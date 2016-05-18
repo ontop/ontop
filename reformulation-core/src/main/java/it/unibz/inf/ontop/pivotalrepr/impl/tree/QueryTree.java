@@ -1,7 +1,9 @@
 package it.unibz.inf.ontop.pivotalrepr.impl.tree;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.pivotalrepr.NonCommutativeOperatorNode;
+import it.unibz.inf.ontop.pivotalrepr.UnsatisfiableNode;
 import it.unibz.inf.ontop.pivotalrepr.impl.IllegalTreeUpdateException;
 import it.unibz.inf.ontop.pivotalrepr.ConstructionNode;
 import it.unibz.inf.ontop.pivotalrepr.QueryNode;
@@ -38,9 +40,12 @@ public interface QueryTree {
 
     void removeOrReplaceNodeByUniqueChild(QueryNode node) throws IllegalTreeUpdateException;
 
-    void replaceNodesByOneNode(ImmutableList<QueryNode> queryNodes, QueryNode replacingNode, QueryNode parentNode, Optional<NonCommutativeOperatorNode.ArgumentPosition> optionalPosition) throws IllegalTreeUpdateException;
+    void replaceNodesByOneNode(ImmutableList<QueryNode> queryNodes, QueryNode replacingNode, QueryNode parentNode,
+                               Optional<NonCommutativeOperatorNode.ArgumentPosition> optionalPosition) throws IllegalTreeUpdateException;
 
     Optional<NonCommutativeOperatorNode.ArgumentPosition> getOptionalPosition(QueryNode parentNode, QueryNode childNode);
 
     void insertParent(QueryNode childNode, QueryNode newParentNode) throws IllegalTreeUpdateException;
+
+    ImmutableSet<UnsatisfiableNode> getUnsatisfiableNodes();
 }

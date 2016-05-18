@@ -1,7 +1,9 @@
 package it.unibz.inf.ontop.pivotalrepr.impl.tree;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.pivotalrepr.NonCommutativeOperatorNode;
+import it.unibz.inf.ontop.pivotalrepr.UnsatisfiableNode;
 import it.unibz.inf.ontop.pivotalrepr.impl.IllegalTreeUpdateException;
 import it.unibz.inf.ontop.pivotalrepr.ConstructionNode;
 import it.unibz.inf.ontop.pivotalrepr.QueryNode;
@@ -23,16 +25,18 @@ public class DefaultTree implements QueryTree {
     private final Map<QueryNode, TreeNode> nodeIndex;
     private final Map<TreeNode, ChildrenRelation> childrenIndex;
     private final Map<TreeNode, TreeNode> parentIndex;
+    private final Set<UnsatisfiableNode> unsatisfiableNodes;
 
 
     protected DefaultTree(ConstructionNode rootQueryNode) {
         nodeIndex = new HashMap<>();
         childrenIndex = new HashMap<>();
         parentIndex = new HashMap<>();
+        unsatisfiableNodes = new HashSet<>();
 
         // Adds the root node
         rootNode = new TreeNode(rootQueryNode);
-        nodeIndex.put(rootQueryNode, rootNode);
+        insertNodeIntoIndex(rootQueryNode, rootNode);
         childrenIndex.put(rootNode, createChildrenRelation(rootNode));
         // No parent
     }
@@ -78,7 +82,7 @@ public class DefaultTree implements QueryTree {
                                Optional<NonCommutativeOperatorNode.ArgumentPosition> optionalPosition, boolean canReplace)
             throws IllegalTreeUpdateException {
         TreeNode childNode = new TreeNode(childQueryNode);
-        nodeIndex.put(childQueryNode, childNode);
+        insertNodeIntoIndex(childQueryNode, childNode);
 
         childrenIndex.put(childNode, createChildrenRelation(childNode));
 
@@ -145,8 +149,8 @@ public class DefaultTree implements QueryTree {
         }
 
         treeNode.changeQueryNode(replacingNode);
-        nodeIndex.remove(previousNode);
-        nodeIndex.put(replacingNode, treeNode);
+        removeNodeFromIndex(previousNode);
+        insertNodeIntoIndex(replacingNode, treeNode);
     }
 
     @Override
@@ -278,11 +282,16 @@ public class DefaultTree implements QueryTree {
         addChild(newParentNode, childNode, Optional.<NonCommutativeOperatorNode.ArgumentPosition>empty(), false, false);
     }
 
+    @Override
+    public ImmutableSet<UnsatisfiableNode> getUnsatisfiableNodes() {
+        return ImmutableSet.copyOf(unsatisfiableNodes);
+    }
+
     /**
      * Low-level
      */
     private void removeNode(TreeNode treeNode) {
-        nodeIndex.remove(treeNode.getQueryNode());
+        removeNodeFromIndex(treeNode.getQueryNode());
         TreeNode parentNode = getParentTreeNode(treeNode);
         if (parentNode != null) {
             accessChildrenRelation(parentNode).removeChild(treeNode);
@@ -341,4 +350,27 @@ public class DefaultTree implements QueryTree {
         else
             throw new RuntimeException("Internal error: points to a parent that is not (anymore) in the tree");
     }
+
+
+    /**
+     * Low-low-level
+     */
+    private void insertNodeIntoIndex(QueryNode queryNode, TreeNode treeNode) {
+        nodeIndex.put(queryNode, treeNode);
+        if (queryNode instanceof UnsatisfiableNode) {
+            unsatisfiableNodes.add((UnsatisfiableNode)queryNode);
+        }
+    }
+
+    /**
+     * Low-low-level
+     */
+    private void removeNodeFromIndex(QueryNode queryNode) {
+        nodeIndex.remove(queryNode);
+
+        if (queryNode instanceof UnsatisfiableNode) {
+            unsatisfiableNodes.remove(queryNode);
+        }
+    }
+
 }
