@@ -17,7 +17,15 @@
  * limitations under the License.
  * #L%
  */
- 
+
+ /*
+  HOW TO GENERATE JAVA FILES:
+
+   $ cd CURRENT_DIRECTORY
+   $ java -jar /path/to/antlr-3.5.2-complete.jar TurtleOBDA.g
+  */
+
+
 grammar TurtleOBDA;
 
 @header {
@@ -151,7 +159,8 @@ public void displayRecognitionError(String[] tokenNames, RecognitionException e)
 public void emitErrorMessage(String msg) {
    error = msg;
 }
-    
+
+@Override
 public Object recoverFromMismatchedToken(IntStream input, int ttype, BitSet follow) throws RecognitionException {
    throw new RecognitionException(input);
 }
