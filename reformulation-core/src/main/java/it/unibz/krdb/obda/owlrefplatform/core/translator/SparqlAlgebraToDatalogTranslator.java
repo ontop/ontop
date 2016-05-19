@@ -1070,7 +1070,7 @@ public class SparqlAlgebraToDatalogTranslator {
         //create statement pattern for same as create owl:sameAs(anon-y1, y)
         //it will be the right atom of the join
 
-        Predicate sameAs = ofac.getPredicate("http://www.w3.org/2002/07/owl#sameAs", new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT });
+        Predicate sameAs = ofac.getPredicate(OBDAVocabulary.SAME_AS, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT });
         Term sTerm2 = unboundleftAtom.getTerm(1);
         Term oTerm2 = leftAtom.getTerm(1);
         Function rightAtomJoin2 = ofac.getFunction(sameAs, sTerm2, oTerm2);
@@ -1126,22 +1126,22 @@ public class SparqlAlgebraToDatalogTranslator {
     }
 
     private Function createJoinWithSameAsOnLeft(Function leftAtom, DatalogProgram pr, String newHeadName) {
-        //given a data property ex hasProperty (x, y)
-        //create statement pattern for same as create owl:sameAs( anon-x, y)
-        //it will be the left atom of the join
-        Predicate predicate = ofac.getPredicate("http://www.w3.org/2002/07/owl#sameAs", new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT });
-        Term sTerm = leftAtom.getTerm(0);
-        Term oTerm = ofac.getVariable("anon-"+ bnode +leftAtom.getTerm(0));
-        Function leftAtomJoin = ofac.getFunction(predicate, sTerm, oTerm);
-
 
         //create left atom of the join between the data property and same as
         //given a data property as hasProperty (x, y)
-        //create the right atom hasProperty (anon-x, y)
+        //create the left atom hasProperty (anon-x, y)
 
-        Function rightAtomJoin =  ofac.getFunction(leftAtom.getFunctionSymbol());
-        rightAtomJoin.updateTerms(leftAtom.getTerms());
-        rightAtomJoin.setTerm(0, ofac.getVariable("anon-" +bnode +leftAtom.getTerm(0)));
+        Function leftAtomJoin =  ofac.getFunction(leftAtom.getFunctionSymbol());
+        leftAtomJoin.updateTerms(leftAtom.getTerms());
+        leftAtomJoin.setTerm(0, ofac.getVariable("anon-" +bnode +leftAtom.getTerm(0)));
+
+		//given a data property ex hasProperty (x, y)
+		//create statement pattern for same as create owl:sameAs( anon-x, y)
+		//it will be the right atom of the join
+		Predicate predicate = ofac.getPredicate(OBDAVocabulary.SAME_AS, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT });
+		Term sTerm = leftAtom.getTerm(0);
+		Term oTerm = ofac.getVariable("anon-"+ bnode +leftAtom.getTerm(0));
+		Function rightAtomJoin = ofac.getFunction(predicate, sTerm, oTerm);
 
         //create join rule
         List<Term> varListJoin = getUnion(getVariables(leftAtomJoin), getVariables(rightAtomJoin));
@@ -1164,7 +1164,7 @@ public class SparqlAlgebraToDatalogTranslator {
         //create statement pattern for same as create owl:sameAs(anon-y, y)
         //it will be the right atom of the join
 
-        Predicate predicate = ofac.getPredicate("http://www.w3.org/2002/07/owl#sameAs", new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT });
+        Predicate predicate = ofac.getPredicate(OBDAVocabulary.SAME_AS, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT });
         Term sTerm2 = ofac.getVariable("anon-"+ bnode +leftAtom.getTerm(1));
         Term oTerm2 = leftAtom.getTerm(1);
         Function rightAtomJoin2 = ofac.getFunction(predicate, sTerm2, oTerm2);
