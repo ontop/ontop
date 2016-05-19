@@ -8,6 +8,8 @@ import it.unibz.inf.ontop.pivotalrepr.*;
 
 public class UnsatisfiableNodeImpl extends QueryNodeImpl implements UnsatisfiableNode {
 
+    private static final String PREFIX = "UNSATISFIABLE";
+
     @Override
     public void acceptVisitor(QueryNodeVisitor visitor) {
         visitor.visit(this);
@@ -51,4 +53,10 @@ public class UnsatisfiableNodeImpl extends QueryNodeImpl implements Unsatisfiabl
     public UnsatisfiableNode clone() {
         return new UnsatisfiableNodeImpl();
     }
+
+    @Override
+    public String toString() {
+        return PREFIX;
+    }
+
 }
