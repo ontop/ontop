@@ -227,8 +227,12 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
 
     @Override
     public boolean isSyntacticallyEquivalentTo(QueryNode node) {
-        return (node instanceof ConstructionNode)
-                && ((ConstructionNode) node).getProjectedVariables().equals(projectedVariables);
+        return Optional.of(node)
+                .filter(n -> n instanceof ConstructionNode)
+                .map(n -> (ConstructionNode) n)
+                .filter(n -> n.getProjectedVariables().equals(projectedVariables))
+                .filter(n -> n.getSubstitution().equals(substitution))
+                .isPresent();
     }
 
     @Override
