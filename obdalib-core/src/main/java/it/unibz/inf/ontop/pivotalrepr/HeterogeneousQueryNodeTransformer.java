@@ -21,5 +21,5 @@ public interface HeterogeneousQueryNodeTransformer<P extends NodeTransformationP
 
     P transform(GroupNode groupNode);
 
-    P transform(UnsatisfiableNode unsatisfiableNode);
+    P transform(EmptyNode emptyNode);
 }

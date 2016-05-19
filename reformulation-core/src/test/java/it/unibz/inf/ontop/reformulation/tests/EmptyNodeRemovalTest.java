@@ -23,7 +23,7 @@ import static it.unibz.inf.ontop.pivotalrepr.NonCommutativeOperatorNode.Argument
 import static it.unibz.inf.ontop.pivotalrepr.equivalence.IQSyntacticEquivalenceChecker.areEquivalent;
 import static org.junit.Assert.assertTrue;
 
-public class UnsatisfiableNodeRemovalTest {
+public class EmptyNodeRemovalTest {
 
     private static MetadataForQueryOptimization METADATA = new MetadataForQueryOptimizationImpl(
             ImmutableMultimap.of(),
@@ -35,6 +35,7 @@ public class UnsatisfiableNodeRemovalTest {
     private static Variable Y = DATA_FACTORY.getVariable("y");
     private static Variable A = DATA_FACTORY.getVariable("a");
     private static Variable B = DATA_FACTORY.getVariable("b");
+    private static Variable C = DATA_FACTORY.getVariable("c");
     private static DistinctVariableOnlyDataAtom PROJECTION_ATOM = DATA_FACTORY.getDistinctVariableOnlyDataAtom(
             ANS1_PREDICATE, ImmutableList.of(X, Y));
     private static URITemplatePredicate URI_PREDICATE =  new URITemplatePredicateImpl(2);
@@ -117,7 +118,7 @@ public class UnsatisfiableNodeRemovalTest {
 
     private static IntermediateQuery generateQueryWithUnion(ImmutableSubstitution<ImmutableTerm> topBindings,
                                                             ImmutableSubstitution<ImmutableTerm> leftBindings,
-                                                            ImmutableSet<Variable> leftProjectedVariables) {
+                                                            ImmutableSet<Variable> subQueryProjectedVariables) {
         IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
 
         ConstructionNode rootNode = new ConstructionNodeImpl(PROJECTION_ATOM.getVariables(), topBindings, Optional.empty());
@@ -126,14 +127,14 @@ public class UnsatisfiableNodeRemovalTest {
         UnionNode unionNode = new UnionNodeImpl();
         queryBuilder.addChild(rootNode, unionNode);
 
-        ConstructionNode leftConstructionNode = new ConstructionNodeImpl(leftProjectedVariables, leftBindings,
+        ConstructionNode leftConstructionNode = new ConstructionNodeImpl(subQueryProjectedVariables, leftBindings,
                 Optional.empty());
         queryBuilder.addChild(unionNode, leftConstructionNode);
 
         queryBuilder.addChild(leftConstructionNode, DATA_NODE_1);
 
-        UnsatisfiableNode unsatisfiableNode = new UnsatisfiableNodeImpl();
-        queryBuilder.addChild(unionNode, unsatisfiableNode);
+        EmptyNode emptyNode = new EmptyNodeImpl(subQueryProjectedVariables);
+        queryBuilder.addChild(unionNode, emptyNode);
 
         return queryBuilder.build();
     }
@@ -151,7 +152,7 @@ public class UnsatisfiableNodeRemovalTest {
         queryBuilder.addChild(rootNode, leftJoinNode);
 
         queryBuilder.addChild(leftJoinNode, DATA_NODE_2, LEFT);
-        queryBuilder.addChild(leftJoinNode, new UnsatisfiableNodeImpl(), RIGHT);
+        queryBuilder.addChild(leftJoinNode, new EmptyNodeImpl(ImmutableSet.of(B)), RIGHT);
 
         IntermediateQuery query = queryBuilder.build();
 
@@ -185,7 +186,7 @@ public class UnsatisfiableNodeRemovalTest {
         LeftJoinNode leftJoinNode = new LeftJoinNodeImpl(Optional.empty());
         queryBuilder.addChild(rootNode, leftJoinNode);
 
-        queryBuilder.addChild(leftJoinNode, new UnsatisfiableNodeImpl(), LEFT);
+        queryBuilder.addChild(leftJoinNode, new EmptyNodeImpl(ImmutableSet.of(A)), LEFT);
         queryBuilder.addChild(leftJoinNode, DATA_NODE_1, RIGHT);
 
         IntermediateQuery query = queryBuilder.build();
@@ -213,7 +214,7 @@ public class UnsatisfiableNodeRemovalTest {
         queryBuilder.addChild(topLeftJoinNode, rightLeftJoinNode, RIGHT);
 
         queryBuilder.addChild(rightLeftJoinNode, DATA_NODE_1, LEFT);
-        queryBuilder.addChild(rightLeftJoinNode, new UnsatisfiableNodeImpl(), RIGHT);
+        queryBuilder.addChild(rightLeftJoinNode, new EmptyNodeImpl(ImmutableSet.of(A, B, C)), RIGHT);
 
         IntermediateQuery query = queryBuilder.build();
 
@@ -249,7 +250,7 @@ public class UnsatisfiableNodeRemovalTest {
         LeftJoinNode rightLeftJoinNode = new LeftJoinNodeImpl(Optional.empty());
         queryBuilder.addChild(topLeftJoinNode, rightLeftJoinNode, RIGHT);
 
-        queryBuilder.addChild(rightLeftJoinNode, new UnsatisfiableNodeImpl(), LEFT);
+        queryBuilder.addChild(rightLeftJoinNode, new EmptyNodeImpl(ImmutableSet.of(A)), LEFT);
         queryBuilder.addChild(rightLeftJoinNode, DATA_NODE_1, RIGHT);
 
         IntermediateQuery query = queryBuilder.build();
@@ -285,7 +286,7 @@ public class UnsatisfiableNodeRemovalTest {
         queryBuilder.addChild(rootNode, joinNode);
 
         queryBuilder.addChild(joinNode, DATA_NODE_1);
-        queryBuilder.addChild(joinNode, new UnsatisfiableNodeImpl());
+        queryBuilder.addChild(joinNode, new EmptyNodeImpl(ImmutableSet.of(A, C)));
 
         IntermediateQuery query = queryBuilder.build();
 
@@ -312,7 +313,7 @@ public class UnsatisfiableNodeRemovalTest {
 
         ConstructionNode constructionNode2 = new ConstructionNodeImpl(ImmutableSet.of(A));
         queryBuilder.addChild(joinNode, constructionNode2);
-        queryBuilder.addChild(constructionNode2, new UnsatisfiableNodeImpl());
+        queryBuilder.addChild(constructionNode2, new EmptyNodeImpl(ImmutableSet.of(A, C)));
 
         IntermediateQuery query = queryBuilder.build();
 

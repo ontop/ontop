@@ -3,7 +3,7 @@ package it.unibz.inf.ontop.pivotalrepr.impl.tree;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.pivotalrepr.NonCommutativeOperatorNode;
-import it.unibz.inf.ontop.pivotalrepr.UnsatisfiableNode;
+import it.unibz.inf.ontop.pivotalrepr.EmptyNode;
 import it.unibz.inf.ontop.pivotalrepr.impl.IllegalTreeUpdateException;
 import it.unibz.inf.ontop.pivotalrepr.ConstructionNode;
 import it.unibz.inf.ontop.pivotalrepr.QueryNode;
@@ -25,14 +25,14 @@ public class DefaultTree implements QueryTree {
     private final Map<QueryNode, TreeNode> nodeIndex;
     private final Map<TreeNode, ChildrenRelation> childrenIndex;
     private final Map<TreeNode, TreeNode> parentIndex;
-    private final Set<UnsatisfiableNode> unsatisfiableNodes;
+    private final Set<EmptyNode> emptyNodes;
 
 
     protected DefaultTree(ConstructionNode rootQueryNode) {
         nodeIndex = new HashMap<>();
         childrenIndex = new HashMap<>();
         parentIndex = new HashMap<>();
-        unsatisfiableNodes = new HashSet<>();
+        emptyNodes = new HashSet<>();
 
         // Adds the root node
         rootNode = new TreeNode(rootQueryNode);
@@ -282,9 +282,8 @@ public class DefaultTree implements QueryTree {
         addChild(newParentNode, childNode, Optional.<NonCommutativeOperatorNode.ArgumentPosition>empty(), false, false);
     }
 
-    @Override
-    public ImmutableSet<UnsatisfiableNode> getUnsatisfiableNodes() {
-        return ImmutableSet.copyOf(unsatisfiableNodes);
+    public ImmutableSet<EmptyNode> getEmptyNodes() {
+        return ImmutableSet.copyOf(emptyNodes);
     }
 
     /**
@@ -357,8 +356,8 @@ public class DefaultTree implements QueryTree {
      */
     private void insertNodeIntoIndex(QueryNode queryNode, TreeNode treeNode) {
         nodeIndex.put(queryNode, treeNode);
-        if (queryNode instanceof UnsatisfiableNode) {
-            unsatisfiableNodes.add((UnsatisfiableNode)queryNode);
+        if (queryNode instanceof EmptyNode) {
+            emptyNodes.add((EmptyNode)queryNode);
         }
     }
 
@@ -368,8 +367,8 @@ public class DefaultTree implements QueryTree {
     private void removeNodeFromIndex(QueryNode queryNode) {
         nodeIndex.remove(queryNode);
 
-        if (queryNode instanceof UnsatisfiableNode) {
-            unsatisfiableNodes.remove(queryNode);
+        if (queryNode instanceof EmptyNode) {
+            emptyNodes.remove(queryNode);
         }
     }
 

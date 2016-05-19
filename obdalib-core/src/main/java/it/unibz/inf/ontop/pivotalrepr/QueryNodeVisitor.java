@@ -24,5 +24,5 @@ public interface QueryNodeVisitor {
 
     void visit(GroupNode groupNode);
 
-    void visit(UnsatisfiableNode unsatisfiableNode);
+    void visit(EmptyNode emptyNode);
 }

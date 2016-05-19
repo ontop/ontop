@@ -47,7 +47,7 @@ public class IdentityQueryNodeTransformer implements HomogeneousQueryNodeTransfo
     }
 
     @Override
-    public UnsatisfiableNode transform(UnsatisfiableNode unsatisfiableNode) {
-        return unsatisfiableNode;
+    public EmptyNode transform(EmptyNode emptyNode) {
+        return emptyNode;
     }
 }

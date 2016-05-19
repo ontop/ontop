@@ -139,10 +139,10 @@ public class JgraphtQueryTreeComponent implements QueryTreeComponent {
     }
 
     @Override
-    public ImmutableSet<UnsatisfiableNode> getUnsatisfiableNodes() {
+    public ImmutableSet<EmptyNode> getUnsatisfiableNodes() {
         return getNodesInTopDownOrder().stream()
-                .filter(n -> n instanceof UnsatisfiableNode)
-                .map(n -> (UnsatisfiableNode) n)
+                .filter(n -> n instanceof EmptyNode)
+                .map(n -> (EmptyNode) n)
                 .collect(ImmutableCollectors.toSet());
     }
 

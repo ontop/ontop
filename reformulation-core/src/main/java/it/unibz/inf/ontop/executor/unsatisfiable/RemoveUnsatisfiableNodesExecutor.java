@@ -4,7 +4,7 @@ import it.unibz.inf.ontop.executor.InternalProposalExecutor;
 import it.unibz.inf.ontop.pivotalrepr.EmptyQueryException;
 import it.unibz.inf.ontop.pivotalrepr.IntermediateQuery;
 import it.unibz.inf.ontop.pivotalrepr.QueryNode;
-import it.unibz.inf.ontop.pivotalrepr.UnsatisfiableNode;
+import it.unibz.inf.ontop.pivotalrepr.EmptyNode;
 import it.unibz.inf.ontop.pivotalrepr.impl.QueryTreeComponent;
 import it.unibz.inf.ontop.pivotalrepr.proposal.ProposalResults;
 import it.unibz.inf.ontop.pivotalrepr.proposal.ReactToChildDeletionProposal;
@@ -29,14 +29,14 @@ public class RemoveUnsatisfiableNodesExecutor implements InternalProposalExecuto
                                  QueryTreeComponent treeComponent)
             throws EmptyQueryException {
 
-        for (UnsatisfiableNode unsatisfiableNode : treeComponent.getUnsatisfiableNodes()) {
+        for (EmptyNode emptyNode : treeComponent.getUnsatisfiableNodes()) {
             /**
              * Some unsatisfiable nodes may already have been deleted
              */
-            if (treeComponent.contains(unsatisfiableNode)) {
+            if (treeComponent.contains(emptyNode)) {
 
-                ReactToChildDeletionProposal reactionProposal = createReactionProposal(query, unsatisfiableNode);
-                treeComponent.removeSubTree(unsatisfiableNode);
+                ReactToChildDeletionProposal reactionProposal = createReactionProposal(query, emptyNode);
+                treeComponent.removeSubTree(emptyNode);
 
                 // May update the query
                 query.applyProposal(reactionProposal, REQUIRE_USING_IN_PLACE_EXECUTOR);
@@ -47,14 +47,14 @@ public class RemoveUnsatisfiableNodesExecutor implements InternalProposalExecuto
     }
 
     private static ReactToChildDeletionProposal createReactionProposal(IntermediateQuery query,
-                                                                       UnsatisfiableNode unsatisfiableNode)
+                                                                       EmptyNode emptyNode)
             throws EmptyQueryException {
-        QueryNode parentNode = query.getParent(unsatisfiableNode)
+        QueryNode parentNode = query.getParent(emptyNode)
                 // It is expected that the root has only one child, so if it is unsatisfiable,
                 // this query will return empty results.
                 .orElseThrow(EmptyQueryException::new);
 
-        Optional<QueryNode> optionalNextSibling = query.getNextSibling(unsatisfiableNode);
+        Optional<QueryNode> optionalNextSibling = query.getNextSibling(emptyNode);
 
         return new ReactToChildDeletionProposalImpl(parentNode, optionalNextSibling);
     }
