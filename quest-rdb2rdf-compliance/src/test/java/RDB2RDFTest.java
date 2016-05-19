@@ -38,7 +38,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.common.io.Resources;
-import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
+import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -67,7 +67,7 @@ import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import sesameWrapper.SesameVirtualRepo;
+import it.unibz.inf.ontop.sesame.SesameVirtualRepo;
 
 import static org.junit.Assert.fail;
 import static org.junit.Assume.assumeTrue;

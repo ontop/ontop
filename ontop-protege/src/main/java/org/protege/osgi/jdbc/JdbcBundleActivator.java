@@ -4,6 +4,7 @@ package org.protege.osgi.jdbc;
 import com.google.common.collect.ImmutableList;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
+import org.protege.osgi.jdbc.prefs.Activator;
 
 import java.util.List;
 
@@ -18,7 +19,7 @@ public class JdbcBundleActivator implements BundleActivator {
     public void start(BundleContext context) throws Exception {
         activators = ImmutableList.of(
                 new org.protege.osgi.jdbc.impl.Activator(),
-                new org.protege.osgi.jdbc.prefs.Activator());
+                new Activator());
 
         for (BundleActivator activator : activators) {
             activator.start(context);
