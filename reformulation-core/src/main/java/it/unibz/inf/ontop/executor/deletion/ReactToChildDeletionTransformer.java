@@ -100,7 +100,7 @@ public class ReactToChildDeletionTransformer implements HeterogeneousQueryNodeTr
     }
 
     @Override
-    public NodeTransformationProposal transform(UnsatisfiedNode unsatisfiedNode) {
+    public NodeTransformationProposal transform(EmptyNode emptyNode) {
         return new NodeTransformationProposalImpl(NodeTransformationProposedState.DELETE);
     }
 
