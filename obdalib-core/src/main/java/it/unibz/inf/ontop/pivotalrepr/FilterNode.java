@@ -7,7 +7,7 @@ import it.unibz.inf.ontop.model.ImmutableSubstitution;
 /**
  * TODO: explain
  */
-public interface FilterNode extends JoinOrFilterNode {
+public interface FilterNode extends CommutativeJoinOrFilterNode {
 
     @Override
     FilterNode clone();
