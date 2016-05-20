@@ -32,26 +32,28 @@ public class PushDownBooleanExpressionOptimizer implements IntermediateQueryOpti
      * All the target nodes (that will "receive or keep" the boolean expression)
      * have to be associated to a delimiter node.
      */
-    private static class DelimiterTargetPair {
+    private static class PotentialRecipient {
 
         /**
-         * Can be a construction node, a data node
+         * Node that can directly receive boolean expressions (JoinOrFilter node)
+         * or can insert a new FilterNode to receive it instead of itself (data node).
+         *
          */
-        public final ConstructionOrDataNode delimiterNode;
+        public final QueryNode recipientNode;
 
         /**
-         * In one special case (when the delimiter node is a data node), the target MAY BE also the source.
-         *
-         * Example: one JOIN followed by data nodes (delimiters) and  a construction node (also a delimiter).
-         * This join will be target for expressions related to the variables of data nodes, while
-         * the sub-query (the sub-tree of the construction node) will have its own target.
-         *
+         * Variables of the tuples produced by the recipient node
          */
-        public final QueryNode targetNode;
+        public final ImmutableSet<Variable> projectedVariables;
 
-        private DelimiterTargetPair(ConstructionOrDataNode delimiterNode, QueryNode targetNode) {
-            this.delimiterNode = delimiterNode;
-            this.targetNode = targetNode;
+        private PotentialRecipient(QueryNode recipientNode, ImmutableSet<Variable> projectedVariables) {
+            if (!((recipientNode instanceof DataNode )||
+                    recipientNode instanceof JoinOrFilterNode)) {
+                throw new IllegalArgumentException("Illegal recipient node: " + recipientNode);
+            }
+
+            this.recipientNode = recipientNode;
+            this.projectedVariables = projectedVariables;
         }
     }
 
@@ -139,12 +141,11 @@ public class PushDownBooleanExpressionOptimizer implements IntermediateQueryOpti
         /**
          * Commutative joins and filters
          */
-        if ((currentNode instanceof CommutativeJoinNode)
-                || (currentNode instanceof FilterNode)) {
-            return makeProposalForFilterOrCommutativeJoin(currentQuery, currentNode);
+        if (currentNode instanceof CommutativeJoinOrFilterNode) {
+            return makeProposalForFilterOrCommutativeJoin(currentQuery, (CommutativeJoinOrFilterNode) currentNode);
         }
         /**
-         * Left-join is not yet supported
+         * TODO: handle LJ (can only push its conditions on the right side)
          */
         else {
             return Optional.empty();
@@ -153,15 +154,9 @@ public class PushDownBooleanExpressionOptimizer implements IntermediateQueryOpti
 
     /**
      * Builds a proposal for a  Filter or CommutativeJoin node.
-     *
-     * NOT FOR LJs!
      */
     private Optional<PushDownBooleanExpressionProposal> makeProposalForFilterOrCommutativeJoin(
-            IntermediateQuery currentQuery, JoinOrFilterNode currentNode) {
-
-        if (currentNode instanceof LeftJoinNode) {
-            throw new IllegalArgumentException("This method does not support LJs!");
-        }
+            IntermediateQuery currentQuery, CommutativeJoinOrFilterNode currentNode) {
 
         /**
          * If there is no boolean expression, no proposal
@@ -178,11 +173,6 @@ public class PushDownBooleanExpressionOptimizer implements IntermediateQueryOpti
         ImmutableSet<ImmutableExpression> booleanExpressions = optionalNestedExpression.get().flattenAND();
 
         /**
-         * Finds a DelimiterTargetPair for each child sub-tree of the current node
-         */
-        ImmutableList<DelimiterTargetPair> potentialTargetNodes = findCandidateTargetNodes(currentQuery, currentNode);
-
-        /**
          * For each boolean expression, looks for target nodes.
          *
          * Deals with the special cases where the source node is also a target node
@@ -193,7 +183,9 @@ public class PushDownBooleanExpressionOptimizer implements IntermediateQueryOpti
         ImmutableList.Builder<ImmutableExpression> toKeepExpressionBuilder = ImmutableList.builder();
 
         for (ImmutableExpression expression : booleanExpressions) {
-            ImmutableList<QueryNode> nodesForTransfer = selectNodesForTransfer(currentQuery, expression, potentialTargetNodes);
+
+
+            ImmutableList<QueryNode> nodesForTransfer = selectNodesForTransfer(currentQuery, expression, currentNode);
 
             /**
              * If a delimiter node is a DataNode, the source node may also be a target.
@@ -220,14 +212,14 @@ public class PushDownBooleanExpressionOptimizer implements IntermediateQueryOpti
 
 
     /**
-     * Finds at least one DelimiterTargetPair per sub-tree of a child of the source node.
+     * Finds at least one PotentialRecipient per sub-tree of a child of the source node.
      *
      * Top method.
      */
-    private ImmutableList<DelimiterTargetPair> findCandidateTargetNodes(IntermediateQuery currentQuery,
-                                                                        JoinOrFilterNode sourceNode) {
+    private ImmutableList<PotentialRecipient> findCandidateRecipients(IntermediateQuery currentQuery,
+                                                                      JoinOrFilterNode sourceNode) {
 
-        ImmutableList.Builder<DelimiterTargetPair> candidateListBuilder = ImmutableList.builder();
+        ImmutableList.Builder<PotentialRecipient> candidateListBuilder = ImmutableList.builder();
         for (QueryNode childNode : currentQuery.getChildren(sourceNode)) {
             candidateListBuilder.addAll(
                     findCandidatesInSubTree(currentQuery, childNode, sourceNode, Optional.<ConstructionOrDataNode>empty())
@@ -239,9 +231,9 @@ public class PushDownBooleanExpressionOptimizer implements IntermediateQueryOpti
     /**
      * Recursive low-level method.
      */
-    private ImmutableList<DelimiterTargetPair> findCandidatesInSubTree(IntermediateQuery currentQuery, QueryNode currentNode,
-                                                                       JoinOrFilterNode sourceNode,
-                                                                       final Optional<ConstructionOrDataNode> optionalClosestDelimiterNode) {
+    private ImmutableList<PotentialRecipient> findCandidatesInSubTree(IntermediateQuery currentQuery, QueryNode currentNode,
+                                                                      JoinOrFilterNode sourceNode,
+                                                                      final Optional<ConstructionOrDataNode> optionalClosestDelimiterNode) {
 
         /**
          * First terminal case: a data node
@@ -253,13 +245,13 @@ public class PushDownBooleanExpressionOptimizer implements IntermediateQueryOpti
              * returns this data node as the target and the delimiter node as delimiter.
              */
             if (optionalClosestDelimiterNode.isPresent()) {
-                return ImmutableList.of(new DelimiterTargetPair(optionalClosestDelimiterNode.get(), currentNode));
+                return ImmutableList.of(new PotentialRecipient(optionalClosestDelimiterNode.get(), currentNode));
             }
             /**
              * Otherwise, the DATA NODE HAS THE ROLE OF DELIMITER and the SOURCE NODE is used as target.
              */
             else {
-                return ImmutableList.of(new DelimiterTargetPair((DataNode)currentNode, sourceNode));
+                return ImmutableList.of(new PotentialRecipient((DataNode)currentNode, sourceNode));
             }
         }
 
@@ -270,7 +262,7 @@ public class PushDownBooleanExpressionOptimizer implements IntermediateQueryOpti
          *
          */
         else if ((currentNode instanceof JoinOrFilterNode) && optionalClosestDelimiterNode.isPresent()) {
-            return ImmutableList.of(new DelimiterTargetPair(optionalClosestDelimiterNode.get(), currentNode));
+            return ImmutableList.of(new PotentialRecipient(optionalClosestDelimiterNode.get(), currentNode));
         }
 
         Optional<ConstructionOrDataNode> newOptionalClosestDelimiterNode;
@@ -295,7 +287,7 @@ public class PushDownBooleanExpressionOptimizer implements IntermediateQueryOpti
          *
          * Recursive.
          */
-        ImmutableList.Builder<DelimiterTargetPair> candidateListBuilder = ImmutableList.builder();
+        ImmutableList.Builder<PotentialRecipient> candidateListBuilder = ImmutableList.builder();
         for (QueryNode child : currentQuery.getChildren(currentNode)) {
             // Recursive call
             candidateListBuilder.addAll(
@@ -311,15 +303,15 @@ public class PushDownBooleanExpressionOptimizer implements IntermediateQueryOpti
      * Criterion: the delimiter node should contain all the variables used in the boolean expression.
      */
     private ImmutableList<QueryNode> selectNodesForTransfer(IntermediateQuery query, ImmutableExpression expression,
-                                                            ImmutableList<DelimiterTargetPair> potentialTargetPairs) {
+                                                            QueryNode currentNode) {
         ImmutableList.Builder<QueryNode> selectionBuilder = ImmutableList.builder();
-        for (DelimiterTargetPair pair : potentialTargetPairs) {
+        for (PotentialRecipient pair : potentialTargetPairs) {
             ImmutableSet<Variable> expressionVariables = expression.getVariables();
             ImmutableSet<Variable> delimiterVariables = ProjectedVariableExtractionTools.extractProjectedVariables(
                     query, pair.delimiterNode);
 
             if (delimiterVariables.containsAll(expressionVariables)) {
-                selectionBuilder.add(pair.targetNode);
+                selectionBuilder.add(pair.recipientNode);
             }
         }
 
