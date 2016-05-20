@@ -146,6 +146,15 @@ public class IntermediateQueryImpl implements IntermediateQuery {
     }
 
     @Override
+    public Optional<QueryNode> getChild(QueryNode currentNode, NonCommutativeOperatorNode.ArgumentPosition position) {
+        return getChildren(currentNode).stream()
+                .filter(c -> getOptionalPosition(currentNode, c)
+                        .filter(position::equals)
+                        .isPresent())
+                .findFirst();
+    }
+
+    @Override
     public ImmutableList<QueryNode> getSubTreeNodesInTopDownOrder(QueryNode currentNode) {
         return treeComponent.getSubTreeNodesInTopDownOrder(currentNode);
     }
