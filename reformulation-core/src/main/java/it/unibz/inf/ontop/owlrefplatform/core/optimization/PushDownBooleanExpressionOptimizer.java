@@ -10,12 +10,15 @@ import it.unibz.inf.ontop.pivotalrepr.proposal.NodeCentricOptimizationResults;
 import it.unibz.inf.ontop.pivotalrepr.proposal.PushDownBooleanExpressionProposal;
 import it.unibz.inf.ontop.pivotalrepr.proposal.impl.PushDownBooleanExpressionProposalImpl;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import it.unibz.inf.ontop.owlrefplatform.core.optimization.QueryNodeNavigationTools.*;
 import it.unibz.inf.ontop.pivotalrepr.unfolding.ProjectedVariableExtractionTools;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import static it.unibz.inf.ontop.owlrefplatform.core.optimization.QueryNodeNavigationTools.getDepthFirstNextNode;
 import static it.unibz.inf.ontop.owlrefplatform.core.optimization.QueryNodeNavigationTools.getNextNodeAndQuery;
+import static it.unibz.inf.ontop.pivotalrepr.NonCommutativeOperatorNode.ArgumentPosition.RIGHT;
 
 /**
  * Pushes immutable boolean expressions down into the intermediate query tree if possible.
@@ -142,26 +145,32 @@ public class PushDownBooleanExpressionOptimizer implements IntermediateQueryOpti
          * Commutative joins and filters
          */
         if (currentNode instanceof CommutativeJoinOrFilterNode) {
-            return makeProposalForFilterOrCommutativeJoin(currentQuery, (CommutativeJoinOrFilterNode) currentNode);
+            return makeProposalForJoinOrFilterNode(currentQuery, currentNode, currentQuery.getChildren(currentNode));
         }
         /**
-         * TODO: handle LJ (can only push its conditions on the right side)
+         * Left join: can only push its conditions on the right side
+         */
+        else if (currentNode instanceof LeftJoinNode) {
+            return makeProposalForJoinOrFilterNode(currentQuery, currentNode,
+                    ImmutableList.of(currentQuery.getChild(currentNode, RIGHT)
+                            .orElseThrow(() -> new IllegalStateException("Was not excepting to find a " +
+                                    "LJ without a right element"))));
+        }
+        /**
+         * Does not optimize other nodes
          */
         else {
             return Optional.empty();
         }
     }
 
-    /**
-     * Builds a proposal for a  Filter or CommutativeJoin node.
-     */
-    private Optional<PushDownBooleanExpressionProposal> makeProposalForFilterOrCommutativeJoin(
-            IntermediateQuery currentQuery, CommutativeJoinOrFilterNode currentNode) {
+    private Optional<PushDownBooleanExpressionProposal> makeProposalForJoinOrFilterNode(
+            IntermediateQuery currentQuery, JoinOrFilterNode providerNode, ImmutableList<QueryNode> preSelectedChildren) {
 
         /**
          * If there is no boolean expression, no proposal
          */
-        Optional<ImmutableExpression> optionalNestedExpression = currentNode.getOptionalFilterCondition();
+        Optional<ImmutableExpression> optionalNestedExpression = providerNode.getOptionalFilterCondition();
 
         if (!optionalNestedExpression.isPresent()) {
             return Optional.empty();
@@ -173,10 +182,7 @@ public class PushDownBooleanExpressionOptimizer implements IntermediateQueryOpti
         ImmutableSet<ImmutableExpression> booleanExpressions = optionalNestedExpression.get().flattenAND();
 
         /**
-         * For each boolean expression, looks for target nodes.
-         *
-         * Deals with the special cases where the source node is also a target node
-         * for some boolean expressions.
+         * For each boolean expression, looks for recipient nodes.
          *
          */
         ImmutableMultimap.Builder<QueryNode, ImmutableExpression> transferMapBuilder = ImmutableMultimap.builder();
@@ -184,139 +190,173 @@ public class PushDownBooleanExpressionOptimizer implements IntermediateQueryOpti
 
         for (ImmutableExpression expression : booleanExpressions) {
 
+            ImmutableList<QueryNode> nodesForTransfer = selectNodesForTransfer(currentQuery, expression, providerNode,
+                    preSelectedChildren);
 
-            ImmutableList<QueryNode> nodesForTransfer = selectNodesForTransfer(currentQuery, expression, currentNode);
 
             /**
-             * If a delimiter node is a DataNode, the source node may also be a target.
-             * Non-final.
+             * Becomes true if the provider is a recipient
              */
-            boolean isSourceAlsoTarget = false;
+            boolean isProviderAlsoRecipient = false;
 
-            for (QueryNode targetNode : nodesForTransfer) {
-                if (targetNode != currentNode)
-                    transferMapBuilder.put(targetNode, expression);
+            for (QueryNode recipientNode : nodesForTransfer) {
+                if (recipientNode != providerNode)
+                    transferMapBuilder.put(recipientNode, expression);
                 else
-                    isSourceAlsoTarget = true;
+                    isProviderAlsoRecipient = true;
             }
             /**
-             * If no transfer or if the source node is also a target
-             * marks the expression as to be kept in the source node.
+             * If no transfer or the provider is a recipient
+             * marks the expression as to be kept in the provider node.
              */
-            if (isSourceAlsoTarget || nodesForTransfer.isEmpty()) {
+            if (isProviderAlsoRecipient || nodesForTransfer.isEmpty()) {
                 toKeepExpressionBuilder.add(expression);
             }
         }
-        return buildProposal(currentNode, transferMapBuilder.build(), toKeepExpressionBuilder.build());
+        return buildProposal(providerNode, transferMapBuilder.build(), toKeepExpressionBuilder.build());
     }
 
-
-    /**
-     * Finds at least one PotentialRecipient per sub-tree of a child of the source node.
-     *
-     * Top method.
-     */
-    private ImmutableList<PotentialRecipient> findCandidateRecipients(IntermediateQuery currentQuery,
-                                                                      JoinOrFilterNode sourceNode) {
-
-        ImmutableList.Builder<PotentialRecipient> candidateListBuilder = ImmutableList.builder();
-        for (QueryNode childNode : currentQuery.getChildren(sourceNode)) {
-            candidateListBuilder.addAll(
-                    findCandidatesInSubTree(currentQuery, childNode, sourceNode, Optional.<ConstructionOrDataNode>empty())
-            );
-        }
-        return candidateListBuilder.build();
+    private ImmutableList<QueryNode> selectNodesForTransfer(IntermediateQuery currentQuery, ImmutableExpression expression,
+                                                            JoinOrFilterNode providerNode,
+                                                            ImmutableList<QueryNode> preSelectedChildren) {
+        return preSelectedChildren.stream()
+                .flatMap(child -> selectNodesForTransferInSubTree(currentQuery, expression, providerNode, child))
+                .collect(ImmutableCollectors.toList());
     }
 
-    /**
-     * Recursive low-level method.
-     */
-    private ImmutableList<PotentialRecipient> findCandidatesInSubTree(IntermediateQuery currentQuery, QueryNode currentNode,
-                                                                      JoinOrFilterNode sourceNode,
-                                                                      final Optional<ConstructionOrDataNode> optionalClosestDelimiterNode) {
-
-        /**
-         * First terminal case: a data node
-         */
-        if (currentNode instanceof DataNode) {
-
-            /**
-             * If there is at least one delimiter node between the source and the current node,
-             * returns this data node as the target and the delimiter node as delimiter.
-             */
-            if (optionalClosestDelimiterNode.isPresent()) {
-                return ImmutableList.of(new PotentialRecipient(optionalClosestDelimiterNode.get(), currentNode));
-            }
-            /**
-             * Otherwise, the DATA NODE HAS THE ROLE OF DELIMITER and the SOURCE NODE is used as target.
-             */
-            else {
-                return ImmutableList.of(new PotentialRecipient((DataNode)currentNode, sourceNode));
-            }
+    private Stream<QueryNode> selectNodesForTransferInSubTree(IntermediateQuery currentQuery,
+                                                              ImmutableExpression expression,
+                                                              JoinOrFilterNode providerNode, QueryNode currentNode) {
+        if (currentNode instanceof CommutativeJoinOrFilterNode) {
+            throw new RuntimeException("TODO: implement");
         }
-
-        /**
-         * Second terminal case: a JoinOrFilter found after a delimiter node.
-         *
-         * The JoinOrFilter is then used as a target and the delimiter node as a delimiter.
-         *
-         */
-        else if ((currentNode instanceof JoinOrFilterNode) && optionalClosestDelimiterNode.isPresent()) {
-            return ImmutableList.of(new PotentialRecipient(optionalClosestDelimiterNode.get(), currentNode));
+        else if (currentNode instanceof LeftJoinNode) {
+            throw new RuntimeException("TODO: implement");
         }
-
-        Optional<ConstructionOrDataNode> newOptionalClosestDelimiterNode;
-
-        /**
-         * If is a normal delimiter node, uses it as the closest one
-         */
-        if (currentNode instanceof ConstructionNode) {
-            ConstructionOrDataNode delimiterNode = (ConstructionNode) currentNode;
-            newOptionalClosestDelimiterNode = Optional.of(delimiterNode);
-
+        else if (currentNode instanceof DataNode) {
+            throw new RuntimeException("TODO: implement");
+        }
+        else if (currentNode instanceof ConstructionNode) {
+            throw new RuntimeException("TODO: implement");
+        }
+        else if (currentNode instanceof UnionNode) {
+            throw new RuntimeException("TODO: implement");
         }
         /**
-         * However, reuses the previous one (if existing).
+         * By default, does not push down (no optimization)
          */
         else {
-            newOptionalClosestDelimiterNode = optionalClosestDelimiterNode;
+            return Stream.of(providerNode);
         }
-
-        /**
-         * Gathers the pairs returned by the children and returns them.
-         *
-         * Recursive.
-         */
-        ImmutableList.Builder<PotentialRecipient> candidateListBuilder = ImmutableList.builder();
-        for (QueryNode child : currentQuery.getChildren(currentNode)) {
-            // Recursive call
-            candidateListBuilder.addAll(
-                    findCandidatesInSubTree(currentQuery, child, sourceNode, newOptionalClosestDelimiterNode)
-            );
-        }
-        return candidateListBuilder.build();
     }
 
-    /**
-     * Selects target nodes for one boolean expression.
-     *
-     * Criterion: the delimiter node should contain all the variables used in the boolean expression.
-     */
-    private ImmutableList<QueryNode> selectNodesForTransfer(IntermediateQuery query, ImmutableExpression expression,
-                                                            QueryNode currentNode) {
-        ImmutableList.Builder<QueryNode> selectionBuilder = ImmutableList.builder();
-        for (PotentialRecipient pair : potentialTargetPairs) {
-            ImmutableSet<Variable> expressionVariables = expression.getVariables();
-            ImmutableSet<Variable> delimiterVariables = ProjectedVariableExtractionTools.extractProjectedVariables(
-                    query, pair.delimiterNode);
-
-            if (delimiterVariables.containsAll(expressionVariables)) {
-                selectionBuilder.add(pair.recipientNode);
-            }
-        }
-
-        return selectionBuilder.build();
-    }
+//
+//    /**
+//     * Finds at least one PotentialRecipient per sub-tree of a child of the source node.
+//     *
+//     * Top method.
+//     */
+//    private ImmutableList<PotentialRecipient> findCandidateRecipients(IntermediateQuery currentQuery,
+//                                                                      JoinOrFilterNode sourceNode) {
+//
+//        ImmutableList.Builder<PotentialRecipient> candidateListBuilder = ImmutableList.builder();
+//        for (QueryNode childNode : currentQuery.getChildren(sourceNode)) {
+//            candidateListBuilder.addAll(
+//                    findCandidatesInSubTree(currentQuery, childNode, sourceNode, Optional.<ConstructionOrDataNode>empty())
+//            );
+//        }
+//        return candidateListBuilder.build();
+//    }
+//
+//    /**
+//     * Recursive low-level method.
+//     */
+//    private ImmutableList<PotentialRecipient> findCandidatesInSubTree(IntermediateQuery currentQuery, QueryNode currentNode,
+//                                                                      JoinOrFilterNode sourceNode,
+//                                                                      final Optional<ConstructionOrDataNode> optionalClosestDelimiterNode) {
+//
+//        /**
+//         * First terminal case: a data node
+//         */
+//        if (currentNode instanceof DataNode) {
+//
+//            /**
+//             * If there is at least one delimiter node between the source and the current node,
+//             * returns this data node as the target and the delimiter node as delimiter.
+//             */
+//            if (optionalClosestDelimiterNode.isPresent()) {
+//                return ImmutableList.of(new PotentialRecipient(optionalClosestDelimiterNode.get(), currentNode));
+//            }
+//            /**
+//             * Otherwise, the DATA NODE HAS THE ROLE OF DELIMITER and the SOURCE NODE is used as target.
+//             */
+//            else {
+//                return ImmutableList.of(new PotentialRecipient((DataNode)currentNode, sourceNode));
+//            }
+//        }
+//
+//        /**
+//         * Second terminal case: a JoinOrFilter found after a delimiter node.
+//         *
+//         * The JoinOrFilter is then used as a target and the delimiter node as a delimiter.
+//         *
+//         */
+//        else if ((currentNode instanceof JoinOrFilterNode) && optionalClosestDelimiterNode.isPresent()) {
+//            return ImmutableList.of(new PotentialRecipient(optionalClosestDelimiterNode.get(), currentNode));
+//        }
+//
+//        Optional<ConstructionOrDataNode> newOptionalClosestDelimiterNode;
+//
+//        /**
+//         * If is a normal delimiter node, uses it as the closest one
+//         */
+//        if (currentNode instanceof ConstructionNode) {
+//            ConstructionOrDataNode delimiterNode = (ConstructionNode) currentNode;
+//            newOptionalClosestDelimiterNode = Optional.of(delimiterNode);
+//
+//        }
+//        /**
+//         * However, reuses the previous one (if existing).
+//         */
+//        else {
+//            newOptionalClosestDelimiterNode = optionalClosestDelimiterNode;
+//        }
+//
+//        /**
+//         * Gathers the pairs returned by the children and returns them.
+//         *
+//         * Recursive.
+//         */
+//        ImmutableList.Builder<PotentialRecipient> candidateListBuilder = ImmutableList.builder();
+//        for (QueryNode child : currentQuery.getChildren(currentNode)) {
+//            // Recursive call
+//            candidateListBuilder.addAll(
+//                    findCandidatesInSubTree(currentQuery, child, sourceNode, newOptionalClosestDelimiterNode)
+//            );
+//        }
+//        return candidateListBuilder.build();
+//    }
+//
+//    /**
+//     * Selects target nodes for one boolean expression.
+//     *
+//     * Criterion: the delimiter node should contain all the variables used in the boolean expression.
+//     */
+//    private ImmutableList<QueryNode> selectNodesForTransfer(IntermediateQuery query, ImmutableExpression expression,
+//                                                            QueryNode currentNode) {
+//        ImmutableList.Builder<QueryNode> selectionBuilder = ImmutableList.builder();
+//        for (PotentialRecipient pair : potentialTargetPairs) {
+//            ImmutableSet<Variable> expressionVariables = expression.getVariables();
+//            ImmutableSet<Variable> delimiterVariables = ProjectedVariableExtractionTools.extractProjectedVariables(
+//                    query, pair.delimiterNode);
+//
+//            if (delimiterVariables.containsAll(expressionVariables)) {
+//                selectionBuilder.add(pair.recipientNode);
+//            }
+//        }
+//
+//        return selectionBuilder.build();
+//    }
 
     /**
      * Builds the PushDownBooleanExpressionProposal.
