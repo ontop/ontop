@@ -21,16 +21,6 @@ package it.unibz.inf.ontop.protege.panels;
  */
 
 import it.unibz.inf.ontop.exception.DuplicateMappingException;
-import it.unibz.inf.ontop.protege.gui.IconLoader;
-import it.unibz.inf.ontop.protege.gui.PredicateItem;
-import it.unibz.inf.ontop.protege.gui.SQLResultSetTableModel;
-import it.unibz.inf.ontop.protege.gui.component.AutoSuggestComboBox;
-import it.unibz.inf.ontop.protege.gui.component.SQLResultTable;
-import it.unibz.inf.ontop.protege.gui.treemodels.IncrementalResultSetTableModel;
-import it.unibz.inf.ontop.protege.utils.DatasourceSelectorListener;
-import it.unibz.inf.ontop.protege.utils.OBDAProgressListener;
-import it.unibz.inf.ontop.protege.utils.OBDAProgressMonitor;
-import it.unibz.inf.ontop.sql.*;
 import it.unibz.inf.ontop.io.PrefixManager;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
@@ -39,14 +29,25 @@ import it.unibz.inf.ontop.ontology.OClass;
 import it.unibz.inf.ontop.owlrefplatform.core.queryevaluation.SQLAdapterFactory;
 import it.unibz.inf.ontop.owlrefplatform.core.queryevaluation.SQLDialectAdapter;
 import it.unibz.inf.ontop.owlrefplatform.core.queryevaluation.SQLServerSQLDialectAdapter;
+import it.unibz.inf.ontop.protege.gui.IconLoader;
 import it.unibz.inf.ontop.protege.gui.MapItem;
+import it.unibz.inf.ontop.protege.gui.PredicateItem;
+import it.unibz.inf.ontop.protege.gui.SQLResultSetTableModel;
+import it.unibz.inf.ontop.protege.gui.component.AutoSuggestComboBox;
 import it.unibz.inf.ontop.protege.gui.component.PropertyMappingPanel;
+import it.unibz.inf.ontop.protege.gui.component.SQLResultTable;
+import it.unibz.inf.ontop.protege.gui.treemodels.IncrementalResultSetTableModel;
+import it.unibz.inf.ontop.protege.utils.DatasourceSelectorListener;
 import it.unibz.inf.ontop.protege.utils.DialogUtils;
+import it.unibz.inf.ontop.protege.utils.OBDAProgressListener;
+import it.unibz.inf.ontop.protege.utils.OBDAProgressMonitor;
+import it.unibz.inf.ontop.sql.*;
 
 import javax.swing.*;
 import javax.swing.plaf.metal.MetalComboBoxButton;
 import javax.swing.table.TableModel;
 import java.awt.*;
+import java.awt.event.ItemEvent;
 import java.awt.event.KeyEvent;
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -458,10 +459,18 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 	private void cboClassAutoSuggestItemStateChanged(java.awt.event.ItemEvent evt) {
 		Object item = evt.getItem(); // Get the affected item
 		if (item instanceof PredicateItem) {
-			PredicateItem selectedItem = (PredicateItem) item;
-			predicateSubjectMap = new MapItem(selectedItem);
-			predicateSubjectMap.setTargetMapping(txtClassUriTemplate.getText());
-			isSubjectClassValid = true;
+
+			if (evt.getStateChange() == ItemEvent.DESELECTED ){
+				predicateSubjectMap = createPredicateSubjectMap();
+				predicateSubjectMap.setTargetMapping(txtClassUriTemplate.getText());
+				isSubjectClassValid = true;
+			}
+			else {
+				PredicateItem selectedItem = (PredicateItem) item;
+				predicateSubjectMap = new MapItem(selectedItem);
+				predicateSubjectMap.setTargetMapping(txtClassUriTemplate.getText());
+				isSubjectClassValid = true;
+			}
 
 		} else if (item instanceof String) {
 			String className = item.toString();
