@@ -1,10 +1,10 @@
 package it.unibz.inf.ontop.executor.deletion;
 
+import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.executor.InternalProposalExecutor;
-import it.unibz.inf.ontop.pivotalrepr.EmptyQueryException;
-import it.unibz.inf.ontop.pivotalrepr.IntermediateQuery;
-import it.unibz.inf.ontop.pivotalrepr.NodeTransformationProposal;
-import it.unibz.inf.ontop.pivotalrepr.QueryNode;
+import it.unibz.inf.ontop.model.Variable;
+import it.unibz.inf.ontop.pivotalrepr.*;
+import it.unibz.inf.ontop.pivotalrepr.NonCommutativeOperatorNode.ArgumentPosition;
 import it.unibz.inf.ontop.pivotalrepr.impl.QueryTreeComponent;
 import it.unibz.inf.ontop.pivotalrepr.proposal.InvalidQueryOptimizationProposalException;
 import it.unibz.inf.ontop.pivotalrepr.proposal.ReactToChildDeletionProposal;
@@ -23,7 +23,12 @@ public class ReactToChildDeletionExecutor implements InternalProposalExecutor<Re
                                  QueryTreeComponent treeComponent) throws InvalidQueryOptimizationProposalException, EmptyQueryException {
 
         // May alter the query and its tree component
-        return analyzeAndUpdate(query, proposal.getParentNode(), proposal.getOptionalNextSibling(), treeComponent);
+        return analyzeAndUpdate(query,
+                proposal.getParentNode(),
+                proposal.getOptionalPositionOfDeletedChild(),
+                proposal.getVariablesProjectedByDeletedChild(),
+                proposal.getOptionalNextSibling(),
+                treeComponent);
     }
 
     /**
@@ -32,15 +37,21 @@ public class ReactToChildDeletionExecutor implements InternalProposalExecutor<Re
      * Recursive!
      */
     private static ReactToChildDeletionResults analyzeAndUpdate(IntermediateQuery query, QueryNode parentNode,
-                                                                java.util.Optional<QueryNode> optionalNextSibling,
+                                                                Optional<ArgumentPosition> optionalPositionOfDeletedChild,
+                                                                ImmutableSet<Variable> variablesProjectedByDeletedChild,
+                                                                Optional<QueryNode> optionalNextSibling,
                                                                 QueryTreeComponent treeComponent)
             throws EmptyQueryException {
-        ReactToChildDeletionTransformer transformer = new ReactToChildDeletionTransformer(query);
+        ReactToChildDeletionTransformer transformer = new ReactToChildDeletionTransformer(query,
+                optionalPositionOfDeletedChild, variablesProjectedByDeletedChild);
 
         NodeTransformationProposal transformationProposal = parentNode.acceptNodeTransformer(transformer);
 
         switch (transformationProposal.getState()) {
-            case NO_CHANGE:
+            case NO_LOCAL_CHANGE:
+                /**
+                 * TODO: handle nulls
+                 */
                 return new ReactToChildDeletionResultsImpl(query, parentNode, optionalNextSibling);
 
             case REPLACE_BY_UNIQUE_CHILD:
@@ -50,13 +61,16 @@ public class ReactToChildDeletionExecutor implements InternalProposalExecutor<Re
                 return applyReplacementProposal(query, parentNode, treeComponent, transformationProposal, false);
 
             case DELETE:
-                return applyDeletionProposal(query, parentNode, treeComponent);
+                return applyDeletionProposal(query, parentNode, treeComponent, transformationProposal.getNullVariables());
 
             default:
                 throw new RuntimeException("Unexpected state: " + transformationProposal.getState());
         }
     }
 
+    /**
+     * TODO: handle nulls
+     */
     private static ReactToChildDeletionResults applyReplacementProposal(IntermediateQuery query,
                                                                         QueryNode parentNode,
                                                                         QueryTreeComponent treeComponent,
@@ -91,11 +105,13 @@ public class ReactToChildDeletionExecutor implements InternalProposalExecutor<Re
         }
         return new ReactToChildDeletionResultsImpl(query, optionalGrandParent.get(), optionalNextSibling);
     }
-
+    
     private static ReactToChildDeletionResults applyDeletionProposal(IntermediateQuery query, QueryNode parentNode,
-                                                                     QueryTreeComponent treeComponent)
+                                                                     QueryTreeComponent treeComponent,
+                                                                     ImmutableSet<Variable> nullVariables)
             throws EmptyQueryException {
         Optional<QueryNode> optionalGrandParent = query.getParent(parentNode);
+        Optional<ArgumentPosition> optionalPosition = query.getOptionalPosition(parentNode);
         Optional<QueryNode> optionalNextSibling = query.getNextSibling(parentNode);
 
         treeComponent.removeSubTree(parentNode);
@@ -104,7 +120,8 @@ public class ReactToChildDeletionExecutor implements InternalProposalExecutor<Re
          * Recursive (cascade)
          */
         if (optionalGrandParent.isPresent()) {
-            return analyzeAndUpdate(query, optionalGrandParent.get(), optionalNextSibling, treeComponent);
+            return analyzeAndUpdate(query, optionalGrandParent.get(), optionalPosition, nullVariables,
+                    optionalNextSibling, treeComponent);
         }
         /**
          * Arrived to the root
