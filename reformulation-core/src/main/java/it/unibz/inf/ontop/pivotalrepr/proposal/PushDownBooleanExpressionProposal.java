@@ -13,9 +13,18 @@ public interface PushDownBooleanExpressionProposal extends NodeCentricOptimizati
 
     /**
      * TODO: explain
-     * TODO: find a better name
+     *
+     * Nodes that can directly receive these additional conditions
      */
-    ImmutableMultimap<QueryNode, ImmutableExpression> getTransferMap();
+    ImmutableMultimap<JoinOrFilterNode, ImmutableExpression> getDirectRecipients();
+
+    /**
+     * TODO: find a better name
+     *
+     * These QueryNode require new FilterNodes to be inserted as their parents.
+     * The filter nodes will receive the corresponding conditions.
+     */
+    ImmutableMultimap<QueryNode, ImmutableExpression> getChildOfFilterNodesToCreate();
 
     /**
      * TODO: explain
