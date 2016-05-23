@@ -7,11 +7,11 @@ import it.unibz.inf.ontop.model.impl.AtomPredicateImpl;
 import it.unibz.inf.ontop.model.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.optimization.PushDownBooleanExpressionOptimizer;
+import it.unibz.inf.ontop.owlrefplatform.core.optimization.PushDownBooleanExpressionOptimizerImpl;
 import it.unibz.inf.ontop.pivotalrepr.*;
 import it.unibz.inf.ontop.pivotalrepr.equivalence.IQSyntacticEquivalenceChecker;
 import it.unibz.inf.ontop.pivotalrepr.impl.*;
 import it.unibz.inf.ontop.pivotalrepr.impl.tree.DefaultIntermediateQueryBuilder;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.Optional;
@@ -77,7 +77,7 @@ public class PushDownBooleanExpressionOptimizerTest {
 
         System.out.println("\nBefore optimization: \n" +  query1);
 
-        PushDownBooleanExpressionOptimizer pushDownBooleanExpressionOptimizer = new PushDownBooleanExpressionOptimizer();
+        PushDownBooleanExpressionOptimizer pushDownBooleanExpressionOptimizer = new PushDownBooleanExpressionOptimizerImpl();
         IntermediateQuery optimizedQuery = pushDownBooleanExpressionOptimizer.optimize(query1);
 
         System.out.println("\nAfter optimization: \n" +  optimizedQuery);
@@ -130,7 +130,7 @@ public class PushDownBooleanExpressionOptimizerTest {
 
         System.out.println("\nBefore optimization: \n" +  query1);
 
-        PushDownBooleanExpressionOptimizer pushDownBooleanExpressionOptimizer = new PushDownBooleanExpressionOptimizer();
+        PushDownBooleanExpressionOptimizer pushDownBooleanExpressionOptimizer = new PushDownBooleanExpressionOptimizerImpl();
         IntermediateQuery optimizedQuery = pushDownBooleanExpressionOptimizer.optimize(query1);
 
         System.out.println("\nAfter optimization: \n" +  optimizedQuery);
@@ -184,7 +184,7 @@ public class PushDownBooleanExpressionOptimizerTest {
 
         System.out.println("\nBefore optimization: \n" +  query1);
 
-        PushDownBooleanExpressionOptimizer pushDownBooleanExpressionOptimizer = new PushDownBooleanExpressionOptimizer();
+        PushDownBooleanExpressionOptimizer pushDownBooleanExpressionOptimizer = new PushDownBooleanExpressionOptimizerImpl();
         IntermediateQuery optimizedQuery = pushDownBooleanExpressionOptimizer.optimize(query1);
 
         System.out.println("\nAfter optimization: \n" +  optimizedQuery);
