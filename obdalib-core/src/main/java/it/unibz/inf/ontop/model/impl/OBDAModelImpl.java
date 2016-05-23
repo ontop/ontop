@@ -27,6 +27,8 @@ import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.ontology.OntologyVocabulary;
 import it.unibz.inf.ontop.ontology.impl.OntologyVocabularyImpl;
 import it.unibz.inf.ontop.querymanager.QueryController;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -34,9 +36,6 @@ import java.net.URI;
 import java.util.*;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class OBDAModelImpl implements OBDAModel {
 
@@ -435,7 +434,8 @@ public class OBDAModelImpl implements OBDAModel {
 
 
 		Map<String, String> currentMap = prefixManager.getPrefixMap();
-		int predicateNameLength = 0;
+		int newpredicateNameLength  = 0;
+		int oldpredicateNameLength = 0;
 
 		//Find the newPrefix in the prefixManager
 		for (String prefix : currentMap.values()) {
@@ -443,14 +443,21 @@ public class OBDAModelImpl implements OBDAModel {
 			if(newName.startsWith(prefix)){
 				//find the new prefix and the length of the predicateName that we do not want to consider
 				int prefixLength = prefix.length();
-				predicateNameLength = newName.length()- prefixLength;
+				newpredicateNameLength = newName.length()- prefixLength;
 				newPrefix = prefix;
+			}
+
+			if(oldName.startsWith(prefix)){
+				//find the new prefix and the length of the predicateName that we do not want to consider
+				int prefixLength = prefix.length();
+				oldpredicateNameLength = oldName.length()- prefixLength;
+				oldPrefix = prefix;
 			}
 		}
 
 		//find old prefix removing the predicateName
-		if(predicateNameLength!=0) {
-			int prefixLength = oldName.length() - predicateNameLength;
+		if(oldpredicateNameLength==0) {
+			int prefixLength = oldName.length() - newpredicateNameLength;
 			oldPrefix = oldName.substring(0, prefixLength);
 		}
 
@@ -467,7 +474,7 @@ public class OBDAModelImpl implements OBDAModel {
 						/**
                          * Rename the uri of individuals in the mapping, substitute the oldPrefix with the newPrefix
 						 */
-						if(!oldPrefix.isEmpty() && !newPrefix.isEmpty()) {
+						if(!oldPrefix.isEmpty() && !newPrefix.isEmpty() && !newPrefix.equals(oldPrefix)) {
 							if (term instanceof Function) {
 								Function uri = ((Function) term);
 								if (uri.getFunctionSymbol() instanceof URITemplatePredicate) {
