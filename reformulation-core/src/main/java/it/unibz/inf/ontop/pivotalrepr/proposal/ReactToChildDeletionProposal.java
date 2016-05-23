@@ -1,5 +1,9 @@
 package it.unibz.inf.ontop.pivotalrepr.proposal;
 
+import com.google.common.collect.ImmutableSet;
+import it.unibz.inf.ontop.model.Variable;
+import it.unibz.inf.ontop.pivotalrepr.NonCommutativeOperatorNode;
+import it.unibz.inf.ontop.pivotalrepr.NonCommutativeOperatorNode.ArgumentPosition;
 import it.unibz.inf.ontop.pivotalrepr.QueryNode;
 
 import java.util.Optional;
@@ -9,10 +13,9 @@ import java.util.Optional;
  *
  * TODO: explain
  *
- *
  * The child is already deleted.
  *
- * Please note they are initial nodes. A cascade of deletion may appear.
+ * Please note that a cascade of deletion may appear.
  *
  */
 public interface ReactToChildDeletionProposal extends QueryOptimizationProposal<ReactToChildDeletionResults> {
@@ -23,4 +26,8 @@ public interface ReactToChildDeletionProposal extends QueryOptimizationProposal<
     QueryNode getParentNode();
 
     Optional<QueryNode> getOptionalNextSibling();
+
+    Optional<ArgumentPosition> getOptionalPositionOfDeletedChild();
+
+    ImmutableSet<Variable> getVariablesProjectedByDeletedChild();
 }
