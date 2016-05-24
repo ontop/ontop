@@ -20,7 +20,6 @@ package it.unibz.inf.ontop.protege.gui.action;
  * #L%
  */
 
-import com.google.common.collect.Iterators;
 import com.google.common.collect.Sets;
 import it.unibz.inf.ontop.owlrefplatform.owlapi3.OWLAPIMaterializer;
 import it.unibz.inf.ontop.protege.utils.OBDAProgressListener;
@@ -33,8 +32,8 @@ import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 
 public class MaterializeAction implements OBDAProgressListener {
@@ -79,7 +78,7 @@ public class MaterializeAction implements OBDAProgressListener {
 		thread = new Thread("AddAxiomToOntology Thread") {
 			public void run() {
 				try {
-					HashSet<OWLAxiom> setAxioms = Sets.newHashSet(Iterators.filter(iterator, OWLAxiom.class));
+					Set<OWLAxiom> setAxioms = Sets.newHashSet(iterator);
 					ontologyManager.addAxioms(currentOntology, setAxioms);
 
 					latch.countDown();

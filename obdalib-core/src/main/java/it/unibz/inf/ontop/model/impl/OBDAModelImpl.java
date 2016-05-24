@@ -313,22 +313,21 @@ public class OBDAModelImpl implements OBDAModel {
 	}
 
 	private void initMappingsArray(URI datasource_uri) {
-		mappings.put(datasource_uri, new ArrayList<OBDAMappingAxiom>());
+		mappings.put(datasource_uri, new ArrayList<>());
 	}
 
 	@Override
-	public void addMapping(URI datasource_uri, OBDAMappingAxiom mapping, boolean multipleAdd) throws DuplicateMappingException {
+	public void addMapping(URI datasource_uri, OBDAMappingAxiom mapping, boolean disableFiringMappingInsertedEvent) throws DuplicateMappingException {
 		int index = indexOf(datasource_uri, mapping.getId());
 		if (index != -1) {
 			throw new DuplicateMappingException("ID " + mapping.getId());
 		}
 		mappings.get(datasource_uri).add(mapping);
 
-		if(!multipleAdd) {
+		if(!disableFiringMappingInsertedEvent) {
 			fireMappingInserted(datasource_uri);
 		}
 	}
-
 
 
 	@Override
@@ -401,28 +400,14 @@ public class OBDAModelImpl implements OBDAModel {
 				duplicates.add(map.getId());
 			}
 		}
-		fireMappigUpdated(datasource_uri);
-		if (duplicates.size() > 0) {
-			String msg = String.format("Found %d duplicates in the following ids: %s", duplicates.size(), duplicates.toString());
-			throw new DuplicateMappingException(msg);
-		}
-	}
-
-	public void addBoostrappedMappings(URI datasource_uri, Collection<OBDAMappingAxiom> mappings) throws DuplicateMappingException {
-		List<String> duplicates = new ArrayList<String>();
-		for (OBDAMappingAxiom map : mappings) {
-			try {
-				addMapping(datasource_uri, map, true);
-			} catch (DuplicateMappingException e) {
-				duplicates.add(map.getId());
-			}
-		}
+			fireMappigUpdated(datasource_uri);
 
 		if (duplicates.size() > 0) {
 			String msg = String.format("Found %d duplicates in the following ids: %s", duplicates.size(), duplicates.toString());
 			throw new DuplicateMappingException(msg);
 		}
 	}
+
 
 	@Override
 	public Object clone() {

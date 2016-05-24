@@ -150,9 +150,13 @@ public class DirectMappingEngine {
 		Collection<DatabaseRelationDefinition> tables = metadata.getDatabaseRelations();
 		List<OBDAMappingAxiom> mappingAxioms = new ArrayList<>();
 		for (DatabaseRelationDefinition td : tables) {
-			model.addBoostrappedMappings(sourceUri, getMapping(td, baseIRI));
+			mappingAxioms.addAll(getMapping(td, baseIRI));
+
 		}
-		model.addBoostrappedMappings(sourceUri, mappingAxioms);
+		for (OBDAMappingAxiom mappingAxiom : mappingAxioms) {
+			model.addMapping(sourceUri, mappingAxiom, true);
+		}
+
 		for (URI uri : model.getMappings().keySet()) {
 			for (OBDAMappingAxiom mapping : model.getMappings().get(uri)) {
 				List<Function> rule = mapping.getTargetQuery();

@@ -513,6 +513,7 @@ public class OBDAModelManager implements Disposable {
 			case ABOUT_TO_CLASSIFY:
 				log.debug("ABOUT TO CLASSIFY");
 				loadingData = true;
+
 				break;
 
 			case ENTITY_RENDERER_CHANGED:
@@ -563,6 +564,7 @@ public class OBDAModelManager implements Disposable {
 
 			if ((!initializing) && (owlEditorKit != null) && (activeOBDAModel != null)) {
                 ProtegeOWLReasonerInfo fac = owlEditorKit.getOWLModelManager().getOWLReasonerManager().getCurrentReasonerFactory();
+
                 if (fac instanceof OntopReasonerInfo) {
                     OntopReasonerInfo questfactory = (OntopReasonerInfo) fac;
                     DisposableQuestPreferences reasonerPreference = (DisposableQuestPreferences) owlEditorKit

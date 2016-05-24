@@ -143,7 +143,7 @@ public interface OBDAModel extends Cloneable, Serializable {
 	 * Inserts a mappings into this model. If the mapping id already exits it
 	 * throws an exception. Can be used inside method addMappings
 	 */
-	public void addMapping(URI sourceuri, OBDAMappingAxiom mapping , boolean multipleAdd) throws DuplicateMappingException;
+	public void addMapping(URI sourceuri, OBDAMappingAxiom mapping , boolean disableFiringMappingInsertedEvent) throws DuplicateMappingException;
 
 	/**
 	 * Inserts a collection of mappings into this model. Any duplicates will be
@@ -151,11 +151,6 @@ public interface OBDAModel extends Cloneable, Serializable {
 	 */
 	public void addMappings(URI sourceuri, Collection<OBDAMappingAxiom> mappings) throws DuplicateMappingException;
 
-	/**
-	 * Inserts a collection of bootstrapped mappings into this model. Any duplicates will be
-	 * failed and the system will report such duplication failures.
-	 */
-	public void addBoostrappedMappings(URI sourceuri, Collection<OBDAMappingAxiom> mappings) throws DuplicateMappingException;
 
 	/***
 	 * Removes all mappings in the model.
