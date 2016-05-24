@@ -1,8 +1,6 @@
 package it.unibz.inf.ontop.owlrefplatform.core.optimization;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.*;
 import it.unibz.inf.ontop.model.ImmutableExpression;
 import it.unibz.inf.ontop.model.Variable;
 import it.unibz.inf.ontop.pivotalrepr.*;
@@ -10,10 +8,13 @@ import it.unibz.inf.ontop.pivotalrepr.proposal.NodeCentricOptimizationResults;
 import it.unibz.inf.ontop.pivotalrepr.proposal.PushDownBooleanExpressionProposal;
 
 import java.util.AbstractMap;
+import java.util.AbstractMap.SimpleEntry;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
 import it.unibz.inf.ontop.owlrefplatform.core.optimization.QueryNodeNavigationTools.*;
+import it.unibz.inf.ontop.pivotalrepr.proposal.impl.PushDownBooleanExpressionProposalImpl;
 import it.unibz.inf.ontop.pivotalrepr.unfolding.ProjectedVariableExtractionTools;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
@@ -224,16 +225,15 @@ public class PushDownBooleanExpressionOptimizerImpl implements PushDownBooleanEx
          * For each boolean expression, looks for recipient nodes.
          *
          */
-        ImmutableMap<ImmutableExpression, ImmutableSet<Recipient>> recipientMap = booleanExpressions.stream()
-                .map(ex -> new AbstractMap.SimpleEntry<>(
-                        ex,
-                        selectRecipients(currentQuery, providerNode, preSelectedChildren, ex)))
-                .collect(ImmutableCollectors.toMap());
+        ImmutableMultimap<Recipient, ImmutableExpression> recipientMap = booleanExpressions.stream()
+                .flatMap(ex -> selectRecipients(currentQuery, providerNode, preSelectedChildren, ex)
+                        .map(recipient -> new SimpleEntry<Recipient, ImmutableExpression>(recipient, ex)))
+                .collect(ImmutableCollectors.toMultimap());
 
         return buildProposal(providerNode, recipientMap);
     }
 
-    private ImmutableSet<Recipient> selectRecipients(IntermediateQuery query, JoinOrFilterNode providerNode,
+    private Stream<Recipient> selectRecipients(IntermediateQuery query, JoinOrFilterNode providerNode,
                                                      ImmutableList<QueryNode> preSelectedChildren,
                                                      ImmutableExpression expression) {
         // Roots of the sub-trees
@@ -242,7 +242,7 @@ public class PushDownBooleanExpressionOptimizerImpl implements PushDownBooleanEx
         boolean requireASiblingToTakeIt = false;
 
         for(QueryNode child : preSelectedChildren) {
-            switch(getChildRequirement(query, child, providerNode, expression)) {
+            switch(getChildRequirement(query, child, expression)) {
                 case NO_NEED:
                     break;
                 case CAN_TAKE:
@@ -266,14 +266,14 @@ public class PushDownBooleanExpressionOptimizerImpl implements PushDownBooleanEx
                 : Stream.empty();
 
         return Stream.concat(providerRecipientStream, childRecipientStream)
-                .collect(ImmutableCollectors.toSet());
+                .distinct();
     }
 
     /**
      * TODO: explain
      */
     private ChildRequirement getChildRequirement(IntermediateQuery query, QueryNode child,
-                                                 JoinOrFilterNode providerNode, ImmutableExpression expression) {
+                                                 ImmutableExpression expression) {
         ImmutableSet<Variable> expressionVariables = expression.getVariables();
 
         ImmutableSet<Variable> projectedVariables = ProjectedVariableExtractionTools.extractProjectedVariables(
@@ -413,8 +413,34 @@ public class PushDownBooleanExpressionOptimizerImpl implements PushDownBooleanEx
      * Builds the PushDownBooleanExpressionProposal.
      */
     private Optional<PushDownBooleanExpressionProposal> buildProposal(
-            JoinOrFilterNode providerNode, ImmutableMap<ImmutableExpression, ImmutableSet<Recipient>> recipientMap) {
-        throw new RuntimeException("TODO: build the proposal");
+            JoinOrFilterNode providerNode, ImmutableMultimap<Recipient, ImmutableExpression> recipientMap) {
+
+        ImmutableCollection<Map.Entry<Recipient, ImmutableExpression>> recipientEntries = recipientMap.entries();
+
+        ImmutableMultimap<JoinOrFilterNode, ImmutableExpression> directRecipients = recipientEntries.stream()
+                .filter(e -> e.getKey().directRecipientNode.isPresent())
+                .map(e -> new AbstractMap.SimpleEntry<>(e.getKey().directRecipientNode.get(), e.getValue()))
+                .filter(e -> e.getKey() != providerNode)
+                .collect(ImmutableCollectors.toMultimap());
+
+        ImmutableMultimap<QueryNode, ImmutableExpression> childOfFilterNodesToCreate = recipientEntries.stream()
+                .filter(e -> e.getKey().indirectRecipientNode.isPresent())
+                .map(e -> new AbstractMap.SimpleEntry<>(e.getKey().indirectRecipientNode.get(), e.getValue()))
+                .collect(ImmutableCollectors.toMultimap());
+
+        if (directRecipients.isEmpty() && childOfFilterNodesToCreate.isEmpty()) {
+            return Optional.empty();
+        }
+        else {
+            ImmutableList<ImmutableExpression> expressionsToKeep = recipientEntries.stream()
+                    .filter(e -> e.getKey().directRecipientNode.isPresent())
+                    .filter(e -> e.getKey().directRecipientNode.get() == providerNode)
+                    .map(Map.Entry::getValue)
+                    .collect(ImmutableCollectors.toList());
+
+            return Optional.of(new PushDownBooleanExpressionProposalImpl(providerNode, directRecipients,
+                    childOfFilterNodesToCreate, expressionsToKeep));
+        }
     }
 
 }
