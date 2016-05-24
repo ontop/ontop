@@ -373,7 +373,7 @@ public class PushDownBooleanExpressionOptimizerImpl implements PushDownBooleanEx
          * Tries to reuse the filter node above if it is its parent
          */
         else if (query.getParent(currentNode)
-                    .map(p -> p == providerNode)
+                    .filter(p -> p == providerNode)
                     .isPresent()) {
             /**
              * Keep the expression in the provider node
@@ -395,7 +395,7 @@ public class PushDownBooleanExpressionOptimizerImpl implements PushDownBooleanEx
     private Stream<Recipient> findRecipientsInDataNode(IntermediateQuery query, ImmutableExpression expression,
                                                        JoinOrFilterNode providerNode, DataNode currentNode) {
         if (query.getParent(currentNode)
-                .map(p -> p == providerNode)
+                .filter(p -> p == providerNode)
                 .isPresent()) {
             /**
              * Keep the expression in the provider node

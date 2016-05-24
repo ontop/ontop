@@ -95,6 +95,8 @@ public class PushDownBooleanExpressionOptimizerTest {
         queryBuilder2.addChild(joinNode4, dataNode3);
         IntermediateQuery query2 = queryBuilder2.build();
 
+        System.out.println("\nExpected: \n" +  query2);
+
         assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, query2));
     }
 
@@ -160,6 +162,8 @@ public class PushDownBooleanExpressionOptimizerTest {
 
         IntermediateQuery query2 = queryBuilder2.build();
 
+        System.out.println("\nExpected: \n" +  query2);
+
         assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, query2));
     }
 
@@ -196,12 +200,14 @@ public class PushDownBooleanExpressionOptimizerTest {
         LeftJoinNode leftJoinNode1 = new LeftJoinNodeImpl(Optional.empty());
 
         queryBuilder2.init(projectionAtom2, constructionNode2);
-        queryBuilder2.addChild(constructionNode2, filterNode);
+        queryBuilder2.addChild(constructionNode2, filterNode1);
         queryBuilder2.addChild(filterNode1, leftJoinNode1);
         queryBuilder2.addChild(leftJoinNode1, dataNode1, NonCommutativeOperatorNode.ArgumentPosition.LEFT);
         queryBuilder2.addChild(leftJoinNode1, dataNode2, NonCommutativeOperatorNode.ArgumentPosition.RIGHT);
 
         IntermediateQuery query2 = queryBuilder2.build();
+
+        System.out.println("\nExpected: \n" +  query2);
 
         assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, query2));
     }
