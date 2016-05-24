@@ -28,6 +28,7 @@ import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.owlapi3.OBDAModelValidator;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
+import it.unibz.inf.ontop.protege.utils.DialogUtils;
 import it.unibz.inf.ontop.querymanager.*;
 import it.unibz.inf.ontop.sql.ImplicitDBConstraintsReader;
 import it.unibz.inf.ontop.sql.JDBCConnectionManager;
@@ -44,7 +45,6 @@ import org.protege.editor.owl.model.inference.ProtegeOWLReasonerInfo;
 import org.protege.editor.owl.ui.prefix.PrefixUtilities;
 import org.semanticweb.owlapi.change.AddImportData;
 import org.semanticweb.owlapi.change.RemoveImportData;
-import it.unibz.inf.ontop.protege.utils.DialogUtils;
 import org.semanticweb.owlapi.formats.PrefixDocumentFormat;
 import org.semanticweb.owlapi.model.*;
 import org.slf4j.Logger;
@@ -864,17 +864,17 @@ public class OBDAModelManager implements Disposable {
 		}
 
 		@Override
-        public void mappingDeleted(URI srcuri, String mapping_id) {
+        public void mappingDeleted(URI srcuri ) {
 			triggerOntologyChanged();
 		}
 
 		@Override
-        public void mappingInserted(URI srcuri, String mapping_id) {
+        public void mappingInserted(URI srcuri ) {
 			triggerOntologyChanged();
 		}
 
 		@Override
-        public void mappingUpdated(URI srcuri, String mapping_id, OBDAMappingAxiom mapping) {
+        public void mappingUpdated(URI srcuri) {
 			triggerOntologyChanged();
 
 		}

@@ -20,19 +20,13 @@ package it.unibz.inf.ontop.owlrefplatform.core.abox;
  * #L%
  */
 
-import it.unibz.inf.ontop.model.Function;
-import it.unibz.inf.ontop.model.Term;
-import it.unibz.inf.ontop.model.OBDADataFactory;
-import it.unibz.inf.ontop.model.OBDADataSource;
-import it.unibz.inf.ontop.model.OBDALibConstants;
-import it.unibz.inf.ontop.model.OBDAMappingAxiom;
-import it.unibz.inf.ontop.model.OBDAModel;
-import it.unibz.inf.ontop.model.Predicate;
+import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.Predicate.COL_TYPE;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.model.impl.RDBMSourceParameterConstants;
 import it.unibz.inf.ontop.ontology.Assertion;
 import it.unibz.inf.ontop.sql.JDBCConnectionManager;
+import junit.framework.TestCase;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -42,8 +36,6 @@ import java.sql.Statement;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
-
-import junit.framework.TestCase;
 
 public class VirtualABoxMaterializerTest extends TestCase {
 
@@ -141,7 +133,7 @@ try{
 
 		OBDAModel model = fac.getOBDAModel();
 		model.addSource(source);
-		model.addMapping(source.getSourceID(), map1);
+		model.addMapping(source.getSourceID(), map1, false);
 
 		QuestMaterializer materializer = new QuestMaterializer(model, false);
 
@@ -237,8 +229,8 @@ try{
 
 		OBDAMappingAxiom map1 = fac.getRDBMSMappingAxiom(fac.getSQLQuery(sql), body);
 
-		model.addMapping(source.getSourceID(), map1);
-		model.addMapping(source2.getSourceID(), map1);
+		model.addMapping(source.getSourceID(), map1, false);
+		model.addMapping(source2.getSourceID(), map1, false);
 
 		QuestMaterializer materializer = new QuestMaterializer(model, false);
 
@@ -343,9 +335,9 @@ try{
 
 		OBDAMappingAxiom map1 = fac.getRDBMSMappingAxiom(fac.getSQLQuery(sql), body);
 
-		model.addMapping(source.getSourceID(), map1);
-		model.addMapping(source2.getSourceID(), map1);
-		model.addMapping(source3.getSourceID(), map1);
+		model.addMapping(source.getSourceID(), map1, false);
+		model.addMapping(source2.getSourceID(), map1 , false);
+		model.addMapping(source3.getSourceID(), map1, false);
 
 		QuestMaterializer materializer = new QuestMaterializer(model, false);
 
@@ -517,7 +509,7 @@ try{
 
 		OBDAMappingAxiom map1 = fac.getRDBMSMappingAxiom(fac.getSQLQuery(sql), body);
 
-		model.addMapping(source2.getSourceID(), map1);
+		model.addMapping(source2.getSourceID(), map1, false);
 		
 		QuestMaterializer materializer = new QuestMaterializer(model, false);
 	
@@ -625,12 +617,12 @@ try{
 
 		OBDAModel model = fac.getOBDAModel();
 		model.addSource(source);
-		model.addMapping(source.getSourceID(), map1);
-		model.addMapping(source.getSourceID(), map2);
-		model.addMapping(source.getSourceID(), map3);
-		model.addMapping(source.getSourceID(), map4);
-		model.addMapping(source.getSourceID(), map5);
-		model.addMapping(source.getSourceID(), map6);
+		model.addMapping(source.getSourceID(), map1, false);
+		model.addMapping(source.getSourceID(), map2, false);
+		model.addMapping(source.getSourceID(), map3, false);
+		model.addMapping(source.getSourceID(), map4, false);
+		model.addMapping(source.getSourceID(), map5, false);
+		model.addMapping(source.getSourceID(), map6, false);
 		
 		QuestMaterializer materializer = new QuestMaterializer(model, false);
 

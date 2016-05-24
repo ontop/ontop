@@ -521,7 +521,7 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 			}
 			// Create the mapping axiom
 			OBDAMappingAxiom mappingAxiom = dfac.getRDBMSMappingAxiom(dfac.getSQLQuery(source), target);
-			obdaModel.addMapping(selectedSource.getSourceID(), mappingAxiom);
+			obdaModel.addMapping(selectedSource.getSourceID(), mappingAxiom, false);
 			
 			// Clear the form afterwards
 			clearForm();

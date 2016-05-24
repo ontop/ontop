@@ -24,21 +24,15 @@ import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWL;
 import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWLEmptyEntitiesChecker;
 import it.unibz.inf.ontop.protege.panels.EmptiesCheckPanel;
 import it.unibz.inf.ontop.protege.utils.DialogUtils;
-
-import java.awt.BorderLayout;
-import java.awt.FlowLayout;
-import java.awt.event.ActionEvent;
-
-import javax.swing.JButton;
-import javax.swing.JDialog;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-
 import it.unibz.inf.ontop.protege.utils.OBDAProgressMonitor;
 import org.protege.editor.core.ui.action.ProtegeAction;
 import org.protege.editor.owl.OWLEditorKit;
 import org.protege.editor.owl.model.OWLModelManager;
 import org.semanticweb.owlapi.reasoner.OWLReasoner;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
 
 public class EmptiesCheckAction extends ProtegeAction {
 
@@ -78,7 +72,7 @@ public class EmptiesCheckAction extends ProtegeAction {
 				dialog.setTitle("Empties Check");
 
 				EmptiesCheckPanel emptiesPanel = new EmptiesCheckPanel();
-				Thread th = new Thread("EmptyEntitiesCheck") {
+				Thread th = new Thread("EmptyEntitiesCheck Thread") {
 					public void run() {
 
 						OBDAProgressMonitor monitor = new OBDAProgressMonitor("Finding empty entities...");

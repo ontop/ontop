@@ -223,7 +223,7 @@ public class OBDAModelImpl implements OBDAModel {
 		if (index != -1) {
 			ArrayList<OBDAMappingAxiom> current_mappings = mappings.get(datasource_uri);
 			current_mappings.remove(index);
-			fireMappingDeleted(datasource_uri, mapping_id);
+			fireMappingDeleted(datasource_uri);
 		}
 	}
 
@@ -245,27 +245,27 @@ public class OBDAModelImpl implements OBDAModel {
 	/**
 	 * Announces that a mapping has been updated.
 	 */
-	private void fireMappigUpdated(URI srcuri, String mapping_id, OBDAMappingAxiom mapping) {
+	private void fireMappigUpdated(URI srcuri) {
 		for (OBDAMappingListener listener : mappinglisteners) {
-			listener.mappingUpdated(srcuri, mapping_id, mapping);
+			listener.mappingUpdated(srcuri);
 		}
 	}
 
 	/**
 	 * Announces to the listeners that a mapping was deleted.
 	 */
-	private void fireMappingDeleted(URI srcuri, String mapping_id) {
+	private void fireMappingDeleted(URI srcuri) {
 		for (OBDAMappingListener listener : mappinglisteners) {
-			listener.mappingDeleted(srcuri, mapping_id);
+			listener.mappingDeleted(srcuri);
 		}
 	}
 
 	/**
 	 * Announces to the listeners that a mapping was inserted.
 	 */
-	private void fireMappingInserted(URI srcuri, String mapping_id) {
+	private void fireMappingInserted(URI srcuri) {
 		for (OBDAMappingListener listener : mappinglisteners) {
-			listener.mappingInserted(srcuri, mapping_id);
+			listener.mappingInserted(srcuri);
 		}
 	}
 
@@ -317,14 +317,19 @@ public class OBDAModelImpl implements OBDAModel {
 	}
 
 	@Override
-	public void addMapping(URI datasource_uri, OBDAMappingAxiom mapping) throws DuplicateMappingException {
+	public void addMapping(URI datasource_uri, OBDAMappingAxiom mapping, boolean multipleAdd) throws DuplicateMappingException {
 		int index = indexOf(datasource_uri, mapping.getId());
 		if (index != -1) {
 			throw new DuplicateMappingException("ID " + mapping.getId());
 		}
 		mappings.get(datasource_uri).add(mapping);
-		fireMappingInserted(datasource_uri, mapping.getId());
+
+		if(!multipleAdd) {
+			fireMappingInserted(datasource_uri);
+		}
 	}
+
+
 
 	@Override
 	public void removeAllMappings() {
@@ -342,7 +347,7 @@ public class OBDAModelImpl implements OBDAModel {
 	public void updateMappingsSourceQuery(URI datasource_uri, String mapping_id, OBDASQLQuery sourceQuery) {
 		OBDAMappingAxiom mapping = getMapping(datasource_uri, mapping_id);
 		mapping.setSourceQuery(sourceQuery);
-		fireMappigUpdated(datasource_uri, mapping.getId(), mapping);
+		fireMappigUpdated(datasource_uri);
 	}
 
 	@Override
@@ -352,7 +357,7 @@ public class OBDAModelImpl implements OBDAModel {
 		// adds a new mapping
 		if (!containsMapping(datasource_uri, new_mappingid)) {
 			mapping.setId(new_mappingid);
-			fireMappigUpdated(datasource_uri, mapping_id, mapping);
+			fireMappigUpdated(datasource_uri);
 			return 0;
 		} 
 		// updates an existing mapping
@@ -375,7 +380,7 @@ public class OBDAModelImpl implements OBDAModel {
 			return;
 		}
 		mapping.setTargetQuery(targetQuery);
-		fireMappigUpdated(datasource_uri, mapping.getId(), mapping);
+		fireMappigUpdated(datasource_uri);
 	}
 
 	@Override
@@ -391,11 +396,28 @@ public class OBDAModelImpl implements OBDAModel {
 		List<String> duplicates = new ArrayList<String>();
 		for (OBDAMappingAxiom map : mappings) {
 			try {
-				addMapping(datasource_uri, map);
+				addMapping(datasource_uri, map, true);
 			} catch (DuplicateMappingException e) {
 				duplicates.add(map.getId());
 			}
 		}
+		fireMappigUpdated(datasource_uri);
+		if (duplicates.size() > 0) {
+			String msg = String.format("Found %d duplicates in the following ids: %s", duplicates.size(), duplicates.toString());
+			throw new DuplicateMappingException(msg);
+		}
+	}
+
+	public void addBoostrappedMappings(URI datasource_uri, Collection<OBDAMappingAxiom> mappings) throws DuplicateMappingException {
+		List<String> duplicates = new ArrayList<String>();
+		for (OBDAMappingAxiom map : mappings) {
+			try {
+				addMapping(datasource_uri, map, true);
+			} catch (DuplicateMappingException e) {
+				duplicates.add(map.getId());
+			}
+		}
+
 		if (duplicates.size() > 0) {
 			String msg = String.format("Found %d duplicates in the following ids: %s", duplicates.size(), duplicates.toString());
 			throw new DuplicateMappingException(msg);
@@ -410,7 +432,7 @@ public class OBDAModelImpl implements OBDAModel {
 			for (ArrayList<OBDAMappingAxiom> mappingList : mappings.values()) {
 				for (OBDAMappingAxiom mapping : mappingList) {
 					try {
-						clone.addMapping(source.getSourceID(), (OBDAMappingAxiom) mapping.clone());
+						clone.addMapping(source.getSourceID(), (OBDAMappingAxiom) mapping.clone(), false);
 					} catch (DuplicateMappingException e) {
 						// Does nothing
 					}
@@ -495,7 +517,7 @@ public class OBDAModelImpl implements OBDAModel {
 					Function newAtom = dfac.getFunction(newPredicate, oldAtom.getTerms());
 					body.set(idx, newAtom);
 				}
-				fireMappigUpdated(source.getSourceID(), mapping.getId(), mapping);
+				fireMappigUpdated(source.getSourceID());
 			}
 		}
 		return modifiedCount;
@@ -517,7 +539,7 @@ public class OBDAModelImpl implements OBDAModel {
 					body.remove(idx);
 				}
 				if (body.size() != 0) {
-					fireMappigUpdated(source.getSourceID(), mapping.getId(), mapping);
+					fireMappigUpdated(source.getSourceID());
 				} else {
 					removeMapping(source.getSourceID(), mapping.getId());
 				}
