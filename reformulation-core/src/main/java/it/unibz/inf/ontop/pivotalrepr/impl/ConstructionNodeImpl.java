@@ -24,17 +24,6 @@ import static it.unibz.inf.ontop.owlrefplatform.core.basicoperations.ImmutableUn
 
 public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionNode {
 
-//    /**
-//     * TODO: explain
-//     *
-//     * TODO: better integrate in the Ontop exception hierarchy
-//     */
-//    private static class SpecializationException extends Exception {
-//
-//        private SpecializationException() {
-//            super();
-//        }
-//    }
 
     /**
      * TODO: find a better name

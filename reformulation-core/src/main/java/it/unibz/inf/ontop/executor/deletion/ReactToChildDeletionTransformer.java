@@ -160,7 +160,10 @@ public class ReactToChildDeletionTransformer implements HeterogeneousQueryNodeTr
 
     @Override
     public NodeTransformationProposal transform(ConstructionNode constructionNode) {
-        throw new RuntimeException("TODO: implement");
+        /**
+         * A construction node has only one child
+         */
+        return new NodeTransformationProposalImpl(DELETE, constructionNode.getProjectedVariables());
     }
 
     /**
@@ -168,7 +171,12 @@ public class ReactToChildDeletionTransformer implements HeterogeneousQueryNodeTr
      */
     @Override
     public NodeTransformationProposal transform(GroupNode groupNode) {
-        throw new RuntimeException("TODO: make group react to child deletion. How to handle nulls?");
+        /**
+         * A group node has only one child
+         *
+         * TODO: what is really projected by a group node?
+         */
+        return new NodeTransformationProposalImpl(DELETE, variablesProjectedByDeletedChild);
     }
 
     @Override

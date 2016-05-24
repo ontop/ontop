@@ -2,16 +2,19 @@ package it.unibz.inf.ontop.executor.deletion;
 
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.executor.InternalProposalExecutor;
+import it.unibz.inf.ontop.model.Constant;
+import it.unibz.inf.ontop.model.ImmutableSubstitution;
 import it.unibz.inf.ontop.model.Variable;
 import it.unibz.inf.ontop.pivotalrepr.*;
 import it.unibz.inf.ontop.pivotalrepr.NonCommutativeOperatorNode.ArgumentPosition;
 import it.unibz.inf.ontop.pivotalrepr.impl.QueryTreeComponent;
-import it.unibz.inf.ontop.pivotalrepr.proposal.InvalidQueryOptimizationProposalException;
-import it.unibz.inf.ontop.pivotalrepr.proposal.ReactToChildDeletionProposal;
-import it.unibz.inf.ontop.pivotalrepr.proposal.ReactToChildDeletionResults;
+import it.unibz.inf.ontop.pivotalrepr.proposal.*;
 import it.unibz.inf.ontop.pivotalrepr.proposal.impl.ReactToChildDeletionResultsImpl;
 
 import java.util.Optional;
+
+import static it.unibz.inf.ontop.executor.substitution.SubstitutionPropagationTools.propagateSubstitutionUp;
+import static it.unibz.inf.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionTools.computeNullSubstitution;
 
 /**
  * TODO: explain
@@ -49,16 +52,16 @@ public class ReactToChildDeletionExecutor implements InternalProposalExecutor<Re
 
         switch (transformationProposal.getState()) {
             case NO_LOCAL_CHANGE:
-                /**
-                 * TODO: handle nulls
-                 */
+                applyNullPropagation(query, parentNode, treeComponent, transformationProposal.getNullVariables());
                 return new ReactToChildDeletionResultsImpl(query, parentNode, optionalNextSibling);
 
             case REPLACE_BY_UNIQUE_CHILD:
-                return applyReplacementProposal(query, parentNode, treeComponent, transformationProposal, true);
+                return applyReplacementProposal(query, parentNode, optionalNextSibling, treeComponent,
+                        transformationProposal, true);
 
             case REPLACE_BY_NEW_NODE:
-                return applyReplacementProposal(query, parentNode, treeComponent, transformationProposal, false);
+                return applyReplacementProposal(query, parentNode, optionalNextSibling, treeComponent,
+                        transformationProposal, false);
 
             case DELETE:
                 return applyDeletionProposal(query, parentNode, treeComponent, transformationProposal.getNullVariables());
@@ -68,44 +71,61 @@ public class ReactToChildDeletionExecutor implements InternalProposalExecutor<Re
         }
     }
 
+    private static void applyNullPropagation(IntermediateQuery query, QueryNode focusNode,
+                                                                    QueryTreeComponent treeComponent,
+                                                                    ImmutableSet<Variable> nullVariables)
+            throws EmptyQueryException {
+        if (!nullVariables.isEmpty()) {
+
+            ImmutableSubstitution<Constant> ascendingSubstitution = computeNullSubstitution(nullVariables);
+            /**
+             * Updates the tree component but does not affect the parent node and the (optional) next sibling.
+             */
+            propagateSubstitutionUp(focusNode, ascendingSubstitution, query, treeComponent);
+        }
+    }
+
     /**
-     * TODO: handle nulls
+     * TODO: explain
      */
     private static ReactToChildDeletionResults applyReplacementProposal(IntermediateQuery query,
                                                                         QueryNode parentNode,
+                                                                        Optional<QueryNode> originalOptionalNextSibling,
                                                                         QueryTreeComponent treeComponent,
                                                                         NodeTransformationProposal transformationProposal,
-                                                                        boolean isReplacedByUniqueChild) {
-        Optional<QueryNode> optionalGrandParent = treeComponent.getParent(parentNode);
+                                                                        boolean isReplacedByUniqueChild)
+            throws EmptyQueryException {
 
-        if (!optionalGrandParent.isPresent()) {
-            throw new InvalidQueryOptimizationProposalException("The root of the tree is not expected to be replaced.");
-        }
+        QueryNode replacingNode = transformationProposal.getOptionalNewNode()
+                .orElseThrow(() -> new InvalidQueryOptimizationProposalException(
+                        "Inconsistent transformation proposal: a replacing node must be given"));
 
-        Optional<QueryNode> optionalReplacingNode = transformationProposal.getOptionalNewNode();
-        if (!optionalReplacingNode.isPresent()) {
-            throw new InvalidQueryOptimizationProposalException("Inconsistent transformation proposal: a replacing node must be given");
-        }
         if (isReplacedByUniqueChild) {
             treeComponent.removeOrReplaceNodeByUniqueChildren(parentNode);
         }
         else {
-            treeComponent.replaceNode(parentNode, optionalReplacingNode.get());
+            treeComponent.replaceNode(parentNode, replacingNode);
         }
 
-        /**
-         * Next sibling: only when the parent is replaced by its unique remaining child.
-         */
-        Optional<QueryNode> optionalNextSibling;
-        if (isReplacedByUniqueChild) {
-            optionalNextSibling = optionalReplacingNode;
-        }
-        else {
-            optionalNextSibling = Optional.empty();
-        }
-        return new ReactToChildDeletionResultsImpl(query, optionalGrandParent.get(), optionalNextSibling);
+        Optional<QueryNode> newOptionalNextSibling = isReplacedByUniqueChild
+                /**
+                 * Next sibling: the unique remaining child of the parent...
+                 */
+                ? Optional.of(replacingNode)
+                /**
+                 * ... or the same one (not touched)
+                 */
+                : originalOptionalNextSibling;
+
+        applyNullPropagation(query, replacingNode, treeComponent, transformationProposal.getNullVariables());
+
+        QueryNode grandParent = treeComponent.getParent(replacingNode)
+                .orElseThrow(() -> new InvalidQueryOptimizationProposalException(
+                        "The root of the tree is not expected to be replaced."));
+
+        return new ReactToChildDeletionResultsImpl(query, grandParent, newOptionalNextSibling);
     }
-    
+
     private static ReactToChildDeletionResults applyDeletionProposal(IntermediateQuery query, QueryNode parentNode,
                                                                      QueryTreeComponent treeComponent,
                                                                      ImmutableSet<Variable> nullVariables)
