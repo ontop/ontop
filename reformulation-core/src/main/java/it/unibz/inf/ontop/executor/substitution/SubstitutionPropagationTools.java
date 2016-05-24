@@ -123,70 +123,65 @@ public class SubstitutionPropagationTools {
      */
     public static QueryTreeComponent propagateSubstitutionUp(QueryNode focusNode, ImmutableSubstitution<? extends VariableOrGroundTerm> substitutionToPropagate,
                                                              IntermediateQuery query, QueryTreeComponent treeComponent) throws QueryNodeSubstitutionException {
-        Queue<QueryNode> nodesToVisit = new LinkedList<>();
+        // Non-final
+        Optional<QueryNode> optionalCurrentAncestor = query.getParent(focusNode);
+        // Non-final
+        ImmutableSubstitution<? extends ImmutableTerm> currentSubstitution = substitutionToPropagate;
 
-        query.getParent(focusNode)
-                .ifPresent(nodesToVisit::add);
 
-        while (!nodesToVisit.isEmpty()) {
-            QueryNode formerAncestor = nodesToVisit.poll();
+        while (optionalCurrentAncestor.isPresent()) {
+            final QueryNode currentAncestor = optionalCurrentAncestor.get();
 
             /**
              * Applies the substitution and analyses the results
              */
-            SubstitutionResults<? extends QueryNode> substitutionResults = formerAncestor.applyAscendingSubstitution(
-                    substitutionToPropagate, focusNode, query);
+            SubstitutionResults<? extends QueryNode> substitutionResults = currentAncestor.applyAscendingSubstitution(
+                    currentSubstitution, focusNode, query);
 
             Optional<? extends ImmutableSubstitution<? extends ImmutableTerm>> optionalNewSubstitution =
                     substitutionResults.getSubstitutionToPropagate();
             Optional<? extends QueryNode> optionalNewAncestor = substitutionResults.getOptionalNewNode();
 
-            if (optionalNewSubstitution.isPresent()) {
-                /**
-                 * TODO: refactor so that to remove this assumption
-                 */
-                if (!substitutionToPropagate.equals(optionalNewSubstitution.get())) {
-                    throw new RuntimeException("Updating the substitution is not supported (yet) in" +
-                            "the ascendent substitution mode");
-                }
+            if (substitutionResults.isEmpty()) {
+                treeComponent.removeSubTree(currentAncestor);
+                throw new RuntimeException("TODO: decide what to return when the ancestor becomes empty");
+            }
+            else {
+                Optional<QueryNode> optionalNextAncestor = query.getParent(currentAncestor);
 
                 /**
                  * Normal case: replace the ancestor by an updated version
                  */
                 if (optionalNewAncestor.isPresent()) {
-                    QueryNode newAncestor = optionalNewAncestor.get();
 
-                    /**
-                     * TODO: exclude the focus node!!!
-                     */
-                    nodesToVisit.addAll(query.getChildren(formerAncestor));
-                    treeComponent.replaceNode(formerAncestor, newAncestor);
+                    QueryNode newAncestor = optionalNewAncestor.get();
+                    treeComponent.replaceNode(currentAncestor, newAncestor);
                 }
                 /**
                  * The ancestor is not needed anymore
                  */
                 else {
-                    /**
-                     * TODO: exclude the focus node!!!
-                     */
-                    nodesToVisit.addAll(query.getChildren(formerAncestor));
-                    treeComponent.removeOrReplaceNodeByUniqueChildren(formerAncestor);
+                    treeComponent.removeOrReplaceNodeByUniqueChildren(currentAncestor);
                 }
-            }
-            /**
-             * Stops the propagation
-             */
-            else {
-                if (optionalNewAncestor.isPresent()) {
-                    treeComponent.replaceNode(formerAncestor, optionalNewAncestor.get());
+
+                /**
+                 * Continue the propagation
+                 */
+                if (optionalNewSubstitution.isPresent()) {
+
+                    // Continue with these values
+                    currentSubstitution = optionalNewSubstitution.get();
+                    optionalCurrentAncestor = optionalNextAncestor;
                 }
+                /**
+                 * Or stop it
+                 */
                 else {
-                    throw new RuntimeException("Unexpected case where the propagation is stopped and" +
-                            "the stopping node not needed anymore. Should we support this case?");
+                    // Stops
+                    optionalCurrentAncestor = Optional.empty();
                 }
             }
         }
-
         return treeComponent;
     }
 }

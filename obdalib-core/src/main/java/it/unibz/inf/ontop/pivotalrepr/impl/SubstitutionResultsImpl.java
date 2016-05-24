@@ -47,7 +47,7 @@ public class SubstitutionResultsImpl<T extends QueryNode> implements Substitutio
         if (!isEmpty) {
             throw new IllegalArgumentException("isEmpty must be true");
         }
-        this.isEmpty= isEmpty;
+        this.isEmpty = true;
         this.optionalNewNode = Optional.empty();
         this.optionalSubstitution = Optional.empty();
     }

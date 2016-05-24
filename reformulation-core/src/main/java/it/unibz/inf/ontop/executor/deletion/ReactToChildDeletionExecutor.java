@@ -72,8 +72,7 @@ public class ReactToChildDeletionExecutor implements InternalProposalExecutor<Re
     }
 
     private static void applyNullPropagation(IntermediateQuery query, QueryNode focusNode,
-                                                                    QueryTreeComponent treeComponent,
-                                                                    ImmutableSet<Variable> nullVariables)
+                                             QueryTreeComponent treeComponent, ImmutableSet<Variable> nullVariables)
             throws EmptyQueryException {
         if (!nullVariables.isEmpty()) {
 
