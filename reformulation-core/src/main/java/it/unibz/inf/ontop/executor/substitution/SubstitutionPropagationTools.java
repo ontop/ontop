@@ -125,10 +125,8 @@ public class SubstitutionPropagationTools {
                                                              IntermediateQuery query, QueryTreeComponent treeComponent) throws QueryNodeSubstitutionException {
         Queue<QueryNode> nodesToVisit = new LinkedList<>();
 
-        Optional<QueryNode> optionalParent = query.getParent(focusNode);
-        if (optionalParent.isPresent()) {
-            nodesToVisit.add(optionalParent.get());
-        }
+        query.getParent(focusNode)
+                .ifPresent(nodesToVisit::add);
 
         while (!nodesToVisit.isEmpty()) {
             QueryNode formerAncestor = nodesToVisit.poll();
@@ -158,6 +156,9 @@ public class SubstitutionPropagationTools {
                 if (optionalNewAncestor.isPresent()) {
                     QueryNode newAncestor = optionalNewAncestor.get();
 
+                    /**
+                     * TODO: exclude the focus node!!!
+                     */
                     nodesToVisit.addAll(query.getChildren(formerAncestor));
                     treeComponent.replaceNode(formerAncestor, newAncestor);
                 }
@@ -165,6 +166,9 @@ public class SubstitutionPropagationTools {
                  * The ancestor is not needed anymore
                  */
                 else {
+                    /**
+                     * TODO: exclude the focus node!!!
+                     */
                     nodesToVisit.addAll(query.getChildren(formerAncestor));
                     treeComponent.removeOrReplaceNodeByUniqueChildren(formerAncestor);
                 }

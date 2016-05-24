@@ -50,7 +50,7 @@ public class SubQueryMergingTools {
                             substitutionToApply.get());
                     substitutionToPropagate = results.getSubstitutionToPropagate();
                     /**
-                     * If the substitution cannot be propagate to the node, replace it by an unsatisfied one.
+                     * If the substitution cannot be propagate to the node, replace it by an empty one.
                      */
                     transformedNode = results.getOptionalNewNode()
                             .map(n -> (QueryNode) n)

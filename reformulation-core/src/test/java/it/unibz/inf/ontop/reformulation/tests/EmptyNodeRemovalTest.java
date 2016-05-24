@@ -324,6 +324,108 @@ public class EmptyNodeRemovalTest {
         System.err.println("\n Failure: this query should have been declared as unsatisfiable: \n" +  query);
     }
 
+    @Test(expected = EmptyQueryException.class)
+    public void testJoinLJ1() throws EmptyQueryException {
+        IntermediateQuery query = generateJoinLJInitialQuery(
+                Optional.of(DATA_FACTORY.getImmutableExpression(ExpressionOperation.EQ, B, C)), B);
+
+        System.out.println("\n Unsatisfiable query: \n" +  query);
+
+        // Should throw an exception
+        query.applyProposal(new RemoveEmptyNodesProposalImpl(), REQUIRE_USING_IN_PLACE_EXECUTOR);
+        System.err.println("\n Failure: this query should have been declared as unsatisfiable: \n" +  query);
+    }
+
+    @Test(expected = EmptyQueryException.class)
+    public void testJoinLJ2() throws EmptyQueryException {
+
+        IntermediateQuery query = generateJoinLJInitialQuery(Optional.of(DATA_FACTORY.getImmutableExpression(
+                ExpressionOperation.IS_NOT_NULL, C)), B);
+
+        System.out.println("\n Unsatisfiable query: \n" +  query);
+
+        // Should throw an exception
+        query.applyProposal(new RemoveEmptyNodesProposalImpl(), REQUIRE_USING_IN_PLACE_EXECUTOR);
+        System.err.println("\n Failure: this query should have been declared as unsatisfiable: \n" +  query);
+    }
+
+    @Test
+    public void testJoinLJ3() throws EmptyQueryException {
+
+        IntermediateQuery query = generateJoinLJInitialQuery(Optional.of(DATA_FACTORY.getImmutableExpression(
+                ExpressionOperation.IS_NULL, C)), B);
+
+        /**
+         * Expected query
+         */
+        IntermediateQueryBuilder expectedQueryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
+
+        ConstructionNode newRootNode = new ConstructionNodeImpl(
+                PROJECTION_ATOM.getVariables(),
+                new ImmutableSubstitutionImpl<>(ImmutableMap.of(X, generateURI1(A), Y, generateURI1(B))),
+                Optional.empty());
+
+        expectedQueryBuilder.init(PROJECTION_ATOM, newRootNode);
+        InnerJoinNode joinNode = new InnerJoinNodeImpl(Optional.empty());
+        expectedQueryBuilder.addChild(newRootNode, joinNode);
+        expectedQueryBuilder.addChild(joinNode, DATA_NODE_1);
+        expectedQueryBuilder.addChild(joinNode, DATA_NODE_2);
+
+        IntermediateQuery expectedQuery = expectedQueryBuilder.build();
+
+        optimizeAndCompare(query, expectedQuery);
+    }
+
+    @Test
+    public void testJoinLJ4() throws EmptyQueryException {
+
+        IntermediateQuery query = generateJoinLJInitialQuery(Optional.empty(), C);
+
+        /**
+         * Expected query
+         */
+        IntermediateQueryBuilder expectedQueryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
+
+        ConstructionNode newRootNode = new ConstructionNodeImpl(
+                PROJECTION_ATOM.getVariables(),
+                new ImmutableSubstitutionImpl<>(ImmutableMap.of(X, generateURI1(A), Y, OBDAVocabulary.NULL)),
+                Optional.empty());
+
+        expectedQueryBuilder.init(PROJECTION_ATOM, newRootNode);
+        InnerJoinNode joinNode = new InnerJoinNodeImpl(Optional.empty());
+        expectedQueryBuilder.addChild(newRootNode, joinNode);
+        expectedQueryBuilder.addChild(joinNode, DATA_NODE_1);
+        expectedQueryBuilder.addChild(joinNode, DATA_NODE_2);
+
+        IntermediateQuery expectedQuery = expectedQueryBuilder.build();
+
+        optimizeAndCompare(query, expectedQuery);
+    }
+
+    private static IntermediateQuery generateJoinLJInitialQuery(Optional<ImmutableExpression> joiningCondition,
+                                                                Variable variableForBuildingY) {
+        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
+
+        ConstructionNode rootNode = new ConstructionNodeImpl(PROJECTION_ATOM.getVariables(),
+                new ImmutableSubstitutionImpl<>(ImmutableMap.of(X, generateURI1(A),
+                        Y, generateURI1(variableForBuildingY))),
+                Optional.empty());
+        queryBuilder.init(PROJECTION_ATOM, rootNode);
+
+        InnerJoinNode joinNode = new InnerJoinNodeImpl(joiningCondition);
+        queryBuilder.addChild(rootNode, joinNode);
+
+        queryBuilder.addChild(joinNode, DATA_NODE_1);
+
+        LeftJoinNode leftJoinNode = new LeftJoinNodeImpl(Optional.empty());
+        queryBuilder.addChild(joinNode, leftJoinNode);
+        queryBuilder.addChild(leftJoinNode, DATA_NODE_2, LEFT);
+        queryBuilder.addChild(leftJoinNode, new EmptyNodeImpl(ImmutableSet.of(A, C)), RIGHT);
+
+        return queryBuilder.build();
+    }
+
+
 
 
     private static void optimizeAndCompare(IntermediateQuery query, IntermediateQuery expectedQuery)
