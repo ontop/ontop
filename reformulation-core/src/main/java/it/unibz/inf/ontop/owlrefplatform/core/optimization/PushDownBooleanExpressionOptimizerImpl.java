@@ -369,12 +369,25 @@ public class PushDownBooleanExpressionOptimizerImpl implements PushDownBooleanEx
             // Recursion on findRecipients()
             return findRecipients(query, leftChild, providerNode, expression);
         }
+        /**
+         * Tries to reuse the filter node above if it is its parent
+         */
+        else if (query.getParent(currentNode)
+                    .map(p -> p == providerNode)
+                    .isPresent()) {
+            /**
+             * Keep the expression in the provider node
+             */
+            return Stream.of(new Recipient(true, providerNode));
+        }
         else {
             /**
              * Inserts a Filter node above the LJ
              */
             return Stream.of(new Recipient(false, currentNode));
+
         }
+
 
     }
 
