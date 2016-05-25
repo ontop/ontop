@@ -45,7 +45,7 @@ public class SubstitutionResultsImpl<T extends QueryNode> implements Substitutio
      */
     public SubstitutionResultsImpl(boolean isEmpty) {
         if (!isEmpty) {
-            throw new IllegalArgumentException("isEmpty must be true");
+            throw new IllegalArgumentException("isNodeEmpty must be true");
         }
         this.isEmpty = true;
         this.optionalNewNode = Optional.empty();
@@ -63,7 +63,7 @@ public class SubstitutionResultsImpl<T extends QueryNode> implements Substitutio
     }
 
     @Override
-    public boolean isEmpty() {
+    public boolean isNodeEmpty() {
         return isEmpty;
     }
 }

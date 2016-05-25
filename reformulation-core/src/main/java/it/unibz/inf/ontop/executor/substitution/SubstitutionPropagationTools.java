@@ -2,17 +2,26 @@ package it.unibz.inf.ontop.executor.substitution;
 
 
 import java.util.Optional;
+
+import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.ImmutableSubstitution;
 import it.unibz.inf.ontop.model.ImmutableTerm;
+import it.unibz.inf.ontop.model.Variable;
 import it.unibz.inf.ontop.model.VariableOrGroundTerm;
-import it.unibz.inf.ontop.pivotalrepr.IntermediateQuery;
-import it.unibz.inf.ontop.pivotalrepr.QueryNode;
-import it.unibz.inf.ontop.pivotalrepr.QueryNodeSubstitutionException;
-import it.unibz.inf.ontop.pivotalrepr.SubstitutionResults;
+import it.unibz.inf.ontop.pivotalrepr.*;
+import it.unibz.inf.ontop.pivotalrepr.NonCommutativeOperatorNode.ArgumentPosition;
 import it.unibz.inf.ontop.pivotalrepr.impl.QueryTreeComponent;
+import it.unibz.inf.ontop.pivotalrepr.proposal.NodeCentricOptimizationResults;
+import it.unibz.inf.ontop.pivotalrepr.proposal.ReactToChildDeletionProposal;
+import it.unibz.inf.ontop.pivotalrepr.proposal.ReactToChildDeletionResults;
+import it.unibz.inf.ontop.pivotalrepr.proposal.impl.NodeCentricOptimizationResultsImpl;
+import it.unibz.inf.ontop.pivotalrepr.proposal.impl.ReactToChildDeletionProposalImpl;
+import it.unibz.inf.ontop.pivotalrepr.unfolding.ProjectedVariableExtractionTools;
 
 import java.util.LinkedList;
 import java.util.Queue;
+
+import static it.unibz.inf.ontop.pivotalrepr.unfolding.ProjectedVariableExtractionTools.extractProjectedVariables;
 
 /**
  * These methods are only accessible by InternalProposalExecutors (requires access to the QueryTreeComponent).
@@ -115,22 +124,31 @@ public class SubstitutionPropagationTools {
     /**
      * Propagates the substitution to the ancestors of the focus node.
      *
-     * THE SUBSTITUTION IS NOT APPLIED TO THE FOCUS NODE.
+     * THE SUBSTITUTION IS NOT APPLIED TO THE FOCUS NODE nor to its siblings.
      *
      * Has-side effect on the tree component.
-     * Returns the updated tree component
+     *
+     * Note that some ancestors may become empty and thus the focus node and its siblings be removed.
+     *
+     * TODO: clean
      *
      */
-    public static QueryTreeComponent propagateSubstitutionUp(QueryNode focusNode, ImmutableSubstitution<? extends VariableOrGroundTerm> substitutionToPropagate,
-                                                             IntermediateQuery query, QueryTreeComponent treeComponent) throws QueryNodeSubstitutionException {
+    public static <T extends QueryNode> NodeCentricOptimizationResults<T> propagateSubstitutionUp(
+            T focusNode, ImmutableSubstitution<? extends VariableOrGroundTerm> substitutionToPropagate,
+            IntermediateQuery query, QueryTreeComponent treeComponent) throws QueryNodeSubstitutionException,
+            EmptyQueryException {
+
         // Non-final
         Optional<QueryNode> optionalCurrentAncestor = query.getParent(focusNode);
+
         // Non-final
         ImmutableSubstitution<? extends ImmutableTerm> currentSubstitution = substitutionToPropagate;
 
 
         while (optionalCurrentAncestor.isPresent()) {
             final QueryNode currentAncestor = optionalCurrentAncestor.get();
+
+            final Optional<QueryNode> optionalNextAncestor = query.getParent(currentAncestor);
 
             /**
              * Applies the substitution and analyses the results
@@ -142,12 +160,30 @@ public class SubstitutionPropagationTools {
                     substitutionResults.getSubstitutionToPropagate();
             Optional<? extends QueryNode> optionalNewAncestor = substitutionResults.getOptionalNewNode();
 
-            if (substitutionResults.isEmpty()) {
+            /**
+             * Ancestor is empty --> applies a ReactToChildDeletionProposal and returns the remaining ancestor
+             */
+            if (substitutionResults.isNodeEmpty()) {
+                QueryNode ancestorParent = optionalNextAncestor
+                        .orElseThrow(EmptyQueryException::new);
+
+                ImmutableSet<Variable> nullVariables = extractProjectedVariables(query, currentAncestor);
+                Optional<QueryNode> optionalNextSibling = query.getNextSibling(currentAncestor);
+                Optional<ArgumentPosition> optionalPosition = query.getOptionalPosition(ancestorParent, currentAncestor);
+
                 treeComponent.removeSubTree(currentAncestor);
-                throw new RuntimeException("TODO: decide what to return when the ancestor becomes empty");
+
+                ReactToChildDeletionProposal reactionProposal = new ReactToChildDeletionProposalImpl(
+                        ancestorParent, optionalNextSibling, optionalPosition, nullVariables);
+
+                // In-place optimization (returns the same query)
+                ReactToChildDeletionResults reactionResults = query.applyProposal(reactionProposal, true);
+
+                // Only returns the closest remaining ancestor
+                return new NodeCentricOptimizationResultsImpl<T>(query, Optional.empty(),
+                        Optional.of(reactionResults.getClosestRemainingAncestor()));
             }
             else {
-                Optional<QueryNode> optionalNextAncestor = query.getParent(currentAncestor);
 
                 /**
                  * Normal case: replace the ancestor by an updated version
@@ -182,6 +218,10 @@ public class SubstitutionPropagationTools {
                 }
             }
         }
-        return treeComponent;
+
+        /**
+         * If no ancestor has been
+         */
+        return new NodeCentricOptimizationResultsImpl<>(query, focusNode);
     }
 }

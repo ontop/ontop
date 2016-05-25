@@ -3,10 +3,7 @@ package it.unibz.inf.ontop.executor.substitution;
 import java.util.Optional;
 
 import it.unibz.inf.ontop.model.VariableOrGroundTerm;
-import it.unibz.inf.ontop.pivotalrepr.IntermediateQuery;
-import it.unibz.inf.ontop.pivotalrepr.QueryNode;
-import it.unibz.inf.ontop.pivotalrepr.QueryNodeSubstitutionException;
-import it.unibz.inf.ontop.pivotalrepr.SubstitutionResults;
+import it.unibz.inf.ontop.pivotalrepr.*;
 import it.unibz.inf.ontop.pivotalrepr.proposal.impl.NodeCentricOptimizationResultsImpl;
 import it.unibz.inf.ontop.executor.NodeCentricInternalExecutor;
 import it.unibz.inf.ontop.model.ImmutableSubstitution;
@@ -25,7 +22,7 @@ public class SubstitutionPropagationExecutor<N extends QueryNode>
     public NodeCentricOptimizationResults<N> apply(SubstitutionPropagationProposal<N> proposal,
                                                    IntermediateQuery query,
                                                    QueryTreeComponent treeComponent)
-            throws InvalidQueryOptimizationProposalException {
+            throws InvalidQueryOptimizationProposalException, EmptyQueryException {
         try {
             return applySubstitution(proposal, query, treeComponent);
         }
@@ -37,14 +34,19 @@ public class SubstitutionPropagationExecutor<N extends QueryNode>
     /**
      * TODO: explain
      *
+     * TODO: refactor
+     *
      */
     private NodeCentricOptimizationResults<N> applySubstitution(SubstitutionPropagationProposal<N> proposal,
                                                                         IntermediateQuery query,
                                                                         QueryTreeComponent treeComponent)
-            throws QueryNodeSubstitutionException {
+            throws QueryNodeSubstitutionException, EmptyQueryException {
         N originalFocusNode = proposal.getFocusNode();
         ImmutableSubstitution<? extends VariableOrGroundTerm> substitutionToPropagate = proposal.getSubstitution();
 
+        /**
+         * TODO: check the results!!!
+         */
         SubstitutionPropagationTools.propagateSubstitutionUp(originalFocusNode, substitutionToPropagate, query, treeComponent);
         SubstitutionPropagationTools.propagateSubstitutionDown(originalFocusNode, substitutionToPropagate, treeComponent);
 

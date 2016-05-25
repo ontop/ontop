@@ -21,5 +21,5 @@ public interface SubstitutionResults<T extends QueryNode> {
      */
     Optional<? extends ImmutableSubstitution<? extends ImmutableTerm>> getSubstitutionToPropagate();
 
-    boolean isEmpty();
+    boolean isNodeEmpty();
 }

@@ -52,8 +52,27 @@ public class ReactToChildDeletionExecutor implements InternalProposalExecutor<Re
 
         switch (transformationProposal.getState()) {
             case NO_LOCAL_CHANGE:
-                applyNullPropagation(query, parentNode, treeComponent, transformationProposal.getNullVariables());
-                return new ReactToChildDeletionResultsImpl(query, parentNode, optionalNextSibling);
+                ImmutableSet<Variable> nullVariables = transformationProposal.getNullVariables();
+                if (!nullVariables.isEmpty()) {
+                    NodeCentricOptimizationResults<QueryNode> propagationResults =
+                            applyNullPropagation(query, parentNode, treeComponent, nullVariables);
+
+                    QueryNode closestAncestor = propagationResults.getOptionalNewNode()
+                            .orElseGet(() -> propagationResults.getOptionalClosestAncestor()
+                                    .orElseThrow(() -> new IllegalStateException(
+                                                    "If no ancestor remains, " +
+                                                            "a EmptyQueryException should have been thrown")));
+
+
+                    return new ReactToChildDeletionResultsImpl(query, closestAncestor,
+                            // If the parent is still there, the sibling should not have been removed.
+                            optionalNextSibling
+                                    .filter(s -> propagationResults.getOptionalNewNode().isPresent())
+                            );
+                }
+                else {
+                    return new ReactToChildDeletionResultsImpl(query, parentNode, optionalNextSibling);
+                }
 
             case REPLACE_BY_UNIQUE_CHILD:
                 return applyReplacementProposal(query, parentNode, optionalNextSibling, treeComponent,
@@ -71,21 +90,23 @@ public class ReactToChildDeletionExecutor implements InternalProposalExecutor<Re
         }
     }
 
-    private static void applyNullPropagation(IntermediateQuery query, QueryNode focusNode,
-                                             QueryTreeComponent treeComponent, ImmutableSet<Variable> nullVariables)
+    private static NodeCentricOptimizationResults<QueryNode> applyNullPropagation(IntermediateQuery query,
+                                                                                  QueryNode focusNode,
+                                                                                  QueryTreeComponent treeComponent,
+                                                                                  ImmutableSet<Variable> nullVariables)
             throws EmptyQueryException {
-        if (!nullVariables.isEmpty()) {
 
-            ImmutableSubstitution<Constant> ascendingSubstitution = computeNullSubstitution(nullVariables);
-            /**
-             * Updates the tree component but does not affect the parent node and the (optional) next sibling.
-             */
-            propagateSubstitutionUp(focusNode, ascendingSubstitution, query, treeComponent);
-        }
+        ImmutableSubstitution<Constant> ascendingSubstitution = computeNullSubstitution(nullVariables);
+        /**
+         * Updates the tree component but does not affect the parent node and the (optional) next sibling.
+         */
+        return propagateSubstitutionUp(focusNode, ascendingSubstitution, query, treeComponent);
     }
 
     /**
      * TODO: explain
+     *
+     * TODO: clean
      */
     private static ReactToChildDeletionResults applyReplacementProposal(IntermediateQuery query,
                                                                         QueryNode parentNode,
@@ -116,13 +137,40 @@ public class ReactToChildDeletionExecutor implements InternalProposalExecutor<Re
                  */
                 : originalOptionalNextSibling;
 
-        applyNullPropagation(query, replacingNode, treeComponent, transformationProposal.getNullVariables());
+        ImmutableSet<Variable> nullVariables = transformationProposal.getNullVariables();
+        if (nullVariables.isEmpty()) {
+            QueryNode closestAncestor = isReplacedByUniqueChild
+                    ? treeComponent.getParent(replacingNode)
+                        .orElseThrow(() -> new InvalidQueryOptimizationProposalException(
+                            "The root of the tree is not expected to be replaced."))
+                    : replacingNode;
 
-        QueryNode grandParent = treeComponent.getParent(replacingNode)
-                .orElseThrow(() -> new InvalidQueryOptimizationProposalException(
-                        "The root of the tree is not expected to be replaced."));
+            return new ReactToChildDeletionResultsImpl(query, closestAncestor, newOptionalNextSibling);
+        }
+        else {
+            NodeCentricOptimizationResults<QueryNode> propagationResults = applyNullPropagation(query, replacingNode,
+                    treeComponent, nullVariables);
 
-        return new ReactToChildDeletionResultsImpl(query, grandParent, newOptionalNextSibling);
+            Optional<QueryNode> optionalNewReplacingNode = propagationResults.getOptionalNewNode();
+
+            if (optionalNewReplacingNode.isPresent()) {
+
+                QueryNode closestAncestor = isReplacedByUniqueChild
+                        ? query.getParent(optionalNewReplacingNode.get())
+                            .orElseThrow(() -> new IllegalStateException("The root is not expected " +
+                                    "to be the replacing node"))
+                        : optionalNewReplacingNode.get();
+
+                return new ReactToChildDeletionResultsImpl(query, closestAncestor, newOptionalNextSibling);
+            }
+            else {
+                QueryNode newAncestor = propagationResults.getOptionalClosestAncestor()
+                        .orElseThrow(() -> new IllegalStateException("An ancestor was expected " +
+                                "after ascendent substitution propagation (or an EmptyQueryException)"));
+                    // The parent has been removed so no more siblings
+                    return new ReactToChildDeletionResultsImpl(query, newAncestor, Optional.empty());
+            }
+        }
     }
 
     private static ReactToChildDeletionResults applyDeletionProposal(IntermediateQuery query, QueryNode parentNode,
