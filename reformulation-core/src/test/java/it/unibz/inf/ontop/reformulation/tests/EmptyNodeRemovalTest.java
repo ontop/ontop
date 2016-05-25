@@ -14,6 +14,7 @@ import it.unibz.inf.ontop.pivotalrepr.*;
 import it.unibz.inf.ontop.pivotalrepr.impl.*;
 import it.unibz.inf.ontop.pivotalrepr.impl.tree.DefaultIntermediateQueryBuilder;
 import it.unibz.inf.ontop.pivotalrepr.proposal.impl.RemoveUnsatisfiableNodesProposalImpl;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.Optional;
@@ -23,6 +24,7 @@ import static it.unibz.inf.ontop.pivotalrepr.NonCommutativeOperatorNode.Argument
 import static it.unibz.inf.ontop.pivotalrepr.equivalence.IQSyntacticEquivalenceChecker.areEquivalent;
 import static org.junit.Assert.assertTrue;
 
+@Ignore
 public class EmptyNodeRemovalTest {
 
     private static MetadataForQueryOptimization METADATA = new MetadataForQueryOptimizationImpl(
