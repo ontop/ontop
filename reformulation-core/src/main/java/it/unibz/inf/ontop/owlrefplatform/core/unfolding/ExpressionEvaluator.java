@@ -653,7 +653,11 @@ public class ExpressionEvaluator {
 			} else {
 				teval1 = term.getTerm(0);
 			}
-		} else {
+		}
+		else if (term.getTerm(0).equals(OBDAVocabulary.NULL)) {
+			return eq ? OBDAVocabulary.FALSE : OBDAVocabulary.TRUE;
+		}
+		else {
 			teval1 = eval(term.getTerm(0));
 		}
 
@@ -673,7 +677,11 @@ public class ExpressionEvaluator {
 			} else {
 				teval2 = term.getTerm(1);
 			}
-		} else {
+		}
+		else if (term.getTerm(1).equals(OBDAVocabulary.NULL)) {
+			return eq ? OBDAVocabulary.FALSE : OBDAVocabulary.TRUE;
+		}
+		else {
 			teval2 = eval(term.getTerm(1));
 		}
 
