@@ -467,6 +467,43 @@ public class EmptyNodeRemovalTest {
         optimizeAndCompare(queryBuilder.build(), expectedQueryBuilder.build());
     }
 
+    /**
+     * Follows the SQL semantics
+     */
+    @Test
+    public void testLJRemovalDueToNull() throws EmptyQueryException {
+        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
+
+        ConstructionNode rootNode = new ConstructionNodeImpl(PROJECTION_ATOM.getVariables(),
+                new ImmutableSubstitutionImpl<>(ImmutableMap.of(X, generateURI1(A),
+                        Y, generateURI1(B))),
+                Optional.empty());
+        queryBuilder.init(PROJECTION_ATOM, rootNode);
+
+        LeftJoinNode lj1 = new LeftJoinNodeImpl(Optional.empty());
+        queryBuilder.addChild(rootNode, lj1);
+        queryBuilder.addChild(lj1, DATA_NODE_1, RIGHT);
+
+        LeftJoinNode lj2 = new LeftJoinNodeImpl(Optional.empty());
+        queryBuilder.addChild(lj1, lj2, LEFT);
+        queryBuilder.addChild(lj2, DATA_NODE_2, LEFT);
+        queryBuilder.addChild(lj2, new EmptyNodeImpl(ImmutableSet.of(A, B)), RIGHT);
+
+
+        /**
+         * Expected query
+         */
+        IntermediateQueryBuilder expectedQueryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
+        ConstructionNode newRootNode = new ConstructionNodeImpl(PROJECTION_ATOM.getVariables(),
+                new ImmutableSubstitutionImpl<>(ImmutableMap.of(X, generateURI1(A),
+                        Y, OBDAVocabulary.NULL)),
+                Optional.empty());
+        expectedQueryBuilder.init(PROJECTION_ATOM, newRootNode);
+        expectedQueryBuilder.addChild(newRootNode, DATA_NODE_2);
+
+        optimizeAndCompare(queryBuilder.build(), expectedQueryBuilder.build());
+    }
+
 
     private static void optimizeAndCompare(IntermediateQuery query, IntermediateQuery expectedQuery)
             throws EmptyQueryException {

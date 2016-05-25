@@ -197,6 +197,18 @@ public class SubstitutionPropagationTools {
                  * The ancestor is not needed anymore
                  */
                 else {
+                    /**
+                     * If a position is specified, removes the other children
+                     */
+                    substitutionResults.getOptionalReplacingChildPosition()
+                            .ifPresent(position -> query.getChildren(currentAncestor).stream()
+                                    // Not the same position
+                                    .filter(c -> query.getOptionalPosition(currentAncestor, c)
+                                            .filter(p -> p.equals(position))
+                                            .isPresent())
+                                    .forEach(treeComponent::removeSubTree));
+
+                    // Assume there is only one child
                     treeComponent.removeOrReplaceNodeByUniqueChildren(currentAncestor);
                 }
 
