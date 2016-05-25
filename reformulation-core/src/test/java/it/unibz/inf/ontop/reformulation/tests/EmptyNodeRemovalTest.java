@@ -402,6 +402,7 @@ public class EmptyNodeRemovalTest {
         optimizeAndCompare(query, expectedQuery);
     }
 
+
     private static IntermediateQuery generateJoinLJInitialQuery(Optional<ImmutableExpression> joiningCondition,
                                                                 Variable variableForBuildingY) {
         IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
@@ -426,18 +427,57 @@ public class EmptyNodeRemovalTest {
     }
 
 
+    @Test
+    public void testComplexTreeWithJoinCondition() throws EmptyQueryException {
+        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
+
+        ConstructionNode rootNode = new ConstructionNodeImpl(PROJECTION_ATOM.getVariables(),
+                new ImmutableSubstitutionImpl<>(ImmutableMap.of(X, generateURI1(A),
+                        Y, generateURI1(B))),
+                Optional.empty());
+        queryBuilder.init(PROJECTION_ATOM, rootNode);
+
+        LeftJoinNode lj1 = new LeftJoinNodeImpl(Optional.empty());
+        queryBuilder.addChild(rootNode, lj1);
+
+        queryBuilder.addChild(lj1, DATA_NODE_2, LEFT);
+
+        InnerJoinNode join = new InnerJoinNodeImpl(Optional.of(DATA_FACTORY.getImmutableExpression(
+                ExpressionOperation.IS_NOT_NULL, C)));
+        queryBuilder.addChild(lj1, join, RIGHT);
+
+        queryBuilder.addChild(join, DATA_NODE_1);
+
+        LeftJoinNode lj2 = new LeftJoinNodeImpl(Optional.empty());
+        queryBuilder.addChild(join, lj2);
+        queryBuilder.addChild(lj2, DATA_NODE_2.clone(), LEFT);
+        queryBuilder.addChild(lj2, new EmptyNodeImpl(ImmutableSet.of(A, C)), RIGHT);
+
+        /**
+         * Expected query
+         */
+        IntermediateQueryBuilder expectedQueryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
+        ConstructionNode newRootNode = new ConstructionNodeImpl(PROJECTION_ATOM.getVariables(),
+                new ImmutableSubstitutionImpl<>(ImmutableMap.of(X, generateURI1(A),
+                        Y, OBDAVocabulary.NULL)),
+                Optional.empty());
+        expectedQueryBuilder.init(PROJECTION_ATOM, newRootNode);
+        expectedQueryBuilder.addChild(newRootNode, DATA_NODE_2);
+
+        optimizeAndCompare(queryBuilder.build(), expectedQueryBuilder.build());
+    }
 
 
     private static void optimizeAndCompare(IntermediateQuery query, IntermediateQuery expectedQuery)
             throws EmptyQueryException {
 
         System.out.println("\n Original query: \n" +  query);
+        System.out.println("\n Expected query: \n" +  expectedQuery);
 
         // Updates the query (in-place optimization)
         query.applyProposal(new RemoveEmptyNodesProposalImpl(), REQUIRE_USING_IN_PLACE_EXECUTOR);
 
         System.out.println("\n Optimized query: \n" +  query);
-        System.out.println("\n Expected query: \n" +  expectedQuery);
 
         assertTrue(areEquivalent(query, expectedQuery));
 
