@@ -21,12 +21,7 @@ package it.unibz.inf.ontop.owlapi3.directmapping;
  */
 
 import it.unibz.inf.ontop.exception.DuplicateMappingException;
-import it.unibz.inf.ontop.model.Function;
-import it.unibz.inf.ontop.model.OBDADataFactory;
-import it.unibz.inf.ontop.model.OBDADataSource;
-import it.unibz.inf.ontop.model.OBDAMappingAxiom;
-import it.unibz.inf.ontop.model.OBDAModel;
-import it.unibz.inf.ontop.model.OBDASQLQuery;
+import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.Predicate.COL_TYPE;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.model.impl.OBDAModelImpl;
@@ -35,27 +30,14 @@ import it.unibz.inf.ontop.ontology.OClass;
 import it.unibz.inf.ontop.ontology.ObjectPropertyExpression;
 import it.unibz.inf.ontop.sql.DBMetadata;
 import it.unibz.inf.ontop.sql.DBMetadataExtractor;
-import it.unibz.inf.ontop.sql.JDBCConnectionManager;
 import it.unibz.inf.ontop.sql.DatabaseRelationDefinition;
+import it.unibz.inf.ontop.sql.JDBCConnectionManager;
+import org.semanticweb.owlapi.model.*;
 
 import java.net.URI;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-
-import org.semanticweb.owlapi.model.IRI;
-import org.semanticweb.owlapi.model.OWLClass;
-import org.semanticweb.owlapi.model.OWLDataFactory;
-import org.semanticweb.owlapi.model.OWLDataProperty;
-import org.semanticweb.owlapi.model.OWLDeclarationAxiom;
-import org.semanticweb.owlapi.model.OWLObjectProperty;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyCreationException;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
-import org.semanticweb.owlapi.model.OWLOntologyStorageException;
+import java.util.*;
 
 
 /***
@@ -102,27 +84,27 @@ public class DirectMappingEngine {
 	public OWLOntology getOntology(OWLOntology ontology, OWLOntologyManager manager, OBDAModel model) throws OWLOntologyCreationException, OWLOntologyStorageException, SQLException{
 
 		OWLDataFactory dataFactory = manager.getOWLDataFactory();
+		Set<OWLDeclarationAxiom> declarationAxioms = new HashSet<>();
 		
 		//Add all the classes
 		for (OClass c :  model.getOntologyVocabulary().getClasses()) {
 			OWLClass owlClass = dataFactory.getOWLClass(IRI.create(c.getName()));
-			OWLDeclarationAxiom declarationAxiom = dataFactory.getOWLDeclarationAxiom(owlClass);
-			manager.addAxiom(ontology, declarationAxiom);
+			declarationAxioms.add(dataFactory.getOWLDeclarationAxiom(owlClass));
 		}
 		
 		//Add all the object properties
 		for (ObjectPropertyExpression p : model.getOntologyVocabulary().getObjectProperties()){
 			OWLObjectProperty property = dataFactory.getOWLObjectProperty(IRI.create(p.getName()));
-			OWLDeclarationAxiom declarationAxiom = dataFactory.getOWLDeclarationAxiom(property);
-			manager.addAxiom(ontology, declarationAxiom);
+			declarationAxioms.add(dataFactory.getOWLDeclarationAxiom(property));
 		}
 		
 		//Add all the data properties
 		for (DataPropertyExpression p : model.getOntologyVocabulary().getDataProperties()){
 			OWLDataProperty property = dataFactory.getOWLDataProperty(IRI.create(p.getName()));
-			OWLDeclarationAxiom declarationAxiom = dataFactory.getOWLDeclarationAxiom(property);
-			manager.addAxiom(ontology, declarationAxiom);
+			declarationAxioms.add(dataFactory.getOWLDeclarationAxiom(property));
 		}
+
+		manager.addAxioms(ontology, declarationAxioms);
 				
 		return ontology;		
 	}
@@ -168,9 +150,13 @@ public class DirectMappingEngine {
 		Collection<DatabaseRelationDefinition> tables = metadata.getDatabaseRelations();
 		List<OBDAMappingAxiom> mappingAxioms = new ArrayList<>();
 		for (DatabaseRelationDefinition td : tables) {
-			model.addMappings(sourceUri, getMapping(td, baseIRI));
+			mappingAxioms.addAll(getMapping(td, baseIRI));
+
 		}
-		model.addMappings(sourceUri, mappingAxioms);
+		for (OBDAMappingAxiom mappingAxiom : mappingAxioms) {
+			model.addMapping(sourceUri, mappingAxiom, true);
+		}
+
 		for (URI uri : model.getMappings().keySet()) {
 			for (OBDAMappingAxiom mapping : model.getMappings().get(uri)) {
 				List<Function> rule = mapping.getTargetQuery();

@@ -116,17 +116,17 @@ public class SynchronizedMappingListModel extends AbstractListModel implements F
 	}
 
 	@Override
-	public void mappingInserted(URI srcid, String mapping_id) {
+	public void mappingInserted(URI srcid) {
 		fireContentsChanged(obdaModel, 0, getSize());
 	}
 
 	@Override
-	public void mappingDeleted(URI srcid, String mapping_id) {
+	public void mappingDeleted(URI srcid) {
 		fireContentsChanged(obdaModel, 0, getSize());
 	}
 
 	@Override
-	public void mappingUpdated(URI srcid, String mapping_id, OBDAMappingAxiom mapping) {
+	public void mappingUpdated(URI srcid) {
 		fireContentsChanged(obdaModel, 0, getSize());
 	}
 

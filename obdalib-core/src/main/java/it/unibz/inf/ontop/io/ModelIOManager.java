@@ -467,7 +467,7 @@ public class ModelIOManager {
         try {
             OBDAMappingAxiom mapping = dataFactory.getRDBMSMappingAxiom(mappingId,
             		dataFactory.getSQLQuery(sourceQuery), targetQuery);
-            model.addMapping(dataSourceUri, mapping);
+            model.addMapping(dataSourceUri, mapping, false);
         } catch (DuplicateMappingException e) {
             // NO-OP: Ignore it as duplicates won't be loaded to the model
         }

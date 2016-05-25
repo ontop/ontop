@@ -20,27 +20,25 @@ package it.unibz.inf.ontop.protege.gui.action;
  * #L%
  */
 
+import com.google.common.collect.Sets;
 import it.unibz.inf.ontop.model.OBDAModel;
 import it.unibz.inf.ontop.model.impl.OBDAModelImpl;
 import it.unibz.inf.ontop.ontology.Ontology;
 import it.unibz.inf.ontop.owlapi3.OWLAPITranslatorUtility;
 import it.unibz.inf.ontop.owlrefplatform.owlapi3.OWLAPIMaterializer;
+import it.unibz.inf.ontop.protege.core.OBDAModelManager;
+import it.unibz.inf.ontop.protege.gui.IconLoader;
+import it.unibz.inf.ontop.protege.utils.OBDAProgressMonitor;
 import org.protege.editor.core.ui.action.ProtegeAction;
 import org.protege.editor.owl.OWLEditorKit;
 import org.protege.editor.owl.model.OWLModelManager;
 import org.protege.editor.owl.model.OWLWorkspace;
-import it.unibz.inf.ontop.protege.core.OBDAModelManager;
-import it.unibz.inf.ontop.protege.utils.OBDAProgressMonitor;
-import it.unibz.inf.ontop.protege.gui.IconLoader;
 import org.semanticweb.owlapi.formats.N3DocumentFormat;
 import org.semanticweb.owlapi.formats.OWLXMLDocumentFormat;
 import org.semanticweb.owlapi.formats.RDFXMLDocumentFormat;
 import org.semanticweb.owlapi.formats.TurtleDocumentFormat;
 import org.semanticweb.owlapi.io.WriterDocumentTarget;
-import org.semanticweb.owlapi.model.OWLDocumentFormat;
-import org.semanticweb.owlapi.model.OWLIndividualAxiom;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
+import org.semanticweb.owlapi.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,6 +48,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ItemEvent;
 import java.io.*;
 import java.util.Iterator;
+import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 
 /***
@@ -215,9 +214,10 @@ public class AboxMaterializationAction extends ProtegeAction {
 				try (OWLAPIMaterializer materializer = new OWLAPIMaterializer(obdaModel, onto, DO_STREAM_RESULTS)) {
 
 					Iterator<OWLIndividualAxiom> iterator = materializer.getIterator();
-					while (iterator.hasNext()) {
-						manager.addAxiom(ontology, iterator.next());
-					}
+
+					Set<OWLAxiom> setAxioms = Sets.newHashSet(iterator);
+					manager.addAxioms(ontology, setAxioms);
+
 					manager.saveOntology(ontology, ontoFormat, new WriterDocumentTarget(fileWriter));
 
 					count = materializer.getTriplesCount();
@@ -262,7 +262,7 @@ public class AboxMaterializationAction extends ProtegeAction {
 				Container container = workspace.getRootPane().getParent();
 				final MaterializeAction action = new MaterializeAction(ontology, ontoManager, individuals, container);
 
-				Thread th = new Thread("MaterializeDataInstances") {
+				Thread th = new Thread("MaterializeDataInstances Thread") {
 					public void run() {
                     try {
                         OBDAProgressMonitor monitor = new OBDAProgressMonitor("Materializing data instances...");

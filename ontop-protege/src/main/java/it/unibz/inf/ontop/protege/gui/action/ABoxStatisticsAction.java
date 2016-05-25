@@ -27,17 +27,13 @@ import it.unibz.inf.ontop.protege.panels.OBDAModelStatisticsPanel;
 import it.unibz.inf.ontop.protege.utils.DialogUtils;
 import it.unibz.inf.ontop.protege.utils.OBDAProgressMonitor;
 import it.unibz.inf.ontop.utils.VirtualABoxStatistics;
-
-import javax.swing.JButton;
-import javax.swing.JDialog;
-import javax.swing.JPanel;
-import java.awt.BorderLayout;
-import java.awt.FlowLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-
 import org.protege.editor.core.ui.action.ProtegeAction;
 import org.protege.editor.owl.OWLEditorKit;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 public class ABoxStatisticsAction extends ProtegeAction {
 
@@ -70,7 +66,7 @@ public class ABoxStatisticsAction extends ProtegeAction {
 
 		OBDAModelStatisticsPanel pnlStatistics = new OBDAModelStatisticsPanel();
 
-		Thread th = new Thread("OBDAModelStatistics") {
+		Thread th = new Thread("OBDAModelStatistics Thread") {
 			public void run() {
 
 
