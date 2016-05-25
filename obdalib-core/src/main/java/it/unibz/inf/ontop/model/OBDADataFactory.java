@@ -84,7 +84,7 @@ public interface OBDADataFactory extends Serializable {
 	
 	public Predicate getClassPredicate(String name);
 
-
+	Predicate getOWLSameASPredicate();
 	
 
 	public JdbcTypeMapper getJdbcTypeMapper();
@@ -112,7 +112,7 @@ public interface OBDADataFactory extends Serializable {
 	 * 
 	 * @param functor
 	 *            the function symbol name.
-	 * @param arguments
+	 * @param terms
 	 *            a list of arguments.
 	 * @return the function object.
 	 */
@@ -291,5 +291,6 @@ public interface OBDADataFactory extends Serializable {
 	public Function getSPARQLJoin(Function t1, Function t2);
 
 	public Function getSPARQLLeftJoin(Function t1, Function t2);
+
 
 }

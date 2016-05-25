@@ -26,6 +26,7 @@ import it.unibz.inf.ontop.model.OBDADataFactory;
 import it.unibz.inf.ontop.model.Predicate;
 import it.unibz.inf.ontop.model.Predicate.COL_TYPE;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
+import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
 import it.unibz.inf.ontop.ontology.ImmutableOntologyVocabulary;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -67,11 +68,12 @@ public class TargetQueryValidator implements TargetQueryVocabularyValidator {
 			boolean isDataProp = isDataProperty(p);
 			boolean isAnnotProp = isAnnotationProperty(p);
 			boolean isTriple = isTriple(p);
+			boolean isSameAs = isSameAs(p);
 
 
 			// Check if the predicate contains in the ontology vocabulary as one
 			// of these components (i.e., class, object property, data property).
-			boolean isPredicateValid = isClass || isObjectProp || isDataProp || isAnnotProp || isTriple;
+			boolean isPredicateValid = isClass || isObjectProp || isDataProp || isAnnotProp || isTriple || isSameAs;
 
 			String debugMsg = "The predicate: [" + p.getName() + "]";
 			if (isPredicateValid) {
@@ -90,6 +92,10 @@ public class TargetQueryValidator implements TargetQueryVocabularyValidator {
                     predicate =  dataFactory.getAnnotationPropertyPredicate(p.getName());
                     debugMsg += " is an Annotation property.";
                 }
+				else if (isSameAs){
+					predicate =  dataFactory.getOWLSameASPredicate();
+					debugMsg += " is the owl:sameAs property.";
+				}
 				else
 					predicate = dataFactory.getPredicate(p.getName(), atom.getArity());
 				atom.setPredicate(predicate); // TODO Fix the API!
@@ -104,6 +110,8 @@ public class TargetQueryValidator implements TargetQueryVocabularyValidator {
 		}
 		return isValid;
 	}
+
+
 
 	@Override
 	public List<String> getInvalidPredicates() {
@@ -134,4 +142,8 @@ public class TargetQueryValidator implements TargetQueryVocabularyValidator {
 	public boolean isTriple(Predicate predicate){
 		return predicate.isTriplePredicate();
 	}
+
+	@Override
+	public boolean isSameAs(Predicate p) { return p.getName().equals(OBDAVocabulary.SAME_AS); }
+
 }
