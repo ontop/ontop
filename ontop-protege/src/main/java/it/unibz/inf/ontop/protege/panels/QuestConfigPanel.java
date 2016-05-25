@@ -167,10 +167,9 @@ public class QuestConfigPanel extends javax.swing.JPanel {
         lblDataSource = new javax.swing.JLabel();
         chkObtainFromOntology = new javax.swing.JCheckBox();
         chkObtainFromMappings = new javax.swing.JCheckBox();
-        fillerPanel = new javax.swing.JPanel();
 
-        setMinimumSize(new java.awt.Dimension(620, 680));
-        setPreferredSize(new java.awt.Dimension(620, 680));
+        setMinimumSize(new java.awt.Dimension(620, 560));
+        setPreferredSize(new java.awt.Dimension(620, 560));
         setLayout(new java.awt.GridBagLayout());
 
         labelNote.setText("<html><b>Note:</b> You will need to restart Ontop Reasoner for any changes to take effect.<p/>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; (i.e., select \"Reasoner-> None\" and then \"Reasoner -> Ontop\" in Protege's menu)</html>");
@@ -179,7 +178,7 @@ public class QuestConfigPanel extends javax.swing.JPanel {
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 0;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.insets = new java.awt.Insets(10, 15, 5, 5);
+        gridBagConstraints.insets = new java.awt.Insets(0, 15, 5, 5);
         add(labelNote, gridBagConstraints);
 
         pnlReformulationMethods.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createLineBorder(java.awt.Color.lightGray), "First Order reformulation"));
@@ -254,7 +253,7 @@ public class QuestConfigPanel extends javax.swing.JPanel {
         add(pnlReformulationMethods, gridBagConstraints);
 
         pnlABoxConfiguration.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createLineBorder(java.awt.Color.lightGray), "Data Configuration"));
-        pnlABoxConfiguration.setMinimumSize(new java.awt.Dimension(620, 480));
+        pnlABoxConfiguration.setMinimumSize(new java.awt.Dimension(620, 350));
         pnlABoxConfiguration.setPreferredSize(new java.awt.Dimension(620, 480));
         pnlABoxConfiguration.setLayout(new java.awt.GridBagLayout());
 
@@ -440,12 +439,6 @@ public class QuestConfigPanel extends javax.swing.JPanel {
         gridBagConstraints.weightx = 1.0;
         gridBagConstraints.insets = new java.awt.Insets(3, 40, 3, 0);
         pnlABoxConfiguration.add(chkObtainFromMappings, gridBagConstraints);
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-        gridBagConstraints.weighty = 2.0;
-        pnlABoxConfiguration.add(fillerPanel, gridBagConstraints);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
@@ -529,7 +522,6 @@ public class QuestConfigPanel extends javax.swing.JPanel {
     private javax.swing.JCheckBox chkSameAs;
     private javax.swing.ButtonGroup datalocationGroup;
     private javax.swing.Box.Filler filler2;
-    private javax.swing.JPanel fillerPanel;
     private javax.swing.JLabel labelNote;
     private javax.swing.JLabel lblDataLocation;
     private javax.swing.JLabel lblDataSource;
