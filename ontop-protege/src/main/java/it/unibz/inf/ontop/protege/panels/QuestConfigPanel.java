@@ -169,16 +169,17 @@ public class QuestConfigPanel extends javax.swing.JPanel {
         chkObtainFromMappings = new javax.swing.JCheckBox();
         fillerPanel = new javax.swing.JPanel();
 
-        setMinimumSize(new java.awt.Dimension(620, 650));
-        setPreferredSize(new java.awt.Dimension(620, 485));
+        setMinimumSize(new java.awt.Dimension(620, 700));
+        setPreferredSize(new java.awt.Dimension(620, 700));
         setLayout(new java.awt.GridBagLayout());
 
         labelNote.setText("<html><b>Note:</b> You will need to restart Ontop Reasoner for any changes to take effect.<p/>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; (i.e., select \"Reasoner-> None\" and then \"Reasoner -> Ontop\" in Protege's menu)</html>");
+        labelNote.setAlignmentX(0.5F);
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 0;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.insets = new java.awt.Insets(5, 15, 5, 5);
+        gridBagConstraints.insets = new java.awt.Insets(10, 15, 5, 5);
         add(labelNote, gridBagConstraints);
 
         pnlReformulationMethods.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createLineBorder(java.awt.Color.lightGray), "First Order reformulation"));
@@ -260,6 +261,7 @@ public class QuestConfigPanel extends javax.swing.JPanel {
         AboxMode.add(radVirtualObda);
         radVirtualObda.setText("Virtual ABox (virtual RDF graph)");
         radVirtualObda.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+        radVirtualObda.setVerticalAlignment(javax.swing.SwingConstants.TOP);
         radVirtualObda.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 radVirtualObdaActionPerformed(evt);
@@ -451,7 +453,6 @@ public class QuestConfigPanel extends javax.swing.JPanel {
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
         gridBagConstraints.weightx = 1.0;
-        gridBagConstraints.weighty = 2.0;
         gridBagConstraints.insets = new java.awt.Insets(15, 6, 15, 6);
         add(pnlABoxConfiguration, gridBagConstraints);
     }// </editor-fold>//GEN-END:initComponents
