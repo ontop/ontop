@@ -98,6 +98,7 @@ public class TargetQueryValidator implements TargetQueryVocabularyValidator {
 				}
 				else
 					predicate = dataFactory.getPredicate(p.getName(), atom.getArity());
+
 				atom.setPredicate(predicate); // TODO Fix the API!
 //                log.debug(debugMsg);
 			} else {
