@@ -654,6 +654,7 @@ public class ExpressionEvaluator {
 				teval1 = term.getTerm(0);
 			}
 		}
+		// This follows the SQL semantics NULL != NULL
 		else if (term.getTerm(0).equals(OBDAVocabulary.NULL)) {
 			return eq ? OBDAVocabulary.FALSE : OBDAVocabulary.TRUE;
 		}
@@ -678,6 +679,7 @@ public class ExpressionEvaluator {
 				teval2 = term.getTerm(1);
 			}
 		}
+		// This follows the SQL semantics NULL != NULL
 		else if (term.getTerm(1).equals(OBDAVocabulary.NULL)) {
 			return eq ? OBDAVocabulary.FALSE : OBDAVocabulary.TRUE;
 		}
