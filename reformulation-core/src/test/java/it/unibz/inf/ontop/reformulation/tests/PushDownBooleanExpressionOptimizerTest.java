@@ -25,14 +25,17 @@ public class PushDownBooleanExpressionOptimizerTest {
     private final static AtomPredicate TABLE2_PREDICATE = new AtomPredicateImpl("table2", 2);
     private final static AtomPredicate TABLE3_PREDICATE = new AtomPredicateImpl("table3", 2);
     private final static AtomPredicate TABLE4_PREDICATE = new AtomPredicateImpl("table2", 3);
+    private final static AtomPredicate TABLE5_PREDICATE = new AtomPredicateImpl("table3", 2);
     private final static AtomPredicate ANS1_PREDICATE1 = new AtomPredicateImpl("ans1", 4);
     private final static AtomPredicate ANS1_PREDICATE2 = new AtomPredicateImpl("ans1", 3);
+    private final static AtomPredicate ANS1_PREDICATE3 = new AtomPredicateImpl("ans1", 5);
     private final static AtomPredicate ANS2_PREDICATE1 = new AtomPredicateImpl("ans2", 2);
     private final static OBDADataFactory DATA_FACTORY = OBDADataFactoryImpl.getInstance();
     private final static Variable X = DATA_FACTORY.getVariable("X");
     private final static Variable Y = DATA_FACTORY.getVariable("Y");
     private final static Variable Z = DATA_FACTORY.getVariable("Z");
     private final static Variable W = DATA_FACTORY.getVariable("W");
+    private final static Variable A = DATA_FACTORY.getVariable("A");
 
     private final static ImmutableExpression EXPRESSION1 = DATA_FACTORY.getImmutableExpression(
             ExpressionOperation.EQ, X, Z);
@@ -44,6 +47,8 @@ public class PushDownBooleanExpressionOptimizerTest {
             ExpressionOperation.EQ, Y, Z);
     private final static ImmutableExpression EXPRESSION5 = DATA_FACTORY.getImmutableExpression(
             ExpressionOperation.NEQ, Z, W);
+    private final static ImmutableExpression EXPRESSION6 = DATA_FACTORY.getImmutableExpression(
+            ExpressionOperation.EQ, X, W);
 
     private final MetadataForQueryOptimization metadata;
 
@@ -210,6 +215,114 @@ public class PushDownBooleanExpressionOptimizerTest {
         System.out.println("\nExpected: \n" +  query2);
 
         assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, query2));
+    }
+
+    @Test
+    public void testJoiningConditionTest4 () throws EmptyQueryException {
+
+        IntermediateQueryBuilder queryBuilder1 = new DefaultIntermediateQueryBuilder(metadata);
+        DistinctVariableOnlyDataAtom projectionAtom1 = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE3, X, Y, Z, W, A);
+        ConstructionNode constructionNode1 = new ConstructionNodeImpl(projectionAtom1.getVariables());
+        InnerJoinNode joinNode1 = new InnerJoinNodeImpl(Optional.of(EXPRESSION1));
+        LeftJoinNode leftJoinNode1 = new LeftJoinNodeImpl(Optional.empty());
+        LeftJoinNode leftJoinNode2 = new LeftJoinNodeImpl(Optional.empty());
+        ExtensionalDataNode dataNode1 = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, X, Y));
+        ExtensionalDataNode dataNode2 = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE2_PREDICATE, X, Z));
+        ExtensionalDataNode dataNode3 = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE2_PREDICATE, X, A));
+        ExtensionalDataNode dataNode4 = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE5_PREDICATE, X, W));
+
+        queryBuilder1.init(projectionAtom1, constructionNode1);
+        queryBuilder1.addChild(constructionNode1, joinNode1);
+        queryBuilder1.addChild(joinNode1, dataNode1);
+        queryBuilder1.addChild(joinNode1, leftJoinNode1);
+        queryBuilder1.addChild(leftJoinNode1, leftJoinNode2, NonCommutativeOperatorNode.ArgumentPosition.LEFT);
+        queryBuilder1.addChild(leftJoinNode1, dataNode4, NonCommutativeOperatorNode.ArgumentPosition.RIGHT);
+        queryBuilder1.addChild(leftJoinNode2, dataNode2, NonCommutativeOperatorNode.ArgumentPosition.LEFT);
+        queryBuilder1.addChild(leftJoinNode2, dataNode3, NonCommutativeOperatorNode.ArgumentPosition.RIGHT);
+
+        IntermediateQuery query1 = queryBuilder1.build();
+
+        System.out.println("\nBefore optimization: \n" +  query1);
+
+        PushDownBooleanExpressionOptimizer pushDownBooleanExpressionOptimizer = new PushDownBooleanExpressionOptimizerImpl();
+        IntermediateQuery optimizedQuery = pushDownBooleanExpressionOptimizer.optimize(query1);
+
+        System.out.println("\nAfter optimization: \n" +  optimizedQuery);
+
+
+        IntermediateQueryBuilder queryBuilder2 = new DefaultIntermediateQueryBuilder(metadata);
+        DistinctVariableOnlyDataAtom projectionAtom2 = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE3, X, Y, Z, W, A);
+        ConstructionNode constructionNode2 = new ConstructionNodeImpl(projectionAtom1.getVariables());
+        InnerJoinNode joinNode2 = new InnerJoinNodeImpl(Optional.empty());
+        LeftJoinNode leftJoinNode3 = new LeftJoinNodeImpl(Optional.empty());
+        LeftJoinNode leftJoinNode4 = new LeftJoinNodeImpl(Optional.empty());
+        FilterNode filterNode1 = new FilterNodeImpl(EXPRESSION1);
+
+        queryBuilder2.init(projectionAtom2, constructionNode2);
+        queryBuilder2.addChild(constructionNode2, joinNode2);
+        queryBuilder2.addChild(joinNode2, dataNode1);
+        queryBuilder2.addChild(joinNode2, leftJoinNode3);
+        queryBuilder2.addChild(leftJoinNode3, leftJoinNode4, NonCommutativeOperatorNode.ArgumentPosition.LEFT);
+        queryBuilder2.addChild(leftJoinNode3, dataNode4, NonCommutativeOperatorNode.ArgumentPosition.RIGHT);
+        queryBuilder2.addChild(leftJoinNode4, filterNode1, NonCommutativeOperatorNode.ArgumentPosition.LEFT);
+        queryBuilder2.addChild(leftJoinNode4, dataNode3, NonCommutativeOperatorNode.ArgumentPosition.RIGHT);
+        queryBuilder2.addChild(filterNode1, dataNode2);
+
+        IntermediateQuery query2 = queryBuilder2.build();
+
+        System.out.println("\nExpected: \n" +  query2);
+
+        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, query2));
+    }
+
+    @Test
+    public void testJoiningConditionTest5 () throws EmptyQueryException {
+
+        IntermediateQueryBuilder queryBuilder1 = new DefaultIntermediateQueryBuilder(metadata);
+        DistinctVariableOnlyDataAtom projectionAtom1 = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE1, X, Y, Z, W);
+        ConstructionNode constructionNode1 = new ConstructionNodeImpl(projectionAtom1.getVariables());
+        InnerJoinNode joinNode1 = new InnerJoinNodeImpl(Optional.of(EXPRESSION6));
+        LeftJoinNode leftJoinNode1 = new LeftJoinNodeImpl(Optional.empty());
+        ExtensionalDataNode dataNode1 = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, X, Y));
+        ExtensionalDataNode dataNode2 = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE2_PREDICATE, X, Z));
+        ExtensionalDataNode dataNode3 = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE5_PREDICATE, X, W));
+
+        queryBuilder1.init(projectionAtom1, constructionNode1);
+        queryBuilder1.addChild(constructionNode1, joinNode1);
+        queryBuilder1.addChild(joinNode1, dataNode1);
+        queryBuilder1.addChild(joinNode1, leftJoinNode1);
+        queryBuilder1.addChild(leftJoinNode1, dataNode2, NonCommutativeOperatorNode.ArgumentPosition.LEFT);
+        queryBuilder1.addChild(leftJoinNode1, dataNode3, NonCommutativeOperatorNode.ArgumentPosition.RIGHT);
+
+        IntermediateQuery query1 = queryBuilder1.build();
+
+        System.out.println("\nBefore optimization: \n" +  query1);
+
+        PushDownBooleanExpressionOptimizer pushDownBooleanExpressionOptimizer = new PushDownBooleanExpressionOptimizerImpl();
+        IntermediateQuery optimizedQuery = pushDownBooleanExpressionOptimizer.optimize(query1);
+
+        System.out.println("\nAfter optimization: \n" +  optimizedQuery);
+
+
+        IntermediateQueryBuilder queryBuilder2 = new DefaultIntermediateQueryBuilder(metadata);
+        DistinctVariableOnlyDataAtom projectionAtom2 = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE1, X, Y, Z, W);
+        ConstructionNode constructionNode2 = new ConstructionNodeImpl(projectionAtom1.getVariables());
+        InnerJoinNode joinNode2 = new InnerJoinNodeImpl(Optional.of(EXPRESSION6));
+        LeftJoinNode leftJoinNode2 = new LeftJoinNodeImpl(Optional.empty());
+
+        queryBuilder2.init(projectionAtom2, constructionNode2);
+        queryBuilder2.addChild(constructionNode2, joinNode2);
+        queryBuilder2.addChild(joinNode2, dataNode1);
+        queryBuilder2.addChild(joinNode2, leftJoinNode2);
+        queryBuilder2.addChild(leftJoinNode2, dataNode2, NonCommutativeOperatorNode.ArgumentPosition.LEFT);
+        queryBuilder2.addChild(leftJoinNode2, dataNode3, NonCommutativeOperatorNode.ArgumentPosition.RIGHT);
+
+        IntermediateQuery query2 = queryBuilder2.build();
+
+        System.out.println("\nExpected: \n" +  query2);
+
+        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, query2));
+
     }
 
 }
