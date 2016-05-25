@@ -9,31 +9,39 @@ import it.unibz.inf.ontop.pivotalrepr.QueryNode;
 
 
 public class PushDownBooleanExpressionProposalImpl implements PushDownBooleanExpressionProposal {
-
     private final JoinOrFilterNode focusNode;
-    private final ImmutableMultimap<QueryNode, ImmutableExpression> transferMap;
-    private final ImmutableList<ImmutableExpression> toKeepExpressions;
+    private final ImmutableMultimap<JoinOrFilterNode, ImmutableExpression> directRecipients;
+    private final ImmutableMultimap<QueryNode, ImmutableExpression> childOfFilterNodesToCreate;
+    private final ImmutableList<ImmutableExpression> expressionsToKeep;
 
-    public PushDownBooleanExpressionProposalImpl(JoinOrFilterNode focusNode,
-                                                 ImmutableMultimap<QueryNode, ImmutableExpression> transferMap,
-                                                 ImmutableList<ImmutableExpression> toKeepExpressions) {
+    public PushDownBooleanExpressionProposalImpl(
+            JoinOrFilterNode focusNode, ImmutableMultimap<JoinOrFilterNode, ImmutableExpression> directRecipients,
+            ImmutableMultimap<QueryNode, ImmutableExpression> childOfFilterNodesToCreate,
+            ImmutableList<ImmutableExpression> expressionsToKeep) {
+
         this.focusNode = focusNode;
-        this.transferMap = transferMap;
-        this.toKeepExpressions = toKeepExpressions;
+        this.directRecipients = directRecipients;
+        this.childOfFilterNodesToCreate = childOfFilterNodesToCreate;
+        this.expressionsToKeep = expressionsToKeep;
+    }
+
+    @Override
+    public ImmutableMultimap<JoinOrFilterNode, ImmutableExpression> getDirectRecipients() {
+        return directRecipients;
+    }
+
+    @Override
+    public ImmutableMultimap<QueryNode, ImmutableExpression> getChildOfFilterNodesToCreate() {
+        return childOfFilterNodesToCreate;
+    }
+
+    @Override
+    public ImmutableList<ImmutableExpression> getExpressionsToKeep() {
+        return expressionsToKeep;
     }
 
     @Override
     public JoinOrFilterNode getFocusNode() {
         return focusNode;
-    }
-
-    @Override
-    public ImmutableMultimap<QueryNode, ImmutableExpression> getTransferMap() {
-        return transferMap;
-    }
-
-    @Override
-    public ImmutableList<ImmutableExpression> getExpressionsToKeep() {
-        return toKeepExpressions;
     }
 }
