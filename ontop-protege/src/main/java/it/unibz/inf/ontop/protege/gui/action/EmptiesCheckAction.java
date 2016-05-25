@@ -20,8 +20,8 @@ package it.unibz.inf.ontop.protege.gui.action;
  * #L%
  */
 
-import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWL;
-import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWLEmptyEntitiesChecker;
+import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWL;
+import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLEmptyEntitiesChecker;
 import it.unibz.inf.ontop.protege.panels.EmptiesCheckPanel;
 import it.unibz.inf.ontop.protege.utils.DialogUtils;
 import it.unibz.inf.ontop.protege.utils.OBDAProgressMonitor;

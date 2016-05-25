@@ -1,7 +1,7 @@
 package it.unibz.inf.ontop.reformulation.owlapi3;
 
 import it.unibz.inf.ontop.model.CQIE;
-import it.unibz.inf.ontop.owlapi3.swrl.SWRLAPITranslator;
+import it.unibz.inf.ontop.owlapi.swrl.SWRLAPITranslator;
 
 import java.io.File;
 import java.util.ArrayList;

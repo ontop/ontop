@@ -24,7 +24,7 @@ import it.unibz.inf.ontop.io.ModelIOManager;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.ontology.Assertion;
-import it.unibz.inf.ontop.owlapi3.OWLAPIABoxIterator;
+import it.unibz.inf.ontop.owlapi.OWLAPIABoxIterator;
 import it.unibz.inf.ontop.owlrefplatform.core.abox.NTripleAssertionIterator;
 import it.unibz.inf.ontop.owlrefplatform.core.abox.QuestMaterializer;
 import org.openrdf.query.parser.ParsedQuery;

@@ -6,7 +6,7 @@ import it.unibz.inf.ontop.model.OBDAModel;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
-import it.unibz.inf.ontop.owlrefplatform.owlapi3.*;
+import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import it.unibz.inf.ontop.utils.SQLScriptRunner;
 import org.junit.*;
 import org.semanticweb.owlapi.apibinding.OWLManager;

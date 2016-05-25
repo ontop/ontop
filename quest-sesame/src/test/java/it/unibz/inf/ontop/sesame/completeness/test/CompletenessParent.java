@@ -24,7 +24,7 @@ import info.aduna.io.IOUtil;
 import info.aduna.iteration.Iterations;
 import info.aduna.text.StringUtil;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
-import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWL;
+import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWL;
 
 import java.io.IOException;
 import java.io.InputStream;

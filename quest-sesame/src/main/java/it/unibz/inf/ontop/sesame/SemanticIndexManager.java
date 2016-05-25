@@ -22,12 +22,11 @@ package it.unibz.inf.ontop.sesame;
 
 import it.unibz.inf.ontop.ontology.ImmutableOntologyVocabulary;
 import it.unibz.inf.ontop.ontology.Ontology;
-import it.unibz.inf.ontop.owlapi3.OWLAPIABoxIterator;
+import it.unibz.inf.ontop.owlapi.OWLAPIABoxIterator;
 import it.unibz.inf.ontop.owlrefplatform.core.abox.RDBMSSIRepositoryManager;
 import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
-import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWL;
-import it.unibz.inf.ontop.sesame.SesameRDFIterator;
+import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWL;
 import org.openrdf.rio.RDFHandlerException;
 import org.openrdf.rio.RDFParseException;
 import org.openrdf.rio.turtle.TurtleParser;

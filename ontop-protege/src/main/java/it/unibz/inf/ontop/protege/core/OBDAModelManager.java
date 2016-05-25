@@ -26,7 +26,7 @@ import it.unibz.inf.ontop.io.PrefixManager;
 import it.unibz.inf.ontop.io.QueryIOManager;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
-import it.unibz.inf.ontop.owlapi3.OBDAModelValidator;
+import it.unibz.inf.ontop.owlapi.OBDAModelValidator;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
 import it.unibz.inf.ontop.protege.utils.DialogUtils;
 import it.unibz.inf.ontop.querymanager.*;

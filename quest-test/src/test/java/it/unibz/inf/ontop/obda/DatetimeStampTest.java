@@ -8,7 +8,7 @@ import it.unibz.inf.ontop.model.OBDADataSource;
 import it.unibz.inf.ontop.model.OBDAModel;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
-import it.unibz.inf.ontop.owlrefplatform.owlapi3.*;
+import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import it.unibz.inf.ontop.querymanager.QueryController;
 import it.unibz.inf.ontop.querymanager.QueryControllerGroup;
 import it.unibz.inf.ontop.querymanager.QueryControllerQuery;

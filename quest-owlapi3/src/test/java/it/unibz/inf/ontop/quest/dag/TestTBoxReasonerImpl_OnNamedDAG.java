@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.quest.dag;
 
 /*
  * #%L
- * ontop-quest-owlapi3
+ * ontop-quest-owlapi
  * %%
  * Copyright (C) 2009 - 2014 Free University of Bozen-Bolzano
  * %%

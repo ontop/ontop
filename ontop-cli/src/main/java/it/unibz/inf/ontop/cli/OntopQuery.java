@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.cli;
 
 /*
  * #%L
- * ontop-quest-owlapi3
+ * ontop-quest-owlapi
  * %%
  * Copyright (C) 2009 - 2014 Free University of Bozen-Bolzano
  * %%
@@ -29,7 +29,7 @@ import com.github.rvesse.airline.help.cli.bash.CompletionBehaviour;
 import it.unibz.inf.ontop.exception.InvalidMappingException;
 import it.unibz.inf.ontop.exception.InvalidPredicateDeclarationException;
 import it.unibz.inf.ontop.model.OBDAModel;
-import it.unibz.inf.ontop.owlrefplatform.owlapi3.*;
+import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.io.ToStringRenderer;
 import org.semanticweb.owlapi.model.OWLOntology;

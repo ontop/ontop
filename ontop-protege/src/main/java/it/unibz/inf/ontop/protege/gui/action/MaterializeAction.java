@@ -21,7 +21,7 @@ package it.unibz.inf.ontop.protege.gui.action;
  */
 
 import com.google.common.collect.Sets;
-import it.unibz.inf.ontop.owlrefplatform.owlapi3.OWLAPIMaterializer;
+import it.unibz.inf.ontop.owlrefplatform.owlapi.OWLAPIMaterializer;
 import it.unibz.inf.ontop.protege.utils.OBDAProgressListener;
 import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLIndividualAxiom;

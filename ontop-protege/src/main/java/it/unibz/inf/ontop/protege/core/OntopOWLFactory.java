@@ -2,8 +2,8 @@ package it.unibz.inf.ontop.protege.core;
 
 
 import it.unibz.inf.ontop.protege.utils.OptionPaneUtils;
-import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWL;
-import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWLFactory;
+import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWL;
+import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLFactory;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.reasoner.IllegalConfigurationException;
 import org.semanticweb.owlapi.reasoner.OWLReasonerConfiguration;

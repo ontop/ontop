@@ -23,7 +23,7 @@ package it.unibz.inf.ontop.protege.views;
 import it.unibz.inf.ontop.io.TargetQueryVocabularyValidator;
 import it.unibz.inf.ontop.model.OBDAModel;
 import it.unibz.inf.ontop.model.impl.OBDAModelImpl;
-import it.unibz.inf.ontop.owlapi3.TargetQueryValidator;
+import it.unibz.inf.ontop.owlapi.TargetQueryValidator;
 import it.unibz.inf.ontop.protege.panels.MappingManagerPanel;
 import org.protege.editor.owl.OWLEditorKit;
 import org.protege.editor.owl.model.selection.OWLSelectionModelListener;

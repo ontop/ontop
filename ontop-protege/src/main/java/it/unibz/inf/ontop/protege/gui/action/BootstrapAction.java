@@ -23,7 +23,7 @@ package it.unibz.inf.ontop.protege.gui.action;
 import it.unibz.inf.ontop.model.OBDADataSource;
 import it.unibz.inf.ontop.model.OBDAModel;
 import it.unibz.inf.ontop.model.impl.OBDAModelImpl;
-import it.unibz.inf.ontop.owlapi3.bootstrapping.DirectMappingBootstrapper;
+import it.unibz.inf.ontop.owlapi.bootstrapping.DirectMappingBootstrapper;
 import it.unibz.inf.ontop.protege.core.OBDAModelManager;
 import it.unibz.inf.ontop.protege.utils.OBDAProgressListener;
 import it.unibz.inf.ontop.protege.utils.OBDAProgressMonitor;
