@@ -169,8 +169,8 @@ public class QuestConfigPanel extends javax.swing.JPanel {
         chkObtainFromMappings = new javax.swing.JCheckBox();
         fillerPanel = new javax.swing.JPanel();
 
-        setMinimumSize(new java.awt.Dimension(620, 700));
-        setPreferredSize(new java.awt.Dimension(620, 700));
+        setMinimumSize(new java.awt.Dimension(620, 680));
+        setPreferredSize(new java.awt.Dimension(620, 680));
         setLayout(new java.awt.GridBagLayout());
 
         labelNote.setText("<html><b>Note:</b> You will need to restart Ontop Reasoner for any changes to take effect.<p/>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; (i.e., select \"Reasoner-> None\" and then \"Reasoner -> Ontop\" in Protege's menu)</html>");
