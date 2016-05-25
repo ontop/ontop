@@ -6,5 +6,5 @@ package it.unibz.inf.ontop.model;
  * Is either a Constant or a variable-free functional term.
  *
  */
-public interface GroundTerm extends VariableOrGroundTerm {
+public interface GroundTerm extends VariableOrGroundTerm, NonVariableTerm {
 }

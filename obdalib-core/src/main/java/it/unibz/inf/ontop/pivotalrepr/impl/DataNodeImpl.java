@@ -1,10 +1,7 @@
 package it.unibz.inf.ontop.pivotalrepr.impl;
 
 import com.google.common.collect.ImmutableSet;
-import it.unibz.inf.ontop.model.DataAtom;
-import it.unibz.inf.ontop.model.ImmutableSubstitution;
-import it.unibz.inf.ontop.model.Variable;
-import it.unibz.inf.ontop.model.VariableOrGroundTerm;
+import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.pivotalrepr.DataNode;
 import it.unibz.inf.ontop.pivotalrepr.SubstitutionResults;
 
@@ -24,6 +21,12 @@ public abstract class DataNodeImpl extends QueryNodeImpl implements DataNode {
         return atom;
     }
 
+
+    @Override
+    public ImmutableSet<Variable> getProjectedVariables() {
+        return getVariables();
+    }
+
     @Override
     public ImmutableSet<Variable> getVariables() {
         ImmutableSet.Builder<Variable> variableBuilder = ImmutableSet.builder();
@@ -35,7 +38,7 @@ public abstract class DataNodeImpl extends QueryNodeImpl implements DataNode {
     }
 
     protected static <T extends DataNode> SubstitutionResults<T> applySubstitution(
-            T dataNode, ImmutableSubstitution<? extends VariableOrGroundTerm> substitution) {
+            T dataNode, ImmutableSubstitution<? extends ImmutableTerm> substitution) {
 
         DataAtom newAtom = substitution.applyToDataAtom(dataNode.getProjectionAtom());
         T newNode = (T) dataNode.newAtom(newAtom);

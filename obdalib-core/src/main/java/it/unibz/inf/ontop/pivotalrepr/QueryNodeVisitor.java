@@ -23,4 +23,6 @@ public interface QueryNodeVisitor {
     void visit(ExtensionalDataNode extensionalDataNode);
 
     void visit(GroupNode groupNode);
+
+    void visit(EmptyNode emptyNode);
 }

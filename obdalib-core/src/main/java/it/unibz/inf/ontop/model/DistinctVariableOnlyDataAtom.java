@@ -6,5 +6,5 @@ package it.unibz.inf.ontop.model;
  * Data atom only composed of variables; all these variables are distinct.
  *
  */
-public interface DistinctVariableOnlyDataAtom extends NonGroundDistinctVariableDataAtom, VariableOnlyDataAtom {
+public interface DistinctVariableOnlyDataAtom extends VariableOnlyDataAtom, NonGroundDistinctVariableDataAtom {
 }

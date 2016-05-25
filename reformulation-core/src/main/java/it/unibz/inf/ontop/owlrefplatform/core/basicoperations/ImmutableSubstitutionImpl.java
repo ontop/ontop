@@ -2,10 +2,14 @@ package it.unibz.inf.ontop.owlrefplatform.core.basicoperations;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableMap;
-import it.unibz.inf.ontop.model.ImmutableSubstitution;
-import it.unibz.inf.ontop.model.ImmutableTerm;
-import it.unibz.inf.ontop.model.Term;
-import it.unibz.inf.ontop.model.Variable;
+import com.google.common.collect.ImmutableSet;
+import it.unibz.inf.ontop.model.*;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
+import org.openrdf.query.algebra.Var;
+
+import java.util.AbstractMap;
+import java.util.Map;
+import java.util.stream.Collector;
 
 /**
  * Wrapper above a ImmutableMap<Variable, ImmutableTerm> map.
@@ -34,6 +38,11 @@ public class ImmutableSubstitutionImpl<T extends ImmutableTerm> extends Abstract
     }
 
     @Override
+    public ImmutableSet<Variable> getDomain() {
+        return map.keySet();
+    }
+
+    @Override
     public boolean isEmpty() {
         return map.isEmpty();
     }
@@ -51,6 +60,28 @@ public class ImmutableSubstitutionImpl<T extends ImmutableTerm> extends Abstract
     }
 
     @Override
+    public Var2VarSubstitution getVar2VarFragment() {
+        ImmutableMap<Variable, Variable> newMap = map.entrySet().stream()
+                .filter(e -> e.getValue() instanceof Variable)
+                .map(e -> (Map.Entry<Variable, Variable>) new AbstractMap.SimpleEntry<>(
+                        e.getKey(), (Variable) e.getValue()))
+                .collect(ImmutableCollectors.toMap());
+
+        return new Var2VarSubstitutionImpl(newMap);
+    }
+
+    @Override
+    public ImmutableSubstitution<GroundTerm> getVar2GroundTermFragment() {
+        ImmutableMap<Variable, GroundTerm> newMap = map.entrySet().stream()
+                .filter(e -> e.getValue() instanceof GroundTerm)
+                .map(e -> (Map.Entry<Variable, GroundTerm>) new AbstractMap.SimpleEntry<>(
+                        e.getKey(), (GroundTerm) e.getValue()))
+                .collect(ImmutableCollectors.toMap());
+
+        return new ImmutableSubstitutionImpl<>(newMap);
+    }
+
+    @Override
     public String toString() {
         return Joiner.on(", ").withKeyValueSeparator("/").join(map);
     }
@@ -59,5 +90,7 @@ public class ImmutableSubstitutionImpl<T extends ImmutableTerm> extends Abstract
     protected ImmutableSubstitution<T> constructNewSubstitution(ImmutableMap<Variable, T> map) {
         return new ImmutableSubstitutionImpl<>(map);
     }
+
+
 
 }

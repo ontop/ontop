@@ -88,6 +88,11 @@ public class BasicBindingTransferTransformer implements BindingTransferTransform
         return new GroupNodeImpl(newGroupingTerms);
     }
 
+    @Override
+    public EmptyNode transform(EmptyNode emptyNode) {
+        return emptyNode;
+    }
+
     private Optional<ImmutableExpression> transformOptionalFilterCondition(
             Optional<ImmutableExpression> optionalFilterCondition) {
         if (optionalFilterCondition.isPresent()) {

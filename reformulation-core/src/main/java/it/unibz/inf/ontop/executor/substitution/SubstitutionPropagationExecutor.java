@@ -64,7 +64,7 @@ public class SubstitutionPropagationExecutor<N extends QueryNode>
                                           QueryTreeComponent treeComponent) throws QueryNodeSubstitutionException {
 
         SubstitutionResults<? extends QueryNode> substitutionResults =
-                originalFocusNode.applyDescendentSubstitution(substitutionToPropagate);
+                originalFocusNode.applyDescendingSubstitution(substitutionToPropagate);
         Optional<? extends QueryNode> optionalNewFocusNode = substitutionResults.getOptionalNewNode();
         if (optionalNewFocusNode.isPresent()) {
             QueryNode newFocusNode = optionalNewFocusNode.get();

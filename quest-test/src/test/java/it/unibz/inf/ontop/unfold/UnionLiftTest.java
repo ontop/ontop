@@ -59,7 +59,7 @@ public class UnionLiftTest {
         ConstructionNode root = new ConstructionNodeImpl(rootDataAtom);
 
 		IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
-		queryBuilder.init(root);
+		queryBuilder.init(projectionAtom, root);
 
 
 		LeftJoinNode topLJ = new LeftJoinNodeImpl(NO_EXPRESSION);

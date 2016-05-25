@@ -29,7 +29,7 @@ public class SubstitutionPropagationTools {
      *
      */
     public static QueryTreeComponent propagateSubstitutionDown(final QueryNode focusNode,
-                                                               final ImmutableSubstitution<? extends VariableOrGroundTerm> currentSubstitutionToPropagate,
+                                                               final ImmutableSubstitution<? extends ImmutableTerm> currentSubstitutionToPropagate,
                                                                final QueryTreeComponent treeComponent)
             throws QueryNodeSubstitutionException {
 
@@ -40,17 +40,17 @@ public class SubstitutionPropagationTools {
             QueryNode formerSubNode = nodesToVisit.poll();
 
             SubstitutionResults<? extends QueryNode> substitutionResults =
-                    formerSubNode.applyDescendentSubstitution(currentSubstitutionToPropagate);
+                    formerSubNode.applyDescendingSubstitution(currentSubstitutionToPropagate);
 
             Optional<? extends QueryNode> optionalNewSubNode = substitutionResults.getOptionalNewNode();
-            Optional<? extends ImmutableSubstitution<? extends VariableOrGroundTerm>> optionalNewSubstitution
+            Optional<? extends ImmutableSubstitution<? extends ImmutableTerm>> optionalNewSubstitution
                     = substitutionResults.getSubstitutionToPropagate();
 
             /**
              * Still a substitution to propagate
              */
             if (optionalNewSubstitution.isPresent()) {
-                ImmutableSubstitution<? extends VariableOrGroundTerm> newSubstitution = optionalNewSubstitution.get();
+                ImmutableSubstitution<? extends ImmutableTerm> newSubstitution = optionalNewSubstitution.get();
 
                 /**
                  * No substitution change
@@ -136,7 +136,7 @@ public class SubstitutionPropagationTools {
             /**
              * Applies the substitution and analyses the results
              */
-            SubstitutionResults<? extends QueryNode> substitutionResults = formerAncestor.applyAscendentSubstitution(
+            SubstitutionResults<? extends QueryNode> substitutionResults = formerAncestor.applyAscendingSubstitution(
                     substitutionToPropagate, focusNode, query);
 
             Optional<? extends ImmutableSubstitution<? extends ImmutableTerm>> optionalNewSubstitution =

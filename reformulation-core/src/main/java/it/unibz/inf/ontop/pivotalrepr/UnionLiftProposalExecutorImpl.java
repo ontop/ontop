@@ -17,7 +17,7 @@ public class UnionLiftProposalExecutorImpl implements UnionLiftProposalExecutor 
         ConstructionNode rootNode = inputQuery.getRootConstructionNode();
         try {
             ConstructionNode newRootNode = rootNode.acceptNodeTransformer(queryNodeCloner);
-            builder.init(newRootNode);
+            builder.init(inputQuery.getProjectionAtom(), newRootNode);
             recursive(unionNode, targetQueryNode, builder, inputQuery, rootNode, newRootNode, Optional.<Integer>empty());
         } catch (NotNeededNodeException e) {
             throw new IllegalStateException("UnionLiftProposalExecutor should not remove any node");

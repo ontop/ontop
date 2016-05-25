@@ -1,20 +1,30 @@
 package it.unibz.inf.ontop.owlrefplatform.core.basicoperations;
 
 import com.google.common.base.Joiner;
+
+import java.util.AbstractMap;
 import java.util.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import fj.data.TreeMap;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.NonGroundFunctionalTermImpl;
 import it.unibz.inf.ontop.pivotalrepr.ImmutableQueryModifiers;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Immutable { Variable --> Variable } substitution.
  */
 public class Var2VarSubstitutionImpl extends AbstractImmutableSubstitutionImpl<Variable> implements Var2VarSubstitution {
+
+    private static class NotASubstitutionException extends RuntimeException  {
+    }
+
 
     private final ImmutableMap<Variable, Variable> map;
 
@@ -37,6 +47,16 @@ public class Var2VarSubstitutionImpl extends AbstractImmutableSubstitutionImpl<V
         if (map.containsKey(variable))
             return map.get(variable);
         return variable;
+    }
+
+    @Override
+    public Var2VarSubstitution getVar2VarFragment() {
+        return this;
+    }
+
+    @Override
+    public ImmutableSubstitution<GroundTerm> getVar2GroundTermFragment() {
+        return new ImmutableSubstitutionImpl<>(ImmutableMap.of());
     }
 
     @Override
@@ -71,6 +91,31 @@ public class Var2VarSubstitutionImpl extends AbstractImmutableSubstitutionImpl<V
         return immutableQueryModifiers.newSortConditions(orderConditionBuilder.build());
     }
 
+    /**
+     * TODO: directly build an ImmutableMap
+     */
+    @Override
+    public Optional<ImmutableSubstitution<ImmutableTerm>> applyToSubstitution(
+            ImmutableSubstitution<? extends ImmutableTerm> substitution) {
+
+        if (isEmpty()) {
+            return Optional.of(new ImmutableSubstitutionImpl<>(substitution.getImmutableMap()));
+        }
+
+        try {
+            ImmutableMap<Variable, ImmutableTerm> newMap = ImmutableMap.copyOf(substitution.getImmutableMap().entrySet().stream()
+                    .map(e -> new AbstractMap.SimpleEntry<>(applyToVariable(e.getKey()), apply(e.getValue())))
+                    .distinct()
+                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue,
+                            (e1, e2) -> {
+                                throw new NotASubstitutionException();
+                            })));
+            return Optional.of(new ImmutableSubstitutionImpl<>(newMap));
+        } catch (NotASubstitutionException e) {
+            return Optional.empty();
+        }
+    }
+
     @Override
     public Variable get(Variable var) {
         return map.get(var);
@@ -102,7 +147,31 @@ public class Var2VarSubstitutionImpl extends AbstractImmutableSubstitutionImpl<V
     }
 
     @Override
+    public ImmutableSet<Variable> getDomain() {
+        return map.keySet();
+    }
+
+    @Override
     protected ImmutableSubstitution<Variable> constructNewSubstitution(ImmutableMap<Variable, Variable> map) {
         return new Var2VarSubstitutionImpl(map);
+    }
+
+    @Override
+    public Var2VarSubstitution composeWithVar2Var(Var2VarSubstitution g) {
+        return new Var2VarSubstitutionImpl(composeRenaming(g));
+    }
+
+    protected ImmutableMap<Variable, Variable> composeRenaming(Var2VarSubstitution g ) {
+        ImmutableSet<Variable> gDomain = g.getDomain();
+
+        Stream<Map.Entry<Variable, Variable>> gEntryStream = g.getImmutableMap().entrySet().stream()
+                .map(e -> new AbstractMap.SimpleEntry<>(e.getKey(), applyToVariable(e.getValue())));
+
+        Stream<Map.Entry<Variable, Variable>> localEntryStream = getImmutableMap().entrySet().stream()
+                .filter(e -> !gDomain.contains(e.getKey()));
+
+        return Stream.concat(gEntryStream, localEntryStream)
+                .filter(e -> !e.getKey().equals(e.getValue()))
+                .collect(ImmutableCollectors.toMap());
     }
 }

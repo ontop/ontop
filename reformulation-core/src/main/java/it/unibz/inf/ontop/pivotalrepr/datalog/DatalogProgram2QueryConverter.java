@@ -8,10 +8,10 @@ import it.unibz.inf.ontop.model.CQIE;
 import it.unibz.inf.ontop.model.DatalogProgram;
 import it.unibz.inf.ontop.model.OBDAQueryModifiers;
 import it.unibz.inf.ontop.model.Predicate;
+import it.unibz.inf.ontop.pivotalrepr.EmptyQueryException;
 import it.unibz.inf.ontop.pivotalrepr.ImmutableQueryModifiers;
 import it.unibz.inf.ontop.pivotalrepr.IntermediateQuery;
 import it.unibz.inf.ontop.pivotalrepr.MetadataForQueryOptimization;
-import it.unibz.inf.ontop.pivotalrepr.QueryMergingException;
 import it.unibz.inf.ontop.pivotalrepr.impl.ImmutableQueryModifiersImpl;
 import it.unibz.inf.ontop.pivotalrepr.impl.IntermediateQueryUtils;
 import it.unibz.inf.ontop.utils.DatalogDependencyGraphGenerator;
@@ -54,7 +54,7 @@ public class DatalogProgram2QueryConverter {
     public static IntermediateQuery convertDatalogProgram(MetadataForQueryOptimization metadata,
                                                           DatalogProgram queryProgram,
                                                           Collection<Predicate> tablePredicates)
-            throws InvalidDatalogProgramException {
+            throws InvalidDatalogProgramException, EmptyQueryException {
         List<CQIE> rules = queryProgram.getRules();
 
         DatalogDependencyGraphGenerator dependencyGraph = new DatalogDependencyGraphGenerator(rules);
@@ -86,11 +86,7 @@ public class DatalogProgram2QueryConverter {
             Optional<IntermediateQuery> optionalSubQuery = convertDatalogDefinitions(metadata, datalogAtomPredicate,
                     ruleIndex, tablePredicates, NO_QUERY_MODIFIER);
             if (optionalSubQuery.isPresent()) {
-                try {
-                    intermediateQuery.mergeSubQuery(optionalSubQuery.get());
-                } catch (QueryMergingException e) {
-                    throw new InvalidDatalogProgramException(e.getMessage());
-                }
+                intermediateQuery.mergeSubQuery(optionalSubQuery.get());
             }
         }
 
@@ -123,11 +119,7 @@ public class DatalogProgram2QueryConverter {
                             convertDatalogRule(metadata, datalogAtomDefinition, tablePredicates,
                                     Optional.<ImmutableQueryModifiers>empty()));
                 }
-                try {
-                    return IntermediateQueryUtils.mergeDefinitions(convertedDefinitions, optionalModifiers);
-                } catch (QueryMergingException e) {
-                    throw new InvalidDatalogProgramException(e.getLocalizedMessage());
-                }
+                return IntermediateQueryUtils.mergeDefinitions(convertedDefinitions, optionalModifiers);
         }
     }
 

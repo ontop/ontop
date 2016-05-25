@@ -99,6 +99,11 @@ public class ReactToChildDeletionTransformer implements HeterogeneousQueryNodeTr
         return checkHasChildren(groupNode);
     }
 
+    @Override
+    public NodeTransformationProposal transform(EmptyNode emptyNode) {
+        return new NodeTransformationProposalImpl(NodeTransformationProposedState.DELETE);
+    }
+
     /**
      * TODO: find a better name
      */

@@ -1,13 +1,13 @@
 package it.unibz.inf.ontop.pivotalrepr;
 
 import it.unibz.inf.ontop.model.ImmutableExpression;
-import it.unibz.inf.ontop.model.VariableOrGroundTerm;
+import it.unibz.inf.ontop.model.ImmutableTerm;
 import it.unibz.inf.ontop.model.ImmutableSubstitution;
 
 /**
  * TODO: explain
  */
-public interface FilterNode extends JoinOrFilterNode {
+public interface FilterNode extends CommutativeJoinOrFilterNode {
 
     @Override
     FilterNode clone();
@@ -26,11 +26,11 @@ public interface FilterNode extends JoinOrFilterNode {
     FilterNode changeFilterCondition(ImmutableExpression newFilterCondition);
 
     @Override
-    SubstitutionResults<FilterNode> applyAscendentSubstitution(
-            ImmutableSubstitution<? extends VariableOrGroundTerm> substitution,
+    SubstitutionResults<FilterNode> applyAscendingSubstitution(
+            ImmutableSubstitution<? extends ImmutableTerm> substitution,
             QueryNode descendantNode, IntermediateQuery query);
 
     @Override
-    SubstitutionResults<FilterNode> applyDescendentSubstitution(
-            ImmutableSubstitution<? extends VariableOrGroundTerm> substitution);
+    SubstitutionResults<FilterNode> applyDescendingSubstitution(
+            ImmutableSubstitution<? extends ImmutableTerm> substitution);
 }
