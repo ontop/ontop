@@ -84,24 +84,26 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
 
         Optional<ImmutableExpression> formerCondition = getOptionalFilterCondition();
 
-        Optional<ImmutableExpression> newCondition = formerCondition
+        Optional<ExpressionEvaluator.Evaluation> optionalEvaluation = formerCondition
                 .map(substitution::applyToBooleanExpression)
                 // Combines the two possible conditions
                 .map(cond -> additionalCondition
-                        .map(addCond -> foldBooleanExpressions(cond,addCond))
+                        .map(addCond -> foldBooleanExpressions(cond, addCond))
                         .orElseGet(() -> Optional.of(cond)))
                 .orElse(additionalCondition)
-                .flatMap(cond -> new ExpressionEvaluator(query.getMetadata().getUriTemplateMatcher())
+                .map(cond -> new ExpressionEvaluator(query.getMetadata().getUriTemplateMatcher())
                         .evaluateExpression(cond));
 
-        /**
-         * The new condition is not satisfied anymore
-         */
-        if ((!newCondition.isPresent()) && formerCondition.isPresent()) {
+        if (optionalEvaluation
+                .filter(ExpressionEvaluator.Evaluation::isFalse)
+                .isPresent()) {
             // Reject
             return new SubstitutionResultsImpl<>(IS_EMPTY);
         }
         else {
+            Optional<ImmutableExpression> newCondition = optionalEvaluation
+                    .flatMap(ExpressionEvaluator.Evaluation::getOptionalExpression);
+
             InnerJoinNode newNode = new InnerJoinNodeImpl(newCondition);
             return new SubstitutionResultsImpl<>(newNode, substitution);
         }

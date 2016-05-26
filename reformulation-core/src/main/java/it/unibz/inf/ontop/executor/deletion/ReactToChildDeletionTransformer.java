@@ -13,8 +13,10 @@ import it.unibz.inf.ontop.pivotalrepr.impl.FilterNodeImpl;
 import it.unibz.inf.ontop.pivotalrepr.impl.InnerJoinNodeImpl;
 import it.unibz.inf.ontop.pivotalrepr.impl.NodeTransformationProposalImpl;
 import it.unibz.inf.ontop.pivotalrepr.*;
+import it.unibz.inf.ontop.pivotalrepr.impl.SubstitutionResultsImpl;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
+import static it.unibz.inf.ontop.model.impl.ImmutabilityTools.foldBooleanExpressions;
 import static it.unibz.inf.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionTools.computeNullSubstitution;
 import static it.unibz.inf.ontop.pivotalrepr.NodeTransformationProposedState.*;
 import static it.unibz.inf.ontop.pivotalrepr.NonCommutativeOperatorNode.ArgumentPosition.*;
@@ -115,41 +117,49 @@ public class ReactToChildDeletionTransformer implements HeterogeneousQueryNodeTr
 
         Optional<ImmutableExpression> formerCondition = innerJoinNode.getOptionalFilterCondition();
 
-        Optional<ImmutableExpression> newCondition = formerCondition
+        Optional<ExpressionEvaluator.Evaluation> optionalEvaluation = formerCondition
                 .map(cond -> computeNullSubstitution(variablesProjectedByDeletedChild).applyToBooleanExpression(cond))
-                .flatMap(cond -> new ExpressionEvaluator(query.getMetadata().getUriTemplateMatcher())
+                .map(cond -> new ExpressionEvaluator(query.getMetadata().getUriTemplateMatcher())
                         .evaluateExpression(cond));
 
         /**
          * The new condition is not satisfied anymore
          */
-        if ((!newCondition.isPresent()) && formerCondition.isPresent()) {
+        if (optionalEvaluation
+                .filter(ExpressionEvaluator.Evaluation::isFalse)
+                .isPresent()) {
+            // Reject
             return rejectInnerJoin(otherNodesProjectedVariables);
         }
+        /**
+         * The condition still holds
+         */
+        else {
+            Optional<ImmutableExpression> newCondition = optionalEvaluation
+                    .flatMap(ExpressionEvaluator.Evaluation::getOptionalExpression);
 
-        switch (remainingChildren.size()) {
-            case 0:
-                return new NodeTransformationProposalImpl(DELETE,
-                        variablesProjectedByDeletedChild);
-            case 1:
-                if (newCondition.isPresent()) {
-                    return new NodeTransformationProposalImpl(REPLACE_BY_NEW_NODE,
-                            new FilterNodeImpl(newCondition.get()),
+            switch (remainingChildren.size()) {
+                case 0:
+                    return new NodeTransformationProposalImpl(DELETE,
                             variablesProjectedByDeletedChild);
-                }
-                else {
-                    return new NodeTransformationProposalImpl(REPLACE_BY_UNIQUE_CHILD, remainingChildren.get(0),
-                            variablesProjectedByDeletedChild);
-                }
-            default:
-                if (newCondition.equals(formerCondition)) {
-                    return new NodeTransformationProposalImpl(NO_LOCAL_CHANGE, variablesProjectedByDeletedChild);
-                }
-                else {
-                    return new NodeTransformationProposalImpl(REPLACE_BY_NEW_NODE,
-                            new InnerJoinNodeImpl(newCondition),
-                            variablesProjectedByDeletedChild);
-                }
+                case 1:
+                    if (newCondition.isPresent()) {
+                        return new NodeTransformationProposalImpl(REPLACE_BY_NEW_NODE,
+                                new FilterNodeImpl(newCondition.get()),
+                                variablesProjectedByDeletedChild);
+                    } else {
+                        return new NodeTransformationProposalImpl(REPLACE_BY_UNIQUE_CHILD, remainingChildren.get(0),
+                                variablesProjectedByDeletedChild);
+                    }
+                default:
+                    if (newCondition.equals(formerCondition)) {
+                        return new NodeTransformationProposalImpl(NO_LOCAL_CHANGE, variablesProjectedByDeletedChild);
+                    } else {
+                        return new NodeTransformationProposalImpl(REPLACE_BY_NEW_NODE,
+                                new InnerJoinNodeImpl(newCondition),
+                                variablesProjectedByDeletedChild);
+                    }
+            }
         }
     }
 

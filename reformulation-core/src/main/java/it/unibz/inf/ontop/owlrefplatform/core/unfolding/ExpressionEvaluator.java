@@ -45,10 +45,36 @@ public class ExpressionEvaluator {
 		uriTemplateMatcher = matcher;
 	}
 
-	/**
-	 * No boolean expression (absent) if the evaluation returns false
-	 */
-	public Optional<ImmutableExpression> evaluateExpression(ImmutableExpression expression) {
+	public static class Evaluation {
+		private final Optional<ImmutableExpression> optionalExpression;
+		private final Optional<Boolean> optionalBooleanValue;
+
+		private Evaluation(ImmutableExpression expression) {
+			optionalExpression = Optional.of(expression);
+			optionalBooleanValue = Optional.empty();
+		}
+
+		private Evaluation(boolean value) {
+			optionalExpression = Optional.empty();
+			optionalBooleanValue = Optional.of(value);
+		}
+
+		public Optional<ImmutableExpression> getOptionalExpression() {
+			return optionalExpression;
+		}
+
+		public Optional<Boolean> getOptionalBooleanValue() {
+			return optionalBooleanValue;
+		}
+
+		public boolean isFalse() {
+			return optionalBooleanValue
+					.filter(v -> !v)
+					.isPresent();
+		}
+	}
+
+	public Evaluation evaluateExpression(ImmutableExpression expression) {
 		Expression mutableExpression = ImmutabilityTools.convertToMutableBooleanExpression(expression);
 
 		Term evaluatedTerm = evalOperation(mutableExpression);
@@ -65,17 +91,16 @@ public class ExpressionEvaluator {
 						+ evaluatedFunctionalTerm);
 			}
 
-			return Optional.of(fac.getImmutableExpression(
+			return new Evaluation(fac.getImmutableExpression(
 					fac.getExpression((OperationPredicate) predicate,
 							evaluatedFunctionalTerm.getTerms())));
 		}
 		else if (evaluatedTerm instanceof Constant) {
 			if (evaluatedTerm.equals(OBDAVocabulary.FALSE)) {
-				return Optional.empty();
+				return new Evaluation(false);
 			}
 			else {
-				return Optional.of(fac.getImmutableExpression(ExpressionOperation.AND, (Constant) evaluatedTerm,
-						OBDAVocabulary.TRUE));
+				return new Evaluation(true);
 			}
 		}
 		else {
