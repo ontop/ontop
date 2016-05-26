@@ -48,10 +48,11 @@ public class SubstitutionPropagationExecutor<N extends QueryNode>
          * TODO: check the results!!!
          */
         SubstitutionPropagationTools.propagateSubstitutionUp(originalFocusNode, substitutionToPropagate, query, treeComponent);
-        SubstitutionPropagationTools.propagateSubstitutionDown(originalFocusNode, substitutionToPropagate, treeComponent);
+        SubstitutionPropagationTools.propagateSubstitutionDown(originalFocusNode, substitutionToPropagate, query,
+                treeComponent);
 
 
-        N newQueryNode = propagateToFocusNode(originalFocusNode, substitutionToPropagate, treeComponent);
+        N newQueryNode = propagateToFocusNode(originalFocusNode, substitutionToPropagate, query, treeComponent);
 
         /**
          * The substitution is supposed
@@ -61,16 +62,18 @@ public class SubstitutionPropagationExecutor<N extends QueryNode>
 
 
 
-    private static <N extends QueryNode> N propagateToFocusNode(N originalFocusNode,
-                                          ImmutableSubstitution<? extends VariableOrGroundTerm> substitutionToPropagate,
-                                          QueryTreeComponent treeComponent) throws QueryNodeSubstitutionException {
+    private static <N extends QueryNode> N propagateToFocusNode(
+            N originalFocusNode, ImmutableSubstitution<? extends VariableOrGroundTerm> substitutionToPropagate,
+            IntermediateQuery query, QueryTreeComponent treeComponent) throws QueryNodeSubstitutionException {
 
         SubstitutionResults<? extends QueryNode> substitutionResults =
-                originalFocusNode.applyDescendingSubstitution(substitutionToPropagate);
+                originalFocusNode.applyDescendingSubstitution(substitutionToPropagate, query);
         Optional<? extends QueryNode> optionalNewFocusNode = substitutionResults.getOptionalNewNode();
         if (optionalNewFocusNode.isPresent()) {
             QueryNode newFocusNode = optionalNewFocusNode.get();
-            treeComponent.replaceNode(originalFocusNode, newFocusNode);
+            if (originalFocusNode != newFocusNode) {
+                treeComponent.replaceNode(originalFocusNode, newFocusNode);
+            }
             return (N) newFocusNode;
         }
         /**

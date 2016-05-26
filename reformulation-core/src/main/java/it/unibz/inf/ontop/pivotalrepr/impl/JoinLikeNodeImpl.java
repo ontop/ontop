@@ -12,13 +12,4 @@ public abstract class JoinLikeNodeImpl extends JoinOrFilterNodeImpl implements J
         super(optionalJoinCondition);
     }
 
-    protected Optional<ImmutableExpression> transformOptionalBooleanExpression(
-            ImmutableSubstitution<? extends ImmutableTerm> substitution,
-            Optional<ImmutableExpression> optionalFilterCondition) {
-        if (optionalFilterCondition.isPresent()) {
-            return Optional.of(transformBooleanExpression(substitution, optionalFilterCondition.get()));
-        }
-        return Optional.empty();
-    }
-
 }

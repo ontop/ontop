@@ -4,6 +4,7 @@ import it.unibz.inf.ontop.model.ImmutableExpression;
 import it.unibz.inf.ontop.model.ImmutableTerm;
 import it.unibz.inf.ontop.model.ImmutableSubstitution;
 import it.unibz.inf.ontop.model.impl.ImmutabilityTools;
+import it.unibz.inf.ontop.owlrefplatform.core.unfolding.ExpressionEvaluator;
 import it.unibz.inf.ontop.pivotalrepr.*;
 
 import java.util.Optional;
@@ -11,6 +12,7 @@ import java.util.Optional;
 public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
 
     private static final String LEFT_JOIN_NODE_STR = "LJ";
+    private static final boolean IS_EMPTY = true;
 
     public LeftJoinNodeImpl(Optional<ImmutableExpression> optionalJoinCondition) {
         super(optionalJoinCondition);
@@ -50,7 +52,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
          * Left-branch
          */
         else {
-            return applyDescendingSubstitution(substitution);
+            return applyDescendingSubstitution(substitution, query);
         }
     }
 
@@ -79,12 +81,24 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
 
     @Override
     public SubstitutionResults<LeftJoinNode> applyDescendingSubstitution(
-            ImmutableSubstitution<? extends ImmutableTerm> substitution) {
-        LeftJoinNode newNode = new LeftJoinNodeImpl(transformOptionalBooleanExpression(substitution,
-                getOptionalFilterCondition()));
-        return new SubstitutionResultsImpl<>(newNode, substitution);
+            ImmutableSubstitution<? extends ImmutableTerm> substitution, IntermediateQuery query) {
+
+        return getOptionalFilterCondition()
+                .map(cond -> transformBooleanExpression(query, substitution, cond))
+                .map(ev -> applyEvaluation(ev, substitution))
+                .orElseGet(() -> new SubstitutionResultsImpl<>(this, substitution));
     }
 
+    private SubstitutionResults<LeftJoinNode> applyEvaluation(ExpressionEvaluator.Evaluation evaluation,
+                                                               ImmutableSubstitution<? extends ImmutableTerm> substitution) {
+        if (evaluation.isFalse()) {
+            return new SubstitutionResultsImpl<>(IS_EMPTY);
+        }
+        else {
+            LeftJoinNode newNode = changeOptionalFilterCondition(evaluation.getOptionalExpression());
+            return new SubstitutionResultsImpl<>(newNode, substitution);
+        }
+    }
     @Override
     public boolean isSyntacticallyEquivalentTo(QueryNode node) {
         return (node instanceof LeftJoinNode)

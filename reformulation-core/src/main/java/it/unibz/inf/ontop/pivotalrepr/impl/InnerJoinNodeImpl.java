@@ -5,7 +5,6 @@ import java.util.Optional;
 
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.*;
-import it.unibz.inf.ontop.model.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
 import it.unibz.inf.ontop.owlrefplatform.core.unfolding.ExpressionEvaluator;
@@ -94,30 +93,30 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
                 .map(cond -> new ExpressionEvaluator(query.getMetadata().getUriTemplateMatcher())
                         .evaluateExpression(cond));
 
-        if (optionalEvaluation
-                .filter(ExpressionEvaluator.Evaluation::isFalse)
-                .isPresent()) {
-            // Reject
-            return new SubstitutionResultsImpl<>(IS_EMPTY);
-        }
-        else {
-            Optional<ImmutableExpression> newCondition = optionalEvaluation
-                    .flatMap(ExpressionEvaluator.Evaluation::getOptionalExpression);
-
-            InnerJoinNode newNode = new InnerJoinNodeImpl(newCondition);
-            return new SubstitutionResultsImpl<>(newNode, substitution);
-        }
+        return optionalEvaluation
+                .map(ev -> applyEvaluation(ev, substitution))
+                .orElseGet(() -> new SubstitutionResultsImpl<>(this, substitution));
     }
 
     @Override
     public SubstitutionResults<InnerJoinNode> applyDescendingSubstitution(
-            ImmutableSubstitution<? extends ImmutableTerm> substitution) {
+            ImmutableSubstitution<? extends ImmutableTerm> substitution, IntermediateQuery query) {
 
-        Optional<ImmutableExpression> newOptionalCondition = transformOptionalBooleanExpression(substitution,
-                getOptionalFilterCondition());
-        InnerJoinNode newNode = new InnerJoinNodeImpl(newOptionalCondition);
+        return getOptionalFilterCondition()
+                .map(cond -> transformBooleanExpression(query, substitution, cond))
+                .map(ev -> applyEvaluation(ev, substitution))
+                .orElseGet(() -> new SubstitutionResultsImpl<>(this, substitution));
+    }
 
-        return new SubstitutionResultsImpl<>(newNode, substitution);
+    private SubstitutionResults<InnerJoinNode> applyEvaluation(ExpressionEvaluator.Evaluation evaluation,
+                                                               ImmutableSubstitution<? extends ImmutableTerm> substitution) {
+        if (evaluation.isFalse()) {
+            return new SubstitutionResultsImpl<>(IS_EMPTY);
+        }
+        else {
+            InnerJoinNode newNode = changeOptionalFilterCondition(evaluation.getOptionalExpression());
+            return new SubstitutionResultsImpl<>(newNode, substitution);
+        }
     }
 
     @Override

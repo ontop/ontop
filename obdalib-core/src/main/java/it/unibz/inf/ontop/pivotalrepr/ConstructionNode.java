@@ -54,5 +54,6 @@ public interface ConstructionNode extends ConstructionOrDataNode {
 
     @Override
     SubstitutionResults<ConstructionNode> applyDescendingSubstitution(
-            ImmutableSubstitution<? extends ImmutableTerm> substitution) throws QueryNodeSubstitutionException;
+            ImmutableSubstitution<? extends ImmutableTerm> substitution, IntermediateQuery query)
+            throws QueryNodeSubstitutionException;
 }

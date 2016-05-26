@@ -39,6 +39,7 @@ public class SubstitutionPropagationTools {
      */
     public static QueryTreeComponent propagateSubstitutionDown(final QueryNode focusNode,
                                                                final ImmutableSubstitution<? extends ImmutableTerm> currentSubstitutionToPropagate,
+                                                               final IntermediateQuery query,
                                                                final QueryTreeComponent treeComponent)
             throws QueryNodeSubstitutionException {
 
@@ -49,7 +50,7 @@ public class SubstitutionPropagationTools {
             QueryNode formerSubNode = nodesToVisit.poll();
 
             SubstitutionResults<? extends QueryNode> substitutionResults =
-                    formerSubNode.applyDescendingSubstitution(currentSubstitutionToPropagate);
+                    formerSubNode.applyDescendingSubstitution(currentSubstitutionToPropagate, query);
 
             Optional<? extends QueryNode> optionalNewSubNode = substitutionResults.getOptionalNewNode();
             Optional<? extends ImmutableSubstitution<? extends ImmutableTerm>> optionalNewSubstitution
@@ -91,7 +92,7 @@ public class SubstitutionPropagationTools {
                     treeComponent.replaceNode(formerSubNode, newSubNode);
 
                     // Recursive call
-                    propagateSubstitutionDown(newSubNode, newSubstitution, treeComponent);
+                    propagateSubstitutionDown(newSubNode, newSubstitution, query, treeComponent);
                 }
                 /**
                  * Unhandled case: new substitution to apply to the children of
@@ -191,7 +192,9 @@ public class SubstitutionPropagationTools {
                 if (optionalNewAncestor.isPresent()) {
 
                     QueryNode newAncestor = optionalNewAncestor.get();
-                    treeComponent.replaceNode(currentAncestor, newAncestor);
+                    if (currentAncestor != newAncestor) {
+                        treeComponent.replaceNode(currentAncestor, newAncestor);
+                    }
                 }
                 /**
                  * The ancestor is not needed anymore

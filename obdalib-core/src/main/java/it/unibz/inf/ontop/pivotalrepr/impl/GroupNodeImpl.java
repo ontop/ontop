@@ -47,12 +47,12 @@ public class GroupNodeImpl extends QueryNodeImpl implements GroupNode {
     public SubstitutionResults<GroupNode> applyAscendingSubstitution(
             ImmutableSubstitution<? extends ImmutableTerm> substitution,
             QueryNode descendantNode, IntermediateQuery query) {
-        return applyDescendingSubstitution(substitution);
+        return applyDescendingSubstitution(substitution, query);
     }
 
     @Override
     public SubstitutionResults<GroupNode> applyDescendingSubstitution(
-            ImmutableSubstitution<? extends ImmutableTerm> substitution) {
+            ImmutableSubstitution<? extends ImmutableTerm> substitution, IntermediateQuery query) {
         ImmutableList.Builder<NonGroundTerm> termBuilder = ImmutableList.builder();
         for (NonGroundTerm term : getGroupingTerms()) {
 

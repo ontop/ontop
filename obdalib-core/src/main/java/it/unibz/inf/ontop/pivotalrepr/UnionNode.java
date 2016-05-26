@@ -18,5 +18,5 @@ public interface UnionNode extends QueryNode {
 
     @Override
     SubstitutionResults<UnionNode> applyDescendingSubstitution(
-            ImmutableSubstitution<? extends ImmutableTerm> substitution) ;
+            ImmutableSubstitution<? extends ImmutableTerm> substitution, IntermediateQuery query) ;
 }

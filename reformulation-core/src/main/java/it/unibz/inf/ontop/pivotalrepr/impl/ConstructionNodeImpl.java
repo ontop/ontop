@@ -194,7 +194,7 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
      */
     @Override
     public SubstitutionResults<ConstructionNode> applyDescendingSubstitution(
-            ImmutableSubstitution<? extends ImmutableTerm> descendingSubstitution)
+            ImmutableSubstitution<? extends ImmutableTerm> descendingSubstitution, IntermediateQuery query)
             throws QueryNodeSubstitutionException {
 
         ImmutableSet<Variable> newProjectedVariables = computeNewProjectedVariables(descendingSubstitution,

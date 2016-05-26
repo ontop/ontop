@@ -46,7 +46,7 @@ public class EmptyNodeImpl extends QueryNodeImpl implements EmptyNode {
 
     @Override
     public SubstitutionResults<EmptyNode> applyDescendingSubstitution(
-            ImmutableSubstitution<? extends ImmutableTerm> substitution) {
+            ImmutableSubstitution<? extends ImmutableTerm> substitution, IntermediateQuery query) {
         ImmutableSet<Variable> newProjectedVariables = projectedVariables.stream()
                 .map(v -> substitution.apply(v))
                 .filter(v -> v instanceof Variable)
