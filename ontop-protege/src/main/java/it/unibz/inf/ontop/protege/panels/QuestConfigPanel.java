@@ -91,6 +91,9 @@ public class QuestConfigPanel extends javax.swing.JPanel {
 
         bChecked = preference.getCurrentBooleanValueFor(QuestPreferences.OBTAIN_FROM_MAPPINGS);
         chkObtainFromMappings.setSelected(bChecked);
+
+        bChecked = preference.getCurrentBooleanValueFor(QuestPreferences.SAME_AS);
+        chkSameAs.setSelected(bChecked);
     }
 
     private void virtualModeSelected() {
