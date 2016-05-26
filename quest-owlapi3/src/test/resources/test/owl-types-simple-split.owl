@@ -10,14 +10,14 @@
 ]>
 
 
-<rdf:RDF xmlns="http://it.unibz.krdb/obda/ontologies/quest-typing-test.owl#"
-     xml:base="http://it.unibz.krdb/obda/ontologies/quest-typing-test.owl"
+<rdf:RDF xmlns="http://it.unibz.inf/obda/ontologies/quest-typing-test.owl#"
+     xml:base="http://it.unibz.inf/obda/ontologies/quest-typing-test.owl"
      xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
      xmlns:owl="http://www.w3.org/2002/07/owl#"
      xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
      xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
      xmlns:quest="http://obda.org/quest#">
-    <owl:Ontology rdf:about="http://it.unibz.krdb/obda/ontologies/quest-typing-test.owl"/>
+    <owl:Ontology rdf:about="http://it.unibz.inf/obda/ontologies/quest-typing-test.owl"/>
     
 
 
@@ -43,9 +43,9 @@
     
 
 
-    <!-- http://it.unibz.krdb/obda/ontologies/quest-typing-test.owl#oproperty -->
+    <!-- http://it.unibz.inf/obda/ontologies/quest-typing-test.owl#oproperty -->
 
-    <owl:ObjectProperty rdf:about="http://it.unibz.krdb/obda/ontologies/quest-typing-test.owl#oproperty"/>
+    <owl:ObjectProperty rdf:about="http://it.unibz.inf/obda/ontologies/quest-typing-test.owl#oproperty"/>
     
 
 
@@ -60,69 +60,69 @@
     
 
 
-    <!-- http://it.unibz.krdb/obda/ontologies/quest-typing-test.owl#uboolean -->
+    <!-- http://it.unibz.inf/obda/ontologies/quest-typing-test.owl#uboolean -->
 
-    <owl:DatatypeProperty rdf:about="http://it.unibz.krdb/obda/ontologies/quest-typing-test.owl#uboolean"/>
+    <owl:DatatypeProperty rdf:about="http://it.unibz.inf/obda/ontologies/quest-typing-test.owl#uboolean"/>
     
 
 
-    <!-- http://it.unibz.krdb/obda/ontologies/quest-typing-test.owl#ubyte -->
+    <!-- http://it.unibz.inf/obda/ontologies/quest-typing-test.owl#ubyte -->
 
-    <owl:DatatypeProperty rdf:about="http://it.unibz.krdb/obda/ontologies/quest-typing-test.owl#ubyte"/>
+    <owl:DatatypeProperty rdf:about="http://it.unibz.inf/obda/ontologies/quest-typing-test.owl#ubyte"/>
     
 
 
-    <!-- http://it.unibz.krdb/obda/ontologies/quest-typing-test.owl#udateTime -->
+    <!-- http://it.unibz.inf/obda/ontologies/quest-typing-test.owl#udateTime -->
 
-    <owl:DatatypeProperty rdf:about="http://it.unibz.krdb/obda/ontologies/quest-typing-test.owl#udateTime"/>
+    <owl:DatatypeProperty rdf:about="http://it.unibz.inf/obda/ontologies/quest-typing-test.owl#udateTime"/>
     
 
 
-    <!-- http://it.unibz.krdb/obda/ontologies/quest-typing-test.owl#udecimal -->
+    <!-- http://it.unibz.inf/obda/ontologies/quest-typing-test.owl#udecimal -->
 
-    <owl:DatatypeProperty rdf:about="http://it.unibz.krdb/obda/ontologies/quest-typing-test.owl#udecimal"/>
+    <owl:DatatypeProperty rdf:about="http://it.unibz.inf/obda/ontologies/quest-typing-test.owl#udecimal"/>
     
 
 
-    <!-- http://it.unibz.krdb/obda/ontologies/quest-typing-test.owl#udouble -->
+    <!-- http://it.unibz.inf/obda/ontologies/quest-typing-test.owl#udouble -->
 
-    <owl:DatatypeProperty rdf:about="http://it.unibz.krdb/obda/ontologies/quest-typing-test.owl#udouble"/>
+    <owl:DatatypeProperty rdf:about="http://it.unibz.inf/obda/ontologies/quest-typing-test.owl#udouble"/>
     
 
 
-    <!-- http://it.unibz.krdb/obda/ontologies/quest-typing-test.owl#ufloat -->
+    <!-- http://it.unibz.inf/obda/ontologies/quest-typing-test.owl#ufloat -->
 
-    <owl:DatatypeProperty rdf:about="http://it.unibz.krdb/obda/ontologies/quest-typing-test.owl#ufloat"/>
+    <owl:DatatypeProperty rdf:about="http://it.unibz.inf/obda/ontologies/quest-typing-test.owl#ufloat"/>
     
 
 
-    <!-- http://it.unibz.krdb/obda/ontologies/quest-typing-test.owl#uint -->
+    <!-- http://it.unibz.inf/obda/ontologies/quest-typing-test.owl#uint -->
 
-    <owl:DatatypeProperty rdf:about="http://it.unibz.krdb/obda/ontologies/quest-typing-test.owl#uint"/>
+    <owl:DatatypeProperty rdf:about="http://it.unibz.inf/obda/ontologies/quest-typing-test.owl#uint"/>
     
 
 
-    <!-- http://it.unibz.krdb/obda/ontologies/quest-typing-test.owl#uinteger -->
+    <!-- http://it.unibz.inf/obda/ontologies/quest-typing-test.owl#uinteger -->
 
-    <owl:DatatypeProperty rdf:about="http://it.unibz.krdb/obda/ontologies/quest-typing-test.owl#uinteger"/>
+    <owl:DatatypeProperty rdf:about="http://it.unibz.inf/obda/ontologies/quest-typing-test.owl#uinteger"/>
     
 
 
-    <!-- http://it.unibz.krdb/obda/ontologies/quest-typing-test.owl#uliteral -->
+    <!-- http://it.unibz.inf/obda/ontologies/quest-typing-test.owl#uliteral -->
 
-    <owl:DatatypeProperty rdf:about="http://it.unibz.krdb/obda/ontologies/quest-typing-test.owl#uliteral"/>
+    <owl:DatatypeProperty rdf:about="http://it.unibz.inf/obda/ontologies/quest-typing-test.owl#uliteral"/>
     
 
 
-    <!-- http://it.unibz.krdb/obda/ontologies/quest-typing-test.owl#ulong -->
+    <!-- http://it.unibz.inf/obda/ontologies/quest-typing-test.owl#ulong -->
 
-    <owl:DatatypeProperty rdf:about="http://it.unibz.krdb/obda/ontologies/quest-typing-test.owl#ulong"/>
+    <owl:DatatypeProperty rdf:about="http://it.unibz.inf/obda/ontologies/quest-typing-test.owl#ulong"/>
     
 
 
-    <!-- http://it.unibz.krdb/obda/ontologies/quest-typing-test.owl#ushort -->
+    <!-- http://it.unibz.inf/obda/ontologies/quest-typing-test.owl#ushort -->
 
-    <owl:DatatypeProperty rdf:about="http://it.unibz.krdb/obda/ontologies/quest-typing-test.owl#ushort"/>
+    <owl:DatatypeProperty rdf:about="http://it.unibz.inf/obda/ontologies/quest-typing-test.owl#ushort"/>
     
 
 
@@ -137,9 +137,9 @@
     
 
 
-    <!-- http://it.unibz.krdb/obda/ontologies/quest-typing-test.owl#class -->
+    <!-- http://it.unibz.inf/obda/ontologies/quest-typing-test.owl#class -->
 
-    <owl:Class rdf:about="http://it.unibz.krdb/obda/ontologies/quest-typing-test.owl#class"/>
+    <owl:Class rdf:about="http://it.unibz.inf/obda/ontologies/quest-typing-test.owl#class"/>
     
 
 
@@ -152,18 +152,18 @@
      -->
 
     
-<owl:NamedIndividual rdf:about="http://it.unibz.krdb/obda/ontologies/quest-typing-test.owl#b"/>
+<owl:NamedIndividual rdf:about="http://it.unibz.inf/obda/ontologies/quest-typing-test.owl#b"/>
     
 
 
-    <owl:NamedIndividual rdf:about="http://it.unibz.krdb/obda/ontologies/quest-typing-test.owl#a">
-        <rdf:type rdf:resource="http://it.unibz.krdb/obda/ontologies/quest-typing-test.owl#class"/>
-        <oproperty rdf:resource="http://it.unibz.krdb/obda/ontologies/quest-typing-test.owl#b"/>
+    <owl:NamedIndividual rdf:about="http://it.unibz.inf/obda/ontologies/quest-typing-test.owl#a">
+        <rdf:type rdf:resource="http://it.unibz.inf/obda/ontologies/quest-typing-test.owl#class"/>
+        <oproperty rdf:resource="http://it.unibz.inf/obda/ontologies/quest-typing-test.owl#b"/>
     </owl:NamedIndividual>
     
     
 
-    <owl:NamedIndividual rdf:about="http://it.unibz.krdb/obda/ontologies/quest-typing-test.owl#uliteral">
+    <owl:NamedIndividual rdf:about="http://it.unibz.inf/obda/ontologies/quest-typing-test.owl#uliteral">
         <uliteral rdf:datatype="&rdfs;Literal">literal1</uliteral>
         <uliteral xml:lang="en">literal2</uliteral>
     </owl:NamedIndividual>
@@ -171,7 +171,7 @@
 
 
 
-    <owl:NamedIndividual rdf:about="http://it.unibz.krdb/obda/ontologies/quest-typing-test.owl#uinteger">
+    <owl:NamedIndividual rdf:about="http://it.unibz.inf/obda/ontologies/quest-typing-test.owl#uinteger">
         <uinteger rdf:datatype="&xsd;integer">+100000</uinteger>
         <uinteger rdf:datatype="&xsd;integer">-1</uinteger>
         <uinteger rdf:datatype="&xsd;integer">0</uinteger>
@@ -183,7 +183,7 @@
 
 
 
-    <owl:NamedIndividual rdf:about="http://it.unibz.krdb/obda/ontologies/quest-typing-test.owl#uboolean">
+    <owl:NamedIndividual rdf:about="http://it.unibz.inf/obda/ontologies/quest-typing-test.owl#uboolean">
         <uboolean rdf:datatype="&xsd;boolean">0</uboolean>
         <uboolean rdf:datatype="&xsd;boolean">1</uboolean>
         <uboolean rdf:datatype="&xsd;boolean">false</uboolean>
@@ -191,7 +191,7 @@
     </owl:NamedIndividual>
     
 
-    <owl:NamedIndividual rdf:about="http://it.unibz.krdb/obda/ontologies/quest-typing-test.owl#udatetime">
+    <owl:NamedIndividual rdf:about="http://it.unibz.inf/obda/ontologies/quest-typing-test.owl#udatetime">
         <udateTime rdf:datatype="&xsd;dateTime">2002-05-30T09:00:00</udateTime>
         <udateTime rdf:datatype="&xsd;dateTime">2002-05-30T09:30:10+06:00
 		</udateTime>
@@ -204,7 +204,7 @@
 
 
 
-    <owl:NamedIndividual rdf:about="http://it.unibz.krdb/obda/ontologies/quest-typing-test.owl#udecimal">
+    <owl:NamedIndividual rdf:about="http://it.unibz.inf/obda/ontologies/quest-typing-test.owl#udecimal">
         <udecimal rdf:datatype="&xsd;decimal">+100000.00</udecimal>
         <udecimal rdf:datatype="&xsd;decimal">-0.00000000000000001</udecimal>
         <udecimal rdf:datatype="&xsd;decimal">-1.23</udecimal>
@@ -218,7 +218,7 @@
 
 
 
-    <owl:NamedIndividual rdf:about="http://it.unibz.krdb/obda/ontologies/quest-typing-test.owl#udouble">
+    <owl:NamedIndividual rdf:about="http://it.unibz.inf/obda/ontologies/quest-typing-test.owl#udouble">
         <udouble rdf:datatype="&xsd;double">-0</udouble>
         <udouble rdf:datatype="&xsd;double">-1E4</udouble>
         <udouble rdf:datatype="&xsd;double">-INF</udouble>
@@ -233,7 +233,7 @@
 
 
 
-    <owl:NamedIndividual rdf:about="http://it.unibz.krdb/obda/ontologies/quest-typing-test.owl#ufloat">
+    <owl:NamedIndividual rdf:about="http://it.unibz.inf/obda/ontologies/quest-typing-test.owl#ufloat">
         <ufloat rdf:datatype="&xsd;float">-0</ufloat>
         <ufloat rdf:datatype="&xsd;float">-1E4</ufloat>
         <ufloat rdf:datatype="&xsd;float">-INF</ufloat>
@@ -248,7 +248,7 @@
 
 
 
-    <owl:NamedIndividual rdf:about="http://it.unibz.krdb/obda/ontologies/quest-typing-test.owl#uint">
+    <owl:NamedIndividual rdf:about="http://it.unibz.inf/obda/ontologies/quest-typing-test.owl#uint">
         <uint rdf:datatype="&xsd;int">+100000</uint>
         <uint rdf:datatype="&xsd;int">-1</uint>
         <uint rdf:datatype="&xsd;int">-2147483648</uint>
@@ -261,7 +261,7 @@
 
 
 
-    <owl:NamedIndividual rdf:about="http://it.unibz.krdb/obda/ontologies/quest-typing-test.owl#ulong">
+    <owl:NamedIndividual rdf:about="http://it.unibz.inf/obda/ontologies/quest-typing-test.owl#ulong">
         <ulong rdf:datatype="&xsd;long">+100000</ulong>
         <ulong rdf:datatype="&xsd;long">-1</ulong>
         <ulong rdf:datatype="&xsd;long">-9223372036854775808</ulong>

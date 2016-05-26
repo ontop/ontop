@@ -3,7 +3,7 @@
     <parent>
         <artifactId>ontop</artifactId>
         <groupId>it.unibz.inf.ontop</groupId>
-        <version>1.17.1</version>
+        <version>1.18.0</version>
         <relativePath>..</relativePath>
     </parent>
 
@@ -17,7 +17,7 @@
     </organization>
 
     <properties>
-        <protege.version>5.0.0-beta-21</protege.version>
+        <protege.version>5.0.0</protege.version>
         <symbolic.name>it.unibz.inf.ontop.protege</symbolic.name>
     </properties>
 
@@ -315,7 +315,7 @@
                         <!-- This makes sure any dependency in the obdalib <dependency> dependencies are packed
                         as .classes (uncompressed, no jars) and the rest is packed as .jars -->
                         <Embed-Dependency>
-                            *;groupId=it.unibz.inf.ontop.*;inline=true,*;groupId=it.unibz.krdb.obda.protege4.*;inline=true,*;groupId=!it.unibz.inf.ontop;scope=compile|runtime
+                            *;groupId=it.unibz.inf.ontop.*;inline=true,*;groupId=it.unibz.inf.ontop.protege4.*;inline=true,*;groupId=!it.unibz.inf.ontop;scope=compile|runtime
                         </Embed-Dependency>
 
 
