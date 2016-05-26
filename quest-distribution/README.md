@@ -4,13 +4,13 @@ The [-ontop-](http://ontop.inf.ubibz.it) framework is an open source project ava
 [Apache 2.0 License](http://www.apache.org/licenses/LICENSE-2.0.txt). 
 By downloading these packages you are agreeing with them.
 
-* Current version: 1.17.0
-* Release date: 04/02/2016
+* Current version: 1.18.0
+* Release date: 16/05/2016
 * [Changelog](https://github.com/ontop/ontop/wiki/OntopReleases)
 
 
 ## Main downloads
-
+mvn versions:set -DnewVersion=
 - `ontop-distribution.zip`: Libraries/scripts to use ontop with the OWLAPI or Sesame and from the command line.
 
 - `it.unibz.inf.ontop.protege.jar`: plugin for Protege 5.x installation files (drop it in Protege’s plugins folder).
