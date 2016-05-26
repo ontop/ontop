@@ -426,6 +426,69 @@ public class EmptyNodeRemovalTest {
         return queryBuilder.build();
     }
 
+    @Test(expected = EmptyQueryException.class)
+    public void testFilter1() throws EmptyQueryException {
+
+        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
+
+        ConstructionNode rootNode = new ConstructionNodeImpl(PROJECTION_ATOM.getVariables(),
+                new ImmutableSubstitutionImpl<>(ImmutableMap.of(X, generateURI1(A),
+                        Y, generateURI1(B))),
+                Optional.empty());
+        queryBuilder.init(PROJECTION_ATOM, rootNode);
+
+        FilterNode filterNode = new FilterNodeImpl(DATA_FACTORY.getImmutableExpression(
+                ExpressionOperation.IS_NOT_NULL, C));
+        queryBuilder.addChild(rootNode, filterNode);
+
+        LeftJoinNode leftJoinNode = new LeftJoinNodeImpl(Optional.empty());
+        queryBuilder.addChild(filterNode, leftJoinNode);
+        queryBuilder.addChild(leftJoinNode, DATA_NODE_2, LEFT);
+        queryBuilder.addChild(leftJoinNode, new EmptyNodeImpl(ImmutableSet.of(A, B, C)), RIGHT);
+
+        IntermediateQuery query = queryBuilder.build();
+
+        System.out.println("\n Unsatisfiable query: \n" +  query);
+
+        // Should throw an exception
+        query.applyProposal(new RemoveEmptyNodesProposalImpl(), REQUIRE_USING_IN_PLACE_EXECUTOR);
+        System.err.println("\n Failure: this query should have been declared as unsatisfiable: \n" +  query);
+    }
+
+    @Test
+    public void testFilter2() throws EmptyQueryException {
+
+        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
+
+        ConstructionNode rootNode = new ConstructionNodeImpl(PROJECTION_ATOM.getVariables(),
+                new ImmutableSubstitutionImpl<>(ImmutableMap.of(X, generateURI1(A),
+                        Y, generateURI1(B))),
+                Optional.empty());
+        queryBuilder.init(PROJECTION_ATOM, rootNode);
+
+        FilterNode filterNode = new FilterNodeImpl(DATA_FACTORY.getImmutableExpression(
+                ExpressionOperation.IS_NULL, C));
+        queryBuilder.addChild(rootNode, filterNode);
+
+        LeftJoinNode leftJoinNode = new LeftJoinNodeImpl(Optional.empty());
+        queryBuilder.addChild(filterNode, leftJoinNode);
+        queryBuilder.addChild(leftJoinNode, DATA_NODE_2, LEFT);
+        queryBuilder.addChild(leftJoinNode, new EmptyNodeImpl(ImmutableSet.of(A, B, C)), RIGHT);
+
+        /**
+         * Expected query
+         */
+        IntermediateQueryBuilder expectedQueryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
+        ConstructionNode newRootNode = new ConstructionNodeImpl(PROJECTION_ATOM.getVariables(),
+                new ImmutableSubstitutionImpl<>(ImmutableMap.of(X, generateURI1(A),
+                        Y, OBDAVocabulary.NULL)),
+                Optional.empty());
+        expectedQueryBuilder.init(PROJECTION_ATOM, newRootNode);
+        expectedQueryBuilder.addChild(newRootNode, DATA_NODE_2);
+
+        optimizeAndCompare(queryBuilder.build(), expectedQueryBuilder.build());
+    }
+
 
     @Test
     public void testComplexTreeWithJoinCondition() throws EmptyQueryException {
