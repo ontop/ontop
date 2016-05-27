@@ -26,7 +26,7 @@ public interface EmptyNode extends QueryNode {
 
     @Override
     SubstitutionResults<EmptyNode> applyDescendingSubstitution(
-            ImmutableSubstitution<? extends ImmutableTerm> substitution) ;
+            ImmutableSubstitution<? extends ImmutableTerm> substitution, IntermediateQuery query) ;
 
     ImmutableSet<Variable> getProjectedVariables();
 }

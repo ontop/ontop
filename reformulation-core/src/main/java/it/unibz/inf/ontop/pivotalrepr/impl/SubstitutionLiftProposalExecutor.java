@@ -29,7 +29,7 @@ public class SubstitutionLiftProposalExecutor implements InternalProposalExecuto
 
         try {
             for (ConstructionNodeUpdate update : proposal.getNodeUpdates()) {
-                applyConstructionNodeUpdate(update, treeComponent);
+                applyConstructionNodeUpdate(update, query, treeComponent);
             }
         } catch (QueryNodeSubstitutionException e) {
             // TODO: should we throw an InvalidProposalException instead?
@@ -91,7 +91,7 @@ public class SubstitutionLiftProposalExecutor implements InternalProposalExecuto
     /**
      * TODO: explain
      */
-    private void applyConstructionNodeUpdate(ConstructionNodeUpdate update, QueryTreeComponent treeComponent)
+    private void applyConstructionNodeUpdate(ConstructionNodeUpdate update, IntermediateQuery query, QueryTreeComponent treeComponent)
             throws InvalidQueryOptimizationProposalException, QueryNodeSubstitutionException {
         QueryNode formerNode = update.getFormerNode();
 
@@ -103,7 +103,7 @@ public class SubstitutionLiftProposalExecutor implements InternalProposalExecuto
          */
         if (optionalSubstitution.isPresent()) {
             // SIDE-EFFECT on the tree component (node replacements)
-            propagateSubstitutionToSubTree(optionalSubstitution.get(), formerNode, treeComponent);
+            propagateSubstitutionToSubTree(optionalSubstitution.get(), formerNode, query, treeComponent);
         }
 
         /**
@@ -128,7 +128,7 @@ public class SubstitutionLiftProposalExecutor implements InternalProposalExecuto
      *
      */
     private static void propagateSubstitutionToSubTree(ImmutableSubstitution<VariableOrGroundTerm> substitutionToPropagate,
-                                                       QueryNode rootNode, QueryTreeComponent treeComponent)
+                                                       QueryNode rootNode, IntermediateQuery query, QueryTreeComponent treeComponent)
             throws InvalidQueryOptimizationProposalException, QueryNodeSubstitutionException {
 
         Queue<QueryNode> descendantNodeToTransform = new LinkedList<>();
@@ -148,7 +148,7 @@ public class SubstitutionLiftProposalExecutor implements InternalProposalExecuto
 
             // May throw an exception
             SubstitutionResults<? extends QueryNode> substitutionResults =
-                    descendantNode.applyDescendingSubstitution(substitutionToPropagate);
+                    descendantNode.applyDescendingSubstitution(substitutionToPropagate, query);
 
             Optional<? extends QueryNode> optionalNewDescendantNode = substitutionResults.getOptionalNewNode();
             Optional<? extends ImmutableSubstitution<? extends ImmutableTerm>> optionalNewSubstitution

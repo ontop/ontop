@@ -6,6 +6,8 @@ import java.util.Optional;
 import it.unibz.inf.ontop.model.ImmutableExpression;
 import it.unibz.inf.ontop.model.ImmutableSubstitution;
 import it.unibz.inf.ontop.model.ImmutableTerm;
+import it.unibz.inf.ontop.owlrefplatform.core.unfolding.ExpressionEvaluator;
+import it.unibz.inf.ontop.owlrefplatform.core.unfolding.ExpressionEvaluator.Evaluation;
 import it.unibz.inf.ontop.pivotalrepr.*;
 
 public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
@@ -50,16 +52,35 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
     public SubstitutionResults<FilterNode> applyAscendingSubstitution(
             ImmutableSubstitution<? extends ImmutableTerm> substitution,
             QueryNode descendantNode, IntermediateQuery query) {
-        return applyDescendingSubstitution(substitution);
+        return applyDescendingSubstitution(substitution, query);
     }
 
     @Override
     public SubstitutionResults<FilterNode> applyDescendingSubstitution(
-            ImmutableSubstitution<? extends ImmutableTerm> substitution) {
-        ImmutableExpression newFilterCondition = transformBooleanExpression(substitution, getFilterCondition());
-        FilterNode newNode = new FilterNodeImpl(newFilterCondition);
+            ImmutableSubstitution<? extends ImmutableTerm> substitution,
+            IntermediateQuery query) {
+        Evaluation evaluation = transformBooleanExpression(query, substitution, getFilterCondition());
 
-        return new SubstitutionResultsImpl<>(newNode, substitution);
+        /**
+         * The condition cannot be satisfied --> the sub-tree is empty.
+         */
+        if (evaluation.isFalse()) {
+            return new SubstitutionResultsImpl<>(true);
+        }
+        else {
+            /**
+             * Propagates the substitution and ...
+             */
+            return evaluation.getOptionalExpression()
+                    /**
+                     * Still a condition: returns a filter node with the new condition
+                     */
+                    .map(exp -> new SubstitutionResultsImpl<>(changeFilterCondition(exp), substitution))
+                    /**
+                     * No condition: the filter node is not needed anymore
+                     */
+                    .orElseGet(() -> new SubstitutionResultsImpl<>(substitution, Optional.empty()));
+        }
     }
 
     @Override

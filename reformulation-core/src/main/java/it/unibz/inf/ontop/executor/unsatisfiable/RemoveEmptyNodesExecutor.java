@@ -1,14 +1,12 @@
 package it.unibz.inf.ontop.executor.unsatisfiable;
 
 import it.unibz.inf.ontop.executor.InternalProposalExecutor;
-import it.unibz.inf.ontop.pivotalrepr.EmptyQueryException;
-import it.unibz.inf.ontop.pivotalrepr.IntermediateQuery;
-import it.unibz.inf.ontop.pivotalrepr.QueryNode;
-import it.unibz.inf.ontop.pivotalrepr.EmptyNode;
+import it.unibz.inf.ontop.pivotalrepr.*;
+import it.unibz.inf.ontop.pivotalrepr.NonCommutativeOperatorNode.ArgumentPosition;
 import it.unibz.inf.ontop.pivotalrepr.impl.QueryTreeComponent;
 import it.unibz.inf.ontop.pivotalrepr.proposal.ProposalResults;
 import it.unibz.inf.ontop.pivotalrepr.proposal.ReactToChildDeletionProposal;
-import it.unibz.inf.ontop.pivotalrepr.proposal.RemoveUnsatisfiableNodesProposal;
+import it.unibz.inf.ontop.pivotalrepr.proposal.RemoveEmptyNodesProposal;
 import it.unibz.inf.ontop.pivotalrepr.proposal.impl.ProposalResultsImpl;
 import it.unibz.inf.ontop.pivotalrepr.proposal.impl.ReactToChildDeletionProposalImpl;
 
@@ -17,7 +15,7 @@ import java.util.Optional;
 /**
  * TODO: explain
  */
-public class RemoveUnsatisfiableNodesExecutor implements InternalProposalExecutor<RemoveUnsatisfiableNodesProposal, ProposalResults> {
+public class RemoveEmptyNodesExecutor implements InternalProposalExecutor<RemoveEmptyNodesProposal, ProposalResults> {
 
     private static boolean REQUIRE_USING_IN_PLACE_EXECUTOR = true;
 
@@ -25,7 +23,7 @@ public class RemoveUnsatisfiableNodesExecutor implements InternalProposalExecuto
      * TODO: explain
      */
     @Override
-    public ProposalResults apply(RemoveUnsatisfiableNodesProposal proposal, IntermediateQuery query,
+    public ProposalResults apply(RemoveEmptyNodesProposal proposal, IntermediateQuery query,
                                  QueryTreeComponent treeComponent)
             throws EmptyQueryException {
 
@@ -54,8 +52,12 @@ public class RemoveUnsatisfiableNodesExecutor implements InternalProposalExecuto
                 // this query will return empty results.
                 .orElseThrow(EmptyQueryException::new);
 
+        Optional<ArgumentPosition> optionalPosition = query.getOptionalPosition(parentNode, emptyNode);
+
         Optional<QueryNode> optionalNextSibling = query.getNextSibling(emptyNode);
 
-        return new ReactToChildDeletionProposalImpl(parentNode, optionalNextSibling);
+
+        return new ReactToChildDeletionProposalImpl(parentNode, optionalNextSibling, optionalPosition,
+                emptyNode.getProjectedVariables());
     }
 }
