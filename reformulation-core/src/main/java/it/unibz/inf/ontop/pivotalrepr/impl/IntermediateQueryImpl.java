@@ -8,6 +8,7 @@ import it.unibz.inf.ontop.executor.deletion.ReactToChildDeletionExecutor;
 import it.unibz.inf.ontop.executor.expression.PushDownExpressionExecutor;
 import it.unibz.inf.ontop.executor.join.JoinInternalCompositeExecutor;
 import it.unibz.inf.ontop.executor.substitution.SubstitutionPropagationExecutor;
+import it.unibz.inf.ontop.executor.substitution.SubstitutionUpPropagationExecutor;
 import it.unibz.inf.ontop.executor.unsatisfiable.RemoveEmptyNodesExecutor;
 import it.unibz.inf.ontop.model.DataAtom;
 import it.unibz.inf.ontop.model.DistinctVariableOnlyDataAtom;
@@ -83,6 +84,7 @@ public class IntermediateQueryImpl implements IntermediateQuery {
         internalExecutorMapBuilder.put(GroundTermRemovalFromDataNodeProposal.class, GroundTermRemovalFromDataNodeExecutor.class);
         internalExecutorMapBuilder.put(PullVariableOutOfDataNodeProposal.class, PullVariableOutOfDataNodeExecutor.class);
         internalExecutorMapBuilder.put(RemoveEmptyNodesProposal.class, RemoveEmptyNodesExecutor.class);
+        internalExecutorMapBuilder.put(SubstitutionUpPropagationProposal.class, SubstitutionUpPropagationExecutor.class);
         INTERNAL_EXECUTOR_CLASSES = internalExecutorMapBuilder.build();
     }
 
