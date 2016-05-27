@@ -73,8 +73,8 @@ public class RedundantSelfLeftJoinExecutor implements NodeCentricInternalExecuto
 //
 //        PredicateLevelProposal predicateProposal;
 //        if(leftPredicate.equals(rightPredicate)) {
-//            if (metadata.getPrimaryKeys().containsKey(leftPredicate)) {
-//                predicateProposal = proposePerPredicate(leftDataNode, rightDataNode, metadata.getPrimaryKeys().get(leftPredicate));
+//            if (metadata.getUniqueConstraints().containsKey(leftPredicate)) {
+//                predicateProposal = proposePerPredicate(leftDataNode, rightDataNode, metadata.getUniqueConstraints().get(leftPredicate));
 //            }
 //        }
 //        else {

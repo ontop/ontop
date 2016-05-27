@@ -57,8 +57,7 @@ public class PushDownBooleanExpressionOptimizerTest {
     }
 
     private static MetadataForQueryOptimization initMetadata() {
-        ImmutableMultimap.Builder<AtomPredicate, ImmutableList<Integer>> uniqueKeyBuilder = ImmutableMultimap.builder();
-        return new MetadataForQueryOptimizationImpl(uniqueKeyBuilder.build(), new UriTemplateMatcher());
+        return new EmptyMetadataForQueryOptimization();
     }
 
     @Test

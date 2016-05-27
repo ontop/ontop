@@ -14,9 +14,11 @@ import it.unibz.inf.ontop.pivotalrepr.impl.tree.DefaultIntermediateQueryBuilder;
 import it.unibz.inf.ontop.pivotalrepr.proposal.InvalidQueryOptimizationProposalException;
 import it.unibz.inf.ontop.pivotalrepr.proposal.impl.InnerJoinOptimizationProposalImpl;
 import it.unibz.inf.ontop.pivotalrepr.proposal.impl.LeftJoinOptimizationProposalImpl;
+import it.unibz.inf.ontop.sql.*;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import java.sql.Types;
 import java.util.Optional;
 
 import static it.unibz.inf.ontop.pivotalrepr.NonCommutativeOperatorNode.ArgumentPosition.LEFT;
@@ -76,7 +78,31 @@ public class SelfLeftJoinTest {
          */
         uniqueKeyBuilder.put(TABLE3_PREDICATE, ImmutableList.of(1, 2));
 
-        return new MetadataForQueryOptimizationImpl(uniqueKeyBuilder.build(), new UriTemplateMatcher());
+        DBMetadata dbMetadata = DBMetadataExtractor.createDummyMetadata();
+        QuotedIDFactory idFactory = dbMetadata.getQuotedIDFactory();
+        DatabaseRelationDefinition table1Def = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null,
+                TABLE1_PREDICATE.getName()));
+        Attribute pk1 = table1Def.addAttribute(idFactory.createAttributeID("col1"), Types.INTEGER, null, false);
+        table1Def.addAttribute(idFactory.createAttributeID("col2"), Types.INTEGER, null, false);
+        table1Def.addAttribute(idFactory.createAttributeID("col3"), Types.INTEGER, null, false);
+        table1Def.addUniqueConstraint(UniqueConstraint.primaryKeyOf(pk1));
+
+        DatabaseRelationDefinition table2Def = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null,
+                TABLE2_PREDICATE.getName()));
+        Attribute pk2 = table2Def.addAttribute(idFactory.createAttributeID("col1"), Types.INTEGER, null, false);
+        table2Def.addAttribute(idFactory.createAttributeID("col2"), Types.INTEGER, null, false);
+        Attribute table2Col3 = table2Def.addAttribute(idFactory.createAttributeID("col3"), Types.INTEGER, null, false);
+        table2Def.addUniqueConstraint(UniqueConstraint.primaryKeyOf(pk2));
+        table2Def.addForeignKeyConstraint(ForeignKeyConstraint.of("fk2-1", table2Col3, pk1));
+
+        DatabaseRelationDefinition table3Def = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null,
+                TABLE2_PREDICATE.getName()));
+        Attribute pk3 = table3Def.addAttribute(idFactory.createAttributeID("col1"), Types.INTEGER, null, false);
+        table3Def.addAttribute(idFactory.createAttributeID("col2"), Types.INTEGER, null, false);
+        table3Def.addAttribute(idFactory.createAttributeID("col3"), Types.INTEGER, null, false);
+        table3Def.addUniqueConstraint(UniqueConstraint.primaryKeyOf(pk2));
+
+        return new MetadataForQueryOptimizationImpl(dbMetadata, uniqueKeyBuilder.build(), new UriTemplateMatcher());
     }
 
     /**
