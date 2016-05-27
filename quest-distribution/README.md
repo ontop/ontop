@@ -10,7 +10,7 @@ By downloading these packages you are agreeing with them.
 
 
 ## Main downloads
-mvn versions:set -DnewVersion=
+
 - `ontop-distribution.zip`: Libraries/scripts to use ontop with the OWLAPI or Sesame and from the command line.
 
 - `it.unibz.inf.ontop.protege.jar`: plugin for Protege 5.x installation files (drop it in Protege’s plugins folder).
