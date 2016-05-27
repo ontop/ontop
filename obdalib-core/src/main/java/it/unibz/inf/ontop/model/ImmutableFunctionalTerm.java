@@ -11,7 +11,7 @@ import java.util.List;
  * --> Implementations must not support any mutable operations of Function.
  *
  */
-public interface ImmutableFunctionalTerm extends Function, ImmutableTerm {
+public interface ImmutableFunctionalTerm extends Function, NonVariableTerm {
 
     /**
      * Please use getArguments() instead

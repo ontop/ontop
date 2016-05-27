@@ -2,11 +2,14 @@ package it.unibz.inf.ontop.reformulation.tests;
 
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.AtomPredicateImpl;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
+import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
+import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionImpl;
 import it.unibz.inf.ontop.pivotalrepr.*;
 import it.unibz.inf.ontop.pivotalrepr.equivalence.IQSyntacticEquivalenceChecker;
 import it.unibz.inf.ontop.pivotalrepr.impl.*;
@@ -23,6 +26,7 @@ public class IQSyntacticEquivalenceCheckerTest {
 
     private final static AtomPredicate TABLE1_PREDICATE = new AtomPredicateImpl("table1", 3);
     private final static AtomPredicate ANS1_PREDICATE = new AtomPredicateImpl("ans1", 3);
+    private final static AtomPredicate ANS2_PREDICATE = new AtomPredicateImpl("ans2", 2);
     private final static OBDADataFactory DATA_FACTORY = OBDADataFactoryImpl.getInstance();
     private final static Variable X = DATA_FACTORY.getVariable("x");
     private final static Variable Y = DATA_FACTORY.getVariable("y");
@@ -519,6 +523,34 @@ public class IQSyntacticEquivalenceCheckerTest {
         IntermediateQuery query1 = queryBuilder1.build();
 
         assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(query, query1));
+    }
+
+    @Test
+    public void testConstructionNodeDifferentSubstitutions() {
+
+        ConstructionNode constructionNode = new ConstructionNodeImpl(ImmutableSet.of(X,Y),
+                new ImmutableSubstitutionImpl<>(ImmutableMap.of(Y, OBDAVocabulary.NULL)),
+                Optional.empty());
+        DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS2_PREDICATE, X, Y);
+        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(metadata);
+        queryBuilder.init(projectionAtom, constructionNode);
+        ExtensionalDataNode dataNode = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, X, Z));
+        queryBuilder.addChild(constructionNode, dataNode);
+
+        IntermediateQuery query = queryBuilder.build();
+
+        ConstructionNode constructionNode1 = new ConstructionNodeImpl(ImmutableSet.of(X,Y),
+                new ImmutableSubstitutionImpl<>(ImmutableMap.of(Y, DATA_FACTORY.getConstantLiteral("John"))),
+                Optional.empty());
+        DistinctVariableOnlyDataAtom projectionAtom1 = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS2_PREDICATE, X, Y);
+        IntermediateQueryBuilder queryBuilder1 = new DefaultIntermediateQueryBuilder(metadata);
+        queryBuilder1.init(projectionAtom1, constructionNode1);
+        ExtensionalDataNode dataNode1 = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, X, Z));
+        queryBuilder1.addChild(constructionNode1, dataNode1);
+
+        IntermediateQuery query1 = queryBuilder1.build();
+
+        assertFalse(IQSyntacticEquivalenceChecker.areEquivalent(query, query1));
     }
 
     @Test

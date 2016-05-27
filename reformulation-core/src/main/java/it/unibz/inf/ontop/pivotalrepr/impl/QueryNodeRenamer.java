@@ -79,8 +79,8 @@ public class QueryNodeRenamer implements HomogeneousQueryNodeTransformer {
     }
 
     @Override
-    public UnsatisfiedNode transform(UnsatisfiedNode unsatisfiedNode) {
-        return unsatisfiedNode.clone();
+    public EmptyNode transform(EmptyNode emptyNode) {
+        return emptyNode.clone();
     }
 
     private Optional<ImmutableQueryModifiers> renameOptionalModifiers(Optional<ImmutableQueryModifiers> optionalModifiers) {

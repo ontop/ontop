@@ -4,8 +4,6 @@ import java.util.*;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import fj.P;
-import fj.P2;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.*;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.pivotalrepr.*;
@@ -14,6 +12,7 @@ import it.unibz.inf.ontop.utils.FunctionalTools;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import static it.unibz.inf.ontop.pivotalrepr.impl.IntermediateQueryUtils.generateNotConflictingRenaming;
+import static it.unibz.inf.ontop.pivotalrepr.unfolding.ProjectedVariableExtractionTools.extractProjectedVariables;
 
 /**
  * TODO: explain
@@ -35,7 +34,7 @@ public class SubQueryMergingTools {
          */
         private final Optional<? extends ImmutableSubstitution<? extends ImmutableTerm>> substitutionToPropagate;
 
-        private Transformation(QueryNode originalNode,
+        private Transformation(IntermediateQuery query, QueryNode originalNode,
                                Optional<? extends ImmutableSubstitution<? extends ImmutableTerm>> substitutionToApply,
                                HomogeneousQueryNodeTransformer renamer, QueryNode transformedParent,
                                Optional<ArgumentPosition> optionalPosition) {
@@ -55,7 +54,7 @@ public class SubQueryMergingTools {
                      */
                     transformedNode = results.getOptionalNewNode()
                             .map(n -> (QueryNode) n)
-                            .orElseGet(UnsatisfiedNodeImpl::new);
+                            .orElseGet(() -> new EmptyNodeImpl(extractProjectedVariables(query, originalNode)));
                 }
                 else {
                     // Empty
@@ -133,7 +132,7 @@ public class SubQueryMergingTools {
                 .filter(s -> !s.isEmpty());
 
         Queue<Transformation> originalNodesToVisit = new LinkedList<>();
-        originalNodesToVisit.add(new Transformation(rootNode, optionalTau, renamer,
+        originalNodesToVisit.add(new Transformation(subQuery, rootNode, optionalTau, renamer,
                 parentOfTheIntensionalNode, topOptionalPosition));
 
 
@@ -161,12 +160,12 @@ public class SubQueryMergingTools {
             /**
              * Puts the children into the queue except if the transformed node is unsatisfied
              */
-            if (!(nodeToInsert instanceof UnsatisfiedNode)) {
+            if (!(nodeToInsert instanceof EmptyNode)) {
                 QueryNode originalNode = transformation.getOriginalNode();
 
                 subQuery.getChildren(originalNode).stream()
                         .forEach(child ->
-                            originalNodesToVisit.add(new Transformation(child,
+                            originalNodesToVisit.add(new Transformation(subQuery, child,
                                     substitutionToPropagate, renamer, nodeToInsert,
                                     subQuery.getOptionalPosition(originalNode, child)
                                     )));

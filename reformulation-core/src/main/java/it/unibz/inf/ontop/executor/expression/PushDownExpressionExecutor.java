@@ -32,8 +32,13 @@ public class PushDownExpressionExecutor implements NodeCentricInternalExecutor<J
             throws InvalidQueryOptimizationProposalException {
         JoinOrFilterNode focusNode = proposal.getFocusNode();
 
-        for (Map.Entry<QueryNode, Collection<ImmutableExpression>> targetEntry : proposal.getTransferMap().asMap().entrySet()) {
-            updateTarget(treeComponent, targetEntry.getKey(), targetEntry.getValue());
+        for (Map.Entry<JoinOrFilterNode, Collection<ImmutableExpression>> targetEntry : proposal.getDirectRecipients().asMap().entrySet()) {
+            updateJoinOrFilterNode(treeComponent, targetEntry.getKey(), targetEntry.getValue());
+        }
+
+        for (Map.Entry<QueryNode, Collection<ImmutableExpression>> targetEntry :
+                proposal.getChildOfFilterNodesToCreate().asMap().entrySet()) {
+            updateChildOfFilter(treeComponent, targetEntry.getKey(), targetEntry.getValue());
         }
 
         QueryNode firstChild = query.getFirstChild(focusNode)
@@ -44,26 +49,8 @@ public class PushDownExpressionExecutor implements NodeCentricInternalExecutor<J
                 .orElseGet(() -> new NodeCentricOptimizationResultsImpl<>(query, Optional.of(firstChild)));
     }
 
-    /**
-     * Routing method
-     *
-     * Updates the treeComponent (side-effect)
-     */
-    private void updateTarget(QueryTreeComponent treeComponent, QueryNode targetNode,
-                              Collection<ImmutableExpression> additionalExpressions) {
-        if (targetNode instanceof DataNode) {
-            updateDataNodeTarget(treeComponent, (DataNode) targetNode, additionalExpressions);
-        }
-        else if (targetNode instanceof JoinOrFilterNode) {
-            updateJoinOrFilterNode(treeComponent, (JoinOrFilterNode)targetNode, additionalExpressions);
-        }
-        else {
-            throw new RuntimeException("Unsupported target node: " + targetNode);
-        }
-    }
-
-    private void updateDataNodeTarget(QueryTreeComponent treeComponent, DataNode targetNode,
-                                      Collection<ImmutableExpression> additionalExpressions) {
+    private void updateChildOfFilter(QueryTreeComponent treeComponent, QueryNode targetNode,
+                                     Collection<ImmutableExpression> additionalExpressions) {
         ImmutableExpression foldedExpression = ImmutabilityTools.foldBooleanExpressions(
                 ImmutableList.copyOf(additionalExpressions)).get();
         FilterNode newFilterNode = new FilterNodeImpl(foldedExpression);

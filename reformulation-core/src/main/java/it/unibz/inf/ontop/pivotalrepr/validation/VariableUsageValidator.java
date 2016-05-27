@@ -37,7 +37,7 @@ public class VariableUsageValidator implements IntermediateQueryValidator {
         }
 
         @Override
-        public void visit(UnsatisfiedNode unsatisfiedNode) {
+        public void visit(EmptyNode emptyNode) {
         }
 
         @Override

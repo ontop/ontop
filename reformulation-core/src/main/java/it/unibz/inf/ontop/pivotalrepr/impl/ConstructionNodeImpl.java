@@ -227,8 +227,12 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
 
     @Override
     public boolean isSyntacticallyEquivalentTo(QueryNode node) {
-        return (node instanceof ConstructionNode)
-                && ((ConstructionNode) node).getProjectedVariables().equals(projectedVariables);
+        return Optional.of(node)
+                .filter(n -> n instanceof ConstructionNode)
+                .map(n -> (ConstructionNode) n)
+                .filter(n -> n.getProjectedVariables().equals(projectedVariables))
+                .filter(n -> n.getSubstitution().equals(substitution))
+                .isPresent();
     }
 
     @Override
@@ -269,11 +273,12 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
             ImmutableSet<Variable> formerV) {
 
         Var2VarSubstitution tauR = tau.getVar2VarFragment();
-        ImmutableSubstitution<GroundTerm> tauG = tau.getVar2GroundTermFragment();
+        // Non-variable term
+        ImmutableSubstitution<NonVariableTerm> tauO = extractTauO(tau);
 
         Var2VarSubstitution tauEq = extractTauEq(tauR);
 
-        ImmutableSubstitution<? extends ImmutableTerm> tauC = tauG.unionHeterogeneous(tauEq)
+        ImmutableSubstitution<? extends ImmutableTerm> tauC = tauO.unionHeterogeneous(tauEq)
                 .orElseThrow(() -> new IllegalStateException("Bug: dom(tauG) must be disjoint with dom(tauEq)"));
 
 
@@ -289,6 +294,15 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
         ImmutableSubstitution<? extends ImmutableTerm> delta = computeDelta(formerTheta, newTheta, eta, tauR, tauEq);
 
         return new NewSubstitutionPair(newTheta, delta);
+    }
+
+    private static ImmutableSubstitution<NonVariableTerm> extractTauO(ImmutableSubstitution<? extends ImmutableTerm> tau) {
+        ImmutableMap<Variable, NonVariableTerm> newMap = tau.getImmutableMap().entrySet().stream()
+                .filter(e -> e.getValue() instanceof NonVariableTerm)
+                .map(e -> (Map.Entry<Variable, NonVariableTerm>) e)
+                .collect(ImmutableCollectors.toMap());
+
+        return new ImmutableSubstitutionImpl<>(newMap);
     }
 
     /**

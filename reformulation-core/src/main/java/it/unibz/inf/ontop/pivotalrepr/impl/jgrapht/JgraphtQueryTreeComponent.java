@@ -3,11 +3,9 @@ package it.unibz.inf.ontop.pivotalrepr.impl.jgrapht;
 import java.util.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import it.unibz.inf.ontop.pivotalrepr.ConstructionNode;
-import it.unibz.inf.ontop.pivotalrepr.IntermediateQuery;
-import it.unibz.inf.ontop.pivotalrepr.NonCommutativeOperatorNode;
-import it.unibz.inf.ontop.pivotalrepr.QueryNode;
+import it.unibz.inf.ontop.pivotalrepr.*;
 import it.unibz.inf.ontop.pivotalrepr.impl.IllegalTreeUpdateException;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.jgrapht.experimental.dag.DirectedAcyclicGraph;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.traverse.TopologicalOrderIterator;
@@ -138,6 +136,14 @@ public class JgraphtQueryTreeComponent implements QueryTreeComponent {
     @Override
     public ImmutableList<QueryNode> getNodesInTopDownOrder() throws IllegalTreeException {
         return getNodesInBottomUpOrder().reverse();
+    }
+
+    @Override
+    public ImmutableSet<EmptyNode> getUnsatisfiableNodes() {
+        return getNodesInTopDownOrder().stream()
+                .filter(n -> n instanceof EmptyNode)
+                .map(n -> (EmptyNode) n)
+                .collect(ImmutableCollectors.toSet());
     }
 
     @Override

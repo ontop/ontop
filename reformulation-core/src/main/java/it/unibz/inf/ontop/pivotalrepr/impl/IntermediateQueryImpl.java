@@ -9,6 +9,7 @@ import it.unibz.inf.ontop.executor.expression.PushDownExpressionExecutor;
 import it.unibz.inf.ontop.executor.join.JoinInternalCompositeExecutor;
 import it.unibz.inf.ontop.executor.leftjoin.LeftJoinInternalCompositeExecutor;
 import it.unibz.inf.ontop.executor.substitution.SubstitutionPropagationExecutor;
+import it.unibz.inf.ontop.executor.unsatisfiable.RemoveUnsatisfiableNodesExecutor;
 import it.unibz.inf.ontop.model.DataAtom;
 import it.unibz.inf.ontop.model.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.Variable;
@@ -83,6 +84,7 @@ public class IntermediateQueryImpl implements IntermediateQuery {
         internalExecutorMapBuilder.put(PushDownBooleanExpressionProposal.class, PushDownExpressionExecutor.class);
         internalExecutorMapBuilder.put(GroundTermRemovalFromDataNodeProposal.class, GroundTermRemovalFromDataNodeExecutor.class);
         internalExecutorMapBuilder.put(PullVariableOutOfDataNodeProposal.class, PullVariableOutOfDataNodeExecutor.class);
+        internalExecutorMapBuilder.put(RemoveUnsatisfiableNodesProposal.class, RemoveUnsatisfiableNodesExecutor.class);
         INTERNAL_EXECUTOR_CLASSES = internalExecutorMapBuilder.build();
     }
 
@@ -143,6 +145,15 @@ public class IntermediateQueryImpl implements IntermediateQuery {
     @Override
     public ImmutableList<QueryNode> getChildren(QueryNode node) {
         return treeComponent.getCurrentSubNodesOf(node);
+    }
+
+    @Override
+    public Optional<QueryNode> getChild(QueryNode currentNode, NonCommutativeOperatorNode.ArgumentPosition position) {
+        return getChildren(currentNode).stream()
+                .filter(c -> getOptionalPosition(currentNode, c)
+                        .filter(position::equals)
+                        .isPresent())
+                .findFirst();
     }
 
     @Override
