@@ -135,7 +135,7 @@ public class SubstitutionPropagationTools {
      *
      */
     public static <T extends QueryNode> NodeCentricOptimizationResults<T> propagateSubstitutionUp(
-            T focusNode, ImmutableSubstitution<? extends VariableOrGroundTerm> substitutionToPropagate,
+            T focusNode, ImmutableSubstitution<? extends ImmutableTerm> substitutionToPropagate,
             IntermediateQuery query, QueryTreeComponent treeComponent) throws QueryNodeSubstitutionException,
             EmptyQueryException {
 
