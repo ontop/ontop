@@ -35,6 +35,7 @@ public class EmptyNodeRemovalTest {
     private static Variable Y = DATA_FACTORY.getVariable("y");
     private static Variable A = DATA_FACTORY.getVariable("a");
     private static Variable B = DATA_FACTORY.getVariable("b");
+    private static Variable B1 = DATA_FACTORY.getVariable("b1");
     private static Variable C = DATA_FACTORY.getVariable("c");
     private static DistinctVariableOnlyDataAtom PROJECTION_ATOM = DATA_FACTORY.getDistinctVariableOnlyDataAtom(
             ANS1_PREDICATE, ImmutableList.of(X, Y));
@@ -534,7 +535,45 @@ public class EmptyNodeRemovalTest {
      * Follows the SQL semantics
      */
     @Test
-    public void testLJRemovalDueToNull() throws EmptyQueryException {
+    public void testLJRemovalDueToNull1() throws EmptyQueryException {
+        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
+
+        ConstructionNode rootNode = new ConstructionNodeImpl(PROJECTION_ATOM.getVariables(),
+                new ImmutableSubstitutionImpl<>(ImmutableMap.of(X, generateURI1(A),
+                        Y, generateURI1(B))),
+                Optional.empty());
+        queryBuilder.init(PROJECTION_ATOM, rootNode);
+
+        LeftJoinNode lj1 = new LeftJoinNodeImpl(Optional.of(DATA_FACTORY.getImmutableExpression(
+                ExpressionOperation.EQ, B, B1)));
+        queryBuilder.addChild(rootNode, lj1);
+        queryBuilder.addChild(lj1, new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE_1, A, B1)), RIGHT);
+
+        LeftJoinNode lj2 = new LeftJoinNodeImpl(Optional.empty());
+        queryBuilder.addChild(lj1, lj2, LEFT);
+        queryBuilder.addChild(lj2, DATA_NODE_2, LEFT);
+        queryBuilder.addChild(lj2, new EmptyNodeImpl(ImmutableSet.of(A, B)), RIGHT);
+
+
+        /**
+         * Expected query
+         */
+        IntermediateQueryBuilder expectedQueryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
+        ConstructionNode newRootNode = new ConstructionNodeImpl(PROJECTION_ATOM.getVariables(),
+                new ImmutableSubstitutionImpl<>(ImmutableMap.of(X, generateURI1(A),
+                        Y, OBDAVocabulary.NULL)),
+                Optional.empty());
+        expectedQueryBuilder.init(PROJECTION_ATOM, newRootNode);
+        expectedQueryBuilder.addChild(newRootNode, DATA_NODE_2);
+
+        optimizeAndCompare(queryBuilder.build(), expectedQueryBuilder.build());
+    }
+
+    /**
+     * Follows the SQL semantics. Equivalent to testLJRemovalDueToNull1.
+     */
+    @Test
+    public void testLJRemovalDueToNull2() throws EmptyQueryException {
         IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
 
         ConstructionNode rootNode = new ConstructionNodeImpl(PROJECTION_ATOM.getVariables(),

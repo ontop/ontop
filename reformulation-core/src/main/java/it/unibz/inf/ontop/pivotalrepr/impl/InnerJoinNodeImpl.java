@@ -73,27 +73,7 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
             return new SubstitutionResultsImpl<>(IS_EMPTY);
         }
 
-        /**
-         * If some variables are shared among the children, add an explicit equality in the join node
-         */
-        Optional<ImmutableExpression> additionalCondition = foldBooleanExpressions(
-                substitution.getImmutableMap().entrySet().stream()
-                    .filter(e -> otherNodesProjectedVariables.contains(e.getKey()))
-                    .map(e -> DATA_FACTORY.getImmutableExpression(ExpressionOperation.EQ, e.getKey(), e.getValue())));
-
-        Optional<ImmutableExpression> formerCondition = getOptionalFilterCondition();
-
-        Optional<ExpressionEvaluator.Evaluation> optionalEvaluation = formerCondition
-                .map(substitution::applyToBooleanExpression)
-                // Combines the two possible conditions
-                .map(cond -> additionalCondition
-                        .map(addCond -> foldBooleanExpressions(cond, addCond))
-                        .orElseGet(() -> Optional.of(cond)))
-                .orElse(additionalCondition)
-                .map(cond -> new ExpressionEvaluator(query.getMetadata().getUriTemplateMatcher())
-                        .evaluateExpression(cond));
-
-        return optionalEvaluation
+        return computeAndEvaluateNewCondition(substitution, query, otherNodesProjectedVariables)
                 .map(ev -> applyEvaluation(ev, substitution))
                 .orElseGet(() -> new SubstitutionResultsImpl<>(this, substitution));
     }

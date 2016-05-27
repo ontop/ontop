@@ -181,7 +181,7 @@ public class SubstitutionPropagationTools {
                 ReactToChildDeletionResults reactionResults = query.applyProposal(reactionProposal, true);
 
                 // Only returns the closest remaining ancestor
-                return new NodeCentricOptimizationResultsImpl<T>(query, Optional.empty(),
+                return new NodeCentricOptimizationResultsImpl<>(query, Optional.empty(),
                         Optional.of(reactionResults.getClosestRemainingAncestor()));
             }
             else {
@@ -207,7 +207,7 @@ public class SubstitutionPropagationTools {
                             .ifPresent(position -> query.getChildren(currentAncestor).stream()
                                     // Not the same position
                                     .filter(c -> query.getOptionalPosition(currentAncestor, c)
-                                            .filter(p -> p.equals(position))
+                                            .filter(p -> ! p.equals(position))
                                             .isPresent())
                                     .forEach(treeComponent::removeSubTree));
 

@@ -1,18 +1,25 @@
 package it.unibz.inf.ontop.pivotalrepr.impl;
 
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.ImmutableExpression;
 import it.unibz.inf.ontop.model.ImmutableTerm;
 import it.unibz.inf.ontop.model.ImmutableSubstitution;
-import it.unibz.inf.ontop.model.impl.ImmutabilityTools;
+import it.unibz.inf.ontop.model.Variable;
+import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.unfolding.ExpressionEvaluator;
 import it.unibz.inf.ontop.pivotalrepr.*;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
+import java.util.Map;
 import java.util.Optional;
+
+import static it.unibz.inf.ontop.pivotalrepr.NonCommutativeOperatorNode.ArgumentPosition.*;
+import static it.unibz.inf.ontop.pivotalrepr.unfolding.ProjectedVariableExtractionTools.extractProjectedVariables;
 
 public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
 
     private static final String LEFT_JOIN_NODE_STR = "LJ";
-    private static final boolean IS_EMPTY = true;
 
     public LeftJoinNodeImpl(Optional<ImmutableExpression> optionalJoinCondition) {
         super(optionalJoinCondition);
@@ -42,42 +49,52 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
     public SubstitutionResults<LeftJoinNode> applyAscendingSubstitution(
             ImmutableSubstitution<? extends ImmutableTerm> substitution,
             QueryNode descendantNode, IntermediateQuery query) {
-        if (isFromRightBranch(descendantNode, query)) {
-            /**
-             * Stops the propagation
-             */
-            return new SubstitutionResultsImpl<>(integrateSubstitutionAsLeftJoinCondition(substitution));
-        }
+        return  isFromRightBranch(descendantNode, query)
+                ? applyAscendingSubstitutionFromRight(substitution, query)
+                : applyAscendingSubstitutionFromLeft(substitution, query);
+    }
+
+    private SubstitutionResults<LeftJoinNode> applyAscendingSubstitutionFromRight(
+            ImmutableSubstitution<? extends ImmutableTerm> substitution, IntermediateQuery query) {
+        QueryNode leftChild = query.getChild(this, LEFT)
+                .orElseThrow(() -> new IllegalStateException("No left child for the LJ"));
+        ImmutableSet<Variable> leftVariables = extractProjectedVariables(query, leftChild);
+
         /**
-         * Left-branch
+         * New substitution: only concerns variables specific to the right
          */
-        else {
-            return applyDescendingSubstitution(substitution, query);
-        }
+        ImmutableMap<Variable, ImmutableTerm> newSubstitutionMap = substitution.getImmutableMap().entrySet().stream()
+                .filter(e -> !leftVariables.contains(e.getKey()))
+                .map(e -> (Map.Entry<Variable, ImmutableTerm>)e)
+                .collect(ImmutableCollectors.toMap());
+        ImmutableSubstitution<ImmutableTerm> newSubstitution = new ImmutableSubstitutionImpl<>(newSubstitutionMap);
+
+        /**
+         * Updates the joining conditions (may add new equalities)
+         * and propagates the new substitution if the conditions still holds.
+         *
+         */
+        return computeAndEvaluateNewCondition(substitution, query, leftVariables)
+                .map(ev -> applyEvaluation(ev, newSubstitution))
+                .orElseGet(() -> new SubstitutionResultsImpl<>(this, newSubstitution));
     }
 
-    /**
-     * TODO: explain
-     */
-    private LeftJoinNode integrateSubstitutionAsLeftJoinCondition(
-            ImmutableSubstitution<? extends ImmutableTerm> substitution) {
-        if (substitution.isEmpty()) {
-            return clone();
-        }
+    private SubstitutionResults<LeftJoinNode> applyAscendingSubstitutionFromLeft(
+            ImmutableSubstitution<? extends ImmutableTerm> substitution, IntermediateQuery query) {
+        QueryNode rightChild = query.getChild(this, RIGHT)
+                .orElseThrow(() -> new IllegalStateException("No right child for the LJ"));
+        ImmutableSet<Variable> rightVariables = extractProjectedVariables(query, rightChild);
 
-        ImmutableExpression newEqualities = substitution.convertIntoBooleanExpression().get();
-
-        Optional<ImmutableExpression> optionalFormerCondition = getOptionalFilterCondition();
-        ImmutableExpression newFilterCondition;
-        if (optionalFormerCondition.isPresent()) {
-            newFilterCondition = ImmutabilityTools.foldBooleanExpressions(
-                    optionalFormerCondition.get(), newEqualities).get();
-        }
-        else {
-            newFilterCondition = newEqualities;
-        }
-        return new LeftJoinNodeImpl(Optional.of(newFilterCondition));
+        /**
+         * Updates the joining conditions (may add new equalities)
+         * and propagates the same substitution if the conditions still holds.
+         *
+         */
+        return computeAndEvaluateNewCondition(substitution, query, rightVariables)
+                .map(ev -> applyEvaluation(ev, substitution))
+                .orElseGet(() -> new SubstitutionResultsImpl<>(this, substitution));
     }
+
 
     @Override
     public SubstitutionResults<LeftJoinNode> applyDescendingSubstitution(
@@ -90,9 +107,12 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
     }
 
     private SubstitutionResults<LeftJoinNode> applyEvaluation(ExpressionEvaluator.Evaluation evaluation,
-                                                               ImmutableSubstitution<? extends ImmutableTerm> substitution) {
+                                                              ImmutableSubstitution<? extends ImmutableTerm> substitution) {
+        /**
+         * Joining condition does not hold: replace the LJ by its left child.
+         */
         if (evaluation.isFalse()) {
-            return new SubstitutionResultsImpl<>(IS_EMPTY);
+            return new SubstitutionResultsImpl<>(substitution, Optional.of(LEFT));
         }
         else {
             LeftJoinNode newNode = changeOptionalFilterCondition(evaluation.getOptionalExpression());
