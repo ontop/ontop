@@ -46,7 +46,7 @@ public class RedundantSelfJoinExecutor
             ImmutableSet<Variable> variablesToKeep = query.getClosestConstructionNode(topJoinNode).getVariables();
 
             Optional<ConcreteProposal> optionalConcreteProposal = propose(initialMap, variablesToKeep,
-                    query.getMetadata().getPrimaryKeys());
+                    query.getMetadata().getUniqueConstraints());
 
             if (optionalConcreteProposal.isPresent()) {
                 ConcreteProposal concreteProposal = optionalConcreteProposal.get();

@@ -77,12 +77,12 @@ public class RedundantSelfLeftJoinExecutor
              * the left and the right predicates are the same,
              * so we deal with self left join
              */
-            if (metadata.getPrimaryKeys().containsKey(leftPredicate)) {
+            if (metadata.getUniqueConstraints().containsKey(leftPredicate)) {
                 try {
                     predicateProposal = proposeForSelfLeftJoin(
                             leftDataNode,
                             rightDataNode,
-                            metadata.getPrimaryKeys().get(leftPredicate), variablesToKeep);
+                            metadata.getUniqueConstraints().get(leftPredicate), variablesToKeep);
                 } catch  (AtomUnificationException e) {
                     predicateProposal = new PredicateLevelProposal(initialNodes);
                 }
@@ -97,12 +97,12 @@ public class RedundantSelfLeftJoinExecutor
              * check whether there are foreign key constraints
              */
 
-            if (metadata.getPrimaryKeys().containsKey(leftPredicate)) {
+            if (metadata.getUniqueConstraints().containsKey(leftPredicate)) {
 
                 predicateProposal = proposeForInnerJoin(
                         leftDataNode,
                         rightDataNode,
-                        metadata.getPrimaryKeys().get(leftPredicate), variablesToKeep);
+                        metadata.getUniqueConstraints().get(leftPredicate), variablesToKeep);
             }
             throw new RuntimeException("TODO: implement optimization for left join on foreign key and not nullable");
         }
@@ -185,8 +185,6 @@ public class RedundantSelfLeftJoinExecutor
 
         return getJoinNodeCentricOptimizationResults(query, treeComponent, leftJoinNode, proposal);
     }
-
-
 
 
 
