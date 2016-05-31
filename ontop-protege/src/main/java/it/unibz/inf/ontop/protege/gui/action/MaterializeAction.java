@@ -20,7 +20,7 @@ package it.unibz.inf.ontop.protege.gui.action;
  * #L%
  */
 
-import it.unibz.inf.ontop.owlrefplatform.owlapi3.OWLAPIMaterializer;
+import it.unibz.inf.ontop.owlrefplatform.owlapi.OWLAPIMaterializer;
 import it.unibz.inf.ontop.protege.utils.OBDAProgressListener;
 import org.semanticweb.owlapi.model.OWLIndividualAxiom;
 import org.semanticweb.owlapi.model.OWLOntology;

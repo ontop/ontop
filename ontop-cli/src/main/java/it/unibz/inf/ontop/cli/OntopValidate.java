@@ -6,8 +6,8 @@ import com.google.common.collect.Sets;
 import it.unibz.inf.ontop.exception.InvalidMappingException;
 import it.unibz.inf.ontop.exception.InvalidPredicateDeclarationException;
 import it.unibz.inf.ontop.model.OBDAModel;
-import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWLConfiguration;
-import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWLFactory;
+import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLConfiguration;
+import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLFactory;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.*;
 

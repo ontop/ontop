@@ -20,19 +20,17 @@ package it.unibz.inf.ontop.protege.gui;
  * #L%
  */
 
-import java.util.List;
-import java.util.Vector;
+import it.unibz.inf.ontop.io.PrefixManager;
+import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLResultSet;
+import org.semanticweb.owlapi.model.OWLException;
+import org.semanticweb.owlapi.model.OWLPropertyAssertionObject;
 
-import javax.swing.JOptionPane;
-import javax.swing.SwingUtilities;
+import javax.swing.*;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.TableModel;
-
-import it.unibz.inf.ontop.io.PrefixManager;
-import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWLResultSet;
-import org.semanticweb.owlapi.model.OWLException;
-import org.semanticweb.owlapi.model.OWLPropertyAssertionObject;
+import java.util.List;
+import java.util.Vector;
 
 public class OWLResultSetTableModel implements TableModel {
 
