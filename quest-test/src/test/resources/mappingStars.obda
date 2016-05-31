@@ -15,7 +15,7 @@ source		Select * from Categories
 
 mappingId	MAPID-simplejoin
 target		:{CustomerID} a :Customer .
-source		Select * from Orders as t1  join OrderDetails  ON Orders.OrderID= OrderDetails.OrderID
+source		Select * from Orders as t1  join OrderDetails  ON t1.OrderID= OrderDetails.OrderID
 
 mappingId	MAPID-simplejoinAlias
 target		:{location} :locationRegion {RegionDescription} .
@@ -30,8 +30,8 @@ target		:{locationID} a :Location .
 source		SELECT *, child.RegionID as locationID  FROM (SELECT * FROM Territories) AS child, (select RegionID, RegionDescription FROM Region  WHERE RegionDescription='Eastern' ) AS parent WHERE child.RegionID=parent.RegionID
 
 mappingId	MAPID-joinWithSameName
-target		:{OrderID} a :OrderDetail .
-source		Select * from Orders as t1  join OrderDetails  ON Orders.OrderID= OrderDetails.OrderID
+target		:{t1.OrderID} a :OrderDetail .
+source		Select * from Orders as t1  join OrderDetails  ON t1.OrderID= OrderDetails.OrderID
 
 mappingId	MAPID-aliasinSubQuery
 target		:{locationID} :locationAddress {address} .

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rdf:RDF
+   xmlns:npd="http://sws.ifi.uio.no/data/npd-v2/"
+   xmlns:npdv="http://sws.ifi.uio.no/vocab/npd-v2#"
+   xmlns:owl="http://www.w3.org/2002/07/owl#"
+   xmlns:ptl="http://sws.ifi.uio.no/vocab/npd-v2-ptl#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+   xmlns:xml="http://www.w3.org/XML/1998/namespace"
+   xmlns:xsd="http://www.w3.org/2001/XMLSchema#">
+  <owl:Class rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#SeismicSurvey">
+    <npdv:definition>Seismic profiles are acquired by transmitting sound waves from a source above or in the substratum. The sound waves travel through the rock layers which reflect them up to sensors on the sea bed or at the surface, or down in a borehole. This enables an image of formations in the substratum to be formed. The seismic mapping of the Norwegian continental shelf started in 1962.  Source: http://www.npd.no/en/About-us/Information-services/Dictionary/</npdv:definition>
+    <rdfs:isDefinedBy>http://sws.ifi.uio.no/vocab/version/20130919/npd-seismic</rdfs:isDefinedBy>
+  </owl:Class>
+  <owl:AnnotationProperty rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#definition"/>
+  <owl:Ontology rdf:about="http://sws.ifi.uio.no/vocab/version/20130919/npd-seismic">
+    <owl:imports rdf:resource="http://sws.ifi.uio.no/vocab/version/20130919/npd-db"/>
+  </owl:Ontology>
+</rdf:RDF>

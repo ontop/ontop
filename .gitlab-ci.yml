@@ -1,0 +1,4 @@
+maven-test:
+  script:
+      - set MAVEN_OPTS="-Xms6000m -Xmx8000m"
+      - mvn install -DskipTests=false

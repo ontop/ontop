@@ -1,0 +1,14 @@
+@base <http://example.com/base/> .
+
+<Student/ID=10> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <Student> .
+<Student/ID=10> <Student#ID> "10"^^<http://www.w3.org/2001/XMLSchema#integer> .
+<Student/ID=10> <Student#Name> "Venus Williams" .
+<Student/ID=10> <Student#Sport> "100"^^<http://www.w3.org/2001/XMLSchema#integer> .
+<Student/ID=10> <Student#ref-Sport> <Sport/ID=100> .
+<Student/ID=20> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <Student> .
+<Student/ID=20> <Student#ID> "20"^^<http://www.w3.org/2001/XMLSchema#integer> .
+<Student/ID=20> <Student#Name> "Demi Moore" .
+<Sport/ID=100> <Sport#ID> "100"^^<http://www.w3.org/2001/XMLSchema#integer> .
+<Sport/ID=100> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <Sport> .
+<Sport/ID=100> <Sport#Name> "Tennis" .
+
