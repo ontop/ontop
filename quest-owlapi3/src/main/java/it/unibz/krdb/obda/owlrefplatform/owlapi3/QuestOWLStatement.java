@@ -20,6 +20,7 @@ package it.unibz.krdb.obda.owlrefplatform.owlapi3;
  * #L%
  */
 
+import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.GraphResultSet;
 import it.unibz.krdb.obda.model.OBDAException;
 import it.unibz.krdb.obda.model.TupleResultSet;
@@ -33,6 +34,7 @@ import it.unibz.krdb.obda.owlapi3.OntopOWLException;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestStatement;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.SPARQLQueryUtility;
 import it.unibz.krdb.obda.sesame.SesameRDFIterator;
+
 import org.openrdf.query.parser.ParsedQuery;
 import org.openrdf.rio.ParserConfig;
 import org.openrdf.rio.RDFFormat;
@@ -358,6 +360,16 @@ public class QuestOWLStatement implements AutoCloseable {
 		catch (Exception e) {
 			throw new OntopOWLException(e);
 		}
+	}
+	
+	public DatalogProgram getDLogUnfolding( String query ) throws OWLException {
+	    try {
+		ParsedQuery pq = st.questInstance.getEngine().getParsedQuery(query); 			
+		return st.questInstance.getEngine().getDLog(pq);
+	    } 
+	    catch (Exception e) {
+		throw new OntopOWLException(e);
+	    }
 	}
 
 	private List<OWLAxiom> createOWLIndividualAxioms(GraphResultSet resultSet) throws Exception {

@@ -222,6 +222,82 @@ public class QuestQueryProcessor {
 		}
 	}
 		
+	/**
+	 * Davide> For the planning paper.
+	 * @param pq
+	 * @return
+	 * @throws OBDAException
+	 */
+	public DatalogProgram getDLog(ParsedQuery pq) throws OBDAException {
+			
+		try {
+			// log.debug("Input query:\n{}", strquery);
+			
+			SparqlAlgebraToDatalogTranslator translator = new SparqlAlgebraToDatalogTranslator(unfolder.getUriTemplateMatcher(), uriMap);	
+			DatalogProgram translation = translator.translate(pq);
+
+			log.debug("Datalog program translated from the SPARQL query: \n{}", translation);
+
+			SPARQLQueryFlattener flattener = new SPARQLQueryFlattener(translation);
+			DatalogProgram program = flattener.flatten();
+			log.debug("Flattened program: \n{}", program);
+				
+			log.debug("Replacing equivalences...");
+			DatalogProgram newprogram = OBDADataFactoryImpl.getInstance().getDatalogProgram(program.getQueryModifiers());
+			for (CQIE query : program.getRules()) {
+				CQIE newquery = vocabularyValidator.replaceEquivalences(query);
+				newprogram.appendRule(newquery);
+			}
+
+			for (CQIE q : newprogram.getRules()) 
+				DatalogNormalizer.unfoldJoinTrees(q);
+			log.debug("Normalized program: \n{}", newprogram);
+
+			if (newprogram.getRules().size() < 1) 
+				throw new OBDAException("Error, the translation of the query generated 0 rules. This is not possible for any SELECT query (other queries are not supported by the translator).");
+
+			log.debug("Start the rewriting process...");
+
+			//final long startTime0 = System.currentTimeMillis();
+			for (CQIE cq : newprogram.getRules())
+				CQCUtilities.optimizeQueryWithSigmaRules(cq.getBody(), sigma);
+			DatalogProgram programAfterRewriting = rewriter.rewrite(newprogram);
+			
+			//rewritingTime = System.currentTimeMillis() - startTime0;
+
+			//final long startTime = System.currentTimeMillis();
+			log.debug("Start the partial evaluation process...");
+
+			DatalogProgram programAfterUnfolding = unfolder.unfold(programAfterRewriting);
+			log.debug("Data atoms evaluated: \n{}", programAfterUnfolding);
+
+			List<CQIE> toRemove = new LinkedList<>();
+			for (CQIE rule : programAfterUnfolding.getRules()) {
+				Predicate headPredicate = rule.getHead().getFunctionSymbol();
+				if (!headPredicate.getName().equals(OBDAVocabulary.QUEST_QUERY)) {
+					toRemove.add(rule);
+				}
+			}
+			programAfterUnfolding.removeRules(toRemove);
+			log.debug("Irrelevant rules removed: \n{}", programAfterUnfolding);
+
+			ExpressionEvaluator evaluator = new ExpressionEvaluator(unfolder.getUriTemplateMatcher());
+			evaluator.evaluateExpressions(programAfterUnfolding);
+
+			log.debug("Boolean expression evaluated: \n{}", programAfterUnfolding);
+			log.debug("Partial evaluation ended.");
+			//unfoldingTime = System.currentTimeMillis() - startTime;
+
+			return programAfterUnfolding;
+		} 
+		catch (Exception e) {
+			log.debug(e.getMessage(), e);
+			e.printStackTrace();
+			OBDAException ex = new OBDAException("Error rewriting and unfolding into SQL\n" +  e.getMessage());
+			ex.setStackTrace(e.getStackTrace());
+			throw ex;
+		}
+	}
 
 	/**
 	 * Returns the final rewriting of the given query

@@ -1,7 +1,12 @@
 package it.unibz.inf.ontop.planning;
 
+import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.Lists;
+
 import org.junit.Test;
+
+import it.unibz.inf.ontop.planning.OntopPlanning;
+import it.unibz.krdb.obda.model.DatalogProgram;
 
 import java.util.List;
 
@@ -80,7 +85,45 @@ public class OntopPlanningTest {
         System.out.println(sql);
     }
 
+    @Test
+    public void getSQLForFragments3() throws Exception {
 
+        String fragment1 = "PREFIX npdv: <http://sws.ifi.uio.no/vocab/npd-v2#> \n " +
+                "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> \n" +
+                "SELECT DISTINCT ?wc ?x ?company ?l\n" +
+                "WHERE {\n" +
+                "   ?wc npdv:coreForWellbore ?x .\n" +
+                "   ?x rdf:type npdv:Wellbore .\n" +
+                "  ?x npdv:drillingOperatorCompany ?y .\n" +
+                "  ?y npdv:name ?company .\n" +
+                "  ?wc npdv:coresTotalLength ?l .\n" +
+                "}\n";
+
+        String fragment2 = "PREFIX npdv: <http://sws.ifi.uio.no/vocab/npd-v2#> \n " +
+                "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> \n"
+                + "SELECT DISTINCT ?x ?wellbore ?year\n" +
+                "WHERE {\n" +
+                "  ?x npdv:name ?wellbore .  \n" +
+                "   ?x npdv:wellboreCompletionYear ?year .\n" +
+                "}";
+
+        List<String> fragments = Lists.newArrayList(fragment1, fragment2);
+
+        final String owlfile = "src/test/resources/npd-v2-ql_a.owl";
+        final String obdafile = "src/test/resources/npd-v2-ql-postgres.obda";
+
+        OntopPlanning op = new OntopPlanning(owlfile, obdafile);
+
+//        String sql = op.getSQLForFragments(fragments);
+        
+        List<DatalogProgram> programs = op.getDLogUnfoldingsForFragments(fragments);
+        
+        LinkedListMultimap<String, MFragIndexToVarIndex> joinOn = op.getFragmentsJoinVariables(fragments);
+        op.pruneDLogPrograms(programs, joinOn);
+        
+        // TODO Finish him. BABBALITY.
+        
+    }
 
 
 }
