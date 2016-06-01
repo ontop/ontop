@@ -56,11 +56,9 @@ import java.util.*;
 
 /***
  * Translate a SPARQL algebra expression into a Datalog program that has the
- * same semantics. We use the built-in predicate LeftJoin. The rules
- * in the program have always 1 or 2 operator atoms, plus (in)equality atoms
- * (due to filters).
+ * same semantics. We use the built-in predicates Join and LeftJoin.
  * 
- * @author mariano
+ * @author Roman Kontchakov
  */
 public class SparqlAlgebraToDatalogTranslator {
 
@@ -134,23 +132,20 @@ public class SparqlAlgebraToDatalogTranslator {
     private static class TranslationResult {
         final ImmutableList<Function> atoms;
         final ImmutableSet<Variable> variables;
-        final ImmutableSet<Variable> allVariables;
         final boolean isBGP;
 
-        TranslationResult(ImmutableList<Function> atoms, ImmutableSet<Variable> variables,
-                          ImmutableSet<Variable> allVariables, boolean isBGP) {
+        TranslationResult(ImmutableList<Function> atoms, ImmutableSet<Variable> variables, boolean isBGP) {
             this.atoms = atoms;
             this.variables = variables;
-            this.allVariables = allVariables;
             this.isBGP = isBGP;
         }
     }
 
     private static class TranslationProgram {
-        final OBDADataFactory ofac = OBDADataFactoryImpl.getInstance();
+        private final OBDADataFactory ofac = OBDADataFactoryImpl.getInstance();
 
-        final DatalogProgram program;
-        int predicateIdx = 0;
+        private final DatalogProgram program;
+        private int predicateIdx = 0;
 
         TranslationProgram() {
             this.program = ofac.getDatalogProgram();
@@ -168,7 +163,9 @@ public class SparqlAlgebraToDatalogTranslator {
         }
 
         void appendRule(Function head, List<Function> body) {
-            CQIE rule = ofac.getCQIE(head, body).clone(); // TODO: get rid of cloning (which is needed for Unfolder)
+            // TODO: get rid of cloning (which is needed for Unfolder)
+            CQIE rule = ofac.getCQIE(head, body).clone();
+            // TODO: get rid of EQNormalizer
             EQNormalizer.enforceEqualities(rule);
             program.appendRule(rule);
         }
@@ -184,8 +181,8 @@ public class SparqlAlgebraToDatalogTranslator {
     }
 
     private ImmutableList<Function> extendWithNulls(ImmutableList<Function> list,
-                                           ImmutableSet<Variable> vars, ImmutableSet<Variable> extVars) {
-        Set<Variable> nullVars = new HashSet<>(extVars);
+                                           ImmutableSet<Variable> vars, ImmutableSet<Variable> allVars) {
+        Set<Variable> nullVars = new HashSet<>(allVars);
         nullVars.removeAll(vars);
         if (nullVars.isEmpty())
             return list;
@@ -223,8 +220,8 @@ public class SparqlAlgebraToDatalogTranslator {
                 ValueExpr expression = c.getExpr();
                 if (!(expression instanceof Var))
                     throw new IllegalArgumentException("Error translating ORDER BY. "
-                            + "The current implementation can only sort by variables, "
-                            + "this query has a more complex expression '" + expression + "'");
+                            + "The current implementation can only sort by variables. "
+                            + "This query has a more complex expression '" + expression + "'");
 
                 Var v = (Var) expression;
                 Variable var = ofac.getVariable(v.getName());
@@ -236,10 +233,9 @@ public class SparqlAlgebraToDatalogTranslator {
         }
         else if (currentNode instanceof StatementPattern) { // triple pattern
             Function atom = translate((StatementPattern) currentNode);
-            Set<Variable> vars0 = new HashSet<>();
-            TermUtils.addReferencedVariablesTo(vars0, atom);
-            ImmutableSet<Variable> vars = new ImmutableSet.Builder<Variable>().addAll(vars0).build();
-            return new TranslationResult(ImmutableList.of(atom), vars, vars, true);
+            Set<Variable> vars = new HashSet<>();
+            TermUtils.addReferencedVariablesTo(vars, atom);
+            return new TranslationResult(ImmutableList.of(atom), ImmutableSet.copyOf(vars), true);
         }
         else if (currentNode instanceof Join) {     // JOIN algebra operation
             Join join = (Join) currentNode;
@@ -250,12 +246,14 @@ public class SparqlAlgebraToDatalogTranslator {
             if (a1.isBGP && a2.isBGP) {             // collect triple patterns into BGPs
                 ImmutableList<Function> atoms =
                         ImmutableList.<Function>builder().addAll(a1.atoms).addAll(a2.atoms).build();
-                return new TranslationResult(atoms, vars, vars, true);
+                return new TranslationResult(atoms, vars, true);
             }
-            Function body = ofac.getSPARQLJoin(program.wrapNonTriplePattern(a1),
-                    program.wrapNonTriplePattern(a2));
+            else {
+                Function body = ofac.getSPARQLJoin(program.wrapNonTriplePattern(a1),
+                        program.wrapNonTriplePattern(a2));
 
-            return new TranslationResult(ImmutableList.of(body), vars, vars, false);
+                return new TranslationResult(ImmutableList.of(body), vars, false);
+            }
         }
         else if (currentNode instanceof LeftJoin) {  // OPTIONAL algebra operation
             LeftJoin lj = (LeftJoin) currentNode;
@@ -272,7 +270,7 @@ public class SparqlAlgebraToDatalogTranslator {
                 body.getTerms().add(f);
             }
 
-            return new TranslationResult(ImmutableList.of(body), vars, vars, false);
+            return new TranslationResult(ImmutableList.of(body), vars, false);
         }
         else if (currentNode instanceof Union) {   // UNION algebra operation
             Union union = (Union) currentNode;
@@ -280,21 +278,20 @@ public class SparqlAlgebraToDatalogTranslator {
             TranslationResult a2 = tran(union.getRightArg(), program);
             ImmutableSet<Variable> vars = union(a1.variables, a2.variables);
 
-            Function head = program.getFreshHead(new ArrayList<>(vars));
+            Function head = program.getFreshHead(new ArrayList<>(vars)); // sort variables in some way
             program.appendRule(head, extendWithNulls(a1.atoms, a1.variables, vars));
             program.appendRule(head, extendWithNulls(a2.atoms, a2.variables, vars));
-            return new TranslationResult(ImmutableList.of(head), vars, vars, false);
+            return new TranslationResult(ImmutableList.of(head), vars, false);
         }
         else if (currentNode instanceof Filter) {   // FILTER algebra operation
             Filter filter = (Filter) currentNode;
             TranslationResult a = tran(filter.getArg(), program);
 
-            ValueExpr expr = filter.getCondition();
-            Function f = getFilterExpression(expr, a.variables);
+            Function f = getFilterExpression(filter.getCondition(), a.variables);
             ImmutableList<Function> atoms = ImmutableList.<Function>builder().addAll(a.atoms).add(f).build();
             // TODO: split ANDs in f
 
-            return new TranslationResult(atoms, a.variables, a.allVariables, false);
+            return new TranslationResult(atoms, a.variables, false);
         }
         else if (currentNode instanceof Projection) {  // PROJECT algebra operation
             Projection projection = (Projection) currentNode;
@@ -327,29 +324,29 @@ public class SparqlAlgebraToDatalogTranslator {
             ImmutableSet<Variable> vars = varsBuilder.build();
 
             if (noRenaming)
-                return new TranslationResult(sub.atoms, vars, sub.allVariables, false);
+                return new TranslationResult(sub.atoms, vars, false);
 
             Function head = program.getFreshHead(sVars);
             program.appendRule(head, sub.atoms);
 
             Function atom = ofac.getFunction(head.getFunctionSymbol(), tVars);
-            return new TranslationResult(ImmutableList.of(atom), vars, vars, false);
+            return new TranslationResult(ImmutableList.of(atom), vars, false);
         }
         else if (currentNode instanceof Extension) {     // EXTEND algebra operation
             Extension extension = (Extension) currentNode;
             TranslationResult sub = tran(extension.getArg(), program);
 
-            Set<Variable> vars0 = new HashSet<>(sub.variables);
+            Set<Variable> vars = new HashSet<>(sub.variables);
             List<Term> terms = new LinkedList<>(sub.variables);
             ImmutableList.Builder bodyBuilder = ImmutableList.<Function>builder().addAll(sub.atoms);
             for (ExtensionElem ee : extension.getElements()) {
-                // ignore the second step of the two-step procedure (mapping via ID, not variable)
-                if (ee.getExpr() instanceof Var && ee.getName().equals(((Var)ee.getExpr()).getName()))
+                String varName = ee.getName();
+                // ignore EXTEND(P, v, v), which is sometimes introduced by Sesame SPARQL parser
+                if (ee.getExpr() instanceof Var && varName.equals(((Var)ee.getExpr()).getName()))
                     continue;
 
-                //System.out.println(ee.getName() + " -> " + ee.getExpr() + " " + ee.getExpr().getClass());
                 Variable v = ofac.getVariable(ee.getName());
-                if (!vars0.add(v))
+                if (!vars.add(v))
                     throw new IllegalArgumentException("Duplicate binding for variable " + v
                             + " in " + extension);
 
@@ -358,38 +355,38 @@ public class SparqlAlgebraToDatalogTranslator {
 
                 bodyBuilder.add(ofac.getFunctionEQ(v, expr));
             }
-            ImmutableSet<Variable> vars = ImmutableSet.<Variable>builder().addAll(vars0).build();
-            return new TranslationResult(bodyBuilder.build(), vars, vars, false);
+            return new TranslationResult(bodyBuilder.build(), ImmutableSet.copyOf(vars), false);
         }
-        else if (currentNode instanceof BindingSetAssignment) {
+        else if (currentNode instanceof BindingSetAssignment) { // VALUES in SPARQL
             BindingSetAssignment values = (BindingSetAssignment) currentNode;
-            ImmutableSet.Builder extVarsBuilder = ImmutableSet.<Variable>builder();
-            List<Pair<ImmutableList.Builder<Function>, ImmutableSet<Variable>>> lists = new LinkedList<>();
+            ImmutableSet.Builder allVarsBuilder = ImmutableSet.<Variable>builder();
+            List<Pair<ImmutableList<Function>, ImmutableSet<Variable>>> bindings = new LinkedList<>();
             for (BindingSet bs : values.getBindingSets()) {
-                ImmutableList.Builder listBuilder = ImmutableList.<Function>builder();
-                ImmutableSet.Builder varsBuilder = ImmutableSet.<Variable>builder();
+                ImmutableList.Builder binding = ImmutableList.<Function>builder();
+                Set<Variable> vars = new HashSet<>();
                 for (Binding b : bs) {
                     Variable v = ofac.getVariable(b.getName());
-                    extVarsBuilder.add(v);
-                    varsBuilder.add(v);
-                    // TODO: resurrect the check?
-                    //throw new IllegalArgumentException("Duplicate binding for variable " + f.getTerm(0)
-                    //        + " in " + values);
+                    allVarsBuilder.add(v);
+                    if (!vars.add(v))
+                        throw new IllegalArgumentException("Duplicate binding for variable " + v
+                                + " in " + bs);
                     Term expr = getConstantExpression(b.getValue());
-                    listBuilder.add(ofac.getFunctionEQ(v, expr));
+                    binding.add(ofac.getFunctionEQ(v, expr));
                 }
-                lists.add(new Pair(listBuilder, varsBuilder.build()));
+                bindings.add(new Pair(binding.build(), ImmutableSet.copyOf(vars)));
             }
-            ImmutableSet<Variable> extVars = extVarsBuilder.build();
-            Function head = program.getFreshHead(new LinkedList<>(extVars));
-            for (Pair<ImmutableList.Builder<Function>, ImmutableSet<Variable>> p : lists) {
-                // TODO: efficiency
-                ImmutableList<Function> list = extendWithNulls(p.getKey().build(), p.getValue(), extVars);
+            ImmutableSet<Variable> allVars = allVarsBuilder.build();
+            Function head = program.getFreshHead(new LinkedList<>(allVars)); // sort in some way
+            for (Pair<ImmutableList<Function>, ImmutableSet<Variable>> p : bindings) {
+                ImmutableList<Function> list = extendWithNulls(p.getKey(), p.getValue(), allVars);
                 program.appendRule(head, list);
             }
-            return new TranslationResult(ImmutableList.of(head), extVars, extVars, false);
+            return new TranslationResult(ImmutableList.of(head), allVars, false);
         }
-        throw new IllegalArgumentException("Not supported");
+        else if (currentNode instanceof Group) {
+            throw new IllegalArgumentException("GROUP BY is not supported yet");
+        }
+        throw new IllegalArgumentException("Not supported: " + currentNode);
     }
 
     private static ImmutableSet<Variable> union(ImmutableSet<Variable> s1, ImmutableSet<Variable> s2) {
@@ -420,7 +417,7 @@ public class SparqlAlgebraToDatalogTranslator {
 
 		Value p = triple.getPredicateVar().getValue();
 		if (p == null) {
-			// term variable term .
+			//  term variable term .
 			Term oTerm = getOntopTerm(triple.getObjectVar());
 			return ofac.getTripleAtom(sTerm, ofac.getVariable(triple.getPredicateVar().getName()), oTerm);
 		}
@@ -428,12 +425,12 @@ public class SparqlAlgebraToDatalogTranslator {
 			if (p.equals(RDF.TYPE)) {
 				Value o = triple.getObjectVar().getValue();
 				if (o == null) {
-					// term a variable .
+					// term rdf:type variable .
 					Function rdfTypeConstant = ofac.getUriTemplate(ofac.getConstantLiteral(OBDAVocabulary.RDF_TYPE));
 					return ofac.getTripleAtom(sTerm, rdfTypeConstant, ofac.getVariable(triple.getObjectVar().getName()));
 				}
 				else if (o instanceof URI) {
-					// term a uri .
+					// term rdf:type uri .
 					Predicate.COL_TYPE type = dtfac.getDatatype((URI)o);
 					if (type != null) // datatype
 						return ofac.getFunction(dtfac.getTypePredicate(type), sTerm);
@@ -441,7 +438,7 @@ public class SparqlAlgebraToDatalogTranslator {
 						return ofac.getFunction(ofac.getClassPredicate(o.stringValue()), sTerm);
 				}
 				else
-					throw new RuntimeException("Unsupported query syntax");
+					throw new IllegalArgumentException("Unsupported query syntax");
 			}
 			else {
 				// term uri term . (where uri is either an object or a datatype property)

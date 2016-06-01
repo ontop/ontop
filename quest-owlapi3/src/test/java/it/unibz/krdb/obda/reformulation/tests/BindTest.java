@@ -329,7 +329,7 @@ public class BindTest {
         //variable should be assigned again in the same SELECT clause. SELECT Expressions, reuse the same variable
         String querySelect1 = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n" +
                 "PREFIX  ns:  <http://example.org/ns#>\n" +
-                "SELECT  ?title (?p AS ?fullPrice) (?fullPrice-?discount AS ?customerPrice)\n" +
+                "SELECT  ?title (?p AS ?price) (?fullPrice-?discount AS ?customerPrice)\n" + // ROMAN (1 June): changed to avoid NullPointerException as runTest requires variable ?price)
                 "{ ?x ns:price ?p .\n" +
                 "   ?x dc:title ?title . \n" +
                 "   ?x ns:discount ?discount \n" +

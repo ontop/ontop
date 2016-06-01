@@ -20,12 +20,57 @@ import org.openrdf.query.parser.QueryParserUtil;
 public class SPARQLQueryFlattenerTest {
 
     @Test
+    public void testBind0() throws MalformedQueryException {
+
+        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+                + "PREFIX  ns:  <http://example.org/ns#>\n"
+                + "SELECT  ?title (UCASE(?title) AS ?v) (CONCAT(?title, \" \", ?v) AS ?w) WHERE \n"
+                + "{  ?x ns:price ?p .\n"
+                + "   ?x ns:discount ?discount .\n"
+                + "   ?x dc:title ?title .\n"
+                + "}";
+
+        QueryParser parser = QueryParserUtil.createParser(QueryLanguage.SPARQL);
+        ParsedQuery pq = parser.parseQuery(queryBind, null);
+
+        SparqlAlgebraToDatalogTranslator translator = new SparqlAlgebraToDatalogTranslator(
+                new UriTemplateMatcher(), new SemanticIndexURIMap());
+        SparqlQuery program = translator.translate(pq);
+        System.out.println(program);
+    }
+
+    @Test
+    public void testBind() throws MalformedQueryException {
+
+        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+                + "PREFIX  ns:  <http://example.org/ns#>\n"
+                + "SELECT  ?title ?w WHERE \n"
+                + "{  ?x ns:price ?p .\n"
+                + "   ?x ns:discount ?discount .\n"
+                + "   ?x dc:title ?title .\n"
+                + "   BIND (UCASE(?title) AS ?v)\n"
+                + "   BIND (CONCAT(?title, \" \", ?v) AS ?w)\n"
+                + "}";
+
+        QueryParser parser = QueryParserUtil.createParser(QueryLanguage.SPARQL);
+        ParsedQuery pq = parser.parseQuery(queryBind, null);
+
+        SparqlAlgebraToDatalogTranslator translator = new SparqlAlgebraToDatalogTranslator(
+                new UriTemplateMatcher(), new SemanticIndexURIMap());
+        SparqlQuery program = translator.translate(pq);
+        System.out.println(program);
+    }
+
+
+    @Test
     public void testUnion() throws MalformedQueryException {
 
         String query6 = "PREFIX : <http://www.example.org/test#> "
+                + "PREFIX owl: <http://www.w3.org/2002/07/owl#> "
                 + "SELECT * "
                 + "WHERE {"
-                + " ?p a :Person . ?p :name ?name ."
+                + " ?p a :Person .  { ?p :name ?name .  "
+                + " ?p a [ a owl:Restriction; owl:onProperty :q; owl:someValuesFrom owl:Thing ] . } "
                 + " OPTIONAL {"
                 + "   ?p :nick1 ?nick1 "
                 + "   OPTIONAL {"
@@ -39,4 +84,24 @@ public class SPARQLQueryFlattenerTest {
         SparqlQuery program = translator.translate(pq);
         System.out.println(program);
     }
+
+    @Test
+    public void testUnionJoin() throws MalformedQueryException {
+
+        String query6 = "PREFIX : <http://www.example.org/test#> "
+                + "PREFIX owl: <http://www.w3.org/2002/07/owl#> "
+                + "SELECT * "
+                + "WHERE {"
+                + " { ?x :q ?z } UNION { ?x :p ?y. ?u :q ?v FILTER (?x > 3) FILTER (?v = 2) }  "
+                + " { ?y :q ?v } UNION { ?z :p ?w } }";
+
+        QueryParser parser = QueryParserUtil.createParser(QueryLanguage.SPARQL);
+        ParsedQuery pq = parser.parseQuery(query6, null);
+
+        SparqlAlgebraToDatalogTranslator translator = new SparqlAlgebraToDatalogTranslator(
+                new UriTemplateMatcher(), new SemanticIndexURIMap());
+        SparqlQuery program = translator.translate(pq);
+        System.out.println(program);
+    }
+
 }
