@@ -4,6 +4,8 @@ package it.unibz.inf.ontop.pivotalrepr.impl;
 import java.util.Optional;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.*;
+import it.unibz.inf.ontop.owlrefplatform.core.unfolding.ExpressionEvaluator;
+import it.unibz.inf.ontop.pivotalrepr.IntermediateQuery;
 import it.unibz.inf.ontop.pivotalrepr.JoinOrFilterNode;
 
 public abstract class JoinOrFilterNodeImpl extends QueryNodeImpl implements JoinOrFilterNode {
@@ -37,9 +39,14 @@ public abstract class JoinOrFilterNodeImpl extends QueryNodeImpl implements Join
         }
     }
 
-    protected ImmutableExpression transformBooleanExpression(
+    protected ExpressionEvaluator.Evaluation transformBooleanExpression(
+            IntermediateQuery query,
             ImmutableSubstitution<? extends ImmutableTerm> substitution,
             ImmutableExpression booleanExpression) {
-        return substitution.applyToBooleanExpression(booleanExpression);
+
+        ImmutableExpression substitutedExpression = substitution.applyToBooleanExpression(booleanExpression);
+
+        return new ExpressionEvaluator(query.getMetadata().getUriTemplateMatcher()).evaluateExpression(
+                substitutedExpression);
     }
 }

@@ -24,7 +24,7 @@ public interface ExtensionalDataNode extends DataNode {
 
     @Override
     SubstitutionResults<ExtensionalDataNode> applyDescendingSubstitution(
-            ImmutableSubstitution<? extends ImmutableTerm> substitution);
+            ImmutableSubstitution<? extends ImmutableTerm> substitution, IntermediateQuery query);
 
     @Override
     ExtensionalDataNode newAtom(DataAtom newAtom);

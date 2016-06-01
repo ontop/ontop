@@ -24,5 +24,5 @@ public interface LeftJoinNode extends JoinLikeNode, NonCommutativeOperatorNode {
 
     @Override
     SubstitutionResults<LeftJoinNode> applyDescendingSubstitution(
-            ImmutableSubstitution<? extends ImmutableTerm> substitution);
+            ImmutableSubstitution<? extends ImmutableTerm> substitution, IntermediateQuery query);
 }

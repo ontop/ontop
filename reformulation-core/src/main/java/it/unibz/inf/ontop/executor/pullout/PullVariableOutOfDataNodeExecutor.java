@@ -85,7 +85,8 @@ public class PullVariableOutOfDataNodeExecutor implements NodeCentricInternalExe
         propagateUpNewEqualities(treeComponent, focusNodeUpdate.newFocusNode, focusNodeUpdate.newEqualities);
 
         if (focusNodeUpdate.optionalSubstitution.isPresent()) {
-            SubstitutionPropagationTools.propagateSubstitutionDown(focusNodeUpdate.newFocusNode, focusNodeUpdate.optionalSubstitution.get(), treeComponent);
+            SubstitutionPropagationTools.propagateSubstitutionDown(focusNodeUpdate.newFocusNode,
+                    focusNodeUpdate.optionalSubstitution.get(), query, treeComponent);
         }
 
         return new NodeCentricOptimizationResultsImpl<>(query, focusNodeUpdate.newFocusNode);

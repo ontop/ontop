@@ -21,6 +21,7 @@ public interface CommutativeJoinNode extends JoinLikeNode, CommutativeJoinOrFilt
 
     @Override
     SubstitutionResults<? extends CommutativeJoinNode> applyDescendingSubstitution(
-            ImmutableSubstitution<? extends ImmutableTerm> substitution) throws QueryNodeSubstitutionException;
+            ImmutableSubstitution<? extends ImmutableTerm> substitution, IntermediateQuery query)
+            throws QueryNodeSubstitutionException;
 
 }

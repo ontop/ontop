@@ -6,6 +6,8 @@ import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.NonGroundFunctionalTermImpl;
 import it.unibz.inf.ontop.pivotalrepr.*;
 
+import java.util.Optional;
+
 import static it.unibz.inf.ontop.model.impl.GroundTermTools.isGroundTerm;
 
 public class GroupNodeImpl extends QueryNodeImpl implements GroupNode {
@@ -45,12 +47,12 @@ public class GroupNodeImpl extends QueryNodeImpl implements GroupNode {
     public SubstitutionResults<GroupNode> applyAscendingSubstitution(
             ImmutableSubstitution<? extends ImmutableTerm> substitution,
             QueryNode descendantNode, IntermediateQuery query) {
-        return applyDescendingSubstitution(substitution);
+        return applyDescendingSubstitution(substitution, query);
     }
 
     @Override
     public SubstitutionResults<GroupNode> applyDescendingSubstitution(
-            ImmutableSubstitution<? extends ImmutableTerm> substitution) {
+            ImmutableSubstitution<? extends ImmutableTerm> substitution, IntermediateQuery query) {
         ImmutableList.Builder<NonGroundTerm> termBuilder = ImmutableList.builder();
         for (NonGroundTerm term : getGroupingTerms()) {
 
@@ -73,7 +75,7 @@ public class GroupNodeImpl extends QueryNodeImpl implements GroupNode {
             /**
              * The group node is not needed anymore because no grouping term remains
              */
-            return new SubstitutionResultsImpl<>(substitution);
+            return new SubstitutionResultsImpl<>(substitution, Optional.empty());
         }
 
         GroupNode newNode = new GroupNodeImpl(newGroupingTerms);

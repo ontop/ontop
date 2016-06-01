@@ -3,10 +3,12 @@ package it.unibz.inf.ontop.model.impl;
 import java.util.Optional;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.model.*;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Stream;
 
 import static it.unibz.inf.ontop.model.impl.GroundTermTools.castIntoGroundTerm;
 import static it.unibz.inf.ontop.model.impl.GroundTermTools.isGroundTerm;
@@ -135,6 +137,12 @@ public class ImmutabilityTools {
     public static Optional<ImmutableExpression> foldBooleanExpressions(
            ImmutableExpression... conjunctionOfExpressions) {
         return foldBooleanExpressions(ImmutableList.copyOf(conjunctionOfExpressions));
+    }
+
+    public static Optional<ImmutableExpression> foldBooleanExpressions(
+            Stream<ImmutableExpression> conjunctionOfExpressions) {
+        return foldBooleanExpressions(conjunctionOfExpressions
+                .collect(ImmutableCollectors.toList()));
     }
 
 }

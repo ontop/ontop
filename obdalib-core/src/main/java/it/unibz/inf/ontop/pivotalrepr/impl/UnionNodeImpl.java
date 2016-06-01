@@ -31,12 +31,12 @@ public class UnionNodeImpl extends QueryNodeImpl implements UnionNode {
     public SubstitutionResults<UnionNode> applyAscendingSubstitution(
             ImmutableSubstitution<? extends ImmutableTerm> substitution,
             QueryNode descendantNode, IntermediateQuery query) {
-        return applyDescendingSubstitution(substitution);
+        return applyDescendingSubstitution(substitution, query);
     }
 
     @Override
     public SubstitutionResults<UnionNode> applyDescendingSubstitution(
-            ImmutableSubstitution<? extends ImmutableTerm> substitution) {
+            ImmutableSubstitution<? extends ImmutableTerm> substitution, IntermediateQuery query) {
         return new SubstitutionResultsImpl<>(clone(), substitution);
     }
 
