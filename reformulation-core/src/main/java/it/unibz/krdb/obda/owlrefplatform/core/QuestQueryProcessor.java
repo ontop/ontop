@@ -83,7 +83,7 @@ public class QuestQueryProcessor {
 	}
 	
 	
-	private DatalogProgram translateAndPreProcess(ParsedQuery pq)  {
+	protected DatalogProgram translateAndPreProcess(ParsedQuery pq)  {
 		
 		SparqlAlgebraToDatalogTranslator translator = new SparqlAlgebraToDatalogTranslator(unfolder.getUriTemplateMatcher(), uriMap);	
 		DatalogProgram program = translator.translate(pq);

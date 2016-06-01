@@ -6,13 +6,18 @@ import com.google.common.collect.LinkedListMultimap;
 import it.unibz.krdb.obda.exception.InvalidMappingException;
 import it.unibz.krdb.obda.exception.InvalidPredicateDeclarationException;
 import it.unibz.krdb.obda.io.ModelIOManager;
+import it.unibz.krdb.obda.model.BNode;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.Term;
+import it.unibz.krdb.obda.model.URIConstant;
+import it.unibz.krdb.obda.model.ValueConstant;
+import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWL;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLConfiguration;
@@ -33,14 +38,16 @@ import org.semanticweb.owlapi.model.OWLOntologyManager;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 public class OntopPlanning {
 
     QuestOWLStatement st;
-
-
+    
     public OntopPlanning(String owlfile, String obdafile) throws OWLException, IOException, InvalidMappingException, InvalidPredicateDeclarationException {
         OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
         OWLOntology ontology = manager.loadOntologyFromOntologyDocument(new File(owlfile));
@@ -52,6 +59,9 @@ public class OntopPlanning {
 
         QuestPreferences pref = new QuestPreferences();
 
+        pref.setCurrentValueOf(QuestPreferences.SQL_GENERATE_REPLACE, QuestConstants.FALSE);
+        pref.setCurrentValueOf(QuestPreferences.SQL_GENERATE_TEMPLATES, QuestConstants.FALSE);
+        
         // pref.setCurrentValueOf(QuestPreferences.REFORMULATION_TECHNIQUE, QuestConstants.TW);
         // pref.setCurrentValueOf(QuestPreferences.REWRITE, QuestConstants.TRUE);
 
@@ -207,7 +217,93 @@ public class OntopPlanning {
 	    }
 	}
     }
-        
+    
+    public List<Pair<TemplatesSignature, DatalogProgram>> splitDLogWRTTemplates(DatalogProgram prog){
+	
+	List<Pair<TemplatesSignature, DatalogProgram>> result = new ArrayList<>();
+	
+	List<TemplatesSignature> encounteredSignatures = new ArrayList<>();
+	for( CQIE cq : prog.getRules() ){
+	    
+	    TemplatesSignature ts = calculateTemplatesSignature(cq);
+	    
+	    if( !encounteredSignatures.contains(ts) ){ // New Signature
+		encounteredSignatures.add(ts);
+		DatalogProgram restriction = calculateRestriction(prog, ts);
+		result.add( new Pair<TemplatesSignature, DatalogProgram>(ts, restriction) );
+	    }
+	}
+	return result;
+    }
+
+    private TemplatesSignature calculateTemplatesSignature(CQIE cq) {
+	Function head = cq.getHead();
+
+	StringBuilder builder = new StringBuilder();
+
+	for( Term t : head.getTerms() ){
+	    if (t instanceof ValueConstant || t instanceof BNode) {
+		System.out.println(t + " ValueConstant || BNode");
+		assert false : "Unsupported";
+	    }
+	    else if( t instanceof Variable ){
+		System.out.println(t + " Variable");
+		assert false : "Unsupported";
+	    }
+	    else if( t instanceof URIConstant ){
+		System.out.println(t + " URIConstant");
+		assert false : "Unsupported";
+	    }
+	    else if( t instanceof Function ){
+		// Data and URIs
+		System.out.println(t + " Function");
+		System.out.println(takeTemplateString(t));
+
+		builder.append( takeTemplateString( t ) );
+	    }
+	}
+	TemplatesSignature result = TemplatesSignature.makeTemplatesSignature(builder.toString());
+	
+	return result;
+    }
+
+	// Restrict a datalog program to a certain template
+	private DatalogProgram calculateRestriction(DatalogProgram prog,
+		TemplatesSignature templ) {
+
+	    DatalogProgram copy = prog.clone();
+
+	    List<CQIE> toRemove = new LinkedList<>();
+	    for( Iterator<CQIE> it = copy.getRules().iterator(); it.hasNext();  ){
+		CQIE cq = it.next();
+		TemplatesSignature ts = calculateTemplatesSignature(cq);
+		if( !ts.equals(templ) ){
+		   // Prune the rule
+		    toRemove.add(cq);
+		}
+	    }
+	    
+	    copy.removeRules(toRemove);
+	    
+	    return copy;
+	}
+	
+    private String takeTemplateString(Term t) {
+	assert (t instanceof Function) : "Assertion Failed: t is NOT an object or a data value\n";
+	
+	String result = null;
+	
+	String termString = t.toString();
+	if( termString.startsWith("URI") ){
+	    result = termString.substring( 0, termString.indexOf(",") );
+	}
+	else{
+	    result = termString.substring( 0, termString.indexOf("(") );
+	}
+	
+	return result;
+    }
+
     public String getSQLForDLogUnfoldings(List<DatalogProgram> unfoldedFragments){
 	return null;
     }
@@ -274,21 +370,34 @@ public class OntopPlanning {
 
 }
 
-class Pair<S,T>{
-    final S first;
-    final T second;
-    
-    Pair(S first, T second){
+class Pair<T,S> {
+    public final T first;
+    public final S second;
+
+    public Pair(T first, S second){
 	this.first = first;
 	this.second = second;
     }
-    
-    @Override
-    public String toString(){
-	return "(" + this.first + ", " + this.second + ")";   
+
+    @Override 
+    public boolean equals(Object other) {
+	boolean result = false;
+	if (other instanceof Pair<?,?>) {
+	    Pair<?,?> that = (Pair<?,?>) other;
+	    result = (this.first == that.first && this.second == that.second);
+	}
+	return result;
     }
-    
-}
+
+    @Override 
+    public int hashCode() {
+	return (41 * (41 + this.first.hashCode()) + this.second.hashCode());
+    }
+
+    public String toString(){
+	return "["+first.toString()+", "+second.toString()+"]";
+    }
+};
 
 class MFragIndexToVarIndex{
     

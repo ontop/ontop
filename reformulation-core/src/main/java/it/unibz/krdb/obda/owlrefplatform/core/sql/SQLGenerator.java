@@ -62,17 +62,19 @@ public class SQLGenerator implements SQLQueryGenerator {
 	private static final String VIEW_NAME_PREFIX = "QVIEW";
 
 	private final DBMetadata metadata;
-	private final SQLDialectAdapter sqladapter;
+	protected final SQLDialectAdapter sqladapter;
 
-	private final boolean distinctResultSet;
-	private final String replace1, replace2;
+	protected final boolean distinctResultSet;
+	protected final String replace1;
+
+	protected final String replace2;
 
 	private boolean isDistinct = false;
 	private boolean isOrderBy = false;
 	
 	private final SemanticIndexURIMap uriRefIds; // non-null in the Semantic Index mode
 	
-	private final DatatypeFactory dtfac = OBDADataFactoryImpl.getInstance().getDatatypeFactory();
+	protected final DatatypeFactory dtfac = OBDADataFactoryImpl.getInstance().getDatatypeFactory();
 	
 	private final ImmutableMap<ExpressionOperation, String> operations;
 
@@ -209,7 +211,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 	 * Main method. Generates the full query, taking into account
 	 * limit/offset/order by.
 	 */
-	private String generateQuery(DatalogProgram query, List<String> signature,
+	protected String generateQuery(DatalogProgram query, List<String> signature,
 			String indent) throws OBDAException {
 
 		int numberOfQueries = query.getRules().size();
@@ -728,7 +730,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 	 *            the query
 	 * @return the sql select clause
 	 */
-	private String getSelectClause(List<String> signature, CQIE query,
+	protected String getSelectClause(List<String> signature, CQIE query,
 			QueryAliasIndex index, boolean distinct) throws OBDAException {
 		/*
 		 * If the head has size 0 this is a boolean query.
@@ -776,7 +778,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 		return sb.toString();
 	}
 
-	private String getMainColumnForSELECT(Term ht,
+	protected String getMainColumnForSELECT(Term ht,
 			List<String> signature, int hpos, QueryAliasIndex index, Set<String> sqlVariableNames) {
 
 		/**
@@ -853,7 +855,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 		return String.format(mainTemplate, mainColumn, variableName);
 	}
 	
-	private String getLangColumnForSELECT(Term ht, List<String> signature, int hpos, QueryAliasIndex index,
+	protected String getLangColumnForSELECT(Term ht, List<String> signature, int hpos, QueryAliasIndex index,
 										  Set<String> sqlVariableNames) {
 
 		/**
@@ -934,7 +936,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 	/**
 	 * Beware: a new entry will be added to sqlVariableNames (is thus mutable).
 	 */
-	private String getTypeColumnForSELECT(Term ht, List<String> signature, int hpos,
+	protected String getTypeColumnForSELECT(Term ht, List<String> signature, int hpos,
 										  Set<String> sqlVariableNames) {
 		
 
@@ -1130,7 +1132,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 	}
 
 	// TODO: move to SQLAdapter
-	private String getStringConcatenation(String[] params) {
+	protected String getStringConcatenation(String[] params) {
 		String toReturn = sqladapter.strConcat(params);
 		if (sqladapter instanceof DB2SQLDialectAdapter) {
 			/*
@@ -1144,7 +1146,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 		return toReturn;
 	}
 
-	private boolean isStringColType(Term term, QueryAliasIndex index) {
+	protected boolean isStringColType(Term term, QueryAliasIndex index) {
 		if (term instanceof Function) {
 			Function function = (Function) term;
 			if (function.getFunctionSymbol() instanceof URITemplatePredicate) {
@@ -1204,7 +1206,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 
 	private static final Pattern pQuotes = Pattern.compile("[\"`\\['][^\\.]*[\"`\\]']");
 	
-	private static String trimLiteral(String string) {
+	protected static String trimLiteral(String string) {
 		while (pQuotes.matcher(string).matches()) {
 			string = string.substring(1, string.length() - 1);
 		}
@@ -1491,7 +1493,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 	 * @param constant
 	 * @return
 	 */
-	private String getSQLLexicalForm(ValueConstant constant) {
+	protected String getSQLLexicalForm(ValueConstant constant) {
 		switch (constant.getType()) {
 		case BNODE:
 		case LITERAL:

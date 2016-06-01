@@ -40,11 +40,13 @@ import it.unibz.krdb.obda.owlrefplatform.core.reformulation.DummyReformulator;
 import it.unibz.krdb.obda.owlrefplatform.core.reformulation.QueryRewriter;
 import it.unibz.krdb.obda.owlrefplatform.core.reformulation.TreeWitnessRewriter;
 import it.unibz.krdb.obda.owlrefplatform.core.sql.SQLGenerator;
+import it.unibz.krdb.obda.owlrefplatform.core.sql.SQLGeneratorPlanning;
 import it.unibz.krdb.obda.owlrefplatform.core.srcquerygeneration.SQLQueryGenerator;
 import it.unibz.krdb.obda.owlrefplatform.core.translator.MappingVocabularyRepair;
 import it.unibz.krdb.obda.utils.MappingParser;
 import it.unibz.krdb.sql.*;
 import net.sf.jsqlparser.JSQLParserException;
+
 import org.apache.tomcat.jdbc.pool.DataSource;
 import org.apache.tomcat.jdbc.pool.PoolProperties;
 import org.slf4j.Logger;
@@ -113,13 +115,6 @@ public class Quest implements Serializable {
 	/** Davide> Exclude specific predicates from T-Mapping approach **/
 	private TMappingExclusionConfig excludeFromTMappings = TMappingExclusionConfig.empty();
 	
-	/** Davide> Whether to exclude the user-supplied predicates from the
-	 *          TMapping procedure (that is, the mapping assertions for 
-	 *          those predicates should not be extended according to the 
-	 *          TBox hierarchies
-	 */
-	//private boolean applyExcludeFromTMappings;
-	
 	/***
 	 * General flags and fields
 	 */
@@ -169,6 +164,8 @@ public class Quest implements Serializable {
 	
 	
 	private DBMetadata metadata;
+
+	private Boolean sqlGenerateTemplates;
 
 
     /***
@@ -323,7 +320,8 @@ public class Quest implements Serializable {
 		obtainFullMetadata = Boolean.valueOf((String) preferences.get(QuestPreferences.OBTAIN_FULL_METADATA));	
 		printKeys = Boolean.valueOf((String) preferences.get(QuestPreferences.PRINT_KEYS));
 		distinctResultSet = Boolean.valueOf((String) preferences.get(QuestPreferences.DISTINCT_RESULTSET));
-        sqlGenerateReplace = Boolean.valueOf((String) preferences.get(QuestPreferences.SQL_GENERATE_REPLACE));
+		sqlGenerateReplace = Boolean.valueOf((String) preferences.get(QuestPreferences.SQL_GENERATE_REPLACE));
+		sqlGenerateTemplates = Boolean.valueOf((String) preferences.get( QuestPreferences.SQL_GENERATE_TEMPLATES )); // Davide> Planning
 		queryingAnnotationsInOntology = Boolean.valueOf((String) preferences.get(QuestPreferences.ANNOTATIONS_IN_ONTO));
 
                 
@@ -581,12 +579,15 @@ public class Quest implements Serializable {
             SQLDialectAdapter sqladapter = SQLAdapterFactory
                    .getSQLDialectAdapter(obdaSource
                           .getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER), metadata.getDbmsVersion());
-			
-            SQLQueryGenerator datasourceQueryGenerator = new SQLGenerator(metadata, sqladapter, sqlGenerateReplace, distinctResultSet, getUriMap());
 
-    		VocabularyValidator vocabularyValidator = new VocabularyValidator(reformulationReasoner, inputOntology.getVocabulary());
+            // Davide> Modfied for Planning Branch
+            SQLQueryGenerator datasourceQueryGenerator = this.sqlGenerateTemplates ? 
+        	    new SQLGenerator(metadata, sqladapter, sqlGenerateReplace, distinctResultSet, getUriMap()) : 
+        		new SQLGeneratorPlanning(metadata, sqladapter, sqlGenerateReplace, distinctResultSet, getUriMap());
             
-            final QuestUnfolder unfolder = new QuestUnfolder(metadata);
+    		VocabularyValidator vocabularyValidator = new VocabularyValidator(reformulationReasoner, inputOntology.getVocabulary());
+    		
+    		final QuestUnfolder unfolder = new QuestUnfolder(metadata);
 
 			/*
 			 * T-Mappings and Fact mappings

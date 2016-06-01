@@ -3,17 +3,21 @@ package it.unibz.inf.ontop.planning;
 import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.Lists;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import it.unibz.inf.ontop.planning.OntopPlanning;
 import it.unibz.krdb.obda.model.DatalogProgram;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.Assert.*;
 
 public class OntopPlanningTest {
 
+    @Ignore
     @Test
     public void getSQLForFragments1() throws Exception {
         String query =
@@ -51,6 +55,7 @@ public class OntopPlanningTest {
         System.out.println(sql);
     }
 
+    @Ignore
     @Test
     public void getSQLForFragments2() throws Exception {
 
@@ -85,6 +90,7 @@ public class OntopPlanningTest {
         System.out.println(sql);
     }
 
+    @Ignore
     @Test
     public void getSQLForFragments3() throws Exception {
 
@@ -118,8 +124,27 @@ public class OntopPlanningTest {
         
         List<DatalogProgram> programs = op.getDLogUnfoldingsForFragments(fragments);
         
+        // {wc=[fragIndex := 0, varIndex := 0)], x=[fragIndex := 0, varIndex := 1), fragIndex := 1, varIndex := 0)], ...}
         LinkedListMultimap<String, MFragIndexToVarIndex> joinOn = op.getFragmentsJoinVariables(fragments);
-        op.pruneDLogPrograms(programs, joinOn);
+        
+        Map<Pair<Integer, TemplatesSignature>, DatalogProgram> mFragmentToRestrictedPrograms = new HashMap<>();
+        
+        int fragCount = 0;
+        for( DatalogProgram prog : programs ){
+            List<Pair<TemplatesSignature, DatalogProgram>> restrictions = op.splitDLogWRTTemplates(prog);
+                        
+            for( Pair<TemplatesSignature, DatalogProgram> el : restrictions ){
+        	mFragmentToRestrictedPrograms.put( new Pair<>(fragCount, el.first), el.second );
+            }
+            ++fragCount;
+        }
+        
+        // And now I can prune the programs TODO
+        
+//      op.pruneDLogPrograms(programs, joinOn);
+        
+        // For each joining template, produce DLog restrictions to that template
+        
         
         // TODO Finish him. BABBALITY.
         
