@@ -91,7 +91,10 @@ public class OntopQuery extends OntopReasoningCommandBase {
         QuestOWLConfiguration config = null;
         try {
             OBDAModel obdaModel = loadMappingFile(mappingFile);
-            config = QuestOWLConfiguration.builder().obdaModel(obdaModel).build();
+            QuestOWLConfiguration.Builder builder = QuestOWLConfiguration.builder();
+            builder.obdaModel(obdaModel);
+            builder.queryingAnnotationsInOntology(enableAnnotations);
+            config = builder.build();
             factory = new QuestOWLFactory();
         } catch (IOException | InvalidPredicateDeclarationException | InvalidMappingException e) {
             e.printStackTrace();

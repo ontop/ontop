@@ -113,7 +113,7 @@ public class BootstrapAction extends ProtegeAction {
 					throw new RuntimeException("Base URI " + baseUri
 							+ " contains '#' character!");
 				} else {
-					Thread th = new Thread(new Runnable() {
+					Thread th = new Thread("Bootstrapper Action Thread"){
 						@Override
 						public void run() {
 							try {
@@ -124,7 +124,6 @@ public class BootstrapAction extends ProtegeAction {
 								monitor.start();
 								t.run(baseUri, currentOnto, currentModel,
 										currentSource);
-								currentModel.fireSourceParametersUpdated();
 								monitor.stop();
 								JOptionPane.showMessageDialog(workspace,
 										"Task is completed.", "Done",
@@ -136,7 +135,7 @@ public class BootstrapAction extends ProtegeAction {
 												"Error occured during bootstrapping data source.");
 							}
 						}
-					});
+					};
 					th.start();
 				}
 			}

@@ -50,20 +50,9 @@ import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
-import java.sql.BatchUpdateException;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
+import java.sql.*;
 import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
 
 import org.slf4j.Logger;
@@ -423,7 +412,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 						failures.put(predicate, counter + 1);					
 					}
 				}
-				else /* (ax instanceof DataPropertyAssertion) */ {
+				else if (ax instanceof DataPropertyAssertion)  {
 					DataPropertyAssertion dpa = (DataPropertyAssertion)ax;
 					try {
 						process(conn, dpa, uriidStm, stmMap);				
@@ -437,6 +426,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 						failures.put(predicate, counter + 1);					
 					}
 				}
+
 
 				// Check if the batch count is already in the batch limit
 				if (batchCount == batchLimit) {

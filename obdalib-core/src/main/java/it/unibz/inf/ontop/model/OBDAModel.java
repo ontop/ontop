@@ -141,15 +141,16 @@ public interface OBDAModel extends Cloneable, Serializable {
 
 	/**
 	 * Inserts a mappings into this model. If the mapping id already exits it
-	 * throws an exception.
+	 * throws an exception. Can be used inside method addMappings
 	 */
-	public void addMapping(URI sourceuri, OBDAMappingAxiom mapping) throws DuplicateMappingException;
+	public void addMapping(URI sourceuri, OBDAMappingAxiom mapping , boolean disableFiringMappingInsertedEvent) throws DuplicateMappingException;
 
 	/**
 	 * Inserts a collection of mappings into this model. Any duplicates will be
 	 * failed and the system will report such duplication failures.
 	 */
 	public void addMappings(URI sourceuri, Collection<OBDAMappingAxiom> mappings) throws DuplicateMappingException;
+
 
 	/***
 	 * Removes all mappings in the model.

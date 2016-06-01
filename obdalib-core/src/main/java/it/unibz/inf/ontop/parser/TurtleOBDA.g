@@ -17,7 +17,15 @@
  * limitations under the License.
  * #L%
  */
- 
+
+ /*
+  HOW TO GENERATE JAVA FILES:
+
+   $ cd CURRENT_DIRECTORY
+   $ java -jar /path/to/antlr-3.5.2-complete.jar TurtleOBDA.g
+  */
+
+
 grammar TurtleOBDA;
 
 @header {
@@ -151,8 +159,9 @@ public void displayRecognitionError(String[] tokenNames, RecognitionException e)
 public void emitErrorMessage(String msg) {
    error = msg;
 }
-    
-public Object recoverFromMismatchedTokenrecoverFromMismatchedToken(IntStream input, int ttype, BitSet follow) throws RecognitionException {
+
+@Override
+public Object recoverFromMismatchedToken(IntStream input, int ttype, BitSet follow) throws RecognitionException {
    throw new RecognitionException(input);
 }
 
@@ -173,11 +182,9 @@ private String removeBrackets(String text) {
 	          toReturn = dfac.getUriTemplate(uriTemplate);
 	      }
 	      else if (token instanceof ColumnString) {
-	         ValueConstant uriTemplate = dfac.getConstantLiteral(PLACEHOLDER); // a single URI template
+	         // a single URI template
 	         Variable column = dfac.getVariable(token.toString());
-	         terms.add(0, uriTemplate);
-	         terms.add(column);
-	         toReturn = dfac.getUriTemplate(terms);
+	         toReturn = dfac.getUriTemplate(column);
 	      }
 	   }
 	   else {

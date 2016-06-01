@@ -191,7 +191,7 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 
 					if (mapping == null) {
 						// Case when we are creating a new mapping
-						mapcon.addMapping(sourceID, newmapping);
+						mapcon.addMapping(sourceID, newmapping, false);
 					} else {
 						// Case when we are updating an existing mapping
 						mapcon.updateMappingsSourceQuery(sourceID, mapping.getId(), body);

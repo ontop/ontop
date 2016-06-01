@@ -59,7 +59,7 @@ public abstract class OBDADataQueryAction<T> implements OBDAProgressListener {
 	private QuestOWL reasoner;
 	private Component rootView;  // Davide> DAG's hack protegeQueryTabFreezeBug
 
-	private static String QUEST_START_MESSAGE = "Quest must be started before using this feature. To proceed \n * select Quest in the \"Reasoners\" menu and \n * click \"Start reasoner\" in the same menu.";
+	private static String QUEST_START_MESSAGE = "Quest must be started before using this feature. To proceed \n * select Ontop in the \"Reasoners\" menu and \n * click \"Start reasoner\" in the same menu.";
 
 
 	private static final Logger log = LoggerFactory.getLogger(OBDADataQueryAction.class);
@@ -153,10 +153,10 @@ public abstract class OBDADataQueryAction<T> implements OBDAProgressListener {
 					latch.countDown();
 				} catch (Exception e) {
 					if(!isCancelled()){
+						latch.countDown();
 						queryExecError = true;
 						log.error(e.getMessage(), e);
 						DialogUtils.showQuickErrorDialog(rootView, e, "Error executing query");
-						latch.countDown();
 					}
 				}	
 			}

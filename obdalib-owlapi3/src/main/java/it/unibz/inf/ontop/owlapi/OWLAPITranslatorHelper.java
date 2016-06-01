@@ -4,6 +4,7 @@ import it.unibz.inf.ontop.model.OBDADataFactory;
 import it.unibz.inf.ontop.model.Predicate;
 import it.unibz.inf.ontop.model.URIConstant;
 import it.unibz.inf.ontop.model.ValueConstant;
+import it.unibz.inf.ontop.model.Constant;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.ontology.*;
 import it.unibz.inf.ontop.ontology.impl.OntologyFactoryImpl;
@@ -36,7 +37,7 @@ public class OWLAPITranslatorHelper {
 		return ofac.createClassAssertion(concept, c);
 	}
 	
-	public ObjectPropertyAssertion translate(OWLObjectPropertyAssertionAxiom ax) throws InconsistentOntologyException {
+	public ObjectPropertyAssertion translate(OWLObjectPropertyAssertionAxiom ax) throws TranslationException, InconsistentOntologyException {
 		URIConstant c1 = getIndividual(ax.getSubject());
 		URIConstant c2 = getIndividual(ax.getObject());
 
@@ -47,9 +48,15 @@ public class OWLAPITranslatorHelper {
 	
 	public DataPropertyAssertion translate(OWLDataPropertyAssertionAxiom ax) throws TranslationException, InconsistentOntologyException {
 		OWLLiteral object = ax.getObject();
-		Predicate.COL_TYPE type = OWLTypeMapper.getType(object.getDatatype());
-		ValueConstant c2 = dfac.getConstantLiteral(object.getLiteral(), type);
 
+		ValueConstant c2;
+		if(!object.getLang().isEmpty()) {
+			c2 = dfac.getConstantLiteral(object.getLiteral(), object.getLang());
+		}
+		else {
+			Predicate.COL_TYPE type = OWLTypeMapper.getType(object.getDatatype());
+			c2 = dfac.getConstantLiteral(object.getLiteral(), type);
+		}
 		URIConstant c1 = getIndividual(ax.getSubject());
 
 		DataPropertyExpression dpe = getPropertyExpression(ax.getProperty());
@@ -59,9 +66,13 @@ public class OWLAPITranslatorHelper {
 
 	public AnnotationAssertion translate(OWLAnnotationAssertionAxiom ax) throws TranslationException, InconsistentOntologyException {
 
+		URIConstant c1 = getIndividual(ax.getSubject());
+
+		Constant c2 = getValue(ax.getValue());
+
 		AnnotationProperty ap = getPropertyExpression(ax.getProperty());
 
-		return ofac.createAnnotationAssertion(ap);
+		return ofac.createAnnotationAssertion(ap, c1, c2);
 	}
 	
 	/**
@@ -125,14 +136,60 @@ public class OWLAPITranslatorHelper {
 
 
 
-	public static URIConstant getIndividual(OWLIndividual ind) {
+	private URIConstant getIndividual(OWLIndividual ind) throws TranslationException {
 		if (ind.isAnonymous()) 
-			throw new RuntimeException("Found anonymous individual, this feature is not supported:" + ind);
+			throw new TranslationException("Found anonymous individual, this feature is not supported:" + ind);
 
 		 return dfac.getConstantURI(ind.asOWLNamedIndividual().getIRI().toString());
 	}
-	
 
-	
-	
+
+	/**
+	 * Use to translatein URIConstant the subject of an annotation property
+	 * @param subject
+	 * @return
+	 * @throws TranslationException
+     */
+	private URIConstant getIndividual(OWLAnnotationSubject subject) throws TranslationException {
+		if (subject instanceof IRI) {
+			return dfac.getConstantURI( ((IRI) subject).asIRI().get().toString());
+		}
+		else{
+			throw new TranslationException("Found anonymous individual, this feature is not supported:" + subject);
+
+		}
+	}
+
+	/**
+	 * Use to translate in URIConstant or ValueConstant the object of an annotation property
+	 * @param value
+	 * @return
+	 * @throws TranslationException
+     */
+	private Constant getValue (OWLAnnotationValue value)  throws TranslationException {
+		try {
+			if (value instanceof IRI) {
+				return dfac.getConstantURI(value.asIRI().get().toString());
+			}
+			if (value instanceof OWLLiteral) {
+				OWLLiteral owlLiteral = value.asLiteral().get();
+				if (!owlLiteral.getLang().isEmpty()) {
+
+					return dfac.getConstantLiteral(owlLiteral.getLiteral(), owlLiteral.getLang());
+				} else {
+					Predicate.COL_TYPE type = OWLTypeMapper.getType(owlLiteral.getDatatype());
+					return dfac.getConstantLiteral(owlLiteral.getLiteral(), type);
+				}
+
+			} else {
+				throw new TranslationException("Found anonymous individual, this feature is not supported:" + value);
+
+			}
+		}
+		catch(OWLRuntimeException ore){
+			throw new TranslationException(ore.getMessage());
+		}
+	}
+
+
 }

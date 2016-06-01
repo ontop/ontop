@@ -17,7 +17,7 @@
     </organization>
 
     <properties>
-        <protege.version>5.0.0-beta-21</protege.version>
+        <protege.version>5.0.0</protege.version>
         <symbolic.name>it.unibz.inf.ontop.protege</symbolic.name>
     </properties>
 

@@ -34,7 +34,7 @@ import java.util.List;
  * Validates an OBDAModel (mappings) against the vocabulary of an ontology 
  * and adds type information to the mapping predicates
  * 
- * Used by the Protege 4 plugin in
+ * Used by the Protege plugin in
  * OBDAModelManager.OBDAPluginOWLModelManagerListener.handleChange
  * 
  * {@see TargetQueryValidator}

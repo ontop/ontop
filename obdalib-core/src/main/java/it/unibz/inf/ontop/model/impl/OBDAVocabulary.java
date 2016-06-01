@@ -35,6 +35,8 @@ public class OBDAVocabulary {
 
 	public static final String RDF_TYPE = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type";
 
+	public static final String SAME_AS = "http://www.w3.org/2002/07/owl#sameAs";
+
 	/* Common namespaces and prefixes */
 
 	public static final String NS_XSD = "http://www.w3.org/2001/XMLSchema#";
