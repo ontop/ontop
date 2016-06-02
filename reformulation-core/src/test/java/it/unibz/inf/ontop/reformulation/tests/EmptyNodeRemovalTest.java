@@ -101,10 +101,6 @@ public class EmptyNodeRemovalTest {
         optimizeAndCompare(query, expectedQuery);
     }
 
-    /**
-     * TODO: remove the construction node with an empty substitution from the initial query
-     * (when will become legal)
-     */
     @Test
     public void testUnionRemoval3() throws EmptyQueryException {
         ImmutableSubstitutionImpl<ImmutableTerm> topBindings = new ImmutableSubstitutionImpl<>(
@@ -120,10 +116,7 @@ public class EmptyNodeRemovalTest {
 
         ConstructionNode rootNode = query.getRootConstructionNode();
         expectedQueryBuilder.init(PROJECTION_ATOM, rootNode);
-        // Useless construction node
-        ConstructionNodeImpl uselessConstructionNode = new ConstructionNodeImpl(ImmutableSet.of(A, B));
-        expectedQueryBuilder.addChild(rootNode, uselessConstructionNode);
-        expectedQueryBuilder.addChild(uselessConstructionNode, DATA_NODE_1);
+        expectedQueryBuilder.addChild(rootNode, DATA_NODE_1);
 
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
 
@@ -135,17 +128,23 @@ public class EmptyNodeRemovalTest {
                                                             ImmutableSet<Variable> subQueryProjectedVariables) {
         IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
 
-        ConstructionNode rootNode = new ConstructionNodeImpl(PROJECTION_ATOM.getVariables(), topBindings, Optional.empty());
+        ImmutableSet<Variable> projectedVariables = PROJECTION_ATOM.getVariables();
+        ConstructionNode rootNode = new ConstructionNodeImpl(projectedVariables, topBindings, Optional.empty());
         queryBuilder.init(PROJECTION_ATOM, rootNode);
 
-        UnionNode unionNode = new UnionNodeImpl();
+        UnionNode unionNode = new UnionNodeImpl(subQueryProjectedVariables);
         queryBuilder.addChild(rootNode, unionNode);
 
-        ConstructionNode leftConstructionNode = new ConstructionNodeImpl(subQueryProjectedVariables, leftBindings,
-                Optional.empty());
-        queryBuilder.addChild(unionNode, leftConstructionNode);
+        if (leftBindings.isEmpty()) {
+            queryBuilder.addChild(unionNode, DATA_NODE_1);
+        }
+        else {
+            ConstructionNode leftConstructionNode = new ConstructionNodeImpl(subQueryProjectedVariables, leftBindings,
+                    Optional.empty());
+            queryBuilder.addChild(unionNode, leftConstructionNode);
 
-        queryBuilder.addChild(leftConstructionNode, DATA_NODE_1);
+            queryBuilder.addChild(leftConstructionNode, DATA_NODE_1);
+        }
 
         EmptyNode emptyNode = new EmptyNodeImpl(subQueryProjectedVariables);
         queryBuilder.addChild(unionNode, emptyNode);

@@ -21,6 +21,7 @@ import org.slf4j.LoggerFactory;
 import it.unibz.inf.ontop.pivotalrepr.*;
 
 import static it.unibz.inf.ontop.owlrefplatform.core.basicoperations.ImmutableUnificationTools.computeMGUS;
+import static it.unibz.inf.ontop.pivotalrepr.impl.ConstructionNodeTools.computeNewProjectedVariables;
 
 public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionNode {
 
@@ -233,22 +234,6 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
     public String toString() {
         // TODO: display the query modifiers
         return CONSTRUCTION_NODE_STR + " " + projectedVariables + " " + "[" + substitution + "]" ;
-    }
-
-
-    public static ImmutableSet<Variable> computeNewProjectedVariables(
-            ImmutableSubstitution<? extends ImmutableTerm> tau, ImmutableSet<Variable> projectedVariables) {
-        ImmutableSet<Variable> tauDomain = tau.getDomain();
-
-        Stream<Variable> remainingVariableStream = projectedVariables.stream()
-                .filter(v -> !tauDomain.contains(v));
-
-        Stream<Variable> newVariableStream = tau.getMap().values().stream()
-                .filter(t -> t instanceof Variable)
-                .map(t -> (Variable) t);
-
-        return Stream.concat(newVariableStream, remainingVariableStream)
-                .collect(ImmutableCollectors.toSet());
     }
 
     /**

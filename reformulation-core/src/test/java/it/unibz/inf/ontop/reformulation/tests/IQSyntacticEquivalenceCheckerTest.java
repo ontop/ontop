@@ -179,25 +179,22 @@ public class IQSyntacticEquivalenceCheckerTest {
     public void testUnionNodeEquivalence() {
 
         IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(metadata);
-        UnionNode unionNode = new UnionNodeImpl();
-        ConstructionNode constructionNodeMain = new ConstructionNodeImpl(ImmutableSet.of(Z));
         DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE, Z);
+        ImmutableSet<Variable> projectedVariables = projectionAtom.getVariables();
+        ConstructionNode constructionNodeMain = new ConstructionNodeImpl(projectedVariables);
+        UnionNode unionNode = new UnionNodeImpl(projectedVariables);
         queryBuilder.init(projectionAtom, constructionNodeMain);
         queryBuilder.addChild(constructionNodeMain, unionNode);
 
-        ConstructionNode constructionNode = new ConstructionNodeImpl(ImmutableSet.of(Z));
-        queryBuilder.addChild(unionNode, constructionNode);
         LeftJoinNode leftJoinNode = new LeftJoinNodeImpl(Optional.empty());
-        queryBuilder.addChild(constructionNode, leftJoinNode);
+        queryBuilder.addChild(unionNode, leftJoinNode);
         ExtensionalDataNode dataNode1 =  new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, X, Z));
         ExtensionalDataNode dataNode2 =  new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, Y, Z));
         queryBuilder.addChild(leftJoinNode, dataNode1, NonCommutativeOperatorNode.ArgumentPosition.LEFT);
         queryBuilder.addChild(leftJoinNode, dataNode2, NonCommutativeOperatorNode.ArgumentPosition.RIGHT);
 
-        ConstructionNode constructionNode1 = new ConstructionNodeImpl(ImmutableSet.of(Z));
-        queryBuilder.addChild(unionNode, constructionNode1);
         LeftJoinNode leftJoinNode1 = new LeftJoinNodeImpl(Optional.empty());
-        queryBuilder.addChild(constructionNode1, leftJoinNode1);
+        queryBuilder.addChild(unionNode, leftJoinNode1);
         ExtensionalDataNode dataNode3 =  new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, X, Z));
         ExtensionalDataNode dataNode4 =  new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, Y, Z));
         queryBuilder.addChild(leftJoinNode1, dataNode3, NonCommutativeOperatorNode.ArgumentPosition.LEFT);
@@ -206,25 +203,21 @@ public class IQSyntacticEquivalenceCheckerTest {
         IntermediateQuery query = queryBuilder.build();
 
         IntermediateQueryBuilder queryBuilder1 = new DefaultIntermediateQueryBuilder(metadata);
-        UnionNode unionNode1 = new UnionNodeImpl();
-        ConstructionNode constructionNodeMain1 = new ConstructionNodeImpl(ImmutableSet.of(Z));
+        UnionNode unionNode1 = new UnionNodeImpl(projectedVariables);
+        ConstructionNode constructionNodeMain1 = new ConstructionNodeImpl(projectedVariables);
         DistinctVariableOnlyDataAtom projectionAtomMain1 = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE, Z);
         queryBuilder1.init(projectionAtomMain1, constructionNodeMain1);
         queryBuilder1.addChild(constructionNodeMain1, unionNode1);
 
-        ConstructionNode constructionNode2 = new ConstructionNodeImpl(ImmutableSet.of(Z));
-        queryBuilder1.addChild(unionNode1, constructionNode2);
         LeftJoinNode leftJoinNode2 = new LeftJoinNodeImpl(Optional.empty());
-        queryBuilder1.addChild(constructionNode2, leftJoinNode2);
+        queryBuilder1.addChild(unionNode1, leftJoinNode2);
         ExtensionalDataNode dataNode5 =  new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, X, Z));
         ExtensionalDataNode dataNode6 =  new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, Y, Z));
         queryBuilder1.addChild(leftJoinNode2, dataNode5, NonCommutativeOperatorNode.ArgumentPosition.LEFT);
         queryBuilder1.addChild(leftJoinNode2, dataNode6, NonCommutativeOperatorNode.ArgumentPosition.RIGHT);
 
-        ConstructionNode constructionNode3 = new ConstructionNodeImpl(ImmutableSet.of(Z));
-        queryBuilder1.addChild(unionNode1, constructionNode3);
         LeftJoinNode leftJoinNode3 = new LeftJoinNodeImpl(Optional.empty());
-        queryBuilder1.addChild(constructionNode3, leftJoinNode3);
+        queryBuilder1.addChild(unionNode1, leftJoinNode3);
         ExtensionalDataNode dataNode7 =  new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, X, Z));
         ExtensionalDataNode dataNode8 =  new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, Y, Z));
         queryBuilder1.addChild(leftJoinNode3, dataNode7, NonCommutativeOperatorNode.ArgumentPosition.LEFT);
@@ -237,26 +230,23 @@ public class IQSyntacticEquivalenceCheckerTest {
 
     @Test
     public void testUnionNodeNotEquivalence() {
-        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(metadata);
-        UnionNode unionNode = new UnionNodeImpl();
-        ConstructionNode constructionNodeMain = new ConstructionNodeImpl(ImmutableSet.of(Z));
+        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(metadata);;
         DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE, Z);
+        ImmutableSet<Variable> projectedVariables = projectionAtom.getVariables();
+        UnionNode unionNode = new UnionNodeImpl(projectedVariables);
+        ConstructionNode constructionNodeMain = new ConstructionNodeImpl(projectedVariables);
         queryBuilder.init(projectionAtom, constructionNodeMain);
         queryBuilder.addChild(constructionNodeMain, unionNode);
 
-        ConstructionNode constructionNode = new ConstructionNodeImpl(ImmutableSet.of(Z));
-        queryBuilder.addChild(unionNode, constructionNode);
         LeftJoinNode leftJoinNode = new LeftJoinNodeImpl(Optional.empty());
-        queryBuilder.addChild(constructionNode, leftJoinNode);
+        queryBuilder.addChild(unionNode, leftJoinNode);
         ExtensionalDataNode dataNode1 =  new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, X, Z));
         ExtensionalDataNode dataNode2 =  new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, Y, Z));
         queryBuilder.addChild(leftJoinNode, dataNode1, NonCommutativeOperatorNode.ArgumentPosition.LEFT);
         queryBuilder.addChild(leftJoinNode, dataNode2, NonCommutativeOperatorNode.ArgumentPosition.RIGHT);
 
-        ConstructionNode constructionNode1 = new ConstructionNodeImpl(ImmutableSet.of(Z));
-        queryBuilder.addChild(unionNode, constructionNode1);
         LeftJoinNode leftJoinNode1 = new LeftJoinNodeImpl(Optional.empty());
-        queryBuilder.addChild(constructionNode1, leftJoinNode1);
+        queryBuilder.addChild(unionNode, leftJoinNode1);
         ExtensionalDataNode dataNode3 =  new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, X, Z));
         ExtensionalDataNode dataNode4 =  new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, Y, Z));
         queryBuilder.addChild(leftJoinNode1, dataNode3, NonCommutativeOperatorNode.ArgumentPosition.LEFT);
@@ -265,24 +255,20 @@ public class IQSyntacticEquivalenceCheckerTest {
         IntermediateQuery query = queryBuilder.build();
 
         IntermediateQueryBuilder queryBuilder1 = new DefaultIntermediateQueryBuilder(metadata);
-        UnionNode unionNode1 = new UnionNodeImpl();
+        UnionNode unionNode1 = new UnionNodeImpl(projectedVariables);
         ConstructionNode constructionNodeMain1 = new ConstructionNodeImpl(ImmutableSet.of(Z));
         queryBuilder1.init(projectionAtom, constructionNodeMain1);
         queryBuilder1.addChild(constructionNodeMain1, unionNode1);
 
-        ConstructionNode constructionNode2 = new ConstructionNodeImpl(ImmutableSet.of(Z));
-        queryBuilder1.addChild(unionNode1, constructionNode2);
         LeftJoinNode leftJoinNode2 = new LeftJoinNodeImpl(Optional.empty());
-        queryBuilder1.addChild(constructionNode2, leftJoinNode2);
+        queryBuilder1.addChild(unionNode1, leftJoinNode2);
         ExtensionalDataNode dataNode5 =  new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, X, Z));
         ExtensionalDataNode dataNode6 =  new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, Y, Z));
         queryBuilder1.addChild(leftJoinNode2, dataNode5, NonCommutativeOperatorNode.ArgumentPosition.LEFT);
         queryBuilder1.addChild(leftJoinNode2, dataNode6, NonCommutativeOperatorNode.ArgumentPosition.RIGHT);
 
-        ConstructionNode constructionNode3 = new ConstructionNodeImpl(ImmutableSet.of(Z));
-        queryBuilder1.addChild(unionNode1, constructionNode3);
         InnerJoinNode innerJoinNode = new InnerJoinNodeImpl(Optional.empty());
-        queryBuilder1.addChild(constructionNode3, innerJoinNode);
+        queryBuilder1.addChild(unionNode1, innerJoinNode);
         ExtensionalDataNode dataNode7 =  new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, X, Z));
         ExtensionalDataNode dataNode8 =  new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, Y, Z));
         queryBuilder1.addChild(innerJoinNode, dataNode7);

@@ -10,6 +10,11 @@ import it.unibz.inf.ontop.pivotalrepr.*;
 public class UnionNodeImpl extends QueryNodeImpl implements UnionNode {
 
     private static final String UNION_NODE_STR = "UNION";
+    private final ImmutableSet<Variable> projectedVariables;
+
+    public UnionNodeImpl(ImmutableSet<Variable> projectedVariables) {
+        this.projectedVariables = projectedVariables;
+    }
 
     @Override
     public void acceptVisitor(QueryNodeVisitor visitor) {
@@ -18,7 +23,7 @@ public class UnionNodeImpl extends QueryNodeImpl implements UnionNode {
 
     @Override
     public UnionNode clone() {
-        return new UnionNodeImpl();
+        return new UnionNodeImpl(projectedVariables);
     }
 
     @Override
@@ -27,17 +32,40 @@ public class UnionNodeImpl extends QueryNodeImpl implements UnionNode {
         return transformer.transform(this);
     }
 
+    /**
+     * Blocks ascending substitutions
+     */
     @Override
     public SubstitutionResults<UnionNode> applyAscendingSubstitution(
             ImmutableSubstitution<? extends ImmutableTerm> substitution,
             QueryNode descendantNode, IntermediateQuery query) {
-        return applyDescendingSubstitution(substitution, query);
+        return new SubstitutionResultsImpl<>(this);
     }
 
     @Override
     public SubstitutionResults<UnionNode> applyDescendingSubstitution(
             ImmutableSubstitution<? extends ImmutableTerm> substitution, IntermediateQuery query) {
-        return new SubstitutionResultsImpl<>(clone(), substitution);
+        ImmutableSet<Variable> newProjectedVariables = ConstructionNodeTools.computeNewProjectedVariables(substitution,
+                projectedVariables);
+
+        /**
+         * Stops the substitution if does not affect the projected variables
+         */
+        if (newProjectedVariables.equals(projectedVariables)) {
+            return new SubstitutionResultsImpl<>(this);
+        }
+        /**
+         * Otherwise, updates the projected variables and propagates the substitution down.
+         */
+        else {
+            UnionNode newNode = new UnionNodeImpl(newProjectedVariables);
+            return new SubstitutionResultsImpl<>(newNode, substitution);
+        }
+    }
+
+    @Override
+    public ImmutableSet<Variable> getProjectedVariables() {
+        return projectedVariables;
     }
 
     @Override
@@ -57,6 +85,6 @@ public class UnionNodeImpl extends QueryNodeImpl implements UnionNode {
 
     @Override
     public String toString() {
-        return UNION_NODE_STR;
+        return UNION_NODE_STR + " " + projectedVariables;
     }
 }
