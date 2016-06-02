@@ -11,9 +11,23 @@ import it.unibz.inf.ontop.model.ImmutableSubstitution;
 public interface SubstitutionResults<T extends QueryNode> {
 
     /**
-     * When is absent, it means that node is not needed anymore.
-     *
-     * May happen with GroupNode and LeftJoinNode.
+     * Does not say if the substitution should be propagated or not.
+     */
+    enum LocalAction {
+        NO_CHANGE,
+        NEW_NODE,
+        REPLACE_BY_CHILD,
+        INSERT_CONSTRUCTION_NODE,
+        DECLARE_AS_EMPTY
+    }
+
+    /**
+     * Specifies if some QueryNodes must be changed or not.
+     */
+    LocalAction getLocalAction();
+
+    /**
+     * Only present if the focus node has to updated.
      */
     Optional<T> getOptionalNewNode();
 
@@ -29,8 +43,6 @@ public interface SubstitutionResults<T extends QueryNode> {
      * If absent, stop propagating to the parent/children (depending on the propagation direction).
      */
     Optional<? extends ImmutableSubstitution<? extends ImmutableTerm>> getSubstitutionToPropagate();
-
-    boolean isNodeEmpty();
 
     /**
      * A construction node that needs to be inserted between the focus

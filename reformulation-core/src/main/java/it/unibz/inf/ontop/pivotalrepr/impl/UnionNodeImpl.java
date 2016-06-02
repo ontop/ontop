@@ -9,6 +9,8 @@ import it.unibz.inf.ontop.pivotalrepr.*;
 
 import java.util.Optional;
 
+import static it.unibz.inf.ontop.pivotalrepr.SubstitutionResults.LocalAction.NO_CHANGE;
+
 public class UnionNodeImpl extends QueryNodeImpl implements UnionNode {
 
     private static final String UNION_NODE_STR = "UNION";
@@ -42,7 +44,7 @@ public class UnionNodeImpl extends QueryNodeImpl implements UnionNode {
             ImmutableSubstitution<? extends ImmutableTerm> substitution,
             QueryNode descendantNode, IntermediateQuery query) {
         if (substitution.isEmpty()) {
-            return new SubstitutionResultsImpl<>(this);
+            return new SubstitutionResultsImpl<>(NO_CHANGE);
         }
         /**
          * Asks for inserting a construction node between the descendant node and this node.
@@ -65,7 +67,7 @@ public class UnionNodeImpl extends QueryNodeImpl implements UnionNode {
          * Stops the substitution if does not affect the projected variables
          */
         if (newProjectedVariables.equals(projectedVariables)) {
-            return new SubstitutionResultsImpl<>(this);
+            return new SubstitutionResultsImpl<>(NO_CHANGE);
         }
         /**
          * Otherwise, updates the projected variables and propagates the substitution down.

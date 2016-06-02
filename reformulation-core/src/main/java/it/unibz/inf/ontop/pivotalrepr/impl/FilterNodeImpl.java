@@ -10,6 +10,8 @@ import it.unibz.inf.ontop.owlrefplatform.core.unfolding.ExpressionEvaluator;
 import it.unibz.inf.ontop.owlrefplatform.core.unfolding.ExpressionEvaluator.Evaluation;
 import it.unibz.inf.ontop.pivotalrepr.*;
 
+import static it.unibz.inf.ontop.pivotalrepr.SubstitutionResults.LocalAction.DECLARE_AS_EMPTY;
+
 public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
 
     private static final String FILTER_NODE_STR = "FILTER";
@@ -65,7 +67,7 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
          * The condition cannot be satisfied --> the sub-tree is empty.
          */
         if (evaluation.isFalse()) {
-            return new SubstitutionResultsImpl<>(true);
+            return new SubstitutionResultsImpl<>(DECLARE_AS_EMPTY);
         }
         else {
             /**

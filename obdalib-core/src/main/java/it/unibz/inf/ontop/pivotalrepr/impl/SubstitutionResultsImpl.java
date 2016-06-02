@@ -9,29 +9,81 @@ import it.unibz.inf.ontop.pivotalrepr.NonCommutativeOperatorNode.ArgumentPositio
 import it.unibz.inf.ontop.pivotalrepr.QueryNode;
 import it.unibz.inf.ontop.pivotalrepr.SubstitutionResults;
 
+import static it.unibz.inf.ontop.pivotalrepr.SubstitutionResults.LocalAction.*;
+
 public class SubstitutionResultsImpl<T extends QueryNode> implements SubstitutionResults<T> {
+    private final LocalAction localAction;
     private final Optional<T> optionalNewNode;
     private final Optional<? extends ImmutableSubstitution<? extends ImmutableTerm>> optionalSubstitution;
-    private final boolean isNodeEmpty;
     private final Optional<ArgumentPosition> optionalReplacingChildPosition;
     private final Optional<ConstructionNode> optionalNewParentOfDescendantNode;
     // Not new (already in the graph)
     private final Optional<QueryNode> optionalDescendantNode;
 
-    public SubstitutionResultsImpl(T newNode, ImmutableSubstitution<? extends ImmutableTerm> substitution) {
-        this.isNodeEmpty = false;
-        this.optionalNewNode = Optional.of(newNode);
-        this.optionalSubstitution = Optional.of(substitution);
+    /**
+     * No change or replace by unique child
+     */
+    public SubstitutionResultsImpl(LocalAction localAction,
+                                   Optional<ImmutableSubstitution<? extends ImmutableTerm>> optionalSubstitution) {
+        switch (localAction) {
+            case NO_CHANGE:
+            case REPLACE_BY_CHILD:
+                break;
+            case NEW_NODE:
+            case INSERT_CONSTRUCTION_NODE:
+            case DECLARE_AS_EMPTY:
+                throw new IllegalArgumentException("Wrong construction for " + localAction);
+        }
+        this.localAction = localAction;
+        this.optionalNewNode = Optional.empty();
+        this.optionalSubstitution = optionalSubstitution.filter(s -> !s.isEmpty());
         this.optionalReplacingChildPosition = Optional.empty();
         this.optionalNewParentOfDescendantNode = Optional.empty();
         this.optionalDescendantNode = Optional.empty();
     }
 
     /**
-     * No substitution to propagate
+     * No change, replace by unique child or emptiness declaration.
+     *
+     * No substitution.
+     *
+     */
+    public SubstitutionResultsImpl(LocalAction localAction) {
+        switch (localAction) {
+            case NO_CHANGE:
+            case REPLACE_BY_CHILD:
+            case DECLARE_AS_EMPTY:
+                break;
+            case NEW_NODE:
+            case INSERT_CONSTRUCTION_NODE:
+                throw new IllegalArgumentException("Wrong construction for " + localAction);
+        }
+        this.localAction = localAction;
+        this.optionalNewNode = Optional.empty();
+        this.optionalSubstitution = Optional.empty();
+        this.optionalReplacingChildPosition = Optional.empty();
+        this.optionalNewParentOfDescendantNode = Optional.empty();
+        this.optionalDescendantNode = Optional.empty();
+    }
+
+    /**
+     * NEW_NODE and substitution to propagate
+     */
+    public SubstitutionResultsImpl(T newNode,
+                                   ImmutableSubstitution<? extends ImmutableTerm> substitution) {
+        this.localAction = NEW_NODE;
+        this.optionalNewNode = Optional.of(newNode);
+        this.optionalSubstitution = Optional.of(substitution).filter(s -> !s.isEmpty());
+        this.optionalReplacingChildPosition = Optional.empty();
+        this.optionalNewParentOfDescendantNode = Optional.empty();
+        this.optionalDescendantNode = Optional.empty();
+    }
+
+    /**
+     * NEW_NODE and no substitution to propagate
      */
     public SubstitutionResultsImpl(T newNode) {
-        this.isNodeEmpty = false;
+        this.localAction = NEW_NODE;
         this.optionalNewNode = Optional.of(newNode);
         this.optionalSubstitution = Optional.empty();
         this.optionalReplacingChildPosition = Optional.empty();
@@ -45,7 +97,7 @@ public class SubstitutionResultsImpl<T extends QueryNode> implements Substitutio
      */
     public SubstitutionResultsImpl(ImmutableSubstitution<? extends ImmutableTerm> substitution,
                                    Optional<ArgumentPosition> optionalReplacingChildPosition) {
-        this.isNodeEmpty = false;
+        this.localAction = REPLACE_BY_CHILD;
         this.optionalNewNode = Optional.empty();
         this.optionalSubstitution = Optional.of(substitution);
         this.optionalReplacingChildPosition = optionalReplacingChildPosition;
@@ -54,32 +106,20 @@ public class SubstitutionResultsImpl<T extends QueryNode> implements Substitutio
     }
 
     /**
-     * Not a default constructor to force people to be aware
-     * that is means that the node is empty
-     *
-     */
-    public SubstitutionResultsImpl(boolean isNodeEmpty) {
-        if (!isNodeEmpty) {
-            throw new IllegalArgumentException("isNodeEmpty must be true");
-        }
-        this.isNodeEmpty = true;
-        this.optionalNewNode = Optional.empty();
-        this.optionalSubstitution = Optional.empty();
-        this.optionalReplacingChildPosition = Optional.empty();
-        this.optionalNewParentOfDescendantNode = Optional.empty();
-        this.optionalDescendantNode = Optional.empty();
-    }
-
-    /**
      * Proposes to add a Construction Node between the descendant node and the focus node.
      */
     public SubstitutionResultsImpl(T newNode, ConstructionNode newParentOfDescendantNode, QueryNode descendantNode) {
-        this.isNodeEmpty = false;
+        this.localAction = INSERT_CONSTRUCTION_NODE;
         this.optionalNewNode = Optional.of(newNode);
         this.optionalSubstitution = Optional.empty();
         this.optionalReplacingChildPosition = Optional.empty();
         this.optionalNewParentOfDescendantNode = Optional.of(newParentOfDescendantNode);
         this.optionalDescendantNode = Optional.of(descendantNode);
+    }
+
+    @Override
+    public LocalAction getLocalAction() {
+        return localAction;
     }
 
     @Override
@@ -95,11 +135,6 @@ public class SubstitutionResultsImpl<T extends QueryNode> implements Substitutio
     @Override
     public Optional<? extends ImmutableSubstitution<? extends ImmutableTerm>> getSubstitutionToPropagate() {
         return optionalSubstitution;
-    }
-
-    @Override
-    public boolean isNodeEmpty() {
-        return isNodeEmpty;
     }
 
     @Override
