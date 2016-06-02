@@ -7,6 +7,8 @@ import it.unibz.inf.ontop.model.ImmutableTerm;
 import it.unibz.inf.ontop.model.Variable;
 import it.unibz.inf.ontop.pivotalrepr.*;
 
+import java.util.Optional;
+
 public class UnionNodeImpl extends QueryNodeImpl implements UnionNode {
 
     private static final String UNION_NODE_STR = "UNION";
@@ -33,13 +35,24 @@ public class UnionNodeImpl extends QueryNodeImpl implements UnionNode {
     }
 
     /**
-     * Blocks ascending substitutions
+     * Blocks an ascending substitution by inserting a construction node.
      */
     @Override
     public SubstitutionResults<UnionNode> applyAscendingSubstitution(
             ImmutableSubstitution<? extends ImmutableTerm> substitution,
             QueryNode descendantNode, IntermediateQuery query) {
-        return new SubstitutionResultsImpl<>(this);
+        if (substitution.isEmpty()) {
+            return new SubstitutionResultsImpl<>(this);
+        }
+        /**
+         * Asks for inserting a construction node between the descendant node and this node.
+         * Such a construction node will contain the substitution.
+         */
+        else {
+            ConstructionNode newParentOfDescendantNode = new ConstructionNodeImpl(projectedVariables,
+                    (ImmutableSubstitution<ImmutableTerm>) substitution, Optional.empty());
+            return new SubstitutionResultsImpl<>(this, newParentOfDescendantNode, descendantNode);
+        }
     }
 
     @Override

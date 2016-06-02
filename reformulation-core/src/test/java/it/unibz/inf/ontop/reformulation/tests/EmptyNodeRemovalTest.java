@@ -123,6 +123,48 @@ public class EmptyNodeRemovalTest {
         optimizeAndCompare(query, expectedQuery);
     }
 
+    @Test
+    public void testUnionNoNullPropagation() throws EmptyQueryException {
+        ImmutableSet<Variable> projectedVariables = PROJECTION_ATOM.getVariables();
+
+        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
+        ConstructionNode rootNode = new ConstructionNodeImpl(projectedVariables,
+                new ImmutableSubstitutionImpl<>(ImmutableMap.of(X, generateURI1(A), Y, generateURI1(B))),
+                Optional.empty());
+        queryBuilder.init(PROJECTION_ATOM, rootNode);
+
+        ImmutableSet<Variable> subQueryProjectedVariables = ImmutableSet.of(A, B);
+        UnionNode unionNode = new UnionNodeImpl(subQueryProjectedVariables);
+        queryBuilder.addChild(rootNode, unionNode);
+
+        queryBuilder.addChild(unionNode, DATA_NODE_1);
+
+        LeftJoinNode leftJoinNode = new LeftJoinNodeImpl(Optional.empty());
+        queryBuilder.addChild(unionNode, leftJoinNode);
+        queryBuilder.addChild(leftJoinNode, DATA_NODE_2, LEFT);
+        EmptyNode emptyNode = new EmptyNodeImpl(subQueryProjectedVariables);
+        queryBuilder.addChild(leftJoinNode, emptyNode, RIGHT);
+
+
+        /**
+         * Expected query
+         */
+        IntermediateQueryBuilder expectedQueryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
+
+        expectedQueryBuilder.init(PROJECTION_ATOM, rootNode);
+        expectedQueryBuilder.addChild(rootNode, unionNode);
+        expectedQueryBuilder.addChild(unionNode, DATA_NODE_1);
+        ConstructionNode rightConstructionNode = new ConstructionNodeImpl(subQueryProjectedVariables,
+                new ImmutableSubstitutionImpl<>(ImmutableMap.of(B, OBDAVocabulary.NULL)), Optional.empty());
+        expectedQueryBuilder.addChild(unionNode, rightConstructionNode);
+        expectedQueryBuilder.addChild(rightConstructionNode, DATA_NODE_2);
+
+        optimizeAndCompare(queryBuilder.build(), expectedQueryBuilder.build());
+    }
+
+
+
+
     private static IntermediateQuery generateQueryWithUnion(ImmutableSubstitution<ImmutableTerm> topBindings,
                                                             ImmutableSubstitution<ImmutableTerm> leftBindings,
                                                             ImmutableSet<Variable> subQueryProjectedVariables) {

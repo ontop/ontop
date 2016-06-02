@@ -195,6 +195,19 @@ public class SubstitutionPropagationTools {
                     if (currentAncestor != newAncestor) {
                         treeComponent.replaceNode(currentAncestor, newAncestor);
                     }
+
+                    /**
+                     * Inserts a construction node
+                     */
+                    if (substitutionResults.getOptionalNewParentOfDescendantNode().isPresent()) {
+                        ConstructionNode newParentOfDescendantNode = substitutionResults
+                                .getOptionalNewParentOfDescendantNode().get();
+                        QueryNode descendantNode = substitutionResults.getOptionalDescendantNode()
+                                .orElseThrow(() -> new IllegalStateException(
+                                        "Descendant node not provided while its future parent is"));
+                        treeComponent.insertParent(descendantNode, newParentOfDescendantNode);
+                    }
+
                 }
                 /**
                  * The ancestor is not needed anymore
