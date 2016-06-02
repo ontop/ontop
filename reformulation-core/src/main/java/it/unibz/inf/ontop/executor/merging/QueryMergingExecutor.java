@@ -32,7 +32,22 @@ public class QueryMergingExecutor implements InternalProposalExecutor<QueryMergi
      * TODO: explain
      */
     private static class Transformation {
-        private final QueryNode originalNode;
+
+        private static class AnalysisResults {
+            public final QueryNode nodeFromSubQuery;
+            public final QueryNode transformedNode;
+            public final Optional<? extends ImmutableSubstitution<? extends ImmutableTerm>> optionalSubstitutionToPropagate;
+
+            private AnalysisResults(QueryNode nodeFromSubQuery, QueryNode transformedNode,
+                                    Optional<? extends ImmutableSubstitution<? extends ImmutableTerm>> optionalSubstitutionToPropagate) {
+                this.nodeFromSubQuery = nodeFromSubQuery;
+                this.transformedNode = transformedNode;
+                this.optionalSubstitutionToPropagate = optionalSubstitutionToPropagate;
+            }
+        }
+
+
+        private final QueryNode nodeFromSubQuery;
         private final QueryNode transformedParent;
         private final QueryNode transformedNode;
 
@@ -47,33 +62,70 @@ public class QueryMergingExecutor implements InternalProposalExecutor<QueryMergi
                                Optional<? extends ImmutableSubstitution<? extends ImmutableTerm>> substitutionToApply,
                                HomogeneousQueryNodeTransformer renamer, QueryNode transformedParent,
                                Optional<NonCommutativeOperatorNode.ArgumentPosition> optionalPosition) {
-            this.originalNode = originalNode;
             this.transformedParent = transformedParent;
             this.optionalPosition = optionalPosition;
 
+            /**
+             * May be recursive because some consecutive nodes in the sub-query may not be needed
+             * (for instance construction nodes without any remaining binding)
+             */
+            AnalysisResults analysisResults = analyze(query, originalNode, substitutionToApply, renamer);
+            this.nodeFromSubQuery = analysisResults.nodeFromSubQuery;
+            this.transformedNode = analysisResults.transformedNode;
+            this.substitutionToPropagate = analysisResults.optionalSubstitutionToPropagate;
+        }
+
+        /**
+         * TODO: find a better name
+         * Recursive
+         */
+        private static AnalysisResults analyze(
+                IntermediateQuery query, QueryNode originalNode,
+                Optional<? extends ImmutableSubstitution<? extends ImmutableTerm>> substitutionToApply,
+                HomogeneousQueryNodeTransformer renamer) {
             try {
                 QueryNode renamedNode = originalNode.acceptNodeTransformer(renamer);
 
                 if (substitutionToApply.isPresent()) {
                     SubstitutionResults<? extends QueryNode> results = renamedNode.applyDescendingSubstitution(
                             substitutionToApply.get(), query);
-                    substitutionToPropagate = results.getSubstitutionToPropagate();
-                    /**
-                     * If the substitution cannot be propagate to the node, replace it by an empty one.
-                     */
-                    transformedNode = results.getOptionalNewNode()
-                            .map(n -> (QueryNode) n)
-                            .orElseGet(() -> new EmptyNodeImpl(extractProjectedVariables(query, originalNode)));
+
+                    switch (results.getLocalAction()) {
+                        case NO_CHANGE:
+                            return new AnalysisResults(originalNode, renamedNode,
+                                    results.getSubstitutionToPropagate());
+
+                        case NEW_NODE:
+                            return new AnalysisResults(originalNode, results.getOptionalNewNode().get(),
+                                    results.getSubstitutionToPropagate());
+                        /**
+                         * Recursive
+                         */
+                        case REPLACE_BY_CHILD:
+                            QueryNode replacingChild = results.getOptionalReplacingChildPosition()
+                                    .flatMap(position -> query.getChild(originalNode, position))
+                                    .orElseGet(() -> query.getFirstChild(originalNode)
+                                            .orElseThrow(() -> new IllegalStateException("No replacing child is available")));
+                            return analyze(query, replacingChild, results.getSubstitutionToPropagate(), renamer);
+
+                        case INSERT_CONSTRUCTION_NODE:
+                            throw new IllegalStateException("Construction node insertion not expected during query merging");
+
+                        case DECLARE_AS_EMPTY:
+                            return new AnalysisResults(originalNode,
+                                    new EmptyNodeImpl(extractProjectedVariables(query, originalNode)),
+                                    Optional.empty());
+                        default:
+                            throw new IllegalStateException("Unknown local action:" + results.getLocalAction());
+                    }
                 }
                 else {
                     // Empty
-                    this.substitutionToPropagate = Optional.empty();
-                    this.transformedNode = renamedNode;
+                    return new AnalysisResults(originalNode, renamedNode, Optional.empty());
                 }
             } catch (NotNeededNodeException e) {
                 throw new IllegalStateException("Unexpected exception: " + e);
             }
-
         }
 
         public Optional<? extends ImmutableSubstitution<? extends ImmutableTerm>> getSubstitutionToPropagate() {
@@ -84,8 +136,8 @@ public class QueryMergingExecutor implements InternalProposalExecutor<QueryMergi
             return transformedNode;
         }
 
-        public QueryNode getOriginalNode() {
-            return originalNode;
+        public QueryNode getNodeFromSubQuery() {
+            return nodeFromSubQuery;
         }
 
         public QueryNode getTransformedParent() {
@@ -202,7 +254,7 @@ public class QueryMergingExecutor implements InternalProposalExecutor<QueryMergi
              * Puts the children into the queue except if the transformed node is unsatisfied
              */
             if (!(nodeToInsert instanceof EmptyNode)) {
-                QueryNode originalNode = transformation.getOriginalNode();
+                QueryNode originalNode = transformation.getNodeFromSubQuery();
 
                 subQuery.getChildren(originalNode).stream()
                         .forEach(child ->

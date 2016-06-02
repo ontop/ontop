@@ -22,6 +22,7 @@ import it.unibz.inf.ontop.pivotalrepr.*;
 
 import static it.unibz.inf.ontop.owlrefplatform.core.basicoperations.ImmutableUnificationTools.computeMGUS;
 import static it.unibz.inf.ontop.pivotalrepr.SubstitutionResults.LocalAction.DECLARE_AS_EMPTY;
+import static it.unibz.inf.ontop.pivotalrepr.SubstitutionResults.LocalAction.REPLACE_BY_CHILD;
 import static it.unibz.inf.ontop.pivotalrepr.impl.ConstructionNodeTools.computeNewProjectedVariables;
 
 public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionNode {
@@ -216,10 +217,24 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
         Optional<ImmutableQueryModifiers> newOptionalModifiers = updateOptionalModifiers(optionalModifiers,
                 descendingSubstitution, substitutionToPropagate);
 
-        ConstructionNode newConstructionNode = new ConstructionNodeImpl(newProjectedVariables,
-                newSubstitutions.bindings, newOptionalModifiers);
+        /**
+         * The construction node is not be needed anymore
+         *
+         * Currently, the root construction node is still required.
+         */
+        if (newSubstitutions.bindings.isEmpty() && !newOptionalModifiers.isPresent()
+                && query.getRootConstructionNode() != this) {
+            return new SubstitutionResultsImpl<>(REPLACE_BY_CHILD, Optional.of(substitutionToPropagate));
+        }
+        /**
+         * New construction node
+         */
+        else {
+            ConstructionNode newConstructionNode = new ConstructionNodeImpl(newProjectedVariables,
+                    newSubstitutions.bindings, newOptionalModifiers);
 
-        return new SubstitutionResultsImpl<>(newConstructionNode, substitutionToPropagate);
+            return new SubstitutionResultsImpl<>(newConstructionNode, substitutionToPropagate);
+        }
     }
 
     @Override
