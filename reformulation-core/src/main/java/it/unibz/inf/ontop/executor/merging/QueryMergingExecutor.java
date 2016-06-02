@@ -1,23 +1,32 @@
-package it.unibz.inf.ontop.pivotalrepr.impl;
+package it.unibz.inf.ontop.executor.merging;
 
-import java.util.*;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.*;
+import it.unibz.inf.ontop.executor.InternalProposalExecutor;
 import it.unibz.inf.ontop.model.*;
+import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionImpl;
+import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.InjectiveVar2VarSubstitution;
 import it.unibz.inf.ontop.pivotalrepr.*;
-import it.unibz.inf.ontop.pivotalrepr.NonCommutativeOperatorNode.ArgumentPosition;
+import it.unibz.inf.ontop.pivotalrepr.impl.*;
+import it.unibz.inf.ontop.pivotalrepr.proposal.InvalidQueryOptimizationProposalException;
+import it.unibz.inf.ontop.pivotalrepr.proposal.ProposalResults;
+import it.unibz.inf.ontop.pivotalrepr.proposal.QueryMergingProposal;
+import it.unibz.inf.ontop.pivotalrepr.proposal.RemoveEmptyNodesProposal;
+import it.unibz.inf.ontop.pivotalrepr.proposal.impl.ProposalResultsImpl;
+import it.unibz.inf.ontop.pivotalrepr.proposal.impl.RemoveEmptyNodesProposalImpl;
 import it.unibz.inf.ontop.utils.FunctionalTools;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
+
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Optional;
+import java.util.Queue;
 
 import static it.unibz.inf.ontop.pivotalrepr.impl.IntermediateQueryUtils.generateNotConflictingRenaming;
 import static it.unibz.inf.ontop.pivotalrepr.unfolding.ProjectedVariableExtractionTools.extractProjectedVariables;
 
-/**
- * TODO: explain
- */
-public class SubQueryMergingTools {
+public class QueryMergingExecutor implements InternalProposalExecutor<QueryMergingProposal, ProposalResults> {
 
     /**
      * TODO: explain
@@ -27,7 +36,7 @@ public class SubQueryMergingTools {
         private final QueryNode transformedParent;
         private final QueryNode transformedNode;
 
-        private final Optional<ArgumentPosition> optionalPosition;
+        private final Optional<NonCommutativeOperatorNode.ArgumentPosition> optionalPosition;
 
         /**
          * Substitution to propagate to the children
@@ -37,7 +46,7 @@ public class SubQueryMergingTools {
         private Transformation(IntermediateQuery query, QueryNode originalNode,
                                Optional<? extends ImmutableSubstitution<? extends ImmutableTerm>> substitutionToApply,
                                HomogeneousQueryNodeTransformer renamer, QueryNode transformedParent,
-                               Optional<ArgumentPosition> optionalPosition) {
+                               Optional<NonCommutativeOperatorNode.ArgumentPosition> optionalPosition) {
             this.originalNode = originalNode;
             this.transformedParent = transformedParent;
             this.optionalPosition = optionalPosition;
@@ -67,7 +76,6 @@ public class SubQueryMergingTools {
 
         }
 
-
         public Optional<? extends ImmutableSubstitution<? extends ImmutableTerm>> getSubstitutionToPropagate() {
             return substitutionToPropagate;
         }
@@ -84,9 +92,44 @@ public class SubQueryMergingTools {
             return transformedParent;
         }
 
-        public Optional<ArgumentPosition> getOptionalPosition() {
+        public Optional<NonCommutativeOperatorNode.ArgumentPosition> getOptionalPosition() {
             return optionalPosition;
         }
+    }
+
+
+    /**
+     * Main method
+     */
+    @Override
+    public ProposalResults apply(QueryMergingProposal proposal, IntermediateQuery mainQuery,
+                                 QueryTreeComponent treeComponent)
+            throws InvalidQueryOptimizationProposalException, EmptyQueryException {
+        IntermediateQuery subQuery = proposal.getSubQuery();
+
+        List<IntensionalDataNode> localDataNodes = findIntensionalDataNodes(mainQuery, subQuery.getProjectionAtom());
+
+        for (IntensionalDataNode localDataNode : localDataNodes) {
+            mergeSubQuery(treeComponent, subQuery, localDataNode);
+        }
+
+        // Removes the empty nodes (in-place operation)
+        RemoveEmptyNodesProposal cleaningProposal = new RemoveEmptyNodesProposalImpl();
+        mainQuery.applyProposal(cleaningProposal, true);
+
+        return new ProposalResultsImpl(mainQuery);
+    }
+
+    /**
+     * Finds intensional data nodes that matches a data atom.
+     */
+    private ImmutableList<IntensionalDataNode> findIntensionalDataNodes(IntermediateQuery query,
+                                                                        DataAtom subsumingDataAtom) {
+        return query.getNodesInTopDownOrder().stream()
+                .filter(n -> n instanceof IntensionalDataNode)
+                .map(n -> (IntensionalDataNode)n)
+                .filter(n -> subsumingDataAtom.hasSamePredicateAndArity(n.getProjectionAtom()))
+                .collect(ImmutableCollectors.toList());
     }
 
     /**
@@ -94,10 +137,8 @@ public class SubQueryMergingTools {
      *
      */
     protected static void mergeSubQuery(QueryTreeComponent treeComponent, IntermediateQuery subQuery,
-                                IntensionalDataNode intensionalDataNode) throws EmptyQueryException {
+                                        IntensionalDataNode intensionalDataNode) throws EmptyQueryException {
         insertSubQuery(treeComponent, subQuery, intensionalDataNode);
-
-        // TODO: remove the unsatisfied nodes and simplify accordingly the query
     }
 
     /**
@@ -111,7 +152,7 @@ public class SubQueryMergingTools {
          */
         QueryNode parentOfTheIntensionalNode = treeComponent.getParent(intensionalDataNode)
                 .orElseThrow(()-> new IllegalStateException("Bug: the intensional does not have a parent"));
-        Optional<ArgumentPosition> topOptionalPosition = treeComponent.getOptionalPosition(
+        Optional<NonCommutativeOperatorNode.ArgumentPosition> topOptionalPosition = treeComponent.getOptionalPosition(
                 parentOfTheIntensionalNode, intensionalDataNode);
         treeComponent.removeSubTree(intensionalDataNode);
 
@@ -127,8 +168,8 @@ public class SubQueryMergingTools {
          */
         ConstructionNode rootNode = subQuery.getRootConstructionNode();
         Optional<? extends ImmutableSubstitution<? extends ImmutableTerm>> optionalTau = Optional.of(extractSubstitution(
-                    renamingSubstitution.applyToDistinctVariableOnlyDataAtom(subQuery.getProjectionAtom()),
-                    intensionalDataNode.getProjectionAtom()))
+                renamingSubstitution.applyToDistinctVariableOnlyDataAtom(subQuery.getProjectionAtom()),
+                intensionalDataNode.getProjectionAtom()))
                 .filter(s -> !s.isEmpty());
 
         Queue<Transformation> originalNodesToVisit = new LinkedList<>();
@@ -165,10 +206,10 @@ public class SubQueryMergingTools {
 
                 subQuery.getChildren(originalNode).stream()
                         .forEach(child ->
-                            originalNodesToVisit.add(new Transformation(subQuery, child,
-                                    substitutionToPropagate, renamer, nodeToInsert,
-                                    subQuery.getOptionalPosition(originalNode, child)
-                                    )));
+                                originalNodesToVisit.add(new Transformation(subQuery, child,
+                                        substitutionToPropagate, renamer, nodeToInsert,
+                                        subQuery.getOptionalPosition(originalNode, child)
+                                )));
             }
         }
     }
@@ -185,7 +226,7 @@ public class SubQueryMergingTools {
 
 
     private static ImmutableSubstitution<VariableOrGroundTerm> extractSubstitution(DistinctVariableOnlyDataAtom sourceAtom,
-                                                                            DataAtom targetAtom) {
+                                                                                   DataAtom targetAtom) {
         if (!sourceAtom.getPredicate().equals(targetAtom.getPredicate())) {
             throw new IllegalStateException("Incompatible predicates");
         }
