@@ -46,6 +46,9 @@ public class EmptyNodeRemovalTest {
     private static ExtensionalDataNode DATA_NODE_1 = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE_1, A, B));
     private static ExtensionalDataNode DATA_NODE_2 = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE_2, A));
 
+    /**
+     * TODO: Put the UNION as the root instead of the construction node (when this will become legal)
+     */
     @Test
     public void testUnionRemoval1NoTopSubstitution() throws EmptyQueryException {
         ImmutableSubstitutionImpl<ImmutableTerm> topBindings = new ImmutableSubstitutionImpl<>(
@@ -58,10 +61,12 @@ public class EmptyNodeRemovalTest {
          * Expected query
          */
         IntermediateQueryBuilder expectedQueryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
-        ConstructionNode newRootNode = new ConstructionNodeImpl(PROJECTION_ATOM.getVariables(), leftBindings,
+        ConstructionNode rootNode = query.getRootConstructionNode();
+        expectedQueryBuilder.init(PROJECTION_ATOM, rootNode);
+        ConstructionNode secondConstructionNode = new ConstructionNodeImpl(PROJECTION_ATOM.getVariables(), leftBindings,
                 Optional.empty());
-        expectedQueryBuilder.init(PROJECTION_ATOM, newRootNode);
-        expectedQueryBuilder.addChild(newRootNode, DATA_NODE_1);
+        expectedQueryBuilder.addChild(rootNode, secondConstructionNode);
+        expectedQueryBuilder.addChild(secondConstructionNode, DATA_NODE_1);
 
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
 
@@ -81,19 +86,25 @@ public class EmptyNodeRemovalTest {
          */
         IntermediateQueryBuilder expectedQueryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
 
-        ImmutableSubstitution<ImmutableTerm> expectedTopBindings = topBindings.union(leftBindings)
-                .orElseThrow(() -> new IllegalStateException("Wrong bindings (union cannot be computed)"));
+        //ImmutableSubstitution<ImmutableTerm> expectedTopBindings = topBindings.union(leftBindings)
+        //        .orElseThrow(() -> new IllegalStateException("Wrong bindings (union cannot be computed)"));
 
-        ConstructionNode newRootNode = new ConstructionNodeImpl(PROJECTION_ATOM.getVariables(), expectedTopBindings,
+        ConstructionNode rootNode = query.getRootConstructionNode();
+        expectedQueryBuilder.init(PROJECTION_ATOM, rootNode);
+        ConstructionNode secondConstructionNode = new ConstructionNodeImpl(ImmutableSet.of(Y, A), leftBindings,
                 Optional.empty());
-        expectedQueryBuilder.init(PROJECTION_ATOM, newRootNode);
-        expectedQueryBuilder.addChild(newRootNode, DATA_NODE_1);
+        expectedQueryBuilder.addChild(rootNode, secondConstructionNode);
+        expectedQueryBuilder.addChild(secondConstructionNode, DATA_NODE_1);
 
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
 
         optimizeAndCompare(query, expectedQuery);
     }
 
+    /**
+     * TODO: remove the construction node with an empty substitution from the initial query
+     * (when will become legal)
+     */
     @Test
     public void testUnionRemoval3() throws EmptyQueryException {
         ImmutableSubstitutionImpl<ImmutableTerm> topBindings = new ImmutableSubstitutionImpl<>(
@@ -107,10 +118,12 @@ public class EmptyNodeRemovalTest {
          */
         IntermediateQueryBuilder expectedQueryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
 
-        ConstructionNode newRootNode = new ConstructionNodeImpl(PROJECTION_ATOM.getVariables(), topBindings,
-                Optional.empty());
-        expectedQueryBuilder.init(PROJECTION_ATOM, newRootNode);
-        expectedQueryBuilder.addChild(newRootNode, DATA_NODE_1);
+        ConstructionNode rootNode = query.getRootConstructionNode();
+        expectedQueryBuilder.init(PROJECTION_ATOM, rootNode);
+        // Useless construction node
+        ConstructionNodeImpl uselessConstructionNode = new ConstructionNodeImpl(ImmutableSet.of(A, B));
+        expectedQueryBuilder.addChild(rootNode, uselessConstructionNode);
+        expectedQueryBuilder.addChild(uselessConstructionNode, DATA_NODE_1);
 
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
 
