@@ -1,16 +1,12 @@
 package it.unibz.inf.ontop.pivotalrepr.impl;
 
 import java.util.AbstractMap;
-import java.util.Map;
 import java.util.Optional;
-import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.*;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.InjectiveVar2VarSubstitution;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.InjectiveVar2VarSubstitutionImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.NeutralSubstitution;
@@ -71,7 +67,7 @@ public class IntermediateQueryUtils {
         IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(firstDefinition.getMetadata());
         queryBuilder.init(projectionAtom, rootNode);
 
-        UnionNode unionNode = new UnionNodeImpl();
+        UnionNode unionNode = new UnionNodeImpl(projectionAtom.getVariables());
         queryBuilder.addChild(rootNode, unionNode);
 
         // First definition can be added safely

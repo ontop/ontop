@@ -7,6 +7,8 @@ import it.unibz.inf.ontop.model.Variable;
 import it.unibz.inf.ontop.pivotalrepr.*;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
+import static it.unibz.inf.ontop.pivotalrepr.SubstitutionResults.LocalAction.NO_CHANGE;
+
 public class EmptyNodeImpl extends QueryNodeImpl implements EmptyNode {
 
     private static final String PREFIX = "EMPTY ";
@@ -41,7 +43,7 @@ public class EmptyNodeImpl extends QueryNodeImpl implements EmptyNode {
     public SubstitutionResults<EmptyNode> applyAscendingSubstitution(
             ImmutableSubstitution<? extends ImmutableTerm> substitution,
             QueryNode descendantNode, IntermediateQuery query) {
-        return new SubstitutionResultsImpl<>(this);
+        return new SubstitutionResultsImpl<>(NO_CHANGE);
     }
 
     @Override

@@ -11,6 +11,7 @@ import it.unibz.inf.ontop.pivotalrepr.ImmutableQueryModifiers;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.*;
+import java.util.stream.Stream;
 
 import static it.unibz.inf.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionTools.computeUnidirectionalSubstitution;
 
@@ -109,6 +110,21 @@ public class ConstructionNodeTools {
                 .orElseGet(childConstructionNode::getOptionalModifiers);
 
         return new ConstructionNodeImpl(projectedVariables, newSubstitution, optionalModifiers);
+    }
+
+    public static ImmutableSet<Variable> computeNewProjectedVariables(
+            ImmutableSubstitution<? extends ImmutableTerm> descendingSubstitution, ImmutableSet<Variable> projectedVariables) {
+        ImmutableSet<Variable> tauDomain = descendingSubstitution.getDomain();
+
+        Stream<Variable> remainingVariableStream = projectedVariables.stream()
+                .filter(v -> !tauDomain.contains(v));
+
+        Stream<Variable> newVariableStream = descendingSubstitution.getMap().values().stream()
+                .filter(t -> t instanceof Variable)
+                .map(t -> (Variable) t);
+
+        return Stream.concat(newVariableStream, remainingVariableStream)
+                .collect(ImmutableCollectors.toSet());
     }
 
 
