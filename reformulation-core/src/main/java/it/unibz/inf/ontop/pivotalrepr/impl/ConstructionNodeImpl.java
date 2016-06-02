@@ -21,6 +21,7 @@ import org.slf4j.LoggerFactory;
 import it.unibz.inf.ontop.pivotalrepr.*;
 
 import static it.unibz.inf.ontop.owlrefplatform.core.basicoperations.ImmutableUnificationTools.computeMGUS;
+import static it.unibz.inf.ontop.pivotalrepr.SubstitutionResults.LocalAction.DECLARE_AS_EMPTY;
 import static it.unibz.inf.ontop.pivotalrepr.impl.ConstructionNodeTools.computeNewProjectedVariables;
 
 public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionNode {
@@ -195,14 +196,20 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
      */
     @Override
     public SubstitutionResults<ConstructionNode> applyDescendingSubstitution(
-            ImmutableSubstitution<? extends ImmutableTerm> descendingSubstitution, IntermediateQuery query)
-            throws QueryNodeSubstitutionException {
+            ImmutableSubstitution<? extends ImmutableTerm> descendingSubstitution, IntermediateQuery query) {
 
         ImmutableSet<Variable> newProjectedVariables = computeNewProjectedVariables(descendingSubstitution,
                 getProjectedVariables());
 
-        NewSubstitutionPair newSubstitutions = traverseConstructionNode(descendingSubstitution, substitution,
-                projectedVariables);
+        /**
+         * TODO: avoid using an exception
+         */
+        NewSubstitutionPair newSubstitutions;
+        try {
+            newSubstitutions = traverseConstructionNode(descendingSubstitution, substitution, projectedVariables);
+        } catch (QueryNodeSubstitutionException e) {
+            return new SubstitutionResultsImpl<>(DECLARE_AS_EMPTY);
+        }
 
         ImmutableSubstitution<? extends ImmutableTerm> substitutionToPropagate = newSubstitutions.propagatedSubstitution;
 
@@ -244,7 +251,7 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
     private NewSubstitutionPair traverseConstructionNode(
             ImmutableSubstitution<? extends ImmutableTerm> tau,
             ImmutableSubstitution<? extends ImmutableTerm> formerTheta,
-            ImmutableSet<Variable> formerV) {
+            ImmutableSet<Variable> formerV) throws QueryNodeSubstitutionException {
 
         Var2VarSubstitution tauR = tau.getVar2VarFragment();
         // Non-variable term

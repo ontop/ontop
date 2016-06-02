@@ -181,7 +181,7 @@ public class QueryMergingExecutor implements InternalProposalExecutor<QueryMergi
          * TODO: explain
          */
         while(!originalNodesToVisit.isEmpty()) {
-            Transformation transformation = originalNodesToVisit.peek();
+            Transformation transformation = originalNodesToVisit.poll();
 
             /**
              * The node to insert is not guaranteed not to be already present in the tree
