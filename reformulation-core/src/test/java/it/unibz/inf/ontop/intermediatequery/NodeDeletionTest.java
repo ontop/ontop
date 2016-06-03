@@ -112,9 +112,11 @@ public class NodeDeletionTest {
         Variable x = DATA_FACTORY.getVariable("x");
         Variable y = DATA_FACTORY.getVariable("y");
 
-        ConstructionNode rootNode = new ConstructionNodeImpl(ImmutableSet.of(x,y));
         DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(
                 new AtomPredicateImpl("ans1", 2), x, y);
+        ImmutableSet<Variable> projectedVariables = projectionAtom.getVariables();
+
+        ConstructionNode rootNode = new ConstructionNodeImpl(projectedVariables);
 
         IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
         queryBuilder.init(projectionAtom, rootNode);
@@ -122,11 +124,10 @@ public class NodeDeletionTest {
         ValueConstant falseValue = DATA_FACTORY.getBooleanConstant(false);
         ImmutableExpression falseCondition = DATA_FACTORY.getImmutableExpression(ExpressionOperation.AND, falseValue, falseValue);
 
-        UnionNode topUnion = new UnionNodeImpl();
+        UnionNode topUnion = new UnionNodeImpl(projectedVariables);
         queryBuilder.addChild(rootNode, topUnion);
 
         //DistinctVariableOnlyDataAtom subAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(new AtomPredicateImpl("ansu1", 2), x, y);
-        ImmutableSet<Variable> projectedVariables = ImmutableSet.of(x, y);
         ConstructionNode constructionNode1 = new ConstructionNodeImpl(projectedVariables);
         queryBuilder.addChild(topUnion, constructionNode1);
 
@@ -184,9 +185,10 @@ public class NodeDeletionTest {
         Variable x = DATA_FACTORY.getVariable("x");
         Variable y = DATA_FACTORY.getVariable("y");
 
-        ConstructionNode rootNode = new ConstructionNodeImpl(ImmutableSet.of(x,y));
         DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(
                 new AtomPredicateImpl("ans1", 2), x, y);
+        ImmutableSet<Variable> projectedVariables = projectionAtom.getVariables();
+        ConstructionNode rootNode = new ConstructionNodeImpl(projectedVariables);
 
 
         IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
@@ -195,11 +197,10 @@ public class NodeDeletionTest {
         ValueConstant falseValue = DATA_FACTORY.getBooleanConstant(false);
         ImmutableExpression falseCondition = DATA_FACTORY.getImmutableExpression(ExpressionOperation.AND, falseValue, falseValue);
 
-        UnionNode topUnion = new UnionNodeImpl();
+        UnionNode topUnion = new UnionNodeImpl(projectedVariables);
         queryBuilder.addChild(rootNode, topUnion);
 
         //DataAtom subAtom = DATA_FACTORY.getDataAtom(new AtomPredicateImpl("ansu1", 2), x, y);
-        ImmutableSet<Variable> projectedVariables = ImmutableSet.of(x, y);
         
         ConstructionNode constructionNode1 = new ConstructionNodeImpl(projectedVariables);
         queryBuilder.addChild(topUnion, constructionNode1);

@@ -21,6 +21,9 @@ import org.slf4j.LoggerFactory;
 import it.unibz.inf.ontop.pivotalrepr.*;
 
 import static it.unibz.inf.ontop.owlrefplatform.core.basicoperations.ImmutableUnificationTools.computeMGUS;
+import static it.unibz.inf.ontop.pivotalrepr.SubstitutionResults.LocalAction.DECLARE_AS_EMPTY;
+import static it.unibz.inf.ontop.pivotalrepr.SubstitutionResults.LocalAction.REPLACE_BY_CHILD;
+import static it.unibz.inf.ontop.pivotalrepr.impl.ConstructionNodeTools.computeNewProjectedVariables;
 
 public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionNode {
 
@@ -194,24 +197,44 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
      */
     @Override
     public SubstitutionResults<ConstructionNode> applyDescendingSubstitution(
-            ImmutableSubstitution<? extends ImmutableTerm> descendingSubstitution, IntermediateQuery query)
-            throws QueryNodeSubstitutionException {
+            ImmutableSubstitution<? extends ImmutableTerm> descendingSubstitution, IntermediateQuery query) {
 
         ImmutableSet<Variable> newProjectedVariables = computeNewProjectedVariables(descendingSubstitution,
                 getProjectedVariables());
 
-        NewSubstitutionPair newSubstitutions = traverseConstructionNode(descendingSubstitution, substitution,
-                projectedVariables);
+        /**
+         * TODO: avoid using an exception
+         */
+        NewSubstitutionPair newSubstitutions;
+        try {
+            newSubstitutions = traverseConstructionNode(descendingSubstitution, substitution, projectedVariables);
+        } catch (QueryNodeSubstitutionException e) {
+            return new SubstitutionResultsImpl<>(DECLARE_AS_EMPTY);
+        }
 
         ImmutableSubstitution<? extends ImmutableTerm> substitutionToPropagate = newSubstitutions.propagatedSubstitution;
 
         Optional<ImmutableQueryModifiers> newOptionalModifiers = updateOptionalModifiers(optionalModifiers,
                 descendingSubstitution, substitutionToPropagate);
 
-        ConstructionNode newConstructionNode = new ConstructionNodeImpl(newProjectedVariables,
-                newSubstitutions.bindings, newOptionalModifiers);
+        /**
+         * The construction node is not be needed anymore
+         *
+         * Currently, the root construction node is still required.
+         */
+        if (newSubstitutions.bindings.isEmpty() && !newOptionalModifiers.isPresent()
+                && query.getRootConstructionNode() != this) {
+            return new SubstitutionResultsImpl<>(REPLACE_BY_CHILD, Optional.of(substitutionToPropagate));
+        }
+        /**
+         * New construction node
+         */
+        else {
+            ConstructionNode newConstructionNode = new ConstructionNodeImpl(newProjectedVariables,
+                    newSubstitutions.bindings, newOptionalModifiers);
 
-        return new SubstitutionResultsImpl<>(newConstructionNode, substitutionToPropagate);
+            return new SubstitutionResultsImpl<>(newConstructionNode, substitutionToPropagate);
+        }
     }
 
     @Override
@@ -235,22 +258,6 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
         return CONSTRUCTION_NODE_STR + " " + projectedVariables + " " + "[" + substitution + "]" ;
     }
 
-
-    public static ImmutableSet<Variable> computeNewProjectedVariables(
-            ImmutableSubstitution<? extends ImmutableTerm> tau, ImmutableSet<Variable> projectedVariables) {
-        ImmutableSet<Variable> tauDomain = tau.getDomain();
-
-        Stream<Variable> remainingVariableStream = projectedVariables.stream()
-                .filter(v -> !tauDomain.contains(v));
-
-        Stream<Variable> newVariableStream = tau.getMap().values().stream()
-                .filter(t -> t instanceof Variable)
-                .map(t -> (Variable) t);
-
-        return Stream.concat(newVariableStream, remainingVariableStream)
-                .collect(ImmutableCollectors.toSet());
-    }
-
     /**
      *
      * TODO: explain
@@ -259,7 +266,7 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
     private NewSubstitutionPair traverseConstructionNode(
             ImmutableSubstitution<? extends ImmutableTerm> tau,
             ImmutableSubstitution<? extends ImmutableTerm> formerTheta,
-            ImmutableSet<Variable> formerV) {
+            ImmutableSet<Variable> formerV) throws QueryNodeSubstitutionException {
 
         Var2VarSubstitution tauR = tau.getVar2VarFragment();
         // Non-variable term
@@ -300,7 +307,7 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
     private static Var2VarSubstitution extractTauEq(Var2VarSubstitution tauR) {
         int domainVariableCount = tauR.getDomain().size();
         if (domainVariableCount <= 1) {
-            return tauR;
+            return new Var2VarSubstitutionImpl(ImmutableMap.of());
         }
 
         ImmutableMultimap<Variable, Variable> inverseMultimap = tauR.getImmutableMap().entrySet().stream()
