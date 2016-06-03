@@ -73,12 +73,13 @@ public class UnionLiftTest {
 		ConstructionNode topAns2Node = new ConstructionNodeImpl(ImmutableSet.of(x));
 		queryBuilder.addChild(join1, topAns2Node);
 
-		UnionNode unionAns2 = new UnionNodeImpl();
+		ImmutableSet<Variable> ans2ProjectedVariables = ImmutableSet.of(x);
+		UnionNode unionAns2 = new UnionNodeImpl(ans2ProjectedVariables);
 		queryBuilder.addChild(topAns2Node, unionAns2);
 
 		Variable a = DATA_FACTORY.getVariable("a");
-		ConstructionNode t1Ans2Node = new ConstructionNodeImpl(ImmutableSet.of(x),
-				new ImmutableSubstitutionImpl<ImmutableTerm>(ImmutableMap.of(x, a)),
+		ConstructionNode t1Ans2Node = new ConstructionNodeImpl(ans2ProjectedVariables,
+				new ImmutableSubstitutionImpl<>(ImmutableMap.of(x, a)),
 				NO_MODIFIER);
 		queryBuilder.addChild(unionAns2, t1Ans2Node);
 
@@ -86,8 +87,8 @@ public class UnionLiftTest {
 		queryBuilder.addChild(t1Ans2Node, t1);
 
 		Variable b = DATA_FACTORY.getVariable("b");
-		ConstructionNode t2Ans2Node = new ConstructionNodeImpl(ImmutableSet.of(x),
-				new ImmutableSubstitutionImpl<ImmutableTerm>(ImmutableMap.of(x, b)),
+		ConstructionNode t2Ans2Node = new ConstructionNodeImpl(ans2ProjectedVariables,
+				new ImmutableSubstitutionImpl<>(ImmutableMap.of(x, b)),
 				NO_MODIFIER);
 		queryBuilder.addChild(unionAns2, t2Ans2Node);
 
@@ -100,7 +101,7 @@ public class UnionLiftTest {
 		ImmutableSet<Variable> ans3Variables = ImmutableSet.of(x);
 		Variable c =  DATA_FACTORY.getVariable("c");
 		ConstructionNode ans3Node = new ConstructionNodeImpl(ans3Variables,
-				new ImmutableSubstitutionImpl<ImmutableTerm>(ImmutableMap.of(x, c)), NO_MODIFIER);
+				new ImmutableSubstitutionImpl<>(ImmutableMap.of(x, c)), NO_MODIFIER);
 		queryBuilder.addChild(join1, ans3Node);
 
 		ExtensionalDataNode t3 = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(new AtomPredicateImpl("t3", 1), c));
@@ -114,7 +115,7 @@ public class UnionLiftTest {
 		ConstructionNode topAns4Node = new ConstructionNodeImpl(ans4Variables);
 		queryBuilder.addChild(topLJ, topAns4Node, NonCommutativeOperatorNode.ArgumentPosition.RIGHT);
 
-		UnionNode unionAns4 = new UnionNodeImpl();
+		UnionNode unionAns4 = new UnionNodeImpl(ans4Variables);
 		queryBuilder.addChild(topAns4Node, unionAns4);
 
 		Variable d = DATA_FACTORY.getVariable("d");
