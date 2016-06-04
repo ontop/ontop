@@ -250,7 +250,7 @@ public class EmptyNodeRemovalTest {
 
         System.out.println("\n Unsatisfiable query: \n" +  query);
 
-        query.applyProposal(new RemoveEmptyNodesProposalImpl(), REQUIRE_USING_IN_PLACE_EXECUTOR);
+        query.applyProposal(new RemoveEmptyNodesProposalImpl<>(rootNode), REQUIRE_USING_IN_PLACE_EXECUTOR);
     }
 
     @Test
@@ -350,7 +350,7 @@ public class EmptyNodeRemovalTest {
         System.out.println("\n Unsatisfiable query: \n" +  query);
 
         // Should throw an exception
-        query.applyProposal(new RemoveEmptyNodesProposalImpl(), REQUIRE_USING_IN_PLACE_EXECUTOR);
+        query.applyProposal(new RemoveEmptyNodesProposalImpl(rootNode), REQUIRE_USING_IN_PLACE_EXECUTOR);
         System.err.println("\n Failure: this query should have been declared as unsatisfiable: \n" +  query);
     }
 
@@ -377,7 +377,7 @@ public class EmptyNodeRemovalTest {
         System.out.println("\n Unsatisfiable query: \n" +  query);
 
         // Should throw an exception
-        query.applyProposal(new RemoveEmptyNodesProposalImpl(), REQUIRE_USING_IN_PLACE_EXECUTOR);
+        query.applyProposal(new RemoveEmptyNodesProposalImpl<>(rootNode), REQUIRE_USING_IN_PLACE_EXECUTOR);
         System.err.println("\n Failure: this query should have been declared as unsatisfiable: \n" +  query);
     }
 
@@ -389,7 +389,8 @@ public class EmptyNodeRemovalTest {
         System.out.println("\n Unsatisfiable query: \n" +  query);
 
         // Should throw an exception
-        query.applyProposal(new RemoveEmptyNodesProposalImpl(), REQUIRE_USING_IN_PLACE_EXECUTOR);
+        query.applyProposal(new RemoveEmptyNodesProposalImpl<>(query.getRootConstructionNode()),
+                REQUIRE_USING_IN_PLACE_EXECUTOR);
         System.err.println("\n Failure: this query should have been declared as unsatisfiable: \n" +  query);
     }
 
@@ -402,7 +403,8 @@ public class EmptyNodeRemovalTest {
         System.out.println("\n Unsatisfiable query: \n" +  query);
 
         // Should throw an exception
-        query.applyProposal(new RemoveEmptyNodesProposalImpl(), REQUIRE_USING_IN_PLACE_EXECUTOR);
+        query.applyProposal(new RemoveEmptyNodesProposalImpl<>(query.getRootConstructionNode()),
+                REQUIRE_USING_IN_PLACE_EXECUTOR);
         System.err.println("\n Failure: this query should have been declared as unsatisfiable: \n" +  query);
     }
 
@@ -508,7 +510,8 @@ public class EmptyNodeRemovalTest {
         System.out.println("\n Unsatisfiable query: \n" +  query);
 
         // Should throw an exception
-        query.applyProposal(new RemoveEmptyNodesProposalImpl(), REQUIRE_USING_IN_PLACE_EXECUTOR);
+        query.applyProposal(new RemoveEmptyNodesProposalImpl<>(query.getRootConstructionNode()),
+                REQUIRE_USING_IN_PLACE_EXECUTOR);
         System.err.println("\n Failure: this query should have been declared as unsatisfiable: \n" +  query);
     }
 
@@ -813,7 +816,8 @@ public class EmptyNodeRemovalTest {
         System.out.println("\n Expected query: \n" +  expectedQuery);
 
         // Updates the query (in-place optimization)
-        query.applyProposal(new RemoveEmptyNodesProposalImpl(), REQUIRE_USING_IN_PLACE_EXECUTOR);
+        query.applyProposal(new RemoveEmptyNodesProposalImpl<>(query.getRootConstructionNode()),
+                REQUIRE_USING_IN_PLACE_EXECUTOR);
 
         System.out.println("\n Optimized query: \n" +  query);
 

@@ -166,7 +166,8 @@ public class QueryMergingExecutor implements InternalProposalExecutor<QueryMergi
         }
 
         // Removes the empty nodes (in-place operation)
-        RemoveEmptyNodesProposal cleaningProposal = new RemoveEmptyNodesProposalImpl();
+        RemoveEmptyNodesProposalImpl<ConstructionNode> cleaningProposal = new RemoveEmptyNodesProposalImpl<>(
+                mainQuery.getRootConstructionNode());
         mainQuery.applyProposal(cleaningProposal, true);
 
         return new ProposalResultsImpl(mainQuery);

@@ -47,5 +47,5 @@ public interface QueryTree {
 
     void insertParent(QueryNode childNode, QueryNode newParentNode) throws IllegalTreeUpdateException;
 
-    ImmutableSet<EmptyNode> getEmptyNodes();
+    ImmutableSet<EmptyNode> getEmptyNodes(QueryNode subTreeRoot);
 }
