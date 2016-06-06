@@ -7,9 +7,12 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import it.unibz.inf.ontop.planning.OntopPlanning;
+import it.unibz.inf.ontop.planning.utils.combinations.Combinator;
 import it.unibz.krdb.obda.model.DatalogProgram;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -90,7 +93,7 @@ public class OntopPlanningTest {
         System.out.println(sql);
     }
 
-    @Ignore
+//    @Ignore
     @Test
     public void getSQLForFragments3() throws Exception {
 
@@ -125,21 +128,25 @@ public class OntopPlanningTest {
         List<DatalogProgram> programs = op.getDLogUnfoldingsForFragments(fragments);
         
         // {wc=[fragIndex := 0, varIndex := 0)], x=[fragIndex := 0, varIndex := 1), fragIndex := 1, varIndex := 0)], ...}
-        LinkedListMultimap<String, MFragIndexToVarIndex> joinOn = op.getFragmentsJoinVariables(fragments);
+        LinkedListMultimap<String, MFragIndexToVarIndex> mOutVariableToFragmentsVariables = op.getmOutVariableToFragmentsVariables(fragments);
         
-        Map<Pair<Integer, TemplatesSignature>, DatalogProgram> mFragmentToRestrictedPrograms = new HashMap<>();
+        List<List<Restriction>> fragmentsToRestrictions = new ArrayList<>();
         
-        int fragCount = 0;
         for( DatalogProgram prog : programs ){
-            List<Pair<TemplatesSignature, DatalogProgram>> restrictions = op.splitDLogWRTTemplates(prog);
-                        
-            for( Pair<TemplatesSignature, DatalogProgram> el : restrictions ){
-        	mFragmentToRestrictedPrograms.put( new Pair<>(fragCount, el.first), el.second );
-            }
-            ++fragCount;
+            List<Restriction> restrictions = op.splitDLogWRTTemplates(prog);
+            fragmentsToRestrictions.add(restrictions);
         }
+                        
+        FragmentsVisitor visitor = new FragmentsVisitor(mOutVariableToFragmentsVariables);
         
-        // And now I can prune the programs TODO
+        Combinator<Restriction> combinator = new Combinator<Restriction>(fragmentsToRestrictions, visitor);
+        
+        combinator.combine();
+        
+        // At this point, all combinations with joins over the same templates are stored in the 
+        // visitor. Each of these combinations translate into a JUCQ.
+        
+        // All combinations of templates in join variables
         
 //      op.pruneDLogPrograms(programs, joinOn);
         

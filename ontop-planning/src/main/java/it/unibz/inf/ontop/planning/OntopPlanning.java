@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.planning;
 import com.google.common.base.Joiner;
 import com.google.common.collect.LinkedListMultimap;
 
+import it.unibz.inf.ontop.planning.fragments.MapOutVariableToFragVariables;
 import it.unibz.krdb.obda.exception.InvalidMappingException;
 import it.unibz.krdb.obda.exception.InvalidPredicateDeclarationException;
 import it.unibz.krdb.obda.io.ModelIOManager;
@@ -42,7 +43,6 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
-import java.util.regex.Pattern;
 
 public class OntopPlanning {
 
@@ -91,7 +91,7 @@ public class OntopPlanning {
      * @return 
      * @throws MalformedQueryException
      */
-    public LinkedListMultimap<String, MFragIndexToVarIndex> getFragmentsJoinVariables(List<String> fragments) throws MalformedQueryException{
+    public LinkedListMultimap<String, MFragIndexToVarIndex> getmOutVariableToFragmentsVariables(List<String> fragments) throws MalformedQueryException{
 	QueryParser parser = QueryParserUtil.createParser(QueryLanguage.SPARQL);
 	
 	LinkedListMultimap<String, MFragIndexToVarIndex> variableOccurrences = LinkedListMultimap.create();
@@ -119,129 +119,130 @@ public class OntopPlanning {
 	return variableOccurrences;	
     }
     
-    /**
-     * Side effect on parameter <i>programs<\i>
-     * @param programs
-     * @param joinOn varName -> [(fragInxed, varIndex), ...]
-     */
-    public void pruneDLogPrograms(List<DatalogProgram> programs, LinkedListMultimap<String, MFragIndexToVarIndex> joinOn){
-	
-	class LocalUtils{
-	    List<Pair<DatalogProgram, MFragIndexToVarIndex>> getProgramsList(List<MFragIndexToVarIndex> joins){
-		List<Pair<DatalogProgram, MFragIndexToVarIndex>> result = new ArrayList<>();
-		for( MFragIndexToVarIndex map : joins ){
-		    result.add( new Pair<DatalogProgram, MFragIndexToVarIndex>(programs.get(map.fragIndex), map) );
-		}
-		return result;
-	    }
-	    
-	    // URI("http://sws.ifi.uio.no/data/npd-v2/wellbore/{}",t9_7) -> http://sws.ifi.uio.no/data/npd-v2/wellbore/{}
-	    String cleanTerm(Term t){
-		String s = t.toString();
-		String result =s.substring(s.indexOf("(")+2, s.lastIndexOf("\""));
-		return result;
-	    }
-
-	    public boolean inAll(String s, List<Pair<DatalogProgram, MFragIndexToVarIndex>> rest, List<MFragIndexToVarIndex> joins) {
-		
-		for( Pair<DatalogProgram, MFragIndexToVarIndex> pair : rest ){
-		    DatalogProgram prog = pair.first;
-		    int varIndex = pair.second.varIndex;
-		    boolean found = false;
-		    for( CQIE cq : prog.getRules() ){
-			Function head = cq.getHead();
-			Term t = head.getTerm(varIndex);
-			String termString = cleanTerm(t);
-			if( termString.equals(s) ){
-			    found = true;
-			    break;
-			}
-		    }
-		    if( !found ) return false;
-		}
-		return true;
-	    }
-
-	    public void prunePrograms(List<Pair<DatalogProgram, MFragIndexToVarIndex>> pairs, List<String> prunableTermsFromPrograms) {
-		for( Pair<DatalogProgram, MFragIndexToVarIndex> pair : pairs ){
-		    DatalogProgram prog = pair.first;
-		    int varIndex = pair.second.getVarIndex();
-		    
-		    List<CQIE> removableRules = new ArrayList<>();
-		    for( String s : prunableTermsFromPrograms ){
-			for( CQIE cq : prog.getRules() ){
-			    Function head = cq.getHead();
-			    Term t = head.getTerm(varIndex);
-			    String termString = cleanTerm(t);
-			    if( termString.equals(s) ){
-				removableRules.add(cq);
-			    }
-			}
-		    }
-		    prog.removeRules(removableRules);
-		}
-	    }
-	};
-	
-	LocalUtils utils = new LocalUtils();
-	
-	for( String varName : joinOn.keySet() ){
-	    List<MFragIndexToVarIndex> joins = joinOn.get(varName);
-	    if( joins.size() > 1 ){ 
-		List<Pair<DatalogProgram, MFragIndexToVarIndex>> progs = utils.getProgramsList( joins );
-		
-		DatalogProgram firstDLogProg = progs.get(0).first;
-		MFragIndexToVarIndex firstMFragIndexToVarIndex = progs.get(0).second;
-		List<Pair<DatalogProgram, MFragIndexToVarIndex>> rest = new ArrayList<>();
-		for( int i = 1; i < progs.size(); ++i ){
-		    rest.add(progs.get(i));
-		}
-		
-		List<String> encounteredTerms = new ArrayList<String>();
-		
-		List<String> prunableTermsFromPrograms = new ArrayList<String>();
-		for( CQIE cq : firstDLogProg.getRules() ){
-		    int varIndex = firstMFragIndexToVarIndex.varIndex;
-		    Function head = cq.getHead();
-		    Term t = head.getTerm(varIndex);
-		    String s = utils.cleanTerm(t);
-		    if( encounteredTerms.contains(s) ) continue;
-		    encounteredTerms.add(s);
-		    if( !utils.inAll(s, rest, joins) ){
-			prunableTermsFromPrograms.add(s);
-		    }
-		}
-		
-		// Now it is the time to prune
-		utils.prunePrograms(progs, prunableTermsFromPrograms);
-	    }
-	}
-    }
+//    /**
+//     * Side effect on parameter <i>programs<\i>
+//     * @param programs
+//     * @param joinOn varName -> [(fragInxed, varIndex), ...]
+//     */
+//    public void pruneDLogPrograms(List<DatalogProgram> programs, LinkedListMultimap<String, MFragIndexToVarIndex> joinOn){
+//	
+//	class LocalUtils{
+//	    List<Pair<DatalogProgram, MFragIndexToVarIndex>> getProgramsList(List<MFragIndexToVarIndex> joins){
+//		List<Pair<DatalogProgram, MFragIndexToVarIndex>> result = new ArrayList<>();
+//		for( MFragIndexToVarIndex map : joins ){
+//		    result.add( new Pair<DatalogProgram, MFragIndexToVarIndex>(programs.get(map.fragIndex), map) );
+//		}
+//		return result;
+//	    }
+//	    
+//	    // URI("http://sws.ifi.uio.no/data/npd-v2/wellbore/{}",t9_7) -> http://sws.ifi.uio.no/data/npd-v2/wellbore/{}
+//	    String cleanTerm(Term t){
+//		String s = t.toString();
+//		String result =s.substring(s.indexOf("(")+2, s.lastIndexOf("\""));
+//		return result;
+//	    }
+//
+//	    public boolean inAll(String s, List<Pair<DatalogProgram, MFragIndexToVarIndex>> rest, List<MFragIndexToVarIndex> joins) {
+//		
+//		for( Pair<DatalogProgram, MFragIndexToVarIndex> pair : rest ){
+//		    DatalogProgram prog = pair.first;
+//		    int varIndex = pair.second.varIndex;
+//		    boolean found = false;
+//		    for( CQIE cq : prog.getRules() ){
+//			Function head = cq.getHead();
+//			Term t = head.getTerm(varIndex);
+//			String termString = cleanTerm(t);
+//			if( termString.equals(s) ){
+//			    found = true;
+//			    break;
+//			}
+//		    }
+//		    if( !found ) return false;
+//		}
+//		return true;
+//	    }
+//
+//	    public void prunePrograms(List<Pair<DatalogProgram, MFragIndexToVarIndex>> pairs, List<String> prunableTermsFromPrograms) {
+//		for( Pair<DatalogProgram, MFragIndexToVarIndex> pair : pairs ){
+//		    DatalogProgram prog = pair.first;
+//		    int varIndex = pair.second.getVarIndex();
+//		    
+//		    List<CQIE> removableRules = new ArrayList<>();
+//		    for( String s : prunableTermsFromPrograms ){
+//			for( CQIE cq : prog.getRules() ){
+//			    Function head = cq.getHead();
+//			    Term t = head.getTerm(varIndex);
+//			    String termString = cleanTerm(t);
+//			    if( termString.equals(s) ){
+//				removableRules.add(cq);
+//			    }
+//			}
+//		    }
+//		    prog.removeRules(removableRules);
+//		}
+//	    }
+//	};
+//	
+//	LocalUtils utils = new LocalUtils();
+//	
+//	for( String varName : joinOn.keySet() ){
+//	    List<MFragIndexToVarIndex> joins = joinOn.get(varName);
+//	    if( joins.size() > 1 ){ 
+//		List<Pair<DatalogProgram, MFragIndexToVarIndex>> progs = utils.getProgramsList( joins );
+//		
+//		DatalogProgram firstDLogProg = progs.get(0).first;
+//		MFragIndexToVarIndex firstMFragIndexToVarIndex = progs.get(0).second;
+//		List<Pair<DatalogProgram, MFragIndexToVarIndex>> rest = new ArrayList<>();
+//		for( int i = 1; i < progs.size(); ++i ){
+//		    rest.add(progs.get(i));
+//		}
+//		
+//		List<String> encounteredTerms = new ArrayList<String>();
+//		
+//		List<String> prunableTermsFromPrograms = new ArrayList<String>();
+//		for( CQIE cq : firstDLogProg.getRules() ){
+//		    int varIndex = firstMFragIndexToVarIndex.varIndex;
+//		    Function head = cq.getHead();
+//		    Term t = head.getTerm(varIndex);
+//		    String s = utils.cleanTerm(t);
+//		    if( encounteredTerms.contains(s) ) continue;
+//		    encounteredTerms.add(s);
+//		    if( !utils.inAll(s, rest, joins) ){
+//			prunableTermsFromPrograms.add(s);
+//		    }
+//		}
+//		
+//		// Now it is the time to prune
+//		utils.prunePrograms(progs, prunableTermsFromPrograms);
+//	    }
+//	}
+//    }
     
-    public List<Pair<TemplatesSignature, DatalogProgram>> splitDLogWRTTemplates(DatalogProgram prog){
+    public List<Restriction> splitDLogWRTTemplates(DatalogProgram prog){
 	
-	List<Pair<TemplatesSignature, DatalogProgram>> result = new ArrayList<>();
+	List<Restriction> result = new ArrayList<>();
 	
-	List<TemplatesSignature> encounteredSignatures = new ArrayList<>();
+	List<Signature> encounteredSignatures = new ArrayList<>();
 	for( CQIE cq : prog.getRules() ){
 	    
-	    TemplatesSignature ts = calculateTemplatesSignature(cq);
+	    Signature ts = calculateTemplatesSignature(cq);
 	    
 	    if( !encounteredSignatures.contains(ts) ){ // New Signature
 		encounteredSignatures.add(ts);
-		DatalogProgram restriction = calculateRestriction(prog, ts);
-		result.add( new Pair<TemplatesSignature, DatalogProgram>(ts, restriction) );
+		DatalogProgram restrictionProgram = calculateRestriction(prog, ts);
+		result.add( new Restriction(ts, restrictionProgram) );
 	    }
 	}
 	return result;
     }
 
-    private TemplatesSignature calculateTemplatesSignature(CQIE cq) {
+    private Signature calculateTemplatesSignature(CQIE cq) {
 	Function head = cq.getHead();
-
-	StringBuilder builder = new StringBuilder();
-
+	
+	Signature.Builder builder = new Signature.Builder();
+	
 	for( Term t : head.getTerms() ){
+	    
 	    if (t instanceof ValueConstant || t instanceof BNode) {
 		System.out.println(t + " ValueConstant || BNode");
 		assert false : "Unsupported";
@@ -259,24 +260,24 @@ public class OntopPlanning {
 		System.out.println(t + " Function");
 		System.out.println(takeTemplateString(t));
 
-		builder.append( takeTemplateString( t ) );
+		builder.template( new Template(takeTemplateString( t )) );
 	    }
 	}
-	TemplatesSignature result = TemplatesSignature.makeTemplatesSignature(builder.toString());
+	Signature result = builder.build();
 	
 	return result;
     }
 
 	// Restrict a datalog program to a certain template
 	private DatalogProgram calculateRestriction(DatalogProgram prog,
-		TemplatesSignature templ) {
+		Signature templ) {
 
 	    DatalogProgram copy = prog.clone();
 
 	    List<CQIE> toRemove = new LinkedList<>();
 	    for( Iterator<CQIE> it = copy.getRules().iterator(); it.hasNext();  ){
 		CQIE cq = it.next();
-		TemplatesSignature ts = calculateTemplatesSignature(cq);
+		Signature ts = calculateTemplatesSignature(cq);
 		if( !ts.equals(templ) ){
 		   // Prune the rule
 		    toRemove.add(cq);
@@ -357,17 +358,27 @@ public class OntopPlanning {
 
         return sqlBuilder.toString();
     }
+}
 
-    public static void main(String[] args) throws InvalidMappingException, OWLException, InvalidPredicateDeclarationException, IOException {
-
-
-//        st.close();
-//
-//        reasoner.dispose();
-
+class Restriction{
+    private Pair<Signature, DatalogProgram> restrictionToTemplateSignature;
+    
+    public Restriction(Signature s, DatalogProgram d){
+	this.restrictionToTemplateSignature = new Pair<>(s,d);
     }
-
-
+    
+    public Signature getSignature(){
+	return this.restrictionToTemplateSignature.first;
+    }
+    
+    public DatalogProgram getDLog(){
+	return this.restrictionToTemplateSignature.second;
+    }
+    
+    @Override
+    public String toString(){
+	return this.restrictionToTemplateSignature.toString();
+    }
 }
 
 class Pair<T,S> {
@@ -398,7 +409,6 @@ class Pair<T,S> {
 	return "["+first.toString()+", "+second.toString()+"]";
     }
 };
-
 class MFragIndexToVarIndex{
     
     final int fragIndex;
