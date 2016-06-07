@@ -36,7 +36,7 @@ public class SPARQLQueryFlattener {
     private final List<Predicate> irreducible = new LinkedList<>();
 	private final DatalogProgram program;
 
-    SPARQLQueryFlattener(DatalogProgram program) {
+    public SPARQLQueryFlattener(DatalogProgram program) {
 		this.program = program;
 	}
 
@@ -79,7 +79,7 @@ public class SPARQLQueryFlattener {
 
 
 
-	List<CQIE> flatten(CQIE topLevelRule) {
+	public List<CQIE> flatten(CQIE topLevelRule) {
 
         List<CQIE> workingSet = new LinkedList<>();
 		workingSet.add(topLevelRule);

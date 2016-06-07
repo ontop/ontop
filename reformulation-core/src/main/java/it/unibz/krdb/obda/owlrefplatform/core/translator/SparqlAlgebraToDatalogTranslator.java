@@ -119,14 +119,7 @@ public class SparqlAlgebraToDatalogTranslator {
         for (Term v : answerVariables)
             signature.add(((Variable)v).getName());
 
-        //System.out.println("result:\n" + program.program);
-
-        // TODO: to be removed
-        SPARQLQueryFlattener fl = new SPARQLQueryFlattener(program.program);
-        List<CQIE> p = fl.flatten(program.program.getRules(pred).get(0));
-        DatalogProgram pp = ofac.getDatalogProgram(program.getQueryModifiers(), p);
-
-		return new SparqlQuery(pp, signature);
+		return new SparqlQuery(program.program, signature);
 	}
 
     private static class TranslationResult {
@@ -163,10 +156,7 @@ public class SparqlAlgebraToDatalogTranslator {
         }
 
         void appendRule(Function head, List<Function> body) {
-            // TODO: get rid of cloning (which is needed for Unfolder)
-            CQIE rule = ofac.getCQIE(head, body).clone();
-            // TODO: get rid of EQNormalizer
-            EQNormalizer.enforceEqualities(rule);
+            CQIE rule = ofac.getCQIE(head, body);
             program.appendRule(rule);
         }
 
