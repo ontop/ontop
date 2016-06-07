@@ -96,7 +96,7 @@ public class R2RMLImportAction extends ProtegeAction {
 							if (mapping.getTargetQuery().toString().contains("BNODE")) {
 								JOptionPane.showMessageDialog(workspace, "The mapping " + mapping.getId() + " contains BNode. -ontoPro- does not support it yet.");
 							} else {
-								obdaModel.addMapping(sourceID, mapping);
+								obdaModel.addMapping(sourceID, mapping, false);
 
 							}
 						}

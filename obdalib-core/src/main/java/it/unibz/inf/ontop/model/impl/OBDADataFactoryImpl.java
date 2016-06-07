@@ -123,7 +123,12 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	public Predicate getClassPredicate(String name) {
 		return new PredicateImpl(name, 1, new COL_TYPE[] { COL_TYPE.OBJECT });
 	}
-	
+
+	@Override
+	public Predicate getOWLSameASPredicate() {
+		return new PredicateImpl(OBDAVocabulary.SAME_AS, 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT });
+	}
+
 	@Override
 	@Deprecated
 	public URIConstant getConstantURI(String uriString) {

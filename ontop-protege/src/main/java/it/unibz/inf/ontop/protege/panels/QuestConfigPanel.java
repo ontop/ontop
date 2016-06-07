@@ -91,6 +91,9 @@ public class QuestConfigPanel extends javax.swing.JPanel {
 
         bChecked = preference.getCurrentBooleanValueFor(QuestPreferences.OBTAIN_FROM_MAPPINGS);
         chkObtainFromMappings.setSelected(bChecked);
+
+        bChecked = preference.getCurrentBooleanValueFor(QuestPreferences.SAME_AS);
+        chkSameAs.setSelected(bChecked);
     }
 
     private void virtualModeSelected() {
@@ -152,6 +155,7 @@ public class QuestConfigPanel extends javax.swing.JPanel {
         pnlReformulationMethods = new javax.swing.JPanel();
         chkRewrite = new javax.swing.JCheckBox();
         chkAnnotations = new javax.swing.JCheckBox();
+        chkSameAs = new javax.swing.JCheckBox();
         filler2 = new javax.swing.Box.Filler(new java.awt.Dimension(0, 0), new java.awt.Dimension(0, 0), new java.awt.Dimension(32767, 32767));
         pnlABoxConfiguration = new javax.swing.JPanel();
         radVirtualObda = new javax.swing.JRadioButton();
@@ -166,24 +170,23 @@ public class QuestConfigPanel extends javax.swing.JPanel {
         lblDataSource = new javax.swing.JLabel();
         chkObtainFromOntology = new javax.swing.JCheckBox();
         chkObtainFromMappings = new javax.swing.JCheckBox();
-        fillerPanel = new javax.swing.JPanel();
 
-        setMinimumSize(new java.awt.Dimension(525, 485));
-        setPreferredSize(new java.awt.Dimension(525, 485));
+        setMinimumSize(new java.awt.Dimension(620, 560));
+        setPreferredSize(new java.awt.Dimension(620, 560));
         setLayout(new java.awt.GridBagLayout());
 
         labelNote.setText("<html><b>Note:</b> You will need to restart Ontop Reasoner for any changes to take effect.<p/>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; (i.e., select \"Reasoner-> None\" and then \"Reasoner -> Ontop\" in Protege's menu)</html>");
+        labelNote.setAlignmentX(0.5F);
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 0;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.insets = new java.awt.Insets(5, 15, 5, 5);
+        gridBagConstraints.insets = new java.awt.Insets(0, 15, 5, 5);
         add(labelNote, gridBagConstraints);
 
         pnlReformulationMethods.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createLineBorder(java.awt.Color.lightGray), "First Order reformulation"));
-        pnlReformulationMethods.setMinimumSize(new java.awt.Dimension(590, 85));
-        pnlReformulationMethods.setPreferredSize(new java.awt.Dimension(590, 85));
-        pnlReformulationMethods.setRequestFocusEnabled(false);
+        pnlReformulationMethods.setMinimumSize(new java.awt.Dimension(620, 120));
+        pnlReformulationMethods.setPreferredSize(new java.awt.Dimension(620, 120));
         pnlReformulationMethods.setLayout(new java.awt.GridBagLayout());
 
         chkRewrite.setText("Enable reasoning over anonymous individuals (tree-witness rewriting) ");
@@ -219,8 +222,23 @@ public class QuestConfigPanel extends javax.swing.JPanel {
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 3, 5);
         pnlReformulationMethods.add(chkAnnotations, gridBagConstraints);
-        chkAnnotations.getAccessibleContext().setAccessibleDescription("Enable only if your application requires querying annotation properties defined in the ontology.");
 
+        chkSameAs.setText("Enable reasoning with owl:sameAs from mappings");
+        chkSameAs.setToolTipText("Enable only if your application requires reasoning with owl:sameAs from mappings");
+        chkSameAs.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+        chkSameAs.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                chkSameAsActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.gridwidth = 3;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 3, 5);
+        pnlReformulationMethods.add(chkSameAs, gridBagConstraints);
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 2;
         gridBagConstraints.gridy = 1;
@@ -230,21 +248,22 @@ public class QuestConfigPanel extends javax.swing.JPanel {
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
         gridBagConstraints.weightx = 1.0;
-        gridBagConstraints.insets = new java.awt.Insets(5, 6, 0, 6);
+        gridBagConstraints.insets = new java.awt.Insets(5, 6, 5, 6);
         add(pnlReformulationMethods, gridBagConstraints);
 
         pnlABoxConfiguration.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createLineBorder(java.awt.Color.lightGray), "Data Configuration"));
-        pnlABoxConfiguration.setMinimumSize(new java.awt.Dimension(620, 480));
-        pnlABoxConfiguration.setPreferredSize(new java.awt.Dimension(620, 350));
+        pnlABoxConfiguration.setMinimumSize(new java.awt.Dimension(620, 350));
+        pnlABoxConfiguration.setPreferredSize(new java.awt.Dimension(620, 480));
         pnlABoxConfiguration.setLayout(new java.awt.GridBagLayout());
 
         AboxMode.add(radVirtualObda);
-        radVirtualObda.setSelected(true);
         radVirtualObda.setText("Virtual ABox (virtual RDF graph)");
         radVirtualObda.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+        radVirtualObda.setVerticalAlignment(javax.swing.SwingConstants.TOP);
         radVirtualObda.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 radVirtualObdaActionPerformed(evt);
@@ -252,6 +271,7 @@ public class QuestConfigPanel extends javax.swing.JPanel {
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 1;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         gridBagConstraints.weightx = 1.0;
@@ -317,7 +337,6 @@ public class QuestConfigPanel extends javax.swing.JPanel {
         pnlABoxConfiguration.add(radUniversal, gridBagConstraints);
 
         mapper.add(radSemanticIndex);
-        radSemanticIndex.setSelected(true);
         radSemanticIndex.setText("Semantic Index (recommended)");
         radSemanticIndex.setToolTipText("SPOG schema optimised for very large hierarchies.");
         radSemanticIndex.setPreferredSize(new java.awt.Dimension(177, 20));
@@ -363,7 +382,6 @@ public class QuestConfigPanel extends javax.swing.JPanel {
         radRemoteDatabase.getAccessibleContext().setAccessibleName("Remote database (the user provides the JDBC connection)");
 
         datalocationGroup.add(radInMemoryDatabase);
-        radInMemoryDatabase.setSelected(true);
         radInMemoryDatabase.setText("In-Memory (H2-DB)");
         radInMemoryDatabase.setToolTipText("ABox assertions/triples are stored in a in-memory relational database created and managed by Quest.");
         radInMemoryDatabase.setPreferredSize(new java.awt.Dimension(97, 20));
@@ -424,20 +442,14 @@ public class QuestConfigPanel extends javax.swing.JPanel {
         gridBagConstraints.weightx = 1.0;
         gridBagConstraints.insets = new java.awt.Insets(3, 40, 3, 0);
         pnlABoxConfiguration.add(chkObtainFromMappings, gridBagConstraints);
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-        gridBagConstraints.weighty = 2.0;
-        pnlABoxConfiguration.add(fillerPanel, gridBagConstraints);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
         gridBagConstraints.weightx = 1.0;
-        gridBagConstraints.weighty = 2.0;
-        gridBagConstraints.insets = new java.awt.Insets(10, 6, 15, 6);
+        gridBagConstraints.insets = new java.awt.Insets(15, 6, 15, 6);
         add(pnlABoxConfiguration, gridBagConstraints);
     }// </editor-fold>//GEN-END:initComponents
 
@@ -490,20 +502,19 @@ public class QuestConfigPanel extends javax.swing.JPanel {
     }//GEN-LAST:event_radVirtualObdaActionPerformed
 
     private void chkRewriteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkRewriteActionPerformed
-        if (chkRewrite.isSelected()) {
-            preference.setCurrentValueOf(QuestPreferences.REWRITE, Boolean.TRUE.toString());
-        } else {
-            preference.setCurrentValueOf(QuestPreferences.REWRITE, Boolean.FALSE.toString());
-        }
+        preference.setCurrentValueOf(QuestPreferences.REWRITE, String.valueOf(chkRewrite.isSelected()));
+
     }//GEN-LAST:event_chkRewriteActionPerformed
 
     private void chkAnnotationsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkAnnotationsActionPerformed
-         if (chkAnnotations.isSelected()) {
-            preference.setCurrentValueOf(QuestPreferences.ANNOTATIONS_IN_ONTO, Boolean.TRUE.toString());
-        } else {
-            preference.setCurrentValueOf(QuestPreferences.ANNOTATIONS_IN_ONTO, Boolean.FALSE.toString());
-        }
+        preference.setCurrentValueOf(QuestPreferences.ANNOTATIONS_IN_ONTO, String.valueOf(chkAnnotations.isSelected()));
+
     }//GEN-LAST:event_chkAnnotationsActionPerformed
+
+    private void chkSameAsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkSameAsActionPerformed
+        preference.setCurrentValueOf(QuestPreferences.SAME_AS, String.valueOf(chkSameAs.isSelected()));
+
+    }//GEN-LAST:event_chkSameAsActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.ButtonGroup AboxMode;
@@ -511,9 +522,9 @@ public class QuestConfigPanel extends javax.swing.JPanel {
     private javax.swing.JCheckBox chkObtainFromMappings;
     private javax.swing.JCheckBox chkObtainFromOntology;
     private javax.swing.JCheckBox chkRewrite;
+    private javax.swing.JCheckBox chkSameAs;
     private javax.swing.ButtonGroup datalocationGroup;
     private javax.swing.Box.Filler filler2;
-    private javax.swing.JPanel fillerPanel;
     private javax.swing.JLabel labelNote;
     private javax.swing.JLabel lblDataLocation;
     private javax.swing.JLabel lblDataSource;

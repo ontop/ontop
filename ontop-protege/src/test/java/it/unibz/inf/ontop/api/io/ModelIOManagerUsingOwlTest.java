@@ -32,6 +32,9 @@ import it.unibz.inf.ontop.model.OBDAModel;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.model.impl.RDBMSourceParameterConstants;
 import it.unibz.inf.ontop.parser.TurtleOBDASyntaxParser;
+import junit.framework.TestCase;
+import org.semanticweb.owlapi.apibinding.OWLManager;
+import org.semanticweb.owlapi.model.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -39,16 +42,6 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
-
-import junit.framework.TestCase;
-
-import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.OWLClass;
-import org.semanticweb.owlapi.model.OWLDataProperty;
-import org.semanticweb.owlapi.model.OWLObjectProperty;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyCreationException;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
 
 public class ModelIOManagerUsingOwlTest extends TestCase {
 
@@ -293,9 +286,9 @@ public class ModelIOManagerUsingOwlTest extends TestCase {
     private void addSampleMappings(OBDAModel model, URI sourceId) {
         // Add some mappings
         try {
-            model.addMapping(sourceId, dfac.getRDBMSMappingAxiom(mappings[0][0], dfac.getSQLQuery(mappings[0][1]), parser.parse(mappings[0][2])));
-            model.addMapping(sourceId, dfac.getRDBMSMappingAxiom(mappings[1][0], dfac.getSQLQuery(mappings[1][1]), parser.parse(mappings[1][2])));
-            model.addMapping(sourceId, dfac.getRDBMSMappingAxiom(mappings[2][0], dfac.getSQLQuery(mappings[2][1]), parser.parse(mappings[2][2])));
+            model.addMapping(sourceId, dfac.getRDBMSMappingAxiom(mappings[0][0], dfac.getSQLQuery(mappings[0][1]), parser.parse(mappings[0][2])), false);
+            model.addMapping(sourceId, dfac.getRDBMSMappingAxiom(mappings[1][0], dfac.getSQLQuery(mappings[1][1]), parser.parse(mappings[1][2])), false);
+            model.addMapping(sourceId, dfac.getRDBMSMappingAxiom(mappings[2][0], dfac.getSQLQuery(mappings[2][1]), parser.parse(mappings[2][2])), false);
         } catch (Exception e) {
             // NO-OP
         }
@@ -304,9 +297,9 @@ public class ModelIOManagerUsingOwlTest extends TestCase {
     private void addMoreSampleMappings(OBDAModel model, URI sourceId) {
         // Add some mappings
         try {
-            model.addMapping(sourceId, dfac.getRDBMSMappingAxiom(mappings[3][0], dfac.getSQLQuery(mappings[3][1]), parser.parse(mappings[3][2])));
-            model.addMapping(sourceId, dfac.getRDBMSMappingAxiom(mappings[4][0], dfac.getSQLQuery(mappings[4][1]), parser.parse(mappings[4][2])));
-            model.addMapping(sourceId, dfac.getRDBMSMappingAxiom(mappings[5][0], dfac.getSQLQuery(mappings[5][1]), parser.parse(mappings[5][2])));
+            model.addMapping(sourceId, dfac.getRDBMSMappingAxiom(mappings[3][0], dfac.getSQLQuery(mappings[3][1]), parser.parse(mappings[3][2])), false);
+            model.addMapping(sourceId, dfac.getRDBMSMappingAxiom(mappings[4][0], dfac.getSQLQuery(mappings[4][1]), parser.parse(mappings[4][2])), false);
+            model.addMapping(sourceId, dfac.getRDBMSMappingAxiom(mappings[5][0], dfac.getSQLQuery(mappings[5][1]), parser.parse(mappings[5][2])), false);
         } catch (Exception e) {
             // NO-OP
         }

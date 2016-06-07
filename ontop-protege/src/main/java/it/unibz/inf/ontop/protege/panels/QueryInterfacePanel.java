@@ -22,7 +22,7 @@ package it.unibz.inf.ontop.protege.panels;
 
 import it.unibz.inf.ontop.model.OBDAModel;
 import it.unibz.inf.ontop.owlrefplatform.core.queryevaluation.SPARQLQueryUtility;
-import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWLResultSet;
+import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLResultSet;
 import it.unibz.inf.ontop.protege.gui.IconLoader;
 import it.unibz.inf.ontop.protege.gui.action.OBDADataQueryAction;
 import it.unibz.inf.ontop.protege.utils.DialogUtils;
@@ -178,7 +178,7 @@ public class QueryInterfacePanel extends JPanel implements SavedQueriesPanelList
 
         chkShowAll.setText("All");
         chkShowAll.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        chkShowAll.setPreferredSize(new java.awt.Dimension(45, 23));
+        chkShowAll.setPreferredSize(new java.awt.Dimension(55, 23));
         chkShowAll.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 chkShowAllActionPerformed(evt);
@@ -190,7 +190,6 @@ public class QueryInterfacePanel extends JPanel implements SavedQueriesPanelList
         chkShowShortURI.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
         chkShowShortURI.setMaximumSize(new java.awt.Dimension(75, 23));
         chkShowShortURI.setMinimumSize(new java.awt.Dimension(75, 23));
-        chkShowShortURI.setPreferredSize(new java.awt.Dimension(75, 23));
         pnlExecutionInfo.add(chkShowShortURI, new java.awt.GridBagConstraints());
 
         gridBagConstraints = new java.awt.GridBagConstraints();

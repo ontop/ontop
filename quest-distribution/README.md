@@ -5,7 +5,7 @@ The [-ontop-](http://ontop.inf.ubibz.it) framework is an open source project ava
 By downloading these packages you are agreeing with them.
 
 * Current version: 1.18.0
-* Release date: 23/05/2016
+* Release date: 26/05/2016
 * [Changelog](https://github.com/ontop/ontop/wiki/OntopReleases)
 
 
