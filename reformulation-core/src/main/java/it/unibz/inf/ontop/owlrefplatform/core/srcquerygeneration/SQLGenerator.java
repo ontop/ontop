@@ -26,15 +26,20 @@ import it.unibz.inf.ontop.model.Predicate.COL_TYPE;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
 import it.unibz.inf.ontop.model.TermType;
+import it.unibz.inf.ontop.model.impl.TermUtils;
 import it.unibz.inf.ontop.owlrefplatform.core.abox.SemanticIndexURIMap;
+import it.unibz.inf.ontop.owlrefplatform.core.abox.XsdDatatypeConverter;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.DatalogNormalizer;
 import it.unibz.inf.ontop.owlrefplatform.core.queryevaluation.DB2SQLDialectAdapter;
 import it.unibz.inf.ontop.owlrefplatform.core.queryevaluation.SQLDialectAdapter;
+import it.unibz.inf.ontop.parser.EncodeForURI;
 import it.unibz.inf.ontop.sql.*;
 import it.unibz.inf.ontop.utils.DatalogDependencyGraphGenerator;
 
 import java.sql.Types;
 import java.util.*;
+import java.util.Map.Entry;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.openrdf.model.Literal;
@@ -83,13 +88,12 @@ public class SQLGenerator implements SQLQueryGenerator {
 
 
 	private boolean generatingREPLACE = true;
+	private boolean distinctResultSet = false;
+	private final String replace1, replace2;
 
 	private boolean isDistinct = false;
 	private boolean isOrderBy = false;
 	private boolean isSI = false;
-
-	private boolean havingCond = false;
-	private String havingStr = "";
 
 	private SemanticIndexURIMap uriRefIds;
 
@@ -160,6 +164,20 @@ public class SQLGenerator implements SQLQueryGenerator {
 		}
 
 		operations = builder.build();
+
+		if (generatingREPLACE) {
+			StringBuilder sb1 = new StringBuilder();
+			StringBuilder sb2 = new StringBuilder();
+			for (Entry<String, String> e : EncodeForURI.TABLE.entrySet()) {
+				sb1.append("REPLACE(");
+				sb2.append(", '").append(e.getValue()).append("', '").append(e.getKey()).append("')");
+			}
+			replace1 = sb1.toString();
+			replace2 = sb2.toString();
+		}
+		else {
+			replace1 = replace2 = "";
+		}
 	}
 
 
@@ -169,10 +187,17 @@ public class SQLGenerator implements SQLQueryGenerator {
 	}
 
 	public SQLGenerator(DBMetadata metadata, SQLDialectAdapter sqladapter, boolean sqlGenerateReplace,
-            /*boolean isSI, */ SemanticIndexURIMap uriRefIds) {
+             SemanticIndexURIMap uriRefIds) {
 		this(metadata, sqladapter, sqlGenerateReplace);
 		this.isSI = (uriRefIds != null);
 		this.uriRefIds = uriRefIds;
+	}
+
+	public SQLGenerator(DBMetadata metadata, SQLDialectAdapter sqladapter, boolean sqlGenerateReplace, boolean distinctResultSet, SemanticIndexURIMap uriRefIds) {
+		this(metadata, sqladapter, sqlGenerateReplace);
+		this.isSI = (uriRefIds != null);
+		this.uriRefIds = uriRefIds;
+		this.distinctResultSet = distinctResultSet;
 	}
 
 	/**
@@ -182,7 +207,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 	 * @return A cloned object without any query-dependent value
 	 */
 	public SQLQueryGenerator cloneGenerator() {
-		return new SQLGenerator(metadata.clone(), sqladapter, generatingREPLACE, uriRefIds);
+		return new SQLGenerator(metadata.clone(), sqladapter, generatingREPLACE, distinctResultSet, uriRefIds);
 	}
 
 	/**
@@ -258,7 +283,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 
     @Override
     public boolean hasDistinctResultSet() {
-        return false;
+        return distinctResultSet;
     }
 
     private boolean hasSelectDistinctStatement(DatalogProgram query) {
@@ -384,7 +409,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 		}
 
 		String UNION;
-		if (isDistinct) {
+		if (isDistinct && !distinctResultSet) {
 			UNION = "UNION";
 		} else {
 			UNION = "UNION ALL";
@@ -421,7 +446,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 		boolean innerdistincts = false;
 
 		// && numberOfQueries == 1
-		if (isDistinct) {
+		if (isDistinct && !distinctResultSet) {
 			innerdistincts = true;
 		}
 
@@ -455,7 +480,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 			condFunctions.add((Function) cond);
 		}
 
-		LinkedHashSet<String> condSet = getBooleanConditionsString(condFunctions, index);
+		Set<String> condSet = getBooleanConditionsString(condFunctions, index);
 
 //		List<String> groupReferences = Lists.newArrayList();
 
@@ -661,9 +686,9 @@ public class SQLGenerator implements SQLQueryGenerator {
 	 * Returns a string with boolean conditions formed with the boolean atoms
 	 * found in the atoms list.
 	 */
-	private LinkedHashSet<String> getBooleanConditionsString(
+	private Set<String> getBooleanConditionsString(
 			List<Function> atoms, QueryAliasIndex index) {
-		LinkedHashSet<String> conditions = new LinkedHashSet<String>();
+		Set<String> conditions = new LinkedHashSet<String>();
 		for (int atomidx = 0; atomidx < atoms.size(); atomidx++) {
 			Term innerAtom = atoms.get(atomidx);
 			Function innerAtomAsFunction = (Function) innerAtom;
@@ -788,7 +813,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 	 * If process boolean operators is enabled, all boolean conditions will be
 	 * added to the ON clause of the first JOIN.
 	 *
-	 * @param inneratoms
+	 * @param atoms
 	 * @param index
 	 * @param isTopLevel
 	 *            indicates if the list of atoms is actually the main body of
@@ -798,20 +823,16 @@ public class SQLGenerator implements SQLQueryGenerator {
 	 *
 	 * @return
 	 */
-	private String getTableDefinitions(List<Function> inneratoms,
+	private String getTableDefinitions(List<Function> atoms,
 									   QueryAliasIndex index, boolean isTopLevel, boolean isLeftJoin,
 									   String indent) {
 		/*
 		 * We now collect the view definitions for each data atom each
 		 * condition, and each each nested Join/LeftJoin
 		 */
-		List<String> tableDefinitions = new LinkedList<String>();
-		for (int atomidx = 0; atomidx < inneratoms.size(); atomidx++) {
-			Term innerAtom = inneratoms.get(atomidx);
-			Function innerAtomAsFunction = (Function) innerAtom;
-			String indent2 = indent + INDENT;
-			String definition = getTableDefinition(innerAtomAsFunction, index,
-					indent2);
+		List<String> tableDefinitions = new LinkedList<>();
+		for (Function a : atoms) {
+			String definition = getTableDefinition(a, index, indent + INDENT);
 			if (!definition.isEmpty()) {
 				tableDefinitions.add(definition);
 			}
@@ -848,7 +869,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 			 * This is actually a Join or LeftJoin, so we form the JOINs/LEFT
 			 * JOINs and the ON clauses
 			 */
-			String JOIN_KEYWORD = null;
+			String JOIN_KEYWORD;
 			if (isLeftJoin) {
 				JOIN_KEYWORD = "LEFT OUTER JOIN";
 			} else {
@@ -893,7 +914,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 			 * last parenthesis ')' and replace it with ' ON %s)' where %s are
 			 * all the conditions
 			 */
-			String conditions = getConditionsString(inneratoms, index, true,
+			String conditions = getConditionsString(atoms, index, true,
 					indent);
 
 //			if (conditions.length() > 0
@@ -924,11 +945,11 @@ public class SQLGenerator implements SQLQueryGenerator {
 				|| atom.isDataTypeFunction()) {
 			// These don't participate in the FROM clause
 			return "";
-		} else if (predicate instanceof AlgebraOperatorPredicate) {
+		} else if (atom.isAlgebraFunction()) {
 			if (predicate.getName().equals("Group")) {
 				return "";
 			}
-			List<Function> innerTerms = new LinkedList<Function>();
+			List<Function> innerTerms = new ArrayList<>(atom.getTerms().size());
 			for (Term innerTerm : atom.getTerms()) {
 				innerTerms.add((Function) innerTerm);
 			}
@@ -969,19 +990,19 @@ public class SQLGenerator implements SQLQueryGenerator {
 	private String getConditionsString(List<Function> atoms,
 									   QueryAliasIndex index, boolean processShared, String indent) {
 
-		LinkedHashSet<String> equalityConditions = new LinkedHashSet<String>();
+		Set<String> equalityConditions = new LinkedHashSet<>();
 
 		// if (processShared)
 
 		// guohui: After normalization, do we have shared variables?
 		// TODO: should we remove this ??
-		LinkedHashSet<String> conditionsSharedVariablesAndConstants = getConditionsSharedVariablesAndConstants(
+		Set<String> conditionsSharedVariablesAndConstants = getConditionsSharedVariablesAndConstants(
 				atoms, index, processShared);
 		equalityConditions.addAll(conditionsSharedVariablesAndConstants);
-		LinkedHashSet<String> booleanConditions = getBooleanConditionsString(
+		Set<String> booleanConditions = getBooleanConditionsString(
 				atoms, index);
 
-		LinkedHashSet<String> conditions = new LinkedHashSet<String>();
+		Set<String> conditions = new LinkedHashSet<>();
 		conditions.addAll(equalityConditions);
 		conditions.addAll(booleanConditions);
 
@@ -1014,13 +1035,15 @@ public class SQLGenerator implements SQLQueryGenerator {
 	 */
 	private Set<Variable> getVariableReferencesWithLeftJoin(Function atom) {
 		if (atom.isDataFunction()) {
-			return atom.getVariables();
+			Set<Variable> variables = new LinkedHashSet<>();
+			TermUtils.addReferencedVariablesTo(variables, atom);
+			return variables;
 		}
 		if (atom.isOperation()) {
-			return new HashSet<Variable>();
+			return Collections.emptySet();
 		}
 		if (atom.isDataTypeFunction()) {
-			return new HashSet<Variable>();
+			return Collections.emptySet();
 		}
 		/*
 		 * we have an algebra operator (join or left join) if its a join, we need
@@ -1033,7 +1056,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 		if (atom.getFunctionSymbol() == OBDAVocabulary.SPARQL_LEFTJOIN) {
 			isLeftJoin = true;
 		}
-		LinkedHashSet<Variable> innerVariables = new LinkedHashSet<Variable>();
+		Set<Variable> innerVariables = new LinkedHashSet<>();
 		for (Term t : atom.getTerms()) {
 			if (isLeftJoin && foundFirstDataAtom) {
 				break;
@@ -1064,11 +1087,11 @@ public class SQLGenerator implements SQLQueryGenerator {
 	 * x),B(x))
 	 *
 	 */
-	private LinkedHashSet<String> getConditionsSharedVariablesAndConstants(
+	private Set<String> getConditionsSharedVariablesAndConstants(
 			List<Function> atoms, QueryAliasIndex index, boolean processShared) {
-		LinkedHashSet<String> equalities = new LinkedHashSet<String>();
+		Set<String> equalities = new LinkedHashSet<>();
 
-		Set<Variable> currentLevelVariables = new LinkedHashSet<Variable>();
+		Set<Variable> currentLevelVariables = new LinkedHashSet<>();
 		if (processShared) {
 			for (Function atom : atoms) {
 				currentLevelVariables
@@ -1173,7 +1196,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 		StringBuilder sb = new StringBuilder();
 
 		sb.append("SELECT ");
-		if (distinct) {
+		if (distinct && !distinctResultSet) {
 			sb.append("DISTINCT ");
 		}
 		//Only for ASK
@@ -1472,16 +1495,6 @@ public class SQLGenerator implements SQLQueryGenerator {
 		return Optional.empty();
 	}
 
-
-
-	private static String unquote(String string) {
-		if (string.charAt(0) == '\'' || string.charAt(0) == '\"'
-				|| string.charAt(0) == '`') {
-			return string.substring(1, string.length() - 1);
-		}
-		return string;
-	}
-
 	public String getSQLStringForTemplateFunction(Function ov,
 												  QueryAliasIndex index) {
 		/*
@@ -1494,10 +1507,10 @@ public class SQLGenerator implements SQLQueryGenerator {
 		if (t instanceof ValueConstant || t instanceof BNode) {
 			/*
 			 * The function is actually a template. The first parameter is a
-			 * string of the form http://.../.../ or empty "{}" with place
-			 * holders of the form {}. The rest are variables or constants that
-			 * should be put in place of the palce holders. We need to tokenize
-			 * and form the CONCAT
+			 * string of the form http://.../.../ or empty "{}" with place holders of the form
+			 * {}. The rest are variables or constants that should be put in
+			 * place of the place holders. We need to tokenize and form the
+			 * CONCAT
 			 */
 			if (t instanceof BNode) {
 				//TODO: why getValue and not getName(). Change coming from v1.
@@ -1507,43 +1520,11 @@ public class SQLGenerator implements SQLQueryGenerator {
 			}
 			Predicate pred = ov.getFunctionSymbol();
 
-
-
-			String replace1;
-			String replace2;
-			if(generatingREPLACE) {
-
-				replace1 = "REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(" +
-						"REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(";
-
-				replace2 = ",' ', '%20')," +
-						"'!', '%21')," +
-						"'@', '%40')," +
-						"'#', '%23')," +
-						"'$', '%24')," +
-						"'&', '%26')," +
-						"'*', '%42'), " +
-						"'(', '%28'), " +
-						"')', '%29'), " +
-						"'[', '%5B'), " +
-						"']', '%5D'), " +
-						"',', '%2C'), " +
-						"';', '%3B'), " +
-						"':', '%3A'), " +
-						"'?', '%3F'), " +
-						"'=', '%3D'), " +
-						"'+', '%2B'), " +
-						"'''', '%22'), " +
-						"'/', '%2F')";
-			} else {
-				replace1 = replace2 = "";
-			}
-
-			String template = trim(literalValue);
+			String template = trimLiteral(literalValue);
 
 			String[] split = template.split("[{][}]");
 
-			List<String> vex = new LinkedList<String>();
+			List<String> vex = new LinkedList<>();
 			if (split.length > 0 && !split[0].isEmpty()) {
 				vex.add(sqladapter.getSQLLexicalFormString(split[0]));
 			}
@@ -1561,16 +1542,24 @@ public class SQLGenerator implements SQLQueryGenerator {
 					Term currentTerm = ov.getTerms().get(termIndex);
 					String repl = "";
 					if (isStringColType(currentTerm, index)) {
-						repl = replace1
-								+ (getSQLString(currentTerm, index, false))
-								+ replace2;
+						//empty place holders: the correct uri is in the column of DB no need to replace
+						if(split.length == 0)
+						{
+							repl = getSQLString(currentTerm, index, false) ;
+						}
+						else
+						{
+							repl = replace1 + (getSQLString(currentTerm, index, false)) + replace2;
+						}
+
 					} else {
-						repl = replace1
-								+ sqladapter
-								.sqlCast(
-										getSQLString(currentTerm,
-												index, false),
-										Types.VARCHAR) + replace2;
+						if(split.length == 0)
+						{
+							repl = sqladapter.sqlCast(getSQLString(currentTerm, index, false), Types.VARCHAR) ;
+						}
+						else {
+							repl = replace1 + sqladapter.sqlCast(getSQLString(currentTerm, index, false), Types.VARCHAR) + replace2;
+						}
 					}
 					vex.add(repl);
 					if (termIndex < split.length) {
@@ -1589,7 +1578,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 				params[i] = param;
 				i += 1;
 			}
-			return getStringConcatenation(sqladapter, params);
+			return getStringConcatenation(params);
 
 		} else if (t instanceof Variable) {
 			/*
@@ -1616,11 +1605,10 @@ public class SQLGenerator implements SQLQueryGenerator {
 
 	}
 
-	//TODO: move to SQLAdapter
-	private String getStringConcatenation(SQLDialectAdapter adapter,
-										  String[] params) {
+	// TODO: move to SQLAdapter
+	private String getStringConcatenation(String[] params) {
 		String toReturn = sqladapter.strConcat(params);
-		if (adapter instanceof DB2SQLDialectAdapter) {
+		if (sqladapter instanceof DB2SQLDialectAdapter) {
 			/*
 			 * A work around to handle DB2 (>9.1) issue SQL0134N: Improper use
 			 * of a string column, host variable, constant, or function name.
@@ -1629,7 +1617,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 			 * =%2Fcom.ibm.db2.luw.messages.sql.doc%2Fdoc%2Fmsql00134n.html
 			 */
 			if (isDistinct || isOrderBy) {
-				return adapter.sqlCast(toReturn, Types.VARCHAR);
+				return sqladapter.sqlCast(toReturn, Types.VARCHAR);
 			}
 		}
 		return toReturn;
@@ -1704,8 +1692,10 @@ public class SQLGenerator implements SQLQueryGenerator {
 		return false;
 	}
 
-	private String trim(String string) {
-		while (string.startsWith("\"") && string.endsWith("\"")) {
+	private static final Pattern pQuotes = Pattern.compile("[\"`\\['][^\\.]*[\"`\\]']");
+
+	private static String trimLiteral(String string) {
+		while (pQuotes.matcher(string).matches()) {
 			string = string.substring(1, string.length() - 1);
 		}
 		return string;
@@ -2048,40 +2038,34 @@ public class SQLGenerator implements SQLQueryGenerator {
 	 * @return
 	 */
 	private String getSQLLexicalForm(ValueConstant constant) {
-		String sql = null;
-		if (constant.getType() == BNODE || constant.getType() == LITERAL || constant.getType() == OBJECT
-				|| constant.getType() == STRING) {
-			sql = "'" + constant.getValue() + "'";
+		switch (constant.getType()) {
+		case BNODE:
+		case LITERAL:
+		case OBJECT:
+		case STRING:
+			return sqladapter.getSQLLexicalFormString(constant.getValue());
+		case BOOLEAN:
+			boolean v = XsdDatatypeConverter.parseXsdBoolean(constant.getValue());
+			return sqladapter.getSQLLexicalFormBoolean(v);
+		case DATETIME:
+			return sqladapter.getSQLLexicalFormDatetime(constant.getValue());
+		case DATETIME_STAMP:
+			return sqladapter.getSQLLexicalFormDatetimeStamp(constant.getValue());
+		case DECIMAL:
+		case DOUBLE:
+		case INTEGER:
+		case LONG:
+		case FLOAT:
+		case NON_POSITIVE_INTEGER:
+		case INT:
+		case UNSIGNED_INT:
+		case NEGATIVE_INTEGER:
+		case POSITIVE_INTEGER:
+		case NON_NEGATIVE_INTEGER:
+			return constant.getValue();
+		default:
+			return "'" + constant.getValue() + "'";
 		}
-		else if (constant.getType() == BOOLEAN) {
-			String value = constant.getValue().toLowerCase();
-			if (value.equals("1") || value.equals("true") || value.equals("t")) {
-				sql = sqladapter.getSQLLexicalFormBoolean(true);
-			}
-			else if (value.equals("0") || value.equals("false") || value.equals("f")) {
-				sql = sqladapter.getSQLLexicalFormBoolean(false);
-			}
-			else {
-				throw new RuntimeException("Invalid lexical form for xsd:boolean. Found: " + value);
-			}
-		}
-		else if (constant.getType() == DATETIME) {
-			sql = sqladapter.getSQLLexicalFormDatetime(constant.getValue());
-		}
-		else if (constant.getType() == NULL
-				|| constant.getType() == DECIMAL || constant.getType() == DOUBLE
-				|| constant.getType() == INTEGER || constant.getType() == LONG
-				|| constant.getType() == FLOAT || constant.getType() == NON_POSITIVE_INTEGER
-				|| constant.getType() == INT || constant.getType() == UNSIGNED_INT
-				|| constant.getType() == NEGATIVE_INTEGER
-				|| constant.getType() == POSITIVE_INTEGER || constant.getType() == NON_NEGATIVE_INTEGER) {
-			sql = constant.getValue();
-		}
-		else {
-			sql = "'" + constant.getValue() + "'";
-		}
-		return sql;
-
 	}
 
 	/***
@@ -2106,7 +2090,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 	/**
 	 * Utility class to resolve "database" atoms to view definitions ready to be
 	 * used in a FROM clause, and variables, to column references defined over
-	 * the existing view definitons of a query.
+	 * the existing view definitions of a query.
 	 */
 	public class QueryAliasIndex {
 
@@ -2150,7 +2134,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 												 Map<Predicate, ParserViewDefinition> subQueryDefinitions) {
 			if (atom.isOperation()) {
 				return;
-			} else if (atom.getFunctionSymbol() instanceof AlgebraOperatorPredicate) {
+			} else if (atom.isAlgebraFunction()){
 				List<Term> lit = atom.getTerms();
 				for (Term subatom : lit) {
 					if (subatom instanceof Function) {
