@@ -114,9 +114,11 @@ public class OntologyImpl implements Ontology {
 		}
 	};
 
+
 	private final Hierarchy<ClassExpression> classAxioms = new Hierarchy<>();
 	private final Hierarchy<ObjectPropertyExpression> objectPropertyAxioms = new Hierarchy<>();
 	private final Hierarchy<DataPropertyExpression> dataPropertyAxioms = new Hierarchy<>();
+	private final List<BinaryAxiom<AnnotationProperty>> annotationAxioms = new ArrayList<>();
 	
 	private final List<BinaryAxiom<DataRangeExpression>> subDataRangeAxioms = new ArrayList<>();
 
@@ -440,7 +442,26 @@ public class OntologyImpl implements Ontology {
 		dataPropertyAxioms.addInclusion(dpe1, dpe2);
 	}
 
-	
+	/**
+	 * Adds an annotation subproperty axiom
+	 * <p>
+	 * SubAnnotationPropertyOf := 'SubAnnotationPropertyOf' '(' axiomAnnotations subAnnotationProperty superAnnotationProperty ')'<br>
+	 * subAnnotationProperty := AnnotationProperty<br>
+	 * superAnnotationProperty := AnnotationProperty
+	 * <p>
+	 *
+	 * @throws InconsistentOntologyException
+	 */
+	@Override
+	public void addSubPropertyOfAxiom(AnnotationProperty ap1, AnnotationProperty ap2)  {
+		checkSignature(ap1);
+		checkSignature(ap2);
+
+		BinaryAxiom<AnnotationProperty> ax = new BinaryAxiomImpl<>(ap1, ap2);
+		annotationAxioms.add(ax);
+	}
+
+
 	/**
 	 * Normalizes and adds class disjointness axiom
 	 * <p>
@@ -635,7 +656,12 @@ public class OntologyImpl implements Ontology {
 	public Collection<BinaryAxiom<DataPropertyExpression>> getSubDataPropertyAxioms() {
 		return Collections.unmodifiableList(dataPropertyAxioms.inclusions);
 	}
-	
+
+	@Override
+	public Collection<BinaryAxiom<AnnotationProperty>> getSubAnnotationAxioms() {
+		return Collections.unmodifiableList(annotationAxioms);
+	}
+
 	@Override 
 	public Set<ObjectPropertyExpression> getFunctionalObjectProperties() {
 		return Collections.unmodifiableSet(functionalObjectPropertyAxioms);
@@ -681,7 +707,7 @@ public class OntologyImpl implements Ontology {
 		 			objectPropertyAxioms.inclusions.size() + dataPropertyAxioms.inclusions.size()))
 			.append(String.format(" Classes: %d", vocabulary.getClasses().size()))
 			.append(String.format(" Object Properties: %d", vocabulary.getObjectProperties().size()))
-			.append(String.format(" Data Properties: %d]", vocabulary.getDataProperties().size()))
+			.append(String.format(" Data Properties: %d", vocabulary.getDataProperties().size()))
 		    .append(String.format(" Annotation Properties: %d]", vocabulary.getAnnotationProperties().size()));
 		return str.toString();
 	}

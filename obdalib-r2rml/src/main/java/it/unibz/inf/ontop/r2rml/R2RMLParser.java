@@ -213,8 +213,11 @@ public class R2RMLParser {
 
 		// process PREDICATEs
 		for (PredicateMap pm : pom.getPredicateMaps()) {
-			Predicate bodyPredicate = fac.getPredicate(pm.getConstant(), 2);
-			bodyPredicates.add(bodyPredicate);
+			String pmConstant = pm.getConstant();
+			if (pmConstant != null) {
+				Predicate bodyPredicate = fac.getPredicate(pmConstant, 2);
+				bodyPredicates.add(bodyPredicate);
+			}
 		}
 		return bodyPredicates;
 	}

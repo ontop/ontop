@@ -20,8 +20,10 @@ package it.unibz.inf.ontop.protege.gui.action;
  * #L%
  */
 
-import it.unibz.inf.ontop.owlrefplatform.owlapi3.OWLAPIMaterializer;
+import com.google.common.collect.Sets;
+import it.unibz.inf.ontop.owlrefplatform.owlapi.OWLAPIMaterializer;
 import it.unibz.inf.ontop.protege.utils.OBDAProgressListener;
+import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLIndividualAxiom;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
@@ -31,6 +33,7 @@ import org.slf4j.LoggerFactory;
 import javax.swing.*;
 import java.awt.*;
 import java.util.Iterator;
+import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 
 public class MaterializeAction implements OBDAProgressListener {
@@ -66,27 +69,32 @@ public class MaterializeAction implements OBDAProgressListener {
 			}
 			catch (Exception e) {
 				log.error(e.getMessage(), e);
-				JOptionPane.showMessageDialog(null, "ERROR: could not materialize abox.");
+				JOptionPane.showMessageDialog(null, "ERROR: could not materialize Abox.");
 				this.errorShown = true;
 				return;
 			}
 		}
-		
-		thread = new Thread() {
+
+		thread = new Thread("AddAxiomToOntology Thread") {
 			public void run() {
 				try {
-					while(iterator.hasNext()) {
-						ontologyManager.addAxiom(currentOntology, iterator.next());
-					}
-					
+					Set<OWLAxiom> setAxioms = Sets.newHashSet(iterator);
+					ontologyManager.addAxioms(currentOntology, setAxioms);
+
 					latch.countDown();
-					if(!bCancel){
+					if (!bCancel) {
 						JOptionPane.showMessageDialog(cont, "Task is completed", "Done", JOptionPane.INFORMATION_MESSAGE);
 					}
-				}
-				catch (Exception e) {
+				} catch (Exception e) {
 					latch.countDown();
 					log.error("Materialization of Abox failed", e);
+
+				} catch (Error e) {
+
+					latch.countDown();
+					log.error("Materialization of Abox failed", e);
+					JOptionPane.showMessageDialog(null, "An error occurred. For more info, see the logs.");
+
 				}
 			}
 		};

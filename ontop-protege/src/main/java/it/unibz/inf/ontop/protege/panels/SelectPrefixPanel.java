@@ -24,18 +24,12 @@ import it.unibz.inf.ontop.io.PrefixManager;
 import it.unibz.inf.ontop.io.SimplePrefixManager;
 import it.unibz.inf.ontop.protege.utils.DialogUtils;
 
-import java.awt.Dimension;
+import javax.swing.*;
+import java.awt.*;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.util.Map;
 import java.util.Vector;
-
-import javax.swing.JCheckBox;
-import javax.swing.JComponent;
-import javax.swing.JDialog;
-import javax.swing.JLabel;
-import javax.swing.JTextPane;
-import javax.swing.KeyStroke;
 
 public class SelectPrefixPanel extends javax.swing.JPanel {
 

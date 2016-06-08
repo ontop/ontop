@@ -47,6 +47,10 @@ public class SPARQLQueryUtility {
 	public String getQueryString() {
 		return query;
 	}
+
+	public boolean isEmpty() {
+		return query.isEmpty();
+	}
 	
 	public boolean isAskQuery() {
 		return isAskQuery(query);

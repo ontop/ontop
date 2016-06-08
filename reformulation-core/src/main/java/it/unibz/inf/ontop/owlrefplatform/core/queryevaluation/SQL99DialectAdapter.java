@@ -25,8 +25,8 @@ import it.unibz.inf.ontop.parser.EncodeForURI;
 import java.sql.Types;
 import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 import it.unibz.inf.ontop.model.OrderCondition;
@@ -455,7 +455,8 @@ public class SQL99DialectAdapter implements SQLDialectAdapter {
 
 	@Override
 	public String getSQLLexicalFormString(String constant) {
-		return "'" + constant + "'";
+
+		return "'" + constant.replaceAll("(?<!')'(?!')","''") + "'";
 	}
 	
 	@Override 

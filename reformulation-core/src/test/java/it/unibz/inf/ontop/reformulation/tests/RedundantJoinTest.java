@@ -47,8 +47,6 @@ public class RedundantJoinTest {
 
     private final static ImmutableExpression EXPRESSION1 = DATA_FACTORY.getImmutableExpression(
             ExpressionOperation.EQ, M, N);
-    private final static ImmutableExpression EXPRESSION2 = DATA_FACTORY.getImmutableExpression(
-            ExpressionOperation.EQ, N, M);
 
     private final MetadataForQueryOptimization metadata;
 
@@ -103,12 +101,14 @@ public class RedundantJoinTest {
         ConstructionNode constructionNode1 = new ConstructionNodeImpl(projectionAtom1.getVariables());
         queryBuilder1.init(projectionAtom1, constructionNode1);
 
-        FilterNode filterNode = new FilterNodeImpl(EXPRESSION2);
+        FilterNode filterNode = new FilterNodeImpl(EXPRESSION1);
         queryBuilder1.addChild(constructionNode1, filterNode);
         ExtensionalDataNode dataNode3 = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, M, N, O));
         queryBuilder1.addChild(filterNode, dataNode3);
 
         IntermediateQuery query1 = queryBuilder1.build();
+
+        System.out.println("\n Expected query: \n" +  query1);
 
         assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, query1));
     }

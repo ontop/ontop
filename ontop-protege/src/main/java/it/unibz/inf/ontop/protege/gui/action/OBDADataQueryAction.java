@@ -1,13 +1,13 @@
 package it.unibz.inf.ontop.protege.gui.action;
 
 import it.unibz.inf.ontop.model.OBDAException;
-import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWL;
-import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWLConnection;
-import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWLStatement;
+import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWL;
+import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLConnection;
+import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLStatement;
+import it.unibz.inf.ontop.protege.utils.DialogUtils;
 import it.unibz.inf.ontop.protege.utils.OBDAProgressListener;
 import it.unibz.inf.ontop.protege.utils.OBDAProgressMonitor;
 import org.protege.editor.owl.OWLEditorKit;
-import it.unibz.inf.ontop.protege.utils.DialogUtils;
 import org.semanticweb.owlapi.model.OWLException;
 import org.semanticweb.owlapi.reasoner.OWLReasoner;
 import org.slf4j.Logger;
@@ -59,7 +59,7 @@ public abstract class OBDADataQueryAction<T> implements OBDAProgressListener {
 	private QuestOWL reasoner;
 	private Component rootView;  // Davide> DAG's hack protegeQueryTabFreezeBug
 
-	private static String QUEST_START_MESSAGE = "Quest must be started before using this feature. To proceed \n * select Quest in the \"Reasoners\" menu and \n * click \"Start reasoner\" in the same menu.";
+	private static String QUEST_START_MESSAGE = "Quest must be started before using this feature. To proceed \n * select Ontop in the \"Reasoners\" menu and \n * click \"Start reasoner\" in the same menu.";
 
 
 	private static final Logger log = LoggerFactory.getLogger(OBDADataQueryAction.class);
@@ -153,10 +153,10 @@ public abstract class OBDADataQueryAction<T> implements OBDAProgressListener {
 					latch.countDown();
 				} catch (Exception e) {
 					if(!isCancelled()){
+						latch.countDown();
 						queryExecError = true;
 						log.error(e.getMessage(), e);
 						DialogUtils.showQuickErrorDialog(rootView, e, "Error executing query");
-						latch.countDown();
 					}
 				}	
 			}

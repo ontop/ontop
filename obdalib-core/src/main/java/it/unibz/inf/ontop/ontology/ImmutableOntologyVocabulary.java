@@ -117,8 +117,8 @@ public interface ImmutableOntologyVocabulary {
 	 */
 
 	public Collection<AnnotationProperty> getAnnotationProperties();
-	
-	
+
+
 	/**
 	 * check whether the vocabulary is empty (no declared classes, object or data properties)
 	 * 

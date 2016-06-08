@@ -42,5 +42,15 @@ public class OntopOBDAToR2RMLTest {
         Ontop.main(argv);
     }
 
+    @Test
+    public void testOntopOBDAToR2RML_NPD (){
+        String[] argv = {"mapping", "to-r2rml",
+                "-i", "src/test/resources/npd-v2-ql-mysql-ontop1.17.obda",
+                "-o", "src/test/resources/npd-v2-ql-mysql-ontop1.17.ttl",
+        };
+        Ontop.main(argv);
+    }
+
+
 
 }

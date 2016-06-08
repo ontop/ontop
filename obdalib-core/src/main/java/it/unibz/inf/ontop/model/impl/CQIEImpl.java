@@ -71,7 +71,7 @@ public class CQIEImpl implements CQIE, ListListener {
 			subscribeHeadTerms(head);
 		}
 	}
-	
+
 	private void subscribeHeadTerms(Function head) {
 		if (head instanceof ListenableFunction) {
 			EventGeneratingList<Term> headterms = ((ListenableFunction)head).getTerms();

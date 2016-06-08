@@ -58,7 +58,7 @@ public class MappingSplitter {
 			if (targetQuery.size() == 1) {
 				// For mappings with only one body atom, we do not need to change it
 				newMappings.add(mapping);
-			} 
+			}
 			else {
 				String id = mapping.getId();
 				OBDASQLQuery sourceQuery = mapping.getSourceQuery();

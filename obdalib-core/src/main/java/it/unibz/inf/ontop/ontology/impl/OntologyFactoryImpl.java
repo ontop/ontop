@@ -20,6 +20,7 @@ package it.unibz.inf.ontop.ontology.impl;
  * #L%
  */
 
+import it.unibz.inf.ontop.model.Constant;
 import it.unibz.inf.ontop.model.ObjectConstant;
 import it.unibz.inf.ontop.model.ValueConstant;
 import it.unibz.inf.ontop.ontology.*;
@@ -118,10 +119,16 @@ public class OntologyFactoryImpl implements OntologyFactory {
 		return new DataPropertyAssertionImpl(dpe, o1, o2);
 	}
 
-//	@Override
-//	public AnnotationAssertion createAnnotationAssertion(AnnotationProperty ap, ObjectConstant o, Constant c) {
-//		return new AnnotationAssertionImpl(ap,o,c);
-//	}
+	/**
+	 * Creates an annotation assertion
+	 * AnnotationAssertion := 'AnnotationAssertion' '(' axiomAnnotations AnnotationProperty AnnotationSubject AnnotationValue ')'
+	 * AnnotationSubject := IRI | AnonymousIndividual
+	 *
+	 */
+	@Override
+	public AnnotationAssertion createAnnotationAssertion(AnnotationProperty ap, ObjectConstant o, Constant c) {
+		return new AnnotationAssertionImpl(ap,o,c);
+	}
 
 	/**
 	 * Creates an annotation assertion
@@ -129,9 +136,9 @@ public class OntologyFactoryImpl implements OntologyFactory {
 	 * AnnotationSubject := IRI | AnonymousIndividual
 	 * Subjects and value are not currently stored
 	 */
-	@Override
-	public AnnotationAssertion createAnnotationAssertion(AnnotationProperty ap) {
-		return new AnnotationAssertionImpl(ap);
-	}
+//	@Override
+//	public AnnotationAssertion createAnnotationAssertion(AnnotationProperty ap) {
+//		return new AnnotationAssertionImpl(ap, o1, o2);
+//	}
 
 }

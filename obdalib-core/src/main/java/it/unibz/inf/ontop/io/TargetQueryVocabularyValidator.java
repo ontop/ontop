@@ -85,4 +85,9 @@ public interface TargetQueryVocabularyValidator {
 	 * 	True if the predicate is "triple", or false otherwise
 	 */
 	boolean isTriple(Predicate predicate);
+
+	/**
+	 * Checks whether the predicate is owl:sameAs
+     */
+	boolean isSameAs(Predicate p);
 }

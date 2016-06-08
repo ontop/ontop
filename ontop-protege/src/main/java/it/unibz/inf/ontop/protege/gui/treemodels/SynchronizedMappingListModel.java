@@ -24,11 +24,10 @@ import it.unibz.inf.ontop.model.OBDAMappingAxiom;
 import it.unibz.inf.ontop.model.OBDAMappingListener;
 import it.unibz.inf.ontop.model.OBDAModel;
 
+import javax.swing.*;
 import java.net.URI;
 import java.util.LinkedList;
 import java.util.List;
-
-import javax.swing.AbstractListModel;
 
 public class SynchronizedMappingListModel extends AbstractListModel implements FilteredModel, OBDAMappingListener {
 
@@ -117,17 +116,17 @@ public class SynchronizedMappingListModel extends AbstractListModel implements F
 	}
 
 	@Override
-	public void mappingInserted(URI srcid, String mapping_id) {
+	public void mappingInserted(URI srcid) {
 		fireContentsChanged(obdaModel, 0, getSize());
 	}
 
 	@Override
-	public void mappingDeleted(URI srcid, String mapping_id) {
+	public void mappingDeleted(URI srcid) {
 		fireContentsChanged(obdaModel, 0, getSize());
 	}
 
 	@Override
-	public void mappingUpdated(URI srcid, String mapping_id, OBDAMappingAxiom mapping) {
+	public void mappingUpdated(URI srcid) {
 		fireContentsChanged(obdaModel, 0, getSize());
 	}
 

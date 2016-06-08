@@ -160,7 +160,7 @@ public class QueryPainter {
 	 */
 	private void validate() throws Exception {
 		final String text = parent.getText().trim();
-		if (text.isEmpty()) {
+		if (text.isEmpty() || text.length() == 1) {
 			String msg = String.format("Empty query");
 			invalid = true;
 			throw new Exception(msg);
@@ -209,18 +209,30 @@ public class QueryPainter {
 				parent.setToolTipText("Syntax error");
 			}
 			else {
-				String errorstring = e.getMessage();
-				int index = errorstring.indexOf("Location: line");
-				if (index != -1) {
-					String location = errorstring.substring(index + 15);
-					int prefixlines = apic.getPrefixManager().getPrefixMap().keySet().size();
-					String[] coordinates = location.split(":");
 
-					int errorline = Integer.valueOf(coordinates[0]) - prefixlines;
-					int errorcol = Integer.valueOf(coordinates[1]);
-					errorstring = errorstring.replace(errorstring.substring(index), "Location: line " + errorline + " column " + errorcol);
+				Throwable cause = e.getCause();
+				String errorstring =  null;
+				if(cause!=null) {
+					errorstring = cause.getMessage();
 				}
-				parent.setToolTipText(getHTMLErrorMessage(errorstring));
+				else {
+					errorstring = e.getMessage();
+				}
+
+				if(errorstring != null) {
+					int index = errorstring.indexOf("Location: line");
+					if (index != -1) {
+						String location = errorstring.substring(index + 15);
+						int prefixlines = apic.getPrefixManager().getPrefixMap().keySet().size();
+						String[] coordinates = location.split(":");
+
+						int errorline = Integer.valueOf(coordinates[0]) - prefixlines;
+						int errorcol = Integer.valueOf(coordinates[1]);
+						errorstring = errorstring.replace(errorstring.substring(index), "Location: line " + errorline + " column " + errorcol);
+					}
+					parent.setToolTipText(getHTMLErrorMessage(errorstring));
+				}
+
 			}
 			setStateBorder(errorBorder);
 		} else {

@@ -22,6 +22,7 @@ package it.unibz.inf.ontop.ontology;
 
 import it.unibz.inf.ontop.model.ObjectConstant;
 import it.unibz.inf.ontop.model.ValueConstant;
+import it.unibz.inf.ontop.model.Constant;
 
 /**
  * 
@@ -92,11 +93,11 @@ public interface OntologyFactory {
 
 	/**
 	 * Creates an annotation property assertion
-	 *Temporary solution without information about the values
+	 *
 	 */
 
-//	public AnnotationAssertion createAnnotationAssertion(AnnotationProperty ap, ObjectConstant o, Constant c);
+	public AnnotationAssertion createAnnotationAssertion(AnnotationProperty ap, ObjectConstant o, Constant c);
 
 
-	public AnnotationAssertion createAnnotationAssertion(AnnotationProperty ap);
+//	public AnnotationAssertion createAnnotationAssertion(AnnotationProperty ap);
 }

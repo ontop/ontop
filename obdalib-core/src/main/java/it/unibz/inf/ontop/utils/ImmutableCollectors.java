@@ -39,7 +39,8 @@ public class ImmutableCollectors {
         }
     }
 
-    private static class ImmutableSetCollector<T> extends ImmutableCollectionCollector {
+    private static class ImmutableSetCollector<T> extends ImmutableCollectionCollector<T, ImmutableSet.Builder<T>,
+            ImmutableSet<T>> {
         @Override
         public Supplier<ImmutableSet.Builder<T>> supplier() {
             return ImmutableSet::builder;

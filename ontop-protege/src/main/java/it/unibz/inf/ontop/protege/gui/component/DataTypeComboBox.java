@@ -26,13 +26,10 @@ import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
 import it.unibz.inf.ontop.protege.gui.IconLoader;
 
-import java.awt.Component;
-import java.awt.Dimension;
-import java.util.List;
-
-import javax.swing.JComboBox;
-import javax.swing.JList;
+import javax.swing.*;
 import javax.swing.plaf.basic.BasicComboBoxRenderer;
+import java.awt.*;
+import java.util.List;
 
 public class DataTypeComboBox extends JComboBox {
 

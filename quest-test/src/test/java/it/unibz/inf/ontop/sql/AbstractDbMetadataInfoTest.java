@@ -20,14 +20,10 @@ package it.unibz.inf.ontop.sql;
  * #L%
  */
 
-import java.sql.Connection;
-import java.sql.Driver;
-import java.sql.DriverManager;
-import java.sql.DriverPropertyInfo;
-import java.sql.SQLException;
-import java.util.Properties;
-
 import junit.framework.TestCase;
+
+import java.sql.*;
+import java.util.Properties;
 
 public abstract class AbstractDbMetadataInfoTest extends TestCase {
 	

@@ -23,35 +23,19 @@ package it.unibz.inf.ontop.model.impl;
 import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.io.PrefixManager;
 import it.unibz.inf.ontop.io.SimplePrefixManager;
-import it.unibz.inf.ontop.model.Function;
-import it.unibz.inf.ontop.model.OBDADataFactory;
-import it.unibz.inf.ontop.model.OBDADataSource;
-import it.unibz.inf.ontop.model.OBDAMappingAxiom;
-import it.unibz.inf.ontop.model.OBDAMappingListener;
-import it.unibz.inf.ontop.model.OBDAModel;
-import it.unibz.inf.ontop.model.OBDAModelListener;
-import it.unibz.inf.ontop.model.OBDASQLQuery;
-import it.unibz.inf.ontop.model.Predicate;
+import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.ontology.OntologyVocabulary;
 import it.unibz.inf.ontop.ontology.impl.OntologyVocabularyImpl;
 import it.unibz.inf.ontop.querymanager.QueryController;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Hashtable;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class OBDAModelImpl implements OBDAModel {
 
@@ -239,7 +223,7 @@ public class OBDAModelImpl implements OBDAModel {
 		if (index != -1) {
 			ArrayList<OBDAMappingAxiom> current_mappings = mappings.get(datasource_uri);
 			current_mappings.remove(index);
-			fireMappingDeleted(datasource_uri, mapping_id);
+			fireMappingDeleted(datasource_uri);
 		}
 	}
 
@@ -261,27 +245,27 @@ public class OBDAModelImpl implements OBDAModel {
 	/**
 	 * Announces that a mapping has been updated.
 	 */
-	private void fireMappigUpdated(URI srcuri, String mapping_id, OBDAMappingAxiom mapping) {
+	private void fireMappigUpdated(URI srcuri) {
 		for (OBDAMappingListener listener : mappinglisteners) {
-			listener.mappingUpdated(srcuri, mapping_id, mapping);
+			listener.mappingUpdated(srcuri);
 		}
 	}
 
 	/**
 	 * Announces to the listeners that a mapping was deleted.
 	 */
-	private void fireMappingDeleted(URI srcuri, String mapping_id) {
+	private void fireMappingDeleted(URI srcuri) {
 		for (OBDAMappingListener listener : mappinglisteners) {
-			listener.mappingDeleted(srcuri, mapping_id);
+			listener.mappingDeleted(srcuri);
 		}
 	}
 
 	/**
 	 * Announces to the listeners that a mapping was inserted.
 	 */
-	private void fireMappingInserted(URI srcuri, String mapping_id) {
+	private void fireMappingInserted(URI srcuri) {
 		for (OBDAMappingListener listener : mappinglisteners) {
-			listener.mappingInserted(srcuri, mapping_id);
+			listener.mappingInserted(srcuri);
 		}
 	}
 
@@ -329,18 +313,22 @@ public class OBDAModelImpl implements OBDAModel {
 	}
 
 	private void initMappingsArray(URI datasource_uri) {
-		mappings.put(datasource_uri, new ArrayList<OBDAMappingAxiom>());
+		mappings.put(datasource_uri, new ArrayList<>());
 	}
 
 	@Override
-	public void addMapping(URI datasource_uri, OBDAMappingAxiom mapping) throws DuplicateMappingException {
+	public void addMapping(URI datasource_uri, OBDAMappingAxiom mapping, boolean disableFiringMappingInsertedEvent) throws DuplicateMappingException {
 		int index = indexOf(datasource_uri, mapping.getId());
 		if (index != -1) {
 			throw new DuplicateMappingException("ID " + mapping.getId());
 		}
 		mappings.get(datasource_uri).add(mapping);
-		fireMappingInserted(datasource_uri, mapping.getId());
+
+		if(!disableFiringMappingInsertedEvent) {
+			fireMappingInserted(datasource_uri);
+		}
 	}
+
 
 	@Override
 	public void removeAllMappings() {
@@ -358,7 +346,7 @@ public class OBDAModelImpl implements OBDAModel {
 	public void updateMappingsSourceQuery(URI datasource_uri, String mapping_id, OBDASQLQuery sourceQuery) {
 		OBDAMappingAxiom mapping = getMapping(datasource_uri, mapping_id);
 		mapping.setSourceQuery(sourceQuery);
-		fireMappigUpdated(datasource_uri, mapping.getId(), mapping);
+		fireMappigUpdated(datasource_uri);
 	}
 
 	@Override
@@ -368,7 +356,7 @@ public class OBDAModelImpl implements OBDAModel {
 		// adds a new mapping
 		if (!containsMapping(datasource_uri, new_mappingid)) {
 			mapping.setId(new_mappingid);
-			fireMappigUpdated(datasource_uri, mapping_id, mapping);
+			fireMappigUpdated(datasource_uri);
 			return 0;
 		} 
 		// updates an existing mapping
@@ -391,7 +379,7 @@ public class OBDAModelImpl implements OBDAModel {
 			return;
 		}
 		mapping.setTargetQuery(targetQuery);
-		fireMappigUpdated(datasource_uri, mapping.getId(), mapping);
+		fireMappigUpdated(datasource_uri);
 	}
 
 	@Override
@@ -407,16 +395,19 @@ public class OBDAModelImpl implements OBDAModel {
 		List<String> duplicates = new ArrayList<String>();
 		for (OBDAMappingAxiom map : mappings) {
 			try {
-				addMapping(datasource_uri, map);
+				addMapping(datasource_uri, map, true);
 			} catch (DuplicateMappingException e) {
 				duplicates.add(map.getId());
 			}
 		}
+			fireMappigUpdated(datasource_uri);
+
 		if (duplicates.size() > 0) {
 			String msg = String.format("Found %d duplicates in the following ids: %s", duplicates.size(), duplicates.toString());
 			throw new DuplicateMappingException(msg);
 		}
 	}
+
 
 	@Override
 	public Object clone() {
@@ -426,7 +417,7 @@ public class OBDAModelImpl implements OBDAModel {
 			for (ArrayList<OBDAMappingAxiom> mappingList : mappings.values()) {
 				for (OBDAMappingAxiom mapping : mappingList) {
 					try {
-						clone.addMapping(source.getSourceID(), (OBDAMappingAxiom) mapping.clone());
+						clone.addMapping(source.getSourceID(), (OBDAMappingAxiom) mapping.clone(), false);
 					} catch (DuplicateMappingException e) {
 						// Does nothing
 					}
@@ -437,22 +428,81 @@ public class OBDAModelImpl implements OBDAModel {
 	}
 
 	@Override
-	public int renamePredicate(Predicate oldname, Predicate newName) {
+	public int renamePredicate(Predicate removedPredicate, Predicate newPredicate) {
+
+		/*
+		Find the new prefix to substitute with the old prefix
+		 */
+		String oldName = removedPredicate.getName();
+		String newName = newPredicate.getName();
+
+		String oldPrefix = "";
+		String newPrefix ="";
+
+
+		Map<String, String> currentMap = prefixManager.getPrefixMap();
+		int newpredicateNameLength  = 0;
+		int oldpredicateNameLength = 0;
+
+		//Find the newPrefix in the prefixManager
+		for (String prefix : currentMap.values()) {
+
+			if(newName.startsWith(prefix)){
+				//find the new prefix and the length of the predicateName that we do not want to consider
+				int prefixLength = prefix.length();
+				newpredicateNameLength = newName.length()- prefixLength;
+				newPrefix = prefix;
+			}
+
+			if(oldName.startsWith(prefix)){
+				//find the new prefix and the length of the predicateName that we do not want to consider
+				int prefixLength = prefix.length();
+				oldpredicateNameLength = oldName.length()- prefixLength;
+				oldPrefix = prefix;
+			}
+		}
+
+		//find old prefix removing the predicateName
+		if(oldpredicateNameLength==0) {
+			int prefixLength = oldName.length() - newpredicateNameLength;
+			oldPrefix = oldName.substring(0, prefixLength);
+		}
+
 		int modifiedCount = 0;
 		for (OBDADataSource source : datasources.values()) {
 			ArrayList<OBDAMappingAxiom> mp = mappings.get(source.getSourceID());
+
 			for (OBDAMappingAxiom mapping : mp) {
 				List<Function> body = mapping.getTargetQuery();
 				for (int idx = 0; idx < body.size(); idx++) {
-					Function oldatom = body.get(idx);
-					if (!oldatom.getFunctionSymbol().equals(oldname)) {
+					Function oldAtom = body.get(idx);
+					for (Term term : oldAtom.getTerms()) {
+
+						/**
+                         * Rename the uri of individuals in the mapping, substitute the oldPrefix with the newPrefix
+						 */
+						if(!oldPrefix.isEmpty() && !newPrefix.isEmpty() && !newPrefix.equals(oldPrefix)) {
+							if (term instanceof Function) {
+								Function uri = ((Function) term);
+								if (uri.getFunctionSymbol() instanceof URITemplatePredicate) {
+									String uriName = ((ValueConstant) uri.getTerm(0)).getValue();
+									if (uriName.startsWith(oldPrefix)) {
+										uriName = uriName.replaceFirst(oldPrefix, newPrefix);
+										uri.setTerm(0, dfac.getConstantLiteral(uriName));
+									}
+								}
+							}
+						}
+					}
+					if (!oldAtom.getFunctionSymbol().equals(removedPredicate)) {
 						continue;
 					}
+					//renamePredicate
 					modifiedCount += 1;
-					Function newatom = dfac.getFunction(newName, oldatom.getTerms());
-					body.set(idx, newatom);
+					Function newAtom = dfac.getFunction(newPredicate, oldAtom.getTerms());
+					body.set(idx, newAtom);
 				}
-				fireMappigUpdated(source.getSourceID(), mapping.getId(), mapping);
+				fireMappigUpdated(source.getSourceID());
 			}
 		}
 		return modifiedCount;
@@ -474,7 +524,7 @@ public class OBDAModelImpl implements OBDAModel {
 					body.remove(idx);
 				}
 				if (body.size() != 0) {
-					fireMappigUpdated(source.getSourceID(), mapping.getId(), mapping);
+					fireMappigUpdated(source.getSourceID());
 				} else {
 					removeMapping(source.getSourceID(), mapping.getId());
 				}

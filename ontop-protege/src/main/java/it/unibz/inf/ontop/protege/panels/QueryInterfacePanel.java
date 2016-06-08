@@ -22,12 +22,12 @@ package it.unibz.inf.ontop.protege.panels;
 
 import it.unibz.inf.ontop.model.OBDAModel;
 import it.unibz.inf.ontop.owlrefplatform.core.queryevaluation.SPARQLQueryUtility;
-import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWLResultSet;
-import it.unibz.inf.ontop.querymanager.QueryController;
-import it.unibz.inf.ontop.utils.OBDAPreferenceChangeListener;
+import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLResultSet;
 import it.unibz.inf.ontop.protege.gui.IconLoader;
 import it.unibz.inf.ontop.protege.gui.action.OBDADataQueryAction;
 import it.unibz.inf.ontop.protege.utils.DialogUtils;
+import it.unibz.inf.ontop.querymanager.QueryController;
+import it.unibz.inf.ontop.utils.OBDAPreferenceChangeListener;
 
 import javax.swing.*;
 import javax.swing.event.TableModelEvent;
@@ -178,7 +178,7 @@ public class QueryInterfacePanel extends JPanel implements SavedQueriesPanelList
 
         chkShowAll.setText("All");
         chkShowAll.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        chkShowAll.setPreferredSize(new java.awt.Dimension(45, 23));
+        chkShowAll.setPreferredSize(new java.awt.Dimension(55, 23));
         chkShowAll.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 chkShowAllActionPerformed(evt);
@@ -190,7 +190,6 @@ public class QueryInterfacePanel extends JPanel implements SavedQueriesPanelList
         chkShowShortURI.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
         chkShowShortURI.setMaximumSize(new java.awt.Dimension(75, 23));
         chkShowShortURI.setMinimumSize(new java.awt.Dimension(75, 23));
-        chkShowShortURI.setPreferredSize(new java.awt.Dimension(75, 23));
         pnlExecutionInfo.add(chkShowShortURI, new java.awt.GridBagConstraints());
 
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -336,25 +335,29 @@ public class QueryInterfacePanel extends JPanel implements SavedQueriesPanelList
 			Thread queryRunnerThread = new Thread(() -> {
                 SPARQLQueryUtility query = new SPARQLQueryUtility(queryTextPane.getText());
                 OBDADataQueryAction<?> action = null;
-                if (query.isSelectQuery() || query.isAskQuery()) {
+				if (query.isEmpty()){
+					JOptionPane.showMessageDialog(QueryInterfacePanel.this, "Query editor cannot be empty.");
+				} else if (query.isSelectQuery() || query.isAskQuery()) {
                     action = QueryInterfacePanel.this.getExecuteSelectAction();
                 } else if ( (query.isConstructQuery() || query.isDescribeQuery()) ){
                     action = QueryInterfacePanel.this.getExecuteGraphQueryAction();
                 } else {
                     JOptionPane.showMessageDialog(QueryInterfacePanel.this, "This type of SPARQL expression is not handled. Please use SELECT, ASK, DESCRIBE, or CONSTRUCT.");
                 }
-                action.run(query.getQueryString());
-                execTime = action.getExecutionTime();
-                do {
-                    int rows = action.getNumberOfRows();
-                    updateStatus(rows);
-                    try {
-                        Thread.sleep(100);
-                    } catch (InterruptedException e) {
-                        break;
-                    }
-                } while (action.isRunning());
-                updateStatus(action.getNumberOfRows());
+				if(action!=null) {
+					action.run(query.getQueryString());
+					execTime = action.getExecutionTime();
+					do {
+						int rows = action.getNumberOfRows();
+						updateStatus(rows);
+						try {
+							Thread.sleep(100);
+						} catch (InterruptedException e) {
+							break;
+						}
+					} while (action.isRunning());
+					updateStatus(action.getNumberOfRows());
+				}
             });
 			queryRunnerThread.start();
 		} catch (Exception e) {

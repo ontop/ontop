@@ -81,6 +81,8 @@ public interface OBDADataFactory extends Serializable {
 
 	public Predicate getDataPropertyPredicate(String name, COL_TYPE type);
 
+	public Predicate getAnnotationPropertyPredicate(String name);
+
 	/**
 	 * with default type COL_TYPE.LITERAL
 	 * @param name
@@ -91,7 +93,7 @@ public interface OBDADataFactory extends Serializable {
 	
 	public Predicate getClassPredicate(String name);
 
-
+	Predicate getOWLSameASPredicate();
 	
 
 	public JdbcTypeMapper getJdbcTypeMapper();
@@ -359,5 +361,6 @@ public interface OBDADataFactory extends Serializable {
 	TermType getTermType(COL_TYPE type);
 	TermType getTermType(String languageTagString);
 	TermType getTermType(Term languageTagTerm);
+
 
 }

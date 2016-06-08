@@ -25,16 +25,16 @@ import it.unibz.inf.ontop.io.TargetQueryVocabularyValidator;
 import it.unibz.inf.ontop.model.OBDADataSource;
 import it.unibz.inf.ontop.model.OBDAMappingAxiom;
 import it.unibz.inf.ontop.model.OBDAModel;
-import it.unibz.inf.ontop.protege.utils.*;
-import it.unibz.inf.ontop.utils.IDGenerator;
-import it.unibz.inf.ontop.utils.SourceQueryValidator;
-import org.antlr.runtime.ANTLRStringStream;
-import org.antlr.runtime.CommonTokenStream;
 import it.unibz.inf.ontop.protege.dialogs.MappingValidationDialog;
 import it.unibz.inf.ontop.protege.gui.IconLoader;
 import it.unibz.inf.ontop.protege.gui.treemodels.FilteredModel;
 import it.unibz.inf.ontop.protege.gui.treemodels.SynchronizedMappingListModel;
 import it.unibz.inf.ontop.protege.gui.treemodels.TreeModelFilter;
+import it.unibz.inf.ontop.protege.utils.*;
+import it.unibz.inf.ontop.utils.IDGenerator;
+import it.unibz.inf.ontop.utils.SourceQueryValidator;
+import org.antlr.runtime.ANTLRStringStream;
+import org.antlr.runtime.CommonTokenStream;
 import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
@@ -172,7 +172,7 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
 
    
 
-    public void setOBDAModel(OBDAModel omodel) {
+    private void setOBDAModel(OBDAModel omodel) {
 		
 		this.apic = omodel;
 		this.mapc = apic;
@@ -632,7 +632,7 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
 				OBDAMappingAxiom newmapping = null;
 				newmapping = oldmapping.clone();
 				newmapping.setId(new_id);
-				controller.addMapping(current_srcuri, newmapping);
+				controller.addMapping(current_srcuri, newmapping, false);
 
 			} catch (DuplicateMappingException e) {
 				JOptionPane.showMessageDialog(this, "Duplicate Mapping: " + new_id);
