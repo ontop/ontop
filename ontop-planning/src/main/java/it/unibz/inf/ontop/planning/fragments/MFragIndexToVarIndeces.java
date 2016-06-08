@@ -18,6 +18,6 @@ public class MFragIndexToVarIndeces{
     
     @Override
     public String toString(){
-	return "fragIndex := " + this.fragIndex + ", varIndeces := " + varIndeces.toString() + ")";
+	return "(" + "fragIndex := " + this.fragIndex + ", varIndeces := " + varIndeces.toString() + ")";
     }
 };

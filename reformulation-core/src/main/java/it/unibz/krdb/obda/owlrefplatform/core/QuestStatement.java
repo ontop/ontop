@@ -25,6 +25,7 @@ import it.unibz.krdb.obda.ontology.Assertion;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.SPARQLQueryUtility;
 import it.unibz.krdb.obda.owlrefplatform.core.resultset.*;
 import it.unibz.krdb.obda.owlrefplatform.core.translator.SesameConstructTemplate;
+
 import org.openrdf.query.MalformedQueryException;
 import org.openrdf.query.parser.ParsedQuery;
 import org.slf4j.Logger;
@@ -509,6 +510,5 @@ public class QuestStatement implements OBDAStatement {
 	@Override
 	public String getSPARQLRewriting(String query) throws OBDAException {
 		return engine.getSPARQLRewriting(query);
-	}
-	
+	}	
 }

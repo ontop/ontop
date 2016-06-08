@@ -9,6 +9,7 @@ import org.junit.Test;
 import it.unibz.inf.ontop.planning.OntopPlanning;
 import it.unibz.inf.ontop.planning.utils.combinations.Combinator;
 import it.unibz.krdb.obda.model.DatalogProgram;
+import it.unibz.krdb.obda.model.Variable;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -20,7 +21,6 @@ import static org.junit.Assert.*;
 
 public class OntopPlanningTest {
 
-    @Ignore
     @Test
     public void getSQLForFragments1() throws Exception {
         String query =
@@ -128,7 +128,7 @@ public class OntopPlanningTest {
         List<DatalogProgram> programs = op.getDLogUnfoldingsForFragments(fragments);
         
         // {wc=[fragIndex := 0, varIndex := 0)], x=[fragIndex := 0, varIndex := 1), fragIndex := 1, varIndex := 0)], ...}
-        LinkedListMultimap<String, MFragIndexToVarIndex> mOutVariableToFragmentsVariables = op.getmOutVariableToFragmentsVariables(fragments);
+        LinkedListMultimap<Variable, MFragIndexToVarIndex> mOutVariableToFragmentsVariables = op.getmOutVariableToFragmentsVariables(fragments);
         
         List<List<Restriction>> fragmentsToRestrictions = new ArrayList<>();
         
@@ -146,9 +146,13 @@ public class OntopPlanningTest {
         // At this point, all combinations with joins over the same templates are stored in the 
         // visitor. Each of these combinations translate into a JUCQ.
         
-        // All combinations of templates in join variables
+        SQLCreator sqlCreator = visitor.getSQLCreatorInstance();
         
-//      op.pruneDLogPrograms(programs, joinOn);
+        String sqlBody = sqlCreator.makeBody(op, mOutVariableToFragmentsVariables);
+
+        System.out.println(sqlBody);
+        
+        //      op.pruneDLogPrograms(programs, joinOn);
         
         // For each joining template, produce DLog restrictions to that template
         

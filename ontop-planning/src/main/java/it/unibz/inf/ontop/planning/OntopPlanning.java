@@ -18,8 +18,11 @@ import it.unibz.krdb.obda.model.URIConstant;
 import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
+import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
+import it.unibz.krdb.obda.model.impl.VariableImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
+import it.unibz.krdb.obda.owlrefplatform.core.sql.SQLGenerator;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWL;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLConfiguration;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLConnection;
@@ -47,12 +50,13 @@ import java.util.Set;
 public class OntopPlanning {
 
     QuestOWLStatement st;
+    OBDADataFactory fac;
     
     public OntopPlanning(String owlfile, String obdafile) throws OWLException, IOException, InvalidMappingException, InvalidPredicateDeclarationException {
         OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
         OWLOntology ontology = manager.loadOntologyFromOntologyDocument(new File(owlfile));
 
-        OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
+        fac = OBDADataFactoryImpl.getInstance();
         OBDAModel obdaModel = fac.getOBDAModel();
         ModelIOManager ioManager = new ModelIOManager(obdaModel);
         ioManager.load(obdafile);
@@ -84,24 +88,24 @@ public class OntopPlanning {
         }
 	return result;
     }
-    
+        
     /**
      * 
      * @param fragments
      * @return 
      * @throws MalformedQueryException
      */
-    public LinkedListMultimap<String, MFragIndexToVarIndex> getmOutVariableToFragmentsVariables(List<String> fragments) throws MalformedQueryException{
+    public LinkedListMultimap<Variable, MFragIndexToVarIndex> getmOutVariableToFragmentsVariables(List<String> fragments) throws MalformedQueryException{
 	QueryParser parser = QueryParserUtil.createParser(QueryLanguage.SPARQL);
 	
-	LinkedListMultimap<String, MFragIndexToVarIndex> variableOccurrences = LinkedListMultimap.create();
+	LinkedListMultimap<Variable, MFragIndexToVarIndex> variableOccurrences = LinkedListMultimap.create();
 	
 	int fragCounter = 0;
 	for( String fragment : fragments ){
 	    ParsedQuery pq = parser.parseQuery(fragment, null);    
 	    
 	    Set<String> bindingNames = pq.getTupleExpr().getBindingNames();
-
+	    
 	    // Davide> Very ugly, but this is the internal order
 	    //       of projection variables in ontop
 	    List<String> orderedBindingNames = new ArrayList<>();
@@ -111,11 +115,10 @@ public class OntopPlanning {
 
 	    int argIndex = 0;
             for( String name : orderedBindingNames ){
-        	variableOccurrences.put(name, new MFragIndexToVarIndex(fragCounter, argIndex++));
+        	variableOccurrences.put(fac.getVariable(name), new MFragIndexToVarIndex(fragCounter, argIndex++));
             }
             ++fragCounter;
 	}
-	System.out.println(variableOccurrences);
 	return variableOccurrences;	
     }
     
@@ -257,8 +260,8 @@ public class OntopPlanning {
 	    }
 	    else if( t instanceof Function ){
 		// Data and URIs
-		System.out.println(t + " Function");
-		System.out.println(takeTemplateString(t));
+//		System.out.println(t + " Function");
+//		System.out.println(takeTemplateString(t));
 
 		builder.template( new Template(takeTemplateString( t )) );
 	    }
@@ -296,7 +299,7 @@ public class OntopPlanning {
 	
 	String termString = t.toString();
 	if( termString.startsWith("URI") ){
-	    result = termString.substring( 0, termString.indexOf(",") );
+	    result = termString.substring( 0, termString.indexOf(",") ) + ")";
 	}
 	else{
 	    result = termString.substring( 0, termString.indexOf("(") );
@@ -307,6 +310,12 @@ public class OntopPlanning {
 
     public String getSQLForDLogUnfoldings(List<DatalogProgram> unfoldedFragments){
 	return null;
+    }
+    
+    public String getSQLForDL(DatalogProgram d, List<String> signature){
+	
+	String sql = st.getSQLFromDLog(d, signature);
+	return sql;
     }
     
     public String getSQLForFragments(List<String> fragments) throws OWLException, MalformedQueryException {
@@ -358,6 +367,23 @@ public class OntopPlanning {
 
         return sqlBuilder.toString();
     }
+
+    public List<String> makeSignatureForFragment(
+	    int fragIndex,
+	    LinkedListMultimap<Variable, MFragIndexToVarIndex> mOutVariableToFragmentsVariables) {
+	
+	List<String> result = new ArrayList<>();
+	
+	for( Variable v : mOutVariableToFragmentsVariables.keySet() ){
+	    for( MFragIndexToVarIndex mFragIndexToVarIndex : mOutVariableToFragmentsVariables.get(v) ){
+		if( fragIndex == mFragIndexToVarIndex.getFragIndex() ){
+		    result.add(v.getName());
+		}
+	    }
+	}
+	
+	return result;
+    }
 }
 
 class Restriction{
@@ -377,7 +403,11 @@ class Restriction{
     
     @Override
     public String toString(){
-	return this.restrictionToTemplateSignature.toString();
+	
+	String result = "Signature:= " + restrictionToTemplateSignature.first + "\n" + 
+		"DLog:= " + restrictionToTemplateSignature.second;
+	
+	return result;
     }
 }
 
@@ -411,8 +441,8 @@ class Pair<T,S> {
 };
 class MFragIndexToVarIndex{
     
-    final int fragIndex;
-    final int varIndex;
+    private final int fragIndex;
+    private final int varIndex;
     
     MFragIndexToVarIndex(Integer fragIndex, Integer varIndex) {
 	this.fragIndex = fragIndex;

@@ -1524,7 +1524,14 @@ public class SQLGenerator implements SQLQueryGenerator {
 		}
 	}
 
-
+	/**
+	 * Davide> Planning
+	 * @param cq
+	 * @return
+	 */
+	public QueryAliasIndex getQueryAliasIndexInstance(CQIE cq){
+	    return new QueryAliasIndex(cq);
+	}
 
     /**
 	 * Utility class to resolve "database" atoms to view definitions ready to be

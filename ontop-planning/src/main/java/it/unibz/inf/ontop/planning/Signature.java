@@ -11,6 +11,21 @@ public class Signature {
 	this.templates.addAll(templates);
     }
     
+    public Template getTemplateOfIndex( int index ){
+	
+	Template result = null;
+	
+	try{
+	    result = this.templates.get(index);
+	}
+	catch( IndexOutOfBoundsException e ){
+	    System.out.println("Templates: " + templates);
+	    System.out.println("Index: " + index);
+	}
+	
+	return result;
+    }
+    
     public static class Builder{
 	private List<Template> templates = new ArrayList<>();
 	

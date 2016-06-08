@@ -15,17 +15,21 @@ import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.LinearInclusionDep
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.VocabularyValidator;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.SPARQLQueryUtility;
 import it.unibz.krdb.obda.owlrefplatform.core.reformulation.QueryRewriter;
+import it.unibz.krdb.obda.owlrefplatform.core.sql.SQLGenerator;
+import it.unibz.krdb.obda.owlrefplatform.core.sql.SQLGenerator.QueryAliasIndex;
 import it.unibz.krdb.obda.owlrefplatform.core.srcquerygeneration.SQLQueryGenerator;
 import it.unibz.krdb.obda.owlrefplatform.core.translator.DatalogToSparqlTranslator;
 import it.unibz.krdb.obda.owlrefplatform.core.translator.SparqlAlgebraToDatalogTranslator;
 import it.unibz.krdb.obda.owlrefplatform.core.unfolding.ExpressionEvaluator;
 import it.unibz.krdb.obda.owlrefplatform.core.unfolding.SPARQLQueryFlattener;
 import it.unibz.krdb.obda.renderer.DatalogProgramRenderer;
+import it.unibz.krdb.sql.QualifiedAttributeID;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.openrdf.query.MalformedQueryException;
@@ -201,14 +205,7 @@ public class QuestQueryProcessor {
 				}
 			querySignatureCache.put(pq, signature);
 	
-			String sql;
-			if (programAfterUnfolding.getRules().size() > 0) {
-				log.debug("Producing the SQL string...");
-				sql = datasourceQueryGenerator.generateSourceQuery(programAfterUnfolding, signature);
-				log.debug("Resulting SQL: \n{}", sql);
-			}
-			else
-				sql = "";
+			String sql = getSQLFromDLog(programAfterUnfolding, signature);
 			
 			translatedSQLCache.put(pq, sql);
 			return sql;
@@ -222,6 +219,31 @@ public class QuestQueryProcessor {
 		}
 	}
 		
+	/**
+	 * Davide> For planning branch
+	 * @param programAfterUnfolding
+	 * @param signature
+	 * @return
+	 */
+	public String getSQLFromDLog(DatalogProgram programAfterUnfolding, List<String> signature){
+	    String sql = "";
+	    if (programAfterUnfolding.getRules().size() > 0) {
+		log.debug("Producing the SQL string...");
+		sql = datasourceQueryGenerator.generateSourceQuery(programAfterUnfolding, signature);
+		log.debug("Resulting SQL: \n{}", sql);
+	    }
+	    return sql;
+	}
+	
+	public List<String> getDBNamesFromTemplate(CQIE cq, List<Variable> dlogCols) {
+	    
+	   QueryAliasIndex index = this.datasourceQueryGenerator.getQueryAliasIndexInstance(cq);
+	    
+//	    index.getColumnReferences(var); TTT
+	    
+	    return null;
+	}
+	
 	/**
 	 * Davide> For the planning paper.
 	 * @param pq

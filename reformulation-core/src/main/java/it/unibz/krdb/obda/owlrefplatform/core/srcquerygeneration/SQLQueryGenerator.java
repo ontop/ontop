@@ -20,8 +20,10 @@ package it.unibz.krdb.obda.owlrefplatform.core.srcquerygeneration;
  * #L%
  */
 
+import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.OBDAException;
+import it.unibz.krdb.obda.owlrefplatform.core.sql.SQLGenerator.QueryAliasIndex;
 
 import java.io.Serializable;
 import java.util.List;
@@ -46,6 +48,13 @@ public interface SQLQueryGenerator extends Serializable {
 	 * @throws Exception
 	 */
 	public String generateSourceQuery(DatalogProgram query, List<String> signature) throws OBDAException;
+	
+	/**
+	 * Davide> Planning
+	 * @param cq
+	 * @return
+	 */
+	public QueryAliasIndex getQueryAliasIndexInstance(CQIE cq);
 
 	public boolean hasDistinctResultSet() ;
 }

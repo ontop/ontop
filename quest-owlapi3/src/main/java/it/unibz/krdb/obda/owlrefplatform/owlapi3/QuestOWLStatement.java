@@ -33,6 +33,7 @@ import it.unibz.krdb.obda.owlapi3.OWLAPIIndividualTranslator;
 import it.unibz.krdb.obda.owlapi3.OntopOWLException;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestStatement;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.SPARQLQueryUtility;
+import it.unibz.krdb.obda.owlrefplatform.core.sql.SQLGenerator;
 import it.unibz.krdb.obda.sesame.SesameRDFIterator;
 
 import org.openrdf.query.parser.ParsedQuery;
@@ -43,6 +44,8 @@ import org.openrdf.rio.Rio;
 import org.openrdf.rio.helpers.BasicParserSettings;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.*;
+
+import eu.optique.api.mapping.Template;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -362,6 +365,16 @@ public class QuestOWLStatement implements AutoCloseable {
 		}
 	}
 	
+	/**
+	 * Davide> Planning branch
+	 * @param d
+	 * @param signature
+	 * @return
+	 */
+	public String getSQLFromDLog(DatalogProgram d, List<String> signature){
+	    return st.questInstance.getEngine().getSQLFromDLog(d, signature);
+	}
+			
 	public DatalogProgram getDLogUnfolding( String query ) throws OWLException {
 	    try {
 		ParsedQuery pq = st.questInstance.getEngine().getParsedQuery(query); 			
