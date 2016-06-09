@@ -21,6 +21,8 @@ package it.unibz.krdb.obda.owlrefplatform.core.sql;
  */
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Maps;
+
 import it.unibz.krdb.obda.model.*;
 import it.unibz.krdb.obda.model.OBDAQueryModifiers.OrderCondition;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
@@ -36,6 +38,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.SQLDialectAdapter;
 import it.unibz.krdb.obda.owlrefplatform.core.srcquerygeneration.SQLQueryGenerator;
 import it.unibz.krdb.obda.parser.EncodeForURI;
 import it.unibz.krdb.sql.*;
+
 import org.openrdf.model.Literal;
 
 import java.sql.Types;
@@ -1561,6 +1564,13 @@ public class SQLGenerator implements SQLQueryGenerator {
 			}
 		}
 
+		/**
+		 * Davide> Planning
+		 */
+		public Map<Variable, Set<QualifiedAttributeID>> getColumnReferences(){
+		    return this.columnReferences;
+		}
+		
 		/***
 		 * We assiciate each atom to a view definition. This will be
 		 * <p>

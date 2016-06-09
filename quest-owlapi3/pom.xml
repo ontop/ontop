@@ -83,6 +83,11 @@
             <artifactId>ontop-obdalib-r2rml</artifactId>
             <version>1.17.2-SNAPSHOT</version>
         </dependency>
+        <dependency>
+        	<groupId>it.unibz.inf.ontop</groupId>
+        	<artifactId>ontop-obdalib-core</artifactId>
+        	<version>1.17.2-SNAPSHOT</version>
+        </dependency>
     </dependencies>
 	
 	<properties>

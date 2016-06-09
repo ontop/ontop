@@ -26,6 +26,7 @@ import it.unibz.krdb.obda.renderer.DatalogProgramRenderer;
 import it.unibz.krdb.sql.QualifiedAttributeID;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -235,13 +236,11 @@ public class QuestQueryProcessor {
 	    return sql;
 	}
 	
-	public List<String> getDBNamesFromTemplate(CQIE cq, List<Variable> dlogCols) {
+	public Map<Variable, Set<QualifiedAttributeID>> getDBAliasMap(CQIE cq) {
 	    
 	   QueryAliasIndex index = this.datasourceQueryGenerator.getQueryAliasIndexInstance(cq);
-	    
-//	    index.getColumnReferences(var); TTT
-	    
-	    return null;
+	   
+	   return index.getColumnReferences();
 	}
 	
 	/**

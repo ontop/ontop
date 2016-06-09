@@ -1,15 +1,25 @@
-package it.unibz.inf.ontop.planning;
+package it.unibz.inf.ontop.planning.sql;
 
+import it.unibz.inf.ontop.planning.OntopPlanning;
+import it.unibz.inf.ontop.planning.datatypes.MFragIndexToVarIndex;
+import it.unibz.inf.ontop.planning.datatypes.Restriction;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.DatalogProgram;
+import it.unibz.krdb.obda.model.Function;
+import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.owlrefplatform.core.sql.SQLGenerator.QueryAliasIndex;
+import it.unibz.krdb.sql.QualifiedAttributeID;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import com.google.common.collect.LinkedListMultimap;
 
@@ -22,6 +32,68 @@ public class SQLCreator {
     private SQLCreator(){
 	this.combinations = new ArrayList<>();
     }
+    
+    // ***** Helper Classes ***** //
+    
+    private class AliasMap{
+	    private List<Map<Variable, Set<QualifiedAttributeID>>> fragmentsMaps;
+	    
+	    private AliasMap(List<Restriction> combination, OntopPlanning op) {
+		
+		this.fragmentsMaps = new ArrayList<>();
+		
+		for( Restriction r : combination ){
+		    // Transform the restriction in SQL
+		    CQIE cq = r.getDLog().getRules().iterator().next();
+		    Map<Variable, Set<QualifiedAttributeID>> aliasMap = op.getAliasMap(cq);
+		    this.fragmentsMaps.add(aliasMap);
+		}
+	    }
+	    
+	    Map<Variable, Set<QualifiedAttributeID>> getMapForFragment(int fragIndex){
+		return this.fragmentsMaps.get(fragIndex);
+	    }
+
+	    private Set<QualifiedAttributeID> getAliasesFor(int fragIndex,
+		    List<Variable> variablesInTerm) {
+		
+		Set<QualifiedAttributeID> result = new HashSet<>();
+		
+		for( Variable v : variablesInTerm ){
+		    result.addAll( getMapForFragment(fragIndex).get(v) );
+		}
+		
+		return result;
+	    }
+	};
+    
+    private class JoinStructurer{
+	// Variable -> FragId -> [col1, \ldots, coln]
+	private Map<Variable, Map<Integer, Set<QualifiedAttributeID>>> state;
+//	private List<Map<Variable, Set<QualifiedAttributeID>>> aliasMap;
+	
+	private JoinStructurer() {
+	    this.state = new HashMap<>();
+	}
+
+	private void add(Variable v, int fragIndex, Set<QualifiedAttributeID> attrs) {
+	    if( state.containsKey(v) ){
+		state.get(v).put(fragIndex, attrs);
+	    }
+	    else{
+		Map<Integer, Set<QualifiedAttributeID>> map = new HashMap<>();
+		map.put(fragIndex, attrs);
+		state.put(v, map);
+	    }
+	}
+
+	@Override
+	public String toString(){
+	    return state.toString();
+	}
+    }
+
+    // ***** ***** //
     
     public static SQLCreator getInstance() {
 	if( instance == null )	instance = new SQLCreator();
@@ -40,7 +112,6 @@ public class SQLCreator {
 	
 	// A generalized union of all combinations!
 	List<String> union = new ArrayList<>();
-	
 	
 	for( List<Restriction> combination : this.getCombinations() ){
 	    String sql = makeJoin(combination, op, mOutVariableToFragmentsVariables);
@@ -61,27 +132,35 @@ public class SQLCreator {
 	    List<Restriction> combination,
 	    OntopPlanning op,
 	    LinkedListMultimap<Variable, MFragIndexToVarIndex> mOutVariableToFragmentsVariables) {
-	
+
 	String result = "";
+
+	JoinStructurer structurer = new JoinStructurer();
 	
+	AliasMap aliasMap = new AliasMap(combination, op);
+
 	for( int fragIndex = 0; fragIndex < combination.size(); ++fragIndex ){
-	    
+
 	    // Transform the restriction in SQL
 	    Restriction r = combination.get(fragIndex);
 	    List<String> signature = op.makeSignatureForFragment(fragIndex, mOutVariableToFragmentsVariables);
 	    String sql = op.getSQLForDL(r.getDLog(), signature);
-	    
+
 	    // Make the projLists for Joins
 	    List<String> projList = retrieveProjections(sql);
-	    CQIE cq = r.getDLog().getRules().iterator().next();
-//	    QueryAliasIndex index = TTT
+
+	    // Update joins structurer	    
 	    for( Variable v : mOutVariableToFragmentsVariables.keySet() ){
 		List<MFragIndexToVarIndex> list = mOutVariableToFragmentsVariables.get(v);
 		if( list.size() > 1 ){
 		    // Join
 		    for( MFragIndexToVarIndex el : list ){
 			if( el.getFragIndex() == fragIndex ){
+			    // Retrieve term
+			    Term t = retrieveTerm( r, el.getVarIndex() );
+			    List<Variable> variablesInTerm = varsOf(t);
 			    
+			    structurer.add(v, fragIndex, aliasMap.getAliasesFor(fragIndex, variablesInTerm) );
 			}
 		    }
 		}
@@ -90,7 +169,28 @@ public class SQLCreator {
 	return result;
     }
 
-    
+    private List<Variable> varsOf(Term t) {
+	
+	List<Variable> result = new ArrayList<>();
+	
+	if( t instanceof Function ){
+	    Function t1 = (Function)t;
+	    for( Term t2 : t1.getTerms() ){
+		if( t2 instanceof Variable )
+		    result.add((Variable) t2);
+	    }
+	}
+	return result;
+    }
+
+    private Term retrieveTerm(Restriction r, int varIndex) {
+	
+	CQIE first = r.getDLog().getRules().iterator().next();
+	Term result = first.getHead().getTerm(varIndex);
+	
+	return result;
+    }
+
     private List<String> retrieveProjections(String sql) {
 	
 	class LocalUtils{

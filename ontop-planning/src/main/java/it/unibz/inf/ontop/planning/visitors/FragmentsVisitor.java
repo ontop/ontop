@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.planning;
+package it.unibz.inf.ontop.planning.visitors;
 
 import java.util.HashSet;
 import java.util.List;
@@ -6,6 +6,10 @@ import java.util.Set;
 
 import com.google.common.collect.LinkedListMultimap;
 
+import it.unibz.inf.ontop.planning.datatypes.MFragIndexToVarIndex;
+import it.unibz.inf.ontop.planning.datatypes.Restriction;
+import it.unibz.inf.ontop.planning.datatypes.Template;
+import it.unibz.inf.ontop.planning.sql.SQLCreator;
 import it.unibz.inf.ontop.planning.utils.combinations.CombinationVisitor;
 import it.unibz.krdb.obda.model.Variable;
 

@@ -7,7 +7,11 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import it.unibz.inf.ontop.planning.OntopPlanning;
+import it.unibz.inf.ontop.planning.datatypes.MFragIndexToVarIndex;
+import it.unibz.inf.ontop.planning.datatypes.Restriction;
+import it.unibz.inf.ontop.planning.sql.SQLCreator;
 import it.unibz.inf.ontop.planning.utils.combinations.Combinator;
+import it.unibz.inf.ontop.planning.visitors.FragmentsVisitor;
 import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.Variable;
 

@@ -20,10 +20,12 @@ package it.unibz.krdb.obda.owlrefplatform.owlapi3;
  * #L%
  */
 
+import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.GraphResultSet;
 import it.unibz.krdb.obda.model.OBDAException;
 import it.unibz.krdb.obda.model.TupleResultSet;
+import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.ontology.Assertion;
 import it.unibz.krdb.obda.ontology.ClassAssertion;
 import it.unibz.krdb.obda.ontology.DataPropertyAssertion;
@@ -35,6 +37,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.QuestStatement;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.SPARQLQueryUtility;
 import it.unibz.krdb.obda.owlrefplatform.core.sql.SQLGenerator;
 import it.unibz.krdb.obda.sesame.SesameRDFIterator;
+import it.unibz.krdb.sql.QualifiedAttributeID;
 
 import org.openrdf.query.parser.ParsedQuery;
 import org.openrdf.rio.ParserConfig;
@@ -55,6 +58,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /***
@@ -409,6 +413,14 @@ public class QuestOWLStatement implements AutoCloseable {
 			}
 		}
 		return axiomList;
+	}
+
+	/**
+	 * Davide> OntopPlanning
+	 * @param cq
+	 */
+	public Map<Variable, Set<QualifiedAttributeID>> getAliasMap(CQIE cq) {
+	    return this.st.questInstance.getEngine().getDBAliasMap(cq);
 	}
 
 }

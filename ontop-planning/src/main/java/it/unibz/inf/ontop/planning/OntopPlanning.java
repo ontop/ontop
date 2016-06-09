@@ -3,6 +3,10 @@ package it.unibz.inf.ontop.planning;
 import com.google.common.base.Joiner;
 import com.google.common.collect.LinkedListMultimap;
 
+import it.unibz.inf.ontop.planning.datatypes.MFragIndexToVarIndex;
+import it.unibz.inf.ontop.planning.datatypes.Restriction;
+import it.unibz.inf.ontop.planning.datatypes.Signature;
+import it.unibz.inf.ontop.planning.datatypes.Template;
 import it.unibz.inf.ontop.planning.fragments.MapOutVariableToFragVariables;
 import it.unibz.krdb.obda.exception.InvalidMappingException;
 import it.unibz.krdb.obda.exception.InvalidPredicateDeclarationException;
@@ -28,6 +32,7 @@ import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLConfiguration;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLConnection;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLFactory;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLStatement;
+import it.unibz.krdb.sql.QualifiedAttributeID;
 
 import org.openrdf.query.MalformedQueryException;
 import org.openrdf.query.QueryLanguage;
@@ -45,6 +50,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public class OntopPlanning {
@@ -121,106 +127,7 @@ public class OntopPlanning {
 	}
 	return variableOccurrences;	
     }
-    
-//    /**
-//     * Side effect on parameter <i>programs<\i>
-//     * @param programs
-//     * @param joinOn varName -> [(fragInxed, varIndex), ...]
-//     */
-//    public void pruneDLogPrograms(List<DatalogProgram> programs, LinkedListMultimap<String, MFragIndexToVarIndex> joinOn){
-//	
-//	class LocalUtils{
-//	    List<Pair<DatalogProgram, MFragIndexToVarIndex>> getProgramsList(List<MFragIndexToVarIndex> joins){
-//		List<Pair<DatalogProgram, MFragIndexToVarIndex>> result = new ArrayList<>();
-//		for( MFragIndexToVarIndex map : joins ){
-//		    result.add( new Pair<DatalogProgram, MFragIndexToVarIndex>(programs.get(map.fragIndex), map) );
-//		}
-//		return result;
-//	    }
-//	    
-//	    // URI("http://sws.ifi.uio.no/data/npd-v2/wellbore/{}",t9_7) -> http://sws.ifi.uio.no/data/npd-v2/wellbore/{}
-//	    String cleanTerm(Term t){
-//		String s = t.toString();
-//		String result =s.substring(s.indexOf("(")+2, s.lastIndexOf("\""));
-//		return result;
-//	    }
-//
-//	    public boolean inAll(String s, List<Pair<DatalogProgram, MFragIndexToVarIndex>> rest, List<MFragIndexToVarIndex> joins) {
-//		
-//		for( Pair<DatalogProgram, MFragIndexToVarIndex> pair : rest ){
-//		    DatalogProgram prog = pair.first;
-//		    int varIndex = pair.second.varIndex;
-//		    boolean found = false;
-//		    for( CQIE cq : prog.getRules() ){
-//			Function head = cq.getHead();
-//			Term t = head.getTerm(varIndex);
-//			String termString = cleanTerm(t);
-//			if( termString.equals(s) ){
-//			    found = true;
-//			    break;
-//			}
-//		    }
-//		    if( !found ) return false;
-//		}
-//		return true;
-//	    }
-//
-//	    public void prunePrograms(List<Pair<DatalogProgram, MFragIndexToVarIndex>> pairs, List<String> prunableTermsFromPrograms) {
-//		for( Pair<DatalogProgram, MFragIndexToVarIndex> pair : pairs ){
-//		    DatalogProgram prog = pair.first;
-//		    int varIndex = pair.second.getVarIndex();
-//		    
-//		    List<CQIE> removableRules = new ArrayList<>();
-//		    for( String s : prunableTermsFromPrograms ){
-//			for( CQIE cq : prog.getRules() ){
-//			    Function head = cq.getHead();
-//			    Term t = head.getTerm(varIndex);
-//			    String termString = cleanTerm(t);
-//			    if( termString.equals(s) ){
-//				removableRules.add(cq);
-//			    }
-//			}
-//		    }
-//		    prog.removeRules(removableRules);
-//		}
-//	    }
-//	};
-//	
-//	LocalUtils utils = new LocalUtils();
-//	
-//	for( String varName : joinOn.keySet() ){
-//	    List<MFragIndexToVarIndex> joins = joinOn.get(varName);
-//	    if( joins.size() > 1 ){ 
-//		List<Pair<DatalogProgram, MFragIndexToVarIndex>> progs = utils.getProgramsList( joins );
-//		
-//		DatalogProgram firstDLogProg = progs.get(0).first;
-//		MFragIndexToVarIndex firstMFragIndexToVarIndex = progs.get(0).second;
-//		List<Pair<DatalogProgram, MFragIndexToVarIndex>> rest = new ArrayList<>();
-//		for( int i = 1; i < progs.size(); ++i ){
-//		    rest.add(progs.get(i));
-//		}
-//		
-//		List<String> encounteredTerms = new ArrayList<String>();
-//		
-//		List<String> prunableTermsFromPrograms = new ArrayList<String>();
-//		for( CQIE cq : firstDLogProg.getRules() ){
-//		    int varIndex = firstMFragIndexToVarIndex.varIndex;
-//		    Function head = cq.getHead();
-//		    Term t = head.getTerm(varIndex);
-//		    String s = utils.cleanTerm(t);
-//		    if( encounteredTerms.contains(s) ) continue;
-//		    encounteredTerms.add(s);
-//		    if( !utils.inAll(s, rest, joins) ){
-//			prunableTermsFromPrograms.add(s);
-//		    }
-//		}
-//		
-//		// Now it is the time to prune
-//		utils.prunePrograms(progs, prunableTermsFromPrograms);
-//	    }
-//	}
-//    }
-    
+       
     public List<Restriction> splitDLogWRTTemplates(DatalogProgram prog){
 	
 	List<Restriction> result = new ArrayList<>();
@@ -384,81 +291,11 @@ public class OntopPlanning {
 	
 	return result;
     }
-}
 
-class Restriction{
-    private Pair<Signature, DatalogProgram> restrictionToTemplateSignature;
-    
-    public Restriction(Signature s, DatalogProgram d){
-	this.restrictionToTemplateSignature = new Pair<>(s,d);
-    }
-    
-    public Signature getSignature(){
-	return this.restrictionToTemplateSignature.first;
-    }
-    
-    public DatalogProgram getDLog(){
-	return this.restrictionToTemplateSignature.second;
-    }
-    
-    @Override
-    public String toString(){
-	
-	String result = "Signature:= " + restrictionToTemplateSignature.first + "\n" + 
-		"DLog:= " + restrictionToTemplateSignature.second;
-	
-	return result;
+    public Map<Variable, Set<QualifiedAttributeID>> getAliasMap(CQIE cq) {
+	return this.st.getAliasMap(cq);
     }
 }
 
-class Pair<T,S> {
-    public final T first;
-    public final S second;
 
-    public Pair(T first, S second){
-	this.first = first;
-	this.second = second;
-    }
 
-    @Override 
-    public boolean equals(Object other) {
-	boolean result = false;
-	if (other instanceof Pair<?,?>) {
-	    Pair<?,?> that = (Pair<?,?>) other;
-	    result = (this.first == that.first && this.second == that.second);
-	}
-	return result;
-    }
-
-    @Override 
-    public int hashCode() {
-	return (41 * (41 + this.first.hashCode()) + this.second.hashCode());
-    }
-
-    public String toString(){
-	return "["+first.toString()+", "+second.toString()+"]";
-    }
-};
-class MFragIndexToVarIndex{
-    
-    private final int fragIndex;
-    private final int varIndex;
-    
-    MFragIndexToVarIndex(Integer fragIndex, Integer varIndex) {
-	this.fragIndex = fragIndex;
-	this.varIndex = varIndex;
-    }
-    
-    int getFragIndex(){
-	return this.fragIndex;
-    }
-    
-    int getVarIndex(){
-	return this.varIndex;
-    }
-    
-    @Override
-    public String toString() {
-	return "fragIndex := " + this.fragIndex + ", varIndex := " + this.varIndex + ")";
-    }
-};
