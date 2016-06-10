@@ -60,7 +60,7 @@ public class QuestPreferences extends Properties {
 	public static final String SQL_GENERATE_REPLACE = "org.obda.owlreformulationplatform.sqlGenerateReplace";
 	
 	// Davide> OBDA Planning
-	public static final String SQL_GENERATE_TEMPLATES = "org.obda.owlreformulationplatform.generateTemplates";
+	public static final String SQL_GENERATE_TEMPLATES = "org.obda.owlreformulationplatform.sqlGenerateTemplates";
 	
 	public static final String DISTINCT_RESULTSET = "org.obda.owlreformulationplatform.distinctResultSet";
 

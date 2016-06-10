@@ -94,6 +94,10 @@ public class OntopPlanning {
         }
 	return result;
     }
+    
+    public OBDADataFactory getFactory(){
+	return this.fac;
+    }
         
     /**
      * 

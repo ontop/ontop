@@ -20,6 +20,6 @@ public class MFragIndexToVarIndex{
     
     @Override
     public String toString() {
-	return "fragIndex := " + this.fragIndex + ", varIndex := " + this.varIndex + ")";
+	return "(" + "fragIndex := " + this.fragIndex + ", varIndex := " + this.varIndex + ")";
     }
 };

@@ -24,7 +24,8 @@ import java.util.Map;
 import static org.junit.Assert.*;
 
 public class OntopPlanningTest {
-
+    
+    @Ignore
     @Test
     public void getSQLForFragments1() throws Exception {
         String query =
@@ -97,7 +98,7 @@ public class OntopPlanningTest {
         System.out.println(sql);
     }
 
-//    @Ignore
+    @Ignore
     @Test
     public void getSQLForFragments3() throws Exception {
 
