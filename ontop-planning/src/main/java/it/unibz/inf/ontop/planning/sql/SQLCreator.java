@@ -151,7 +151,13 @@ public class SQLCreator {
 	List<String> union = new ArrayList<>();
 
 	for( List<Restriction> combination : this.getCombinations() ){
-	    String sql = makeJoin(combination, op, mOutVariableToFragmentsVariables);
+	   
+	    AliasMap aliasMap = new AliasMap(combination, op);
+	    
+	    // SELECT projection FROM () AS F1, JOIN () AS F2, ..., ON 
+//	    Map<String, String> mColToTemplateToAttach = makeProjList(combination, op, mOutVariableToFragmentsVariables, aliasMap);
+	    // Projection stucture: 
+	    String sql = makeJoinCondition(combination, op, mOutVariableToFragmentsVariables, aliasMap);
 	    union.add(sql);
 	}
 
@@ -160,22 +166,32 @@ public class SQLCreator {
 	return body;
     }
 
+    private Map<String, String> makeProjList(
+	    List<Restriction> combination,
+	    OntopPlanning op,
+	    LinkedListMultimap<Variable, MFragIndexToVarIndex> mOutVariableToFragmentsVariables, AliasMap aliasMap) {
+	
+//	TTT
+	
+	return null;
+    }
+
     private String uniteAll(List<String> union) {
 	// TODO Auto-generated method stub
 	return null;
     }
 
-    private String makeJoin(
+    private String makeJoinCondition(
 	    List<Restriction> combination,
 	    OntopPlanning op,
-	    LinkedListMultimap<Variable, MFragIndexToVarIndex> mOutVariableToFragmentsVariables) {
+	    LinkedListMultimap<Variable, MFragIndexToVarIndex> mOutVariableToFragmentsVariables, AliasMap aliasMap) {
 
 	String result = "";
 
 	JoinStructurer structurer = new JoinStructurer(); // Davide> At the moment I am re-creating this every time
 	                                  //       but this behavior could be optimized I think...
 
-	AliasMap aliasMap = new AliasMap(combination, op);
+	
 
 	for( int fragIndex = 0; fragIndex < combination.size(); ++fragIndex ){
 
@@ -208,6 +224,7 @@ public class SQLCreator {
 	// Ok, now we have
 	// {x={0=[qview1."wlbNpdidWellbore", qview2."wlbNpdidWellbore", qview3."wlbNpdidWellbore"], 1=[qview1."wlbNpdidWellbore", qview2."wlbNpdidWellbore"]}}
 	result = structurer.joinString();
+	System.out.println(result);
 	return result;
     }
 
