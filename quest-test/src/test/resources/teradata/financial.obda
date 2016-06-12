@@ -1,0 +1,37 @@
+[PrefixDeclaration]
+:		http://www.semanticweb.org/elem/ontologies/2016/5/financial#
+owl:		http://www.w3.org/2002/07/owl#
+rdf:		http://www.w3.org/1999/02/22-rdf-syntax-ns#
+xml:		http://www.w3.org/XML/1998/namespace
+xsd:		http://www.w3.org/2001/XMLSchema#
+rdfs:		http://www.w3.org/2000/01/rdf-schema#
+
+[SourceDeclaration]
+sourceUri	datasource1
+connectionUrl	jdbc:teradata://172.16.92.129/DATABASE=financial
+username	dbc
+password	dbc
+driverClass	com.teradata.jdbc.TeraDriver
+
+[MappingDeclaration] @collection [[
+mappingId	Customer
+target		:Customer/{cust_id} a :Customer .
+source		select "cust_id" from "financial"."customer";
+
+mappingId	Checking Account
+target		:CheckingAccount/{acct_nbr} a :CheckingAccount .
+source		select "acct_nbr" from "financial"."checking_acct";
+
+mappingId	Savings Account
+target		:SavingsAccount/{acct_nbr} a :SavingsAccount .
+source		select "acct_nbr" from "financial"."savings_acct";
+
+mappingId	customer has checking account
+target		:Customer/{cust_id} :hasAccount :CheckingAccount/{acct_nbr} .
+source		SELECT "cust_id", "acct_nbr" from "financial"."checking_acct";
+
+mappingId	customer has savings account
+target		:Customer/{cust_id} :hasAccount :SavingsAccount/{acct_nbr} .
+source		select "cust_id", "acct_nbr" from "financial"."savings_acct";
+]]
+

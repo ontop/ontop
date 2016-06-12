@@ -29,7 +29,7 @@ public class TeradataMetadataInfoTest extends AbstractDbMetadataInfoTest {
 
 	@Override
 	protected String getConnectionString() {
-		return "jdbc:teradata://192.168.32.181/DATABASE=financial";
+		return "jdbc:teradata://172.16.92.129/DATABASE=financial";
 	}
 
 	@Override
