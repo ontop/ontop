@@ -598,7 +598,7 @@ public class Quest implements Serializable {
                           .getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER), metadata.getDbmsVersion());
 			
             SQLQueryGenerator datasourceQueryGenerator = new SQLGenerator(metadata, sqladapter, sqlGenerateReplace,
-					/* distinctResultSet, */ getUriMap());
+					 distinctResultSet, getUriMap());
 
     		VocabularyValidator vocabularyValidator = new VocabularyValidator(reformulationReasoner, inputOntology.getVocabulary());
             
