@@ -1,0 +1,17 @@
+package it.unibz.inf.ontop.pivotalrepr.impl;
+
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMultimap;
+import it.unibz.inf.ontop.model.AtomPredicate;
+import it.unibz.inf.ontop.pivotalrepr.MetadataForQueryOptimization;
+
+/**
+ * Provides no metadata
+ */
+public class EmptyMetadataForQueryOptimization implements MetadataForQueryOptimization {
+
+    @Override
+    public ImmutableMultimap<AtomPredicate, ImmutableList<Integer>> getPrimaryKeys() {
+        return ImmutableMultimap.of();
+    }
+}

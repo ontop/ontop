@@ -64,7 +64,7 @@
 		<module>obdalib-core</module>
 		<module>reformulation-core</module>
 		<module>obdalib-owlapi3</module>
-		<module>obdalib-protege41</module>
+		<module>ontop-protege</module>
 		<module>obdalib-sesame</module>
 		<module>obdalib-r2rml</module>
 		<module>quest-owlapi3</module>
