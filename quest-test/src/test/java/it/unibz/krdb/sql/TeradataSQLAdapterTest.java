@@ -91,7 +91,8 @@ public class TeradataSQLAdapterTest {
         String sparqlQuery =
                 "PREFIX : <http://www.semanticweb.org/elem/ontologies/2016/5/financial#>\n" +
                         "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
-                        "select ?x ?y where {?x :hasAge ?y}";
+                        "select ?x ?y where {?x :hasAccount ?y}" +
+                        "limit 10";
 
         try {
             long t1 = System.currentTimeMillis();
