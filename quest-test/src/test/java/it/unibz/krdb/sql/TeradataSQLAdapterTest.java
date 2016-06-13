@@ -1,5 +1,7 @@
 package it.unibz.krdb.sql;
 
+import it.unibz.krdb.obda.exception.InvalidMappingException;
+import it.unibz.krdb.obda.exception.InvalidPredicateDeclarationException;
 import it.unibz.krdb.obda.io.ModelIOManager;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAModel;
@@ -11,12 +13,10 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.OWLException;
-import org.semanticweb.owlapi.model.OWLObject;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
+import org.semanticweb.owlapi.model.*;
 
 import java.io.File;
+import java.io.IOException;
 
 public class TeradataSQLAdapterTest {
     final String owlfile = "src/test/resources/teradata/financial.owl";
@@ -24,70 +24,75 @@ public class TeradataSQLAdapterTest {
     QuestOWLConnection conn;
     QuestOWLStatement st;
     QuestOWL reasoner;
+    QuestOWLFactory factory;
+    QuestOWLConfiguration config;
+    QuestPreferences preference;
+    ModelIOManager ioManager;
+    OBDAModel obdaModel;
+    OBDADataFactory fac;
+    OWLOntologyManager manager;
+    OWLOntology ontology;
 
 
-    @Before
-    public void setUp() throws Exception {
+    public  void runQuery(){
 
-         /* 
+        try {
+          /* 
              * Load the ontology from an external .owl file. 
             */
-        OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-        OWLOntology ontology = manager.loadOntologyFromOntologyDocument(new File(owlfile));
+            manager = OWLManager.createOWLOntologyManager();
+            ontology = manager.loadOntologyFromOntologyDocument(new File(owlfile));
 
             /* 
             * Load the OBDA model from an external .obda file 
             */
-        OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
-        OBDAModel obdaModel = fac.getOBDAModel();
-        ModelIOManager ioManager = new ModelIOManager(obdaModel);
-        ioManager.load(obdafile);
+            fac = OBDADataFactoryImpl.getInstance();
+            obdaModel = fac.getOBDAModel();
+            ioManager = new ModelIOManager(obdaModel);
+            ioManager.load(obdafile);
 
             /* 
             * * Prepare the configuration for the Quest instance. The example below shows the setup for 
             * * "Virtual ABox" mode 
             */
-        QuestPreferences preference = new QuestPreferences();
-        preference.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+            preference = new QuestPreferences();
+            preference.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+            preference.setCurrentValueOf(QuestPreferences.SQL_GENERATE_REPLACE, QuestConstants.FALSE);
 
             /* 
             * Create the instance of Quest OWL reasoner. 
             */
-        QuestOWLFactory factory = new QuestOWLFactory();
-        QuestOWLConfiguration config = QuestOWLConfiguration.builder().obdaModel(obdaModel).preferences(preference).build();
-        QuestOWL reasoner = factory.createReasoner(ontology, config);
+            factory = new QuestOWLFactory();
+            config = QuestOWLConfiguration.builder().obdaModel(obdaModel).preferences(preference).build();
+            reasoner = factory.createReasoner(ontology, config);
 
             /* 
             * Prepare the data connection for querying. 
             */
-        QuestOWLConnection conn = reasoner.getConnection();
-        QuestOWLStatement st = conn.createStatement();
+            conn = reasoner.getConnection();
+            st = conn.createStatement();
 
-
-    }
-
-    @After
-    public void tearDown() throws Exception{
-        /* 
-            * Close connection and resources 
-            * */
-        if (st != null && !st.isClosed()) {
-            st.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (OWLOntologyCreationException e) {
+            e.printStackTrace();
+        } catch (InvalidMappingException e) {
+            e.printStackTrace();
+        } catch (OWLException e) {
+            e.printStackTrace();
+        } catch (InvalidPredicateDeclarationException e) {
+            e.printStackTrace();
         }
 
-        if (conn != null && !conn.isClosed()) {
-            conn.close();
-        }
-        reasoner.dispose();
-
-    }
-
-    public  void runQuery(){
-
+//        String sparqlQuery =
+//                "PREFIX : <http://www.semanticweb.org/elem/ontologies/2016/5/financial#>\n" +
+//                        "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
+//                        "select ?x ?y where {?x :hasAccount ?y}";
         String sparqlQuery =
                 "PREFIX : <http://www.semanticweb.org/elem/ontologies/2016/5/financial#>\n" +
                         "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
-                        "select ?x ?y where {?x :hasAccount ?y}";
+                        "select ?x ?y where {?x :hasAge ?y}";
+
         try {
             long t1 = System.currentTimeMillis();
             QuestOWLResultSet rs = st.executeTuple(sparqlQuery);
@@ -119,6 +124,23 @@ public class TeradataSQLAdapterTest {
             System.out.println("=====================");
             System.out.println((t2-t1) + "ms");
 
+        } catch (OWLException e) {
+            e.printStackTrace();
+        }
+
+         /* 
+            * Close connection and resources 
+            * */
+        try {
+            if (st != null && !st.isClosed()) {
+                st.close();
+            }
+
+
+        if (conn != null && !conn.isClosed()) {
+            conn.close();
+        }
+        reasoner.dispose();
         } catch (OWLException e) {
             e.printStackTrace();
         }

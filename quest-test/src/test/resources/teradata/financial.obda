@@ -15,23 +15,31 @@ driverClass	com.teradata.jdbc.TeraDriver
 
 [MappingDeclaration] @collection [[
 mappingId	Customer
-target		:Customer/{cust_id} a :Customer .
+target		:Customer/{cust_id} a :Customer . 
 source		select "cust_id" from "financial"."customer";
 
 mappingId	Checking Account
-target		:CheckingAccount/{acct_nbr} a :CheckingAccount .
+target		:CheckingAccount/{acct_nbr} a :CheckingAccount . 
 source		select "acct_nbr" from "financial"."checking_acct";
 
 mappingId	Savings Account
-target		:SavingsAccount/{acct_nbr} a :SavingsAccount .
+target		:SavingsAccount/{acct_nbr} a :SavingsAccount . 
 source		select "acct_nbr" from "financial"."savings_acct";
 
 mappingId	customer has checking account
-target		:Customer/{cust_id} :hasAccount :CheckingAccount/{acct_nbr} .
+target		:Customer/{cust_id} :hasAccount :CheckingAccount/{acct_nbr} . 
 source		SELECT "cust_id", "acct_nbr" from "financial"."checking_acct";
 
 mappingId	customer has savings account
-target		:Customer/{cust_id} :hasAccount :SavingsAccount/{acct_nbr} .
+target		:Customer/{cust_id} :hasAccount :SavingsAccount/{acct_nbr} . 
 source		select "cust_id", "acct_nbr" from "financial"."savings_acct";
+
+mappingId	Customer has customer ID
+target		:Customer/{cust_id} :hasCustomerID {cust_id} . 
+source		select "cust_id" from "financial"."customer";
+
+mappingId	Customer has age
+target		:Customer/{cust_id} :hasAge {age} .
+source		select "cust_id" from "financial"."customer";
 ]]
 

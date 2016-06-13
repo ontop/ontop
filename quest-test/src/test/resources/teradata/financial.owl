@@ -43,6 +43,35 @@
     <!-- 
     ///////////////////////////////////////////////////////////////////////////////////////
     //
+    // Data properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://www.semanticweb.org/elem/ontologies/2016/5/financial#hasAge -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/elem/ontologies/2016/5/financial#hasAge">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/elem/ontologies/2016/5/financial#Customer"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#int"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/elem/ontologies/2016/5/financial#hasCustomerID -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/elem/ontologies/2016/5/financial#hasCustomerID">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/elem/ontologies/2016/5/financial#Customer"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#int"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
     // Classes
     //
     ///////////////////////////////////////////////////////////////////////////////////////
