@@ -61,7 +61,7 @@ public class OntopPlanning {
     public OntopPlanning(String owlfile, String obdafile) throws OWLException, IOException, InvalidMappingException, InvalidPredicateDeclarationException {
         OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
         OWLOntology ontology = manager.loadOntologyFromOntologyDocument(new File(owlfile));
-
+        
         fac = OBDADataFactoryImpl.getInstance();
         OBDAModel obdaModel = fac.getOBDAModel();
         ModelIOManager ioManager = new ModelIOManager(obdaModel);

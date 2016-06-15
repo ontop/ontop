@@ -35,6 +35,13 @@ public class SQLCreator {
 
     // ***** Helper Classes ***** //
 
+    /**
+     * 
+     * Mapping between datalog variables and attribute names.
+     * 
+     * @author Davide Lanti
+     *
+     */
     private class AliasMap{
 	private List<Map<Variable, Set<QualifiedAttributeID>>> fragmentsMaps;
 
@@ -155,12 +162,12 @@ public class SQLCreator {
 	    AliasMap aliasMap = new AliasMap(combination, op);
 	    
 	    // SELECT projection FROM () AS F1, JOIN () AS F2, ..., ON 
-//	    Map<String, String> mColToTemplateToAttach = makeProjList(combination, op, mOutVariableToFragmentsVariables, aliasMap);
+	    Map<String, String> mColToTemplateToAttach = makeProjList(combination, op, mOutVariableToFragmentsVariables, aliasMap);
 	    // Projection stucture: 
 	    String sql = makeJoinCondition(combination, op, mOutVariableToFragmentsVariables, aliasMap);
 	    union.add(sql);
 	}
-
+	
 	String body = uniteAll(union);
 
 	return body;
@@ -169,9 +176,11 @@ public class SQLCreator {
     private Map<String, String> makeProjList(
 	    List<Restriction> combination,
 	    OntopPlanning op,
-	    LinkedListMultimap<Variable, MFragIndexToVarIndex> mOutVariableToFragmentsVariables, AliasMap aliasMap) {
+	    LinkedListMultimap<Variable, MFragIndexToVarIndex> mOutVariableToFragmentsVariables, 
+	    AliasMap aliasMap) {
 	
-//	TTT
+//  	It can be that a combination projects out twice the same variable. Hence, we need renaming for each.
+    	//	
 	
 	return null;
     }
@@ -201,7 +210,7 @@ public class SQLCreator {
 	    String sql = op.getSQLForDL(r.getDLog(), signature);
 
 	    // Make the projLists for Joins
-	    List<String> projList = retrieveProjections(sql);
+	    List<String> projList = retrieveProjections(sql); // TTT TODO Davide, what was this doing?
 
 	    // Update joins structurer	    
 	    for( Variable v : mOutVariableToFragmentsVariables.keySet() ){
