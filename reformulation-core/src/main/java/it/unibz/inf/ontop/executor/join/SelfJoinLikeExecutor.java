@@ -15,7 +15,7 @@ import it.unibz.inf.ontop.pivotalrepr.proposal.impl.SubstitutionPropagationPropo
 
 import java.util.Optional;
 
-public class RedundantJoinExecutor {
+public class SelfJoinLikeExecutor {
 
     /**
      * TODO: explain

@@ -2,12 +2,16 @@ package it.unibz.inf.ontop.executor.leftjoin;
 
 import com.google.common.collect.*;
 import it.unibz.inf.ontop.executor.NodeCentricInternalExecutor;
-import it.unibz.inf.ontop.executor.join.RedundantJoinExecutor;
+import it.unibz.inf.ontop.executor.join.SelfJoinLikeExecutor;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.pivotalrepr.*;
 import it.unibz.inf.ontop.pivotalrepr.impl.QueryTreeComponent;
 import it.unibz.inf.ontop.pivotalrepr.proposal.*;
 import it.unibz.inf.ontop.pivotalrepr.proposal.impl.NodeCentricOptimizationResultsImpl;
+import it.unibz.inf.ontop.sql.DatabaseRelationDefinition;
+import it.unibz.inf.ontop.sql.ForeignKeyConstraint;
+import it.unibz.inf.ontop.sql.QuotedIDFactory;
+import it.unibz.inf.ontop.sql.RelationID;
 
 import java.util.Optional;
 
@@ -23,7 +27,7 @@ import static it.unibz.inf.ontop.pivotalrepr.NonCommutativeOperatorNode.Argument
  *
  */
 public class RedundantSelfLeftJoinExecutor
-        extends RedundantJoinExecutor
+        extends SelfJoinLikeExecutor
         implements NodeCentricInternalExecutor<LeftJoinNode, LeftJoinOptimizationProposal> {
 
     @Override
@@ -97,14 +101,22 @@ public class RedundantSelfLeftJoinExecutor
              * check whether there are foreign key constraints
              */
 
-            if (metadata.getUniqueConstraints().containsKey(leftPredicate)) {
-
-                predicateProposal = proposeForInnerJoin(
-                        leftDataNode,
-                        rightDataNode,
-                        metadata.getUniqueConstraints().get(leftPredicate), variablesToKeep);
+//
+            QuotedIDFactory factory = metadata.getDBMetadata().getQuotedIDFactory();
+            RelationID obj = factory.createRelationID(null, rightPredicate.getName());
+            ImmutableList<ForeignKeyConstraint> foreignKeyConstraints = metadata.getDBMetadata().getDatabaseRelation(obj).getForeignKeys();
+            for( ForeignKeyConstraint foreignKey: foreignKeyConstraints ) {
+                DatabaseRelationDefinition id = foreignKey.getReferencedRelation();
             }
-            throw new RuntimeException("TODO: implement optimization for left join on foreign key and not nullable");
+
+//            if (getUniqueConstraints().containsKey(leftPredicate)) {
+//
+//                predicateProposal = proposeForInnerJoin(
+//                        leftDataNode,
+//                        rightDataNode,
+//                        metadata.getUniqueConstraints().get(leftPredicate), variablesToKeep);
+//            }
+//            throw new RuntimeException("TODO: implement optimization for left join on foreign key and not nullable");
         }
 
         return createConcreteProposal(ImmutableList.of(predicateProposal), variablesToKeep);

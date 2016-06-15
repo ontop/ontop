@@ -29,7 +29,7 @@ import static junit.framework.TestCase.assertTrue;
  * TODO: explain
  */
 
-public class SelfLeftJoinTest {
+public class LeftJoinOptimizationTest {
 
     private final static AtomPredicate TABLE1_PREDICATE = new AtomPredicateImpl("table1", 3);
     private final static AtomPredicate TABLE2_PREDICATE = new AtomPredicateImpl("table2", 3);
@@ -57,7 +57,7 @@ public class SelfLeftJoinTest {
 
     private final MetadataForQueryOptimization metadata;
 
-    public SelfLeftJoinTest() {
+    public LeftJoinOptimizationTest() {
         metadata = initMetadata();
     }
 
@@ -89,18 +89,18 @@ public class SelfLeftJoinTest {
 
         DatabaseRelationDefinition table2Def = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null,
                 TABLE2_PREDICATE.getName()));
-        Attribute pk2 = table2Def.addAttribute(idFactory.createAttributeID("col1"), Types.INTEGER, null, false);
-        table2Def.addAttribute(idFactory.createAttributeID("col2"), Types.INTEGER, null, false);
+        table2Def.addAttribute(idFactory.createAttributeID("col1"), Types.INTEGER, null, false);
+        Attribute pk2 = table2Def.addAttribute(idFactory.createAttributeID("col2"), Types.INTEGER, null, false);
         Attribute table2Col3 = table2Def.addAttribute(idFactory.createAttributeID("col3"), Types.INTEGER, null, false);
         table2Def.addUniqueConstraint(UniqueConstraint.primaryKeyOf(pk2));
         table2Def.addForeignKeyConstraint(ForeignKeyConstraint.of("fk2-1", table2Col3, pk1));
 
         DatabaseRelationDefinition table3Def = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null,
                 TABLE2_PREDICATE.getName()));
-        Attribute pk3 = table3Def.addAttribute(idFactory.createAttributeID("col1"), Types.INTEGER, null, false);
-        table3Def.addAttribute(idFactory.createAttributeID("col2"), Types.INTEGER, null, false);
+        Attribute table3Col1 = table3Def.addAttribute(idFactory.createAttributeID("col1"), Types.INTEGER, null, false);
+        Attribute table3Col2 = table3Def.addAttribute(idFactory.createAttributeID("col2"), Types.INTEGER, null, false);
         table3Def.addAttribute(idFactory.createAttributeID("col3"), Types.INTEGER, null, false);
-        table3Def.addUniqueConstraint(UniqueConstraint.primaryKeyOf(pk2));
+        table3Def.addUniqueConstraint(UniqueConstraint.primaryKeyOf(table3Col1, table3Col2));
 
         return new MetadataForQueryOptimizationImpl(dbMetadata, uniqueKeyBuilder.build(), new UriTemplateMatcher());
     }
