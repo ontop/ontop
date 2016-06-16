@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.protege.gui.component;
 
 /*
  * #%L
- * ontop-protege4
+ * ontop-protege
  * %%
  * Copyright (C) 2009 - 2013 KRDB Research Centre. Free University of Bozen Bolzano.
  * %%
@@ -51,15 +51,26 @@ import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 
+<<<<<<< HEAD:ontop-protege/src/main/java/it/unibz/inf/ontop/protege/gui/component/PropertyMappingPanel.java
 import it.unibz.inf.ontop.protege.core.OBDAModelWrapper;
 import it.unibz.inf.ontop.protege.gui.IconLoader;
+=======
+import it.unibz.inf.ontop.model.Predicate;
+import it.unibz.inf.ontop.ontology.ObjectPropertyExpression;
+>>>>>>> v3/package-names-changed:ontop-protege/src/main/java/it/unibz/inf/ontop/protege/gui/component/PropertyMappingPanel.java
 import it.unibz.inf.ontop.protege.gui.MapItem;
 import it.unibz.inf.ontop.protege.gui.PredicateItem;
 import it.unibz.inf.ontop.protege.gui.action.EditableCellFocusAction;
 import it.unibz.inf.ontop.io.PrefixManager;
+<<<<<<< HEAD:ontop-protege/src/main/java/it/unibz/inf/ontop/protege/gui/component/PropertyMappingPanel.java
 import it.unibz.inf.ontop.model.Predicate;
 import it.unibz.inf.ontop.ontology.DataPropertyExpression;
 import it.unibz.inf.ontop.ontology.ObjectPropertyExpression;
+=======
+import it.unibz.inf.ontop.model.OBDAModel;
+import it.unibz.inf.ontop.ontology.DataPropertyExpression;
+import it.unibz.inf.ontop.protege.gui.IconLoader;
+>>>>>>> v3/package-names-changed:ontop-protege/src/main/java/it/unibz/inf/ontop/protege/gui/component/PropertyMappingPanel.java
 
 public class PropertyMappingPanel extends javax.swing.JPanel {
 

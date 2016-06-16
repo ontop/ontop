@@ -8,6 +8,7 @@ import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.github.rvesse.airline.Command;
 import com.github.rvesse.airline.Option;
 import com.github.rvesse.airline.OptionType;
+<<<<<<< HEAD:ontop-cli/src/main/java/it/unibz/inf/ontop/cli/OntopOBDAToR2RML.java
 import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.exception.InvalidMappingException;
 import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
@@ -17,6 +18,13 @@ import it.unibz.inf.ontop.mapping.MappingParser;
 import it.unibz.inf.ontop.model.OBDAModel;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
 import it.unibz.inf.ontop.r2rml.R2RMLWriter;
+=======
+import it.unibz.inf.ontop.r2rml.R2RMLWriter;
+import it.unibz.inf.ontop.exception.InvalidMappingException;
+import it.unibz.inf.ontop.io.ModelIOManager;
+import it.unibz.inf.ontop.model.OBDAModel;
+import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
+>>>>>>> v3/package-names-changed:ontop-cli/src/main/java/it/unibz/inf/ontop/cli/OntopOBDAToR2RML.java
 import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.RDFFormat;

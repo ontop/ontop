@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.protege.core;
 
 /*
  * #%L
- * ontop-protege4
+ * ontop-protege
  * %%
  * Copyright (C) 2009 - 2013 KRDB Research Centre. Free University of Bozen Bolzano.
  * %%
@@ -25,7 +25,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+<<<<<<< HEAD:ontop-protege/src/main/java/it/unibz/inf/ontop/protege/core/PrefixManagerWrapper.java
 import com.google.common.collect.ImmutableMap;
+=======
+>>>>>>> v3/package-names-changed:ontop-protege/src/main/java/it/unibz/inf/ontop/protege/core/PrefixManagerWrapper.java
 import it.unibz.inf.ontop.io.AbstractPrefixManager;
 import org.semanticweb.owlapi.vocab.PrefixOWLOntologyFormat;
 

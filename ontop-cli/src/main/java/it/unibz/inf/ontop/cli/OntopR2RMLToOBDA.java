@@ -4,18 +4,14 @@ import com.google.common.base.Strings;
 import com.github.rvesse.airline.Command;
 import com.github.rvesse.airline.Option;
 import com.github.rvesse.airline.OptionType;
-import com.google.inject.Guice;
-import com.google.inject.Injector;
-import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
-import it.unibz.inf.ontop.injection.OBDACoreModule;
-import it.unibz.inf.ontop.io.OntopNativeMappingSerializer;
-import it.unibz.inf.ontop.mapping.MappingParser;
+import it.unibz.inf.ontop.model.OBDADataFactory;
+import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
+import it.unibz.inf.ontop.io.ModelIOManager;
+import it.unibz.inf.ontop.model.OBDADataSource;
 import it.unibz.inf.ontop.model.OBDAModel;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
-import it.unibz.inf.ontop.owlrefplatform.questdb.R2RMLQuestPreferences;
 
 import java.io.File;
-import java.util.Properties;
+import java.net.URI;
 
 @Command(name = "to-obda",
         description = "Convert R2RML format to ontop native mapping format (.obda)")
@@ -37,30 +33,25 @@ public class OntopR2RMLToOBDA implements OntopCommand {
         }
 
         File out = new File(outputMappingFile);
+
+        URI obdaURI = new File(inputMappingFile).toURI();
         try {
-            String jdbcurl = "jdbc:h2:tcp://localhost/DBName";
-            String username = "username";
-            String password = "password";
-            String driverclass = "com.mysql.jdbc.Driver";
+        R2RMLReader reader = new R2RMLReader(inputMappingFile);
 
-            Properties p = new Properties();
-            p.setProperty(QuestPreferences.JDBC_URL, jdbcurl);
-            p.setProperty(QuestPreferences.DB_USER, username);
-            p.setProperty(QuestPreferences.DB_PASSWORD, password);
-            p.setProperty(QuestPreferences.JDBC_DRIVER, driverclass);
+        String jdbcurl = "jdbc:h2:tcp://localhost/DBName";
+        String username = "username";
+        String password = "password";
+        String driverclass = "com.mysql.jdbc.Driver";
 
-            QuestPreferences preferences = new R2RMLQuestPreferences(p);
+        OBDADataFactory f = OBDADataFactoryImpl.getInstance();
+        String sourceUrl = obdaURI.toString();
+        OBDADataSource dataSource = f.getJDBCDataSource(sourceUrl, jdbcurl,
+                username, password, driverclass);
+        OBDAModel model = reader.readModel(dataSource);
 
-            Injector injector = Guice.createInjector(new OBDACoreModule(preferences));
+        ModelIOManager modelIO = new ModelIOManager(model);
 
-            NativeQueryLanguageComponentFactory factory = injector.getInstance(NativeQueryLanguageComponentFactory.class);
-            MappingParser mappingParser = factory.create(new File(inputMappingFile));
-
-            OBDAModel model = mappingParser.getOBDAModel();
-
-            OntopNativeMappingSerializer mappingSerializer = new OntopNativeMappingSerializer(model);
-            mappingSerializer.save(out);
-
+            modelIO.save(out);
         } catch (Exception e) {
             e.printStackTrace();
         }

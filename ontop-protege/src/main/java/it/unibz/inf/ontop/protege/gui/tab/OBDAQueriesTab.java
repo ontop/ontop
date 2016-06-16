@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.protege.gui.tab;
 
 /*
  * #%L
- * ontop-protege4
+ * ontop-protege
  * %%
  * Copyright (C) 2009 - 2013 KRDB Research Centre. Free University of Bozen Bolzano.
  * %%
@@ -23,8 +23,12 @@ package it.unibz.inf.ontop.protege.gui.tab;
 import java.util.HashSet;
 import java.util.Iterator;
 
-import org.protege.editor.owl.ui.OWLWorkspaceViewsTab;
 import it.unibz.inf.ontop.protege.views.QueryInterfaceView;
+import org.protege.editor.owl.ui.OWLWorkspaceViewsTab;
+<<<<<<< HEAD:ontop-protege/src/main/java/it/unibz/inf/ontop/protege/gui/tab/OBDAQueriesTab.java
+import it.unibz.inf.ontop.protege.views.QueryInterfaceView;
+=======
+>>>>>>> v3/package-names-changed:ontop-protege/src/main/java/it/unibz/inf/ontop/protege/gui/tab/OBDAQueriesTab.java
 import it.unibz.inf.ontop.protege.views.QueryManagerView;
 
 public class OBDAQueriesTab extends OWLWorkspaceViewsTab {

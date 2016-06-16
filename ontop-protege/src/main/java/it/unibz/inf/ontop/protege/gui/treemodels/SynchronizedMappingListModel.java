@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.protege.gui.treemodels;
 
 /*
  * #%L
- * ontop-protege4
+ * ontop-protege
  * %%
  * Copyright (C) 2009 - 2013 KRDB Research Centre. Free University of Bozen Bolzano.
  * %%
@@ -26,9 +26,15 @@ import java.util.List;
 
 import javax.swing.AbstractListModel;
 
+<<<<<<< HEAD:ontop-protege/src/main/java/it/unibz/inf/ontop/protege/gui/treemodels/SynchronizedMappingListModel.java
 import it.unibz.inf.ontop.protege.core.OBDAMappingListener;
 import it.unibz.inf.ontop.protege.core.OBDAModelWrapper;
 import it.unibz.inf.ontop.model.OBDAMappingAxiom;
+=======
+import it.unibz.inf.ontop.model.OBDAMappingAxiom;
+import it.unibz.inf.ontop.model.OBDAMappingListener;
+import it.unibz.inf.ontop.model.OBDAModel;
+>>>>>>> v3/package-names-changed:ontop-protege/src/main/java/it/unibz/inf/ontop/protege/gui/treemodels/SynchronizedMappingListModel.java
 
 public class SynchronizedMappingListModel extends AbstractListModel implements FilteredModel, OBDAMappingListener {
 

@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.protege.gui.preferences;
 
 /*
  * #%L
- * ontop-protege4
+ * ontop-protege
  * %%
  * Copyright (C) 2009 - 2013 KRDB Research Centre. Free University of Bozen Bolzano.
  * %%
@@ -27,7 +27,11 @@ import javax.swing.JLabel;
 import it.unibz.inf.ontop.protege.panels.OBDAPreferencesPanel;
 import org.protege.editor.core.prefs.PreferencesManager;
 import org.protege.editor.owl.ui.preferences.OWLPreferencesPanel;
+<<<<<<< HEAD:ontop-protege/src/main/java/it/unibz/inf/ontop/protege/gui/preferences/OBDAPluginPreferencesPanel.java
 import it.unibz.inf.ontop.protege.core.ProtegeOBDAPreferences;
+=======
+import it.unibz.inf.ontop.utils.OBDAPreferences;
+>>>>>>> v3/package-names-changed:ontop-protege/src/main/java/it/unibz/inf/ontop/protege/gui/preferences/OBDAPluginPreferencesPanel.java
 
 /***
  * This class is deprecated

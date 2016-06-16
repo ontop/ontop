@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.protege.views;
 
 /*
  * #%L
- * ontop-protege4
+ * ontop-protege
  * %%
  * Copyright (C) 2009 - 2013 KRDB Research Centre. Free University of Bozen Bolzano.
  * %%
@@ -31,6 +31,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.border.TitledBorder;
 
+<<<<<<< HEAD:ontop-protege/src/main/java/it/unibz/inf/ontop/protege/views/MappingAssistantView.java
 import it.unibz.inf.ontop.protege.core.OBDAModelManager;
 import it.unibz.inf.ontop.protege.core.OBDAModelManagerListener;
 import it.unibz.inf.ontop.protege.core.OBDAModelWrapper;
@@ -39,6 +40,15 @@ import org.protege.editor.owl.ui.view.AbstractOWLViewComponent;
 import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
 import it.unibz.inf.ontop.model.impl.OBDAModelImpl;
 import it.unibz.inf.ontop.protege.panels.MappingAssistantPanel;
+=======
+import it.unibz.inf.ontop.model.OBDAModel;
+import it.unibz.inf.ontop.model.impl.OBDAModelImpl;
+import it.unibz.inf.ontop.protege.core.OBDAModelManager;
+import it.unibz.inf.ontop.protege.core.OBDAModelManagerListener;
+import it.unibz.inf.ontop.protege.panels.DatasourceSelector;
+import it.unibz.inf.ontop.protege.panels.MappingAssistantPanel;
+import org.protege.editor.owl.ui.view.AbstractOWLViewComponent;
+>>>>>>> v3/package-names-changed:ontop-protege/src/main/java/it/unibz/inf/ontop/protege/views/MappingAssistantView.java
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

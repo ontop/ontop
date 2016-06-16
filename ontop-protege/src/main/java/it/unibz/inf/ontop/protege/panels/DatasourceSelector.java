@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.protege.panels;
 
 /*
  * #%L
- * ontop-protege4
+ * ontop-protege
  * %%
  * Copyright (C) 2009 - 2013 KRDB Research Centre. Free University of Bozen Bolzano.
  * %%
@@ -33,10 +33,17 @@ import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.ListCellRenderer;
 
+<<<<<<< HEAD:ontop-protege/src/main/java/it/unibz/inf/ontop/protege/panels/DatasourceSelector.java
 import it.unibz.inf.ontop.protege.core.OBDAModelListener;
 import it.unibz.inf.ontop.protege.core.OBDAModelWrapper;
 import it.unibz.inf.ontop.model.OBDADataSource;
 import it.unibz.inf.ontop.protege.utils.DatasourceSelectorListener;
+=======
+import it.unibz.inf.ontop.model.OBDAModel;
+import it.unibz.inf.ontop.model.OBDAModelListener;
+import it.unibz.inf.ontop.protege.utils.DatasourceSelectorListener;
+import it.unibz.inf.ontop.model.OBDADataSource;
+>>>>>>> v3/package-names-changed:ontop-protege/src/main/java/it/unibz/inf/ontop/protege/panels/DatasourceSelector.java
 
 /**
  * A combo box component to select a data source.

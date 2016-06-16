@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.protege.utils;
 
 /*
  * #%L
- * ontop-protege4
+ * ontop-protege
  * %%
  * Copyright (C) 2009 - 2013 KRDB Research Centre. Free University of Bozen Bolzano.
  * %%
@@ -42,6 +42,7 @@ import javax.swing.text.Style;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
 
+<<<<<<< HEAD:ontop-protege/src/main/java/it/unibz/inf/ontop/protege/utils/OBDAMappingListRenderer.java
 import it.unibz.inf.ontop.protege.core.OBDAModelWrapper;
 import it.unibz.inf.ontop.protege.gui.IconLoader;
 import it.unibz.inf.ontop.io.PrefixManager;
@@ -50,6 +51,16 @@ import it.unibz.inf.ontop.model.OBDAMappingAxiom;
 import it.unibz.inf.ontop.model.OBDAQuery;
 import it.unibz.inf.ontop.renderer.SourceQueryRenderer;
 import it.unibz.inf.ontop.renderer.TargetQueryRenderer;
+=======
+import it.unibz.inf.ontop.io.TargetQueryVocabularyValidator;
+import it.unibz.inf.ontop.model.OBDAMappingAxiom;
+import it.unibz.inf.ontop.model.OBDAModel;
+import it.unibz.inf.ontop.protege.gui.IconLoader;
+import it.unibz.inf.ontop.renderer.TargetQueryRenderer;
+import it.unibz.inf.ontop.io.PrefixManager;
+import it.unibz.inf.ontop.model.OBDAQuery;
+import it.unibz.inf.ontop.renderer.SourceQueryRenderer;
+>>>>>>> v3/package-names-changed:ontop-protege/src/main/java/it/unibz/inf/ontop/protege/utils/OBDAMappingListRenderer.java
 
 public class OBDAMappingListRenderer implements ListCellRenderer {
 

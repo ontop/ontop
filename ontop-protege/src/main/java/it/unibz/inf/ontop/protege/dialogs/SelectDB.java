@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.protege.dialogs;
 
 /*
  * #%L
- * ontop-protege4
+ * ontop-protege
  * %%
  * Copyright (C) 2009 - 2013 KRDB Research Centre. Free University of Bozen Bolzano.
  * %%
@@ -24,8 +24,13 @@ import java.util.Iterator;
 
 import javax.swing.JFrame;
 
+<<<<<<< HEAD:ontop-protege/src/main/java/it/unibz/inf/ontop/protege/dialogs/SelectDB.java
 import it.unibz.inf.ontop.protege.core.OBDAModelWrapper;
 import it.unibz.inf.ontop.model.OBDADataSource;
+=======
+import it.unibz.inf.ontop.model.OBDADataSource;
+import it.unibz.inf.ontop.model.OBDAModel;
+>>>>>>> v3/package-names-changed:ontop-protege/src/main/java/it/unibz/inf/ontop/protege/dialogs/SelectDB.java
 
 /*
  * SelectDB.java

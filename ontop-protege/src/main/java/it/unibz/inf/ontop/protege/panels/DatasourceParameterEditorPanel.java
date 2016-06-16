@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.protege.panels;
 
 /*
  * #%L
- * ontop-protege4
+ * ontop-protege
  * %%
  * Copyright (C) 2009 - 2013 KRDB Research Centre. Free University of Bozen Bolzano.
  * %%
@@ -36,6 +36,7 @@ import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 
+<<<<<<< HEAD:ontop-protege/src/main/java/it/unibz/inf/ontop/protege/panels/DatasourceParameterEditorPanel.java
 import it.unibz.inf.ontop.protege.core.OBDAModelListener;
 import it.unibz.inf.ontop.protege.core.OBDAModelWrapper;
 import it.unibz.inf.ontop.protege.gui.IconLoader;
@@ -46,6 +47,18 @@ import it.unibz.inf.ontop.model.impl.RDBMSourceParameterConstants;
 import it.unibz.inf.ontop.protege.utils.CustomTraversalPolicy;
 import it.unibz.inf.ontop.protege.utils.DatasourceSelectorListener;
 import it.unibz.inf.ontop.protege.utils.DialogUtils;
+=======
+import it.unibz.inf.ontop.model.OBDAModel;
+import it.unibz.inf.ontop.model.OBDAModelListener;
+import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
+import it.unibz.inf.ontop.protege.gui.IconLoader;
+import it.unibz.inf.ontop.protege.utils.DatasourceSelectorListener;
+import it.unibz.inf.ontop.protege.utils.DialogUtils;
+import it.unibz.inf.ontop.model.OBDADataSource;
+import it.unibz.inf.ontop.model.OBDAException;
+import it.unibz.inf.ontop.model.impl.RDBMSourceParameterConstants;
+import it.unibz.inf.ontop.protege.utils.CustomTraversalPolicy;
+>>>>>>> v3/package-names-changed:ontop-protege/src/main/java/it/unibz/inf/ontop/protege/panels/DatasourceParameterEditorPanel.java
 import it.unibz.inf.ontop.sql.JDBCConnectionManager;
 
 public class DatasourceParameterEditorPanel extends javax.swing.JPanel implements DatasourceSelectorListener {

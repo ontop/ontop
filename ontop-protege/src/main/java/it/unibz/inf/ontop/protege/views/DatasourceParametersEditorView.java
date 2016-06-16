@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.protege.views;
 
 /*
  * #%L
- * ontop-protege4
+ * ontop-protege
  * %%
  * Copyright (C) 2009 - 2013 KRDB Research Centre. Free University of Bozen Bolzano.
  * %%
@@ -25,10 +25,17 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 
 import it.unibz.inf.ontop.protege.core.OBDAModelManager;
+<<<<<<< HEAD:ontop-protege/src/main/java/it/unibz/inf/ontop/protege/views/DatasourceParametersEditorView.java
 import it.unibz.inf.ontop.protege.core.OBDAModelManagerListener;
 import it.unibz.inf.ontop.protege.panels.DatasourceParameterEditorPanel;
 import org.protege.editor.owl.ui.view.AbstractOWLViewComponent;
 import it.unibz.inf.ontop.model.impl.OBDAModelImpl;
+=======
+import org.protege.editor.owl.ui.view.AbstractOWLViewComponent;
+import it.unibz.inf.ontop.model.impl.OBDAModelImpl;
+import it.unibz.inf.ontop.protege.core.OBDAModelManagerListener;
+import it.unibz.inf.ontop.protege.panels.DatasourceParameterEditorPanel;
+>>>>>>> v3/package-names-changed:ontop-protege/src/main/java/it/unibz/inf/ontop/protege/views/DatasourceParametersEditorView.java
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

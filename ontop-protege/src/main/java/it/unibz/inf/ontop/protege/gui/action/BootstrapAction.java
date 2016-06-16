@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.protege.gui.action;
 
 /*
  * #%L
- * ontop-protege4
+ * ontop-protege
  * %%
  * Copyright (C) 2009 - 2013 KRDB Research Centre. Free University of Bozen Bolzano.
  * %%
@@ -34,16 +34,24 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
+<<<<<<< HEAD:ontop-protege/src/main/java/it/unibz/inf/ontop/protege/gui/action/BootstrapAction.java
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import it.unibz.inf.ontop.protege.core.OBDAModelManager;
 import it.unibz.inf.ontop.protege.core.OBDAModelWrapper;
 import it.unibz.inf.ontop.protege.utils.OBDAProgessMonitor;
+=======
+import it.unibz.inf.ontop.model.OBDAModel;
+import it.unibz.inf.ontop.model.impl.OBDAModelImpl;
+import it.unibz.inf.ontop.owlapi3.bootstrapping.DirectMappingBootstrapper;
+import it.unibz.inf.ontop.protege.core.OBDAModelManager;
+>>>>>>> v3/package-names-changed:ontop-protege/src/main/java/it/unibz/inf/ontop/protege/gui/action/BootstrapAction.java
 import it.unibz.inf.ontop.protege.utils.OBDAProgressListener;
 import org.protege.editor.core.ui.action.ProtegeAction;
 import org.protege.editor.owl.OWLEditorKit;
 import org.protege.editor.owl.model.OWLModelManager;
 import org.protege.editor.owl.model.OWLWorkspace;
+<<<<<<< HEAD:ontop-protege/src/main/java/it/unibz/inf/ontop/protege/gui/action/BootstrapAction.java
 import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
 import it.unibz.inf.ontop.injection.OBDACoreModule;
 import it.unibz.inf.ontop.injection.OBDAFactoryWithException;
@@ -51,6 +59,10 @@ import it.unibz.inf.ontop.injection.OBDAProperties;
 import it.unibz.inf.ontop.model.OBDADataSource;
 import it.unibz.inf.ontop.model.impl.OBDAModelImpl;
 import it.unibz.inf.ontop.owlapi3.bootstrapping.DirectMappingBootstrapper;
+=======
+import it.unibz.inf.ontop.model.OBDADataSource;
+import it.unibz.inf.ontop.protege.utils.OBDAProgessMonitor;
+>>>>>>> v3/package-names-changed:ontop-protege/src/main/java/it/unibz/inf/ontop/protege/gui/action/BootstrapAction.java
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

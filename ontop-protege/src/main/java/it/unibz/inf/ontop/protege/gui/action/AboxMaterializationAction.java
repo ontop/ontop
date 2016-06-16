@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.protege.gui.action;
 
 /*
  * #%L
- * ontop-protege4
+ * ontop-protege
  * %%
  * Copyright (C) 2009 - 2013 KRDB Research Centre. Free University of Bozen Bolzano.
  * %%
@@ -41,9 +41,20 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 
+<<<<<<< HEAD:ontop-protege/src/main/java/it/unibz/inf/ontop/protege/gui/action/AboxMaterializationAction.java
 import it.unibz.inf.ontop.protege.core.OBDAModelManager;
 import it.unibz.inf.ontop.protege.core.OBDAModelWrapper;
 import it.unibz.inf.ontop.protege.utils.OBDAProgessMonitor;
+=======
+import it.unibz.inf.ontop.model.OBDAModel;
+import it.unibz.inf.ontop.model.impl.OBDAModelImpl;
+import it.unibz.inf.ontop.ontology.Ontology;
+import it.unibz.inf.ontop.owlapi3.OWLAPI3TranslatorUtility;
+import it.unibz.inf.ontop.owlrefplatform.owlapi3.OWLAPI3Materializer;
+import it.unibz.inf.ontop.protege.core.OBDAModelManager;
+import it.unibz.inf.ontop.protege.utils.OBDAProgessMonitor;
+import it.unibz.inf.ontop.sesame.SesameMaterializer;
+>>>>>>> v3/package-names-changed:ontop-protege/src/main/java/it/unibz/inf/ontop/protege/gui/action/AboxMaterializationAction.java
 import org.openrdf.model.Statement;
 import org.openrdf.rio.RDFWriter;
 import org.openrdf.rio.n3.N3Writer;
@@ -53,12 +64,15 @@ import org.protege.editor.core.ui.action.ProtegeAction;
 import org.protege.editor.owl.OWLEditorKit;
 import org.protege.editor.owl.model.OWLModelManager;
 import org.protege.editor.owl.model.OWLWorkspace;
+<<<<<<< HEAD:ontop-protege/src/main/java/it/unibz/inf/ontop/protege/gui/action/AboxMaterializationAction.java
 import it.unibz.inf.ontop.model.impl.OBDAModelImpl;
 import it.unibz.inf.ontop.ontology.Ontology;
 import it.unibz.inf.ontop.ontology.OntologyVocabulary;
 import it.unibz.inf.ontop.owlapi3.OWLAPI3TranslatorUtility;
 import it.unibz.inf.ontop.owlrefplatform.owlapi3.OWLAPI3Materializer;
 import it.unibz.inf.ontop.sesame.SesameMaterializer;
+=======
+>>>>>>> v3/package-names-changed:ontop-protege/src/main/java/it/unibz/inf/ontop/protege/gui/action/AboxMaterializationAction.java
 import org.semanticweb.owlapi.io.OWLXMLOntologyFormat;
 import org.semanticweb.owlapi.io.RDFXMLOntologyFormat;
 import org.semanticweb.owlapi.io.WriterDocumentTarget;

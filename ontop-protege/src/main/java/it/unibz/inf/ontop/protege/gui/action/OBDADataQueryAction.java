@@ -6,14 +6,22 @@ import java.util.concurrent.CountDownLatch;
 
 import javax.swing.JOptionPane;
 
+<<<<<<< HEAD:ontop-protege/src/main/java/it/unibz/inf/ontop/protege/gui/action/OBDADataQueryAction.java
 import it.unibz.inf.ontop.protege.utils.OBDAProgessMonitor;
+=======
+import it.unibz.inf.ontop.protege.utils.DialogUtils;
+>>>>>>> v3/package-names-changed:ontop-protege/src/main/java/it/unibz/inf/ontop/protege/gui/action/OBDADataQueryAction.java
 import it.unibz.inf.ontop.protege.utils.OBDAProgressListener;
 import org.protege.editor.owl.OWLEditorKit;
 import it.unibz.inf.ontop.model.OBDAException;
 import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWL;
 import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWLConnection;
 import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWLStatement;
+<<<<<<< HEAD:ontop-protege/src/main/java/it/unibz/inf/ontop/protege/gui/action/OBDADataQueryAction.java
 import it.unibz.inf.ontop.protege.utils.DialogUtils;
+=======
+import it.unibz.inf.ontop.protege.utils.OBDAProgessMonitor;
+>>>>>>> v3/package-names-changed:ontop-protege/src/main/java/it/unibz/inf/ontop/protege/gui/action/OBDADataQueryAction.java
 import org.semanticweb.owlapi.model.OWLException;
 import org.semanticweb.owlapi.reasoner.OWLReasoner;
 import org.slf4j.Logger;
@@ -21,7 +29,7 @@ import org.slf4j.LoggerFactory;
 
 /*
  * #%L
- * ontop-protege4
+ * ontop-protege
  * %%
  * Copyright (C) 2009 - 2013 KRDB Research Centre. Free University of Bozen Bolzano.
  * %%

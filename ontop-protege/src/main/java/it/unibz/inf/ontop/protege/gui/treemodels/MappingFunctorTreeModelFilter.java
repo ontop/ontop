@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.protege.gui.treemodels;
 
 /*
  * #%L
- * ontop-protege4
+ * ontop-protege
  * %%
  * Copyright (C) 2009 - 2013 KRDB Research Centre. Free University of Bozen Bolzano.
  * %%
@@ -25,7 +25,10 @@ import java.util.List;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.CQIEImpl;
 import it.unibz.inf.ontop.model.impl.FunctionalTermImpl;
+<<<<<<< HEAD:ontop-protege/src/main/java/it/unibz/inf/ontop/protege/gui/treemodels/MappingFunctorTreeModelFilter.java
 import it.unibz.inf.ontop.model.impl.VariableImpl;
+=======
+>>>>>>> v3/package-names-changed:ontop-protege/src/main/java/it/unibz/inf/ontop/protege/gui/treemodels/MappingFunctorTreeModelFilter.java
 
 /**
  * This filter receives a string and returns true if any mapping contains the

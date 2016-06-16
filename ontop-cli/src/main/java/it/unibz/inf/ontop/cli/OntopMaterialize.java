@@ -28,8 +28,13 @@ import it.unibz.inf.ontop.model.OBDAModel;
 import it.unibz.inf.ontop.model.Predicate;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.ontology.Ontology;
+<<<<<<< HEAD:ontop-cli/src/main/java/it/unibz/inf/ontop/cli/OntopMaterialize.java
 import it.unibz.inf.ontop.owlapi3.QuestOWLIndividualAxiomIterator;
 import it.unibz.inf.ontop.owlapi3.OWLAPI3TranslatorUtility;
+=======
+import it.unibz.inf.ontop.owlapi3.OWLAPI3TranslatorUtility;
+import it.unibz.inf.ontop.owlapi3.QuestOWLIndividualAxiomIterator;
+>>>>>>> v3/package-names-changed:ontop-cli/src/main/java/it/unibz/inf/ontop/cli/OntopMaterialize.java
 import it.unibz.inf.ontop.owlrefplatform.owlapi3.OWLAPI3Materializer;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.io.WriterDocumentTarget;

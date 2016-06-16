@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.protege.gui.action;
 
 /*
  * #%L
- * ontop-protege4
+ * ontop-protege
  * %%
  * Copyright (C) 2009 - 2013 KRDB Research Centre. Free University of Bozen Bolzano.
  * %%
@@ -29,6 +29,7 @@ import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JPanel;
 
+<<<<<<< HEAD:ontop-protege/src/main/java/it/unibz/inf/ontop/protege/gui/action/ABoxStatisticsAction.java
 import it.unibz.inf.ontop.protege.core.OBDAModelManager;
 import it.unibz.inf.ontop.protege.core.OBDAModelWrapper;
 import it.unibz.inf.ontop.protege.utils.DialogUtils;
@@ -37,6 +38,16 @@ import org.protege.editor.owl.OWLEditorKit;
 import it.unibz.inf.ontop.model.impl.OBDAModelImpl;
 import it.unibz.inf.ontop.protege.panels.OBDAModelStatisticsPanel;
 import it.unibz.inf.ontop.utils.VirtualABoxStatistics;
+=======
+import it.unibz.inf.ontop.model.OBDAModel;
+import it.unibz.inf.ontop.model.impl.OBDAModelImpl;
+import it.unibz.inf.ontop.protege.core.OBDAModelManager;
+import it.unibz.inf.ontop.protege.panels.OBDAModelStatisticsPanel;
+import it.unibz.inf.ontop.protege.utils.DialogUtils;
+import it.unibz.inf.ontop.utils.VirtualABoxStatistics;
+import org.protege.editor.core.ui.action.ProtegeAction;
+import org.protege.editor.owl.OWLEditorKit;
+>>>>>>> v3/package-names-changed:ontop-protege/src/main/java/it/unibz/inf/ontop/protege/gui/action/ABoxStatisticsAction.java
 
 public class ABoxStatisticsAction extends ProtegeAction {
 

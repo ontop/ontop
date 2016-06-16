@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.protege.panels;
 
 /*
  * #%L
- * ontop-protege4
+ * ontop-protege
  * %%
  * Copyright (C) 2009 - 2013 KRDB Research Centre. Free University of Bozen Bolzano.
  * %%
@@ -50,6 +50,7 @@ import javax.swing.UIManager;
 import javax.swing.plaf.metal.MetalComboBoxButton;
 import javax.swing.table.TableModel;
 
+<<<<<<< HEAD:ontop-protege/src/main/java/it/unibz/inf/ontop/protege/panels/MappingAssistantPanel.java
 import it.unibz.inf.ontop.protege.core.OBDAModelWrapper;
 import it.unibz.inf.ontop.protege.gui.IconLoader;
 import it.unibz.inf.ontop.protege.gui.MapItem;
@@ -79,6 +80,45 @@ import it.unibz.inf.ontop.sql.DataDefinition;
 import it.unibz.inf.ontop.sql.JDBCConnectionManager;
 import it.unibz.inf.ontop.sql.TableDefinition;
 import it.unibz.inf.ontop.sql.ViewDefinition;
+=======
+import it.unibz.inf.ontop.exception.DuplicateMappingException;
+import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
+import it.unibz.inf.ontop.model.impl.RDBMSourceParameterConstants;
+import it.unibz.inf.ontop.ontology.OClass;
+import it.unibz.inf.ontop.owlrefplatform.core.queryevaluation.SQLAdapterFactory;
+import it.unibz.inf.ontop.owlrefplatform.core.queryevaluation.SQLDialectAdapter;
+import it.unibz.inf.ontop.owlrefplatform.core.queryevaluation.SQLServerSQLDialectAdapter;
+import it.unibz.inf.ontop.protege.gui.IconLoader;
+import it.unibz.inf.ontop.protege.gui.MapItem;
+import it.unibz.inf.ontop.protege.gui.PredicateItem;
+import it.unibz.inf.ontop.protege.gui.component.AutoSuggestComboBox;
+import it.unibz.inf.ontop.protege.gui.component.PropertyMappingPanel;
+import it.unibz.inf.ontop.protege.gui.treemodels.IncrementalResultSetTableModel;
+import it.unibz.inf.ontop.protege.utils.DatasourceSelectorListener;
+import it.unibz.inf.ontop.protege.utils.DialogUtils;
+import it.unibz.inf.ontop.protege.utils.OBDAProgressListener;
+import it.unibz.inf.ontop.sql.DBMetadata;
+import it.unibz.inf.ontop.sql.DataDefinition;
+import it.unibz.inf.ontop.sql.TableDefinition;
+import it.unibz.inf.ontop.sql.ViewDefinition;
+import it.unibz.inf.ontop.io.PrefixManager;
+import it.unibz.inf.ontop.model.CQIE;
+import it.unibz.inf.ontop.model.Function;
+import it.unibz.inf.ontop.model.OBDADataFactory;
+import it.unibz.inf.ontop.model.OBDADataSource;
+import it.unibz.inf.ontop.model.OBDALibConstants;
+import it.unibz.inf.ontop.model.OBDAMappingAxiom;
+import it.unibz.inf.ontop.model.OBDAModel;
+import it.unibz.inf.ontop.model.OBDAQuery;
+import it.unibz.inf.ontop.model.Predicate;
+import it.unibz.inf.ontop.model.Term;
+import it.unibz.inf.ontop.model.ValueConstant;
+import it.unibz.inf.ontop.model.Variable;
+import it.unibz.inf.ontop.protege.gui.SQLResultSetTableModel;
+import it.unibz.inf.ontop.protege.gui.component.SQLResultTable;
+import it.unibz.inf.ontop.protege.utils.OBDAProgessMonitor;
+import it.unibz.inf.ontop.sql.JDBCConnectionManager;
+>>>>>>> v3/package-names-changed:ontop-protege/src/main/java/it/unibz/inf/ontop/protege/panels/MappingAssistantPanel.java
 import it.unibz.inf.ontop.sql.api.Attribute;
 
 public class MappingAssistantPanel extends javax.swing.JPanel implements DatasourceSelectorListener {
@@ -308,7 +348,7 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
         pnlClassSeachComboBox.setLayout(new java.awt.BorderLayout());
         Vector<Object> v = new Vector<Object>();
         for (OClass c : obdaModel.getDeclaredClasses()) {
-        	Predicate pred = c.getPredicate(); 
+        	Predicate pred = c.getPredicate();
             v.addElement(new PredicateItem(pred, prefixManager));
         }
         cboClassAutoSuggest = new AutoSuggestComboBox(v);

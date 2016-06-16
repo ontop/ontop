@@ -37,7 +37,7 @@
 						value="org.semanticweb.ontop.protege4.MappingsManagerViewComponent" />
 				</Component>
 				<!-- <Component label="RDBMS source schema inspector"> <Property id="pluginId" 
-					value="org.semanticweb.ontop.protege4.RDBMSInspectorViewComponent"/> </Component> -->
+					value="org.semanticweb.ontop.protege.RDBMSInspectorViewComponent"/> </Component> -->
 				<Component label="Mapping Assistant - BETA">
 					<Property id="pluginId"
 						value="org.semanticweb.ontop.protege4.MappingAssistantViewComponent" />

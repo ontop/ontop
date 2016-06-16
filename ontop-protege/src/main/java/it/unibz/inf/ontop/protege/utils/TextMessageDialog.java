@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.protege.utils;
 
 /*
  * #%L
- * ontop-protege4
+ * ontop-protege
  * %%
  * Copyright (C) 2009 - 2013 KRDB Research Centre. Free University of Bozen Bolzano.
  * %%
@@ -138,7 +138,7 @@ public class TextMessageDialog extends javax.swing.JDialog {
 
         jTextArea1.setColumns(20);
         jTextArea1.setRows(5);
-        jTextArea1.setText("com.ibm.db2.jcc.b.SqlException?: DB2 SQL error: SQLCODE: -101, SQLSTATE: 54001, SQLERRMC: null\nat com.ibm.db2.jcc.b.zc.e(zc.java:1606)\nat com.ibm.db2.jcc.b.zc.a(zc.java:1206)\nat com.ibm.db2.jcc.a.db.h(db.java:149)\nat com.ibm.db2.jcc.a.db.a(db.java:43)\nat com.ibm.db2.jcc.a.r.a(r.java:30)\nat com.ibm.db2.jcc.a.sb.g(sb.java:152)\nat com.ibm.db2.jcc.b.zc.n(zc.java:1186)\nat com.ibm.db2.jcc.b.zc.a(zc.java:1857)\nat com.ibm.db2.jcc.b.zc.a(zc.java:497)\nat com.ibm.db2.jcc.b.zc.executeQuery(zc.java:481)\nat it.uniroma1.dis.quonto.datasourcemanager.impl.DB2DataSourceManager.executeQuery(DB2DataSourceManager.java:175)\nat it.uniroma1.dis.quonto.eql.impl.EqlEngine?.evaluateEQLWithoutCheckConsistency(EqlEngine?.java:160)\nat it.uniroma1.dis.quonto.eql.impl.EqlEngine?.evaluateEQL(EqlEngine?.java:192)\nat it.uniroma1.dis.quonto.mastromanager.MastroManager?.answerEQLQuery(MastroManager?.java:273)\nat it.fub.inf.quonto.owlapi.QuontoOWLReasonerWrapper.answerEQL(QuontoOWLReasonerWrapper.java:921)\nat inf.unibz.it.obda.protege4.gui.view.query.QueryInterfaceViewComponent?$6.run(QueryInterfaceViewComponent?.java:345)\nat inf.unibz.it.obda.gui.swing.dataquery.panel.QueryInterfacePanel?$10.run(QueryInterfacePanel?.java:335)\nat java.lang.Thread.run(Thread.java:637)");
+        jTextArea1.setText("com.ibm.db2.jcc.b.SqlException?: DB2 SQL error: SQLCODE: -101, SQLSTATE: 54001, SQLERRMC: null\nat com.ibm.db2.jcc.b.zc.e(zc.java:1606)\nat com.ibm.db2.jcc.b.zc.a(zc.java:1206)\nat com.ibm.db2.jcc.a.db.h(db.java:149)\nat com.ibm.db2.jcc.a.db.a(db.java:43)\nat com.ibm.db2.jcc.a.r.a(r.java:30)\nat com.ibm.db2.jcc.a.sb.g(sb.java:152)\nat com.ibm.db2.jcc.b.zc.n(zc.java:1186)\nat com.ibm.db2.jcc.b.zc.a(zc.java:1857)\nat com.ibm.db2.jcc.b.zc.a(zc.java:497)\nat com.ibm.db2.jcc.b.zc.executeQuery(zc.java:481)\nat it.uniroma1.dis.quonto.datasourcemanager.impl.DB2DataSourceManager.executeQuery(DB2DataSourceManager.java:175)\nat it.uniroma1.dis.quonto.eql.impl.EqlEngine?.evaluateEQLWithoutCheckConsistency(EqlEngine?.java:160)\nat it.uniroma1.dis.quonto.eql.impl.EqlEngine?.evaluateEQL(EqlEngine?.java:192)\nat it.uniroma1.dis.quonto.mastromanager.MastroManager?.answerEQLQuery(MastroManager?.java:273)\nat it.fub.inf.quonto.owlapi.QuontoOWLReasonerWrapper.answerEQL(QuontoOWLReasonerWrapper.java:921)\nat inf.unibz.it.obda.protege.gui.view.query.QueryInterfaceViewComponent?$6.run(QueryInterfaceViewComponent?.java:345)\nat inf.unibz.it.obda.gui.swing.dataquery.panel.QueryInterfacePanel?$10.run(QueryInterfacePanel?.java:335)\nat java.lang.Thread.run(Thread.java:637)");
         jTextArea1.setPreferredSize(new java.awt.Dimension(640, 480));
         jScrollPane2.setViewportView(jTextArea1);
 

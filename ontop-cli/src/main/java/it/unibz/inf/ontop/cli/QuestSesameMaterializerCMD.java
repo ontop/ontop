@@ -23,20 +23,27 @@ package it.unibz.inf.ontop.cli;
 import java.io.*;
 import java.net.URI;
 
+<<<<<<< HEAD:ontop-cli/src/main/java/it/unibz/inf/ontop/cli/QuestSesameMaterializerCMD.java
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import it.unibz.inf.ontop.owlapi3.OWLAPI3TranslatorUtility;
+=======
+import it.unibz.inf.ontop.model.OBDAModel;
+import it.unibz.inf.ontop.ontology.Ontology;
+>>>>>>> v3/package-names-changed:ontop-cli/src/main/java/it/unibz/inf/ontop/cli/QuestSesameMaterializerCMD.java
 import org.openrdf.rio.RDFHandler;
 import org.openrdf.rio.n3.N3Writer;
 import org.openrdf.rio.rdfxml.RDFXMLWriter;
 import org.openrdf.rio.turtle.TurtleWriter;
+<<<<<<< HEAD:ontop-cli/src/main/java/it/unibz/inf/ontop/cli/QuestSesameMaterializerCMD.java
 import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
 import it.unibz.inf.ontop.injection.OBDACoreModule;
 import it.unibz.inf.ontop.mapping.MappingParser;
-import it.unibz.inf.ontop.model.OBDAModel;
-import it.unibz.inf.ontop.ontology.Ontology;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
 import it.unibz.inf.ontop.owlrefplatform.questdb.R2RMLQuestPreferences;
+=======
+import it.unibz.inf.ontop.io.ModelIOManager;
+>>>>>>> v3/package-names-changed:ontop-cli/src/main/java/it/unibz/inf/ontop/cli/QuestSesameMaterializerCMD.java
 import it.unibz.inf.ontop.sesame.SesameStatementIterator;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLOntology;

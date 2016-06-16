@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.protege.panels;
 
 /*
  * #%L
- * ontop-protege4
+ * ontop-protege
  * %%
  * Copyright (C) 2009 - 2013 KRDB Research Centre. Free University of Bozen Bolzano.
  * %%
@@ -33,12 +33,21 @@ import javax.swing.table.TableModel;
 import javax.swing.text.DefaultStyledDocument;
 import javax.swing.text.StyleContext;
 
+<<<<<<< HEAD:ontop-protege/src/main/java/it/unibz/inf/ontop/protege/panels/QueryInterfacePanel.java
 import it.unibz.inf.ontop.protege.core.OBDAModelWrapper;
 import it.unibz.inf.ontop.protege.gui.IconLoader;
 import it.unibz.inf.ontop.protege.gui.action.OBDADataQueryAction;
 import it.unibz.inf.ontop.owlrefplatform.core.queryevaluation.SPARQLQueryUtility;
 import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWLResultSet;
 import it.unibz.inf.ontop.protege.utils.DialogUtils;
+=======
+import it.unibz.inf.ontop.protege.utils.DialogUtils;
+import it.unibz.inf.ontop.model.OBDAModel;
+import it.unibz.inf.ontop.owlrefplatform.core.queryevaluation.SPARQLQueryUtility;
+import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWLResultSet;
+import it.unibz.inf.ontop.protege.gui.IconLoader;
+import it.unibz.inf.ontop.protege.gui.action.OBDADataQueryAction;
+>>>>>>> v3/package-names-changed:ontop-protege/src/main/java/it/unibz/inf/ontop/protege/panels/QueryInterfacePanel.java
 import it.unibz.inf.ontop.querymanager.QueryController;
 import it.unibz.inf.ontop.utils.OBDAPreferenceChangeListener;
 

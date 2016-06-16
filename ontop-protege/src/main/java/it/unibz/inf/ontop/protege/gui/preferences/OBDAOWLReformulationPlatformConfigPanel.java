@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.protege.gui.preferences;
 
 /*
  * #%L
- * ontop-protege4
+ * ontop-protege
  * %%
  * Copyright (C) 2009 - 2013 KRDB Research Centre. Free University of Bozen Bolzano.
  * %%
@@ -23,10 +23,15 @@ package it.unibz.inf.ontop.protege.gui.preferences;
 
 import java.awt.BorderLayout;
 
+import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
+import it.unibz.inf.ontop.protege.panels.ConfigPanel;
 import org.protege.editor.owl.ui.preferences.OWLPreferencesPanel;
+<<<<<<< HEAD:ontop-protege/src/main/java/it/unibz/inf/ontop/protege/gui/preferences/OBDAOWLReformulationPlatformConfigPanel.java
 import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
 import it.unibz.inf.ontop.protege.core.ProtegeReformulationPlatformPreferences;
 import it.unibz.inf.ontop.protege.panels.ConfigPanel;
+=======
+>>>>>>> v3/package-names-changed:ontop-protege/src/main/java/it/unibz/inf/ontop/protege/gui/preferences/OBDAOWLReformulationPlatformConfigPanel.java
 
 public class OBDAOWLReformulationPlatformConfigPanel extends OWLPreferencesPanel {
 

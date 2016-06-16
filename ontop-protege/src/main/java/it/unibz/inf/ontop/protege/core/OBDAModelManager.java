@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.protege.core;
 
 /*
  * #%L
- * ontop-protege4
+ * ontop-protege
  * %%
  * Copyright (C) 2009 - 2013 KRDB Research Centre. Free University of Bozen Bolzano.
  * %%
@@ -21,6 +21,7 @@ package it.unibz.inf.ontop.protege.core;
  */
 
 
+<<<<<<< HEAD:ontop-protege/src/main/java/it/unibz/inf/ontop/protege/core/OBDAModelManager.java
 import it.unibz.inf.ontop.protege.utils.DialogUtils;
 import org.protege.editor.owl.model.inference.OWLReasonerManager;
 import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
@@ -29,6 +30,19 @@ import it.unibz.inf.ontop.io.OntopNativeMappingSerializer;
 import it.unibz.inf.ontop.io.PrefixManager;
 import it.unibz.inf.ontop.io.QueryIOManager;
 import it.unibz.inf.ontop.model.*;
+=======
+import it.unibz.inf.ontop.io.ModelIOManager;
+import it.unibz.inf.ontop.io.PrefixManager;
+import it.unibz.inf.ontop.io.QueryIOManager;
+import it.unibz.inf.ontop.model.OBDADataFactory;
+import it.unibz.inf.ontop.model.OBDADataSource;
+import it.unibz.inf.ontop.model.OBDAException;
+import it.unibz.inf.ontop.model.OBDAMappingAxiom;
+import it.unibz.inf.ontop.model.OBDAMappingListener;
+import it.unibz.inf.ontop.model.OBDAModel;
+import it.unibz.inf.ontop.model.OBDAModelListener;
+import it.unibz.inf.ontop.model.Predicate;
+>>>>>>> v3/package-names-changed:ontop-protege/src/main/java/it/unibz/inf/ontop/protege/core/OBDAModelManager.java
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.ontology.DataPropertyExpression;
 import it.unibz.inf.ontop.ontology.OClass;
@@ -37,6 +51,10 @@ import it.unibz.inf.ontop.ontology.OntologyFactory;
 import it.unibz.inf.ontop.ontology.impl.OntologyFactoryImpl;
 import it.unibz.inf.ontop.owlapi3.OBDAModelValidator;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
+<<<<<<< HEAD:ontop-protege/src/main/java/it/unibz/inf/ontop/protege/core/OBDAModelManager.java
+=======
+import it.unibz.inf.ontop.protege.utils.DialogUtils;
+>>>>>>> v3/package-names-changed:ontop-protege/src/main/java/it/unibz/inf/ontop/protege/core/OBDAModelManager.java
 import it.unibz.inf.ontop.querymanager.QueryController;
 import it.unibz.inf.ontop.querymanager.QueryControllerEntity;
 import it.unibz.inf.ontop.querymanager.QueryControllerGroup;
@@ -46,7 +64,12 @@ import it.unibz.inf.ontop.sql.JDBCConnectionManager;
 import it.unibz.inf.ontop.sql.ImplicitDBConstraints;
 
 
+<<<<<<< HEAD:ontop-protege/src/main/java/it/unibz/inf/ontop/protege/core/OBDAModelManager.java
 import java.io.*;
+=======
+import java.io.File;
+import java.io.IOException;
+>>>>>>> v3/package-names-changed:ontop-protege/src/main/java/it/unibz/inf/ontop/protege/core/OBDAModelManager.java
 import java.net.URI;
 import java.util.*;
 

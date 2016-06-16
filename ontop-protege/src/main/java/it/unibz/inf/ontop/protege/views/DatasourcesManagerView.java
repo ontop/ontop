@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.protege.views;
 
 /*
  * #%L
- * ontop-protege4
+ * ontop-protege
  * %%
  * Copyright (C) 2009 - 2013 KRDB Research Centre. Free University of Bozen Bolzano.
  * %%
@@ -22,9 +22,13 @@ package it.unibz.inf.ontop.protege.views;
 
 import java.awt.BorderLayout;
 
+import it.unibz.inf.ontop.protege.core.OBDAModelManager;
 import org.protege.editor.owl.ui.view.AbstractOWLViewComponent;
 import it.unibz.inf.ontop.model.impl.OBDAModelImpl;
+<<<<<<< HEAD:ontop-protege/src/main/java/it/unibz/inf/ontop/protege/views/DatasourcesManagerView.java
 import it.unibz.inf.ontop.protege.core.OBDAModelManager;
+=======
+>>>>>>> v3/package-names-changed:ontop-protege/src/main/java/it/unibz/inf/ontop/protege/views/DatasourcesManagerView.java
 import it.unibz.inf.ontop.protege.core.OBDAModelManagerListener;
 import it.unibz.inf.ontop.protege.panels.DatasourceParameterEditorPanel;
 import org.slf4j.Logger;

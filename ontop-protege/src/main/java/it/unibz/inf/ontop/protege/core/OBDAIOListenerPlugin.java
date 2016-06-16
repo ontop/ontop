@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.protege.core;
 
 /*
  * #%L
- * ontop-protege4
+ * ontop-protege
  * %%
  * Copyright (C) 2009 - 2013 KRDB Research Centre. Free University of Bozen Bolzano.
  * %%
@@ -47,7 +47,7 @@ public class OBDAIOListenerPlugin extends IOListenerPluginInstance {
 //    	Bundle obdaBundle = null;
 //    	for(Bundle plugin: plugins) {
 //    		String name = plugin.getSymbolicName();
-//    		if (name.equals("inf.unibz.it.obda.protege4")) {
+//    		if (name.equals("inf.unibz.it.obda.protege")) {
 //    			obdaBundle =  plugin;
 //    		}
 //    	}
@@ -91,7 +91,7 @@ public class OBDAIOListenerPlugin extends IOListenerPluginInstance {
 //    	Bundle obdaBundle = null;
 //    	for(Bundle plugin: plugins) {
 //    		String name = plugin.getSymbolicName();
-//    		if (name.equals("inf.unibz.it.obda.protege4")) {
+//    		if (name.equals("inf.unibz.it.obda.protege")) {
 //    			obdaBundle =  plugin;
 //    		}
 //    	}

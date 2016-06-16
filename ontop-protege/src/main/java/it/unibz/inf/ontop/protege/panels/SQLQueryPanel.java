@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.protege.panels;
 
 /*
  * #%L
- * ontop-protege4
+ * ontop-protege
  * %%
  * Copyright (C) 2009 - 2013 KRDB Research Centre. Free University of Bozen Bolzano.
  * %%
@@ -29,12 +29,21 @@ import java.util.concurrent.CountDownLatch;
 import javax.swing.JOptionPane;
 import javax.swing.table.TableModel;
 
+<<<<<<< HEAD:ontop-protege/src/main/java/it/unibz/inf/ontop/protege/panels/SQLQueryPanel.java
 import it.unibz.inf.ontop.protege.gui.IconLoader;
 import it.unibz.inf.ontop.protege.gui.treemodels.IncrementalResultSetTableModel;
 import it.unibz.inf.ontop.protege.utils.OBDAProgessMonitor;
 import it.unibz.inf.ontop.protege.utils.OBDAProgressListener;
 import it.unibz.inf.ontop.model.OBDADataSource;
 import it.unibz.inf.ontop.protege.utils.DatasourceSelectorListener;
+=======
+import it.unibz.inf.ontop.model.OBDADataSource;
+import it.unibz.inf.ontop.protege.gui.IconLoader;
+import it.unibz.inf.ontop.protege.gui.treemodels.IncrementalResultSetTableModel;
+import it.unibz.inf.ontop.protege.utils.DatasourceSelectorListener;
+import it.unibz.inf.ontop.protege.utils.OBDAProgessMonitor;
+import it.unibz.inf.ontop.protege.utils.OBDAProgressListener;
+>>>>>>> v3/package-names-changed:ontop-protege/src/main/java/it/unibz/inf/ontop/protege/panels/SQLQueryPanel.java
 import it.unibz.inf.ontop.sql.JDBCConnectionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

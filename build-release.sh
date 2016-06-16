@@ -12,7 +12,7 @@
 ########################################################################################################################
 
 # location for the build ROOT folder
-export BUILD_ROOT=/build/ontop
+export BUILD_ROOT=/build/ontop-1.8
 
 # location for the build dependencies home 
 export ONTOP_DEP_HOME=/build/dependencies
@@ -24,11 +24,11 @@ export ONTOP_DEP_HOME=/build/dependencies
 # location for the JDBC plugin jars
 export JDBC_PLUGINS_PATH=$ONTOP_DEP_HOME
 
-# location for protege clean folder (Protege 4.3)
+# location for protege clean folder (Protege 4.2)
 export PROTEGE_COPY_PATH=$ONTOP_DEP_HOME
-export PROTEGE_COPY_FILENAME=protege-5.0.0-beta-17-platform-independent
-export PROTEGE_MAIN_FOLDER_NAME=Protege-5.0.0-beta-17
-export PROTEGE_MAIN_PLUGIN=ontopPro-plugin
+export PROTEGE_COPY_FILENAME=protege-4.2-beta.284
+export PROTEGE_MAIN_FOLDER_NAME=Protege_4.2
+export PROTEGE_MAIN_PLUGIN=ontopro-plugin
 
 # location and name for jetty distribution (should be ZIP)
 export JETTY_COPY_PATH=$ONTOP_DEP_HOME
@@ -49,8 +49,8 @@ export QUEST_SESAME_DIST=QuestSesame
 export QUEST_JETTY_DIST=QuestJetty
 export OWL_API_DIST=QuestOWL
 
-export VERSION=2.0
-export REVISION=0-SNAPSHOT
+export VERSION=1.8
+export REVISION=0
 
 
 # Start building the packages
@@ -72,7 +72,7 @@ mvn bundle:bundle -DskipTests
 
 rm -fr $BUILD_ROOT/quest-distribution/$PROTEGE_DIST
 mkdir $BUILD_ROOT/quest-distribution/$PROTEGE_DIST
-cp target/it.unibz.inf.obda.p4plugin-$VERSION.$REVISION.jar $BUILD_ROOT/quest-distribution/$PROTEGE_DIST/it.unibz.inf.obda.p4plugin-$VERSION.$REVISION.jar
+cp target/it.unibz.inf.obda.p4plugin-$VERSION.jar $BUILD_ROOT/quest-distribution/$PROTEGE_DIST/it.unibz.inf.obda.p4plugin-$VERSION.$REVISION.jar
 cp $PROTEGE_COPY_PATH/$PROTEGE_COPY_FILENAME.zip $BUILD_ROOT/quest-distribution/$PROTEGE_DIST/
 
 cd $BUILD_ROOT/quest-distribution/$PROTEGE_DIST/
@@ -98,8 +98,8 @@ echo "-----------------------------------------"
 rm -fr $QUEST_SESAME_DIST
 mkdir -p $QUEST_SESAME_DIST/WEB-INF/lib
 mvn assembly:assembly -DskipTests
-cp target/ontop-distribution-$VERSION.$REVISION-sesame-bin.jar $QUEST_SESAME_DIST/WEB-INF/lib/ontop-distribution-$VERSION.$REVISION.jar
-unzip -q -d $QUEST_SESAME_DIST/WEB-INF/lib/ target/ontop-distribution-$VERSION.$REVISION-dependencies.zip
+cp target/quest-distribution-$VERSION-sesame-bin.jar $QUEST_SESAME_DIST/WEB-INF/lib/ontop-distribution-$VERSION.$REVISION.jar
+unzip -q -d $QUEST_SESAME_DIST/WEB-INF/lib/ target/quest-distribution-$VERSION-dependencies.zip
 cp $OPENRDF_SESAME_PATH/$OPENRDF_SESAME_FILENAME.war $QUEST_SESAME_DIST/
 cp $OPENRDF_WORKBENCH_PATH/$OPENRDF_WORKBENCH_FILENAME.war $QUEST_SESAME_DIST/
 
@@ -144,7 +144,7 @@ echo "-----------------------------------------"
 rm -fr $OWL_API_DIST
 mkdir $OWL_API_DIST
 echo "[INFO] Copying files..."
-cp target/ontop-distribution-$VERSION.$REVISION-bin.zip $OWL_API_DIST/ontop-distribution-$VERSION.$REVISION.zip
+cp target/quest-distribution-$VERSION-bin.zip $OWL_API_DIST/ontop-distribution-$VERSION.$REVISION.zip
 
 echo ""
 echo "Done."

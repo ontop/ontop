@@ -1,5 +1,12 @@
 package it.unibz.inf.ontop.cli;
 
+<<<<<<< HEAD:ontop-cli/src/test/java/it/unibz/inf/ontop/cli/SimpleMaterializerTest.java
+=======
+import it.unibz.inf.ontop.model.OBDADataFactory;
+import it.unibz.inf.ontop.model.OBDAModel;
+import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
+import it.unibz.inf.ontop.io.ModelIOManager;
+>>>>>>> v3/package-names-changed:ontop-cli/src/test/java/it/unibz/inf/ontop/cli/SimpleMaterializerTest.java
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;

@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.protege.panels;
 
 /*
  * #%L
- * ontop-protege4
+ * ontop-protege
  * %%
  * Copyright (C) 2009 - 2013 KRDB Research Centre. Free University of Bozen Bolzano.
  * %%
@@ -51,6 +51,7 @@ import it.unibz.inf.ontop.protege.utils.MappingFilterParser;
 import org.antlr.runtime.ANTLRStringStream;
 import org.antlr.runtime.CommonTokenStream;
 import it.unibz.inf.ontop.exception.DuplicateMappingException;
+<<<<<<< HEAD:ontop-protege/src/main/java/it/unibz/inf/ontop/protege/panels/MappingManagerPanel.java
 import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
 import it.unibz.inf.ontop.io.TargetQueryVocabularyValidator;
 import it.unibz.inf.ontop.model.OBDADataSource;
@@ -64,6 +65,24 @@ import it.unibz.inf.ontop.protege.utils.MappingFilterLexer;
 import it.unibz.inf.ontop.protege.utils.OBDAMappingListRenderer;
 import it.unibz.inf.ontop.utils.IDGenerator;
 import it.unibz.inf.ontop.mapping.sql.SQLSourceQueryValidator;
+=======
+import it.unibz.inf.ontop.io.TargetQueryVocabularyValidator;
+import it.unibz.inf.ontop.protege.gui.treemodels.TreeModelFilter;
+import it.unibz.inf.ontop.protege.utils.DialogUtils;
+import it.unibz.inf.ontop.protege.utils.MappingFilterParser;
+import it.unibz.inf.ontop.model.OBDADataSource;
+import it.unibz.inf.ontop.model.OBDAMappingAxiom;
+import it.unibz.inf.ontop.model.OBDAModel;
+import it.unibz.inf.ontop.protege.dialogs.MappingValidationDialog;
+import it.unibz.inf.ontop.protege.gui.IconLoader;
+import it.unibz.inf.ontop.protege.gui.treemodels.FilteredModel;
+import it.unibz.inf.ontop.protege.gui.treemodels.SynchronizedMappingListModel;
+import it.unibz.inf.ontop.protege.utils.DatasourceSelectorListener;
+import it.unibz.inf.ontop.protege.utils.MappingFilterLexer;
+import it.unibz.inf.ontop.protege.utils.OBDAMappingListRenderer;
+import it.unibz.inf.ontop.utils.IDGenerator;
+import it.unibz.inf.ontop.utils.SourceQueryValidator;
+>>>>>>> v3/package-names-changed:ontop-protege/src/main/java/it/unibz/inf/ontop/protege/panels/MappingManagerPanel.java
 import org.slf4j.LoggerFactory;
 
 public class MappingManagerPanel extends JPanel implements DatasourceSelectorListener {

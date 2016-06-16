@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.protege.views;
 
 /*
  * #%L
- * ontop-protege4
+ * ontop-protege
  * %%
  * Copyright (C) 2009 - 2013 KRDB Research Centre. Free University of Bozen Bolzano.
  * %%
@@ -20,6 +20,7 @@ package it.unibz.inf.ontop.protege.views;
  * #L%
  */
 
+<<<<<<< HEAD:ontop-protege/src/main/java/it/unibz/inf/ontop/protege/views/QueryInterfaceView.java
 import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWLResultSet;
 import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWLStatement;
 import it.unibz.inf.ontop.protege.core.OBDAModelManager;
@@ -38,6 +39,25 @@ import it.unibz.inf.ontop.model.impl.OBDAModelImpl;
 import it.unibz.inf.ontop.owlapi3.OWLResultSetWriter;
 import it.unibz.inf.ontop.owlrefplatform.core.SQLExecutableQuery;
 import it.unibz.inf.ontop.protege.gui.OWLResultSetTableModel;
+=======
+import it.unibz.inf.ontop.model.impl.OBDAModelImpl;
+import it.unibz.inf.ontop.owlapi3.OWLResultSetWriter;
+import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWLResultSet;
+import it.unibz.inf.ontop.protege.core.OBDAModelManager;
+import it.unibz.inf.ontop.protege.panels.QueryInterfacePanel;
+import it.unibz.inf.ontop.protege.utils.DialogUtils;
+import it.unibz.inf.ontop.protege.utils.OBDAProgressListener;
+import it.unibz.inf.ontop.protege.utils.TextMessageFrame;
+import it.unibz.inf.ontop.io.PrefixManager;
+import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWLStatement;
+import it.unibz.inf.ontop.protege.core.OBDAModelManagerListener;
+import it.unibz.inf.ontop.protege.gui.OWLResultSetTableModel;
+import it.unibz.inf.ontop.protege.gui.action.OBDADataQueryAction;
+import it.unibz.inf.ontop.protege.gui.action.OBDASaveQueryResultToFileAction;
+import it.unibz.inf.ontop.protege.panels.ResultViewTablePanel;
+import it.unibz.inf.ontop.protege.panels.SavedQueriesPanelListener;
+import it.unibz.inf.ontop.protege.utils.OBDAProgessMonitor;
+>>>>>>> v3/package-names-changed:ontop-protege/src/main/java/it/unibz/inf/ontop/protege/views/QueryInterfaceView.java
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;

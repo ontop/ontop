@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.protege.utils;
 
 /*
  * #%L
- * ontop-protege4
+ * ontop-protege
  * %%
  * Copyright (C) 2009 - 2013 KRDB Research Centre. Free University of Bozen Bolzano.
  * %%
@@ -23,8 +23,13 @@ package it.unibz.inf.ontop.protege.utils;
 import javax.swing.JTextPane;
 import javax.swing.text.DefaultStyledDocument;
 
+<<<<<<< HEAD:ontop-protege/src/main/java/it/unibz/inf/ontop/protege/utils/MappingStyledDocument.java
 import it.unibz.inf.ontop.protege.core.OBDAModelWrapper;
 import it.unibz.inf.ontop.io.TargetQueryVocabularyValidator;
+=======
+import it.unibz.inf.ontop.io.TargetQueryVocabularyValidator;
+import it.unibz.inf.ontop.model.OBDAModel;
+>>>>>>> v3/package-names-changed:ontop-protege/src/main/java/it/unibz/inf/ontop/protege/utils/MappingStyledDocument.java
 
 public class MappingStyledDocument extends DefaultStyledDocument {
 

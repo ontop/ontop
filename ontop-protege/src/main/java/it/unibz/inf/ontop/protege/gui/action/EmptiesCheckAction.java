@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.protege.gui.action;
 
 /*
  * #%L
- * ontop-protege4
+ * ontop-protege
  * %%
  * Copyright (C) 2009 - 2013 KRDB Research Centre. Free University of Bozen Bolzano.
  * %%
@@ -31,13 +31,21 @@ import javax.swing.JDialog;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
+<<<<<<< HEAD:ontop-protege/src/main/java/it/unibz/inf/ontop/protege/gui/action/EmptiesCheckAction.java
+=======
+import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWL;
+import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWLEmptyEntitiesChecker;
+>>>>>>> v3/package-names-changed:ontop-protege/src/main/java/it/unibz/inf/ontop/protege/gui/action/EmptiesCheckAction.java
 import it.unibz.inf.ontop.protege.panels.EmptiesCheckPanel;
 import it.unibz.inf.ontop.protege.utils.DialogUtils;
 import org.protege.editor.core.ui.action.ProtegeAction;
 import org.protege.editor.owl.OWLEditorKit;
 import org.protege.editor.owl.model.OWLModelManager;
+<<<<<<< HEAD:ontop-protege/src/main/java/it/unibz/inf/ontop/protege/gui/action/EmptiesCheckAction.java
 import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWL;
 import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWLEmptyEntitiesChecker;
+=======
+>>>>>>> v3/package-names-changed:ontop-protege/src/main/java/it/unibz/inf/ontop/protege/gui/action/EmptiesCheckAction.java
 import org.semanticweb.owlapi.reasoner.OWLReasoner;
 
 public class EmptiesCheckAction extends ProtegeAction {

@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.protege.core;
 
 /*
  * #%L
- * ontop-protege4
+ * ontop-protege
  * %%
  * Copyright (C) 2009 - 2013 KRDB Research Centre. Free University of Bozen Bolzano.
  * %%
@@ -24,13 +24,21 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+<<<<<<< HEAD:ontop-protege/src/main/java/it/unibz/inf/ontop/protege/core/OBDAEditorKitSynchronizerPlugin.java
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+=======
+import it.unibz.inf.ontop.model.impl.OBDAModelImpl;
+import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
+import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
+import it.unibz.inf.ontop.utils.OBDAPreferences;
+>>>>>>> v3/package-names-changed:ontop-protege/src/main/java/it/unibz/inf/ontop/protege/core/OBDAEditorKitSynchronizerPlugin.java
 import org.protege.editor.core.editorkit.EditorKit;
 import org.protege.editor.core.editorkit.plugin.EditorKitHook;
 import org.protege.editor.core.prefs.Preferences;
 import org.protege.editor.core.prefs.PreferencesManager;
 import org.protege.editor.owl.OWLEditorKit;
+<<<<<<< HEAD:ontop-protege/src/main/java/it/unibz/inf/ontop/protege/core/OBDAEditorKitSynchronizerPlugin.java
 import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
 import it.unibz.inf.ontop.injection.OBDACoreModule;
 import it.unibz.inf.ontop.injection.OBDAFactoryWithException;
@@ -38,6 +46,8 @@ import it.unibz.inf.ontop.model.impl.OBDAModelImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
 import it.unibz.inf.ontop.owlrefplatform.injection.QuestComponentModule;
+=======
+>>>>>>> v3/package-names-changed:ontop-protege/src/main/java/it/unibz/inf/ontop/protege/core/OBDAEditorKitSynchronizerPlugin.java
 
 /***
  * This class is responsible for initializing all base classes for the OBDA
@@ -138,7 +148,7 @@ public class OBDAEditorKitSynchronizerPlugin extends EditorKitHook {
 			String value = pref.getString(key, null);
 			if(value != null){
 				// here we ensure that if the abox mode is classic the the data location can only be in memory
-				if (key.equals(QuestPreferences.ABOX_MODE) && value.equals(QuestConstants.CLASSIC)) { 
+				if (key.equals(QuestPreferences.ABOX_MODE) && value.equals(QuestConstants.CLASSIC)) {
 //					refplatPref.put(ReformulationPlatformPreferences.DATA_LOCATION, QuestConstants.INMEMORY);
 					refplatPref = refplatPref.newProperties(key, value);
 					isCalssic = true;

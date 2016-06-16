@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.protege.gui;
 
 /*
  * #%L
- * ontop-protege4
+ * ontop-protege
  * %%
  * Copyright (C) 2009 - 2013 KRDB Research Centre. Free University of Bozen Bolzano.
  * %%
@@ -20,7 +20,6 @@ package it.unibz.inf.ontop.protege.gui;
  * #L%
  */
 
-import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
 

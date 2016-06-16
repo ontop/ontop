@@ -2,19 +2,11 @@ package it.unibz.inf.ontop.protege.core;
 
 import javax.swing.JOptionPane;
 
-import it.unibz.inf.ontop.exception.DuplicateMappingException;
-import it.unibz.inf.ontop.exception.InvalidMappingException;
-import it.unibz.inf.ontop.io.InvalidDataSourceException;
-import it.unibz.inf.ontop.io.OntopNativeMappingSerializer;
-import it.unibz.inf.ontop.model.OBDAModel;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
 import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWL;
 import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWLFactory;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.reasoner.IllegalConfigurationException;
 import org.semanticweb.owlapi.reasoner.OWLReasonerConfiguration;
-
-import java.io.*;
 
 
 /**
@@ -26,13 +18,8 @@ import java.io.*;
  */
 public class OntopOWLFactory extends QuestOWLFactory {
 
-    public OntopOWLFactory(OBDAModel obdaModel, QuestPreferences preferences)
-            throws IOException, InvalidMappingException, InvalidDataSourceException, DuplicateMappingException {
-        super(preferences, convertOBDAModelToReader(obdaModel));
-    }
-
 	
-	public static void handleError(Exception e){
+	private void handleError(Exception e){
 		String message = "Error during reasoner initialization: " + e;
 		JOptionPane.showMessageDialog(null, message, "Ontop Initialization Error", JOptionPane.ERROR_MESSAGE);
 	}
@@ -75,57 +62,4 @@ public class OntopOWLFactory extends QuestOWLFactory {
 		}
 	}
 
-    @Override
-    public void reload(QuestPreferences preferences) {
-        try {
-            super.reload(preferences);
-        } catch (Exception e) {
-            handleError(e);
-            //TODO: see if we should return an exception
-        }
-    }
-
-    @Override
-    public void reload(File mappingFile, QuestPreferences preferences) {
-        try {
-            super.reload(mappingFile, preferences);
-        } catch (Exception e) {
-            handleError(e);
-            //TODO: see if we should return an exception
-        }
-    }
-
-    @Override
-    public void reload(Reader mappingReader, QuestPreferences preferences) {
-        try {
-            super.reload(mappingReader, preferences);
-        } catch (Exception e) {
-            handleError(e);
-            //TODO: see if we should return an exception
-        }
-    }
-
-    public void reload(OBDAModel currentModel, QuestPreferences preferences) {
-        try {
-            Reader mappingReader = convertOBDAModelToReader(currentModel);
-            super.reload(mappingReader, preferences);
-        } catch (Exception e) {
-            handleError(e);
-            //TODO: see if we should return an exception
-        }
-    }
-
-    /**
-     * TODO: make it generic (not OntopNativeMapping-specific).
-     *
-     */
-    private static Reader convertOBDAModelToReader(OBDAModel currentModel) throws IOException {
-        OntopNativeMappingSerializer mappingSerializer = new OntopNativeMappingSerializer(currentModel);
-        StringWriter stringWriter = new StringWriter();
-
-        mappingSerializer.save(stringWriter);
-        String mappingDump = stringWriter.toString();
-
-        return new StringReader(mappingDump);
-    }
 }

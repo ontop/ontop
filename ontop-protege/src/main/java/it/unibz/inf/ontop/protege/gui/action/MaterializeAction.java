@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.protege.gui.action;
 
 /*
  * #%L
- * ontop-protege4
+ * ontop-protege
  * %%
  * Copyright (C) 2009 - 2013 KRDB Research Centre. Free University of Bozen Bolzano.
  * %%
@@ -26,8 +26,13 @@ import java.util.concurrent.CountDownLatch;
 
 import javax.swing.JOptionPane;
 
+<<<<<<< HEAD:ontop-protege/src/main/java/it/unibz/inf/ontop/protege/gui/action/MaterializeAction.java
 import it.unibz.inf.ontop.protege.utils.OBDAProgressListener;
 import it.unibz.inf.ontop.owlrefplatform.owlapi3.OWLAPI3Materializer;
+=======
+import it.unibz.inf.ontop.owlrefplatform.owlapi3.OWLAPI3Materializer;
+import it.unibz.inf.ontop.protege.utils.OBDAProgressListener;
+>>>>>>> v3/package-names-changed:ontop-protege/src/main/java/it/unibz/inf/ontop/protege/gui/action/MaterializeAction.java
 import org.semanticweb.owlapi.model.OWLIndividualAxiom;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;

@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.protege.panels;
 
 /*
  * #%L
- * ontop-protege4
+ * ontop-protege
  * %%
  * Copyright (C) 2009 - 2013 KRDB Research Centre. Free University of Bozen Bolzano.
  * %%
@@ -41,6 +41,7 @@ import javax.swing.text.Style;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
 
+<<<<<<< HEAD:ontop-protege/src/main/java/it/unibz/inf/ontop/protege/panels/NewMappingDialogPanel.java
 import it.unibz.inf.ontop.protege.core.OBDAModelWrapper;
 import it.unibz.inf.ontop.protege.gui.IconLoader;
 import it.unibz.inf.ontop.protege.gui.treemodels.IncrementalResultSetTableModel;
@@ -60,6 +61,32 @@ import it.unibz.inf.ontop.protege.utils.OBDAProgressListener;
 import it.unibz.inf.ontop.protege.utils.QueryPainter;
 import it.unibz.inf.ontop.renderer.SourceQueryRenderer;
 import it.unibz.inf.ontop.renderer.TargetQueryRenderer;
+=======
+import it.unibz.inf.ontop.exception.DuplicateMappingException;
+import it.unibz.inf.ontop.io.TargetQueryVocabularyValidator;
+import it.unibz.inf.ontop.model.OBDADataFactory;
+import it.unibz.inf.ontop.model.OBDAMappingAxiom;
+import it.unibz.inf.ontop.model.OBDAModel;
+import it.unibz.inf.ontop.model.OBDARDBMappingAxiom;
+import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
+import it.unibz.inf.ontop.parser.TargetQueryParserException;
+import it.unibz.inf.ontop.protege.gui.IconLoader;
+import it.unibz.inf.ontop.protege.gui.treemodels.IncrementalResultSetTableModel;
+import it.unibz.inf.ontop.protege.utils.DatasourceSelectorListener;
+import it.unibz.inf.ontop.protege.utils.DialogUtils;
+import it.unibz.inf.ontop.protege.utils.OBDAProgressListener;
+import it.unibz.inf.ontop.protege.utils.QueryPainter;
+import it.unibz.inf.ontop.renderer.TargetQueryRenderer;
+import it.unibz.inf.ontop.io.PrefixManager;
+import it.unibz.inf.ontop.model.CQIE;
+import it.unibz.inf.ontop.model.OBDADataSource;
+import it.unibz.inf.ontop.model.OBDAQuery;
+import it.unibz.inf.ontop.model.OBDASQLQuery;
+import it.unibz.inf.ontop.parser.TurtleOBDASyntaxParser;
+import it.unibz.inf.ontop.protege.utils.CustomTraversalPolicy;
+import it.unibz.inf.ontop.protege.utils.OBDAProgessMonitor;
+import it.unibz.inf.ontop.renderer.SourceQueryRenderer;
+>>>>>>> v3/package-names-changed:ontop-protege/src/main/java/it/unibz/inf/ontop/protege/panels/NewMappingDialogPanel.java
 import it.unibz.inf.ontop.sql.JDBCConnectionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.protege.panels;
 
 /*
  * #%L
- * ontop-protege4
+ * ontop-protege
  * %%
  * Copyright (C) 2009 - 2013 KRDB Research Centre. Free University of Bozen Bolzano.
  * %%
@@ -21,14 +21,21 @@ package it.unibz.inf.ontop.protege.panels;
  */
 
 import it.unibz.inf.ontop.model.Predicate;
+<<<<<<< HEAD:ontop-protege/src/main/java/it/unibz/inf/ontop/protege/panels/EmptiesCheckPanel.java
+=======
+import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWLEmptyEntitiesChecker;
+>>>>>>> v3/package-names-changed:ontop-protege/src/main/java/it/unibz/inf/ontop/protege/panels/EmptiesCheckPanel.java
 
 import java.util.List;
 
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
 
+<<<<<<< HEAD:ontop-protege/src/main/java/it/unibz/inf/ontop/protege/panels/EmptiesCheckPanel.java
 import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWLEmptyEntitiesChecker;
 
+=======
+>>>>>>> v3/package-names-changed:ontop-protege/src/main/java/it/unibz/inf/ontop/protege/panels/EmptiesCheckPanel.java
 public class EmptiesCheckPanel extends javax.swing.JPanel {
 
 	private static final long serialVersionUID = 2317777246039649415L;

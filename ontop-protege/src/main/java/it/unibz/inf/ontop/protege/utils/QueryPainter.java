@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.protege.utils;
 
 /*
  * #%L
- * ontop-protege4
+ * ontop-protege
  * %%
  * Copyright (C) 2009 - 2013 KRDB Research Centre. Free University of Bozen Bolzano.
  * %%
@@ -41,10 +41,21 @@ import javax.swing.text.Style;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
 
+<<<<<<< HEAD:ontop-protege/src/main/java/it/unibz/inf/ontop/protege/utils/QueryPainter.java
 import it.unibz.inf.ontop.protege.core.OBDAModelWrapper;
 import it.unibz.inf.ontop.io.PrefixManager;
 import it.unibz.inf.ontop.io.TargetQueryVocabularyValidator;
 import it.unibz.inf.ontop.model.*;
+=======
+import it.unibz.inf.ontop.io.TargetQueryVocabularyValidator;
+import it.unibz.inf.ontop.model.Function;
+import it.unibz.inf.ontop.model.Predicate;
+import it.unibz.inf.ontop.io.PrefixManager;
+import it.unibz.inf.ontop.model.CQIE;
+import it.unibz.inf.ontop.model.OBDAModel;
+import it.unibz.inf.ontop.model.Term;
+import it.unibz.inf.ontop.model.URIConstant;
+>>>>>>> v3/package-names-changed:ontop-protege/src/main/java/it/unibz/inf/ontop/protege/utils/QueryPainter.java
 import it.unibz.inf.ontop.parser.TargetQueryParserException;
 import it.unibz.inf.ontop.parser.TurtleOBDASyntaxParser;
 

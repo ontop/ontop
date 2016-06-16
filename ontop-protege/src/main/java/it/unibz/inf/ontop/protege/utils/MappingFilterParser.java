@@ -4,7 +4,7 @@ package it.unibz.inf.ontop.protege.utils;
 
 /*
  * #%L
- * ontop-protege4
+ * ontop-protege
  * %%
  * Copyright (C) 2009 - 2013 KRDB Research Centre. Free University of Bozen Bolzano.
  * %%
@@ -35,11 +35,19 @@ import org.antlr.runtime.RecognitionException;
 import org.antlr.runtime.RecognizerSharedState;
 import org.antlr.runtime.Token;
 import org.antlr.runtime.TokenStream;
+<<<<<<< HEAD:ontop-protege/src/main/java/it/unibz/inf/ontop/protege/utils/MappingFilterParser.java
+=======
+import it.unibz.inf.ontop.protege.gui.treemodels.TreeModelFilter;
+>>>>>>> v3/package-names-changed:ontop-protege/src/main/java/it/unibz/inf/ontop/protege/utils/MappingFilterParser.java
 import it.unibz.inf.ontop.model.OBDAMappingAxiom;
 import it.unibz.inf.ontop.protege.gui.treemodels.MappingFunctorTreeModelFilter;
 import it.unibz.inf.ontop.protege.gui.treemodels.MappingHeadVariableTreeModelFilter;
 import it.unibz.inf.ontop.protege.gui.treemodels.MappingIDTreeModelFilter;
 import it.unibz.inf.ontop.protege.gui.treemodels.MappingPredicateTreeModelFilter;
+<<<<<<< HEAD:ontop-protege/src/main/java/it/unibz/inf/ontop/protege/utils/MappingFilterParser.java
+=======
+import it.unibz.inf.ontop.protege.gui.treemodels.MappingSQLStringTreeModelFilter;
+>>>>>>> v3/package-names-changed:ontop-protege/src/main/java/it/unibz/inf/ontop/protege/utils/MappingFilterParser.java
 import it.unibz.inf.ontop.protege.gui.treemodels.MappingStringTreeModelFilter;
 
 @SuppressWarnings({"all", "warnings", "unchecked"})

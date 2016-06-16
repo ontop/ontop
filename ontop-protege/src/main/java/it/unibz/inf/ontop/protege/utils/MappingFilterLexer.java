@@ -4,7 +4,7 @@ package it.unibz.inf.ontop.protege.utils;
 
 /*
  * #%L
- * ontop-protege4
+ * ontop-protege
  * %%
  * Copyright (C) 2009 - 2013 KRDB Research Centre. Free University of Bozen Bolzano.
  * %%
@@ -26,9 +26,8 @@ import java.util.Vector;
 
 
 import org.antlr.runtime.*;
-import java.util.Stack;
+
 import java.util.List;
-import java.util.ArrayList;
 
 @SuppressWarnings({"all", "warnings", "unchecked"})
 public class MappingFilterLexer extends Lexer {

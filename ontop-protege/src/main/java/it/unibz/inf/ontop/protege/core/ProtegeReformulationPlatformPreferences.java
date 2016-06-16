@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.protege.core;
 
 /*
  * #%L
- * ontop-protege4
+ * ontop-protege
  * %%
  * Copyright (C) 2009 - 2013 KRDB Research Centre. Free University of Bozen Bolzano.
  * %%
@@ -20,11 +20,15 @@ package it.unibz.inf.ontop.protege.core;
  * #L%
  */
 
+import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
 import org.protege.editor.core.Disposable;
+<<<<<<< HEAD:ontop-protege/src/main/java/it/unibz/inf/ontop/protege/core/ProtegeReformulationPlatformPreferences.java
 import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
 
 import java.util.Properties;
 import java.util.Set;
+=======
+>>>>>>> v3/package-names-changed:ontop-protege/src/main/java/it/unibz/inf/ontop/protege/core/ProtegeReformulationPlatformPreferences.java
 
 public class ProtegeReformulationPlatformPreferences extends QuestPreferences implements Disposable {
 

@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.protege.gui.action;
 
 /*
  * #%L
- * ontop-protege4
+ * ontop-protege
  * %%
  * Copyright (C) 2009 - 2013 KRDB Research Centre. Free University of Bozen Bolzano.
  * %%
@@ -28,6 +28,7 @@ import java.net.URI;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 
+<<<<<<< HEAD:ontop-protege/src/main/java/it/unibz/inf/ontop/protege/gui/action/R2RMLImportAction.java
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import it.unibz.inf.ontop.protege.core.OBDAModelWrapper;
@@ -48,6 +49,8 @@ import it.unibz.inf.ontop.model.OBDAModel;
 import it.unibz.inf.ontop.model.impl.OBDAModelImpl;
 import it.unibz.inf.ontop.owlrefplatform.questdb.R2RMLQuestPreferences;
 import it.unibz.inf.ontop.protege.core.OBDAModelManager;
+=======
+>>>>>>> v3/package-names-changed:ontop-protege/src/main/java/it/unibz/inf/ontop/protege/gui/action/R2RMLImportAction.java
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

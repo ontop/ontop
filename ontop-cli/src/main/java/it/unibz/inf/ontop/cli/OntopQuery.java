@@ -24,6 +24,12 @@ import com.github.rvesse.airline.Command;
 import com.github.rvesse.airline.Option;
 import com.github.rvesse.airline.OptionType;
 import com.google.common.base.Joiner;
+<<<<<<< HEAD:ontop-cli/src/main/java/it/unibz/inf/ontop/cli/OntopQuery.java
+=======
+import it.unibz.inf.ontop.model.OBDAModel;
+import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
+import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
+>>>>>>> v3/package-names-changed:ontop-cli/src/main/java/it/unibz/inf/ontop/cli/OntopQuery.java
 import it.unibz.inf.ontop.model.OBDAException;
 
 import java.io.BufferedWriter;
@@ -35,13 +41,17 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
+<<<<<<< HEAD:ontop-cli/src/main/java/it/unibz/inf/ontop/cli/OntopQuery.java
 import it.unibz.inf.ontop.owlrefplatform.owlapi3.*;
+=======
+>>>>>>> v3/package-names-changed:ontop-cli/src/main/java/it/unibz/inf/ontop/cli/OntopQuery.java
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLException;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
+import it.unibz.inf.ontop.owlrefplatform.owlapi3.*;
 
 @Command(name = "query",
         description = "Query the RDF graph exposed by the mapping and the OWL ontology")

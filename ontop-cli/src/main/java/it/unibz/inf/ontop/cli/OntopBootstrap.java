@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.cli;
 import com.github.rvesse.airline.Command;
 import com.github.rvesse.airline.Option;
 import com.github.rvesse.airline.OptionType;
+<<<<<<< HEAD:ontop-cli/src/main/java/it/unibz/inf/ontop/cli/OntopBootstrap.java
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
@@ -13,6 +14,11 @@ import it.unibz.inf.ontop.model.OBDAModel;
 import it.unibz.inf.ontop.owlapi3.bootstrapping.DirectMappingBootstrapper;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
 import it.unibz.inf.ontop.owlrefplatform.questdb.R2RMLQuestPreferences;
+=======
+import it.unibz.inf.ontop.model.OBDAModel;
+import it.unibz.inf.ontop.owlapi3.bootstrapping.DirectMappingBootstrapper;
+import it.unibz.inf.ontop.io.ModelIOManager;
+>>>>>>> v3/package-names-changed:ontop-cli/src/main/java/it/unibz/inf/ontop/cli/OntopBootstrap.java
 import org.semanticweb.owlapi.io.FileDocumentTarget;
 import org.semanticweb.owlapi.model.OWLOntology;
 

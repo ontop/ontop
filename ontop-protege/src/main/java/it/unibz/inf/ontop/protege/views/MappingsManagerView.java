@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.protege.views;
 
 /*
  * #%L
- * ontop-protege4
+ * ontop-protege
  * %%
  * Copyright (C) 2009 - 2013 KRDB Research Centre. Free University of Bozen Bolzano.
  * %%
@@ -33,16 +33,27 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.border.TitledBorder;
 
+<<<<<<< HEAD:ontop-protege/src/main/java/it/unibz/inf/ontop/protege/views/MappingsManagerView.java
 import it.unibz.inf.ontop.protege.core.OBDAModelWrapper;
+=======
+import it.unibz.inf.ontop.protege.core.OBDAModelManager;
+>>>>>>> v3/package-names-changed:ontop-protege/src/main/java/it/unibz/inf/ontop/protege/views/MappingsManagerView.java
 import org.protege.editor.owl.OWLEditorKit;
 import org.protege.editor.owl.model.selection.OWLSelectionModelListener;
 import org.protege.editor.owl.ui.view.AbstractOWLViewComponent;
 import org.protege.editor.owl.ui.view.Findable;
+<<<<<<< HEAD:ontop-protege/src/main/java/it/unibz/inf/ontop/protege/views/MappingsManagerView.java
 import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
 import it.unibz.inf.ontop.io.TargetQueryVocabularyValidator;
 import it.unibz.inf.ontop.model.impl.OBDAModelImpl;
 import it.unibz.inf.ontop.owlapi3.TargetQueryValidator;
 import it.unibz.inf.ontop.protege.core.OBDAModelManager;
+=======
+import it.unibz.inf.ontop.io.TargetQueryVocabularyValidator;
+import it.unibz.inf.ontop.model.OBDAModel;
+import it.unibz.inf.ontop.model.impl.OBDAModelImpl;
+import it.unibz.inf.ontop.owlapi3.TargetQueryValidator;
+>>>>>>> v3/package-names-changed:ontop-protege/src/main/java/it/unibz/inf/ontop/protege/views/MappingsManagerView.java
 import it.unibz.inf.ontop.protege.core.OBDAModelManagerListener;
 import it.unibz.inf.ontop.protege.panels.DatasourceSelector;
 import it.unibz.inf.ontop.protege.panels.MappingManagerPanel;

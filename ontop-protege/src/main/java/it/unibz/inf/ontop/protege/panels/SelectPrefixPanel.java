@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.protege.panels;
 
 /*
  * #%L
- * ontop-protege4
+ * ontop-protege
  * %%
  * Copyright (C) 2009 - 2013 KRDB Research Centre. Free University of Bozen Bolzano.
  * %%
@@ -34,9 +34,14 @@ import javax.swing.JLabel;
 import javax.swing.JTextPane;
 import javax.swing.KeyStroke;
 
+<<<<<<< HEAD:ontop-protege/src/main/java/it/unibz/inf/ontop/protege/panels/SelectPrefixPanel.java
 import it.unibz.inf.ontop.io.PrefixManager;
 import it.unibz.inf.ontop.io.SimplePrefixManager;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
+=======
+import it.unibz.inf.ontop.io.SimplePrefixManager;
+import it.unibz.inf.ontop.io.PrefixManager;
+>>>>>>> v3/package-names-changed:ontop-protege/src/main/java/it/unibz/inf/ontop/protege/panels/SelectPrefixPanel.java
 import it.unibz.inf.ontop.protege.utils.DialogUtils;
 
 public class SelectPrefixPanel extends javax.swing.JPanel {

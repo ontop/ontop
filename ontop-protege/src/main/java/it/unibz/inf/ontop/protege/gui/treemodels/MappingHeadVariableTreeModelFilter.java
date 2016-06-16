@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.protege.gui.treemodels;
 
 /*
  * #%L
- * ontop-protege4
+ * ontop-protege
  * %%
  * Copyright (C) 2009 - 2013 KRDB Research Centre. Free University of Bozen Bolzano.
  * %%
@@ -22,8 +22,13 @@ package it.unibz.inf.ontop.protege.gui.treemodels;
 
 import java.util.List;
 
+<<<<<<< HEAD:ontop-protege/src/main/java/it/unibz/inf/ontop/protege/gui/treemodels/MappingHeadVariableTreeModelFilter.java
 import it.unibz.inf.ontop.model.CQIE;
 import it.unibz.inf.ontop.model.Function;
+=======
+import it.unibz.inf.ontop.model.Function;
+import it.unibz.inf.ontop.model.CQIE;
+>>>>>>> v3/package-names-changed:ontop-protege/src/main/java/it/unibz/inf/ontop/protege/gui/treemodels/MappingHeadVariableTreeModelFilter.java
 import it.unibz.inf.ontop.model.OBDAMappingAxiom;
 import it.unibz.inf.ontop.model.Term;
 import it.unibz.inf.ontop.model.impl.CQIEImpl;

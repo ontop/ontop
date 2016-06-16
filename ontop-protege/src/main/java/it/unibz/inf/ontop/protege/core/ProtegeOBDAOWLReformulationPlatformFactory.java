@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.protege.core;
 
 /*
  * #%L
- * ontop-protege4
+ * ontop-protege
  * %%
  * Copyright (C) 2009 - 2013 KRDB Research Centre. Free University of Bozen Bolzano.
  * %%
@@ -21,6 +21,12 @@ package it.unibz.inf.ontop.protege.core;
  */
 
 import it.unibz.inf.ontop.model.OBDAModel;
+<<<<<<< HEAD:ontop-protege/src/main/java/it/unibz/inf/ontop/protege/core/ProtegeOBDAOWLReformulationPlatformFactory.java
+=======
+import it.unibz.inf.ontop.sql.ImplicitDBConstraints;
+
+import java.util.Properties;
+>>>>>>> v3/package-names-changed:ontop-protege/src/main/java/it/unibz/inf/ontop/protege/core/ProtegeOBDAOWLReformulationPlatformFactory.java
 
 import org.protege.editor.owl.model.inference.AbstractProtegeOWLReasonerInfo;
 import org.semanticweb.owlapi.reasoner.BufferingMode;
