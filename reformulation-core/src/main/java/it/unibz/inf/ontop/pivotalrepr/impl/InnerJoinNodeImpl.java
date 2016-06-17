@@ -12,13 +12,13 @@ import it.unibz.inf.ontop.pivotalrepr.*;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import static it.unibz.inf.ontop.model.impl.ImmutabilityTools.foldBooleanExpressions;
+import static it.unibz.inf.ontop.pivotalrepr.SubstitutionResults.LocalAction.DECLARE_AS_EMPTY;
+import static it.unibz.inf.ontop.pivotalrepr.SubstitutionResults.LocalAction.NO_CHANGE;
 import static it.unibz.inf.ontop.pivotalrepr.unfolding.ProjectedVariableExtractionTools.extractProjectedVariables;
 
 public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode {
 
     private static final String JOIN_NODE_STR = "JOIN" ;
-    private static final boolean IS_EMPTY = true;
-    private static final OBDADataFactory DATA_FACTORY = OBDADataFactoryImpl.getInstance();
 
     public InnerJoinNodeImpl(Optional<ImmutableExpression> optionalFilterCondition) {
         super(optionalFilterCondition);
@@ -50,7 +50,7 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
             QueryNode descendantNode, IntermediateQuery query) {
 
         if (substitution.isEmpty()) {
-            return new SubstitutionResultsImpl<>(this);
+            return new SubstitutionResultsImpl<>(NO_CHANGE);
         }
 
         ImmutableSet<Variable> nullVariables = substitution.getImmutableMap().entrySet().stream()
@@ -70,7 +70,7 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
         if (otherNodesProjectedVariables.stream()
                 .anyMatch(nullVariables::contains)) {
             // Reject
-            return new SubstitutionResultsImpl<>(IS_EMPTY);
+            return new SubstitutionResultsImpl<>(DECLARE_AS_EMPTY);
         }
 
         return computeAndEvaluateNewCondition(substitution, query, otherNodesProjectedVariables)
@@ -91,7 +91,7 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
     private SubstitutionResults<InnerJoinNode> applyEvaluation(ExpressionEvaluator.Evaluation evaluation,
                                                                ImmutableSubstitution<? extends ImmutableTerm> substitution) {
         if (evaluation.isFalse()) {
-            return new SubstitutionResultsImpl<>(IS_EMPTY);
+            return new SubstitutionResultsImpl<>(DECLARE_AS_EMPTY);
         }
         else {
             InnerJoinNode newNode = changeOptionalFilterCondition(evaluation.getOptionalExpression());

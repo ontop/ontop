@@ -14,6 +14,8 @@ import it.unibz.inf.ontop.pivotalrepr.IntermediateQuery;
 import it.unibz.inf.ontop.pivotalrepr.MetadataForQueryOptimization;
 import it.unibz.inf.ontop.pivotalrepr.impl.ImmutableQueryModifiersImpl;
 import it.unibz.inf.ontop.pivotalrepr.impl.IntermediateQueryUtils;
+import it.unibz.inf.ontop.pivotalrepr.proposal.QueryMergingProposal;
+import it.unibz.inf.ontop.pivotalrepr.proposal.impl.QueryMergingProposalImpl;
 import it.unibz.inf.ontop.utils.DatalogDependencyGraphGenerator;
 
 import java.util.ArrayList;
@@ -86,7 +88,8 @@ public class DatalogProgram2QueryConverter {
             Optional<IntermediateQuery> optionalSubQuery = convertDatalogDefinitions(metadata, datalogAtomPredicate,
                     ruleIndex, tablePredicates, NO_QUERY_MODIFIER);
             if (optionalSubQuery.isPresent()) {
-                intermediateQuery.mergeSubQuery(optionalSubQuery.get());
+                QueryMergingProposal mergingProposal = new QueryMergingProposalImpl(optionalSubQuery.get());
+                intermediateQuery.applyProposal(mergingProposal, true);
             }
         }
 

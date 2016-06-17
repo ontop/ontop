@@ -53,8 +53,8 @@ public class DefaultQueryTreeComponent implements QueryTreeComponent {
     }
 
     @Override
-    public ImmutableSet<EmptyNode> getUnsatisfiableNodes() {
-        return tree.getEmptyNodes();
+    public ImmutableSet<EmptyNode> getEmptyNodes(QueryNode subTreeRoot) {
+        return tree.getEmptyNodes(subTreeRoot);
     }
 
     @Override

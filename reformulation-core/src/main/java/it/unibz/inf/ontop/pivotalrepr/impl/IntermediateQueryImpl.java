@@ -8,6 +8,7 @@ import it.unibz.inf.ontop.executor.deletion.ReactToChildDeletionExecutor;
 import it.unibz.inf.ontop.executor.expression.PushDownExpressionExecutor;
 import it.unibz.inf.ontop.executor.join.JoinInternalCompositeExecutor;
 import it.unibz.inf.ontop.executor.pullout.PullVariableOutOfSubTreeExecutor;
+import it.unibz.inf.ontop.executor.merging.QueryMergingExecutor;
 import it.unibz.inf.ontop.executor.substitution.SubstitutionPropagationExecutor;
 import it.unibz.inf.ontop.executor.substitution.SubstitutionUpPropagationExecutor;
 import it.unibz.inf.ontop.executor.unsatisfiable.RemoveEmptyNodesExecutor;
@@ -87,6 +88,7 @@ public class IntermediateQueryImpl implements IntermediateQuery {
         internalExecutorMapBuilder.put(PullVariableOutOfSubTreeProposal.class, PullVariableOutOfSubTreeExecutor.class);
         internalExecutorMapBuilder.put(RemoveEmptyNodesProposal.class, RemoveEmptyNodesExecutor.class);
         internalExecutorMapBuilder.put(SubstitutionUpPropagationProposal.class, SubstitutionUpPropagationExecutor.class);
+        internalExecutorMapBuilder.put(QueryMergingProposal.class, QueryMergingExecutor.class);
         INTERNAL_EXECUTOR_CLASSES = internalExecutorMapBuilder.build();
     }
 
@@ -280,18 +282,6 @@ public class IntermediateQueryImpl implements IntermediateQuery {
         return treeComponent.getFirstChild(node);
     }
 
-    /**
-     * TODO: replace that by a proposal
-     */
-    @Override
-    public void mergeSubQuery(IntermediateQuery originalSubQuery) throws EmptyQueryException {
-        List<IntensionalDataNode> localDataNodes = findOrdinaryDataNodes(originalSubQuery.getProjectionAtom());
-
-        for (IntensionalDataNode localDataNode : localDataNodes) {
-            SubQueryMergingTools.mergeSubQuery(treeComponent, originalSubQuery, localDataNode);
-        }
-    }
-
 
     @Override
     public ConstructionNode getClosestConstructionNode(QueryNode node) {
@@ -317,29 +307,6 @@ public class IntermediateQueryImpl implements IntermediateQuery {
     public Variable generateNewVariable(Variable formerVariable) {
         return treeComponent.generateNewVariable(formerVariable);
     }
-
-    /**
-     * Finds ordinary data nodes.
-     *
-     * TODO: explain
-     */
-    private ImmutableList<IntensionalDataNode> findOrdinaryDataNodes(DataAtom subsumingDataAtom)
-            throws InconsistentIntermediateQueryException {
-        ImmutableList.Builder<IntensionalDataNode> listBuilder = ImmutableList.builder();
-        try {
-            for(QueryNode node : treeComponent.getNodesInBottomUpOrder()) {
-                if (node instanceof IntensionalDataNode) {
-                    IntensionalDataNode dataNode = (IntensionalDataNode) node;
-                    if (subsumingDataAtom.hasSamePredicateAndArity(dataNode.getProjectionAtom()))
-                        listBuilder.add(dataNode);
-                }
-            }
-        } catch (IllegalTreeException e) {
-            throw new InconsistentIntermediateQueryException(e.getMessage());
-        }
-        return listBuilder.build();
-    }
-
 
     /**
      * Not appearing in the interface because users do not

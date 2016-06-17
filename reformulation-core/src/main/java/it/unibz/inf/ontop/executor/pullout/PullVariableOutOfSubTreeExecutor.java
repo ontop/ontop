@@ -16,6 +16,7 @@ import it.unibz.inf.ontop.pivotalrepr.proposal.PullVariableOutOfSubTreeProposal;
 import it.unibz.inf.ontop.pivotalrepr.proposal.PullVariableOutOfSubTreeResults;
 import it.unibz.inf.ontop.pivotalrepr.proposal.impl.PullVariableOutOfSubTreeResultsImpl;
 
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import static it.unibz.inf.ontop.executor.substitution.SubstitutionPropagationTools.propagateSubstitutionDown;
@@ -75,12 +76,15 @@ public class PullVariableOutOfSubTreeExecutor<N extends JoinLikeNode>
         SubstitutionResults<? extends QueryNode> rootRenamingResults = originalSubTreeNode
                 .applyDescendingSubstitution(renamingSubstitution, query);
 
-        QueryNode newSubTreeRootNode = rootRenamingResults.getOptionalNewNode()
-                .orElseThrow(() -> new IllegalStateException("A renaming should always be well-accepted"));
+        Optional<? extends QueryNode> optionalUpdatedNode = rootRenamingResults.getOptionalNewNode();
 
-        if (newSubTreeRootNode != originalSubTreeNode) {
-            treeComponent.replaceNode(originalSubTreeNode, newSubTreeRootNode);
+        if (optionalUpdatedNode.isPresent()) {
+            treeComponent.replaceNode(originalSubTreeNode, optionalUpdatedNode.get());
         }
+
+        QueryNode newSubTreeRootNode = optionalUpdatedNode
+                .map(n -> (QueryNode) n)
+                .orElse(originalSubTreeNode);
 
         /**
          * Updates the tree component
