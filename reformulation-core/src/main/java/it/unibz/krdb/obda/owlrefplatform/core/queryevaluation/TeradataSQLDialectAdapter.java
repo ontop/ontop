@@ -1,8 +1,23 @@
 package it.unibz.krdb.obda.owlrefplatform.core.queryevaluation;
 
+import it.unibz.krdb.obda.parser.EncodeForURI;
+
 import java.sql.Types;
+import java.util.Map;
 
 public class TeradataSQLDialectAdapter extends SQL99DialectAdapter {
+
+    static {
+        StringBuilder sb1 = new StringBuilder();
+        StringBuilder sb2 = new StringBuilder();
+        for (Map.Entry<String, String> e : EncodeForURI.TABLE.entrySet()) {
+            sb1.append("OREPLACE(");
+            sb2.append(", '").append(e.getValue()).append("', '").append(e.getKey()).append("')");
+        }
+        ENCODE_FOR_URI_START = sb1.toString();
+        ENCODE_FOR_URI_END = sb2.toString();
+    }
+
 
     @Override
     public String sqlCast(String value, int type) {

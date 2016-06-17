@@ -76,6 +76,8 @@ public class SQLGenerator implements SQLQueryGenerator {
 	
 	private final ImmutableMap<ExpressionOperation, String> operations;
 
+	private String replaceKeyWord = "REPLACE(";
+
 	public SQLGenerator(DBMetadata metadata, SQLDialectAdapter sqladapter) {
 		this(metadata, sqladapter, false, true, null);
 	}
@@ -135,12 +137,16 @@ public class SQLGenerator implements SQLQueryGenerator {
 		}
 	
 		operations = builder.build();
+
+		if (metadata.getDriverName().equals("com.teradata.jdbc.TeraDriver")){
+			replaceKeyWord = "OREPLACE(";
+		}
 		
         if (sqlGenerateReplace) {
         	StringBuilder sb1 = new StringBuilder();
         	StringBuilder sb2 = new StringBuilder();
         	for (Entry<String, String> e : EncodeForURI.TABLE.entrySet()) {
-        		sb1.append("REPLACE(");
+        		sb1.append(replaceKeyWord);
         		sb2.append(", '").append(e.getValue()).append("', '").append(e.getKey()).append("')");
         	}
         	replace1 = sb1.toString();

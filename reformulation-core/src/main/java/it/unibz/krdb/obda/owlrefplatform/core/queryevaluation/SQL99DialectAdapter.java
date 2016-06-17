@@ -33,7 +33,7 @@ public class SQL99DialectAdapter implements SQLDialectAdapter {
 
     private Pattern quotes = Pattern.compile("[\"`\\['].*[\"`\\]']");  
     
-    protected static final String ENCODE_FOR_URI_START, ENCODE_FOR_URI_END;
+    protected static String ENCODE_FOR_URI_START, ENCODE_FOR_URI_END;
     
     static {
     	StringBuilder sb1 = new StringBuilder();

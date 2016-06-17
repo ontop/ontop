@@ -57,7 +57,7 @@ public class TeradataSQLAdapterTest {
             */
             preference = new QuestPreferences();
             preference.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-            preference.setCurrentValueOf(QuestPreferences.SQL_GENERATE_REPLACE, QuestConstants.FALSE);
+            //preference.setCurrentValueOf(QuestPreferences.SQL_GENERATE_REPLACE, QuestConstants.FALSE);
 
             /* 
             * Create the instance of Quest OWL reasoner. 
@@ -91,7 +91,7 @@ public class TeradataSQLAdapterTest {
         String sparqlQuery =
                 "PREFIX : <http://www.semanticweb.org/elem/ontologies/2016/5/financial#>\n" +
                         "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
-                        "select ?x ?y where {?x :hasAccount ?y}" +
+                        "select ?x where {?x a :Customer}" +
                         "limit 10";
 
         try {
