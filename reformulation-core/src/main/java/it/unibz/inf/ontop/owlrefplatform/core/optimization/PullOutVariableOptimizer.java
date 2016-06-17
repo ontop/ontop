@@ -1,21 +1,31 @@
 package it.unibz.inf.ontop.owlrefplatform.core.optimization;
 
+import java.util.AbstractMap;
 import java.util.Optional;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.VariableOrGroundTerm;
 import it.unibz.inf.ontop.model.DataAtom;
 import it.unibz.inf.ontop.model.Variable;
+import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.InjectiveVar2VarSubstitution;
+import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.InjectiveVar2VarSubstitutionImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.optimization.QueryNodeNavigationTools.NextNodeAndQuery;
 import it.unibz.inf.ontop.pivotalrepr.*;
 import it.unibz.inf.ontop.pivotalrepr.proposal.NodeCentricOptimizationResults;
 import it.unibz.inf.ontop.pivotalrepr.proposal.PullVariableOutOfDataNodeProposal;
+import it.unibz.inf.ontop.pivotalrepr.proposal.PullVariableOutOfSubTreeProposal;
+import it.unibz.inf.ontop.pivotalrepr.proposal.PullVariableOutOfSubTreeResults;
 import it.unibz.inf.ontop.pivotalrepr.proposal.impl.PullVariableOutOfDataNodeProposalImpl;
+import it.unibz.inf.ontop.pivotalrepr.proposal.impl.PullVariableOutOfSubTreeProposalImpl;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.HashSet;
 import java.util.Set;
 
 import static it.unibz.inf.ontop.owlrefplatform.core.optimization.QueryNodeNavigationTools.getDepthFirstNextNode;
 import static it.unibz.inf.ontop.owlrefplatform.core.optimization.QueryNodeNavigationTools.getNextNodeAndQuery;
+import static it.unibz.inf.ontop.pivotalrepr.unfolding.ProjectedVariableExtractionTools.extractProjectedVariables;
 
 /**
  * TODO: explain
@@ -73,57 +83,73 @@ public class PullOutVariableOptimizer implements IntermediateQueryOptimizer {
     }
 
     /**
-     * TODO: explain
+     *
+     * Looks at the projected variables by all the child sub-trees and does the appropriate renamings.
+     *
      */
     private NextNodeAndQuery optimizeJoinLikeNodeChildren(IntermediateQuery initialQuery, JoinLikeNode initialJoinLikeNode)
             throws EmptyQueryException {
 
+        Optional<QueryNode> optionalFirstChild = initialQuery.getFirstChild(initialJoinLikeNode);
+
+        // Non-final
+        Optional<QueryNode> optionalNextChild = optionalFirstChild
+                .flatMap(initialQuery::getNextSibling);
+
+        /**
+         * Less than 2 children: nothing to be done here
+         */
+        if (!optionalNextChild.isPresent()) {
+            return new NextNodeAndQuery(getDepthFirstNextNode(initialQuery, initialJoinLikeNode),
+                    initialQuery);
+        }
+
+        Set<Variable> variablesFromOtherSubTrees = new HashSet<>(extractProjectedVariables(initialQuery,
+                optionalFirstChild.get()));
+
         // Non-final variables
         IntermediateQuery currentQuery = initialQuery;
-        QueryNode currentJoinLikeNode = initialJoinLikeNode;
-        Optional<QueryNode> optionalCurrentChildNode = currentQuery.getFirstChild(initialJoinLikeNode);
+        JoinLikeNode currentJoinLikeNode = initialJoinLikeNode;
 
-        Set<Variable> alreadySeenVariables = new HashSet<>();
 
-        while (optionalCurrentChildNode.isPresent()) {
+        /**
+         * TODO: explain
+         */
+        while (optionalNextChild.isPresent()){
 
-            QueryNode childNode = optionalCurrentChildNode.get();
+            QueryNode childNode = optionalNextChild.get();
 
-            /**
-             * PullOutVariableProposals only concern SubTreeDelimiterNodes
-             */
-            if (childNode instanceof DataNode) {
+            ImmutableSet<Variable> projectedVariablesByThisChild = extractProjectedVariables(currentQuery, childNode);
 
-                /**
-                 * May update alreadySeenVariables (append-only)!!
-                 */
-                Optional<PullVariableOutOfDataNodeProposal> optionalProposal = buildProposal((DataNode) childNode,
-                        alreadySeenVariables);
+            // To trick the compiler
+            final IntermediateQuery query = currentQuery;
 
-                /**
-                 * Applies the proposal and extracts the next node (and query)
-                 * from the results
-                 */
-                if (optionalProposal.isPresent()) {
-                    PullVariableOutOfDataNodeProposal proposal = optionalProposal.get();
+            ImmutableMap<Variable, Variable> substitutionMap = projectedVariablesByThisChild.stream()
+                    .filter(variablesFromOtherSubTrees::contains)
+                    .map(v -> new AbstractMap.SimpleEntry<>(v, query.generateNewVariable(v)))
+                    .collect(ImmutableCollectors.toMap());
 
-                    NodeCentricOptimizationResults<DataNode> results = currentQuery.applyProposal(proposal);
-
-                    currentQuery = results.getResultingQuery();
-                    optionalCurrentChildNode = results.getOptionalNextSibling();
-
-                    Optional<QueryNode> optionalCurrentParent = results.getOptionalClosestAncestor();
-                    if (!optionalCurrentParent.isPresent()) {
-                        throw new IllegalStateException("Missing parent of current node after pulling out some variables");
-                    }
-                    currentJoinLikeNode = optionalCurrentParent.get();
-                }
-                else {
-                    optionalCurrentChildNode = currentQuery.getNextSibling(childNode);
-                }
+            if (substitutionMap.isEmpty()) {
+                optionalNextChild = currentQuery.getNextSibling(childNode);
             }
             else {
-                optionalCurrentChildNode = currentQuery.getFirstChild(childNode);
+                variablesFromOtherSubTrees.addAll(substitutionMap.keySet());
+
+                InjectiveVar2VarSubstitution renamingSubstitution = new InjectiveVar2VarSubstitutionImpl(substitutionMap);
+
+                PullVariableOutOfSubTreeProposal<JoinLikeNode> proposal = new PullVariableOutOfSubTreeProposalImpl<>(
+                        currentJoinLikeNode, renamingSubstitution, childNode);
+
+                PullVariableOutOfSubTreeResults<JoinLikeNode> results = currentQuery.applyProposal(proposal);
+
+                /**
+                 * Updates the "iterated" variables
+                 */
+                currentJoinLikeNode = results.getOptionalNewNode()
+                        .orElseThrow(() -> new IllegalStateException("The JoinLikeNode was expected to be preserved"));
+                currentQuery = results.getResultingQuery();
+
+                optionalNextChild = currentQuery.getNextSibling(results.getNewSubTreeRoot());
             }
         }
 
