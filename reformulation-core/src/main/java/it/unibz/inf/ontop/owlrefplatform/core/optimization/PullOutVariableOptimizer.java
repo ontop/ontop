@@ -6,12 +6,10 @@ import it.unibz.inf.ontop.model.VariableOrGroundTerm;
 import it.unibz.inf.ontop.model.DataAtom;
 import it.unibz.inf.ontop.model.Variable;
 import it.unibz.inf.ontop.owlrefplatform.core.optimization.QueryNodeNavigationTools.NextNodeAndQuery;
-import it.unibz.inf.ontop.owlrefplatform.core.optimization.QueryNodeNavigationTools.UpdatedNodeAndQuery;
 import it.unibz.inf.ontop.pivotalrepr.*;
 import it.unibz.inf.ontop.pivotalrepr.proposal.NodeCentricOptimizationResults;
 import it.unibz.inf.ontop.pivotalrepr.proposal.PullVariableOutOfDataNodeProposal;
 import it.unibz.inf.ontop.pivotalrepr.proposal.impl.PullVariableOutOfDataNodeProposalImpl;
-import it.unibz.inf.ontop.pivotalrepr.proposal.impl.SubstitutionUpPropagationProposalImpl;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -47,19 +45,15 @@ public class PullOutVariableOptimizer implements IntermediateQueryOptimizer {
         // Non-final
         IntermediateQuery currentQuery = initialQuery;
 
-        Set<Variable> alreadySeenVariables = new HashSet<>();
-
         while (optionalCurrentNode.isPresent()) {
             final QueryNode currentNode = optionalCurrentNode.get();
 
             /**
-             * Targets: join-like nodes
+             * Targets: join-like nodes and data nodes
              */
             if (currentNode instanceof JoinLikeNode) {
-                UpdatedNodeAndQuery<JoinLikeNode> updatedJoinLikeNodeAndQuery = optimizeJoinLikeNode(currentQuery,
-                        (JoinLikeNode) currentNode);
                 NextNodeAndQuery nextNodeAndQuery = optimizeJoinLikeNodeChildren(
-                        updatedJoinLikeNodeAndQuery.getNextQuery(), updatedJoinLikeNodeAndQuery.getUpdatedNode());
+                        currentQuery, (JoinLikeNode) currentNode);
 
                 optionalCurrentNode = nextNodeAndQuery.getOptionalNextNode();
                 currentQuery = nextNodeAndQuery.getNextQuery();
@@ -129,7 +123,7 @@ public class PullOutVariableOptimizer implements IntermediateQueryOptimizer {
                 }
             }
             else {
-                optionalCurrentChildNode = currentQuery.getNextSibling(childNode);
+                optionalCurrentChildNode = currentQuery.getFirstChild(childNode);
             }
         }
 
@@ -137,18 +131,6 @@ public class PullOutVariableOptimizer implements IntermediateQueryOptimizer {
                 currentQuery);
     }
 
-    /**
-     * TODO: explain
-     *
-     * By default, does nothing
-     *
-     * Can be overwritten (useful for extensions).
-     *
-     */
-    private UpdatedNodeAndQuery<JoinLikeNode> optimizeJoinLikeNode(IntermediateQuery initialQuery,
-                                                                     JoinLikeNode initialJoinLikeNode) {
-        return new UpdatedNodeAndQuery<>(initialJoinLikeNode, initialQuery);
-    }
 
     /**
      * May update alreadySeenVariables!

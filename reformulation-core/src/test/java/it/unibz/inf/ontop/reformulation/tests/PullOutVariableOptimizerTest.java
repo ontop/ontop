@@ -15,6 +15,7 @@ import org.junit.Test;
 
 import java.util.Optional;
 
+import static it.unibz.inf.ontop.model.ExpressionOperation.EQ;
 import static junit.framework.TestCase.assertTrue;
 
 public class PullOutVariableOptimizerTest {
@@ -33,19 +34,25 @@ public class PullOutVariableOptimizerTest {
     private final static Variable X0 = DATA_FACTORY.getVariable("Xf0");
     private final static Variable X1 = DATA_FACTORY.getVariable("Xf1");
     private final static Variable X2 = DATA_FACTORY.getVariable("Xf2");
+    private final static Variable X3 = DATA_FACTORY.getVariable("Xf3");
     private final static Variable Y = DATA_FACTORY.getVariable("Y");
     private final static Variable Y1 = DATA_FACTORY.getVariable("Yf1");
+    private final static Variable Y2 = DATA_FACTORY.getVariable("Yf2");
     private final static Variable Z = DATA_FACTORY.getVariable("Z");
     private final static Variable W = DATA_FACTORY.getVariable("W");
 
     private final static ImmutableExpression EXPRESSION1 = DATA_FACTORY.getImmutableExpression(
-            ExpressionOperation.EQ, X, X0);
+            EQ, X, X0);
     private final static ImmutableExpression EXPRESSION2 = DATA_FACTORY.getImmutableExpression(
-            ExpressionOperation.EQ, Y, Y1);
+            EQ, Y, Y1);
     private final static ImmutableExpression EXPRESSION3 = DATA_FACTORY.getImmutableExpression(
-            ExpressionOperation.EQ, X, X1);
+            EQ, X, X1);
     private final static ImmutableExpression EXPRESSION4 = DATA_FACTORY.getImmutableExpression(
-            ExpressionOperation.EQ, X, X2);
+            EQ, X, X2);
+    private final static ImmutableExpression EXPRESSION5 = DATA_FACTORY.getImmutableExpression(
+            EQ, X, X3);
+    private final static ImmutableExpression EXPRESSION6 = DATA_FACTORY.getImmutableExpression(
+            EQ, Y, Y2);
 
 
     private final MetadataForQueryOptimization metadata;
@@ -177,10 +184,10 @@ public class PullOutVariableOptimizerTest {
         DistinctVariableOnlyDataAtom projectionAtom2 = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE3, X, Y);
         ConstructionNode constructionNode2 = new ConstructionNodeImpl(projectionAtom1.getVariables());
 
-        LeftJoinNode leftJoinNode2 = new LeftJoinNodeImpl(Optional.of(EXPRESSION3));
+        LeftJoinNode leftJoinNode2 = new LeftJoinNodeImpl(ImmutabilityTools.foldBooleanExpressions(EXPRESSION3, EXPRESSION6, EXPRESSION5));
         FilterNode filterNode1 = new FilterNodeImpl(EXPRESSION1);
         ExtensionalDataNode dataNode3 =  new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, X, X0, Y));
-        ExtensionalDataNode dataNode4 = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE4_PREDICATE, X, Y, X1));
+        ExtensionalDataNode dataNode4 = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE4_PREDICATE, X1, Y2, X3));
 
         queryBuilder2.init(projectionAtom2, constructionNode2);
         queryBuilder2.addChild(constructionNode2, leftJoinNode2);
@@ -199,8 +206,8 @@ public class PullOutVariableOptimizerTest {
     public void testJoiningConditionTest4() throws EmptyQueryException {
 
         IntermediateQueryBuilder queryBuilder1 = new DefaultIntermediateQueryBuilder(metadata);
-        DistinctVariableOnlyDataAtom projectionAtom1 = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE1, X, Y, Z, W);
-        ConstructionNode constructionNode1 = new ConstructionNodeImpl(projectionAtom1.getVariables());
+        DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE1, X, Y, Z, W);
+        ConstructionNode constructionNode = new ConstructionNodeImpl(projectionAtom.getVariables());
 
         InnerJoinNode joinNode1 = new InnerJoinNodeImpl(Optional.empty());
         LeftJoinNode leftJoinNode1 = new LeftJoinNodeImpl(Optional.empty());
@@ -208,8 +215,8 @@ public class PullOutVariableOptimizerTest {
         ExtensionalDataNode dataNode2 = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE2_PREDICATE, X, Z));
         ExtensionalDataNode dataNode3 = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE3_PREDICATE, X, W));
 
-        queryBuilder1.init(projectionAtom1, constructionNode1);
-        queryBuilder1.addChild(constructionNode1, joinNode1);
+        queryBuilder1.init(projectionAtom, constructionNode);
+        queryBuilder1.addChild(constructionNode, joinNode1);
         queryBuilder1.addChild(joinNode1, dataNode1);
         queryBuilder1.addChild(joinNode1, leftJoinNode1);
         queryBuilder1.addChild(leftJoinNode1, dataNode2, NonCommutativeOperatorNode.ArgumentPosition.LEFT);
@@ -224,24 +231,22 @@ public class PullOutVariableOptimizerTest {
 
         System.out.println("\nAfter optimization: \n" +  optimizedQuery);
 
-        IntermediateQueryBuilder queryBuilder2 = new DefaultIntermediateQueryBuilder(metadata);
-        DistinctVariableOnlyDataAtom projectionAtom2 = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE1, X, Y, Z, W);
-        ConstructionNode constructionNode2 = new ConstructionNodeImpl(projectionAtom2.getVariables());
+        IntermediateQueryBuilder expectedQueryBuilder = new DefaultIntermediateQueryBuilder(metadata);
 
-        InnerJoinNode joinNode2 = new InnerJoinNodeImpl(Optional.empty());
-        LeftJoinNode leftJoinNode2 = new LeftJoinNodeImpl(Optional.of(EXPRESSION1));
+        InnerJoinNode joinNode2 = new InnerJoinNodeImpl(Optional.of(EXPRESSION1));
+        LeftJoinNode leftJoinNode2 = new LeftJoinNodeImpl(Optional.of(DATA_FACTORY.getImmutableExpression(EQ, X0, X1)));
         ExtensionalDataNode dataNode4 =  new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, X, Y));
-        ExtensionalDataNode dataNode5 = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE2_PREDICATE, X, Z));
-        ExtensionalDataNode dataNode6 = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE3_PREDICATE, X0, W));
+        ExtensionalDataNode dataNode5 = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE2_PREDICATE, X0, Z));
+        ExtensionalDataNode dataNode6 = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE3_PREDICATE, X1, W));
 
-        queryBuilder2.init(projectionAtom2, constructionNode2);
-        queryBuilder2.addChild(constructionNode2, joinNode2);
-        queryBuilder2.addChild(joinNode2, dataNode4);
-        queryBuilder2.addChild(joinNode2, leftJoinNode2);
-        queryBuilder2.addChild(leftJoinNode2, dataNode5, NonCommutativeOperatorNode.ArgumentPosition.LEFT);
-        queryBuilder2.addChild(leftJoinNode2, dataNode6, NonCommutativeOperatorNode.ArgumentPosition.RIGHT);
+        expectedQueryBuilder.init(projectionAtom, constructionNode);
+        expectedQueryBuilder.addChild(constructionNode, joinNode2);
+        expectedQueryBuilder.addChild(joinNode2, dataNode4);
+        expectedQueryBuilder.addChild(joinNode2, leftJoinNode2);
+        expectedQueryBuilder.addChild(leftJoinNode2, dataNode5, NonCommutativeOperatorNode.ArgumentPosition.LEFT);
+        expectedQueryBuilder.addChild(leftJoinNode2, dataNode6, NonCommutativeOperatorNode.ArgumentPosition.RIGHT);
 
-        IntermediateQuery query2 = queryBuilder2.build();
+        IntermediateQuery query2 = expectedQueryBuilder.build();
 
         System.out.println("\nExpected: \n" +  query2);
 
