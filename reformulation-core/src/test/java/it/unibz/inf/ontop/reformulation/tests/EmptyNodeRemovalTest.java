@@ -48,6 +48,9 @@ public class EmptyNodeRemovalTest {
     private static ExtensionalDataNode DATA_NODE_1 = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE_1, A, B));
     private static ExtensionalDataNode DATA_NODE_2 = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE_2, A));
 
+    /**
+     * TODO: Put the UNION as the root instead of the construction node (when this will become legal)
+     */
     @Test
     public void testUnionRemoval1NoTopSubstitution() throws EmptyQueryException {
         ImmutableSubstitutionImpl<ImmutableTerm> topBindings = new ImmutableSubstitutionImpl<>(
@@ -60,10 +63,12 @@ public class EmptyNodeRemovalTest {
          * Expected query
          */
         IntermediateQueryBuilder expectedQueryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
-        ConstructionNode newRootNode = new ConstructionNodeImpl(PROJECTION_ATOM.getVariables(), leftBindings,
+        ConstructionNode rootNode = query.getRootConstructionNode();
+        expectedQueryBuilder.init(PROJECTION_ATOM, rootNode);
+        ConstructionNode secondConstructionNode = new ConstructionNodeImpl(PROJECTION_ATOM.getVariables(), leftBindings,
                 Optional.empty());
-        expectedQueryBuilder.init(PROJECTION_ATOM, newRootNode);
-        expectedQueryBuilder.addChild(newRootNode, DATA_NODE_1);
+        expectedQueryBuilder.addChild(rootNode, secondConstructionNode);
+        expectedQueryBuilder.addChild(secondConstructionNode, DATA_NODE_1);
 
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
 
@@ -83,13 +88,15 @@ public class EmptyNodeRemovalTest {
          */
         IntermediateQueryBuilder expectedQueryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
 
-        ImmutableSubstitution<ImmutableTerm> expectedTopBindings = topBindings.union(leftBindings)
-                .orElseThrow(() -> new IllegalStateException("Wrong bindings (union cannot be computed)"));
+        //ImmutableSubstitution<ImmutableTerm> expectedTopBindings = topBindings.union(leftBindings)
+        //        .orElseThrow(() -> new IllegalStateException("Wrong bindings (union cannot be computed)"));
 
-        ConstructionNode newRootNode = new ConstructionNodeImpl(PROJECTION_ATOM.getVariables(), expectedTopBindings,
+        ConstructionNode rootNode = query.getRootConstructionNode();
+        expectedQueryBuilder.init(PROJECTION_ATOM, rootNode);
+        ConstructionNode secondConstructionNode = new ConstructionNodeImpl(ImmutableSet.of(Y, A), leftBindings,
                 Optional.empty());
-        expectedQueryBuilder.init(PROJECTION_ATOM, newRootNode);
-        expectedQueryBuilder.addChild(newRootNode, DATA_NODE_1);
+        expectedQueryBuilder.addChild(rootNode, secondConstructionNode);
+        expectedQueryBuilder.addChild(secondConstructionNode, DATA_NODE_1);
 
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
 
@@ -109,32 +116,79 @@ public class EmptyNodeRemovalTest {
          */
         IntermediateQueryBuilder expectedQueryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
 
-        ConstructionNode newRootNode = new ConstructionNodeImpl(PROJECTION_ATOM.getVariables(), topBindings,
-                Optional.empty());
-        expectedQueryBuilder.init(PROJECTION_ATOM, newRootNode);
-        expectedQueryBuilder.addChild(newRootNode, DATA_NODE_1);
+        ConstructionNode rootNode = query.getRootConstructionNode();
+        expectedQueryBuilder.init(PROJECTION_ATOM, rootNode);
+        expectedQueryBuilder.addChild(rootNode, DATA_NODE_1);
 
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
 
         optimizeAndCompare(query, expectedQuery);
     }
 
+    @Test
+    public void testUnionNoNullPropagation() throws EmptyQueryException {
+        ImmutableSet<Variable> projectedVariables = PROJECTION_ATOM.getVariables();
+
+        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
+        ConstructionNode rootNode = new ConstructionNodeImpl(projectedVariables,
+                new ImmutableSubstitutionImpl<>(ImmutableMap.of(X, generateURI1(A), Y, generateURI1(B))),
+                Optional.empty());
+        queryBuilder.init(PROJECTION_ATOM, rootNode);
+
+        ImmutableSet<Variable> subQueryProjectedVariables = ImmutableSet.of(A, B);
+        UnionNode unionNode = new UnionNodeImpl(subQueryProjectedVariables);
+        queryBuilder.addChild(rootNode, unionNode);
+
+        queryBuilder.addChild(unionNode, DATA_NODE_1);
+
+        LeftJoinNode leftJoinNode = new LeftJoinNodeImpl(Optional.empty());
+        queryBuilder.addChild(unionNode, leftJoinNode);
+        queryBuilder.addChild(leftJoinNode, DATA_NODE_2, LEFT);
+        EmptyNode emptyNode = new EmptyNodeImpl(subQueryProjectedVariables);
+        queryBuilder.addChild(leftJoinNode, emptyNode, RIGHT);
+
+
+        /**
+         * Expected query
+         */
+        IntermediateQueryBuilder expectedQueryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
+
+        expectedQueryBuilder.init(PROJECTION_ATOM, rootNode);
+        expectedQueryBuilder.addChild(rootNode, unionNode);
+        expectedQueryBuilder.addChild(unionNode, DATA_NODE_1);
+        ConstructionNode rightConstructionNode = new ConstructionNodeImpl(subQueryProjectedVariables,
+                new ImmutableSubstitutionImpl<>(ImmutableMap.of(B, OBDAVocabulary.NULL)), Optional.empty());
+        expectedQueryBuilder.addChild(unionNode, rightConstructionNode);
+        expectedQueryBuilder.addChild(rightConstructionNode, DATA_NODE_2);
+
+        optimizeAndCompare(queryBuilder.build(), expectedQueryBuilder.build());
+    }
+
+
+
+
     private static IntermediateQuery generateQueryWithUnion(ImmutableSubstitution<ImmutableTerm> topBindings,
                                                             ImmutableSubstitution<ImmutableTerm> leftBindings,
                                                             ImmutableSet<Variable> subQueryProjectedVariables) {
         IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
 
-        ConstructionNode rootNode = new ConstructionNodeImpl(PROJECTION_ATOM.getVariables(), topBindings, Optional.empty());
+        ImmutableSet<Variable> projectedVariables = PROJECTION_ATOM.getVariables();
+        ConstructionNode rootNode = new ConstructionNodeImpl(projectedVariables, topBindings, Optional.empty());
         queryBuilder.init(PROJECTION_ATOM, rootNode);
 
-        UnionNode unionNode = new UnionNodeImpl();
+        UnionNode unionNode = new UnionNodeImpl(subQueryProjectedVariables);
         queryBuilder.addChild(rootNode, unionNode);
 
-        ConstructionNode leftConstructionNode = new ConstructionNodeImpl(subQueryProjectedVariables, leftBindings,
-                Optional.empty());
-        queryBuilder.addChild(unionNode, leftConstructionNode);
+        if (leftBindings.isEmpty()) {
+            queryBuilder.addChild(unionNode, DATA_NODE_1);
+        }
+        else {
+            ConstructionNode leftConstructionNode = new ConstructionNodeImpl(subQueryProjectedVariables, leftBindings,
+                    Optional.empty());
+            queryBuilder.addChild(unionNode, leftConstructionNode);
 
-        queryBuilder.addChild(leftConstructionNode, DATA_NODE_1);
+            queryBuilder.addChild(leftConstructionNode, DATA_NODE_1);
+        }
 
         EmptyNode emptyNode = new EmptyNodeImpl(subQueryProjectedVariables);
         queryBuilder.addChild(unionNode, emptyNode);
@@ -196,7 +250,7 @@ public class EmptyNodeRemovalTest {
 
         System.out.println("\n Unsatisfiable query: \n" +  query);
 
-        query.applyProposal(new RemoveEmptyNodesProposalImpl(), REQUIRE_USING_IN_PLACE_EXECUTOR);
+        query.applyProposal(new RemoveEmptyNodesProposalImpl<>(rootNode), REQUIRE_USING_IN_PLACE_EXECUTOR);
     }
 
     @Test
@@ -296,7 +350,7 @@ public class EmptyNodeRemovalTest {
         System.out.println("\n Unsatisfiable query: \n" +  query);
 
         // Should throw an exception
-        query.applyProposal(new RemoveEmptyNodesProposalImpl(), REQUIRE_USING_IN_PLACE_EXECUTOR);
+        query.applyProposal(new RemoveEmptyNodesProposalImpl(rootNode), REQUIRE_USING_IN_PLACE_EXECUTOR);
         System.err.println("\n Failure: this query should have been declared as unsatisfiable: \n" +  query);
     }
 
@@ -323,7 +377,7 @@ public class EmptyNodeRemovalTest {
         System.out.println("\n Unsatisfiable query: \n" +  query);
 
         // Should throw an exception
-        query.applyProposal(new RemoveEmptyNodesProposalImpl(), REQUIRE_USING_IN_PLACE_EXECUTOR);
+        query.applyProposal(new RemoveEmptyNodesProposalImpl<>(rootNode), REQUIRE_USING_IN_PLACE_EXECUTOR);
         System.err.println("\n Failure: this query should have been declared as unsatisfiable: \n" +  query);
     }
 
@@ -335,7 +389,8 @@ public class EmptyNodeRemovalTest {
         System.out.println("\n Unsatisfiable query: \n" +  query);
 
         // Should throw an exception
-        query.applyProposal(new RemoveEmptyNodesProposalImpl(), REQUIRE_USING_IN_PLACE_EXECUTOR);
+        query.applyProposal(new RemoveEmptyNodesProposalImpl<>(query.getRootConstructionNode()),
+                REQUIRE_USING_IN_PLACE_EXECUTOR);
         System.err.println("\n Failure: this query should have been declared as unsatisfiable: \n" +  query);
     }
 
@@ -348,7 +403,8 @@ public class EmptyNodeRemovalTest {
         System.out.println("\n Unsatisfiable query: \n" +  query);
 
         // Should throw an exception
-        query.applyProposal(new RemoveEmptyNodesProposalImpl(), REQUIRE_USING_IN_PLACE_EXECUTOR);
+        query.applyProposal(new RemoveEmptyNodesProposalImpl<>(query.getRootConstructionNode()),
+                REQUIRE_USING_IN_PLACE_EXECUTOR);
         System.err.println("\n Failure: this query should have been declared as unsatisfiable: \n" +  query);
     }
 
@@ -454,7 +510,8 @@ public class EmptyNodeRemovalTest {
         System.out.println("\n Unsatisfiable query: \n" +  query);
 
         // Should throw an exception
-        query.applyProposal(new RemoveEmptyNodesProposalImpl(), REQUIRE_USING_IN_PLACE_EXECUTOR);
+        query.applyProposal(new RemoveEmptyNodesProposalImpl<>(query.getRootConstructionNode()),
+                REQUIRE_USING_IN_PLACE_EXECUTOR);
         System.err.println("\n Failure: this query should have been declared as unsatisfiable: \n" +  query);
     }
 
@@ -759,7 +816,8 @@ public class EmptyNodeRemovalTest {
         System.out.println("\n Expected query: \n" +  expectedQuery);
 
         // Updates the query (in-place optimization)
-        query.applyProposal(new RemoveEmptyNodesProposalImpl(), REQUIRE_USING_IN_PLACE_EXECUTOR);
+        query.applyProposal(new RemoveEmptyNodesProposalImpl<>(query.getRootConstructionNode()),
+                REQUIRE_USING_IN_PLACE_EXECUTOR);
 
         System.out.println("\n Optimized query: \n" +  query);
 

@@ -82,14 +82,17 @@ public class PullVariableOutOfDataNodeExecutor implements NodeCentricInternalExe
 
         treeComponent.replaceNode(originalFocusNode, focusNodeUpdate.newFocusNode);
 
-        propagateUpNewEqualities(treeComponent, focusNodeUpdate.newFocusNode, focusNodeUpdate.newEqualities);
+        QueryNode newNode = propagateUpNewEqualities(treeComponent, focusNodeUpdate.newFocusNode,
+                focusNodeUpdate.newEqualities);
 
         if (focusNodeUpdate.optionalSubstitution.isPresent()) {
             SubstitutionPropagationTools.propagateSubstitutionDown(focusNodeUpdate.newFocusNode,
                     focusNodeUpdate.optionalSubstitution.get(), query, treeComponent);
         }
 
-        return new NodeCentricOptimizationResultsImpl<>(query, focusNodeUpdate.newFocusNode);
+        // return new NodeCentricOptimizationResultsImpl<>(query, focusNodeUpdate.newFocusNode);
+        return new NodeCentricOptimizationResultsImpl(query, query.getNextSibling(newNode),
+                query.getParent(newNode));
     }
 
     /**
@@ -98,8 +101,8 @@ public class PullVariableOutOfDataNodeExecutor implements NodeCentricInternalExe
      * TODO: make this code more better by not relying that much on instance checking!
      *
      */
-    private void propagateUpNewEqualities(QueryTreeComponent treeComponent,
-                                          DataNode newFocusNode, ImmutableExpression newEqualities)
+    private QueryNode propagateUpNewEqualities(QueryTreeComponent treeComponent,
+                                          QueryNode newFocusNode, ImmutableExpression newEqualities)
             throws IllegalTreeUpdateException, InvalidQueryOptimizationProposalException {
 
         QueryNode lastChildNode = newFocusNode;
@@ -110,7 +113,7 @@ public class PullVariableOutOfDataNodeExecutor implements NodeCentricInternalExe
 
             if (ancestorNode instanceof CommutativeJoinNode) {
                 updateNewJoinLikeNode(treeComponent, (CommutativeJoinNode) ancestorNode, newEqualities);
-                return;
+                return newFocusNode;
             }
             else if (ancestorNode instanceof FilterNode) {
                 FilterNode originalFilterNode = (FilterNode) ancestorNode;
@@ -120,26 +123,23 @@ public class PullVariableOutOfDataNodeExecutor implements NodeCentricInternalExe
 
                 FilterNode newFilterNode = originalFilterNode.changeFilterCondition(newFilteringCondition);
                 treeComponent.replaceNode(originalFilterNode, newFilterNode);
-                return;
+                return newFocusNode;
             }
             else if (ancestorNode instanceof LeftJoinNode) {
                 NonCommutativeOperatorNode.ArgumentPosition position =
                         treeComponent.getOptionalPosition(ancestorNode, lastChildNode).get();
                 switch (position) {
                     case LEFT:
-                        insertFilterNode(treeComponent, lastChildNode, newEqualities);
-                        return;
+                        return insertFilterNode(treeComponent, lastChildNode, newEqualities);
 
                     case RIGHT:
                         updateNewJoinLikeNode(treeComponent, (LeftJoinNode) ancestorNode, newEqualities);
-                        return;
+                        return newFocusNode;
                 }
 
             }
             else if (ancestorNode instanceof ConstructionNode) {
-                insertFilterNode(treeComponent, lastChildNode, newEqualities);
-                return;
-
+                return insertFilterNode(treeComponent, lastChildNode, newEqualities);
             }
             /**
              * Continues to the next ancestor
@@ -180,10 +180,11 @@ public class PullVariableOutOfDataNodeExecutor implements NodeCentricInternalExe
     /**
      * TODO: explain
      */
-    private static void insertFilterNode(QueryTreeComponent treeComponent, QueryNode child,
+    private static QueryNode insertFilterNode(QueryTreeComponent treeComponent, QueryNode child,
                                          ImmutableExpression newEqualities) throws IllegalTreeUpdateException {
         FilterNode newFilterNode = new FilterNodeImpl(newEqualities);
         treeComponent.insertParent(child, newFilterNode);
+        return  newFilterNode;
     }
 
 

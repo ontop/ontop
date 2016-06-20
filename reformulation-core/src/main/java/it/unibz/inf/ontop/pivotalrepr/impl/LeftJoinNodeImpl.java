@@ -111,7 +111,9 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
         return getOptionalFilterCondition()
                 .map(cond -> transformBooleanExpression(query, substitution, cond))
                 .map(ev -> applyEvaluation(query, ev, substitution, Optional.empty(), Provenance.FROM_ABOVE))
-                .orElseGet(() -> new SubstitutionResultsImpl<>(this, substitution));
+                .orElseGet(() -> new SubstitutionResultsImpl<>(
+                        SubstitutionResults.LocalAction.NO_CHANGE,
+                        Optional.of(substitution)));
     }
 
     private SubstitutionResults<LeftJoinNode> applyEvaluation(IntermediateQuery query, ExpressionEvaluator.Evaluation evaluation,

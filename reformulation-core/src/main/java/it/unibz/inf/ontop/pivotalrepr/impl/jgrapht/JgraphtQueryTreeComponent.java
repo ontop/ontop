@@ -14,6 +14,7 @@ import it.unibz.inf.ontop.pivotalrepr.impl.IllegalTreeException;
 import it.unibz.inf.ontop.pivotalrepr.impl.QueryTreeComponent;
 
 import java.util.*;
+import java.util.stream.Stream;
 
 /**
  * Basic implementation based on a JGrapht DAG.
@@ -139,8 +140,10 @@ public class JgraphtQueryTreeComponent implements QueryTreeComponent {
     }
 
     @Override
-    public ImmutableSet<EmptyNode> getUnsatisfiableNodes() {
-        return getNodesInTopDownOrder().stream()
+    public ImmutableSet<EmptyNode> getEmptyNodes(QueryNode subTreeRoot) {
+        return Stream.concat(
+                    Stream.of(subTreeRoot),
+                    getSubTreeNodesInTopDownOrder(subTreeRoot).stream())
                 .filter(n -> n instanceof EmptyNode)
                 .map(n -> (EmptyNode) n)
                 .collect(ImmutableCollectors.toSet());

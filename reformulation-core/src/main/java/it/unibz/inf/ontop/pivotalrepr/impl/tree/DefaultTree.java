@@ -7,8 +7,10 @@ import it.unibz.inf.ontop.pivotalrepr.EmptyNode;
 import it.unibz.inf.ontop.pivotalrepr.impl.IllegalTreeUpdateException;
 import it.unibz.inf.ontop.pivotalrepr.ConstructionNode;
 import it.unibz.inf.ontop.pivotalrepr.QueryNode;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.*;
+import java.util.stream.Stream;
 
 /**
  * TODO: explain
@@ -282,8 +284,21 @@ public class DefaultTree implements QueryTree {
         addChild(newParentNode, childNode, Optional.<NonCommutativeOperatorNode.ArgumentPosition>empty(), false, false);
     }
 
-    public ImmutableSet<EmptyNode> getEmptyNodes() {
-        return ImmutableSet.copyOf(emptyNodes);
+    public ImmutableSet<EmptyNode> getEmptyNodes(QueryNode subTreeRoot) {
+        if (subTreeRoot == rootNode) {
+            return ImmutableSet.copyOf(emptyNodes);
+        }
+        /**
+         * TODO: find a more efficient implementation
+         */
+        else {
+            return Stream.concat(
+                    Stream.of(subTreeRoot),
+                    getSubTreeNodesInTopDownOrder(subTreeRoot).stream())
+                    .filter(n -> n instanceof EmptyNode)
+                    .map(n -> (EmptyNode) n)
+                    .collect(ImmutableCollectors.toSet());
+        }
     }
 
     /**
