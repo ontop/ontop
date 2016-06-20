@@ -106,7 +106,7 @@ public class SQLQueryDeepParser {
 		
 		ParsedSQLQuery queryParsed = null;
 		try {
-			queryParsed = new ParsedSQLQuery(select, false, idfac);
+			queryParsed = new ParsedSQLQuery(select.toString(), false, idfac);
 		} 
 		catch (JSQLParserException e) {
 			if (e.getCause() instanceof ParseException)

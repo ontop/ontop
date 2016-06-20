@@ -40,12 +40,13 @@ import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.Statement;
-import net.sf.jsqlparser.statement.select.Select;
+import net.sf.jsqlparser.statement.select.*;
 
 /**
  * A structure to store the parsed SQL query string. It returns the information
  * about the query using the visitor classes
  */
+
 public class ParsedSQLQuery implements Serializable {
 
 	private static final long serialVersionUID = -4590590361733833782L;
@@ -53,7 +54,7 @@ public class ParsedSQLQuery implements Serializable {
 	private final String query;
 	private final boolean deepParsing; // used to remove all quotes from the query
 
-	private Select selectQuery; // the parsed query
+	private final Select selectQuery; // the parsed query
 
 	private final QuotedIDFactory idfac;
 	
@@ -63,8 +64,7 @@ public class ParsedSQLQuery implements Serializable {
 	private Map<QuotedID, Expression> aliasMap;
 	private List<Expression> joins;
 	private Expression whereClause;
-	private ProjectionJSQL projection;
-	//private AggregationJSQL groupByClause;
+	private List<SelectExpressionItem> projection;
 
 
 	/**
@@ -82,16 +82,12 @@ public class ParsedSQLQuery implements Serializable {
 
 
 	public ParsedSQLQuery(String queryString, boolean deepParsing, QuotedIDFactory idfac) throws JSQLParserException {
-		this.idfac = idfac;
-		query = queryString;
-		this.deepParsing = deepParsing;
-		Statement stm = CCJSqlParserUtil.parse(query);
-		init(stm);
+		this(CCJSqlParserUtil.parse(queryString), deepParsing, idfac);
 	}
 
 	/**
 	 * The query is not parsed again
-	 * 
+	 *
 	 * @param statement
 	 *            we pass already a parsed statement
 	 * @param deepParsing
@@ -99,16 +95,13 @@ public class ParsedSQLQuery implements Serializable {
 	 *            for unsupported query in the mapping
 	 * @throws JSQLParserException
 	 */
-	public ParsedSQLQuery(Statement statement, boolean deepParsing, QuotedIDFactory idfac) throws JSQLParserException {
+	private ParsedSQLQuery(Statement statement, boolean deepParsing, QuotedIDFactory idfac) throws JSQLParserException {
 		this.idfac = idfac;
-		query = statement.toString();
+		this.query = statement.toString();
 		this.deepParsing = deepParsing;
-		init(statement);
-	}
 
-	private final void init(Statement stm) throws JSQLParserException {
-		if (stm instanceof Select) {
-			selectQuery = (Select) stm;
+		if (statement instanceof Select) {
+			selectQuery = (Select) statement;
 
 			// Getting the values we also eliminate or handle the quotes if
 			// deepParsing is set to true and we throw errors for unsupported values
@@ -119,7 +112,6 @@ public class ParsedSQLQuery implements Serializable {
 				projection = getProjection(); // bring the names in FROM clause into NORMAL FORM
 				joins = getJoinConditions(); // bring the names in JOIN clauses into NORMAL FORM
 				aliasMap = getAliasMap();    // bring the alias names in Expr AS Alias into NORMAL FORM 
-				//groupByClause = getGroupByClause();
 			}
 		}
 		// catch exception about wrong inserted columns
@@ -209,7 +201,7 @@ public class ParsedSQLQuery implements Serializable {
 	 * 
 	 * @throws JSQLParserException
 	 */
-	public ProjectionJSQL getProjection() throws JSQLParserException {
+	public List<SelectExpressionItem> getProjection() throws JSQLParserException {
 		if (projection == null) {
 			ProjectionVisitor visitor = new ProjectionVisitor(idfac);
 			projection = visitor.getProjection(selectQuery, deepParsing);
@@ -230,56 +222,86 @@ public class ParsedSQLQuery implements Serializable {
 		return visitor.getColumns();
 	}
 
+
 	/**
 	 * Set the object construction for the SELECT clause, modifying the current
 	 * statement
-	 * 
-	 * META-MAPPING EXPANDER
-	 * 
-	 * @param projection
-	 */
-
-	public void setProjection(ProjectionJSQL projection) {
-		ProjectionVisitor visitor = new ProjectionVisitor(idfac);
-		visitor.setProjection(selectQuery, projection);
-		this.projection = projection;
-	}
-
-	/**
 	 * Set the object construction for the WHERE clause, modifying the current
 	 * statement
-	 * 
+	 *
+	 *
 	 * META-MAPPING EXPANDER
-	 * 
+	 *
+	 * @param columnList
+	 * @param distinct
 	 * @param whereClause
 	 */
 
-	public void setWhereClause(Expression whereClause) {
-		WhereClauseVisitor sel = new WhereClauseVisitor(idfac);
-		sel.setWhereClause(selectQuery, whereClause);
-		this.whereClause = whereClause;
-	}
-
-	/**
-	 * Constructs the GROUP BY statement based on the Aggregation object.
-	 * 
-	 * FUTURE USE
-	 * 
-	 */
-/*	
-	public AggregationJSQL getGroupByClause() {
-		if (groupByClause == null) {
-			AggregationVisitor agg = new AggregationVisitor();
-			groupByClause = agg.getAggregation(selectQuery, deepParsing);
+	public static String getModifiedQuery(ParsedSQLQuery original, List<SelectExpressionItem> columnList, boolean distinct, Expression whereClause) {
+		ParsedSQLQuery parsed = null;
+		try {
+			parsed = new ParsedSQLQuery(original.selectQuery, false, original.idfac);
+		}
+		catch (JSQLParserException e) {
+			e.printStackTrace();
 		}
 
-		return groupByClause;
-	}
-*/
+		ProjectionVisitor visitor = new ProjectionVisitor(parsed.idfac);
+		parsed.selectQuery.getSelectBody().accept(new SelectVisitor() {
 
-	public Select getStatement() {
-		return selectQuery;
+			@Override
+			public void visit(PlainSelect plainSelect) {
+				if (distinct) {
+					plainSelect.setDistinct(new Distinct());
+
+					plainSelect.getSelectItems().clear();
+					plainSelect.getSelectItems().addAll(columnList);
+				}
+				else {
+					plainSelect.getSelectItems().clear();
+					if (!columnList.isEmpty()) {
+						plainSelect.getSelectItems().addAll(columnList);
+					}
+					else {
+						plainSelect.getSelectItems().add(new AllColumns());
+					}
+				}
+			}
+
+			@Override
+			public void visit(SetOperationList setOpList) {
+				setOpList.getPlainSelects().get(0).accept(this);
+			}
+
+			@Override
+			public void visit(WithItem withItem) {
+				withItem.getSelectBody().accept(this);
+			}});
+
+
+		if (whereClause != null) {
+			WhereClauseVisitor sel = new WhereClauseVisitor(parsed.idfac);
+			parsed.selectQuery.getSelectBody().accept(new SelectVisitor() {
+				@Override
+				public void visit(PlainSelect plainSelect) {
+					plainSelect.setWhere(whereClause);
+				}
+				@Override
+				public void visit(SetOperationList setOpList) {
+					// we do not consider the case of UNION
+					// ROMAN (22 Sep 2015): not sure why it is applied to the first one only
+					setOpList.getPlainSelects().get(0).accept(this);
+				}
+				@Override
+				public void visit(WithItem withItem) {
+					// we do not consider the case for WITH
+				}
+			});
+		}
+
+		return parsed.toString();
 	}
+
 
 	public static void normalizeColumnName(QuotedIDFactory idfac, Column tableColumn) {
 		QuotedID columnName = idfac.createAttributeID(tableColumn.getColumnName());

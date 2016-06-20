@@ -84,12 +84,7 @@ public class AliasMapVisitor {
 	
 	
 	private SelectVisitor selectVisitor = new SelectVisitor() {
-		/*
-		 * visit PlainSelect, search for the content in select
-		 * Stored in AggregationJSQL. 
-		 * @see net.sf.jsqlparser.statement.select.SelectVisitor#visit(net.sf.jsqlparser.statement.select.PlainSelect)
-		 */
-		
+
 		@Override
 		public void visit(PlainSelect plainSelect) {
 	        plainSelect.getFromItem().accept(fromItemVisitor);

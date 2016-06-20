@@ -37,7 +37,6 @@ import it.unibz.inf.ontop.sql.QuotedID;
 import it.unibz.inf.ontop.sql.QuotedIDFactory;
 import it.unibz.inf.ontop.sql.RelationID;
 import it.unibz.inf.ontop.sql.api.ParsedSQLQuery;
-import it.unibz.inf.ontop.sql.api.ProjectionJSQL;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -140,7 +139,7 @@ public class MetaMappingExpander {
 				 */
 				
 				try {
-					columnList = sourceQueryParsed.getProjection().getColumnList();
+					columnList = sourceQueryParsed.getProjection();
 				} 
 				catch (JSQLParserException e2) {
 					continue;
@@ -159,7 +158,7 @@ public class MetaMappingExpander {
 					String newId = IDGenerator.getNextUniqueID(id + "#");
 					OBDAMappingAxiom newMapping = instantiateMapping(newId, targetQuery,
 							bodyAtom, sourceQueryParsed, columnsForTemplate,
-							columnsForValues, params, arity, idfac);
+							columnsForValues, params, arity);
 										
 					expandedMappings.add(newMapping);	
 					
@@ -180,24 +179,8 @@ public class MetaMappingExpander {
 		 * we only need to distinct project the columns needed for the template expansion 
 		 */
 		
-		ParsedSQLQuery distinctParsedQuery = null;
-		try {
-			distinctParsedQuery = new ParsedSQLQuery(sourceQueryParsed.getStatement(), false, idfac);
-		} 
-		catch (JSQLParserException e1) {
-			throw new IllegalArgumentException(e1);
-			//continue;
-		}
-
-		
-		ProjectionJSQL distinctParamsProjection = new ProjectionJSQL();
-		distinctParamsProjection.setType(ProjectionJSQL.SELECT_DISTINCT);
-		distinctParamsProjection.addAll(columnsForTemplate);
-		
-		distinctParsedQuery.setProjection(distinctParamsProjection);
-		
-		
-		String distinctParamsSQL = distinctParsedQuery.toString();
+		String distinctParamsSQL = ParsedSQLQuery.getModifiedQuery(sourceQueryParsed,
+				columnsForTemplate, true, null);
 
 	
 		List<List<String>> paramsForClassTemplate = new LinkedList<List<String>>();
@@ -250,7 +233,7 @@ public class MetaMappingExpander {
 			Function bodyAtom, ParsedSQLQuery sourceParsedQuery,
 			List<SelectExpressionItem> columnsForTemplate,
 			List<SelectExpressionItem> columnsForValues,
-			List<String> params, int arity, QuotedIDFactory idfac) throws JSQLParserException {
+			List<String> params, int arity) throws JSQLParserException {
 		
 		/*
 		 * First construct new Target Query 
@@ -283,20 +266,11 @@ public class MetaMappingExpander {
 			j++;	
 		}
 			
-		
-		ProjectionJSQL newProjection = new ProjectionJSQL();
-		newProjection.addAll(columnsForValues);
-		
 		/*
-		 * new statement for the source query
-		 * we create a new statement with the changed projection and selection
+		 * we create a new  query with the changed projection and selection
 		 */
-		
-		ParsedSQLQuery newSourceParsedQuery = new ParsedSQLQuery(sourceParsedQuery.getStatement(), false, idfac);
-		newSourceParsedQuery.setProjection(newProjection);
-		newSourceParsedQuery.setWhereClause(selection);
-		
-		String newSourceQuerySQL = newSourceParsedQuery.toString();
+		String newSourceQuerySQL = ParsedSQLQuery.getModifiedQuery(sourceParsedQuery,
+				columnsForValues, false, selection);
 		OBDASQLQuery newSourceQuery =  dfac.getSQLQuery(newSourceQuerySQL);
 
 		OBDAMappingAxiom newMapping = dfac.getRDBMSMappingAxiom(id, newSourceQuery, 

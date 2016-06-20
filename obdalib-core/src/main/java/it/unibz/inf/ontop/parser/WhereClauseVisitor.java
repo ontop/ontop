@@ -73,27 +73,6 @@ public class WhereClauseVisitor {
 		return whereClause;
 	}
 
-		
-    public void setWhereClause(Select selectQuery, final Expression whereClause) {
-
-        selectQuery.getSelectBody().accept(new SelectVisitor() {
-    		@Override
-    		public void visit(PlainSelect plainSelect) {
-                plainSelect.setWhere(whereClause);
-    		}
-    		@Override
-    		public void visit(SetOperationList setOpList) {
-    			// we do not consider the case of UNION
-    			// ROMAN (22 Sep 2015): not sure why it is applied to the first one only 
-        		setOpList.getPlainSelects().get(0).accept(this);
-    		}
-    		@Override
-    		public void visit(WithItem withItem) {
-    	  		// we do not consider the case for WITH
-    		}    	
-        });
-    }
-
 	private void unsupported(Object o) {
 		System.out.println(this.getClass() + " DOES NOT SUPPORT " + o);
 		unsupported = true;
@@ -465,4 +444,32 @@ public class WhereClauseVisitor {
             unsupported(arg0);		
     	}
     };
+
+	private static class AnyComparison extends AnyComparisonExpression {
+
+		private AnyComparison(SubSelect subSelect) {
+			super(subSelect);
+		}
+
+		@Override
+		public String toString(){
+			return "ANY "+getSubSelect();
+		}
+
+	}
+
+	private static class AllComparison extends AllComparisonExpression {
+
+		public AllComparison(SubSelect subSelect) {
+			super(subSelect);
+		}
+
+		@Override
+		public String toString(){
+			return "ALL "+getSubSelect();
+		}
+
+	}
+
+
 }

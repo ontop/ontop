@@ -70,7 +70,7 @@ public class AutomaticMGUGenerationTests extends TestCase {
 	
 	public void testGetMGUAtomAtomBoolean() throws Exception {
 		log.debug("Testing computation of MGUs");
-		File inputFile = new File("src/test/java/it/unibz/inf/obda/reformulation/tests/mgu-computation-test-cases.txt");
+		File inputFile = new File("src/test/java/it/unibz/inf/ontop/reformulation/tests/mgu-computation-test-cases.txt");
 		BufferedReader in = new BufferedReader(new FileReader(inputFile));
 
 		String testcase = in.readLine();
