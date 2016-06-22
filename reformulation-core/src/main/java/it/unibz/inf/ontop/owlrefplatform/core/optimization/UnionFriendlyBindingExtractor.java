@@ -26,7 +26,7 @@ public class UnionFriendlyBindingExtractor implements BindingExtractor {
                 .collect(ImmutableCollectors.toMap());
 
         return Optional.of(substitutionMap)
-                .filter(ImmutableMap::isEmpty)
+                .filter(m -> !m.isEmpty())
                 .map(ImmutableSubstitutionImpl::new);
     }
 
@@ -47,7 +47,7 @@ public class UnionFriendlyBindingExtractor implements BindingExtractor {
     }
 
     /**
-     * TODO: explain
+     * Extract the bindings from the construction node, searching recursively for bindings in its children
      */
     private Stream<Map.Entry<Variable, ImmutableTerm>> extractBindingsFromConstructionNode(IntermediateQuery query,
                                                                                   ConstructionNode currentNode) {
@@ -62,7 +62,8 @@ public class UnionFriendlyBindingExtractor implements BindingExtractor {
     }
 
     /**
-     * TODO: explain
+     * Extract the bindings from the union node, searching recursively for bindings in its children.
+     * Ignore conflicting definitions of variables
      */
     private Stream<Map.Entry<Variable, ImmutableTerm>> extractBindingsFromUnionNode(IntermediateQuery query,
                                                                            UnionNode currentNode) {
@@ -100,6 +101,7 @@ public class UnionFriendlyBindingExtractor implements BindingExtractor {
 
     /**
      * TODO: make explicit its assumptions ans make sure they hold
+     * Verify if the ImmutableTerm are Compatible
      */
     private static boolean areCompatible(ImmutableTerm term1, ImmutableTerm term2) {
         if (term1.equals(term2)) {
