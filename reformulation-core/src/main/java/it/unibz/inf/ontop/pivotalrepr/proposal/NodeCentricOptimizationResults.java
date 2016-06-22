@@ -30,4 +30,6 @@ public interface NodeCentricOptimizationResults<N extends QueryNode> extends Pro
      * of its children
      */
     Optional<QueryNode> getOptionalReplacingChild();
+
+    Optional<QueryNode> getNewNodeOrReplacingChild();
 }
