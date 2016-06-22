@@ -61,7 +61,7 @@ public class SubstitutionPropagationExecutor<N extends QueryNode>
         if (newNodeAndSubst.getOptionalSubstitution().isPresent()) {
             ImmutableSubstitution<? extends ImmutableTerm> newSubstitution = newNodeAndSubst.getOptionalSubstitution().get();
 
-            SubstitutionPropagationTools.propagateSubstitutionDown(originalFocusNode, newSubstitution, query,
+            SubstitutionPropagationTools.propagateSubstitutionDown(newNodeAndSubst.getNewOrReplacingNode(), newSubstitution, query,
                     treeComponent);
         }
 

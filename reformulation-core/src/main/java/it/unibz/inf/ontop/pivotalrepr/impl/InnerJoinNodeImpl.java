@@ -75,7 +75,7 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
 
         return computeAndEvaluateNewCondition(substitution, query, otherNodesProjectedVariables)
                 .map(ev -> applyEvaluation(ev, substitution))
-                .orElseGet(() -> new SubstitutionResultsImpl<>(this, substitution));
+                .orElseGet(() -> new SubstitutionResultsImpl<>(NO_CHANGE, Optional.of(substitution)));
     }
 
     @Override
@@ -85,7 +85,7 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
         return getOptionalFilterCondition()
                 .map(cond -> transformBooleanExpression(query, substitution, cond))
                 .map(ev -> applyEvaluation(ev, substitution))
-                .orElseGet(() -> new SubstitutionResultsImpl<>(this, substitution));
+                .orElseGet(() -> new SubstitutionResultsImpl<>(NO_CHANGE, Optional.of(substitution)));
     }
 
     private SubstitutionResults<InnerJoinNode> applyEvaluation(ExpressionEvaluator.Evaluation evaluation,

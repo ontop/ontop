@@ -96,7 +96,12 @@ public class QueryMergingExecutor implements InternalProposalExecutor<QueryMergi
                                     results.getSubstitutionToPropagate());
 
                         case NEW_NODE:
-                            return new AnalysisResults(originalNode, results.getOptionalNewNode().get(),
+                            QueryNode newNode = results.getOptionalNewNode().get();
+                            if (newNode == originalNode) {
+                                throw new IllegalStateException("NEW_NODE action must not return the same node. " +
+                                        "Use NO_CHANGE instead.");
+                            }
+                            return new AnalysisResults(originalNode, newNode,
                                     results.getSubstitutionToPropagate());
                         /**
                          * Recursive

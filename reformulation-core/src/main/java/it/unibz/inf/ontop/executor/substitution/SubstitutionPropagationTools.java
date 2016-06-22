@@ -159,6 +159,10 @@ public class SubstitutionPropagationTools {
             case NEW_NODE:
                 N newNode = (N) substitutionResults.getOptionalNewNode()
                         .orElseThrow(() -> new IllegalStateException("A new newNode was expected"));
+                if (newNode == node) {
+                    throw new IllegalStateException("NEW_NODE action must not return the same node. " +
+                            "Use NO_CHANGE instead.");
+                }
                 treeComponent.replaceNode(node, newNode);
                 return new SubstitutionApplicationResults(newNode, newSubstitution);
 
