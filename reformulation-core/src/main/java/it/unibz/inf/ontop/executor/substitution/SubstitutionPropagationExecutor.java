@@ -1,9 +1,7 @@
 package it.unibz.inf.ontop.executor.substitution;
 
-import java.util.Optional;
-
+import it.unibz.inf.ontop.executor.substitution.SubstitutionPropagationTools.SubstitutionApplicationResults;
 import it.unibz.inf.ontop.model.ImmutableTerm;
-import it.unibz.inf.ontop.model.VariableOrGroundTerm;
 import it.unibz.inf.ontop.pivotalrepr.*;
 import it.unibz.inf.ontop.pivotalrepr.proposal.impl.NodeCentricOptimizationResultsImpl;
 import it.unibz.inf.ontop.executor.NodeCentricInternalExecutor;
@@ -46,42 +44,42 @@ public class SubstitutionPropagationExecutor<N extends QueryNode>
         ImmutableSubstitution<? extends ImmutableTerm> substitutionToPropagate = proposal.getSubstitution();
 
         /**
-         * TODO: check the results!!!
+         * First propagates up
          */
-        SubstitutionPropagationTools.propagateSubstitutionUp(originalFocusNode, substitutionToPropagate, query, treeComponent);
-        SubstitutionPropagationTools.propagateSubstitutionDown(originalFocusNode, substitutionToPropagate, query,
+        SubstitutionPropagationTools.propagateSubstitutionUp(originalFocusNode, substitutionToPropagate, query,
                 treeComponent);
 
-
-        N newQueryNode = propagateToFocusNode(originalFocusNode, substitutionToPropagate, query, treeComponent);
+        /**
+         * Then to the focus node
+         */
+        SubstitutionApplicationResults<N> newNodeAndSubst = SubstitutionPropagationTools.applySubstitutionToNode(
+                originalFocusNode, substitutionToPropagate, query, treeComponent);
 
         /**
-         * The substitution is supposed
+         * Finally, down
          */
-        return new NodeCentricOptimizationResultsImpl<>(query, newQueryNode);
-    }
+        if (newNodeAndSubst.getOptionalSubstitution().isPresent()) {
+            ImmutableSubstitution<? extends ImmutableTerm> newSubstitution = newNodeAndSubst.getOptionalSubstitution().get();
 
+            SubstitutionPropagationTools.propagateSubstitutionDown(originalFocusNode, newSubstitution, query,
+                    treeComponent);
+        }
 
-
-    private static <N extends QueryNode> N propagateToFocusNode(
-            N originalFocusNode, ImmutableSubstitution<? extends ImmutableTerm> substitutionToPropagate,
-            IntermediateQuery query, QueryTreeComponent treeComponent) throws QueryNodeSubstitutionException {
-
-        SubstitutionResults<? extends QueryNode> substitutionResults =
-                originalFocusNode.applyDescendingSubstitution(substitutionToPropagate, query);
-        Optional<? extends QueryNode> optionalNewFocusNode = substitutionResults.getOptionalNewNode();
-        if (optionalNewFocusNode.isPresent()) {
-            QueryNode newFocusNode = optionalNewFocusNode.get();
-            if (originalFocusNode != newFocusNode) {
-                treeComponent.replaceNode(originalFocusNode, newFocusNode);
-            }
-            return (N) newFocusNode;
+        if (newNodeAndSubst.getNewNode().isPresent()) {
+            return new NodeCentricOptimizationResultsImpl<N>(query, newNodeAndSubst.getNewNode().get());
+        }
+        else if (newNodeAndSubst.isReplacedByAChild()) {
+            return new NodeCentricOptimizationResultsImpl<N>(query, newNodeAndSubst.getReplacingNode());
         }
         /**
-         * TODO: should we handle this case properly?
+         * Replaced by another node
          */
         else {
-            throw new RuntimeException("The focus node was not expected to become not needed anymore ");
+            QueryNode replacingNode = newNodeAndSubst.getReplacingNode().get();
+
+            return new NodeCentricOptimizationResultsImpl<N>(query,
+                    query.getNextSibling(replacingNode),
+                    query.getParent(replacingNode));
         }
     }
 }

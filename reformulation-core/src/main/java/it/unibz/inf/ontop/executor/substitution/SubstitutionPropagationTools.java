@@ -16,7 +16,6 @@ import it.unibz.inf.ontop.pivotalrepr.proposal.ReactToChildDeletionProposal;
 import it.unibz.inf.ontop.pivotalrepr.proposal.ReactToChildDeletionResults;
 import it.unibz.inf.ontop.pivotalrepr.proposal.impl.NodeCentricOptimizationResultsImpl;
 import it.unibz.inf.ontop.pivotalrepr.proposal.impl.ReactToChildDeletionProposalImpl;
-import it.unibz.inf.ontop.pivotalrepr.unfolding.ProjectedVariableExtractionTools;
 
 import java.util.LinkedList;
 import java.util.Queue;
@@ -31,7 +30,7 @@ public class SubstitutionPropagationTools {
     private static class NodeAndSubstitution {
         public final QueryNode node;
         /**
-         * Substitution to propagate to this node
+         * Substitution to propagate to this newNode
          */
         public final ImmutableSubstitution<? extends ImmutableTerm> substitution;
 
@@ -43,7 +42,64 @@ public class SubstitutionPropagationTools {
     }
 
     /**
-     * Propagates the substitution to the descendants of the focus node.
+     * Results AFTER the substitution application.
+     *
+     * Only after propagating a substitution down
+     */
+    protected static class SubstitutionApplicationResults<N extends QueryNode> {
+        private final Optional<N> newNode;
+        /**
+         * Substitution to propagate to this newNode
+         */
+        private final Optional<ImmutableSubstitution<? extends ImmutableTerm>> optionalSubst;
+        private final boolean isReplacedByAChild;
+        private final Optional<QueryNode> replacingNode;
+
+        protected SubstitutionApplicationResults(N newNode,
+                                                 Optional<ImmutableSubstitution<? extends ImmutableTerm>> optionalSubst) {
+            this.newNode = Optional.of(newNode);
+            this.replacingNode = Optional.empty();
+            this.optionalSubst = optionalSubst;
+            this.isReplacedByAChild = false;
+        }
+
+        protected SubstitutionApplicationResults(QueryNode replacingNode,
+                                                 Optional<ImmutableSubstitution<? extends ImmutableTerm>> optionalSubst,
+                                                 boolean isReplacedByAChild) {
+            this.newNode = Optional.empty();
+            this.replacingNode = Optional.of(replacingNode);
+            this.optionalSubst = optionalSubst;
+            this.isReplacedByAChild = isReplacedByAChild;
+        }
+
+        public Optional<N> getNewNode() {
+            return newNode;
+        }
+
+        public Optional<ImmutableSubstitution<? extends ImmutableTerm>> getOptionalSubstitution() {
+            return optionalSubst;
+        }
+
+        public boolean isReplacedByAChild() {
+            return isReplacedByAChild;
+        }
+
+        public Optional<QueryNode> getReplacingNode() {
+            return replacingNode;
+        }
+
+        public QueryNode getNewOrReplacingNode() {
+            return newNode
+                    .map(Optional::<QueryNode>of)
+                    .orElse(replacingNode)
+                    .orElseThrow(() -> new IllegalStateException("At least one query node must be present"));
+        }
+    }
+
+
+
+    /**
+     * Propagates the substitution to the descendants of the focus newNode.
      *
      * THE SUBSTITUTION IS NOT APPLIED TO THE FOCUS NODE.
      *
@@ -63,73 +119,89 @@ public class SubstitutionPropagationTools {
                 .forEach(nodeAndSubsToVisit::add);
 
         while (!nodeAndSubsToVisit.isEmpty()) {
+            NodeAndSubstitution initialNodeAndSubstitution = nodeAndSubsToVisit.poll();
 
-            NodeAndSubstitution currentNodeAndSubstitution = nodeAndSubsToVisit.poll();
-            SubstitutionResults<? extends QueryNode> substitutionResults =
-                    currentNodeAndSubstitution.node.applyDescendingSubstitution(
-                            currentNodeAndSubstitution.substitution, query);
-
-            /**
-             * Applies the local action
-             */
-            final QueryNode currentNode;
-            switch (substitutionResults.getLocalAction()) {
-                case NEW_NODE:
-                    QueryNode newNode = substitutionResults.getOptionalNewNode()
-                            .orElseThrow(() -> new IllegalStateException("A new node was expected"));
-                    treeComponent.replaceNode(currentNodeAndSubstitution.node, newNode);
-                    currentNode = newNode;
-                    break;
-                case NO_CHANGE:
-                    currentNode = currentNodeAndSubstitution.node;
-                    break;
-                case REPLACE_BY_CHILD:
-                    QueryNode replacingChild = substitutionResults.getOptionalReplacingChildPosition()
-                            .flatMap(position -> query.getChild(currentNodeAndSubstitution.node, position))
-                            .orElseGet(() -> query.getFirstChild(currentNodeAndSubstitution.node)
-                                    .orElseThrow(() -> new IllegalStateException("No replacing child is available")));
-
-                    treeComponent.replaceNodeByChild(currentNodeAndSubstitution.node,
-                            substitutionResults.getOptionalReplacingChildPosition());
-
-                    currentNode = replacingChild;
-                    break;
-                case INSERT_CONSTRUCTION_NODE:
-                    throw new IllegalStateException("Construction node insertion not expected " +
-                            "while pushing a substitution down");
-                    /**
-                     * Replace the sub-tree by an empty node
-                     */
-                case DECLARE_AS_EMPTY:
-                    QueryNode replacingNode = new EmptyNodeImpl(
-                            extractProjectedVariables(query, currentNodeAndSubstitution.node));
-                    treeComponent.replaceSubTree(currentNodeAndSubstitution.node, replacingNode);
-                    currentNode = replacingNode;
-                    break;
-
-                default:
-                    throw new IllegalStateException("Unknown local action: " + substitutionResults.getLocalAction());
-            }
+            SubstitutionApplicationResults<QueryNode> applicationResults = applySubstitutionToNode(
+                    initialNodeAndSubstitution.node,
+                    initialNodeAndSubstitution.substitution, query, treeComponent);
 
             /**
              * Adds the children - new substitution pairs to the queue
              */
-            substitutionResults.getSubstitutionToPropagate()
-                    .ifPresent(newSubstitution -> treeComponent.getCurrentSubNodesOf(currentNode).stream()
-                            .map(n -> new NodeAndSubstitution(n, newSubstitution))
-                            .forEach(nodeAndSubsToVisit::add));
+            applicationResults.getOptionalSubstitution()
+                    .ifPresent(newSubstitution -> {
+                        if (applicationResults.isReplacedByAChild) {
+                            nodeAndSubsToVisit.add(new NodeAndSubstitution(applicationResults.getReplacingNode().get(),
+                                    newSubstitution));
+                        }
+                        else {
+                            treeComponent.getCurrentSubNodesOf(applicationResults.getNewOrReplacingNode()).stream()
+                                    .map(n -> new NodeAndSubstitution(n, newSubstitution))
+                                    .forEach(nodeAndSubsToVisit::add);
+                        }
+                    });
         }
         return treeComponent;
     }
 
     /**
-     * Propagates the substitution to the ancestors of the focus node.
+     * Applies the substitution to the newNode
+     */
+    protected static <N extends QueryNode> SubstitutionApplicationResults<N> applySubstitutionToNode(N node, ImmutableSubstitution substitution,
+                                                                            IntermediateQuery query,
+                                                                            QueryTreeComponent treeComponent) {
+        SubstitutionResults<? extends QueryNode> substitutionResults = node.applyDescendingSubstitution(substitution, query);
+
+        Optional<? extends ImmutableSubstitution<? extends ImmutableTerm>> newSubstitution =
+                substitutionResults.getSubstitutionToPropagate();
+
+        switch (substitutionResults.getLocalAction()) {
+            case NEW_NODE:
+                N newNode = (N) substitutionResults.getOptionalNewNode()
+                        .orElseThrow(() -> new IllegalStateException("A new newNode was expected"));
+                treeComponent.replaceNode(node, newNode);
+                return new SubstitutionApplicationResults(newNode, newSubstitution);
+
+            case NO_CHANGE:
+                return new SubstitutionApplicationResults(node, newSubstitution);
+
+            case REPLACE_BY_CHILD:
+                QueryNode replacingChild = substitutionResults.getOptionalReplacingChildPosition()
+                        .flatMap(position -> query.getChild(node, position))
+                        .orElseGet(() -> query.getFirstChild(node)
+                                .orElseThrow(() -> new IllegalStateException("No replacing child is available")));
+
+                treeComponent.replaceNodeByChild(node,
+                        substitutionResults.getOptionalReplacingChildPosition());
+
+                return new SubstitutionApplicationResults(replacingChild, newSubstitution, true);
+
+            case INSERT_CONSTRUCTION_NODE:
+                throw new IllegalStateException("Construction newNode insertion not expected " +
+                        "while pushing a substitution down");
+                /**
+                 * Replace the sub-tree by an empty newNode
+                 */
+            case DECLARE_AS_EMPTY:
+                QueryNode replacingNode = new EmptyNodeImpl(
+                        extractProjectedVariables(query, node));
+                treeComponent.replaceSubTree(node, replacingNode);
+
+                return new SubstitutionApplicationResults(replacingNode, newSubstitution, false);
+
+            default:
+                throw new IllegalStateException("Unknown local action: " + substitutionResults.getLocalAction());
+        }
+    }
+
+    /**
+     * Propagates the substitution to the ancestors of the focus newNode.
      *
      * THE SUBSTITUTION IS NOT APPLIED TO THE FOCUS NODE nor to its siblings.
      *
      * Has-side effect on the tree component.
      *
-     * Note that some ancestors may become empty and thus the focus node and its siblings be removed.
+     * Note that some ancestors may become empty and thus the focus newNode and its siblings be removed.
      *
      * TODO: clean
      *
