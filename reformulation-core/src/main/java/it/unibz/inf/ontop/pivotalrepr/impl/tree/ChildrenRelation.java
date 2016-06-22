@@ -28,4 +28,6 @@ public interface ChildrenRelation {
     ImmutableList<QueryNode> getChildQueryNodes();
 
     Optional<NonCommutativeOperatorNode.ArgumentPosition> getOptionalPosition(TreeNode childTreeNode);
+
+    Optional<TreeNode> getChild(NonCommutativeOperatorNode.ArgumentPosition position);
 }

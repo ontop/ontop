@@ -7,6 +7,8 @@ import it.unibz.inf.ontop.pivotalrepr.*;
 
 import java.util.Optional;
 
+import static it.unibz.inf.ontop.pivotalrepr.unfolding.ProjectedVariableExtractionTools.extractProjectedVariables;
+
 /**
  * Mutable component used for internal implementations of IntermediateQuery.
  */
@@ -91,4 +93,18 @@ public interface QueryTreeComponent {
      * All the possibly already allocated variables
      */
     ImmutableSet<Variable> getKnownVariables();
+
+    /**
+     * Replaces the sub-tree (root included) by a single node
+     */
+    default void replaceSubTree(QueryNode subTreeRootNode, QueryNode replacingNode) {
+        insertParent(subTreeRootNode, replacingNode);
+        removeSubTree(subTreeRootNode);
+    }
+
+    /**
+     * If no position is given, replaces the parent node by its first child
+     */
+    void replaceNodeByChild(QueryNode parentNode,
+                            Optional<NonCommutativeOperatorNode.ArgumentPosition> optionalReplacingChildPosition);
 }

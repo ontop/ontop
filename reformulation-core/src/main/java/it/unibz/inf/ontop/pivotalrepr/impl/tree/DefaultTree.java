@@ -301,6 +301,38 @@ public class DefaultTree implements QueryTree {
         }
     }
 
+    @Override
+    public void replaceNodeByChild(QueryNode parentNode,
+                                   Optional<NonCommutativeOperatorNode.ArgumentPosition> optionalReplacingChildPosition) {
+        TreeNode parentTreeNode = accessTreeNode(parentNode);
+
+        ChildrenRelation childrenRelation = accessChildrenRelation(parentTreeNode);
+
+        TreeNode childTreeNode;
+        if (optionalReplacingChildPosition.isPresent()) {
+            childTreeNode = childrenRelation.getChild(optionalReplacingChildPosition.get())
+                    .orElseThrow(() -> new IllegalTreeUpdateException("No child at the position"
+                            + optionalReplacingChildPosition.get()));
+        }
+        else {
+            ImmutableList<TreeNode> children = childrenRelation.getChildren();
+            if (children.isEmpty()) {
+                throw new IllegalTreeUpdateException("The node cannot be replaced by a child " +
+                        "(does not have any)");
+            }
+            childTreeNode = children.get(0);
+        }
+
+        childrenIndex.remove(parentTreeNode);
+        // May be null
+        TreeNode grandParentTreeNode = getParentTreeNode(parentTreeNode);
+        parentIndex.remove(parentTreeNode);
+        parentIndex.put(childTreeNode, grandParentTreeNode);
+
+        ChildrenRelation grandParentRelation = accessChildrenRelation(grandParentTreeNode);
+        grandParentRelation.replaceChild(parentTreeNode, childTreeNode);
+    }
+
     /**
      * Low-level
      */

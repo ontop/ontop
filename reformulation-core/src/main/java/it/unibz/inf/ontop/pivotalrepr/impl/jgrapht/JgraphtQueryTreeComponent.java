@@ -469,6 +469,11 @@ public class JgraphtQueryTreeComponent implements QueryTreeComponent {
         throw new RuntimeException("TODO: support getKnownVariables()");
     }
 
+    @Override
+    public void replaceNodeByChild(QueryNode parentNode, Optional<NonCommutativeOperatorNode.ArgumentPosition> optionalReplacingChildPosition) {
+        throw new RuntimeException("TODO: support replaceNodeByChild");
+    }
+
     private void addChild(QueryNode parentNode, QueryNode childNode, boolean isNew) throws IllegalTreeUpdateException {
 
         if (parentNode instanceof NonCommutativeOperatorNode) {

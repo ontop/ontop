@@ -123,4 +123,16 @@ public class BinaryChildrenRelation implements ChildrenRelation {
             throw new IllegalArgumentException(childNode.getQueryNode() + " does not appear as a child.");
         }
     }
+
+    @Override
+    public Optional<TreeNode> getChild(NonCommutativeOperatorNode.ArgumentPosition position) {
+        switch (position) {
+            case LEFT:
+                return optionalLeftChild;
+            case RIGHT:
+                return optionalRightChild;
+            default:
+                throw new IllegalStateException("Unknown position: " + position);
+        }
+    }
 }

@@ -82,4 +82,9 @@ public class StandardChildrenRelation implements ChildrenRelation {
     public Optional<NonCommutativeOperatorNode.ArgumentPosition> getOptionalPosition(TreeNode childTreeNode) {
         return Optional.empty();
     }
+
+    @Override
+    public Optional<TreeNode> getChild(NonCommutativeOperatorNode.ArgumentPosition position) {
+        return Optional.empty();
+    }
 }
