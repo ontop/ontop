@@ -37,12 +37,20 @@ public class QueryMergingTest {
     private static Variable C = DATA_FACTORY.getVariable("c");
     private static DistinctVariableOnlyDataAtom ANS1_ATOM = DATA_FACTORY.getDistinctVariableOnlyDataAtom(
             ANS1_PREDICATE, ImmutableList.of(X, Y));
+    private static DistinctVariableOnlyDataAtom ANS2_ATOM = DATA_FACTORY.getDistinctVariableOnlyDataAtom(
+            ANS1_PREDICATE, ImmutableList.of(X));
+    private static VariableOnlyDataAtom ANS3_ATOM = DATA_FACTORY.getVariableOnlyDataAtom(
+            ANS1_PREDICATE, ImmutableList.of(X, X));
     private static DistinctVariableOnlyDataAtom P1_ATOM = DATA_FACTORY.getDistinctVariableOnlyDataAtom(
             P1_PREDICATE, ImmutableList.of(S, T));
     private static URITemplatePredicate URI_PREDICATE =  new URITemplatePredicateImpl(2);
     private static Constant URI_TEMPLATE_STR_1 =  DATA_FACTORY.getConstantLiteral("http://example.org/ds1/{}");
     private static Constant URI_TEMPLATE_STR_2 =  DATA_FACTORY.getConstantLiteral("http://example.org/ds2/{}");
     private static Constant ONE = DATA_FACTORY.getConstantLiteral("1", INTEGER);
+    private static DatatypePredicate XSD_INTEGER = DATA_FACTORY.getDatatypeFactory().getTypePredicate(INTEGER);
+    private static Constant THREE = DATA_FACTORY.getConstantLiteral("3", INTEGER);
+    private static GroundTerm INT_OF_THREE = (GroundTerm) DATA_FACTORY.getImmutableFunctionalTerm(XSD_INTEGER, THREE);
+    private static ImmutableFunctionalTerm INT_OF_B = DATA_FACTORY.getImmutableFunctionalTerm(XSD_INTEGER, B);
     private static AtomPredicate TABLE_1 = new AtomPredicateImpl("table1", 2);
     private static AtomPredicate TABLE_2 = new AtomPredicateImpl("table2", 1);
     private static AtomPredicate TABLE_3 = new AtomPredicateImpl("table3", 2);
@@ -97,9 +105,94 @@ public class QueryMergingTest {
 
 
     @Test
-    public void testEx1() {
-        // TODO: complete
+    public void testEx1() throws EmptyQueryException {
+
+        /**
+         * Original query
+         */
+        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
+
+        ConstructionNode rootNode = new ConstructionNodeImpl(ANS2_ATOM.getVariables(),
+                new ImmutableSubstitutionImpl<>(ImmutableMap.of()), Optional.empty());
+
+        queryBuilder.init(ANS1_ATOM, rootNode);
+
+        IntensionalDataNode dataNode = new IntensionalDataNodeImpl(
+                DATA_FACTORY.getDataAtom(P1_PREDICATE, X, INT_OF_THREE));
+        queryBuilder.addChild(rootNode, dataNode);
+
+        IntermediateQuery mainQuery = queryBuilder.build();
+
+        /**
+         * Sub-query
+         */
+        IntermediateQueryBuilder subQueryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
+        ConstructionNode subQueryRoot = new ConstructionNodeImpl(P1_ATOM.getVariables(),
+                new ImmutableSubstitutionImpl<>(ImmutableMap.of(S, generateURI1(A), T, INT_OF_B)), Optional.empty());
+        subQueryBuilder.init(P1_ATOM, subQueryRoot);
+        subQueryBuilder.addChild(subQueryRoot, DATA_NODE_1);
+
+
+        /**
+         * Expected
+         */
+        IntermediateQueryBuilder expectedBuilder = new DefaultIntermediateQueryBuilder(METADATA);
+        ConstructionNode expectedRootNode = mainQuery.getRootConstructionNode();
+        expectedBuilder.init(mainQuery.getProjectionAtom(), expectedRootNode);
+        ConstructionNode remainingConstructionNode = new ConstructionNodeImpl(ImmutableSet.of(X),
+                new ImmutableSubstitutionImpl<>(ImmutableMap.of(X, generateURI1(A))), Optional.empty());
+        expectedBuilder.addChild(expectedRootNode, remainingConstructionNode);
+
+        ExtensionalDataNode expectedDataNode = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE_1, A, THREE));
+        expectedBuilder.addChild(remainingConstructionNode, expectedDataNode);
+
+        optimizeAndCompare(mainQuery, subQueryBuilder.build(), expectedBuilder.build());
     }
+
+    @Test
+    public void testEx2() throws EmptyQueryException {
+
+        /**
+         * Original query
+         */
+        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
+
+        ConstructionNode rootNode = new ConstructionNodeImpl(ANS3_ATOM.getVariables(),
+                new ImmutableSubstitutionImpl<>(ImmutableMap.of()), Optional.empty());
+
+        queryBuilder.init(ANS1_ATOM, rootNode);
+
+        IntensionalDataNode dataNode = new IntensionalDataNodeImpl(
+                DATA_FACTORY.getDataAtom(P1_PREDICATE, X, X));
+        queryBuilder.addChild(rootNode, dataNode);
+
+        IntermediateQuery mainQuery = queryBuilder.build();
+
+        /**
+         * Sub-query
+         */
+        IntermediateQueryBuilder subQueryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
+        ConstructionNode subQueryRoot = new ConstructionNodeImpl(P1_ATOM.getVariables(),
+                new ImmutableSubstitutionImpl<>(ImmutableMap.of(S, generateURI1(A), T, generateURI1(B))), Optional.empty());
+        subQueryBuilder.init(P1_ATOM, subQueryRoot);
+        subQueryBuilder.addChild(subQueryRoot, DATA_NODE_1);
+
+        /**
+         * Expected
+         */
+        IntermediateQueryBuilder expectedBuilder = new DefaultIntermediateQueryBuilder(METADATA);
+        ConstructionNode expectedRootNode = mainQuery.getRootConstructionNode();
+        expectedBuilder.init(mainQuery.getProjectionAtom(), expectedRootNode);
+        ConstructionNode remainingConstructionNode = new ConstructionNodeImpl(ImmutableSet.of(X),
+                new ImmutableSubstitutionImpl<>(ImmutableMap.of(X, generateURI1(B))), Optional.empty());
+        expectedBuilder.addChild(expectedRootNode, remainingConstructionNode);
+
+        ExtensionalDataNode expectedDataNode = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE_1, B, B));
+        expectedBuilder.addChild(remainingConstructionNode, expectedDataNode);
+
+        optimizeAndCompare(mainQuery, subQueryBuilder.build(), expectedBuilder.build());
+    }
+
 
     private static IntermediateQuery createBasicSparqlQuery(
             ImmutableMap<Variable, ImmutableTerm> topBindings,
