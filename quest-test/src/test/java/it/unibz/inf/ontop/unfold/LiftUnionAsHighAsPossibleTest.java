@@ -34,7 +34,7 @@ import org.junit.Test;
 import java.util.Optional;
 
 
-public class UnionLiftTest {
+public class LiftUnionAsHighAsPossibleTest {
 
 	private static final OBDADataFactory DATA_FACTORY = OBDADataFactoryImpl.getInstance();
 	private static final Optional<ImmutableExpression> NO_EXPRESSION = Optional.empty();
@@ -149,9 +149,9 @@ public class UnionLiftTest {
 
         System.out.println("Query 1: \n" + intermediateQuery);
 
-        UnionLiftProposal unionLiftProposal = new UnionLiftProposalImpl(unionAns2Node);
+        LiftUnionAsHighAsPossibleProposal unionLiftProposal = new LiftUnionAsHighAsPossibleProposalImpl(unionAns2Node);
 
-        UnionLiftProposalExecutor executor = new UnionLiftProposalExecutorImpl();
+        LiftUnionAsHighAsPossibleProposalExecutor executor = new LiftUnionAsHighAsPossibleProposalExecutorImpl();
 
         IntermediateQuery newQuery = executor.apply(unionLiftProposal, intermediateQuery).getResultingQuery();
 
@@ -167,9 +167,9 @@ public class UnionLiftTest {
 
         System.out.println("Query 1: \n" + intermediateQuery);
 
-        UnionLiftProposal unionLiftProposal = new UnionLiftProposalImpl(unionAns4Node);
+        LiftUnionAsHighAsPossibleProposal unionLiftProposal = new LiftUnionAsHighAsPossibleProposalImpl(unionAns4Node);
 
-        UnionLiftProposalExecutor executor = new UnionLiftProposalExecutorImpl();
+        LiftUnionAsHighAsPossibleProposalExecutor executor = new LiftUnionAsHighAsPossibleProposalExecutorImpl();
 
         IntermediateQuery newQuery = executor.apply(unionLiftProposal, intermediateQuery).getResultingQuery();
 

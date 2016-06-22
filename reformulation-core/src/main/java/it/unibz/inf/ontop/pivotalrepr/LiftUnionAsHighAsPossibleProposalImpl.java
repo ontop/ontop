@@ -1,10 +1,10 @@
 package it.unibz.inf.ontop.pivotalrepr;
 
-public class UnionLiftProposalImpl implements UnionLiftProposal {
+public class LiftUnionAsHighAsPossibleProposalImpl implements LiftUnionAsHighAsPossibleProposal {
 
     private final UnionNode unionNode;
 
-    public UnionLiftProposalImpl(UnionNode unionNode) {
+    public LiftUnionAsHighAsPossibleProposalImpl(UnionNode unionNode) {
         this.unionNode = unionNode;
     }
 
