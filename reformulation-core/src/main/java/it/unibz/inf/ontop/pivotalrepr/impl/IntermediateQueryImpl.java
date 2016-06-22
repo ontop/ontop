@@ -10,8 +10,9 @@ import it.unibz.inf.ontop.executor.join.JoinInternalCompositeExecutor;
 import it.unibz.inf.ontop.executor.merging.QueryMergingExecutor;
 import it.unibz.inf.ontop.executor.substitution.SubstitutionPropagationExecutor;
 import it.unibz.inf.ontop.executor.substitution.SubstitutionUpPropagationExecutor;
+import it.unibz.inf.ontop.executor.union.LiftUnionAsHighAsPossibleProposalExecutor;
+import it.unibz.inf.ontop.executor.union.UnionLiftInternalExecutor;
 import it.unibz.inf.ontop.executor.unsatisfiable.RemoveEmptyNodesExecutor;
-import it.unibz.inf.ontop.model.DataAtom;
 import it.unibz.inf.ontop.model.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.Variable;
 import it.unibz.inf.ontop.executor.groundterm.GroundTermRemovalFromDataNodeExecutor;
@@ -21,7 +22,6 @@ import org.slf4j.LoggerFactory;
 import it.unibz.inf.ontop.pivotalrepr.*;
 import it.unibz.inf.ontop.pivotalrepr.proposal.*;
 
-import java.util.List;
 import java.util.Optional;
 
 /**
@@ -67,7 +67,7 @@ public class IntermediateQueryImpl implements IntermediateQuery {
     private static final ImmutableMap<Class<? extends QueryOptimizationProposal>, Class<? extends StandardProposalExecutor>> STD_EXECUTOR_CLASSES;
     static {
         STD_EXECUTOR_CLASSES = ImmutableMap.<Class<? extends QueryOptimizationProposal>, Class<? extends StandardProposalExecutor>>of(
-                UnionLiftProposal.class, UnionLiftProposalExecutor.class);
+                LiftUnionAsHighAsPossibleProposal.class, LiftUnionAsHighAsPossibleProposalExecutor.class);
     }
 
     /**
@@ -86,6 +86,7 @@ public class IntermediateQueryImpl implements IntermediateQuery {
         internalExecutorMapBuilder.put(RemoveEmptyNodesProposal.class, RemoveEmptyNodesExecutor.class);
         internalExecutorMapBuilder.put(SubstitutionUpPropagationProposal.class, SubstitutionUpPropagationExecutor.class);
         internalExecutorMapBuilder.put(QueryMergingProposal.class, QueryMergingExecutor.class);
+        internalExecutorMapBuilder.put(UnionLiftProposal.class, UnionLiftInternalExecutor.class);
         INTERNAL_EXECUTOR_CLASSES = internalExecutorMapBuilder.build();
     }
 

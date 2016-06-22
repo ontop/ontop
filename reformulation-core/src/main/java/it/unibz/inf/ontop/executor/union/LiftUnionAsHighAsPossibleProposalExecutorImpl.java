@@ -1,12 +1,14 @@
-package it.unibz.inf.ontop.pivotalrepr;
+package it.unibz.inf.ontop.executor.union;
 
 import java.util.Optional;
 
+import it.unibz.inf.ontop.pivotalrepr.*;
 import it.unibz.inf.ontop.pivotalrepr.impl.tree.DefaultIntermediateQueryBuilder;
+import it.unibz.inf.ontop.pivotalrepr.proposal.LiftUnionAsHighAsPossibleProposal;
 import it.unibz.inf.ontop.pivotalrepr.proposal.ProposalResults;
 import it.unibz.inf.ontop.pivotalrepr.proposal.impl.ProposalResultsImpl;
 
-public class UnionLiftProposalExecutorImpl implements UnionLiftProposalExecutor {
+public class LiftUnionAsHighAsPossibleProposalExecutorImpl implements LiftUnionAsHighAsPossibleProposalExecutor {
 
     private final HomogeneousQueryNodeTransformer queryNodeCloner = new QueryNodeCloner();
 
@@ -20,7 +22,7 @@ public class UnionLiftProposalExecutorImpl implements UnionLiftProposalExecutor 
             builder.init(inputQuery.getProjectionAtom(), newRootNode);
             recursive(unionNode, targetQueryNode, builder, inputQuery, rootNode, newRootNode, Optional.<Integer>empty());
         } catch (NotNeededNodeException e) {
-            throw new IllegalStateException("UnionLiftProposalExecutor should not remove any node");
+            throw new IllegalStateException("LiftUnionAsHighAsPossibleProposalExecutor should not remove any node");
         }
         return builder.build();
     }
@@ -79,7 +81,7 @@ public class UnionLiftProposalExecutorImpl implements UnionLiftProposalExecutor 
     }
 
     @Override
-    public ProposalResults apply(UnionLiftProposal proposal, IntermediateQuery inputQuery) {
+    public ProposalResults apply(LiftUnionAsHighAsPossibleProposal proposal, IntermediateQuery inputQuery) {
         Optional<QueryNode> targetQueryNode = findTargetQueryNode(inputQuery, proposal.getUnionNode());
 
         if(!targetQueryNode.isPresent()){
