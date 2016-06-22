@@ -1,4 +1,7 @@
-package it.unibz.inf.ontop.pivotalrepr;
+package it.unibz.inf.ontop.pivotalrepr.proposal.impl;
+
+import it.unibz.inf.ontop.pivotalrepr.UnionNode;
+import it.unibz.inf.ontop.pivotalrepr.proposal.LiftUnionAsHighAsPossibleProposal;
 
 public class LiftUnionAsHighAsPossibleProposalImpl implements LiftUnionAsHighAsPossibleProposal {
 

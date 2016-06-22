@@ -1,8 +1,10 @@
-package it.unibz.inf.ontop.pivotalrepr;
+package it.unibz.inf.ontop.executor.union;
 
 import java.util.Optional;
 
+import it.unibz.inf.ontop.pivotalrepr.*;
 import it.unibz.inf.ontop.pivotalrepr.impl.tree.DefaultIntermediateQueryBuilder;
+import it.unibz.inf.ontop.pivotalrepr.proposal.LiftUnionAsHighAsPossibleProposal;
 import it.unibz.inf.ontop.pivotalrepr.proposal.ProposalResults;
 import it.unibz.inf.ontop.pivotalrepr.proposal.impl.ProposalResultsImpl;
 

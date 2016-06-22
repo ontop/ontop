@@ -22,6 +22,8 @@ package it.unibz.inf.ontop.unfold;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import it.unibz.inf.ontop.executor.union.LiftUnionAsHighAsPossibleProposalExecutor;
+import it.unibz.inf.ontop.executor.union.LiftUnionAsHighAsPossibleProposalExecutorImpl;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.AtomPredicateImpl;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
@@ -29,6 +31,8 @@ import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitut
 import it.unibz.inf.ontop.pivotalrepr.*;
 import it.unibz.inf.ontop.pivotalrepr.impl.*;
 import it.unibz.inf.ontop.pivotalrepr.impl.tree.DefaultIntermediateQueryBuilder;
+import it.unibz.inf.ontop.pivotalrepr.proposal.LiftUnionAsHighAsPossibleProposal;
+import it.unibz.inf.ontop.pivotalrepr.proposal.impl.LiftUnionAsHighAsPossibleProposalImpl;
 import org.junit.Test;
 
 import java.util.Optional;
