@@ -170,6 +170,11 @@ public class Quest implements Serializable {
 	
 	
 	private DBMetadata metadata;
+	
+	
+	/** TODO: Improve comment.
+	 *  TBox stored as a DAG. */
+	private TBoxReasoner reformulationReasoner;
 
 
     /***
@@ -298,6 +303,11 @@ public class Quest implements Serializable {
 
 	public OBDAModel getOBDAModel() {
 		return inputOBDAModel;
+	}
+	
+	/** TODO: Comment. Why do we need this? */
+	public TBoxReasoner getReformulationReasoner() {
+		return this.reformulationReasoner;
 	}
 
 
@@ -433,7 +443,7 @@ public class Quest implements Serializable {
 		 * Simplifying the vocabulary of the TBox
 		 */
 
-		final TBoxReasoner reformulationReasoner = TBoxReasonerImpl.create(inputOntology, bOptimizeEquivalences);
+		this.reformulationReasoner = TBoxReasonerImpl.create(inputOntology, bOptimizeEquivalences);
 
 		try {
 
@@ -610,6 +620,9 @@ public class Quest implements Serializable {
 			else
 				unfolder.setupInSemanticIndexMode(mappings, reformulationReasoner);
 
+			
+			//TODO: Check if this is necessary, related to parameter in setupInSemanticIndexMode below.
+			TBoxReasoner reformulationReasoner = this.reformulationReasoner;
 			if (dataRepository != null)
 				dataRepository.addRepositoryChangedListener(new RepositoryChangedListener() {
 					@Override
@@ -617,6 +630,7 @@ public class Quest implements Serializable {
 						engine.clearSQLCache();
 						try {
 							// 
+							// TODO: Check reference to this reformulationReasoner !!
 							unfolder.setupInSemanticIndexMode(dataRepository.getMappings(), reformulationReasoner);
 							log.debug("Mappings and unfolder have been updated after inserts to the semantic index DB");
 						} 
