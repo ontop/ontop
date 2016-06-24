@@ -20,27 +20,24 @@ package it.unibz.inf.ontop.obda;
  * #L%
  */
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import it.unibz.inf.ontop.injection.OBDAProperties;
+import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
+import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
+import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
+import it.unibz.inf.ontop.owlrefplatform.core.R2RMLQuestPreferences;
+import org.junit.Before;
+import org.junit.Test;
+import org.semanticweb.owlapi.apibinding.OWLManager;
+import org.semanticweb.owlapi.model.OWLOntology;
+import org.semanticweb.owlapi.model.OWLOntologyManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.util.Properties;
 
-import it.unibz.inf.ontop.owlrefplatform.owlapi3.*;
-import org.junit.Before;
-import org.junit.Test;
-import it.unibz.inf.ontop.injection.OBDAProperties;
-import it.unibz.inf.ontop.mapping.MappingParser;
-import it.unibz.inf.ontop.model.OBDAException;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
-import it.unibz.inf.ontop.r2rml.R2RMLMappingParser;
-import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
-import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Test if the datatypes are assigned correctly.
@@ -50,7 +47,7 @@ import org.slf4j.LoggerFactory;
  * 
  */
 
-public class OntologyTypesTest{
+public class OntologyTypesTest {
 
 	Logger log = LoggerFactory.getLogger(this.getClass());
 	private OWLOntology ontology;
@@ -62,18 +59,21 @@ public class OntologyTypesTest{
 
 	@Before
 	public void setUp() throws Exception {
-		
 		// Loading the OWL file
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 		ontology = manager.loadOntologyFromOntologyDocument((new File(owlFile)));
 	}
 
-	private void runTests(Properties p, String query, int numberResults, String mappingFile) throws Exception {
+	private void runTests(QuestPreferences prefs, String query, int numberResults,
+						  String mappingFile) throws Exception {
 
 		// Creating a new instance of the reasoner
-		QuestOWLFactory factory = new QuestOWLFactory(new File(mappingFile), new QuestPreferences(p));
-
-		QuestOWL reasoner = factory.createReasoner(ontology, new SimpleConfiguration());
+		QuestOWLFactory factory = new QuestOWLFactory();
+        QuestOWLConfiguration config = QuestOWLConfiguration.builder()
+				.nativeOntopMappingFile(new File(mappingFile))
+				.preferences(prefs)
+				.build();
+        QuestOWL reasoner = factory.createReasoner(ontology, config);
 
 		// Now we are ready for querying
 		QuestOWLConnection conn = reasoner.getConnection();
@@ -115,10 +115,7 @@ public class OntologyTypesTest{
 
 	@Test
 	public void testOntologyType() throws Exception {
-		Properties p = new Properties();
-		p.setProperty(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-		p.setProperty(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-		p.setProperty(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
+		QuestPreferences p = new QuestPreferences();
 		
 		//no value in the mapping
 		//xsd:long in the ontology, asking for the general case we will not have any result
@@ -185,42 +182,42 @@ public class OntologyTypesTest{
         Properties p = new Properties();
         p.setProperty(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
         p.setProperty(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-        p.setProperty(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
 
 
 		p.setProperty(OBDAProperties.DB_NAME, jdbcurl);
 		p.setProperty(OBDAProperties.DB_USER, username);
 		p.setProperty(OBDAProperties.DB_PASSWORD, password);
 		p.setProperty(OBDAProperties.JDBC_DRIVER, driverclass);
-		p.setProperty(MappingParser.class.getCanonicalName(), R2RMLMappingParser.class.getCanonicalName());
+
+		QuestPreferences prefs = new R2RMLQuestPreferences(p);
 
         //no value in the mapping
         //xsd:long in the ontology, asking for the general case we will not have any result
         String query1 = "PREFIX : <http://www.company.com/ARES#>" +
                 "select * {?x :number ?y. FILTER(datatype(?y) = xsd:integer)}";
 
-        runTests(p, query1, 0, r2rmlFile);
+        runTests(prefs, query1, 0, r2rmlFile);
 //
 //        //no value in the mapping
         //xsd:long in the ontology
         String query1b = "PREFIX : <http://www.company.com/ARES#>" +
                 "select * {?x :number ?y. FILTER(datatype(?y) = xsd:long)}";
 
-        runTests(p, query1b, 3, r2rmlFile);
+        runTests(prefs, query1b, 3, r2rmlFile);
 
         //no value in the mapping
         //xsd:string in the ontology
         String query2 = "PREFIX : <http://www.company.com/ARES#>" +
                 "select * {?x :assayName ?y. FILTER(datatype(?y) = xsd:string)}";
 
-        runTests(p, query2, 3, r2rmlFile);
+        runTests(prefs, query2, 3, r2rmlFile);
 
         //no value in the ontology
         //rdfs:Literal in the mapping
         String query3 = "PREFIX : <http://www.company.com/ARES#>" +
                 "select * {?x :hasDepartment ?y. FILTER(datatype(?y) = rdfs:Literal)}";
 
-        runTests(p, query3, 3, r2rmlFile);
+        runTests(prefs, query3, 3, r2rmlFile);
 
         //no value in the ontology
         //no value in the mapping
@@ -228,7 +225,7 @@ public class OntologyTypesTest{
         String query4 = "PREFIX : <http://www.company.com/ARES#>" +
                 "select * {?x :AssayID ?y. FILTER(datatype(?y) = xsd:decimal)}";
 
-        runTests(p, query4, 3, r2rmlFile);
+        runTests(prefs, query4, 3, r2rmlFile);
 
         // no value in the ontology
         //value in the mapping is xsd:long
@@ -236,7 +233,7 @@ public class OntologyTypesTest{
         String query5 = "PREFIX franz: <http://www.franz.com/>" +
                 "select * {?x  franz:solrDocid ?y. FILTER(datatype(?y) = xsd:long)}";
 
-        runTests(p, query5, 3, r2rmlFile);
+        runTests(prefs, query5, 3, r2rmlFile);
 
         // no value in the ontology
         //value in the mapping is xsd:positiveInteger
@@ -244,25 +241,31 @@ public class OntologyTypesTest{
         String query6 = "PREFIX : <http://www.company.com/ARES#>" +
                 "select * {?x :hasSection ?y. FILTER(datatype(?y) = xsd:positiveInteger)}";
 
-        runTests(p, query6, 3, r2rmlFile);
+        runTests(prefs, query6, 3, r2rmlFile);
     }
 
 	@Test
 	// Ontology datatype http://www.w3.org/2001/XMLSchema#integer for http://www.company.com/ARES#hasARESID
 	// does not correspond to datatype http://www.w3.org/2001/XMLSchema#string in mappings
 	public void failedMapping()  throws Exception  {
-		Properties p = new Properties();
-		p.setProperty(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-		p.setProperty(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-		p.setProperty(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
+		QuestPreferences p = new QuestPreferences();
 
 		try {
 			// Creating a new instance of the reasoner
-			QuestOWLFactory factory = new QuestOWLFactory(new File(obdaFile), new QuestPreferences(p));
-			factory.createReasoner(ontology, new SimpleConfiguration());
+	        QuestOWLFactory factory = new QuestOWLFactory();
+	        QuestOWLConfiguration config = QuestOWLConfiguration.builder()
+					.nativeOntopMappingFile(new File(obdaErroredFile))
+					.preferences(p)
+					.build();
+	        QuestOWL reasoner = factory.createReasoner(ontology, config);
+
 
 		} catch (Exception e) {
-            assertEquals(e.getCause().getClass(), OBDAException.class);
+
+
+            assertEquals(e.getCause().getClass().getCanonicalName(), "it.unibz.inf.ontop.model.OBDAException" );
+
+
 		}
 	}
 

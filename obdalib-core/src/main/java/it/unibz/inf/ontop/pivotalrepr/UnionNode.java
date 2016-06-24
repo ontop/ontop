@@ -1,7 +1,7 @@
 package it.unibz.inf.ontop.pivotalrepr;
 
+import it.unibz.inf.ontop.model.ImmutableTerm;
 import it.unibz.inf.ontop.model.ImmutableSubstitution;
-import it.unibz.inf.ontop.model.VariableOrGroundTerm;
 
 public interface UnionNode extends QueryNode {
 
@@ -12,11 +12,11 @@ public interface UnionNode extends QueryNode {
     UnionNode acceptNodeTransformer(HomogeneousQueryNodeTransformer transformer) throws QueryNodeTransformationException;
 
     @Override
-    SubstitutionResults<UnionNode> applyAscendentSubstitution(
-            ImmutableSubstitution<? extends VariableOrGroundTerm> substitution,
+    SubstitutionResults<UnionNode> applyAscendingSubstitution(
+            ImmutableSubstitution<? extends ImmutableTerm> substitution,
             QueryNode descendantNode, IntermediateQuery query) ;
 
     @Override
-    SubstitutionResults<UnionNode> applyDescendentSubstitution(
-            ImmutableSubstitution<? extends VariableOrGroundTerm> substitution) ;
+    SubstitutionResults<UnionNode> applyDescendingSubstitution(
+            ImmutableSubstitution<? extends ImmutableTerm> substitution, IntermediateQuery query) ;
 }

@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.protege.panels;
 
 /*
  * #%L
- * ontop-protege
+ * ontop-protege4
  * %%
  * Copyright (C) 2009 - 2013 KRDB Research Centre. Free University of Bozen Bolzano.
  * %%
@@ -20,6 +20,18 @@ package it.unibz.inf.ontop.protege.panels;
  * #L%
  */
 
+import it.unibz.inf.ontop.protege.gui.treemodels.TreeElement;
+import it.unibz.inf.ontop.protege.gui.IconLoader;
+import it.unibz.inf.ontop.protege.gui.treemodels.QueryControllerTreeModel;
+import it.unibz.inf.ontop.protege.gui.treemodels.QueryGroupTreeElement;
+import it.unibz.inf.ontop.protege.gui.treemodels.QueryTreeElement;
+import it.unibz.inf.ontop.protege.utils.DialogUtils;
+import it.unibz.inf.ontop.querymanager.QueryController;
+import it.unibz.inf.ontop.querymanager.QueryControllerEntity;
+import it.unibz.inf.ontop.querymanager.QueryControllerGroup;
+import it.unibz.inf.ontop.querymanager.QueryControllerListener;
+import it.unibz.inf.ontop.querymanager.QueryControllerQuery;
+
 import java.awt.Dialog.ModalityType;
 import java.util.Vector;
 
@@ -30,18 +42,6 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
-
-import it.unibz.inf.ontop.protege.gui.IconLoader;
-import it.unibz.inf.ontop.protege.gui.treemodels.QueryControllerTreeModel;
-import it.unibz.inf.ontop.protege.gui.treemodels.QueryGroupTreeElement;
-import it.unibz.inf.ontop.protege.gui.treemodels.QueryTreeElement;
-import it.unibz.inf.ontop.protege.gui.treemodels.TreeElement;
-import it.unibz.inf.ontop.protege.utils.DialogUtils;
-import it.unibz.inf.ontop.querymanager.QueryController;
-import it.unibz.inf.ontop.querymanager.QueryControllerEntity;
-import it.unibz.inf.ontop.querymanager.QueryControllerGroup;
-import it.unibz.inf.ontop.querymanager.QueryControllerListener;
-import it.unibz.inf.ontop.querymanager.QueryControllerQuery;
 
 /**
  * This class represents the display of stored queries using a tree structure.
@@ -171,7 +171,7 @@ public class SavedQueriesPanel extends JPanel implements QueryControllerListener
 
         cmdRemove.setIcon(IconLoader.getImageIcon("images/minus.png"));
         cmdRemove.setText("Remove");
-        cmdRemove.setToolTipText("Remove the selected datasource");
+        cmdRemove.setToolTipText("Remove the selected query");
         cmdRemove.setBorder(javax.swing.BorderFactory.createEtchedBorder());
         cmdRemove.setContentAreaFilled(false);
         cmdRemove.setIconTextGap(5);
@@ -192,7 +192,7 @@ public class SavedQueriesPanel extends JPanel implements QueryControllerListener
 
         cmdAdd.setIcon(IconLoader.getImageIcon("images/plus.png"));
         cmdAdd.setText("Add");
-        cmdAdd.setToolTipText("Remove the selected datasource");
+        cmdAdd.setToolTipText("Add a new query");
         cmdAdd.setBorder(javax.swing.BorderFactory.createEtchedBorder());
         cmdAdd.setContentAreaFilled(false);
         cmdAdd.setIconTextGap(4);
@@ -342,7 +342,7 @@ public class SavedQueriesPanel extends JPanel implements QueryControllerListener
 
 	public void fireQueryChanged(String newgroup, String newquery, String newid) {
 		for (SavedQueriesPanelListener listener : listeners) {
-			listener.selectedQuerychanged(newgroup, newquery, newid);
+			listener.selectedQueryChanged(newgroup, newquery, newid);
 		}
 	}
 

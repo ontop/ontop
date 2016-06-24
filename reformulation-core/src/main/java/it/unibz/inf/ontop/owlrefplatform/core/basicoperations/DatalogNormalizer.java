@@ -60,7 +60,7 @@ public class DatalogNormalizer {
 		/* Collecting all necessary conditions */
 		for (int i = 0; i < body.size(); i++) {
 			Function currentAtom = body.get(i);
-			if (currentAtom.getFunctionSymbol() == OBDAVocabulary.AND) {
+			if (currentAtom.getFunctionSymbol() == ExpressionOperation.AND) {
 				body.remove(i);
 				body.addAll(getUnfolderAtomList(currentAtom));
 			}
@@ -134,7 +134,7 @@ public class DatalogNormalizer {
 		 */
 		for (Object o : atoms) {
 			Function atom = (Function) o;
-			if (atom.isBooleanFunction()) {
+			if (atom.isOperation()) {
 				booleanAtoms.add(atom);
 			} else {
 				dataAtoms.add(atom);
@@ -177,7 +177,7 @@ public class DatalogNormalizer {
 		int count = 0;
 		for (Term currentTerm : terms) {
 			Function currentAtom = (Function)currentTerm;
-			if (!currentAtom.isBooleanFunction())
+			if (!currentAtom.isOperation())
 				count += 1;
 		}
 		return count;
@@ -199,7 +199,7 @@ public class DatalogNormalizer {
 			if (f.isAlgebraFunction()) {
 				addMinimalEqualityToLeftJoin(f);
 			}
-			if (f.isBooleanFunction())
+			if (f.isOperation())
 				booleanAtoms += 1;
 		}
 		if (isLeftJoin && booleanAtoms == 0) {
@@ -272,7 +272,7 @@ public class DatalogNormalizer {
 			else if (subTerm instanceof Function) {
                 Predicate head = ((Function) subTerm).getFunctionSymbol();
 
-                if (head.isDataTypePredicate()) {
+                if (head instanceof DatatypePredicate) {
 
                     // This case is for the ans atoms that might have
                     // functions in the head. Check if it is needed.
@@ -459,7 +459,7 @@ public class DatalogNormalizer {
 		Iterator<Function> iter = boolSet.iterator();
 		while (iter.hasNext()) {
 			Function eq = iter.next();
-			if (eq.getFunctionSymbol() != OBDAVocabulary.EQ)
+			if (eq.getFunctionSymbol() != ExpressionOperation.EQ)
 				continue;
 			Term v1 = eq.getTerm(0);
 			Term v2 = eq.getTerm(1);
@@ -513,7 +513,7 @@ public class DatalogNormalizer {
 		Set<Variable> currentLevelVariables = new HashSet<>();
 		for (Term l : atoms) {
 			Function atom = (Function) l;
-			if (atom.isBooleanFunction()) {
+			if (atom.isOperation()) {
 				continue;
 			} else if (atom.isAlgebraFunction()) {
 				currentLevelVariables.addAll(getDefinedVariables(atom.getTerms()));
@@ -678,7 +678,7 @@ public class DatalogNormalizer {
 			Function atom = (Function) l;
 			// System.out
 			// .println(atom.getFunctionSymbol().getClass() + " " + atom);
-			if (!(atom.getFunctionSymbol() instanceof BooleanOperationPredicate))
+			if (!(atom.getFunctionSymbol() instanceof OperationPredicate))
 				continue;
 			Set<Variable> variables = new HashSet<>();
 			TermUtils.addReferencedVariablesTo(variables, atom); 
@@ -705,7 +705,7 @@ public class DatalogNormalizer {
 					// if (!(l2 instanceof Function))
 					// continue;
 					// Function f2 = (Function) l2;
-					// if (f2.getPredicate() != OBDAVocabulary.EQ)
+					// if (f2.getPredicate() != ExpressionOperation.EQ)
 					// continue;
 					// List<NewLiteral> equalityVariables = f2.getTerms();
 					// if (equalityVariables.contains(var)) {
@@ -752,7 +752,7 @@ public class DatalogNormalizer {
 	 * @return
 	 */
 	public static List<Function> getUnfolderAtomList(Function atom) {
-		if (atom.getFunctionSymbol() != OBDAVocabulary.AND) {
+		if (atom.getFunctionSymbol() != ExpressionOperation.AND) {
 			throw new InvalidParameterException();
 		}
 		List<Term> innerFunctionalTerms = new LinkedList<>();
@@ -779,7 +779,7 @@ public class DatalogNormalizer {
 
 		List<Term> result = new LinkedList<>();
 
-		if (term.getFunctionSymbol() != OBDAVocabulary.AND) {
+		if (term.getFunctionSymbol() != ExpressionOperation.AND) {
 			result.add(term);
 		} else {
 			List<Term> terms = term.getTerms();

@@ -2,23 +2,20 @@ package it.unibz.inf.ontop.intermediatequery;
 
 import java.util.Optional;
 
+import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.*;
-import it.unibz.inf.ontop.pivotalrepr.*;
-import it.unibz.inf.ontop.pivotalrepr.impl.*;
-import org.junit.Test;
-
 import it.unibz.inf.ontop.model.impl.AtomPredicateImpl;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
-import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
+import org.junit.Test;
 import it.unibz.inf.ontop.owlrefplatform.core.optimization.BasicJoinOptimizer;
+import it.unibz.inf.ontop.pivotalrepr.EmptyQueryException;
 import it.unibz.inf.ontop.owlrefplatform.core.optimization.IntermediateQueryOptimizer;
-import it.unibz.inf.ontop.pivotalrepr.*;
+import it.unibz.inf.ontop.pivotalrepr.impl.*;
 import it.unibz.inf.ontop.pivotalrepr.impl.tree.DefaultIntermediateQueryBuilder;
+import it.unibz.inf.ontop.pivotalrepr.*;
 
 import static junit.framework.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static it.unibz.inf.ontop.pivotalrepr.NonCommutativeOperatorNode.ArgumentPosition.LEFT;
-import static it.unibz.inf.ontop.pivotalrepr.NonCommutativeOperatorNode.ArgumentPosition.RIGHT;
 
 /**
  * TODO: test
@@ -32,13 +29,14 @@ public class NodeDeletionTest {
     @Test(expected = EmptyQueryException.class)
     public void testSimpleJoin() throws IntermediateQueryBuilderException, EmptyQueryException {
         Variable x = DATA_FACTORY.getVariable("x");
-        ConstructionNode rootNode = new ConstructionNodeImpl(DATA_FACTORY.getDataAtom(new AtomPredicateImpl("ans1", 1), x));
+        ConstructionNode rootNode = new ConstructionNodeImpl(ImmutableSet.of(x));
+        DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(new AtomPredicateImpl("ans1", 1), x);
 
         IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
-        queryBuilder.init(rootNode);
+        queryBuilder.init(projectionAtom, rootNode);
 
         ValueConstant falseValue = DATA_FACTORY.getBooleanConstant(false);
-        ImmutableBooleanExpression falseCondition = DATA_FACTORY.getImmutableBooleanExpression(OBDAVocabulary.AND, falseValue, falseValue);
+        ImmutableExpression falseCondition = DATA_FACTORY.getImmutableExpression(ExpressionOperation.AND, falseValue, falseValue);
 
         InnerJoinNode joinNode = new InnerJoinNodeImpl(Optional.of(falseCondition));
         queryBuilder.addChild(rootNode, joinNode);
@@ -66,24 +64,25 @@ public class NodeDeletionTest {
         Variable x = DATA_FACTORY.getVariable("x");
         Variable y = DATA_FACTORY.getVariable("y");
 
-        ConstructionNode rootNode = new ConstructionNodeImpl(DATA_FACTORY.getDataAtom(
-                new AtomPredicateImpl("ans1", 2), x, y));
+        ConstructionNode rootNode = new ConstructionNodeImpl(ImmutableSet.of(x,y));
+        DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(
+                new AtomPredicateImpl("ans1", 2), x, y);
 
         IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
-        queryBuilder.init(rootNode);
+        queryBuilder.init(projectionAtom, rootNode);
 
         ValueConstant falseValue = DATA_FACTORY.getBooleanConstant(false);
-        ImmutableBooleanExpression falseCondition = DATA_FACTORY.getImmutableBooleanExpression(OBDAVocabulary.AND, falseValue, falseValue);
+        ImmutableExpression falseCondition = DATA_FACTORY.getImmutableExpression(ExpressionOperation.AND, falseValue, falseValue);
 
-        LeftJoinNode ljNode = new LeftJoinNodeImpl(Optional.<ImmutableBooleanExpression>empty());
+        LeftJoinNode ljNode = new LeftJoinNodeImpl(Optional.<ImmutableExpression>empty());
         queryBuilder.addChild(rootNode, ljNode);
 
         String table1Name = "table1";
         ExtensionalDataNode table1 = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(new AtomPredicateImpl(table1Name, 1), x));
-        queryBuilder.addChild(ljNode, table1, LEFT);
+        queryBuilder.addChild(ljNode, table1, NonCommutativeOperatorNode.ArgumentPosition.LEFT);
 
         InnerJoinNode joinNode = new InnerJoinNodeImpl(Optional.of(falseCondition));
-        queryBuilder.addChild(ljNode, joinNode, RIGHT);
+        queryBuilder.addChild(ljNode, joinNode, NonCommutativeOperatorNode.ArgumentPosition.RIGHT);
 
         ExtensionalDataNode table2 = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(new AtomPredicateImpl("table2", 2), x, y));
         queryBuilder.addChild(joinNode, table2);
@@ -113,27 +112,29 @@ public class NodeDeletionTest {
         Variable x = DATA_FACTORY.getVariable("x");
         Variable y = DATA_FACTORY.getVariable("y");
 
-        ConstructionNode rootNode = new ConstructionNodeImpl(DATA_FACTORY.getDataAtom(
-                new AtomPredicateImpl("ans1", 2), x, y));
+        ConstructionNode rootNode = new ConstructionNodeImpl(ImmutableSet.of(x,y));
+        DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(
+                new AtomPredicateImpl("ans1", 2), x, y);
 
         IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
-        queryBuilder.init(rootNode);
+        queryBuilder.init(projectionAtom, rootNode);
 
         ValueConstant falseValue = DATA_FACTORY.getBooleanConstant(false);
-        ImmutableBooleanExpression falseCondition = DATA_FACTORY.getImmutableBooleanExpression(OBDAVocabulary.AND, falseValue, falseValue);
+        ImmutableExpression falseCondition = DATA_FACTORY.getImmutableExpression(ExpressionOperation.AND, falseValue, falseValue);
 
         UnionNode topUnion = new UnionNodeImpl();
         queryBuilder.addChild(rootNode, topUnion);
 
-        DataAtom subAtom = DATA_FACTORY.getDataAtom(new AtomPredicateImpl("ansu1", 2), x, y);
-        ConstructionNode constructionNode1 = new ConstructionNodeImpl(subAtom);
+        //DistinctVariableOnlyDataAtom subAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(new AtomPredicateImpl("ansu1", 2), x, y);
+        ImmutableSet<Variable> projectedVariables = ImmutableSet.of(x, y);
+        ConstructionNode constructionNode1 = new ConstructionNodeImpl(projectedVariables);
         queryBuilder.addChild(topUnion, constructionNode1);
 
         String table1Name = "table1";
         ExtensionalDataNode table1 = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(new AtomPredicateImpl(table1Name, 2), x, y));
         queryBuilder.addChild(constructionNode1, table1);
 
-        ConstructionNode constructionNode2 = new ConstructionNodeImpl(subAtom);
+        ConstructionNode constructionNode2 = new ConstructionNodeImpl(projectedVariables);
         queryBuilder.addChild(topUnion, constructionNode2);
 
         InnerJoinNode joinNode1 = new InnerJoinNodeImpl(Optional.of(falseCondition));
@@ -145,7 +146,7 @@ public class NodeDeletionTest {
         ExtensionalDataNode table3 = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(new AtomPredicateImpl("table3", 2), x, y));
         queryBuilder.addChild(joinNode1, table3);
 
-        ConstructionNode constructionNode3 = new ConstructionNodeImpl(subAtom);
+        ConstructionNode constructionNode3 = new ConstructionNodeImpl(projectedVariables);
         queryBuilder.addChild(topUnion, constructionNode3);
 
         InnerJoinNode joinNode2 = new InnerJoinNodeImpl(Optional.of(falseCondition));
@@ -183,27 +184,31 @@ public class NodeDeletionTest {
         Variable x = DATA_FACTORY.getVariable("x");
         Variable y = DATA_FACTORY.getVariable("y");
 
-        ConstructionNode rootNode = new ConstructionNodeImpl(DATA_FACTORY.getDataAtom(
-                new AtomPredicateImpl("ans1", 2), x, y));
+        ConstructionNode rootNode = new ConstructionNodeImpl(ImmutableSet.of(x,y));
+        DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(
+                new AtomPredicateImpl("ans1", 2), x, y);
+
 
         IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
-        queryBuilder.init(rootNode);
+        queryBuilder.init(projectionAtom, rootNode);
 
         ValueConstant falseValue = DATA_FACTORY.getBooleanConstant(false);
-        ImmutableBooleanExpression falseCondition = DATA_FACTORY.getImmutableBooleanExpression(OBDAVocabulary.AND, falseValue, falseValue);
+        ImmutableExpression falseCondition = DATA_FACTORY.getImmutableExpression(ExpressionOperation.AND, falseValue, falseValue);
 
         UnionNode topUnion = new UnionNodeImpl();
         queryBuilder.addChild(rootNode, topUnion);
 
-        DataAtom subAtom = DATA_FACTORY.getDataAtom(new AtomPredicateImpl("ansu1", 2), x, y);
-        ConstructionNode constructionNode1 = new ConstructionNodeImpl(subAtom);
+        //DataAtom subAtom = DATA_FACTORY.getDataAtom(new AtomPredicateImpl("ansu1", 2), x, y);
+        ImmutableSet<Variable> projectedVariables = ImmutableSet.of(x, y);
+        
+        ConstructionNode constructionNode1 = new ConstructionNodeImpl(projectedVariables);
         queryBuilder.addChild(topUnion, constructionNode1);
 
         String table1Name = "table1";
         ExtensionalDataNode table1 = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(new AtomPredicateImpl(table1Name, 2), x, y));
         queryBuilder.addChild(constructionNode1, table1);
 
-        ConstructionNode constructionNode2 = new ConstructionNodeImpl(subAtom);
+        ConstructionNode constructionNode2 = new ConstructionNodeImpl(projectedVariables);
         queryBuilder.addChild(topUnion, constructionNode2);
 
         InnerJoinNode joinNode1 = new InnerJoinNodeImpl(Optional.of(falseCondition));
@@ -215,10 +220,10 @@ public class NodeDeletionTest {
         ExtensionalDataNode table3 = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(new AtomPredicateImpl("table3", 2), x, y));
         queryBuilder.addChild(joinNode1, table3);
 
-        ConstructionNode constructionNode3 = new ConstructionNodeImpl(subAtom);
+        ConstructionNode constructionNode3 = new ConstructionNodeImpl(projectedVariables);
         queryBuilder.addChild(topUnion, constructionNode3);
 
-        InnerJoinNode joinNode2 = new InnerJoinNodeImpl(Optional.<ImmutableBooleanExpression>empty());
+        InnerJoinNode joinNode2 = new InnerJoinNodeImpl(Optional.<ImmutableExpression>empty());
         queryBuilder.addChild(constructionNode3, joinNode2);
 
         ExtensionalDataNode table4 = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(new AtomPredicateImpl("table4", 2), x, y));
@@ -248,20 +253,21 @@ public class NodeDeletionTest {
         Variable x = DATA_FACTORY.getVariable("x");
         Variable y = DATA_FACTORY.getVariable("y");
 
-        ConstructionNode rootNode = new ConstructionNodeImpl(DATA_FACTORY.getDataAtom(
-                new AtomPredicateImpl("ans1", 2), x, y));
+        ConstructionNode rootNode = new ConstructionNodeImpl(ImmutableSet.of(x,y));
+        DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(
+                new AtomPredicateImpl("ans1", 2), x, y);
 
         IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
-        queryBuilder.init(rootNode);
+        queryBuilder.init(projectionAtom, rootNode);
 
         ValueConstant falseValue = DATA_FACTORY.getBooleanConstant(false);
-        ImmutableBooleanExpression falseCondition = DATA_FACTORY.getImmutableBooleanExpression(OBDAVocabulary.AND, falseValue, falseValue);
+        ImmutableExpression falseCondition = DATA_FACTORY.getImmutableExpression(ExpressionOperation.AND, falseValue, falseValue);
 
-        LeftJoinNode ljNode = new LeftJoinNodeImpl(Optional.<ImmutableBooleanExpression>empty());
+        LeftJoinNode ljNode = new LeftJoinNodeImpl(Optional.<ImmutableExpression>empty());
         queryBuilder.addChild(rootNode, ljNode);
 
         InnerJoinNode joinNode = new InnerJoinNodeImpl(Optional.of(falseCondition));
-        queryBuilder.addChild(ljNode, joinNode, LEFT);
+        queryBuilder.addChild(ljNode, joinNode, NonCommutativeOperatorNode.ArgumentPosition.LEFT);
 
         ExtensionalDataNode table2 = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(new AtomPredicateImpl("table2", 2), x, y));
         queryBuilder.addChild(joinNode, table2);
@@ -270,7 +276,7 @@ public class NodeDeletionTest {
         queryBuilder.addChild(joinNode, table3);
 
         ExtensionalDataNode table4 = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(new AtomPredicateImpl("table4", 1), x));
-        queryBuilder.addChild(ljNode, table4, RIGHT);
+        queryBuilder.addChild(ljNode, table4, NonCommutativeOperatorNode.ArgumentPosition.RIGHT);
 
 
         IntermediateQuery initialQuery = queryBuilder.build();

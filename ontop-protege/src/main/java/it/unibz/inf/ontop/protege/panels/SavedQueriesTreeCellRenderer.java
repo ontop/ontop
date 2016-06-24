@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.protege.panels;
 
 /*
  * #%L
- * ontop-protege
+ * ontop-protege4
  * %%
  * Copyright (C) 2009 - 2013 KRDB Research Centre. Free University of Bozen Bolzano.
  * %%
@@ -20,20 +20,15 @@ package it.unibz.inf.ontop.protege.panels;
  * #L%
  */
 
+import it.unibz.inf.ontop.protege.gui.IconLoader;
+import it.unibz.inf.ontop.protege.gui.treemodels.QueryGroupTreeElement;
+import it.unibz.inf.ontop.protege.gui.treemodels.QueryTreeElement;
+
 import java.awt.Component;
 
 import javax.swing.Icon;
 import javax.swing.JTree;
 import javax.swing.tree.DefaultTreeCellRenderer;
-
-import it.unibz.inf.ontop.protege.gui.IconLoader;
-<<<<<<< HEAD:ontop-protege/src/main/java/it/unibz/inf/ontop/protege/panels/SavedQueriesTreeCellRenderer.java
-import it.unibz.inf.ontop.protege.gui.treemodels.QueryGroupTreeElement;
-import it.unibz.inf.ontop.protege.gui.treemodels.QueryTreeElement;
-=======
-import it.unibz.inf.ontop.protege.gui.treemodels.QueryTreeElement;
-import it.unibz.inf.ontop.protege.gui.treemodels.QueryGroupTreeElement;
->>>>>>> v3/package-names-changed:ontop-protege/src/main/java/it/unibz/inf/ontop/protege/panels/SavedQueriesTreeCellRenderer.java
 
 public class SavedQueriesTreeCellRenderer extends DefaultTreeCellRenderer {
 

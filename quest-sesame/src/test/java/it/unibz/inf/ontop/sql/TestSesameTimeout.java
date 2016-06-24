@@ -11,6 +11,7 @@ import java.util.Scanner;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import it.unibz.inf.ontop.owlrefplatform.core.R2RMLQuestPreferences;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -25,15 +26,19 @@ import it.unibz.inf.ontop.injection.OBDACoreModule;
 import it.unibz.inf.ontop.injection.OBDAProperties;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
-import it.unibz.inf.ontop.owlrefplatform.questdb.R2RMLQuestPreferences;
 import it.unibz.inf.ontop.r2rml.R2RMLManager;
 import it.unibz.inf.ontop.sesame.RepositoryConnection;
 import it.unibz.inf.ontop.sesame.SesameVirtualRepo;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
+
 /**
- * Tests the timeout on sesame queries
+ * Tests that user-applied constraints can be provided through
+ * sesameWrapper.SesameVirtualRepo
+ * with manually instantiated metadata.
+ *
+ * This is quite similar to the setting in the optique platform
  * 
  * Some stuff copied from ExampleManualMetadata 
  * 

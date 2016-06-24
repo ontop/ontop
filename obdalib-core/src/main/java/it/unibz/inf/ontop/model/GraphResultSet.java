@@ -20,22 +20,22 @@ package it.unibz.inf.ontop.model;
  * #L%
  */
 
-import java.util.List;
-
 import it.unibz.inf.ontop.ontology.Assertion;
 
-public interface GraphResultSet extends ResultSet {
+import java.util.Iterator;
+import java.util.List;
 
-	public boolean hasNext() throws OBDAException;
+public interface GraphResultSet extends ResultSet, Iterator<List<Assertion>> {
 
-	public List<Assertion> next() throws OBDAException;
+	@Override
+    boolean hasNext() throws OBDAException;
 
-	public void close() throws OBDAException;
+	@Override
+    List<Assertion> next() throws OBDAException;
 
-	TupleResultSet getTupleResultSet();
+	@Override
+    void close() throws OBDAException;
 
-	void addNewResultSet(List<Assertion> result);
-	
-	//Template getTemplate();
-	
+    void addNewResultSet(List<Assertion> result);
+
 }

@@ -20,21 +20,14 @@ package it.unibz.inf.ontop.protege.gui.treemodels;
  * #L%
  */
 
-import java.net.URI;
-import java.util.LinkedList;
-import java.util.List;
-
-import javax.swing.AbstractListModel;
-
-<<<<<<< HEAD:ontop-protege/src/main/java/it/unibz/inf/ontop/protege/gui/treemodels/SynchronizedMappingListModel.java
-import it.unibz.inf.ontop.protege.core.OBDAMappingListener;
-import it.unibz.inf.ontop.protege.core.OBDAModelWrapper;
-import it.unibz.inf.ontop.model.OBDAMappingAxiom;
-=======
 import it.unibz.inf.ontop.model.OBDAMappingAxiom;
 import it.unibz.inf.ontop.model.OBDAMappingListener;
 import it.unibz.inf.ontop.model.OBDAModel;
->>>>>>> v3/package-names-changed:ontop-protege/src/main/java/it/unibz/inf/ontop/protege/gui/treemodels/SynchronizedMappingListModel.java
+
+import javax.swing.*;
+import java.net.URI;
+import java.util.LinkedList;
+import java.util.List;
 
 public class SynchronizedMappingListModel extends AbstractListModel implements FilteredModel, OBDAMappingListener {
 
@@ -123,17 +116,17 @@ public class SynchronizedMappingListModel extends AbstractListModel implements F
 	}
 
 	@Override
-	public void mappingInserted(URI srcid, String mapping_id) {
+	public void mappingInserted(URI srcid) {
 		fireContentsChanged(obdaModel, 0, getSize());
 	}
 
 	@Override
-	public void mappingDeleted(URI srcid, String mapping_id) {
+	public void mappingDeleted(URI srcid) {
 		fireContentsChanged(obdaModel, 0, getSize());
 	}
 
 	@Override
-	public void mappingUpdated(URI srcid, String mapping_id, OBDAMappingAxiom mapping) {
+	public void mappingUpdated(URI srcid) {
 		fireContentsChanged(obdaModel, 0, getSize());
 	}
 

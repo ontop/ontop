@@ -20,10 +20,10 @@ package it.unibz.inf.ontop.testsuite;
  * #L%
  */
 
+import it.unibz.inf.ontop.quest.scenarios.Db2VirtualScenarioTest;
 import it.unibz.inf.ontop.quest.scenarios.MssqlVirtualScenarioTest;
 import it.unibz.inf.ontop.quest.scenarios.MysqlVirtualScenarioTest;
 import it.unibz.inf.ontop.quest.scenarios.OracleVirtualScenarioTest;
-import it.unibz.inf.ontop.quest.scenarios.Db2VirtualScenarioTest;
 import it.unibz.inf.ontop.quest.scenarios.PgsqlVirtualScenarioTest;
 
 import junit.framework.Test;

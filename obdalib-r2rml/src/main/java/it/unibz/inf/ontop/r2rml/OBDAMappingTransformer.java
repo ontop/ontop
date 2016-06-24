@@ -20,29 +20,35 @@ package it.unibz.inf.ontop.r2rml;
  * #L%
  */
 
+import eu.optique.api.mapping.*;
+import eu.optique.api.mapping.TermMap.TermMapType;
+import eu.optique.api.mapping.impl.sesame.SesameR2RMLMappingManagerFactory;
+import it.unibz.inf.ontop.io.PrefixManager;
+import it.unibz.inf.ontop.model.*;
+import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
+import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
+import it.unibz.inf.ontop.model.impl.SQLQueryImpl;
+import it.unibz.inf.ontop.renderer.TargetQueryRenderer;
+import it.unibz.inf.ontop.utils.IDGenerator;
+import it.unibz.inf.ontop.utils.URITemplates;
 
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import it.unibz.inf.ontop.model.*;
-
-import it.unibz.inf.ontop.renderer.TargetQueryRenderer;
 import org.openrdf.model.Resource;
 import org.openrdf.model.Statement;
 import org.openrdf.model.URI;
 import org.openrdf.model.ValueFactory;
 import org.openrdf.model.impl.ValueFactoryImpl;
 import it.unibz.inf.ontop.io.PrefixManager;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
-import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
-import it.unibz.inf.ontop.model.impl.SQLQueryImpl;
 import it.unibz.inf.ontop.utils.IDGenerator;
-import it.unibz.inf.ontop.utils.URITemplates;
-import org.semanticweb.owlapi.model.*;
-import org.semanticweb.owlapi.apibinding.OWLManager;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Set;
 import eu.optique.api.mapping.LogicalTable;
 import eu.optique.api.mapping.MappingFactory;
 import eu.optique.api.mapping.ObjectMap;
@@ -54,6 +60,11 @@ import eu.optique.api.mapping.SubjectMap;
 import eu.optique.api.mapping.Template;
 import eu.optique.api.mapping.TermMap.TermMapType;
 import eu.optique.api.mapping.TriplesMap;
+import it.unibz.inf.ontop.model.*;
+import org.semanticweb.owlapi.apibinding.OWLManager;
+import org.semanticweb.owlapi.model.*;
+import org.semanticweb.owlapi.search.EntitySearcher;
+
 /**
  * Transform OBDA mappings in R2rml mappings
  * @author Sarah, Mindas, Timi, Guohui, Martin
@@ -85,7 +96,7 @@ public class OBDAMappingTransformer {
 	public List<Statement> getStatements(OBDAMappingAxiom axiom, PrefixManager prefixmng) {
 		List<Statement> statements = new ArrayList<Statement>();
 		SQLQueryImpl squery = (SQLQueryImpl) axiom.getSourceQuery();
-		CQIE tquery = (CQIE) axiom.getTargetQuery();
+		List<Function> tquery = axiom.getTargetQuery();
 		
 		String random_number = IDGenerator.getNextUniqueID("");
 		
@@ -101,7 +112,6 @@ public class OBDAMappingTransformer {
 		
 		//process source query
 		String sqlquery = squery.getSQLQuery();
-		OBDAQueryModifiers modifiers = squery.getQueryModifiers();
 		if (sqlquery.startsWith("SELECT * FROM") &&
 			 !sqlquery.contains("WHERE") && !sqlquery.contains(",")) {
 				//tableName -> need small parser
@@ -134,7 +144,7 @@ public class OBDAMappingTransformer {
 		statements.add(vf.createStatement(subjectNode, vf.createURI(OBDAVocabulary.RDF_TYPE),   R2RMLVocabulary.termMap));		
 
 		//Now we add the template!!
-		Function uriTemplate = (Function) tquery.getBody().get(0).getTerm(0); //URI("..{}..", , )
+		Function uriTemplate = (Function) tquery.get(0).getTerm(0); //URI("..{}..", , )
 		String subjectTemplate =  URITemplates.getUriTemplateString(uriTemplate, prefixmng);
 		
 		//add template subject
@@ -143,7 +153,7 @@ public class OBDAMappingTransformer {
 		
 		
 		//process target query
-		for (Function func : tquery.getBody()) {
+		for (Function func : tquery) {
 			random_number = IDGenerator.getNextUniqueID("");
 			Predicate pred = func.getFunctionSymbol();
 			
@@ -226,7 +236,8 @@ public class OBDAMappingTransformer {
 						String objectURI =  URITemplates.getUriTemplateString((Function)object, prefixmng);
 						//add template object
 						statements.add(vf.createStatement(objNode, R2RMLVocabulary.template, vf.createLiteral(objectURI)));
-					}else if (objectPred instanceof DatatypePredicate) {
+					}
+					else if (objectPred instanceof DatatypePredicate) {
 						Term objectTerm = ((Function) object).getTerm(0);
 
 						if (objectTerm instanceof Variable) {
@@ -267,7 +278,7 @@ public class OBDAMappingTransformer {
 			PrefixManager prefixmng) {
 		
 		SQLQueryImpl squery = (SQLQueryImpl) axiom.getSourceQuery();
-		CQIE tquery = (CQIE) axiom.getTargetQuery();
+		List<Function> tquery = axiom.getTargetQuery();
 		
 		String random_number = IDGenerator.getNextUniqueID("");
 		
@@ -277,14 +288,14 @@ public class OBDAMappingTransformer {
 			mapping_id = "http://example.org/" + mapping_id;
 		Resource mainNode = vf.createURI(mapping_id);
 
-		R2RMLMappingManager mm = R2RMLMappingManagerFactory.getSesameMappingManager();
+        R2RMLMappingManager mm = new SesameR2RMLMappingManagerFactory().getR2RMLMappingManager();
 		MappingFactory mfact = mm.getMappingFactory();
 		
 		//Table
 		LogicalTable lt = mfact.createR2RMLView(squery.getSQLQuery());
 		
 		//SubjectMap
-		Function uriTemplate = (Function) tquery.getBody().get(0).getTerm(0); //URI("..{}..", , )
+		Function uriTemplate = (Function) tquery.get(0).getTerm(0); //URI("..{}..", , )
 		String subjectTemplate =  URITemplates.getUriTemplateString(uriTemplate, prefixmng);		
 		Template templs = mfact.createTemplate(subjectTemplate);
 		SubjectMap sm = mfact.createSubjectMap(templs);
@@ -292,7 +303,7 @@ public class OBDAMappingTransformer {
 		TriplesMap tm = mfact.createTriplesMap(lt, sm);
 		
 		//process target query
-		for (Function func : tquery.getBody()) {
+		for (Function func : tquery) {
 			random_number = IDGenerator.getNextUniqueID("");
 			Predicate pred = func.getFunctionSymbol();
 			String predName = pred.getName();
@@ -357,7 +368,8 @@ public class OBDAMappingTransformer {
                             obm = mfact.createObjectMap(TermMapType.COLUMN_VALUED, vf.createLiteral(((Variable) object).getName()).stringValue());
                             //set the datatype for the typed literal
 
-                            Set<OWLDataRange> ranges = dataProperty.getRanges(ontology);
+                            //Set<OWLDataRange> ranges = dataProperty.getRanges(ontology);
+                            Collection<OWLDataRange> ranges = EntitySearcher.getRanges(dataProperty, ontology);
                             //assign the datatype if present
                             if (ranges.size() == 1) {
                                 IRI dataRange = ranges.iterator().next().asOWLDatatype().getIRI();
@@ -371,16 +383,30 @@ public class OBDAMappingTransformer {
                     //we add the predicate object map in case of literal
 					pom = mfact.createPredicateObjectMap(predM, obm);
 					tm.addPredicateObjectMap(pom);
-				} else if (object instanceof Function) { //we create a template
+				} 
+ 				else if (object instanceof Function) { //we create a template
 					//check if uritemplate
- 					Predicate objectPred = ((Function) object).getFunctionSymbol();
+ 					Function o = (Function) object;
+ 					Predicate objectPred = o.getFunctionSymbol();
 					if (objectPred instanceof URITemplatePredicate) {
-						String objectURI =  URITemplates.getUriTemplateString((Function)object, prefixmng);
-						//add template object
-						//statements.add(vf.createStatement(objNode, R2RMLVocabulary.template, vf.createLiteral(objectURI)));
-						//obm.setTemplate(mfact.createTemplate(objectURI));
-						obm = mfact.createObjectMap(mfact.createTemplate(objectURI));
-					}else if (objectPred.isDataTypePredicate()) {
+
+						Term objectTerm = ((Function) object).getTerm(0);
+
+						if(objectTerm instanceof Variable)
+						{
+							obm = mfact.createObjectMap(TermMapType.COLUMN_VALUED, vf.createLiteral(((Variable) objectTerm).getName()).stringValue());
+							obm.setTermType(R2RMLVocabulary.iri);
+						}
+						else {
+
+							String objectURI = URITemplates.getUriTemplateString((Function) object, prefixmng);
+							//add template object
+							//statements.add(vf.createStatement(objNode, R2RMLVocabulary.template, vf.createLiteral(objectURI)));
+							//obm.setTemplate(mfact.createTemplate(objectURI));
+							obm = mfact.createObjectMap(mfact.createTemplate(objectURI));
+						}
+					}
+					else if (o.isDataTypeFunction()) {
 						Term objectTerm = ((Function) object).getTerm(0);
 						
 						if (objectTerm instanceof Variable) {
@@ -424,8 +450,7 @@ public class OBDAMappingTransformer {
 							StringBuilder sb = new StringBuilder();
 							Predicate functionSymbol = ((Function) objectTerm).getFunctionSymbol();
 							
-							if (functionSymbol instanceof StringOperationPredicate){ //concat
-								
+							if (functionSymbol == ExpressionOperation.CONCAT) { //concat						
 								List<Term> terms = ((Function)objectTerm).getTerms();
 								TargetQueryRenderer.getNestedConcats(sb, terms.get(0),terms.get(1));
 								obm = mfact.createObjectMap(mfact.createTemplate(sb.toString()));

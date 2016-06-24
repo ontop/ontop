@@ -2,12 +2,12 @@ package it.unibz.inf.ontop.executor.join;
 
 import java.util.Optional;
 import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.model.ImmutableBooleanExpression;
+import it.unibz.inf.ontop.model.ExpressionOperation;
+import it.unibz.inf.ontop.model.ImmutableExpression;
 import it.unibz.inf.ontop.model.OBDADataFactory;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
-import it.unibz.inf.ontop.pivotalrepr.*;
 import it.unibz.inf.ontop.owlrefplatform.core.unfolding.ExpressionEvaluator;
-import static it.unibz.inf.ontop.model.impl.OBDAVocabulary.AND;
+import it.unibz.inf.ontop.pivotalrepr.*;
 
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -30,23 +30,23 @@ public class JoinExtractionUtils {
     /**
      * TODO: explain
      */
-    public static Optional<ImmutableBooleanExpression> extractFoldAndOptimizeBooleanExpressions(
-            ImmutableList<JoinOrFilterNode> filterAndJoinNodes) throws InsatisfiedExpressionException {
+    public static Optional<ImmutableExpression> extractFoldAndOptimizeBooleanExpressions(
+            ImmutableList<JoinOrFilterNode> filterAndJoinNodes, MetadataForQueryOptimization metadata)
+            throws InsatisfiedExpressionException {
 
-        ImmutableList<ImmutableBooleanExpression> booleanExpressions = extractBooleanExpressions(
+        ImmutableList<ImmutableExpression> booleanExpressions = extractBooleanExpressions(
                 filterAndJoinNodes);
 
-        Optional<ImmutableBooleanExpression> foldedExpression = foldBooleanExpressions(booleanExpressions);
+        Optional<ImmutableExpression> foldedExpression = foldBooleanExpressions(booleanExpressions);
         if (foldedExpression.isPresent()) {
-            ExpressionEvaluator evaluator = new ExpressionEvaluator();
+            ExpressionEvaluator evaluator = new ExpressionEvaluator(metadata.getUriTemplateMatcher());
 
-            Optional<ImmutableBooleanExpression> optionalEvaluatedExpression = evaluator.evaluateBooleanExpression(
-                    foldedExpression.get());
-            if (optionalEvaluatedExpression.isPresent()) {
-                return optionalEvaluatedExpression;
+            ExpressionEvaluator.Evaluation evaluation = evaluator.evaluateExpression(foldedExpression.get());
+            if (evaluation.isFalse()) {
+                throw new InsatisfiedExpressionException();
             }
             else {
-                throw new InsatisfiedExpressionException();
+                return evaluation.getOptionalExpression();
             }
         }
         else {
@@ -89,21 +89,21 @@ public class JoinExtractionUtils {
         return joinAndFilterNodeBuilder.build();
     }
 
-    public static Optional<ImmutableBooleanExpression> foldBooleanExpressions(
-        ImmutableList<ImmutableBooleanExpression> booleanExpressions) {
+    public static Optional<ImmutableExpression> foldBooleanExpressions(
+        ImmutableList<ImmutableExpression> booleanExpressions) {
         switch (booleanExpressions.size()) {
             case 0:
                 return Optional.empty();
             case 1:
                 return Optional.of(booleanExpressions.get(0));
             default:
-                Iterator<ImmutableBooleanExpression> it = booleanExpressions.iterator();
+                Iterator<ImmutableExpression> it = booleanExpressions.iterator();
 
                 // Non-final
-                ImmutableBooleanExpression currentExpression = DATA_FACTORY.getImmutableBooleanExpression(AND,
+                ImmutableExpression currentExpression = DATA_FACTORY.getImmutableExpression(ExpressionOperation.AND,
                         it.next(), it.next());
                 while(it.hasNext()) {
-                    currentExpression = DATA_FACTORY.getImmutableBooleanExpression(AND, currentExpression, it.next());
+                    currentExpression = DATA_FACTORY.getImmutableExpression(ExpressionOperation.AND, currentExpression, it.next());
                 }
 
                 return Optional.of(currentExpression);
@@ -111,17 +111,17 @@ public class JoinExtractionUtils {
     }
 
     @Deprecated
-    public static ImmutableList<ImmutableBooleanExpression> extractBooleanExpressionsFromJoins(InnerJoinNode topJoinNode,
-                                                                                               IntermediateQuery query) {
+    public static ImmutableList<ImmutableExpression> extractBooleanExpressionsFromJoins(InnerJoinNode topJoinNode,
+                                                                                        IntermediateQuery query) {
         Queue<InnerJoinNode> joinNodesToExplore = new LinkedList<>();
         joinNodesToExplore.add(topJoinNode);
 
-        ImmutableList.Builder<ImmutableBooleanExpression> exprListBuilder = ImmutableList.builder();
+        ImmutableList.Builder<ImmutableExpression> exprListBuilder = ImmutableList.builder();
 
         while (!joinNodesToExplore.isEmpty()) {
             InnerJoinNode joinNode = joinNodesToExplore.poll();
 
-            Optional<ImmutableBooleanExpression> optionalFilterCondition = joinNode.getOptionalFilterCondition();
+            Optional<ImmutableExpression> optionalFilterCondition = joinNode.getOptionalFilterCondition();
             if (optionalFilterCondition.isPresent()) {
                 exprListBuilder.add(optionalFilterCondition.get());
             }
@@ -177,11 +177,11 @@ public class JoinExtractionUtils {
         return otherNodeListBuilder.build();
     }
 
-    private static ImmutableList<ImmutableBooleanExpression> extractBooleanExpressions(
+    private static ImmutableList<ImmutableExpression> extractBooleanExpressions(
             ImmutableList<JoinOrFilterNode> filterAndJoinNodes) {
-        ImmutableList.Builder<ImmutableBooleanExpression> builder = ImmutableList.builder();
+        ImmutableList.Builder<ImmutableExpression> builder = ImmutableList.builder();
         for (JoinOrFilterNode node : filterAndJoinNodes) {
-            Optional<ImmutableBooleanExpression> optionalFilterCondition = node.getOptionalFilterCondition();
+            Optional<ImmutableExpression> optionalFilterCondition = node.getOptionalFilterCondition();
             if (optionalFilterCondition.isPresent()) {
                 builder.add(optionalFilterCondition.get());
             }

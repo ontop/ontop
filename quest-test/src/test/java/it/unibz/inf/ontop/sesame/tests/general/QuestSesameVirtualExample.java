@@ -20,6 +20,9 @@ package it.unibz.inf.ontop.sesame.tests.general;
  * #L%
  */
 
+import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
+import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
@@ -48,6 +51,7 @@ import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyIRIMapper;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.util.AutoIRIMapper;
+
 
 public class QuestSesameVirtualExample {
 

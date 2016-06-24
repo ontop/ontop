@@ -21,10 +21,11 @@ package it.unibz.inf.ontop.cli;
  */
 
 
+import com.github.rvesse.airline.annotations.Command;
+import com.github.rvesse.airline.annotations.Option;
+import com.github.rvesse.airline.annotations.OptionType;
+import com.github.rvesse.airline.annotations.restrictions.Required;
 import com.hp.hpl.jena.rdf.model.Model;
-import com.github.rvesse.airline.Command;
-import com.github.rvesse.airline.Option;
-import com.github.rvesse.airline.OptionType;
 import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.RDFFormat;
@@ -39,11 +40,14 @@ import java.io.OutputStream;
 public class OntopR2RMLPrettify implements OntopCommand {
 
     @Option(type = OptionType.COMMAND, name = {"-i", "--input"}, title = "input.ttl",
-            description = "Input mapping file in Ontop native format (.obda)", required = true)
+            description = "Input mapping file in Ontop native format (.obda)")
+    @Required
     protected String inputMappingFile;
 
+
     @Option(type = OptionType.COMMAND, name = {"-o", "--output"}, title = "pretty.ttl",
-            description = "Input mapping file in Ontop native format (.obda)", required = true)
+            description = "Input mapping file in Ontop native format (.obda)")
+    @Required
     protected String outputMappingFile;
 
     public static void main(String[] args) throws FileNotFoundException {

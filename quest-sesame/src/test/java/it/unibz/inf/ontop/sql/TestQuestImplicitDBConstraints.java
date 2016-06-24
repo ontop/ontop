@@ -10,26 +10,17 @@ import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.util.Properties;
 import java.util.Scanner;
 
-import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWL;
-import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWLConnection;
-import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWLFactory;
-import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWLStatement;
+import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import org.junit.After;
 import org.junit.Test;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
 import it.unibz.inf.ontop.owlrefplatform.core.SQLExecutableQuery;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
-import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.annotation.Nullable;
 
 /**
  * @author dagc
@@ -57,7 +48,7 @@ public class TestQuestImplicitDBConstraints {
 	private Connection sqlConnection;
 
 	
-	public void start_reasoner(String owlfile, String obdafile, String sqlfile, @Nullable String dbContraintsFile) throws Exception {
+	public void start_reasoner(String owlfile, String sqlfile) throws Exception {
 		try {
 			sqlConnection= DriverManager.getConnection("jdbc:h2:mem:countries","sa", "");
 			java.sql.Statement s = sqlConnection.createStatement();
@@ -78,18 +69,6 @@ public class TestQuestImplicitDBConstraints {
 			OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 			ontology = manager.loadOntologyFromOntologyDocument((new File(owlfile)));
 
-			Properties p = new Properties();
-			p.setProperty(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-			p.setProperty(QuestPreferences.OBTAIN_FULL_METADATA, QuestConstants.FALSE);
-			if (dbContraintsFile != null) {
-				// Parsing user constraints
-				ImplicitDBConstraints userConstraints = new ImplicitDBConstraints(dbContraintsFile);
-				p.put(QuestPreferences.DB_CONSTRAINTS, userConstraints);
-			}
-			
-			// Creating a new instance of the reasoner
-			this.factory = new QuestOWLFactory(new File(obdafile), new QuestPreferences(p));
-
 		} catch (Exception exc) {
 			try {
 				tearDown();
@@ -102,7 +81,7 @@ public class TestQuestImplicitDBConstraints {
 
 
 	@After
-	public void tearDown() throws Exception{
+	public void tearDown() throws Exception {
 		conn.close();
 		reasoner.dispose();
 		if (!sqlConnection.isClosed()) {
@@ -120,9 +99,14 @@ public class TestQuestImplicitDBConstraints {
 
 	@Test
 	public void testNoSelfJoinElim() throws Exception {
-		this.start_reasoner(uc_owlfile, uc_obdafile, uc_create, null);
-		this.reasoner = factory.createReasoner(ontology, new SimpleConfiguration());
-
+		this.start_reasoner(uc_owlfile, uc_create);
+		//this.reasoner = factory.createReasoner(ontology, new SimpleConfiguration());
+		QuestOWLFactory factory = new QuestOWLFactory();
+        QuestOWLConfiguration config = QuestOWLConfiguration.builder()
+				.nativeOntopMappingFile(uc_obdafile)
+				.build();
+        reasoner = factory.createReasoner(ontology, config);
+        
 
 		// Now we are ready for querying
 		this.conn = reasoner.getConnection();
@@ -139,8 +123,16 @@ public class TestQuestImplicitDBConstraints {
 
 	@Test
 	public void testForeignKeysNoSelfJoinElim() throws Exception {
-		this.start_reasoner(uc_owlfile, uc_obdafile, uc_create, null);
-		this.reasoner = factory.createReasoner(ontology, new SimpleConfiguration());
+		this.start_reasoner(uc_owlfile, uc_create);
+		
+		QuestOWLFactory factory = new QuestOWLFactory();
+        QuestOWLConfiguration config = QuestOWLConfiguration.builder()
+				.nativeOntopMappingFile(uc_obdafile)
+				.build();
+        reasoner = factory.createReasoner(ontology, config);
+        
+		
+		//this.reasoner = factory.createReasoner(ontology, new SimpleConfiguration());
 
 
 		// Now we are ready for querying
@@ -158,9 +150,15 @@ public class TestQuestImplicitDBConstraints {
 	
 	@Test
 	public void testWithSelfJoinElim() throws Exception {
-		this.start_reasoner(uc_owlfile, uc_obdafile, uc_create, uc_keyfile);
-		this.reasoner = factory.createReasoner(ontology, new SimpleConfiguration());
+		this.start_reasoner(uc_owlfile, uc_create);
 
+		// Parsing user constraints
+		ImplicitDBConstraintsReader userConstraints = new ImplicitDBConstraintsReader(new File(uc_keyfile));
+
+
+		QuestOWLFactory factory = new QuestOWLFactory();
+        QuestOWLConfiguration config = QuestOWLConfiguration.builder().nativeOntopMappingFile(uc_obdafile).dbConstraintsReader(userConstraints).build();
+        reasoner = factory.createReasoner(ontology, config);
 
 		// Now we are ready for querying
 		this.conn = reasoner.getConnection();
@@ -177,11 +175,16 @@ public class TestQuestImplicitDBConstraints {
 	
 	@Test
 	public void testForeignKeysWithSelfJoinElim() throws Exception {
-		this.start_reasoner(uc_owlfile, uc_obdafile, uc_create, uc_keyfile);
+		this.start_reasoner(uc_owlfile, uc_create);
 		// Parsing user constraints
-		this.reasoner = factory.createReasoner(ontology, new SimpleConfiguration());
+		ImplicitDBConstraintsReader userConstraints = new ImplicitDBConstraintsReader(new File(uc_keyfile));
+//		factory.setImplicitDBConstraints(userConstraints);
+//		this.reasoner = factory.createReasoner(ontology, new SimpleConfiguration());
 
-
+		QuestOWLFactory factory = new QuestOWLFactory();
+        QuestOWLConfiguration config = QuestOWLConfiguration.builder().nativeOntopMappingFile(uc_obdafile).dbConstraintsReader(userConstraints).build();
+        reasoner = factory.createReasoner(ontology, config);
+        
 		// Now we are ready for querying
 		this.conn = reasoner.getConnection();
 		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT * WHERE {?x :hasVal3 ?v1; :hasVal4 ?v4.}";
@@ -202,9 +205,13 @@ public class TestQuestImplicitDBConstraints {
 	 */
 	@Test
 	public void testForeignKeysTablesNOUc() throws Exception {
-		this.start_reasoner(fk_owlfile, fk_obdafile, fk_create, null);
+		this.start_reasoner(fk_owlfile, fk_create);
 		
-		this.reasoner = factory.createReasoner(ontology, new SimpleConfiguration());
+		QuestOWLFactory factory = new QuestOWLFactory();
+        QuestOWLConfiguration config = QuestOWLConfiguration.builder().nativeOntopMappingFile(fk_obdafile).build();
+        reasoner = factory.createReasoner(ontology, config);
+        
+		//this.reasoner = factory.createReasoner(ontology, new SimpleConfiguration());
 
 
 		// Now we are ready for querying
@@ -228,10 +235,16 @@ public class TestQuestImplicitDBConstraints {
 	 */
 	@Test
 	public void testForeignKeysTablesWithUC() throws Exception {
-		this.start_reasoner(fk_owlfile, fk_obdafile, fk_create, fk_keyfile);
-		this.reasoner =factory.createReasoner(ontology, new SimpleConfiguration());
+		this.start_reasoner(fk_owlfile, fk_create);
+		// Parsing user constraints
+		ImplicitDBConstraintsReader userConstraints = new ImplicitDBConstraintsReader(new File(fk_keyfile));
+//		factory.setImplicitDBConstraints(userConstraints);
+//		this.reasoner = factory.createReasoner(ontology, new SimpleConfiguration());
 
-
+		QuestOWLFactory factory = new QuestOWLFactory();
+        QuestOWLConfiguration config = QuestOWLConfiguration.builder().nativeOntopMappingFile(fk_obdafile).dbConstraintsReader(userConstraints).build();
+        reasoner = factory.createReasoner(ontology, config);
+        
 		// Now we are ready for querying
 		this.conn = reasoner.getConnection();
 		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT * WHERE {?x :relatedTo ?y; :hasVal1 ?v1. ?y :hasVal2 ?v2.}";

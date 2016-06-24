@@ -39,12 +39,12 @@ public class SQLAdapterFactory {
 			case "org.h2.Driver":
 				return new H2SQLDialectAdapter();
 			case "org.hsqldb.jdbc.JDBCDriver":
-				return new HSQLSQLDialectAdapter();
+				return new HSQLDBDialectAdapter();
 			case "com.ibm.db2.jcc.DB2Driver":
 				return new DB2SQLDialectAdapter();
 			case "oracle.jdbc.driver.OracleDriver":
 			case "oracle.jdbc.OracleDriver":
-				return new OracleSQLDialectAdapter();
+				return new OracleSQLDialectAdapter(databaseName);
 			case "org.teiid.jdbc.TeiidDriver":
 				return new TeiidSQLDialectAdapter();
 			case "net.sourceforge.jtds.jdbc.Driver":
@@ -52,6 +52,10 @@ public class SQLAdapterFactory {
 				return new SQLServerSQLDialectAdapter();
 			case "madgik.adp.federatedjdbc.AdpDriver":
 				return new AdpSQLDialectAdapter();
+            case "nl.cwi.monetdb.jdbc.MonetDriver":
+                return new MonetDBSQLDialectAdapter();
+            case "com.sap.db.jdbc.Driver":
+                return new SAPHANASQLDialectAdapter();
 			default:
 				log.warn("WARNING: the specified driver doesn't correspond to any of the drivers officially supported by Ontop.");
 				log.warn("WARNING: Contact the authors for further support.");
@@ -63,6 +67,9 @@ public class SQLAdapterFactory {
 				 throw new RuntimeException("Impossible to initialize the SQL adapter: " + e.getMessage());
             }
 		}
+
+		
+
 	}
 
 }

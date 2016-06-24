@@ -1,19 +1,18 @@
 package it.unibz.inf.ontop.obda;
 
 
-import it.unibz.inf.ontop.owlrefplatform.owlapi3.*;
+import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import org.junit.Before;
 import org.junit.Test;
 import it.unibz.inf.ontop.io.QueryIOManager;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
-import it.unibz.inf.ontop.owlrefplatform.questdb.R2RMLQuestPreferences;
+import it.unibz.inf.ontop.owlrefplatform.core.R2RMLQuestPreferences;
 import it.unibz.inf.ontop.querymanager.QueryController;
 import it.unibz.inf.ontop.querymanager.QueryControllerGroup;
 import it.unibz.inf.ontop.querymanager.QueryControllerQuery;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
-import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,10 +40,11 @@ public class DatetimeStampTest {
     private void runTests(QuestPreferences preferences, String filename) throws Exception {
 
         // Creating a new instance of the reasoner
-        QuestOWLFactory factory = new QuestOWLFactory(new File(filename), preferences);
-
-        QuestOWL reasoner = factory.createReasoner(ontology, new SimpleConfiguration());
-
+        QuestOWLFactory factory = new QuestOWLFactory();
+        QuestOWLConfiguration config = QuestOWLConfiguration.builder()
+                .nativeOntopMappingFile(new File(filename))
+                .preferences(preferences).build();
+        QuestOWL reasoner = factory.createReasoner(ontology, config);
         // Now we are ready for querying
         QuestOWLConnection conn = reasoner.getConnection();
         QuestOWLStatement st = conn.createStatement();

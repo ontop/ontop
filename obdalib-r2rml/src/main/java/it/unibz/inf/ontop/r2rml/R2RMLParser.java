@@ -22,51 +22,35 @@ package it.unibz.inf.ontop.r2rml;
 
 /**
  * @author timea bagosi
- * The R2RML parser class that breaks down the responsibility of parsing by case.
+ * The R2RML parser class that breaks down the responsibility of parsing by case
  *
  * Low-level class that should not be confused with the R2RMLMappingParser.
  */
-import it.unibz.inf.ontop.model.Constant;
-import it.unibz.inf.ontop.model.DatatypePredicate;
-import it.unibz.inf.ontop.model.DatatypeFactory;
-import it.unibz.inf.ontop.model.Function;
-import it.unibz.inf.ontop.model.OBDADataFactory;
-import it.unibz.inf.ontop.model.Predicate;
+
+import eu.optique.api.mapping.*;
+import eu.optique.api.mapping.TermMap.TermMapType;
+import eu.optique.api.mapping.impl.InvalidR2RMLMappingException;
+import eu.optique.api.mapping.impl.SubjectMapImpl;
+import eu.optique.api.mapping.impl.sesame.SesameR2RMLMappingManagerFactory;
+import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.Predicate.COL_TYPE;
-import it.unibz.inf.ontop.model.Term;
 import it.unibz.inf.ontop.model.impl.DatatypePredicateImpl;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
+import it.unibz.inf.ontop.model.Term;
 import org.openrdf.model.Model;
 import org.openrdf.model.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import eu.optique.api.mapping.ObjectMap;
-import eu.optique.api.mapping.PredicateMap;
-import eu.optique.api.mapping.PredicateObjectMap;
-import eu.optique.api.mapping.R2RMLMappingManager;
-import eu.optique.api.mapping.R2RMLMappingManagerFactory;
-import eu.optique.api.mapping.SubjectMap;
-import eu.optique.api.mapping.Template;
-import eu.optique.api.mapping.TermMap.TermMapType;
-import eu.optique.api.mapping.TriplesMap;
-import eu.optique.api.mapping.impl.InvalidR2RMLMappingException;
-import eu.optique.api.mapping.impl.SubjectMapImpl;
+import java.util.*;
 
 public class R2RMLParser {
 
 	private final OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 	private final DatatypeFactory dtfac = OBDADataFactoryImpl.getInstance().getDatatypeFactory();
 
-	List<Predicate> classPredicates; 
-	List<Resource> joinPredObjNodes; 
+	List<Predicate> classPredicates;
+	List<Resource> joinPredObjNodes;
 
 	String parsedString = "";
 	String subjectString = "";
@@ -75,10 +59,10 @@ public class R2RMLParser {
 	Logger logger = LoggerFactory.getLogger(R2RMLParser.class);
 
 	/**
-	 * empty constructor 
+	 * empty constructor
 	 */
 	public R2RMLParser() {
-		mapManager = R2RMLMappingManagerFactory.getSesameMappingManager();
+        mapManager = new SesameR2RMLMappingManagerFactory().getR2RMLMappingManager();
 		classPredicates = new ArrayList<Predicate>();
 		joinPredObjNodes = new ArrayList<Resource>();
 	}
@@ -94,7 +78,7 @@ public class R2RMLParser {
 			coll = mapManager.importMappings(myModel);
 		} catch (InvalidR2RMLMappingException e) {
 			e.printStackTrace();
-		}		
+		}
 		return coll;
 	}
 
@@ -114,7 +98,7 @@ public class R2RMLParser {
 	 */
 	public List<Predicate> getClassPredicates() {
 		List<Predicate> classes = new ArrayList<Predicate>();
-		for (Predicate p: classPredicates)
+		for (Predicate p : classPredicates)
 			classes.add(p);
 		classPredicates.clear();
 		return classes;
@@ -129,7 +113,7 @@ public class R2RMLParser {
 		Set<Resource> predobjs = new HashSet<Resource>();
 		for (PredicateObjectMap pobj : tm.getPredicateObjectMaps()) {
 			for (PredicateMap pm : pobj.getPredicateMaps()) {
-				Resource r = (Resource)pm.getResource(Object.class);	
+				Resource r = (Resource) pm.getResource(Object.class);
 				predobjs.add(r);
 			}
 		}
@@ -139,10 +123,10 @@ public class R2RMLParser {
 	public Term getSubjectAtom(TriplesMap tm) throws Exception {
 		return getSubjectAtom(tm, "");
 	}
-	
+
 	/**
 	 * Get subject
-     *
+	 *
 	 * @param tm
 	 * @param joinCond
 	 * @return
@@ -151,7 +135,7 @@ public class R2RMLParser {
 	public Term getSubjectAtom(TriplesMap tm, String joinCond) throws Exception {
 		Term subjectAtom = null;
 		String subj = "";
-        classPredicates.clear();
+		classPredicates.clear();
 
 		// SUBJECT
 		SubjectMap sMap = tm.getSubjectMap();
@@ -165,38 +149,46 @@ public class R2RMLParser {
 		// SubjectMap.getTemplateString() throws NullPointerException when
 		// template == null
 		//
-		if (sMap.getTemplate() == null) {
+		Template template = sMap.getTemplate();
+		if (template == null) {
 			subj = null;
 		} else {
 			subj = sMap.getTemplateString();
 		}
 
 		if (subj != null) {
-			// craete uri("...",var)
-			subjectAtom = getURIFunction((subj), joinCond);
+			// create uri("...",var)
+			subjectAtom = getTermTypeAtom(subj, termType, joinCond);
 		}
 
 		// process column declaration
 		subj = sMap.getColumn();
 		if (subj != null) {
-			// craete uri("...",var)
-			subjectAtom = getURIFunction((subj), joinCond);
+			if(template == null && (termType.equals(R2RMLVocabulary.iri))){
+
+				subjectAtom = fac.getUriTemplate(fac.getVariable(subj));
+
+			}
+			else {
+				// create uri("...",var)
+				subjectAtom = getTermTypeAtom(subj, termType, joinCond);
+			}
 		}
 
 		// process constant declaration
 		subj = sMap.getConstant();
 		if (subj != null) {
-			// craete uri("...",var)
-			subjectAtom = getURIFunction((subj), joinCond);
+			// create uri("...",var)
+			subjectAtom = getURIFunction(subj, joinCond);
 		}
 
 		// process termType declaration
-		//		subj = sMap.getTermMapType().toString();
-		//		sMap.getTermType(Object.class);
-		//		if (subj != null) {
-		//			
-		//			
-		//		}
+		// subj = sMap.getTermMapType().toString();
+		// sMap.getTermType(Object.class);
+		// if (subj != null) {
+		//
+		//
+		// }
 
 		// process class declaration
 		List<Object> classes = sMap.getClasses(Object.class);
@@ -220,12 +212,14 @@ public class R2RMLParser {
 	 */
 	public List<Predicate> getBodyPredicates(PredicateObjectMap pom) {
 		List<Predicate> bodyPredicates = new ArrayList<Predicate>();
-		Predicate bodyPredicate = null;
 
 		// process PREDICATEs
 		for (PredicateMap pm : pom.getPredicateMaps()) {
-			bodyPredicate = fac.getPredicate(pm.getConstant(), 2);
-			bodyPredicates.add(bodyPredicate);
+			String pmConstant = pm.getConstant();
+			if (pmConstant != null) {
+				Predicate bodyPredicate = fac.getPredicate(pmConstant, 2);
+				bodyPredicates.add(bodyPredicate);
+			}
 		}
 		return bodyPredicates;
 	}
@@ -236,24 +230,22 @@ public class R2RMLParser {
 	 * @return
 	 * @throws Exception
 	 */
-	public List<Function> getBodyURIPredicates(PredicateObjectMap pom)
-			throws Exception {
-		List<Function> predicateAtoms = new ArrayList<Function>();
-		Function predicateAtom;
+	public List<Function> getBodyURIPredicates(PredicateObjectMap pom) {
+		List<Function> predicateAtoms = new ArrayList<>();
 
 		// process PREDICATEMAP
 		for (PredicateMap pm : pom.getPredicateMaps()) {
 			Template t = pm.getTemplate();
 			if (t != null) {
-				// craete uri("...",var)
-				predicateAtom = getURIFunction(t.toString());
+				// create uri("...",var)
+				Function predicateAtom = getURIFunction(t.toString());
 				predicateAtoms.add(predicateAtom);
 			}
 
 			// process column declaration
 			String c = pm.getColumn();
 			if (c != null) {
-				predicateAtom = getURIFunction(c);
+				Function predicateAtom = getURIFunction(c);
 				predicateAtoms.add(predicateAtom);
 			}
 		}
@@ -261,8 +253,7 @@ public class R2RMLParser {
 
 	}
 
-	public Term getObjectAtom(PredicateObjectMap pom)
-			throws Exception {
+	public Term getObjectAtom(PredicateObjectMap pom) {
 		return getObjectAtom(pom, "");
 	}
 
@@ -281,23 +272,23 @@ public class R2RMLParser {
 
 	/**
 	 * Get the object atom, it can be a constant, a column or a template
+	 * 
 	 * @param pom
 	 * @param joinCond
 	 * @return
 	 * @throws Exception
 	 */
-	public Term getObjectAtom(PredicateObjectMap pom, String joinCond)
-			throws Exception {
+	public Term getObjectAtom(PredicateObjectMap pom, String joinCond) {
 		Term objectAtom = null;
 		if (pom.getObjectMaps().isEmpty()) {
 			return null;
 		}
 		ObjectMap om = pom.getObjectMap(0);
-		
+
 		String lan = om.getLanguageTag();
 		Object datatype = om.getDatatype(Object.class);
-		
-		//we check if the object map is a constant (can be a iri or a literal)
+
+		// we check if the object map is a constant (can be a iri or a literal)
 		String obj = om.getConstant();
 		if (obj != null) {
 			// boolean isURI = false;
@@ -315,7 +306,7 @@ public class R2RMLParser {
 
 			} else {
 				Term newlit = fac.getConstantLiteral(obj);
-				
+
 				if (obj.startsWith("http://")) {
 					objectAtom = fac.getUriTemplate(newlit);
 				} else {
@@ -324,13 +315,13 @@ public class R2RMLParser {
 			}
 		}
 
-		// we check if the object map is a column (can be only literal)
-		// if it has a datatype or language property we check it later
+		// we check if the object map is a column
+		// if it has a datatype or language property or its a iri we check it later
 		String col = om.getColumn();
 		if (col != null) {
-			col=trim(col);
-			
-			if (!joinCond.isEmpty()){
+			col = trim(col);
+
+			if (!joinCond.isEmpty()) {
 				col = joinCond + col;
 			}
 
@@ -373,6 +364,18 @@ public class R2RMLParser {
 					objectAtom = getTermTypeAtom(t.toString(), type, joinCond);
 				}
 			}
+		}
+		else{
+			//assign iri template
+			TermMapType termMapType = om.getTermMapType();
+			if(termMapType.equals(TermMapType.CONSTANT_VALUED)){
+
+			} else if(termMapType.equals(TermMapType.COLUMN_VALUED)){
+				if(typ.equals(R2RMLVocabulary.iri)) {
+					objectAtom = fac.getUriTemplate(objectAtom);
+				}
+			}
+
 		}
 
 		// we check if it is a literal with language tag
@@ -497,13 +500,18 @@ public class R2RMLParser {
 	}
 
 	/**
-	 * get a typed atom 
-	 * @param parsedString - the content of atom
-	 * @param type - 0=constant uri, 1=uri or iri, 2=bnode, 3=literal
-	 * @param joinCond - CHILD_ or PARENT_ prefix for variables
+	 * get a typed atom
+	 * 
+	 * @param parsedString
+	 *            - the content of atom
+	 * @param type
+	 *            - 0=constant uri, 1=uri or iri, 2=bnode, 3=literal 4=concat
+	 * @param joinCond
+	 *            - CHILD_ or PARENT_ prefix for variables
 	 * @return the constructed Function atom
 	 */
-	public Function getTypedFunction(String parsedString, int type, String joinCond) {
+	public Function getTypedFunction(String parsedString, int type,
+			String joinCond) {
 
 		List<Term> terms = new ArrayList<Term>();
 		String string = (parsedString);
@@ -563,28 +571,31 @@ public class R2RMLParser {
 	
 		string = string.replace("[", "{");
 		string = string.replace("]", "}");
-        
+
 		Term uriTemplate = null;
 		switch (type) {
-		//constant uri
+		// constant uri
 		case 0:
 			uriTemplate = fac.getConstantLiteral(string);
-			terms.add(0, uriTemplate);  // the URI template is always on the first position in the term list
+			terms.add(0, uriTemplate); // the URI template is always on the
+										// first position in the term list
 			return fac.getUriTemplate(terms);
 			// URI or IRI
 		case 1:
 			uriTemplate = fac.getConstantLiteral(string);
-			terms.add(0, uriTemplate);    // the URI template is always on the first position in the term list
+			terms.add(0, uriTemplate); // the URI template is always on the
+										// first position in the term list
 			return fac.getUriTemplate(terms);
 			// BNODE
 		case 2:
 			uriTemplate = fac.getConstantBNode(string);
-			terms.add(0, uriTemplate);  			// the URI template is always on the first position in the term list
+			terms.add(0, uriTemplate); // the URI template is always on the
+										// first position in the term list
 			return fac.getBNodeTemplate(terms);
-			// simple LITERAL 
+			// simple LITERAL
 		case 3:
 			uriTemplate = terms.remove(0);
-			// pred = dtfac.getTypePredicate(); // OBDAVocabulary.RDFS_LITERAL; 
+			// pred = dtfac.getTypePredicate(); // OBDAVocabulary.RDFS_LITERAL;
 			// the URI template is always on the first position in the term list
 			// terms.add(0, uriTemplate);
 			return fac.getTypedTerm(uriTemplate, COL_TYPE.LITERAL);
@@ -599,9 +610,11 @@ public class R2RMLParser {
 	}
 
 	/**
-	 * method that trims a string of all its double apostrophes
-	 * from beginning and end
-	 * @param string - to be trimmed
+	 * method that trims a string of all its double apostrophes from beginning
+	 * and end
+	 * 
+	 * @param string
+	 *            - to be trimmed
 	 * @return the string without any quotes
 	 */
 	private String trim(String string) {
@@ -614,9 +627,10 @@ public class R2RMLParser {
 	}
 
 	/**
-	 * method to trim a string of its leading or trailing quotes
-	 * but one
-	 * @param string - to be trimmed
+	 * method to trim a string of its leading or trailing quotes but one
+	 * 
+	 * @param string
+	 *            - to be trimmed
 	 * @return the string left with one leading and trailing quote
 	 */
 	private String trimTo1(String string) {
@@ -630,8 +644,11 @@ public class R2RMLParser {
 
 	/**
 	 * method to find the triplesmap node referenced in a parent join condition
-	 * @param myModel - the Model of mappings
-	 * @param predobjNode - the pred obj node containing the join condition
+	 * 
+	 * @param myModel
+	 *            - the Model of mappings
+	 * @param predobjNode
+	 *            - the pred obj node containing the join condition
 	 * @return the Resource node refferred to in the condition
 	 */
 	public Resource getReferencedTripleMap(Model myModel, Resource predobjNode) {
@@ -652,8 +669,11 @@ public class R2RMLParser {
 
 	/**
 	 * method to get the child column in a join condition
-	 * @param myModel - the Model of mappings
-	 * @param predobjNode - the pred obj node containing the join condition
+	 * 
+	 * @param myModel
+	 *            - the Model of mappings
+	 * @param predobjNode
+	 *            - the pred obj node containing the join condition
 	 * @return the child column condition as a string
 	 */
 	public String getChildColumn(Model myModel, Resource predobjNode) {
@@ -680,8 +700,11 @@ public class R2RMLParser {
 
 	/**
 	 * method to get the parent column in a join condition
-	 * @param myModel - the Model of mappings
-	 * @param predobjNode - the pred obj node containing the join condition
+	 * 
+	 * @param myModel
+	 *            - the Model of mappings
+	 * @param predobjNode
+	 *            - the pred obj node containing the join condition
 	 * @return the parent column condition as a string
 	 */
 	public String getParentColumn(Model myModel, Resource predobjNode) {

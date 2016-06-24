@@ -21,24 +21,7 @@ package it.unibz.inf.ontop.parser;
  */
 
 
-import java.io.File;
-import java.util.Properties;
-
-import junit.framework.TestCase;
-
-import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
-import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWL;
-import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWLConnection;
-import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWLFactory;
-import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWLResultSet;
-import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWLStatement;
-import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
-import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import it.unibz.inf.ontop.quest.AbstractVirtualModeTest;
 
 /***
  * A simple test that check if the system is able to handle Mappings for
@@ -48,84 +31,13 @@ import org.slf4j.LoggerFactory;
  * We are going to create an H2 DB, the .sql file is fixed. We will map directly
  * there and then query on top.
  */
-public class MultiSchemaTest extends TestCase {
+public class MultiSchemaTest extends AbstractVirtualModeTest {
 
-	// TODO We need to extend this test to import the contents of the mappings
-	// into OWL and repeat everything taking form OWL
+	static final String owlfile = "src/test/resources/oracle.owl";
+	static final String obdafile = "src/test/resources/oracle.obda";
 
-	private QuestOWLConnection conn;
-
-	Logger log = LoggerFactory.getLogger(this.getClass());
-	private OWLOntology ontology;
-
-	final String owlfile = "src/test/resources/oracle.owl";
-	final String obdafile = "src/test/resources/oracle.obda";
-	private QuestOWL reasoner;
-
-	@Override
-	public void setUp() throws Exception {
-		
-		
-		// Loading the OWL file
-		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-		ontology = manager.loadOntologyFromOntologyDocument((new File(owlfile)));
-
-		Properties p = new Properties();
-		p.setProperty(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-		p.setProperty(QuestPreferences.OBTAIN_FULL_METADATA, QuestConstants.FALSE);
-		// Creating a new instance of the reasoner
-		QuestOWLFactory factory = new QuestOWLFactory(new File(obdafile), new QuestPreferences(p));
-
-		reasoner = factory.createReasoner(ontology, new SimpleConfiguration());
-
-		// Now we are ready for querying
-		conn = reasoner.getConnection();
-
-		
-	}
-
-
-	public void tearDown() throws Exception{
-		conn.close();
-		reasoner.dispose();
-	}
-	
-
-	
-	private void runTests(String query) throws Exception {
-		QuestOWLStatement st = conn.createStatement();
-		try {
-			
-
-			QuestOWLResultSet rs = st.executeTuple(query);
-			/*
-			boolean nextRow = rs.nextRow();
-			
-			*/
-			assertTrue(rs.nextRow());
-//			while (rs.nextRow()){
-//				OWLIndividual ind1 =	rs.getOWLIndividual("x")	 ;
-//				System.out.println(ind1.toString());
-//			}
-		
-/*
-			assertEquals("<uri1>", ind1.toString());
-			assertEquals("<uri1>", ind2.toString());
-			assertEquals("\"value1\"", val.toString());
-	*/		
-
-		} catch (Exception e) {
-			throw e;
-		} finally {
-			try {
-
-			} catch (Exception e) {
-				st.close();
-				assertTrue(false);
-			}
-			conn.close();
-			reasoner.dispose();
-		}
+	protected MultiSchemaTest() {
+		super(owlfile, obdafile);
 	}
 
 	/**
@@ -134,7 +46,7 @@ public class MultiSchemaTest extends TestCase {
 	 */
 	public void testMultiSchemaAliases() throws Exception {
 		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT ?x WHERE {?x a :View}";
-		runTests(query);
+		checkThereIsAtLeastOneResult(query);
 	}
 	
 	/**
@@ -143,7 +55,7 @@ public class MultiSchemaTest extends TestCase {
 	 */
 	public void testMultiSchemaAlias2() throws Exception {
 		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT ?x WHERE {?x a :View2}";
-		runTests(query);
+		checkThereIsAtLeastOneResult(query);
 	}
 	
 	/**
@@ -152,7 +64,7 @@ public class MultiSchemaTest extends TestCase {
 	 */
 	public void testMultiSchemaCapitalAlias() throws Exception {
 		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT ?x WHERE {?x a :Something}";
-		runTests(query);
+		checkThereIsAtLeastOneResult(query);
 	}
 	
 	/**
@@ -161,7 +73,7 @@ public class MultiSchemaTest extends TestCase {
 	 */
 	public void testMultiSchemaView() throws Exception {
 		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT ?x WHERE {?x a :NewCountry}";
-		runTests(query);
+		checkThereIsAtLeastOneResult(query);
 	}
 	
 	
@@ -171,7 +83,7 @@ public class MultiSchemaTest extends TestCase {
 	 */
 	public void testMultiSchemaToChar() throws Exception {
 		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT ?x WHERE {?x a :RegionID}";
-		runTests(query);
+		checkThereIsAtLeastOneResult(query);
 	}
 	
 	/**
@@ -180,7 +92,7 @@ public class MultiSchemaTest extends TestCase {
 	 */
 	public void testMultiSchemaWhereNot() throws Exception {
 		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT ?x WHERE {?x a :CountryNotEgypt}";
-		runTests(query);
+		checkThereIsAtLeastOneResult(query);
 	}
 	
 
@@ -190,7 +102,7 @@ public class MultiSchemaTest extends TestCase {
 	 */
 	public void testMultiSchemaWherePrefix() throws Exception {
 		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT ?x ?r WHERE { ?x :countryIsInRegion ?r }";
-		runTests(query);
+		checkThereIsAtLeastOneResult(query);
 	}
 	
 	/**
@@ -199,7 +111,7 @@ public class MultiSchemaTest extends TestCase {
 	 */
 	public void testMultiSchema() throws Exception {
 		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT ?x WHERE { ?x a :Country }";
-		runTests(query);
+		checkThereIsAtLeastOneResult(query);
 	}
 
 	/**
@@ -208,7 +120,7 @@ public class MultiSchemaTest extends TestCase {
 	 */
 	public void testMultiSchemaNQ() throws Exception {
 		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT ?x WHERE { ?x a :CountryPrefixNQ }";
-		runTests(query);
+		checkThereIsAtLeastOneResult(query);
 	}
 
 	
@@ -218,7 +130,7 @@ public class MultiSchemaTest extends TestCase {
 	 */
 	public void testMultiSchemaPrefix() throws Exception {
 		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT ?x WHERE { ?x a :Pais }";
-		runTests(query);
+		checkThereIsAtLeastOneResult(query);
 	}
 
 
@@ -228,7 +140,7 @@ public class MultiSchemaTest extends TestCase {
 	 */
 	public void testMultiSchemaAlias() throws Exception {
 		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT ?x WHERE { ?x a :Land }";
-		runTests(query);
+		checkThereIsAtLeastOneResult(query);
 	}
 
 	/**
@@ -237,7 +149,7 @@ public class MultiSchemaTest extends TestCase {
 	 */
 	public void testMultiSchemaAliasQuote() throws Exception {
 		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT ?x WHERE { ?x a :LandQuote }";
-		runTests(query);
+		checkThereIsAtLeastOneResult(query);
 	}
 	
 	/**
@@ -246,7 +158,7 @@ public class MultiSchemaTest extends TestCase {
 	 */
 	public void testMultiSchemaWhere() throws Exception {
 		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT ?x WHERE { ?x a :CountryEgypt }";
-		runTests(query);
+		checkThereIsAtLeastOneResult(query);
 	}
 		
 }

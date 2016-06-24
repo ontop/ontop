@@ -5,6 +5,7 @@ import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.DBMetadataUtil;
+import it.unibz.inf.ontop.sql.ImplicitDBConstraintsReader;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.statement.select.Select;
@@ -53,7 +54,7 @@ public class JDBCConnector implements DBConnector {
      *
      * Also injected in the DBMetadataExtractor. Only useful here if the DBMetadata is pre-defined.
      */
-    private final ImplicitDBConstraints userConstraints;
+    private final ImplicitDBConstraintsReader userConstraints;
 
     /* The active connection used to get metadata from the DBMS */
     private transient Connection localConnection;
@@ -81,7 +82,7 @@ public class JDBCConnector implements DBConnector {
     private JDBCConnector(@Assisted OBDADataSource obdaDataSource, @Assisted IQuest questInstance,
                           NativeQueryLanguageComponentFactory nativeQLFactory,
                           QuestPreferences preferences,
-                          @Nullable ImplicitDBConstraints userConstraints) {
+                          @Nullable ImplicitDBConstraintsReader userConstraints) {
         this.questPreferences = preferences;
         this.obdaSource = obdaDataSource;
         this.questInstance = questInstance;
@@ -164,7 +165,7 @@ public class JDBCConnector implements DBConnector {
 
     private OBDAModel expandMetaMappings(OBDAModel unfoldingOBDAModel, URI sourceId) throws OBDAException {
         MetaMappingExpander metaMappingExpander = new MetaMappingExpander(localConnection, nativeQLFactory);
-        return metaMappingExpander.expand(unfoldingOBDAModel, sourceId);
+        return metaMappingExpander.expand(unfoldingOBDAModel.getMappings(sourceId));
     }
 
     private void setupConnectionPool() {

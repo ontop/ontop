@@ -2,6 +2,8 @@ package it.unibz.inf.ontop.pivotalrepr.impl;
 
 import java.util.Optional;
 
+import com.google.common.collect.ImmutableSet;
+import it.unibz.inf.ontop.model.Variable;
 import it.unibz.inf.ontop.pivotalrepr.NodeTransformationProposal;
 import it.unibz.inf.ontop.pivotalrepr.NodeTransformationProposedState;
 import it.unibz.inf.ontop.pivotalrepr.QueryNode;
@@ -10,14 +12,16 @@ public class NodeTransformationProposalImpl implements NodeTransformationProposa
 
     private final NodeTransformationProposedState state;
     private final Optional<QueryNode> optionalNewNode;
+    private final ImmutableSet<Variable> nullVariables;
 
-    public NodeTransformationProposalImpl(NodeTransformationProposedState state, QueryNode newNode) {
+    public NodeTransformationProposalImpl(NodeTransformationProposedState state, QueryNode newNode,
+                                          ImmutableSet<Variable> nullVariables) {
         switch(state) {
             case REPLACE_BY_UNIQUE_CHILD:
                 break;
             case REPLACE_BY_NEW_NODE:
                 break;
-            case NO_CHANGE:
+            case NO_LOCAL_CHANGE:
                 throw new IllegalArgumentException("No new node has to be given when there is no change");
             case DELETE:
                 throw new IllegalArgumentException("No new node has to be given when the node is deleted " +
@@ -25,11 +29,12 @@ public class NodeTransformationProposalImpl implements NodeTransformationProposa
         }
         this.state = state;
         this.optionalNewNode = Optional.of(newNode);
+        this.nullVariables = nullVariables;
     }
 
-    public NodeTransformationProposalImpl(NodeTransformationProposedState state) {
+    public NodeTransformationProposalImpl(NodeTransformationProposedState state, ImmutableSet<Variable> nullVariables) {
         switch (state) {
-            case NO_CHANGE:
+            case NO_LOCAL_CHANGE:
                 break;
             case DELETE:
                 break;
@@ -40,6 +45,7 @@ public class NodeTransformationProposalImpl implements NodeTransformationProposa
         }
         this.state = state;
         this.optionalNewNode = Optional.empty();
+        this.nullVariables = nullVariables;
     }
 
     @Override
@@ -50,5 +56,10 @@ public class NodeTransformationProposalImpl implements NodeTransformationProposa
     @Override
     public Optional<QueryNode> getOptionalNewNode() {
         return optionalNewNode;
+    }
+
+    @Override
+    public ImmutableSet<Variable> getNullVariables() {
+        return nullVariables;
     }
 }

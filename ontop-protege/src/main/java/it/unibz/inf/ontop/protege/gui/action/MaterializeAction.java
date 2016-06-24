@@ -20,24 +20,21 @@ package it.unibz.inf.ontop.protege.gui.action;
  * #L%
  */
 
-import java.awt.Container;
-import java.util.Iterator;
-import java.util.concurrent.CountDownLatch;
-
-import javax.swing.JOptionPane;
-
-<<<<<<< HEAD:ontop-protege/src/main/java/it/unibz/inf/ontop/protege/gui/action/MaterializeAction.java
+import com.google.common.collect.Sets;
+import it.unibz.inf.ontop.owlrefplatform.owlapi.OWLAPIMaterializer;
 import it.unibz.inf.ontop.protege.utils.OBDAProgressListener;
-import it.unibz.inf.ontop.owlrefplatform.owlapi3.OWLAPI3Materializer;
-=======
-import it.unibz.inf.ontop.owlrefplatform.owlapi3.OWLAPI3Materializer;
-import it.unibz.inf.ontop.protege.utils.OBDAProgressListener;
->>>>>>> v3/package-names-changed:ontop-protege/src/main/java/it/unibz/inf/ontop/protege/gui/action/MaterializeAction.java
+import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLIndividualAxiom;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.swing.*;
+import java.awt.*;
+import java.util.Iterator;
+import java.util.Set;
+import java.util.concurrent.CountDownLatch;
 
 public class MaterializeAction implements OBDAProgressListener {
 
@@ -47,13 +44,13 @@ public class MaterializeAction implements OBDAProgressListener {
 	
 	private OWLOntology currentOntology = null;
 	private OWLOntologyManager ontologyManager = null;
-	private OWLAPI3Materializer materializer = null;
+	private OWLAPIMaterializer materializer = null;
 	private Iterator<OWLIndividualAxiom> iterator = null;
 	private Container cont = null;
 	private boolean bCancel = false;
 	private boolean errorShown = false;
 
-	public MaterializeAction(OWLOntology currentOntology, OWLOntologyManager ontologyManager, OWLAPI3Materializer materialize, Container cont) {
+	public MaterializeAction(OWLOntology currentOntology, OWLOntologyManager ontologyManager, OWLAPIMaterializer materialize, Container cont) {
 		this.currentOntology = currentOntology;
 		this.ontologyManager = ontologyManager;			
 		this.materializer = materialize;
@@ -72,27 +69,32 @@ public class MaterializeAction implements OBDAProgressListener {
 			}
 			catch (Exception e) {
 				log.error(e.getMessage(), e);
-				JOptionPane.showMessageDialog(null, "ERROR: could not materialize abox.");
+				JOptionPane.showMessageDialog(null, "ERROR: could not materialize Abox.");
 				this.errorShown = true;
 				return;
 			}
 		}
-		
-		thread = new Thread() {
+
+		thread = new Thread("AddAxiomToOntology Thread") {
 			public void run() {
 				try {
-					while(iterator.hasNext()) {
-						ontologyManager.addAxiom(currentOntology, iterator.next());
-					}
-					
+					Set<OWLAxiom> setAxioms = Sets.newHashSet(iterator);
+					ontologyManager.addAxioms(currentOntology, setAxioms);
+
 					latch.countDown();
-					if(!bCancel){
+					if (!bCancel) {
 						JOptionPane.showMessageDialog(cont, "Task is completed", "Done", JOptionPane.INFORMATION_MESSAGE);
 					}
-				}
-				catch (Exception e) {
+				} catch (Exception e) {
 					latch.countDown();
 					log.error("Materialization of Abox failed", e);
+
+				} catch (Error e) {
+
+					latch.countDown();
+					log.error("Materialization of Abox failed", e);
+					JOptionPane.showMessageDialog(null, "An error occurred. For more info, see the logs.");
+
 				}
 			}
 		};

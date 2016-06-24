@@ -21,38 +21,41 @@ package it.unibz.inf.ontop.model.impl;
  */
 
 import java.security.InvalidParameterException;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
-import it.unibz.inf.ontop.model.CQIE;
-import it.unibz.inf.ontop.model.OBDAQuery;
-import it.unibz.inf.ontop.model.OBDARDBMappingAxiom;
+import it.unibz.inf.ontop.model.Function;
 import it.unibz.inf.ontop.model.OBDASQLQuery;
+import it.unibz.inf.ontop.model.SourceQuery;
+import it.unibz.inf.ontop.sql.RDBMSMappingAxiom;
 import it.unibz.inf.ontop.utils.IDGenerator;
 
-public class RDBMSMappingAxiomImpl extends AbstractOBDAMappingAxiom implements OBDARDBMappingAxiom {
+public class RDBMSMappingAxiomImpl extends AbstractOBDAMappingAxiom implements RDBMSMappingAxiom
+{
 
 	private static final long serialVersionUID = 5793656631843898419L;
 	
-	private OBDASQLQuery sourceQuery = null;
-	private CQIE targetQuery = null;
+	private OBDASQLQuery sourceQuery;
+	private List<Function> targetQuery;
 
 	@AssistedInject
-	protected RDBMSMappingAxiomImpl(@Assisted String id, @Assisted("sourceQuery") OBDAQuery sourceQuery,
-									@Assisted("targetQuery") CQIE targetQuery) {
+	protected RDBMSMappingAxiomImpl(@Assisted String id, @Assisted("sourceQuery") SourceQuery sourceQuery,
+									@Assisted("targetQuery") List<Function> targetQuery) {
 		super(id);
 		setSourceQuery(sourceQuery);
 		setTargetQuery(targetQuery);
 	}
 
 	@AssistedInject
-	private RDBMSMappingAxiomImpl(@Assisted("sourceQuery") OBDAQuery sourceQuery,
-								  @Assisted("targetQuery") CQIE targetQuery) {
+	private RDBMSMappingAxiomImpl(@Assisted("sourceQuery") SourceQuery sourceQuery,
+								  @Assisted("targetQuery") List<Function> targetQuery) {
 		this(IDGenerator.getNextUniqueID("MAPID-"), sourceQuery, targetQuery);
 	}
 
 	@Override
-	public void setSourceQuery(OBDAQuery query) {
+	public void setSourceQuery(SourceQuery query) {
 		if (!(query instanceof OBDASQLQuery)) {
 			throw new InvalidParameterException("RDBMSDataSourceMapping must receive a RDBMSSQLQuery as source query");
 		}
@@ -60,7 +63,7 @@ public class RDBMSMappingAxiomImpl extends AbstractOBDAMappingAxiom implements O
 	}
 
 	@Override
-	public void setTargetQuery(CQIE query) {
+	public void setTargetQuery(List<Function> query) {
 		this.targetQuery = query;
 	}
 
@@ -70,13 +73,17 @@ public class RDBMSMappingAxiomImpl extends AbstractOBDAMappingAxiom implements O
 	}
 
 	@Override
-	public CQIE getTargetQuery() {
+	public List<Function> getTargetQuery() {
 		return targetQuery;
 	}
 
 	@Override
-	public OBDARDBMappingAxiom clone() {
-		OBDARDBMappingAxiom clone = new RDBMSMappingAxiomImpl(this.getId(), sourceQuery.clone(),targetQuery.clone());
+	public RDBMSMappingAxiom clone() {
+		List<Function> newbody = new ArrayList<>(targetQuery.size());
+		for (Function f : targetQuery)
+			newbody.add((Function)f.clone());
+
+		RDBMSMappingAxiom clone = new RDBMSMappingAxiomImpl(this.getId(), sourceQuery.clone(), newbody);
 		return clone;
 	}
 	

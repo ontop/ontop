@@ -316,7 +316,7 @@ public class OntopNativeMappingParser implements MappingParser {
         String mappingId = "";
         String currentLabel = ""; // the reader is working on which label
         StringBuffer sourceQuery = null;
-        CQIE targetQuery = null;
+        List<Function> targetQuery = null;
         int wsCount = 0;  // length of whitespace used as the separator
         boolean isMappingValid = true; // a flag to load the mapping to the model if valid
         
@@ -410,12 +410,12 @@ public class OntopNativeMappingParser implements MappingParser {
         return currentSourceMappings;
     }
 
-	private static CQIE loadTargetQuery(String targetString,
+	private static List<Function> loadTargetQuery(String targetString,
                                         List<TargetQueryParser> parsers) throws UnparsableTargetQueryException {
         Map<TargetQueryParser, TargetQueryParserException> exceptions = new HashMap<>();
 		for (TargetQueryParser parser : parsers) {
             try {
-            	CQIE parse = parser.parse(targetString);
+            	List<Function> parse = parser.parse(targetString);
 				return parse;
             } catch (TargetQueryParserException e) {
             	exceptions.put(parser, e);
@@ -435,7 +435,7 @@ public class OntopNativeMappingParser implements MappingParser {
 		return count;
 	}
 
-    private static List<OBDAMappingAxiom> addNewMapping(String mappingId, String sourceQuery, CQIE targetQuery,
+    private static List<OBDAMappingAxiom> addNewMapping(String mappingId, String sourceQuery, List<Function> targetQuery,
                                                         List<OBDAMappingAxiom> currentSourceMappings,
                                                         NativeQueryLanguageComponentFactory nativeQLFactory) {
         OBDAMappingAxiom mapping = nativeQLFactory.create(mappingId, DATA_FACTORY.getSQLQuery(sourceQuery), targetQuery);

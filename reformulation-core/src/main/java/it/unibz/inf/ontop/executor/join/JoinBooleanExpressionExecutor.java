@@ -2,15 +2,18 @@ package it.unibz.inf.ontop.executor.join;
 
 import java.util.Optional;
 import com.google.common.collect.ImmutableList;
+import it.unibz.inf.ontop.executor.NodeCentricInternalExecutor;
+import it.unibz.inf.ontop.model.ImmutableExpression;
+import it.unibz.inf.ontop.pivotalrepr.NonCommutativeOperatorNode.ArgumentPosition;
+import it.unibz.inf.ontop.pivotalrepr.impl.InnerJoinNodeImpl;
+import it.unibz.inf.ontop.pivotalrepr.proposal.impl.NodeCentricOptimizationResultsImpl;
+import it.unibz.inf.ontop.pivotalrepr.impl.QueryTreeComponent;
+import it.unibz.inf.ontop.pivotalrepr.proposal.impl.ReactToChildDeletionProposalImpl;
 import it.unibz.inf.ontop.pivotalrepr.*;
 import it.unibz.inf.ontop.pivotalrepr.proposal.*;
-import it.unibz.inf.ontop.executor.NodeCentricInternalExecutor;
-import it.unibz.inf.ontop.model.ImmutableBooleanExpression;
-import it.unibz.inf.ontop.pivotalrepr.*;
-import it.unibz.inf.ontop.pivotalrepr.impl.InnerJoinNodeImpl;
-import it.unibz.inf.ontop.pivotalrepr.impl.QueryTreeComponent;
-import it.unibz.inf.ontop.pivotalrepr.proposal.impl.NodeCentricOptimizationResultsImpl;
-import it.unibz.inf.ontop.pivotalrepr.proposal.impl.ReactToChildDeletionProposalImpl;
+import it.unibz.inf.ontop.pivotalrepr.unfolding.ProjectedVariableExtractionTools;
+
+import static it.unibz.inf.ontop.executor.join.JoinExtractionUtils.*;
 
 /**
 * TODO: explain
@@ -22,65 +25,52 @@ public class JoinBooleanExpressionExecutor implements NodeCentricInternalExecuto
      */
     @Override
     public NodeCentricOptimizationResults<InnerJoinNode> apply(InnerJoinOptimizationProposal proposal, IntermediateQuery query,
-                                                               QueryTreeComponent treeComponent)
+                                              QueryTreeComponent treeComponent)
             throws InvalidQueryOptimizationProposalException, EmptyQueryException {
 
         InnerJoinNode originalTopJoinNode = proposal.getFocusNode();
 
-        /**
-         * Will remain the sames, whatever happens
-         */
-        Optional<QueryNode> optionalParent = query.getParent(originalTopJoinNode);
-        Optional<QueryNode> optionalNextSibling = query.getNextSibling(originalTopJoinNode);
+        ImmutableList<JoinOrFilterNode> filterOrJoinNodes = extractFilterAndInnerJoinNodes(originalTopJoinNode, query);
 
-        /**
-         * Optimizes
-         */
-        Optional<InnerJoinNode> optionalNewJoinNode = transformJoin(originalTopJoinNode, query, treeComponent);
+        QueryNode parentNode = query.getParent(originalTopJoinNode).get();
 
-        if (optionalNewJoinNode.isPresent()) {
-            return new NodeCentricOptimizationResultsImpl<>(query, optionalNewJoinNode.get());
-        }
-        else {
-            ReactToChildDeletionProposal reactionProposal = new ReactToChildDeletionProposalImpl(originalTopJoinNode,
-                    optionalParent.get(), optionalNextSibling);
-
-            ReactToChildDeletionResults deletionResults = query.applyProposal(reactionProposal);
-
-            return new NodeCentricOptimizationResultsImpl<>(deletionResults.getResultingQuery(),
-                    deletionResults.getOptionalNextSibling(), java.util.Optional.of(deletionResults.getClosestRemainingAncestor()));
-        }
-    }
-
-    /**
-     * TODO: explain
-     */
-    private Optional<InnerJoinNode> transformJoin(InnerJoinNode topJoinNode, IntermediateQuery query,
-                                          QueryTreeComponent treeComponent) {
-
-
-        ImmutableList<JoinOrFilterNode> filterOrJoinNodes = JoinExtractionUtils.extractFilterAndInnerJoinNodes(topJoinNode, query);
-
-        Optional<ImmutableBooleanExpression> optionalAggregatedFilterCondition;
+        Optional<ImmutableExpression> optionalAggregatedFilterCondition;
         try {
-            optionalAggregatedFilterCondition = JoinExtractionUtils.extractFoldAndOptimizeBooleanExpressions(filterOrJoinNodes);
+            optionalAggregatedFilterCondition = extractFoldAndOptimizeBooleanExpressions(filterOrJoinNodes,
+                    query.getMetadata());
         }
         /**
          * The filter condition can be satisfied --> the join node and its sub-tree is thus removed from the tree.
          * Returns no join node.
          */
-        catch (JoinExtractionUtils.InsatisfiedExpressionException e) {
-            treeComponent.removeSubTree(topJoinNode);
-            return Optional.empty();
+        catch (InsatisfiedExpressionException e) {
+            /**
+             * Will remain the sames, whatever happens
+             */
+            ReactToChildDeletionProposal reactionProposal = new ReactToChildDeletionProposalImpl(
+                    parentNode,
+                    query.getNextSibling(originalTopJoinNode),
+                    query.getOptionalPosition(parentNode, originalTopJoinNode),
+                    ProjectedVariableExtractionTools.extractProjectedVariables(query, originalTopJoinNode));
+
+            // Removes the join node
+            treeComponent.removeSubTree(originalTopJoinNode);
+            ReactToChildDeletionResults deletionResults = query.applyProposal(reactionProposal);
+
+            return new NodeCentricOptimizationResultsImpl<>(deletionResults.getResultingQuery(),
+                    deletionResults.getOptionalNextSibling(), Optional.of(deletionResults.getClosestRemainingAncestor()));
         }
 
+        /**
+         * Optimized join node
+         */
         InnerJoinNode newJoinNode = new InnerJoinNodeImpl(optionalAggregatedFilterCondition);
 
-        QueryNode parentNode = treeComponent.getParent(topJoinNode).get();
-        Optional<NonCommutativeOperatorNode.ArgumentPosition> optionalPosition = treeComponent.getOptionalPosition(parentNode, topJoinNode);
-        treeComponent.replaceNodesByOneNode(ImmutableList.<QueryNode>copyOf(filterOrJoinNodes), newJoinNode, parentNode, optionalPosition);
+        Optional<ArgumentPosition> optionalPosition = treeComponent.getOptionalPosition(parentNode, originalTopJoinNode);
+        treeComponent.replaceNodesByOneNode(ImmutableList.<QueryNode>copyOf(filterOrJoinNodes), newJoinNode, parentNode,
+                optionalPosition);
 
-        return Optional.of(newJoinNode);
+        return new NodeCentricOptimizationResultsImpl<>(query, newJoinNode);
     }
 
 

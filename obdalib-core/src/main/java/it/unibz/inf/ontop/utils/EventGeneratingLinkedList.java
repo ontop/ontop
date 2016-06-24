@@ -41,7 +41,7 @@ public class EventGeneratingLinkedList<E> extends LinkedList<E> implements Event
 	private static Logger log = LoggerFactory.getLogger(EventGeneratingLinkedList.class);
 
 	/* (non-Javadoc)
-	 * @see it.unibz.krdb.obda.utils.EventGeneratingList#addListener(it.unibz.krdb.obda.utils.ListListener)
+	 * @see it.unibz.inf.obda.utils.EventGeneratingList#addListener(it.unibz.inf.obda.utils.ListListener)
 	 */
 	@Override
 	public void addListener(ListListener listener) {
@@ -49,7 +49,7 @@ public class EventGeneratingLinkedList<E> extends LinkedList<E> implements Event
 	}
 
 	/* (non-Javadoc)
-	 * @see it.unibz.krdb.obda.utils.EventGeneratingList#removeListener(it.unibz.krdb.obda.utils.ListListener)
+	 * @see it.unibz.inf.obda.utils.EventGeneratingList#removeListener(it.unibz.inf.obda.utils.ListListener)
 	 */
 	@Override
 	public void removeListener(ListListener listener) {
@@ -118,7 +118,7 @@ public class EventGeneratingLinkedList<E> extends LinkedList<E> implements Event
 	}
 
 	/* (non-Javadoc)
-	 * @see it.unibz.krdb.obda.utils.EventGeneratingList#riseListChanged()
+	 * @see it.unibz.inf.obda.utils.EventGeneratingList#riseListChanged()
 	 */
 	@Override
 	public void riseListChanged() {

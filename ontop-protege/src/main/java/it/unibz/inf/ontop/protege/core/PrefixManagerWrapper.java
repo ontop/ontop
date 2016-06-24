@@ -20,17 +20,15 @@ package it.unibz.inf.ontop.protege.core;
  * #L%
  */
 
+import it.unibz.inf.ontop.io.AbstractPrefixManager;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-<<<<<<< HEAD:ontop-protege/src/main/java/it/unibz/inf/ontop/protege/core/PrefixManagerWrapper.java
-import com.google.common.collect.ImmutableMap;
-=======
->>>>>>> v3/package-names-changed:ontop-protege/src/main/java/it/unibz/inf/ontop/protege/core/PrefixManagerWrapper.java
-import it.unibz.inf.ontop.io.AbstractPrefixManager;
-import org.semanticweb.owlapi.vocab.PrefixOWLOntologyFormat;
+import org.semanticweb.owlapi.formats.PrefixDocumentFormat;
+
 
 /**
  * This PrefixManager is meant to 'wrap' Protege's prefix manager. That way any
@@ -38,9 +36,9 @@ import org.semanticweb.owlapi.vocab.PrefixOWLOntologyFormat;
  */
 public class PrefixManagerWrapper extends AbstractPrefixManager {
 
-	PrefixOWLOntologyFormat owlmapper;
+    PrefixDocumentFormat owlmapper;
 
-	public PrefixManagerWrapper(PrefixOWLOntologyFormat owlmapper) {
+	public PrefixManagerWrapper(PrefixDocumentFormat owlmapper) {
 		this.owlmapper = owlmapper;
 	}
 	
@@ -75,11 +73,11 @@ public class PrefixManagerWrapper extends AbstractPrefixManager {
 	}
 
 	public void addPrefix(String name, String uri) {
-		owlmapper.setPrefix(name, getProperPrefixURI(uri));
+		owlmapper.setPrefix(name, uri);
 	}
 
 	public void clear() {
-		owlmapper.clearPrefixes();
+		owlmapper.clear();
 	}
 
 	@Override

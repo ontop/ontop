@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.cli;
 
 /*
  * #%L
- * ontop-quest-owlapi3
+ * ontop-quest-owlapi
  * %%
  * Copyright (C) 2009 - 2014 Free University of Bozen-Bolzano
  * %%
@@ -20,38 +20,28 @@ package it.unibz.inf.ontop.cli;
  * #L%
  */
 
-import com.github.rvesse.airline.Command;
-import com.github.rvesse.airline.Option;
-import com.github.rvesse.airline.OptionType;
-import com.google.common.base.Joiner;
-<<<<<<< HEAD:ontop-cli/src/main/java/it/unibz/inf/ontop/cli/OntopQuery.java
-=======
-import it.unibz.inf.ontop.model.OBDAModel;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
->>>>>>> v3/package-names-changed:ontop-cli/src/main/java/it/unibz/inf/ontop/cli/OntopQuery.java
-import it.unibz.inf.ontop.model.OBDAException;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
+import com.github.rvesse.airline.annotations.Command;
+import com.github.rvesse.airline.annotations.Option;
+import com.github.rvesse.airline.annotations.OptionType;
+import com.github.rvesse.airline.annotations.help.BashCompletion;
+import com.github.rvesse.airline.help.cli.bash.CompletionBehaviour;
+import it.unibz.inf.ontop.exception.InvalidMappingException;
+import it.unibz.inf.ontop.exception.InvalidPredicateDeclarationException;
+import it.unibz.inf.ontop.model.OBDAModel;
+import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
+import org.semanticweb.owlapi.apibinding.OWLManager;
+import org.semanticweb.owlapi.io.ToStringRenderer;
+import org.semanticweb.owlapi.model.OWLOntology;
+import org.semanticweb.owlapi.model.OWLOntologyCreationException;
+import org.semanticweb.owlapi.model.OWLOntologyManager;
+
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
-<<<<<<< HEAD:ontop-cli/src/main/java/it/unibz/inf/ontop/cli/OntopQuery.java
-import it.unibz.inf.ontop.owlrefplatform.owlapi3.*;
-=======
->>>>>>> v3/package-names-changed:ontop-cli/src/main/java/it/unibz/inf/ontop/cli/OntopQuery.java
-import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.OWLException;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyCreationException;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
-import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
-import it.unibz.inf.ontop.owlrefplatform.owlapi3.*;
+import static java.util.stream.Collectors.joining;
 
 @Command(name = "query",
         description = "Query the RDF graph exposed by the mapping and the OWL ontology")
@@ -59,15 +49,14 @@ public class OntopQuery extends OntopReasoningCommandBase {
 
     @Option(type = OptionType.COMMAND, name = {"-q", "--query"}, title = "queryFile",
             description = "SPARQL query file")
+    @BashCompletion(behaviour = CompletionBehaviour.FILENAMES)
     private String queryFile;
 
-
-    public OntopQuery() { }
+    public OntopQuery() {
+    }
 
     @Override
     public void run() {
-
-
         OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
         OWLOntology ontology;
 
@@ -91,24 +80,39 @@ public class OntopQuery extends OntopReasoningCommandBase {
             return;
         }
 
+//        QuestOWLFactory factory = null;
+//        try {
+//            factory = createQueryOWLFactory(nativeOntopMappingFile);
+//        } catch (Exception e1) {
+//            e1.printStackTrace();
+//        }
+
         QuestOWLFactory factory = null;
+        QuestOWLConfiguration config = null;
         try {
-            factory = createQueryOWLFactory(mappingFile);
-        } catch (Exception e1) {
-            e1.printStackTrace();
+            OBDAModel obdaModel = loadMappingFile(mappingFile);
+            QuestOWLConfiguration.Builder builder = QuestOWLConfiguration.builder();
+            builder.obdaModel(obdaModel);
+            builder.queryingAnnotationsInOntology(enableAnnotations);
+            config = builder.build();
+            factory = new QuestOWLFactory();
+        } catch (IOException | InvalidPredicateDeclarationException | InvalidMappingException e) {
+            e.printStackTrace();
+            System.exit(1);
         }
 
-        try (
-                QuestOWL reasoner = factory.createReasoner(ontology, new SimpleConfiguration());
-                QuestOWLConnection conn = reasoner.getConnection();
-                QuestOWLStatement st = conn.createStatement();
+        try (QuestOWL reasoner = factory.createReasoner(ontology, config);
+             QuestOWLConnection conn = reasoner.getConnection();
+             QuestOWLStatement st = conn.createStatement();
         ) {
 
 			/*
              * Reading query file:
 			 */
-            String query = Joiner.on("\n").
-                    join(Files.readAllLines(Paths.get(queryFile), StandardCharsets.UTF_8));
+//            String query = Joiner.on("\n").
+//                    join(Files.readAllLines(Paths.get(queryFile), StandardCharsets.UTF_8));
+
+            String query = Files.lines(Paths.get(queryFile), StandardCharsets.UTF_8).collect(joining("\n"));
 
             QuestOWLResultSet result = st.executeTuple(query);
 
@@ -121,10 +125,6 @@ public class OntopQuery extends OntopReasoningCommandBase {
             printResult(out, result);
 
 
-        } catch (OBDAException e1) {
-            e1.printStackTrace();
-        } catch (OWLException e1) {
-            e1.printStackTrace();
         } catch (Exception e1) {
             e1.printStackTrace();
 
@@ -135,7 +135,7 @@ public class OntopQuery extends OntopReasoningCommandBase {
         BufferedWriter wr = new BufferedWriter(new OutputStreamWriter(out, "utf8"));
 
 		/*
-		 * Printing the header
+         * Printing the header
 		 */
 
         int columns = result.getColumnCount();
@@ -146,13 +146,10 @@ public class OntopQuery extends OntopReasoningCommandBase {
                 wr.append(",");
         }
         wr.newLine();
-		/*
-		 * Printing the header
-		 */
 
         while (result.nextRow()) {
             for (int c = 0; c < columns; c++) {
-                String value = result.getOWLObject(c + 1).toString();
+                String value = ToStringRenderer.getInstance().getRendering(result.getOWLObject(c + 1));
                 wr.append(value);
                 if (c + 1 < columns)
                     wr.append(",");
@@ -162,20 +159,7 @@ public class OntopQuery extends OntopReasoningCommandBase {
         wr.flush();
 
         result.close();
-
     }
 
 
-    public QuestOWLFactory createQueryOWLFactory(String mappingFile) throws Exception {
-
-		/*
-		 * Creating the instance of the reasoner using the factory. Remember
-		 * that the RDBMS that contains the data must be already running and
-		 * accepting connections. The HelloWorld and Books tutorials at our wiki
-		 * show you how to do this.
-		 */
-        QuestOWLFactory factory = new QuestOWLFactory(new File(mappingFile), createPreferences(mappingFile));
-
-        return factory;
-    }
 }

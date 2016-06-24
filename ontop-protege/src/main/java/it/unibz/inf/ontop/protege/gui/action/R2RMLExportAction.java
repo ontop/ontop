@@ -20,38 +20,22 @@ package it.unibz.inf.ontop.protege.gui.action;
  * #L%
  */
 
-import java.awt.event.ActionEvent;
-import java.io.File;
-import java.net.URI;
-
-import javax.swing.JFileChooser;
-
-<<<<<<< HEAD:ontop-protege/src/main/java/it/unibz/inf/ontop/protege/gui/action/R2RMLExportAction.java
-import it.unibz.inf.ontop.protege.core.OBDAModelManager;
-import it.unibz.inf.ontop.protege.core.OBDAModelWrapper;
-=======
-import it.unibz.inf.ontop.model.OBDAModel;
 import it.unibz.inf.ontop.model.impl.OBDAModelImpl;
 import it.unibz.inf.ontop.protege.core.OBDAModelManager;
+import it.unibz.inf.ontop.protege.core.OBDAModelWrapper;
 import it.unibz.inf.ontop.r2rml.R2RMLWriter;
->>>>>>> v3/package-names-changed:ontop-protege/src/main/java/it/unibz/inf/ontop/protege/gui/action/R2RMLExportAction.java
 import org.protege.editor.core.ui.action.ProtegeAction;
 import org.protege.editor.owl.OWLEditorKit;
 import org.protege.editor.owl.model.OWLModelManager;
 import org.protege.editor.owl.model.OWLWorkspace;
-<<<<<<< HEAD:ontop-protege/src/main/java/it/unibz/inf/ontop/protege/gui/action/R2RMLExportAction.java
-import it.unibz.inf.ontop.model.impl.OBDAModelImpl;
-import it.unibz.inf.ontop.r2rml.R2RMLWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
+import java.awt.event.ActionEvent;
+import java.io.File;
+import java.net.URI;
 
-=======
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
->>>>>>> v3/package-names-changed:ontop-protege/src/main/java/it/unibz/inf/ontop/protege/gui/action/R2RMLExportAction.java
 public class R2RMLExportAction extends ProtegeAction {
 
 	private static final long serialVersionUID = -1211395039869926309L;
@@ -91,7 +75,7 @@ public class R2RMLExportAction extends ProtegeAction {
                 int approve = fc.showSaveDialog(workspace);
 
                 if(approve == JFileChooser.APPROVE_OPTION) {
-                File file = fc.getSelectedFile();
+                    File file = fc.getSelectedFile();
 
 
 				R2RMLWriter writer = new R2RMLWriter(obdaModel.getCurrentImmutableOBDAModel(), sourceID,

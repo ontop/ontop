@@ -1,24 +1,17 @@
 package it.unibz.inf.ontop.sql;
 
-
-import java.io.File;
-import java.io.FileReader;
-
+import com.google.common.base.Joiner;
+import com.google.common.io.CharStreams;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
 import it.unibz.inf.ontop.owlrefplatform.core.SQLExecutableQuery;
-import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWL;
-import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWLConnection;
-import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWLFactory;
-import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWLResultSet;
-import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWLStatement;
+import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLObject;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
-import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
 
-import com.google.common.base.Joiner;
-import com.google.common.io.CharStreams;
+import java.io.File;
+import java.io.FileReader;
 
 /**
  *
@@ -39,7 +32,7 @@ public class ADPOntopTest {
 		 */
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 		OWLOntology ontology = manager.loadOntologyFromOntologyDocument(new File(owlfile));
-		
+
 		/*
 		 * Prepare the configuration for the Quest instance. The example below shows the setup for
 		 * "Virtual ABox" mode
@@ -50,8 +43,11 @@ public class ADPOntopTest {
 		/*
 		 * Create the instance of Quest OWL reasoner.
 		 */
-		QuestOWLFactory factory = new QuestOWLFactory(new File(obdafile), preferences);
-		QuestOWL reasoner = factory.createReasoner(ontology, new SimpleConfiguration());
+        QuestOWLFactory factory = new QuestOWLFactory();
+        QuestOWLConfiguration config = QuestOWLConfiguration.builder()
+				.nativeOntopMappingFile(new File(obdafile))
+				.preferences(preferences).build();
+        QuestOWL reasoner = factory.createReasoner(ontology, config);
 
 		/*
 		 * Prepare the data connection for querying.

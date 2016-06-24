@@ -1,31 +1,23 @@
 package it.unibz.inf.ontop.owlrefplatform.sql;
 
-import static org.junit.Assert.*;
-
-import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
 import it.unibz.inf.ontop.owlrefplatform.core.SQLExecutableQuery;
-import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWL;
-import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWLConnection;
-import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWLFactory;
-import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWLStatement;
-
-import java.io.File;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.util.Properties;
-import java.util.Scanner;
-
+import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
-import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+import java.util.Scanner;
+
+import static org.junit.Assert.assertFalse;
 
 /**
  * Tests that the generated SQL contains no blank lines
@@ -90,11 +82,12 @@ public class TestSQLBlankLines {
 			OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 			ontology = manager.loadOntologyFromOntologyDocument((new File(owlfile)));
 
-			Properties p = new Properties();
-			p.setProperty(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-			p.setProperty(QuestPreferences.OBTAIN_FULL_METADATA, QuestConstants.FALSE);
 			// Creating a new instance of the reasoner
-			this.factory = new QuestOWLFactory(new File(obdafile), new QuestPreferences(p));
+			this.factory = new QuestOWLFactory();
+	        QuestOWLConfiguration config = QuestOWLConfiguration.builder()
+					.nativeOntopMappingFile(obdafile).build();
+	        reasoner = factory.createReasoner(ontology, config);
+
 
 		} catch (Exception exc) {
 			try {
@@ -108,7 +101,6 @@ public class TestSQLBlankLines {
 
 	@Test
 	public void testNoSQLBlankLines() throws Exception {
-		reasoner = (QuestOWL) factory.createReasoner(ontology, new SimpleConfiguration());
 
 		// Now we are ready for querying
 		conn = reasoner.getConnection();

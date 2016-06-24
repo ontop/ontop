@@ -20,16 +20,6 @@ package it.unibz.inf.ontop.sesame;
  * #L%
  */
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.FilenameFilter;
-import java.net.URI;
-import java.sql.Connection;
-import java.util.Properties;
-
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
@@ -42,10 +32,7 @@ import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.model.impl.RDBMSourceParameterConstants;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
-import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWL;
-import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWLConnection;
-import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWLFactory;
-import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWLStatement;
+import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import it.unibz.inf.ontop.querymanager.QueryController;
 import it.unibz.inf.ontop.querymanager.QueryControllerEntity;
 import it.unibz.inf.ontop.querymanager.QueryControllerQuery;
@@ -55,6 +42,11 @@ import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.*;
+import java.net.URI;
+import java.sql.Connection;
+import java.util.Properties;
 
 /***
  * Tests if QuestOWL can be initialized on top of an existing semantic index
@@ -197,7 +189,10 @@ public class LUBM50Tests {
 		p.setProperty(QuestPreferences.REWRITE, "true");
 
         QuestOWLFactory fac = new QuestOWLFactory(new QuestPreferences(p));
-		QuestOWL quest = fac.createReasoner(ontology);
+		QuestOWLConfiguration config = QuestOWLConfiguration.builder()
+				.properties(p)
+				.build();
+		QuestOWL quest = fac.createReasoner(ontology, config);
 
 		QuestOWLConnection qconn = quest.getConnection();
 

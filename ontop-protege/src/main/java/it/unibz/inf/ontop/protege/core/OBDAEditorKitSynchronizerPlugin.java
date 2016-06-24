@@ -20,25 +20,8 @@ package it.unibz.inf.ontop.protege.core;
  * #L%
  */
 
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
-
-<<<<<<< HEAD:ontop-protege/src/main/java/it/unibz/inf/ontop/protege/core/OBDAEditorKitSynchronizerPlugin.java
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-=======
-import it.unibz.inf.ontop.model.impl.OBDAModelImpl;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
-import it.unibz.inf.ontop.utils.OBDAPreferences;
->>>>>>> v3/package-names-changed:ontop-protege/src/main/java/it/unibz/inf/ontop/protege/core/OBDAEditorKitSynchronizerPlugin.java
-import org.protege.editor.core.editorkit.EditorKit;
-import org.protege.editor.core.editorkit.plugin.EditorKitHook;
-import org.protege.editor.core.prefs.Preferences;
-import org.protege.editor.core.prefs.PreferencesManager;
-import org.protege.editor.owl.OWLEditorKit;
-<<<<<<< HEAD:ontop-protege/src/main/java/it/unibz/inf/ontop/protege/core/OBDAEditorKitSynchronizerPlugin.java
 import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
 import it.unibz.inf.ontop.injection.OBDACoreModule;
 import it.unibz.inf.ontop.injection.OBDAFactoryWithException;
@@ -46,8 +29,15 @@ import it.unibz.inf.ontop.model.impl.OBDAModelImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
 import it.unibz.inf.ontop.owlrefplatform.injection.QuestComponentModule;
-=======
->>>>>>> v3/package-names-changed:ontop-protege/src/main/java/it/unibz/inf/ontop/protege/core/OBDAEditorKitSynchronizerPlugin.java
+import org.protege.editor.core.editorkit.EditorKit;
+import org.protege.editor.core.editorkit.plugin.EditorKitHook;
+import org.protege.editor.core.prefs.Preferences;
+import org.protege.editor.core.prefs.PreferencesManager;
+import org.protege.editor.owl.OWLEditorKit;
+
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
 
 /***
  * This class is responsible for initializing all base classes for the OBDA
@@ -64,8 +54,8 @@ public class OBDAEditorKitSynchronizerPlugin extends EditorKitHook {
 	OBDAModelManager instance = null;
 	OWLEditorKit kit = null;
 //	OWLModelManager mmgr = null;
-	ProtegeOBDAPreferences obdaPref = null;
-	ProtegeReformulationPlatformPreferences refplatPref = null;
+	DisposableOBDAPreferences obdaPref = null;
+	DisposableQuestPreferences refplatPref = null;
 	
 	@Override
 	protected void setup(EditorKit editorKit) {
@@ -78,13 +68,13 @@ public class OBDAEditorKitSynchronizerPlugin extends EditorKitHook {
         /***
          * Preferences for the OBDA plugin (gui, etc)
          */
-        obdaPref = new ProtegeOBDAPreferences();
-        getEditorKit().put(ProtegeOBDAPreferences.class.getName(), obdaPref);
+        obdaPref = new DisposableOBDAPreferences();
+        getEditorKit().put(DisposableOBDAPreferences.class.getName(), obdaPref);
 
         /***
          * Preferences for Quest
          */
-        refplatPref = new ProtegeReformulationPlatformPreferences();
+        refplatPref = new DisposableQuestPreferences();
         getEditorKit().put(QuestPreferences.class.getName(),refplatPref);
         loadPreferences();
 
@@ -117,6 +107,8 @@ public class OBDAEditorKitSynchronizerPlugin extends EditorKitHook {
 
 		// getEditorKit().getModelManager().put(APIController.class.getName(),
 		// instance);
+
+		loadPreferences();
 	}
 
 	@Override

@@ -20,26 +20,20 @@ package it.unibz.inf.ontop.owlrefplatform.core.unfolding;
  * #L%
  */
 
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import it.unibz.inf.ontop.model.*;
+import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 
 import java.util.ArrayList;
 
 import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
+import junit.framework.TestCase;
 import org.junit.Ignore;
-import it.unibz.inf.ontop.model.CQIE;
-import it.unibz.inf.ontop.model.DatalogProgram;
-import it.unibz.inf.ontop.model.Function;
-import it.unibz.inf.ontop.model.OBDADataFactory;
-import it.unibz.inf.ontop.model.Predicate;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.Multimap;
-
-public class LeftJoinUnfoldingTest{
+/**
+ * TODO: port it to the new IntermediateQuery data structure
+ */
+@Ignore
+public class LeftJoinUnfoldingTest extends TestCase {
 	OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 
 	@Ignore
@@ -74,10 +68,8 @@ public class LeftJoinUnfoldingTest{
 		CQIE rule3 = fac.getCQIE(head, body);
 		p.appendRule(rule3);
 
-		DatalogUnfolder unfolder = new DatalogUnfolder(p);
-		Multimap<Predicate,Integer> multiplePredIdx = ArrayListMultimap.create();
-
-		DatalogProgram result = unfolder.unfold(queryProgram, "q", QuestConstants.TDOWN,true,multiplePredIdx);
+		DatalogUnfolder unfolder = new DatalogUnfolder(p.getRules());
+		DatalogProgram result = unfolder.unfold(queryProgram, "q", QuestConstants.TDOWN, true);
 
 		System.out.println(result);
 
@@ -128,10 +120,9 @@ public class LeftJoinUnfoldingTest{
 		CQIE rule3 = fac.getCQIE(head, body);
 		p.appendRule(rule3);
 
-		DatalogUnfolder unfolder = new DatalogUnfolder(p);
-		Multimap<Predicate,Integer> multiplePredIdx = ArrayListMultimap.create();
+		DatalogUnfolder unfolder = new DatalogUnfolder(p.getRules());
 
-		DatalogProgram result = unfolder.unfold(queryProgram, "q",QuestConstants.TDOWN,true,multiplePredIdx);
+		DatalogProgram result = unfolder.unfold(queryProgram, "q",QuestConstants.TDOWN, true);
 
 		System.out.println(result);
 
@@ -179,10 +170,9 @@ public class LeftJoinUnfoldingTest{
 		head = fac.getFunction(fac.getPredicate("R", 2), fac.getFunction(fac.getPredicate("g", 1), fac.getVariable("x")), fac.getVariable("y"));
 		CQIE rule3 = fac.getCQIE(head, body);
 		p.appendRule(rule3);
-		Multimap<Predicate,Integer> multiplePredIdx = ArrayListMultimap.create();
 
-		DatalogUnfolder unfolder = new DatalogUnfolder(p);
-		DatalogProgram result = unfolder.unfold(queryProgram, "q",QuestConstants.TDOWN,true, multiplePredIdx) ;
+		DatalogUnfolder unfolder = new DatalogUnfolder(p.getRules());
+		DatalogProgram result = unfolder.unfold(queryProgram, "q",QuestConstants.TDOWN, true) ;
 
 		// Only one rule should be returned where y is null
 		System.out.println(result);
@@ -228,10 +218,9 @@ public class LeftJoinUnfoldingTest{
 			CQIE rule3 = fac.getCQIE(head, body);
 			p.appendRule(rule3);
 
-			DatalogUnfolder unfolder = new DatalogUnfolder(p);
-			Multimap<Predicate,Integer> multiplePredIdx = ArrayListMultimap.create();
+			DatalogUnfolder unfolder = new DatalogUnfolder(p.getRules());
 
-			DatalogProgram result = unfolder.unfold(queryProgram, "q",QuestConstants.TDOWN,true, multiplePredIdx);
+			DatalogProgram result = unfolder.unfold(queryProgram, "q",QuestConstants.TDOWN, true);
 
 			// Only one rule should be returned where y is null
 			System.out.println(result);
@@ -269,10 +258,9 @@ public class LeftJoinUnfoldingTest{
 		CQIE rule1 = fac.getCQIE(head, lj);
 		query.appendRule(rule1);
 
-		DatalogUnfolder unfolder = new DatalogUnfolder(p);
-		Multimap<Predicate,Integer> multiplePredIdx = ArrayListMultimap.create();
+		DatalogUnfolder unfolder = new DatalogUnfolder(p.getRules());
 
-		DatalogProgram result = unfolder.unfold(query, "q",QuestConstants.TDOWN,true, multiplePredIdx);
+		DatalogProgram result = unfolder.unfold(query, "q",QuestConstants.TDOWN, true);
 
 		// Only one rule should be returned where y is null
 		System.out.println(result);

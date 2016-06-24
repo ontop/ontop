@@ -20,23 +20,7 @@ package it.unibz.inf.ontop.obda;
  * #L%
  */
 
-import it.unibz.inf.ontop.owlrefplatform.owlapi3.*;
-import org.junit.Before;
-import org.junit.Test;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
-import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
-import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.io.File;
-import java.util.Properties;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import it.unibz.inf.ontop.quest.AbstractVirtualModeTest;
 
 /**
  * Test if the datatypes are assigned correctly.
@@ -45,105 +29,35 @@ import static org.junit.Assert.assertTrue;
  * 
  */
 
-public class OntologyTypesStockexchangeTest {
+public class OntologyTypesStockexchangeTest extends AbstractVirtualModeTest {
+    
+	static final String owlFile = "src/main/resources/testcases-scenarios/virtual-mode/stockexchange/simplecq/stockexchange.owl";
+	static final String obdaFile = "src/main/resources/testcases-scenarios/virtual-mode/stockexchange/simplecq/stockexchange-db2.obda";
 
-	Logger log = LoggerFactory.getLogger(this.getClass());
-	private OWLOntology ontology;
-
-	final String owlFile = "src/main/resources/testcases-scenarios/virtual-mode/stockexchange/simplecq/stockexchange.owl";
-	final String obdaFile = "src/main/resources/testcases-scenarios/virtual-mode/stockexchange/simplecq/stockexchange-db2.obda";
-
-	@Before
-	public void setUp() throws Exception {
-		
-		// Loading the OWL file
-		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-		ontology = manager.loadOntologyFromOntologyDocument((new File(owlFile)));
-		
-	}
-
-	private void runTests(Properties p, String query1, int numberResults) throws Exception {
-
-		// Creating a new instance of the reasoner
-        QuestOWLFactory factory = new QuestOWLFactory(new File(obdaFile), new QuestPreferences(p));
-
-		QuestOWL reasoner = factory.createReasoner(ontology, new SimpleConfiguration());
-
-		// Now we are ready for querying
-		QuestOWLConnection conn = reasoner.getConnection();
-		QuestOWLStatement st = conn.createStatement();
+    public OntologyTypesStockexchangeTest() {
+        super(owlFile, obdaFile);
+    }
 
 
-		try {
-			executeQueryAssertResults(query1, st, numberResults);
-			
-		} catch (Exception e) {
-            st.close();
-            e.printStackTrace();
-            assertTrue(false);
-
-
-		} finally {
-
-			conn.close();
-			reasoner.dispose();
-		}
-	}
-	
-	private void executeQueryAssertResults(String query, QuestOWLStatement st, int expectedRows) throws Exception {
-		QuestOWLResultSet rs = st.executeTuple(query);
-		int count = 0;
-		while (rs.nextRow()) {
-			count++;
-			for (int i = 1; i <= rs.getColumnCount(); i++) {
-				System.out.print(rs.getSignature().get(i-1));
-				System.out.print("=" + rs.getOWLObject(i));
-				System.out.print(" ");
-			}
-			System.out.println();
-		}
-		rs.close();
-		assertEquals(expectedRows, count);
-	}
-
-
-	@Test //we need xsd:string to work correctly 
+    //we need xsd:string to work correctly 
 	public void testQuotedLiteral() throws Exception {
-
-		Properties p = new Properties();
-		p.setProperty(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-		p.setProperty(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-		p.setProperty(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
-
         String query1 = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#>\n SELECT DISTINCT ?x ?street WHERE {?x a :Address; :inStreet ?street; :inCity \"Bolzano\".}";
 
-		runTests(p, query1, 0 );
+		countResults(query1, 0 );
 	}
 
-    @Test
+    
     public void testDatatypeString() throws Exception {
-
-        Properties p = new Properties();
-        p.setProperty(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-        p.setProperty(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-        p.setProperty(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
-
         String query1 = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#>\n SELECT DISTINCT ?x ?street WHERE {?x a :Address; :inStreet ?street; :inCity \"Bolzano\"^^xsd:string .}";
 
-        runTests(p, query1, 2 );
+        countResults(query1, 2 );
     }
     
     
 
 
-    @Test //we need xsd:string to work correctly 
+    //we need xsd:string to work correctly 
     public void testAddressesQuotedLiteral() throws Exception {
-
-        Properties p = new Properties();
-        p.setProperty(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-        p.setProperty(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-        p.setProperty(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
-
         String query1 = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#>\n" +
                 "SELECT DISTINCT * WHERE {      \n" +
                 "\t    $x a :Address . \n" +
@@ -155,140 +69,76 @@ public class OntologyTypesStockexchangeTest {
                 "\t\t$x :hasNumber $number.\n" +
                 "}";
 
-        runTests(p, query1, 0 );
+        countResults(query1, 0 );
     }
 
-    @Test //in db2 there is no boolean type we refer to it in the database with a smallint 1 for true and a smallint 0 for false
+    //in db2 there is no boolean type we refer to it in the database with a smallint 1 for true and a smallint 0 for false
     public void testBooleanDatatype() throws Exception {
-
-        Properties p = new Properties();
-        p.setProperty(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-        p.setProperty(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-        p.setProperty(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
-
         String query1 = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#>\n SELECT DISTINCT ?x WHERE { ?x a :Stock; :amountOfShares ?amount; :typeOfShares \"1\"^^xsd:integer . }";
 
-        runTests(p, query1, 5 );
-    }
-
-    @Test
-    public void testBooleanInteger() throws Exception {
-
-        Properties p = new Properties();
-        p.setProperty(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-        p.setProperty(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-        p.setProperty(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
-
-        String query1 = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#>\n SELECT DISTINCT ?x WHERE { ?x a :Stock; :amountOfShares ?amount; :typeOfShares 1 . }";
-
-        runTests(p, query1, 5 );
-    }
-
-    //in db2 there is no boolean datatype, it is substitute with smallint
-    @Test
-    public void testBoolean() throws Exception {
-
-        Properties p = new Properties();
-        p.setProperty(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-        p.setProperty(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-        p.setProperty(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
-
-        String query1 = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#>\n SELECT DISTINCT ?x WHERE { ?x a :Stock; :amountOfShares ?amount; :typeOfShares TRUE . }";
-
-        runTests(p, query1, 0 );
-    }
-
-    //in db2 there is no boolean datatype, it is substitute with smallint
-    @Test
-    public void testBooleanTrueDatatype() throws Exception {
-
-        Properties p = new Properties();
-        p.setProperty(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-        p.setProperty(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-        p.setProperty(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
-
-        String query1 = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#>\n SELECT DISTINCT ?x WHERE { ?x a :Stock; :amountOfShares ?amount; :typeOfShares \"1\"^^xsd:boolean . }";
-
-        runTests(p, query1, 0 );
-    }
-
-
-    @Test
-    public void testFilterBoolean() throws Exception {
-
-        Properties p = new Properties();
-        p.setProperty(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-        p.setProperty(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-        p.setProperty(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
-
-        String query1 = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#>\n SELECT DISTINCT ?x ?amount WHERE { ?x a :Stock; :amountOfShares ?amount; :typeOfShares ?type. FILTER ( ?type = 1 ). }";
-
-        runTests(p, query1, 5 );
-    }
-
-    @Test
-    public void testNotFilterBoolean() throws Exception {
-
-        Properties p = new Properties();
-        p.setProperty(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-        p.setProperty(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-        p.setProperty(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
-
-        String query1 = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#>\n SELECT DISTINCT ?x ?amount WHERE { ?x a :Stock; :amountOfShares ?amount; :typeOfShares ?type. FILTER ( ?type != 1 ). }";
-
-        runTests(p, query1, 5 );
+        countResults(query1, 5 );
     }
     
-    @Test //a quoted integer is treated as a literal
-    public void testQuotedInteger() throws Exception {
+    public void testBooleanInteger() throws Exception {
+        String query1 = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#>\n SELECT DISTINCT ?x WHERE { ?x a :Stock; :amountOfShares ?amount; :typeOfShares 1 . }";
 
-    	  Properties p = new Properties();
-          p.setProperty(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-          p.setProperty(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-          p.setProperty(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
+        countResults(query1, 5 );
+    }
+
+    //in db2 there is no boolean datatype, it is substitute with smallint
+    public void testBoolean() throws Exception {
+        String query1 = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#>\n SELECT DISTINCT ?x WHERE { ?x a :Stock; :amountOfShares ?amount; :typeOfShares TRUE . }";
+
+        countResults(query1, 0 );
+    }
+
+    //in db2 there is no boolean datatype, it is substitute with smallint
+    public void testBooleanTrueDatatype() throws Exception {
+        String query1 = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#>\n SELECT DISTINCT ?x WHERE { ?x a :Stock; :amountOfShares ?amount; :typeOfShares \"1\"^^xsd:boolean . }";
+
+        countResults(query1, 0 );
+    }
+    
+    public void testFilterBoolean() throws Exception {
+        String query1 = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#>\n SELECT DISTINCT ?x ?amount WHERE { ?x a :Stock; :amountOfShares ?amount; :typeOfShares ?type. FILTER ( ?type = 1 ). }";
+
+        countResults(query1, 5 );
+    }
+    
+    public void testNotFilterBoolean() throws Exception {
+        String query1 = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#>\n SELECT DISTINCT ?x ?amount WHERE { ?x a :Stock; :amountOfShares ?amount; :typeOfShares ?type. FILTER ( ?type != 1 ). }";
+
+        countResults(query1, 5 );
+    }
+    
+    //a quoted integer is treated as a literal
+    public void testQuotedInteger() throws Exception {
 
           String query1 = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#>\n SELECT DISTINCT ?x WHERE { ?x a :Stock; :amountOfShares ?amount; :typeOfShares \"1\" . }";
 
-          runTests(p, query1, 0 );
+          countResults(query1, 0 );
     }
 
 
-    @Test //a quoted datatype is treated as a literal
+    //a quoted datatype is treated as a literal
     public void testDatatype() throws Exception {
-
-        Properties p = new Properties();
-        p.put(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-        p.put(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-        p.put(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
 
         String query1 = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#>\n SELECT DISTINCT ?x WHERE { ?x a :Transaction; :transactionID ?id; :transactionDate \"2008-04-02T00:00:00\"^^<http://www.w3.org/2001/XMLSchema#dateTime> . }";
 
-        runTests(p, query1, 1 );
+        countResults(query1, 1 );
     }
 
-    @Test //a quoted datatype is treated as a literal
+    //a quoted datatype is treated as a literal
     public void testQuotedDatatype() throws Exception {
-
-        Properties p = new Properties();
-        p.put(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-        p.put(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-        p.put(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
-
         String query1 = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#>\n SELECT DISTINCT ?x WHERE { ?x a :Transaction; :transactionID ?id; :transactionDate \"2008-04-02T00:00:00\" . }";
 
-        runTests(p, query1, 0 );
+        countResults(query1, 0 );
     }
 
-    @Test //a quoted datatype is treated as a literal
+    //a quoted datatype is treated as a literal
     public void testDatatypeTimezone() throws Exception {
-
-        Properties p = new Properties();
-        p.put(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-        p.put(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-        p.put(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
-
         String query1 = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#>\n SELECT DISTINCT ?x WHERE { ?x a :Transaction; :transactionID ?id; :transactionDate \"2008-04-02T00:00:00+06:00\"^^<http://www.w3.org/2001/XMLSchema#dateTime> . }";
 
-        runTests(p, query1, 1 );
+        countResults(query1, 1 );
     }
 }

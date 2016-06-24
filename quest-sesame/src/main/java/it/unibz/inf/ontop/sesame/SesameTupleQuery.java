@@ -1,6 +1,5 @@
 package it.unibz.inf.ontop.sesame;
 
-
 /*
  * #%L
  * ontop-quest-sesame
@@ -21,19 +20,23 @@ package it.unibz.inf.ontop.sesame;
  * #L%
  */
 
+import it.unibz.inf.ontop.model.OBDAException;
+import it.unibz.inf.ontop.model.TupleResultSet;
+import it.unibz.inf.ontop.owlrefplatform.core.QuestDBConnection;
+import it.unibz.inf.ontop.owlrefplatform.core.QuestDBStatement;
 
+import it.unibz.inf.ontop.model.TupleResultSet;
+import it.unibz.inf.ontop.owlrefplatform.core.QuestDBConnection;
+import it.unibz.inf.ontop.owlrefplatform.core.QuestDBStatement;
 import org.openrdf.query.MalformedQueryException;
 import org.openrdf.query.QueryEvaluationException;
 import org.openrdf.query.TupleQuery;
 import org.openrdf.query.TupleQueryResult;
 import org.openrdf.query.TupleQueryResultHandler;
 import org.openrdf.query.TupleQueryResultHandlerException;
-import it.unibz.inf.ontop.model.OBDAException;
-import it.unibz.inf.ontop.model.TupleResultSet;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestDBConnection;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestDBStatement;
 
 import java.util.List;
+
 
 public class SesameTupleQuery extends SesameAbstractQuery implements TupleQuery {
 

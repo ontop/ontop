@@ -20,21 +20,15 @@ package it.unibz.inf.ontop.protege.views;
  * #L%
  */
 
-import java.awt.BorderLayout;
-
-<<<<<<< HEAD:ontop-protege/src/main/java/it/unibz/inf/ontop/protege/views/QueryManagerView.java
-=======
 import it.unibz.inf.ontop.model.impl.OBDAModelImpl;
->>>>>>> v3/package-names-changed:ontop-protege/src/main/java/it/unibz/inf/ontop/protege/views/QueryManagerView.java
 import it.unibz.inf.ontop.protege.core.OBDAModelManager;
 import it.unibz.inf.ontop.protege.core.OBDAModelManagerListener;
 import it.unibz.inf.ontop.protege.panels.SavedQueriesPanel;
 import it.unibz.inf.ontop.protege.panels.SavedQueriesPanelListener;
+
+import java.awt.BorderLayout;
+
 import org.protege.editor.owl.ui.view.AbstractOWLViewComponent;
-<<<<<<< HEAD:ontop-protege/src/main/java/it/unibz/inf/ontop/protege/views/QueryManagerView.java
-import it.unibz.inf.ontop.model.impl.OBDAModelImpl;
-=======
->>>>>>> v3/package-names-changed:ontop-protege/src/main/java/it/unibz/inf/ontop/protege/views/QueryManagerView.java
 
 public class QueryManagerView extends AbstractOWLViewComponent implements OBDAModelManagerListener {
 

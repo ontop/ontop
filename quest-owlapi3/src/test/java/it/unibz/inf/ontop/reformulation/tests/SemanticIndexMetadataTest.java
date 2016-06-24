@@ -1,6 +1,13 @@
 package it.unibz.inf.ontop.reformulation.tests;
 
-
+import it.unibz.inf.ontop.ontology.Ontology;
+import it.unibz.inf.ontop.ontology.OntologyFactory;
+import it.unibz.inf.ontop.ontology.OntologyVocabulary;
+import it.unibz.inf.ontop.ontology.impl.OntologyFactoryImpl;
+import it.unibz.inf.ontop.owlrefplatform.core.Quest;
+import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
+import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
+import it.unibz.inf.ontop.owlrefplatform.core.abox.RDBMSSIRepositoryManager;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -11,16 +18,11 @@ import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.Properties;
 
+import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWL;
+import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLConfiguration;
+import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLFactory;
 import junit.framework.TestCase;
 
-import it.unibz.inf.ontop.ontology.Ontology;
-import it.unibz.inf.ontop.ontology.OntologyFactory;
-import it.unibz.inf.ontop.ontology.impl.OntologyFactoryImpl;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
-import it.unibz.inf.ontop.owlrefplatform.core.abox.RDBMSSIRepositoryManager;
-import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWL;
-import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWLFactory;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
@@ -96,21 +98,29 @@ public class SemanticIndexMetadataTest  extends TestCase {
 			p.put(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
 			p.put(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
 			p.put(QuestPreferences.OBTAIN_FROM_ONTOLOGY, "true");
-			p.put(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
 			p.put(QuestPreferences.STORAGE_LOCATION, QuestConstants.INMEMORY);
 			
 			p.setProperty("rewrite", "true");
 
 			OntologyFactory ofac = OntologyFactoryImpl.getInstance();
-			Ontology ont = ofac.createOntology();
-			ont.getVocabulary().createClass("A");
-			ont.getVocabulary().createObjectProperty("P");
-			ont.getVocabulary().createDataProperty("P");
-			ont.getVocabulary().createObjectProperty("Q");
-			ont.getVocabulary().createDataProperty("D");
+			OntologyVocabulary vb = ofac.createVocabulary();
 
-			QuestOWLFactory factory = new QuestOWLFactory(new QuestPreferences(p));
-			QuestOWL reasoner = factory.createReasoner(ontology);
+			vb.createClass("A");
+			vb.createObjectProperty("P");
+			vb.createDataProperty("P");
+			vb.createObjectProperty("Q");
+			vb.createDataProperty("D");
+
+			Ontology ont = ofac.createOntology(vb);
+
+			QuestOWLFactory factory = new QuestOWLFactory();
+			QuestOWLConfiguration config = QuestOWLConfiguration.builder()
+					.properties(p)
+					.build();
+			QuestOWL reasoner = factory.createReasoner(ontology, config);
+
+			Quest quest = new Quest(ont, p);
+			quest.setupRepository();
 			
 			RDBMSSIRepositoryManager si = reasoner.getQuestInstance().getOptionalSemanticIndexRepository().get();
 			

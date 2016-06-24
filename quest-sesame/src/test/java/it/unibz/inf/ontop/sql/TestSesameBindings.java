@@ -21,6 +21,8 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Properties;
 import java.util.Scanner;
+
+import it.unibz.inf.ontop.owlrefplatform.core.R2RMLQuestPreferences;
 import org.junit.After;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -37,7 +39,6 @@ import org.openrdf.query.TupleQueryResult;
 import it.unibz.inf.ontop.injection.OBDAProperties;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
-import it.unibz.inf.ontop.owlrefplatform.questdb.R2RMLQuestPreferences;
 import it.unibz.inf.ontop.sesame.RepositoryConnection;
 import it.unibz.inf.ontop.sesame.SesameVirtualRepo;
 

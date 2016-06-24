@@ -72,7 +72,7 @@ public class CQIEImpl implements CQIE, ListListener {
 			subscribeHeadTerms(head);
 		}
 	}
-	
+
 	private void subscribeHeadTerms(Function head) {
 		if (head instanceof ListenableFunction) {
 			EventGeneratingList<Term> headterms = ((ListenableFunction)head).getTerms();
@@ -232,21 +232,11 @@ public class CQIEImpl implements CQIE, ListListener {
 	}
 
 	@Override
-	public OBDAQueryModifiers getQueryModifiers() {
-		return new MutableQueryModifiersImpl();
-	}
-
-	@Override
 	public Set<Variable> getReferencedVariables() {
 		Set<Variable> vars = new LinkedHashSet<Variable>();
 		for (Function atom : body) {
 			TermUtils.addReferencedVariablesTo(vars, atom);
 			}
 		return vars;
-	}
-
-	@Override
-	public boolean hasModifiers() {
-		return false;
 	}
 }

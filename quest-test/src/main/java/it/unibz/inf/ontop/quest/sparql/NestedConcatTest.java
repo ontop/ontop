@@ -1,7 +1,8 @@
 package it.unibz.inf.ontop.quest.sparql;
+
 /*
  * #%L
- * ontop-quest-owlapi3
+ * ontop-quest-owlapi
  * %%
  * Copyright (C) 2009 - 2014 Free University of Bozen-Bolzano
  * %%
@@ -19,20 +20,14 @@ package it.unibz.inf.ontop.quest.sparql;
  * #L%
  */
 
-import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
 import it.unibz.inf.ontop.owlrefplatform.core.SQLExecutableQuery;
-import it.unibz.inf.ontop.owlrefplatform.owlapi3.*;
-import org.semanticweb.owlapi.apibinding.OWLManager;
+import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLResultSet;
+import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLStatement;
+import it.unibz.inf.ontop.quest.AbstractVirtualModeTest;
 import org.semanticweb.owlapi.model.OWLObject;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
-import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
-import org.junit.Test;
-import java.io.File;
-import java.util.Properties;
 
-public class NestedConcatTest {
+
+public class NestedConcatTest extends AbstractVirtualModeTest {
 
     /*
      * Use the sample database using H2 from
@@ -43,35 +38,15 @@ public class NestedConcatTest {
      * Test with not latin Character
      *
      */
-    final String owlfile = "src/test/resources/nestedConcat/test.owl";
-    final String obdafile = "src/test/resources/nestedConcat/test.obda";
+    static final String owlfile = "src/test/resources/nestedConcat/test.owl";
+    static final String obdafile = "src/test/resources/nestedConcat/test.obda";
 
-    @Test
+    protected NestedConcatTest() {
+        super(owlfile, obdafile);
+    }
+
     public void runQuery() throws Exception {
 
-		/*
-		 * Load the ontology from an external .owl file.
-		 */
-        OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-        OWLOntology ontology = manager.loadOntologyFromOntologyDocument(new File(owlfile));
-
-		/*
-		 * Prepare the configuration for the Quest instance. The example below shows the setup for
-		 * "Virtual ABox" mode
-		 */
-        Properties p = new Properties();
-        p.put(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-
-		/*
-		 * Create the instance of Quest OWL reasoner.
-		 */
-        QuestOWLFactory factory = new QuestOWLFactory(new File(obdafile), new QuestPreferences(p));
-        QuestOWL reasoner = factory.createReasoner(ontology, new SimpleConfiguration());
-
-		/*
-		 * Prepare the data connection for querying.
-		 */
-        QuestOWLConnection conn = reasoner.getConnection();
         QuestOWLStatement st = conn.createStatement();
 
 		/*
@@ -85,11 +60,11 @@ public class NestedConcatTest {
 //                        "}\n" +
 //                        "LIMIT 1";
                 "PREFIX : <http://www.semanticweb.org/meme/ontologies/2015/3/test#>\n" +
-                        "SELECT ?per ?yS ?yE\n" +
-                        "WHERE{\n" +
-                        "?per a :Period ; :yStart ?yS ; :yEnd ?yE\n" +
-                        "}\n" +
-                        "LIMIT 1";
+                            "SELECT ?per ?yS ?yE\n" +
+                            "WHERE{\n" +
+                            "?per a :Period ; :yStart ?yS ; :yEnd ?yE\n" +
+                            "}\n" +
+                            "LIMIT 1";
 
         try {
             long t1 = System.currentTimeMillis();
@@ -108,8 +83,7 @@ public class NestedConcatTest {
 			/*
 			 * Print the query summary
 			 */
-            QuestOWLStatement qst = (QuestOWLStatement) st;
-            String sqlQuery = ((SQLExecutableQuery)qst.getExecutableQuery(sparqlQuery)).getSQL();
+            String sqlQuery = ((SQLExecutableQuery)st.getExecutableQuery(sparqlQuery)).getSQL();
 
             System.out.println();
             System.out.println("The input SPARQL query:");
@@ -137,18 +111,6 @@ public class NestedConcatTest {
                 conn.close();
             }
             reasoner.dispose();
-        }
-    }
-
-    /**
-     * Main client program
-     */
-    public static void main(String[] args) {
-        try {
-            NestedConcatTest example = new NestedConcatTest();
-            example.runQuery();
-        } catch (Exception e) {
-            e.printStackTrace();
         }
     }
 }

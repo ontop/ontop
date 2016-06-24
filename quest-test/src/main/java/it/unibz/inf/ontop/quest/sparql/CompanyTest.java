@@ -20,33 +20,11 @@ package it.unibz.inf.ontop.quest.sparql;
  * #L%
  */
 
-
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.Properties;
-
-import junit.framework.TestCase;
-
-import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
-import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWL;
-import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWLConnection;
-import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWLFactory;
-import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWLResultSet;
-import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWLStatement;
-import org.semanticweb.owlapi.apibinding.OWLManager;
+import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLResultSet;
+import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLStatement;
+import it.unibz.inf.ontop.quest.AbstractVirtualModeTest;
 import org.semanticweb.owlapi.model.OWLObject;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
-import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
 
 /***
  * Check how the optional filter is converted in left join
@@ -55,90 +33,91 @@ import org.slf4j.LoggerFactory;
  * We are going to create an H2 DB, the .sql file is fixed. We will map directly
  * there and then query on top.
  */
-public class CompanyTest extends TestCase {
+public class CompanyTest extends AbstractVirtualModeTest {
 
 	// TODO We need to extend this test to import the contents of the mappings
 	// into OWL and repeat everything taking form OWL
 
-	private Connection conn;
+	private static final String owlfile = "resources/optional/company.owl";
+	private static final String obdafile = "resources/optional/company.obda";
 
-	Logger log = LoggerFactory.getLogger(this.getClass());
-	private OWLOntology ontology;
-
-	final String owlfile = "resources/optional/company.owl";
-	final String obdafile = "resources/optional/company.obda";
-
-	@Override
-	public void setUp() throws Exception {
-		
-		
-		/*
-		 * Initializing and H2 database with the stock exchange data
-		 */
-		// String driver = "org.h2.Driver";
-		String url = "jdbc:h2:mem:questjunitdb";
-		String username = "fish";
-		String password = "fish";
-
-		conn = DriverManager.getConnection(url, username, password);
-		
-		Statement st = conn.createStatement();
-
-		//with simple h2 test we enter in a second nested left join and it fails
-		FileReader reader = new FileReader("resources/optional/company-h2.sql");
-		BufferedReader in = new BufferedReader(reader);
-		StringBuilder bf = new StringBuilder();
-		String line = in.readLine();
-		while (line != null) {
-			bf.append(line);
-			line = in.readLine();
-		}
-
-		st.executeUpdate(bf.toString());
-		conn.commit();
-
-		// Loading the OWL file
-		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-		ontology = manager.loadOntologyFromOntologyDocument((new File(owlfile)));
+	protected CompanyTest() {
+		super(owlfile, obdafile);
 	}
 
-	@Override
-	public void tearDown() throws Exception {
-		try {
-			dropTables();
-			conn.close();
-		} catch (Exception e) {
-			log.debug(e.getMessage());
-		}
-	}
+//	@Override
+//	public void setUp() throws Exception {
+//
+//
+//		/*
+//		 * Initializing and H2 database with the stock exchange data
+//		 */
+//		// String driver = "org.h2.Driver";
+//		String url = "jdbc:h2:mem:questjunitdb";
+//		String username = "fish";
+//		String password = "fish";
+//
+//		fac = OBDADataFactoryImpl.getInstance();
+//
+//		conn = DriverManager.getConnection(url, username, password);
+//
+//		Statement st = conn.createStatement();
+//
+//		//with simple h2 test we enter in a second nested left join and it fails
+//		FileReader reader = new FileReader("resources/optional/company-h2.sql");
+//		BufferedReader in = new BufferedReader(reader);
+//		StringBuilder bf = new StringBuilder();
+//		String line = in.readLine();
+//		while (line != null) {
+//			bf.append(line);
+//			line = in.readLine();
+//		}
+//
+//		st.executeUpdate(bf.toString());
+//		conn.commit();
+//
+//		// Loading the OWL file
+//		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
+//		ontology = manager.loadOntologyFromOntologyDocument((new File(owlfile)));
+//
+//		// Loading the OBDA data
+//		obdaModel = fac.getOBDAModel();
+//
+//		ModelIOManager ioManager = new ModelIOManager(obdaModel);
+//		ioManager.load(obdafile);
+//
+//	}
+//
+//	@Override
+//	public void tearDown() throws Exception {
+//		try {
+//			dropTables();
+//			conn.close();
+//		} catch (Exception e) {
+//			log.debug(e.getMessage());
+//		}
+//	}
+//
+//	private void dropTables() throws SQLException, IOException {
+//
+//		Statement st = conn.createStatement();
+//
+//		FileReader reader = new FileReader("resources/optional/drop-company.sql");
+//		BufferedReader in = new BufferedReader(reader);
+//		StringBuilder bf = new StringBuilder();
+//		String line = in.readLine();
+//		while (line != null) {
+//			bf.append(line);
+//			line = in.readLine();
+//		}
+//
+//		st.executeUpdate(bf.toString());
+//		st.close();
+//		conn.commit();
+//	}
 
-	private void dropTables() throws SQLException, IOException {
+	private void runTests() throws Exception {
 
-		Statement st = conn.createStatement();
-
-		FileReader reader = new FileReader("resources/optional/drop-company.sql");
-		BufferedReader in = new BufferedReader(reader);
-		StringBuilder bf = new StringBuilder();
-		String line = in.readLine();
-		while (line != null) {
-			bf.append(line);
-			line = in.readLine();
-		}
-
-		st.executeUpdate(bf.toString());
-		st.close();
-		conn.commit();
-	}
-
-	private void runTests(QuestPreferences p) throws Exception {
-
-		// Creating a new instance of the reasoner
-		QuestOWLFactory factory = new QuestOWLFactory(new File(obdafile), p);
-
-		QuestOWL reasoner = (QuestOWL) factory.createReasoner(ontology, new SimpleConfiguration());
-
-		// Now we are ready for querying
-		QuestOWLConnection conn = reasoner.getConnection();
 		QuestOWLStatement st = conn.createStatement();
 
 		
@@ -201,22 +180,16 @@ public class CompanyTest extends TestCase {
 	}
 
 	public void testViEqSig() throws Exception {
-
-		Properties p = new Properties();
-		p.setProperty(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-		p.setProperty(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-		p.setProperty(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
-
-		runTests(new QuestPreferences(p));
+		runTests();
 	}
 	
 //	public void testClassicEqSig() throws Exception {
 //
-//		Properties p = new Properties();
-//		p.setProperty(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
-//		p.setProperty(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-//		p.setProperty(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
-//		p.setProperty(QuestPreferences.OBTAIN_FROM_MAPPINGS, "true");
+//		QuestPreferences p = new QuestPreferences();
+//		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
+//		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
+//		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
+//		p.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_MAPPINGS, "true");
 //
 //		runTests(p);
 //	}

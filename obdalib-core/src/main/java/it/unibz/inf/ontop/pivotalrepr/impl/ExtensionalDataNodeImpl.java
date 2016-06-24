@@ -1,9 +1,7 @@
 package it.unibz.inf.ontop.pivotalrepr.impl;
 
-import it.unibz.inf.ontop.model.DataAtom;
-import it.unibz.inf.ontop.model.ImmutableSubstitution;
-import it.unibz.inf.ontop.model.VariableOrGroundTerm;
-import it.unibz.inf.ontop.pivotalrepr.*;
+import com.google.common.collect.ImmutableSet;
+import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.pivotalrepr.*;
 
 /**
@@ -40,16 +38,22 @@ public class ExtensionalDataNodeImpl extends DataNodeImpl implements Extensional
     }
 
     @Override
-    public SubstitutionResults<ExtensionalDataNode> applyAscendentSubstitution(
-            ImmutableSubstitution<? extends VariableOrGroundTerm> substitution,
+    public SubstitutionResults<ExtensionalDataNode> applyAscendingSubstitution(
+            ImmutableSubstitution<? extends ImmutableTerm> substitution,
             QueryNode descendantNode, IntermediateQuery query) {
         return applySubstitution((ExtensionalDataNode) this, substitution);
     }
 
     @Override
-    public SubstitutionResults<ExtensionalDataNode> applyDescendentSubstitution(
-            ImmutableSubstitution<? extends VariableOrGroundTerm> substitution) {
+    public SubstitutionResults<ExtensionalDataNode> applyDescendingSubstitution(
+            ImmutableSubstitution<? extends ImmutableTerm> substitution, IntermediateQuery query) {
         return applySubstitution((ExtensionalDataNode)this, substitution);
+    }
+
+    @Override
+    public boolean isSyntacticallyEquivalentTo(QueryNode node) {
+        return (node instanceof ExtensionalDataNode)
+                && ((ExtensionalDataNode) node).getProjectionAtom().equals(this.getProjectionAtom());
     }
 
     @Override

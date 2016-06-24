@@ -1,9 +1,11 @@
 package it.unibz.inf.ontop.pivotalrepr;
 
 import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.model.Variable;
+import com.google.common.collect.ImmutableSet;
+import it.unibz.inf.ontop.model.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.pivotalrepr.proposal.InvalidQueryOptimizationProposalException;
 import it.unibz.inf.ontop.pivotalrepr.proposal.ProposalResults;
+import it.unibz.inf.ontop.model.Variable;
 import it.unibz.inf.ontop.pivotalrepr.proposal.QueryOptimizationProposal;
 
 import java.util.Optional;
@@ -22,6 +24,8 @@ public interface IntermediateQuery {
     ImmutableList<QueryNode> getNodesInTopDownOrder();
 
     ImmutableList<QueryNode> getChildren(QueryNode node);
+
+    Optional<QueryNode> getChild(QueryNode currentNode, NonCommutativeOperatorNode.ArgumentPosition position);
 
     /**
      * From the parent to the oldest ancestor.
@@ -72,9 +76,14 @@ public interface IntermediateQuery {
             throws InvalidQueryOptimizationProposalException, EmptyQueryException;
 
     /**
-     * TODO: find an exception to throw
+     * Useful when converting a DatalogProgram into an IntermediateQuery.
+     *
+     * However, for unfolding IQ mappings, another method should be created.
+     *
+     * If the subQuery is irrelevant (cannot be merged in), it is simply ignored.
+     *
      */
-    void mergeSubQuery(IntermediateQuery subQuery) throws QueryMergingException;
+    void mergeSubQuery(IntermediateQuery subQuery) throws EmptyQueryException;
 
     /**
      *
@@ -96,4 +105,7 @@ public interface IntermediateQuery {
     Variable generateNewVariable(Variable formerVariable);
 
 
+    DistinctVariableOnlyDataAtom getProjectionAtom();
+
+    ImmutableSet<Variable> getKnownVariables();
 }

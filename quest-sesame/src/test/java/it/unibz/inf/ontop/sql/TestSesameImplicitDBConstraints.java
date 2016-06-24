@@ -21,12 +21,9 @@ import static org.junit.Assert.*;
 import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
 import it.unibz.inf.ontop.injection.OBDACoreModule;
 import it.unibz.inf.ontop.injection.OBDAProperties;
-import it.unibz.inf.ontop.owlapi3.OWLAPI3TranslatorUtility;
 import it.unibz.inf.ontop.owlrefplatform.core.*;
-import it.unibz.inf.ontop.owlrefplatform.questdb.R2RMLQuestPreferences;
 import it.unibz.inf.ontop.r2rml.R2RMLManager;
 import it.unibz.inf.ontop.sesame.SesameVirtualRepo;
-import it.unibz.inf.ontop.sql.api.Attribute;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
@@ -52,7 +49,6 @@ public class TestSesameImplicitDBConstraints {
 	static String uc_create = "src/test/resources/userconstraints/create.sql";
 
 	private Connection sqlConnection;
-	private OWLAPI3TranslatorUtility translator = new OWLAPI3TranslatorUtility();
 	private QuestDBStatement qst = null;
 
 	/*
@@ -94,7 +90,7 @@ public class TestSesameImplicitDBConstraints {
 
 		if(applyUserConstraints){
 			// Parsing user constraints
-			ImplicitDBConstraints userConstraints = new ImplicitDBConstraints(uc_keyfile);
+			ImplicitDBConstraintsReader userConstraints = new ImplicitDBConstraintsReader(new File(uc_keyfile));
 			p.put(QuestPreferences.DB_CONSTRAINTS, userConstraints);
 		}
 
@@ -153,21 +149,17 @@ public class TestSesameImplicitDBConstraints {
 		}
 	}
 
-	private TableDefinition defTable(String name){
-		TableDefinition tableDefinition = new TableDefinition(name);
-		Attribute attribute = null;
-		//It starts from 1 !!!
-		attribute = new Attribute("COL1", java.sql.Types.INTEGER, false, null);
-		tableDefinition.addAttribute(attribute);
-		attribute = new Attribute("COL2", java.sql.Types.INTEGER, false, null);
-		tableDefinition.addAttribute(attribute);
-		return tableDefinition;
+	private void defTable(DBMetadata dbMetadata, String name) {
+		QuotedIDFactory idfac = dbMetadata.getQuotedIDFactory();
+		DatabaseRelationDefinition tableDefinition = dbMetadata.createDatabaseRelation(idfac.createRelationID(null, name));
+		tableDefinition.addAttribute(idfac.createAttributeID("COL1"), java.sql.Types.INTEGER, null, false);
+		tableDefinition.addAttribute(idfac.createAttributeID("COL2"), java.sql.Types.INTEGER, null, false);
 	}
 	private DBMetadata getMeta(){
-		DBMetadata dbMetadata = new DBMetadata("org.h2.Driver");
-		dbMetadata.add(defTable("\"TABLE1\""));
-		dbMetadata.add(defTable("\"TABLE2\""));
-		dbMetadata.add(defTable("\"TABLE3\""));
+		DBMetadata dbMetadata = RDBMetadataExtractionTools.createDummyMetadata("org.h2.Driver");
+		defTable(dbMetadata, "TABLE1");
+		defTable(dbMetadata, "TABLE2");
+		defTable(dbMetadata, "TABLE3");
 		return dbMetadata;
 	}
 
@@ -177,7 +169,7 @@ public class TestSesameImplicitDBConstraints {
 		init(true, true);
 		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT * WHERE {?x :hasVal1 ?v1; :hasVal2 ?v2.}";
 		String sql = qst.getSQL(query);
-		boolean m = sql.matches("(?ms)(.*)\"TABLE1\"(.*),(.*)\"TABLE1\"(.*)");
+		boolean m = sql.matches("(?ms)(.*)TABLE1 (.*),(.*)TABLE1 (.*)");
 		assertFalse(m);
 	}
 
@@ -186,7 +178,7 @@ public class TestSesameImplicitDBConstraints {
 		init(false, true);
 		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT * WHERE {?x :hasVal1 ?v1; :hasVal2 ?v2.}";
 		String sql = qst.getSQL(query);
-		boolean m = sql.matches("(?ms)(.*)\"TABLE1\"(.*),(.*)\"TABLE1\"(.*)");
+		boolean m = sql.matches("(?ms)(.*)TABLE1 (.*),(.*)TABLE1 (.*)");
 		assertTrue(m);
 	}
 
@@ -195,7 +187,7 @@ public class TestSesameImplicitDBConstraints {
 		init(true, false);
 		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT * WHERE {?x :hasVal1 ?v1; :hasVal2 ?v2.}";
 		String sql = qst.getSQL(query);
-		boolean m = sql.matches("(?ms)(.*)\"TABLE1\"(.*),(.*)\"TABLE1\"(.*)");
+		boolean m = sql.matches("(?ms)(.*)TABLE1 (.*),(.*)TABLE1 (.*)");
 		assertFalse(m);
 	}
 
@@ -204,7 +196,7 @@ public class TestSesameImplicitDBConstraints {
 		init(false, false);
 		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT * WHERE {?x :hasVal1 ?v1; :hasVal2 ?v2.}";
 		String sql = qst.getSQL(query);
-		boolean m = sql.matches("(?ms)(.*)\"TABLE1\"(.*),(.*)\"TABLE1\"(.*)");
+		boolean m = sql.matches("(?ms)(.*)TABLE1\"(.*),(.*)TABLE1\"(.*)");
 		assertTrue(m);
 	}
 }

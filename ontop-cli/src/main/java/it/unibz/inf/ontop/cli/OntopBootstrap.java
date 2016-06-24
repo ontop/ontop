@@ -3,7 +3,6 @@ package it.unibz.inf.ontop.cli;
 import com.github.rvesse.airline.Command;
 import com.github.rvesse.airline.Option;
 import com.github.rvesse.airline.OptionType;
-<<<<<<< HEAD:ontop-cli/src/main/java/it/unibz/inf/ontop/cli/OntopBootstrap.java
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
@@ -11,14 +10,8 @@ import it.unibz.inf.ontop.injection.OBDACoreModule;
 import it.unibz.inf.ontop.injection.OBDAFactoryWithException;
 import it.unibz.inf.ontop.io.OntopNativeMappingSerializer;
 import it.unibz.inf.ontop.model.OBDAModel;
-import it.unibz.inf.ontop.owlapi3.bootstrapping.DirectMappingBootstrapper;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
-import it.unibz.inf.ontop.owlrefplatform.questdb.R2RMLQuestPreferences;
-=======
-import it.unibz.inf.ontop.model.OBDAModel;
-import it.unibz.inf.ontop.owlapi3.bootstrapping.DirectMappingBootstrapper;
-import it.unibz.inf.ontop.io.ModelIOManager;
->>>>>>> v3/package-names-changed:ontop-cli/src/main/java/it/unibz/inf/ontop/cli/OntopBootstrap.java
+import it.unibz.inf.ontop.owlrefplatform.core.R2RMLQuestPreferences;
 import org.semanticweb.owlapi.io.FileDocumentTarget;
 import org.semanticweb.owlapi.model.OWLOntology;
 
@@ -29,9 +22,9 @@ import java.util.Properties;
         description = "Bootstrap ontology and mapping from the database")
 public class OntopBootstrap extends OntopMappingOntologyRelatedCommand {
 
-    @Option(type = OptionType.COMMAND, name = {"-b", "--base-uri"}, title = "baseURI",
+    @Option(type = OptionType.COMMAND, name = {"-b", "--base-iri"}, title = "base IRI",
             description = "base uri of the generated mapping")
-    protected String baseUri;
+    protected String baseIRI;
 
     @Override
     public void run() {
@@ -63,7 +56,7 @@ public class OntopBootstrap extends OntopMappingOntologyRelatedCommand {
                 }
             }
         } catch (Exception e) {
-            System.err.println("Error occured during bootstrapping: "
+            System.err.println("Error occurred during bootstrapping: "
                     + e.getMessage());
             System.err.println("Debugging information for developers: ");
             e.printStackTrace();

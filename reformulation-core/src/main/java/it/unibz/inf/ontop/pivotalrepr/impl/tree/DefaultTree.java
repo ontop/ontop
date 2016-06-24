@@ -1,11 +1,12 @@
 package it.unibz.inf.ontop.pivotalrepr.impl.tree;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.pivotalrepr.NonCommutativeOperatorNode;
-import it.unibz.inf.ontop.pivotalrepr.NonCommutativeOperatorNode.ArgumentPosition;
+import it.unibz.inf.ontop.pivotalrepr.EmptyNode;
+import it.unibz.inf.ontop.pivotalrepr.impl.IllegalTreeUpdateException;
 import it.unibz.inf.ontop.pivotalrepr.ConstructionNode;
 import it.unibz.inf.ontop.pivotalrepr.QueryNode;
-import it.unibz.inf.ontop.pivotalrepr.impl.IllegalTreeUpdateException;
 
 import java.util.*;
 
@@ -24,16 +25,18 @@ public class DefaultTree implements QueryTree {
     private final Map<QueryNode, TreeNode> nodeIndex;
     private final Map<TreeNode, ChildrenRelation> childrenIndex;
     private final Map<TreeNode, TreeNode> parentIndex;
+    private final Set<EmptyNode> emptyNodes;
 
 
     protected DefaultTree(ConstructionNode rootQueryNode) {
         nodeIndex = new HashMap<>();
         childrenIndex = new HashMap<>();
         parentIndex = new HashMap<>();
+        emptyNodes = new HashSet<>();
 
         // Adds the root node
         rootNode = new TreeNode(rootQueryNode);
-        nodeIndex.put(rootQueryNode, rootNode);
+        insertNodeIntoIndex(rootQueryNode, rootNode);
         childrenIndex.put(rootNode, createChildrenRelation(rootNode));
         // No parent
     }
@@ -44,7 +47,7 @@ public class DefaultTree implements QueryTree {
     }
 
     @Override
-    public void addChild(QueryNode parentQueryNode, QueryNode childQueryNode, Optional<ArgumentPosition> optionalPosition,
+    public void addChild(QueryNode parentQueryNode, QueryNode childQueryNode, Optional<NonCommutativeOperatorNode.ArgumentPosition> optionalPosition,
                          boolean mustBeNew, boolean canReplace) throws IllegalTreeUpdateException {
         TreeNode parentNode = accessTreeNode(parentQueryNode);
 
@@ -76,10 +79,10 @@ public class DefaultTree implements QueryTree {
      * Low-level
      */
     private void createNewNode(QueryNode childQueryNode, TreeNode parentNode,
-                               Optional<ArgumentPosition> optionalPosition, boolean canReplace)
+                               Optional<NonCommutativeOperatorNode.ArgumentPosition> optionalPosition, boolean canReplace)
             throws IllegalTreeUpdateException {
         TreeNode childNode = new TreeNode(childQueryNode);
-        nodeIndex.put(childQueryNode, childNode);
+        insertNodeIntoIndex(childQueryNode, childNode);
 
         childrenIndex.put(childNode, createChildrenRelation(childNode));
 
@@ -146,8 +149,8 @@ public class DefaultTree implements QueryTree {
         }
 
         treeNode.changeQueryNode(replacingNode);
-        nodeIndex.remove(previousNode);
-        nodeIndex.put(replacingNode, treeNode);
+        removeNodeFromIndex(previousNode);
+        insertNodeIntoIndex(replacingNode, treeNode);
     }
 
     @Override
@@ -221,7 +224,7 @@ public class DefaultTree implements QueryTree {
 
     @Override
     public void replaceNodesByOneNode(ImmutableList<QueryNode> nodesToRemove, QueryNode replacingNode,
-                                      QueryNode parentNode, Optional<ArgumentPosition> optionalPosition) throws IllegalTreeUpdateException {
+                                      QueryNode parentNode, Optional<NonCommutativeOperatorNode.ArgumentPosition> optionalPosition) throws IllegalTreeUpdateException {
         if (replacingNode instanceof NonCommutativeOperatorNode) {
             throw new RuntimeException("Having a BinaryAsymmetricOperatorNode replacing node is not yet supported");
         }
@@ -240,7 +243,7 @@ public class DefaultTree implements QueryTree {
                                 "is not yet supported");
                     }
                     else {
-                        addChild(replacingNode, child, Optional.<ArgumentPosition>empty(), false, true);
+                        addChild(replacingNode, child, Optional.<NonCommutativeOperatorNode.ArgumentPosition>empty(), false, true);
                     }
                 }
             }
@@ -249,7 +252,7 @@ public class DefaultTree implements QueryTree {
     }
 
     @Override
-    public Optional<ArgumentPosition> getOptionalPosition(QueryNode parentNode, QueryNode childNode) {
+    public Optional<NonCommutativeOperatorNode.ArgumentPosition> getOptionalPosition(QueryNode parentNode, QueryNode childNode) {
         TreeNode parentTreeNode = accessTreeNode(parentNode);
         TreeNode childTreeNode = accessTreeNode(childNode);
 
@@ -268,7 +271,7 @@ public class DefaultTree implements QueryTree {
         QueryNode formerParentNode = optionalFormerParent.get();
         TreeNode formerParentTreeNode = accessTreeNode(formerParentNode);
 
-        Optional<ArgumentPosition> optionalPosition = getOptionalPosition(formerParentNode, childNode);
+        Optional<NonCommutativeOperatorNode.ArgumentPosition> optionalPosition = getOptionalPosition(formerParentNode, childNode);
 
         // Does not delete the child node, just disconnect it from its parent
         removeChild(formerParentTreeNode, childTreeNode);
@@ -276,14 +279,18 @@ public class DefaultTree implements QueryTree {
         // Adds the new parent (must be new)
         addChild(formerParentNode, newParentNode, optionalPosition, true, false);
 
-        addChild(newParentNode, childNode, Optional.<ArgumentPosition>empty(), false, false);
+        addChild(newParentNode, childNode, Optional.<NonCommutativeOperatorNode.ArgumentPosition>empty(), false, false);
+    }
+
+    public ImmutableSet<EmptyNode> getEmptyNodes() {
+        return ImmutableSet.copyOf(emptyNodes);
     }
 
     /**
      * Low-level
      */
     private void removeNode(TreeNode treeNode) {
-        nodeIndex.remove(treeNode.getQueryNode());
+        removeNodeFromIndex(treeNode.getQueryNode());
         TreeNode parentNode = getParentTreeNode(treeNode);
         if (parentNode != null) {
             accessChildrenRelation(parentNode).removeChild(treeNode);
@@ -342,4 +349,27 @@ public class DefaultTree implements QueryTree {
         else
             throw new RuntimeException("Internal error: points to a parent that is not (anymore) in the tree");
     }
+
+
+    /**
+     * Low-low-level
+     */
+    private void insertNodeIntoIndex(QueryNode queryNode, TreeNode treeNode) {
+        nodeIndex.put(queryNode, treeNode);
+        if (queryNode instanceof EmptyNode) {
+            emptyNodes.add((EmptyNode)queryNode);
+        }
+    }
+
+    /**
+     * Low-low-level
+     */
+    private void removeNodeFromIndex(QueryNode queryNode) {
+        nodeIndex.remove(queryNode);
+
+        if (queryNode instanceof EmptyNode) {
+            emptyNodes.remove(queryNode);
+        }
+    }
+
 }

@@ -20,19 +20,15 @@ package it.unibz.inf.ontop.protege.views;
  * #L%
  */
 
-import java.awt.BorderLayout;
-
-import it.unibz.inf.ontop.protege.core.OBDAModelManager;
-import org.protege.editor.owl.ui.view.AbstractOWLViewComponent;
 import it.unibz.inf.ontop.model.impl.OBDAModelImpl;
-<<<<<<< HEAD:ontop-protege/src/main/java/it/unibz/inf/ontop/protege/views/DatasourcesManagerView.java
 import it.unibz.inf.ontop.protege.core.OBDAModelManager;
-=======
->>>>>>> v3/package-names-changed:ontop-protege/src/main/java/it/unibz/inf/ontop/protege/views/DatasourcesManagerView.java
 import it.unibz.inf.ontop.protege.core.OBDAModelManagerListener;
 import it.unibz.inf.ontop.protege.panels.DatasourceParameterEditorPanel;
+import org.protege.editor.owl.ui.view.AbstractOWLViewComponent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.awt.*;
 
 public class DatasourcesManagerView extends AbstractOWLViewComponent implements OBDAModelManagerListener {
 
@@ -42,22 +38,25 @@ public class DatasourcesManagerView extends AbstractOWLViewComponent implements 
 
 	DatasourceParameterEditorPanel editor;
 
-	OBDAModelManager apic = null;
+	OBDAModelManager obdaModelManager = null;
 
 	@Override
 	protected void disposeOWLView() {
-		apic.removeListener(this);
+		obdaModelManager.removeListener(this);
 	}
 
 	@Override
 	protected void initialiseOWLView() throws Exception {
 		
-		apic = (OBDAModelManager) getOWLEditorKit().get(OBDAModelImpl.class.getName());
-		apic.addListener(this);
+		obdaModelManager = (OBDAModelManager) getOWLEditorKit().get(OBDAModelImpl.class.getName());
+		obdaModelManager.addListener(this);
 
-		setLayout(new BorderLayout());
+        //OWLModelManager owlModelManager = getOWLEditorKit().getOWLModelManager();
 
-		editor = new DatasourceParameterEditorPanel(apic.getActiveOBDAModelWrapper());
+        setLayout(new BorderLayout());
+
+		//editor = new DatasourceParameterEditorPanel(obdaModelManager.getActiveOBDAModel(), owlModelManager);
+		editor = new DatasourceParameterEditorPanel(getOWLEditorKit());
 		add(editor, BorderLayout.NORTH);
 
 		log.debug("Datasource browser initialized");

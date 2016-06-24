@@ -25,13 +25,28 @@ import it.unibz.inf.ontop.model.ValueConstant;
 import it.unibz.inf.ontop.ontology.DataPropertyAssertion;
 import it.unibz.inf.ontop.ontology.DataPropertyExpression;
 
+
+/**
+ * Represents DataPropertyAssertion from the OWL 2 QL Specification
+ * 
+ * DataPropertyAssertion := 'DataPropertyAssertion' '(' axiomAnnotations
+ * 					DataPropertyExpression sourceIndividual targetValue ')'
+ * DataPropertyExpression := DataProperty
+ * 
+ * Support for owl:topDataProperty and owl:bottomDataProperty
+ * 
+ * @author Roman Kontchakov
+ *
+ */
+
 public class DataPropertyAssertionImpl implements DataPropertyAssertion {
 
 	private static final long serialVersionUID = -8834975903851540150L;
 	
 	private final DataPropertyExpression prop;
-	private final ValueConstant o2;
 	private final ObjectConstant o1;
+	private final ValueConstant o2;
+
 
 	DataPropertyAssertionImpl(DataPropertyExpression prop, ObjectConstant o1, ValueConstant o2) {
 		this.prop = prop;

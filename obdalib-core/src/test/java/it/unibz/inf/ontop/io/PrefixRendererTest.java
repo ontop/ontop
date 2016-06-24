@@ -27,6 +27,7 @@ import com.google.inject.Injector;
 import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
 import it.unibz.inf.ontop.injection.OBDACoreModule;
 import it.unibz.inf.ontop.injection.OBDAProperties;
+import it.unibz.inf.ontop.io.PrefixManager;
 import it.unibz.inf.ontop.model.CQIE;
 import it.unibz.inf.ontop.model.DatalogProgram;
 import it.unibz.inf.ontop.model.Function;
@@ -49,7 +50,7 @@ public class PrefixRendererTest extends TestCase {
         Injector injector = Guice.createInjector(new OBDACoreModule(new OBDAProperties()));
         factory = injector.getInstance(NativeQueryLanguageComponentFactory.class);
     }
-	
+
 	public void setUp() throws Exception {
 		OBDADataFactory pfac = OBDADataFactoryImpl.getInstance();
 		OBDADataFactory tfac = OBDADataFactoryImpl.getInstance();
@@ -137,5 +138,37 @@ public class PrefixRendererTest extends TestCase {
 		atom0 = (Function) query.getRules().get(0).getBody().get(0);
 		name = pm.getShortForm(((FunctionalTermImpl) atom0.getTerms().get(0)).getFunctionSymbol().toString(), false);
 		assertTrue(name, name.equals("onto:person-individual"));
+
+	}
+
+	/**
+	 * This test checks if the prefix are properly handled. The prefix inside uri should not be modified
+	 */
+	public void testPrefixInsideURI() {
+		Map<String, String> prefixes = new HashMap<>();
+		prefixes.put(PrefixManager.DEFAULT_PREFIX, "http://obda.org/onto.owl#");
+		prefixes.put("obdap:", "http://obda.org/predicates#");
+
+		String uri = "http://obda.org/onto.owl#redirect=http://obda.org/predicates#";
+
+		PrefixManager pm = factory.create(prefixes);
+
+		String shortForm = pm.getShortForm(uri, false);
+		System.out.println(shortForm);
+
+		assertEquals(":redirect=http://obda.org/predicates#", shortForm);
+
+		prefixes.put(PrefixManager.DEFAULT_PREFIX, "http://example.com/resource/");
+		prefixes.put("movie:", "http://www.movieontology.org/2009/10/01/movieontology.owl/");
+
+		pm = factory.create(prefixes);
+
+		String uri2 = "http://example.com/resource/?repository=repo&uri=http://www.movieontology.org/2009/10/01/movieontology.owl/China-24951";
+		String shortForm2 = pm.getShortForm(uri2, false);
+		System.out.println(shortForm2);
+		assertEquals(":?repository=repo&uri=http://www.movieontology.org/2009/10/01/movieontology.owl/China-24951", shortForm2);
+
+
+
 	}
 }

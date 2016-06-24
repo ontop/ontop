@@ -1,9 +1,9 @@
 package it.unibz.inf.ontop.pivotalrepr;
 
 import java.util.Optional;
-import it.unibz.inf.ontop.model.ImmutableBooleanExpression;
+import it.unibz.inf.ontop.model.ImmutableExpression;
 import it.unibz.inf.ontop.model.ImmutableSubstitution;
-import it.unibz.inf.ontop.model.VariableOrGroundTerm;
+import it.unibz.inf.ontop.model.ImmutableTerm;
 
 public interface InnerJoinNode extends CommutativeJoinNode {
 
@@ -15,14 +15,14 @@ public interface InnerJoinNode extends CommutativeJoinNode {
             throws QueryNodeTransformationException;
 
     @Override
-    InnerJoinNode changeOptionalFilterCondition(Optional<ImmutableBooleanExpression> newOptionalFilterCondition);
+    InnerJoinNode changeOptionalFilterCondition(Optional<ImmutableExpression> newOptionalFilterCondition);
 
     @Override
-    SubstitutionResults<InnerJoinNode> applyAscendentSubstitution(
-            ImmutableSubstitution<? extends VariableOrGroundTerm> substitution,
+    SubstitutionResults<InnerJoinNode> applyAscendingSubstitution(
+            ImmutableSubstitution<? extends ImmutableTerm> substitution,
             QueryNode descendantNode, IntermediateQuery query);
 
     @Override
-    SubstitutionResults<InnerJoinNode> applyDescendentSubstitution(
-            ImmutableSubstitution<? extends VariableOrGroundTerm> substitution);
+    SubstitutionResults<InnerJoinNode> applyDescendingSubstitution(
+            ImmutableSubstitution<? extends ImmutableTerm> substitution, IntermediateQuery query);
 }

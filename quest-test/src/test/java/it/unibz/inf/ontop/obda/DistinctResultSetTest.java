@@ -1,9 +1,11 @@
 package it.unibz.inf.ontop.obda;
 
 
-
-import it.unibz.inf.ontop.owlrefplatform.core.resultset.QuestDistinctResultset;
-import it.unibz.inf.ontop.owlrefplatform.owlapi3.*;
+import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
+import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
+import it.unibz.inf.ontop.owlrefplatform.core.resultset.QuestDistinctTupleResultSet;
+import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
+import it.unibz.inf.ontop.sesame.SesameVirtualRepo;
 import org.junit.Before;
 import org.junit.Test;
 import org.openrdf.query.BindingSet;
@@ -12,16 +14,11 @@ import org.openrdf.query.TupleQuery;
 import org.openrdf.query.TupleQueryResult;
 import org.openrdf.repository.Repository;
 import org.openrdf.repository.RepositoryConnection;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
-import it.unibz.inf.ontop.sesame.SesameVirtualRepo;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
-import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 
 import java.io.File;
 import java.util.List;
@@ -33,7 +30,7 @@ import static org.junit.Assert.assertTrue;
 
 /**
  * Test to check the use of SPARQL Select distinct in Sesame and QuestOWL.
- * Use the class {@link QuestDistinctResultset}
+ * Use the class {@link QuestDistinctTupleResultSet}
  */
 
 public class DistinctResultSetTest { //
@@ -56,10 +53,12 @@ public class DistinctResultSetTest { //
         ontology = manager.loadOntologyFromOntologyDocument((new File(owlFile)));
 
         // Creating a new instance of the reasoner
-        QuestOWLFactory factory = new QuestOWLFactory(new File(obdaFile), new QuestPreferences(p));
-
-        QuestOWL reasoner = factory.createReasoner(ontology, new SimpleConfiguration());
-
+        QuestOWLFactory factory = new QuestOWLFactory();
+        QuestOWLConfiguration config = QuestOWLConfiguration.builder()
+                .preferences(new QuestPreferences(p))
+                .nativeOntopMappingFile(new File(obdaFile))
+                .build();
+        QuestOWL reasoner = factory.createReasoner(ontology, config);
         // Now we are ready for querying
         QuestOWLConnection conn = reasoner.getConnection();
         QuestOWLStatement st = conn.createStatement();

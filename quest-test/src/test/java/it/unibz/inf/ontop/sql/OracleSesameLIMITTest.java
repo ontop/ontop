@@ -26,12 +26,11 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
 import it.unibz.inf.ontop.injection.OBDACoreModule;
-import it.unibz.inf.ontop.sql.api.Attribute;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestDBConnection;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestDBStatement;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
-import it.unibz.inf.ontop.owlrefplatform.questdb.R2RMLQuestPreferences;
+import it.unibz.inf.ontop.owlrefplatform.core.R2RMLQuestPreferences;
 import it.unibz.inf.ontop.r2rml.R2RMLManager;
 import it.unibz.inf.ontop.sesame.SesameVirtualRepo;
 
@@ -44,10 +43,6 @@ import org.openrdf.model.Model;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import static org.junit.Assert.assertTrue;
 
 /***
  * Tests that the SPARQL LIMIT statement is correctly translated to WHERE ROWNUM <= x in oracle
@@ -57,8 +52,6 @@ public class OracleSesameLIMITTest  {
 
 	private QuestDBConnection conn;
 	private QuestDBStatement qst;
-
-	Logger log = LoggerFactory.getLogger(this.getClass());
 
 	final String owlfile = "resources/oraclesql/o.owl";
 	final String r2rmlfile = "resources/oraclesql/o.ttl";
@@ -131,19 +124,17 @@ public class OracleSesameLIMITTest  {
 		conn.close();
 	}
 
-	private TableDefinition defTable(String name){
-		TableDefinition tableDefinition = new TableDefinition(name);
-		Attribute attribute = null;
-		//It starts from 1 !!!
-		attribute = new Attribute("country_name", java.sql.Types.VARCHAR, false, null);
-		tableDefinition.addAttribute(attribute);
-		return tableDefinition;
+	private void defTable(DBMetadata dbMetadata, String schema, String name) {
+		QuotedIDFactory idfac = dbMetadata.getQuotedIDFactory();
+		DatabaseRelationDefinition tableDefinition = dbMetadata.createDatabaseRelation(idfac.createRelationID(schema, name));
+		tableDefinition.addAttribute(idfac.createAttributeID("country_name"), java.sql.Types.VARCHAR, null, false);
 	}
 	private DBMetadata getMeta(String driver_class){
-		DBMetadata dbMetadata = new DBMetadata(driver_class);
-		dbMetadata.add(defTable("hr.countries"));
-		dbMetadata.add(defTable("HR.countries"));
-		dbMetadata.add(new TableDefinition("dual"));
+		DBMetadata dbMetadata = RDBMetadataExtractionTools.createDummyMetadata(driver_class);
+		QuotedIDFactory idfac = dbMetadata.getQuotedIDFactory();
+		defTable(dbMetadata, "hr", "countries");
+		defTable(dbMetadata, "HR", "countries");
+		dbMetadata.createDatabaseRelation(idfac.createRelationID(null, "dual"));
 		return dbMetadata;
 	}
 

@@ -20,143 +20,57 @@ package it.unibz.inf.ontop.obda;
  * #L%
  */
 
-import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
-import it.unibz.inf.ontop.owlrefplatform.owlapi3.*;
-import org.junit.Before;
-import org.junit.Test;
-import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.OWLObject;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
-import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.util.Properties;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import it.unibz.inf.ontop.quest.AbstractVirtualModeTest;
 
 /**
  * Test if the datatypes xsd:date, xsd:time and xsd:year are returned correctly.
  *
  */
 
-public class OntologyTypesDatatypeTest {
+public class OntologyTypesDatatypeTest extends AbstractVirtualModeTest {
 
-	Logger log = LoggerFactory.getLogger(this.getClass());
-	private OWLOntology ontology;
+    static final String owlfile = "src/main/resources/testcases-datatypes/datetime/datatypes.owl";
+    static final String obdafile = "src/main/resources/testcases-datatypes/datetime/datatypes-mysql.obda";
 
-    final String owlFile = "src/main/resources/testcases-datatypes/datetime/datatypes.owl";
-    final String obdaFile = "src/main/resources/testcases-datatypes/datetime/datatypes-mysql.obda";
-
-	@Before
-	public void setUp() throws Exception {
-		
-		// Loading the OWL file
-		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-		ontology = manager.loadOntologyFromOntologyDocument((new File(owlFile)));
-		
-	}
-
-	private void runTests(Properties p, String query1, String expectedAnswer) throws Exception {
-
-		// Creating a new instance of the reasoner
-		QuestOWLFactory factory = new QuestOWLFactory(new File(obdaFile), new QuestPreferences(p));
-
-		QuestOWL reasoner = factory.createReasoner(ontology, new SimpleConfiguration());
-
-		// Now we are ready for querying
-		QuestOWLConnection conn = reasoner.getConnection();
-		QuestOWLStatement st = conn.createStatement();
-
-
-		try {
-			executeQueryAssertResults(query1, st, expectedAnswer);
-			
-		} catch (Exception e) {
-            st.close();
-            e.printStackTrace();
-            assertTrue(false);
-
-
-		} finally {
-
-			conn.close();
-			reasoner.dispose();
-		}
-	}
-	
-	private void executeQueryAssertResults(String query, QuestOWLStatement st, String expectedAnswer) throws Exception {
-		QuestOWLResultSet rs = st.executeTuple(query);
-
-        OWLObject answer = null;
-		while (rs.nextRow()) {
-
-			for (int i = 1; i <= rs.getColumnCount(); i++) {
-				System.out.print(rs.getSignature().get(i-1));
-                answer= rs.getOWLObject(i);
-				System.out.print("=" + answer);
-				System.out.print(" ");
-			}
-			System.out.println();
-		}
-		rs.close();
-		assertEquals(expectedAnswer, answer.toString());
-	}
-
-    //With QuestOWL the results for xsd:date, xsd:time and xsd:year are returned as a plain literal since OWLAPI3 supports only xsd:dateTime
-	@Test
-	public void testDatatypeDate() throws Exception {
-
-		Properties p = new Properties();
-		p.setProperty(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-		p.setProperty(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-		p.setProperty(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
-
-        String query1 = "PREFIX : <http://ontop.inf.unibz.it/test/datatypes#> SELECT ?x ?y\n" +
-                "WHERE {\n" +
-                "   ?x a :Row; :hasDate ?y\n" +
-                "   FILTER ( ?y = \"2013-03-18\"^^xsd:date ) .\n" +
-                "}";
-
-		runTests(p, query1, "\"2013-03-18\"");
-	}
-
-    @Test
-    public void testDatatypeTime() throws Exception {
-
-        Properties p = new Properties();
-        p.setProperty(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-        p.setProperty(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-        p.setProperty(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
-
-        String query1 = "PREFIX : <http://ontop.inf.unibz.it/test/datatypes#> SELECT ?x ?y\n" +
-                "WHERE {\n" +
-                "   ?x a :Row; :hasTime ?y\n" +
-                "   FILTER ( ?y = \"10:12:10\"^^xsd:time ) .\n" +
-                "}";
-
-        runTests(p, query1, "\"10:12:10\"");
+    protected OntologyTypesDatatypeTest() {
+        super(owlfile, obdafile);
     }
 
-    @Test
-    public void testDatatypeYear() throws Exception {
 
-        Properties p = new Properties();
-        p.setProperty(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-        p.setProperty(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-        p.setProperty(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
+    //With QuestOWL the results for xsd:date, xsd:time and xsd:year are returned as a plain literal since OWLAPI3 supports only xsd:dateTime
+	public void testDatatypeDate() throws Exception {
 
-        String query1 = "PREFIX : <http://ontop.inf.unibz.it/test/datatypes#> SELECT ?x ?y\n" +
+        String query1 = "PREFIX : <http://ontop.inf.unibz.it/test/datatypes#> SELECT ?s ?x\n" +
                 "WHERE {\n" +
-                "   ?x a :Row; :hasYear ?y\n" +
-                "   FILTER ( ?y = \"2013\"^^xsd:gYear ) .\n" +
+                "   ?s a :Row; :hasDate ?x\n" +
+                "   FILTER ( ?x = \"2013-03-18\"^^xsd:date ) .\n" +
                 "}";
 
-        runTests(p, query1, "\"2013\"");
+        String result = runQueryAndReturnStringX(query1);
+		assertEquals(result, "\"2013-03-18\"");
+	}
+	
+    public void testDatatypeTime() throws Exception {
+
+        String query1 = "PREFIX : <http://ontop.inf.unibz.it/test/datatypes#> SELECT ?s ?x\n" +
+                "WHERE {\n" +
+                "   ?s a :Row; :hasTime ?x\n" +
+                "   FILTER ( ?x = \"10:12:10\"^^xsd:time ) .\n" +
+                "}";
+
+        String result = runQueryAndReturnStringX(query1);
+        assertEquals(result, "\"10:12:10\"");
+    }
+	
+    public void testDatatypeYear() throws Exception {
+        String query1 = "PREFIX : <http://ontop.inf.unibz.it/test/datatypes#> SELECT ?s ?x\n" +
+                "WHERE {\n" +
+                "   ?s a :Row; :hasYear ?x\n" +
+                "   FILTER ( ?x = \"2013\"^^xsd:gYear ) .\n" +
+                "}";
+        String result = runQueryAndReturnStringX(query1);
+        assertEquals(result, "\"2013\"");
     }
 
 

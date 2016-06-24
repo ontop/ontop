@@ -20,19 +20,14 @@ package it.unibz.inf.ontop.protege.utils;
  * #L%
  */
 
-import java.awt.Color;
-import java.awt.Font;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Vector;
+import it.unibz.inf.ontop.io.PrefixManager;
+import it.unibz.inf.ontop.io.TargetQueryVocabularyValidator;
+import it.unibz.inf.ontop.model.*;
+import it.unibz.inf.ontop.parser.TargetQueryParserException;
+import it.unibz.inf.ontop.parser.TurtleOBDASyntaxParser;
+import it.unibz.inf.ontop.protege.core.OBDAModelWrapper;
 
-import javax.swing.BorderFactory;
-import javax.swing.JOptionPane;
-import javax.swing.JTextPane;
-import javax.swing.Timer;
-import javax.swing.ToolTipManager;
+import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
@@ -40,24 +35,12 @@ import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.Style;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
-
-<<<<<<< HEAD:ontop-protege/src/main/java/it/unibz/inf/ontop/protege/utils/QueryPainter.java
-import it.unibz.inf.ontop.protege.core.OBDAModelWrapper;
-import it.unibz.inf.ontop.io.PrefixManager;
-import it.unibz.inf.ontop.io.TargetQueryVocabularyValidator;
-import it.unibz.inf.ontop.model.*;
-=======
-import it.unibz.inf.ontop.io.TargetQueryVocabularyValidator;
-import it.unibz.inf.ontop.model.Function;
-import it.unibz.inf.ontop.model.Predicate;
-import it.unibz.inf.ontop.io.PrefixManager;
-import it.unibz.inf.ontop.model.CQIE;
-import it.unibz.inf.ontop.model.OBDAModel;
-import it.unibz.inf.ontop.model.Term;
-import it.unibz.inf.ontop.model.URIConstant;
->>>>>>> v3/package-names-changed:ontop-protege/src/main/java/it/unibz/inf/ontop/protege/utils/QueryPainter.java
-import it.unibz.inf.ontop.parser.TargetQueryParserException;
-import it.unibz.inf.ontop.parser.TurtleOBDASyntaxParser;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Vector;
 
 public class QueryPainter {
 	private final OBDAModelWrapper apic;
@@ -66,6 +49,7 @@ public class QueryPainter {
 	private SimpleAttributeSet brackets;
 	private SimpleAttributeSet dataProp;
 	private SimpleAttributeSet objectProp;
+	private SimpleAttributeSet annotProp;
 	private SimpleAttributeSet clazz;
 	private SimpleAttributeSet individual;
 
@@ -177,21 +161,20 @@ public class QueryPainter {
 	 */
 	private void validate() throws Exception {
 		final String text = parent.getText().trim();
-		if (text.isEmpty()) {
+		if (text.isEmpty() || text.length() == 1) {
 			String msg = String.format("Empty query");
 			invalid = true;
 			throw new Exception(msg);
 		}
 
-		CQIE query = null;
-		query = textParser.parse(text);
+		List<Function> query = textParser.parse(text);
 
 		if (query == null) {
 			invalid = true;
 			throw parsingException;
 		}
 		if (!validator.validate(query)) {
-			Vector<String> invalidPredicates = validator.getInvalidPredicates();
+			List<String> invalidPredicates = validator.getInvalidPredicates();
 			String invalidList = "";
 			for (String predicate : invalidPredicates) {
 				invalidList += "- " + predicate + "\n";
@@ -227,18 +210,30 @@ public class QueryPainter {
 				parent.setToolTipText("Syntax error");
 			}
 			else {
-				String errorstring = e.getMessage();
-				int index = errorstring.indexOf("Location: line");
-				if (index != -1) {
-					String location = errorstring.substring(index + 15);
-					int prefixlines = apic.getPrefixManager().getPrefixMap().keySet().size();
-					String[] coordinates = location.split(":");
 
-					int errorline = Integer.valueOf(coordinates[0]) - prefixlines;
-					int errorcol = Integer.valueOf(coordinates[1]);
-					errorstring = errorstring.replace(errorstring.substring(index), "Location: line " + errorline + " column " + errorcol);
+				Throwable cause = e.getCause();
+				String errorstring =  null;
+				if(cause!=null) {
+					errorstring = cause.getMessage();
 				}
-				parent.setToolTipText(getHTMLErrorMessage(errorstring));
+				else {
+					errorstring = e.getMessage();
+				}
+
+				if(errorstring != null) {
+					int index = errorstring.indexOf("Location: line");
+					if (index != -1) {
+						String location = errorstring.substring(index + 15);
+						int prefixlines = apic.getPrefixManager().getPrefixMap().keySet().size();
+						String[] coordinates = location.split(":");
+
+						int errorline = Integer.valueOf(coordinates[0]) - prefixlines;
+						int errorcol = Integer.valueOf(coordinates[1]);
+						errorstring = errorstring.replace(errorstring.substring(index), "Location: line " + errorline + " column " + errorcol);
+					}
+					parent.setToolTipText(getHTMLErrorMessage(errorstring));
+				}
+
 			}
 			setStateBorder(errorBorder);
 		} else {
@@ -296,9 +291,14 @@ public class QueryPainter {
 		brackets = new SimpleAttributeSet();
 		brackets.addAttribute(StyleConstants.CharacterConstants.Foreground, Color.BLACK);
 
+		annotProp = new SimpleAttributeSet();
+		Color c_dp = new Color(109, 159, 162);
+		annotProp.addAttribute(StyleConstants.CharacterConstants.Foreground, c_dp);
+		annotProp.addAttribute(StyleConstants.CharacterConstants.Bold, true);
+
 		dataProp = new SimpleAttributeSet();
-		Color c_dp = new Color(41, 167, 121);
-		dataProp.addAttribute(StyleConstants.CharacterConstants.Foreground, c_dp);
+		Color c_ap = new Color(41, 167, 121);
+		dataProp.addAttribute(StyleConstants.CharacterConstants.Foreground, c_ap);
 		dataProp.addAttribute(StyleConstants.CharacterConstants.Bold, true);
 
 		objectProp = new SimpleAttributeSet();
@@ -339,7 +339,7 @@ public class QueryPainter {
 	}
 
 	private void setupFont() {
-		plainFont = new Font("Dialog", Font.PLAIN, 14);
+		plainFont = new Font("Lucida Grande", Font.PLAIN, 14);
 		parent.setFont(plainFont);
 	}
 
@@ -356,7 +356,7 @@ public class QueryPainter {
 		PrefixManager man = apic.getPrefixManager();
 
 		String input = doc.getText(0, doc.getLength());
-		CQIE current_query = parse(input);
+		List<Function> current_query = parse(input);
 
 		if (current_query == null) {
             JOptionPane.showMessageDialog(null, "An error occured while parsing the mappings. For more info, see the logs.");
@@ -391,7 +391,7 @@ public class QueryPainter {
 			doc.setCharacterAttributes(pos, 1, black, false);
 			pos = input.indexOf(":", pos + 1);
 		}
-		for (Function atom : current_query.getBody()) {
+		for (Function atom : current_query) {
 			Predicate predicate = atom.getFunctionSymbol();
 			String predicateName = man.getShortForm(atom.getFunctionSymbol().toString());
 			if (validator.isClass(predicate)) {
@@ -402,6 +402,9 @@ public class QueryPainter {
 				tasks.add(task);
 			} else if (validator.isDataProperty(predicate)) {
 				ColorTask task = new ColorTask(predicateName, dataProp);
+				tasks.add(task);
+			} else if (validator.isAnnotationProperty(predicate)) {
+				ColorTask task = new ColorTask(predicateName, annotProp);
 				tasks.add(task);
 			}
 
@@ -436,7 +439,7 @@ public class QueryPainter {
 		tasks.clear();
 	}
 
-	private CQIE parse(String query) {
+	private List<Function> parse(String query) {
 		try {
 			return textParser.parse(query);
 		} catch (TargetQueryParserException e) {

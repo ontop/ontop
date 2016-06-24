@@ -20,26 +20,16 @@ package it.unibz.inf.ontop.protege.gui.component;
  * #L%
  */
 
-import java.awt.Component;
-import java.awt.Dimension;
-import java.util.List;
-
-import javax.swing.JComboBox;
-import javax.swing.JList;
-import javax.swing.plaf.basic.BasicComboBoxRenderer;
-
-<<<<<<< HEAD:ontop-protege/src/main/java/it/unibz/inf/ontop/protege/gui/component/DataTypeComboBox.java
-import it.unibz.inf.ontop.protege.gui.IconLoader;
-=======
->>>>>>> v3/package-names-changed:ontop-protege/src/main/java/it/unibz/inf/ontop/protege/gui/component/DataTypeComboBox.java
 import it.unibz.inf.ontop.model.DatatypeFactory;
 import it.unibz.inf.ontop.model.Predicate;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
-<<<<<<< HEAD:ontop-protege/src/main/java/it/unibz/inf/ontop/protege/gui/component/DataTypeComboBox.java
-=======
 import it.unibz.inf.ontop.protege.gui.IconLoader;
->>>>>>> v3/package-names-changed:ontop-protege/src/main/java/it/unibz/inf/ontop/protege/gui/component/DataTypeComboBox.java
+
+import javax.swing.*;
+import javax.swing.plaf.basic.BasicComboBoxRenderer;
+import java.awt.*;
+import java.util.List;
 
 public class DataTypeComboBox extends JComboBox {
 

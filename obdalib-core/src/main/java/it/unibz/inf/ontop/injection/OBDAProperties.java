@@ -28,6 +28,28 @@ public class OBDAProperties {
 
     public static final String DB_CONSTRAINTS = "DB_CONSTRAINTS";
 
+    public static final String MAPPING_FILE_PATH = "MAPPING_FILE_PATH";
+    /**
+     * Expects a File object, not a String!
+     */
+    public static final String MAPPING_FILE_OBJECT = "MAPPING_FILE_OBJECT";
+
+    /**
+     * Expects a Reader object, not a String!
+     */
+    public static final String MAPPING_FILE_READER = "MAPPING_FILE_READER";
+
+    /**
+     * Expects a Model object, not a String!
+     */
+    public static final String MAPPING_FILE_MODEL = "MAPPING_FILE_MODEL";
+
+    /**
+     * Expects an OBDAModel object, not a string!
+     * Not it is not the standard way to access the OBDA model
+     */
+    public static final String PREDEFINED_OBDA_MODEL = "PREDEFINED_OBDA_MODEL";
+
     public static final String DEFAULT_OBDA_PROPERTIES_FILE = "default_implementations.properties";
     private static Logger LOG = LoggerFactory.getLogger(OBDAProperties.class);
     private final Properties properties;

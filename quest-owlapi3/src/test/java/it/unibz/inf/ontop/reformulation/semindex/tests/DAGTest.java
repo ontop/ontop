@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.reformulation.semindex.tests;
 
 /*
  * #%L
- * ontop-quest-owlapi3
+ * ontop-quest-owlapi
  * %%
  * Copyright (C) 2009 - 2014 Free University of Bozen-Bolzano
  * %%
@@ -21,21 +21,13 @@ package it.unibz.inf.ontop.reformulation.semindex.tests;
  */
 
 
-
+import it.unibz.inf.ontop.ontology.*;
+import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.Equivalences;
+import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
+import junit.framework.TestCase;
 
 import java.util.LinkedList;
 import java.util.List;
-
-
-import it.unibz.inf.ontop.ontology.ClassExpression;
-import it.unibz.inf.ontop.ontology.DataPropertyExpression;
-import it.unibz.inf.ontop.ontology.DataRangeExpression;
-import it.unibz.inf.ontop.ontology.Description;
-import it.unibz.inf.ontop.ontology.ObjectPropertyExpression;
-import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.Equivalences;
-import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
-
-import junit.framework.TestCase;
 
 public class DAGTest extends TestCase {
 

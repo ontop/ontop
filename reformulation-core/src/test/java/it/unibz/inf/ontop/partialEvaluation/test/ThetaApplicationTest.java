@@ -21,12 +21,9 @@ package it.unibz.inf.ontop.partialEvaluation.test;
  */
 
 import it.unibz.inf.ontop.model.*;
-import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.SingletonSubstitution;
-import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.SubstitutionImpl;
-import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.SubstitutionUtilities;
-
 import it.unibz.inf.ontop.model.impl.FunctionalTermImpl;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
+import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.*;
 
 import java.util.HashMap;
 import java.util.List;

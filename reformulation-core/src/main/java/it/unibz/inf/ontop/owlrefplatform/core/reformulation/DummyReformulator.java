@@ -22,6 +22,7 @@ package it.unibz.inf.ontop.owlrefplatform.core.reformulation;
 
 import it.unibz.inf.ontop.model.DatalogProgram;
 import it.unibz.inf.ontop.model.OBDAException;
+import it.unibz.inf.ontop.ontology.ImmutableOntologyVocabulary;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.LinearInclusionDependencies;
 import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 
@@ -40,7 +41,7 @@ public class DummyReformulator implements QueryRewriter {
 	}
 
 	@Override
-	public void setTBox(TBoxReasoner ontology, LinearInclusionDependencies sigma) {
+	public void setTBox(TBoxReasoner ontology, ImmutableOntologyVocabulary voc, LinearInclusionDependencies sigma) {
 		// NO-OP		
 	}
 }

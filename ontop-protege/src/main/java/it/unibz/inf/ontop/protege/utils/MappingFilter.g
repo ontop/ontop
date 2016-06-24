@@ -1,23 +1,23 @@
 grammar MappingFilter;
 
 @header {
-package it.unibz.krdb.obda.gui.swing.utils;
+package it.unibz.inf.ontop.gui.swing.utils;
 
-import it.unibz.krdb.obda.gui.swing.treemodel.TreeModelFilter;
-import it.unibz.krdb.obda.gui.swing.treemodel.MappingIDTreeModelFilter;
-import it.unibz.krdb.obda.gui.swing.treemodel.MappingStringTreeModelFilter;
-import it.unibz.krdb.obda.gui.swing.treemodel.MappingHeadVariableTreeModelFilter;
-import it.unibz.krdb.obda.gui.swing.treemodel.MappingSQLStringTreeModelFilter;
-import it.unibz.krdb.obda.gui.swing.treemodel.MappingFunctorTreeModelFilter;
-import it.unibz.krdb.obda.gui.swing.treemodel.MappingPredicateTreeModelFilter;
-import it.unibz.krdb.obda.model.OBDAMappingAxiom;
+import it.unibz.inf.ontop.gui.swing.treemodel.TreeModelFilter;
+import it.unibz.inf.ontop.gui.swing.treemodel.MappingIDTreeModelFilter;
+import it.unibz.inf.ontop.gui.swing.treemodel.MappingStringTreeModelFilter;
+import it.unibz.inf.ontop.gui.swing.treemodel.MappingHeadVariableTreeModelFilter;
+import it.unibz.inf.ontop.gui.swing.treemodel.MappingSQLStringTreeModelFilter;
+import it.unibz.inf.ontop.gui.swing.treemodel.MappingFunctorTreeModelFilter;
+import it.unibz.inf.ontop.gui.swing.treemodel.MappingPredicateTreeModelFilter;
+import it.unibz.inf.ontop.model.OBDAMappingAxiom;
 
 import java.util.List;
 import java.util.LinkedList;
 }
 
 @lexer::header {
-package it.unibz.krdb.obda.gui.swing.utils;
+package it.unibz.inf.ontop.gui.swing.utils;
 
 import java.util.Vector;
 }

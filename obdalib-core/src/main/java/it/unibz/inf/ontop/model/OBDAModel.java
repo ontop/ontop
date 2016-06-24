@@ -6,10 +6,7 @@ import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.io.PrefixManager;
 import it.unibz.inf.ontop.mapping.MappingParser;
-import it.unibz.inf.ontop.ontology.DataPropertyExpression;
-import it.unibz.inf.ontop.ontology.OClass;
-import it.unibz.inf.ontop.ontology.ObjectPropertyExpression;
-import it.unibz.inf.ontop.ontology.OntologyVocabulary;
+import it.unibz.inf.ontop.ontology.*;
 
 import java.net.URI;
 import java.util.Map;
@@ -42,11 +39,7 @@ import java.util.Set;
  * Initial author (before refactoring):
  * @author Mariano Rodriguez Muro <mariano.muro@gmail.com>
  *
- * TODO: remove the side-effect methods so that OBDA models can be truly
- * immutable.
- *
- * TODO: split the OBDAModel into a SourceModel and an OntologyModel.
- * The OBDAModel would then remain the aggregate of the two. The three classes should be immutable.
+ * TODO: make the ontology vocabulary immutable
  *
  */
 public interface OBDAModel {
@@ -104,9 +97,8 @@ public interface OBDAModel {
      */
     public OBDAModel newModel(Set<OBDADataSource> dataSources,
                               Map<URI, ImmutableList<OBDAMappingAxiom>> newMappings,
-                              PrefixManager prefixManager, Set<OClass> declaredClasses,
-                              Set<ObjectPropertyExpression> declaredObjectProperties,
-                              Set<DataPropertyExpression> declaredDataProperties) throws DuplicateMappingException;
+                              PrefixManager prefixManager, OntologyVocabulary ontologyVocabulary)
+            throws DuplicateMappingException;
 
     /**
      * TODO: remove it when OBDA models will be FULLY immutable.
@@ -123,36 +115,6 @@ public interface OBDAModel {
 
     public boolean containsSource(URI sourceURI);
 
-    public Set<OClass> getDeclaredClasses();
+	public OntologyVocabulary getOntologyVocabulary();
 
-    public Set<ObjectPropertyExpression> getDeclaredObjectProperties();
-
-    public Set<DataPropertyExpression> getDeclaredDataProperties();
-
-    public boolean isDeclaredClass(OClass classname);
-
-    public boolean isDeclaredObjectProperty(ObjectPropertyExpression property);
-
-    public boolean isDeclaredDataProperty(DataPropertyExpression property);
-
-
-    //--------------------------------
-    // Side-effect methods (mutable)
-    // TODO: remove them
-    //--------------------------------
-
-
-    public boolean declareClass(OClass className);
-
-    public boolean declareObjectProperty(ObjectPropertyExpression property);
-
-    public boolean declareDataProperty(DataPropertyExpression property);
-
-    public boolean unDeclareClass(OClass className);
-
-    public boolean unDeclareObjectProperty(ObjectPropertyExpression property);
-
-    public boolean unDeclareDataProperty(DataPropertyExpression property);
-
-    public void declareAll(OntologyVocabulary vocabulary);
 }

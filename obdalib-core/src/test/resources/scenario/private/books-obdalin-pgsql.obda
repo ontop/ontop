@@ -8,7 +8,7 @@
    <!ENTITY dcterms 'http://purl.org/dc/terms/'>
 ]>
 <OBDA version="1.0" xml:base="http://meraka/moss/exampleBooks.owl#" xmlns="http://meraka/moss/exampleBooks.owl#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:dctype="http://purl.org/dc/dcmitype/Image" xmlns:foaf="http://xmlns.com/foaf/0.1/" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#" xmlns:swrl="http://www.w3.org/2003/11/swrl#" xmlns:swrlb="http://www.w3.org/2003/11/swrlb#" xmlns:xsd="http://www.w3.org/2001/XMLSchema#">
-  <mappings body="class it.unibz.krdb.obda.model.impl.SQLQueryImpl" headclass="class it.unibz.krdb.obda.model.impl.CQIEImpl" sourceuri="Books">
+  <mappings body="class it.unibz.inf.ontop.model.impl.SQLQueryImpl" headclass="class it.unibz.inf.ontop.model.impl.CQIEImpl" sourceuri="Books">
     <mapping id="cl_Authors">
       <CQ string="Author(author($wr_code)),name(author($wr_code),$wr_name)"/>
       <SQLQuery string="select wr_code, wr_name from tb_affiliated_writers"/>

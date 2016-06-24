@@ -20,16 +20,17 @@ package it.unibz.inf.ontop.protege.utils;
  * #L%
  */
 
-import java.awt.Component;
-import java.awt.Container;
-import java.awt.FocusTraversalPolicy;
-import java.util.Vector;
+import com.google.common.collect.Iterables;
+
+import java.awt.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class CustomTraversalPolicy extends FocusTraversalPolicy {
-	Vector<Component> order;
+	List<Component> order;
 
-	public CustomTraversalPolicy(Vector<Component> order) {
-		this.order = new Vector<Component>(order.size());
+	public CustomTraversalPolicy(List<Component> order) {
+		this.order = new ArrayList<>(order.size());
 		this.order.addAll(order);
 	}
 	
@@ -55,7 +56,7 @@ public class CustomTraversalPolicy extends FocusTraversalPolicy {
 	}
 
 	public Component getLastComponent(Container focusCycleRoot) {
-		return order.lastElement();
+		return Iterables.getLast(order);
 	}
 
 	public Component getFirstComponent(Container focusCycleRoot) {

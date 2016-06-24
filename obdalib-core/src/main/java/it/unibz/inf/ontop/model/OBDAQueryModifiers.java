@@ -1,7 +1,6 @@
 package it.unibz.inf.ontop.model;
 
 import it.unibz.inf.ontop.pivotalrepr.QueryModifiers;
-
 import java.util.List;
 
 /**

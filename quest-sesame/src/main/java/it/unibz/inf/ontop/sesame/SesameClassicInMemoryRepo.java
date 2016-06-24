@@ -20,14 +20,15 @@ package it.unibz.inf.ontop.sesame;
  * #L%
  */
 
+import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
+import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.net.URI;
 import java.util.Properties;
 
 import org.openrdf.query.Dataset;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
 
 public class SesameClassicInMemoryRepo extends SesameClassicRepo {
 	
@@ -38,10 +39,9 @@ public class SesameClassicInMemoryRepo extends SesameClassicRepo {
 		Properties props = new Properties();
 		props.setProperty(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
 		props.setProperty(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-		props.setProperty(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
 		props.setProperty(QuestPreferences.OBTAIN_FROM_MAPPINGS, "false");
 		props.setProperty(QuestPreferences.OBTAIN_FROM_ONTOLOGY, "false");
-		props.setProperty(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC_INDEX); 
+		props.setProperty(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC_INDEX);
 		props.setProperty(QuestPreferences.STORAGE_LOCATION, QuestConstants.INMEMORY);
 		if (existential) {
 			props.setProperty(QuestPreferences.REWRITE, "true");
@@ -54,7 +54,7 @@ public class SesameClassicInMemoryRepo extends SesameClassicRepo {
 			props.setProperty(QuestPreferences.REFORMULATION_TECHNIQUE, QuestConstants.UCQBASED);
 		}
 		p = new QuestPreferences(props);
-		createStore(name, tboxFile, p); 
+		createStore(name, tboxFile, p);
 	}
 	
 	public SesameClassicInMemoryRepo(String name, Dataset data) throws Exception {
@@ -62,10 +62,9 @@ public class SesameClassicInMemoryRepo extends SesameClassicRepo {
 		Properties props = new Properties();
 		props.setProperty(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
 		props.setProperty(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-		props.setProperty(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
 		props.setProperty(QuestPreferences.OBTAIN_FROM_MAPPINGS, "false");
 		props.setProperty(QuestPreferences.OBTAIN_FROM_ONTOLOGY, "false");
-		props.setProperty(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC_INDEX); 
+		props.setProperty(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC_INDEX);
 		props.setProperty(QuestPreferences.STORAGE_LOCATION, QuestConstants.INMEMORY);
 
 		p = new QuestPreferences(props);

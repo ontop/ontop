@@ -23,76 +23,28 @@ package it.unibz.inf.ontop.quest.sparql;
  * #L%
  */
 
-import java.io.File;
-import java.util.Properties;
 
-import junit.framework.TestCase;
-
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
-import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWL;
-import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWLConnection;
-import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWLFactory;
-import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWLResultSet;
-import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWLStatement;
-import org.semanticweb.owlapi.apibinding.OWLManager;
+import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLResultSet;
+import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLStatement;
+import it.unibz.inf.ontop.quest.AbstractVirtualModeTest;
+i
 import org.semanticweb.owlapi.model.OWLObject;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
-import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
 
 /***
  * Tests that the system can handle the SPARQL "LIKE" keyword in the oracle setting
  * (i.e. that it is translated to REGEXP_LIKE and not LIKE in oracle sql)
  */
-public class OracleDateTimeTest extends TestCase {
+public class OracleDateTimeTest extends AbstractVirtualModeTest {
 
-	// TODO We need to extend this test to import the contents of the mappings
-	// into OWL and repeat everything taking form OWL
+	static final String owlfile = "src/test/resources/dateTimeExampleBooks.owl";
+	static final String obdafile = "src/test/resources/dateTimeExampleBooks.obda";
 
-	private QuestOWLConnection conn;
-
-	Logger log = LoggerFactory.getLogger(this.getClass());
-	private OWLOntology ontology;
-
-	final String owlfile = "src/test/resources/dateTimeExampleBooks.owl";
-	final String obdafile = "src/test/resources/dateTimeExampleBooks.obda";
-	private QuestOWL reasoner;
-
-	@Override
-	@Before
-	public void setUp() throws Exception {
-		
-		
-		// Loading the OWL file
-		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-		ontology = manager.loadOntologyFromOntologyDocument((new File(owlfile)));
-	
-		Properties p = new Properties();
-		p.setProperty(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-		p.setProperty(QuestPreferences.OBTAIN_FULL_METADATA, QuestConstants.FALSE);
-		// Creating a new instance of the reasoner
-		QuestOWLFactory factory = new QuestOWLFactory(new File(obdafile), new QuestPreferences(p));
-
-		reasoner = factory.createReasoner(ontology, new SimpleConfiguration());
-
-		// Now we are ready for querying
-		conn = reasoner.getConnection();
+	protected OracleDateTimeTest() {
+		super(owlfile, obdafile);
 	}
 
-	@After
-	public void tearDown() throws Exception{
-		conn.close();
-		reasoner.dispose();
-	}
-	
 
-	
 	private String runTest(QuestOWLStatement st, String query, boolean hasResult) throws Exception {
 		String retval;
 		QuestOWLResultSet rs = st.executeTuple(query);
@@ -112,7 +64,6 @@ public class OracleDateTimeTest extends TestCase {
 	 * Tests the use of SPARQL like
 	 * @throws Exception
 	 */
-	@Test
 	public void testSparql2OracleRegex() throws Exception {
 		QuestOWLStatement st = null;
 		try {

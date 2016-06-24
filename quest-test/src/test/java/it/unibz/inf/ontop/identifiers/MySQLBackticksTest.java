@@ -20,97 +20,19 @@ package it.unibz.inf.ontop.identifiers;
  * #L%
  */
 
-import java.io.File;
-import java.util.Properties;
-
-import junit.framework.TestCase;
-
-import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
-import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWL;
-import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWLConnection;
-import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWLFactory;
-import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWLResultSet;
-import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWLStatement;
-import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.OWLIndividual;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
-import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import it.unibz.inf.ontop.quest.AbstractVirtualModeTest;
 
 /***
  * Tests that mysql identifiers for tables and columns are treated
  * correctly. Especially, how backticks are treated
  */
-public class MySQLBackticksTest extends TestCase {
+public class MySQLBackticksTest extends AbstractVirtualModeTest {
 
-	private QuestOWLConnection conn;
+	static final String owlfile = "resources/identifiers/identifiers.owl";
+	static final String obdafile = "resources/identifiers/identifiers-backtick-mysql.obda";
 
-	Logger log = LoggerFactory.getLogger(this.getClass());
-	private OWLOntology ontology;
-
-	final String owlfile = "resources/identifiers/identifiers.owl";
-	final String obdafile = "resources/identifiers/identifiers-backtick-mysql.obda";
-	private QuestOWL reasoner;
-
-	@Override
-	public void setUp() throws Exception {
-		
-		
-		// Loading the OWL file
-		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-		ontology = manager.loadOntologyFromOntologyDocument((new File(owlfile)));
-	
-		Properties p = new Properties();
-		p.setProperty(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-		p.setProperty(QuestPreferences.OBTAIN_FULL_METADATA, QuestConstants.FALSE);
-		// Creating a new instance of the reasoner
-        QuestOWLFactory factory = new QuestOWLFactory(new File(obdafile), new QuestPreferences(p));
-
-		reasoner = factory.createReasoner(ontology, new SimpleConfiguration());
-
-		// Now we are ready for querying
-		conn = reasoner.getConnection();
-
-		
-	}
-
-
-	public void tearDown() throws Exception{
-		conn.close();
-		reasoner.dispose();
-	}
-	
-
-	
-	private String runTests(String query) throws Exception {
-		QuestOWLStatement st = conn.createStatement();
-		//StringBuilder bf = new StringBuilder(query);
-		String retval;
-		try {
-			
-
-			QuestOWLResultSet rs = st.executeTuple(query);
-			
-			assertTrue(rs.nextRow());
-			OWLIndividual ind1 =	rs.getOWLIndividual("x")	 ;
-			retval = ind1.toString();
-
-		} catch (Exception e) {
-			throw e;
-		} finally {
-			try {
-
-			} catch (Exception e) {
-				st.close();
-				assertTrue(false);
-			}
-			conn.close();
-			reasoner.dispose();
-		}
-		return retval;
+	public MySQLBackticksTest() {
+		super(owlfile, obdafile);
 	}
 
 	/**
@@ -118,34 +40,33 @@ public class MySQLBackticksTest extends TestCase {
 	 * @throws Exception
 	 */
 
-
 	public void testBacktick() throws Exception {
 		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT ?x WHERE {?x a :Country} ORDER BY ?x";
-		String val = runTests(query);
+		String val = runQueryAndReturnStringX(query);
 		assertEquals("<http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country-a>", val);
 	}
 	
 	public void testAliasBacktick() throws Exception {
 		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT ?x WHERE {?x a :Country2} ORDER BY ?x";
-		String val = runTests(query);
+		String val = runQueryAndReturnStringX(query);
 		assertEquals("<http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country2-a>", val);
 	}
 	
 	public void testAliasBacktick2() throws Exception {
 		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT ?x WHERE {?x a :Country3} ORDER BY ?x";
-		String val = runTests(query);
+		String val = runQueryAndReturnStringX(query);
 		assertEquals("<http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country3-a>", val);
 	}
 	
 	public void testTableBacktick() throws Exception {
 		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT ?x WHERE {?x a :Country4} ORDER BY ?x";
-		String val = runTests(query);
+		String val = runQueryAndReturnStringX(query);
 		assertEquals("<http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country4-a>", val);
 	}
 	
 	public void testColumnBacktick() throws Exception {
 		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT ?x WHERE {?x a :Country5} ORDER BY ?x";
-		String val = runTests(query);
+		String val = runQueryAndReturnStringX(query);
 		assertEquals("<http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country5-a>", val);
 	}
 			

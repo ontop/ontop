@@ -46,7 +46,7 @@ public class ABoxSesameMaterializerExample {
 	 */
 	final String inputFile = "src/main/resources/example/exampleBooks.obda";
 	final String outputFile = "src/main/resources/example/exampleBooks.n3";
-	
+
 	/**
 	 * TODO: try with result streaming
 	 */

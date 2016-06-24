@@ -2344,7 +2344,7 @@ _:node190675gahx440 rr:termType rr:IRI .
 
 _:node190675gahx447 rr:logicalTable _:node190675gahx445 .
 
-_:node190675gahx446 rr:template "http://sws.ifi.uio.no/data/npd-v2/wellbore/{wlbNpdidWellbore}/core/{wlbCoreNumber}" .
+_:node190675gahx446 rr:column "wlbCoreNumber" .
 
 _:node190675gahx449 a rr:ObjectMap .
 

@@ -35,7 +35,7 @@ import it.unibz.inf.ontop.owlrefplatform.core.execution.SISQLQuestStatementImpl;
  * SQL-specific implementation (specific to the JDBCConnector)!
  *
  * TODO: rename it SQLQuestConnection
- * 
+ *
  * @author mariano
  * 
  */

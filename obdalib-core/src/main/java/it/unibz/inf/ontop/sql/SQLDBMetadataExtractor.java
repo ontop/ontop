@@ -1,21 +1,23 @@
 package it.unibz.inf.ontop.sql;
 
 
-import net.sf.jsqlparser.JSQLParserException;
 import it.unibz.inf.ontop.injection.OBDAProperties;
-import it.unibz.inf.ontop.mapping.sql.SQLTableNameExtractor;
 import it.unibz.inf.ontop.model.OBDADataSource;
 import it.unibz.inf.ontop.model.OBDAModel;
 import it.unibz.inf.ontop.nativeql.DBConnectionWrapper;
 import it.unibz.inf.ontop.nativeql.DBMetadataException;
 import it.unibz.inf.ontop.nativeql.DBMetadataExtractor;
-import it.unibz.inf.ontop.sql.api.RelationJSQL;
+import net.sf.jsqlparser.JSQLParserException;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+
+import static it.unibz.inf.ontop.mapping.sql.SQLTableNameExtractor.getRealTables;
 
 /**
  * DBMetadataExtractor for JDBC-enabled DBs.
@@ -33,64 +35,63 @@ public class SQLDBMetadataExtractor implements DBMetadataExtractor {
      *
      * Can be useful for eliminating self-joins
      */
-    private final ImplicitDBConstraints userConstraints;
+    private final Optional<ImplicitDBConstraintsReader> userConstraints;
 
     @Inject
-    private SQLDBMetadataExtractor(OBDAProperties preferences, @Nullable ImplicitDBConstraints userConstraints) {
+    private SQLDBMetadataExtractor(OBDAProperties preferences, @Nullable ImplicitDBConstraintsReader userConstraints) {
         this.obtainFullMetadata = preferences.getBoolean(OBDAProperties.OBTAIN_FULL_METADATA);
-        this.userConstraints = userConstraints;
+        this.userConstraints = Optional.ofNullable(userConstraints);
     }
 
     /**
      * Expects the DBConnectionWrapper to wrap a JDBC connection.
      */
     @Override
-    public DBMetadata extract(OBDADataSource dataSource, OBDAModel obdaModel, DBConnectionWrapper dbConnection) throws DBMetadataException {
-        boolean applyUserConstraints = (userConstraints != null);
+    public DBMetadata extract(OBDADataSource dataSource, OBDAModel obdaModel, DBConnectionWrapper dbConnection)
+            throws DBMetadataException {
 
-        if (dbConnection == null) {
-            throw new IllegalArgumentException("dbConnection is required by " + getClass().getCanonicalName());
-        }
-
-        Object abstractConnection = dbConnection.getConnection();
-
-        if (!(abstractConnection instanceof Connection)) {
-            throw new IllegalArgumentException("The connection must correspond to a java.sql.connection (" + getClass().getCanonicalName() + ")");
-        }
-        Connection connection = (Connection) abstractConnection;
-
+        Connection connection = (Connection) dbConnection.getConnection();
         try {
-            DBMetadata metadata;
+            DBMetadata metadata = RDBMetadataExtractionTools.createMetadata(connection);
+
+            // if we have to parse the full metadata or just the table list in the mappings
             if (obtainFullMetadata) {
-                 metadata = JDBCConnectionManager.getMetaData(connection);
-            } else {
-                // This is the NEW way of obtaining part of the metadata
-                // (the schema.table names) by parsing the mappings
+                RDBMetadataExtractionTools.loadMetadata(metadata, connection, null);
+            }
+            else {
+                try {
+                    // This is the NEW way of obtaining part of the metadata
+                    // (the schema.table names) by parsing the mappings
 
-                // Parse mappings. Just to get the table names in use
-                SQLTableNameExtractor mParser = new SQLTableNameExtractor(connection, obdaModel.getMappings(dataSource.getSourceID()));
+                    // Parse mappings. Just to get the table names in use
 
-                List<RelationJSQL> realTables = mParser.getRealTables();
+                    Set<RelationID> realTables = getRealTables(metadata.getQuotedIDFactory(), obdaModel.getMappings(
+                            dataSource.getSourceID()));
+                    userConstraints.ifPresent(c -> {
+                        // Add the tables referred to by user-supplied foreign keys
+                        Set<RelationID> referredTables = c.getReferredTables(metadata.getQuotedIDFactory());
+                        realTables.addAll(referredTables);
+                    });
 
-                if (applyUserConstraints) {
-                    // Add the tables referred to by user-supplied foreign keys
-                    userConstraints.addReferredTables(realTables);
+                    RDBMetadataExtractionTools.loadMetadata(metadata, connection, realTables);
                 }
-
-                metadata = JDBCConnectionManager.getMetaData(connection, realTables);
+                catch (JSQLParserException e) {
+                    System.out.println("Error obtaining the tables" + e);
+                }
+                catch (SQLException e) {
+                    System.out.println("Error obtaining the metadata " + e);
+                }
             }
 
-            //Adds keys from the text file
-            if (userConstraints != null) {
-                userConstraints.addConstraints(metadata);
-            }
+            userConstraints.ifPresent(c ->  {
+                c.insertUniqueConstraints(metadata);
+                c.insertForeignKeyConstraints(metadata);
+            });
 
             return metadata;
 
-        } catch (JSQLParserException e) {
-            throw new DBMetadataException("Error obtaining the tables" + e);
         } catch (SQLException e) {
-            throw new DBMetadataException("Error obtaining the Metadata" + e);
+            throw new DBMetadataException(e.getMessage());
         }
     }
 }

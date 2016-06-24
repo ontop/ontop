@@ -1,8 +1,8 @@
 package it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht;
 
+import it.unibz.inf.ontop.ontology.ClassExpression;
 import it.unibz.inf.ontop.ontology.DataPropertyExpression;
 import it.unibz.inf.ontop.ontology.OClass;
-import it.unibz.inf.ontop.ontology.ClassExpression;
 import it.unibz.inf.ontop.ontology.ObjectPropertyExpression;
 
 import java.util.HashMap;

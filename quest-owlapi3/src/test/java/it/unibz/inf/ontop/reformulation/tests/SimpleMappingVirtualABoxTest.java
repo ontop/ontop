@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.reformulation.tests;
 
 /*
  * #%L
- * ontop-quest-owlapi3
+ * ontop-quest-owlapi
  * %%
  * Copyright (C) 2009 - 2014 Free University of Bozen-Bolzano
  * %%
@@ -20,6 +20,18 @@ package it.unibz.inf.ontop.reformulation.tests;
  * #L%
  */
 
+import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
+import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
+import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
+import junit.framework.TestCase;
+import org.semanticweb.owlapi.apibinding.OWLManager;
+import org.semanticweb.owlapi.io.ToStringRenderer;
+import org.semanticweb.owlapi.model.OWLObject;
+import org.semanticweb.owlapi.model.OWLOntology;
+import org.semanticweb.owlapi.model.OWLOntologyManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -29,22 +41,6 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Properties;
-
-import it.unibz.inf.ontop.owlrefplatform.owlapi3.*;
-import junit.framework.TestCase;
-
-import it.unibz.inf.ontop.model.OBDADataFactory;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
-import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.OWLIndividual;
-import org.semanticweb.owlapi.model.OWLLiteral;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
-import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /***
  * A simple test that check if the system is able to handle Mappings for
@@ -56,10 +52,6 @@ import org.slf4j.LoggerFactory;
  */
 public class SimpleMappingVirtualABoxTest extends TestCase {
 
-	// TODO We need to extend this test to import the contents of the mappings
-	// into OWL and repeat everything taking form OWL
-
-	private OBDADataFactory fac;
 	private Connection conn;
 
 	Logger log = LoggerFactory.getLogger(this.getClass());
@@ -80,8 +72,6 @@ public class SimpleMappingVirtualABoxTest extends TestCase {
 		String username = "sa";
 		String password = "";
 
-		fac = OBDADataFactoryImpl.getInstance();
-
 		conn = DriverManager.getConnection(url, username, password);
 		Statement st = conn.createStatement();
 
@@ -101,7 +91,7 @@ public class SimpleMappingVirtualABoxTest extends TestCase {
 		// Loading the OWL file
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 		ontology = manager.loadOntologyFromOntologyDocument((new File(owlfile)));
-		
+
 	}
 
 	@Override
@@ -131,18 +121,21 @@ public class SimpleMappingVirtualABoxTest extends TestCase {
 		conn.commit();
 	}
 
-	private void runTests(QuestPreferences p) throws Exception {
+	private void runTests(Properties p) throws Exception {
 
 		// Creating a new instance of the reasoner
-		QuestOWLFactory factory = new QuestOWLFactory(new File(obdafile), p);
-
-		QuestOWL reasoner = factory.createReasoner(ontology, new SimpleConfiguration());
+		QuestOWLFactory factory = new QuestOWLFactory();
+        QuestOWLConfiguration config = QuestOWLConfiguration.builder()
+				.nativeOntopMappingFile(obdafile)
+				.properties(p)
+				.build();
+        QuestOWL reasoner = factory.createReasoner(ontology, config);
 
 		// Now we are ready for querying
 		QuestOWLConnection conn = reasoner.getConnection();
 		QuestOWLStatement st = conn.createStatement();
 
-		String query = "PREFIX : <http://it.unibz.krdb/obda/test/simple#> SELECT * WHERE { ?x a :A; :P ?y; :U ?z; :P ?y; :U ?z; :P ?y ; :U ?z; :P ?y; :U ?z; :P ?y ; :U ?z; :P ?y; :U ?z; :P ?y ; :U ?z; :P ?y; :U ?z; :P ?y ; :U ?z; :P ?y; :U ?z; :P ?y ; :U ?z; :P ?y; :U ?z; :P ?y ; :U ?z; :P ?y; :U ?z; :P ?y ; :U ?z }";
+		String query = "PREFIX : <http://it.unibz.inf/obda/test/simple#> SELECT * WHERE { ?x a :A; :P ?y; :U ?z; :P ?y; :U ?z; :P ?y ; :U ?z; :P ?y; :U ?z; :P ?y ; :U ?z; :P ?y; :U ?z; :P ?y ; :U ?z; :P ?y; :U ?z; :P ?y ; :U ?z; :P ?y; :U ?z; :P ?y ; :U ?z; :P ?y; :U ?z; :P ?y ; :U ?z; :P ?y; :U ?z; :P ?y ; :U ?z }";
 		try {
 			
 			/*
@@ -158,12 +151,12 @@ public class SimpleMappingVirtualABoxTest extends TestCase {
 //			log.info("Elapsed time: {}", elapsed);
 			QuestOWLResultSet rs = st.executeTuple(query);
 			assertTrue(rs.nextRow());
-			OWLIndividual ind1 = rs.getOWLIndividual("x");
-			OWLIndividual ind2 = rs.getOWLIndividual("y");
-			OWLLiteral val = rs.getOWLLiteral("z");
-			assertEquals("<uri1>", ind1.toString());
-			assertEquals("<uri1>", ind2.toString());
-			assertEquals("\"value1\"", val.toString());
+			OWLObject ind1 = rs.getOWLObject("x");
+			OWLObject ind2 = rs.getOWLObject("y");
+			OWLObject val = rs.getOWLObject("z");
+			assertEquals("<uri1>", ToStringRenderer.getInstance().getRendering(ind1));
+			assertEquals("<uri1>", ToStringRenderer.getInstance().getRendering(ind2));
+			assertEquals("\"value1\"", ToStringRenderer.getInstance().getRendering(val));
 			
 
 		} catch (Exception e) {
@@ -174,10 +167,10 @@ public class SimpleMappingVirtualABoxTest extends TestCase {
 			} catch (Exception e) {
 				throw e;
 			} finally {
-			conn.close();
-			reasoner.dispose();
+				conn.close();
+				reasoner.dispose();
+			}
 		}
-	}
 	}
 
 	public void testViEqSig() throws Exception {
@@ -185,9 +178,18 @@ public class SimpleMappingVirtualABoxTest extends TestCase {
 		Properties p = new Properties();
 		p.setProperty(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
 		p.setProperty(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-		p.setProperty(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
 
-		runTests(new QuestPreferences(p));
+		runTests(p);
+	}
+	
+	public void testClassicEqSig() throws Exception {
+
+		Properties p = new Properties();
+		p.setProperty(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
+		p.setProperty(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
+		p.setProperty(QuestPreferences.OBTAIN_FROM_MAPPINGS, "true");
+
+		runTests(p);
 	}
 
 

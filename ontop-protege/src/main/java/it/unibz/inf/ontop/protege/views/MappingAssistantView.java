@@ -20,101 +20,57 @@ package it.unibz.inf.ontop.protege.views;
  * #L%
  */
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Font;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
-
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.border.TitledBorder;
-
-<<<<<<< HEAD:ontop-protege/src/main/java/it/unibz/inf/ontop/protege/views/MappingAssistantView.java
+import it.unibz.inf.ontop.model.impl.OBDAModelImpl;
 import it.unibz.inf.ontop.protege.core.OBDAModelManager;
 import it.unibz.inf.ontop.protege.core.OBDAModelManagerListener;
 import it.unibz.inf.ontop.protege.core.OBDAModelWrapper;
-import it.unibz.inf.ontop.protege.panels.DatasourceSelector;
-import org.protege.editor.owl.ui.view.AbstractOWLViewComponent;
-import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
-import it.unibz.inf.ontop.model.impl.OBDAModelImpl;
-import it.unibz.inf.ontop.protege.panels.MappingAssistantPanel;
-=======
-import it.unibz.inf.ontop.model.OBDAModel;
-import it.unibz.inf.ontop.model.impl.OBDAModelImpl;
-import it.unibz.inf.ontop.protege.core.OBDAModelManager;
-import it.unibz.inf.ontop.protege.core.OBDAModelManagerListener;
-import it.unibz.inf.ontop.protege.panels.DatasourceSelector;
 import it.unibz.inf.ontop.protege.panels.MappingAssistantPanel;
 import org.protege.editor.owl.ui.view.AbstractOWLViewComponent;
->>>>>>> v3/package-names-changed:ontop-protege/src/main/java/it/unibz/inf/ontop/protege/views/MappingAssistantView.java
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.swing.border.TitledBorder;
+import java.awt.*;
+
 public class MappingAssistantView extends AbstractOWLViewComponent implements OBDAModelManagerListener {
 
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	private DatasourceSelector datasourceSelector;
+    private OBDAModelManager obdaModelManager;
 
-	private OBDAModelManager apic;
+    private OBDAModelWrapper activeOBDAModel;
 
-	private static final Logger log = LoggerFactory.getLogger(SQLQueryInterfaceView.class);
-	
-	@Override
-	protected void disposeOWLView() {
-		apic.removeListener(this);
-	}
+    private static final Logger log = LoggerFactory.getLogger(SQLQueryInterfaceView.class);
 
-	@Override
-	protected void initialiseOWLView() throws Exception {
+    @Override
+    protected void disposeOWLView() {
+        obdaModelManager.removeListener(this);
+    }
 
-		apic = (OBDAModelManager) getOWLEditorKit().get(OBDAModelImpl.class.getName());
-		apic.addListener(this);
+    @Override
+    protected void initialiseOWLView() throws Exception {
 
-		OBDAModelWrapper dsController = apic.getActiveOBDAModelWrapper();
+        obdaModelManager = (OBDAModelManager) getOWLEditorKit().get(OBDAModelImpl.class.getName());
+        obdaModelManager.addListener(this);
+
+        activeOBDAModel = obdaModelManager.getActiveOBDAModelWrapper();
+
+        MappingAssistantPanel queryPanel = new MappingAssistantPanel(activeOBDAModel);
 
 
-		MappingAssistantPanel queryPanel = new MappingAssistantPanel(dsController, apic.getNativeQLFactory());
-		datasourceSelector = new DatasourceSelector(dsController);
-		datasourceSelector.addDatasourceListListener(queryPanel);
+        queryPanel.setBorder(new TitledBorder("SQL Query Editor"));
 
-		JPanel selectorPanel = new JPanel();
-		selectorPanel.setLayout(new GridBagLayout());
+        setLayout(new BorderLayout());
+        add(queryPanel, BorderLayout.NORTH);
 
-		JLabel label = new JLabel("Select datasource: ");
 
-		label.setFont(new Font("Dialog", Font.BOLD, 12));
-		label.setForeground(new Color(53, 113, 163));
+        log.debug("SQL Query view initialized");
+    }
 
-		GridBagConstraints gridBagConstraints = new java.awt.GridBagConstraints();
-		gridBagConstraints.gridx = 0;
-		gridBagConstraints.gridy = 0;
-		gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-		gridBagConstraints.insets = new Insets(5, 5, 5, 5);
-		selectorPanel.add(label, gridBagConstraints);
+    @Override
+    public void activeOntologyChanged() {
 
-		gridBagConstraints = new java.awt.GridBagConstraints();
-		gridBagConstraints.gridx = 1;
-		gridBagConstraints.gridy = 0;
-		gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-		gridBagConstraints.weightx = 1.0;
-		gridBagConstraints.insets = new Insets(5, 5, 5, 5);
-		selectorPanel.add(datasourceSelector, gridBagConstraints);
+       activeOBDAModel = obdaModelManager.getActiveOBDAModelWrapper();
 
-		selectorPanel.setBorder(new TitledBorder("Datasource selection"));
-		queryPanel.setBorder(new TitledBorder("SQL Query Editor"));
-
-		setLayout(new BorderLayout());
-		add(queryPanel, BorderLayout.CENTER);
-		add(selectorPanel, BorderLayout.NORTH);
-
-		log.debug("SQL Query view initialized");
-	}
-
-	@Override
-	public void activeOntologyChanged() {
-		datasourceSelector.setDatasourceController(apic.getActiveOBDAModelWrapper());
-	}
+    }
 }

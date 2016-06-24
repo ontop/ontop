@@ -20,6 +20,8 @@ package it.unibz.inf.ontop.sesame;
  * #L%
  */
 
+import it.unibz.inf.ontop.ontology.Assertion;
+
 import java.util.Iterator;
 
 import org.openrdf.model.Statement;

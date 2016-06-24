@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.protege.gui.treemodels;
 
 /*
  * #%L
- * ontop-protege
+ * ontop-protege4
  * %%
  * Copyright (C) 2009 - 2013 KRDB Research Centre. Free University of Bozen Bolzano.
  * %%
@@ -20,9 +20,9 @@ package it.unibz.inf.ontop.protege.gui.treemodels;
  * #L%
  */
 
-import java.util.List;
-
 import it.unibz.inf.ontop.model.OBDAMappingAxiom;
+
+import java.util.List;
 
 /**
  * Interface that implements a set of functions to add and remove filters of the

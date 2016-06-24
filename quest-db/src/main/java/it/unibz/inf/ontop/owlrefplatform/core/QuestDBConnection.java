@@ -27,6 +27,7 @@ import it.unibz.inf.ontop.model.OBDAException;
 /**
  * High-level OBDAConnection used by Sesame.
  */
+
 public class QuestDBConnection implements OBDAConnection {
 
 	private final IQuestConnection conn;

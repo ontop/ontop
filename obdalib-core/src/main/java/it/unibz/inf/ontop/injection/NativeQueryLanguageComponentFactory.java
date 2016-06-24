@@ -1,19 +1,16 @@
 package it.unibz.inf.ontop.injection;
 
 import com.google.inject.assistedinject.Assisted;
+import it.unibz.inf.ontop.model.*;
 import org.openrdf.model.Model;
 import it.unibz.inf.ontop.io.PrefixManager;
 import it.unibz.inf.ontop.mapping.MappingParser;
-import it.unibz.inf.ontop.model.CQIE;
-import it.unibz.inf.ontop.model.OBDADataSource;
-import it.unibz.inf.ontop.model.OBDAMappingAxiom;
-import it.unibz.inf.ontop.model.OBDAQuery;
 import it.unibz.inf.ontop.nativeql.DBMetadataExtractor;
-import it.unibz.inf.ontop.model.DataSourceMetadata;
 import it.unibz.inf.ontop.utils.IMapping2DatalogConverter;
 
 import java.io.File;
 import java.io.Reader;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -46,11 +43,11 @@ public interface NativeQueryLanguageComponentFactory {
 
     public DBMetadataExtractor create();
 
-    public OBDAMappingAxiom create(String id, @Assisted("sourceQuery") OBDAQuery sourceQuery,
-                                   @Assisted("targetQuery") CQIE targetQuery);
+    public OBDAMappingAxiom create(String id, @Assisted("sourceQuery") SourceQuery sourceQuery,
+                                   @Assisted("targetQuery") List<Function> targetQuery);
 
-    public OBDAMappingAxiom create(@Assisted("sourceQuery") OBDAQuery sourceQuery,
-                                   @Assisted("targetQuery") CQIE targetQuery);
+    public OBDAMappingAxiom create(@Assisted("sourceQuery") SourceQuery sourceQuery,
+                                   @Assisted("targetQuery") List<Function> targetQuery);
 
     public IMapping2DatalogConverter create(DataSourceMetadata metadata);
 }

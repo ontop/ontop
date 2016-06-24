@@ -20,27 +20,24 @@ package it.unibz.inf.ontop.unfold;
  * #L%
  */
 
-import java.util.Optional;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.*;
-import it.unibz.inf.ontop.pivotalrepr.*;
-import it.unibz.inf.ontop.pivotalrepr.impl.*;
-import org.junit.Test;
-
 import it.unibz.inf.ontop.model.impl.AtomPredicateImpl;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionImpl;
 import it.unibz.inf.ontop.pivotalrepr.*;
+import it.unibz.inf.ontop.pivotalrepr.impl.*;
 import it.unibz.inf.ontop.pivotalrepr.impl.tree.DefaultIntermediateQueryBuilder;
+import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
-import static it.unibz.inf.ontop.pivotalrepr.NonCommutativeOperatorNode.ArgumentPosition.*;
+import java.util.Optional;
 
 
 public class UnionLiftTest {
 
 	private static final OBDADataFactory DATA_FACTORY = OBDADataFactoryImpl.getInstance();
-	private static final Optional<ImmutableBooleanExpression> NO_EXPRESSION = Optional.empty();
+	private static final Optional<ImmutableExpression> NO_EXPRESSION = Optional.empty();
 	private static final Optional<ImmutableQueryModifiers> NO_MODIFIER = Optional.empty();
 	private static final MetadataForQueryOptimization METADATA = new EmptyMetadataForQueryOptimization();
 
@@ -50,38 +47,37 @@ public class UnionLiftTest {
 
 
     public IntermediateQuery buildQuery1() throws Exception {
-		Variable x = (Variable) DATA_FACTORY.getVariable("x");
-		Variable y = (Variable) DATA_FACTORY.getVariable("y");
+		Variable x =  DATA_FACTORY.getVariable("x");
+		Variable y =  DATA_FACTORY.getVariable("y");
 
 
         /**
          * Ans 1
          */
-        DataAtom rootDataAtom = DATA_FACTORY.getDataAtom(new AtomPredicateImpl("ans1", 2), x, y);
-        ConstructionNode root = new ConstructionNodeImpl(rootDataAtom);
+		DistinctVariableOnlyDataAtom rootDataAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(new AtomPredicateImpl("ans1", 2), x, y);
+        ConstructionNode root = new ConstructionNodeImpl(rootDataAtom.getVariables());
 
 		IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
-		queryBuilder.init(root);
+		queryBuilder.init(rootDataAtom, root);
 
 
 		LeftJoinNode topLJ = new LeftJoinNodeImpl(NO_EXPRESSION);
 		queryBuilder.addChild(root, topLJ);
 
 		InnerJoinNode join1 = new InnerJoinNodeImpl(NO_EXPRESSION);
-		queryBuilder.addChild(topLJ, join1, LEFT);
+		queryBuilder.addChild(topLJ, join1, NonCommutativeOperatorNode.ArgumentPosition.LEFT);
 
 		/**
 		 * Ans 2
 		 */
-		DataAtom ans2Atom = DATA_FACTORY.getDataAtom(new AtomPredicateImpl("ans2", 1), x);
-		ConstructionNode topAns2Node = new ConstructionNodeImpl(ans2Atom);
+		ConstructionNode topAns2Node = new ConstructionNodeImpl(ImmutableSet.of(x));
 		queryBuilder.addChild(join1, topAns2Node);
 
 		UnionNode unionAns2 = new UnionNodeImpl();
 		queryBuilder.addChild(topAns2Node, unionAns2);
 
-		Variable a = (Variable) DATA_FACTORY.getVariable("a");
-		ConstructionNode t1Ans2Node = new ConstructionNodeImpl(ans2Atom,
+		Variable a = DATA_FACTORY.getVariable("a");
+		ConstructionNode t1Ans2Node = new ConstructionNodeImpl(ImmutableSet.of(x),
 				new ImmutableSubstitutionImpl<ImmutableTerm>(ImmutableMap.of(x, a)),
 				NO_MODIFIER);
 		queryBuilder.addChild(unionAns2, t1Ans2Node);
@@ -89,8 +85,8 @@ public class UnionLiftTest {
 		ExtensionalDataNode t1 = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(new AtomPredicateImpl("t1", 1), a));
 		queryBuilder.addChild(t1Ans2Node, t1);
 
-		Variable b = (Variable) DATA_FACTORY.getVariable("b");
-		ConstructionNode t2Ans2Node = new ConstructionNodeImpl(ans2Atom,
+		Variable b = DATA_FACTORY.getVariable("b");
+		ConstructionNode t2Ans2Node = new ConstructionNodeImpl(ImmutableSet.of(x),
 				new ImmutableSubstitutionImpl<ImmutableTerm>(ImmutableMap.of(x, b)),
 				NO_MODIFIER);
 		queryBuilder.addChild(unionAns2, t2Ans2Node);
@@ -101,9 +97,9 @@ public class UnionLiftTest {
 		/**
 		 * Ans 3
 		 */
-		DataAtom ans3Atom = DATA_FACTORY.getDataAtom(new AtomPredicateImpl("ans3", 1), x);
-		Variable c = (Variable) DATA_FACTORY.getVariable("c");
-		ConstructionNode ans3Node = new ConstructionNodeImpl(ans3Atom,
+		ImmutableSet<Variable> ans3Variables = ImmutableSet.of(x);
+		Variable c =  DATA_FACTORY.getVariable("c");
+		ConstructionNode ans3Node = new ConstructionNodeImpl(ans3Variables,
 				new ImmutableSubstitutionImpl<ImmutableTerm>(ImmutableMap.of(x, c)), NO_MODIFIER);
 		queryBuilder.addChild(join1, ans3Node);
 
@@ -114,16 +110,16 @@ public class UnionLiftTest {
 		/**
 		 * Ans 4
 		 */
-		DataAtom ans4Atom = DATA_FACTORY.getDataAtom(new AtomPredicateImpl("ans4", 2), x, y);
-		ConstructionNode topAns4Node = new ConstructionNodeImpl(ans4Atom);
-		queryBuilder.addChild(topLJ, topAns4Node, RIGHT);
+		ImmutableSet<Variable> ans4Variables = ImmutableSet.of(x, y);
+		ConstructionNode topAns4Node = new ConstructionNodeImpl(ans4Variables);
+		queryBuilder.addChild(topLJ, topAns4Node, NonCommutativeOperatorNode.ArgumentPosition.RIGHT);
 
 		UnionNode unionAns4 = new UnionNodeImpl();
 		queryBuilder.addChild(topAns4Node, unionAns4);
 
-		Variable d = (Variable) DATA_FACTORY.getVariable("d");
-		Variable e = (Variable) DATA_FACTORY.getVariable("e");
-		ConstructionNode t4Ans4Node = new ConstructionNodeImpl(ans4Atom,
+		Variable d = DATA_FACTORY.getVariable("d");
+		Variable e = DATA_FACTORY.getVariable("e");
+		ConstructionNode t4Ans4Node = new ConstructionNodeImpl(ans4Variables,
 				new ImmutableSubstitutionImpl<ImmutableTerm>(ImmutableMap.of(x, d, y, e)),
 				NO_MODIFIER);
 		queryBuilder.addChild(unionAns4, t4Ans4Node);
@@ -131,10 +127,10 @@ public class UnionLiftTest {
 		ExtensionalDataNode t4 = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(new AtomPredicateImpl("t4", 2), d, e));
 		queryBuilder.addChild(t4Ans4Node, t4);
 
-		Variable f = (Variable) DATA_FACTORY.getVariable("f");
-		Variable g = (Variable) DATA_FACTORY.getVariable("g");
-		ConstructionNode t5Ans4Node = new ConstructionNodeImpl(ans4Atom,
-				new ImmutableSubstitutionImpl<ImmutableTerm>(ImmutableMap.of(x, f, y, g)),
+		Variable f =  DATA_FACTORY.getVariable("f");
+		Variable g =  DATA_FACTORY.getVariable("g");
+		ConstructionNode t5Ans4Node = new ConstructionNodeImpl(ans4Variables,
+				new ImmutableSubstitutionImpl<>(ImmutableMap.of(x, f, y, g)),
 				NO_MODIFIER);
 		queryBuilder.addChild(unionAns4, t5Ans4Node);
 

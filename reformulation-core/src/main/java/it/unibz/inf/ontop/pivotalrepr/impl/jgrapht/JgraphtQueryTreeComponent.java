@@ -3,18 +3,14 @@ package it.unibz.inf.ontop.pivotalrepr.impl.jgrapht;
 import java.util.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import it.unibz.inf.ontop.pivotalrepr.ConstructionNode;
-import it.unibz.inf.ontop.pivotalrepr.IntermediateQuery;
-import it.unibz.inf.ontop.pivotalrepr.NonCommutativeOperatorNode;
-import it.unibz.inf.ontop.pivotalrepr.QueryNode;
-import org.jgraph.graph.DefaultEdge;
+import it.unibz.inf.ontop.pivotalrepr.*;
+import it.unibz.inf.ontop.pivotalrepr.impl.IllegalTreeUpdateException;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.jgrapht.experimental.dag.DirectedAcyclicGraph;
+import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.traverse.TopologicalOrderIterator;
 import it.unibz.inf.ontop.model.Variable;
-import it.unibz.inf.ontop.pivotalrepr.*;
-import it.unibz.inf.ontop.pivotalrepr.NonCommutativeOperatorNode.ArgumentPosition;
 import it.unibz.inf.ontop.pivotalrepr.impl.IllegalTreeException;
-import it.unibz.inf.ontop.pivotalrepr.impl.IllegalTreeUpdateException;
 import it.unibz.inf.ontop.pivotalrepr.impl.QueryTreeComponent;
 
 import java.util.*;
@@ -27,36 +23,36 @@ import java.util.*;
  */
 public class JgraphtQueryTreeComponent implements QueryTreeComponent {
 
-    private static final Optional<ArgumentPosition> NO_POSITION = Optional.empty();
-    private static final Optional<ArgumentPosition> LEFT_POSITION = Optional.of(ArgumentPosition.LEFT);
-    private static final Optional<ArgumentPosition> RIGHT_POSITION = Optional.of(ArgumentPosition.RIGHT);
+    private static final Optional<NonCommutativeOperatorNode.ArgumentPosition> NO_POSITION = Optional.empty();
+    private static final Optional<NonCommutativeOperatorNode.ArgumentPosition> LEFT_POSITION = Optional.of(NonCommutativeOperatorNode.ArgumentPosition.LEFT);
+    private static final Optional<NonCommutativeOperatorNode.ArgumentPosition> RIGHT_POSITION = Optional.of(NonCommutativeOperatorNode.ArgumentPosition.RIGHT);
 
     /**
      * TODO: explain
      */
     public static class LabeledEdge extends DefaultEdge implements Comparable<LabeledEdge> {
 
-        private final Optional<ArgumentPosition> optionalPosition;
+        private final Optional<NonCommutativeOperatorNode.ArgumentPosition> optionalPosition;
 
         public LabeledEdge() {
             this.optionalPosition = Optional.empty();
         }
 
-        public LabeledEdge(Optional<ArgumentPosition> optionalPosition) {
+        public LabeledEdge(Optional<NonCommutativeOperatorNode.ArgumentPosition> optionalPosition) {
             this.optionalPosition = optionalPosition;
         }
 
-        public LabeledEdge(ArgumentPosition position) {
+        public LabeledEdge(NonCommutativeOperatorNode.ArgumentPosition position) {
             this.optionalPosition = Optional.of(position);
         }
 
-        public Optional<ArgumentPosition> getOptionalPosition() {
+        public Optional<NonCommutativeOperatorNode.ArgumentPosition> getOptionalPosition() {
             return optionalPosition;
         }
 
         @Override
         public int compareTo(LabeledEdge o) {
-            Optional<ArgumentPosition> otherOptionalPosition = o.getOptionalPosition();
+            Optional<NonCommutativeOperatorNode.ArgumentPosition> otherOptionalPosition = o.getOptionalPosition();
 
             if (optionalPosition.isPresent()) {
                 if (otherOptionalPosition.isPresent()) {
@@ -143,6 +139,14 @@ public class JgraphtQueryTreeComponent implements QueryTreeComponent {
     }
 
     @Override
+    public ImmutableSet<EmptyNode> getUnsatisfiableNodes() {
+        return getNodesInTopDownOrder().stream()
+                .filter(n -> n instanceof EmptyNode)
+                .map(n -> (EmptyNode) n)
+                .collect(ImmutableCollectors.toSet());
+    }
+
+    @Override
     public boolean contains(QueryNode node) {
         return queryDAG.containsVertex(node);
     }
@@ -184,7 +188,7 @@ public class JgraphtQueryTreeComponent implements QueryTreeComponent {
             QueryNode localChild = externalChild.clone();
             queryDAG.addVertex(localChild);
             try {
-                Optional<ArgumentPosition> optionalPosition = subQuery.getOptionalPosition(externalParent, externalChild);
+                Optional<NonCommutativeOperatorNode.ArgumentPosition> optionalPosition = subQuery.getOptionalPosition(externalParent, externalChild);
                 queryDAG.addDagEdge(localChild, localParent, new LabeledEdge(optionalPosition));
             } catch (DirectedAcyclicGraph.CycleFoundException e) {
                 throw new RuntimeException("BUG (internal error)" + e.getLocalizedMessage());
@@ -294,7 +298,7 @@ public class JgraphtQueryTreeComponent implements QueryTreeComponent {
     }
 
     @Override
-    public Optional<ArgumentPosition> getOptionalPosition(QueryNode parentNode, QueryNode childNode) {
+    public Optional<NonCommutativeOperatorNode.ArgumentPosition> getOptionalPosition(QueryNode parentNode, QueryNode childNode) {
         LabeledEdge edge = queryDAG.getEdge(childNode, parentNode);
         if (edge == null)
             return Optional.empty();

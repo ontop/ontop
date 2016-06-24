@@ -20,45 +20,36 @@ package it.unibz.inf.ontop.sesame.repository.test;
  * #L%
  */
 
-import it.unibz.inf.ontop.exception.InvalidMappingException;
-import it.unibz.inf.ontop.model.OBDAModel;
-import it.unibz.inf.ontop.ontology.Ontology;
-import it.unibz.inf.ontop.sesame.SesameStatementIterator;
-import it.unibz.inf.ontop.owlapi3.OWLAPI3TranslatorUtility;
-import it.unibz.inf.ontop.owlapi3.QuestOWLIndividualAxiomIterator;
-import it.unibz.inf.ontop.owlrefplatform.owlapi3.OWLAPI3Materializer;
-import it.unibz.inf.ontop.sesame.SesameMaterializer;
-
-import java.io.BufferedOutputStream;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.Writer;
-
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-import junit.framework.TestCase;
-
-import org.openrdf.rio.RDFHandler;
-import org.openrdf.rio.n3.N3Writer;
-import org.openrdf.rio.rdfxml.RDFXMLWriter;
-import org.openrdf.rio.turtle.TurtleWriter;
 import it.unibz.inf.ontop.exception.DuplicateMappingException;
+import it.unibz.inf.ontop.exception.InvalidMappingException;
 import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
 import it.unibz.inf.ontop.injection.OBDACoreModule;
 import it.unibz.inf.ontop.injection.OBDAProperties;
 import it.unibz.inf.ontop.io.InvalidDataSourceException;
 import it.unibz.inf.ontop.mapping.MappingParser;
+import it.unibz.inf.ontop.model.OBDAModel;
+import it.unibz.inf.ontop.ontology.Ontology;
+import it.unibz.inf.ontop.owlapi.OWLAPITranslatorUtility;
+import it.unibz.inf.ontop.owlapi.QuestOWLIndividualAxiomIterator;
+import it.unibz.inf.ontop.owlrefplatform.owlapi.OWLAPIMaterializer;
+import it.unibz.inf.ontop.sesame.SesameMaterializer;
+import it.unibz.inf.ontop.sesame.SesameStatementIterator;
+import junit.framework.TestCase;
+import org.openrdf.rio.RDFHandler;
+import org.openrdf.rio.n3.N3Writer;
+import org.openrdf.rio.rdfxml.RDFXMLWriter;
+import org.openrdf.rio.turtle.TurtleWriter;
 import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.io.OWLXMLOntologyFormat;
+import org.semanticweb.owlapi.formats.OWLXMLDocumentFormat;
 import org.semanticweb.owlapi.io.WriterDocumentTarget;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 
+import java.io.*;
 
 public class SesameMaterializerCmdTest extends TestCase {
 
@@ -89,7 +80,7 @@ public class SesameMaterializerCmdTest extends TestCase {
 		File f = new File("src/test/resources/materializer/MaterializeTest.owl");
 		// Loading the OWL ontology from the file as with normal OWLReasoners
 		ontology = manager.loadOntologyFromOntologyDocument(f);
-		onto =  OWLAPI3TranslatorUtility.translate(ontology);
+		onto =  OWLAPITranslatorUtility.translate(ontology);
 	}
 	
 	public void testModelN3() throws Exception {
@@ -266,14 +257,14 @@ public class SesameMaterializerCmdTest extends TestCase {
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 		OWLOntology ontology = manager.createOntology(IRI.create(out));
 		manager = ontology.getOWLOntologyManager();
-		OWLAPI3Materializer materializer = new OWLAPI3Materializer(model, DO_STREAM_RESULTS);
+		OWLAPIMaterializer materializer = new OWLAPIMaterializer(model, DO_STREAM_RESULTS);
 
 		
 		QuestOWLIndividualAxiomIterator iterator = materializer.getIterator();
 		
 		while(iterator.hasNext()) 
 			manager.addAxiom(ontology, iterator.next());
-		manager.saveOntology(ontology, new OWLXMLOntologyFormat(), new WriterDocumentTarget(writer));	
+		manager.saveOntology(ontology, new OWLXMLDocumentFormat(), new WriterDocumentTarget(writer));
 		
 		assertEquals(27, materializer.getTriplesCount());
 		assertEquals(3, materializer.getVocabularySize());
@@ -298,14 +289,14 @@ public class SesameMaterializerCmdTest extends TestCase {
 		setUpOnto();
 		
 		OWLOntologyManager manager = ontology.getOWLOntologyManager();
-		OWLAPI3Materializer	materializer = new OWLAPI3Materializer(model, onto, DO_STREAM_RESULTS);
+		OWLAPIMaterializer materializer = new OWLAPIMaterializer(model, onto, DO_STREAM_RESULTS);
 		BufferedOutputStream output = new BufferedOutputStream(new FileOutputStream(out)); 
 		BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(output, "UTF-8"));
 		QuestOWLIndividualAxiomIterator iterator = materializer.getIterator();
 
 		while(iterator.hasNext()) 
 			manager.addAxiom(ontology, iterator.next());
-		manager.saveOntology(ontology, new OWLXMLOntologyFormat(), new WriterDocumentTarget(writer));	
+		manager.saveOntology(ontology, new OWLXMLDocumentFormat(), new WriterDocumentTarget(writer));
 		
 		assertEquals(51, materializer.getTriplesCount());
 		assertEquals(5, materializer.getVocabularySize());

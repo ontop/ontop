@@ -1,35 +1,25 @@
 package it.unibz.inf.ontop.protege.gui.action;
 
-
-import java.awt.Component;
-import java.util.concurrent.CountDownLatch;
-
-import javax.swing.JOptionPane;
-
-<<<<<<< HEAD:ontop-protege/src/main/java/it/unibz/inf/ontop/protege/gui/action/OBDADataQueryAction.java
-import it.unibz.inf.ontop.protege.utils.OBDAProgessMonitor;
-=======
-import it.unibz.inf.ontop.protege.utils.DialogUtils;
->>>>>>> v3/package-names-changed:ontop-protege/src/main/java/it/unibz/inf/ontop/protege/gui/action/OBDADataQueryAction.java
-import it.unibz.inf.ontop.protege.utils.OBDAProgressListener;
-import org.protege.editor.owl.OWLEditorKit;
 import it.unibz.inf.ontop.model.OBDAException;
-import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWL;
-import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWLConnection;
-import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWLStatement;
-<<<<<<< HEAD:ontop-protege/src/main/java/it/unibz/inf/ontop/protege/gui/action/OBDADataQueryAction.java
+import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWL;
+import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLConnection;
+import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLStatement;
 import it.unibz.inf.ontop.protege.utils.DialogUtils;
-=======
-import it.unibz.inf.ontop.protege.utils.OBDAProgessMonitor;
->>>>>>> v3/package-names-changed:ontop-protege/src/main/java/it/unibz/inf/ontop/protege/gui/action/OBDADataQueryAction.java
+import it.unibz.inf.ontop.protege.utils.OBDAProgressListener;
+import it.unibz.inf.ontop.protege.utils.OBDAProgressMonitor;
+import org.protege.editor.owl.OWLEditorKit;
 import org.semanticweb.owlapi.model.OWLException;
 import org.semanticweb.owlapi.reasoner.OWLReasoner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.swing.*;
+import java.awt.*;
+import java.util.concurrent.CountDownLatch;
+
 /*
  * #%L
- * ontop-protege
+ * ontop-protege4
  * %%
  * Copyright (C) 2009 - 2013 KRDB Research Centre. Free University of Bozen Bolzano.
  * %%
@@ -69,7 +59,7 @@ public abstract class OBDADataQueryAction<T> implements OBDAProgressListener {
 	private QuestOWL reasoner;
 	private Component rootView;  // Davide> DAG's hack protegeQueryTabFreezeBug
 
-	private static String QUEST_START_MESSAGE = "Quest must be started before using this feature. To proceed \n * select Quest in the \"Reasoners\" menu and \n * click \"Start reasoner\" in the same menu.";
+	private static String QUEST_START_MESSAGE = "Quest must be started before using this feature. To proceed \n * select Ontop in the \"Reasoners\" menu and \n * click \"Start reasoner\" in the same menu.";
 
 
 	private static final Logger log = LoggerFactory.getLogger(OBDADataQueryAction.class);
@@ -82,8 +72,6 @@ public abstract class OBDADataQueryAction<T> implements OBDAProgressListener {
 
 	/**
 	 *  This function must do the call to e.g. statement.query()
-	 * @param queryString
-	 * @return
 	 */
 	public abstract T executeQuery(QuestOWLStatement st, String queryString) throws OWLException;
 
@@ -95,7 +83,7 @@ public abstract class OBDADataQueryAction<T> implements OBDAProgressListener {
 
 	/**
 	 * This function displays or handles the result
-	 * @param result THe result object ot be handles
+	 * @param res THe result object ot be handles
 	 */
 	public abstract void handleResult(T res) throws OWLException;
 
@@ -105,9 +93,9 @@ public abstract class OBDADataQueryAction<T> implements OBDAProgressListener {
 		this.actionStarted = true;
 		this.isCanceled = false;
 		this.queryExecError = false;
-		OBDAProgessMonitor monitor = null;
+		OBDAProgressMonitor monitor = null;
 		try {
-			monitor = new OBDAProgessMonitor(this.msg);
+			monitor = new OBDAProgressMonitor(this.msg);
 			monitor.start();
 			latch = new CountDownLatch(1);
 			OWLEditorKit kit = this.getEditorKit();
@@ -165,10 +153,10 @@ public abstract class OBDADataQueryAction<T> implements OBDAProgressListener {
 					latch.countDown();
 				} catch (Exception e) {
 					if(!isCancelled()){
+						latch.countDown();
 						queryExecError = true;
 						log.error(e.getMessage(), e);
 						DialogUtils.showQuickErrorDialog(rootView, e, "Error executing query");
-						latch.countDown();
 					}
 				}	
 			}

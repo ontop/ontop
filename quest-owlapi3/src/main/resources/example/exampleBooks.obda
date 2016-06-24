@@ -8,7 +8,7 @@ quest:		http://obda.org/quest#
 
 [SourceDeclaration]
 sourceUri	Books
-connectionUrl	jdbc:h2:tcp://localhost/books;
+connectionUrl	jdbc:h2:tcp://localhost/./books;
 username	sa
 password	
 driverClass	org.h2.Driver
@@ -40,7 +40,7 @@ source		select "wr_code", "wr_name" from "tb_on_prob_wr"
 
 mappingId	cl_SpecialEdition
 target		:edition/{ed_code}/ a :SpecialEdition . 
-source		select "ed_code", "pub_date", "n_edt" from "tb_edition" where ed_type='S'
+source		select "ed_code", "pub_date", "n_edt" from "tb_edition" where "ed_type"='S'
 
 mappingId	dp_genre
 target		:book/{id_bk}/ :genre {gen_name} . 

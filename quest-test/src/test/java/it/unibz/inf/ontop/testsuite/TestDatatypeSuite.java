@@ -24,7 +24,6 @@ import it.unibz.inf.ontop.quest.datatypes.MssqlDatatypeTest;
 import it.unibz.inf.ontop.quest.datatypes.MysqlDatatypeTest;
 import it.unibz.inf.ontop.quest.datatypes.OracleDatatypeTest;
 import it.unibz.inf.ontop.quest.datatypes.PgsqlDatatypeTest;
-
 import junit.framework.Test;
 import junit.framework.TestSuite;
 

@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.pivotalrepr.impl.tree;
 
 import java.util.Optional;
 import com.google.common.collect.ImmutableList;
+import it.unibz.inf.ontop.model.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.pivotalrepr.*;
 import it.unibz.inf.ontop.pivotalrepr.*;
 import it.unibz.inf.ontop.pivotalrepr.NonCommutativeOperatorNode.ArgumentPosition;
@@ -15,6 +16,7 @@ import it.unibz.inf.ontop.pivotalrepr.impl.QueryTreeComponent;
 public class DefaultIntermediateQueryBuilder implements IntermediateQueryBuilder {
 
     private final MetadataForQueryOptimization metadata;
+    private DistinctVariableOnlyDataAtom projectionAtom;
     private QueryTree tree;
     private boolean canEdit;
 
@@ -26,12 +28,13 @@ public class DefaultIntermediateQueryBuilder implements IntermediateQueryBuilder
 
 
     @Override
-    public void init(ConstructionNode rootConstructionNode){
+    public void init(DistinctVariableOnlyDataAtom projectionAtom, ConstructionNode rootConstructionNode){
         if (tree != null)
             throw new IllegalArgumentException("Already initialized IntermediateQueryBuilder.");
 
         // TODO: use Guice to construct this tree
         tree = new DefaultTree(rootConstructionNode);
+        this.projectionAtom = projectionAtom;
         canEdit = true;
     }
 
@@ -73,7 +76,7 @@ public class DefaultIntermediateQueryBuilder implements IntermediateQueryBuilder
     public IntermediateQuery build() throws IntermediateQueryBuilderException{
         checkInitialization();
 
-        IntermediateQuery query = buildQuery(metadata, new DefaultQueryTreeComponent(tree));
+        IntermediateQuery query = buildQuery(metadata, projectionAtom, new DefaultQueryTreeComponent(tree));
         canEdit = false;
         return query;
     }
@@ -81,8 +84,10 @@ public class DefaultIntermediateQueryBuilder implements IntermediateQueryBuilder
     /**
      * Can be overwritten to use another constructor
      */
-    protected IntermediateQuery buildQuery(MetadataForQueryOptimization metadata, QueryTreeComponent treeComponent) {
-        return new IntermediateQueryImpl(metadata, treeComponent);
+    protected IntermediateQuery buildQuery(MetadataForQueryOptimization metadata,
+                                           DistinctVariableOnlyDataAtom projectionAtom,
+                                           QueryTreeComponent treeComponent) {
+        return new IntermediateQueryImpl(metadata, projectionAtom, treeComponent);
     }
 
     private void checkInitialization() throws IntermediateQueryBuilderException {

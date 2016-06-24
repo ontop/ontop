@@ -21,21 +21,15 @@ package it.unibz.inf.ontop.owlrefplatform.core.translator;
  */
 
 
-import java.util.Optional;
+import java.util.*;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.*;
-import it.unibz.inf.ontop.pivotalrepr.*;
-
-import it.unibz.inf.ontop.model.impl.ImmutabilityTools;
-import it.unibz.inf.ontop.model.impl.MutableQueryModifiersImpl;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
-import it.unibz.inf.ontop.pivotalrepr.*;
+import it.unibz.inf.ontop.model.impl.*;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.slf4j.LoggerFactory;
-
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Queue;
+import it.unibz.inf.ontop.pivotalrepr.*;
 
 import static it.unibz.inf.ontop.model.impl.ImmutabilityTools.convertToMutableFunction;
 
@@ -49,6 +43,18 @@ import static it.unibz.inf.ontop.model.impl.ImmutabilityTools.convertToMutableFu
  * @author mrezk
  */
 public class IntermediateQueryToDatalogTranslator {
+
+
+	private static class RuleHead {
+		public final ConstructionNode constructionNode;
+		public final DataAtom atom;
+
+		private RuleHead(ConstructionNode constructionNode, DataAtom headAtom) {
+			this.constructionNode = constructionNode;
+			this.atom = headAtom;
+		}
+	}
+
 	
 	private final static OBDADataFactory ofac = OBDADataFactoryImpl.getInstance();
 	
@@ -56,16 +62,24 @@ public class IntermediateQueryToDatalogTranslator {
 
 	private static final org.slf4j.Logger log = LoggerFactory.getLogger(IntermediateQueryToDatalogTranslator.class);
 
+	// Incremented
+	private int subQueryCounter;
+
+	private IntermediateQueryToDatalogTranslator() {
+		subQueryCounter = 0;
+	}
+
 	/**
 	 * Translate an intermediate query tree into a Datalog program 
 	 * 
 	 */
-	public static DatalogProgram translate(IntermediateQuery te) {
-		
+	public static DatalogProgram translate(IntermediateQuery query) {
+		IntermediateQueryToDatalogTranslator translator = new IntermediateQueryToDatalogTranslator();
+		return translator.translateQuery(query);
+	}
 
-		
-
-		ConstructionNode root = te.getRootConstructionNode();
+	private DatalogProgram translateQuery(IntermediateQuery query) {
+		ConstructionNode root = query.getRootConstructionNode();
 		
 		Optional<ImmutableQueryModifiers> optionalModifiers =  root.getOptionalModifiers();
 
@@ -82,16 +96,8 @@ public class IntermediateQueryToDatalogTranslator {
         else {
             dProgram = ofac.getDatalogProgram();
         }
-		
-		
-	
-		Queue<ConstructionNode> rulesToDo = new LinkedList<ConstructionNode>();
-		rulesToDo.add(root);
 
-		//In rulesToDo we keep the nodes that represent sub-rules in the program, e.g. ans5 :- LeftJoin(....)
-		while(!rulesToDo.isEmpty()){
-			translate(te,  dProgram, rulesToDo);
-		}
+		translate(query,  dProgram, root);
 		
 	
 		
@@ -106,30 +112,39 @@ public class IntermediateQueryToDatalogTranslator {
 	 * @return Datalog program that represents the construction of the SPARQL
 	 *         query.
 	 */
-	private static void translate(IntermediateQuery te,   DatalogProgram pr, Queue<ConstructionNode> rulesToDo  ) {
-		
-		ConstructionNode root = rulesToDo.poll();
-		
-		DataAtom head= root.getProjectionAtom();
-	
-		//Applying substitutions in the head.
-		ImmutableFunctionalTerm substitutedHead= root.getSubstitution().applyToFunctionalTerm(head);
-		List<QueryNode> listNodes=  te.getChildren(root);
-		
-		List<Function> atoms = new LinkedList<Function>();
-		
-		//Constructing the rule
-		CQIE newrule = ofac.getCQIE(convertToMutableFunction(substitutedHead), atoms);
-		
-		pr.appendRule(newrule);
-		
-		//Iterating over the nodes and constructing the rule
-		for (QueryNode node: listNodes){
-			
-			List<Function> uAtoms= getAtomFrom(te, node, rulesToDo);
-			newrule.getBody().addAll(uAtoms);	
-			
-		} //end-for
+	private void translate(IntermediateQuery query, DatalogProgram pr, ConstructionNode root) {
+
+		Queue<RuleHead> heads = new LinkedList<>();
+		heads.add(new RuleHead(root, query.getProjectionAtom()));
+
+		// Mutable (append-only)
+		Map<ConstructionNode, DataAtom> subQueryProjectionAtoms = new HashMap<>();
+		subQueryProjectionAtoms.put(root, query.getProjectionAtom());
+
+		//In heads we keep the heads of the sub-rules in the program, e.g. ans5() :- LeftJoin(....)
+		while(!heads.isEmpty()) {
+
+			RuleHead head = heads.poll();
+
+			//Applying substitutions in the head.
+			ImmutableFunctionalTerm substitutedHeadAtom = head.constructionNode.getSubstitution().applyToFunctionalTerm(
+					head.atom);
+
+			List<Function> atoms = new LinkedList<>();
+
+			//Constructing the rule
+			CQIE newrule = ofac.getCQIE(convertToMutableFunction(substitutedHeadAtom), atoms);
+
+			pr.appendRule(newrule);
+
+			//Iterating over the nodes and constructing the rule
+			for (QueryNode node : query.getChildren(head.constructionNode)) {
+
+				List<Function> uAtoms = getAtomFrom(query, node, heads, subQueryProjectionAtoms);
+				newrule.getBody().addAll(uAtoms);
+
+			} //end-for
+		}
 	}
 
 	
@@ -139,26 +154,33 @@ public class IntermediateQueryToDatalogTranslator {
 	 * Takes a node and return the list of functions (atoms) that it represents.
 	 * Usually it will be a single atom, but it is different for the filter case.
 	 */
-	private static List<Function> getAtomFrom(IntermediateQuery te, QueryNode node,  Queue<ConstructionNode> rulesToDo  ) {
+	private List<Function> getAtomFrom(IntermediateQuery te, QueryNode node, Queue<RuleHead> heads,
+											  Map<ConstructionNode, DataAtom> subQueryProjectionAtoms) {
 		
-		List<Function> body = new ArrayList<Function>();
+		List<Function> body = new ArrayList<>();
 		
 		/**
 		 * Basic Atoms
 		 */
 		
 		if (node instanceof ConstructionNode) {
-			DataAtom newAns = ((ConstructionNode) node).getProjectionAtom();
-			Function mutAt = convertToMutableFunction(newAns);
-			rulesToDo.add((ConstructionNode)node);
+			ConstructionNode constructionNode = (ConstructionNode) node;
+			DataAtom projectionAtom = Optional.ofNullable(
+					subQueryProjectionAtoms.get(constructionNode))
+					.map(atom -> adaptProjectionAtom(atom, constructionNode))
+					.orElseGet(() -> generateProjectionAtom(constructionNode.getProjectedVariables()));
+
+			heads.add(new RuleHead(constructionNode, projectionAtom));
+			subQueryProjectionAtoms.put(constructionNode, projectionAtom);
+			Function mutAt = convertToMutableFunction(projectionAtom);
 			body.add(mutAt);
 			return body;
 			
 		} else if (node instanceof FilterNode) {
-			ImmutableBooleanExpression filter = ((FilterNode) node).getFilterCondition();
-			BooleanExpression mutFilter =  ImmutabilityTools.convertToMutableBooleanExpression(filter);
+			ImmutableExpression filter = ((FilterNode) node).getFilterCondition();
+			Expression mutFilter =  ImmutabilityTools.convertToMutableBooleanExpression(filter);
 			List<QueryNode> listnode =  te.getChildren(node);
-			body.addAll(getAtomFrom(te, listnode.get(0), rulesToDo));
+			body.addAll(getAtomFrom(te, listnode.get(0), heads, subQueryProjectionAtoms));
 			body.add(mutFilter);
 			return body;
 			
@@ -175,62 +197,71 @@ public class IntermediateQueryToDatalogTranslator {
 		 * Nested Atoms	
 		 */
 		} else  if (node instanceof InnerJoinNode) {
-			Optional<ImmutableBooleanExpression> filter = ((InnerJoinNode)node).getOptionalFilterCondition();
-			List<Function> atoms = new LinkedList<Function>();
+			Optional<ImmutableExpression> filter = ((InnerJoinNode)node).getOptionalFilterCondition();
+			List<Function> atoms = new ArrayList<>();
 			List<QueryNode> listnode =  te.getChildren(node);
 			for (QueryNode childnode: listnode) {
-				List<Function> atomsList = getAtomFrom(te, childnode, rulesToDo);
+				List<Function> atomsList = getAtomFrom(te, childnode, heads, subQueryProjectionAtoms);
 				atoms.addAll(atomsList);
 			}
+
+			if (atoms.size() <= 1) {
+				throw new IllegalArgumentException("Inconsistent IQ: an InnerJoinNode must have at least two children");
+			}
+
 			if (filter.isPresent()){
-				ImmutableBooleanExpression filter2 = filter.get();
+				ImmutableExpression filter2 = filter.get();
 				Function mutFilter = ImmutabilityTools.convertToMutableBooleanExpression(filter2);
-				Function newJ = ofac.getSPARQLJoin(atoms, mutFilter);
+				Function newJ = getSPARQLJoin(atoms, Optional.of(mutFilter));
 				body.add(newJ);
 				return body;
 			}else{
-				Function newJ = ofac.getSPARQLJoin(atoms);
+				Function newJ = getSPARQLJoin(atoms, Optional.empty());
 				body.add(newJ);
 				return body;
 			}
 			
 		} else if (node instanceof LeftJoinNode) {
-			Optional<ImmutableBooleanExpression> filter = ((LeftJoinNode)node).getOptionalFilterCondition();
+			Optional<ImmutableExpression> filter = ((LeftJoinNode)node).getOptionalFilterCondition();
 			List<QueryNode> listnode =  te.getChildren(node);
-		
-			List<Function> atomsListLeft = getAtomFrom(te, listnode.get(0), rulesToDo);
-			List<Function> atomsListRight = getAtomFrom(te, listnode.get(1), rulesToDo);
 
+			List<Function> atomsListLeft = getAtomFrom(te, listnode.get(0), heads, subQueryProjectionAtoms);
+			List<Function> atomsListRight = getAtomFrom(te, listnode.get(1), heads, subQueryProjectionAtoms);
 				
 			if (filter.isPresent()){
-				ImmutableBooleanExpression filter2 = filter.get();
-				BooleanExpression mutFilter =  ImmutabilityTools.convertToMutableBooleanExpression(filter2);
-				Function newLJAtom = ofac.getSPARQLLeftJoin(atomsListLeft, atomsListRight, mutFilter);
+				ImmutableExpression filter2 = filter.get();
+				Expression mutFilter =  ImmutabilityTools.convertToMutableBooleanExpression(filter2);
+				Function newLJAtom = ofac.getSPARQLLeftJoin(atomsListLeft, atomsListRight, Optional.of(mutFilter));
 				body.add(newLJAtom);
 				return body;
 			}else{
-				Function newLJAtom = ofac.getSPARQLLeftJoin(atomsListLeft, atomsListRight);
+				Function newLJAtom = ofac.getSPARQLLeftJoin(atomsListLeft, atomsListRight, Optional.empty());
 				body.add(newLJAtom);
 				return body;
 			}
 
 		} else if (node instanceof UnionNode) {
-		
-			List<QueryNode> listnode =  te.getChildren(node);
+
+			ConstructionNode parentNode = te.getParent(node)
+					.filter(p -> p instanceof ConstructionNode)
+					.map(p -> (ConstructionNode) p)
+					.orElseThrow(() -> new IllegalStateException("Invalid IQ: " +
+							"a UNION node must have a ConstructionNode as parent"));
+
+			DistinctVariableOnlyDataAtom childIdealProjectionAtom = generateProjectionAtom(
+					parentNode.getProjectedVariables());
 			
-			for (QueryNode nod: listnode){
-				rulesToDo.add((ConstructionNode)nod);
+			for (QueryNode child : te.getChildren(node)) {
+				ConstructionNode childConstructionNode =(ConstructionNode) child;
+				DataAtom childAtom = adaptProjectionAtom(childIdealProjectionAtom, childConstructionNode);
+				subQueryProjectionAtoms.put(childConstructionNode, childAtom);
+				heads.add(new RuleHead(childConstructionNode, childAtom));
 		
 			} //end for
-		
-			QueryNode nod= listnode.get(0);
-			if (nod instanceof ConstructionNode) {
-					Function newAns = convertToMutableFunction(((ConstructionNode) nod).getProjectionAtom());
-					body.add(newAns);
-					return body;
-				}else{
-					 throw new UnsupportedOperationException("The Union should have only construct");
-				}
+
+			Function bodyAtom = convertToMutableFunction(childIdealProjectionAtom);
+			body.add(bodyAtom);
+			return body;
 			
 
 						
@@ -239,5 +270,49 @@ public class IntermediateQueryToDatalogTranslator {
 		}
 	
 	}
-	
+
+	private DataAtom adaptProjectionAtom(DataAtom idealProjectionAtom, ConstructionNode constructionNode) {
+		ImmutableList<? extends VariableOrGroundTerm> arguments = idealProjectionAtom.getArguments();
+		ImmutableSet<Variable> projectedVariables = constructionNode.getProjectedVariables();
+
+		if (ImmutableSet.copyOf(arguments).equals(projectedVariables)) {
+			return idealProjectionAtom;
+		}
+		else {
+			ImmutableList<VariableOrGroundTerm> newArguments = arguments.stream()
+					.map(arg -> projectedVariables.contains(arg)
+							? arg
+							: OBDAVocabulary.NULL)
+					.collect(ImmutableCollectors.toList());
+
+			return ofac.getDataAtom(idealProjectionAtom.getPredicate(), newArguments);
+		}
+	}
+
+	private DistinctVariableOnlyDataAtom generateProjectionAtom(ImmutableSet<Variable> projectedVariables) {
+		AtomPredicate newPredicate = new AtomPredicateImpl("ansSQ" + ++subQueryCounter, projectedVariables.size());
+		return ofac.getDistinctVariableOnlyDataAtom(newPredicate, ImmutableList.copyOf(projectedVariables));
+	}
+
+	private static Function getSPARQLJoin(List<Function> atoms, Optional<Function> optionalCondition) {
+		int atomCount = atoms.size();
+		Function rightTerm;
+
+		switch (atomCount) {
+			case 0:
+			case 1:
+				throw new IllegalArgumentException("A join requires at least two atoms");
+			case 2:
+				rightTerm = atoms.get(1);
+				break;
+			default:
+				rightTerm = getSPARQLJoin(atoms.subList(1, atomCount), Optional.empty());
+				break;
+		}
+
+		return optionalCondition.isPresent()
+				? ofac.getSPARQLJoin(atoms.get(0), rightTerm, optionalCondition.get())
+				: ofac.getSPARQLJoin(atoms.get(0), rightTerm);
+	}
+
 }

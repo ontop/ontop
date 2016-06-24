@@ -27,6 +27,7 @@ import java.util.Properties;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import junit.framework.TestCase;
 
 import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
@@ -38,11 +39,6 @@ import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.model.impl.RDBMSourceParameterConstants;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
-import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWL;
-import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWLConnection;
-import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWLFactory;
-import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWLResultSet;
-import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWLStatement;
 import it.unibz.inf.ontop.querymanager.QueryController;
 import it.unibz.inf.ontop.querymanager.QueryControllerEntity;
 import it.unibz.inf.ontop.querymanager.QueryControllerQuery;
@@ -159,11 +155,16 @@ public class SemanticIndexManagerLUBMMySQLTest extends TestCase {
 		p.setProperty(QuestPreferences.DB_USER, username);
 		p.setProperty(QuestPreferences.DB_PASSWORD, password);
 
-        QuestOWLFactory fac = new QuestOWLFactory(new QuestPreferences(p));
 
-		QuestOWL quest = fac.createReasoner(ontology);
-		QuestOWLConnection qconn = quest.getConnection();
-		QuestOWLStatement st = qconn.createStatement();
+		QuestOWLFactory factory = new QuestOWLFactory();
+        QuestOWLConfiguration config = QuestOWLConfiguration.builder()
+				.preferences(new QuestPreferences(p))
+				.build();
+        QuestOWL quest = factory.createReasoner(ontology, config);
+
+
+		QuestOWLConnection qconn = (QuestOWLConnection) quest.getConnection();
+		QuestOWLStatement st = (QuestOWLStatement) qconn.createStatement();
 
 		QueryController qc = new QueryController();
 		QueryIOManager qman = new QueryIOManager(qc);

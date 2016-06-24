@@ -2,18 +2,17 @@ package it.unibz.inf.ontop.pivotalrepr.transformer.impl;
 
 import java.util.Optional;
 import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.model.ImmutableBooleanExpression;
-import it.unibz.inf.ontop.model.ImmutableSubstitution;
+import it.unibz.inf.ontop.model.ImmutableExpression;
 import it.unibz.inf.ontop.model.ImmutableTerm;
 import it.unibz.inf.ontop.model.NonGroundTerm;
-import it.unibz.inf.ontop.pivotalrepr.*;
 import it.unibz.inf.ontop.pivotalrepr.impl.FilterNodeImpl;
 import it.unibz.inf.ontop.pivotalrepr.impl.GroupNodeImpl;
 import it.unibz.inf.ontop.pivotalrepr.impl.InnerJoinNodeImpl;
 import it.unibz.inf.ontop.pivotalrepr.impl.LeftJoinNodeImpl;
 import it.unibz.inf.ontop.pivotalrepr.proposal.BindingTransfer;
-import it.unibz.inf.ontop.pivotalrepr.*;
 import it.unibz.inf.ontop.pivotalrepr.transformer.BindingTransferTransformer;
+import it.unibz.inf.ontop.model.ImmutableSubstitution;
+import it.unibz.inf.ontop.pivotalrepr.*;
 
 /**
  * Basic implementation: applies the bindings directly
@@ -31,7 +30,7 @@ public class BasicBindingTransferTransformer implements BindingTransferTransform
 
     @Override
     public FilterNode transform(FilterNode filterNode) {
-        ImmutableBooleanExpression newBooleanExpression =
+        ImmutableExpression newBooleanExpression =
                 transformOptionalFilterCondition(filterNode.getOptionalFilterCondition()).get();
         return new FilterNodeImpl(newBooleanExpression);
     }
@@ -89,8 +88,13 @@ public class BasicBindingTransferTransformer implements BindingTransferTransform
         return new GroupNodeImpl(newGroupingTerms);
     }
 
-    private Optional<ImmutableBooleanExpression> transformOptionalFilterCondition(
-            Optional<ImmutableBooleanExpression> optionalFilterCondition) {
+    @Override
+    public EmptyNode transform(EmptyNode emptyNode) {
+        return emptyNode;
+    }
+
+    private Optional<ImmutableExpression> transformOptionalFilterCondition(
+            Optional<ImmutableExpression> optionalFilterCondition) {
         if (optionalFilterCondition.isPresent()) {
             return Optional.of(transferredBindings.applyToBooleanExpression(optionalFilterCondition.get()));
         }

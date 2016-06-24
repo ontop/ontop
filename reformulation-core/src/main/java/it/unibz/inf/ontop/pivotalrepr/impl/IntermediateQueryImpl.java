@@ -3,21 +3,21 @@ package it.unibz.inf.ontop.pivotalrepr.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import it.unibz.inf.ontop.pivotalrepr.*;
-import it.unibz.inf.ontop.pivotalrepr.proposal.*;
 import it.unibz.inf.ontop.executor.InternalProposalExecutor;
 import it.unibz.inf.ontop.executor.deletion.ReactToChildDeletionExecutor;
 import it.unibz.inf.ontop.executor.expression.PushDownExpressionExecutor;
-import it.unibz.inf.ontop.executor.groundterm.GroundTermRemovalFromDataNodeExecutor;
 import it.unibz.inf.ontop.executor.join.JoinInternalCompositeExecutor;
-import it.unibz.inf.ontop.executor.pullout.PullOutVariableExecutor;
-import it.unibz.inf.ontop.executor.renaming.PredicateRenamingExecutor;
 import it.unibz.inf.ontop.executor.substitution.SubstitutionPropagationExecutor;
+import it.unibz.inf.ontop.executor.unsatisfiable.RemoveEmptyNodesExecutor;
 import it.unibz.inf.ontop.model.DataAtom;
+import it.unibz.inf.ontop.model.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.Variable;
-import it.unibz.inf.ontop.pivotalrepr.*;
+import it.unibz.inf.ontop.executor.groundterm.GroundTermRemovalFromDataNodeExecutor;
+import it.unibz.inf.ontop.executor.pullout.PullVariableOutOfDataNodeExecutor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import it.unibz.inf.ontop.pivotalrepr.*;
+import it.unibz.inf.ontop.pivotalrepr.proposal.*;
 
 import java.util.List;
 import java.util.Optional;
@@ -56,14 +56,16 @@ public class IntermediateQueryImpl implements IntermediateQuery {
 
     private final MetadataForQueryOptimization metadata;
 
+    private final DistinctVariableOnlyDataAtom projectionAtom;
+
+
     /**
      * TODO: explain
      */
     private static final ImmutableMap<Class<? extends QueryOptimizationProposal>, Class<? extends StandardProposalExecutor>> STD_EXECUTOR_CLASSES;
     static {
         STD_EXECUTOR_CLASSES = ImmutableMap.<Class<? extends QueryOptimizationProposal>, Class<? extends StandardProposalExecutor>>of(
-                UnionLiftProposal.class, UnionLiftProposalExecutor.class,
-                PredicateRenamingProposal.class, PredicateRenamingExecutor.class);
+                UnionLiftProposal.class, UnionLiftProposalExecutor.class);
     }
 
     /**
@@ -79,7 +81,8 @@ public class IntermediateQueryImpl implements IntermediateQuery {
         internalExecutorMapBuilder.put(SubstitutionPropagationProposal.class, SubstitutionPropagationExecutor.class);
         internalExecutorMapBuilder.put(PushDownBooleanExpressionProposal.class, PushDownExpressionExecutor.class);
         internalExecutorMapBuilder.put(GroundTermRemovalFromDataNodeProposal.class, GroundTermRemovalFromDataNodeExecutor.class);
-        internalExecutorMapBuilder.put(PullOutVariableProposal.class, PullOutVariableExecutor.class);
+        internalExecutorMapBuilder.put(PullVariableOutOfDataNodeProposal.class, PullVariableOutOfDataNodeExecutor.class);
+        internalExecutorMapBuilder.put(RemoveEmptyNodesProposal.class, RemoveEmptyNodesExecutor.class);
         INTERNAL_EXECUTOR_CLASSES = internalExecutorMapBuilder.build();
     }
 
@@ -87,10 +90,23 @@ public class IntermediateQueryImpl implements IntermediateQuery {
     /**
      * For IntermediateQueryBuilders ONLY!!
      */
-    public IntermediateQueryImpl(MetadataForQueryOptimization metadata, QueryTreeComponent treeComponent) {
+    public IntermediateQueryImpl(MetadataForQueryOptimization metadata, DistinctVariableOnlyDataAtom projectionAtom,
+                                 QueryTreeComponent treeComponent) {
         this.metadata = metadata;
+        this.projectionAtom = projectionAtom;
         this.treeComponent = treeComponent;
     }
+
+    @Override
+    public DistinctVariableOnlyDataAtom getProjectionAtom() {
+        return projectionAtom;
+    }
+
+    @Override
+    public ImmutableSet<Variable> getKnownVariables() {
+        return treeComponent.getKnownVariables();
+    }
+
 
     @Override
     public MetadataForQueryOptimization getMetadata() {
@@ -127,6 +143,15 @@ public class IntermediateQueryImpl implements IntermediateQuery {
     @Override
     public ImmutableList<QueryNode> getChildren(QueryNode node) {
         return treeComponent.getCurrentSubNodesOf(node);
+    }
+
+    @Override
+    public Optional<QueryNode> getChild(QueryNode currentNode, NonCommutativeOperatorNode.ArgumentPosition position) {
+        return getChildren(currentNode).stream()
+                .filter(c -> getOptionalPosition(currentNode, c)
+                        .filter(position::equals)
+                        .isPresent())
+                .findFirst();
     }
 
     @Override
@@ -252,36 +277,17 @@ public class IntermediateQueryImpl implements IntermediateQuery {
     }
 
     /**
-     * TODO: explain
+     * TODO: replace that by a proposal
      */
     @Override
-    public void mergeSubQuery(final IntermediateQuery originalSubQuery) throws QueryMergingException {
-        /**
-         * TODO: explain
-         */
-        List<IntensionalDataNode> localDataNodes = findOrdinaryDataNodes(originalSubQuery.getRootConstructionNode().getProjectionAtom());
-        if (localDataNodes.isEmpty())
-            throw new QueryMergingException("No OrdinaryDataNode matches " + originalSubQuery.getRootConstructionNode().getProjectionAtom());
-
+    public void mergeSubQuery(IntermediateQuery originalSubQuery) throws EmptyQueryException {
+        List<IntensionalDataNode> localDataNodes = findOrdinaryDataNodes(originalSubQuery.getProjectionAtom());
 
         for (IntensionalDataNode localDataNode : localDataNodes) {
-
-            ImmutableSet<Variable> localVariables = treeComponent.getKnownVariables();
-
-            try {
-                IntermediateQuery cloneSubQuery = SubQueryUnificationTools.unifySubQuery(originalSubQuery,
-                            localDataNode.getProjectionAtom(), localVariables);
-
-                ConstructionNode subQueryRootNode = cloneSubQuery.getRootConstructionNode();
-                ConstructionNode localSubTreeRootNode = subQueryRootNode.clone();
-                treeComponent.replaceNode(localDataNode, localSubTreeRootNode);
-
-                treeComponent.addSubTree(cloneSubQuery, subQueryRootNode, localSubTreeRootNode);
-            } catch (SubQueryUnificationTools.SubQueryUnificationException | IllegalTreeUpdateException e) {
-                throw new QueryMergingException(e.getMessage());
-            }
+            SubQueryMergingTools.mergeSubQuery(treeComponent, originalSubQuery, localDataNode);
         }
     }
+
 
     @Override
     public ConstructionNode getClosestConstructionNode(QueryNode node) {

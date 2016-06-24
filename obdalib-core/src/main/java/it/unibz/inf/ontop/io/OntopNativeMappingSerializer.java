@@ -1,16 +1,16 @@
 package it.unibz.inf.ontop.io;
 
 
-import it.unibz.inf.ontop.model.OBDADataSource;
-import it.unibz.inf.ontop.model.OBDAMappingAxiom;
-import it.unibz.inf.ontop.model.OBDAModel;
-import it.unibz.inf.ontop.model.OBDAQuery;
+import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.renderer.SourceQueryRenderer;
 import it.unibz.inf.ontop.renderer.TargetQueryRenderer;
+import it.unibz.inf.ontop.sql.RDBMSMappingAxiom;
+
 import static it.unibz.inf.ontop.model.impl.RDBMSourceParameterConstants.*;
 
 import java.io.*;
 import java.net.URI;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -97,16 +97,22 @@ public class OntopNativeMappingSerializer {
         writer.write("\n");
 
         boolean needLineBreak = false;
-        for (OBDAMappingAxiom mapping : model.getMappings(sourceUri)) {
+        for (OBDAMappingAxiom axiom : model.getMappings(sourceUri)) {
+            if (!(axiom instanceof RDBMSMappingAxiom)) {
+                throw new IllegalArgumentException("The ontop native mapping serializer only supports RDBMSMappingAxioms");
+            }
+
+            RDBMSMappingAxiom mapping = (RDBMSMappingAxiom) axiom;
+
             if (needLineBreak) {
                 writer.write("\n");
             }
             writer.write(OntopNativeMappingParser.Label.mappingId.name() + "\t" + mapping.getId() + "\n");
 
-            OBDAQuery targetQuery = mapping.getTargetQuery();
+            List<Function> targetQuery = mapping.getTargetQuery();
             writer.write(OntopNativeMappingParser.Label.target.name() + "\t\t" + printTargetQuery(targetQuery) + "\n");
 
-            OBDAQuery sourceQuery = mapping.getSourceQuery();
+            OBDASQLQuery sourceQuery = mapping.getSourceQuery();
             writer.write(OntopNativeMappingParser.Label.source.name() + "\t\t" + printSourceQuery(sourceQuery) + "\n");
             needLineBreak = true;
         }
@@ -114,11 +120,11 @@ public class OntopNativeMappingSerializer {
         writer.write("\n\n");
     }
 
-    private String printTargetQuery(OBDAQuery query) {
+    private String printTargetQuery(List<Function> query) {
         return TargetQueryRenderer.encode(query, model.getPrefixManager());
     }
 
-    private String printSourceQuery(OBDAQuery query) {
+    private String printSourceQuery(OBDASQLQuery query) {
         String sourceString = SourceQueryRenderer.encode(query);
         String toReturn = convertTabToSpaces(sourceString);
         return toReturn.replaceAll("\n", "\n\t\t\t");

@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.owlrefplatform.core.basicoperations;
 
+import java.util.AbstractMap;
 import java.util.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -7,9 +8,10 @@ import com.google.common.collect.ImmutableSet;
 import fj.P;
 import fj.P2;
 import it.unibz.inf.ontop.model.*;
-
-import it.unibz.inf.ontop.model.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
+import it.unibz.inf.ontop.model.impl.ImmutabilityTools;
+import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Map;
 
@@ -243,5 +245,12 @@ public class ImmutableSubstitutionTools {
     public static boolean isInjective(Map<Variable, ? extends VariableOrGroundTerm> substitutionMap) {
         ImmutableSet<VariableOrGroundTerm> valueSet = ImmutableSet.copyOf(substitutionMap.values());
         return valueSet.size() == substitutionMap.keySet().size();
+    }
+
+    public static ImmutableSubstitution<Constant> computeNullSubstitution(ImmutableSet<Variable> nullVariables) {
+        ImmutableMap<Variable, Constant> map = nullVariables.stream()
+                .map(v -> new AbstractMap.SimpleEntry<Variable, Constant>(v, OBDAVocabulary.NULL))
+                .collect(ImmutableCollectors.toMap());
+        return new ImmutableSubstitutionImpl<>(map);
     }
 }

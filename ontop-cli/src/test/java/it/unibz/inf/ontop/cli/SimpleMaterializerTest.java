@@ -1,12 +1,8 @@
 package it.unibz.inf.ontop.cli;
 
-<<<<<<< HEAD:ontop-cli/src/test/java/it/unibz/inf/ontop/cli/SimpleMaterializerTest.java
-=======
 import it.unibz.inf.ontop.model.OBDADataFactory;
 import it.unibz.inf.ontop.model.OBDAModel;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
-import it.unibz.inf.ontop.io.ModelIOManager;
->>>>>>> v3/package-names-changed:ontop-cli/src/test/java/it/unibz/inf/ontop/cli/SimpleMaterializerTest.java
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -105,6 +101,7 @@ public class SimpleMaterializerTest {
                 "-o", outFile);
         assertEquals(5, numOfClassAssertions(outFile));
         assertEquals(0, numOfObjectPropertyAssertions(outFile));
+        assertEquals(2, numOfAnnotationAssertions(outFile));
     }
 
     @Test
@@ -128,6 +125,12 @@ public class SimpleMaterializerTest {
         OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
         OWLOntology ontology = manager.loadOntologyFromOntologyDocument(new File(owlFile));
         return ontology.getAxioms(AxiomType.OBJECT_PROPERTY_ASSERTION).size();
+    }
+
+    public int numOfAnnotationAssertions(String owlFile) throws OWLOntologyCreationException {
+        OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
+        OWLOntology ontology = manager.loadOntologyFromOntologyDocument(new File(owlFile));
+        return ontology.getAxioms(AxiomType.ANNOTATION_ASSERTION).size();
     }
 
 }

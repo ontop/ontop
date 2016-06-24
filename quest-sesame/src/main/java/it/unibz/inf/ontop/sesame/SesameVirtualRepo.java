@@ -26,7 +26,9 @@ import it.unibz.inf.ontop.owlrefplatform.core.QuestDBConnection;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
 import it.unibz.inf.ontop.owlrefplatform.questdb.QuestDBVirtualStore;
 import it.unibz.inf.ontop.sql.DBMetadata;
-
+import org.openrdf.model.Model;
+import org.openrdf.repository.RepositoryException;
+import org.semanticweb.owlapi.model.OWLOntology;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -35,13 +37,10 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.Properties;
 
-import org.openrdf.model.Model;
-import org.openrdf.repository.RepositoryException;
-import org.semanticweb.owlapi.model.OWLOntology;
-
 public class SesameVirtualRepo extends SesameAbstractRepo {
 
 	private QuestDBVirtualStore virtualStore;
+	private QuestDBConnection questDBConn;
 
 	public SesameVirtualRepo(String name, String obdaFile, boolean existential, String rewriting)
 			throws Exception {
@@ -180,10 +179,11 @@ public class SesameVirtualRepo extends SesameAbstractRepo {
 	 */
 	@Override
 	public QuestDBConnection getQuestConnection() throws OBDAException {
-		if(!super.isinitialized)
+		if(!super.initialized)
 			throw new Error("The SesameVirtualRepo must be initialized before getQuestConnection can be run. See https://github.com/ontop/ontop/wiki/API-change-in-SesameVirtualRepo-and-QuestDBVirtualStore");
 
-        return virtualStore.getConnection();
+		questDBConn = this.virtualStore.getConnection();
+		return questDBConn;
 	}
 
 	@Override
@@ -198,7 +198,12 @@ public class SesameVirtualRepo extends SesameAbstractRepo {
 	@Override
 	public void shutDown() throws RepositoryException {
 		super.shutDown();
-		virtualStore.close();
+		try {
+			questDBConn.close();
+			virtualStore.close();
+		} catch (OBDAException e) {
+			e.printStackTrace();
+		}
 	}
 
 	public String getType() {

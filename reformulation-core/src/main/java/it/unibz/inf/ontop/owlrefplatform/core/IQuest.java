@@ -53,6 +53,8 @@ public interface IQuest extends RepositoryChangedListener {
 
     SemanticIndexURIMap getUriMap();
 
+    QuestQueryProcessor getEngine();
+
     Optional<RDBMSSIRepositoryManager> getOptionalSemanticIndexRepository();
 
     DataSourceMetadata getMetaData();

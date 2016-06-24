@@ -1,8 +1,9 @@
 package it.unibz.inf.ontop.pivotalrepr;
 
+import it.unibz.inf.ontop.model.ImmutableTerm;
+import it.unibz.inf.ontop.model.VariableOrGroundTerm;
 import it.unibz.inf.ontop.model.DataAtom;
 import it.unibz.inf.ontop.model.ImmutableSubstitution;
-import it.unibz.inf.ontop.model.VariableOrGroundTerm;
 
 /**
  * TODO: explain
@@ -17,13 +18,13 @@ public interface ExtensionalDataNode extends DataNode {
             throws QueryNodeTransformationException;
 
     @Override
-    SubstitutionResults<ExtensionalDataNode> applyAscendentSubstitution(
-            ImmutableSubstitution<? extends VariableOrGroundTerm> substitution,
+    SubstitutionResults<ExtensionalDataNode> applyAscendingSubstitution(
+            ImmutableSubstitution<? extends ImmutableTerm> substitution,
             QueryNode descendantNode, IntermediateQuery query);
 
     @Override
-    SubstitutionResults<ExtensionalDataNode> applyDescendentSubstitution(
-            ImmutableSubstitution<? extends VariableOrGroundTerm> substitution);
+    SubstitutionResults<ExtensionalDataNode> applyDescendingSubstitution(
+            ImmutableSubstitution<? extends ImmutableTerm> substitution, IntermediateQuery query);
 
     @Override
     ExtensionalDataNode newAtom(DataAtom newAtom);

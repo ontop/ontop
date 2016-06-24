@@ -25,6 +25,7 @@ import java.io.Serializable;
 import java.net.URI;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.model.Predicate.COL_TYPE;
@@ -34,7 +35,7 @@ public interface OBDADataFactory extends Serializable {
 	
 	public DatatypeFactory getDatatypeFactory();
 
-	public CQIE getCQIE(Function head, Function... body );
+	public CQIE getCQIE(Function head, Function... body);
 	
 	public CQIE getCQIE(Function head, List<Function> body);
 	
@@ -78,6 +79,8 @@ public interface OBDADataFactory extends Serializable {
 
 	public Predicate getDataPropertyPredicate(String name, COL_TYPE type);
 
+	public Predicate getAnnotationPropertyPredicate(String name);
+
 	/**
 	 * with default type COL_TYPE.LITERAL
 	 * @param name
@@ -88,7 +91,7 @@ public interface OBDADataFactory extends Serializable {
 	
 	public Predicate getClassPredicate(String name);
 
-
+	Predicate getOWLSameASPredicate();
 	
 
 	public JdbcTypeMapper getJdbcTypeMapper();
@@ -116,20 +119,20 @@ public interface OBDADataFactory extends Serializable {
 	 * 
 	 * @param functor
 	 *            the function symbol name.
-	 * @param arguments
+	 * @param terms
 	 *            a list of arguments.
 	 * @return the function object.
 	 */
 	public Function getFunction(Predicate functor, Term... terms);
 
-	BooleanExpression getBooleanExpression(BooleanOperationPredicate functor, List<Term> arguments);
+	Expression getExpression(OperationPredicate functor, List<Term> arguments);
 
-	ImmutableBooleanExpression getImmutableBooleanExpression(BooleanOperationPredicate functor, ImmutableTerm... arguments);
+	ImmutableExpression getImmutableExpression(OperationPredicate functor, ImmutableTerm... arguments);
 
-	ImmutableBooleanExpression getImmutableBooleanExpression(BooleanOperationPredicate functor,
-															 ImmutableList<? extends ImmutableTerm> arguments);
+	ImmutableExpression getImmutableExpression(OperationPredicate functor,
+											   ImmutableList<? extends ImmutableTerm> arguments);
 
-	ImmutableBooleanExpression getImmutableBooleanExpression(BooleanExpression booleanExpression);
+	ImmutableExpression getImmutableExpression(Expression expression);
 
 	public Function getFunction(Predicate functor, List<Term> terms);
 
@@ -160,64 +163,65 @@ public interface OBDADataFactory extends Serializable {
 	public DistinctVariableOnlyDataAtom getDistinctVariableOnlyDataAtom(AtomPredicate predicate,
 																 ImmutableList<Variable> arguments);
 
+	public DistinctVariableOnlyDataAtom getDistinctVariableOnlyDataAtom(AtomPredicate predicate,
+																		Variable ... arguments);
 
-	public BooleanExpression getBooleanExpression(BooleanOperationPredicate functor, Term... arguments);
+	public Expression getExpression(OperationPredicate functor, Term... arguments);
 
 	/*
 	 * Boolean function terms
 	 */
 
-	public BooleanExpression getFunctionEQ(Term firstTerm, Term secondTerm);
+	public Expression getFunctionEQ(Term firstTerm, Term secondTerm);
 
-	public BooleanExpression getFunctionGTE(Term firstTerm, Term secondTerm);
+	public Expression getFunctionGTE(Term firstTerm, Term secondTerm);
 
-	public BooleanExpression getFunctionGT(Term firstTerm, Term secondTerm);
+	public Expression getFunctionGT(Term firstTerm, Term secondTerm);
 
-	public BooleanExpression getFunctionLTE(Term firstTerm, Term secondTerm);
+	public Expression getFunctionLTE(Term firstTerm, Term secondTerm);
 
-	public BooleanExpression getFunctionLT(Term firstTerm, Term secondTerm);
+	public Expression getFunctionLT(Term firstTerm, Term secondTerm);
 
-	public BooleanExpression getFunctionNEQ(Term firstTerm, Term secondTerm);
+	public Expression getFunctionNEQ(Term firstTerm, Term secondTerm);
 
-	public BooleanExpression getFunctionNOT(Term term);
+	public Expression getFunctionNOT(Term term);
 
-	public BooleanExpression getFunctionAND(Term term1, Term term2);
+	public Expression getFunctionAND(Term term1, Term term2);
 
-	public BooleanExpression getFunctionOR(Term term1, Term term2);
+	public Expression getFunctionOR(Term term1, Term term2);
 
-	public BooleanExpression getFunctionIsTrue(Term term);
+	public Expression getFunctionIsTrue(Term term);
 	
-	public BooleanExpression getFunctionIsNull(Term term);
+	public Expression getFunctionIsNull(Term term);
 
-	public BooleanExpression getFunctionIsNotNull(Term term);
+	public Expression getFunctionIsNotNull(Term term);
 
-	public BooleanExpression getLANGMATCHESFunction(Term term1, Term term2);
+	public Expression getLANGMATCHESFunction(Term term1, Term term2);
 	
-	public BooleanExpression getFunctionLike(Term term1, Term term2);
+	// ROMAN (23 Dec 2015): LIKE comes only from mappings
+	public Expression getSQLFunctionLike(Term term1, Term term2);
 	
-	public BooleanExpression getFunctionRegex(Term term1, Term term2, Term term3);
+	public Expression getFunctionRegex(Term term1, Term term2, Term term3);
 	
-	public Function getFunctionReplace(Term term1, Term term2, Term term3);
+	public Expression getFunctionReplace(Term term1, Term term2, Term term3);
 	
+	/* Functions on strings */
 
-	/*
-	 * Numerical arithmethic functions
-	 */
+    public Expression getFunctionConcat(Term term1, Term term2);
 
-	public Function getFunctionMinus(Term term1);
+ // added by Nika:
 
-	public Function getFunctionAdd(Term term1, Term term2);
+	public Expression getFunctionSubstring(Term term1, Term term2, Term term3);
 
-	public Function getFunctionSubstract(Term term1, Term term2);
+	public Expression getFunctionSubstring(Term term1, Term term2);
 
-	public Function getFunctionMultiply(Term term1, Term term2);
 
-    public Function getFunctionConcat(Term term1, Term term2);
-	
+
+
 	/*
 	 * Casting values cast(source-value AS destination-type)
 	 */
-	public Function getFunctionCast(Term term1, Term term2);
+	public Expression getFunctionCast(Term term1, Term term2);
 	
 	/*
 	 * JDBC objects
@@ -329,35 +333,25 @@ public interface OBDADataFactory extends Serializable {
 	 * @return the variable object.
 	 */
 	public Variable getVariable(String name);
-	
-	
-
-	/**
-	 * Construct a {@link Variable} object with empty name.
-	 * 
-	 * @return the variable object.
-	 */
-//	public Variable getVariableNondistinguished();
 
 	public OBDASQLQuery getSQLQuery(String query);
 
-	
-	public Function getSPARQLJoin(Term t1, Term t2);
+	/* SPARQL meta-predicates */
+
+	public Function getSPARQLJoin(Function t1, Function t2);
 
 	public Function getSPARQLJoin(Function t1, Function t2, Function joinCondition);
-	
-	public Function getSPARQLJoin(List<Function> atoms, Function filter);
 
-	public Function getSPARQLJoin(List<Function> atoms);
-
-	
-
-	
-	public Function getSPARQLLeftJoin(List<Function> atoms, List<Function> atoms2, Function filter);
-
-	public Function getSPARQLLeftJoin(List<Function> atoms, List<Function> atoms2);
+	/**
+	 * Follows the ugly encoding of complex left-join expressions (with a filter on the left side)
+     */
+	public Function getSPARQLLeftJoin(List<Function> atoms, List<Function> atoms2, Optional<Function> optionalCondition);
 
 	public Function getSPARQLLeftJoin(Term t1, Term t2);
 
-	public Function getSPARQLLeftJoin(Function function, Function function2, Function LjoinCondition);
+	TermType getTermType(COL_TYPE type);
+	TermType getTermType(String languageTagString);
+	TermType getTermType(Term languageTagTerm);
+
+
 }

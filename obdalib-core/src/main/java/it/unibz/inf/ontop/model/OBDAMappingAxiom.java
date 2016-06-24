@@ -21,20 +21,22 @@ package it.unibz.inf.ontop.model;
  */
 
 import java.io.Serializable;
+import java.util.List;
 
 public interface OBDAMappingAxiom extends Cloneable, Serializable {
 
-	public void setSourceQuery(OBDAQuery query);
+	void setSourceQuery(SourceQuery query);
 
-	public OBDAQuery getSourceQuery();
+	SourceQuery getSourceQuery();
 
-	public void setTargetQuery(CQIE query);
+	public void setTargetQuery(List<Function> query);
 
-	public CQIE getTargetQuery();
-
-	public OBDAMappingAxiom clone();
+	public List<Function> getTargetQuery();
 
 	public void setId(String id);
 
 	public String getId();
+
+	public OBDAMappingAxiom clone();
+
 }

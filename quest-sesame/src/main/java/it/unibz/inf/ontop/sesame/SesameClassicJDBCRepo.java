@@ -26,6 +26,7 @@ import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
 
 import java.util.Properties;
 
+@Deprecated
 public class SesameClassicJDBCRepo extends SesameClassicRepo {
 
     private static QuestPreferences preferences = new QuestPreferences();
@@ -40,7 +41,6 @@ public class SesameClassicJDBCRepo extends SesameClassicRepo {
             Properties p = new Properties();
             p.setProperty(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
             p.setProperty(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-            p.setProperty(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
             p.setProperty(QuestPreferences.OBTAIN_FROM_MAPPINGS, "true");
             p.setProperty(QuestPreferences.OBTAIN_FROM_ONTOLOGY, "false");
             p.setProperty(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC_INDEX);
@@ -55,6 +55,6 @@ public class SesameClassicJDBCRepo extends SesameClassicRepo {
         }
 
 //		classicStore.saveState(storePath);
-    }
+	}
 
 }

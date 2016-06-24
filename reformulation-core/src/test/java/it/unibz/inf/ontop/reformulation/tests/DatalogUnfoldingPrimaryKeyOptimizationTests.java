@@ -21,32 +21,34 @@ package it.unibz.inf.ontop.reformulation.tests;
  */
 
 
-import java.sql.Types;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
-
+import com.google.common.collect.Multimap;
+import it.unibz.inf.ontop.model.Function;
 import it.unibz.inf.ontop.model.CQIE;
 import it.unibz.inf.ontop.model.DatalogProgram;
-import it.unibz.inf.ontop.model.Function;
 import it.unibz.inf.ontop.model.OBDADataFactory;
 import it.unibz.inf.ontop.model.Predicate;
 import it.unibz.inf.ontop.model.Term;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
+import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.DBMetadataUtil;
 import it.unibz.inf.ontop.owlrefplatform.core.unfolding.DatalogUnfolder;
 import it.unibz.inf.ontop.sql.DBMetadata;
-import it.unibz.inf.ontop.sql.TableDefinition;
-import it.unibz.inf.ontop.sql.api.Attribute;
-
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.Multimap;
-
+import it.unibz.inf.ontop.sql.RDBMetadataExtractionTools;
+import it.unibz.inf.ontop.sql.QuotedIDFactory;
+import it.unibz.inf.ontop.sql.DatabaseRelationDefinition;
+import it.unibz.inf.ontop.sql.UniqueConstraint;
 import junit.framework.TestCase;
+import org.junit.Ignore;
+
+import java.sql.Types;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
- * TODO: disable this test
+ * TODO: port it to RedundantJoinTest
  */
+@Ignore
 public class DatalogUnfoldingPrimaryKeyOptimizationTests extends TestCase {
 
 	DBMetadata metadata;
@@ -55,23 +57,25 @@ public class DatalogUnfoldingPrimaryKeyOptimizationTests extends TestCase {
 
 	DatalogProgram unfoldingProgram;
 
+	
 	@Override
 	public void setUp() {
-		metadata = new DBMetadata("dummy class");
-		TableDefinition table = new TableDefinition("TABLE");
-		table.addAttribute(new Attribute("col1", Types.INTEGER, true, false));
-		table.addAttribute(new Attribute("col2", Types.INTEGER, false, false));
-		table.addAttribute(new Attribute("col3", Types.INTEGER, false, false));
-		table.addAttribute(new Attribute("col4", Types.INTEGER, false, false));
-		metadata.add(table);
+		metadata = RDBMetadataExtractionTools.createDummyMetadata();
+		QuotedIDFactory idfac = metadata.getQuotedIDFactory();
 		
+		DatabaseRelationDefinition table = metadata.createDatabaseRelation(idfac.createRelationID(null, "TABLE"));
+		table.addAttribute(idfac.createAttributeID("col1"), Types.INTEGER, null, false);
+		table.addAttribute(idfac.createAttributeID("col2"), Types.INTEGER, null, false);
+		table.addAttribute(idfac.createAttributeID("col3"), Types.INTEGER, null, false);
+		table.addAttribute(idfac.createAttributeID("col4"), Types.INTEGER, null, false);
+		table.addUniqueConstraint(UniqueConstraint.primaryKeyOf(table.getAttribute(idfac.createAttributeID("col1"))));
 		
-		table = new TableDefinition("TABLE2");
-		table.addAttribute(new Attribute("col1", Types.INTEGER, true, false));
-		table.addAttribute(new Attribute("col2", Types.INTEGER, false, false));
-		table.addAttribute(new Attribute("col3", Types.INTEGER, false, false));
-		table.addAttribute(new Attribute("col4", Types.INTEGER, false, false));
-		metadata.add(table);
+		table = metadata.createDatabaseRelation(idfac.createRelationID(null, "TABLE2"));
+		table.addAttribute(idfac.createAttributeID("col1"), Types.INTEGER, null, false);
+		table.addAttribute(idfac.createAttributeID("col2"), Types.INTEGER, null, false);
+		table.addAttribute(idfac.createAttributeID("col3"), Types.INTEGER, null, false);
+		table.addAttribute(idfac.createAttributeID("col4"), Types.INTEGER, null, false);
+		table.addUniqueConstraint(UniqueConstraint.primaryKeyOf(table.getAttribute(idfac.createAttributeID("col1"))));
 
 		unfoldingProgram = fac.getDatalogProgram();
 
@@ -137,7 +141,8 @@ public class DatalogUnfoldingPrimaryKeyOptimizationTests extends TestCase {
 	}
 
 	public void testRedundancyElimination() throws Exception {
-		Multimap<Predicate, List<Integer>> pkeys = metadata.extractPKs(unfoldingProgram.getRules());
+		
+		Multimap<Predicate, List<Integer>> pkeys = DBMetadataUtil.extractPKs(metadata);
 		DatalogUnfolder unfolder = new DatalogUnfolder(unfoldingProgram.getRules(), pkeys);
 
 		LinkedList<Term> headterms = new LinkedList<Term>();
@@ -154,8 +159,7 @@ public class DatalogUnfoldingPrimaryKeyOptimizationTests extends TestCase {
 		CQIE query = fac.getCQIE(head, body);
 
 		DatalogProgram input = fac.getDatalogProgram(Collections.singletonList(query));
-		DatalogProgram output = unfolder.unfold(input, "q", QuestConstants.BUP, true,
-				ArrayListMultimap.<Predicate, Integer>create());
+		DatalogProgram output = unfolder.unfold(input, "q", QuestConstants.BUP, true);
 		System.out.println("input " + input);
 
 		int atomcount = 0;
@@ -184,8 +188,7 @@ public class DatalogUnfoldingPrimaryKeyOptimizationTests extends TestCase {
 		query = fac.getCQIE(head, body);
 
 		input = fac.getDatalogProgram(Collections.singletonList(query));
-		output = unfolder.unfold(input, "q", QuestConstants.BUP, true,
-				ArrayListMultimap.<Predicate, Integer>create());
+		output = unfolder.unfold(input, "q", QuestConstants.BUP, true);
 		System.out.println("input " + input);
 
 		atomcount = 0;

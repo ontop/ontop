@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <artifactId>ontop</artifactId>
         <groupId>it.unibz.inf.ontop</groupId>
@@ -30,7 +29,7 @@
 
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>ontop-quest-owlapi3</artifactId>
+            <artifactId>ontop-quest-owlapi</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -39,16 +38,14 @@
             <version>${project.version}</version>
         </dependency>
 
-        <!--
-        <dependency>
-            <groupId>io.airlift</groupId>
-            <artifactId>airline</artifactId>
-        </dependency>
--->
         <dependency>
             <groupId>com.github.rvesse</groupId>
             <artifactId>airline</artifactId>
-            <version>1.0.1</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.rvesse</groupId>
+            <artifactId>airline-help-bash</artifactId>
+            <scope>compile</scope>
         </dependency>
 
         <!--
@@ -71,4 +68,21 @@
         </dependency>
 
     </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <addClasspath>true</addClasspath>
+                            <mainClass>it.unibz.inf.ontop.cli.Ontop</mainClass>
+                        </manifest>
+                    </archive>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 </project>

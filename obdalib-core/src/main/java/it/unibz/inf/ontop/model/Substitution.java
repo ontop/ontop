@@ -87,3 +87,4 @@ public interface Substitution {
     @Deprecated
     void put(Variable var, Term term);
 }
+

@@ -20,18 +20,11 @@ package it.unibz.inf.ontop.protege.gui.treemodels;
  * #L%
  */
 
-import java.util.List;
-
-<<<<<<< HEAD:ontop-protege/src/main/java/it/unibz/inf/ontop/protege/gui/treemodels/MappingHeadVariableTreeModelFilter.java
-import it.unibz.inf.ontop.model.CQIE;
 import it.unibz.inf.ontop.model.Function;
-=======
-import it.unibz.inf.ontop.model.Function;
-import it.unibz.inf.ontop.model.CQIE;
->>>>>>> v3/package-names-changed:ontop-protege/src/main/java/it/unibz/inf/ontop/protege/gui/treemodels/MappingHeadVariableTreeModelFilter.java
 import it.unibz.inf.ontop.model.OBDAMappingAxiom;
 import it.unibz.inf.ontop.model.Term;
-import it.unibz.inf.ontop.model.impl.CQIEImpl;
+
+import java.util.List;
 
 /**
  * This Filter receives a string and returns true if any mapping contains the
@@ -45,8 +38,7 @@ public class MappingHeadVariableTreeModelFilter extends TreeModelFilter<OBDAMapp
 
 	@Override
 	public boolean match(OBDAMappingAxiom object) {
-		final CQIE headquery = (CQIEImpl) object.getTargetQuery();
-		final List<Function> atoms = headquery.getBody();
+		final List<Function> atoms = object.getTargetQuery();
 
 		boolean isMatch = false;
 		for (String keyword : vecKeyword) {

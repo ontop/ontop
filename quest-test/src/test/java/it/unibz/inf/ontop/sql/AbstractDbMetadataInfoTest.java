@@ -20,14 +20,10 @@ package it.unibz.inf.ontop.sql;
  * #L%
  */
 
-import java.sql.Connection;
-import java.sql.Driver;
-import java.sql.DriverManager;
-import java.sql.DriverPropertyInfo;
-import java.sql.SQLException;
-import java.util.Properties;
-
 import junit.framework.TestCase;
+
+import java.sql.*;
+import java.util.Properties;
 
 public abstract class AbstractDbMetadataInfoTest extends TestCase {
 	
@@ -38,8 +34,10 @@ public abstract class AbstractDbMetadataInfoTest extends TestCase {
 		
 		try {
 			Connection conn = DriverManager.getConnection(getConnectionString(), getConnectionUsername(), getConnectionPassword());
-			metadata = JDBCConnectionManager.getMetaData(conn);
-		} catch (SQLException e) { 
+			metadata = RDBMetadataExtractionTools.createMetadata(conn);
+			RDBMetadataExtractionTools.loadMetadata(metadata, conn, null);
+		} 
+		catch (SQLException e) { 
 			e.printStackTrace();
 		}
 	}

@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.reformulation.tests;
 
 /*
  * #%L
- * ontop-quest-owlapi3
+ * ontop-quest-owlapi
  * %%
  * Copyright (C) 2009 - 2014 Free University of Bozen-Bolzano
  * %%
@@ -22,13 +22,16 @@ package it.unibz.inf.ontop.reformulation.tests;
 
 import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
-import it.unibz.inf.ontop.owlrefplatform.owlapi3.*;
-import junit.framework.TestCase;
+import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLIndividual;
 import org.semanticweb.owlapi.model.OWLLiteral;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
+import org.semanticweb.owlapi.reasoner.ReasonerInternalException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,10 +45,13 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Properties;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 /***
  * Test use of REPLACE in where clause
  */
-public class ComplexWhereMappingTest extends TestCase {
+public class ComplexWhereMappingTest {
 
 	private Connection conn;
 
@@ -55,10 +61,10 @@ public class ComplexWhereMappingTest extends TestCase {
 	final String owlfile = "src/test/resources/test/complexmapping.owl";
 	final String obdafile = "src/test/resources/test/complexwheremapping.obda";
 
-	@Override
+	@Before
 	public void setUp() throws Exception {
-		
-		
+
+
 		/*
 		 * Initializing and H2 database
 		 */
@@ -85,15 +91,15 @@ public class ComplexWhereMappingTest extends TestCase {
 		// Loading the OWL file
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 		ontology = manager.loadOntologyFromOntologyDocument((new File(owlfile)));
-		
+
 	}
 
-	@Override
+	@After
 	public void tearDown() throws Exception {
-	
+
 			dropTables();
 			conn.close();
-		
+
 	}
 
 	private void dropTables() throws SQLException, IOException {
@@ -114,64 +120,60 @@ public class ComplexWhereMappingTest extends TestCase {
 		conn.commit();
 	}
 
-	private void runTests(Properties p) throws Exception {
+	private void runTests(QuestOWLConfiguration config) throws Exception {
 
-		// Creating a new instance of the reasoner
-		QuestOWLFactory factory = new QuestOWLFactory(new File(obdafile), new QuestPreferences(p));
-
-		QuestOWL reasoner = factory.createReasoner(ontology);
+        QuestOWLFactory factory = new QuestOWLFactory();
+        QuestOWL reasoner = factory.createReasoner(ontology, config);
 
 		// Now we are ready for querying
 		QuestOWLConnection conn = reasoner.getConnection();
 		QuestOWLStatement st = conn.createStatement();
 
-		String query = "PREFIX : <http://it.unibz.krdb/obda/test/simple#> SELECT * WHERE { ?x a :A; :P ?y; :U ?z; :P ?y; :U ?z; :P ?y ; :U ?z; :P ?y; :U ?z; :P ?y ; :U ?z; :P ?y; :U ?z; :P ?y ; :U ?z; :P ?y; :U ?z; :P ?y ; :U ?z; :P ?y; :U ?z; :P ?y ; :U ?z; :P ?y; :U ?z; :P ?y ; :U ?z; :P ?y; :U ?z; :P ?y ; :U ?z }";
+		String query = "PREFIX : <http://it.unibz.inf/obda/test/simple#> SELECT * WHERE { ?x a :A; :P ?y; :U ?z; :P ?y; :U ?z; :P ?y ; :U ?z; :P ?y; :U ?z; :P ?y ; :U ?z; :P ?y; :U ?z; :P ?y ; :U ?z; :P ?y; :U ?z; :P ?y ; :U ?z; :P ?y; :U ?z; :P ?y ; :U ?z; :P ?y; :U ?z; :P ?y ; :U ?z; :P ?y; :U ?z; :P ?y ; :U ?z }";
 		StringBuilder bf = new StringBuilder(query);
 		try {
-				QuestOWLResultSet rs = st.executeTuple(query);
+			QuestOWLResultSet rs = st.executeTuple(query);
 			assertTrue(rs.nextRow());
 			OWLIndividual ind1 = rs.getOWLIndividual("x");
 			OWLIndividual ind2 = rs.getOWLIndividual("y");
 			OWLLiteral val = rs.getOWLLiteral("z");
-			assertEquals("<http://it.unibz.krdb/obda/test/simple#uri1>", ind1.toString());
-			assertEquals("<http://it.unibz.krdb/obda/test/simple#uri1>", ind2.toString());
+			assertEquals("<http://it.unibz.inf/obda/test/simple#uri1>", ind1.toString());
+			assertEquals("<http://it.unibz.inf/obda/test/simple#uri1>", ind2.toString());
 			assertEquals("\"value1\"", val.toString());
-			
+
 
 		} catch (Exception e) {
 			throw e;
 		} finally {
-			try {
-
-			} catch (Exception e) {
-				st.close();
-				throw e;
-			}
 			conn.close();
 			reasoner.dispose();
 		}
 	}
 
+    @Test
 	public void testViEqSig() throws Exception {
 
 		Properties p = new Properties();
 		p.put(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
 		p.put(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-		p.put(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
+		QuestOWLConfiguration config = QuestOWLConfiguration.builder()
+				.nativeOntopMappingFile(obdafile)
+				.properties(p).build();
 
-		runTests(p);
+		runTests(config);
 	}
 
-
-	public void testClassicEqSig() throws Exception {
+    @Test(expected = ReasonerInternalException.class)
+    public void testClassicEqSig() throws Exception {
 
 		Properties p = new Properties();
 		p.put(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
 		p.put(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-		p.put(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
 		p.put(QuestPreferences.OBTAIN_FROM_MAPPINGS, "true");
+		QuestOWLConfiguration config = QuestOWLConfiguration.builder()
+				.properties(p).build();
 
-		runTests(p);
+		runTests(config);
 	}
 
 }

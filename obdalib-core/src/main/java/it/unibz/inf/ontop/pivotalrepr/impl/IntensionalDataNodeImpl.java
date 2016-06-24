@@ -1,9 +1,9 @@
 package it.unibz.inf.ontop.pivotalrepr.impl;
 
 import it.unibz.inf.ontop.model.DataAtom;
-import it.unibz.inf.ontop.model.ImmutableSubstitution;
+import it.unibz.inf.ontop.model.ImmutableTerm;
 import it.unibz.inf.ontop.model.VariableOrGroundTerm;
-import it.unibz.inf.ontop.pivotalrepr.*;
+import it.unibz.inf.ontop.model.ImmutableSubstitution;
 import it.unibz.inf.ontop.pivotalrepr.*;
 
 public class IntensionalDataNodeImpl extends DataNodeImpl implements IntensionalDataNode {
@@ -31,16 +31,22 @@ public class IntensionalDataNodeImpl extends DataNodeImpl implements Intensional
     }
 
     @Override
-    public SubstitutionResults<IntensionalDataNode> applyAscendentSubstitution(
-            ImmutableSubstitution<? extends VariableOrGroundTerm> substitution,
+    public SubstitutionResults<IntensionalDataNode> applyAscendingSubstitution(
+            ImmutableSubstitution<? extends ImmutableTerm> substitution,
             QueryNode descendantNode, IntermediateQuery query) {
         return applySubstitution((IntensionalDataNode)this, substitution);
     }
 
     @Override
-    public SubstitutionResults<IntensionalDataNode> applyDescendentSubstitution(
-            ImmutableSubstitution<? extends VariableOrGroundTerm> substitution) {
+    public SubstitutionResults<IntensionalDataNode> applyDescendingSubstitution(
+            ImmutableSubstitution<? extends ImmutableTerm> substitution, IntermediateQuery query) {
         return applySubstitution((IntensionalDataNode)this, substitution);
+    }
+
+    @Override
+    public boolean isSyntacticallyEquivalentTo(QueryNode node) {
+        return (node instanceof IntensionalDataNode)
+                && ((IntensionalDataNode) node).getProjectionAtom().equals(this.getProjectionAtom());
     }
 
     @Override

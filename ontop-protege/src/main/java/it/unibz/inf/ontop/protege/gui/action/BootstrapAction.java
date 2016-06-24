@@ -20,52 +20,33 @@ package it.unibz.inf.ontop.protege.gui.action;
  * #L%
  */
 
-import java.awt.Component;
-import java.awt.Dimension;
-import java.awt.event.ActionEvent;
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.swing.Box;
-import javax.swing.BoxLayout;
-import javax.swing.JComboBox;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JTextField;
-
-<<<<<<< HEAD:ontop-protege/src/main/java/it/unibz/inf/ontop/protege/gui/action/BootstrapAction.java
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-import it.unibz.inf.ontop.protege.core.OBDAModelManager;
-import it.unibz.inf.ontop.protege.core.OBDAModelWrapper;
-import it.unibz.inf.ontop.protege.utils.OBDAProgessMonitor;
-=======
-import it.unibz.inf.ontop.model.OBDAModel;
-import it.unibz.inf.ontop.model.impl.OBDAModelImpl;
-import it.unibz.inf.ontop.owlapi3.bootstrapping.DirectMappingBootstrapper;
-import it.unibz.inf.ontop.protege.core.OBDAModelManager;
->>>>>>> v3/package-names-changed:ontop-protege/src/main/java/it/unibz/inf/ontop/protege/gui/action/BootstrapAction.java
-import it.unibz.inf.ontop.protege.utils.OBDAProgressListener;
-import org.protege.editor.core.ui.action.ProtegeAction;
-import org.protege.editor.owl.OWLEditorKit;
-import org.protege.editor.owl.model.OWLModelManager;
-import org.protege.editor.owl.model.OWLWorkspace;
-<<<<<<< HEAD:ontop-protege/src/main/java/it/unibz/inf/ontop/protege/gui/action/BootstrapAction.java
 import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
 import it.unibz.inf.ontop.injection.OBDACoreModule;
 import it.unibz.inf.ontop.injection.OBDAFactoryWithException;
 import it.unibz.inf.ontop.injection.OBDAProperties;
 import it.unibz.inf.ontop.model.OBDADataSource;
+import it.unibz.inf.ontop.model.OBDAModel;
 import it.unibz.inf.ontop.model.impl.OBDAModelImpl;
-import it.unibz.inf.ontop.owlapi3.bootstrapping.DirectMappingBootstrapper;
-=======
-import it.unibz.inf.ontop.model.OBDADataSource;
-import it.unibz.inf.ontop.protege.utils.OBDAProgessMonitor;
->>>>>>> v3/package-names-changed:ontop-protege/src/main/java/it/unibz/inf/ontop/protege/gui/action/BootstrapAction.java
+import it.unibz.inf.ontop.owlapi.bootstrapping.DirectMappingBootstrapper;
+import it.unibz.inf.ontop.protege.core.OBDAModelManager;
+import it.unibz.inf.ontop.protege.core.OBDAModelWrapper;
+import it.unibz.inf.ontop.protege.utils.OBDAProgressListener;
+import it.unibz.inf.ontop.protege.utils.OBDAProgressMonitor;
+import org.protege.editor.core.ui.action.ProtegeAction;
+import org.protege.editor.owl.OWLEditorKit;
+import org.protege.editor.owl.model.OWLModelManager;
+import org.protege.editor.owl.model.OWLWorkspace;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.util.ArrayList;
+import java.util.List;
 
 public class BootstrapAction extends ProtegeAction {
 
@@ -139,18 +120,17 @@ public class BootstrapAction extends ProtegeAction {
 					throw new RuntimeException("Base URI " + baseUri
 							+ " contains '#' character!");
 				} else {
-					Thread th = new Thread(new Runnable() {
+					Thread th = new Thread("Bootstrapper Action Thread"){
 						@Override
 						public void run() {
 							try {
-								OBDAProgessMonitor monitor = new OBDAProgessMonitor(
+								OBDAProgressMonitor monitor = new OBDAProgressMonitor(
 										"Bootstrapping ontology and mappings...");
 								BootstrapperThread t = new BootstrapperThread();
 								monitor.addProgressListener(t);
 								monitor.start();
 								t.run(baseUri, currentOnto, currentModel,
 										currentSource);
-								currentModel.fireSourceParametersUpdated();
 								monitor.stop();
 								JOptionPane.showMessageDialog(workspace,
 										"Task is completed.", "Done",
@@ -162,7 +142,7 @@ public class BootstrapAction extends ProtegeAction {
 												"Error occured during bootstrapping data source.");
 							}
 						}
-					});
+					};
 					th.start();
 				}
 			}
@@ -177,7 +157,7 @@ public class BootstrapAction extends ProtegeAction {
 		}
 
 		public void run(String baseUri, OWLOntology currentOnto,
-				OBDAModelWrapper currentModel, OBDADataSource currentSource)
+						OBDAModelWrapper currentModel, OBDADataSource currentSource)
 				throws Exception {
 
             // TODO: Retrieve the effective Quest preferences (not just the default ones).

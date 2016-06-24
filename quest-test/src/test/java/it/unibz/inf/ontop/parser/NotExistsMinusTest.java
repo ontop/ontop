@@ -23,13 +23,13 @@
 //import org.junit.After;
 //import org.junit.Before;
 //import org.junit.Test;
-//import it.unibz.inf.ontop.io.ModelIOManager;
+//import ModelIOManager;
 //import OBDADataFactory;
 //import OBDAModel;
 //import OBDADataFactoryImpl;
 //import QuestConstants;
 //import QuestPreferences;
-//import it.unibz.inf.ontop.owlrefplatform.owlapi3.*;
+//import org.semanticweb.ontop.owlrefplatform.owlapi.*;
 //import org.semanticweb.owlapi.apibinding.OWLManager;
 //import org.semanticweb.owlapi.model.OWLNamedIndividual;
 //import org.semanticweb.owlapi.model.OWLOntology;

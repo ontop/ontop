@@ -20,9 +20,11 @@ package it.unibz.inf.ontop.parser;
  * #L%
  */
 
-import it.unibz.inf.ontop.model.CQIE;
+import java.util.List;
+
+import it.unibz.inf.ontop.model.Function;
 
 public interface TargetQueryParser {
 
-	public CQIE parse(String input) throws TargetQueryParserException;
+	public List<Function> parse(String input) throws TargetQueryParserException;
 }

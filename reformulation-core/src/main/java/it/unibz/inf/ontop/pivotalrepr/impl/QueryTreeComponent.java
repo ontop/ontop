@@ -3,10 +3,6 @@ package it.unibz.inf.ontop.pivotalrepr.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.Variable;
-import it.unibz.inf.ontop.pivotalrepr.ConstructionNode;
-import it.unibz.inf.ontop.pivotalrepr.IntermediateQuery;
-import it.unibz.inf.ontop.pivotalrepr.NonCommutativeOperatorNode;
-import it.unibz.inf.ontop.pivotalrepr.QueryNode;
 import it.unibz.inf.ontop.pivotalrepr.*;
 
 import java.util.Optional;
@@ -23,6 +19,8 @@ public interface QueryTreeComponent {
     ImmutableList<QueryNode> getNodesInBottomUpOrder() throws IllegalTreeException;
 
     ImmutableList<QueryNode> getNodesInTopDownOrder() throws IllegalTreeException;
+
+    ImmutableSet<EmptyNode> getUnsatisfiableNodes();
 
     boolean contains(QueryNode node);
 

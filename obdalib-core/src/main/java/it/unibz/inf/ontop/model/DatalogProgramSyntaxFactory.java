@@ -87,43 +87,43 @@ public class DatalogProgramSyntaxFactory {
 	}
 	
 	public static Function and(Term... terms){
-		return termFactory.getFunction(OBDAVocabulary.AND, terms);
+		return termFactory.getFunction(ExpressionOperation.AND, terms);
 	}
 	
 	public static Function or(Term... terms){
-		return termFactory.getFunction(OBDAVocabulary.OR, terms);
+		return termFactory.getFunction(ExpressionOperation.OR, terms);
 	}
 	
 	public static Function eq(Term... terms){
-		return termFactory.getFunction(OBDAVocabulary.EQ, terms);
+		return termFactory.getFunction(ExpressionOperation.EQ, terms);
 	}
 	
 	public static Function gt(Term... terms){
-		return termFactory.getFunction(OBDAVocabulary.GT, terms);
+		return termFactory.getFunction(ExpressionOperation.GT, terms);
 	}
 
 	public static Function isNotNull(Term term){
-		return termFactory.getFunction(OBDAVocabulary.IS_NOT_NULL, term);
+		return termFactory.getFunction(ExpressionOperation.IS_NOT_NULL, term);
 	}
 	
 	public static Function isNull(Term term){
-		return termFactory.getFunction(OBDAVocabulary.IS_NULL, term);
+		return termFactory.getFunction(ExpressionOperation.IS_NULL, term);
 	}
 	
 	public static Function lt(Term... terms){
-		return termFactory.getFunction(OBDAVocabulary.LT, terms);
+		return termFactory.getFunction(ExpressionOperation.LT, terms);
 	}
 	
 	public static Function lte(Term... terms){
-		return termFactory.getFunction(OBDAVocabulary.LTE, terms);
+		return termFactory.getFunction(ExpressionOperation.LTE, terms);
 	}
 	
 	public static Function neq(Term... terms){
-		return termFactory.getFunction(OBDAVocabulary.NEQ, terms);
+		return termFactory.getFunction(ExpressionOperation.NEQ, terms);
 	}
 	
 	public static Function not(Term... terms){
-		return termFactory.getFunction(OBDAVocabulary.NOT, terms);
+		return termFactory.getFunction(ExpressionOperation.NOT, terms);
 	}
 	
 	public static Function leftJoin(Term... terms){

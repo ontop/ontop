@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.protege.panels;
 
 /*
  * #%L
- * ontop-protege
+ * ontop-protege4
  * %%
  * Copyright (C) 2009 - 2013 KRDB Research Centre. Free University of Bozen Bolzano.
  * %%
@@ -20,24 +20,25 @@ package it.unibz.inf.ontop.protege.panels;
  * #L%
  */
 
+import it.unibz.inf.ontop.utils.VirtualABoxStatistics;
+import it.unibz.inf.ontop.protege.utils.OBDAProgressListener;
+
+import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
 import java.util.HashMap;
 
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
-import javax.swing.table.DefaultTableModel;
-
-import it.unibz.inf.ontop.utils.VirtualABoxStatistics;
-
-public class OBDAModelStatisticsPanel extends javax.swing.JPanel {
+public class OBDAModelStatisticsPanel extends javax.swing.JPanel implements OBDAProgressListener {
 
 	private static final long serialVersionUID = 2317777246039649415L;
-	
-    public OBDAModelStatisticsPanel(VirtualABoxStatistics statistics) {
+
+    private boolean bCancel = false;
+    private boolean errorShown = false;
+
+    public OBDAModelStatisticsPanel() {
         initComponents();
-        initContent(statistics);
     }
     
-    private void initContent(VirtualABoxStatistics statistics) {
+    public void initContent(VirtualABoxStatistics statistics) {
     	
     	/* Fill the label summary value */
     	String message = "";
@@ -47,26 +48,28 @@ public class OBDAModelStatisticsPanel extends javax.swing.JPanel {
 		} 
 		catch (Exception e) {
 			message = String.format("%s. Please try again!", e.getMessage());
-		} 
+            errorShown = true;
+		}
     	lblSummaryValue.setText(message); 	
     	
     	/* Fill the triples summary table */
     	final HashMap<String, HashMap<String, Integer>> data = statistics.getStatistics();
-    	for (String datasourceName : data.keySet()) {
+    	for (String datasourceName : data.keySet() ) {
+
     		HashMap<String, Integer> mappingStat = data.get(datasourceName);
-    		
+
     		final int row = mappingStat.size();
-    		final int col = 2;    		
+    		final int col = 2;
     		final String[] columnNames = {"Mapping ID", "Number of Triples"};
-    		
+
     		Object[][] rowData = new Object[row][col];
-    		
+
     		int index = 0;
     		for (String mappingId : mappingStat.keySet()){
     			rowData[index][0] = mappingId;
     			rowData[index][1] = mappingStat.get(mappingId);
     			index++;
-    		}    		
+    		}
     		JTable tblTriplesCount = createStatisticTable(rowData, columnNames);
 			tabDataSources.add(datasourceName, new JScrollPane(tblTriplesCount));
     	}
@@ -135,5 +138,21 @@ public class OBDAModelStatisticsPanel extends javax.swing.JPanel {
     private javax.swing.JPanel pnlSummary;
     private javax.swing.JPanel pnlTriplesSummary;
     private javax.swing.JTabbedPane tabDataSources;
+
+    @Override
+    public void actionCanceled() {
+        bCancel = true;
+
+    }
+
+    @Override
+    public boolean isCancelled() {
+        return this.bCancel;
+    }
+
+    @Override
+    public boolean isErrorShown() {
+        return this.errorShown;
+    }
     // End of variables declaration//GEN-END:variables
 }

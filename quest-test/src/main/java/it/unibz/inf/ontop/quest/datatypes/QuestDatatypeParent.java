@@ -21,6 +21,8 @@ package it.unibz.inf.ontop.quest.datatypes;
  */
 
 import info.aduna.io.IOUtil;
+import it.unibz.inf.ontop.quest.ResultSetInfo;
+import it.unibz.inf.ontop.quest.ResultSetInfoTupleUtil;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -29,6 +31,7 @@ import java.net.URL;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+import it.unibz.inf.ontop.sesame.SesameVirtualRepo;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
@@ -268,7 +271,7 @@ public abstract class QuestDatatypeParent extends TestCase {
 	}
 
 	public static TestSuite suite(String manifestFileURL, Factory factory, boolean approvedOnly) throws Exception {
-		logger.info("Building test extractTest for {}", manifestFileURL);
+		logger.info("Building test suite for {}", manifestFileURL);
 
 		TestSuite suite = new TestSuite(factory.getClass().getName());
 
@@ -328,14 +331,14 @@ public abstract class QuestDatatypeParent extends TestCase {
 		con.close();
 
 		manifestRep.shutDown();
-		logger.info("Created test extractTest with " + suite.countTestCases() + " test cases.");
+		logger.info("Created test suite with " + suite.countTestCases() + " test cases.");
 		return suite;
 	}
 
 	protected static String getManifestName(Repository manifestRep, RepositoryConnection con, String manifestFileURL)
 		throws QueryEvaluationException, RepositoryException, MalformedQueryException
 	{
-		// Try to extract extractTest name from manifest file
+		// Try to extract suite name from manifest file
 		TupleQuery manifestNameQuery = con.prepareTupleQuery(QueryLanguage.SERQL,
 				"SELECT ManifestName FROM {ManifestURL} rdfs:label {ManifestName}");
 		manifestNameQuery.setBinding("ManifestURL", manifestRep.getValueFactory().createURI(manifestFileURL));

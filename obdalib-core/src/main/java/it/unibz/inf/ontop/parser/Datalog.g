@@ -21,19 +21,19 @@
 grammar Datalog;
 
 @header {
-package org.semanticweb.ontop.parser;
+package it.unibz.inf.ontop.parser;
 
-import CQIE;
-import DatalogProgram;
-import Function;
-import Term;
-import OBDADataFactory;
-import Predicate;
-import URIConstant;
-import ValueConstant;
-import Variable;
-import OBDADataFactoryImpl;
-import OBDAVocabulary;
+import it.unibz.inf.ontop.model.CQIE;
+import it.unibz.inf.ontop.model.DatalogProgram;
+import it.unibz.inf.ontop.model.Function;
+import it.unibz.inf.ontop.model.Term;
+import it.unibz.inf.ontop.model.OBDADataFactory;
+import it.unibz.inf.ontop.model.Predicate;
+import it.unibz.inf.ontop.model.URIConstant;
+import it.unibz.inf.ontop.model.ValueConstant;
+import it.unibz.inf.ontop.model.Variable;
+import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
+import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -53,7 +53,7 @@ import org.antlr.runtime.TokenStream;
 }
 
 @lexer::header {
-package org.semanticweb.ontop.parser;
+package it.unibz.inf.ontop.parser;
 
 import java.util.List;
 import java.util.Vector;

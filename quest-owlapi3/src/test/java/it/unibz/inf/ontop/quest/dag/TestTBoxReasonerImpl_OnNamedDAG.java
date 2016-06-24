@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.quest.dag;
 
 /*
  * #%L
- * ontop-quest-owlapi3
+ * ontop-quest-owlapi
  * %%
  * Copyright (C) 2009 - 2014 Free University of Bozen-Bolzano
  * %%
@@ -24,23 +24,21 @@ package it.unibz.inf.ontop.quest.dag;
 import it.unibz.inf.ontop.ontology.ClassExpression;
 import it.unibz.inf.ontop.ontology.DataPropertyExpression;
 import it.unibz.inf.ontop.ontology.DataRangeExpression;
-import it.unibz.inf.ontop.ontology.OClass;
 import it.unibz.inf.ontop.ontology.ObjectPropertyExpression;
 import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.Equivalences;
 import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.EquivalencesDAG;
 import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.SemanticIndexBuilder;
 import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
-
-import java.util.Iterator;
-import java.util.LinkedHashSet;
-import java.util.Set;
-
 import org.jgrapht.DirectedGraph;
 import org.jgrapht.Graphs;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.EdgeReversedGraph;
 import org.jgrapht.graph.SimpleDirectedGraph;
 import org.jgrapht.traverse.BreadthFirstIterator;
+
+import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 /**
  * Representation of the named part of the property and class DAGs  
@@ -135,7 +133,7 @@ public class TestTBoxReasonerImpl_OnNamedDAG implements TBoxReasoner {
 		}
 
 		@Override
-		public Equivalences<T> getVertex(T v) {
+		public Equivalences<T> getVertex(T v) {		
 			// either all or none
 			Equivalences<T> vertex = reasonerDAG.getVertex(v);
 			if (dag.containsVertex(vertex.getRepresentative()))
@@ -232,24 +230,11 @@ public class TestTBoxReasonerImpl_OnNamedDAG implements TBoxReasoner {
 			// TODO Auto-generated method stub
 			return null;
 		}
-	}
 
-	@Override
-	public OClass getClassRepresentative(OClass p) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-
-	@Override
-	public ObjectPropertyExpression getObjectPropertyRepresentative(ObjectPropertyExpression p) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-	
-	@Override
-	public DataPropertyExpression getDataPropertyRepresentative(DataPropertyExpression p) {
-		// TODO Auto-generated method stub
-		return null;
+		@Override
+		public T getCanonicalForm(T v) {
+			// TODO Auto-generated method stub
+			return null;
+		}
 	}
 }

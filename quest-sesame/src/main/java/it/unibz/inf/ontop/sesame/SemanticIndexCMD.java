@@ -20,11 +20,6 @@ package it.unibz.inf.ontop.sesame;
  * #L%
  */
 
-import java.io.File;
-import java.net.URI;
-import java.sql.Connection;
-import java.util.Properties;
-
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
@@ -37,7 +32,7 @@ import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.model.impl.RDBMSourceParameterConstants;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
-import it.unibz.inf.ontop.owlrefplatform.owlapi3.*;
+import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import it.unibz.inf.ontop.querymanager.QueryController;
 import it.unibz.inf.ontop.querymanager.QueryControllerEntity;
 import it.unibz.inf.ontop.querymanager.QueryControllerQuery;
@@ -47,6 +42,11 @@ import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.net.URI;
+import java.sql.Connection;
+import java.util.Properties;
 
 
 /***
@@ -70,7 +70,7 @@ public class SemanticIndexCMD {
 	private OWLOntologyManager manager;
 	private OBDADataSource source;
 	private final NativeQueryLanguageComponentFactory nativeQLFactory;
-	
+
 	Logger log = LoggerFactory.getLogger(this.getClass());
 
 	public SemanticIndexCMD(String configFile) throws Exception {
@@ -87,7 +87,7 @@ public class SemanticIndexCMD {
 		source.setParameter(RDBMSourceParameterConstants.DATABASE_USERNAME, username);
 		source.setParameter(RDBMSourceParameterConstants.IS_IN_MEMORY, "false");
 		source.setParameter(RDBMSourceParameterConstants.USE_DATASOURCE_FOR_ABOXDUMP, "true");
-		
+
 		Injector injector = Guice.createInjector(new OBDACoreModule(new QuestPreferences()));
 		nativeQLFactory = injector.getInstance(NativeQueryLanguageComponentFactory.class);
 
@@ -154,11 +154,12 @@ public class SemanticIndexCMD {
         p.setProperty(OBDAProperties.JDBC_URL, url);
         p.setProperty(OBDAProperties.DB_USER, username);
         p.setProperty(OBDAProperties.DB_PASSWORD, password);
-		QuestPreferences pref = new QuestPreferences(p);
 
-		QuestOWLFactory fac = new QuestOWLFactory(pref);
+		QuestOWLFactory fac = new QuestOWLFactory();
+		QuestOWLConfiguration config = QuestOWLConfiguration.builder()
+				.properties(p).build();
 
-		QuestOWL quest = fac.createReasoner(ontology);
+		QuestOWL quest = fac.createReasoner(ontology, config);
 
 		QuestOWLConnection qconn = quest.getConnection();
 

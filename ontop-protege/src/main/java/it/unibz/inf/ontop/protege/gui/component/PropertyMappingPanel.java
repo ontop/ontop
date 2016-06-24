@@ -20,10 +20,24 @@ package it.unibz.inf.ontop.protege.gui.component;
  * #L%
  */
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Font;
+import it.unibz.inf.ontop.io.PrefixManager;
+import it.unibz.inf.ontop.model.Predicate;
+import it.unibz.inf.ontop.ontology.DataPropertyExpression;
+import it.unibz.inf.ontop.ontology.ObjectPropertyExpression;
+import it.unibz.inf.ontop.protege.core.OBDAModelWrapper;
+import it.unibz.inf.ontop.protege.gui.IconLoader;
+import it.unibz.inf.ontop.protege.gui.MapItem;
+import it.unibz.inf.ontop.protege.gui.PredicateItem;
+import it.unibz.inf.ontop.protege.gui.action.EditableCellFocusAction;
+
+import javax.swing.*;
+import javax.swing.border.Border;
+import javax.swing.plaf.metal.MetalComboBoxButton;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableCellEditor;
+import javax.swing.table.TableCellRenderer;
+import javax.swing.table.TableColumn;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
@@ -31,46 +45,6 @@ import java.util.ArrayList;
 import java.util.EventObject;
 import java.util.List;
 import java.util.Vector;
-
-import javax.swing.AbstractCellEditor;
-import javax.swing.BorderFactory;
-import javax.swing.DefaultListCellRenderer;
-import javax.swing.ImageIcon;
-import javax.swing.JComboBox;
-import javax.swing.JLabel;
-import javax.swing.JList;
-import javax.swing.JPanel;
-import javax.swing.JTable;
-import javax.swing.JTextField;
-import javax.swing.KeyStroke;
-import javax.swing.UIManager;
-import javax.swing.border.Border;
-import javax.swing.plaf.metal.MetalComboBoxButton;
-import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableCellEditor;
-import javax.swing.table.TableCellRenderer;
-import javax.swing.table.TableColumn;
-
-<<<<<<< HEAD:ontop-protege/src/main/java/it/unibz/inf/ontop/protege/gui/component/PropertyMappingPanel.java
-import it.unibz.inf.ontop.protege.core.OBDAModelWrapper;
-import it.unibz.inf.ontop.protege.gui.IconLoader;
-=======
-import it.unibz.inf.ontop.model.Predicate;
-import it.unibz.inf.ontop.ontology.ObjectPropertyExpression;
->>>>>>> v3/package-names-changed:ontop-protege/src/main/java/it/unibz/inf/ontop/protege/gui/component/PropertyMappingPanel.java
-import it.unibz.inf.ontop.protege.gui.MapItem;
-import it.unibz.inf.ontop.protege.gui.PredicateItem;
-import it.unibz.inf.ontop.protege.gui.action.EditableCellFocusAction;
-import it.unibz.inf.ontop.io.PrefixManager;
-<<<<<<< HEAD:ontop-protege/src/main/java/it/unibz/inf/ontop/protege/gui/component/PropertyMappingPanel.java
-import it.unibz.inf.ontop.model.Predicate;
-import it.unibz.inf.ontop.ontology.DataPropertyExpression;
-import it.unibz.inf.ontop.ontology.ObjectPropertyExpression;
-=======
-import it.unibz.inf.ontop.model.OBDAModel;
-import it.unibz.inf.ontop.ontology.DataPropertyExpression;
-import it.unibz.inf.ontop.protege.gui.IconLoader;
->>>>>>> v3/package-names-changed:ontop-protege/src/main/java/it/unibz/inf/ontop/protege/gui/component/PropertyMappingPanel.java
 
 public class PropertyMappingPanel extends javax.swing.JPanel {
 
@@ -171,10 +145,10 @@ public class PropertyMappingPanel extends javax.swing.JPanel {
         pnlAddProperty.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 0, 3, 0));
         pnlAddProperty.setLayout(new java.awt.BorderLayout(3, 0));
         Vector<Object> v = new Vector<Object>();
-        for (DataPropertyExpression dp : obdaModel.getDeclaredDataProperties()) {
+        for (DataPropertyExpression dp : obdaModel.getOntologyVocabulary().getDataProperties()) {
             v.addElement(new PredicateItem(dp.getPredicate(), prefixManager));
         }
-        for (ObjectPropertyExpression op : obdaModel.getDeclaredObjectProperties()) {
+        for (ObjectPropertyExpression op : obdaModel.getOntologyVocabulary().getObjectProperties()) {
             v.addElement(new PredicateItem(op.getPredicate(), prefixManager));
         }
         cboPropertyAutoSuggest = new AutoSuggestComboBox(v);

@@ -7,13 +7,10 @@ import it.unibz.inf.ontop.model.OBDAConnection;
 import it.unibz.inf.ontop.model.OBDAException;
 import it.unibz.inf.ontop.model.TupleResultSet;
 import it.unibz.inf.ontop.owlrefplatform.core.execution.NativeQueryExecutionException;
-import it.unibz.inf.ontop.owlrefplatform.core.resultset.EmptyQueryResultSet;
-import it.unibz.inf.ontop.owlrefplatform.core.resultset.QuestGraphResultSet;
+import it.unibz.inf.ontop.owlrefplatform.core.resultset.*;
 import it.unibz.inf.ontop.owlrefplatform.core.translator.SesameConstructTemplate;
 
 import it.unibz.inf.ontop.ontology.Assertion;
-import it.unibz.inf.ontop.owlrefplatform.core.resultset.BooleanOWLOBDARefResultSet;
-import it.unibz.inf.ontop.owlrefplatform.core.resultset.QuestResultset;
 
 import java.sql.*;
 import java.sql.ResultSet;
@@ -109,33 +106,33 @@ public class SQLQuestStatement extends QuestStatement {
         }
     }
 
-    /**
-     * Returns the number of tuples returned by the query
-     */
-    @Override
-    public int getTupleCount(String query) throws OBDAException {
-
-
-        SQLExecutableQuery targetQuery = checkAndConvertTargetQuery(unfoldAndGenerateTargetQuery(query));
-        String unf = targetQuery.getSQL();
-        String newsql = "SELECT count(*) FROM (" + unf + ") t1";
-        if (!isCanceled()) {
-            try {
-
-                java.sql.ResultSet set = sqlStatement.executeQuery(newsql);
-                if (set.next()) {
-                    return set.getInt(1);
-                } else {
-                    throw new OBDAException("Tuple count failed due to empty result set.");
-                }
-            } catch (SQLException e) {
-                throw new OBDAException(e.getMessage());
-            }
-        }
-        else {
-            throw new OBDAException("Action canceled.");
-        }
-    }
+//    /**
+//     * Returns the number of tuples returned by the query
+//     */
+//    @Override
+//    public int getTupleCount(String query) throws OBDAException {
+//
+//
+//        SQLExecutableQuery targetQuery = checkAndConvertTargetQuery(unfoldAndGenerateTargetQuery(query));
+//        String unf = targetQuery.translateIntoNativeQuery();
+//        String newsql = "SELECT count(*) FROM (" + unf + ") t1";
+//        if (!isCanceled()) {
+//            try {
+//
+//                java.sql.ResultSet set = sqlStatement.executeQuery(newsql);
+//                if (set.next()) {
+//                    return set.getInt(1);
+//                } else {
+//                    throw new OBDAException("Tuple count failed due to empty result set.");
+//                }
+//            } catch (SQLException e) {
+//                throw new OBDAException(e.getMessage());
+//            }
+//        }
+//        else {
+//            throw new OBDAException("Action canceled.");
+//        }
+//    }
 
     @Override
     public void close() throws OBDAException {
@@ -160,28 +157,30 @@ public class SQLQuestStatement extends QuestStatement {
         SQLExecutableQuery sqlTargetQuery = checkAndConvertTargetQuery(executableQuery);
         String sqlQuery = sqlTargetQuery.getSQL();
         if (sqlQuery.equals("")) {
-            return new BooleanOWLOBDARefResultSet(false, this);
+            return new BooleanResultSet(false, this);
         }
 
         try {
             java.sql.ResultSet set = sqlStatement.executeQuery(sqlQuery);
-            return new BooleanOWLOBDARefResultSet(set, this);
+            return new BooleanResultSet(set, this);
         } catch (SQLException e) {
             throw new NativeQueryExecutionException(e.getMessage());
         }
     }
 
     @Override
-    protected TupleResultSet executeSelectQuery(ExecutableQuery executableQuery) throws OBDAException {
+    protected TupleResultSet executeSelectQuery(ExecutableQuery executableQuery, boolean doDistinctPostProcessing) throws OBDAException {
         SQLExecutableQuery sqlTargetQuery = checkAndConvertTargetQuery(executableQuery);
         String sqlQuery = sqlTargetQuery.getSQL();
 
         if (sqlQuery.equals("") ) {
-            return new EmptyQueryResultSet(executableQuery.getSignature(), this);
+            return new EmptyTupleResultSet(executableQuery.getSignature(), this);
         }
         try {
             java.sql.ResultSet set = sqlStatement.executeQuery(sqlQuery);
-            return new QuestResultset(set, executableQuery.getSignature(), this);
+            return doDistinctPostProcessing
+                    ? new QuestDistinctTupleResultSet(set, executableQuery.getSignature(), this)
+                    : new QuestTupleResultSet(set, executableQuery.getSignature(), this);
         } catch (SQLException e) {
             throw new NativeQueryExecutionException(e.getMessage());
         }
@@ -201,12 +200,12 @@ public class SQLQuestStatement extends QuestStatement {
         TupleResultSet tuples;
 
         if (sqlQuery.equals("") ) {
-            tuples = new EmptyQueryResultSet(executableQuery.getSignature(), this);
+            tuples = new EmptyTupleResultSet(executableQuery.getSignature(), this);
         }
         else {
             try {
                 ResultSet set = sqlStatement.executeQuery(sqlQuery);
-                tuples = new QuestResultset(set, executableQuery.getSignature(), this);
+                tuples = new QuestTupleResultSet(set, executableQuery.getSignature(), this);
             } catch (SQLException e) {
                 throw new NativeQueryExecutionException(e.getMessage());
             }

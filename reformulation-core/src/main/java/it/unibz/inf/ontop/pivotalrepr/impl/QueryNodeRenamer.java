@@ -1,7 +1,10 @@
 package it.unibz.inf.ontop.pivotalrepr.impl;
 
 import java.util.Optional;
+import java.util.stream.Collectors;
+
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.pivotalrepr.*;
 
@@ -40,7 +43,7 @@ public class QueryNodeRenamer implements HomogeneousQueryNodeTransformer {
 
     @Override
     public UnionNode transform(UnionNode unionNode){
-        return unionNode;
+        return unionNode.clone();
     }
 
     @Override
@@ -56,10 +59,16 @@ public class QueryNodeRenamer implements HomogeneousQueryNodeTransformer {
 
     @Override
     public ConstructionNode transform(ConstructionNode constructionNode) {
-        return new ConstructionNodeImpl(renameDataAtom(constructionNode.getProjectionAtom()),
+        return new ConstructionNodeImpl(renameProjectedVars(constructionNode.getProjectedVariables()),
                 renameSubstitution(constructionNode.getSubstitution()),
                 renameOptionalModifiers(constructionNode.getOptionalModifiers())
                 );
+    }
+
+    private ImmutableSet<Variable> renameProjectedVars(ImmutableSet<Variable> projectedVariables) {
+        return projectedVariables.stream()
+                .map(renamingSubstitution::applyToVariable)
+                .collect(Collectors.collectingAndThen(Collectors.toSet(), ImmutableSet::copyOf));
     }
 
     @Override
@@ -71,6 +80,11 @@ public class QueryNodeRenamer implements HomogeneousQueryNodeTransformer {
         return new GroupNodeImpl(renamedTermBuilder.build());
     }
 
+    @Override
+    public EmptyNode transform(EmptyNode emptyNode) {
+        return emptyNode.clone();
+    }
+
     private Optional<ImmutableQueryModifiers> renameOptionalModifiers(Optional<ImmutableQueryModifiers> optionalModifiers) {
         if (optionalModifiers.isPresent()) {
             return renamingSubstitution.applyToQueryModifiers(optionalModifiers.get());
@@ -80,7 +94,7 @@ public class QueryNodeRenamer implements HomogeneousQueryNodeTransformer {
         }
     }
 
-    private ImmutableBooleanExpression renameBooleanExpression(ImmutableBooleanExpression booleanExpression) {
+    private ImmutableExpression renameBooleanExpression(ImmutableExpression booleanExpression) {
         return renamingSubstitution.applyToBooleanExpression(booleanExpression);
     }
 
@@ -93,12 +107,12 @@ public class QueryNodeRenamer implements HomogeneousQueryNodeTransformer {
         return DATA_FACTORY.getDataAtom(atom.getPredicate(), argListBuilder.build());
     }
 
-    private Optional<ImmutableBooleanExpression> renameOptionalBooleanExpression(
-            Optional<ImmutableBooleanExpression> optionalExpression) {
+    private Optional<ImmutableExpression> renameOptionalBooleanExpression(
+            Optional<ImmutableExpression> optionalExpression) {
         if (!optionalExpression.isPresent())
             return Optional.empty();
 
-        ImmutableBooleanExpression expression = optionalExpression.get();
+        ImmutableExpression expression = optionalExpression.get();
         return Optional.of(renameBooleanExpression(expression));
     }
 

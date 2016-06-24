@@ -30,17 +30,17 @@ public interface OBDAMappingListener extends Serializable {
 	/**
 	 * Called when a mapping has been inserted into the currently selected data source.
 	 */
-	public void mappingInserted(URI srcid, String mapping_id);
+	public void mappingInserted(URI srcid);
 	
 	/**
 	 * Called when a mapping has been deleted into the currently selected data source.
 	 */
-	public void mappingDeleted(URI srcid, String mapping_id);
+	public void mappingDeleted(URI srcid);
 		
 	/**
 	 * Called when a mapping has been updated into the currently selected datasource.
 	 */
-	public void mappingUpdated(URI srcid, String mapping_id, OBDAMappingAxiom mapping);
+	public void mappingUpdated(URI srcid);
 
 	/**
 	 * Called when the current data sources has changed.

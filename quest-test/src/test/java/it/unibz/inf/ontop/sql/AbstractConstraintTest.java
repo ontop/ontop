@@ -20,18 +20,15 @@ package it.unibz.inf.ontop.sql;
  * #L%
  */
 
+import junit.framework.TestCase;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
-
-import junit.framework.TestCase;
-
-import it.unibz.inf.ontop.sql.api.Attribute;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public abstract class AbstractConstraintTest extends TestCase {
 	
@@ -50,12 +47,13 @@ public abstract class AbstractConstraintTest extends TestCase {
 	
 	@Override
 	public void setUp() {
-
 		try {
 			log.info(getConnectionString() + "\n");
 			Connection conn = DriverManager.getConnection(getConnectionString(), getConnectionUsername(), getConnectionPassword());
-			metadata = JDBCConnectionManager.getMetaData(conn);
-		} catch (SQLException e) { 
+			metadata = RDBMetadataExtractionTools.createMetadata(conn);
+			RDBMetadataExtractionTools.loadMetadata(metadata, conn, null);
+		} 
+		catch (SQLException e) { 
 			e.printStackTrace();
 		}
 	}
@@ -63,19 +61,23 @@ public abstract class AbstractConstraintTest extends TestCase {
 	public void testPrimaryKey() {
 		log.info("==== PRIMARY KEY ====");
 		
-		Collection<TableDefinition> tables = metadata.getTables();
-		for (TableDefinition t : tables) {
-			List<Attribute> pk =  t.getPrimaryKeys();
+		Collection<DatabaseRelationDefinition> tables = metadata.getDatabaseRelations();
+		for (DatabaseRelationDefinition t : tables) {
+			UniqueConstraint pkc = null;
+			List<UniqueConstraint> pks = t.getUniqueConstraints();
+			if (!pks.isEmpty())
+				pkc = pks.get(0);
 			if (checkName(t, TB_BOOK)) {
-				assertEquals(1, pk.size());
+				assertEquals(1, pkc.getAttributes().size());
 			} else if (checkName(t, TB_BOOKWRITER)) {
-				assertEquals(0, pk.size());
+				assertTrue(pkc == null);
 			} else if (checkName(t, TB_EDITION)) {
-				assertEquals(1, pk.size());
+				assertEquals(1, pkc.getAttributes().size());
 			} else if (checkName(t, TB_WRITER)) {
-				assertEquals(1, pk.size());
+				assertEquals(1, pkc.getAttributes().size());
 			}
-			writeLog(t.getName(), pk);
+			if (pkc != null)
+				writeLog(t.getID().getSQLRendering(), pkc.getAttributes());
 		}
 		log.info("\n");
 	}
@@ -83,9 +85,9 @@ public abstract class AbstractConstraintTest extends TestCase {
 	public void testForeignKey() {
 		log.info("==== FOREIGN KEY ====");
 		
-		Collection<TableDefinition> tables = metadata.getTables();
-		for (TableDefinition t : tables) {
-			Map<String, List<Attribute>> fk =  t.getForeignKeys();
+		Collection<DatabaseRelationDefinition> tables = metadata.getDatabaseRelations();
+		for (DatabaseRelationDefinition t : tables) {
+			List<ForeignKeyConstraint> fk =  t.getForeignKeys();
 			if (checkName(t, TB_BOOK)) {
 				assertEquals(0, fk.size());
 			} else if (checkName(t, TB_BOOKWRITER)) {
@@ -95,13 +97,13 @@ public abstract class AbstractConstraintTest extends TestCase {
 			} else if (checkName(t, TB_WRITER)) {
 				assertEquals(0, fk.size());
 			}
-			writeLog(t.getName(), fk);
+			writeLog(t.getID().getSQLRendering(), fk);
 		}
 		log.info("\n");
 	}
 	
-	private boolean checkName(TableDefinition table, String value) {
-		final String tableName = table.getName();
+	private boolean checkName(DatabaseRelationDefinition table, String value) {
+		final String tableName = table.getID().getSQLRendering();
 		return tableName.equalsIgnoreCase(value);
 	}
 	

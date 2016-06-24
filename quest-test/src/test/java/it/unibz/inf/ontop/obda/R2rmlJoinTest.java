@@ -1,18 +1,17 @@
 package it.unibz.inf.ontop.obda;
 
-import it.unibz.inf.ontop.owlrefplatform.owlapi3.*;
+import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import org.junit.Before;
 import org.junit.Test;
 import it.unibz.inf.ontop.io.QueryIOManager;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
-import it.unibz.inf.ontop.owlrefplatform.questdb.R2RMLQuestPreferences;
+import it.unibz.inf.ontop.owlrefplatform.core.R2RMLQuestPreferences;
 import it.unibz.inf.ontop.querymanager.QueryController;
 import it.unibz.inf.ontop.querymanager.QueryControllerGroup;
 import it.unibz.inf.ontop.querymanager.QueryControllerQuery;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
-import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,8 +30,6 @@ public class R2rmlJoinTest {
 
     @Before
     public void setUp() throws Exception {
-
-
         // Loading the OWL file
         OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
         ontology = manager.loadOntologyFromOntologyDocument((new File(owlFile)));
@@ -42,9 +39,12 @@ public class R2rmlJoinTest {
     private void runTests(QuestPreferences p, String filename) throws Exception {
 
         // Creating a new instance of the reasoner
-        QuestOWLFactory factory = new QuestOWLFactory(new File(filename), p);
-
-        QuestOWL reasoner = factory.createReasoner(ontology, new SimpleConfiguration());
+        QuestOWLFactory factory = new QuestOWLFactory();
+        QuestOWLConfiguration config = QuestOWLConfiguration.builder()
+                .nativeOntopMappingFile(new File(filename))
+                .preferences(p)
+                .build();
+        QuestOWL reasoner = factory.createReasoner(ontology, config);
 
         // Now we are ready for querying
         QuestOWLConnection conn = reasoner.getConnection();
@@ -84,12 +84,7 @@ public class R2rmlJoinTest {
 
         st.close();
         conn.close();
-
-
     }
-
-
-
 
 
     @Test
@@ -116,10 +111,6 @@ public class R2rmlJoinTest {
         QuestPreferences p = new QuestPreferences();
         runTests(p, obdaFile);
     }
-
-
-
-
 
 }
 

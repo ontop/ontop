@@ -6,22 +6,23 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import it.unibz.inf.ontop.model.DatatypePredicate;
 import org.openrdf.model.URI;
 import org.openrdf.model.ValueFactory;
 import org.openrdf.model.impl.ValueFactoryImpl;
+import org.openrdf.model.vocabulary.RDF;
 import org.openrdf.model.vocabulary.RDFS;
 import org.openrdf.model.vocabulary.XMLSchema;
+
 import it.unibz.inf.ontop.model.DatatypeFactory;
 import it.unibz.inf.ontop.model.Predicate;
 import it.unibz.inf.ontop.model.Predicate.COL_TYPE;
-import it.unibz.inf.ontop.model.DatatypePredicate;
-
 
 public class DatatypeFactoryImpl implements DatatypeFactory {
 
 	
-	// special case of literals with the specified language 
-	private final DatatypePredicate RDFS_LITERAL_LANG = new DatatypePredicateImpl(RDFS.LITERAL.toString(),
+	// special case of literals with the specified language
+	private final DatatypePredicate RDFS_LITERAL_LANG = new DatatypePredicateImpl(RDF.LANGSTRING.toString(),
 									new COL_TYPE[] { COL_TYPE.LITERAL, COL_TYPE.LITERAL });
 	
 	private final DatatypePredicate RDFS_LITERAL, XSD_STRING;
@@ -61,7 +62,7 @@ public class DatatypeFactoryImpl implements DatatypeFactory {
 		XSD_NON_POSITIVE_INTEGER = registerType(XMLSchema.NON_POSITIVE_INTEGER, COL_TYPE.NON_POSITIVE_INTEGER); // 18 "http://www.w3.org/2001/XMLSchema#nonPositiveInteger"
 		XSD_INT = registerType(XMLSchema.INT, COL_TYPE.INT);  // 19 "http://www.w3.org/2001/XMLSchema#int"
 		XSD_UNSIGNED_INT = registerType(XMLSchema.UNSIGNED_INT, COL_TYPE.UNSIGNED_INT);   // 20 "http://www.w3.org/2001/XMLSchema#unsignedInt"
-		
+
 		// special case
 		// used in ExpressionEvaluator only(?) use proper method there? 
 		mapCOLTYPEtoPredicate.put(COL_TYPE.LITERAL_LANG, RDFS_LITERAL_LANG);
@@ -136,7 +137,7 @@ public class DatatypeFactoryImpl implements DatatypeFactory {
 	
 	
 	@Override
-	public Predicate getTypePredicate(Predicate.COL_TYPE type) {
+	public DatatypePredicate getTypePredicate(Predicate.COL_TYPE type) {
 		return mapCOLTYPEtoPredicate.get(type);
 		
 		//case OBJECT:   // different uses

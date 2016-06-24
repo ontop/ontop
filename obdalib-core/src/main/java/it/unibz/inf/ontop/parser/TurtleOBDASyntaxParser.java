@@ -20,14 +20,16 @@ package it.unibz.inf.ontop.parser;
  * #L%
  */
 
+import com.google.common.collect.ImmutableMap;
+import it.unibz.inf.ontop.model.Function;
+import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
+
+import java.util.List;
 import java.util.Map;
 
-import com.google.common.collect.ImmutableMap;
 import org.antlr.runtime.ANTLRStringStream;
 import org.antlr.runtime.CommonTokenStream;
 import org.antlr.runtime.RecognitionException;
-import it.unibz.inf.ontop.model.CQIE;
-import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
 
 public class TurtleOBDASyntaxParser implements TargetQueryParser {
 
@@ -38,16 +40,16 @@ public class TurtleOBDASyntaxParser implements TargetQueryParser {
 	 */
 	public TurtleOBDASyntaxParser() {
 		this.prefixes = ImmutableMap.of();
-    }
+	}
 
 	/**
 	 * Constructs the parser object with prefixes. These prefixes will
-     * help to generate the query header that contains the prefix definitions
-     * (i.e., the directives @BASE and @PREFIX).
+	 * help to generate the query header that contains the prefix definitions
+	 * (i.e., the directives @BASE and @PREFIX).
 	 *
 	 */
 	public TurtleOBDASyntaxParser(Map<String, String> prefixes) {
-        this.prefixes = prefixes;
+		this.prefixes = prefixes;
 	}
 
 	/**
@@ -59,12 +61,12 @@ public class TurtleOBDASyntaxParser implements TargetQueryParser {
 	 * @return A CQIE object.
 	 */
 	@Override
-	public CQIE parse(String input) throws TargetQueryParserException {
+	public List<Function> parse(String input) throws TargetQueryParserException {
 		StringBuffer bf = new StringBuffer(input.trim());
 		if (!bf.substring(bf.length() - 2, bf.length()).equals(" .")) {
 			bf.insert(bf.length() - 1, ' ');
 		}
-		if (!prefixes.isEmpty()) {
+		if (prefixes.isEmpty()) {
 			// Update the input by appending the directives
 			appendDirectives(bf);
 		}		
@@ -75,9 +77,9 @@ public class TurtleOBDASyntaxParser implements TargetQueryParser {
 			TurtleOBDAParser parser = new TurtleOBDAParser(tokenStream);
 			return parser.parse();
 		} catch (RecognitionException e) {
-			throw new TargetQueryParserException(e);
+			throw new TargetQueryParserException(input, e);
 		} catch (RuntimeException e) {
-			throw new TargetQueryParserException(e);
+			throw new TargetQueryParserException(input, e);
 		}
 	}
 

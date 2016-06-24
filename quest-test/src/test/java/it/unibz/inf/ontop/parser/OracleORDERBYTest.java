@@ -20,77 +20,32 @@ package it.unibz.inf.ontop.parser;
  * #L%
  */
 
-
-import it.unibz.inf.ontop.exception.DuplicateMappingException;
-import it.unibz.inf.ontop.exception.InvalidMappingException;
-import it.unibz.inf.ontop.io.InvalidDataSourceException;
 import it.unibz.inf.ontop.model.OBDAException;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
 import it.unibz.inf.ontop.owlrefplatform.core.SQLExecutableQuery;
-import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWL;
-import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWLConnection;
-import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWLFactory;
-import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWLStatement;
-import org.junit.After;
-import org.junit.Before;
+import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLStatement;
+import it.unibz.inf.ontop.quest.AbstractVirtualModeTest;
 import org.junit.Test;
-import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLException;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
-import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.Properties;
-
-import static org.junit.Assert.assertTrue;
+import java.util.ArrayList;
+import java.util.List;
 
 /***
  * Tests that the SPARQL ORDER BY statement is correctly translated to ORDER BY in SQL.
  */
-public class OracleORDERBYTest {
+public class OracleORDERBYTest extends AbstractVirtualModeTest {
 
-    private QuestOWLConnection conn;
+    private static final Logger log = LoggerFactory.getLogger(OracleORDERBYTest.class);
+    static final String owlFile = "resources/orderby/orderBy.owl";
+    static final String obdaFile = "resources/orderby/orderBy.obda";
 
-    Logger log = LoggerFactory.getLogger(this.getClass());
-    private OWLOntology ontology;
-    private QuestOWLFactory factory;
-
-    final String owlFile = "resources/orderby/orderBy.owl";
-    final String obdaFile = "resources/orderby/orderBy.obda";
-    private QuestOWL reasoner;
-
-    @Before
-    public void setUp() throws Exception {
-        // Loading the OWL file
-        OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-        ontology = manager.loadOntologyFromOntologyDocument((new File(owlFile)));
+    public OracleORDERBYTest() {
+        super(owlFile, obdaFile);
     }
 
-    @After
-    public void tearDown() throws Exception{
-        conn.close();
-        reasoner.dispose();
-    }
-
-
-    private void runQuery(String query) throws OBDAException, OWLException, IOException, InvalidMappingException,
-            DuplicateMappingException, InvalidDataSourceException {
-
-        Properties p = new Properties();
-        p.setProperty(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-        p.setProperty(QuestPreferences.OBTAIN_FULL_METADATA, QuestConstants.FALSE);
-        // Creating a new instance of the reasoner
-        QuestOWLFactory factory = new QuestOWLFactory(new File(obdaFile), new QuestPreferences(p));
-
-        reasoner = factory.createReasoner(ontology, new SimpleConfiguration());
-
-        // Now we are ready for querying
-        conn = reasoner.getConnection();
+    private void runQuery(String query) throws OBDAException, OWLException{
 
         QuestOWLStatement st = conn.createStatement();
         String sql = ((SQLExecutableQuery)st.getExecutableQuery(query)).getSQL();
@@ -103,12 +58,59 @@ public class OracleORDERBYTest {
 
     @Test
     public void testOrderBy() throws Exception {
+
         String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> " +
                 "SELECT ?x ?name " +
                 "WHERE { ?x a :Country; :name ?name . } "
                 + "ORDER BY ?name"
                 ;
+
         runQuery(query);
+
+        List<String> expectedUris = new ArrayList<>();
+        expectedUris.add("http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country-Argentina");
+        expectedUris.add("http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country-Australia");
+        expectedUris.add("http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country-Belgium");
+        expectedUris.add("http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country-Brazil");
+        expectedUris.add("http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country-Canada");
+        expectedUris.add("http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country-China");
+        expectedUris.add("http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country-Denmark");
+        expectedUris.add("http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country-Egypt");
+        expectedUris.add("http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country-France");
+        expectedUris.add("http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country-Germany");
+        expectedUris.add("http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country-India");
+        expectedUris.add("http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country-Israel");
+        expectedUris.add("http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country-Italy");
+        expectedUris.add("http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country-Japan");
+        expectedUris.add("http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country-Kuwait");
+        expectedUris.add("http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country-Malaysia");
+        expectedUris.add("http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country-Mexico");
+        expectedUris.add("http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country-Netherlands");
+        expectedUris.add("http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country-Nigeria");
+        expectedUris.add("http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country-Singapore");
+        expectedUris.add("http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country-Switzerland");
+        expectedUris.add("http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country-United%20Kingdom");
+        expectedUris.add("http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country-United%20States%20of%20America");
+        expectedUris.add("http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country-Zambia");
+        expectedUris.add("http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country-Zimbabwe");
+
+        checkReturnedUris(query, expectedUris);
+    }
+
+
+    @Test
+    public void testOrderByAndLimit() throws Exception {
+        String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> " +
+                "SELECT ?x ?name " +
+                "WHERE { ?x a :Country; :name ?name . } "
+                + "ORDER BY ?name "
+                + "LIMIT 2 " ;
+
+        runQuery(query);
+        List<String> expectedUris = new ArrayList<>();
+        expectedUris.add("http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country-Argentina");
+        expectedUris.add("http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country-Australia");
+        checkReturnedUris(query, expectedUris);
     }
 
 

@@ -30,6 +30,7 @@ import it.unibz.inf.ontop.model.OBDADataFactory;
 import it.unibz.inf.ontop.model.OBDADataSource;
 import it.unibz.inf.ontop.model.OBDAException;
 import it.unibz.inf.ontop.model.OBDAModel;
+import it.unibz.inf.ontop.ontology.OntologyVocabulary;
 import it.unibz.inf.ontop.owlrefplatform.core.IQuest;
 import it.unibz.inf.ontop.owlrefplatform.core.IQuestConnection;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
@@ -40,7 +41,6 @@ import it.unibz.inf.ontop.exception.InvalidMappingException;
 import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
 import it.unibz.inf.ontop.io.InvalidDataSourceException;
 import it.unibz.inf.ontop.io.OBDADataSourceFromConfigExtractor;
-import it.unibz.inf.ontop.owlrefplatform.core.*;
 import it.unibz.inf.ontop.owlrefplatform.injection.QuestComponentFactory;
 import it.unibz.inf.ontop.mapping.MappingParser;
 
@@ -48,8 +48,8 @@ import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.model.impl.RDBMSourceParameterConstants;
 import it.unibz.inf.ontop.ontology.Ontology;
 import it.unibz.inf.ontop.ontology.impl.OntologyFactoryImpl;
-import it.unibz.inf.ontop.owlapi3.OWLAPI3TranslatorUtility;
-import it.unibz.inf.ontop.owlapi3.directmapping.DirectMappingEngine;
+import it.unibz.inf.ontop.owlapi.OWLAPITranslatorUtility;
+import it.unibz.inf.ontop.owlapi.directmapping.DirectMappingEngine;
 import it.unibz.inf.ontop.sql.DBMetadata;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLOntology;
@@ -151,19 +151,20 @@ public class QuestDBVirtualStore extends QuestDBAbstractStore {
 			//read owl file
 			OWLOntology owlontology = getOntologyFromFile(tboxFile);
 			//get transformation from owlontology into ontology
-			 tbox = getOntologyFromOWLOntology(owlontology);
+			 tbox = OWLAPITranslatorUtility.translateImportsClosure(owlontology);
 
-		} else {
+		} else { 
 			// create empty ontology
 			//owlontology = man.createOntology();
-			tbox = OntologyFactoryImpl.getInstance().createOntology();
+			OntologyVocabulary voc = OntologyFactoryImpl.getInstance().createVocabulary();
+			tbox = OntologyFactoryImpl.getInstance().createOntology(voc);
 			if (obdaModel.getSources().size() == 0) {
                 Set<OBDADataSource> dataSources = new HashSet<>(obdaModel.getSources());
                 dataSources.add(getMemOBDADataSource("MemH2"));
                 obdaModel = obdaModel.newModel(dataSources, obdaModel.getMappings());
             }
 		}
-		obdaModel.declareAll(tbox.getVocabulary());
+		obdaModel.getOntologyVocabulary().merge(tbox.getVocabulary());
 		// OBDAModelSynchronizer.declarePredicates(owlontology, obdaModel);
 
 		//set up Quest
@@ -186,12 +187,12 @@ public class QuestDBVirtualStore extends QuestDBAbstractStore {
 		super(name, config);
 		
 		//obtain ontology
-		Ontology ontology = getOntologyFromOWLOntology(tbox);
+		Ontology ontology = OWLAPITranslatorUtility.translateImportsClosure(tbox);
 
         MappingParser mappingParser = getNativeQLFactory().create(mappings);
         OBDAModel obdaModel = mappingParser.getOBDAModel();
 
-		obdaModel.declareAll(ontology.getVocabulary());
+		obdaModel.getOntologyVocabulary().merge(ontology.getVocabulary());
 		//setup Quest
 		setupQuest(ontology, obdaModel, metadata, config);
 	}
@@ -217,19 +218,7 @@ public class QuestDBVirtualStore extends QuestDBAbstractStore {
 		
 		return owlontology;
 	}
-	
-	/**
-	 * Given an OWL ontology returns the translated Ontology 
-	 * of its closure
-	 * @param owlontology
-	 * @return the translated Ontology
-	 * @throws Exception
-	 */
-	private Ontology getOntologyFromOWLOntology(OWLOntology owlontology) throws Exception{
-		//compute closure first (owlontology might contain include other source declarations)
-		Set<OWLOntology> closure = owlontology.getOWLOntologyManager().getImportsClosure(owlontology);
-		return OWLAPI3TranslatorUtility.mergeTranslateOntologies(closure);
-	}
+
 	
 	private void setupQuest(Ontology tbox, OBDAModel obdaModel, DBMetadata metadata,
                             QuestPreferences pref) throws Exception {

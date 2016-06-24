@@ -32,10 +32,7 @@ import it.unibz.inf.ontop.model.OBDAMappingAxiom;
 import it.unibz.inf.ontop.model.OBDAModel;
 import it.unibz.inf.ontop.io.PrefixManager;
 
-import it.unibz.inf.ontop.ontology.DataPropertyExpression;
-import it.unibz.inf.ontop.ontology.OClass;
-import it.unibz.inf.ontop.ontology.ObjectPropertyExpression;
-import it.unibz.inf.ontop.ontology.OntologyVocabulary;
+import it.unibz.inf.ontop.ontology.*;
 
 public class OBDAModelImpl implements OBDAModel {
 	private final PrefixManager prefixManager;
@@ -46,47 +43,23 @@ public class OBDAModelImpl implements OBDAModel {
 	private final ImmutableMap<URI, ImmutableList<OBDAMappingAxiom>> mappingIndexByDataSource;
     private final ImmutableMap<String, OBDAMappingAxiom> mappingIndexById;
 
-    /**
-     * TODO: make these sets immutable
-     */
-	private final Set<OClass> declaredClasses;
-	private final Set<ObjectPropertyExpression> declaredObjectProperties;
-	private final Set<DataPropertyExpression> declaredDataProperties;
+    private final OntologyVocabulary ontologyVocabulary;
 
     /**
      * Normal constructor. Used by the QuestComponentFactory.
      */
     public OBDAModelImpl(Set<OBDADataSource> dataSources,
                          Map<URI, ImmutableList<OBDAMappingAxiom>> newMappings,
-                         PrefixManager prefixManager) throws DuplicateMappingException {
-
-        this(dataSources, newMappings, prefixManager, new HashSet<OClass>(),
-                new HashSet<ObjectPropertyExpression>(), new HashSet<DataPropertyExpression>());
-    }
-
-    /**
-     * Is protected so as the OBDAFactoryWithException method just have to consider the
-     * first and unique constructor.
-     * TODO: integrate it to the factory (make it public).
-     */
-    protected OBDAModelImpl(Set<OBDADataSource> dataSources,
-                         Map<URI, ImmutableList<OBDAMappingAxiom>> newMappings,
                          PrefixManager prefixManager,
-                         Set<OClass> declaredClasses,
-                         Set<ObjectPropertyExpression> declaredObjectProperties,
-                         Set<DataPropertyExpression> declaredDataProperties
-                         )
-            throws DuplicateMappingException{
+                         OntologyVocabulary ontologyVocabulary) throws DuplicateMappingException {
+
         checkDuplicates(newMappings);
         this.mappingIndexByDataSource = ImmutableMap.copyOf(newMappings);
         this.mappingIndexById = indexMappingsById(newMappings);
         this.prefixManager = prefixManager;
         this.dataSources = ImmutableSet.copyOf(dataSources);
         this.dataSourceIndex = indexDataSources(this.dataSources);
-
-        this.declaredClasses = declaredClasses;
-        this.declaredObjectProperties = declaredObjectProperties;
-        this.declaredDataProperties = declaredDataProperties;
+        this.ontologyVocabulary = ontologyVocabulary;
     }
 
     /**
@@ -167,23 +140,20 @@ public class OBDAModelImpl implements OBDAModel {
     public OBDAModel newModel(Set<OBDADataSource> dataSources,
                               Map<URI, ImmutableList<OBDAMappingAxiom>> newMappings,
                               PrefixManager prefixManager) throws DuplicateMappingException {
-        return newModel(dataSources, newMappings, prefixManager, declaredClasses, declaredObjectProperties, declaredDataProperties);
+        return newModel(dataSources, newMappings, prefixManager, ontologyVocabulary);
     }
 
     @Override
     public OBDAModel newModel(Set<OBDADataSource> dataSources,
                               Map<URI, ImmutableList<OBDAMappingAxiom>> newMappings,
-                              PrefixManager prefixManager, Set<OClass> declaredClasses,
-                              Set<ObjectPropertyExpression> declaredObjectProperties,
-                              Set<DataPropertyExpression> declaredDataProperties) throws DuplicateMappingException {
-        return new OBDAModelImpl(dataSources, newMappings, prefixManager, declaredClasses, declaredObjectProperties, declaredDataProperties);
+                              PrefixManager prefixManager, OntologyVocabulary ontologyVocabulary) throws DuplicateMappingException {
+        return new OBDAModelImpl(dataSources, newMappings, prefixManager, ontologyVocabulary);
     }
 
     @Override
     public OBDAModel clone() {
         try {
-            return new OBDAModelImpl(dataSources, mappingIndexByDataSource, prefixManager, declaredClasses,
-                    declaredObjectProperties, declaredDataProperties);
+            return new OBDAModelImpl(dataSources, mappingIndexByDataSource, prefixManager, ontologyVocabulary);
         } catch (DuplicateMappingException e) {
             throw new RuntimeException("Unexpected error (inconsistent cloning): " + e.getMessage());
         }
@@ -210,6 +180,11 @@ public class OBDAModelImpl implements OBDAModel {
 	}
 
     @Override
+    public OntologyVocabulary getOntologyVocabulary() {
+        return ontologyVocabulary;
+    }
+
+    @Override
     public OBDAMappingAxiom getMapping(String mappingId) {
         return mappingIndexById.get(mappingId);
     }
@@ -231,80 +206,4 @@ public class OBDAModelImpl implements OBDAModel {
          */
         return ImmutableList.of();
 	}
-
-	@Override
-	public Set<OClass> getDeclaredClasses() {
-        return new HashSet<>(declaredClasses);
-	}
-
-	@Override
-	public Set<ObjectPropertyExpression> getDeclaredObjectProperties() {
-		return new HashSet<>(declaredObjectProperties);
-	}
-
-	@Override
-	public Set<DataPropertyExpression> getDeclaredDataProperties() {
-        return new HashSet<>(declaredDataProperties);
-	}
-	
-	@Override
-	public boolean isDeclaredClass(OClass classname) {
-		return declaredClasses.contains(classname);
-	}
-
-	@Override
-	public boolean isDeclaredObjectProperty(ObjectPropertyExpression property) {
-		return declaredObjectProperties.contains(property);
-	}
-
-	@Override
-	public boolean isDeclaredDataProperty(DataPropertyExpression property) {
-		return declaredDataProperties.contains(property);
-	}
-
-    //--------------------------------
-    // Side-effect methods (mutable)
-    // TODO: remove them
-    //--------------------------------
-
-    @Override
-    public boolean declareClass(OClass className) {
-        return declaredClasses.add(className);
-    }
-
-    @Override
-    public boolean declareObjectProperty(ObjectPropertyExpression property) {
-        return declaredObjectProperties.add(property);
-    }
-
-    @Override
-    public boolean declareDataProperty(DataPropertyExpression property) {
-        return declaredDataProperties.add(property);
-    }
-
-
-    @Override
-    public boolean unDeclareClass(OClass className) {
-        return declaredClasses.remove(className);
-    }
-
-    @Override
-    public boolean unDeclareObjectProperty(ObjectPropertyExpression property) {
-        return declaredObjectProperties.remove(property);
-    }
-
-    @Override
-    public boolean unDeclareDataProperty(DataPropertyExpression property) {
-        return declaredDataProperties.remove(property);
-    }
-
-    @Override
-    public void declareAll(OntologyVocabulary vocabulary) {
-        for (OClass p : vocabulary.getClasses())
-            declareClass(p);
-        for (ObjectPropertyExpression p : vocabulary.getObjectProperties())
-            declareObjectProperty(p);
-        for (DataPropertyExpression p : vocabulary.getDataProperties())
-            declareDataProperty(p);
-    }
 }

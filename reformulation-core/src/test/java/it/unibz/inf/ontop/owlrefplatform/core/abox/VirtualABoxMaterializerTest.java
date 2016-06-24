@@ -253,9 +253,9 @@ public class VirtualABoxMaterializerTest extends TestCase {
                     fac.getVariable("ln"));
 
 		List<Function> body = new LinkedList<Function>();
-	Predicate person = fac.getClassPredicate("Person");
-	Predicate fn = fac.getDataPropertyPredicate("fn", COL_TYPE.LITERAL);
-	Predicate ln = fac.getDataPropertyPredicate("ln", COL_TYPE.LITERAL);
+		Predicate person = fac.getClassPredicate("Person");
+		Predicate fn = fac.getDataPropertyPredicate("fn", COL_TYPE.LITERAL);
+		Predicate ln = fac.getDataPropertyPredicate("ln", COL_TYPE.LITERAL);
 		Predicate age = fac.getDataPropertyPredicate("age", COL_TYPE.LITERAL);
 		Predicate hasschool = fac.getObjectPropertyPredicate("hasschool");
 		Predicate school = fac.getClassPredicate("School");
@@ -365,9 +365,9 @@ public class VirtualABoxMaterializerTest extends TestCase {
 				fac.getVariable("ln"));
 
 		List<Function> body = new LinkedList<Function>();
-	Predicate person = fac.getClassPredicate("Person");
-	Predicate fn = fac.getDataPropertyPredicate("fn", COL_TYPE.LITERAL);
-	Predicate ln = fac.getDataPropertyPredicate("ln", COL_TYPE.LITERAL);
+		Predicate person = fac.getClassPredicate("Person");
+		Predicate fn = fac.getDataPropertyPredicate("fn", COL_TYPE.LITERAL);
+		Predicate ln = fac.getDataPropertyPredicate("ln", COL_TYPE.LITERAL);
 		Predicate age = fac.getDataPropertyPredicate("age", COL_TYPE.LITERAL);
 		Predicate hasschool = fac.getObjectPropertyPredicate("hasschool");
 		Predicate school = fac.getClassPredicate("School");
@@ -542,9 +542,9 @@ public class VirtualABoxMaterializerTest extends TestCase {
 				fac.getVariable("ln"));
 
 		List<Function> body = new LinkedList<Function>();
-	Predicate person = fac.getClassPredicate("Person");
-	Predicate fn = fac.getDataPropertyPredicate("fn", COL_TYPE.LITERAL);
-	Predicate ln = fac.getDataPropertyPredicate("ln", COL_TYPE.LITERAL);
+		Predicate person = fac.getClassPredicate("Person");
+		Predicate fn = fac.getDataPropertyPredicate("fn", COL_TYPE.LITERAL);
+		Predicate ln = fac.getDataPropertyPredicate("ln", COL_TYPE.LITERAL);
 		Predicate age = fac.getDataPropertyPredicate("age", COL_TYPE.LITERAL);
 		Predicate hasschool = fac.getObjectPropertyPredicate("hasschool");
 		Predicate school = fac.getClassPredicate("School");

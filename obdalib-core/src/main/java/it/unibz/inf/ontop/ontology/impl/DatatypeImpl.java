@@ -20,7 +20,10 @@ package it.unibz.inf.ontop.ontology.impl;
  * #L%
  */
 
+import it.unibz.inf.ontop.model.OBDADataFactory;
 import it.unibz.inf.ontop.model.Predicate;
+import it.unibz.inf.ontop.model.Predicate.COL_TYPE;
+import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.ontology.Datatype;
 
 public class DatatypeImpl implements Datatype {
@@ -28,6 +31,13 @@ public class DatatypeImpl implements Datatype {
 	private static final long serialVersionUID = -6228610469212615956L;
 	
 	private final Predicate predicate;
+
+	public static final  Datatype rdfsLiteral; 
+	
+	static {
+		OBDADataFactory ofac = OBDADataFactoryImpl.getInstance();
+	    rdfsLiteral = new DatatypeImpl(ofac.getDatatypeFactory().getTypePredicate(COL_TYPE.LITERAL));   	
+	}
 	
 	DatatypeImpl(Predicate p) {
 		predicate = p;

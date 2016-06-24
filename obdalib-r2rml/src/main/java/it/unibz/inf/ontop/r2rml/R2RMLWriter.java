@@ -24,15 +24,13 @@ package it.unibz.inf.ontop.r2rml;
  * Class responsible to write an r2rml turtle file given an obda model
  */
 
+import eu.optique.api.mapping.R2RMLMappingManager;
+import eu.optique.api.mapping.R2RMLMappingManagerFactory;
+import eu.optique.api.mapping.TriplesMap;
+import eu.optique.api.mapping.impl.sesame.SesameR2RMLMappingManagerFactory;
+import it.unibz.inf.ontop.io.PrefixManager;
 import it.unibz.inf.ontop.model.OBDAMappingAxiom;
 import it.unibz.inf.ontop.model.OBDAModel;
-import it.unibz.inf.ontop.io.PrefixManager;
-
-
-import java.io.*;
-import java.net.URI;
-import java.util.*;
-
 import org.openrdf.model.Graph;
 import org.openrdf.model.Model;
 import org.openrdf.model.Statement;
@@ -41,9 +39,12 @@ import org.openrdf.rio.RDFFormat;
 import org.openrdf.rio.Rio;
 import org.semanticweb.owlapi.model.OWLOntology;
 
-import eu.optique.api.mapping.R2RMLMappingManager;
-import eu.optique.api.mapping.R2RMLMappingManagerFactory;
-import eu.optique.api.mapping.TriplesMap;
+import java.io.*;
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
 
 
 public class R2RMLWriter {
@@ -130,20 +131,20 @@ public class R2RMLWriter {
 		}
 	}
 
-	/**
-	 * the method to write the R2RML mappings
-	 * from an rdf Model to a file
-	 * @param os the output target
-	 */
-	public void write(OutputStream os) throws Exception {
-		try {
-			R2RMLMappingManager mm = R2RMLMappingManagerFactory.getSesameMappingManager();
-			Collection<TriplesMap> coll = getTriplesMaps();
-			Model out = mm.exportMappings(coll, Model.class);
-			Rio.write(out, os, RDFFormat.TURTLE);
-			os.close();
-		} catch (Exception e) {
-			e.printStackTrace();
+    /**
+     * the method to write the R2RML mappings
+     * from an rdf Model to a file
+     * @param os the output target
+     */
+    public void write(OutputStream os) throws Exception {
+        try {
+            R2RMLMappingManager mm = new SesameR2RMLMappingManagerFactory().getR2RMLMappingManager();
+            Collection<TriplesMap> coll = getTriplesMaps();
+            Model out = mm.exportMappings(coll, Model.class);
+            Rio.write(out, os, RDFFormat.TURTLE);
+            os.close();
+        } catch (Exception e) {
+            e.printStackTrace();
 			throw e;
 		}
 	}

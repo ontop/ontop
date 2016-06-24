@@ -19,23 +19,19 @@ package it.unibz.inf.ontop.obda;
  * limitations under the License.
  * #L%
  */
+
+import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWL;
+import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLConfiguration;
+import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLFactory;
 import org.junit.Before;
 import org.junit.Test;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
-import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWL;
-import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWLFactory;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
-import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.semanticweb.owlapi.reasoner.ReasonerInternalException;
+
 
 import java.io.File;
-import java.util.Properties;
-
-import static org.junit.Assert.assertFalse;
 
 /**
  * Test mysql jdbc driver.
@@ -46,7 +42,6 @@ import static org.junit.Assert.assertFalse;
 
 public class ConferenceMySQLTest {
 
-	private static Logger log = LoggerFactory.getLogger(ConferenceMySQLTest.class);
 	private OWLOntology ontology;
 
     final String owlFile = "src/test/resources/conference/ontology5.owl";
@@ -62,36 +57,27 @@ public class ConferenceMySQLTest {
 		
 	}
 
-	private void runTests(Properties p, String query1) throws Exception {
+	private void runTests(String query) throws Exception {
 
-		// Creating a new instance of the reasoner
-		QuestOWLFactory factory = new QuestOWLFactory(new File(obdaFile), new QuestPreferences(p));
-		QuestOWL reasoner=null;
-		try{
-		 reasoner = factory.createReasoner(ontology, new SimpleConfiguration());
-		} catch (Exception ne) {
-			assertFalse(false);
-		}
-
+        // Creating a new instance of the reasoner
+        QuestOWLFactory factory = new QuestOWLFactory();
+        QuestOWLConfiguration config = QuestOWLConfiguration.builder()
+				.nativeOntopMappingFile(new File(obdaFile))
+				.build();
+        QuestOWL reasoner = factory.createReasoner(ontology, config);
 	}
-	
 
 
 
-	@Test
+
+	@Test(expected = ReasonerInternalException.class)
 	public void testWrongMappings() throws Exception {
-
-		Properties p = new Properties();
-		p.put(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-		p.put(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-		p.put(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
-
         String query1 = "PREFIX : <http://myproject.org/odbs#> SELECT ?x ?y\n" +
                 "WHERE {\n" +
                 "   ?x :LcontainsT ?y\n" +
                 "}";
 
-		runTests(p, query1);
+		runTests(query1);
 	}
 
 

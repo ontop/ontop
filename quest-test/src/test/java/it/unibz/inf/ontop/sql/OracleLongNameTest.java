@@ -20,30 +20,18 @@ package it.unibz.inf.ontop.sql;
  * #L%
  */
 
+import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
+import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import it.unibz.inf.ontop.exception.DuplicateMappingException;
-import it.unibz.inf.ontop.exception.InvalidMappingException;
-import it.unibz.inf.ontop.io.InvalidDataSourceException;
 import it.unibz.inf.ontop.model.OBDAException;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
-import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWL;
-import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWLConnection;
-import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWLFactory;
-import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWLStatement;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLException;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
-import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.io.IOException;
-import java.util.Properties;
 
 /***
  * Oracle long name.
@@ -51,8 +39,6 @@ import java.util.Properties;
 public class OracleLongNameTest {
 
 	private QuestOWLConnection conn;
-
-	Logger log = LoggerFactory.getLogger(this.getClass());
 	private OWLOntology ontology;
 	
 	final String owlfile = "resources/oraclesql/o.owl";
@@ -61,8 +47,6 @@ public class OracleLongNameTest {
 
 	@Before
 	public void setUp() throws Exception {
-		
-		
 		// Loading the OWL file
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 		ontology = manager.loadOntologyFromOntologyDocument((new File(owlfile)));
@@ -75,16 +59,16 @@ public class OracleLongNameTest {
 	}
 	
 
-	private void runQuery(String varName) throws OBDAException, OWLException, DuplicateMappingException,
-			InvalidMappingException, InvalidDataSourceException, IOException {
+	private void runQuery(String varName) throws OBDAException, OWLException{
 		
-		Properties p = new Properties();
-		p.put(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-		p.put(QuestPreferences.OBTAIN_FULL_METADATA, QuestConstants.FALSE);
+		QuestPreferences p = new QuestPreferences();
 		// Creating a new instance of the reasoner
-		QuestOWLFactory factory = new QuestOWLFactory(new File(obdafile1), new QuestPreferences(p));
-
-		reasoner = factory.createReasoner(ontology, new SimpleConfiguration());
+		QuestOWLFactory factory = new QuestOWLFactory();
+        QuestOWLConfiguration config = QuestOWLConfiguration.builder()
+				.nativeOntopMappingFile(new File(obdafile1))
+				.preferences(p)
+				.build();
+        reasoner = factory.createReasoner(ontology, config);
 
 		// Now we are ready for querying
 		conn = reasoner.getConnection();

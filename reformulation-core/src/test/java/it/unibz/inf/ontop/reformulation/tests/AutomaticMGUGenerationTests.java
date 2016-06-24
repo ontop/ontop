@@ -64,7 +64,7 @@ public class AutomaticMGUGenerationTests extends TestCase {
 
 	/**
 	 * Test method for
-	 * {@link UnifierUtilities#getMGU(org.semanticweb.ontop.model.Atom, org.semanticweb.ontop.model.Atom)}
+	 * {@link it.unibz.inf.ontop.owlrefplatform.core.basicoperations.UnifierUtilities#getMGU(it.unibz.inf.ontop.model.Atom, it.unibz.inf.ontop.model.Atom)}
 	 * .
 	 * 
 	 * @throws Exception
@@ -72,7 +72,7 @@ public class AutomaticMGUGenerationTests extends TestCase {
 	
 	public void testGetMGUAtomAtomBoolean() throws Exception {
 		log.debug("Testing computation of MGUs");
-		File inputFile = new File("src/test/java/org/semanticweb/ontop/reformulation/tests/mgu-computation-test-cases.txt");
+		File inputFile = new File("src/test/java/it/unibz/inf/ontop/reformulation/tests/mgu-computation-test-cases.txt");
 		BufferedReader in = new BufferedReader(new FileReader(inputFile));
 
 		String testcase = in.readLine();

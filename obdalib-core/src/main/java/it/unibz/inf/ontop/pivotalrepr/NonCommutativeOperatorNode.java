@@ -8,8 +8,8 @@ package it.unibz.inf.ontop.pivotalrepr;
  */
 public interface NonCommutativeOperatorNode extends QueryNode {
 
-    public static enum ArgumentPosition {
+    public enum ArgumentPosition {
         LEFT,
-        childPosition, RIGHT
+        RIGHT
     }
 }

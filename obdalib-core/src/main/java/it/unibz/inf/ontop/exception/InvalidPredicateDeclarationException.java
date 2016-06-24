@@ -20,10 +20,11 @@ package it.unibz.inf.ontop.exception;
  * #L%
  */
 
+import it.unibz.inf.ontop.exception.Indicator;
+import it.unibz.inf.ontop.model.Predicate;
+
 import java.util.ArrayList;
 import java.util.List;
-
-import it.unibz.inf.ontop.model.Predicate;
 
 /**
  * This happens if the declared predicates in the OBDA file do not match to the ones

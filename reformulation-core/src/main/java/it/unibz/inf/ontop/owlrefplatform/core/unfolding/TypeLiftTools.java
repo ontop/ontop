@@ -402,7 +402,7 @@ public class TypeLiftTools {
                      *
                      * URI templates are considered here.
                      */
-                    if (functionSymbol.isDataTypePredicate() || functionSymbol.getName().equals(OBDAVocabulary.QUEST_URI)) {
+                    if (functionalTerm.isDataTypeFunction() || functionSymbol.getName().equals(OBDAVocabulary.QUEST_URI)) {
                         Term firstTerm = functionalTerm.getTerm(0);
                         if (firstTerm instanceof Variable)
                             return Option.some((Variable) firstTerm);
@@ -480,7 +480,7 @@ public class TypeLiftTools {
                     Function functionalTerm = (Function) term;
                     Predicate functionSymbol = functionalTerm.getFunctionSymbol();
 
-                    if (functionSymbol.isDataTypePredicate()) {
+                    if (functionalTerm.isDataTypeFunction()) {
                         java.util.List<Term> newSubTerms = cleanAlreadyTypedSubTerms(functionalTerm.getTerms());
                         Function newTerm = (Function) functionalTerm.clone();
                         newTerm.updateTerms(newSubTerms);
@@ -489,20 +489,29 @@ public class TypeLiftTools {
                     /**
                      * MIN, MAX, SUM, AVG, etc. but NOT COUNT
                      */
-                    else if (functionSymbol.isAggregationPredicate()) {
-                        if (functionSymbol.equals(OBDAVocabulary.SPARQL_COUNT))
-                            throw new RuntimeException("COUNT functional term should already be typed! " + atom);
-                        /**
-                         * TODO: make it stronger.
-                         */
-                        java.util.List<Term> subTerms = functionalTerm.getTerms();
-                        if (subTerms.size() != 1)
-                            throw new RuntimeException("Non unary aggregation functions are not yet supported" + atom);
+                    else if (functionSymbol instanceof ExpressionOperation) {
 
-                        /**
-                         * Returns the unique sub-term
-                         */
-                        return subTerms.get(0);
+                        switch((ExpressionOperation) functionSymbol) {
+                            case AVG:
+                            case SUM:
+                            case MAX:
+                            case MIN:
+                                /**
+                                 * TODO: make it stronger.
+                                 */
+                                java.util.List<Term> subTerms = functionalTerm.getTerms();
+                                if (subTerms.size() != 1)
+                                    throw new RuntimeException("Non unary aggregation functions are not yet supported" + atom);
+
+                                /**
+                                 * Returns the unique sub-term
+                                 */
+                                return subTerms.get(0);
+                            case COUNT:
+                                throw new RuntimeException("COUNT functional term should already be typed! " + atom);
+                            default:
+                                break;
+                        }
                     }
                 }
                 /**

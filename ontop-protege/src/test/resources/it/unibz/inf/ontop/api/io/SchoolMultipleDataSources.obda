@@ -3,7 +3,6 @@ owl:		http://www.w3.org/2002/07/owl#
 rdf:		http://www.w3.org/1999/02/22-rdf-syntax-ns#
 xsd:		http://www.w3.org/2001/XMLSchema#
 :		http://www.semanticweb.org/ontologies/2012/5/Ontology1340973114537.owl#
-quest:		http://obda.org/quest#
 rdfs:		http://www.w3.org/2000/01/rdf-schema#
 
 [SourceDeclaration]

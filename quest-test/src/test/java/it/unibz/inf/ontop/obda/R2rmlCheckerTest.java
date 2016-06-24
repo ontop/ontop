@@ -20,37 +20,16 @@ package it.unibz.inf.ontop.obda;
  * #L%
  */
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
-import it.unibz.inf.ontop.exception.DuplicateMappingException;
-import it.unibz.inf.ontop.exception.InvalidMappingException;
 import it.unibz.inf.ontop.injection.OBDAProperties;
-import it.unibz.inf.ontop.io.InvalidDataSourceException;
-import it.unibz.inf.ontop.mapping.MappingParser;
-import it.unibz.inf.ontop.model.CQIE;
-import it.unibz.inf.ontop.model.Predicate;
+import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.ontology.DataPropertyExpression;
 import it.unibz.inf.ontop.ontology.OClass;
 import it.unibz.inf.ontop.ontology.ObjectPropertyExpression;
 import it.unibz.inf.ontop.ontology.Ontology;
-import it.unibz.inf.ontop.owlapi3.OWLAPI3TranslatorUtility;
-import it.unibz.inf.ontop.r2rml.R2RMLMappingParser;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
+import it.unibz.inf.ontop.owlapi.OWLAPITranslatorUtility;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
-import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWL;
-import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWLConnection;
-import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWLEmptyEntitiesChecker;
-import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWLFactory;
-import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWLResultSet;
-import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWLStatement;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Properties;
-
+import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
+import it.unibz.inf.ontop.owlrefplatform.core.R2RMLQuestPreferences;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -58,9 +37,17 @@ import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLException;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
-import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Properties;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Class to test that the r2rml file with the mappings give the same results of the corresponding obda file.
@@ -70,16 +57,16 @@ public class R2rmlCheckerTest {
 	private QuestOWLConnection conn;
 
 	Logger log = LoggerFactory.getLogger(this.getClass());
-	private OWLOntology ontology;
+	private OWLOntology owlOntology;
 	private Ontology onto;
 
 	final String owlfile = "src/test/resources/r2rml/npd-v2-ql_a.owl";
     final String obdafile = "src/test/resources/r2rml/npd-v2-ql_a.obda";
-	final String r2rmlfile = "src/test/resources/r2rml/npd-v2-ql_a.pretty.ttl";
+	final String r2rmlfile = "src/test/resources/r2rml/npd-v2-ql_test_a.ttl";
 
-	private List<Predicate> emptyConceptsObda = new ArrayList<Predicate>();
-	private List<Predicate> emptyRolesObda = new ArrayList<Predicate>();
-	private List<Predicate> emptyConceptsR2rml = new ArrayList<Predicate>();
+	private List<Predicate> emptyConceptsObda = new ArrayList<>();
+	private List<Predicate> emptyRolesObda = new ArrayList<>();
+	private List<Predicate> emptyConceptsR2rml = new ArrayList<>();
 	private List<Predicate> emptyRolesR2rml = new ArrayList<Predicate>();
 
 	private QuestOWL reasonerOBDA;
@@ -90,15 +77,12 @@ public class R2rmlCheckerTest {
 		// Loading the OWL file
 		
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-		ontology = manager
+		owlOntology = manager
 				.loadOntologyFromOntologyDocument((new File(owlfile)));
 
-		onto = OWLAPI3TranslatorUtility.translate(ontology);
+		onto = OWLAPITranslatorUtility.translate(owlOntology);
 
 		Properties p = new Properties();
-		p.setProperty(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-		p.setProperty(QuestPreferences.OBTAIN_FULL_METADATA,
-				QuestConstants.FALSE);
         p.setProperty(OBDAProperties.DB_NAME, "npd");
         p.setProperty(OBDAProperties.JDBC_URL, "jdbc:mysql://10.7.20.39/npd");
         p.setProperty(OBDAProperties.DB_USER, "fish");
@@ -129,12 +113,12 @@ public class R2rmlCheckerTest {
 	
 	@Test 
 	public void testMappings() throws Exception {
-		for (CQIE q : reasonerOBDA.getQuestInstance().getQuestUnfolder().getRules()) {
-			if (!reasonerR2rml.getQuestInstance().getQuestUnfolder().getRules().contains(q))
+		for (CQIE q : reasonerOBDA.getQuestInstance().getUnfolderRules()) {
+			if (!reasonerR2rml.getQuestInstance().getUnfolderRules().contains(q))
 				System.out.println("NOT IN R2RML: " + q);
 		}
-		for (CQIE q : reasonerR2rml.getQuestInstance().getQuestUnfolder().getRules()) {
-			if (!reasonerOBDA.getQuestInstance().getQuestUnfolder().getRules().contains(q))
+		for (CQIE q : reasonerR2rml.getQuestInstance().getUnfolderRules()) {
+			if (!reasonerOBDA.getQuestInstance().getUnfolderRules().contains(q))
 				System.out.println("NOT IN OBDA: " + q);
 		}
 	}
@@ -153,51 +137,34 @@ public class R2rmlCheckerTest {
 		// Now we are ready for querying
 		log.debug("Comparing concepts");
 		for (OClass cl : onto.getVocabulary().getClasses()) {
-			Predicate concept = cl.getPredicate();
+			String concept = cl.getName();
 					
-			int conceptOBDA = runSPARQLConceptsQuery("<" + concept.getName()
-					+ ">", reasonerOBDA.getConnection());
-			int conceptR2rml = runSPARQLConceptsQuery("<" + concept.getName()
-					+ ">", reasonerR2rml.getConnection());
+			int conceptOBDA = runSPARQLConceptsQuery("<" + concept + ">", reasonerOBDA.getConnection());
+			int conceptR2rml = runSPARQLConceptsQuery("<" + concept + ">", reasonerR2rml.getConnection());
 
 			assertEquals(conceptOBDA, conceptR2rml);
 		}
 
 		log.debug("Comparing object properties");
         for (ObjectPropertyExpression prop : onto.getVocabulary().getObjectProperties()) {
+            String role = prop.getName();
 
-            // We need to make sure we make no mappings for Auxiliary roles
-            // introduced by the Ontology translation process.
-            //if (!OntologyVocabularyImpl.isAuxiliaryProperty(prop)) {
-                Predicate role = prop.getPredicate();
+            log.debug("description " + role);
+            int roleOBDA = runSPARQLRolesQuery("<" + role + ">", reasonerOBDA.getConnection());
+            int roleR2rml = runSPARQLRolesQuery("<" + role + ">", reasonerR2rml.getConnection());
 
-                log.debug("description " + role);
-                int roleOBDA = runSPARQLRolesQuery("<" + role.getName() + ">",
-                        reasonerOBDA.getConnection());
-                int roleR2rml = runSPARQLRolesQuery("<" + role.getName() + ">",
-                        reasonerR2rml.getConnection());
-
-                assertEquals(roleOBDA, roleR2rml);
-            //}
+            assertEquals(roleOBDA, roleR2rml);
         }
 
         log.debug("Comparing data properties");
         for (DataPropertyExpression prop : onto.getVocabulary().getDataProperties()) {
+            String role = prop.getName();
 
-            // We need to make sure we make no mappings for Auxiliary roles
-            // introduced by the Ontology translation process.
-            //if (!OntologyVocabularyImpl.isAuxiliaryProperty(prop)) {
-                Predicate role = prop.getPredicate();
+            log.debug("description " + role);
+            int roleOBDA = runSPARQLRolesQuery("<" + role + ">", reasonerOBDA.getConnection());
+            int roleR2rml = runSPARQLRolesQuery("<" + role + ">", reasonerR2rml.getConnection());
 
-
-                log.debug("description " + role);
-                int roleOBDA = runSPARQLRolesQuery("<" + role.getName() + ">",
-                        reasonerOBDA.getConnection());
-                int roleR2rml = runSPARQLRolesQuery("<" + role.getName() + ">",
-                        reasonerR2rml.getConnection());
-
-                assertEquals(roleOBDA, roleR2rml);
-            //}
+            assertEquals(roleOBDA, roleR2rml);
         }
 	}
 
@@ -212,15 +179,21 @@ public class R2rmlCheckerTest {
 
 		// Now we are ready for querying
 		conn = reasonerOBDA.getConnection();
-
+		Ontology ontology =  OWLAPITranslatorUtility.translate(owlOntology);
 		QuestOWLEmptyEntitiesChecker empties = new QuestOWLEmptyEntitiesChecker(
 				ontology, conn);
-		emptyConceptsObda = empties.getEmptyConcepts();
+		Iterator<Predicate> iteratorC = empties.iEmptyConcepts();
+		while (iteratorC.hasNext()){
+			emptyConceptsObda.add(iteratorC.next());
+		}
 		log.info(empties.toString());
 		log.info("Empty concept/s: " + emptyConceptsObda);
 		assertEquals(162, emptyConceptsObda.size());
 
-		emptyRolesObda = empties.getEmptyRoles();
+		Iterator<Predicate> iteratorR = empties.iEmptyRoles();
+		while (iteratorR.hasNext()){
+			emptyRolesObda.add(iteratorR.next());
+		}
 		log.info("Empty role/s: " + emptyRolesObda);
 		assertEquals(46, emptyRolesObda.size());
 
@@ -236,15 +209,21 @@ public class R2rmlCheckerTest {
 
 		// Now we are ready for querying
 		conn = reasonerR2rml.getConnection();
-
+		Ontology ontology =  OWLAPITranslatorUtility.translate(owlOntology);
 		QuestOWLEmptyEntitiesChecker empties = new QuestOWLEmptyEntitiesChecker(
 				ontology, conn);
-		emptyConceptsR2rml = empties.getEmptyConcepts();
+		Iterator<Predicate> iteratorC = empties.iEmptyConcepts();
+		while (iteratorC.hasNext()){
+			emptyConceptsR2rml.add(iteratorC.next());
+		}
 		log.info(empties.toString());
 		log.info("Empty concept/s: " + emptyConceptsR2rml);
 		assertEquals(162, emptyConceptsR2rml.size());
 
-		emptyRolesR2rml = empties.getEmptyRoles();
+		Iterator<Predicate> iteratorR = empties.iEmptyRoles();
+		while (iteratorR.hasNext()){
+			emptyRolesR2rml.add(iteratorR.next());
+		}
 		log.info("Empty role/s: " + emptyRolesR2rml);
 		assertEquals(46, emptyRolesR2rml.size());
 	}
@@ -308,7 +287,7 @@ public class R2rmlCheckerTest {
 		// Now we are ready for querying
 		log.debug("Comparing roles");
 
-		int roleOBDA = runSPARQLRoleFilterQuery("<http://sws.ifi.uio.no/vocab/npd-v2#name>",reasonerOBDA.getConnection());
+		int roleOBDA = runSPARQLRoleFilterQuery("<http://sws.ifi.uio.no/vocab/npd-v2#name>", reasonerOBDA.getConnection());
 		int roleR2rml = runSPARQLRoleFilterQuery("<http://sws.ifi.uio.no/vocab/npd-v2#name>", reasonerR2rml.getConnection());
 
 		assertEquals(roleOBDA, roleR2rml);
@@ -358,19 +337,16 @@ public class R2rmlCheckerTest {
 	 * 
 	 * @param p
 	 *            quest preferences for QuestOWL, dataSource for the model
+	 * @throws Exception
 	 */
-	private void loadR2rml(Properties p)
-            throws IOException, InvalidMappingException, DuplicateMappingException, InvalidDataSourceException {
+	private void loadR2rml(Properties p) {
 		log.info("Loading r2rml file");
 
-        // Make sure the R2RML parser will be used.
-        p.put(MappingParser.class.getCanonicalName(), R2RMLMappingParser.class.getCanonicalName());
-
-		// Creating a new instance of the reasoner
-		QuestOWLFactory factory = new QuestOWLFactory(new File(r2rmlfile), new QuestPreferences(p));
-
-		reasonerR2rml = factory.createReasoner(ontology, new SimpleConfiguration());
-
+		QuestOWLConfiguration config = QuestOWLConfiguration.builder()
+				.nativeOntopMappingFile(new File(r2rmlfile))
+				.preferences(new R2RMLQuestPreferences(p))
+				.build();
+        reasonerR2rml = factory.createReasoner(owlOntology, config);
 	}
 
 	/**
@@ -385,9 +361,14 @@ public class R2rmlCheckerTest {
 		log.info("Loading obda file");
 
 		// Creating a new instance of the reasoner
-		QuestOWLFactory factory = new QuestOWLFactory(new File(obdafile), new QuestPreferences(p));
+		QuestOWLFactory factory = new QuestOWLFactory();
 
-		reasonerOBDA = factory.createReasoner(ontology, new SimpleConfiguration());
+		QuestOWLConfiguration config = QuestOWLConfiguration.builder()
+				.nativeOntopMappingFile(new File(obdafile))
+				.preferences(new QuestPreferences(p))
+				.build();
+		reasonerOBDA = factory.createReasoner(owlOntology, config);
+
 
 	}
 

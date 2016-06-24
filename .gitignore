@@ -27,9 +27,16 @@ catalog-v*.xml
 \#*
 tmp.*
 
+# Antlr generated files
+*.tokens
+
 # Ontop specific
 plugin-runtime
 
 ontop-optique-test
 tmp
+<<<<<<< HEAD
 ontop-beyond-ql
+=======
+*.log
+>>>>>>> v1/package-names-changed

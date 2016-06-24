@@ -31,7 +31,7 @@ import java.util.Set;
 
 import it.unibz.inf.ontop.model.OBDAException;
 import it.unibz.inf.ontop.owlrefplatform.core.*;
-import it.unibz.inf.ontop.owlrefplatform.core.*;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -86,7 +86,8 @@ public class QuestDB {
 		 * Called when System.exit() is called or Control+C happens.
 		 */
 		Runtime.getRuntime().addShutdownHook(new Thread() {
-			public void run() {
+			@Override
+            public void run() {
 				log.info("Shutting down.");
 
 				/*
@@ -98,7 +99,7 @@ public class QuestDB {
 		});
 	}
 
-	public static void main(String argsp[]) {
+	public static void main(String args[]) {
 		QuestDB db = new QuestDB();
 	}
 

@@ -8,7 +8,7 @@ import it.unibz.inf.ontop.mapping.MappingParser;
 import it.unibz.inf.ontop.model.OBDAMappingAxiom;
 import it.unibz.inf.ontop.model.OBDAModel;
 import it.unibz.inf.ontop.nativeql.DBMetadataExtractor;
-import it.unibz.inf.ontop.sql.ImplicitDBConstraints;
+import it.unibz.inf.ontop.sql.ImplicitDBConstraintsReader;
 import it.unibz.inf.ontop.utils.IMapping2DatalogConverter;
 
 public class OBDACoreModule extends OBDAAbstractModule {
@@ -18,11 +18,12 @@ public class OBDACoreModule extends OBDAAbstractModule {
     }
 
     private void bindImplicitDBConstraints() {
-        ImplicitDBConstraints dbContraints = (ImplicitDBConstraints) getPreferences().get(OBDAProperties.DB_CONSTRAINTS);
+        ImplicitDBConstraintsReader dbContraints = (ImplicitDBConstraintsReader) getPreferences().get(
+                OBDAProperties.DB_CONSTRAINTS);
         if (dbContraints == null)
-            bind(ImplicitDBConstraints.class).toProvider(Providers.<ImplicitDBConstraints>of(null));
+            bind(ImplicitDBConstraintsReader.class).toProvider(Providers.<ImplicitDBConstraintsReader>of(null));
         else
-            bind(ImplicitDBConstraints.class).toInstance(dbContraints);
+            bind(ImplicitDBConstraintsReader.class).toInstance(dbContraints);
     }
 
     @Override

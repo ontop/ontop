@@ -20,39 +20,30 @@ package it.unibz.inf.ontop.protege.gui.action;
  * #L%
  */
 
-import java.awt.event.ActionEvent;
-import java.io.File;
-import java.io.IOException;
-import java.net.URI;
-
-import javax.swing.JFileChooser;
-import javax.swing.JOptionPane;
-
-<<<<<<< HEAD:ontop-protege/src/main/java/it/unibz/inf/ontop/protege/gui/action/R2RMLImportAction.java
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import it.unibz.inf.ontop.exception.DuplicateMappingException;
+import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
+import it.unibz.inf.ontop.injection.OBDACoreModule;
+import it.unibz.inf.ontop.injection.OBDAProperties;
+import it.unibz.inf.ontop.mapping.MappingParser;
+import it.unibz.inf.ontop.model.OBDADataSource;
+import it.unibz.inf.ontop.model.OBDAMappingAxiom;
+import it.unibz.inf.ontop.model.impl.OBDAModelImpl;
+import it.unibz.inf.ontop.owlrefplatform.core.R2RMLQuestPreferences;
+import it.unibz.inf.ontop.protege.core.OBDAModelManager;
 import it.unibz.inf.ontop.protege.core.OBDAModelWrapper;
 import org.protege.editor.core.Disposable;
 import org.protege.editor.core.ui.action.ProtegeAction;
 import org.protege.editor.owl.OWLEditorKit;
 import org.protege.editor.owl.model.OWLWorkspace;
-import it.unibz.inf.ontop.exception.DuplicateMappingException;
-import it.unibz.inf.ontop.exception.InvalidMappingException;
-import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
-import it.unibz.inf.ontop.injection.OBDACoreModule;
-import it.unibz.inf.ontop.injection.OBDAProperties;
-import it.unibz.inf.ontop.io.InvalidDataSourceException;
-import it.unibz.inf.ontop.mapping.MappingParser;
-import it.unibz.inf.ontop.model.OBDADataSource;
-import it.unibz.inf.ontop.model.OBDAMappingAxiom;
-import it.unibz.inf.ontop.model.OBDAModel;
-import it.unibz.inf.ontop.model.impl.OBDAModelImpl;
-import it.unibz.inf.ontop.owlrefplatform.questdb.R2RMLQuestPreferences;
-import it.unibz.inf.ontop.protege.core.OBDAModelManager;
-=======
->>>>>>> v3/package-names-changed:ontop-protege/src/main/java/it/unibz/inf/ontop/protege/gui/action/R2RMLImportAction.java
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.swing.*;
+import java.awt.event.ActionEvent;
+import java.io.File;
+import java.net.URI;
 
 public class R2RMLImportAction extends ProtegeAction {
 
@@ -121,7 +112,7 @@ public class R2RMLImportAction extends ProtegeAction {
 					URI sourceID = dataSource.getSourceID();
 
 					try {
-						OBDAModel parsedModel = parser.getOBDAModel();
+						OBDAModelWrapper parsedModel = parser.getOBDAModel();
 
 						/**
 						 * TODO: improve this inefficient method (batch processing, not one by one)
@@ -130,22 +121,23 @@ public class R2RMLImportAction extends ProtegeAction {
 							if (mapping.getTargetQuery().toString().contains("BNODE")) {
 								JOptionPane.showMessageDialog(workspace, "The mapping " + mapping.getId() + " contains BNode. -ontoPro- does not support it yet.");
 							} else {
-								obdaModelController.addMapping(sourceID, mapping);
+								obdaModelController.addMapping(sourceID, mapping, false);
 							}
 						}
+						JOptionPane.showMessageDialog(workspace, "R2rml Import completed. " );
 					} catch (DuplicateMappingException dm) {
 						JOptionPane.showMessageDialog(workspace, "Duplicate mapping id found. Please correct the Resource node name: " + dm.getLocalizedMessage());
 						throw new RuntimeException("Duplicate mapping found: " + dm.getMessage());
-					} catch (IOException e) {
-						e.printStackTrace();
-					} catch (InvalidMappingException e) {
-						e.printStackTrace();
-					} catch (InvalidDataSourceException e) {
+					}
+
+					} catch (Exception e) {
+						JOptionPane.showMessageDialog(null, "An error occurred. For more info, see the logs.");
+						log.error("Error during r2rml import. \n");
 						e.printStackTrace();
 					}
+
 				}
 
 			}
 		}
-	}
 }

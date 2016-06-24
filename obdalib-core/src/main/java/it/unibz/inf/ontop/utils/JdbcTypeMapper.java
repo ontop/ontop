@@ -33,9 +33,9 @@ import java.util.Map;
  */
 public class JdbcTypeMapper {
 
-	private final Map<Integer, Predicate.COL_TYPE> sqlToQuest = new HashMap<Integer, Predicate.COL_TYPE>();	
-	private final Map<Predicate.COL_TYPE, Integer> datatypeMap = new HashMap<Predicate.COL_TYPE, Integer>();
-	
+	private final Map<Integer, COL_TYPE> sqlToQuest = new HashMap<Integer, COL_TYPE>();
+	private final Map<COL_TYPE, Integer> datatypeMap = new HashMap<COL_TYPE, Integer>();
+
 	public JdbcTypeMapper() {
 		sqlToQuest.put(Types.VARCHAR, COL_TYPE.LITERAL);
 		sqlToQuest.put(Types.CHAR, COL_TYPE.LITERAL);
@@ -61,11 +61,12 @@ public class JdbcTypeMapper {
 //		typeMapper.put(Types.VARBINARY, dfac.getDataTypePredicateBinary());
 //		typeMapper.put(Types.BLOB, dfac.getDataTypePredicateBinary());
 		sqlToQuest.put(Types.CLOB, COL_TYPE.LITERAL);
-		sqlToQuest.put(Types.OTHER, COL_TYPE.LITERAL);		
-		
+		sqlToQuest.put(Types.OTHER, COL_TYPE.LITERAL);
+
 		datatypeMap.put(COL_TYPE.BOOLEAN, Types.BOOLEAN);
 		datatypeMap.put(COL_TYPE.INT, Types.INTEGER);
 		datatypeMap.put(COL_TYPE.INTEGER, Types.BIGINT);
+		datatypeMap.put(COL_TYPE.DECIMAL, Types.DECIMAL); //BC: needs to be checked
 		datatypeMap.put(COL_TYPE.LONG, Types.BIGINT);
 		datatypeMap.put(COL_TYPE.NEGATIVE_INTEGER, Types.BIGINT);
 		datatypeMap.put(COL_TYPE.POSITIVE_INTEGER, Types.BIGINT);
@@ -74,20 +75,19 @@ public class JdbcTypeMapper {
 		datatypeMap.put(COL_TYPE.FLOAT, Types.FLOAT);
 		datatypeMap.put(COL_TYPE.DOUBLE, Types.DOUBLE);
 		datatypeMap.put(COL_TYPE.STRING, Types.VARCHAR);
-		datatypeMap.put(COL_TYPE.LITERAL, Types.VARCHAR);	
+		datatypeMap.put(COL_TYPE.LITERAL, Types.VARCHAR);
 		datatypeMap.put(COL_TYPE.DATETIME_STAMP, Types.TIMESTAMP);
-        datatypeMap.put(COL_TYPE.DECIMAL, Types.DECIMAL);
 		// all other COL_TYPEs are mapped to Types.VARCHAR by default
 	}
-	
+
 	public Predicate.COL_TYPE getPredicate(int sqlType) {
 		Predicate.COL_TYPE type = sqlToQuest.get(sqlType);
-		if (type == null) 
-			type = COL_TYPE.LITERAL; 
-		
+		if (type == null)
+			type = COL_TYPE.LITERAL;
+
 		return type;
 	}
-	
+
 	public int getSQLType(Predicate.COL_TYPE type) {
 		if (type != null) {
 			Integer sqlType = datatypeMap.get(type);

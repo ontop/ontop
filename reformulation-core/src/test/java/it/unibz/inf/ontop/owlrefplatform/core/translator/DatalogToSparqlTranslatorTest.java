@@ -20,27 +20,20 @@ package it.unibz.inf.ontop.owlrefplatform.core.translator;
  * #L%
  */
 
-import java.util.Arrays;
-import java.util.List;
-
 import com.google.common.collect.ImmutableMap;
-import org.junit.Before;
-import org.junit.Test;
 import it.unibz.inf.ontop.io.PrefixManager;
 import it.unibz.inf.ontop.io.SimplePrefixManager;
-import it.unibz.inf.ontop.model.CQIE;
-import it.unibz.inf.ontop.model.Constant;
-import it.unibz.inf.ontop.model.DatalogProgram;
-import it.unibz.inf.ontop.model.Function;
-import it.unibz.inf.ontop.model.OBDADataFactory;
-import it.unibz.inf.ontop.model.OBDAQueryModifiers;
-import it.unibz.inf.ontop.model.Predicate;
-import it.unibz.inf.ontop.model.Variable;
+import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.Predicate.COL_TYPE;
 import it.unibz.inf.ontop.model.impl.MutableQueryModifiersImpl;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
-import it.unibz.inf.ontop.model.OrderCondition;
+
+import java.util.Arrays;
+import java.util.List;
+
+import org.junit.Before;
+import org.junit.Test;
 
 @SuppressWarnings("deprecation")
 public class DatalogToSparqlTranslatorTest {
@@ -148,9 +141,9 @@ public class DatalogToSparqlTranslatorTest {
 		Function ans1 = createQuery(x, a);
 		Function cond1 = dataFactory.getFunctionEQ(a, c1);
 		Function cond2 = dataFactory.getFunctionNEQ(b, c2);
-		Function cond3 = dataFactory.getFunctionGT(c, c3);
-		Function cond4 = dataFactory.getFunctionGTE(d, c4);
-		Function cond5 = dataFactory.getFunctionLT(e, c5);
+		Function cond3 = dataFactory.getFunction(ExpressionOperation.GT, c, c3);
+		Function cond4 = dataFactory.getFunction(ExpressionOperation.GTE, d, c4);
+		Function cond5 = dataFactory.getFunction(ExpressionOperation.LT, e, c5);
 		
 		/**
 		 * ans1(x) :- Student(x), firstName(x,a), lastName(x,b), age(x,c), grade(x,d), enrollmentDate(x,e),
@@ -193,9 +186,9 @@ public class DatalogToSparqlTranslatorTest {
 		Function ans6 = createRule(ANS6, x, e);
 		Function cond1 = dataFactory.getFunctionEQ(a, c1);
 		Function cond2 = dataFactory.getFunctionNEQ(b, c2);
-		Function cond3 = dataFactory.getFunctionGT(c, c3);
-		Function cond4 = dataFactory.getFunctionGTE(d, c4);
-		Function cond5 = dataFactory.getFunctionLT(e, c5);
+		Function cond3 = dataFactory.getFunction(ExpressionOperation.GT, c, c3);
+		Function cond4 = dataFactory.getFunction(ExpressionOperation.GTE, d, c4);
+		Function cond5 = dataFactory.getFunction(ExpressionOperation.LT, e, c5);
 		
 		/**
 		 * ans1(x) :- Student(x), ans2(x,a)
@@ -224,9 +217,9 @@ public class DatalogToSparqlTranslatorTest {
 		Function ans1 = createQuery(x, a);
 		Function cond1 = dataFactory.getFunctionEQ(a, c1);
 		Function cond2 = dataFactory.getFunctionNEQ(b, c2);
-		Function cond3 = dataFactory.getFunctionGT(c, c3);
-		Function cond4 = dataFactory.getFunctionGTE(d, c4);
-		Function cond5 = dataFactory.getFunctionLT(e, c5);
+		Function cond3 = dataFactory.getFunction(ExpressionOperation.GT, c, c3);
+		Function cond4 = dataFactory.getFunction(ExpressionOperation.GTE, d, c4);
+		Function cond5 = dataFactory.getFunction(ExpressionOperation.LT, e, c5);
 		Function cond6 = dataFactory.getFunctionAND(cond3, cond4);
 		Function cond7 = dataFactory.getFunctionOR(cond6, cond5);
 		

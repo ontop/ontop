@@ -1,27 +1,21 @@
 package it.unibz.inf.ontop.cli;
 
 
-import com.github.rvesse.airline.Option;
-import com.github.rvesse.airline.OptionType;
-<<<<<<< HEAD:ontop-cli/src/main/java/it/unibz/inf/ontop/cli/OntopReasoningCommandBase.java
-import com.google.inject.Guice;
-import com.google.inject.Injector;
-import it.unibz.inf.ontop.exception.DuplicateMappingException;
+import com.github.rvesse.airline.annotations.Option;
+import com.github.rvesse.airline.annotations.OptionType;
+import com.google.common.base.Preconditions;
 import it.unibz.inf.ontop.exception.InvalidMappingException;
 import it.unibz.inf.ontop.exception.InvalidPredicateDeclarationException;
-import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
-import it.unibz.inf.ontop.injection.OBDACoreModule;
-import it.unibz.inf.ontop.io.InvalidDataSourceException;
-import it.unibz.inf.ontop.mapping.MappingParser;
-import it.unibz.inf.ontop.model.OBDAModel;
-=======
 import it.unibz.inf.ontop.io.ModelIOManager;
->>>>>>> v3/package-names-changed:ontop-cli/src/main/java/it/unibz/inf/ontop/cli/OntopReasoningCommandBase.java
-import org.coode.owlapi.turtle.TurtleOntologyFormat;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
-import it.unibz.inf.ontop.owlrefplatform.questdb.R2RMLQuestPreferences;
-import org.semanticweb.owlapi.io.OWLXMLOntologyFormat;
-import org.semanticweb.owlapi.io.RDFXMLOntologyFormat;
+import it.unibz.inf.ontop.model.OBDADataFactory;
+import it.unibz.inf.ontop.model.OBDADataSource;
+import it.unibz.inf.ontop.model.OBDAModel;
+import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
+import it.unibz.inf.ontop.r2rml.R2RMLReader;
+import org.semanticweb.owlapi.formats.N3DocumentFormat;
+import org.semanticweb.owlapi.formats.OWLXMLDocumentFormat;
+import org.semanticweb.owlapi.formats.RDFXMLDocumentFormat;
+import org.semanticweb.owlapi.formats.TurtleDocumentFormat;
 import org.semanticweb.owlapi.model.*;
 
 import java.io.File;
@@ -38,25 +32,33 @@ public abstract class OntopReasoningCommandBase extends OntopMappingOntologyRela
 
     @Option(type = OptionType.COMMAND, name = {"-o", "--output"},
             title = "output", description = "output file (default) or directory (for --separate-files)")
+    //@BashCompletion(behaviour = CompletionBehaviour.FILENAMES)
     protected String outputFile;
 
-    protected static OWLOntologyFormat getOntologyFormat(String format) throws Exception {
-		OWLOntologyFormat ontoFormat;
+    @Option(type = OptionType.COMMAND, name = {"--enable-annotations"},
+            description = "enable annotation properties defined in the ontology. Default: false")
+    public boolean enableAnnotations = false;
+
+    protected static OWLDocumentFormat getDocumentFormat(String format) throws Exception {
+		OWLDocumentFormat ontoFormat;
 
 		if(format == null){
-			ontoFormat = new RDFXMLOntologyFormat();
+			ontoFormat = new RDFXMLDocumentFormat();
 		}
 		else {
 		switch (format) {
 			case "rdfxml":
-				ontoFormat = new RDFXMLOntologyFormat();
+				ontoFormat = new RDFXMLDocumentFormat();
 				break;
 			case "owlxml":
-				ontoFormat = new OWLXMLOntologyFormat();
+				ontoFormat = new OWLXMLDocumentFormat();
 				break;
 			case "turtle":
-				ontoFormat = new TurtleOntologyFormat();
+				ontoFormat = new TurtleDocumentFormat();
 				break;
+            case "n3":
+                ontoFormat = new N3DocumentFormat();
+                break;
 			default:
 				throw new Exception("Unknown format: " + format);
 			}
@@ -66,7 +68,7 @@ public abstract class OntopReasoningCommandBase extends OntopMappingOntologyRela
 
     protected static OWLOntology extractDeclarations(OWLOntologyManager manager, OWLOntology ontology) throws OWLOntologyCreationException {
 
-        IRI ontologyIRI = ontology.getOntologyID().getOntologyIRI();
+        IRI ontologyIRI = ontology.getOntologyID().getOntologyIRI().get();
         System.err.println("Ontology " + ontologyIRI);
 
         Set<OWLDeclarationAxiom> declarationAxioms = ontology.getAxioms(AxiomType.DECLARATION);

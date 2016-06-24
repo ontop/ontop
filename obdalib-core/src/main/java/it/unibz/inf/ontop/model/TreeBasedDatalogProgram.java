@@ -6,10 +6,10 @@ import com.google.common.collect.Multimap;
 import fj.*;
 import fj.data.*;
 import fj.data.List;
-import org.jgraph.graph.DefaultEdge;
-import org.jgrapht.DirectedGraph;
-import org.jgrapht.traverse.TopologicalOrderIterator;
 import it.unibz.inf.ontop.utils.DatalogDependencyGraphGenerator;
+import org.jgrapht.DirectedGraph;
+import org.jgrapht.graph.DefaultEdge;
+import org.jgrapht.traverse.TopologicalOrderIterator;
 
 /**
  * Immutable DatalogProgram for queries.
