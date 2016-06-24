@@ -20,10 +20,7 @@ package it.unibz.krdb.obda.owlrefplatform.core.translator;
  * #L%
  */
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.UnmodifiableIterator;
+import com.google.common.collect.*;
 import it.unibz.krdb.obda.model.*;
 import it.unibz.krdb.obda.model.OBDAQueryModifiers.OrderCondition;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
@@ -123,6 +120,8 @@ public class SparqlAlgebraToDatalogTranslator {
 	}
 
     private static class TranslationResult {
+        private final OBDADataFactory ofac = OBDADataFactoryImpl.getInstance();
+
         final ImmutableList<Function> atoms;
         final ImmutableSet<Variable> variables;
         final boolean isBGP;
@@ -132,6 +131,18 @@ public class SparqlAlgebraToDatalogTranslator {
             this.variables = variables;
             this.isBGP = isBGP;
         }
+
+        private ImmutableList<Function> getAtomsExtendedWithNulls(ImmutableSet<Variable> allVariables) {
+            Sets.SetView<Variable>  nullVariables = Sets.difference(allVariables, variables);
+            if (nullVariables.isEmpty())
+                return atoms;
+
+            ImmutableList.Builder builder = ImmutableList.<Function>builder().addAll(atoms);
+            for (Variable v : nullVariables)
+                builder.add(ofac.getFunctionEQ(v, OBDAVocabulary.NULL));
+            return builder.build();
+        }
+
     }
 
     private static class TranslationProgram {
@@ -168,19 +179,6 @@ public class SparqlAlgebraToDatalogTranslator {
             }
             return sub.atoms.get(0);
         }
-    }
-
-    private ImmutableList<Function> extendWithNulls(ImmutableList<Function> list,
-                                           ImmutableSet<Variable> vars, ImmutableSet<Variable> allVars) {
-        Set<Variable> nullVars = new HashSet<>(allVars);
-        nullVars.removeAll(vars);
-        if (nullVars.isEmpty())
-            return list;
-
-        ImmutableList.Builder extListBuilder = ImmutableList.<Function>builder().addAll(list);
-        for (Variable v : nullVars)
-            extListBuilder.add(ofac.getFunctionEQ(v, OBDAVocabulary.NULL));
-        return extListBuilder.build();
     }
 
     private TranslationResult tran(TupleExpr currentNode, TranslationProgram program) {
@@ -231,7 +229,7 @@ public class SparqlAlgebraToDatalogTranslator {
             Join join = (Join) currentNode;
             TranslationResult a1 = tran(join.getLeftArg(), program);
             TranslationResult a2 = tran(join.getRightArg(), program);
-            ImmutableSet<Variable> vars = union(a1.variables, a2.variables);
+            ImmutableSet<Variable> vars = Sets.union(a1.variables, a2.variables).immutableCopy();
 
             if (a1.isBGP && a2.isBGP) {             // collect triple patterns into BGPs
                 ImmutableList<Function> atoms =
@@ -249,7 +247,7 @@ public class SparqlAlgebraToDatalogTranslator {
             LeftJoin lj = (LeftJoin) currentNode;
             TranslationResult a1 = tran(lj.getLeftArg(), program);
             TranslationResult a2 = tran(lj.getRightArg(), program);
-            ImmutableSet<Variable> vars = union(a1.variables, a2.variables);
+            ImmutableSet<Variable> vars = Sets.union(a1.variables, a2.variables).immutableCopy();
 
             Function body = ofac.getSPARQLLeftJoin(program.wrapNonTriplePattern(a1),
                     program.wrapNonTriplePattern(a2));
@@ -266,11 +264,11 @@ public class SparqlAlgebraToDatalogTranslator {
             Union union = (Union) currentNode;
             TranslationResult a1 = tran(union.getLeftArg(), program);
             TranslationResult a2 = tran(union.getRightArg(), program);
-            ImmutableSet<Variable> vars = union(a1.variables, a2.variables);
+            ImmutableSet<Variable> vars = Sets.union(a1.variables, a2.variables).immutableCopy();
 
             Function head = program.getFreshHead(new ArrayList<>(vars)); // sort variables in some way
-            program.appendRule(head, extendWithNulls(a1.atoms, a1.variables, vars));
-            program.appendRule(head, extendWithNulls(a2.atoms, a2.variables, vars));
+            program.appendRule(head, a1.getAtomsExtendedWithNulls(vars));
+            program.appendRule(head, a2.getAtomsExtendedWithNulls(vars));
             return new TranslationResult(ImmutableList.of(head), vars, false);
         }
         else if (currentNode instanceof Filter) {   // FILTER algebra operation
@@ -350,7 +348,7 @@ public class SparqlAlgebraToDatalogTranslator {
         else if (currentNode instanceof BindingSetAssignment) { // VALUES in SPARQL
             BindingSetAssignment values = (BindingSetAssignment) currentNode;
             ImmutableSet.Builder allVarsBuilder = ImmutableSet.<Variable>builder();
-            List<Pair<ImmutableList<Function>, ImmutableSet<Variable>>> bindings = new LinkedList<>();
+            List<TranslationResult> bindings = new LinkedList<>();
             for (BindingSet bs : values.getBindingSets()) {
                 ImmutableList.Builder binding = ImmutableList.<Function>builder();
                 Set<Variable> vars = new HashSet<>();
@@ -363,24 +361,19 @@ public class SparqlAlgebraToDatalogTranslator {
                     Term expr = getConstantExpression(b.getValue());
                     binding.add(ofac.getFunctionEQ(v, expr));
                 }
-                bindings.add(new Pair(binding.build(), ImmutableSet.copyOf(vars)));
+                bindings.add(new TranslationResult(binding.build(), ImmutableSet.copyOf(vars), false));
             }
             ImmutableSet<Variable> allVars = allVarsBuilder.build();
             Function head = program.getFreshHead(new LinkedList<>(allVars)); // sort in some way
-            for (Pair<ImmutableList<Function>, ImmutableSet<Variable>> p : bindings) {
-                ImmutableList<Function> list = extendWithNulls(p.getKey(), p.getValue(), allVars);
-                program.appendRule(head, list);
-            }
+            for (TranslationResult p : bindings)
+                program.appendRule(head, p.getAtomsExtendedWithNulls(allVars));
+
             return new TranslationResult(ImmutableList.of(head), allVars, false);
         }
         else if (currentNode instanceof Group) {
             throw new IllegalArgumentException("GROUP BY is not supported yet");
         }
         throw new IllegalArgumentException("Not supported: " + currentNode);
-    }
-
-    private static ImmutableSet<Variable> union(ImmutableSet<Variable> s1, ImmutableSet<Variable> s2) {
-        return ImmutableSet.<Variable>builder().addAll(s1).addAll(s2).build();
     }
 
 	private Function getFilterExpression(ValueExpr condition, ImmutableSet<Variable> vars) {
