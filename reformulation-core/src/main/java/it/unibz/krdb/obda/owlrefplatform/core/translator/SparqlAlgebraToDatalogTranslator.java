@@ -29,6 +29,7 @@ import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.SemanticIndexURIMap;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.UriTemplateMatcher;
 import it.unibz.krdb.obda.parser.EncodeForURI;
+import jdk.nashorn.internal.ir.annotations.Immutable;
 import org.openrdf.model.Literal;
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
@@ -130,15 +131,15 @@ public class SparqlAlgebraToDatalogTranslator {
 
         private <T> TranslationResult extendWithBindings(Stream<T> bindings,
                                          java.util.function.Function<? super T, Variable> varNameMapper,
-                                         java.util.function.Function<? super T, Term> exprMapper) {
+                                         java.util.function.BiFunction<? super T, ImmutableSet<Variable>, Term> exprMapper) {
 
             Set<Variable> vars = new HashSet<>(variables);
             Stream<Function> eqAtoms = bindings.map(b -> {
+                Term expr = exprMapper.apply(b, ImmutableSet.copyOf(vars));
+
                 Variable v = varNameMapper.apply(b);
                 if (!vars.add(v))
                     throw new IllegalArgumentException("Duplicate binding for variable " + v);
-
-                Term expr = exprMapper.apply(b); // TODO: add a fix for the range of variables
 
                 return ofac.getFunctionEQ(v, expr);
             });
@@ -205,28 +206,28 @@ public class SparqlAlgebraToDatalogTranslator {
         }
     }
 
-    private TranslationResult tran(TupleExpr currentNode, TranslationProgram program) {
+    private TranslationResult tran(TupleExpr node, TranslationProgram program) {
 
-        //System.out.println("node: \n" + currentNode);
+        //System.out.println("node: \n" + node);
 
-        if (currentNode instanceof Slice) {   // SLICE algebra operation
-            Slice slice = (Slice) currentNode;
+        if (node instanceof Slice) {   // SLICE algebra operation
+            Slice slice = (Slice) node;
             OBDAQueryModifiers modifiers = program.getQueryModifiers();
             modifiers.setOffset(slice.getOffset());
             modifiers.setLimit(slice.getLimit());
             return tran(slice.getArg(), program);
         }
-        else if (currentNode instanceof Distinct) { // DISTINCT algebra operation
-            Distinct distinct = (Distinct) currentNode;
+        else if (node instanceof Distinct) { // DISTINCT algebra operation
+            Distinct distinct = (Distinct) node;
             program.getQueryModifiers().setDistinct();
             return tran(distinct.getArg(), program);
         }
-        else if (currentNode instanceof Reduced) {  // REDUCED algebra operation
-            Reduced reduced = (Reduced) currentNode;
+        else if (node instanceof Reduced) {  // REDUCED algebra operation
+            Reduced reduced = (Reduced) node;
             return tran(reduced.getArg(), program);
         }
-        else if (currentNode instanceof Order) {   // ORDER algebra operation
-            Order order = (Order) currentNode;
+        else if (node instanceof Order) {   // ORDER algebra operation
+            Order order = (Order) node;
             OBDAQueryModifiers modifiers = program.getQueryModifiers();
             for (OrderElem c : order.getElements()) {
                 ValueExpr expression = c.getExpr();
@@ -243,11 +244,15 @@ public class SparqlAlgebraToDatalogTranslator {
             }
             return tran(order.getArg(), program);
         }
-        else if (currentNode instanceof StatementPattern) { // triple pattern
-            return translate((StatementPattern) currentNode);
+        else if (node instanceof StatementPattern) { // triple pattern
+            return translate((StatementPattern) node);
         }
-        else if (currentNode instanceof Join) {     // JOIN algebra operation
-            Join join = (Join) currentNode;
+        else if (node instanceof SingletonSet) {
+            // the empty BGP has no variables and gives a single solution mapping on every non-empty graph
+            return new TranslationResult(ImmutableList.of(), ImmutableSet.of(), true);
+        }
+        else if (node instanceof Join) {     // JOIN algebra operation
+            Join join = (Join) node;
             TranslationResult a1 = tran(join.getLeftArg(), program);
             TranslationResult a2 = tran(join.getRightArg(), program);
             ImmutableSet<Variable> vars = Sets.union(a1.variables, a2.variables).immutableCopy();
@@ -264,8 +269,8 @@ public class SparqlAlgebraToDatalogTranslator {
                 return new TranslationResult(ImmutableList.of(body), vars, false);
             }
         }
-        else if (currentNode instanceof LeftJoin) {  // OPTIONAL algebra operation
-            LeftJoin lj = (LeftJoin) currentNode;
+        else if (node instanceof LeftJoin) {  // OPTIONAL algebra operation
+            LeftJoin lj = (LeftJoin) node;
             TranslationResult a1 = tran(lj.getLeftArg(), program);
             TranslationResult a2 = tran(lj.getRightArg(), program);
             ImmutableSet<Variable> vars = Sets.union(a1.variables, a2.variables).immutableCopy();
@@ -281,8 +286,8 @@ public class SparqlAlgebraToDatalogTranslator {
 
             return new TranslationResult(ImmutableList.of(body), vars, false);
         }
-        else if (currentNode instanceof Union) {   // UNION algebra operation
-            Union union = (Union) currentNode;
+        else if (node instanceof Union) {   // UNION algebra operation
+            Union union = (Union) node;
             TranslationResult a1 = tran(union.getLeftArg(), program);
             TranslationResult a2 = tran(union.getRightArg(), program);
             ImmutableSet<Variable> vars = Sets.union(a1.variables, a2.variables).immutableCopy();
@@ -292,18 +297,18 @@ public class SparqlAlgebraToDatalogTranslator {
             program.appendRule(res.atoms.get(0), a2.getAtomsExtendedWithNulls(vars));
             return res;
         }
-        else if (currentNode instanceof Filter) {   // FILTER algebra operation
-            Filter filter = (Filter) currentNode;
+        else if (node instanceof Filter) {   // FILTER algebra operation
+            Filter filter = (Filter) node;
             TranslationResult a = tran(filter.getArg(), program);
 
             Function f = getFilterExpression(filter.getCondition(), a.variables);
             ImmutableList<Function> atoms = ImmutableList.<Function>builder().addAll(a.atoms).add(f).build();
-            // TODO: split ANDs in f
+            // TODO: split ANDs in the FILTER?
 
             return new TranslationResult(atoms, a.variables, false);
         }
-        else if (currentNode instanceof Projection) {  // PROJECT algebra operation
-            Projection projection = (Projection) currentNode;
+        else if (node instanceof Projection) {  // PROJECT algebra operation
+            Projection projection = (Projection) node;
             TranslationResult sub = tran(projection.getArg(), program);
 
             List<ProjectionElem> pes = projection.getProjectionElemList().getElements();
@@ -339,8 +344,8 @@ public class SparqlAlgebraToDatalogTranslator {
             Function atom = ofac.getFunction(head.getFunctionSymbol(), tVars);
             return new TranslationResult(ImmutableList.of(atom), vars, false);
         }
-        else if (currentNode instanceof Extension) {     // EXTEND algebra operation
-            Extension extension = (Extension) currentNode;
+        else if (node instanceof Extension) {     // EXTEND algebra operation
+            Extension extension = (Extension) node;
             TranslationResult sub = tran(extension.getArg(), program);
             return sub.extendWithBindings(
                     StreamSupport.stream(extension.getElements().spliterator(), false)
@@ -348,19 +353,18 @@ public class SparqlAlgebraToDatalogTranslator {
                             .filter(ee -> !(ee.getExpr() instanceof Var &&
                                     ee.getName().equals(((Var)ee.getExpr()).getName()))),
                             ee -> ofac.getVariable(ee.getName()),
-                            ee -> getExpression(ee.getExpr(), sub.variables));
-            // TODO : extend should extend the list of variables!
+                            (ee, vars) -> getExpression(ee.getExpr(), vars));
         }
-        else if (currentNode instanceof BindingSetAssignment) { // VALUES in SPARQL
-            BindingSetAssignment values = (BindingSetAssignment) currentNode;
+        else if (node instanceof BindingSetAssignment) { // VALUES in SPARQL
+            BindingSetAssignment values = (BindingSetAssignment) node;
 
             TranslationResult empty = new TranslationResult(ImmutableList.of(), ImmutableSet.of(), false);
-            Stream<TranslationResult> bindings =
+            List<TranslationResult> bindings =
                 StreamSupport.stream(values.getBindingSets().spliterator(), false)
                     .map(bs -> empty.extendWithBindings(
                             StreamSupport.stream(bs.spliterator(), false),
                             be -> ofac.getVariable(be.getName()),
-                            be -> getConstantExpression(be.getValue())));
+                            (be, vars) -> getConstantExpression(be.getValue()))).collect(Collectors.toList());
 
             ImmutableSet.Builder allVarsBuilder = ImmutableSet.<Variable>builder();
             bindings.forEach(s -> allVarsBuilder.addAll(s.variables));
@@ -371,14 +375,10 @@ public class SparqlAlgebraToDatalogTranslator {
                 program.appendRule(res.atoms.get(0), p.getAtomsExtendedWithNulls(allVars)));
             return res;
         }
-        else if (currentNode instanceof SingletonSet) {
-            // the empty BGP has no variables and gives a single solution mapping on every non-empty graph
-            return new TranslationResult(ImmutableList.of(), ImmutableSet.of(), true);
-        }
-        else if (currentNode instanceof Group) {
+        else if (node instanceof Group) {
             throw new IllegalArgumentException("GROUP BY is not supported yet");
         }
-        throw new IllegalArgumentException("Not supported: " + currentNode);
+        throw new IllegalArgumentException("Not supported: " + node);
     }
 
 	private Function getFilterExpression(ValueExpr condition, ImmutableSet<Variable> variables) {
@@ -489,18 +489,17 @@ public class SparqlAlgebraToDatalogTranslator {
 				else
 					return ofac.getTypedTerm(constant, type);
 			} 
-			else {
+			else
 				return ofac.getTypedTerm(constant, type);
-			}
-		} 
+		}
 		else if (v instanceof URI) {
+            String uri = EncodeForURI.decodeURIEscapeCodes(v.stringValue());
 			if (uriRef != null) {
 				// if in the Semantic Index mode 
-				int id = uriRef.getId(v.stringValue());
+				int id = uriRef.getId(uri);
 				return ofac.getUriTemplate(ofac.getConstantLiteral(String.valueOf(id), COL_TYPE.INTEGER));
 			} 
 			else {
-				String uri = EncodeForURI.decodeURIEscapeCodes(v.stringValue());
 				return uriTemplateMatcher.generateURIFunction(uri);
 			}
 		}
@@ -523,14 +522,15 @@ public class SparqlAlgebraToDatalogTranslator {
                     return ofac.getUriTemplateForDatatype(typeURI.stringValue());
             }
 
-            String constantString = LiteralConversion.get(type).apply(lit);
-            Term constant = ofac.getConstantLiteral(constantString, type);
+            String value = LiteralConversion.get(type).apply(lit);
+            Term constant = ofac.getConstantLiteral(value, type);
             return ofac.getTypedTerm(constant, type);
         }
         else if (v instanceof URI) {
-            Function constantFunction = uriTemplateMatcher.generateURIFunction(v.stringValue());
+            String uri = EncodeForURI.decodeURIEscapeCodes(v.stringValue());
+            Function constantFunction = uriTemplateMatcher.generateURIFunction(uri);
             if (constantFunction.getArity() == 1)
-                constantFunction = ofac.getUriTemplateForDatatype(v.stringValue());
+                constantFunction = ofac.getUriTemplateForDatatype(uri);
             return constantFunction;
         }
 
