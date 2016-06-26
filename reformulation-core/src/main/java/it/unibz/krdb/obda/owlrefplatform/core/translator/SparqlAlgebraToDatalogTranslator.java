@@ -90,7 +90,7 @@ public class SparqlAlgebraToDatalogTranslator {
 		
 		TupleExpr te = pq.getTupleExpr();
 		log.debug("SPARQL algebra: \n{}", te);
-        System.out.println("SPARQL algebra: \n" + te);
+        //System.out.println("SPARQL algebra: \n" + te);
 
         TranslationProgram program = new TranslationProgram();
         TranslationResult body = tran(te, program);
@@ -111,7 +111,7 @@ public class SparqlAlgebraToDatalogTranslator {
 
         List<String> signature = Lists.transform(answerVariables, t -> ((Variable)t).getName());
 
-        System.out.println("PROGRAM\n" + program.program);
+        //System.out.println("PROGRAM\n" + program.program);
 		return new SparqlQuery(program.program, signature);
 	}
 
@@ -207,7 +207,7 @@ public class SparqlAlgebraToDatalogTranslator {
 
     private TranslationResult tran(TupleExpr currentNode, TranslationProgram program) {
 
-        System.out.println("node: \n" + currentNode);
+        //System.out.println("node: \n" + currentNode);
 
         if (currentNode instanceof Slice) {   // SLICE algebra operation
             Slice slice = (Slice) currentNode;
@@ -372,6 +372,7 @@ public class SparqlAlgebraToDatalogTranslator {
             return res;
         }
         else if (currentNode instanceof SingletonSet) {
+            // the empty BGP has no variables and gives a single solution mapping on every non-empty graph
             return new TranslationResult(ImmutableList.of(), ImmutableSet.of(), true);
         }
         else if (currentNode instanceof Group) {
