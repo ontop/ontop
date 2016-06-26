@@ -24,7 +24,6 @@ import com.google.common.collect.*;
 import it.unibz.krdb.obda.model.*;
 import it.unibz.krdb.obda.model.OBDAQueryModifiers.OrderCondition;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
-import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.SemanticIndexURIMap;
@@ -36,6 +35,7 @@ import org.openrdf.model.Value;
 import org.openrdf.model.datatypes.XMLDatatypeUtil;
 import org.openrdf.model.vocabulary.RDF;
 import org.openrdf.query.algebra.*;
+import org.openrdf.query.algebra.ValueConstant;
 import org.openrdf.query.parser.ParsedGraphQuery;
 import org.openrdf.query.parser.ParsedQuery;
 import org.openrdf.query.parser.ParsedTupleQuery;
@@ -90,6 +90,7 @@ public class SparqlAlgebraToDatalogTranslator {
 		
 		TupleExpr te = pq.getTupleExpr();
 		log.debug("SPARQL algebra: \n{}", te);
+        System.out.println("SPARQL algebra: \n" + te);
 
         TranslationProgram program = new TranslationProgram();
         TranslationResult body = tran(te, program);
@@ -110,6 +111,7 @@ public class SparqlAlgebraToDatalogTranslator {
 
         List<String> signature = Lists.transform(answerVariables, t -> ((Variable)t).getName());
 
+        System.out.println("PROGRAM\n" + program.program);
 		return new SparqlQuery(program.program, signature);
 	}
 
@@ -204,6 +206,8 @@ public class SparqlAlgebraToDatalogTranslator {
     }
 
     private TranslationResult tran(TupleExpr currentNode, TranslationProgram program) {
+
+        System.out.println("node: \n" + currentNode);
 
         if (currentNode instanceof Slice) {   // SLICE algebra operation
             Slice slice = (Slice) currentNode;
@@ -367,6 +371,9 @@ public class SparqlAlgebraToDatalogTranslator {
                 program.appendRule(res.atoms.get(0), p.getAtomsExtendedWithNulls(allVars)));
             return res;
         }
+        else if (currentNode instanceof SingletonSet) {
+            return new TranslationResult(ImmutableList.of(), ImmutableSet.of(), true);
+        }
         else if (currentNode instanceof Group) {
             throw new IllegalArgumentException("GROUP BY is not supported yet");
         }
@@ -469,7 +476,7 @@ public class SparqlAlgebraToDatalogTranslator {
 			}
 			
 
-			ValueConstant constant = ofac.getConstantLiteral(value, type);
+			Term constant = ofac.getConstantLiteral(value, type);
 
 			// v1.7: We extend the syntax such that the datatype of a
 			// constant is defined using a functional symbol.
@@ -516,7 +523,7 @@ public class SparqlAlgebraToDatalogTranslator {
             }
 
             String constantString = LiteralConversion.get(type).apply(lit);
-            ValueConstant constant = ofac.getConstantLiteral(constantString, type);
+            Term constant = ofac.getConstantLiteral(constantString, type);
             return ofac.getTypedTerm(constant, type);
         }
         else if (v instanceof URI) {
@@ -543,10 +550,17 @@ public class SparqlAlgebraToDatalogTranslator {
             Variable var = ofac.getVariable(v.getName());
             return variables.contains(var) ? var : OBDAVocabulary.NULL;
 		} 
-		else if (expr instanceof org.openrdf.query.algebra.ValueConstant) {
-			return getConstantExpression(((org.openrdf.query.algebra.ValueConstant) expr).getValue());
-		} 
-		else if (expr instanceof UnaryValueOperator) {
+		else if (expr instanceof ValueConstant) {
+			return getConstantExpression(((ValueConstant) expr).getValue());
+		}
+        else if (expr instanceof Bound) {
+            // BOUND (Sec 17.4.1.1)
+            // xsd:boolean  BOUND (variable var)
+            Var v = ((Bound) expr).getArg();
+            Variable var = ofac.getVariable(v.getName());
+            return variables.contains(var) ? ofac.getFunctionIsNotNull(var) : ofac.getBooleanConstant(false);
+        }
+        else if (expr instanceof UnaryValueOperator) {
             Term term = getExpression(((UnaryValueOperator) expr).getArg(), variables);
 
             if (expr instanceof Not) {
@@ -634,15 +648,68 @@ public class SparqlAlgebraToDatalogTranslator {
             // other subclasses
             // SameTerm
         }
-		else if (expr instanceof Bound) {
-            // BOUND (Sec 17.4.1.1)
-            // xsd:boolean  BOUND (variable var)
-            Var v = ((Bound) expr).getArg();
-            Variable var = ofac.getVariable(v.getName());
-			return variables.contains(var) ? ofac.getFunctionIsNotNull(var) : ofac.getBooleanConstant(false);
-		} 
 		else if (expr instanceof FunctionCall) {
-            return getFunctionCallTerm((FunctionCall)expr, variables);
+            FunctionCall f = (FunctionCall) expr;
+
+            int arity = f.getArgs().size();
+            List<Term> terms = new ArrayList<>(arity);
+            for (ValueExpr a : f.getArgs())
+                terms.add(getExpression(a, variables));
+
+            OperationPredicate p = XPathFunctions.get(f.getURI());
+            if (p != null) {
+                if (arity != p.getArity())
+                    throw new UnsupportedOperationException(
+                            "Wrong number of arguments (found " + terms.size() + ", only " +
+                                    p.getArity() + "supported) for SPARQL " + f.getURI() + "function");
+
+                return ofac.getFunction(p, terms);
+            }
+
+            // these are all special cases with **variable** number of arguments
+
+            switch (f.getURI()) {
+                // CONCAT (Sec 17.4.3.12)
+                // string literal  CONCAT(string literal ltrl1 ... string literal ltrln)
+                case "http://www.w3.org/2005/xpath-functions#concat":
+                    if (arity < 1)
+                        throw new UnsupportedOperationException("Wrong number of arguments (found " + terms.size() +
+                                ", at least 1) for SPARQL function CONCAT");
+
+                    Term concat = terms.get(0);
+                    for (int i = 1; i < arity; i++) // .get(i) is OK because it's based on an array
+                        concat = ofac.getFunctionConcat(concat, terms.get(i));
+                    return concat;
+
+                // REPLACE (Sec 17.4.3.15)
+                //string literal  REPLACE (string literal arg, simple literal pattern, simple literal replacement )
+                //string literal  REPLACE (string literal arg, simple literal pattern, simple literal replacement,  simple literal flags)
+                case "http://www.w3.org/2005/xpath-functions#replace":
+                    if (arity == 3)
+                        return ofac.getFunctionReplace(terms.get(0), terms.get(1), terms.get(2));
+                    else if (arity == 4)
+                        // TODO: the fourth argument is flags (see http://www.w3.org/TR/xpath-functions/#flags)
+                        // (it is ignored at the moment)
+                        return ofac.getFunctionReplace(terms.get(0), terms.get(1), terms.get(2));
+
+                    throw new UnsupportedOperationException("Wrong number of arguments (found "
+                            + terms.size() + ", only 3 or 4 supported) for SPARQL function REPLACE");
+
+                    // SUBSTR (Sec 17.4.3.3)
+                    // string literal  SUBSTR(string literal source, xsd:integer startingLoc)
+                    // string literal  SUBSTR(string literal source, xsd:integer startingLoc, xsd:integer length)
+                case "http://www.w3.org/2005/xpath-functions#substring":
+                    if (arity == 2)
+                        return ofac.getFunctionSubstring(terms.get(0), terms.get(1));
+                    else if (arity == 3)
+                        return ofac.getFunctionSubstring(terms.get(0), terms.get(1), terms.get(2));
+
+                    throw new UnsupportedOperationException("Wrong number of arguments (found "
+                            + terms.size() + ", only 2 or 3 supported) for SPARQL function SUBSTRING");
+
+                default:
+                    throw new RuntimeException("Function " + f.getURI() + " is not supported yet!");
+            }
 		}
         // other subclasses
         // SubQueryValueOperator
@@ -655,75 +722,6 @@ public class SparqlAlgebraToDatalogTranslator {
 	
 
 	
-	
-	
-	
-    /** Return the Functions
-     * @param expr
-     * @return
-     */
-    private Term getFunctionCallTerm(FunctionCall expr, ImmutableSet<Variable> variables) {
-
-        int arity = expr.getArgs().size();
-        List<Term> terms = new ArrayList<>(arity);
-        for (ValueExpr a : expr.getArgs())
-            terms.add(getExpression(a, variables));
-
-        OperationPredicate p = XPathFunctions.get(expr.getURI());
-    	if (p != null) {
-    		if (arity != p.getArity())
-                throw new UnsupportedOperationException(
-                		"Wrong number of arguments (found " + terms.size() + ", only " +
-                			 p.getArity() + "supported) for SPARQL " + expr.getURI() + "function");					
-
-    		return ofac.getFunction(p, terms);
-    	}
-    	
-    	// these are all special cases with **variable** number of arguments
-  
-        switch (expr.getURI()) {
-            // CONCAT (Sec 17.4.3.12)
-        	// string literal  CONCAT(string literal ltrl1 ... string literal ltrln)
-            case "http://www.w3.org/2005/xpath-functions#concat":
-                if (arity < 1)
-                    throw new UnsupportedOperationException("Wrong number of arguments (found " + terms.size() +
-                            ", at least 1) for SPARQL function CONCAT");
-
-                Term concat = terms.get(0);
-                for (int i = 1; i < arity; i++) // .get(i) is OK because it's based on an array
-                    concat = ofac.getFunctionConcat(concat, terms.get(i));
-                return concat;
-
-            // REPLACE (Sec 17.4.3.15)
-            //string literal  REPLACE (string literal arg, simple literal pattern, simple literal replacement )
-            //string literal  REPLACE (string literal arg, simple literal pattern, simple literal replacement,  simple literal flags)
-            case "http://www.w3.org/2005/xpath-functions#replace":
-                if (arity == 3)
-                    return ofac.getFunctionReplace(terms.get(0), terms.get(1), terms.get(2));
-                else if (arity == 4)
-                    // TODO: the fourth argument is flags (see http://www.w3.org/TR/xpath-functions/#flags)
-                    // (it is ignored at the moment)
-                    return ofac.getFunctionReplace(terms.get(0), terms.get(1), terms.get(2));
-
-                throw new UnsupportedOperationException("Wrong number of arguments (found "
-                            + terms.size() + ", only 3 or 4 supported) for SPARQL function REPLACE");
-
-            // SUBSTR (Sec 17.4.3.3)
-            // string literal  SUBSTR(string literal source, xsd:integer startingLoc)
-            // string literal  SUBSTR(string literal source, xsd:integer startingLoc, xsd:integer length)
-            case "http://www.w3.org/2005/xpath-functions#substring":
-                if (arity == 2)
-                    return ofac.getFunctionSubstring(terms.get(0), terms.get(1));
-                else if (arity == 3)
-                    return ofac.getFunctionSubstring(terms.get(0), terms.get(1), terms.get(2));
-
-                throw new UnsupportedOperationException("Wrong number of arguments (found "
-                            + terms.size() + ", only 2 or 3 supported) for SPARQL function SUBSTRING");
-            	
-            default:
-                throw new RuntimeException("Function " + expr.getURI() + " is not supported yet!");
-        }
-    }
 
 
 
