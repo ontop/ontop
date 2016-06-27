@@ -452,45 +452,43 @@ public class SparqlAlgebraToDatalogTranslator {
         return var;
     }
 
+    private Term getLiteral(Literal literal) {
+        URI typeURI = literal.getDatatype();
+        String value = literal.getLabel();
+
+        COL_TYPE type;
+        if (typeURI == null)
+            type = COL_TYPE.LITERAL;
+        else {
+            type = dtfac.getDatatype(typeURI);
+            if (type == null)
+                // ROMAN (27 June 2016): type1 in open-eq-05 test would not be supported in OWL
+                // the actual value is LOST here
+                return ofac.getUriTemplateForDatatype(typeURI.stringValue());
+                // old strict version:
+                // throw new RuntimeException("Unsupported datatype: " + typeURI);
+
+            // check if the value is (lexically) correct for the specified datatype
+            if (!XMLDatatypeUtil.isValidValue(value, typeURI))
+                throw new RuntimeException("Invalid lexical form for datatype. Found: " + value);
+        }
+
+        Term constant = ofac.getConstantLiteral(value, type);
+
+        // wrap the constant in its datatype function
+        if (type == COL_TYPE.LITERAL) {
+            // if the object has type LITERAL, check the language tag
+            String lang = literal.getLanguage();
+            if (lang != null && !lang.equals(""))
+                return ofac.getTypedTerm(constant, lang);
+        }
+        return ofac.getTypedTerm(constant, type);
+    }
+
 	private Term getLiteralOrIri(Value v) {
 
 		if (v instanceof Literal) {
-			Literal literal = (Literal) v;
-			URI typeURI = literal.getDatatype();
-			String value = literal.getLabel();
-	
-			COL_TYPE type;
-			if (typeURI == null)
-				type = COL_TYPE.LITERAL;
-			else {
-				type = dtfac.getDatatype(typeURI);
-		        if (type == null)
-					throw new RuntimeException("Unsupported datatype: " + typeURI);
-
-				// check if the value is (lexically) correct for the specified datatype
-				if (!XMLDatatypeUtil.isValidValue(value, typeURI))
-					throw new RuntimeException("Invalid lexical form for datatype. Found: " + value);
-
-				// special case for decimal without a fractions
-				if ((type == COL_TYPE.DECIMAL) && !value.contains("."))
-					type = COL_TYPE.INTEGER;
-			}
-			
-
-			Term constant = ofac.getConstantLiteral(value, type);
-
-			// v1.7: We extend the syntax such that the datatype of a
-			// constant is defined using a functional symbol.
-			if (type == COL_TYPE.LITERAL) {
-				// if the object has type LITERAL, check the language tag
-				String lang = literal.getLanguage();
-				if (lang != null && !lang.equals(""))
-					return ofac.getTypedTerm(constant, lang);
-				else
-					return ofac.getTypedTerm(constant, type);
-			} 
-			else
-				return ofac.getTypedTerm(constant, type);
+			return getLiteral((Literal) v);
 		}
 		else if (v instanceof URI) {
             String uri = EncodeForURI.decodeURIEscapeCodes(v.stringValue());
@@ -510,27 +508,16 @@ public class SparqlAlgebraToDatalogTranslator {
     private Term getConstantExpression(Value v) {
 
         if (v instanceof Literal) {
-            Literal lit = (Literal)v;
-            URI typeURI = lit.getDatatype();
-            COL_TYPE type;
-            if (typeURI == null) {
-                type = COL_TYPE.LITERAL;
-            }
-            else {
-                type = dtfac.getDatatype(typeURI);
-                if (type == null)
-                    return ofac.getUriTemplateForDatatype(typeURI.stringValue());
-            }
-
-            String value = LiteralConversion.get(type).apply(lit);
-            Term constant = ofac.getConstantLiteral(value, type);
-            return ofac.getTypedTerm(constant, type);
+            return getLiteral((Literal) v);
         }
         else if (v instanceof URI) {
             String uri = EncodeForURI.decodeURIEscapeCodes(v.stringValue());
             Function constantFunction = uriTemplateMatcher.generateURIFunction(uri);
-            if (constantFunction.getArity() == 1)
+            if (constantFunction.getArity() == 1) {
+                // ROMAN (27 June 2016: this means ZERO arguments, e.g., xsd:double or :z
+                // despite the name, this is NOT necessarily a datatype
                 constantFunction = ofac.getUriTemplateForDatatype(uri);
+            }
             return constantFunction;
         }
 
