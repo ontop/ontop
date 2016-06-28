@@ -80,13 +80,22 @@ public class SelfJoinLikeExecutor {
         private final ImmutableCollection<DataNode> newDataNodes;
         private final Optional<ImmutableSubstitution<VariableOrGroundTerm>> optionalSubstitution;
         private final ImmutableCollection<DataNode> removedDataNodes;
+        private final boolean replaceLeftJoinByInnerJoin;
 
-        protected ConcreteProposal(ImmutableCollection<DataNode> newDataNodes,
+        public ConcreteProposal(ImmutableCollection<DataNode> newDataNodes,
                                    Optional<ImmutableSubstitution<VariableOrGroundTerm>> optionalSubstitution,
                                    ImmutableCollection<DataNode> removedDataNodes) {
             this.newDataNodes = newDataNodes;
             this.optionalSubstitution = optionalSubstitution;
             this.removedDataNodes = removedDataNodes;
+            this.replaceLeftJoinByInnerJoin = false;
+        }
+
+        public ConcreteProposal(boolean replaceLeftJoinByInnerJoin) {
+            this.newDataNodes = ImmutableList.of();
+            this.optionalSubstitution = Optional.empty();
+            this.removedDataNodes = ImmutableList.of();
+            this.replaceLeftJoinByInnerJoin = replaceLeftJoinByInnerJoin;
         }
 
         public ImmutableCollection<DataNode> getNewDataNodes() {
@@ -103,6 +112,10 @@ public class SelfJoinLikeExecutor {
 
         public boolean shouldOptimize() {
             return !removedDataNodes.isEmpty();
+        }
+
+        public boolean getReplaceLeftJoinByInnerJoin() {
+            return replaceLeftJoinByInnerJoin;
         }
 
     }
