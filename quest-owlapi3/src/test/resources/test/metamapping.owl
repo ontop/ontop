@@ -9,13 +9,13 @@
 ]>
 
 
-<rdf:RDF xmlns="http://it.unibz.krdb/obda/test/simple#"
-     xml:base="http://it.unibz.krdb/obda/test/simple"
+<rdf:RDF xmlns="http://it.unibz.inf/obda/test/simple#"
+     xml:base="http://it.unibz.inf/obda/test/simple"
      xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
      xmlns:owl="http://www.w3.org/2002/07/owl#"
      xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
      xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
-    <owl:Ontology rdf:about="http://it.unibz.krdb/obda/test/simple"/>
+    <owl:Ontology rdf:about="http://it.unibz.inf/obda/test/simple"/>
     
 
 
@@ -30,33 +30,33 @@
     
 
 
-    <!-- http://it.unibz.krdb/obda/test/simple#P -->
+    <!-- http://it.unibz.inf/obda/test/simple#P -->
 
-    <owl:ObjectProperty rdf:about="http://it.unibz.krdb/obda/test/simple#P"/>
+    <owl:ObjectProperty rdf:about="http://it.unibz.inf/obda/test/simple#P"/>
     
 
 
-    <!-- http://it.unibz.krdb/obda/test/simple#P_1 -->
+    <!-- http://it.unibz.inf/obda/test/simple#P_1 -->
 
-    <owl:ObjectProperty rdf:about="http://it.unibz.krdb/obda/test/simple#P_1"/>
+    <owl:ObjectProperty rdf:about="http://it.unibz.inf/obda/test/simple#P_1"/>
     
 
 
-    <!-- http://it.unibz.krdb/obda/test/simple#P_2 -->
+    <!-- http://it.unibz.inf/obda/test/simple#P_2 -->
 
-    <owl:ObjectProperty rdf:about="http://it.unibz.krdb/obda/test/simple#P_2"/>
+    <owl:ObjectProperty rdf:about="http://it.unibz.inf/obda/test/simple#P_2"/>
     
 
 
-    <!-- http://it.unibz.krdb/obda/test/simple#Q_1 -->
+    <!-- http://it.unibz.inf/obda/test/simple#Q_1 -->
 
-    <owl:ObjectProperty rdf:about="http://it.unibz.krdb/obda/test/simple#Q_1"/>
+    <owl:ObjectProperty rdf:about="http://it.unibz.inf/obda/test/simple#Q_1"/>
     
 
 
-    <!-- http://it.unibz.krdb/obda/test/simple#Q_2 -->
+    <!-- http://it.unibz.inf/obda/test/simple#Q_2 -->
 
-    <owl:ObjectProperty rdf:about="http://it.unibz.krdb/obda/test/simple#Q_2"/>
+    <owl:ObjectProperty rdf:about="http://it.unibz.inf/obda/test/simple#Q_2"/>
     
 
 
@@ -71,9 +71,9 @@
     
 
 
-    <!-- http://it.unibz.krdb/obda/test/simple#U -->
+    <!-- http://it.unibz.inf/obda/test/simple#U -->
 
-    <owl:DatatypeProperty rdf:about="http://it.unibz.krdb/obda/test/simple#U">
+    <owl:DatatypeProperty rdf:about="http://it.unibz.inf/obda/test/simple#U">
     <rdfs:range rdf:resource="&rdfs;Literal"/>
     </owl:DatatypeProperty>
 
@@ -89,45 +89,45 @@
     
 
 
-    <!-- http://it.unibz.krdb/obda/test/simple#A -->
+    <!-- http://it.unibz.inf/obda/test/simple#A -->
 
-    <owl:Class rdf:about="http://it.unibz.krdb/obda/test/simple#A"/>
+    <owl:Class rdf:about="http://it.unibz.inf/obda/test/simple#A"/>
     
 
 
-    <!-- http://it.unibz.krdb/obda/test/simple#A_1 -->
+    <!-- http://it.unibz.inf/obda/test/simple#A_1 -->
 
-    <owl:Class rdf:about="http://it.unibz.krdb/obda/test/simple#A_1"/>
+    <owl:Class rdf:about="http://it.unibz.inf/obda/test/simple#A_1"/>
     
 
 
-    <!-- http://it.unibz.krdb/obda/test/simple#A_2 -->
+    <!-- http://it.unibz.inf/obda/test/simple#A_2 -->
 
-    <owl:Class rdf:about="http://it.unibz.krdb/obda/test/simple#A_2"/>
+    <owl:Class rdf:about="http://it.unibz.inf/obda/test/simple#A_2"/>
     
 
 
-    <!-- http://it.unibz.krdb/obda/test/simple#B -->
+    <!-- http://it.unibz.inf/obda/test/simple#B -->
 
-    <owl:Class rdf:about="http://it.unibz.krdb/obda/test/simple#B"/>
+    <owl:Class rdf:about="http://it.unibz.inf/obda/test/simple#B"/>
     
 
 
-    <!-- http://it.unibz.krdb/obda/test/simple#B_1 -->
+    <!-- http://it.unibz.inf/obda/test/simple#B_1 -->
 
-    <owl:Class rdf:about="http://it.unibz.krdb/obda/test/simple#B_1"/>
+    <owl:Class rdf:about="http://it.unibz.inf/obda/test/simple#B_1"/>
     
 
 
-    <!-- http://it.unibz.krdb/obda/test/simple#B_2 -->
+    <!-- http://it.unibz.inf/obda/test/simple#B_2 -->
 
-    <owl:Class rdf:about="http://it.unibz.krdb/obda/test/simple#B_2"/>
+    <owl:Class rdf:about="http://it.unibz.inf/obda/test/simple#B_2"/>
     
 
 
-    <!-- http://it.unibz.krdb/obda/test/simple#C -->
+    <!-- http://it.unibz.inf/obda/test/simple#C -->
 
-    <owl:Class rdf:about="http://it.unibz.krdb/obda/test/simple#C"/>
+    <owl:Class rdf:about="http://it.unibz.inf/obda/test/simple#C"/>
 </rdf:RDF>
 
 
