@@ -54,7 +54,8 @@ public class MultipleSchemasTestH2 {
     @BeforeClass
     public static void setUp() throws Exception {
 
-        String url = "jdbc:h2:tcp://localhost/./helloworld";
+        //String url = "jdbc:h2:tcp://localhost/./helloworld";
+        String url = "jdbc:h2:mem:questrepository;";
         String username = "sa";
         String password = "";
 

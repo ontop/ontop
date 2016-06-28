@@ -8,7 +8,7 @@ rdfs:		http://www.w3.org/2000/01/rdf-schema#
 
 [SourceDeclaration]
 sourceUri	RandBStockExchange
-connectionUrl	jdbc:h2:tcp://localhost/./helloworld;
+connectionUrl	jdbc:h2:mem:questrepository;
 username	sa
 password	
 driverClass	org.h2.Driver

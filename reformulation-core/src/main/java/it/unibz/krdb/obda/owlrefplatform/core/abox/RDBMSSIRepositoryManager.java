@@ -549,16 +549,19 @@ public class RDBMSSIRepositoryManager implements Serializable {
 
 	private void process(Connection conn, DataPropertyAssertion ax, PreparedStatement uriidStm, Map<SemanticIndexViewID, PreparedStatement> stmMap) throws SQLException {
 
-		// replace the property by its canonical representative 
+		// replace the property by its canonical representative
 		DataPropertyExpression dpe0 = ax.getProperty();
 		DataPropertyExpression dpe = reasonerDag.getDataPropertyDAG().getCanonicalForm(dpe0);		
 		int idx = cacheSI.getEntry(dpe).getIndex();
 		
 		ObjectConstant subject = ax.getSubject();
-		
+		int uri_id = getObjectConstantUriId(subject, uriidStm);
+
 		ValueConstant object = ax.getValue();
 		COL_TYPE objectType = object.getType();
-		
+
+		// ROMAN (28 June 2016): quite fragile because objectType is UNSUPPORTED for SHORT, BYTE, etc.
+		//                       a a workaround, obtain the URI ID first, without triggering an exception here
 		SemanticIndexView view =  views.getView(subject.getType(), objectType);
 		PreparedStatement stm = stmMap.get(view.getId());
 		if (stm == null) {
@@ -566,7 +569,6 @@ public class RDBMSSIRepositoryManager implements Serializable {
 			stmMap.put(view.getId(), stm);
 		}
 
-		int uri_id = getObjectConstantUriId(subject, uriidStm);
 		stm.setInt(1, uri_id);
 		
 		String value = object.getValue();
@@ -671,8 +673,8 @@ public class RDBMSSIRepositoryManager implements Serializable {
 		int uri_id = uriMap.getId(uri);
 		if (uri_id < 0) {
 			uri_id = maxURIId + 1;
-			uriMap.set(uri, uri_id);			
-			maxURIId++;		
+			uriMap.set(uri, uri_id);
+			maxURIId++;
 			
 			// Construct the database INSERT statement
 			uriidStm.setInt(1, uri_id);

@@ -29,7 +29,6 @@ import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.SemanticIndexURIMap;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.UriTemplateMatcher;
 import it.unibz.krdb.obda.parser.EncodeForURI;
-import jdk.nashorn.internal.ir.annotations.Immutable;
 import org.openrdf.model.Literal;
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
@@ -364,7 +363,7 @@ public class SparqlAlgebraToDatalogTranslator {
                     .map(bs -> empty.extendWithBindings(
                             StreamSupport.stream(bs.spliterator(), false),
                             be -> ofac.getVariable(be.getName()),
-                            (be, vars) -> getConstantExpression(be.getValue()))).collect(Collectors.toList());
+                            (be, vars) -> getLiteralOrIri(be.getValue()))).collect(Collectors.toList());
 
             ImmutableSet.Builder allVarsBuilder = ImmutableSet.<Variable>builder();
             bindings.forEach(s -> allVarsBuilder.addAll(s.variables));
@@ -452,7 +451,7 @@ public class SparqlAlgebraToDatalogTranslator {
         return var;
     }
 
-    private Term getLiteral(Literal literal) {
+    private Term getTermForLiteral(Literal literal) {
         URI typeURI = literal.getDatatype();
         String value = literal.getLabel();
 
@@ -485,46 +484,45 @@ public class SparqlAlgebraToDatalogTranslator {
         return ofac.getTypedTerm(constant, type);
     }
 
-	private Term getLiteralOrIri(Value v) {
+    /**
+     *
+     * @param v
+     * @param unknownUrisToTemplates - the URIs are treated differently in triple patterns
+     *                               and filter expressions (this will be normalised later)
+     * @return
+     */
 
-		if (v instanceof Literal) {
-			return getLiteral((Literal) v);
-		}
-		else if (v instanceof URI) {
-            String uri = EncodeForURI.decodeURIEscapeCodes(v.stringValue());
-			if (uriRef != null) {
-				// if in the Semantic Index mode 
-				int id = uriRef.getId(uri);
-				return ofac.getUriTemplate(ofac.getConstantLiteral(String.valueOf(id), COL_TYPE.INTEGER));
-			} 
-			else {
-				return uriTemplateMatcher.generateURIFunction(uri);
-			}
-		}
+    private Term getTermForIri(URI v, boolean unknownUrisToTemplates) {
 
-        throw new RuntimeException("The value " + v + " is not supported yet!");
-	}
+        String uri = EncodeForURI.decodeURIEscapeCodes(v.stringValue());
 
-    private Term getConstantExpression(Value v) {
-
-        if (v instanceof Literal) {
-            return getLiteral((Literal) v);
+        if (uriRef != null) {  // if in the Semantic Index mode
+            int id = uriRef.getId(uri);
+            if (id < 0 && unknownUrisToTemplates)  // URI is not found and need to wrap it in a template
+                return ofac.getUriTemplateForDatatype(uri);
+            else
+                return ofac.getUriTemplate(ofac.getConstantLiteral(String.valueOf(id), COL_TYPE.INTEGER));
         }
-        else if (v instanceof URI) {
-            String uri = EncodeForURI.decodeURIEscapeCodes(v.stringValue());
+        else {
             Function constantFunction = uriTemplateMatcher.generateURIFunction(uri);
-            if (constantFunction.getArity() == 1) {
+            if (constantFunction.getArity() == 1 && unknownUrisToTemplates) {
                 // ROMAN (27 June 2016: this means ZERO arguments, e.g., xsd:double or :z
                 // despite the name, this is NOT necessarily a datatype
                 constantFunction = ofac.getUriTemplateForDatatype(uri);
             }
             return constantFunction;
         }
-
-        throw new RuntimeException("The value " + v + " is not supported yet!");
     }
 
+	private Term getLiteralOrIri(Value v) {
 
+		if (v instanceof Literal)
+			return getTermForLiteral((Literal) v);
+		else if (v instanceof URI)
+            return getTermForIri((URI)v, false);
+
+        throw new RuntimeException("The value " + v + " is not supported yet!");
+	}
 
 
 	private Term getExpression(ValueExpr expr, ImmutableSet<Variable> variables) {
@@ -539,8 +537,14 @@ public class SparqlAlgebraToDatalogTranslator {
             return variables.contains(var) ? var : OBDAVocabulary.NULL;
 		} 
 		else if (expr instanceof ValueConstant) {
-			return getConstantExpression(((ValueConstant) expr).getValue());
-		}
+			Value v = ((ValueConstant) expr).getValue();
+            if (v instanceof Literal)
+                return getTermForLiteral((Literal) v);
+            else if (v instanceof URI)
+                return getTermForIri((URI)v, true);
+
+            throw new RuntimeException("The value " + v + " is not supported yet!");
+        }
         else if (expr instanceof Bound) {
             // BOUND (Sec 17.4.1.1)
             // xsd:boolean  BOUND (variable var)
