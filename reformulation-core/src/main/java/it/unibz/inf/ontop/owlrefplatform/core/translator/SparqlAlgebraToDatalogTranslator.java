@@ -609,6 +609,8 @@ public class SparqlAlgebraToDatalogTranslator {
                 return ofac.getFunctionOR(term1, term2);
             }
             else if (expr instanceof SameTerm) {
+                // sameTerm (Sec 17.4.1.8)
+                // ROMAN (28 June 2016): strictly speaking it's not equality
                 return ofac.getFunctionEQ(term1, term2);
             }
             else if (expr instanceof Regex) {
@@ -644,8 +646,6 @@ public class SparqlAlgebraToDatalogTranslator {
 
                 return ofac.getLANGMATCHESFunction(term1, term2);
             }
-            // other subclasses
-            // SameTerm
         }
 		else if (expr instanceof FunctionCall) {
             FunctionCall f = (FunctionCall) expr;
