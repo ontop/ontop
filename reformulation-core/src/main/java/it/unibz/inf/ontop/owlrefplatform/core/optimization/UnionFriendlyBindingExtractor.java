@@ -2,10 +2,12 @@ package it.unibz.inf.ontop.owlrefplatform.core.optimization;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.*;
 
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionImpl;
 import it.unibz.inf.ontop.pivotalrepr.*;
+import it.unibz.inf.ontop.pivotalrepr.unfolding.ProjectedVariableExtractionTools;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 
@@ -19,9 +21,12 @@ import java.util.stream.Stream;
 public class UnionFriendlyBindingExtractor implements BindingExtractor {
 
 
+
+
     @Override
     public Optional<ImmutableSubstitution<ImmutableTerm>> extractInSubTree(IntermediateQuery query,
                                                                            QueryNode subTreeRootNode) {
+
         ImmutableMap<Variable, ImmutableTerm> substitutionMap = extractBindings(query, subTreeRootNode)
                 .collect(ImmutableCollectors.toMap());
 
@@ -29,6 +34,7 @@ public class UnionFriendlyBindingExtractor implements BindingExtractor {
                 .filter(m -> !m.isEmpty())
                 .map(ImmutableSubstitutionImpl::new);
     }
+
 
     private Stream<Map.Entry<Variable, ImmutableTerm>> extractBindings(IntermediateQuery query, QueryNode currentNode){
 
@@ -63,44 +69,61 @@ public class UnionFriendlyBindingExtractor implements BindingExtractor {
 
     /**
      * Extract the bindings from the union node, searching recursively for bindings in its children.
-     * Ignore conflicting definitions of variables
+     * Ignore conflicting definitions of variables and return only the common bindings between the subtree
      */
     private Stream<Map.Entry<Variable, ImmutableTerm>> extractBindingsFromUnionNode(IntermediateQuery query,
                                                                            UnionNode currentNode) {
         Map<Variable, ImmutableTerm> substitutionMap = new HashMap<>();
-        Set<Variable> variablesWithConflictingDefinitions = new HashSet<>();
+        Set<Variable> commonVariables = new HashSet<>();
+        Set<Variable> variablesWithConflictingDefinitions = new HashSet<>();;
+
+
+        query.getFirstChild(currentNode).ifPresent(child -> {
+            //get variables from the first child
+            ImmutableSet<Variable> varsFirstChild = ProjectedVariableExtractionTools.extractProjectedVariables(query, child);
+
+            commonVariables.addAll(varsFirstChild); }
+        );
+
+        //update commonVariables between the children
+        query.getChildren(currentNode).forEach(child ->
+                commonVariables.retainAll(ProjectedVariableExtractionTools.extractProjectedVariables(query, child)));
 
         query.getChildren(currentNode).stream()
-                .map(c -> extractBindings(query, c))
-                .forEach(entries -> entries
-                        .forEach(e -> {
-                            Variable variable = e.getKey();
-                            ImmutableTerm value = e.getValue();
+                    .map(c -> extractBindings(query, c))
+                    .forEach(entries -> entries
+                            .forEach(e -> {
+                                Variable variable = e.getKey();
+                                ImmutableTerm value = e.getValue();
 
-                            if (!variablesWithConflictingDefinitions.contains(variable)) {
-                                Optional<ImmutableTerm> optionalPreviousValue = Optional.ofNullable(substitutionMap.get(variable));
+                                //return only the common bindings between the child sub tree and the non conflicting one
+                                if (commonVariables.contains(variable) && !variablesWithConflictingDefinitions.contains(variable)) {
+                                    Optional<ImmutableTerm> optionalPreviousValue = Optional.ofNullable(substitutionMap.get(variable));
 
-                                if (optionalPreviousValue.isPresent()) {
-                                    if (!areCompatible(optionalPreviousValue.get(), value)) {
-                                        substitutionMap.remove(variable);
-                                        variablesWithConflictingDefinitions.add(variable);
+                                    if (optionalPreviousValue.isPresent()) {
+                                        if (!areCompatible(optionalPreviousValue.get(), value)) {
+                                            substitutionMap.remove(variable);
+                                            variablesWithConflictingDefinitions.add(variable);
+                                        }
+                                        // otherwise does nothing
                                     }
-                                    // otherwise does nothing
+                                    /**
+                                     * New variable
+                                     */
+                                    else {
+                                        substitutionMap.put(variable, value);
+                                    }
                                 }
-                                /**
-                                 * New variable
-                                 */
-                                else {
-                                    substitutionMap.put(variable, value);
+                                else{
+                                    commonVariables.remove(variable);
                                 }
-                            }
-                        }));
+                            }));
 
         return substitutionMap.entrySet().stream();
     }
 
     /**
-     * TODO: make explicit its assumptions ans make sure they hold
+     * TODO: make explicit its assumptions and make sure they hold
      * Verify if the ImmutableTerm are Compatible
      */
     private static boolean areCompatible(ImmutableTerm term1, ImmutableTerm term2) {
