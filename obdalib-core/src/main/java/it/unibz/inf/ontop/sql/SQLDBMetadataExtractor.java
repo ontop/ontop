@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.sql;
 
 
 import it.unibz.inf.ontop.injection.OBDAProperties;
+import it.unibz.inf.ontop.model.DataSourceMetadata;
 import it.unibz.inf.ontop.model.OBDADataSource;
 import it.unibz.inf.ontop.model.OBDAModel;
 import it.unibz.inf.ontop.nativeql.DBConnectionWrapper;
@@ -53,6 +54,23 @@ public class SQLDBMetadataExtractor implements DBMetadataExtractor {
         Connection connection = (Connection) dbConnection.getConnection();
         try {
             DBMetadata metadata = RDBMetadataExtractionTools.createMetadata(connection);
+            return extract(dataSource, obdaModel, dbConnection, metadata);
+        } catch (SQLException e) {
+            throw new DBMetadataException(e.getMessage());
+        }
+    }
+
+    @Override
+    public DBMetadata extract(OBDADataSource dataSource, OBDAModel model, @Nullable DBConnectionWrapper dbConnection,
+                                      DataSourceMetadata partiallyDefinedMetadata) throws DBMetadataException {
+
+        if (!(partiallyDefinedMetadata instanceof DBMetadata)) {
+            throw new IllegalArgumentException("Was expecting a DBMetadata");
+        }
+
+        Connection connection = (Connection) dbConnection.getConnection();
+        try {
+            DBMetadata metadata = (DBMetadata) partiallyDefinedMetadata;
 
             // if we have to parse the full metadata or just the table list in the mappings
             if (obtainFullMetadata) {
@@ -65,7 +83,7 @@ public class SQLDBMetadataExtractor implements DBMetadataExtractor {
 
                     // Parse mappings. Just to get the table names in use
 
-                    Set<RelationID> realTables = getRealTables(metadata.getQuotedIDFactory(), obdaModel.getMappings(
+                    Set<RelationID> realTables = getRealTables(metadata.getQuotedIDFactory(), model.getMappings(
                             dataSource.getSourceID()));
                     userConstraints.ifPresent(c -> {
                         // Add the tables referred to by user-supplied foreign keys
@@ -92,6 +110,5 @@ public class SQLDBMetadataExtractor implements DBMetadataExtractor {
 
         } catch (SQLException e) {
             throw new DBMetadataException(e.getMessage());
-        }
-    }
+        }    }
 }

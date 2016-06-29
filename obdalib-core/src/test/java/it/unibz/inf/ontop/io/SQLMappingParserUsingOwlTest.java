@@ -37,6 +37,7 @@ import it.unibz.inf.ontop.model.OBDADataFactory;
 import it.unibz.inf.ontop.model.OBDADataSource;
 import it.unibz.inf.ontop.model.OBDAMappingAxiom;
 import it.unibz.inf.ontop.model.OBDAModel;
+import it.unibz.inf.ontop.ontology.impl.OntologyVocabularyImpl;
 import org.junit.Before;
 import org.junit.Test;
 import it.unibz.inf.ontop.exception.DuplicateMappingException;
@@ -112,34 +113,34 @@ public class SQLMappingParserUsingOwlTest {
     @Test(expected=InvalidMappingExceptionWithIndicator.class)
     public void testLoadWithBlankMappingId()
             throws DuplicateMappingException, InvalidDataSourceException, InvalidMappingException, IOException, InvalidPredicateDeclarationException {
-        loadObdaFile("src/test/resources/org/semanticweb/ontop/io/SchoolBadFile5.obda");
+        loadObdaFile("src/test/resources/it/unibz/inf/ontop/io/SchoolBadFile5.obda");
     }
 
     @Test(expected=InvalidMappingExceptionWithIndicator.class)
     public void testLoadWithBlankTargetQuery() throws DuplicateMappingException, InvalidMappingException, InvalidPredicateDeclarationException, InvalidDataSourceException, IOException {
-        loadObdaFile("src/test/resources/org/semanticweb/ontop/io/SchoolBadFile6.obda");
+        loadObdaFile("src/test/resources/it/unibz/inf/ontop/io/SchoolBadFile6.obda");
     }
 
     @Test(expected=InvalidMappingExceptionWithIndicator.class)
     public void testLoadWithBlankSourceQuery() throws DuplicateMappingException, InvalidMappingException, InvalidPredicateDeclarationException, InvalidDataSourceException, IOException {
-        loadObdaFile("src/test/resources/org/semanticweb/ontop/io/SchoolBadFile7.obda");
+        loadObdaFile("src/test/resources/it/unibz/inf/ontop/io/SchoolBadFile7.obda");
     }
 
     @Test(expected=IOException.class)
     public void testLoadWithBadTargetQuery() throws DuplicateMappingException, InvalidMappingException,
             InvalidPredicateDeclarationException, InvalidDataSourceException, IOException {
-        loadObdaFile("src/test/resources/org/semanticweb/ontop/io/SchoolBadFile8.obda");
+        loadObdaFile("src/test/resources/it/unibz/inf/ontop/io/SchoolBadFile8.obda");
     }
 
     @Test(expected=IOException.class)
     public void testLoadWithPredicateDeclarations() throws Exception {
-        loadObdaFile("src/test/resources/org/semanticweb/ontop/io/SchoolBadFile9.obda");
+        loadObdaFile("src/test/resources/it/unibz/inf/ontop/io/SchoolBadFile9.obda");
     }
 
     @Test(expected=InvalidMappingExceptionWithIndicator.class)
     public void testLoadWithAllMistakes() throws DuplicateMappingException, InvalidMappingException,
             InvalidPredicateDeclarationException, InvalidDataSourceException, IOException {
-            loadObdaFile("src/test/resources/org/semanticweb/ontop/io/SchoolBadFile10.obda");
+            loadObdaFile("src/test/resources/it/unibz/inf/ontop/io/SchoolBadFile10.obda");
     }
     
     /*
@@ -149,9 +150,10 @@ public class SQLMappingParserUsingOwlTest {
     private void saveRegularFile() throws Exception {
         OBDAModel model = modelFactory.createOBDAModel(ImmutableSet.<OBDADataSource>of(),
                 ImmutableMap.<URI, ImmutableList<OBDAMappingAxiom>>of(),
-                nativeQLFactory.create(ImmutableMap.<String, String>of()));
+                nativeQLFactory.create(ImmutableMap.<String, String>of()),
+                new OntologyVocabularyImpl());
         OntopNativeMappingSerializer writer = new OntopNativeMappingSerializer(model);
-        writer.save(new File("src/test/java/org/semanticweb/ontop/io/SchoolRegularFile.obda"));
+        writer.save(new File("src/test/java/it/unibz/inf/ontop/io/SchoolRegularFile.obda"));
     }
 
     private void saveFileWithMultipleDataSources() throws Exception {
@@ -164,11 +166,11 @@ public class SQLMappingParserUsingOwlTest {
         mappingIndex = addMoreSampleMappings(mappingIndex, datasource2.getSourceID());
 
         OBDAModel model = modelFactory.createOBDAModel(ImmutableSet.of(dataSource, datasource2),
-                ImmutableMap.copyOf(mappingIndex), nativeQLFactory.create(prefixes));
+                ImmutableMap.copyOf(mappingIndex), nativeQLFactory.create(prefixes), new OntologyVocabularyImpl());
         OntopNativeMappingSerializer writer = new OntopNativeMappingSerializer(model);
 
         // Save the model
-        writer.save(new File("src/test/java/org/semanticweb/ontop/io/SchoolMultipleDataSources.obda"));
+        writer.save(new File("src/test/java/it/unibz/inf/ontop/io/SchoolMultipleDataSources.obda"));
     }
 
     /*
@@ -176,7 +178,7 @@ public class SQLMappingParserUsingOwlTest {
      */
 
     private void loadRegularFile() throws Exception {
-        OBDAModel model = loadObdaFile("src/test/java/org/semanticweb/ontop/io/SchoolRegularFile.obda");
+        OBDAModel model = loadObdaFile("src/test/java/it/unibz/inf/ontop/io/SchoolRegularFile.obda");
 
         // Check the content
         assertEquals(model.getPrefixManager().getPrefixMap().size(), 5);
@@ -185,7 +187,7 @@ public class SQLMappingParserUsingOwlTest {
     }
 
     private void loadFileWithMultipleDataSources() throws Exception {
-        OBDAModel model = loadObdaFile("src/test/java/org/semanticweb/ontop/io/SchoolMultipleDataSources.obda");
+        OBDAModel model = loadObdaFile("src/test/java/it/unibz/inf/ontop/io/SchoolMultipleDataSources.obda");
 
         // Check the content
         assertEquals(model.getPrefixManager().getPrefixMap().size(), 6);

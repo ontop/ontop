@@ -6,6 +6,7 @@ import it.unibz.inf.ontop.io.PrefixManager;
 import it.unibz.inf.ontop.model.OBDADataSource;
 import it.unibz.inf.ontop.model.OBDAMappingAxiom;
 import it.unibz.inf.ontop.model.OBDAModel;
+import it.unibz.inf.ontop.ontology.ImmutableOntologyVocabulary;
 
 import java.net.URI;
 import java.util.Map;
@@ -23,7 +24,8 @@ import java.util.Set;
  */
 public interface OBDAFactoryWithException {
 
-    public OBDAModel createOBDAModel(Set<OBDADataSource> dataSources,
+    OBDAModel createOBDAModel(Set<OBDADataSource> dataSources,
                                      Map<URI, ImmutableList<OBDAMappingAxiom>> newMappings,
-                                     PrefixManager prefixManager) throws DuplicateMappingException;
+                                     PrefixManager prefixManager,
+                                     ImmutableOntologyVocabulary ontologyVocabulary) throws DuplicateMappingException;
 }

@@ -43,7 +43,7 @@ import it.unibz.inf.ontop.utils.IDGenerator;
  */
 public class MappingSplitter {
 
-	private static List<OBDAMappingAxiom> splitMappings(List<OBDAMappingAxiom> mappings,
+	public static List<OBDAMappingAxiom> splitMappings(List<OBDAMappingAxiom> mappings,
 														NativeQueryLanguageComponentFactory nativeQLFactory) {
 
 		List<OBDAMappingAxiom> newMappings = new ArrayList<>();

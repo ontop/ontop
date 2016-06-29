@@ -6,6 +6,7 @@ import it.unibz.inf.ontop.io.PrefixManager;
 import it.unibz.inf.ontop.model.OBDADataSource;
 import it.unibz.inf.ontop.model.OBDAMappingAxiom;
 import it.unibz.inf.ontop.model.OBDAModel;
+import it.unibz.inf.ontop.ontology.ImmutableOntologyVocabulary;
 
 import javax.inject.Inject;
 import java.lang.reflect.Constructor;
@@ -55,7 +56,7 @@ public class OBDAFactoryWithExceptionImpl
     @Override
     public OBDAModel createOBDAModel(Set<OBDADataSource> dataSources,
                                      Map<URI, ImmutableList<OBDAMappingAxiom>> newMappings,
-                                     PrefixManager prefixManager)
+                                     PrefixManager prefixManager, ImmutableOntologyVocabulary ontologyVocabulary)
             throws DuplicateMappingException {
         try {
             /**
@@ -63,7 +64,7 @@ public class OBDAFactoryWithExceptionImpl
              */
             Constructor constructor = findFirstConstructor(OBDAModel.class);
             return (OBDAModel) constructor.newInstance(dataSources,
-                    newMappings, prefixManager);
+                    newMappings, prefixManager, ontologyVocabulary);
             /**
              * Exception management
              */
@@ -81,7 +82,7 @@ public class OBDAFactoryWithExceptionImpl
             throw new RuntimeException(targetException.getMessage());
 
         } catch (Exception e) {
-            throw new RuntimeException(e.getMessage());
+            throw new RuntimeException(e);
         }
     }
 }

@@ -20,6 +20,7 @@ package it.unibz.inf.ontop.utils;
  * #L%
  */
 
+import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.Function;
 import it.unibz.inf.ontop.model.Predicate.COL_TYPE;
@@ -55,16 +56,22 @@ import net.sf.jsqlparser.statement.select.SubSelect;
 
 import com.google.common.collect.ImmutableMap;
 
-public class Mapping2DatalogConverter {
+public class Mapping2DatalogConverter implements IMapping2DatalogConverter {
 
 	private static final OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 
 	/**
 	 * Creates a mapping analyzer by taking into account the OBDA model.
 	 */
-	public static List<CQIE> constructDatalogProgram(Collection<OBDAMappingAxiom> mappings, DBMetadata dbMetadata) {
+	public ImmutableList<CQIE> constructDatalogProgram(Collection<OBDAMappingAxiom> mappings, DataSourceMetadata metadata) {
+
+        if (!(metadata instanceof DBMetadata)) {
+            throw new IllegalArgumentException("A DBMetadata was expected");
+        }
+
+        DBMetadata dbMetadata = (DBMetadata) metadata;
 		
-		List<CQIE> datalogProgram = new LinkedList<>();
+		ImmutableList.Builder<CQIE> listBuilder = ImmutableList.builder();
 		List<String> errorMessages = new ArrayList<>();
 		
 		QuotedIDFactory idfac = dbMetadata.getQuotedIDFactory();
@@ -114,7 +121,7 @@ public class Mapping2DatalogConverter {
                     Function head = (Function)renameVariables(atom, lookupTable, idfac);
                     // Create a new rule from the new head and the body
                     CQIE rule = fac.getCQIE(head, bodyAtoms);
-                    datalogProgram.add(rule);
+                    listBuilder.add(rule);
                 }
 			} 
 			catch (Exception e) {
@@ -136,7 +143,7 @@ public class Mapping2DatalogConverter {
 			throw  new IllegalArgumentException(msg);
 		}
 
-		return datalogProgram;
+		return listBuilder.build();
 	}
 
 

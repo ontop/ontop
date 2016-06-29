@@ -99,7 +99,7 @@ public class Mapping2DatalogConverterTest extends TestCase {
 		mappingList.add(mappingAxiom);
 
 		IMapping2DatalogConverter mapping2DatalogConverter = factory.create(md);
-		List<CQIE> dp = mapping2DatalogConverter.constructDatalogProgram(mappingList);
+		List<CQIE> dp = mapping2DatalogConverter.constructDatalogProgram(mappingList, md);
 		
 		assertNotNull(dp);
 		System.out.println(dp.toString());

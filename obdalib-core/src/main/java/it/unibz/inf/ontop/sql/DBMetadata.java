@@ -174,6 +174,27 @@ public class DBMetadata implements DataSourceMetadata {
 		return driverVersion;
 	}
 
+	@Override
+	public String printKeys() {
+		StringBuilder builder = new StringBuilder();
+		Collection<DatabaseRelationDefinition> table_list = getDatabaseRelations();
+		// Prints all primary keys
+		builder.append("\n====== Unique constraints ==========\n");
+		for (DatabaseRelationDefinition dd : table_list) {
+			builder.append(dd + ";\n");
+			for (UniqueConstraint uc : dd.getUniqueConstraints())
+				builder.append(uc + ";\n");
+			builder.append("\n");
+		}
+		// Prints all foreign keys
+		builder.append("====== Foreign key constraints ==========\n");
+		for(DatabaseRelationDefinition dd : table_list) {
+			for (ForeignKeyConstraint fk : dd.getForeignKeys())
+				builder.append(fk + ";\n");
+		}
+		return builder.toString();
+	}
+
 	public String getDbmsProductName() {
 		return databaseProductName;
 	}
