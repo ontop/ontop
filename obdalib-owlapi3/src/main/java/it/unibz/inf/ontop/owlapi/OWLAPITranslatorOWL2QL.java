@@ -48,6 +48,11 @@ public class OWLAPITranslatorOWL2QL implements OWLAxiomVisitor {
 		helper = new OWLAPITranslatorHelper(dl_onto.getVocabulary());
 	}
 	
+	public OWLAPITranslatorOWL2QL(Ontology ontology) {
+		dl_onto = ontology;
+		helper = new OWLAPITranslatorHelper(dl_onto.getVocabulary());
+	}
+	
 	public ImmutableOntologyVocabulary getVocabulary() {
 		return dl_onto.getVocabulary();
 	}
@@ -801,7 +806,7 @@ public class OWLAPITranslatorOWL2QL implements OWLAxiomVisitor {
 	 * @throws TranslationException
 	 */
 	
-	private ClassExpression getSubclassExpression(OWLClassExpression owlCE) throws TranslationException {
+	public ClassExpression getSubclassExpression(OWLClassExpression owlCE) throws TranslationException {
 		
 		if (owlCE instanceof OWLClass) {
 			return helper.getOClass((OWLClass)owlCE);
