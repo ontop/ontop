@@ -742,6 +742,7 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 			ClassExpression cexp = owlTranslator.getSubclassExpression(ce);
 			
 			//TODO: Remember - I needed to change this from private to public!!
+			// Get sub classes from DAG
 			EquivalencesDAG<ClassExpression> classDAG = this.questInstance.getReformulationReasoner().getClassDAG();
 			Equivalences<ClassExpression> classEquivalences = classDAG.getVertex(cexp);
 
@@ -763,7 +764,7 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 		}
 
 		OWLAPITranslator2QLOWL ontopTranslator = new OWLAPITranslator2QLOWL();
-		return ontopTranslator.translate(subClassesSet);
+		return ontopTranslator.translateToNodeSet(subClassesSet);
 	}
 
 
@@ -772,14 +773,72 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
     @Override
     public NodeSet<OWLClass> getSuperClasses(@Nonnull OWLClassExpression ce, boolean direct) throws InconsistentOntologyException,
 			ClassExpressionNotInProfileException, FreshEntitiesException, ReasonerInterruptedException, TimeOutException {
-        return structuralReasoner.getSuperClasses(ce, direct);
+		
+		// Check if the class expression is supported
+		isSupportedClassExpression(ce); 
+		
+		Set<ClassExpression> superClassesSet = new HashSet<ClassExpression>();
+		try {
+			Set<Equivalences<ClassExpression>> superClasses;
+			
+			// Translate the OWLClassExpression object to an Ontop related object
+			OWLAPITranslatorOWL2QL owlTranslator = new OWLAPITranslatorOWL2QL(translatedOntologyMerge);
+			ClassExpression cexp = owlTranslator.getSubclassExpression(ce);
+			
+			// Get super classes from DAG
+			EquivalencesDAG<ClassExpression> classDAG = this.questInstance.getReformulationReasoner().getClassDAG();
+			Equivalences<ClassExpression> classEquivalences = classDAG.getVertex(cexp);
+
+			if(direct) {
+				superClasses = classDAG.getDirectSuper(classEquivalences);
+			} else {
+				superClasses = classDAG.getSuper(classEquivalences);
+			}
+			
+			for(Equivalences<ClassExpression> equivClasses: superClasses) {
+				for(ClassExpression classExp: equivClasses) {
+					superClassesSet.add(classExp);
+				}
+			}
+			
+		} catch (TranslationException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+
+		OWLAPITranslator2QLOWL ontopTranslator = new OWLAPITranslator2QLOWL();
+		return ontopTranslator.translateToNodeSet(superClassesSet);
 	}
 
 	@Nonnull
     @Override
     public Node<OWLClass> getEquivalentClasses(@Nonnull OWLClassExpression ce) throws InconsistentOntologyException,
 			ClassExpressionNotInProfileException, FreshEntitiesException, ReasonerInterruptedException, TimeOutException {
-        return structuralReasoner.getEquivalentClasses(ce);
+		
+		// Check if the class expression is supported
+		isSupportedClassExpression(ce); 
+		
+		Set<ClassExpression> equivClassesSet = new HashSet<ClassExpression>();
+		try {			
+			// Translate the OWLClassExpression object to an Ontop related object
+			OWLAPITranslatorOWL2QL owlTranslator = new OWLAPITranslatorOWL2QL(translatedOntologyMerge);
+			ClassExpression cexp = owlTranslator.getSubclassExpression(ce);
+			
+			// Get equivalence classes from DAG
+			EquivalencesDAG<ClassExpression> classDAG = this.questInstance.getReformulationReasoner().getClassDAG();
+			Equivalences<ClassExpression> classEquivalences = classDAG.getVertex(cexp);
+			
+			for(ClassExpression classExp: classEquivalences) {
+				equivClassesSet.add(classExp);
+			}
+			
+		} catch (TranslationException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+
+		OWLAPITranslator2QLOWL ontopTranslator = new OWLAPITranslator2QLOWL();
+		return ontopTranslator.translateToNode(equivClassesSet);
 	}
 
 	@Nonnull
