@@ -84,7 +84,7 @@ public class QuestQueryProcessor {
 
 		SameAsRewriter sameAs = new SameAsRewriter(unfolder.getSameAsDataPredicatesAndClasses(), unfolder.getSameAsObjectPredicates());
 		program = sameAs.getSameAsRewriting(program);
-		System.out.println("SAMEAS" + program);
+		//System.out.println("SAMEAS" + program);
 
 		log.debug("Replacing equivalences...");
 		DatalogProgram newprogramEq = OBDADataFactoryImpl.getInstance().getDatalogProgram(program.getQueryModifiers());
@@ -127,11 +127,11 @@ public class QuestQueryProcessor {
 			SparqlQuery translation = translator.translate(pq);
 			DatalogProgram program = translation.getProgram();
 			log.debug("Datalog program translated from the SPARQL query: \n{}", program);
-			System.out.println("OUT " + program);
+			//System.out.println("OUT " + program);
 
 			SameAsRewriter sameAs = new SameAsRewriter(unfolder.getSameAsDataPredicatesAndClasses(), unfolder.getSameAsObjectPredicates());
 			program = sameAs.getSameAsRewriting(program);
-			System.out.println("SAMEAS" + program);
+			//System.out.println("SAMEAS" + program);
 
 			log.debug("Replacing equivalences...");
 			DatalogProgram newprogramEq = OBDADataFactoryImpl.getInstance().getDatalogProgram(program.getQueryModifiers());
