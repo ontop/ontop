@@ -26,15 +26,22 @@ import it.unibz.inf.ontop.model.ResultSet;
 import it.unibz.inf.ontop.model.TupleResultSet;
 import it.unibz.inf.ontop.ontology.*;
 import it.unibz.inf.ontop.owlapi.OWLAPIABoxIterator;
+import it.unibz.inf.ontop.owlapi.OWLAPITranslator2QLOWL;
+import it.unibz.inf.ontop.owlapi.OWLAPITranslatorOWL2QL;
+import it.unibz.inf.ontop.owlapi.OWLAPITranslatorOWL2QL.TranslationException;
 import it.unibz.inf.ontop.owlapi.OWLAPITranslatorUtility;
 import it.unibz.inf.ontop.owlrefplatform.core.*;
 import it.unibz.inf.ontop.owlrefplatform.core.abox.QuestMaterializer;
+import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.Equivalences;
+import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.EquivalencesDAG;
 import it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing.TMappingExclusionConfig;
 import it.unibz.inf.ontop.utils.VersionInfo;
 import it.unibz.inf.ontop.sql.ImplicitDBConstraintsReader;
 import org.semanticweb.owlapi.model.*;
+import org.semanticweb.owlapi.profiles.OWL2QLProfile;
 import org.semanticweb.owlapi.reasoner.*;
 import org.semanticweb.owlapi.reasoner.InconsistentOntologyException;
+import org.semanticweb.owlapi.reasoner.impl.OWLClassNodeSet;
 import org.semanticweb.owlapi.reasoner.impl.OWLReasonerBase;
 import org.semanticweb.owlapi.reasoner.structural.StructuralReasoner;
 import org.semanticweb.owlapi.util.Version;
@@ -43,6 +50,8 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Properties;
 import java.util.Set;
@@ -52,6 +61,8 @@ import java.util.Set;
  * the implementation of the reasoning method in the reformulation project.
  */
 public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
+	
+	final OWL2QLProfile owl2qlprofile = new OWL2QLProfile();
 
     StructuralReasoner structuralReasoner;
 
@@ -663,12 +674,99 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
         return structuralReasoner.getBottomClassNode();
 	}
 
+	/*
+	 * Implementation decisions:
+	 * 
+	 * * No check for InconsistentOntologyException exception:
+	 * Inconsistency check is expensive. This action should be explicitly triggered by the user.
+	 * 
+	 * * No check for  FreshEntitiesException, ReasonerInterruptedException, TimeOutException:
+	 * At the time of this implementation it was decided that this are not relevant in the
+	 * context of Quest reasoning.
+	 * 
+	 * (non-Javadoc)
+	 */
+	
+	
+
+	/**
+	 * Check if <code>ce</code> is a valid and supported OWLClassExpression for QuestOWL reasoning.
+	 * 
+	 * <code>ce</code> is a valid if it is supported in OWL 2 QL profile.
+	 * 
+	 * TODO: WHY?
+	 * <code>ce</code> is supported if it can be translated into a subClassExpression. 
+	 * subClassExpression does not support ObjectIntersectionOf and ObjectComplementOf.
+	 * 
+	 * @param ce OWLClassExpression to check
+	 * @throws ClassExpressionNotInProfileException
+	 */
+	private void isSupportedClassExpression(OWLClassExpression ce) throws ClassExpressionNotInProfileException {
+		
+		//TODO: check this
+		IRI iri = ce.asOWLClass().getIRI();
+		
+		// Check if the classExpression is supported by OWL 2 QL
+		if(!owl2qlprofile.isOWL2QLSuperClassExpression(ce)) { 
+			throw new ClassExpressionNotInProfileException(ce, iri);
+		}
+		
+		ClassExpressionType ceType = ce.getClassExpressionType();
+		if(ceType != null) {
+			String ceTypeName = ceType.getName();
+			
+			// TODO: Not suppported classes in reasoning WHY?
+			// How to deal with this? Should I throw a ClassExpressionNotInProfileException?
+			if(ceTypeName.equals(ClassExpressionType.OBJECT_COMPLEMENT_OF.getName())) {
+				throw new ClassExpressionNotInProfileException(ce, iri);			
+			} else if (ceTypeName.equals(ClassExpressionType.OBJECT_INTERSECTION_OF.getName())) {
+				throw new ClassExpressionNotInProfileException(ce, iri);			
+			}
+		}
+	}
+	
 	@Nonnull
     @Override
     public NodeSet<OWLClass> getSubClasses(@Nonnull OWLClassExpression ce, boolean direct) throws InconsistentOntologyException,
 			ClassExpressionNotInProfileException, FreshEntitiesException, ReasonerInterruptedException, TimeOutException {
-        return structuralReasoner.getSubClasses(ce, direct);
+		
+		// Check if the class expression is supported
+		isSupportedClassExpression(ce); 
+		
+		Set<ClassExpression> subClassesSet = new HashSet<ClassExpression>();
+		try {
+			Set<Equivalences<ClassExpression>> subClasses;
+			
+			// Translate the OWLClassExpression object to an Ontop related object
+			OWLAPITranslatorOWL2QL owlTranslator = new OWLAPITranslatorOWL2QL(translatedOntologyMerge);
+			ClassExpression cexp = owlTranslator.getSubclassExpression(ce);
+			
+			//TODO: Remember - I needed to change this from private to public!!
+			EquivalencesDAG<ClassExpression> classDAG = this.questInstance.getReformulationReasoner().getClassDAG();
+			Equivalences<ClassExpression> classEquivalences = classDAG.getVertex(cexp);
+
+			if(direct) {
+				subClasses = classDAG.getDirectSub(classEquivalences);
+			} else {
+				subClasses = classDAG.getSub(classEquivalences);
+			}
+			
+			for(Equivalences<ClassExpression> equivClasses: subClasses) {
+				for(ClassExpression classExp: equivClasses) {
+					subClassesSet.add(classExp);
+				}
+			}
+			
+		} catch (TranslationException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+
+		OWLAPITranslator2QLOWL ontopTranslator = new OWLAPITranslator2QLOWL();
+		return ontopTranslator.translate(subClassesSet);
 	}
+
+
 
 	@Nonnull
     @Override
