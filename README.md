@@ -5,8 +5,8 @@
 
 | Branch    | build status  |
 |-----------|---------------|
-| [master](https://github.com/ontop/ontop/tree/master)  |[![Build Status](https://travis-ci.org/ontop/ontop.svg?branch=master)](https://travis-ci.org/ontop/ontop)|
-| [develop](https://github.com/ontop/ontop/tree/develop) |[![Build Status](https://travis-ci.org/ontop/ontop.svg?branch=develop)](https://travis-ci.org/ontop/ontop)|
+| [Freephoenix master](https://github.com/Freephoenix/ontop/tree/master)  |[![Build Status](https://api.travis-ci.org/Freephoenix/ontop.svg?branch=master)](https://travis-ci.org/ontop/ontop)|
+| [Ontop master](https://github.com/ontop/ontop/tree/master)  |[![Build Status](https://travis-ci.org/ontop/ontop.svg?branch=master)](https://travis-ci.org/ontop/ontop)|
 
 
 Ontop
