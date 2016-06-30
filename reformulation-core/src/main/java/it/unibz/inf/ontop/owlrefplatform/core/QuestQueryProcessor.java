@@ -11,9 +11,7 @@ import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.*;
 import it.unibz.inf.ontop.owlrefplatform.core.queryevaluation.SPARQLQueryUtility;
 import it.unibz.inf.ontop.owlrefplatform.core.reformulation.QueryRewriter;
 import it.unibz.inf.ontop.owlrefplatform.core.srcquerygeneration.SQLQueryGenerator;
-import it.unibz.inf.ontop.owlrefplatform.core.translator.DatalogToSparqlTranslator;
-import it.unibz.inf.ontop.owlrefplatform.core.translator.SPARQLQueryFlattener;
-import it.unibz.inf.ontop.owlrefplatform.core.translator.SparqlAlgebraToDatalogTranslator;
+import it.unibz.inf.ontop.owlrefplatform.core.translator.*;
 import it.unibz.inf.ontop.owlrefplatform.core.unfolding.ExpressionEvaluator;
 import it.unibz.inf.ontop.renderer.DatalogProgramRenderer;
 
@@ -22,7 +20,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import it.unibz.inf.ontop.owlrefplatform.core.translator.SparqlQuery;
 import org.openrdf.query.MalformedQueryException;
 import org.openrdf.query.QueryLanguage;
 import org.openrdf.query.parser.ParsedQuery;
@@ -80,12 +77,14 @@ public class QuestQueryProcessor {
 	
 	private DatalogProgram translateAndPreProcess(ParsedQuery pq)  {
 
-		SparqlAlgebraToDatalogTranslator translator = new SparqlAlgebraToDatalogTranslator(unfolder.getUriTemplateMatcher(), uriMap, unfolder.getSameAsDataPredicatesAndClasses(), unfolder.getSameAsObjectPredicates() );
+		SparqlAlgebraToDatalogTranslator translator = new SparqlAlgebraToDatalogTranslator(unfolder.getUriTemplateMatcher(), uriMap);
 		SparqlQuery translation = translator.translate(pq);
 		DatalogProgram program = translation.getProgram();
-
 		log.debug("Datalog program translated from the SPARQL query: \n{}", program);
 
+		SameAsRewriter sameAs = new SameAsRewriter(unfolder.getSameAsDataPredicatesAndClasses(), unfolder.getSameAsObjectPredicates());
+		program = sameAs.getSameAsRewriting(program);
+		System.out.println("SAMEAS" + program);
 
 		log.debug("Replacing equivalences...");
 		DatalogProgram newprogramEq = OBDADataFactoryImpl.getInstance().getDatalogProgram(program.getQueryModifiers());
@@ -124,11 +123,15 @@ public class QuestQueryProcessor {
 		try {
 			// log.debug("Input query:\n{}", strquery);
 			
-			SparqlAlgebraToDatalogTranslator translator = new SparqlAlgebraToDatalogTranslator(unfolder.getUriTemplateMatcher(), uriMap, unfolder.getSameAsDataPredicatesAndClasses(), unfolder.getSameAsObjectPredicates());
+			SparqlAlgebraToDatalogTranslator translator = new SparqlAlgebraToDatalogTranslator(unfolder.getUriTemplateMatcher(), uriMap);
 			SparqlQuery translation = translator.translate(pq);
 			DatalogProgram program = translation.getProgram();
 			log.debug("Datalog program translated from the SPARQL query: \n{}", program);
+			System.out.println("OUT " + program);
 
+			SameAsRewriter sameAs = new SameAsRewriter(unfolder.getSameAsDataPredicatesAndClasses(), unfolder.getSameAsObjectPredicates());
+			program = sameAs.getSameAsRewriting(program);
+			System.out.println("SAMEAS" + program);
 
 			log.debug("Replacing equivalences...");
 			DatalogProgram newprogramEq = OBDADataFactoryImpl.getInstance().getDatalogProgram(program.getQueryModifiers());

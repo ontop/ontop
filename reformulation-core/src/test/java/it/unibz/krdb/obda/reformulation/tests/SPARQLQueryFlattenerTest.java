@@ -32,7 +32,7 @@ public class SPARQLQueryFlattenerTest {
         ParsedQuery pq = parser.parseQuery(queryBind, null);
 
         SparqlAlgebraToDatalogTranslator translator = new SparqlAlgebraToDatalogTranslator(
-                new UriTemplateMatcher(), new SemanticIndexURIMap(), null, null);
+                new UriTemplateMatcher(), new SemanticIndexURIMap());
         SparqlQuery program = translator.translate(pq);
         System.out.println(program);
     }
@@ -54,7 +54,7 @@ public class SPARQLQueryFlattenerTest {
         ParsedQuery pq = parser.parseQuery(queryBind, null);
 
         SparqlAlgebraToDatalogTranslator translator = new SparqlAlgebraToDatalogTranslator(
-                new UriTemplateMatcher(), new SemanticIndexURIMap(), null, null);
+                new UriTemplateMatcher(), new SemanticIndexURIMap());
         SparqlQuery program = translator.translate(pq);
         System.out.println(program);
     }
@@ -78,7 +78,7 @@ public class SPARQLQueryFlattenerTest {
         ParsedQuery pq = parser.parseQuery(query6, null);
 
         SparqlAlgebraToDatalogTranslator translator = new SparqlAlgebraToDatalogTranslator(
-                new UriTemplateMatcher(), new SemanticIndexURIMap(), null, null);
+                new UriTemplateMatcher(), new SemanticIndexURIMap());
         SparqlQuery program = translator.translate(pq);
         System.out.println(program);
     }
@@ -97,7 +97,7 @@ public class SPARQLQueryFlattenerTest {
         ParsedQuery pq = parser.parseQuery(query6, null);
 
         SparqlAlgebraToDatalogTranslator translator = new SparqlAlgebraToDatalogTranslator(
-                new UriTemplateMatcher(), new SemanticIndexURIMap(), null, null);
+                new UriTemplateMatcher(), new SemanticIndexURIMap());
         SparqlQuery program = translator.translate(pq);
         System.out.println(program);
     }
