@@ -74,11 +74,10 @@ public class OWLAPITranslator2QLOWL {
 	/*
 	 * OBJECT PROPERTY
 	 */
-	public OWLObjectProperty translate(ObjectPropertyExpression op) {
+	public OWLObjectPropertyExpression translate(ObjectPropertyExpression op) {
 		IRI roleIRI = IRI.create(op.getPredicate().getName());
 		if (op.isInverse()) {
-			//TODO: I should get the inverse?
-			return dataFactory.getOWLObjectProperty(roleIRI);
+			return dataFactory.getOWLObjectInverseOf(dataFactory.getOWLObjectProperty(roleIRI));
 		} else {
 			return dataFactory.getOWLObjectProperty(roleIRI);
 		}
