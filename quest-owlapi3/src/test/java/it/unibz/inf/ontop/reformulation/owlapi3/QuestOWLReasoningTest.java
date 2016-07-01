@@ -2,6 +2,8 @@ package it.unibz.inf.ontop.reformulation.owlapi3;
 
 import static org.junit.Assert.*;
 import static org.semanticweb.owlapi.apibinding.OWLFunctionalSyntaxFactory.Class;
+import static org.semanticweb.owlapi.apibinding.OWLFunctionalSyntaxFactory.ObjectProperty;
+import static org.semanticweb.owlapi.apibinding.OWLFunctionalSyntaxFactory.ObjectInverseOf;
 import static org.semanticweb.owlapi.apibinding.OWLFunctionalSyntaxFactory.Declaration;
 import static org.semanticweb.owlapi.apibinding.OWLFunctionalSyntaxFactory.Ontology;
 
@@ -11,6 +13,9 @@ import org.semanticweb.owlapi.apibinding.OWLFunctionalSyntaxFactory;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLClass;
+import org.semanticweb.owlapi.model.OWLObjectInverseOf;
+import org.semanticweb.owlapi.model.OWLObjectProperty;
+import org.semanticweb.owlapi.model.OWLObjectPropertyExpression;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
@@ -34,7 +39,7 @@ public class QuestOWLReasoningTest {
 	private OWLOntologyManager manager;
 
 	/*
-	 * Create Objects that will be use in ontology assertions.
+	 * Create Objects that will be used in ontology assertions.
 	 */
 	String prefix = "http://www.example.org/";
 	OWLClass cDirect = Class(IRI.create(prefix + "Direct"));
@@ -44,7 +49,12 @@ public class QuestOWLReasoningTest {
 	OWLClass cB = Class(IRI.create(prefix + "B"));
 	OWLClass cC = Class(IRI.create(prefix + "C"));
 	
-	
+	OWLObjectProperty oD = ObjectProperty(IRI.create(prefix + "D"));
+	OWLObjectInverseOf oDInv = ObjectInverseOf(oD);
+	OWLObjectProperty oE = ObjectProperty(IRI.create(prefix + "E"));
+	OWLObjectInverseOf oEInv = ObjectInverseOf(oE);
+
+
 	@Before
 	public void setUp() throws Exception {
 		manager = OWLManager.createOWLOntologyManager();
@@ -53,11 +63,16 @@ public class QuestOWLReasoningTest {
 				Declaration(cNotDirect),
 				Declaration(cA),
 				Declaration(cB),
-				Declaration(cC) 
+				Declaration(cC),
+				
+				Declaration(oD),
+				Declaration(oE)
 				);
 	}
 	
-	
+	/*
+	 * CLASS EXPRESIONS
+	 */
 	/**
 	 * TODO: Add test for invalid types of class expressions.
 	 */
@@ -149,4 +164,27 @@ public class QuestOWLReasoningTest {
 	} 
 
 
+	/*
+	 * OBJECT PROPERTY EXPRESIONS
+	 */
+
+	@Test
+	public void testGetSubObjProperty(){
+		
+		manager.addAxiom(ontology, OWLFunctionalSyntaxFactory.SubObjectPropertyOf(oE, oD));
+		
+		startReasoner();
+		
+		NodeSet<OWLObjectPropertyExpression> subClasses = reasoner.getSubObjectProperties(oD, true);
+		assertTrue(subClasses.containsEntity(oE));
+		assertFalse(subClasses.containsEntity(oEInv));
+		assertFalse(subClasses.containsEntity(oDInv));
+
+
+		subClasses = reasoner.getSubObjectProperties(oDInv, true);
+		assertTrue(subClasses.containsEntity(oEInv));
+		assertFalse(subClasses.containsEntity(oE));
+
+		
+	}
 }

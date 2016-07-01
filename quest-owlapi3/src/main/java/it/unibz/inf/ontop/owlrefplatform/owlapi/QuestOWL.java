@@ -886,7 +886,7 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 		}
 		
 		 
-		 OWLAPITranslator2QLOWL ontopTranslator = new OWLAPITranslator2QLOWL();
+		OWLAPITranslator2QLOWL ontopTranslator = new OWLAPITranslator2QLOWL();
 		return ontopTranslator.translateObjPropertyToNodeSet(subObjectPropSet);
 	}
 
