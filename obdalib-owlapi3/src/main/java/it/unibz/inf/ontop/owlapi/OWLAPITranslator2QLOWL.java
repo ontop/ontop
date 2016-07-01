@@ -21,92 +21,93 @@ import uk.ac.manchester.cs.owl.owlapi.OWLDataFactoryImpl;
 
 /**
  * Translate Ontop objects to OWL API objects.
- * <p>
+ * 
  * It includes:
  * <ul>
  * <li> simple translation between objects {@link #translate(OClass)}
  * <li> translation between Set of Ontop objects and specific OWL API collections
- * (Example : {@link #translateToNode(Set)} or {@link #translateClassToNodeSet(Set)})
- *
+ * (Example : {@link #translateToNode(Set)} or {@link #translateClassToNodeSet(Set)}) 
+ * 
  * @author Ana Oliveira da Costa
  */
 public class OWLAPITranslator2QLOWL {
 
-    private final OWLDataFactory dataFactory = new OWLDataFactoryImpl();
+	private final OWLDataFactory dataFactory = new OWLDataFactoryImpl();
 
-    /*
-     * CLASS
-     */
-    public OWLClass translate(OClass ca) {
-        IRI conceptIRI = IRI.create(ca.getName());
-        return dataFactory.getOWLClass(conceptIRI);
-    }
+	/*
+	 * CLASS
+	 */
+	public OWLClass translate(OClass ca) {
+		IRI conceptIRI = IRI.create(ca.getName());
+		return dataFactory.getOWLClass(conceptIRI);
+	} 
+	
+	public NodeSet<OWLClass> translateClassToNodeSet(Set<ClassExpression> itOclasses) {
+		OWLClassNodeSet listOWLClasses = new OWLClassNodeSet();
 
-    public NodeSet<OWLClass> translateClassToNodeSet(Set<ClassExpression> itOclasses) {
-        OWLClassNodeSet listOWLClasses = new OWLClassNodeSet();
+		for(ClassExpression classExp : itOclasses) {
+			if(classExp instanceof OClass) {
+				//TODO: OClass has the implementation!
+				OClass oclass = (OClass) classExp;
+				listOWLClasses.addEntity(translate(oclass));
+			} else {
+				//TODO: What should I do here?
+			}
+		}
+		return listOWLClasses;
+	}
+	
+	public Node<OWLClass> translateToNode(Set<ClassExpression> itOclasses) {
+		OWLClassNode nodeOWLClasses = new OWLClassNode();
 
-        for (ClassExpression classExp : itOclasses) {
-            if (classExp instanceof OClass) {
-                //TODO: OClass has the implementation!
-                OClass oclass = (OClass) classExp;
-                listOWLClasses.addEntity(translate(oclass));
-            } else {
-                //TODO: What should I do here?
-            }
-        }
-        return listOWLClasses;
-    }
+		for(ClassExpression classExp : itOclasses) {
+			if(classExp instanceof OClass) {
+				OClass oclass = (OClass) classExp;
+				nodeOWLClasses.add(translate(oclass));
+			} else {
+				//TODO: What should I do here?
+			}
+		}
+		return nodeOWLClasses;
+	}
+	
+	/*
+	 * OBJECT PROPERTY
+	 */
+	public OWLObjectPropertyExpression translate(ObjectPropertyExpression op) {
+		IRI roleIRI = IRI.create(op.getPredicate().getName());
+		if (op.isInverse()) {
+			return dataFactory.getOWLObjectInverseOf(dataFactory.getOWLObjectProperty(roleIRI));
+		} else {
+			return dataFactory.getOWLObjectProperty(roleIRI);
+		}
+		
+		
+	}
+	
+	
+	public NodeSet<OWLObjectPropertyExpression> translateObjPropertyToNodeSet(
+			Set<ObjectPropertyExpression> itOPclasses) {
+		
+		OWLObjectPropertyNodeSet listOWLClasses = new OWLObjectPropertyNodeSet();
 
-    public Node<OWLClass> translateToNode(Set<ClassExpression> itOclasses) {
-        OWLClassNode nodeOWLClasses = new OWLClassNode();
+		for(ObjectPropertyExpression obProperty : itOPclasses) {
+			listOWLClasses.addEntity(translate(obProperty));
+		}
+		return listOWLClasses;
+	}
+	
+	public Node<OWLObjectPropertyExpression> translateObjPropertyToNode(
+			Set<ObjectPropertyExpression> itOPclasses) {
+		
+		OWLObjectPropertyNode nodeObjProperty = new OWLObjectPropertyNode();
 
-        for (ClassExpression classExp : itOclasses) {
-            if (classExp instanceof OClass) {
-                OClass oclass = (OClass) classExp;
-                nodeOWLClasses.add(translate(oclass));
-            } else {
-                //TODO: What should I do here?
-            }
-        }
-        return nodeOWLClasses;
-    }
-
-    /*
-     * OBJECT PROPERTY
-     */
-    public OWLObjectPropertyExpression translate(ObjectPropertyExpression op) {
-        IRI roleIRI = IRI.create(op.getPredicate().getName());
-        if (op.isInverse()) {
-            return dataFactory.getOWLObjectInverseOf(dataFactory.getOWLObjectProperty(roleIRI));
-        } else {
-            return dataFactory.getOWLObjectProperty(roleIRI);
-        }
-
-
-    }
-
-
-    public NodeSet<OWLObjectPropertyExpression> translateObjPropertyToNodeSet(
-            Set<ObjectPropertyExpression> itOPclasses) {
-
-        OWLObjectPropertyNodeSet listOWLClasses = new OWLObjectPropertyNodeSet();
-
-        for (ObjectPropertyExpression obProperty : itOPclasses) {
-            listOWLClasses.addEntity(translate(obProperty));
-        }
-        return listOWLClasses;
-    }
-
-    public Node<OWLObjectPropertyExpression> translateObjPropertyToNode(
-            Set<ObjectPropertyExpression> itOPclasses) {
-
-        OWLObjectPropertyNode nodeObjProperty = new OWLObjectPropertyNode();
-
-        for (ObjectPropertyExpression obProperty : itOPclasses) {
-            nodeObjProperty.add(translate(obProperty));
-        }
-        return nodeObjProperty;
-    }
-
-
+		for(ObjectPropertyExpression obProperty : itOPclasses) {
+			nodeObjProperty.add(translate(obProperty));
+		}
+		return nodeObjProperty;
+	}
+	
+	
+	
 }
