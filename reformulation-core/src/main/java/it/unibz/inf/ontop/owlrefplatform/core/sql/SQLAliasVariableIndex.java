@@ -6,16 +6,12 @@ import java.util.List;
 import java.util.Map;
 
 import it.unibz.inf.ontop.model.AlgebraOperatorPredicate;
-import it.unibz.inf.ontop.model.BooleanOperationPredicate;
 import it.unibz.inf.ontop.model.CQIE;
 import it.unibz.inf.ontop.model.Function;
 import it.unibz.inf.ontop.model.Term;
 import it.unibz.inf.ontop.model.Variable;
 import it.unibz.inf.ontop.owlrefplatform.core.queryevaluation.SQLDialectAdapter;
 import it.unibz.inf.ontop.sql.DBMetadata;
-import it.unibz.inf.ontop.sql.DataDefinition;
-import it.unibz.inf.ontop.sql.TableDefinition;
-import it.unibz.inf.ontop.sql.ViewDefinition;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableMap;

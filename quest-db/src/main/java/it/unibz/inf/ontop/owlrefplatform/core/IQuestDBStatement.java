@@ -15,7 +15,7 @@ import java.util.Iterator;
 public interface IQuestDBStatement extends OBDAStatement {
 
     /**
-     * Deprecated. See getTargetQuery() instead.
+     * Deprecated. See getExecutableQuery() instead.
      */
     @Deprecated
     String getSQL(String query) throws OBDAException;

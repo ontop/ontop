@@ -23,22 +23,19 @@ package it.unibz.inf.ontop.owlrefplatform.core;
 import java.io.File;
 import java.net.URI;
 import java.util.Iterator;
+import java.util.Optional;
 import java.util.Set;
 
 import it.unibz.inf.ontop.model.*;
-import org.openrdf.query.MalformedQueryException;
-import org.openrdf.query.QueryLanguage;
-import org.openrdf.query.parser.ParsedQuery;
-import org.openrdf.query.parser.QueryParser;
-import org.openrdf.query.parser.QueryParserUtil;
+import it.unibz.inf.ontop.owlapi.OWLAPIABoxIterator;
 import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
 import it.unibz.inf.ontop.mapping.MappingParser;
 
 import it.unibz.inf.ontop.ontology.Assertion;
-import it.unibz.inf.ontop.owlapi3.OWLAPI3ABoxIterator;
-import it.unibz.inf.ontop.owlrefplatform.core.abox.EquivalentTriplePredicateIterator;
 import it.unibz.inf.ontop.owlrefplatform.core.abox.NTripleAssertionIterator;
 import it.unibz.inf.ontop.owlrefplatform.core.abox.QuestMaterializer;
+import org.openrdf.query.MalformedQueryException;
+import org.openrdf.query.parser.ParsedQuery;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntology;
@@ -97,7 +94,7 @@ public class QuestDBStatement implements OBDAStatement {
 				OWLOntology owlontology = man.loadOntologyFromOntologyDocument(IRI.create(rdffile));
 				Set<OWLOntology> ontos = man.getImportsClosure(owlontology);
 				
-				OWLAPIABoxIterator aBoxIter = new OWLAPIABoxIterator(ontos, st.questInstance.getVocabulary());
+				OWLAPIABoxIterator aBoxIter = new OWLAPIABoxIterator(ontos, st.getQuestInstance().getVocabulary());
 				result = st.insertData(aBoxIter, /*useFile,*/ commit, batch);
 			} 
 			else if (ext.toLowerCase().equals(".nt")) {				
@@ -209,31 +206,23 @@ public class QuestDBStatement implements OBDAStatement {
 	/**
 	 * Ontop is not SQL-specific anymore.
 	 *
-	 * Use getTargetQuery instead.
+	 * Use getExecutableQuery instead.
 	 */
 	@Deprecated
-	public String getSQL(String query) throws OBDAException {
-		//ParsedQuery pq = st.questInstance.getEngine().getParsedQuery(query);
-		//return st.questInstance.getEngine().translateIntoNativeQuery(pq);
-		return ((SQLExecutableQuery)st.unfoldAndGenerateTargetQuery(query)).getSQL();
+	public String getSQL(String sparqlQuery) throws OBDAException {
+		ExecutableQuery executableQuery = getExecutableQuery(sparqlQuery);
+		return ((SQLExecutableQuery) executableQuery).getSQL();
 	}
 
-	public ExecutableQuery getTargetQuery(String query) throws OBDAException {
-		return st.unfoldAndGenerateTargetQuery(query);
-	}
-
-	@Override
-	public String getSPARQLRewriting(String query) throws OBDAException {
-		return st.getSPARQLRewriting(query);
-	}
-
-	@Override
-	public int getTupleCount(String query) throws OBDAException {
-		return st.getTupleCount(query);
-	}
-
-	public String getRewriting(String query) throws Exception {
-		ParsedQuery pq = st.questInstance.getEngine().getParsedQuery(query);
-		return st.getRewriting(pq);
+	public ExecutableQuery getExecutableQuery(String sparqlQuery) throws OBDAException {
+		try {
+			QuestQueryProcessor queryProcessor = st.getQuestInstance().getEngine();
+			ParsedQuery pq = queryProcessor.getParsedQuery(sparqlQuery);
+			// TODO: extract the construction template when existing
+			return queryProcessor.translateIntoNativeQuery(
+					pq, Optional.empty());
+		} catch (MalformedQueryException e) {
+			throw new OBDAException(e);
+		}
 	}
 }

@@ -172,7 +172,8 @@ public class QuestQueryProcessor {
 
 			// TODO: make it final
 			DatalogProgram programAfterUnfolding = datalogUnfolder
-					.unfold(programAfterRewriting, "ans1", QuestConstants.BUP, true);
+					.unfold(programAfterRewriting,
+							"ans1", QuestConstants.BUP, true);
 			log.debug("Data atoms evaluated: \n{}", programAfterUnfolding);
 
 
@@ -252,7 +253,7 @@ public class QuestQueryProcessor {
 
 		return executableQuery;
 	}
-		
+
 
 	/**
 	 * Returns the final rewriting of the given query

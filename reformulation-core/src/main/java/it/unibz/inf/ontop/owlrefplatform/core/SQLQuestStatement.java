@@ -11,6 +11,7 @@ import it.unibz.inf.ontop.owlrefplatform.core.resultset.*;
 import it.unibz.inf.ontop.owlrefplatform.core.translator.SesameConstructTemplate;
 
 import it.unibz.inf.ontop.ontology.Assertion;
+import org.openrdf.query.parser.ParsedQuery;
 
 import java.sql.*;
 import java.sql.ResultSet;
@@ -106,33 +107,31 @@ public class SQLQuestStatement extends QuestStatement {
         }
     }
 
-//    /**
-//     * Returns the number of tuples returned by the query
-//     */
-//    @Override
-//    public int getTupleCount(String query) throws OBDAException {
-//
-//
-//        SQLExecutableQuery targetQuery = checkAndConvertTargetQuery(unfoldAndGenerateTargetQuery(query));
-//        String unf = targetQuery.translateIntoNativeQuery();
-//        String newsql = "SELECT count(*) FROM (" + unf + ") t1";
-//        if (!isCanceled()) {
-//            try {
-//
-//                java.sql.ResultSet set = sqlStatement.executeQuery(newsql);
-//                if (set.next()) {
-//                    return set.getInt(1);
-//                } else {
-//                    throw new OBDAException("Tuple count failed due to empty result set.");
-//                }
-//            } catch (SQLException e) {
-//                throw new OBDAException(e.getMessage());
-//            }
-//        }
-//        else {
-//            throw new OBDAException("Action canceled.");
-//        }
-//    }
+    /**
+     * Returns the number of tuples returned by the query
+     */
+    @Override
+    public int getTupleCount(String sparqlQuery) throws OBDAException {
+        SQLExecutableQuery targetQuery = checkAndConvertTargetQuery(generateExecutableQuery(sparqlQuery));
+        String sql = targetQuery.getSQL();
+        String newsql = "SELECT count(*) FROM (" + sql + ") t1";
+        if (!isCanceled()) {
+            try {
+
+                java.sql.ResultSet set = sqlStatement.executeQuery(newsql);
+                if (set.next()) {
+                    return set.getInt(1);
+                } else {
+                    throw new OBDAException("Tuple count failed due to empty result set.");
+                }
+            } catch (SQLException e) {
+                throw new OBDAException(e.getMessage());
+            }
+        }
+        else {
+            throw new OBDAException("Action canceled.");
+        }
+    }
 
     @Override
     public void close() throws OBDAException {
@@ -144,7 +143,7 @@ public class SQLQuestStatement extends QuestStatement {
         }
     }
 
-    protected void cancelTargetQueryStatement() throws NativeQueryExecutionException {
+    protected void cancelExecution() throws NativeQueryExecutionException {
         try {
             sqlStatement.cancel();
         } catch (SQLException e) {

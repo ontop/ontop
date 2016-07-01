@@ -6,7 +6,6 @@ import it.unibz.inf.ontop.ontology.Assertion;
 import it.unibz.inf.ontop.owlrefplatform.core.IQuest;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestConnection;
 import it.unibz.inf.ontop.owlrefplatform.core.SQLQuestStatement;
-import it.unibz.inf.ontop.owlrefplatform.core.abox.EquivalentTriplePredicateIterator;
 import it.unibz.inf.ontop.owlrefplatform.core.abox.RDBMSSIRepositoryManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -89,42 +88,12 @@ public class SISQLQuestStatementImpl extends SQLQuestStatement implements SIQues
      *            new index will be created.
      *
      */
+    @Override
     public int insertData(Iterator<Assertion> data, int commit, int batch) throws OBDAException {
-        int result = -1;
-
-        EquivalentTriplePredicateIterator newData = new EquivalentTriplePredicateIterator(data, getQuestInstance().getReasoner());
-
-        //if (!useFile) {
-
-            try {
-                result = siRepository.insertData(sqlConnection, newData, commit, batch);
-            } catch (SQLException e) {
-                throw new OBDAException(e);
-            }
-//        } else {
-//            try {
-//                // File temporalFile = new File("quest-copy.tmp");
-//                // FileOutputStream os = new FileOutputStream(temporalFile);
-//                // ROMAN: this called DOES NOTHING
-//                result = (int) siRepository.loadWithFile(sqlConnection, newData);
-//                // os.close();
-//
-//            } catch (IOException e) {
-//                log.error(e.getMessage());
-//            } catch (SQLException e) {
-//                throw new OBDAException(e);
-//            }
-//        }
-
         try {
-            getQuestInstance().updateSemanticIndexMappings();
-            // Removed in V1
-            //getTranslator().setTemplateMatcher(getQuestInstance().getUriTemplateMatcher());
-
-        } catch (Exception e) {
-            log.error("Error updating semantic index mappings after insert.", e);
+            return siRepository.insertData(sqlConnection, data, commit, batch);
+        } catch (SQLException e) {
+            throw new OBDAException(e);
         }
-
-        return result;
     }
 }

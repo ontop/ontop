@@ -41,7 +41,7 @@ import java.util.concurrent.CountDownLatch;
  *
  * TODO: rename it (not now) AbstractQuestStatement.
  */
-public abstract class QuestStatement implements OBDAStatement {
+public abstract class QuestStatement implements IQuestStatement {
 
 	public final IQuest questInstance;
 	private final QuestQueryProcessor engine;
@@ -109,7 +109,7 @@ public abstract class QuestStatement implements OBDAStatement {
 			if (!executingTargetQuery) {
 				this.stop();
 			} else {
-				cancelTargetQueryStatement();
+				cancelExecution();
 			}
 		}
 
@@ -187,7 +187,7 @@ public abstract class QuestStatement implements OBDAStatement {
 	/**
 	 * Cancel the processing of the target query.
 	 */
-	protected abstract void cancelTargetQueryStatement() throws NativeQueryExecutionException;
+	protected abstract void cancelExecution() throws NativeQueryExecutionException;
 
 	/**
 	 * Calls the necessary tuple or graph query execution Implements describe
@@ -375,10 +375,25 @@ public abstract class QuestStatement implements OBDAStatement {
 		return null;
 	}
 
-
 	@Override
-	public String getSPARQLRewriting(String query) throws OBDAException {
-		return engine.getSPARQLRewriting(query);
+	public IQuest getQuestInstance() {
+		return questInstance;
+	}
+
+//	public String getSPARQLRewriting(String query) throws OBDAException {
+//		return engine.getSPARQLRewriting(query);
+//	}
+
+
+	protected ExecutableQuery generateExecutableQuery(String sparqlQuery)
+			throws OBDAException{
+		try {
+			ParsedQuery sparqlTree = engine.getParsedQuery(sparqlQuery);
+			// TODO: handle the construction template correctly
+			return engine.translateIntoNativeQuery(sparqlTree, Optional.empty());
+		} catch (MalformedQueryException e) {
+			throw new OBDAException(e);
+		}
 	}
 	
 }

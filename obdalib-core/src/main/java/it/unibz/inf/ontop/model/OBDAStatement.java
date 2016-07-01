@@ -20,10 +20,6 @@ package it.unibz.inf.ontop.model;
  * #L%
  */
 
-import it.unibz.inf.ontop.ontology.Assertion;
-
-import java.util.Iterator;
-
 public interface OBDAStatement extends AutoCloseable {
 
 	void cancel() throws OBDAException;
@@ -60,23 +56,7 @@ public interface OBDAStatement extends AutoCloseable {
 	 *            the new query timeout limit in seconds; zero means no limit.
 	 * @throws Exception
 	 */
-    void setQueryTimeout(int seconds) throws Exception;
-	
-	/**
-	 * Produces an expanded SPARQL string given the initial <code>query</code> input.
-	 * The expansion utilizes Quest rewriter over an ontology.
-	 * 
-	 * @param query
-	 * 			The initial SPARQL query string.
-	 * @return SPARQL query expansion.
-	 * @throws OBDAException
-	 */
-    String getSPARQLRewriting(String query) throws OBDAException;
+    void setQueryTimeout(int seconds) throws OBDAException;
 
 	//int getTupleCount(String query) throws OBDAException;
-
-	/**
-	 * TODO: can we get rid of this?
-     */
-	int insertData(Iterator<Assertion> data, int commit, int batch) throws OBDAException;
 }

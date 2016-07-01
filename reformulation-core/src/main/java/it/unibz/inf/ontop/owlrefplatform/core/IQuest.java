@@ -5,6 +5,7 @@ import com.google.common.collect.Multimap;
 import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.model.*;
 
+import it.unibz.inf.ontop.ontology.ImmutableOntologyVocabulary;
 import it.unibz.inf.ontop.owlrefplatform.core.abox.RDBMSSIRepositoryManager;
 import it.unibz.inf.ontop.owlrefplatform.core.abox.RepositoryChangedListener;
 import it.unibz.inf.ontop.owlrefplatform.core.abox.SemanticIndexURIMap;
@@ -54,4 +55,6 @@ public interface IQuest extends RepositoryChangedListener {
     DatalogProgram getRewriting(DatalogProgram initialProgram) throws OBDAException;
 
     ExpressionEvaluator getExpressionEvaluator();
+
+    ImmutableOntologyVocabulary getVocabulary();
 }

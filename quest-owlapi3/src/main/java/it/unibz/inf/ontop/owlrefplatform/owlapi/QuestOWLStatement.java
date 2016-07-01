@@ -48,11 +48,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.Reader;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /***
  * A Statement to execute queries over a QuestOWLConnection. The logic of this
@@ -146,7 +142,7 @@ public class QuestOWLStatement implements IQuestOWLStatement {
 
 			// Retrieves the ABox from the ontology file.
 
-			aBoxIter = new OWLAPIABoxIterator(set, st.questInstance.getVocabulary());
+			aBoxIter = new OWLAPIABoxIterator(set, st.getQuestInstance().getVocabulary());
 			return st.insertData(aBoxIter, commitSize, batchsize);
 		} 
 		else if (owlFile.getName().toLowerCase().endsWith(".ttl") || owlFile.getName().toLowerCase().endsWith(".nt")) {
@@ -345,8 +341,8 @@ public class QuestOWLStatement implements IQuestOWLStatement {
 
 	public String getRewriting(String query) throws OWLException {
 		try {
-			ParsedQuery pq = st.questInstance.getEngine().getParsedQuery(query);
-			return st.questInstance.getEngine().getRewriting(pq);
+			ParsedQuery pq = st.getQuestInstance().getEngine().getParsedQuery(query);
+			return st.getQuestInstance().getEngine().getRewriting(pq);
 		} 
 		catch (Exception e) {
 			throw new OntopOWLException(e);
@@ -370,7 +366,8 @@ public class QuestOWLStatement implements IQuestOWLStatement {
 
 	public ExecutableQuery getExecutableQuery(String query) throws OWLException {
 		try {
-			return st.unfoldAndGenerateTargetQuery(query);
+			ParsedQuery pq = st.getQuestInstance().getEngine().getParsedQuery(query);
+			return st.getQuestInstance().getEngine().translateIntoNativeQuery(pq, Optional.empty());
 		} catch (Exception e) {
 			throw new OntopOWLException(e);
 		}
