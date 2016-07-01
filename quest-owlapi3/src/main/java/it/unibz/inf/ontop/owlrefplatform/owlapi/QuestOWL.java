@@ -771,7 +771,7 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 		}
 
 		OWLAPITranslator2QLOWL ontopTranslator = new OWLAPITranslator2QLOWL();
-		return ontopTranslator.translateToNodeSet(subClassesSet);
+		return ontopTranslator.translateClassToNodeSet(subClassesSet);
 	}
 
 	@Nonnull
@@ -808,7 +808,7 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 		}
 
 		OWLAPITranslator2QLOWL ontopTranslator = new OWLAPITranslator2QLOWL();
-		return ontopTranslator.translateToNodeSet(superClassesSet);
+		return ontopTranslator.translateClassToNodeSet(superClassesSet);
 	}
 
 	@Nonnull
@@ -860,7 +860,34 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 	public NodeSet<OWLObjectPropertyExpression> getSubObjectProperties(@Nonnull OWLObjectPropertyExpression pe,
 			boolean direct) throws InconsistentOntologyException, FreshEntitiesException, ReasonerInterruptedException,
 					TimeOutException {
-		return structuralReasoner.getSubObjectProperties(pe, direct);
+		
+		Set<ObjectPropertyExpression> subObjectPropSet = new HashSet<ObjectPropertyExpression>();
+		Set<Equivalences<ObjectPropertyExpression>> subClasses;
+
+		// Translate the OWLObjectPropertyExpression object to an Ontop related object
+		OWLAPITranslatorHelper owlTranslator = new OWLAPITranslatorHelper(translatedOntologyMerge.getVocabulary());
+		ObjectPropertyExpression cexp = owlTranslator.getPropertyExpression(pe);
+
+		EquivalencesDAG<ObjectPropertyExpression> classDAG = this.questInstance.getReformulationReasoner()
+				.getObjectPropertyDAG();
+		Equivalences<ObjectPropertyExpression> classEquivalences = classDAG.getVertex(classDAG.getCanonicalForm(cexp));
+
+		if (direct) {
+			subClasses = classDAG.getDirectSub(classEquivalences);
+		} else {
+			subClasses = classDAG.getSub(classEquivalences);
+		}
+
+		for (Equivalences<ObjectPropertyExpression> equivClasses : subClasses) {
+			for (ObjectPropertyExpression classExp : equivClasses) {
+				for (ObjectPropertyExpression equivClass : classDAG.getFullVertex(classExp))
+					subObjectPropSet.add(equivClass);
+			}
+		}
+		
+		 
+		 OWLAPITranslator2QLOWL ontopTranslator = new OWLAPITranslator2QLOWL();
+		return ontopTranslator.translateObjPropertyToNodeSet(subObjectPropSet);
 	}
 
 	@Nonnull
@@ -868,7 +895,33 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 	public NodeSet<OWLObjectPropertyExpression> getSuperObjectProperties(@Nonnull OWLObjectPropertyExpression pe,
 			boolean direct) throws InconsistentOntologyException, FreshEntitiesException, ReasonerInterruptedException,
 					TimeOutException {
-		return structuralReasoner.getSuperObjectProperties(pe, direct);
+		Set<ObjectPropertyExpression> superObjectPropSet = new HashSet<ObjectPropertyExpression>();
+		Set<Equivalences<ObjectPropertyExpression>> superClasses;
+
+		// Translate the OWLObjectPropertyExpression object to an Ontop related object
+		OWLAPITranslatorHelper owlTranslator = new OWLAPITranslatorHelper(translatedOntologyMerge.getVocabulary());
+		ObjectPropertyExpression cexp = owlTranslator.getPropertyExpression(pe);
+
+		EquivalencesDAG<ObjectPropertyExpression> classDAG = this.questInstance.getReformulationReasoner()
+				.getObjectPropertyDAG();
+		Equivalences<ObjectPropertyExpression> classEquivalences = classDAG.getVertex(classDAG.getCanonicalForm(cexp));
+
+		if (direct) {
+			superClasses = classDAG.getDirectSuper(classEquivalences);
+		} else {
+			superClasses = classDAG.getSuper(classEquivalences);
+		}
+
+		for (Equivalences<ObjectPropertyExpression> equivClasses : superClasses) {
+			for (ObjectPropertyExpression classExp : equivClasses) {
+				for (ObjectPropertyExpression equivClass : classDAG.getFullVertex(classExp))
+					superObjectPropSet.add(equivClass);
+			}
+		}
+		
+		 
+		OWLAPITranslator2QLOWL ontopTranslator = new OWLAPITranslator2QLOWL();
+		return ontopTranslator.translateObjPropertyToNodeSet(superObjectPropSet);
 	}
 
 	@Nonnull
@@ -876,7 +929,24 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 	public Node<OWLObjectPropertyExpression> getEquivalentObjectProperties(@Nonnull OWLObjectPropertyExpression pe)
 			throws InconsistentOntologyException, FreshEntitiesException, ReasonerInterruptedException,
 			TimeOutException {
-		return structuralReasoner.getEquivalentObjectProperties(pe);
+		
+		Set<ObjectPropertyExpression> equivClassesSet = new HashSet<ObjectPropertyExpression>();
+		
+		// Translate the OWLClassExpression object to an Ontop related object
+		OWLAPITranslatorHelper owlTranslator = new OWLAPITranslatorHelper(translatedOntologyMerge.getVocabulary());
+		ObjectPropertyExpression cexp = owlTranslator.getPropertyExpression(pe);
+
+		// Get equivalence classes from DAG
+		EquivalencesDAG<ObjectPropertyExpression> classDAG = this.questInstance.getReformulationReasoner()
+				.getObjectPropertyDAG();		
+		Equivalences<ObjectPropertyExpression> classEquivalences = classDAG.getFullVertex(classDAG.getCanonicalForm(cexp));
+
+		for (ObjectPropertyExpression classExp : classEquivalences) {
+			equivClassesSet.add(classExp);
+		}
+
+		OWLAPITranslator2QLOWL ontopTranslator = new OWLAPITranslator2QLOWL();
+		return ontopTranslator.translateObjPropertyToNode(equivClassesSet);
 	}
 
 	@Nonnull
