@@ -827,7 +827,9 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 
 		// Get equivalence classes from DAG
 		EquivalencesDAG<ClassExpression> classDAG = this.questInstance.getReformulationReasoner().getClassDAG();
-		Equivalences<ClassExpression> classEquivalences = classDAG.getFullVertex(classDAG.getCanonicalForm(cexp));
+		//Equivalences<ClassExpression> classEquivalences = classDAG.getFullVertex(classDAG.getCanonicalForm(cexp));
+
+        Equivalences<ClassExpression> classEquivalences = classDAG.getVertex(classDAG.getCanonicalForm(cexp));
 
 		for (ClassExpression classExp : classEquivalences) {
 			equivClassesSet.add(classExp);

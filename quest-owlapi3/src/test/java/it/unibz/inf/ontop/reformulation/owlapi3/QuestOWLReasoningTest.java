@@ -76,14 +76,9 @@ public class QuestOWLReasoningTest {
 	/**
 	 * TODO: Add test for invalid types of class expressions.
 	 */
-	
-	/** 
-	 * TODO: Check if it is a good configuration.
-	 * */
 	private void startReasoner() {
 		QuestPreferences p = new QuestPreferences();
 		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
-		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
 
 		QuestOWLFactory factory = new QuestOWLFactory();
         QuestOWLConfiguration config = QuestOWLConfiguration.builder().preferences(p).build();
