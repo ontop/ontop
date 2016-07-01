@@ -323,9 +323,9 @@ public abstract class QuestStatement implements OBDAStatement {
 	 */
 	private ResultSet executeInThread(ParsedQuery pq, QueryType type, Optional<SesameConstructTemplate> templ) throws OBDAException {
 		CountDownLatch monitor = new CountDownLatch(1);
-		String sql = engine.translateIntoNativeQuery(pq);
-		List<String> signature = engine.getQuerySignature(pq);
-		QueryExecutionThread executionthread = new QueryExecutionThread(sql, signature, type, templ, monitor);
+		ExecutableQuery executableQuery = engine.translateIntoNativeQuery(pq, templ);
+		QueryExecutionThread executionthread = new QueryExecutionThread(executableQuery, type, templ, monitor,
+				engine.hasDistinctResultSet());
 		this.executionThread = executionthread;
 		executionthread.start();
 		try {

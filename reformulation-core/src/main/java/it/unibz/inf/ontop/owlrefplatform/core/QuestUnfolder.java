@@ -25,6 +25,8 @@ import it.unibz.inf.ontop.model.impl.TermUtils;
 import it.unibz.inf.ontop.ontology.ClassAssertion;
 import it.unibz.inf.ontop.ontology.DataPropertyAssertion;
 import it.unibz.inf.ontop.ontology.ObjectPropertyAssertion;
+import it.unibz.inf.ontop.pivotalrepr.MetadataForQueryOptimization;
+import it.unibz.inf.ontop.pivotalrepr.impl.MetadataForQueryOptimizationImpl;
 import it.unibz.inf.ontop.sql.DBMetadata;
 import it.unibz.inf.ontop.utils.IMapping2DatalogConverter;
 import net.sf.jsqlparser.JSQLParserException;
@@ -54,6 +56,7 @@ public class QuestUnfolder {
 
 	private ImmutableMultimap<AtomPredicate, ImmutableList<Integer>> uniqueConstraints;
 	private final IMapping2DatalogConverter mapping2DatalogConvertor;
+	private MetadataForQueryOptimization metadataForQueryOptimization;
 
 	/** Davide> Whether to exclude the user-supplied predicates from the
 	 *          TMapping procedure (that is, the mapping assertions for 
@@ -124,6 +127,7 @@ public class QuestUnfolder {
 
 		Multimap<Predicate, List<Integer>> pkeys = dbConnector.extractUniqueConstraints(metadata);
 		uniqueConstraints = convertUniqueConstraints(pkeys);
+		metadataForQueryOptimization = new MetadataForQueryOptimizationImpl(uniqueConstraints, uriTemplateMatcher);
 		unfolder = new DatalogUnfolder(unfoldingProgram, pkeys);
 
 		this.ufp = unfoldingProgram;
@@ -156,6 +160,7 @@ public class QuestUnfolder {
 
 		Multimap<Predicate, List<Integer>> pkeys = dbConnector.extractUniqueConstraints(metadata);
 		uniqueConstraints = convertUniqueConstraints(pkeys);
+		metadataForQueryOptimization = new MetadataForQueryOptimizationImpl(uniqueConstraints, uriTemplateMatcher);
 		unfolder = new DatalogUnfolder(unfoldingProgram, pkeys);
 
 		this.ufp = unfoldingProgram;
@@ -408,5 +413,13 @@ public class QuestUnfolder {
 
 	public ImmutableMultimap<AtomPredicate, ImmutableList<Integer>> getUniqueConstraints() {
 		return uniqueConstraints;
+	}
+
+	public DatalogUnfolder getDatalogUnfolder() {
+		return unfolder;
+	}
+
+	public MetadataForQueryOptimization getMetadataForQueryOptimization() {
+		return metadataForQueryOptimization;
 	}
 }

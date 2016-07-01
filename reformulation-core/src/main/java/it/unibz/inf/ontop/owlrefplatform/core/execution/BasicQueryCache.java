@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.owlrefplatform.core.execution;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.owlrefplatform.core.ExecutableQuery;
 import it.unibz.inf.ontop.owlrefplatform.core.QueryCache;
+import org.openrdf.query.parser.ParsedQuery;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -13,25 +14,25 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class BasicQueryCache implements QueryCache {
 
-    private final Map<String, ExecutableQuery> targetQueryCache;
+    private final Map<ParsedQuery, ExecutableQuery> mutableMap;
 
     @Inject
     private BasicQueryCache() {
-        targetQueryCache = new ConcurrentHashMap<>();
+        mutableMap = new ConcurrentHashMap<>();
     }
 
     @Override
-    public ExecutableQuery getTargetQuery(String sparqlQuery) {
-        return targetQueryCache.get(sparqlQuery);
+    public ExecutableQuery get(ParsedQuery sparqlTree) {
+        return mutableMap.get(sparqlTree);
     }
 
     @Override
-    public void cacheTargetQuery(String sparqlQuery, ExecutableQuery executableQuery) {
-        targetQueryCache.put(sparqlQuery, executableQuery);
+    public void put(ParsedQuery sparqlTree, ExecutableQuery executableQuery) {
+        mutableMap.put(sparqlTree, executableQuery);
     }
 
     @Override
     public void clear() {
-        targetQueryCache.clear();
+        mutableMap.clear();
     }
 }

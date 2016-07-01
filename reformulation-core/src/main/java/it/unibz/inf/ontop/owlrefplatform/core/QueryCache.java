@@ -1,14 +1,16 @@
 package it.unibz.inf.ontop.owlrefplatform.core;
 
+import org.openrdf.query.parser.ParsedQuery;
+
 /**
  * Cache of queries.
  *
  * Mutable class.
  */
 public interface QueryCache {
-    ExecutableQuery getTargetQuery(String sparqlQuery);
+    ExecutableQuery get(ParsedQuery sparqlTree);
 
-    void cacheTargetQuery(String sparqlQuery, ExecutableQuery executableQuery);
+    void put(ParsedQuery sparqlTree, ExecutableQuery executableQuery);
 
     void clear();
 }

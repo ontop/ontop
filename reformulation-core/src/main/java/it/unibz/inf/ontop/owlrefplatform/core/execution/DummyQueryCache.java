@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.owlrefplatform.core.execution;
 
 import it.unibz.inf.ontop.owlrefplatform.core.ExecutableQuery;
 import it.unibz.inf.ontop.owlrefplatform.core.QueryCache;
+import org.openrdf.query.parser.ParsedQuery;
 
 /**
  * Does not cache anything.
@@ -9,12 +10,12 @@ import it.unibz.inf.ontop.owlrefplatform.core.QueryCache;
 public class DummyQueryCache implements QueryCache {
 
     @Override
-    public ExecutableQuery getTargetQuery(String sparqlQuery) {
+    public ExecutableQuery get(ParsedQuery sparqlTree) {
         return null;
     }
 
     @Override
-    public void cacheTargetQuery(String sparqlQuery, ExecutableQuery executableQuery) {
+    public void put(ParsedQuery sparqlTree, ExecutableQuery executableQuery) {
     }
 
     @Override

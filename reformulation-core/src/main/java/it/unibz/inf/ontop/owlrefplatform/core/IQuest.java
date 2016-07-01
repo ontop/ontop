@@ -24,8 +24,6 @@ public interface IQuest extends RepositoryChangedListener {
 
     OBDAModel getOBDAModel();
 
-    Multimap<Predicate,Integer> copyMultiTypedFunctionSymbolIndex();
-
     void dispose();
 
     QuestPreferences getPreferences();
@@ -52,8 +50,6 @@ public interface IQuest extends RepositoryChangedListener {
     Optional<RDBMSSIRepositoryManager> getOptionalSemanticIndexRepository();
 
     DataSourceMetadata getMetaData();
-
-    MetadataForQueryOptimization getMetadataForQueryOptimization();
 
     DatalogProgram getRewriting(DatalogProgram initialProgram) throws OBDAException;
 

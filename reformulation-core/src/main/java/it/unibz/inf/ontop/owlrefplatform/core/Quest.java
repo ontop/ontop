@@ -34,7 +34,6 @@ import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
 import it.unibz.inf.ontop.injection.OBDAFactoryWithException;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.io.PrefixManager;
-import it.unibz.inf.ontop.nativeql.DBMetadataExtractor;
 import it.unibz.inf.ontop.ontology.ImmutableOntologyVocabulary;
 import it.unibz.inf.ontop.owlrefplatform.core.abox.RDBMSSIRepositoryManager;
 import it.unibz.inf.ontop.owlrefplatform.core.abox.RepositoryChangedListener;
@@ -46,7 +45,6 @@ import it.unibz.inf.ontop.owlrefplatform.core.reformulation.DummyReformulator;
 import it.unibz.inf.ontop.owlrefplatform.core.reformulation.QueryRewriter;
 import it.unibz.inf.ontop.owlrefplatform.core.reformulation.TreeWitnessRewriter;
 import it.unibz.inf.ontop.owlrefplatform.core.srcquerygeneration.NativeQueryGenerator;
-import it.unibz.inf.ontop.owlrefplatform.core.srcquerygeneration.SQLGenerator;
 import it.unibz.inf.ontop.owlrefplatform.core.translator.MappingVocabularyFixer;
 
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
@@ -57,7 +55,7 @@ import it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing.TMappingExclusio
 import it.unibz.inf.ontop.owlrefplatform.injection.QuestComponentFactory;
 import it.unibz.inf.ontop.sql.DBMetadata;
 import it.unibz.inf.ontop.sql.ImplicitDBConstraintsReader;
-import it.unibz.inf.ontop.sql.RDBMetadataExtractionTools;
+import it.unibz.inf.ontop.utils.IMapping2DatalogConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -71,7 +69,6 @@ import java.util.*;
 public class Quest implements Serializable, IQuest {
 
 	private static final long serialVersionUID = -6074403119825754295L;
-
 	// Whether to print primary and foreign keys to stdout.
 	private boolean printKeys;
 
@@ -182,7 +179,10 @@ public class Quest implements Serializable, IQuest {
 	private final QuestComponentFactory questComponentFactory;
 	private final OBDAFactoryWithException obdaFactory;
 	private final MappingVocabularyFixer mappingVocabularyFixer;
+	private final IMapping2DatalogConverter mapping2DatalogConverter;
+
 	private DBConnector dbConnector;
+	private final QueryCache queryCache;
 
 	/***
 	 * Will prepare an instance of quest in classic or virtual ABox mode. If the
@@ -191,29 +191,27 @@ public class Quest implements Serializable, IQuest {
 	 * 
 	 * <p>
 	 * You must still call setupRepository() after creating the instance.
-	 * 
-	 * @param tbox
+	 *  @param tbox
 	 *            . The TBox must not be null, even if its empty. At least, the
 	 *            TBox must define all the vocabulary of the system.
 	 * @param obdaModel
 	 *            . The mappings of the system. The vocabulary of the mappings
 	 *            must be subset or equal to the vocabulary of the ontology.
 	 *            Can be null.
-	 * @param config
-	 *            . The configuration parameters for quest. See
-	 *            QuestDefaults.properties for a description (in
-	 *            src/main/resources). Should not be null.
-	 *
 	 * @param metadata TODO: describe
-	 * @param nativeQLFactory
-	 *
-	 * TODO: describe nativeQLFactory
+	 * @param config
+*            . The configuration parameters for quest. See
+*            QuestDefaults.properties for a description (in
+*            src/main/resources). Should not be null.
+*@param nativeQLFactory
+*@param queryCache
 	 */
 	@Inject
 	private Quest(@Assisted Ontology tbox, @Assisted @Nullable OBDAModel obdaModel, @Assisted @Nullable DBMetadata metadata,
 				  @Assisted QuestPreferences config, NativeQueryLanguageComponentFactory nativeQLFactory,
 				  OBDAFactoryWithException obdaFactory, QuestComponentFactory questComponentFactory,
-				  MappingVocabularyFixer mappingVocabularyFixer, TMappingExclusionConfig excludeFromTMappings) throws DuplicateMappingException {
+				  MappingVocabularyFixer mappingVocabularyFixer, TMappingExclusionConfig excludeFromTMappings,
+				  IMapping2DatalogConverter mapping2DatalogConverter, QueryCache queryCache) throws DuplicateMappingException {
 		if (tbox == null)
 			throw new InvalidParameterException("TBox cannot be null");
 
@@ -221,6 +219,8 @@ public class Quest implements Serializable, IQuest {
 		this.obdaFactory = obdaFactory;
 		this.questComponentFactory = questComponentFactory;
 		this.mappingVocabularyFixer = mappingVocabularyFixer;
+		this.mapping2DatalogConverter = mapping2DatalogConverter;
+		this.queryCache = queryCache;
 
 		inputOntology = tbox;
 
@@ -489,16 +489,16 @@ public class Quest implements Serializable, IQuest {
     		VocabularyValidator vocabularyValidator = new VocabularyValidator(reformulationReasoner,
 					inputOntology.getVocabulary(), nativeQLFactory);
 
-            final QuestUnfolder unfolder = new QuestUnfolder(metadata);
+            final QuestUnfolder unfolder = new QuestUnfolder(nativeQLFactory, mapping2DatalogConverter);
 
 			/*
 			 * T-Mappings and Fact mappings
 			 */
 			if (aboxMode.equals(QuestConstants.VIRTUAL))
-				unfolder.setupInVirtualMode(mappings, localConnection, vocabularyValidator, reformulationReasoner,
-						inputOntology, excludeFromTMappings, queryingAnnotationsInOntology, sameAsInMapping);
+				unfolder.setupInVirtualMode(mappings, metadata, dbConnector, vocabularyValidator, reformulationReasoner,
+						inputOntology, excludeFromTMappings);
 			else
-				unfolder.setupInSemanticIndexMode(mappings, reformulationReasoner);
+				unfolder.setupInSemanticIndexMode(mappings, dbConnector, reformulationReasoner, metadata);
 
 			if (dataRepository != null)
 				dataRepository.addRepositoryChangedListener(new RepositoryChangedListener() {
@@ -507,7 +507,8 @@ public class Quest implements Serializable, IQuest {
 						engine.clearNativeQueryCache();
 						try {
 							//
-							unfolder.setupInSemanticIndexMode(dataRepository.getMappings(), reformulationReasoner);
+							unfolder.setupInSemanticIndexMode(dataRepository.getMappings(), dbConnector, reformulationReasoner,
+									metadata);
 							log.debug("Mappings and unfolder have been updated after inserts to the semantic index DB");
 						}
 						catch (Exception e) {
@@ -548,7 +549,7 @@ public class Quest implements Serializable, IQuest {
 			 * Done, sending a new reasoner with the modules we just configured
 			 */
 			engine = new QuestQueryProcessor(rewriter, sigma, unfolder, vocabularyValidator, getUriMap(),
-					dataSourceQueryGenerator);
+					dataSourceQueryGenerator, queryCache, distinctResultSet);
 
 
 			log.debug("... Quest has been initialized.");
@@ -608,10 +609,6 @@ public class Quest implements Serializable, IQuest {
 			return dataRepository.getUriMap();
 		else
 			return null;
-	}
-	
-	public boolean hasDistinctResultSet() {
-		return distinctResultSet;
 	}
 
 	@Override

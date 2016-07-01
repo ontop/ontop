@@ -1,7 +1,6 @@
 package it.unibz.inf.ontop.owlrefplatform.core;
 
 import com.google.common.collect.ImmutableList;
-import com.google.inject.Inject;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
@@ -14,6 +13,7 @@ import it.unibz.inf.ontop.owlrefplatform.core.srcquerygeneration.NativeQueryGene
 import it.unibz.inf.ontop.owlrefplatform.core.translator.DatalogToSparqlTranslator;
 import it.unibz.inf.ontop.owlrefplatform.core.translator.SesameConstructTemplate;
 import it.unibz.inf.ontop.owlrefplatform.core.translator.SparqlAlgebraToDatalogTranslator;
+import it.unibz.inf.ontop.owlrefplatform.core.unfolding.DatalogUnfolder;
 import it.unibz.inf.ontop.owlrefplatform.core.unfolding.ExpressionEvaluator;
 import it.unibz.inf.ontop.owlrefplatform.core.unfolding.SPARQLQueryFlattener;
 import it.unibz.inf.ontop.pivotalrepr.EmptyQueryException;
@@ -49,12 +49,12 @@ public class QuestQueryProcessor {
 	
 	private static final Logger log = LoggerFactory.getLogger(QuestQueryProcessor.class);
 	private static final OBDADataFactory DATA_FACTORY = OBDADataFactoryImpl.getInstance();
+	private final boolean hasDistinctResultSet;
 
-	@Inject
-	public QuestQueryProcessor(QueryRewriter rewriter, LinearInclusionDependencies sigma, QuestUnfolder unfolder, 
-			VocabularyValidator vocabularyValidator, SemanticIndexURIMap uriMap,
+	public QuestQueryProcessor(QueryRewriter rewriter, LinearInclusionDependencies sigma, QuestUnfolder unfolder,
+							   VocabularyValidator vocabularyValidator, SemanticIndexURIMap uriMap,
 							   NativeQueryGenerator datasourceQueryGenerator,
-							   QueryCache queryCache) {
+							   QueryCache queryCache, boolean hasDistinctResultSet) {
 		this.rewriter = rewriter;
 		this.sigma = sigma;
 		this.unfolder = unfolder;
@@ -62,6 +62,7 @@ public class QuestQueryProcessor {
 		this.uriMap = uriMap;
 		this.datasourceQueryGenerator = datasourceQueryGenerator;
 		this.queryCache = queryCache;
+		this.hasDistinctResultSet = hasDistinctResultSet;
 	}
 
 	/**
@@ -81,7 +82,7 @@ public class QuestQueryProcessor {
 	private DatalogProgram translateAndPreProcess(ParsedQuery pq)  {
 		
 		SparqlAlgebraToDatalogTranslator translator = new SparqlAlgebraToDatalogTranslator(unfolder.getUriTemplateMatcher(),
-				uriMap, unfolder.getSameAsDataPredicatesAndClasses(), unfolder.getSameAsObjectPredicates());
+				uriMap);
 		DatalogProgram program = translator.translate(pq);
 
 		log.debug("Datalog program translated from the SPARQL query: \n{}", program);
@@ -105,34 +106,34 @@ public class QuestQueryProcessor {
 	}
 	
 	
-	public ExecutableQuery translateIntoNativeQuery(ParsedQuery pq) throws OBDAException {
+	public ExecutableQuery translateIntoNativeQuery(ParsedQuery pq,
+													Optional<SesameConstructTemplate> optionalConstructTemplate)
+			throws OBDAException {
 
-		ExecutableQuery executableQuery = queryCache.getTargetQuery(pq);
+		ExecutableQuery executableQuery = queryCache.get(pq);
 		if (executableQuery != null)
 			return executableQuery;
+
+		SparqlAlgebraToDatalogTranslator translator = new SparqlAlgebraToDatalogTranslator(
+				unfolder.getUriTemplateMatcher(),
+				uriMap);
+		DatalogProgram translation = translator.translate(pq);
+
+		List<String> signature = null;
+		// IMPORTANT: this is the original query
+		// (with original variable names, not the BINDings after flattening)
+		for (CQIE q : translation.getRules()) {
+			if (q.getHead().getFunctionSymbol().getName().equals(OBDAVocabulary.QUEST_QUERY)) {
+				List<Term> terms = q.getHead().getTerms();
+				signature = new ArrayList<>(terms.size());
+				for (Term t : terms)
+					signature.add(((Variable) t).getName()); // ALL VARIABLES by construction
+				break;
+			}
+		}
 		
 		try {
 			// log.debug("Input query:\n{}", strquery);
-			
-			SparqlAlgebraToDatalogTranslator translator = new SparqlAlgebraToDatalogTranslator(
-					unfolder.getUriTemplateMatcher(),
-					uriMap,
-					unfolder.getSameAsDataPredicatesAndClasses(),
-					unfolder.getSameAsObjectPredicates());
-			DatalogProgram translation = translator.translate(pq);
-
-			List<String> signature = null;
-			// IMPORTANT: this is the original query
-			// (with original variable names, not the BINDings after flattening)
-			for (CQIE q : translation.getRules()) {
-				if (q.getHead().getFunctionSymbol().getName().equals(OBDAVocabulary.QUEST_QUERY)) {
-					List<Term> terms = q.getHead().getTerms();
-					signature = new ArrayList<>(terms.size());
-					for (Term t : terms)
-						signature.add(((Variable) t).getName()); // ALL VARIABLES by construction
-					break;
-				}
-			}
 
 
 			log.debug("Datalog program translated from the SPARQL query: \n{}", translation);
@@ -167,10 +168,11 @@ public class QuestQueryProcessor {
 			//final long startTime = System.currentTimeMillis();
 			log.debug("Start the partial evaluation process...");
 
+			DatalogUnfolder datalogUnfolder = unfolder.getDatalogUnfolder();
+
 			// TODO: make it final
-			DatalogProgram programAfterUnfolding = unfolder.getDatalogUnfolder()
-					.unfold((DatalogProgram) programAfterRewriting,
-							"ans1", QuestConstants.BUP, true, multiTypedFunctionSymbolIndex);
+			DatalogProgram programAfterUnfolding = datalogUnfolder
+					.unfold(programAfterRewriting, "ans1", QuestConstants.BUP, true);
 			log.debug("Data atoms evaluated: \n{}", programAfterUnfolding);
 
 
@@ -185,7 +187,7 @@ public class QuestQueryProcessor {
 				try {
 					IntermediateQuery intermediateQuery = DatalogProgram2QueryConverter.convertDatalogProgram(
 							unfolder.getMetadataForQueryOptimization(), programAfterUnfolding,
-							unfolder.getExtensionalPredicates());
+							datalogUnfolder.getExtensionalPredicates());
 					log.debug("New directly translated intermediate query: \n" + intermediateQuery.toString());
 
 					// BasicTypeLiftOptimizer typeLiftOptimizer = new BasicTypeLiftOptimizer();
@@ -200,8 +202,9 @@ public class QuestQueryProcessor {
 
 					log.debug("Partial evaluation ended.");
 
-					executableQuery = generateTargetQuery(intermediateQuery, signature, optionalConstructTemplate);
-					queryCache.cacheTargetQuery(pq, executableQuery);
+					executableQuery = generateExecutableQuery(intermediateQuery, ImmutableList.copyOf(signature),
+							optionalConstructTemplate);
+					queryCache.put(pq, executableQuery);
 					return executableQuery;
 
 
@@ -213,10 +216,10 @@ public class QuestQueryProcessor {
 				 */
 				catch (EmptyQueryException e) {
 					ExecutableQuery emptyQuery = datasourceQueryGenerator.generateEmptyQuery(
-							signature, optionalConstructTemplate);
+							ImmutableList.copyOf(signature), optionalConstructTemplate);
 
 					log.debug("Empty query --> no solution.");
-					queryCache.cacheTargetQuery(pq, emptyQuery);
+					queryCache.put(pq, emptyQuery);
 					return emptyQuery;
 				}
 			}
@@ -224,7 +227,7 @@ public class QuestQueryProcessor {
 			//unfoldingTime = System.currentTimeMillis() - startTime;
 		}
 		catch (EmptyQueryException e) {
-			return datasourceQueryGenerator.generateEmptyQuery(signature, optionalConstructTemplate);
+			return datasourceQueryGenerator.generateEmptyQuery(ImmutableList.copyOf(signature), optionalConstructTemplate);
 		}
 		catch (OBDAException e) {
 			throw e;
@@ -239,11 +242,11 @@ public class QuestQueryProcessor {
 		}
 	}
 
-	private ExecutableQuery generateTargetQuery(IntermediateQuery intermediateQuery, ImmutableList<String> signature,
-												Optional<SesameConstructTemplate> optionalConstructTemplate) throws OBDAException {
+	private ExecutableQuery generateExecutableQuery(IntermediateQuery intermediateQuery, ImmutableList<String> signature,
+													Optional<SesameConstructTemplate> optionalConstructTemplate) throws OBDAException {
 		log.debug("Producing the native query string...");
 
-		ExecutableQuery executableQuery = queryGenerator.generateSourceQuery(intermediateQuery, signature, optionalConstructTemplate);
+		ExecutableQuery executableQuery = datasourceQueryGenerator.generateSourceQuery(intermediateQuery, signature, optionalConstructTemplate);
 
 		log.debug("Resulting native query: \n{}", executableQuery);
 
@@ -310,5 +313,9 @@ public class QuestQueryProcessor {
 			ex.setStackTrace(e.getStackTrace());
 			throw ex;
 		}
+	}
+
+	public boolean hasDistinctResultSet() {
+		return hasDistinctResultSet;
 	}
 }
