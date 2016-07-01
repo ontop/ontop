@@ -806,7 +806,7 @@ public class OWLAPITranslatorOWL2QL implements OWLAxiomVisitor {
 	 * @throws TranslationException
 	 */
 	
-	public ClassExpression getSubclassExpression(OWLClassExpression owlCE) throws TranslationException {
+	private ClassExpression getSubclassExpression(OWLClassExpression owlCE) throws TranslationException {
 		
 		if (owlCE instanceof OWLClass) {
 			return helper.getOClass((OWLClass)owlCE);

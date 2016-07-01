@@ -19,7 +19,7 @@ public class OWLAPITranslatorHelper {
 	private static final OBDADataFactory dfac = OBDADataFactoryImpl.getInstance();
 	
 	
-	OWLAPITranslatorHelper(ImmutableOntologyVocabulary voc) {
+	public OWLAPITranslatorHelper(ImmutableOntologyVocabulary voc) {
 		this.voc = voc;
 	}
 

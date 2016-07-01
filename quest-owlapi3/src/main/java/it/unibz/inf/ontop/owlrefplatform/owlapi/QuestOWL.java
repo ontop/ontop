@@ -27,6 +27,7 @@ import it.unibz.inf.ontop.model.TupleResultSet;
 import it.unibz.inf.ontop.ontology.*;
 import it.unibz.inf.ontop.owlapi.OWLAPIABoxIterator;
 import it.unibz.inf.ontop.owlapi.OWLAPITranslator2QLOWL;
+import it.unibz.inf.ontop.owlapi.OWLAPITranslatorHelper;
 import it.unibz.inf.ontop.owlapi.OWLAPITranslatorOWL2QL;
 import it.unibz.inf.ontop.owlapi.OWLAPITranslatorOWL2QL.TranslationException;
 import it.unibz.inf.ontop.owlapi.OWLAPITranslatorUtility;
@@ -61,12 +62,12 @@ import java.util.Set;
  * the implementation of the reasoning method in the reformulation project.
  */
 public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
-	
+
 	final OWL2QLProfile owl2qlprofile = new OWL2QLProfile();
 
-    StructuralReasoner structuralReasoner;
+	StructuralReasoner structuralReasoner;
 
-    private Version version;
+	private Version version;
 
 	private boolean interrupted = false;
 
@@ -75,7 +76,7 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 	private boolean prepared = false;
 
 	private boolean questready = false;
-	
+
 	private Object inconsistent = null;
 
 	// / holds the error that quest had when initializing
@@ -105,89 +106,91 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 	private QuestOWLConnection owlconn = null;
 
 	private OWLOntologyManager man;
-	
-	
+
 	// //////////////////////////////////////////////////////////////////////////////////////
 	//
-	//  User Constraints are primary and foreign keys not in the database 
-	//  
+	// User Constraints are primary and foreign keys not in the database
+	//
 	//
 	// //////////////////////////////////////////////////////////////////////////////////////
-	
+
 	private ImplicitDBConstraintsReader userConstraints = null;
-	
+
 	/* Used to signal whether to apply the user constraints above */
 	private boolean applyUserConstraints = false;
-	
+
 	// //////////////////////////////////////////////////////////////////////////////////////
-	//  Davide>
-	//  T-Mappings Configuration
-	//  
+	// Davide>
+	// T-Mappings Configuration
+	//
 	//
 	// //////////////////////////////////////////////////////////////////////////////////////
 
 	private TMappingExclusionConfig excludeFromTMappings = TMappingExclusionConfig.empty();
 
-	/* Used to enable querying annotation Properties coming from the ontology. */
+	/*
+	 * Used to enable querying annotation Properties coming from the ontology.
+	 */
 
-	private  boolean queryingAnnotationsInOntology = false;
+	private boolean queryingAnnotationsInOntology = false;
 
 	/* Used to enable use of same as in mappings. */
 
 	private boolean sameAsInMappings = false;
-	
+
 	/* Used to signal whether to apply the user constraints above */
-	//private boolean applyExcludeFromTMappings = false;
-	
+	// private boolean applyExcludeFromTMappings = false;
+
 	/**
-	 * Initialization code which is called from both of the two constructors. 
-	 * @param obdaModel 
+	 * Initialization code which is called from both of the two constructors.
+	 * 
+	 * @param obdaModel
 	 * 
 	 */
-	private void init(OWLOntology rootOntology, OBDAModel obdaModel, OWLReasonerConfiguration configuration, Properties preferences){
+	private void init(OWLOntology rootOntology, OBDAModel obdaModel, OWLReasonerConfiguration configuration,
+			Properties preferences) {
 		pm = configuration.getProgressMonitor();
 
-        man = rootOntology.getOWLOntologyManager();
+		man = rootOntology.getOWLOntologyManager();
 
 		if (obdaModel != null)
-			this.obdaModel = (OBDAModel)obdaModel.clone();
-		
+			this.obdaModel = (OBDAModel) obdaModel.clone();
+
 		this.preferences.putAll(preferences);
 
 		extractVersion();
-		
+
 		prepareReasoner();
 	}
 
+	public QuestOWL(OWLOntology rootOntology, QuestOWLConfiguration configuration) {
+		super(rootOntology, configuration, BufferingMode.BUFFERING);
+		this.structuralReasoner = new StructuralReasoner(rootOntology, configuration, BufferingMode.BUFFERING);
 
-    public QuestOWL(OWLOntology rootOntology, QuestOWLConfiguration configuration) {
-        super(rootOntology, configuration, BufferingMode.BUFFERING);
-        this.structuralReasoner = new StructuralReasoner(rootOntology, configuration, BufferingMode.BUFFERING);
+		this.obdaModel = configuration.getObdaModel();
 
-        this.obdaModel = configuration.getObdaModel();
+		if (configuration.getUserConstraints() != null) {
+			this.applyUserConstraints = true;
+			this.userConstraints = configuration.getUserConstraints();
+		}
 
-        if (configuration.getUserConstraints() != null){
-            this.applyUserConstraints = true;
-            this.userConstraints = configuration.getUserConstraints();
-        }
+		this.excludeFromTMappings = configuration.getExcludeFromTMappings();
 
-        this.excludeFromTMappings = configuration.getExcludeFromTMappings();
+		this.preferences = configuration.getPreferences();
 
-        this.preferences = configuration.getPreferences();
-
-		if(configuration.isQueryingAnnotationsInOntology()) {
+		if (configuration.isQueryingAnnotationsInOntology()) {
 			this.queryingAnnotationsInOntology = true;
 		}
 
-		if(configuration.isSameAsInMappings()) {
+		if (configuration.isSameAsInMappings()) {
 			this.sameAsInMappings = true;
 		}
-        this.init(rootOntology, obdaModel, configuration, preferences);
-    }
-
+		this.init(rootOntology, obdaModel, configuration, preferences);
+	}
 
 	/**
-	 * extract version from {@link it.unibz.inf.ontop.utils.VersionInfo}, which is from the file {@code version.properties}
+	 * extract version from {@link it.unibz.inf.ontop.utils.VersionInfo}, which
+	 * is from the file {@code version.properties}
 	 */
 	private void extractVersion() {
 		VersionInfo versionInfo = VersionInfo.getVersionInfo();
@@ -209,20 +212,20 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 	}
 
 	@Override
-    public void flush() {
+	public void flush() {
 		prepared = false;
-		
+
 		super.flush();
-		
+
 		prepareReasoner();
-		
+
 	}
-	
+
 	@Deprecated // used in one test only
 	public Quest getQuestInstance() {
 		return questInstance;
 	}
-	
+
 	public void setPreferences(QuestPreferences preferences) {
 		this.preferences = preferences;
 	}
@@ -230,8 +233,9 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 	public QuestOWLStatement getStatement() throws OWLException {
 		if (!questready) {
 			OWLReasonerRuntimeException owlReasonerRuntimeException = new ReasonerInternalException(
-					"Quest was not initialized properly. This is generally indicates, connection problems or error during ontology or mapping pre-processing. \n\nOriginal error message:\n" + questException.getMessage()) ;
-				owlReasonerRuntimeException.setStackTrace(questException.getStackTrace());
+					"Quest was not initialized properly. This is generally indicates, connection problems or error during ontology or mapping pre-processing. \n\nOriginal error message:\n"
+							+ questException.getMessage());
+			owlReasonerRuntimeException.setStackTrace(questException.getStackTrace());
 			throw owlReasonerRuntimeException;
 		}
 		return owlconn.createStatement();
@@ -248,8 +252,10 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 
 		log.debug("Initializing a new Quest instance...");
 
-		final boolean bObtainFromOntology = preferences.getCurrentBooleanValueFor(QuestPreferences.OBTAIN_FROM_ONTOLOGY);
-		final boolean bObtainFromMappings = preferences.getCurrentBooleanValueFor(QuestPreferences.OBTAIN_FROM_MAPPINGS);
+		final boolean bObtainFromOntology = preferences
+				.getCurrentBooleanValueFor(QuestPreferences.OBTAIN_FROM_ONTOLOGY);
+		final boolean bObtainFromMappings = preferences
+				.getCurrentBooleanValueFor(QuestPreferences.OBTAIN_FROM_MAPPINGS);
 		final String unfoldingMode = (String) preferences.getCurrentValue(QuestPreferences.ABOX_MODE);
 
 		// pm.reasonerTaskStarted("Classifying...");
@@ -257,23 +263,21 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 
 		questInstance = new Quest(translatedOntologyMerge, obdaModel, preferences);
 
-		if(this.applyUserConstraints)
+		if (this.applyUserConstraints)
 			questInstance.setImplicitDBConstraints(userConstraints);
-		
-		//if( this.applyExcludeFromTMappings )
+
+		// if( this.applyExcludeFromTMappings )
 		questInstance.setExcludeFromTMappings(this.excludeFromTMappings);
 
-		if(this.queryingAnnotationsInOntology){
+		if (this.queryingAnnotationsInOntology) {
 			questInstance.setQueryingAnnotationsInOntology(this.queryingAnnotationsInOntology);
 		}
 
-		if(this.sameAsInMappings){
+		if (this.sameAsInMappings) {
 			questInstance.setSameAsInMapping(this.sameAsInMappings);
 		}
 
-		
 		Set<OWLOntology> importsClosure = man.getImportsClosure(getRootOntology());
-		
 
 		try {
 			// pm.reasonerTaskProgressChanged(1, 4);
@@ -283,7 +287,7 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 			// pm.reasonerTaskProgressChanged(2, 4);
 
 			// Retrives the connection from Quest
-			//conn = questInstance.getConnection();
+			// conn = questInstance.getConnection();
 			conn = questInstance.getNonPoolConnection();
 			owlconn = new QuestOWLConnection(conn);
 			// pm.reasonerTaskProgressChanged(3, 4);
@@ -298,25 +302,26 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 					int count = st.insertData(aBoxIter, 5000, 500);
 					log.debug("Inserted {} triples from the ontology.", count);
 				}
-				if (bObtainFromMappings) { // TODO: GUOHUI 2016-01-16: This mode will be removed
+				if (bObtainFromMappings) { // TODO: GUOHUI 2016-01-16: This mode
+											// will be removed
 					// Retrieves the ABox from the target database via mapping.
 					log.debug("Loading data from Mappings into the database");
 
 					OBDAModel obdaModelForMaterialization = questInstance.getOBDAModel();
 					obdaModelForMaterialization.getOntologyVocabulary().merge(translatedOntologyMerge.getVocabulary());
-					
+
 					QuestMaterializer materializer = new QuestMaterializer(obdaModelForMaterialization, false);
 					Iterator<Assertion> assertionIter = materializer.getAssertionIterator();
 					int count = st.insertData(assertionIter, 5000, 500);
 					materializer.disconnect();
 					log.debug("Inserted {} triples from the mappings.", count);
 				}
-//				st.createIndexes();
+				// st.createIndexes();
 				st.close();
 				if (!conn.getAutoCommit())
-				conn.commit();
-				
-				//questInstance.updateSemanticIndexMappings();
+					conn.commit();
+
+				// questInstance.updateSemanticIndexMappings();
 			} else {
 				// VIRTUAL MODE - NO-OP
 			}
@@ -338,7 +343,7 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 		} catch (Exception e) {
 			log.debug(e.getMessage());
 		}
-		
+
 		try {
 			questInstance.dispose();
 		} catch (Exception e) {
@@ -367,20 +372,19 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 		 */
 		log.debug("Load ontologies called. Translating ontologies.");
 
-        Ontology mergeOntology = OWLAPITranslatorUtility.translateImportsClosure(ontology);
-        return mergeOntology;
-//		log.debug("Ontology loaded: {}", mergeOntology);
+		Ontology mergeOntology = OWLAPITranslatorUtility.translateImportsClosure(ontology);
+		return mergeOntology;
+		// log.debug("Ontology loaded: {}", mergeOntology);
 	}
-
-
 
 	public QuestOWLConnection getConnection() throws OBDAException {
 		return owlconn;
 	}
 
 	/**
-	 * Replaces the owl connection with a new one
-	 * Called when the user cancels a query. Easier to get a new connection, than waiting for the cancel
+	 * Replaces the owl connection with a new one Called when the user cancels a
+	 * query. Easier to get a new connection, than waiting for the cancel
+	 * 
 	 * @return The old connection: The caller must close this connection
 	 * @throws OBDAException
 	 */
@@ -390,15 +394,15 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 		owlconn = new QuestOWLConnection(conn);
 		return oldconn;
 	}
-	
+
 	@Nonnull
-    @Override
+	@Override
 	public String getReasonerName() {
 		return "Quest";
 	}
 
 	@Nonnull
-    @Override
+	@Override
 	public FreshEntityPolicy getFreshEntityPolicy() {
 		return structuralReasoner.getFreshEntityPolicy();
 	}
@@ -410,9 +414,9 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 	 * @return The policy.
 	 */
 	@Nonnull
-    @Override
+	@Override
 	public IndividualNodeSetPolicy getIndividualNodeSetPolicy() {
-        return structuralReasoner.getIndividualNodeSetPolicy();
+		return structuralReasoner.getIndividualNodeSetPolicy();
 	}
 
 	/**
@@ -421,8 +425,8 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 	 * @return The version of this reasoner. Not <code>null</code>.
 	 */
 	@Override
-    @Nonnull
-    public Version getReasonerVersion() {
+	@Nonnull
+	public Version getReasonerVersion() {
 		return version;
 	}
 
@@ -433,7 +437,7 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 	}
 
 	@Override
-    public void interrupt() {
+	public void interrupt() {
 		interrupted = true;
 	}
 
@@ -447,14 +451,14 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 		pm.reasonerTaskStarted("Classifying...");
 		pm.reasonerTaskBusy();
 
-        structuralReasoner.prepareReasoner();
+		structuralReasoner.prepareReasoner();
 
-        try {
+		try {
 			/*
 			 * Compute the an ontology with the merge of all the vocabulary and
 			 * axioms of the closure of the root ontology
 			 */
-            this.translatedOntologyMerge = loadOntologies(getRootOntology());
+			this.translatedOntologyMerge = loadOntologies(getRootOntology());
 
 			questready = false;
 			questException = null;
@@ -468,7 +472,8 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 				questready = false;
 				questException = e;
 				errorMessage = e.getMessage();
-				log.error("Could not initialize the Quest query answering engine. Answering queries will not be available.");
+				log.error(
+						"Could not initialize the Quest query answering engine. Answering queries will not be available.");
 				log.error(e.getMessage(), e);
 				throw e;
 			}
@@ -481,54 +486,55 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 
 	}
 
-    @Override
-	public void precomputeInferences(@Nonnull InferenceType... inferenceTypes) throws ReasonerInterruptedException, TimeOutException,
-			InconsistentOntologyException {
+	@Override
+	public void precomputeInferences(@Nonnull InferenceType... inferenceTypes)
+			throws ReasonerInterruptedException, TimeOutException, InconsistentOntologyException {
 		// System.out.println("precomputeInferences");
 		ensurePrepared();
 		// prepareReasoner();
 	}
 
 	@Override
-    public boolean isPrecomputed(@Nonnull InferenceType inferenceType) {
+	public boolean isPrecomputed(@Nonnull InferenceType inferenceType) {
 		// return true;
 		return prepared;
 	}
 
 	@Override
-    @Nonnull
-    public Set<InferenceType> getPrecomputableInferenceTypes() {
-        return structuralReasoner.getPrecomputableInferenceTypes();
+	@Nonnull
+	public Set<InferenceType> getPrecomputableInferenceTypes() {
+		return structuralReasoner.getPrecomputableInferenceTypes();
 	}
 
 	@Override
-    public boolean isConsistent() {
+	public boolean isConsistent() {
 		return true;
 	}
-	
-	//info to return which axiom was inconsistent during the check
+
+	// info to return which axiom was inconsistent during the check
 	public Object getInconsistentAxiom() {
 		return inconsistent;
 	}
-	
+
 	public boolean isQuestConsistent() throws ReasonerInterruptedException, TimeOutException {
 		return isDisjointAxiomsConsistent() && isFunctionalPropertyAxiomsConsistent();
 	}
-	
+
 	private boolean isDisjointAxiomsConsistent() throws ReasonerInterruptedException, TimeOutException {
 
-		//deal with disjoint classes
+		// deal with disjoint classes
 		{
 			final String strQueryClass = "ASK {?x a <%s>; a <%s> }";
-			
+
 			for (NaryAxiom<ClassExpression> dda : translatedOntologyMerge.getDisjointClassesAxioms()) {
-				// TODO: handle complex class expressions and many pairs of disjoint classes
+				// TODO: handle complex class expressions and many pairs of
+				// disjoint classes
 				Collection<ClassExpression> disj = dda.getComponents();
 				Iterator<ClassExpression> classIterator = disj.iterator();
 				ClassExpression s1 = classIterator.next();
 				ClassExpression s2 = classIterator.next();
 				String strQuery = String.format(strQueryClass, s1, s2);
-				
+
 				boolean isConsistent = executeConsistencyQuery(strQuery);
 				if (!isConsistent) {
 					inconsistent = dda;
@@ -536,20 +542,20 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 				}
 			}
 		}
-		
-		//deal with disjoint properties
+
+		// deal with disjoint properties
 		{
 			final String strQueryProp = "ASK {?x <%s> ?y; <%s> ?y }";
 
-			for(NaryAxiom<ObjectPropertyExpression> dda
-						: translatedOntologyMerge.getDisjointObjectPropertiesAxioms()) {		
-				// TODO: handle role inverses and multiple arguments			
+			for (NaryAxiom<ObjectPropertyExpression> dda : translatedOntologyMerge
+					.getDisjointObjectPropertiesAxioms()) {
+				// TODO: handle role inverses and multiple arguments
 				Collection<ObjectPropertyExpression> props = dda.getComponents();
 				Iterator<ObjectPropertyExpression> iterator = props.iterator();
 				ObjectPropertyExpression p1 = iterator.next();
 				ObjectPropertyExpression p2 = iterator.next();
 				String strQuery = String.format(strQueryProp, p1, p2);
-				
+
 				boolean isConsistent = executeConsistencyQuery(strQuery);
 				if (!isConsistent) {
 					inconsistent = dda;
@@ -557,19 +563,18 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 				}
 			}
 		}
-		
+
 		{
 			final String strQueryProp = "ASK {?x <%s> ?y; <%s> ?y }";
 
-			for(NaryAxiom<DataPropertyExpression> dda 
-						: translatedOntologyMerge.getDisjointDataPropertiesAxioms()) {		
-				// TODO: handle role inverses and multiple arguments			
+			for (NaryAxiom<DataPropertyExpression> dda : translatedOntologyMerge.getDisjointDataPropertiesAxioms()) {
+				// TODO: handle role inverses and multiple arguments
 				Collection<DataPropertyExpression> props = dda.getComponents();
 				Iterator<DataPropertyExpression> iterator = props.iterator();
 				DataPropertyExpression p1 = iterator.next();
 				DataPropertyExpression p2 = iterator.next();
 				String strQuery = String.format(strQueryProp, p1, p2);
-				
+
 				boolean isConsistent = executeConsistencyQuery(strQuery);
 				if (!isConsistent) {
 					inconsistent = dda;
@@ -577,56 +582,56 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 				}
 			}
 		}
-		
+
 		return true;
 	}
-	
+
 	private boolean isFunctionalPropertyAxiomsConsistent() throws ReasonerInterruptedException, TimeOutException {
-		
-		//deal with functional properties
+
+		// deal with functional properties
 
 		final String strQueryFunc = "ASK { ?x <%s> ?y; <%s> ?z. FILTER (?z != ?y) }";
-		
+
 		for (ObjectPropertyExpression pfa : translatedOntologyMerge.getFunctionalObjectProperties()) {
 			// TODO: handle inverses
 			String propFunc = pfa.getName();
 			String strQuery = String.format(strQueryFunc, propFunc, propFunc);
-			
+
 			boolean isConsistent = executeConsistencyQuery(strQuery);
 			if (!isConsistent) {
 				inconsistent = pfa;
 				return false;
 			}
 		}
-		
+
 		for (DataPropertyExpression pfa : translatedOntologyMerge.getFunctionalDataProperties()) {
 			String propFunc = pfa.getName();
 			String strQuery = String.format(strQueryFunc, propFunc, propFunc);
-			
+
 			boolean isConsistent = executeConsistencyQuery(strQuery);
 			if (!isConsistent) {
 				inconsistent = pfa;
 				return false;
 			}
 		}
-		
+
 		return true;
 	}
-	
+
 	private boolean executeConsistencyQuery(String strQuery) {
 		QuestStatement query;
 		try {
 			query = conn.createStatement();
 			ResultSet rs = query.execute(strQuery);
-			TupleResultSet trs = ((TupleResultSet)rs);
-			if (trs!= null && trs.nextRow()){
+			TupleResultSet trs = ((TupleResultSet) rs);
+			if (trs != null && trs.nextRow()) {
 				String value = trs.getConstant(0).getValue();
-				boolean b = Boolean.parseBoolean(value);				
+				boolean b = Boolean.parseBoolean(value);
 				trs.close();
-				if (b) 
+				if (b)
 					return false;
 			}
-			
+
 		} catch (OBDAException e) {
 			e.printStackTrace();
 		}
@@ -634,178 +639,172 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 	}
 
 	@Override
-    public boolean isSatisfiable(@Nonnull OWLClassExpression classExpression) throws ReasonerInterruptedException, TimeOutException,
-			ClassExpressionNotInProfileException, FreshEntitiesException, InconsistentOntologyException {
-        return structuralReasoner.isSatisfiable(classExpression);
+	public boolean isSatisfiable(@Nonnull OWLClassExpression classExpression)
+			throws ReasonerInterruptedException, TimeOutException, ClassExpressionNotInProfileException,
+			FreshEntitiesException, InconsistentOntologyException {
+		return structuralReasoner.isSatisfiable(classExpression);
 	}
 
 	@Nonnull
-    @Override
-    public Node<OWLClass> getUnsatisfiableClasses() throws ReasonerInterruptedException, TimeOutException {
-        return structuralReasoner.getUnsatisfiableClasses();
+	@Override
+	public Node<OWLClass> getUnsatisfiableClasses() throws ReasonerInterruptedException, TimeOutException {
+		return structuralReasoner.getUnsatisfiableClasses();
 	}
 
 	@Override
-    public boolean isEntailed(@Nonnull OWLAxiom axiom) throws ReasonerInterruptedException, UnsupportedEntailmentTypeException, TimeOutException,
+	public boolean isEntailed(@Nonnull OWLAxiom axiom)
+			throws ReasonerInterruptedException, UnsupportedEntailmentTypeException, TimeOutException,
 			AxiomNotInProfileException, FreshEntitiesException, InconsistentOntologyException {
-        return structuralReasoner.isEntailed(axiom);
+		return structuralReasoner.isEntailed(axiom);
 	}
 
 	@Override
-    public boolean isEntailed(@Nonnull Set<? extends OWLAxiom> axioms) throws ReasonerInterruptedException, UnsupportedEntailmentTypeException,
-			TimeOutException, AxiomNotInProfileException, FreshEntitiesException, InconsistentOntologyException {
-        return structuralReasoner.isEntailed(axioms);
+	public boolean isEntailed(@Nonnull Set<? extends OWLAxiom> axioms)
+			throws ReasonerInterruptedException, UnsupportedEntailmentTypeException, TimeOutException,
+			AxiomNotInProfileException, FreshEntitiesException, InconsistentOntologyException {
+		return structuralReasoner.isEntailed(axioms);
 	}
 
 	@Override
-    public boolean isEntailmentCheckingSupported(@Nonnull AxiomType<?> axiomType) {
-        return structuralReasoner.isEntailmentCheckingSupported(axiomType);
+	public boolean isEntailmentCheckingSupported(@Nonnull AxiomType<?> axiomType) {
+		return structuralReasoner.isEntailmentCheckingSupported(axiomType);
 	}
 
 	@Nonnull
-    @Override
-    public Node<OWLClass> getTopClassNode() {
-        return structuralReasoner.getTopClassNode();
+	@Override
+	public Node<OWLClass> getTopClassNode() {
+		return structuralReasoner.getTopClassNode();
 	}
 
 	@Nonnull
-    @Override
-    public Node<OWLClass> getBottomClassNode() {
-        return structuralReasoner.getBottomClassNode();
+	@Override
+	public Node<OWLClass> getBottomClassNode() {
+		return structuralReasoner.getBottomClassNode();
 	}
 
 	/*
 	 * Implementation decisions:
 	 * 
-	 * * No check for InconsistentOntologyException exception:
-	 * Inconsistency check is expensive. This action should be explicitly triggered by the user.
+	 * * No check for InconsistentOntologyException exception: Inconsistency
+	 * check is expensive. This action should be explicitly triggered by the
+	 * user.
 	 * 
-	 * * No check for  FreshEntitiesException, ReasonerInterruptedException, TimeOutException:
-	 * At the time of this implementation it was decided that this are not relevant in the
-	 * context of Quest reasoning.
+	 * * No check for FreshEntitiesException, ReasonerInterruptedException,
+	 * TimeOutException: At the time of this implementation it was decided that
+	 * this are not relevant in the context of Quest reasoning.
 	 * 
 	 * (non-Javadoc)
 	 */
-	
-	
 
 	/**
-	 * Check if <code>ce</code> is a valid and supported OWLClassExpression for QuestOWL reasoning.
+	 * Check if <code>ce</code> is a valid and supported OWLClassExpression for
+	 * QuestOWL reasoning.
 	 * 
 	 * <code>ce</code> is a valid if it is supported in OWL 2 QL profile.
 	 * 
-	 * TODO: WHY?
-	 * <code>ce</code> is supported if it can be translated into a subClassExpression. 
-	 * subClassExpression does not support ObjectIntersectionOf and ObjectComplementOf.
+	 * TODO: WHY? <code>ce</code> is supported if it can be translated into a
+	 * subClassExpression. subClassExpression does not support
+	 * ObjectIntersectionOf and ObjectComplementOf.
 	 * 
-	 * @param ce OWLClassExpression to check
+	 * @param ce
+	 *            OWLClassExpression to check
 	 * @throws ClassExpressionNotInProfileException
 	 */
 	private void isSupportedClassExpression(OWLClassExpression ce) throws ClassExpressionNotInProfileException {
-		
-		//TODO: check this
+
+		// TODO: check this
 		IRI iri = ce.asOWLClass().getIRI();
-		
+
 		// Check if the classExpression is supported by OWL 2 QL
-		if(!owl2qlprofile.isOWL2QLSuperClassExpression(ce)) { 
+		if (!owl2qlprofile.isOWL2QLSuperClassExpression(ce)) {
 			throw new ClassExpressionNotInProfileException(ce, iri);
 		}
-		
+
 		ClassExpressionType ceType = ce.getClassExpressionType();
-		if(ceType != null) {
+		if (ceType != null) {
 			String ceTypeName = ceType.getName();
-			
+
 			// TODO: Not suppported classes in reasoning WHY?
-			// How to deal with this? Should I throw a ClassExpressionNotInProfileException?
-			if(ceTypeName.equals(ClassExpressionType.OBJECT_COMPLEMENT_OF.getName())) {
-				throw new ClassExpressionNotInProfileException(ce, iri);			
+			// How to deal with this? Should I throw a
+			// ClassExpressionNotInProfileException?
+			if (ceTypeName.equals(ClassExpressionType.OBJECT_COMPLEMENT_OF.getName())) {
+				throw new ClassExpressionNotInProfileException(ce, iri);
 			} else if (ceTypeName.equals(ClassExpressionType.OBJECT_INTERSECTION_OF.getName())) {
-				throw new ClassExpressionNotInProfileException(ce, iri);			
+				throw new ClassExpressionNotInProfileException(ce, iri);
 			}
 		}
 	}
-	
-	@Nonnull
-    @Override
-    public NodeSet<OWLClass> getSubClasses(@Nonnull OWLClassExpression ce, boolean direct) throws InconsistentOntologyException,
-			ClassExpressionNotInProfileException, FreshEntitiesException, ReasonerInterruptedException, TimeOutException {
-		
-		// Check if the class expression is supported
-		isSupportedClassExpression(ce); 
-		
-		Set<ClassExpression> subClassesSet = new HashSet<ClassExpression>();
-		try {
-			Set<Equivalences<ClassExpression>> subClasses;
-			
-			// Translate the OWLClassExpression object to an Ontop related object
-			OWLAPITranslatorOWL2QL owlTranslator = new OWLAPITranslatorOWL2QL(translatedOntologyMerge);
-			ClassExpression cexp = owlTranslator.getSubclassExpression(ce);
-			
-			//TODO: Remember - I needed to change this from private to public!!
-			// Get sub classes from DAG
-			EquivalencesDAG<ClassExpression> classDAG = this.questInstance.getReformulationReasoner().getClassDAG();
-			Equivalences<ClassExpression> classEquivalences = classDAG.getVertex(cexp);
 
-			if(direct) {
-				subClasses = classDAG.getDirectSub(classEquivalences);
-			} else {
-				subClasses = classDAG.getSub(classEquivalences);
+	@Nonnull
+	@Override
+	public NodeSet<OWLClass> getSubClasses(@Nonnull OWLClassExpression ce, boolean direct)
+			throws InconsistentOntologyException, ClassExpressionNotInProfileException, FreshEntitiesException,
+			ReasonerInterruptedException, TimeOutException {
+
+		// Check if the class expression is supported
+		isSupportedClassExpression(ce);
+
+		Set<ClassExpression> subClassesSet = new HashSet<ClassExpression>();
+		Set<Equivalences<ClassExpression>> subClasses;
+
+		// Translate the OWLClassExpression object to an Ontop related object
+		//TODO: Needed to change visibility to public, it was package
+		OWLAPITranslatorHelper owlTranslator = new OWLAPITranslatorHelper(translatedOntologyMerge.getVocabulary());
+		OClass cexp = owlTranslator.getOClass(ce.asOWLClass());
+
+		// TODO: Remember - I needed to change this from private to public!!
+		// Get sub classes from DAG
+		EquivalencesDAG<ClassExpression> classDAG = this.questInstance.getReformulationReasoner().getClassDAG();
+		Equivalences<ClassExpression> classEquivalences = classDAG.getVertex(classDAG.getCanonicalForm(cexp));
+
+		if (direct) {
+			subClasses = classDAG.getDirectSub(classEquivalences);
+		} else {
+			subClasses = classDAG.getSub(classEquivalences);
+		}
+
+		for (Equivalences<ClassExpression> equivClasses : subClasses) {
+			for (ClassExpression classExp : equivClasses) {
+				for (ClassExpression equivClass : classDAG.getFullVertex(classExp))
+					subClassesSet.add(equivClass);
 			}
-			
-			for(Equivalences<ClassExpression> equivClasses: subClasses) {
-				for(ClassExpression classExp: equivClasses) {
-					for(ClassExpression equivClass: classDAG.getFullVertex(classExp))
-						subClassesSet.add(equivClass);
-				}
-			}
-			
-		} catch (TranslationException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
 		}
 
 		OWLAPITranslator2QLOWL ontopTranslator = new OWLAPITranslator2QLOWL();
 		return ontopTranslator.translateToNodeSet(subClassesSet);
 	}
 
-
-
 	@Nonnull
-    @Override
-    public NodeSet<OWLClass> getSuperClasses(@Nonnull OWLClassExpression ce, boolean direct) throws InconsistentOntologyException,
-			ClassExpressionNotInProfileException, FreshEntitiesException, ReasonerInterruptedException, TimeOutException {
-		
-		// Check if the class expression is supported
-		isSupportedClassExpression(ce); 
-		
-		Set<ClassExpression> superClassesSet = new HashSet<ClassExpression>();
-		try {
-			Set<Equivalences<ClassExpression>> superClasses;
-			
-			// Translate the OWLClassExpression object to an Ontop related object
-			OWLAPITranslatorOWL2QL owlTranslator = new OWLAPITranslatorOWL2QL(translatedOntologyMerge);
-			ClassExpression cexp = owlTranslator.getSubclassExpression(ce);
-			
-			// Get super classes from DAG
-			EquivalencesDAG<ClassExpression> classDAG = this.questInstance.getReformulationReasoner().getClassDAG();
-			Equivalences<ClassExpression> classEquivalences = classDAG.getVertex(cexp);
+	@Override
+	public NodeSet<OWLClass> getSuperClasses(@Nonnull OWLClassExpression ce, boolean direct)
+			throws InconsistentOntologyException, ClassExpressionNotInProfileException, FreshEntitiesException,
+			ReasonerInterruptedException, TimeOutException {
 
-			if(direct) {
-				superClasses = classDAG.getDirectSuper(classEquivalences);
-			} else {
-				superClasses = classDAG.getSuper(classEquivalences);
+		// Check if the class expression is supported
+		isSupportedClassExpression(ce);
+
+		Set<ClassExpression> superClassesSet = new HashSet<ClassExpression>();
+		Set<Equivalences<ClassExpression>> superClasses;
+
+		// Translate the OWLClassExpression object to an Ontop related object
+		OWLAPITranslatorHelper owlTranslator = new OWLAPITranslatorHelper(translatedOntologyMerge.getVocabulary());
+		OClass cexp = owlTranslator.getOClass(ce.asOWLClass());
+
+		// Get super classes from DAG
+		EquivalencesDAG<ClassExpression> classDAG = this.questInstance.getReformulationReasoner().getClassDAG();
+		Equivalences<ClassExpression> classEquivalences = classDAG.getVertex(classDAG.getCanonicalForm(cexp));
+
+		if (direct) {
+			superClasses = classDAG.getDirectSuper(classEquivalences);
+		} else {
+			superClasses = classDAG.getSuper(classEquivalences);
+		}
+
+		for (Equivalences<ClassExpression> equivClasses : superClasses) {
+			for (ClassExpression classExp : equivClasses) {
+				for (ClassExpression equivClass : classDAG.getFullVertex(classExp))
+					superClassesSet.add(equivClass);
 			}
-			
-			for(Equivalences<ClassExpression> equivClasses: superClasses) {
-				for(ClassExpression classExp: equivClasses) {
-					for(ClassExpression equivClass: classDAG.getFullVertex(classExp))
-						superClassesSet.add(equivClass);
-				}
-			}
-			
-		} catch (TranslationException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
 		}
 
 		OWLAPITranslator2QLOWL ontopTranslator = new OWLAPITranslator2QLOWL();
@@ -813,30 +812,25 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 	}
 
 	@Nonnull
-    @Override
-    public Node<OWLClass> getEquivalentClasses(@Nonnull OWLClassExpression ce) throws InconsistentOntologyException,
-			ClassExpressionNotInProfileException, FreshEntitiesException, ReasonerInterruptedException, TimeOutException {
-		
+	@Override
+	public Node<OWLClass> getEquivalentClasses(@Nonnull OWLClassExpression ce)
+			throws InconsistentOntologyException, ClassExpressionNotInProfileException, FreshEntitiesException,
+			ReasonerInterruptedException, TimeOutException {
+
 		// Check if the class expression is supported
-		isSupportedClassExpression(ce); 
-		
+		isSupportedClassExpression(ce);
+
 		Set<ClassExpression> equivClassesSet = new HashSet<ClassExpression>();
-		try {			
-			// Translate the OWLClassExpression object to an Ontop related object
-			OWLAPITranslatorOWL2QL owlTranslator = new OWLAPITranslatorOWL2QL(translatedOntologyMerge);
-			ClassExpression cexp = owlTranslator.getSubclassExpression(ce);
-			
-			// Get equivalence classes from DAG
-			EquivalencesDAG<ClassExpression> classDAG = this.questInstance.getReformulationReasoner().getClassDAG();
-			Equivalences<ClassExpression> classEquivalences = classDAG.getFullVertex(classDAG.getCanonicalForm(cexp));
-			
-			for(ClassExpression classExp: classEquivalences) {
-				equivClassesSet.add(classExp);
-			}
-			
-		} catch (TranslationException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
+		// Translate the OWLClassExpression object to an Ontop related object
+		OWLAPITranslatorHelper owlTranslator = new OWLAPITranslatorHelper(translatedOntologyMerge.getVocabulary());
+		OClass cexp = owlTranslator.getOClass(ce.asOWLClass());
+
+		// Get equivalence classes from DAG
+		EquivalencesDAG<ClassExpression> classDAG = this.questInstance.getReformulationReasoner().getClassDAG();
+		Equivalences<ClassExpression> classEquivalences = classDAG.getFullVertex(classDAG.getCanonicalForm(cexp));
+
+		for (ClassExpression classExp : classEquivalences) {
+			equivClassesSet.add(classExp);
 		}
 
 		OWLAPITranslator2QLOWL ontopTranslator = new OWLAPITranslator2QLOWL();
@@ -844,174 +838,193 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 	}
 
 	@Nonnull
-    @Override
-    public NodeSet<OWLClass> getDisjointClasses(@Nonnull OWLClassExpression ce) {
-        return structuralReasoner.getDisjointClasses(ce);
+	@Override
+	public NodeSet<OWLClass> getDisjointClasses(@Nonnull OWLClassExpression ce) {
+		return structuralReasoner.getDisjointClasses(ce);
 	}
 
 	@Nonnull
-    @Override
-    public Node<OWLObjectPropertyExpression> getTopObjectPropertyNode() {
-        return structuralReasoner.getTopObjectPropertyNode();
+	@Override
+	public Node<OWLObjectPropertyExpression> getTopObjectPropertyNode() {
+		return structuralReasoner.getTopObjectPropertyNode();
 	}
 
 	@Nonnull
-    @Override
-    public Node<OWLObjectPropertyExpression> getBottomObjectPropertyNode() {
-        return structuralReasoner.getBottomObjectPropertyNode();
+	@Override
+	public Node<OWLObjectPropertyExpression> getBottomObjectPropertyNode() {
+		return structuralReasoner.getBottomObjectPropertyNode();
 	}
 
 	@Nonnull
-    @Override
-    public NodeSet<OWLObjectPropertyExpression> getSubObjectProperties(@Nonnull OWLObjectPropertyExpression pe, boolean direct)
-			throws InconsistentOntologyException, FreshEntitiesException, ReasonerInterruptedException, TimeOutException {
-        return structuralReasoner.getSubObjectProperties(pe, direct);
+	@Override
+	public NodeSet<OWLObjectPropertyExpression> getSubObjectProperties(@Nonnull OWLObjectPropertyExpression pe,
+			boolean direct) throws InconsistentOntologyException, FreshEntitiesException, ReasonerInterruptedException,
+					TimeOutException {
+		return structuralReasoner.getSubObjectProperties(pe, direct);
 	}
 
 	@Nonnull
-    @Override
-    public NodeSet<OWLObjectPropertyExpression> getSuperObjectProperties(@Nonnull OWLObjectPropertyExpression pe, boolean direct)
-			throws InconsistentOntologyException, FreshEntitiesException, ReasonerInterruptedException, TimeOutException {
-        return structuralReasoner.getSuperObjectProperties(pe, direct);
+	@Override
+	public NodeSet<OWLObjectPropertyExpression> getSuperObjectProperties(@Nonnull OWLObjectPropertyExpression pe,
+			boolean direct) throws InconsistentOntologyException, FreshEntitiesException, ReasonerInterruptedException,
+					TimeOutException {
+		return structuralReasoner.getSuperObjectProperties(pe, direct);
 	}
 
 	@Nonnull
-    @Override
-    public Node<OWLObjectPropertyExpression> getEquivalentObjectProperties(@Nonnull OWLObjectPropertyExpression pe)
-			throws InconsistentOntologyException, FreshEntitiesException, ReasonerInterruptedException, TimeOutException {
-        return structuralReasoner.getEquivalentObjectProperties(pe);
+	@Override
+	public Node<OWLObjectPropertyExpression> getEquivalentObjectProperties(@Nonnull OWLObjectPropertyExpression pe)
+			throws InconsistentOntologyException, FreshEntitiesException, ReasonerInterruptedException,
+			TimeOutException {
+		return structuralReasoner.getEquivalentObjectProperties(pe);
 	}
 
 	@Nonnull
-    @Override
-    public NodeSet<OWLObjectPropertyExpression> getDisjointObjectProperties(@Nonnull OWLObjectPropertyExpression pe)
-			throws InconsistentOntologyException, FreshEntitiesException, ReasonerInterruptedException, TimeOutException {
-        return structuralReasoner.getDisjointObjectProperties(pe);
+	@Override
+	public NodeSet<OWLObjectPropertyExpression> getDisjointObjectProperties(@Nonnull OWLObjectPropertyExpression pe)
+			throws InconsistentOntologyException, FreshEntitiesException, ReasonerInterruptedException,
+			TimeOutException {
+		return structuralReasoner.getDisjointObjectProperties(pe);
 	}
 
 	@Nonnull
-    @Override
-    public Node<OWLObjectPropertyExpression> getInverseObjectProperties(@Nonnull OWLObjectPropertyExpression pe)
-			throws InconsistentOntologyException, FreshEntitiesException, ReasonerInterruptedException, TimeOutException {
-        return structuralReasoner.getInverseObjectProperties(pe);
+	@Override
+	public Node<OWLObjectPropertyExpression> getInverseObjectProperties(@Nonnull OWLObjectPropertyExpression pe)
+			throws InconsistentOntologyException, FreshEntitiesException, ReasonerInterruptedException,
+			TimeOutException {
+		return structuralReasoner.getInverseObjectProperties(pe);
 	}
 
 	@Nonnull
-    @Override
-    public NodeSet<OWLClass> getObjectPropertyDomains(@Nonnull OWLObjectPropertyExpression pe, boolean direct) throws InconsistentOntologyException,
-			FreshEntitiesException, ReasonerInterruptedException, TimeOutException {
-        return structuralReasoner.getObjectPropertyDomains(pe, direct);
+	@Override
+	public NodeSet<OWLClass> getObjectPropertyDomains(@Nonnull OWLObjectPropertyExpression pe, boolean direct)
+			throws InconsistentOntologyException, FreshEntitiesException, ReasonerInterruptedException,
+			TimeOutException {
+		return structuralReasoner.getObjectPropertyDomains(pe, direct);
 	}
 
 	@Nonnull
-    @Override
-    public NodeSet<OWLClass> getObjectPropertyRanges(@Nonnull OWLObjectPropertyExpression pe, boolean direct) throws InconsistentOntologyException,
-			FreshEntitiesException, ReasonerInterruptedException, TimeOutException {
-        return structuralReasoner.getObjectPropertyRanges(pe, direct);
+	@Override
+	public NodeSet<OWLClass> getObjectPropertyRanges(@Nonnull OWLObjectPropertyExpression pe, boolean direct)
+			throws InconsistentOntologyException, FreshEntitiesException, ReasonerInterruptedException,
+			TimeOutException {
+		return structuralReasoner.getObjectPropertyRanges(pe, direct);
 	}
 
 	@Nonnull
-    @Override
-    public Node<OWLDataProperty> getTopDataPropertyNode() {
-        return structuralReasoner.getTopDataPropertyNode();
+	@Override
+	public Node<OWLDataProperty> getTopDataPropertyNode() {
+		return structuralReasoner.getTopDataPropertyNode();
 	}
 
 	@Nonnull
-    @Override
-    public Node<OWLDataProperty> getBottomDataPropertyNode() {
-        return structuralReasoner.getBottomDataPropertyNode();
+	@Override
+	public Node<OWLDataProperty> getBottomDataPropertyNode() {
+		return structuralReasoner.getBottomDataPropertyNode();
 	}
 
 	@Nonnull
-    @Override
-    public NodeSet<OWLDataProperty> getSubDataProperties(@Nonnull OWLDataProperty pe, boolean direct) throws InconsistentOntologyException,
-			FreshEntitiesException, ReasonerInterruptedException, TimeOutException {
-        return structuralReasoner.getSubDataProperties(pe, direct);
+	@Override
+	public NodeSet<OWLDataProperty> getSubDataProperties(@Nonnull OWLDataProperty pe, boolean direct)
+			throws InconsistentOntologyException, FreshEntitiesException, ReasonerInterruptedException,
+			TimeOutException {
+		return structuralReasoner.getSubDataProperties(pe, direct);
 	}
 
 	@Nonnull
-    @Override
-    public NodeSet<OWLDataProperty> getSuperDataProperties(@Nonnull OWLDataProperty pe, boolean direct) throws InconsistentOntologyException,
-			FreshEntitiesException, ReasonerInterruptedException, TimeOutException {
-        return structuralReasoner.getSuperDataProperties(pe, direct);
+	@Override
+	public NodeSet<OWLDataProperty> getSuperDataProperties(@Nonnull OWLDataProperty pe, boolean direct)
+			throws InconsistentOntologyException, FreshEntitiesException, ReasonerInterruptedException,
+			TimeOutException {
+		return structuralReasoner.getSuperDataProperties(pe, direct);
 	}
 
 	@Nonnull
-    @Override
-    public Node<OWLDataProperty> getEquivalentDataProperties(@Nonnull OWLDataProperty pe) throws InconsistentOntologyException,
-			FreshEntitiesException, ReasonerInterruptedException, TimeOutException {
-        return structuralReasoner.getEquivalentDataProperties(pe);
+	@Override
+	public Node<OWLDataProperty> getEquivalentDataProperties(@Nonnull OWLDataProperty pe)
+			throws InconsistentOntologyException, FreshEntitiesException, ReasonerInterruptedException,
+			TimeOutException {
+		return structuralReasoner.getEquivalentDataProperties(pe);
 	}
 
 	@Nonnull
-    @Override
-    public NodeSet<OWLDataProperty> getDisjointDataProperties(@Nonnull OWLDataPropertyExpression pe) throws InconsistentOntologyException,
-			FreshEntitiesException, ReasonerInterruptedException, TimeOutException {
-        return structuralReasoner.getDisjointDataProperties(pe);
+	@Override
+	public NodeSet<OWLDataProperty> getDisjointDataProperties(@Nonnull OWLDataPropertyExpression pe)
+			throws InconsistentOntologyException, FreshEntitiesException, ReasonerInterruptedException,
+			TimeOutException {
+		return structuralReasoner.getDisjointDataProperties(pe);
 	}
 
 	@Nonnull
-    @Override
-    public NodeSet<OWLClass> getDataPropertyDomains(@Nonnull OWLDataProperty pe, boolean direct) throws InconsistentOntologyException,
-			FreshEntitiesException, ReasonerInterruptedException, TimeOutException {
-        return structuralReasoner.getDataPropertyDomains(pe, direct);
+	@Override
+	public NodeSet<OWLClass> getDataPropertyDomains(@Nonnull OWLDataProperty pe, boolean direct)
+			throws InconsistentOntologyException, FreshEntitiesException, ReasonerInterruptedException,
+			TimeOutException {
+		return structuralReasoner.getDataPropertyDomains(pe, direct);
 	}
 
 	@Nonnull
-    @Override
-    public NodeSet<OWLClass> getTypes(@Nonnull OWLNamedIndividual ind, boolean direct) throws InconsistentOntologyException, FreshEntitiesException,
-			ReasonerInterruptedException, TimeOutException {
+	@Override
+	public NodeSet<OWLClass> getTypes(@Nonnull OWLNamedIndividual ind, boolean direct)
+			throws InconsistentOntologyException, FreshEntitiesException, ReasonerInterruptedException,
+			TimeOutException {
 		return structuralReasoner.getTypes(ind, direct);
 	}
 
 	@Nonnull
-    @Override
-    public NodeSet<OWLNamedIndividual> getInstances(@Nonnull OWLClassExpression ce, boolean direct) throws InconsistentOntologyException,
-			ClassExpressionNotInProfileException, FreshEntitiesException, ReasonerInterruptedException, TimeOutException {
-        return structuralReasoner.getInstances(ce, direct);
+	@Override
+	public NodeSet<OWLNamedIndividual> getInstances(@Nonnull OWLClassExpression ce, boolean direct)
+			throws InconsistentOntologyException, ClassExpressionNotInProfileException, FreshEntitiesException,
+			ReasonerInterruptedException, TimeOutException {
+		return structuralReasoner.getInstances(ce, direct);
 	}
 
 	@Nonnull
-    @Override
-    public NodeSet<OWLNamedIndividual> getObjectPropertyValues(@Nonnull OWLNamedIndividual ind, @Nonnull OWLObjectPropertyExpression pe)
-			throws InconsistentOntologyException, FreshEntitiesException, ReasonerInterruptedException, TimeOutException {
-        return structuralReasoner.getObjectPropertyValues(ind, pe);
-	}
-
-
-	@Nonnull
-    @Override
-    public Set<OWLLiteral> getDataPropertyValues(@Nonnull OWLNamedIndividual ind, @Nonnull OWLDataProperty pe) throws InconsistentOntologyException,
-			FreshEntitiesException, ReasonerInterruptedException, TimeOutException {
-	    return structuralReasoner.getDataPropertyValues(ind, pe);
+	@Override
+	public NodeSet<OWLNamedIndividual> getObjectPropertyValues(@Nonnull OWLNamedIndividual ind,
+			@Nonnull OWLObjectPropertyExpression pe) throws InconsistentOntologyException, FreshEntitiesException,
+					ReasonerInterruptedException, TimeOutException {
+		return structuralReasoner.getObjectPropertyValues(ind, pe);
 	}
 
 	@Nonnull
-    @Override
-    public Node<OWLNamedIndividual> getSameIndividuals(@Nonnull OWLNamedIndividual ind) throws InconsistentOntologyException,
-			FreshEntitiesException, ReasonerInterruptedException, TimeOutException {
-        return structuralReasoner.getSameIndividuals(ind);
+	@Override
+	public Set<OWLLiteral> getDataPropertyValues(@Nonnull OWLNamedIndividual ind, @Nonnull OWLDataProperty pe)
+			throws InconsistentOntologyException, FreshEntitiesException, ReasonerInterruptedException,
+			TimeOutException {
+		return structuralReasoner.getDataPropertyValues(ind, pe);
 	}
 
 	@Nonnull
-    @Override
-    public NodeSet<OWLNamedIndividual> getDifferentIndividuals(@Nonnull OWLNamedIndividual ind) throws InconsistentOntologyException,
-			FreshEntitiesException, ReasonerInterruptedException, TimeOutException {
-        return structuralReasoner.getDifferentIndividuals(ind);
+	@Override
+	public Node<OWLNamedIndividual> getSameIndividuals(@Nonnull OWLNamedIndividual ind)
+			throws InconsistentOntologyException, FreshEntitiesException, ReasonerInterruptedException,
+			TimeOutException {
+		return structuralReasoner.getSameIndividuals(ind);
+	}
+
+	@Nonnull
+	@Override
+	public NodeSet<OWLNamedIndividual> getDifferentIndividuals(@Nonnull OWLNamedIndividual ind)
+			throws InconsistentOntologyException, FreshEntitiesException, ReasonerInterruptedException,
+			TimeOutException {
+		return structuralReasoner.getDifferentIndividuals(ind);
 	}
 
 	/**
-	 * Methods to get the empty concepts and roles in the ontology using the given mappings.
-	 * It generates SPARQL queries to check for entities.
-	 * @return QuestOWLEmptyEntitiesChecker class to get empty concepts and roles
+	 * Methods to get the empty concepts and roles in the ontology using the
+	 * given mappings. It generates SPARQL queries to check for entities.
+	 * 
+	 * @return QuestOWLEmptyEntitiesChecker class to get empty concepts and
+	 *         roles
 	 * @throws Exception
 	 */
-	public QuestOWLEmptyEntitiesChecker getEmptyEntitiesChecker() throws Exception{
+	public QuestOWLEmptyEntitiesChecker getEmptyEntitiesChecker() throws Exception {
 		QuestOWLEmptyEntitiesChecker empties = new QuestOWLEmptyEntitiesChecker(translatedOntologyMerge, owlconn);
 		return empties;
 	}
 
-    @Override
+	@Override
 	public void close() throws Exception {
 		dispose();
 	}
