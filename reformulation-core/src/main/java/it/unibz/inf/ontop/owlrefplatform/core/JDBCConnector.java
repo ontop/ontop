@@ -1,6 +1,6 @@
 package it.unibz.inf.ontop.owlrefplatform.core;
 
-import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Multimap;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 import it.unibz.inf.ontop.model.*;
@@ -22,15 +22,13 @@ import it.unibz.inf.ontop.nativeql.JDBCConnectionWrapper;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.LinearInclusionDependencies;
 import it.unibz.inf.ontop.parser.PreprocessProjection;
 import it.unibz.inf.ontop.sql.DBMetadata;
-import it.unibz.inf.ontop.sql.ImplicitDBConstraints;
-import it.unibz.inf.ontop.utils.IMapping2DatalogConverter;
 import it.unibz.inf.ontop.utils.MetaMappingExpander;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
-import java.net.URI;
 import java.sql.*;
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -158,14 +156,39 @@ public class JDBCConnector implements DBConnector {
         }
     }
 
-    private DataSourceMetadata extractDBMetadata(OBDAModel obdaModel) throws DBMetadataException {
+    @Override
+    public DataSourceMetadata extractDBMetadata(OBDAModel obdaModel) throws DBMetadataException {
         DBMetadataExtractor dataSourceMetadataExtractor = nativeQLFactory.create();
         return dataSourceMetadataExtractor.extract(obdaSource, obdaModel, new JDBCConnectionWrapper(localConnection));
     }
 
-    private OBDAModel expandMetaMappings(OBDAModel unfoldingOBDAModel, URI sourceId) throws OBDAException {
-        MetaMappingExpander metaMappingExpander = new MetaMappingExpander(localConnection, nativeQLFactory);
-        return metaMappingExpander.expand(unfoldingOBDAModel.getMappings(sourceId));
+    @Override
+    public DataSourceMetadata extractDBMetadata(OBDAModel obdaModel, DataSourceMetadata partiallyDefinedMetadata)
+            throws DBMetadataException {
+        DBMetadataExtractor dataSourceMetadataExtractor = nativeQLFactory.create();
+        return dataSourceMetadataExtractor.extract(obdaSource, obdaModel, new JDBCConnectionWrapper(localConnection),
+                partiallyDefinedMetadata);
+    }
+
+    @Override
+    public Multimap<Predicate, List<Integer>> extractUniqueConstraints(DataSourceMetadata metadata) {
+        if (!(metadata instanceof DBMetadata)) {
+            throw new IllegalArgumentException("Was expecting a DBMetadata");
+        }
+        return DBMetadataUtil.extractPKs((DBMetadata) metadata);
+    }
+
+    private Collection<OBDAMappingAxiom> expandMetaMappings(Collection<OBDAMappingAxiom> mappingAxioms,
+                                                            DBMetadata metadata) throws OBDAException {
+        MetaMappingExpander metaMappingExpander = new MetaMappingExpander(localConnection, metadata.getQuotedIDFactory(),
+                nativeQLFactory);
+        try {
+            return metaMappingExpander.expand(mappingAxioms);
+        } catch (SQLException e) {
+            throw new OBDAException(e);
+        } catch (JSQLParserException e) {
+            throw new OBDAException(e);
+        }
     }
 
     private void setupConnectionPool() {
@@ -294,22 +317,19 @@ public class JDBCConnector implements DBConnector {
     /***
      * Expands a SELECT * into a SELECT with all columns implicit in the *
      *
+     *
+     * Has side-effects on the input mapping axioms
+     *
      */
-    private OBDAModel preprocessProjection(OBDAModel obdaModel, URI sourceId, DataSourceMetadata metadata)
+    private Collection<OBDAMappingAxiom> preprocessProjection(Collection<OBDAMappingAxiom> mappingAxioms,
+                                                              DBMetadata dbMetadata)
             throws OBDAException {
-        if (!(metadata instanceof DBMetadata)) {
-            throw new IllegalArgumentException("The JDBC connector expects a SQL-specific DBMetadata");
-        }
-        DBMetadata dbMetadata = (DBMetadata) metadata;
-        List<OBDAMappingAxiom> mappings = obdaModel.getMappings(sourceId);
-
-
-        for (OBDAMappingAxiom axiom : mappings) {
+        for (OBDAMappingAxiom axiom : mappingAxioms) {
             String sourceString = axiom.getSourceQuery().toString();
 
-            OBDAQuery targetQuery= axiom.getTargetQuery();
+            List<Function> targetQuery = axiom.getTargetQuery();
 
-            Select select = null;
+            Select select;
             try {
                 select = (Select) CCJSqlParserUtil.parse(sourceString);
 
@@ -325,7 +345,7 @@ public class JDBCConnector implements DBConnector {
             }
         }
 
-        return obdaModel;
+        return mappingAxioms;
     }
 
     @Override
@@ -338,45 +358,41 @@ public class JDBCConnector implements DBConnector {
         }
     }
 
-    private OBDAModel normalizeMappings(OBDAModel unfoldingOBDAModel, final URI sourceId, final DataSourceMetadata metadata) throws OBDAException {
+    @Override
+    public Collection<OBDAMappingAxiom> applyDBSpecificNormalization(Collection<OBDAMappingAxiom> mappingAxioms,
+                                                                     final DataSourceMetadata metadata) throws OBDAException {
         /** Substitute select * with column names (in the SQL case) **/
-        unfoldingOBDAModel = preprocessProjection(unfoldingOBDAModel, sourceId, metadata);
+
+        if (!(metadata instanceof DBMetadata)) {
+            throw new IllegalArgumentException("The JDBC connector expects a SQL-specific DBMetadata");
+        }
+        DBMetadata dbMetadata = (DBMetadata) metadata;
+
+        mappingAxioms = preprocessProjection(mappingAxioms, dbMetadata);
 
         /**
          * Split the mapping
          */
-        unfoldingOBDAModel = MappingSplitter.splitMappings(unfoldingOBDAModel, sourceId, nativeQLFactory);
+        List<OBDAMappingAxiom> splittedMappingsAxioms = MappingSplitter.splitMappings(mappingAxioms, nativeQLFactory);
 
         /**
          * Expand the meta mapping
          */
-        unfoldingOBDAModel = expandMetaMappings(unfoldingOBDAModel, sourceId);
-        return unfoldingOBDAModel;
-    }
+        Collection<OBDAMappingAxiom> expandedMappingAxioms = expandMetaMappings(splittedMappingsAxioms, dbMetadata);
 
-    @Override
-    public DBMetadataAndMappings extractDBMetadataAndMappings(OBDAModel obdaModel, URI sourceId)
-            throws DBMetadataException, OBDAException {
-        DataSourceMetadata metadata = extractDBMetadata(obdaModel);
-        ImmutableList<CQIE> mappingRules = extractMappings(obdaModel, sourceId, metadata);
-        return new DBMetadataAndMappings(metadata, mappingRules);
-    }
-
-    @Override
-    public ImmutableList<CQIE> extractMappings(OBDAModel obdaModel, URI sourceId, DataSourceMetadata metadata)
-            throws OBDAException {
-        obdaModel = normalizeMappings(obdaModel, sourceId, metadata);
-        ImmutableList<OBDAMappingAxiom> mappings = obdaModel.getMappings(sourceId);
-
-        IMapping2DatalogConverter mapping2DatalogConverter = nativeQLFactory.create(metadata);
-        return ImmutableList.copyOf(mapping2DatalogConverter.constructDatalogProgram(mappings));
+        return expandedMappingAxioms;
     }
 
     @Override
     public void completePredefinedMetadata(DataSourceMetadata metadata) {
+        if (!(metadata instanceof DBMetadata)) {
+            throw new IllegalArgumentException("DBMetadata is required");
+        }
+
         //Adds keys from the text file
         if (userConstraints != null) {
-            userConstraints.addConstraints(metadata);
+            userConstraints.insertUniqueConstraints((DBMetadata) metadata);
+            userConstraints.insertForeignKeyConstraints((DBMetadata) metadata);
         }
     }
 }

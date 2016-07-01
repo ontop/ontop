@@ -22,12 +22,6 @@ import it.unibz.inf.ontop.pivotalrepr.MetadataForQueryOptimization;
  */
 public interface IQuest extends RepositoryChangedListener {
 
-    VocabularyValidator getVocabularyValidator();
-
-    NativeQueryGenerator cloneIfNecessaryNativeQueryGenerator();
-
-    QuestUnfolder getQuestUnfolder();
-
     OBDAModel getOBDAModel();
 
     Multimap<Predicate,Integer> copyMultiTypedFunctionSymbolIndex();
@@ -59,13 +53,9 @@ public interface IQuest extends RepositoryChangedListener {
 
     DataSourceMetadata getMetaData();
 
-    QueryCache getQueryCache();
-
     MetadataForQueryOptimization getMetadataForQueryOptimization();
 
     DatalogProgram getRewriting(DatalogProgram initialProgram) throws OBDAException;
 
     ExpressionEvaluator getExpressionEvaluator();
-
-    SparqlAlgebraToDatalogTranslator getSparqlAlgebraToDatalogTranslator();
 }

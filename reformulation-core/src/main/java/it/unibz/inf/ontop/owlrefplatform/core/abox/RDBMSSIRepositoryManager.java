@@ -20,6 +20,7 @@ package it.unibz.inf.ontop.owlrefplatform.core.abox;
  * #L%
  */
 
+import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
 import it.unibz.inf.ontop.model.BNode;
 import it.unibz.inf.ontop.model.Function;

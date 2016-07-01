@@ -12,14 +12,12 @@ import it.unibz.inf.ontop.owlrefplatform.core.queryevaluation.SPARQLQueryUtility
 import it.unibz.inf.ontop.owlrefplatform.core.reformulation.QueryRewriter;
 import it.unibz.inf.ontop.owlrefplatform.core.srcquerygeneration.NativeQueryGenerator;
 import it.unibz.inf.ontop.owlrefplatform.core.translator.DatalogToSparqlTranslator;
-import it.unibz.inf.ontop.owlrefplatform.core.translator.IntermediateQueryToDatalogTranslator;
 import it.unibz.inf.ontop.owlrefplatform.core.translator.SesameConstructTemplate;
 import it.unibz.inf.ontop.owlrefplatform.core.translator.SparqlAlgebraToDatalogTranslator;
 import it.unibz.inf.ontop.owlrefplatform.core.unfolding.ExpressionEvaluator;
 import it.unibz.inf.ontop.owlrefplatform.core.unfolding.SPARQLQueryFlattener;
 import it.unibz.inf.ontop.pivotalrepr.EmptyQueryException;
 import it.unibz.inf.ontop.pivotalrepr.IntermediateQuery;
-import it.unibz.inf.ontop.pivotalrepr.MetadataForQueryOptimization;
 import it.unibz.inf.ontop.pivotalrepr.datalog.DatalogProgram2QueryConverter;
 import it.unibz.inf.ontop.renderer.DatalogProgramRenderer;
 
@@ -83,7 +81,7 @@ public class QuestQueryProcessor {
 	private DatalogProgram translateAndPreProcess(ParsedQuery pq)  {
 		
 		SparqlAlgebraToDatalogTranslator translator = new SparqlAlgebraToDatalogTranslator(unfolder.getUriTemplateMatcher(),
-				uriMap, unfolder.getSameAsDataPredicatesAndClasses(), unfolder.getSameAsObjectPredicates() );
+				uriMap, unfolder.getSameAsDataPredicatesAndClasses(), unfolder.getSameAsObjectPredicates());
 		DatalogProgram program = translator.translate(pq);
 
 		log.debug("Datalog program translated from the SPARQL query: \n{}", program);
@@ -204,7 +202,7 @@ public class QuestQueryProcessor {
 
 					executableQuery = generateTargetQuery(intermediateQuery, signature, optionalConstructTemplate);
 					queryCache.cacheTargetQuery(pq, executableQuery);
-					return executableQuery
+					return executableQuery;
 
 
 				} catch (DatalogProgram2QueryConverter.InvalidDatalogProgramException e) {

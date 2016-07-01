@@ -1,14 +1,14 @@
 package it.unibz.inf.ontop.owlrefplatform.core;
 
 import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.model.CQIE;
-import it.unibz.inf.ontop.model.OBDAException;
-import it.unibz.inf.ontop.model.OBDAModel;
+import com.google.common.collect.Multimap;
+import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.nativeql.DBMetadataException;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.LinearInclusionDependencies;
-import it.unibz.inf.ontop.model.DataSourceMetadata;
 
 import java.net.URI;
+import java.util.Collection;
+import java.util.List;
 
 /**
  * High-level component in charge of abstracting the interaction with the DB.
@@ -25,6 +25,14 @@ public interface DBConnector {
     boolean connect() throws OBDAException;
     void disconnect() throws OBDAException;
     void dispose();
+
+    DataSourceMetadata extractDBMetadata(OBDAModel obdaModel) throws DBMetadataException;
+
+    DataSourceMetadata extractDBMetadata(OBDAModel obdaModel, DataSourceMetadata partiallyDefinedMetadata)
+            throws DBMetadataException;
+
+    Multimap<Predicate, List<Integer>> extractUniqueConstraints(DataSourceMetadata metadata);
+
     void close();
 
     /**
@@ -39,10 +47,10 @@ public interface DBConnector {
 
     LinearInclusionDependencies generateFKRules(DataSourceMetadata metadata);
 
-    DBMetadataAndMappings extractDBMetadataAndMappings(OBDAModel obdaModel, URI sourceId)
-            throws DBMetadataException, OBDAException;
 
-    ImmutableList<CQIE> extractMappings(OBDAModel obdaModel, URI sourceId, DataSourceMetadata metadata) throws OBDAException;
+    Collection<OBDAMappingAxiom> applyDBSpecificNormalization(Collection<OBDAMappingAxiom> mappingAxioms,
+                                                              DataSourceMetadata metadata) throws OBDAException;
 
     void completePredefinedMetadata(DataSourceMetadata metadata);
+
 }

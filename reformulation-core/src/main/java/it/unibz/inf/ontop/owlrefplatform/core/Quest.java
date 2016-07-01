@@ -34,8 +34,10 @@ import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
 import it.unibz.inf.ontop.injection.OBDAFactoryWithException;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.io.PrefixManager;
+import it.unibz.inf.ontop.nativeql.DBMetadataExtractor;
 import it.unibz.inf.ontop.ontology.ImmutableOntologyVocabulary;
 import it.unibz.inf.ontop.owlrefplatform.core.abox.RDBMSSIRepositoryManager;
+import it.unibz.inf.ontop.owlrefplatform.core.abox.RepositoryChangedListener;
 import it.unibz.inf.ontop.owlrefplatform.core.abox.SemanticIndexURIMap;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.LinearInclusionDependencies;
 import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
@@ -43,6 +45,8 @@ import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.reformulation.DummyReformulator;
 import it.unibz.inf.ontop.owlrefplatform.core.reformulation.QueryRewriter;
 import it.unibz.inf.ontop.owlrefplatform.core.reformulation.TreeWitnessRewriter;
+import it.unibz.inf.ontop.owlrefplatform.core.srcquerygeneration.NativeQueryGenerator;
+import it.unibz.inf.ontop.owlrefplatform.core.srcquerygeneration.SQLGenerator;
 import it.unibz.inf.ontop.owlrefplatform.core.translator.MappingVocabularyFixer;
 
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
@@ -53,6 +57,7 @@ import it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing.TMappingExclusio
 import it.unibz.inf.ontop.owlrefplatform.injection.QuestComponentFactory;
 import it.unibz.inf.ontop.sql.DBMetadata;
 import it.unibz.inf.ontop.sql.ImplicitDBConstraintsReader;
+import it.unibz.inf.ontop.sql.RDBMetadataExtractionTools;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -177,6 +182,7 @@ public class Quest implements Serializable, IQuest {
 	private final QuestComponentFactory questComponentFactory;
 	private final OBDAFactoryWithException obdaFactory;
 	private final MappingVocabularyFixer mappingVocabularyFixer;
+	private DBConnector dbConnector;
 
 	/***
 	 * Will prepare an instance of quest in classic or virtual ABox mode. If the
@@ -236,7 +242,7 @@ public class Quest implements Serializable, IQuest {
 							+ "\". If you want to work in \"classic abox\" mode, that is, as a triple store, you may not provide mappings (quest will take care of setting up the mappings and the database), set them to null.");
 		}
 
-		loadOBDAModel(obdaModel);
+		loadOBDAModel(obdaModel, inputOntology.getVocabulary());
 		this.metadata = metadata;
 	}
 
@@ -245,7 +251,7 @@ public class Quest implements Serializable, IQuest {
 		return engine.unfolder.ufp;
 	}
 
-	private void loadOBDAModel(OBDAModel model) {
+	private void loadOBDAModel(OBDAModel model, ImmutableOntologyVocabulary vocabulary) {
 
 		if (model == null) {
 			//model = OBDADataFactoryImpl.getInstance().getOBDAModel();
@@ -254,7 +260,7 @@ public class Quest implements Serializable, IQuest {
 			PrefixManager defaultPrefixManager = nativeQLFactory.create(new HashMap<String, String>());
 
 			model = obdaFactory.createOBDAModel(new HashSet<OBDADataSource>(),
-					new HashMap<URI, ImmutableList<OBDAMappingAxiom>>(), defaultPrefixManager);
+					new HashMap<URI, ImmutableList<OBDAMappingAxiom>>(), defaultPrefixManager, vocabulary);
 		}
 		inputOBDAModel = model;
 	}
@@ -296,7 +302,6 @@ public class Quest implements Serializable, IQuest {
 		inmemory = preferences.getProperty(QuestPreferences.STORAGE_LOCATION).equals(QuestConstants.INMEMORY);
 
 		printKeys = Boolean.valueOf((String) preferences.get(QuestPreferences.PRINT_KEYS));
-		distinctResultSet = Boolean.valueOf((String) preferences.get(QuestPreferences.DISTINCT_RESULTSET));
 
 		if (!inmemory) {
 			aboxJdbcURL = preferences.getProperty(QuestPreferences.JDBC_URL);
@@ -352,9 +357,9 @@ public class Quest implements Serializable, IQuest {
 		}
 
 		// TODO: better use this constructor.
-		inputOBDAModel = obdaFactory.createOBDAModel(new HashSet<OBDADataSource>(),
+		inputOBDAModel = obdaFactory.createOBDAModel(new HashSet<>(),
 				new HashMap<URI, ImmutableList<OBDAMappingAxiom>>(),
-				nativeQLFactory.create(new HashMap<String, String>()));
+				nativeQLFactory.create(new HashMap<String, String>()), inputOntology.getVocabulary());
 
 		/*
 		 * Simplifying the vocabulary of the TBox
@@ -416,7 +421,8 @@ public class Quest implements Serializable, IQuest {
 				JDBCConnector jdbcConnector = (JDBCConnector) dbConnector;
 				Connection localConnection = jdbcConnector.getSQLConnection();
 
-				dataRepository = new RDBMSSIRepositoryManager(reformulationReasoner, inputOntology.getVocabulary());
+				dataRepository = new RDBMSSIRepositoryManager(reformulationReasoner, inputOntology.getVocabulary(),
+						nativeQLFactory);
 
 				if (inmemory) {
 					// we work in memory (with H2), the database is clean and
@@ -454,6 +460,8 @@ public class Quest implements Serializable, IQuest {
 				// Setting up the OBDA model
 
 				obdaSource = sources.iterator().next();
+				dbConnector = questComponentFactory.create(obdaSource, this);
+				dbConnector.connect();
 
 				log.debug("Testing DB connection...");
 				mappings = inputOBDAModel.getMappings(obdaSource.getSourceID());
@@ -462,58 +470,24 @@ public class Quest implements Serializable, IQuest {
 
 			//if the metadata was not already set
 			if (metadata == null) {
-				metadata = DBMetadataExtractor.createMetadata(localConnection);
-				// if we have to parse the full metadata or just the table list in the mappings
-				if (obtainFullMetadata) {
-					DBMetadataExtractor.loadMetadata(metadata, localConnection, null);
-				}
-				else {
-					try {
-						// This is the NEW way of obtaining part of the metadata
-						// (the schema.table names) by parsing the mappings
-
-						// Parse mappings. Just to get the table names in use
-						Set<RelationID> realTables = MappingParser.getRealTables(metadata.getQuotedIDFactory(), mappings);
-
-						if (applyUserConstraints) {
-							// Add the tables referred to by user-supplied foreign keys
-							Set<RelationID> referredTables = userConstraints.getReferredTables(metadata.getQuotedIDFactory());
-							realTables.addAll(referredTables);
-						}
-
-						DBMetadataExtractor.loadMetadata(metadata, localConnection, realTables);
-					}
-					catch (JSQLParserException e) {
-						System.out.println("Error obtaining the tables" + e);
-					}
-					catch (SQLException e) {
-						System.out.println("Error obtaining the metadata " + e);
-					}
-				}
+				metadata = dbConnector.extractDBMetadata(inputOBDAModel);
+			}
+			else {
+				metadata = dbConnector.extractDBMetadata(inputOBDAModel, metadata);
 			}
 
-			//Adds keys from the text file
-			if (applyUserConstraints) {
-				userConstraints.insertUniqueConstraints(metadata);
-				userConstraints.insertForeignKeyConstraints(metadata);
-			}
+			dbConnector.completePredefinedMetadata(metadata);
+
 
 			// This is true if the QuestDefaults.properties contains PRINT_KEYS=true
 			// Very useful for debugging of User Constraints (also for the end user)
-			if (printKeys) {
-				log.debug(metadata.printKeys());
-			}
+			if (printKeys)
+				System.out.println(metadata.printKeys());
 			else
 				log.debug("DB Metadata: \n{}", metadata);
 
-            SQLDialectAdapter sqladapter = SQLAdapterFactory
-                   .getSQLDialectAdapter(obdaSource
-                          .getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER), metadata.getDbmsVersion());
-
-            SQLQueryGenerator datasourceQueryGenerator = new SQLGenerator(metadata, sqladapter, sqlGenerateReplace,
-					 distinctResultSet, getUriMap());
-
-    		VocabularyValidator vocabularyValidator = new VocabularyValidator(reformulationReasoner, inputOntology.getVocabulary());
+    		VocabularyValidator vocabularyValidator = new VocabularyValidator(reformulationReasoner,
+					inputOntology.getVocabulary(), nativeQLFactory);
 
             final QuestUnfolder unfolder = new QuestUnfolder(metadata);
 
@@ -521,7 +495,8 @@ public class Quest implements Serializable, IQuest {
 			 * T-Mappings and Fact mappings
 			 */
 			if (aboxMode.equals(QuestConstants.VIRTUAL))
-				unfolder.setupInVirtualMode(mappings, localConnection, vocabularyValidator, reformulationReasoner, inputOntology, excludeFromTMappings, queryingAnnotationsInOntology, sameAsInMapping);
+				unfolder.setupInVirtualMode(mappings, localConnection, vocabularyValidator, reformulationReasoner,
+						inputOntology, excludeFromTMappings, queryingAnnotationsInOntology, sameAsInMapping);
 			else
 				unfolder.setupInSemanticIndexMode(mappings, reformulationReasoner);
 
@@ -564,10 +539,16 @@ public class Quest implements Serializable, IQuest {
 
 			rewriter.setTBox(reformulationReasoner, inputOntology.getVocabulary(), sigma);
 
+
+			NativeQueryGenerator dataSourceQueryGenerator = aboxMode.equals(QuestConstants.VIRTUAL)
+					? questComponentFactory.create(metadata, obdaSource)
+					: questComponentFactory.create(metadata, obdaSource, dataRepository.getUriMap());
+
 			/*
 			 * Done, sending a new reasoner with the modules we just configured
 			 */
-			engine = new QuestQueryProcessor(rewriter, sigma, unfolder, vocabularyValidator, getUriMap(), datasourceQueryGenerator);
+			engine = new QuestQueryProcessor(rewriter, sigma, unfolder, vocabularyValidator, getUriMap(),
+					dataSourceQueryGenerator);
 
 
 			log.debug("... Quest has been initialized.");

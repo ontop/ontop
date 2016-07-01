@@ -94,7 +94,7 @@ public class SQLGenerator implements NativeQueryGenerator {
 
 
 	private boolean generatingREPLACE = true;
-	private boolean distinctResultSet = false;
+	private final boolean distinctResultSet;
 	private final String replace1, replace2;
 
 	/**
@@ -131,10 +131,10 @@ public class SQLGenerator implements NativeQueryGenerator {
      * TODO: remove
 	 */
 	@Deprecated
-	public SQLGenerator(DBMetadata metadata, SQLDialectAdapter sqladapter) {
+	public SQLGenerator(DBMetadata metadata, SQLDialectAdapter sqladapter, QuestPreferences preferences) {
 		this.metadata = metadata;
 		this.sqladapter = sqladapter;
-
+		this.distinctResultSet = Boolean.valueOf((String) preferences.get(QuestPreferences.DISTINCT_RESULTSET));
 
 
 		operations = builder.build();
@@ -173,6 +173,8 @@ public class SQLGenerator implements NativeQueryGenerator {
 		this.metadata = (DBMetadata)metadata;
 		this.sqladapter = SQLAdapterFactory.getSQLDialectAdapter(driverURI, preferences);
 		this.operations = buildOperations(sqladapter);
+		this.distinctResultSet = Boolean.valueOf((String) preferences.get(QuestPreferences.DISTINCT_RESULTSET));
+
 
 		this.generatingREPLACE = Boolean.valueOf((String) preferences.get(QuestPreferences.SQL_GENERATE_REPLACE));
 

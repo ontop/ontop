@@ -52,7 +52,7 @@ public class SQLMappingVocabularyFixer implements MappingVocabularyFixer {
     private static final Logger log = LoggerFactory.getLogger(SQLMappingVocabularyFixer.class);
 
 	@Override
-	public OBDAModel fixOBDAModel(OBDAModel model, OntologyVocabulary vocabulary,
+	public OBDAModel fixOBDAModel(OBDAModel model, ImmutableOntologyVocabulary vocabulary,
 								  NativeQueryLanguageComponentFactory nativeQLFactory) {
         log.debug("Fixing OBDA Model");
 

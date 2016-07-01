@@ -43,14 +43,14 @@ import it.unibz.inf.ontop.utils.IDGenerator;
  */
 public class MappingSplitter {
 
-	public static List<OBDAMappingAxiom> splitMappings(List<OBDAMappingAxiom> mappings,
+	public static List<OBDAMappingAxiom> splitMappings(Collection<OBDAMappingAxiom> mappingAxioms,
 														NativeQueryLanguageComponentFactory nativeQLFactory) {
 
 		List<OBDAMappingAxiom> newMappings = new ArrayList<>();
 		
 		OBDADataFactory dfac = OBDADataFactoryImpl.getInstance();
 
-		for (OBDAMappingAxiom mapping : mappings) {
+		for (OBDAMappingAxiom mapping : mappingAxioms) {
 			List<Function> bodyAtoms = mapping.getTargetQuery();
 
 			if(bodyAtoms.size() == 1){
