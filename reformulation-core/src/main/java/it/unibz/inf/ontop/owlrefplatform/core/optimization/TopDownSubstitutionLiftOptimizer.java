@@ -74,21 +74,34 @@ public class TopDownSubstitutionLiftOptimizer implements SubstitutionLiftOptimiz
         }
     }
 
-    //union lift when the ancestor has in the other branch (check first child) useful projected variables,
-    //common with the bindings of the union
-    //after the lift execute binding starting from the union to see if it is possible to simplify
+    /* lift the bindings of the union to see if it is possible to simplify the tree
+     otherwise try to lift the union to an ancestor with useful projected variables between its children,
+      common with the bindings of the union.
+      */
     private NextNodeAndQuery liftBindingsAndUnion(IntermediateQuery currentQuery, UnionNode initialUnionNode) throws EmptyQueryException {
+        QueryNode currentNode = initialUnionNode;
 
-        NextNodeAndQuery liftedBindingsNodeAndQuery = liftBindingsFromUnionNode(currentQuery, initialUnionNode);
-        QueryNode currentNode = liftedBindingsNodeAndQuery.getOptionalNextNode().get();
-        currentQuery = liftedBindingsNodeAndQuery.getNextQuery();
+        //extract substitution from the union node
+        Optional<ImmutableSubstitution<ImmutableTerm>> optionalSubstitution = extractor.extractInSubTree(
+                currentQuery, currentNode);
+
+        if (optionalSubstitution.isPresent()) {
+            SubstitutionPropagationProposal<QueryNode> proposal =
+                    new SubstitutionPropagationProposalImpl<>(currentNode, optionalSubstitution.get());
+
+            NodeCentricOptimizationResults<QueryNode> results = currentQuery.applyProposal(proposal);
+            currentQuery = results.getResultingQuery();
+            currentNode = results.getNewNodeOrReplacingChild()
+                    .orElseThrow(() -> new IllegalStateException(
+                            "The focus was expected to be kept or replaced, not removed"));
+
+        }
 
         //if the union node has not been removed
         if (currentNode instanceof UnionNode) {
             UnionNode currentUnionNode = (UnionNode) currentNode;
 
-                //no conflicting variable definition has been found
-                return liftUnionToMatchingVariable(currentQuery, currentUnionNode, currentUnionNode.getProjectedVariables());
+            return liftUnionToMatchingVariable(currentQuery, currentUnionNode, currentUnionNode.getProjectedVariables());
 
         }
 
@@ -97,7 +110,9 @@ public class TopDownSubstitutionLiftOptimizer implements SubstitutionLiftOptimiz
 
     }
 
-    private NextNodeAndQuery liftUnionToMatchingVariable(IntermediateQuery currentQuery, UnionNode currentUnionNode, ImmutableSet<Variable> variables) throws EmptyQueryException {
+//    lift the union to an ancestor with useful projected variables between its children,
+//    common with the bindings of the union.
+    private NextNodeAndQuery liftUnionToMatchingVariable(IntermediateQuery currentQuery, UnionNode currentUnionNode, ImmutableSet<Variable> unionVariables) throws EmptyQueryException {
         QueryNode currentNode = currentUnionNode;
         // Non-final
         Optional<QueryNode> optionalParent = currentQuery.getParent(currentNode);
@@ -105,7 +120,7 @@ public class TopDownSubstitutionLiftOptimizer implements SubstitutionLiftOptimiz
 
         while (optionalParent.isPresent()) {
             QueryNode parentNode = optionalParent.get();
-            for (Variable variable : variables) {
+            for (Variable variable : unionVariables) {
 
                 ImmutableList<QueryNode> childrenParentNode = currentQuery.getChildren(parentNode);
                 for (QueryNode children : childrenParentNode){
@@ -122,10 +137,7 @@ public class TopDownSubstitutionLiftOptimizer implements SubstitutionLiftOptimiz
                     currentUnionNode = results.getOptionalNewNode().orElseThrow(() -> new IllegalStateException(
                             "The focus node has to be a union node and be present"));
 
-                    NextNodeAndQuery liftedBindingsNodeAndQuery2 = liftBindingsFromUnionNode(currentQuery, currentUnionNode);
-                    currentNode = liftedBindingsNodeAndQuery2.getOptionalNextNode().get();
-                    currentQuery = liftedBindingsNodeAndQuery2.getNextQuery();
-                    return new NextNodeAndQuery(getDepthFirstNextNode(currentQuery, currentNode), currentQuery);
+                    return liftBindingsAndUnion(currentQuery, currentUnionNode);
                 }
             }
 
@@ -138,31 +150,6 @@ public class TopDownSubstitutionLiftOptimizer implements SubstitutionLiftOptimiz
         return new NextNodeAndQuery(getDepthFirstNextNode(currentQuery, currentNode), currentQuery);
     }
 
-
-
-    private NextNodeAndQuery liftBindingsFromUnionNode(IntermediateQuery initialQuery,
-                                                       UnionNode initialUnionNode) throws EmptyQueryException {
-        QueryNode currentNode = initialUnionNode;
-
-        //extract substitution from the union node
-        Optional<ImmutableSubstitution<ImmutableTerm>> optionalSubstitution = extractor.extractInSubTree(
-                initialQuery, currentNode);
-
-        if (optionalSubstitution.isPresent()) {
-            SubstitutionPropagationProposal<QueryNode> proposal =
-                    new SubstitutionPropagationProposalImpl<>(currentNode, optionalSubstitution.get());
-
-            NodeCentricOptimizationResults<QueryNode> results = initialQuery.applyProposal(proposal);
-            initialQuery = results.getResultingQuery();
-            currentNode = results.getNewNodeOrReplacingChild()
-                    .orElseThrow(() -> new IllegalStateException(
-                            "The focus was expected to be kept or replaced, not removed"));
-
-        }
-
-        return new NextNodeAndQuery( Optional.of(currentNode), initialQuery);
-
-    }
 
 
     private NextNodeAndQuery liftBindingsFromConstructionNode(IntermediateQuery initialQuery,

@@ -13,11 +13,14 @@ import it.unibz.inf.ontop.owlrefplatform.core.optimization.IntermediateQueryOpti
 import it.unibz.inf.ontop.owlrefplatform.core.optimization.TopDownSubstitutionLiftOptimizer;
 import it.unibz.inf.ontop.pivotalrepr.*;
 import it.unibz.inf.ontop.pivotalrepr.EmptyNode;
+import it.unibz.inf.ontop.pivotalrepr.equivalence.IQSyntacticEquivalenceChecker;
 import it.unibz.inf.ontop.pivotalrepr.impl.*;
 import it.unibz.inf.ontop.pivotalrepr.impl.tree.DefaultIntermediateQueryBuilder;
 import org.junit.Test;
 
 import java.util.Optional;
+
+import static junit.framework.TestCase.assertTrue;
 
 /**
  * Test the top down substitution lift optimizer
@@ -208,6 +211,8 @@ public class SubstitutionLiftTest {
         //build expected query
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
         System.out.println("\n Expected query: \n" +  expectedQuery);
+
+        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, expectedQuery));
     }
 
 
@@ -314,6 +319,8 @@ public class SubstitutionLiftTest {
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
         System.out.println("\n Expected query: \n" +  expectedQuery);
 
+        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, expectedQuery));
+
 
     }
 
@@ -399,14 +406,29 @@ public class SubstitutionLiftTest {
 
         System.out.println("\nAfter optimization: \n" +  optimizedQuery);
 
+        //----------------------------------------------------------------------
+        //Construct expected query
+        IntermediateQueryBuilder expectedQueryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
+        ConstructionNode expectedRootNode = new ConstructionNodeImpl(projectionAtom.getVariables(),
+                new ImmutableSubstitutionImpl<>(ImmutableMap.of(Y, generateURI1(A))), Optional.empty());
 
-//        //Construct expected query
-//        IntermediateQueryBuilder expectedQueryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
-//        ConstructionNode expectedRootNode = new ConstructionNodeImpl(projectionAtom.getVariables(),
-//                new ImmutableSubstitutionImpl<>(ImmutableMap.of(Y, generateURI1(A))), Optional.empty());
-//
-//        expectedQueryBuilder.init(projectionAtom, expectedRootNode);
+        expectedQueryBuilder.init(projectionAtom, expectedRootNode);
 
+        //constract union Node
+        UnionNode expectedUnionNode =  new UnionNodeImpl(projectionAtom.getVariables());
+
+        expectedQueryBuilder.addChild(expectedRootNode, expectedUnionNode );
+
+        ConstructionNode expectedSubQuery1UnionNode = new ConstructionNodeImpl(projectionAtom.getVariables(),
+                new ImmutableSubstitutionImpl<>(ImmutableMap.of(X, generateURI1(A))), Optional.empty());
+        queryBuilder.addChild(expectedUnionNode, expectedSubQuery1UnionNode);
+
+        ConstructionNode expectedSubQuery2UnionNode = new ConstructionNodeImpl(projectionAtom.getVariables(),
+                new ImmutableSubstitutionImpl<>(ImmutableMap.of(X, generateURI2(C))), Optional.empty());
+        queryBuilder.addChild(expectedUnionNode, expectedSubQuery2UnionNode);
+        IntermediateQuery expectedQuery = expectedQueryBuilder.build();
+
+        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, expectedQuery));
 
 
     }
