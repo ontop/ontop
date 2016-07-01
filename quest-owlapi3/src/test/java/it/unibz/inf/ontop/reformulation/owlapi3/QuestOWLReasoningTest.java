@@ -2,12 +2,7 @@ package it.unibz.inf.ontop.reformulation.owlapi3;
 
 import static org.junit.Assert.*;
 import static org.semanticweb.owlapi.apibinding.OWLFunctionalSyntaxFactory.Class;
-import static org.semanticweb.owlapi.apibinding.OWLFunctionalSyntaxFactory.ClassAssertion;
-import static org.semanticweb.owlapi.apibinding.OWLFunctionalSyntaxFactory.DataProperty;
 import static org.semanticweb.owlapi.apibinding.OWLFunctionalSyntaxFactory.Declaration;
-import static org.semanticweb.owlapi.apibinding.OWLFunctionalSyntaxFactory.DisjointClasses;
-import static org.semanticweb.owlapi.apibinding.OWLFunctionalSyntaxFactory.NamedIndividual;
-import static org.semanticweb.owlapi.apibinding.OWLFunctionalSyntaxFactory.ObjectProperty;
 import static org.semanticweb.owlapi.apibinding.OWLFunctionalSyntaxFactory.Ontology;
 
 import org.junit.Before;
@@ -62,6 +57,11 @@ public class QuestOWLReasoningTest {
 				);
 	}
 	
+	
+	/**
+	 * TODO: Add test for invalid types of class expressions.
+	 */
+	
 	/** 
 	 * TODO: Check if it is a good configuration.
 	 * */
@@ -81,6 +81,9 @@ public class QuestOWLReasoningTest {
 
 		//Direct subclass
 		manager.addAxiom(ontology, OWLFunctionalSyntaxFactory.SubClassOf(cDirect,cB));
+		//TODO: Should cA be considered a directed subclass?
+		manager.addAxiom(ontology, OWLFunctionalSyntaxFactory.SubClassOf(cDirect,cA));
+		manager.addAxiom(ontology, OWLFunctionalSyntaxFactory.SubClassOf(cA, cDirect));
 		//Not direct subclass
 		manager.addAxiom(ontology, OWLFunctionalSyntaxFactory.SubClassOf(cNotDirect,cDirect));
 
@@ -89,6 +92,7 @@ public class QuestOWLReasoningTest {
 		//Get only direct subclass
 		NodeSet<OWLClass> subClasses = reasoner.getSubClasses(cB, true);
 		assertTrue(subClasses.containsEntity(cDirect));
+		assertTrue(subClasses.containsEntity(cA));
 		assertFalse(subClasses.containsEntity(cNotDirect));
 		
 		//Get all subclass
@@ -102,6 +106,9 @@ public class QuestOWLReasoningTest {
 
 		//Direct superclass
 		manager.addAxiom(ontology, OWLFunctionalSyntaxFactory.SubClassOf(cB, cDirect));
+		//TODO: Should cA be considered a directed subclass?
+		manager.addAxiom(ontology, OWLFunctionalSyntaxFactory.SubClassOf(cDirect,cA));
+		manager.addAxiom(ontology, OWLFunctionalSyntaxFactory.SubClassOf(cA, cDirect));
 		//Not direct subclass
 		manager.addAxiom(ontology, OWLFunctionalSyntaxFactory.SubClassOf(cDirect, cNotDirect));
 
@@ -110,6 +117,7 @@ public class QuestOWLReasoningTest {
 		//Get only direct superclass
 		NodeSet<OWLClass> superClasses = reasoner.getSuperClasses(cB, true);
 		assertTrue(superClasses.containsEntity(cDirect));
+		assertTrue(superClasses.containsEntity(cA));
 		assertFalse(superClasses.containsEntity(cNotDirect));
 		
 		//Get all superclass
@@ -118,5 +126,27 @@ public class QuestOWLReasoningTest {
 		assertTrue(superNotDirectClasses.containsEntity(cNotDirect));
 	} 
 	
+	@Test
+	public void testGetEquivClasses() throws OWLOntologyCreationException {
+
+		manager.addAxiom(ontology, OWLFunctionalSyntaxFactory.SubClassOf(cA,cB));
+		manager.addAxiom(ontology, OWLFunctionalSyntaxFactory.SubClassOf(cB, cA));
+		manager.addAxiom(ontology, OWLFunctionalSyntaxFactory.SubClassOf(cA, cC));
+
+		startReasoner();
+		
+		//Get equivalent classes
+		Node<OWLClass> equivClasses = reasoner.getEquivalentClasses(cA);
+		// TODO: Only one element : A!!
+		assertTrue(equivClasses.contains(cB));
+		assertFalse(equivClasses.contains(cC));
+		
+		//Get all superclass
+		// TODO: Equivalences are empty !!
+		equivClasses = reasoner.getEquivalentClasses(cB);
+		assertTrue(equivClasses.contains(cA));
+		assertFalse(equivClasses.contains(cC));
+	} 
+
 
 }

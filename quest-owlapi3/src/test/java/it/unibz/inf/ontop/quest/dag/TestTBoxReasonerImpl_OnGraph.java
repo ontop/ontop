@@ -305,6 +305,12 @@ public class TestTBoxReasonerImpl_OnGraph implements TBoxReasoner {
 			// TODO Auto-generated method stub
 			return null;
 		}
+
+		@Override
+		public Equivalences<T> getFullVertex(T v) {
+			// TODO Auto-generated method stub
+			return null;
+		}
 	}
 	
 	

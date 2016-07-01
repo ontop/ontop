@@ -754,7 +754,8 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 			
 			for(Equivalences<ClassExpression> equivClasses: subClasses) {
 				for(ClassExpression classExp: equivClasses) {
-					subClassesSet.add(classExp);
+					for(ClassExpression equivClass: classDAG.getFullVertex(classExp))
+						subClassesSet.add(equivClass);
 				}
 			}
 			
@@ -797,7 +798,8 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 			
 			for(Equivalences<ClassExpression> equivClasses: superClasses) {
 				for(ClassExpression classExp: equivClasses) {
-					superClassesSet.add(classExp);
+					for(ClassExpression equivClass: classDAG.getFullVertex(classExp))
+						superClassesSet.add(equivClass);
 				}
 			}
 			
@@ -826,7 +828,7 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 			
 			// Get equivalence classes from DAG
 			EquivalencesDAG<ClassExpression> classDAG = this.questInstance.getReformulationReasoner().getClassDAG();
-			Equivalences<ClassExpression> classEquivalences = classDAG.getVertex(cexp);
+			Equivalences<ClassExpression> classEquivalences = classDAG.getFullVertex(classDAG.getCanonicalForm(cexp));
 			
 			for(ClassExpression classExp: classEquivalences) {
 				equivClassesSet.add(classExp);
