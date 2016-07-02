@@ -25,11 +25,13 @@ import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
 import it.unibz.inf.ontop.injection.OBDAFactoryWithException;
+import it.unibz.inf.ontop.io.PrefixManager;
 import it.unibz.inf.ontop.model.OBDADataFactory;
 import it.unibz.inf.ontop.model.OBDADataSource;
 import it.unibz.inf.ontop.model.OBDAMappingAxiom;
 import it.unibz.inf.ontop.model.OBDAModel;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
+import it.unibz.inf.ontop.ontology.impl.OntologyVocabularyImpl;
 import it.unibz.inf.ontop.owlapi.directmapping.DirectMappingEngine;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.*;
@@ -57,17 +59,23 @@ public class DirectMappingBootstrapper {
 		//TODO: avoid creating a model without mappings
 		PrefixManager prefixManager = nativeQLFactory.create(new HashMap<String, String>());
 		OBDAModel model = obdaFactory.createOBDAModel(ImmutableSet.of(source),
-				new HashMap<URI, ImmutableList<OBDAMappingAxiom>>(), prefixManager);
-		bootstrapOntologyAndDirectMappings(baseuri, onto, model, source);
+				new HashMap<URI, ImmutableList<OBDAMappingAxiom>>(), prefixManager,
+				new OntologyVocabularyImpl());
+
+		bootstrapOntologyAndDirectMappings(baseuri, onto, model, source, nativeQLFactory, obdaFactory);
 	}
 
-	public DirectMappingBootstrapper(String baseUri, OWLOntology ontology, OBDAModel model, OBDADataSource source) throws Exception {
-		bootstrapOntologyAndDirectMappings(baseUri, ontology, model, source);
+	public DirectMappingBootstrapper(String baseUri, OWLOntology ontology, OBDAModel model, OBDADataSource source,
+									 NativeQueryLanguageComponentFactory nativeQLFactory,
+									 OBDAFactoryWithException obdaFactory) throws Exception {
+		bootstrapOntologyAndDirectMappings(baseUri, ontology, model, source, nativeQLFactory, obdaFactory);
 	}
 
-    private void bootstrapOntologyAndDirectMappings(String baseuri, OWLOntology onto, OBDAModel model, OBDADataSource source) throws DuplicateMappingException, SQLException, OWLOntologyCreationException, OWLOntologyStorageException {
+    private void bootstrapOntologyAndDirectMappings(String baseuri, OWLOntology onto, OBDAModel model,
+													OBDADataSource source, NativeQueryLanguageComponentFactory nativeQLFactory,
+													OBDAFactoryWithException obdaFactory) throws DuplicateMappingException, SQLException, OWLOntologyCreationException, OWLOntologyStorageException {
         this.source = source;
-        DirectMappingEngine engine = new DirectMappingEngine(baseuri, model.getMappings(source.getSourceID()).size());
+        DirectMappingEngine engine = new DirectMappingEngine(baseuri, model.getMappings(source.getSourceID()).size(), nativeQLFactory, obdaFactory);
         this.model =  engine.extractMappings(model, source);
         this.onto =  engine.getOntology(onto, onto.getOWLOntologyManager(), model);
     }

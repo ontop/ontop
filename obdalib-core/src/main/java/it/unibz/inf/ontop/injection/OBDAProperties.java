@@ -18,6 +18,16 @@ import java.util.Properties;
  */
 public class OBDAProperties {
 
+    public static class InvalidOBDAConfigurationException extends RuntimeException {
+        public InvalidOBDAConfigurationException(String message) {
+            super(message);
+        }
+
+        public InvalidOBDAConfigurationException(String message, OBDAProperties properties) {
+            super(message + "\nProperties:\n" + properties);
+        }
+    }
+
     public static final String JDBC_URL = "JDBC_URL";
     public static final String DB_NAME = "DB_NAME";
     public static final String DB_USER = "DBUSER";
@@ -59,8 +69,9 @@ public class OBDAProperties {
      *
      * --> Only default properties.
      */
-    public OBDAProperties() {
+    public OBDAProperties() throws InvalidOBDAConfigurationException {
         this(new Properties());
+        checkProperties(this);
     }
 
     /**
@@ -71,7 +82,7 @@ public class OBDAProperties {
      * Changing the Properties object afterwards will not have any effect
      * on this OBDAProperties object.
      */
-    public OBDAProperties(Properties userProperties) {
+    public OBDAProperties(Properties userProperties) throws InvalidOBDAConfigurationException {
         /**
          * Loads default properties
          */
@@ -80,6 +91,7 @@ public class OBDAProperties {
          * Overloads the default properties.
          */
         properties.putAll(userProperties);
+        checkProperties(this);
     }
 
     protected static Properties loadDefaultPropertiesFromFile(Class localClass, String fileName) {
@@ -145,5 +157,11 @@ public class OBDAProperties {
         Properties p = new Properties();
         p.putAll(properties);
         return p;
+    }
+
+    /**
+     * TODO: complete
+     */
+    private static void checkProperties(OBDAProperties properties) throws InvalidOBDAConfigurationException {
     }
 }

@@ -20,14 +20,19 @@ package it.unibz.inf.ontop.owlapi.directmapping;
  * #L%
  */
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.exception.DuplicateMappingException;
+import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
+import it.unibz.inf.ontop.injection.OBDAFactoryWithException;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.Predicate.COL_TYPE;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
-import it.unibz.inf.ontop.model.impl.OBDAModelImpl;
 import it.unibz.inf.ontop.ontology.DataPropertyExpression;
 import it.unibz.inf.ontop.ontology.OClass;
 import it.unibz.inf.ontop.ontology.ObjectPropertyExpression;
+import it.unibz.inf.ontop.ontology.OntologyVocabulary;
+import it.unibz.inf.ontop.ontology.impl.OntologyVocabularyImpl;
 import it.unibz.inf.ontop.sql.DBMetadata;
 import it.unibz.inf.ontop.sql.RDBMetadataExtractionTools;
 import it.unibz.inf.ontop.sql.DatabaseRelationDefinition;
@@ -48,15 +53,21 @@ import java.util.*;
  *
  */
 public class DirectMappingEngine {
-	
+
+	private final NativeQueryLanguageComponentFactory nativeQLFactory;
+	private final OBDAFactoryWithException obdaFactory;
 	private JDBCConnectionManager connManager = null;
     private String baseIRI;
 	private int currentMappingIndex = 1;
 	
-	public DirectMappingEngine(String baseIRI, int numOfExisitingMappings){
+	public DirectMappingEngine(String baseIRI, int numOfExisitingMappings,
+							   NativeQueryLanguageComponentFactory nativeQLFactory,
+							   OBDAFactoryWithException obdaFactory){
 		connManager = JDBCConnectionManager.getJDBCConnectionManager();
 		this.baseIRI = baseIRI;
 		currentMappingIndex = numOfExisitingMappings + 1;
+		this.nativeQLFactory = nativeQLFactory;
+		this.obdaFactory = obdaFactory;
 	}
 
 
@@ -118,13 +129,16 @@ public class DirectMappingEngine {
 	 * @return a new OBDA Model containing all the extracted mappings
 	 */
 	public OBDAModel extractMappings(OBDADataSource source) throws DuplicateMappingException, SQLException {
-		OBDAModel model = new OBDAModelImpl();
-		return extractMappings(model, source);
+		//TODO: avoid this empty construction
+		it.unibz.inf.ontop.io.PrefixManager prefixManager = nativeQLFactory.create(new HashMap<String, String>());
+		OBDAModel emptyModel = obdaFactory.createOBDAModel(new HashSet<OBDADataSource>(),
+				new HashMap<URI, ImmutableList<OBDAMappingAxiom>>(),prefixManager,
+				new OntologyVocabularyImpl());
+		return extractMappings(emptyModel, source);
 	}
 
 	public OBDAModel extractMappings(OBDAModel model, OBDADataSource source) throws DuplicateMappingException, SQLException {
-		bootstrapMappings(source, model);
-		return model;
+		return bootstrapMappings(source, model);
 	}
 
 
@@ -134,42 +148,53 @@ public class DirectMappingEngine {
 	 * Duplicate Exception may happen,
 	 * since mapping id is generated randomly and same id may occur
 	 */
-	public void bootstrapMappings(OBDADataSource source, OBDAModel model) throws SQLException, DuplicateMappingException {
-		model.addSource(source);
+	public OBDAModel bootstrapMappings(OBDADataSource source, OBDAModel model) throws SQLException, DuplicateMappingException {
+		if (model == null) {
+			throw new IllegalArgumentException("Model should not be null");
+		}
+
+		Set<OBDADataSource> dataSources = new HashSet<>(model.getSources());
+		dataSources.add(source);
+
+		OBDAModel updatedModel = model.newModel(dataSources, model.getMappings());
+
 		Connection conn = connManager.getConnection(source);
 		DBMetadata metadata = RDBMetadataExtractionTools.createMetadata(conn);
 		// this operation is EXPENSIVE
 		RDBMetadataExtractionTools.loadMetadata(metadata, conn, null);
-		bootstrapMappings(metadata, model,source.getSourceID());
+		return bootstrapMappings(metadata, updatedModel,source.getSourceID());
 	}
 
 
-	public void bootstrapMappings(DBMetadata metadata, OBDAModel model, URI sourceUri) throws DuplicateMappingException {
+	public OBDAModel bootstrapMappings(DBMetadata metadata, OBDAModel model, URI sourceUri) throws DuplicateMappingException {
 		if (baseIRI == null || baseIRI.isEmpty())
 			this.baseIRI = model.getPrefixManager().getDefaultPrefix();
 		Collection<DatabaseRelationDefinition> tables = metadata.getDatabaseRelations();
 		List<OBDAMappingAxiom> mappingAxioms = new ArrayList<>();
 		for (DatabaseRelationDefinition td : tables) {
 			mappingAxioms.addAll(getMapping(td, baseIRI));
+		}
 
-		}
-		for (OBDAMappingAxiom mappingAxiom : mappingAxioms) {
-			model.addMapping(sourceUri, mappingAxiom, true);
-		}
+		Map<URI, ImmutableList<OBDAMappingAxiom>> mappingIndex = new HashMap<>();
+		mappingIndex.putAll(model.getMappings());
+		mappingIndex.put(sourceUri, ImmutableList.copyOf(mappingAxioms));
+
+		OntologyVocabulary ontologyVocabulary = model.getOntologyVocabulary();
 
 		for (URI uri : model.getMappings().keySet()) {
 			for (OBDAMappingAxiom mapping : model.getMappings().get(uri)) {
 				List<Function> rule = mapping.getTargetQuery();
 				for (Function f : rule) {
 					if (f.getArity() == 1)
-						model.getOntologyVocabulary().createClass(f.getFunctionSymbol().getName());
+						ontologyVocabulary.createClass(f.getFunctionSymbol().getName());
 					else if (f.getFunctionSymbol().getType(1).equals(COL_TYPE.OBJECT))
-						model.getOntologyVocabulary().createObjectProperty(f.getFunctionSymbol().getName());
+						ontologyVocabulary.createObjectProperty(f.getFunctionSymbol().getName());
 					else
-						model.getOntologyVocabulary().createDataProperty(f.getFunctionSymbol().getName());
+						ontologyVocabulary.createDataProperty(f.getFunctionSymbol().getName());
 				}
 			}
 		}
+		return model.newModel(model.getSources(), mappingIndex, model.getPrefixManager(), ontologyVocabulary);
 	}
 
 
@@ -187,14 +212,14 @@ public class DirectMappingEngine {
 		DirectMappingAxiomProducer dmap = new DirectMappingAxiomProducer(baseUri, dfac);
 
 		List<OBDAMappingAxiom> axioms = new ArrayList<>();
-		axioms.add(dfac.getRDBMSMappingAxiom("MAPPING-ID"+ currentMappingIndex, dfac.getSQLQuery(dmap.getSQL(table)), dmap.getCQ(table)));
+		axioms.add(nativeQLFactory.create("MAPPING-ID"+ currentMappingIndex, dfac.getSQLQuery(dmap.getSQL(table)), dmap.getCQ(table)));
 		currentMappingIndex++;
 		
 		Map<String, List<Function>> refAxioms = dmap.getRefAxioms(table);
 		for (Map.Entry<String, List<Function>> e : refAxioms.entrySet()) {
             OBDASQLQuery sqlQuery = dfac.getSQLQuery(e.getKey());
             List<Function> targetQuery = e.getValue();
-            axioms.add(dfac.getRDBMSMappingAxiom("MAPPING-ID"+ currentMappingIndex, sqlQuery, targetQuery));
+            axioms.add(nativeQLFactory.create("MAPPING-ID"+ currentMappingIndex, sqlQuery, targetQuery));
 			currentMappingIndex++;
 		}
 		

@@ -20,11 +20,16 @@ package it.unibz.inf.ontop.owlrefplatform.core;
  * #L%
  */
 
+import java.io.File;
+import java.io.Reader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Properties;
 
 import it.unibz.inf.ontop.injection.OBDAProperties;
+import it.unibz.inf.ontop.model.OBDAModel;
+import org.openrdf.model.Model;
 
 /**
  * A class that represents the preferences overwritten by the user.
@@ -132,5 +137,58 @@ public class QuestPreferences extends OBDAProperties {
 //		keys.add(CREATE_TEST_MAPPINGS);
 
 		return keys;
+	}
+
+	public Optional<File> getMappingFile() {
+		if (contains(QuestPreferences.MAPPING_FILE_PATH)) {
+			File mappingFile = new File(getProperty(QuestPreferences.MAPPING_FILE_PATH));
+			return Optional.of(mappingFile);
+		}
+		else if (contains(QuestPreferences.MAPPING_FILE_OBJECT)) {
+			File mappingFile = (File) get(QuestPreferences.MAPPING_FILE_PATH);
+			return Optional.of(mappingFile);
+		}
+		else {
+			return Optional.empty();
+		}
+	}
+
+	public Optional<Reader> getMappingReader() {
+		return Optional.ofNullable(get(QuestPreferences.MAPPING_FILE_READER))
+				.map(r -> (Reader) r);
+	}
+
+	public Optional<Model> getMappingModel() {
+		return Optional.ofNullable(get(QuestPreferences.MAPPING_FILE_MODEL))
+				.map(o -> (Model) o);
+	}
+
+	public Optional<OBDAModel> getPredefinedOBDAModel() {
+		return Optional.ofNullable(get(QuestPreferences.MAPPING_FILE_MODEL))
+				.map(o -> (OBDAModel) o);
+	}
+
+	private static void checkPreferences(QuestPreferences preferences) {
+		boolean areMappingsDefined =
+				preferences.contains(OBDAProperties.MAPPING_FILE_OBJECT)
+						|| preferences.contains(OBDAProperties.MAPPING_FILE_READER)
+						|| preferences.contains(OBDAProperties.MAPPING_FILE_MODEL)
+						|| preferences.contains(OBDAProperties.MAPPING_FILE_PATH)
+						|| preferences.contains(OBDAProperties.PREDEFINED_OBDA_MODEL);
+		if ((!areMappingsDefined) && preferences.get(QuestPreferences.ABOX_MODE).equals(QuestConstants.VIRTUAL)) {
+			throw new InvalidOBDAConfigurationException("mappings are not specified in virtual mode", preferences);
+		} else if (areMappingsDefined && preferences.get(QuestPreferences.ABOX_MODE).equals(QuestConstants.CLASSIC)) {
+			throw new InvalidOBDAConfigurationException("mappings are specified in classic mode", preferences);
+		}
+
+		/**
+		 * TODO: complete
+		 */
+
+		// TODO: check the types of some Object properties.
+	}
+
+	public boolean isInVirtualMode() {
+		return getProperty(ABOX_MODE).equals(QuestConstants.VIRTUAL);
 	}
 }

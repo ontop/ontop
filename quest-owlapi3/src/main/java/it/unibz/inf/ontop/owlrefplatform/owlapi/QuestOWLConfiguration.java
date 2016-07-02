@@ -8,6 +8,7 @@ import it.unibz.inf.ontop.owlrefplatform.core.R2RMLQuestPreferences;
 import it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing.TMappingExclusionConfig;
 import it.unibz.inf.ontop.sql.ImplicitDBConstraintsReader;
 import org.openrdf.model.Model;
+import org.semanticweb.owlapi.reasoner.IllegalConfigurationException;
 import org.semanticweb.owlapi.reasoner.NullReasonerProgressMonitor;
 import org.semanticweb.owlapi.reasoner.ReasonerProgressMonitor;
 import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
@@ -176,7 +177,7 @@ public class QuestOWLConfiguration extends SimpleConfiguration {
             return this;
         }
 
-        public QuestOWLConfiguration build() {
+        public QuestOWLConfiguration build() throws IllegalConfigurationException {
 
             Properties p = new Properties();
             userConstraints.ifPresent(constraints -> p.put(OBDAProperties.DB_CONSTRAINTS, constraints));

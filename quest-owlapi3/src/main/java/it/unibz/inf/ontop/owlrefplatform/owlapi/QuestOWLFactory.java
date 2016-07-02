@@ -20,8 +20,6 @@ package it.unibz.inf.ontop.owlrefplatform.owlapi;
  * #L%
  */
 
-import it.unibz.inf.ontop.exception.InvalidMappingException;
-import it.unibz.inf.ontop.io.InvalidDataSourceException;
 import it.unibz.inf.ontop.model.OBDAModel;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
@@ -35,7 +33,6 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 
-import java.io.IOException;
 import java.util.Properties;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -72,7 +69,7 @@ public class QuestOWLFactory implements OWLReasonerFactory {
     public OWLReasoner createReasoner(OWLOntology ontology) {
         Properties p = new Properties();
         p.setProperty(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
-        return createReasoner(ontology, QuestOWLConfiguration.builder().preferences(new QuestPreferences(p)).build());
+        return createReasoner(ontology, QuestOWLConfiguration.builder().properties(p).build());
     }
 
     @Nonnull
@@ -101,17 +98,6 @@ public class QuestOWLFactory implements OWLReasonerFactory {
     @Nonnull
     public QuestOWL createReasoner(@Nonnull OWLOntology ontology, @Nonnull QuestOWLConfiguration config)
             throws IllegalConfigurationException {
-
-        QuestPreferences preferences = config.getPreferences();
-
-        boolean areMappingsDefined = config.areMappingsDefined();
-
-        if ((!areMappingsDefined) && preferences.get(QuestPreferences.ABOX_MODE).equals(QuestConstants.VIRTUAL)) {
-            throw new IllegalConfigurationException("mappings are not specified in virtual mode", config);
-        } else if (areMappingsDefined && preferences.get(QuestPreferences.ABOX_MODE).equals(QuestConstants.CLASSIC)) {
-            throw new IllegalConfigurationException("mappings are specified in classic mode", config);
-        }
-
         return new QuestOWL(ontology, config);
 
     }

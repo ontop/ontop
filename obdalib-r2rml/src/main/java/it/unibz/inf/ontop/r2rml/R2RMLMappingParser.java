@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
+import it.unibz.inf.ontop.ontology.impl.OntologyVocabularyImpl;
 import org.openrdf.model.Model;
 import org.openrdf.rio.RDFHandlerException;
 import org.openrdf.rio.RDFParseException;
@@ -141,7 +142,7 @@ public class R2RMLMappingParser implements MappingParser {
         PrefixManager prefixManager = nativeQLFactory.create(new HashMap<String, String>());
 
         obdaModel = obdaFactory.createOBDAModel(ImmutableSet.of(dataSource), ImmutableMap.of(dataSource.getSourceID(),
-                        sourceMappings), prefixManager);
+                        sourceMappings), prefixManager, new OntologyVocabularyImpl());
 
     return obdaModel;
     }

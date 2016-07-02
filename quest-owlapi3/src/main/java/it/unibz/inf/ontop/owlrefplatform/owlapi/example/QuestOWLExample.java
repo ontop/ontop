@@ -53,15 +53,12 @@ public class QuestOWLExample {
         OWLOntology ontology = manager.loadOntologyFromOntologyDocument(new File(owlfile));
 
 		/*
-         * Load the OBDA model from an external .obda file
-		 */
-        OBDAModel obdaModel = new MappingLoader().loadFromOBDAFile(obdafile);
-
-		/*
          * Create the instance of Quest OWL reasoner.
 		 */
         QuestOWLFactory factory = new QuestOWLFactory();
-        QuestOWLConfiguration config = QuestOWLConfiguration.builder().obdaModel(obdaModel).build();
+        QuestOWLConfiguration config = QuestOWLConfiguration.builder()
+                .nativeOntopMappingFile(obdafile)
+                .build();
         QuestOWL reasoner = factory.createReasoner(ontology, config);
 
 		/*

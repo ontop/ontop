@@ -1,15 +1,15 @@
 package it.unibz.inf.ontop.owlrefplatform.owlapi.example;
 
-
-import it.unibz.inf.ontop.io.ModelIOManager;
-import it.unibz.inf.ontop.model.OBDADataFactory;
+import com.google.inject.Guice;
+import com.google.inject.Injector;
+import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
+import it.unibz.inf.ontop.injection.OBDACoreModule;
+import it.unibz.inf.ontop.mapping.MappingParser;
 import it.unibz.inf.ontop.model.OBDAModel;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.owlapi.OWLAPITranslatorUtility;
-import it.unibz.inf.ontop.owlrefplatform.core.Quest;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestConnection;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
+import it.unibz.inf.ontop.owlrefplatform.core.*;
+import it.unibz.inf.ontop.owlrefplatform.injection.QuestComponentFactory;
+import it.unibz.inf.ontop.owlrefplatform.injection.QuestComponentModule;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLConnection;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLStatement;
 import it.unibz.inf.ontop.sql.DBMetadata;
@@ -43,29 +43,28 @@ private void setup()  throws Exception {
 	OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 	OWLOntology ontology = manager.loadOntologyFromOntologyDocument(new File(owlfile));
 
-	/*
-	 * Load the OBDA model from an external .obda file
-	 */
-	OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
-	OBDAModel obdaModel = fac.getOBDAModel();
-	ModelIOManager ioManager = new ModelIOManager(obdaModel);
-	ioManager.load(obdafile);
+	QuestPreferences preference = new QuestPreferences();
+	Injector injector = Guice.createInjector(new OBDACoreModule(preference), new QuestComponentModule(preference));
+	NativeQueryLanguageComponentFactory nativeQLFactory = injector.getInstance(NativeQueryLanguageComponentFactory.class);
+	QuestComponentFactory componentFactory = injector.getInstance(QuestComponentFactory.class);
+
+	MappingParser mappingParser = nativeQLFactory.create(new File(obdafile));
+	OBDAModel obdaModel = mappingParser.getOBDAModel();
 	
 	/*
 	 * Prepare the configuration for the Quest instance. The example below shows the setup for
 	 * "Virtual ABox" mode
 	 */
-	QuestPreferences preference = new QuestPreferences();
-	preference.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
 	DBMetadata dbMetadata = getMeta();
-	Quest qest = new Quest(OWLAPITranslatorUtility.translateImportsClosure(ontology), obdaModel, dbMetadata, preference);
-	qest.setupRepository();
+	IQuest quest = componentFactory.create(OWLAPITranslatorUtility.translateImportsClosure(ontology), obdaModel,
+			dbMetadata, preference);
+	quest.setupRepository();
 	
 	/*
 	 * Prepare the data connection for querying.
 	 */
 	
-	QuestConnection conn =qest.getConnection();
+	IQuestConnection conn =quest.getConnection();
 	QuestOWLConnection connOWL = new QuestOWLConnection(conn);
 	qst = connOWL.createStatement();
 }
