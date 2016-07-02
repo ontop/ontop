@@ -334,15 +334,13 @@ public class Quest implements Serializable, IQuest {
 		/*
 		 * Fixing the typing of predicates, in case they are not properly given.
 		 */
-		if (inputOBDAModel != null && !inputOntology.getVocabulary().isEmpty()) {
+		if (inputOBDAModel == null) {
+			throw new IllegalStateException("The input OBDA model should not be null");
+		}
+		if (!inputOntology.getVocabulary().isEmpty()) {
 			inputOBDAModel = mappingVocabularyFixer.fixOBDAModel(inputOBDAModel,
 					inputOntology.getVocabulary(), nativeQLFactory);
 		}
-
-		// TODO: better use this constructor.
-		inputOBDAModel = obdaFactory.createOBDAModel(new HashSet<>(),
-				new HashMap<URI, ImmutableList<OBDAMappingAxiom>>(),
-				nativeQLFactory.create(new HashMap<String, String>()), inputOntology.getVocabulary());
 
 		/*
 		 * Simplifying the vocabulary of the TBox

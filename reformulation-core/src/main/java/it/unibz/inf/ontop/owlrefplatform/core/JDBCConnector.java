@@ -31,6 +31,7 @@ import java.sql.*;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * For RDBMS having a JDBC driver.
@@ -333,7 +334,9 @@ public class JDBCConnector implements DBConnector {
             try {
                 select = (Select) CCJSqlParserUtil.parse(sourceString);
 
-                Set<Variable> variables = ((CQIE) targetQuery).getReferencedVariables();
+                Set<Variable> variables = targetQuery.stream()
+                        .flatMap(atom -> atom.getVariables().stream())
+                        .collect(Collectors.toSet());
                 PreprocessProjection ps = new PreprocessProjection(dbMetadata);
                 String query = ps.getMappingQuery(select, variables);
                 axiom.setSourceQuery(fac.getSQLQuery(query));
