@@ -25,9 +25,12 @@ import java.util.Optional;
 import com.google.common.collect.*;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
+import it.unibz.inf.ontop.model.Predicate.COL_TYPE;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
 import it.unibz.inf.ontop.model.impl.RDBMSourceParameterConstants;
+import it.unibz.inf.ontop.model.impl.TermUtils;
+import it.unibz.inf.ontop.owlrefplatform.core.ExecutableQuery;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
 import it.unibz.inf.ontop.owlrefplatform.core.SQLExecutableQuery;
@@ -50,12 +53,17 @@ import it.unibz.inf.ontop.utils.DatalogDependencyGraphGenerator;
 import java.sql.Types;
 import java.util.*;
 import java.util.Map.Entry;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import org.openrdf.model.Literal;
+import org.openrdf.model.vocabulary.XMLSchema;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Joiner;
 import it.unibz.inf.ontop.model.*;
+
+import static it.unibz.inf.ontop.model.Predicate.COL_TYPE.*;
 
 /**
  * This class generates an SQLExecutableQuery from the datalog program coming from the
@@ -119,41 +127,6 @@ public class SQLGenerator implements NativeQueryGenerator {
 	private static final org.slf4j.Logger log = LoggerFactory
 			.getLogger(SQLGenerator.class);
 
-	/**
-	 * This method is in charge of generating the SQL query from a Datalog
-	 * program
-	 *
-	 * @param metadata
-	 *            This is an instance of {@link DBMetadata}
-	 * @param sqladapter
-	 *            This contains the syntax that each DB uses.
-     *
-     * TODO: remove
-	 */
-	@Deprecated
-	public SQLGenerator(DBMetadata metadata, SQLDialectAdapter sqladapter, QuestPreferences preferences) {
-		this.metadata = metadata;
-		this.sqladapter = sqladapter;
-		this.distinctResultSet = Boolean.valueOf((String) preferences.get(QuestPreferences.DISTINCT_RESULTSET));
-
-
-		operations = builder.build();
-
-		if (generatingREPLACE) {
-			StringBuilder sb1 = new StringBuilder();
-			StringBuilder sb2 = new StringBuilder();
-			for (Entry<String, String> e : EncodeForURI.TABLE.entrySet()) {
-				sb1.append("REPLACE(");
-				sb2.append(", '").append(e.getValue()).append("', '").append(e.getKey()).append("')");
-			}
-			replace1 = sb1.toString();
-			replace2 = sb2.toString();
-		}
-		else {
-			replace1 = replace2 = "";
-		}
-	}
-
     @AssistedInject
 	private SQLGenerator(@Assisted DataSourceMetadata metadata, @Assisted OBDADataSource dataSource, QuestPreferences preferences) {
         // TODO: make these attributes immutable.
@@ -171,12 +144,26 @@ public class SQLGenerator implements NativeQueryGenerator {
 		}
 
 		this.metadata = (DBMetadata)metadata;
-		this.sqladapter = SQLAdapterFactory.getSQLDialectAdapter(driverURI, preferences);
+		this.sqladapter = SQLAdapterFactory.getSQLDialectAdapter(driverURI,this.metadata.getDbmsVersion(), preferences);
 		this.operations = buildOperations(sqladapter);
 		this.distinctResultSet = Boolean.valueOf((String) preferences.get(QuestPreferences.DISTINCT_RESULTSET));
 
 
 		this.generatingREPLACE = Boolean.valueOf((String) preferences.get(QuestPreferences.SQL_GENERATE_REPLACE));
+
+		if (generatingREPLACE) {
+			StringBuilder sb1 = new StringBuilder();
+			StringBuilder sb2 = new StringBuilder();
+			for (Entry<String, String> e : EncodeForURI.TABLE.entrySet()) {
+				sb1.append("REPLACE(");
+				sb2.append(", '").append(e.getValue()).append("', '").append(e.getKey()).append("')");
+			}
+			replace1 = sb1.toString();
+			replace2 = sb2.toString();
+		}
+		else {
+			replace1 = replace2 = "";
+		}
 
 		String aBoxMode = (String) preferences.get(QuestPreferences.ABOX_MODE);
 		this.isSI = aBoxMode.equals(QuestConstants.CLASSIC);
@@ -187,7 +174,8 @@ public class SQLGenerator implements NativeQueryGenerator {
 	 * For clone purposes only
 	 */
 	private SQLGenerator(DBMetadata metadata, SQLDialectAdapter sqlAdapter, boolean generatingReplace,
-						 boolean isSI, SemanticIndexURIMap uriRefIds) {
+						 boolean isSI, String replace1, String replace2, boolean distinctResultSet,
+						 SemanticIndexURIMap uriRefIds) {
 		if (isSI && uriRefIds == null) {
 			throw new IllegalArgumentException("A SemanticIndexURIMap must be given in the classic mode.");
 		}
@@ -195,7 +183,10 @@ public class SQLGenerator implements NativeQueryGenerator {
 		this.sqladapter = sqlAdapter;
 		this.operations = buildOperations(sqlAdapter);
 		this.generatingREPLACE = generatingReplace;
+		this.replace1 = replace1;
+		this.replace2 = replace2;
 		this.isSI = isSI;
+		this.distinctResultSet = distinctResultSet;
 		this.uriRefIds = uriRefIds;
 	}
 
@@ -252,7 +243,7 @@ public class SQLGenerator implements NativeQueryGenerator {
 	 */
 	public NativeQueryGenerator cloneIfNecessary() {
 		return new SQLGenerator(metadata.clone(), sqladapter, generatingREPLACE,
-				isSI, uriRefIds);
+				isSI, replace1, replace2, distinctResultSet, uriRefIds);
 	}
 
 	@Override
@@ -262,26 +253,11 @@ public class SQLGenerator implements NativeQueryGenerator {
 	}
 
 	/**
-	 * SQLGenerator must not be shared between threads
-	 * but CLONED.
-	 *
-	 * @return A cloned object without any query-dependent value
-	 */
-	public SQLQueryGenerator cloneGenerator() {
-		return new SQLGenerator(metadata.clone(), sqladapter, generatingREPLACE, distinctResultSet, uriRefIds);
-	}
-
-	/**
 	 * Generates and SQL query ready to be executed by Quest. Each query is a
 	 * SELECT FROM WHERE query. To know more about each of these see the inner
 	 * method descriptions. Observe that the SQL itself will be done by
 	 * {@link #generateQuery}
 	 *
-	 * @param queryProgram
-	 *            This is an arbitrary Datalog Program. In this program ans
-	 *            predicates will be translated to Views.
-	 * @param signature
-	 * @param optionalConstructTemplate
 	 */
 	@Override
 	public SQLExecutableQuery generateSourceQuery(IntermediateQuery intermediateQuery, ImmutableList<String> signature,

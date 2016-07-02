@@ -29,9 +29,9 @@ public class SQLAdapterFactory {
 
 	private static Logger log = LoggerFactory.getLogger(SQLAdapterFactory.class);
 
-	public static SQLDialectAdapter getSQLDialectAdapter(String driverURI, QuestPreferences preferences) {
+	public static SQLDialectAdapter getSQLDialectAdapter(String className, String databaseName, QuestPreferences preferences) {
 
-		switch (driverURI) {
+		switch (className) {
 			case "org.postgresql.Driver":
 				return new PostgreSQLDialectAdapter();
 			case "com.mysql.jdbc.Driver":

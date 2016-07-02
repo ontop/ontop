@@ -305,8 +305,8 @@ public class QuestMaterializer {
 		private String query1 = "CONSTRUCT {?s <%s> ?o} WHERE {?s <%s> ?o}";
 		private String query2 = "CONSTRUCT {?s a <%s>} WHERE {?s a <%s>}";
 
-		private QuestConnection questConn;
-		private QuestStatement stm;
+		private IQuestConnection questConn;
+		private IQuestStatement stm;
 		
 		private boolean read = false, hasNext = false;
 

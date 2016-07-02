@@ -31,14 +31,14 @@ public class OBDACoreModule extends OBDAAbstractModule {
         configurePreferences();
 
         bindImplicitDBConstraints();
+        bindFromPreferences(IMapping2DatalogConverter.class);
 
         Module nativeQLFactoryModule = buildFactory(ImmutableList.<Class>of(
                         OBDAModel.class,
                         MappingParser.class,
                         PrefixManager.class,
                         DBMetadataExtractor.class,
-                        OBDAMappingAxiom.class,
-                        IMapping2DatalogConverter.class
+                        OBDAMappingAxiom.class
                         ),
                 NativeQueryLanguageComponentFactory.class);
         install(nativeQLFactoryModule);

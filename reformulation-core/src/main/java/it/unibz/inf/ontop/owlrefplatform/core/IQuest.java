@@ -21,7 +21,7 @@ import it.unibz.inf.ontop.pivotalrepr.MetadataForQueryOptimization;
  *
  * TODO: clean it.
  */
-public interface IQuest extends RepositoryChangedListener {
+public interface IQuest {
 
     OBDAModel getOBDAModel();
 
@@ -31,8 +31,6 @@ public interface IQuest extends RepositoryChangedListener {
 
     void setupRepository() throws Exception;
 
-    void updateSemanticIndexMappings() throws DuplicateMappingException, OBDAException;
-
     void close();
 
     // get a real (non pool) connection - used for protege plugin
@@ -40,9 +38,7 @@ public interface IQuest extends RepositoryChangedListener {
 
     IQuestConnection getConnection() throws OBDAException;
 
-    void repositoryChanged();
-
-	TBoxReasoner getReasoner();
+	//TBoxReasoner getReasoner();
 
     SemanticIndexURIMap getUriMap();
 
@@ -51,10 +47,6 @@ public interface IQuest extends RepositoryChangedListener {
     Optional<RDBMSSIRepositoryManager> getOptionalSemanticIndexRepository();
 
     DataSourceMetadata getMetaData();
-
-    DatalogProgram getRewriting(DatalogProgram initialProgram) throws OBDAException;
-
-    ExpressionEvaluator getExpressionEvaluator();
 
     ImmutableOntologyVocabulary getVocabulary();
 }

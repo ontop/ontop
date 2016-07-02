@@ -20,6 +20,7 @@ package it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing;
  * #L%
  */
 
+import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
@@ -183,7 +184,8 @@ public class MappingSameAs {
 
     /* add the inverse of the same as present in the mapping */
 
-    public static Collection<OBDAMappingAxiom> addSameAsInverse(Collection<OBDAMappingAxiom> mappings) {
+    public static Collection<OBDAMappingAxiom> addSameAsInverse(Collection<OBDAMappingAxiom> mappings,
+                                                                NativeQueryLanguageComponentFactory nativeQLFactory) {
 
 
         Collection<OBDAMappingAxiom> results = new LinkedList<>();
@@ -206,7 +208,7 @@ public class MappingSameAs {
             }
             String newId = IDGenerator.getNextUniqueID(mapping.getId() + "#");
 //            CQIE newTargetQuery = fac.getCQIE(targetQuery.getHead(), newTargetBody);
-            results.add(fac.getRDBMSMappingAxiom(newId, mapping.getSourceQuery(), newTargetBody));
+            results.add(nativeQLFactory.create(newId, mapping.getSourceQuery(), newTargetBody));
         }
         return results;
     }

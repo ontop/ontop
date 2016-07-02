@@ -94,15 +94,6 @@ public class Quest implements Serializable, IQuest {
 	private ImplicitDBConstraintsReader userConstraints = null;
 
 	/*
- * Index of the function symbols that have multiple types.
- * This index, built from the mappings, is immutable.
- *
- * TODO: not in version 1, check if still relevant.
- *
- */
-	private ImmutableMultimap<Predicate,Integer> multiTypedFunctionSymbolIndex;
-
-	/*
 	 * Whether to apply the user-supplied database constraints given above
 	 * userConstraints must be initialized and non-null whenever this is true
 	 */
@@ -268,14 +259,6 @@ public class Quest implements Serializable, IQuest {
 	@Override
 	public OBDAModel getOBDAModel() {
 		return inputOBDAModel;
-	}
-
-	/**
-	 * Returns a mutable copy of the index of the multi-typed function symbols.
-	 */
-	@Override
-	public Multimap<Predicate,Integer> copyMultiTypedFunctionSymbolIndex() {
-		return ArrayListMultimap.create(multiTypedFunctionSymbolIndex);
 	}
 
 	@Override

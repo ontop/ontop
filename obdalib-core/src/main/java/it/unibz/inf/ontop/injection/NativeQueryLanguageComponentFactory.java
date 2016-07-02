@@ -48,6 +48,4 @@ public interface NativeQueryLanguageComponentFactory {
 
     public OBDAMappingAxiom create(@Assisted("sourceQuery") SourceQuery sourceQuery,
                                    @Assisted("targetQuery") List<Function> targetQuery);
-
-    public IMapping2DatalogConverter create(DataSourceMetadata metadata);
 }

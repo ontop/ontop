@@ -49,6 +49,7 @@ import it.unibz.inf.ontop.model.Predicate.COL_TYPE;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.model.impl.RDBMSourceParameterConstants;
 import it.unibz.inf.ontop.ontology.Assertion;
+import it.unibz.inf.ontop.ontology.impl.OntologyVocabularyImpl;
 import it.unibz.inf.ontop.sql.JDBCConnectionManager;
 
 import java.util.LinkedList;
@@ -77,7 +78,9 @@ public class VirtualABoxMaterializerTest extends TestCase {
         try{
                 OBDAModel model = obdaFactory.createOBDAModel(new HashSet<OBDADataSource>(),
 						new HashMap<URI, ImmutableList<OBDAMappingAxiom>>(),
-						nativeQLFactory.create(new HashMap<String, String>()));
+						nativeQLFactory.create(new HashMap<String, String>()),
+						new OntologyVocabularyImpl()
+						);
 
 		/*
 		 * Setting the database;
@@ -159,7 +162,7 @@ public class VirtualABoxMaterializerTest extends TestCase {
 		body.add(fac.getFunction(hasschool, objectTerm, fac.getVariable("schooluri")));
 		body.add(fac.getFunction(school, fac.getVariable("schooluri")));
 
-		OBDAMappingAxiom map1 = nativeQLFactory.create(fac.getSQLQuery(sql), fac.getCQIE(head, body));
+		OBDAMappingAxiom map1 = nativeQLFactory.create(fac.getSQLQuery(sql), body);
 
         Set<OBDADataSource> dataSources = new HashSet<>();
         Map<URI, ImmutableList<OBDAMappingAxiom>> mappings = new HashMap<>();
@@ -170,7 +173,7 @@ public class VirtualABoxMaterializerTest extends TestCase {
         mappings.put(source.getSourceID(), ImmutableList.of(map1));
 
         PrefixManager prefixManager = nativeQLFactory.create(new HashMap<String, String>());
-		OBDAModel model = obdaFactory.createOBDAModel(dataSources, mappings, prefixManager);
+		OBDAModel model = obdaFactory.createOBDAModel(dataSources, mappings, prefixManager, new OntologyVocabularyImpl());
 
         //TODO: remove this dangerous cast
 		QuestMaterializer materializer = new QuestMaterializer(model, false);
@@ -266,13 +269,14 @@ public class VirtualABoxMaterializerTest extends TestCase {
 		body.add(fac.getFunction(hasschool, objectTerm, fac.getVariable("schooluri")));
 		body.add(fac.getFunction(school, fac.getVariable("schooluri")));
 
-            OBDAMappingAxiom map1 = nativeQLFactory.create(fac.getSQLQuery(sql), fac.getCQIE(head, body));
+            OBDAMappingAxiom map1 = nativeQLFactory.create(fac.getSQLQuery(sql), body);
 
             mappingIndex.put(source.getSourceID(), ImmutableList.of(map1));
             mappingIndex.put(source2.getSourceID(), ImmutableList.of(map1));
 
             PrefixManager prefixManager = nativeQLFactory.create(new HashMap<String, String>());
-            OBDAModel model = obdaFactory.createOBDAModel(dataSources, mappingIndex, prefixManager);
+            OBDAModel model = obdaFactory.createOBDAModel(dataSources, mappingIndex, prefixManager,
+					new OntologyVocabularyImpl());
 
             QuestMaterializer materializer = new QuestMaterializer(model, false);
 
@@ -378,10 +382,10 @@ public class VirtualABoxMaterializerTest extends TestCase {
 		body.add(fac.getFunction(hasschool, objectTerm, fac.getVariable("schooluri")));
 		body.add(fac.getFunction(school, fac.getVariable("schooluri")));
 
-		OBDAMappingAxiom map1 = nativeQLFactory.create(fac.getSQLQuery(sql), fac.getCQIE(head, body));
+		OBDAMappingAxiom map1 = nativeQLFactory.create(fac.getSQLQuery(sql), body);
 
         PrefixManager prefixManager = nativeQLFactory.create(new HashMap<String, String>());
-        OBDAModel model = obdaFactory.createOBDAModel(dataSources, mappingIndex, prefixManager);
+        OBDAModel model = obdaFactory.createOBDAModel(dataSources, mappingIndex, prefixManager, new OntologyVocabularyImpl());
 
 		QuestMaterializer materializer = new QuestMaterializer(model, false);
 
@@ -453,7 +457,7 @@ public class VirtualABoxMaterializerTest extends TestCase {
         dataSources.add(source3);
 
         PrefixManager prefixManager = nativeQLFactory.create(new HashMap<String, String>());
-        OBDAModel model = obdaFactory.createOBDAModel(dataSources, mappingIndex, prefixManager);
+        OBDAModel model = obdaFactory.createOBDAModel(dataSources, mappingIndex, prefixManager, new OntologyVocabularyImpl());
 		QuestMaterializer materializer = new QuestMaterializer(model, false);
 
 		List<Assertion> assertions = materializer.getAssertionList();
@@ -555,12 +559,13 @@ public class VirtualABoxMaterializerTest extends TestCase {
 		body.add(fac.getFunction(hasschool, objectTerm, fac.getVariable("schooluri")));
 		body.add(fac.getFunction(school, fac.getVariable("schooluri")));
 
-		OBDAMappingAxiom map1 = nativeQLFactory.create(fac.getSQLQuery(sql), fac.getCQIE(head, body));
+		OBDAMappingAxiom map1 = nativeQLFactory.create(fac.getSQLQuery(sql), body);
 
         mappingIndex.put(source2.getSourceID(), ImmutableList.of(map1));
 
         PrefixManager prefixManager = nativeQLFactory.create(new HashMap<String, String>());
-        OBDAModel model = obdaFactory.createOBDAModel(dataSources, mappingIndex, prefixManager);
+        OBDAModel model = obdaFactory.createOBDAModel(dataSources, mappingIndex, prefixManager,
+				new OntologyVocabularyImpl());
 
 		QuestMaterializer materializer = new QuestMaterializer(model, false);
 	
@@ -656,18 +661,18 @@ public class VirtualABoxMaterializerTest extends TestCase {
 //		body.add(fac.getFunctionalTerm(school, fac.getVariable("schooluri")));
 
 		
-		OBDAMappingAxiom map1 = nativeQLFactory.create(fac.getSQLQuery(sql1), fac.getCQIE(head, fac.getFunction(person, objectTerm)));
-		OBDAMappingAxiom map2 = nativeQLFactory.create(fac.getSQLQuery(sql2), fac.getCQIE(head, fac.getFunction(fn, objectTerm, firstNameVariable)));
-		OBDAMappingAxiom map3 = nativeQLFactory.create(fac.getSQLQuery(sql3), fac.getCQIE(head, fac.getFunction(ln, objectTerm, lastNameVariable)));
-		OBDAMappingAxiom map4 = nativeQLFactory.create(fac.getSQLQuery(sql4), fac.getCQIE(head, fac.getFunction(age, objectTerm, ageVariable)));
-		OBDAMappingAxiom map5 = nativeQLFactory.create(fac.getSQLQuery(sql5), fac.getCQIE(head, fac.getFunction(hasschool, objectTerm, schoolUriVariable)));
-		OBDAMappingAxiom map6 = nativeQLFactory.create(fac.getSQLQuery(sql6), fac.getCQIE(head, fac.getFunction(school, schoolUriVariable)));
+		OBDAMappingAxiom map1 = nativeQLFactory.create(fac.getSQLQuery(sql1), Arrays.asList(fac.getFunction(person, objectTerm)));
+		OBDAMappingAxiom map2 = nativeQLFactory.create(fac.getSQLQuery(sql2), Arrays.asList(fac.getFunction(fn, objectTerm, firstNameVariable)));
+		OBDAMappingAxiom map3 = nativeQLFactory.create(fac.getSQLQuery(sql3), Arrays.asList(fac.getFunction(ln, objectTerm, lastNameVariable)));
+		OBDAMappingAxiom map4 = nativeQLFactory.create(fac.getSQLQuery(sql4), Arrays.asList(fac.getFunction(age, objectTerm, ageVariable)));
+		OBDAMappingAxiom map5 = nativeQLFactory.create(fac.getSQLQuery(sql5), Arrays.asList(fac.getFunction(hasschool, objectTerm, schoolUriVariable)));
+		OBDAMappingAxiom map6 = nativeQLFactory.create(fac.getSQLQuery(sql6), Arrays.asList(fac.getFunction(school, schoolUriVariable)));
 
         dataSources.add(source);
         mappingIndex.put(source.getSourceID(), ImmutableList.of(map1, map2, map3, map4, map5, map6));
 
         PrefixManager prefixManager = nativeQLFactory.create(new HashMap<String, String>());
-        OBDAModel model = obdaFactory.createOBDAModel(dataSources, mappingIndex, prefixManager);
+        OBDAModel model = obdaFactory.createOBDAModel(dataSources, mappingIndex, prefixManager, new OntologyVocabularyImpl());
 
 		QuestMaterializer materializer = new QuestMaterializer(model, false);
 

@@ -28,18 +28,14 @@ import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.parser.SQLQueryDeepParser;
 import it.unibz.inf.ontop.sql.*;
 import it.unibz.inf.ontop.sql.api.*;
-import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
 import it.unibz.inf.ontop.model.CQIE;
 import it.unibz.inf.ontop.model.Constant;
-import it.unibz.inf.ontop.model.Function;
 import it.unibz.inf.ontop.model.OBDADataFactory;
 import it.unibz.inf.ontop.model.OBDAMappingAxiom;
 import it.unibz.inf.ontop.model.OBDASQLQuery;
 import it.unibz.inf.ontop.model.Predicate;
-import it.unibz.inf.ontop.model.Predicate.COL_TYPE;
 import it.unibz.inf.ontop.model.Term;
 import it.unibz.inf.ontop.model.Variable;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.sql.DBMetadata;
 
 import java.util.*;

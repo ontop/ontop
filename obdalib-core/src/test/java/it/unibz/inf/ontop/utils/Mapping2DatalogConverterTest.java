@@ -49,12 +49,13 @@ public class Mapping2DatalogConverterTest extends TestCase {
 
 	private static OBDADataFactory ofac = OBDADataFactoryImpl.getInstance();
     private final NativeQueryLanguageComponentFactory factory;
+	private final Injector injector;
 
-    private DBMetadata md = RDBMetadataExtractionTools.createDummyMetadata();
+	private DBMetadata md = RDBMetadataExtractionTools.createDummyMetadata();
 	private PrefixManager pm;
 
     public Mapping2DatalogConverterTest() {
-        Injector injector = Guice.createInjector(new OBDACoreModule(new OBDAProperties()));
+        injector = Guice.createInjector(new OBDACoreModule(new OBDAProperties()));
         factory = injector.getInstance(NativeQueryLanguageComponentFactory.class);
     }
 	
@@ -98,7 +99,7 @@ public class Mapping2DatalogConverterTest extends TestCase {
 		ArrayList<OBDAMappingAxiom> mappingList = new ArrayList<OBDAMappingAxiom>();
 		mappingList.add(mappingAxiom);
 
-		IMapping2DatalogConverter mapping2DatalogConverter = factory.create(md);
+		IMapping2DatalogConverter mapping2DatalogConverter = injector.getInstance(IMapping2DatalogConverter.class);
 		List<CQIE> dp = mapping2DatalogConverter.constructDatalogProgram(mappingList, md);
 		
 		assertNotNull(dp);
