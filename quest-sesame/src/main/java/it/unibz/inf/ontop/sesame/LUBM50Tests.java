@@ -188,7 +188,7 @@ public class LUBM50Tests {
 		p.setProperty(OBDAProperties.DB_PASSWORD, password);
 		p.setProperty(QuestPreferences.REWRITE, "true");
 
-        QuestOWLFactory fac = new QuestOWLFactory(new QuestPreferences(p));
+        QuestOWLFactory fac = new QuestOWLFactory();
 		QuestOWLConfiguration config = QuestOWLConfiguration.builder()
 				.properties(p)
 				.build();

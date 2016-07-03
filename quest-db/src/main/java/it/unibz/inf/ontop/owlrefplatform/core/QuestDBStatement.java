@@ -50,7 +50,7 @@ import org.slf4j.LoggerFactory;
  */
 // DISABLED TEMPORARILY FOR MERGING PURPOSES (NOT BREAKING CLIENTS WITH this ugly name IQquestOWLStatement)
 //public class QuestDBStatement implements IQuestDBStatement {
-public class QuestDBStatement implements OBDAStatement {
+public class QuestDBStatement implements IQuestDBStatement {
 
 	private final IQuestStatement st;
 	private final NativeQueryLanguageComponentFactory nativeQLFactory;
@@ -202,6 +202,16 @@ public class QuestDBStatement implements OBDAStatement {
 		st.setQueryTimeout(seconds);
 	}
 
+	@Override
+	public String getRewriting(String sparqlQuery) throws OBDAException {
+		try {
+		QuestQueryProcessor queryProcessor = st.getQuestInstance().getEngine();
+		ParsedQuery sparqlTree = queryProcessor.getParsedQuery(sparqlQuery);
+		return queryProcessor.getRewriting(sparqlTree);
+		} catch (MalformedQueryException e) {
+			throw new OBDAException(e);
+		}
+	}
 
 	/**
 	 * Ontop is not SQL-specific anymore.
@@ -214,6 +224,7 @@ public class QuestDBStatement implements OBDAStatement {
 		return ((SQLExecutableQuery) executableQuery).getSQL();
 	}
 
+	@Override
 	public ExecutableQuery getExecutableQuery(String sparqlQuery) throws OBDAException {
 		try {
 			QuestQueryProcessor queryProcessor = st.getQuestInstance().getEngine();

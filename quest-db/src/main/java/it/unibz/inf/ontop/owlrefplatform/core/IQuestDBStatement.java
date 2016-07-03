@@ -23,7 +23,7 @@ public interface IQuestDBStatement extends OBDAStatement {
     /**
      * Gets the target query.
      */
-    ExecutableQuery getTargetQuery(String query) throws OBDAException;
+    ExecutableQuery getExecutableQuery(String query) throws OBDAException;
 
     /**
      * TODO: explain

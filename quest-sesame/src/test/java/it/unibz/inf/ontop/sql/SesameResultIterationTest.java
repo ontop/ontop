@@ -2,14 +2,19 @@ package it.unibz.inf.ontop.sql;
 
 import static org.junit.Assert.assertTrue;
 
+import it.unibz.inf.ontop.injection.OBDAProperties;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
 import it.unibz.inf.ontop.r2rml.R2RMLManager;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.net.URL;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.Properties;
 import java.util.Scanner;
 
 import it.unibz.inf.ontop.sesame.RepositoryConnection;
@@ -19,10 +24,15 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.openrdf.model.Model;
+import org.openrdf.model.impl.LinkedHashModel;
 import org.openrdf.query.Query;
 import org.openrdf.query.QueryLanguage;
 import org.openrdf.query.TupleQuery;
 import org.openrdf.query.TupleQueryResult;
+import org.openrdf.rio.RDFFormat;
+import org.openrdf.rio.RDFParser;
+import org.openrdf.rio.Rio;
+import org.openrdf.rio.helpers.StatementCollector;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
@@ -67,12 +77,6 @@ public class SesameResultIterationTest {
 
     @Before
     public void init() throws Exception {
-
-        QuestPreferences preference;
-        OWLOntology ontology;
-        Model model;
-
-
         sqlConnection = DriverManager.getConnection(jdbcUrl, "sa", "");
         java.sql.Statement s = sqlConnection.createStatement();
 
@@ -93,20 +97,27 @@ public class SesameResultIterationTest {
         s.close();
 
         OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-        ontology = manager.loadOntologyFromOntologyDocument(new File(owlfile));
+        OWLOntology ontology = manager.loadOntologyFromOntologyDocument(new File(owlfile));
 
-        R2RMLManager rmanager = new R2RMLManager(r2rmlfile);
-        model = rmanager.getModel();
+        /**
+         * Parses the R2RML turtle file
+         */
+        Model model = new LinkedHashModel();
+        RDFParser parser = Rio.createParser(RDFFormat.TURTLE);
+        InputStream in = new FileInputStream(r2rmlfile);
+        URL documentUrl = new URL("file://" + r2rmlfile);
+        StatementCollector collector = new StatementCollector(model);
+        parser.setRDFHandler(collector);
+        parser.parse(in, documentUrl.toString());
 
-        preference = new QuestPreferences();
-        preference.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-        preference.setCurrentValueOf(QuestPreferences.DBNAME, "countries_iteration_test");
-        preference.setCurrentValueOf(QuestPreferences.JDBC_URL, jdbcUrl);
-        preference.setCurrentValueOf(QuestPreferences.DBUSER, "sa");
-        preference.setCurrentValueOf(QuestPreferences.DBPASSWORD, "");
-        preference.setCurrentValueOf(QuestPreferences.JDBC_DRIVER, "org.h2.Driver");
+        Properties p = new Properties();
+        p.put(OBDAProperties.DB_NAME, "countries_iteration_test");
+        p.put(OBDAProperties.JDBC_URL, jdbcUrl);
+        p.put(OBDAProperties.DB_USER, "sa");
+        p.put(OBDAProperties.DB_PASSWORD, "");
+        p.put(OBDAProperties.JDBC_DRIVER, "org.h2.Driver");
 
-        SesameVirtualRepo repo = new SesameVirtualRepo("", ontology, model, preference);
+        SesameVirtualRepo repo = new SesameVirtualRepo("", ontology, model, new QuestPreferences(p));
         repo.initialize();
         /*
 		 * Prepare the data connection for querying.
