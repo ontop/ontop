@@ -98,9 +98,9 @@ public class TMappingConcurrencyErrorFixTest{
 		p.setProperty(QuestPreferences.OBTAIN_FULL_METADATA, QuestConstants.FALSE);
 		// Creating a new instance of the reasoner
         QuestOWLFactory factory = new QuestOWLFactory();
-        QuestOWLConfiguration config = QuestOWLConfiguration.builder()
+        QuestOWLConfiguration config = new QuestOWLConfiguration(QuestPreferences.builder()
 				.nativeOntopMappingFile(obdaFileName)
-				.properties(p).build();
+				.properties(p).build());
         reasoner = factory.createReasoner(ontology, config);
 
 		// Now we are ready for querying

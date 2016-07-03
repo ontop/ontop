@@ -156,9 +156,9 @@ public class ComplexWhereMappingTest {
 		Properties p = new Properties();
 		p.put(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
 		p.put(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-		QuestOWLConfiguration config = QuestOWLConfiguration.builder()
+		QuestOWLConfiguration config = new QuestOWLConfiguration(QuestPreferences.builder()
 				.nativeOntopMappingFile(obdafile)
-				.properties(p).build();
+				.properties(p).build());
 
 		runTests(config);
 	}
@@ -170,8 +170,8 @@ public class ComplexWhereMappingTest {
 		p.put(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
 		p.put(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
 		p.put(QuestPreferences.OBTAIN_FROM_MAPPINGS, "true");
-		QuestOWLConfiguration config = QuestOWLConfiguration.builder()
-				.properties(p).build();
+		QuestOWLConfiguration config = new QuestOWLConfiguration(QuestPreferences.builder()
+				.properties(p).build());
 
 		runTests(config);
 	}

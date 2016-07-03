@@ -114,9 +114,9 @@ public class SemanticIndexMetadataTest  extends TestCase {
 			Ontology ont = ofac.createOntology(vb);
 
 			QuestOWLFactory factory = new QuestOWLFactory();
-			QuestOWLConfiguration config = QuestOWLConfiguration.builder()
+			QuestOWLConfiguration config = new QuestOWLConfiguration(QuestPreferences.builder()
 					.properties(p)
-					.build();
+					.build());
 			QuestOWL reasoner = factory.createReasoner(ontology, config);
 			
 			RDBMSSIRepositoryManager si = reasoner.getQuestInstance().getOptionalSemanticIndexRepository().get();

@@ -127,9 +127,9 @@ public class TMappingDisablingTest extends TestCase {
 		 * Create the instance of Quest OWL reasoner.
 		 */
 		QuestOWLFactory factory = new QuestOWLFactory();
-		QuestOWLConfiguration configuration = QuestOWLConfiguration.builder()
+		QuestOWLConfiguration configuration = new QuestOWLConfiguration(QuestPreferences.builder()
 				.nativeOntopMappingFile(obdafile)
-				.build();
+				.build());
 		
 		QuestOWL reasoner = factory.createReasoner(ontology, configuration);
 		
@@ -191,10 +191,10 @@ public class TMappingDisablingTest extends TestCase {
 		 * Create the instance of Quest OWL reasoner.
 		 */
 		QuestOWLFactory factory = new QuestOWLFactory();
-		QuestOWLConfiguration configuration = QuestOWLConfiguration.builder()
+		QuestOWLConfiguration configuration = new QuestOWLConfiguration(QuestPreferences.builder()
 				.nativeOntopMappingFile(obdafile)
 				.properties(p)
-				.build();
+				.build());
 		QuestOWL reasoner = factory.createReasoner(ontology, configuration);
 		
 		/*

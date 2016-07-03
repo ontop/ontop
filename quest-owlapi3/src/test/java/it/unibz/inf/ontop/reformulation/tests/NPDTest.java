@@ -94,9 +94,9 @@ public class NPDTest {
 
 		setupDatabase();
 		QuestOWLFactory factory = new QuestOWLFactory();
-        QuestOWLConfiguration config = QuestOWLConfiguration.builder()
+        QuestOWLConfiguration config = new QuestOWLConfiguration(QuestPreferences.builder()
 				.nativeOntopMappingFile(path + "npd.obda")
-				.properties(pref).build();
+				.properties(pref).build());
         QuestOWL reasoner = factory.createReasoner(owlOnto, config);
 		
 		//QuestOWL reasoner = factory.createReasoner(owlOnto, new SimpleConfiguration());

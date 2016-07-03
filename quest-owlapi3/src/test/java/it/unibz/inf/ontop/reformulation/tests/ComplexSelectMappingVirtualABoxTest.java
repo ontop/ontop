@@ -135,8 +135,8 @@ public class ComplexSelectMappingVirtualABoxTest  {
 	private String runTests(Properties p) throws Exception {
 
         QuestOWLFactory factory = new QuestOWLFactory();
-        QuestOWLConfiguration config = QuestOWLConfiguration.builder()
-				.nativeOntopMappingFile(obdafile).properties(p).build();
+        QuestOWLConfiguration config = new QuestOWLConfiguration(QuestPreferences.builder()
+				.nativeOntopMappingFile(obdafile).properties(p).build());
         QuestOWL reasoner = factory.createReasoner(ontology, config);
 
 

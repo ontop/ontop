@@ -92,9 +92,9 @@ public class InconsistencyCheckingTest extends TestCase{
 		Properties p = new Properties();
 		p.setProperty(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
 		p.setProperty(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-		QuestOWLConfiguration configuration = QuestOWLConfiguration.builder()
+		QuestOWLConfiguration configuration = new QuestOWLConfiguration(QuestPreferences.builder()
 				.properties(p)
-				.build();
+				.build());
 
 		QuestOWLFactory questOWLFactory = new QuestOWLFactory();
 		reasoner = questOWLFactory.createReasoner(ontology, configuration);

@@ -45,8 +45,9 @@ public class InteractiveExample {
 //		factory.setExcludeFromTMappingsPredicates(tMapParser.parsePredicates());
 
         QuestOWLFactory factory = new QuestOWLFactory();
-        QuestOWLConfiguration config = QuestOWLConfiguration.builder()
-				.nativeOntopMappingFile(obdafile).build();
+        QuestOWLConfiguration config = new QuestOWLConfiguration(
+				QuestPreferences.builder()
+				.nativeOntopMappingFile(obdafile).build());
         QuestOWL reasoner = factory.createReasoner(ontology, config);
 
 

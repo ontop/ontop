@@ -13,6 +13,8 @@ import java.util.Properties;
  * Focuses on implementation class declaration
  * for the core module of Ontop.
  *
+ * Validation is not done at construction time but on demand.
+ *
  * Immutable!
  *
  */
@@ -71,7 +73,6 @@ public class OBDAProperties {
      */
     public OBDAProperties() throws InvalidOBDAConfigurationException {
         this(new Properties());
-        checkProperties(this);
     }
 
     /**
@@ -91,7 +92,13 @@ public class OBDAProperties {
          * Overloads the default properties.
          */
         properties.putAll(userProperties);
-        checkProperties(this);
+    }
+
+    /**
+     * TODO: complete
+     */
+    public void validate() throws InvalidOBDAConfigurationException {
+
     }
 
     protected static Properties loadDefaultPropertiesFromFile(Class localClass, String fileName) {
@@ -157,11 +164,5 @@ public class OBDAProperties {
         Properties p = new Properties();
         p.putAll(properties);
         return p;
-    }
-
-    /**
-     * TODO: complete
-     */
-    private static void checkProperties(OBDAProperties properties) throws InvalidOBDAConfigurationException {
     }
 }

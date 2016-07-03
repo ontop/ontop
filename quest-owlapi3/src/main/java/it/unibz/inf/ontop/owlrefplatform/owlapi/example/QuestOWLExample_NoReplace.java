@@ -58,9 +58,10 @@ public class QuestOWLExample_NoReplace {
          * Create the instance of Quest OWL reasoner.
 		 */
         QuestOWLFactory factory = new QuestOWLFactory();
-        QuestOWLConfiguration config = QuestOWLConfiguration.builder()
+        QuestPreferences preferences = QuestPreferences.builder()
                 .nativeOntopMappingFile(obdafile)
                 .build();
+        QuestOWLConfiguration config = new QuestOWLConfiguration(preferences);
         QuestOWL reasoner = factory.createReasoner(ontology, config);
 
 		/*

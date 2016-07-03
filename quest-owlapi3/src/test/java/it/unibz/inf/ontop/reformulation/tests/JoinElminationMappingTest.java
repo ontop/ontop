@@ -104,15 +104,17 @@ public class JoinElminationMappingTest extends TestCase {
 		if (p.getProperty(QuestPreferences.ABOX_MODE).equals(QuestConstants.VIRTUAL) ||
 				Boolean.getBoolean(p.getProperty(QuestPreferences.OBTAIN_FROM_MAPPINGS))) {
 
-			configuration = QuestOWLConfiguration.builder()
-					.nativeOntopMappingFile(obdafile)
-					.properties(p)
-					.build();
+			configuration = new QuestOWLConfiguration(
+					QuestPreferences.builder()
+							.nativeOntopMappingFile(obdafile)
+							.properties(p)
+							.build());
 		}
 		else {
-			configuration = QuestOWLConfiguration.builder()
-					.properties(p)
-					.build();
+			configuration = new QuestOWLConfiguration(
+					QuestPreferences.builder()
+							.properties(p)
+							.build());
 		}
 
 		QuestOWL reasoner = factory.createReasoner(ontology, configuration);

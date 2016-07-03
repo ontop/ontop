@@ -66,8 +66,8 @@ public class ClassicABoxAssertionTestPositiveNoRangeTest extends TestCase {
 //		reasoner = (QuestOWL) fac.createReasoner(ontology);
 //		reasoner.flush();
         QuestOWLFactory factory = new QuestOWLFactory();
-        QuestOWLConfiguration config = QuestOWLConfiguration.builder()
-				.properties(p).build();
+        QuestOWLConfiguration config = new QuestOWLConfiguration(QuestPreferences.builder()
+				.properties(p).build());
         QuestOWL reasoner = factory.createReasoner(ontology, config);
 
 

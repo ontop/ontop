@@ -134,9 +134,9 @@ public class BindTestWithFunctions {
         // Creating a new instance of the reasoner
 
         QuestOWLFactory factory = new QuestOWLFactory();
-        QuestOWLConfiguration config = QuestOWLConfiguration.builder()
+        QuestOWLConfiguration config = new QuestOWLConfiguration(QuestPreferences.builder()
                 .nativeOntopMappingFile(obdafile)
-                .build();
+                .build());
         QuestOWL reasoner = factory.createReasoner(ontology, config);
 
         // Now we are ready for querying
@@ -797,9 +797,9 @@ public class BindTestWithFunctions {
     private void checkReturnedValues(String query, List<String> expectedValues) throws Exception {
 
         QuestOWLFactory factory = new QuestOWLFactory();
-        QuestOWLConfiguration config = QuestOWLConfiguration.builder()
+        QuestOWLConfiguration config = new QuestOWLConfiguration(QuestPreferences.builder()
                 .nativeOntopMappingFile(obdafile)
-                .build();
+                .build());
         QuestOWL reasoner = factory.createReasoner(ontology, config);
 
 

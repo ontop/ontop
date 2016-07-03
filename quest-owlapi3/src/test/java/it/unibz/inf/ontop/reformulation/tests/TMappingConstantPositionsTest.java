@@ -115,10 +115,10 @@ public class TMappingConstantPositionsTest extends TestCase {
 
 		// Creating a new instance of the reasoner
 		QuestOWLFactory factory = new QuestOWLFactory();
-        QuestOWLConfiguration config = QuestOWLConfiguration.builder()
+        QuestOWLConfiguration config = new QuestOWLConfiguration(QuestPreferences.builder()
 				.nativeOntopMappingFile(obdafile)
 				.properties(p)
-				.build();
+				.build());
         QuestOWL reasoner = factory.createReasoner(ontology, config);
 
 		//System.out.println(reasoner.getQuestInstance().getUnfolder().getRules());

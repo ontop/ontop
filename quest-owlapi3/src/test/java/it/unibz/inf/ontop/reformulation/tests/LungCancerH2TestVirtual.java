@@ -31,6 +31,7 @@ import java.sql.Statement;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
 import junit.framework.TestCase;
 
 import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
@@ -151,9 +152,9 @@ public class LungCancerH2TestVirtual extends TestCase {
 	private void runTests() throws Exception {
 
         QuestOWLFactory factory = new QuestOWLFactory();
-        QuestOWLConfiguration config = QuestOWLConfiguration.builder()
+        QuestOWLConfiguration config = new QuestOWLConfiguration(QuestPreferences.builder()
 				.nativeOntopMappingFile(obdafile)
-				.build();
+				.build());
         QuestOWL reasoner = factory.createReasoner(ontology, config);
 
 		// Now we are ready for querying

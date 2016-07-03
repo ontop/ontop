@@ -244,8 +244,8 @@ public class TreeWitnessRewriterH2Test{
 
 		// Creating a new instance of the reasoner
 		QuestOWLFactory factory = new QuestOWLFactory();
-        QuestOWLConfiguration config = QuestOWLConfiguration.builder().properties(p)
-				.nativeOntopMappingFile(obdafile).build();
+        QuestOWLConfiguration config = new QuestOWLConfiguration(QuestPreferences.builder().properties(p)
+				.nativeOntopMappingFile(obdafile).build());
         QuestOWL reasoner = factory.createReasoner(ontology, config);
 
 		// Now we are ready for querying

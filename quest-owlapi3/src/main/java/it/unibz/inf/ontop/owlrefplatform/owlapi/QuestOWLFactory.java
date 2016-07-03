@@ -69,7 +69,7 @@ public class QuestOWLFactory implements OWLReasonerFactory {
     public OWLReasoner createReasoner(OWLOntology ontology) {
         Properties p = new Properties();
         p.setProperty(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
-        return createReasoner(ontology, QuestOWLConfiguration.builder().properties(p).build());
+        return createReasoner(ontology, new QuestOWLConfiguration(QuestPreferences.builder().properties(p).build()));
     }
 
     @Nonnull

@@ -22,6 +22,7 @@ package it.unibz.inf.ontop.reformulation.tests;
 
 import it.unibz.inf.ontop.exception.InvalidMappingException;
 import it.unibz.inf.ontop.exception.InvalidPredicateDeclarationException;
+import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWL;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLFactory;
@@ -108,9 +109,9 @@ public class OBDA2DatalogTest extends TestCase {
 		
 		// Creating a new instance of the reasoner
 		QuestOWLFactory factory = new QuestOWLFactory();
-		QuestOWLConfiguration configuration = QuestOWLConfiguration.builder()
+		QuestOWLConfiguration configuration = new QuestOWLConfiguration(QuestPreferences.builder()
 				.nativeOntopMappingFile(obdaFileName)
-				.build();
+				.build());
 
 		QuestOWL reasoner = factory.createReasoner(ontology, configuration);
 

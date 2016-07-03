@@ -28,5 +28,4 @@ public class R2RMLQuestPreferences extends QuestPreferences {
         properties.putAll(userPreferences);
         return properties;
     }
-
 }

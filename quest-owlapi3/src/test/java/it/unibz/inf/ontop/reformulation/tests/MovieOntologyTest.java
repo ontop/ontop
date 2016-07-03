@@ -63,8 +63,8 @@ public class MovieOntologyTest extends TestCase {
 		 * Create the instance of Quest OWL reasoner.
 		 */
         QuestOWLFactory factory = new QuestOWLFactory();
-        QuestOWLConfiguration config = QuestOWLConfiguration.builder()
-				.nativeOntopMappingFile(obdafile).properties(p).build();
+        QuestOWLConfiguration config = new QuestOWLConfiguration(QuestPreferences.builder()
+				.nativeOntopMappingFile(obdafile).properties(p).build());
         QuestOWL reasoner = factory.createReasoner(ontology, config);
 
 				

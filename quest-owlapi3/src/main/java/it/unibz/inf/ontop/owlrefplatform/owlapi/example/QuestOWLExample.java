@@ -22,6 +22,7 @@ package it.unibz.inf.ontop.owlrefplatform.owlapi.example;
 
 
 import it.unibz.inf.ontop.model.OBDAModel;
+import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.io.ToStringRenderer;
@@ -56,9 +57,9 @@ public class QuestOWLExample {
          * Create the instance of Quest OWL reasoner.
 		 */
         QuestOWLFactory factory = new QuestOWLFactory();
-        QuestOWLConfiguration config = QuestOWLConfiguration.builder()
+        QuestOWLConfiguration config = new QuestOWLConfiguration(QuestPreferences.builder()
                 .nativeOntopMappingFile(obdafile)
-                .build();
+                .build());
         QuestOWL reasoner = factory.createReasoner(ontology, config);
 
 		/*

@@ -127,8 +127,8 @@ public class MetaMappingVirtualABoxTest {
 	private void runTests(Properties p) throws Exception {
 
         QuestOWLFactory factory = new QuestOWLFactory();
-        QuestOWLConfiguration config = QuestOWLConfiguration.builder()
-				.nativeOntopMappingFile(obdaFileName).properties(p).build();
+        QuestOWLConfiguration config = new QuestOWLConfiguration(QuestPreferences.builder()
+				.nativeOntopMappingFile(obdaFileName).properties(p).build());
 
 
 		String query1 = "PREFIX : <http://it.unibz.inf/obda/test/simple#> SELECT * WHERE { ?x a :A_1 }";

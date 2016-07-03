@@ -130,9 +130,9 @@ public class MetaMappingVirtualABoxMissingColumnTest {
 	private void runTests() throws Exception {
 
         QuestOWLFactory factory = new QuestOWLFactory();
-        QuestOWLConfiguration config = QuestOWLConfiguration.builder()
+        QuestOWLConfiguration config = new QuestOWLConfiguration(QuestPreferences.builder()
 				.nativeOntopMappingFile(obdafile)
-				.build();
+				.build());
        
 		String query1 = "PREFIX : <http://it.unibz.inf/obda/test/simple#> SELECT * WHERE { ?x a :A_1 }";
         try (QuestOWL reasoner = factory.createReasoner(ontology, config);

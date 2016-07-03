@@ -245,8 +245,8 @@ public class NPDUndolferTest extends TestCase {
 		pref.put(QuestPreferences.REWRITE, QuestConstants.TRUE);
 
         QuestOWLFactory factory = new QuestOWLFactory();
-        QuestOWLConfiguration config = QuestOWLConfiguration.builder()
-                .nativeOntopMappingFile(obdafile).properties(pref).build();
+        QuestOWLConfiguration config = new QuestOWLConfiguration(QuestPreferences.builder()
+                .nativeOntopMappingFile(obdafile).properties(pref).build());
         QuestOWL reasoner = factory.createReasoner(ontology, config);
 
 		QuestOWLConnection qconn =  reasoner.getConnection();
@@ -283,8 +283,8 @@ public class NPDUndolferTest extends TestCase {
         //pref.put(QuestPreferences.REWRITE, QuestConstants.TRUE);
 
         QuestOWLFactory factory = new QuestOWLFactory();
-        QuestOWLConfiguration config = QuestOWLConfiguration.builder()
-                .nativeOntopMappingFile(obdafile).properties(pref).build();
+        QuestOWLConfiguration config = new QuestOWLConfiguration(QuestPreferences.builder()
+                .nativeOntopMappingFile(obdafile).properties(pref).build());
         QuestOWL reasoner = factory.createReasoner(ontology, config);
 
         QuestOWLConnection qconn =  reasoner.getConnection();
@@ -316,8 +316,8 @@ public class NPDUndolferTest extends TestCase {
         pref.put(QuestPreferences.REFORMULATION_TECHNIQUE, QuestConstants.TW);
         pref.put(QuestPreferences.REWRITE, QuestConstants.TRUE);
 
-        QuestOWLConfiguration config = QuestOWLConfiguration.builder()
-                .properties(pref).build();
+        QuestOWLConfiguration config = new QuestOWLConfiguration(QuestPreferences.builder()
+                .properties(pref).build());
 
         QuestOWL quest = fac.createReasoner(ontology, config);
         QuestOWLConnection qconn = quest.getConnection();

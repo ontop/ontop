@@ -20,6 +20,7 @@ package it.unibz.inf.ontop.reformulation.tests;
  * #L%
  */
 
+import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import org.junit.*;
 import org.semanticweb.owlapi.apibinding.OWLManager;
@@ -71,7 +72,7 @@ public class OWLConstructDescribeTest{
 //			obdaModel.addSource(source);
 
 		    QuestOWLFactory factory = new QuestOWLFactory();
-		    QuestOWLConfiguration config = QuestOWLConfiguration.builder().build();
+		    QuestOWLConfiguration config = new QuestOWLConfiguration(QuestPreferences.builder().build());
 		    reasoner = factory.createReasoner(ontology, config);
 			conn = reasoner.getConnection();
 			st = conn.createStatement();

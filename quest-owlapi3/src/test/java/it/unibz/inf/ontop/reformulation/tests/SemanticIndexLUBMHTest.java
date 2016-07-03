@@ -61,8 +61,8 @@ public class SemanticIndexLUBMHTest extends TestCase {
         p.setProperty(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
 
 		QuestOWLFactory factory = new QuestOWLFactory();
-        QuestOWLConfiguration config = QuestOWLConfiguration.builder()
-				.properties(p).build();
+        QuestOWLConfiguration config = new QuestOWLConfiguration(QuestPreferences.builder()
+				.properties(p).build());
         QuestOWL quest = factory.createReasoner(ontology, config);
 
 		QuestOWLConnection qconn =  quest.getConnection();

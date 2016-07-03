@@ -29,7 +29,11 @@ import java.util.Properties;
 
 import it.unibz.inf.ontop.injection.OBDAProperties;
 import it.unibz.inf.ontop.model.OBDAModel;
+import it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing.TMappingExclusionConfig;
+import it.unibz.inf.ontop.sql.ImplicitDBConstraintsReader;
 import org.openrdf.model.Model;
+
+import javax.annotation.Nonnull;
 
 /**
  * A class that represents the preferences overwritten by the user.
@@ -116,6 +120,30 @@ public class QuestPreferences extends OBDAProperties {
 		super(loadQuestPreferences(userPreferences));
 	}
 
+	/**
+	 * TODO: complete
+	 */
+	@Override
+	public void validate() throws InvalidOBDAConfigurationException {
+		boolean areMappingsDefined =
+				contains(OBDAProperties.MAPPING_FILE_OBJECT)
+						|| contains(OBDAProperties.MAPPING_FILE_READER)
+						|| contains(OBDAProperties.MAPPING_FILE_MODEL)
+						|| contains(OBDAProperties.MAPPING_FILE_PATH)
+						|| contains(OBDAProperties.PREDEFINED_OBDA_MODEL);
+		if ((!areMappingsDefined) && get(QuestPreferences.ABOX_MODE).equals(QuestConstants.VIRTUAL)) {
+			throw new InvalidOBDAConfigurationException("mappings are not specified in virtual mode", this);
+		} else if (areMappingsDefined && get(QuestPreferences.ABOX_MODE).equals(QuestConstants.CLASSIC)) {
+			throw new InvalidOBDAConfigurationException("mappings are specified in classic mode", this);
+		}
+
+		/**
+		 * TODO: complete
+		 */
+
+		// TODO: check the types of some Object properties.
+	}
+
 	private static Properties loadQuestPreferences(Properties userPreferences) {
 		Properties properties = loadDefaultPropertiesFromFile(QuestPreferences.class, DEFAULT_QUEST_PROPERTIES_FILE);
 		properties.putAll(userPreferences);
@@ -168,27 +196,183 @@ public class QuestPreferences extends OBDAProperties {
 				.map(o -> (OBDAModel) o);
 	}
 
-	private static void checkPreferences(QuestPreferences preferences) {
-		boolean areMappingsDefined =
-				preferences.contains(OBDAProperties.MAPPING_FILE_OBJECT)
-						|| preferences.contains(OBDAProperties.MAPPING_FILE_READER)
-						|| preferences.contains(OBDAProperties.MAPPING_FILE_MODEL)
-						|| preferences.contains(OBDAProperties.MAPPING_FILE_PATH)
-						|| preferences.contains(OBDAProperties.PREDEFINED_OBDA_MODEL);
-		if ((!areMappingsDefined) && preferences.get(QuestPreferences.ABOX_MODE).equals(QuestConstants.VIRTUAL)) {
-			throw new InvalidOBDAConfigurationException("mappings are not specified in virtual mode", preferences);
-		} else if (areMappingsDefined && preferences.get(QuestPreferences.ABOX_MODE).equals(QuestConstants.CLASSIC)) {
-			throw new InvalidOBDAConfigurationException("mappings are specified in classic mode", preferences);
+	public boolean isInVirtualMode() {
+		return getProperty(ABOX_MODE).equals(QuestConstants.VIRTUAL);
+	}
+
+	public static Builder builder() {
+		return new Builder();
+	}
+
+	public static class Builder {
+		private Optional<TMappingExclusionConfig> excludeFromTMappings = Optional.empty();
+		private Optional<ImplicitDBConstraintsReader> userConstraints = Optional.empty();
+		private Optional<OBDAModel> obdaModel = Optional.empty();
+		private Optional<File> mappingFile = Optional.empty();
+		private Optional<Reader> mappingReader = Optional.empty();
+		private Optional<Model> mappingModel = Optional.empty();
+		private Optional<Boolean> queryingAnnotationsInOntology = Optional.empty();
+		private Optional<Boolean> sameAsMappings = Optional.empty();
+		private Optional<Properties> properties = Optional.empty();
+
+		private boolean useR2rml = false;
+		private boolean areMappingsDefined = false;
+
+		public Builder() {
+		}
+
+		public Builder tMappingExclusionConfig(@Nonnull TMappingExclusionConfig config) {
+			this.excludeFromTMappings = Optional.of(config);
+			return this;
+		}
+
+		public Builder dbConstraintsReader(@Nonnull ImplicitDBConstraintsReader constraints) {
+			this.userConstraints = Optional.of(constraints);
+			return this;
 		}
 
 		/**
-		 * TODO: complete
+		 * Not for end-users! Please consider giving a mapping file or a mapping reader.
 		 */
+		public Builder obdaModel(@Nonnull OBDAModel obdaModel) {
+			if (areMappingsDefined) {
+				throw new IllegalArgumentException("OBDA model or mappings already defined!");
+			}
+			areMappingsDefined = true;
+			this.obdaModel = Optional.of(obdaModel);
+			return this;
+		}
 
-		// TODO: check the types of some Object properties.
-	}
+		public Builder nativeOntopMappingFile(@Nonnull File mappingFile) {
+			if (areMappingsDefined) {
+				throw new IllegalArgumentException("OBDA model or mappings already defined!");
+			}
+			areMappingsDefined = true;
+			this.mappingFile = Optional.of(mappingFile);
+			return this;
+		}
 
-	public boolean isInVirtualMode() {
-		return getProperty(ABOX_MODE).equals(QuestConstants.VIRTUAL);
+		public Builder nativeOntopMappingFile(@Nonnull String mappingFilename) {
+			if (areMappingsDefined) {
+				throw new IllegalArgumentException("OBDA model or mappings already defined!");
+			}
+			areMappingsDefined = true;
+			this.mappingFile = Optional.of(new File(mappingFilename));
+			return this;
+		}
+
+		public Builder nativeOntopMappingReader(@Nonnull Reader mappingReader) {
+			if (areMappingsDefined) {
+				throw new IllegalArgumentException("OBDA model or mappings already defined!");
+			}
+			areMappingsDefined = true;
+			this.mappingReader = Optional.of(mappingReader);
+			return this;
+		}
+
+		public Builder r2rmlMappingFile(@Nonnull File mappingFile) {
+			if (areMappingsDefined) {
+				throw new IllegalArgumentException("OBDA model or mappings already defined!");
+			}
+			areMappingsDefined = true;
+			useR2rml = true;
+			this.mappingFile = Optional.of(mappingFile);
+			return this;
+		}
+
+		public Builder r2rmlMappingFile(@Nonnull String mappingFilename) {
+			if (areMappingsDefined) {
+				throw new IllegalArgumentException("OBDA model or mappings already defined!");
+			}
+			areMappingsDefined = true;
+			useR2rml = true;
+			this.mappingFile = Optional.of(new File(mappingFilename));
+			return this;
+		}
+
+		public Builder r2rmlMappingReader(@Nonnull Reader mappingReader) {
+			if (areMappingsDefined) {
+				throw new IllegalArgumentException("OBDA model or mappings already defined!");
+			}
+			areMappingsDefined = true;
+			useR2rml = true;
+			this.mappingReader = Optional.of(mappingReader);
+			return this;
+		}
+
+		public Builder r2rmlMappingModel(@Nonnull Model mappingModel) {
+			if (areMappingsDefined) {
+				throw new IllegalArgumentException("OBDA model or mappings already defined!");
+			}
+			areMappingsDefined = true;
+			useR2rml = true;
+			this.mappingModel = Optional.of(mappingModel);
+			return this;
+		}
+
+		public Builder queryingAnnotationsInOntology(boolean queryingAnnotationsInOntology) {
+			this.queryingAnnotationsInOntology = Optional.of(queryingAnnotationsInOntology);
+			return this;
+		}
+
+		public Builder sameAsMappings(boolean sameAsMappings) {
+			this.sameAsMappings = Optional.of(sameAsMappings);
+			return this;
+		}
+
+		/**
+		 * Have precedence over other parameters
+		 */
+		public Builder properties(@Nonnull Properties properties) {
+			this.properties = Optional.of(properties);
+			return this;
+		}
+
+		public final QuestPreferences build() throws InvalidOBDAConfigurationException {
+			Properties p = generateIndirectProperties();
+
+			/**
+			 * User-provided properties have the highest precedence.
+			 */
+			properties.ifPresent(p::putAll);
+
+			return createPreferences(p);
+		}
+
+		/**
+		 * TODO: explain
+		 * TODO: find a better term
+		 *
+		 * Can be overloaded (for extensions)
+         */
+		protected Properties generateIndirectProperties() {
+			Properties p = new Properties();
+			userConstraints.ifPresent(constraints -> p.put(OBDAProperties.DB_CONSTRAINTS, constraints));
+			excludeFromTMappings.ifPresent(config -> p.put(QuestPreferences.TMAPPING_EXCLUSION, config));
+
+			mappingFile.ifPresent(f -> p.put(OBDAProperties.MAPPING_FILE_OBJECT, f));
+			mappingReader.ifPresent(r -> p.put(OBDAProperties.MAPPING_FILE_READER, r));
+			mappingModel.ifPresent(m -> p.put(OBDAProperties.MAPPING_FILE_MODEL, m));
+			obdaModel.ifPresent(m -> p.put(OBDAProperties.PREDEFINED_OBDA_MODEL, m));
+
+			// By default, virtual A-box mode
+			if (!areMappingsDefined) {
+				p.put(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
+			}
+
+			queryingAnnotationsInOntology.ifPresent(b -> p.put(QuestPreferences.ANNOTATIONS_IN_ONTO, b));
+			sameAsMappings.ifPresent(b -> p.put(QuestPreferences.SAME_AS, b));
+
+			return p;
+		}
+
+		/**
+		 * Can be overloaded by specialized classes (extensions).
+		 */
+		protected QuestPreferences createPreferences(Properties p) {
+			return useR2rml
+					? new R2RMLQuestPreferences(p)
+					: new QuestPreferences(p);
+		}
 	}
 }

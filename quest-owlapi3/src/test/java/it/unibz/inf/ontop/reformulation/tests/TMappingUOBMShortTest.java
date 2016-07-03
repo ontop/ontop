@@ -44,10 +44,10 @@ public class TMappingUOBMShortTest {
 		pref.put(QuestPreferences.PRINT_KEYS, QuestConstants.TRUE);
 
 		QuestOWLFactory factory = new QuestOWLFactory();
-        QuestOWLConfiguration config = QuestOWLConfiguration.builder()
+        QuestOWLConfiguration config = new QuestOWLConfiguration(QuestPreferences.builder()
 				.nativeOntopMappingFile("src/test/resources/tmapping-uobm/univ-bench-dl.obda")
 				.properties(pref)
-				.build();
+				.build());
         QuestOWL reasoner = factory.createReasoner(owlOnto, config);		
 	}
 	

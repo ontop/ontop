@@ -146,8 +146,8 @@ public class PropertyCharacteristicTest extends TestCase {
 		OWLOntology ontology = manager.loadOntologyFromOntologyDocument(owlFile);
 		
 		QuestOWLFactory factory = new QuestOWLFactory();
-        QuestOWLConfiguration config = QuestOWLConfiguration.builder()
-				.nativeOntopMappingFile(obdaFile).build();
+        QuestOWLConfiguration config = new QuestOWLConfiguration(QuestPreferences.builder()
+				.nativeOntopMappingFile(obdaFile).build());
         reasoner = factory.createReasoner(ontology, config);
 	}
 	

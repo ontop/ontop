@@ -134,10 +134,10 @@ public class MappingAnalyzerTest extends TestCase {
 		// Creating a new instance of the reasoner
 		QuestOWLFactory factory = new QuestOWLFactory();
 
-		QuestOWLConfiguration configuration = QuestOWLConfiguration.builder()
+		QuestOWLConfiguration configuration = new QuestOWLConfiguration(QuestPreferences.builder()
 				.nativeOntopMappingFile(obdaFileName)
 				.properties(p)
-				.build();
+				.build());
 
 		QuestOWL reasoner = factory.createReasoner(ontology, configuration);
 

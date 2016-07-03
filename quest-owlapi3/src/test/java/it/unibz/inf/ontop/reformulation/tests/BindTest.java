@@ -137,10 +137,10 @@ public class BindTest {
 
 		// Creating a new instance of the reasoner
 		QuestOWLFactory factory = new QuestOWLFactory();
-        QuestOWLConfiguration configuration = QuestOWLConfiguration.builder()
+        QuestOWLConfiguration configuration = new QuestOWLConfiguration(QuestPreferences.builder()
                 .nativeOntopMappingFile(obdafile)
                 .properties(p)
-                .build();
+                .build());
 
 		QuestOWL reasoner = factory.createReasoner(ontology, configuration);
 
@@ -568,10 +568,10 @@ public class BindTest {
 
 			// Creating a new instance of the reasoner
 			QuestOWLFactory factory = new QuestOWLFactory();
-            QuestOWLConfiguration configuration = QuestOWLConfiguration.builder()
+            QuestOWLConfiguration configuration = new QuestOWLConfiguration(QuestPreferences.builder()
                     .nativeOntopMappingFile(obdafile)
                     .properties(p)
-                    .build();
+                    .build());
 
 			QuestOWL reasoner = factory.createReasoner(ontology, configuration);
 
