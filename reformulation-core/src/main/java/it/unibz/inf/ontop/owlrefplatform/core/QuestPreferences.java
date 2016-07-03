@@ -145,7 +145,7 @@ public class QuestPreferences extends OBDAProperties {
 			return Optional.of(mappingFile);
 		}
 		else if (contains(QuestPreferences.MAPPING_FILE_OBJECT)) {
-			File mappingFile = (File) get(QuestPreferences.MAPPING_FILE_PATH);
+			File mappingFile = (File) get(QuestPreferences.MAPPING_FILE_OBJECT);
 			return Optional.of(mappingFile);
 		}
 		else {

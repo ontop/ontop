@@ -43,8 +43,6 @@ import java.util.Properties;
  */
 public class SemanticIndexLUBMHTest extends TestCase {
 
-	private final String owlfile = "src/test/resources/test/lubm-ex-20-uni1/University0-imports.owl";
-
 	private OWLOntology ontology;
 	private OWLOntologyManager manager;
 
@@ -61,8 +59,6 @@ public class SemanticIndexLUBMHTest extends TestCase {
         Properties p = new Properties();
         p.setProperty(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC_INDEX);
         p.setProperty(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
-
-		QuestOWLFactory fac = new QuestOWLFactory();
 
 		QuestOWLFactory factory = new QuestOWLFactory();
         QuestOWLConfiguration config = QuestOWLConfiguration.builder()
@@ -203,7 +199,7 @@ public class SemanticIndexLUBMHTest extends TestCase {
 			// + " }";
 
 			start = System.nanoTime();
-			QuestOWLResultSet res = (QuestOWLResultSet) st.executeTuple(query.getQuery());
+			QuestOWLResultSet res = st.executeTuple(query.getQuery());
 			end = System.nanoTime();
 
 			double time = (end - start) / 1000000;

@@ -30,7 +30,8 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Properties;
 
-import it.unibz.inf.ontop.owlrefplatform.owlapi3.*;
+import it.unibz.inf.ontop.owlapi.OntopOWLException;
+import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import org.junit.*;
 import org.junit.Before;
 import org.junit.Test;
@@ -42,10 +43,8 @@ import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLOntology;
-import it.unibz.inf.ontop.owlapi3.OntopOWLException;
 import org.semanticweb.owlapi.model.OWLObject;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
-import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -134,12 +133,16 @@ public class BindTest {
         conn.commit();
     }
 
-    private OWLObject runTests(QuestPreferences p, String query) throws Exception {
+    private OWLObject runTests(Properties p, String query) throws Exception {
 
 		// Creating a new instance of the reasoner
-		QuestOWLFactory factory = new QuestOWLFactory(new File(obdafile), new QuestPreferences(p));
+		QuestOWLFactory factory = new QuestOWLFactory();
+        QuestOWLConfiguration configuration = QuestOWLConfiguration.builder()
+                .nativeOntopMappingFile(obdafile)
+                .properties(p)
+                .build();
 
-		QuestOWL reasoner = factory.createReasoner(ontology, new SimpleConfiguration());
+		QuestOWL reasoner = factory.createReasoner(ontology, configuration);
 
         // Now we are ready for querying
         QuestOWLConnection conn = reasoner.getConnection();
@@ -564,9 +567,13 @@ public class BindTest {
         private void checkReturnedValues(Properties p, String query, List<String> expectedValues) throws Exception {
 
 			// Creating a new instance of the reasoner
-			QuestOWLFactory factory = new QuestOWLFactory(new File(obdafile), new QuestPreferences(p));
+			QuestOWLFactory factory = new QuestOWLFactory();
+            QuestOWLConfiguration configuration = QuestOWLConfiguration.builder()
+                    .nativeOntopMappingFile(obdafile)
+                    .properties(p)
+                    .build();
 
-			QuestOWL reasoner = factory.createReasoner(ontology, new SimpleConfiguration());
+			QuestOWL reasoner = factory.createReasoner(ontology, configuration);
 
 			// Now we are ready for querying
 			QuestOWLConnection conn = reasoner.getConnection();

@@ -32,6 +32,9 @@ import java.util.Properties;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWL;
+import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLConfiguration;
+import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLFactory;
 import junit.framework.TestCase;
 
 import it.unibz.inf.ontop.exception.InvalidMappingException;
@@ -41,8 +44,6 @@ import it.unibz.inf.ontop.injection.OBDACoreModule;
 import it.unibz.inf.ontop.injection.OBDAProperties;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
-import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWL;
-import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWLFactory;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
@@ -129,13 +130,16 @@ public class MappingAnalyzerTest extends TestCase {
 		Properties p = new Properties();
 		p.setProperty(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
 		p.setProperty(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-		p.setProperty(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
-		QuestPreferences preferences = new QuestPreferences(p);
 		
 		// Creating a new instance of the reasoner
-		QuestOWLFactory factory = new QuestOWLFactory(new File(obdaFileName), preferences);
+		QuestOWLFactory factory = new QuestOWLFactory();
 
-		QuestOWL reasoner = factory.createReasoner(ontology, new SimpleConfiguration());
+		QuestOWLConfiguration configuration = QuestOWLConfiguration.builder()
+				.nativeOntopMappingFile(obdaFileName)
+				.properties(p)
+				.build();
+
+		QuestOWL reasoner = factory.createReasoner(ontology, configuration);
 
 		// Get ready for querying
 		reasoner.getStatement();

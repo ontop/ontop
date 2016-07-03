@@ -22,8 +22,6 @@ package it.unibz.inf.ontop.reformulation.tests;
 
 import it.unibz.inf.ontop.exception.InvalidMappingException;
 import it.unibz.inf.ontop.exception.InvalidPredicateDeclarationException;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWL;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLFactory;
@@ -42,7 +40,6 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.Properties;
 
 /***
  * A simple test that check if the system is able to handle mapping variants
@@ -108,14 +105,14 @@ public class OBDA2DatalogTest extends TestCase {
 	}
 
 	private void runTests(String obdaFileName) throws Exception {
-		Properties p = new Properties();
-		p.setProperty(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-		p.setProperty(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
 		
 		// Creating a new instance of the reasoner
-		QuestOWLFactory factory = new QuestOWLFactory(new File(obdaFileName), new QuestPreferences(p));
+		QuestOWLFactory factory = new QuestOWLFactory();
+		QuestOWLConfiguration configuration = QuestOWLConfiguration.builder()
+				.nativeOntopMappingFile(obdaFileName)
+				.build();
 
-		QuestOWL reasoner = factory.createReasoner(ontology, new SimpleConfiguration());
+		QuestOWL reasoner = factory.createReasoner(ontology, configuration);
 
 		// Get ready for querying
 		reasoner.getStatement();

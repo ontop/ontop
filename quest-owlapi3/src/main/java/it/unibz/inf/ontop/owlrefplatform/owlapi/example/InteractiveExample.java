@@ -37,19 +37,6 @@ public class InteractiveExample {
 		 */
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 		OWLOntology ontology = manager.loadOntologyFromOntologyDocument(new File(owlfile));
-
-		/*
-		 * Prepare the configuration for the Quest instance. The example below shows the setup for
-		 * "Virtual ABox" mode
-		 */
-		Properties p = new Properties();
-		p.setProperty(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-		QuestPreferences preference = new QuestPreferences(p);
-
-		/*
-		 * Create the instance of Quest OWL reasoner.
-		 */
-		QuestOWLFactory factory = new QuestOWLFactory(new File(obdafile), preference);
 		
 //		/*
 //		 * T-Mappings Handling!!
@@ -58,7 +45,8 @@ public class InteractiveExample {
 //		factory.setExcludeFromTMappingsPredicates(tMapParser.parsePredicates());
 
         QuestOWLFactory factory = new QuestOWLFactory();
-        QuestOWLConfiguration config = QuestOWLConfiguration.builder().preferences(preference).build();
+        QuestOWLConfiguration config = QuestOWLConfiguration.builder()
+				.nativeOntopMappingFile(obdafile).build();
         QuestOWL reasoner = factory.createReasoner(ontology, config);
 
 

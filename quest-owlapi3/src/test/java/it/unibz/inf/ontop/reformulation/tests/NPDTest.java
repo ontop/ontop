@@ -1,6 +1,5 @@
 package it.unibz.inf.ontop.reformulation.tests;
 
-import it.unibz.inf.ontop.io.ModelIOManager;
 import it.unibz.inf.ontop.model.OBDADataFactory;
 import it.unibz.inf.ontop.model.OBDAModel;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
@@ -23,6 +22,7 @@ import java.io.IOException;
 import java.sql.*;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Properties;
 
 import static org.junit.Assert.assertEquals;
 
@@ -83,22 +83,20 @@ public class NPDTest {
 		System.out.println("Class names: " + (onto.getVocabulary().getClasses().size() - 2));
 		System.out.println("Object Property names: " + (onto.getVocabulary().getObjectProperties().size() - 2));
 		System.out.println("Data Property names: " + (onto.getVocabulary().getDataProperties().size() - 2));
-*/		
-		OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
-		OBDAModel obdaModel = fac.getOBDAModel();
-		ModelIOManager ioManager = new ModelIOManager(obdaModel);
-		ioManager.load(path + "npd.obda");
+*/
 
-		QuestPreferences pref = new QuestPreferences();
+		Properties pref = new Properties();
 		//pref.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC_INDEX);
-		pref.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-		pref.setCurrentValueOf(QuestPreferences.REFORMULATION_TECHNIQUE, QuestConstants.TW);
-		pref.setCurrentValueOf(QuestPreferences.REWRITE, QuestConstants.TRUE);
-		pref.setCurrentValueOf(QuestPreferences.PRINT_KEYS, QuestConstants.FALSE);
+		pref.put(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+		pref.put(QuestPreferences.REFORMULATION_TECHNIQUE, QuestConstants.TW);
+		pref.put(QuestPreferences.REWRITE, QuestConstants.TRUE);
+		pref.put(QuestPreferences.PRINT_KEYS, QuestConstants.FALSE);
 
 		setupDatabase();
 		QuestOWLFactory factory = new QuestOWLFactory();
-        QuestOWLConfiguration config = QuestOWLConfiguration.builder().obdaModel(obdaModel).preferences(pref).build();
+        QuestOWLConfiguration config = QuestOWLConfiguration.builder()
+				.nativeOntopMappingFile(path + "npd.obda")
+				.properties(pref).build();
         QuestOWL reasoner = factory.createReasoner(owlOnto, config);
 		
 		//QuestOWL reasoner = factory.createReasoner(owlOnto, new SimpleConfiguration());

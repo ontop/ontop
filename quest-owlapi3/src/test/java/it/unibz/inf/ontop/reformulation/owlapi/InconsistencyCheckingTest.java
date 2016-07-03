@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.reformulation.owlapi3;
+package it.unibz.inf.ontop.reformulation.owlapi;
 
 /*
  * #%L
@@ -35,13 +35,15 @@ import static org.semanticweb.owlapi.apibinding.OWLFunctionalSyntaxFactory.Funct
 import static org.semanticweb.owlapi.apibinding.OWLFunctionalSyntaxFactory.FunctionalObjectProperty;
 import static org.semanticweb.owlapi.apibinding.OWLFunctionalSyntaxFactory.Literal;
 import static org.semanticweb.owlapi.apibinding.OWLFunctionalSyntaxFactory.Ontology;
+
+import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
+import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWL;
+import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLConfiguration;
+import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLFactory;
 import junit.framework.TestCase;
 
 import org.junit.Test;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
-import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWL;
-import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWLFactory;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLClass;
@@ -90,11 +92,12 @@ public class InconsistencyCheckingTest extends TestCase{
 		Properties p = new Properties();
 		p.setProperty(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
 		p.setProperty(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-		p.setProperty(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
-		QuestPreferences preferences = new QuestPreferences(p);
+		QuestOWLConfiguration configuration = QuestOWLConfiguration.builder()
+				.properties(p)
+				.build();
 
-		QuestOWLFactory questOWLFactory = new QuestOWLFactory(preferences);
-		reasoner = questOWLFactory.createReasoner(ontology);
+		QuestOWLFactory questOWLFactory = new QuestOWLFactory();
+		reasoner = questOWLFactory.createReasoner(ontology, configuration);
 	}
 	
 	@Test

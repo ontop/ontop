@@ -150,7 +150,7 @@ public class OBDAProperties {
     }
 
     public boolean contains(Object key) {
-        return properties.contains(key);
+        return properties.containsKey(key);
     }
 
     protected Properties copyProperties() {

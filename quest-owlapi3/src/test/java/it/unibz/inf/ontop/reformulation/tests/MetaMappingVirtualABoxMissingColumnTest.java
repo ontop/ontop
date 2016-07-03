@@ -20,9 +20,6 @@ package it.unibz.inf.ontop.reformulation.tests;
  * #L%
  */
 
-import it.unibz.inf.ontop.io.ModelIOManager;
-import it.unibz.inf.ontop.model.OBDADataFactory;
-import it.unibz.inf.ontop.model.OBDAModel;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
@@ -65,12 +62,9 @@ import static org.junit.Assert.assertTrue;
  */
 public class MetaMappingVirtualABoxMissingColumnTest {
 
-
-	private OBDADataFactory fac;
 	private Connection conn;
 
 	Logger log = LoggerFactory.getLogger(this.getClass());
-	private OBDAModel obdaModel;
 	private OWLOntology ontology;
 
 	final String owlfile = "src/test/resources/test/metamapping.owl";
@@ -88,8 +82,6 @@ public class MetaMappingVirtualABoxMissingColumnTest {
 		String url = "jdbc:h2:mem:questjunitdb2_broken;DATABASE_TO_UPPER=FALSE";
 		String username = "sa";
 		String password = "";
-
-		fac = OBDADataFactoryImpl.getInstance();
 
 		conn = DriverManager.getConnection(url, username, password);
 		Statement st = conn.createStatement();
@@ -109,13 +101,6 @@ public class MetaMappingVirtualABoxMissingColumnTest {
 		// Loading the OWL file
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 		ontology = manager.loadOntologyFromOntologyDocument((new File(owlfile)));
-
-		// Loading the OBDA data
-		obdaModel = fac.getOBDAModel();
-
-		ModelIOManager ioManager = new ModelIOManager(obdaModel);
-		ioManager.load(obdafile);
-
 	}
 
 	@After
@@ -142,10 +127,12 @@ public class MetaMappingVirtualABoxMissingColumnTest {
 		conn.commit();
 	}
 
-	private void runTests(QuestPreferences p) throws Exception {
+	private void runTests() throws Exception {
 
         QuestOWLFactory factory = new QuestOWLFactory();
-        QuestOWLConfiguration config = QuestOWLConfiguration.builder().obdaModel(obdaModel).preferences(p).build();
+        QuestOWLConfiguration config = QuestOWLConfiguration.builder()
+				.nativeOntopMappingFile(obdafile)
+				.build();
        
 		String query1 = "PREFIX : <http://it.unibz.inf/obda/test/simple#> SELECT * WHERE { ?x a :A_1 }";
         try (QuestOWL reasoner = factory.createReasoner(ontology, config);
@@ -175,11 +162,7 @@ public class MetaMappingVirtualABoxMissingColumnTest {
         expectedEx.expect(ReasonerInternalException.class);
         expectedEx.expectMessage("The placeholder 'code1' in the target does not occur in the body of the mapping");
 
-		QuestPreferences p = new QuestPreferences();
-		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-
-		runTests(p);
+		runTests();
 	}
 
 

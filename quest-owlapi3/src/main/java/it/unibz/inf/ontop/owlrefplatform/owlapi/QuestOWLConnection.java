@@ -71,13 +71,24 @@ public class QuestOWLConnection implements AutoCloseable {
 	}
 
 	/**
-	 * For the virtual and classic mode.
+	 * For the virtual A-box mode.
 	 */
 	public QuestOWLStatement createStatement() throws OWLException {
 		try {
 			return new QuestOWLStatement(conn.createStatement(), this);
 		} catch (OBDAException e) {
 			throw new OWLException(e); 
+		}
+	}
+
+	/**
+	 * For the classic A-box mode
+     */
+	public SIQuestOWLStatement createSIStatement() throws OWLException {
+		try {
+			return new SIQuestOWLStatementImpl(conn.createSIStatement(), this);
+		} catch (OBDAException e) {
+			throw new OWLException(e);
 		}
 	}
 

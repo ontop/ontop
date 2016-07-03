@@ -118,9 +118,6 @@ public class SemanticIndexMetadataTest  extends TestCase {
 					.properties(p)
 					.build();
 			QuestOWL reasoner = factory.createReasoner(ontology, config);
-
-			Quest quest = new Quest(ont, p);
-			quest.setupRepository();
 			
 			RDBMSSIRepositoryManager si = reasoner.getQuestInstance().getOptionalSemanticIndexRepository().get();
 			

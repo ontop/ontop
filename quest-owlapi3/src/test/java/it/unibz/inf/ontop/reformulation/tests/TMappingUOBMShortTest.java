@@ -1,9 +1,5 @@
 package it.unibz.inf.ontop.reformulation.tests;
 
-import it.unibz.inf.ontop.io.ModelIOManager;
-import it.unibz.inf.ontop.model.OBDADataFactory;
-import it.unibz.inf.ontop.model.OBDAModel;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWL;
@@ -22,6 +18,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Properties;
 
 public class TMappingUOBMShortTest {
 
@@ -38,21 +35,19 @@ public class TMappingUOBMShortTest {
 		Connection conn = DriverManager.getConnection(url, username, password);
 
 		execute(conn, "src/test/resources/tmapping-uobm/univ-bench-dl.sql");
-		
-		OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
-		OBDAModel obdaModel = fac.getOBDAModel();
-		ModelIOManager ioManager = new ModelIOManager(obdaModel);
-		ioManager.load("src/test/resources/tmapping-uobm/univ-bench-dl.obda");
 
-		QuestPreferences pref = new QuestPreferences();
-		//pref.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC_INDEX);
-		pref.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-		pref.setCurrentValueOf(QuestPreferences.REFORMULATION_TECHNIQUE, QuestConstants.TW);
-		pref.setCurrentValueOf(QuestPreferences.REWRITE, QuestConstants.TRUE);
-		pref.setCurrentValueOf(QuestPreferences.PRINT_KEYS, QuestConstants.TRUE);
+		Properties pref = new Properties();
+		//pref.put(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC_INDEX);
+		pref.put(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+		pref.put(QuestPreferences.REFORMULATION_TECHNIQUE, QuestConstants.TW);
+		pref.put(QuestPreferences.REWRITE, QuestConstants.TRUE);
+		pref.put(QuestPreferences.PRINT_KEYS, QuestConstants.TRUE);
 
 		QuestOWLFactory factory = new QuestOWLFactory();
-        QuestOWLConfiguration config = QuestOWLConfiguration.builder().obdaModel(obdaModel).build();
+        QuestOWLConfiguration config = QuestOWLConfiguration.builder()
+				.nativeOntopMappingFile("src/test/resources/tmapping-uobm/univ-bench-dl.obda")
+				.properties(pref)
+				.build();
         QuestOWL reasoner = factory.createReasoner(owlOnto, config);		
 	}
 	
