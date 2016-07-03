@@ -25,6 +25,7 @@ import com.google.inject.Injector;
 import it.unibz.inf.ontop.exception.InvalidMappingException;
 import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
 import it.unibz.inf.ontop.injection.OBDACoreModule;
+import it.unibz.inf.ontop.injection.OBDAProperties;
 import it.unibz.inf.ontop.io.InvalidDataSourceException;
 import it.unibz.inf.ontop.model.OBDAException;
 import it.unibz.inf.ontop.model.OBDAModel;
@@ -132,11 +133,24 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 	//private boolean applyExcludeFromTMappings = false;
 
 
-    public QuestOWL(OWLOntology rootOntology, QuestOWLConfiguration configuration)
+	/**
+	 * End-users: use the QuestOWLFactory instead
+     */
+    protected QuestOWL(OWLOntology rootOntology, QuestOWLConfiguration configuration)
 			throws IllegalConfigurationException {
         super(rootOntology, configuration, BufferingMode.BUFFERING);
-        this.structuralReasoner = new StructuralReasoner(rootOntology, configuration, BufferingMode.BUFFERING);
+
 		preferences = configuration.getPreferences();
+		/**
+		 * Validates the preferences
+		 */
+		try {
+			preferences.validate();
+		} catch (OBDAProperties.InvalidOBDAConfigurationException e) {
+			throw new IllegalConfigurationException(e.getMessage(), configuration);
+		}
+
+        this.structuralReasoner = new StructuralReasoner(rootOntology, configuration, BufferingMode.BUFFERING);
 
 		Injector injector = Guice.createInjector(new OBDACoreModule(preferences), new QuestComponentModule(preferences));
 		this.componentFactory = injector.getInstance(QuestComponentFactory.class);

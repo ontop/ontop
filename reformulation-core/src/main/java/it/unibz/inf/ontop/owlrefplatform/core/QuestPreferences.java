@@ -103,7 +103,10 @@ public class QuestPreferences extends OBDAProperties {
 	 * Beware: immutable class!
 	 *
 	 * --> Only default properties.
+	 *
+	 * TODO: remove this constructor
 	 */
+	@Deprecated
 	public QuestPreferences() {
 		this(new Properties());
 	}
