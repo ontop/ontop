@@ -47,4 +47,9 @@ public class TeradataSQLDialectAdapter extends SQL99DialectAdapter {
         }
     }
 
+    @Override
+    public String strStartsOperator(){
+        return "SUBSTR(%1$s, 1, LENGTH(%2$s)) LIKE %2$s";
+    }
+
 }
