@@ -110,8 +110,8 @@ import com.google.common.collect.ImmutableSet;
 
 public class DBMetadataExtractor {
 
-	//private static final boolean printouts = false;
-    private static final boolean printouts = true; // DEBUG ONLY!!
+	private static final boolean printouts = false;
+    //private static final boolean printouts = true; // DEBUG ONLY!!
 	
 	private static Logger log = LoggerFactory.getLogger(DBMetadataExtractor.class);
 
