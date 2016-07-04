@@ -57,48 +57,55 @@ import java.util.stream.StreamSupport;
 public class SparqlAlgebraToDatalogTranslator {
 
 	
-	private final OBDADataFactory ofac = OBDADataFactoryImpl.getInstance();
+	private static final OBDADataFactory ofac = OBDADataFactoryImpl.getInstance();
 	
-	private final DatatypeFactory dtfac = OBDADataFactoryImpl.getInstance().getDatatypeFactory();
+	private static final DatatypeFactory dtfac = OBDADataFactoryImpl.getInstance().getDatatypeFactory();
+
+    private static final Logger log = LoggerFactory.getLogger(SparqlAlgebraToDatalogTranslator.class);
 
 	private final UriTemplateMatcher uriTemplateMatcher;
 	private final SemanticIndexURIMap uriRef;
 
-	private static final Logger log = LoggerFactory.getLogger(SparqlAlgebraToDatalogTranslator.class);
-	
+    private final DatalogProgram program;
+    private int predicateIdx = 0;
+
 	/**
 	 * 
-	 * @param uriTemplateMatcher
-	 * @param uriRef is used only in the Semantic Index mode
+	 * @param uriTemplateMatcher matches URIs to templates (comes from mappings)
+	 * @param uriRef maps URIs to their integer identifiers (used only in the Semantic Index mode)
 	 */
 
 	public SparqlAlgebraToDatalogTranslator(UriTemplateMatcher uriTemplateMatcher, SemanticIndexURIMap uriRef) {
 		this.uriTemplateMatcher = uriTemplateMatcher;
 		this.uriRef = uriRef;
-	}
+
+        this.program = ofac.getDatalogProgram();
+    }
 	
 	/**
 	 * Translate a given SPARQL query object to datalog program.
-	 * 
+     *
+     * IMPORTANT: this method should be called only once on each instance of the class
 	 *
-	 *            The Query object.
-	 * @return Datalog program that represents the construction of the SPARQL
-	 *         query.
+	 * @pq     SPQRQL query object
+	 * @return our representatin of the SPARQL query (as a datalog program)
 	 */
 
 	public SparqlQuery translate(ParsedQuery pq) {
-		
+
+        if (predicateIdx != 0 || !program.getRules().isEmpty())
+            throw new RuntimeException("SparqlAlgebraToDatalogTranslator.translate can only be called once.");
+
 		TupleExpr te = pq.getTupleExpr();
 		log.debug("SPARQL algebra: \n{}", te);
         //System.out.println("SPARQL algebra: \n" + te);
 
-        TranslationProgram program = new TranslationProgram();
-        TranslationResult body = tran(te, program);
+        TranslationResult body = translate(te);
 
         List<Term> answerVariables;
 		if (pq instanceof ParsedTupleQuery || pq instanceof ParsedGraphQuery) {
             // order elements of the set in some way by converting it into the list
-            answerVariables = new ArrayList<Term>(body.variables);
+            answerVariables = new ArrayList<>(body.variables);
         }
 		else {
             // ASK queries have no answer variables
@@ -107,16 +114,16 @@ public class SparqlAlgebraToDatalogTranslator {
 
         Predicate pred = ofac.getPredicate(OBDAVocabulary.QUEST_QUERY, answerVariables.size());
         Function head = ofac.getFunction(pred, answerVariables);
-        program.appendRule(head, body.atoms);
+        appendRule(head, body.atoms);
 
         List<String> signature = Lists.transform(answerVariables, t -> ((Variable)t).getName());
 
         //System.out.println("PROGRAM\n" + program.program);
-		return new SparqlQuery(program.program, signature);
+		return new SparqlQuery(program, signature);
 	}
 
     private static class TranslationResult {
-        private final OBDADataFactory ofac = OBDADataFactoryImpl.getInstance();
+        final OBDADataFactory ofac = OBDADataFactoryImpl.getInstance();
 
         final ImmutableList<Function> atoms;
         final ImmutableSet<Variable> variables;
@@ -128,9 +135,9 @@ public class SparqlAlgebraToDatalogTranslator {
             this.isBGP = isBGP;
         }
 
-        private <T> TranslationResult extendWithBindings(Stream<T> bindings,
-                                         java.util.function.Function<? super T, Variable> varNameMapper,
-                                         java.util.function.BiFunction<? super T, ImmutableSet<Variable>, Term> exprMapper) {
+        <T> TranslationResult extendWithBindings(Stream<T> bindings,
+                                                 java.util.function.Function<? super T, Variable> varNameMapper,
+                                                 java.util.function.BiFunction<? super T, ImmutableSet<Variable>, Term> exprMapper) {
 
             Set<Variable> vars = new HashSet<>(variables);
             Stream<Function> eqAtoms = bindings.map(b -> {
@@ -146,7 +153,7 @@ public class SparqlAlgebraToDatalogTranslator {
             return new TranslationResult(getAtomsExtended(eqAtoms), ImmutableSet.copyOf(vars), false);
         }
 
-        private ImmutableList<Function> getAtomsExtendedWithNulls(ImmutableSet<Variable> allVariables) {
+        ImmutableList<Function> getAtomsExtendedWithNulls(ImmutableSet<Variable> allVariables) {
             Sets.SetView<Variable>  nullVariables = Sets.difference(allVariables, variables);
             if (nullVariables.isEmpty())
                 return atoms;
@@ -154,7 +161,7 @@ public class SparqlAlgebraToDatalogTranslator {
             return getAtomsExtended(nullVariables.stream().map(v -> ofac.getFunctionEQ(v, OBDAVocabulary.NULL)));
         }
 
-        private ImmutableList<Function> getAtomsExtended(Stream<Function> extension) {
+        ImmutableList<Function> getAtomsExtended(Stream<Function> extension) {
             return ImmutableList.copyOf(Iterables.concat(atoms, extension.collect(Collectors.toList())));
 
 //            ImmutableList.Builder builder = ImmutableList.<Function>builder().addAll(atoms)
@@ -165,47 +172,33 @@ public class SparqlAlgebraToDatalogTranslator {
 
     }
 
-    private static class TranslationProgram {
-        private final OBDADataFactory ofac = OBDADataFactoryImpl.getInstance();
-
-        private final DatalogProgram program;
-        private int predicateIdx = 0;
-
-        TranslationProgram() {
-            this.program = ofac.getDatalogProgram();
-        }
-
-        OBDAQueryModifiers getQueryModifiers() {
-            return program.getQueryModifiers();
-        }
-
-        Function getFreshHead(List<Term> terms) {
-            Predicate pred = ofac.getPredicate(OBDAVocabulary.QUEST_QUERY + predicateIdx, terms.size());
-            predicateIdx++;
-            return ofac.getFunction(pred, terms);
-        }
-
-        void appendRule(Function head, List<Function> body) {
-            CQIE rule = ofac.getCQIE(head, body);
-            program.appendRule(rule);
-        }
-
-        Function wrapNonTriplePattern(TranslationResult sub) {
-            if (sub.atoms.size() > 1 || sub.atoms.get(0).isAlgebraFunction()) {
-                Function head = getFreshHead(new ArrayList<>(sub.variables));
-                appendRule(head, sub.atoms);
-                return head;
-            }
-            return sub.atoms.get(0);
-        }
-
-        TranslationResult getFreshNode(ImmutableSet<Variable> vars) {
-            Function head = getFreshHead(new ArrayList<>(vars));
-            return new TranslationResult(ImmutableList.of(head), vars, false);
-        }
+    private Function getFreshHead(List<Term> terms) {
+        Predicate pred = ofac.getPredicate(OBDAVocabulary.QUEST_QUERY + predicateIdx, terms.size());
+        predicateIdx++;
+        return ofac.getFunction(pred, terms);
     }
 
-    private TranslationResult tran(TupleExpr node, TranslationProgram program) {
+    private TranslationResult createFreshNode(ImmutableSet<Variable> vars) {
+        Function head = getFreshHead(new ArrayList<>(vars));
+        return new TranslationResult(ImmutableList.of(head), vars, false);
+    }
+
+    private Function wrapNonTriplePattern(TranslationResult sub) {
+        if (sub.atoms.size() > 1 || sub.atoms.get(0).isAlgebraFunction()) {
+            Function head = getFreshHead(new ArrayList<>(sub.variables));
+            appendRule(head, sub.atoms);
+            return head;
+        }
+        return sub.atoms.get(0);
+    }
+
+    private void appendRule(Function head, List<Function> body) {
+        CQIE rule = ofac.getCQIE(head, body);
+        program.appendRule(rule);
+    }
+
+
+    private TranslationResult translate(TupleExpr node) {
 
         //System.out.println("node: \n" + node);
 
@@ -214,16 +207,16 @@ public class SparqlAlgebraToDatalogTranslator {
             OBDAQueryModifiers modifiers = program.getQueryModifiers();
             modifiers.setOffset(slice.getOffset());
             modifiers.setLimit(slice.getLimit());
-            return tran(slice.getArg(), program);
+            return translate(slice.getArg());
         }
         else if (node instanceof Distinct) { // DISTINCT algebra operation
             Distinct distinct = (Distinct) node;
             program.getQueryModifiers().setDistinct();
-            return tran(distinct.getArg(), program);
+            return translate(distinct.getArg());
         }
         else if (node instanceof Reduced) {  // REDUCED algebra operation
             Reduced reduced = (Reduced) node;
-            return tran(reduced.getArg(), program);
+            return translate(reduced.getArg());
         }
         else if (node instanceof Order) {   // ORDER algebra operation
             Order order = (Order) node;
@@ -237,14 +230,14 @@ public class SparqlAlgebraToDatalogTranslator {
 
                 Var v = (Var) expression;
                 Variable var = ofac.getVariable(v.getName());
-                int direction =  c.isAscending() ? OrderCondition.ORDER_ASCENDING
+                int direction = c.isAscending() ? OrderCondition.ORDER_ASCENDING
                         : OrderCondition.ORDER_DESCENDING;
                 modifiers.addOrderCondition(var, direction);
             }
-            return tran(order.getArg(), program);
+            return translate(order.getArg());
         }
         else if (node instanceof StatementPattern) { // triple pattern
-            return translate((StatementPattern) node);
+            return translateTriplePattern((StatementPattern) node);
         }
         else if (node instanceof SingletonSet) {
             // the empty BGP has no variables and gives a single solution mapping on every non-empty graph
@@ -252,8 +245,8 @@ public class SparqlAlgebraToDatalogTranslator {
         }
         else if (node instanceof Join) {     // JOIN algebra operation
             Join join = (Join) node;
-            TranslationResult a1 = tran(join.getLeftArg(), program);
-            TranslationResult a2 = tran(join.getRightArg(), program);
+            TranslationResult a1 = translate(join.getLeftArg());
+            TranslationResult a2 = translate(join.getRightArg());
             ImmutableSet<Variable> vars = Sets.union(a1.variables, a2.variables).immutableCopy();
 
             if (a1.isBGP && a2.isBGP) {             // collect triple patterns into BGPs
@@ -262,20 +255,20 @@ public class SparqlAlgebraToDatalogTranslator {
                 return new TranslationResult(atoms, vars, true);
             }
             else {
-                Function body = ofac.getSPARQLJoin(program.wrapNonTriplePattern(a1),
-                        program.wrapNonTriplePattern(a2));
+                Function body = ofac.getSPARQLJoin(wrapNonTriplePattern(a1),
+                        wrapNonTriplePattern(a2));
 
                 return new TranslationResult(ImmutableList.of(body), vars, false);
             }
         }
         else if (node instanceof LeftJoin) {  // OPTIONAL algebra operation
             LeftJoin lj = (LeftJoin) node;
-            TranslationResult a1 = tran(lj.getLeftArg(), program);
-            TranslationResult a2 = tran(lj.getRightArg(), program);
+            TranslationResult a1 = translate(lj.getLeftArg());
+            TranslationResult a2 = translate(lj.getRightArg());
             ImmutableSet<Variable> vars = Sets.union(a1.variables, a2.variables).immutableCopy();
 
-            Function body = ofac.getSPARQLLeftJoin(program.wrapNonTriplePattern(a1),
-                    program.wrapNonTriplePattern(a2));
+            Function body = ofac.getSPARQLLeftJoin(wrapNonTriplePattern(a1),
+                    wrapNonTriplePattern(a2));
 
             ValueExpr expr = lj.getCondition();
             if (expr != null) {
@@ -287,18 +280,18 @@ public class SparqlAlgebraToDatalogTranslator {
         }
         else if (node instanceof Union) {   // UNION algebra operation
             Union union = (Union) node;
-            TranslationResult a1 = tran(union.getLeftArg(), program);
-            TranslationResult a2 = tran(union.getRightArg(), program);
+            TranslationResult a1 = translate(union.getLeftArg());
+            TranslationResult a2 = translate(union.getRightArg());
             ImmutableSet<Variable> vars = Sets.union(a1.variables, a2.variables).immutableCopy();
 
-            TranslationResult res = program.getFreshNode(vars);
-            program.appendRule(res.atoms.get(0), a1.getAtomsExtendedWithNulls(vars));
-            program.appendRule(res.atoms.get(0), a2.getAtomsExtendedWithNulls(vars));
+            TranslationResult res = createFreshNode(vars);
+            appendRule(res.atoms.get(0), a1.getAtomsExtendedWithNulls(vars));
+            appendRule(res.atoms.get(0), a2.getAtomsExtendedWithNulls(vars));
             return res;
         }
         else if (node instanceof Filter) {   // FILTER algebra operation
             Filter filter = (Filter) node;
-            TranslationResult a = tran(filter.getArg(), program);
+            TranslationResult a = translate(filter.getArg());
 
             Function f = getFilterExpression(filter.getCondition(), a.variables);
             ImmutableList<Function> atoms = ImmutableList.<Function>builder().addAll(a.atoms).add(f).build();
@@ -308,14 +301,14 @@ public class SparqlAlgebraToDatalogTranslator {
         }
         else if (node instanceof Projection) {  // PROJECT algebra operation
             Projection projection = (Projection) node;
-            TranslationResult sub = tran(projection.getArg(), program);
+            TranslationResult sub = translate(projection.getArg());
 
             List<ProjectionElem> pes = projection.getProjectionElemList().getElements();
             // the two lists are required to synchronise the order of variables
             List<Term> sVars = new ArrayList<>(pes.size());
             List<Term> tVars = new ArrayList<>(pes.size());
             boolean noRenaming = true;
-            for (ProjectionElem pe : pes)  {
+            for (ProjectionElem pe : pes) {
                 Variable sVar = ofac.getVariable(pe.getSourceName());
                 if (!sub.variables.contains(sVar))
                     throw new IllegalArgumentException("Projection source of " + pe
@@ -332,46 +325,46 @@ public class SparqlAlgebraToDatalogTranslator {
                 return sub;
 
             ImmutableSet<Variable> vars = ImmutableSet.copyOf(
-                    tVars.stream().map(t -> (Variable)t).collect(Collectors.toSet()));
+                    tVars.stream().map(t -> (Variable) t).collect(Collectors.toSet()));
 
             if (noRenaming)
                 return new TranslationResult(sub.atoms, vars, false);
 
-            Function head = program.getFreshHead(sVars);
-            program.appendRule(head, sub.atoms);
+            Function head = getFreshHead(sVars);
+            appendRule(head, sub.atoms);
 
             Function atom = ofac.getFunction(head.getFunctionSymbol(), tVars);
             return new TranslationResult(ImmutableList.of(atom), vars, false);
         }
         else if (node instanceof Extension) {     // EXTEND algebra operation
             Extension extension = (Extension) node;
-            TranslationResult sub = tran(extension.getArg(), program);
+            TranslationResult sub = translate(extension.getArg());
             return sub.extendWithBindings(
                     StreamSupport.stream(extension.getElements().spliterator(), false)
                             // ignore EXTEND(P, v, v), which is sometimes introduced by Sesame SPARQL parser
                             .filter(ee -> !(ee.getExpr() instanceof Var &&
-                                    ee.getName().equals(((Var)ee.getExpr()).getName()))),
-                            ee -> ofac.getVariable(ee.getName()),
-                            (ee, vars) -> getExpression(ee.getExpr(), vars));
+                                    ee.getName().equals(((Var) ee.getExpr()).getName()))),
+                    ee -> ofac.getVariable(ee.getName()),
+                    (ee, vars) -> getExpression(ee.getExpr(), vars));
         }
         else if (node instanceof BindingSetAssignment) { // VALUES in SPARQL
             BindingSetAssignment values = (BindingSetAssignment) node;
 
             TranslationResult empty = new TranslationResult(ImmutableList.of(), ImmutableSet.of(), false);
             List<TranslationResult> bindings =
-                StreamSupport.stream(values.getBindingSets().spliterator(), false)
-                    .map(bs -> empty.extendWithBindings(
-                            StreamSupport.stream(bs.spliterator(), false),
-                            be -> ofac.getVariable(be.getName()),
-                            (be, vars) -> getLiteralOrIri(be.getValue()))).collect(Collectors.toList());
+                    StreamSupport.stream(values.getBindingSets().spliterator(), false)
+                            .map(bs -> empty.extendWithBindings(
+                                    StreamSupport.stream(bs.spliterator(), false),
+                                    be -> ofac.getVariable(be.getName()),
+                                    (be, vars) -> getTermForLiteralOrIri(be.getValue()))).collect(Collectors.toList());
 
             ImmutableSet.Builder allVarsBuilder = ImmutableSet.<Variable>builder();
             bindings.forEach(s -> allVarsBuilder.addAll(s.variables));
             ImmutableSet<Variable> allVars = allVarsBuilder.build();
 
-            TranslationResult res = program.getFreshNode(allVars);
+            TranslationResult res = createFreshNode(allVars);
             bindings.forEach(p ->
-                program.appendRule(res.atoms.get(0), p.getAtomsExtendedWithNulls(allVars)));
+                    appendRule(res.atoms.get(0), p.getAtomsExtendedWithNulls(allVars)));
             return res;
         }
         else if (node instanceof Group) {
@@ -380,18 +373,26 @@ public class SparqlAlgebraToDatalogTranslator {
         throw new IllegalArgumentException("Not supported: " + node);
     }
 
-	private Function getFilterExpression(ValueExpr condition, ImmutableSet<Variable> variables) {
-        Term term = getExpression(condition, variables);
-        return (term instanceof Function) ? (Function) term : ofac.getFunctionIsTrue(term);
-	}
+    /**
+     *
+     * @param expr  expression
+     * @param variables the set of variables that can occur in the expression
+     *                  (the rest will be replaced with NULL)
+     * @return
+     */
 
-	/***
-	 * This translates a single triple. 
-	 * 
-	 * @param triple
-	 * @return
-	 */
-	private TranslationResult translate(StatementPattern triple) {
+    private Function getFilterExpression(ValueExpr expr, ImmutableSet<Variable> variables) {
+        Term term = getExpression(expr, variables);
+        // Effective Boolean Value (EBV): wrap in isTrue function if it is not a (Boolean) expression
+        if (term instanceof Function) {
+            Function f = (Function) term;
+            // TODO: check whether the return type is Boolean
+            return f;
+        }
+        return ofac.getFunctionIsTrue(term);
+    }
+
+	private TranslationResult translateTriplePattern(StatementPattern triple) {
 
         // A triple pattern is member of the set (RDF-T + V) x (I + V) x (RDF-T + V)
         // VarOrTerm ::=  Var | GraphTerm
@@ -404,12 +405,12 @@ public class SparqlAlgebraToDatalogTranslator {
         Value p = triple.getPredicateVar().getValue();
         Value o = triple.getObjectVar().getValue();
 
-        Term sTerm = (s == null) ? createVariable(triple.getSubjectVar(), variables) : getLiteralOrIri(s);
+        Term sTerm = (s == null) ? getTermForVariable(triple.getSubjectVar(), variables) : getTermForLiteralOrIri(s);
 
 		if (p == null) {
 			//  term variable term .
-            Term pTerm = createVariable(triple.getPredicateVar(), variables);
-            Term oTerm = (o == null) ? createVariable(triple.getObjectVar(), variables) : getLiteralOrIri(o);
+            Term pTerm = getTermForVariable(triple.getPredicateVar(), variables);
+            Term oTerm = (o == null) ? getTermForVariable(triple.getObjectVar(), variables) : getTermForLiteralOrIri(o);
 			atom = ofac.getTripleAtom(sTerm, pTerm, oTerm);
 		}
 		else if (p instanceof URI) {
@@ -417,7 +418,7 @@ public class SparqlAlgebraToDatalogTranslator {
 				if (o == null) {
 					// term rdf:type variable .
 					Term pTerm = ofac.getUriTemplate(ofac.getConstantLiteral(OBDAVocabulary.RDF_TYPE));
-                    Term oTerm = createVariable(triple.getObjectVar(), variables);
+                    Term oTerm = getTermForVariable(triple.getObjectVar(), variables);
 					atom = ofac.getTripleAtom(sTerm, pTerm, oTerm);
 				}
 				else if (o instanceof URI) {
@@ -433,7 +434,7 @@ public class SparqlAlgebraToDatalogTranslator {
 			}
 			else {
 				// term uri term . (where uri is either an object or a datatype property)
-				Term oTerm = (o == null) ? createVariable(triple.getObjectVar(), variables) : getLiteralOrIri(o);
+				Term oTerm = (o == null) ? getTermForVariable(triple.getObjectVar(), variables) : getTermForLiteralOrIri(o);
 				Predicate predicate = ofac.getPredicate(p.stringValue(), new COL_TYPE[] { null, null });
 				atom = ofac.getFunction(predicate, sTerm, oTerm);
 			}
@@ -445,13 +446,23 @@ public class SparqlAlgebraToDatalogTranslator {
         return new TranslationResult(ImmutableList.of(atom), variables.build(), true);
 	}
 
-    private Term createVariable(Var v, ImmutableSet.Builder<Variable> variables) {
+    private static Term getTermForVariable(Var v, ImmutableSet.Builder<Variable> variables) {
         Variable var = ofac.getVariable(v.getName());
         variables.add(var);
         return var;
     }
 
-    private Term getTermForLiteral(Literal literal) {
+    private Term getTermForLiteralOrIri(Value v) {
+
+        if (v instanceof Literal)
+            return getTermForLiteral((Literal) v);
+        else if (v instanceof URI)
+            return getTermForIri((URI)v, false);
+
+        throw new RuntimeException("The value " + v + " is not supported yet!");
+    }
+
+    private static Term getTermForLiteral(Literal literal) {
         URI typeURI = literal.getDatatype();
         String value = literal.getLabel();
 
@@ -486,10 +497,10 @@ public class SparqlAlgebraToDatalogTranslator {
 
     /**
      *
-     * @param v
+     * @param v URI object
      * @param unknownUrisToTemplates - the URIs are treated differently in triple patterns
      *                               and filter expressions (this will be normalised later)
-     * @return
+     * @return term (URI template)
      */
 
     private Term getTermForIri(URI v, boolean unknownUrisToTemplates) {
@@ -514,16 +525,13 @@ public class SparqlAlgebraToDatalogTranslator {
         }
     }
 
-	private Term getLiteralOrIri(Value v) {
-
-		if (v instanceof Literal)
-			return getTermForLiteral((Literal) v);
-		else if (v instanceof URI)
-            return getTermForIri((URI)v, false);
-
-        throw new RuntimeException("The value " + v + " is not supported yet!");
-	}
-
+    /**
+     *
+     * @param expr expression
+     * @param variables the set of variables that can occur in the expression
+     *                  (the rest will be replaced with NULL)
+     * @return term
+     */
 
 	private Term getExpression(ValueExpr expr, ImmutableSet<Variable> variables) {
 
@@ -709,12 +717,6 @@ public class SparqlAlgebraToDatalogTranslator {
         // NAryValueOperator (ListMemberOperator and Coalesce)
 		throw new RuntimeException("The expression " + expr + " is not supported yet!");
 	}
-
-
-
-
-
-
 
     // XPath 1.0 functions (XPath 1.1 has variants with more arguments)
     private static final ImmutableMap<String, OperationPredicate> XPathFunctions =
