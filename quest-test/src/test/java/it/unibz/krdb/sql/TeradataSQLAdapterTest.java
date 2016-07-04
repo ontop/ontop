@@ -91,8 +91,8 @@ public class TeradataSQLAdapterTest {
                 String sparqlQuery =
                 "PREFIX : <http://www.semanticweb.org/elem/ontologies/2016/5/financial#>\n" +
                         "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
-                        "select ?x where {?x a :Customer" +
-                        "   FILTER(STRENDS(?x,\"6\"))}\n";
+                        "select ?x where {?x a :Customer." +
+                        " FILTER(CONTAINS(?x, '6')}\n";
 
         try {
             long t1 = System.currentTimeMillis();
@@ -176,3 +176,14 @@ public class TeradataSQLAdapterTest {
 //                    "select ?x where {?x a :Customer" +
 //                    "   FILTER(STRENDS(?x,\"6\"))}\n";
 
+//    String sparqlQuery =
+//            "PREFIX : <http://www.semanticweb.org/elem/ontologies/2016/5/financial#>\n" +
+//                    "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
+//                    "select ?x where {?x a :Customer" +
+//                    " FILTER(STRLEN(?x) > 1)}\n";
+
+//    String sparqlQuery =
+//            "PREFIX : <http://www.semanticweb.org/elem/ontologies/2016/5/financial#>\n" +
+//                    "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
+//                    "select ?x where {?x a :Customer" +
+//                    " FILTER(STRLEN(UCASE(?x)) > 1)}\n";
