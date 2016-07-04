@@ -62,5 +62,9 @@ public class TeradataSQLDialectAdapter extends SQL99DialectAdapter {
         return "POSITION(%2$s IN %1$s) > 0";
     }
 
+    @Override
+    public String strBefore(String str, String before) {
+        return String.format("SUBSTR(%s, 1, POSITION(%s IN %s) - 1)", str, before, str);
+    }
 
 }
