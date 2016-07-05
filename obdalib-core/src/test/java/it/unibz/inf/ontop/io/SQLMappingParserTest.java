@@ -6,7 +6,7 @@ import java.io.IOException;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
-import it.unibz.inf.ontop.injection.OBDACoreModule;
+import it.unibz.inf.ontop.injection.impl.OBDACoreModule;
 import it.unibz.inf.ontop.injection.OBDAProperties;
 import it.unibz.inf.ontop.mapping.MappingParser;
 

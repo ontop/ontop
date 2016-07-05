@@ -1,7 +1,9 @@
-package it.unibz.inf.ontop.injection;
+package it.unibz.inf.ontop.injection.impl;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.exception.DuplicateMappingException;
+import it.unibz.inf.ontop.injection.OBDAProperties;
+import it.unibz.inf.ontop.injection.OBDAFactoryWithException;
 import it.unibz.inf.ontop.io.PrefixManager;
 import it.unibz.inf.ontop.model.OBDADataSource;
 import it.unibz.inf.ontop.model.OBDAMappingAxiom;

@@ -38,7 +38,7 @@ import net.sf.jsqlparser.JSQLParserException;
 
 import it.unibz.inf.ontop.exception.InvalidMappingException;
 import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
-import it.unibz.inf.ontop.injection.OBDACoreModule;
+import it.unibz.inf.ontop.injection.impl.OBDACoreModule;
 import it.unibz.inf.ontop.injection.OBDAProperties;
 import it.unibz.inf.ontop.mapping.MappingParser;
 import it.unibz.inf.ontop.model.OBDAMappingAxiom;

@@ -45,7 +45,7 @@ import it.unibz.inf.ontop.exception.InvalidMappingException;
 import it.unibz.inf.ontop.exception.InvalidMappingExceptionWithIndicator;
 import it.unibz.inf.ontop.exception.InvalidPredicateDeclarationException;
 import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
-import it.unibz.inf.ontop.injection.OBDACoreModule;
+import it.unibz.inf.ontop.injection.impl.OBDACoreModule;
 import it.unibz.inf.ontop.injection.OBDAFactoryWithException;
 import it.unibz.inf.ontop.injection.OBDAProperties;
 import it.unibz.inf.ontop.mapping.MappingParser;

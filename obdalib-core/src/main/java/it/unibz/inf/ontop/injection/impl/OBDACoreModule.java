@@ -1,8 +1,11 @@
-package it.unibz.inf.ontop.injection;
+package it.unibz.inf.ontop.injection.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Module;
 import com.google.inject.util.Providers;
+import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
+import it.unibz.inf.ontop.injection.OBDAConfiguration;
+import it.unibz.inf.ontop.injection.OBDAFactoryWithException;
 import it.unibz.inf.ontop.io.PrefixManager;
 import it.unibz.inf.ontop.mapping.MappingParser;
 import it.unibz.inf.ontop.model.OBDAMappingAxiom;
@@ -11,24 +14,31 @@ import it.unibz.inf.ontop.nativeql.DBMetadataExtractor;
 import it.unibz.inf.ontop.sql.ImplicitDBConstraintsReader;
 import it.unibz.inf.ontop.utils.IMapping2DatalogConverter;
 
+import java.util.Optional;
+
 public class OBDACoreModule extends OBDAAbstractModule {
 
-    public OBDACoreModule(OBDAProperties configuration) {
-        super(configuration);
+    // Keeps track of the config until module configuration
+    private OBDAConfiguration configuration;
+
+    protected OBDACoreModule(OBDAConfiguration configuration) {
+        super(configuration.getOBDAProperties());
+        this.configuration = configuration;
     }
 
     private void bindImplicitDBConstraints() {
-        ImplicitDBConstraintsReader dbContraints = (ImplicitDBConstraintsReader) getPreferences().get(
-                OBDAProperties.DB_CONSTRAINTS);
-        if (dbContraints == null)
+        Optional<ImplicitDBConstraintsReader> optionalDBConstraints = configuration.getImplicitDBConstraintsReader();
+        if (optionalDBConstraints.isPresent()) {
+            bind(ImplicitDBConstraintsReader.class).toInstance(optionalDBConstraints.get());
+        }
+        else {
             bind(ImplicitDBConstraintsReader.class).toProvider(Providers.<ImplicitDBConstraintsReader>of(null));
-        else
-            bind(ImplicitDBConstraintsReader.class).toInstance(dbContraints);
+        }
     }
 
     @Override
     protected void configure() {
-        configurePreferences();
+        configureCoreConfiguration();
 
         bindImplicitDBConstraints();
         bindFromPreferences(IMapping2DatalogConverter.class);
@@ -44,5 +54,8 @@ public class OBDACoreModule extends OBDAAbstractModule {
         install(nativeQLFactoryModule);
 
         bind(OBDAFactoryWithException.class).to(OBDAFactoryWithExceptionImpl.class);
+
+        // Forgets the configuration (useful for the GC in case of large input objects)
+        this.configuration = null;
     }
 }

@@ -1,8 +1,9 @@
-package it.unibz.inf.ontop.injection;
+package it.unibz.inf.ontop.injection.impl;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Module;
 import com.google.inject.assistedinject.FactoryModuleBuilder;
+import it.unibz.inf.ontop.injection.OBDAProperties;
 
 import java.util.List;
 
@@ -56,7 +57,7 @@ public abstract class OBDAAbstractModule extends AbstractModule {
     /**
      * TO be called by sub-classes, inside the configure() method.
      */
-    protected void configurePreferences() {
+    protected void configureCoreConfiguration() {
         bind(OBDAProperties.class).toInstance(configuration);
     }
 

@@ -1,11 +1,6 @@
 package it.unibz.inf.ontop.injection;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Properties;
+import java.util.Optional;
 
 /**
  * General properties.
@@ -17,152 +12,50 @@ import java.util.Properties;
  *
  * Immutable!
  *
+ * TODO: update this description
+ *
  */
-public class OBDAProperties {
+public interface OBDAProperties {
 
-    public static class InvalidOBDAConfigurationException extends RuntimeException {
-        public InvalidOBDAConfigurationException(String message) {
-            super(message);
-        }
+    //-------------------
+    // High-level methods
+    //-------------------
 
-        public InvalidOBDAConfigurationException(String message, OBDAProperties properties) {
-            super(message + "\nProperties:\n" + properties);
-        }
-    }
+    Optional<String> getMappingFilePath();
 
-    public static final String JDBC_URL = "JDBC_URL";
-    public static final String DB_NAME = "DB_NAME";
-    public static final String DB_USER = "DBUSER";
-    public static final String DB_PASSWORD = "DBPASSWORD";
-    public static final String JDBC_DRIVER = "JDBC_DRIVER";
+    boolean obtainFullMetadata();
 
-    public static final String OBTAIN_FULL_METADATA = "OBTAIN_FULL_METADATA";
+    Optional<String> getJdbcUrl();
+    // TODO: continue
 
-    public static final String DB_CONSTRAINTS = "DB_CONSTRAINTS";
 
-    public static final String MAPPING_FILE_PATH = "MAPPING_FILE_PATH";
-    /**
-     * Expects a File object, not a String!
-     */
-    protected static final String MAPPING_FILE_OBJECT = "MAPPING_FILE_OBJECT";
+    //-------
+    // Keys
+    //-------
 
-    /**
-     * Expects a Reader object, not a String!
-     */
-    protected static final String MAPPING_FILE_READER = "MAPPING_FILE_READER";
+    String JDBC_URL = "JDBC_URL";
+    String DB_NAME = "DB_NAME";
+    String DB_USER = "DBUSER";
+    String DB_PASSWORD = "DBPASSWORD";
+    String JDBC_DRIVER = "JDBC_DRIVER";
 
-    /**
-     * Expects a Model object, not a String!
-     */
-    protected static final String MAPPING_FILE_MODEL = "MAPPING_FILE_MODEL";
+    String OBTAIN_FULL_METADATA = "OBTAIN_FULL_METADATA";
 
-    /**
-     * Expects an OBDAModel object, not a string!
-     * Not it is not the standard way to access the OBDA model
-     */
-    protected static final String PREDEFINED_OBDA_MODEL = "PREDEFINED_OBDA_MODEL";
+    // String DB_CONSTRAINTS = "DB_CONSTRAINTS";
 
-    public static final String DEFAULT_OBDA_PROPERTIES_FILE = "default_implementations.properties";
-    private static Logger LOG = LoggerFactory.getLogger(OBDAProperties.class);
-    private final Properties properties;
+    String MAPPING_FILE_PATH = "MAPPING_FILE_PATH";
 
-    /**
-     * Beware: immutable class!
-     *
-     * --> Only default properties.
-     */
-    public OBDAProperties() throws InvalidOBDAConfigurationException {
-        this(new Properties());
-    }
 
-    /**
-     * Beware: immutable class!
-     *
-     * Recommended constructor.
-     *
-     * Changing the Properties object afterwards will not have any effect
-     * on this OBDAProperties object.
-     */
-    public OBDAProperties(Properties userProperties) throws InvalidOBDAConfigurationException {
-        /**
-         * Loads default properties
-         */
-        properties = loadDefaultPropertiesFromFile(OBDAProperties.class, DEFAULT_OBDA_PROPERTIES_FILE);
-        /**
-         * Overloads the default properties.
-         */
-        properties.putAll(userProperties);
-    }
+    //-------------------
+    // Low-level methods
+    //-------------------
 
-    /**
-     * TODO: complete
-     */
-    public void validate() throws InvalidOBDAConfigurationException {
+    boolean getBoolean(String key);
 
-    }
+    int getInteger(String key);
 
-    protected static Properties loadDefaultPropertiesFromFile(Class localClass, String fileName) {
-        Properties properties = new Properties();
-        InputStream in = localClass.getResourceAsStream(fileName);
-        if (in == null)
-            throw new RuntimeException("Configuration " + fileName + " not found.");
+    String getProperty(String key);
 
-        try {
+    boolean contains(Object key);
 
-            properties.load(in);
-        } catch (IOException e1) {
-            LOG.error("Error reading default OBDA properties.");
-            LOG.debug(e1.getMessage(), e1);
-            throw new RuntimeException("Impossible to extract configuration from " + fileName);
-        }
-        return properties;
-    }
-
-    /**
-     * Returns the value of the given key.
-     *
-     * Returns null if not available.
-     */
-    public Object get(Object key) {
-        return properties.get(key);
-    }
-
-    /**
-     * Returns the boolean value of the given key.
-     *
-     * Returns null if not available.
-     */
-    public boolean getBoolean(String key) {
-        String value = (String) get(key);
-        return Boolean.parseBoolean(value);
-    }
-
-    /**
-     * Returns the integer value of the given key.
-     *
-     * Returns null if not available.
-     */
-    public int getInteger(String key) {
-        String value = (String) get(key);
-        return Integer.parseInt(value);
-    }
-
-    /**
-     * Returns the string value of the given key.
-     *
-     * Returns null if not available.
-     */
-    public String getProperty(String key) {
-        return (String) get(key);
-    }
-
-    public boolean contains(Object key) {
-        return properties.containsKey(key);
-    }
-
-    protected Properties copyProperties() {
-        Properties p = new Properties();
-        p.putAll(properties);
-        return p;
-    }
 }

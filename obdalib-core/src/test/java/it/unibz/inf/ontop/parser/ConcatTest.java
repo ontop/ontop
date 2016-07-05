@@ -5,7 +5,7 @@ import com.google.inject.Injector;
 import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.exception.InvalidMappingException;
 import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
-import it.unibz.inf.ontop.injection.OBDACoreModule;
+import it.unibz.inf.ontop.injection.impl.OBDACoreModule;
 import it.unibz.inf.ontop.injection.OBDAProperties;
 import it.unibz.inf.ontop.io.InvalidDataSourceException;
 import it.unibz.inf.ontop.mapping.MappingParser;
