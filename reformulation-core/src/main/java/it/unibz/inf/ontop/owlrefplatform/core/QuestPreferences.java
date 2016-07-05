@@ -28,7 +28,9 @@ import java.util.Optional;
 import java.util.Properties;
 
 import it.unibz.inf.ontop.injection.OBDAProperties;
+import it.unibz.inf.ontop.model.DataSourceMetadata;
 import it.unibz.inf.ontop.model.OBDAModel;
+import it.unibz.inf.ontop.ontology.Ontology;
 import it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing.TMappingExclusionConfig;
 import it.unibz.inf.ontop.sql.ImplicitDBConstraintsReader;
 import org.openrdf.model.Model;
@@ -76,7 +78,14 @@ public class QuestPreferences extends OBDAProperties {
 
 	public static final String STORAGE_LOCATION = "STORAGE_LOCATION";
 
-	public static final String TMAPPING_EXCLUSION = "TMAPPING_EXCLUSION";
+	private static final String TMAPPING_EXCLUSION = "TMAPPING_EXCLUSION";
+	private static final String DB_METADATA_OBJECT = "DB_METADATA_OBJECT";
+
+	public static final String ONTOLOGY_FILE_PATH = "ONTOLOGY_FILE_PATH";
+	public static final String ONTOLOGY_FILE_OBJECT = "ONTOLOGY_FILE_OBJECT";
+	private static final String ONTOLOGY_OBJECT = "ONTOLOGY_OBJECT";
+
+
 
     //@Deprecated
 	//public static final String JDBC_URL = OBDAProperties.JDBC_URL;
@@ -213,15 +222,20 @@ public class QuestPreferences extends OBDAProperties {
 		private Optional<OBDAModel> obdaModel = Optional.empty();
 		private Optional<File> mappingFile = Optional.empty();
 		private Optional<Reader> mappingReader = Optional.empty();
-		private Optional<Model> mappingModel = Optional.empty();
+		private Optional<Model> mappingGraph = Optional.empty();
 		private Optional<Boolean> queryingAnnotationsInOntology = Optional.empty();
 		private Optional<Boolean> sameAsMappings = Optional.empty();
 		private Optional<Properties> properties = Optional.empty();
+		private Optional<DataSourceMetadata> dbMetadata = Optional.empty();
+
+		private Optional<File> owlFile = Optional.empty();
+		private Optional<OWLOntology> ontology = Optional.empty();
 
 		private boolean useR2rml = false;
 		private boolean areMappingsDefined = false;
+		private boolean isOntologyDefined = false;
 
-		public Builder() {
+		protected Builder() {
 		}
 
 		public Builder tMappingExclusionConfig(@Nonnull TMappingExclusionConfig config) {
@@ -264,6 +278,33 @@ public class QuestPreferences extends OBDAProperties {
 			return this;
 		}
 
+		public Builder owlFile(@Nonnull String owlFilename) {
+			if (isOntologyDefined) {
+				throw new IllegalArgumentException("Ontology already defined!");
+			}
+			isOntologyDefined = true;
+			this.owlFile = Optional.of(new File(owlFilename));
+			return this;
+		}
+
+		public Builder owlFile(@Nonnull File owlFile) {
+			if (isOntologyDefined) {
+				throw new IllegalArgumentException("Ontology already defined!");
+			}
+			isOntologyDefined = true;
+			this.owlFile = Optional.of(owlFile);
+			return this;
+		}
+
+		public Builder ontology(@Nonnull OWLOntology ontology) {
+			if (isOntologyDefined) {
+				throw new IllegalArgumentException("Ontology already defined!");
+			}
+			isOntologyDefined = true;
+			this.ontology = Optional.of(ontology);
+			return this;
+		}
+
 		public Builder nativeOntopMappingReader(@Nonnull Reader mappingReader) {
 			if (areMappingsDefined) {
 				throw new IllegalArgumentException("OBDA model or mappings already defined!");
@@ -303,13 +344,18 @@ public class QuestPreferences extends OBDAProperties {
 			return this;
 		}
 
-		public Builder r2rmlMappingModel(@Nonnull Model mappingModel) {
+		public Builder r2rmlMappingGraph(@Nonnull Model rdfGraph) {
 			if (areMappingsDefined) {
 				throw new IllegalArgumentException("OBDA model or mappings already defined!");
 			}
 			areMappingsDefined = true;
 			useR2rml = true;
-			this.mappingModel = Optional.of(mappingModel);
+			this.mappingGraph = Optional.of(rdfGraph);
+			return this;
+		}
+
+		public Builder dbMetadata(@Nonnull DataSourceMetadata dbMetadata) {
+			this.dbMetadata = Optional.of(dbMetadata);
 			return this;
 		}
 
@@ -352,11 +398,15 @@ public class QuestPreferences extends OBDAProperties {
 			Properties p = new Properties();
 			userConstraints.ifPresent(constraints -> p.put(OBDAProperties.DB_CONSTRAINTS, constraints));
 			excludeFromTMappings.ifPresent(config -> p.put(QuestPreferences.TMAPPING_EXCLUSION, config));
+			dbMetadata.ifPresent(m -> p.put(QuestPreferences.DB_METADATA_OBJECT, m));
 
 			mappingFile.ifPresent(f -> p.put(OBDAProperties.MAPPING_FILE_OBJECT, f));
 			mappingReader.ifPresent(r -> p.put(OBDAProperties.MAPPING_FILE_READER, r));
-			mappingModel.ifPresent(m -> p.put(OBDAProperties.MAPPING_FILE_MODEL, m));
+			mappingGraph.ifPresent(m -> p.put(OBDAProperties.MAPPING_FILE_MODEL, m));
 			obdaModel.ifPresent(m -> p.put(OBDAProperties.PREDEFINED_OBDA_MODEL, m));
+
+			owlFile.ifPresent(o -> p.put(QuestPreferences.ONTOLOGY_FILE_OBJECT, o));
+			ontology.ifPresent(o -> p.put(QuestPreferences.ONTOLOGY_OBJECT, o));
 
 			// By default, virtual A-box mode
 			if (!areMappingsDefined) {

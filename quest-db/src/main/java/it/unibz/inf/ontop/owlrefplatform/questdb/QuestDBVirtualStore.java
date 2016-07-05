@@ -24,6 +24,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 
 import it.unibz.inf.ontop.model.OBDADataFactory;
@@ -59,6 +60,8 @@ import org.semanticweb.owlapi.util.AutoIRIMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nonnull;
+
 /***
  * A bean that holds all the data about a store, generates a store folder and
  * maintains this data.
@@ -77,17 +80,8 @@ public class QuestDBVirtualStore extends QuestDBAbstractStore {
 	
 	private boolean isinitalized = false;
 	
-	public QuestDBVirtualStore(String name, URI obdaURI, QuestPreferences config) throws Exception {
-		this(name, null, obdaURI, config);
-	}
-	
-	public QuestDBVirtualStore(String name, URI tboxFile, URI obdaURI) throws Exception {
-		this(name, tboxFile, obdaURI, null);
-	}
-	
-	public QuestDBVirtualStore(String name, QuestPreferences pref) throws Exception {
-		// direct mapping : no tbox, no obda file, repo in-mem h2
-		this(name, null, null, pref);
+	public QuestDBVirtualStore(String name, QuestPreferences config) throws Exception {
+		this(name, null, config);
 	}
 
 	@Override
@@ -99,18 +93,31 @@ public class QuestDBVirtualStore extends QuestDBAbstractStore {
 	 * The method generates the OBDAModel according to the MappingParser
      * implementation deduced from the preferences.
      *
-	 * @param obdaURI - the file URI
 	 * @return the generated OBDAModel
 	 * @throws IOException
 	 * @throws InvalidMappingException
      *
 	 */
-	public OBDAModel getObdaModel(URI obdaURI) throws IOException, InvalidMappingException,
+	public OBDAModel getObdaModel(QuestPreferences config) throws IOException, InvalidMappingException,
             DuplicateMappingException, InvalidDataSourceException {
         NativeQueryLanguageComponentFactory nativeQLFactory = getNativeQLFactory();
-        MappingParser modelParser = nativeQLFactory.create(new File(obdaURI));
-        OBDAModel obdaModel = modelParser.getOBDAModel();
-        return obdaModel;
+
+		Optional<MappingParser> optionalMappingParser = config.getMappingFile()
+				.map(nativeQLFactory::create)
+				.map(Optional::of)
+				.orElseGet(() -> config.getMappingModel()
+						.map(nativeQLFactory::create)
+						.map(Optional::of)
+						.orElseGet(() -> config.getMappingReader()
+								.map(nativeQLFactory::create)));
+        if (optionalMappingParser.isPresent()) {
+			return optionalMappingParser.get().getOBDAModel();
+		}
+		else {
+			return config.getPredefinedOBDAModel()
+					.orElseThrow(() -> new IllegalStateException("Invalid configuration not detected: " +
+							"no mapping in virtual mode"));
+		}
 	}
 
 	/**
@@ -118,32 +125,23 @@ public class QuestDBVirtualStore extends QuestDBAbstractStore {
 	 * an owl file URI and an obda or R2rml mapping file URI
 	 * @param name - the name of the triple store
 	 * @param tboxFile - the owl file URI
-	 * @param obdaUri - the obda or ttl file URI
 	 * @param config - QuestPreferences
 	 * @throws Exception
 	 */
-	public QuestDBVirtualStore(String name, URI tboxFile, URI obdaUri, QuestPreferences config) throws Exception {
+	public QuestDBVirtualStore(@Nonnull String name, URI tboxFile, @Nonnull QuestPreferences config) throws Exception {
 
 		super(name, config);
 
-		//obtain the model
-		OBDAModel obdaModel;
-		if (obdaUri == null) {
-			log.debug("No mappings where given, mappings will be automatically generated.");
-			//obtain model from direct mapping RDB2RDF method
-			obdaModel = getOBDAModelDM();
-		} else {
-			//obtain model from file
-			obdaModel = getObdaModel(obdaUri);
-		}
+		// TODO: re-cast the exception to a Sesame-specific one
+		config.validate();
 
-		//set config preferences values
-		if (config == null) {
-			config = new QuestPreferences();
-		}
 		//we are working in virtual mode
 		if (!config.getProperty(QuestPreferences.ABOX_MODE).equals(QuestConstants.VIRTUAL))
 			throw new IllegalArgumentException("Virtual mode was expected in QuestDBVirtualStore!");
+
+		//obtain the model
+		OBDAModel obdaModel = getObdaModel(config);
+
 
 		//obtain the ontology
 		Ontology tbox;
@@ -181,7 +179,7 @@ public class QuestDBVirtualStore extends QuestDBAbstractStore {
 	 * @param config - QuestPreferences
 	 * @throws Exception
 	 */
-	public QuestDBVirtualStore(String name, OWLOntology tbox, Model mappings, DBMetadata metadata,
+	public QuestDBVirtualStore(String name, OWLOntology tbox, DBMetadata metadata,
                                QuestPreferences config) throws Exception {
 		//call super constructor -> QuestDBAbstractStore
 		super(name, config);
