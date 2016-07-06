@@ -1,35 +1,40 @@
-package it.unibz.inf.ontop.owlrefplatform.injection;
+package it.unibz.inf.ontop.owlrefplatform.injection.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Module;
-import it.unibz.inf.ontop.injection.OBDAAbstractModule;
-import it.unibz.inf.ontop.injection.*;
+import it.unibz.inf.ontop.injection.impl.OBDAAbstractModule;
 import it.unibz.inf.ontop.owlrefplatform.core.DBConnector;
 import it.unibz.inf.ontop.owlrefplatform.core.IQuest;
 import it.unibz.inf.ontop.owlrefplatform.core.QueryCache;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
 import it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing.TMappingExclusionConfig;
 import it.unibz.inf.ontop.owlrefplatform.core.srcquerygeneration.NativeQueryGenerator;
 import it.unibz.inf.ontop.owlrefplatform.core.translator.MappingVocabularyFixer;
+import it.unibz.inf.ontop.owlrefplatform.injection.QuestComponentFactory;
+import it.unibz.inf.ontop.owlrefplatform.injection.QuestCoreConfiguration;
+import it.unibz.inf.ontop.owlrefplatform.injection.QuestCorePreferences;
 
 /**
  * TODO: describe
  */
 public class QuestComponentModule extends OBDAAbstractModule {
 
-    public QuestComponentModule(QuestPreferences configuration) {
-        super(configuration);
+    // Temporary
+    private QuestCoreConfiguration configuration;
+
+    protected QuestComponentModule(QuestCoreConfiguration configuration) {
+        super(configuration.getPreferences());
+        this.configuration = configuration;
     }
 
     @Override
-    protected void configurePreferences() {
-        super.configurePreferences();
-        bind(QuestPreferences.class).toInstance((QuestPreferences) getPreferences());
+    protected void configureCoreConfiguration() {
+        super.configureCoreConfiguration();
+        bind(QuestCorePreferences.class).toInstance((QuestCorePreferences) getPreferences());
     }
 
     @Override
     protected void configure() {
-        configurePreferences();
+        configureCoreConfiguration();
 
         bindTMappingExclusionConfig();
 
@@ -39,14 +44,15 @@ public class QuestComponentModule extends OBDAAbstractModule {
         install(componentFactoryModule);
         bindFromPreferences(MappingVocabularyFixer.class);
         bindFromPreferences(QueryCache.class);
+
+        // Releases the configuration (enables some GC)
+        this.configuration = null;
     }
 
     private void bindTMappingExclusionConfig() {
-        TMappingExclusionConfig tMappingExclusionConfig = (TMappingExclusionConfig) getPreferences().get(
-                QuestPreferences.TMAPPING_EXCLUSION);
-        if (tMappingExclusionConfig == null) {
-            tMappingExclusionConfig = TMappingExclusionConfig.empty();
-        }
+        TMappingExclusionConfig tMappingExclusionConfig = configuration.getTmappingExclusions()
+                .orElseGet(TMappingExclusionConfig::empty);
+
         bind(TMappingExclusionConfig.class).toInstance(tMappingExclusionConfig);
     }
 }

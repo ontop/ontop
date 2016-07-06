@@ -3,11 +3,9 @@ package it.unibz.inf.ontop.io;
 import java.io.File;
 import java.io.IOException;
 
-import com.google.inject.Guice;
 import com.google.inject.Injector;
 import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
-import it.unibz.inf.ontop.injection.impl.OBDACoreModule;
-import it.unibz.inf.ontop.injection.OBDAProperties;
+import it.unibz.inf.ontop.injection.OBDACoreConfiguration;
 import it.unibz.inf.ontop.mapping.MappingParser;
 
 import org.junit.Test;
@@ -17,7 +15,8 @@ public class SQLMappingParserTest {
     private final NativeQueryLanguageComponentFactory factory;
 
     public SQLMappingParserTest() {
-        Injector injector = Guice.createInjector(new OBDACoreModule(new OBDAProperties()));
+        OBDACoreConfiguration configuration = OBDACoreConfiguration.defaultBuilder().build();
+        Injector injector = configuration.getInjector();
         factory = injector.getInstance(NativeQueryLanguageComponentFactory.class);
     }
 

@@ -5,6 +5,7 @@ import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.DBMetadataUtil;
+import it.unibz.inf.ontop.owlrefplatform.injection.QuestCorePreferences;
 import it.unibz.inf.ontop.sql.ImplicitDBConstraintsReader;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
@@ -41,7 +42,7 @@ public class JDBCConnector implements DBConnector {
     private static final OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 
     private final IQuest questInstance;
-    private final QuestPreferences questPreferences;
+    private final QuestCorePreferences questCorePreferences;
 
     /**
      * This represents user-supplied constraints, i.e. primary
@@ -80,17 +81,17 @@ public class JDBCConnector implements DBConnector {
     @Inject
     private JDBCConnector(@Assisted OBDADataSource obdaDataSource, @Assisted IQuest questInstance,
                           NativeQueryLanguageComponentFactory nativeQLFactory,
-                          QuestPreferences preferences,
+                          QuestCorePreferences preferences,
                           @Nullable ImplicitDBConstraintsReader userConstraints) {
-        this.questPreferences = preferences;
+        this.questCorePreferences = preferences;
         this.obdaSource = obdaDataSource;
         this.questInstance = questInstance;
         this.nativeQLFactory = nativeQLFactory;
-        keepAlive = Boolean.valueOf((String) preferences.get(QuestPreferences.KEEP_ALIVE));
-        removeAbandoned = Boolean.valueOf((String) preferences.get(QuestPreferences.REMOVE_ABANDONED));
-        abandonedTimeout = Integer.valueOf((String) preferences.get(QuestPreferences.ABANDONED_TIMEOUT));
-        startPoolSize = Integer.valueOf((String) preferences.get(QuestPreferences.INIT_POOL_SIZE));
-        maxPoolSize = Integer.valueOf((String) preferences.get(QuestPreferences.MAX_POOL_SIZE));
+        keepAlive = preferences.isKeepAliveEnabled();
+        removeAbandoned = preferences.isRemoveAbandonedEnabled();
+        abandonedTimeout = preferences.getAbandonedTimeout();
+        startPoolSize = preferences.getConnectionPoolInitialSize();
+        maxPoolSize = preferences.getConnectionPoolMaxSize();
         this.userConstraints = userConstraints;
 
         setupConnectionPool();
@@ -290,7 +291,7 @@ public class JDBCConnector implements DBConnector {
     @Override
     public IQuestConnection getNonPoolConnection() throws OBDAException {
 
-        return new QuestConnection(this, questInstance, getSQLConnection(), questPreferences);
+        return new QuestConnection(this, questInstance, getSQLConnection(), questCorePreferences);
     }
 
     /***
@@ -312,7 +313,7 @@ public class JDBCConnector implements DBConnector {
     @Override
     public IQuestConnection getConnection() throws OBDAException {
 
-        return new QuestConnection(this, questInstance, getSQLPoolConnection(), questPreferences);
+        return new QuestConnection(this, questInstance, getSQLPoolConnection(), questCorePreferences);
     }
 
     /***

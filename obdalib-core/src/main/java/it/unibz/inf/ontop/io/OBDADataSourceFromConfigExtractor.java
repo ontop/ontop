@@ -45,12 +45,9 @@ public class OBDADataSourceFromConfigExtractor {
 
     private static String extractProperty(String propertyName, OBDAProperties properties)
             throws InvalidDataSourceException {
-        String property = properties.getProperty(propertyName);
-        if (property == null) {
-            throw new InvalidDataSourceException(String.format("Property %s is missing in the configuration." +
-                    "This data source information is required.", propertyName));
-        }
-        return property;
+        return properties.getProperty(propertyName)
+                .orElseThrow(() -> new InvalidDataSourceException(String.format("Property %s is missing in the configuration." +
+                        "This data source information is required.", propertyName)));
     }
 }
 

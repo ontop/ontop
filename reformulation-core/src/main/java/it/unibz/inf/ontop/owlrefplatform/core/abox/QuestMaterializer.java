@@ -20,9 +20,7 @@ package it.unibz.inf.ontop.owlrefplatform.core.abox;
  * #L%
  */
 
-import com.google.inject.Guice;
 import com.google.inject.Injector;
-import it.unibz.inf.ontop.injection.OBDACoreModule;
 import it.unibz.inf.ontop.model.Function;
 import it.unibz.inf.ontop.model.GraphResultSet;
 import it.unibz.inf.ontop.model.OBDAException;
@@ -46,7 +44,8 @@ import java.sql.SQLException;
 import java.util.*;
 
 import it.unibz.inf.ontop.owlrefplatform.injection.QuestComponentFactory;
-import it.unibz.inf.ontop.owlrefplatform.injection.QuestComponentModule;
+import it.unibz.inf.ontop.owlrefplatform.injection.QuestCoreConfiguration;
+import it.unibz.inf.ontop.owlrefplatform.injection.QuestCorePreferences;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -95,23 +94,23 @@ public class QuestMaterializer {
 	 * @throws Exception
 	 */
 	public QuestMaterializer(OBDAModel model, boolean doStreamResults) throws Exception {
-		this(model, null, null, getDefaultPreferences(), doStreamResults);
+		this(model, null, null, new Properties(), doStreamResults);
 	}
 	
-	public QuestMaterializer(OBDAModel model, QuestPreferences pref, boolean doStreamResults) throws Exception {
+	public QuestMaterializer(OBDAModel model, Properties pref, boolean doStreamResults) throws Exception {
 		this(model, null, null, pref, doStreamResults);
 		
 	}
 	
 	public QuestMaterializer(OBDAModel model, Ontology onto, boolean doStreamResults) throws Exception {
-		this(model, onto, null, getDefaultPreferences(), doStreamResults);
+		this(model, onto, null, new Properties(), doStreamResults);
 	}
 
     public QuestMaterializer(OBDAModel model, Ontology onto, Collection<Predicate> predicates, boolean doStreamResults) throws Exception {
-        this(model, onto, predicates, getDefaultPreferences(), doStreamResults);
+        this(model, onto, predicates, new Properties(), doStreamResults);
     }
 
-	public QuestMaterializer(OBDAModel model, Ontology onto, QuestPreferences prefs, boolean doStreamResults) throws Exception {
+	public QuestMaterializer(OBDAModel model, Ontology onto, Properties prefs, boolean doStreamResults) throws Exception {
 		this(model, onto, null, prefs, doStreamResults);
 	}
 
@@ -121,7 +120,7 @@ public class QuestMaterializer {
 	 * @param model
 	 * @throws Exception
 	 */
-	public QuestMaterializer(OBDAModel model, Ontology onto, Collection<Predicate> predicates, QuestPreferences preferences,
+	public QuestMaterializer(OBDAModel model, Ontology onto, Collection<Predicate> predicates, Properties properties,
 							 boolean doStreamResults) throws Exception {
 		this.doStreamResults = doStreamResults;
 		this.model = model;
@@ -133,8 +132,11 @@ public class QuestMaterializer {
            this.vocabulary = extractVocabulary(model, onto);
         }
 
-		Injector injector = Guice.createInjector(new OBDACoreModule(preferences),
-				new QuestComponentModule(preferences));
+		QuestCoreConfiguration configuration = QuestCoreConfiguration.defaultBuilder()
+				.enableOntologyAnnotationQuerying(true)
+				.properties(properties).build();
+
+		Injector injector = configuration.getInjector();
 		questComponentFactory = injector.getInstance(QuestComponentFactory.class);
 
 		if (this.model.getSources()!= null && this.model.getSources().size() > 1)
@@ -165,7 +167,7 @@ public class QuestMaterializer {
 		
 		//preferences.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
 
-		questInstance = questComponentFactory.create(ontology, this.model, null, preferences);
+		questInstance = questComponentFactory.create(ontology, this.model, null, configuration.getPreferences());
 		// Was an ugly way to ask for also querying the annotations
 
 		questInstance.setupRepository();
@@ -242,15 +244,6 @@ public class QuestMaterializer {
 /*    public QuestMaterializer(OBDAModel model, Ontology onto, List<Predicate> predicates, QuestPreferences defaultPreferences) {
     }
 */
-
-    private static QuestPreferences getDefaultPreferences() {
-		Properties p = new Properties();
-		p.put(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-		p.put(QuestPreferences.OBTAIN_FROM_MAPPINGS, "true");
-		p.put(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-		p.put(QuestPreferences.ANNOTATIONS_IN_ONTO, "true");
-		return new QuestPreferences(p);
-	}
 
 
 	public Iterator<Assertion> getAssertionIterator() throws Exception {

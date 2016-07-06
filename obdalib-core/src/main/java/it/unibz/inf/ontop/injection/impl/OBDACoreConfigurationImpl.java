@@ -21,16 +21,16 @@ import java.util.Properties;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class OBDAConfigurationImpl implements OBDAConfiguration {
+public class OBDACoreConfigurationImpl implements OBDACoreConfiguration {
 
     private final OBDAProperties obdaProperties;
-    private final Options options;
+    private final OBDAConfigurationOptions options;
 
     // Late-building
     private Injector injector;
 
-    protected OBDAConfigurationImpl(OBDAProperties obdaProperties,
-                                    Options options) {
+    protected OBDACoreConfigurationImpl(OBDAProperties obdaProperties,
+                                        OBDAConfigurationOptions options) {
         this.obdaProperties = obdaProperties;
         this.options = options;
         // Will be built on-demand
@@ -108,16 +108,16 @@ public class OBDAConfigurationImpl implements OBDAConfiguration {
      * Useful for extensions
      *
      */
-    public static class Options {
+    public static class OBDAConfigurationOptions {
         public final Optional<File> mappingFile;
         public final Optional<Reader> mappingReader;
         public final Optional<Model> mappingGraph;
         public final Optional<OBDAModel> predefinedMappingModel;
         public final Optional<ImplicitDBConstraintsReader> implicitDBConstraintsReader;
 
-        public Options(Optional<File> mappingFile, Optional<Reader> mappingReader, Optional<Model> mappingGraph,
-                       Optional<OBDAModel> predefinedMappingModel,
-                       Optional<ImplicitDBConstraintsReader> implicitDBConstraintsReader) {
+        public OBDAConfigurationOptions(Optional<File> mappingFile, Optional<Reader> mappingReader, Optional<Model> mappingGraph,
+                                        Optional<OBDAModel> predefinedMappingModel,
+                                        Optional<ImplicitDBConstraintsReader> implicitDBConstraintsReader) {
             this.mappingFile = mappingFile;
             this.mappingReader = mappingReader;
             this.mappingGraph = mappingGraph;
@@ -130,7 +130,7 @@ public class OBDAConfigurationImpl implements OBDAConfiguration {
      * Builder
      *
      */
-    public static class BuilderImpl<B extends Builder, P extends OBDAProperties, C extends OBDAConfiguration> implements Builder<B> {
+    public static class BuilderImpl<B extends Builder, P extends OBDAProperties, C extends OBDACoreConfiguration> implements Builder<B> {
 
         /**
          * Please make sure it is an instance of B!
@@ -275,7 +275,7 @@ public class OBDAConfigurationImpl implements OBDAConfiguration {
 
             P obdaProperties = createOBDAProperties(p);
 
-            return createOBDAConfiguration(obdaProperties);
+            return createConfiguration(obdaProperties);
 
         }
 
@@ -310,12 +310,12 @@ public class OBDAConfigurationImpl implements OBDAConfiguration {
          *
          * Default implementation for P == OBDAConfiguration
          */
-        protected C createOBDAConfiguration(P obdaProperties) {
-            return (C) new OBDAConfigurationImpl(obdaProperties, createOBDAConfigurationArguments());
+        protected C createConfiguration(P obdaProperties) {
+            return (C) new OBDACoreConfigurationImpl(obdaProperties, createOBDAConfigurationArguments());
         }
 
-        protected final Options createOBDAConfigurationArguments() {
-            return new Options(mappingFile, mappingReader, mappingGraph, obdaModel, userConstraints);
+        protected final OBDAConfigurationOptions createOBDAConfigurationArguments() {
+            return new OBDAConfigurationOptions(mappingFile, mappingReader, mappingGraph, obdaModel, userConstraints);
         }
 
         protected boolean isR2rml() {

@@ -32,7 +32,7 @@ import it.unibz.inf.ontop.model.impl.RDBMSourceParameterConstants;
 import it.unibz.inf.ontop.model.impl.TermUtils;
 import it.unibz.inf.ontop.owlrefplatform.core.ExecutableQuery;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
+import it.unibz.inf.ontop.owlrefplatform.injection.QuestCorePreferences;
 import it.unibz.inf.ontop.owlrefplatform.core.SQLExecutableQuery;
 import it.unibz.inf.ontop.owlrefplatform.core.abox.SemanticIndexURIMap;
 import it.unibz.inf.ontop.owlrefplatform.core.abox.XsdDatatypeConverter;
@@ -128,7 +128,7 @@ public class SQLGenerator implements NativeQueryGenerator {
 			.getLogger(SQLGenerator.class);
 
     @AssistedInject
-	private SQLGenerator(@Assisted DataSourceMetadata metadata, @Assisted OBDADataSource dataSource, QuestPreferences preferences) {
+	private SQLGenerator(@Assisted DataSourceMetadata metadata, @Assisted OBDADataSource dataSource, QuestCorePreferences preferences) {
         // TODO: make these attributes immutable.
         //TODO: avoid the null value
         this(metadata, dataSource, null, preferences);
@@ -136,7 +136,7 @@ public class SQLGenerator implements NativeQueryGenerator {
 
 	@AssistedInject
 	private SQLGenerator(@Assisted DataSourceMetadata metadata, @Assisted OBDADataSource dataSource,
-						 @Assisted SemanticIndexURIMap uriRefIds, QuestPreferences preferences) {
+						 @Assisted SemanticIndexURIMap uriRefIds, QuestCorePreferences preferences) {
 		String driverURI = dataSource.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER);
 
 		if (!(metadata instanceof DBMetadata)) {
@@ -146,10 +146,10 @@ public class SQLGenerator implements NativeQueryGenerator {
 		this.metadata = (DBMetadata)metadata;
 		this.sqladapter = SQLAdapterFactory.getSQLDialectAdapter(driverURI,this.metadata.getDbmsVersion(), preferences);
 		this.operations = buildOperations(sqladapter);
-		this.distinctResultSet = Boolean.valueOf((String) preferences.get(QuestPreferences.DISTINCT_RESULTSET));
+		this.distinctResultSet = preferences.isDistinctPostProcessingEnabled();
 
 
-		this.generatingREPLACE = Boolean.valueOf((String) preferences.get(QuestPreferences.SQL_GENERATE_REPLACE));
+		this.generatingREPLACE = preferences.isIRISafeEncodingEnabled();
 
 		if (generatingREPLACE) {
 			StringBuilder sb1 = new StringBuilder();
@@ -165,8 +165,7 @@ public class SQLGenerator implements NativeQueryGenerator {
 			replace1 = replace2 = "";
 		}
 
-		String aBoxMode = (String) preferences.get(QuestPreferences.ABOX_MODE);
-		this.isSI = aBoxMode.equals(QuestConstants.CLASSIC);
+		this.isSI = !preferences.isInVirtualMode();
 		this.uriRefIds = uriRefIds;
  	}
 

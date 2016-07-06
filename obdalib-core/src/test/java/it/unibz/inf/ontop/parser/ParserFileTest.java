@@ -28,8 +28,8 @@ import java.net.URISyntaxException;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.inject.Guice;
 import com.google.inject.Injector;
+import it.unibz.inf.ontop.injection.OBDACoreConfiguration;
 import it.unibz.inf.ontop.sql.DBMetadata;
 import it.unibz.inf.ontop.sql.QuotedIDFactory;
 import it.unibz.inf.ontop.sql.RDBMetadataExtractionTools;
@@ -38,8 +38,6 @@ import net.sf.jsqlparser.JSQLParserException;
 
 import it.unibz.inf.ontop.exception.InvalidMappingException;
 import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
-import it.unibz.inf.ontop.injection.impl.OBDACoreModule;
-import it.unibz.inf.ontop.injection.OBDAProperties;
 import it.unibz.inf.ontop.mapping.MappingParser;
 import it.unibz.inf.ontop.model.OBDAMappingAxiom;
 import it.unibz.inf.ontop.model.OBDAModel;
@@ -56,7 +54,8 @@ public class ParserFileTest extends TestCase {
     private final NativeQueryLanguageComponentFactory factory;
 
     public ParserFileTest() {
-        Injector injector = Guice.createInjector(new OBDACoreModule(new OBDAProperties()));
+		OBDACoreConfiguration configuration = OBDACoreConfiguration.defaultBuilder().build();
+		Injector injector = configuration.getInjector();
         factory = injector.getInstance(NativeQueryLanguageComponentFactory.class);
     }
 

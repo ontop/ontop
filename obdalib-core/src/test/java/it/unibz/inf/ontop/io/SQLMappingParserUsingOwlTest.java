@@ -30,9 +30,9 @@ import java.util.Map;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import com.google.inject.Guice;
 import com.google.inject.Injector;
 
+import it.unibz.inf.ontop.injection.OBDACoreConfiguration;
 import it.unibz.inf.ontop.model.OBDADataFactory;
 import it.unibz.inf.ontop.model.OBDADataSource;
 import it.unibz.inf.ontop.model.OBDAMappingAxiom;
@@ -45,9 +45,7 @@ import it.unibz.inf.ontop.exception.InvalidMappingException;
 import it.unibz.inf.ontop.exception.InvalidMappingExceptionWithIndicator;
 import it.unibz.inf.ontop.exception.InvalidPredicateDeclarationException;
 import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
-import it.unibz.inf.ontop.injection.impl.OBDACoreModule;
 import it.unibz.inf.ontop.injection.OBDAFactoryWithException;
-import it.unibz.inf.ontop.injection.OBDAProperties;
 import it.unibz.inf.ontop.mapping.MappingParser;
 
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
@@ -83,7 +81,8 @@ public class SQLMappingParserUsingOwlTest {
     private ImmutableMap<String, String> prefixes;
 
     public SQLMappingParserUsingOwlTest() {
-        Injector injector = Guice.createInjector(new OBDACoreModule(new OBDAProperties()));
+        OBDACoreConfiguration configuration = OBDACoreConfiguration.defaultBuilder().build();
+        Injector injector = configuration.getInjector();
         nativeQLFactory = injector.getInstance(NativeQueryLanguageComponentFactory.class);
         modelFactory = injector.getInstance(OBDAFactoryWithException.class);
     }

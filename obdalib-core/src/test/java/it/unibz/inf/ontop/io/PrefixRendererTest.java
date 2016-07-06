@@ -22,11 +22,9 @@ package it.unibz.inf.ontop.io;
 
 import java.util.*;
 
-import com.google.inject.Guice;
 import com.google.inject.Injector;
 import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
-import it.unibz.inf.ontop.injection.impl.OBDACoreModule;
-import it.unibz.inf.ontop.injection.OBDAProperties;
+import it.unibz.inf.ontop.injection.OBDACoreConfiguration;
 import it.unibz.inf.ontop.model.CQIE;
 import it.unibz.inf.ontop.model.DatalogProgram;
 import it.unibz.inf.ontop.model.Function;
@@ -37,7 +35,6 @@ import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 
 import junit.framework.TestCase;
 
-//import com.hp.hpl.jena.iri.IRIFactory;
 
 public class PrefixRendererTest extends TestCase {
 
@@ -46,7 +43,8 @@ public class PrefixRendererTest extends TestCase {
     private final NativeQueryLanguageComponentFactory factory;
 
     public PrefixRendererTest() {
-        Injector injector = Guice.createInjector(new OBDACoreModule(new OBDAProperties()));
+		OBDACoreConfiguration configuration = OBDACoreConfiguration.defaultBuilder().build();
+		Injector injector = configuration.getInjector();
         factory = injector.getInstance(NativeQueryLanguageComponentFactory.class);
     }
 

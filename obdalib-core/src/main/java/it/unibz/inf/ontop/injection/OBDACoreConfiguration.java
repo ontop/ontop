@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.injection;
 
 import com.google.inject.Injector;
 import it.unibz.inf.ontop.exception.InvalidMappingException;
-import it.unibz.inf.ontop.injection.impl.OBDAConfigurationImpl;
+import it.unibz.inf.ontop.injection.impl.OBDACoreConfigurationImpl;
 import it.unibz.inf.ontop.io.InvalidDataSourceException;
 import it.unibz.inf.ontop.model.OBDAModel;
 import it.unibz.inf.ontop.sql.ImplicitDBConstraintsReader;
@@ -18,7 +18,7 @@ import java.util.Properties;
 /**
  * TODO: explain
  */
-public interface OBDAConfiguration {
+public interface OBDACoreConfiguration {
 
     OBDAProperties getOBDAProperties();
 
@@ -36,8 +36,8 @@ public interface OBDAConfiguration {
     /**
      * Default builder
      */
-    static Builder<Builder> builder() {
-        return new OBDAConfigurationImpl.BuilderImpl<>();
+    static Builder<Builder> defaultBuilder() {
+        return new OBDACoreConfigurationImpl.BuilderImpl<>();
     }
 
     /**
@@ -69,6 +69,6 @@ public interface OBDAConfiguration {
 
         B jdbcUrl(String jdbcUrl);
 
-        OBDAConfiguration build();
+        OBDACoreConfiguration build();
     }
 }

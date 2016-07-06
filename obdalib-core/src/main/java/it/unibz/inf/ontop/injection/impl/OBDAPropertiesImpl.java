@@ -61,24 +61,22 @@ public class OBDAPropertiesImpl implements OBDAProperties {
 
     @Override
     public Optional<String> getMappingFilePath() {
-        return Optional.ofNullable(getProperty(OBDAProperties.MAPPING_FILE_PATH));
+        return getProperty(OBDAProperties.MAPPING_FILE_PATH);
     }
 
     @Override
-    public boolean obtainFullMetadata() {
-        return Optional.ofNullable(getBoolean(OBDAProperties.OBTAIN_FULL_METADATA))
+    public boolean isFullMetadataExtractionEnabled() {
+        return getBoolean(OBDAProperties.OBTAIN_FULL_METADATA)
                 .orElseThrow(() -> new IllegalStateException("Predefined value for OBTAIN_FULL_METADATA is missing"));
     }
 
     @Override
     public Optional<String> getJdbcUrl() {
-        return Optional.ofNullable(getProperty(OBDAProperties.JDBC_URL));
+        return getProperty(OBDAProperties.JDBC_URL);
     }
 
     /**
      * Returns the value of the given key.
-     *
-     * Returns null if not available.
      */
     public Object get(Object key) {
         return properties.get(key);
@@ -86,34 +84,28 @@ public class OBDAPropertiesImpl implements OBDAProperties {
 
     /**
      * Returns the boolean value of the given key.
-     *
-     * Returns null if not available.
      */
     @Override
-    public boolean getBoolean(String key) {
+    public Optional<Boolean> getBoolean(String key) {
         String value = (String) get(key);
-        return Boolean.parseBoolean(value);
+        return Optional.ofNullable(Boolean.parseBoolean(value));
     }
 
     /**
      * Returns the integer value of the given key.
-     *
-     * Returns null if not available.
      */
     @Override
-    public int getInteger(String key) {
+    public Optional<Integer> getInteger(String key) {
         String value = (String) get(key);
-        return Integer.parseInt(value);
+        return Optional.ofNullable(Integer.parseInt(value));
     }
 
     /**
      * Returns the string value of the given key.
-     *
-     * Returns null if not available.
      */
     @Override
-    public String getProperty(String key) {
-        return (String) get(key);
+    public Optional<String> getProperty(String key) {
+        return Optional.ofNullable((String) get(key));
     }
 
     @Override

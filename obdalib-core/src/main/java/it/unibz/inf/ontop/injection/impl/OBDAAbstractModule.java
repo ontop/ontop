@@ -29,11 +29,10 @@ public abstract class OBDAAbstractModule extends AbstractModule {
     }
 
     public Class getImplementation(String interfaceClassName) throws UnknownClassException {
-        String implementationClassName = configuration.getProperty(interfaceClassName);
-
-        if (implementationClassName == null)
-            throw new UnknownClassException(String.format("No entry for the interface %s in the configuration.",
-                    interfaceClassName));
+        String implementationClassName = configuration.getProperty(interfaceClassName)
+                .orElseThrow(() -> new UnknownClassException(String.format(
+                        "No entry for the interface %s in the configuration.",
+                        interfaceClassName)));
 
         try {
             return Class.forName(implementationClassName);

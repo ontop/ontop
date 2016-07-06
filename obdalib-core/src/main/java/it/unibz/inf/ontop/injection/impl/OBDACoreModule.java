@@ -4,7 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.inject.Module;
 import com.google.inject.util.Providers;
 import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
-import it.unibz.inf.ontop.injection.OBDAConfiguration;
+import it.unibz.inf.ontop.injection.OBDACoreConfiguration;
 import it.unibz.inf.ontop.injection.OBDAFactoryWithException;
 import it.unibz.inf.ontop.io.PrefixManager;
 import it.unibz.inf.ontop.mapping.MappingParser;
@@ -19,9 +19,9 @@ import java.util.Optional;
 public class OBDACoreModule extends OBDAAbstractModule {
 
     // Keeps track of the config until module configuration
-    private OBDAConfiguration configuration;
+    private OBDACoreConfiguration configuration;
 
-    protected OBDACoreModule(OBDAConfiguration configuration) {
+    protected OBDACoreModule(OBDACoreConfiguration configuration) {
         super(configuration.getOBDAProperties());
         this.configuration = configuration;
     }

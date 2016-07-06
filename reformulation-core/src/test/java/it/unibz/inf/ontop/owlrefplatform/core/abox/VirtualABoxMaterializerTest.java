@@ -37,19 +37,17 @@ import java.sql.Statement;
 import java.util.*;
 
 import com.google.common.collect.ImmutableList;
-import com.google.inject.Guice;
 import com.google.inject.Injector;
 import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
-import it.unibz.inf.ontop.injection.OBDACoreModule;
 import it.unibz.inf.ontop.injection.OBDAFactoryWithException;
-import it.unibz.inf.ontop.injection.OBDAProperties;
 import it.unibz.inf.ontop.io.PrefixManager;
 import it.unibz.inf.ontop.model.Predicate.COL_TYPE;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.model.impl.RDBMSourceParameterConstants;
 import it.unibz.inf.ontop.ontology.Assertion;
 import it.unibz.inf.ontop.ontology.impl.OntologyVocabularyImpl;
+import it.unibz.inf.ontop.owlrefplatform.injection.QuestCoreConfiguration;
 import it.unibz.inf.ontop.sql.JDBCConnectionManager;
 
 import java.util.LinkedList;
@@ -60,12 +58,12 @@ import junit.framework.TestCase;
 public class VirtualABoxMaterializerTest extends TestCase {
 
 	private final OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
-	private final DatatypeFactory dtfac	= OBDADataFactoryImpl.getInstance().getDatatypeFactory();
 	private final NativeQueryLanguageComponentFactory nativeQLFactory;
 	private final OBDAFactoryWithException obdaFactory;
 
     public VirtualABoxMaterializerTest() {
-        Injector injector = Guice.createInjector(new OBDACoreModule(new OBDAProperties()));
+        QuestCoreConfiguration configuration = QuestCoreConfiguration.defaultBuilder().build();
+		Injector injector = configuration.getInjector();
         nativeQLFactory = injector.getInstance(NativeQueryLanguageComponentFactory.class);
         obdaFactory = injector.getInstance(OBDAFactoryWithException.class);
     }

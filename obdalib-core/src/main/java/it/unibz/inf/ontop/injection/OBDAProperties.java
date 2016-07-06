@@ -23,7 +23,7 @@ public interface OBDAProperties {
 
     Optional<String> getMappingFilePath();
 
-    boolean obtainFullMetadata();
+    boolean isFullMetadataExtractionEnabled();
 
     Optional<String> getJdbcUrl();
     // TODO: continue
@@ -50,11 +50,11 @@ public interface OBDAProperties {
     // Low-level methods
     //-------------------
 
-    boolean getBoolean(String key);
+    Optional<Boolean> getBoolean(String key);
 
-    int getInteger(String key);
+    Optional<Integer> getInteger(String key);
 
-    String getProperty(String key);
+    Optional<String> getProperty(String key);
 
     boolean contains(Object key);
 

@@ -20,11 +20,9 @@ package it.unibz.inf.ontop.utils;
  * #L%
  */
 
-import com.google.inject.Guice;
 import com.google.inject.Injector;
 import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
-import it.unibz.inf.ontop.injection.impl.OBDACoreModule;
-import it.unibz.inf.ontop.injection.OBDAProperties;
+import it.unibz.inf.ontop.injection.OBDACoreConfiguration;
 import it.unibz.inf.ontop.io.PrefixManager;
 import it.unibz.inf.ontop.model.CQIE;
 import it.unibz.inf.ontop.model.Function;
@@ -55,7 +53,8 @@ public class Mapping2DatalogConverterTest extends TestCase {
 	private PrefixManager pm;
 
     public Mapping2DatalogConverterTest() {
-        injector = Guice.createInjector(new OBDACoreModule(new OBDAProperties()));
+		OBDACoreConfiguration configuration = OBDACoreConfiguration.defaultBuilder().build();
+        injector = configuration.getInjector();
         factory = injector.getInstance(NativeQueryLanguageComponentFactory.class);
     }
 	

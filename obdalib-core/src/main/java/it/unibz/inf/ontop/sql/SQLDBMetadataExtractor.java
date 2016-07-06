@@ -39,7 +39,7 @@ public class SQLDBMetadataExtractor implements DBMetadataExtractor {
 
     @Inject
     private SQLDBMetadataExtractor(OBDAProperties preferences, @Nullable ImplicitDBConstraintsReader userConstraints) {
-        this.obtainFullMetadata = preferences.getBoolean(OBDAProperties.OBTAIN_FULL_METADATA);
+        this.obtainFullMetadata = preferences.isFullMetadataExtractionEnabled();
         this.userConstraints = Optional.ofNullable(userConstraints);
     }
 

@@ -32,13 +32,11 @@ public class OBDAFactoryWithExceptionImpl
     }
 
     private Constructor[] findConstructors(Class genericClass) {
-        String implementationName = preferences.getProperty(
-                genericClass.getCanonicalName());
-        if (implementationName == null) {
-            //TODO: find a better exception
-            throw new RuntimeException("No implementation declared for " +
-            genericClass.getCanonicalName());
-        }
+        String implementationName = preferences.getProperty(genericClass.getCanonicalName())
+                //TODO: find a better exception
+                .orElseThrow(() -> new RuntimeException("No implementation declared for " +
+                        genericClass.getCanonicalName()));
+
         try {
             Class implementationClass = Class.forName(implementationName);
             return implementationClass.getConstructors();
