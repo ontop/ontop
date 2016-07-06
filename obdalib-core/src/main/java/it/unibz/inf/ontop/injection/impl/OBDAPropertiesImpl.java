@@ -12,8 +12,8 @@ import java.util.Properties;
 
 public class OBDAPropertiesImpl implements OBDAProperties {
 
-    private static final String DEFAULT_OBDA_PROPERTIES_FILE = "default_implementations_obda.properties";
-    private static final String DEFAULT_R2RML_PROPERTIES_FILE = "default_implementations_r2rml.properties";
+    private static final String DEFAULT_OBDA_PROPERTIES_FILE = "default_obda.properties";
+    private static final String DEFAULT_R2RML_PROPERTIES_FILE = "default_r2rml.properties";
 
     private static Logger LOG = LoggerFactory.getLogger(OBDAProperties.class);
     private final Properties properties;
