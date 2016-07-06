@@ -20,14 +20,10 @@ package it.unibz.inf.ontop.r2rml;
  * #L%
  */
 
-import com.google.inject.Guice;
-import com.google.inject.Injector;
 import it.unibz.inf.ontop.exception.InvalidMappingExceptionWithIndicator;
-import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
-import it.unibz.inf.ontop.injection.OBDACoreModule;
+import it.unibz.inf.ontop.injection.OBDACoreConfiguration;
 import it.unibz.inf.ontop.injection.OBDAProperties;
 import it.unibz.inf.ontop.io.OntopNativeMappingSerializer;
-import it.unibz.inf.ontop.mapping.MappingParser;
 import it.unibz.inf.ontop.model.OBDAModel;
 
 import java.io.File;
@@ -60,21 +56,18 @@ class MappingConverterCMD {
 
 		try {
 			if (mapFile.endsWith(".obda")) {
-                Injector injector = Guice.createInjector(new OBDACoreModule(
-                        new OBDAProperties()));
-                NativeQueryLanguageComponentFactory factory =
-                        injector.getInstance(NativeQueryLanguageComponentFactory.class);
+				OBDACoreConfiguration configuration = OBDACoreConfiguration.defaultBuilder()
+						.nativeOntopMappingFile(mapFile)
+						.build();
 
 				String outfile = mapFile.substring(0, mapFile.length() - 5)
 						.concat(".ttl");
 				File out = new File(outfile);
-				URI obdaURI = new File(mapFile).toURI();
 				// create model
 
                 OBDAModel model;
                 try {
-                    MappingParser mappingParser = factory.create(new File(obdaURI));
-                    model = mappingParser.getOBDAModel();
+                    model = configuration.loadInputMappings().get();
 				} catch (InvalidMappingExceptionWithIndicator e) {
 					e.printStackTrace();
                     return;
@@ -100,23 +93,20 @@ class MappingConverterCMD {
 
                 Properties p = new Properties();
                 p.setProperty(OBDAProperties.DB_NAME, "DBName");
-                p.setProperty(OBDAProperties.JDBC_URL, "jdbc:h2:tcp://localhost/DBName");;
+                p.setProperty(OBDAProperties.JDBC_URL, "jdbc:h2:tcp://localhost/DBName");
                 p.setProperty(OBDAProperties.DB_USER, "sa");
                 p.setProperty(OBDAProperties.DB_PASSWORD, "");
                 p.setProperty(OBDAProperties.JDBC_DRIVER, "com.mysql.jdbc.Driver");
-				OBDAProperties pref = new OBDAProperties(p);
-
-                Injector injector = Guice.createInjector(new OBDACoreModule(pref));
-                NativeQueryLanguageComponentFactory factory =
-                        injector.getInstance(NativeQueryLanguageComponentFactory.class);
+				OBDACoreConfiguration configuration = OBDACoreConfiguration.defaultBuilder()
+						.properties(p)
+						.r2rmlMappingFile(mapFile)
+						.build();
 
 				String outfile = mapFile.substring(0, mapFile.length() - 4)
 						.concat(".obda");
 				File out = new File(outfile);
 
-				URI obdaURI = new File(mapFile).toURI();
-                MappingParser mappingParser = factory.create(new File(obdaURI));
-                OBDAModel model = mappingParser.getOBDAModel();
+                OBDAModel model = configuration.loadInputMappings().get();
 
                 OntopNativeMappingSerializer mappingWriter = new OntopNativeMappingSerializer(model);
 				mappingWriter.save(out);
