@@ -75,6 +75,13 @@ public class DefaultQueryTreeComponent implements QueryTreeComponent {
     }
 
     @Override
+    public void replaceSubTree(QueryNode subTreeRootNode, QueryNode replacingNode) {
+        getCurrentSubNodesOf(subTreeRootNode).stream()
+                .forEach(this::removeSubTree);
+        replaceNode(subTreeRootNode, replacingNode);
+    }
+
+    @Override
     public void addSubTree(IntermediateQuery subQuery, QueryNode subQueryTopNode, QueryNode localTopNode)
             throws IllegalTreeUpdateException {
         Queue<QueryNode> localParents = new LinkedList<>();

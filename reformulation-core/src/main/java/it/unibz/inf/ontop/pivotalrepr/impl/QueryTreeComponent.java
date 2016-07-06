@@ -26,6 +26,11 @@ public interface QueryTreeComponent {
 
     void replaceNode(QueryNode previousNode, QueryNode replacingNode);
 
+    /**
+     * Replaces all the sub-tree by one sub-tree node
+     */
+    void replaceSubTree(QueryNode subTreeRootNode, QueryNode replacingNode);
+
     void addSubTree(IntermediateQuery subQuery, QueryNode subQueryTopNode, QueryNode localTopNode)
             throws IllegalTreeUpdateException;
 

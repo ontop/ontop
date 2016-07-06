@@ -180,6 +180,11 @@ public class JgraphtQueryTreeComponent implements QueryTreeComponent {
         queryDAG.removeVertex(previousNode);
     }
 
+    @Override
+    public void replaceSubTree(QueryNode subTreeRootNode, QueryNode replacingNode) {
+        throw new RuntimeException("TODO: support replaceSubTree()");
+    }
+
     /**
      * TODO: explain
      * TODO: replace this recursive implementation but iterative one
