@@ -5,6 +5,7 @@ import it.unibz.inf.ontop.pivotalrepr.NonCommutativeOperatorNode;
 import it.unibz.inf.ontop.pivotalrepr.impl.IllegalTreeUpdateException;
 import it.unibz.inf.ontop.pivotalrepr.QueryNode;
 
+import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -28,4 +29,6 @@ public interface ChildrenRelation {
     ImmutableList<QueryNode> getChildQueryNodes();
 
     Optional<NonCommutativeOperatorNode.ArgumentPosition> getOptionalPosition(TreeNode childTreeNode);
+
+    ChildrenRelation clone(Map<QueryNode, TreeNode> newNodeIndex);
 }

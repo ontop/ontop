@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.pivotalrepr.impl.tree;
 
+import java.util.Map;
 import java.util.Optional;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.pivotalrepr.NonCommutativeOperatorNode;
@@ -7,6 +8,7 @@ import it.unibz.inf.ontop.pivotalrepr.QueryNode;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * TODO: explain
@@ -23,6 +25,11 @@ public class StandardChildrenRelation implements ChildrenRelation {
         }
         this.parent = parent;
         this.children = new LinkedList<>();
+    }
+
+    private StandardChildrenRelation(TreeNode parent, List<TreeNode> children) {
+        this.parent = parent;
+        this.children = children;
     }
 
     @Override
@@ -81,5 +88,13 @@ public class StandardChildrenRelation implements ChildrenRelation {
     @Override
     public Optional<NonCommutativeOperatorNode.ArgumentPosition> getOptionalPosition(TreeNode childTreeNode) {
         return Optional.empty();
+    }
+
+    @Override
+    public ChildrenRelation clone(Map<QueryNode, TreeNode> newNodeIndex) {
+        return new StandardChildrenRelation(parent.findNewTreeNode(newNodeIndex),
+                children.stream()
+                        .map(c -> c.findNewTreeNode(newNodeIndex))
+                        .collect(Collectors.toList()));
     }
 }

@@ -111,6 +111,11 @@ public class IntermediateQueryImpl implements IntermediateQuery {
         return treeComponent.getKnownVariables();
     }
 
+    @Override
+    public IntermediateQuery createSnapshot() {
+        return new IntermediateQueryImpl(metadata, projectionAtom, treeComponent.createSnapshot());
+    }
+
 
     @Override
     public MetadataForQueryOptimization getMetadata() {

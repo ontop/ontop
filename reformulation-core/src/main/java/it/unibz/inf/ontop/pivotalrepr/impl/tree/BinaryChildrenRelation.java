@@ -5,6 +5,7 @@ import it.unibz.inf.ontop.pivotalrepr.NonCommutativeOperatorNode;
 import it.unibz.inf.ontop.pivotalrepr.impl.IllegalTreeUpdateException;
 import it.unibz.inf.ontop.pivotalrepr.QueryNode;
 
+import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -26,6 +27,13 @@ public class BinaryChildrenRelation implements ChildrenRelation {
         this.parent = parent;
         this.optionalLeftChild = Optional.empty();
         this.optionalRightChild = Optional.empty();
+    }
+
+    private BinaryChildrenRelation(TreeNode parent, Optional<TreeNode> optionalLeftChild,
+                                   Optional<TreeNode> optionalRightChild) {
+        this.parent = parent;
+        this.optionalLeftChild = optionalLeftChild;
+        this.optionalRightChild = optionalRightChild;
     }
 
 
@@ -122,5 +130,13 @@ public class BinaryChildrenRelation implements ChildrenRelation {
         else {
             throw new IllegalArgumentException(childNode.getQueryNode() + " does not appear as a child.");
         }
+    }
+
+    @Override
+    public ChildrenRelation clone(Map<QueryNode, TreeNode> newNodeIndex) {
+        return new BinaryChildrenRelation(parent.findNewTreeNode(newNodeIndex),
+                optionalLeftChild.map(n -> n.findNewTreeNode(newNodeIndex)),
+                optionalRightChild.map(n -> n.findNewTreeNode(newNodeIndex))
+                );
     }
 }

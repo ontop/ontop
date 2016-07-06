@@ -10,6 +10,7 @@ import it.unibz.inf.ontop.pivotalrepr.QueryNode;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -41,6 +42,18 @@ public class DefaultTree implements QueryTree {
         insertNodeIntoIndex(rootQueryNode, rootNode);
         childrenIndex.put(rootNode, createChildrenRelation(rootNode));
         // No parent
+    }
+
+    private DefaultTree(TreeNode rootNode,
+                        Map<QueryNode, TreeNode> nodeIndex,
+                        Map<TreeNode, ChildrenRelation> childrenIndex,
+                        Map<TreeNode, TreeNode> parentIndex,
+                        Set<EmptyNode> emptyNodes) {
+        this.rootNode = rootNode;
+        this.nodeIndex = nodeIndex;
+        this.childrenIndex = childrenIndex;
+        this.parentIndex = parentIndex;
+        this.emptyNodes = emptyNodes;
     }
 
     @Override
@@ -299,6 +312,30 @@ public class DefaultTree implements QueryTree {
                     .map(n -> (EmptyNode) n)
                     .collect(ImmutableCollectors.toSet());
         }
+    }
+
+    @Override
+    public QueryTree createSnapshot() {
+        Map<QueryNode, TreeNode> newNodeIndex = nodeIndex.entrySet().stream()
+                .map(e -> new AbstractMap.SimpleEntry<>(e.getKey(), e.getValue().cloneShallowly()))
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        Map.Entry::getValue
+                ));
+        Map<TreeNode, ChildrenRelation> newChildrenIndex = newNodeIndex.values().stream()
+                .map(c -> new AbstractMap.SimpleEntry<>(c, childrenIndex.get(c).clone(newNodeIndex)))
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        Map.Entry::getValue
+                ));
+        Map<TreeNode, TreeNode> newParentIndex = parentIndex.entrySet().stream()
+                .map(e -> new AbstractMap.SimpleEntry<>(e.getKey().findNewTreeNode(newNodeIndex),
+                        e.getValue().findNewTreeNode(newNodeIndex)))
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        Map.Entry::getValue
+                ));
+        return new DefaultTree(rootNode, newNodeIndex, newChildrenIndex, newParentIndex, new HashSet<>(emptyNodes));
     }
 
     /**

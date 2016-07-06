@@ -27,9 +27,15 @@ public class DefaultQueryTreeComponent implements QueryTreeComponent {
      * TODO: explain
      */
     protected DefaultQueryTreeComponent(QueryTree tree) {
+        this(tree,
+                new VariableGenerator(
+                        VariableCollector.collectVariables(
+                                tree.getNodesInTopDownOrder())));
+    }
+
+    private DefaultQueryTreeComponent(QueryTree tree, VariableGenerator variableGenerator) {
         this.tree = tree;
-        this.variableGenerator = new VariableGenerator(
-                VariableCollector.collectVariables(tree.getNodesInTopDownOrder()));
+        this.variableGenerator = variableGenerator;
     }
 
     @Override
@@ -198,6 +204,12 @@ public class DefaultQueryTreeComponent implements QueryTreeComponent {
     @Override
     public ImmutableSet<Variable> getKnownVariables() {
         return variableGenerator.getKnownVariables();
+    }
+
+    @Override
+    public QueryTreeComponent createSnapshot() {
+        return new DefaultQueryTreeComponent(tree.createSnapshot(), new VariableGenerator(
+                variableGenerator.getKnownVariables()));
     }
 
     /**

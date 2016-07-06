@@ -91,4 +91,11 @@ public interface QueryTreeComponent {
      * All the possibly already allocated variables
      */
     ImmutableSet<Variable> getKnownVariables();
+
+
+    /**
+     * Keeps the same query node objects but clones the tree edges
+     * (since the latter are mutable by default).
+     */
+    QueryTreeComponent createSnapshot();
 }
