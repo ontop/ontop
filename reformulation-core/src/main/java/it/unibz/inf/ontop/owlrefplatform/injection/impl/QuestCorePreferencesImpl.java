@@ -52,81 +52,68 @@ public class QuestCorePreferencesImpl extends OBDAPropertiesImpl implements Ques
 
     @Override
     public boolean isOntologyAnnotationQueryingEnabled() {
-        return getBoolean(ANNOTATIONS_IN_ONTO)
-                .orElseThrow(() -> new IllegalStateException("ANNOTATIONS_IN_ONTO must have a default value"));
+        return getRequiredBoolean(ANNOTATIONS_IN_ONTO);
     }
 
     @Override
     public boolean isSameAsInMappingsEnabled() {
-        return getBoolean(SAME_AS)
-                .orElseThrow(() -> new IllegalStateException("SAME_AS must have a default value"));
+        return getRequiredBoolean(SAME_AS);
     }
 
     @Override
     public boolean isRewritingEnabled() {
-        return getBoolean(REWRITE)
-                .orElseThrow(() -> new IllegalStateException("REWRITE must have a default value"));
+        return getRequiredBoolean(REWRITE);
     }
 
     @Override
     public boolean isEquivalenceOptimizationEnabled() {
-        return getBoolean(OPTIMIZE_EQUIVALENCES)
-                .orElseThrow(() -> new IllegalStateException("OPTIMIZE_EQUIVALENCES must have a default value"));
+        return getRequiredBoolean(OPTIMIZE_EQUIVALENCES);
     }
 
     @Override
     public boolean isKeyPrintingEnabled() {
-        return getBoolean(PRINT_KEYS)
-                .orElseThrow(() -> new IllegalStateException("PRINT_KEYS must have a default value"));
+        return getRequiredBoolean(PRINT_KEYS);
     }
 
     @Override
     public boolean isDistinctPostProcessingEnabled() {
-        return getBoolean(DISTINCT_RESULTSET)
-                .orElseThrow(() -> new IllegalStateException("DISTINCT_RESULTSET must have a default value"));
+        return getRequiredBoolean(DISTINCT_RESULTSET);
     }
 
     @Override
     public boolean isIRISafeEncodingEnabled() {
-        return getBoolean(SQL_GENERATE_REPLACE)
-                .orElseThrow(() -> new IllegalStateException("SQL_GENERATE_REPLACE must have a default value"));
+        return getRequiredBoolean(SQL_GENERATE_REPLACE);
     }
 
     @Override
     public boolean isInVirtualMode() {
-        String mode =  getProperty(ABOX_MODE)
-                .orElseThrow(() -> new IllegalStateException("ABOX_MODE must have a default value"));
+        String mode = getRequiredProperty(ABOX_MODE);
 
         return mode.equals(QuestConstants.VIRTUAL);
     }
 
     @Override
     public boolean isKeepAliveEnabled() {
-        return getBoolean(KEEP_ALIVE)
-                .orElseThrow(() -> new IllegalStateException("KEEP_ALIVE must have a default value"));
+        return getRequiredBoolean(KEEP_ALIVE);
     }
 
     @Override
     public boolean isRemoveAbandonedEnabled() {
-        return getBoolean(REMOVE_ABANDONED)
-                .orElseThrow(() -> new IllegalStateException("REMOVE_ABANDONED must have a default value"));
+        return getRequiredBoolean(REMOVE_ABANDONED);
     }
 
     @Override
     public int getAbandonedTimeout() {
-        return getInteger(ABANDONED_TIMEOUT)
-                .orElseThrow(() -> new IllegalStateException("ABANDONED_TIMEOUT must have a default value"));
+        return getRequiredInteger(ABANDONED_TIMEOUT);
     }
 
     @Override
     public int getConnectionPoolInitialSize() {
-        return getInteger(INIT_POOL_SIZE)
-                .orElseThrow(() -> new IllegalStateException("INIT_POOL_SIZE must have a default value"));
+        return getRequiredInteger(INIT_POOL_SIZE);
     }
 
     @Override
     public int getConnectionPoolMaxSize() {
-        return getInteger(MAX_POOL_SIZE)
-                .orElseThrow(() -> new IllegalStateException("MAX_POOL_SIZE must have a default value"));
+        return getRequiredInteger(MAX_POOL_SIZE);
     }
 }

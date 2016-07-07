@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.owlrefplatform.injection;
 
+import com.google.inject.assistedinject.Assisted;
 import it.unibz.inf.ontop.model.OBDADataSource;
 import it.unibz.inf.ontop.model.OBDAModel;
 import it.unibz.inf.ontop.ontology.Ontology;
@@ -13,7 +14,8 @@ import java.util.Optional;
 
 public interface QuestComponentFactory {
 
-    IQuest create(Ontology inputTBox, Optional<OBDAModel> inputMappings, Optional<DataSourceMetadata> inputDBMetadata);
+    IQuest create(Ontology inputTBox, @Assisted Optional<OBDAModel> inputMappings,
+                  @Assisted Optional<DataSourceMetadata> inputMetadata);
 
     NativeQueryGenerator create(DataSourceMetadata metadata, OBDADataSource dataSource);
     NativeQueryGenerator create(DataSourceMetadata metadata, OBDADataSource dataSource,

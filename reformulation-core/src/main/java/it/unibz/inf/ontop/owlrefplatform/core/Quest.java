@@ -195,7 +195,7 @@ public class Quest implements Serializable, IQuest {
 	 */
 	@Inject
 	private Quest(@Assisted Ontology tbox, @Assisted Optional<OBDAModel> obdaModel,
-				  @Assisted Optional<DBMetadata> inputMetadata,
+				  @Assisted Optional<DataSourceMetadata> inputMetadata,
 				  QuestCorePreferences config, NativeQueryLanguageComponentFactory nativeQLFactory,
 				  OBDAFactoryWithException obdaFactory, QuestComponentFactory questComponentFactory,
 				  MappingVocabularyFixer mappingVocabularyFixer, TMappingExclusionConfig excludeFromTMappings,
@@ -280,14 +280,11 @@ public class Quest implements Serializable, IQuest {
 		/**
 		 * Classic A-box specific configuration
 		 */
-		bObtainFromOntology = preferences.getBoolean(QuestCorePreferences.OBTAIN_FROM_ONTOLOGY)
-				.orElseThrow(() -> new IllegalStateException("OBTAIN_FROM_ONTOLOGY must have a default value"));
-		bObtainFromMappings = preferences.getBoolean(QuestCorePreferences.OBTAIN_FROM_MAPPINGS)
-				.orElseThrow(() -> new IllegalStateException("OBTAIN_FROM_MAPPING must have a default value"));
+		bObtainFromOntology = preferences.getRequiredBoolean(QuestCorePreferences.OBTAIN_FROM_ONTOLOGY);
+		bObtainFromMappings = preferences.getRequiredBoolean(QuestCorePreferences.OBTAIN_FROM_MAPPINGS);
 		isVirtualMode = preferences.isInVirtualMode();
 		aboxSchemaType = preferences.getProperty(QuestCorePreferences.DBTYPE);
-		inmemory = preferences.getProperty(QuestCorePreferences.STORAGE_LOCATION)
-				.orElseThrow(() -> new IllegalStateException("STORAGE_LOCATION must have a default value"))
+		inmemory = preferences.getRequiredProperty(QuestCorePreferences.STORAGE_LOCATION)
 				.equals(QuestConstants.INMEMORY);
 
 		printKeys = preferences.isKeyPrintingEnabled();

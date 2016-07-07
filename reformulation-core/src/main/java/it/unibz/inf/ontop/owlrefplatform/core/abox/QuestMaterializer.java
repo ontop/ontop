@@ -97,11 +97,6 @@ public class QuestMaterializer {
 		this(model, null, null, new Properties(), doStreamResults);
 	}
 	
-	public QuestMaterializer(OBDAModel model, Properties pref, boolean doStreamResults) throws Exception {
-		this(model, null, null, pref, doStreamResults);
-		
-	}
-	
 	public QuestMaterializer(OBDAModel model, Ontology onto, boolean doStreamResults) throws Exception {
 		this(model, onto, null, new Properties(), doStreamResults);
 	}
@@ -109,10 +104,6 @@ public class QuestMaterializer {
     public QuestMaterializer(OBDAModel model, Ontology onto, Collection<Predicate> predicates, boolean doStreamResults) throws Exception {
         this(model, onto, predicates, new Properties(), doStreamResults);
     }
-
-	public QuestMaterializer(OBDAModel model, Ontology onto, Properties prefs, boolean doStreamResults) throws Exception {
-		this(model, onto, null, prefs, doStreamResults);
-	}
 
 	/***
 	 * 
@@ -167,7 +158,7 @@ public class QuestMaterializer {
 		
 		//preferences.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
 
-		questInstance = questComponentFactory.create(ontology, this.model, Optional.empty());
+		questInstance = questComponentFactory.create(ontology, Optional.of(this.model), Optional.empty());
 		// Was an ugly way to ask for also querying the annotations
 
 		questInstance.setupRepository();

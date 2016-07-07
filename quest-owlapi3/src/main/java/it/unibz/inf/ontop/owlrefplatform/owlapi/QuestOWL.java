@@ -265,7 +265,7 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 
 			// Preparing the data source
 			if (!isVirtualMode) {
-				IQuestStatement st = conn.createStatement();
+				IQuestStatement st = conn.createSIStatement();
 				if (bObtainFromOntology) {
 					// Retrieves the ABox from the ontology file.
 					log.debug("Loading data from Ontology into the database");
