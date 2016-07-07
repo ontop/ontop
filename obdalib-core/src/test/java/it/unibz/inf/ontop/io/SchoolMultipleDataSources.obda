@@ -14,6 +14,9 @@ password	dummy
 driverClass	org.postgresl.Driver
 
 [MappingDeclaration] @collection [[
+mappingId	M3
+target		:P{sid} :hasEnrollment :C{cid} . 
+source		select sid, cid from enrollment
 ]]
 
 [SourceDeclaration]
@@ -24,5 +27,8 @@ password	dummy2
 driverClass	org.postgresl.Driver
 
 [MappingDeclaration] @collection [[
+mappingId	M6
+target		:P{sid} :hasEnrollment :C{cid} . 
+source		select sid, cid from registrare
 ]]
 

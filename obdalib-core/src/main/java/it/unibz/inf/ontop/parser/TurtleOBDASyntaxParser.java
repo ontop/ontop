@@ -66,7 +66,7 @@ public class TurtleOBDASyntaxParser implements TargetQueryParser {
 		if (!bf.substring(bf.length() - 2, bf.length()).equals(" .")) {
 			bf.insert(bf.length() - 1, ' ');
 		}
-		if (prefixes.isEmpty()) {
+		if (!prefixes.isEmpty()) {
 			// Update the input by appending the directives
 			appendDirectives(bf);
 		}		
