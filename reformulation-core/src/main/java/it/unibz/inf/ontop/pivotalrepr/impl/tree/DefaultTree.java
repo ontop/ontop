@@ -322,8 +322,10 @@ public class DefaultTree implements QueryTree {
                         Map.Entry::getKey,
                         Map.Entry::getValue
                 ));
-        Map<TreeNode, ChildrenRelation> newChildrenIndex = newNodeIndex.values().stream()
-                .map(c -> new AbstractMap.SimpleEntry<>(c, childrenIndex.get(c).clone(newNodeIndex)))
+        Map<TreeNode, ChildrenRelation> newChildrenIndex = childrenIndex.entrySet().stream()
+                .map(e -> new AbstractMap.SimpleEntry<>(
+                        e.getKey().findNewTreeNode(newNodeIndex),
+                        e.getValue().clone(newNodeIndex)))
                 .collect(Collectors.toMap(
                         Map.Entry::getKey,
                         Map.Entry::getValue
