@@ -56,17 +56,8 @@ public class RedundantSelfLeftJoinExecutor
             if (optionalConcreteProposal.isPresent()) {
                 ConcreteProposal concreteProposal = optionalConcreteProposal.get();
 
-                if(concreteProposal.getReplaceLeftJoinByInnerJoin()) {
-                    /**
-                     * In this case we only change left join to inner join.
-                     * We do not remove/modify the data nodes
-                     */
-                    return replaceLeftJoinByInnerJoin(query, treeComponent, leftJoinNode);
-
-                } else {
-                    // SIDE-EFFECT on the tree component (and thus on the query)
-                    return applyOptimization(query, treeComponent, leftJoinNode, concreteProposal);
-                }
+                // SIDE-EFFECT on the tree component (and thus on the query)
+                return applyOptimization(query, treeComponent, leftJoinNode, concreteProposal);
             }
         }
 
@@ -108,108 +99,16 @@ public class RedundantSelfLeftJoinExecutor
             else {
                 predicateProposal = new PredicateLevelProposal(initialNodes);
             }
-
-            return createConcreteProposal(ImmutableList.of(predicateProposal), variablesToKeep);
         }
         else {
-            /**
-             * the left and the right predicates are different, so we
-             * check whether there are foreign key constraints
-             */
-
-            DatabaseRelationDefinition leftPredicateDatabaseRelation = getDatabaseRelationByName(metadata.getDBMetadata(), leftPredicate.getName());
-            DatabaseRelationDefinition rightPredicateDatabaseRelation = getDatabaseRelationByName(metadata.getDBMetadata(), rightPredicate.getName());
-
-
-            if(leftPredicateDatabaseRelation != null && rightPredicateDatabaseRelation != null) {
-                boolean toReplaceLeftJoinByInnerJoin = checkIfReplaceLeftJoinByInnerJoin(leftDataNode, rightDataNode, leftPredicateDatabaseRelation, rightPredicateDatabaseRelation);
-                if(toReplaceLeftJoinByInnerJoin) {
-                    return Optional.of(new ConcreteProposal(true));
-                }
-            }
-
-
             // TODO: that is a weird way of dealing with no optimization. Change it
             predicateProposal = new PredicateLevelProposal(initialNodes);
-            return createConcreteProposal(ImmutableList.of(predicateProposal), variablesToKeep);
         }
+
+        return createConcreteProposal(ImmutableList.of(predicateProposal), variablesToKeep);
 
     }
 
-
-    private boolean checkIfReplaceLeftJoinByInnerJoin(DataNode leftDataNode,
-                                                      DataNode rightDataNode,
-                                                      DatabaseRelationDefinition leftPredicateDatabaseRelation,
-                                                      DatabaseRelationDefinition rightPredicateDatabaseRelation) {
-        for( ForeignKeyConstraint foreignKey: leftPredicateDatabaseRelation.getForeignKeys() ) {
-
-            /**
-             * Assumes that there is a single foreign key constraint for each referenced relation
-             */
-            if(rightPredicateDatabaseRelation == foreignKey.getReferencedRelation()) {
-
-                Set<VariableOrGroundTerm> foreignKeyReferencedRightTerms = new HashSet<>();
-                for(ForeignKeyConstraint.Component component: foreignKey.getComponents()) {
-
-                    Attribute attr = component.getAttribute();
-                    Attribute ref = component.getReference();
-
-                    VariableOrGroundTerm leftTerm = leftDataNode.getProjectionAtom().getTerm(attr.getIndex() - 1);
-                    VariableOrGroundTerm rightTerm = rightDataNode.getProjectionAtom().getTerm(ref.getIndex() - 1);
-                    if(leftTerm == rightTerm) {
-                        foreignKeyReferencedRightTerms.add(rightTerm);
-                    }
-                }
-
-                Set<VariableOrGroundTerm> rightPrimaryKeyTerms = new HashSet<>();
-                UniqueConstraint rightPrimaryKey = rightPredicateDatabaseRelation.getPrimaryKey();
-                for( Attribute attr: rightPrimaryKey.getAttributes() ) {
-                    rightPrimaryKeyTerms.add(rightDataNode.getProjectionAtom().getTerm(attr.getIndex() - 1));
-                }
-
-                // TODO: check if it is ok
-                if(foreignKeyReferencedRightTerms.containsAll(rightPrimaryKeyTerms) &&
-                        projectedVariablesAreNotNullable(rightDataNode, rightPredicateDatabaseRelation)) {
-                    return true;
-                } else {
-                    return false;
-                }
-
-            }
-        }
-        return false;
-    }
-
-    private boolean projectedVariablesAreNotNullable(DataNode rightDataNode,
-                                                     DatabaseRelationDefinition rightPredicateDatabaseRelation) {
-        ImmutableSet<Variable> projectedVariables = rightDataNode.getProjectedVariables();
-        Set<Variable> notNullableVariables = new HashSet<>();
-
-        DataAtom dataAtom = rightDataNode.getProjectionAtom();
-        List<Attribute> attributes = rightPredicateDatabaseRelation.getAttributes();
-        for(Attribute attr: attributes) {
-            VariableOrGroundTerm term = dataAtom.getTerm(attr.getIndex() - 1);
-            if(projectedVariables.contains(term) && !attr.canNull()) {
-                notNullableVariables.add((Variable) term);
-            }
-        }
-
-        if(notNullableVariables.containsAll(projectedVariables)) {
-            return true;
-        }
-        else {
-            return false;
-        }
-    }
-
-    private DatabaseRelationDefinition getDatabaseRelationByName(DBMetadata dbMetadata, String name) {
-        for(DatabaseRelationDefinition relation: dbMetadata.getDatabaseRelations()) {
-            if(relation.getID().getTableName().equalsIgnoreCase(name)) {
-                return relation;
-            }
-        }
-        return null;
-    }
 
     private PredicateLevelProposal proposeForSelfLeftJoin(
             DataNode leftDataNode,
@@ -277,15 +176,6 @@ public class RedundantSelfLeftJoinExecutor
         return getJoinNodeCentricOptimizationResults(query, treeComponent, leftJoinNode, proposal);
     }
 
-
-    private NodeCentricOptimizationResults<LeftJoinNode> replaceLeftJoinByInnerJoin(IntermediateQuery query,
-                                                                                    QueryTreeComponent treeComponent,
-                                                                                    LeftJoinNode leftJoinNode) {
-        InnerJoinNode newTopNode = new InnerJoinNodeImpl(leftJoinNode.getOptionalFilterCondition());
-        treeComponent.replaceNode(leftJoinNode, newTopNode);
-
-        return new NodeCentricOptimizationResultsImpl<>(query, Optional.of(newTopNode));
-    }
 
 
 }

@@ -27,6 +27,7 @@ public class LeftJoinInternalCompositeExecutor extends NodeCentricInternalCompos
 
         //executorBuilder.add(new LeftJoinBooleanExpressionExecutor());
         executorBuilder.add(new RedundantSelfLeftJoinExecutor());
+        executorBuilder.add(new ForeignKeyLeftJoinExecutor());
 
         return executorBuilder.build();
     }
