@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.owlrefplatform.injection.impl;
 
 import com.google.inject.Module;
 import it.unibz.inf.ontop.injection.InvalidOBDAConfigurationException;
+import it.unibz.inf.ontop.injection.OBDAProperties;
 import it.unibz.inf.ontop.injection.impl.OBDACoreConfigurationImpl;
 import it.unibz.inf.ontop.model.DataSourceMetadata;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
@@ -32,17 +33,14 @@ public class QuestCoreConfigurationImpl extends OBDACoreConfigurationImpl implem
      */
     @Override
     public void validate() throws InvalidOBDAConfigurationException {
-//        boolean areMappingsDefined =
-//                contains(OBDAProperties.MAPPING_FILE_OBJECT)
-//                        || contains(OBDAProperties.MAPPING_FILE_READER)
-//                        || contains(OBDAProperties.MAPPING_FILE_MODEL)
-//                        || contains(OBDAProperties.MAPPING_FILE_PATH)
-//                        || contains(OBDAProperties.PREDEFINED_OBDA_MODEL);
-//        if ((!areMappingsDefined) && get(QuestPreferences.ABOX_MODE).equals(QuestConstants.VIRTUAL)) {
-//            throw new InvalidOBDAConfigurationException("mappings are not specified in virtual mode", this);
-//        } else if (areMappingsDefined && get(QuestPreferences.ABOX_MODE).equals(QuestConstants.CLASSIC)) {
-//            throw new InvalidOBDAConfigurationException("mappings are specified in classic mode", this);
-//        }
+
+        boolean areMappings = areMappingsDefined();
+
+        if ((!areMappings) && preferences.isInVirtualMode()) {
+            throw new InvalidOBDAConfigurationException("mappings are not specified in virtual mode", this);
+        } else if (areMappings && (!preferences.isInVirtualMode())) {
+            throw new InvalidOBDAConfigurationException("mappings are specified in classic A-box mode", this);
+        }
         /**
          * TODO: complete
          */

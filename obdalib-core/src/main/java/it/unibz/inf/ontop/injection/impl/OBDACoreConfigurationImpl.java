@@ -89,6 +89,14 @@ public class OBDACoreConfigurationImpl implements OBDACoreConfiguration {
         // TODO: complete if multiple alternatives for building the OBDAModel are provided
     }
 
+    protected boolean areMappingsDefined() {
+        return obdaProperties.contains(OBDAProperties.MAPPING_FILE_PATH)
+                || options.mappingFile.isPresent()
+                || options.mappingGraph.isPresent()
+                || options.mappingReader.isPresent()
+                || options.predefinedMappingModel.isPresent();
+    }
+
     @Override
     public final Injector getInjector() {
         if (injector == null) {

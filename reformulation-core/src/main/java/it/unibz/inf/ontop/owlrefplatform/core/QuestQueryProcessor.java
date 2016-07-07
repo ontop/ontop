@@ -21,6 +21,7 @@ import it.unibz.inf.ontop.pivotalrepr.IntermediateQuery;
 import it.unibz.inf.ontop.pivotalrepr.datalog.DatalogProgram2QueryConverter;
 import it.unibz.inf.ontop.renderer.DatalogProgramRenderer;
 
+import java.security.Signature;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -114,25 +115,25 @@ public class QuestQueryProcessor {
 		if (executableQuery != null)
 			return executableQuery;
 
-		SparqlAlgebraToDatalogTranslator translator = new SparqlAlgebraToDatalogTranslator(
-				unfolder.getUriTemplateMatcher(),
-				uriMap);
-		DatalogProgram translation = translator.translate(pq);
-
 		List<String> signature = null;
-		// IMPORTANT: this is the original query
-		// (with original variable names, not the BINDings after flattening)
-		for (CQIE q : translation.getRules()) {
-			if (q.getHead().getFunctionSymbol().getName().equals(OBDAVocabulary.QUEST_QUERY)) {
-				List<Term> terms = q.getHead().getTerms();
-				signature = new ArrayList<>(terms.size());
-				for (Term t : terms)
-					signature.add(((Variable) t).getName()); // ALL VARIABLES by construction
-				break;
-			}
-		}
-		
 		try {
+			SparqlAlgebraToDatalogTranslator translator = new SparqlAlgebraToDatalogTranslator(
+					unfolder.getUriTemplateMatcher(),
+					uriMap);
+			DatalogProgram translation = translator.translate(pq);
+
+			// IMPORTANT: this is the original query
+			// (with original variable names, not the BINDings after flattening)
+			for (CQIE q : translation.getRules()) {
+				if (q.getHead().getFunctionSymbol().getName().equals(OBDAVocabulary.QUEST_QUERY)) {
+					List<Term> terms = q.getHead().getTerms();
+					signature = new ArrayList<>(terms.size());
+					for (Term t : terms)
+						signature.add(((Variable) t).getName()); // ALL VARIABLES by construction
+					break;
+				}
+			}
+
 			// log.debug("Input query:\n{}", strquery);
 
 
