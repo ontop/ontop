@@ -1,12 +1,12 @@
 package it.unibz.inf.ontop.reformulation.tests;
 
+import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.ontology.Ontology;
 import it.unibz.inf.ontop.ontology.OntologyFactory;
 import it.unibz.inf.ontop.ontology.OntologyVocabulary;
 import it.unibz.inf.ontop.ontology.impl.OntologyFactoryImpl;
-import it.unibz.inf.ontop.owlrefplatform.core.Quest;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
+import it.unibz.inf.ontop.owlrefplatform.injection.QuestCorePreferences;
 import it.unibz.inf.ontop.owlrefplatform.core.abox.RDBMSSIRepositoryManager;
 
 import java.io.BufferedReader;
@@ -29,8 +29,6 @@ import org.semanticweb.owlapi.model.OWLOntologyManager;
 
 public class SemanticIndexMetadataTest  extends TestCase {
 	private Connection conn;
-
-	private OWLOntology ontology;
 
 	private static final String testCase = "twr-predicate";
 	private static final String owlfile = "src/test/resources/test/treewitness/" + testCase + ".owl"; 
@@ -62,9 +60,6 @@ public class SemanticIndexMetadataTest  extends TestCase {
 		//st.executeUpdate(bf.toString());
 		st.close();
 		conn.commit();
-
-		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-		ontology = manager.loadOntologyFromOntologyDocument((new File(owlfile)));
 	}
 
 	@Override
@@ -93,12 +88,12 @@ public class SemanticIndexMetadataTest  extends TestCase {
 		//prepareTestQueries(tuples);
 		{
 			Properties p = new Properties();
-			p.put(QuestPreferences.REFORMULATION_TECHNIQUE, QuestConstants.TW);
-			p.put(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC_INDEX);
-			p.put(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
-			p.put(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-			p.put(QuestPreferences.OBTAIN_FROM_ONTOLOGY, "true");
-			p.put(QuestPreferences.STORAGE_LOCATION, QuestConstants.INMEMORY);
+			p.put(QuestCorePreferences.REFORMULATION_TECHNIQUE, QuestConstants.TW);
+			p.put(QuestCorePreferences.DBTYPE, QuestConstants.SEMANTIC_INDEX);
+			p.put(QuestCorePreferences.ABOX_MODE, QuestConstants.CLASSIC);
+			p.put(QuestCorePreferences.OPTIMIZE_EQUIVALENCES, "true");
+			p.put(QuestCorePreferences.OBTAIN_FROM_ONTOLOGY, "true");
+			p.put(QuestCorePreferences.STORAGE_LOCATION, QuestConstants.INMEMORY);
 			
 			p.setProperty("rewrite", "true");
 
@@ -114,10 +109,11 @@ public class SemanticIndexMetadataTest  extends TestCase {
 			Ontology ont = ofac.createOntology(vb);
 
 			QuestOWLFactory factory = new QuestOWLFactory();
-			QuestOWLConfiguration config = new QuestOWLConfiguration(QuestPreferences.builder()
+			QuestConfiguration config = QuestConfiguration.defaultBuilder()
+					.ontologyFile(owlfile)
 					.properties(p)
-					.build());
-			QuestOWL reasoner = factory.createReasoner(ontology, config);
+					.build();
+			QuestOWL reasoner = factory.createReasoner(config);
 			
 			RDBMSSIRepositoryManager si = reasoner.getQuestInstance().getOptionalSemanticIndexRepository().get();
 			

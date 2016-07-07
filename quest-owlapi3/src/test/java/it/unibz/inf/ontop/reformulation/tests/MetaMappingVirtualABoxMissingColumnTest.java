@@ -20,25 +20,19 @@ package it.unibz.inf.ontop.reformulation.tests;
  * #L%
  */
 
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
+import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLIndividual;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.reasoner.ReasonerInternalException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.sql.Connection;
@@ -65,7 +59,6 @@ public class MetaMappingVirtualABoxMissingColumnTest {
 	private Connection conn;
 
 	Logger log = LoggerFactory.getLogger(this.getClass());
-	private OWLOntology ontology;
 
 	final String owlfile = "src/test/resources/test/metamapping.owl";
 	final String obdafile = "src/test/resources/test/metamapping_broken.obda";
@@ -97,10 +90,6 @@ public class MetaMappingVirtualABoxMissingColumnTest {
 		in.close();
 		st.executeUpdate(bf.toString());
 		conn.commit();
-
-		// Loading the OWL file
-		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-		ontology = manager.loadOntologyFromOntologyDocument((new File(owlfile)));
 	}
 
 	@After
@@ -130,12 +119,13 @@ public class MetaMappingVirtualABoxMissingColumnTest {
 	private void runTests() throws Exception {
 
         QuestOWLFactory factory = new QuestOWLFactory();
-        QuestOWLConfiguration config = new QuestOWLConfiguration(QuestPreferences.builder()
+        QuestConfiguration config = QuestConfiguration.defaultBuilder()
 				.nativeOntopMappingFile(obdafile)
-				.build());
+				.ontologyFile(owlfile)
+				.build();
        
 		String query1 = "PREFIX : <http://it.unibz.inf/obda/test/simple#> SELECT * WHERE { ?x a :A_1 }";
-        try (QuestOWL reasoner = factory.createReasoner(ontology, config);
+        try (QuestOWL reasoner = factory.createReasoner(config);
              // Now we are ready for querying
              QuestOWLConnection conn = reasoner.getConnection();
              QuestOWLStatement st = conn.createStatement();

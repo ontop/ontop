@@ -29,9 +29,11 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
+import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.model.OBDAException;
 import it.unibz.inf.ontop.owlrefplatform.core.*;
 
+import it.unibz.inf.ontop.owlrefplatform.injection.QuestCorePreferences;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -141,26 +143,24 @@ public class QuestDB {
 		}
 	}
 
-	public void createClassicStore(String name, URI tboxUri, Properties params) throws Exception {
+	public void createClassicStore(String name, QuestConfiguration configuration) throws Exception {
 
 		if (stores.containsKey(name))
 			throw new Exception("A store already exists with the name" + name);
 
-		QuestPreferences config = new QuestPreferences(params);
-
-		QuestDBClassicStore store = new QuestDBClassicStore(name, tboxUri, config);
+		QuestDBClassicStore store = new QuestDBClassicStore(name, configuration);
 
 		stores.put(name, store);
 
 		saveStore(name);
 	}
 
-	public void createVirtualStore(String name, URI tboxUri, URI obdaUri) throws Exception {
+	public void createVirtualStore(String name, QuestConfiguration configuration) throws Exception {
 
 		if (stores.containsKey(name))
 			throw new Exception("A store already exists with the name" + name);
 
-		QuestDBVirtualStore store = new QuestDBVirtualStore(name, tboxUri, obdaUri);
+		QuestDBVirtualStore store = new QuestDBVirtualStore(name, configuration);
 
 		stores.put(name, store);
 
@@ -223,8 +223,9 @@ public class QuestDB {
 		QuestDBAbstractStore dbstore = stores.get(storename);
 		try {
 			QuestDBConnection conn = dbstore.getConnection();
-			boolean classic = dbstore.getPreferences().get(QuestPreferences.ABOX_MODE).equals(QuestConstants.CLASSIC);
-			boolean inmemory = dbstore.getPreferences().get(QuestPreferences.STORAGE_LOCATION).equals(QuestConstants.INMEMORY);
+			boolean classic = ! dbstore.getPreferences().isInVirtualMode();
+			boolean inmemory = dbstore.getPreferences().getRequiredProperty(QuestCorePreferences.STORAGE_LOCATION)
+					.equals(QuestConstants.INMEMORY);
 			if (classic && inmemory) {
 				// V1
 				// dbstore.getOptionalSemanticIndexRepository().createDBSchemaAndInsertMetadata(conn.getConnection());

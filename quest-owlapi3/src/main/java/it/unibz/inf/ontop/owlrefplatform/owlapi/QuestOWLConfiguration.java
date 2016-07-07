@@ -1,7 +1,7 @@
 package it.unibz.inf.ontop.owlrefplatform.owlapi;
 
 
-import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
+import it.unibz.inf.ontop.injection.QuestConfiguration;
 import org.semanticweb.owlapi.reasoner.NullReasonerProgressMonitor;
 import org.semanticweb.owlapi.reasoner.ReasonerProgressMonitor;
 import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
@@ -14,24 +14,24 @@ import javax.annotation.Nonnull;
 @SuppressWarnings("serial")
 public class QuestOWLConfiguration extends SimpleConfiguration {
 
-    private final QuestPreferences preferences;
+    private final QuestConfiguration questConfiguration;
 
     @Nonnull
-    public QuestPreferences getPreferences() {
-        return preferences;
+    public QuestConfiguration getQuestConfiguration() {
+        return questConfiguration;
     }
 
-    public QuestOWLConfiguration(@Nonnull QuestPreferences preferences) {
+    public QuestOWLConfiguration(@Nonnull QuestConfiguration questConfiguration) {
         super(new NullReasonerProgressMonitor());
-        this.preferences = preferences;
+        this.questConfiguration = questConfiguration;
     }
 
     /**
      * Constructor
      */
-    public QuestOWLConfiguration(@Nonnull QuestPreferences preferences,
+    public QuestOWLConfiguration(@Nonnull QuestConfiguration questConfiguration,
                                  @Nonnull ReasonerProgressMonitor progressMonitor) {
         super(progressMonitor);
-        this.preferences = preferences;
+        this.questConfiguration = questConfiguration;
     }
 }

@@ -1,17 +1,13 @@
 package it.unibz.inf.ontop.reformulation.tests;
 
+import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
+import it.unibz.inf.ontop.owlrefplatform.injection.QuestCorePreferences;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWL;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLFactory;
 import org.junit.Test;
-import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.sql.Connection;
@@ -28,9 +24,6 @@ public class TMappingUOBMShortTest {
 		String url = "jdbc:h2:mem:uobm";
 		String username = "sa";
 		String password = "";
-
-		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-		OWLOntology owlOnto = manager.loadOntologyFromOntologyDocument(new File("src/test/resources/tmapping-uobm/univ-bench-dl.owl")); 		
 		
 		Connection conn = DriverManager.getConnection(url, username, password);
 
@@ -38,17 +31,18 @@ public class TMappingUOBMShortTest {
 
 		Properties pref = new Properties();
 		//pref.put(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC_INDEX);
-		pref.put(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-		pref.put(QuestPreferences.REFORMULATION_TECHNIQUE, QuestConstants.TW);
-		pref.put(QuestPreferences.REWRITE, QuestConstants.TRUE);
-		pref.put(QuestPreferences.PRINT_KEYS, QuestConstants.TRUE);
+		pref.put(QuestCorePreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+		pref.put(QuestCorePreferences.REFORMULATION_TECHNIQUE, QuestConstants.TW);
+		pref.put(QuestCorePreferences.REWRITE, QuestConstants.TRUE);
+		pref.put(QuestCorePreferences.PRINT_KEYS, QuestConstants.TRUE);
 
 		QuestOWLFactory factory = new QuestOWLFactory();
-        QuestOWLConfiguration config = new QuestOWLConfiguration(QuestPreferences.builder()
+        QuestConfiguration config = QuestConfiguration.defaultBuilder()
 				.nativeOntopMappingFile("src/test/resources/tmapping-uobm/univ-bench-dl.obda")
+				.ontologyFile("src/test/resources/tmapping-uobm/univ-bench-dl.owl")
 				.properties(pref)
-				.build());
-        QuestOWL reasoner = factory.createReasoner(owlOnto, config);		
+				.build();
+        QuestOWL reasoner = factory.createReasoner(config);
 	}
 	
 	private static void execute(Connection conn, String filename) throws IOException, SQLException {		

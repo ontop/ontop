@@ -2,12 +2,13 @@ package it.unibz.inf.ontop.reformulation.owlapi;
 
 
 import it.unibz.inf.ontop.exception.DuplicateMappingException;
+import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.io.InvalidDataSourceException;
 import it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing.TMappingExclusionConfig;
 import it.unibz.inf.ontop.exception.InvalidMappingException;
 import it.unibz.inf.ontop.model.OBDAException;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
+import it.unibz.inf.ontop.owlrefplatform.injection.QuestCorePreferences;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -26,8 +27,6 @@ import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import junit.framework.TestCase;
 
@@ -43,9 +42,7 @@ import junit.framework.TestCase;
 public class TMappingDisablingTest extends TestCase {
 	
 	private Connection connection;
-	
 
-	Logger log = LoggerFactory.getLogger(this.getClass());
 	
 	private final String owlfile = "src/test/resources/test/tmapping/exampleTMappingNoEquivalence.owl";
 	private final String obdafile = "src/test/resources/test/tmapping/exampleTMapping.obda";
@@ -104,34 +101,19 @@ public class TMappingDisablingTest extends TestCase {
 		in.close();
 	}
 		
-	public void testDisableTMappings() throws DuplicateMappingException, InvalidMappingException, InvalidDataSourceException, IOException {
-		/*
-		 * Load the ontology from an external .owl file.
-		 */
-		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-		OWLOntology ontology = null;
-		try {
-			ontology = manager.loadOntologyFromOntologyDocument(new File(owlfile));
-		} catch (OWLOntologyCreationException e1) {
-			e1.printStackTrace();
-			System.exit(1);
-		}
-
-		
-		/*
-		 * Prepare the configuration for the Quest instance. The example below shows the setup for
-		 * "Virtual ABox" mode
-		 */
+	public void testDisableTMappings() throws DuplicateMappingException, InvalidMappingException,
+			InvalidDataSourceException, IOException, OWLOntologyCreationException {
 		
 		/*
 		 * Create the instance of Quest OWL reasoner.
 		 */
 		QuestOWLFactory factory = new QuestOWLFactory();
-		QuestOWLConfiguration configuration = new QuestOWLConfiguration(QuestPreferences.builder()
+		QuestConfiguration configuration = QuestConfiguration.defaultBuilder()
 				.nativeOntopMappingFile(obdafile)
-				.build());
+				.ontologyFile(owlfile)
+				.build();
 		
-		QuestOWL reasoner = factory.createReasoner(ontology, configuration);
+		QuestOWL reasoner = factory.createReasoner(configuration);
 		
 		/*
 		 * Prepare the data connection for querying.
@@ -166,36 +148,18 @@ public class TMappingDisablingTest extends TestCase {
 		reasoner.dispose();
 	}
 	
-	public void testDisableSelectedTMappings() throws DuplicateMappingException, InvalidMappingException, InvalidDataSourceException, IOException {
-		/*
-		 * Load the ontology from an external .owl file.
-		 */
-		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-		OWLOntology ontology = null;
-		try {
-			ontology = manager.loadOntologyFromOntologyDocument(new File(owlfile));
-		} catch (OWLOntologyCreationException e1) {
-			e1.printStackTrace();
-		}
-		
-		/*
-		 * Prepare the configuration for the Quest instance. The example below shows the setup for
-		 * "Virtual ABox" mode
-		 */
-		Properties p = new Properties();
-		p.put(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-		p.put(QuestPreferences.TMAPPING_EXCLUSION, TMappingExclusionConfig.parseFile(tMappingsConfFile));
-		//p.put(QuestPreferences.T_MAPPINGS, QuestConstants.FALSE); // Disable T_Mappings
-
+	public void testDisableSelectedTMappings() throws DuplicateMappingException, InvalidMappingException,
+			InvalidDataSourceException, IOException, OWLOntologyCreationException {
 		/*
 		 * Create the instance of Quest OWL reasoner.
 		 */
 		QuestOWLFactory factory = new QuestOWLFactory();
-		QuestOWLConfiguration configuration = new QuestOWLConfiguration(QuestPreferences.builder()
+		QuestConfiguration configuration = QuestConfiguration.defaultBuilder()
 				.nativeOntopMappingFile(obdafile)
-				.properties(p)
-				.build());
-		QuestOWL reasoner = factory.createReasoner(ontology, configuration);
+				.ontologyFile(owlfile)
+				.tMappingExclusionConfig(TMappingExclusionConfig.parseFile(tMappingsConfFile))
+				.build();
+		QuestOWL reasoner = factory.createReasoner(configuration);
 		
 		/*
 		 * Prepare the data connection for querying.

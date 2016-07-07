@@ -20,24 +20,18 @@ package it.unibz.inf.ontop.reformulation.tests;
  * #L%
  */
 
-import it.unibz.inf.ontop.model.OBDADataFactory;
-import it.unibz.inf.ontop.model.OBDAModel;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
+import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
+import it.unibz.inf.ontop.owlrefplatform.injection.QuestCorePreferences;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLIndividual;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.sql.Connection;
@@ -59,7 +53,6 @@ public class TMappingConcurrencyErrorFixTest{
 	
 
 	Logger log = LoggerFactory.getLogger(this.getClass());
-	private OWLOntology ontology;
 
 	final String owlFileName = "src/test/resources/test/tmapping/exampleTMapping.owl";
 	final String obdaFileName = "src/test/resources/test/tmapping/exampleTMapping.obda";
@@ -88,20 +81,17 @@ public class TMappingConcurrencyErrorFixTest{
 
 		st.executeUpdate(bf.toString());
 		connection.commit();
-
-		// Loading the OWL file
-		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-		ontology = manager.loadOntologyFromOntologyDocument((new File(owlFileName)));
 	
 		Properties p = new Properties();
-		p.setProperty(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-		p.setProperty(QuestPreferences.OBTAIN_FULL_METADATA, QuestConstants.FALSE);
+		p.setProperty(QuestCorePreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+		p.setProperty(QuestCorePreferences.OBTAIN_FULL_METADATA, QuestConstants.FALSE);
 		// Creating a new instance of the reasoner
         QuestOWLFactory factory = new QuestOWLFactory();
-        QuestOWLConfiguration config = new QuestOWLConfiguration(QuestPreferences.builder()
+        QuestConfiguration config = QuestConfiguration.defaultBuilder()
 				.nativeOntopMappingFile(obdaFileName)
-				.properties(p).build());
-        reasoner = factory.createReasoner(ontology, config);
+				.ontologyFile(owlFileName)
+				.properties(p).build();
+        reasoner = factory.createReasoner(config);
 
 		// Now we are ready for querying
 		conn = reasoner.getConnection();

@@ -20,17 +20,15 @@ package it.unibz.inf.ontop.reformulation.tests;
  * #L%
  */
 
+import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.io.QueryIOManager;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
+import it.unibz.inf.ontop.owlrefplatform.injection.QuestCorePreferences;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import it.unibz.inf.ontop.querymanager.QueryController;
 import it.unibz.inf.ontop.querymanager.QueryControllerEntity;
 import it.unibz.inf.ontop.querymanager.QueryControllerQuery;
 import junit.framework.TestCase;
-import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,27 +41,25 @@ import java.util.Properties;
  */
 public class SemanticIndexLUBMHTest extends TestCase {
 
-	private OWLOntology ontology;
-	private OWLOntologyManager manager;
-
 	private final Logger log = LoggerFactory.getLogger(this.getClass());
+	private static final String owlFilePath = "src/test/resources/test/lubm-ex-20-uni1/LUBM-ex-20.owl";
 
 	public SemanticIndexLUBMHTest() throws Exception {
-		manager = OWLManager.createOWLOntologyManager();
-		ontology = manager.loadOntologyFromOntologyDocument(new File("src/test/resources/test/lubm-ex-20-uni1/LUBM-ex-20.owl"));
 	}
 
 	public void test3InitializingQuest() throws Exception {
 		long start = System.nanoTime();
 
         Properties p = new Properties();
-        p.setProperty(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC_INDEX);
-        p.setProperty(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
+        p.setProperty(QuestCorePreferences.DBTYPE, QuestConstants.SEMANTIC_INDEX);
+        p.setProperty(QuestCorePreferences.ABOX_MODE, QuestConstants.CLASSIC);
 
 		QuestOWLFactory factory = new QuestOWLFactory();
-        QuestOWLConfiguration config = new QuestOWLConfiguration(QuestPreferences.builder()
-				.properties(p).build());
-        QuestOWL quest = factory.createReasoner(ontology, config);
+        QuestConfiguration config = QuestConfiguration.defaultBuilder()
+				.ontologyFile(owlFilePath)
+				.properties(p)
+				.build();
+        QuestOWL quest = factory.createReasoner(config);
 
 		QuestOWLConnection qconn =  quest.getConnection();
 

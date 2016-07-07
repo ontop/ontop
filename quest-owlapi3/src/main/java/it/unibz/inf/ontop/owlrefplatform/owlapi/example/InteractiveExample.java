@@ -1,19 +1,13 @@
 package it.unibz.inf.ontop.owlrefplatform.owlapi.example;
 
-import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
+import it.unibz.inf.ontop.injection.QuestConfiguration;
+import it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing.TMappingExclusionConfig;
 import it.unibz.inf.ontop.owlrefplatform.core.SQLExecutableQuery;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.InputStreamReader;
-import java.util.Properties;
 
-import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
-import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
 
 public class InteractiveExample {
 
@@ -31,12 +25,6 @@ public class InteractiveExample {
 	final String tMappingsConfFile = "src/main/resources/example/tMappingsConf.conf";
 
 	public void runQuery() throws Exception {
-
-		/*
-		 * Load the ontology from an external .owl file.
-		 */
-		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-		OWLOntology ontology = manager.loadOntologyFromOntologyDocument(new File(owlfile));
 		
 //		/*
 //		 * T-Mappings Handling!!
@@ -45,10 +33,11 @@ public class InteractiveExample {
 //		factory.setExcludeFromTMappingsPredicates(tMapParser.parsePredicates());
 
         QuestOWLFactory factory = new QuestOWLFactory();
-        QuestOWLConfiguration config = new QuestOWLConfiguration(
-				QuestPreferences.builder()
-				.nativeOntopMappingFile(obdafile).build());
-        QuestOWL reasoner = factory.createReasoner(ontology, config);
+        QuestConfiguration config = QuestConfiguration.defaultBuilder()
+				.nativeOntopMappingFile(obdafile)
+				.ontologyFile(owlfile)
+				.build();
+        QuestOWL reasoner = factory.createReasoner(config);
 
 
 		String outFile = "src/main/resources/davide/QueriesStdout/prova";

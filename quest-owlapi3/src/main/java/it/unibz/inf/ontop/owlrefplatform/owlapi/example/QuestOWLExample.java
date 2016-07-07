@@ -21,16 +21,10 @@ package it.unibz.inf.ontop.owlrefplatform.owlapi.example;
  */
 
 
-import it.unibz.inf.ontop.model.OBDAModel;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
+import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
-import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.io.ToStringRenderer;
 import org.semanticweb.owlapi.model.OWLObject;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
-
-import java.io.File;
 
 /*
  * Use the sample database using H2 from
@@ -48,19 +42,14 @@ public class QuestOWLExample {
     public void runQuery() throws Exception {
 
 		/*
-         * Load the ontology from an external .owl file.
-		 */
-        OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-        OWLOntology ontology = manager.loadOntologyFromOntologyDocument(new File(owlfile));
-
-		/*
          * Create the instance of Quest OWL reasoner.
 		 */
         QuestOWLFactory factory = new QuestOWLFactory();
-        QuestOWLConfiguration config = new QuestOWLConfiguration(QuestPreferences.builder()
+        QuestConfiguration config = QuestConfiguration.defaultBuilder()
                 .nativeOntopMappingFile(obdafile)
-                .build());
-        QuestOWL reasoner = factory.createReasoner(ontology, config);
+                .ontologyFile(owlfile)
+                .build();
+        QuestOWL reasoner = factory.createReasoner(config);
 
 		/*
          * Get the book information that is stored in the database

@@ -20,12 +20,11 @@ package it.unibz.inf.ontop.reformulation.tests;
  * #L%
  */
 
+import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.model.OBDADataFactory;
-import it.unibz.inf.ontop.model.OBDAModel;
 import it.unibz.inf.ontop.model.Predicate;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
+import it.unibz.inf.ontop.owlrefplatform.injection.QuestCorePreferences;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import org.junit.After;
 import org.junit.Before;
@@ -47,7 +46,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import java.util.Properties;
 
 import static org.junit.Assert.assertTrue;
 
@@ -62,8 +60,6 @@ public class BindTestWithFunctions {
 	
 	private OBDADataFactory fac;
 	private Connection conn;
-    
-	private OWLOntology ontology;
 
 	final String owlfile = "src/test/resources/test/bind/sparqlBind.owl";
 	final String obdafile = "src/test/resources/test/bind/sparqlBindWithFunctions.obda";
@@ -94,10 +90,6 @@ public class BindTestWithFunctions {
 		
 		st.executeUpdate(bf.toString()); 
 		conn.commit();
-
-		// Loading the OWL file
-		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-		ontology = manager.loadOntologyFromOntologyDocument((new File(owlfile)));
 	}
 
 	@After
@@ -134,10 +126,11 @@ public class BindTestWithFunctions {
         // Creating a new instance of the reasoner
 
         QuestOWLFactory factory = new QuestOWLFactory();
-        QuestOWLConfiguration config = new QuestOWLConfiguration(QuestPreferences.builder()
+        QuestConfiguration config = QuestConfiguration.defaultBuilder()
                 .nativeOntopMappingFile(obdafile)
-                .build());
-        QuestOWL reasoner = factory.createReasoner(ontology, config);
+                .ontologyFile(owlfile)
+                .build();
+        QuestOWL reasoner = factory.createReasoner(config);
 
         // Now we are ready for querying
         QuestOWLConnection conn = reasoner.getConnection();
@@ -797,10 +790,11 @@ public class BindTestWithFunctions {
     private void checkReturnedValues(String query, List<String> expectedValues) throws Exception {
 
         QuestOWLFactory factory = new QuestOWLFactory();
-        QuestOWLConfiguration config = new QuestOWLConfiguration(QuestPreferences.builder()
+        QuestConfiguration config = QuestConfiguration.defaultBuilder()
                 .nativeOntopMappingFile(obdafile)
-                .build());
-        QuestOWL reasoner = factory.createReasoner(ontology, config);
+                .ontologyFile(owlfile)
+                .build();
+        QuestOWL reasoner = factory.createReasoner(config);
 
 
         // Now we are ready for querying

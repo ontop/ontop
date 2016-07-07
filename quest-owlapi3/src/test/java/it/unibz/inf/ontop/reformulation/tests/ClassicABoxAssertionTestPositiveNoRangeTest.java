@@ -20,8 +20,9 @@ package it.unibz.inf.ontop.reformulation.tests;
  * #L%
  */
 
+import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
+import it.unibz.inf.ontop.owlrefplatform.injection.QuestCorePreferences;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import junit.framework.TestCase;
 import org.semanticweb.owlapi.apibinding.OWLManager;
@@ -48,16 +49,13 @@ public class ClassicABoxAssertionTestPositiveNoRangeTest extends TestCase {
 
 	public ClassicABoxAssertionTestPositiveNoRangeTest() throws Exception {
 		Properties p = new Properties();
-		p.setProperty(QuestPreferences.REFORMULATION_TECHNIQUE, QuestConstants.UCQBASED);
-		p.setProperty(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC_INDEX);
-		p.setProperty(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
-		p.setProperty(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-		p.setProperty(QuestPreferences.OBTAIN_FROM_ONTOLOGY, "true");
+		p.setProperty(QuestCorePreferences.REFORMULATION_TECHNIQUE, QuestConstants.UCQBASED);
+		p.setProperty(QuestCorePreferences.DBTYPE, QuestConstants.SEMANTIC_INDEX);
+		p.setProperty(QuestCorePreferences.ABOX_MODE, QuestConstants.CLASSIC);
+		p.setProperty(QuestCorePreferences.OPTIMIZE_EQUIVALENCES, "true");
+		p.setProperty(QuestCorePreferences.OBTAIN_FROM_ONTOLOGY, "true");
 
 		String owlfile = "src/test/resources/test/owl-types-simple-split.owl";
-
-		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-		OWLOntology ontology = manager.loadOntologyFromOntologyDocument(new File(owlfile));
 
 		
 //		QuestOWLFactory fac = new QuestOWLFactory();
@@ -66,9 +64,12 @@ public class ClassicABoxAssertionTestPositiveNoRangeTest extends TestCase {
 //		reasoner = (QuestOWL) fac.createReasoner(ontology);
 //		reasoner.flush();
         QuestOWLFactory factory = new QuestOWLFactory();
-        QuestOWLConfiguration config = new QuestOWLConfiguration(QuestPreferences.builder()
-				.properties(p).build());
-        QuestOWL reasoner = factory.createReasoner(ontology, config);
+
+        QuestConfiguration config = QuestConfiguration.defaultBuilder()
+				.ontologyFile(owlfile)
+				.properties(p)
+				.build();
+        QuestOWL reasoner = factory.createReasoner(config);
 
 
 		conn = reasoner.getConnection();

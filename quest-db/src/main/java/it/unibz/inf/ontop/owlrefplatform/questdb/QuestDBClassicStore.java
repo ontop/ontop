@@ -20,15 +20,13 @@ package it.unibz.inf.ontop.owlrefplatform.questdb;
  * #L%
  */
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Properties;
-import java.util.Set;
+import java.util.*;
 
+import it.unibz.inf.ontop.injection.QuestConfiguration;
+import it.unibz.inf.ontop.injection.QuestPreferences;
 import it.unibz.inf.ontop.model.OBDAException;
 import it.unibz.inf.ontop.model.OBDAModel;
 import it.unibz.inf.ontop.ontology.OntologyVocabulary;
@@ -36,8 +34,7 @@ import it.unibz.inf.ontop.owlapi.OWLAPIABoxIterator;
 import it.unibz.inf.ontop.owlapi.OWLAPITranslatorUtility;
 import it.unibz.inf.ontop.owlrefplatform.core.IQuest;
 import it.unibz.inf.ontop.owlrefplatform.core.IQuestConnection;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
+import it.unibz.inf.ontop.owlrefplatform.injection.QuestCorePreferences;
 import org.openrdf.model.Literal;
 import org.openrdf.model.Resource;
 import org.openrdf.model.Statement;
@@ -61,11 +58,8 @@ import it.unibz.inf.ontop.ontology.impl.OntologyFactoryImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.abox.QuestMaterializer;
 import it.unibz.inf.ontop.owlrefplatform.core.abox.RDBMSSIRepositoryManager;
 import it.unibz.inf.ontop.owlrefplatform.core.execution.SIQuestStatement;
-import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyIRIMapper;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
-import org.semanticweb.owlapi.util.AutoIRIMapper;
+import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -82,75 +76,41 @@ public class QuestDBClassicStore extends QuestDBAbstractStore {
 
 	private static Logger log = LoggerFactory.getLogger(QuestDBClassicStore.class);
 
-	protected transient OWLOntologyManager man = OWLManager.createOWLOntologyManager();
-
-	private OntologyFactory ofac = OntologyFactoryImpl.getInstance();
+	private static final OntologyFactory ofac = OntologyFactoryImpl.getInstance();
 	
 	private Set<OWLOntology> closure;
 
 	private IQuest questInstance;
 
-	public QuestDBClassicStore(String name, java.net.URI tboxFile, QuestPreferences config) throws Exception {
+	public QuestDBClassicStore(String name, QuestConfiguration config) throws Exception {
 		super(name, config);
-		Ontology tbox = readOntology(tboxFile.toASCIIString());
-		setup(tbox, config);
+		Ontology tbox = loadTboxFromConfiguration(config);
+		createInstance(tbox, config.getPreferences());
 	}
-	
-	public QuestDBClassicStore(String name, String tboxFile, QuestPreferences config) throws Exception {
+
+	private static Ontology loadTboxFromConfiguration(QuestConfiguration config) throws OWLOntologyCreationException {
+		return config.loadInputOntology()
+				.map(OWLAPITranslatorUtility::translateImportsClosure)
+				// Default empty Ontology
+				.orElseGet(() -> ofac.createOntology(ofac.createVocabulary()));
+	}
+
+
+	/**
+	 * TODO: integrate Ontology loading from a Dataset into QuestConfiguration
+     */
+	public QuestDBClassicStore(String name, Dataset data, QuestConfiguration config) throws Exception {
 		super(name, config);
-		Ontology tbox = null;
-		if (tboxFile == null) {
-			OntologyVocabulary voc = ofac.createVocabulary();
-			tbox = ofac.createOntology(voc);
-		} else {
-			tbox = readOntology(tboxFile);
-		}
-		setup(tbox, config);
-	}
-	
-	private Ontology readOntology(String tboxFile) throws Exception {
-		File f = new File(tboxFile);
-		OWLOntologyIRIMapper iriMapper = new AutoIRIMapper(f.getParentFile(), false);
-		man.addIRIMapper(iriMapper);
-		
-		OWLOntology owlontology = null;
-		if (tboxFile.contains("file:")) {
-			owlontology = man.loadOntologyFromOntologyDocument(new URL(tboxFile).openStream());
-		} else {
-			owlontology = man.loadOntologyFromOntologyDocument(new File(tboxFile));
-		}
-		closure = man.getImportsClosure(owlontology);
-		return OWLAPITranslatorUtility.mergeTranslateOntologies(closure);
+		Ontology tbox = loadTBoxFromDataset(data);
+		createInstance(tbox, config.getPreferences());
 	}
 
-
-	public QuestDBClassicStore(String name, Dataset data, QuestPreferences config) throws Exception {
-		super(name, config);
-		Ontology tbox = getTBox(data);
-		setup(tbox, config);
-	}
-
-	
-	private void setup(Ontology onto, QuestPreferences config) throws Exception {
-		if (config == null) {
-			Properties p = new Properties();
-			p.setProperty(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
-			config = new QuestPreferences(p);
-		}
-
-		if (!config.getProperty(QuestPreferences.ABOX_MODE).equals(QuestConstants.CLASSIC)) {
-			throw new IllegalArgumentException("A classic repository must be created with the CLASSIC flag in the configuration.");
-		}
-		createInstance(onto, config);
-	}
-
-	private void createInstance(Ontology tbox, QuestPreferences config) throws Exception {
-        questInstance = getComponentFactory().create(tbox, null, null, config);
-
+	private void createInstance(Ontology tbox, QuestPreferences preferences) throws Exception {
+        questInstance = getComponentFactory().create(tbox, Optional.empty(), Optional.empty());
 		questInstance.setupRepository();
 		
-		final boolean bObtainFromOntology = config.getBoolean(QuestPreferences.OBTAIN_FROM_ONTOLOGY);
-		final boolean bObtainFromMappings = config.getBoolean(QuestPreferences.OBTAIN_FROM_MAPPINGS);
+		final boolean bObtainFromOntology = preferences.getRequiredBoolean(QuestCorePreferences.OBTAIN_FROM_ONTOLOGY);
+		final boolean bObtainFromMappings = preferences.getRequiredBoolean(QuestCorePreferences.OBTAIN_FROM_MAPPINGS);
 		IQuestConnection conn = questInstance.getNonPoolConnection();
         //TODO: avoid this cast
 		SIQuestStatement st = conn.createSIStatement();
@@ -192,7 +152,7 @@ public class QuestDBClassicStore extends QuestDBAbstractStore {
 	}
 
 	@Override
-	public QuestPreferences getPreferences() {
+	public QuestCorePreferences getPreferences() {
 		return questInstance.getPreferences();
 	}
 
@@ -206,7 +166,7 @@ public class QuestDBClassicStore extends QuestDBAbstractStore {
 		return conn;
 	}
 
-	private Ontology getTBox(Dataset dataset) throws Exception {
+	private Ontology loadTBoxFromDataset(Dataset dataset) throws Exception {
 		// Merge default and named graphs to filter duplicates
 		Set<URI> graphURIs = new HashSet<>();
 		graphURIs.addAll(dataset.getDefaultGraphs());

@@ -22,18 +22,15 @@ package it.unibz.inf.ontop.owlrefplatform.questdb;
 
 import java.io.Serializable;
 
-import com.google.inject.Guice;
 import com.google.inject.Injector;
 import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
-import it.unibz.inf.ontop.injection.OBDACoreModule;
+import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.injection.OBDAFactoryWithException;
 import it.unibz.inf.ontop.owlrefplatform.core.IQuestConnection;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestDBConnection;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
+import it.unibz.inf.ontop.owlrefplatform.injection.QuestCorePreferences;
 import it.unibz.inf.ontop.owlrefplatform.injection.QuestComponentFactory;
 import it.unibz.inf.ontop.model.OBDAException;
-import it.unibz.inf.ontop.owlrefplatform.core.*;
-import it.unibz.inf.ontop.owlrefplatform.injection.QuestComponentModule;
 
 public abstract class QuestDBAbstractStore implements Serializable {
 
@@ -46,13 +43,13 @@ public abstract class QuestDBAbstractStore implements Serializable {
 
 	protected String name;
 
-	public QuestDBAbstractStore(String name, QuestPreferences config) {
+	public QuestDBAbstractStore(String name, QuestConfiguration configuration) {
 		this.name = name;
 
         /**
          * Setup the dependency injection for the QuestComponentFactory
          */
-        injector = Guice.createInjector(new OBDACoreModule(config), new QuestComponentModule(config));
+        injector = configuration.getInjector();
         nativeQLFactory = injector.getInstance(NativeQueryLanguageComponentFactory.class);
         componentFactory = injector.getInstance(QuestComponentFactory.class);
         obdaFactory = injector.getInstance(OBDAFactoryWithException.class);
@@ -63,7 +60,7 @@ public abstract class QuestDBAbstractStore implements Serializable {
 	}
 	
 	/* Move to query time ? */
-	public abstract QuestPreferences getPreferences();
+	public abstract QuestCorePreferences getPreferences();
 
 	public QuestDBConnection getConnection() throws OBDAException {
 	//	System.out.println("getquestdbconn..");

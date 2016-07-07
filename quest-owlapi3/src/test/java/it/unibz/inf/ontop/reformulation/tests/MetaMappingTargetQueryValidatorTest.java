@@ -31,10 +31,13 @@ import java.sql.Statement;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import it.unibz.inf.ontop.exception.InvalidMappingException;
+import it.unibz.inf.ontop.injection.QuestConfiguration;
+import it.unibz.inf.ontop.io.InvalidDataSourceException;
 import junit.framework.TestCase;
 
 import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
-import it.unibz.inf.ontop.injection.OBDACoreModule;
+import it.unibz.inf.ontop.injection.impl.OBDACoreModule;
 import it.unibz.inf.ontop.injection.OBDAProperties;
 import it.unibz.inf.ontop.mapping.MappingParser;
 import it.unibz.inf.ontop.model.OBDADataFactory;
@@ -61,12 +64,9 @@ import org.slf4j.LoggerFactory;
 public class MetaMappingTargetQueryValidatorTest extends TestCase {
 
 
-	private OBDADataFactory fac;
 	private Connection conn;
 
 	Logger log = LoggerFactory.getLogger(this.getClass());
-	private OBDAModel obdaModel;
-	private OWLOntology ontology;
 
 	final String owlfile = "src/test/resources/test/metamapping.owl";
 	final String obdafile = "src/test/resources/test/metamapping.obda";
@@ -83,8 +83,6 @@ public class MetaMappingTargetQueryValidatorTest extends TestCase {
 		String username = "sa";
 		String password = "";
 
-		fac = OBDADataFactoryImpl.getInstance();
-
 		conn = DriverManager.getConnection(url, username, password);
 		Statement st = conn.createStatement();
 
@@ -99,23 +97,6 @@ public class MetaMappingTargetQueryValidatorTest extends TestCase {
 
 		st.executeUpdate(bf.toString());
 		conn.commit();
-
-		// Loading the OWL file
-		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-		ontology = manager.loadOntologyFromOntologyDocument((new File(owlfile)));
-
-        /**
-         * Factory initialization
-         */
-        Injector injector = Guice.createInjector(new OBDACoreModule(new OBDAProperties()));
-        NativeQueryLanguageComponentFactory factory = injector.getInstance(NativeQueryLanguageComponentFactory.class);
-
-        /*
-         * Load the OBDA model from an external .obda file
-         */
-        MappingParser mappingParser = factory.create(new FileReader(obdafile));
-        obdaModel = mappingParser.getOBDAModel();
-		
 	}
 
 	@Override
@@ -144,9 +125,16 @@ public class MetaMappingTargetQueryValidatorTest extends TestCase {
 		conn.commit();
 	}
 
-	public void testValidate(){
+	public void testValidate() throws InvalidDataSourceException, IOException, InvalidMappingException {
 
-		// run validador
+		QuestConfiguration configuration = QuestConfiguration.defaultBuilder()
+				.nativeOntopMappingFile(obdafile)
+				.build();
+
+		OBDAModel obdaModel = configuration.loadInputMappings()
+				.orElseThrow(IllegalStateException::new);
+
+		// run validator
 		try {
 			OBDAModelValidator.validate(obdaModel);
 		}

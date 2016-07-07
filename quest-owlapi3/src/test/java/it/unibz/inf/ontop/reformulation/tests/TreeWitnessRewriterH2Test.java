@@ -20,18 +20,13 @@ package it.unibz.inf.ontop.reformulation.tests;
  * #L%
  */
 
-import com.google.inject.Guice;
-import com.google.inject.Injector;
-import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
-import it.unibz.inf.ontop.injection.OBDACoreModule;
-import it.unibz.inf.ontop.injection.OBDAProperties;
+import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.io.QueryIOManager;
-import it.unibz.inf.ontop.mapping.MappingParser;
 import it.unibz.inf.ontop.model.OBDADataFactory;
 import it.unibz.inf.ontop.model.OBDAModel;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
+import it.unibz.inf.ontop.owlrefplatform.injection.QuestCorePreferences;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import it.unibz.inf.ontop.querymanager.QueryController;
 import it.unibz.inf.ontop.querymanager.QueryControllerEntity;
@@ -40,10 +35,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -170,22 +163,6 @@ public class TreeWitnessRewriterH2Test{
 
 		st.executeUpdate(bf.toString());
 		conn.commit();
-
-		// Loading the OWL file
-		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-		ontology = manager.loadOntologyFromOntologyDocument((new File(owlfile)));
-
-        /**
-         * Factory initialization
-         */
-        Injector injector = Guice.createInjector(new OBDACoreModule(new OBDAProperties()));
-        NativeQueryLanguageComponentFactory factory = injector.getInstance(NativeQueryLanguageComponentFactory.class);
-
-        /*
-         * Load the OBDA model from an external .obda file
-         */
-        MappingParser mappingParser = factory.create(new FileReader(obdafile));
-        obdaModel = mappingParser.getOBDAModel();
 	}
 
 	@After
@@ -244,9 +221,11 @@ public class TreeWitnessRewriterH2Test{
 
 		// Creating a new instance of the reasoner
 		QuestOWLFactory factory = new QuestOWLFactory();
-        QuestOWLConfiguration config = new QuestOWLConfiguration(QuestPreferences.builder().properties(p)
-				.nativeOntopMappingFile(obdafile).build());
-        QuestOWL reasoner = factory.createReasoner(ontology, config);
+        QuestConfiguration config = QuestConfiguration.defaultBuilder().properties(p)
+				.nativeOntopMappingFile(obdafile)
+				.ontologyFile(owlfile)
+				.build();
+        QuestOWL reasoner = factory.createReasoner(config);
 
 		// Now we are ready for querying
 		QuestOWLStatement st = reasoner.getStatement();
@@ -331,11 +310,11 @@ public class TreeWitnessRewriterH2Test{
 		 * p.setProperty("rewrite", "true");
 		 */
 		Properties p  = new Properties();
-		p.setProperty(QuestPreferences.REFORMULATION_TECHNIQUE, QuestConstants.TW);
-		p.setProperty(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC_INDEX);
-		p.setProperty(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
-		p.setProperty(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-		p.setProperty(QuestPreferences.OBTAIN_FROM_ONTOLOGY, "true");
+		p.setProperty(QuestCorePreferences.REFORMULATION_TECHNIQUE, QuestConstants.TW);
+		p.setProperty(QuestCorePreferences.DBTYPE, QuestConstants.SEMANTIC_INDEX);
+		p.setProperty(QuestCorePreferences.ABOX_MODE, QuestConstants.CLASSIC);
+		p.setProperty(QuestCorePreferences.OPTIMIZE_EQUIVALENCES, "true");
+		p.setProperty(QuestCorePreferences.OBTAIN_FROM_ONTOLOGY, "true");
 		p.setProperty("rewrite", "true");
 
 		runTests(p);

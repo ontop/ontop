@@ -3,13 +3,15 @@ package it.unibz.inf.ontop.owlrefplatform.owlapi.example;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
-import it.unibz.inf.ontop.injection.OBDACoreModule;
+import it.unibz.inf.ontop.injection.impl.OBDACoreModule;
 import it.unibz.inf.ontop.mapping.MappingParser;
 import it.unibz.inf.ontop.model.OBDAModel;
 import it.unibz.inf.ontop.owlapi.OWLAPITranslatorUtility;
 import it.unibz.inf.ontop.owlrefplatform.core.*;
 import it.unibz.inf.ontop.owlrefplatform.injection.QuestComponentFactory;
-import it.unibz.inf.ontop.owlrefplatform.injection.QuestComponentModule;
+import it.unibz.inf.ontop.owlrefplatform.injection.QuestCoreConfiguration;
+import it.unibz.inf.ontop.owlrefplatform.injection.impl.QuestComponentModule;
+import it.unibz.inf.ontop.owlrefplatform.injection.QuestCorePreferences;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLConnection;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLStatement;
 import it.unibz.inf.ontop.sql.DBMetadata;
@@ -21,6 +23,7 @@ import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 
 import java.io.File;
+import java.util.Optional;
 
 /**
  * This class shows how to create an instance of quest giving the metadata manually 
@@ -43,8 +46,11 @@ private void setup()  throws Exception {
 	OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 	OWLOntology ontology = manager.loadOntologyFromOntologyDocument(new File(owlfile));
 
-	QuestPreferences preference = new QuestPreferences();
-	Injector injector = Guice.createInjector(new OBDACoreModule(preference), new QuestComponentModule(preference));
+	QuestCoreConfiguration configuration = QuestCoreConfiguration.defaultBuilder()
+			.nativeOntopMappingFile(obdafile)
+			.dbMetadata(getMeta())
+			.build();
+	Injector injector = configuration.getInjector();
 	NativeQueryLanguageComponentFactory nativeQLFactory = injector.getInstance(NativeQueryLanguageComponentFactory.class);
 	QuestComponentFactory componentFactory = injector.getInstance(QuestComponentFactory.class);
 
@@ -55,9 +61,10 @@ private void setup()  throws Exception {
 	 * Prepare the configuration for the Quest instance. The example below shows the setup for
 	 * "Virtual ABox" mode
 	 */
-	DBMetadata dbMetadata = getMeta();
-	IQuest quest = componentFactory.create(OWLAPITranslatorUtility.translateImportsClosure(ontology), obdaModel,
-			dbMetadata, preference);
+	IQuest quest = componentFactory.create(
+			OWLAPITranslatorUtility.translateImportsClosure(ontology),
+			Optional.of(obdaModel),
+			Optional.empty());
 	quest.setupRepository();
 	
 	/*

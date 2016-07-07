@@ -20,10 +20,10 @@ package it.unibz.inf.ontop.owlrefplatform.owlapi;
  * #L%
  */
 
+import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.model.OBDAModel;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
 import org.semanticweb.owlapi.model.OWLOntology;
+import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.reasoner.IllegalConfigurationException;
 import org.semanticweb.owlapi.reasoner.OWLReasoner;
 import org.semanticweb.owlapi.reasoner.OWLReasonerConfiguration;
@@ -33,7 +33,6 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 
-import java.util.Properties;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
@@ -65,11 +64,18 @@ public class QuestOWLFactory implements OWLReasonerFactory {
         throw new UnsupportedOperationException("Quest is a buffering reasoner");
     }
 
+    /**
+     * TODO: should we really support this method?
+     */
     @Override
     public OWLReasoner createReasoner(OWLOntology ontology) {
-        Properties p = new Properties();
-        p.setProperty(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
-        return createReasoner(ontology, new QuestOWLConfiguration(QuestPreferences.builder().properties(p).build()));
+        QuestOWLConfiguration configuration = new QuestOWLConfiguration(QuestConfiguration
+                .defaultBuilder()
+                .ontology(ontology)
+                .enableClassicABoxMode()
+                .build());
+
+        return createReasoner(ontology, configuration);
     }
 
     @Nonnull
@@ -79,27 +85,23 @@ public class QuestOWLFactory implements OWLReasonerFactory {
         throw new UnsupportedOperationException("Quest is a buffering reasoner");
     }
 
-    /**
-     *
-     * @deprecated use {@link #createReasoner(OWLOntology, QuestOWLConfiguration)} instead
-     *
-     * @throws IllegalConfigurationException
-     */
     @Nonnull
     @Override
-    @Deprecated
     public QuestOWL createReasoner(@Nonnull OWLOntology ontology, @Nonnull OWLReasonerConfiguration config) throws IllegalConfigurationException {
         checkArgument(config instanceof QuestOWLConfiguration, "config %s is not an instance of QuestOWLConfiguration", config);
-        return createReasoner(ontology, (QuestOWLConfiguration) config);
-
+        return new QuestOWL(ontology, (QuestOWLConfiguration)config);
     }
 
-
     @Nonnull
-    public QuestOWL createReasoner(@Nonnull OWLOntology ontology, @Nonnull QuestOWLConfiguration config)
-            throws IllegalConfigurationException {
-        return new QuestOWL(ontology, config);
+    public QuestOWL createReasoner(@Nonnull QuestConfiguration config)
+            throws IllegalConfigurationException, OWLOntologyCreationException {
 
+        QuestOWLConfiguration owlConfiguration = new QuestOWLConfiguration(config);
+
+        OWLOntology ontology = config.loadInputOntology()
+                .orElseThrow(() -> new IllegalConfigurationException("QuestOWL requires an ontology", owlConfiguration));
+
+        return createReasoner(ontology, owlConfiguration);
     }
 
 }

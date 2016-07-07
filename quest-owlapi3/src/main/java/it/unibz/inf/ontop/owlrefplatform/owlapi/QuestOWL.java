@@ -23,23 +23,21 @@ package it.unibz.inf.ontop.owlrefplatform.owlapi;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import it.unibz.inf.ontop.exception.InvalidMappingException;
+import it.unibz.inf.ontop.injection.InvalidOBDAConfigurationException;
 import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
-import it.unibz.inf.ontop.injection.OBDACoreModule;
-import it.unibz.inf.ontop.injection.OBDAProperties;
+import it.unibz.inf.ontop.injection.QuestConfiguration;
+import it.unibz.inf.ontop.injection.QuestPreferences;
+import it.unibz.inf.ontop.injection.impl.OBDACoreModule;
 import it.unibz.inf.ontop.io.InvalidDataSourceException;
-import it.unibz.inf.ontop.model.OBDAException;
-import it.unibz.inf.ontop.model.OBDAModel;
-import it.unibz.inf.ontop.model.ResultSet;
-import it.unibz.inf.ontop.model.TupleResultSet;
+import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.ontology.*;
 import it.unibz.inf.ontop.owlapi.OWLAPIABoxIterator;
 import it.unibz.inf.ontop.owlapi.OWLAPITranslatorUtility;
 import it.unibz.inf.ontop.owlrefplatform.core.*;
 import it.unibz.inf.ontop.owlrefplatform.core.abox.QuestMaterializer;
-import it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing.TMappingExclusionConfig;
 import it.unibz.inf.ontop.owlrefplatform.injection.QuestComponentFactory;
-import it.unibz.inf.ontop.owlrefplatform.injection.QuestComponentModule;
-import it.unibz.inf.ontop.sql.ImplicitDBConstraintsReader;
+import it.unibz.inf.ontop.owlrefplatform.injection.impl.QuestComponentModule;
+import it.unibz.inf.ontop.owlrefplatform.injection.QuestCorePreferences;
 import it.unibz.inf.ontop.utils.VersionInfo;
 import org.openrdf.model.Model;
 import org.semanticweb.owlapi.model.*;
@@ -66,7 +64,9 @@ import java.util.Set;
  */
 public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 
-    StructuralReasoner structuralReasoner;
+	private final QuestPreferences preferences;
+	private final Optional<DataSourceMetadata> inputDBMetadata;
+	StructuralReasoner structuralReasoner;
 
     private final Version version;
 
@@ -94,9 +94,9 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 	/* The merge and tranlsation of all loaded ontologies */
 	private Ontology translatedOntologyMerge;
 
-	private final OBDAModel obdaModel;
+	private final Optional<OBDAModel> obdaModel;
 
-	private final QuestPreferences preferences;
+	private final Injector injector;
 
 	private IQuest questInstance = null;
 
@@ -136,69 +136,39 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 	/**
 	 * End-users: use the QuestOWLFactory instead
      */
-    protected QuestOWL(OWLOntology rootOntology, QuestOWLConfiguration configuration)
+    protected QuestOWL(OWLOntology rootOntology, QuestOWLConfiguration owlConfiguration)
 			throws IllegalConfigurationException {
-        super(rootOntology, configuration, BufferingMode.BUFFERING);
+        super(rootOntology, owlConfiguration, BufferingMode.BUFFERING);
 
-		preferences = configuration.getPreferences();
+		QuestConfiguration questConfiguration = owlConfiguration.getQuestConfiguration();
+		preferences = questConfiguration.getPreferences();
+		inputDBMetadata = questConfiguration.getDatasourceMetadata();
+
+
 		/**
 		 * Validates the preferences
 		 */
 		try {
-			preferences.validate();
-		} catch (OBDAProperties.InvalidOBDAConfigurationException e) {
-			throw new IllegalConfigurationException(e.getMessage(), configuration);
+			questConfiguration.validate();
+		} catch (InvalidOBDAConfigurationException e) {
+			throw new IllegalConfigurationException(e.getMessage(), owlConfiguration);
 		}
 
-        this.structuralReasoner = new StructuralReasoner(rootOntology, configuration, BufferingMode.BUFFERING);
+        this.structuralReasoner = new StructuralReasoner(rootOntology, owlConfiguration, BufferingMode.BUFFERING);
 
-		Injector injector = Guice.createInjector(new OBDACoreModule(preferences), new QuestComponentModule(preferences));
+		injector = questConfiguration.getInjector();
 		this.componentFactory = injector.getInstance(QuestComponentFactory.class);
-		NativeQueryLanguageComponentFactory nativeQLFactory = injector.getInstance(NativeQueryLanguageComponentFactory.class);
 
 		try {
-			if (preferences.isInVirtualMode()) {
-				/**
-				 * OBDA model extraction (virtual mode)
-				 */
-				Optional<File> optionalFile = preferences.getMappingFile();
-				if (optionalFile.isPresent()) {
-					File mappingFile = optionalFile.get();
-					obdaModel = nativeQLFactory.create(mappingFile).getOBDAModel();
-				} else {
-					Optional<Reader> optionalReader = preferences.getMappingReader();
-					if (optionalReader.isPresent()) {
-						obdaModel = nativeQLFactory.create(optionalReader.get()).getOBDAModel();
-					} else {
-						Optional<Model> optionalModel = preferences.getMappingModel();
-						if (optionalModel.isPresent()) {
-							obdaModel = nativeQLFactory.create(optionalModel.get()).getOBDAModel();
-						} else {
-							Optional<OBDAModel> optionalPredefinedOBDAModel = preferences.getPredefinedOBDAModel();
-							if (optionalPredefinedOBDAModel.isPresent()) {
-								obdaModel = optionalPredefinedOBDAModel.get();
-							} else {
-								throw new IllegalConfigurationException("Mappings are expected in the virtual mode", configuration);
-							}
-						}
-					}
-				}
-			}
-			/**
-			 * Classic mode
-			 */
-			else {
-				obdaModel = null;
-			}
-
+			obdaModel = questConfiguration.loadInputMappings();
 			/**
 			 * Mapping parsing exceptions are re-thrown as configuration exceptions.
 			 */
 		} catch (InvalidDataSourceException | IOException | InvalidMappingException e) {
-			throw new IllegalConfigurationException(e.getMessage(), configuration);
+			throw new IllegalConfigurationException(e.getMessage(), owlConfiguration);
 		}
 
-		pm = configuration.getProgressMonitor();
+		pm = owlConfiguration.getProgressMonitor();
 
 		man = rootOntology.getOWLOntologyManager();
 
@@ -266,14 +236,16 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 
 		log.debug("Initializing a new Quest instance...");
 
-		final boolean bObtainFromOntology = preferences.getBoolean(QuestPreferences.OBTAIN_FROM_ONTOLOGY);
-		final boolean bObtainFromMappings = preferences.getBoolean(QuestPreferences.OBTAIN_FROM_MAPPINGS);
-		final String unfoldingMode = preferences.getProperty(QuestPreferences.ABOX_MODE);
+		final boolean bObtainFromOntology = preferences.getBoolean(QuestCorePreferences.OBTAIN_FROM_ONTOLOGY)
+				.orElseThrow(() -> new IllegalStateException("Missing property: OBTAIN_FROM_ONTOLOGY"));
+		final boolean bObtainFromMappings = preferences.getBoolean(QuestCorePreferences.OBTAIN_FROM_MAPPINGS)
+				.orElseThrow(() -> new IllegalStateException("Missing property: OBTAIN_FROM_MAPPINGS"));
+		final boolean isVirtualMode = preferences.isInVirtualMode();
 
 		// pm.reasonerTaskStarted("Classifying...");
 		// pm.reasonerTaskBusy();
 
-		questInstance = componentFactory.create(translatedOntologyMerge, obdaModel, null, preferences);
+		questInstance = componentFactory.create(translatedOntologyMerge, obdaModel, inputDBMetadata);
 		
 		Set<OWLOntology> importsClosure = man.getImportsClosure(getRootOntology());
 		
@@ -292,7 +264,7 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 			// pm.reasonerTaskProgressChanged(3, 4);
 
 			// Preparing the data source
-			if (unfoldingMode.equals(QuestConstants.CLASSIC)) {
+			if (!isVirtualMode) {
 				IQuestStatement st = conn.createStatement();
 				if (bObtainFromOntology) {
 					// Retrieves the ABox from the ontology file.

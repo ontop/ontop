@@ -25,7 +25,8 @@ import java.io.*;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
-import it.unibz.inf.ontop.injection.OBDACoreModule;
+import it.unibz.inf.ontop.injection.QuestConfiguration;
+import it.unibz.inf.ontop.injection.impl.OBDACoreModule;
 import it.unibz.inf.ontop.injection.OBDAProperties;
 import it.unibz.inf.ontop.mapping.MappingParser;
 import it.unibz.inf.ontop.model.OBDAModel;
@@ -51,17 +52,12 @@ public class ABoxMaterializerExample {
 	
 	public void generateTriples() throws Exception {
 
-        /**
-         * Factory initialization
-         */
-        Injector injector = Guice.createInjector(new OBDACoreModule(new OBDAProperties()));
-        NativeQueryLanguageComponentFactory factory = injector.getInstance(NativeQueryLanguageComponentFactory.class);
+		QuestConfiguration configuration = QuestConfiguration.defaultBuilder()
+				.nativeOntopMappingFile(inputFile)
+				.build();
 
-        /*
-         * Load the OBDA model from an external .obda file
-         */
-        MappingParser mappingParser = factory.create(new FileReader(inputFile));
-        OBDAModel obdaModel = mappingParser.getOBDAModel();
+        OBDAModel obdaModel = configuration.loadInputMappings()
+				.orElseThrow(() -> new IllegalStateException("Mappings must be provided"));
 
 		/*
 		 * Start materializing data from database to triples.

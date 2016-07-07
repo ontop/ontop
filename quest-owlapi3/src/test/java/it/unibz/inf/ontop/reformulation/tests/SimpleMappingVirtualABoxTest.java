@@ -20,20 +20,17 @@ package it.unibz.inf.ontop.reformulation.tests;
  * #L%
  */
 
+import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
+import it.unibz.inf.ontop.owlrefplatform.injection.QuestCorePreferences;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import junit.framework.TestCase;
-import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.io.ToStringRenderer;
 import org.semanticweb.owlapi.model.OWLObject;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.sql.Connection;
@@ -55,7 +52,6 @@ public class SimpleMappingVirtualABoxTest extends TestCase {
 	private Connection conn;
 
 	Logger log = LoggerFactory.getLogger(this.getClass());
-	private OWLOntology ontology;
 
 	final String owlfile = "src/test/resources/test/simplemapping.owl";
 	final String obdafile = "src/test/resources/test/simplemapping.obda";
@@ -87,11 +83,6 @@ public class SimpleMappingVirtualABoxTest extends TestCase {
 
 		st.executeUpdate(bf.toString());
 		conn.commit();
-
-		// Loading the OWL file
-		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-		ontology = manager.loadOntologyFromOntologyDocument((new File(owlfile)));
-
 	}
 
 	@Override
@@ -125,11 +116,12 @@ public class SimpleMappingVirtualABoxTest extends TestCase {
 
 		// Creating a new instance of the reasoner
 		QuestOWLFactory factory = new QuestOWLFactory();
-        QuestOWLConfiguration config = new QuestOWLConfiguration(QuestPreferences.builder()
+        QuestConfiguration config = QuestConfiguration.defaultBuilder()
 				.nativeOntopMappingFile(obdafile)
+				.ontologyFile(owlfile)
 				.properties(p)
-				.build());
-        QuestOWL reasoner = factory.createReasoner(ontology, config);
+				.build();
+        QuestOWL reasoner = factory.createReasoner(config);
 
 		// Now we are ready for querying
 		QuestOWLConnection conn = reasoner.getConnection();
@@ -176,8 +168,8 @@ public class SimpleMappingVirtualABoxTest extends TestCase {
 	public void testViEqSig() throws Exception {
 
 		Properties p = new Properties();
-		p.setProperty(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-		p.setProperty(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
+		p.setProperty(QuestCorePreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+		p.setProperty(QuestCorePreferences.OPTIMIZE_EQUIVALENCES, "true");
 
 		runTests(p);
 	}
@@ -185,9 +177,9 @@ public class SimpleMappingVirtualABoxTest extends TestCase {
 	public void testClassicEqSig() throws Exception {
 
 		Properties p = new Properties();
-		p.setProperty(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
-		p.setProperty(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-		p.setProperty(QuestPreferences.OBTAIN_FROM_MAPPINGS, "true");
+		p.setProperty(QuestCorePreferences.ABOX_MODE, QuestConstants.CLASSIC);
+		p.setProperty(QuestCorePreferences.OPTIMIZE_EQUIVALENCES, "true");
+		p.setProperty(QuestCorePreferences.OBTAIN_FROM_MAPPINGS, "true");
 
 		runTests(p);
 	}

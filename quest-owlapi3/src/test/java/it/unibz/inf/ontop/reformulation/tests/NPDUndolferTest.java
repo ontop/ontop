@@ -1,21 +1,13 @@
 package it.unibz.inf.ontop.reformulation.tests;
 
-import it.unibz.inf.ontop.model.OBDADataFactory;
-import it.unibz.inf.ontop.model.OBDAModel;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
+import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
+import it.unibz.inf.ontop.owlrefplatform.injection.QuestCorePreferences;
 import it.unibz.inf.ontop.owlrefplatform.core.SQLExecutableQuery;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import junit.framework.TestCase;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
-import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
 
-import java.io.File;
 import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -25,15 +17,6 @@ public class NPDUndolferTest extends TestCase {
     private final String owlfile = "src/test/resources/npd-v2-ql_a.owl";
     private final String obdafile = "src/test/resources/npd-v2-ql_a.obda";
 
-    private OWLOntology ontology;
-    private OWLOntologyManager manager;
-
-
-    @Before
-    public void setUp() throws Exception {
-        manager = OWLManager.createOWLOntologyManager();
-        ontology = manager.loadOntologyFromOntologyDocument(new File(owlfile));
-    }
 
     /**
      * Query 6 from the NPD benchmark
@@ -232,22 +215,19 @@ public class NPDUndolferTest extends TestCase {
 
     private String getNPDUnfoldingThroughRewriting(String query) throws Exception {
 
-		/*
-		 * Load the ontology from an external .owl file.
-		 */
-		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-		OWLOntology ontology = manager.loadOntologyFromOntologyDocument(new File(owlfile));
-
 		Properties pref = new Properties();
-		pref.put(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC_INDEX);
-		pref.put(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
-		pref.put(QuestPreferences.REFORMULATION_TECHNIQUE, QuestConstants.TW);
-		pref.put(QuestPreferences.REWRITE, QuestConstants.TRUE);
+		pref.put(QuestCorePreferences.DBTYPE, QuestConstants.SEMANTIC_INDEX);
+		pref.put(QuestCorePreferences.ABOX_MODE, QuestConstants.CLASSIC);
+		pref.put(QuestCorePreferences.REFORMULATION_TECHNIQUE, QuestConstants.TW);
+		pref.put(QuestCorePreferences.REWRITE, QuestConstants.TRUE);
 
         QuestOWLFactory factory = new QuestOWLFactory();
-        QuestOWLConfiguration config = new QuestOWLConfiguration(QuestPreferences.builder()
-                .nativeOntopMappingFile(obdafile).properties(pref).build());
-        QuestOWL reasoner = factory.createReasoner(ontology, config);
+        QuestConfiguration config = QuestConfiguration.defaultBuilder()
+                .nativeOntopMappingFile(obdafile)
+                .ontologyFile(owlfile)
+                .properties(pref)
+                .build();
+        QuestOWL reasoner = factory.createReasoner(config);
 
 		QuestOWLConnection qconn =  reasoner.getConnection();
 		QuestOWLStatement st = qconn.createStatement();
@@ -269,23 +249,20 @@ public class NPDUndolferTest extends TestCase {
 	 */
 	
 	private String getNPDUnfolding(String query) throws Exception {
-		
-		/*
-		 * Load the ontology from an external .owl file.
-		 */
-        OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-        OWLOntology ontology = manager.loadOntologyFromOntologyDocument(new File(owlfile));
 
         Properties pref = new Properties();
-        pref.put(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC_INDEX);
-        pref.put(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
+        pref.put(QuestCorePreferences.DBTYPE, QuestConstants.SEMANTIC_INDEX);
+        pref.put(QuestCorePreferences.ABOX_MODE, QuestConstants.CLASSIC);
         //pref.put(QuestPreferences.REFORMULATION_TECHNIQUE, QuestConstants.TW);
         //pref.put(QuestPreferences.REWRITE, QuestConstants.TRUE);
 
         QuestOWLFactory factory = new QuestOWLFactory();
-        QuestOWLConfiguration config = new QuestOWLConfiguration(QuestPreferences.builder()
-                .nativeOntopMappingFile(obdafile).properties(pref).build());
-        QuestOWL reasoner = factory.createReasoner(ontology, config);
+        QuestConfiguration config = QuestConfiguration.defaultBuilder()
+                .nativeOntopMappingFile(obdafile)
+                .ontologyFile(owlfile)
+                .properties(pref)
+                .build();
+        QuestOWL reasoner = factory.createReasoner(config);
 
         QuestOWLConnection qconn =  reasoner.getConnection();
         QuestOWLStatement st = qconn.createStatement();
@@ -311,15 +288,16 @@ public class NPDUndolferTest extends TestCase {
 		QuestOWLFactory fac = new QuestOWLFactory();
 
         Properties pref = new Properties();
-        pref.put(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC_INDEX);
-        pref.put(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
-        pref.put(QuestPreferences.REFORMULATION_TECHNIQUE, QuestConstants.TW);
-        pref.put(QuestPreferences.REWRITE, QuestConstants.TRUE);
+        pref.put(QuestCorePreferences.DBTYPE, QuestConstants.SEMANTIC_INDEX);
+        pref.put(QuestCorePreferences.ABOX_MODE, QuestConstants.CLASSIC);
+        pref.put(QuestCorePreferences.REFORMULATION_TECHNIQUE, QuestConstants.TW);
+        pref.put(QuestCorePreferences.REWRITE, QuestConstants.TRUE);
 
-        QuestOWLConfiguration config = new QuestOWLConfiguration(QuestPreferences.builder()
-                .properties(pref).build());
+        QuestConfiguration config = QuestConfiguration.defaultBuilder()
+                .ontologyFile(owlfile)
+                .properties(pref).build();
 
-        QuestOWL quest = fac.createReasoner(ontology, config);
+        QuestOWL quest = fac.createReasoner(config);
         QuestOWLConnection qconn = quest.getConnection();
         QuestOWLStatement st = qconn.createStatement();
 
@@ -329,11 +307,5 @@ public class NPDUndolferTest extends TestCase {
         quest.dispose();
 
         return rewriting;
-    }
-
-    @After
-    public void tearDown() throws Exception {
-        ontology = null;
-        manager = null;
     }
 }

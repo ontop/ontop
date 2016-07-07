@@ -22,22 +22,19 @@ package it.unibz.inf.ontop.reformulation.tests;
 
 import com.google.common.base.Joiner;
 import com.google.common.io.CharStreams;
+import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
+import it.unibz.inf.ontop.owlrefplatform.injection.QuestCorePreferences;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLObject;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.reasoner.IllegalConfigurationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.sql.Connection;
@@ -66,7 +63,6 @@ public class MetaMappingVirtualABoxTest {
 	private Connection conn;
 
 	Logger log = LoggerFactory.getLogger(this.getClass());
-	private OWLOntology ontology;
 
 	final String owlfile = "src/test/resources/test/metamapping.owl";
 	final String obdaFileName = "src/test/resources/test/metamapping.obda";
@@ -93,11 +89,6 @@ public class MetaMappingVirtualABoxTest {
 
         st.executeUpdate(sql);
 		conn.commit();
-
-		// Loading the OWL file
-		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-		ontology = manager.loadOntologyFromOntologyDocument((new File(owlfile)));
-
 	}
 
 	@After
@@ -127,13 +118,16 @@ public class MetaMappingVirtualABoxTest {
 	private void runTests(Properties p) throws Exception {
 
         QuestOWLFactory factory = new QuestOWLFactory();
-        QuestOWLConfiguration config = new QuestOWLConfiguration(QuestPreferences.builder()
-				.nativeOntopMappingFile(obdaFileName).properties(p).build());
+        QuestConfiguration config = QuestConfiguration.defaultBuilder()
+				.nativeOntopMappingFile(obdaFileName)
+				.ontologyFile(owlfile)
+				.properties(p)
+				.build();
 
 
 		String query1 = "PREFIX : <http://it.unibz.inf/obda/test/simple#> SELECT * WHERE { ?x a :A_1 }";
 		String query2 = "PREFIX : <http://it.unibz.inf/obda/test/simple#> SELECT * WHERE { ?x :P_1 ?y }";
-        try (QuestOWL reasoner = factory.createReasoner(ontology, config);
+        try (QuestOWL reasoner = factory.createReasoner(config);
              // Now we are ready for querying
              QuestOWLConnection conn = reasoner.getConnection();
              QuestOWLStatement st = conn.createStatement();
@@ -150,7 +144,7 @@ public class MetaMappingVirtualABoxTest {
 
 		}
 
-        try (QuestOWL reasoner = factory.createReasoner(ontology, config);
+        try (QuestOWL reasoner = factory.createReasoner(config);
              // Now we are ready for querying
              QuestOWLConnection conn = reasoner.getConnection();
              QuestOWLStatement st = conn.createStatement();
@@ -172,8 +166,8 @@ public class MetaMappingVirtualABoxTest {
 	public void testViEqSig() throws Exception {
 
 		Properties p = new Properties();
-		p.setProperty(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-		p.setProperty(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
+		p.setProperty(QuestCorePreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+		p.setProperty(QuestCorePreferences.OPTIMIZE_EQUIVALENCES, "true");
 
 		runTests(p);
 	}
@@ -182,9 +176,9 @@ public class MetaMappingVirtualABoxTest {
 	public void testClassicEqSig() throws Exception {
 
 		Properties p = new Properties();
-		p.setProperty(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
-		p.setProperty(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-		p.setProperty(QuestPreferences.OBTAIN_FROM_MAPPINGS, "true");
+		p.setProperty(QuestCorePreferences.ABOX_MODE, QuestConstants.CLASSIC);
+		p.setProperty(QuestCorePreferences.OPTIMIZE_EQUIVALENCES, "true");
+		p.setProperty(QuestCorePreferences.OBTAIN_FROM_MAPPINGS, "true");
 
 		runTests(p);
 	}

@@ -20,7 +20,6 @@ package it.unibz.inf.ontop.reformulation.tests;
  * #L%
  */
 
-import java.io.File;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -28,14 +27,12 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Properties;
 
+import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import junit.framework.TestCase;
 
 import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
-import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
+import it.unibz.inf.ontop.owlrefplatform.injection.QuestCorePreferences;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -56,7 +53,6 @@ public class JoinElminationMappingTest extends TestCase {
 	private Connection conn;
 
 	private Logger log = LoggerFactory.getLogger(this.getClass());
-	private OWLOntology ontology;
 
 	final String owlfile = "src/test/resources/test/ontologies/scenarios/join-elimination-test.owl";
 	final String obdafile = "src/test/resources/test/ontologies/scenarios/join-elimination-test.obda";
@@ -78,10 +74,6 @@ public class JoinElminationMappingTest extends TestCase {
 
 		st.executeUpdate(createStr);
 		conn.commit();
-
-		// Loading the OWL file
-		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-		ontology = manager.loadOntologyFromOntologyDocument((new File(owlfile)));
 	}
 
 	@Override
@@ -100,24 +92,24 @@ public class JoinElminationMappingTest extends TestCase {
 	private void runTests(Properties p) throws Exception {
 		// Creating a new instance of the reasoner
 		QuestOWLFactory factory = new QuestOWLFactory();
-		QuestOWLConfiguration configuration;
-		if (p.getProperty(QuestPreferences.ABOX_MODE).equals(QuestConstants.VIRTUAL) ||
-				Boolean.getBoolean(p.getProperty(QuestPreferences.OBTAIN_FROM_MAPPINGS))) {
+		QuestConfiguration configuration;
+		if (p.getProperty(QuestCorePreferences.ABOX_MODE).equals(QuestConstants.VIRTUAL) ||
+				Boolean.getBoolean(p.getProperty(QuestCorePreferences.OBTAIN_FROM_MAPPINGS))) {
 
-			configuration = new QuestOWLConfiguration(
-					QuestPreferences.builder()
-							.nativeOntopMappingFile(obdafile)
-							.properties(p)
-							.build());
+			configuration = QuestConfiguration.defaultBuilder()
+					.nativeOntopMappingFile(obdafile)
+					.ontologyFile(owlfile)
+					.properties(p)
+					.build();
 		}
 		else {
-			configuration = new QuestOWLConfiguration(
-					QuestPreferences.builder()
-							.properties(p)
-							.build());
+			configuration = QuestConfiguration.defaultBuilder()
+					.ontologyFile(owlfile)
+					.properties(p)
+					.build();
 		}
 
-		QuestOWL reasoner = factory.createReasoner(ontology, configuration);
+		QuestOWL reasoner = factory.createReasoner(configuration);
 		reasoner.flush();
 
 		// Now we are ready for querying
@@ -193,21 +185,21 @@ public class JoinElminationMappingTest extends TestCase {
 	 */
 	public void disabletestDiEqSig() throws Exception {
 		Properties p  = new Properties();
-		p.setProperty(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
-		p.setProperty(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-		p.setProperty(QuestPreferences.OBTAIN_FROM_MAPPINGS, "true");
-		p.setProperty(QuestPreferences.OBTAIN_FROM_ONTOLOGY, "false");
-		p.setProperty(QuestPreferences.DBTYPE, QuestConstants.DIRECT);
+		p.setProperty(QuestCorePreferences.ABOX_MODE, QuestConstants.CLASSIC);
+		p.setProperty(QuestCorePreferences.OPTIMIZE_EQUIVALENCES, "true");
+		p.setProperty(QuestCorePreferences.OBTAIN_FROM_MAPPINGS, "true");
+		p.setProperty(QuestCorePreferences.OBTAIN_FROM_ONTOLOGY, "false");
+		p.setProperty(QuestCorePreferences.DBTYPE, QuestConstants.DIRECT);
 		runTests(p);
 	}
 
 	public void disabletestDiEqNoSig() throws Exception {
 		Properties p  = new Properties();
-		p.setProperty(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
-		p.setProperty(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-		p.setProperty(QuestPreferences.OBTAIN_FROM_MAPPINGS, "true");
-		p.setProperty(QuestPreferences.OBTAIN_FROM_ONTOLOGY, "false");
-		p.setProperty(QuestPreferences.DBTYPE, QuestConstants.DIRECT);
+		p.setProperty(QuestCorePreferences.ABOX_MODE, QuestConstants.CLASSIC);
+		p.setProperty(QuestCorePreferences.OPTIMIZE_EQUIVALENCES, "true");
+		p.setProperty(QuestCorePreferences.OBTAIN_FROM_MAPPINGS, "true");
+		p.setProperty(QuestCorePreferences.OBTAIN_FROM_ONTOLOGY, "false");
+		p.setProperty(QuestCorePreferences.DBTYPE, QuestConstants.DIRECT);
 		runTests(p);
 	}
 
@@ -218,11 +210,11 @@ public class JoinElminationMappingTest extends TestCase {
 	 */
 	public void disabletestDiNoEqSig() throws Exception {
 		Properties p  = new Properties();
-		p.setProperty(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
-		p.setProperty(QuestPreferences.OPTIMIZE_EQUIVALENCES, "false");
-		p.setProperty(QuestPreferences.OBTAIN_FROM_MAPPINGS, "true");
-		p.setProperty(QuestPreferences.OBTAIN_FROM_ONTOLOGY, "false");
-		p.setProperty(QuestPreferences.DBTYPE, QuestConstants.DIRECT);
+		p.setProperty(QuestCorePreferences.ABOX_MODE, QuestConstants.CLASSIC);
+		p.setProperty(QuestCorePreferences.OPTIMIZE_EQUIVALENCES, "false");
+		p.setProperty(QuestCorePreferences.OBTAIN_FROM_MAPPINGS, "true");
+		p.setProperty(QuestCorePreferences.OBTAIN_FROM_ONTOLOGY, "false");
+		p.setProperty(QuestCorePreferences.DBTYPE, QuestConstants.DIRECT);
 		runTests(p);
 	}
 
@@ -233,26 +225,26 @@ public class JoinElminationMappingTest extends TestCase {
 	 */
 	public void disabletestDiNoEqNoSig() throws Exception {
 		Properties p  = new Properties();
-		p.setProperty(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
-		p.setProperty(QuestPreferences.OPTIMIZE_EQUIVALENCES, "false");
-		p.setProperty(QuestPreferences.OBTAIN_FROM_MAPPINGS, "true");
-		p.setProperty(QuestPreferences.OBTAIN_FROM_ONTOLOGY, "false");
-		p.setProperty(QuestPreferences.DBTYPE, QuestConstants.DIRECT);
+		p.setProperty(QuestCorePreferences.ABOX_MODE, QuestConstants.CLASSIC);
+		p.setProperty(QuestCorePreferences.OPTIMIZE_EQUIVALENCES, "false");
+		p.setProperty(QuestCorePreferences.OBTAIN_FROM_MAPPINGS, "true");
+		p.setProperty(QuestCorePreferences.OBTAIN_FROM_ONTOLOGY, "false");
+		p.setProperty(QuestCorePreferences.DBTYPE, QuestConstants.DIRECT);
 		runTests(p);
 	}
 
 	public void testViEqSig() throws Exception {
 		Properties p  = new Properties();
-		p.setProperty(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-		p.setProperty(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
+		p.setProperty(QuestCorePreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+		p.setProperty(QuestCorePreferences.OPTIMIZE_EQUIVALENCES, "true");
 
 		runTests(p);
 	}
 
 	public void testViEqNoSig() throws Exception {
 		Properties p  = new Properties();
-		p.setProperty(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-		p.setProperty(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
+		p.setProperty(QuestCorePreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+		p.setProperty(QuestCorePreferences.OPTIMIZE_EQUIVALENCES, "true");
 		runTests(p);
 	}
 
@@ -261,8 +253,8 @@ public class JoinElminationMappingTest extends TestCase {
 	 */
 	public void testViNoEqSig() throws Exception {
 		Properties p  = new Properties();
-		p.setProperty(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-		p.setProperty(QuestPreferences.OPTIMIZE_EQUIVALENCES, "false");
+		p.setProperty(QuestCorePreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+		p.setProperty(QuestCorePreferences.OPTIMIZE_EQUIVALENCES, "false");
 		runTests(p);
 	}
 
@@ -271,8 +263,8 @@ public class JoinElminationMappingTest extends TestCase {
 	 */
 	public void testViNoEqNoSig() throws Exception {
 		Properties p  = new Properties();
-		p.setProperty(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-		p.setProperty(QuestPreferences.OPTIMIZE_EQUIVALENCES, "false");
+		p.setProperty(QuestCorePreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+		p.setProperty(QuestCorePreferences.OPTIMIZE_EQUIVALENCES, "false");
 		runTests(p);
 	}
 }

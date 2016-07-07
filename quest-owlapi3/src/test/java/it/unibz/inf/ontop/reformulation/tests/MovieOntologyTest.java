@@ -1,14 +1,11 @@
 package it.unibz.inf.ontop.reformulation.tests;
 
+import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
+import it.unibz.inf.ontop.owlrefplatform.injection.QuestCorePreferences;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWL;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLFactory;
 import junit.framework.TestCase;
-import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
 
 import java.io.*;
 import java.sql.Connection;
@@ -21,8 +18,6 @@ public class MovieOntologyTest extends TestCase {
 
 	private Connection conn;
 
-	private OWLOntology ontology;
-
 	final String testCase = "movieontology";
 	final String owlfile = "src/test/resources/test/treewitness/" + testCase + ".owl"; 
 	final String obdafile = "src/test/resources/test/treewitness/" + testCase + ".obda";
@@ -34,11 +29,7 @@ public class MovieOntologyTest extends TestCase {
 
 		// String driver = "org.h2.Driver";
 		conn = DriverManager.getConnection("jdbc:h2:mem:questjunitdb", "sa",  "");
-		executeUpdate("src/test/resources/test/treewitness/imdb-schema-create-h2.sql");		
-
-		// Loading the OWL file
-		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-		ontology = manager.loadOntologyFromOntologyDocument((new File(owlfile)));
+		executeUpdate("src/test/resources/test/treewitness/imdb-schema-create-h2.sql");
 	}
 
 	
@@ -51,10 +42,10 @@ public class MovieOntologyTest extends TestCase {
 	public void testOntologyLoad() throws Exception {
 
 		Properties p = new Properties();
-		p.setProperty(QuestPreferences.REFORMULATION_TECHNIQUE, QuestConstants.TW);
+		p.setProperty(QuestCorePreferences.REFORMULATION_TECHNIQUE, QuestConstants.TW);
 		// p.setProperty(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC_INDEX);
-		p.setProperty(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL); // CLASSIC IS A TRIPLE STORE
-		p.setProperty(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
+		p.setProperty(QuestCorePreferences.ABOX_MODE, QuestConstants.VIRTUAL); // CLASSIC IS A TRIPLE STORE
+		p.setProperty(QuestCorePreferences.OPTIMIZE_EQUIVALENCES, "true");
 		//p.setProperty(QuestPreferences.OBTAIN_FROM_ONTOLOGY, "true");
 		p.setProperty("rewrite", "true");
 	
@@ -63,9 +54,12 @@ public class MovieOntologyTest extends TestCase {
 		 * Create the instance of Quest OWL reasoner.
 		 */
         QuestOWLFactory factory = new QuestOWLFactory();
-        QuestOWLConfiguration config = new QuestOWLConfiguration(QuestPreferences.builder()
-				.nativeOntopMappingFile(obdafile).properties(p).build());
-        QuestOWL reasoner = factory.createReasoner(ontology, config);
+        QuestConfiguration config = QuestConfiguration.defaultBuilder()
+				.nativeOntopMappingFile(obdafile)
+				.ontologyFile(owlfile)
+				.properties(p)
+				.build();
+        QuestOWL reasoner = factory.createReasoner(config);
 
 				
 		//for (Entry<URI, ArrayList<OBDAMappingAxiom>> m: obdaModel.getMappings().entrySet()) {

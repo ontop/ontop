@@ -21,7 +21,6 @@ package it.unibz.inf.ontop.reformulation.tests;
  */
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.sql.Connection;
@@ -30,24 +29,15 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Properties;
 
-import com.google.inject.Guice;
-import com.google.inject.Injector;
+import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWL;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLFactory;
 import junit.framework.TestCase;
 
 import it.unibz.inf.ontop.exception.InvalidMappingException;
 import it.unibz.inf.ontop.exception.InvalidPredicateDeclarationException;
-import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
-import it.unibz.inf.ontop.injection.OBDACoreModule;
-import it.unibz.inf.ontop.injection.OBDAProperties;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
-import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
-import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
+import it.unibz.inf.ontop.owlrefplatform.injection.QuestCorePreferences;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -60,18 +50,10 @@ public class MappingAnalyzerTest extends TestCase {
 	private Connection conn;
 
 	Logger log = LoggerFactory.getLogger(this.getClass());
-	private OWLOntology ontology;
-
-    private final NativeQueryLanguageComponentFactory factory;
 
 	final String owlfile = "src/test/resources/test/mappinganalyzer/ontology.owl";
 
     public MappingAnalyzerTest() {
-        /**
-         * Factory initialization
-         */
-        Injector injector = Guice.createInjector(new OBDACoreModule(new OBDAProperties()));
-        factory = injector.getInstance(NativeQueryLanguageComponentFactory.class);
     }
 
 	@Override
@@ -95,10 +77,6 @@ public class MappingAnalyzerTest extends TestCase {
 		}
 		st.executeUpdate(bf.toString());
 		conn.commit();
-
-		// Loading the OWL file
-		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-		ontology = manager.loadOntologyFromOntologyDocument((new File(owlfile)));
 	}
 
 	@Override
@@ -128,18 +106,19 @@ public class MappingAnalyzerTest extends TestCase {
 
 	private void runTests(String obdaFileName) throws Exception {
 		Properties p = new Properties();
-		p.setProperty(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-		p.setProperty(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
+		p.setProperty(QuestCorePreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+		p.setProperty(QuestCorePreferences.OPTIMIZE_EQUIVALENCES, "true");
 		
 		// Creating a new instance of the reasoner
 		QuestOWLFactory factory = new QuestOWLFactory();
 
-		QuestOWLConfiguration configuration = new QuestOWLConfiguration(QuestPreferences.builder()
+		QuestConfiguration configuration = QuestConfiguration.defaultBuilder()
 				.nativeOntopMappingFile(obdaFileName)
+				.ontologyFile(owlfile)
 				.properties(p)
-				.build());
+				.build();
 
-		QuestOWL reasoner = factory.createReasoner(ontology, configuration);
+		QuestOWL reasoner = factory.createReasoner(configuration);
 
 		// Get ready for querying
 		reasoner.getStatement();

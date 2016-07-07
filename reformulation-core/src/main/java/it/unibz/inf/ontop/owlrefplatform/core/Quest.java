@@ -185,7 +185,7 @@ public class Quest implements Serializable, IQuest {
 	 *            . The mappings of the system. The vocabulary of the mappings
 	 *            must be subset or equal to the vocabulary of the ontology.
 	 *            Can be null.
-	 * @param metadata TODO: describe
+	 * @param inputMetadata TODO: describe
 	 * @param config
 *            . The configuration parameters for quest. See
 *            QuestDefaults.properties for a description (in
@@ -194,8 +194,9 @@ public class Quest implements Serializable, IQuest {
 *@param queryCache
 	 */
 	@Inject
-	private Quest(@Assisted Ontology tbox, @Assisted @Nullable OBDAModel obdaModel, @Assisted @Nullable DBMetadata metadata,
-				  @Assisted QuestCorePreferences config, NativeQueryLanguageComponentFactory nativeQLFactory,
+	private Quest(@Assisted Ontology tbox, @Assisted Optional<OBDAModel> obdaModel,
+				  @Assisted Optional<DBMetadata> inputMetadata,
+				  QuestCorePreferences config, NativeQueryLanguageComponentFactory nativeQLFactory,
 				  OBDAFactoryWithException obdaFactory, QuestComponentFactory questComponentFactory,
 				  MappingVocabularyFixer mappingVocabularyFixer, TMappingExclusionConfig excludeFromTMappings,
 				  IMapping2DatalogConverter mapping2DatalogConverter, QueryCache queryCache) throws DuplicateMappingException {
@@ -216,21 +217,22 @@ public class Quest implements Serializable, IQuest {
 
 		setPreferences(config);
 
-		if (obdaModel == null && isVirtualMode) {
+		if ((!obdaModel.isPresent()) && isVirtualMode) {
 			throw new IllegalArgumentException(
 					"When working without mappings, you must set the ABox mode to \""
 							+ QuestConstants.CLASSIC
 							+ "\". If you want to work with no mappings in virtual ABox mode you must at least provide an empty but not null OBDAModel");
 		}
-		if (obdaModel != null && (!isVirtualMode)) {
+		if (obdaModel.isPresent() && (!isVirtualMode)) {
 			throw new IllegalArgumentException(
 					"When working with mappings, you must set the ABox mode to \""
 							+ QuestConstants.VIRTUAL
 							+ "\". If you want to work in \"classic abox\" mode, that is, as a triple store, you may not provide mappings (quest will take care of setting up the mappings and the database), set them to null.");
 		}
 
-		loadOBDAModel(obdaModel, inputOntology.getVocabulary());
-		this.metadata = metadata;
+		loadOBDAModel(obdaModel.orElse(null), inputOntology.getVocabulary());
+		// TODO: use the Optional instead
+		this.metadata = inputMetadata.orElse(null);
 	}
 
 	// TEST ONLY

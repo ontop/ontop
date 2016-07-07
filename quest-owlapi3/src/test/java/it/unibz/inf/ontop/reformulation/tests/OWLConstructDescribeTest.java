@@ -20,13 +20,10 @@ package it.unibz.inf.ontop.reformulation.tests;
  * #L%
  */
 
-import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
+import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import org.junit.*;
-import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLAxiom;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
 
 import java.io.File;
 import java.util.List;
@@ -42,7 +39,6 @@ import java.util.List;
 @Ignore // GUOHUI: 2016-01-16 SI+Mapping mode is disabled
 public class OWLConstructDescribeTest{
 
-    OWLOntology ontology = null;
 	QuestOWL reasoner = null;
 	QuestOWLConnection conn = null;
 	QuestOWLStatement st = null;
@@ -50,10 +46,6 @@ public class OWLConstructDescribeTest{
 	
 	@Before
 	public void setUp() throws Exception {
-		
-			// Loading the OWL file
-			OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-			ontology = manager.loadOntologyFromOntologyDocument(new File(owlFile));
 
 //			String driver = "org.h2.Driver";
 //			String url = "jdbc:h2:mem:aboxdumptestx1";
@@ -72,8 +64,11 @@ public class OWLConstructDescribeTest{
 //			obdaModel.addSource(source);
 
 		    QuestOWLFactory factory = new QuestOWLFactory();
-		    QuestOWLConfiguration config = new QuestOWLConfiguration(QuestPreferences.builder().build());
-		    reasoner = factory.createReasoner(ontology, config);
+		    QuestConfiguration config = QuestConfiguration.defaultBuilder()
+					.ontologyFile(owlFile)
+					.enableClassicABoxMode()
+					.build();
+		    reasoner = factory.createReasoner(config);
 			conn = reasoner.getConnection();
 			st = conn.createStatement();
 		

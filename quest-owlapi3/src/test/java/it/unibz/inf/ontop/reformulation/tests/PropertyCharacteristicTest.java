@@ -20,17 +20,11 @@ package it.unibz.inf.ontop.reformulation.tests;
  * #L%
  */
 
-import it.unibz.inf.ontop.model.OBDADataFactory;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
+import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import junit.framework.TestCase;
-import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLException;
 import org.semanticweb.owlapi.model.OWLObject;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,7 +36,6 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.Properties;
 
 public class PropertyCharacteristicTest extends TestCase {
 	
@@ -52,15 +45,6 @@ public class PropertyCharacteristicTest extends TestCase {
 	
 	private Connection jdbcconn = null;
 	private Logger log = LoggerFactory.getLogger(this.getClass());
-	private static OBDADataFactory ofac = OBDADataFactoryImpl.getInstance();
-	
-	private static 	QuestPreferences prefs;
-	static {
-		Properties p = new Properties();
-		p.setProperty(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-		p.setProperty(QuestPreferences.REWRITE, QuestConstants.TRUE);
-		prefs = new QuestPreferences(p);
-	}
 	
 	@Override
 	public void setUp() throws Exception {
@@ -86,8 +70,6 @@ public class PropertyCharacteristicTest extends TestCase {
 		String url = "jdbc:h2:mem:questjunitdb";
 		String username = "sa";
 		String password = "";
-
-		ofac = OBDADataFactoryImpl.getInstance();
 
 		jdbcconn = DriverManager.getConnection(url, username, password);
 		Statement st = jdbcconn.createStatement();
@@ -142,13 +124,11 @@ public class PropertyCharacteristicTest extends TestCase {
 	}
 	
 	private void setupReasoner(File owlFile, File obdaFile) throws Exception {
-		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-		OWLOntology ontology = manager.loadOntologyFromOntologyDocument(owlFile);
-		
 		QuestOWLFactory factory = new QuestOWLFactory();
-        QuestOWLConfiguration config = new QuestOWLConfiguration(QuestPreferences.builder()
-				.nativeOntopMappingFile(obdaFile).build());
-        reasoner = factory.createReasoner(ontology, config);
+        QuestConfiguration config = QuestConfiguration.defaultBuilder()
+				.ontologyFile(owlFile)
+				.nativeOntopMappingFile(obdaFile).build();
+        reasoner = factory.createReasoner(config);
 	}
 	
 	private QuestOWLResultSet executeQuery(String sparql) throws Exception {

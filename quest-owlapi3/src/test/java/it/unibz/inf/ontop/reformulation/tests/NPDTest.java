@@ -1,10 +1,8 @@
 package it.unibz.inf.ontop.reformulation.tests;
 
-import it.unibz.inf.ontop.model.OBDADataFactory;
-import it.unibz.inf.ontop.model.OBDAModel;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
+import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
+import it.unibz.inf.ontop.owlrefplatform.injection.QuestCorePreferences;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import org.junit.Test;
 import org.semanticweb.owlapi.apibinding.OWLManager;
@@ -87,17 +85,18 @@ public class NPDTest {
 
 		Properties pref = new Properties();
 		//pref.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC_INDEX);
-		pref.put(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-		pref.put(QuestPreferences.REFORMULATION_TECHNIQUE, QuestConstants.TW);
-		pref.put(QuestPreferences.REWRITE, QuestConstants.TRUE);
-		pref.put(QuestPreferences.PRINT_KEYS, QuestConstants.FALSE);
+		pref.put(QuestCorePreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+		pref.put(QuestCorePreferences.REFORMULATION_TECHNIQUE, QuestConstants.TW);
+		pref.put(QuestCorePreferences.REWRITE, QuestConstants.TRUE);
+		pref.put(QuestCorePreferences.PRINT_KEYS, QuestConstants.FALSE);
 
 		setupDatabase();
 		QuestOWLFactory factory = new QuestOWLFactory();
-        QuestOWLConfiguration config = new QuestOWLConfiguration(QuestPreferences.builder()
+        QuestConfiguration config = QuestConfiguration.defaultBuilder()
 				.nativeOntopMappingFile(path + "npd.obda")
-				.properties(pref).build());
-        QuestOWL reasoner = factory.createReasoner(owlOnto, config);
+				.ontologyFile(path + "npd-v2.owl")
+				.properties(pref).build();
+        QuestOWL reasoner = factory.createReasoner(config);
 		
 		//QuestOWL reasoner = factory.createReasoner(owlOnto, new SimpleConfiguration());
 	

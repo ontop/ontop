@@ -22,7 +22,8 @@ package it.unibz.inf.ontop.reformulation.tests;
 
 import it.unibz.inf.ontop.exception.InvalidMappingException;
 import it.unibz.inf.ontop.exception.InvalidPredicateDeclarationException;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
+import it.unibz.inf.ontop.injection.QuestConfiguration;
+import it.unibz.inf.ontop.owlrefplatform.injection.QuestCorePreferences;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWL;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLFactory;
@@ -51,7 +52,6 @@ public class OBDA2DatalogTest extends TestCase {
 	private Connection conn;
 
 	Logger log = LoggerFactory.getLogger(this.getClass());
-	private OWLOntology ontology;
 
 	final String owlfile = "src/test/resources/test/mappinganalyzer/ontology.owl";
 
@@ -77,10 +77,6 @@ public class OBDA2DatalogTest extends TestCase {
 		}
 		st.executeUpdate(bf.toString());
 		conn.commit();
-
-		// Loading the OWL file
-		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-		ontology = manager.loadOntologyFromOntologyDocument((new File(owlfile)));
 	}
 
 	@Override
@@ -109,11 +105,12 @@ public class OBDA2DatalogTest extends TestCase {
 		
 		// Creating a new instance of the reasoner
 		QuestOWLFactory factory = new QuestOWLFactory();
-		QuestOWLConfiguration configuration = new QuestOWLConfiguration(QuestPreferences.builder()
+		QuestConfiguration configuration = QuestConfiguration.defaultBuilder()
 				.nativeOntopMappingFile(obdaFileName)
-				.build());
+				.ontologyFile(owlfile)
+				.build();
 
-		QuestOWL reasoner = factory.createReasoner(ontology, configuration);
+		QuestOWL reasoner = factory.createReasoner(configuration);
 
 		// Get ready for querying
 		reasoner.getStatement();

@@ -66,8 +66,7 @@ public class OBDAPropertiesImpl implements OBDAProperties {
 
     @Override
     public boolean isFullMetadataExtractionEnabled() {
-        return getBoolean(OBDAProperties.OBTAIN_FULL_METADATA)
-                .orElseThrow(() -> new IllegalStateException("Predefined value for OBTAIN_FULL_METADATA is missing"));
+        return getRequiredBoolean(OBDAProperties.OBTAIN_FULL_METADATA);
     }
 
     @Override
@@ -91,6 +90,13 @@ public class OBDAPropertiesImpl implements OBDAProperties {
         return Optional.ofNullable(Boolean.parseBoolean(value));
     }
 
+    @Override
+    public boolean getRequiredBoolean(String key) {
+        return getBoolean(key)
+                .orElseThrow(() -> new IllegalStateException(key + " is required but missing " +
+                        "(must have a default value)"));
+    }
+
     /**
      * Returns the integer value of the given key.
      */
@@ -100,12 +106,26 @@ public class OBDAPropertiesImpl implements OBDAProperties {
         return Optional.ofNullable(Integer.parseInt(value));
     }
 
+    @Override
+    public int getRequiredInteger(String key) {
+        return getInteger(key)
+                .orElseThrow(() -> new IllegalStateException(key + " is required but missing " +
+                        "(must have a default value)"));
+    }
+
     /**
      * Returns the string value of the given key.
      */
     @Override
     public Optional<String> getProperty(String key) {
         return Optional.ofNullable((String) get(key));
+    }
+
+    @Override
+    public String getRequiredProperty(String key) {
+        return getProperty(key)
+                .orElseThrow(() -> new IllegalStateException(key + " is required but missing " +
+                        "(must have a default value)"));
     }
 
     @Override
