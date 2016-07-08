@@ -27,6 +27,7 @@ import it.unibz.inf.ontop.model.OBDAException;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestDBConnection;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestDBStatement;
+import it.unibz.inf.ontop.owlrefplatform.core.SIQuestDBStatement;
 import org.openrdf.OpenRDFUtil;
 import org.openrdf.model.*;
 import org.openrdf.model.impl.NamespaceImpl;
@@ -379,9 +380,10 @@ throw new RuntimeException(e);
     	SesameRDFIterator it = new SesameRDFIterator(stmIterator);
     	
     	//insert data   useFile=false, batch=0
-		QuestDBStatement questStm = null;
+		SIQuestDBStatement questStm = null;
     	try {
-    		questStm = questConn.createStatement();
+			// Statement insertion is only supported in the classic A-box mode
+    		questStm = questConn.createSIStatement();
 			questStm.add(it);
 		} catch (OBDAException e) {
 			throw new RepositoryException(e);
