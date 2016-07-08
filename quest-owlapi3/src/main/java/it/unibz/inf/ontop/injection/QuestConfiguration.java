@@ -7,6 +7,7 @@ import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
 import javax.annotation.Nonnull;
 import java.io.File;
+import java.net.URL;
 import java.util.Optional;
 
 /**
@@ -37,6 +38,8 @@ public interface QuestConfiguration extends QuestCoreConfiguration {
     interface Builder<B extends Builder> extends QuestCoreConfiguration.Builder<B> {
 
         B ontologyFile(@Nonnull String owlFilename);
+
+        B ontologyFile(@Nonnull URL url);
 
         B ontologyFile(@Nonnull File owlFile);
 

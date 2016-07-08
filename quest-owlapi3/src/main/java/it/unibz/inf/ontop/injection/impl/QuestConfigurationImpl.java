@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.injection.impl;
 
 
+import it.unibz.inf.ontop.injection.InvalidOBDAConfigurationException;
 import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.injection.QuestPreferences;
 import it.unibz.inf.ontop.owlrefplatform.injection.impl.QuestCoreConfigurationImpl;
@@ -11,6 +12,9 @@ import org.semanticweb.owlapi.model.OWLOntologyManager;
 
 import javax.annotation.Nonnull;
 import java.io.File;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.Optional;
 import java.util.Properties;
 
@@ -37,30 +41,58 @@ public class QuestConfigurationImpl extends QuestCoreConfigurationImpl implement
             return options.ontology;
         }
 
-        Optional<File> optionalFile = options.ontologyFile
-                .map(Optional::of)
-                .orElseGet(() -> preferences.getOntologyFilePath()
-                        .map(File::new));
+        /**
+         * File
+         */
+        OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 
-        if (optionalFile.isPresent()) {
-            OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-            OWLOntology ontology = manager.loadOntologyFromOntologyDocument(optionalFile.get());
-            return Optional.of(ontology);
+        if (options.ontologyFile.isPresent()) {
+            return Optional.of(manager.loadOntologyFromOntologyDocument(options.ontologyFile.get()));
+        }
+
+        /**
+         * URL
+         */
+        try {
+            Optional<URL> optionalURL = extractOntologyURL();
+            if (optionalURL.isPresent()) {
+                return Optional.of(
+                        manager.loadOntologyFromOntologyDocument(
+                                optionalURL.get().openStream()));
+            }
+
+        } catch (MalformedURLException e ) {
+            throw new OWLOntologyCreationException("Invalid URI: " + e.getMessage());
+        } catch (IOException e) {
+            throw new OWLOntologyCreationException(e.getMessage());
+        }
+
+        return Optional.empty();
+    }
+
+    private Optional<URL> extractOntologyURL() throws MalformedURLException {
+        if (options.ontologyURL.isPresent()) {
+            return options.ontologyURL;
+        }
+        Optional<String> optionalString = preferences.getOntologyURL();
+        if (optionalString.isPresent()) {
+            return Optional.of(new URL(optionalString.get()));
         }
         else {
             return Optional.empty();
         }
-
     }
 
     public static class QuestOptions {
 
         private final Optional<OWLOntology> ontology;
         private final Optional<File> ontologyFile;
+        private final Optional<URL> ontologyURL;
 
-        public QuestOptions(Optional<OWLOntology> ontology, Optional<File> ontologyFile) {
+        public QuestOptions(Optional<OWLOntology> ontology, Optional<File> ontologyFile, Optional<URL> ontologyURL) {
             this.ontology = ontology;
             this.ontologyFile = ontologyFile;
+            this.ontologyURL = ontologyURL;
         }
     }
 
@@ -74,16 +106,37 @@ public class QuestConfigurationImpl extends QuestCoreConfigurationImpl implement
         private Optional<File> ontologyFile = Optional.empty();
         private Optional<OWLOntology> ontology = Optional.empty();
         private boolean isOntologyDefined = false;
+        private Optional<URL> ontologyURL = Optional.empty() ;
 
         @Override
-        public B ontologyFile(@Nonnull String owlFilename) {
-            if (isOntologyDefined) {
-                throw new IllegalArgumentException("Ontology already defined!");
+        public B ontologyFile(@Nonnull String urlOrPath) {
+            try {
+                URL url = new URL(urlOrPath);
+                /**
+                 * If no protocol, treats it as a path
+                 */
+                if (url.getProtocol() == null) {
+                    return ontologyFile(new File(urlOrPath));
+                }
+                else {
+                    return ontologyFile(url);
+                }
+            } catch (MalformedURLException e) {
+                throw new InvalidOBDAConfigurationException(
+                        "The given ontology URL is not valid: " + e.getMessage());
             }
-            isOntologyDefined = true;
-            this.ontologyFile = Optional.of(new File(owlFilename));
-            return (B) this;
         }
+
+        @Override
+        public B ontologyFile(@Nonnull URL url) {
+                if (isOntologyDefined) {
+                    throw new IllegalArgumentException("Ontology already defined!");
+                }
+                isOntologyDefined = true;
+                this.ontologyURL = Optional.of(url);
+                return (B) this;
+        }
+
 
         @Override
         public B ontologyFile(@Nonnull File owlFile) {
@@ -138,7 +191,7 @@ public class QuestConfigurationImpl extends QuestCoreConfigurationImpl implement
         }
 
         protected final QuestOptions createQuestArguments() {
-            return new QuestOptions(ontology, ontologyFile);
+            return new QuestOptions(ontology, ontologyFile, ontologyURL);
         }
 
     }

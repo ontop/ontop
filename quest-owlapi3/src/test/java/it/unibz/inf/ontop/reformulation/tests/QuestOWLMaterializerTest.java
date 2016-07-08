@@ -27,8 +27,6 @@ import it.unibz.inf.ontop.ontology.ClassAssertion;
 import it.unibz.inf.ontop.ontology.ObjectPropertyAssertion;
 import it.unibz.inf.ontop.ontology.Ontology;
 import it.unibz.inf.ontop.owlapi.OWLAPITranslatorUtility;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.inf.ontop.owlrefplatform.injection.QuestCorePreferences;
 import it.unibz.inf.ontop.owlrefplatform.core.abox.QuestMaterializer;
 import junit.framework.Assert;
 import junit.framework.TestCase;
@@ -45,14 +43,6 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.*;
-
-import com.google.inject.Guice;
-import com.google.inject.Injector;
-
-import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
-import it.unibz.inf.ontop.injection.impl.OBDACoreModule;
-import it.unibz.inf.ontop.injection.OBDAProperties;
-import it.unibz.inf.ontop.mapping.MappingParser;
 
 public class QuestOWLMaterializerTest extends TestCase {
 

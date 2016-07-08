@@ -14,7 +14,7 @@ public class QuestPreferencesImpl extends QuestCorePreferencesImpl implements Qu
     }
 
     @Override
-    public Optional<String> getOntologyFilePath() {
-        return getProperty(QuestPreferences.ONTOLOGY_FILE_PATH);
+    public Optional<String> getOntologyURL() {
+        return getProperty(ONTOLOGY_URL);
     }
 }

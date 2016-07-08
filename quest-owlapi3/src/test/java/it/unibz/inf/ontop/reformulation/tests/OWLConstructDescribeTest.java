@@ -25,7 +25,6 @@ import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import org.junit.*;
 import org.semanticweb.owlapi.model.OWLAxiom;
 
-import java.io.File;
 import java.util.List;
 
 /**
