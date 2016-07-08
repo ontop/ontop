@@ -20,17 +20,14 @@ package it.unibz.inf.ontop.protege.gui.action;
  * #L%
  */
 
-import com.google.inject.Guice;
-import com.google.inject.Injector;
 import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
-import it.unibz.inf.ontop.injection.OBDACoreModule;
-import it.unibz.inf.ontop.injection.OBDAProperties;
-import it.unibz.inf.ontop.mapping.MappingParser;
+import it.unibz.inf.ontop.injection.QuestConfiguration;
+import it.unibz.inf.ontop.io.DataSource2PropertiesConvertor;
 import it.unibz.inf.ontop.model.OBDADataSource;
 import it.unibz.inf.ontop.model.OBDAMappingAxiom;
+import it.unibz.inf.ontop.model.OBDAModel;
 import it.unibz.inf.ontop.model.impl.OBDAModelImpl;
-import it.unibz.inf.ontop.owlrefplatform.core.R2RMLQuestPreferences;
 import it.unibz.inf.ontop.protege.core.OBDAModelManager;
 import it.unibz.inf.ontop.protege.core.OBDAModelWrapper;
 import org.protege.editor.core.Disposable;
@@ -53,24 +50,12 @@ public class R2RMLImportAction extends ProtegeAction {
 	private OBDAModelWrapper obdaModelController = null;
 
 	private Logger log = LoggerFactory.getLogger(R2RMLImportAction.class);
-	private NativeQueryLanguageComponentFactory nativeQLFactory;
 
 	@Override
 	public void initialise() throws Exception {
 		editorKit = (OWLEditorKit) getEditorKit();
 		obdaModelController = ((OBDAModelManager) editorKit.get(OBDAModelImpl.class
 				.getName())).getActiveOBDAModelWrapper();
-
-		/**
-		 * OBDA properties for building a R2RML mapping parser
-		 *
-		 * Data source parameters are missing. --> We use the dataSource object instead.
-		 */
-		OBDAProperties r2rmlProperties = new R2RMLQuestPreferences();
-
-		Injector injector = Guice.createInjector(new OBDACoreModule(r2rmlProperties));
-		nativeQLFactory = injector.getInstance(
-				NativeQueryLanguageComponentFactory.class);
 	}
 
 	@Override
@@ -108,11 +93,16 @@ public class R2RMLImportAction extends ProtegeAction {
 					 * Uses the predefined data source for creating the OBDAModel.
 					 */
 					OBDADataSource dataSource = obdaModelController.getSources().get(0);
-					MappingParser parser = nativeQLFactory.create(file, dataSource);
+
+					QuestConfiguration configuration = QuestConfiguration.defaultBuilder()
+							.properties(DataSource2PropertiesConvertor.convert(dataSource))
+							.r2rmlMappingFile(file)
+							.build();
+
 					URI sourceID = dataSource.getSourceID();
 
 					try {
-						OBDAModelWrapper parsedModel = parser.getOBDAModel();
+						OBDAModel parsedModel = configuration.loadProvidedInputMappings();
 
 						/**
 						 * TODO: improve this inefficient method (batch processing, not one by one)
@@ -124,12 +114,10 @@ public class R2RMLImportAction extends ProtegeAction {
 								obdaModelController.addMapping(sourceID, mapping, false);
 							}
 						}
-						JOptionPane.showMessageDialog(workspace, "R2rml Import completed. " );
+						JOptionPane.showMessageDialog(workspace, "R2rml Import completed. ");
 					} catch (DuplicateMappingException dm) {
 						JOptionPane.showMessageDialog(workspace, "Duplicate mapping id found. Please correct the Resource node name: " + dm.getLocalizedMessage());
 						throw new RuntimeException("Duplicate mapping found: " + dm.getMessage());
-					}
-
 					} catch (Exception e) {
 						JOptionPane.showMessageDialog(null, "An error occurred. For more info, see the logs.");
 						log.error("Error during r2rml import. \n");
@@ -140,4 +128,5 @@ public class R2RMLImportAction extends ProtegeAction {
 
 			}
 		}
+	}
 }

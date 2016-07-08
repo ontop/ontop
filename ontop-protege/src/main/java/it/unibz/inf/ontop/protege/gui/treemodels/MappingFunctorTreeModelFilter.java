@@ -25,10 +25,6 @@ import it.unibz.inf.ontop.model.OBDAMappingAxiom;
 import it.unibz.inf.ontop.model.Term;
 import it.unibz.inf.ontop.model.Variable;
 import it.unibz.inf.ontop.model.impl.FunctionalTermImpl;
-<<<<<<< HEAD:ontop-protege/src/main/java/it/unibz/inf/ontop/protege/gui/treemodels/MappingFunctorTreeModelFilter.java
-import it.unibz.inf.ontop.model.impl.VariableImpl;
-=======
->>>>>>> v3/package-names-changed:ontop-protege/src/main/java/it/unibz/inf/ontop/protege/gui/treemodels/MappingFunctorTreeModelFilter.java
 
 import java.util.List;
 

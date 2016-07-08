@@ -26,6 +26,7 @@ import it.unibz.inf.ontop.io.TargetQueryVocabularyValidator;
 import it.unibz.inf.ontop.mapping.sql.SQLSourceQueryValidator;
 import it.unibz.inf.ontop.model.OBDADataSource;
 import it.unibz.inf.ontop.model.OBDAMappingAxiom;
+import it.unibz.inf.ontop.model.OBDASQLQuery;
 import it.unibz.inf.ontop.protege.core.OBDAModelWrapper;
 import it.unibz.inf.ontop.protege.dialogs.MappingValidationDialog;
 import it.unibz.inf.ontop.protege.gui.IconLoader;
@@ -519,7 +520,7 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
                 OBDAMappingAxiom o = (OBDAMappingAxiom) path.get(i);
                 String id = o.getId();
                 outputField.addText("  id: '" + id + "'... ", outputField.NORMAL);
-                validator = new SQLSourceQueryValidator(selectedSource, o.getSourceQuery());
+                validator = new SQLSourceQueryValidator(selectedSource, (OBDASQLQuery)o.getSourceQuery());
                 long timestart = System.nanoTime();
 
                 if (canceled) {

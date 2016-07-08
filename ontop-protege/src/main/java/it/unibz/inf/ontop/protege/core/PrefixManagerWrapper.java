@@ -20,6 +20,7 @@ package it.unibz.inf.ontop.protege.core;
  * #L%
  */
 
+import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.io.AbstractPrefixManager;
 
 import java.util.ArrayList;

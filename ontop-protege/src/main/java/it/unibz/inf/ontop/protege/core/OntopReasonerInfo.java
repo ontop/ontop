@@ -20,8 +20,8 @@ package it.unibz.inf.ontop.protege.core;
  * #L%
  */
 
+import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.model.OBDAModel;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLConfiguration;
 import it.unibz.inf.ontop.sql.ImplicitDBConstraintsReader;
 import org.protege.editor.owl.model.inference.AbstractProtegeOWLReasonerInfo;
@@ -30,11 +30,13 @@ import org.semanticweb.owlapi.reasoner.OWLReasonerConfiguration;
 import org.semanticweb.owlapi.reasoner.OWLReasonerFactory;
 import org.semanticweb.owlapi.reasoner.ReasonerProgressMonitor;
 
+import java.util.Properties;
+
 public class OntopReasonerInfo extends AbstractProtegeOWLReasonerInfo {
 
     private OntopOWLFactory factory = new OntopOWLFactory();
 
-    private final QuestOWLConfiguration.Builder configBuilder = QuestOWLConfiguration.builder();
+    private final QuestConfiguration.Builder configBuilder = QuestConfiguration.defaultBuilder();
 
     @Override
 	public BufferingMode getRecommendedBuffering() {
@@ -46,8 +48,8 @@ public class OntopReasonerInfo extends AbstractProtegeOWLReasonerInfo {
 		return factory;
 	}
 
-	public void setPreferences(QuestPreferences preferences) {
-        configBuilder.preferences(preferences);
+	public void setPreferences(Properties preferences) {
+        configBuilder.properties(preferences);
 	}
 
 	public void setOBDAModel(OBDAModel model) {
@@ -67,6 +69,6 @@ public class OntopReasonerInfo extends AbstractProtegeOWLReasonerInfo {
 
     @Override
     public OWLReasonerConfiguration getConfiguration(ReasonerProgressMonitor monitor) {
-        return configBuilder.progressMonitor(monitor).build();
+		return new QuestOWLConfiguration(configBuilder.build(), monitor);
     }
 }

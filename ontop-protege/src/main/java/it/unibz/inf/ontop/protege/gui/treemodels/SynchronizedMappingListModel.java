@@ -21,8 +21,8 @@ package it.unibz.inf.ontop.protege.gui.treemodels;
  */
 
 import it.unibz.inf.ontop.model.OBDAMappingAxiom;
-import it.unibz.inf.ontop.model.OBDAMappingListener;
-import it.unibz.inf.ontop.model.OBDAModel;
+import it.unibz.inf.ontop.protege.core.OBDAMappingListener;
+import it.unibz.inf.ontop.protege.core.OBDAModelWrapper;
 
 import javax.swing.*;
 import java.net.URI;

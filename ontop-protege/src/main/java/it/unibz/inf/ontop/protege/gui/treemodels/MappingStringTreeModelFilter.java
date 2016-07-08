@@ -58,7 +58,7 @@ public class MappingStringTreeModelFilter extends TreeModelFilter<OBDAMappingAxi
 			}
 
 			// Check in the Mapping Source Query
-			final OBDASQLQuery query = object.getSourceQuery();
+			final OBDASQLQuery query = (OBDASQLQuery) object.getSourceQuery();
 			isMatch = MappingSQLStringTreeModelFilter.match(keyword.trim(), query.toString());
 			if (isMatch) {
 				break; // end loop if a match is found!

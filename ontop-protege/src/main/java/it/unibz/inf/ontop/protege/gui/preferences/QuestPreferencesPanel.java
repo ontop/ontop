@@ -21,7 +21,8 @@ package it.unibz.inf.ontop.protege.gui.preferences;
  */
 
 
-import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
+import it.unibz.inf.ontop.owlrefplatform.injection.QuestCorePreferences;
+import it.unibz.inf.ontop.protege.core.DisposableProperties;
 import org.protege.editor.owl.ui.preferences.OWLPreferencesPanel;
 import it.unibz.inf.ontop.protege.panels.QuestConfigPanel;
 
@@ -38,7 +39,7 @@ public class QuestPreferencesPanel extends OWLPreferencesPanel {
 
 	@Override
 	public void initialise() throws Exception {
-        QuestPreferences preference = (QuestPreferences)getEditorKit().get(QuestPreferences.class.getName());
+		DisposableProperties preference = (DisposableProperties)getEditorKit().get(DisposableProperties.class.getName());
 		
 		this.setLayout(new BorderLayout());
         QuestConfigPanel configPanel = new QuestConfigPanel(preference);

@@ -23,6 +23,7 @@ package it.unibz.inf.ontop.protege.views;
 import it.unibz.inf.ontop.io.PrefixManager;
 import it.unibz.inf.ontop.model.impl.OBDAModelImpl;
 import it.unibz.inf.ontop.owlapi.OWLResultSetWriter;
+import it.unibz.inf.ontop.owlrefplatform.core.SQLExecutableQuery;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLResultSet;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLStatement;
 import it.unibz.inf.ontop.protege.core.OBDAModelManager;

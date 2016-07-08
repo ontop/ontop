@@ -51,10 +51,6 @@ public interface QuestCorePreferences extends OBDAProperties {
 	 */
 	boolean isIRISafeEncodingEnabled();
 
-	/**
-	 * TODO: should we keep it?
-	 */
-	List<String> getReformulationPlatformPreferencesKeys();
 
 	//--------------------------
 	// Connection configuration

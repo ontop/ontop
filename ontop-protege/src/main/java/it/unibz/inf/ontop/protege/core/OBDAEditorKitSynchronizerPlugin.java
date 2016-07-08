@@ -23,12 +23,12 @@ package it.unibz.inf.ontop.protege.core;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
-import it.unibz.inf.ontop.injection.OBDACoreModule;
+import it.unibz.inf.ontop.injection.impl.OBDACoreModule;
 import it.unibz.inf.ontop.injection.OBDAFactoryWithException;
 import it.unibz.inf.ontop.model.impl.OBDAModelImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
-import it.unibz.inf.ontop.owlrefplatform.injection.QuestComponentModule;
+import it.unibz.inf.ontop.owlrefplatform.injection.QuestCorePreferences;
+import it.unibz.inf.ontop.owlrefplatform.injection.impl.QuestComponentModule;
 import org.protege.editor.core.editorkit.EditorKit;
 import org.protege.editor.core.editorkit.plugin.EditorKitHook;
 import org.protege.editor.core.prefs.Preferences;
@@ -55,7 +55,7 @@ public class OBDAEditorKitSynchronizerPlugin extends EditorKitHook {
 	OWLEditorKit kit = null;
 //	OWLModelManager mmgr = null;
 	DisposableOBDAPreferences obdaPref = null;
-	DisposableQuestPreferences refplatPref = null;
+	DisposableProperties refplatPref = null;
 	
 	@Override
 	protected void setup(EditorKit editorKit) {
@@ -74,26 +74,16 @@ public class OBDAEditorKitSynchronizerPlugin extends EditorKitHook {
         /***
          * Preferences for Quest
          */
-        refplatPref = new DisposableQuestPreferences();
-        getEditorKit().put(QuestPreferences.class.getName(),refplatPref);
+        refplatPref = new DisposableProperties();
+        getEditorKit().put(QuestCorePreferences.class.getName(),refplatPref);
         loadPreferences();
-
-        Injector injector = Guice.createInjector(new OBDACoreModule(refplatPref),
-                new QuestComponentModule(refplatPref));
-
-        NativeQueryLanguageComponentFactory nativeQLFactory = injector.getInstance(
-                NativeQueryLanguageComponentFactory.class);
-
-        OBDAFactoryWithException obdaFactoryWithException = injector.getInstance(
-                OBDAFactoryWithException.class);
 		
 		/***
 		 * Each editor kit has its own instance of the ProtegePluginController.
 		 * Note, the OBDA model is inside this object (do
 		 * .getOBDAModelManager())
 		 */
-		instance = new OBDAModelManager(this.getEditorKit(), nativeQLFactory,
-                obdaFactoryWithException);
+		instance = new OBDAModelManager(this.getEditorKit());
 		getEditorKit().put(OBDAEditorKitSynchronizerPlugin.class.getName(), this);
 		kit = (OWLEditorKit)getEditorKit();
 //		mmgr = (OWLModelManager)kit.getModelManager();
@@ -140,17 +130,17 @@ public class OBDAEditorKitSynchronizerPlugin extends EditorKitHook {
 			String value = pref.getString(key, null);
 			if(value != null){
 				// here we ensure that if the abox mode is classic the the data location can only be in memory
-				if (key.equals(QuestPreferences.ABOX_MODE) && value.equals(QuestConstants.CLASSIC)) {
+				if (key.equals(QuestCorePreferences.ABOX_MODE) && value.equals(QuestConstants.CLASSIC)) {
 //					refplatPref.put(ReformulationPlatformPreferences.DATA_LOCATION, QuestConstants.INMEMORY);
-					refplatPref = refplatPref.newProperties(key, value);
+					refplatPref.put(key, value);
 					isCalssic = true;
 				}else{
-					refplatPref = refplatPref.newProperties(key, value);
+					refplatPref.put(key, value);
 				}
 			}
 		}
 		// Publish the new refplatPref
-		getEditorKit().put(QuestPreferences.class.getName(),refplatPref);
+		getEditorKit().put(QuestCorePreferences.class.getName(),refplatPref);
 	}
 	
 	private void storePreferences(){
@@ -165,7 +155,7 @@ public class OBDAEditorKitSynchronizerPlugin extends EditorKitHook {
 			pref.putString(key.toString(), value.toString());
 		}
 		
-		keys = refplatPref.getKeys();
+		keys = refplatPref.keySet();
 		it = keys.iterator();
 		while(it.hasNext()){
 			Object key = it.next();

@@ -20,8 +20,6 @@ package it.unibz.inf.ontop.protege.core;
  * #L%
  */
 
-import it.unibz.inf.ontop.model.OBDAMappingAxiom;
-
 import java.io.Serializable;
 import java.net.URI;
 

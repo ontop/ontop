@@ -21,6 +21,7 @@ package it.unibz.inf.ontop.protege.gui.component;
  */
 
 import it.unibz.inf.ontop.io.PrefixManager;
+import it.unibz.inf.ontop.model.OBDAModel;
 import it.unibz.inf.ontop.model.Predicate;
 import it.unibz.inf.ontop.ontology.DataPropertyExpression;
 import it.unibz.inf.ontop.ontology.ObjectPropertyExpression;
@@ -50,7 +51,7 @@ public class PropertyMappingPanel extends javax.swing.JPanel {
 
 	private static final long serialVersionUID = 1L;
 
-	private OBDAModelWrapper obdaModel;
+	private final OBDAModelWrapper obdaModelWrapper;
 	private PrefixManager prefixManager;
 
 	private boolean isPredicatePropertyValid = false;
@@ -74,9 +75,9 @@ public class PropertyMappingPanel extends javax.swing.JPanel {
 	private static Color DEFAULT_TEXTFIELD_BACKGROUND = UIManager.getDefaults().getColor("TextField.background");
 	private static Color ERROR_TEXTFIELD_BACKGROUND = new Color(255, 143, 143);
 	
-	public PropertyMappingPanel(OBDAModelWrapper obdaModel) {
-		this.obdaModel = obdaModel;
-		prefixManager = obdaModel.getPrefixManager();
+	public PropertyMappingPanel(OBDAModelWrapper obdaModelWrapper) {
+		this.obdaModelWrapper = obdaModelWrapper;
+		prefixManager = obdaModelWrapper.getPrefixManager();
 		initComponents();
 	}
 
@@ -145,6 +146,7 @@ public class PropertyMappingPanel extends javax.swing.JPanel {
         pnlAddProperty.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 0, 3, 0));
         pnlAddProperty.setLayout(new java.awt.BorderLayout(3, 0));
         Vector<Object> v = new Vector<Object>();
+		OBDAModel obdaModel = obdaModelWrapper.getCurrentImmutableOBDAModel();
         for (DataPropertyExpression dp : obdaModel.getOntologyVocabulary().getDataProperties()) {
             v.addElement(new PredicateItem(dp.getPredicate(), prefixManager));
         }

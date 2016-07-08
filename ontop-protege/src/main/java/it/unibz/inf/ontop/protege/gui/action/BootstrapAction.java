@@ -20,14 +20,11 @@ package it.unibz.inf.ontop.protege.gui.action;
  * #L%
  */
 
-import com.google.inject.Guice;
 import com.google.inject.Injector;
 import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
-import it.unibz.inf.ontop.injection.OBDACoreModule;
+import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.injection.OBDAFactoryWithException;
-import it.unibz.inf.ontop.injection.OBDAProperties;
 import it.unibz.inf.ontop.model.OBDADataSource;
-import it.unibz.inf.ontop.model.OBDAModel;
 import it.unibz.inf.ontop.model.impl.OBDAModelImpl;
 import it.unibz.inf.ontop.owlapi.bootstrapping.DirectMappingBootstrapper;
 import it.unibz.inf.ontop.protege.core.OBDAModelManager;
@@ -160,9 +157,11 @@ public class BootstrapAction extends ProtegeAction {
 						OBDAModelWrapper currentModel, OBDADataSource currentSource)
 				throws Exception {
 
-            // TODO: Retrieve the effective Quest preferences (not just the default ones).
-            OBDAProperties defaultProperties = new OBDAProperties();
-            Injector injector = Guice.createInjector(new OBDACoreModule(defaultProperties));
+            // TODO: Retrieve the effective properties (not just the default ones).
+
+			QuestConfiguration defaultConfiguration = QuestConfiguration.defaultBuilder().build();
+            Injector injector = defaultConfiguration.getInjector();
+
             NativeQueryLanguageComponentFactory nativeQLFactory = injector.getInstance(
                     NativeQueryLanguageComponentFactory.class);
             OBDAFactoryWithException factoryWithException = injector.getInstance(

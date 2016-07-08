@@ -24,7 +24,6 @@ import it.unibz.inf.ontop.io.PrefixManager;
 import it.unibz.inf.ontop.io.TargetQueryVocabularyValidator;
 import it.unibz.inf.ontop.model.Function;
 import it.unibz.inf.ontop.model.OBDAMappingAxiom;
-import it.unibz.inf.ontop.model.OBDAModel;
 import it.unibz.inf.ontop.model.OBDASQLQuery;
 import it.unibz.inf.ontop.protege.core.OBDAModelWrapper;
 import it.unibz.inf.ontop.renderer.SourceQueryRenderer;
@@ -373,7 +372,7 @@ public class OBDAMappingListRenderer implements ListCellRenderer {
 		String trgQuery = TargetQueryRenderer.encode(targetQuery, prefixManager);
  		trgQueryTextPane.setText(trgQuery);
 
- 		OBDASQLQuery sourceQuery = value.getSourceQuery();
+ 		OBDASQLQuery sourceQuery = (OBDASQLQuery) value.getSourceQuery();
 		String srcQuery = SourceQueryRenderer.encode(sourceQuery);
 		srcQueryTextPane.setText(srcQuery);
 		

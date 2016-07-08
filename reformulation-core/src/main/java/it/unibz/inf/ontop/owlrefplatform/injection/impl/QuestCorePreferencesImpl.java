@@ -32,24 +32,6 @@ public class QuestCorePreferencesImpl extends OBDAPropertiesImpl implements Ques
         return properties;
     }
 
-
-    @Override
-    public List<String> getReformulationPlatformPreferencesKeys(){
-        ArrayList<String> keys = new ArrayList<String>();
-        keys.add(REFORMULATION_TECHNIQUE);
-        keys.add(ABOX_MODE);
-        keys.add(DBTYPE);
-//		keys.add(DATA_LOCATION);
-        keys.add(OBTAIN_FROM_ONTOLOGY);
-        keys.add(OBTAIN_FROM_MAPPINGS);
-        keys.add(OPTIMIZE_EQUIVALENCES);
-//		keys.add(ANNOTATIONS_IN_ONTO);
-//		keys.add(OPTIMIZE_TBOX_SIGMA);
-//		keys.add(CREATE_TEST_MAPPINGS);
-
-        return keys;
-    }
-
     @Override
     public boolean isOntologyAnnotationQueryingEnabled() {
         return getRequiredBoolean(ANNOTATIONS_IN_ONTO);

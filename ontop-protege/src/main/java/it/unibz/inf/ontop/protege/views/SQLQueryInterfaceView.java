@@ -20,10 +20,10 @@ package it.unibz.inf.ontop.protege.views;
  * #L%
  */
 
-import it.unibz.inf.ontop.model.OBDAModel;
 import it.unibz.inf.ontop.model.impl.OBDAModelImpl;
 import it.unibz.inf.ontop.protege.core.OBDAModelManager;
 import it.unibz.inf.ontop.protege.core.OBDAModelManagerListener;
+import it.unibz.inf.ontop.protege.core.OBDAModelWrapper;
 import it.unibz.inf.ontop.protege.panels.SQLQueryPanel;
 import org.protege.editor.owl.ui.view.AbstractOWLViewComponent;
 import org.slf4j.Logger;
@@ -37,8 +37,7 @@ public class SQLQueryInterfaceView extends AbstractOWLViewComponent implements O
 	private static final long serialVersionUID = 993255482453828915L;
 
 	OBDAModelManager apic;
-
-        OBDAModel dsController;
+	OBDAModelWrapper dsController;
 
 	private static final Logger log = LoggerFactory.getLogger(SQLQueryInterfaceView.class);
 	
@@ -53,7 +52,7 @@ public class SQLQueryInterfaceView extends AbstractOWLViewComponent implements O
 		apic = (OBDAModelManager) getOWLEditorKit().get(OBDAModelImpl.class.getName());
 		apic.addListener(this);
 
-		OBDAModelWrapper dsController = apic.getActiveOBDAModelWrapper();
+		dsController = apic.getActiveOBDAModelWrapper();
 
 		SQLQueryPanel queryPanel = new SQLQueryPanel();
 
@@ -69,6 +68,6 @@ public class SQLQueryInterfaceView extends AbstractOWLViewComponent implements O
 
 	@Override
 	public void activeOntologyChanged() {
-		datasourceSelector.setDatasourceController(apic.getActiveOBDAModelWrapper());
+		dsController = apic.getActiveOBDAModelWrapper();
 	}
 }

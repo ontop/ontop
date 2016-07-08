@@ -23,7 +23,9 @@ package it.unibz.inf.ontop.protege.panels;
 
 import it.unibz.inf.ontop.model.OBDADataSource;
 import it.unibz.inf.ontop.model.OBDAException;
+import it.unibz.inf.ontop.model.OBDAModel;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
+import it.unibz.inf.ontop.model.impl.OBDAModelImpl;
 import it.unibz.inf.ontop.model.impl.RDBMSourceParameterConstants;
 import it.unibz.inf.ontop.protege.core.OBDAModelManager;
 import it.unibz.inf.ontop.protege.core.OBDAModelWrapper;
@@ -65,7 +67,7 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
 
         this.owlEditorKit = owlEditorKit;
         OBDAModelManager obdaModelManager = (OBDAModelManager) owlEditorKit.get(OBDAModelImpl.class.getName());
-        OBDAModel model = obdaModelManager.getActiveOBDAModel();
+        OBDAModelWrapper model = obdaModelManager.getActiveOBDAModelWrapper();
 
         timer = new Timer(200, e -> handleTimer());
 
@@ -116,7 +118,7 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
          */
         if (obdaModel.getSources().size() > 0) {
 
-            currentDatasourceChange(obdaModel.getCurrentImmutableOBDAModel().getSources().get(0));
+            currentDatasourceChange(obdaModel.getCurrentImmutableOBDAModel().getSources().iterator().next());
         }
     }
 

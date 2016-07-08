@@ -628,7 +628,7 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 		cmdInsertMapping.setText("Update");
 		txtMappingID.setText(mapping.getId());
 
-		OBDASQLQuery sourceQuery = mapping.getSourceQuery();
+		OBDASQLQuery sourceQuery = (OBDASQLQuery) mapping.getSourceQuery();
 		String srcQuery = SourceQueryRenderer.encode(sourceQuery);
 		txtSourceQuery.setText(srcQuery);
 
