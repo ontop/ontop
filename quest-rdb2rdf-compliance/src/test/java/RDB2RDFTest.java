@@ -29,6 +29,7 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.List;
+import java.util.Properties;
 import java.util.Set;
 
 import com.google.common.base.Charsets;
@@ -38,7 +39,9 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.common.io.Resources;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
+import it.unibz.inf.ontop.injection.OBDAProperties;
+import it.unibz.inf.ontop.injection.QuestConfiguration;
+import it.unibz.inf.ontop.owlrefplatform.injection.QuestCorePreferences;
 import it.unibz.inf.ontop.sesame.SesameVirtualRepo;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -46,7 +49,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
-import org.openrdf.model.Model;
 import org.openrdf.model.Statement;
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
@@ -100,9 +102,8 @@ public class RDB2RDFTest {
 	private static ValueFactory FACTORY = ValueFactoryImpl.getInstance();
 
 	private static OWLOntology EMPTY_ONT;
+	private static Properties PROPERTIES;
 
-
-	private static QuestPreferences QUEST_PREFS = new QuestPreferences();
 
 	/**
 	 * Terms used in the manifest files of RDB2RDF test suite
@@ -222,12 +223,14 @@ public class RDB2RDFTest {
 
 		EMPTY_ONT = OWLManager.createOWLOntologyManager().createOntology();
 
-		QUEST_PREFS.setProperty(QuestPreferences.DBNAME, "h2");
-		QUEST_PREFS.setProperty(QuestPreferences.DBUSER, "sa");
-		QUEST_PREFS.setProperty(QuestPreferences.DBPASSWORD, "");
-		QUEST_PREFS.setProperty(QuestPreferences.JDBC_URL, "jdbc:h2:mem:questrepository");
-		QUEST_PREFS.setProperty(QuestPreferences.JDBC_DRIVER, "org.h2.Driver");
-		QUEST_PREFS.setProperty(QuestPreferences.BASE_IRI, BASE_IRI);
+		PROPERTIES = new Properties();
+
+		PROPERTIES.setProperty(OBDAProperties.DB_NAME, "h2");
+		PROPERTIES.setProperty(OBDAProperties.DB_USER, "sa");
+		PROPERTIES.setProperty(OBDAProperties.DB_PASSWORD, "");
+		PROPERTIES.setProperty(OBDAProperties.JDBC_URL, "jdbc:h2:mem:questrepository");
+		PROPERTIES.setProperty(OBDAProperties.JDBC_DRIVER, "org.h2.Driver");
+		PROPERTIES.setProperty(QuestCorePreferences.BASE_IRI, BASE_IRI);
 	}
 
 	@Before
@@ -255,8 +258,13 @@ public class RDB2RDFTest {
 	protected Repository createRepository() throws Exception {
 		logger.info("RDB2RDFTest " + name + " " + mappingFile);
 
-		Model mappings = mappingFile == null ? null : Rio.parse(stream(mappingFile), BASE_IRI, Rio.getParserFormatForFileName(mappingFile));
-		SesameVirtualRepo repo = new SesameVirtualRepo(name, EMPTY_ONT, mappings, null, QUEST_PREFS);
+		QuestConfiguration.Builder configBuilder = QuestConfiguration.defaultBuilder()
+				.properties(PROPERTIES)
+				.ontology(EMPTY_ONT);
+		if (mappingFile != null) {
+			configBuilder.r2rmlMappingFile(mappingFile);
+		}
+		SesameVirtualRepo repo = new SesameVirtualRepo(name, configBuilder.build());
 		repo.initialize();
 		return repo;
 	}
