@@ -5,33 +5,28 @@ import it.unibz.inf.ontop.ontology.Ontology;
 import it.unibz.inf.ontop.ontology.OntologyFactory;
 import it.unibz.inf.ontop.ontology.OntologyVocabulary;
 import it.unibz.inf.ontop.ontology.impl.OntologyFactoryImpl;
+import it.unibz.inf.ontop.owlrefplatform.core.IQuest;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
+import it.unibz.inf.ontop.owlrefplatform.injection.QuestComponentFactory;
 import it.unibz.inf.ontop.owlrefplatform.injection.QuestCorePreferences;
 import it.unibz.inf.ontop.owlrefplatform.core.abox.RDBMSSIRepositoryManager;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileReader;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.Statement;
+import java.util.Optional;
 import java.util.Properties;
 
-import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWL;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLConfiguration;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLFactory;
 import junit.framework.TestCase;
-
-import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
 
 public class SemanticIndexMetadataTest  extends TestCase {
 	private Connection conn;
 
 	private static final String testCase = "twr-predicate";
-	private static final String owlfile = "src/test/resources/test/treewitness/" + testCase + ".owl"; 
+	// private static final String owlfile = "src/test/resources/test/treewitness/" + testCase + ".owl";
 	//private static final String obdafile = "src/test/resources/test/treewitness/" + testCase + ".obda";
 
 
@@ -108,14 +103,15 @@ public class SemanticIndexMetadataTest  extends TestCase {
 
 			Ontology ont = ofac.createOntology(vb);
 
-			QuestOWLFactory factory = new QuestOWLFactory();
 			QuestConfiguration config = QuestConfiguration.defaultBuilder()
-					.ontologyFile(owlfile)
 					.properties(p)
 					.build();
-			QuestOWL reasoner = factory.createReasoner(config);
+
+			QuestComponentFactory componentFactory = config.getInjector().getInstance(QuestComponentFactory.class);
+			IQuest questInstance = componentFactory.create(ont, Optional.empty(), Optional.empty());
+			questInstance.setupRepository();
 			
-			RDBMSSIRepositoryManager si = reasoner.getQuestInstance().getOptionalSemanticIndexRepository().get();
+			RDBMSSIRepositoryManager si = questInstance.getOptionalSemanticIndexRepository().get();
 			
 			si.createDBSchemaAndInsertMetadata(conn);
 

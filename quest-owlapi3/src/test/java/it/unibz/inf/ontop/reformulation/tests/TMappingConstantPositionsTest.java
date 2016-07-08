@@ -26,6 +26,7 @@ import it.unibz.inf.ontop.owlrefplatform.injection.QuestCorePreferences;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import junit.framework.TestCase;
 import org.junit.Test;
+import org.semanticweb.owlapi.reasoner.IllegalConfigurationException;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -144,8 +145,7 @@ public class TMappingConstantPositionsTest extends TestCase {
 
 		runTests(p);
 	}
-	
-	@Test
+
 	public void testClassicEqSig() throws Exception {
 
 		Properties p = new Properties();
@@ -153,7 +153,12 @@ public class TMappingConstantPositionsTest extends TestCase {
 		p.put(QuestCorePreferences.OPTIMIZE_EQUIVALENCES, "true");
 		p.put(QuestCorePreferences.OBTAIN_FROM_MAPPINGS, "true");
 
-		runTests(p);
+		try {
+			runTests(p);
+			fail("Was expecting an IllegalConfigurationException " +
+					"(mappings are currently forbidden in the classic mode)");
+		} catch (IllegalConfigurationException e) {
+		}
 	}
 
 

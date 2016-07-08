@@ -27,6 +27,7 @@ import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import junit.framework.TestCase;
 import org.semanticweb.owlapi.io.ToStringRenderer;
 import org.semanticweb.owlapi.model.OWLObject;
+import org.semanticweb.owlapi.reasoner.IllegalConfigurationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -173,7 +174,7 @@ public class SimpleMappingVirtualABoxTest extends TestCase {
 
 		runTests(p);
 	}
-	
+
 	public void testClassicEqSig() throws Exception {
 
 		Properties p = new Properties();
@@ -181,7 +182,12 @@ public class SimpleMappingVirtualABoxTest extends TestCase {
 		p.setProperty(QuestCorePreferences.OPTIMIZE_EQUIVALENCES, "true");
 		p.setProperty(QuestCorePreferences.OBTAIN_FROM_MAPPINGS, "true");
 
-		runTests(p);
+		try {
+			runTests(p);
+			fail("Was expecting an IllegalConfigurationException " +
+					"(mappings are currently forbidden in the classic mode)");
+		} catch (IllegalConfigurationException e) {
+		}
 	}
 
 
