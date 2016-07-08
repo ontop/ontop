@@ -115,8 +115,12 @@ public class QuestConfigurationImpl extends QuestCoreConfigurationImpl implement
                 /**
                  * If no protocol, treats it as a path
                  */
-                if (url.getProtocol() == null) {
+                String protocol = url.getProtocol();
+                if (protocol == null) {
                     return ontologyFile(new File(urlOrPath));
+                }
+                else if (protocol.equals("file")) {
+                    return ontologyFile(new File(url.getPath()));
                 }
                 else {
                     return ontologyFile(url);

@@ -59,7 +59,6 @@ import it.unibz.inf.ontop.owlrefplatform.core.abox.QuestMaterializer;
 import it.unibz.inf.ontop.owlrefplatform.core.abox.RDBMSSIRepositoryManager;
 import it.unibz.inf.ontop.owlrefplatform.core.execution.SIQuestStatement;
 import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -84,17 +83,23 @@ public class QuestDBClassicStore extends QuestDBAbstractStore {
 
 	public QuestDBClassicStore(String name, QuestConfiguration config) throws Exception {
 		super(name, config);
-		Ontology tbox = loadTboxFromConfiguration(config);
-		createInstance(tbox, config.getPreferences());
-	}
 
-	private static Ontology loadTboxFromConfiguration(QuestConfiguration config) throws OWLOntologyCreationException {
-		return config.loadInputOntology()
+		Optional<OWLOntology> optionalInputOntology = config.loadInputOntology();
+		if (optionalInputOntology.isPresent()) {
+			OWLOntology ontology = optionalInputOntology.get();
+			closure = ontology.getOWLOntologyManager().getImportsClosure(ontology);
+		}
+		else {
+			closure = new HashSet<>();
+		}
+
+		Ontology tbox = optionalInputOntology
 				.map(OWLAPITranslatorUtility::translateImportsClosure)
 				// Default empty Ontology
 				.orElseGet(() -> ofac.createOntology(ofac.createVocabulary()));
-	}
 
+		createInstance(tbox, config.getPreferences());
+	}
 
 	/**
 	 * TODO: integrate Ontology loading from a Dataset into QuestConfiguration
@@ -186,6 +191,9 @@ public class QuestDBClassicStore extends QuestDBAbstractStore {
 			//	result.add(ax);	
 		}
 		Ontology result = ofac.createOntology(vb);
+
+		// TODO: what about closure?
+		closure = null;
 
 		return result;
 	}
