@@ -5,15 +5,13 @@ import com.github.rvesse.airline.annotations.Option;
 import com.github.rvesse.airline.annotations.OptionType;
 import com.github.rvesse.airline.annotations.restrictions.Required;
 import com.google.common.base.Strings;
-import it.unibz.inf.ontop.io.ModelIOManager;
-import it.unibz.inf.ontop.model.OBDADataFactory;
-import it.unibz.inf.ontop.model.OBDADataSource;
+import it.unibz.inf.ontop.injection.OBDAProperties;
+import it.unibz.inf.ontop.injection.QuestConfiguration;
+import it.unibz.inf.ontop.io.OntopNativeMappingSerializer;
 import it.unibz.inf.ontop.model.OBDAModel;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
-import it.unibz.inf.ontop.r2rml.R2RMLReader;
 
 import java.io.File;
-import java.net.URI;
+import java.util.Properties;
 
 @Command(name = "to-obda",
         description = "Convert R2RML format to ontop native mapping format (.obda)")
@@ -36,25 +34,23 @@ public class OntopR2RMLToOBDA implements OntopCommand {
         }
 
         File out = new File(outputMappingFile);
-
-        URI obdaURI = new File(inputMappingFile).toURI();
         try {
-        R2RMLReader reader = new R2RMLReader(inputMappingFile);
+            Properties p = new Properties();
+            p.put(OBDAProperties.JDBC_URL, "jdbc:h2:tcp://localhost/DBName");
+            p.put(OBDAProperties.DB_USER, "username");
+            p.put(OBDAProperties.DB_PASSWORD, "password");
+            p.put(OBDAProperties.JDBC_DRIVER, "com.mysql.jdbc.Driver");
 
-        String jdbcurl = "jdbc:h2:tcp://localhost/DBName";
-        String username = "username";
-        String password = "password";
-        String driverclass = "com.mysql.jdbc.Driver";
+            QuestConfiguration configuration = QuestConfiguration.defaultBuilder()
+                    .r2rmlMappingFile(inputMappingFile)
+                    .properties(p)
+                    .build();
 
-        OBDADataFactory f = OBDADataFactoryImpl.getInstance();
-        String sourceUrl = obdaURI.toString();
-        OBDADataSource dataSource = f.getJDBCDataSource(sourceUrl, jdbcurl,
-                username, password, driverclass);
-        OBDAModel model = reader.readModel(dataSource);
+            OBDAModel obdaModel = configuration.loadProvidedInputMappings();
 
-        ModelIOManager modelIO = new ModelIOManager(model);
+            OntopNativeMappingSerializer writer = new OntopNativeMappingSerializer(obdaModel);
+            writer.save(out);
 
-            modelIO.save(out);
         } catch (Exception e) {
             e.printStackTrace();
         }

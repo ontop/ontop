@@ -31,6 +31,15 @@ public interface OBDACoreConfiguration {
      */
     Optional<OBDAModel> loadInputMappings() throws InvalidDataSourceException, IOException, InvalidMappingException;
 
+    /**
+     * Only call it if you are sure that mappings have been provided
+     */
+    default OBDAModel loadProvidedInputMappings() throws InvalidDataSourceException, IOException, InvalidMappingException {
+        return loadInputMappings()
+                .orElseThrow(() -> new IllegalStateException("No mapping has been provided. " +
+                        "Do not call this method unless you are sure of the mapping provision."));
+    }
+
     void validate() throws InvalidOBDAConfigurationException;
 
     /**

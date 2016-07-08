@@ -131,8 +131,7 @@ public class MetaMappingTargetQueryValidatorTest extends TestCase {
 				.nativeOntopMappingFile(obdafile)
 				.build();
 
-		OBDAModel obdaModel = configuration.loadInputMappings()
-				.orElseThrow(IllegalStateException::new);
+		OBDAModel obdaModel = configuration.loadProvidedInputMappings();
 
 		// run validator
 		try {

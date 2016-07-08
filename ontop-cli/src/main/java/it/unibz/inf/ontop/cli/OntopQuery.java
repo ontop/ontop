@@ -28,6 +28,8 @@ import com.github.rvesse.airline.annotations.help.BashCompletion;
 import com.github.rvesse.airline.help.cli.bash.CompletionBehaviour;
 import it.unibz.inf.ontop.exception.InvalidMappingException;
 import it.unibz.inf.ontop.exception.InvalidPredicateDeclarationException;
+import it.unibz.inf.ontop.injection.QuestConfiguration;
+import it.unibz.inf.ontop.io.InvalidDataSourceException;
 import it.unibz.inf.ontop.model.OBDAModel;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import org.semanticweb.owlapi.apibinding.OWLManager;
@@ -57,22 +59,21 @@ public class OntopQuery extends OntopReasoningCommandBase {
 
     @Override
     public void run() {
-        OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
+
         OWLOntology ontology;
-
         try {
+            OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
+
             if (owlFile != null) {
-                // Loading the OWL ontology from the file as with normal OWLReasoners
-                ontology = manager.loadOntologyFromOntologyDocument((new File(owlFile)));
-
+                ontology = manager.loadOntologyFromOntologyDocument(new File(owlFile));
                 if (disableReasoning) {
-                /*
-                 * when reasoning is disabled, we extract only the declaration assertions for the vocabulary
-                 */
-                    ontology = extractDeclarations(manager, ontology);
+                    /*
+                     * when reasoning is disabled, we extract only the declaration assertions for the vocabulary
+                     */
+                    ontology = extractDeclarations(ontology.getOWLOntologyManager(), ontology);
                 }
-
-            } else {
+            }
+            else {
                 ontology = manager.createOntology();
             }
         } catch (OWLOntologyCreationException e) {
@@ -80,28 +81,21 @@ public class OntopQuery extends OntopReasoningCommandBase {
             return;
         }
 
-//        QuestOWLFactory factory = null;
-//        try {
-//            factory = createQueryOWLFactory(nativeOntopMappingFile);
-//        } catch (Exception e1) {
-//            e1.printStackTrace();
-//        }
 
-        QuestOWLFactory factory = null;
-        QuestOWLConfiguration config = null;
-        try {
-            OBDAModel obdaModel = loadMappingFile(mappingFile);
-            QuestOWLConfiguration.Builder builder = QuestOWLConfiguration.builder();
-            builder.obdaModel(obdaModel);
-            builder.queryingAnnotationsInOntology(enableAnnotations);
-            config = builder.build();
-            factory = new QuestOWLFactory();
-        } catch (IOException | InvalidPredicateDeclarationException | InvalidMappingException e) {
-            e.printStackTrace();
-            System.exit(1);
+        QuestOWLFactory factory = new QuestOWLFactory();
+        QuestConfiguration.Builder configurationBuilder = QuestConfiguration.defaultBuilder()
+                .ontology(ontology)
+                .enableOntologyAnnotationQuerying(enableAnnotations);
+
+        if (isR2rmlFile(mappingFile)) {
+            configurationBuilder.r2rmlMappingFile(mappingFile);
+        } else {
+            configurationBuilder.nativeOntopMappingFile(mappingFile);
         }
 
-        try (QuestOWL reasoner = factory.createReasoner(ontology, config);
+        factory = new QuestOWLFactory();
+
+        try (QuestOWL reasoner = factory.createReasoner(configurationBuilder.build());
              QuestOWLConnection conn = reasoner.getConnection();
              QuestOWLStatement st = conn.createStatement();
         ) {

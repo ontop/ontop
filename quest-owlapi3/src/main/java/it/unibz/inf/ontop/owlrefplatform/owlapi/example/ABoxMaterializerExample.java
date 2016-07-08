@@ -56,8 +56,7 @@ public class ABoxMaterializerExample {
 				.nativeOntopMappingFile(inputFile)
 				.build();
 
-        OBDAModel obdaModel = configuration.loadInputMappings()
-				.orElseThrow(() -> new IllegalStateException("Mappings must be provided"));
+        OBDAModel obdaModel = configuration.loadProvidedInputMappings();
 
 		/*
 		 * Start materializing data from database to triples.

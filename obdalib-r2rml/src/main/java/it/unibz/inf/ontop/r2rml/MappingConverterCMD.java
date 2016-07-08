@@ -67,7 +67,7 @@ class MappingConverterCMD {
 
                 OBDAModel model;
                 try {
-                    model = configuration.loadInputMappings().get();
+                    model = configuration.loadProvidedInputMappings();
 				} catch (InvalidMappingExceptionWithIndicator e) {
 					e.printStackTrace();
                     return;
@@ -106,7 +106,7 @@ class MappingConverterCMD {
 						.concat(".obda");
 				File out = new File(outfile);
 
-                OBDAModel model = configuration.loadInputMappings().get();
+                OBDAModel model = configuration.loadProvidedInputMappings();
 
                 OntopNativeMappingSerializer mappingWriter = new OntopNativeMappingSerializer(model);
 				mappingWriter.save(out);

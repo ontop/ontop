@@ -7,20 +7,19 @@ import com.github.rvesse.airline.annotations.help.BashCompletion;
 import com.github.rvesse.airline.annotations.restrictions.Required;
 import com.github.rvesse.airline.help.cli.bash.CompletionBehaviour;
 import com.google.common.base.Strings;
-import com.google.inject.Guice;
-import com.google.inject.Injector;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
+import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.exception.InvalidMappingException;
+import it.unibz.inf.ontop.injection.QuestConfiguration;
+import it.unibz.inf.ontop.io.InvalidDataSourceException;
 import it.unibz.inf.ontop.model.OBDAModel;
 import it.unibz.inf.ontop.r2rml.R2RMLWriter;
 import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.RDFFormat;
-import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
 
 import java.io.*;
 import java.net.URI;
@@ -55,39 +54,38 @@ public class OntopOBDAToR2RML implements OntopCommand {
         }
 
         File out = new File(outputMappingFile);
-        URI obdaURI = new File(inputMappingFile).toURI();
 
-        QuestPreferences preferences = new QuestPreferences();
-        Injector injector = Guice.createInjector(new OBDACoreModule(preferences));
-        NativeQueryLanguageComponentFactory factory = injector.getInstance(NativeQueryLanguageComponentFactory.class);
+        QuestConfiguration.Builder configBuilder = QuestConfiguration.defaultBuilder()
+                .nativeOntopMappingFile(inputMappingFile);
 
-        MappingParser mappingParser = factory.create(new File(obdaURI));
+        if (owlFile != null)
+            configBuilder.ontologyFile(owlFile);
+
+        QuestConfiguration config = configBuilder.build();
 
         OBDAModel model;
         /**
          * load the mapping in native Ontop syntax
          */
         try {
-            model = mappingParser.getOBDAModel();
+            model = config.loadProvidedInputMappings();
         } catch (IOException | InvalidMappingException | DuplicateMappingException | InvalidDataSourceException e) {
             e.printStackTrace();
             System.exit(1);
             return;
         }
 
-        URI srcURI = model.getSources().iterator().next().getSourceID();
-
-        OWLOntology ontology = null;
-        if (owlFile != null) {
-
-            // Loading the OWL file
-            OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-            try {
-                ontology = manager.loadOntologyFromOntologyDocument((new File(owlFile)));
-            } catch (OWLOntologyCreationException e) {
-                e.printStackTrace();
-            }
+        OWLOntology ontology;
+        try {
+            ontology = config.loadInputOntology()
+                    .orElse(null);
+        } catch (OWLOntologyCreationException e) {
+            e.printStackTrace();
+            System.exit(1);
+            return;
         }
+
+        URI srcURI = model.getSources().iterator().next().getSourceID();
 
         /**
          * render the mapping in the (ugly) Turtle syntax and save it to a string
