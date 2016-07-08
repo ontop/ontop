@@ -126,8 +126,7 @@ public class QuestConfigurationImpl extends QuestCoreConfigurationImpl implement
                     return ontologyFile(url);
                 }
             } catch (MalformedURLException e) {
-                throw new InvalidOBDAConfigurationException(
-                        "The given ontology URL is not valid: " + e.getMessage());
+                return ontologyFile(new File(urlOrPath));
             }
         }
 

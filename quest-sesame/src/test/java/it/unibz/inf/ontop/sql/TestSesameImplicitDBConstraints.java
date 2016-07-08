@@ -7,26 +7,17 @@ import java.io.File;
 import java.util.Properties;
 import java.util.Scanner;
 
-import com.google.inject.Guice;
-import com.google.inject.Injector;
+import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestDBConnection;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestDBStatement;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
+import it.unibz.inf.ontop.owlrefplatform.injection.QuestCorePreferences;
 import org.junit.After;
 import org.junit.Test;
-import org.openrdf.model.Model;
 import static org.junit.Assert.*;
 
-import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
-import it.unibz.inf.ontop.injection.OBDACoreModule;
 import it.unibz.inf.ontop.injection.OBDAProperties;
-import it.unibz.inf.ontop.owlrefplatform.core.*;
-import it.unibz.inf.ontop.r2rml.R2RMLManager;
 import it.unibz.inf.ontop.sesame.SesameVirtualRepo;
-import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
 
 /**
  * Tests that user-applied constraints can be provided through 
@@ -81,49 +72,29 @@ public class TestSesameImplicitDBConstraints {
 		 * "Virtual ABox" mode
 		 */
 		Properties p = new Properties();
-		p.setProperty(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+		p.setProperty(QuestCorePreferences.ABOX_MODE, QuestConstants.VIRTUAL);
 		p.setProperty(OBDAProperties.DB_NAME, "countries");
 		p.setProperty(OBDAProperties.JDBC_URL, "jdbc:h2:mem:countries");
 		p.setProperty(OBDAProperties.DB_USER, "sa");
 		p.setProperty(OBDAProperties.DB_PASSWORD, "");
 		p.setProperty(OBDAProperties.JDBC_DRIVER, "org.h2.Driver");
 
+		QuestConfiguration.Builder configurationBuilder = QuestConfiguration.defaultBuilder()
+				.ontologyFile(owlfile)
+				.r2rmlMappingFile(r2rmlfile)
+				.properties(p);
+
 		if(applyUserConstraints){
 			// Parsing user constraints
-			ImplicitDBConstraintsReader userConstraints = new ImplicitDBConstraintsReader(new File(uc_keyfile));
-			p.put(QuestPreferences.DB_CONSTRAINTS, userConstraints);
+			ImplicitDBConstraintsReader userConstraintReader = new ImplicitDBConstraintsReader(new File(uc_keyfile));
+			configurationBuilder.dbConstraintsReader(userConstraintReader);
 		}
 
-		QuestPreferences preferences = new R2RMLQuestPreferences(p);
-
-		SesameVirtualRepo qest1;
-
-		/**
-		 * TODO: simplify this part by updating the prototype of SesameVirtualRepo
-		 */
-		if(provideMetadata){
-			/*
-			 * Load the ontology from an external .owl file.
-			 */
-			OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-			OWLOntology ontology = manager.loadOntologyFromOntologyDocument(new File(owlfile));
-
-			Injector injector = Guice.createInjector(new OBDACoreModule(preferences));
-			NativeQueryLanguageComponentFactory nativeQLFactory = injector.getInstance(
-					NativeQueryLanguageComponentFactory.class);
-
-			/*
-			 * Load the OBDA model from an external .r2rml file
-			 */
-			R2RMLManager rmanager = new R2RMLManager(r2rmlfile, nativeQLFactory);
-			Model model = rmanager.getModel();
-
-			DBMetadata dbMetadata = getMeta();
-
-			qest1 = new SesameVirtualRepo("", ontology, model, dbMetadata, preferences);
-		} else {
-			qest1 = new SesameVirtualRepo("", owlfile, r2rmlfile, preferences);
+		if(provideMetadata) {
+			configurationBuilder.dbMetadata(getMeta());
 		}
+
+		SesameVirtualRepo qest1 = new SesameVirtualRepo("", configurationBuilder.build());
 		qest1.initialize();
 		/*
 		 * Prepare the data connection for querying.

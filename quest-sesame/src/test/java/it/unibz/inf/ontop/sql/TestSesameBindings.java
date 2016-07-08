@@ -22,7 +22,7 @@ import java.sql.SQLException;
 import java.util.Properties;
 import java.util.Scanner;
 
-import it.unibz.inf.ontop.owlrefplatform.core.R2RMLQuestPreferences;
+import it.unibz.inf.ontop.injection.QuestConfiguration;
 import org.junit.After;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -38,7 +38,7 @@ import org.openrdf.query.TupleQuery;
 import org.openrdf.query.TupleQueryResult;
 import it.unibz.inf.ontop.injection.OBDAProperties;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
+import it.unibz.inf.ontop.owlrefplatform.injection.QuestCorePreferences;
 import it.unibz.inf.ontop.sesame.RepositoryConnection;
 import it.unibz.inf.ontop.sesame.SesameVirtualRepo;
 
@@ -77,16 +77,20 @@ public class TestSesameBindings {
         s.close();
 
         Properties p = new Properties();
-        p.setProperty(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+        p.setProperty(QuestCorePreferences.ABOX_MODE, QuestConstants.VIRTUAL);
         p.setProperty(OBDAProperties.DB_NAME, "countries");
         p.setProperty(OBDAProperties.JDBC_URL, "jdbc:h2:mem:countries");
         p.setProperty(OBDAProperties.DB_USER, "sa");
         p.setProperty(OBDAProperties.DB_PASSWORD, "");
         p.setProperty(OBDAProperties.JDBC_DRIVER, "org.h2.Driver");
 
-        QuestPreferences preferences = new R2RMLQuestPreferences(p);
+        QuestConfiguration config = QuestConfiguration.defaultBuilder()
+                .ontologyFile(owlfile)
+                .r2rmlMappingFile(r2rmlfile)
+                .properties(p)
+                .build();
 
-        SesameVirtualRepo repo = new SesameVirtualRepo("", owlfile, r2rmlfile, preferences);
+        SesameVirtualRepo repo = new SesameVirtualRepo("", config);
         repo.initialize();
         /*
          * Prepare the data connection for querying.

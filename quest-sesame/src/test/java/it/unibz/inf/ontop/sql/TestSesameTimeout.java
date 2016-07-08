@@ -9,29 +9,18 @@ import java.sql.SQLException;
 import java.util.Properties;
 import java.util.Scanner;
 
-import com.google.inject.Guice;
-import com.google.inject.Injector;
-import it.unibz.inf.ontop.owlrefplatform.core.R2RMLQuestPreferences;
+import it.unibz.inf.ontop.injection.QuestConfiguration;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.openrdf.model.Model;
 import org.openrdf.query.Query;
 import org.openrdf.query.QueryEvaluationException;
 import org.openrdf.query.QueryLanguage;
 import org.openrdf.query.TupleQuery;
 import org.openrdf.query.TupleQueryResult;
-import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
-import it.unibz.inf.ontop.injection.OBDACoreModule;
 import it.unibz.inf.ontop.injection.OBDAProperties;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
-import it.unibz.inf.ontop.r2rml.R2RMLManager;
 import it.unibz.inf.ontop.sesame.RepositoryConnection;
 import it.unibz.inf.ontop.sesame.SesameVirtualRepo;
-import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
 
 /**
  * Tests that user-applied constraints can be provided through
@@ -61,19 +50,11 @@ public class TestSesameTimeout {
 	public void init()  throws Exception {
 
 		Properties p = new Properties();
-		p.setProperty(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
 		p.setProperty(OBDAProperties.DB_NAME, "countries");
 		p.setProperty(OBDAProperties.JDBC_URL, "jdbc:h2:mem:countries");
 		p.setProperty(OBDAProperties.DB_USER, "sa");
 		p.setProperty(OBDAProperties.DB_PASSWORD, "");
 		p.setProperty(OBDAProperties.JDBC_DRIVER, "org.h2.Driver");
-
-		QuestPreferences preferences = new R2RMLQuestPreferences(p);
-		OWLOntology ontology;
-		Model model;
-
-		Injector injector = Guice.createInjector(new OBDACoreModule(preferences));
-		NativeQueryLanguageComponentFactory nativeQLFactory = injector.getInstance(NativeQueryLanguageComponentFactory.class);
 
 		sqlConnection= DriverManager.getConnection("jdbc:h2:mem:countries","sa", "");
 		java.sql.Statement s = sqlConnection.createStatement();
@@ -94,22 +75,18 @@ public class TestSesameTimeout {
 
 		s.close();
 
-		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-		ontology = manager.loadOntologyFromOntologyDocument(new File(owlfile));
+		QuestConfiguration configuration = QuestConfiguration.defaultBuilder()
+				.r2rmlMappingFile(r2rmlfile)
+				.ontologyFile(owlfile)
+				.properties(p)
+				.build();
 
-		R2RMLManager rmanager = new R2RMLManager(r2rmlfile, nativeQLFactory);
-		model = rmanager.getModel();
-
-
-		SesameVirtualRepo repo = new SesameVirtualRepo("", ontology, model, preferences);
+		SesameVirtualRepo repo = new SesameVirtualRepo("", configuration);
 		repo.initialize();
 		/*
 		 * Prepare the data connection for querying.
 		 */
 		conn = repo.getConnection();
-
-
-
 	}
 
 

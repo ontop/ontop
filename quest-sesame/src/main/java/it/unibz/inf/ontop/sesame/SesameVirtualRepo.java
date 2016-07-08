@@ -20,10 +20,11 @@ package it.unibz.inf.ontop.sesame;
  * #L%
  */
 
+import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.model.OBDAException;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestDBConnection;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
+import it.unibz.inf.ontop.owlrefplatform.injection.QuestCorePreferences;
 import it.unibz.inf.ontop.owlrefplatform.questdb.QuestDBVirtualStore;
 
 import org.openrdf.repository.RepositoryException;
@@ -62,9 +63,9 @@ public class SesameVirtualRepo extends SesameAbstractRepo {
 //		createRepo(name, getPreferencesFromFile(configFileName, tbox, mappings));
 //	}
 	
-	public SesameVirtualRepo(String name, QuestPreferences prop) throws Exception {
+	public SesameVirtualRepo(String name, QuestConfiguration configuration) throws Exception {
 		super();
-		createRepo(name, prop);
+		this.virtualStore = new QuestDBVirtualStore(name, configuration);
 	}
 
 //	/**
@@ -105,14 +106,9 @@ public class SesameVirtualRepo extends SesameAbstractRepo {
 //			p.setProperty(QuestPreferences.REFORMULATION_TECHNIQUE, QuestConstants.UCQBASED);
 //		return new QuestPreferences(p);
 //	}
-	
-	private void createRepo(String name, QuestPreferences pref) throws Exception
-	{
-		this.virtualStore = new QuestDBVirtualStore(name, pref);
-	}
 
 	/**
-	 * This method leads to the reasoner being initalized, which includes the call to {@link Quest.setupRepository}: connecting to the database, 
+	 * This method leads to the reasoner being initalized, which includes the call to {@link Quest.setupRepository}: connecting to the database,
 	 * analyzing mappings etc. This must be called before any queries are run, i.e. before {@link getQuestConnection}.
 	 * @throws RepositoryException 
 	 * 
