@@ -33,7 +33,16 @@ public interface QuestCoreConfiguration extends OBDACoreConfiguration {
 
         B enableOntologyAnnotationQuerying(boolean queryingAnnotationsInOntology);
 
+        /**
+         * In the case of SQL, inserts REPLACE functions in the generated query
+         */
+        B enableIRISafeEncoding(boolean enable);
+
         B sameAsMappings(boolean sameAsMappings);
+
+        B enableEquivalenceOptimization(boolean enable);
+
+        B enableExistentialReasoning(boolean enable);
 
         /**
          * By default, the virtual A-box mode is used.

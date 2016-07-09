@@ -14,6 +14,7 @@ import org.openrdf.model.Model;
 
 import javax.annotation.Nonnull;
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
 import java.util.Optional;
@@ -164,7 +165,7 @@ public class OBDACoreConfigurationImpl implements OBDACoreConfiguration {
         @Override
         public B obdaModel(@Nonnull OBDAModel obdaModel) {
             if (areMappingsDefined) {
-                throw new IllegalArgumentException("OBDA model or mappings already defined!");
+                throw new InvalidOBDAConfigurationException("OBDA model or mappings already defined!");
             }
             areMappingsDefined = true;
             this.obdaModel = Optional.of(obdaModel);
@@ -174,7 +175,7 @@ public class OBDACoreConfigurationImpl implements OBDACoreConfiguration {
         @Override
         public B nativeOntopMappingFile(@Nonnull File mappingFile) {
             if (areMappingsDefined) {
-                throw new IllegalArgumentException("OBDA model or mappings already defined!");
+                throw new InvalidOBDAConfigurationException("OBDA model or mappings already defined!");
             }
             areMappingsDefined = true;
             this.mappingFile = Optional.of(mappingFile);
@@ -184,7 +185,7 @@ public class OBDACoreConfigurationImpl implements OBDACoreConfiguration {
         @Override
         public B nativeOntopMappingFile(@Nonnull String mappingFilename) {
             if (areMappingsDefined) {
-                throw new IllegalArgumentException("OBDA model or mappings already defined!");
+                throw new InvalidOBDAConfigurationException("OBDA model or mappings already defined!");
             }
             areMappingsDefined = true;
             this.mappingFile = Optional.of(new File(mappingFilename));
@@ -194,7 +195,7 @@ public class OBDACoreConfigurationImpl implements OBDACoreConfiguration {
         @Override
         public B nativeOntopMappingReader(@Nonnull Reader mappingReader) {
             if (areMappingsDefined) {
-                throw new IllegalArgumentException("OBDA model or mappings already defined!");
+                throw new InvalidOBDAConfigurationException("OBDA model or mappings already defined!");
             }
             areMappingsDefined = true;
             this.mappingReader = Optional.of(mappingReader);
@@ -204,7 +205,7 @@ public class OBDACoreConfigurationImpl implements OBDACoreConfiguration {
         @Override
         public B r2rmlMappingFile(@Nonnull File mappingFile) {
             if (areMappingsDefined) {
-                throw new IllegalArgumentException("OBDA model or mappings already defined!");
+                throw new InvalidOBDAConfigurationException("OBDA model or mappings already defined!");
             }
             areMappingsDefined = true;
             useR2rml = true;
@@ -215,7 +216,7 @@ public class OBDACoreConfigurationImpl implements OBDACoreConfiguration {
         @Override
         public B r2rmlMappingFile(@Nonnull String mappingFilename) {
             if (areMappingsDefined) {
-                throw new IllegalArgumentException("OBDA model or mappings already defined!");
+                throw new InvalidOBDAConfigurationException("OBDA model or mappings already defined!");
             }
             areMappingsDefined = true;
             useR2rml = true;
@@ -226,7 +227,7 @@ public class OBDACoreConfigurationImpl implements OBDACoreConfiguration {
         @Override
         public B r2rmlMappingReader(@Nonnull Reader mappingReader) {
             if (areMappingsDefined) {
-                throw new IllegalArgumentException("OBDA model or mappings already defined!");
+                throw new InvalidOBDAConfigurationException("OBDA model or mappings already defined!");
             }
             areMappingsDefined = true;
             useR2rml = true;
@@ -237,7 +238,7 @@ public class OBDACoreConfigurationImpl implements OBDACoreConfiguration {
         @Override
         public B r2rmlMappingGraph(@Nonnull Model rdfGraph) {
             if (areMappingsDefined) {
-                throw new IllegalArgumentException("OBDA model or mappings already defined!");
+                throw new InvalidOBDAConfigurationException("OBDA model or mappings already defined!");
             }
             areMappingsDefined = true;
             useR2rml = true;
@@ -255,13 +256,30 @@ public class OBDACoreConfigurationImpl implements OBDACoreConfiguration {
         }
 
         @Override
+        public B propertyFile(String propertyFilePath) {
+            return propertyFile(new File(propertyFilePath));
+        }
+
+        @Override
+        public B propertyFile(File propertyFile) {
+            try {
+                Properties p = new Properties();
+                p.load(new FileReader(propertyFile));
+                return properties(p);
+
+            } catch (IOException e) {
+                throw new InvalidOBDAConfigurationException("Cannot reach the property file: " + propertyFile);
+            }
+        }
+
+        @Override
         public B dbConstraintsReader(@Nonnull ImplicitDBConstraintsReader constraints) {
             this.userConstraints = Optional.of(constraints);
             return (B) this;
         }
 
         @Override
-        public B obtainFullMetadata(boolean obtainFullMetadata) {
+        public B enableFullMetadataExtraction(boolean obtainFullMetadata) {
             this.obtainFullMetadata = Optional.of(obtainFullMetadata);
             return (B) this;
         }

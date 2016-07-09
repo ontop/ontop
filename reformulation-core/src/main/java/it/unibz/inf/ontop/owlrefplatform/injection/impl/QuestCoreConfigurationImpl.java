@@ -3,7 +3,6 @@ package it.unibz.inf.ontop.owlrefplatform.injection.impl;
 
 import com.google.inject.Module;
 import it.unibz.inf.ontop.injection.InvalidOBDAConfigurationException;
-import it.unibz.inf.ontop.injection.OBDAProperties;
 import it.unibz.inf.ontop.injection.impl.OBDACoreConfigurationImpl;
 import it.unibz.inf.ontop.model.DataSourceMetadata;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
@@ -92,8 +91,11 @@ public class QuestCoreConfigurationImpl extends OBDACoreConfigurationImpl implem
         private Optional<TMappingExclusionConfig> excludeFromTMappings = Optional.empty();
 
         private Optional<Boolean> queryingAnnotationsInOntology = Optional.empty();
+        private Optional<Boolean> encodeIRISafely = Optional.empty();
         private Optional<Boolean> sameAsMappings = Optional.empty();
+        private Optional<Boolean> optimizeEquivalences = Optional.empty();
         private Optional<DataSourceMetadata> dbMetadata = Optional.empty();
+        private Optional<Boolean> existentialReasoning = Optional.empty();
 
         private boolean inVirtualMode = true;
 
@@ -119,9 +121,28 @@ public class QuestCoreConfigurationImpl extends OBDACoreConfigurationImpl implem
         }
 
         @Override
+        public B enableIRISafeEncoding(boolean enable) {
+            this.encodeIRISafely = Optional.of(enable);
+            return (B) this;
+        }
+
+        @Override
         public B sameAsMappings(boolean sameAsMappings) {
             this.sameAsMappings = Optional.of(sameAsMappings);
             return (B) this;
+        }
+
+        @Override
+        public B enableEquivalenceOptimization(boolean enable) {
+            this.optimizeEquivalences = Optional.of(enable);
+            return (B) this;
+        }
+
+        @Override
+        public B enableExistentialReasoning(boolean enable) {
+            this.existentialReasoning = Optional.of(enable);
+            return (B) this;
+
         }
 
         @Override
@@ -130,12 +151,6 @@ public class QuestCoreConfigurationImpl extends OBDACoreConfigurationImpl implem
             return (B) this;
         }
 
-        /**
-         * TODO: explain
-         * TODO: find a better term
-         *
-         * Can be overloaded (for extensions)
-         */
         @Override
         protected Properties generateProperties() {
             Properties p = super.generateProperties();
@@ -144,7 +159,13 @@ public class QuestCoreConfigurationImpl extends OBDACoreConfigurationImpl implem
             }
 
             queryingAnnotationsInOntology.ifPresent(b -> p.put(QuestCorePreferences.ANNOTATIONS_IN_ONTO, b));
+            encodeIRISafely.ifPresent(e -> p.put(QuestCorePreferences.SQL_GENERATE_REPLACE, e));
             sameAsMappings.ifPresent(b -> p.put(QuestCorePreferences.SAME_AS, b));
+            optimizeEquivalences.ifPresent(b -> p.put(QuestCorePreferences.OPTIMIZE_EQUIVALENCES, b));
+            existentialReasoning.ifPresent(r -> {
+                p.put(QuestCorePreferences.REWRITE, r);
+                p.put(QuestCorePreferences.REFORMULATION_TECHNIQUE, QuestConstants.TW);
+            });
 
             return p;
         }

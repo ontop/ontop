@@ -71,13 +71,17 @@ public interface OBDACoreConfiguration {
         B r2rmlMappingGraph(@Nonnull Model rdfGraph);
 
         B properties(@Nonnull Properties properties);
+        B propertyFile(String propertyFilePath);
+        B propertyFile(File propertyFile);
 
         B dbConstraintsReader(@Nonnull ImplicitDBConstraintsReader constraints);
 
-        B obtainFullMetadata(boolean obtainFullMetadata);
+        B enableFullMetadataExtraction(boolean obtainFullMetadata);
 
         B jdbcUrl(String jdbcUrl);
 
         OBDACoreConfiguration build();
+
+
     }
 }

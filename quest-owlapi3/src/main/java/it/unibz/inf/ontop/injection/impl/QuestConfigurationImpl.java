@@ -133,7 +133,7 @@ public class QuestConfigurationImpl extends QuestCoreConfigurationImpl implement
         @Override
         public B ontologyFile(@Nonnull URL url) {
                 if (isOntologyDefined) {
-                    throw new IllegalArgumentException("Ontology already defined!");
+                    throw new InvalidOBDAConfigurationException("Ontology already defined!");
                 }
                 isOntologyDefined = true;
                 this.ontologyURL = Optional.of(url);
@@ -144,7 +144,7 @@ public class QuestConfigurationImpl extends QuestCoreConfigurationImpl implement
         @Override
         public B ontologyFile(@Nonnull File owlFile) {
             if (isOntologyDefined) {
-                throw new IllegalArgumentException("Ontology already defined!");
+                throw new InvalidOBDAConfigurationException("Ontology already defined!");
             }
             isOntologyDefined = true;
             this.ontologyFile = Optional.of(owlFile);
@@ -154,7 +154,7 @@ public class QuestConfigurationImpl extends QuestCoreConfigurationImpl implement
         @Override
         public B ontology(@Nonnull OWLOntology ontology) {
             if (isOntologyDefined) {
-                throw new IllegalArgumentException("Ontology already defined!");
+                throw new InvalidOBDAConfigurationException("Ontology already defined!");
             }
             isOntologyDefined = true;
             this.ontology = Optional.of(ontology);
