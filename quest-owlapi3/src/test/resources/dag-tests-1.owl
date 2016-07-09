@@ -6,18 +6,18 @@
     <!ENTITY xsd "http://www.w3.org/2001/XMLSchema#" >
     <!ENTITY rdfs "http://www.w3.org/2000/01/rdf-schema#" >
     <!ENTITY rdf "http://www.w3.org/1999/02/22-rdf-syntax-ns#" >
-    <!ENTITY testDAG "http://it.unibz.krdb/obda/ontologies/testDAG.owl#" >
+    <!ENTITY testDAG "http://it.unibz.inf/obda/ontologies/testDAG.owl#" >
 ]>
 
 
-<rdf:RDF xmlns="http://it.unibz.krdb/obda/ontologies/testDAG.owl#"
-     xml:base="http://it.unibz.krdb/obda/ontologies/testDAG.owl"
+<rdf:RDF xmlns="http://it.unibz.inf/obda/ontologies/testDAG.owl#"
+     xml:base="http://it.unibz.inf/obda/ontologies/testDAG.owl"
      xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
-     xmlns:testDAG="http://it.unibz.krdb/obda/ontologies/testDAG.owl#"
+     xmlns:testDAG="http://it.unibz.inf/obda/ontologies/testDAG.owl#"
      xmlns:owl="http://www.w3.org/2002/07/owl#"
      xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
      xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
-    <owl:Ontology rdf:about="http://it.unibz.krdb/obda/ontologies/testDAG.owl"/>
+    <owl:Ontology rdf:about="http://it.unibz.inf/obda/ontologies/testDAG.owl"/>
     
 
 
@@ -32,7 +32,7 @@
     
 
 
-    <!-- http://it.unibz.krdb/obda/ontologies/testDAG.owl#A -->
+    <!-- http://it.unibz.inf/obda/ontologies/testDAG.owl#A -->
 
     <owl:Class rdf:about="&testDAG;A">
         <rdfs:subClassOf rdf:resource="&testDAG;A00"/>
@@ -41,7 +41,7 @@
     
 
 
-    <!-- http://it.unibz.krdb/obda/ontologies/testDAG.owl#A00 -->
+    <!-- http://it.unibz.inf/obda/ontologies/testDAG.owl#A00 -->
 
     <owl:Class rdf:about="&testDAG;A00">
         <rdfs:subClassOf rdf:resource="&testDAG;A1"/>
@@ -49,7 +49,7 @@
     
 
 
-    <!-- http://it.unibz.krdb/obda/ontologies/testDAG.owl#A01 -->
+    <!-- http://it.unibz.inf/obda/ontologies/testDAG.owl#A01 -->
 
     <owl:Class rdf:about="&testDAG;A01">
         <rdfs:subClassOf rdf:resource="&testDAG;A1"/>
@@ -57,7 +57,7 @@
     
 
 
-    <!-- http://it.unibz.krdb/obda/ontologies/testDAG.owl#A1 -->
+    <!-- http://it.unibz.inf/obda/ontologies/testDAG.owl#A1 -->
 
     <owl:Class rdf:about="&testDAG;A1">
         <rdfs:subClassOf rdf:resource="&testDAG;A"/>
@@ -66,7 +66,7 @@
     
 
 
-    <!-- http://it.unibz.krdb/obda/ontologies/testDAG.owl#B -->
+    <!-- http://it.unibz.inf/obda/ontologies/testDAG.owl#B -->
 
     <owl:Class rdf:about="&testDAG;B">
         <rdfs:subClassOf rdf:resource="&testDAG;A"/>
@@ -74,7 +74,7 @@
     
 
 
-    <!-- http://it.unibz.krdb/obda/ontologies/testDAG.owl#C -->
+    <!-- http://it.unibz.inf/obda/ontologies/testDAG.owl#C -->
 
     <owl:Class rdf:about="&testDAG;C">
         <rdfs:subClassOf rdf:resource="&testDAG;B"/>
@@ -82,7 +82,7 @@
     
 
 
-    <!-- http://it.unibz.krdb/obda/ontologies/testDAG.owl#D -->
+    <!-- http://it.unibz.inf/obda/ontologies/testDAG.owl#D -->
 
     <owl:Class rdf:about="&testDAG;D">
         <rdfs:subClassOf rdf:resource="&testDAG;A"/>
@@ -92,7 +92,7 @@
     
 
 
-    <!-- http://it.unibz.krdb/obda/ontologies/testDAG.owl#T1 -->
+    <!-- http://it.unibz.inf/obda/ontologies/testDAG.owl#T1 -->
 
     <owl:Class rdf:about="&testDAG;T1">
         <rdfs:subClassOf rdf:resource="&testDAG;T2"/>
@@ -100,7 +100,7 @@
     
 
 
-    <!-- http://it.unibz.krdb/obda/ontologies/testDAG.owl#T2 -->
+    <!-- http://it.unibz.inf/obda/ontologies/testDAG.owl#T2 -->
 
     <owl:Class rdf:about="&testDAG;T2">
         <rdfs:subClassOf rdf:resource="&testDAG;T1"/>

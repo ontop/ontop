@@ -17,14 +17,10 @@
 		</dependency>
 		<dependency>
 			<groupId>${project.groupId}</groupId>
-			<artifactId>ontop-obdalib-owlapi3</artifactId>
+			<artifactId>ontop-obdalib-owlapi</artifactId>
 			<version>${project.version}</version>
 		</dependency>
-		<dependency>
-			<groupId>${project.groupId}</groupId>
-			<artifactId>ontop-obdalib-sesame</artifactId>
-			<version>${project.version}</version>
-		</dependency>
+
 		<dependency>
 			<groupId>${project.groupId}</groupId>
 			<artifactId>ontop-reformulation-core</artifactId>
@@ -35,6 +31,11 @@
 			<artifactId>ontop-obdalib-r2rml</artifactId>
 			<version>${project.version}</version>
 		</dependency>
+		<dependency>
+			<artifactId>ontop-quest-owlapi</artifactId>
+			<groupId>${project.groupId}</groupId>
+			<version>${project.version}</version>
+		</dependency>
 		
 		<dependency>
             <groupId>org.postgresql</groupId>
@@ -43,30 +44,5 @@
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
-	
-	<build>
-		<plugins>
-			<plugin>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<configuration>
-					<source>1.8</source>
-					<target>1.8</target>
-					<testExcludes>
-						<exclude>**/DirectStore*.java</exclude>
-					</testExcludes>
-				</configuration>
-			</plugin>
-			<plugin>
-        		<groupId>org.apache.maven.plugins</groupId>
-        		<artifactId>maven-surefire-plugin</artifactId>
-	       		<configuration>
-          			<skipTests>true</skipTests>
-        		</configuration>
-      		</plugin>
-		</plugins>
-	</build>
-	
-	<properties>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-	</properties>
+
 </project>
