@@ -37,7 +37,7 @@ public interface QuestConfiguration extends QuestCoreConfiguration {
 
     interface Builder<B extends Builder> extends QuestCoreConfiguration.Builder<B> {
 
-        B ontologyFile(@Nonnull String owlFilename);
+        B ontologyFile(@Nonnull String urlOrPath);
 
         B ontologyFile(@Nonnull URL url);
 

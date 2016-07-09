@@ -17,6 +17,8 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.stream.Collectors;
@@ -188,8 +190,20 @@ public class OBDACoreConfigurationImpl implements OBDACoreConfiguration {
                 throw new InvalidOBDAConfigurationException("OBDA model or mappings already defined!");
             }
             areMappingsDefined = true;
-            this.mappingFile = Optional.of(new File(mappingFilename));
-            return (B) this;
+            try {
+                URI fileURI = new URI(mappingFilename);
+                String scheme = fileURI.getScheme();
+                if (scheme == null || scheme.equals("file")) {
+                    this.mappingFile = Optional.of(new File(fileURI));
+                }
+                else {
+                    throw new InvalidOBDAConfigurationException("Currently only local files are supported" +
+                            "as OBDA mapping files");
+                }
+                return (B) this;
+            } catch (URISyntaxException e) {
+                throw new InvalidOBDAConfigurationException("Invalid mapping file path: " + e.getMessage());
+            }
         }
 
         @Override
@@ -220,8 +234,21 @@ public class OBDACoreConfigurationImpl implements OBDACoreConfiguration {
             }
             areMappingsDefined = true;
             useR2rml = true;
-            this.mappingFile = Optional.of(new File(mappingFilename));
-            return (B) this;
+
+            try {
+                URI fileURI = new URI(mappingFilename);
+                String scheme = fileURI.getScheme();
+                if (scheme == null || scheme.equals("file")) {
+                    this.mappingFile = Optional.of(new File(fileURI));
+                }
+                else {
+                    throw new InvalidOBDAConfigurationException("Currently only local files are supported" +
+                            "as R2RML mapping files");
+                }
+                return (B) this;
+            } catch (URISyntaxException e) {
+                throw new InvalidOBDAConfigurationException("Invalid mapping file path: " + e.getMessage());
+            }
         }
 
         @Override
@@ -257,7 +284,18 @@ public class OBDACoreConfigurationImpl implements OBDACoreConfiguration {
 
         @Override
         public B propertyFile(String propertyFilePath) {
-            return propertyFile(new File(propertyFilePath));
+            try {
+                URI fileURI = new URI(propertyFilePath);
+                String scheme = fileURI.getScheme();
+                if (scheme == null || scheme.equals("file")) {
+                    return propertyFile(new File(fileURI));
+                }
+                else {
+                    throw new InvalidOBDAConfigurationException("Currently only local property files are supported.");
+                }
+            } catch (URISyntaxException e) {
+                throw new InvalidOBDAConfigurationException("Invalid property file path: " + e.getMessage());
+            }
         }
 
         @Override

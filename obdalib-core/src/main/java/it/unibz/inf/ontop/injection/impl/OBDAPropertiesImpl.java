@@ -87,14 +87,19 @@ public class OBDAPropertiesImpl implements OBDAProperties {
     @Override
     public Optional<Boolean> getBoolean(String key) {
         Object value = get(key);
+
+        if (value == null) {
+            return Optional.empty();
+        }
+
         if (value instanceof Boolean) {
             return Optional.of((Boolean) value);
         }
         else if (value instanceof String) {
-            return Optional.ofNullable(Boolean.parseBoolean((String)value));
+            return Optional.of(Boolean.parseBoolean((String)value));
         }
         else {
-            throw new IllegalArgumentException("A boolean was expected: " + value);
+            throw new InvalidOBDAConfigurationException("A boolean was expected: " + value);
         }
     }
 
