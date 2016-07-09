@@ -5,6 +5,8 @@ import it.unibz.inf.ontop.model.Variable;
 
 /**
  * Common abstraction for ConstructionNodes and DataNodes.
+ *
+ * TODO: get rid of this interface
  */
 public interface ConstructionOrDataNode extends QueryNode {
 

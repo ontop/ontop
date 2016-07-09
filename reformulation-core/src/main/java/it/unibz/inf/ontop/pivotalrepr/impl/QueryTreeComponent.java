@@ -20,7 +20,7 @@ public interface QueryTreeComponent {
 
     ImmutableList<QueryNode> getNodesInTopDownOrder() throws IllegalTreeException;
 
-    ImmutableSet<EmptyNode> getUnsatisfiableNodes();
+    ImmutableSet<EmptyNode> getEmptyNodes(QueryNode subTreeRoot);
 
     boolean contains(QueryNode node);
 

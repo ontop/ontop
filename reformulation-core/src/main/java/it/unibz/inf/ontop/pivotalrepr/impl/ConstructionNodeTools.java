@@ -5,13 +5,13 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.*;
-import it.unibz.inf.ontop.pivotalrepr.ImmutableQueryModifiers;
-
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionImpl;
 import it.unibz.inf.ontop.pivotalrepr.ConstructionNode;
+import it.unibz.inf.ontop.pivotalrepr.ImmutableQueryModifiers;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.*;
+import java.util.stream.Stream;
 
 import static it.unibz.inf.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionTools.computeUnidirectionalSubstitution;
 
@@ -80,6 +80,51 @@ public class ConstructionNodeTools {
             }
             return Optional.of(substitutionToPropagate);
         }
+    }
+
+    public static ConstructionNode merge(ConstructionNode parentConstructionNode,
+                                         ConstructionNode childConstructionNode) {
+
+        ImmutableSubstitution<ImmutableTerm> composition = childConstructionNode.getSubstitution().composeWith(
+                parentConstructionNode.getSubstitution());
+
+        ImmutableSet<Variable> projectedVariables = parentConstructionNode.getProjectedVariables();
+
+        ImmutableSubstitution<ImmutableTerm> newSubstitution = projectedVariables.containsAll(
+                childConstructionNode.getProjectedVariables())
+                ? composition
+                : new ImmutableSubstitutionImpl<>(
+                composition.getImmutableMap().entrySet().stream()
+                        .filter(e -> !projectedVariables.contains(e.getKey()))
+                        .collect(ImmutableCollectors.toMap()));
+
+        if (parentConstructionNode.getOptionalModifiers().isPresent()
+                && childConstructionNode.getOptionalModifiers().isPresent()) {
+            // TODO: find a better exception
+            throw new RuntimeException("TODO: support combination of modifiers");
+        }
+
+        // TODO: should update the modifiers?
+        Optional<ImmutableQueryModifiers> optionalModifiers = parentConstructionNode.getOptionalModifiers()
+                .map(Optional::of)
+                .orElseGet(childConstructionNode::getOptionalModifiers);
+
+        return new ConstructionNodeImpl(projectedVariables, newSubstitution, optionalModifiers);
+    }
+
+    public static ImmutableSet<Variable> computeNewProjectedVariables(
+            ImmutableSubstitution<? extends ImmutableTerm> descendingSubstitution, ImmutableSet<Variable> projectedVariables) {
+        ImmutableSet<Variable> tauDomain = descendingSubstitution.getDomain();
+
+        Stream<Variable> remainingVariableStream = projectedVariables.stream()
+                .filter(v -> !tauDomain.contains(v));
+
+        Stream<Variable> newVariableStream = descendingSubstitution.getMap().values().stream()
+                .filter(t -> t instanceof Variable)
+                .map(t -> (Variable) t);
+
+        return Stream.concat(newVariableStream, remainingVariableStream)
+                .collect(ImmutableCollectors.toSet());
     }
 
 

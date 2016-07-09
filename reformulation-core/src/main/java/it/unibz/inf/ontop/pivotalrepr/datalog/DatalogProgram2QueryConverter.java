@@ -14,13 +14,15 @@ import it.unibz.inf.ontop.pivotalrepr.IntermediateQuery;
 import it.unibz.inf.ontop.pivotalrepr.MetadataForQueryOptimization;
 import it.unibz.inf.ontop.pivotalrepr.impl.ImmutableQueryModifiersImpl;
 import it.unibz.inf.ontop.pivotalrepr.impl.IntermediateQueryUtils;
-
-import it.unibz.inf.ontop.pivotalrepr.*;
+import it.unibz.inf.ontop.pivotalrepr.proposal.QueryMergingProposal;
+import it.unibz.inf.ontop.pivotalrepr.proposal.impl.QueryMergingProposalImpl;
 import it.unibz.inf.ontop.utils.DatalogDependencyGraphGenerator;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+
+import static it.unibz.inf.ontop.pivotalrepr.datalog.DatalogRule2QueryConverter.convertDatalogRule;
 
 /**
  * Converts a datalog program into an intermediate query
@@ -86,7 +88,8 @@ public class DatalogProgram2QueryConverter {
             Optional<IntermediateQuery> optionalSubQuery = convertDatalogDefinitions(metadata, datalogAtomPredicate,
                     ruleIndex, tablePredicates, NO_QUERY_MODIFIER);
             if (optionalSubQuery.isPresent()) {
-                intermediateQuery.mergeSubQuery(optionalSubQuery.get());
+                QueryMergingProposal mergingProposal = new QueryMergingProposalImpl(optionalSubQuery.get());
+                intermediateQuery.applyProposal(mergingProposal, true);
             }
         }
 
@@ -111,12 +114,12 @@ public class DatalogProgram2QueryConverter {
                 return Optional.empty();
             case 1:
                 CQIE definition = atomDefinitions.iterator().next();
-                return Optional.of(DatalogRule2QueryConverter.convertDatalogRule(metadata, definition, tablePredicates, optionalModifiers));
+                return Optional.of(convertDatalogRule(metadata, definition, tablePredicates, optionalModifiers));
             default:
                 List<IntermediateQuery> convertedDefinitions = new ArrayList<>();
                 for (CQIE datalogAtomDefinition : atomDefinitions) {
                     convertedDefinitions.add(
-                            DatalogRule2QueryConverter.convertDatalogRule(metadata, datalogAtomDefinition, tablePredicates,
+                            convertDatalogRule(metadata, datalogAtomDefinition, tablePredicates,
                                     Optional.<ImmutableQueryModifiers>empty()));
                 }
                 return IntermediateQueryUtils.mergeDefinitions(convertedDefinitions, optionalModifiers);
