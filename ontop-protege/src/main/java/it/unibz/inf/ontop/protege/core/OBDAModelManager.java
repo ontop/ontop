@@ -23,8 +23,8 @@ package it.unibz.inf.ontop.protege.core;
 import com.google.common.base.Optional;
 import com.google.inject.Injector;
 import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
+import it.unibz.inf.ontop.injection.OBDACoreConfiguration;
 import it.unibz.inf.ontop.injection.OBDAFactoryWithException;
-import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.io.OntopNativeMappingSerializer;
 import it.unibz.inf.ontop.io.PrefixManager;
 import it.unibz.inf.ontop.io.QueryIOManager;
@@ -106,7 +106,7 @@ public class OBDAModelManager implements Disposable {
 
     public OBDAModelManager(EditorKit editorKit) {
 		// Default injector
-		Injector defaultInjector = QuestConfiguration.defaultBuilder().build().getInjector();
+		Injector defaultInjector = OBDACoreConfiguration.defaultBuilder().build().getInjector();
 
 		this.nativeQLFactory = defaultInjector.getInstance(NativeQueryLanguageComponentFactory.class);
 		this.obdaFactory = defaultInjector.getInstance(OBDAFactoryWithException.class);;

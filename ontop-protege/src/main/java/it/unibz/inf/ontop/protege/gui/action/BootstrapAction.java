@@ -22,7 +22,7 @@ package it.unibz.inf.ontop.protege.gui.action;
 
 import com.google.inject.Injector;
 import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
-import it.unibz.inf.ontop.injection.QuestConfiguration;
+import it.unibz.inf.ontop.injection.OBDACoreConfiguration;
 import it.unibz.inf.ontop.injection.OBDAFactoryWithException;
 import it.unibz.inf.ontop.model.OBDADataSource;
 import it.unibz.inf.ontop.model.impl.OBDAModelImpl;
@@ -159,7 +159,7 @@ public class BootstrapAction extends ProtegeAction {
 
             // TODO: Retrieve the effective properties (not just the default ones).
 
-			QuestConfiguration defaultConfiguration = QuestConfiguration.defaultBuilder().build();
+			OBDACoreConfiguration defaultConfiguration = OBDACoreConfiguration.defaultBuilder().build();
             Injector injector = defaultConfiguration.getInjector();
 
             NativeQueryLanguageComponentFactory nativeQLFactory = injector.getInstance(

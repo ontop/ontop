@@ -22,7 +22,7 @@ package it.unibz.inf.ontop.protege.gui.action;
 
 import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
-import it.unibz.inf.ontop.injection.QuestConfiguration;
+import it.unibz.inf.ontop.injection.OBDACoreConfiguration;
 import it.unibz.inf.ontop.io.DataSource2PropertiesConvertor;
 import it.unibz.inf.ontop.model.OBDADataSource;
 import it.unibz.inf.ontop.model.OBDAMappingAxiom;
@@ -94,7 +94,7 @@ public class R2RMLImportAction extends ProtegeAction {
 					 */
 					OBDADataSource dataSource = obdaModelController.getSources().get(0);
 
-					QuestConfiguration configuration = QuestConfiguration.defaultBuilder()
+					OBDACoreConfiguration configuration = OBDACoreConfiguration.defaultBuilder()
 							.properties(DataSource2PropertiesConvertor.convert(dataSource))
 							.r2rmlMappingFile(file)
 							.build();
