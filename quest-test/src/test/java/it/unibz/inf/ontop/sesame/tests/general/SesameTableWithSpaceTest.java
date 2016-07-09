@@ -1,8 +1,9 @@
 package it.unibz.inf.ontop.sesame.tests.general;
 
 
+import it.unibz.inf.ontop.injection.QuestConfiguration;
 import junit.framework.TestCase;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
+import it.unibz.inf.ontop.owlrefplatform.injection.QuestCorePreferences;
 import org.junit.Test;
 import org.openrdf.model.Model;
 import org.openrdf.model.impl.LinkedHashModel;
@@ -14,7 +15,6 @@ import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
 import org.openrdf.rio.*;
 import org.openrdf.rio.helpers.StatementCollector;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
 import it.unibz.inf.ontop.sesame.SesameVirtualRepo;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLOntology;
@@ -40,7 +40,7 @@ public class SesameTableWithSpaceTest extends TestCase {
 	OWLOntology owlontology;
 	Model mappings;
 	RepositoryConnection con;
-	QuestPreferences pref;
+	Properties connectionProperties;
 
 	public SesameTableWithSpaceTest() {
 		// create owlontology from file
@@ -68,27 +68,28 @@ public class SesameTableWithSpaceTest extends TestCase {
 			assertFalse(false);
 		}
 
-		Properties p = new Properties();
-		p.put(QuestPreferences.ABOX_MODE,
-				QuestConstants.VIRTUAL);
-		p.put(QuestPreferences.REWRITE, "true");
-		p.put(QuestPreferences.REFORMULATION_TECHNIQUE, QuestConstants.TW);
+		connectionProperties = new Properties();
 		// set jdbc params in config
-		p.put(QuestPreferences.DB_NAME, "northwindSpaced");
-		p.put(QuestPreferences.JDBC_URL,
+		connectionProperties.put(QuestCorePreferences.DB_NAME, "northwindSpaced");
+		connectionProperties.put(QuestCorePreferences.JDBC_URL,
 				"jdbc:mysql://10.7.20.39/northwindSpaced?sessionVariables=sql_mode='ANSI'");
-		p.put(QuestPreferences.DB_USER, "fish");
-		p.put(QuestPreferences.DB_PASSWORD, "fish");
-		p.put(QuestPreferences.JDBC_DRIVER,"com.mysql.jdbc.Driver");
-		pref = new QuestPreferences(p);
+		connectionProperties.put(QuestCorePreferences.DB_USER, "fish");
+		connectionProperties.put(QuestCorePreferences.DB_PASSWORD, "fish");
+		connectionProperties.put(QuestCorePreferences.JDBC_DRIVER,"com.mysql.jdbc.Driver");
 	}
 
 	public void setUp() {
 
 		Repository repo;
 		try {
-			repo = new SesameVirtualRepo("virtualExample2", owlontology,
-					mappings, pref);
+			QuestConfiguration configuration = QuestConfiguration.defaultBuilder()
+					.ontologyFile(owlfile)
+					.r2rmlMappingFile(mappingfile)
+					.enableExistentialReasoning(true)
+					.properties(connectionProperties)
+					.build();
+
+			repo = new SesameVirtualRepo("virtualExample2", configuration);
 			/*
 			 * Repository must be always initialized first
 			 */
@@ -116,7 +117,7 @@ public class SesameTableWithSpaceTest extends TestCase {
 		}
 	}
 	
-	private int runQuery(String query){
+	private int count(String query){
 		int resultCount = 0;
 		try {
 			TupleQuery tupleQuery = con.prepareTupleQuery(QueryLanguage.SPARQL,
@@ -146,7 +147,7 @@ public class SesameTableWithSpaceTest extends TestCase {
 //		int expectedResult = 14366 ;
 		int expectedResult = 2155;
 		
-		int obtainedResult = runQuery(sparqlQuery);
+		int obtainedResult = count(sparqlQuery);
 		System.out.println(obtainedResult);
 		assertEquals(expectedResult, obtainedResult);
 

@@ -20,16 +20,12 @@ package it.unibz.inf.ontop.sql;
  * #L%
  */
 
-import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
+import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 import it.unibz.inf.ontop.model.OBDAException;
-import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLException;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
 
 import java.io.File;
 
@@ -39,18 +35,10 @@ import java.io.File;
 public class OracleLongNameTest {
 
 	private QuestOWLConnection conn;
-	private OWLOntology ontology;
 	
 	final String owlfile = "resources/oraclesql/o.owl";
 	final String obdafile1 = "resources/oraclesql/o1.obda";
 	private QuestOWL reasoner;
-
-	@Before
-	public void setUp() throws Exception {
-		// Loading the OWL file
-		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-		ontology = manager.loadOntologyFromOntologyDocument((new File(owlfile)));
-	}
 
 	@After
 	public void tearDown() throws Exception{
@@ -60,15 +48,14 @@ public class OracleLongNameTest {
 	
 
 	private void runQuery(String varName) throws OBDAException, OWLException{
-		
-		QuestPreferences p = new QuestPreferences();
+
 		// Creating a new instance of the reasoner
 		QuestOWLFactory factory = new QuestOWLFactory();
-        QuestOWLConfiguration config = QuestOWLConfiguration.builder()
+        QuestConfiguration config = QuestConfiguration.defaultBuilder()
 				.nativeOntopMappingFile(new File(obdafile1))
-				.preferences(p)
+				.ontologyFile(owlfile)
 				.build();
-        reasoner = factory.createReasoner(ontology, config);
+        reasoner = factory.createReasoner(config);
 
 		// Now we are ready for querying
 		conn = reasoner.getConnection();

@@ -20,112 +20,31 @@ package it.unibz.inf.ontop.unfold;
  * #L%
  */
 
-import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWL;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLConnection;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLFactory;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLResultSet;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLStatement;
 
+import it.unibz.inf.ontop.quest.AbstractVirtualModeTest;
 
-import java.io.File;
+public class LeftJoinTestVirtual extends AbstractVirtualModeTest {
 
-import junit.framework.TestCase;
-import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+	private static final String owlfile = "src/test/resources/person.owl";
+	private static final String obdafile = "src/test/resources/person.obda";
 
-import java.io.File;
-import java.sql.Connection;
-
-
-public class LeftJoinTestVirtual extends TestCase {
-
-	Logger log = LoggerFactory.getLogger(this.getClass());
-	private OWLOntology ontology;
-
-	final String owlfile = "src/test/resources/person.owl";
-	final String obdafile = "src/test/resources/person.obda";
-
-	@Override
-	public void setUp() throws Exception {
-
-		// Loading the OWL file
-		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-		ontology = manager.loadOntologyFromOntologyDocument((new File(owlfile)));
+	public LeftJoinTestVirtual() {
+		super(owlfile, obdafile);
 	}
 
-	private void runTests(QuestPreferences p) throws Exception {
 
-		// Creating a new instance of the reasoner
-		QuestOWLFactory factory = new QuestOWLFactory(new File(obdafile), p);
-
-		QuestOWL reasoner = (QuestOWL) factory.createReasoner(ontology, new SimpleConfiguration());
-
-		// Now we are ready for querying
-		QuestOWLConnection conn = reasoner.getConnection();
-		QuestOWLStatement st = conn.createStatement();
-
+	public void testLeftJoin() throws Exception {
 		String query1 = "PREFIX : <http://www.semanticweb.org/mindaugas/ontologies/2013/9/untitled-ontology-58#> SELECT * WHERE {?p a :Person . ?p :name ?name . ?p :age ?age }";
 		String query2 = "PREFIX : <http://www.semanticweb.org/mindaugas/ontologies/2013/9/untitled-ontology-58#> SELECT * WHERE {?p a :Person . ?p :name ?name . OPTIONAL {?p :nick11 ?nick1} OPTIONAL {?p :nick22 ?nick2} }";
 		String query3 = "PREFIX : <http://www.semanticweb.org/mindaugas/ontologies/2013/9/untitled-ontology-58#> SELECT * WHERE {?p a :Person . ?p :name ?name . OPTIONAL {?p :nick11 ?nick1} }";
 		String query4 = "PREFIX : <http://www.semanticweb.org/mindaugas/ontologies/2013/9/untitled-ontology-58#> SELECT * WHERE {?p a :Person . ?p :name ?name . OPTIONAL {?p :nick1 ?nick1} OPTIONAL {?p :nick2 ?nick2} }";
 		String query5 = "PREFIX : <http://www.semanticweb.org/mindaugas/ontologies/2013/9/untitled-ontology-58#> SELECT * WHERE {?p a :Person . ?p :name ?name . OPTIONAL {?p :age ?age} }";
-		
-		try {
-			executeQueryAssertResults(query1, st, 3);
-			executeQueryAssertResults(query2, st, 4);
-			executeQueryAssertResults(query3, st, 4);
-			executeQueryAssertResults(query4, st, 4);
-			executeQueryAssertResults(query5, st, 4);
-			
-		} catch (Exception e) {
-			throw e;
-		} finally {
-			try {
 
-			} catch (Exception e) {
-				st.close();
-				assertTrue(false);
-			}
-			conn.close();
-			reasoner.dispose();
-		}
-	}
-	
-	public void executeQueryAssertResults(String query, QuestOWLStatement st, int expectedRows) throws Exception {
-		QuestOWLResultSet rs = st.executeTuple(query);
-		int count = 0;
-		while (rs.nextRow()) {
-			count++;
-			for (int i = 1; i <= rs.getColumnCount(); i++) {
-				System.out.print(rs.getSignature().get(i-1));
-				System.out.print("=" + rs.getOWLObject(i));
-				System.out.print(" ");
-			}
-			System.out.println();
-		}
-		rs.close();
-		assertEquals(expectedRows, count);
-	}
-
-//	public void executeGraphQueryAssertResults(String query, QuestOWLStatement st, int expectedRows) throws Exception {
-//		List<OWLAxiom> rs = st.executeGraph(query);
-//		int count = 0;
-//		Iterator<OWLAxiom> axit = rs.iterator();
-//		while (axit.hasNext()) {
-//			System.out.println(axit.next());
-//			count++;
-//		}
-//		assertEquals(expectedRows, count);
-//	}
-
-	public void testLeftJoin() throws Exception {
-
-		QuestPreferences p = new QuestPreferences();
-		runTests(p);
+		countResults(query1, 3);
+		countResults(query2, 4);
+		countResults(query3, 4);
+		countResults(query4, 4);
+		countResults(query5, 4);
 	}
 
 }

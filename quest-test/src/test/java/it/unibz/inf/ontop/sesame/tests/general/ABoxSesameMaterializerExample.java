@@ -25,16 +25,11 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
 
-import com.google.inject.Guice;
-import com.google.inject.Injector;
+import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.sesame.SesameStatementIterator;
 import org.openrdf.model.Statement;
 import org.openrdf.rio.RDFWriter;
 import org.openrdf.rio.n3.N3Writer;
-import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
-import it.unibz.inf.ontop.injection.OBDACoreModule;
-import it.unibz.inf.ontop.injection.OBDAProperties;
-import it.unibz.inf.ontop.mapping.MappingParser;
 import it.unibz.inf.ontop.model.OBDAModel;
 import it.unibz.inf.ontop.sesame.SesameMaterializer;
 
@@ -53,16 +48,12 @@ public class ABoxSesameMaterializerExample {
 	private static boolean DO_STREAM_RESULTS = false;
 	
 	public void generateTriples() throws Exception {
-		/*
-		 * Start materializing data from database to triples.
-		 * TODO: update the interface of SesameMaterializer to avoid these
-		 * lines
-		 */
-        Injector injector = Guice.createInjector(new OBDACoreModule(new OBDAProperties()));
-        NativeQueryLanguageComponentFactory nativeQLFactory = injector.getInstance(
-                NativeQueryLanguageComponentFactory.class);
-        MappingParser mappingParser = nativeQLFactory.create(new File(inputFile));
-        OBDAModel obdaModel = mappingParser.getOBDAModel();
+
+		QuestConfiguration configuration = QuestConfiguration.defaultBuilder()
+				.nativeOntopMappingFile(inputFile)
+				.build();
+
+		OBDAModel obdaModel = configuration.loadProvidedInputMappings();
 
 		SesameMaterializer materializer = new SesameMaterializer(obdaModel, DO_STREAM_RESULTS);
 		

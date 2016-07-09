@@ -21,21 +21,21 @@ package it.unibz.inf.ontop.obda;
  */
 
 import it.unibz.inf.ontop.injection.OBDAProperties;
+import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.ontology.DataPropertyExpression;
 import it.unibz.inf.ontop.ontology.OClass;
 import it.unibz.inf.ontop.ontology.ObjectPropertyExpression;
 import it.unibz.inf.ontop.ontology.Ontology;
 import it.unibz.inf.ontop.owlapi.OWLAPITranslatorUtility;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
-import it.unibz.inf.ontop.owlrefplatform.core.R2RMLQuestPreferences;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLException;
 import org.semanticweb.owlapi.model.OWLOntology;
+import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -339,14 +339,16 @@ public class R2rmlCheckerTest {
 	 *            quest preferences for QuestOWL, dataSource for the model
 	 * @throws Exception
 	 */
-	private void loadR2rml(Properties p) {
+	private void loadR2rml(Properties p) throws OWLOntologyCreationException {
 		log.info("Loading r2rml file");
+		QuestOWLFactory factory = new QuestOWLFactory();
 
-		QuestOWLConfiguration config = QuestOWLConfiguration.builder()
-				.nativeOntopMappingFile(new File(r2rmlfile))
-				.preferences(new R2RMLQuestPreferences(p))
+		QuestConfiguration config = QuestConfiguration.defaultBuilder()
+				.r2rmlMappingFile(r2rmlfile)
+				.ontology(owlOntology)
+				.properties(p)
 				.build();
-        reasonerR2rml = factory.createReasoner(owlOntology, config);
+        reasonerR2rml = factory.createReasoner(config);
 	}
 
 	/**
@@ -363,11 +365,12 @@ public class R2rmlCheckerTest {
 		// Creating a new instance of the reasoner
 		QuestOWLFactory factory = new QuestOWLFactory();
 
-		QuestOWLConfiguration config = QuestOWLConfiguration.builder()
-				.nativeOntopMappingFile(new File(obdafile))
-				.preferences(new QuestPreferences(p))
+		QuestConfiguration config = QuestConfiguration.defaultBuilder()
+				.nativeOntopMappingFile(obdafile)
+				.properties(p)
+				.ontology(owlOntology)
 				.build();
-		reasonerOBDA = factory.createReasoner(owlOntology, config);
+		reasonerOBDA = factory.createReasoner(config);
 
 
 	}

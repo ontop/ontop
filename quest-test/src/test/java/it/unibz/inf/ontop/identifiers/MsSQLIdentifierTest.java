@@ -20,93 +20,20 @@ package it.unibz.inf.ontop.identifiers;
  * #L%
  */
 
-import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
-import junit.framework.TestCase;
-import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.OWLIndividual;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.util.Properties;
+import it.unibz.inf.ontop.quest.AbstractVirtualModeTest;
 
 /***
  * Tests that mssql identifiers for tables and columns are treated
  * correctly. Especially, that the unquoted identifers are treated as lowercase (for columns)
  */
-public class MsSQLIdentifierTest extends TestCase {
-	private QuestOWLConnection conn;
+public class MsSQLIdentifierTest extends AbstractVirtualModeTest {
 
-	Logger log = LoggerFactory.getLogger(this.getClass());
-	private OWLOntology ontology;
+	private static final String owlfile = "resources/identifiers/identifiers.owl";
+	private static final String obdafile = "resources/identifiers/identifiers-mssql.obda";
 
-	final String owlfile = "resources/identifiers/identifiers.owl";
-	final String obdafile = "resources/identifiers/identifiers-mssql.obda";
-	private QuestOWL reasoner;
-
-	@Override
-	public void setUp() throws Exception {
-		
-		
-		// Loading the OWL file
-		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-		ontology = manager.loadOntologyFromOntologyDocument((new File(owlfile)));
-
-		Properties p = new Properties();
-		p.setProperty(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-		p.setProperty(QuestPreferences.OBTAIN_FULL_METADATA, QuestConstants.FALSE);
-		// Creating a new instance of the reasoner
-        QuestOWLFactory factory = new QuestOWLFactory();
-        QuestOWLConfiguration config = QuestOWLConfiguration.builder()
-				.preferences(new QuestPreferences(p))
-				.nativeOntopMappingFile(new File(obdafile))
-				.build();
-        reasoner = factory.createReasoner(ontology, config);
-
-		// Now we are ready for querying
-		conn = reasoner.getConnection();
-
-		
-	}
-
-
-	public void tearDown() throws Exception{
-		conn.close();
-		reasoner.dispose();
-	}
-	
-
-	
-	private String runTests(String query) throws Exception {
-		QuestOWLStatement st = conn.createStatement();
-		//StringBuilder bf = new StringBuilder(query);
-		String retval;
-		try {
-			
-
-			QuestOWLResultSet rs = st.executeTuple(query);
-			
-			assertTrue(rs.nextRow());
-			OWLIndividual ind1 =	rs.getOWLIndividual("x")	 ;
-			retval = ind1.toString();
-
-		} catch (Exception e) {
-			throw e;
-		} finally {
-			try {
-
-			} catch (Exception e) {
-				st.close();
-				assertTrue(false);
-			}
-			conn.close();
-			reasoner.dispose();
-		}
-		return retval;
+	public MsSQLIdentifierTest() {
+		super(owlfile, obdafile);
 	}
 
 	/**
@@ -115,25 +42,25 @@ public class MsSQLIdentifierTest extends TestCase {
 	 */
 	public void testLowercaseUnquoted() throws Exception {
 		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT ?x WHERE {?x a :Country} ORDER BY ?x";
-		String val = runTests(query);
+		String val = runQueryAndReturnStringX(query);
 		assertEquals("<http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country-991>", val);
 	}
 
 	public void testUppercaseUnquoted() throws Exception {
 		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT ?x WHERE {?x a :Country2} ORDER BY ?x";
-		String val = runTests(query);
+		String val = runQueryAndReturnStringX(query);
 		assertEquals("<http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country2-211>", val);	
 	}
 		
 	public void testLowercaseQuoted() throws Exception {
 		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT ?x WHERE {?x a :Country3} ORDER BY ?x";
-		String val = runTests(query);
+		String val = runQueryAndReturnStringX(query);
 		assertEquals("<http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country3-112>", val);
 	}
 	
 	public void testAliasQuoted() throws Exception {
 		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT ?x WHERE {?x a :Country4} ORDER BY ?x";
-		String val = runTests(query);
+		String val = runQueryAndReturnStringX(query);
 		assertEquals("<http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country4-111>", val);
 	}
 }

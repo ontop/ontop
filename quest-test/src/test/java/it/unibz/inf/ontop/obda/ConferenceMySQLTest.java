@@ -20,14 +20,10 @@ package it.unibz.inf.ontop.obda;
  * #L%
  */
 
+import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWL;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLFactory;
-import org.junit.Before;
 import org.junit.Test;
-import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.reasoner.ReasonerInternalException;
 
 
@@ -42,29 +38,18 @@ import java.io.File;
 
 public class ConferenceMySQLTest {
 
-	private OWLOntology ontology;
-
     final String owlFile = "src/test/resources/conference/ontology5.owl";
     final String obdaFile = "src/test/resources/conference/ontology5.obda";
-
-	@Before
-	public void setUp() throws Exception {
-		
-		// Loading the OWL file
-		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-		ontology = manager.loadOntologyFromOntologyDocument((new File(owlFile)));
-
-		
-	}
 
 	private void runTests(String query) throws Exception {
 
         // Creating a new instance of the reasoner
         QuestOWLFactory factory = new QuestOWLFactory();
-        QuestOWLConfiguration config = QuestOWLConfiguration.builder()
+        QuestConfiguration config = QuestConfiguration.defaultBuilder()
+				.ontologyFile(owlFile)
 				.nativeOntopMappingFile(new File(obdaFile))
 				.build();
-        QuestOWL reasoner = factory.createReasoner(ontology, config);
+        QuestOWL reasoner = factory.createReasoner(config);
 	}
 
 

@@ -20,16 +20,12 @@ package it.unibz.inf.ontop.obda;
  * #L%
  */
 
-import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
+import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.core.SQLExecutableQuery;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import org.junit.Test;
-import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLObject;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
 
-import java.io.File;
 
 public class QuestOWLExampleNotLatin {
 	
@@ -49,25 +45,14 @@ public class QuestOWLExampleNotLatin {
 	public void runQuery() throws Exception {
 
 		/*
-		 * Load the ontology from an external .owl file.
-		 */
-		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-		OWLOntology ontology = manager.loadOntologyFromOntologyDocument(new File(owlfile));
-
-		/*
-		 * Prepare the configuration for the Quest instance. The example below shows the setup for
-		 * "Virtual ABox" mode
-		 */
-		QuestPreferences preference = new QuestPreferences();
-
-		/*
 		 * Create the instance of Quest OWL reasoner.
 		 */
         QuestOWLFactory factory = new QuestOWLFactory();
-        QuestOWLConfiguration config = QuestOWLConfiguration.builder()
-				.nativeOntopMappingFile(new File(obdafile))
-				.preferences(preference).build();
-        QuestOWL reasoner = factory.createReasoner(ontology, config);
+        QuestConfiguration config = QuestConfiguration.defaultBuilder()
+				.nativeOntopMappingFile(obdafile)
+				.ontologyFile(owlfile)
+				.build();
+        QuestOWL reasoner = factory.createReasoner(config);
 
 		/*
 		 * Prepare the data connection for querying.

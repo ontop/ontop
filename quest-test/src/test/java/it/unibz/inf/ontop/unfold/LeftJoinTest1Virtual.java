@@ -20,26 +20,22 @@ package it.unibz.inf.ontop.unfold;
  * #L%
  */
 
-import it.unibz.inf.ontop.exception.DuplicateMappingException;
-import it.unibz.inf.ontop.exception.InvalidMappingException;
-import it.unibz.inf.ontop.io.InvalidDataSourceException;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
-import java.io.IOException;
-
+import it.unibz.inf.ontop.quest.AbstractVirtualModeTest;
 import org.junit.Test;
-import it.unibz.inf.ontop.test.AbstractQuestOWLTest;
-import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
 /**
  * Class to check the translation of the combination of Optional/Union in SPARQL into Datalog, and finally 
  * SQL
  * @author Minda, Guohui, mrezk
  */
-public class LeftJoinTest1Virtual extends AbstractQuestOWLTest {
+public class LeftJoinTest1Virtual extends AbstractVirtualModeTest {
 	//private static Logger log = LoggerFactory.getLogger(LeftJoinTest1Virtual.class);
 
-    public LeftJoinTest1Virtual() throws IOException, InvalidMappingException, OWLOntologyCreationException, DuplicateMappingException, InvalidDataSourceException {
-        super(new QuestPreferences());
+	private static final String owlfile = "src/test/resources/person.owl";
+	private static final String obdafile = "src/test/resources/person1.obda";
+
+    public LeftJoinTest1Virtual() {
+        super(owlfile, obdafile);
     }
 
     @Test
@@ -50,7 +46,7 @@ public class LeftJoinTest1Virtual extends AbstractQuestOWLTest {
 				+ "WHERE {?p a :Person . ?p :name ?name . "
 				+ "  OPTIONAL {?p :nick11 ?nick1} "
 				+ "  OPTIONAL {?p :nick22 ?nick2} }";
-		runTests(query2,4);
+		countResults(query2, 4);
 	}
 	
 	@Test
@@ -65,7 +61,7 @@ public class LeftJoinTest1Virtual extends AbstractQuestOWLTest {
 				+ "   OPTIONAL {"
 				+ "     {?p :nick2 ?nick2 } UNION {?p :nick22 ?nick22} } } }";
 
-		runTests(query6,4);
+		countResults(query6, 4);
 	}
 
 	@Test
@@ -78,7 +74,7 @@ public class LeftJoinTest1Virtual extends AbstractQuestOWLTest {
 				+ "  ?p :name ?name ."
 				+ "    OPTIONAL {?p :age ?age} }";
 
-		runTests(query5,4);
+		countResults(query5,4);
 	}
 	@Test
 	public void testLeftJoin4() throws Exception {
@@ -91,8 +87,8 @@ public class LeftJoinTest1Virtual extends AbstractQuestOWLTest {
 
 	
 		
-		QuestPreferences p = new QuestPreferences();
-		runTests(query4,4);
+
+		countResults(query4,4);
 	}	
 	
 	
@@ -105,8 +101,8 @@ public class LeftJoinTest1Virtual extends AbstractQuestOWLTest {
 				+ "		OPTIONAL {?p :nick11 ?nick1} }";
 		
 		
-		QuestPreferences p = new QuestPreferences();
-		runTests(query3, 4);
+
+		countResults(query3, 4);
 	}	
 	
 	@Test
@@ -121,7 +117,7 @@ public class LeftJoinTest1Virtual extends AbstractQuestOWLTest {
 				+ "    ?p :nick11 ?nick11 "
 				+ "    OPTIONAL { {?p :nick33 ?nick33 } UNION {?p :nick22 ?nick22} } } }";
 
-		runTests(query7, 4);
+		countResults(query7, 4);
 	}	
 	
 	@Test
@@ -131,7 +127,7 @@ public class LeftJoinTest1Virtual extends AbstractQuestOWLTest {
 				+ "SELECT DISTINCT * WHERE "
 				+ "{?p a :Person . ?p :name ?name . ?p :age ?age }";
 
-		runTests(query1,3);
+		countResults(query1,3);
 	}	
 
 
@@ -149,7 +145,7 @@ public class LeftJoinTest1Virtual extends AbstractQuestOWLTest {
 				+ "      ?p :nick1 ?nick1 "
 				+ "      OPTIONAL {?p :nick2 ?nick2. FILTER (?nick2 = 'alice2')} } } }";
 
-		runTests(query_multi7,4);
+		countResults(query_multi7,4);
 	}	
 
 	@Test
@@ -166,7 +162,7 @@ public class LeftJoinTest1Virtual extends AbstractQuestOWLTest {
 				+ "      OPTIONAL {?p :nick2 ?nick2} } } }";
 		
 
-		runTests(query_multi6,4);
+		countResults(query_multi6,4);
 	}	
 
 
@@ -178,7 +174,7 @@ public class LeftJoinTest1Virtual extends AbstractQuestOWLTest {
 		String query_multi = "PREFIX : <http://www.example.org/test#> SELECT DISTINCT * WHERE "
 				+ "{?p a :Person . OPTIONAL {{?p :salary ?salary .} UNION   {?p :name ?name .}}}";
 
-		runTests(query_multi,4);
+		countResults(query_multi,4);
 	}	
 	
 	@Test
@@ -186,7 +182,7 @@ public class LeftJoinTest1Virtual extends AbstractQuestOWLTest {
 		
 		String query_multi1 = "PREFIX : <http://www.example.org/test#> SELECT DISTINCT * WHERE {?p a :Person . ?p :name ?name }";
 
-		runTests(query_multi1,4);
+		countResults(query_multi1,4);
 	}		
 	
 	@Test
@@ -194,7 +190,7 @@ public class LeftJoinTest1Virtual extends AbstractQuestOWLTest {
 		
 		String query_multi2 = "PREFIX : <http://www.example.org/test#> SELECT DISTINCT * WHERE {?p a :Person . OPTIONAL {?p :name ?name} }";
 
-		runTests(query_multi2,4);
+		countResults(query_multi2,4);
 	}		
 	
 	@Test
@@ -202,7 +198,7 @@ public class LeftJoinTest1Virtual extends AbstractQuestOWLTest {
 		
 		String query_multi3 = "PREFIX : <http://www.example.org/test#> SELECT DISTINCT * WHERE {?p :name ?name . OPTIONAL {?p :nick1 ?nick1} }";
 
-		runTests(query_multi3,4);
+		countResults(query_multi3,4);
 	}		
 	
 	@Test
@@ -211,7 +207,7 @@ public class LeftJoinTest1Virtual extends AbstractQuestOWLTest {
 
 		String query_multi4 = "PREFIX : <http://www.example.org/test#> SELECT DISTINCT * WHERE {?p a :Person . OPTIONAL {?p :name ?name . OPTIONAL {?p :nick1 ?nick1} } }";
 
-		runTests(query_multi4,4);
+		countResults(query_multi4,4);
 	}		
 	
 	@Test
@@ -220,7 +216,7 @@ public class LeftJoinTest1Virtual extends AbstractQuestOWLTest {
 
 		String query_multi5 = "PREFIX : <http://www.example.org/test#> SELECT DISTINCT * WHERE {?p a :Person . OPTIONAL {?p :name ?name . OPTIONAL {?p :nick1 ?nick1} OPTIONAL {?p :nick2 ?nick2} } }";
 
-		runTests(query_multi5,4);
+		countResults(query_multi5,4);
 	}	
 	
 	@Test
@@ -229,7 +225,7 @@ public class LeftJoinTest1Virtual extends AbstractQuestOWLTest {
 
 		String query_multi7 = "PREFIX : <http://www.example.org/test#> SELECT ?person ?name ?nick1 ?nick2 WHERE{ ?person :name ?name . OPTIONAL { { ?person :nick1 ?nick1 } UNION { ?person :nick2 ?nick2 } FILTER ( bound( ?nick1 ) && bound( ?nick2) ) } }";
 
-		runTests(query_multi7,4);
+		countResults(query_multi7,4);
 	}
 	
 	@Test
@@ -238,7 +234,7 @@ public class LeftJoinTest1Virtual extends AbstractQuestOWLTest {
 
 		String query_multi7 = "PREFIX : <http://www.example.org/test#> SELECT ?person ?name ?nick1 ?nick2 WHERE{ ?person :name ?name . OPTIONAL { { ?person :nick1 ?nick1 } UNION { ?person :nick2 ?nick2 } FILTER ( bound( ?nick1 ) ) } }";
 
-		runTests(query_multi7,4);
+		countResults(query_multi7,4);
 	}
 
 	@Test
@@ -247,7 +243,7 @@ public class LeftJoinTest1Virtual extends AbstractQuestOWLTest {
 
 		String query_multi7 = "PREFIX : <http://www.example.org/test#> SELECT ?person ?nick1 ?nick2 WHERE{ { ?person :nick1 ?nick1 } UNION { ?person :nick2 ?nick2 } FILTER ( bound( ?nick1 ) ) }";
 
-		runTests(query_multi7,2);
+		countResults(query_multi7,2);
 	}
 
 	@Test
@@ -256,7 +252,7 @@ public class LeftJoinTest1Virtual extends AbstractQuestOWLTest {
 
 		String query_multi7 = "PREFIX : <http://www.example.org/test#> SELECT ?person ?nick1 ?nick2 WHERE{ { ?person :nick1 ?nick1 } UNION { ?person :nick2 ?nick2 } }";
 
-		runTests(query_multi7,4);
+		countResults(query_multi7,4);
 	}
 
 	@Test
@@ -265,7 +261,7 @@ public class LeftJoinTest1Virtual extends AbstractQuestOWLTest {
 
 		String query_multi7 = "PREFIX : <http://www.example.org/test#> SELECT ?person ?name ?nick1 ?nick2 WHERE{ ?person :name ?name . OPTIONAL { ?person :nick1 ?nick1 . ?person :nick2 ?nick2 . FILTER ( bound( ?nick1 ) && bound( ?nick2) ) } }";
 
-		runTests(query_multi7,4);
+		countResults(query_multi7,4);
 	}
 
 }

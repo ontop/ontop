@@ -21,6 +21,7 @@ package it.unibz.inf.ontop.quest.service;
  */
 
 import info.aduna.io.IOUtil;
+import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.model.OBDAException;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestDBStatement;
 import it.unibz.inf.ontop.sesame.SesameVirtualRepo;
@@ -47,7 +48,11 @@ public class QuestSPARQLRewriterTest extends TestCase {
 		try {
 			final URL owlFileUrl = QuestSPARQLRewriterTest.class.getResource(OWL_FILE_LOCATION);
 			final URL obdaFileUrl = QuestSPARQLRewriterTest.class.getResource(OBDA_FILE_LOCATION);
-			repository = new SesameVirtualRepo(getName(), owlFileUrl.toString(), obdaFileUrl.toString(), "");
+			QuestConfiguration configuration = QuestConfiguration.defaultBuilder()
+					.ontologyFile(owlFileUrl)
+					.nativeOntopMappingFile(obdaFileUrl.toString())
+					.build();
+			repository = new SesameVirtualRepo(getName(), configuration);
 			repository.initialize();
 		} catch (Exception exc) {
 			repository.shutDown();
@@ -132,7 +137,7 @@ public class QuestSPARQLRewriterTest extends TestCase {
 	private String getSPARQLRewriting(String sparqlInput) {
 		String sparqlOutput;
 		try {
-			sparqlOutput = getStatement().getSPARQLRewriting(sparqlInput);
+			sparqlOutput = getStatement().getRewriting(sparqlInput);
 		} catch (OBDAException e) {
 			sparqlOutput = "NULL";
 		}

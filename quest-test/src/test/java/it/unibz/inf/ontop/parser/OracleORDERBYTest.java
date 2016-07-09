@@ -45,7 +45,7 @@ public class OracleORDERBYTest extends AbstractVirtualModeTest {
         super(owlFile, obdaFile);
     }
 
-    private void runQuery(String query) throws OBDAException, OWLException{
+    private void runQueryAndCheckSQL(String query) throws OBDAException, OWLException{
 
         QuestOWLStatement st = conn.createStatement();
         String sql = ((SQLExecutableQuery)st.getExecutableQuery(query)).getSQL();
@@ -65,7 +65,7 @@ public class OracleORDERBYTest extends AbstractVirtualModeTest {
                 + "ORDER BY ?name"
                 ;
 
-        runQuery(query);
+        runQueryAndCheckSQL(query);
 
         List<String> expectedUris = new ArrayList<>();
         expectedUris.add("http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country-Argentina");
@@ -106,7 +106,7 @@ public class OracleORDERBYTest extends AbstractVirtualModeTest {
                 + "ORDER BY ?name "
                 + "LIMIT 2 " ;
 
-        runQuery(query);
+        runQueryAndCheckSQL(query);
         List<String> expectedUris = new ArrayList<>();
         expectedUris.add("http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country-Argentina");
         expectedUris.add("http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country-Australia");

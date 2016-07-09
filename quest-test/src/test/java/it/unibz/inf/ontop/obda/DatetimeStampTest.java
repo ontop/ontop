@@ -1,22 +1,17 @@
 package it.unibz.inf.ontop.obda;
 
 
+import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
-import org.junit.Before;
 import org.junit.Test;
 import it.unibz.inf.ontop.io.QueryIOManager;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
-import it.unibz.inf.ontop.owlrefplatform.core.R2RMLQuestPreferences;
+import it.unibz.inf.ontop.owlrefplatform.injection.QuestCorePreferences;
 import it.unibz.inf.ontop.querymanager.QueryController;
 import it.unibz.inf.ontop.querymanager.QueryControllerGroup;
 import it.unibz.inf.ontop.querymanager.QueryControllerQuery;
-import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
 import java.util.Properties;
 
 import static org.junit.Assert.assertFalse;
@@ -24,27 +19,26 @@ import static org.junit.Assert.assertFalse;
 public class DatetimeStampTest {
 
     private Logger log = LoggerFactory.getLogger(this.getClass());
-    private OWLOntology ontology;
 
     final String owlFile = "src/test/resources/northwind/northwind-dmo.owl";
     final String r2rmlFile = "src/test/resources/northwind/mapping-northwind-dmo.ttl";
     final String obdaFile = "src/test/resources/northwind/mapping-northwind-dmo.obda";
 
-    @Before
-    public void setUp() throws Exception {
-        // Loading the OWL file
-        OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-        ontology = manager.loadOntologyFromOntologyDocument((new File(owlFile)));
-    }
-
-    private void runTests(QuestPreferences preferences, String filename) throws Exception {
+    private void runTests(String filename, boolean isR2rml) throws Exception {
 
         // Creating a new instance of the reasoner
         QuestOWLFactory factory = new QuestOWLFactory();
-        QuestOWLConfiguration config = QuestOWLConfiguration.builder()
-                .nativeOntopMappingFile(new File(filename))
-                .preferences(preferences).build();
-        QuestOWL reasoner = factory.createReasoner(ontology, config);
+        QuestConfiguration.Builder configBuilder = QuestConfiguration.defaultBuilder()
+                .ontologyFile(owlFile);
+
+        if (isR2rml) {
+            configBuilder.r2rmlMappingFile(filename);
+        }
+        else {
+            configBuilder.nativeOntopMappingFile(filename);
+        }
+
+        QuestOWL reasoner = factory.createReasoner(configBuilder.build());
         // Now we are ready for querying
         QuestOWLConnection conn = reasoner.getConnection();
         QuestOWLStatement st = conn.createStatement();
@@ -94,15 +88,13 @@ public class DatetimeStampTest {
     @Test
     public void testR2rml() throws Exception {
         Properties p = new Properties();
-        p.setProperty(QuestPreferences.JDBC_URL, "jdbc:mysql://10.7.20.39/northwind");
-        p.setProperty(QuestPreferences.DB_USER, "fish");
-        p.setProperty(QuestPreferences.DB_PASSWORD, "fish");
-        p.setProperty(QuestPreferences.JDBC_DRIVER, "com.mysql.jdbc.Driver");
+        p.setProperty(QuestCorePreferences.JDBC_URL, "jdbc:mysql://10.7.20.39/northwind");
+        p.setProperty(QuestCorePreferences.DB_USER, "fish");
+        p.setProperty(QuestCorePreferences.DB_PASSWORD, "fish");
+        p.setProperty(QuestCorePreferences.JDBC_DRIVER, "com.mysql.jdbc.Driver");
 
         log.info("Loading r2rml file");
-
-        QuestPreferences prefs = new R2RMLQuestPreferences(p);
-        runTests(prefs, r2rmlFile);
+        runTests(r2rmlFile, true);
     }
 
 
@@ -110,9 +102,7 @@ public class DatetimeStampTest {
     public void testOBDA() throws Exception {
 
         log.info("Loading OBDA file");
-
-        QuestPreferences p = new QuestPreferences();
-        runTests(p, obdaFile);
+        runTests(obdaFile, false);
     }
 
 

@@ -1,15 +1,14 @@
 package it.unibz.inf.ontop.quest;
 
+import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.io.QueryIOManager;
 import it.unibz.inf.ontop.model.OBDAException;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
+import it.unibz.inf.ontop.owlrefplatform.core.SQLExecutableQuery;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import it.unibz.inf.ontop.querymanager.QueryController;
 import it.unibz.inf.ontop.querymanager.QueryControllerGroup;
 import it.unibz.inf.ontop.querymanager.QueryControllerQuery;
 import junit.framework.TestCase;
-import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,7 +16,6 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Properties;
 
 /**
  * Common initialization for many tests
@@ -28,32 +26,24 @@ public abstract class AbstractVirtualModeTest extends TestCase {
     private final String owlFileName;
     private final String obdaFileName;
 
-    private OWLOntology ontology;
-
     protected QuestOWL reasoner;
     protected QuestOWLConnection conn;
 
-    protected AbstractVirtualModeTest(String owlfile, String obdafile) {
+    public AbstractVirtualModeTest(String owlfile, String obdafile) {
         this.owlFileName = owlfile;
         this.obdaFileName = obdafile;
     }
 
     @Override
     public void setUp() throws Exception {
-        // Loading the OWL file
-        OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-        ontology = manager.loadOntologyFromOntologyDocument((new File(owlFileName)));
-
-        Properties p = new Properties();
-        p.setProperty(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-        p.setProperty(QuestPreferences.OBTAIN_FULL_METADATA, QuestConstants.FALSE);
         // Creating a new instance of the reasoner
         QuestOWLFactory factory = new QuestOWLFactory();
-        QuestOWLConfiguration config = QuestOWLConfiguration.builder()
-                .preferences(new QuestPreferences(p))
+        QuestConfiguration config = QuestConfiguration.defaultBuilder()
+                .enableFullMetadataExtraction(false)
+                .ontologyFile(owlFileName)
                 .nativeOntopMappingFile(new File(obdaFileName))
                 .build();
-        reasoner = factory.createReasoner(ontology, config);
+        reasoner = factory.createReasoner(config);
 
         // Now we are ready for querying
         conn = reasoner.getConnection();
@@ -215,5 +205,39 @@ public abstract class AbstractVirtualModeTest extends TestCase {
                 log.debug("Elapsed time: {} ms", time);
             }
         }
+    }
+
+    protected void runQuery(String query) throws Exception {
+        long t1 = System.currentTimeMillis();
+
+        QuestOWLStatement st = conn.createStatement();
+        QuestOWLResultSet rs = st.executeTuple(query);
+
+        int columnSize = rs.getColumnCount();
+        while (rs.nextRow()) {
+            for (int idx = 1; idx <= columnSize; idx++) {
+                OWLObject binding = rs.getOWLObject(idx);
+                System.out.print(binding.toString() + ", ");
+            }
+            System.out.print("\n");
+        }
+        rs.close();
+        long t2 = System.currentTimeMillis();
+
+                /* 
+                * Print the query summary 
+                */
+        String sqlQuery = ((SQLExecutableQuery) st.getExecutableQuery(query)).getSQL();
+        System.out.println();
+        System.out.println("The input SPARQL query:");
+        System.out.println("=======================");
+        System.out.println(query);
+        System.out.println();
+        System.out.println("The output SQL query:");
+        System.out.println("=====================");
+        System.out.println(sqlQuery);
+        System.out.println("Query Execution Time:");
+        System.out.println("=====================");
+        System.out.println((t2-t1) + "ms");
     }
 }

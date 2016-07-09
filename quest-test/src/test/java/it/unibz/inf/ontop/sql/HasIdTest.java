@@ -23,7 +23,7 @@ public class HasIdTest extends AbstractVirtualModeTest {
     }
 
 
-    private QuestOWLResultSet runQuery(String query) throws OBDAException, OWLException {
+    private QuestOWLResultSet runLocalQuery(String query) throws OBDAException, OWLException {
 
         // Now we are ready for querying
         conn = reasoner.getConnection();
@@ -33,7 +33,7 @@ public class HasIdTest extends AbstractVirtualModeTest {
     }
 
     public void test() throws OBDAException, OWLException {
-        QuestOWLResultSet results = runQuery("PREFIX : <http://example.com/vocab#>" +
+        QuestOWLResultSet results = runLocalQuery("PREFIX : <http://example.com/vocab#>" +
                 "PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>" +
                 "SELECT ?p ?firstName ?lastName " +
                 "WHERE { " +

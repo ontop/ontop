@@ -1,8 +1,9 @@
 package it.unibz.inf.ontop.obda;
 
 
+import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
+import it.unibz.inf.ontop.owlrefplatform.injection.QuestCorePreferences;
 import it.unibz.inf.ontop.owlrefplatform.core.resultset.QuestDistinctTupleResultSet;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import it.unibz.inf.ontop.sesame.SesameVirtualRepo;
@@ -36,7 +37,6 @@ import static org.junit.Assert.assertTrue;
 public class DistinctResultSetTest { //
 
     private Logger log = LoggerFactory.getLogger(this.getClass());
-    private OWLOntology ontology;
 
     final String owlFile = "src/test/resources/example/exampleBooks.owl";
     final String obdaFile = "src/test/resources/example/exampleBooks.obda";
@@ -48,17 +48,14 @@ public class DistinctResultSetTest { //
     }
     private int runTestsQuestOWL(Properties p, String query) throws Exception {
 
-        // Loading the OWL file
-        OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-        ontology = manager.loadOntologyFromOntologyDocument((new File(owlFile)));
-
         // Creating a new instance of the reasoner
         QuestOWLFactory factory = new QuestOWLFactory();
-        QuestOWLConfiguration config = QuestOWLConfiguration.builder()
-                .preferences(new QuestPreferences(p))
-                .nativeOntopMappingFile(new File(obdaFile))
+        QuestConfiguration config = QuestConfiguration.defaultBuilder()
+                .properties(p)
+                .nativeOntopMappingFile(obdaFile)
+                .ontologyFile(owlFile)
                 .build();
-        QuestOWL reasoner = factory.createReasoner(ontology, config);
+        QuestOWL reasoner = factory.createReasoner(config);
         // Now we are ready for querying
         QuestOWLConnection conn = reasoner.getConnection();
         QuestOWLStatement st = conn.createStatement();
@@ -89,10 +86,13 @@ public class DistinctResultSetTest { //
         Repository repo = null;
         int count = 0;
         try {
+            QuestConfiguration configuration = QuestConfiguration.defaultBuilder()
+                    .ontologyFile(owlFile)
+                    .nativeOntopMappingFile(obdaFile)
+                    .propertyFile(configFile)
+                    .build();
 
-        repo = new SesameVirtualRepo("my_name", owlFile, obdaFile, configFile);
-
-
+        repo = new SesameVirtualRepo("my_name", configuration);
 
         repo.initialize();
 
@@ -150,7 +150,7 @@ public class DistinctResultSetTest { //
 
 
         Properties p = new Properties();
-        p.setProperty(QuestPreferences.DISTINCT_RESULTSET, QuestConstants.TRUE);
+        p.setProperty(QuestCorePreferences.DISTINCT_RESULTSET, QuestConstants.TRUE);
         String query = "PREFIX : <http://meraka/moss/exampleBooks.owl#>" +
                 " select distinct * {?x a :Author}";
         int nResults = runTestsQuestOWL(p, query);

@@ -3,11 +3,12 @@ package it.unibz.inf.ontop.owlrefplatform.owlapi;
 
 import it.unibz.inf.ontop.exception.InvalidMappingException;
 import it.unibz.inf.ontop.exception.InvalidPredicateDeclarationException;
+import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.model.OBDAException;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
+import it.unibz.inf.ontop.owlrefplatform.core.SQLExecutableQuery;
+import it.unibz.inf.ontop.owlrefplatform.injection.QuestCorePreferences;
 import it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing.TMappingExclusionConfig;
-import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.*;
 
 import java.io.*;
@@ -354,42 +355,25 @@ public class QuestOWLExample_ReasoningDisabled {
     private QuestOWLConnection createStuff() throws OBDAException, OWLOntologyCreationException, IOException, InvalidPredicateDeclarationException, InvalidMappingException {
 
 		/*
-		 * Load the ontology from an external .owl file.
-		 */
-        OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-        OWLOntology ontology = manager.loadOntologyFromOntologyDocument(new File(owlfile));
-
-		/*
 		 * Prepare the configuration for the Quest instance. The example below shows the setup for
 		 * "Virtual ABox" mode
 		 */
         Properties p = new Properties();
-        p.put(QuestPreferences.SQL_GENERATE_REPLACE, QuestConstants.FALSE);
-        p.put(QuestPreferences.TMAPPING_EXCLUSION, TMappingExclusionConfig.parseFile(Settings.tMappingConfFile));
+        p.put(QuestCorePreferences.SQL_GENERATE_REPLACE, QuestConstants.FALSE);
 
-        QuestPreferences preference = new QuestPreferences(p);
 //		TEST preference.setCurrentValueOf(QuestPreferences.T_MAPPINGS, QuestConstants.FALSE); // Disable T_Mappings
 
-		/*
-		 * Create the instance of Quest OWL reasoner.
-		 */
-//        QuestOWLFactory factory = new QuestOWLFactory();
-//        factory.setOBDAController(obdaModel);
-//        factory.setPreferenceHolder(preference);
-//
-//        TMappingExclusionConfig config = TMappingExclusionConfig.parseFile(Settings.tMappingConfFile);
-//        factory.setExcludeFromTMappingsPredicates(config);
-
-
-        //QuestOWL reasoner = factory.createReasoner(ontology, new SimpleConfiguration());
         TMappingExclusionConfig tMapConfig = TMappingExclusionConfig.parseFile(Settings.tMappingConfFile);
 
 
         QuestOWLFactory factory = new QuestOWLFactory();
-        QuestOWLConfiguration config = QuestOWLConfiguration.builder()
+        QuestConfiguration config = QuestConfiguration.defaultBuilder()
                 .nativeOntopMappingFile(new File(Settings.obdaFile))
-                .tMappingExclusionConfig(tMapConfig).build();
-        this.reasoner = factory.createReasoner(ontology, config);
+                .ontologyFile(owlfile)
+                .tMappingExclusionConfig(tMapConfig)
+                .properties(p)
+                .build();
+        this.reasoner = factory.createReasoner(config);
 		/*
 		 * Prepare the data connection for querying.
 		 */

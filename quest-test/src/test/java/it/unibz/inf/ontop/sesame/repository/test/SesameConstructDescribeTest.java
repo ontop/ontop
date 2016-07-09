@@ -38,8 +38,6 @@ import org.openrdf.repository.RepositoryResult;
 import org.openrdf.rio.RDFFormat;
 import it.unibz.inf.ontop.sesame.RepositoryConnection;
 import it.unibz.inf.ontop.sesame.SesameClassicInMemoryRepo;
-import it.unibz.inf.ontop.sesame.SesameRepositoryConfig;
-import it.unibz.inf.ontop.sesame.SesameRepositoryFactory;
 
 /**
  * This unit test is to ensure the correctness of construct and describe
@@ -59,13 +57,7 @@ public class SesameConstructDescribeTest extends TestCase{
 	public void setUp() throws Exception {
 		
 		try {
-			System.out.println("In-memory quest repo.");			
-
-			SesameRepositoryConfig config;
-			SesameRepositoryFactory fact = new SesameRepositoryFactory();
-			config = (SesameRepositoryConfig) fact.getConfig();
-			config.setQuestType("quest-inmemory");
-			config.setName("my_repo");
+			System.out.println("In-memory quest repo.");
 			
 			repo = new SesameClassicInMemoryRepo("constructDescribe", owlFile, false, "TreeWitness");
 			repo.initialize();

@@ -22,11 +22,12 @@ package it.unibz.inf.ontop.owlrefplatform.owlapi;
 
 import it.unibz.inf.ontop.exception.InvalidMappingException;
 import it.unibz.inf.ontop.exception.InvalidPredicateDeclarationException;
+import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.model.OBDAException;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
+import it.unibz.inf.ontop.owlrefplatform.core.SQLExecutableQuery;
+import it.unibz.inf.ontop.owlrefplatform.injection.QuestCorePreferences;
 import it.unibz.inf.ontop.sql.ImplicitDBConstraintsReader;
-import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.*;
 
 import java.io.*;
@@ -160,7 +161,6 @@ public class QuestOWLExample_OntowisTests {
 
 	/**
 	 * @param resultsOne
-	 * @param obdaFile 
 	 * @throws UnsupportedEncodingException 
 	 * @throws FileNotFoundException 
 	 */
@@ -220,17 +220,11 @@ public class QuestOWLExample_OntowisTests {
 	private QuestOWLConnection createStuff(boolean manualKeys) throws OBDAException, OWLOntologyCreationException, IOException, InvalidPredicateDeclarationException, InvalidMappingException{
 
 		/*
-		 * Load the ontology from an external .owl file.
-		 */
-		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-		OWLOntology ontology = manager.loadOntologyFromOntologyDocument(new File(owlfile));
-
-		/*
 		 * Prepare the configuration for the Quest instance. The example below shows the setup for
 		 * "Virtual ABox" mode
 		 */
 		Properties p = new Properties();
-		p.setProperty(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+		p.setProperty(QuestCorePreferences.ABOX_MODE, QuestConstants.VIRTUAL);
 		//		TEST preference.setProperty(QuestPreferences.T_MAPPINGS, QuestConstants.FALSE); // Disable T_Mappings
 
 		/*
@@ -243,15 +237,17 @@ public class QuestOWLExample_OntowisTests {
 		/*
 		 * USR CONSTRAINTS !!!!
 		 */
-		QuestOWLConfiguration config;
+		QuestConfiguration config;
 		if (manualKeys){
 			System.out.println();
 			ImplicitDBConstraintsReader constr = new ImplicitDBConstraintsReader(new File(usrConstrinFile));
 			//factory.setImplicitDBConstraints(constr);
-			config = QuestOWLConfiguration.builder()
+			config = QuestConfiguration.defaultBuilder()
+					.ontologyFile(owlfile)
 					.nativeOntopMappingFile(new File(obdaFile)).dbConstraintsReader(constr).build();
 		} else {
-			config = QuestOWLConfiguration.builder()
+			config = QuestConfiguration.defaultBuilder()
+					.ontologyFile(owlfile)
 					.nativeOntopMappingFile(new File(obdaFile))
 					.build();
 		}
@@ -261,7 +257,7 @@ public class QuestOWLExample_OntowisTests {
 		//TMappingsConfParser tMapParser = new TMappingsConfParser(tMappingsConfFile);
 		//factory.setExcludeFromTMappingsPredicates(tMapParser.parsePredicates());
 
-		QuestOWL reasoner = factory.createReasoner(ontology, config);
+		QuestOWL reasoner = factory.createReasoner(config);
 
 		this.reasoner = reasoner;
 		/*

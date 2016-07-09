@@ -20,10 +20,9 @@ package it.unibz.inf.ontop.obda;
  * #L%
  */
 
+import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.ontology.*;
 import it.unibz.inf.ontop.owlapi.OWLAPITranslatorUtility;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
 import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.Equivalences;
 import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
@@ -31,9 +30,6 @@ import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,7 +48,6 @@ public class EmptyEntitiesTest {
 	private QuestOWLConnection conn;
 
 	Logger log = LoggerFactory.getLogger(this.getClass());
-	private OWLOntology ontology;
 
 //	final String owlfile = "src/test/resources/emptiesDatabase.owl";
 //	final String obdafile = "src/test/resources/emptiesDatabase.obda";
@@ -95,27 +90,21 @@ public class EmptyEntitiesTest {
 //		st.executeUpdate(bf.toString());
 //		connection.commit();
 
-		// Loading the OWL file
-		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-		ontology = manager.loadOntologyFromOntologyDocument((new File(owlfile)));
-
-		Properties p = new Properties();
-		p.setProperty(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-		p.setProperty(QuestPreferences.OBTAIN_FULL_METADATA, QuestConstants.FALSE);
 		// Creating a new instance of the reasoner
         // Creating a new instance of the reasoner
         QuestOWLFactory factory = new QuestOWLFactory();
-        QuestOWLConfiguration config = QuestOWLConfiguration.builder()
+        QuestConfiguration config = QuestConfiguration.defaultBuilder()
+				.enableFullMetadataExtraction(false)
+				.ontologyFile(owlfile)
 				.nativeOntopMappingFile(new File(obdafile))
-				.preferences(new QuestPreferences(p))
 				.build();
-        reasoner = factory.createReasoner(ontology, config);
+        reasoner = factory.createReasoner(config);
 
 
 		// Now we are ready for querying
 		conn = reasoner.getConnection();
 
-		onto = OWLAPITranslatorUtility.translate(ontology);
+		onto = OWLAPITranslatorUtility.translate(config.loadProvidedInputOntology());
 	}
 
 	@After

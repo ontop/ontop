@@ -21,6 +21,7 @@ package it.unibz.inf.ontop.sesame.tests.general;
  */
 import java.util.List;
 
+import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.sesame.SesameVirtualRepo;
 import junit.framework.TestCase;
 
@@ -52,8 +53,12 @@ public class SesameVirtualTest extends TestCase {
 			
 			String owlfile = "src/test/resources/example/exampleBooks.owl";
 			String obdafile = "src/test/resources/example/exampleBooks.obda";
+			QuestConfiguration configuration = QuestConfiguration.defaultBuilder()
+					.ontologyFile(owlfile)
+					.nativeOntopMappingFile(obdafile)
+					.build();
 
-			repo = new SesameVirtualRepo("my_name", owlfile, obdafile, false, "TreeWitness");
+			repo = new SesameVirtualRepo("my_name", configuration);
 	
 			repo.initialize();
 			

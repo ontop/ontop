@@ -20,130 +20,32 @@ package it.unibz.inf.ontop.unfold;
  * #L%
  */
 
-import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
-import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWL;
-import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWLConnection;
-import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWLFactory;
-import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWLResultSet;
-import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWLStatement;
+import it.unibz.inf.ontop.quest.AbstractVirtualModeTest;
 
-import java.io.File;
-
-import junit.framework.TestCase;
-
-import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
-import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Class to check the translation of the combination of Optional/Union in SPARQL into Datalog, and finally 
  * SQL
  * @author Minda, Guohui, mrezk
  */
-public class LeftJoinTest3Virtual extends TestCase {
+public class LeftJoinTest3Virtual extends AbstractVirtualModeTest {
 
-	Logger log = LoggerFactory.getLogger(this.getClass());
-	private OWLOntology ontology;
+	private static final String owlfile = "src/test/resources/person.owl";
+	private static final String obdafile = "src/test/resources/person3.obda";
 
-	final String owlfile = "src/test/resources/person.owl";
-	final String obdafile = "src/test/resources/person3.obda";
-
-	@Override
-	public void setUp() throws Exception {
-		//String url = "jdbc:h2:mem:ljtest;DATABASE_TO_UPPER=FALSE";
-		//String username = "sa";
-		//String password = "";
-
-		
-		String url = "jdbc:mysql://obdalin3:3306/optional_test";
-		String username = "fish";
-		String password = "fish";
-/*
-		conn = DriverManager.getConnection(url, username, password);
-		log.debug("Creating in-memory DB and inserting data!");
-		Statement st = conn.createStatement();
-		FileReader reader = new FileReader("src/test/resources/create_optional.sql");
-		BufferedReader in = new BufferedReader(reader);
-		StringBuilder bf = new StringBuilder();
-		String line = in.readLine();
-		while (line != null) {
-			bf.append(line + "\n");
-			line = in.readLine();
-		}
-
-		st.executeUpdate(bf.toString());
-		conn.commit();
-		log.debug("Data loaded!");
-*/
-		// Loading the OWL file
-		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-		ontology = manager.loadOntologyFromOntologyDocument((new File(owlfile)));
-		
+	public LeftJoinTest3Virtual() {
+		super(owlfile, obdafile);
 	}
 
-	private void runTests(QuestPreferences p) throws Exception {
 
-		// Creating a new instance of the reasoner
-        QuestOWLFactory factory = new QuestOWLFactory(new File(obdafile), p);
-
-		QuestOWL reasoner = (QuestOWL) factory.createReasoner(ontology, new SimpleConfiguration());
-
-		// Now we are ready for querying
-		QuestOWLConnection conn = reasoner.getConnection();
-		QuestOWLStatement st = conn.createStatement();
-
-		//@formatter.off
+	public void testLeftJoin() throws Exception {
 		String query_multi1 = "PREFIX : <http://www.example.org/test#> "
 				+ "SELECT DISTINCT * "
 				+ "WHERE {"
 				+ "  ?p a :Person . "
 				+ "  ?p :name ?name . "
 				+ "  OPTIONAL {?p :nick ?nick} }";
-		
-		//@formatter.on
-		
-		try {
-			executeQueryAssertResults(query_multi1, st, 5);
-
-			
-		} catch (Exception e) {
-			throw e;
-		} finally {
-			try {
-
-			} catch (Exception e) {
-				st.close();
-			}
-			conn.close();
-			reasoner.dispose();
-		}
-	}
-	
-	public void executeQueryAssertResults(String query, QuestOWLStatement st, int expectedRows) throws Exception {
-		QuestOWLResultSet rs = st.executeTuple(query);
-		int count = 0;
-		while (rs.nextRow()) {
-			count++;
-			for (int i = 1; i <= rs.getColumnCount(); i++) {
-				String varName = rs.getSignature().get(i-1);
-				System.out.print(varName);
-				//System.out.print("=" + rs.getOWLObject(i));
-				System.out.print("=" + rs.getOWLObject(varName));
-				System.out.print(" ");
-			}
-			System.out.println();
-		}
-		rs.close();
-		assertEquals(expectedRows, count);
-	}
-
-	public void testLeftJoin() throws Exception {
-
-		QuestPreferences p = new QuestPreferences();
-		runTests(p);
+		countResults(query_multi1, 5);
 	}
 
 }

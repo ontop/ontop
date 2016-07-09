@@ -1,50 +1,47 @@
 package it.unibz.inf.ontop.obda;
 
+import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
-import org.junit.Before;
 import org.junit.Test;
 import it.unibz.inf.ontop.io.QueryIOManager;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
-import it.unibz.inf.ontop.owlrefplatform.core.R2RMLQuestPreferences;
+import it.unibz.inf.ontop.owlrefplatform.injection.QuestCorePreferences;
 import it.unibz.inf.ontop.querymanager.QueryController;
 import it.unibz.inf.ontop.querymanager.QueryControllerGroup;
 import it.unibz.inf.ontop.querymanager.QueryControllerQuery;
-import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.util.Optional;
 import java.util.Properties;
 
 import static org.junit.Assert.assertFalse;
 
 public class R2rmlJoinTest {
     Logger log = LoggerFactory.getLogger(this.getClass());
-    private OWLOntology ontology;
 
     final String owlFile = "src/test/resources/oreda/oreda_bootstrapped_ontology.owl";
     final String r2rmlFile = "src/test/resources/oreda/oreda_bootstrapped_mapping.ttl";
     final String obdaFile = "src/test/resources/oreda/oreda_bootstrapped_mapping.obda";
 
-    @Before
-    public void setUp() throws Exception {
-        // Loading the OWL file
-        OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-        ontology = manager.loadOntologyFromOntologyDocument((new File(owlFile)));
-
-    }
-
-    private void runTests(QuestPreferences p, String filename) throws Exception {
+    private void runTests(Optional<Properties> optionalProperties, String filename) throws Exception {
 
         // Creating a new instance of the reasoner
         QuestOWLFactory factory = new QuestOWLFactory();
-        QuestOWLConfiguration config = QuestOWLConfiguration.builder()
+        QuestConfiguration.Builder configBuilder = QuestConfiguration.defaultBuilder()
                 .nativeOntopMappingFile(new File(filename))
-                .preferences(p)
-                .build();
-        QuestOWL reasoner = factory.createReasoner(ontology, config);
+                .ontologyFile(owlFile);
+
+        if (optionalProperties.isPresent()) {
+            configBuilder
+                    .r2rmlMappingFile(filename)
+                    .properties(optionalProperties.get());
+        }
+        else {
+            configBuilder.nativeOntopMappingFile(filename);
+        }
+     
+        QuestOWL reasoner = factory.createReasoner(configBuilder.build());
 
         // Now we are ready for querying
         QuestOWLConnection conn = reasoner.getConnection();
@@ -90,16 +87,14 @@ public class R2rmlJoinTest {
     @Test
     public void testR2rml() throws Exception {
         Properties p = new Properties();
-        p.setProperty(QuestPreferences.DB_USER, "mssql");
-        p.setProperty(QuestPreferences.DB_PASSWORD, "obdaps83");
-        p.setProperty(QuestPreferences.JDBC_URL, "jdbc:sqlserver://10.7.20.91;databaseName=OREDA_OPTIQUE");
-        p.setProperty(QuestPreferences.JDBC_DRIVER, "com.microsoft.sqlserver.jdbc.SQLServerDriver");
+        p.setProperty(QuestCorePreferences.DB_USER, "mssql");
+        p.setProperty(QuestCorePreferences.DB_PASSWORD, "obdaps83");
+        p.setProperty(QuestCorePreferences.JDBC_URL, "jdbc:sqlserver://10.7.20.91;databaseName=OREDA_OPTIQUE");
+        p.setProperty(QuestCorePreferences.JDBC_DRIVER, "com.microsoft.sqlserver.jdbc.SQLServerDriver");
 
         log.info("Loading r2rml file");
 
-        QuestPreferences prefs = new R2RMLQuestPreferences(p);
-
-        runTests(prefs, r2rmlFile);
+        runTests(Optional.of(p), r2rmlFile);
     }
 
 
@@ -107,9 +102,7 @@ public class R2rmlJoinTest {
     public void testOBDA() throws Exception {
 
         log.info("Loading OBDA file");
-
-        QuestPreferences p = new QuestPreferences();
-        runTests(p, obdaFile);
+        runTests(Optional.empty(), obdaFile);
     }
 
 }

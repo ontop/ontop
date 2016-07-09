@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.owlrefplatform.core;
 
+import java.util.List;
 import java.util.Optional;
 
 import it.unibz.inf.ontop.model.*;
@@ -42,4 +43,7 @@ public interface IQuest {
     DataSourceMetadata getMetaData();
 
     ImmutableOntologyVocabulary getVocabulary();
+
+    // TEST ONLY
+    List<CQIE> getUnfolderRules();
 }

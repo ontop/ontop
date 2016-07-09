@@ -27,18 +27,20 @@ import java.util.Properties;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import it.unibz.inf.ontop.injection.OBDACoreConfiguration;
+import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import junit.framework.TestCase;
 
 import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
-import it.unibz.inf.ontop.injection.OBDACoreModule;
+import it.unibz.inf.ontop.injection.impl.OBDACoreModule;
 import it.unibz.inf.ontop.io.QueryIOManager;
 import it.unibz.inf.ontop.model.OBDADataFactory;
 import it.unibz.inf.ontop.model.OBDADataSource;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.model.impl.RDBMSourceParameterConstants;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
+import it.unibz.inf.ontop.owlrefplatform.injection.QuestCorePreferences;
 import it.unibz.inf.ontop.querymanager.QueryController;
 import it.unibz.inf.ontop.querymanager.QueryControllerEntity;
 import it.unibz.inf.ontop.querymanager.QueryControllerQuery;
@@ -83,7 +85,7 @@ public class SemanticIndexManagerLUBMMySQLTest extends TestCase {
 		source.setParameter(RDBMSourceParameterConstants.IS_IN_MEMORY, "false");
 		source.setParameter(RDBMSourceParameterConstants.USE_DATASOURCE_FOR_ABOXDUMP, "true");
 
-		Injector injector = Guice.createInjector(new OBDACoreModule(new QuestPreferences()));
+		Injector injector = OBDACoreConfiguration.defaultBuilder().build().getInjector();
 		nativeQLFactory = injector.getInstance(NativeQueryLanguageComponentFactory.class);
 	}
 
@@ -146,21 +148,22 @@ public class SemanticIndexManagerLUBMMySQLTest extends TestCase {
 
 	public void test3InitializingQuest() throws Exception {
 		Properties p = new Properties();
-		p.setProperty(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC_INDEX);
-		p.setProperty(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
-		p.setProperty(QuestPreferences.STORAGE_LOCATION, QuestConstants.JDBC);
-		p.setProperty(QuestPreferences.OBTAIN_FROM_ONTOLOGY, "false");
-		p.setProperty(QuestPreferences.JDBC_DRIVER, driver);
-		p.setProperty(QuestPreferences.JDBC_URL, url);
-		p.setProperty(QuestPreferences.DB_USER, username);
-		p.setProperty(QuestPreferences.DB_PASSWORD, password);
+		p.setProperty(QuestCorePreferences.DBTYPE, QuestConstants.SEMANTIC_INDEX);
+		p.setProperty(QuestCorePreferences.ABOX_MODE, QuestConstants.CLASSIC);
+		p.setProperty(QuestCorePreferences.STORAGE_LOCATION, QuestConstants.JDBC);
+		p.setProperty(QuestCorePreferences.OBTAIN_FROM_ONTOLOGY, "false");
+		p.setProperty(QuestCorePreferences.JDBC_DRIVER, driver);
+		p.setProperty(QuestCorePreferences.JDBC_URL, url);
+		p.setProperty(QuestCorePreferences.DB_USER, username);
+		p.setProperty(QuestCorePreferences.DB_PASSWORD, password);
 
 
 		QuestOWLFactory factory = new QuestOWLFactory();
-        QuestOWLConfiguration config = QuestOWLConfiguration.builder()
-				.preferences(new QuestPreferences(p))
+        QuestConfiguration config = QuestConfiguration.defaultBuilder()
+				.ontology(ontology)
+				.properties(p)
 				.build();
-        QuestOWL quest = factory.createReasoner(ontology, config);
+        QuestOWL quest = factory.createReasoner(config);
 
 
 		QuestOWLConnection qconn = (QuestOWLConnection) quest.getConnection();

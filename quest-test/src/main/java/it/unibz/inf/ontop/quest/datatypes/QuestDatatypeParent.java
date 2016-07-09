@@ -21,14 +21,17 @@ package it.unibz.inf.ontop.quest.datatypes;
  */
 
 import info.aduna.io.IOUtil;
+import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.quest.ResultSetInfo;
 import it.unibz.inf.ontop.quest.ResultSetInfoTupleUtil;
 
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.LinkedHashSet;
+import java.util.Properties;
 import java.util.Set;
 
 import it.unibz.inf.ontop.sesame.SesameVirtualRepo;
@@ -118,14 +121,16 @@ public abstract class QuestDatatypeParent extends TestCase {
 	}
 	
 	protected Repository createRepository() throws Exception {
-		try {
-			SesameVirtualRepo repo = new SesameVirtualRepo(getName(), owlFileURL, obdaFileURL, parameterFileURL);
-			repo.initialize();
-			return repo;
-		} catch (Exception e) {
-			e.printStackTrace();
-			return null;
-		}
+		QuestConfiguration.Builder configBuilder = QuestConfiguration.defaultBuilder()
+				.ontologyFile(owlFileURL)
+				.nativeOntopMappingFile(obdaFileURL);
+
+		if ((parameterFileURL != null) && (!parameterFileURL.isEmpty()))
+				configBuilder.propertyFile(parameterFileURL);
+
+		SesameVirtualRepo repo = new SesameVirtualRepo(getName(), configBuilder.build());
+		repo.initialize();
+		return repo;
 	}
 	
 	@Override

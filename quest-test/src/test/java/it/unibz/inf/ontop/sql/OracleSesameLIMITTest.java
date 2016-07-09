@@ -22,27 +22,16 @@ package it.unibz.inf.ontop.sql;
 
 import static org.junit.Assert.assertTrue;
 
-import com.google.inject.Guice;
-import com.google.inject.Injector;
-import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
-import it.unibz.inf.ontop.injection.OBDACoreModule;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
+import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestDBConnection;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestDBStatement;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
-import it.unibz.inf.ontop.owlrefplatform.core.R2RMLQuestPreferences;
-import it.unibz.inf.ontop.r2rml.R2RMLManager;
+import it.unibz.inf.ontop.owlrefplatform.injection.QuestCorePreferences;
 import it.unibz.inf.ontop.sesame.SesameVirtualRepo;
 
-import java.io.File;
 import java.util.Properties;
 
 import org.junit.After;
 import org.junit.Test;
-import org.openrdf.model.Model;
-import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
 
 /***
  * Tests that the SPARQL LIMIT statement is correctly translated to WHERE ROWNUM <= x in oracle
@@ -60,56 +49,27 @@ public class OracleSesameLIMITTest  {
 	 * 	prepare ontop for rewriting and unfolding steps 
 	 */
 	public void init(String jdbc_driver_class)  throws Exception {
-
-		DBMetadata dbMetadata;
-		OWLOntology ontology;
-		Model model;
-
-		/*
-		 * Load the ontology from an external .owl file.
-		 */
-		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-		ontology = manager.loadOntologyFromOntologyDocument(new File(owlfile));
-
-		/*
-		OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
-		obdaModel = fac.getOBDAModel();
-		ModelIOManager ioManager = new ModelIOManager(obdaModel);
-		ioManager.load(obdafile);
-		 */
 		/*
 		 * Prepare the configuration for the Quest instance. The example below shows the setup for
 		 * "Virtual ABox" mode
 		 */
 		Properties p = new Properties();
-		p.setProperty(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-		p.setProperty(QuestPreferences.REWRITE, "true");
-		p.setProperty(QuestPreferences.OPTIMIZE_EQUIVALENCES, "false");
-		p.setProperty(QuestPreferences.REFORMULATION_TECHNIQUE,
-				QuestConstants.TW);
+		p.setProperty(QuestCorePreferences.DB_NAME, "db");
+		p.setProperty(QuestCorePreferences.JDBC_URL, "jdbc:oracle:thin:@//10.7.20.91:1521/xe");
+		p.setProperty(QuestCorePreferences.DB_USER, "system");
+		p.setProperty(QuestCorePreferences.DB_PASSWORD, "obdaps83");
+		p.setProperty(QuestCorePreferences.JDBC_DRIVER, jdbc_driver_class);
 
-		p.setProperty(QuestPreferences.DB_NAME, "db");
-		p.setProperty(QuestPreferences.JDBC_URL, "jdbc:oracle:thin:@//10.7.20.91:1521/xe");
-		p.setProperty(QuestPreferences.DB_USER, "system");
-		p.setProperty(QuestPreferences.DB_PASSWORD, "obdaps83");
-		p.setProperty(QuestPreferences.JDBC_DRIVER, jdbc_driver_class);
+		QuestConfiguration configuration = QuestConfiguration.defaultBuilder()
+				.enableEquivalenceOptimization(false)
+				.enableExistentialReasoning(true)
+				.dbMetadata(getMeta(jdbc_driver_class))
+				.ontologyFile(owlfile)
+				.r2rmlMappingFile(r2rmlfile)
+				.properties(p)
+				.build();
 
-		QuestPreferences preferences = new R2RMLQuestPreferences(p);
-
-		Injector injector = Guice.createInjector(new OBDACoreModule(preferences));
-		NativeQueryLanguageComponentFactory nativeQLFactory = injector.getInstance(
-				NativeQueryLanguageComponentFactory.class);
-
-		/*
-		 * Load the OBDA model from an external .r2rml file
-		 */
-		R2RMLManager rmanager = new R2RMLManager(r2rmlfile, nativeQLFactory);
-		model = rmanager.getModel();
-
-		dbMetadata = getMeta(jdbc_driver_class);
-		SesameVirtualRepo qest1;
-
-		qest1 = new SesameVirtualRepo("dbname", ontology, model, dbMetadata, preferences);
+		SesameVirtualRepo qest1 = new SesameVirtualRepo("dbname", configuration);
 		qest1.initialize();
 		/*
 		 * Prepare the data connection for querying.

@@ -1,9 +1,9 @@
 package it.unibz.inf.ontop.sesame.tests.general;
 
+import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
+import it.unibz.inf.ontop.owlrefplatform.injection.QuestCorePreferences;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWL;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLFactory;
 import org.junit.Before;
 import org.junit.Test;
@@ -26,7 +26,7 @@ public class InconsistencyCheckingVirtualTest {
 	private OWLOntology ontology;
 	private OWLOntologyManager manager;
 	
-	QuestPreferences p;
+	Properties p;
 	
 	String prefix = "http://meraka/moss/exampleBooks.owl#";
 	OWLClass c1 = Class(IRI.create(prefix + "AudioBook"));
@@ -46,12 +46,10 @@ public class InconsistencyCheckingVirtualTest {
 	@Before
 	public void setUp() throws Exception {
 
-		Properties props = new Properties();
-		props.setProperty(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-		props.setProperty(QuestPreferences.OPTIMIZE_EQUIVALENCES, QuestConstants.TRUE);
-		props.setProperty(QuestPreferences.OBTAIN_FROM_ONTOLOGY, QuestConstants.TRUE);
-		p = new QuestPreferences(props);
-		
+		p = new Properties();
+		// ???
+		p.setProperty(QuestCorePreferences.OBTAIN_FROM_ONTOLOGY, QuestConstants.TRUE);
+
 		manager = OWLManager.createOWLOntologyManager();
 		try {
 			ontology = manager.loadOntologyFromOntologyDocument(new File(owlfile));
@@ -72,12 +70,13 @@ public class InconsistencyCheckingVirtualTest {
 
         // Creating a new instance of the reasoner
         QuestOWLFactory factory = new QuestOWLFactory();
-        QuestOWLConfiguration config = QuestOWLConfiguration.builder()
+        QuestConfiguration config = QuestConfiguration.defaultBuilder()
                 .nativeOntopMappingFile(new File(obdafile))
-				.preferences(p)
+				.ontology(ontology)
+				.properties(p)
 				.build();
 		try {
-	        reasoner = factory.createReasoner(ontology, config);
+	        reasoner = factory.createReasoner(config);
 
 		} catch (Exception e) {
 			e.printStackTrace();
