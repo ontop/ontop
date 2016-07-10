@@ -546,7 +546,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 
 		// log.debug("Before folding Joins: \n{}", cq);
 
-		DatalogNormalizer.foldJoinTrees(cq.getBody(), false);
+		DatalogNormalizer.foldJoinTrees(cq);
 
 		// log.debug("Before pulling out equalities: \n{}", cq);
 

@@ -249,7 +249,7 @@ public class SPARQLRegExTest {
 	 */
 	@Test
 	public void testSingleColum2() throws Exception {
-		String query = "PREFIX : <http://www.ontop.org/> SELECT ?x ?name WHERE {?x :name ?name . FILTER regex(?name, \"ohn\")}";
+		String query = "PREFIX : <http://www.ontop.org/> SELECT ?x ?name WHERE {?x :name ?name . FILTER regex(?name, \"ABA\")}";
 		runTests(query, 2);
 	}
 
