@@ -193,7 +193,10 @@ public class OBDACoreConfigurationImpl implements OBDACoreConfiguration {
             try {
                 URI fileURI = new URI(mappingFilename);
                 String scheme = fileURI.getScheme();
-                if (scheme == null || scheme.equals("file")) {
+                if (scheme == null) {
+                    this.mappingFile = Optional.of(new File(fileURI.getPath()));
+                }
+                else if (scheme.equals("file")) {
                     this.mappingFile = Optional.of(new File(fileURI));
                 }
                 else {
@@ -238,7 +241,10 @@ public class OBDACoreConfigurationImpl implements OBDACoreConfiguration {
             try {
                 URI fileURI = new URI(mappingFilename);
                 String scheme = fileURI.getScheme();
-                if (scheme == null || scheme.equals("file")) {
+                if (scheme == null) {
+                    this.mappingFile = Optional.of(new File(fileURI.getPath()));
+                }
+                else if (scheme.equals("file")) {
                     this.mappingFile = Optional.of(new File(fileURI));
                 }
                 else {
@@ -287,7 +293,10 @@ public class OBDACoreConfigurationImpl implements OBDACoreConfiguration {
             try {
                 URI fileURI = new URI(propertyFilePath);
                 String scheme = fileURI.getScheme();
-                if (scheme == null || scheme.equals("file")) {
+                if (scheme == null) {
+                    return propertyFile(new File(fileURI.getPath()));
+                }
+                else if (scheme.equals("file")) {
                     return propertyFile(new File(fileURI));
                 }
                 else {
