@@ -36,7 +36,9 @@ import java.util.regex.Pattern;
 import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.model.OBDAException;
 import it.unibz.inf.ontop.model.TupleResultSet;
+import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestDBStatement;
+import it.unibz.inf.ontop.owlrefplatform.injection.QuestCorePreferences;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -455,12 +457,13 @@ public class QuestDBCMD {
 		//URI tboxURI = getFileURI(tboxfile);
 		Properties prop = new Properties();
 		try {
+			// By default
+			prop.put(QuestCorePreferences.ABOX_MODE, QuestConstants.CLASSIC);
 			prop.load(new FileReader(new File(getFileURI(paramfile))));
 
 			QuestConfiguration configuration = QuestConfiguration.defaultBuilder()
 					.ontologyFile(tboxfile)
 					.properties(prop)
-					.enableClassicABoxMode()
 					.build();
 
 			dbInstance.createClassicStore(name, configuration);

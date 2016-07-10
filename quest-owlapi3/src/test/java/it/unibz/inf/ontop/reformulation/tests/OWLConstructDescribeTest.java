@@ -21,11 +21,14 @@ package it.unibz.inf.ontop.reformulation.tests;
  */
 
 import it.unibz.inf.ontop.injection.QuestConfiguration;
+import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
+import it.unibz.inf.ontop.owlrefplatform.injection.QuestCorePreferences;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import org.junit.*;
 import org.semanticweb.owlapi.model.OWLAxiom;
 
 import java.util.List;
+import java.util.Properties;
 
 /**
  * This unit test is for testing correctness of construct and describe queries
@@ -62,10 +65,13 @@ public class OWLConstructDescribeTest{
 //			obdaModel = fac.getOBDAModel();
 //			obdaModel.addSource(source);
 
+			Properties p = new Properties();
+			p.put(QuestCorePreferences.ABOX_MODE, QuestConstants.CLASSIC);
+
 		    QuestOWLFactory factory = new QuestOWLFactory();
 		    QuestConfiguration config = QuestConfiguration.defaultBuilder()
 					.ontologyFile(owlFile)
-					.enableClassicABoxMode()
+					.properties(p)
 					.build();
 		    reasoner = factory.createReasoner(config);
 			conn = reasoner.getConnection();

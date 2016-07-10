@@ -97,8 +97,6 @@ public class QuestCoreConfigurationImpl extends OBDACoreConfigurationImpl implem
         private Optional<DataSourceMetadata> dbMetadata = Optional.empty();
         private Optional<Boolean> existentialReasoning = Optional.empty();
 
-        private boolean inVirtualMode = true;
-
         public BuilderImpl() {
         }
 
@@ -146,17 +144,8 @@ public class QuestCoreConfigurationImpl extends OBDACoreConfigurationImpl implem
         }
 
         @Override
-        public B enableClassicABoxMode() {
-            this.inVirtualMode = false;
-            return (B) this;
-        }
-
-        @Override
         protected Properties generateProperties() {
             Properties p = super.generateProperties();
-            if (!inVirtualMode) {
-                p.put(QuestCorePreferences.ABOX_MODE, QuestConstants.CLASSIC);
-            }
 
             queryingAnnotationsInOntology.ifPresent(b -> p.put(QuestCorePreferences.ANNOTATIONS_IN_ONTO, b));
             encodeIRISafely.ifPresent(e -> p.put(QuestCorePreferences.SQL_GENERATE_REPLACE, e));

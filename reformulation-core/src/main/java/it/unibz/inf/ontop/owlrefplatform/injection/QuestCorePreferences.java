@@ -32,8 +32,6 @@ import java.util.List;
  */
 public interface QuestCorePreferences extends OBDAProperties {
 
-	boolean isInVirtualMode();
-
 	boolean isOntologyAnnotationQueryingEnabled();
 
 	boolean isSameAsInMappingsEnabled();
@@ -50,6 +48,11 @@ public interface QuestCorePreferences extends OBDAProperties {
 	 * In the case of SQL, inserts REPLACE functions in the generated query
 	 */
 	boolean isIRISafeEncodingEnabled();
+
+	/**
+	 * TODO: remove it when the virtual and classic A-Box modes will be completely isolated.
+     */
+	boolean isInVirtualMode();
 
 
 	//--------------------------
@@ -110,7 +113,11 @@ public interface QuestCorePreferences extends OBDAProperties {
 	String KEEP_ALIVE = "keep_alive";
 
 
-	// Classic A-box-specific properties
+	//------------------------------
+	// Classic A-box-specific keys
+	// TODO: move them into an extension dedicated to the classic A-Box mode
+	//------------------------------
+
 	String	DBTYPE					= "org.obda.owlreformulationplatform.dbtype";
 	//	String	DATA_LOCATION			= "org.obda.owlreformulationplatform.datalocation";
 	String  OBTAIN_FROM_ONTOLOGY	= "org.obda.owlreformulationplatform.obtainFromOntology";

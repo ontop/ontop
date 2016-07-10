@@ -22,6 +22,8 @@ package it.unibz.inf.ontop.owlrefplatform.owlapi;
 
 import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.model.OBDAModel;
+import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
+import it.unibz.inf.ontop.owlrefplatform.injection.QuestCorePreferences;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.reasoner.IllegalConfigurationException;
@@ -33,6 +35,8 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 
+
+import java.util.Properties;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
@@ -69,10 +73,13 @@ public class QuestOWLFactory implements OWLReasonerFactory {
      */
     @Override
     public OWLReasoner createReasoner(OWLOntology ontology) {
+        Properties p = new Properties();
+        p.put(QuestCorePreferences.ABOX_MODE, QuestConstants.CLASSIC);
+
         QuestOWLConfiguration configuration = new QuestOWLConfiguration(QuestConfiguration
                 .defaultBuilder()
                 .ontology(ontology)
-                .enableClassicABoxMode()
+                .properties(p)
                 .build());
 
         return createReasoner(ontology, configuration);

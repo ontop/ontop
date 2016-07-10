@@ -10,6 +10,7 @@ import java.util.Optional;
 
 /**
  * TODO: explain
+ *
  */
 public interface QuestCoreConfiguration extends OBDACoreConfiguration {
 
@@ -24,7 +25,13 @@ public interface QuestCoreConfiguration extends OBDACoreConfiguration {
         return new QuestCoreConfigurationImpl.BuilderImpl<>();
     }
 
-
+    /**
+     * By default, it assumes that the A-box is virtual.
+     *
+     * If you want to enable the classic A-box, please use a Properties object/file.
+     * Not the classic A-box mode is not intended to be used by end-users (but for test purposes).
+     *
+     */
     interface Builder<B extends Builder> extends OBDACoreConfiguration.Builder<B> {
 
         B tMappingExclusionConfig(@Nonnull TMappingExclusionConfig config);
@@ -43,15 +50,6 @@ public interface QuestCoreConfiguration extends OBDACoreConfiguration {
         B enableEquivalenceOptimization(boolean enable);
 
         B enableExistentialReasoning(boolean enable);
-
-        /**
-         * By default, the virtual A-box mode is used.
-         *
-         * The classic A-box mode is not intended to be used by end-users (but for test purposes),
-         * so its activation must be made explicit.
-         *
-         */
-        B enableClassicABoxMode();
 
         QuestCoreConfiguration build();
     }
