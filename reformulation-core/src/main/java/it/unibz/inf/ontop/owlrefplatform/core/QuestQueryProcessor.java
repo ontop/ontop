@@ -158,6 +158,7 @@ public class QuestQueryProcessor {
 					topLevelPredicate = newquery.getHead().getFunctionSymbol();
 				newprogramEq.appendRule(newquery);
 			}
+			log.debug("Program before flattening: \n{}", newprogramEq);
 
 			SPARQLQueryFlattener fl = new SPARQLQueryFlattener(newprogramEq);
 			List<CQIE> p = fl.flatten(newprogramEq.getRules(topLevelPredicate).get(0));
