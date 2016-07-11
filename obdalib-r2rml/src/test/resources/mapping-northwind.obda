@@ -1,4 +1,5 @@
 [PrefixDeclaration]
+:				https://www.optique-project.eu/resource/
 xsd:		http://www.w3.org/2001/XMLSchema#
 owl:		http://www.w3.org/2002/07/owl#
 quest:		http://obda.org/quest#
@@ -14,7 +15,7 @@ driverClass	com.mysql.jdbc.Driver
 
 [MappingDeclaration] @collection [[
 mappingId	mapping-1308227722
-target		<http://www.optique-project.eu/resource/employeesLocation/{EMPLOYEEID}> a <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/LOCATION> ; <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/LOCATION/POSTALCODE> {POSTALCODE}^^xsd:string ; <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/LOCATION/COUNTRY> {COUNTRY}^^xsd:string ; rdfs:label "adres : {ADDRESS} \\{city:\\} {CITY}{COUNTRY}something"@en-us ; <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/LOCATION/ADDRESS> {ADDRESS}^^xsd:string ; <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/LOCATION/REGION> {REGION}^^xsd:string ; <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/LOCATION/CITY> {CITY}^^xsd:string . 
+target		:employeesLocation/{EMPLOYEEID} a :northwind-h2-db/NORTHWIND/LOCATION ; :northwind-h2-db/NORTHWIND/LOCATION/POSTALCODE {POSTALCODE}^^xsd:string ; :northwind-h2-db/NORTHWIND/LOCATION/COUNTRY {COUNTRY}^^xsd:string ; rdfs:label "adres : {ADDRESS} \\{city:\\} {CITY}{COUNTRY}something"@en-us ; :northwind-h2-db/NORTHWIND/LOCATION/ADDRESS {ADDRESS}^^xsd:string ; :northwind-h2-db/NORTHWIND/LOCATION/REGION {REGION}^^xsd:string ; :northwind-h2-db/NORTHWIND/LOCATION/CITY {CITY}^^xsd:string .
 source		SELECT * FROM NORTHWIND.EMPLOYEES
 ]]
 

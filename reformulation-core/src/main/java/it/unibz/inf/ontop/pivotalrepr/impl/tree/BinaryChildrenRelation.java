@@ -5,7 +5,9 @@ import it.unibz.inf.ontop.pivotalrepr.NonCommutativeOperatorNode;
 import it.unibz.inf.ontop.pivotalrepr.impl.IllegalTreeUpdateException;
 import it.unibz.inf.ontop.pivotalrepr.QueryNode;
 
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 /**
  * TODO: explain
@@ -26,6 +28,13 @@ public class BinaryChildrenRelation implements ChildrenRelation {
         this.parent = parent;
         this.optionalLeftChild = Optional.empty();
         this.optionalRightChild = Optional.empty();
+    }
+
+    private BinaryChildrenRelation(TreeNode parent, Optional<TreeNode> optionalLeftChild,
+                                   Optional<TreeNode> optionalRightChild) {
+        this.parent = parent;
+        this.optionalLeftChild = optionalLeftChild;
+        this.optionalRightChild = optionalRightChild;
     }
 
 
@@ -55,7 +64,7 @@ public class BinaryChildrenRelation implements ChildrenRelation {
     public void addChild(TreeNode childNode, Optional<NonCommutativeOperatorNode.ArgumentPosition> optionalPosition, boolean canReplace)
             throws IllegalTreeUpdateException {
         if (!optionalPosition.isPresent()) {
-            throw new IllegalArgumentException("The StandardChildrenRelation requires argument positions");
+            throw new IllegalArgumentException("The BinaryChildrenRelation requires argument positions");
         }
 
         switch (optionalPosition.get()) {
@@ -134,5 +143,31 @@ public class BinaryChildrenRelation implements ChildrenRelation {
             default:
                 throw new IllegalStateException("Unknown position: " + position);
         }
+    }
+
+    @Override
+    public ChildrenRelation clone(Map<QueryNode, TreeNode> newNodeIndex) {
+        return new BinaryChildrenRelation(parent.findNewTreeNode(newNodeIndex),
+                optionalLeftChild.map(n -> n.findNewTreeNode(newNodeIndex)),
+                optionalRightChild.map(n -> n.findNewTreeNode(newNodeIndex))
+                );
+    }
+
+    @Override
+    public ChildrenRelation convertToBinaryChildrenRelation() {
+        return this;
+    }
+
+    @Override
+    public ChildrenRelation convertToStandardChildrenRelation() {
+        StandardChildrenRelation newRelation = new StandardChildrenRelation(parent);
+
+        Stream.of(optionalLeftChild, optionalRightChild)
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .forEach(c -> newRelation.addChild(c, Optional.empty(), false));
+
+        return newRelation;
+
     }
 }

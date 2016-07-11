@@ -27,7 +27,7 @@ public interface SubstitutionResults<T extends QueryNode> {
     LocalAction getLocalAction();
 
     /**
-     * Only present if the focus node has to updated.
+     * Only present if the focus node has to be updated.
      */
     Optional<T> getOptionalNewNode();
 

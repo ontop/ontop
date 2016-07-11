@@ -51,4 +51,10 @@ public interface QueryTree {
 
     void replaceNodeByChild(QueryNode parentNode,
                             Optional<NonCommutativeOperatorNode.ArgumentPosition> optionalReplacingChildPosition);
+
+    /**
+     * Keeps the same query node objects but clones the tree edges
+     * (since the latter are mutable by default).
+     */
+    QueryTree createSnapshot();
 }

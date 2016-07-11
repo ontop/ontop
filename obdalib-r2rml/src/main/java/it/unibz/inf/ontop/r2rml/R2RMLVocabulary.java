@@ -29,8 +29,33 @@ import org.openrdf.model.impl.ValueFactoryImpl;
 
 public class R2RMLVocabulary {
 
-	public static final String baseuri = "http://example.com/base/";
-	
+	/**
+	 * Returns true if the passed string is a resource.
+	 *
+	 * @param resource
+	 * @return
+     */
+    public static final boolean isResourceString(String resource) {
+		return 	resource.startsWith("http://")
+				|| resource.startsWith("https://")
+				|| resource.startsWith("urn:");
+	}
+
+	/**
+	 * Pre-pends the passed resource string with a default prefix in order
+	 * to make it into a valid URI.
+	 *
+	 * @param resource
+	 * @return
+     */
+    public static final String prefixUri(String resource) {
+		if ( !isResourceString(resource)) {
+			return "http://example.com/base/" + resource;
+		} else {
+			return resource;
+		}
+	}
+
 	public static final ValueFactory fact = new ValueFactoryImpl();
 	public static final URI TriplesMap = fact.createURI("http://www.w3.org/ns/r2rml#TriplesMap");
 	

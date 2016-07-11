@@ -28,6 +28,11 @@ public interface QueryTreeComponent {
 
     void replaceNode(QueryNode previousNode, QueryNode replacingNode);
 
+    /**
+     * Replaces all the sub-tree by one sub-tree node
+     */
+    void replaceSubTree(QueryNode subTreeRootNode, QueryNode replacingNode);
+
     void addSubTree(IntermediateQuery subQuery, QueryNode subQueryTopNode, QueryNode localTopNode)
             throws IllegalTreeUpdateException;
 
@@ -95,16 +100,15 @@ public interface QueryTreeComponent {
     ImmutableSet<Variable> getKnownVariables();
 
     /**
-     * Replaces the sub-tree (root included) by a single node
-     */
-    default void replaceSubTree(QueryNode subTreeRootNode, QueryNode replacingNode) {
-        insertParent(subTreeRootNode, replacingNode);
-        removeSubTree(subTreeRootNode);
-    }
-
-    /**
      * If no position is given, replaces the parent node by its first child
      */
     void replaceNodeByChild(QueryNode parentNode,
                             Optional<NonCommutativeOperatorNode.ArgumentPosition> optionalReplacingChildPosition);
+
+
+    /**
+     * Keeps the same query node objects but clones the tree edges
+     * (since the latter are mutable by default).
+     */
+    QueryTreeComponent createSnapshot();
 }
