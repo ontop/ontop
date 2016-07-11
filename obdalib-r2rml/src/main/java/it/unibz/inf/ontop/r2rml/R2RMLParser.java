@@ -515,8 +515,8 @@ public class R2RMLParser {
 		String string = (parsedString);
 		if (!string.contains("{")) {
 			if (type < 3) {
-				if (!string.startsWith("http://")) {
-					string = R2RMLVocabulary.baseuri + "{" + string + "}";
+    				if (!R2RMLVocabulary.isResourceString(string)) {
+						string = R2RMLVocabulary.prefixUri("{" + string + "}");
 					if (type == 2) {
 						string = "\"" + string + "\"";
 					}
@@ -525,8 +525,8 @@ public class R2RMLParser {
 				}
 			}
 		}
-		if (type == 1 && !string.startsWith("http://")) {
-			string = R2RMLVocabulary.baseuri + string;
+		if (type == 1) {
+			string = R2RMLVocabulary.prefixUri(string);
 		}
 
 		String str = string; //str for concat of constant literal

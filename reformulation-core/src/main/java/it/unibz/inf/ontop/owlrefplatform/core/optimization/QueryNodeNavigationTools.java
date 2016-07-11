@@ -30,27 +30,6 @@ public class QueryNodeNavigationTools {
         }
     }
 
-    /**
-     * Updated node and query
-     */
-    public static class UpdatedNodeAndQuery<N extends QueryNode> {
-        private final N updatedQuery;
-        private final IntermediateQuery nextQuery;
-
-        public UpdatedNodeAndQuery(N updatedNode, IntermediateQuery nextQuery) {
-            this.updatedQuery = updatedNode;
-            this.nextQuery = nextQuery;
-        }
-
-        public N getUpdatedNode() {
-            return updatedQuery;
-        }
-
-        public IntermediateQuery getNextQuery() {
-            return nextQuery;
-        }
-    }
-
 
     /**
      * Depth-first exploration
