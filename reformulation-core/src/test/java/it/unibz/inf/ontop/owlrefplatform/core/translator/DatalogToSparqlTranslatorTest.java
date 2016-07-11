@@ -663,7 +663,9 @@ public class DatalogToSparqlTranslatorTest {
 
 	private DatalogProgram createDatalogProgram(CQIE... queryAndRules) {
 		List<CQIE> program = Arrays.asList(queryAndRules);
-		return dataFactory.getDatalogProgram(program);
+		DatalogProgram dp =  dataFactory.getDatalogProgram();
+		dp.appendRule(program);
+		return dp;
 	}
 	
 	private void translateAndDisplayOutput(String title, DatalogProgram datalog) {
