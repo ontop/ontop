@@ -166,6 +166,21 @@ public class DefaultTree implements QueryTree {
         treeNode.changeQueryNode(replacingNode);
         removeNodeFromIndex(previousNode);
         insertNodeIntoIndex(replacingNode, treeNode);
+
+        if ((!(previousNode instanceof NonCommutativeOperatorNode))
+                && (replacingNode instanceof NonCommutativeOperatorNode)) {
+            ChildrenRelation newChildrenRelation = accessChildrenRelation(treeNode)
+                    .convertToBinaryChildrenRelation();
+            // Overrides the previous entry
+            childrenIndex.put(treeNode, newChildrenRelation);
+        }
+        else if ((previousNode instanceof NonCommutativeOperatorNode)
+                && (!(replacingNode instanceof NonCommutativeOperatorNode))) {
+            ChildrenRelation newChildrenRelation = accessChildrenRelation(treeNode)
+                    .convertToStandardChildrenRelation();
+            // Overrides the previous entry
+            childrenIndex.put(treeNode, newChildrenRelation);
+        }
     }
 
     @Override

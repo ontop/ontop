@@ -31,4 +31,14 @@ public interface ChildrenRelation {
     Optional<NonCommutativeOperatorNode.ArgumentPosition> getOptionalPosition(TreeNode childTreeNode);
 
     ChildrenRelation clone(Map<QueryNode, TreeNode> newNodeIndex);
+
+    /**
+     * May return itself (no cloning)
+     */
+    ChildrenRelation convertToBinaryChildrenRelation();
+
+    /**
+     * May return itself (no cloning)
+     */
+    ChildrenRelation convertToStandardChildrenRelation();
 }

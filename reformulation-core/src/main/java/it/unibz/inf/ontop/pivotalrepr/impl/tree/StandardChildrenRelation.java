@@ -97,4 +97,18 @@ public class StandardChildrenRelation implements ChildrenRelation {
                         .map(c -> c.findNewTreeNode(newNodeIndex))
                         .collect(Collectors.toList()));
     }
+
+    @Override
+    public ChildrenRelation convertToBinaryChildrenRelation() {
+        if (!children.isEmpty()) {
+            throw new IllegalStateException("Conversion from a standard to binary children relation is not supported " +
+                    "when there are children");
+        }
+        return new BinaryChildrenRelation(parent);
+    }
+
+    @Override
+    public ChildrenRelation convertToStandardChildrenRelation() {
+        return this;
+    }
 }
