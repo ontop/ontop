@@ -48,4 +48,10 @@ public interface QueryTree {
     void insertParent(QueryNode childNode, QueryNode newParentNode) throws IllegalTreeUpdateException;
 
     ImmutableSet<EmptyNode> getEmptyNodes(QueryNode subTreeRoot);
+
+    /**
+     * Keeps the same query node objects but clones the tree edges
+     * (since the latter are mutable by default).
+     */
+    QueryTree createSnapshot();
 }
