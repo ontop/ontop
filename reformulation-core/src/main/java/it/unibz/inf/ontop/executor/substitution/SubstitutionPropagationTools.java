@@ -226,6 +226,7 @@ public class SubstitutionPropagationTools {
 
         while (optionalCurrentAncestor.isPresent()) {
             final QueryNode currentAncestor = optionalCurrentAncestor.get();
+            QueryNode futureChild = currentAncestor;
 
             final Optional<QueryNode> optionalNextAncestor = query.getParent(currentAncestor);
 
@@ -248,16 +249,18 @@ public class SubstitutionPropagationTools {
                         treeComponent.replaceNode(currentAncestor, newAncestor);
                     }
                     otherChildren = query.getOtherChildrenStream(newAncestor, ancestorChild);
+                    futureChild = newAncestor;
                     break;
                 case INSERT_CONSTRUCTION_NODE:
                     QueryNode downgradedChildNode = substitutionResults.getOptionalDowngradedChildNode().get();
                     otherChildren = query.getOtherChildrenStream(currentAncestor, downgradedChildNode);
 
-                    substitutionResults.getOptionalNewNode()
-                            .ifPresent(updatedAncestor -> {
-                                if (currentAncestor != updatedAncestor) {
-                                    treeComponent.replaceNode(currentAncestor, updatedAncestor);
-                                }});
+                    Optional<? extends QueryNode> optionalUpdatedAncestor = substitutionResults.getOptionalNewNode();
+                    if (optionalUpdatedAncestor.isPresent()) {
+                        QueryNode updatedAncestor = optionalUpdatedAncestor.get();
+                        treeComponent.replaceNode(currentAncestor, updatedAncestor);
+                        futureChild = updatedAncestor;
+                    }
 
                     ConstructionNode newParentOfChildNode = substitutionResults
                             .getOptionalNewParentOfChildNode().get();
@@ -275,11 +278,12 @@ public class SubstitutionPropagationTools {
                                             .filter(p -> ! p.equals(position))
                                             .isPresent())
                                     .forEach(treeComponent::removeSubTree));
-
                     // Assume there is only one child
-                    treeComponent.removeOrReplaceNodeByUniqueChildren(currentAncestor);
-                    // Only one, most likely useless
-                    otherChildren = query.getChildrenStream(currentAncestor);
+                    QueryNode replacingChild = treeComponent.removeOrReplaceNodeByUniqueChildren(currentAncestor);
+                    otherChildren = ancestorChild != replacingChild
+                            ? Stream.of(replacingChild)
+                            : Stream.of();
+                    futureChild = replacingChild;
                     break;
                 /**
                  * Ancestor is empty --> applies a ReactToChildDeletionProposal and returns the remaining ancestor
@@ -316,7 +320,7 @@ public class SubstitutionPropagationTools {
                 optionalCurrentAncestor = Optional.empty();
             }
 
-            ancestorChild = currentAncestor;
+            ancestorChild = futureChild;
         }
 
         /**

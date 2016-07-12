@@ -165,7 +165,7 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
         ImmutableSet<Variable> boundVariables = localSubstitution.getImmutableMap().keySet();
 
         if (substitutionToApply.getImmutableMap().keySet().stream().anyMatch(boundVariables::contains)) {
-            throw new IllegalArgumentException("An ascending substitution MUST NOT include variables bound by" +
+            throw new IllegalArgumentException("An ascending substitution MUST NOT include variables bound by " +
                     "the substitution of the current construction node");
         }
 

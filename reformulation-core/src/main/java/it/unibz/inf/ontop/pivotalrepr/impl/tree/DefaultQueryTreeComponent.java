@@ -148,8 +148,8 @@ public class DefaultQueryTreeComponent implements QueryTreeComponent {
     }
 
     @Override
-    public void removeOrReplaceNodeByUniqueChildren(QueryNode node) throws IllegalTreeUpdateException {
-        tree.removeOrReplaceNodeByUniqueChild(node);
+    public QueryNode removeOrReplaceNodeByUniqueChildren(QueryNode node) throws IllegalTreeUpdateException {
+        return tree.removeOrReplaceNodeByUniqueChild(node);
     }
 
     @Override

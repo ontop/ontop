@@ -242,7 +242,7 @@ public class DefaultTree implements QueryTree {
     }
 
     @Override
-    public void removeOrReplaceNodeByUniqueChild(QueryNode parentQueryNode) throws IllegalTreeUpdateException {
+    public QueryNode removeOrReplaceNodeByUniqueChild(QueryNode parentQueryNode) throws IllegalTreeUpdateException {
         TreeNode parentTreeNode = accessTreeNode(parentQueryNode);
 
         ImmutableList<TreeNode> children = accessChildrenRelation(parentTreeNode).getChildren();
@@ -257,6 +257,7 @@ public class DefaultTree implements QueryTree {
 
             ChildrenRelation grandParentRelation = accessChildrenRelation(grandParentTreeNode);
             grandParentRelation.replaceChild(parentTreeNode, childTreeNode);
+            return childTreeNode.getQueryNode();
         }
         else {
             throw new IllegalTreeUpdateException("The query node " + parentQueryNode + " does not have a unique child");
