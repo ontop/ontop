@@ -21,6 +21,8 @@ package it.unibz.inf.ontop.owlrefplatform.core.translator;
  */
 
 import com.google.common.collect.*;
+import com.sun.javafx.fxml.expression.Expression;
+import com.sun.org.apache.xpath.internal.ExpressionNode;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.OBDAQueryModifiers.OrderCondition;
 import it.unibz.inf.ontop.model.Predicate.COL_TYPE;
@@ -82,14 +84,14 @@ public class SparqlAlgebraToDatalogTranslator {
         this.program = ofac.getDatalogProgram();
     }
 
-    /**
-     * Translate a given SPARQL query object to datalog program.
-     * <p>
-     * IMPORTANT: this method should be called only once on each instance of the class
+	/**
+	 * Translate a given SPARQL query object to datalog program.
      *
-     * @param pq a SPARQL query object from Sesame Parser
-     * @return our representation of the SPARQL query (as a datalog program)
-     */
+     * IMPORTANT: this method should be called only once on each instance of the class
+	 *
+	 * @pq     SPARQL query object
+	 * @return our representation of the SPARQL query (as a datalog program)
+	 */
 	public SparqlQuery translate(ParsedQuery pq) {
 
         if (predicateIdx != 0 || !program.getRules().isEmpty())
@@ -693,31 +695,34 @@ public class SparqlAlgebraToDatalogTranslator {
 
                     Term concat = terms.get(0);
                     for (int i = 1; i < arity; i++) // .get(i) is OK because it's based on an array
-                        concat = ofac.getFunctionConcat(concat, terms.get(i));
+                        concat = ofac.getFunction(ExpressionOperation.CONCAT, concat, terms.get(i));
                     return concat;
 
                 // REPLACE (Sec 17.4.3.15)
                 //string literal  REPLACE (string literal arg, simple literal pattern, simple literal replacement )
                 //string literal  REPLACE (string literal arg, simple literal pattern, simple literal replacement,  simple literal flags)
                 case "http://www.w3.org/2005/xpath-functions#replace":
+                    // TODO: the fourth argument is flags (see http://www.w3.org/TR/xpath-functions/#flags)
+                    Term flags;
                     if (arity == 3)
-                        return ofac.getFunctionReplace(terms.get(0), terms.get(1), terms.get(2));
+                        flags = ofac.getConstantLiteral("");
                     else if (arity == 4)
-                        // TODO: the fourth argument is flags (see http://www.w3.org/TR/xpath-functions/#flags)
-                        // (it is ignored at the moment)
-                        return ofac.getFunctionReplace(terms.get(0), terms.get(1), terms.get(2));
+                        flags = terms.get(3);
+                    else
+                        throw new UnsupportedOperationException("Wrong number of arguments (found "
+                                + terms.size() + ", only 3 or 4 supported) for SPARQL function REPLACE");
 
-                    throw new UnsupportedOperationException("Wrong number of arguments (found "
-                            + terms.size() + ", only 3 or 4 supported) for SPARQL function REPLACE");
+                    return ofac.getFunction(ExpressionOperation.REPLACE, terms.get(0), terms.get(1), terms.get(2), flags);
+
 
                     // SUBSTR (Sec 17.4.3.3)
                     // string literal  SUBSTR(string literal source, xsd:integer startingLoc)
                     // string literal  SUBSTR(string literal source, xsd:integer startingLoc, xsd:integer length)
                 case "http://www.w3.org/2005/xpath-functions#substring":
                     if (arity == 2)
-                        return ofac.getFunctionSubstring(terms.get(0), terms.get(1));
+                        return ofac.getFunction(ExpressionOperation.SUBSTR2, terms.get(0), terms.get(1));
                     else if (arity == 3)
-                        return ofac.getFunctionSubstring(terms.get(0), terms.get(1), terms.get(2));
+                        return ofac.getFunction(ExpressionOperation.SUBSTR3, terms.get(0), terms.get(1), terms.get(2));
 
                     throw new UnsupportedOperationException("Wrong number of arguments (found "
                             + terms.size() + ", only 2 or 3 supported) for SPARQL function SUBSTRING");
