@@ -11,8 +11,10 @@ import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitut
 import it.unibz.inf.ontop.owlrefplatform.core.optimization.QueryNodeNavigationTools.NextNodeAndQuery;
 import it.unibz.inf.ontop.pivotalrepr.*;
 import it.unibz.inf.ontop.pivotalrepr.proposal.NodeCentricOptimizationResults;
+import it.unibz.inf.ontop.pivotalrepr.proposal.RemoveEmptyNodesProposal;
 import it.unibz.inf.ontop.pivotalrepr.proposal.SubstitutionPropagationProposal;
 import it.unibz.inf.ontop.pivotalrepr.proposal.UnionLiftProposal;
+import it.unibz.inf.ontop.pivotalrepr.proposal.impl.RemoveEmptyNodesProposalImpl;
 import it.unibz.inf.ontop.pivotalrepr.proposal.impl.SubstitutionPropagationProposalImpl;
 import it.unibz.inf.ontop.pivotalrepr.proposal.impl.UnionLiftProposalImpl;
 import it.unibz.inf.ontop.pivotalrepr.unfolding.ProjectedVariableExtractionTools;
@@ -95,13 +97,22 @@ public class TopDownSubstitutionLiftOptimizer implements SubstitutionLiftOptimiz
                     .orElseThrow(() -> new IllegalStateException(
                             "The focus was expected to be kept or replaced, not removed"));
 
+            RemoveEmptyNodesProposal<QueryNode> emptyProposal = new RemoveEmptyNodesProposalImpl<>(currentNode);
+            NodeCentricOptimizationResults<QueryNode> emptyProposalResults = currentQuery.applyProposal(emptyProposal);
+            currentQuery = emptyProposalResults.getResultingQuery();
+            currentNode = results.getNewNodeOrReplacingChild().orElseThrow(() -> new IllegalStateException("No focus node has been found"));
+
         }
 
         //if the union node has not been removed
         if (currentNode instanceof UnionNode) {
-            UnionNode currentUnionNode = (UnionNode) currentNode;
 
-            return liftUnionToMatchingVariable(currentQuery, currentUnionNode, currentUnionNode.getProjectedVariables());
+            Optional<ImmutableSet<Variable>> irregularVariables = extractor.getIrregularVariables();
+
+            if(irregularVariables.isPresent()) {
+                UnionNode currentUnionNode = (UnionNode) currentNode;
+                return liftUnionToMatchingVariable(currentQuery, currentUnionNode, irregularVariables.get());
+            }
 
         }
 
@@ -120,24 +131,26 @@ public class TopDownSubstitutionLiftOptimizer implements SubstitutionLiftOptimiz
 
         while (optionalParent.isPresent()) {
             QueryNode parentNode = optionalParent.get();
-            for (Variable variable : unionVariables) {
+            if(parentNode instanceof JoinOrFilterNode) {
+                for (Variable variable : unionVariables) {
 
-                ImmutableList<QueryNode> childrenParentNode = currentQuery.getChildren(parentNode);
-                for (QueryNode children : childrenParentNode){
-                    if(!children.equals(currentNode)){
-                        projectedVariables.addAll(ProjectedVariableExtractionTools.extractProjectedVariables(currentQuery, children));
+                    ImmutableList<QueryNode> childrenParentNode = currentQuery.getChildren(parentNode);
+                    for (QueryNode children : childrenParentNode) {
+                        if (!children.equals(currentNode)) {
+                            projectedVariables.addAll(ProjectedVariableExtractionTools.extractProjectedVariables(currentQuery, children));
+                        }
                     }
-                }
 
-                if (projectedVariables.contains(variable)) {
+                    if (projectedVariables.contains(variable)) {
 
-                    UnionLiftProposal proposal = new UnionLiftProposalImpl(currentUnionNode, parentNode);
-                    NodeCentricOptimizationResults<UnionNode> results = currentQuery.applyProposal(proposal);
-                    currentQuery = results.getResultingQuery();
-                    currentUnionNode = results.getOptionalNewNode().orElseThrow(() -> new IllegalStateException(
-                            "The focus node has to be a union node and be present"));
+                        UnionLiftProposal proposal = new UnionLiftProposalImpl(currentUnionNode, parentNode);
+                        NodeCentricOptimizationResults<UnionNode> results = currentQuery.applyProposal(proposal);
+                        currentQuery = results.getResultingQuery();
+                        currentUnionNode = results.getOptionalNewNode().orElseThrow(() -> new IllegalStateException(
+                                "The focus node has to be a union node and be present"));
 
-                    return liftBindingsAndUnion(currentQuery, currentUnionNode);
+                        return liftBindingsAndUnion(currentQuery, currentUnionNode);
+                    }
                 }
             }
 
@@ -221,7 +234,8 @@ public class TopDownSubstitutionLiftOptimizer implements SubstitutionLiftOptimiz
     }
 
 
-    //lift bindings from left node checking first the left part, lift from the right only the variables that are not common with the right
+    //lift bindings from left node checking first the left part,
+    // lift from the right only the bindings with variables that are not common with the left
     private NextNodeAndQuery liftBindingsFromLeftJoinNode(IntermediateQuery initialQuery, LeftJoinNode initialLeftJoinNode) throws EmptyQueryException {
         // Non-final
         Optional<QueryNode> optionalLeftChild = initialQuery.getChild(initialLeftJoinNode, LEFT);

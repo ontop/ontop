@@ -20,12 +20,15 @@ import java.util.stream.Stream;
  */
 public class UnionFriendlyBindingExtractor implements BindingExtractor {
 
-
+    //store conflicting and not common variables of the subTreeRootNode
+    private Set<Variable> irregularVariables;
 
 
     @Override
     public Optional<ImmutableSubstitution<ImmutableTerm>> extractInSubTree(IntermediateQuery query,
                                                                            QueryNode subTreeRootNode) {
+
+        irregularVariables = new HashSet<>();
 
         ImmutableMap<Variable, ImmutableTerm> substitutionMap = extractBindings(query, subTreeRootNode)
                 .collect(ImmutableCollectors.toMap());
@@ -33,6 +36,14 @@ public class UnionFriendlyBindingExtractor implements BindingExtractor {
         return Optional.of(substitutionMap)
                 .filter(m -> !m.isEmpty())
                 .map(ImmutableSubstitutionImpl::new);
+    }
+
+    @Override
+    public Optional<ImmutableSet<Variable>> getIrregularVariables(){
+
+        return Optional.of(irregularVariables.stream().collect(ImmutableCollectors.toSet()))
+                .filter(m -> !m.isEmpty());
+
     }
 
 
@@ -75,7 +86,7 @@ public class UnionFriendlyBindingExtractor implements BindingExtractor {
                                                                            UnionNode currentNode) {
         Map<Variable, ImmutableTerm> substitutionMap = new HashMap<>();
         Set<Variable> commonVariables = new HashSet<>();
-        Set<Variable> variablesWithConflictingDefinitions = new HashSet<>();;
+        Set<Variable> variablesWithConflictingDefinitions = new HashSet<>();
 
 
         query.getFirstChild(currentNode).ifPresent(child -> {
@@ -104,6 +115,7 @@ public class UnionFriendlyBindingExtractor implements BindingExtractor {
                                         if (!areCompatible(optionalPreviousValue.get(), value)) {
                                             substitutionMap.remove(variable);
                                             variablesWithConflictingDefinitions.add(variable);
+                                            irregularVariables.add(variable);
                                         }
                                         // otherwise does nothing
                                     }
@@ -116,6 +128,7 @@ public class UnionFriendlyBindingExtractor implements BindingExtractor {
                                 }
                                 else{
                                     commonVariables.remove(variable);
+                                    irregularVariables.add(variable);
                                 }
                             }));
 

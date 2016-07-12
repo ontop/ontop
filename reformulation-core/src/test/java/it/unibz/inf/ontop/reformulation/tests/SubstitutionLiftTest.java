@@ -16,6 +16,7 @@ import it.unibz.inf.ontop.pivotalrepr.EmptyNode;
 import it.unibz.inf.ontop.pivotalrepr.equivalence.IQSyntacticEquivalenceChecker;
 import it.unibz.inf.ontop.pivotalrepr.impl.*;
 import it.unibz.inf.ontop.pivotalrepr.impl.tree.DefaultIntermediateQueryBuilder;
+import it.unibz.inf.ontop.pivotalrepr.proposal.impl.RemoveEmptyNodesProposalImpl;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -26,7 +27,6 @@ import static junit.framework.TestCase.assertTrue;
 /**
  * Test the top down substitution lift optimizer
  */
-@Ignore
 public class SubstitutionLiftTest {
 
 
@@ -154,39 +154,6 @@ public class SubstitutionLiftTest {
 
         System.out.println("\nAfter optimization: \n" +  optimizedQuery);
 
-        //----------------------------------------------------------------------
-        //Construct expected intermediate query
-        IntermediateQueryBuilder intermediateQueryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
-        DistinctVariableOnlyDataAtom intermediateProjectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE, X, Y);
-
-        ConstructionNode intermediateRootNode = new ConstructionNodeImpl(intermediateProjectionAtom.getVariables(),
-                new ImmutableSubstitutionImpl<>(ImmutableMap.of(X, generateURI1(C), Y, generateInt(D))),
-                Optional.empty());
-
-        intermediateQueryBuilder.init(intermediateProjectionAtom, intermediateRootNode);
-
-        //construct innerjoin
-        ImmutableExpression intermediateEspressionGT = DATA_FACTORY.getImmutableExpression(ExpressionOperation.GT, generateInt(A), generateInt(D));
-        InnerJoinNode intermediateJoinNode = new InnerJoinNodeImpl(Optional.of(intermediateEspressionGT));
-        intermediateQueryBuilder.addChild(intermediateRootNode, intermediateJoinNode);
-
-        //construct left side join (union)
-        ImmutableSet<Variable> intermediateProjectedVariables = ImmutableSet.of(X,A);
-        UnionNode intermediateUnionNode = new UnionNodeImpl(intermediateProjectedVariables);
-
-        intermediateQueryBuilder.addChild(intermediateJoinNode, intermediateUnionNode);
-
-        intermediateQueryBuilder.addChild(intermediateUnionNode,  EXPECTED_DATA_NODE_1);
-
-        EmptyNode emptyNode = new EmptyNodeImpl(intermediateProjectedVariables);
-
-        intermediateQueryBuilder.addChild(intermediateUnionNode, emptyNode);
-
-        intermediateQueryBuilder.addChild(intermediateJoinNode, EXPECTED_DATA_NODE_3);
-
-        //build unoptimized query
-        IntermediateQuery intermediateQuery = intermediateQueryBuilder.build();
-        System.out.println("\nIntermediate result: \n" +  intermediateQuery);
 
 
         //----------------------------------------------------------------------
@@ -423,12 +390,14 @@ public class SubstitutionLiftTest {
 
         ConstructionNode expectedSubQuery1UnionNode = new ConstructionNodeImpl(projectionAtom.getVariables(),
                 new ImmutableSubstitutionImpl<>(ImmutableMap.of(X, generateURI1(A))), Optional.empty());
-        queryBuilder.addChild(expectedUnionNode, expectedSubQuery1UnionNode);
+        expectedQueryBuilder.addChild(expectedUnionNode, expectedSubQuery1UnionNode);
 
         ConstructionNode expectedSubQuery2UnionNode = new ConstructionNodeImpl(projectionAtom.getVariables(),
                 new ImmutableSubstitutionImpl<>(ImmutableMap.of(X, generateURI2(C))), Optional.empty());
-        queryBuilder.addChild(expectedUnionNode, expectedSubQuery2UnionNode);
+        expectedQueryBuilder.addChild(expectedUnionNode, expectedSubQuery2UnionNode);
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
+
+        System.out.println("\nExpected  query: \n" +  expectedQuery);
 
         assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, expectedQuery));
 
@@ -453,6 +422,46 @@ public class SubstitutionLiftTest {
         return DATA_FACTORY.getImmutableFunctionalTerm(
                 DATA_FACTORY.getDatatypeFactory().getTypePredicate(Predicate.COL_TYPE.STRING),
                 argument);
+    }
+
+
+    public void testQueryWithEmpty() throws EmptyQueryException {
+
+        //Construct expected intermediate query
+        IntermediateQueryBuilder intermediateQueryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
+        DistinctVariableOnlyDataAtom intermediateProjectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE, X, Y);
+
+        ConstructionNode intermediateRootNode = new ConstructionNodeImpl(intermediateProjectionAtom.getVariables(),
+                new ImmutableSubstitutionImpl<>(ImmutableMap.of(X, generateURI1(C), Y, generateInt(D))),
+                Optional.empty());
+
+        intermediateQueryBuilder.init(intermediateProjectionAtom, intermediateRootNode);
+
+        //construct innerjoin
+        ImmutableExpression intermediateEspressionGT = DATA_FACTORY.getImmutableExpression(ExpressionOperation.GT, generateInt(A), generateInt(D));
+        InnerJoinNode intermediateJoinNode = new InnerJoinNodeImpl(Optional.of(intermediateEspressionGT));
+        intermediateQueryBuilder.addChild(intermediateRootNode, intermediateJoinNode);
+
+        //construct left side join (union)
+        ImmutableSet<Variable> intermediateProjectedVariables = ImmutableSet.of(X,A);
+        UnionNode intermediateUnionNode = new UnionNodeImpl(intermediateProjectedVariables);
+
+        intermediateQueryBuilder.addChild(intermediateJoinNode, intermediateUnionNode);
+
+        intermediateQueryBuilder.addChild(intermediateUnionNode,  EXPECTED_DATA_NODE_1);
+
+        EmptyNode emptyNode = new EmptyNodeImpl(intermediateProjectedVariables);
+
+        intermediateQueryBuilder.addChild(intermediateUnionNode, emptyNode);
+
+        intermediateQueryBuilder.addChild(intermediateJoinNode, EXPECTED_DATA_NODE_3);
+
+        //build unoptimized query
+        IntermediateQuery intermediateQuery = intermediateQueryBuilder.build();
+        System.out.println("\nIntermediate result: \n" +  intermediateQuery);
+
+        intermediateQuery.applyProposal(new RemoveEmptyNodesProposalImpl<>(intermediateRootNode));
+        System.out.println("\nAfter optimization: \n" +  intermediateQuery);
     }
 
 }
