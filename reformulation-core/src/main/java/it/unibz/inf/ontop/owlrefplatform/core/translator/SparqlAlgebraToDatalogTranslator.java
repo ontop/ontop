@@ -69,7 +69,7 @@ public class SparqlAlgebraToDatalogTranslator {
     private final DatalogProgram program;
     private int predicateIdx = 0;
 
-	/**
+    /**
 	 * 
 	 * @param uriTemplateMatcher matches URIs to templates (comes from mappings)
 	 * @param uriRef maps URIs to their integer identifiers (used only in the Semantic Index mode)
@@ -81,16 +81,15 @@ public class SparqlAlgebraToDatalogTranslator {
 
         this.program = ofac.getDatalogProgram();
     }
-	
-	/**
-	 * Translate a given SPARQL query object to datalog program.
-     *
-     * IMPORTANT: this method should be called only once on each instance of the class
-	 *
-	 * @pq     SPQRQL query object
-	 * @return our representatin of the SPARQL query (as a datalog program)
-	 */
 
+    /**
+     * Translate a given SPARQL query object to datalog program.
+     * <p>
+     * IMPORTANT: this method should be called only once on each instance of the class
+     *
+     * @param pq a SPARQL query object from Sesame Parser
+     * @return our representation of the SPARQL query (as a datalog program)
+     */
 	public SparqlQuery translate(ParsedQuery pq) {
 
         if (predicateIdx != 0 || !program.getRules().isEmpty())
@@ -135,15 +134,24 @@ public class SparqlAlgebraToDatalogTranslator {
             this.isBGP = isBGP;
         }
 
+        /**
+         * Extends the current translation result with bindings coming from {@link Extension} (expr AS ?x) or {@link BindingSetAssignment} (VALUES in SPARQL)
+         *
+         * @param bindings   a stream of bindings. A binding is a pair of a variable, and a value/expression
+         * @param varMapper  a function from bindings to {@link Variable}s
+         * @param exprMapper a function maps a pair of a binding and a set variables to a {@link Term}
+         * @param <T>        A class for binding. E.g. {@link org.openrdf.query.Binding} or {@link org.openrdf.query.algebra.ExtensionElem}
+         * @return extended translation result
+         */
         <T> TranslationResult extendWithBindings(Stream<T> bindings,
-                                                 java.util.function.Function<? super T, Variable> varNameMapper,
+                                                 java.util.function.Function<? super T, Variable> varMapper,
                                                  java.util.function.BiFunction<? super T, ImmutableSet<Variable>, Term> exprMapper) {
 
             Set<Variable> vars = new HashSet<>(variables);
             Stream<Function> eqAtoms = bindings.map(b -> {
                 Term expr = exprMapper.apply(b, ImmutableSet.copyOf(vars));
 
-                Variable v = varNameMapper.apply(b);
+                Variable v = varMapper.apply(b);
                 if (!vars.add(v))
                     throw new IllegalArgumentException("Duplicate binding for variable " + v);
 
@@ -153,6 +161,7 @@ public class SparqlAlgebraToDatalogTranslator {
             return new TranslationResult(getAtomsExtended(eqAtoms), ImmutableSet.copyOf(vars), false);
         }
 
+
         ImmutableList<Function> getAtomsExtendedWithNulls(ImmutableSet<Variable> allVariables) {
             Sets.SetView<Variable>  nullVariables = Sets.difference(allVariables, variables);
             if (nullVariables.isEmpty())
@@ -161,6 +170,12 @@ public class SparqlAlgebraToDatalogTranslator {
             return getAtomsExtended(nullVariables.stream().map(v -> ofac.getFunctionEQ(v, OBDAVocabulary.NULL)));
         }
 
+        /**
+         * Extends the atoms in current translation result with {@code extension}
+         *
+         * @param extension a stream of functions to be added
+         * @return extended list of atoms
+         */
         ImmutableList<Function> getAtomsExtended(Stream<Function> extension) {
             return ImmutableList.copyOf(Iterables.concat(atoms, extension.collect(Collectors.toList())));
 
@@ -339,11 +354,11 @@ public class SparqlAlgebraToDatalogTranslator {
         else if (node instanceof Extension) {     // EXTEND algebra operation
             Extension extension = (Extension) node;
             TranslationResult sub = translate(extension.getArg());
+            final Stream<ExtensionElem> nontrivialBindings = extension.getElements().stream()
+                    // ignore EXTEND(P, v, v), which is sometimes introduced by Sesame SPARQL parser
+                    .filter(ee -> !(ee.getExpr() instanceof Var && ee.getName().equals(((Var) ee.getExpr()).getName())));
             return sub.extendWithBindings(
-                    StreamSupport.stream(extension.getElements().spliterator(), false)
-                            // ignore EXTEND(P, v, v), which is sometimes introduced by Sesame SPARQL parser
-                            .filter(ee -> !(ee.getExpr() instanceof Var &&
-                                    ee.getName().equals(((Var) ee.getExpr()).getName()))),
+                    nontrivialBindings,
                     ee -> ofac.getVariable(ee.getName()),
                     (ee, vars) -> getExpression(ee.getExpr(), vars));
         }
@@ -356,9 +371,10 @@ public class SparqlAlgebraToDatalogTranslator {
                             .map(bs -> empty.extendWithBindings(
                                     StreamSupport.stream(bs.spliterator(), false),
                                     be -> ofac.getVariable(be.getName()),
-                                    (be, vars) -> getTermForLiteralOrIri(be.getValue()))).collect(Collectors.toList());
+                                    (be, vars) -> getTermForLiteralOrIri(be.getValue())))
+                            .collect(Collectors.toList());
 
-            ImmutableSet.Builder allVarsBuilder = ImmutableSet.<Variable>builder();
+            ImmutableSet.Builder<Variable> allVarsBuilder = ImmutableSet.builder();
             bindings.forEach(s -> allVarsBuilder.addAll(s.variables));
             ImmutableSet<Variable> allVars = allVarsBuilder.build();
 
@@ -721,6 +737,9 @@ public class SparqlAlgebraToDatalogTranslator {
     // XPath 1.0 functions (XPath 1.1 has variants with more arguments)
     private static final ImmutableMap<String, OperationPredicate> XPathFunctions =
             new ImmutableMap.Builder<String, OperationPredicate>()
+                    /*
+                     * String functions
+                     */
                     .put("http://www.w3.org/2005/xpath-functions#upper-case", ExpressionOperation.UCASE)
                     .put("http://www.w3.org/2005/xpath-functions#lower-case", ExpressionOperation.LCASE)
                     .put("http://www.w3.org/2005/xpath-functions#string-length", ExpressionOperation.STRLEN)
@@ -732,13 +751,17 @@ public class SparqlAlgebraToDatalogTranslator {
                     .put("http://www.w3.org/2005/xpath-functions#contains", ExpressionOperation.CONTAINS)
                     .put("UUID", ExpressionOperation.UUID)
                     .put("STRUUID", ExpressionOperation.STRUUID)
-
+                    /*
+                     * Numerical functions
+                     */
                     .put("http://www.w3.org/2005/xpath-functions#numeric-abs", ExpressionOperation.ABS)
                     .put("http://www.w3.org/2005/xpath-functions#numeric-ceil", ExpressionOperation.CEIL)
                     .put("http://www.w3.org/2005/xpath-functions#numeric-floor", ExpressionOperation.FLOOR)
                     .put("http://www.w3.org/2005/xpath-functions#numeric-round", ExpressionOperation.ROUND)
                     .put("RAND", ExpressionOperation.RAND)
-
+                    /*
+                     * Datetime functions
+                     */
                     .put("http://www.w3.org/2005/xpath-functions#year-from-dateTime", ExpressionOperation.YEAR)
                     .put("http://www.w3.org/2005/xpath-functions#day-from-dateTime", ExpressionOperation.DAY)
                     .put("http://www.w3.org/2005/xpath-functions#month-from-dateTime", ExpressionOperation.MONTH)
@@ -747,7 +770,9 @@ public class SparqlAlgebraToDatalogTranslator {
                     .put("http://www.w3.org/2005/xpath-functions#seconds-from-dateTime", ExpressionOperation.SECONDS)
                     .put("NOW", ExpressionOperation.NOW)
                     .put("TZ", ExpressionOperation.TZ)
-
+                    /*
+                     * Hash functions
+                     */
                     .put("MD5", ExpressionOperation.MD5)
                     .put("SHA1", ExpressionOperation.SHA1)
                     .put("SHA256", ExpressionOperation.SHA256)
