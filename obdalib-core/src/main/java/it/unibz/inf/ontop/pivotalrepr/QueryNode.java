@@ -64,7 +64,7 @@ public interface QueryNode extends Cloneable {
      */
     SubstitutionResults<? extends QueryNode> applyAscendingSubstitution(
             ImmutableSubstitution<? extends ImmutableTerm> substitution,
-            QueryNode descendantNode, IntermediateQuery query)
+            QueryNode childNode, IntermediateQuery query)
             throws QueryNodeSubstitutionException;
 
     /**

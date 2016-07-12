@@ -42,18 +42,18 @@ public class UnionNodeImpl extends QueryNodeImpl implements UnionNode {
     @Override
     public SubstitutionResults<UnionNode> applyAscendingSubstitution(
             ImmutableSubstitution<? extends ImmutableTerm> substitution,
-            QueryNode descendantNode, IntermediateQuery query) {
+            QueryNode childNode, IntermediateQuery query) {
         if (substitution.isEmpty()) {
             return new SubstitutionResultsImpl<>(NO_CHANGE);
         }
         /**
-         * Asks for inserting a construction node between the descendant node and this node.
+         * Asks for inserting a construction node between the child node and this node.
          * Such a construction node will contain the substitution.
          */
         else {
-            ConstructionNode newParentOfDescendantNode = new ConstructionNodeImpl(projectedVariables,
+            ConstructionNode newParentOfChildNode = new ConstructionNodeImpl(projectedVariables,
                     (ImmutableSubstitution<ImmutableTerm>) substitution, Optional.empty());
-            return new SubstitutionResultsImpl<>(this, newParentOfDescendantNode, descendantNode);
+            return new SubstitutionResultsImpl<>(this, newParentOfChildNode, childNode);
         }
     }
 

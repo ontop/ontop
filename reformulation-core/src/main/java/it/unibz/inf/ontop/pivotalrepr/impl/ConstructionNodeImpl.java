@@ -159,7 +159,7 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
     @Override
     public SubstitutionResults<ConstructionNode> applyAscendingSubstitution(
             ImmutableSubstitution<? extends ImmutableTerm> substitutionToApply,
-            QueryNode descendantNode, IntermediateQuery query) {
+            QueryNode childNode, IntermediateQuery query) {
 
         ImmutableSubstitution<ImmutableTerm> localSubstitution = getSubstitution();
         ImmutableSet<Variable> boundVariables = localSubstitution.getImmutableMap().keySet();

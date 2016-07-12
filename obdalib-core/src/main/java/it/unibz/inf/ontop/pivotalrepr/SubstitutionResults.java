@@ -51,7 +51,7 @@ public interface SubstitutionResults<T extends QueryNode> {
      * Useful for Union
      *
      */
-    Optional<ConstructionNode> getOptionalNewParentOfDescendantNode();
+    Optional<ConstructionNode> getOptionalNewParentOfChildNode();
 
     /**
      * Descendant node that need to receive a construction node as a parent.

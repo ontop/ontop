@@ -233,7 +233,7 @@ public class SubstitutionPropagationTools {
              * Applies the substitution and analyses the results
              */
             SubstitutionResults<? extends QueryNode> substitutionResults = currentAncestor.applyAscendingSubstitution(
-                    currentSubstitution, focusNode, query);
+                    currentSubstitution, ancestorChild, query);
 
             Stream<QueryNode> otherChildren;
 
@@ -256,7 +256,7 @@ public class SubstitutionPropagationTools {
                                 }});
 
                     ConstructionNode newParentOfDescendantNode = substitutionResults
-                            .getOptionalNewParentOfDescendantNode().get();
+                            .getOptionalNewParentOfChildNode().get();
                     QueryNode descendantNode = substitutionResults.getOptionalDescendantNode().get();
                     treeComponent.insertParent(descendantNode, newParentOfDescendantNode);
                     /**

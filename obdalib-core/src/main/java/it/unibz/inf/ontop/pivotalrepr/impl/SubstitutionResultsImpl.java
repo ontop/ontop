@@ -16,7 +16,7 @@ public class SubstitutionResultsImpl<T extends QueryNode> implements Substitutio
     private final Optional<T> optionalNewNode;
     private final Optional<? extends ImmutableSubstitution<? extends ImmutableTerm>> optionalSubstitution;
     private final Optional<ArgumentPosition> optionalReplacingChildPosition;
-    private final Optional<ConstructionNode> optionalNewParentOfDescendantNode;
+    private final Optional<ConstructionNode> optionalNewParentOfChildNode;
     // Not new (already in the graph)
     private final Optional<QueryNode> optionalDescendantNode;
 
@@ -38,7 +38,7 @@ public class SubstitutionResultsImpl<T extends QueryNode> implements Substitutio
         this.optionalNewNode = Optional.empty();
         this.optionalSubstitution = optionalSubstitution.filter(s -> !s.isEmpty());
         this.optionalReplacingChildPosition = Optional.empty();
-        this.optionalNewParentOfDescendantNode = Optional.empty();
+        this.optionalNewParentOfChildNode = Optional.empty();
         this.optionalDescendantNode = Optional.empty();
     }
 
@@ -62,7 +62,7 @@ public class SubstitutionResultsImpl<T extends QueryNode> implements Substitutio
         this.optionalNewNode = Optional.empty();
         this.optionalSubstitution = Optional.empty();
         this.optionalReplacingChildPosition = Optional.empty();
-        this.optionalNewParentOfDescendantNode = Optional.empty();
+        this.optionalNewParentOfChildNode = Optional.empty();
         this.optionalDescendantNode = Optional.empty();
     }
 
@@ -75,7 +75,7 @@ public class SubstitutionResultsImpl<T extends QueryNode> implements Substitutio
         this.optionalNewNode = Optional.of(newNode);
         this.optionalSubstitution = Optional.of(substitution).filter(s -> !s.isEmpty());
         this.optionalReplacingChildPosition = Optional.empty();
-        this.optionalNewParentOfDescendantNode = Optional.empty();
+        this.optionalNewParentOfChildNode = Optional.empty();
         this.optionalDescendantNode = Optional.empty();
     }
 
@@ -87,7 +87,7 @@ public class SubstitutionResultsImpl<T extends QueryNode> implements Substitutio
         this.optionalNewNode = Optional.of(newNode);
         this.optionalSubstitution = Optional.empty();
         this.optionalReplacingChildPosition = Optional.empty();
-        this.optionalNewParentOfDescendantNode = Optional.empty();
+        this.optionalNewParentOfChildNode = Optional.empty();
         this.optionalDescendantNode = Optional.empty();
     }
 
@@ -101,19 +101,19 @@ public class SubstitutionResultsImpl<T extends QueryNode> implements Substitutio
         this.optionalNewNode = Optional.empty();
         this.optionalSubstitution = Optional.of(substitution);
         this.optionalReplacingChildPosition = optionalReplacingChildPosition;
-        this.optionalNewParentOfDescendantNode = Optional.empty();
+        this.optionalNewParentOfChildNode = Optional.empty();
         this.optionalDescendantNode = Optional.empty();
     }
 
     /**
-     * Proposes to add a Construction Node between the descendant node and the focus node.
+     * Proposes to add a Construction Node between the child node and the focus node.
      */
-    public SubstitutionResultsImpl(T newNode, ConstructionNode newParentOfDescendantNode, QueryNode descendantNode) {
+    public SubstitutionResultsImpl(T newNode, ConstructionNode newParentOfChildNode, QueryNode descendantNode) {
         this.localAction = INSERT_CONSTRUCTION_NODE;
         this.optionalNewNode = Optional.of(newNode);
         this.optionalSubstitution = Optional.empty();
         this.optionalReplacingChildPosition = Optional.empty();
-        this.optionalNewParentOfDescendantNode = Optional.of(newParentOfDescendantNode);
+        this.optionalNewParentOfChildNode = Optional.of(newParentOfChildNode);
         this.optionalDescendantNode = Optional.of(descendantNode);
     }
 
@@ -137,9 +137,11 @@ public class SubstitutionResultsImpl<T extends QueryNode> implements Substitutio
         return optionalSubstitution;
     }
 
-    @Override
-    public Optional<ConstructionNode> getOptionalNewParentOfDescendantNode() {
-        return optionalNewParentOfDescendantNode;
+    /**
+     * Note the "child node" is now the grand-child of the focus node
+     */
+    public Optional<ConstructionNode> getOptionalNewParentOfChildNode() {
+        return optionalNewParentOfChildNode;
     }
 
     @Override

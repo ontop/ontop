@@ -56,8 +56,8 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
     @Override
     public SubstitutionResults<LeftJoinNode> applyAscendingSubstitution(
             ImmutableSubstitution<? extends ImmutableTerm> substitution,
-            QueryNode descendantNode, IntermediateQuery query) {
-        return  isFromRightBranch(descendantNode, query)
+            QueryNode childNode, IntermediateQuery query) {
+        return  isFromRightBranch(childNode, query)
                 ? applyAscendingSubstitutionFromRight(substitution, query)
                 : applyAscendingSubstitutionFromLeft(substitution, query);
     }
@@ -231,34 +231,20 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
      *
      * TODO: move it to the NonCommutativeOperatorNodeImpl when the latter will be created.
      */
-    protected boolean isFromRightBranch(QueryNode descendantNode, IntermediateQuery query) {
-
-        Optional<QueryNode> optionalCurrentNode = Optional.of(descendantNode);
-
-        while (optionalCurrentNode.isPresent()) {
-            QueryNode currentNode = optionalCurrentNode.get();
-            Optional<QueryNode> optionalAncestor = query.getParent(currentNode);
-
-            if (optionalAncestor.isPresent() && (optionalAncestor.get() == this)) {
-                Optional<ArgumentPosition> optionalPosition = query.getOptionalPosition(this, currentNode);
-                if (optionalPosition.isPresent()) {
-                    switch(optionalPosition.get()) {
-                        case LEFT:
-                            return false;
-                        case RIGHT:
-                            return true;
-                        default:
-                            throw new RuntimeException("Unexpected position: " + optionalPosition.get());
-                    }
-                }
-                else {
-                    throw new RuntimeException("Inconsistent tree: no argument position after " + this);
-                }
-            }
-            else {
-                optionalCurrentNode = optionalAncestor;
+    protected boolean isFromRightBranch(QueryNode childNode, IntermediateQuery query) {
+        Optional<ArgumentPosition> optionalPosition = query.getOptionalPosition(this, childNode);
+        if (optionalPosition.isPresent()) {
+            switch(optionalPosition.get()) {
+                case LEFT:
+                    return false;
+                case RIGHT:
+                    return true;
+                default:
+                    throw new RuntimeException("Unexpected position: " + optionalPosition.get());
             }
         }
-        throw new IllegalArgumentException(descendantNode.toString() +  " is not a descendant of " + this);
+        else {
+            throw new RuntimeException("Inconsistent tree: no argument position after " + this);
+        }
     }
 }

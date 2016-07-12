@@ -47,7 +47,7 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
     @Override
     public SubstitutionResults<InnerJoinNode> applyAscendingSubstitution(
             ImmutableSubstitution<? extends ImmutableTerm> substitution,
-            QueryNode descendantNode, IntermediateQuery query) {
+            QueryNode childNode, IntermediateQuery query) {
 
         if (substitution.isEmpty()) {
             return new SubstitutionResultsImpl<>(NO_CHANGE);
@@ -59,8 +59,7 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
                 .collect(ImmutableCollectors.toSet());
 
 
-        ImmutableSet<Variable > otherNodesProjectedVariables = query.getChildren(this).stream()
-                .filter(c -> c != descendantNode)
+        ImmutableSet<Variable > otherNodesProjectedVariables = query.getOtherChildrenStream(this, childNode)
                 .flatMap(c -> extractProjectedVariables(query, c).stream())
                 .collect(ImmutableCollectors.toSet());
 

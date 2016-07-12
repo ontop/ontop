@@ -22,7 +22,7 @@ public interface EmptyNode extends QueryNode {
     @Override
     SubstitutionResults<EmptyNode> applyAscendingSubstitution(
             ImmutableSubstitution<? extends ImmutableTerm> substitution,
-            QueryNode descendantNode, IntermediateQuery query) ;
+            QueryNode childNode, IntermediateQuery query) ;
 
     @Override
     SubstitutionResults<EmptyNode> applyDescendingSubstitution(

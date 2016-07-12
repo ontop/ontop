@@ -16,7 +16,7 @@ public interface UnionNode extends QueryNode {
     @Override
     SubstitutionResults<UnionNode> applyAscendingSubstitution(
             ImmutableSubstitution<? extends ImmutableTerm> substitution,
-            QueryNode descendantNode, IntermediateQuery query) ;
+            QueryNode childNode, IntermediateQuery query) ;
 
     @Override
     SubstitutionResults<UnionNode> applyDescendingSubstitution(

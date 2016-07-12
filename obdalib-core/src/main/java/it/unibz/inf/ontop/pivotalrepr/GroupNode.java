@@ -22,7 +22,7 @@ public interface GroupNode extends QueryNode {
     @Override
     SubstitutionResults<GroupNode> applyAscendingSubstitution(
             ImmutableSubstitution<? extends ImmutableTerm> substitution,
-            QueryNode descendantNode, IntermediateQuery query) ;
+            QueryNode childNode, IntermediateQuery query) ;
 
     @Override
     SubstitutionResults<GroupNode> applyDescendingSubstitution(
