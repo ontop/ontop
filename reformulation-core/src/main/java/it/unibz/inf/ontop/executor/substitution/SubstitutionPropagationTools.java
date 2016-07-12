@@ -19,6 +19,7 @@ import it.unibz.inf.ontop.pivotalrepr.proposal.impl.ReactToChildDeletionProposal
 
 import java.util.LinkedList;
 import java.util.Queue;
+import java.util.stream.Stream;
 
 import static it.unibz.inf.ontop.pivotalrepr.unfolding.ProjectedVariableExtractionTools.extractProjectedVariables;
 
@@ -217,6 +218,7 @@ public class SubstitutionPropagationTools {
 
         // Non-final
         Optional<QueryNode> optionalCurrentAncestor = query.getParent(focusNode);
+        QueryNode ancestorChild = focusNode;
 
         // Non-final
         ImmutableSubstitution<? extends ImmutableTerm> currentSubstitution = substitutionToPropagate;
@@ -233,14 +235,18 @@ public class SubstitutionPropagationTools {
             SubstitutionResults<? extends QueryNode> substitutionResults = currentAncestor.applyAscendingSubstitution(
                     currentSubstitution, focusNode, query);
 
+            Stream<QueryNode> otherChildren;
+
             switch (substitutionResults.getLocalAction()) {
                 case NO_CHANGE:
+                    otherChildren = query.getOtherChildrenStream(currentAncestor, ancestorChild);
                     break;
                 case NEW_NODE:
                     QueryNode newAncestor = substitutionResults.getOptionalNewNode().get();
                     if (currentAncestor != newAncestor) {
                         treeComponent.replaceNode(currentAncestor, newAncestor);
                     }
+                    otherChildren = query.getOtherChildrenStream(newAncestor, ancestorChild);
                     break;
                 case INSERT_CONSTRUCTION_NODE:
                     substitutionResults.getOptionalNewNode()
@@ -253,6 +259,10 @@ public class SubstitutionPropagationTools {
                             .getOptionalNewParentOfDescendantNode().get();
                     QueryNode descendantNode = substitutionResults.getOptionalDescendantNode().get();
                     treeComponent.insertParent(descendantNode, newParentOfDescendantNode);
+                    /**
+                     * TODO: should we consider other children in this case?
+                     */
+                    otherChildren = Stream.of();
                     break;
 
                 case REPLACE_BY_CHILD:
@@ -269,6 +279,8 @@ public class SubstitutionPropagationTools {
 
                     // Assume there is only one child
                     treeComponent.removeOrReplaceNodeByUniqueChildren(currentAncestor);
+                    // Only one, most likely useless
+                    otherChildren = query.getChildren(currentAncestor).stream();
                     break;
                 /**
                  * Ancestor is empty --> applies a ReactToChildDeletionProposal and returns the remaining ancestor
@@ -281,6 +293,12 @@ public class SubstitutionPropagationTools {
 
             Optional<? extends ImmutableSubstitution<? extends ImmutableTerm>> optionalNewSubstitution =
                     substitutionResults.getSubstitutionToPropagate();
+
+            /**
+             * Propagates the substitution DOWN to the other children
+             */
+            optionalNewSubstitution.ifPresent(subst -> otherChildren
+                    .forEach(c -> propagateSubstitutionDown(c, subst, query, treeComponent)));
 
             /**
              * Continue the propagation
@@ -298,6 +316,8 @@ public class SubstitutionPropagationTools {
                 // Stops
                 optionalCurrentAncestor = Optional.empty();
             }
+
+            ancestorChild = currentAncestor;
         }
 
         /**

@@ -18,12 +18,14 @@ import it.unibz.inf.ontop.model.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.Variable;
 import it.unibz.inf.ontop.executor.groundterm.GroundTermRemovalFromDataNodeExecutor;
 import it.unibz.inf.ontop.executor.pullout.PullVariableOutOfDataNodeExecutor;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import it.unibz.inf.ontop.pivotalrepr.*;
 import it.unibz.inf.ontop.pivotalrepr.proposal.*;
 
 import java.util.Optional;
+import java.util.stream.Stream;
 
 /**
  * TODO: describe
@@ -116,6 +118,12 @@ public class IntermediateQueryImpl implements IntermediateQuery {
     @Override
     public IntermediateQuery createSnapshot() {
         return new IntermediateQueryImpl(metadata, projectionAtom, treeComponent.createSnapshot());
+    }
+
+    @Override
+    public Stream<QueryNode> getOtherChildrenStream(QueryNode parent, QueryNode childToOmmit) {
+        return getChildren(parent).stream()
+                .filter(c -> ! (c == childToOmmit));
     }
 
 

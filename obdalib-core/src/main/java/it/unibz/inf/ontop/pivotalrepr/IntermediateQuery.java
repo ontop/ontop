@@ -9,6 +9,7 @@ import it.unibz.inf.ontop.model.Variable;
 import it.unibz.inf.ontop.pivotalrepr.proposal.QueryOptimizationProposal;
 
 import java.util.Optional;
+import java.util.stream.Stream;
 
 /**
  *
@@ -106,4 +107,6 @@ public interface IntermediateQuery {
      * TODO: return an immutable Intermediate Query
      */
     IntermediateQuery createSnapshot();
+
+    Stream<QueryNode> getOtherChildrenStream(QueryNode parent, QueryNode childToOmmit);
 }
