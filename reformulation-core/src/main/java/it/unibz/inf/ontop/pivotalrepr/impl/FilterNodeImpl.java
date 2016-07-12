@@ -53,7 +53,7 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
     @Override
     public SubstitutionResults<FilterNode> applyAscendingSubstitution(
             ImmutableSubstitution<? extends ImmutableTerm> substitution,
-            QueryNode descendantNode, IntermediateQuery query) {
+            QueryNode childNode, IntermediateQuery query) {
         return applyDescendingSubstitution(substitution, query);
     }
 

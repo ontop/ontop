@@ -9,6 +9,7 @@ import it.unibz.inf.ontop.pivotalrepr.QueryNode;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * TODO: explain
@@ -40,6 +41,11 @@ public class StandardChildrenRelation implements ChildrenRelation {
     @Override
     public ImmutableList<TreeNode> getChildren() {
         return ImmutableList.copyOf(children);
+    }
+
+    @Override
+    public Stream<TreeNode> getChildrenStream() {
+        return children.stream();
     }
 
     @Override
@@ -83,6 +89,12 @@ public class StandardChildrenRelation implements ChildrenRelation {
             builder.add(treeNode.getQueryNode());
         }
         return builder.build();
+    }
+
+    @Override
+    public Stream<QueryNode> getChildQueryNodeStream() {
+        return children.stream()
+                .map(TreeNode::getQueryNode);
     }
 
     @Override

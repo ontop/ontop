@@ -20,7 +20,7 @@ public interface IntensionalDataNode extends DataNode {
     @Override
     SubstitutionResults<IntensionalDataNode> applyAscendingSubstitution(
             ImmutableSubstitution<? extends ImmutableTerm> substitution,
-            QueryNode descendantNode, IntermediateQuery query);
+            QueryNode childNode, IntermediateQuery query);
 
     @Override
     SubstitutionResults<IntensionalDataNode> applyDescendingSubstitution(

@@ -12,6 +12,7 @@ import it.unibz.inf.ontop.pivotalrepr.impl.QueryTreeComponent;
 import it.unibz.inf.ontop.pivotalrepr.impl.VariableCollector;
 
 import java.util.*;
+import java.util.stream.Stream;
 
 
 /**
@@ -40,8 +41,13 @@ public class DefaultQueryTreeComponent implements QueryTreeComponent {
     }
 
     @Override
-    public ImmutableList<QueryNode> getCurrentSubNodesOf(QueryNode node) {
+    public ImmutableList<QueryNode> getChildren(QueryNode node) {
         return tree.getChildren(node);
+    }
+
+    @Override
+    public Stream<QueryNode> getChildrenStream(QueryNode node) {
+        return tree.getChildrenStream(node);
     }
 
     @Override
@@ -77,7 +83,7 @@ public class DefaultQueryTreeComponent implements QueryTreeComponent {
 
     @Override
     public void replaceSubTree(QueryNode subTreeRootNode, QueryNode replacingNode) {
-        getCurrentSubNodesOf(subTreeRootNode).stream()
+        getChildren(subTreeRootNode).stream()
                 .forEach(this::removeSubTree);
         replaceNode(subTreeRootNode, replacingNode);
     }

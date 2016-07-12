@@ -9,6 +9,7 @@ import it.unibz.inf.ontop.pivotalrepr.ConstructionNode;
 import it.unibz.inf.ontop.pivotalrepr.QueryNode;
 
 import java.util.Optional;
+import java.util.stream.Stream;
 
 /**
  * TODO: describe
@@ -20,6 +21,8 @@ public interface QueryTree {
                   boolean mustBeNew, boolean canReplace) throws IllegalTreeUpdateException;
 
     ImmutableList<QueryNode> getChildren(QueryNode node);
+
+    Stream<QueryNode> getChildrenStream(QueryNode node);
 
     boolean contains(QueryNode node);
 

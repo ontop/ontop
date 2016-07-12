@@ -109,8 +109,13 @@ public class JgraphtQueryTreeComponent implements QueryTreeComponent {
     }
 
     @Override
-    public ImmutableList<QueryNode> getCurrentSubNodesOf(QueryNode node) {
+    public ImmutableList<QueryNode> getChildren(QueryNode node) {
         return getSubNodesOf(queryDAG, node);
+    }
+
+    @Override
+    public Stream<QueryNode> getChildrenStream(QueryNode node) {
+        return getChildren(node).stream();
     }
 
     @Override
@@ -296,11 +301,11 @@ public class JgraphtQueryTreeComponent implements QueryTreeComponent {
 
         ImmutableList.Builder<QueryNode> nodeBuilder = ImmutableList.builder();
 
-        Queue<QueryNode> nodesToVisit = new LinkedList<>(getCurrentSubNodesOf(topNode));
+        Queue<QueryNode> nodesToVisit = new LinkedList<>(getChildren(topNode));
         while(!nodesToVisit.isEmpty()) {
             QueryNode node = nodesToVisit.poll();
             nodeBuilder.add(node);
-            nodesToVisit.addAll(getCurrentSubNodesOf(node));
+            nodesToVisit.addAll(getChildren(node));
         }
         return nodeBuilder.build();
     }
@@ -352,7 +357,7 @@ public class JgraphtQueryTreeComponent implements QueryTreeComponent {
 
     @Override
     public void removeOrReplaceNodeByUniqueChildren(QueryNode node) throws IllegalTreeUpdateException {
-        ImmutableList<QueryNode> children = getCurrentSubNodesOf(node);
+        ImmutableList<QueryNode> children = getChildren(node);
         int nbChildren = children.size();
         switch(nbChildren) {
             case 0:
@@ -379,7 +384,7 @@ public class JgraphtQueryTreeComponent implements QueryTreeComponent {
         for(QueryNode nodeToRemove : nodesToRemove) {
             boolean isParentBinaryAsymmetricOperator = (nodeToRemove instanceof NonCommutativeOperatorNode);
 
-            for (QueryNode child : getCurrentSubNodesOf(nodeToRemove)) {
+            for (QueryNode child : getChildren(nodeToRemove)) {
                 if (!nodesToRemove.contains(child)) {
                     if (isParentBinaryAsymmetricOperator) {
                         throw new RuntimeException("Re-integrating children of a BinaryAsymmetricOperatorNode " +
@@ -414,7 +419,7 @@ public class JgraphtQueryTreeComponent implements QueryTreeComponent {
     public Optional<QueryNode> nextSibling(QueryNode node) throws IllegalTreeException {
         Optional<QueryNode> optionalParent = getParent(node);
         if (optionalParent.isPresent()) {
-            ImmutableList<QueryNode> siblings = getCurrentSubNodesOf(optionalParent.get());
+            ImmutableList<QueryNode> siblings = getChildren(optionalParent.get());
             int index = siblings.indexOf(node);
             int nextIndex = index + 1;
             if (nextIndex < siblings.size()) {
@@ -445,7 +450,7 @@ public class JgraphtQueryTreeComponent implements QueryTreeComponent {
 
     @Override
     public Optional<QueryNode> getFirstChild(QueryNode node) {
-        ImmutableList<QueryNode> children = getCurrentSubNodesOf(node);
+        ImmutableList<QueryNode> children = getChildren(node);
         if (children.isEmpty()) {
             return Optional.empty();
         }

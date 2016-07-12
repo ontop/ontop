@@ -46,7 +46,7 @@ public class GroupNodeImpl extends QueryNodeImpl implements GroupNode {
     @Override
     public SubstitutionResults<GroupNode> applyAscendingSubstitution(
             ImmutableSubstitution<? extends ImmutableTerm> substitution,
-            QueryNode descendantNode, IntermediateQuery query) {
+            QueryNode childNode, IntermediateQuery query) {
         return applyDescendingSubstitution(substitution, query);
     }
 
