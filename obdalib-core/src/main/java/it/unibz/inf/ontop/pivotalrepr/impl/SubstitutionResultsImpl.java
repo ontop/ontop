@@ -145,7 +145,7 @@ public class SubstitutionResultsImpl<T extends QueryNode> implements Substitutio
     }
 
     @Override
-    public Optional<QueryNode> getOptionalDescendantNode() {
+    public Optional<QueryNode> getOptionalDowngradedChildNode() {
         return optionalDescendantNode;
     }
 }

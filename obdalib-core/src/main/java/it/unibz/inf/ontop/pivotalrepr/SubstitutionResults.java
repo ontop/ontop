@@ -58,5 +58,5 @@ public interface SubstitutionResults<T extends QueryNode> {
      *
      * Useful for Union
      */
-    Optional<QueryNode> getOptionalDescendantNode();
+    Optional<QueryNode> getOptionalDowngradedChildNode();
 }

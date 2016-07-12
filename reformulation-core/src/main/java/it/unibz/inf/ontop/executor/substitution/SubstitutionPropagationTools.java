@@ -235,6 +235,7 @@ public class SubstitutionPropagationTools {
             SubstitutionResults<? extends QueryNode> substitutionResults = currentAncestor.applyAscendingSubstitution(
                     currentSubstitution, ancestorChild, query);
 
+
             Stream<QueryNode> otherChildren;
 
             switch (substitutionResults.getLocalAction()) {
@@ -249,20 +250,18 @@ public class SubstitutionPropagationTools {
                     otherChildren = query.getOtherChildrenStream(newAncestor, ancestorChild);
                     break;
                 case INSERT_CONSTRUCTION_NODE:
+                    QueryNode downgradedChildNode = substitutionResults.getOptionalDowngradedChildNode().get();
+                    otherChildren = query.getOtherChildrenStream(currentAncestor, downgradedChildNode);
+
                     substitutionResults.getOptionalNewNode()
                             .ifPresent(updatedAncestor -> {
                                 if (currentAncestor != updatedAncestor) {
                                     treeComponent.replaceNode(currentAncestor, updatedAncestor);
                                 }});
 
-                    ConstructionNode newParentOfDescendantNode = substitutionResults
+                    ConstructionNode newParentOfChildNode = substitutionResults
                             .getOptionalNewParentOfChildNode().get();
-                    QueryNode descendantNode = substitutionResults.getOptionalDescendantNode().get();
-                    treeComponent.insertParent(descendantNode, newParentOfDescendantNode);
-                    /**
-                     * TODO: should we consider other children in this case?
-                     */
-                    otherChildren = Stream.of();
+                    treeComponent.insertParent(downgradedChildNode, newParentOfChildNode);
                     break;
 
                 case REPLACE_BY_CHILD:
