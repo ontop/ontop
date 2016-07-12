@@ -82,7 +82,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
          * and propagates the new substitution if the conditions still holds.
          *
          */
-        return computeAndEvaluateNewCondition(substitution, query, leftVariables)
+        return computeAndEvaluateNewCondition(substitution, query)
                 .map(ev -> applyEvaluation(query, ev, newSubstitution, Optional.of(leftVariables), Provenance.FROM_RIGHT))
                 .orElseGet(() -> new SubstitutionResultsImpl<>(this, newSubstitution));
     }
@@ -98,7 +98,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
          * and propagates the same substitution if the conditions still holds.
          *
          */
-        return computeAndEvaluateNewCondition(substitution, query, rightVariables)
+        return computeAndEvaluateNewCondition(substitution, query)
                 .map(ev -> applyEvaluation(query, ev, substitution, Optional.of(rightVariables), Provenance.FROM_LEFT))
                 .orElseGet(() -> new SubstitutionResultsImpl<>(this, substitution));
     }

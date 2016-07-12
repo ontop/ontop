@@ -97,7 +97,7 @@ public class SubstitutionPropagationTest {
         initialQueryBuilder.addChild(leftConstructionNode, DATA_NODE_1);
 
 
-        ConstructionNode rightConstructionNode = new ConstructionNodeImpl(ImmutableSet.of(X, Y),
+        ConstructionNode rightConstructionNode = new ConstructionNodeImpl(ImmutableSet.of(X),
                 new ImmutableSubstitutionImpl<>(ImmutableMap.of(
                         X, generateURI1(C))),
                 Optional.empty());
