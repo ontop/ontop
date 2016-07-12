@@ -6,6 +6,7 @@ import it.unibz.inf.ontop.model.Variable;
 import it.unibz.inf.ontop.pivotalrepr.*;
 
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import static it.unibz.inf.ontop.pivotalrepr.unfolding.ProjectedVariableExtractionTools.extractProjectedVariables;
 
@@ -14,7 +15,9 @@ import static it.unibz.inf.ontop.pivotalrepr.unfolding.ProjectedVariableExtracti
  */
 public interface QueryTreeComponent {
 
-    ImmutableList<QueryNode> getCurrentSubNodesOf(QueryNode node);
+    ImmutableList<QueryNode> getChildren(QueryNode node);
+
+    Stream<QueryNode> getChildrenStream(QueryNode node);
 
     ConstructionNode getRootConstructionNode() throws IllegalTreeException;
 

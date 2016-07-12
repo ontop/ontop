@@ -56,6 +56,13 @@ public class BinaryChildrenRelation implements ChildrenRelation {
     }
 
     @Override
+    public Stream<TreeNode> getChildrenStream() {
+        return Stream.of(optionalLeftChild, optionalRightChild)
+                .filter(Optional::isPresent)
+                .map(Optional::get);
+    }
+
+    @Override
     public boolean contains(TreeNode node) {
         return getChildren().contains(node);
     }
@@ -121,6 +128,12 @@ public class BinaryChildrenRelation implements ChildrenRelation {
     }
 
     @Override
+    public Stream<QueryNode> getChildQueryNodeStream() {
+        return getChildrenStream()
+                .map(TreeNode::getQueryNode);
+    }
+
+    @Override
     public Optional<NonCommutativeOperatorNode.ArgumentPosition> getOptionalPosition(TreeNode childNode) {
         if (optionalLeftChild.isPresent() && (optionalLeftChild.get() == childNode)) {
             return Optional.of(NonCommutativeOperatorNode.ArgumentPosition.LEFT);
@@ -162,9 +175,7 @@ public class BinaryChildrenRelation implements ChildrenRelation {
     public ChildrenRelation convertToStandardChildrenRelation() {
         StandardChildrenRelation newRelation = new StandardChildrenRelation(parent);
 
-        Stream.of(optionalLeftChild, optionalRightChild)
-                .filter(Optional::isPresent)
-                .map(Optional::get)
+        getChildrenStream()
                 .forEach(c -> newRelation.addChild(c, Optional.empty(), false));
 
         return newRelation;

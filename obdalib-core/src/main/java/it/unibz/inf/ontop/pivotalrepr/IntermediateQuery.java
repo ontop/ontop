@@ -26,6 +26,10 @@ public interface IntermediateQuery {
 
     ImmutableList<QueryNode> getChildren(QueryNode node);
 
+    Stream<QueryNode> getChildrenStream(QueryNode node);
+
+    Stream<QueryNode> getOtherChildrenStream(QueryNode parent, QueryNode childToOmmit);
+
     Optional<QueryNode> getChild(QueryNode currentNode, NonCommutativeOperatorNode.ArgumentPosition position);
 
     /**
@@ -107,6 +111,4 @@ public interface IntermediateQuery {
      * TODO: return an immutable Intermediate Query
      */
     IntermediateQuery createSnapshot();
-
-    Stream<QueryNode> getOtherChildrenStream(QueryNode parent, QueryNode childToOmmit);
 }

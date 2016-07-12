@@ -18,7 +18,6 @@ import it.unibz.inf.ontop.model.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.Variable;
 import it.unibz.inf.ontop.executor.groundterm.GroundTermRemovalFromDataNodeExecutor;
 import it.unibz.inf.ontop.executor.pullout.PullVariableOutOfDataNodeExecutor;
-import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import it.unibz.inf.ontop.pivotalrepr.*;
@@ -122,7 +121,7 @@ public class IntermediateQueryImpl implements IntermediateQuery {
 
     @Override
     public Stream<QueryNode> getOtherChildrenStream(QueryNode parent, QueryNode childToOmmit) {
-        return getChildren(parent).stream()
+        return treeComponent.getChildrenStream(parent)
                 .filter(c -> ! (c == childToOmmit));
     }
 
@@ -161,7 +160,12 @@ public class IntermediateQueryImpl implements IntermediateQuery {
 
     @Override
     public ImmutableList<QueryNode> getChildren(QueryNode node) {
-        return treeComponent.getCurrentSubNodesOf(node);
+        return treeComponent.getChildren(node);
+    }
+
+    @Override
+    public Stream<QueryNode> getChildrenStream(QueryNode node) {
+        return treeComponent.getChildrenStream(node);
     }
 
     @Override

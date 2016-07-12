@@ -450,7 +450,7 @@ public class RedundantSelfJoinExecutor implements NodeCentricInternalExecutor<In
                 .forEach(newNode -> treeComponent.addChild(topJoinNode, newNode,
                         Optional.<NonCommutativeOperatorNode.ArgumentPosition>empty(), false));
 
-        switch(treeComponent.getCurrentSubNodesOf(topJoinNode).size()) {
+        switch(treeComponent.getChildren(topJoinNode).size()) {
             case 0:
                 throw new IllegalStateException("Self-join elimination MUST not eliminate ALL the nodes");
 

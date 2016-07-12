@@ -7,6 +7,7 @@ import it.unibz.inf.ontop.pivotalrepr.QueryNode;
 
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 /**
  * TODO: explain
@@ -16,6 +17,8 @@ public interface ChildrenRelation {
     TreeNode getParent();
 
     ImmutableList<TreeNode> getChildren();
+
+    Stream<TreeNode> getChildrenStream();
 
     boolean contains(TreeNode node);
 
@@ -27,6 +30,8 @@ public interface ChildrenRelation {
     void removeChild(TreeNode childNode);
 
     ImmutableList<QueryNode> getChildQueryNodes();
+
+    Stream<QueryNode> getChildQueryNodeStream();
 
     Optional<NonCommutativeOperatorNode.ArgumentPosition> getOptionalPosition(TreeNode childTreeNode);
 

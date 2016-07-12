@@ -115,7 +115,7 @@ public class SubstitutionPropagationTools {
             throws QueryNodeSubstitutionException {
 
         Queue<NodeAndSubstitution> nodeAndSubsToVisit = new LinkedList<>();
-        treeComponent.getCurrentSubNodesOf(focusNode).stream()
+        treeComponent.getChildren(focusNode).stream()
                 .map(n -> new NodeAndSubstitution(n, initialSubstitutionToPropagate))
                 .forEach(nodeAndSubsToVisit::add);
 
@@ -136,7 +136,7 @@ public class SubstitutionPropagationTools {
                                     newSubstitution));
                         }
                         else {
-                            treeComponent.getCurrentSubNodesOf(applicationResults.getNewOrReplacingNode()).stream()
+                            treeComponent.getChildren(applicationResults.getNewOrReplacingNode()).stream()
                                     .map(n -> new NodeAndSubstitution(n, newSubstitution))
                                     .forEach(nodeAndSubsToVisit::add);
                         }
@@ -279,7 +279,7 @@ public class SubstitutionPropagationTools {
                     // Assume there is only one child
                     treeComponent.removeOrReplaceNodeByUniqueChildren(currentAncestor);
                     // Only one, most likely useless
-                    otherChildren = query.getChildren(currentAncestor).stream();
+                    otherChildren = query.getChildrenStream(currentAncestor);
                     break;
                 /**
                  * Ancestor is empty --> applies a ReactToChildDeletionProposal and returns the remaining ancestor

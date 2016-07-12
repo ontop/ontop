@@ -127,6 +127,17 @@ public class DefaultTree implements QueryTree {
     }
 
     @Override
+    public Stream<QueryNode> getChildrenStream(QueryNode node) {
+        ChildrenRelation childrenRelation = accessChildrenRelation(accessTreeNode(node));
+        if (childrenRelation == null) {
+            return Stream.of();
+        }
+        else {
+            return childrenRelation.getChildQueryNodeStream();
+        }
+    }
+
+    @Override
     public boolean contains(QueryNode node) {
         return nodeIndex.containsKey(node);
     }
