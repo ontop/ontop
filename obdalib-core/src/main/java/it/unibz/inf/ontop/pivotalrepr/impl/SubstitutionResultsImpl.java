@@ -108,9 +108,9 @@ public class SubstitutionResultsImpl<T extends QueryNode> implements Substitutio
     /**
      * Proposes to add a Construction Node between the child node and the focus node.
      */
-    public SubstitutionResultsImpl(T newNode, ConstructionNode newParentOfChildNode, QueryNode descendantNode) {
+    public SubstitutionResultsImpl(ConstructionNode newParentOfChildNode, QueryNode descendantNode) {
         this.localAction = INSERT_CONSTRUCTION_NODE;
-        this.optionalNewNode = Optional.of(newNode);
+        this.optionalNewNode = Optional.empty();
         this.optionalSubstitution = Optional.empty();
         this.optionalReplacingChildPosition = Optional.empty();
         this.optionalNewParentOfChildNode = Optional.of(newParentOfChildNode);

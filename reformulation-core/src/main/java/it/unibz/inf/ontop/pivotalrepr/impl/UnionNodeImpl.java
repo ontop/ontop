@@ -53,7 +53,7 @@ public class UnionNodeImpl extends QueryNodeImpl implements UnionNode {
         else {
             ConstructionNode newParentOfChildNode = new ConstructionNodeImpl(projectedVariables,
                     (ImmutableSubstitution<ImmutableTerm>) substitution, Optional.empty());
-            return new SubstitutionResultsImpl<>(this, newParentOfChildNode, childNode);
+            return new SubstitutionResultsImpl<>(newParentOfChildNode, childNode);
         }
     }
 
