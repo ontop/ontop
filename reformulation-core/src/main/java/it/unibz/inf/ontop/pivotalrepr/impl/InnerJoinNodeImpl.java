@@ -72,7 +72,7 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
             return new SubstitutionResultsImpl<>(DECLARE_AS_EMPTY);
         }
 
-        return computeAndEvaluateNewCondition(substitution, query, otherNodesProjectedVariables)
+        return computeAndEvaluateNewCondition(substitution, query)
                 .map(ev -> applyEvaluation(ev, substitution))
                 .orElseGet(() -> new SubstitutionResultsImpl<>(NO_CHANGE, Optional.of(substitution)));
     }
