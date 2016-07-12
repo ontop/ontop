@@ -8,8 +8,6 @@ import it.unibz.inf.ontop.pivotalrepr.*;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static it.unibz.inf.ontop.pivotalrepr.unfolding.ProjectedVariableExtractionTools.extractProjectedVariables;
-
 /**
  * Mutable component used for internal implementations of IntermediateQuery.
  */
@@ -59,7 +57,7 @@ public interface QueryTreeComponent {
     /**
      * TODO: explain
      */
-    void removeOrReplaceNodeByUniqueChildren(QueryNode node) throws IllegalTreeUpdateException;
+    QueryNode removeOrReplaceNodeByUniqueChildren(QueryNode node) throws IllegalTreeUpdateException;
 
     /**
      * TODO: explain

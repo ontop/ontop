@@ -41,7 +41,7 @@ public interface QueryTree {
 
     Optional<QueryNode> getParent(QueryNode childNode);
 
-    void removeOrReplaceNodeByUniqueChild(QueryNode node) throws IllegalTreeUpdateException;
+    QueryNode removeOrReplaceNodeByUniqueChild(QueryNode node) throws IllegalTreeUpdateException;
 
     void replaceNodesByOneNode(ImmutableList<QueryNode> queryNodes, QueryNode replacingNode, QueryNode parentNode,
                                Optional<NonCommutativeOperatorNode.ArgumentPosition> optionalPosition) throws IllegalTreeUpdateException;
