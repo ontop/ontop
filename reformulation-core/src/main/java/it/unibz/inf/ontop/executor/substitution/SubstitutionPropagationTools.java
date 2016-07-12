@@ -114,8 +114,21 @@ public class SubstitutionPropagationTools {
                                                                final QueryTreeComponent treeComponent)
             throws QueryNodeSubstitutionException {
 
+        return propagateSubstitutionDownToNodes(treeComponent.getChildrenStream(focusNode),
+                initialSubstitutionToPropagate, query, treeComponent);
+    }
+
+    /**
+     * Applies the substitution to the starting nodes and to their childre
+     */
+    private static QueryTreeComponent propagateSubstitutionDownToNodes(final Stream<QueryNode> startingNodes,
+                                                               final ImmutableSubstitution<? extends ImmutableTerm> initialSubstitutionToPropagate,
+                                                               final IntermediateQuery query,
+                                                               final QueryTreeComponent treeComponent)
+            throws QueryNodeSubstitutionException {
+
         Queue<NodeAndSubstitution> nodeAndSubsToVisit = new LinkedList<>();
-        treeComponent.getChildren(focusNode).stream()
+        startingNodes
                 .map(n -> new NodeAndSubstitution(n, initialSubstitutionToPropagate))
                 .forEach(nodeAndSubsToVisit::add);
 
@@ -300,8 +313,8 @@ public class SubstitutionPropagationTools {
             /**
              * Propagates the substitution DOWN to the other children
              */
-            optionalNewSubstitution.ifPresent(subst -> otherChildren
-                    .forEach(c -> propagateSubstitutionDown(c, subst, query, treeComponent)));
+            optionalNewSubstitution.ifPresent(subst -> propagateSubstitutionDownToNodes(otherChildren, subst,
+                    query, treeComponent));
 
             /**
              * Continue the propagation
