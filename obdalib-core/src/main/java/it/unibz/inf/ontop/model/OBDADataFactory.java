@@ -54,10 +54,6 @@ public interface OBDADataFactory extends Serializable {
 	
 	public DatalogProgram getDatalogProgram(OBDAQueryModifiers modifiers);
 
-	public DatalogProgram getDatalogProgram(CQIE rule);
-
-	public DatalogProgram getDatalogProgram(Collection<CQIE> rules);
-
 	public DatalogProgram getDatalogProgram(OBDAQueryModifiers modifiers, Collection<CQIE> rules);
 
 
@@ -193,7 +189,7 @@ public interface OBDADataFactory extends Serializable {
 	public Expression getFunctionOR(Term term1, Term term2);
 
 	public Expression getFunctionIsTrue(Term term);
-	
+
 	public Expression getFunctionIsNull(Term term);
 
 	public Expression getFunctionIsNotNull(Term term);
@@ -202,22 +198,6 @@ public interface OBDADataFactory extends Serializable {
 	
 	// ROMAN (23 Dec 2015): LIKE comes only from mappings
 	public Expression getSQLFunctionLike(Term term1, Term term2);
-	
-	public Expression getFunctionRegex(Term term1, Term term2, Term term3);
-	
-	public Expression getFunctionReplace(Term term1, Term term2, Term term3);
-	
-	/* Functions on strings */
-
-    public Expression getFunctionConcat(Term term1, Term term2);
-    
- // added by Nika: 
-    
-	public Expression getFunctionSubstring(Term term1, Term term2, Term term3);
-
-	public Expression getFunctionSubstring(Term term1, Term term2);
-
-	
 
 
 	/*

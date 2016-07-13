@@ -48,10 +48,11 @@ public enum ExpressionOperation implements OperationPredicate {
 	STRLEN("STRLEN", PREDEFINED_INTEGER_RULE, COL_TYPE.LITERAL),
 	UCASE("UCASE", STRING_LANG_RULE, COL_TYPE.LITERAL),
 	LCASE("LCASE", STRING_LANG_RULE, COL_TYPE.LITERAL),
-	SUBSTR("SUBSTR", FIRST_STRING_LANG_ARG_RULE, COL_TYPE.LITERAL, COL_TYPE.INTEGER, COL_TYPE.INTEGER),
+	SUBSTR2("SUBSTR", FIRST_STRING_LANG_ARG_RULE, COL_TYPE.LITERAL, COL_TYPE.INTEGER),
+	SUBSTR3("SUBSTR", FIRST_STRING_LANG_ARG_RULE, COL_TYPE.LITERAL, COL_TYPE.INTEGER, COL_TYPE.INTEGER),
 	STRBEFORE("STRBEFORE", FIRST_STRING_LANG_ARG_RULE, COL_TYPE.LITERAL, COL_TYPE.LITERAL),
 	STRAFTER("STRAFTER", FIRST_STRING_LANG_ARG_RULE, COL_TYPE.LITERAL, COL_TYPE.LITERAL),
-	REPLACE("REPLACE", PREDEFINED_LITERAL_RULE, COL_TYPE.LITERAL, COL_TYPE.LITERAL, COL_TYPE.LITERAL),
+	REPLACE("REPLACE", PREDEFINED_LITERAL_RULE, COL_TYPE.LITERAL, COL_TYPE.LITERAL, COL_TYPE.LITERAL, COL_TYPE.LITERAL),
 	CONCAT("CONCAT", STRING_LANG_RULE, COL_TYPE.LITERAL, COL_TYPE.LITERAL),
 	ENCODE_FOR_URI("ENCODE_FOR_URI", PREDEFINED_LITERAL_RULE, COL_TYPE.LITERAL),
 
@@ -129,6 +130,15 @@ public enum ExpressionOperation implements OperationPredicate {
 		this.termTypeInferenceRule = termTypeInferenceRule;
 		this.argTypes = ImmutableList.of(Optional.ofNullable(arg1), Optional.ofNullable(arg2), Optional.ofNullable(arg3));
 	}
+	// Quad operations
+	ExpressionOperation(String name, TermTypeInferenceRule termTypeInferenceRule, COL_TYPE arg1, COL_TYPE arg2,
+						COL_TYPE arg3, COL_TYPE arg4) {
+		this.name = name;
+		this.termTypeInferenceRule = termTypeInferenceRule;
+		this.argTypes = ImmutableList.of(Optional.ofNullable(arg1), Optional.ofNullable(arg2),
+				Optional.ofNullable(arg3), Optional.ofNullable(arg4));
+	}
+
 
 
 	private final String name;
