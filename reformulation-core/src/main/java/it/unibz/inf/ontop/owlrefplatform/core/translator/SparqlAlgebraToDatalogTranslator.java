@@ -31,6 +31,7 @@ import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
 import it.unibz.inf.ontop.owlrefplatform.core.abox.SemanticIndexURIMap;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.UriTemplateMatcher;
 import it.unibz.inf.ontop.parser.EncodeForURI;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.openrdf.model.Literal;
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
@@ -376,9 +377,9 @@ public class SparqlAlgebraToDatalogTranslator {
                                     (be, vars) -> getTermForLiteralOrIri(be.getValue())))
                             .collect(Collectors.toList());
 
-            ImmutableSet.Builder<Variable> allVarsBuilder = ImmutableSet.builder();
-            bindings.forEach(s -> allVarsBuilder.addAll(s.variables));
-            ImmutableSet<Variable> allVars = allVarsBuilder.build();
+            ImmutableSet<Variable> allVars = bindings.stream()
+                    .flatMap(s -> s.variables.stream())
+                    .collect(ImmutableCollectors.toSet());
 
             TranslationResult res = createFreshNode(allVars);
             bindings.forEach(p ->
