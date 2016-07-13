@@ -85,7 +85,10 @@ public class UnionNodeImpl extends QueryNodeImpl implements UnionNode {
 
     @Override
     public boolean isSyntacticallyEquivalentTo(QueryNode node) {
-        return (node instanceof UnionNode);
+        if (node instanceof UnionNode) {
+            return projectedVariables.equals(((UnionNode)node).getProjectedVariables());
+        }
+        return false;
     }
 
     @Override

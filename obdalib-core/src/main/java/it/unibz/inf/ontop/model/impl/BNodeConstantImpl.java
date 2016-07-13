@@ -22,6 +22,9 @@ package it.unibz.inf.ontop.model.impl;
 
 import it.unibz.inf.ontop.model.BNode;
 import it.unibz.inf.ontop.model.Predicate;
+import it.unibz.inf.ontop.model.Variable;
+
+import java.util.stream.Stream;
 
 /**
  * Implementation for BNodes.
@@ -76,6 +79,11 @@ public class BNodeConstantImpl implements BNode {
 	@Override
 	public boolean isGround() {
 		return true;
+	}
+
+	@Override
+	public Stream<Variable> getVariableStream() {
+		return Stream.of();
 	}
 
 	@Override
