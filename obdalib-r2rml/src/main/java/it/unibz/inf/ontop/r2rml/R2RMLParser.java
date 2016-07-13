@@ -602,9 +602,9 @@ public class R2RMLParser {
 			// terms.add(0, uriTemplate);
 			return fac.getTypedTerm(uriTemplate, COL_TYPE.LITERAL);
 		case 4://concat
-			Function f = fac.getFunctionConcat(terms.get(0),terms.get(1));
+			Function f = fac.getFunction(ExpressionOperation.CONCAT, terms.get(0), terms.get(1));
             for(int j=2;j<terms.size();j++){
-                f = fac.getFunctionConcat(f,terms.get(j));
+                f = fac.getFunction(ExpressionOperation.CONCAT, f, terms.get(j));
             }
             return f;
 		}

@@ -4,25 +4,17 @@ import it.unibz.inf.ontop.model.CQIE;
 import it.unibz.inf.ontop.model.DatalogProgram;
 import it.unibz.inf.ontop.model.OBDAException;
 import it.unibz.inf.ontop.model.Predicate;
-import it.unibz.inf.ontop.model.Term;
-import it.unibz.inf.ontop.model.Variable;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
 import it.unibz.inf.ontop.owlrefplatform.core.abox.SemanticIndexURIMap;
-import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.CQCUtilities;
-import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.DatalogNormalizer;
-import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.LinearInclusionDependencies;
-import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.VocabularyValidator;
+import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.*;
 import it.unibz.inf.ontop.owlrefplatform.core.queryevaluation.SPARQLQueryUtility;
 import it.unibz.inf.ontop.owlrefplatform.core.reformulation.QueryRewriter;
 import it.unibz.inf.ontop.owlrefplatform.core.srcquerygeneration.SQLQueryGenerator;
-import it.unibz.inf.ontop.owlrefplatform.core.translator.DatalogToSparqlTranslator;
-import it.unibz.inf.ontop.owlrefplatform.core.translator.SparqlAlgebraToDatalogTranslator;
+import it.unibz.inf.ontop.owlrefplatform.core.translator.*;
 import it.unibz.inf.ontop.owlrefplatform.core.unfolding.ExpressionEvaluator;
-import it.unibz.inf.ontop.owlrefplatform.core.unfolding.SPARQLQueryFlattener;
 import it.unibz.inf.ontop.renderer.DatalogProgramRenderer;
 
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -84,23 +76,36 @@ public class QuestQueryProcessor {
 	
 	
 	private DatalogProgram translateAndPreProcess(ParsedQuery pq)  {
-		
-		SparqlAlgebraToDatalogTranslator translator = new SparqlAlgebraToDatalogTranslator(unfolder.getUriTemplateMatcher(), uriMap, unfolder.getSameAsDataPredicatesAndClasses(), unfolder.getSameAsObjectPredicates() );
-		DatalogProgram program = translator.translate(pq);
 
+		SparqlAlgebraToDatalogTranslator translator = new SparqlAlgebraToDatalogTranslator(unfolder.getUriTemplateMatcher(), uriMap);
+		SparqlQuery translation = translator.translate(pq);
+		DatalogProgram program = translation.getProgram();
 		log.debug("Datalog program translated from the SPARQL query: \n{}", program);
 
-		SPARQLQueryFlattener unfolder = new SPARQLQueryFlattener(program);
-		program = unfolder.flatten();
-		log.debug("Flattened program: \n{}", program);
-			
+		SameAsRewriter sameAs = new SameAsRewriter(unfolder.getSameAsDataPredicatesAndClasses(), unfolder.getSameAsObjectPredicates());
+		program = sameAs.getSameAsRewriting(program);
+		//System.out.println("SAMEAS" + program);
+
 		log.debug("Replacing equivalences...");
-		DatalogProgram newprogram = OBDADataFactoryImpl.getInstance().getDatalogProgram(program.getQueryModifiers());
+		DatalogProgram newprogramEq = OBDADataFactoryImpl.getInstance().getDatalogProgram(program.getQueryModifiers());
+		Predicate topLevelPredicate = null;
 		for (CQIE query : program.getRules()) {
-			CQIE newquery = vocabularyValidator.replaceEquivalences(query);
-			newprogram.appendRule(newquery);
+			// TODO: fix cloning
+			CQIE rule = query.clone();
+			// TODO: get rid of EQNormalizer
+			EQNormalizer.enforceEqualities(rule);
+
+			CQIE newquery = vocabularyValidator.replaceEquivalences(rule);
+			if (newquery.getHead().getFunctionSymbol().getName().equals(OBDAVocabulary.QUEST_QUERY))
+				topLevelPredicate = newquery.getHead().getFunctionSymbol();
+			newprogramEq.appendRule(newquery);
 		}
-		return newprogram;		
+
+		SPARQLQueryFlattener fl = new SPARQLQueryFlattener(newprogramEq);
+		List<CQIE> p = fl.flatten(newprogramEq.getRules(topLevelPredicate).get(0));
+		DatalogProgram newprogram = OBDADataFactoryImpl.getInstance().getDatalogProgram(program.getQueryModifiers(), p);
+
+		return newprogram;
 	}
 	
 	
@@ -118,27 +123,40 @@ public class QuestQueryProcessor {
 		try {
 			// log.debug("Input query:\n{}", strquery);
 			
-			SparqlAlgebraToDatalogTranslator translator = new SparqlAlgebraToDatalogTranslator(unfolder.getUriTemplateMatcher(), uriMap, unfolder.getSameAsDataPredicatesAndClasses(), unfolder.getSameAsObjectPredicates());
-			DatalogProgram translation = translator.translate(pq);
+			SparqlAlgebraToDatalogTranslator translator = new SparqlAlgebraToDatalogTranslator(unfolder.getUriTemplateMatcher(), uriMap);
+			SparqlQuery translation = translator.translate(pq);
+			DatalogProgram program = translation.getProgram();
+			log.debug("Datalog program translated from the SPARQL query: \n{}", program);
+			//System.out.println("OUT " + program);
 
-			log.debug("Datalog program translated from the SPARQL query: \n{}", translation);
+			SameAsRewriter sameAs = new SameAsRewriter(unfolder.getSameAsDataPredicatesAndClasses(), unfolder.getSameAsObjectPredicates());
+			program = sameAs.getSameAsRewriting(program);
+			//System.out.println("SAMEAS" + program);
 
-			SPARQLQueryFlattener flattener = new SPARQLQueryFlattener(translation);
-			DatalogProgram program = flattener.flatten();
-			log.debug("Flattened program: \n{}", program);
-				
 			log.debug("Replacing equivalences...");
-			DatalogProgram newprogram = OBDADataFactoryImpl.getInstance().getDatalogProgram(program.getQueryModifiers());
+			DatalogProgram newprogramEq = OBDADataFactoryImpl.getInstance().getDatalogProgram(program.getQueryModifiers());
+			Predicate topLevelPredicate = null;
 			for (CQIE query : program.getRules()) {
-				CQIE newquery = vocabularyValidator.replaceEquivalences(query);
-				newprogram.appendRule(newquery);
+				// TODO: fix cloning
+				CQIE rule = query.clone();
+				// TODO: get rid of EQNormalizer
+				EQNormalizer.enforceEqualities(rule);
+
+				CQIE newquery = vocabularyValidator.replaceEquivalences(rule);
+				if (newquery.getHead().getFunctionSymbol().getName().equals(OBDAVocabulary.QUEST_QUERY))
+					topLevelPredicate = newquery.getHead().getFunctionSymbol();
+				newprogramEq.appendRule(newquery);
 			}
+
+			SPARQLQueryFlattener fl = new SPARQLQueryFlattener(newprogramEq);
+			List<CQIE> p = fl.flatten(newprogramEq.getRules(topLevelPredicate).get(0));
+			DatalogProgram newprogram = OBDADataFactoryImpl.getInstance().getDatalogProgram(program.getQueryModifiers(), p);
 
 			for (CQIE q : newprogram.getRules()) 
 				DatalogNormalizer.unfoldJoinTrees(q);
 			log.debug("Normalized program: \n{}", newprogram);
 
-			if (newprogram.getRules().size() < 1) 
+			if (newprogram.getRules().size() < 1)
 				throw new OBDAException("Error, the translation of the query generated 0 rules. This is not possible for any SELECT query (other queries are not supported by the translator).");
 
 			log.debug("Start the rewriting process...");
@@ -147,14 +165,18 @@ public class QuestQueryProcessor {
 			for (CQIE cq : newprogram.getRules())
 				CQCUtilities.optimizeQueryWithSigmaRules(cq.getBody(), sigma);
 			DatalogProgram programAfterRewriting = rewriter.rewrite(newprogram);
-			
+
 			//rewritingTime = System.currentTimeMillis() - startTime0;
 
 			//final long startTime = System.currentTimeMillis();
 			log.debug("Start the partial evaluation process...");
 
+			//System.out.println("OUT " + programAfterRewriting);
+
 			DatalogProgram programAfterUnfolding = unfolder.unfold(programAfterRewriting);
 			log.debug("Data atoms evaluated: \n{}", programAfterUnfolding);
+
+			//System.out.println("OUT UNFOLDED " + programAfterUnfolding);
 
 			List<CQIE> toRemove = new LinkedList<>();
 			for (CQIE rule : programAfterUnfolding.getRules()) {
@@ -188,23 +210,12 @@ public class QuestQueryProcessor {
 			log.debug("Partial evaluation ended.");
 			//unfoldingTime = System.currentTimeMillis() - startTime;
 
-			List<String> signature = null;
-			 // IMPORTANT: this is the original query 
-			// (with original variable names, not the BINDings after flattening)
-			for (CQIE q : translation.getRules()) 
-				if (q.getHead().getFunctionSymbol().getName().equals(OBDAVocabulary.QUEST_QUERY)) {
-					List<Term> terms = q.getHead().getTerms();
-					signature = new ArrayList<>(terms.size());
-					for (Term t : terms)
-						signature.add(((Variable)t).getName()); // ALL VARIABLES by construction
-					break;
-				}
-			querySignatureCache.put(pq, signature);
-	
+			querySignatureCache.put(pq, translation.getSignature());
+
 			String sql;
 			if (programAfterUnfolding.getRules().size() > 0) {
 				log.debug("Producing the SQL string...");
-				sql = datasourceQueryGenerator.generateSourceQuery(programAfterUnfolding, signature);
+				sql = datasourceQueryGenerator.generateSourceQuery(programAfterUnfolding, translation.getSignature());
 				log.debug("Resulting SQL: \n{}", sql);
 			}
 			else
