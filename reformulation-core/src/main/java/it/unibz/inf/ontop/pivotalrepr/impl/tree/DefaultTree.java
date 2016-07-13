@@ -244,7 +244,7 @@ public class DefaultTree implements QueryTree {
     @Override
     public QueryNode removeOrReplaceNodeByUniqueChild(QueryNode parentQueryNode) throws IllegalTreeUpdateException {
         TreeNode parentTreeNode = accessTreeNode(parentQueryNode);
-
+        removeNodeFromIndex(parentQueryNode);
         ImmutableList<TreeNode> children = accessChildrenRelation(parentTreeNode).getChildren();
 
         if (children.size() == 1) {

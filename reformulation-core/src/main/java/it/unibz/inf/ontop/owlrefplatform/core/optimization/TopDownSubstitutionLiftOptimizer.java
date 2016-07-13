@@ -47,7 +47,9 @@ public class TopDownSubstitutionLiftOptimizer implements SubstitutionLiftOptimiz
         while (nextNodeAndQuery.getOptionalNextNode().isPresent()) {
             nextNodeAndQuery = liftBindings(nextNodeAndQuery.getNextQuery(),
                     nextNodeAndQuery.getOptionalNextNode().get());
+
             log.debug(String.valueOf(nextNodeAndQuery.getNextQuery()));
+
         }
 
         return nextNodeAndQuery.getNextQuery();
@@ -97,12 +99,13 @@ public class TopDownSubstitutionLiftOptimizer implements SubstitutionLiftOptimiz
                     .orElseThrow(() -> new IllegalStateException(
                             "The focus was expected to be kept or replaced, not removed"));
 
-            RemoveEmptyNodesProposal<QueryNode> emptyProposal = new RemoveEmptyNodesProposalImpl<>(currentNode);
-            NodeCentricOptimizationResults<QueryNode> emptyProposalResults = currentQuery.applyProposal(emptyProposal);
-            currentQuery = emptyProposalResults.getResultingQuery();
-            currentNode = results.getNewNodeOrReplacingChild().orElseThrow(() -> new IllegalStateException("No focus node has been found"));
-
         }
+        RemoveEmptyNodesProposal<QueryNode> emptyProposal = new RemoveEmptyNodesProposalImpl<>(currentNode);
+        NodeCentricOptimizationResults<QueryNode> emptyProposalResults = currentQuery.applyProposal(emptyProposal);
+        currentQuery = emptyProposalResults.getResultingQuery();
+        currentNode = emptyProposalResults.getNewNodeOrReplacingChild()
+                .orElseGet(() -> emptyProposalResults.getOptionalNextSibling()
+                        .orElseThrow(() -> new IllegalStateException("No focus node has been found")));
 
         //if the union node has not been removed
         if (currentNode instanceof UnionNode) {
@@ -217,6 +220,8 @@ public class TopDownSubstitutionLiftOptimizer implements SubstitutionLiftOptimiz
 
                 NodeCentricOptimizationResults<QueryNode> results = currentQuery.applyProposal(proposal);
                 currentQuery = results.getResultingQuery();
+                currentChild = results.getNewNodeOrReplacingChild().orElseThrow(() -> new IllegalStateException(
+                                        "The focus was expected to be kept or replaced, not removed"));
                 optionalCurrentChild = results.getOptionalNextSibling();
                 currentJoinNode = currentQuery.getParent(
                         results.getNewNodeOrReplacingChild()
@@ -224,6 +229,8 @@ public class TopDownSubstitutionLiftOptimizer implements SubstitutionLiftOptimiz
                                         "The focus was expected to be kept or replaced, not removed")))
                         .orElseThrow(() -> new IllegalStateException(
                                 "The focus node should still have a parent (a Join node)"));
+
+
             }
             else {
                 optionalCurrentChild = currentQuery.getNextSibling(currentChild);

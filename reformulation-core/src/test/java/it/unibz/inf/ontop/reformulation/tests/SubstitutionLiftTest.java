@@ -389,12 +389,38 @@ public class SubstitutionLiftTest {
         expectedQueryBuilder.addChild(expectedRootNode, expectedUnionNode );
 
         ConstructionNode expectedSubQuery1UnionNode = new ConstructionNodeImpl(projectionAtom.getVariables(),
-                new ImmutableSubstitutionImpl<>(ImmutableMap.of(X, generateURI1(A))), Optional.empty());
+                new ImmutableSubstitutionImpl<>(ImmutableMap.of(X, generateURI1(B))), Optional.empty());
         expectedQueryBuilder.addChild(expectedUnionNode, expectedSubQuery1UnionNode);
+
+        InnerJoinNode joinNode11 = new InnerJoinNodeImpl(Optional.empty());
+        expectedQueryBuilder.addChild(expectedSubQuery1UnionNode, joinNode11);
+
+        InnerJoinNode joinNode12 = new InnerJoinNodeImpl(Optional.empty());
+        expectedQueryBuilder.addChild(joinNode11, joinNode12);
+
+        expectedQueryBuilder.addChild(joinNode11, new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE5_PREDICATE, A, B)) );
+
+        expectedQueryBuilder.addChild(joinNode12, new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, A, B)) );
+        expectedQueryBuilder.addChild(joinNode12, new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE3_PREDICATE, A, B)) );
 
         ConstructionNode expectedSubQuery2UnionNode = new ConstructionNodeImpl(projectionAtom.getVariables(),
                 new ImmutableSubstitutionImpl<>(ImmutableMap.of(X, generateURI2(C))), Optional.empty());
         expectedQueryBuilder.addChild(expectedUnionNode, expectedSubQuery2UnionNode);
+
+        InnerJoinNode joinNode21 = new InnerJoinNodeImpl(Optional.empty());
+        expectedQueryBuilder.addChild(expectedSubQuery2UnionNode, joinNode21);
+
+        InnerJoinNode joinNode22 = new InnerJoinNodeImpl(Optional.empty());
+        expectedQueryBuilder.addChild(joinNode21, joinNode22);
+
+        expectedQueryBuilder.addChild(joinNode21, new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE6_PREDICATE, C, B)) );
+
+        expectedQueryBuilder.addChild(joinNode22, new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, C, B)) );
+        expectedQueryBuilder.addChild(joinNode22, new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE2_PREDICATE, C, B)) );
+
+
+
+
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
 
         System.out.println("\nExpected  query: \n" +  expectedQuery);
