@@ -26,6 +26,11 @@ public interface QueryTreeComponent {
 
     void replaceNode(QueryNode previousNode, QueryNode replacingNode);
 
+    /**
+     * Replaces all the sub-tree by one sub-tree node
+     */
+    void replaceSubTree(QueryNode subTreeRootNode, QueryNode replacingNode);
+
     void addSubTree(IntermediateQuery subQuery, QueryNode subQueryTopNode, QueryNode localTopNode)
             throws IllegalTreeUpdateException;
 
@@ -91,4 +96,11 @@ public interface QueryTreeComponent {
      * All the possibly already allocated variables
      */
     ImmutableSet<Variable> getKnownVariables();
+
+
+    /**
+     * Keeps the same query node objects but clones the tree edges
+     * (since the latter are mutable by default).
+     */
+    QueryTreeComponent createSnapshot();
 }

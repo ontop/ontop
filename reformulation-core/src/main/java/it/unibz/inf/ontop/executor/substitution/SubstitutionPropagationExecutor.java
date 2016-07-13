@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.executor.substitution;
 
 import java.util.Optional;
 
+import it.unibz.inf.ontop.model.ImmutableTerm;
 import it.unibz.inf.ontop.model.VariableOrGroundTerm;
 import it.unibz.inf.ontop.pivotalrepr.*;
 import it.unibz.inf.ontop.pivotalrepr.proposal.impl.NodeCentricOptimizationResultsImpl;
@@ -42,7 +43,7 @@ public class SubstitutionPropagationExecutor<N extends QueryNode>
                                                                         QueryTreeComponent treeComponent)
             throws QueryNodeSubstitutionException, EmptyQueryException {
         N originalFocusNode = proposal.getFocusNode();
-        ImmutableSubstitution<? extends VariableOrGroundTerm> substitutionToPropagate = proposal.getSubstitution();
+        ImmutableSubstitution<? extends ImmutableTerm> substitutionToPropagate = proposal.getSubstitution();
 
         /**
          * TODO: check the results!!!
@@ -63,7 +64,7 @@ public class SubstitutionPropagationExecutor<N extends QueryNode>
 
 
     private static <N extends QueryNode> N propagateToFocusNode(
-            N originalFocusNode, ImmutableSubstitution<? extends VariableOrGroundTerm> substitutionToPropagate,
+            N originalFocusNode, ImmutableSubstitution<? extends ImmutableTerm> substitutionToPropagate,
             IntermediateQuery query, QueryTreeComponent treeComponent) throws QueryNodeSubstitutionException {
 
         SubstitutionResults<? extends QueryNode> substitutionResults =

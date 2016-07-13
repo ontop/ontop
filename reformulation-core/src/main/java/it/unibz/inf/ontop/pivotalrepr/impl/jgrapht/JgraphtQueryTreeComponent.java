@@ -180,6 +180,11 @@ public class JgraphtQueryTreeComponent implements QueryTreeComponent {
         queryDAG.removeVertex(previousNode);
     }
 
+    @Override
+    public void replaceSubTree(QueryNode subTreeRootNode, QueryNode replacingNode) {
+        throw new RuntimeException("TODO: support replaceSubTree()");
+    }
+
     /**
      * TODO: explain
      * TODO: replace this recursive implementation but iterative one
@@ -467,6 +472,11 @@ public class JgraphtQueryTreeComponent implements QueryTreeComponent {
     @Override
     public ImmutableSet<Variable> getKnownVariables() {
         throw new RuntimeException("TODO: support getKnownVariables()");
+    }
+
+    @Override
+    public QueryTreeComponent createSnapshot() {
+        throw new RuntimeException("TODO: support createSnapshot()");
     }
 
     private void addChild(QueryNode parentNode, QueryNode childNode, boolean isNew) throws IllegalTreeUpdateException {
