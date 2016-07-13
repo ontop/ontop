@@ -119,9 +119,10 @@ public class ConstructionNodeTools {
         Stream<Variable> remainingVariableStream = projectedVariables.stream()
                 .filter(v -> !tauDomain.contains(v));
 
-        Stream<Variable> newVariableStream = descendingSubstitution.getMap().values().stream()
-                .filter(t -> t instanceof Variable)
-                .map(t -> (Variable) t);
+        Stream<Variable> newVariableStream = descendingSubstitution.getImmutableMap().entrySet().stream()
+                .filter(e -> projectedVariables.contains(e.getKey()))
+                .map(Map.Entry::getValue)
+                .flatMap(ImmutableTerm::getVariableStream);
 
         return Stream.concat(newVariableStream, remainingVariableStream)
                 .collect(ImmutableCollectors.toSet());
