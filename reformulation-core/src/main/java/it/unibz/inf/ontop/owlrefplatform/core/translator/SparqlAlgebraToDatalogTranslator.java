@@ -21,8 +21,6 @@ package it.unibz.inf.ontop.owlrefplatform.core.translator;
  */
 
 import com.google.common.collect.*;
-import com.sun.javafx.fxml.expression.Expression;
-import com.sun.org.apache.xpath.internal.ExpressionNode;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.OBDAQueryModifiers.OrderCondition;
 import it.unibz.inf.ontop.model.Predicate.COL_TYPE;
