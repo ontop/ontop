@@ -1889,6 +1889,7 @@ public class SQLGenerator implements SQLQueryGenerator {
                 String out_str = getSQLString(function.getTerm(1), index, false);
                 String in_str = getSQLString(function.getTerm(2), index, false);
                 String result = sqladapter.strReplace(orig, out_str, in_str);
+				// TODO: handle flags
                 return result;
             }
             else if (functionSymbol == ExpressionOperation.CONCAT) {
