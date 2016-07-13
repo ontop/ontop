@@ -106,4 +106,6 @@ public interface IntermediateQuery {
      * TODO: return an immutable Intermediate Query
      */
     IntermediateQuery createSnapshot();
+
+    boolean hasAncestor(QueryNode descendantNode, QueryNode ancestorNode);
 }

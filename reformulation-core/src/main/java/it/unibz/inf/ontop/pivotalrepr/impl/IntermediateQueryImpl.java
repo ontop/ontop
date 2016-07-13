@@ -118,6 +118,14 @@ public class IntermediateQueryImpl implements IntermediateQuery {
         return new IntermediateQueryImpl(metadata, projectionAtom, treeComponent.createSnapshot());
     }
 
+    /**
+     * TODO: replace by a more efficient implementation
+     */
+    @Override
+    public boolean hasAncestor(QueryNode descendantNode, QueryNode ancestorNode) {
+        return getAncestors(descendantNode).contains(ancestorNode);
+    }
+
 
     @Override
     public MetadataForQueryOptimization getMetadata() {
