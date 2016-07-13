@@ -2246,7 +2246,7 @@ public class DatalogUnfolder {
      * not really JOINs
      */
     private void cleanJoins(CQIE query) {
-        DatalogNormalizer.unfoldJoinTrees(query.getBody(), false);
+        DatalogNormalizer.unfoldJoinTrees(query);
     }
 
     /***
