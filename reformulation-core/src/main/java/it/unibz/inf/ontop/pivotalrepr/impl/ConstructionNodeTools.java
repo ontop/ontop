@@ -128,6 +128,17 @@ public class ConstructionNodeTools {
                 .collect(ImmutableCollectors.toSet());
     }
 
+    public static ImmutableSubstitution<ImmutableTerm> extractRelevantDescendingSubstitution(
+            ImmutableSubstitution<? extends ImmutableTerm> descendingSubstitution,
+            ImmutableSet<Variable> projectedVariables) {
+        ImmutableMap<Variable, ImmutableTerm> newSubstitutionMap = descendingSubstitution.getImmutableMap().entrySet().stream()
+                .filter(e -> projectedVariables.contains(e.getKey()))
+                .map(e -> (Map.Entry<Variable, ImmutableTerm>) e)
+                .collect(ImmutableCollectors.toMap());
+
+        return new ImmutableSubstitutionImpl<>(newSubstitutionMap);
+    }
+
 
     /**
      * TODO: explain
