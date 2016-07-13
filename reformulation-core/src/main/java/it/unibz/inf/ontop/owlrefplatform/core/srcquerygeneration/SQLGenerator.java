@@ -1972,12 +1972,14 @@ public class SQLGenerator implements SQLQueryGenerator {
 				String result = sqladapter.strLcase(literal);
 				return result;
 			}
-			else if (functionSymbol == ExpressionOperation.SUBSTR) {
+			else if (functionSymbol == ExpressionOperation.SUBSTR2) {
 				String string = getSQLString(function.getTerm(0), index, false);
 				String start = getSQLString(function.getTerm(1), index, false);
-				if (function.getTerms().size() == 2){
-					return sqladapter.strSubstr(string, start);
-				}
+				return sqladapter.strSubstr(string, start);
+			}
+			else if (functionSymbol == ExpressionOperation.SUBSTR3) {
+				String string = getSQLString(function.getTerm(0), index, false);
+				String start = getSQLString(function.getTerm(1), index, false);
 				String end = getSQLString(function.getTerm(2), index, false);
 				String result = sqladapter.strSubstr(string, start, end);
 

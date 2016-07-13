@@ -323,7 +323,8 @@ public class TreeWitnessRewriter implements QueryRewriter {
 			log.debug("EDGE DEFS\n{}", edgeDP);			
 			outputRules = DatalogQueryServices.plugInDefinitions(outputRules, edgeDP);
 			if (ccDP != null)
-				ccDP = fac.getDatalogProgram(DatalogQueryServices.plugInDefinitions(ccDP.getRules(), edgeDP));
+				ccDP = fac.getDatalogProgram(dp.getQueryModifiers(),
+						DatalogQueryServices.plugInDefinitions(ccDP.getRules(), edgeDP));
 			log.debug("INLINE EDGE PROGRAM\n{}CC DEFS\n{}", outputRules, ccDP);
 		}
 		if (ccDP != null) {

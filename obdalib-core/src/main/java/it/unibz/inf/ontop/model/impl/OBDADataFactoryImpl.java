@@ -375,26 +375,12 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	}
 
 	@Override
-	public DatalogProgram getDatalogProgram(CQIE rule) {
-		DatalogProgram p = new DatalogProgramImpl();
-		p.appendRule(rule);
-		return p;
-	}
-
-	@Override
 	public DatalogProgram getDatalogProgram(OBDAQueryModifiers modifiers) {
 		DatalogProgram p = new DatalogProgramImpl();
 		p.getQueryModifiers().copy(modifiers);
 		return p;
 	}
-	
-	@Override
-	public DatalogProgram getDatalogProgram(Collection<CQIE> rules) {
-		DatalogProgram p = new DatalogProgramImpl();
-		p.appendRule(rules);
-		return p;
-	}
-	
+
 	@Override
 	public DatalogProgram getDatalogProgram(OBDAQueryModifiers modifiers, Collection<CQIE> rules) {
 		DatalogProgram p = new DatalogProgramImpl();
@@ -560,32 +546,7 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	public Expression getSQLFunctionLike(Term term1, Term term2) {
 		return getExpression(ExpressionOperation.SQL_LIKE, term1, term2);
 	}
-	
-	@Override
-	public Expression getFunctionRegex(Term term1, Term term2, Term term3) {
-		return getExpression(ExpressionOperation.REGEX, term1, term2, term3);
-	}
-	
-	@Override
-	public Expression getFunctionReplace(Term term1, Term term2, Term term3) {
-		return getExpression(ExpressionOperation.REPLACE, term1, term2, term3 );
-	}
-	
-    @Override
-    public Expression getFunctionConcat(Term term1, Term term2) {
-        return getExpression(ExpressionOperation.CONCAT, term1, term2);
-    }
 
-    @Override
-    public Expression getFunctionSubstring(Term term1, Term term2, Term term3) {
-        return getExpression(ExpressionOperation.SUBSTR, term1, term2, term3);
-    } //added by Nika
-
-	@Override
-	public Expression getFunctionSubstring(Term term1, Term term2) {
-		return getExpression(ExpressionOperation.SUBSTR, term1, term2);
-	}
-        
 	@Override
 	public Expression getFunctionCast(Term term1, Term term2) {
 		// TODO implement cast function

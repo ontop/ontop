@@ -1,4 +1,4 @@
-package it.unibz.krdb.obda.reformulation.tests;
+package it.unibz.inf.ontop.reformulation.tests;
 
 import it.unibz.inf.ontop.model.UriTemplateMatcher;
 import it.unibz.inf.ontop.owlrefplatform.core.abox.SemanticIndexURIMap;
