@@ -56,7 +56,8 @@ public class SubstitutionPropagationTest {
     private static final Variable N = DATA_FACTORY.getVariable("n");
 
 
-    private static final URITemplatePredicate URI_PREDICATE =  new URITemplatePredicateImpl(2);
+    private static final URITemplatePredicate URI1_PREDICATE =  new URITemplatePredicateImpl(2);
+    private static final URITemplatePredicate URI2_PREDICATE =  new URITemplatePredicateImpl(3);
     private static final Constant URI_TEMPLATE_STR_1 =  DATA_FACTORY.getConstantLiteral("http://example.org/ds1/{}");
     private static final Constant URI_TEMPLATE_STR_2 =  DATA_FACTORY.getConstantLiteral("http://example.org/ds2/{}/{}");
 
@@ -151,7 +152,7 @@ public class SubstitutionPropagationTest {
         ConstructionNode newRootNode = leftConstructionNode;
         expectedQueryBuilder.init(projectionAtom, newRootNode);
         expectedQueryBuilder.addChild(newRootNode, joinNode);
-        expectedQueryBuilder.addChild(joinNode, buildExtensionalDataNode(TABLE3_PREDICATE, A, B));
+        expectedQueryBuilder.addChild(joinNode, DATA_NODE_1);
         expectedQueryBuilder.addChild(joinNode, buildExtensionalDataNode(TABLE3_PREDICATE, A, B));
 
         propagateAndCompare(initialQuery, expectedQueryBuilder.build(), propagationProposal);
@@ -383,11 +384,11 @@ public class SubstitutionPropagationTest {
 
 
     private static ImmutableFunctionalTerm generateURI1(ImmutableTerm argument) {
-        return DATA_FACTORY.getImmutableFunctionalTerm(URI_PREDICATE, URI_TEMPLATE_STR_1, argument);
+        return DATA_FACTORY.getImmutableFunctionalTerm(URI1_PREDICATE, URI_TEMPLATE_STR_1, argument);
     }
 
     private static ImmutableFunctionalTerm generateURI2(ImmutableTerm argument1, ImmutableTerm argument2) {
-        return DATA_FACTORY.getImmutableFunctionalTerm(URI_PREDICATE, URI_TEMPLATE_STR_2, argument1, argument2);
+        return DATA_FACTORY.getImmutableFunctionalTerm(URI2_PREDICATE, URI_TEMPLATE_STR_2, argument1, argument2);
     }
     
     private static ExtensionalDataNode buildExtensionalDataNode(AtomPredicate predicate, VariableOrGroundTerm ... arguments) {
