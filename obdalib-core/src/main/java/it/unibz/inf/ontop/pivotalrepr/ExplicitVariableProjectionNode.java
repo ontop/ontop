@@ -6,7 +6,7 @@ import it.unibz.inf.ontop.model.Variable;
 /**
  * Node that explicitly projects some variables.
  *
- * Common abstraction for ConstructionNodes, UnionNodes and DataNodes.
+ * Common abstraction for ConstructionNodes, UnionNodes, DataNodes and EmptyNodes.
  *
  */
 public interface ExplicitVariableProjectionNode extends QueryNode {

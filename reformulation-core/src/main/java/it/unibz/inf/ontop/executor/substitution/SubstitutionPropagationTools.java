@@ -16,6 +16,7 @@ import it.unibz.inf.ontop.pivotalrepr.proposal.ReactToChildDeletionProposal;
 import it.unibz.inf.ontop.pivotalrepr.proposal.ReactToChildDeletionResults;
 import it.unibz.inf.ontop.pivotalrepr.proposal.impl.NodeCentricOptimizationResultsImpl;
 import it.unibz.inf.ontop.pivotalrepr.proposal.impl.ReactToChildDeletionProposalImpl;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.LinkedList;
 import java.util.Queue;
@@ -199,7 +200,7 @@ public class SubstitutionPropagationTools {
                  * Replace the sub-tree by an empty newNode
                  */
             case DECLARE_AS_EMPTY:
-                QueryNode replacingNode = new EmptyNodeImpl(query.getProjectedVariables(node));
+                QueryNode replacingNode = replaceByEmptyNode(node, substitution, query);
                 treeComponent.replaceSubTree(node, replacingNode);
 
                 return new SubstitutionApplicationResults(replacingNode, newSubstitution, false);
@@ -207,6 +208,19 @@ public class SubstitutionPropagationTools {
             default:
                 throw new IllegalStateException("Unknown local action: " + substitutionResults.getLocalAction());
         }
+    }
+
+    private static EmptyNode replaceByEmptyNode(QueryNode rejectingNode, ImmutableSubstitution descendingSubstitution,
+                                                IntermediateQuery query) {
+        /**
+         * The new set of projected variables have to take into account
+         * the changes proposed by the descending substitution.
+         */
+        ImmutableSet<Variable> newProjectedVariables = query.getProjectedVariables(rejectingNode).stream()
+                .flatMap(v -> descendingSubstitution.apply(v).getVariableStream())
+                .collect(ImmutableCollectors.toSet());
+
+        return new EmptyNodeImpl(newProjectedVariables);
     }
 
     /**
