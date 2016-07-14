@@ -117,6 +117,95 @@ public class SubstitutionPropagationTest {
     }
 
     @Test
+    public void testURI1PropURI2Branch() throws EmptyQueryException {
+        IntermediateQueryBuilder initialQueryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
+        DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE, X, Y);
+
+        ConstructionNode initialRootNode = new ConstructionNodeImpl(projectionAtom.getVariables());
+        initialQueryBuilder.init(projectionAtom, initialRootNode);
+
+        InnerJoinNode joinNode = new InnerJoinNodeImpl(Optional.empty());
+        initialQueryBuilder.addChild(initialRootNode, joinNode);
+
+        ConstructionNode leftConstructionNode = new ConstructionNodeImpl(ImmutableSet.of(X, Y),
+                new ImmutableSubstitutionImpl<>(ImmutableMap.of(
+                        X, generateURI1(A),
+                        Y, generateURI1(B))),
+                Optional.empty());
+        initialQueryBuilder.addChild(joinNode, leftConstructionNode);
+        initialQueryBuilder.addChild(leftConstructionNode, DATA_NODE_1);
+
+
+        ConstructionNode rightConstructionNode = new ConstructionNodeImpl(ImmutableSet.of(X),
+                new ImmutableSubstitutionImpl<>(ImmutableMap.of(
+                        X, generateURI2(C, D))),
+                Optional.empty());
+        initialQueryBuilder.addChild(joinNode, rightConstructionNode);
+        initialQueryBuilder.addChild(rightConstructionNode, DATA_NODE_3);
+
+        IntermediateQuery initialQuery = initialQueryBuilder.build();
+
+        SubstitutionPropagationProposal<ConstructionNode> propagationProposal =
+                new SubstitutionPropagationProposalImpl<>(leftConstructionNode, leftConstructionNode.getDirectBindingSubstitution());
+
+        IntermediateQueryBuilder expectedQueryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
+        ConstructionNode newRootNode = leftConstructionNode;
+        expectedQueryBuilder.init(projectionAtom, newRootNode);
+        expectedQueryBuilder.addChild(newRootNode, joinNode);
+        expectedQueryBuilder.addChild(joinNode, DATA_NODE_1);
+        expectedQueryBuilder.addChild(joinNode, new EmptyNodeImpl(ImmutableSet.of(A)));
+
+        propagateAndCompare(initialQuery, expectedQueryBuilder.build(), propagationProposal);
+
+    }
+
+    @Test
+    public void testURI2PropURI1Branch() throws EmptyQueryException {
+        IntermediateQueryBuilder initialQueryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
+        DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE, X, Y);
+
+        ConstructionNode initialRootNode = new ConstructionNodeImpl(projectionAtom.getVariables());
+        initialQueryBuilder.init(projectionAtom, initialRootNode);
+
+        InnerJoinNode joinNode = new InnerJoinNodeImpl(Optional.empty());
+        initialQueryBuilder.addChild(initialRootNode, joinNode);
+
+        ConstructionNode leftConstructionNode = new ConstructionNodeImpl(ImmutableSet.of(X, Y),
+                new ImmutableSubstitutionImpl<>(ImmutableMap.of(
+                        X, generateURI1(A),
+                        Y, generateURI1(B))),
+                Optional.empty());
+        initialQueryBuilder.addChild(joinNode, leftConstructionNode);
+        initialQueryBuilder.addChild(leftConstructionNode, DATA_NODE_1);
+
+
+        ConstructionNode rightConstructionNode = new ConstructionNodeImpl(ImmutableSet.of(X),
+                new ImmutableSubstitutionImpl<>(ImmutableMap.of(
+                        X, generateURI2(C, D))),
+                Optional.empty());
+        initialQueryBuilder.addChild(joinNode, rightConstructionNode);
+        initialQueryBuilder.addChild(rightConstructionNode, DATA_NODE_3);
+
+        IntermediateQuery initialQuery = initialQueryBuilder.build();
+
+        /**
+         * Now propagates the right proposal
+         */
+        SubstitutionPropagationProposal<ConstructionNode> propagationProposal =
+                new SubstitutionPropagationProposalImpl<>(rightConstructionNode, rightConstructionNode.getDirectBindingSubstitution());
+
+        IntermediateQueryBuilder expectedQueryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
+        ConstructionNode newRootNode = leftConstructionNode;
+        expectedQueryBuilder.init(projectionAtom, newRootNode);
+        expectedQueryBuilder.addChild(newRootNode, joinNode);
+        expectedQueryBuilder.addChild(joinNode, new EmptyNodeImpl(ImmutableSet.of(C, D, Y)));
+        expectedQueryBuilder.addChild(joinNode, DATA_NODE_3);
+
+        propagateAndCompare(initialQuery, expectedQueryBuilder.build(), propagationProposal);
+
+    }
+
+    @Test
     public void testURI2PropOtherBranch() throws EmptyQueryException {
         IntermediateQueryBuilder initialQueryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
         DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE, X, Y);
@@ -371,6 +460,7 @@ public class SubstitutionPropagationTest {
             throws EmptyQueryException {
 
         System.out.println("\n Original query: \n" +  query);
+        System.out.println(propagationProposal);
         System.out.println("\n Expected query: \n" +  expectedQuery);
 
         // Updates the query (in-place optimization)
