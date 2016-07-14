@@ -22,6 +22,9 @@ package it.unibz.inf.ontop.model.impl;
 
 import it.unibz.inf.ontop.model.Predicate.COL_TYPE;
 import it.unibz.inf.ontop.model.URIConstant;
+import it.unibz.inf.ontop.model.Variable;
+
+import java.util.stream.Stream;
 
 
 /**
@@ -66,6 +69,11 @@ public class URIConstantImpl implements URIConstant {
 	@Override
 	public boolean isGround() {
 		return true;
+	}
+
+	@Override
+	public Stream<Variable> getVariableStream() {
+		return Stream.of();
 	}
 
 	@Override

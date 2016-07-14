@@ -9,6 +9,7 @@ import it.unibz.inf.ontop.model.Variable;
 import it.unibz.inf.ontop.pivotalrepr.proposal.QueryOptimizationProposal;
 
 import java.util.Optional;
+import java.util.stream.Stream;
 
 /**
  *
@@ -24,6 +25,10 @@ public interface IntermediateQuery {
     ImmutableList<QueryNode> getNodesInTopDownOrder();
 
     ImmutableList<QueryNode> getChildren(QueryNode node);
+
+    Stream<QueryNode> getChildrenStream(QueryNode node);
+
+    Stream<QueryNode> getOtherChildrenStream(QueryNode parent, QueryNode childToOmmit);
 
     Optional<QueryNode> getChild(QueryNode currentNode, NonCommutativeOperatorNode.ArgumentPosition position);
 

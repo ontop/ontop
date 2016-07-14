@@ -127,6 +127,17 @@ public class DefaultTree implements QueryTree {
     }
 
     @Override
+    public Stream<QueryNode> getChildrenStream(QueryNode node) {
+        ChildrenRelation childrenRelation = accessChildrenRelation(accessTreeNode(node));
+        if (childrenRelation == null) {
+            return Stream.of();
+        }
+        else {
+            return childrenRelation.getChildQueryNodeStream();
+        }
+    }
+
+    @Override
     public boolean contains(QueryNode node) {
         return nodeIndex.containsKey(node);
     }
@@ -231,7 +242,7 @@ public class DefaultTree implements QueryTree {
     }
 
     @Override
-    public void removeOrReplaceNodeByUniqueChild(QueryNode parentQueryNode) throws IllegalTreeUpdateException {
+    public QueryNode removeOrReplaceNodeByUniqueChild(QueryNode parentQueryNode) throws IllegalTreeUpdateException {
         TreeNode parentTreeNode = accessTreeNode(parentQueryNode);
 
         ImmutableList<TreeNode> children = accessChildrenRelation(parentTreeNode).getChildren();
@@ -246,6 +257,7 @@ public class DefaultTree implements QueryTree {
 
             ChildrenRelation grandParentRelation = accessChildrenRelation(grandParentTreeNode);
             grandParentRelation.replaceChild(parentTreeNode, childTreeNode);
+            return childTreeNode.getQueryNode();
         }
         else {
             throw new IllegalTreeUpdateException("The query node " + parentQueryNode + " does not have a unique child");
@@ -327,6 +339,38 @@ public class DefaultTree implements QueryTree {
                     .map(n -> (EmptyNode) n)
                     .collect(ImmutableCollectors.toSet());
         }
+    }
+
+    @Override
+    public void replaceNodeByChild(QueryNode parentNode,
+                                   Optional<NonCommutativeOperatorNode.ArgumentPosition> optionalReplacingChildPosition) {
+        TreeNode parentTreeNode = accessTreeNode(parentNode);
+
+        ChildrenRelation childrenRelation = accessChildrenRelation(parentTreeNode);
+
+        TreeNode childTreeNode;
+        if (optionalReplacingChildPosition.isPresent()) {
+            childTreeNode = childrenRelation.getChild(optionalReplacingChildPosition.get())
+                    .orElseThrow(() -> new IllegalTreeUpdateException("No child at the position"
+                            + optionalReplacingChildPosition.get()));
+        }
+        else {
+            ImmutableList<TreeNode> children = childrenRelation.getChildren();
+            if (children.isEmpty()) {
+                throw new IllegalTreeUpdateException("The node cannot be replaced by a child " +
+                        "(does not have any)");
+            }
+            childTreeNode = children.get(0);
+        }
+
+        childrenIndex.remove(parentTreeNode);
+        // May be null
+        TreeNode grandParentTreeNode = getParentTreeNode(parentTreeNode);
+        parentIndex.remove(parentTreeNode);
+        parentIndex.put(childTreeNode, grandParentTreeNode);
+
+        ChildrenRelation grandParentRelation = accessChildrenRelation(grandParentTreeNode);
+        grandParentRelation.replaceChild(parentTreeNode, childTreeNode);
     }
 
     @Override

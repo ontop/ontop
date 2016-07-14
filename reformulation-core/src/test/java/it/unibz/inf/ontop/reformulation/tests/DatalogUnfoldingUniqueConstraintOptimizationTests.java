@@ -172,7 +172,8 @@ public class DatalogUnfoldingUniqueConstraintOptimizationTests extends TestCase 
         body.add(fac.getFunction(fac.getDataPropertyPredicate("id1"), fac.getVariable("n"), fac.getVariable("p")));
 		CQIE query = fac.getCQIE(head, body);
 
-		DatalogProgram input = fac.getDatalogProgram(Collections.singletonList(query));
+		DatalogProgram input = fac.getDatalogProgram();
+		input.appendRule(query);
 		DatalogProgram output = unfolder.unfold(input, "q", QuestConstants.BUP, true);
 		System.out.println("input " + input);
 

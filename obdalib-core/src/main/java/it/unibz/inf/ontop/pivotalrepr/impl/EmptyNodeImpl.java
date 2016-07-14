@@ -42,7 +42,7 @@ public class EmptyNodeImpl extends QueryNodeImpl implements EmptyNode {
     @Override
     public SubstitutionResults<EmptyNode> applyAscendingSubstitution(
             ImmutableSubstitution<? extends ImmutableTerm> substitution,
-            QueryNode descendantNode, IntermediateQuery query) {
+            QueryNode childNode, IntermediateQuery query) {
         return new SubstitutionResultsImpl<>(NO_CHANGE);
     }
 

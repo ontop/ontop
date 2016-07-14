@@ -6,13 +6,16 @@ import it.unibz.inf.ontop.model.Variable;
 import it.unibz.inf.ontop.pivotalrepr.*;
 
 import java.util.Optional;
+import java.util.stream.Stream;
 
 /**
  * Mutable component used for internal implementations of IntermediateQuery.
  */
 public interface QueryTreeComponent {
 
-    ImmutableList<QueryNode> getCurrentSubNodesOf(QueryNode node);
+    ImmutableList<QueryNode> getChildren(QueryNode node);
+
+    Stream<QueryNode> getChildrenStream(QueryNode node);
 
     ConstructionNode getRootConstructionNode() throws IllegalTreeException;
 
@@ -54,7 +57,7 @@ public interface QueryTreeComponent {
     /**
      * TODO: explain
      */
-    void removeOrReplaceNodeByUniqueChildren(QueryNode node) throws IllegalTreeUpdateException;
+    QueryNode removeOrReplaceNodeByUniqueChildren(QueryNode node) throws IllegalTreeUpdateException;
 
     /**
      * TODO: explain
@@ -96,6 +99,12 @@ public interface QueryTreeComponent {
      * All the possibly already allocated variables
      */
     ImmutableSet<Variable> getKnownVariables();
+
+    /**
+     * If no position is given, replaces the parent node by its first child
+     */
+    void replaceNodeByChild(QueryNode parentNode,
+                            Optional<NonCommutativeOperatorNode.ArgumentPosition> optionalReplacingChildPosition);
 
 
     /**

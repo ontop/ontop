@@ -24,6 +24,7 @@ import it.unibz.inf.ontop.pivotalrepr.*;
 import it.unibz.inf.ontop.pivotalrepr.proposal.*;
 
 import java.util.Optional;
+import java.util.stream.Stream;
 
 /**
  * TODO: describe
@@ -118,6 +119,12 @@ public class IntermediateQueryImpl implements IntermediateQuery {
         return new IntermediateQueryImpl(metadata, projectionAtom, treeComponent.createSnapshot());
     }
 
+    @Override
+    public Stream<QueryNode> getOtherChildrenStream(QueryNode parent, QueryNode childToOmmit) {
+        return treeComponent.getChildrenStream(parent)
+                .filter(c -> ! (c == childToOmmit));
+    }
+
     /**
      * TODO: replace by a more efficient implementation
      */
@@ -161,7 +168,12 @@ public class IntermediateQueryImpl implements IntermediateQuery {
 
     @Override
     public ImmutableList<QueryNode> getChildren(QueryNode node) {
-        return treeComponent.getCurrentSubNodesOf(node);
+        return treeComponent.getChildren(node);
+    }
+
+    @Override
+    public Stream<QueryNode> getChildrenStream(QueryNode node) {
+        return treeComponent.getChildrenStream(node);
     }
 
     @Override
