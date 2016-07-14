@@ -125,6 +125,14 @@ public class IntermediateQueryImpl implements IntermediateQuery {
                 .filter(c -> ! (c == childToOmmit));
     }
 
+    /**
+     * TODO: replace by a more efficient implementation
+     */
+    @Override
+    public boolean hasAncestor(QueryNode descendantNode, QueryNode ancestorNode) {
+        return getAncestors(descendantNode).contains(ancestorNode);
+    }
+
 
     @Override
     public MetadataForQueryOptimization getMetadata() {

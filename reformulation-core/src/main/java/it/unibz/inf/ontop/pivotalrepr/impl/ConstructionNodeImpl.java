@@ -322,7 +322,7 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
 
         ImmutableMap<Variable, Variable> newMap = inverseMultimap.asMap().values().stream()
                 // TODO: explain
-                .filter(vars -> vars.size() <= 1)
+                .filter(vars -> vars.size() >= 1)
                 //
                 .flatMap(vars -> {
                     List<Variable> sortedVariables = vars.stream()
