@@ -195,7 +195,8 @@ public class SubstitutionPropagationTest {
                 new SubstitutionPropagationProposalImpl<>(rightConstructionNode, rightConstructionNode.getDirectBindingSubstitution());
 
         IntermediateQueryBuilder expectedQueryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
-        ConstructionNode newRootNode = leftConstructionNode;
+        ConstructionNode newRootNode = new ConstructionNodeImpl(projectionAtom.getVariables(),
+                rightConstructionNode.getDirectBindingSubstitution(), Optional.empty());
         expectedQueryBuilder.init(projectionAtom, newRootNode);
         expectedQueryBuilder.addChild(newRootNode, joinNode);
         expectedQueryBuilder.addChild(joinNode, new EmptyNodeImpl(ImmutableSet.of(C, D, Y)));
