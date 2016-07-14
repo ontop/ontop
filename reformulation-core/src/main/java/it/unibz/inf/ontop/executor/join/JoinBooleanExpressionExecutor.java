@@ -11,7 +11,6 @@ import it.unibz.inf.ontop.pivotalrepr.impl.QueryTreeComponent;
 import it.unibz.inf.ontop.pivotalrepr.proposal.impl.ReactToChildDeletionProposalImpl;
 import it.unibz.inf.ontop.pivotalrepr.*;
 import it.unibz.inf.ontop.pivotalrepr.proposal.*;
-import it.unibz.inf.ontop.pivotalrepr.unfolding.ProjectedVariableExtractionTools;
 
 import static it.unibz.inf.ontop.executor.join.JoinExtractionUtils.*;
 
@@ -51,7 +50,7 @@ public class JoinBooleanExpressionExecutor implements NodeCentricInternalExecuto
                     parentNode,
                     query.getNextSibling(originalTopJoinNode),
                     query.getOptionalPosition(parentNode, originalTopJoinNode),
-                    ProjectedVariableExtractionTools.extractProjectedVariables(query, originalTopJoinNode));
+                    query.getProjectedVariables(originalTopJoinNode));
 
             // Removes the join node
             treeComponent.removeSubTree(originalTopJoinNode);

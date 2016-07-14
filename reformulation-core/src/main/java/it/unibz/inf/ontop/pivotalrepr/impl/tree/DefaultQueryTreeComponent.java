@@ -10,6 +10,7 @@ import it.unibz.inf.ontop.model.Variable;
 import it.unibz.inf.ontop.pivotalrepr.impl.IllegalTreeException;
 import it.unibz.inf.ontop.pivotalrepr.impl.QueryTreeComponent;
 import it.unibz.inf.ontop.pivotalrepr.impl.VariableCollector;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.*;
 import java.util.stream.Stream;
@@ -230,6 +231,31 @@ public class DefaultQueryTreeComponent implements QueryTreeComponent {
         return new DefaultQueryTreeComponent(tree.createSnapshot(), new VariableGenerator(
                 variableGenerator.getKnownVariables()));
     }
+
+    /**
+     * TODO: optimize by it but materializing (and maintaining) the results.
+     */
+    @Override
+    public ImmutableSet<Variable> getProjectedVariables(QueryNode node) {
+        if (node instanceof ExplicitVariableProjectionNode) {
+            return ((ExplicitVariableProjectionNode) node).getProjectedVariables();
+        }
+        else {
+            return getProjectedVariableStream(node)
+                    .collect(ImmutableCollectors.toSet());
+        }
+    }
+
+    private Stream<Variable> getProjectedVariableStream(QueryNode node) {
+        if (node instanceof ExplicitVariableProjectionNode) {
+            return ((ExplicitVariableProjectionNode) node).getProjectedVariables().stream();
+        }
+        else {
+            return getChildrenStream(node)
+                    .flatMap(this::getProjectedVariableStream);
+        }
+    }
+
 
     /**
      * To be called every time a new node is added to the tree component.

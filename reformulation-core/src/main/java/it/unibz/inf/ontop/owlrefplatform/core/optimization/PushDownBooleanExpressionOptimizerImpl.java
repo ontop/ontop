@@ -15,7 +15,6 @@ import java.util.stream.Stream;
 
 import it.unibz.inf.ontop.owlrefplatform.core.optimization.QueryNodeNavigationTools.*;
 import it.unibz.inf.ontop.pivotalrepr.proposal.impl.PushDownBooleanExpressionProposalImpl;
-import it.unibz.inf.ontop.pivotalrepr.unfolding.ProjectedVariableExtractionTools;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import static it.unibz.inf.ontop.owlrefplatform.core.optimization.QueryNodeNavigationTools.getDepthFirstNextNode;
@@ -276,8 +275,7 @@ public class PushDownBooleanExpressionOptimizerImpl implements PushDownBooleanEx
                                                  ImmutableExpression expression) {
         ImmutableSet<Variable> expressionVariables = expression.getVariables();
 
-        ImmutableSet<Variable> projectedVariables = ProjectedVariableExtractionTools.extractProjectedVariables(
-                query, child);
+        ImmutableSet<Variable> projectedVariables = query.getProjectedVariables(child);
 
         /**
          * All the expression variables are projected: the current node is the recipient
@@ -359,8 +357,7 @@ public class PushDownBooleanExpressionOptimizerImpl implements PushDownBooleanEx
         QueryNode leftChild = query.getChild(currentNode, LEFT)
                 .orElseThrow(() -> new IllegalStateException("The LJ node was expected to have a left child"));
 
-        ImmutableSet<Variable> projectedVariablesOnTheLeft = ProjectedVariableExtractionTools.extractProjectedVariables(
-                query, leftChild);
+        ImmutableSet<Variable> projectedVariablesOnTheLeft = query.getProjectedVariables(leftChild);
 
         /**
          * Can propagate the expression to the left child

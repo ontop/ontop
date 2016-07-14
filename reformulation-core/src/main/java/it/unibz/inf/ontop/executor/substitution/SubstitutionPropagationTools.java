@@ -21,8 +21,6 @@ import java.util.LinkedList;
 import java.util.Queue;
 import java.util.stream.Stream;
 
-import static it.unibz.inf.ontop.pivotalrepr.unfolding.ProjectedVariableExtractionTools.extractProjectedVariables;
-
 /**
  * These methods are only accessible by InternalProposalExecutors (requires access to the QueryTreeComponent).
  */
@@ -201,8 +199,7 @@ public class SubstitutionPropagationTools {
                  * Replace the sub-tree by an empty newNode
                  */
             case DECLARE_AS_EMPTY:
-                QueryNode replacingNode = new EmptyNodeImpl(
-                        extractProjectedVariables(query, node));
+                QueryNode replacingNode = new EmptyNodeImpl(query.getProjectedVariables(node));
                 treeComponent.replaceSubTree(node, replacingNode);
 
                 return new SubstitutionApplicationResults(replacingNode, newSubstitution, false);
@@ -348,7 +345,7 @@ public class SubstitutionPropagationTools {
         QueryNode ancestorParent = optionalNextAncestor
                 .orElseThrow(EmptyQueryException::new);
 
-        ImmutableSet<Variable> nullVariables = extractProjectedVariables(query, currentAncestor);
+        ImmutableSet<Variable> nullVariables = query.getProjectedVariables(currentAncestor);
         Optional<QueryNode> optionalNextSibling = query.getNextSibling(currentAncestor);
         Optional<ArgumentPosition> optionalPosition = query.getOptionalPosition(ancestorParent, currentAncestor);
 
