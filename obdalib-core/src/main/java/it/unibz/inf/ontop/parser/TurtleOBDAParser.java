@@ -2,22 +2,11 @@
 
 package it.unibz.inf.ontop.parser;
 
-import it.unibz.inf.ontop.model.CQIE;
-import it.unibz.inf.ontop.model.Constant;
-import it.unibz.inf.ontop.model.Function;
-import it.unibz.inf.ontop.model.Term;
-import it.unibz.inf.ontop.model.OBDADataFactory;
-import it.unibz.inf.ontop.model.DatatypeFactory;
-import it.unibz.inf.ontop.model.OBDALibConstants;
-import it.unibz.inf.ontop.model.Predicate;
-import it.unibz.inf.ontop.model.URIConstant;
-import it.unibz.inf.ontop.model.ValueConstant;
-import it.unibz.inf.ontop.model.Variable;
+import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.Predicate.COL_TYPE;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
 import it.unibz.inf.ontop.utils.QueryUtils;
-import it.unibz.inf.ontop.model.URITemplatePredicate;
 
 import java.net.URI;
 import java.util.ArrayList;
@@ -348,9 +337,9 @@ public class TurtleOBDAParser extends Parser {
 	          return v;
 		   }
 
-		   Function f = dfac.getFunctionConcat(terms.get(0),terms.get(1));
-	           for(int j=2;j<terms.size();j++){
-	              f = dfac.getFunctionConcat(f,terms.get(j));
+		   Function f = dfac.getFunction(ExpressionOperation.CONCAT, terms.get(0), terms.get(1));
+	           for(int j=2;j<terms.size();j++) {
+	              f = dfac.getFunction(ExpressionOperation.CONCAT, f, terms.get(j));
 	           }
 
 		   return f;

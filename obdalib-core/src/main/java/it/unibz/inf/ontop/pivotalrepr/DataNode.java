@@ -23,7 +23,7 @@ public interface DataNode extends ConstructionOrDataNode {
     @Override
     SubstitutionResults<? extends DataNode> applyAscendingSubstitution(
             ImmutableSubstitution<? extends ImmutableTerm> substitution,
-            QueryNode descendantNode, IntermediateQuery query);
+            QueryNode childNode, IntermediateQuery query);
 
     @Override
     SubstitutionResults<? extends DataNode> applyDescendingSubstitution(

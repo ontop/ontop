@@ -1,5 +1,7 @@
 package it.unibz.inf.ontop.model;
 
+import java.util.stream.Stream;
+
 /**
  * Term that is guaranteed to be immutable.
  *
@@ -14,4 +16,6 @@ public interface ImmutableTerm extends Term {
     ImmutableTerm clone();
 
     boolean isGround();
+
+    Stream<Variable> getVariableStream();
 }

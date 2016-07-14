@@ -10,6 +10,7 @@ import it.unibz.inf.ontop.pivotalrepr.QueryNode;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -41,6 +42,18 @@ public class DefaultTree implements QueryTree {
         insertNodeIntoIndex(rootQueryNode, rootNode);
         childrenIndex.put(rootNode, createChildrenRelation(rootNode));
         // No parent
+    }
+
+    private DefaultTree(TreeNode rootNode,
+                        Map<QueryNode, TreeNode> nodeIndex,
+                        Map<TreeNode, ChildrenRelation> childrenIndex,
+                        Map<TreeNode, TreeNode> parentIndex,
+                        Set<EmptyNode> emptyNodes) {
+        this.rootNode = rootNode;
+        this.nodeIndex = nodeIndex;
+        this.childrenIndex = childrenIndex;
+        this.parentIndex = parentIndex;
+        this.emptyNodes = emptyNodes;
     }
 
     @Override
@@ -114,6 +127,17 @@ public class DefaultTree implements QueryTree {
     }
 
     @Override
+    public Stream<QueryNode> getChildrenStream(QueryNode node) {
+        ChildrenRelation childrenRelation = accessChildrenRelation(accessTreeNode(node));
+        if (childrenRelation == null) {
+            return Stream.of();
+        }
+        else {
+            return childrenRelation.getChildQueryNodeStream();
+        }
+    }
+
+    @Override
     public boolean contains(QueryNode node) {
         return nodeIndex.containsKey(node);
     }
@@ -153,6 +177,21 @@ public class DefaultTree implements QueryTree {
         treeNode.changeQueryNode(replacingNode);
         removeNodeFromIndex(previousNode);
         insertNodeIntoIndex(replacingNode, treeNode);
+
+        if ((!(previousNode instanceof NonCommutativeOperatorNode))
+                && (replacingNode instanceof NonCommutativeOperatorNode)) {
+            ChildrenRelation newChildrenRelation = accessChildrenRelation(treeNode)
+                    .convertToBinaryChildrenRelation();
+            // Overrides the previous entry
+            childrenIndex.put(treeNode, newChildrenRelation);
+        }
+        else if ((previousNode instanceof NonCommutativeOperatorNode)
+                && (!(replacingNode instanceof NonCommutativeOperatorNode))) {
+            ChildrenRelation newChildrenRelation = accessChildrenRelation(treeNode)
+                    .convertToStandardChildrenRelation();
+            // Overrides the previous entry
+            childrenIndex.put(treeNode, newChildrenRelation);
+        }
     }
 
     @Override
@@ -203,7 +242,7 @@ public class DefaultTree implements QueryTree {
     }
 
     @Override
-    public void removeOrReplaceNodeByUniqueChild(QueryNode parentQueryNode) throws IllegalTreeUpdateException {
+    public QueryNode removeOrReplaceNodeByUniqueChild(QueryNode parentQueryNode) throws IllegalTreeUpdateException {
         TreeNode parentTreeNode = accessTreeNode(parentQueryNode);
 
         ImmutableList<TreeNode> children = accessChildrenRelation(parentTreeNode).getChildren();
@@ -218,6 +257,7 @@ public class DefaultTree implements QueryTree {
 
             ChildrenRelation grandParentRelation = accessChildrenRelation(grandParentTreeNode);
             grandParentRelation.replaceChild(parentTreeNode, childTreeNode);
+            return childTreeNode.getQueryNode();
         }
         else {
             throw new IllegalTreeUpdateException("The query node " + parentQueryNode + " does not have a unique child");
@@ -299,6 +339,64 @@ public class DefaultTree implements QueryTree {
                     .map(n -> (EmptyNode) n)
                     .collect(ImmutableCollectors.toSet());
         }
+    }
+
+    @Override
+    public void replaceNodeByChild(QueryNode parentNode,
+                                   Optional<NonCommutativeOperatorNode.ArgumentPosition> optionalReplacingChildPosition) {
+        TreeNode parentTreeNode = accessTreeNode(parentNode);
+
+        ChildrenRelation childrenRelation = accessChildrenRelation(parentTreeNode);
+
+        TreeNode childTreeNode;
+        if (optionalReplacingChildPosition.isPresent()) {
+            childTreeNode = childrenRelation.getChild(optionalReplacingChildPosition.get())
+                    .orElseThrow(() -> new IllegalTreeUpdateException("No child at the position"
+                            + optionalReplacingChildPosition.get()));
+        }
+        else {
+            ImmutableList<TreeNode> children = childrenRelation.getChildren();
+            if (children.isEmpty()) {
+                throw new IllegalTreeUpdateException("The node cannot be replaced by a child " +
+                        "(does not have any)");
+            }
+            childTreeNode = children.get(0);
+        }
+
+        childrenIndex.remove(parentTreeNode);
+        // May be null
+        TreeNode grandParentTreeNode = getParentTreeNode(parentTreeNode);
+        parentIndex.remove(parentTreeNode);
+        parentIndex.put(childTreeNode, grandParentTreeNode);
+
+        ChildrenRelation grandParentRelation = accessChildrenRelation(grandParentTreeNode);
+        grandParentRelation.replaceChild(parentTreeNode, childTreeNode);
+    }
+
+    @Override
+    public QueryTree createSnapshot() {
+        Map<QueryNode, TreeNode> newNodeIndex = nodeIndex.entrySet().stream()
+                .map(e -> new AbstractMap.SimpleEntry<>(e.getKey(), e.getValue().cloneShallowly()))
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        Map.Entry::getValue
+                ));
+        Map<TreeNode, ChildrenRelation> newChildrenIndex = childrenIndex.entrySet().stream()
+                .map(e -> new AbstractMap.SimpleEntry<>(
+                        e.getKey().findNewTreeNode(newNodeIndex),
+                        e.getValue().clone(newNodeIndex)))
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        Map.Entry::getValue
+                ));
+        Map<TreeNode, TreeNode> newParentIndex = parentIndex.entrySet().stream()
+                .map(e -> new AbstractMap.SimpleEntry<>(e.getKey().findNewTreeNode(newNodeIndex),
+                        e.getValue().findNewTreeNode(newNodeIndex)))
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        Map.Entry::getValue
+                ));
+        return new DefaultTree(rootNode, newNodeIndex, newChildrenIndex, newParentIndex, new HashSet<>(emptyNodes));
     }
 
     /**

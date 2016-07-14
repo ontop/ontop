@@ -24,6 +24,7 @@ import static it.unibz.inf.ontop.owlrefplatform.core.basicoperations.ImmutableUn
 import static it.unibz.inf.ontop.pivotalrepr.SubstitutionResults.LocalAction.DECLARE_AS_EMPTY;
 import static it.unibz.inf.ontop.pivotalrepr.SubstitutionResults.LocalAction.REPLACE_BY_CHILD;
 import static it.unibz.inf.ontop.pivotalrepr.impl.ConstructionNodeTools.computeNewProjectedVariables;
+import static it.unibz.inf.ontop.pivotalrepr.impl.ConstructionNodeTools.extractRelevantDescendingSubstitution;
 
 public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionNode {
 
@@ -159,13 +160,13 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
     @Override
     public SubstitutionResults<ConstructionNode> applyAscendingSubstitution(
             ImmutableSubstitution<? extends ImmutableTerm> substitutionToApply,
-            QueryNode descendantNode, IntermediateQuery query) {
+            QueryNode childNode, IntermediateQuery query) {
 
         ImmutableSubstitution<ImmutableTerm> localSubstitution = getSubstitution();
         ImmutableSet<Variable> boundVariables = localSubstitution.getImmutableMap().keySet();
 
         if (substitutionToApply.getImmutableMap().keySet().stream().anyMatch(boundVariables::contains)) {
-            throw new IllegalArgumentException("An ascending substitution MUST NOT include variables bound by" +
+            throw new IllegalArgumentException("An ascending substitution MUST NOT include variables bound by " +
                     "the substitution of the current construction node");
         }
 
@@ -199,7 +200,10 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
     public SubstitutionResults<ConstructionNode> applyDescendingSubstitution(
             ImmutableSubstitution<? extends ImmutableTerm> descendingSubstitution, IntermediateQuery query) {
 
-        ImmutableSet<Variable> newProjectedVariables = computeNewProjectedVariables(descendingSubstitution,
+        ImmutableSubstitution<ImmutableTerm> relevantSubstitution = extractRelevantDescendingSubstitution(
+                descendingSubstitution, projectedVariables);
+
+        ImmutableSet<Variable> newProjectedVariables = computeNewProjectedVariables(relevantSubstitution,
                 getProjectedVariables());
 
         /**
@@ -207,7 +211,8 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
          */
         NewSubstitutionPair newSubstitutions;
         try {
-            newSubstitutions = traverseConstructionNode(descendingSubstitution, substitution, projectedVariables);
+            newSubstitutions = traverseConstructionNode(relevantSubstitution, substitution, projectedVariables,
+                    newProjectedVariables);
         } catch (QueryNodeSubstitutionException e) {
             return new SubstitutionResultsImpl<>(DECLARE_AS_EMPTY);
         }
@@ -266,7 +271,7 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
     private NewSubstitutionPair traverseConstructionNode(
             ImmutableSubstitution<? extends ImmutableTerm> tau,
             ImmutableSubstitution<? extends ImmutableTerm> formerTheta,
-            ImmutableSet<Variable> formerV) throws QueryNodeSubstitutionException {
+            ImmutableSet<Variable> formerV, ImmutableSet<Variable> newV) throws QueryNodeSubstitutionException {
 
         Var2VarSubstitution tauR = tau.getVar2VarFragment();
         // Non-variable term
@@ -282,7 +287,7 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
                 .orElseThrow(() -> new QueryNodeSubstitutionException("The descending substitution " + tau
                         + " is incompatible with " + this));
 
-        ImmutableSubstitution<ImmutableTerm> etaB = extractEtaB(eta, formerV, tauC);
+        ImmutableSubstitution<ImmutableTerm> etaB = extractEtaB(eta, formerV, newV, tauC);
 
         ImmutableSubstitution<ImmutableTerm> newTheta = tauR.applyToSubstitution(etaB)
                 .orElseThrow(() -> new IllegalStateException("Bug: tauR does not rename etaB safely as excepted"));
@@ -335,12 +340,13 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
 
     private static ImmutableSubstitution<ImmutableTerm> extractEtaB(ImmutableSubstitution<ImmutableTerm> eta,
                                                                     ImmutableSet<Variable> formerV,
+                                                                    ImmutableSet<Variable> newV,
                                                                     ImmutableSubstitution<? extends ImmutableTerm> tauC) {
 
         ImmutableSet<Variable> tauCDomain = tauC.getDomain();
 
         ImmutableMap<Variable, ImmutableTerm> newMap = eta.getImmutableMap().entrySet().stream()
-                .filter(e -> formerV.contains(e.getKey()))
+                .filter(e -> formerV.contains(e.getKey()) || newV.contains(e.getKey()))
                 .filter(e -> !tauCDomain.contains(e.getKey()))
                 .collect(ImmutableCollectors.toMap());
 

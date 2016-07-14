@@ -22,16 +22,14 @@ public class DatalogProgramSyntaxFactory {
 
 	private static final OBDADataFactory termFactory = OBDADataFactoryImpl.getInstance();
 	
-	public static DatalogProgram program(CQIE rule){
-		return termFactory.getDatalogProgram(rule);
-	}
-	
 	public static DatalogProgram program(CQIE... rules){
-		return termFactory.getDatalogProgram(Arrays.asList(rules));
+		return program(Arrays.asList(rules));
 	}
 	
 	public static DatalogProgram program(Collection<CQIE> rules){
-		return termFactory.getDatalogProgram(rules);
+		DatalogProgram datalogProgram = termFactory.getDatalogProgram();
+		datalogProgram.appendRule(rules);
+		return datalogProgram;
 	}
 	
 	public static CQIE rule(Function head, Function... body){

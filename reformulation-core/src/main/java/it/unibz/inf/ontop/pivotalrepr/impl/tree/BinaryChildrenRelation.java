@@ -5,7 +5,9 @@ import it.unibz.inf.ontop.pivotalrepr.NonCommutativeOperatorNode;
 import it.unibz.inf.ontop.pivotalrepr.impl.IllegalTreeUpdateException;
 import it.unibz.inf.ontop.pivotalrepr.QueryNode;
 
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 /**
  * TODO: explain
@@ -28,6 +30,13 @@ public class BinaryChildrenRelation implements ChildrenRelation {
         this.optionalRightChild = Optional.empty();
     }
 
+    private BinaryChildrenRelation(TreeNode parent, Optional<TreeNode> optionalLeftChild,
+                                   Optional<TreeNode> optionalRightChild) {
+        this.parent = parent;
+        this.optionalLeftChild = optionalLeftChild;
+        this.optionalRightChild = optionalRightChild;
+    }
+
 
     @Override
     public TreeNode getParent() {
@@ -47,6 +56,13 @@ public class BinaryChildrenRelation implements ChildrenRelation {
     }
 
     @Override
+    public Stream<TreeNode> getChildrenStream() {
+        return Stream.of(optionalLeftChild, optionalRightChild)
+                .filter(Optional::isPresent)
+                .map(Optional::get);
+    }
+
+    @Override
     public boolean contains(TreeNode node) {
         return getChildren().contains(node);
     }
@@ -55,7 +71,7 @@ public class BinaryChildrenRelation implements ChildrenRelation {
     public void addChild(TreeNode childNode, Optional<NonCommutativeOperatorNode.ArgumentPosition> optionalPosition, boolean canReplace)
             throws IllegalTreeUpdateException {
         if (!optionalPosition.isPresent()) {
-            throw new IllegalArgumentException("The StandardChildrenRelation requires argument positions");
+            throw new IllegalArgumentException("The BinaryChildrenRelation requires argument positions");
         }
 
         switch (optionalPosition.get()) {
@@ -112,6 +128,12 @@ public class BinaryChildrenRelation implements ChildrenRelation {
     }
 
     @Override
+    public Stream<QueryNode> getChildQueryNodeStream() {
+        return getChildrenStream()
+                .map(TreeNode::getQueryNode);
+    }
+
+    @Override
     public Optional<NonCommutativeOperatorNode.ArgumentPosition> getOptionalPosition(TreeNode childNode) {
         if (optionalLeftChild.isPresent() && (optionalLeftChild.get() == childNode)) {
             return Optional.of(NonCommutativeOperatorNode.ArgumentPosition.LEFT);
@@ -122,5 +144,41 @@ public class BinaryChildrenRelation implements ChildrenRelation {
         else {
             throw new IllegalArgumentException(childNode.getQueryNode() + " does not appear as a child.");
         }
+    }
+
+    @Override
+    public Optional<TreeNode> getChild(NonCommutativeOperatorNode.ArgumentPosition position) {
+        switch (position) {
+            case LEFT:
+                return optionalLeftChild;
+            case RIGHT:
+                return optionalRightChild;
+            default:
+                throw new IllegalStateException("Unknown position: " + position);
+        }
+    }
+
+    @Override
+    public ChildrenRelation clone(Map<QueryNode, TreeNode> newNodeIndex) {
+        return new BinaryChildrenRelation(parent.findNewTreeNode(newNodeIndex),
+                optionalLeftChild.map(n -> n.findNewTreeNode(newNodeIndex)),
+                optionalRightChild.map(n -> n.findNewTreeNode(newNodeIndex))
+                );
+    }
+
+    @Override
+    public ChildrenRelation convertToBinaryChildrenRelation() {
+        return this;
+    }
+
+    @Override
+    public ChildrenRelation convertToStandardChildrenRelation() {
+        StandardChildrenRelation newRelation = new StandardChildrenRelation(parent);
+
+        getChildrenStream()
+                .forEach(c -> newRelation.addChild(c, Optional.empty(), false));
+
+        return newRelation;
+
     }
 }
