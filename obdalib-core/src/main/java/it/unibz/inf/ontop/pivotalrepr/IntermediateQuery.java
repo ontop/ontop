@@ -113,4 +113,11 @@ public interface IntermediateQuery {
     IntermediateQuery createSnapshot();
 
     boolean hasAncestor(QueryNode descendantNode, QueryNode ancestorNode);
+
+    /**
+     * Set of variables that are projected by the node.
+     *
+     * It typically depends on the other nodes of their sub-trees.
+     */
+    ImmutableSet<Variable> getProjectedVariables(QueryNode node);
 }

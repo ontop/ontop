@@ -4,11 +4,12 @@ import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.Variable;
 
 /**
- * Common abstraction for ConstructionNodes and DataNodes.
+ * Node that explicitly projects some variables.
  *
- * TODO: get rid of this interface
+ * Common abstraction for ConstructionNodes, UnionNodes and DataNodes.
+ *
  */
-public interface ConstructionOrDataNode extends QueryNode {
+public interface ExplicitVariableProjectionNode extends QueryNode {
 
     ImmutableSet<Variable> getProjectedVariables();
 }

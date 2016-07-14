@@ -12,7 +12,6 @@ import it.unibz.inf.ontop.pivotalrepr.impl.*;
 import it.unibz.inf.ontop.pivotalrepr.proposal.InvalidQueryOptimizationProposalException;
 import it.unibz.inf.ontop.pivotalrepr.proposal.ProposalResults;
 import it.unibz.inf.ontop.pivotalrepr.proposal.QueryMergingProposal;
-import it.unibz.inf.ontop.pivotalrepr.proposal.RemoveEmptyNodesProposal;
 import it.unibz.inf.ontop.pivotalrepr.proposal.impl.ProposalResultsImpl;
 import it.unibz.inf.ontop.pivotalrepr.proposal.impl.RemoveEmptyNodesProposalImpl;
 import it.unibz.inf.ontop.utils.FunctionalTools;
@@ -24,7 +23,6 @@ import java.util.Optional;
 import java.util.Queue;
 
 import static it.unibz.inf.ontop.pivotalrepr.impl.IntermediateQueryUtils.generateNotConflictingRenaming;
-import static it.unibz.inf.ontop.pivotalrepr.unfolding.ProjectedVariableExtractionTools.extractProjectedVariables;
 
 public class QueryMergingExecutor implements InternalProposalExecutor<QueryMergingProposal, ProposalResults> {
 
@@ -118,7 +116,7 @@ public class QueryMergingExecutor implements InternalProposalExecutor<QueryMergi
 
                         case DECLARE_AS_EMPTY:
                             return new AnalysisResults(originalNode,
-                                    new EmptyNodeImpl(extractProjectedVariables(query, originalNode)),
+                                    new EmptyNodeImpl(query.getProjectedVariables(originalNode)),
                                     Optional.empty());
                         default:
                             throw new IllegalStateException("Unknown local action:" + results.getLocalAction());

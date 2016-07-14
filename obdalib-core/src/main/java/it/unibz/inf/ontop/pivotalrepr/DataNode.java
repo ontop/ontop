@@ -3,12 +3,11 @@ package it.unibz.inf.ontop.pivotalrepr;
 import it.unibz.inf.ontop.model.DataAtom;
 import it.unibz.inf.ontop.model.ImmutableSubstitution;
 import it.unibz.inf.ontop.model.ImmutableTerm;
-import it.unibz.inf.ontop.model.VariableOrGroundTerm;
 
 /**
  * TODO: describe
  */
-public interface DataNode extends ConstructionOrDataNode {
+public interface DataNode extends ExplicitVariableProjectionNode {
 
     /**
      * Data atom containing the projected variables

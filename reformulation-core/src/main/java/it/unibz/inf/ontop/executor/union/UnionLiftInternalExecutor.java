@@ -13,7 +13,6 @@ import it.unibz.inf.ontop.pivotalrepr.proposal.impl.NodeCentricOptimizationResul
 import java.util.*;
 
 import static it.unibz.inf.ontop.pivotalrepr.NonCommutativeOperatorNode.ArgumentPosition.RIGHT;
-import static it.unibz.inf.ontop.pivotalrepr.unfolding.ProjectedVariableExtractionTools.extractProjectedVariables;
 
 /**
  * TODO: explain
@@ -74,7 +73,7 @@ public class UnionLiftInternalExecutor implements NodeCentricInternalExecutor<Un
         QueryNode targetNode = proposal.getTargetNode();
         UnionNode focusNode = proposal.getFocusNode();
 
-        UnionNode newTopUnionNode = new UnionNodeImpl(extractProjectedVariables(query, targetNode));
+        UnionNode newTopUnionNode = new UnionNodeImpl(query.getProjectedVariables(targetNode));
 
         IntermediateQuery querySnapshot = query.createSnapshot();
 

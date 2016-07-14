@@ -7,7 +7,6 @@ import it.unibz.inf.ontop.model.*;
 
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionImpl;
 import it.unibz.inf.ontop.pivotalrepr.*;
-import it.unibz.inf.ontop.pivotalrepr.unfolding.ProjectedVariableExtractionTools;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 
@@ -80,14 +79,14 @@ public class UnionFriendlyBindingExtractor implements BindingExtractor {
 
         query.getFirstChild(currentNode).ifPresent(child -> {
             //get variables from the first child
-            ImmutableSet<Variable> varsFirstChild = ProjectedVariableExtractionTools.extractProjectedVariables(query, child);
+            ImmutableSet<Variable> varsFirstChild = query.getProjectedVariables(child);
 
             commonVariables.addAll(varsFirstChild); }
         );
 
         //update commonVariables between the children
         query.getChildren(currentNode).forEach(child ->
-                commonVariables.retainAll(ProjectedVariableExtractionTools.extractProjectedVariables(query, child)));
+                commonVariables.retainAll(query.getProjectedVariables(child)));
 
         query.getChildren(currentNode).stream()
                     .map(c -> extractBindings(query, c))

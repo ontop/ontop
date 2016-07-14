@@ -489,6 +489,11 @@ public class JgraphtQueryTreeComponent implements QueryTreeComponent {
         throw new RuntimeException("TODO: support createSnapshot()");
     }
 
+    @Override
+    public ImmutableSet<Variable> getProjectedVariables(QueryNode node) {
+        throw new RuntimeException("TODO: support getProjectedVariables");
+    }
+
     private void addChild(QueryNode parentNode, QueryNode childNode, boolean isNew) throws IllegalTreeUpdateException {
 
         if (parentNode instanceof NonCommutativeOperatorNode) {

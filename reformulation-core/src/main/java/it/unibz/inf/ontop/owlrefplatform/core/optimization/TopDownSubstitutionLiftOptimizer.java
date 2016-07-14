@@ -15,7 +15,6 @@ import it.unibz.inf.ontop.pivotalrepr.proposal.SubstitutionPropagationProposal;
 import it.unibz.inf.ontop.pivotalrepr.proposal.UnionLiftProposal;
 import it.unibz.inf.ontop.pivotalrepr.proposal.impl.SubstitutionPropagationProposalImpl;
 import it.unibz.inf.ontop.pivotalrepr.proposal.impl.UnionLiftProposalImpl;
-import it.unibz.inf.ontop.pivotalrepr.unfolding.ProjectedVariableExtractionTools;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -125,7 +124,7 @@ public class TopDownSubstitutionLiftOptimizer implements SubstitutionLiftOptimiz
                 ImmutableList<QueryNode> childrenParentNode = currentQuery.getChildren(parentNode);
                 for (QueryNode children : childrenParentNode){
                     if(!children.equals(currentNode)){
-                        projectedVariables.addAll(ProjectedVariableExtractionTools.extractProjectedVariables(currentQuery, children));
+                        projectedVariables.addAll(currentQuery.getProjectedVariables(children));
                     }
                 }
 
@@ -261,8 +260,8 @@ public class TopDownSubstitutionLiftOptimizer implements SubstitutionLiftOptimiz
             Optional<ImmutableSubstitution<ImmutableTerm>> optionalSubstitution = extractor.extractInSubTree(
                     currentQuery, rightChild);
             Set<Variable> onlyRightVariables = new HashSet<>();
-            onlyRightVariables.addAll(ProjectedVariableExtractionTools.extractProjectedVariables(currentQuery, rightChild));
-            onlyRightVariables.removeAll(ProjectedVariableExtractionTools.extractProjectedVariables(currentQuery, optionalLeftChild.get()));
+            onlyRightVariables.addAll(currentQuery.getProjectedVariables(rightChild));
+            onlyRightVariables.removeAll(currentQuery.getProjectedVariables(optionalLeftChild.get()));
             Map<Variable, ImmutableTerm> substitutionMap = new HashMap<>();
             onlyRightVariables.forEach(v ->
                 optionalSubstitution.ifPresent(s -> {

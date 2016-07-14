@@ -13,14 +13,11 @@ import it.unibz.inf.ontop.pivotalrepr.impl.FilterNodeImpl;
 import it.unibz.inf.ontop.pivotalrepr.impl.InnerJoinNodeImpl;
 import it.unibz.inf.ontop.pivotalrepr.impl.NodeTransformationProposalImpl;
 import it.unibz.inf.ontop.pivotalrepr.*;
-import it.unibz.inf.ontop.pivotalrepr.impl.SubstitutionResultsImpl;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
-import static it.unibz.inf.ontop.model.impl.ImmutabilityTools.foldBooleanExpressions;
 import static it.unibz.inf.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionTools.computeNullSubstitution;
 import static it.unibz.inf.ontop.pivotalrepr.NodeTransformationProposedState.*;
 import static it.unibz.inf.ontop.pivotalrepr.NonCommutativeOperatorNode.ArgumentPosition.*;
-import static it.unibz.inf.ontop.pivotalrepr.unfolding.ProjectedVariableExtractionTools.extractProjectedVariables;
 
 /**
  * TODO: explain
@@ -57,7 +54,7 @@ public class ReactToChildDeletionTransformer implements HeterogeneousQueryNodeTr
         QueryNode otherChild = query.getChild(leftJoinNode, (positionOfDeletedChild == LEFT) ? RIGHT : LEFT)
                 .orElseThrow(() -> new IllegalStateException("The other child of a LJ is missing"));
 
-        ImmutableSet<Variable> variablesProjectedByOtherChild = extractProjectedVariables(query, otherChild);
+        ImmutableSet<Variable> variablesProjectedByOtherChild = query.getProjectedVariables(otherChild);
 
         ImmutableSet<Variable> nullVariables;
 
@@ -105,7 +102,7 @@ public class ReactToChildDeletionTransformer implements HeterogeneousQueryNodeTr
     public NodeTransformationProposal transform(InnerJoinNode innerJoinNode) {
         ImmutableList<QueryNode> remainingChildren = query.getChildren(innerJoinNode);
 
-        ImmutableSet<Variable> otherNodesProjectedVariables = extractProjectedVariables(query, innerJoinNode);
+        ImmutableSet<Variable> otherNodesProjectedVariables = query.getProjectedVariables(innerJoinNode);
 
         /**
          * If there is an implicit equality involving one null variables, the join is empty.

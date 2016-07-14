@@ -133,6 +133,11 @@ public class IntermediateQueryImpl implements IntermediateQuery {
         return getAncestors(descendantNode).contains(ancestorNode);
     }
 
+    @Override
+    public ImmutableSet<Variable> getProjectedVariables(QueryNode node) {
+        return treeComponent.getProjectedVariables(node);
+    }
+
 
     @Override
     public MetadataForQueryOptimization getMetadata() {
