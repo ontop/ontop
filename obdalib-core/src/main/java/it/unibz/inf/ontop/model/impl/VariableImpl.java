@@ -84,6 +84,6 @@ public class VariableImpl implements Variable, Comparable<Variable> {
 
 	@Override
 	public int compareTo(Variable other) {
-		return other.hashCode() - hashCode() ;
+		return name.compareTo(other.getName());
 	}
 }
