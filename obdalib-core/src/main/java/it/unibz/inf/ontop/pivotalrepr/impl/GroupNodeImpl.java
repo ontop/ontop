@@ -9,6 +9,7 @@ import it.unibz.inf.ontop.pivotalrepr.*;
 import java.util.Optional;
 
 import static it.unibz.inf.ontop.model.impl.GroundTermTools.isGroundTerm;
+import static it.unibz.inf.ontop.pivotalrepr.NodeTransformationProposedState.DELETE;
 
 public class GroupNodeImpl extends QueryNodeImpl implements GroupNode {
 
@@ -87,6 +88,16 @@ public class GroupNodeImpl extends QueryNodeImpl implements GroupNode {
     public boolean isSyntacticallyEquivalentTo(QueryNode node) {
         return (node instanceof GroupNode)
                 && ((GroupNode) node).getGroupingTerms().equals(groupingTerms);
+    }
+
+    @Override
+    public NodeTransformationProposal reactToEmptyChild(IntermediateQuery query, EmptyNode emptyChild) {
+        /**
+         * A group node has only one child
+         *
+         * TODO: what is really projected by a group node?
+         */
+        return new NodeTransformationProposalImpl(DELETE, emptyChild.getProjectedVariables());
     }
 
     @Override
