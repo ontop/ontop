@@ -9,7 +9,9 @@ import it.unibz.inf.ontop.model.impl.URITemplatePredicateImpl;
 import it.unibz.inf.ontop.pivotalrepr.*;
 import it.unibz.inf.ontop.pivotalrepr.impl.*;
 import it.unibz.inf.ontop.pivotalrepr.impl.tree.DefaultIntermediateQueryBuilder;
+import it.unibz.inf.ontop.pivotalrepr.proposal.InnerJoinOptimizationProposal;
 import it.unibz.inf.ontop.pivotalrepr.proposal.NodeCentricOptimizationResults;
+import it.unibz.inf.ontop.pivotalrepr.proposal.impl.InnerJoinOptimizationProposalImpl;
 import it.unibz.inf.ontop.pivotalrepr.proposal.impl.RemoveEmptyNodesProposalImpl;
 import org.junit.Test;
 
@@ -58,7 +60,7 @@ public class NavigationAfterRemovingEmptyNodes {
     private static final ExtensionalDataNode DATA_NODE_1 = buildExtensionalDataNode(TABLE1_PREDICATE, A, B);
     private static final ExtensionalDataNode DATA_NODE_2 = buildExtensionalDataNode(TABLE2_PREDICATE, A, E);
     private static final ExtensionalDataNode DATA_NODE_3 = buildExtensionalDataNode(TABLE3_PREDICATE, C, D);
-    private static final ExtensionalDataNode DATA_NODE_4 = buildExtensionalDataNode(TABLE1_PREDICATE, A, B);
+    private static final ExtensionalDataNode DATA_NODE_4 = buildExtensionalDataNode(TABLE4_PREDICATE, A, B);
     private static final ExtensionalDataNode DATA_NODE_5 = buildExtensionalDataNode(TABLE2_PREDICATE, C, E);
     private static final ExtensionalDataNode DATA_NODE_6 = buildExtensionalDataNode(TABLE3_PREDICATE, E, F);
     private static final ExtensionalDataNode DATA_NODE_7 = buildExtensionalDataNode(TABLE4_PREDICATE, G, H);
@@ -105,6 +107,41 @@ public class NavigationAfterRemovingEmptyNodes {
         assertFalse(results.getNewNodeOrReplacingChild().isPresent());
         assertTrue(results.getOptionalNextSibling().isPresent());
         assertTrue(results.getOptionalNextSibling().get().isSyntacticallyEquivalentTo(rightMostNode));
+    }
+
+    @Test
+    public void testInsatisfiedJoinCondition() throws EmptyQueryException {
+        IntermediateQueryBuilder initialQueryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
+        DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE, A);
+
+        ConstructionNode initialRootNode = new ConstructionNodeImpl(projectionAtom.getVariables());
+        initialQueryBuilder.init(projectionAtom, initialRootNode);
+
+        UnionNode unionNode = new UnionNodeImpl(projectionAtom.getVariables());
+        initialQueryBuilder.addChild(initialRootNode, unionNode);
+
+        InnerJoinNode unsatisfiedJoinNode = new InnerJoinNodeImpl(Optional.of(DATA_FACTORY.getImmutableExpression(
+                ExpressionOperation.EQ,
+                DATA_FACTORY.getConstantLiteral("2", Predicate.COL_TYPE.INTEGER),
+                DATA_FACTORY.getConstantLiteral("3", Predicate.COL_TYPE.INTEGER))));
+        initialQueryBuilder.addChild(unionNode, unsatisfiedJoinNode);
+        initialQueryBuilder.addChild(unsatisfiedJoinNode, DATA_NODE_1);
+        initialQueryBuilder.addChild(unsatisfiedJoinNode, DATA_NODE_2);
+
+        initialQueryBuilder.addChild(unionNode, DATA_NODE_4);
+
+        IntermediateQuery initialQuery = initialQueryBuilder.build();
+
+        System.out.println("Initial query: \n" + initialQuery);
+
+        InnerJoinOptimizationProposal proposal = new InnerJoinOptimizationProposalImpl(unsatisfiedJoinNode);
+        NodeCentricOptimizationResults<InnerJoinNode> results = initialQuery.applyProposal(proposal);
+
+        System.out.println("Optimized query: \n" + results.getResultingQuery());
+
+        assertFalse(results.getNewNodeOrReplacingChild().isPresent());
+        assertTrue(results.getOptionalNextSibling().isPresent());
+        assertTrue(results.getOptionalNextSibling().get().isSyntacticallyEquivalentTo(DATA_NODE_4));
     }
 
     private static ImmutableFunctionalTerm generateURI1(ImmutableTerm argument) {
