@@ -11,6 +11,8 @@ import it.unibz.inf.ontop.pivotalrepr.proposal.InvalidQueryOptimizationProposalE
 import it.unibz.inf.ontop.pivotalrepr.proposal.NodeCentricOptimizationResults;
 import it.unibz.inf.ontop.pivotalrepr.proposal.SubstitutionPropagationProposal;
 
+import static it.unibz.inf.ontop.executor.substitution.SubstitutionPropagationTools.*;
+
 /**
  * TODO: explain
  */
@@ -46,14 +48,25 @@ public class SubstitutionPropagationExecutor<N extends QueryNode>
         /**
          * First propagates up
          */
-        SubstitutionPropagationTools.propagateSubstitutionUp(originalFocusNode, substitutionToPropagate, query,
-                treeComponent);
+        NodeCentricOptimizationResults<N> ascendingPropagationResults = propagateSubstitutionUp(originalFocusNode,
+                substitutionToPropagate, query, treeComponent);
+
+        /**
+         * If some ancestors are removed, don't go further
+         */
+        if (!ascendingPropagationResults.getOptionalNewNode().isPresent()) {
+            return ascendingPropagationResults;
+        }
+
+        if (ascendingPropagationResults.getOptionalNewNode().get() != originalFocusNode) {
+            throw new IllegalStateException("The original focus node was not expected to changed");
+        }
 
         /**
          * Then to the focus node
          */
-        SubstitutionApplicationResults<N> newNodeAndSubst = SubstitutionPropagationTools.applySubstitutionToNode(
-                originalFocusNode, substitutionToPropagate, query, treeComponent);
+        SubstitutionApplicationResults<N> newNodeAndSubst = applySubstitutionToNode(originalFocusNode,
+                substitutionToPropagate, query, treeComponent);
 
         /**
          * Finally, down
@@ -61,7 +74,7 @@ public class SubstitutionPropagationExecutor<N extends QueryNode>
         if (newNodeAndSubst.getOptionalSubstitution().isPresent()) {
             ImmutableSubstitution<? extends ImmutableTerm> newSubstitution = newNodeAndSubst.getOptionalSubstitution().get();
 
-            SubstitutionPropagationTools.propagateSubstitutionDown(newNodeAndSubst.getNewOrReplacingNode(), newSubstitution, query,
+            propagateSubstitutionDown(newNodeAndSubst.getNewOrReplacingNode(), newSubstitution, query,
                     treeComponent);
         }
 
