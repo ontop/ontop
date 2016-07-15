@@ -330,37 +330,37 @@ public class SubstitutionLiftTest {
         queryBuilder.addChild(subQuery2UnionNode2, new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE2_PREDICATE, C, D)) );
 
         //right side second join (unionNode 3)
-        UnionNode unionNode3 =  new UnionNodeImpl(projectionAtom.getVariables());
+        UnionNode unionNode3 =  new UnionNodeImpl(ImmutableSet.of(Y));
         queryBuilder.addChild(joinNode2, unionNode3);
 
         //first child of unionNode3
-        ConstructionNode subQuery1UnionNode3 = new ConstructionNodeImpl(projectionAtom.getVariables(),
+        ConstructionNode subQuery1UnionNode3 = new ConstructionNodeImpl(ImmutableSet.of(Y),
                 new ImmutableSubstitutionImpl<>(ImmutableMap.of( Y, generateURI1(F))), Optional.empty());
         queryBuilder.addChild(unionNode3, subQuery1UnionNode3);
 
         queryBuilder.addChild(subQuery1UnionNode3, new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE3_PREDICATE, E, F)) );
 
         //second child of unionNode3
-        ConstructionNode subQuery2UnionNode3 = new ConstructionNodeImpl(projectionAtom.getVariables(),
+        ConstructionNode subQuery2UnionNode3 = new ConstructionNodeImpl(ImmutableSet.of(Y),
                 new ImmutableSubstitutionImpl<>(ImmutableMap.of(Y,  generateURI2(H))), Optional.empty());
         queryBuilder.addChild(unionNode3, subQuery2UnionNode3);
 
         queryBuilder.addChild(subQuery2UnionNode3, new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE4_PREDICATE, G, H)) );
 
         //right side first join
-        UnionNode unionNode1 =  new UnionNodeImpl(projectionAtom.getVariables());
+        UnionNode unionNode1 =  new UnionNodeImpl(ImmutableSet.of(X));
         queryBuilder.addChild(joinNode, unionNode1);
 
         //first child of unionNode1
-        ConstructionNode subQuery1UnionNode1 = new ConstructionNodeImpl(projectionAtom.getVariables(),
-                new ImmutableSubstitutionImpl<>(ImmutableMap.of(X, generateURI1(I), Y, generateURI1(L))), Optional.empty());
+        ConstructionNode subQuery1UnionNode1 = new ConstructionNodeImpl(ImmutableSet.of(X),
+                new ImmutableSubstitutionImpl<>(ImmutableMap.of(X, generateURI1(I))), Optional.empty());
         queryBuilder.addChild(unionNode1, subQuery1UnionNode1);
 
         queryBuilder.addChild(subQuery1UnionNode1, new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE5_PREDICATE, I, L)) );
 
         //second child of unionNode1
-        ConstructionNode subQuery2UnionNode1 = new ConstructionNodeImpl(projectionAtom.getVariables(),
-                new ImmutableSubstitutionImpl<>(ImmutableMap.of(X, generateURI2(M), Y, generateURI1(N))), Optional.empty());
+        ConstructionNode subQuery2UnionNode1 = new ConstructionNodeImpl(ImmutableSet.of(X),
+                new ImmutableSubstitutionImpl<>(ImmutableMap.of(X, generateURI2(M))), Optional.empty());
         queryBuilder.addChild(unionNode1, subQuery2UnionNode1);
 
         queryBuilder.addChild(subQuery2UnionNode1, new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE6_PREDICATE, M, N)) );
@@ -415,8 +415,8 @@ public class SubstitutionLiftTest {
 
         expectedQueryBuilder.addChild(joinNode21, new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE6_PREDICATE, C, B)) );
 
-        expectedQueryBuilder.addChild(joinNode22, new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, C, B)) );
         expectedQueryBuilder.addChild(joinNode22, new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE2_PREDICATE, C, B)) );
+        expectedQueryBuilder.addChild(joinNode22, new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE3_PREDICATE, C, B)) );
 
 
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
@@ -488,4 +488,60 @@ public class SubstitutionLiftTest {
         System.out.println("\nAfter optimization: \n" +  intermediateQuery);
     }
 
+    @Test
+    public void testNewConstructionNode() throws EmptyQueryException {
+        //Construct unoptimized query
+        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
+        DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE, X, Y);
+        ConstructionNode rootNode = new ConstructionNodeImpl(projectionAtom.getVariables(),
+                new ImmutableSubstitutionImpl<>(ImmutableMap.of( Y, generateURI1(B))), Optional.empty());
+
+        queryBuilder.init(projectionAtom, rootNode);
+
+        UnionNode unionNode =  new UnionNodeImpl(ImmutableSet.of(B,X,E));
+        queryBuilder.addChild(rootNode, unionNode);
+
+        InnerJoinNode joinNode = new InnerJoinNodeImpl(Optional.empty());
+        queryBuilder.addChild(unionNode, joinNode);
+
+        UnionNode unionNode2 =  new UnionNodeImpl(projectionAtom.getVariables());
+        queryBuilder.addChild(unionNode, unionNode2);
+
+        //first child of unionNode2
+        ConstructionNode subQuery1UnionNode2 = new ConstructionNodeImpl(projectionAtom.getVariables(),
+                new ImmutableSubstitutionImpl<>(ImmutableMap.of(X, generateURI1(I))), Optional.empty());
+        queryBuilder.addChild(unionNode2, subQuery1UnionNode2);
+
+        queryBuilder.addChild(subQuery1UnionNode2, new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE5_PREDICATE, I, L)) );
+
+        //second child of unionNode2
+        ConstructionNode subQuery2UnionNode2 = new ConstructionNodeImpl(projectionAtom.getVariables(),
+                new ImmutableSubstitutionImpl<>(ImmutableMap.of(X, generateURI2(M))), Optional.empty());
+        queryBuilder.addChild(unionNode2, subQuery2UnionNode2);
+
+        queryBuilder.addChild(subQuery2UnionNode2, new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE6_PREDICATE, M, N)) );
+
+
+        //first child of JoinNode
+        ConstructionNode subQueryJoinNode = new ConstructionNodeImpl(ImmutableSet.of(B,X),
+                new ImmutableSubstitutionImpl<>(ImmutableMap.of( X, generateURI1(A))), Optional.empty());
+        queryBuilder.addChild(joinNode, subQueryJoinNode);
+
+        queryBuilder.addChild(subQueryJoinNode, new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, A, B)) );
+
+        //second child of JoinNode
+
+        queryBuilder.addChild(joinNode, new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE3_PREDICATE, E, B)) );
+
+
+        //build unoptimized query
+        IntermediateQuery unOptimizedQuery = queryBuilder.build();
+        System.out.println("\nBefore optimization: \n" +  unOptimizedQuery);
+
+        IntermediateQueryOptimizer substitutionOptimizer = new TopDownSubstitutionLiftOptimizer();
+
+        IntermediateQuery optimizedQuery = substitutionOptimizer.optimize(unOptimizedQuery);
+
+        System.out.println("\nAfter optimization: \n" +  optimizedQuery);
+    }
 }
