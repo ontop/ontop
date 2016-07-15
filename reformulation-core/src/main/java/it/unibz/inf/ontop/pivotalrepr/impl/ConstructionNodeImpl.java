@@ -368,6 +368,7 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
                 .filter(e -> !tauEqEntries.contains(e))
                 .filter(e -> !formerThetaDomain.contains(e.getKey()))
                 .map(e -> new AbstractMap.SimpleEntry<>(e.getKey(), newTheta.apply(e.getValue())))
+                .distinct()
                 .collect(ImmutableCollectors.toMap());
 
         return new ImmutableSubstitutionImpl<>(newMap);
