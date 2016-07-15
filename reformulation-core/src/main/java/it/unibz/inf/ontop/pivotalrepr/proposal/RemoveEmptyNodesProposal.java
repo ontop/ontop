@@ -1,9 +1,9 @@
 package it.unibz.inf.ontop.pivotalrepr.proposal;
 
-import it.unibz.inf.ontop.pivotalrepr.QueryNode;
+import it.unibz.inf.ontop.pivotalrepr.EmptyNode;
 
 /**
- * Removes all the EmptyNodeNode in the sub-tree of the focus node (including the latter)
+ * Removes the EmptyNode and reacts to this removal by restructuring the query.
  */
-public interface RemoveEmptyNodesProposal<T extends QueryNode> extends NodeCentricOptimizationProposal<T> {
+public interface RemoveEmptyNodesProposal extends NodeCentricOptimizationProposal<EmptyNode> {
 }

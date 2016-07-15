@@ -1,17 +1,17 @@
 package it.unibz.inf.ontop.pivotalrepr.proposal.impl;
 
-import it.unibz.inf.ontop.pivotalrepr.QueryNode;
+import it.unibz.inf.ontop.pivotalrepr.EmptyNode;
 import it.unibz.inf.ontop.pivotalrepr.proposal.RemoveEmptyNodesProposal;
 
-public class RemoveEmptyNodesProposalImpl<N extends QueryNode> implements RemoveEmptyNodesProposal<N> {
-    private final N focusNode;
+public class RemoveEmptyNodesProposalImpl implements RemoveEmptyNodesProposal {
+    private final EmptyNode focusNode;
 
-    public RemoveEmptyNodesProposalImpl(N focusNode) {
-        this.focusNode = focusNode;
+    public RemoveEmptyNodesProposalImpl(EmptyNode emptyNode) {
+        this.focusNode = emptyNode;
     }
 
     @Override
-    public N getFocusNode() {
+    public EmptyNode getFocusNode() {
         return focusNode;
     }
 }

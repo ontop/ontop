@@ -145,10 +145,8 @@ public class JgraphtQueryTreeComponent implements QueryTreeComponent {
     }
 
     @Override
-    public ImmutableSet<EmptyNode> getEmptyNodes(QueryNode subTreeRoot) {
-        return Stream.concat(
-                    Stream.of(subTreeRoot),
-                    getSubTreeNodesInTopDownOrder(subTreeRoot).stream())
+    public ImmutableSet<EmptyNode> getEmptyNodes() {
+        return getNodesInTopDownOrder().stream()
                 .filter(n -> n instanceof EmptyNode)
                 .map(n -> (EmptyNode) n)
                 .collect(ImmutableCollectors.toSet());

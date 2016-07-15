@@ -11,6 +11,7 @@ import it.unibz.inf.ontop.pivotalrepr.*;
 import it.unibz.inf.ontop.pivotalrepr.impl.EmptyNodeImpl;
 import it.unibz.inf.ontop.pivotalrepr.impl.QueryTreeComponent;
 import it.unibz.inf.ontop.pivotalrepr.proposal.NodeCentricOptimizationResults;
+import it.unibz.inf.ontop.pivotalrepr.proposal.RemoveEmptyNodesProposal;
 import it.unibz.inf.ontop.pivotalrepr.proposal.impl.NodeCentricOptimizationResultsImpl;
 import it.unibz.inf.ontop.pivotalrepr.proposal.impl.RemoveEmptyNodesProposalImpl;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -313,7 +314,7 @@ public class SubstitutionPropagationTools {
                     /**
                      *
                      */
-                    NodeCentricOptimizationResults<QueryNode> removalResults =
+                    NodeCentricOptimizationResults<EmptyNode> removalResults =
                             reactToEmptinessDeclaration(query, currentAncestor, treeComponent);
                     // TODO: make sure it makes sense
                     return new NodeCentricOptimizationResultsImpl<T>(query, removalResults.getOptionalNextSibling(),
@@ -360,7 +361,7 @@ public class SubstitutionPropagationTools {
     /**
      * Returns results centered on the removed node.
      */
-    private static NodeCentricOptimizationResults<QueryNode> reactToEmptinessDeclaration(
+    private static NodeCentricOptimizationResults<EmptyNode> reactToEmptinessDeclaration(
             IntermediateQuery query, QueryNode currentAncestor, QueryTreeComponent treeComponent) throws EmptyQueryException {
 
         ImmutableSet<Variable> nullVariables = query.getProjectedVariables(currentAncestor);
@@ -368,7 +369,7 @@ public class SubstitutionPropagationTools {
 
         treeComponent.replaceSubTree(currentAncestor, replacingEmptyNode);
 
-        RemoveEmptyNodesProposalImpl<QueryNode> proposal = new RemoveEmptyNodesProposalImpl<>(replacingEmptyNode);
+        RemoveEmptyNodesProposal proposal = new RemoveEmptyNodesProposalImpl(replacingEmptyNode);
         return query.applyProposal(proposal, true);
     }
 }

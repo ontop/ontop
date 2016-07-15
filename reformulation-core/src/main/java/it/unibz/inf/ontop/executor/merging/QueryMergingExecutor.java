@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.executor.merging;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.executor.InternalProposalExecutor;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionImpl;
@@ -12,6 +13,7 @@ import it.unibz.inf.ontop.pivotalrepr.impl.*;
 import it.unibz.inf.ontop.pivotalrepr.proposal.InvalidQueryOptimizationProposalException;
 import it.unibz.inf.ontop.pivotalrepr.proposal.ProposalResults;
 import it.unibz.inf.ontop.pivotalrepr.proposal.QueryMergingProposal;
+import it.unibz.inf.ontop.pivotalrepr.proposal.RemoveEmptyNodesProposal;
 import it.unibz.inf.ontop.pivotalrepr.proposal.impl.ProposalResultsImpl;
 import it.unibz.inf.ontop.pivotalrepr.proposal.impl.RemoveEmptyNodesProposalImpl;
 import it.unibz.inf.ontop.utils.FunctionalTools;
@@ -168,10 +170,16 @@ public class QueryMergingExecutor implements InternalProposalExecutor<QueryMergi
             mergeSubQuery(treeComponent, subQuery, localDataNode);
         }
 
-        // Removes the empty nodes (in-place operation)
-        RemoveEmptyNodesProposalImpl<ConstructionNode> cleaningProposal = new RemoveEmptyNodesProposalImpl<>(
-                mainQuery.getRootConstructionNode());
-        mainQuery.applyProposal(cleaningProposal, true);
+        // Non-final
+        Optional<EmptyNode> nextEmptyNode = treeComponent.getEmptyNodes().stream()
+                .findFirst();
+        while (nextEmptyNode.isPresent()) {
+            // Removes the empty nodes (in-place operation)
+            RemoveEmptyNodesProposal cleaningProposal = new RemoveEmptyNodesProposalImpl(nextEmptyNode.get());
+            mainQuery.applyProposal(cleaningProposal, true);
+
+            nextEmptyNode = treeComponent.getEmptyNodes().stream().findFirst();
+        }
 
         return new ProposalResultsImpl(mainQuery);
     }
