@@ -8,14 +8,11 @@ import it.unibz.inf.ontop.model.ImmutableSubstitution;
 import it.unibz.inf.ontop.model.ImmutableTerm;
 import it.unibz.inf.ontop.model.Variable;
 import it.unibz.inf.ontop.pivotalrepr.*;
-import it.unibz.inf.ontop.pivotalrepr.NonCommutativeOperatorNode.ArgumentPosition;
 import it.unibz.inf.ontop.pivotalrepr.impl.EmptyNodeImpl;
 import it.unibz.inf.ontop.pivotalrepr.impl.QueryTreeComponent;
 import it.unibz.inf.ontop.pivotalrepr.proposal.NodeCentricOptimizationResults;
-import it.unibz.inf.ontop.pivotalrepr.proposal.ReactToChildDeletionProposal;
-import it.unibz.inf.ontop.pivotalrepr.proposal.ReactToChildDeletionResults;
 import it.unibz.inf.ontop.pivotalrepr.proposal.impl.NodeCentricOptimizationResultsImpl;
-import it.unibz.inf.ontop.pivotalrepr.proposal.impl.ReactToChildDeletionProposalImpl;
+import it.unibz.inf.ontop.pivotalrepr.proposal.impl.RemoveEmptyNodesProposalImpl;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.LinkedList;
@@ -313,7 +310,14 @@ public class SubstitutionPropagationTools {
                  * Ancestor is empty --> applies a ReactToChildDeletionProposal and returns the remaining ancestor
                  */
                 case DECLARE_AS_EMPTY:
-                    return reactToEmptinessDeclaration(optionalNextAncestor, query, currentAncestor, treeComponent);
+                    /**
+                     *
+                     */
+                    NodeCentricOptimizationResults<QueryNode> removalResults =
+                            reactToEmptinessDeclaration(query, currentAncestor, treeComponent);
+                    // TODO: make sure it makes sense
+                    return new NodeCentricOptimizationResultsImpl<T>(query, removalResults.getOptionalNextSibling(),
+                            removalResults.getOptionalClosestAncestor());
                 default:
                     throw new IllegalStateException("Unknown local action: " + substitutionResults.getLocalAction());
             }
@@ -353,26 +357,18 @@ public class SubstitutionPropagationTools {
         return new NodeCentricOptimizationResultsImpl<>(query, focusNode);
     }
 
-    private static <T extends QueryNode> NodeCentricOptimizationResults<T> reactToEmptinessDeclaration(
-            Optional<QueryNode> optionalNextAncestor, IntermediateQuery query, QueryNode currentAncestor,
-            QueryTreeComponent treeComponent) throws EmptyQueryException {
-        QueryNode ancestorParent = optionalNextAncestor
-                .orElseThrow(EmptyQueryException::new);
+    /**
+     * Returns results centered on the removed node.
+     */
+    private static NodeCentricOptimizationResults<QueryNode> reactToEmptinessDeclaration(
+            IntermediateQuery query, QueryNode currentAncestor, QueryTreeComponent treeComponent) throws EmptyQueryException {
 
         ImmutableSet<Variable> nullVariables = query.getProjectedVariables(currentAncestor);
-        Optional<QueryNode> optionalNextSibling = query.getNextSibling(currentAncestor);
-        Optional<ArgumentPosition> optionalPosition = query.getOptionalPosition(ancestorParent, currentAncestor);
+        EmptyNode replacingEmptyNode = new EmptyNodeImpl(nullVariables);
 
-        treeComponent.removeSubTree(currentAncestor);
+        treeComponent.replaceSubTree(currentAncestor, replacingEmptyNode);
 
-        ReactToChildDeletionProposal reactionProposal = new ReactToChildDeletionProposalImpl(
-                ancestorParent, optionalNextSibling, optionalPosition, nullVariables);
-
-        // In-place optimization (returns the same query)
-        ReactToChildDeletionResults reactionResults = query.applyProposal(reactionProposal, true);
-
-        // Only returns the closest remaining ancestor
-        return new NodeCentricOptimizationResultsImpl<>(query, Optional.empty(),
-                Optional.of(reactionResults.getClosestRemainingAncestor()));
+        RemoveEmptyNodesProposalImpl<QueryNode> proposal = new RemoveEmptyNodesProposalImpl<>(replacingEmptyNode);
+        return query.applyProposal(proposal, true);
     }
 }
