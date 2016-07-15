@@ -17,6 +17,8 @@ import org.junit.Test;
 
 import java.util.Optional;
 
+import static it.unibz.inf.ontop.pivotalrepr.NonCommutativeOperatorNode.ArgumentPosition.LEFT;
+import static it.unibz.inf.ontop.pivotalrepr.NonCommutativeOperatorNode.ArgumentPosition.RIGHT;
 import static it.unibz.inf.ontop.pivotalrepr.equivalence.IQSyntacticEquivalenceChecker.areEquivalent;
 import static org.junit.Assert.assertTrue;
 
@@ -451,6 +453,52 @@ public class SubstitutionPropagationTest {
         expectedQueryBuilder.addChild(joinNode, newUnionNode);
         expectedQueryBuilder.addChild(newUnionNode, buildExtensionalDataNode(TABLE3_PREDICATE, A, B));
         expectedQueryBuilder.addChild(newUnionNode, buildExtensionalDataNode(TABLE2_PREDICATE, A, B));
+        propagateAndCompare(initialQuery, expectedQueryBuilder.build(), propagationProposal);
+    }
+
+    @Test
+    public void testUnsatisfiedFilter() throws EmptyQueryException {
+        IntermediateQueryBuilder initialQueryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
+        DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE, X, Y);
+
+        ConstructionNode initialRootNode = new ConstructionNodeImpl(projectionAtom.getVariables());
+        initialQueryBuilder.init(projectionAtom, initialRootNode);
+
+        LeftJoinNode leftJoin = new LeftJoinNodeImpl(Optional.empty());
+        initialQueryBuilder.addChild(initialRootNode, leftJoin);
+
+        ConstructionNode leftConstructionNode = new ConstructionNodeImpl(ImmutableSet.of(X, Y),
+                new ImmutableSubstitutionImpl<>(ImmutableMap.of(
+                        X, generateURI2(A, B),
+                        Y, generateURI1(B))),
+                Optional.empty());
+        initialQueryBuilder.addChild(leftJoin, leftConstructionNode, LEFT);
+        initialQueryBuilder.addChild(leftConstructionNode, DATA_NODE_1);
+
+        FilterNode filterNode = new FilterNodeImpl(DATA_FACTORY.getImmutableExpression(ExpressionOperation.EQ,
+                X, generateURI1(DATA_FACTORY.getConstantLiteral("two"))));
+        initialQueryBuilder.addChild(leftJoin, filterNode, RIGHT);
+
+        ConstructionNode rightConstructionNode = new ConstructionNodeImpl(ImmutableSet.of(X),
+                new ImmutableSubstitutionImpl<>(ImmutableMap.of(
+                        X, generateURI2(C, D))),
+                Optional.empty());
+        initialQueryBuilder.addChild(filterNode, rightConstructionNode);
+
+        initialQueryBuilder.addChild(rightConstructionNode, DATA_NODE_3);
+
+        IntermediateQuery initialQuery = initialQueryBuilder.build();
+
+        SubstitutionPropagationProposal<ConstructionNode> propagationProposal =
+                new SubstitutionPropagationProposalImpl<>(rightConstructionNode, rightConstructionNode.getDirectBindingSubstitution());
+
+        IntermediateQueryBuilder expectedQueryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
+        expectedQueryBuilder.init(projectionAtom, initialRootNode);
+        expectedQueryBuilder.addChild(initialRootNode, leftJoin);
+        expectedQueryBuilder.addChild(leftJoin, leftConstructionNode, LEFT);
+        expectedQueryBuilder.addChild(leftConstructionNode, DATA_NODE_1);
+        expectedQueryBuilder.addChild(leftJoin, new EmptyNodeImpl(ImmutableSet.of(X)), RIGHT);
+
         propagateAndCompare(initialQuery, expectedQueryBuilder.build(), propagationProposal);
     }
 
