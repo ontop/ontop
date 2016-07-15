@@ -326,21 +326,21 @@ public class DefaultTree implements QueryTree {
         addChild(newParentNode, childNode, Optional.<NonCommutativeOperatorNode.ArgumentPosition>empty(), false, false);
     }
 
-    public ImmutableSet<EmptyNode> getEmptyNodes(QueryNode subTreeRoot) {
-        if (subTreeRoot == rootNode) {
-            return ImmutableSet.copyOf(emptyNodes);
-        }
-        /**
-         * TODO: find a more efficient implementation
-         */
-        else {
-            return Stream.concat(
-                    Stream.of(subTreeRoot),
-                    getSubTreeNodesInTopDownOrder(subTreeRoot).stream())
-                    .filter(n -> n instanceof EmptyNode)
-                    .map(n -> (EmptyNode) n)
-                    .collect(ImmutableCollectors.toSet());
-        }
+    public ImmutableSet<EmptyNode> getEmptyNodes() {
+//        if (subTreeRoot == rootNode) {
+        return ImmutableSet.copyOf(emptyNodes);
+//        }
+//        /**
+//         * TODO: find a more efficient implementation
+//         */
+//        else {
+//            return Stream.concat(
+//                    Stream.of(subTreeRoot),
+//                    getSubTreeNodesInTopDownOrder(subTreeRoot).stream())
+//                    .filter(n -> n instanceof EmptyNode)
+//                    .map(n -> (EmptyNode) n)
+//                    .collect(ImmutableCollectors.toSet());
+//        }
     }
 
     @Override

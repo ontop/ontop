@@ -11,6 +11,7 @@ import it.unibz.inf.ontop.pivotalrepr.impl.*;
 import it.unibz.inf.ontop.pivotalrepr.impl.tree.DefaultIntermediateQueryBuilder;
 import it.unibz.inf.ontop.pivotalrepr.proposal.InnerJoinOptimizationProposal;
 import it.unibz.inf.ontop.pivotalrepr.proposal.NodeCentricOptimizationResults;
+import it.unibz.inf.ontop.pivotalrepr.proposal.RemoveEmptyNodesProposal;
 import it.unibz.inf.ontop.pivotalrepr.proposal.impl.InnerJoinOptimizationProposalImpl;
 import it.unibz.inf.ontop.pivotalrepr.proposal.impl.RemoveEmptyNodesProposalImpl;
 import org.junit.Test;
@@ -87,7 +88,8 @@ public class NavigationAfterRemovingEmptyNodes {
         FilterNode filterNode = new FilterNodeImpl(DATA_FACTORY.getImmutableExpression(ExpressionOperation.GT, A,
                 DATA_FACTORY.getConstantLiteral("2")));
         initialQueryBuilder.addChild(joinNode, filterNode);
-        initialQueryBuilder.addChild(filterNode, new EmptyNodeImpl(ImmutableSet.of(A)));
+        EmptyNode emptyNode = new EmptyNodeImpl(ImmutableSet.of(A));
+        initialQueryBuilder.addChild(filterNode, emptyNode);
         initialQueryBuilder.addChild(joinNode, buildExtensionalDataNode(TABLE2_PREDICATE, A, C));
 
         ExtensionalDataNode rightMostNode = buildExtensionalDataNode(TABLE3_PREDICATE, A, D);
@@ -95,12 +97,11 @@ public class NavigationAfterRemovingEmptyNodes {
 
         IntermediateQuery initialQuery = initialQueryBuilder.build();
 
-        RemoveEmptyNodesProposalImpl<FilterNode> proposal = new RemoveEmptyNodesProposalImpl<>(filterNode);
+        RemoveEmptyNodesProposal proposal = new RemoveEmptyNodesProposalImpl(emptyNode);
 
         System.out.println("Initial query: \n" + initialQuery);
 
-        NodeCentricOptimizationResults<FilterNode> results = initialQuery.applyProposal(proposal,
-                REQUIRE_USING_IN_PLACE_EXECUTOR);
+        NodeCentricOptimizationResults<EmptyNode> results = initialQuery.applyProposal(proposal, REQUIRE_USING_IN_PLACE_EXECUTOR);
 
         System.out.println("Optimized query: \n" + initialQuery);
 
