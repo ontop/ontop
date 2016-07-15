@@ -10,6 +10,7 @@ import it.unibz.inf.ontop.owlrefplatform.core.unfolding.ExpressionEvaluator;
 import it.unibz.inf.ontop.owlrefplatform.core.unfolding.ExpressionEvaluator.Evaluation;
 import it.unibz.inf.ontop.pivotalrepr.*;
 
+import static it.unibz.inf.ontop.pivotalrepr.NodeTransformationProposedState.DELETE;
 import static it.unibz.inf.ontop.pivotalrepr.SubstitutionResults.LocalAction.DECLARE_AS_EMPTY;
 
 public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
@@ -89,6 +90,11 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
     public boolean isSyntacticallyEquivalentTo(QueryNode node) {
         return (node instanceof FilterNode)
                 && ((FilterNode) node).getFilterCondition().equals(this.getFilterCondition());
+    }
+
+    @Override
+    public NodeTransformationProposal reactToEmptyChild(IntermediateQuery query, EmptyNode emptyChild) {
+        return new NodeTransformationProposalImpl(DELETE, emptyChild.getProjectedVariables());
     }
 
     @Override

@@ -14,6 +14,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import static it.unibz.inf.ontop.pivotalrepr.NodeTransformationProposedState.DELETE;
+import static it.unibz.inf.ontop.pivotalrepr.NodeTransformationProposedState.REPLACE_BY_UNIQUE_CHILD;
 import static it.unibz.inf.ontop.pivotalrepr.NonCommutativeOperatorNode.ArgumentPosition.*;
 
 public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
@@ -212,6 +214,34 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
     public boolean isSyntacticallyEquivalentTo(QueryNode node) {
         return (node instanceof LeftJoinNode)
                 && ((LeftJoinNode) node).getOptionalFilterCondition().equals(this.getOptionalFilterCondition());
+    }
+
+    @Override
+    public NodeTransformationProposal reactToEmptyChild(IntermediateQuery query, EmptyNode emptyChild) {
+        ArgumentPosition positionOfDeletedChild = query.getOptionalPosition(this, emptyChild)
+                .orElseThrow(() -> new IllegalStateException("The deleted child of a LJ must have a position"));
+
+        QueryNode otherChild = query.getChild(this, (positionOfDeletedChild == LEFT) ? RIGHT : LEFT)
+                .orElseThrow(() -> new IllegalStateException("The other child of a LJ is missing"));
+
+        ImmutableSet<Variable> variablesProjectedByOtherChild = query.getProjectedVariables(otherChild);
+
+        ImmutableSet<Variable> nullVariables;
+
+        switch(positionOfDeletedChild) {
+            case LEFT:
+                nullVariables = union(variablesProjectedByOtherChild, emptyChild.getProjectedVariables());
+                return new NodeTransformationProposalImpl(DELETE, nullVariables);
+
+            case RIGHT:
+                nullVariables = emptyChild.getProjectedVariables().stream()
+                        .filter(v -> !(variablesProjectedByOtherChild.contains(v)))
+                        .collect(ImmutableCollectors.toSet());
+                return new NodeTransformationProposalImpl(REPLACE_BY_UNIQUE_CHILD,
+                        otherChild, nullVariables);
+            default:
+                throw new IllegalStateException("Unknown position: " + positionOfDeletedChild);
+        }
     }
 
     @Override
