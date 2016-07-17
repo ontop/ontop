@@ -6,12 +6,8 @@ import java.util.Optional;
 import it.unibz.inf.ontop.model.ImmutableExpression;
 import it.unibz.inf.ontop.model.ImmutableSubstitution;
 import it.unibz.inf.ontop.model.ImmutableTerm;
-import it.unibz.inf.ontop.owlrefplatform.core.unfolding.ExpressionEvaluator;
 import it.unibz.inf.ontop.owlrefplatform.core.unfolding.ExpressionEvaluator.Evaluation;
 import it.unibz.inf.ontop.pivotalrepr.*;
-
-import static it.unibz.inf.ontop.pivotalrepr.NodeTransformationProposedState.DELETE;
-import static it.unibz.inf.ontop.pivotalrepr.SubstitutionResults.LocalAction.DECLARE_AS_EMPTY;
 
 public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
 
@@ -68,7 +64,7 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
          * The condition cannot be satisfied --> the sub-tree is empty.
          */
         if (evaluation.isFalse()) {
-            return new SubstitutionResultsImpl<>(DECLARE_AS_EMPTY);
+            return new SubstitutionResultsImpl<>(SubstitutionResults.LocalAction.DECLARE_AS_EMPTY);
         }
         else {
             /**
@@ -94,7 +90,7 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
 
     @Override
     public NodeTransformationProposal reactToEmptyChild(IntermediateQuery query, EmptyNode emptyChild) {
-        return new NodeTransformationProposalImpl(DELETE, emptyChild.getProjectedVariables());
+        return new NodeTransformationProposalImpl(NodeTransformationProposedState.DECLARE_AS_EMPTY, emptyChild.getProjectedVariables());
     }
 
     @Override

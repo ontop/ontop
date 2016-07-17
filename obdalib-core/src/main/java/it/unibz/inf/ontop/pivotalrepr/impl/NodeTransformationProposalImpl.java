@@ -23,9 +23,8 @@ public class NodeTransformationProposalImpl implements NodeTransformationProposa
                 break;
             case NO_LOCAL_CHANGE:
                 throw new IllegalArgumentException("No new node has to be given when there is no change");
-            case DELETE:
-                throw new IllegalArgumentException("No new node has to be given when the node is deleted " +
-                        "(without replacement)");
+            case DECLARE_AS_EMPTY:
+                throw new IllegalArgumentException("No new node has to be given when the node is declared as empty");
         }
         this.state = state;
         this.optionalNewNode = Optional.of(newNode);
@@ -36,7 +35,7 @@ public class NodeTransformationProposalImpl implements NodeTransformationProposa
         switch (state) {
             case NO_LOCAL_CHANGE:
                 break;
-            case DELETE:
+            case DECLARE_AS_EMPTY:
                 break;
             case REPLACE_BY_UNIQUE_CHILD:
             case REPLACE_BY_NEW_NODE:

@@ -38,7 +38,7 @@ public class ReactToChildDeletionTransformer implements HeterogeneousQueryNodeTr
 
     @Override
     public NodeTransformationProposal transform(FilterNode filterNode) {
-        return new NodeTransformationProposalImpl(DELETE, variablesProjectedByDeletedChild);
+        return new NodeTransformationProposalImpl(DECLARE_AS_EMPTY, variablesProjectedByDeletedChild);
     }
 
     @Override
@@ -61,7 +61,7 @@ public class ReactToChildDeletionTransformer implements HeterogeneousQueryNodeTr
         switch(positionOfDeletedChild) {
             case LEFT:
                 nullVariables = union(variablesProjectedByOtherChild, variablesProjectedByDeletedChild);
-                return new NodeTransformationProposalImpl(DELETE, nullVariables);
+                return new NodeTransformationProposalImpl(DECLARE_AS_EMPTY, nullVariables);
 
             case RIGHT:
                 nullVariables = variablesProjectedByDeletedChild.stream()
@@ -79,7 +79,7 @@ public class ReactToChildDeletionTransformer implements HeterogeneousQueryNodeTr
         ImmutableList<QueryNode> children = query.getChildren(unionNode);
         switch (children.size()) {
             case 0:
-                return new NodeTransformationProposalImpl(DELETE,
+                return new NodeTransformationProposalImpl(DECLARE_AS_EMPTY,
                         variablesProjectedByDeletedChild);
             case 1:
                 return new NodeTransformationProposalImpl(REPLACE_BY_UNIQUE_CHILD, children.get(0),
@@ -137,7 +137,7 @@ public class ReactToChildDeletionTransformer implements HeterogeneousQueryNodeTr
 
             switch (remainingChildren.size()) {
                 case 0:
-                    return new NodeTransformationProposalImpl(DELETE,
+                    return new NodeTransformationProposalImpl(DECLARE_AS_EMPTY,
                             variablesProjectedByDeletedChild);
                 case 1:
                     if (newCondition.isPresent()) {
@@ -161,7 +161,7 @@ public class ReactToChildDeletionTransformer implements HeterogeneousQueryNodeTr
     }
 
     private NodeTransformationProposal rejectInnerJoin(ImmutableSet<Variable> otherNodesProjectedVariables) {
-        return new NodeTransformationProposalImpl(DELETE,
+        return new NodeTransformationProposalImpl(DECLARE_AS_EMPTY,
                 union(otherNodesProjectedVariables, variablesProjectedByDeletedChild));
     }
 
@@ -170,7 +170,7 @@ public class ReactToChildDeletionTransformer implements HeterogeneousQueryNodeTr
         /**
          * A construction node has only one child
          */
-        return new NodeTransformationProposalImpl(DELETE, constructionNode.getProjectedVariables());
+        return new NodeTransformationProposalImpl(DECLARE_AS_EMPTY, constructionNode.getProjectedVariables());
     }
 
     /**
@@ -183,12 +183,12 @@ public class ReactToChildDeletionTransformer implements HeterogeneousQueryNodeTr
          *
          * TODO: what is really projected by a group node?
          */
-        return new NodeTransformationProposalImpl(DELETE, variablesProjectedByDeletedChild);
+        return new NodeTransformationProposalImpl(DECLARE_AS_EMPTY, variablesProjectedByDeletedChild);
     }
 
     @Override
     public NodeTransformationProposal transform(EmptyNode emptyNode) {
-        return new NodeTransformationProposalImpl(DELETE,
+        return new NodeTransformationProposalImpl(DECLARE_AS_EMPTY,
                 emptyNode.getProjectedVariables());
     }
 

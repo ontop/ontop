@@ -21,9 +21,7 @@ import org.slf4j.LoggerFactory;
 import it.unibz.inf.ontop.pivotalrepr.*;
 
 import static it.unibz.inf.ontop.owlrefplatform.core.basicoperations.ImmutableUnificationTools.computeMGUS;
-import static it.unibz.inf.ontop.pivotalrepr.NodeTransformationProposedState.DELETE;
-import static it.unibz.inf.ontop.pivotalrepr.SubstitutionResults.LocalAction.DECLARE_AS_EMPTY;
-import static it.unibz.inf.ontop.pivotalrepr.SubstitutionResults.LocalAction.REPLACE_BY_CHILD;
+import static it.unibz.inf.ontop.pivotalrepr.SubstitutionResults.LocalAction.*;
 import static it.unibz.inf.ontop.pivotalrepr.impl.ConstructionNodeTools.computeNewProjectedVariables;
 import static it.unibz.inf.ontop.pivotalrepr.impl.ConstructionNodeTools.extractRelevantDescendingSubstitution;
 
@@ -258,7 +256,7 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
         /**
          * A construction node has only one child
          */
-        return new NodeTransformationProposalImpl(DELETE, projectedVariables);
+        return new NodeTransformationProposalImpl(NodeTransformationProposedState.DECLARE_AS_EMPTY, projectedVariables);
     }
 
     @Override

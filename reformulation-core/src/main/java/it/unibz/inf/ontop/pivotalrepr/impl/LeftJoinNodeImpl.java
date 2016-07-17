@@ -14,7 +14,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static it.unibz.inf.ontop.pivotalrepr.NodeTransformationProposedState.DELETE;
+import static it.unibz.inf.ontop.pivotalrepr.NodeTransformationProposedState.DECLARE_AS_EMPTY;
 import static it.unibz.inf.ontop.pivotalrepr.NodeTransformationProposedState.REPLACE_BY_UNIQUE_CHILD;
 import static it.unibz.inf.ontop.pivotalrepr.NonCommutativeOperatorNode.ArgumentPosition.*;
 
@@ -231,7 +231,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
         switch(positionOfDeletedChild) {
             case LEFT:
                 nullVariables = union(variablesProjectedByOtherChild, emptyChild.getProjectedVariables());
-                return new NodeTransformationProposalImpl(DELETE, nullVariables);
+                return new NodeTransformationProposalImpl(DECLARE_AS_EMPTY, nullVariables);
 
             case RIGHT:
                 nullVariables = emptyChild.getProjectedVariables().stream()

@@ -5,9 +5,9 @@ import it.unibz.inf.ontop.pivotalrepr.QueryNode;
 import java.util.Optional;
 
 /**
- * TODO: explain
+ * TODO: remove
  */
-public interface ReactToChildDeletionResults extends ProposalResults {
+public interface ReactToChildDeletionResults {
 
 
     /**

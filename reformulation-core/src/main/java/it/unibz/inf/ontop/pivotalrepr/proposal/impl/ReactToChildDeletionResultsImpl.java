@@ -6,14 +6,13 @@ import it.unibz.inf.ontop.pivotalrepr.proposal.ReactToChildDeletionResults;
 
 import java.util.Optional;
 
-public class ReactToChildDeletionResultsImpl extends ProposalResultsImpl implements ReactToChildDeletionResults {
+public class ReactToChildDeletionResultsImpl implements ReactToChildDeletionResults {
 
     private final QueryNode closestAncestor;
     private final Optional<QueryNode> optionalNextSibling;
 
     public ReactToChildDeletionResultsImpl(IntermediateQuery resultingQuery, QueryNode closestAncestor,
                                            Optional<QueryNode> optionalNextSibling) {
-        super(resultingQuery);
         this.closestAncestor = closestAncestor;
         this.optionalNextSibling = optionalNextSibling;
 
