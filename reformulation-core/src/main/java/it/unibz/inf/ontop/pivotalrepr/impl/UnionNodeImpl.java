@@ -13,7 +13,7 @@ import java.util.Optional;
 
 import static it.unibz.inf.ontop.pivotalrepr.NodeTransformationProposedState.DECLARE_AS_EMPTY;
 import static it.unibz.inf.ontop.pivotalrepr.NodeTransformationProposedState.NO_LOCAL_CHANGE;
-import static it.unibz.inf.ontop.pivotalrepr.NodeTransformationProposedState.REPLACE_BY_UNIQUE_CHILD;
+import static it.unibz.inf.ontop.pivotalrepr.NodeTransformationProposedState.REPLACE_BY_UNIQUE_NON_EMPTY_CHILD;
 import static it.unibz.inf.ontop.pivotalrepr.SubstitutionResults.LocalAction.NO_CHANGE;
 
 public class UnionNodeImpl extends QueryNodeImpl implements UnionNode {
@@ -110,7 +110,7 @@ public class UnionNodeImpl extends QueryNodeImpl implements UnionNode {
             case 0:
                 return new NodeTransformationProposalImpl(DECLARE_AS_EMPTY, emptyChild.getProjectedVariables());
             case 1:
-                return new NodeTransformationProposalImpl(REPLACE_BY_UNIQUE_CHILD, children.get(0),
+                return new NodeTransformationProposalImpl(REPLACE_BY_UNIQUE_NON_EMPTY_CHILD, children.get(0),
                         ImmutableSet.of());
             default:
                 return new NodeTransformationProposalImpl(NO_LOCAL_CHANGE,

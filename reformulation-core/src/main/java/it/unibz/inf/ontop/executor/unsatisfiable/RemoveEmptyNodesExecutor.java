@@ -10,7 +10,6 @@ import it.unibz.inf.ontop.pivotalrepr.impl.EmptyNodeImpl;
 import it.unibz.inf.ontop.pivotalrepr.impl.QueryTreeComponent;
 import it.unibz.inf.ontop.pivotalrepr.proposal.*;
 import it.unibz.inf.ontop.pivotalrepr.proposal.impl.NodeCentricOptimizationResultsImpl;
-import it.unibz.inf.ontop.pivotalrepr.proposal.impl.ReactToChildDeletionResultsImpl;
 
 import java.util.Optional;
 
@@ -22,6 +21,39 @@ import static it.unibz.inf.ontop.owlrefplatform.core.basicoperations.ImmutableSu
  */
 public class RemoveEmptyNodesExecutor implements NodeCentricInternalExecutor<EmptyNode, RemoveEmptyNodesProposal> {
 
+
+    public static class ReactionResults {
+
+        private final QueryNode closestAncestor;
+        private final Optional<QueryNode> optionalNextSibling;
+
+        public ReactionResults(IntermediateQuery resultingQuery, QueryNode closestAncestor,
+                               Optional<QueryNode> optionalNextSibling) {
+            this.closestAncestor = closestAncestor;
+            this.optionalNextSibling = optionalNextSibling;
+
+            /**
+             * Checks the arguments
+             */
+            if (optionalNextSibling.isPresent()) {
+                Optional<QueryNode> optionalParent = resultingQuery.getParent(optionalNextSibling.get());
+                if ((!optionalParent.isPresent()) || optionalParent.get() != closestAncestor) {
+                    throw new IllegalArgumentException("The closest ancestor must be the parent of the next sibling");
+                }
+            }
+        }
+
+        public QueryNode getClosestRemainingAncestor() {
+            return closestAncestor;
+        }
+
+        public Optional<QueryNode> getOptionalNextSibling() {
+            return optionalNextSibling;
+        }
+    }
+
+
+
     /**
      * TODO: explain
      */
@@ -30,22 +62,19 @@ public class RemoveEmptyNodesExecutor implements NodeCentricInternalExecutor<Emp
                                                            QueryTreeComponent treeComponent)
             throws EmptyQueryException {
 
-        return removeFocusEmptyNode(proposal.getFocusNode(), query, treeComponent);
-    }
-
-    /**
-     * When the focus node is an EmptyNode (special case)
-     */
-    private NodeCentricOptimizationResults<EmptyNode> removeFocusEmptyNode(EmptyNode emptyFocusNode, IntermediateQuery query,
-                                                                   QueryTreeComponent treeComponent)
-            throws EmptyQueryException {
-
         // May update the query
-        ReactToChildDeletionResults reactionResults = analyzeAndUpdate(query, emptyFocusNode, treeComponent);
+        ReactionResults reactionResults = reactToEmptyChildNode(query, proposal.getFocusNode(), treeComponent);
 
         return new NodeCentricOptimizationResultsImpl<>(
                 query,
+                /**
+                 * Next sibling (of the empty node or of the lastly removed ancestor)
+                 */
                 reactionResults.getOptionalNextSibling(),
+
+                /**
+                 * First ancestor to remain (may be updated)
+                 */
                 Optional.of(reactionResults.getClosestRemainingAncestor()));
     }
 
@@ -54,8 +83,8 @@ public class RemoveEmptyNodesExecutor implements NodeCentricInternalExecutor<Emp
      *
      * Recursive!
      */
-    private static ReactToChildDeletionResults analyzeAndUpdate(IntermediateQuery query, EmptyNode emptyNode,
-                                                                QueryTreeComponent treeComponent)
+    private static ReactionResults reactToEmptyChildNode(IntermediateQuery query, EmptyNode emptyNode,
+                                                         QueryTreeComponent treeComponent)
             throws EmptyQueryException {
 
         QueryNode parentNode = query.getParent(emptyNode)
@@ -83,17 +112,17 @@ public class RemoveEmptyNodesExecutor implements NodeCentricInternalExecutor<Emp
                                                     "a EmptyQueryException should have been thrown")));
 
 
-                    return new ReactToChildDeletionResultsImpl(query, closestAncestor,
+                    return new ReactionResults(query, closestAncestor,
                             // If the parent is still there, the sibling should not have been removed.
                             optionalNextSibling
                                     .filter(s -> propagationResults.getOptionalNewNode().isPresent())
                     );
                 }
                 else {
-                    return new ReactToChildDeletionResultsImpl(query, parentNode, optionalNextSibling);
+                    return new ReactionResults(query, parentNode, optionalNextSibling);
                 }
 
-            case REPLACE_BY_UNIQUE_CHILD:
+            case REPLACE_BY_UNIQUE_NON_EMPTY_CHILD:
                 return applyReplacementProposal(query, parentNode, optionalNextSibling, treeComponent,
                         transformationProposal, true);
 
@@ -102,7 +131,13 @@ public class RemoveEmptyNodesExecutor implements NodeCentricInternalExecutor<Emp
                         transformationProposal, false);
 
             case DECLARE_AS_EMPTY:
-                return declareAsEmpty(query, parentNode, treeComponent, transformationProposal.getNullVariables());
+                EmptyNode newEmptyNode = new EmptyNodeImpl(transformationProposal.getNullVariables());
+                treeComponent.replaceSubTree(parentNode, newEmptyNode);
+
+                /**
+                 * Recursive (cascade)
+                 */
+                return reactToEmptyChildNode(query, newEmptyNode, treeComponent);
 
             default:
                 throw new RuntimeException("Unexpected state: " + transformationProposal.getState());
@@ -127,12 +162,12 @@ public class RemoveEmptyNodesExecutor implements NodeCentricInternalExecutor<Emp
      *
      * TODO: clean
      */
-    private static ReactToChildDeletionResults applyReplacementProposal(IntermediateQuery query,
-                                                                        QueryNode parentNode,
-                                                                        Optional<QueryNode> originalOptionalNextSibling,
-                                                                        QueryTreeComponent treeComponent,
-                                                                        NodeTransformationProposal transformationProposal,
-                                                                        boolean isReplacedByUniqueChild)
+    private static ReactionResults applyReplacementProposal(IntermediateQuery query,
+                                                            QueryNode parentNode,
+                                                            Optional<QueryNode> originalOptionalNextSibling,
+                                                            QueryTreeComponent treeComponent,
+                                                            NodeTransformationProposal transformationProposal,
+                                                            boolean isReplacedByUniqueChild)
             throws EmptyQueryException {
 
         QueryNode replacingNode = transformationProposal.getOptionalNewNode()
@@ -164,7 +199,7 @@ public class RemoveEmptyNodesExecutor implements NodeCentricInternalExecutor<Emp
                             "The root of the tree is not expected to be replaced."))
                     : replacingNode;
 
-            return new ReactToChildDeletionResultsImpl(query, closestAncestor, newOptionalNextSibling);
+            return new ReactionResults(query, closestAncestor, newOptionalNextSibling);
         }
         else {
             NodeCentricOptimizationResults<QueryNode> propagationResults = applyNullPropagation(query, replacingNode,
@@ -180,29 +215,15 @@ public class RemoveEmptyNodesExecutor implements NodeCentricInternalExecutor<Emp
                                 "to be the replacing node"))
                         : optionalNewReplacingNode.get();
 
-                return new ReactToChildDeletionResultsImpl(query, closestAncestor, newOptionalNextSibling);
+                return new ReactionResults(query, closestAncestor, newOptionalNextSibling);
             }
             else {
                 QueryNode newAncestor = propagationResults.getOptionalClosestAncestor()
                         .orElseThrow(() -> new IllegalStateException("An ancestor was expected " +
                                 "after ascendent substitution propagation (or an EmptyQueryException)"));
                 // The parent has been removed so no more siblings
-                return new ReactToChildDeletionResultsImpl(query, newAncestor, Optional.empty());
+                return new ReactionResults(query, newAncestor, Optional.empty());
             }
         }
     }
-
-    private static ReactToChildDeletionResults declareAsEmpty(IntermediateQuery query, QueryNode parentNode,
-                                                              QueryTreeComponent treeComponent,
-                                                              ImmutableSet<Variable> nullVariables)
-            throws EmptyQueryException {
-        EmptyNode newEmptyNode = new EmptyNodeImpl(nullVariables);
-        treeComponent.replaceSubTree(parentNode, newEmptyNode);
-
-        /**
-         * Recursive (cascade)
-         */
-        return analyzeAndUpdate(query, newEmptyNode, treeComponent);
-    }
-
 }

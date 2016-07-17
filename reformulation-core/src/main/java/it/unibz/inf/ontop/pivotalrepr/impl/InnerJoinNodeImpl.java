@@ -107,7 +107,9 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
 
     @Override
     public NodeTransformationProposal reactToEmptyChild(IntermediateQuery query, EmptyNode emptyChild) {
-        ImmutableList<QueryNode> remainingChildren = query.getChildren(this);
+        ImmutableList<QueryNode> remainingChildren = query.getChildrenStream(this)
+                .filter(c -> c != emptyChild)
+                .collect(ImmutableCollectors.toList());
 
         ImmutableSet<Variable> variablesProjectedByDeletedChild = emptyChild.getProjectedVariables();
         ImmutableSet<Variable> otherNodesProjectedVariables = query.getProjectedVariables(this);
@@ -153,7 +155,7 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
                                 new FilterNodeImpl(newCondition.get()),
                                 variablesProjectedByDeletedChild);
                     } else {
-                        return new NodeTransformationProposalImpl(REPLACE_BY_UNIQUE_CHILD, remainingChildren.get(0),
+                        return new NodeTransformationProposalImpl(REPLACE_BY_UNIQUE_NON_EMPTY_CHILD, remainingChildren.get(0),
                                 variablesProjectedByDeletedChild);
                     }
                 default:
