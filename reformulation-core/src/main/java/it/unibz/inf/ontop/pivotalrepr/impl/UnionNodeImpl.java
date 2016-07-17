@@ -7,10 +7,11 @@ import it.unibz.inf.ontop.model.ImmutableSubstitution;
 import it.unibz.inf.ontop.model.ImmutableTerm;
 import it.unibz.inf.ontop.model.Variable;
 import it.unibz.inf.ontop.pivotalrepr.*;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Optional;
 
-import static it.unibz.inf.ontop.pivotalrepr.NodeTransformationProposedState.DELETE;
+import static it.unibz.inf.ontop.pivotalrepr.NodeTransformationProposedState.DECLARE_AS_EMPTY;
 import static it.unibz.inf.ontop.pivotalrepr.NodeTransformationProposedState.NO_LOCAL_CHANGE;
 import static it.unibz.inf.ontop.pivotalrepr.NodeTransformationProposedState.REPLACE_BY_UNIQUE_CHILD;
 import static it.unibz.inf.ontop.pivotalrepr.SubstitutionResults.LocalAction.NO_CHANGE;
@@ -97,10 +98,17 @@ public class UnionNodeImpl extends QueryNodeImpl implements UnionNode {
 
     @Override
     public NodeTransformationProposal reactToEmptyChild(IntermediateQuery query, EmptyNode emptyChild) {
-        ImmutableList<QueryNode> children = query.getChildren(this);
+
+        /**
+         * All the children expected the given empty child
+         */
+        ImmutableList<QueryNode> children = query.getChildrenStream(this)
+                .filter(c -> c != emptyChild)
+                .collect(ImmutableCollectors.toList());
+
         switch (children.size()) {
             case 0:
-                return new NodeTransformationProposalImpl(DELETE, emptyChild.getProjectedVariables());
+                return new NodeTransformationProposalImpl(DECLARE_AS_EMPTY, emptyChild.getProjectedVariables());
             case 1:
                 return new NodeTransformationProposalImpl(REPLACE_BY_UNIQUE_CHILD, children.get(0),
                         ImmutableSet.of());

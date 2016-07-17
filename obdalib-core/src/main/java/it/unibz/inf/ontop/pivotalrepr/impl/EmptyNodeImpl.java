@@ -7,7 +7,6 @@ import it.unibz.inf.ontop.model.Variable;
 import it.unibz.inf.ontop.pivotalrepr.*;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
-import static it.unibz.inf.ontop.pivotalrepr.NodeTransformationProposedState.DELETE;
 import static it.unibz.inf.ontop.pivotalrepr.SubstitutionResults.LocalAction.NO_CHANGE;
 
 public class EmptyNodeImpl extends QueryNodeImpl implements EmptyNode {

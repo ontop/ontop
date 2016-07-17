@@ -9,7 +9,7 @@ import it.unibz.inf.ontop.pivotalrepr.*;
 import java.util.Optional;
 
 import static it.unibz.inf.ontop.model.impl.GroundTermTools.isGroundTerm;
-import static it.unibz.inf.ontop.pivotalrepr.NodeTransformationProposedState.DELETE;
+import static it.unibz.inf.ontop.pivotalrepr.NodeTransformationProposedState.DECLARE_AS_EMPTY;
 
 public class GroupNodeImpl extends QueryNodeImpl implements GroupNode {
 
@@ -97,7 +97,7 @@ public class GroupNodeImpl extends QueryNodeImpl implements GroupNode {
          *
          * TODO: what is really projected by a group node?
          */
-        return new NodeTransformationProposalImpl(DELETE, emptyChild.getProjectedVariables());
+        return new NodeTransformationProposalImpl(DECLARE_AS_EMPTY, emptyChild.getProjectedVariables());
     }
 
     @Override

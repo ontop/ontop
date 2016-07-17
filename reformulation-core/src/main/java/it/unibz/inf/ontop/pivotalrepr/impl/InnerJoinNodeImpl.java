@@ -145,7 +145,7 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
 
             switch (remainingChildren.size()) {
                 case 0:
-                    return new NodeTransformationProposalImpl(DELETE,
+                    return new NodeTransformationProposalImpl(NodeTransformationProposedState.DECLARE_AS_EMPTY,
                             variablesProjectedByDeletedChild);
                 case 1:
                     if (newCondition.isPresent()) {
@@ -170,7 +170,7 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
 
     private NodeTransformationProposal rejectInnerJoin(ImmutableSet<Variable> otherNodesProjectedVariables,
                                                        ImmutableSet<Variable> variablesProjectedByDeletedChild) {
-        return new NodeTransformationProposalImpl(DELETE,
+        return new NodeTransformationProposalImpl(NodeTransformationProposedState.DECLARE_AS_EMPTY,
                 union(otherNodesProjectedVariables, variablesProjectedByDeletedChild));
     }
 
