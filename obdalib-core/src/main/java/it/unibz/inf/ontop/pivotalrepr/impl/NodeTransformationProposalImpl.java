@@ -11,10 +11,10 @@ import it.unibz.inf.ontop.pivotalrepr.QueryNode;
 public class NodeTransformationProposalImpl implements NodeTransformationProposal {
 
     private final NodeTransformationProposedState state;
-    private final Optional<QueryNode> optionalNewNode;
+    private final Optional<QueryNode> optionalNewNodeOrReplacingChild;
     private final ImmutableSet<Variable> nullVariables;
 
-    public NodeTransformationProposalImpl(NodeTransformationProposedState state, QueryNode newNode,
+    public NodeTransformationProposalImpl(NodeTransformationProposedState state, QueryNode newNodeOrReplacingChild,
                                           ImmutableSet<Variable> nullVariables) {
         switch(state) {
             case REPLACE_BY_UNIQUE_NON_EMPTY_CHILD:
@@ -27,7 +27,7 @@ public class NodeTransformationProposalImpl implements NodeTransformationProposa
                 throw new IllegalArgumentException("No new node has to be given when the node is declared as empty");
         }
         this.state = state;
-        this.optionalNewNode = Optional.of(newNode);
+        this.optionalNewNodeOrReplacingChild = Optional.of(newNodeOrReplacingChild);
         this.nullVariables = nullVariables;
     }
 
@@ -43,7 +43,7 @@ public class NodeTransformationProposalImpl implements NodeTransformationProposa
                         "Please use the other constructor.");
         }
         this.state = state;
-        this.optionalNewNode = Optional.empty();
+        this.optionalNewNodeOrReplacingChild = Optional.empty();
         this.nullVariables = nullVariables;
     }
 
@@ -53,8 +53,8 @@ public class NodeTransformationProposalImpl implements NodeTransformationProposa
     }
 
     @Override
-    public Optional<QueryNode> getOptionalNewNode() {
-        return optionalNewNode;
+    public Optional<QueryNode> getOptionalNewNodeOrReplacingChild() {
+        return optionalNewNodeOrReplacingChild;
     }
 
     @Override
