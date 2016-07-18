@@ -434,7 +434,7 @@ public class DefaultTree implements QueryTree {
     private void changeChild(TreeNode parentNode, TreeNode childNodeToReplace, TreeNode replacingChild) {
         if (getParentTreeNode(childNodeToReplace) == parentNode) {
             parentIndex.remove(childNodeToReplace);
-            parentIndex.put(parentNode, replacingChild);
+            parentIndex.put(replacingChild, parentNode);
         }
         else {
             throw new IllegalArgumentException(childNodeToReplace + " is not the child of " + parentNode);

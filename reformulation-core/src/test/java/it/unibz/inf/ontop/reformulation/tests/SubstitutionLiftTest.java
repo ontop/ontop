@@ -379,17 +379,17 @@ public class SubstitutionLiftTest {
         //Construct expected query
         IntermediateQueryBuilder expectedQueryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
         ConstructionNode expectedRootNode = new ConstructionNodeImpl(projectionAtom.getVariables(),
-                new ImmutableSubstitutionImpl<>(ImmutableMap.of(Y, generateURI1(A))), Optional.empty());
+                new ImmutableSubstitutionImpl<>(ImmutableMap.of(Y, generateURI1(B))), Optional.empty());
 
         expectedQueryBuilder.init(projectionAtom, expectedRootNode);
 
         //constract union Node
-        UnionNode expectedUnionNode =  new UnionNodeImpl(projectionAtom.getVariables());
+        UnionNode expectedUnionNode =  new UnionNodeImpl(ImmutableSet.of(B,X));
 
         expectedQueryBuilder.addChild(expectedRootNode, expectedUnionNode );
 
-        ConstructionNode expectedSubQuery1UnionNode = new ConstructionNodeImpl(projectionAtom.getVariables(),
-                new ImmutableSubstitutionImpl<>(ImmutableMap.of(X, generateURI1(B))), Optional.empty());
+        ConstructionNode expectedSubQuery1UnionNode = new ConstructionNodeImpl(expectedUnionNode.getVariables(),
+                new ImmutableSubstitutionImpl<>(ImmutableMap.of(X, generateURI1(A))), Optional.empty());
         expectedQueryBuilder.addChild(expectedUnionNode, expectedSubQuery1UnionNode);
 
         InnerJoinNode joinNode11 = new InnerJoinNodeImpl(Optional.empty());
@@ -403,7 +403,7 @@ public class SubstitutionLiftTest {
         expectedQueryBuilder.addChild(joinNode12, new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, A, B)) );
         expectedQueryBuilder.addChild(joinNode12, new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE3_PREDICATE, A, B)) );
 
-        ConstructionNode expectedSubQuery2UnionNode = new ConstructionNodeImpl(projectionAtom.getVariables(),
+        ConstructionNode expectedSubQuery2UnionNode = new ConstructionNodeImpl(expectedUnionNode.getVariables(),
                 new ImmutableSubstitutionImpl<>(ImmutableMap.of(X, generateURI2(C))), Optional.empty());
         expectedQueryBuilder.addChild(expectedUnionNode, expectedSubQuery2UnionNode);
 
@@ -543,5 +543,55 @@ public class SubstitutionLiftTest {
         IntermediateQuery optimizedQuery = substitutionOptimizer.optimize(unOptimizedQuery);
 
         System.out.println("\nAfter optimization: \n" +  optimizedQuery);
+
+
+        IntermediateQueryBuilder expectedQueryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
+        ConstructionNode expectedRootNode = new ConstructionNodeImpl(projectionAtom.getVariables(),
+                new ImmutableSubstitutionImpl<>(ImmutableMap.of( Y, generateURI1(B))), Optional.empty());
+
+        expectedQueryBuilder.init(projectionAtom, expectedRootNode);
+
+        UnionNode expectedUnionNode =  new UnionNodeImpl(ImmutableSet.of(B,X,E));
+        expectedQueryBuilder.addChild(expectedRootNode, expectedUnionNode);
+
+        //first child of UnionNode
+        ConstructionNode expSubQueryUnionNode = new ConstructionNodeImpl(ImmutableSet.of(B,X,E),
+                new ImmutableSubstitutionImpl<>(ImmutableMap.of( X, generateURI1(A))), Optional.empty());
+        expectedQueryBuilder.addChild(expectedUnionNode, expSubQueryUnionNode);
+
+        InnerJoinNode expectedJoinNode = new InnerJoinNodeImpl(Optional.empty());
+        expectedQueryBuilder.addChild(expSubQueryUnionNode, expectedJoinNode);
+
+        expectedQueryBuilder.addChild(expectedJoinNode, new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, A, B)) );
+
+        //second child of JoinNode
+
+        expectedQueryBuilder.addChild(expectedJoinNode, new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE3_PREDICATE, E, B)) );
+
+        UnionNode expectedUnionNode2 =  new UnionNodeImpl(projectionAtom.getVariables());
+        expectedQueryBuilder.addChild(expectedUnionNode, expectedUnionNode2);
+
+        //first child of unionNode2
+        ConstructionNode expSubQuery1UnionNode2 = new ConstructionNodeImpl(projectionAtom.getVariables(),
+                new ImmutableSubstitutionImpl<>(ImmutableMap.of(X, generateURI1(I))), Optional.empty());
+        expectedQueryBuilder.addChild(expectedUnionNode2, expSubQuery1UnionNode2);
+
+        expectedQueryBuilder.addChild(expSubQuery1UnionNode2, new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE5_PREDICATE, I, L)) );
+
+        //second child of unionNode2
+        ConstructionNode expSubQuery2UnionNode2 = new ConstructionNodeImpl(projectionAtom.getVariables(),
+                new ImmutableSubstitutionImpl<>(ImmutableMap.of(X, generateURI2(M))), Optional.empty());
+        expectedQueryBuilder.addChild(expectedUnionNode2, expSubQuery2UnionNode2);
+
+        expectedQueryBuilder.addChild(expSubQuery2UnionNode2, new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE6_PREDICATE, M, N)) );
+
+        IntermediateQuery expectedQuery = expectedQueryBuilder.build();
+
+        System.out.println("\nExpected  query: \n" +  expectedQuery);
+
+        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, expectedQuery));
+
+
+
     }
 }
