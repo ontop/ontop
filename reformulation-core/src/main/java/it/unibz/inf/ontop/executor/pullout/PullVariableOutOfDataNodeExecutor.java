@@ -87,8 +87,12 @@ public class PullVariableOutOfDataNodeExecutor implements SimpleNodeCentricInter
                 focusNodeUpdate.newEqualities);
 
         if (focusNodeUpdate.optionalSubstitution.isPresent()) {
-            SubstitutionPropagationTools.propagateSubstitutionDown(focusNodeUpdate.newFocusNode,
-                    focusNodeUpdate.optionalSubstitution.get(), query, treeComponent);
+            try {
+                SubstitutionPropagationTools.propagateSubstitutionDown(focusNodeUpdate.newFocusNode,
+                        focusNodeUpdate.optionalSubstitution.get(), query, treeComponent);
+            } catch (EmptyQueryException e) {
+                throw new IllegalStateException("EmptyQueryExceptions are not expected when pulling the variables out of data nodes");
+            }
         }
 
         // return new NodeCentricOptimizationResultsImpl<>(query, focusNodeUpdate.newFocusNode);
