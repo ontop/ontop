@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.executor.unsatisfiable;
 
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.executor.NodeCentricInternalExecutor;
+import it.unibz.inf.ontop.executor.SimpleNodeCentricInternalExecutor;
 import it.unibz.inf.ontop.model.Constant;
 import it.unibz.inf.ontop.model.ImmutableSubstitution;
 import it.unibz.inf.ontop.model.Variable;
@@ -10,6 +11,7 @@ import it.unibz.inf.ontop.pivotalrepr.impl.EmptyNodeImpl;
 import it.unibz.inf.ontop.pivotalrepr.impl.QueryTreeComponent;
 import it.unibz.inf.ontop.pivotalrepr.proposal.*;
 import it.unibz.inf.ontop.pivotalrepr.proposal.impl.NodeCentricOptimizationResultsImpl;
+import it.unibz.inf.ontop.pivotalrepr.proposal.impl.RemoveEmptyNodeResultsImpl;
 
 import java.util.Optional;
 
@@ -19,7 +21,7 @@ import static it.unibz.inf.ontop.owlrefplatform.core.basicoperations.ImmutableSu
 /**
  * TODO: explain
  */
-public class RemoveEmptyNodesExecutor implements NodeCentricInternalExecutor<EmptyNode, RemoveEmptyNodesProposal> {
+public class RemoveEmptyNodesExecutor implements NodeCentricInternalExecutor<EmptyNode, RemoveEmptyNodeResults, RemoveEmptyNodeProposal> {
 
 
     private static class ReactionResults {
@@ -47,14 +49,14 @@ public class RemoveEmptyNodesExecutor implements NodeCentricInternalExecutor<Emp
      * TODO: explain
      */
     @Override
-    public NodeCentricOptimizationResults<EmptyNode> apply(RemoveEmptyNodesProposal proposal, IntermediateQuery query,
+    public RemoveEmptyNodeResults apply(RemoveEmptyNodeProposal proposal, IntermediateQuery query,
                                                            QueryTreeComponent treeComponent)
             throws EmptyQueryException {
 
         // May update the query
         ReactionResults reactionResults = reactToEmptyChildNode(query, proposal.getFocusNode(), treeComponent);
 
-        return new NodeCentricOptimizationResultsImpl<>(
+        return new RemoveEmptyNodeResultsImpl(
                 query,
                 /**
                  * Next sibling (of the empty node or of the lastly removed ancestor)

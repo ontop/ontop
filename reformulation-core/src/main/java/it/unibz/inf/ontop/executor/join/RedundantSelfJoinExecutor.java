@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.executor.join;
 
 import java.util.Optional;
 import com.google.common.collect.*;
-import it.unibz.inf.ontop.executor.NodeCentricInternalExecutor;
+import it.unibz.inf.ontop.executor.SimpleNodeCentricInternalExecutor;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.ImmutableUnificationTools;
 import it.unibz.inf.ontop.pivotalrepr.impl.ExtensionalDataNodeImpl;
@@ -25,7 +25,7 @@ import it.unibz.inf.ontop.pivotalrepr.*;
  * Naturally assumes that the data atoms are leafs.
  *
  */
-public class RedundantSelfJoinExecutor implements NodeCentricInternalExecutor<InnerJoinNode, InnerJoinOptimizationProposal> {
+public class RedundantSelfJoinExecutor implements SimpleNodeCentricInternalExecutor<InnerJoinNode, InnerJoinOptimizationProposal> {
 
     /**
      * TODO: explain

@@ -1,10 +1,10 @@
 package it.unibz.inf.ontop.executor.substitution;
 
+import it.unibz.inf.ontop.executor.SimpleNodeCentricInternalExecutor;
 import it.unibz.inf.ontop.executor.substitution.SubstitutionPropagationTools.SubstitutionApplicationResults;
 import it.unibz.inf.ontop.model.ImmutableTerm;
 import it.unibz.inf.ontop.pivotalrepr.*;
 import it.unibz.inf.ontop.pivotalrepr.proposal.impl.NodeCentricOptimizationResultsImpl;
-import it.unibz.inf.ontop.executor.NodeCentricInternalExecutor;
 import it.unibz.inf.ontop.model.ImmutableSubstitution;
 import it.unibz.inf.ontop.pivotalrepr.impl.QueryTreeComponent;
 import it.unibz.inf.ontop.pivotalrepr.proposal.InvalidQueryOptimizationProposalException;
@@ -19,7 +19,7 @@ import static it.unibz.inf.ontop.executor.substitution.SubstitutionPropagationTo
  * TODO: explain
  */
 public class SubstitutionPropagationExecutor<N extends QueryNode>
-        implements NodeCentricInternalExecutor<N, SubstitutionPropagationProposal<N>> {
+        implements SimpleNodeCentricInternalExecutor<N, SubstitutionPropagationProposal<N>> {
 
     @Override
     public NodeCentricOptimizationResults<N> apply(SubstitutionPropagationProposal<N> proposal,

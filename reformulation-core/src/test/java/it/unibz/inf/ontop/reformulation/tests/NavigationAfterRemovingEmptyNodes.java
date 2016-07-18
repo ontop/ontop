@@ -11,9 +11,9 @@ import it.unibz.inf.ontop.pivotalrepr.impl.*;
 import it.unibz.inf.ontop.pivotalrepr.impl.tree.DefaultIntermediateQueryBuilder;
 import it.unibz.inf.ontop.pivotalrepr.proposal.InnerJoinOptimizationProposal;
 import it.unibz.inf.ontop.pivotalrepr.proposal.NodeCentricOptimizationResults;
-import it.unibz.inf.ontop.pivotalrepr.proposal.RemoveEmptyNodesProposal;
+import it.unibz.inf.ontop.pivotalrepr.proposal.RemoveEmptyNodeProposal;
 import it.unibz.inf.ontop.pivotalrepr.proposal.impl.InnerJoinOptimizationProposalImpl;
-import it.unibz.inf.ontop.pivotalrepr.proposal.impl.RemoveEmptyNodesProposalImpl;
+import it.unibz.inf.ontop.pivotalrepr.proposal.impl.RemoveEmptyNodeProposalImpl;
 import org.junit.Test;
 
 import java.util.Optional;
@@ -97,7 +97,7 @@ public class NavigationAfterRemovingEmptyNodes {
 
         IntermediateQuery initialQuery = initialQueryBuilder.build();
 
-        RemoveEmptyNodesProposal proposal = new RemoveEmptyNodesProposalImpl(emptyNode);
+        RemoveEmptyNodeProposal proposal = new RemoveEmptyNodeProposalImpl(emptyNode);
 
         System.out.println("Initial query: \n" + initialQuery);
 

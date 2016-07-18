@@ -2,16 +2,17 @@ package it.unibz.inf.ontop.executor.join;
 
 import java.util.Optional;
 import com.google.common.collect.ImmutableList;
+import it.unibz.inf.ontop.executor.SimpleNodeCentricInternalCompositeExecutor;
+import it.unibz.inf.ontop.executor.SimpleNodeCentricInternalExecutor;
 import it.unibz.inf.ontop.pivotalrepr.InnerJoinNode;
-import it.unibz.inf.ontop.executor.NodeCentricInternalCompositeExecutor;
-import it.unibz.inf.ontop.executor.NodeCentricInternalExecutor;
 import it.unibz.inf.ontop.pivotalrepr.proposal.InnerJoinOptimizationProposal;
 import it.unibz.inf.ontop.pivotalrepr.proposal.impl.InnerJoinOptimizationProposalImpl;
 
 /**
  * TODO: explain
  */
-public class JoinInternalCompositeExecutor extends NodeCentricInternalCompositeExecutor<InnerJoinNode, InnerJoinOptimizationProposal> {
+public class JoinInternalCompositeExecutor
+        extends SimpleNodeCentricInternalCompositeExecutor<InnerJoinNode, InnerJoinOptimizationProposal> {
 
     @Override
     protected Optional<InnerJoinOptimizationProposal> createNewProposalFromFocusNode(InnerJoinNode focusNode) {
@@ -20,8 +21,9 @@ public class JoinInternalCompositeExecutor extends NodeCentricInternalCompositeE
     }
 
     @Override
-    protected ImmutableList<NodeCentricInternalExecutor<InnerJoinNode, InnerJoinOptimizationProposal>> createExecutors() {
-        ImmutableList.Builder<NodeCentricInternalExecutor<InnerJoinNode, InnerJoinOptimizationProposal>> executorBuilder = ImmutableList.builder();
+    protected ImmutableList<SimpleNodeCentricInternalExecutor<InnerJoinNode, InnerJoinOptimizationProposal>> createExecutors() {
+
+        ImmutableList.Builder<SimpleNodeCentricInternalExecutor<InnerJoinNode, InnerJoinOptimizationProposal>> executorBuilder = ImmutableList.builder();
 
         executorBuilder.add(new JoinBooleanExpressionExecutor());
         executorBuilder.add(new RedundantSelfJoinExecutor());
