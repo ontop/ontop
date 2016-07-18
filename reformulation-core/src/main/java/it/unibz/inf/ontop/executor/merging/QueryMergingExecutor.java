@@ -3,7 +3,6 @@ package it.unibz.inf.ontop.executor.merging;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.executor.InternalProposalExecutor;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionImpl;
@@ -175,7 +174,7 @@ public class QueryMergingExecutor implements InternalProposalExecutor<QueryMergi
                 .findFirst();
         while (nextEmptyNode.isPresent()) {
             // Removes the empty nodes (in-place operation)
-            RemoveEmptyNodesProposal cleaningProposal = new RemoveEmptyNodesProposalImpl(nextEmptyNode.get());
+            RemoveEmptyNodesProposal cleaningProposal = new RemoveEmptyNodesProposalImpl(nextEmptyNode.get(), false);
             mainQuery.applyProposal(cleaningProposal, true);
 
             nextEmptyNode = treeComponent.getEmptyNodes().stream().findFirst();
