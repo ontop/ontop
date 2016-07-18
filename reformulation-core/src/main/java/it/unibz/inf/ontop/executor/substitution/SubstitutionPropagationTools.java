@@ -4,6 +4,7 @@ package it.unibz.inf.ontop.executor.substitution;
 import java.util.Optional;
 
 import com.google.common.collect.ImmutableSet;
+import it.unibz.inf.ontop.executor.AncestryStatus;
 import it.unibz.inf.ontop.model.ImmutableSubstitution;
 import it.unibz.inf.ontop.model.ImmutableTerm;
 import it.unibz.inf.ontop.model.Variable;
@@ -12,6 +13,7 @@ import it.unibz.inf.ontop.pivotalrepr.impl.EmptyNodeImpl;
 import it.unibz.inf.ontop.pivotalrepr.impl.QueryTreeComponent;
 import it.unibz.inf.ontop.pivotalrepr.proposal.NodeCentricOptimizationResults;
 import it.unibz.inf.ontop.pivotalrepr.proposal.RemoveEmptyNodeProposal;
+import it.unibz.inf.ontop.pivotalrepr.proposal.AncestryTrackingResults;
 import it.unibz.inf.ontop.pivotalrepr.proposal.impl.NodeCentricOptimizationResultsImpl;
 import it.unibz.inf.ontop.pivotalrepr.proposal.impl.RemoveEmptyNodeProposalImpl;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -70,12 +72,13 @@ public class SubstitutionPropagationTools {
         /**
          * When the node has removed
          */
-        protected SubstitutionApplicationResults(IntermediateQuery query,
-                                                 Optional<QueryNode> optionalNextSibling,
-                                                 Optional<QueryNode> optionalClosestAncestor) {
-            super(query, optionalNextSibling, optionalClosestAncestor);
+        protected SubstitutionApplicationResults(N originalFocusNode, AncestryTrackingResults<QueryNode> emptyNodeResults) {
+            super(emptyNodeResults.getResultingQuery(),
+                    emptyNodeResults.getOptionalNextSibling(),
+                    emptyNodeResults.getOptionalClosestAncestor());
             this.optionalSubst = Optional.empty();
             this.isReplacedByAChild = false;
+            // TODO:
         }
 
         public Optional<ImmutableSubstitution<? extends ImmutableTerm>> getOptionalSubstitution() {
@@ -112,7 +115,7 @@ public class SubstitutionPropagationTools {
      * Applies the substitution to the starting nodes and to their children
      */
     private static <N extends QueryNode> NodeCentricOptimizationResults<N> propagateSubstitutionDownToNodes(
-            N focusNode, final Stream<QueryNode> startingNodes,
+            N originalFocusNode, final Stream<QueryNode> startingNodes,
             final ImmutableSubstitution<? extends ImmutableTerm> initialSubstitutionToPropagate,
             final IntermediateQuery query, final QueryTreeComponent treeComponent)
             throws QueryNodeSubstitutionException, EmptyQueryException {
@@ -215,11 +218,9 @@ public class SubstitutionPropagationTools {
                  */
                 RemoveEmptyNodeProposal cleaningProposal = new RemoveEmptyNodeProposalImpl(replacingEmptyNode, true);
                 // May restructure significantly the query
-                NodeCentricOptimizationResults<EmptyNode> cleaningResults = query.applyProposal(cleaningProposal, true);
+                AncestryTrackingResults removeEmptyNodeResults = query.applyProposal(cleaningProposal, true);
 
-                return new SubstitutionApplicationResults<>(query,
-                        cleaningResults.getOptionalNextSibling(),
-                        cleaningResults.getOptionalClosestAncestor());
+                return new SubstitutionApplicationResults<>(node, removeEmptyNodeResults);
 
             default:
                 throw new IllegalStateException("Unknown local action: " + substitutionResults.getLocalAction());
@@ -251,9 +252,10 @@ public class SubstitutionPropagationTools {
      * TODO: clean
      *
      */
-    public static <T extends QueryNode> NodeCentricOptimizationResults<T> propagateSubstitutionUp(
+    public static <T extends QueryNode> AncestryTrackingResults<T> propagateSubstitutionUp(
             T focusNode, ImmutableSubstitution<? extends ImmutableTerm> substitutionToPropagate,
-            IntermediateQuery query, QueryTreeComponent treeComponent) throws QueryNodeSubstitutionException,
+            IntermediateQuery query, QueryTreeComponent treeComponent,
+            Optional<AncestryStatus> optionalAncestryStatus) throws QueryNodeSubstitutionException,
             EmptyQueryException {
 
         // Non-final

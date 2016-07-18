@@ -51,7 +51,7 @@ public class SubstitutionPropagationExecutor<N extends QueryNode>
          * First propagates up
          */
         NodeCentricOptimizationResults<N> ascendingPropagationResults = propagateSubstitutionUp(originalFocusNode,
-                substitutionToPropagate, query, treeComponent);
+                substitutionToPropagate, query, treeComponent, Optional.empty());
 
         /**
          * If some ancestors are removed, don't go further
