@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.executor.pullout;
 import java.util.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import it.unibz.inf.ontop.executor.SimpleNodeCentricInternalExecutor;
 import it.unibz.inf.ontop.executor.substitution.SubstitutionPropagationTools;
 import it.unibz.inf.ontop.model.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
@@ -27,7 +28,7 @@ import it.unibz.inf.ontop.pivotalrepr.*;
  * TODO: complete (partially implemented)
  *
  */
-public class PullVariableOutOfDataNodeExecutor implements NodeCentricInternalExecutor<DataNode, PullVariableOutOfDataNodeProposal> {
+public class PullVariableOutOfDataNodeExecutor implements SimpleNodeCentricInternalExecutor<DataNode, PullVariableOutOfDataNodeProposal> {
 
     private static final OBDADataFactory DATA_FACTORY = OBDADataFactoryImpl.getInstance();
 

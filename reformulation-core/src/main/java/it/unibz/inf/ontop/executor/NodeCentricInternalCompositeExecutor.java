@@ -5,15 +5,20 @@ import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.pivotalrepr.QueryNode;
 import it.unibz.inf.ontop.pivotalrepr.proposal.NodeCentricOptimizationProposal;
 import it.unibz.inf.ontop.pivotalrepr.proposal.NodeCentricOptimizationResults;
+import it.unibz.inf.ontop.pivotalrepr.proposal.SimpleNodeCentricOptimizationProposal;
 
 /**
  * TODO: explain
  */
-public abstract class NodeCentricInternalCompositeExecutor<N extends QueryNode, P extends NodeCentricOptimizationProposal<N>>
-        extends InternalCompositeExecutor<P, NodeCentricOptimizationResults<N>> implements NodeCentricInternalExecutor<N, P> {
+public abstract class NodeCentricInternalCompositeExecutor<
+        N extends QueryNode,
+        R extends NodeCentricOptimizationResults<N>,
+        P extends NodeCentricOptimizationProposal<N, R>>
+        extends InternalCompositeExecutor<P, R>
+        implements NodeCentricInternalExecutor<N, R, P> {
 
     @Override
-    protected Optional<P> createNewProposal(NodeCentricOptimizationResults<N> results) {
+    protected Optional<P> createNewProposal(R results) {
         Optional<N> optionalNewNode = results.getOptionalNewNode()
                 .map(Optional::of)
                 .orElseGet(Optional::empty);
@@ -30,5 +35,5 @@ public abstract class NodeCentricInternalCompositeExecutor<N extends QueryNode, 
     protected abstract Optional<P> createNewProposalFromFocusNode(N focusNode);
 
     @Override
-    protected abstract ImmutableList<NodeCentricInternalExecutor<N, P>> createExecutors();
+    protected abstract ImmutableList<? extends NodeCentricInternalExecutor<N, R, P>> createExecutors();
 }

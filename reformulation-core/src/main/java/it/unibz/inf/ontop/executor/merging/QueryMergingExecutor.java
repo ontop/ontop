@@ -12,9 +12,9 @@ import it.unibz.inf.ontop.pivotalrepr.impl.*;
 import it.unibz.inf.ontop.pivotalrepr.proposal.InvalidQueryOptimizationProposalException;
 import it.unibz.inf.ontop.pivotalrepr.proposal.ProposalResults;
 import it.unibz.inf.ontop.pivotalrepr.proposal.QueryMergingProposal;
-import it.unibz.inf.ontop.pivotalrepr.proposal.RemoveEmptyNodesProposal;
+import it.unibz.inf.ontop.pivotalrepr.proposal.RemoveEmptyNodeProposal;
 import it.unibz.inf.ontop.pivotalrepr.proposal.impl.ProposalResultsImpl;
-import it.unibz.inf.ontop.pivotalrepr.proposal.impl.RemoveEmptyNodesProposalImpl;
+import it.unibz.inf.ontop.pivotalrepr.proposal.impl.RemoveEmptyNodeProposalImpl;
 import it.unibz.inf.ontop.utils.FunctionalTools;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
@@ -174,7 +174,7 @@ public class QueryMergingExecutor implements InternalProposalExecutor<QueryMergi
                 .findFirst();
         while (nextEmptyNode.isPresent()) {
             // Removes the empty nodes (in-place operation)
-            RemoveEmptyNodesProposal cleaningProposal = new RemoveEmptyNodesProposalImpl(nextEmptyNode.get(), false);
+            RemoveEmptyNodeProposal cleaningProposal = new RemoveEmptyNodeProposalImpl(nextEmptyNode.get(), false);
             mainQuery.applyProposal(cleaningProposal, true);
 
             nextEmptyNode = treeComponent.getEmptyNodes().stream().findFirst();

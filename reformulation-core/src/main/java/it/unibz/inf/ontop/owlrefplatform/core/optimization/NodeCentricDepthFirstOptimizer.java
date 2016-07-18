@@ -3,8 +3,8 @@ package it.unibz.inf.ontop.owlrefplatform.core.optimization;
 import it.unibz.inf.ontop.pivotalrepr.EmptyQueryException;
 import it.unibz.inf.ontop.pivotalrepr.IntermediateQuery;
 import it.unibz.inf.ontop.pivotalrepr.QueryNode;
-import it.unibz.inf.ontop.pivotalrepr.proposal.NodeCentricOptimizationProposal;
 import it.unibz.inf.ontop.pivotalrepr.proposal.NodeCentricOptimizationResults;
+import it.unibz.inf.ontop.pivotalrepr.proposal.SimpleNodeCentricOptimizationProposal;
 
 import java.util.Optional;
 
@@ -13,7 +13,7 @@ import java.util.Optional;
  *
  * When evaluating one QueryNode, it can make one proposal.
  */
-public abstract class NodeCentricDepthFirstOptimizer<P extends NodeCentricOptimizationProposal<? extends QueryNode>>
+public abstract class NodeCentricDepthFirstOptimizer<P extends SimpleNodeCentricOptimizationProposal<? extends QueryNode>>
         implements IntermediateQueryOptimizer {
 
     private final boolean canEmptyQuery;

@@ -11,9 +11,9 @@ import it.unibz.inf.ontop.pivotalrepr.*;
 import it.unibz.inf.ontop.pivotalrepr.impl.EmptyNodeImpl;
 import it.unibz.inf.ontop.pivotalrepr.impl.QueryTreeComponent;
 import it.unibz.inf.ontop.pivotalrepr.proposal.NodeCentricOptimizationResults;
-import it.unibz.inf.ontop.pivotalrepr.proposal.RemoveEmptyNodesProposal;
+import it.unibz.inf.ontop.pivotalrepr.proposal.RemoveEmptyNodeProposal;
 import it.unibz.inf.ontop.pivotalrepr.proposal.impl.NodeCentricOptimizationResultsImpl;
-import it.unibz.inf.ontop.pivotalrepr.proposal.impl.RemoveEmptyNodesProposalImpl;
+import it.unibz.inf.ontop.pivotalrepr.proposal.impl.RemoveEmptyNodeProposalImpl;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.LinkedList;
@@ -213,7 +213,7 @@ public class SubstitutionPropagationTools {
                 /**
                  * Immediately removes the empty node
                  */
-                RemoveEmptyNodesProposal cleaningProposal = new RemoveEmptyNodesProposalImpl(replacingEmptyNode, true);
+                RemoveEmptyNodeProposal cleaningProposal = new RemoveEmptyNodeProposalImpl(replacingEmptyNode, true);
                 // May restructure significantly the query
                 NodeCentricOptimizationResults<EmptyNode> cleaningResults = query.applyProposal(cleaningProposal, true);
 
@@ -385,7 +385,7 @@ public class SubstitutionPropagationTools {
 
         treeComponent.replaceSubTree(currentAncestor, replacingEmptyNode);
 
-        RemoveEmptyNodesProposal proposal = new RemoveEmptyNodesProposalImpl(replacingEmptyNode, false);
+        RemoveEmptyNodeProposal proposal = new RemoveEmptyNodeProposalImpl(replacingEmptyNode, false);
         return query.applyProposal(proposal, true);
     }
 }

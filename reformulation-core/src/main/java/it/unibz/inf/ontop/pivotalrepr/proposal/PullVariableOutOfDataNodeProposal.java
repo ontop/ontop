@@ -9,7 +9,7 @@ import it.unibz.inf.ontop.pivotalrepr.DataNode;
  * TODO: make explicit the treatment that is expected to be done
  *
  */
-public interface PullVariableOutOfDataNodeProposal extends NodeCentricOptimizationProposal<DataNode> {
+public interface PullVariableOutOfDataNodeProposal extends SimpleNodeCentricOptimizationProposal<DataNode> {
 
     /**
      * Indexes of the variables to renamed.
