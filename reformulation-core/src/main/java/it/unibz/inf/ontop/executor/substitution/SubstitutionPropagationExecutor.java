@@ -11,6 +11,8 @@ import it.unibz.inf.ontop.pivotalrepr.proposal.InvalidQueryOptimizationProposalE
 import it.unibz.inf.ontop.pivotalrepr.proposal.NodeCentricOptimizationResults;
 import it.unibz.inf.ontop.pivotalrepr.proposal.SubstitutionPropagationProposal;
 
+import java.util.Optional;
+
 import static it.unibz.inf.ontop.executor.substitution.SubstitutionPropagationTools.*;
 
 /**
@@ -65,34 +67,67 @@ public class SubstitutionPropagationExecutor<N extends QueryNode>
         /**
          * Then to the focus node
          */
-        SubstitutionApplicationResults<N> newNodeAndSubst = applySubstitutionToNode(originalFocusNode,
+        SubstitutionApplicationResults<N> localApplicationResults = applySubstitutionToNode(originalFocusNode,
                 substitutionToPropagate, query, treeComponent);
 
         /**
          * Finally, down
          */
-        if (newNodeAndSubst.getOptionalSubstitution().isPresent()) {
-            ImmutableSubstitution<? extends ImmutableTerm> newSubstitution = newNodeAndSubst.getOptionalSubstitution().get();
+        Optional<QueryNode> optionalNewFocusNode = localApplicationResults.getNewNodeOrReplacingChild();
+        if (optionalNewFocusNode.isPresent()) {
 
-            propagateSubstitutionDown(newNodeAndSubst.getNewOrReplacingNode(), newSubstitution, query,
-                    treeComponent);
-        }
+            if (localApplicationResults.getOptionalSubstitution().isPresent()) {
+                ImmutableSubstitution<? extends ImmutableTerm> newSubstitution = localApplicationResults.getOptionalSubstitution().get();
 
-        if (newNodeAndSubst.getNewNode().isPresent()) {
-            return new NodeCentricOptimizationResultsImpl<N>(query, newNodeAndSubst.getNewNode().get());
-        }
-        else if (newNodeAndSubst.isReplacedByAChild()) {
-            return new NodeCentricOptimizationResultsImpl<N>(query, newNodeAndSubst.getReplacingNode());
+                /**
+                 * TODO: analyse the results!
+                 */
+                propagateSubstitutionDown(optionalNewFocusNode.get(), newSubstitution, query, treeComponent);
+
+                // TODO: refactor
+                if (localApplicationResults.getOptionalNewNode().isPresent()) {
+                    return new NodeCentricOptimizationResultsImpl<>(query, localApplicationResults.getOptionalNewNode().get());
+                }
+                else if (localApplicationResults.isReplacedByAChild()) {
+                    return new NodeCentricOptimizationResultsImpl<>(query, localApplicationResults.getOptionalReplacingChild());
+                }
+                /**
+                 * Replaced by another node
+                 */
+                else {
+                    QueryNode replacingNode = localApplicationResults.getNewNodeOrReplacingChild().get();
+
+                    return new NodeCentricOptimizationResultsImpl<>(query,
+                            query.getNextSibling(replacingNode),
+                            query.getParent(replacingNode));
+                }
+            }
+            else if (localApplicationResults.getOptionalNewNode().isPresent()) {
+                return new NodeCentricOptimizationResultsImpl<>(query, localApplicationResults.getOptionalNewNode().get());
+            }
+            else if (localApplicationResults.isReplacedByAChild()) {
+                return new NodeCentricOptimizationResultsImpl<>(query, localApplicationResults.getOptionalReplacingChild());
+            }
+            /**
+             * Replaced by another node
+             */
+            else {
+                QueryNode replacingNode = localApplicationResults.getNewNodeOrReplacingChild().get();
+
+                return new NodeCentricOptimizationResultsImpl<>(query,
+                        query.getNextSibling(replacingNode),
+                        query.getParent(replacingNode));
+            }
+
         }
         /**
-         * Replaced by another node
+         *  The focus node has removed
+         *
          */
         else {
-            QueryNode replacingNode = newNodeAndSubst.getReplacingNode().get();
-
-            return new NodeCentricOptimizationResultsImpl<N>(query,
-                    query.getNextSibling(replacingNode),
-                    query.getParent(replacingNode));
+            return new NodeCentricOptimizationResultsImpl<>(query, localApplicationResults.getOptionalNextSibling(),
+                    localApplicationResults.getOptionalClosestAncestor());
         }
+
     }
 }

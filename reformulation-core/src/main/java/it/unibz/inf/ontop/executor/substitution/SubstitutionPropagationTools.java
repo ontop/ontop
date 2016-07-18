@@ -44,34 +44,38 @@ public class SubstitutionPropagationTools {
      *
      * Only after propagating a substitution down
      */
-    protected static class SubstitutionApplicationResults<N extends QueryNode> {
-        private final Optional<N> newNode;
+    protected static class SubstitutionApplicationResults<N extends QueryNode>
+            extends NodeCentricOptimizationResultsImpl<N> {
         /**
          * Substitution to propagate to this newNode
          */
         private final Optional<ImmutableSubstitution<? extends ImmutableTerm>> optionalSubst;
         private final boolean isReplacedByAChild;
-        private final Optional<QueryNode> replacingNode;
 
-        protected SubstitutionApplicationResults(N newNode,
+        protected SubstitutionApplicationResults(IntermediateQuery query, N newNode,
                                                  Optional<ImmutableSubstitution<? extends ImmutableTerm>> optionalSubst) {
-            this.newNode = Optional.of(newNode);
-            this.replacingNode = Optional.empty();
+            super(query, newNode);
             this.optionalSubst = optionalSubst;
             this.isReplacedByAChild = false;
         }
 
-        protected SubstitutionApplicationResults(QueryNode replacingNode,
+        protected SubstitutionApplicationResults(IntermediateQuery query, QueryNode replacingNode,
                                                  Optional<ImmutableSubstitution<? extends ImmutableTerm>> optionalSubst,
                                                  boolean isReplacedByAChild) {
-            this.newNode = Optional.empty();
-            this.replacingNode = Optional.of(replacingNode);
+            super(query, Optional.of(replacingNode));
             this.optionalSubst = optionalSubst;
             this.isReplacedByAChild = isReplacedByAChild;
         }
 
-        public Optional<N> getNewNode() {
-            return newNode;
+        /**
+         * When the node has removed
+         */
+        protected SubstitutionApplicationResults(IntermediateQuery query,
+                                                 Optional<QueryNode> optionalNextSibling,
+                                                 Optional<QueryNode> optionalClosestAncestor) {
+            super(query, optionalNextSibling, optionalClosestAncestor);
+            this.optionalSubst = Optional.empty();
+            this.isReplacedByAChild = false;
         }
 
         public Optional<ImmutableSubstitution<? extends ImmutableTerm>> getOptionalSubstitution() {
@@ -80,17 +84,6 @@ public class SubstitutionPropagationTools {
 
         public boolean isReplacedByAChild() {
             return isReplacedByAChild;
-        }
-
-        public Optional<QueryNode> getReplacingNode() {
-            return replacingNode;
-        }
-
-        public QueryNode getNewOrReplacingNode() {
-            return newNode
-                    .map(Optional::<QueryNode>of)
-                    .orElse(replacingNode)
-                    .orElseThrow(() -> new IllegalStateException("At least one query node must be present"));
         }
     }
 
@@ -105,24 +98,24 @@ public class SubstitutionPropagationTools {
      * Returns the updated tree component
      *
      */
-    public static QueryTreeComponent propagateSubstitutionDown(final QueryNode focusNode,
+    public static <N extends QueryNode> NodeCentricOptimizationResults<N> propagateSubstitutionDown(final N focusNode,
                                                                final ImmutableSubstitution<? extends ImmutableTerm> initialSubstitutionToPropagate,
                                                                final IntermediateQuery query,
                                                                final QueryTreeComponent treeComponent)
-            throws QueryNodeSubstitutionException {
+            throws QueryNodeSubstitutionException, EmptyQueryException {
 
-        return propagateSubstitutionDownToNodes(treeComponent.getChildrenStream(focusNode),
+        return propagateSubstitutionDownToNodes(focusNode, treeComponent.getChildrenStream(focusNode),
                 initialSubstitutionToPropagate, query, treeComponent);
     }
 
     /**
-     * Applies the substitution to the starting nodes and to their childre
+     * Applies the substitution to the starting nodes and to their children
      */
-    private static QueryTreeComponent propagateSubstitutionDownToNodes(final Stream<QueryNode> startingNodes,
-                                                               final ImmutableSubstitution<? extends ImmutableTerm> initialSubstitutionToPropagate,
-                                                               final IntermediateQuery query,
-                                                               final QueryTreeComponent treeComponent)
-            throws QueryNodeSubstitutionException {
+    private static <N extends QueryNode> NodeCentricOptimizationResults<N> propagateSubstitutionDownToNodes(
+            N focusNode, final Stream<QueryNode> startingNodes,
+            final ImmutableSubstitution<? extends ImmutableTerm> initialSubstitutionToPropagate,
+            final IntermediateQuery query, final QueryTreeComponent treeComponent)
+            throws QueryNodeSubstitutionException, EmptyQueryException {
 
         Queue<NodeAndSubstitution> nodeAndSubsToVisit = new LinkedList<>();
         startingNodes
@@ -131,6 +124,20 @@ public class SubstitutionPropagationTools {
 
         while (!nodeAndSubsToVisit.isEmpty()) {
             NodeAndSubstitution initialNodeAndSubstitution = nodeAndSubsToVisit.poll();
+
+            /**
+             * Some nodes may have be removed in the reaction to the removal of an empty sibling.
+             *
+             * It is ASSUMED that the removal of a child:
+             *    - either leads to the removal of some other siblings
+             *    - or have no impact on its siblings beside moving their position (e.g. making them replace their parent).
+             *
+             * If this assumption holds, it is then safe to ignore a removed node.
+             *
+             */
+            if (!treeComponent.contains(initialNodeAndSubstitution.node)) {
+                break;
+            }
 
             SubstitutionApplicationResults<QueryNode> applicationResults = applySubstitutionToNode(
                     initialNodeAndSubstitution.node,
@@ -142,13 +149,14 @@ public class SubstitutionPropagationTools {
             applicationResults.getOptionalSubstitution()
                     .ifPresent(newSubstitution -> {
                         if (applicationResults.isReplacedByAChild) {
-                            nodeAndSubsToVisit.add(new NodeAndSubstitution(applicationResults.getReplacingNode().get(),
+                            nodeAndSubsToVisit.add(new NodeAndSubstitution(applicationResults.getOptionalReplacingChild().get(),
                                     newSubstitution));
                         }
                         else {
-                            treeComponent.getChildren(applicationResults.getNewOrReplacingNode()).stream()
-                                    .map(n -> new NodeAndSubstitution(n, newSubstitution))
-                                    .forEach(nodeAndSubsToVisit::add);
+                            applicationResults.getNewNodeOrReplacingChild()
+                                    .ifPresent(newNode -> treeComponent.getChildren(newNode).stream()
+                                            .map(n -> new NodeAndSubstitution(n, newSubstitution))
+                                            .forEach(nodeAndSubsToVisit::add));
                         }
                     });
         }
@@ -160,11 +168,12 @@ public class SubstitutionPropagationTools {
      */
     protected static <N extends QueryNode> SubstitutionApplicationResults<N> applySubstitutionToNode(N node, ImmutableSubstitution substitution,
                                                                             IntermediateQuery query,
-                                                                            QueryTreeComponent treeComponent) {
+                                                                            QueryTreeComponent treeComponent) throws EmptyQueryException {
         SubstitutionResults<? extends QueryNode> substitutionResults = node.applyDescendingSubstitution(substitution, query);
 
-        Optional<? extends ImmutableSubstitution<? extends ImmutableTerm>> newSubstitution =
-                substitutionResults.getSubstitutionToPropagate();
+        Optional<ImmutableSubstitution<? extends ImmutableTerm>> newSubstitution =
+                substitutionResults.getSubstitutionToPropagate()
+                        .map(s -> (ImmutableSubstitution<? extends ImmutableTerm>)s);
 
         switch (substitutionResults.getLocalAction()) {
             case NEW_NODE:
@@ -175,10 +184,10 @@ public class SubstitutionPropagationTools {
                             "Use NO_CHANGE instead.");
                 }
                 treeComponent.replaceNode(node, newNode);
-                return new SubstitutionApplicationResults(newNode, newSubstitution);
+                return new SubstitutionApplicationResults<>(query, newNode, newSubstitution);
 
             case NO_CHANGE:
-                return new SubstitutionApplicationResults(node, newSubstitution);
+                return new SubstitutionApplicationResults<>(query, node, newSubstitution);
 
             case REPLACE_BY_CHILD:
                 QueryNode replacingChild = substitutionResults.getOptionalReplacingChildPosition()
@@ -189,7 +198,7 @@ public class SubstitutionPropagationTools {
                 treeComponent.replaceNodeByChild(node,
                         substitutionResults.getOptionalReplacingChildPosition());
 
-                return new SubstitutionApplicationResults(replacingChild, newSubstitution, true);
+                return new SubstitutionApplicationResults<>(query, replacingChild, newSubstitution, true);
 
             case INSERT_CONSTRUCTION_NODE:
                 throw new IllegalStateException("Construction newNode insertion not expected " +
@@ -198,10 +207,19 @@ public class SubstitutionPropagationTools {
                  * Replace the sub-tree by an empty newNode
                  */
             case DECLARE_AS_EMPTY:
-                QueryNode replacingNode = replaceByEmptyNode(node, substitution, query);
-                treeComponent.replaceSubTree(node, replacingNode);
+                EmptyNode replacingEmptyNode = replaceByEmptyNode(node, substitution, query);
+                treeComponent.replaceSubTree(node, replacingEmptyNode);
 
-                return new SubstitutionApplicationResults(replacingNode, newSubstitution, false);
+                /**
+                 * Immediately removes the empty node
+                 */
+                RemoveEmptyNodesProposal cleaningProposal = new RemoveEmptyNodesProposalImpl(replacingEmptyNode, true);
+                // May restructure significantly the query
+                NodeCentricOptimizationResults<EmptyNode> cleaningResults = query.applyProposal(cleaningProposal, true);
+
+                return new SubstitutionApplicationResults<>(query,
+                        cleaningResults.getOptionalNextSibling(),
+                        cleaningResults.getOptionalClosestAncestor());
 
             default:
                 throw new IllegalStateException("Unknown local action: " + substitutionResults.getLocalAction());
@@ -253,7 +271,7 @@ public class SubstitutionPropagationTools {
             final Optional<QueryNode> optionalNextAncestor = query.getParent(currentAncestor);
 
             /**
-             * Applies the substitution and analyses the results
+             * Applies the substitution and analyses the proposed results
              */
             SubstitutionResults<? extends QueryNode> substitutionResults = currentAncestor.applyAscendingSubstitution(
                     currentSubstitution, ancestorChild, query);
@@ -302,22 +320,19 @@ public class SubstitutionPropagationTools {
                                     .forEach(treeComponent::removeSubTree));
                     // Assume there is only one child
                     QueryNode replacingChild = treeComponent.removeOrReplaceNodeByUniqueChildren(currentAncestor);
+
                     otherChildren = ancestorChild != replacingChild
                             ? Stream.of(replacingChild)
                             : Stream.of();
                     futureChild = replacingChild;
                     break;
                 /**
-                 * Ancestor is empty --> applies a ReactToChildDeletionProposal and returns the remaining ancestor
+                 * Ancestor is empty --> removes it and returns the closest ancestor + the next sibling
                  */
                 case DECLARE_AS_EMPTY:
-                    /**
-                     *
-                     */
                     NodeCentricOptimizationResults<EmptyNode> removalResults =
                             reactToEmptinessDeclaration(query, currentAncestor, treeComponent);
-                    // TODO: make sure it makes sense
-                    return new NodeCentricOptimizationResultsImpl<T>(query, removalResults.getOptionalNextSibling(),
+                    return new NodeCentricOptimizationResultsImpl<>(query, removalResults.getOptionalNextSibling(),
                             removalResults.getOptionalClosestAncestor());
                 default:
                     throw new IllegalStateException("Unknown local action: " + substitutionResults.getLocalAction());
@@ -329,8 +344,9 @@ public class SubstitutionPropagationTools {
             /**
              * Propagates the substitution DOWN to the other children
              */
-            optionalNewSubstitution.ifPresent(subst -> propagateSubstitutionDownToNodes(otherChildren, subst,
-                    query, treeComponent));
+            if (optionalNewSubstitution.isPresent()) {
+                propagateSubstitutionDownToNodes(futureChild, otherChildren, optionalNewSubstitution.get(), query, treeComponent);
+            }
 
             /**
              * Continue the propagation
@@ -369,7 +385,7 @@ public class SubstitutionPropagationTools {
 
         treeComponent.replaceSubTree(currentAncestor, replacingEmptyNode);
 
-        RemoveEmptyNodesProposal proposal = new RemoveEmptyNodesProposalImpl(replacingEmptyNode);
+        RemoveEmptyNodesProposal proposal = new RemoveEmptyNodesProposalImpl(replacingEmptyNode, false);
         return query.applyProposal(proposal, true);
     }
 }

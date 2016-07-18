@@ -48,7 +48,7 @@ public class JoinBooleanExpressionExecutor implements NodeCentricInternalExecuto
             EmptyNode replacingEmptyNode = new EmptyNodeImpl(query.getProjectedVariables(originalTopJoinNode));
             treeComponent.replaceSubTree(originalTopJoinNode, replacingEmptyNode);
 
-            RemoveEmptyNodesProposal cleaningProposal = new RemoveEmptyNodesProposalImpl(replacingEmptyNode);
+            RemoveEmptyNodesProposal cleaningProposal = new RemoveEmptyNodesProposalImpl(replacingEmptyNode, false);
 
             NodeCentricOptimizationResults<EmptyNode> cleaningResults = query.applyProposal(cleaningProposal, true);
 
