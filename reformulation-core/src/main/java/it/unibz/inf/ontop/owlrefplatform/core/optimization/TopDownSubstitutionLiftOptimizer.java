@@ -119,6 +119,7 @@ public class TopDownSubstitutionLiftOptimizer implements SubstitutionLiftOptimiz
 
             Optional<ImmutableSet<Variable>> irregularVariables = extractor.getIrregularVariables();
 
+
             if (irregularVariables.isPresent()) {
                 UnionNode currentUnionNode = (UnionNode) currentNode;
                 return liftUnionToMatchingVariable(currentQuery, currentUnionNode, irregularVariables.get());
@@ -280,22 +281,24 @@ public class TopDownSubstitutionLiftOptimizer implements SubstitutionLiftOptimiz
             }
         }
 
-
-        if (optionalRightChild.isPresent()) {
+        if (optionalRightChild.filter(rightChild -> !(rightChild instanceof EmptyNode)).isPresent()) {
             QueryNode rightChild = optionalRightChild.get();
+
             Optional<ImmutableSubstitution<ImmutableTerm>> optionalSubstitution = extractor.extractInSubTree(
                     currentQuery, rightChild);
             Set<Variable> onlyRightVariables = new HashSet<>();
             onlyRightVariables.addAll(currentQuery.getProjectedVariables(rightChild));
-            onlyRightVariables.removeAll(currentQuery.getProjectedVariables(optionalLeftChild.get()));
+            if(optionalLeftChild.isPresent()){
+                onlyRightVariables.removeAll(currentQuery.getProjectedVariables(optionalLeftChild.get()));
+            }
             Map<Variable, ImmutableTerm> substitutionMap = new HashMap<>();
             onlyRightVariables.forEach(v ->
-                optionalSubstitution.ifPresent(s -> {
-                    ImmutableMap<Variable, ImmutableTerm> immutableMap = s.getImmutableMap();
-                    if (immutableMap.containsKey(v)) {
-                        substitutionMap.put(v, immutableMap.get(v));
-                    }
-                })
+                    optionalSubstitution.ifPresent(s -> {
+                        ImmutableMap<Variable, ImmutableTerm> immutableMap = s.getImmutableMap();
+                        if (immutableMap.containsKey(v)) {
+                            substitutionMap.put(v, immutableMap.get(v));
+                        }
+                    })
             );
             ImmutableMap<Variable, ImmutableTerm> immutableMap = substitutionMap.entrySet().stream().collect(ImmutableCollectors.toMap());
 
@@ -319,6 +322,7 @@ public class TopDownSubstitutionLiftOptimizer implements SubstitutionLiftOptimiz
                         .orElseThrow(() -> new IllegalStateException(
                                 "The focus node should still have a parent (a Join node)"));
             }
+
         }
 
         //remove empty nodes if present

@@ -35,7 +35,7 @@ public class SimpleUnionNodeLifter implements UnionNodeLifter {
                 if(parentNode instanceof LeftJoinNode){
                     LeftJoinNode leftJoin = (LeftJoinNode) parentNode;
                     Optional<NonCommutativeOperatorNode.ArgumentPosition> optionalPosition = currentQuery.getOptionalPosition(leftJoin, unionNode);
-                    NonCommutativeOperatorNode.ArgumentPosition position = optionalPosition.orElseThrow(() -> new IllegalStateException("Missing position of the child of a leftJoin"));
+                    NonCommutativeOperatorNode.ArgumentPosition position = optionalPosition.orElseThrow(() -> new IllegalStateException("Missing position of leftJoin child"));
 
                     //cannot lift over a left join from the right part
                     if (position.equals(RIGHT)){
@@ -77,13 +77,12 @@ public class SimpleUnionNodeLifter implements UnionNodeLifter {
             optionalParent = currentQuery.getParent(parentNode);
         }
 
-        //no parent with the given variable,
-
+        //no innerJoin or leftJoin parent with the given variable, use highest filterJoin instead
         if(filterJoin!=null){
             return Optional.of(filterJoin);
         }
 
-//            I don't lift
+        //I don't lift
         return Optional.empty();
     }
 
