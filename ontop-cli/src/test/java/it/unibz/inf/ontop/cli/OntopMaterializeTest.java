@@ -96,6 +96,7 @@ public class OntopMaterializeTest {
         Ontop.main(argv);
     }
 
+    @Ignore("too expensive")
     @Test
     public void testOntopMaterializeSeparateFiles2 (){
         String[] argv = {"materialize",
