@@ -1,7 +1,6 @@
 package it.unibz.inf.ontop.executor.unsatisfiable;
 
 import com.google.common.collect.ImmutableSet;
-import it.unibz.inf.ontop.executor.AncestryStatus;
 import it.unibz.inf.ontop.executor.NodeCentricInternalExecutor;
 import it.unibz.inf.ontop.model.Constant;
 import it.unibz.inf.ontop.model.ImmutableSubstitution;
@@ -14,7 +13,7 @@ import it.unibz.inf.ontop.pivotalrepr.proposal.impl.AncestryTrackingResultsImpl;
 
 import java.util.Optional;
 
-import static it.unibz.inf.ontop.executor.substitution.SubstitutionPropagationTools.propagateSubstitutionUp;
+import static it.unibz.inf.ontop.executor.substitution.AscendingPropagationTools.propagateSubstitutionUp;
 import static it.unibz.inf.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionTools.computeNullSubstitution;
 
 /**
@@ -25,32 +24,6 @@ public class RemoveEmptyNodesExecutor implements NodeCentricInternalExecutor<
         AncestryTrackingResults<EmptyNode>,
         RemoveEmptyNodeProposal> {
 
-
-    /**
-     * TODO: use AncestryTrackingResults instead?
-     */
-    @Deprecated
-    private static class ReactionResults {
-
-        private final Optional<QueryNode> closestAncestor;
-        private final Optional<QueryNode> optionalNextSibling;
-
-        private ReactionResults(Optional<QueryNode> closestAncestor, Optional<QueryNode> optionalNextSibling,
-                                Optional<AncestryStatus> optionalAncestorStatus) {
-            this.closestAncestor = closestAncestor;
-            this.optionalNextSibling = optionalNextSibling;
-        }
-
-        public Optional<QueryNode> getClosestRemainingAncestor() {
-            return closestAncestor;
-        }
-
-        public Optional<QueryNode> getOptionalNextSibling() {
-            return optionalNextSibling;
-        }
-    }
-
-
     /**
      * TODO: explain
      */
@@ -59,23 +32,9 @@ public class RemoveEmptyNodesExecutor implements NodeCentricInternalExecutor<
                                          QueryTreeComponent treeComponent)
             throws EmptyQueryException {
 
+        EmptyNode originalFocusNode = proposal.getFocusNode();
 
-        // May update the query
-        ReactionResults reactionResults = reactToEmptyChildNode(query, proposal.getFocusNode(),
-                treeComponent,
-                proposal.isKeepingTrackOfAncestors() ? Optional.of(new AncestryStatus()) : Optional.empty());
-
-        return new AncestryTrackingResultsImpl<>(
-                query,
-                /**
-                 * Next sibling (of the empty node or of the lastly removed ancestor)
-                 */
-                reactionResults.getOptionalNextSibling(),
-
-                /**
-                 * First ancestor to remain (may have be updated)
-                 */
-                reactionResults.getClosestRemainingAncestor());
+        return reactToEmptyChildNode(query, originalFocusNode, treeComponent, proposal.getOptionalTracker(query));
     }
 
     /**
@@ -83,9 +42,9 @@ public class RemoveEmptyNodesExecutor implements NodeCentricInternalExecutor<
      *
      * Recursive!
      */
-    private static ReactionResults reactToEmptyChildNode(IntermediateQuery query, EmptyNode emptyNode,
+    private static AncestryTrackingResults<EmptyNode> reactToEmptyChildNode(IntermediateQuery query, EmptyNode emptyNode,
                                                          QueryTreeComponent treeComponent,
-                                                         Optional<AncestryStatus> optionalAncestorStatus)
+                                                         Optional<AncestryTracker> optionalTracker)
             throws EmptyQueryException {
 
         QueryNode originalParentNode = query.getParent(emptyNode)
@@ -116,26 +75,27 @@ public class RemoveEmptyNodesExecutor implements NodeCentricInternalExecutor<
                         emptyNode, true);
                 // Propagates the null variables from the replacing child
                 propagatingNode = transformationProposal.getOptionalNewNodeOrReplacingChild().get();
-                optionalAncestorStatus
-                        .ifPresent(st -> st.replaceAncestorByChild(originalParentNode, propagatingNode));
+                optionalTracker
+                        .ifPresent(tr -> tr.recordReplacementByChild(originalParentNode, propagatingNode));
                 break;
 
             case REPLACE_BY_NEW_NODE:
                 optionalClosestAncestorNode = applyReplacementProposal(originalParentNode, treeComponent, transformationProposal,
                         emptyNode, false);
                 propagatingNode = optionalClosestAncestorNode.get();
-                optionalAncestorStatus
-                        .ifPresent(st -> st.replaceAncestor(originalParentNode, propagatingNode));
+                optionalTracker
+                        .ifPresent(tr -> tr.recordReplacement(originalParentNode, propagatingNode));
                 break;
 
             case DECLARE_AS_EMPTY:
+                optionalTracker.ifPresent(tr -> tr.recordRemoval(originalParentNode));
                 EmptyNode newEmptyNode = new EmptyNodeImpl(transformationProposal.getNullVariables());
                 treeComponent.replaceSubTree(originalParentNode, newEmptyNode);
 
                 /**
                  * Tail-recursive (cascade)
                  */
-                return reactToEmptyChildNode(query, newEmptyNode, treeComponent, optionalAncestorStatus);
+                return reactToEmptyChildNode(query, newEmptyNode, treeComponent, optionalTracker);
 
             default:
                 throw new RuntimeException("Unexpected state: " + transformationProposal.getState());
@@ -152,13 +112,21 @@ public class RemoveEmptyNodesExecutor implements NodeCentricInternalExecutor<
              * After removing the empty node(s), second phase: propagates the null variables
              */
             return propagateNullVariables(query, optionalClosestAncestorNode.get(), optionalNewNextSibling, treeComponent,
-                    transformationProposal.getNullVariables(), propagatingNode, optionalAncestorStatus);
+                    transformationProposal.getNullVariables(), propagatingNode, optionalTracker);
         }
         /**
          * Special case: the promoted child is now the root the query
          */
         else {
-            return new ReactionResults(optionalClosestAncestorNode, optionalNewNextSibling, optionalAncestorStatus);
+            return new AncestryTrackingResultsImpl<>(query,
+                    /**
+                     * Next sibling (of the empty node or of the lastly removed ancestor)
+                     */
+                    optionalNewNextSibling,
+                    /**
+                     * First ancestor to remain (may have be updated)
+                     */
+                    optionalClosestAncestorNode, optionalTracker);
         }
     }
 
@@ -195,27 +163,24 @@ public class RemoveEmptyNodesExecutor implements NodeCentricInternalExecutor<
      * Keeps track of the closest ancestor and the next sibling of the original focus (empty) node.
      *
      */
-    private static ReactionResults propagateNullVariables(IntermediateQuery query,
+    private static AncestryTrackingResults<EmptyNode> propagateNullVariables(IntermediateQuery query,
                                                           QueryNode ancestorNode,
                                                           Optional<QueryNode> optionalNextSiblingOfFocusNode,
                                                           QueryTreeComponent treeComponent,
                                                           ImmutableSet<Variable> nullVariables,
                                                           QueryNode propagatingNode,
-                                                          Optional<AncestryStatus> optionalAncestorStatus)
+                                                          Optional<AncestryTracker> optionalAncestorTracker)
             throws EmptyQueryException {
 
         if (nullVariables.isEmpty()) {
-            return new ReactionResults(Optional.of(ancestorNode), optionalNextSiblingOfFocusNode, optionalAncestorStatus);
+            return new AncestryTrackingResultsImpl<>(query, optionalNextSiblingOfFocusNode,
+                    Optional.of(ancestorNode), optionalAncestorTracker);
         }
 
         ImmutableSubstitution<Constant> ascendingSubstitution = computeNullSubstitution(nullVariables);
 
-
-        /**
-         * TODO: analyze these results
-         */
         AncestryTrackingResults<QueryNode> propagationResults =
-                propagateSubstitutionUp(propagatingNode, ascendingSubstitution, query, treeComponent, optionalAncestorStatus);
+                propagateSubstitutionUp(propagatingNode, ascendingSubstitution, query, treeComponent, optionalAncestorTracker);
 
         QueryNode closestRemainingAncestor = propagationResults.getOptionalNewNode()
                 /**
@@ -239,7 +204,8 @@ public class RemoveEmptyNodesExecutor implements NodeCentricInternalExecutor<
                 .orElseGet(propagationResults::getOptionalNextSibling);
 
 
-        return new ReactionResults(Optional.of(closestRemainingAncestor), optionalNewNextSibling, optionalAncestorStatus);
+        return new AncestryTrackingResultsImpl<>(query, optionalNewNextSibling, Optional.of(closestRemainingAncestor),
+                propagationResults.getOptionalTracker());
 
     }
 }

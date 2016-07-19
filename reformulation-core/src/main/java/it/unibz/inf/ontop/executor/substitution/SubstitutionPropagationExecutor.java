@@ -1,7 +1,7 @@
 package it.unibz.inf.ontop.executor.substitution;
 
 import it.unibz.inf.ontop.executor.SimpleNodeCentricInternalExecutor;
-import it.unibz.inf.ontop.executor.substitution.SubstitutionPropagationTools.SubstitutionApplicationResults;
+import it.unibz.inf.ontop.executor.substitution.LocalPropagationTools.SubstitutionApplicationResults;
 import it.unibz.inf.ontop.model.ImmutableTerm;
 import it.unibz.inf.ontop.pivotalrepr.*;
 import it.unibz.inf.ontop.pivotalrepr.proposal.impl.NodeCentricOptimizationResultsImpl;
@@ -13,7 +13,9 @@ import it.unibz.inf.ontop.pivotalrepr.proposal.SubstitutionPropagationProposal;
 
 import java.util.Optional;
 
-import static it.unibz.inf.ontop.executor.substitution.SubstitutionPropagationTools.*;
+import static it.unibz.inf.ontop.executor.substitution.AscendingPropagationTools.*;
+import static it.unibz.inf.ontop.executor.substitution.DescendingPropagationTools.propagateSubstitutionDown;
+import static it.unibz.inf.ontop.executor.substitution.LocalPropagationTools.applySubstitutionToNode;
 
 /**
  * TODO: explain
