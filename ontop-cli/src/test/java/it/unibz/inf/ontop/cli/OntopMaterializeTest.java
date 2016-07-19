@@ -96,4 +96,19 @@ public class OntopMaterializeTest {
         Ontop.main(argv);
     }
 
+    @Test
+    public void testOntopMaterializeSeparateFiles2 (){
+        String[] argv = {"materialize",
+                "-m", "../quest-test/src/test/resources/example/npd-v2-ql_a.ttl",
+                "-t", "../quest-test/src/test/resources/example/npd-v2-ql_a.owl",
+                "-f", "turtle", "-o", "/tmp/npd",
+                "-l",	"jdbc:mysql://10.7.20.39/npd",
+                "-u",	"fish",
+                "-p",	"fish",
+                "-d",	"com.mysql.jdbc.Driver",
+                "--separate-files"};
+        Ontop.main(argv);
+
+    }
+
 }
