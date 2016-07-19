@@ -4,7 +4,7 @@ import java.util.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.executor.SimpleNodeCentricInternalExecutor;
-import it.unibz.inf.ontop.executor.substitution.SubstitutionPropagationTools;
+import it.unibz.inf.ontop.executor.substitution.DescendingPropagationTools;
 import it.unibz.inf.ontop.model.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.pivotalrepr.impl.FilterNodeImpl;
@@ -12,7 +12,6 @@ import it.unibz.inf.ontop.pivotalrepr.impl.IllegalTreeUpdateException;
 import it.unibz.inf.ontop.pivotalrepr.proposal.InvalidQueryOptimizationProposalException;
 import it.unibz.inf.ontop.pivotalrepr.proposal.PullVariableOutOfDataNodeProposal;
 import it.unibz.inf.ontop.pivotalrepr.proposal.impl.NodeCentricOptimizationResultsImpl;
-import it.unibz.inf.ontop.executor.NodeCentricInternalExecutor;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.InjectiveVar2VarSubstitution;
 import it.unibz.inf.ontop.pivotalrepr.impl.QueryTreeComponent;
 import it.unibz.inf.ontop.pivotalrepr.proposal.NodeCentricOptimizationResults;
@@ -88,7 +87,7 @@ public class PullVariableOutOfDataNodeExecutor implements SimpleNodeCentricInter
 
         if (focusNodeUpdate.optionalSubstitution.isPresent()) {
             try {
-                SubstitutionPropagationTools.propagateSubstitutionDown(focusNodeUpdate.newFocusNode,
+                DescendingPropagationTools.propagateSubstitutionDown(focusNodeUpdate.newFocusNode,
                         focusNodeUpdate.optionalSubstitution.get(), query, treeComponent);
             } catch (EmptyQueryException e) {
                 throw new IllegalStateException("EmptyQueryExceptions are not expected when pulling the variables out of data nodes");

@@ -97,7 +97,7 @@ public class NavigationAfterRemovingEmptyNodes {
 
         IntermediateQuery initialQuery = initialQueryBuilder.build();
 
-        RemoveEmptyNodeProposal proposal = new RemoveEmptyNodeProposalImpl(emptyNode);
+        RemoveEmptyNodeProposal proposal = new RemoveEmptyNodeProposalImpl(emptyNode, false);
 
         System.out.println("Initial query: \n" + initialQuery);
 
