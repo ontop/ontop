@@ -56,7 +56,7 @@ public class SubstitutionPropagationExecutor<N extends QueryNode>
                 substitutionToPropagate, query, treeComponent, Optional.empty());
 
         /**
-         * If some ancestors are removed, don't go further
+         * If some ancestors are removed, does not go further
          */
         if (!ascendingPropagationResults.getOptionalNewNode().isPresent()) {
             return ascendingPropagationResults;
@@ -73,63 +73,68 @@ public class SubstitutionPropagationExecutor<N extends QueryNode>
                 substitutionToPropagate, query, treeComponent);
 
         /**
-         * Finally, down
+         * Finally, propagates down and returns the results
          */
-        Optional<QueryNode> optionalNewFocusNode = localApplicationResults.getNewNodeOrReplacingChild();
-        if (optionalNewFocusNode.isPresent()) {
+        return propagateDown(query, treeComponent, localApplicationResults);
 
+
+    }
+
+    private NodeCentricOptimizationResults<N> propagateDown(IntermediateQuery query, QueryTreeComponent treeComponent,
+                                                            SubstitutionApplicationResults<N> localApplicationResults)
+            throws EmptyQueryException {
+
+        if (localApplicationResults.getNewNodeOrReplacingChild().isPresent()) {
+
+            /**
+             * Still a substitution to propagate down
+             */
             if (localApplicationResults.getOptionalSubstitution().isPresent()) {
                 ImmutableSubstitution<? extends ImmutableTerm> newSubstitution = localApplicationResults.getOptionalSubstitution().get();
 
-                /**
-                 * TODO: analyse the results!
-                 */
-                propagateSubstitutionDown(optionalNewFocusNode.get(), newSubstitution, query, treeComponent);
+                Optional<N> optionalNewFocusNode = localApplicationResults.getOptionalNewNode();
 
-                // TODO: refactor
-                if (localApplicationResults.getOptionalNewNode().isPresent()) {
-                    return new NodeCentricOptimizationResultsImpl<>(query, localApplicationResults.getOptionalNewNode().get());
-                }
-                else if (localApplicationResults.isReplacedByAChild()) {
-                    return new NodeCentricOptimizationResultsImpl<>(query, localApplicationResults.getOptionalReplacingChild());
+                if (optionalNewFocusNode.isPresent()) {
+                    return propagateSubstitutionDown(optionalNewFocusNode.get(), newSubstitution, query, treeComponent);
                 }
                 /**
-                 * Replaced by another node
+                 * When the focus has already been replaced by its child
                  */
-                else {
-                    QueryNode replacingNode = localApplicationResults.getNewNodeOrReplacingChild().get();
+                else  {
+                    QueryNode replacingNode = localApplicationResults.getOptionalReplacingChild().get();
 
-                    return new NodeCentricOptimizationResultsImpl<>(query,
-                            query.getNextSibling(replacingNode),
-                            query.getParent(replacingNode));
+                    /**
+                     * The results have to be converted
+                     */
+                    NodeCentricOptimizationResults<QueryNode> descendingResults = propagateSubstitutionDown(
+                            replacingNode, newSubstitution, query, treeComponent);
+
+                    if (descendingResults.getNewNodeOrReplacingChild().isPresent()) {
+                        // Declares as replacing child
+                        return new NodeCentricOptimizationResultsImpl<>(query, descendingResults.getNewNodeOrReplacingChild());
+                    } else {
+                        return new NodeCentricOptimizationResultsImpl<>(query, descendingResults.getOptionalNextSibling(),
+                                descendingResults.getOptionalClosestAncestor());
+                    }
                 }
-            }
-            else if (localApplicationResults.getOptionalNewNode().isPresent()) {
-                return new NodeCentricOptimizationResultsImpl<>(query, localApplicationResults.getOptionalNewNode().get());
-            }
-            else if (localApplicationResults.isReplacedByAChild()) {
-                return new NodeCentricOptimizationResultsImpl<>(query, localApplicationResults.getOptionalReplacingChild());
             }
             /**
-             * Replaced by another node
+             * No propagation down
              */
             else {
-                QueryNode replacingNode = localApplicationResults.getNewNodeOrReplacingChild().get();
-
-                return new NodeCentricOptimizationResultsImpl<>(query,
-                        query.getNextSibling(replacingNode),
-                        query.getParent(replacingNode));
+                return localApplicationResults.getOptionalNewNode()
+                        .map(focus -> new NodeCentricOptimizationResultsImpl<>(query, focus))
+                        .orElseGet(() -> new NodeCentricOptimizationResultsImpl<>(query,
+                                localApplicationResults.getOptionalReplacingChild()));
             }
-
         }
         /**
-         *  The focus node has removed
+         *  The focus node has removed by the local application
          *
          */
         else {
             return new NodeCentricOptimizationResultsImpl<>(query, localApplicationResults.getOptionalNextSibling(),
                     localApplicationResults.getOptionalClosestAncestor());
         }
-
     }
 }
