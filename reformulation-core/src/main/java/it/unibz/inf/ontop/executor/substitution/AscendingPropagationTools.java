@@ -29,6 +29,55 @@ public class AscendingPropagationTools {
 
 
     /**
+     * Wrapper of what can be returned when applying the ascending substitution to an ancestor
+     */
+    private static class AncestorPropagationResults<N extends QueryNode> {
+
+        public final Optional<AncestryTrackingResults<N>> optionalAncestryTrackingResults;
+        public final Optional<ImmutableSubstitution<? extends ImmutableTerm>> optionalSubstitutionToPropagate;
+        public final Optional<QueryNode> optionalNextAncestor;
+        public final Optional<QueryNode> optionalChildOfNextAncestor;
+        public final Optional<DescendingPropagationParams> optionalDescendingPropagParams;
+
+        /**
+         * Case 1: empty ancestor --> returns the results of its removal
+         */
+        public AncestorPropagationResults(AncestryTrackingResults<N> ancestryTrackingResults) {
+            this.optionalAncestryTrackingResults = Optional.of(ancestryTrackingResults);
+            this.optionalSubstitutionToPropagate = Optional.empty();
+            this.optionalNextAncestor = Optional.empty();
+            this.optionalChildOfNextAncestor = Optional.empty();
+            this.optionalDescendingPropagParams = Optional.empty();
+        }
+
+        /**
+         * Case 2: continues the ascending propagation
+         */
+        public AncestorPropagationResults(ImmutableSubstitution<? extends ImmutableTerm> substitutionToPropagate,
+                                          Optional<QueryNode> optionalNextAncestor,
+                                          QueryNode childOfNextAncestor,
+                                          Optional<DescendingPropagationParams> optionalDescendingPropagParams) {
+            this.optionalAncestryTrackingResults = Optional.empty();
+            this.optionalSubstitutionToPropagate = Optional.of(substitutionToPropagate);
+            this.optionalNextAncestor = optionalNextAncestor;
+            this.optionalChildOfNextAncestor = Optional.of(childOfNextAncestor);
+            this.optionalDescendingPropagParams = optionalDescendingPropagParams;
+        }
+
+        /**
+         * Case 3: stops the ascending propagation
+         */
+        public AncestorPropagationResults(Optional<DescendingPropagationParams> optionalDescendingPropagParams) {
+            this.optionalAncestryTrackingResults = Optional.empty();
+            this.optionalSubstitutionToPropagate = Optional.empty();
+            this.optionalNextAncestor = Optional.empty();
+            this.optionalChildOfNextAncestor = Optional.empty();
+            this.optionalDescendingPropagParams = optionalDescendingPropagParams;
+        }
+    }
+
+
+    /**
      * TODO: find a better term
      */
     private static class DescendingPropagationParams {
@@ -54,137 +103,167 @@ public class AscendingPropagationTools {
      *
      * Note that some ancestors may become empty and thus the focus newNode and its siblings be removed.
      *
-     * TODO: clean
-     *
      */
-    public static <T extends QueryNode> AncestryTrackingResults<T> propagateSubstitutionUp(
-            T focusNode, ImmutableSubstitution<? extends ImmutableTerm> substitutionToPropagate,
+    public static <N extends QueryNode> AncestryTrackingResults<N> propagateSubstitutionUp(
+            N focusNode, ImmutableSubstitution<? extends ImmutableTerm> substitutionToPropagate,
             IntermediateQuery query, QueryTreeComponent treeComponent,
             Optional<AncestryTracker> optionalAncestryTracker) throws QueryNodeSubstitutionException,
             EmptyQueryException {
 
-        // Propagations to be apply into branches after the ascendant one
+        // Substitutions to be propagated down into branches after the ascendant one
         ImmutableList.Builder<DescendingPropagationParams> descendingPropagParamBuilder = ImmutableList.builder();
 
         // Non-final
         Optional<QueryNode> optionalCurrentAncestor = query.getParent(focusNode);
         QueryNode ancestorChild = focusNode;
-
-        // Non-final
         ImmutableSubstitution<? extends ImmutableTerm> currentSubstitution = substitutionToPropagate;
 
+        /**
+         * Iterates over the ancestors until nothing needs to be propagated
+         * or an ancestor is declared as empty (it is then immediately removed).
+         */
         while (optionalCurrentAncestor.isPresent()) {
-            final QueryNode currentAncestor = optionalCurrentAncestor.get();
-            QueryNode futureChild = currentAncestor;
+            AncestorPropagationResults<N> results = applyAscendingSubstitutionToAncestor(query, optionalCurrentAncestor.get(),
+                    currentSubstitution, ancestorChild, treeComponent, optionalAncestryTracker);
 
-            final Optional<QueryNode> optionalNextAncestor = query.getParent(currentAncestor);
+            // Case 1
+            if (results.optionalAncestryTrackingResults.isPresent()) {
+                return results.optionalAncestryTrackingResults.get();
+            }
+            // Case 2: continues the propagation
+            else if (results.optionalNextAncestor.isPresent()) {
+                ancestorChild = results.optionalChildOfNextAncestor.get();
+                currentSubstitution = results.optionalSubstitutionToPropagate.get();
 
-            /**
-             * Applies the substitution and analyses the proposed results
-             */
-            SubstitutionResults<? extends QueryNode> substitutionResults = currentAncestor.applyAscendingSubstitution(
-                    currentSubstitution, ancestorChild, query);
-
-
-            Stream<QueryNode> otherChildren;
-
-            switch (substitutionResults.getLocalAction()) {
-                case NO_CHANGE:
-                    otherChildren = query.getOtherChildrenStream(currentAncestor, ancestorChild);
-                    break;
-                case NEW_NODE:
-                    QueryNode newAncestor = substitutionResults.getOptionalNewNode().get();
-                    if (currentAncestor != newAncestor) {
-                        treeComponent.replaceNode(currentAncestor, newAncestor);
-                        optionalAncestryTracker.ifPresent(tr -> tr.recordReplacement(currentAncestor, newAncestor));
-                    }
-                    otherChildren = query.getOtherChildrenStream(newAncestor, ancestorChild);
-                    futureChild = newAncestor;
-                    break;
-                case INSERT_CONSTRUCTION_NODE:
-                    QueryNode downgradedChildNode = substitutionResults.getOptionalDowngradedChildNode().get();
-                    otherChildren = query.getOtherChildrenStream(currentAncestor, downgradedChildNode);
-
-                    Optional<? extends QueryNode> optionalUpdatedAncestor = substitutionResults.getOptionalNewNode();
-                    if (optionalUpdatedAncestor.isPresent()) {
-                        QueryNode updatedAncestor = optionalUpdatedAncestor.get();
-                        treeComponent.replaceNode(currentAncestor, updatedAncestor);
-                        futureChild = updatedAncestor;
-                    }
-
-                    ConstructionNode newParentOfChildNode = substitutionResults
-                            .getOptionalNewParentOfChildNode().get();
-                    treeComponent.insertParent(downgradedChildNode, newParentOfChildNode);
-                    break;
-
-                case REPLACE_BY_CHILD:
-                    /**
-                     * If a position is specified, removes the other children
-                     */
-                    substitutionResults.getOptionalReplacingChildPosition()
-                            .ifPresent(position -> query.getChildren(currentAncestor).stream()
-                                    // Not the same position
-                                    .filter(c -> query.getOptionalPosition(currentAncestor, c)
-                                            .filter(p -> ! p.equals(position))
-                                            .isPresent())
-                                    .forEach(treeComponent::removeSubTree));
-                    // Assume there is only one child
-                    QueryNode replacingChild = treeComponent.removeOrReplaceNodeByUniqueChildren(currentAncestor);
-
-                    optionalAncestryTracker.ifPresent(tr -> tr.recordReplacementByChild(currentAncestor, replacingChild));
-
-                    otherChildren = ancestorChild != replacingChild
-                            ? Stream.of(replacingChild)
-                            : Stream.of();
-                    futureChild = replacingChild;
-                    break;
-                /**
-                 * Ancestor is empty --> removes it and returns the closest ancestor + the next sibling
-                 */
-                case DECLARE_AS_EMPTY:
-                    AncestryTrackingResults<EmptyNode> removalResults =
-                            reactToEmptinessDeclaration(query, currentAncestor, treeComponent);
-
-                    return new AncestryTrackingResultsImpl<>(query, removalResults.getOptionalNextSibling(),
-                            removalResults.getOptionalClosestAncestor(), removalResults.getOptionalTracker());
-                default:
-                    throw new IllegalStateException("Unknown local action: " + substitutionResults.getLocalAction());
             }
 
-            Optional<? extends ImmutableSubstitution<? extends ImmutableTerm>> optionalNewSubstitution =
-                    substitutionResults.getSubstitutionToPropagate();
+            results.optionalDescendingPropagParams
+                    .ifPresent(descendingPropagParamBuilder::add);
 
-            /**
-             * Plans to propagate the substitution DOWN to the other children (will be done later)
-             */
-            if (optionalNewSubstitution.isPresent()) {
-                descendingPropagParamBuilder.add(new DescendingPropagationParams(futureChild, otherChildren,
-                        optionalNewSubstitution.get()));
-            }
+            // May stop the propagation
+            optionalCurrentAncestor = results.optionalNextAncestor;
 
-            /**
-             * Continue the propagation
-             */
-            if (optionalNewSubstitution.isPresent()) {
-
-                // Continue with these values
-                currentSubstitution = optionalNewSubstitution.get();
-                optionalCurrentAncestor = optionalNextAncestor;
-            }
-            /**
-             * Or stop it
-             */
-            else {
-                // Stops
-                optionalCurrentAncestor = Optional.empty();
-            }
-
-            ancestorChild = futureChild;
         }
 
         return applyDescendingPropagations(descendingPropagParamBuilder.build(), query, treeComponent,
                 focusNode, optionalAncestryTracker);
     }
+
+    /**
+     * Applies the ascending substitution to one ancestor
+     */
+    private static <N extends QueryNode> AncestorPropagationResults<N> applyAscendingSubstitutionToAncestor(
+            IntermediateQuery query, QueryNode currentAncestor,
+            ImmutableSubstitution<? extends ImmutableTerm> currentSubstitution,
+            QueryNode childOfAncestor,
+            QueryTreeComponent treeComponent, Optional<AncestryTracker> optionalAncestryTracker) throws EmptyQueryException {
+
+        // Non-final
+        QueryNode childOfNextAncestor = currentAncestor;
+
+        final Optional<QueryNode> optionalNextAncestor = query.getParent(currentAncestor);
+
+        /**
+         * Applies the substitution and analyses the proposed results.
+         *
+         * Keeps track of the changes by updating the ancestry tracker.
+         *
+         */
+        final SubstitutionResults<? extends QueryNode> substitutionResults = currentAncestor.applyAscendingSubstitution(
+                currentSubstitution, childOfAncestor, query);
+
+        final Stream<QueryNode> otherChildren;
+
+        switch (substitutionResults.getLocalAction()) {
+            case NO_CHANGE:
+                otherChildren = query.getOtherChildrenStream(currentAncestor, childOfAncestor);
+                break;
+            case NEW_NODE:
+                QueryNode newAncestor = substitutionResults.getOptionalNewNode().get();
+                if (currentAncestor != newAncestor) {
+                    treeComponent.replaceNode(currentAncestor, newAncestor);
+                    optionalAncestryTracker.ifPresent(tr -> tr.recordReplacement(currentAncestor, newAncestor));
+                }
+                otherChildren = query.getOtherChildrenStream(newAncestor, childOfAncestor);
+                childOfNextAncestor = newAncestor;
+                break;
+            case INSERT_CONSTRUCTION_NODE:
+                QueryNode downgradedChildNode = substitutionResults.getOptionalDowngradedChildNode().get();
+                otherChildren = query.getOtherChildrenStream(currentAncestor, downgradedChildNode);
+
+                Optional<? extends QueryNode> optionalUpdatedAncestor = substitutionResults.getOptionalNewNode();
+                if (optionalUpdatedAncestor.isPresent()) {
+                    QueryNode updatedAncestor = optionalUpdatedAncestor.get();
+                    treeComponent.replaceNode(currentAncestor, updatedAncestor);
+                    childOfNextAncestor = updatedAncestor;
+                }
+
+                ConstructionNode newParentOfChildNode = substitutionResults
+                        .getOptionalNewParentOfChildNode().get();
+                treeComponent.insertParent(downgradedChildNode, newParentOfChildNode);
+                break;
+
+            case REPLACE_BY_CHILD:
+                /**
+                 * If a position is specified, removes the other children
+                 */
+                substitutionResults.getOptionalReplacingChildPosition()
+                        .ifPresent(position -> query.getChildren(currentAncestor).stream()
+                                // Not the same position
+                                .filter(c -> query.getOptionalPosition(currentAncestor, c)
+                                        .filter(p -> ! p.equals(position))
+                                        .isPresent())
+                                .forEach(treeComponent::removeSubTree));
+                // Assume there is only one child
+                QueryNode replacingChild = treeComponent.removeOrReplaceNodeByUniqueChildren(currentAncestor);
+
+                optionalAncestryTracker.ifPresent(tr -> tr.recordReplacementByChild(currentAncestor, replacingChild));
+
+                otherChildren = childOfAncestor != replacingChild
+                        ? Stream.of(replacingChild)
+                        : Stream.of();
+                childOfNextAncestor = replacingChild;
+                break;
+            /**
+             * Ancestor is empty --> removes it and returns the closest ancestor + the next sibling
+             */
+            case DECLARE_AS_EMPTY:
+                AncestryTrackingResults<EmptyNode> removalResults =
+                        reactToEmptinessDeclaration(query, currentAncestor, treeComponent);
+
+                return new AncestorPropagationResults<>(
+                        new AncestryTrackingResultsImpl<>(query, removalResults.getOptionalNextSibling(),
+                                removalResults.getOptionalClosestAncestor(), removalResults.getOptionalTracker()));
+            default:
+                throw new IllegalStateException("Unknown local action: " + substitutionResults.getLocalAction());
+        }
+
+        Optional<? extends ImmutableSubstitution<? extends ImmutableTerm>> optionalNewSubstitution =
+                substitutionResults.getSubstitutionToPropagate();
+
+        /**
+         * Plans to propagate the substitution DOWN to the other children (will be done later)
+         */
+        Optional<DescendingPropagationParams> optionalDescendingPropagParams = optionalNewSubstitution.isPresent()
+                ? Optional.of(new DescendingPropagationParams(childOfNextAncestor, otherChildren, optionalNewSubstitution.get()))
+                : Optional.empty();
+
+
+        /**
+         * Continues the propagation
+         */
+        if (optionalNewSubstitution.isPresent()) {
+            return new AncestorPropagationResults<>(optionalNewSubstitution.get(), optionalNextAncestor, childOfNextAncestor,
+                    optionalDescendingPropagParams);
+        }
+        /**
+         * Or stops it
+         */
+        else {
+            return new AncestorPropagationResults<>(optionalDescendingPropagParams);
+        }
+    }
+
 
     /**
      * TODO: explain
