@@ -61,7 +61,10 @@ public class EmptyNodeImpl extends QueryNodeImpl implements EmptyNode {
 
     @Override
     public boolean isSyntacticallyEquivalentTo(QueryNode node) {
-        return (node instanceof EmptyNode);
+        if (node instanceof EmptyNode) {
+            return projectedVariables.equals(((EmptyNode) node).getProjectedVariables());
+        }
+        return false;
     }
 
     @Override

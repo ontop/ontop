@@ -26,4 +26,9 @@ public class SubstitutionPropagationProposalImpl<T extends QueryNode> implements
     public T getFocusNode() {
         return focusNode;
     }
+
+    @Override
+    public String toString() {
+        return "Propagation " + substitutionToPropagate + " from " + focusNode;
+    }
 }
