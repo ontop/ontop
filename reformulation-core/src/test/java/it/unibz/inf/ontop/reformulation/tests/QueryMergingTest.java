@@ -55,10 +55,12 @@ public class QueryMergingTest {
     private static Constant URI_TEMPLATE_STR_2 =  DATA_FACTORY.getConstantLiteral("http://example.org/ds2/{}");
     private static Constant URI_TEMPLATE_STR_3 =  DATA_FACTORY.getConstantLiteral("http://example.org/ds3/{}/{}");
     private static Constant ONE = DATA_FACTORY.getConstantLiteral("1", INTEGER);
+    private static Constant TWO = DATA_FACTORY.getConstantLiteral("2", INTEGER);
     private static DatatypePredicate XSD_INTEGER = DATA_FACTORY.getDatatypeFactory().getTypePredicate(INTEGER);
     private static Constant THREE = DATA_FACTORY.getConstantLiteral("3", INTEGER);
     private static GroundTerm INT_OF_THREE = (GroundTerm) DATA_FACTORY.getImmutableFunctionalTerm(XSD_INTEGER, THREE);
     private static GroundTerm INT_OF_ONE = (GroundTerm) DATA_FACTORY.getImmutableFunctionalTerm(XSD_INTEGER, ONE);
+    private static GroundTerm INT_OF_TWO = (GroundTerm) DATA_FACTORY.getImmutableFunctionalTerm(XSD_INTEGER, TWO);
     private static ImmutableFunctionalTerm INT_OF_B = DATA_FACTORY.getImmutableFunctionalTerm(XSD_INTEGER, B);
     private static AtomPredicate TABLE_1 = new AtomPredicateImpl("table1", 2);
     private static AtomPredicate TABLE_2 = new AtomPredicateImpl("table2", 1);
@@ -353,7 +355,7 @@ public class QueryMergingTest {
         /**
          * Sub-query
          */
-        ExtensionalDataNode dataNodeSubquery = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE_1, S, THREE));
+        ExtensionalDataNode dataNodeSubquery = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE_1, S, B));
         IntermediateQueryBuilder subQueryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
         ConstructionNode subQueryRoot = new ConstructionNodeImpl(P1_ATOM.getVariables(),
                 new ImmutableSubstitutionImpl<>(ImmutableMap.of(T, INT_OF_B)), Optional.empty());
@@ -605,7 +607,7 @@ public class QueryMergingTest {
         /**
          * Sub-query
          */
-        ExtensionalDataNode dataNodeSubquery = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE_1, A, INT_OF_ONE));
+        ExtensionalDataNode dataNodeSubquery = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE_2, A));
         IntermediateQueryBuilder subQueryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
         ConstructionNode subQueryRoot = new ConstructionNodeImpl(P1_ATOM.getVariables(),
                 new ImmutableSubstitutionImpl<>(ImmutableMap.of(S, generateURI1(A), T, generateURI1(INT_OF_ONE))), Optional.empty());
@@ -622,7 +624,7 @@ public class QueryMergingTest {
                 new ImmutableSubstitutionImpl<>(ImmutableMap.of(X, generateURI1(A), Y, generateURI1(INT_OF_ONE))), Optional.empty());
         expectedBuilder.addChild(expectedRootNode, remainingConstructionNode);
 
-        ExtensionalDataNode expectedDataNode = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE_1, A, INT_OF_ONE));
+        ExtensionalDataNode expectedDataNode = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE_2, A));
         expectedBuilder.addChild(remainingConstructionNode, expectedDataNode);
 
         optimizeAndCompare(mainQuery, subQueryBuilder.build(), expectedBuilder.build());
@@ -912,7 +914,7 @@ public class QueryMergingTest {
 
         ConstructionNode constructionNode2 = new ConstructionNodeImpl(ImmutableSet.of(T, A, B),
                 new ImmutableSubstitutionImpl<>(ImmutableMap.of(
-                        T, generateURI3(INT_OF_ONE, INT_OF_ONE)
+                        T, generateURI3(INT_OF_ONE, INT_OF_TWO)
                 )), Optional.empty());
         subQueryBuilder.addChild(subQueryRoot, constructionNode2);
         ExtensionalDataNode dataNodeSubquery = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE_1, A, B));
@@ -930,11 +932,11 @@ public class QueryMergingTest {
         ConstructionNode secondRemainingConstructionNode = new ConstructionNodeImpl(ImmutableSet.of(A,B),
                 new ImmutableSubstitutionImpl<>(ImmutableMap.of(
                         A, INT_OF_ONE,
-                        B, INT_OF_ONE)), Optional.empty());
+                        B, INT_OF_TWO)), Optional.empty());
         expectedBuilder.addChild(firstRemainingConstructionNode, secondRemainingConstructionNode);
 
         ExtensionalDataNode expectedDataNode = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE_1, INT_OF_ONE,
-                INT_OF_ONE));
+                INT_OF_TWO));
         expectedBuilder.addChild(secondRemainingConstructionNode, expectedDataNode);
 
         optimizeAndCompare(mainQuery, subQueryBuilder.build(), expectedBuilder.build());
