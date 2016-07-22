@@ -88,7 +88,9 @@ public class RemoveEmptyNodesExecutor implements NodeCentricInternalExecutor<
                 break;
 
             case DECLARE_AS_EMPTY:
-                optionalTracker.ifPresent(tr -> tr.recordRemoval(originalParentNode));
+                optionalTracker.ifPresent(tr -> tr.recordEmptinessDeclaration(originalParentNode,
+                        query.getNextSibling(originalParentNode),
+                        query.getParent(originalParentNode)));
                 EmptyNode newEmptyNode = new EmptyNodeImpl(transformationProposal.getNullVariables());
                 treeComponent.replaceSubTree(originalParentNode, newEmptyNode);
 

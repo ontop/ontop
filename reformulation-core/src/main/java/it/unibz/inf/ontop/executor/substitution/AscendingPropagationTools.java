@@ -126,7 +126,7 @@ public class AscendingPropagationTools {
             AncestorPropagationResults<N> results = applyAscendingSubstitutionToAncestor(query, optionalCurrentAncestor.get(),
                     currentSubstitution, ancestorChild, treeComponent, optionalAncestryTracker);
 
-            // Case 1
+            // Case 1:  empty ancestor --> returns the results of its removals
             if (results.optionalAncestryTrackingResults.isPresent()) {
                 return results.optionalAncestryTrackingResults.get();
             }
@@ -140,7 +140,7 @@ public class AscendingPropagationTools {
             results.optionalDescendingPropagParams
                     .ifPresent(descendingPropagParamBuilder::add);
 
-            // May stop the propagation
+            // May stop the propagation (case 3)
             optionalCurrentAncestor = results.optionalNextAncestor;
 
         }
@@ -268,7 +268,7 @@ public class AscendingPropagationTools {
     /**
      * TODO: explain
      *
-     * Applies descending propagations in some other branches
+     * Propagates descending substitutions in some other branches
      *
      */
     private static <T extends QueryNode> AncestryTrackingResults<T> applyDescendingPropagations(
@@ -283,7 +283,7 @@ public class AscendingPropagationTools {
             NodeCentricOptimizationResults<QueryNode> propagationResults = propagateSubstitutionDownToNodes(
                         params.focusNode, params.otherChildren, params.substitution, query, treeComponent);
 
-            optionalAncestryTracker.ifPresent(tr -> tr.recordResults(propagationResults));
+            optionalAncestryTracker.ifPresent(tr -> tr.recordResults(params.focusNode, propagationResults));
         }
 
         if (query.contains(originalFocusNode)) {
