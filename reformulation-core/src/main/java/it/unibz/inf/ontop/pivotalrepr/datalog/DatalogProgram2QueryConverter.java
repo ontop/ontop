@@ -1,7 +1,5 @@
 package it.unibz.inf.ontop.pivotalrepr.datalog;
 
-import java.util.Optional;
-
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import it.unibz.inf.ontop.model.CQIE;
@@ -21,6 +19,7 @@ import it.unibz.inf.ontop.utils.DatalogDependencyGraphGenerator;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 import static it.unibz.inf.ontop.pivotalrepr.datalog.DatalogRule2QueryConverter.convertDatalogRule;
 
@@ -43,7 +42,7 @@ public class DatalogProgram2QueryConverter {
     /**
      * TODO: explain
      */
-    public static class InvalidDatalogProgramException extends Exception {
+    public static class InvalidDatalogProgramException extends RuntimeException {
         public InvalidDatalogProgramException(String message) {
             super(message);
         }
@@ -63,7 +62,7 @@ public class DatalogProgram2QueryConverter {
         List<Predicate> topDownPredicates = Lists.reverse(dependencyGraph.getPredicatesInBottomUp());
 
         if (topDownPredicates.size() == 0) {
-            throw new InvalidDatalogProgramException("Datalog program without any rule!");
+            throw new EmptyQueryException();
         }
 
         Predicate rootPredicate = topDownPredicates.get(0);
@@ -102,7 +101,7 @@ public class DatalogProgram2QueryConverter {
     /**
      * TODO: explain and comment
      */
-    private static Optional<IntermediateQuery> convertDatalogDefinitions(MetadataForQueryOptimization metadata,
+    protected static Optional<IntermediateQuery> convertDatalogDefinitions(MetadataForQueryOptimization metadata,
                                                                          Predicate datalogAtomPredicate,
                                                                          Multimap<Predicate, CQIE> datalogRuleIndex,
                                                                          Collection<Predicate> tablePredicates,

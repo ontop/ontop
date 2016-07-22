@@ -1,6 +1,5 @@
 package it.unibz.inf.ontop.owlrefplatform.core.optimization;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.ImmutableSubstitution;
@@ -29,7 +28,7 @@ import static it.unibz.inf.ontop.pivotalrepr.NonCommutativeOperatorNode.Argument
 
 /**
  * Optimizer to propagate bindings up and down the tree
- * //TODO:explain
+ *
  */
 public class TopDownSubstitutionLiftOptimizer implements SubstitutionLiftOptimizer {
 
