@@ -16,11 +16,12 @@ public interface AncestryTracker {
 
     void recordReplacement(QueryNode formerNode, QueryNode newNode);
 
-    void recordRemoval(QueryNode formerNode);
+    void recordEmptinessDeclaration(QueryNode ancestorNode, Optional<QueryNode> optionalNextSibling,
+                                    Optional<QueryNode> optionalClosestAncestor);
 
-    void recordResults(NodeCentricOptimizationResults<QueryNode> propagationResults);
+    void recordResults(QueryNode focusNode, NodeCentricOptimizationResults<? extends QueryNode> propagationResults);
 
-    boolean hasChanged(QueryNode ancestorNode);
+    //boolean hasChanged(QueryNode ancestorNode);
 
     /**
      * Returns the same node if node updated
