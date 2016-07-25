@@ -2,12 +2,11 @@ package it.unibz.inf.ontop.executor.leftjoin;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Sets;
 import it.unibz.inf.ontop.executor.NodeCentricInternalExecutor;
 import it.unibz.inf.ontop.executor.join.SelfJoinLikeExecutor;
-import it.unibz.inf.ontop.model.AtomPredicate;
-import it.unibz.inf.ontop.model.DataAtom;
-import it.unibz.inf.ontop.model.Variable;
-import it.unibz.inf.ontop.model.VariableOrGroundTerm;
+import it.unibz.inf.ontop.model.*;
+import it.unibz.inf.ontop.model.impl.GroundExpressionImpl;
 import it.unibz.inf.ontop.pivotalrepr.*;
 import it.unibz.inf.ontop.pivotalrepr.impl.InnerJoinNodeImpl;
 import it.unibz.inf.ontop.pivotalrepr.impl.QueryTreeComponent;
@@ -53,6 +52,7 @@ public class ForeignKeyLeftJoinExecutor implements NodeCentricInternalExecutor<L
         QueryNode leftChild = query.getChild(leftJoinNode,LEFT).orElseThrow(() -> new IllegalStateException("The left child of a LJ is missing: " + leftJoinNode ));
         QueryNode rightChild = query.getChild(leftJoinNode,RIGHT).orElseThrow(() -> new IllegalStateException("The right child of a LJ is missing: " + leftJoinNode));
 
+
         if (leftChild instanceof DataNode && rightChild instanceof DataNode) {
 
             DataNode leftDataNode = (DataNode) leftChild;
@@ -60,8 +60,9 @@ public class ForeignKeyLeftJoinExecutor implements NodeCentricInternalExecutor<L
 
             // TODO: explain
             ImmutableSet<Variable> variablesToKeep = query.getClosestConstructionNode(leftJoinNode).getVariables();
+            Optional<ImmutableExpression> filterCondition = leftJoinNode.getOptionalFilterCondition();
 
-            boolean replaceLeftJoinByInnerJoin = propose(leftDataNode, rightDataNode, variablesToKeep,
+            boolean replaceLeftJoinByInnerJoin = propose(leftDataNode, rightDataNode, filterCondition, variablesToKeep,
                     query.getMetadata());
 
             if (replaceLeftJoinByInnerJoin) {
@@ -84,13 +85,12 @@ public class ForeignKeyLeftJoinExecutor implements NodeCentricInternalExecutor<L
      *  Returns a proposal for optimization.
      */
     private boolean propose(DataNode leftDataNode, DataNode rightDataNode,
-                                                                    ImmutableSet<Variable> variablesToKeep,
-                                                                    MetadataForQueryOptimization metadata) {
+                            Optional<ImmutableExpression> filterCondition,
+                            ImmutableSet<Variable> variablesToKeep,
+                            MetadataForQueryOptimization metadata) {
 
         AtomPredicate leftPredicate = leftDataNode.getProjectionAtom().getPredicate();
         AtomPredicate rightPredicate = rightDataNode.getProjectionAtom().getPredicate();
-
-        ImmutableList<DataNode> initialNodes = ImmutableList.of(leftDataNode, rightDataNode);
 
         /**
          * the left and the right predicates are different, so we
@@ -102,7 +102,9 @@ public class ForeignKeyLeftJoinExecutor implements NodeCentricInternalExecutor<L
 
 
         if(leftPredicateDatabaseRelation != null && rightPredicateDatabaseRelation != null) {
-            return checkIfReplaceLeftJoinByInnerJoin(leftDataNode, rightDataNode, leftPredicateDatabaseRelation, rightPredicateDatabaseRelation);
+            return checkIfReplaceLeftJoinByInnerJoin(leftDataNode, rightDataNode,
+                    leftPredicateDatabaseRelation, rightPredicateDatabaseRelation,
+                    filterCondition, variablesToKeep);
 
             /**
              * TODO: check that there is no crazy joining condition,
@@ -116,7 +118,9 @@ public class ForeignKeyLeftJoinExecutor implements NodeCentricInternalExecutor<L
     private boolean checkIfReplaceLeftJoinByInnerJoin(DataNode leftDataNode,
                                                       DataNode rightDataNode,
                                                       DatabaseRelationDefinition leftPredicateDatabaseRelation,
-                                                      DatabaseRelationDefinition rightPredicateDatabaseRelation) {
+                                                      DatabaseRelationDefinition rightPredicateDatabaseRelation,
+                                                      Optional<ImmutableExpression> filterCondition,
+                                                      ImmutableSet<Variable> variablesToKeep) {
         for( ForeignKeyConstraint foreignKey: leftPredicateDatabaseRelation.getForeignKeys() ) {
 
             /**
@@ -125,45 +129,62 @@ public class ForeignKeyLeftJoinExecutor implements NodeCentricInternalExecutor<L
             if(rightPredicateDatabaseRelation.equals(foreignKey.getReferencedRelation())) {
 
                 Set<VariableOrGroundTerm> foreignKeyReferencedRightTerms = new HashSet<>();
+                int joiningReferencedTermsCount = 0;
                 for(ForeignKeyConstraint.Component component: foreignKey.getComponents()) {
 
-                    Attribute attr = component.getAttribute();
-                    Attribute ref = component.getReference();
+                    Attribute childAttribute = component.getAttribute();
+                    Attribute referencedAttribute = component.getReference();
 
-                    VariableOrGroundTerm leftTerm = leftDataNode.getProjectionAtom().getTerm(attr.getIndex() - 1);
-                    VariableOrGroundTerm rightTerm = rightDataNode.getProjectionAtom().getTerm(ref.getIndex() - 1);
+                    VariableOrGroundTerm leftTerm = leftDataNode.getProjectionAtom().getTerm(childAttribute.getIndex() - 1);
+                    VariableOrGroundTerm rightTerm = rightDataNode.getProjectionAtom().getTerm(referencedAttribute.getIndex() - 1);
                     if(leftTerm.equals(rightTerm)) {
                         foreignKeyReferencedRightTerms.add(rightTerm);
+                        joiningReferencedTermsCount++;
                     }
                 }
 
-//                Set<VariableOrGroundTerm> rightPrimaryKeyTerms = new HashSet<>();
-//                UniqueConstraint rightPrimaryKey = rightPredicateDatabaseRelation.getPrimaryKey();
-//                for( Attribute attr: rightPrimaryKey.getAttributes() ) {
-//                    rightPrimaryKeyTerms.add(rightDataNode.getProjectionAtom().getTerm(attr.getIndex() - 1));
-//                }
 
                 // TODO: continue and check the logic
                 // check joining condition
                 // not null
-//                if(//foreignKeyReferencedRightTerms.containsAll(rightPrimaryKeyTerms) &&
-//                        projectedVariablesAreNotNullable(rightDataNode, rightPredicateDatabaseRelation)) {
-//                    return true;
-//                }
+                if(joiningReferencedTermsCount == foreignKey.getComponents().size()) {
+
+                    if(projectedVariablesAreNotNullable(rightDataNode, rightPredicateDatabaseRelation, variablesToKeep)) {
+                        return true;
+                    }
+                    else if (doesNotContradictJoiningCondition(filterCondition)){
+                        return true;
+                    }
+                }
                 throw new RuntimeException("TODO: implement");
             }
         }
         return false;
     }
 
-    private boolean projectedVariablesAreNotNullable(DataNode rightDataNode,
-                                                     DatabaseRelationDefinition rightPredicateDatabaseRelation) {
-        ImmutableSet<Variable> projectedVariables = rightDataNode.getProjectedVariables();
-        Set<Variable> notNullableVariables = new HashSet<>();
+    private boolean doesNotContradictJoiningCondition(Optional<ImmutableExpression> filterCondition) {
+        if(filterCondition.isPresent()) {
 
+            ImmutableExpression actualFilterCondition = filterCondition.get();
+            ImmutableSet<ImmutableExpression> conjunctionOfConditions = actualFilterCondition.flattenAND();
+            for (ImmutableExpression atom : conjunctionOfConditions) {
+                if(atom instanceof GroundExpressionImpl) {
+
+                }
+            }
+        } else {
+            return true;
+        }
+    }
+
+    private boolean projectedVariablesAreNotNullable(DataNode rightDataNode,
+                                                     DatabaseRelationDefinition rightPredicateDatabaseRelation,
+                                                     ImmutableSet<Variable> variablesToKeep) {
+        ImmutableSet<Variable> projectedVariables = Sets.intersection(rightDataNode.getVariables(), variablesToKeep).immutableCopy();
+
+        Set<Variable> notNullableVariables = new HashSet<>();
         DataAtom dataAtom = rightDataNode.getProjectionAtom();
-        List<Attribute> attributes = rightPredicateDatabaseRelation.getAttributes();
-        for(Attribute attr: attributes) {
+        for(Attribute attr: rightPredicateDatabaseRelation.getAttributes()) {
             VariableOrGroundTerm term = dataAtom.getTerm(attr.getIndex() - 1);
             if(projectedVariables.contains(term) && !attr.canNull()) {
                 notNullableVariables.add((Variable) term);
