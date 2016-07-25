@@ -18,12 +18,18 @@ import it.unibz.inf.ontop.model.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.Variable;
 import it.unibz.inf.ontop.executor.groundterm.GroundTermRemovalFromDataNodeExecutor;
 import it.unibz.inf.ontop.executor.pullout.PullVariableOutOfDataNodeExecutor;
+import it.unibz.inf.ontop.pivotalrepr.validation.IntermediateQueryValidator;
+import it.unibz.inf.ontop.pivotalrepr.validation.InvalidIntermediateQueryException;
+import it.unibz.inf.ontop.pivotalrepr.validation.StandardIntermediateQueryValidator;
+import org.h2.store.Data;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import it.unibz.inf.ontop.pivotalrepr.*;
 import it.unibz.inf.ontop.pivotalrepr.proposal.*;
 
+import java.util.LinkedList;
 import java.util.Optional;
+import java.util.Queue;
 import java.util.stream.Stream;
 
 /**
@@ -137,7 +143,6 @@ public class IntermediateQueryImpl implements IntermediateQuery {
     public ImmutableSet<Variable> getProjectedVariables(QueryNode node) {
         return treeComponent.getProjectedVariables(node);
     }
-
 
     @Override
     public MetadataForQueryOptimization getMetadata() {
@@ -350,5 +355,10 @@ public class IntermediateQueryImpl implements IntermediateQuery {
     @Override
     public String toString() {
         return PRINTER.stringify(this);
+    }
+
+    private void validate() throws InvalidIntermediateQueryException {
+        IntermediateQueryValidator validator = new StandardIntermediateQueryValidator();
+        validator.validate(this);
     }
 }
