@@ -7,7 +7,6 @@ import it.unibz.inf.ontop.pivotalrepr.EmptyNode;
 import it.unibz.inf.ontop.pivotalrepr.impl.IllegalTreeUpdateException;
 import it.unibz.inf.ontop.pivotalrepr.ConstructionNode;
 import it.unibz.inf.ontop.pivotalrepr.QueryNode;
-import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -344,8 +343,8 @@ public class DefaultTree implements QueryTree {
     }
 
     @Override
-    public void replaceNodeByChild(QueryNode parentNode,
-                                   Optional<NonCommutativeOperatorNode.ArgumentPosition> optionalReplacingChildPosition) {
+    public QueryNode replaceNodeByChild(QueryNode parentNode,
+                                        Optional<NonCommutativeOperatorNode.ArgumentPosition> optionalReplacingChildPosition) {
         TreeNode parentTreeNode = accessTreeNode(parentNode);
 
         ChildrenRelation childrenRelation = accessChildrenRelation(parentTreeNode);
@@ -373,6 +372,7 @@ public class DefaultTree implements QueryTree {
 
         ChildrenRelation grandParentRelation = accessChildrenRelation(grandParentTreeNode);
         grandParentRelation.replaceChild(parentTreeNode, childTreeNode);
+        return childTreeNode.getQueryNode();
     }
 
     @Override

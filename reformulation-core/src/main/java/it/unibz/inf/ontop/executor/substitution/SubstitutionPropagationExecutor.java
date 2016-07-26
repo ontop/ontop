@@ -70,7 +70,7 @@ public class SubstitutionPropagationExecutor<N extends QueryNode>
          * Then to the focus node
          */
         SubstitutionApplicationResults<N> localApplicationResults = applySubstitutionToNode(originalFocusNode,
-                substitutionToPropagate, query, treeComponent);
+                substitutionToPropagate, query, treeComponent, Optional.empty());
 
         /**
          * Finally, propagates down and returns the results

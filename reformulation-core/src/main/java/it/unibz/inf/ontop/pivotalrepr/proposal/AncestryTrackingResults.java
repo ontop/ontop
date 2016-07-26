@@ -15,7 +15,7 @@ public interface AncestryTrackingResults<N extends QueryNode> extends NodeCentri
      */
     <M extends QueryNode> NodeCentricOptimizationResults<M> generateResultsForAncestor(M originalAncestorNode);
 
-    Optional<AncestryTracker> getOptionalTracker();
+    Optional<NodeTracker> getOptionalTracker();
 
 
 }

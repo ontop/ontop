@@ -103,8 +103,8 @@ public interface QueryTreeComponent {
     /**
      * If no position is given, replaces the parent node by its first child
      */
-    void replaceNodeByChild(QueryNode parentNode,
-                            Optional<NonCommutativeOperatorNode.ArgumentPosition> optionalReplacingChildPosition);
+    QueryNode replaceNodeByChild(QueryNode parentNode,
+                                 Optional<NonCommutativeOperatorNode.ArgumentPosition> optionalReplacingChildPosition);
 
 
     /**

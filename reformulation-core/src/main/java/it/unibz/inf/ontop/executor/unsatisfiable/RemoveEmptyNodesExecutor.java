@@ -44,7 +44,7 @@ public class RemoveEmptyNodesExecutor implements NodeCentricInternalExecutor<
      */
     private static AncestryTrackingResults<EmptyNode> reactToEmptyChildNode(IntermediateQuery query, EmptyNode emptyNode,
                                                          QueryTreeComponent treeComponent,
-                                                         Optional<AncestryTracker> optionalTracker)
+                                                         Optional<NodeTracker> optionalTracker)
             throws EmptyQueryException {
 
         QueryNode originalParentNode = query.getParent(emptyNode)
@@ -76,7 +76,7 @@ public class RemoveEmptyNodesExecutor implements NodeCentricInternalExecutor<
                 // Propagates the null variables from the replacing child
                 propagatingNode = transformationProposal.getOptionalNewNodeOrReplacingChild().get();
                 optionalTracker
-                        .ifPresent(tr -> tr.recordReplacementByChild(originalParentNode, propagatingNode));
+                        .ifPresent(tr -> tr.recordUpcomingReplacementByChild(query, originalParentNode, propagatingNode));
                 break;
 
             case REPLACE_BY_NEW_NODE:
@@ -88,9 +88,7 @@ public class RemoveEmptyNodesExecutor implements NodeCentricInternalExecutor<
                 break;
 
             case DECLARE_AS_EMPTY:
-                optionalTracker.ifPresent(tr -> tr.recordEmptinessDeclaration(originalParentNode,
-                        query.getNextSibling(originalParentNode),
-                        query.getParent(originalParentNode)));
+                optionalTracker.ifPresent(tr -> tr.recordUpcomingRemoval(query, originalParentNode));
                 EmptyNode newEmptyNode = new EmptyNodeImpl(transformationProposal.getNullVariables());
                 treeComponent.replaceSubTree(originalParentNode, newEmptyNode);
 
@@ -132,6 +130,7 @@ public class RemoveEmptyNodesExecutor implements NodeCentricInternalExecutor<
         }
     }
 
+
     /**
      * Returns the newly created parent node or the parent of the promoted child.
      */
@@ -171,7 +170,7 @@ public class RemoveEmptyNodesExecutor implements NodeCentricInternalExecutor<
                                                           QueryTreeComponent treeComponent,
                                                           ImmutableSet<Variable> nullVariables,
                                                           QueryNode propagatingNode,
-                                                          Optional<AncestryTracker> optionalAncestorTracker)
+                                                          Optional<NodeTracker> optionalAncestorTracker)
             throws EmptyQueryException {
 
         if (nullVariables.isEmpty()) {

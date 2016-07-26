@@ -10,5 +10,5 @@ import java.util.Optional;
  */
 public interface RemoveEmptyNodeProposal extends NodeCentricOptimizationProposal<EmptyNode, AncestryTrackingResults<EmptyNode>> {
 
-    Optional<AncestryTracker> getOptionalTracker(IntermediateQuery query);
+    Optional<NodeTracker> getOptionalTracker(IntermediateQuery query);
 }
