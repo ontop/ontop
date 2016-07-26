@@ -13,6 +13,8 @@ import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitut
 import it.unibz.inf.ontop.pivotalrepr.*;
 import it.unibz.inf.ontop.pivotalrepr.impl.*;
 import it.unibz.inf.ontop.pivotalrepr.impl.tree.DefaultIntermediateQueryBuilder;
+import it.unibz.inf.ontop.pivotalrepr.proposal.NodeTracker;
+import it.unibz.inf.ontop.pivotalrepr.proposal.AncestryTrackingResults;
 import it.unibz.inf.ontop.pivotalrepr.proposal.impl.RemoveEmptyNodeProposalImpl;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -827,19 +829,24 @@ public class EmptyNodeRemovalTest {
     }
 
 
-    private static void optimizeAndCompare(IntermediateQuery query, IntermediateQuery expectedQuery,
-                                           EmptyNode emptyNode)
+    private static NodeTracker optimizeAndCompare(IntermediateQuery query, IntermediateQuery expectedQuery,
+                                                  EmptyNode emptyNode)
             throws EmptyQueryException {
 
         System.out.println("\n Original query: \n" +  query);
         System.out.println("\n Expected query: \n" +  expectedQuery);
 
         // Updates the query (in-place optimization)
-        query.applyProposal(new RemoveEmptyNodeProposalImpl(emptyNode, true), REQUIRE_USING_IN_PLACE_EXECUTOR);
+        AncestryTrackingResults<EmptyNode> results = query.applyProposal(new RemoveEmptyNodeProposalImpl(emptyNode, true),
+                REQUIRE_USING_IN_PLACE_EXECUTOR);
 
         System.out.println("\n Optimized query: \n" +  query);
 
         assertTrue(areEquivalent(query, expectedQuery));
+
+        Optional<NodeTracker> optionalTracker = results.getOptionalTracker();
+        assertTrue(optionalTracker.isPresent());
+        return optionalTracker.get();
 
     }
 

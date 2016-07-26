@@ -5,14 +5,13 @@ import java.util.Optional;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import it.unibz.inf.ontop.pivotalrepr.proposal.AncestryTracker;
+import it.unibz.inf.ontop.pivotalrepr.proposal.NodeTracker;
 import it.unibz.inf.ontop.model.ImmutableSubstitution;
 import it.unibz.inf.ontop.model.ImmutableTerm;
 import it.unibz.inf.ontop.model.Variable;
 import it.unibz.inf.ontop.pivotalrepr.*;
 import it.unibz.inf.ontop.pivotalrepr.impl.EmptyNodeImpl;
 import it.unibz.inf.ontop.pivotalrepr.impl.QueryTreeComponent;
-import it.unibz.inf.ontop.pivotalrepr.proposal.NodeCentricOptimizationResults;
 import it.unibz.inf.ontop.pivotalrepr.proposal.RemoveEmptyNodeProposal;
 import it.unibz.inf.ontop.pivotalrepr.proposal.AncestryTrackingResults;
 import it.unibz.inf.ontop.pivotalrepr.proposal.impl.AncestryTrackingResultsImpl;
@@ -107,7 +106,7 @@ public class AscendingPropagationTools {
     public static <N extends QueryNode> AncestryTrackingResults<N> propagateSubstitutionUp(
             N focusNode, ImmutableSubstitution<? extends ImmutableTerm> substitutionToPropagate,
             IntermediateQuery query, QueryTreeComponent treeComponent,
-            Optional<AncestryTracker> optionalAncestryTracker) throws QueryNodeSubstitutionException,
+            Optional<NodeTracker> optionalAncestryTracker) throws QueryNodeSubstitutionException,
             EmptyQueryException {
 
         // Substitutions to be propagated down into branches after the ascendant one
@@ -156,7 +155,7 @@ public class AscendingPropagationTools {
             IntermediateQuery query, QueryNode currentAncestor,
             ImmutableSubstitution<? extends ImmutableTerm> currentSubstitution,
             QueryNode childOfAncestor,
-            QueryTreeComponent treeComponent, Optional<AncestryTracker> optionalAncestryTracker) throws EmptyQueryException {
+            QueryTreeComponent treeComponent, Optional<NodeTracker> optionalAncestryTracker) throws EmptyQueryException {
 
         // Non-final
         QueryNode childOfNextAncestor = currentAncestor;
@@ -217,7 +216,7 @@ public class AscendingPropagationTools {
                 // Assume there is only one child
                 QueryNode replacingChild = treeComponent.removeOrReplaceNodeByUniqueChildren(currentAncestor);
 
-                optionalAncestryTracker.ifPresent(tr -> tr.recordReplacementByChild(currentAncestor, replacingChild));
+                optionalAncestryTracker.ifPresent(tr -> tr.recordUpcomingReplacementByChild(query, currentAncestor, replacingChild));
 
                 otherChildren = childOfAncestor != replacingChild
                         ? Stream.of(replacingChild)
@@ -273,25 +272,33 @@ public class AscendingPropagationTools {
      */
     private static <T extends QueryNode> AncestryTrackingResults<T> applyDescendingPropagations(
             ImmutableList<DescendingPropagationParams> propagations, IntermediateQuery query,
-            QueryTreeComponent treeComponent, T originalFocusNode, Optional<AncestryTracker> optionalAncestryTracker) throws EmptyQueryException {
+            QueryTreeComponent treeComponent, T originalFocusNode, Optional<NodeTracker> optionalNodeTracker) throws EmptyQueryException {
+
+        if (!optionalNodeTracker.isPresent()) {
+            throw new RuntimeException(
+                    "TODO: should we handle an empty ancestry tracker while propagating a substitution down?");
+        }
+
+        NodeTracker tracker = optionalNodeTracker.get();
 
         for(DescendingPropagationParams params : propagations) {
             if (!query.contains(params.focusNode)) {
                 break;
             }
 
-            NodeCentricOptimizationResults<QueryNode> propagationResults = propagateSubstitutionDownToNodes(
-                        params.focusNode, params.otherChildren, params.substitution, query, treeComponent);
-
-            optionalAncestryTracker.ifPresent(tr -> tr.recordResults(params.focusNode, propagationResults));
+            AncestryTrackingResults<QueryNode> propagationResults = propagateSubstitutionDownToNodes(
+                        params.focusNode, params.otherChildren, params.substitution, query, treeComponent,
+                    optionalNodeTracker);
         }
 
-        if (query.contains(originalFocusNode)) {
-            return new AncestryTrackingResultsImpl<>(query, originalFocusNode, optionalAncestryTracker);
-        }
-        else {
-            throw new RuntimeException("TODO: support the case where the focus node is removed");
-        }
+        NodeTracker.NodeUpdate<T> update = tracker.getUpdate(originalFocusNode);
+
+        return update.getNewNode()
+                .map(n -> new AncestryTrackingResultsImpl<>(query, n, optionalNodeTracker))
+                .orElseGet(() -> update.getReplacingChild()
+                        .map(n -> new AncestryTrackingResultsImpl<T>(query, Optional.of(n), optionalNodeTracker))
+                        .orElseGet(() -> new AncestryTrackingResultsImpl<T>(query, update.getOptionalNextSibling(),
+                                update.getOptionalClosestAncestor(), optionalNodeTracker)));
     }
 
     /**

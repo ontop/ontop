@@ -9,8 +9,10 @@ import it.unibz.inf.ontop.pivotalrepr.IntermediateQuery;
 import it.unibz.inf.ontop.pivotalrepr.QueryNode;
 import it.unibz.inf.ontop.pivotalrepr.QueryNodeSubstitutionException;
 import it.unibz.inf.ontop.pivotalrepr.impl.QueryTreeComponent;
+import it.unibz.inf.ontop.pivotalrepr.proposal.NodeTracker;
+import it.unibz.inf.ontop.pivotalrepr.proposal.AncestryTrackingResults;
 import it.unibz.inf.ontop.pivotalrepr.proposal.NodeCentricOptimizationResults;
-import it.unibz.inf.ontop.pivotalrepr.proposal.impl.NodeCentricOptimizationResultsImpl;
+import it.unibz.inf.ontop.pivotalrepr.proposal.impl.AncestryTrackingResultsImpl;
 
 import java.util.LinkedList;
 import java.util.Optional;
@@ -54,16 +56,17 @@ public class DescendingPropagationTools {
             throws QueryNodeSubstitutionException, EmptyQueryException {
 
         return propagateSubstitutionDownToNodes(focusNode, treeComponent.getChildrenStream(focusNode),
-                initialSubstitutionToPropagate, query, treeComponent);
+                initialSubstitutionToPropagate, query, treeComponent, Optional.empty());
     }
 
     /**
      * Applies the substitution to the starting nodes and to their children
      */
-    protected static <N extends QueryNode> NodeCentricOptimizationResults<N> propagateSubstitutionDownToNodes(
+    protected static <N extends QueryNode> AncestryTrackingResults<N> propagateSubstitutionDownToNodes(
             N originalFocusNode, final Stream<QueryNode> startingNodes,
             final ImmutableSubstitution<? extends ImmutableTerm> initialSubstitutionToPropagate,
-            final IntermediateQuery query, final QueryTreeComponent treeComponent)
+            final IntermediateQuery query, final QueryTreeComponent treeComponent,
+            Optional<NodeTracker> optionalAncestryTracker)
             throws QueryNodeSubstitutionException, EmptyQueryException {
 
         Queue<NodeAndSubstitution> nodeAndSubsToVisit = new LinkedList<>();
@@ -100,7 +103,7 @@ public class DescendingPropagationTools {
 
             SubstitutionApplicationResults<QueryNode> applicationResults = applySubstitutionToNode(
                     initialNodeAndSubstitution.node, initialNodeAndSubstitution.substitution,
-                    query, treeComponent);
+                    query, treeComponent, optionalAncestryTracker);
 
             /**
              * Adds the children - new substitution pairs to the queue
@@ -128,8 +131,13 @@ public class DescendingPropagationTools {
                     });
 
             if (optionalFocusNode.isPresent() && applicationResults.getOptionalTracker().isPresent()) {
-                optionalFocusNode = applicationResults.getOptionalTracker().get()
-                        .getCurrentNode(optionalFocusNode.get());
+                NodeTracker.NodeUpdate<N> nodeUpdate = applicationResults.getOptionalTracker().get()
+                        .getUpdate(optionalFocusNode.get());
+                optionalFocusNode = nodeUpdate.getNewNode();
+
+                /**
+                 * TODO: what should we do if it is replaced by its child?
+                 */
 
                 if (optionalFocusNode.isPresent() && ! treeComponent.contains(optionalFocusNode.get())) {
                     throw new IllegalStateException("Out-of-date ancestry tracker found");
@@ -160,11 +168,11 @@ public class DescendingPropagationTools {
             if (!treeComponent.contains(optionalFocusNode.get())) {
                 throw new IllegalStateException("Out-dated focus node (its removal has not been detected)");
             }
-            return new NodeCentricOptimizationResultsImpl<>(query, optionalFocusNode.get());
+            return new AncestryTrackingResultsImpl<>(query, optionalFocusNode.get(), optionalAncestryTracker);
         }
         else {
-            return new NodeCentricOptimizationResultsImpl<>(query, optionalNextSiblingOfFocusNode,
-                    optionalClosestAncestorOfFocusNode);
+            return new AncestryTrackingResultsImpl<>(query, optionalNextSiblingOfFocusNode,
+                    optionalClosestAncestorOfFocusNode, optionalAncestryTracker);
         }
     }
 }
