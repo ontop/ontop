@@ -108,6 +108,9 @@ public class IntermediateQueryImpl implements IntermediateQuery {
         this.metadata = metadata;
         this.projectionAtom = projectionAtom;
         this.treeComponent = treeComponent;
+
+        // TODO: disable it in production
+        this.validate();
     }
 
     @Override
@@ -213,6 +216,9 @@ public class IntermediateQueryImpl implements IntermediateQuery {
                                                        boolean requireUsingInternalExecutor)
             throws InvalidQueryOptimizationProposalException, EmptyQueryException {
 
+        // TODO: disable it in production
+        validate();
+
         /**
          * It assumes that the concrete proposal classes DIRECTLY
          * implements a registered interface (extending QueryOptimizationProposal).
@@ -250,7 +256,10 @@ public class IntermediateQueryImpl implements IntermediateQuery {
                 /**
                  * Has a SIDE-EFFECT on the tree component.
                  */
-                return executor.apply(proposal, this, treeComponent);
+                R results = executor.apply(proposal, this, treeComponent);
+                // TODO: disable it in production
+                validate();
+                return results;
             }
         }
 

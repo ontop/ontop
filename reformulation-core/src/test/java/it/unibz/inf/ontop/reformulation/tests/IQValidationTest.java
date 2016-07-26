@@ -13,6 +13,7 @@ import it.unibz.inf.ontop.pivotalrepr.*;
 import it.unibz.inf.ontop.pivotalrepr.equivalence.IQSyntacticEquivalenceChecker;
 import it.unibz.inf.ontop.pivotalrepr.impl.*;
 import it.unibz.inf.ontop.pivotalrepr.impl.tree.DefaultIntermediateQueryBuilder;
+import it.unibz.inf.ontop.pivotalrepr.validation.InvalidIntermediateQueryException;
 import org.junit.Test;
 
 import java.util.Optional;
@@ -60,7 +61,7 @@ public class IQValidationTest {
         return new MetadataForQueryOptimizationImpl(uniqueKeyBuilder.build(), new UriTemplateMatcher());
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test(expected = InvalidIntermediateQueryException.class)
     public void testInnerJoinNodeChildren() {
         IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(metadata);
         InnerJoinNode innerJoinNode = new InnerJoinNodeImpl(Optional.of(EXPRESSION));
@@ -73,7 +74,7 @@ public class IQValidationTest {
         IntermediateQuery query = queryBuilder.build();
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test(expected = InvalidIntermediateQueryException.class)
     public void testUnionNodeProjectedVariables() {
         AtomPredicate TABLE_1 = new AtomPredicateImpl("table1", 2);
         AtomPredicate TABLE_2 = new AtomPredicateImpl("table2", 2);
