@@ -24,6 +24,8 @@ import java.util.Optional;
 import static it.unibz.inf.ontop.pivotalrepr.NonCommutativeOperatorNode.ArgumentPosition.LEFT;
 import static it.unibz.inf.ontop.pivotalrepr.NonCommutativeOperatorNode.ArgumentPosition.RIGHT;
 import static it.unibz.inf.ontop.pivotalrepr.equivalence.IQSyntacticEquivalenceChecker.areEquivalent;
+import static junit.framework.TestCase.assertFalse;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 @Ignore
@@ -296,7 +298,18 @@ public class EmptyNodeRemovalTest {
 
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
 
-        optimizeAndCompare(query, expectedQuery, emptyNode);
+        NodeTracker tracker = optimizeAndCompare(query, expectedQuery, emptyNode);
+        NodeTracker.NodeUpdate<LeftJoinNode> secondLJUpdate = tracker.getUpdate(query, rightLeftJoinNode);
+        assertFalse(secondLJUpdate.getNewNode().isPresent());
+
+        assertTrue(secondLJUpdate.getReplacingChild().isPresent());
+        QueryNode replacingChildOfSecondLJ = secondLJUpdate.getReplacingChild().get();
+        assertTrue(query.contains(replacingChildOfSecondLJ));
+        assertTrue(replacingChildOfSecondLJ.isSyntacticallyEquivalentTo(DATA_NODE_1));
+
+        assertTrue(secondLJUpdate.getOptionalClosestAncestor(query).isPresent());
+        assertTrue(secondLJUpdate.getOptionalClosestAncestor(query).get().isSyntacticallyEquivalentTo(topLeftJoinNode));
+        assertFalse(secondLJUpdate.getOptionalNextSibling(query).isPresent());
     }
 
     @Test

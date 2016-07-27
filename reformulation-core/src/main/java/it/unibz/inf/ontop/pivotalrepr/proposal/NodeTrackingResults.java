@@ -10,11 +10,6 @@ import java.util.Optional;
  */
 public interface NodeTrackingResults<N extends QueryNode> extends NodeCentricOptimizationResults<N> {
 
-    /**
-     * TODO: explain
-     */
-    <M extends QueryNode> NodeCentricOptimizationResults<M> generateResultsForAncestor(M originalAncestorNode);
-
     Optional<NodeTracker> getOptionalTracker();
 
 

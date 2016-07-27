@@ -289,14 +289,14 @@ public class AscendingPropagationTools {
                     optionalNodeTracker);
         }
 
-        NodeTracker.NodeUpdate<T> update = tracker.getUpdate(originalFocusNode);
+        NodeTracker.NodeUpdate<T> update = tracker.getUpdate(query, originalFocusNode);
 
         return update.getNewNode()
                 .map(n -> new NodeTrackingResultsImpl<>(query, n, optionalNodeTracker))
                 .orElseGet(() -> update.getReplacingChild()
                         .map(n -> new NodeTrackingResultsImpl<T>(query, Optional.of(n), optionalNodeTracker))
-                        .orElseGet(() -> new NodeTrackingResultsImpl<T>(query, update.getOptionalNextSibling(),
-                                update.getOptionalClosestAncestor(), optionalNodeTracker)));
+                        .orElseGet(() -> new NodeTrackingResultsImpl<T>(query, update.getOptionalNextSibling(query),
+                                update.getOptionalClosestAncestor(query), optionalNodeTracker)));
     }
 
     /**

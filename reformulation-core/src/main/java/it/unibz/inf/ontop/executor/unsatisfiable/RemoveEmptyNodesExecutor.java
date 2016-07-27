@@ -71,12 +71,12 @@ public class RemoveEmptyNodesExecutor implements NodeCentricInternalExecutor<
                 propagatingNode = originalParentNode;
                 break;
             case REPLACE_BY_UNIQUE_NON_EMPTY_CHILD:
-                optionalClosestAncestorNode = applyReplacementProposal(originalParentNode, treeComponent, transformationProposal,
-                        emptyNode, true);
                 // Propagates the null variables from the replacing child
                 propagatingNode = transformationProposal.getOptionalNewNodeOrReplacingChild().get();
                 optionalTracker
                         .ifPresent(tr -> tr.recordUpcomingReplacementByChild(query, originalParentNode, propagatingNode));
+                optionalClosestAncestorNode = applyReplacementProposal(originalParentNode, treeComponent, transformationProposal,
+                        emptyNode, true);
                 break;
 
             case REPLACE_BY_NEW_NODE:

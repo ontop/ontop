@@ -132,7 +132,7 @@ public class DescendingPropagationTools {
 
             if (optionalFocusNode.isPresent() && applicationResults.getOptionalTracker().isPresent()) {
                 NodeTracker.NodeUpdate<N> nodeUpdate = applicationResults.getOptionalTracker().get()
-                        .getUpdate(optionalFocusNode.get());
+                        .getUpdate(query, optionalFocusNode.get());
                 optionalFocusNode = nodeUpdate.getNewNode();
 
                 /**

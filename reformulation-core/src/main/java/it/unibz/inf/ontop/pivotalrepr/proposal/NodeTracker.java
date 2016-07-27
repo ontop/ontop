@@ -23,11 +23,11 @@ public interface NodeTracker {
         /**
          * May only be defined if no replacing node is present
          */
-        Optional<QueryNode> getOptionalNextSibling();
+        Optional<QueryNode> getOptionalNextSibling(IntermediateQuery query);
         /**
          * May only be defined if no replacing node is present
          */
-        Optional<QueryNode> getOptionalClosestAncestor();
+        Optional<QueryNode> getOptionalClosestAncestor(IntermediateQuery query);
     }
 
     void recordUpcomingReplacementByChild(IntermediateQuery query, QueryNode formerNode, QueryNode replacingChildNode);
@@ -43,5 +43,5 @@ public interface NodeTracker {
 
     //boolean hasChanged(QueryNode ancestorNode);
 
-    <N extends QueryNode> NodeUpdate<N> getUpdate(N node);
+    <N extends QueryNode> NodeUpdate<N> getUpdate(IntermediateQuery query, N node);
 }
