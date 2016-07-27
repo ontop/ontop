@@ -9,7 +9,7 @@ import it.unibz.inf.ontop.pivotalrepr.*;
 import it.unibz.inf.ontop.pivotalrepr.impl.EmptyNodeImpl;
 import it.unibz.inf.ontop.pivotalrepr.impl.QueryTreeComponent;
 import it.unibz.inf.ontop.pivotalrepr.proposal.*;
-import it.unibz.inf.ontop.pivotalrepr.proposal.impl.AncestryTrackingResultsImpl;
+import it.unibz.inf.ontop.pivotalrepr.proposal.impl.NodeTrackingResultsImpl;
 
 import java.util.Optional;
 
@@ -21,15 +21,15 @@ import static it.unibz.inf.ontop.owlrefplatform.core.basicoperations.ImmutableSu
  */
 public class RemoveEmptyNodesExecutor implements NodeCentricInternalExecutor<
         EmptyNode,
-        AncestryTrackingResults<EmptyNode>,
+        NodeTrackingResults<EmptyNode>,
         RemoveEmptyNodeProposal> {
 
     /**
      * TODO: explain
      */
     @Override
-    public AncestryTrackingResults<EmptyNode> apply(RemoveEmptyNodeProposal proposal, IntermediateQuery query,
-                                         QueryTreeComponent treeComponent)
+    public NodeTrackingResults<EmptyNode> apply(RemoveEmptyNodeProposal proposal, IntermediateQuery query,
+                                                QueryTreeComponent treeComponent)
             throws EmptyQueryException {
 
         EmptyNode originalFocusNode = proposal.getFocusNode();
@@ -42,9 +42,9 @@ public class RemoveEmptyNodesExecutor implements NodeCentricInternalExecutor<
      *
      * Recursive!
      */
-    private static AncestryTrackingResults<EmptyNode> reactToEmptyChildNode(IntermediateQuery query, EmptyNode emptyNode,
-                                                         QueryTreeComponent treeComponent,
-                                                         Optional<NodeTracker> optionalTracker)
+    private static NodeTrackingResults<EmptyNode> reactToEmptyChildNode(IntermediateQuery query, EmptyNode emptyNode,
+                                                                        QueryTreeComponent treeComponent,
+                                                                        Optional<NodeTracker> optionalTracker)
             throws EmptyQueryException {
 
         QueryNode originalParentNode = query.getParent(emptyNode)
@@ -118,7 +118,7 @@ public class RemoveEmptyNodesExecutor implements NodeCentricInternalExecutor<
          * Special case: the promoted child is now the root the query
          */
         else {
-            return new AncestryTrackingResultsImpl<>(query,
+            return new NodeTrackingResultsImpl<>(query,
                     /**
                      * Next sibling (of the empty node or of the lastly removed ancestor)
                      */
@@ -164,23 +164,23 @@ public class RemoveEmptyNodesExecutor implements NodeCentricInternalExecutor<
      * Keeps track of the closest ancestor and the next sibling of the original focus (empty) node.
      *
      */
-    private static AncestryTrackingResults<EmptyNode> propagateNullVariables(IntermediateQuery query,
-                                                          QueryNode ancestorNode,
-                                                          Optional<QueryNode> optionalNextSiblingOfFocusNode,
-                                                          QueryTreeComponent treeComponent,
-                                                          ImmutableSet<Variable> nullVariables,
-                                                          QueryNode propagatingNode,
-                                                          Optional<NodeTracker> optionalAncestorTracker)
+    private static NodeTrackingResults<EmptyNode> propagateNullVariables(IntermediateQuery query,
+                                                                         QueryNode ancestorNode,
+                                                                         Optional<QueryNode> optionalNextSiblingOfFocusNode,
+                                                                         QueryTreeComponent treeComponent,
+                                                                         ImmutableSet<Variable> nullVariables,
+                                                                         QueryNode propagatingNode,
+                                                                         Optional<NodeTracker> optionalAncestorTracker)
             throws EmptyQueryException {
 
         if (nullVariables.isEmpty()) {
-            return new AncestryTrackingResultsImpl<>(query, optionalNextSiblingOfFocusNode,
+            return new NodeTrackingResultsImpl<>(query, optionalNextSiblingOfFocusNode,
                     Optional.of(ancestorNode), optionalAncestorTracker);
         }
 
         ImmutableSubstitution<Constant> ascendingSubstitution = computeNullSubstitution(nullVariables);
 
-        AncestryTrackingResults<QueryNode> propagationResults =
+        NodeTrackingResults<QueryNode> propagationResults =
                 propagateSubstitutionUp(propagatingNode, ascendingSubstitution, query, treeComponent, optionalAncestorTracker);
 
         QueryNode closestRemainingAncestor = propagationResults.getOptionalNewNode()
@@ -205,7 +205,7 @@ public class RemoveEmptyNodesExecutor implements NodeCentricInternalExecutor<
                 .orElseGet(propagationResults::getOptionalNextSibling);
 
 
-        return new AncestryTrackingResultsImpl<>(query, optionalNewNextSibling, Optional.of(closestRemainingAncestor),
+        return new NodeTrackingResultsImpl<>(query, optionalNewNextSibling, Optional.of(closestRemainingAncestor),
                 propagationResults.getOptionalTracker());
 
     }

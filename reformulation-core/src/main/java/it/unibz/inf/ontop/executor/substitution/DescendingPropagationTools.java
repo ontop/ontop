@@ -10,9 +10,9 @@ import it.unibz.inf.ontop.pivotalrepr.QueryNode;
 import it.unibz.inf.ontop.pivotalrepr.QueryNodeSubstitutionException;
 import it.unibz.inf.ontop.pivotalrepr.impl.QueryTreeComponent;
 import it.unibz.inf.ontop.pivotalrepr.proposal.NodeTracker;
-import it.unibz.inf.ontop.pivotalrepr.proposal.AncestryTrackingResults;
+import it.unibz.inf.ontop.pivotalrepr.proposal.NodeTrackingResults;
 import it.unibz.inf.ontop.pivotalrepr.proposal.NodeCentricOptimizationResults;
-import it.unibz.inf.ontop.pivotalrepr.proposal.impl.AncestryTrackingResultsImpl;
+import it.unibz.inf.ontop.pivotalrepr.proposal.impl.NodeTrackingResultsImpl;
 
 import java.util.LinkedList;
 import java.util.Optional;
@@ -62,7 +62,7 @@ public class DescendingPropagationTools {
     /**
      * Applies the substitution to the starting nodes and to their children
      */
-    protected static <N extends QueryNode> AncestryTrackingResults<N> propagateSubstitutionDownToNodes(
+    protected static <N extends QueryNode> NodeTrackingResults<N> propagateSubstitutionDownToNodes(
             N originalFocusNode, final Stream<QueryNode> startingNodes,
             final ImmutableSubstitution<? extends ImmutableTerm> initialSubstitutionToPropagate,
             final IntermediateQuery query, final QueryTreeComponent treeComponent,
@@ -168,10 +168,10 @@ public class DescendingPropagationTools {
             if (!treeComponent.contains(optionalFocusNode.get())) {
                 throw new IllegalStateException("Out-dated focus node (its removal has not been detected)");
             }
-            return new AncestryTrackingResultsImpl<>(query, optionalFocusNode.get(), optionalAncestryTracker);
+            return new NodeTrackingResultsImpl<>(query, optionalFocusNode.get(), optionalAncestryTracker);
         }
         else {
-            return new AncestryTrackingResultsImpl<>(query, optionalNextSiblingOfFocusNode,
+            return new NodeTrackingResultsImpl<>(query, optionalNextSiblingOfFocusNode,
                     optionalClosestAncestorOfFocusNode, optionalAncestryTracker);
         }
     }
