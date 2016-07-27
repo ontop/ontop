@@ -14,6 +14,7 @@ import it.unibz.inf.ontop.pivotalrepr.impl.EmptyNodeImpl;
 import it.unibz.inf.ontop.pivotalrepr.impl.QueryTreeComponent;
 import it.unibz.inf.ontop.pivotalrepr.proposal.RemoveEmptyNodeProposal;
 import it.unibz.inf.ontop.pivotalrepr.proposal.NodeTrackingResults;
+import it.unibz.inf.ontop.pivotalrepr.proposal.impl.NodeTrackerImpl;
 import it.unibz.inf.ontop.pivotalrepr.proposal.impl.NodeTrackingResultsImpl;
 import it.unibz.inf.ontop.pivotalrepr.proposal.impl.RemoveEmptyNodeProposalImpl;
 
@@ -272,14 +273,11 @@ public class AscendingPropagationTools {
      */
     private static <T extends QueryNode> NodeTrackingResults<T> applyDescendingPropagations(
             ImmutableList<DescendingPropagationParams> propagations, IntermediateQuery query,
-            QueryTreeComponent treeComponent, T originalFocusNode, Optional<NodeTracker> optionalNodeTracker) throws EmptyQueryException {
+            QueryTreeComponent treeComponent, T originalFocusNode,
+            Optional<NodeTracker> optionalNodeTracker) throws EmptyQueryException {
 
-        if (!optionalNodeTracker.isPresent()) {
-            throw new RuntimeException(
-                    "TODO: should we handle an empty ancestry tracker while propagating a substitution down?");
-        }
-
-        NodeTracker tracker = optionalNodeTracker.get();
+        NodeTracker tracker = optionalNodeTracker
+                .orElseGet(() -> new NodeTrackerImpl());
 
         for(DescendingPropagationParams params : propagations) {
             if (!query.contains(params.focusNode)) {
