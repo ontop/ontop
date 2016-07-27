@@ -35,7 +35,7 @@ public class RemoveEmptyNodeProposalImpl implements RemoveEmptyNodeProposal {
                 .map(Optional::of)
                 .orElseGet(() ->
                     isKeepingTrackOfAncestors
-                            ? Optional.of(new NodeTrackerImpl(query, focusNode))
+                            ? Optional.of(new NodeTrackerImpl())
                             : Optional.empty());
     }
 }

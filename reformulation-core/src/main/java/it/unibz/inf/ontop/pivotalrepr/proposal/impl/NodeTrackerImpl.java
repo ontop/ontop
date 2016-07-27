@@ -97,7 +97,7 @@ public class NodeTrackerImpl implements NodeTracker {
      */
     private final Set<QueryNode> droppedNodes;
 
-    public NodeTrackerImpl(IntermediateQuery query, QueryNode descendantNode) {
+    public NodeTrackerImpl() {
         //originalDescendantNode = descendantNode;
         //originalAncestors = query.getAncestors(descendantNode).reverse();
         childReplacement = new HashMap<>();
