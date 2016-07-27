@@ -25,10 +25,23 @@ public class NodeTrackerImpl implements NodeTracker {
             this.closestAncestor = Optional.empty();
         }
 
-        private NodeUpdateImpl(Optional<QueryNode> replacingChild, Optional<QueryNode> nextSibling,
+        private NodeUpdateImpl(Optional<QueryNode> optionalReplacingChild) {
+            if (!optionalReplacingChild.isPresent()) {
+                throw new IllegalArgumentException("The replacing child must be given (fake optional)");
+            }
+
+            this.newNode = Optional.empty();
+            QueryNode replacingChild = optionalReplacingChild.get();
+
+            this.replacingChild = optionalReplacingChild;
+            this.nextSibling = Optional.empty();
+            this.closestAncestor = Optional.empty();
+        }
+
+        private NodeUpdateImpl(Optional<QueryNode> nextSibling,
                                Optional<QueryNode> closestAncestor) {
             this.newNode = Optional.empty();
-            this.replacingChild = replacingChild;
+            this.replacingChild = Optional.empty();
             this.nextSibling = nextSibling;
             this.closestAncestor = closestAncestor;
         }
@@ -52,14 +65,19 @@ public class NodeTrackerImpl implements NodeTracker {
         }
 
         @Override
-        public Optional<QueryNode> getOptionalNextSibling() {
-            return nextSibling;
+        public Optional<QueryNode> getOptionalNextSibling(IntermediateQuery query) {
+            return getNewNodeOrReplacingChild()
+                    .map(query::getNextSibling)
+                    .orElse(nextSibling);
         }
 
         @Override
-        public Optional<QueryNode> getOptionalClosestAncestor() {
-            return closestAncestor;
+        public Optional<QueryNode> getOptionalClosestAncestor(IntermediateQuery query) {
+            return getNewNodeOrReplacingChild()
+                    .map(query::getParent)
+                    .orElse(closestAncestor);
         }
+
     }
 
 
@@ -264,7 +282,7 @@ public class NodeTrackerImpl implements NodeTracker {
 //    }
 
     @Override
-    public <N extends QueryNode> NodeUpdate<N> getUpdate(N node) {
+    public <N extends QueryNode> NodeUpdate<N> getUpdate(IntermediateQuery query, N node) {
         if (droppedNodes.contains(node)) {
 
             // TODO: distinguish the next sibling from the extended one
@@ -272,23 +290,21 @@ public class NodeTrackerImpl implements NodeTracker {
                     .map(Optional::of)
                     .orElseGet(() -> getNextExtendedSibling(node));
 
-            return new NodeUpdateImpl<>(Optional.empty(), nextExtendedSibling, getClosestAncestor(node));
+            return new NodeUpdateImpl<>(nextExtendedSibling, getClosestAncestor(query, node));
         }
         else if (nodeUpdate.containsKey(node)) {
-            return getUpdate((N) nodeUpdate.get(node));
+            return getUpdate(query, (N) nodeUpdate.get(node));
         }
         else if (childReplacement.containsKey(node)) {
             QueryNode initialReplacingChild = childReplacement.get(node);
-            NodeUpdate<QueryNode> update = getUpdate(initialReplacingChild);
+            NodeUpdate<QueryNode> update = getUpdate(query, initialReplacingChild);
 
             Optional<QueryNode> optionalNewReplacingChild = update.getNewNodeOrReplacingChild();
             if (optionalNewReplacingChild.isPresent()) {
-                // TODO: should we return the next sibling?
-                return new NodeUpdateImpl<>(optionalNewReplacingChild, Optional.empty(), Optional.empty());
+                return new NodeUpdateImpl<>(optionalNewReplacingChild);
             }
             else {
-                return new NodeUpdateImpl<>(Optional.empty(), getNextSibling(node),
-                        getClosestAncestor(initialReplacingChild));
+                return new NodeUpdateImpl<>(getNextSibling(node), getClosestAncestor(query, initialReplacingChild));
             }
         }
         else {
@@ -296,12 +312,12 @@ public class NodeTrackerImpl implements NodeTracker {
         }
     }
 
-    private Optional<QueryNode> getClosestAncestor(QueryNode node) {
+    private Optional<QueryNode> getClosestAncestor(IntermediateQuery query, QueryNode node) {
 
         if (closestAncestorMap.containsKey(node)) {
             QueryNode initialClosestAncestor = closestAncestorMap.get(node);
 
-            NodeUpdate<QueryNode> ancestorUpdate = getUpdate(initialClosestAncestor);
+            NodeUpdate<QueryNode> ancestorUpdate = getUpdate(query, initialClosestAncestor);
             Optional<QueryNode> optionalNewAncestor = ancestorUpdate.getNewNode();
             if (optionalNewAncestor.isPresent()) {
                 return optionalNewAncestor;
@@ -311,11 +327,11 @@ public class NodeTrackerImpl implements NodeTracker {
                 throw new RuntimeException("TODO: support ancestors that are replaced by their child");
             }
             else {
-                return ancestorUpdate.getOptionalClosestAncestor();
+                return ancestorUpdate.getOptionalClosestAncestor(query);
             }
         }
         else if (nodeUpdate.containsKey(node)) {
-            return getClosestAncestor(nodeUpdate.get(node));
+            return getClosestAncestor(query, nodeUpdate.get(node));
         }
         /**
          * When a node is replaced by its child, its closest ancestor is expected to be be declared.

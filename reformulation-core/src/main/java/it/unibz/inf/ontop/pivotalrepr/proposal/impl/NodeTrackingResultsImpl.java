@@ -32,13 +32,6 @@ public class NodeTrackingResultsImpl<N extends QueryNode> extends NodeCentricOpt
         this.optionalTracker = optionalTracker;
     }
 
-
-
-    @Override
-    public <M extends QueryNode> NodeCentricOptimizationResults<M> generateResultsForAncestor(M originalAncestorNode) {
-        throw new RuntimeException("TODO: implement it");
-    }
-
     @Override
     public Optional<NodeTracker> getOptionalTracker() {
         return optionalTracker;
