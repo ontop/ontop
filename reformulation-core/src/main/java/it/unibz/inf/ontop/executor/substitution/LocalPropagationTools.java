@@ -8,9 +8,9 @@ import it.unibz.inf.ontop.pivotalrepr.*;
 import it.unibz.inf.ontop.pivotalrepr.impl.EmptyNodeImpl;
 import it.unibz.inf.ontop.pivotalrepr.impl.QueryTreeComponent;
 import it.unibz.inf.ontop.pivotalrepr.proposal.NodeTracker;
-import it.unibz.inf.ontop.pivotalrepr.proposal.AncestryTrackingResults;
+import it.unibz.inf.ontop.pivotalrepr.proposal.NodeTrackingResults;
 import it.unibz.inf.ontop.pivotalrepr.proposal.RemoveEmptyNodeProposal;
-import it.unibz.inf.ontop.pivotalrepr.proposal.impl.AncestryTrackingResultsImpl;
+import it.unibz.inf.ontop.pivotalrepr.proposal.impl.NodeTrackingResultsImpl;
 import it.unibz.inf.ontop.pivotalrepr.proposal.impl.RemoveEmptyNodeProposalImpl;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
@@ -30,7 +30,7 @@ public class LocalPropagationTools {
      *
      */
     protected static class SubstitutionApplicationResults<N extends QueryNode>
-            extends AncestryTrackingResultsImpl<N> {
+            extends NodeTrackingResultsImpl<N> {
         /**
          * Substitution to propagate to this newNode
          */
@@ -56,7 +56,7 @@ public class LocalPropagationTools {
         /**
          * When the node has removed
          */
-        protected SubstitutionApplicationResults(N originalFocusNode, AncestryTrackingResults<EmptyNode> emptyNodeResults) {
+        protected SubstitutionApplicationResults(N originalFocusNode, NodeTrackingResults<EmptyNode> emptyNodeResults) {
             super(emptyNodeResults.getResultingQuery(),
                     emptyNodeResults.getOptionalNextSibling(),
                     emptyNodeResults.getOptionalClosestAncestor(), emptyNodeResults.getOptionalTracker());
@@ -134,7 +134,7 @@ public class LocalPropagationTools {
                         : new RemoveEmptyNodeProposalImpl(replacingEmptyNode, true);
 
                 // May restructure significantly the query
-                AncestryTrackingResults<EmptyNode> removeEmptyNodeResults = query.applyProposal(removalProposal, true);
+                NodeTrackingResults<EmptyNode> removeEmptyNodeResults = query.applyProposal(removalProposal, true);
 
                 return new SubstitutionApplicationResults<>(node, removeEmptyNodeResults);
 

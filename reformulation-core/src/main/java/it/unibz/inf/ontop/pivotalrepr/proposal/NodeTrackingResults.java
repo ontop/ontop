@@ -8,7 +8,7 @@ import java.util.Optional;
  * TODO: explain
  *
  */
-public interface AncestryTrackingResults<N extends QueryNode> extends NodeCentricOptimizationResults<N> {
+public interface NodeTrackingResults<N extends QueryNode> extends NodeCentricOptimizationResults<N> {
 
     /**
      * TODO: explain

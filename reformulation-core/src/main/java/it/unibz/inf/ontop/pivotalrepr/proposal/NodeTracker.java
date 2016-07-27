@@ -8,7 +8,7 @@ import java.util.Optional;
 /**
  * TODO: explain
  *
- * Tracks the events related to ancestors
+ * Tracks the node updates
  *
  */
 public interface NodeTracker {

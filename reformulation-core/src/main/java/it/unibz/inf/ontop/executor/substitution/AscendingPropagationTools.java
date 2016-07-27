@@ -13,8 +13,8 @@ import it.unibz.inf.ontop.pivotalrepr.*;
 import it.unibz.inf.ontop.pivotalrepr.impl.EmptyNodeImpl;
 import it.unibz.inf.ontop.pivotalrepr.impl.QueryTreeComponent;
 import it.unibz.inf.ontop.pivotalrepr.proposal.RemoveEmptyNodeProposal;
-import it.unibz.inf.ontop.pivotalrepr.proposal.AncestryTrackingResults;
-import it.unibz.inf.ontop.pivotalrepr.proposal.impl.AncestryTrackingResultsImpl;
+import it.unibz.inf.ontop.pivotalrepr.proposal.NodeTrackingResults;
+import it.unibz.inf.ontop.pivotalrepr.proposal.impl.NodeTrackingResultsImpl;
 import it.unibz.inf.ontop.pivotalrepr.proposal.impl.RemoveEmptyNodeProposalImpl;
 
 import java.util.stream.Stream;
@@ -32,7 +32,7 @@ public class AscendingPropagationTools {
      */
     private static class AncestorPropagationResults<N extends QueryNode> {
 
-        public final Optional<AncestryTrackingResults<N>> optionalAncestryTrackingResults;
+        public final Optional<NodeTrackingResults<N>> optionalAncestryTrackingResults;
         public final Optional<ImmutableSubstitution<? extends ImmutableTerm>> optionalSubstitutionToPropagate;
         public final Optional<QueryNode> optionalNextAncestor;
         public final Optional<QueryNode> optionalChildOfNextAncestor;
@@ -41,8 +41,8 @@ public class AscendingPropagationTools {
         /**
          * Case 1: empty ancestor --> returns the results of its removal
          */
-        public AncestorPropagationResults(AncestryTrackingResults<N> ancestryTrackingResults) {
-            this.optionalAncestryTrackingResults = Optional.of(ancestryTrackingResults);
+        public AncestorPropagationResults(NodeTrackingResults<N> nodeTrackingResults) {
+            this.optionalAncestryTrackingResults = Optional.of(nodeTrackingResults);
             this.optionalSubstitutionToPropagate = Optional.empty();
             this.optionalNextAncestor = Optional.empty();
             this.optionalChildOfNextAncestor = Optional.empty();
@@ -103,7 +103,7 @@ public class AscendingPropagationTools {
      * Note that some ancestors may become empty and thus the focus newNode and its siblings be removed.
      *
      */
-    public static <N extends QueryNode> AncestryTrackingResults<N> propagateSubstitutionUp(
+    public static <N extends QueryNode> NodeTrackingResults<N> propagateSubstitutionUp(
             N focusNode, ImmutableSubstitution<? extends ImmutableTerm> substitutionToPropagate,
             IntermediateQuery query, QueryTreeComponent treeComponent,
             Optional<NodeTracker> optionalAncestryTracker) throws QueryNodeSubstitutionException,
@@ -227,11 +227,11 @@ public class AscendingPropagationTools {
              * Ancestor is empty --> removes it and returns the closest ancestor + the next sibling
              */
             case DECLARE_AS_EMPTY:
-                AncestryTrackingResults<EmptyNode> removalResults =
+                NodeTrackingResults<EmptyNode> removalResults =
                         reactToEmptinessDeclaration(query, currentAncestor, treeComponent);
 
                 return new AncestorPropagationResults<>(
-                        new AncestryTrackingResultsImpl<>(query, removalResults.getOptionalNextSibling(),
+                        new NodeTrackingResultsImpl<>(query, removalResults.getOptionalNextSibling(),
                                 removalResults.getOptionalClosestAncestor(), removalResults.getOptionalTracker()));
             default:
                 throw new IllegalStateException("Unknown local action: " + substitutionResults.getLocalAction());
@@ -270,7 +270,7 @@ public class AscendingPropagationTools {
      * Propagates descending substitutions in some other branches
      *
      */
-    private static <T extends QueryNode> AncestryTrackingResults<T> applyDescendingPropagations(
+    private static <T extends QueryNode> NodeTrackingResults<T> applyDescendingPropagations(
             ImmutableList<DescendingPropagationParams> propagations, IntermediateQuery query,
             QueryTreeComponent treeComponent, T originalFocusNode, Optional<NodeTracker> optionalNodeTracker) throws EmptyQueryException {
 
@@ -286,7 +286,7 @@ public class AscendingPropagationTools {
                 break;
             }
 
-            AncestryTrackingResults<QueryNode> propagationResults = propagateSubstitutionDownToNodes(
+            NodeTrackingResults<QueryNode> propagationResults = propagateSubstitutionDownToNodes(
                         params.focusNode, params.otherChildren, params.substitution, query, treeComponent,
                     optionalNodeTracker);
         }
@@ -294,17 +294,17 @@ public class AscendingPropagationTools {
         NodeTracker.NodeUpdate<T> update = tracker.getUpdate(originalFocusNode);
 
         return update.getNewNode()
-                .map(n -> new AncestryTrackingResultsImpl<>(query, n, optionalNodeTracker))
+                .map(n -> new NodeTrackingResultsImpl<>(query, n, optionalNodeTracker))
                 .orElseGet(() -> update.getReplacingChild()
-                        .map(n -> new AncestryTrackingResultsImpl<T>(query, Optional.of(n), optionalNodeTracker))
-                        .orElseGet(() -> new AncestryTrackingResultsImpl<T>(query, update.getOptionalNextSibling(),
+                        .map(n -> new NodeTrackingResultsImpl<T>(query, Optional.of(n), optionalNodeTracker))
+                        .orElseGet(() -> new NodeTrackingResultsImpl<T>(query, update.getOptionalNextSibling(),
                                 update.getOptionalClosestAncestor(), optionalNodeTracker)));
     }
 
     /**
      * Returns results centered on the removed node.
      */
-    private static AncestryTrackingResults<EmptyNode> reactToEmptinessDeclaration(
+    private static NodeTrackingResults<EmptyNode> reactToEmptinessDeclaration(
             IntermediateQuery query, QueryNode currentAncestor, QueryTreeComponent treeComponent) throws EmptyQueryException {
 
         ImmutableSet<Variable> nullVariables = query.getProjectedVariables(currentAncestor);
