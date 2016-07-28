@@ -1,6 +1,5 @@
 package it.unibz.inf.ontop.owlrefplatform.core.optimization;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.ImmutableSubstitution;
@@ -11,10 +10,8 @@ import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitut
 import it.unibz.inf.ontop.owlrefplatform.core.optimization.QueryNodeNavigationTools.NextNodeAndQuery;
 import it.unibz.inf.ontop.pivotalrepr.*;
 import it.unibz.inf.ontop.pivotalrepr.proposal.NodeCentricOptimizationResults;
-import it.unibz.inf.ontop.pivotalrepr.proposal.RemoveEmptyNodesProposal;
 import it.unibz.inf.ontop.pivotalrepr.proposal.SubstitutionPropagationProposal;
 import it.unibz.inf.ontop.pivotalrepr.proposal.UnionLiftProposal;
-import it.unibz.inf.ontop.pivotalrepr.proposal.impl.RemoveEmptyNodesProposalImpl;
 import it.unibz.inf.ontop.pivotalrepr.proposal.impl.SubstitutionPropagationProposalImpl;
 import it.unibz.inf.ontop.pivotalrepr.proposal.impl.UnionLiftProposalImpl;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -29,7 +26,7 @@ import static it.unibz.inf.ontop.pivotalrepr.NonCommutativeOperatorNode.Argument
 
 /**
  * Optimizer to propagate bindings up and down the tree
- * //TODO:explain
+ *
  */
 public class TopDownSubstitutionLiftOptimizer implements SubstitutionLiftOptimizer {
 
@@ -104,15 +101,15 @@ public class TopDownSubstitutionLiftOptimizer implements SubstitutionLiftOptimiz
         }
 
         //remove empty nodes if present
-        RemoveEmptyNodesProposal<QueryNode> emptyProposal = new RemoveEmptyNodesProposalImpl<>(currentNode);
-        NodeCentricOptimizationResults<QueryNode> emptyProposalResults = currentQuery.applyProposal(emptyProposal);
-        currentQuery = emptyProposalResults.getResultingQuery();
-        if(emptyProposalResults.getNewNodeOrReplacingChild().isPresent()) {
-            currentNode = emptyProposalResults.getNewNodeOrReplacingChild().get();
-        }
-        else {
-            return QueryNodeNavigationTools.getNextNodeAndQuery(emptyProposalResults);
-        }
+//        RemoveEmptyNodesProposal<QueryNode> emptyProposal = new RemoveEmptyNodesProposalImpl<>(currentNode);
+//        NodeCentricOptimizationResults<QueryNode> emptyProposalResults = currentQuery.applyProposal(emptyProposal);
+//        currentQuery = emptyProposalResults.getResultingQuery();
+//        if(emptyProposalResults.getNewNodeOrReplacingChild().isPresent()) {
+//            currentNode = emptyProposalResults.getNewNodeOrReplacingChild().get();
+//        }
+//        else {
+//            return QueryNodeNavigationTools.getNextNodeAndQuery(emptyProposalResults);
+//        }
 
         //if the union node has not been removed
         if (currentNode instanceof UnionNode) {
@@ -229,19 +226,20 @@ public class TopDownSubstitutionLiftOptimizer implements SubstitutionLiftOptimiz
         }
 
         //remove empty nodes if present
-        RemoveEmptyNodesProposal<QueryNode> emptyProposal = new RemoveEmptyNodesProposalImpl<>(currentJoinNode);
-        NodeCentricOptimizationResults<QueryNode> emptyProposalResults = currentQuery.applyProposal(emptyProposal);
-        currentQuery = emptyProposalResults.getResultingQuery();
+//        RemoveEmptyNodesProposal<QueryNode> emptyProposal = new RemoveEmptyNodesProposalImpl<>(currentJoinNode);
+//        NodeCentricOptimizationResults<QueryNode> emptyProposalResults = currentQuery.applyProposal(emptyProposal);
+//        currentQuery = emptyProposalResults.getResultingQuery();
+//
+//        if(emptyProposalResults.getNewNodeOrReplacingChild().isPresent()) {
+//            QueryNode currentNode = emptyProposalResults.getNewNodeOrReplacingChild().get();
+//            return new NextNodeAndQuery(getDepthFirstNextNode(currentQuery, currentNode), currentQuery);
+//
+//        }
+//        else {
+//            return QueryNodeNavigationTools.getNextNodeAndQuery(emptyProposalResults);
+//        }
 
-        if(emptyProposalResults.getNewNodeOrReplacingChild().isPresent()) {
-            QueryNode currentNode = emptyProposalResults.getNewNodeOrReplacingChild().get();
-            return new NextNodeAndQuery(getDepthFirstNextNode(currentQuery, currentNode), currentQuery);
-
-        }
-        else {
-            return QueryNodeNavigationTools.getNextNodeAndQuery(emptyProposalResults);
-        }
-
+        return new NextNodeAndQuery(getDepthFirstNextNode(currentQuery, currentJoinNode), currentQuery);
 
     }
 
@@ -326,18 +324,20 @@ public class TopDownSubstitutionLiftOptimizer implements SubstitutionLiftOptimiz
         }
 
         //remove empty nodes if present
-        RemoveEmptyNodesProposal<QueryNode> emptyProposal = new RemoveEmptyNodesProposalImpl<>(currentJoinNode);
-        NodeCentricOptimizationResults<QueryNode> emptyProposalResults = currentQuery.applyProposal(emptyProposal);
-        currentQuery = emptyProposalResults.getResultingQuery();
+//        RemoveEmptyNodesProposal<QueryNode> emptyProposal = new RemoveEmptyNodesProposalImpl<>(currentJoinNode);
+//        NodeCentricOptimizationResults<QueryNode> emptyProposalResults = currentQuery.applyProposal(emptyProposal);
+//        currentQuery = emptyProposalResults.getResultingQuery();
+//
+//        if(emptyProposalResults.getNewNodeOrReplacingChild().isPresent()) {
+//            QueryNode currentNode = emptyProposalResults.getNewNodeOrReplacingChild().get();
+//            return new NextNodeAndQuery(getDepthFirstNextNode(currentQuery, currentNode), currentQuery);
+//
+//        }
+//        else {
+//            return QueryNodeNavigationTools.getNextNodeAndQuery(emptyProposalResults);
+//        }
 
-        if(emptyProposalResults.getNewNodeOrReplacingChild().isPresent()) {
-            QueryNode currentNode = emptyProposalResults.getNewNodeOrReplacingChild().get();
-            return new NextNodeAndQuery(getDepthFirstNextNode(currentQuery, currentNode), currentQuery);
-
-        }
-        else {
-            return QueryNodeNavigationTools.getNextNodeAndQuery(emptyProposalResults);
-        }
+        return new NextNodeAndQuery(getDepthFirstNextNode(currentQuery, currentJoinNode), currentQuery);
 
 
     }

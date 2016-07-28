@@ -1,19 +1,21 @@
 package it.unibz.inf.ontop.pivotalrepr.impl;
 
-import java.util.Map;
-import java.util.Optional;
-
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import it.unibz.inf.ontop.model.*;
+import it.unibz.inf.ontop.model.ImmutableExpression;
+import it.unibz.inf.ontop.model.ImmutableSubstitution;
+import it.unibz.inf.ontop.model.ImmutableTerm;
+import it.unibz.inf.ontop.model.Variable;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
 import it.unibz.inf.ontop.owlrefplatform.core.unfolding.ExpressionEvaluator;
 import it.unibz.inf.ontop.pivotalrepr.*;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
+import java.util.Map;
+import java.util.Optional;
+
 import static it.unibz.inf.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionTools.computeNullSubstitution;
 import static it.unibz.inf.ontop.pivotalrepr.NodeTransformationProposedState.*;
-import static it.unibz.inf.ontop.pivotalrepr.NodeTransformationProposedState.REPLACE_BY_NEW_NODE;
 import static it.unibz.inf.ontop.pivotalrepr.SubstitutionResults.LocalAction.DECLARE_AS_EMPTY;
 import static it.unibz.inf.ontop.pivotalrepr.SubstitutionResults.LocalAction.NO_CHANGE;
 

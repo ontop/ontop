@@ -1,17 +1,21 @@
 package it.unibz.inf.ontop.executor.join;
 
-import java.util.Optional;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.executor.SimpleNodeCentricInternalExecutor;
 import it.unibz.inf.ontop.model.ImmutableExpression;
+import it.unibz.inf.ontop.pivotalrepr.*;
 import it.unibz.inf.ontop.pivotalrepr.NonCommutativeOperatorNode.ArgumentPosition;
 import it.unibz.inf.ontop.pivotalrepr.impl.EmptyNodeImpl;
 import it.unibz.inf.ontop.pivotalrepr.impl.InnerJoinNodeImpl;
-import it.unibz.inf.ontop.pivotalrepr.proposal.impl.NodeCentricOptimizationResultsImpl;
 import it.unibz.inf.ontop.pivotalrepr.impl.QueryTreeComponent;
-import it.unibz.inf.ontop.pivotalrepr.*;
-import it.unibz.inf.ontop.pivotalrepr.proposal.*;
+import it.unibz.inf.ontop.pivotalrepr.proposal.InnerJoinOptimizationProposal;
+import it.unibz.inf.ontop.pivotalrepr.proposal.InvalidQueryOptimizationProposalException;
+import it.unibz.inf.ontop.pivotalrepr.proposal.NodeCentricOptimizationResults;
+import it.unibz.inf.ontop.pivotalrepr.proposal.RemoveEmptyNodeProposal;
+import it.unibz.inf.ontop.pivotalrepr.proposal.impl.NodeCentricOptimizationResultsImpl;
 import it.unibz.inf.ontop.pivotalrepr.proposal.impl.RemoveEmptyNodeProposalImpl;
+
+import java.util.Optional;
 
 import static it.unibz.inf.ontop.executor.join.JoinExtractionUtils.*;
 

@@ -8,7 +8,10 @@ import it.unibz.inf.ontop.model.Variable;
 import it.unibz.inf.ontop.pivotalrepr.*;
 import it.unibz.inf.ontop.pivotalrepr.impl.EmptyNodeImpl;
 import it.unibz.inf.ontop.pivotalrepr.impl.QueryTreeComponent;
-import it.unibz.inf.ontop.pivotalrepr.proposal.*;
+import it.unibz.inf.ontop.pivotalrepr.proposal.InvalidQueryOptimizationProposalException;
+import it.unibz.inf.ontop.pivotalrepr.proposal.NodeTracker;
+import it.unibz.inf.ontop.pivotalrepr.proposal.NodeTrackingResults;
+import it.unibz.inf.ontop.pivotalrepr.proposal.RemoveEmptyNodeProposal;
 import it.unibz.inf.ontop.pivotalrepr.proposal.impl.NodeTrackingResultsImpl;
 
 import java.util.Optional;

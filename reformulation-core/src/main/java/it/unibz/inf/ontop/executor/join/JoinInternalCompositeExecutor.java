@@ -1,12 +1,13 @@
 package it.unibz.inf.ontop.executor.join;
 
-import java.util.Optional;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.executor.SimpleNodeCentricInternalCompositeExecutor;
 import it.unibz.inf.ontop.executor.SimpleNodeCentricInternalExecutor;
 import it.unibz.inf.ontop.pivotalrepr.InnerJoinNode;
 import it.unibz.inf.ontop.pivotalrepr.proposal.InnerJoinOptimizationProposal;
 import it.unibz.inf.ontop.pivotalrepr.proposal.impl.InnerJoinOptimizationProposalImpl;
+
+import java.util.Optional;
 
 /**
  * TODO: explain
