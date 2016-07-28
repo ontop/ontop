@@ -100,16 +100,6 @@ public class TopDownSubstitutionLiftOptimizer implements SubstitutionLiftOptimiz
 
         }
 
-        //remove empty nodes if present
-//        RemoveEmptyNodesProposal<QueryNode> emptyProposal = new RemoveEmptyNodesProposalImpl<>(currentNode);
-//        NodeCentricOptimizationResults<QueryNode> emptyProposalResults = currentQuery.applyProposal(emptyProposal);
-//        currentQuery = emptyProposalResults.getResultingQuery();
-//        if(emptyProposalResults.getNewNodeOrReplacingChild().isPresent()) {
-//            currentNode = emptyProposalResults.getNewNodeOrReplacingChild().get();
-//        }
-//        else {
-//            return QueryNodeNavigationTools.getNextNodeAndQuery(emptyProposalResults);
-//        }
 
         //if the union node has not been removed
         if (currentNode instanceof UnionNode) {
@@ -193,6 +183,7 @@ public class TopDownSubstitutionLiftOptimizer implements SubstitutionLiftOptimiz
         IntermediateQuery currentQuery = initialQuery;
         QueryNode currentJoinNode = initialJoinNode;
 
+        //apply directly to join
 
         while (optionalCurrentChild.isPresent()) {
             QueryNode currentChild = optionalCurrentChild.get();
@@ -225,19 +216,6 @@ public class TopDownSubstitutionLiftOptimizer implements SubstitutionLiftOptimiz
             }
         }
 
-        //remove empty nodes if present
-//        RemoveEmptyNodesProposal<QueryNode> emptyProposal = new RemoveEmptyNodesProposalImpl<>(currentJoinNode);
-//        NodeCentricOptimizationResults<QueryNode> emptyProposalResults = currentQuery.applyProposal(emptyProposal);
-//        currentQuery = emptyProposalResults.getResultingQuery();
-//
-//        if(emptyProposalResults.getNewNodeOrReplacingChild().isPresent()) {
-//            QueryNode currentNode = emptyProposalResults.getNewNodeOrReplacingChild().get();
-//            return new NextNodeAndQuery(getDepthFirstNextNode(currentQuery, currentNode), currentQuery);
-//
-//        }
-//        else {
-//            return QueryNodeNavigationTools.getNextNodeAndQuery(emptyProposalResults);
-//        }
 
         return new NextNodeAndQuery(getDepthFirstNextNode(currentQuery, currentJoinNode), currentQuery);
 
@@ -323,19 +301,6 @@ public class TopDownSubstitutionLiftOptimizer implements SubstitutionLiftOptimiz
 
         }
 
-        //remove empty nodes if present
-//        RemoveEmptyNodesProposal<QueryNode> emptyProposal = new RemoveEmptyNodesProposalImpl<>(currentJoinNode);
-//        NodeCentricOptimizationResults<QueryNode> emptyProposalResults = currentQuery.applyProposal(emptyProposal);
-//        currentQuery = emptyProposalResults.getResultingQuery();
-//
-//        if(emptyProposalResults.getNewNodeOrReplacingChild().isPresent()) {
-//            QueryNode currentNode = emptyProposalResults.getNewNodeOrReplacingChild().get();
-//            return new NextNodeAndQuery(getDepthFirstNextNode(currentQuery, currentNode), currentQuery);
-//
-//        }
-//        else {
-//            return QueryNodeNavigationTools.getNextNodeAndQuery(emptyProposalResults);
-//        }
 
         return new NextNodeAndQuery(getDepthFirstNextNode(currentQuery, currentJoinNode), currentQuery);
 
