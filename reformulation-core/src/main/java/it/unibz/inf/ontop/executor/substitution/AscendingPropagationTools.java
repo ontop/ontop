@@ -214,9 +214,14 @@ public class AscendingPropagationTools {
                                         .isPresent())
                                 .forEach(treeComponent::removeSubTree));
                 // Assume there is only one child
-                QueryNode replacingChild = treeComponent.removeOrReplaceNodeByUniqueChildren(currentAncestor);
+                QueryNode replacingChild = query.getFirstChild(currentAncestor)
+                        .orElseThrow(() -> new IllegalStateException(currentAncestor + " has no child " +
+                                "so cannot be replaced by it!"));
 
-                optionalAncestryTracker.ifPresent(tr -> tr.recordUpcomingReplacementByChild(query, currentAncestor, replacingChild));
+                optionalAncestryTracker.ifPresent(tr -> tr.recordUpcomingReplacementByChild(query, currentAncestor,
+                        replacingChild));
+
+                treeComponent.removeOrReplaceNodeByUniqueChildren(currentAncestor);
 
                 otherChildren = childOfAncestor != replacingChild
                         ? Stream.of(replacingChild)
