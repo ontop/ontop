@@ -53,30 +53,48 @@ public class SubstitutionPropagationExecutor<N extends QueryNode>
         ImmutableSubstitution<? extends ImmutableTerm> substitutionToPropagate = proposal.getSubstitution();
 
         /**
-         * First propagates up
+         * First to the focus node
          */
-        NodeCentricOptimizationResults<N> ascendingPropagationResults = propagateSubstitutionUp(originalFocusNode,
+        SubstitutionApplicationResults<N> localApplicationResults = applySubstitutionToNode(originalFocusNode,
+                substitutionToPropagate, query, treeComponent, Optional.empty());
+
+        QueryNode newFocusOrReplacingChildNode = localApplicationResults.getNewNodeOrReplacingChild()
+                .orElseThrow(() -> new InvalidQueryOptimizationProposalException(
+                        "A SubstitutionPropagationProposal must provide a substitution " +
+                                "that is directly applicable to the focus node (the focus node should not reject it)"));
+
+        /**
+         * Then propagates up
+         *
+         * NB: this can remove the focus node (or its replacing child) but not altered it and its sub-tree.
+         *
+         */
+        NodeCentricOptimizationResults<QueryNode> ascendingPropagationResults = propagateSubstitutionUp(
+                newFocusOrReplacingChildNode,
                 substitutionToPropagate, query, treeComponent, Optional.empty());
 
         /**
          * If some ancestors are removed, does not go further
          */
         if (!ascendingPropagationResults.getOptionalNewNode().isPresent()) {
-            return ascendingPropagationResults;
+            if (ascendingPropagationResults.getOptionalReplacingChild().isPresent()) {
+                throw new IllegalStateException("The focus node is not expected to be replaced " +
+                        "by its child while propagating the substitution up");
+            }
+
+            return new NodeCentricOptimizationResultsImpl<>(ascendingPropagationResults.getResultingQuery(),
+                    ascendingPropagationResults.getOptionalNextSibling(),
+                    ascendingPropagationResults.getOptionalClosestAncestor());
         }
 
-        if (ascendingPropagationResults.getOptionalNewNode().get() != originalFocusNode) {
+        if (ascendingPropagationResults.getOptionalNewNode().get() != newFocusOrReplacingChildNode) {
             throw new IllegalStateException("The original focus node was not expected to changed");
         }
 
         /**
-         * Then to the focus node
-         */
-        SubstitutionApplicationResults<N> localApplicationResults = applySubstitutionToNode(originalFocusNode,
-                substitutionToPropagate, query, treeComponent, Optional.empty());
-
-        /**
          * Finally, propagates down and returns the results
+         *
+         * NB: localApplicationResults should still be valid after propagating the substitution up
          */
         return propagateDown(query, treeComponent, localApplicationResults);
 

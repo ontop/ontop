@@ -6,6 +6,7 @@ import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.AtomPredicateImpl;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
+import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
 import it.unibz.inf.ontop.model.impl.URITemplatePredicateImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionImpl;
 import it.unibz.inf.ontop.pivotalrepr.*;
@@ -509,6 +510,51 @@ public class SubstitutionPropagationTest {
         expectedQueryBuilder.addChild(leftConstructionNode, DATA_NODE_1);
 
         propagateAndCompare(initialQuery, expectedQueryBuilder.build(), propagationProposal);
+    }
+
+    @Test
+    public void testIncompatibleRightOfLJ() throws EmptyQueryException {
+        IntermediateQueryBuilder initialQueryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
+        DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE, X, Y);
+
+        ConstructionNode initialRootNode = new ConstructionNodeImpl(projectionAtom.getVariables());
+        initialQueryBuilder.init(projectionAtom, initialRootNode);
+
+        LeftJoinNode leftJoinNode = new LeftJoinNodeImpl(Optional.empty());
+        initialQueryBuilder.addChild(initialRootNode, leftJoinNode);
+
+        ConstructionNode leftConstructionNode = new ConstructionNodeImpl(ImmutableSet.of(X),
+                new ImmutableSubstitutionImpl<>(ImmutableMap.of(X, generateURI1(A))),
+                Optional.empty());
+        initialQueryBuilder.addChild(leftJoinNode, leftConstructionNode, LEFT);
+        initialQueryBuilder.addChild(leftConstructionNode, DATA_NODE_1);
+
+        ConstructionNode rightConstructionNode = new ConstructionNodeImpl(ImmutableSet.of(X, Y),
+                new ImmutableSubstitutionImpl<>(ImmutableMap.of(X, generateURI2(C, D),
+                        Y, generateURI1(D))),
+                Optional.empty());
+        initialQueryBuilder.addChild(leftJoinNode, rightConstructionNode, RIGHT);
+        initialQueryBuilder.addChild(rightConstructionNode, DATA_NODE_3);
+
+        /**
+         * Throw from the LJ the substitution of the left construction node
+         */
+        SubstitutionPropagationProposal<ConstructionNode> propagationProposal =
+                new SubstitutionPropagationProposalImpl<>(leftConstructionNode,
+                        leftConstructionNode.getDirectBindingSubstitution());
+
+
+        IntermediateQueryBuilder expectedQueryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
+
+        ConstructionNode expectedRootNode = new ConstructionNodeImpl(projectionAtom.getVariables(),
+                new ImmutableSubstitutionImpl<>(ImmutableMap.of(
+                        X, generateURI1(A),
+                        Y, OBDAVocabulary.NULL)), Optional.empty());
+        expectedQueryBuilder.init(projectionAtom, expectedRootNode);
+        expectedQueryBuilder.addChild(expectedRootNode, DATA_NODE_1);
+
+        propagateAndCompare(initialQueryBuilder.build(), expectedQueryBuilder.build(), propagationProposal);
+
     }
 
 
