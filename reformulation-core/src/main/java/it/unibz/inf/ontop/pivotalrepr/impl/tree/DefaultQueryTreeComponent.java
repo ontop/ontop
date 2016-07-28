@@ -67,8 +67,8 @@ public class DefaultQueryTreeComponent implements QueryTreeComponent {
     }
 
     @Override
-    public ImmutableSet<EmptyNode> getEmptyNodes(QueryNode subTreeRoot) {
-        return tree.getEmptyNodes(subTreeRoot);
+    public ImmutableSet<EmptyNode> getEmptyNodes() {
+        return tree.getEmptyNodes();
     }
 
     @Override
@@ -227,8 +227,8 @@ public class DefaultQueryTreeComponent implements QueryTreeComponent {
     }
 
     @Override
-    public void replaceNodeByChild(QueryNode parentNode, Optional<ArgumentPosition> optionalReplacingChildPosition) {
-        tree.replaceNodeByChild(parentNode, optionalReplacingChildPosition);
+    public QueryNode replaceNodeByChild(QueryNode parentNode, Optional<ArgumentPosition> optionalReplacingChildPosition) {
+        return tree.replaceNodeByChild(parentNode, optionalReplacingChildPosition);
     }
 
     @Override

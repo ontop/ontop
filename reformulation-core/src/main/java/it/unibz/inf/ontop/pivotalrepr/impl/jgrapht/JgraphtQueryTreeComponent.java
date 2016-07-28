@@ -144,10 +144,8 @@ public class JgraphtQueryTreeComponent implements QueryTreeComponent {
     }
 
     @Override
-    public ImmutableSet<EmptyNode> getEmptyNodes(QueryNode subTreeRoot) {
-        return Stream.concat(
-                    Stream.of(subTreeRoot),
-                    getSubTreeNodesInTopDownOrder(subTreeRoot).stream())
+    public ImmutableSet<EmptyNode> getEmptyNodes() {
+        return getNodesInTopDownOrder().stream()
                 .filter(n -> n instanceof EmptyNode)
                 .map(n -> (EmptyNode) n)
                 .collect(ImmutableCollectors.toSet());
@@ -484,7 +482,7 @@ public class JgraphtQueryTreeComponent implements QueryTreeComponent {
     }
 
     @Override
-    public void replaceNodeByChild(QueryNode parentNode, Optional<NonCommutativeOperatorNode.ArgumentPosition> optionalReplacingChildPosition) {
+    public QueryNode replaceNodeByChild(QueryNode parentNode, Optional<NonCommutativeOperatorNode.ArgumentPosition> optionalReplacingChildPosition) {
         throw new RuntimeException("TODO: support replaceNodeByChild");
     }
 

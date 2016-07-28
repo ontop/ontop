@@ -13,7 +13,9 @@ import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitut
 import it.unibz.inf.ontop.pivotalrepr.*;
 import it.unibz.inf.ontop.pivotalrepr.impl.*;
 import it.unibz.inf.ontop.pivotalrepr.impl.tree.DefaultIntermediateQueryBuilder;
-import it.unibz.inf.ontop.pivotalrepr.proposal.impl.RemoveEmptyNodesProposalImpl;
+import it.unibz.inf.ontop.pivotalrepr.proposal.NodeTracker;
+import it.unibz.inf.ontop.pivotalrepr.proposal.NodeTrackingResults;
+import it.unibz.inf.ontop.pivotalrepr.proposal.impl.RemoveEmptyNodeProposalImpl;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -22,6 +24,8 @@ import java.util.Optional;
 import static it.unibz.inf.ontop.pivotalrepr.NonCommutativeOperatorNode.ArgumentPosition.LEFT;
 import static it.unibz.inf.ontop.pivotalrepr.NonCommutativeOperatorNode.ArgumentPosition.RIGHT;
 import static it.unibz.inf.ontop.pivotalrepr.equivalence.IQSyntacticEquivalenceChecker.areEquivalent;
+import static junit.framework.TestCase.assertFalse;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 @Ignore
@@ -47,6 +51,7 @@ public class EmptyNodeRemovalTest {
     private static AtomPredicate TABLE_2 = new AtomPredicateImpl("table2", 1);
     private static ExtensionalDataNode DATA_NODE_1 = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE_1, A, B));
     private static ExtensionalDataNode DATA_NODE_2 = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE_2, A));
+    private static final EmptyNode EMPTY_NODE_1 = new EmptyNodeImpl(ImmutableSet.of(A, C));
 
     /**
      * TODO: Put the UNION as the root instead of the construction node (when this will become legal)
@@ -57,7 +62,8 @@ public class EmptyNodeRemovalTest {
                 ImmutableMap.of());
         ImmutableSubstitutionImpl<ImmutableTerm> leftBindings = new ImmutableSubstitutionImpl<>(
                 ImmutableMap.of(X, generateURI1(A), Y, generateURI1(B)));
-        IntermediateQuery query = generateQueryWithUnion(topBindings, leftBindings, PROJECTION_ATOM.getVariables());
+        EmptyNode emptyNode = new EmptyNodeImpl(PROJECTION_ATOM.getVariables());
+        IntermediateQuery query = generateQueryWithUnion(topBindings, leftBindings, emptyNode);
 
         /**
          * Expected query
@@ -72,7 +78,7 @@ public class EmptyNodeRemovalTest {
 
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
 
-        optimizeAndCompare(query, expectedQuery);
+        optimizeAndCompare(query, expectedQuery, emptyNode);
     }
 
     @Test
@@ -81,7 +87,8 @@ public class EmptyNodeRemovalTest {
                 ImmutableMap.of(X, generateURI1(A)));
         ImmutableSubstitutionImpl<ImmutableTerm> leftBindings = new ImmutableSubstitutionImpl<>(
                 ImmutableMap.of(Y, generateURI1(B)));
-        IntermediateQuery query = generateQueryWithUnion(topBindings, leftBindings, ImmutableSet.of(Y, A));
+        EmptyNode emptyNode = new EmptyNodeImpl(ImmutableSet.of(Y, A));
+        IntermediateQuery query = generateQueryWithUnion(topBindings, leftBindings, emptyNode);
 
         /**
          * Expected query
@@ -100,7 +107,7 @@ public class EmptyNodeRemovalTest {
 
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
 
-        optimizeAndCompare(query, expectedQuery);
+        optimizeAndCompare(query, expectedQuery, emptyNode);
     }
 
     @Test
@@ -109,7 +116,8 @@ public class EmptyNodeRemovalTest {
                 ImmutableMap.of(X, generateURI1(A), Y, generateURI1(B)));
         ImmutableSubstitutionImpl<ImmutableTerm> leftBindings = new ImmutableSubstitutionImpl<>(
                 ImmutableMap.of());
-        IntermediateQuery query = generateQueryWithUnion(topBindings, leftBindings, ImmutableSet.of(A, B));
+        EmptyNode emptyNode = new EmptyNodeImpl(ImmutableSet.of(A, B));
+        IntermediateQuery query = generateQueryWithUnion(topBindings, leftBindings, emptyNode);
 
         /**
          * Expected query
@@ -122,7 +130,7 @@ public class EmptyNodeRemovalTest {
 
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
 
-        optimizeAndCompare(query, expectedQuery);
+        optimizeAndCompare(query, expectedQuery, emptyNode);
     }
 
     @Test
@@ -161,7 +169,7 @@ public class EmptyNodeRemovalTest {
         expectedQueryBuilder.addChild(unionNode, rightConstructionNode);
         expectedQueryBuilder.addChild(rightConstructionNode, DATA_NODE_2);
 
-        optimizeAndCompare(queryBuilder.build(), expectedQueryBuilder.build());
+        optimizeAndCompare(queryBuilder.build(), expectedQueryBuilder.build(), emptyNode);
     }
 
 
@@ -169,7 +177,9 @@ public class EmptyNodeRemovalTest {
 
     private static IntermediateQuery generateQueryWithUnion(ImmutableSubstitution<ImmutableTerm> topBindings,
                                                             ImmutableSubstitution<ImmutableTerm> leftBindings,
-                                                            ImmutableSet<Variable> subQueryProjectedVariables) {
+                                                            EmptyNode emptyNode) {
+        ImmutableSet<Variable> subQueryProjectedVariables = emptyNode.getProjectedVariables();
+
         IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
 
         ImmutableSet<Variable> projectedVariables = PROJECTION_ATOM.getVariables();
@@ -188,9 +198,7 @@ public class EmptyNodeRemovalTest {
             queryBuilder.addChild(unionNode, leftConstructionNode);
 
             queryBuilder.addChild(leftConstructionNode, DATA_NODE_1);
-        }
-
-        EmptyNode emptyNode = new EmptyNodeImpl(subQueryProjectedVariables);
+        };
         queryBuilder.addChild(unionNode, emptyNode);
 
         return queryBuilder.build();
@@ -209,7 +217,8 @@ public class EmptyNodeRemovalTest {
         queryBuilder.addChild(rootNode, leftJoinNode);
 
         queryBuilder.addChild(leftJoinNode, DATA_NODE_2, LEFT);
-        queryBuilder.addChild(leftJoinNode, new EmptyNodeImpl(ImmutableSet.of(B)), RIGHT);
+        EmptyNode emptyNode = new EmptyNodeImpl(ImmutableSet.of(B));
+        queryBuilder.addChild(leftJoinNode, emptyNode, RIGHT);
 
         IntermediateQuery query = queryBuilder.build();
 
@@ -228,7 +237,7 @@ public class EmptyNodeRemovalTest {
 
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
 
-        optimizeAndCompare(query, expectedQuery);
+        optimizeAndCompare(query, expectedQuery, emptyNode);
     }
 
     @Test(expected = EmptyQueryException.class)
@@ -243,14 +252,15 @@ public class EmptyNodeRemovalTest {
         LeftJoinNode leftJoinNode = new LeftJoinNodeImpl(Optional.empty());
         queryBuilder.addChild(rootNode, leftJoinNode);
 
-        queryBuilder.addChild(leftJoinNode, new EmptyNodeImpl(ImmutableSet.of(A)), LEFT);
+        EmptyNode emptyNode = new EmptyNodeImpl(ImmutableSet.of(A));
+        queryBuilder.addChild(leftJoinNode, emptyNode, LEFT);
         queryBuilder.addChild(leftJoinNode, DATA_NODE_1, RIGHT);
 
         IntermediateQuery query = queryBuilder.build();
 
         System.out.println("\n Unsatisfiable query: \n" +  query);
 
-        query.applyProposal(new RemoveEmptyNodesProposalImpl<>(rootNode), REQUIRE_USING_IN_PLACE_EXECUTOR);
+        query.applyProposal(new RemoveEmptyNodeProposalImpl(emptyNode, false), REQUIRE_USING_IN_PLACE_EXECUTOR);
     }
 
     @Test
@@ -271,7 +281,8 @@ public class EmptyNodeRemovalTest {
         queryBuilder.addChild(topLeftJoinNode, rightLeftJoinNode, RIGHT);
 
         queryBuilder.addChild(rightLeftJoinNode, DATA_NODE_1, LEFT);
-        queryBuilder.addChild(rightLeftJoinNode, new EmptyNodeImpl(ImmutableSet.of(A, B, C)), RIGHT);
+        EmptyNode emptyNode = new EmptyNodeImpl(ImmutableSet.of(A, B, C));
+        queryBuilder.addChild(rightLeftJoinNode, emptyNode, RIGHT);
 
         IntermediateQuery query = queryBuilder.build();
 
@@ -287,7 +298,18 @@ public class EmptyNodeRemovalTest {
 
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
 
-        optimizeAndCompare(query, expectedQuery);
+        NodeTracker tracker = optimizeAndCompare(query, expectedQuery, emptyNode);
+        NodeTracker.NodeUpdate<LeftJoinNode> secondLJUpdate = tracker.getUpdate(query, rightLeftJoinNode);
+        assertFalse(secondLJUpdate.getNewNode().isPresent());
+
+        assertTrue(secondLJUpdate.getReplacingChild().isPresent());
+        QueryNode replacingChildOfSecondLJ = secondLJUpdate.getReplacingChild().get();
+        assertTrue(query.contains(replacingChildOfSecondLJ));
+        assertTrue(replacingChildOfSecondLJ.isSyntacticallyEquivalentTo(DATA_NODE_1));
+
+        assertTrue(secondLJUpdate.getOptionalClosestAncestor(query).isPresent());
+        assertTrue(secondLJUpdate.getOptionalClosestAncestor(query).get().isSyntacticallyEquivalentTo(topLeftJoinNode));
+        assertFalse(secondLJUpdate.getOptionalNextSibling(query).isPresent());
     }
 
     @Test
@@ -307,7 +329,8 @@ public class EmptyNodeRemovalTest {
         LeftJoinNode rightLeftJoinNode = new LeftJoinNodeImpl(Optional.empty());
         queryBuilder.addChild(topLeftJoinNode, rightLeftJoinNode, RIGHT);
 
-        queryBuilder.addChild(rightLeftJoinNode, new EmptyNodeImpl(ImmutableSet.of(A)), LEFT);
+        EmptyNode emptyNode = new EmptyNodeImpl(ImmutableSet.of(A));
+        queryBuilder.addChild(rightLeftJoinNode, emptyNode, LEFT);
         queryBuilder.addChild(rightLeftJoinNode, DATA_NODE_1, RIGHT);
 
         IntermediateQuery query = queryBuilder.build();
@@ -327,7 +350,7 @@ public class EmptyNodeRemovalTest {
 
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
 
-        optimizeAndCompare(query, expectedQuery);
+        optimizeAndCompare(query, expectedQuery, emptyNode);
     }
 
     @Test(expected = EmptyQueryException.class)
@@ -343,14 +366,15 @@ public class EmptyNodeRemovalTest {
         queryBuilder.addChild(rootNode, joinNode);
 
         queryBuilder.addChild(joinNode, DATA_NODE_1);
-        queryBuilder.addChild(joinNode, new EmptyNodeImpl(ImmutableSet.of(A, C)));
+        EmptyNode emptyNode = new EmptyNodeImpl(ImmutableSet.of(A, C));
+        queryBuilder.addChild(joinNode, emptyNode);
 
         IntermediateQuery query = queryBuilder.build();
 
         System.out.println("\n Unsatisfiable query: \n" +  query);
 
         // Should throw an exception
-        query.applyProposal(new RemoveEmptyNodesProposalImpl(rootNode), REQUIRE_USING_IN_PLACE_EXECUTOR);
+        query.applyProposal(new RemoveEmptyNodeProposalImpl(emptyNode, true), REQUIRE_USING_IN_PLACE_EXECUTOR);
         System.err.println("\n Failure: this query should have been declared as unsatisfiable: \n" +  query);
     }
 
@@ -370,14 +394,15 @@ public class EmptyNodeRemovalTest {
 
         ConstructionNode constructionNode2 = new ConstructionNodeImpl(ImmutableSet.of(A));
         queryBuilder.addChild(joinNode, constructionNode2);
-        queryBuilder.addChild(constructionNode2, new EmptyNodeImpl(ImmutableSet.of(A, C)));
+        EmptyNode emptyNode = new EmptyNodeImpl(ImmutableSet.of(A, C));
+        queryBuilder.addChild(constructionNode2, emptyNode);
 
         IntermediateQuery query = queryBuilder.build();
 
         System.out.println("\n Unsatisfiable query: \n" +  query);
 
         // Should throw an exception
-        query.applyProposal(new RemoveEmptyNodesProposalImpl<>(rootNode), REQUIRE_USING_IN_PLACE_EXECUTOR);
+        query.applyProposal(new RemoveEmptyNodeProposalImpl(emptyNode, true), REQUIRE_USING_IN_PLACE_EXECUTOR);
         System.err.println("\n Failure: this query should have been declared as unsatisfiable: \n" +  query);
     }
 
@@ -389,7 +414,7 @@ public class EmptyNodeRemovalTest {
         System.out.println("\n Unsatisfiable query: \n" +  query);
 
         // Should throw an exception
-        query.applyProposal(new RemoveEmptyNodesProposalImpl<>(query.getRootConstructionNode()),
+        query.applyProposal(new RemoveEmptyNodeProposalImpl(EMPTY_NODE_1, true),
                 REQUIRE_USING_IN_PLACE_EXECUTOR);
         System.err.println("\n Failure: this query should have been declared as unsatisfiable: \n" +  query);
     }
@@ -403,7 +428,7 @@ public class EmptyNodeRemovalTest {
         System.out.println("\n Unsatisfiable query: \n" +  query);
 
         // Should throw an exception
-        query.applyProposal(new RemoveEmptyNodesProposalImpl<>(query.getRootConstructionNode()),
+        query.applyProposal(new RemoveEmptyNodeProposalImpl(EMPTY_NODE_1, true),
                 REQUIRE_USING_IN_PLACE_EXECUTOR);
         System.err.println("\n Failure: this query should have been declared as unsatisfiable: \n" +  query);
     }
@@ -432,7 +457,7 @@ public class EmptyNodeRemovalTest {
 
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
 
-        optimizeAndCompare(query, expectedQuery);
+        optimizeAndCompare(query, expectedQuery, EMPTY_NODE_1);
     }
 
     @Test
@@ -458,7 +483,7 @@ public class EmptyNodeRemovalTest {
 
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
 
-        optimizeAndCompare(query, expectedQuery);
+        optimizeAndCompare(query, expectedQuery, EMPTY_NODE_1);
     }
 
 
@@ -480,7 +505,7 @@ public class EmptyNodeRemovalTest {
         LeftJoinNode leftJoinNode = new LeftJoinNodeImpl(Optional.empty());
         queryBuilder.addChild(joinNode, leftJoinNode);
         queryBuilder.addChild(leftJoinNode, DATA_NODE_2, LEFT);
-        queryBuilder.addChild(leftJoinNode, new EmptyNodeImpl(ImmutableSet.of(A, C)), RIGHT);
+        queryBuilder.addChild(leftJoinNode, EMPTY_NODE_1, RIGHT);
 
         return queryBuilder.build();
     }
@@ -503,15 +528,15 @@ public class EmptyNodeRemovalTest {
         LeftJoinNode leftJoinNode = new LeftJoinNodeImpl(Optional.empty());
         queryBuilder.addChild(filterNode, leftJoinNode);
         queryBuilder.addChild(leftJoinNode, DATA_NODE_2, LEFT);
-        queryBuilder.addChild(leftJoinNode, new EmptyNodeImpl(ImmutableSet.of(A, B, C)), RIGHT);
+        EmptyNode emptyNode = new EmptyNodeImpl(ImmutableSet.of(A, B, C));
+        queryBuilder.addChild(leftJoinNode, emptyNode, RIGHT);
 
         IntermediateQuery query = queryBuilder.build();
 
         System.out.println("\n Unsatisfiable query: \n" +  query);
 
         // Should throw an exception
-        query.applyProposal(new RemoveEmptyNodesProposalImpl<>(query.getRootConstructionNode()),
-                REQUIRE_USING_IN_PLACE_EXECUTOR);
+        query.applyProposal(new RemoveEmptyNodeProposalImpl(emptyNode, true), REQUIRE_USING_IN_PLACE_EXECUTOR);
         System.err.println("\n Failure: this query should have been declared as unsatisfiable: \n" +  query);
     }
 
@@ -533,7 +558,8 @@ public class EmptyNodeRemovalTest {
         LeftJoinNode leftJoinNode = new LeftJoinNodeImpl(Optional.empty());
         queryBuilder.addChild(filterNode, leftJoinNode);
         queryBuilder.addChild(leftJoinNode, DATA_NODE_2, LEFT);
-        queryBuilder.addChild(leftJoinNode, new EmptyNodeImpl(ImmutableSet.of(A, B, C)), RIGHT);
+        EmptyNode emptyNode = new EmptyNodeImpl(ImmutableSet.of(A, B, C));
+        queryBuilder.addChild(leftJoinNode, emptyNode, RIGHT);
 
         /**
          * Expected query
@@ -546,7 +572,7 @@ public class EmptyNodeRemovalTest {
         expectedQueryBuilder.init(PROJECTION_ATOM, newRootNode);
         expectedQueryBuilder.addChild(newRootNode, DATA_NODE_2);
 
-        optimizeAndCompare(queryBuilder.build(), expectedQueryBuilder.build());
+        optimizeAndCompare(queryBuilder.build(), expectedQueryBuilder.build(), emptyNode);
     }
 
 
@@ -574,7 +600,8 @@ public class EmptyNodeRemovalTest {
         LeftJoinNode lj2 = new LeftJoinNodeImpl(Optional.empty());
         queryBuilder.addChild(join, lj2);
         queryBuilder.addChild(lj2, DATA_NODE_2.clone(), LEFT);
-        queryBuilder.addChild(lj2, new EmptyNodeImpl(ImmutableSet.of(A, C)), RIGHT);
+        EmptyNode emptyNode = new EmptyNodeImpl(ImmutableSet.of(A, C));
+        queryBuilder.addChild(lj2, emptyNode, RIGHT);
 
         /**
          * Expected query
@@ -587,7 +614,7 @@ public class EmptyNodeRemovalTest {
         expectedQueryBuilder.init(PROJECTION_ATOM, newRootNode);
         expectedQueryBuilder.addChild(newRootNode, DATA_NODE_2);
 
-        optimizeAndCompare(queryBuilder.build(), expectedQueryBuilder.build());
+        optimizeAndCompare(queryBuilder.build(), expectedQueryBuilder.build(), emptyNode);
     }
 
     /**
@@ -611,7 +638,8 @@ public class EmptyNodeRemovalTest {
         LeftJoinNode lj2 = new LeftJoinNodeImpl(Optional.empty());
         queryBuilder.addChild(lj1, lj2, LEFT);
         queryBuilder.addChild(lj2, DATA_NODE_2, LEFT);
-        queryBuilder.addChild(lj2, new EmptyNodeImpl(ImmutableSet.of(A, B)), RIGHT);
+        EmptyNode emptyNode = new EmptyNodeImpl(ImmutableSet.of(A, B));
+                queryBuilder.addChild(lj2, emptyNode, RIGHT);
 
 
         /**
@@ -625,7 +653,7 @@ public class EmptyNodeRemovalTest {
         expectedQueryBuilder.init(PROJECTION_ATOM, newRootNode);
         expectedQueryBuilder.addChild(newRootNode, DATA_NODE_2);
 
-        optimizeAndCompare(queryBuilder.build(), expectedQueryBuilder.build());
+        optimizeAndCompare(queryBuilder.build(), expectedQueryBuilder.build(), emptyNode);
     }
 
     /**
@@ -648,7 +676,8 @@ public class EmptyNodeRemovalTest {
         LeftJoinNode lj2 = new LeftJoinNodeImpl(Optional.empty());
         queryBuilder.addChild(lj1, lj2, LEFT);
         queryBuilder.addChild(lj2, DATA_NODE_2, LEFT);
-        queryBuilder.addChild(lj2, new EmptyNodeImpl(ImmutableSet.of(A, B)), RIGHT);
+        EmptyNode emptyNode = new EmptyNodeImpl(ImmutableSet.of(A, B));
+        queryBuilder.addChild(lj2, emptyNode, RIGHT);
 
 
         /**
@@ -662,7 +691,7 @@ public class EmptyNodeRemovalTest {
         expectedQueryBuilder.init(PROJECTION_ATOM, newRootNode);
         expectedQueryBuilder.addChild(newRootNode, DATA_NODE_2);
 
-        optimizeAndCompare(queryBuilder.build(), expectedQueryBuilder.build());
+        optimizeAndCompare(queryBuilder.build(), expectedQueryBuilder.build(), emptyNode);
     }
 
     @Test
@@ -683,7 +712,8 @@ public class EmptyNodeRemovalTest {
         LeftJoinNode lj2 = new LeftJoinNodeImpl(Optional.empty());
         queryBuilder.addChild(lj1, lj2, LEFT);
         queryBuilder.addChild(lj2, DATA_NODE_2, LEFT);
-        queryBuilder.addChild(lj2, new EmptyNodeImpl(ImmutableSet.of(A, B)), RIGHT);
+        EmptyNode emptyNode = new EmptyNodeImpl(ImmutableSet.of(A, B));
+        queryBuilder.addChild(lj2, emptyNode, RIGHT);
 
 
         /**
@@ -697,7 +727,7 @@ public class EmptyNodeRemovalTest {
         expectedQueryBuilder.init(PROJECTION_ATOM, newRootNode);
         expectedQueryBuilder.addChild(newRootNode, DATA_NODE_2);
 
-        optimizeAndCompare(queryBuilder.build(), expectedQueryBuilder.build());
+        optimizeAndCompare(queryBuilder.build(), expectedQueryBuilder.build(), emptyNode);
     }
 
     @Test
@@ -716,7 +746,8 @@ public class EmptyNodeRemovalTest {
         LeftJoinNode lj1 = new LeftJoinNodeImpl(Optional.empty());
         queryBuilder.addChild(groupNode, lj1);
         queryBuilder.addChild(lj1, DATA_NODE_2, LEFT);
-        queryBuilder.addChild(lj1, new EmptyNodeImpl(ImmutableSet.of(B)), RIGHT);
+        EmptyNode emptyNode = new EmptyNodeImpl(ImmutableSet.of(B));
+        queryBuilder.addChild(lj1, emptyNode, RIGHT);
 
         /**
          * Expected query
@@ -732,7 +763,7 @@ public class EmptyNodeRemovalTest {
         expectedQueryBuilder.addChild(newRootNode, newGroupNode);
         expectedQueryBuilder.addChild(newGroupNode, DATA_NODE_2);
 
-        optimizeAndCompare(queryBuilder.build(), expectedQueryBuilder.build());
+        optimizeAndCompare(queryBuilder.build(), expectedQueryBuilder.build(), emptyNode);
     }
 
     @Test
@@ -751,7 +782,8 @@ public class EmptyNodeRemovalTest {
         LeftJoinNode lj1 = new LeftJoinNodeImpl(Optional.empty());
         queryBuilder.addChild(groupNode, lj1);
         queryBuilder.addChild(lj1, DATA_NODE_2, LEFT);
-        queryBuilder.addChild(lj1, new EmptyNodeImpl(ImmutableSet.of(B)), RIGHT);
+        EmptyNode emptyNode = new EmptyNodeImpl(ImmutableSet.of(B));
+        queryBuilder.addChild(lj1, emptyNode, RIGHT);
 
         /**
          * Expected query
@@ -767,7 +799,7 @@ public class EmptyNodeRemovalTest {
         expectedQueryBuilder.addChild(newRootNode, newGroupNode);
         expectedQueryBuilder.addChild(newGroupNode, DATA_NODE_2);
 
-        optimizeAndCompare(queryBuilder.build(), expectedQueryBuilder.build());
+        optimizeAndCompare(queryBuilder.build(), expectedQueryBuilder.build(), emptyNode);
     }
 
     /**
@@ -790,7 +822,8 @@ public class EmptyNodeRemovalTest {
         LeftJoinNode lj1 = new LeftJoinNodeImpl(Optional.empty());
         queryBuilder.addChild(groupNode, lj1);
         queryBuilder.addChild(lj1, DATA_NODE_2, LEFT);
-        queryBuilder.addChild(lj1, new EmptyNodeImpl(ImmutableSet.of(B)), RIGHT);
+        EmptyNode emptyNode = new EmptyNodeImpl(ImmutableSet.of(B));
+        queryBuilder.addChild(lj1, emptyNode, RIGHT);
 
         /**
          * Expected query
@@ -805,23 +838,28 @@ public class EmptyNodeRemovalTest {
 
         expectedQueryBuilder.addChild(newRootNode, DATA_NODE_2);
 
-        optimizeAndCompare(queryBuilder.build(), expectedQueryBuilder.build());
+        optimizeAndCompare(queryBuilder.build(), expectedQueryBuilder.build(), emptyNode);
     }
 
 
-    private static void optimizeAndCompare(IntermediateQuery query, IntermediateQuery expectedQuery)
+    private static NodeTracker optimizeAndCompare(IntermediateQuery query, IntermediateQuery expectedQuery,
+                                                  EmptyNode emptyNode)
             throws EmptyQueryException {
 
         System.out.println("\n Original query: \n" +  query);
         System.out.println("\n Expected query: \n" +  expectedQuery);
 
         // Updates the query (in-place optimization)
-        query.applyProposal(new RemoveEmptyNodesProposalImpl<>(query.getRootConstructionNode()),
+        NodeTrackingResults<EmptyNode> results = query.applyProposal(new RemoveEmptyNodeProposalImpl(emptyNode, true),
                 REQUIRE_USING_IN_PLACE_EXECUTOR);
 
         System.out.println("\n Optimized query: \n" +  query);
 
         assertTrue(areEquivalent(query, expectedQuery));
+
+        Optional<NodeTracker> optionalTracker = results.getOptionalTracker();
+        assertTrue(optionalTracker.isPresent());
+        return optionalTracker.get();
 
     }
 

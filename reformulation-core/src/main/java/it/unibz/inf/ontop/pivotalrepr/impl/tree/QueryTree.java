@@ -47,12 +47,13 @@ public interface QueryTree {
 
     void insertParent(QueryNode childNode, QueryNode newParentNode) throws IllegalTreeUpdateException;
 
-    ImmutableSet<EmptyNode> getEmptyNodes(QueryNode subTreeRoot);
+    ImmutableSet<EmptyNode> getEmptyNodes();
+
+    QueryNode replaceNodeByChild(QueryNode parentNode,
+                                 Optional<NonCommutativeOperatorNode.ArgumentPosition> optionalReplacingChildPosition);
 
     ImmutableSet<IntensionalDataNode> getIntensionalNodes();
 
-    void replaceNodeByChild(QueryNode parentNode,
-                            Optional<NonCommutativeOperatorNode.ArgumentPosition> optionalReplacingChildPosition);
 
     /**
      * Keeps the same query node objects but clones the tree edges

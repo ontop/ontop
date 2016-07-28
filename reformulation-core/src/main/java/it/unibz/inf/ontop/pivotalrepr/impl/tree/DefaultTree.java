@@ -4,6 +4,8 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.pivotalrepr.*;
 import it.unibz.inf.ontop.pivotalrepr.impl.IllegalTreeUpdateException;
+import it.unibz.inf.ontop.pivotalrepr.ConstructionNode;
+import it.unibz.inf.ontop.pivotalrepr.QueryNode;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.*;
@@ -327,21 +329,21 @@ public class DefaultTree implements QueryTree {
         addChild(newParentNode, childNode, Optional.<NonCommutativeOperatorNode.ArgumentPosition>empty(), false, false);
     }
 
-    public ImmutableSet<EmptyNode> getEmptyNodes(QueryNode subTreeRoot) {
-        if (subTreeRoot == rootNode) {
-            return ImmutableSet.copyOf(emptyNodes);
-        }
-        /**
-         * TODO: find a more efficient implementation
-         */
-        else {
-            return Stream.concat(
-                    Stream.of(subTreeRoot),
-                    getSubTreeNodesInTopDownOrder(subTreeRoot).stream())
-                    .filter(n -> n instanceof EmptyNode)
-                    .map(n -> (EmptyNode) n)
-                    .collect(ImmutableCollectors.toSet());
-        }
+    public ImmutableSet<EmptyNode> getEmptyNodes() {
+//        if (subTreeRoot == rootNode) {
+        return ImmutableSet.copyOf(emptyNodes);
+//        }
+//        /**
+//         * TODO: find a more efficient implementation
+//         */
+//        else {
+//            return Stream.concat(
+//                    Stream.of(subTreeRoot),
+//                    getSubTreeNodesInTopDownOrder(subTreeRoot).stream())
+//                    .filter(n -> n instanceof EmptyNode)
+//                    .map(n -> (EmptyNode) n)
+//                    .collect(ImmutableCollectors.toSet());
+//        }
     }
 
     @Override
@@ -350,8 +352,8 @@ public class DefaultTree implements QueryTree {
     }
 
     @Override
-    public void replaceNodeByChild(QueryNode parentNode,
-                                   Optional<NonCommutativeOperatorNode.ArgumentPosition> optionalReplacingChildPosition) {
+    public QueryNode replaceNodeByChild(QueryNode parentNode,
+                                        Optional<NonCommutativeOperatorNode.ArgumentPosition> optionalReplacingChildPosition) {
         TreeNode parentTreeNode = accessTreeNode(parentNode);
 
         ChildrenRelation childrenRelation = accessChildrenRelation(parentTreeNode);
@@ -379,6 +381,7 @@ public class DefaultTree implements QueryTree {
 
         ChildrenRelation grandParentRelation = accessChildrenRelation(grandParentTreeNode);
         grandParentRelation.replaceChild(parentTreeNode, childTreeNode);
+        return childTreeNode.getQueryNode();
     }
 
     @Override

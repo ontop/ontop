@@ -14,6 +14,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import static it.unibz.inf.ontop.pivotalrepr.NodeTransformationProposedState.DECLARE_AS_EMPTY;
+import static it.unibz.inf.ontop.pivotalrepr.NodeTransformationProposedState.REPLACE_BY_UNIQUE_NON_EMPTY_CHILD;
 import static it.unibz.inf.ontop.pivotalrepr.NonCommutativeOperatorNode.ArgumentPosition.*;
 
 public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
@@ -93,6 +95,16 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
         ImmutableSet<Variable> rightVariables = query.getProjectedVariables(rightChild);
 
         /**
+         * If the substitution will set some right variables to be null
+         *  -> remove the right part
+         */
+        if (rightVariables.stream()
+                .filter(substitution::isDefining)
+                .anyMatch(v -> substitution.get(v).equals(OBDAVocabulary.NULL))) {
+            return proposeToRemoveTheRightPart(query, substitution, Optional.of(rightVariables), Provenance.FROM_LEFT);
+        }
+
+        /**
          * Updates the joining conditions (may add new equalities)
          * and propagates the same substitution if the conditions still holds.
          *
@@ -123,29 +135,36 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
          * Joining condition does not hold: replace the LJ by its left child.
          */
         if (evaluation.isFalse()) {
-
-            ImmutableSubstitution<? extends ImmutableTerm> newSubstitution;
-            switch(provenance) {
-                case FROM_LEFT:
-                    newSubstitution = removeRightChildSubstitutionFromLeft(query, substitution,
-                            optionalVariablesFromOppositeSide);
-                    break;
-                case FROM_RIGHT:
-                    newSubstitution = removeRightChildSubstitutionFromRight(query, substitution,
-                            optionalVariablesFromOppositeSide);
-                    break;
-                default:
-                    newSubstitution = substitution;
-                    break;
-            }
-
-            return new SubstitutionResultsImpl<>(newSubstitution, Optional.of(LEFT));
+            return proposeToRemoveTheRightPart(query, substitution, optionalVariablesFromOppositeSide, provenance);
         }
         else {
             LeftJoinNode newNode = changeOptionalFilterCondition(evaluation.getOptionalExpression());
             return new SubstitutionResultsImpl<>(newNode, substitution);
         }
     }
+
+    private SubstitutionResults<LeftJoinNode> proposeToRemoveTheRightPart(
+            IntermediateQuery query, ImmutableSubstitution<? extends ImmutableTerm> substitution,
+            Optional<ImmutableSet<Variable>> optionalVariablesFromOppositeSide, Provenance provenance) {
+
+        ImmutableSubstitution<? extends ImmutableTerm> newSubstitution;
+        switch(provenance) {
+            case FROM_LEFT:
+                newSubstitution = removeRightChildSubstitutionFromLeft(query, substitution,
+                        optionalVariablesFromOppositeSide);
+                break;
+            case FROM_RIGHT:
+                newSubstitution = removeRightChildSubstitutionFromRight(query, substitution,
+                        optionalVariablesFromOppositeSide);
+                break;
+            default:
+                newSubstitution = substitution;
+                break;
+        }
+
+        return new SubstitutionResultsImpl<>(newSubstitution, Optional.of(LEFT));
+    }
+
 
     private ImmutableSubstitution<ImmutableTerm> removeRightChildSubstitutionFromLeft(
             IntermediateQuery query, ImmutableSubstitution<? extends ImmutableTerm> substitution,
@@ -212,6 +231,34 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
     public boolean isSyntacticallyEquivalentTo(QueryNode node) {
         return (node instanceof LeftJoinNode)
                 && ((LeftJoinNode) node).getOptionalFilterCondition().equals(this.getOptionalFilterCondition());
+    }
+
+    @Override
+    public NodeTransformationProposal reactToEmptyChild(IntermediateQuery query, EmptyNode emptyChild) {
+        ArgumentPosition emptyNodePosition = query.getOptionalPosition(this, emptyChild)
+                .orElseThrow(() -> new IllegalStateException("The deleted child of a LJ must have a position"));
+
+        QueryNode otherChild = query.getChild(this, (emptyNodePosition == LEFT) ? RIGHT : LEFT)
+                .orElseThrow(() -> new IllegalStateException("The other child of a LJ is missing"));
+
+        ImmutableSet<Variable> variablesProjectedByOtherChild = query.getProjectedVariables(otherChild);
+
+        ImmutableSet<Variable> nullVariables;
+
+        switch(emptyNodePosition) {
+            case LEFT:
+                nullVariables = union(variablesProjectedByOtherChild, emptyChild.getProjectedVariables());
+                return new NodeTransformationProposalImpl(DECLARE_AS_EMPTY, nullVariables);
+
+            case RIGHT:
+                nullVariables = emptyChild.getProjectedVariables().stream()
+                        .filter(v -> !(variablesProjectedByOtherChild.contains(v)))
+                        .collect(ImmutableCollectors.toSet());
+                return new NodeTransformationProposalImpl(REPLACE_BY_UNIQUE_NON_EMPTY_CHILD,
+                        otherChild, nullVariables);
+            default:
+                throw new IllegalStateException("Unknown position: " + emptyNodePosition);
+        }
     }
 
     @Override

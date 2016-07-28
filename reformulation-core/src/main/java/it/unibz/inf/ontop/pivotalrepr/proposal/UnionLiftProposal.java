@@ -5,7 +5,7 @@ import it.unibz.inf.ontop.pivotalrepr.UnionNode;
 import it.unibz.inf.ontop.pivotalrepr.proposal.ProposalResults;
 import it.unibz.inf.ontop.pivotalrepr.proposal.QueryOptimizationProposal;
 
-public interface UnionLiftProposal extends NodeCentricOptimizationProposal<UnionNode> {
+public interface UnionLiftProposal extends SimpleNodeCentricOptimizationProposal<UnionNode> {
 
     /**
      * The Union has to be lift just above this target node
