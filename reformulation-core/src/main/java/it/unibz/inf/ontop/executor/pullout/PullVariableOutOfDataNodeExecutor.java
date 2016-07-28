@@ -1,22 +1,23 @@
 package it.unibz.inf.ontop.executor.pullout;
 
-import java.util.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.executor.SimpleNodeCentricInternalExecutor;
 import it.unibz.inf.ontop.executor.substitution.DescendingPropagationTools;
+import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
+import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.InjectiveVar2VarSubstitution;
+import it.unibz.inf.ontop.pivotalrepr.*;
 import it.unibz.inf.ontop.pivotalrepr.impl.FilterNodeImpl;
 import it.unibz.inf.ontop.pivotalrepr.impl.IllegalTreeUpdateException;
+import it.unibz.inf.ontop.pivotalrepr.impl.QueryTreeComponent;
 import it.unibz.inf.ontop.pivotalrepr.proposal.InvalidQueryOptimizationProposalException;
+import it.unibz.inf.ontop.pivotalrepr.proposal.NodeCentricOptimizationResults;
 import it.unibz.inf.ontop.pivotalrepr.proposal.PullVariableOutOfDataNodeProposal;
 import it.unibz.inf.ontop.pivotalrepr.proposal.impl.NodeCentricOptimizationResultsImpl;
-import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.InjectiveVar2VarSubstitution;
-import it.unibz.inf.ontop.pivotalrepr.impl.QueryTreeComponent;
-import it.unibz.inf.ontop.pivotalrepr.proposal.NodeCentricOptimizationResults;
-import it.unibz.inf.ontop.model.*;
-import it.unibz.inf.ontop.pivotalrepr.*;
+
+import java.util.Optional;
 
 
 /**

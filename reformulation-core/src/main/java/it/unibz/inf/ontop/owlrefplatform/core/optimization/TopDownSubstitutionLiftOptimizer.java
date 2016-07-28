@@ -10,10 +10,8 @@ import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitut
 import it.unibz.inf.ontop.owlrefplatform.core.optimization.QueryNodeNavigationTools.NextNodeAndQuery;
 import it.unibz.inf.ontop.pivotalrepr.*;
 import it.unibz.inf.ontop.pivotalrepr.proposal.NodeCentricOptimizationResults;
-
 import it.unibz.inf.ontop.pivotalrepr.proposal.SubstitutionPropagationProposal;
 import it.unibz.inf.ontop.pivotalrepr.proposal.UnionLiftProposal;
-
 import it.unibz.inf.ontop.pivotalrepr.proposal.impl.SubstitutionPropagationProposalImpl;
 import it.unibz.inf.ontop.pivotalrepr.proposal.impl.UnionLiftProposalImpl;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;

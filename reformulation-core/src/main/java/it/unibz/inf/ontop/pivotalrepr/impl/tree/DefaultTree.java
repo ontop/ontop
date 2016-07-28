@@ -4,9 +4,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.pivotalrepr.*;
 import it.unibz.inf.ontop.pivotalrepr.impl.IllegalTreeUpdateException;
-import it.unibz.inf.ontop.pivotalrepr.ConstructionNode;
-import it.unibz.inf.ontop.pivotalrepr.QueryNode;
-import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.*;
 import java.util.stream.Collectors;

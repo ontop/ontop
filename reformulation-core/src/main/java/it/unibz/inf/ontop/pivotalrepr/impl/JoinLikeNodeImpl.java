@@ -1,8 +1,5 @@
 package it.unibz.inf.ontop.pivotalrepr.impl;
 
-import java.util.Optional;
-import java.util.stream.Stream;
-
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
@@ -11,7 +8,8 @@ import it.unibz.inf.ontop.pivotalrepr.IntermediateQuery;
 import it.unibz.inf.ontop.pivotalrepr.JoinLikeNode;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
-import static it.unibz.inf.ontop.model.impl.ImmutabilityTools.foldBooleanExpressions;
+import java.util.Optional;
+import java.util.stream.Stream;
 
 public abstract class JoinLikeNodeImpl extends JoinOrFilterNodeImpl implements JoinLikeNode {
 
