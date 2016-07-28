@@ -6,6 +6,7 @@ import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.AtomPredicateImpl;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
+import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
 import it.unibz.inf.ontop.model.impl.URITemplatePredicateImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.optimization.IntermediateQueryOptimizer;
@@ -752,9 +753,15 @@ public class SubstitutionLiftTest {
         InnerJoinNode expectedJoinNode = new InnerJoinNodeImpl(Optional.empty());
         expectedQueryBuilder.addChild(expectedRootNode, expectedJoinNode);
 
+
+
         //construct union
         UnionNode expectedUnionNode = new UnionNodeImpl(ImmutableSet.of(G, X, F));
         expectedQueryBuilder.addChild(expectedJoinNode, expectedUnionNode);
+
+        //construct right side join
+
+        expectedQueryBuilder.addChild(expectedJoinNode, new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE4_PREDICATE, G, H)));
 
         //construct union left side
 
@@ -772,8 +779,8 @@ public class SubstitutionLiftTest {
         //construct right side left join
         expectedQueryBuilder.addChild(expectedLeftJoinNode, new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE3_PREDICATE, A, F)), RIGHT);
 
-        ConstructionNode expectedNodeOnRight =new ConstructionNodeImpl(ImmutableSet.of(G, X),
-                new ImmutableSubstitutionImpl<>(ImmutableMap.of(X, generateURI2(C))), Optional.empty());
+        ConstructionNode expectedNodeOnRight =new ConstructionNodeImpl(ImmutableSet.of(G, X, F),
+                new ImmutableSubstitutionImpl<>(ImmutableMap.of(F, OBDAVocabulary.NULL, X, generateURI2(C))), Optional.empty());
 
         expectedQueryBuilder.addChild(expectedUnionNode, expectedNodeOnRight);
 
