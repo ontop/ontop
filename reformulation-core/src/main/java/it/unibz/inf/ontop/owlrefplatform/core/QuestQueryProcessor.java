@@ -65,7 +65,7 @@ public class QuestQueryProcessor {
 
 		Stream<IntermediateQuery> intermediateQueryStream =
 				convertMappings(unfolder.getMappings(), unfolder.getExtensionalPredicates(), unfolder.getMetadataForQueryOptimization());
-		// TODO: complete
+
 		this.queryUnfolder = new QueryUnfolderImpl(intermediateQueryStream);
 
 		this.vocabularyValidator = vocabularyValidator;
@@ -204,6 +204,7 @@ public class QuestQueryProcessor {
 				log.debug("Directly translated (SPARQL) intermediate query: \n" + intermediateQuery.toString());
 
 				log.debug("Start the unfolding...");
+
 				intermediateQuery = queryUnfolder.optimize(intermediateQuery);
 
 				log.debug("Unfolded query: \n" + intermediateQuery.toString());

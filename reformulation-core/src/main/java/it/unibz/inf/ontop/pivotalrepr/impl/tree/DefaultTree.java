@@ -2,11 +2,8 @@ package it.unibz.inf.ontop.pivotalrepr.impl.tree;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import it.unibz.inf.ontop.pivotalrepr.NonCommutativeOperatorNode;
-import it.unibz.inf.ontop.pivotalrepr.EmptyNode;
+import it.unibz.inf.ontop.pivotalrepr.*;
 import it.unibz.inf.ontop.pivotalrepr.impl.IllegalTreeUpdateException;
-import it.unibz.inf.ontop.pivotalrepr.ConstructionNode;
-import it.unibz.inf.ontop.pivotalrepr.QueryNode;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.*;
@@ -29,6 +26,7 @@ public class DefaultTree implements QueryTree {
     private final Map<TreeNode, ChildrenRelation> childrenIndex;
     private final Map<TreeNode, TreeNode> parentIndex;
     private final Set<EmptyNode> emptyNodes;
+    private final Set<IntensionalDataNode> intensionalNodes;
 
 
     protected DefaultTree(ConstructionNode rootQueryNode) {
@@ -36,6 +34,7 @@ public class DefaultTree implements QueryTree {
         childrenIndex = new HashMap<>();
         parentIndex = new HashMap<>();
         emptyNodes = new HashSet<>();
+        intensionalNodes = new HashSet<>();
 
         // Adds the root node
         rootNode = new TreeNode(rootQueryNode);
@@ -48,12 +47,14 @@ public class DefaultTree implements QueryTree {
                         Map<QueryNode, TreeNode> nodeIndex,
                         Map<TreeNode, ChildrenRelation> childrenIndex,
                         Map<TreeNode, TreeNode> parentIndex,
-                        Set<EmptyNode> emptyNodes) {
+                        Set<EmptyNode> emptyNodes,
+                        Set<IntensionalDataNode> intensionalNodes) {
         this.rootNode = rootNode;
         this.nodeIndex = nodeIndex;
         this.childrenIndex = childrenIndex;
         this.parentIndex = parentIndex;
         this.emptyNodes = emptyNodes;
+        this.intensionalNodes = intensionalNodes;
     }
 
     @Override
@@ -344,6 +345,11 @@ public class DefaultTree implements QueryTree {
     }
 
     @Override
+    public ImmutableSet<IntensionalDataNode> getIntensionalNodes(){
+        return ImmutableSet.copyOf(intensionalNodes);
+    }
+
+    @Override
     public void replaceNodeByChild(QueryNode parentNode,
                                    Optional<NonCommutativeOperatorNode.ArgumentPosition> optionalReplacingChildPosition) {
         TreeNode parentTreeNode = accessTreeNode(parentNode);
@@ -398,7 +404,7 @@ public class DefaultTree implements QueryTree {
                         Map.Entry::getKey,
                         Map.Entry::getValue
                 ));
-        return new DefaultTree(rootNode, newNodeIndex, newChildrenIndex, newParentIndex, new HashSet<>(emptyNodes));
+        return new DefaultTree(rootNode, newNodeIndex, newChildrenIndex, newParentIndex, new HashSet<>(emptyNodes), new HashSet<>(intensionalNodes));
     }
 
     /**
@@ -490,6 +496,9 @@ public class DefaultTree implements QueryTree {
         nodeIndex.put(queryNode, treeNode);
         if (queryNode instanceof EmptyNode) {
             emptyNodes.add((EmptyNode)queryNode);
+
+        }else if (queryNode instanceof IntensionalDataNode){
+            intensionalNodes.add((IntensionalDataNode) queryNode);
         }
     }
 
@@ -501,6 +510,9 @@ public class DefaultTree implements QueryTree {
 
         if (queryNode instanceof EmptyNode) {
             emptyNodes.remove(queryNode);
+
+        } else if (queryNode instanceof IntensionalDataNode){
+            intensionalNodes.add((IntensionalDataNode) queryNode);
         }
     }
 

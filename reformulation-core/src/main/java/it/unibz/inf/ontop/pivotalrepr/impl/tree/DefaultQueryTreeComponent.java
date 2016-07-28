@@ -2,12 +2,12 @@ package it.unibz.inf.ontop.pivotalrepr.impl.tree;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import it.unibz.inf.ontop.model.Variable;
 import it.unibz.inf.ontop.model.VariableGenerator;
 import it.unibz.inf.ontop.pivotalrepr.*;
 import it.unibz.inf.ontop.pivotalrepr.NonCommutativeOperatorNode.ArgumentPosition;
-import it.unibz.inf.ontop.pivotalrepr.impl.IllegalTreeUpdateException;
-import it.unibz.inf.ontop.model.Variable;
 import it.unibz.inf.ontop.pivotalrepr.impl.IllegalTreeException;
+import it.unibz.inf.ontop.pivotalrepr.impl.IllegalTreeUpdateException;
 import it.unibz.inf.ontop.pivotalrepr.impl.QueryTreeComponent;
 import it.unibz.inf.ontop.pivotalrepr.impl.VariableCollector;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -69,6 +69,11 @@ public class DefaultQueryTreeComponent implements QueryTreeComponent {
     @Override
     public ImmutableSet<EmptyNode> getEmptyNodes(QueryNode subTreeRoot) {
         return tree.getEmptyNodes(subTreeRoot);
+    }
+
+    @Override
+    public ImmutableSet<IntensionalDataNode> getIntensionalNodes() {
+        return tree.getIntensionalNodes();
     }
 
     @Override

@@ -6,9 +6,11 @@ import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.executor.InternalProposalExecutor;
 import it.unibz.inf.ontop.executor.deletion.ReactToChildDeletionExecutor;
 import it.unibz.inf.ontop.executor.expression.PushDownExpressionExecutor;
+import it.unibz.inf.ontop.executor.groundterm.GroundTermRemovalFromDataNodeExecutor;
 import it.unibz.inf.ontop.executor.join.JoinInternalCompositeExecutor;
-import it.unibz.inf.ontop.executor.pullout.PullVariableOutOfSubTreeExecutor;
 import it.unibz.inf.ontop.executor.merging.QueryMergingExecutor;
+import it.unibz.inf.ontop.executor.pullout.PullVariableOutOfDataNodeExecutor;
+import it.unibz.inf.ontop.executor.pullout.PullVariableOutOfSubTreeExecutor;
 import it.unibz.inf.ontop.executor.substitution.SubstitutionPropagationExecutor;
 import it.unibz.inf.ontop.executor.substitution.SubstitutionUpPropagationExecutor;
 import it.unibz.inf.ontop.executor.union.LiftUnionAsHighAsPossibleProposalExecutor;
@@ -16,12 +18,10 @@ import it.unibz.inf.ontop.executor.union.UnionLiftInternalExecutor;
 import it.unibz.inf.ontop.executor.unsatisfiable.RemoveEmptyNodesExecutor;
 import it.unibz.inf.ontop.model.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.Variable;
-import it.unibz.inf.ontop.executor.groundterm.GroundTermRemovalFromDataNodeExecutor;
-import it.unibz.inf.ontop.executor.pullout.PullVariableOutOfDataNodeExecutor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import it.unibz.inf.ontop.pivotalrepr.*;
 import it.unibz.inf.ontop.pivotalrepr.proposal.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -193,6 +193,11 @@ public class IntermediateQueryImpl implements IntermediateQuery {
     @Override
     public ImmutableList<QueryNode> getSubTreeNodesInTopDownOrder(QueryNode currentNode) {
         return treeComponent.getSubTreeNodesInTopDownOrder(currentNode);
+    }
+
+    @Override
+    public Stream<IntensionalDataNode> getIntensionalNodes(){
+        return treeComponent.getIntensionalNodes().stream();
     }
 
     @Override

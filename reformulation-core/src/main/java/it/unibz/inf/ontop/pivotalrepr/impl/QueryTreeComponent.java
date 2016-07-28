@@ -25,6 +25,8 @@ public interface QueryTreeComponent {
 
     ImmutableSet<EmptyNode> getEmptyNodes(QueryNode subTreeRoot);
 
+    ImmutableSet<IntensionalDataNode> getIntensionalNodes();
+
     boolean contains(QueryNode node);
 
     void replaceNode(QueryNode previousNode, QueryNode replacingNode);
