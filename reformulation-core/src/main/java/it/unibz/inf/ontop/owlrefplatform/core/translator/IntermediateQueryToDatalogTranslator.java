@@ -21,15 +21,17 @@ package it.unibz.inf.ontop.owlrefplatform.core.translator;
  */
 
 
-import java.util.*;
-
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.*;
-import it.unibz.inf.ontop.model.impl.*;
-import it.unibz.inf.ontop.utils.ImmutableCollectors;
-import org.slf4j.LoggerFactory;
+import it.unibz.inf.ontop.model.impl.AtomPredicateImpl;
+import it.unibz.inf.ontop.model.impl.ImmutabilityTools;
+import it.unibz.inf.ontop.model.impl.MutableQueryModifiersImpl;
+import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.pivotalrepr.*;
+import org.slf4j.LoggerFactory;
+
+import java.util.*;
 
 import static it.unibz.inf.ontop.model.impl.ImmutabilityTools.convertToMutableFunction;
 
@@ -249,7 +251,7 @@ public class IntermediateQueryToDatalogTranslator {
 							"a UNION node must have a ConstructionNode as parent"));
 
 			DistinctVariableOnlyDataAtom childIdealProjectionAtom = generateProjectionAtom(
-					parentNode.getProjectedVariables());
+					parentNode.getChildVariables());
 			
 			for (QueryNode child : te.getChildren(node)) {
 				ConstructionNode childConstructionNode =(ConstructionNode) child;
@@ -279,13 +281,7 @@ public class IntermediateQueryToDatalogTranslator {
 			return idealProjectionAtom;
 		}
 		else {
-			ImmutableList<VariableOrGroundTerm> newArguments = arguments.stream()
-					.map(arg -> projectedVariables.contains(arg)
-							? arg
-							: OBDAVocabulary.NULL)
-					.collect(ImmutableCollectors.toList());
-
-			return ofac.getDataAtom(idealProjectionAtom.getPredicate(), newArguments);
+			throw new IllegalStateException("The child is not providing the required variables");
 		}
 	}
 

@@ -101,6 +101,18 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
     }
 
     @Override
+    public ImmutableSet<Variable> getChildVariables() {
+        ImmutableSet<Variable> variableDefinedByBindings = substitution.getDomain();
+
+        Stream<Variable> variablesRequiredByBindings = substitution.getImmutableMap().values().stream()
+                .flatMap(t -> t.getVariableStream());
+
+        return Stream.concat(projectedVariables.stream(), variablesRequiredByBindings)
+                .filter(v -> !variableDefinedByBindings.contains(v))
+                .collect(ImmutableCollectors.toSet());
+    }
+
+    @Override
     public NodeTransformationProposal acceptNodeTransformer(HeterogeneousQueryNodeTransformer transformer) {
         return transformer.transform(this);
     }
