@@ -72,7 +72,7 @@ public class TypeExtractor {
         Map<Predicate,ImmutableList<Predicate.COL_TYPE>> mutableCastMap = Maps.newHashMap();
 
         for (Predicate predicate : predicatesInBottomUp) {
-            ImmutableList<Predicate.COL_TYPE> castTypes = inferCastTypes(ruleIndex.get(predicate), termTypeMap,
+            ImmutableList<Predicate.COL_TYPE> castTypes = inferCastTypes(predicate, ruleIndex.get(predicate), termTypeMap,
                     mutableCastMap);
 
             mutableCastMap.put(predicate, castTypes);
@@ -87,11 +87,15 @@ public class TypeExtractor {
      * No side-effect on alreadyKnownCastTypes
      */
     private static ImmutableList<Predicate.COL_TYPE> inferCastTypes(
-            Collection<CQIE> samePredicateRules, ImmutableMap<CQIE, ImmutableList<Optional<TermType>>> termTypeMap,
+            Predicate predicate, Collection<CQIE> samePredicateRules,
+            ImmutableMap<CQIE, ImmutableList<Optional<TermType>>> termTypeMap,
             Map<Predicate, ImmutableList<Predicate.COL_TYPE>> alreadyKnownCastTypes) {
 
         if (samePredicateRules.isEmpty()) {
-            return ImmutableList.of();
+            ImmutableList.Builder<Predicate.COL_TYPE> defaultTypeBuilder = ImmutableList.builder();
+            IntStream.range(0, predicate.getArity())
+                    .forEach(i -> defaultTypeBuilder.add(LITERAL));
+            return defaultTypeBuilder.build();
         }
 
         ImmutableMultimap<Integer, Predicate.COL_TYPE> collectedProposedCastTypes = collectProposedCastTypes(
