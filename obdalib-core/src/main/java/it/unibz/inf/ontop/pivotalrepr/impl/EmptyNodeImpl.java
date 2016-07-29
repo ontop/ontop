@@ -68,6 +68,11 @@ public class EmptyNodeImpl extends QueryNodeImpl implements EmptyNode {
     }
 
     @Override
+    public NodeTransformationProposal reactToEmptyChild(IntermediateQuery query, EmptyNode emptyChild) {
+        throw new UnsupportedOperationException("A EmptyNode is not expected to have a child");
+    }
+
+    @Override
     public EmptyNode clone() {
         return new EmptyNodeImpl(projectedVariables);
     }

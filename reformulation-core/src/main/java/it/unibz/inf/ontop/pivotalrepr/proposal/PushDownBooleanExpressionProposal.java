@@ -9,7 +9,7 @@ import it.unibz.inf.ontop.pivotalrepr.QueryNode;
 /**
  * TODO: explain
  */
-public interface PushDownBooleanExpressionProposal extends NodeCentricOptimizationProposal<JoinOrFilterNode> {
+public interface PushDownBooleanExpressionProposal extends SimpleNodeCentricOptimizationProposal<JoinOrFilterNode> {
 
     /**
      * TODO: explain

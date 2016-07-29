@@ -1,8 +1,11 @@
 package it.unibz.inf.ontop.executor.union;
 
-import it.unibz.inf.ontop.executor.NodeCentricInternalExecutor;
-import it.unibz.inf.ontop.pivotalrepr.*;
+import it.unibz.inf.ontop.executor.SimpleNodeCentricInternalExecutor;
+import it.unibz.inf.ontop.pivotalrepr.IntermediateQuery;
+import it.unibz.inf.ontop.pivotalrepr.LeftJoinNode;
 import it.unibz.inf.ontop.pivotalrepr.NonCommutativeOperatorNode.ArgumentPosition;
+import it.unibz.inf.ontop.pivotalrepr.QueryNode;
+import it.unibz.inf.ontop.pivotalrepr.UnionNode;
 import it.unibz.inf.ontop.pivotalrepr.impl.QueryTreeComponent;
 import it.unibz.inf.ontop.pivotalrepr.impl.UnionNodeImpl;
 import it.unibz.inf.ontop.pivotalrepr.proposal.InvalidQueryOptimizationProposalException;
@@ -17,7 +20,7 @@ import static it.unibz.inf.ontop.pivotalrepr.NonCommutativeOperatorNode.Argument
 /**
  * TODO: explain
  */
-public class UnionLiftInternalExecutor implements NodeCentricInternalExecutor<UnionNode, UnionLiftProposal> {
+public class UnionLiftInternalExecutor implements SimpleNodeCentricInternalExecutor<UnionNode, UnionLiftProposal> {
 
     @Override
     public NodeCentricOptimizationResults<UnionNode> apply(UnionLiftProposal proposal, IntermediateQuery query,

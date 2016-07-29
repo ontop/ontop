@@ -8,7 +8,7 @@ package it.unibz.inf.ontop.pivotalrepr;
  */
 public enum NodeTransformationProposedState {
     NO_LOCAL_CHANGE,
-    REPLACE_BY_UNIQUE_CHILD,
+    REPLACE_BY_UNIQUE_NON_EMPTY_CHILD,
     REPLACE_BY_NEW_NODE,
-    DELETE
+    DECLARE_AS_EMPTY
 }
