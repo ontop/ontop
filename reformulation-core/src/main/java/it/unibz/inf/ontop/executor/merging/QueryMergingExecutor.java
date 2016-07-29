@@ -164,12 +164,13 @@ public class QueryMergingExecutor implements InternalProposalExecutor<QueryMergi
     public ProposalResults apply(QueryMergingProposal proposal, IntermediateQuery mainQuery,
                                  QueryTreeComponent treeComponent)
             throws InvalidQueryOptimizationProposalException, EmptyQueryException {
-        IntermediateQuery subQuery = proposal.getSubQuery();
 
-        List<IntensionalDataNode> localDataNodes = findIntensionalDataNodes(mainQuery, subQuery.getProjectionAtom());
-
-        for (IntensionalDataNode localDataNode : localDataNodes) {
-            mergeSubQuery(treeComponent, subQuery, localDataNode);
+        Optional<IntermediateQuery> optionalSubQuery = proposal.getSubQuery();
+        if (optionalSubQuery.isPresent()) {
+            mergeSubQuery(treeComponent, optionalSubQuery.get(), proposal.getIntensionalNode());
+        }
+        else {
+            removeUnsatisfiedNode(treeComponent, proposal.getIntensionalNode());
         }
 
         // Non-final
@@ -186,16 +187,10 @@ public class QueryMergingExecutor implements InternalProposalExecutor<QueryMergi
         return new ProposalResultsImpl(mainQuery);
     }
 
-    /**
-     * Finds intensional data nodes that matches a data atom.
-     */
-    private ImmutableList<IntensionalDataNode> findIntensionalDataNodes(IntermediateQuery query,
-                                                                        DataAtom subsumingDataAtom) {
-        return query.getNodesInTopDownOrder().stream()
-                .filter(n -> n instanceof IntensionalDataNode)
-                .map(n -> (IntensionalDataNode)n)
-                .filter(n -> subsumingDataAtom.hasSamePredicateAndArity(n.getProjectionAtom()))
-                .collect(ImmutableCollectors.toList());
+    private void removeUnsatisfiedNode(QueryTreeComponent treeComponent, IntensionalDataNode intensionalNode) {
+
+        EmptyNode emptyNode = new EmptyNodeImpl(intensionalNode.getProjectedVariables());
+        treeComponent.replaceSubTree(intensionalNode, emptyNode);
     }
 
     /**

@@ -1,20 +1,16 @@
 package it.unibz.inf.ontop.pivotalrepr.datalog;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
-import it.unibz.inf.ontop.model.CQIE;
-import it.unibz.inf.ontop.model.DatalogProgram;
-import it.unibz.inf.ontop.model.OBDAQueryModifiers;
-import it.unibz.inf.ontop.model.Predicate;
-import it.unibz.inf.ontop.pivotalrepr.EmptyQueryException;
-import it.unibz.inf.ontop.pivotalrepr.ImmutableQueryModifiers;
-import it.unibz.inf.ontop.pivotalrepr.IntermediateQuery;
-import it.unibz.inf.ontop.pivotalrepr.MetadataForQueryOptimization;
+import it.unibz.inf.ontop.model.*;
+import it.unibz.inf.ontop.pivotalrepr.*;
 import it.unibz.inf.ontop.pivotalrepr.impl.ImmutableQueryModifiersImpl;
 import it.unibz.inf.ontop.pivotalrepr.impl.IntermediateQueryUtils;
 import it.unibz.inf.ontop.pivotalrepr.proposal.QueryMergingProposal;
 import it.unibz.inf.ontop.pivotalrepr.proposal.impl.QueryMergingProposalImpl;
 import it.unibz.inf.ontop.utils.DatalogDependencyGraphGenerator;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -87,16 +83,30 @@ public class DatalogProgram2QueryConverter {
             Optional<IntermediateQuery> optionalSubQuery = convertDatalogDefinitions(metadata, datalogAtomPredicate,
                     ruleIndex, tablePredicates, NO_QUERY_MODIFIER);
             if (optionalSubQuery.isPresent()) {
-                QueryMergingProposal mergingProposal = new QueryMergingProposalImpl(optionalSubQuery.get());
-                intermediateQuery.applyProposal(mergingProposal, true);
+
+                ImmutableSet<IntensionalDataNode> intensionalMatches = findIntensionalDataNodes(intermediateQuery,
+                        optionalSubQuery.get().getProjectionAtom());
+
+                for(IntensionalDataNode intensionalNode : intensionalMatches) {
+
+                    if (intermediateQuery.contains(intensionalNode)) {
+                        QueryMergingProposal mergingProposal = new QueryMergingProposalImpl(intensionalNode,
+                                optionalSubQuery);
+                        intermediateQuery.applyProposal(mergingProposal, true);
+                    }
+                }
             }
         }
 
         return intermediateQuery;
-
-
     }
 
+    private static ImmutableSet<IntensionalDataNode> findIntensionalDataNodes(IntermediateQuery query,
+                                                                              DataAtom subQueryProjectionAtom) {
+        return query.getIntensionalNodes()
+                .filter(n -> subQueryProjectionAtom.hasSamePredicateAndArity(n.getProjectionAtom()))
+                .collect(ImmutableCollectors.toSet());
+    }
 
     /**
      * TODO: explain and comment

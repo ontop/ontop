@@ -512,7 +512,7 @@ public class DefaultTree implements QueryTree {
             emptyNodes.remove(queryNode);
 
         } else if (queryNode instanceof IntensionalDataNode){
-            intensionalNodes.add((IntensionalDataNode) queryNode);
+            intensionalNodes.remove(queryNode);
         }
     }
 

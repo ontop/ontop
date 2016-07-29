@@ -11,6 +11,7 @@ import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitut
 import it.unibz.inf.ontop.pivotalrepr.*;
 import it.unibz.inf.ontop.pivotalrepr.impl.*;
 import it.unibz.inf.ontop.pivotalrepr.impl.tree.DefaultIntermediateQueryBuilder;
+import it.unibz.inf.ontop.pivotalrepr.proposal.QueryMergingProposal;
 import it.unibz.inf.ontop.pivotalrepr.proposal.impl.QueryMergingProposalImpl;
 import org.junit.Test;
 
@@ -113,7 +114,7 @@ public class QueryMergingTest {
         expectedBuilder.addChild(remainingConstructionNode, expectedDataNode);
 
 
-        optimizeAndCompare(mainQuery, subQueryBuilder.build(), expectedBuilder.build());
+        optimizeAndCompare(mainQuery, subQueryBuilder.build(), expectedBuilder.build(),  mainQuery.getIntensionalNodes().findFirst().get());
     }
 
 
@@ -159,7 +160,7 @@ public class QueryMergingTest {
         ExtensionalDataNode expectedDataNode = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE_1, A, THREE));
         expectedBuilder.addChild(remainingConstructionNode, expectedDataNode);
 
-        optimizeAndCompare(mainQuery, subQueryBuilder.build(), expectedBuilder.build());
+        optimizeAndCompare(mainQuery, subQueryBuilder.build(), expectedBuilder.build(), dataNode);
     }
 
     @Test
@@ -203,7 +204,7 @@ public class QueryMergingTest {
         ExtensionalDataNode expectedDataNode = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE_1, B, B));
         expectedBuilder.addChild(remainingConstructionNode, expectedDataNode);
 
-        optimizeAndCompare(mainQuery, subQueryBuilder.build(), expectedBuilder.build());
+        optimizeAndCompare(mainQuery, subQueryBuilder.build(), expectedBuilder.build(), dataNode);
     }
 
     @Test
@@ -244,7 +245,7 @@ public class QueryMergingTest {
         ExtensionalDataNode expectedDataNode = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE_1, X, INT_OF_THREE));
         expectedBuilder.addChild(expectedRootNode, expectedDataNode);
 
-        optimizeAndCompare(mainQuery, subQueryBuilder.build(), expectedBuilder.build());
+        optimizeAndCompare(mainQuery, subQueryBuilder.build(), expectedBuilder.build(), dataNode);
     }
 
     @Test
@@ -285,7 +286,7 @@ public class QueryMergingTest {
         ExtensionalDataNode expectedDataNode = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE_1, X, X));
         expectedBuilder.addChild(expectedRootNode, expectedDataNode);
 
-        optimizeAndCompare(mainQuery, subQueryBuilder.build(), expectedBuilder.build());
+        optimizeAndCompare(mainQuery, subQueryBuilder.build(), expectedBuilder.build(), dataNode);
     }
 
     @Test
@@ -330,7 +331,7 @@ public class QueryMergingTest {
         ExtensionalDataNode expectedDataNode = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE_1, X, U));
         expectedBuilder.addChild(remainingConstructionNode, expectedDataNode);
 
-        optimizeAndCompare(mainQuery, subQueryBuilder.build(), expectedBuilder.build());
+        optimizeAndCompare(mainQuery, subQueryBuilder.build(), expectedBuilder.build(), dataNode);
     }
 
     @Test
@@ -372,7 +373,7 @@ public class QueryMergingTest {
         ExtensionalDataNode expectedDataNode = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE_1, X, THREE));
         expectedBuilder.addChild(expectedRootNode, expectedDataNode);
 
-        optimizeAndCompare(mainQuery, subQueryBuilder.build(), expectedBuilder.build());
+        optimizeAndCompare(mainQuery, subQueryBuilder.build(), expectedBuilder.build(), dataNode);
     }
 
     @Test
@@ -420,7 +421,7 @@ public class QueryMergingTest {
         ExtensionalDataNode expectedDataNode = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE_4, C, C, C));
         expectedBuilder.addChild(remainingConstructionNode, expectedDataNode);
 
-        optimizeAndCompare(mainQuery, subQueryBuilder.build(), expectedBuilder.build());
+        optimizeAndCompare(mainQuery, subQueryBuilder.build(), expectedBuilder.build(), dataNode);
     }
 
     @Test
@@ -475,7 +476,7 @@ public class QueryMergingTest {
         ExtensionalDataNode expectedDataNode = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE_1, A, A));
         expectedBuilder.addChild(remainingConstructionNode, expectedDataNode);
 
-        optimizeAndCompare(mainQuery, subQueryBuilder.build(), expectedBuilder.build());
+        optimizeAndCompare(mainQuery, subQueryBuilder.build(), expectedBuilder.build(), dataNode);
     }
 
     @Test
@@ -531,7 +532,7 @@ public class QueryMergingTest {
         ExtensionalDataNode expectedDataNode = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(tableSubquery, A, A, A));
         expectedBuilder.addChild(remainingConstructionNode, expectedDataNode);
 
-        optimizeAndCompare(mainQuery, subQueryBuilder.build(), expectedBuilder.build());
+        optimizeAndCompare(mainQuery, subQueryBuilder.build(), expectedBuilder.build(), dataNode);
     }
 
     @Test
@@ -581,7 +582,7 @@ public class QueryMergingTest {
         ExtensionalDataNode expectedDataNode = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE_1, B, B));
         expectedBuilder.addChild(remainingConstructionNode, expectedDataNode);
 
-        optimizeAndCompare(mainQuery, subQueryBuilder.build(), expectedBuilder.build());
+        optimizeAndCompare(mainQuery, subQueryBuilder.build(), expectedBuilder.build(), dataNode);
     }
 
     @Test
@@ -627,7 +628,7 @@ public class QueryMergingTest {
         ExtensionalDataNode expectedDataNode = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE_2, A));
         expectedBuilder.addChild(remainingConstructionNode, expectedDataNode);
 
-        optimizeAndCompare(mainQuery, subQueryBuilder.build(), expectedBuilder.build());
+        optimizeAndCompare(mainQuery, subQueryBuilder.build(), expectedBuilder.build(), dataNode);
     }
 
     @Test
@@ -672,7 +673,7 @@ public class QueryMergingTest {
         ExtensionalDataNode expectedDataNode = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE_1, INT_OF_ONE, INT_OF_ONE));
         expectedBuilder.addChild(remainingConstructionNode, expectedDataNode);
 
-        optimizeAndCompare(mainQuery, subQueryBuilder.build(), expectedBuilder.build());
+        optimizeAndCompare(mainQuery, subQueryBuilder.build(), expectedBuilder.build(), dataNode);
     }
 
     @Test
@@ -717,7 +718,7 @@ public class QueryMergingTest {
         ExtensionalDataNode expectedDataNode = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE_1, INT_OF_ONE, INT_OF_ONE));
         expectedBuilder.addChild(remainingConstructionNode, expectedDataNode);
 
-        optimizeAndCompare(mainQuery, subQueryBuilder.build(), expectedBuilder.build());
+        optimizeAndCompare(mainQuery, subQueryBuilder.build(), expectedBuilder.build(), dataNode);
     }
 
     @Test
@@ -761,7 +762,7 @@ public class QueryMergingTest {
         expectedBuilder.init(mainQuery.getProjectionAtom(), expectedRootNode);
         expectedBuilder.addChild(expectedRootNode, tableNode);
 
-        optimizeAndCompare(mainQuery, subQueryBuilder.build(), expectedBuilder.build());
+        optimizeAndCompare(mainQuery, subQueryBuilder.build(), expectedBuilder.build(), dataNode);
     }
 
     @Test
@@ -821,7 +822,7 @@ public class QueryMergingTest {
         ExtensionalDataNode expectedDataNode = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE_1, A, A));
         expectedBuilder.addChild(remainingConstructionNode, expectedDataNode);
 
-        optimizeAndCompare(mainQuery, subQueryBuilder.build(), expectedBuilder.build());
+        optimizeAndCompare(mainQuery, subQueryBuilder.build(), expectedBuilder.build(), dataNode);
     }
 
 
@@ -880,7 +881,7 @@ public class QueryMergingTest {
         ExtensionalDataNode expectedDataNode = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE_1, C, C));
         expectedBuilder.addChild(secondRemainingConstructionNode, expectedDataNode);
 
-        optimizeAndCompare(mainQuery, subQueryBuilder.build(), expectedBuilder.build());
+        optimizeAndCompare(mainQuery, subQueryBuilder.build(), expectedBuilder.build(), dataNode);
     }
 
     @Test
@@ -939,7 +940,7 @@ public class QueryMergingTest {
                 INT_OF_TWO));
         expectedBuilder.addChild(secondRemainingConstructionNode, expectedDataNode);
 
-        optimizeAndCompare(mainQuery, subQueryBuilder.build(), expectedBuilder.build());
+        optimizeAndCompare(mainQuery, subQueryBuilder.build(), expectedBuilder.build(), dataNode);
     }
 
     @Test
@@ -993,7 +994,7 @@ public class QueryMergingTest {
         ExtensionalDataNode expectedDataNode = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(tableSubquery, A,B,A,B));
         expectedBuilder.addChild(firstRemainingConstructionNode, expectedDataNode);
 
-        optimizeAndCompare(mainQuery, subQueryBuilder.build(), expectedBuilder.build());
+        optimizeAndCompare(mainQuery, subQueryBuilder.build(), expectedBuilder.build(), dataNode);
     }
 
 
@@ -1015,7 +1016,7 @@ public class QueryMergingTest {
     }
 
     private static void optimizeAndCompare(IntermediateQuery mainQuery, IntermediateQuery subQuery,
-                                           IntermediateQuery expectedQuery)
+                                           IntermediateQuery expectedQuery, IntensionalDataNode intensionalNode)
             throws EmptyQueryException {
 
         System.out.println("\n Original query: \n" +  mainQuery);
@@ -1023,7 +1024,7 @@ public class QueryMergingTest {
         System.out.println("\n Expected query: \n" +  expectedQuery);
 
         // Updates the query (in-place optimization)
-        mainQuery.applyProposal(new QueryMergingProposalImpl(subQuery), REQUIRE_USING_IN_PLACE_EXECUTOR);
+        mainQuery.applyProposal(new QueryMergingProposalImpl(intensionalNode, Optional.of(subQuery)), REQUIRE_USING_IN_PLACE_EXECUTOR);
 
         System.out.println("\n Optimized query: \n" +  mainQuery);
 
