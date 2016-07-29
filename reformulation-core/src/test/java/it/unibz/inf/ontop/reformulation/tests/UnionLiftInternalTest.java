@@ -30,6 +30,8 @@ public class UnionLiftInternalTest {
     private static URITemplatePredicate URI_PREDICATE =  new URITemplatePredicateImpl(2);
 
     private static AtomPredicate P1_PREDICATE = new AtomPredicateImpl("p1", 1);
+    private static AtomPredicate P2_PREDICATE = new AtomPredicateImpl("p1", 2);
+    private static AtomPredicate P3_PREDICATE = new AtomPredicateImpl("p1", 3);
     private static AtomPredicate TABLE_1 = new AtomPredicateImpl("table1", 1);
     private static AtomPredicate TABLE_2 = new AtomPredicateImpl("table2", 1);
     private static AtomPredicate TABLE_3 = new AtomPredicateImpl("table3", 2);
@@ -48,16 +50,16 @@ public class UnionLiftInternalTest {
 
     private static DistinctVariableOnlyDataAtom ROOT_CONSTRUCTION_NODE_ATOM =
             DATA_FACTORY.getDistinctVariableOnlyDataAtom(
-            P1_PREDICATE, ImmutableList.of(X, Y, Z));
+            P3_PREDICATE, ImmutableList.of(X, Y, Z));
 
     private static DistinctVariableOnlyDataAtom TABLE1_ATOM = DATA_FACTORY.getDistinctVariableOnlyDataAtom(
             P1_PREDICATE, ImmutableList.of(X));
     private static DistinctVariableOnlyDataAtom TABLE2_ATOM = DATA_FACTORY.getDistinctVariableOnlyDataAtom(
             P1_PREDICATE, ImmutableList.of(X));
     private static DistinctVariableOnlyDataAtom TABLE3_ATOM = DATA_FACTORY.getDistinctVariableOnlyDataAtom(
-            P1_PREDICATE, ImmutableList.of(X, Y));
+            P2_PREDICATE, ImmutableList.of(X, Y));
     private static DistinctVariableOnlyDataAtom TABLE4_ATOM = DATA_FACTORY.getDistinctVariableOnlyDataAtom(
-            P1_PREDICATE, ImmutableList.of(Y, Z));
+            P2_PREDICATE, ImmutableList.of(Y, Z));
 
     private final MetadataForQueryOptimization metadata;
 
@@ -182,7 +184,7 @@ public class UnionLiftInternalTest {
 
         DistinctVariableOnlyDataAtom ROOT_CONSTRUCTION_NODE_ATOM =
                 DATA_FACTORY.getDistinctVariableOnlyDataAtom(
-                        P1_PREDICATE, ImmutableList.of(A, B, C));
+                        P3_PREDICATE, ImmutableList.of(A, B, C));
 
         IntermediateQueryBuilder originalBuilder = new DefaultIntermediateQueryBuilder(metadata);
 
@@ -265,7 +267,7 @@ public class UnionLiftInternalTest {
 
         DistinctVariableOnlyDataAtom ROOT_CONSTRUCTION_NODE_ATOM =
                 DATA_FACTORY.getDistinctVariableOnlyDataAtom(
-                        P1_PREDICATE, ImmutableList.of(A, B, C));
+                        P3_PREDICATE, ImmutableList.of(A, B, C));
 
         IntermediateQueryBuilder originalBuilder = new DefaultIntermediateQueryBuilder(metadata);
 
@@ -315,7 +317,7 @@ public class UnionLiftInternalTest {
 
         DistinctVariableOnlyDataAtom ROOT_CONSTRUCTION_NODE_ATOM =
                 DATA_FACTORY.getDistinctVariableOnlyDataAtom(
-                        P1_PREDICATE, ImmutableList.of(A, B, C));
+                        P3_PREDICATE, ImmutableList.of(A, B, C));
 
         IntermediateQueryBuilder originalBuilder = new DefaultIntermediateQueryBuilder(metadata);
 
@@ -369,7 +371,7 @@ public class UnionLiftInternalTest {
 
         DistinctVariableOnlyDataAtom ROOT_CONSTRUCTION_NODE_ATOM =
                 DATA_FACTORY.getDistinctVariableOnlyDataAtom(
-                        P1_PREDICATE, ImmutableList.of(A, B, C));
+                        P3_PREDICATE, ImmutableList.of(A, B, C));
 
         IntermediateQueryBuilder originalBuilder = new DefaultIntermediateQueryBuilder(metadata);
 
@@ -423,7 +425,7 @@ public class UnionLiftInternalTest {
 
         DistinctVariableOnlyDataAtom ROOT_CONSTRUCTION_NODE_ATOM =
                 DATA_FACTORY.getDistinctVariableOnlyDataAtom(
-                        P1_PREDICATE, ImmutableList.of(A, B, C));
+                        P3_PREDICATE, ImmutableList.of(A, B, C));
 
         IntermediateQueryBuilder originalBuilder = new DefaultIntermediateQueryBuilder(metadata);
 
