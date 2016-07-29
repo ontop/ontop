@@ -147,7 +147,7 @@ public class QuestUnfolder {
 			String finalMappings = Joiner.on("\n").join(unfoldingProgram);
 			log.debug("Final set of mappings: \n {}", finalMappings);
 		}
-		
+
 		unfolder = new DatalogUnfolder(unfoldingProgram, pkeys);
 		
 		this.ufp = unfoldingProgram;
@@ -207,8 +207,8 @@ public class QuestUnfolder {
 			String finalMappings = Joiner.on("\n").join(unfoldingProgram);
 			log.debug("Final set of mappings: \n {}", finalMappings);
 		}
-		
-		unfolder = new DatalogUnfolder(unfoldingProgram, pkeys);	
+
+		unfolder = new DatalogUnfolder(unfoldingProgram, pkeys);
 		
 		this.ufp = unfoldingProgram;
 	}

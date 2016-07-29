@@ -5,6 +5,7 @@ import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
 import it.unibz.inf.ontop.owlrefplatform.core.abox.SemanticIndexURIMap;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.*;
+import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import it.unibz.inf.ontop.owlrefplatform.core.optimization.BasicJoinOptimizer;
 import it.unibz.inf.ontop.owlrefplatform.core.optimization.IntermediateQueryOptimizer;
 import it.unibz.inf.ontop.owlrefplatform.core.optimization.TopDownSubstitutionLiftOptimizer;
@@ -27,6 +28,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -71,6 +73,18 @@ public class QuestQueryProcessor {
 		this.vocabularyValidator = vocabularyValidator;
 		this.uriMap = uriMap;
 		this.datasourceQueryGenerator = datasourceQueryGenerator;
+	}
+
+	/**
+	 * Returns a new QuestQueryProcessor(will be immutable in the future)
+	 *
+	 * Specific to the Classic A-box mode!
+	 */
+	public QuestQueryProcessor changeMappings(Collection<OBDAMappingAxiom> mappings, TBoxReasoner reformulationReasoner) {
+		// TODO: clone it and then configure it
+		// TODO: check that it is in the classic A-box mode
+		unfolder.setupInSemanticIndexMode(mappings, reformulationReasoner);
+		return new QuestQueryProcessor(rewriter, sigma, unfolder, vocabularyValidator, uriMap, datasourceQueryGenerator);
 	}
 
 	/**

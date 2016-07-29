@@ -611,22 +611,6 @@ public class Quest implements Serializable {
 				unfolder.setupInVirtualMode(mappings, localConnection, vocabularyValidator, reformulationReasoner, inputOntology, excludeFromTMappings, queryingAnnotationsInOntology, sameAsInMapping);
 			else
 				unfolder.setupInSemanticIndexMode(mappings, reformulationReasoner);
-
-			if (dataRepository != null)
-				dataRepository.addRepositoryChangedListener(new RepositoryChangedListener() {
-					@Override
-					public void repositoryChanged() {
-						engine.clearSQLCache();
-						try {
-							// 
-							unfolder.setupInSemanticIndexMode(dataRepository.getMappings(), reformulationReasoner);
-							log.debug("Mappings and unfolder have been updated after inserts to the semantic index DB");
-						} 
-						catch (Exception e) {
-							log.error("Error updating Semantic Index mappings", e);
-						}
-					}
-				});
 			
 			
 			/* The active ABox dependencies */
@@ -655,6 +639,22 @@ public class Quest implements Serializable {
 			 * Done, sending a new reasoner with the modules we just configured
 			 */
 			engine = new QuestQueryProcessor(rewriter, sigma, unfolder, vocabularyValidator, getUriMap(), datasourceQueryGenerator);
+
+			if (dataRepository != null)
+				dataRepository.addRepositoryChangedListener(new RepositoryChangedListener() {
+					@Override
+					public void repositoryChanged() {
+						engine.clearSQLCache();
+						try {
+							//
+							engine = engine.changeMappings(dataRepository.getMappings(), reformulationReasoner);
+							log.debug("Mappings and unfolder have been updated after inserts to the semantic index DB");
+						}
+						catch (Exception e) {
+							log.error("Error updating Semantic Index mappings", e);
+						}
+					}
+				});
 			
 
 			log.debug("... Quest has been initialized.");
