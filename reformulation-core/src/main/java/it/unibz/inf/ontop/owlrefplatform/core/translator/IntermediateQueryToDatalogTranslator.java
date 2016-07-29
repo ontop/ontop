@@ -169,7 +169,7 @@ public class IntermediateQueryToDatalogTranslator {
 			ConstructionNode constructionNode = (ConstructionNode) node;
 			DataAtom projectionAtom = Optional.ofNullable(
 					subQueryProjectionAtoms.get(constructionNode))
-					.map(atom -> adaptProjectionAtom(atom, constructionNode))
+					//.map(atom -> adaptProjectionAtom(atom, constructionNode))
 					.orElseGet(() -> generateProjectionAtom(constructionNode.getProjectedVariables()));
 
 			heads.add(new RuleHead(constructionNode, projectionAtom));
@@ -255,9 +255,8 @@ public class IntermediateQueryToDatalogTranslator {
 			
 			for (QueryNode child : te.getChildren(node)) {
 				ConstructionNode childConstructionNode =(ConstructionNode) child;
-				DataAtom childAtom = adaptProjectionAtom(childIdealProjectionAtom, childConstructionNode);
-				subQueryProjectionAtoms.put(childConstructionNode, childAtom);
-				heads.add(new RuleHead(childConstructionNode, childAtom));
+				subQueryProjectionAtoms.put(childConstructionNode, childIdealProjectionAtom);
+				heads.add(new RuleHead(childConstructionNode, childIdealProjectionAtom));
 		
 			} //end for
 
@@ -268,21 +267,9 @@ public class IntermediateQueryToDatalogTranslator {
 
 						
 		} else {
-			 throw new UnsupportedOperationException("Type od node in the intermediate tree is unknown!!");
+			 throw new UnsupportedOperationException("Type of node in the intermediate tree is unknown!!");
 		}
 	
-	}
-
-	private DataAtom adaptProjectionAtom(DataAtom idealProjectionAtom, ConstructionNode constructionNode) {
-		ImmutableList<? extends VariableOrGroundTerm> arguments = idealProjectionAtom.getArguments();
-		ImmutableSet<Variable> projectedVariables = constructionNode.getProjectedVariables();
-
-		if (ImmutableSet.copyOf(arguments).equals(projectedVariables)) {
-			return idealProjectionAtom;
-		}
-		else {
-			throw new IllegalStateException("The child is not providing the required variables");
-		}
 	}
 
 	private DistinctVariableOnlyDataAtom generateProjectionAtom(ImmutableSet<Variable> projectedVariables) {
