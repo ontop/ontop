@@ -269,6 +269,7 @@ public class QuestQueryProcessor {
 				 * TODO: should we really return an sql query?
 				 */
 				String sql = "";
+				querySignatureCache.put(pq, translation.getSignature());
 				translatedSQLCache.put(pq, sql);
 				return sql;
 			}
