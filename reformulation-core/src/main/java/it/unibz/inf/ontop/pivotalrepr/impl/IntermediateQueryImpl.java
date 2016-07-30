@@ -211,9 +211,19 @@ public class IntermediateQueryImpl implements IntermediateQuery {
     public <R extends ProposalResults, P extends QueryOptimizationProposal<R>> R applyProposal(P proposal,
                                                        boolean requireUsingInternalExecutor)
             throws InvalidQueryOptimizationProposalException, EmptyQueryException {
+        return applyProposal(proposal, requireUsingInternalExecutor, false);
+    }
 
-        // TODO: disable it in production
-        validate();
+    @Override
+    public <R extends ProposalResults, P extends QueryOptimizationProposal<R>> R applyProposal(P proposal,
+                                                                                               boolean requireUsingInternalExecutor,
+                                                                                               boolean disableValidationTests)
+            throws InvalidQueryOptimizationProposalException, EmptyQueryException {
+
+        if (!disableValidationTests) {
+            // TODO: disable it in production
+            validate();
+        }
 
         /**
          * It assumes that the concrete proposal classes DIRECTLY
@@ -253,8 +263,10 @@ public class IntermediateQueryImpl implements IntermediateQuery {
                  * Has a SIDE-EFFECT on the tree component.
                  */
                 R results = executor.apply(proposal, this, treeComponent);
-                // TODO: disable it in production
-                validate();
+                if (!disableValidationTests) {
+                    // TODO: disable it in production
+                    validate();
+                }
                 return results;
             }
         }

@@ -39,8 +39,8 @@ public class StandardIntermediateQueryValidator implements IntermediateQueryVali
 
                 if (!childProjectedVariables.containsAll(unionProjectedVariables)) {
                     throw new InvalidIntermediateQueryException("This child " + child
-                            + "does not project all the variables " +
-                            "required by the UNION node (" + unionProjectedVariables + ")");
+                            + " does not project all the variables " +
+                            "required by the UNION node (" + unionProjectedVariables + ")\n" + query);
                 }
             }
         }
@@ -49,7 +49,7 @@ public class StandardIntermediateQueryValidator implements IntermediateQueryVali
         public void visit(InnerJoinNode innerJoinNode) {
             if (query.getChildren(innerJoinNode).size() < 2) {
                 throw new InvalidIntermediateQueryException("JOIN node " + innerJoinNode
-                        +" does not have at least 2 children.");
+                        +" does not have at least 2 children.\n" + query);
             }
         }
 
@@ -57,7 +57,7 @@ public class StandardIntermediateQueryValidator implements IntermediateQueryVali
         public void visit(LeftJoinNode leftJoinNode) {
             if (query.getChildren(leftJoinNode).size() != 2) {
                 throw new InvalidIntermediateQueryException("LEFTJOIN node " + leftJoinNode
-                        + " does not have 2 children.");
+                        + " does not have 2 children.\n" + query);
             }
         }
 
@@ -65,7 +65,7 @@ public class StandardIntermediateQueryValidator implements IntermediateQueryVali
         public void visit(FilterNode filterNode) {
             if (query.getChildren(filterNode).size() != 1) {
                 throw new InvalidIntermediateQueryException("FILTER node " + filterNode
-                        + " does not have single child.");
+                        + " does not have single child.\n" + query);
             }
         }
 
@@ -73,7 +73,7 @@ public class StandardIntermediateQueryValidator implements IntermediateQueryVali
         public void visit(IntensionalDataNode intensionalDataNode) {
             if (query.getChildren(intensionalDataNode).size() != 0) {
                 throw new InvalidIntermediateQueryException("DATA node "+ intensionalDataNode
-                        + " has a child.");
+                        + " has a child.\n" + query);
             }
         }
 
@@ -81,7 +81,7 @@ public class StandardIntermediateQueryValidator implements IntermediateQueryVali
         public void visit(ExtensionalDataNode extensionalDataNode) {
             if (query.getChildren(extensionalDataNode).size() != 0) {
                 throw new InvalidIntermediateQueryException("DATA node "+ extensionalDataNode
-                        + " has a child.");
+                        + " has a child.\n" + query);
             }
         }
 
@@ -89,7 +89,7 @@ public class StandardIntermediateQueryValidator implements IntermediateQueryVali
         public void visit(GroupNode groupNode) {
             if (query.getChildren(groupNode).size() != 1) {
                 throw new InvalidIntermediateQueryException("GROUP node " + groupNode
-                        + " does not have a child.");
+                        + " does not have a child.\n" + query);
             }
         }
 
@@ -97,7 +97,7 @@ public class StandardIntermediateQueryValidator implements IntermediateQueryVali
         public void visit(EmptyNode emptyNode) {
             if (query.getChildren(emptyNode).size() != 0) {
                 throw new InvalidIntermediateQueryException("EMPTY node " + emptyNode
-                        + " has a child.");
+                        + " has a child.\n" + query);
             }
         }
     }

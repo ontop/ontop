@@ -81,6 +81,14 @@ public interface IntermediateQuery {
             throws InvalidQueryOptimizationProposalException, EmptyQueryException;
 
     /**
+     * May forbid the use of a StandardProposalExecutor and disable the (possible) validation tests
+     */
+    <R extends ProposalResults, P extends QueryOptimizationProposal<R>> R applyProposal(P propagationProposal,
+                                                                                        boolean requireUsingInternalExecutor,
+                                                                                        boolean disableValidation)
+            throws InvalidQueryOptimizationProposalException, EmptyQueryException;
+
+    /**
      *
      * Returns itself if is a ConstructionNode or its first ancestor that is a construction node otherwise.
      */

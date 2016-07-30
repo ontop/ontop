@@ -134,7 +134,7 @@ public class LocalPropagationTools {
                         : new RemoveEmptyNodeProposalImpl(replacingEmptyNode, true);
 
                 // May restructure significantly the query
-                NodeTrackingResults<EmptyNode> removeEmptyNodeResults = query.applyProposal(removalProposal, true);
+                NodeTrackingResults<EmptyNode> removeEmptyNodeResults = query.applyProposal(removalProposal, true, true);
 
                 return new SubstitutionApplicationResults<>(node, removeEmptyNodeResults);
 

@@ -600,19 +600,25 @@ public class SubstitutionLiftTest {
         InnerJoinNode joinNode = new InnerJoinNodeImpl(Optional.empty());
         queryBuilder.addChild(unionNode, joinNode);
 
-        UnionNode unionNode2 =  new UnionNodeImpl(ImmutableSet.of(X));
+        UnionNode unionNode2 =  unionNode.clone();
         queryBuilder.addChild(unionNode, unionNode2);
 
         //first child of unionNode2
         ConstructionNode subQuery1UnionNode2 = new ConstructionNodeImpl(unionNode2.getProjectedVariables(),
-                new ImmutableSubstitutionImpl<>(ImmutableMap.of(X, generateCompositeURI2(I, L))), Optional.empty());
+                new ImmutableSubstitutionImpl<>(ImmutableMap.of(
+                        X, generateCompositeURI2(I, L),
+                        Y, OBDAVocabulary.NULL
+                        )), Optional.empty());
         queryBuilder.addChild(unionNode2, subQuery1UnionNode2);
 
         queryBuilder.addChild(subQuery1UnionNode2, new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE5_PREDICATE, I, L)) );
 
         //second child of unionNode2
         ConstructionNode subQuery2UnionNode2 = new ConstructionNodeImpl(unionNode2.getProjectedVariables(),
-                new ImmutableSubstitutionImpl<>(ImmutableMap.of(X, generateCompositeURI2(M, N))), Optional.empty());
+                new ImmutableSubstitutionImpl<>(ImmutableMap.of(
+                        X, generateCompositeURI2(M, N),
+                        Y, OBDAVocabulary.NULL
+                        )), Optional.empty());
         queryBuilder.addChild(unionNode2, subQuery2UnionNode2);
 
         queryBuilder.addChild(subQuery2UnionNode2, new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE6_PREDICATE, M, N)) );
@@ -636,12 +642,6 @@ public class SubstitutionLiftTest {
         //build unoptimized query
         IntermediateQuery unOptimizedQuery = queryBuilder.build();
         System.out.println("\nBefore optimization: \n" +  unOptimizedQuery);
-
-        IntermediateQueryOptimizer substitutionOptimizer = new TopDownSubstitutionLiftOptimizer();
-
-        IntermediateQuery optimizedQuery = substitutionOptimizer.optimize(unOptimizedQuery);
-
-        System.out.println("\nAfter optimization: \n" +  optimizedQuery);
 
 
         IntermediateQueryBuilder expectedQueryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
@@ -667,8 +667,13 @@ public class SubstitutionLiftTest {
 
         expectedQueryBuilder.addChild(expectedJoinNode, new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE3_PREDICATE, E, L)) );
 
-        UnionNode expectedUnionNode2 =  new UnionNodeImpl(ImmutableSet.of(I,L));
-        expectedQueryBuilder.addChild(expectedUnionNode, expectedUnionNode2);
+
+        ConstructionNode newRightConstructionNode = new ConstructionNodeImpl(expectedUnionNode.getProjectedVariables(),
+                new ImmutableSubstitutionImpl<>(ImmutableMap.of( Y, OBDAVocabulary.NULL)), Optional.empty());
+        expectedQueryBuilder.addChild(expectedUnionNode, newRightConstructionNode);
+
+        UnionNode expectedUnionNode2 =  new UnionNodeImpl(ImmutableSet.of(I, L));
+        expectedQueryBuilder.addChild(newRightConstructionNode, expectedUnionNode2);
 
         //first child of unionNode2
 
@@ -681,6 +686,12 @@ public class SubstitutionLiftTest {
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
 
         System.out.println("\nExpected  query: \n" +  expectedQuery);
+
+        IntermediateQueryOptimizer substitutionOptimizer = new TopDownSubstitutionLiftOptimizer();
+
+        IntermediateQuery optimizedQuery = substitutionOptimizer.optimize(unOptimizedQuery);
+
+        System.out.println("\nAfter optimization: \n" +  optimizedQuery);
 
         assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, expectedQuery));
 
