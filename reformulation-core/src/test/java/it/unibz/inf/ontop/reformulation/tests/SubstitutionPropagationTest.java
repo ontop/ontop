@@ -12,6 +12,7 @@ import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitut
 import it.unibz.inf.ontop.pivotalrepr.*;
 import it.unibz.inf.ontop.pivotalrepr.impl.*;
 import it.unibz.inf.ontop.pivotalrepr.impl.tree.DefaultIntermediateQueryBuilder;
+import it.unibz.inf.ontop.pivotalrepr.proposal.NodeCentricOptimizationResults;
 import it.unibz.inf.ontop.pivotalrepr.proposal.SubstitutionPropagationProposal;
 import it.unibz.inf.ontop.pivotalrepr.proposal.impl.SubstitutionPropagationProposalImpl;
 import org.junit.Test;
@@ -21,6 +22,8 @@ import java.util.Optional;
 import static it.unibz.inf.ontop.pivotalrepr.NonCommutativeOperatorNode.ArgumentPosition.LEFT;
 import static it.unibz.inf.ontop.pivotalrepr.NonCommutativeOperatorNode.ArgumentPosition.RIGHT;
 import static it.unibz.inf.ontop.pivotalrepr.equivalence.IQSyntacticEquivalenceChecker.areEquivalent;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -113,10 +116,21 @@ public class SubstitutionPropagationTest {
         expectedQueryBuilder.init(projectionAtom, newRootNode);
         expectedQueryBuilder.addChild(newRootNode, joinNode);
         expectedQueryBuilder.addChild(joinNode, DATA_NODE_1);
-        expectedQueryBuilder.addChild(joinNode, buildExtensionalDataNode(TABLE3_PREDICATE, A, D));
 
-        propagateAndCompare(initialQuery, expectedQueryBuilder.build(), propagationProposal);
+        ExtensionalDataNode rightDataNode = buildExtensionalDataNode(TABLE3_PREDICATE, A, D);
+        expectedQueryBuilder.addChild(joinNode, rightDataNode);
 
+        NodeCentricOptimizationResults<? extends QueryNode> results = propagateAndCompare(initialQuery,
+                expectedQueryBuilder.build(), propagationProposal);
+
+        assertFalse(results.getOptionalNewNode().isPresent());
+        Optional<QueryNode> optionalReplacingChild = results.getOptionalReplacingChild();
+        assertTrue(optionalReplacingChild.isPresent());
+        assertTrue(optionalReplacingChild.get().isSyntacticallyEquivalentTo(DATA_NODE_1));
+
+        Optional<QueryNode> optionalNextSibling = results.getOptionalNextSibling();
+        assertTrue(optionalNextSibling.isPresent());
+        assertTrue(optionalNextSibling.get().isSyntacticallyEquivalentTo(rightDataNode));
     }
 
     @Test(expected = EmptyQueryException.class)
@@ -208,16 +222,6 @@ public class SubstitutionPropagationTest {
 
         // Updates the query (in-place optimization)
         initialQuery.applyProposal(propagationProposal, REQUIRE_USING_IN_PLACE_EXECUTOR);
-
-//        IntermediateQueryBuilder expectedQueryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
-//        ConstructionNode newRootNode = new ConstructionNodeImpl(projectionAtom.getVariables(),
-//                rightConstructionNode.getDirectBindingSubstitution(), Optional.empty());
-//        expectedQueryBuilder.init(projectionAtom, newRootNode);
-//        expectedQueryBuilder.addChild(newRootNode, joinNode);
-//        expectedQueryBuilder.addChild(joinNode, new EmptyNodeImpl(ImmutableSet.of(C, D, Y)));
-//        expectedQueryBuilder.addChild(joinNode, DATA_NODE_3);
-//
-//        propagateAndCompare(initialQuery, expectedQueryBuilder.build(), propagationProposal);
     }
 
     @Test
@@ -257,9 +261,28 @@ public class SubstitutionPropagationTest {
         expectedQueryBuilder.init(projectionAtom, newRootNode);
         expectedQueryBuilder.addChild(newRootNode, joinNode);
         expectedQueryBuilder.addChild(joinNode, DATA_NODE_1);
-        expectedQueryBuilder.addChild(joinNode, buildExtensionalDataNode(TABLE3_PREDICATE, A, B));
+        ExtensionalDataNode rightDataNode = buildExtensionalDataNode(TABLE3_PREDICATE, A, B);
+        expectedQueryBuilder.addChild(joinNode, rightDataNode);
 
-        propagateAndCompare(initialQuery, expectedQueryBuilder.build(), propagationProposal);
+        NodeCentricOptimizationResults<? extends QueryNode> results = propagateAndCompare(initialQuery,
+                expectedQueryBuilder.build(), propagationProposal);
+
+        /**
+         * Results
+         */
+        assertFalse(results.getOptionalNewNode().isPresent());
+
+        Optional<QueryNode> optionalReplacingChild = results.getOptionalReplacingChild();
+        assertTrue(optionalReplacingChild.isPresent());
+        assertTrue(optionalReplacingChild.get().isSyntacticallyEquivalentTo(DATA_NODE_1));
+
+        Optional<QueryNode> optionalNextSibling = results.getOptionalNextSibling();
+        assertTrue(optionalNextSibling.isPresent());
+        assertTrue(optionalNextSibling.get().isSyntacticallyEquivalentTo(rightDataNode));
+
+        Optional<QueryNode> optionalAncestor = results.getOptionalClosestAncestor();
+        assertTrue(optionalAncestor.isPresent());
+        assertTrue(optionalAncestor.get().isSyntacticallyEquivalentTo(joinNode));
     }
 
     @Test
@@ -308,7 +331,21 @@ public class SubstitutionPropagationTest {
         expectedQueryBuilder.addChild(joinNode, newUnionNode);
         expectedQueryBuilder.addChild(newUnionNode, buildExtensionalDataNode(TABLE3_PREDICATE, A, D));
         expectedQueryBuilder.addChild(newUnionNode, buildExtensionalDataNode(TABLE2_PREDICATE, A, E));
-        propagateAndCompare(initialQuery, expectedQueryBuilder.build(), propagationProposal);
+
+        NodeCentricOptimizationResults<? extends QueryNode> results = propagateAndCompare(initialQuery,
+                expectedQueryBuilder.build(), propagationProposal);
+
+        /**
+         * Results
+         */
+        assertFalse(results.getOptionalNewNode().isPresent());
+        Optional<QueryNode> optionalReplacingChild = results.getOptionalReplacingChild();
+        assertTrue(optionalReplacingChild.isPresent());
+        assertTrue(optionalReplacingChild.get().isSyntacticallyEquivalentTo(DATA_NODE_1));
+
+        Optional<QueryNode> optionalNextSibling = results.getOptionalNextSibling();
+        assertTrue(optionalNextSibling.isPresent());
+        assertTrue(optionalNextSibling.get().isSyntacticallyEquivalentTo(newUnionNode));
     }
 
     @Test
@@ -362,7 +399,20 @@ public class SubstitutionPropagationTest {
         expectedQueryBuilder.addChild(joinNode, newUnionNode);
         expectedQueryBuilder.addChild(newUnionNode, buildExtensionalDataNode(TABLE3_PREDICATE, A, D));
         expectedQueryBuilder.addChild(newUnionNode, buildExtensionalDataNode(TABLE2_PREDICATE, A, F));
-        propagateAndCompare(initialQuery, expectedQueryBuilder.build(), propagationProposal);
+        NodeCentricOptimizationResults<? extends QueryNode> results = propagateAndCompare(initialQuery,
+                expectedQueryBuilder.build(), propagationProposal);
+
+        /**
+         * Results
+         */
+        assertFalse(results.getOptionalNewNode().isPresent());
+        Optional<QueryNode> optionalReplacingChild = results.getOptionalReplacingChild();
+        assertTrue(optionalReplacingChild.isPresent());
+        assertTrue(optionalReplacingChild.get().isSyntacticallyEquivalentTo(DATA_NODE_1));
+
+        Optional<QueryNode> optionalNextSibling = results.getOptionalNextSibling();
+        assertTrue(optionalNextSibling.isPresent());
+        assertTrue(optionalNextSibling.get().isSyntacticallyEquivalentTo(newUnionNode));
     }
 
     @Test
@@ -411,7 +461,21 @@ public class SubstitutionPropagationTest {
         expectedQueryBuilder.addChild(joinNode, newUnionNode);
         expectedQueryBuilder.addChild(newUnionNode, buildExtensionalDataNode(TABLE3_PREDICATE, A, B));
         expectedQueryBuilder.addChild(newUnionNode, buildExtensionalDataNode(TABLE2_PREDICATE, A, B));
-        propagateAndCompare(initialQuery, expectedQueryBuilder.build(), propagationProposal);
+
+        NodeCentricOptimizationResults<? extends QueryNode> results = propagateAndCompare(initialQuery,
+                expectedQueryBuilder.build(), propagationProposal);
+
+        /**
+         * Results
+         */
+        assertFalse(results.getOptionalNewNode().isPresent());
+        Optional<QueryNode> optionalReplacingChild = results.getOptionalReplacingChild();
+        assertTrue(optionalReplacingChild.isPresent());
+        assertTrue(optionalReplacingChild.get().isSyntacticallyEquivalentTo(DATA_NODE_1));
+
+        Optional<QueryNode> optionalNextSibling = results.getOptionalNextSibling();
+        assertTrue(optionalNextSibling.isPresent());
+        assertTrue(optionalNextSibling.get().isSyntacticallyEquivalentTo(newUnionNode));
     }
 
     @Test
@@ -465,7 +529,20 @@ public class SubstitutionPropagationTest {
         expectedQueryBuilder.addChild(joinNode, newUnionNode);
         expectedQueryBuilder.addChild(newUnionNode, buildExtensionalDataNode(TABLE3_PREDICATE, A, B));
         expectedQueryBuilder.addChild(newUnionNode, buildExtensionalDataNode(TABLE2_PREDICATE, A, B));
-        propagateAndCompare(initialQuery, expectedQueryBuilder.build(), propagationProposal);
+        NodeCentricOptimizationResults<? extends QueryNode> results = propagateAndCompare(initialQuery,
+                expectedQueryBuilder.build(), propagationProposal);
+
+        /**
+         * Results
+         */
+        assertFalse(results.getOptionalNewNode().isPresent());
+        Optional<QueryNode> optionalReplacingChild = results.getOptionalReplacingChild();
+        assertTrue(optionalReplacingChild.isPresent());
+        assertTrue(optionalReplacingChild.get().isSyntacticallyEquivalentTo(DATA_NODE_1));
+
+        Optional<QueryNode> optionalNextSibling = results.getOptionalNextSibling();
+        assertTrue(optionalNextSibling.isPresent());
+        assertTrue(optionalNextSibling.get().isSyntacticallyEquivalentTo(newUnionNode));
     }
 
     @Test
@@ -509,7 +586,19 @@ public class SubstitutionPropagationTest {
         expectedQueryBuilder.addChild(initialRootNode, leftConstructionNode);
         expectedQueryBuilder.addChild(leftConstructionNode, DATA_NODE_1);
 
-        propagateAndCompare(initialQuery, expectedQueryBuilder.build(), propagationProposal);
+        NodeCentricOptimizationResults<? extends QueryNode> results = propagateAndCompare(initialQuery,
+                expectedQueryBuilder.build(), propagationProposal);
+
+        /**
+         * Results
+         */
+        assertFalse(results.getNewNodeOrReplacingChild().isPresent());
+        assertFalse(results.getOptionalNextSibling().isPresent());
+
+        Optional<QueryNode> optionalAncestor = results.getOptionalClosestAncestor();
+        assertTrue(optionalAncestor.isPresent());
+        assertTrue(optionalAncestor.get().isSyntacticallyEquivalentTo(initialRootNode));
+
     }
 
     @Test
@@ -553,14 +642,22 @@ public class SubstitutionPropagationTest {
         expectedQueryBuilder.init(projectionAtom, expectedRootNode);
         expectedQueryBuilder.addChild(expectedRootNode, DATA_NODE_1);
 
-        propagateAndCompare(initialQueryBuilder.build(), expectedQueryBuilder.build(), propagationProposal);
+        NodeCentricOptimizationResults<? extends QueryNode> results = propagateAndCompare(initialQueryBuilder.build(),
+                expectedQueryBuilder.build(), propagationProposal);
 
+        /**
+         * Checks the results
+         */
+        Optional<QueryNode> optionalReplacingChild = results.getOptionalReplacingChild();
+        assertTrue(optionalReplacingChild.isPresent());
+        assertTrue(optionalReplacingChild.get().isSyntacticallyEquivalentTo(DATA_NODE_1));
     }
 
 
 
-    private static void propagateAndCompare(IntermediateQuery query, IntermediateQuery expectedQuery,
-                                            SubstitutionPropagationProposal propagationProposal)
+    private static NodeCentricOptimizationResults<? extends QueryNode> propagateAndCompare(
+            IntermediateQuery query, IntermediateQuery expectedQuery,
+            SubstitutionPropagationProposal<? extends QueryNode> propagationProposal)
             throws EmptyQueryException {
 
         System.out.println("\n Original query: \n" +  query);
@@ -568,11 +665,14 @@ public class SubstitutionPropagationTest {
         System.out.println("\n Expected query: \n" +  expectedQuery);
 
         // Updates the query (in-place optimization)
-        query.applyProposal(propagationProposal, REQUIRE_USING_IN_PLACE_EXECUTOR);
+        NodeCentricOptimizationResults<? extends QueryNode> results = query.applyProposal(propagationProposal,
+                REQUIRE_USING_IN_PLACE_EXECUTOR);
 
         System.out.println("\n Optimized query: \n" +  query);
 
         assertTrue(areEquivalent(query, expectedQuery));
+
+        return results;
 
     }
 
