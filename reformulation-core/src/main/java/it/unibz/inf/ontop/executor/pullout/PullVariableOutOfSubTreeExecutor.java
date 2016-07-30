@@ -6,10 +6,7 @@ import it.unibz.inf.ontop.model.OBDADataFactory;
 import it.unibz.inf.ontop.model.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.InjectiveVar2VarSubstitution;
-import it.unibz.inf.ontop.pivotalrepr.IntermediateQuery;
-import it.unibz.inf.ontop.pivotalrepr.JoinLikeNode;
-import it.unibz.inf.ontop.pivotalrepr.QueryNode;
-import it.unibz.inf.ontop.pivotalrepr.SubstitutionResults;
+import it.unibz.inf.ontop.pivotalrepr.*;
 import it.unibz.inf.ontop.pivotalrepr.impl.QueryTreeComponent;
 import it.unibz.inf.ontop.pivotalrepr.proposal.InvalidQueryOptimizationProposalException;
 import it.unibz.inf.ontop.pivotalrepr.proposal.PullVariableOutOfSubTreeProposal;
@@ -19,7 +16,7 @@ import it.unibz.inf.ontop.pivotalrepr.proposal.impl.PullVariableOutOfSubTreeResu
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static it.unibz.inf.ontop.executor.substitution.SubstitutionPropagationTools.propagateSubstitutionDown;
+import static it.unibz.inf.ontop.executor.substitution.DescendingPropagationTools.propagateSubstitutionDown;
 import static it.unibz.inf.ontop.model.ExpressionOperation.EQ;
 
 /**
@@ -89,8 +86,13 @@ public class PullVariableOutOfSubTreeExecutor<N extends JoinLikeNode>
         /**
          * Updates the tree component
          */
-        propagateSubstitutionDown(newSubTreeRootNode, renamingSubstitution, query, treeComponent);
+        try {
+            propagateSubstitutionDown(newSubTreeRootNode, renamingSubstitution, query, treeComponent);
+        } catch (EmptyQueryException e) {
+            throw new IllegalStateException("PullVariableOutOfSubTree should not generate a QueryEmptyNodeException");
+        }
 
+        // TODO: make sure the root node has not been modified (would be a bug)
         return newSubTreeRootNode;
     }
 }

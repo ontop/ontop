@@ -1,10 +1,9 @@
 package it.unibz.inf.ontop.pivotalrepr;
 
 import com.google.common.collect.ImmutableSet;
+import it.unibz.inf.ontop.model.ImmutableSubstitution;
 import it.unibz.inf.ontop.model.ImmutableTerm;
 import it.unibz.inf.ontop.model.Variable;
-import it.unibz.inf.ontop.model.VariableOrGroundTerm;
-import it.unibz.inf.ontop.model.ImmutableSubstitution;
 
 /**
  * Immutable.
@@ -78,4 +77,6 @@ public interface QueryNode extends Cloneable {
      * TODO: explain
      */
     boolean isSyntacticallyEquivalentTo(QueryNode node);
+
+    NodeTransformationProposal reactToEmptyChild(IntermediateQuery query, EmptyNode emptyChild);
 }

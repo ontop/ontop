@@ -12,7 +12,7 @@ public interface NodeTransformationProposal {
 
     NodeTransformationProposedState getState();
 
-    Optional<QueryNode> getOptionalNewNode();
+    Optional<QueryNode> getOptionalNewNodeOrReplacingChild();
 
     ImmutableSet<Variable> getNullVariables();
 }
