@@ -1,23 +1,22 @@
 package it.unibz.inf.ontop.executor.substitution;
 
 
-import java.util.Optional;
-
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import it.unibz.inf.ontop.pivotalrepr.proposal.NodeTracker;
 import it.unibz.inf.ontop.model.ImmutableSubstitution;
 import it.unibz.inf.ontop.model.ImmutableTerm;
 import it.unibz.inf.ontop.model.Variable;
 import it.unibz.inf.ontop.pivotalrepr.*;
 import it.unibz.inf.ontop.pivotalrepr.impl.EmptyNodeImpl;
 import it.unibz.inf.ontop.pivotalrepr.impl.QueryTreeComponent;
-import it.unibz.inf.ontop.pivotalrepr.proposal.RemoveEmptyNodeProposal;
+import it.unibz.inf.ontop.pivotalrepr.proposal.NodeTracker;
 import it.unibz.inf.ontop.pivotalrepr.proposal.NodeTrackingResults;
+import it.unibz.inf.ontop.pivotalrepr.proposal.RemoveEmptyNodeProposal;
 import it.unibz.inf.ontop.pivotalrepr.proposal.impl.NodeTrackerImpl;
 import it.unibz.inf.ontop.pivotalrepr.proposal.impl.NodeTrackingResultsImpl;
 import it.unibz.inf.ontop.pivotalrepr.proposal.impl.RemoveEmptyNodeProposalImpl;
 
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import static it.unibz.inf.ontop.executor.substitution.DescendingPropagationTools.propagateSubstitutionDownToNodes;

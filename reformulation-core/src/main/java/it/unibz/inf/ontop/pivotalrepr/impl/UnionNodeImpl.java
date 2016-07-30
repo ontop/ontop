@@ -11,9 +11,7 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Optional;
 
-import static it.unibz.inf.ontop.pivotalrepr.NodeTransformationProposedState.DECLARE_AS_EMPTY;
-import static it.unibz.inf.ontop.pivotalrepr.NodeTransformationProposedState.NO_LOCAL_CHANGE;
-import static it.unibz.inf.ontop.pivotalrepr.NodeTransformationProposedState.REPLACE_BY_UNIQUE_NON_EMPTY_CHILD;
+import static it.unibz.inf.ontop.pivotalrepr.NodeTransformationProposedState.*;
 import static it.unibz.inf.ontop.pivotalrepr.SubstitutionResults.LocalAction.NO_CHANGE;
 
 public class UnionNodeImpl extends QueryNodeImpl implements UnionNode {

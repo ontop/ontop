@@ -26,7 +26,6 @@ import it.unibz.inf.ontop.model.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.UnifierUtilities;
-import it.unibz.inf.ontop.model.UriTemplateMatcher;
 
 import java.util.*;
 

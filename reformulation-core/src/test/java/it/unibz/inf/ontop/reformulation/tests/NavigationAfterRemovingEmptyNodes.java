@@ -30,9 +30,8 @@ public class NavigationAfterRemovingEmptyNodes {
     private static final AtomPredicate TABLE5_PREDICATE = new AtomPredicateImpl("table5", 2);
     private static final AtomPredicate TABLE6_PREDICATE = new AtomPredicateImpl("table6", 2);
 
-    private static final AtomPredicate ANS1_PREDICATE = new AtomPredicateImpl("ans1", 2);
-
-
+    private static final AtomPredicate ANS1_ARITY_1_PREDICATE = new AtomPredicateImpl("ans1", 1);
+    private static final AtomPredicate ANS1_ARITY_2_PREDICATE = new AtomPredicateImpl("ans1", 2);
 
     private static final OBDADataFactory DATA_FACTORY = OBDADataFactoryImpl.getInstance();
     private static final Variable X = DATA_FACTORY.getVariable("x");
@@ -73,7 +72,7 @@ public class NavigationAfterRemovingEmptyNodes {
     @Test
     public void testNextSiblingInitiallyFar() throws EmptyQueryException {
         IntermediateQueryBuilder initialQueryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
-        DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE, A);
+        DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_1_PREDICATE, A);
 
         ConstructionNode initialRootNode = new ConstructionNodeImpl(projectionAtom.getVariables());
         initialQueryBuilder.init(projectionAtom, initialRootNode);
@@ -113,7 +112,7 @@ public class NavigationAfterRemovingEmptyNodes {
     @Test
     public void testInsatisfiedJoinCondition() throws EmptyQueryException {
         IntermediateQueryBuilder initialQueryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
-        DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE, A);
+        DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_1_PREDICATE, A);
 
         ConstructionNode initialRootNode = new ConstructionNodeImpl(projectionAtom.getVariables());
         initialQueryBuilder.init(projectionAtom, initialRootNode);

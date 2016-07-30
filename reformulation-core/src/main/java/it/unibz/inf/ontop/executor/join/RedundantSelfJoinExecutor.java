@@ -1,21 +1,22 @@
 package it.unibz.inf.ontop.executor.join;
 
-import java.util.Optional;
 import com.google.common.collect.*;
 import it.unibz.inf.ontop.executor.SimpleNodeCentricInternalExecutor;
+import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.ImmutableUnificationTools;
+import it.unibz.inf.ontop.pivotalrepr.*;
 import it.unibz.inf.ontop.pivotalrepr.impl.ExtensionalDataNodeImpl;
 import it.unibz.inf.ontop.pivotalrepr.impl.FilterNodeImpl;
+import it.unibz.inf.ontop.pivotalrepr.impl.QueryTreeComponent;
 import it.unibz.inf.ontop.pivotalrepr.proposal.InnerJoinOptimizationProposal;
 import it.unibz.inf.ontop.pivotalrepr.proposal.InvalidQueryOptimizationProposalException;
 import it.unibz.inf.ontop.pivotalrepr.proposal.NodeCentricOptimizationResults;
 import it.unibz.inf.ontop.pivotalrepr.proposal.SubstitutionPropagationProposal;
 import it.unibz.inf.ontop.pivotalrepr.proposal.impl.NodeCentricOptimizationResultsImpl;
 import it.unibz.inf.ontop.pivotalrepr.proposal.impl.SubstitutionPropagationProposalImpl;
-import it.unibz.inf.ontop.pivotalrepr.impl.QueryTreeComponent;
-import it.unibz.inf.ontop.model.*;
-import it.unibz.inf.ontop.pivotalrepr.*;
+
+import java.util.Optional;
 
 /**
  * TODO: explain

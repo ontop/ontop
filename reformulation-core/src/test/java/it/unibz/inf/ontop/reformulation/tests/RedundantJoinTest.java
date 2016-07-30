@@ -185,7 +185,7 @@ public class RedundantJoinTest {
                 .getResultingQuery();
         System.out.println("\n After optimization: \n" +  optimizedQuery);
 
-        DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE, Y);
+        DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_1, Y);
         ConstructionNode constructionNode = new ConstructionNodeImpl(projectionAtom.getVariables());
         IntermediateQueryBuilder queryBuilder1 = new DefaultIntermediateQueryBuilder(metadata);
         queryBuilder1.init(projectionAtom, constructionNode);

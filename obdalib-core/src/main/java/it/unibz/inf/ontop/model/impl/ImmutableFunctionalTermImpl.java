@@ -31,6 +31,11 @@ public abstract class ImmutableFunctionalTermImpl extends AbstractFunctionalTerm
         // No problem since the list is immutable
         this.terms = terms;
         string = null;
+
+        if (functor.getArity() != terms.size()) {
+            throw new IllegalArgumentException("Arity violation: " + functor + " was expecting " + functor.getArity()
+            + ", not " + terms.size());
+        }
     }
 
     protected ImmutableFunctionalTermImpl(Function functionalTermToClone) {

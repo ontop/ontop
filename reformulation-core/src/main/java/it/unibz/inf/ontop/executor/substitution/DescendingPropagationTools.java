@@ -9,9 +9,9 @@ import it.unibz.inf.ontop.pivotalrepr.IntermediateQuery;
 import it.unibz.inf.ontop.pivotalrepr.QueryNode;
 import it.unibz.inf.ontop.pivotalrepr.QueryNodeSubstitutionException;
 import it.unibz.inf.ontop.pivotalrepr.impl.QueryTreeComponent;
+import it.unibz.inf.ontop.pivotalrepr.proposal.NodeCentricOptimizationResults;
 import it.unibz.inf.ontop.pivotalrepr.proposal.NodeTracker;
 import it.unibz.inf.ontop.pivotalrepr.proposal.NodeTrackingResults;
-import it.unibz.inf.ontop.pivotalrepr.proposal.NodeCentricOptimizationResults;
 import it.unibz.inf.ontop.pivotalrepr.proposal.impl.NodeTrackingResultsImpl;
 
 import java.util.LinkedList;

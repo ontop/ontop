@@ -3,7 +3,6 @@ package it.unibz.inf.ontop.pivotalrepr.proposal.impl;
 import it.unibz.inf.ontop.pivotalrepr.IntermediateQuery;
 import it.unibz.inf.ontop.pivotalrepr.QueryNode;
 import it.unibz.inf.ontop.pivotalrepr.proposal.NodeTracker;
-import it.unibz.inf.ontop.pivotalrepr.proposal.NodeCentricOptimizationResults;
 import it.unibz.inf.ontop.pivotalrepr.proposal.NodeTrackingResults;
 
 import java.util.Optional;

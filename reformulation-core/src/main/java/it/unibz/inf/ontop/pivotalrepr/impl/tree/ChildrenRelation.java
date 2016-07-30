@@ -48,4 +48,5 @@ public interface ChildrenRelation {
      * May return itself (no cloning)
      */
     ChildrenRelation convertToStandardChildrenRelation();
+
 }
