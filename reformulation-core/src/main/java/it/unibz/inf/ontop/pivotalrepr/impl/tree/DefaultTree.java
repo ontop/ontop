@@ -398,7 +398,8 @@ public class DefaultTree implements QueryTree {
                         Map.Entry::getKey,
                         Map.Entry::getValue
                 ));
-        return new DefaultTree(rootNode, newNodeIndex, newChildrenIndex, newParentIndex, new HashSet<>(emptyNodes));
+        return new DefaultTree(newNodeIndex.get(rootNode.getQueryNode()), newNodeIndex, newChildrenIndex,
+                newParentIndex, new HashSet<>(emptyNodes));
     }
 
     /**
