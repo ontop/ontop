@@ -5,6 +5,8 @@ import it.unibz.inf.ontop.model.ImmutableSubstitution;
 import it.unibz.inf.ontop.model.ImmutableTerm;
 import it.unibz.inf.ontop.model.Variable;
 
+import java.util.Optional;
+
 /**
  * Immutable.
  *
