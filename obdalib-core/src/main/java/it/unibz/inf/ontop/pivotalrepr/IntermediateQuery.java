@@ -123,9 +123,7 @@ public interface IntermediateQuery {
     boolean hasAncestor(QueryNode descendantNode, QueryNode ancestorNode);
 
     /**
-     * Set of variables that are projected by the node.
-     *
-     * It typically depends on the other nodes of their sub-trees.
+     * Set of variables that are returned by the sub-tree.
      */
-    ImmutableSet<Variable> getProjectedVariables(QueryNode node);
+    ImmutableSet<Variable> getVariables(QueryNode subTreeRootNode);
 }

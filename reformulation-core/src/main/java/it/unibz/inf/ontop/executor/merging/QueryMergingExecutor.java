@@ -120,7 +120,7 @@ public class QueryMergingExecutor implements InternalProposalExecutor<QueryMergi
 
                         case DECLARE_AS_EMPTY:
                             return new AnalysisResults(originalNode,
-                                    new EmptyNodeImpl(query.getProjectedVariables(originalNode)),
+                                    new EmptyNodeImpl(query.getVariables(originalNode)),
                                     Optional.empty());
                         default:
                             throw new IllegalStateException("Unknown local action:" + results.getLocalAction());

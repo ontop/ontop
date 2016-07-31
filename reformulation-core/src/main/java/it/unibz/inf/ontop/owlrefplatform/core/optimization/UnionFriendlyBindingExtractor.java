@@ -90,14 +90,14 @@ public class UnionFriendlyBindingExtractor implements BindingExtractor {
 
         query.getFirstChild(currentNode).ifPresent(child -> {
             //get variables from the first child
-            ImmutableSet<Variable> varsFirstChild = query.getProjectedVariables(child);
+            ImmutableSet<Variable> varsFirstChild = query.getVariables(child);
 
             commonVariables.addAll(varsFirstChild); }
         );
 
         //update commonVariables between the children
         query.getChildren(currentNode).forEach(child ->
-                commonVariables.retainAll(query.getProjectedVariables(child)));
+                commonVariables.retainAll(query.getVariables(child)));
 
         query.getChildren(currentNode).stream()
                     .map(c -> extractBindings(query, c))

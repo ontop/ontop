@@ -19,15 +19,12 @@ import it.unibz.inf.ontop.executor.pullout.PullVariableOutOfDataNodeExecutor;
 import it.unibz.inf.ontop.pivotalrepr.validation.IntermediateQueryValidator;
 import it.unibz.inf.ontop.pivotalrepr.validation.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.pivotalrepr.validation.StandardIntermediateQueryValidator;
-import org.h2.store.Data;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import it.unibz.inf.ontop.pivotalrepr.*;
 import it.unibz.inf.ontop.pivotalrepr.proposal.*;
 
-import java.util.LinkedList;
 import java.util.Optional;
-import java.util.Queue;
 import java.util.stream.Stream;
 
 /**
@@ -139,8 +136,8 @@ public class IntermediateQueryImpl implements IntermediateQuery {
     }
 
     @Override
-    public ImmutableSet<Variable> getProjectedVariables(QueryNode node) {
-        return treeComponent.getProjectedVariables(node);
+    public ImmutableSet<Variable> getVariables(QueryNode subTreeRootNode) {
+        return treeComponent.getVariables(subTreeRootNode);
     }
 
     @Override
@@ -282,7 +279,7 @@ public class IntermediateQueryImpl implements IntermediateQuery {
     @Override
     public <R extends ProposalResults, P extends QueryOptimizationProposal<R>> R applyProposal(P propagationProposal)
             throws InvalidQueryOptimizationProposalException, EmptyQueryException {
-        return applyProposal(propagationProposal, false);
+        return applyProposal(propagationProposal, false, false);
     }
 
     @Override

@@ -32,10 +32,10 @@ public class StandardIntermediateQueryValidator implements IntermediateQueryVali
                         +" does not have at least 2 children node.");
             }
 
-            ImmutableSet<Variable> unionProjectedVariables = unionNode.getProjectedVariables();
+            ImmutableSet<Variable> unionProjectedVariables = unionNode.getVariables();
 
             for (QueryNode child : query.getChildren(unionNode)) {
-                ImmutableSet<Variable> childProjectedVariables = query.getProjectedVariables(child);
+                ImmutableSet<Variable> childProjectedVariables = query.getVariables(child);
 
                 if (!childProjectedVariables.containsAll(unionProjectedVariables)) {
                     throw new InvalidIntermediateQueryException("This child " + child

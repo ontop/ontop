@@ -49,7 +49,7 @@ public class JoinBooleanExpressionExecutor implements SimpleNodeCentricInternalE
          */
         catch (InsatisfiedExpressionException e) {
 
-            EmptyNode replacingEmptyNode = new EmptyNodeImpl(query.getProjectedVariables(originalTopJoinNode));
+            EmptyNode replacingEmptyNode = new EmptyNodeImpl(query.getVariables(originalTopJoinNode));
             treeComponent.replaceSubTree(originalTopJoinNode, replacingEmptyNode);
 
             RemoveEmptyNodeProposal cleaningProposal = new RemoveEmptyNodeProposalImpl(replacingEmptyNode, false);

@@ -71,7 +71,7 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
     }
 
     @Override
-    public ImmutableSet<Variable> getProjectedVariables() {
+    public ImmutableSet<Variable> getVariables() {
         return projectedVariables;
     }
 
@@ -105,7 +105,7 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
     }
 
     @Override
-    public ImmutableSet<Variable> getVariables() {
+    public ImmutableSet<Variable> getLocalVariables() {
         ImmutableSet.Builder<Variable> collectedVariableBuilder = ImmutableSet.builder();
 
         collectedVariableBuilder.addAll(projectedVariables);
@@ -203,7 +203,7 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
                 descendingSubstitution, projectedVariables);
 
         ImmutableSet<Variable> newProjectedVariables = computeNewProjectedVariables(relevantSubstitution,
-                getProjectedVariables());
+                getVariables());
 
         /**
          * TODO: avoid using an exception
@@ -246,7 +246,7 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
         return Optional.of(node)
                 .filter(n -> n instanceof ConstructionNode)
                 .map(n -> (ConstructionNode) n)
-                .filter(n -> n.getProjectedVariables().equals(projectedVariables))
+                .filter(n -> n.getVariables().equals(projectedVariables))
                 .filter(n -> n.getSubstitution().equals(substitution))
                 .isPresent();
     }

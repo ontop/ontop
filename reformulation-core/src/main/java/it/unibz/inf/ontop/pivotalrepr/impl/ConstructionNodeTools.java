@@ -88,10 +88,10 @@ public class ConstructionNodeTools {
         ImmutableSubstitution<ImmutableTerm> composition = childConstructionNode.getSubstitution().composeWith(
                 parentConstructionNode.getSubstitution());
 
-        ImmutableSet<Variable> projectedVariables = parentConstructionNode.getProjectedVariables();
+        ImmutableSet<Variable> projectedVariables = parentConstructionNode.getVariables();
 
         ImmutableSubstitution<ImmutableTerm> newSubstitution = projectedVariables.containsAll(
-                childConstructionNode.getProjectedVariables())
+                childConstructionNode.getVariables())
                 ? composition
                 : new ImmutableSubstitutionImpl<>(
                 composition.getImmutableMap().entrySet().stream()
@@ -147,7 +147,7 @@ public class ConstructionNodeTools {
                                                                  ImmutableSubstitution<ImmutableTerm> additionalBindingsSubstitution)
             throws InconsistentBindingException {
 
-        ImmutableSet<Variable> projectedVariables = formerConstructionNode.getProjectedVariables();
+        ImmutableSet<Variable> projectedVariables = formerConstructionNode.getVariables();
 
         /**
          * TODO: explain why the composition is too rich
@@ -354,7 +354,7 @@ public class ConstructionNodeTools {
         /**
          * Checks that no projected but not-bound variable was proposed to be removed.
          */
-        ImmutableSet<Variable> projectedVariables = formerConstructionNode.getProjectedVariables();
+        ImmutableSet<Variable> projectedVariables = formerConstructionNode.getVariables();
         for (Variable variable : allVariablesToRemove) {
             if ((!localVariablesToRemove.contains(variable)) && projectedVariables.contains(variable)) {
                 throw new InconsistentBindingException("The variable to remove " + variable + " is projected but" +

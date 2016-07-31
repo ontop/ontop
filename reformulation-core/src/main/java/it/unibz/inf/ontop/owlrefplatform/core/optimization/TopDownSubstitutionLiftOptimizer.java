@@ -263,9 +263,9 @@ public class TopDownSubstitutionLiftOptimizer implements SubstitutionLiftOptimiz
             Optional<ImmutableSubstitution<ImmutableTerm>> optionalSubstitution = extractor.extractInSubTree(
                     currentQuery, rightChild);
             Set<Variable> onlyRightVariables = new HashSet<>();
-            onlyRightVariables.addAll(currentQuery.getProjectedVariables(rightChild));
+            onlyRightVariables.addAll(currentQuery.getVariables(rightChild));
             if(optionalLeftChild.isPresent()){
-                onlyRightVariables.removeAll(currentQuery.getProjectedVariables(optionalLeftChild.get()));
+                onlyRightVariables.removeAll(currentQuery.getVariables(optionalLeftChild.get()));
             }
             Map<Variable, ImmutableTerm> substitutionMap = new HashMap<>();
             onlyRightVariables.forEach(v ->

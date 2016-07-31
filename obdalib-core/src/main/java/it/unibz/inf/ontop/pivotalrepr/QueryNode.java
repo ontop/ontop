@@ -56,9 +56,13 @@ public interface QueryNode extends Cloneable {
     NodeTransformationProposal acceptNodeTransformer(HeterogeneousQueryNodeTransformer transformer);
 
     /**
-     * Set of variables mentioned in the node.
+     * Set of variables MENTIONED in the node, INDEPENDENTLY of its sub-tree.
+     *
+     * See ImmutableQuery.getVariables(QueryNode node) for getting all the variables
+     * returned by the QueryNode.
+     *
      */
-    ImmutableSet<Variable> getVariables();
+    ImmutableSet<Variable> getLocalVariables();
 
     /**
      * Applies a substitution coming from below

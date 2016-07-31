@@ -488,8 +488,8 @@ public class JgraphtQueryTreeComponent implements QueryTreeComponent {
     }
 
     @Override
-    public ImmutableSet<Variable> getProjectedVariables(QueryNode node) {
-        throw new RuntimeException("TODO: support getProjectedVariables");
+    public ImmutableSet<Variable> getVariables(QueryNode node) {
+        throw new RuntimeException("TODO: support getVariables");
     }
 
     private void addChild(QueryNode parentNode, QueryNode childNode, boolean isNew) throws IllegalTreeUpdateException {

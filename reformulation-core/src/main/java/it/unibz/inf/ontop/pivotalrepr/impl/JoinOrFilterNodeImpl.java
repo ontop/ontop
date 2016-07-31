@@ -30,7 +30,7 @@ public abstract class JoinOrFilterNodeImpl extends QueryNodeImpl implements Join
     }
 
     @Override
-    public ImmutableSet<Variable> getVariables() {
+    public ImmutableSet<Variable> getLocalVariables() {
         if (optionalFilterCondition.isPresent()) {
             return optionalFilterCondition.get().getVariables();
         }

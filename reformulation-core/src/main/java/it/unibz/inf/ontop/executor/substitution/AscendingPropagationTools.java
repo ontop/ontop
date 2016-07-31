@@ -309,7 +309,7 @@ public class AscendingPropagationTools {
     private static NodeTrackingResults<EmptyNode> reactToEmptinessDeclaration(
             IntermediateQuery query, QueryNode currentAncestor, QueryTreeComponent treeComponent) throws EmptyQueryException {
 
-        ImmutableSet<Variable> nullVariables = query.getProjectedVariables(currentAncestor);
+        ImmutableSet<Variable> nullVariables = query.getVariables(currentAncestor);
         EmptyNode replacingEmptyNode = new EmptyNodeImpl(nullVariables);
 
         treeComponent.replaceSubTree(currentAncestor, replacingEmptyNode);

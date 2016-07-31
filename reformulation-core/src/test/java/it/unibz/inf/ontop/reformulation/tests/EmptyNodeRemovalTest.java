@@ -177,7 +177,7 @@ public class EmptyNodeRemovalTest {
     private static IntermediateQuery generateQueryWithUnion(ImmutableSubstitution<ImmutableTerm> topBindings,
                                                             ImmutableSubstitution<ImmutableTerm> leftBindings,
                                                             EmptyNode emptyNode) {
-        ImmutableSet<Variable> subQueryProjectedVariables = emptyNode.getProjectedVariables();
+        ImmutableSet<Variable> subQueryProjectedVariables = emptyNode.getVariables();
 
         IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
 
