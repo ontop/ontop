@@ -233,7 +233,7 @@ public class AscendingPropagationTools {
              */
             case DECLARE_AS_EMPTY:
                 NodeTrackingResults<EmptyNode> removalResults =
-                        reactToEmptinessDeclaration(query, currentAncestor, treeComponent);
+                        reactToEmptinessDeclaration(query, currentAncestor, treeComponent, optionalAncestryTracker);
 
                 return new AncestorPropagationResults<>(
                         new NodeTrackingResultsImpl<>(query, removalResults.getOptionalNextSibling(),
@@ -307,14 +307,18 @@ public class AscendingPropagationTools {
      * Returns results centered on the removed node.
      */
     private static NodeTrackingResults<EmptyNode> reactToEmptinessDeclaration(
-            IntermediateQuery query, QueryNode currentAncestor, QueryTreeComponent treeComponent) throws EmptyQueryException {
+            IntermediateQuery query, QueryNode currentAncestor, QueryTreeComponent treeComponent,
+            Optional<NodeTracker> optionalAncestryTracker) throws EmptyQueryException {
 
         ImmutableSet<Variable> nullVariables = query.getVariables(currentAncestor);
         EmptyNode replacingEmptyNode = new EmptyNodeImpl(nullVariables);
 
         treeComponent.replaceSubTree(currentAncestor, replacingEmptyNode);
 
-        RemoveEmptyNodeProposal proposal = new RemoveEmptyNodeProposalImpl(replacingEmptyNode, false);
+        RemoveEmptyNodeProposal proposal =
+                optionalAncestryTracker.isPresent()
+                ? new RemoveEmptyNodeProposalImpl(replacingEmptyNode, optionalAncestryTracker.get())
+                : new RemoveEmptyNodeProposalImpl(replacingEmptyNode, false);
         return query.applyProposal(proposal, true);
     }
 }

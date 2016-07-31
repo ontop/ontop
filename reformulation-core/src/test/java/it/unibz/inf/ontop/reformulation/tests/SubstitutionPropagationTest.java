@@ -109,7 +109,7 @@ public class SubstitutionPropagationTest {
         IntermediateQuery initialQuery = initialQueryBuilder.build();
 
         SubstitutionPropagationProposal<ConstructionNode> propagationProposal =
-                new SubstitutionPropagationProposalImpl<>(leftConstructionNode, leftConstructionNode.getDirectBindingSubstitution());
+                new SubstitutionPropagationProposalImpl<>(leftConstructionNode, leftConstructionNode.getSubstitution());
 
         IntermediateQueryBuilder expectedQueryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
         ConstructionNode newRootNode = leftConstructionNode;
@@ -163,7 +163,7 @@ public class SubstitutionPropagationTest {
         IntermediateQuery initialQuery = initialQueryBuilder.build();
 
         SubstitutionPropagationProposal<ConstructionNode> propagationProposal =
-                new SubstitutionPropagationProposalImpl<>(leftConstructionNode, leftConstructionNode.getDirectBindingSubstitution());
+                new SubstitutionPropagationProposalImpl<>(leftConstructionNode, leftConstructionNode.getSubstitution());
 
         System.out.println("\n Original query: \n" +  initialQuery);
         System.out.println(propagationProposal);
@@ -215,7 +215,7 @@ public class SubstitutionPropagationTest {
          * Now propagates the right proposal
          */
         SubstitutionPropagationProposal<ConstructionNode> propagationProposal =
-                new SubstitutionPropagationProposalImpl<>(rightConstructionNode, rightConstructionNode.getDirectBindingSubstitution());
+                new SubstitutionPropagationProposalImpl<>(rightConstructionNode, rightConstructionNode.getSubstitution());
 
         System.out.println("\n Original query: \n" +  initialQuery);
         System.out.println(propagationProposal);
@@ -254,7 +254,7 @@ public class SubstitutionPropagationTest {
         IntermediateQuery initialQuery = initialQueryBuilder.build();
 
         SubstitutionPropagationProposal<ConstructionNode> propagationProposal =
-                new SubstitutionPropagationProposalImpl<>(leftConstructionNode, leftConstructionNode.getDirectBindingSubstitution());
+                new SubstitutionPropagationProposalImpl<>(leftConstructionNode, leftConstructionNode.getSubstitution());
 
         IntermediateQueryBuilder expectedQueryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
         ConstructionNode newRootNode = leftConstructionNode;
@@ -320,7 +320,7 @@ public class SubstitutionPropagationTest {
         IntermediateQuery initialQuery = initialQueryBuilder.build();
 
         SubstitutionPropagationProposal<ConstructionNode> propagationProposal =
-                new SubstitutionPropagationProposalImpl<>(leftConstructionNode, leftConstructionNode.getDirectBindingSubstitution());
+                new SubstitutionPropagationProposalImpl<>(leftConstructionNode, leftConstructionNode.getSubstitution());
 
         IntermediateQueryBuilder expectedQueryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
         ConstructionNode newRootNode = leftConstructionNode;
@@ -388,7 +388,7 @@ public class SubstitutionPropagationTest {
         IntermediateQuery initialQuery = initialQueryBuilder.build();
 
         SubstitutionPropagationProposal<ConstructionNode> propagationProposal =
-                new SubstitutionPropagationProposalImpl<>(leftConstructionNode, leftConstructionNode.getDirectBindingSubstitution());
+                new SubstitutionPropagationProposalImpl<>(leftConstructionNode, leftConstructionNode.getSubstitution());
 
         IntermediateQueryBuilder expectedQueryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
         ConstructionNode newRootNode = leftConstructionNode;
@@ -450,7 +450,7 @@ public class SubstitutionPropagationTest {
         IntermediateQuery initialQuery = initialQueryBuilder.build();
 
         SubstitutionPropagationProposal<ConstructionNode> propagationProposal =
-                new SubstitutionPropagationProposalImpl<>(leftConstructionNode, leftConstructionNode.getDirectBindingSubstitution());
+                new SubstitutionPropagationProposalImpl<>(leftConstructionNode, leftConstructionNode.getSubstitution());
 
         IntermediateQueryBuilder expectedQueryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
         ConstructionNode newRootNode = leftConstructionNode;
@@ -518,7 +518,7 @@ public class SubstitutionPropagationTest {
         IntermediateQuery initialQuery = initialQueryBuilder.build();
 
         SubstitutionPropagationProposal<ConstructionNode> propagationProposal =
-                new SubstitutionPropagationProposalImpl<>(leftConstructionNode, leftConstructionNode.getDirectBindingSubstitution());
+                new SubstitutionPropagationProposalImpl<>(leftConstructionNode, leftConstructionNode.getSubstitution());
 
         IntermediateQueryBuilder expectedQueryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
         ConstructionNode newRootNode = leftConstructionNode;
@@ -579,7 +579,7 @@ public class SubstitutionPropagationTest {
         IntermediateQuery initialQuery = initialQueryBuilder.build();
 
         SubstitutionPropagationProposal<ConstructionNode> propagationProposal =
-                new SubstitutionPropagationProposalImpl<>(rightConstructionNode, rightConstructionNode.getDirectBindingSubstitution());
+                new SubstitutionPropagationProposalImpl<>(rightConstructionNode, rightConstructionNode.getSubstitution());
 
         IntermediateQueryBuilder expectedQueryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
         expectedQueryBuilder.init(projectionAtom, initialRootNode);
@@ -630,7 +630,7 @@ public class SubstitutionPropagationTest {
          */
         SubstitutionPropagationProposal<ConstructionNode> propagationProposal =
                 new SubstitutionPropagationProposalImpl<>(leftConstructionNode,
-                        leftConstructionNode.getDirectBindingSubstitution());
+                        leftConstructionNode.getSubstitution());
 
 
         IntermediateQueryBuilder expectedQueryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
