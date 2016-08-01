@@ -132,6 +132,11 @@ public class OntopPlanning {
 	return variableOccurrences;	
     }
        
+    /**
+     * 
+     * @param A DatalogProgram D
+     * @return (D|_s1, ..., D|_sn), where s1, ..., sn in SignaturesOf(D)
+     */
     public List<Restriction> splitDLogWRTTemplates(DatalogProgram prog){
 	
 	List<Restriction> result = new ArrayList<>();

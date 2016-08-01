@@ -1,5 +1,17 @@
 package it.unibz.inf.ontop.planning.datatypes;
 
+/**
+ * A template is a pair f/n, where f is a function
+ * symbol and n is the arity for f.
+ * 
+ * In this class, we use the URI representation of templates, e.g.
+ * 
+ * www.example.com/pagina/{}/paragrafo/{} corresponds to a binary
+ * function example/2.
+ * 
+ * @author Davide Lanti
+ *
+ */
 public class Template{
     
     private String value;

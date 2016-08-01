@@ -16,12 +16,7 @@ import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.Variable;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
-
-import static org.junit.Assert.*;
 
 public class OntopPlanningTest {
     
@@ -98,7 +93,6 @@ public class OntopPlanningTest {
         System.out.println(sql);
     }
 
-    @Ignore
     @Test
     public void getSQLForFragments3() throws Exception {
 

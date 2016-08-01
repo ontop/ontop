@@ -2,6 +2,12 @@ package it.unibz.inf.ontop.planning.datatypes;
 
 import it.unibz.krdb.obda.model.DatalogProgram;
 
+/**
+ * A Restriction is a pair (Signature, DatalogProgram) 
+ * 
+ * @author Davide Lanti
+ *
+ */
 public class Restriction{
     private Pair<Signature, DatalogProgram> restrictionToTemplateSignature;
     

@@ -3,6 +3,12 @@ package it.unibz.inf.ontop.planning.datatypes;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * A Signature is a tuple (t1, ..., tn) of Templates
+ * 
+ * @author Davide Lanti
+ *
+ */
 public class Signature {
     
     private final List<Template> templates = new ArrayList<>();
