@@ -22,7 +22,6 @@ import it.unibz.inf.ontop.utils.FunctionalTools;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Optional;
 import java.util.Queue;
 
@@ -120,7 +119,7 @@ public class QueryMergingExecutor implements InternalProposalExecutor<QueryMergi
 
                         case DECLARE_AS_EMPTY:
                             return new AnalysisResults(originalNode,
-                                    new EmptyNodeImpl(query.getProjectedVariables(originalNode)),
+                                    new EmptyNodeImpl(query.getVariables(originalNode)),
                                     Optional.empty());
                         default:
                             throw new IllegalStateException("Unknown local action:" + results.getLocalAction());
@@ -189,7 +188,7 @@ public class QueryMergingExecutor implements InternalProposalExecutor<QueryMergi
 
     private void removeUnsatisfiedNode(QueryTreeComponent treeComponent, IntensionalDataNode intensionalNode) {
 
-        EmptyNode emptyNode = new EmptyNodeImpl(intensionalNode.getProjectedVariables());
+        EmptyNode emptyNode = new EmptyNodeImpl(intensionalNode.getVariables());
         treeComponent.replaceSubTree(intensionalNode, emptyNode);
     }
 

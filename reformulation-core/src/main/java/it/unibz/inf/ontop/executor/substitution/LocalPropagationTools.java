@@ -134,7 +134,7 @@ public class LocalPropagationTools {
                         : new RemoveEmptyNodeProposalImpl(replacingEmptyNode, true);
 
                 // May restructure significantly the query
-                NodeTrackingResults<EmptyNode> removeEmptyNodeResults = query.applyProposal(removalProposal, true);
+                NodeTrackingResults<EmptyNode> removeEmptyNodeResults = query.applyProposal(removalProposal, true, true);
 
                 return new SubstitutionApplicationResults<>(node, removeEmptyNodeResults);
 
@@ -150,7 +150,7 @@ public class LocalPropagationTools {
          * The new set of projected variables have to take into account
          * the changes proposed by the descending substitution.
          */
-        ImmutableSet<Variable> newProjectedVariables = query.getProjectedVariables(rejectedNode).stream()
+        ImmutableSet<Variable> newProjectedVariables = query.getVariables(rejectedNode).stream()
                 .flatMap(v -> descendingSubstitution.apply(v).getVariableStream())
                 .collect(ImmutableCollectors.toSet());
 

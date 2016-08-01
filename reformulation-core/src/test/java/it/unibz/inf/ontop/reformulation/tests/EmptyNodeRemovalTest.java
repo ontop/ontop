@@ -16,7 +16,6 @@ import it.unibz.inf.ontop.pivotalrepr.impl.tree.DefaultIntermediateQueryBuilder;
 import it.unibz.inf.ontop.pivotalrepr.proposal.NodeTracker;
 import it.unibz.inf.ontop.pivotalrepr.proposal.NodeTrackingResults;
 import it.unibz.inf.ontop.pivotalrepr.proposal.impl.RemoveEmptyNodeProposalImpl;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.Optional;
@@ -27,7 +26,6 @@ import static it.unibz.inf.ontop.pivotalrepr.equivalence.IQSyntacticEquivalenceC
 import static junit.framework.TestCase.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-@Ignore
 public class EmptyNodeRemovalTest {
 
     private static MetadataForQueryOptimization METADATA = new MetadataForQueryOptimizationImpl(
@@ -177,7 +175,7 @@ public class EmptyNodeRemovalTest {
     private static IntermediateQuery generateQueryWithUnion(ImmutableSubstitution<ImmutableTerm> topBindings,
                                                             ImmutableSubstitution<ImmutableTerm> leftBindings,
                                                             EmptyNode emptyNode) {
-        ImmutableSet<Variable> subQueryProjectedVariables = emptyNode.getProjectedVariables();
+        ImmutableSet<Variable> subQueryProjectedVariables = emptyNode.getVariables();
 
         IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
 
@@ -861,6 +859,43 @@ public class EmptyNodeRemovalTest {
         return optionalTracker.get();
 
     }
+
+    @Test
+    public void testIsNotNullBinding() throws EmptyQueryException {
+        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
+
+        ConstructionNode rootNode = new ConstructionNodeImpl(PROJECTION_ATOM.getVariables(),
+                new ImmutableSubstitutionImpl<>(ImmutableMap.of(X, generateURI1(A),
+                        Y, DATA_FACTORY.getImmutableExpression(ExpressionOperation.IS_NOT_NULL, B))),
+                Optional.empty());
+        queryBuilder.init(PROJECTION_ATOM, rootNode);
+
+        GroupNode groupNode = new GroupNodeImpl(ImmutableList.of(A));
+        queryBuilder.addChild(rootNode, groupNode);
+
+        LeftJoinNode lj1 = new LeftJoinNodeImpl(Optional.empty());
+        queryBuilder.addChild(groupNode, lj1);
+        queryBuilder.addChild(lj1, DATA_NODE_2, LEFT);
+        EmptyNode emptyNode = new EmptyNodeImpl(ImmutableSet.of(B));
+        queryBuilder.addChild(lj1, emptyNode, RIGHT);
+
+        /**
+         * Expected query
+         */
+        IntermediateQueryBuilder expectedQueryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
+        ConstructionNode newRootNode = new ConstructionNodeImpl(PROJECTION_ATOM.getVariables(),
+                new ImmutableSubstitutionImpl<>(ImmutableMap.of(X, generateURI1(A),
+                        Y, DATA_FACTORY.getImmutableExpression(ExpressionOperation.IS_NOT_NULL, OBDAVocabulary.NULL))),
+                Optional.empty());
+        expectedQueryBuilder.init(PROJECTION_ATOM, newRootNode);
+
+        GroupNode newGroupNode = new GroupNodeImpl(ImmutableList.of(A));
+        expectedQueryBuilder.addChild(newRootNode, newGroupNode);
+        expectedQueryBuilder.addChild(newGroupNode, DATA_NODE_2);
+
+        optimizeAndCompare(queryBuilder.build(), expectedQueryBuilder.build(), emptyNode);
+    }
+
 
     private static ImmutableFunctionalTerm generateURI1(VariableOrGroundTerm argument) {
         return DATA_FACTORY.getImmutableFunctionalTerm(URI_PREDICATE, URI_TEMPLATE_STR_1, argument);

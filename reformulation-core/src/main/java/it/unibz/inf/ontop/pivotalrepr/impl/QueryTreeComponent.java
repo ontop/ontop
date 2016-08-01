@@ -115,5 +115,5 @@ public interface QueryTreeComponent {
      */
     QueryTreeComponent createSnapshot();
 
-    ImmutableSet<Variable> getProjectedVariables(QueryNode node);
+    ImmutableSet<Variable> getVariables(QueryNode node);
 }

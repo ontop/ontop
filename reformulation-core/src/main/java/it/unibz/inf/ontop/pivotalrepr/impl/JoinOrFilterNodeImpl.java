@@ -1,12 +1,16 @@
 package it.unibz.inf.ontop.pivotalrepr.impl;
 
 
-import java.util.Optional;
 import com.google.common.collect.ImmutableSet;
-import it.unibz.inf.ontop.model.*;
+import it.unibz.inf.ontop.model.ImmutableExpression;
+import it.unibz.inf.ontop.model.ImmutableSubstitution;
+import it.unibz.inf.ontop.model.ImmutableTerm;
+import it.unibz.inf.ontop.model.Variable;
 import it.unibz.inf.ontop.owlrefplatform.core.unfolding.ExpressionEvaluator;
 import it.unibz.inf.ontop.pivotalrepr.IntermediateQuery;
 import it.unibz.inf.ontop.pivotalrepr.JoinOrFilterNode;
+
+import java.util.Optional;
 
 public abstract class JoinOrFilterNodeImpl extends QueryNodeImpl implements JoinOrFilterNode {
 
@@ -30,7 +34,7 @@ public abstract class JoinOrFilterNodeImpl extends QueryNodeImpl implements Join
     }
 
     @Override
-    public ImmutableSet<Variable> getVariables() {
+    public ImmutableSet<Variable> getLocalVariables() {
         if (optionalFilterCondition.isPresent()) {
             return optionalFilterCondition.get().getVariables();
         }

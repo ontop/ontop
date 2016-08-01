@@ -97,7 +97,7 @@ public class GroupNodeImpl extends QueryNodeImpl implements GroupNode {
          *
          * TODO: what is really projected by a group node?
          */
-        return new NodeTransformationProposalImpl(DECLARE_AS_EMPTY, emptyChild.getProjectedVariables());
+        return new NodeTransformationProposalImpl(DECLARE_AS_EMPTY, emptyChild.getVariables());
     }
 
     @Override
@@ -106,7 +106,7 @@ public class GroupNodeImpl extends QueryNodeImpl implements GroupNode {
     }
 
     @Override
-    public ImmutableSet<Variable> getVariables() {
+    public ImmutableSet<Variable> getLocalVariables() {
         ImmutableSet.Builder<Variable> collectedVariableBuilder = ImmutableSet.builder();
 
         for (NonGroundTerm term : groupingTerms) {

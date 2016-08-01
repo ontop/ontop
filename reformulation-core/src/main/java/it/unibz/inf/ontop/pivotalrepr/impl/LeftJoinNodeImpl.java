@@ -71,7 +71,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
             ImmutableSubstitution<? extends ImmutableTerm> substitution, IntermediateQuery query) {
         QueryNode leftChild = query.getChild(this, LEFT)
                 .orElseThrow(() -> new IllegalStateException("No left child for the LJ"));
-        ImmutableSet<Variable> leftVariables = query.getProjectedVariables(leftChild);
+        ImmutableSet<Variable> leftVariables = query.getVariables(leftChild);
 
         /**
          * New substitution: only concerns variables specific to the right
@@ -96,7 +96,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
             ImmutableSubstitution<? extends ImmutableTerm> substitution, IntermediateQuery query) {
         QueryNode rightChild = query.getChild(this, RIGHT)
                 .orElseThrow(() -> new IllegalStateException("No right child for the LJ"));
-        ImmutableSet<Variable> rightVariables = query.getProjectedVariables(rightChild);
+        ImmutableSet<Variable> rightVariables = query.getVariables(rightChild);
 
         /**
          * If the substitution will set some right variables to be null
@@ -174,7 +174,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
             IntermediateQuery query, ImmutableSubstitution<? extends ImmutableTerm> substitution,
             Optional<ImmutableSet<Variable>> optionalRightVariables) {
 
-        ImmutableSet<Variable> leftVariables = query.getProjectedVariables(query.getChild(this, LEFT)
+        ImmutableSet<Variable> leftVariables = query.getVariables(query.getChild(this, LEFT)
                 .orElseThrow(() -> new IllegalStateException("Missing left child ")));
         ImmutableSet<Variable> rightVariables = getChildProjectedVariables(query, optionalRightVariables, RIGHT);
 
@@ -203,7 +203,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
             Optional<ImmutableSet<Variable>> optionalLeftVariables) {
 
         ImmutableSet<Variable> leftVariables = getChildProjectedVariables(query, optionalLeftVariables, LEFT);
-        ImmutableSet<Variable> rightVariables = query.getProjectedVariables(query.getChild(this, RIGHT)
+        ImmutableSet<Variable> rightVariables = query.getVariables(query.getChild(this, RIGHT)
                                 .orElseThrow(() -> new IllegalStateException("Missing right child ")));
 
         ImmutableSet<Variable> newlyNullVariables = rightVariables.stream()
@@ -226,7 +226,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
                                                               Optional<ImmutableSet<Variable>> optionalChildVariables,
                                                               ArgumentPosition position) {
         return optionalChildVariables
-                .orElseGet(() -> query.getProjectedVariables(query.getChild(this, position)
+                .orElseGet(() -> query.getVariables(query.getChild(this, position)
                                 .orElseThrow(() -> new IllegalStateException("Missing child "))));
     }
 
@@ -245,17 +245,17 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
         QueryNode otherChild = query.getChild(this, (emptyNodePosition == LEFT) ? RIGHT : LEFT)
                 .orElseThrow(() -> new IllegalStateException("The other child of a LJ is missing"));
 
-        ImmutableSet<Variable> variablesProjectedByOtherChild = query.getProjectedVariables(otherChild);
+        ImmutableSet<Variable> variablesProjectedByOtherChild = query.getVariables(otherChild);
 
         ImmutableSet<Variable> nullVariables;
 
         switch(emptyNodePosition) {
             case LEFT:
-                nullVariables = union(variablesProjectedByOtherChild, emptyChild.getProjectedVariables());
+                nullVariables = union(variablesProjectedByOtherChild, emptyChild.getVariables());
                 return new NodeTransformationProposalImpl(DECLARE_AS_EMPTY, nullVariables);
 
             case RIGHT:
-                nullVariables = emptyChild.getProjectedVariables().stream()
+                nullVariables = emptyChild.getVariables().stream()
                         .filter(v -> !(variablesProjectedByOtherChild.contains(v)))
                         .collect(ImmutableCollectors.toSet());
                 return new NodeTransformationProposalImpl(REPLACE_BY_UNIQUE_NON_EMPTY_CHILD,

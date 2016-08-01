@@ -170,7 +170,7 @@ public class IntermediateQueryToDatalogTranslator {
 			DataAtom projectionAtom = Optional.ofNullable(
 					subQueryProjectionAtoms.get(constructionNode))
 					//.map(atom -> adaptProjectionAtom(atom, constructionNode))
-					.orElseGet(() -> generateProjectionAtom(constructionNode.getProjectedVariables()));
+					.orElseGet(() -> generateProjectionAtom(constructionNode.getVariables()));
 
 			heads.add(new RuleHead(constructionNode, projectionAtom));
 			subQueryProjectionAtoms.put(constructionNode, projectionAtom);
@@ -269,7 +269,7 @@ public class IntermediateQueryToDatalogTranslator {
 		} else {
 			 throw new UnsupportedOperationException("Type of node in the intermediate tree is unknown!!");
 		}
-	
+
 	}
 
 	private DistinctVariableOnlyDataAtom generateProjectionAtom(ImmutableSet<Variable> projectedVariables) {

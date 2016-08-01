@@ -51,7 +51,7 @@ public class SimpleUnionNodeLifter implements UnionNodeLifter {
                     childrenParentNode.stream()
                             .filter(child -> !child.equals(unionNode))
                             .forEach(child -> {
-                        projectedVariables.addAll(currentQuery.getProjectedVariables(child));
+                        projectedVariables.addAll(currentQuery.getVariables(child));
                     });
 
                     if (projectedVariables.contains(variable)) {

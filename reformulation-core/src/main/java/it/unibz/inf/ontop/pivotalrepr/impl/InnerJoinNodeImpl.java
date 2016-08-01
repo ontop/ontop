@@ -63,7 +63,7 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
 
 
         ImmutableSet<Variable > otherNodesProjectedVariables = query.getOtherChildrenStream(this, childNode)
-                .flatMap(c -> query.getProjectedVariables(c).stream())
+                .flatMap(c -> query.getVariables(c).stream())
                 .collect(ImmutableCollectors.toSet());
 
         /**
@@ -113,8 +113,8 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
                 .filter(c -> c != emptyChild)
                 .collect(ImmutableCollectors.toList());
 
-        ImmutableSet<Variable> variablesProjectedByDeletedChild = emptyChild.getProjectedVariables();
-        ImmutableSet<Variable> otherNodesProjectedVariables = query.getProjectedVariables(this);
+        ImmutableSet<Variable> variablesProjectedByDeletedChild = emptyChild.getVariables();
+        ImmutableSet<Variable> otherNodesProjectedVariables = query.getVariables(this);
 
         /**
          * If there is an implicit equality involving one null variables, the join is empty.

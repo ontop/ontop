@@ -82,14 +82,14 @@ public class UnionNodeImpl extends QueryNodeImpl implements UnionNode {
     }
 
     @Override
-    public ImmutableSet<Variable> getProjectedVariables() {
+    public ImmutableSet<Variable> getVariables() {
         return projectedVariables;
     }
 
     @Override
     public boolean isSyntacticallyEquivalentTo(QueryNode node) {
         if (node instanceof UnionNode) {
-            return projectedVariables.equals(((UnionNode)node).getProjectedVariables());
+            return projectedVariables.equals(((UnionNode)node).getVariables());
         }
         return false;
     }
@@ -106,7 +106,7 @@ public class UnionNodeImpl extends QueryNodeImpl implements UnionNode {
 
         switch (children.size()) {
             case 0:
-                return new NodeTransformationProposalImpl(DECLARE_AS_EMPTY, emptyChild.getProjectedVariables());
+                return new NodeTransformationProposalImpl(DECLARE_AS_EMPTY, emptyChild.getVariables());
             case 1:
                 return new NodeTransformationProposalImpl(REPLACE_BY_UNIQUE_NON_EMPTY_CHILD, children.get(0),
                         ImmutableSet.of());
@@ -122,7 +122,7 @@ public class UnionNodeImpl extends QueryNodeImpl implements UnionNode {
     }
 
     @Override
-    public ImmutableSet<Variable> getVariables() {
+    public ImmutableSet<Variable> getLocalVariables() {
         return ImmutableSet.of();
     }
 

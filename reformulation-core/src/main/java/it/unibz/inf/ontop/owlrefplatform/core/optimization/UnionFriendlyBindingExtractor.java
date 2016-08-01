@@ -3,12 +3,16 @@ package it.unibz.inf.ontop.owlrefplatform.core.optimization;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import it.unibz.inf.ontop.model.*;
-
+import it.unibz.inf.ontop.model.ImmutableFunctionalTerm;
+import it.unibz.inf.ontop.model.ImmutableSubstitution;
+import it.unibz.inf.ontop.model.ImmutableTerm;
+import it.unibz.inf.ontop.model.Variable;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionImpl;
-import it.unibz.inf.ontop.pivotalrepr.*;
+import it.unibz.inf.ontop.pivotalrepr.ConstructionNode;
+import it.unibz.inf.ontop.pivotalrepr.IntermediateQuery;
+import it.unibz.inf.ontop.pivotalrepr.QueryNode;
+import it.unibz.inf.ontop.pivotalrepr.UnionNode;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
-
 
 import java.util.*;
 import java.util.stream.IntStream;
@@ -90,14 +94,14 @@ public class UnionFriendlyBindingExtractor implements BindingExtractor {
 
         query.getFirstChild(currentNode).ifPresent(child -> {
             //get variables from the first child
-            ImmutableSet<Variable> varsFirstChild = query.getProjectedVariables(child);
+            ImmutableSet<Variable> varsFirstChild = query.getVariables(child);
 
             commonVariables.addAll(varsFirstChild); }
         );
 
         //update commonVariables between the children
         query.getChildren(currentNode).forEach(child ->
-                commonVariables.retainAll(query.getProjectedVariables(child)));
+                commonVariables.retainAll(query.getVariables(child)));
 
         query.getChildren(currentNode).stream()
                     .map(c -> extractBindings(query, c))

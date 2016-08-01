@@ -1,14 +1,14 @@
 package it.unibz.inf.ontop.pivotalrepr.impl;
 
-import java.util.Optional;
-import java.util.stream.Collectors;
-
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.InjectiveVar2VarSubstitution;
 import it.unibz.inf.ontop.pivotalrepr.*;
+
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * Renames query nodes according to one renaming substitution.
@@ -57,7 +57,7 @@ public class QueryNodeRenamer implements HomogeneousQueryNodeTransformer {
 
     @Override
     public ConstructionNode transform(ConstructionNode constructionNode) {
-        return new ConstructionNodeImpl(renameProjectedVars(constructionNode.getProjectedVariables()),
+        return new ConstructionNodeImpl(renameProjectedVars(constructionNode.getVariables()),
                 renameSubstitution(constructionNode.getSubstitution()),
                 renameOptionalModifiers(constructionNode.getOptionalModifiers())
                 );

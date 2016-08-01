@@ -6,6 +6,8 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.*;
+import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
+import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.Var2VarSubstitutionImpl;
 import it.unibz.inf.ontop.pivotalrepr.*;
@@ -47,6 +49,7 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
 
 
     private static Logger LOGGER = LoggerFactory.getLogger(ConstructionNodeImpl.class);
+    private static OBDADataFactory DATA_FACTORY = OBDADataFactoryImpl.getInstance();
     private static int CONVERGENCE_BOUND = 5;
 
     private final Optional<ImmutableQueryModifiers> optionalModifiers;
@@ -72,7 +75,7 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
     }
 
     @Override
-    public ImmutableSet<Variable> getProjectedVariables() {
+    public ImmutableSet<Variable> getVariables() {
         return projectedVariables;
     }
 
@@ -118,7 +121,7 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
     }
 
     @Override
-    public ImmutableSet<Variable> getVariables() {
+    public ImmutableSet<Variable> getLocalVariables() {
         ImmutableSet.Builder<Variable> collectedVariableBuilder = ImmutableSet.builder();
 
         collectedVariableBuilder.addAll(projectedVariables);
@@ -190,6 +193,7 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
 
         ImmutableMap.Builder<Variable, ImmutableTerm> newSubstitutionMapBuilder = ImmutableMap.builder();
         compositeSubstitution.getImmutableMap().entrySet().stream()
+                .map(ConstructionNodeImpl::applyNullNormalization)
                 .filter(e -> projectedVariables.contains(e.getKey()))
                 .forEach(newSubstitutionMapBuilder::put);
 
@@ -206,6 +210,62 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
     }
 
     /**
+     * Most functional terms do not accept NULL as arguments. If this happens, they become NULL.
+     */
+    private static Map.Entry<Variable, ImmutableTerm> applyNullNormalization(
+            Map.Entry<Variable, ImmutableTerm> substitutionEntry) {
+        ImmutableTerm value = substitutionEntry.getValue();
+        if (value instanceof ImmutableFunctionalTerm) {
+            ImmutableTerm newValue = normalizeFunctionalTerm((ImmutableFunctionalTerm) value);
+            return newValue.equals(value)
+                    ? substitutionEntry
+                    : new AbstractMap.SimpleEntry<>(substitutionEntry.getKey(), newValue);
+        }
+        return substitutionEntry;
+    }
+
+    private static ImmutableTerm normalizeFunctionalTerm(ImmutableFunctionalTerm functionalTerm) {
+        if (isSupportingNullArguments(functionalTerm)) {
+            return functionalTerm;
+        }
+
+        ImmutableList<ImmutableTerm> newArguments = functionalTerm.getArguments().stream()
+                .map(arg -> (arg instanceof ImmutableFunctionalTerm)
+                        ? normalizeFunctionalTerm((ImmutableFunctionalTerm) arg)
+                        : arg)
+                .collect(ImmutableCollectors.toList());
+        if (newArguments.stream()
+                .anyMatch(arg -> arg.equals(OBDAVocabulary.NULL))) {
+            return OBDAVocabulary.NULL;
+        }
+
+        return DATA_FACTORY.getImmutableFunctionalTerm(functionalTerm.getFunctionSymbol(), newArguments);
+    }
+
+    /**
+     * TODO: move it elsewhere
+     */
+    private static boolean isSupportingNullArguments(ImmutableFunctionalTerm functionalTerm) {
+        Predicate functionSymbol = functionalTerm.getFunctionSymbol();
+        if (functionSymbol instanceof ExpressionOperation) {
+            switch((ExpressionOperation)functionSymbol) {
+                case IS_NOT_NULL:
+                case IS_NULL:
+                    // TODO: add COALESCE, EXISTS, NOT EXISTS
+                    return true;
+                default:
+                    return false;
+            }
+        }
+        else if ((functionSymbol instanceof URITemplatePredicate)
+                || (functionSymbol instanceof BNodePredicate)) {
+            return false;
+        }
+        return true;
+    }
+
+
+    /**
      * TODO: explain
      */
     @Override
@@ -216,7 +276,7 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
                 descendingSubstitution, projectedVariables);
 
         ImmutableSet<Variable> newProjectedVariables = computeNewProjectedVariables(relevantSubstitution,
-                getProjectedVariables());
+                getVariables());
 
         /**
          * TODO: avoid using an exception
@@ -259,7 +319,7 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
         return Optional.of(node)
                 .filter(n -> n instanceof ConstructionNode)
                 .map(n -> (ConstructionNode) n)
-                .filter(n -> n.getProjectedVariables().equals(projectedVariables))
+                .filter(n -> n.getVariables().equals(projectedVariables))
                 .filter(n -> n.getSubstitution().equals(substitution))
                 .isPresent();
     }

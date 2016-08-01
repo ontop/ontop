@@ -1,13 +1,11 @@
 package it.unibz.inf.ontop.owlrefplatform.core.optimization;
 
-import java.util.AbstractMap;
-import java.util.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import it.unibz.inf.ontop.model.VariableOrGroundTerm;
 import it.unibz.inf.ontop.model.DataAtom;
 import it.unibz.inf.ontop.model.Variable;
+import it.unibz.inf.ontop.model.VariableOrGroundTerm;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.InjectiveVar2VarSubstitution;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.InjectiveVar2VarSubstitutionImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.optimization.QueryNodeNavigationTools.NextNodeAndQuery;
@@ -20,7 +18,9 @@ import it.unibz.inf.ontop.pivotalrepr.proposal.impl.PullVariableOutOfDataNodePro
 import it.unibz.inf.ontop.pivotalrepr.proposal.impl.PullVariableOutOfSubTreeProposalImpl;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
+import java.util.AbstractMap;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 
 import static it.unibz.inf.ontop.owlrefplatform.core.optimization.QueryNodeNavigationTools.getDepthFirstNextNode;
@@ -103,7 +103,7 @@ public class PullOutVariableOptimizer implements IntermediateQueryOptimizer {
                     initialQuery);
         }
 
-        Set<Variable> variablesFromOtherSubTrees = new HashSet<>(initialQuery.getProjectedVariables(
+        Set<Variable> variablesFromOtherSubTrees = new HashSet<>(initialQuery.getVariables(
                 optionalFirstChild.get()));
 
         // Non-final variables
@@ -118,7 +118,7 @@ public class PullOutVariableOptimizer implements IntermediateQueryOptimizer {
 
             QueryNode childNode = optionalNextChild.get();
 
-            ImmutableSet<Variable> projectedVariablesByThisChild = currentQuery.getProjectedVariables(childNode);
+            ImmutableSet<Variable> projectedVariablesByThisChild = currentQuery.getVariables(childNode);
 
             // To trick the compiler
             final IntermediateQuery query = currentQuery;

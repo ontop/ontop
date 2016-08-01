@@ -76,7 +76,7 @@ public class UnionLiftInternalExecutor implements SimpleNodeCentricInternalExecu
         QueryNode targetNode = proposal.getTargetNode();
         UnionNode focusNode = proposal.getFocusNode();
 
-        UnionNode newTopUnionNode = new UnionNodeImpl(query.getProjectedVariables(targetNode));
+        UnionNode newTopUnionNode = new UnionNodeImpl(query.getVariables(targetNode));
 
         IntermediateQuery querySnapshot = query.createSnapshot();
 

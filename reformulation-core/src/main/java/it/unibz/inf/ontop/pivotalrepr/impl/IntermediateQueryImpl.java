@@ -18,6 +18,9 @@ import it.unibz.inf.ontop.model.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.Variable;
 import it.unibz.inf.ontop.pivotalrepr.*;
 import it.unibz.inf.ontop.pivotalrepr.proposal.*;
+import it.unibz.inf.ontop.pivotalrepr.validation.IntermediateQueryValidator;
+import it.unibz.inf.ontop.pivotalrepr.validation.InvalidIntermediateQueryException;
+import it.unibz.inf.ontop.pivotalrepr.validation.StandardIntermediateQueryValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -98,6 +101,9 @@ public class IntermediateQueryImpl implements IntermediateQuery {
         this.metadata = metadata;
         this.projectionAtom = projectionAtom;
         this.treeComponent = treeComponent;
+
+        // TODO: disable it in production
+        this.validate();
     }
 
     @Override
@@ -130,10 +136,9 @@ public class IntermediateQueryImpl implements IntermediateQuery {
     }
 
     @Override
-    public ImmutableSet<Variable> getProjectedVariables(QueryNode node) {
-        return treeComponent.getProjectedVariables(node);
+    public ImmutableSet<Variable> getVariables(QueryNode subTreeRootNode) {
+        return treeComponent.getVariables(subTreeRootNode);
     }
-
 
     @Override
     public MetadataForQueryOptimization getMetadata() {
@@ -208,6 +213,19 @@ public class IntermediateQueryImpl implements IntermediateQuery {
     public <R extends ProposalResults, P extends QueryOptimizationProposal<R>> R applyProposal(P proposal,
                                                        boolean requireUsingInternalExecutor)
             throws InvalidQueryOptimizationProposalException, EmptyQueryException {
+        return applyProposal(proposal, requireUsingInternalExecutor, false);
+    }
+
+    @Override
+    public <R extends ProposalResults, P extends QueryOptimizationProposal<R>> R applyProposal(P proposal,
+                                                                                               boolean requireUsingInternalExecutor,
+                                                                                               boolean disableValidationTests)
+            throws InvalidQueryOptimizationProposalException, EmptyQueryException {
+
+        if (!disableValidationTests) {
+            // TODO: disable it in production
+            validate();
+        }
 
         /**
          * It assumes that the concrete proposal classes DIRECTLY
@@ -246,7 +264,12 @@ public class IntermediateQueryImpl implements IntermediateQuery {
                 /**
                  * Has a SIDE-EFFECT on the tree component.
                  */
-                return executor.apply(proposal, this, treeComponent);
+                R results = executor.apply(proposal, this, treeComponent);
+                if (!disableValidationTests) {
+                    // TODO: disable it in production
+                    validate();
+                }
+                return results;
             }
         }
 
@@ -261,7 +284,7 @@ public class IntermediateQueryImpl implements IntermediateQuery {
     @Override
     public <R extends ProposalResults, P extends QueryOptimizationProposal<R>> R applyProposal(P propagationProposal)
             throws InvalidQueryOptimizationProposalException, EmptyQueryException {
-        return applyProposal(propagationProposal, false);
+        return applyProposal(propagationProposal, false, false);
     }
 
     @Override
@@ -351,5 +374,10 @@ public class IntermediateQueryImpl implements IntermediateQuery {
     @Override
     public String toString() {
         return PRINTER.stringify(this);
+    }
+
+    private void validate() throws InvalidIntermediateQueryException {
+        IntermediateQueryValidator validator = new StandardIntermediateQueryValidator();
+        validator.validate(this);
     }
 }
