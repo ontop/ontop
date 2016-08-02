@@ -907,14 +907,14 @@ public class SubstitutionLiftTest {
         UnionNode newLeftUnionNode = new UnionNodeImpl(ImmutableSet.of(X));
         expectedQueryBuilder.addChild(newLeftConstructionNode, newLeftUnionNode);
 
-        ConstructionNode newConstructionNode1 = new ConstructionNodeImpl(newLeftConstructionNode.getVariables(),
+        ConstructionNode newConstructionNode1 = new ConstructionNodeImpl(newLeftUnionNode.getVariables(),
                 new ImmutableSubstitutionImpl<>(ImmutableMap.of(
                         X, generateURI1(A))),
                 Optional.empty());
         expectedQueryBuilder.addChild(newLeftUnionNode, newConstructionNode1);
         expectedQueryBuilder.addChild(newConstructionNode1, dataNode7);
 
-        ConstructionNode newConstructionNode2 = new ConstructionNodeImpl(newLeftConstructionNode.getVariables(),
+        ConstructionNode newConstructionNode2 = new ConstructionNodeImpl(newLeftUnionNode.getVariables(),
                 new ImmutableSubstitutionImpl<>(ImmutableMap.of(
                         X, generateURI2(C))),
                 Optional.empty());
@@ -1014,14 +1014,14 @@ public class SubstitutionLiftTest {
         UnionNode newLeftUnionNode = new UnionNodeImpl(ImmutableSet.of(X));
         expectedQueryBuilder.addChild(newLeftConstructionNode, newLeftUnionNode);
 
-        ConstructionNode newConstructionNode1 = new ConstructionNodeImpl(newLeftConstructionNode.getVariables(),
+        ConstructionNode newConstructionNode1 = new ConstructionNodeImpl(newLeftUnionNode.getVariables(),
                 new ImmutableSubstitutionImpl<>(ImmutableMap.of(
                         X, generateURI1(A))),
                 Optional.empty());
         expectedQueryBuilder.addChild(newLeftUnionNode, newConstructionNode1);
         expectedQueryBuilder.addChild(newConstructionNode1, dataNode7);
 
-        ConstructionNode newConstructionNode2 = new ConstructionNodeImpl(newLeftConstructionNode.getVariables(),
+        ConstructionNode newConstructionNode2 = new ConstructionNodeImpl(newLeftUnionNode.getVariables(),
                 new ImmutableSubstitutionImpl<>(ImmutableMap.of(
                         X, generateURI2(C))),
                 Optional.empty());
