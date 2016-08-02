@@ -207,7 +207,6 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 		
 	}
 	
-	// Davide> For benchmarking
 	@Deprecated // used in one test only
 	public Quest getQuestInstance() {
 		return questInstance;
