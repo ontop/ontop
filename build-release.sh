@@ -1,23 +1,3 @@
-<<<<<<< HEAD
-#!/bin/sh
-
-########################################################################################################################
-# README:                                                                                                              #
-#                                                                                                                      #
-# The required components for building the release can be found: http://obda.inf.unibz.it/files/dev/Dependencies.zip   #
-# Unzip it and locate the folder in ONTOP_DEP_HOME variable.                                                           #
-#                                                                                                                      #
-# Clone the repository from GitHub: https://github.com/ontop/ontop. Locate the source folder in BUILD_ROOT variable    #
-# Update the repository to the TAG release for stable version.                                                         #
-#                                                                                                                      #
-########################################################################################################################
-
-# location for the build ROOT folder
-export BUILD_ROOT=/home/tir/Study/Programming/ontop/build/ontop
-
-# location for the build dependencies home 
-export ONTOP_DEP_HOME=/home/tir/Study/Programming/ontop/build/dependencies
-=======
 #!/usr/bin/env bash
 
 ########################################################################
@@ -33,7 +13,6 @@ export ONTOP_DEP_HOME=/home/tir/Study/Programming/ontop/build/dependencies
 #   - git-lfs
 #
 ########################################################################
->>>>>>> 673a76b931a53e6a832ee6a56e3028ac66f1768d
 
 
 if type -p java; then

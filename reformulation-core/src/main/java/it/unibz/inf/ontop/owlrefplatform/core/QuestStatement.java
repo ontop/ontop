@@ -526,8 +526,12 @@ public class QuestStatement implements OBDAStatement {
 	return result;
     }
 
+
+
+
     @Override
     public String getSPARQLRewriting(String query) throws OBDAException {
 	return engine.getSPARQLRewriting(query);
     }
-};
+
+}

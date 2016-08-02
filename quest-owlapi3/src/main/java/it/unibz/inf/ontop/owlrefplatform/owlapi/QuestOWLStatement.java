@@ -385,4 +385,5 @@ public class QuestOWLStatement implements AutoCloseable {
 		}
 		return axiomList;
 	}
-};
+
+}

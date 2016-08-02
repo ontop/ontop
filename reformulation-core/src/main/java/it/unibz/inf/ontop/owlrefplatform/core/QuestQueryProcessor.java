@@ -303,4 +303,4 @@ public class QuestQueryProcessor {
 			throw ex;
 		}
 	}
-};
+}
