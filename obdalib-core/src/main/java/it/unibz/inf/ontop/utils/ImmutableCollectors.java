@@ -71,7 +71,7 @@ public class ImmutableCollectors {
 
     public static <T, K, U> Collector<T, ? ,ImmutableMap<K,U>> toMap(Function<? super T, ? extends K> keyMapper,
                                                      Function<? super T, ? extends U> valueMapper) {
-        return Collector.of(
+	return Collector.of(
                 // Supplier
                 ImmutableMap::<K,U>builder,
                 // Accumulator
