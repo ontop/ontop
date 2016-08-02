@@ -3,7 +3,7 @@
   	<parent>
     	<artifactId>ontop</artifactId>
     	<groupId>it.unibz.inf.ontop</groupId>
-    	<version>1.13.1-BENCHMARK</version>
+    	<version>1.18.1-SNAPSHOT</version>
     	<relativePath>..</relativePath>
   	</parent>
   	<artifactId>ontop-quest-db</artifactId>
@@ -17,14 +17,10 @@
 		</dependency>
 		<dependency>
 			<groupId>${project.groupId}</groupId>
-			<artifactId>ontop-obdalib-owlapi3</artifactId>
+			<artifactId>ontop-obdalib-owlapi</artifactId>
 			<version>${project.version}</version>
 		</dependency>
-		<dependency>
-			<groupId>${project.groupId}</groupId>
-			<artifactId>ontop-obdalib-sesame</artifactId>
-			<version>${project.version}</version>
-		</dependency>
+
 		<dependency>
 			<groupId>${project.groupId}</groupId>
 			<artifactId>ontop-reformulation-core</artifactId>
@@ -37,36 +33,11 @@
 		</dependency>
 		
 		<dependency>
-			<groupId>postgresql</groupId>
-			<artifactId>postgresql</artifactId>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
 			<type>jar</type>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
-	
-	<build>
-		<plugins>
-			<plugin>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<configuration>
-					<source>1.7</source>
-					<target>1.7</target>	
-					<testExcludes>
-						<exclude>**/DirectStore*.java</exclude>
-					</testExcludes>
-				</configuration>
-			</plugin>
-			<plugin>
-        		<groupId>org.apache.maven.plugins</groupId>
-        		<artifactId>maven-surefire-plugin</artifactId>
-	       		<configuration>
-          			<skipTests>true</skipTests>
-        		</configuration>
-      		</plugin>
-		</plugins>
-	</build>
-	
-	<properties>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-	</properties>
+
 </project>

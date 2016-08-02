@@ -6,28 +6,6 @@
                          ] ;
   rr:predicateObjectMap  [ a             rr:PredicateObjectMap ;
                            rr:objectMap  [ a            rr:ObjectMap , rr:TermMap ;
-                                           rr:datatype  <http://www.w3.org/2001/XMLSchema#integer> ;
-                                           rr:template  "{ID}" ;
-                                           rr:termType  rr:Literal
-                                         ] ;
-                           rr:predicate  <http://www.company.com/ARES#hasARESID>
-                         ] ;
-  rr:predicateObjectMap  [ a             rr:PredicateObjectMap ;
-                           rr:objectMap  [ a            rr:ObjectMap , rr:TermMap ;
-                                           rr:template  "{DEPARTMENT_CODE}" ;
-                                           rr:termType  rr:Literal
-                                         ] ;
-                           rr:predicate  <http://www.company.com/ARES#hasDepartment>
-                         ] ;
-  rr:predicateObjectMap  [ a             rr:PredicateObjectMap ;
-                           rr:objectMap  [ a            rr:ObjectMap , rr:TermMap ;
-                                           rr:column    "ID" ;
-                                           rr:termType  rr:Literal
-                                         ] ;
-                           rr:predicate  <http://www.company.com/ARES#number>
-                         ] ;
-  rr:predicateObjectMap  [ a             rr:PredicateObjectMap ;
-                           rr:objectMap  [ a            rr:TermMap , rr:ObjectMap ;
                                            rr:datatype  <http://www.w3.org/2001/XMLSchema#string> ;
                                            rr:template  "{SHORT_NAME}" ;
                                            rr:termType  rr:Literal
@@ -42,14 +20,53 @@
                            rr:predicate  <http://www.company.com/ARES#AssayID>
                          ] ;
   rr:predicateObjectMap  [ a             rr:PredicateObjectMap ;
-                           rr:objectMap  [ a            rr:ObjectMap , rr:TermMap ;
+                           rr:objectMap  [ a            rr:TermMap , rr:ObjectMap ;
                                            rr:datatype  <http://www.w3.org/2001/XMLSchema#string> ;
                                            rr:template  "{PTT_REF}" ;
                                            rr:termType  rr:Literal
                                          ] ;
                            rr:predicate  <http://www.company.com/ARES#hasPTTName>
                          ] ;
-  rr:subjectMap          [ a            rr:SubjectMap , rr:TermMap ;
+  rr:predicateObjectMap  [ a             rr:PredicateObjectMap ;
+                           rr:objectMap  [ a            rr:ObjectMap , rr:TermMap ;
+                                           rr:datatype  <http://www.w3.org/2001/XMLSchema#long> ;
+                                           rr:template  "{ID}" ;
+                                           rr:termType  rr:Literal
+                                         ] ;
+                           rr:predicate  <http://www.franz.com/solrDocid>
+                         ] ;
+  rr:predicateObjectMap  [ a             rr:PredicateObjectMap ;
+                           rr:objectMap  [ a            rr:TermMap , rr:ObjectMap ;
+                                           rr:template  "{DEPARTMENT_CODE}" ;
+                                           rr:termType  rr:Literal
+                                         ] ;
+                           rr:predicate  <http://www.company.com/ARES#hasDepartment>
+                         ] ;
+  rr:predicateObjectMap  [ a             rr:PredicateObjectMap ;
+                           rr:objectMap  [ a            rr:ObjectMap , rr:TermMap ;
+                                           rr:datatype  <http://www.w3.org/2001/XMLSchema#integer> ;
+                                           rr:template  "{ID}" ;
+                                           rr:termType  rr:Literal
+                                         ] ;
+                           rr:predicate  <http://www.company.com/ARES#hasARESID>
+                         ] ;
+  rr:predicateObjectMap  [ a             rr:PredicateObjectMap ;
+                           rr:objectMap  [ a            rr:TermMap , rr:ObjectMap ;
+                                           rr:column    "ID" ;
+                                           rr:datatype  <http://www.w3.org/2001/XMLSchema#long> ;
+                                           rr:termType  rr:Literal
+                                         ] ;
+                           rr:predicate  <http://www.company.com/ARES#number>
+                         ] ;
+  rr:predicateObjectMap  [ a             rr:PredicateObjectMap ;
+                           rr:objectMap  [ a            rr:TermMap , rr:ObjectMap ;
+                                           rr:datatype  <http://www.w3.org/2001/XMLSchema#positiveInteger> ;
+                                           rr:template  "{ID}" ;
+                                           rr:termType  rr:Literal
+                                         ] ;
+                           rr:predicate  <http://www.company.com/ARES#hasSection>
+                         ] ;
+  rr:subjectMap          [ a            rr:TermMap , rr:SubjectMap ;
                            rr:class     <http://www.company.com/ARES#Assay> ;
                            rr:template  "http://www.company.com/ARES#{ID}" ;
                            rr:termType  rr:IRI

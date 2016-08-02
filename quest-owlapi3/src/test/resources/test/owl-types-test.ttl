@@ -1,13 +1,13 @@
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
-@prefix quest-typing-test: <http://it.unibz.krdb/obda/ontologies/quest-typing-test.owl#> .
-@prefix : <http://it.unibz.krdb/obda/ontologies/quest-typing-test.owl#> .
+@prefix quest-typing-test: <http://it.unibz.inf/obda/ontologies/quest-typing-test.owl#> .
+@prefix : <http://it.unibz.inf/obda/ontologies/quest-typing-test.owl#> .
 @prefix xml: <http://www.w3.org/XML/1998/namespace> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
-@base <http://it.unibz.krdb/obda/ontologies/quest-typing-test.owl> .
+@base <http://it.unibz.inf/obda/ontologies/quest-typing-test.owl> .
 
-<http://it.unibz.krdb/obda/ontologies/quest-typing-test.owl> rdf:type owl:Ontology .
+<http://it.unibz.inf/obda/ontologies/quest-typing-test.owl> rdf:type owl:Ontology .
 
 
 #################################################################
@@ -39,13 +39,13 @@ quest-typing-test:xsddatatime rdf:type owl:AnnotationProperty .
 #################################################################
 
 
-###  http://it.unibz.krdb/obda/ontologies/quest-typing-test.owl#nottyped
+###  http://it.unibz.inf/obda/ontologies/quest-typing-test.owl#nottyped
 
 quest-typing-test:nottyped rdf:type owl:DatatypeProperty .
 
 
 
-###  http://it.unibz.krdb/obda/ontologies/quest-typing-test.owl#rdfsliteral
+###  http://it.unibz.inf/obda/ontologies/quest-typing-test.owl#rdfsliteral
 
 quest-typing-test:rdfsliteral rdf:type owl:DatatypeProperty ;
                               
@@ -53,7 +53,7 @@ quest-typing-test:rdfsliteral rdf:type owl:DatatypeProperty ;
 
 
 
-###  http://it.unibz.krdb/obda/ontologies/quest-typing-test.owl#xsdboolean
+###  http://it.unibz.inf/obda/ontologies/quest-typing-test.owl#xsdboolean
 
 quest-typing-test:xsdboolean rdf:type owl:DatatypeProperty ;
                              
@@ -61,7 +61,7 @@ quest-typing-test:xsdboolean rdf:type owl:DatatypeProperty ;
 
 
 
-###  http://it.unibz.krdb/obda/ontologies/quest-typing-test.owl#xsddatetime
+###  http://it.unibz.inf/obda/ontologies/quest-typing-test.owl#xsddatetime
 
 quest-typing-test:xsddatetime rdf:type owl:DatatypeProperty ;
                               
@@ -69,7 +69,7 @@ quest-typing-test:xsddatetime rdf:type owl:DatatypeProperty ;
 
 
 
-###  http://it.unibz.krdb/obda/ontologies/quest-typing-test.owl#xsddecimal
+###  http://it.unibz.inf/obda/ontologies/quest-typing-test.owl#xsddecimal
 
 quest-typing-test:xsddecimal rdf:type owl:DatatypeProperty ;
                              
@@ -77,7 +77,7 @@ quest-typing-test:xsddecimal rdf:type owl:DatatypeProperty ;
 
 
 
-###  http://it.unibz.krdb/obda/ontologies/quest-typing-test.owl#xsddouble
+###  http://it.unibz.inf/obda/ontologies/quest-typing-test.owl#xsddouble
 
 quest-typing-test:xsddouble rdf:type owl:DatatypeProperty ;
                             
@@ -85,7 +85,7 @@ quest-typing-test:xsddouble rdf:type owl:DatatypeProperty ;
 
 
 
-###  http://it.unibz.krdb/obda/ontologies/quest-typing-test.owl#xsdfloat
+###  http://it.unibz.inf/obda/ontologies/quest-typing-test.owl#xsdfloat
 
 quest-typing-test:xsdfloat rdf:type owl:DatatypeProperty ;
                            
@@ -93,7 +93,7 @@ quest-typing-test:xsdfloat rdf:type owl:DatatypeProperty ;
 
 
 
-###  http://it.unibz.krdb/obda/ontologies/quest-typing-test.owl#xsdint
+###  http://it.unibz.inf/obda/ontologies/quest-typing-test.owl#xsdint
 
 quest-typing-test:xsdint rdf:type owl:DatatypeProperty ;
                          
@@ -101,7 +101,7 @@ quest-typing-test:xsdint rdf:type owl:DatatypeProperty ;
 
 
 
-###  http://it.unibz.krdb/obda/ontologies/quest-typing-test.owl#xsdinteger
+###  http://it.unibz.inf/obda/ontologies/quest-typing-test.owl#xsdinteger
 
 quest-typing-test:xsdinteger rdf:type owl:DatatypeProperty ;
                              
@@ -109,7 +109,7 @@ quest-typing-test:xsdinteger rdf:type owl:DatatypeProperty ;
 
 
 
-###  http://it.unibz.krdb/obda/ontologies/quest-typing-test.owl#xsdstring
+###  http://it.unibz.inf/obda/ontologies/quest-typing-test.owl#xsdstring
 
 quest-typing-test:xsdstring rdf:type owl:DatatypeProperty ;
                             
@@ -126,14 +126,14 @@ quest-typing-test:xsdstring rdf:type owl:DatatypeProperty ;
 #################################################################
 
 
-###  http://it.unibz.krdb/obda/ontologies/quest-typing-test.owl#asdf
+###  http://it.unibz.inf/obda/ontologies/quest-typing-test.owl#asdf
 
 quest-typing-test:asdf rdf:type owl:NamedIndividual ,
                                 owl:Thing .
 
 
 
-###  http://it.unibz.krdb/obda/ontologies/quest-typing-test.owl#obj1
+###  http://it.unibz.inf/obda/ontologies/quest-typing-test.owl#obj1
 
 quest-typing-test:obj1 rdf:type owl:NamedIndividual ,
                                 owl:Thing ;

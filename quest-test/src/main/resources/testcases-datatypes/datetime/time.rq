@@ -1,4 +1,5 @@
 PREFIX : <http://ontop.inf.unibz.it/test/datatypes#>
+PREFIX xsd:	<http://www.w3.org/2001/XMLSchema#>
 
 SELECT ?x ?y
 WHERE {

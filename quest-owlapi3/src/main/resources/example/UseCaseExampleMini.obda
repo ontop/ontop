@@ -19,11 +19,11 @@ driverClass	org.postgresql.Driver
 [MappingDeclaration] @collection [[
 mappingId   Mapping - hasVal
 target		op:{sensor} op:hasVal {value}^^xsd:double .
-source		SELECT "value", sensor FROM burner
+source		SELECT  reverse(sensor) as RR FROM burner
 
 mappingId   Mapping - hasAssembly
 target		op:{sensor} op:hasAss op:{assembly} .
-source		SELECT assembly, sensor FROM burner
+source		SELECT assembly, sensor as FD FROM burner
 
 mappingId   Mapping - hasEvent
 target		op:{assembly} op:hasEvent {eventtext}^^xsd:string .
@@ -43,14 +43,14 @@ source		SELECT DISTINCT sensor FROM burner
 
 mappingId	Mapping - Critical
 target		op:{sensor} a op:Critical ; op:hasVal {value}^^xsd:double . 
-source		SELECT "value", sensor FROM burner WHERE "value" > 80
+source		SELECT "value", sensor  FROM burner WHERE "value" > 80
 
 mappingId	Mapping - Assembly
 target		op:{assembly} a op:Assembly . 
-source		SELECT DISTINCT assembly FROM burner
+source		SELECT DISTINCT assembly as DG FROM burner
 
 mappingId	Mapping - TempSensor
 target		op:{domain} a op:TempSensor .
-source		SELECT domain FROM a_static WHERE range = 'TempSensor'
+source		SELECT domain  as DD FROM a_static WHERE range = 'TempSensor'
 
 ]]

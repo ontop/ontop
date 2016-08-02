@@ -1,0 +1,155 @@
+[PrefixDeclaration]
+:		http://myproject.org/odbs#
+
+[SourceDeclaration]
+sourceUri	database
+connectionUrl	jdbc:mysql://10.7.20.39/sakila
+username	test
+password	ontop2014
+driverClass	com.mysql.jdbc.Driver
+
+[MappingDeclaration] @collection [[
+mappingId	film-filmcategory-category-language
+target		:film{idFilm} a :Film ; :idFilm {idFilm} ; :title {title} ; :genre {category} ; :languageFilm {language} ; :releaseDate {release_date} . 
+source		SELECT a.film_id AS idFilm, a.title, c.name as category, d.name AS language, a.release_year AS release_date
+			FROM film AS a, film_category AS b, category AS c, language AS d
+			WHERE a.film_id = b.film_id AND 
+			b.category_id = c.category_id AND  
+			a.language_id = d.language_id 
+
+mappingId	actor
+target		:actor{idActor} a :Actor ; :firstNameCeleb {firstName} ; :lastNameCeleb {lastName} . 
+source		SELECT actor_id AS idActor, first_name AS firstName, last_name AS lastName
+			FROM actor
+
+mappingId	customer
+target		:customer{idCustomer} a :Customer ; :firstName {firstName} ; :lastName {lastName} . 
+source		SELECT customer_id AS idCustomer,first_name AS firstName, last_name AS lastName
+			FROM customer
+
+mappingId	hasActor
+target		:film{idFilm} :hasActor :actor{idActor} . 
+source		SELECT a.film_id as idFilm, c.actor_id as idActor
+			FROM film as a, film_actor as b, actor as c
+			WHERE a.film_id = b.film_id AND b.actor_id = c.actor_id
+
+mappingId	staff
+target		:staff{idStaff} a :Staff ; :firstName {firstName} ; :lastName {lastName} . 
+source		SELECT staff_id AS idStaff, first_name AS firstName, last_name AS lastName
+			FROM staff
+
+mappingId	hasAddress-customer
+target		:customer{idCustomer} :hasAddress :address{idAddress} . :address{idAddress} a :Address ; :street {address} ; :sector {sector} ; :postalCode {postalcode} . 
+source		SELECT a.address_id as idAddress, a.address as address, a.district as sector, a.postal_code as postalcode, c.customer_id as idCustomer
+			FROM address as a, customer as c
+			WHERE a.address_id = c.address_id
+
+mappingId	hasAddress-staff
+target		:staff{idStaff} :hasAddress :address{idAddress} . :address{idAddress} a :Address ; :street {address} ; :sector {sector} ; :postalCode {postalcode} . 
+source		SELECT a.address_id as idAddress,a.address as address, a.district as sector, a.postal_code as postalcode, s.staff_id as idStaff
+			FROM address as a, staff as s
+			WHERE a.address_id = s.address_id
+
+mappingId	addressLocatedIn
+target		:city{idCity} a :City ; :nameCity {nameCity} . :address{idAddress} :addressLocatedIn :city{idCity} . 
+source		SELECT a.address_id as idAddress, c.city_id as idCity, c.city as nameCity
+			FROM address as a, city as c
+			WHERE a.city_id = c.city_id
+
+mappingId	cityLocatedIn
+target		:city{idCity} :cityLocatedIn :country{idCountry} . :country{idCountry} a :Country ; :nameCountry {countryName} . 
+source		SELECT a.city_id as idCity, b.country_id as idCountry, b.country as countryName
+			FROM city as a, country as b
+			WHERE a.country_id = b.country_id            
+
+mappingId	storeLocatedIn
+target		:store{idStore} :storeLocatedIn :address{idAddress} . :address{idAddress} a :Address ; :street {address} ; :sector {sector} ; :postalCode {postalcode} . 
+source		SELECT  a.address_id as idAddress, a.address as address, a.district as sector, a.postal_code as postalcode, s.store_id as idStore
+			FROM store as s, address as a
+			WHERE s.address_id = a.address_id
+
+mappingId	store
+target		:store{idStore} a :Store ; :idStore {idStore} . 
+source		SELECT store_id as idStore
+			FROM store
+
+mappingId	inventory
+target		:inventory{idInventory} a :Inventory ; :idInventory {idInventory} . 
+source		SELECT inventory_id as idInventory
+			FROM inventory
+
+mappingId	filmInventory
+target		:inventory{idInventory} :filmInventory :film{idFilm} . 
+source		SELECT f.film_id as idFilm, i.inventory_id as idInventory
+			FROM inventory as i, film as f
+			WHERE i.film_id = f.film_id
+
+mappingId	storeInventory
+target		:inventory{idInventory} :storeInventory :store{idStore} . 
+source		SELECT s.store_id as idStore, i.inventory_id as idInventory
+			FROM inventory as i, store as s
+			WHERE s.store_id = i.store_id
+
+mappingId	rental
+target		:rental{idRental} a :Rental ; :idRental {idRental} ; :dateOfRent {dateRent} ; :dateOfReturn {dateReturn} . 
+source		SELECT r.rental_id as idRental, r.rental_date as dateRent, r.return_date as dateReturn
+			FROM rental as r
+
+mappingId	payment
+target		:payment{idPayment} a :Payment ; :idPayment {idPayment} ; :price {price} ; :dateOfPayment {datePayment} . 
+source		SELECT p.payment_id as idPayment, p.amount as price, p.payment_date as datePayment
+			FROM payment as p
+
+mappingId	customerRental
+target		:rental{idRental} :customerRental :customer{idCustomer} . 
+source		SELECT c.customer_id as idCustomer, r.rental_id as idRental
+			FROM customer as c, rental as r
+			WHERE c.customer_id = r.customer_id
+
+mappingId	basedOn
+target		:rental{idRental} :basedOn :inventory{idInventory} . 
+source		SELECT i.inventory_id as idInventory, r.rental_id as idRental
+			FROM inventory as i, rental as r
+			WHERE r.inventory_id = i.inventory_id
+
+mappingId	paymentRental
+target		:rental{idRental} :paymentRental :payment{idPayment} . 
+source		SELECT r.rental_id as idRental, p.payment_id as idPayment
+			         FROM payment as p, rental as r
+			         WHERE p.rental_id = r.rental_id
+
+mappingId	worksIn
+target		:staff{idStaff} :worksIn :store{idStore} . 
+source		SELECT b.store_id as idStore, a.staff_id as idStaff
+			         FROM staff as a, store as b
+			         WHERE a.store_id = b.store_id
+
+mappingId	numberOfCopies
+target		:inventory{idInventory} :numberOfCopies {numberOfCopies} . 
+source		SELECT inventory_id as idInventory, film_id as idFilm, store_id as idStore, count(*) as numberOfCopies
+			FROM inventory
+			GROUP BY film_id, store_id
+
+mappingId	phone-staff
+target		:staff{idStaff} :cellphone {phone} . 
+source		SELECT a.phone as phone, s.staff_id as idStaff
+			FROM address as a, staff as s
+			WHERE s.address_id = a.address_id
+
+mappingId	phone-customer
+target		:customer{idCustomer} :cellphone {phone} . 
+source		SELECT a.phone as phone, c.customer_id as idCustomer
+			FROM address as a, customer as c
+			WHERE c.address_id = a.address_id
+
+mappingId	numberOfAvailability
+target		:inventory{idInventory} :numberOfAvailability {numberOfAvailability} . 
+source		SELECT i.inventory_id as idInventory, i.film_id,i.store_id, i.numberOfCopies, u.numberOfUnavailability, (i.numberOfCopies - u.numberOfUnavailability) as numberOfAvailability FROM inv_numcopies as i left join inv_numofunavailable2 as u ON i.film_id = u.film_id and i.store_id = u.store_id
+
+mappingId	director
+target		:film{idFilm} :hasDirector :director{idDirector} . :director{idDirector} a :Director ; :firstNameCeleb {firstName} ; :lastNameCeleb {lastName} . 
+source		SELECT d.director_id as idDirector, d.film_id as idFilm, d.first_name as firstName, d.last_name as lastName
+			FROM director as d, film as f
+			WHERE d.film_id = f.film_id
+]]
+

@@ -3,4 +3,5 @@
 @prefix :        <http://example.org/#> .
 
 []    rdf:type      rsi:ResultSetInfo ;
-      rsi:size      "41" .
+      rsi:size      "45" .
+      # it was 46 before. The difference is a trivial triple with topDataProperty.

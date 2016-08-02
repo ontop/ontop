@@ -200,18 +200,18 @@
 
     <owl:DatatypeProperty rdf:about="http://www.owl-ontologies.com/Ontology1207768242.owl#addressID">
         <rdfs:domain rdf:resource="http://www.owl-ontologies.com/Ontology1207768242.owl#Address"/>
-        <rdfs:range rdf:resource="&xsd;int"/>
+        <rdfs:range rdf:resource="&xsd;integer"/>
     </owl:DatatypeProperty>
-    
+
 
 
     <!-- http://www.owl-ontologies.com/Ontology1207768242.owl#amountOfShares -->
 
     <owl:DatatypeProperty rdf:about="http://www.owl-ontologies.com/Ontology1207768242.owl#amountOfShares">
         <rdfs:domain rdf:resource="http://www.owl-ontologies.com/Ontology1207768242.owl#Stock"/>
-        <rdfs:range rdf:resource="&xsd;int"/>
+        <rdfs:range rdf:resource="&xsd;integer"/>
     </owl:DatatypeProperty>
-    
+
 
 
     <!-- http://www.owl-ontologies.com/Ontology1207768242.owl#amountOfTransaction -->
@@ -220,7 +220,7 @@
         <rdfs:domain rdf:resource="http://www.owl-ontologies.com/Ontology1207768242.owl#Transaction"/>
         <rdfs:range rdf:resource="&xsd;decimal"/>
     </owl:DatatypeProperty>
-    
+
 
 
     <!-- http://www.owl-ontologies.com/Ontology1207768242.owl#companyName -->
@@ -229,7 +229,7 @@
         <rdfs:domain rdf:resource="http://www.owl-ontologies.com/Ontology1207768242.owl#Company"/>
         <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
-    
+
 
 
     <!-- http://www.owl-ontologies.com/Ontology1207768242.owl#dateOfBirth -->
@@ -238,16 +238,16 @@
         <rdfs:domain rdf:resource="http://www.owl-ontologies.com/Ontology1207768242.owl#PhysicalPerson"/>
         <rdfs:range rdf:resource="&xsd;dateTime"/>
     </owl:DatatypeProperty>
-    
+
 
 
     <!-- http://www.owl-ontologies.com/Ontology1207768242.owl#financialInstrumentID -->
 
     <owl:DatatypeProperty rdf:about="http://www.owl-ontologies.com/Ontology1207768242.owl#financialInstrumentID">
         <rdfs:domain rdf:resource="http://www.owl-ontologies.com/Ontology1207768242.owl#FinantialInstrument"/>
-        <rdfs:range rdf:resource="&xsd;int"/>
+        <rdfs:range rdf:resource="&xsd;integer"/>
     </owl:DatatypeProperty>
-    
+
 
 
     <!-- http://www.owl-ontologies.com/Ontology1207768242.owl#firstName -->
@@ -256,16 +256,16 @@
         <rdfs:domain rdf:resource="http://www.owl-ontologies.com/Ontology1207768242.owl#PhysicalPerson"/>
         <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
-    
+
 
 
     <!-- http://www.owl-ontologies.com/Ontology1207768242.owl#hasNumber -->
 
     <owl:DatatypeProperty rdf:about="http://www.owl-ontologies.com/Ontology1207768242.owl#hasNumber">
         <rdfs:domain rdf:resource="http://www.owl-ontologies.com/Ontology1207768242.owl#Address"/>
-        <rdfs:range rdf:resource="&xsd;int"/>
+        <rdfs:range rdf:resource="&xsd;integer"/>
     </owl:DatatypeProperty>
-    
+
 
 
     <!-- http://www.owl-ontologies.com/Ontology1207768242.owl#inCity -->
@@ -274,7 +274,7 @@
         <rdfs:domain rdf:resource="http://www.owl-ontologies.com/Ontology1207768242.owl#Address"/>
         <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
-    
+
 
 
     <!-- http://www.owl-ontologies.com/Ontology1207768242.owl#inCountry -->
@@ -283,7 +283,7 @@
         <rdfs:domain rdf:resource="http://www.owl-ontologies.com/Ontology1207768242.owl#Address"/>
         <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
-    
+
 
 
     <!-- http://www.owl-ontologies.com/Ontology1207768242.owl#inState -->
@@ -292,7 +292,7 @@
         <rdfs:domain rdf:resource="http://www.owl-ontologies.com/Ontology1207768242.owl#Address"/>
         <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
-    
+
 
 
     <!-- http://www.owl-ontologies.com/Ontology1207768242.owl#inStreet -->
@@ -301,7 +301,7 @@
         <rdfs:domain rdf:resource="http://www.owl-ontologies.com/Ontology1207768242.owl#Address"/>
         <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
-    
+
 
 
     <!-- http://www.owl-ontologies.com/Ontology1207768242.owl#lastName -->
@@ -310,7 +310,7 @@
         <rdfs:domain rdf:resource="http://www.owl-ontologies.com/Ontology1207768242.owl#PhysicalPerson"/>
         <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
-    
+
 
 
     <!-- http://www.owl-ontologies.com/Ontology1207768242.owl#listdate -->
@@ -319,16 +319,16 @@
         <rdfs:domain rdf:resource="http://www.owl-ontologies.com/Ontology1207768242.owl#StockExchangeList"/>
         <rdfs:range rdf:resource="&xsd;dateTime"/>
     </owl:DatatypeProperty>
-    
+
 
 
     <!-- http://www.owl-ontologies.com/Ontology1207768242.owl#marketShares -->
 
     <owl:DatatypeProperty rdf:about="http://www.owl-ontologies.com/Ontology1207768242.owl#marketShares">
         <rdfs:domain rdf:resource="http://www.owl-ontologies.com/Ontology1207768242.owl#Company"/>
-        <rdfs:range rdf:resource="&xsd;int"/>
+        <rdfs:range rdf:resource="&xsd;integer"/>
     </owl:DatatypeProperty>
-    
+
 
 
     <!-- http://www.owl-ontologies.com/Ontology1207768242.owl#membershipDate -->
@@ -336,7 +336,7 @@
     <owl:DatatypeProperty rdf:about="http://www.owl-ontologies.com/Ontology1207768242.owl#membershipDate">
         <rdfs:range rdf:resource="&xsd;dateTime"/>
     </owl:DatatypeProperty>
-    
+
 
 
     <!-- http://www.owl-ontologies.com/Ontology1207768242.owl#netWorth -->
@@ -345,16 +345,16 @@
         <rdfs:domain rdf:resource="http://www.owl-ontologies.com/Ontology1207768242.owl#Company"/>
         <rdfs:range rdf:resource="&xsd;float"/>
     </owl:DatatypeProperty>
-    
+
 
 
     <!-- http://www.owl-ontologies.com/Ontology1207768242.owl#personID -->
 
     <owl:DatatypeProperty rdf:about="http://www.owl-ontologies.com/Ontology1207768242.owl#personID">
         <rdfs:domain rdf:resource="http://www.owl-ontologies.com/Ontology1207768242.owl#Person"/>
-        <rdfs:range rdf:resource="&xsd;int"/>
+        <rdfs:range rdf:resource="&xsd;integer"/>
     </owl:DatatypeProperty>
-    
+
 
 
     <!-- http://www.owl-ontologies.com/Ontology1207768242.owl#ssn -->
@@ -363,7 +363,7 @@
         <rdfs:domain rdf:resource="http://www.owl-ontologies.com/Ontology1207768242.owl#PhysicalPerson"/>
         <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
-    
+
 
 
     <!-- http://www.owl-ontologies.com/Ontology1207768242.owl#stockDescription -->
@@ -372,7 +372,7 @@
         <rdfs:domain rdf:resource="http://www.owl-ontologies.com/Ontology1207768242.owl#Stock"/>
         <rdfs:range rdf:resource="&rdfs;Literal"/>
     </owl:DatatypeProperty>
-    
+
 
 
     <!-- http://www.owl-ontologies.com/Ontology1207768242.owl#transactionDate -->
@@ -381,14 +381,14 @@
         <rdfs:domain rdf:resource="http://www.owl-ontologies.com/Ontology1207768242.owl#Transaction"/>
         <rdfs:range rdf:resource="&xsd;dateTime"/>
     </owl:DatatypeProperty>
-    
+
 
 
     <!-- http://www.owl-ontologies.com/Ontology1207768242.owl#transactionID -->
 
     <owl:DatatypeProperty rdf:about="http://www.owl-ontologies.com/Ontology1207768242.owl#transactionID">
         <rdfs:domain rdf:resource="http://www.owl-ontologies.com/Ontology1207768242.owl#Transaction"/>
-        <rdfs:range rdf:resource="&xsd;int"/>
+        <rdfs:range rdf:resource="&xsd;integer"/>
     </owl:DatatypeProperty>
     
 

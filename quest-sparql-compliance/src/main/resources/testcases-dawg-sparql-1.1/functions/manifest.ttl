@@ -10,63 +10,63 @@
     rdfs:label "Built-in Functions" ;
     mf:entries
     ( 
-	:strdt01
-	:strdt02
-	:strdt03
-	:strlang01
-	:strlang02
-	:strlang03
-	:isnumeric01
-	:abs01
-	:ceil01
-	:floor01
-	:round01
-	:concat01
-	:concat02
-	:substring01
-	:substring02
-	:length01
-	:ucase01
-	:lcase01
-	:encode01
-	:contains01
-	:starts01
-	:ends01
-	:plus-1
-	:plus-2
-	:md5-01
-	:md5-02
-	:sha1-01
-	:sha1-02
-	:sha256-01
-	:sha256-02
-	:sha512-01
-	:sha512-02
-	:minutes
-	:seconds
-	:hours
-	:month
-	:year
-	:day
-	:timezone
-	:tz
-	:bnode01
-	:bnode02
-	:in01
-	:in02
-	:notin01
-	:notin02
-	:now01
-	:rand01
-	:iri01
-	:if01
-	:if02
-	:coalesce01
-	:strbefore01
-	:strafter01
-	:replace01
-	:replace02
-	:replace03
+	# :strdt01
+	# :strdt02
+	# :strdt03
+	# :strlang01
+	# :strlang02
+	# :strlang03
+	# :isnumeric01
+	# :abs01
+	# :ceil01
+	# :floor01
+	# :round01
+	 :concat01
+	# :concat02
+	# :substring01
+	# :substring02
+	# :length01
+	# :ucase01
+	# :lcase01
+	# :encode01
+	# :contains01
+	# :starts01
+	# :ends01
+	# :plus-1
+	# :plus-2
+	# :md5-01
+	# :md5-02
+	# :sha1-01
+	# :sha1-02
+	# :sha256-01
+	# :sha256-02
+	# :sha512-01
+	# :sha512-02
+	# :minutes
+	# :seconds
+	# :hours
+	# :month
+	# :year
+	# :day
+	# :timezone
+	# :tz
+	# :bnode01
+	# :bnode02
+	# :in01
+	# :in02
+	# :notin01
+	# :notin02
+	# :now01
+	# :rand01
+	# :iri01
+	# :if01
+	# :if02
+	# :coalesce01
+	# :strbefore01
+	# :strafter01
+	# :replace01
+	 :replace02
+	 :replace03
  ) .
 
 

@@ -2,6 +2,6 @@ PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#>
 
 SELECT DISTINCT $x $amount 
 WHERE { 
-   $x a :Stock; :amountOfShares $amount; :typeOfShares $type. 
+   $x a :Stock; :amountOfShares $amount; :typeOfShares $type .
    FILTER ( $type = true ).
 }

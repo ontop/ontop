@@ -3,5 +3,5 @@ PREFIX : <http://ontop.inf.unibz.it/test/datatypes#>
 SELECT ?x ?y
 WHERE {
    ?x a :Row; :hasTimestampTZString ?y
-   FILTER ( ?y = "2013-03-19 03:12:10+01" ) .
+   FILTER ( ?y = "2013-03-19 03:12:10+01"^^xsd:string ) .
 }

@@ -3,7 +3,7 @@
   <parent>
     <groupId>it.unibz.inf.ontop</groupId>
     <artifactId>ontop</artifactId>
-    <version>1.13.1-BENCHMARK</version>
+    <version>1.18.1-SNAPSHOT</version>
   </parent>
   <artifactId>ontop-obdalib-r2rml</artifactId>
   <dependencies>
@@ -48,17 +48,17 @@
 			<groupId>org.openrdf.sesame</groupId>
 			<artifactId>sesame-rio-turtle</artifactId>
 		</dependency>
-  			<!-- Optique R2RML API -->
+
+        <!-- Optique R2RML API -->
 		<dependency>
-			<groupId>org.optique-project</groupId>
+			<groupId>eu.optique-project</groupId>
 			<artifactId>r2rml-api</artifactId>
 		</dependency>
 	
 		<dependency>
-			<groupId>org.optique-project</groupId>
+			<groupId>eu.optique-project</groupId>
 			<artifactId>r2rml-api-sesame-bridge</artifactId>
 		</dependency>
-
 
 		<dependency>
 			<groupId>net.sourceforge.owlapi</groupId>
@@ -68,18 +68,6 @@
 			<groupId>net.sourceforge.owlapi</groupId>
 			<artifactId>owlapi-apibinding</artifactId>
 		</dependency>
-  
   </dependencies>
-  <repositories>
-		<repository>
-			<id>bolzano-nexus-public</id>
-			<url>http://obdavm.inf.unibz.it:8080/nexus/content/groups/public/</url>
-			<releases>
-				<enabled>true</enabled>
-			</releases>
-			<snapshots>
-				<enabled>true</enabled>
-			</snapshots>
-		</repository>
-	</repositories>
+
 </project>

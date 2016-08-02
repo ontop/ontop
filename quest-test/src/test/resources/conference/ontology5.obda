@@ -1,0 +1,177 @@
+[PrefixDeclaration]
+:		http://myproject.org/odbs#
+
+[SourceDeclaration]
+sourceUri	database_conference
+connectionUrl	jdbc:mysql://10.7.20.39/conference
+username	fish
+password	fish
+driverClass	com.mysql.jdbc.Driver
+
+[MappingDeclaration] @collection [[
+mappingId	trace0
+target		:log/log1 :LcontainsT :trace/paper/{t0} . 
+source		select submission.`paper` as `t0` from submission 
+
+mappingId	trace1
+target		:trace/paper/{t0} :TcontainsA :attr/paper/{t0} . 
+source		select submission.`paper` as `t0` from submission 
+
+mappingId	trace2
+target		:attr/paper/{t0} :keyA "concept:name"^^xsd:string ; :valueA {t0} ; :typeA "literal"^^xsd:string . 
+source		select submission.`paper` as `t0` from submission 
+
+mappingId	trace3
+target		:log/log1 :LcontainsT :trace/paper/{t0} . 
+source		 select decision.`paper` as `t0` from decision 
+
+mappingId	trace4
+target		:trace/paper/{t0} :TcontainsA :attr/paper/{t0} . 
+source		 select decision.`paper` as `t0` from decision 
+
+mappingId	trace5
+target		:attr/paper/{t0} :keyA "concept:name"^^xsd:string ; :valueA {t0} ; :typeA "literal"^^xsd:string . 
+source		 select decision.`paper` as `t0` from decision 
+
+mappingId	trace6
+target		:log/log1 :LcontainsT :trace/paper/{t0} . 
+source		 select reviewrequest.`paper` as `t0` from reviewrequest 
+
+mappingId	trace7
+target		:trace/paper/{t0} :TcontainsA :attr/paper/{t0} . 
+source		 select reviewrequest.`paper` as `t0` from reviewrequest 
+
+mappingId	trace8
+target		:attr/paper/{t0} :keyA "concept:name"^^xsd:string ; :valueA {t0} ; :typeA "literal"^^xsd:string . 
+source		 select reviewrequest.`paper` as `t0` from reviewrequest 
+
+mappingId	trace9
+target		:log/log1 :LcontainsT :trace/paper/{t0} . 
+source		 select acceptance.`paper` as `t0` from acceptance 
+
+mappingId	trace10
+target		:trace/paper/{t0} :TcontainsA :attr/paper/{t0} . 
+source		 select acceptance.`paper` as `t0` from acceptance 
+
+mappingId	trace11
+target		:attr/paper/{t0} :keyA "concept:name"^^xsd:string ; :valueA {t0} ; :typeA "literal"^^xsd:string . 
+source		 select acceptance.`paper` as `t0` from acceptance 
+
+mappingId	trace12
+target		:log/log1 :LcontainsT :trace/paper/{t0} . 
+source		 select paper.`id` as `t0` from paper 
+
+mappingId	trace13
+target		:trace/paper/{t0} :TcontainsA :attr/paper/{t0} . 
+source		 select paper.`id` as `t0` from paper 
+
+mappingId	trace14
+target		:attr/paper/{t0} :keyA "concept:name"^^xsd:string ; :valueA {t0} ; :typeA "literal"^^xsd:string . 
+source		 select paper.`id` as `t0` from paper 
+
+mappingId	event15
+target		:trace/paper/{t0} :TcontainsE :event/uplsub/{e0} . 
+source		select submission.`paper` as `t0` , submission.`id` as `e0` from submission 
+
+mappingId	activityname16
+target		:event/uplsub/{e0} :EcontainsA :attr/submitpaper/uplsub/{e0} . :attr/submitpaper/uplsub/{e0} :keyA "concept:name"^^xsd:string ; :typeA "literal"^^xsd:string ; :valueA "submit paper"^^xsd:string . 
+source		select submission.`id` as `e0` from submission 
+
+mappingId	timestamp17
+target		:event/uplsub/{e0} :EcontainsA :attr/{t0}/uplsub/{e0} . :attr/{t0}/uplsub/{e0} :keyA "time:timestamp"^^xsd:string ; :typeA "timestamp"^^xsd:string ; :valueA {t0} . 
+source		select submission.`id` as `e0` , submission.`uploadtime` as `t0` from submission 
+
+mappingId	lifecycle18
+target		:event/uplsub/{e0} :EcontainsA :attr/complete/uplsub/{e0} . :attr/complete/uplsub/{e0} :keyA "lifecycle:transition"^^xsd:string ; :typeA "literal"^^xsd:string ; :valueA "complete"^^xsd:string . 
+source		select submission.`id` as `e0` from submission 
+
+mappingId	event19
+target		:trace/paper/{t0} :TcontainsE :event/uplacc/{e0} . 
+source		select acceptance.`paper` as `t0` , acceptance.`id` as `e0` from acceptance, acceptance where (acceptance.`paper` = acceptance.`paper`)
+
+mappingId	timestamp20
+target		:event/uplacc/{e0} :EcontainsA :attr/{t0}/uplacc/{e0} . :attr/{t0}/uplacc/{e0} :keyA "time:timestamp"^^xsd:string ; :typeA "timestamp"^^xsd:string ; :valueA {t0} . 
+source		select acceptance.`id` as `e0` , acceptance.`uploadtime` as `t0` from acceptance 
+
+mappingId	activityname21
+target		:event/uplacc/{e0} :EcontainsA :attr/receivefinalversion/uplacc/{e0} . :attr/receivefinalversion/uplacc/{e0} :keyA "concept:name"^^xsd:string ; :typeA "literal"^^xsd:string ; :valueA "receive final version"^^xsd:string . 
+source		select acceptance.`id` as `e0` from acceptance 
+
+mappingId	lifecycle22
+target		:event/uplacc/{e0} :EcontainsA :attr/complete/uplacc/{e0} . :attr/complete/uplacc/{e0} :keyA "lifecycle:transition"^^xsd:string ; :typeA "literal"^^xsd:string ; :valueA "complete"^^xsd:string . 
+source		select acceptance.`id` as `e0` from acceptance 
+
+mappingId	event23
+target		:trace/paper/{t0} :TcontainsE :event/rev/{e0} . 
+source		select reviewrequest.`paper` as `t0` , review.`id` as `e0` from review, reviewrequest where (review.`idrr` = reviewrequest.`id`) 
+
+mappingId	timestamp24
+target		:event/rev/{e0} :EcontainsA :attr/{t0}/rev/{e0} . :attr/{t0}/rev/{e0} :keyA "time:timestamp"^^xsd:string ; :typeA "timestamp"^^xsd:string ; :valueA {t0} . 
+source		select review.`id` as `e0` , review.`submissiontime` as `t0` from review 
+
+mappingId	activityname25
+target		:event/rev/{e0} :EcontainsA :attr/getreview/rev/{e0} . :attr/getreview/rev/{e0} :keyA "concept:name"^^xsd:string ; :typeA "literal"^^xsd:string ; :valueA "get review"^^xsd:string . 
+source		select review.`id` as `e0` from review 
+
+mappingId	lifecycle26
+target		:event/rev/{e0} :EcontainsA :attr/complete/rev/{e0} . :attr/complete/rev/{e0} :keyA "lifecycle:transition"^^xsd:string ; :typeA "literal"^^xsd:string ; :valueA "complete"^^xsd:string . 
+source		select review.`id` as `e0` from review 
+
+mappingId	event27
+target		:trace/paper/{t0} :TcontainsE :event/dec/{e0} . 
+source		select decision.`paper` as `t0` , decision.`id` as `e0` from decision where (decision.`outcome` = true) 
+
+mappingId	activityname28
+target		:event/dec/{e0} :EcontainsA :attr/acceptance/dec/{e0} . :attr/acceptance/dec/{e0} :keyA "concept:name"^^xsd:string ; :typeA "literal"^^xsd:string ; :valueA "acceptance"^^xsd:string . 
+source		select decision.`id` as `e0` from decision where (decision.`outcome` = true) 
+
+mappingId	timestamp29
+target		:event/dec/{e0} :EcontainsA :attr/{t0}/dec/{e0} . :attr/{t0}/dec/{e0} :keyA "time:timestamp"^^xsd:string ; :typeA "timestamp"^^xsd:string ; :valueA {t0} . 
+source		select decision.`id` as `e0` , decision.`decisiontime` as `t0` from decision where (decision.`outcome` = true) 
+
+mappingId	lifecycle30
+target		:event/dec/{e0} :EcontainsA :attr/complete/dec/{e0} . :attr/complete/dec/{e0} :keyA "lifecycle:transition"^^xsd:string ; :typeA "literal"^^xsd:string ; :valueA "complete"^^xsd:string . 
+source		select decision.`id` as `e0` from decision where (decision.`outcome` = false) 
+
+mappingId	event31
+target		:trace/paper/{t0} :TcontainsE :event/dec/{e0} . 
+source		select decision.`paper` as `t0` , decision.`id` as `e0` from decision where (decision.`outcome` = false) 
+
+mappingId	activityname32
+target		:event/dec/{e0} :EcontainsA :attr/rejection/dec/{e0} . :attr/rejection/dec/{e0} :keyA "concept:name"^^xsd:string ; :typeA "literal"^^xsd:string ; :valueA "rejection"^^xsd:string . 
+source		select decision.`id` as `e0` from decision where (decision.`outcome` = false) 
+
+mappingId	timestamp33
+target		:event/dec/{e0} :EcontainsA :attr/{t0}/dec/{e0} . :attr/{t0}/dec/{e0} :keyA "time:timestamp"^^xsd:string ; :typeA "timestamp"^^xsd:string ; :valueA {t0} . 
+source		select decision.`id` as `e0` , decision.`decisiontime` as `t0` from decision where (decision.`outcome` = false) 
+
+mappingId	lifecycle34
+target		:event/dec/{e0} :EcontainsA :attr/complete/dec/{e0} . :attr/complete/dec/{e0} :keyA "lifecycle:transition"^^xsd:string ; :typeA "literal"^^xsd:string ; :valueA "complete"^^xsd:string . 
+source		select decision.`id` as `e0` from decision where (decision.`outcome` = true) 
+
+mappingId	event35
+target		:trace/paper/{t0} :TcontainsE :event/revreq/{e0} . 
+source		select reviewrequest.`paper` as `t0` , reviewrequest.`id` as `e0` from reviewrequest 
+
+mappingId	activityname36
+target		:event/revreq/{e0} :EcontainsA :attr/invitereviewer/revreq/{e0} . :attr/invitereviewer/revreq/{e0} :keyA "concept:name"^^xsd:string ; :typeA "literal"^^xsd:string ; :valueA "invite reviewer"^^xsd:string . 
+source		select reviewrequest.`id` as `e0` from reviewrequest 
+
+mappingId	activityname37
+target		:event/revreq/{e0} :EcontainsA :attr/invitereviewer/revreq/{e0} . :attr/invitereviewer/revreq/{e0} :keyA "concept:name"^^xsd:string ; :typeA "literal"^^xsd:string ; :valueA "invite reviewer"^^xsd:string . 
+source		 select review.`idrr` as `e0` from review 
+
+mappingId	timestamp38
+target		:event/revreq/{e0} :EcontainsA :attr/{t0}/revreq/{e0} . :attr/{t0}/revreq/{e0} :keyA "time:timestamp"^^xsd:string ; :typeA "timestamp"^^xsd:string ; :valueA {t0} . 
+source		select reviewrequest.`id` as `e0` , reviewrequest.`invitationtime` as `t0` from reviewrequest 
+
+mappingId	lifecycle39
+target		:event/revreq/{e0} :EcontainsA :attr/complete/revreq/{e0} . :attr/complete/revreq/{e0} :keyA "lifecycle:transition"^^xsd:string ; :typeA "literal"^^xsd:string ; :valueA "complete"^^xsd:string . 
+source		select reviewrequest.`id` as `e0` from reviewrequest 
+
+mappingId	lifecycle40
+target		:event/revreq/{e0} :EcontainsA :attr/complete/revreq/{e0} . :attr/complete/revreq/{e0} :keyA "lifecycle:transition"^^xsd:string ; :typeA "literal"^^xsd:string ; :valueA "complete"^^xsd:string . 
+source		 select review.`idrr` as `e0` from review 
+
+]]
+

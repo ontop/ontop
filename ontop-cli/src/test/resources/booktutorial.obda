@@ -1,0 +1,85 @@
+[PrefixDeclaration]
+:		http://meraka/moss/exampleBooks.owl#
+owl:		http://www.w3.org/2002/07/owl#
+rdf:		http://www.w3.org/1999/02/22-rdf-syntax-ns#
+xsd:		http://www.w3.org/2001/XMLSchema#
+rdfs:		http://www.w3.org/2000/01/rdf-schema#
+quest:		http://obda.org/quest#
+owl2xml:		http://www.w3.org/2006/12/owl2-xml#
+
+[SourceDeclaration]
+sourceUri	Books
+connectionUrl	jdbc:postgresql://10.7.20.39/books
+username	postgres
+password	postgres
+driverClass	org.postgresql.Driver
+
+[MappingDeclaration] @collection [[
+mappingId	cl_Authors
+target		:author/{wr_code}/ a :Author ; :name {wr_name} . 
+source		select wr_code, wr_name from tb_affiliated_writers
+
+mappingId	cl_Books
+target		:book/{bk_code}/ a :Book ; :title {bk_title} . 
+source		select bk_code, bk_title from tb_books
+
+mappingId	cl_Editors
+target		:editor/{ed_code}/ a :Editor ; :name {ed_name} . 
+source		select ed_code, ed_name from tb_editor
+
+mappingId	cl_Editions
+target		:edition/{ed_code}/ a :Edition ; :dateOfPublication {pub_date} ; :editionNumber {n_edt} . 
+source		select ed_code,pub_date,n_edt from tb_edition
+
+mappingId	cl_AudioBook
+target		:book/{bk_code}/ a :AudioBook . 
+source		select bk_code, bk_title from tb_books where bk_type='A'
+
+mappingId	cl_EmergingWriter
+target		:author/{wr_code}/ a :EmergingWriter ; :name {wr_name} . 
+source		select wr_code,wr_name from tb_on_prob_wr
+
+mappingId	cl_SpecialEdition
+target		:edition/{ed_code}/ a :SpecialEdition . 
+source		select ed_code,pub_date,n_edt from tb_edition where ed_type='S'
+
+mappingId	dp_genre
+target		:book/{id_bk}/ :genre {gen_name} . 
+source		select id_bk,gen_name from tb_bk_gen
+
+mappingId	op_writtenBy
+target		:book/{bk_code}/ :writtenBy :author/{wr_id}/ . 
+source		select bk_code,wr_id from tb_authors
+
+mappingId	op_hasEdition
+target		:book/{bk_id}/ :hasEdition :edition/{ed_code}/ . 
+source		select ed_code,bk_id from tb_edition
+
+mappingId	mapping--697739399
+target		<http://example.com/emp/{empno}> a <http://example.com/dept#Manager> , <http://example.com/emp/job/{job}> ; rdfs:label {Name}@en ; <http://example.com/emp#job> {job} ; <http://example.com/emp#jobtype> <http://example.com/emp/job/{job}> . 
+source		SELECT * FROM "EMP"
+
+mappingId	mapping-774920445
+target		<http://example.com/base/{deptId}> <http://example.com/dept#COMPANY> "EXAMPLE Corporation"^^rdfs:Literal ; <http://example.com/dept#deptno> {deptno}^^xsd:positiveInteger ; <http://example.com/dept#name> {dname} . 
+source		Select ('Department' || "deptno") AS deptId
+			            , "deptno"
+			            , "dname"
+			            , "loc"
+			         from "DEPT"
+			       
+
+mappingId	mapping--855926317
+target		<http://example.com/emp/{empno}> a <http://example.com/dept#Manager> ; rdfs:label {Name}@en ; <http://example.com/emp#job> {job} ; <http://example.com/emp#jobtype> <http://example.com/emp/job/{job}> . 
+source		SELECT * FROM "EMP"
+
+mappingId	mapping-join--979622349
+target		<http://example.com/emp/{empno}> <http://example.com/emp#c_ref_deptno> <http://example.com/base/{deptId}> . 
+source		SELECT * FROM (SELECT * FROM "EMP") AS child, (
+			       Select ('Department' || "deptno") AS deptId
+			            , "deptno"
+			            , "dname"
+			            , "loc"
+			         from "DEPT"
+			       ) AS parent WHERE child."deptno"=parent."deptno"
+]]
+
