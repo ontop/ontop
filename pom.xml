@@ -3,11 +3,7 @@
 	<groupId>it.unibz.inf.ontop</groupId>
 	<artifactId>ontop</artifactId>
 	<packaging>pom</packaging>
-<<<<<<< HEAD
-	<version>1.13.1-BENCHMARK</version>
-=======
 	<version>1.18.1-SNAPSHOT</version>
->>>>>>> 673a76b931a53e6a832ee6a56e3028ac66f1768d
 	<name>ontop</name>
 	<url>http://ontop.inf.unibz.it/</url>
 
