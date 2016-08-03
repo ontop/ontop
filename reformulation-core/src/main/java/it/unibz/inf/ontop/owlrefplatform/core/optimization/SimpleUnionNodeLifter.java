@@ -12,9 +12,12 @@ import java.util.Set;
 import static it.unibz.inf.ontop.pivotalrepr.NonCommutativeOperatorNode.ArgumentPosition.RIGHT;
 
 /**
- * Choose the QueryNode for the UnionNode lift.
- * Stop at the first interesting match
+ * Choose the ancestor for the UnionNode lift.
+ * Stop at the first interesting match ( a JoinLikeNode ) having in its subtree one of the conflicting variable of the UnionNode
+ * if not present choose a FilterNode instead, if available.
+ *
  */
+
 public class SimpleUnionNodeLifter implements UnionNodeLifter {
 
 
@@ -24,8 +27,8 @@ public class SimpleUnionNodeLifter implements UnionNodeLifter {
         // Non-final
         Optional<QueryNode> optionalParent = currentQuery.getParent(unionNode);
         Set<Variable> projectedVariables = new HashSet<>();
-        FilterNode filterJoin = null;
-        
+
+        Optional<QueryNode> filterJoin = Optional.empty();
 
         while (optionalParent.isPresent()) {
 
@@ -33,13 +36,13 @@ public class SimpleUnionNodeLifter implements UnionNodeLifter {
             if(parentNode instanceof JoinOrFilterNode) {
 
                 if(parentNode instanceof LeftJoinNode){
-                    LeftJoinNode leftJoin = (LeftJoinNode) parentNode;
-                    Optional<NonCommutativeOperatorNode.ArgumentPosition> optionalPosition = currentQuery.getOptionalPosition(leftJoin, unionNode);
+
+                    Optional<NonCommutativeOperatorNode.ArgumentPosition> optionalPosition = currentQuery.getOptionalPosition(parentNode, unionNode);
                     NonCommutativeOperatorNode.ArgumentPosition position = optionalPosition.orElseThrow(() -> new IllegalStateException("Missing position of leftJoin child"));
 
-                    //cannot lift over a left join from the right part
+                    //cannot lift coming from the right part of the left join
                     if (position.equals(RIGHT)){
-                        return Optional.empty();
+                        return filterJoin;
                     }
                 }
 
@@ -50,17 +53,16 @@ public class SimpleUnionNodeLifter implements UnionNodeLifter {
                     //get all projected variables from the children of the parent node
                     childrenParentNode.stream()
                             .filter(child -> !child.equals(unionNode))
-                            .forEach(child -> {
-                        projectedVariables.addAll(currentQuery.getVariables(child));
-                    });
+                            .forEach(child ->  projectedVariables.addAll(currentQuery.getVariables(child)));
 
                     if (projectedVariables.contains(variable)) {
 
+                        //if we found a filter node, we keep it as a possible point to lift the union,
+                        //but continue to another ancestor searching for a better match
                         if(parentNode instanceof FilterNode) {
-                            filterJoin = (FilterNode) parentNode;
+                            filterJoin = Optional.of(parentNode);
                         }
                         else {
-
                             return Optional.of(parentNode);
                         }
 
@@ -69,21 +71,16 @@ public class SimpleUnionNodeLifter implements UnionNodeLifter {
             }
             else if (parentNode instanceof UnionNode){
                 //cannot lift over a union
-                return Optional.empty();
+                return filterJoin;
 
             }
-
             //search in another ancestor
             optionalParent = currentQuery.getParent(parentNode);
         }
 
-        //no innerJoin or leftJoin parent with the given variable, use highest filterJoin instead
-        if(filterJoin!=null){
-            return Optional.of(filterJoin);
-        }
+        //no innerJoin or leftJoin parent with the given variable, use highest filterJoin instead if present
+        return filterJoin;
 
-        //I don't lift
-        return Optional.empty();
     }
 
 }
