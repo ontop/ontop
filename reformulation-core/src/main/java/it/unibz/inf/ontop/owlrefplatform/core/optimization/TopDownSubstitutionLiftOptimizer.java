@@ -1,6 +1,5 @@
 package it.unibz.inf.ontop.owlrefplatform.core.optimization;
 
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.ImmutableSubstitution;
 import it.unibz.inf.ontop.model.ImmutableTerm;
@@ -18,9 +17,12 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
 
 import static it.unibz.inf.ontop.owlrefplatform.core.optimization.QueryNodeNavigationTools.getDepthFirstNextNode;
+import static it.unibz.inf.ontop.owlrefplatform.core.optimization.QueryNodeNavigationTools.getNextNodeAndQuery;
 import static it.unibz.inf.ontop.pivotalrepr.NonCommutativeOperatorNode.ArgumentPosition.LEFT;
 import static it.unibz.inf.ontop.pivotalrepr.NonCommutativeOperatorNode.ArgumentPosition.RIGHT;
 
@@ -82,6 +84,8 @@ public class TopDownSubstitutionLiftOptimizer implements SubstitutionLiftOptimiz
       (common with the conflicting bindings of the union).
       */
     private NextNodeAndQuery liftBindingsAndUnion(IntermediateQuery currentQuery, UnionNode initialUnionNode) throws EmptyQueryException {
+
+        Optional<UnionNode> unionNode = Optional.of(initialUnionNode) ;
         QueryNode currentNode = initialUnionNode;
 
 
@@ -95,34 +99,33 @@ public class TopDownSubstitutionLiftOptimizer implements SubstitutionLiftOptimiz
         if (optionalSubstitution.isPresent()) {
 
             //try to lift the bindings up and down the tree
-            SubstitutionPropagationProposal<QueryNode> proposal =
-                    new SubstitutionPropagationProposalImpl<>(currentNode, optionalSubstitution.get());
+            SubstitutionPropagationProposal<UnionNode> proposal =
+                    new SubstitutionPropagationProposalImpl<>(initialUnionNode, optionalSubstitution.get());
 
-            NodeCentricOptimizationResults<QueryNode> results = currentQuery.applyProposal(proposal);
+            NodeCentricOptimizationResults<UnionNode> results = currentQuery.applyProposal(proposal);
             currentQuery = results.getResultingQuery();
+            unionNode = results.getOptionalNewNode();
             currentNode = results.getNewNodeOrReplacingChild()
                     .orElseThrow(() -> new IllegalStateException(
                             "The focus was expected to be kept or replaced, not removed"));
 
-
         }
 
-
         //if the union node has not been removed
-        if (currentNode instanceof UnionNode) {
+        if (unionNode.isPresent()) {
 
             //variables of bindings that could not be returned because conflicting or not common in the subtree
             ImmutableSet<Variable> irregularVariables = extraction.getVariablesWithConflictingBindings();
 
             if(!irregularVariables.isEmpty()) {
-                UnionNode currentUnionNode = (UnionNode) currentNode;
-                return liftUnionToMatchingVariable(currentQuery, currentUnionNode, irregularVariables);
+
+                //try to lift the union
+                return liftUnionToMatchingVariable(currentQuery, unionNode.get(), irregularVariables);
             }
 
-
         }
-        return new NextNodeAndQuery(getDepthFirstNextNode(currentQuery, currentNode), currentQuery);
 
+        return new NextNodeAndQuery(getDepthFirstNextNode(currentQuery, currentNode), currentQuery);
 
 
     }
@@ -130,6 +133,7 @@ public class TopDownSubstitutionLiftOptimizer implements SubstitutionLiftOptimiz
 
     /*  Lift the union to an ancestor with useful projected variables between its children,
        These variables are common with the bindings of the union. */
+
     private NextNodeAndQuery liftUnionToMatchingVariable(IntermediateQuery currentQuery, UnionNode currentUnionNode, ImmutableSet<Variable> unionVariables) throws EmptyQueryException {
 
 
@@ -155,11 +159,10 @@ public class TopDownSubstitutionLiftOptimizer implements SubstitutionLiftOptimiz
     }
 
 
-    private NextNodeAndQuery liftBindingsFromConstructionNode(IntermediateQuery initialQuery,
+    private NextNodeAndQuery liftBindingsFromConstructionNode(IntermediateQuery currentQuery,
                                                               ConstructionNode initialConstrNode)
             throws EmptyQueryException {
 
-        IntermediateQuery currentQuery = initialQuery;
         QueryNode currentNode = initialConstrNode;
 
         //extract substitution from the construction node
@@ -182,16 +185,23 @@ public class TopDownSubstitutionLiftOptimizer implements SubstitutionLiftOptimiz
         return new NextNodeAndQuery(getDepthFirstNextNode(currentQuery, currentNode), currentQuery);
     }
 
-    private NextNodeAndQuery liftBindingsFromCommutativeJoinNode(IntermediateQuery initialQuery,
+
+    /** Lift the bindings for the commutative join
+     * I extract the bindings (from union and construction nodes ) iterating through its children
+     * @param currentQuery
+     * @param initialJoinNode
+     * @return
+     * @throws EmptyQueryException
+     */
+
+    private NextNodeAndQuery liftBindingsFromCommutativeJoinNode(IntermediateQuery currentQuery,
                                                                  CommutativeJoinNode initialJoinNode)
             throws EmptyQueryException {
 
         // Non-final
-        Optional<QueryNode> optionalCurrentChild = initialQuery.getFirstChild(initialJoinNode);
-        IntermediateQuery currentQuery = initialQuery;
+        Optional<QueryNode> optionalCurrentChild = currentQuery.getFirstChild(initialJoinNode);
         QueryNode currentJoinNode = initialJoinNode;
 
-        //apply directly to join
 
         while (optionalCurrentChild.isPresent()) {
             QueryNode currentChild = optionalCurrentChild.get();
@@ -216,8 +226,6 @@ public class TopDownSubstitutionLiftOptimizer implements SubstitutionLiftOptimiz
                         .orElseThrow(() -> new IllegalStateException(
                                 "The focus node should still have a parent (a Join node)"));
 
-
-
             }
             else {
                 optionalCurrentChild = currentQuery.getNextSibling(currentChild);
@@ -230,89 +238,130 @@ public class TopDownSubstitutionLiftOptimizer implements SubstitutionLiftOptimiz
     }
 
 
-    //lift bindings from left node checking first the left part,
-    // lift from the right only the bindings with variables that are not common with the left
-    private NextNodeAndQuery liftBindingsFromLeftJoinNode(IntermediateQuery initialQuery, LeftJoinNode initialLeftJoinNode) throws EmptyQueryException {
-        // Non-final
-        Optional<QueryNode> optionalLeftChild = initialQuery.getChild(initialLeftJoinNode, LEFT);
-        IntermediateQuery currentQuery = initialQuery;
-        QueryNode currentJoinNode = initialLeftJoinNode;
-        Optional<QueryNode> optionalRightChild = currentQuery.getChild(currentJoinNode, RIGHT);
+    /** Lift bindings from left node extracting first bindings coming from the left side of its subtree,
+     * lift from the right only the bindings with variables that are not common with the left
+     * @param currentQuery
+     * @param initialLeftJoinNode
+     * @return
+     * @throws EmptyQueryException
+     */
+    private NextNodeAndQuery liftBindingsFromLeftJoinNode(IntermediateQuery currentQuery, LeftJoinNode initialLeftJoinNode) throws EmptyQueryException {
+
+        QueryNode currentNode = initialLeftJoinNode;
+        Optional<LeftJoinNode> currentJoinNode = Optional.of(initialLeftJoinNode);
+
+        Optional<QueryNode> optionalLeftChild = currentQuery.getChild(currentNode, LEFT);
+
 
         //check bindings of the right side if there are some that are not projected in the second, they can be already pushed
         //substitution coming from the left have more importance than the one coming from the right
         if (optionalLeftChild.isPresent()) {
-            QueryNode leftChild = optionalLeftChild.get();
+
             Optional<ImmutableSubstitution<ImmutableTerm>> optionalSubstitution = extractor.extractInSubTree(
-                    currentQuery, leftChild).getOptionalSubstitution();
+                    currentQuery, optionalLeftChild.get()).getOptionalSubstitution();
 
             /**
-             * Applies the substitution to the child
+             * Applies the substitution to the join
              */
             if (optionalSubstitution.isPresent()) {
-                SubstitutionPropagationProposal<QueryNode> proposal =
-                        new SubstitutionPropagationProposalImpl<>(leftChild, optionalSubstitution.get());
+                SubstitutionPropagationProposal<LeftJoinNode> proposal =
+                        new SubstitutionPropagationProposalImpl<>(initialLeftJoinNode, optionalSubstitution.get());
 
-                NodeCentricOptimizationResults<QueryNode> results = currentQuery.applyProposal(proposal);
+                NodeCentricOptimizationResults<LeftJoinNode> results = currentQuery.applyProposal(proposal);
                 currentQuery = results.getResultingQuery();
-                optionalRightChild = results.getOptionalNextSibling();
-                currentJoinNode = currentQuery.getParent(
-                        results.getNewNodeOrReplacingChild()
-                                .orElseThrow(() -> new IllegalStateException(
-                                        "The focus was expected to be kept or replaced, not removed")))
-                        .orElseThrow(() -> new IllegalStateException(
-                                "The focus node should still have a parent (a Join node)"));
+                currentJoinNode = results.getOptionalNewNode();
+
+                if(currentJoinNode.isPresent()){
+                    currentNode = currentJoinNode.get();
+                }
+                else{
+                    return getNextNodeAndQuery(results);
+                }
+
+
             }
         }
+        else
+            {
+            throw new IllegalStateException("Left Join needs to have a left child");
+        }
 
-        if (optionalRightChild.filter(rightChild -> !(rightChild instanceof EmptyNode)).isPresent()) {
-            QueryNode rightChild = optionalRightChild.get();
+        /* Current join node has not been removed lifting left side bindings.
+          Extract the bindings also from the right child */
 
-            Optional<ImmutableSubstitution<ImmutableTerm>> optionalSubstitution = extractor.extractInSubTree(
-                    currentQuery, rightChild).getOptionalSubstitution();
-            Set<Variable> onlyRightVariables = new HashSet<>();
-            onlyRightVariables.addAll(currentQuery.getVariables(rightChild));
-            if(optionalLeftChild.isPresent()){
-                onlyRightVariables.removeAll(currentQuery.getVariables(optionalLeftChild.get()));
+        if (currentJoinNode.isPresent()){
+
+            Optional<QueryNode> optionalRightChild = currentQuery.getChild(currentNode, RIGHT);
+
+            if (optionalRightChild.isPresent()) {
+                QueryNode rightChild = optionalRightChild.get();
+
+                Optional<ImmutableSubstitution<ImmutableTerm>> optionalSubstitution = extractor.extractInSubTree(
+                        currentQuery, rightChild).getOptionalSubstitution();
+
+                if(optionalSubstitution.isPresent()){
+
+                //extract variables present only in the right child
+                Optional<ImmutableSubstitutionImpl<ImmutableTerm>> substitutionRightMap =
+                        getRightChildSubstitutionMap(currentQuery, currentNode, rightChild, optionalSubstitution);
+
+                /**
+                 * Propagate the bindings to the join
+                 */
+                if (substitutionRightMap.isPresent()) {
+                    SubstitutionPropagationProposal<QueryNode> proposal =
+                            new SubstitutionPropagationProposalImpl<>(currentNode, substitutionRightMap.get());
+
+                    NodeCentricOptimizationResults<QueryNode> results = currentQuery.applyProposal(proposal);
+
+                    return getNextNodeAndQuery(results);
+
+                }
+                }
+
             }
-            Map<Variable, ImmutableTerm> substitutionMap = new HashMap<>();
-            onlyRightVariables.forEach(v ->
-                    optionalSubstitution.ifPresent(s -> {
-                        ImmutableMap<Variable, ImmutableTerm> immutableMap = s.getImmutableMap();
-                        if (immutableMap.containsKey(v)) {
-                            substitutionMap.put(v, immutableMap.get(v));
-                        }
-                    })
-            );
-            ImmutableMap<Variable, ImmutableTerm> immutableMap = substitutionMap.entrySet().stream().collect(ImmutableCollectors.toMap());
-
-            Optional<ImmutableSubstitutionImpl<ImmutableTerm>> substitutionRightMap = Optional.of(immutableMap)
-                    .filter(m -> !m.isEmpty())
-                    .map(ImmutableSubstitutionImpl::new);
-
-            /**
-             * Applies the substitution to the child
-             */
-            if (substitutionRightMap.isPresent()) {
-                SubstitutionPropagationProposal<QueryNode> proposal =
-                        new SubstitutionPropagationProposalImpl<>(rightChild, substitutionRightMap.get());
-
-                NodeCentricOptimizationResults<QueryNode> results = currentQuery.applyProposal(proposal);
-                currentQuery = results.getResultingQuery();
-                currentJoinNode = currentQuery.getParent(
-                        results.getNewNodeOrReplacingChild()
-                                .orElseThrow(() -> new IllegalStateException(
-                                        "The focus was expected to be kept or replaced, not removed")))
-                        .orElseThrow(() -> new IllegalStateException(
-                                "The focus node should still have a parent (a Join node)"));
+            else
+            {
+                throw new IllegalStateException("Left Join needs to have a right child");
             }
+
 
         }
 
 
-        return new NextNodeAndQuery(getDepthFirstNextNode(currentQuery, currentJoinNode), currentQuery);
+        return new NextNodeAndQuery(getDepthFirstNextNode(currentQuery, currentNode), currentQuery);
 
 
+    }
+
+    /**
+     * From the given substitutionMap returns only the bindings with variables that are contained in the right child of the left join
+     * and do not appear in the left child
+     */
+
+    private Optional<ImmutableSubstitutionImpl<ImmutableTerm>> getRightChildSubstitutionMap(IntermediateQuery currentQuery, QueryNode currentNode, QueryNode rightChild, Optional<ImmutableSubstitution<ImmutableTerm>> optionalSubstitution) {
+
+        Optional<QueryNode> optionalLeftChild;
+        Set<Variable> onlyRightVariables = new HashSet<>();
+
+        onlyRightVariables.addAll(currentQuery.getVariables(rightChild));
+        optionalLeftChild = currentQuery.getChild(currentNode, LEFT);
+
+        if(optionalLeftChild.isPresent()){
+            onlyRightVariables.removeAll(currentQuery.getVariables(optionalLeftChild.get()));
+        }
+        else
+        {
+            throw new IllegalStateException("Left Join needs to have a left child");
+        }
+
+        //Get only the bindings referring to the right variables
+        return Optional.of(optionalSubstitution.get()
+                    .getImmutableMap().entrySet().stream()
+                    .filter(binding -> onlyRightVariables.contains(binding.getKey()))
+                    .collect(ImmutableCollectors.toMap()))
+                .filter(m -> !m.isEmpty())
+                .map(ImmutableSubstitutionImpl::new);
     }
 
 
