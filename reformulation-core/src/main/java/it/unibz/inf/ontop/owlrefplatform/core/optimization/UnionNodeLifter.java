@@ -9,13 +9,19 @@ import it.unibz.inf.ontop.pivotalrepr.UnionNode;
 import java.util.Optional;
 
 /**
- *  Choose the query node where to lift the UnionNode
+ *  Class to help choosing the useful ancestors to lift the UnionNode.
  *
- *  TODO: explain
  */
 
 public interface UnionNodeLifter {
 
+    /**
+     *
+     * @param currentQuery
+     * @param unionNode
+     * @param unionVariables variables usually coming from conflicting bindings in the unionNode
+     * @return querynode to which the union will be lifted, if possible
+     */
     public Optional<QueryNode> chooseLevelLift(IntermediateQuery currentQuery, UnionNode unionNode, ImmutableSet<Variable> unionVariables);
 
 
