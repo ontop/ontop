@@ -65,6 +65,7 @@ public class IntermediateQueryImpl implements IntermediateQuery {
     private final DistinctVariableOnlyDataAtom projectionAtom;
 
     private final Injector injector;
+    private final OptimizationConfiguration optimizationConfiguration;
 
 
     /**
@@ -74,25 +75,6 @@ public class IntermediateQueryImpl implements IntermediateQuery {
     static {
         STD_EXECUTOR_CLASSES = ImmutableMap.<Class<? extends QueryOptimizationProposal>, Class<? extends StandardProposalExecutor>>of(
                 LiftUnionAsHighAsPossibleProposal.class, LiftUnionAsHighAsPossibleProposalExecutor.class);
-    }
-
-    /**
-     * TODO: explain
-     */
-    private static final ImmutableMap<Class<? extends QueryOptimizationProposal>, Class<? extends InternalProposalExecutor>> INTERNAL_EXECUTOR_CLASSES;
-    static {
-        ImmutableMap.Builder<Class<? extends QueryOptimizationProposal>, Class<? extends InternalProposalExecutor>>
-                internalExecutorMapBuilder = ImmutableMap.builder();
-        internalExecutorMapBuilder.put(InnerJoinOptimizationProposal.class, JoinInternalCompositeExecutor.class);
-        internalExecutorMapBuilder.put(SubstitutionPropagationProposal.class, SubstitutionPropagationExecutor.class);
-        internalExecutorMapBuilder.put(PushDownBooleanExpressionProposal.class, PushDownExpressionExecutor.class);
-        internalExecutorMapBuilder.put(GroundTermRemovalFromDataNodeProposal.class, GroundTermRemovalFromDataNodeExecutor.class);
-        internalExecutorMapBuilder.put(PullVariableOutOfDataNodeProposal.class, PullVariableOutOfDataNodeExecutor.class);
-        internalExecutorMapBuilder.put(PullVariableOutOfSubTreeProposal.class, PullVariableOutOfSubTreeExecutor.class);
-        internalExecutorMapBuilder.put(RemoveEmptyNodeProposal.class, RemoveEmptyNodesExecutor.class);
-        internalExecutorMapBuilder.put(QueryMergingProposal.class, QueryMergingExecutor.class);
-        internalExecutorMapBuilder.put(UnionLiftProposal.class, UnionLiftInternalExecutor.class);
-        INTERNAL_EXECUTOR_CLASSES = internalExecutorMapBuilder.build();
     }
 
 
@@ -105,6 +87,7 @@ public class IntermediateQueryImpl implements IntermediateQuery {
         this.projectionAtom = projectionAtom;
         this.treeComponent = treeComponent;
         this.injector = injector;
+        this.optimizationConfiguration = injector.getInstance(OptimizationConfiguration.class);
 
         // TODO: disable it in production
         this.validate();
@@ -252,24 +235,21 @@ public class IntermediateQueryImpl implements IntermediateQuery {
         /**
          * Then, look for a internal one
          */
-        for (Class proposalClass : proposalClassHierarchy) {
-            if (INTERNAL_EXECUTOR_CLASSES.containsKey(proposalClass)) {
-                InternalProposalExecutor<P, R> executor;
-                try {
-                    executor = INTERNAL_EXECUTOR_CLASSES.get(proposalClass).newInstance();
-                } catch (InstantiationException | IllegalAccessException e ) {
-                    throw new RuntimeException(e.getMessage());
-                }
-                /**
-                 * Has a SIDE-EFFECT on the tree component.
-                 */
-                R results = executor.apply(proposal, this, treeComponent);
-                if (!disableValidationTests) {
-                    // TODO: disable it in production
-                    validate();
-                }
-                return results;
+        Optional<Class<? extends InternalProposalExecutor>> optionalExecutorClass =
+                optimizationConfiguration.getProposalExecutorInterface(proposal.getClass());
+
+        if (optionalExecutorClass.isPresent()) {
+            InternalProposalExecutor<P, R> executor = injector.getInstance(optionalExecutorClass.get());
+
+            /**
+             * Has a SIDE-EFFECT on the tree component.
+             */
+            R results = executor.apply(proposal, this, treeComponent);
+            if (!disableValidationTests) {
+                // TODO: disable it in production
+                validate();
             }
+            return results;
         }
 
         if (requireUsingInternalExecutor) {

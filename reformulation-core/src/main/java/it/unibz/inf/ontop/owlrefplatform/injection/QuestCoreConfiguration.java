@@ -4,6 +4,7 @@ import it.unibz.inf.ontop.injection.OBDACoreConfiguration;
 import it.unibz.inf.ontop.model.DataSourceMetadata;
 import it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing.TMappingExclusionConfig;
 import it.unibz.inf.ontop.owlrefplatform.injection.impl.QuestCoreConfigurationImpl;
+import it.unibz.inf.ontop.pivotalrepr.OptimizationConfiguration;
 
 import javax.annotation.Nonnull;
 import java.util.Optional;
@@ -19,6 +20,8 @@ public interface QuestCoreConfiguration extends OBDACoreConfiguration {
     Optional<DataSourceMetadata> getDatasourceMetadata();
 
     QuestCorePreferences getPreferences();
+
+    OptimizationConfiguration getOptimizationConfiguration();
 
 
     static Builder<Builder<Builder<Builder<Builder<Builder<Builder<Builder<Builder<Builder<Builder<Builder<Builder>>>>>>>>>>>> defaultBuilder() {
