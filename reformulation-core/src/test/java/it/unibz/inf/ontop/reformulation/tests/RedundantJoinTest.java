@@ -388,7 +388,6 @@ public class RedundantJoinTest {
     /**
      * Ignored for the moment because the looping mechanism is not implemented
      */
-    @Ignore
     @Test
     public void testLoop1() throws EmptyQueryException {
 

@@ -22,7 +22,7 @@ import static it.unibz.inf.ontop.executor.join.JoinExtractionUtils.*;
 /**
 * TODO: explain
 */
-public class JoinBooleanExpressionExecutor implements SimpleNodeCentricInternalExecutor<InnerJoinNode, InnerJoinOptimizationProposal> {
+public class JoinBooleanExpressionExecutor implements InnerJoinExecutor {
 
     /**
      * Standard method (InternalProposalExecutor)
