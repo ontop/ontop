@@ -25,7 +25,8 @@ import static it.unibz.inf.ontop.pivotalrepr.NonCommutativeOperatorNode.Argument
 import static it.unibz.inf.ontop.pivotalrepr.NonCommutativeOperatorNode.ArgumentPosition.RIGHT;
 
 /**
- * Optimizer to propagate bindings up and down the tree
+ * Optimizer to extract and propagate bindings in the query up and down the tree.
+ * Uses {@link UnionFriendlyBindingExtractor}, {@link SubstitutionPropagationProposal} and {@link UnionLiftProposal}
  *
  */
 public class TopDownSubstitutionLiftOptimizer implements SubstitutionLiftOptimizer {
@@ -76,18 +77,24 @@ public class TopDownSubstitutionLiftOptimizer implements SubstitutionLiftOptimiz
         }
     }
 
-    /* Lift the bindings of the union to see if it is possible to simplify the tree
-      otherwise try to lift the union to an ancestor with useful projected variables between its children,
-      common with the bindings of the union.
+    /* Lift the bindings of the union to see if it is possible to simplify the tree.
+      Otherwise try to lift the union to an ancestor with useful projected variables between its children
+      (common with the conflicting bindings of the union).
       */
     private NextNodeAndQuery liftBindingsAndUnion(IntermediateQuery currentQuery, UnionNode initialUnionNode) throws EmptyQueryException {
         QueryNode currentNode = initialUnionNode;
 
-        //extract substitution from the union node
-        Optional<ImmutableSubstitution<ImmutableTerm>> optionalSubstitution = extractor.extractInSubTree(
+
+        //extract bindings (liftable bindings and conflicting one) from the union node
+        final BindingExtractor.Extraction extraction = extractor.extractInSubTree(
                 currentQuery, currentNode);
 
+        //get liftable bindings
+        Optional<ImmutableSubstitution<ImmutableTerm>> optionalSubstitution = extraction.getOptionalSubstitution();
+
         if (optionalSubstitution.isPresent()) {
+
+            //try to lift the bindings up and down the tree
             SubstitutionPropagationProposal<QueryNode> proposal =
                     new SubstitutionPropagationProposalImpl<>(currentNode, optionalSubstitution.get());
 
@@ -104,13 +111,14 @@ public class TopDownSubstitutionLiftOptimizer implements SubstitutionLiftOptimiz
         //if the union node has not been removed
         if (currentNode instanceof UnionNode) {
 
-            Optional<ImmutableSet<Variable>> irregularVariables = extractor.getIrregularVariables();
+            //variables of bindings that could not be returned because conflicting or not common in the subtree
+            ImmutableSet<Variable> irregularVariables = extraction.getVariablesWithConflictingBindings();
 
-
-            if (irregularVariables.isPresent()) {
+            if(!irregularVariables.isEmpty()) {
                 UnionNode currentUnionNode = (UnionNode) currentNode;
-                return liftUnionToMatchingVariable(currentQuery, currentUnionNode, irregularVariables.get());
+                return liftUnionToMatchingVariable(currentQuery, currentUnionNode, irregularVariables);
             }
+
 
         }
         return new NextNodeAndQuery(getDepthFirstNextNode(currentQuery, currentNode), currentQuery);
@@ -156,7 +164,7 @@ public class TopDownSubstitutionLiftOptimizer implements SubstitutionLiftOptimiz
 
         //extract substitution from the construction node
         Optional<ImmutableSubstitution<ImmutableTerm>> optionalSubstitution = extractor.extractInSubTree(
-                currentQuery, currentNode);
+                currentQuery, currentNode).getOptionalSubstitution();
 
         //propagate substitution up and down
         if (optionalSubstitution.isPresent()) {
@@ -189,7 +197,7 @@ public class TopDownSubstitutionLiftOptimizer implements SubstitutionLiftOptimiz
             QueryNode currentChild = optionalCurrentChild.get();
 
             Optional<ImmutableSubstitution<ImmutableTerm>> optionalSubstitution = extractor.extractInSubTree(
-                    currentQuery, currentChild);
+                    currentQuery, currentChild).getOptionalSubstitution();
 
             /**
              * Applies the substitution to the child
@@ -236,7 +244,7 @@ public class TopDownSubstitutionLiftOptimizer implements SubstitutionLiftOptimiz
         if (optionalLeftChild.isPresent()) {
             QueryNode leftChild = optionalLeftChild.get();
             Optional<ImmutableSubstitution<ImmutableTerm>> optionalSubstitution = extractor.extractInSubTree(
-                    currentQuery, leftChild);
+                    currentQuery, leftChild).getOptionalSubstitution();
 
             /**
              * Applies the substitution to the child
@@ -261,7 +269,7 @@ public class TopDownSubstitutionLiftOptimizer implements SubstitutionLiftOptimiz
             QueryNode rightChild = optionalRightChild.get();
 
             Optional<ImmutableSubstitution<ImmutableTerm>> optionalSubstitution = extractor.extractInSubTree(
-                    currentQuery, rightChild);
+                    currentQuery, rightChild).getOptionalSubstitution();
             Set<Variable> onlyRightVariables = new HashSet<>();
             onlyRightVariables.addAll(currentQuery.getVariables(rightChild));
             if(optionalLeftChild.isPresent()){

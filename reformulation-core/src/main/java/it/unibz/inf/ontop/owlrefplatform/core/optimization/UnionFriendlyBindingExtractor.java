@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.owlrefplatform.core.optimization;
 
+
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -12,7 +13,9 @@ import it.unibz.inf.ontop.pivotalrepr.QueryNode;
 import it.unibz.inf.ontop.pivotalrepr.UnionNode;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
-import java.util.*;
+import java.util.AbstractMap;
+import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 /**
@@ -20,38 +23,57 @@ import java.util.stream.Stream;
  */
 public class UnionFriendlyBindingExtractor implements BindingExtractor {
 
+    private static class PartialExtraction {
+
+
+        Stream<Map.Entry<Variable, ImmutableTerm>> mergedBindings;
+
+        ImmutableSet<Variable> mergedVariables;
+
+        private Stream<Map.Entry<Variable, ImmutableTerm>> getMergedBindings() {
+            return mergedBindings;
+        }
+
+        private ImmutableSet<Variable> getMergedVariables() {
+            return mergedVariables;
+        }
+
+        private PartialExtraction(Stream<Map.Entry<Variable, ImmutableTerm>> mergedBindings, ImmutableSet<Variable> mergedVariables) {
+
+            this.mergedBindings = mergedBindings;
+            this.mergedVariables =  mergedVariables;
+
+        }
+    }
+
     private static final OBDADataFactory DATA_FACTORY = OBDADataFactoryImpl.getInstance();
-    //store conflicting and not common variables of the subTreeRootNode
-    private Set<Variable> irregularVariables;
-
 
     @Override
-    public Optional<ImmutableSubstitution<ImmutableTerm>> extractInSubTree(IntermediateQuery query,
-                                                                           QueryNode subTreeRootNode) {
+    public Extraction extractInSubTree(IntermediateQuery query, QueryNode subTreeRootNode) {
 
-        irregularVariables = new HashSet<>();
+        PartialExtraction substitutionMap = extractBindings(query, subTreeRootNode);
 
-        ImmutableMap<Variable, ImmutableTerm> substitutionMap = extractBindings(query, subTreeRootNode)
-                .collect(ImmutableCollectors.toMap());
 
-        return Optional.of(substitutionMap)
-                .filter(m -> !m.isEmpty())
-                .map(ImmutableSubstitutionImpl::new);
-    }
+        return new Extraction() {
+            @Override
+            public Optional<ImmutableSubstitution<ImmutableTerm>> getOptionalSubstitution() {
+                return Optional.of(substitutionMap.getMergedBindings().collect(ImmutableCollectors.toMap())).filter(m -> !m.isEmpty())
+                        .map(ImmutableSubstitutionImpl::new);
+            }
 
-    @Override
-    public Optional<ImmutableSet<Variable>> getIrregularVariables(){
-
-        return Optional.of(irregularVariables.stream().collect(ImmutableCollectors.toSet()))
-                .filter(m -> !m.isEmpty());
+            @Override
+            public ImmutableSet<Variable> getVariablesWithConflictingBindings() {
+                return substitutionMap.getMergedVariables();
+            }
+        };
 
     }
 
 
-    private Stream<Map.Entry<Variable, ImmutableTerm>> extractBindings(IntermediateQuery query, QueryNode currentNode){
+    private PartialExtraction extractBindings(IntermediateQuery query, QueryNode currentNode){
 
         if (currentNode instanceof ConstructionNode) {
-            return extractBindingsFromConstructionNode(query, (ConstructionNode) currentNode);
+            return  new PartialExtraction(extractBindingsFromConstructionNode(query, (ConstructionNode) currentNode),  ImmutableSet.of());
         }
         else if (currentNode instanceof UnionNode) {
             return extractBindingsFromUnionNode(query, (UnionNode) currentNode);
@@ -60,7 +82,7 @@ public class UnionFriendlyBindingExtractor implements BindingExtractor {
          * Stops when another node is found
          */
         else {
-            return Stream.of();
+            return new PartialExtraction(Stream.of(), ImmutableSet.of());
         }
     }
 
@@ -74,7 +96,7 @@ public class UnionFriendlyBindingExtractor implements BindingExtractor {
 
         // Recursive
         Stream<Map.Entry<Variable, ImmutableTerm>> childBindings = query.getChildren(currentNode).stream()
-                .flatMap(c -> extractBindings(query, c));
+                .flatMap(c -> extractBindings(query, c).getMergedBindings());
 
         return Stream.concat(localBindings, childBindings);
     }
@@ -83,69 +105,33 @@ public class UnionFriendlyBindingExtractor implements BindingExtractor {
      * Extract the bindings from the union node, searching recursively for bindings in its children.
      * Ignore conflicting definitions of variables and return only the common bindings between the subtree
      */
-    private Stream<Map.Entry<Variable, ImmutableTerm>> extractBindingsFromUnionNode(IntermediateQuery query,
+    private PartialExtraction extractBindingsFromUnionNode(IntermediateQuery query,
                                                                            UnionNode currentNode) {
 
-        return query.getChildrenStream(currentNode)
-                .map(c -> extractBindings(query, c)
+        ImmutableList<ImmutableMap<Variable, ImmutableTerm>> childrenBindings = query.getChildrenStream(currentNode)
+                .map(c -> extractBindings(query, c).getMergedBindings()
                         .collect(ImmutableCollectors.toMap()))
+                .collect(ImmutableCollectors.toList());
+
+        ImmutableSet<Map.Entry<Variable, ImmutableTerm>> mergedBindings = childrenBindings.stream()
                 .reduce((c1, c2) -> combineUnionChildBindings(query, c1, c2))
                 .orElseThrow(() -> new IllegalStateException("A union must have children"))
-                .entrySet().stream();
+                .entrySet();
 
-//        Map<Variable, ImmutableTerm> substitutionMap = new HashMap<>();
-//        Set<Variable> commonVariables = new HashSet<>();
-//        Set<Variable> variablesWithConflictingDefinitions = new HashSet<>();
-//
-//
-//        query.getFirstChild(currentNode).ifPresent(child -> {
-//            //get variables from the first child
-//            ImmutableSet<Variable> varsFirstChild = query.getVariables(child);
-//
-//            commonVariables.addAll(varsFirstChild); }
-//        );
-//
-//        //update commonVariables between the children
-//        query.getChildren(currentNode).forEach(child ->
-//                commonVariables.retainAll(query.getVariables(child)));
-//
-//        query.getChildren(currentNode).stream()
-//                    .map(c -> extractBindings(query, c))
-//                    .forEach(entries -> entries
-//                            .forEach(e -> {
-//                                Variable variable = e.getKey();
-//                                ImmutableTerm value = e.getValue();
-//
-//                                //return only the common bindings between the child sub tree and the non conflicting one
-//                                if (commonVariables.contains(variable) && !variablesWithConflictingDefinitions.contains(variable)) {
-//                                    Optional<ImmutableTerm> optionalPreviousValue = Optional.ofNullable(substitutionMap.get(variable));
-//
-//                                    if (optionalPreviousValue.isPresent()) {
-//                                        if (!areCompatible(optionalPreviousValue.get(), value)) {
-//                                            substitutionMap.remove(variable);
-//                                            variablesWithConflictingDefinitions.add(variable);
-//                                            irregularVariables.add(variable);
-//                                        }
-//                                        // otherwise does nothing
-//                                    }
-//                                    /**
-//                                     * New variable
-//                                     */
-//                                    else {
-//                                        substitutionMap.put(variable, value);
-//                                    }
-//                                }
-//                                else{
-//                                    commonVariables.remove(variable);
-//                                    irregularVariables.add(variable);
-//                                }
-//                            }));
-//
-//        return substitutionMap.entrySet().stream();
+        ImmutableSet<Variable> mergedVariables = mergedBindings.stream()
+                .map(e -> e.getKey())
+                .collect(ImmutableCollectors.toSet());
+
+        ImmutableSet<Variable> conflictingVariables = childrenBindings.stream()
+                .flatMap(c -> c.keySet().stream())
+                .filter(v -> !mergedVariables.contains(v))
+                .collect(ImmutableCollectors.toSet());
+
+        return new PartialExtraction(mergedBindings.stream(), conflictingVariables);
     }
 
     /**
-     * TODO: explain
+     * Get the common and compatible bindings between the children of the union
      */
     private ImmutableMap<Variable, ImmutableTerm> combineUnionChildBindings(
             IntermediateQuery query,
@@ -156,13 +142,14 @@ public class UnionFriendlyBindingExtractor implements BindingExtractor {
                 .map(cb -> Optional.ofNullable(secondChildBindings.get(cb.getKey()))
                         .flatMap(v -> combineUnionChildBindingValues(query, cb.getValue(), v))
                         .map(value -> new AbstractMap.SimpleEntry<>(cb.getKey(), value)))
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .collect(ImmutableCollectors.toMap());
+                        .filter(Optional::isPresent)
+                        .map(Optional::get)
+                        .collect(ImmutableCollectors.toMap());
     }
 
     /**
-     * TODO: explain
+     * Compare and combine the bindings, returning only the compatible values.
+     * In case of variable, we generate and return a new variable to avoid inconsistency during propagation
      */
     private Optional<ImmutableTerm> combineUnionChildBindingValues(IntermediateQuery query, ImmutableTerm firstValue, ImmutableTerm secondValue) {
 
