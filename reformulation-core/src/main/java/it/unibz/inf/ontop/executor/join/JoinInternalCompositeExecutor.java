@@ -13,7 +13,8 @@ import java.util.Optional;
  * TODO: explain
  */
 public class JoinInternalCompositeExecutor
-        extends SimpleNodeCentricInternalCompositeExecutor<InnerJoinNode, InnerJoinOptimizationProposal> {
+        extends SimpleNodeCentricInternalCompositeExecutor<InnerJoinNode, InnerJoinOptimizationProposal>
+        implements InnerJoinExecutor {
 
     @Override
     protected Optional<InnerJoinOptimizationProposal> createNewProposalFromFocusNode(InnerJoinNode focusNode) {

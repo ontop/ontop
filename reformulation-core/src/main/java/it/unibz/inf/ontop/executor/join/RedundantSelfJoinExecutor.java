@@ -26,7 +26,7 @@ import java.util.Optional;
  * Naturally assumes that the data atoms are leafs.
  *
  */
-public class RedundantSelfJoinExecutor implements SimpleNodeCentricInternalExecutor<InnerJoinNode, InnerJoinOptimizationProposal> {
+public class RedundantSelfJoinExecutor implements InnerJoinExecutor {
 
     /**
      * Safety, to prevent infinite loops
