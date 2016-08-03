@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.reformulation.tests;
 
+import com.google.inject.Injector;
 import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.ontology.Ontology;
 import it.unibz.inf.ontop.ontology.OntologyFactory;
@@ -107,9 +108,10 @@ public class SemanticIndexMetadataTest  extends TestCase {
 					.properties(p)
 					.build();
 
-			QuestComponentFactory componentFactory = config.getInjector().getInstance(QuestComponentFactory.class);
+			Injector injector = config.getInjector();
+			QuestComponentFactory componentFactory = injector.getInstance(QuestComponentFactory.class);
 			IQuest questInstance = componentFactory.create(ont, Optional.empty(), Optional.empty());
-			questInstance.setupRepository();
+			questInstance.setupRepository(injector);
 			
 			RDBMSSIRepositoryManager si = questInstance.getOptionalSemanticIndexRepository().get();
 			

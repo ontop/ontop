@@ -28,6 +28,7 @@ import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.AtomPredicateImpl;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionImpl;
+import it.unibz.inf.ontop.owlrefplatform.injection.QuestCoreConfiguration;
 import it.unibz.inf.ontop.pivotalrepr.*;
 import it.unibz.inf.ontop.pivotalrepr.impl.*;
 import it.unibz.inf.ontop.pivotalrepr.impl.tree.DefaultIntermediateQueryBuilder;
@@ -61,7 +62,8 @@ public class LiftUnionAsHighAsPossibleTest {
 		DistinctVariableOnlyDataAtom rootDataAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(new AtomPredicateImpl("ans1", 2), x, y);
         ConstructionNode root = new ConstructionNodeImpl(rootDataAtom.getVariables());
 
-		IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
+		IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(METADATA,
+				QuestCoreConfiguration.defaultBuilder().build().getInjector());
 		queryBuilder.init(rootDataAtom, root);
 
 

@@ -3,9 +3,11 @@ package it.unibz.inf.ontop.intermediatequery;
 import java.util.Optional;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.inject.Injector;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.AtomPredicateImpl;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
+import it.unibz.inf.ontop.owlrefplatform.injection.QuestCoreConfiguration;
 import org.junit.Test;
 import it.unibz.inf.ontop.owlrefplatform.core.optimization.BasicJoinOptimizer;
 import it.unibz.inf.ontop.pivotalrepr.EmptyQueryException;
@@ -25,6 +27,7 @@ public class NodeDeletionTest {
     private static final OBDADataFactory DATA_FACTORY = OBDADataFactoryImpl.getInstance();
     private static final MetadataForQueryOptimization METADATA = new EmptyMetadataForQueryOptimization();
 
+    private static final Injector INJECTOR = QuestCoreConfiguration.defaultBuilder().build().getInjector();
 
     @Test(expected = EmptyQueryException.class)
     public void testSimpleJoin() throws IntermediateQueryBuilderException, EmptyQueryException {
@@ -32,7 +35,7 @@ public class NodeDeletionTest {
         ConstructionNode rootNode = new ConstructionNodeImpl(ImmutableSet.of(x));
         DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(new AtomPredicateImpl("ans1", 1), x);
 
-        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
+        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(METADATA, INJECTOR);
         queryBuilder.init(projectionAtom, rootNode);
 
         ValueConstant falseValue = DATA_FACTORY.getBooleanConstant(false);
@@ -68,7 +71,7 @@ public class NodeDeletionTest {
         DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(
                 new AtomPredicateImpl("ans1", 2), x, y);
 
-        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
+        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(METADATA, INJECTOR);
         queryBuilder.init(projectionAtom, rootNode);
 
         ValueConstant falseValue = DATA_FACTORY.getBooleanConstant(false);
@@ -118,7 +121,7 @@ public class NodeDeletionTest {
 
         ConstructionNode rootNode = new ConstructionNodeImpl(projectedVariables);
 
-        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
+        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(METADATA, INJECTOR);
         queryBuilder.init(projectionAtom, rootNode);
 
         ValueConstant falseValue = DATA_FACTORY.getBooleanConstant(false);
@@ -191,7 +194,7 @@ public class NodeDeletionTest {
         ConstructionNode rootNode = new ConstructionNodeImpl(projectedVariables);
 
 
-        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
+        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(METADATA, INJECTOR);
         queryBuilder.init(projectionAtom, rootNode);
 
         ValueConstant falseValue = DATA_FACTORY.getBooleanConstant(false);
@@ -258,7 +261,7 @@ public class NodeDeletionTest {
         DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(
                 new AtomPredicateImpl("ans1", 2), x, y);
 
-        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
+        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(METADATA, INJECTOR);
         queryBuilder.init(projectionAtom, rootNode);
 
         ValueConstant falseValue = DATA_FACTORY.getBooleanConstant(false);

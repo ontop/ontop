@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.pivotalrepr.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import com.google.inject.Injector;
 import it.unibz.inf.ontop.executor.InternalProposalExecutor;
 import it.unibz.inf.ontop.executor.expression.PushDownExpressionExecutor;
 import it.unibz.inf.ontop.executor.join.JoinInternalCompositeExecutor;
@@ -63,6 +64,8 @@ public class IntermediateQueryImpl implements IntermediateQuery {
 
     private final DistinctVariableOnlyDataAtom projectionAtom;
 
+    private final Injector injector;
+
 
     /**
      * TODO: explain
@@ -97,10 +100,11 @@ public class IntermediateQueryImpl implements IntermediateQuery {
      * For IntermediateQueryBuilders ONLY!!
      */
     public IntermediateQueryImpl(MetadataForQueryOptimization metadata, DistinctVariableOnlyDataAtom projectionAtom,
-                                 QueryTreeComponent treeComponent) {
+                                 QueryTreeComponent treeComponent, Injector injector) {
         this.metadata = metadata;
         this.projectionAtom = projectionAtom;
         this.treeComponent = treeComponent;
+        this.injector = injector;
 
         // TODO: disable it in production
         this.validate();
@@ -118,7 +122,7 @@ public class IntermediateQueryImpl implements IntermediateQuery {
 
     @Override
     public IntermediateQuery createSnapshot() {
-        return new IntermediateQueryImpl(metadata, projectionAtom, treeComponent.createSnapshot());
+        return new IntermediateQueryImpl(metadata, projectionAtom, treeComponent.createSnapshot(), injector);
     }
 
     @Override
@@ -374,5 +378,10 @@ public class IntermediateQueryImpl implements IntermediateQuery {
     private void validate() throws InvalidIntermediateQueryException {
         IntermediateQueryValidator validator = new StandardIntermediateQueryValidator();
         validator.validate(this);
+    }
+
+    @Override
+    public Injector getInjector() {
+        return injector;
     }
 }

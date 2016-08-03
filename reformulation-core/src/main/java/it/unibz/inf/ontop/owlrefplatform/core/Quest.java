@@ -25,6 +25,7 @@ import java.util.Optional;
 import com.google.common.collect.ImmutableList;
 
 import com.google.inject.Inject;
+import com.google.inject.Injector;
 import com.google.inject.assistedinject.Assisted;
 
 import it.unibz.inf.ontop.exception.DuplicateMappingException;
@@ -53,13 +54,11 @@ import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.VocabularyValidato
 import it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing.TMappingExclusionConfig;
 import it.unibz.inf.ontop.owlrefplatform.injection.QuestComponentFactory;
 import it.unibz.inf.ontop.owlrefplatform.injection.QuestCorePreferences;
-import it.unibz.inf.ontop.sql.DBMetadata;
 import it.unibz.inf.ontop.sql.ImplicitDBConstraintsReader;
 import it.unibz.inf.ontop.utils.IMapping2DatalogConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nullable;
 import java.io.Serializable;
 import java.net.URI;
 import java.security.InvalidParameterException;
@@ -325,8 +324,9 @@ public class Quest implements Serializable, IQuest {
 	 * creating the instance.
 	 * 
 	 * @throws Exception
+	 * @param injector
 	 */
-	public void setupRepository() throws Exception {
+	public void setupRepository(Injector injector) throws Exception {
 
 		OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 
@@ -539,7 +539,7 @@ public class Quest implements Serializable, IQuest {
 			 * Done, sending a new reasoner with the modules we just configured
 			 */
 			engine = new QuestQueryProcessor(rewriter, sigma, unfolder, vocabularyValidator, getUriMap(),
-					dataSourceQueryGenerator, queryCache, distinctResultSet);
+					dataSourceQueryGenerator, queryCache, distinctResultSet, injector);
 
 
 			log.debug("... Quest has been initialized.");

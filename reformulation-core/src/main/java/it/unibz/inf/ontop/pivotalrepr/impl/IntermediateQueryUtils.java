@@ -6,6 +6,7 @@ import java.util.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import com.google.inject.Injector;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.InjectiveVar2VarSubstitution;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.InjectiveVar2VarSubstitutionImpl;
@@ -31,8 +32,8 @@ public class IntermediateQueryUtils {
     /**
      * Can be overwritten.
      */
-    protected IntermediateQueryBuilder newBuilder(MetadataForQueryOptimization metadata) {
-        return new DefaultIntermediateQueryBuilder(metadata);
+    protected IntermediateQueryBuilder newBuilder(MetadataForQueryOptimization metadata, Injector injector) {
+        return new DefaultIntermediateQueryBuilder(metadata, injector);
     }
 
     /**
@@ -64,7 +65,8 @@ public class IntermediateQueryUtils {
         ConstructionNode rootNode = new ConstructionNodeImpl(projectionAtom.getVariables(),
                 new NeutralSubstitution(), optionalTopModifiers);
 
-        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(firstDefinition.getMetadata());
+        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(firstDefinition.getMetadata(),
+                firstDefinition.getInjector());
         queryBuilder.init(projectionAtom, rootNode);
 
         UnionNode unionNode = new UnionNodeImpl(projectionAtom.getVariables());
@@ -207,7 +209,8 @@ public class IntermediateQueryUtils {
                 .map(n -> new AbstractMap.SimpleEntry<>(n, n.clone()))
                 .collect(ImmutableCollectors.toMap());
 
-        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(originalQuery.getMetadata());
+        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(originalQuery.getMetadata(),
+                originalQuery.getInjector());
         queryBuilder.init(originalQuery.getProjectionAtom(),
                 (ConstructionNode) cloneNodeMap.get(originalQuery.getRootConstructionNode()));
 
@@ -240,7 +243,7 @@ public class IntermediateQueryUtils {
     protected IntermediateQueryBuilder convertToBuilderAndTransform(IntermediateQuery originalQuery,
                                                                   Optional<HomogeneousQueryNodeTransformer> optionalTransformer)
             throws IntermediateQueryBuilderException, QueryNodeTransformationException, NotNeededNodeException {
-        IntermediateQueryBuilder queryBuilder = newBuilder(originalQuery.getMetadata());
+        IntermediateQueryBuilder queryBuilder = newBuilder(originalQuery.getMetadata(), originalQuery.getInjector());
 
         // Clone of the original root node and apply the transformer if available.
         ConstructionNode originalRootNode = originalQuery.getRootConstructionNode();

@@ -4,12 +4,14 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
+import com.google.inject.Injector;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.AtomPredicateImpl;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
 import it.unibz.inf.ontop.model.impl.URITemplatePredicateImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionImpl;
+import it.unibz.inf.ontop.owlrefplatform.injection.QuestCoreConfiguration;
 import it.unibz.inf.ontop.pivotalrepr.*;
 import it.unibz.inf.ontop.pivotalrepr.impl.*;
 import it.unibz.inf.ontop.pivotalrepr.impl.tree.DefaultIntermediateQueryBuilder;
@@ -51,6 +53,8 @@ public class EmptyNodeRemovalTest {
     private static ExtensionalDataNode DATA_NODE_2 = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE_2, A));
     private static final EmptyNode EMPTY_NODE_1 = new EmptyNodeImpl(ImmutableSet.of(A, C));
 
+    private static final Injector INJECTOR = QuestCoreConfiguration.defaultBuilder().build().getInjector();
+
     /**
      * TODO: Put the UNION as the root instead of the construction node (when this will become legal)
      */
@@ -66,7 +70,7 @@ public class EmptyNodeRemovalTest {
         /**
          * Expected query
          */
-        IntermediateQueryBuilder expectedQueryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
+        IntermediateQueryBuilder expectedQueryBuilder = new DefaultIntermediateQueryBuilder(METADATA, INJECTOR);
         ConstructionNode rootNode = query.getRootConstructionNode();
         expectedQueryBuilder.init(PROJECTION_ATOM, rootNode);
         ConstructionNode secondConstructionNode = new ConstructionNodeImpl(PROJECTION_ATOM.getVariables(), leftBindings,
@@ -91,7 +95,7 @@ public class EmptyNodeRemovalTest {
         /**
          * Expected query
          */
-        IntermediateQueryBuilder expectedQueryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
+        IntermediateQueryBuilder expectedQueryBuilder = new DefaultIntermediateQueryBuilder(METADATA, INJECTOR);
 
         //ImmutableSubstitution<ImmutableTerm> expectedTopBindings = topBindings.union(leftBindings)
         //        .orElseThrow(() -> new IllegalStateException("Wrong bindings (union cannot be computed)"));
@@ -120,7 +124,7 @@ public class EmptyNodeRemovalTest {
         /**
          * Expected query
          */
-        IntermediateQueryBuilder expectedQueryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
+        IntermediateQueryBuilder expectedQueryBuilder = new DefaultIntermediateQueryBuilder(METADATA, INJECTOR);
 
         ConstructionNode rootNode = query.getRootConstructionNode();
         expectedQueryBuilder.init(PROJECTION_ATOM, rootNode);
@@ -135,7 +139,7 @@ public class EmptyNodeRemovalTest {
     public void testUnionNoNullPropagation() throws EmptyQueryException {
         ImmutableSet<Variable> projectedVariables = PROJECTION_ATOM.getVariables();
 
-        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
+        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(METADATA, INJECTOR);
         ConstructionNode rootNode = new ConstructionNodeImpl(projectedVariables,
                 new ImmutableSubstitutionImpl<>(ImmutableMap.of(X, generateURI1(A), Y, generateURI1(B))),
                 Optional.empty());
@@ -157,7 +161,7 @@ public class EmptyNodeRemovalTest {
         /**
          * Expected query
          */
-        IntermediateQueryBuilder expectedQueryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
+        IntermediateQueryBuilder expectedQueryBuilder = new DefaultIntermediateQueryBuilder(METADATA, INJECTOR);
 
         expectedQueryBuilder.init(PROJECTION_ATOM, rootNode);
         expectedQueryBuilder.addChild(rootNode, unionNode);
@@ -178,7 +182,7 @@ public class EmptyNodeRemovalTest {
                                                             EmptyNode emptyNode) {
         ImmutableSet<Variable> subQueryProjectedVariables = emptyNode.getVariables();
 
-        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
+        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(METADATA, INJECTOR);
 
         ImmutableSet<Variable> projectedVariables = PROJECTION_ATOM.getVariables();
         ConstructionNode rootNode = new ConstructionNodeImpl(projectedVariables, topBindings, Optional.empty());
@@ -204,7 +208,7 @@ public class EmptyNodeRemovalTest {
 
     @Test
     public void testLJ1() throws EmptyQueryException {
-        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
+        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(METADATA, INJECTOR);
 
         ConstructionNode rootNode = new ConstructionNodeImpl(PROJECTION_ATOM.getVariables(),
                 new ImmutableSubstitutionImpl<>(ImmutableMap.of(X, generateURI1(A), Y, generateURI1(B))),
@@ -223,7 +227,7 @@ public class EmptyNodeRemovalTest {
         /**
          * Expected query
          */
-        IntermediateQueryBuilder expectedQueryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
+        IntermediateQueryBuilder expectedQueryBuilder = new DefaultIntermediateQueryBuilder(METADATA, INJECTOR);
 
         ConstructionNode newRootNode = new ConstructionNodeImpl(
                 PROJECTION_ATOM.getVariables(),
@@ -240,7 +244,7 @@ public class EmptyNodeRemovalTest {
 
     @Test(expected = EmptyQueryException.class)
     public void testLJ2() throws EmptyQueryException {
-        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
+        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(METADATA, INJECTOR);
 
         ConstructionNode rootNode = new ConstructionNodeImpl(PROJECTION_ATOM.getVariables(),
                 new ImmutableSubstitutionImpl<>(ImmutableMap.of(X, generateURI1(A), Y, generateURI1(B))),
@@ -263,7 +267,7 @@ public class EmptyNodeRemovalTest {
 
     @Test
     public void testLJ3() throws EmptyQueryException {
-        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
+        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(METADATA, INJECTOR);
 
         ConstructionNode rootNode = new ConstructionNodeImpl(PROJECTION_ATOM.getVariables(),
                 new ImmutableSubstitutionImpl<>(ImmutableMap.of(X, generateURI1(A), Y, generateURI1(B))),
@@ -287,7 +291,7 @@ public class EmptyNodeRemovalTest {
         /**
          * Expected query
          */
-        IntermediateQueryBuilder expectedQueryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
+        IntermediateQueryBuilder expectedQueryBuilder = new DefaultIntermediateQueryBuilder(METADATA, INJECTOR);
 
         expectedQueryBuilder.init(PROJECTION_ATOM, rootNode);
         expectedQueryBuilder.addChild(rootNode, topLeftJoinNode);
@@ -312,7 +316,7 @@ public class EmptyNodeRemovalTest {
 
     @Test
     public void testLJ4() throws EmptyQueryException {
-        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
+        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(METADATA, INJECTOR);
 
         ConstructionNode rootNode = new ConstructionNodeImpl(PROJECTION_ATOM.getVariables(),
                 new ImmutableSubstitutionImpl<>(ImmutableMap.of(X, generateURI1(A), Y, generateURI1(B))),
@@ -336,7 +340,7 @@ public class EmptyNodeRemovalTest {
         /**
          * Expected query
          */
-        IntermediateQueryBuilder expectedQueryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
+        IntermediateQueryBuilder expectedQueryBuilder = new DefaultIntermediateQueryBuilder(METADATA, INJECTOR);
 
         ConstructionNode newRootNode = new ConstructionNodeImpl(
                 PROJECTION_ATOM.getVariables(),
@@ -353,7 +357,7 @@ public class EmptyNodeRemovalTest {
 
     @Test(expected = EmptyQueryException.class)
     public void testJoin1() throws EmptyQueryException {
-        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
+        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(METADATA, INJECTOR);
 
         ConstructionNode rootNode = new ConstructionNodeImpl(PROJECTION_ATOM.getVariables(),
                 new ImmutableSubstitutionImpl<>(ImmutableMap.of(X, generateURI1(A), Y, generateURI1(B))),
@@ -378,7 +382,7 @@ public class EmptyNodeRemovalTest {
 
     @Test(expected = EmptyQueryException.class)
     public void testJoin2() throws EmptyQueryException {
-        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
+        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(METADATA, INJECTOR);
 
         ConstructionNode rootNode = new ConstructionNodeImpl(PROJECTION_ATOM.getVariables(),
                 new ImmutableSubstitutionImpl<>(ImmutableMap.of(X, generateURI1(A), Y, generateURI1(B))),
@@ -440,7 +444,7 @@ public class EmptyNodeRemovalTest {
         /**
          * Expected query
          */
-        IntermediateQueryBuilder expectedQueryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
+        IntermediateQueryBuilder expectedQueryBuilder = new DefaultIntermediateQueryBuilder(METADATA, INJECTOR);
 
         ConstructionNode newRootNode = new ConstructionNodeImpl(
                 PROJECTION_ATOM.getVariables(),
@@ -466,7 +470,7 @@ public class EmptyNodeRemovalTest {
         /**
          * Expected query
          */
-        IntermediateQueryBuilder expectedQueryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
+        IntermediateQueryBuilder expectedQueryBuilder = new DefaultIntermediateQueryBuilder(METADATA, INJECTOR);
 
         ConstructionNode newRootNode = new ConstructionNodeImpl(
                 PROJECTION_ATOM.getVariables(),
@@ -487,7 +491,7 @@ public class EmptyNodeRemovalTest {
 
     private static IntermediateQuery generateJoinLJInitialQuery(Optional<ImmutableExpression> joiningCondition,
                                                                 Variable variableForBuildingY) {
-        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
+        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(METADATA, INJECTOR);
 
         ConstructionNode rootNode = new ConstructionNodeImpl(PROJECTION_ATOM.getVariables(),
                 new ImmutableSubstitutionImpl<>(ImmutableMap.of(X, generateURI1(A),
@@ -511,7 +515,7 @@ public class EmptyNodeRemovalTest {
     @Test(expected = EmptyQueryException.class)
     public void testFilter1() throws EmptyQueryException {
 
-        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
+        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(METADATA, INJECTOR);
 
         ConstructionNode rootNode = new ConstructionNodeImpl(PROJECTION_ATOM.getVariables(),
                 new ImmutableSubstitutionImpl<>(ImmutableMap.of(X, generateURI1(A),
@@ -541,7 +545,7 @@ public class EmptyNodeRemovalTest {
     @Test
     public void testFilter2() throws EmptyQueryException {
 
-        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
+        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(METADATA, INJECTOR);
 
         ConstructionNode rootNode = new ConstructionNodeImpl(PROJECTION_ATOM.getVariables(),
                 new ImmutableSubstitutionImpl<>(ImmutableMap.of(X, generateURI1(A),
@@ -562,7 +566,7 @@ public class EmptyNodeRemovalTest {
         /**
          * Expected query
          */
-        IntermediateQueryBuilder expectedQueryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
+        IntermediateQueryBuilder expectedQueryBuilder = new DefaultIntermediateQueryBuilder(METADATA, INJECTOR);
         ConstructionNode newRootNode = new ConstructionNodeImpl(PROJECTION_ATOM.getVariables(),
                 new ImmutableSubstitutionImpl<>(ImmutableMap.of(X, generateURI1(A),
                         Y, OBDAVocabulary.NULL)),
@@ -576,7 +580,7 @@ public class EmptyNodeRemovalTest {
 
     @Test
     public void testComplexTreeWithJoinCondition() throws EmptyQueryException {
-        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
+        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(METADATA, INJECTOR);
 
         ConstructionNode rootNode = new ConstructionNodeImpl(PROJECTION_ATOM.getVariables(),
                 new ImmutableSubstitutionImpl<>(ImmutableMap.of(X, generateURI1(A),
@@ -604,7 +608,7 @@ public class EmptyNodeRemovalTest {
         /**
          * Expected query
          */
-        IntermediateQueryBuilder expectedQueryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
+        IntermediateQueryBuilder expectedQueryBuilder = new DefaultIntermediateQueryBuilder(METADATA, INJECTOR);
         ConstructionNode newRootNode = new ConstructionNodeImpl(PROJECTION_ATOM.getVariables(),
                 new ImmutableSubstitutionImpl<>(ImmutableMap.of(X, generateURI1(A),
                         Y, OBDAVocabulary.NULL)),
@@ -620,7 +624,7 @@ public class EmptyNodeRemovalTest {
      */
     @Test
     public void testLJRemovalDueToNull1() throws EmptyQueryException {
-        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
+        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(METADATA, INJECTOR);
 
         ConstructionNode rootNode = new ConstructionNodeImpl(PROJECTION_ATOM.getVariables(),
                 new ImmutableSubstitutionImpl<>(ImmutableMap.of(X, generateURI1(A),
@@ -643,7 +647,7 @@ public class EmptyNodeRemovalTest {
         /**
          * Expected query
          */
-        IntermediateQueryBuilder expectedQueryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
+        IntermediateQueryBuilder expectedQueryBuilder = new DefaultIntermediateQueryBuilder(METADATA, INJECTOR);
         ConstructionNode newRootNode = new ConstructionNodeImpl(PROJECTION_ATOM.getVariables(),
                 new ImmutableSubstitutionImpl<>(ImmutableMap.of(X, generateURI1(A),
                         Y, OBDAVocabulary.NULL)),
@@ -659,7 +663,7 @@ public class EmptyNodeRemovalTest {
      */
     @Test
     public void testLJRemovalDueToNull2() throws EmptyQueryException {
-        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
+        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(METADATA, INJECTOR);
 
         ConstructionNode rootNode = new ConstructionNodeImpl(PROJECTION_ATOM.getVariables(),
                 new ImmutableSubstitutionImpl<>(ImmutableMap.of(X, generateURI1(A),
@@ -681,7 +685,7 @@ public class EmptyNodeRemovalTest {
         /**
          * Expected query
          */
-        IntermediateQueryBuilder expectedQueryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
+        IntermediateQueryBuilder expectedQueryBuilder = new DefaultIntermediateQueryBuilder(METADATA, INJECTOR);
         ConstructionNode newRootNode = new ConstructionNodeImpl(PROJECTION_ATOM.getVariables(),
                 new ImmutableSubstitutionImpl<>(ImmutableMap.of(X, generateURI1(A),
                         Y, OBDAVocabulary.NULL)),
@@ -694,7 +698,7 @@ public class EmptyNodeRemovalTest {
 
     @Test
     public void testLJRemovalDueToNull3() throws EmptyQueryException {
-        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
+        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(METADATA, INJECTOR);
 
         ConstructionNode rootNode = new ConstructionNodeImpl(PROJECTION_ATOM.getVariables(),
                 new ImmutableSubstitutionImpl<>(ImmutableMap.of(X, generateURI1(C),
@@ -717,7 +721,7 @@ public class EmptyNodeRemovalTest {
         /**
          * Expected query
          */
-        IntermediateQueryBuilder expectedQueryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
+        IntermediateQueryBuilder expectedQueryBuilder = new DefaultIntermediateQueryBuilder(METADATA, INJECTOR);
         ConstructionNode newRootNode = new ConstructionNodeImpl(PROJECTION_ATOM.getVariables(),
                 new ImmutableSubstitutionImpl<>(ImmutableMap.of(X, OBDAVocabulary.NULL,
                         Y, OBDAVocabulary.NULL)),
@@ -730,7 +734,7 @@ public class EmptyNodeRemovalTest {
 
     @Test
     public void testGroup1() throws EmptyQueryException {
-        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
+        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(METADATA, INJECTOR);
 
         ConstructionNode rootNode = new ConstructionNodeImpl(PROJECTION_ATOM.getVariables(),
                 new ImmutableSubstitutionImpl<>(ImmutableMap.of(X, generateURI1(A),
@@ -750,7 +754,7 @@ public class EmptyNodeRemovalTest {
         /**
          * Expected query
          */
-        IntermediateQueryBuilder expectedQueryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
+        IntermediateQueryBuilder expectedQueryBuilder = new DefaultIntermediateQueryBuilder(METADATA, INJECTOR);
         ConstructionNode newRootNode = new ConstructionNodeImpl(PROJECTION_ATOM.getVariables(),
                 new ImmutableSubstitutionImpl<>(ImmutableMap.of(X, generateURI1(A),
                         Y, OBDAVocabulary.NULL)),
@@ -766,7 +770,7 @@ public class EmptyNodeRemovalTest {
 
     @Test
     public void testGroup2() throws EmptyQueryException {
-        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
+        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(METADATA, INJECTOR);
 
         ConstructionNode rootNode = new ConstructionNodeImpl(PROJECTION_ATOM.getVariables(),
                 new ImmutableSubstitutionImpl<>(ImmutableMap.of(X, generateURI1(A),
@@ -786,7 +790,7 @@ public class EmptyNodeRemovalTest {
         /**
          * Expected query
          */
-        IntermediateQueryBuilder expectedQueryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
+        IntermediateQueryBuilder expectedQueryBuilder = new DefaultIntermediateQueryBuilder(METADATA, INJECTOR);
         ConstructionNode newRootNode = new ConstructionNodeImpl(PROJECTION_ATOM.getVariables(),
                 new ImmutableSubstitutionImpl<>(ImmutableMap.of(X, generateURI1(A),
                         Y, OBDAVocabulary.NULL)),
@@ -805,7 +809,7 @@ public class EmptyNodeRemovalTest {
      */
     @Test
     public void testGroup3() throws EmptyQueryException {
-        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
+        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(METADATA, INJECTOR);
 
         ConstructionNode rootNode = new ConstructionNodeImpl(PROJECTION_ATOM.getVariables(),
                 new ImmutableSubstitutionImpl<>(ImmutableMap.of(
@@ -826,7 +830,7 @@ public class EmptyNodeRemovalTest {
         /**
          * Expected query
          */
-        IntermediateQueryBuilder expectedQueryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
+        IntermediateQueryBuilder expectedQueryBuilder = new DefaultIntermediateQueryBuilder(METADATA, INJECTOR);
         ConstructionNode newRootNode = new ConstructionNodeImpl(PROJECTION_ATOM.getVariables(),
                 new ImmutableSubstitutionImpl<>(ImmutableMap.of(
                         X, DATA_FACTORY.getImmutableExpression(ExpressionOperation.AVG, A),
@@ -863,7 +867,7 @@ public class EmptyNodeRemovalTest {
 
     @Test
     public void testIsNotNullBinding() throws EmptyQueryException {
-        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
+        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(METADATA, INJECTOR);
 
         ConstructionNode rootNode = new ConstructionNodeImpl(PROJECTION_ATOM.getVariables(),
                 new ImmutableSubstitutionImpl<>(ImmutableMap.of(X, generateURI1(A),
@@ -883,7 +887,7 @@ public class EmptyNodeRemovalTest {
         /**
          * Expected query
          */
-        IntermediateQueryBuilder expectedQueryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
+        IntermediateQueryBuilder expectedQueryBuilder = new DefaultIntermediateQueryBuilder(METADATA, INJECTOR);
         ConstructionNode newRootNode = new ConstructionNodeImpl(PROJECTION_ATOM.getVariables(),
                 new ImmutableSubstitutionImpl<>(ImmutableMap.of(X, generateURI1(A),
                         Y, DATA_FACTORY.getImmutableExpression(ExpressionOperation.IS_NOT_NULL, OBDAVocabulary.NULL))),

@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.pivotalrepr.datalog;
 
 import java.util.Optional;
 import com.google.common.collect.ImmutableList;
+import com.google.inject.Injector;
 import fj.P2;
 import fj.data.List;
 import it.unibz.inf.ontop.model.impl.DatalogTools;
@@ -100,7 +101,8 @@ public class DatalogRule2QueryConverter {
      */
     public static IntermediateQuery convertDatalogRule(MetadataForQueryOptimization metadata, CQIE datalogRule,
                                                        Collection<Predicate> tablePredicates,
-                                                       Optional<ImmutableQueryModifiers> optionalModifiers)
+                                                       Optional<ImmutableQueryModifiers> optionalModifiers,
+                                                       Injector injector)
             throws DatalogProgram2QueryConverter.InvalidDatalogProgramException {
 
         P2<DistinctVariableOnlyDataAtom, ImmutableSubstitution<ImmutableTerm>> decomposition =
@@ -116,7 +118,7 @@ public class DatalogRule2QueryConverter {
 
         return createDefinition(metadata, rootNode, projectionAtom, tablePredicates,
                 atomClassification.dataAndCompositeAtoms, atomClassification.booleanAtoms,
-                atomClassification.optionalGroupAtom);
+                atomClassification.optionalGroupAtom, injector);
     }
 
 
@@ -127,7 +129,7 @@ public class DatalogRule2QueryConverter {
                                                       DistinctVariableOnlyDataAtom projectionAtom,
                                                       Collection<Predicate> tablePredicates,
                                                       List<Function> dataAndCompositeAtoms,
-                                                      List<Function> booleanAtoms, Optional<Function> optionalGroupAtom)
+                                                      List<Function> booleanAtoms, Optional<Function> optionalGroupAtom, Injector injector)
             throws DatalogProgram2QueryConverter.InvalidDatalogProgramException {
         /**
          * TODO: explain
@@ -135,7 +137,7 @@ public class DatalogRule2QueryConverter {
         Optional<JoinOrFilterNode> optionalFilterOrJoinNode = createFilterOrJoinNode(dataAndCompositeAtoms, booleanAtoms);
 
         // Non final
-        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(metadata);
+        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(metadata, injector);
 
         try {
             queryBuilder.init(projectionAtom, rootNode);

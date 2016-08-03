@@ -1,17 +1,13 @@
 package it.unibz.inf.ontop.owlrefplatform.owlapi.example;
 
-import com.google.inject.Guice;
 import com.google.inject.Injector;
 import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
-import it.unibz.inf.ontop.injection.impl.OBDACoreModule;
 import it.unibz.inf.ontop.mapping.MappingParser;
 import it.unibz.inf.ontop.model.OBDAModel;
 import it.unibz.inf.ontop.owlapi.OWLAPITranslatorUtility;
 import it.unibz.inf.ontop.owlrefplatform.core.*;
 import it.unibz.inf.ontop.owlrefplatform.injection.QuestComponentFactory;
 import it.unibz.inf.ontop.owlrefplatform.injection.QuestCoreConfiguration;
-import it.unibz.inf.ontop.owlrefplatform.injection.impl.QuestComponentModule;
-import it.unibz.inf.ontop.owlrefplatform.injection.QuestCorePreferences;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLConnection;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLStatement;
 import it.unibz.inf.ontop.sql.DBMetadata;
@@ -65,7 +61,7 @@ private void setup()  throws Exception {
 			OWLAPITranslatorUtility.translateImportsClosure(ontology),
 			Optional.of(obdaModel),
 			Optional.empty());
-	quest.setupRepository();
+	quest.setupRepository(injector);
 	
 	/*
 	 * Prepare the data connection for querying.

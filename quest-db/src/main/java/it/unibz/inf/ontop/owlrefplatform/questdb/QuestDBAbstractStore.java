@@ -81,4 +81,8 @@ public abstract class QuestDBAbstractStore implements Serializable {
         return obdaFactory;
     }
 
+	protected Injector getInjector() {
+		return injector;
+	}
+
 }

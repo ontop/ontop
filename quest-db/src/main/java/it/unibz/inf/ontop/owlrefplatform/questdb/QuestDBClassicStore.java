@@ -112,7 +112,7 @@ public class QuestDBClassicStore extends QuestDBAbstractStore {
 
 	private void createInstance(Ontology tbox, QuestPreferences preferences) throws Exception {
         questInstance = getComponentFactory().create(tbox, Optional.empty(), Optional.empty());
-		questInstance.setupRepository();
+		questInstance.setupRepository(getInjector());
 		
 		final boolean bObtainFromOntology = preferences.getRequiredBoolean(QuestCorePreferences.OBTAIN_FROM_ONTOLOGY);
 		final boolean bObtainFromMappings = preferences.getRequiredBoolean(QuestCorePreferences.OBTAIN_FROM_MAPPINGS);

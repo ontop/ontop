@@ -167,7 +167,7 @@ public class QuestDBVirtualStore extends QuestDBAbstractStore {
 			log.warn("Double initialization of QuestDBVirtualStore");
 		} else {
 			this.isinitalized = true;
-			questInstance.setupRepository();
+			questInstance.setupRepository(getInjector());
 		}
 	}
 	

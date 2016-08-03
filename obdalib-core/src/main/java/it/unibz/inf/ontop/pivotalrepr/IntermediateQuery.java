@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.pivotalrepr;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.google.inject.Injector;
 import it.unibz.inf.ontop.model.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.pivotalrepr.proposal.InvalidQueryOptimizationProposalException;
 import it.unibz.inf.ontop.pivotalrepr.proposal.ProposalResults;
@@ -126,4 +127,6 @@ public interface IntermediateQuery {
      * Set of variables that are returned by the sub-tree.
      */
     ImmutableSet<Variable> getVariables(QueryNode subTreeRootNode);
+
+    Injector getInjector();
 }

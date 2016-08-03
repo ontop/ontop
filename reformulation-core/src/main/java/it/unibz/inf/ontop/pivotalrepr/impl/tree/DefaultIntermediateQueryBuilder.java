@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.pivotalrepr.impl.tree;
 
 import java.util.Optional;
 import com.google.common.collect.ImmutableList;
+import com.google.inject.Injector;
 import it.unibz.inf.ontop.model.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.pivotalrepr.*;
 import it.unibz.inf.ontop.pivotalrepr.*;
@@ -16,14 +17,16 @@ import it.unibz.inf.ontop.pivotalrepr.impl.QueryTreeComponent;
 public class DefaultIntermediateQueryBuilder implements IntermediateQueryBuilder {
 
     private final MetadataForQueryOptimization metadata;
+    private final Injector injector;
     private DistinctVariableOnlyDataAtom projectionAtom;
     private QueryTree tree;
     private boolean canEdit;
 
-    public DefaultIntermediateQueryBuilder(MetadataForQueryOptimization metadata) {
+    public DefaultIntermediateQueryBuilder(MetadataForQueryOptimization metadata, Injector injector) {
         this.metadata = metadata;
         tree = null;
         canEdit = true;
+        this.injector = injector;
     }
 
 
@@ -81,7 +84,7 @@ public class DefaultIntermediateQueryBuilder implements IntermediateQueryBuilder
     public IntermediateQuery build() throws IntermediateQueryBuilderException{
         checkInitialization();
 
-        IntermediateQuery query = buildQuery(metadata, projectionAtom, new DefaultQueryTreeComponent(tree));
+        IntermediateQuery query = buildQuery(metadata, projectionAtom, new DefaultQueryTreeComponent(tree), injector);
         canEdit = false;
         return query;
     }
@@ -91,8 +94,8 @@ public class DefaultIntermediateQueryBuilder implements IntermediateQueryBuilder
      */
     protected IntermediateQuery buildQuery(MetadataForQueryOptimization metadata,
                                            DistinctVariableOnlyDataAtom projectionAtom,
-                                           QueryTreeComponent treeComponent) {
-        return new IntermediateQueryImpl(metadata, projectionAtom, treeComponent);
+                                           QueryTreeComponent treeComponent, Injector injector) {
+        return new IntermediateQueryImpl(metadata, projectionAtom, treeComponent, injector);
     }
 
     private void checkInitialization() throws IntermediateQueryBuilderException {
