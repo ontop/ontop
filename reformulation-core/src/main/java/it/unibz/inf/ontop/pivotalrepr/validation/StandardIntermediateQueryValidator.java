@@ -17,6 +17,10 @@ public class StandardIntermediateQueryValidator implements IntermediateQueryVali
             this.query = query;
         }
 
+        protected IntermediateQuery getQuery() {
+            return query;
+        }
+
         @Override
         public void visit(ConstructionNode constructionNode) {
             if (query.getChildren(constructionNode).size() > 1) {
@@ -102,10 +106,16 @@ public class StandardIntermediateQueryValidator implements IntermediateQueryVali
         }
     }
 
+    /**
+     * To be overloaded
+     */
+    protected ValidationVisitor createVisitor(IntermediateQuery query) {
+        return new ValidationVisitor(query);
+    }
+
     @Override
     public void validate(IntermediateQuery query) throws InvalidIntermediateQueryException {
-
-        QueryNodeVisitor visitor = new ValidationVisitor(query);
+        QueryNodeVisitor visitor = createVisitor(query);
 
         /**
          * May throw an InvalidIntermediateQueryException
