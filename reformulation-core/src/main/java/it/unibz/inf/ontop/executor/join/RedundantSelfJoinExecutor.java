@@ -28,6 +28,11 @@ import it.unibz.inf.ontop.pivotalrepr.*;
 public class RedundantSelfJoinExecutor implements NodeCentricInternalExecutor<InnerJoinNode, InnerJoinOptimizationProposal> {
 
     /**
+     * Safety, to prevent infinite loops
+     */
+    private static final int MAX_ITERATIONS = 100;
+
+    /**
      * TODO: explain
      */
     protected static class PredicateLevelProposal {
@@ -130,7 +135,8 @@ public class RedundantSelfJoinExecutor implements NodeCentricInternalExecutor<In
         /**
          * Tries to optimize if there are data nodes
          */
-        if (!initialMap.isEmpty()) {
+        int i=0;
+        while (!initialMap.isEmpty() && (i++ < MAX_ITERATIONS)) {
 
             // TODO: explain
             ImmutableSet<Variable> variablesToKeep = query.getClosestConstructionNode(topJoinNode).getVariables();
@@ -142,10 +148,39 @@ public class RedundantSelfJoinExecutor implements NodeCentricInternalExecutor<In
                 ConcreteProposal concreteProposal = optionalConcreteProposal.get();
 
                 // SIDE-EFFECT on the tree component (and thus on the query)
-                return applyOptimization(query, treeComponent, highLevelProposal.getFocusNode(),
-                        concreteProposal);
+                NodeCentricOptimizationResults<InnerJoinNode> result = applyOptimization(query, treeComponent,
+                        highLevelProposal.getFocusNode(), concreteProposal);
+
+                /**
+                 *
+                 */
+                if (result.getOptionalNewNode().isPresent()) {
+                    int oldSize = initialMap.size();
+                    initialMap = extractDataNodes(result.getResultingQuery().getChildren(
+                            result.getOptionalNewNode().get()));
+                    int newSize = initialMap.size();
+
+                    if (oldSize == newSize) {
+                        return result;
+                    }
+                    else if (oldSize < newSize) {
+                        throw new IllegalStateException("The number of data atoms was expected to decrease, not increase");
+                    }
+                    // else, continue
+                } else {
+                    return result;
+                }
             }
         }
+
+        /**
+         * Safety
+         */
+        if (i >= MAX_ITERATIONS) {
+            throw new IllegalStateException("Redundant self-join elimination loop has reached " +
+                    "the max iteration threshold (" + MAX_ITERATIONS + ")");
+        }
+
         // No optimization
         return new NodeCentricOptimizationResultsImpl<>(query, topJoinNode);
     }
