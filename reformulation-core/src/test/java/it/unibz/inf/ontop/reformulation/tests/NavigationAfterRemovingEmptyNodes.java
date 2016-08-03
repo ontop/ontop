@@ -2,10 +2,12 @@ package it.unibz.inf.ontop.reformulation.tests;
 
 
 import com.google.common.collect.ImmutableSet;
+import com.google.inject.Injector;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.AtomPredicateImpl;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.model.impl.URITemplatePredicateImpl;
+import it.unibz.inf.ontop.owlrefplatform.injection.QuestCoreConfiguration;
 import it.unibz.inf.ontop.pivotalrepr.*;
 import it.unibz.inf.ontop.pivotalrepr.impl.*;
 import it.unibz.inf.ontop.pivotalrepr.impl.tree.DefaultIntermediateQueryBuilder;
@@ -68,10 +70,12 @@ public class NavigationAfterRemovingEmptyNodes {
     private static final MetadataForQueryOptimization METADATA = new EmptyMetadataForQueryOptimization();
     private static final boolean REQUIRE_USING_IN_PLACE_EXECUTOR = true;
 
+    private static final Injector INJECTOR = QuestCoreConfiguration.defaultBuilder().build().getInjector();
+
 
     @Test
     public void testNextSiblingInitiallyFar() throws EmptyQueryException {
-        IntermediateQueryBuilder initialQueryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
+        IntermediateQueryBuilder initialQueryBuilder = new DefaultIntermediateQueryBuilder(METADATA, INJECTOR);
         DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_1_PREDICATE, A);
 
         ConstructionNode initialRootNode = new ConstructionNodeImpl(projectionAtom.getVariables());
@@ -111,7 +115,7 @@ public class NavigationAfterRemovingEmptyNodes {
 
     @Test
     public void testInsatisfiedJoinCondition() throws EmptyQueryException {
-        IntermediateQueryBuilder initialQueryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
+        IntermediateQueryBuilder initialQueryBuilder = new DefaultIntermediateQueryBuilder(METADATA, INJECTOR);
         DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_1_PREDICATE, A);
 
         ConstructionNode initialRootNode = new ConstructionNodeImpl(projectionAtom.getVariables());

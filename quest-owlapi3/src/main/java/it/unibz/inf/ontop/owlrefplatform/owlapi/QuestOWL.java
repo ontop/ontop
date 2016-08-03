@@ -20,14 +20,11 @@ package it.unibz.inf.ontop.owlrefplatform.owlapi;
  * #L%
  */
 
-import com.google.inject.Guice;
 import com.google.inject.Injector;
 import it.unibz.inf.ontop.exception.InvalidMappingException;
 import it.unibz.inf.ontop.injection.InvalidOBDAConfigurationException;
-import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
 import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.injection.QuestPreferences;
-import it.unibz.inf.ontop.injection.impl.OBDACoreModule;
 import it.unibz.inf.ontop.io.InvalidDataSourceException;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.ontology.*;
@@ -36,10 +33,8 @@ import it.unibz.inf.ontop.owlapi.OWLAPITranslatorUtility;
 import it.unibz.inf.ontop.owlrefplatform.core.*;
 import it.unibz.inf.ontop.owlrefplatform.core.abox.QuestMaterializer;
 import it.unibz.inf.ontop.owlrefplatform.injection.QuestComponentFactory;
-import it.unibz.inf.ontop.owlrefplatform.injection.impl.QuestComponentModule;
 import it.unibz.inf.ontop.owlrefplatform.injection.QuestCorePreferences;
 import it.unibz.inf.ontop.utils.VersionInfo;
-import org.openrdf.model.Model;
 import org.semanticweb.owlapi.model.*;
 import org.semanticweb.owlapi.reasoner.*;
 import org.semanticweb.owlapi.reasoner.InconsistentOntologyException;
@@ -50,9 +45,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
-import java.io.File;
 import java.io.IOException;
-import java.io.Reader;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Optional;
@@ -254,7 +247,7 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 			// pm.reasonerTaskProgressChanged(1, 4);
 
 			// Setup repository
-			questInstance.setupRepository();
+			questInstance.setupRepository(injector);
 			// pm.reasonerTaskProgressChanged(2, 4);
 
 			// Retrives the connection from Quest

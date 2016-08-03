@@ -4,6 +4,7 @@ import java.util.Optional;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
+import com.google.inject.Injector;
 import it.unibz.inf.ontop.model.CQIE;
 import it.unibz.inf.ontop.model.DatalogProgram;
 import it.unibz.inf.ontop.model.OBDAQueryModifiers;
@@ -55,7 +56,7 @@ public class DatalogProgram2QueryConverter {
      */
     public static IntermediateQuery convertDatalogProgram(MetadataForQueryOptimization metadata,
                                                           DatalogProgram queryProgram,
-                                                          Collection<Predicate> tablePredicates)
+                                                          Collection<Predicate> tablePredicates, Injector injector)
             throws InvalidDatalogProgramException, EmptyQueryException {
         List<CQIE> rules = queryProgram.getRules();
 
@@ -78,7 +79,7 @@ public class DatalogProgram2QueryConverter {
          * TODO: explain
          */
         IntermediateQuery intermediateQuery = convertDatalogDefinitions(metadata, rootPredicate, ruleIndex, tablePredicates,
-                topQueryModifiers).get();
+                topQueryModifiers, injector).get();
 
         /**
          * Rules (sub-queries)
@@ -86,7 +87,7 @@ public class DatalogProgram2QueryConverter {
         for (int i=1; i < topDownPredicates.size() ; i++) {
             Predicate datalogAtomPredicate  = topDownPredicates.get(i);
             Optional<IntermediateQuery> optionalSubQuery = convertDatalogDefinitions(metadata, datalogAtomPredicate,
-                    ruleIndex, tablePredicates, NO_QUERY_MODIFIER);
+                    ruleIndex, tablePredicates, NO_QUERY_MODIFIER, injector);
             if (optionalSubQuery.isPresent()) {
                 QueryMergingProposal mergingProposal = new QueryMergingProposalImpl(optionalSubQuery.get());
                 intermediateQuery.applyProposal(mergingProposal, true);
@@ -106,7 +107,8 @@ public class DatalogProgram2QueryConverter {
                                                                          Predicate datalogAtomPredicate,
                                                                          Multimap<Predicate, CQIE> datalogRuleIndex,
                                                                          Collection<Predicate> tablePredicates,
-                                                                         Optional<ImmutableQueryModifiers> optionalModifiers)
+                                                                         Optional<ImmutableQueryModifiers> optionalModifiers,
+                                                                         Injector injector)
             throws InvalidDatalogProgramException {
         Collection<CQIE> atomDefinitions = datalogRuleIndex.get(datalogAtomPredicate);
         switch(atomDefinitions.size()) {
@@ -114,13 +116,13 @@ public class DatalogProgram2QueryConverter {
                 return Optional.empty();
             case 1:
                 CQIE definition = atomDefinitions.iterator().next();
-                return Optional.of(convertDatalogRule(metadata, definition, tablePredicates, optionalModifiers));
+                return Optional.of(convertDatalogRule(metadata, definition, tablePredicates, optionalModifiers, injector));
             default:
                 List<IntermediateQuery> convertedDefinitions = new ArrayList<>();
                 for (CQIE datalogAtomDefinition : atomDefinitions) {
                     convertedDefinitions.add(
                             convertDatalogRule(metadata, datalogAtomDefinition, tablePredicates,
-                                    Optional.<ImmutableQueryModifiers>empty()));
+                                    Optional.<ImmutableQueryModifiers>empty(), injector));
                 }
                 return IntermediateQueryUtils.mergeDefinitions(convertedDefinitions, optionalModifiers);
         }

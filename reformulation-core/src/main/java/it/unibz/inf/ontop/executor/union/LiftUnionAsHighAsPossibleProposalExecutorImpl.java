@@ -14,7 +14,8 @@ public class LiftUnionAsHighAsPossibleProposalExecutorImpl implements LiftUnionA
 
     public IntermediateQuery apply(UnionNode unionNode, QueryNode targetQueryNode, IntermediateQuery inputQuery) {
 
-        IntermediateQueryBuilder builder = new DefaultIntermediateQueryBuilder(inputQuery.getMetadata());
+        IntermediateQueryBuilder builder = new DefaultIntermediateQueryBuilder(inputQuery.getMetadata(),
+                inputQuery.getInjector());
 
         ConstructionNode rootNode = inputQuery.getRootConstructionNode();
         try {

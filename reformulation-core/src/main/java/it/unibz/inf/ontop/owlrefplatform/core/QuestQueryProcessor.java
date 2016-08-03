@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.owlrefplatform.core;
 
 import com.google.common.collect.ImmutableList;
+import com.google.inject.Injector;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
@@ -47,11 +48,13 @@ public class QuestQueryProcessor {
 	private static final Logger log = LoggerFactory.getLogger(QuestQueryProcessor.class);
 	private static final OBDADataFactory DATA_FACTORY = OBDADataFactoryImpl.getInstance();
 	private final boolean hasDistinctResultSet;
+	private final Injector injector;
 
 	public QuestQueryProcessor(QueryRewriter rewriter, LinearInclusionDependencies sigma, QuestUnfolder unfolder,
 							   VocabularyValidator vocabularyValidator, SemanticIndexURIMap uriMap,
 							   NativeQueryGenerator datasourceQueryGenerator,
-							   QueryCache queryCache, boolean hasDistinctResultSet) {
+							   QueryCache queryCache, boolean hasDistinctResultSet,
+							   Injector injector) {
 		this.rewriter = rewriter;
 		this.sigma = sigma;
 		this.unfolder = unfolder;
@@ -60,6 +63,7 @@ public class QuestQueryProcessor {
 		this.datasourceQueryGenerator = datasourceQueryGenerator;
 		this.queryCache = queryCache;
 		this.hasDistinctResultSet = hasDistinctResultSet;
+		this.injector = injector;
 	}
 
 	/**
@@ -207,7 +211,7 @@ public class QuestQueryProcessor {
 
 				IntermediateQuery intermediateQuery = DatalogProgram2QueryConverter.convertDatalogProgram(
 						unfolder.getMetadataForQueryOptimization(), programAfterUnfolding,
-						datalogUnfolder.getExtensionalPredicates());
+						datalogUnfolder.getExtensionalPredicates(), injector);
 				log.debug("New directly translated intermediate query: \n" + intermediateQuery.toString());
 
 				// BasicTypeLiftOptimizer typeLiftOptimizer = new BasicTypeLiftOptimizer();

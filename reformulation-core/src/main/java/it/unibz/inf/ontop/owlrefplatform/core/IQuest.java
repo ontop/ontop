@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.owlrefplatform.core;
 import java.util.List;
 import java.util.Optional;
 
+import com.google.inject.Injector;
 import it.unibz.inf.ontop.model.*;
 
 import it.unibz.inf.ontop.ontology.ImmutableOntologyVocabulary;
@@ -23,7 +24,7 @@ public interface IQuest {
 
     QuestCorePreferences getPreferences();
 
-    void setupRepository() throws Exception;
+    void setupRepository(Injector injector) throws Exception;
 
     void close();
 

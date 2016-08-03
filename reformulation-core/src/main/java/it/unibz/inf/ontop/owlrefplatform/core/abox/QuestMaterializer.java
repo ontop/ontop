@@ -161,7 +161,7 @@ public class QuestMaterializer {
 		questInstance = questComponentFactory.create(ontology, Optional.of(this.model), Optional.empty());
 		// Was an ugly way to ask for also querying the annotations
 
-		questInstance.setupRepository();
+		questInstance.setupRepository(injector);
 	}
 
 

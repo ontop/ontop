@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.pivotalrepr.impl.jgrapht;
 
 import java.util.Optional;
 import com.google.common.collect.ImmutableList;
+import com.google.inject.Injector;
 import it.unibz.inf.ontop.model.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.pivotalrepr.impl.IllegalTreeException;
 import it.unibz.inf.ontop.pivotalrepr.impl.IntermediateQueryImpl;
@@ -12,6 +13,7 @@ import it.unibz.inf.ontop.pivotalrepr.*;
 public class JgraphtIntermediateQueryBuilder implements IntermediateQueryBuilder {
 
     private final MetadataForQueryOptimization metadata;
+    private final Injector injector;
     private DistinctVariableOnlyDataAtom projectionAtom;
     private DirectedAcyclicGraph<QueryNode,JgraphtQueryTreeComponent.LabeledEdge> queryDAG;
     private ConstructionNode rootConstructionNode;
@@ -21,12 +23,13 @@ public class JgraphtIntermediateQueryBuilder implements IntermediateQueryBuilder
     /**
      * TODO: construct with Guice?
      */
-    public JgraphtIntermediateQueryBuilder(MetadataForQueryOptimization metadata) {
+    public JgraphtIntermediateQueryBuilder(MetadataForQueryOptimization metadata, Injector injector) {
         this.metadata =  metadata;
         queryDAG = new DirectedAcyclicGraph<>(JgraphtQueryTreeComponent.LabeledEdge.class);
         rootConstructionNode = null;
         canEdit = false;
         hasBeenInitialized = false;
+        this.injector = injector;
     }
 
     @Override
@@ -98,7 +101,7 @@ public class JgraphtIntermediateQueryBuilder implements IntermediateQueryBuilder
 
         IntermediateQuery query;
         try {
-            query = new IntermediateQueryImpl(metadata, projectionAtom, new JgraphtQueryTreeComponent(queryDAG));
+            query = new IntermediateQueryImpl(metadata, projectionAtom, new JgraphtQueryTreeComponent(queryDAG), injector);
         } catch (IllegalTreeException e) {
             throw new IntermediateQueryBuilderException(e.getMessage());
         }

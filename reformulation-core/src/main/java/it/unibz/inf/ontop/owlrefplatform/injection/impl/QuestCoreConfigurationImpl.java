@@ -1,7 +1,18 @@
 package it.unibz.inf.ontop.owlrefplatform.injection.impl;
 
 
+import com.google.common.collect.ImmutableMap;
 import com.google.inject.Module;
+import it.unibz.inf.ontop.executor.InternalProposalExecutor;
+import it.unibz.inf.ontop.executor.expression.PushDownExpressionExecutor;
+import it.unibz.inf.ontop.executor.groundterm.GroundTermRemovalFromDataNodeExecutor;
+import it.unibz.inf.ontop.executor.join.InnerJoinExecutor;
+import it.unibz.inf.ontop.executor.merging.QueryMergingExecutor;
+import it.unibz.inf.ontop.executor.pullout.PullVariableOutOfDataNodeExecutor;
+import it.unibz.inf.ontop.executor.pullout.PullVariableOutOfSubTreeExecutor;
+import it.unibz.inf.ontop.executor.substitution.SubstitutionPropagationExecutor;
+import it.unibz.inf.ontop.executor.union.UnionLiftInternalExecutor;
+import it.unibz.inf.ontop.executor.unsatisfiable.RemoveEmptyNodesExecutor;
 import it.unibz.inf.ontop.injection.InvalidOBDAConfigurationException;
 import it.unibz.inf.ontop.injection.impl.OBDACoreConfigurationImpl;
 import it.unibz.inf.ontop.model.DataSourceMetadata;
@@ -9,6 +20,9 @@ import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
 import it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing.TMappingExclusionConfig;
 import it.unibz.inf.ontop.owlrefplatform.injection.QuestCoreConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.injection.QuestCorePreferences;
+import it.unibz.inf.ontop.pivotalrepr.OptimizationConfiguration;
+import it.unibz.inf.ontop.pivotalrepr.impl.OptimizationConfigurationImpl;
+import it.unibz.inf.ontop.pivotalrepr.proposal.*;
 
 import javax.annotation.Nonnull;
 import java.util.Optional;
@@ -19,12 +33,14 @@ public class QuestCoreConfigurationImpl extends OBDACoreConfigurationImpl implem
 
     private final QuestCorePreferences preferences;
     private final QuestCoreOptions options;
+    private final OptimizationConfiguration optimizationConfiguration;
 
     protected QuestCoreConfigurationImpl(QuestCorePreferences preferences, OBDAConfigurationOptions obdaOptions,
                                          QuestCoreOptions options) {
         super(preferences, obdaOptions);
         this.preferences = preferences;
         this.options = options;
+        this.optimizationConfiguration = new OptimizationConfigurationImpl(generateOptimizationConfigurationMap());
     }
 
     /**
@@ -67,6 +83,30 @@ public class QuestCoreConfigurationImpl extends OBDACoreConfigurationImpl implem
         return Stream.concat(
                 super.buildGuiceModules(),
                 Stream.of(new QuestComponentModule(this)));
+    }
+
+    /**
+     * Can be overloaded by sub-classes
+     */
+    protected ImmutableMap<Class<? extends QueryOptimizationProposal>, Class<? extends InternalProposalExecutor>>
+    generateOptimizationConfigurationMap() {
+        ImmutableMap.Builder<Class<? extends QueryOptimizationProposal>, Class<? extends InternalProposalExecutor>>
+                internalExecutorMapBuilder = ImmutableMap.builder();
+        internalExecutorMapBuilder.put(InnerJoinOptimizationProposal.class, InnerJoinExecutor.class);
+        internalExecutorMapBuilder.put(SubstitutionPropagationProposal.class, SubstitutionPropagationExecutor.class);
+        internalExecutorMapBuilder.put(PushDownBooleanExpressionProposal.class, PushDownExpressionExecutor.class);
+        internalExecutorMapBuilder.put(GroundTermRemovalFromDataNodeProposal.class, GroundTermRemovalFromDataNodeExecutor.class);
+        internalExecutorMapBuilder.put(PullVariableOutOfDataNodeProposal.class, PullVariableOutOfDataNodeExecutor.class);
+        internalExecutorMapBuilder.put(PullVariableOutOfSubTreeProposal.class, PullVariableOutOfSubTreeExecutor.class);
+        internalExecutorMapBuilder.put(RemoveEmptyNodeProposal.class, RemoveEmptyNodesExecutor.class);
+        internalExecutorMapBuilder.put(QueryMergingProposal.class, QueryMergingExecutor.class);
+        internalExecutorMapBuilder.put(UnionLiftProposal.class, UnionLiftInternalExecutor.class);
+        return internalExecutorMapBuilder.build();
+    }
+
+    @Override
+    public OptimizationConfiguration getOptimizationConfiguration() {
+        return optimizationConfiguration;
     }
 
     public static class QuestCoreOptions {

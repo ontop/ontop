@@ -3,19 +3,20 @@ package it.unibz.inf.ontop.pivotalrepr.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import com.google.inject.Injector;
 import it.unibz.inf.ontop.executor.InternalProposalExecutor;
-import it.unibz.inf.ontop.executor.expression.PushDownExpressionExecutorImpl;
+import it.unibz.inf.ontop.executor.expression.PushDownExpressionExecutor;
 import it.unibz.inf.ontop.executor.join.JoinInternalCompositeExecutor;
-import it.unibz.inf.ontop.executor.pullout.PullVariableOutOfSubTreeExecutorImpl;
-import it.unibz.inf.ontop.executor.merging.QueryMergingExecutorImpl;
-import it.unibz.inf.ontop.executor.substitution.SubstitutionPropagationExecutorImpl;
+import it.unibz.inf.ontop.executor.pullout.PullVariableOutOfSubTreeExecutor;
+import it.unibz.inf.ontop.executor.merging.QueryMergingExecutor;
+import it.unibz.inf.ontop.executor.substitution.SubstitutionPropagationExecutor;
 import it.unibz.inf.ontop.executor.union.LiftUnionAsHighAsPossibleProposalExecutor;
-import it.unibz.inf.ontop.executor.union.UnionLiftInternalExecutorImpl;
-import it.unibz.inf.ontop.executor.unsatisfiable.RemoveEmptyNodesExecutorImpl;
+import it.unibz.inf.ontop.executor.union.UnionLiftInternalExecutor;
+import it.unibz.inf.ontop.executor.unsatisfiable.RemoveEmptyNodesExecutor;
 import it.unibz.inf.ontop.model.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.Variable;
-import it.unibz.inf.ontop.executor.groundterm.GroundTermRemovalFromDataNodeExecutorImpl;
-import it.unibz.inf.ontop.executor.pullout.PullVariableOutOfDataNodeExecutorImpl;
+import it.unibz.inf.ontop.executor.groundterm.GroundTermRemovalFromDataNodeExecutor;
+import it.unibz.inf.ontop.executor.pullout.PullVariableOutOfDataNodeExecutor;
 import it.unibz.inf.ontop.pivotalrepr.validation.IntermediateQueryValidator;
 import it.unibz.inf.ontop.pivotalrepr.validation.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.pivotalrepr.validation.StandardIntermediateQueryValidator;
@@ -63,6 +64,9 @@ public class IntermediateQueryImpl implements IntermediateQuery {
 
     private final DistinctVariableOnlyDataAtom projectionAtom;
 
+    private final Injector injector;
+    private final OptimizationConfiguration optimizationConfiguration;
+
 
     /**
      * TODO: explain
@@ -73,34 +77,17 @@ public class IntermediateQueryImpl implements IntermediateQuery {
                 LiftUnionAsHighAsPossibleProposal.class, LiftUnionAsHighAsPossibleProposalExecutor.class);
     }
 
-    /**
-     * TODO: explain
-     */
-    private static final ImmutableMap<Class<? extends QueryOptimizationProposal>, Class<? extends InternalProposalExecutor>> INTERNAL_EXECUTOR_CLASSES;
-    static {
-        ImmutableMap.Builder<Class<? extends QueryOptimizationProposal>, Class<? extends InternalProposalExecutor>>
-                internalExecutorMapBuilder = ImmutableMap.builder();
-        internalExecutorMapBuilder.put(InnerJoinOptimizationProposal.class, JoinInternalCompositeExecutor.class);
-        internalExecutorMapBuilder.put(SubstitutionPropagationProposal.class, SubstitutionPropagationExecutorImpl.class);
-        internalExecutorMapBuilder.put(PushDownBooleanExpressionProposal.class, PushDownExpressionExecutorImpl.class);
-        internalExecutorMapBuilder.put(GroundTermRemovalFromDataNodeProposal.class, GroundTermRemovalFromDataNodeExecutorImpl.class);
-        internalExecutorMapBuilder.put(PullVariableOutOfDataNodeProposal.class, PullVariableOutOfDataNodeExecutorImpl.class);
-        internalExecutorMapBuilder.put(PullVariableOutOfSubTreeProposal.class, PullVariableOutOfSubTreeExecutorImpl.class);
-        internalExecutorMapBuilder.put(RemoveEmptyNodeProposal.class, RemoveEmptyNodesExecutorImpl.class);
-        internalExecutorMapBuilder.put(QueryMergingProposal.class, QueryMergingExecutorImpl.class);
-        internalExecutorMapBuilder.put(UnionLiftProposal.class, UnionLiftInternalExecutorImpl.class);
-        INTERNAL_EXECUTOR_CLASSES = internalExecutorMapBuilder.build();
-    }
-
 
     /**
      * For IntermediateQueryBuilders ONLY!!
      */
     public IntermediateQueryImpl(MetadataForQueryOptimization metadata, DistinctVariableOnlyDataAtom projectionAtom,
-                                 QueryTreeComponent treeComponent) {
+                                 QueryTreeComponent treeComponent, Injector injector) {
         this.metadata = metadata;
         this.projectionAtom = projectionAtom;
         this.treeComponent = treeComponent;
+        this.injector = injector;
+        this.optimizationConfiguration = injector.getInstance(OptimizationConfiguration.class);
 
         // TODO: disable it in production
         this.validate();
@@ -118,7 +105,7 @@ public class IntermediateQueryImpl implements IntermediateQuery {
 
     @Override
     public IntermediateQuery createSnapshot() {
-        return new IntermediateQueryImpl(metadata, projectionAtom, treeComponent.createSnapshot());
+        return new IntermediateQueryImpl(metadata, projectionAtom, treeComponent.createSnapshot(), injector);
     }
 
     @Override
@@ -248,24 +235,21 @@ public class IntermediateQueryImpl implements IntermediateQuery {
         /**
          * Then, look for a internal one
          */
-        for (Class proposalClass : proposalClassHierarchy) {
-            if (INTERNAL_EXECUTOR_CLASSES.containsKey(proposalClass)) {
-                InternalProposalExecutor<P, R> executor;
-                try {
-                    executor = INTERNAL_EXECUTOR_CLASSES.get(proposalClass).newInstance();
-                } catch (InstantiationException | IllegalAccessException e ) {
-                    throw new RuntimeException(e.getMessage());
-                }
-                /**
-                 * Has a SIDE-EFFECT on the tree component.
-                 */
-                R results = executor.apply(proposal, this, treeComponent);
-                if (!disableValidationTests) {
-                    // TODO: disable it in production
-                    validate();
-                }
-                return results;
+        Optional<Class<? extends InternalProposalExecutor>> optionalExecutorClass =
+                optimizationConfiguration.getProposalExecutorInterface(proposal.getClass());
+
+        if (optionalExecutorClass.isPresent()) {
+            InternalProposalExecutor<P, R> executor = injector.getInstance(optionalExecutorClass.get());
+
+            /**
+             * Has a SIDE-EFFECT on the tree component.
+             */
+            R results = executor.apply(proposal, this, treeComponent);
+            if (!disableValidationTests) {
+                // TODO: disable it in production
+                validate();
             }
+            return results;
         }
 
         if (requireUsingInternalExecutor) {
@@ -374,5 +358,10 @@ public class IntermediateQueryImpl implements IntermediateQuery {
     private void validate() throws InvalidIntermediateQueryException {
         IntermediateQueryValidator validator = new StandardIntermediateQueryValidator();
         validator.validate(this);
+    }
+
+    @Override
+    public Injector getInjector() {
+        return injector;
     }
 }
