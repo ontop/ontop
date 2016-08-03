@@ -68,14 +68,15 @@ public class SWRLVisitor implements SWRLObjectVisitor {
 		}
 		
 		
-		return fac.getDatalogProgram(facts);
-		
+		DatalogProgram dp = fac.getDatalogProgram();
+		dp.appendRule(facts);
+		return dp;
 	}
 	
 	/**
 	 * Translate the swrl_rule
 	 * Return a datalog program containing the supported datalog facts
-	 * @param onto an OWLOntology
+	 * @param rule an SWRLRule
 	 * @return DatalogProgram
 	 */
 	public DatalogProgram createDatalog(SWRLRule rule){
@@ -87,9 +88,10 @@ public class SWRLVisitor implements SWRLObjectVisitor {
 			log.warn("Not Supported Translation of: "+ errors);
 			errors.clear();
 		}
-		
-		return fac.getDatalogProgram(facts);
-		
+
+		DatalogProgram dp = fac.getDatalogProgram();
+		dp.appendRule(facts);
+		return dp;
 	}
 	
 	private void getHead(SWRLAtom atoms) {

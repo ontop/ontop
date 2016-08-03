@@ -23,6 +23,9 @@ package it.unibz.inf.ontop.model.impl;
 import it.unibz.inf.ontop.model.Predicate;
 import it.unibz.inf.ontop.model.ValueConstant;
 import it.unibz.inf.ontop.model.Predicate.COL_TYPE;
+import it.unibz.inf.ontop.model.Variable;
+
+import java.util.stream.Stream;
 
 public class ValueConstantImpl implements ValueConstant {
 
@@ -111,6 +114,11 @@ public class ValueConstantImpl implements ValueConstant {
 	@Override
 	public boolean isGround() {
 		return true;
+	}
+
+	@Override
+	public Stream<Variable> getVariableStream() {
+		return Stream.of();
 	}
 
 	@Override

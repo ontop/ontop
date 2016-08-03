@@ -10,18 +10,14 @@ import it.unibz.inf.ontop.owlrefplatform.core.optimization.BasicJoinOptimizer;
 import it.unibz.inf.ontop.owlrefplatform.core.queryevaluation.SPARQLQueryUtility;
 import it.unibz.inf.ontop.owlrefplatform.core.reformulation.QueryRewriter;
 import it.unibz.inf.ontop.owlrefplatform.core.srcquerygeneration.NativeQueryGenerator;
-import it.unibz.inf.ontop.owlrefplatform.core.translator.DatalogToSparqlTranslator;
-import it.unibz.inf.ontop.owlrefplatform.core.translator.SesameConstructTemplate;
-import it.unibz.inf.ontop.owlrefplatform.core.translator.SparqlAlgebraToDatalogTranslator;
+import it.unibz.inf.ontop.owlrefplatform.core.translator.*;
 import it.unibz.inf.ontop.owlrefplatform.core.unfolding.DatalogUnfolder;
 import it.unibz.inf.ontop.owlrefplatform.core.unfolding.ExpressionEvaluator;
-import it.unibz.inf.ontop.owlrefplatform.core.unfolding.SPARQLQueryFlattener;
 import it.unibz.inf.ontop.pivotalrepr.EmptyQueryException;
 import it.unibz.inf.ontop.pivotalrepr.IntermediateQuery;
 import it.unibz.inf.ontop.pivotalrepr.datalog.DatalogProgram2QueryConverter;
 import it.unibz.inf.ontop.renderer.DatalogProgramRenderer;
 
-import java.security.Signature;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -78,27 +74,39 @@ public class QuestQueryProcessor {
 		}
 		return pq;
 	}
-	
+
 	
 	private DatalogProgram translateAndPreProcess(ParsedQuery pq)  {
-		
-		SparqlAlgebraToDatalogTranslator translator = new SparqlAlgebraToDatalogTranslator(unfolder.getUriTemplateMatcher(),
-				uriMap);
-		DatalogProgram program = translator.translate(pq);
 
+		SparqlAlgebraToDatalogTranslator translator = new SparqlAlgebraToDatalogTranslator(unfolder.getUriTemplateMatcher(), uriMap);
+		SparqlQuery translation = translator.translate(pq);
+		DatalogProgram program = translation.getProgram();
 		log.debug("Datalog program translated from the SPARQL query: \n{}", program);
 
-		SPARQLQueryFlattener unfolder = new SPARQLQueryFlattener(program);
-		program = unfolder.flatten();
-		log.debug("Flattened program: \n{}", program);
-			
+		SameAsRewriter sameAs = new SameAsRewriter(unfolder.getSameAsDataPredicatesAndClasses(), unfolder.getSameAsObjectPredicates());
+		program = sameAs.getSameAsRewriting(program);
+		//System.out.println("SAMEAS" + program);
+
 		log.debug("Replacing equivalences...");
-		DatalogProgram newprogram = OBDADataFactoryImpl.getInstance().getDatalogProgram(program.getQueryModifiers());
+		DatalogProgram newprogramEq = OBDADataFactoryImpl.getInstance().getDatalogProgram(program.getQueryModifiers());
+		Predicate topLevelPredicate = null;
 		for (CQIE query : program.getRules()) {
-			CQIE newquery = vocabularyValidator.replaceEquivalences(query);
-			newprogram.appendRule(newquery);
+			// TODO: fix cloning
+			CQIE rule = query.clone();
+			// TODO: get rid of EQNormalizer
+			EQNormalizer.enforceEqualities(rule);
+
+			CQIE newquery = vocabularyValidator.replaceEquivalences(rule);
+			if (newquery.getHead().getFunctionSymbol().getName().equals(OBDAVocabulary.QUEST_QUERY))
+				topLevelPredicate = newquery.getHead().getFunctionSymbol();
+			newprogramEq.appendRule(newquery);
 		}
-		return newprogram;		
+
+		SPARQLQueryFlattener fl = new SPARQLQueryFlattener(newprogramEq);
+		List<CQIE> p = fl.flatten(newprogramEq.getRules(topLevelPredicate).get(0));
+		DatalogProgram newprogram = OBDADataFactoryImpl.getInstance().getDatalogProgram(program.getQueryModifiers(), p);
+
+		return newprogram;
 	}
 	
 	
@@ -115,46 +123,44 @@ public class QuestQueryProcessor {
 		if (executableQuery != null)
 			return executableQuery;
 
-		List<String> signature = null;
 		try {
-			SparqlAlgebraToDatalogTranslator translator = new SparqlAlgebraToDatalogTranslator(
-					unfolder.getUriTemplateMatcher(),
-					uriMap);
-			DatalogProgram translation = translator.translate(pq);
-
-			// IMPORTANT: this is the original query
-			// (with original variable names, not the BINDings after flattening)
-			for (CQIE q : translation.getRules()) {
-				if (q.getHead().getFunctionSymbol().getName().equals(OBDAVocabulary.QUEST_QUERY)) {
-					List<Term> terms = q.getHead().getTerms();
-					signature = new ArrayList<>(terms.size());
-					for (Term t : terms)
-						signature.add(((Variable) t).getName()); // ALL VARIABLES by construction
-					break;
-				}
-			}
-
 			// log.debug("Input query:\n{}", strquery);
+			
+			SparqlAlgebraToDatalogTranslator translator = new SparqlAlgebraToDatalogTranslator(unfolder.getUriTemplateMatcher(), uriMap);
+			SparqlQuery translation = translator.translate(pq);
+			DatalogProgram program = translation.getProgram();
+			log.debug("Datalog program translated from the SPARQL query: \n{}", program);
+			//System.out.println("OUT " + program);
 
+			SameAsRewriter sameAs = new SameAsRewriter(unfolder.getSameAsDataPredicatesAndClasses(), unfolder.getSameAsObjectPredicates());
+			program = sameAs.getSameAsRewriting(program);
+			//System.out.println("SAMEAS" + program);
 
-			log.debug("Datalog program translated from the SPARQL query: \n{}", translation);
-
-			SPARQLQueryFlattener flattener = new SPARQLQueryFlattener(translation);
-			DatalogProgram program = flattener.flatten();
-			log.debug("Flattened program: \n{}", program);
-				
 			log.debug("Replacing equivalences...");
-			DatalogProgram newprogram = OBDADataFactoryImpl.getInstance().getDatalogProgram(program.getQueryModifiers());
+			DatalogProgram newprogramEq = OBDADataFactoryImpl.getInstance().getDatalogProgram(program.getQueryModifiers());
+			Predicate topLevelPredicate = null;
 			for (CQIE query : program.getRules()) {
-				CQIE newquery = vocabularyValidator.replaceEquivalences(query);
-				newprogram.appendRule(newquery);
+				// TODO: fix cloning
+				CQIE rule = query.clone();
+				// TODO: get rid of EQNormalizer
+				EQNormalizer.enforceEqualities(rule);
+
+				CQIE newquery = vocabularyValidator.replaceEquivalences(rule);
+				if (newquery.getHead().getFunctionSymbol().getName().equals(OBDAVocabulary.QUEST_QUERY))
+					topLevelPredicate = newquery.getHead().getFunctionSymbol();
+				newprogramEq.appendRule(newquery);
 			}
+			log.debug("Program before flattening: \n{}", newprogramEq);
+
+			SPARQLQueryFlattener fl = new SPARQLQueryFlattener(newprogramEq);
+			List<CQIE> p = fl.flatten(newprogramEq.getRules(topLevelPredicate).get(0));
+			DatalogProgram newprogram = OBDADataFactoryImpl.getInstance().getDatalogProgram(program.getQueryModifiers(), p);
 
 			for (CQIE q : newprogram.getRules()) 
 				DatalogNormalizer.unfoldJoinTrees(q);
 			log.debug("Normalized program: \n{}", newprogram);
 
-			if (newprogram.getRules().size() < 1) 
+			if (newprogram.getRules().size() < 1)
 				throw new OBDAException("Error, the translation of the query generated 0 rules. This is not possible for any SELECT query (other queries are not supported by the translator).");
 
 			log.debug("Start the rewriting process...");
@@ -163,7 +169,7 @@ public class QuestQueryProcessor {
 			for (CQIE cq : newprogram.getRules())
 				CQCUtilities.optimizeQueryWithSigmaRules(cq.getBody(), sigma);
 			DatalogProgram programAfterRewriting = rewriter.rewrite(newprogram);
-			
+
 			//rewritingTime = System.currentTimeMillis() - startTime0;
 
 			//final long startTime = System.currentTimeMillis();
@@ -177,59 +183,67 @@ public class QuestQueryProcessor {
 							"ans1", QuestConstants.BUP, true);
 			log.debug("Data atoms evaluated: \n{}", programAfterUnfolding);
 
+			//System.out.println("OUT UNFOLDED " + programAfterUnfolding);
+
+			List<CQIE> toRemove = new LinkedList<>();
+			for (CQIE rule : programAfterUnfolding.getRules()) {
+				Predicate headPredicate = rule.getHead().getFunctionSymbol();
+				if (!headPredicate.getName().equals(OBDAVocabulary.QUEST_QUERY)) {
+					toRemove.add(rule);
+				}
+			}
+			programAfterUnfolding.removeRules(toRemove);
+			log.debug("Irrelevant rules removed: \n{}", programAfterUnfolding);
 
 			ExpressionEvaluator evaluator = new ExpressionEvaluator(unfolder.getUriTemplateMatcher());
 			evaluator.evaluateExpressions(programAfterUnfolding);
 			log.debug("Boolean expression evaluated: \n{}", programAfterUnfolding);
 
-			if (programAfterUnfolding.getRules().isEmpty()) {
-				throw new EmptyQueryException();
+			try {
+				if (programAfterUnfolding.getRules().isEmpty()) {
+					throw new EmptyQueryException();
+				}
+
+
+				IntermediateQuery intermediateQuery = DatalogProgram2QueryConverter.convertDatalogProgram(
+						unfolder.getMetadataForQueryOptimization(), programAfterUnfolding,
+						datalogUnfolder.getExtensionalPredicates());
+				log.debug("New directly translated intermediate query: \n" + intermediateQuery.toString());
+
+				// BasicTypeLiftOptimizer typeLiftOptimizer = new BasicTypeLiftOptimizer();
+				// intermediateQuery = typeLiftOptimizer.optimize(intermediateQuery);
+
+				log.debug("New lifted query: \n" + intermediateQuery.toString());
+
+
+				BasicJoinOptimizer joinOptimizer = new BasicJoinOptimizer();
+				intermediateQuery = joinOptimizer.optimize(intermediateQuery);
+				log.debug("New query after join optimization: \n" + intermediateQuery.toString());
+
+				log.debug("Partial evaluation ended.");
+
+				executableQuery = generateExecutableQuery(intermediateQuery, ImmutableList.copyOf(translation.getSignature()),
+						optionalConstructTemplate);
+				queryCache.put(pq, executableQuery);
+				return executableQuery;
+
+
+			} catch (DatalogProgram2QueryConverter.InvalidDatalogProgramException e) {
+				throw new OBDAException(e.getLocalizedMessage());
 			}
-			else {
-				try {
-					IntermediateQuery intermediateQuery = DatalogProgram2QueryConverter.convertDatalogProgram(
-							unfolder.getMetadataForQueryOptimization(), programAfterUnfolding,
-							datalogUnfolder.getExtensionalPredicates());
-					log.debug("New directly translated intermediate query: \n" + intermediateQuery.toString());
+			/**
+			 * No solution.
+			 */
+			catch (EmptyQueryException e) {
+				ExecutableQuery emptyQuery = datasourceQueryGenerator.generateEmptyQuery(
+						ImmutableList.copyOf(translation.getSignature()), optionalConstructTemplate);
 
-					// BasicTypeLiftOptimizer typeLiftOptimizer = new BasicTypeLiftOptimizer();
-					// intermediateQuery = typeLiftOptimizer.optimize(intermediateQuery);
-
-					log.debug("New lifted query: \n" + intermediateQuery.toString());
-
-
-					BasicJoinOptimizer joinOptimizer = new BasicJoinOptimizer();
-					intermediateQuery = joinOptimizer.optimize(intermediateQuery);
-					log.debug("New query after join optimization: \n" + intermediateQuery.toString());
-
-					log.debug("Partial evaluation ended.");
-
-					executableQuery = generateExecutableQuery(intermediateQuery, ImmutableList.copyOf(signature),
-							optionalConstructTemplate);
-					queryCache.put(pq, executableQuery);
-					return executableQuery;
-
-
-				} catch (DatalogProgram2QueryConverter.InvalidDatalogProgramException e) {
-					throw new OBDAException(e.getLocalizedMessage());
-				}
-				/**
-				 * No solution.
-				 */
-				catch (EmptyQueryException e) {
-					ExecutableQuery emptyQuery = datasourceQueryGenerator.generateEmptyQuery(
-							ImmutableList.copyOf(signature), optionalConstructTemplate);
-
-					log.debug("Empty query --> no solution.");
-					queryCache.put(pq, emptyQuery);
-					return emptyQuery;
-				}
+				log.debug("Empty query --> no solution.");
+				queryCache.put(pq, emptyQuery);
+				return emptyQuery;
 			}
 
 			//unfoldingTime = System.currentTimeMillis() - startTime;
-		}
-		catch (EmptyQueryException e) {
-			return datasourceQueryGenerator.generateEmptyQuery(ImmutableList.copyOf(signature), optionalConstructTemplate);
 		}
 		catch (OBDAException e) {
 			throw e;

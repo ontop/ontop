@@ -168,7 +168,7 @@ public class IntermediateQueryToDatalogTranslator {
 			DataAtom projectionAtom = Optional.ofNullable(
 					subQueryProjectionAtoms.get(constructionNode))
 					.map(atom -> adaptProjectionAtom(atom, constructionNode))
-					.orElseGet(() -> generateProjectionAtom(constructionNode.getProjectedVariables()));
+					.orElseGet(() -> generateProjectionAtom(constructionNode.getVariables()));
 
 			heads.add(new RuleHead(constructionNode, projectionAtom));
 			subQueryProjectionAtoms.put(constructionNode, projectionAtom);
@@ -249,7 +249,7 @@ public class IntermediateQueryToDatalogTranslator {
 							"a UNION node must have a ConstructionNode as parent"));
 
 			DistinctVariableOnlyDataAtom childIdealProjectionAtom = generateProjectionAtom(
-					parentNode.getProjectedVariables());
+					parentNode.getVariables());
 			
 			for (QueryNode child : te.getChildren(node)) {
 				ConstructionNode childConstructionNode =(ConstructionNode) child;
@@ -273,7 +273,7 @@ public class IntermediateQueryToDatalogTranslator {
 
 	private DataAtom adaptProjectionAtom(DataAtom idealProjectionAtom, ConstructionNode constructionNode) {
 		ImmutableList<? extends VariableOrGroundTerm> arguments = idealProjectionAtom.getArguments();
-		ImmutableSet<Variable> projectedVariables = constructionNode.getProjectedVariables();
+		ImmutableSet<Variable> projectedVariables = constructionNode.getVariables();
 
 		if (ImmutableSet.copyOf(arguments).equals(projectedVariables)) {
 			return idealProjectionAtom;

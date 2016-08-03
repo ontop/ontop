@@ -2,11 +2,8 @@ package it.unibz.inf.ontop.pivotalrepr;
 
 import java.util.Optional;
 
-import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.ImmutableSubstitution;
 import it.unibz.inf.ontop.model.ImmutableTerm;
-import it.unibz.inf.ontop.model.Variable;
-import it.unibz.inf.ontop.model.VariableOrGroundTerm;
 
 /**
  * Head node an IntermediateQuery
@@ -14,7 +11,7 @@ import it.unibz.inf.ontop.model.VariableOrGroundTerm;
  * TODO: further explain
  *
  */
-public interface ConstructionNode extends ConstructionOrDataNode {
+public interface ConstructionNode extends ExplicitVariableProjectionNode {
 
     /**
      * (Some) projected variable --> transformed variable
@@ -50,7 +47,7 @@ public interface ConstructionNode extends ConstructionOrDataNode {
     @Override
     SubstitutionResults<ConstructionNode> applyAscendingSubstitution(
             ImmutableSubstitution<? extends ImmutableTerm> substitution,
-            QueryNode descendantNode, IntermediateQuery query);
+            QueryNode childNode, IntermediateQuery query);
 
     @Override
     SubstitutionResults<ConstructionNode> applyDescendingSubstitution(

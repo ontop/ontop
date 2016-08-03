@@ -17,7 +17,7 @@ public class VariableCollector {
         ImmutableSet.Builder<Variable> collectedVariableBuilder = ImmutableSet.builder();
 
         for (QueryNode node : nodes) {
-            collectedVariableBuilder.addAll(node.getVariables());
+            collectedVariableBuilder.addAll(node.getLocalVariables());
         }
         return collectedVariableBuilder.build();
     }

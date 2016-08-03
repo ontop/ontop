@@ -20,7 +20,7 @@ public interface InnerJoinNode extends CommutativeJoinNode {
     @Override
     SubstitutionResults<InnerJoinNode> applyAscendingSubstitution(
             ImmutableSubstitution<? extends ImmutableTerm> substitution,
-            QueryNode descendantNode, IntermediateQuery query);
+            QueryNode childNode, IntermediateQuery query);
 
     @Override
     SubstitutionResults<InnerJoinNode> applyDescendingSubstitution(

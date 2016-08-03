@@ -1,14 +1,17 @@
 package it.unibz.inf.ontop.pivotalrepr.impl;
 
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.ImmutableSubstitution;
 import it.unibz.inf.ontop.model.ImmutableTerm;
 import it.unibz.inf.ontop.model.Variable;
 import it.unibz.inf.ontop.pivotalrepr.*;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Optional;
 
+import static it.unibz.inf.ontop.pivotalrepr.NodeTransformationProposedState.*;
 import static it.unibz.inf.ontop.pivotalrepr.SubstitutionResults.LocalAction.NO_CHANGE;
 
 public class UnionNodeImpl extends QueryNodeImpl implements UnionNode {
@@ -42,18 +45,18 @@ public class UnionNodeImpl extends QueryNodeImpl implements UnionNode {
     @Override
     public SubstitutionResults<UnionNode> applyAscendingSubstitution(
             ImmutableSubstitution<? extends ImmutableTerm> substitution,
-            QueryNode descendantNode, IntermediateQuery query) {
+            QueryNode childNode, IntermediateQuery query) {
         if (substitution.isEmpty()) {
             return new SubstitutionResultsImpl<>(NO_CHANGE);
         }
         /**
-         * Asks for inserting a construction node between the descendant node and this node.
+         * Asks for inserting a construction node between the child node and this node.
          * Such a construction node will contain the substitution.
          */
         else {
-            ConstructionNode newParentOfDescendantNode = new ConstructionNodeImpl(projectedVariables,
+            ConstructionNode newParentOfChildNode = new ConstructionNodeImpl(projectedVariables,
                     (ImmutableSubstitution<ImmutableTerm>) substitution, Optional.empty());
-            return new SubstitutionResultsImpl<>(this, newParentOfDescendantNode, descendantNode);
+            return new SubstitutionResultsImpl<>(newParentOfChildNode, childNode);
         }
     }
 
@@ -79,13 +82,38 @@ public class UnionNodeImpl extends QueryNodeImpl implements UnionNode {
     }
 
     @Override
-    public ImmutableSet<Variable> getProjectedVariables() {
+    public ImmutableSet<Variable> getVariables() {
         return projectedVariables;
     }
 
     @Override
     public boolean isSyntacticallyEquivalentTo(QueryNode node) {
-        return (node instanceof UnionNode);
+        if (node instanceof UnionNode) {
+            return projectedVariables.equals(((UnionNode)node).getVariables());
+        }
+        return false;
+    }
+
+    @Override
+    public NodeTransformationProposal reactToEmptyChild(IntermediateQuery query, EmptyNode emptyChild) {
+
+        /**
+         * All the children expected the given empty child
+         */
+        ImmutableList<QueryNode> children = query.getChildrenStream(this)
+                .filter(c -> c != emptyChild)
+                .collect(ImmutableCollectors.toList());
+
+        switch (children.size()) {
+            case 0:
+                return new NodeTransformationProposalImpl(DECLARE_AS_EMPTY, emptyChild.getVariables());
+            case 1:
+                return new NodeTransformationProposalImpl(REPLACE_BY_UNIQUE_NON_EMPTY_CHILD, children.get(0),
+                        ImmutableSet.of());
+            default:
+                return new NodeTransformationProposalImpl(NO_LOCAL_CHANGE,
+                        ImmutableSet.of());
+        }
     }
 
     @Override
@@ -94,7 +122,7 @@ public class UnionNodeImpl extends QueryNodeImpl implements UnionNode {
     }
 
     @Override
-    public ImmutableSet<Variable> getVariables() {
+    public ImmutableSet<Variable> getLocalVariables() {
         return ImmutableSet.of();
     }
 

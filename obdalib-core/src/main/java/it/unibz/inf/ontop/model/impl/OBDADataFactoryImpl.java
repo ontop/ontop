@@ -35,11 +35,11 @@ import java.net.URI;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static it.unibz.inf.ontop.model.impl.DataAtomTools.areVariablesDistinct;
-import static it.unibz.inf.ontop.model.impl.DataAtomTools.isVariableOnly;
-
 
 import com.google.common.collect.ImmutableList;
+
+import static it.unibz.inf.ontop.model.impl.DataAtomTools.areVariablesDistinct;
+import static it.unibz.inf.ontop.model.impl.DataAtomTools.isVariableOnly;
 
 public class OBDADataFactoryImpl implements OBDADataFactory {
 
@@ -196,7 +196,7 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 		// Default constructor
 		return new FunctionalTermImpl(functor, arguments);
 	}
-
+	
 	@Override
 	public Expression getExpression(OperationPredicate functor, Term... arguments) {
 		return new ExpressionImpl(functor, arguments);
@@ -370,23 +370,9 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	}
 
 	@Override
-	public DatalogProgram getDatalogProgram(CQIE rule) {
-		DatalogProgram p = new DatalogProgramImpl();
-		p.appendRule(rule);
-		return p;
-	}
-
-	@Override
 	public DatalogProgram getDatalogProgram(OBDAQueryModifiers modifiers) {
 		DatalogProgram p = new DatalogProgramImpl();
 		p.getQueryModifiers().copy(modifiers);
-		return p;
-	}
-
-	@Override
-	public DatalogProgram getDatalogProgram(Collection<CQIE> rules) {
-		DatalogProgram p = new DatalogProgramImpl();
-		p.appendRule(rules);
 		return p;
 	}
 
@@ -542,31 +528,6 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	@Override
 	public Expression getSQLFunctionLike(Term term1, Term term2) {
 		return getExpression(ExpressionOperation.SQL_LIKE, term1, term2);
-	}
-	
-	@Override
-	public Expression getFunctionRegex(Term term1, Term term2, Term term3) {
-		return getExpression(ExpressionOperation.REGEX, term1, term2, term3);
-	}
-	
-	@Override
-	public Expression getFunctionReplace(Term term1, Term term2, Term term3) {
-		return getExpression(ExpressionOperation.REPLACE, term1, term2, term3 );
-	}
-	
-    @Override
-    public Expression getFunctionConcat(Term term1, Term term2) {
-        return getExpression(ExpressionOperation.CONCAT, term1, term2);
-    }
-
-    @Override
-    public Expression getFunctionSubstring(Term term1, Term term2, Term term3) {
-        return getExpression(ExpressionOperation.SUBSTR, term1, term2, term3);
-    } //added by Nika
-
-	@Override
-	public Expression getFunctionSubstring(Term term1, Term term2) {
-		return getExpression(ExpressionOperation.SUBSTR, term1, term2);
 	}
 
 	@Override

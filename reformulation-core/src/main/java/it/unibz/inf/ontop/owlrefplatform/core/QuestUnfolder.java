@@ -15,6 +15,7 @@ import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.LinearInclusionDep
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.VocabularyValidator;
 import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing.MappingDataTypeRepair;
+import it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing.MappingSameAs;
 import it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing.TMappingExclusionConfig;
 import it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing.TMappingProcessor;
 import it.unibz.inf.ontop.owlrefplatform.core.unfolding.DatalogUnfolder;
@@ -57,6 +58,9 @@ public class QuestUnfolder {
 	private ImmutableMultimap<AtomPredicate, ImmutableList<Integer>> uniqueConstraints;
 	private final IMapping2DatalogConverter mapping2DatalogConvertor;
 	private MetadataForQueryOptimization metadataForQueryOptimization;
+
+	private Set<Predicate> dataPropertiesAndClassesMapped = new HashSet<>();
+	private Set<Predicate> objectPropertiesMapped = new HashSet<>();
 
 	/** Davide> Whether to exclude the user-supplied predicates from the
 	 *          TMapping procedure (that is, the mapping assertions for 
@@ -405,6 +409,30 @@ public class QuestUnfolder {
 			newmappings.add(newmapping);
 		}
 		return newmappings;
+	}
+
+	/**
+	 * Store information about owl:sameAs
+	 */
+	public void addSameAsMapping(List<CQIE> unfoldingProgram) throws OBDAException{
+
+
+		MappingSameAs msa = new MappingSameAs(unfoldingProgram);
+
+		dataPropertiesAndClassesMapped = msa.getDataPropertiesAndClassesWithSameAs();
+		objectPropertiesMapped =  msa.getObjectPropertiesWithSameAs();
+
+
+	}
+
+	public Set<Predicate> getSameAsDataPredicatesAndClasses(){
+
+		return dataPropertiesAndClassesMapped;
+	}
+
+	public Set<Predicate> getSameAsObjectPredicates(){
+
+		return objectPropertiesMapped;
 	}
 
 	public UriTemplateMatcher getUriTemplateMatcher() {

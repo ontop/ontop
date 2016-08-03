@@ -4,13 +4,16 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.VariableGenerator;
 import it.unibz.inf.ontop.pivotalrepr.*;
+import it.unibz.inf.ontop.pivotalrepr.NonCommutativeOperatorNode.ArgumentPosition;
 import it.unibz.inf.ontop.pivotalrepr.impl.IllegalTreeUpdateException;
 import it.unibz.inf.ontop.model.Variable;
 import it.unibz.inf.ontop.pivotalrepr.impl.IllegalTreeException;
 import it.unibz.inf.ontop.pivotalrepr.impl.QueryTreeComponent;
 import it.unibz.inf.ontop.pivotalrepr.impl.VariableCollector;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.*;
+import java.util.stream.Stream;
 
 
 /**
@@ -27,14 +30,25 @@ public class DefaultQueryTreeComponent implements QueryTreeComponent {
      * TODO: explain
      */
     protected DefaultQueryTreeComponent(QueryTree tree) {
+        this(tree,
+                new VariableGenerator(
+                        VariableCollector.collectVariables(
+                                tree.getNodesInTopDownOrder())));
+    }
+
+    private DefaultQueryTreeComponent(QueryTree tree, VariableGenerator variableGenerator) {
         this.tree = tree;
-        this.variableGenerator = new VariableGenerator(
-                VariableCollector.collectVariables(tree.getNodesInTopDownOrder()));
+        this.variableGenerator = variableGenerator;
     }
 
     @Override
-    public ImmutableList<QueryNode> getCurrentSubNodesOf(QueryNode node) {
+    public ImmutableList<QueryNode> getChildren(QueryNode node) {
         return tree.getChildren(node);
+    }
+
+    @Override
+    public Stream<QueryNode> getChildrenStream(QueryNode node) {
+        return tree.getChildrenStream(node);
     }
 
     @Override
@@ -53,8 +67,8 @@ public class DefaultQueryTreeComponent implements QueryTreeComponent {
     }
 
     @Override
-    public ImmutableSet<EmptyNode> getEmptyNodes(QueryNode subTreeRoot) {
-        return tree.getEmptyNodes(subTreeRoot);
+    public ImmutableSet<EmptyNode> getEmptyNodes() {
+        return tree.getEmptyNodes();
     }
 
     @Override
@@ -66,6 +80,13 @@ public class DefaultQueryTreeComponent implements QueryTreeComponent {
     public void replaceNode(QueryNode previousNode, QueryNode replacingNode) {
         collectPossiblyNewVariables(replacingNode);
         tree.replaceNode(previousNode, replacingNode);
+    }
+
+    @Override
+    public void replaceSubTree(QueryNode subTreeRootNode, QueryNode replacingNode) {
+        getChildren(subTreeRootNode).stream()
+                .forEach(this::removeSubTree);
+        replaceNode(subTreeRootNode, replacingNode);
     }
 
     @Override
@@ -101,7 +122,7 @@ public class DefaultQueryTreeComponent implements QueryTreeComponent {
     }
 
     @Override
-    public Optional<NonCommutativeOperatorNode.ArgumentPosition> getOptionalPosition(QueryNode parentNode,
+    public Optional<ArgumentPosition> getOptionalPosition(QueryNode parentNode,
                                                                                      QueryNode childNode) {
         return tree.getOptionalPosition(parentNode, childNode);
     }
@@ -128,13 +149,13 @@ public class DefaultQueryTreeComponent implements QueryTreeComponent {
     }
 
     @Override
-    public void removeOrReplaceNodeByUniqueChildren(QueryNode node) throws IllegalTreeUpdateException {
-        tree.removeOrReplaceNodeByUniqueChild(node);
+    public QueryNode removeOrReplaceNodeByUniqueChildren(QueryNode node) throws IllegalTreeUpdateException {
+        return tree.removeOrReplaceNodeByUniqueChild(node);
     }
 
     @Override
     public void replaceNodesByOneNode(ImmutableList<QueryNode> queryNodes, QueryNode replacingNode, QueryNode parentNode,
-                                      Optional<NonCommutativeOperatorNode.ArgumentPosition> optionalPosition)
+                                      Optional<ArgumentPosition> optionalPosition)
             throws IllegalTreeUpdateException {
         collectPossiblyNewVariables(replacingNode);
         tree.replaceNodesByOneNode(queryNodes, replacingNode, parentNode, optionalPosition);
@@ -143,7 +164,7 @@ public class DefaultQueryTreeComponent implements QueryTreeComponent {
 
     @Override
     public void addChild(QueryNode parentNode, QueryNode childNode,
-                         Optional<NonCommutativeOperatorNode.ArgumentPosition> optionalPosition, boolean canReplace)
+                         Optional<ArgumentPosition> optionalPosition, boolean canReplace)
             throws IllegalTreeUpdateException {
         collectPossiblyNewVariables(childNode);
         tree.addChild(parentNode, childNode, optionalPosition, true, canReplace);
@@ -200,10 +221,46 @@ public class DefaultQueryTreeComponent implements QueryTreeComponent {
         return variableGenerator.getKnownVariables();
     }
 
+    @Override
+    public QueryNode replaceNodeByChild(QueryNode parentNode, Optional<ArgumentPosition> optionalReplacingChildPosition) {
+        return tree.replaceNodeByChild(parentNode, optionalReplacingChildPosition);
+    }
+
+    @Override
+    public QueryTreeComponent createSnapshot() {
+        return new DefaultQueryTreeComponent(tree.createSnapshot(), new VariableGenerator(
+                variableGenerator.getKnownVariables()));
+    }
+
+    /**
+     * TODO: optimize by it but materializing (and maintaining) the results.
+     */
+    @Override
+    public ImmutableSet<Variable> getVariables(QueryNode node) {
+        if (node instanceof ExplicitVariableProjectionNode) {
+            return ((ExplicitVariableProjectionNode) node).getVariables();
+        }
+        else {
+            return getProjectedVariableStream(node)
+                    .collect(ImmutableCollectors.toSet());
+        }
+    }
+
+    private Stream<Variable> getProjectedVariableStream(QueryNode node) {
+        if (node instanceof ExplicitVariableProjectionNode) {
+            return ((ExplicitVariableProjectionNode) node).getVariables().stream();
+        }
+        else {
+            return getChildrenStream(node)
+                    .flatMap(this::getProjectedVariableStream);
+        }
+    }
+
+
     /**
      * To be called every time a new node is added to the tree component.
      */
     private void collectPossiblyNewVariables(QueryNode newNode) {
-        variableGenerator.registerAdditionalVariables(newNode.getVariables());
+        variableGenerator.registerAdditionalVariables(newNode.getLocalVariables());
     }
 }

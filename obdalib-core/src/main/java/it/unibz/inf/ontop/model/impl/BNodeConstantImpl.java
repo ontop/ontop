@@ -21,7 +21,10 @@ package it.unibz.inf.ontop.model.impl;
  */
 
 import it.unibz.inf.ontop.model.BNode;
-import it.unibz.inf.ontop.model.Predicate.COL_TYPE;
+import it.unibz.inf.ontop.model.Predicate;
+import it.unibz.inf.ontop.model.Variable;
+
+import java.util.stream.Stream;
 
 /**
  * Implementation for BNodes.
@@ -79,13 +82,18 @@ public class BNodeConstantImpl implements BNode {
 	}
 
 	@Override
+	public Stream<Variable> getVariableStream() {
+		return Stream.of();
+	}
+
+	@Override
 	public String toString() {
 		return name;
 	}
 
 	@Override
-	public COL_TYPE getType() {
-		return COL_TYPE.BNODE;
+	public Predicate.COL_TYPE getType() {
+		return Predicate.COL_TYPE.BNODE;
 	}
 
 }

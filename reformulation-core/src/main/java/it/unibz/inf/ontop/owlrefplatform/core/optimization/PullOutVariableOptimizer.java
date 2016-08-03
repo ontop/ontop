@@ -25,7 +25,6 @@ import java.util.Set;
 
 import static it.unibz.inf.ontop.owlrefplatform.core.optimization.QueryNodeNavigationTools.getDepthFirstNextNode;
 import static it.unibz.inf.ontop.owlrefplatform.core.optimization.QueryNodeNavigationTools.getNextNodeAndQuery;
-import static it.unibz.inf.ontop.pivotalrepr.unfolding.ProjectedVariableExtractionTools.extractProjectedVariables;
 
 /**
  * TODO: explain
@@ -104,7 +103,7 @@ public class PullOutVariableOptimizer implements IntermediateQueryOptimizer {
                     initialQuery);
         }
 
-        Set<Variable> variablesFromOtherSubTrees = new HashSet<>(extractProjectedVariables(initialQuery,
+        Set<Variable> variablesFromOtherSubTrees = new HashSet<>(initialQuery.getVariables(
                 optionalFirstChild.get()));
 
         // Non-final variables
@@ -119,7 +118,7 @@ public class PullOutVariableOptimizer implements IntermediateQueryOptimizer {
 
             QueryNode childNode = optionalNextChild.get();
 
-            ImmutableSet<Variable> projectedVariablesByThisChild = extractProjectedVariables(currentQuery, childNode);
+            ImmutableSet<Variable> projectedVariablesByThisChild = currentQuery.getVariables(childNode);
 
             // To trick the compiler
             final IntermediateQuery query = currentQuery;

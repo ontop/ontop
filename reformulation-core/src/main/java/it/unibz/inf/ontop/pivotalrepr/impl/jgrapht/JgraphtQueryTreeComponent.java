@@ -109,8 +109,13 @@ public class JgraphtQueryTreeComponent implements QueryTreeComponent {
     }
 
     @Override
-    public ImmutableList<QueryNode> getCurrentSubNodesOf(QueryNode node) {
+    public ImmutableList<QueryNode> getChildren(QueryNode node) {
         return getSubNodesOf(queryDAG, node);
+    }
+
+    @Override
+    public Stream<QueryNode> getChildrenStream(QueryNode node) {
+        return getChildren(node).stream();
     }
 
     @Override
@@ -140,10 +145,8 @@ public class JgraphtQueryTreeComponent implements QueryTreeComponent {
     }
 
     @Override
-    public ImmutableSet<EmptyNode> getEmptyNodes(QueryNode subTreeRoot) {
-        return Stream.concat(
-                    Stream.of(subTreeRoot),
-                    getSubTreeNodesInTopDownOrder(subTreeRoot).stream())
+    public ImmutableSet<EmptyNode> getEmptyNodes() {
+        return getNodesInTopDownOrder().stream()
                 .filter(n -> n instanceof EmptyNode)
                 .map(n -> (EmptyNode) n)
                 .collect(ImmutableCollectors.toSet());
@@ -178,6 +181,11 @@ public class JgraphtQueryTreeComponent implements QueryTreeComponent {
             throw new RuntimeException("BUG: " + e.getLocalizedMessage());
         }
         queryDAG.removeVertex(previousNode);
+    }
+
+    @Override
+    public void replaceSubTree(QueryNode subTreeRootNode, QueryNode replacingNode) {
+        throw new RuntimeException("TODO: support replaceSubTree()");
     }
 
     /**
@@ -291,11 +299,11 @@ public class JgraphtQueryTreeComponent implements QueryTreeComponent {
 
         ImmutableList.Builder<QueryNode> nodeBuilder = ImmutableList.builder();
 
-        Queue<QueryNode> nodesToVisit = new LinkedList<>(getCurrentSubNodesOf(topNode));
+        Queue<QueryNode> nodesToVisit = new LinkedList<>(getChildren(topNode));
         while(!nodesToVisit.isEmpty()) {
             QueryNode node = nodesToVisit.poll();
             nodeBuilder.add(node);
-            nodesToVisit.addAll(getCurrentSubNodesOf(node));
+            nodesToVisit.addAll(getChildren(node));
         }
         return nodeBuilder.build();
     }
@@ -346,17 +354,17 @@ public class JgraphtQueryTreeComponent implements QueryTreeComponent {
     }
 
     @Override
-    public void removeOrReplaceNodeByUniqueChildren(QueryNode node) throws IllegalTreeUpdateException {
-        ImmutableList<QueryNode> children = getCurrentSubNodesOf(node);
+    public QueryNode removeOrReplaceNodeByUniqueChildren(QueryNode node) throws IllegalTreeUpdateException {
+        ImmutableList<QueryNode> children = getChildren(node);
         int nbChildren = children.size();
         switch(nbChildren) {
             case 0:
                 removeSubTree(node);
-                return;
+                throw new IllegalTreeUpdateException("Don't have a child");
             case 1:
                 QueryNode child = children.get(0);
                 replaceNodeByUniqueChildren(node, child);
-                return;
+                return child;
             default:
                 throw new IllegalTreeUpdateException(node.toString() + " has more children. Cannot be replaced");
         }
@@ -374,7 +382,7 @@ public class JgraphtQueryTreeComponent implements QueryTreeComponent {
         for(QueryNode nodeToRemove : nodesToRemove) {
             boolean isParentBinaryAsymmetricOperator = (nodeToRemove instanceof NonCommutativeOperatorNode);
 
-            for (QueryNode child : getCurrentSubNodesOf(nodeToRemove)) {
+            for (QueryNode child : getChildren(nodeToRemove)) {
                 if (!nodesToRemove.contains(child)) {
                     if (isParentBinaryAsymmetricOperator) {
                         throw new RuntimeException("Re-integrating children of a BinaryAsymmetricOperatorNode " +
@@ -409,7 +417,7 @@ public class JgraphtQueryTreeComponent implements QueryTreeComponent {
     public Optional<QueryNode> nextSibling(QueryNode node) throws IllegalTreeException {
         Optional<QueryNode> optionalParent = getParent(node);
         if (optionalParent.isPresent()) {
-            ImmutableList<QueryNode> siblings = getCurrentSubNodesOf(optionalParent.get());
+            ImmutableList<QueryNode> siblings = getChildren(optionalParent.get());
             int index = siblings.indexOf(node);
             int nextIndex = index + 1;
             if (nextIndex < siblings.size()) {
@@ -440,7 +448,7 @@ public class JgraphtQueryTreeComponent implements QueryTreeComponent {
 
     @Override
     public Optional<QueryNode> getFirstChild(QueryNode node) {
-        ImmutableList<QueryNode> children = getCurrentSubNodesOf(node);
+        ImmutableList<QueryNode> children = getChildren(node);
         if (children.isEmpty()) {
             return Optional.empty();
         }
@@ -467,6 +475,21 @@ public class JgraphtQueryTreeComponent implements QueryTreeComponent {
     @Override
     public ImmutableSet<Variable> getKnownVariables() {
         throw new RuntimeException("TODO: support getKnownVariables()");
+    }
+
+    @Override
+    public QueryNode replaceNodeByChild(QueryNode parentNode, Optional<NonCommutativeOperatorNode.ArgumentPosition> optionalReplacingChildPosition) {
+        throw new RuntimeException("TODO: support replaceNodeByChild");
+    }
+
+    @Override
+    public QueryTreeComponent createSnapshot() {
+        throw new RuntimeException("TODO: support createSnapshot()");
+    }
+
+    @Override
+    public ImmutableSet<Variable> getVariables(QueryNode node) {
+        throw new RuntimeException("TODO: support getVariables");
     }
 
     private void addChild(QueryNode parentNode, QueryNode childNode, boolean isNew) throws IllegalTreeUpdateException {

@@ -9,6 +9,7 @@ import it.unibz.inf.ontop.pivotalrepr.ConstructionNode;
 import it.unibz.inf.ontop.pivotalrepr.QueryNode;
 
 import java.util.Optional;
+import java.util.stream.Stream;
 
 /**
  * TODO: describe
@@ -20,6 +21,8 @@ public interface QueryTree {
                   boolean mustBeNew, boolean canReplace) throws IllegalTreeUpdateException;
 
     ImmutableList<QueryNode> getChildren(QueryNode node);
+
+    Stream<QueryNode> getChildrenStream(QueryNode node);
 
     boolean contains(QueryNode node);
 
@@ -38,7 +41,7 @@ public interface QueryTree {
 
     Optional<QueryNode> getParent(QueryNode childNode);
 
-    void removeOrReplaceNodeByUniqueChild(QueryNode node) throws IllegalTreeUpdateException;
+    QueryNode removeOrReplaceNodeByUniqueChild(QueryNode node) throws IllegalTreeUpdateException;
 
     void replaceNodesByOneNode(ImmutableList<QueryNode> queryNodes, QueryNode replacingNode, QueryNode parentNode,
                                Optional<NonCommutativeOperatorNode.ArgumentPosition> optionalPosition) throws IllegalTreeUpdateException;
@@ -47,5 +50,14 @@ public interface QueryTree {
 
     void insertParent(QueryNode childNode, QueryNode newParentNode) throws IllegalTreeUpdateException;
 
-    ImmutableSet<EmptyNode> getEmptyNodes(QueryNode subTreeRoot);
+    ImmutableSet<EmptyNode> getEmptyNodes();
+
+    QueryNode replaceNodeByChild(QueryNode parentNode,
+                                 Optional<NonCommutativeOperatorNode.ArgumentPosition> optionalReplacingChildPosition);
+
+    /**
+     * Keeps the same query node objects but clones the tree edges
+     * (since the latter are mutable by default).
+     */
+    QueryTree createSnapshot();
 }

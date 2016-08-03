@@ -139,8 +139,10 @@ public class IntermediateQueryUtils {
 
         subQuery.getNodesInTopDownOrder().stream()
                 .skip(1)
-                .forEach(node -> queryBuilder.addChild(subQuery.getParent(node)
-                        .orElseThrow(()-> new IllegalStateException("Unknown parent")), node));
+                .forEach(node -> queryBuilder.addChild(
+                        subQuery.getParent(node).orElseThrow(()-> new IllegalStateException("Unknown parent")),
+                        node,
+                        subQuery.getOptionalPosition(node)));
     }
 
     public static InjectiveVar2VarSubstitution generateNotConflictingRenaming(VariableGenerator variableGenerator,
@@ -188,7 +190,8 @@ public class IntermediateQueryUtils {
                 .forEach(node -> queryBuilder.addChild(
                         renamedNodeMap.get(definition.getParent(node)
                                 .orElseThrow(()-> new IllegalStateException("Unknown parent"))),
-                        renamedNodeMap.get(node)));
+                        renamedNodeMap.get(node),
+                        definition.getOptionalPosition(node)));
     }
 
 

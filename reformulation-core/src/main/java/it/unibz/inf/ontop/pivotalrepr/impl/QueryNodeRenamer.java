@@ -59,7 +59,7 @@ public class QueryNodeRenamer implements HomogeneousQueryNodeTransformer {
 
     @Override
     public ConstructionNode transform(ConstructionNode constructionNode) {
-        return new ConstructionNodeImpl(renameProjectedVars(constructionNode.getProjectedVariables()),
+        return new ConstructionNodeImpl(renameProjectedVars(constructionNode.getVariables()),
                 renameSubstitution(constructionNode.getSubstitution()),
                 renameOptionalModifiers(constructionNode.getOptionalModifiers())
                 );

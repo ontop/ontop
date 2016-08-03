@@ -88,10 +88,10 @@ public class ConstructionNodeTools {
         ImmutableSubstitution<ImmutableTerm> composition = childConstructionNode.getSubstitution().composeWith(
                 parentConstructionNode.getSubstitution());
 
-        ImmutableSet<Variable> projectedVariables = parentConstructionNode.getProjectedVariables();
+        ImmutableSet<Variable> projectedVariables = parentConstructionNode.getVariables();
 
         ImmutableSubstitution<ImmutableTerm> newSubstitution = projectedVariables.containsAll(
-                childConstructionNode.getProjectedVariables())
+                childConstructionNode.getVariables())
                 ? composition
                 : new ImmutableSubstitutionImpl<>(
                 composition.getImmutableMap().entrySet().stream()
@@ -119,12 +119,24 @@ public class ConstructionNodeTools {
         Stream<Variable> remainingVariableStream = projectedVariables.stream()
                 .filter(v -> !tauDomain.contains(v));
 
-        Stream<Variable> newVariableStream = descendingSubstitution.getMap().values().stream()
-                .filter(t -> t instanceof Variable)
-                .map(t -> (Variable) t);
+        Stream<Variable> newVariableStream = descendingSubstitution.getImmutableMap().entrySet().stream()
+                .filter(e -> projectedVariables.contains(e.getKey()))
+                .map(Map.Entry::getValue)
+                .flatMap(ImmutableTerm::getVariableStream);
 
         return Stream.concat(newVariableStream, remainingVariableStream)
                 .collect(ImmutableCollectors.toSet());
+    }
+
+    public static ImmutableSubstitution<ImmutableTerm> extractRelevantDescendingSubstitution(
+            ImmutableSubstitution<? extends ImmutableTerm> descendingSubstitution,
+            ImmutableSet<Variable> projectedVariables) {
+        ImmutableMap<Variable, ImmutableTerm> newSubstitutionMap = descendingSubstitution.getImmutableMap().entrySet().stream()
+                .filter(e -> projectedVariables.contains(e.getKey()))
+                .map(e -> (Map.Entry<Variable, ImmutableTerm>) e)
+                .collect(ImmutableCollectors.toMap());
+
+        return new ImmutableSubstitutionImpl<>(newSubstitutionMap);
     }
 
 
@@ -135,7 +147,7 @@ public class ConstructionNodeTools {
                                                                  ImmutableSubstitution<ImmutableTerm> additionalBindingsSubstitution)
             throws InconsistentBindingException {
 
-        ImmutableSet<Variable> projectedVariables = formerConstructionNode.getProjectedVariables();
+        ImmutableSet<Variable> projectedVariables = formerConstructionNode.getVariables();
 
         /**
          * TODO: explain why the composition is too rich
@@ -342,7 +354,7 @@ public class ConstructionNodeTools {
         /**
          * Checks that no projected but not-bound variable was proposed to be removed.
          */
-        ImmutableSet<Variable> projectedVariables = formerConstructionNode.getProjectedVariables();
+        ImmutableSet<Variable> projectedVariables = formerConstructionNode.getVariables();
         for (Variable variable : allVariablesToRemove) {
             if ((!localVariablesToRemove.contains(variable)) && projectedVariables.contains(variable)) {
                 throw new InconsistentBindingException("The variable to remove " + variable + " is projected but" +

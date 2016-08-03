@@ -270,9 +270,11 @@ public class BindTest {
                 "SELECT  ?title  ?w WHERE \n" +
                 "{  ?x ns:discount ?discount .\n" +
                 "   ?x dc:title ?title .\n" +
+                "   ?x ns:price ?p .\n" +  // ROMAN (26 June 2016): moved and changed the line here
+                                           // otherwise, ?p would not have any values as BIND is evaluated
+                                           // in the context of the preceding part of the pattern
                 "   BIND (?p AS ?fullPrice) \n" +
                 "   BIND (?fullPrice  - ?discount AS ?w) \n" +
-                "   ?x ns:price ?fullPrice .\n" +
                 "}";
 
         List<String> expectedValues = new ArrayList<>();
@@ -298,8 +300,10 @@ public class BindTest {
                 "SELECT  ?title  (?fullPrice * ?discount AS ?w) WHERE \n" +
                 "{  ?x ns:discount ?discount .\n" +
                 "   ?x dc:title ?title .\n" +
+                "  ?x ns:price ?p .\n" +  // ROMAN (26 June 2016): moved and changed the line here
+                                          // otherwise, ?p would not have any values as BIND is evaluated
+                                          // in the context of the preceding part of the pattern
                 "   BIND (?p AS ?fullPrice) \n" +
-                "  ?x ns:price ?fullPrice .\n" +
                 "}";
 
         List<String> expectedValues = new ArrayList<>();
@@ -321,7 +325,7 @@ public class BindTest {
         //variable should be assigned again in the same SELECT clause. SELECT Expressions, reuse the same variable
         String querySelect1 = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n" +
                 "PREFIX  ns:  <http://example.org/ns#>\n" +
-                "SELECT  ?title (?p AS ?fullPrice) (?fullPrice-?discount AS ?customerPrice)\n" +
+                "SELECT  ?title (?p AS ?price) (?price-?discount AS ?customerPrice)\n" + // ROMAN (1 June): changed to avoid NullPointerException as runTest requires variable ?price)
                 "{ ?x ns:price ?p .\n" +
                 "   ?x dc:title ?title . \n" +
                 "   ?x ns:discount ?discount \n" +
@@ -368,6 +372,8 @@ public class BindTest {
         p.setProperty(QuestCorePreferences.ABOX_MODE, QuestConstants.VIRTUAL);
         p.setProperty(QuestCorePreferences.OPTIMIZE_EQUIVALENCES, "true");
 
+/*      ROMAN (26 June 2016): commented out - the query has little sense because the expressions
+                              used in BIND can never have any values
         String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
                 + "PREFIX  ns:  <http://example.org/ns#>\n"
                 + "SELECT  ?title ?price WHERE \n"
@@ -387,16 +393,17 @@ public class BindTest {
             // ROMAN: commented out -- now the message is different
             // assertEquals("Operator not supported: SingletonSet", e.getCause().getLocalizedMessage().trim());
         }
-
+*/
         //error in DataFactoryImpl to handle  nested functional terms getFreshCQIECopy
 //        (?fullPrice * ?discount AS ?customerPrice)
         String queryBind1 = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
                 + "PREFIX  ns:  <http://example.org/ns#>\n" +
                 "SELECT  ?title  (?fullPrice * (1- ?discount) AS ?price) WHERE \n" + // ROMAN: replaced customerPrice
                 "{  ?x ns:discount ?discount .\n" +
+                "   ?x ns:price ?p .\n" +  // ROMAN (26 June 2016): added the line
                 "   ?x dc:title ?title .\n" +
                 "   BIND (?p AS ?fullPrice) \n" +
-                "  ?x ns:price ?fullPrice .\n" +
+                //"   ?x ns:price ?fullPrice .\n" + // ROMAN (26 June 2016): commented out - does not make sense
                 "}";
 
         try {

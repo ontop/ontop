@@ -591,14 +591,20 @@ public class RDBMetadataExtractionTools {
 				
 				if (builder != null) {
 					QuotedID attrId = QuotedID.createIdFromDatabaseRecord(idfac, rs.getString("COLUMN_NAME"));
-					// ASC_OR_DESC String => column sort sequence, "A" => ascending, "D" => descending, 
+					// ASC_OR_DESC String => column sort sequence, "A" => ascending, "D" => descending,
 					//        may be null if sort sequence is not supported; null when TYPE is tableIndexStatistic
 					// CARDINALITY int => When TYPE is tableIndexStatistic, then this is the number of rows in the table; 
 					//                      otherwise, it is the number of unique values in the index.
 					// PAGES int => When TYPE is tableIndexStatisic then this is the number of pages used for the table, 
 					//                    otherwise it is the number of pages used for the current index.
 					// FILTER_CONDITION String => Filter condition, if any. (may be null)
-					builder.add(relation.getAttribute(attrId));
+					Attribute attr = relation.getAttribute(attrId);
+					if (attr == null) { // Compensate for the bug in PostgreSQL JBDC driver that
+						// strips off the quatation marks
+						attrId = QuotedID.createIdFromDatabaseRecord(idfac, "\"" + rs.getString("COLUMN_NAME") + "\"");
+						attr = relation.getAttribute(attrId);
+					}
+					builder.add(attr);
 				}
 			}
 			if (builder != null)

@@ -4,26 +4,28 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.executor.InternalProposalExecutor;
-import it.unibz.inf.ontop.executor.deletion.ReactToChildDeletionExecutor;
 import it.unibz.inf.ontop.executor.expression.PushDownExpressionExecutor;
 import it.unibz.inf.ontop.executor.join.JoinInternalCompositeExecutor;
 import it.unibz.inf.ontop.executor.pullout.PullVariableOutOfSubTreeExecutor;
 import it.unibz.inf.ontop.executor.merging.QueryMergingExecutor;
 import it.unibz.inf.ontop.executor.substitution.SubstitutionPropagationExecutor;
-import it.unibz.inf.ontop.executor.substitution.SubstitutionUpPropagationExecutor;
+import it.unibz.inf.ontop.executor.union.LiftUnionAsHighAsPossibleProposalExecutor;
+import it.unibz.inf.ontop.executor.union.UnionLiftInternalExecutor;
 import it.unibz.inf.ontop.executor.unsatisfiable.RemoveEmptyNodesExecutor;
-import it.unibz.inf.ontop.model.DataAtom;
 import it.unibz.inf.ontop.model.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.Variable;
 import it.unibz.inf.ontop.executor.groundterm.GroundTermRemovalFromDataNodeExecutor;
 import it.unibz.inf.ontop.executor.pullout.PullVariableOutOfDataNodeExecutor;
+import it.unibz.inf.ontop.pivotalrepr.validation.IntermediateQueryValidator;
+import it.unibz.inf.ontop.pivotalrepr.validation.InvalidIntermediateQueryException;
+import it.unibz.inf.ontop.pivotalrepr.validation.StandardIntermediateQueryValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import it.unibz.inf.ontop.pivotalrepr.*;
 import it.unibz.inf.ontop.pivotalrepr.proposal.*;
 
-import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 /**
  * TODO: describe
@@ -68,7 +70,7 @@ public class IntermediateQueryImpl implements IntermediateQuery {
     private static final ImmutableMap<Class<? extends QueryOptimizationProposal>, Class<? extends StandardProposalExecutor>> STD_EXECUTOR_CLASSES;
     static {
         STD_EXECUTOR_CLASSES = ImmutableMap.<Class<? extends QueryOptimizationProposal>, Class<? extends StandardProposalExecutor>>of(
-                UnionLiftProposal.class, UnionLiftProposalExecutor.class);
+                LiftUnionAsHighAsPossibleProposal.class, LiftUnionAsHighAsPossibleProposalExecutor.class);
     }
 
     /**
@@ -78,17 +80,15 @@ public class IntermediateQueryImpl implements IntermediateQuery {
     static {
         ImmutableMap.Builder<Class<? extends QueryOptimizationProposal>, Class<? extends InternalProposalExecutor>>
                 internalExecutorMapBuilder = ImmutableMap.builder();
-        internalExecutorMapBuilder.put(SubstitutionLiftProposal.class, SubstitutionLiftProposalExecutor.class);
         internalExecutorMapBuilder.put(InnerJoinOptimizationProposal.class, JoinInternalCompositeExecutor.class);
-        internalExecutorMapBuilder.put(ReactToChildDeletionProposal.class, ReactToChildDeletionExecutor.class);
         internalExecutorMapBuilder.put(SubstitutionPropagationProposal.class, SubstitutionPropagationExecutor.class);
         internalExecutorMapBuilder.put(PushDownBooleanExpressionProposal.class, PushDownExpressionExecutor.class);
         internalExecutorMapBuilder.put(GroundTermRemovalFromDataNodeProposal.class, GroundTermRemovalFromDataNodeExecutor.class);
         internalExecutorMapBuilder.put(PullVariableOutOfDataNodeProposal.class, PullVariableOutOfDataNodeExecutor.class);
         internalExecutorMapBuilder.put(PullVariableOutOfSubTreeProposal.class, PullVariableOutOfSubTreeExecutor.class);
-        internalExecutorMapBuilder.put(RemoveEmptyNodesProposal.class, RemoveEmptyNodesExecutor.class);
-        internalExecutorMapBuilder.put(SubstitutionUpPropagationProposal.class, SubstitutionUpPropagationExecutor.class);
+        internalExecutorMapBuilder.put(RemoveEmptyNodeProposal.class, RemoveEmptyNodesExecutor.class);
         internalExecutorMapBuilder.put(QueryMergingProposal.class, QueryMergingExecutor.class);
+        internalExecutorMapBuilder.put(UnionLiftProposal.class, UnionLiftInternalExecutor.class);
         INTERNAL_EXECUTOR_CLASSES = internalExecutorMapBuilder.build();
     }
 
@@ -101,6 +101,9 @@ public class IntermediateQueryImpl implements IntermediateQuery {
         this.metadata = metadata;
         this.projectionAtom = projectionAtom;
         this.treeComponent = treeComponent;
+
+        // TODO: disable it in production
+        this.validate();
     }
 
     @Override
@@ -113,6 +116,29 @@ public class IntermediateQueryImpl implements IntermediateQuery {
         return treeComponent.getKnownVariables();
     }
 
+    @Override
+    public IntermediateQuery createSnapshot() {
+        return new IntermediateQueryImpl(metadata, projectionAtom, treeComponent.createSnapshot());
+    }
+
+    @Override
+    public Stream<QueryNode> getOtherChildrenStream(QueryNode parent, QueryNode childToOmmit) {
+        return treeComponent.getChildrenStream(parent)
+                .filter(c -> ! (c == childToOmmit));
+    }
+
+    /**
+     * TODO: replace by a more efficient implementation
+     */
+    @Override
+    public boolean hasAncestor(QueryNode descendantNode, QueryNode ancestorNode) {
+        return getAncestors(descendantNode).contains(ancestorNode);
+    }
+
+    @Override
+    public ImmutableSet<Variable> getVariables(QueryNode subTreeRootNode) {
+        return treeComponent.getVariables(subTreeRootNode);
+    }
 
     @Override
     public MetadataForQueryOptimization getMetadata() {
@@ -148,7 +174,12 @@ public class IntermediateQueryImpl implements IntermediateQuery {
 
     @Override
     public ImmutableList<QueryNode> getChildren(QueryNode node) {
-        return treeComponent.getCurrentSubNodesOf(node);
+        return treeComponent.getChildren(node);
+    }
+
+    @Override
+    public Stream<QueryNode> getChildrenStream(QueryNode node) {
+        return treeComponent.getChildrenStream(node);
     }
 
     @Override
@@ -177,6 +208,19 @@ public class IntermediateQueryImpl implements IntermediateQuery {
     public <R extends ProposalResults, P extends QueryOptimizationProposal<R>> R applyProposal(P proposal,
                                                        boolean requireUsingInternalExecutor)
             throws InvalidQueryOptimizationProposalException, EmptyQueryException {
+        return applyProposal(proposal, requireUsingInternalExecutor, false);
+    }
+
+    @Override
+    public <R extends ProposalResults, P extends QueryOptimizationProposal<R>> R applyProposal(P proposal,
+                                                                                               boolean requireUsingInternalExecutor,
+                                                                                               boolean disableValidationTests)
+            throws InvalidQueryOptimizationProposalException, EmptyQueryException {
+
+        if (!disableValidationTests) {
+            // TODO: disable it in production
+            validate();
+        }
 
         /**
          * It assumes that the concrete proposal classes DIRECTLY
@@ -215,7 +259,12 @@ public class IntermediateQueryImpl implements IntermediateQuery {
                 /**
                  * Has a SIDE-EFFECT on the tree component.
                  */
-                return executor.apply(proposal, this, treeComponent);
+                R results = executor.apply(proposal, this, treeComponent);
+                if (!disableValidationTests) {
+                    // TODO: disable it in production
+                    validate();
+                }
+                return results;
             }
         }
 
@@ -230,7 +279,7 @@ public class IntermediateQueryImpl implements IntermediateQuery {
     @Override
     public <R extends ProposalResults, P extends QueryOptimizationProposal<R>> R applyProposal(P propagationProposal)
             throws InvalidQueryOptimizationProposalException, EmptyQueryException {
-        return applyProposal(propagationProposal, false);
+        return applyProposal(propagationProposal, false, false);
     }
 
     @Override
@@ -320,5 +369,10 @@ public class IntermediateQueryImpl implements IntermediateQuery {
     @Override
     public String toString() {
         return PRINTER.stringify(this);
+    }
+
+    private void validate() throws InvalidIntermediateQueryException {
+        IntermediateQueryValidator validator = new StandardIntermediateQueryValidator();
+        validator.validate(this);
     }
 }

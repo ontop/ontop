@@ -11,6 +11,7 @@ import it.unibz.inf.ontop.pivotalrepr.*;
 import java.util.Optional;
 
 import static it.unibz.inf.ontop.model.impl.GroundTermTools.isGroundTerm;
+import static it.unibz.inf.ontop.pivotalrepr.NodeTransformationProposedState.DECLARE_AS_EMPTY;
 
 public class GroupNodeImpl extends QueryNodeImpl implements GroupNode {
 
@@ -48,7 +49,7 @@ public class GroupNodeImpl extends QueryNodeImpl implements GroupNode {
     @Override
     public SubstitutionResults<GroupNode> applyAscendingSubstitution(
             ImmutableSubstitution<? extends ImmutableTerm> substitution,
-            QueryNode descendantNode, IntermediateQuery query) {
+            QueryNode childNode, IntermediateQuery query) {
         return applyDescendingSubstitution(substitution, query);
     }
 
@@ -92,12 +93,22 @@ public class GroupNodeImpl extends QueryNodeImpl implements GroupNode {
     }
 
     @Override
+    public NodeTransformationProposal reactToEmptyChild(IntermediateQuery query, EmptyNode emptyChild) {
+        /**
+         * A group node has only one child
+         *
+         * TODO: what is really projected by a group node?
+         */
+        return new NodeTransformationProposalImpl(DECLARE_AS_EMPTY, emptyChild.getVariables());
+    }
+
+    @Override
     public NodeTransformationProposal acceptNodeTransformer(HeterogeneousQueryNodeTransformer transformer) {
         return transformer.transform(this);
     }
 
     @Override
-    public ImmutableSet<Variable> getVariables() {
+    public ImmutableSet<Variable> getLocalVariables() {
         ImmutableSet.Builder<Variable> collectedVariableBuilder = ImmutableSet.builder();
 
         for (NonGroundTerm term : groupingTerms) {

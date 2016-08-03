@@ -1,14 +1,13 @@
 package it.unibz.inf.ontop.executor.expression;
 
 import com.google.common.collect.ImmutableList;
+import it.unibz.inf.ontop.executor.SimpleNodeCentricInternalExecutor;
+import it.unibz.inf.ontop.model.ImmutableExpression;
+import it.unibz.inf.ontop.model.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.pivotalrepr.*;
 import it.unibz.inf.ontop.pivotalrepr.impl.FilterNodeImpl;
 import it.unibz.inf.ontop.pivotalrepr.impl.IllegalTreeUpdateException;
 import it.unibz.inf.ontop.pivotalrepr.impl.QueryTreeComponent;
-import it.unibz.inf.ontop.executor.NodeCentricInternalExecutor;
-import it.unibz.inf.ontop.model.ImmutableExpression;
-import it.unibz.inf.ontop.model.impl.ImmutabilityTools;
-import it.unibz.inf.ontop.pivotalrepr.*;
 import it.unibz.inf.ontop.pivotalrepr.proposal.InvalidQueryOptimizationProposalException;
 import it.unibz.inf.ontop.pivotalrepr.proposal.NodeCentricOptimizationResults;
 import it.unibz.inf.ontop.pivotalrepr.proposal.PushDownBooleanExpressionProposal;
@@ -21,7 +20,7 @@ import java.util.Optional;
 /**
  * TODO: explain
  */
-public class PushDownExpressionExecutor implements NodeCentricInternalExecutor<JoinOrFilterNode, PushDownBooleanExpressionProposal> {
+public class PushDownExpressionExecutor implements SimpleNodeCentricInternalExecutor<JoinOrFilterNode, PushDownBooleanExpressionProposal> {
 
     /**
      * TODO: explain
