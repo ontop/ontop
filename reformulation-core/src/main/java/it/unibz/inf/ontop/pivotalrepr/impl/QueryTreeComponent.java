@@ -23,7 +23,7 @@ public interface QueryTreeComponent {
 
     ImmutableList<QueryNode> getNodesInTopDownOrder() throws IllegalTreeException;
 
-    ImmutableSet<EmptyNode> getEmptyNodes(QueryNode subTreeRoot);
+    ImmutableSet<EmptyNode> getEmptyNodes();
 
     boolean contains(QueryNode node);
 
@@ -103,8 +103,8 @@ public interface QueryTreeComponent {
     /**
      * If no position is given, replaces the parent node by its first child
      */
-    void replaceNodeByChild(QueryNode parentNode,
-                            Optional<NonCommutativeOperatorNode.ArgumentPosition> optionalReplacingChildPosition);
+    QueryNode replaceNodeByChild(QueryNode parentNode,
+                                 Optional<NonCommutativeOperatorNode.ArgumentPosition> optionalReplacingChildPosition);
 
 
     /**
@@ -113,5 +113,5 @@ public interface QueryTreeComponent {
      */
     QueryTreeComponent createSnapshot();
 
-    ImmutableSet<Variable> getProjectedVariables(QueryNode node);
+    ImmutableSet<Variable> getVariables(QueryNode node);
 }

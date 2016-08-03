@@ -66,9 +66,6 @@ public class NodeCentricOptimizationResultsImpl<N extends QueryNode> extends Pro
 
     }
 
-    /**
-     * If absent, it means that the focus node has been deleted.
-     */
     @Override
     public Optional<N> getOptionalNewNode() {
         return optionalNewNode;

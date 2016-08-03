@@ -2,7 +2,10 @@ package it.unibz.inf.ontop.pivotalrepr.impl;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import it.unibz.inf.ontop.model.*;
+import it.unibz.inf.ontop.model.ImmutableExpression;
+import it.unibz.inf.ontop.model.ImmutableSubstitution;
+import it.unibz.inf.ontop.model.ImmutableTerm;
+import it.unibz.inf.ontop.model.Variable;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.unfolding.ExpressionEvaluator;
@@ -14,7 +17,10 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static it.unibz.inf.ontop.pivotalrepr.NonCommutativeOperatorNode.ArgumentPosition.*;
+import static it.unibz.inf.ontop.pivotalrepr.NodeTransformationProposedState.DECLARE_AS_EMPTY;
+import static it.unibz.inf.ontop.pivotalrepr.NodeTransformationProposedState.REPLACE_BY_UNIQUE_NON_EMPTY_CHILD;
+import static it.unibz.inf.ontop.pivotalrepr.NonCommutativeOperatorNode.ArgumentPosition.LEFT;
+import static it.unibz.inf.ontop.pivotalrepr.NonCommutativeOperatorNode.ArgumentPosition.RIGHT;
 
 public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
 
@@ -65,7 +71,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
             ImmutableSubstitution<? extends ImmutableTerm> substitution, IntermediateQuery query) {
         QueryNode leftChild = query.getChild(this, LEFT)
                 .orElseThrow(() -> new IllegalStateException("No left child for the LJ"));
-        ImmutableSet<Variable> leftVariables = query.getProjectedVariables(leftChild);
+        ImmutableSet<Variable> leftVariables = query.getVariables(leftChild);
 
         /**
          * New substitution: only concerns variables specific to the right
@@ -90,7 +96,17 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
             ImmutableSubstitution<? extends ImmutableTerm> substitution, IntermediateQuery query) {
         QueryNode rightChild = query.getChild(this, RIGHT)
                 .orElseThrow(() -> new IllegalStateException("No right child for the LJ"));
-        ImmutableSet<Variable> rightVariables = query.getProjectedVariables(rightChild);
+        ImmutableSet<Variable> rightVariables = query.getVariables(rightChild);
+
+        /**
+         * If the substitution will set some right variables to be null
+         *  -> remove the right part
+         */
+        if (rightVariables.stream()
+                .filter(substitution::isDefining)
+                .anyMatch(v -> substitution.get(v).equals(OBDAVocabulary.NULL))) {
+            return proposeToRemoveTheRightPart(query, substitution, Optional.of(rightVariables), Provenance.FROM_LEFT);
+        }
 
         /**
          * Updates the joining conditions (may add new equalities)
@@ -123,23 +139,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
          * Joining condition does not hold: replace the LJ by its left child.
          */
         if (evaluation.isFalse()) {
-
-            ImmutableSubstitution<? extends ImmutableTerm> newSubstitution;
-            switch(provenance) {
-                case FROM_LEFT:
-                    newSubstitution = removeRightChildSubstitutionFromLeft(query, substitution,
-                            optionalVariablesFromOppositeSide);
-                    break;
-                case FROM_RIGHT:
-                    newSubstitution = removeRightChildSubstitutionFromRight(query, substitution,
-                            optionalVariablesFromOppositeSide);
-                    break;
-                default:
-                    newSubstitution = substitution;
-                    break;
-            }
-
-            return new SubstitutionResultsImpl<>(newSubstitution, Optional.of(LEFT));
+            return proposeToRemoveTheRightPart(query, substitution, optionalVariablesFromOppositeSide, provenance);
         }
         else {
             LeftJoinNode newNode = changeOptionalFilterCondition(evaluation.getOptionalExpression());
@@ -147,11 +147,34 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
         }
     }
 
+    private SubstitutionResults<LeftJoinNode> proposeToRemoveTheRightPart(
+            IntermediateQuery query, ImmutableSubstitution<? extends ImmutableTerm> substitution,
+            Optional<ImmutableSet<Variable>> optionalVariablesFromOppositeSide, Provenance provenance) {
+
+        ImmutableSubstitution<? extends ImmutableTerm> newSubstitution;
+        switch(provenance) {
+            case FROM_LEFT:
+                newSubstitution = removeRightChildSubstitutionFromLeft(query, substitution,
+                        optionalVariablesFromOppositeSide);
+                break;
+            case FROM_RIGHT:
+                newSubstitution = removeRightChildSubstitutionFromRight(query, substitution,
+                        optionalVariablesFromOppositeSide);
+                break;
+            default:
+                newSubstitution = substitution;
+                break;
+        }
+
+        return new SubstitutionResultsImpl<>(newSubstitution, Optional.of(LEFT));
+    }
+
+
     private ImmutableSubstitution<ImmutableTerm> removeRightChildSubstitutionFromLeft(
             IntermediateQuery query, ImmutableSubstitution<? extends ImmutableTerm> substitution,
             Optional<ImmutableSet<Variable>> optionalRightVariables) {
 
-        ImmutableSet<Variable> leftVariables = query.getProjectedVariables(query.getChild(this, LEFT)
+        ImmutableSet<Variable> leftVariables = query.getVariables(query.getChild(this, LEFT)
                 .orElseThrow(() -> new IllegalStateException("Missing left child ")));
         ImmutableSet<Variable> rightVariables = getChildProjectedVariables(query, optionalRightVariables, RIGHT);
 
@@ -180,7 +203,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
             Optional<ImmutableSet<Variable>> optionalLeftVariables) {
 
         ImmutableSet<Variable> leftVariables = getChildProjectedVariables(query, optionalLeftVariables, LEFT);
-        ImmutableSet<Variable> rightVariables = query.getProjectedVariables(query.getChild(this, RIGHT)
+        ImmutableSet<Variable> rightVariables = query.getVariables(query.getChild(this, RIGHT)
                                 .orElseThrow(() -> new IllegalStateException("Missing right child ")));
 
         ImmutableSet<Variable> newlyNullVariables = rightVariables.stream()
@@ -203,7 +226,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
                                                               Optional<ImmutableSet<Variable>> optionalChildVariables,
                                                               ArgumentPosition position) {
         return optionalChildVariables
-                .orElseGet(() -> query.getProjectedVariables(query.getChild(this, position)
+                .orElseGet(() -> query.getVariables(query.getChild(this, position)
                                 .orElseThrow(() -> new IllegalStateException("Missing child "))));
     }
 
@@ -212,6 +235,34 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
     public boolean isSyntacticallyEquivalentTo(QueryNode node) {
         return (node instanceof LeftJoinNode)
                 && ((LeftJoinNode) node).getOptionalFilterCondition().equals(this.getOptionalFilterCondition());
+    }
+
+    @Override
+    public NodeTransformationProposal reactToEmptyChild(IntermediateQuery query, EmptyNode emptyChild) {
+        ArgumentPosition emptyNodePosition = query.getOptionalPosition(this, emptyChild)
+                .orElseThrow(() -> new IllegalStateException("The deleted child of a LJ must have a position"));
+
+        QueryNode otherChild = query.getChild(this, (emptyNodePosition == LEFT) ? RIGHT : LEFT)
+                .orElseThrow(() -> new IllegalStateException("The other child of a LJ is missing"));
+
+        ImmutableSet<Variable> variablesProjectedByOtherChild = query.getVariables(otherChild);
+
+        ImmutableSet<Variable> nullVariables;
+
+        switch(emptyNodePosition) {
+            case LEFT:
+                nullVariables = union(variablesProjectedByOtherChild, emptyChild.getVariables());
+                return new NodeTransformationProposalImpl(DECLARE_AS_EMPTY, nullVariables);
+
+            case RIGHT:
+                nullVariables = emptyChild.getVariables().stream()
+                        .filter(v -> !(variablesProjectedByOtherChild.contains(v)))
+                        .collect(ImmutableCollectors.toSet());
+                return new NodeTransformationProposalImpl(REPLACE_BY_UNIQUE_NON_EMPTY_CHILD,
+                        otherChild, nullVariables);
+            default:
+                throw new IllegalStateException("Unknown position: " + emptyNodePosition);
+        }
     }
 
     @Override

@@ -35,7 +35,7 @@ public class EmptyNodeImpl extends QueryNodeImpl implements EmptyNode {
     }
 
     @Override
-    public ImmutableSet<Variable> getVariables() {
+    public ImmutableSet<Variable> getLocalVariables() {
         return projectedVariables;
     }
 
@@ -62,9 +62,14 @@ public class EmptyNodeImpl extends QueryNodeImpl implements EmptyNode {
     @Override
     public boolean isSyntacticallyEquivalentTo(QueryNode node) {
         if (node instanceof EmptyNode) {
-            return projectedVariables.equals(((EmptyNode) node).getProjectedVariables());
+            return projectedVariables.equals(((EmptyNode) node).getVariables());
         }
         return false;
+    }
+
+    @Override
+    public NodeTransformationProposal reactToEmptyChild(IntermediateQuery query, EmptyNode emptyChild) {
+        throw new UnsupportedOperationException("A EmptyNode is not expected to have a child");
     }
 
     @Override
@@ -78,7 +83,7 @@ public class EmptyNodeImpl extends QueryNodeImpl implements EmptyNode {
     }
 
     @Override
-    public ImmutableSet<Variable> getProjectedVariables() {
+    public ImmutableSet<Variable> getVariables() {
         return projectedVariables;
     }
 }

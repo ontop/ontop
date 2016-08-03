@@ -67,8 +67,8 @@ public class DefaultQueryTreeComponent implements QueryTreeComponent {
     }
 
     @Override
-    public ImmutableSet<EmptyNode> getEmptyNodes(QueryNode subTreeRoot) {
-        return tree.getEmptyNodes(subTreeRoot);
+    public ImmutableSet<EmptyNode> getEmptyNodes() {
+        return tree.getEmptyNodes();
     }
 
     @Override
@@ -222,8 +222,8 @@ public class DefaultQueryTreeComponent implements QueryTreeComponent {
     }
 
     @Override
-    public void replaceNodeByChild(QueryNode parentNode, Optional<ArgumentPosition> optionalReplacingChildPosition) {
-        tree.replaceNodeByChild(parentNode, optionalReplacingChildPosition);
+    public QueryNode replaceNodeByChild(QueryNode parentNode, Optional<ArgumentPosition> optionalReplacingChildPosition) {
+        return tree.replaceNodeByChild(parentNode, optionalReplacingChildPosition);
     }
 
     @Override
@@ -236,9 +236,9 @@ public class DefaultQueryTreeComponent implements QueryTreeComponent {
      * TODO: optimize by it but materializing (and maintaining) the results.
      */
     @Override
-    public ImmutableSet<Variable> getProjectedVariables(QueryNode node) {
+    public ImmutableSet<Variable> getVariables(QueryNode node) {
         if (node instanceof ExplicitVariableProjectionNode) {
-            return ((ExplicitVariableProjectionNode) node).getProjectedVariables();
+            return ((ExplicitVariableProjectionNode) node).getVariables();
         }
         else {
             return getProjectedVariableStream(node)
@@ -248,7 +248,7 @@ public class DefaultQueryTreeComponent implements QueryTreeComponent {
 
     private Stream<Variable> getProjectedVariableStream(QueryNode node) {
         if (node instanceof ExplicitVariableProjectionNode) {
-            return ((ExplicitVariableProjectionNode) node).getProjectedVariables().stream();
+            return ((ExplicitVariableProjectionNode) node).getVariables().stream();
         }
         else {
             return getChildrenStream(node)
@@ -261,6 +261,6 @@ public class DefaultQueryTreeComponent implements QueryTreeComponent {
      * To be called every time a new node is added to the tree component.
      */
     private void collectPossiblyNewVariables(QueryNode newNode) {
-        variableGenerator.registerAdditionalVariables(newNode.getVariables());
+        variableGenerator.registerAdditionalVariables(newNode.getLocalVariables());
     }
 }

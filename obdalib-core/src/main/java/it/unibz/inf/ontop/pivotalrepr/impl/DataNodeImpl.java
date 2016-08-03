@@ -2,8 +2,7 @@ package it.unibz.inf.ontop.pivotalrepr.impl;
 
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.*;
-import it.unibz.inf.ontop.pivotalrepr.DataNode;
-import it.unibz.inf.ontop.pivotalrepr.SubstitutionResults;
+import it.unibz.inf.ontop.pivotalrepr.*;
 
 /**
  *
@@ -23,12 +22,12 @@ public abstract class DataNodeImpl extends QueryNodeImpl implements DataNode {
 
 
     @Override
-    public ImmutableSet<Variable> getProjectedVariables() {
-        return getVariables();
+    public ImmutableSet<Variable> getVariables() {
+        return getLocalVariables();
     }
 
     @Override
-    public ImmutableSet<Variable> getVariables() {
+    public ImmutableSet<Variable> getLocalVariables() {
         ImmutableSet.Builder<Variable> variableBuilder = ImmutableSet.builder();
         for (VariableOrGroundTerm term : atom.getArguments()) {
             if (term instanceof Variable)
@@ -43,6 +42,11 @@ public abstract class DataNodeImpl extends QueryNodeImpl implements DataNode {
         DataAtom newAtom = substitution.applyToDataAtom(dataNode.getProjectionAtom());
         T newNode = (T) dataNode.newAtom(newAtom);
         return new SubstitutionResultsImpl<>(newNode, substitution);
+    }
+
+    @Override
+    public NodeTransformationProposal reactToEmptyChild(IntermediateQuery query, EmptyNode emptyChild) {
+        throw new UnsupportedOperationException("A DataNode is not expected to have a child");
     }
 
 }

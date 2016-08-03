@@ -8,12 +8,16 @@ import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.InjectiveVar2VarSubstitution;
 import it.unibz.inf.ontop.pivotalrepr.*;
-import it.unibz.inf.ontop.pivotalrepr.impl.*;
+import it.unibz.inf.ontop.pivotalrepr.impl.EmptyNodeImpl;
+import it.unibz.inf.ontop.pivotalrepr.impl.IdentityQueryNodeTransformer;
+import it.unibz.inf.ontop.pivotalrepr.impl.QueryNodeRenamer;
+import it.unibz.inf.ontop.pivotalrepr.impl.QueryTreeComponent;
 import it.unibz.inf.ontop.pivotalrepr.proposal.InvalidQueryOptimizationProposalException;
 import it.unibz.inf.ontop.pivotalrepr.proposal.ProposalResults;
 import it.unibz.inf.ontop.pivotalrepr.proposal.QueryMergingProposal;
+import it.unibz.inf.ontop.pivotalrepr.proposal.RemoveEmptyNodeProposal;
 import it.unibz.inf.ontop.pivotalrepr.proposal.impl.ProposalResultsImpl;
-import it.unibz.inf.ontop.pivotalrepr.proposal.impl.RemoveEmptyNodesProposalImpl;
+import it.unibz.inf.ontop.pivotalrepr.proposal.impl.RemoveEmptyNodeProposalImpl;
 import it.unibz.inf.ontop.utils.FunctionalTools;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
@@ -116,7 +120,7 @@ public class QueryMergingExecutor implements InternalProposalExecutor<QueryMergi
 
                         case DECLARE_AS_EMPTY:
                             return new AnalysisResults(originalNode,
-                                    new EmptyNodeImpl(query.getProjectedVariables(originalNode)),
+                                    new EmptyNodeImpl(query.getVariables(originalNode)),
                                     Optional.empty());
                         default:
                             throw new IllegalStateException("Unknown local action:" + results.getLocalAction());
@@ -168,10 +172,16 @@ public class QueryMergingExecutor implements InternalProposalExecutor<QueryMergi
             mergeSubQuery(treeComponent, subQuery, localDataNode);
         }
 
-        // Removes the empty nodes (in-place operation)
-        RemoveEmptyNodesProposalImpl<ConstructionNode> cleaningProposal = new RemoveEmptyNodesProposalImpl<>(
-                mainQuery.getRootConstructionNode());
-        mainQuery.applyProposal(cleaningProposal, true);
+        // Non-final
+        Optional<EmptyNode> nextEmptyNode = treeComponent.getEmptyNodes().stream()
+                .findFirst();
+        while (nextEmptyNode.isPresent()) {
+            // Removes the empty nodes (in-place operation)
+            RemoveEmptyNodeProposal cleaningProposal = new RemoveEmptyNodeProposalImpl(nextEmptyNode.get(), false);
+            mainQuery.applyProposal(cleaningProposal, true);
+
+            nextEmptyNode = treeComponent.getEmptyNodes().stream().findFirst();
+        }
 
         return new ProposalResultsImpl(mainQuery);
     }

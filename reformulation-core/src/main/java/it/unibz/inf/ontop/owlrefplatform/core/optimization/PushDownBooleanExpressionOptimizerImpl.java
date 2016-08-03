@@ -275,7 +275,7 @@ public class PushDownBooleanExpressionOptimizerImpl implements PushDownBooleanEx
                                                  ImmutableExpression expression) {
         ImmutableSet<Variable> expressionVariables = expression.getVariables();
 
-        ImmutableSet<Variable> projectedVariables = query.getProjectedVariables(child);
+        ImmutableSet<Variable> projectedVariables = query.getVariables(child);
 
         /**
          * All the expression variables are projected: the current node is the recipient
@@ -357,7 +357,7 @@ public class PushDownBooleanExpressionOptimizerImpl implements PushDownBooleanEx
         QueryNode leftChild = query.getChild(currentNode, LEFT)
                 .orElseThrow(() -> new IllegalStateException("The LJ node was expected to have a left child"));
 
-        ImmutableSet<Variable> projectedVariablesOnTheLeft = query.getProjectedVariables(leftChild);
+        ImmutableSet<Variable> projectedVariablesOnTheLeft = query.getVariables(leftChild);
 
         /**
          * Can propagate the expression to the left child

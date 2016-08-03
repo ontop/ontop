@@ -7,7 +7,6 @@ import it.unibz.inf.ontop.pivotalrepr.EmptyNode;
 import it.unibz.inf.ontop.pivotalrepr.impl.IllegalTreeUpdateException;
 import it.unibz.inf.ontop.pivotalrepr.ConstructionNode;
 import it.unibz.inf.ontop.pivotalrepr.QueryNode;
-import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -244,7 +243,7 @@ public class DefaultTree implements QueryTree {
     @Override
     public QueryNode removeOrReplaceNodeByUniqueChild(QueryNode parentQueryNode) throws IllegalTreeUpdateException {
         TreeNode parentTreeNode = accessTreeNode(parentQueryNode);
-
+        removeNodeFromIndex(parentQueryNode);
         ImmutableList<TreeNode> children = accessChildrenRelation(parentTreeNode).getChildren();
 
         if (children.size() == 1) {
@@ -304,46 +303,48 @@ public class DefaultTree implements QueryTree {
 
     @Override
     public void insertParent(QueryNode childNode, QueryNode newParentNode) throws IllegalTreeUpdateException {
+        if (contains(newParentNode)) {
+            throw new IllegalTreeUpdateException(newParentNode + " is already present so cannot be inserted again");
+        }
+
+
         TreeNode childTreeNode = accessTreeNode(childNode);
 
         Optional<QueryNode> optionalFormerParent = getParent(childNode);
         if (!optionalFormerParent.isPresent()) {
             throw new IllegalTreeUpdateException("Inserting a parent to the current root is not supported");
         }
-        QueryNode formerParentNode = optionalFormerParent.get();
-        TreeNode formerParentTreeNode = accessTreeNode(formerParentNode);
+        QueryNode grandParentNode = optionalFormerParent.get();
+        TreeNode grandParentTreeNode = accessTreeNode(grandParentNode);
 
-        Optional<NonCommutativeOperatorNode.ArgumentPosition> optionalPosition = getOptionalPosition(formerParentNode, childNode);
-
-        // Does not delete the child node, just disconnect it from its parent
-        removeChild(formerParentTreeNode, childTreeNode);
-
-        // Adds the new parent (must be new)
-        addChild(formerParentNode, newParentNode, optionalPosition, true, false);
+        TreeNode newParentTreeNode = new TreeNode(newParentNode);
+        insertNodeIntoIndex(newParentNode, newParentTreeNode);
+        childrenIndex.put(newParentTreeNode, createChildrenRelation(newParentTreeNode));
+        changeChild(grandParentTreeNode, childTreeNode, newParentTreeNode);
 
         addChild(newParentNode, childNode, Optional.<NonCommutativeOperatorNode.ArgumentPosition>empty(), false, false);
     }
 
-    public ImmutableSet<EmptyNode> getEmptyNodes(QueryNode subTreeRoot) {
-        if (subTreeRoot == rootNode) {
-            return ImmutableSet.copyOf(emptyNodes);
-        }
-        /**
-         * TODO: find a more efficient implementation
-         */
-        else {
-            return Stream.concat(
-                    Stream.of(subTreeRoot),
-                    getSubTreeNodesInTopDownOrder(subTreeRoot).stream())
-                    .filter(n -> n instanceof EmptyNode)
-                    .map(n -> (EmptyNode) n)
-                    .collect(ImmutableCollectors.toSet());
-        }
+    public ImmutableSet<EmptyNode> getEmptyNodes() {
+//        if (subTreeRoot == rootNode) {
+        return ImmutableSet.copyOf(emptyNodes);
+//        }
+//        /**
+//         * TODO: find a more efficient implementation
+//         */
+//        else {
+//            return Stream.concat(
+//                    Stream.of(subTreeRoot),
+//                    getSubTreeNodesInTopDownOrder(subTreeRoot).stream())
+//                    .filter(n -> n instanceof EmptyNode)
+//                    .map(n -> (EmptyNode) n)
+//                    .collect(ImmutableCollectors.toSet());
+//        }
     }
 
     @Override
-    public void replaceNodeByChild(QueryNode parentNode,
-                                   Optional<NonCommutativeOperatorNode.ArgumentPosition> optionalReplacingChildPosition) {
+    public QueryNode replaceNodeByChild(QueryNode parentNode,
+                                        Optional<NonCommutativeOperatorNode.ArgumentPosition> optionalReplacingChildPosition) {
         TreeNode parentTreeNode = accessTreeNode(parentNode);
 
         ChildrenRelation childrenRelation = accessChildrenRelation(parentTreeNode);
@@ -371,6 +372,7 @@ public class DefaultTree implements QueryTree {
 
         ChildrenRelation grandParentRelation = accessChildrenRelation(grandParentTreeNode);
         grandParentRelation.replaceChild(parentTreeNode, childTreeNode);
+        return childTreeNode.getQueryNode();
     }
 
     @Override
@@ -396,7 +398,8 @@ public class DefaultTree implements QueryTree {
                         Map.Entry::getKey,
                         Map.Entry::getValue
                 ));
-        return new DefaultTree(rootNode, newNodeIndex, newChildrenIndex, newParentIndex, new HashSet<>(emptyNodes));
+        return new DefaultTree(newNodeIndex.get(rootNode.getQueryNode()), newNodeIndex, newChildrenIndex,
+                newParentIndex, new HashSet<>(emptyNodes));
     }
 
     /**
@@ -426,6 +429,23 @@ public class DefaultTree implements QueryTree {
 
         if (childrenIndex.containsKey(parentNode)) {
             accessChildrenRelation(parentNode).removeChild(childNodeToRemove);
+        }
+    }
+
+    private void changeChild(TreeNode parentNode, TreeNode childNodeToReplace, TreeNode replacingChild) {
+        if (getParentTreeNode(childNodeToReplace) == parentNode) {
+            parentIndex.remove(childNodeToReplace);
+            parentIndex.put(replacingChild, parentNode);
+        }
+        else {
+            throw new IllegalArgumentException(childNodeToReplace + " is not the child of " + parentNode);
+        }
+
+        if (childrenIndex.containsKey(parentNode)) {
+            accessChildrenRelation(parentNode).replaceChild(childNodeToReplace, replacingChild);
+        }
+        else {
+            throw new IllegalTreeUpdateException(parentNode + " has no childrenRelation");
         }
     }
 

@@ -8,6 +8,6 @@ import it.unibz.inf.ontop.pivotalrepr.ConstructionNode;
  * TODO: make explicit the treatment that is expected to be done
  *
  */
-public interface PullVariableOutOfConstructionNodeProposal extends NodeCentricOptimizationProposal<ConstructionNode> {
+public interface PullVariableOutOfConstructionNodeProposal extends SimpleNodeCentricOptimizationProposal<ConstructionNode> {
 
 }

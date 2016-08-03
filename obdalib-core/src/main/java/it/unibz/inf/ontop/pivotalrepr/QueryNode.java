@@ -1,10 +1,11 @@
 package it.unibz.inf.ontop.pivotalrepr;
 
 import com.google.common.collect.ImmutableSet;
+import it.unibz.inf.ontop.model.ImmutableSubstitution;
 import it.unibz.inf.ontop.model.ImmutableTerm;
 import it.unibz.inf.ontop.model.Variable;
-import it.unibz.inf.ontop.model.VariableOrGroundTerm;
-import it.unibz.inf.ontop.model.ImmutableSubstitution;
+
+import java.util.Optional;
 
 /**
  * Immutable.
@@ -55,9 +56,13 @@ public interface QueryNode extends Cloneable {
     NodeTransformationProposal acceptNodeTransformer(HeterogeneousQueryNodeTransformer transformer);
 
     /**
-     * Set of variables mentioned in the node.
+     * Set of variables MENTIONED in the node, INDEPENDENTLY of its sub-tree.
+     *
+     * See ImmutableQuery.getVariables(QueryNode node) for getting all the variables
+     * returned by the QueryNode.
+     *
      */
-    ImmutableSet<Variable> getVariables();
+    ImmutableSet<Variable> getLocalVariables();
 
     /**
      * Applies a substitution coming from below
@@ -78,4 +83,6 @@ public interface QueryNode extends Cloneable {
      * TODO: explain
      */
     boolean isSyntacticallyEquivalentTo(QueryNode node);
+
+    NodeTransformationProposal reactToEmptyChild(IntermediateQuery query, EmptyNode emptyChild);
 }

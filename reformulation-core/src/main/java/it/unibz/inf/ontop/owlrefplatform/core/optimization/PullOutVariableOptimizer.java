@@ -103,7 +103,7 @@ public class PullOutVariableOptimizer implements IntermediateQueryOptimizer {
                     initialQuery);
         }
 
-        Set<Variable> variablesFromOtherSubTrees = new HashSet<>(initialQuery.getProjectedVariables(
+        Set<Variable> variablesFromOtherSubTrees = new HashSet<>(initialQuery.getVariables(
                 optionalFirstChild.get()));
 
         // Non-final variables
@@ -118,7 +118,7 @@ public class PullOutVariableOptimizer implements IntermediateQueryOptimizer {
 
             QueryNode childNode = optionalNextChild.get();
 
-            ImmutableSet<Variable> projectedVariablesByThisChild = currentQuery.getProjectedVariables(childNode);
+            ImmutableSet<Variable> projectedVariablesByThisChild = currentQuery.getVariables(childNode);
 
             // To trick the compiler
             final IntermediateQuery query = currentQuery;

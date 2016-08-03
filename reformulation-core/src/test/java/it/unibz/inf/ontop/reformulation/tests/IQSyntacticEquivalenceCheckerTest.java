@@ -292,7 +292,7 @@ public class IQSyntacticEquivalenceCheckerTest {
                 ExpressionOperation.EQ, X, Z));
         queryBuilder.addChild(constructionNode, filterNode);
         ExtensionalDataNode dataNode = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE2_PREDICATE, X, Z));
-        queryBuilder.addChild(constructionNode, dataNode);
+        queryBuilder.addChild(filterNode, dataNode);
 
         IntermediateQuery query = queryBuilder.build();
 
@@ -304,7 +304,7 @@ public class IQSyntacticEquivalenceCheckerTest {
                 ExpressionOperation.EQ, X, Z));
         queryBuilder1.addChild(constructionNode1, filterNode1);
         ExtensionalDataNode dataNode1 = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE2_PREDICATE, X, Z));
-        queryBuilder1.addChild(constructionNode1, dataNode1);
+        queryBuilder1.addChild(filterNode1, dataNode1);
 
         IntermediateQuery query1 = queryBuilder1.build();
 
@@ -321,7 +321,7 @@ public class IQSyntacticEquivalenceCheckerTest {
                 ExpressionOperation.EQ, X, Z));
         queryBuilder.addChild(constructionNode, filterNode);
         ExtensionalDataNode dataNode = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE2_PREDICATE, X, Z));
-        queryBuilder.addChild(constructionNode, dataNode);
+        queryBuilder.addChild(filterNode, dataNode);
 
         IntermediateQuery query = queryBuilder.build();
 
@@ -333,7 +333,7 @@ public class IQSyntacticEquivalenceCheckerTest {
                 ExpressionOperation.EQ, X, Y));
         queryBuilder1.addChild(constructionNode1, filterNode1);
         ExtensionalDataNode dataNode1 = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE2_PREDICATE, X, Z));
-        queryBuilder1.addChild(constructionNode1, dataNode1);
+        queryBuilder1.addChild(filterNode1, dataNode1);
 
         IntermediateQuery query1 = queryBuilder1.build();
 
@@ -438,8 +438,8 @@ public class IQSyntacticEquivalenceCheckerTest {
         termBuilder.add(X);
         GroupNode groupNode = new GroupNodeImpl(termBuilder.build());
         ExtensionalDataNode dataNode = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE2_PREDICATE, X, Z));
-        queryBuilder.addChild(constructionNode, dataNode);
-        queryBuilder.addChild(dataNode, groupNode);
+        queryBuilder.addChild(constructionNode, groupNode);
+        queryBuilder.addChild(groupNode, dataNode);
 
         IntermediateQuery query = queryBuilder.build();
 
@@ -451,8 +451,8 @@ public class IQSyntacticEquivalenceCheckerTest {
         termBuilder1.add(X);
         GroupNode groupNode1 = new GroupNodeImpl(termBuilder1.build());
         ExtensionalDataNode dataNode1 = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE2_PREDICATE, X, Z));
-        queryBuilder1.addChild(constructionNode1, dataNode1);
-        queryBuilder1.addChild(dataNode1, groupNode1);
+        queryBuilder1.addChild(constructionNode1, groupNode1);
+        queryBuilder1.addChild(groupNode1, dataNode1);
 
         IntermediateQuery query1 = queryBuilder1.build();
 
@@ -469,8 +469,8 @@ public class IQSyntacticEquivalenceCheckerTest {
         termBuilder.add(X);
         GroupNode groupNode = new GroupNodeImpl(termBuilder.build());
         ExtensionalDataNode dataNode = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE2_PREDICATE, X, Y));
-        queryBuilder.addChild(constructionNode, dataNode);
-        queryBuilder.addChild(dataNode, groupNode);
+        queryBuilder.addChild(constructionNode, groupNode);
+        queryBuilder.addChild(groupNode, dataNode);
 
         IntermediateQuery query = queryBuilder.build();
 
@@ -482,8 +482,8 @@ public class IQSyntacticEquivalenceCheckerTest {
         termBuilder1.add(Y);
         GroupNode groupNode1 = new GroupNodeImpl(termBuilder1.build());
         ExtensionalDataNode dataNode1 = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE2_PREDICATE, X, Y));
-        queryBuilder1.addChild(constructionNode1, dataNode1);
-        queryBuilder1.addChild(dataNode1, groupNode1);
+        queryBuilder1.addChild(constructionNode1, groupNode1);
+        queryBuilder1.addChild(groupNode1, dataNode1);
 
         IntermediateQuery query1 = queryBuilder1.build();
 
