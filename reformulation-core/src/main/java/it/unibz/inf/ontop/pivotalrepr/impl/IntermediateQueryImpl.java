@@ -67,6 +67,8 @@ public class IntermediateQueryImpl implements IntermediateQuery {
     private final Injector injector;
     private final OptimizationConfiguration optimizationConfiguration;
 
+    private final IntermediateQueryValidator validator;
+
 
     /**
      * TODO: explain
@@ -88,6 +90,7 @@ public class IntermediateQueryImpl implements IntermediateQuery {
         this.treeComponent = treeComponent;
         this.injector = injector;
         this.optimizationConfiguration = injector.getInstance(OptimizationConfiguration.class);
+        this.validator = injector.getInstance(IntermediateQueryValidator.class);
 
         // TODO: disable it in production
         this.validate();
@@ -356,7 +359,6 @@ public class IntermediateQueryImpl implements IntermediateQuery {
     }
 
     private void validate() throws InvalidIntermediateQueryException {
-        IntermediateQueryValidator validator = new StandardIntermediateQueryValidator();
         validator.validate(this);
     }
 

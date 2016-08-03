@@ -22,6 +22,7 @@ import it.unibz.inf.ontop.owlrefplatform.injection.QuestComponentFactory;
 import it.unibz.inf.ontop.owlrefplatform.injection.QuestCoreConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.injection.QuestCorePreferences;
 import it.unibz.inf.ontop.pivotalrepr.OptimizationConfiguration;
+import it.unibz.inf.ontop.pivotalrepr.validation.IntermediateQueryValidator;
 
 /**
  * TODO: describe
@@ -55,6 +56,7 @@ public class QuestComponentModule extends OBDAAbstractModule {
         install(componentFactoryModule);
         bindFromPreferences(MappingVocabularyFixer.class);
         bindFromPreferences(QueryCache.class);
+        bindFromPreferences(IntermediateQueryValidator.class);
         // Executors
         bindFromPreferences(InnerJoinExecutor.class);
         bindFromPreferences(SubstitutionPropagationExecutor.class);
