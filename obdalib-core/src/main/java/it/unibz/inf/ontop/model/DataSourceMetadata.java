@@ -3,7 +3,7 @@ package it.unibz.inf.ontop.model;
 import java.io.Serializable;
 
 /**
- * Common abstraction for all sorts of Database (relational, etc.)x
+ * Common abstraction for all sorts of Database (relational, etc.)
  */
 public interface DataSourceMetadata extends Serializable {
 

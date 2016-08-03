@@ -186,27 +186,8 @@ public class OBDACoreConfigurationImpl implements OBDACoreConfiguration {
 
         @Override
         public B nativeOntopMappingFile(@Nonnull String mappingFilename) {
-            if (areMappingsDefined) {
-                throw new InvalidOBDAConfigurationException("OBDA model or mappings already defined!");
-            }
-            areMappingsDefined = true;
-            try {
-                URI fileURI = new URI(mappingFilename);
-                String scheme = fileURI.getScheme();
-                if (scheme == null) {
-                    this.mappingFile = Optional.of(new File(fileURI.getPath()));
-                }
-                else if (scheme.equals("file")) {
-                    this.mappingFile = Optional.of(new File(fileURI));
-                }
-                else {
-                    throw new InvalidOBDAConfigurationException("Currently only local files are supported" +
-                            "as OBDA mapping files");
-                }
-                return (B) this;
-            } catch (URISyntaxException e) {
-                throw new InvalidOBDAConfigurationException("Invalid mapping file path: " + e.getMessage());
-            }
+            setMappingFile(mappingFilename);
+            return (B) this;
         }
 
         @Override
@@ -393,6 +374,29 @@ public class OBDACoreConfigurationImpl implements OBDACoreConfiguration {
 
         protected boolean isR2rml() {
             return useR2rml;
+        }
+
+        protected final void setMappingFile(String mappingFilename) {
+            if (areMappingsDefined) {
+                throw new InvalidOBDAConfigurationException("OBDA model or mappings already defined!");
+            }
+            areMappingsDefined = true;
+            try {
+                URI fileURI = new URI(mappingFilename);
+                String scheme = fileURI.getScheme();
+                if (scheme == null) {
+                    this.mappingFile = Optional.of(new File(fileURI.getPath()));
+                }
+                else if (scheme.equals("file")) {
+                    this.mappingFile = Optional.of(new File(fileURI));
+                }
+                else {
+                    throw new InvalidOBDAConfigurationException("Currently only local files are supported" +
+                            "as mapping files");
+                }
+            } catch (URISyntaxException e) {
+                throw new InvalidOBDAConfigurationException("Invalid mapping file path: " + e.getMessage());
+            }
         }
     }
 

@@ -377,12 +377,12 @@ public class JDBCConnector implements DBConnector {
         /**
          * Split the mapping
          */
-        List<OBDAMappingAxiom> splittedMappingsAxioms = MappingSplitter.splitMappings(mappingAxioms, nativeQLFactory);
+        List<OBDAMappingAxiom> splitMappingsAxioms = MappingSplitter.splitMappings(mappingAxioms, nativeQLFactory);
 
         /**
          * Expand the meta mapping
          */
-        Collection<OBDAMappingAxiom> expandedMappingAxioms = expandMetaMappings(splittedMappingsAxioms, dbMetadata);
+        Collection<OBDAMappingAxiom> expandedMappingAxioms = expandMetaMappings(splitMappingsAxioms, dbMetadata);
 
         return expandedMappingAxioms;
     }
