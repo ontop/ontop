@@ -110,6 +110,7 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
         Stream<Variable> variablesRequiredByBindings = substitution.getImmutableMap().values().stream()
                 .flatMap(t -> t.getVariableStream());
 
+        //return only the variables that are also used in the bindings for the child of the construction node
         return Stream.concat(projectedVariables.stream(), variablesRequiredByBindings)
                 .filter(v -> !variableDefinedByBindings.contains(v))
                 .collect(ImmutableCollectors.toSet());

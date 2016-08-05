@@ -118,9 +118,8 @@ public class QueryMergingExecutor implements InternalProposalExecutor<QueryMergi
                             throw new IllegalStateException("Construction node insertion not expected during query merging");
 
                         case DECLARE_AS_EMPTY:
-                            return new AnalysisResults(originalNode,
-                                    new EmptyNodeImpl(query.getVariables(originalNode)),
-                                    Optional.empty());
+                            return analyze(query, new EmptyNodeImpl(query.getVariables(originalNode)), substitutionToApply, renamer);
+
                         default:
                             throw new IllegalStateException("Unknown local action:" + results.getLocalAction());
                     }

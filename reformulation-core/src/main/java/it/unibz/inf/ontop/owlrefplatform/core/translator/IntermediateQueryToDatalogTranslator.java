@@ -244,14 +244,19 @@ public class IntermediateQueryToDatalogTranslator {
 
 		} else if (node instanceof UnionNode) {
 
-			ConstructionNode parentNode = te.getParent(node)
+			Optional<ConstructionNode> parentNode = te.getParent(node)
 					.filter(p -> p instanceof ConstructionNode)
-					.map(p -> (ConstructionNode) p)
-					.orElseThrow(() -> new IllegalStateException("Invalid IQ: " +
-							"a UNION node must have a ConstructionNode as parent"));
+					.map(p -> (ConstructionNode) p);
 
-			DistinctVariableOnlyDataAtom childIdealProjectionAtom = generateProjectionAtom(
-					parentNode.getChildVariables());
+			DistinctVariableOnlyDataAtom childIdealProjectionAtom;
+			if(parentNode.isPresent()) {
+				childIdealProjectionAtom = generateProjectionAtom(parentNode.get().getChildVariables());
+			}
+			else{
+				childIdealProjectionAtom = generateProjectionAtom(((UnionNode) node).getVariables());
+			}
+
+
 			
 			for (QueryNode child : te.getChildren(node)) {
 				ConstructionNode childConstructionNode =(ConstructionNode) child;
