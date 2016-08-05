@@ -66,7 +66,7 @@ public class OntopBenchmark {
 
     // Public interface
 
-    public OntopBenchmark getInstance() {
+    public static OntopBenchmark getInstance() {
 	return instance;
     }
     
