@@ -14,7 +14,7 @@ import java.util.stream.Collector;
  * Inspired by http://codingjunkie.net/guava-and-java8-collectors/
  */
 public class ImmutableCollectors {
-
+ 
     private static abstract class ImmutableCollectionCollector<T, A extends ImmutableCollection.Builder, R extends ImmutableCollection<T>>
             implements Collector<T, A, R> {
 
