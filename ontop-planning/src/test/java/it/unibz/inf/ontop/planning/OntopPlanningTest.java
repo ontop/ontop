@@ -126,7 +126,7 @@ public class OntopPlanningTest {
         
         List<DatalogProgram> programs = op.getDLogUnfoldingsForFragments(fragments);
         
-        // {wc=[fragIndex := 0, varIndex := 0)], x=[fragIndex := 0, varIndex := 1), fragIndex := 1, varIndex := 0)], ...}
+        // {wc=[(fragIndex := 0, varIndex := 0)], x=[(fragIndex := 0, varIndex := 1), (fragIndex := 1, varIndex := 0)], ...}
         LinkedListMultimap<Variable, MFragIndexToVarIndex> mOutVariableToFragmentsVariables = op.getmOutVariableToFragmentsVariables(fragments);
         
         List<List<Restriction>> fragmentsToRestrictions = new ArrayList<>();
