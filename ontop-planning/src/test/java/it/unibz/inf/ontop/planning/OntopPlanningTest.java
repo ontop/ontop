@@ -147,9 +147,9 @@ public class OntopPlanningTest {
         
         SQLCreator sqlCreator = visitor.getSQLCreatorInstance();
         
-        String sqlBody = sqlCreator.makeBody(op, mOutVariableToFragmentsVariables);
+        String sql = sqlCreator.makeSQL(op, mOutVariableToFragmentsVariables);
 
-        System.out.println(sqlBody);
+        System.out.println(sql);
         
         //      op.pruneDLogPrograms(programs, joinOn);
         

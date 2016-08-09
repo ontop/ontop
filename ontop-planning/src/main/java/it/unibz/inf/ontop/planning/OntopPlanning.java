@@ -228,6 +228,12 @@ public class OntopPlanning {
 	return null;
     }
     
+    /** 
+     * 
+     * @param d
+     * @param signature
+     * @return SELECT * FROM (SELECT ... UNION ...)
+     */
     public String getSQLForDL(DatalogProgram d, List<String> signature){
 	
 	String sql = st.getSQLFromDLog(d, signature);
@@ -284,6 +290,7 @@ public class OntopPlanning {
         return sqlBuilder.toString();
     }
 
+    /** Returns list of output variables for the fragment **/
     public List<String> makeSignatureForFragment(
 	    int fragIndex,
 	    LinkedListMultimap<Variable, MFragIndexToVarIndex> mOutVariableToFragmentsVariables) {

@@ -3,6 +3,8 @@ package it.unibz.inf.ontop.planning.sql;
 import it.unibz.inf.ontop.planning.OntopPlanning;
 import it.unibz.inf.ontop.planning.datatypes.MFragIndexToVarIndex;
 import it.unibz.inf.ontop.planning.datatypes.Restriction;
+import it.unibz.inf.ontop.planning.datatypes.Signature;
+import it.unibz.inf.ontop.planning.datatypes.Template;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.Function;
@@ -25,7 +27,7 @@ import com.google.common.collect.LinkedListMultimap;
 
 public class SQLCreator {
 
-    private List<List<Restriction>> combinations;
+    private List<CombinationRestriction> combinations;
 
     private static SQLCreator instance = null;
 
@@ -45,11 +47,11 @@ public class SQLCreator {
     private class AliasMap{
 	private List<Map<Variable, Set<QualifiedAttributeID>>> fragmentsMaps;
 
-	private AliasMap(List<Restriction> combination, OntopPlanning op) {
+	private AliasMap(CombinationRestriction combination, OntopPlanning op) {
 
 	    this.fragmentsMaps = new ArrayList<>();
 
-	    for( Restriction r : combination ){
+	    for( Restriction r : combination.getRestrictions() ){
 		// Transform the restriction in SQL
 		CQIE cq = r.getDLog().getRules().iterator().next();
 		Map<Variable, Set<QualifiedAttributeID>> aliasMap = op.getAliasMap(cq);
@@ -130,7 +132,7 @@ public class SQLCreator {
 		    
 		    //		    qA.
 		}
-		builder.deleteCharAt(builder.length() -1); // Remove .
+		builder.deleteCharAt(builder.length() -2); // Remove , 
 	    }
 	    
 	    return " ON " + builder.toString();
@@ -145,27 +147,29 @@ public class SQLCreator {
     }
 
     public void addValidCombination(List<Restriction> combination) {
-	this.combinations.add(new ArrayList<>(combination));
+	this.combinations.add( new CombinationRestriction(combination) );
     }
 
-    public List<List<Restriction>> getCombinations(){
+    public List<CombinationRestriction> getCombinations(){
 	return Collections.unmodifiableList(this.combinations);
     }
 
-    public String makeBody(OntopPlanning op, LinkedListMultimap<Variable, MFragIndexToVarIndex> mOutVariableToFragmentsVariables) {
+    public String makeSQL(OntopPlanning op, LinkedListMultimap<Variable, MFragIndexToVarIndex> mOutVariableToFragmentsVariables) {
 
 	// A generalized union of all combinations!
 	List<String> union = new ArrayList<>();
 
-	for( List<Restriction> combination : this.getCombinations() ){
+	for( CombinationRestriction combination : this.getCombinations() ){
 	   
 	    AliasMap aliasMap = new AliasMap(combination, op);
 	    
 	    // SELECT projection FROM () AS F1, JOIN () AS F2, ..., ON 
-	    Map<String, String> mColToTemplateToAttach = makeProjList(combination, op, mOutVariableToFragmentsVariables, aliasMap);
+	    Map<List<String>, String> mColsToTemplateToAttach = makeCombinationInfos(combination, op, mOutVariableToFragmentsVariables, aliasMap);
+	    
+	    
 	    // Projection stucture: 
-	    String sql = makeJoinCondition(combination, op, mOutVariableToFragmentsVariables, aliasMap);
-	    union.add(sql);
+	    String joinCondition = makeJoinCondition(combination, op, mOutVariableToFragmentsVariables, aliasMap); // ON f_0."wlbNpdidWellbore"=f_1."wlbNpdidWellbore" 
+	    union.add(joinCondition);
 	}
 	
 	String body = uniteAll(union);
@@ -173,13 +177,56 @@ public class SQLCreator {
 	return body;
     }
 
-    private Map<String, String> makeProjList(
-	    List<Restriction> combination,
+    
+    // SELECT f1.colName1, f1.colName2, ..
+    // This work for a combination
+    /**
+     * 
+     * @param combination
+     * @param op
+     * @param mOutVariableToFragmentsVariables
+     * @param aliasMap
+     * @return 
+     */
+    private Map<List<String>, String> makeCombinationInfos(
+	    CombinationRestriction combination,
 	    OntopPlanning op,
 	    LinkedListMultimap<Variable, MFragIndexToVarIndex> mOutVariableToFragmentsVariables, 
 	    AliasMap aliasMap) {
 	
-//  	It can be that a combination projects out twice the same variable. Hence, we need renaming for each.
+	
+	for( int fragIndex = 0; fragIndex < combination.numFragments(); ++fragIndex ){
+	    
+	    // Transform the restriction in SQL
+	    Restriction r = combination.getFragmentOfIndex(fragIndex);
+	    List<String> signature = op.makeSignatureForFragment(fragIndex, mOutVariableToFragmentsVariables);
+	    
+	    
+	    String sql = op.getSQLForDL(r.getDLog(), signature);
+	    
+	    // Make the projLists for Joins
+	    List<String> projList = retrieveProjections(sql); // Retrieve the projection of sql
+	    
+	    // Update joins structurer	    
+	    for( Variable v : mOutVariableToFragmentsVariables.keySet() ){
+		List<MFragIndexToVarIndex> list = mOutVariableToFragmentsVariables.get(v);
+		for( MFragIndexToVarIndex el : list ){
+		    if( el.getFragIndex() == fragIndex ){
+			// Retrieve term
+			Term t = retrieveTerm( r, el.getVarIndex() );
+			List<Variable> variablesInTerm = varsOf(t, op);
+
+			// The same term variable (e.g., t09) can be filled by several columns
+			Set<QualifiedAttributeID> aliases = aliasMap.getAliasesFor(fragIndex, variablesInTerm);
+		    }
+		}
+	    }
+
+	}
+	
+//	retrieveProjections(sql)
+	
+//  	It can be that a combination projects out twice the same variable. Hence, we need renaming for each. (why?)
     	//	
 	
 	return null;
@@ -191,7 +238,7 @@ public class SQLCreator {
     }
 
     private String makeJoinCondition(
-	    List<Restriction> combination,
+	    CombinationRestriction combination,
 	    OntopPlanning op,
 	    LinkedListMultimap<Variable, MFragIndexToVarIndex> mOutVariableToFragmentsVariables, AliasMap aliasMap) {
 
@@ -202,15 +249,17 @@ public class SQLCreator {
 
 	
 
-	for( int fragIndex = 0; fragIndex < combination.size(); ++fragIndex ){
+	for( int fragIndex = 0; fragIndex < combination.numFragments(); ++fragIndex ){
 
 	    // Transform the restriction in SQL
-	    Restriction r = combination.get(fragIndex);
+	    Restriction r = combination.getFragmentOfIndex(fragIndex);
 	    List<String> signature = op.makeSignatureForFragment(fragIndex, mOutVariableToFragmentsVariables);
+	    
+	    
 	    String sql = op.getSQLForDL(r.getDLog(), signature);
 
 	    // Make the projLists for Joins
-	    List<String> projList = retrieveProjections(sql); // TTT TODO Davide, what was this doing?
+	    List<String> projList = retrieveProjections(sql); // Retrieve the projection of sql
 
 	    // Update joins structurer	    
 	    for( Variable v : mOutVariableToFragmentsVariables.keySet() ){
@@ -276,12 +325,26 @@ public class SQLCreator {
 
 	class LocalUtils{
 	    private String header = "SELECT *\nFROM (\nSELECT ";
+	    
+	    /**
+	     
+	     * 
+	     * @param first
+	     * @return
+	     * 
+	     * * SELECT *
+                FROM (
+                  SELECT qview1."wlbNpdidWellbore", qview1."lsuNpdidLithoStrat", qview1."wlbNpdidWellbore", qview3."wlbDrillingOperator", qview1."lsuCoreLenght"
+                  FROM 
+                  <br>
+                  => 
+                  <br>
+                  ["wlbNpdidWellbore", "lsuNpdidLithoStrat", "wlbNpdidWellbore", "wlbDrillingOperator", "lsuCoreLenght"]                  
+	     * 
+	     */
 	    public List<String> projList(String first) {
 
-		System.out.println(header.length());
-		System.out.println(first.lastIndexOf("FROM"));
 		String raw = first.substring( header.length(), first.lastIndexOf("FROM") );
-		System.out.println(raw);
 		String clean = raw.replaceAll("qview.\\.", "").trim();
 
 		List<String> result = Arrays.asList( clean.split(",") );
@@ -306,4 +369,122 @@ public class SQLCreator {
     public String toString() {
 	return combinations.toString();
     }    
+};
+
+
+class CombinationRestriction{
+    private final List<Restriction> restrictions;
+    
+    CombinationRestriction( List<Restriction> restrictions){
+	this.restrictions = restrictions;
+    }
+    
+    List<Restriction> getRestrictions(){
+	return Collections.unmodifiableList(this.restrictions);
+    }
+    
+    int numFragments(){
+	return this.getRestrictions().size();
+    }
+    
+    Restriction getFragmentOfIndex( int index ){
+	return this.restrictions.get(index);
+    }
+}
+
+//Decorator pattern
+class SignatureDecorator{
+
+    private final Signature component;
+    
+    
+    SignatureDecorator( Signature component ){
+	this.component = component;
+    }
+    
+    // Decorator wrapping
+    public Template getTemplateOfIndex( int index ){
+	
+	return component.getTemplateOfIndex(index);
+    }
+    
+    @Override 
+    public boolean equals(Object other) {
+	if( other instanceof SignatureDecorator )
+	    return component.equals( ((SignatureDecorator) other).component );
+	else return false;
+    }
+    
+    @Override
+    public int hashCode(){
+	return component.hashCode();
+    }
+    
+    @Override
+    public String toString(){
+	return component.toString();
+    }
+};
+
+class ExtendedSignature extends SignatureDecorator{
+    
+    private final List<Variable> outVariables;
+    private final Map<Variable, Term> mOutVarToTerm;
+    private final Map<Variable, List<QualifiedAttributeID>> mTermVariableToQualifiedAttributes;
+
+    ExtendedSignature( Signature component, List<Variable> outVariables, Map<Variable, Term> mOutVarToTerm, 
+	    Map<Variable, List<QualifiedAttributeID>> mTermVariableToQualifiedAttributes ){
+	
+	super(component);
+	this.outVariables = outVariables;
+	this.mOutVarToTerm = mOutVarToTerm;
+	this.mTermVariableToQualifiedAttributes = mTermVariableToQualifiedAttributes;
+    }
+    
+    List<Variable> getOutVariables(){
+	return Collections.unmodifiableList(outVariables);
+    }
+    
+    Term getTermOf( Variable outVariable ){
+	return this.mOutVarToTerm.get(outVariable);
+    }
+    
+    List<QualifiedAttributeID> getQualifiedAttributesFor( Variable termVariable ){
+	return this.mTermVariableToQualifiedAttributes.get(termVariable);
+    }
+    // TODO Continua questa robaccia (magari usa altri files)
+};
+
+class RestrictionInfo{
+    
+    private final List<Variable> outVariables;
+    private final Map<Variable, Term> mOutVarToTerm;
+    private final Map<Variable, List<QualifiedAttributeID>> mTermVariableToQualifiedAttributes;
+    private final Restriction restriction;
+    
+    RestrictionInfo( List<Variable> outVariables, Map<Variable, Term> mOutVarToTerm, 
+	    Map<Variable, List<QualifiedAttributeID>> mTermVariableToQualifiedAttributes, Restriction combination ){
+	
+	this.outVariables = outVariables;
+	this.mOutVarToTerm = mOutVarToTerm;
+	this.mTermVariableToQualifiedAttributes = mTermVariableToQualifiedAttributes;
+	this.restriction = combination;
+    }
+    
+
+    List<Variable> getOutVariables(){
+	return Collections.unmodifiableList(outVariables);
+    }
+    
+    Term getTermOf( Variable outVariable ){
+	return this.mOutVarToTerm.get(outVariable);
+    }
+    
+    List<QualifiedAttributeID> getQualifiedAttributesFor( Variable termVariable ){
+	return this.mTermVariableToQualifiedAttributes.get(termVariable);
+    }
+    
+    Restriction getCombination(){
+	return this.restriction;
+    }
 };

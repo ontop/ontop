@@ -9,26 +9,30 @@ import it.unibz.krdb.obda.model.DatalogProgram;
  *
  */
 public class Restriction{
-    private Pair<Signature, DatalogProgram> restrictionToTemplateSignature;
+    
+    private Signature signature;
+    private DatalogProgram program;
+    
     
     public Restriction(Signature s, DatalogProgram d){
-	this.restrictionToTemplateSignature = new Pair<>(s,d);
+	this.signature = s;
+	this.program = d;
     }
     
     public Signature getSignature(){
-	return this.restrictionToTemplateSignature.first;
+	return this.signature;
     }
     
     public DatalogProgram getDLog(){
-	return this.restrictionToTemplateSignature.second;
+	return this.program;
     }
     
     @Override
     public String toString(){
-	
-	String result = "Signature:= " + restrictionToTemplateSignature.first + "\n" + 
-		"DLog:= " + restrictionToTemplateSignature.second;
-	
+
+	String result = "Signature:= " + signature + "\n" + 
+		"DLog:= " + program;
+
 	return result;
     }
 }
