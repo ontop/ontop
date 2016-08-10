@@ -88,7 +88,6 @@ public class SQLCreator {
 	
 	// Variable -> FragId -> [col1, \ldots, coln]
 	private Map<Variable, Map<Integer, Set<QualifiedAttributeID>>> state;
-	//	private List<Map<Variable, Set<QualifiedAttributeID>>> aliasMap;
 
 	private JoinStructurer() {
 	    this.state = new HashMap<>();

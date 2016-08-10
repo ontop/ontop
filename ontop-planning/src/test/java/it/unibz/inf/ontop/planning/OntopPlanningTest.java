@@ -94,7 +94,6 @@ public class OntopPlanningTest {
     }
 
     @Test
-    @Ignore
     public void getSQLForFragments3() throws Exception {
 
         String fragment1 = "PREFIX npdv: <http://sws.ifi.uio.no/vocab/npd-v2#> \n " +
