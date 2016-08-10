@@ -291,7 +291,7 @@ public class OntopPlanning {
     }
 
     /** Returns list of output variables for the fragment **/
-    public List<String> makeSignatureForFragment(
+    public List<String> outVarsListForFragment(
 	    int fragIndex,
 	    LinkedListMultimap<Variable, MFragIndexToVarIndex> mOutVariableToFragmentsVariables) {
 	

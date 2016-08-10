@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.planning.datatypes;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -32,6 +33,14 @@ public class Signature {
 	return result;
     }
     
+    public int numTemplates(){
+	return templates.size();
+    }
+    
+    public List<Template> getTemplates(){
+	return Collections.unmodifiableList(templates);
+    }
+    
     public static class Builder{
 	private List<Template> templates = new ArrayList<>();
 	
@@ -40,9 +49,6 @@ public class Signature {
 	    return this;
 	}
 	
-	public Builder Builder(){
-	    return this;
-	}
 	
 	public Signature build(){
 	    Signature result = new Signature(templates);

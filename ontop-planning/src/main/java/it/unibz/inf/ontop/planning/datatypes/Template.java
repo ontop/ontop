@@ -9,6 +9,9 @@ package it.unibz.inf.ontop.planning.datatypes;
  * www.example.com/pagina/{}/paragrafo/{} corresponds to a binary
  * function example/2.
  * 
+ * A template is NOT a Term! Indeed, a template 
+ * does NOT contain variables, whereas a Term does.
+ * 
  * @author Davide Lanti
  *
  */

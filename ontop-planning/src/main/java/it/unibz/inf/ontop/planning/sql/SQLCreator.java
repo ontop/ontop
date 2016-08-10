@@ -5,6 +5,11 @@ import it.unibz.inf.ontop.planning.datatypes.MFragIndexToVarIndex;
 import it.unibz.inf.ontop.planning.datatypes.Restriction;
 import it.unibz.inf.ontop.planning.datatypes.Signature;
 import it.unibz.inf.ontop.planning.datatypes.Template;
+import it.unibz.inf.ontop.planning.sql.helpers.ExtendedCombinationRestriction;
+import it.unibz.inf.ontop.planning.sql.helpers.ExtendedRestriction;
+import it.unibz.inf.ontop.planning.sql.helpers.ExtendedSignature;
+import it.unibz.inf.ontop.planning.sql.helpers.ExtendedTerm;
+import it.unibz.inf.ontop.planning.sql.helpers.RestrictionDecorator;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.Function;
@@ -74,6 +79,7 @@ public class SQLCreator {
 
 	    return result;
 	}
+	
     };
 
     /**
@@ -162,9 +168,7 @@ public class SQLCreator {
 	   
 	    AliasMap aliasMap = new AliasMap(combination, op);
 	    
-	    // SELECT projection FROM () AS F1, JOIN () AS F2, ..., ON 
-	    Map<List<String>, String> mColsToTemplateToAttach = makeCombinationInfos(combination, op, mOutVariableToFragmentsVariables, aliasMap);
-	    
+	    ExtendedCombinationRestriction extendedCombination =  extendCombinationRestriction(combination, op, mOutVariableToFragmentsVariables, aliasMap);
 	    
 	    // Projection stucture: 
 	    String joinCondition = makeJoinCondition(combination, op, mOutVariableToFragmentsVariables, aliasMap); // ON f_0."wlbNpdidWellbore"=f_1."wlbNpdidWellbore" 
@@ -187,48 +191,43 @@ public class SQLCreator {
      * @param aliasMap
      * @return 
      */
-    private Map<List<String>, String> makeCombinationInfos(
+    private ExtendedCombinationRestriction extendCombinationRestriction(
 	    CombinationRestriction combination,
 	    OntopPlanning op,
 	    LinkedListMultimap<Variable, MFragIndexToVarIndex> mOutVariableToFragmentsVariables, 
 	    AliasMap aliasMap) {
 	
+
+	List<ExtendedRestriction> restrictions = new ArrayList<>();
 	
 	for( int fragIndex = 0; fragIndex < combination.numFragments(); ++fragIndex ){
 	    
 	    // Transform the restriction in SQL
 	    Restriction r = combination.getFragmentOfIndex(fragIndex);
-	    List<String> signature = op.makeSignatureForFragment(fragIndex, mOutVariableToFragmentsVariables);
 	    
-	    
-	    String sql = op.getSQLForDL(r.getDLog(), signature);
-	    
-	    // Make the projLists for Joins
-	    List<String> projList = retrieveProjections(sql); // Retrieve the projection of sql
-	    
-	    // Update joins structurer	    
+	    ExtendedSignature.Builder signatureBuilder = new ExtendedSignature.Builder();
 	    for( Variable v : mOutVariableToFragmentsVariables.keySet() ){
 		List<MFragIndexToVarIndex> list = mOutVariableToFragmentsVariables.get(v);
+		
+		
 		for( MFragIndexToVarIndex el : list ){
 		    if( el.getFragIndex() == fragIndex ){
 			// Retrieve term
 			Term t = retrieveTerm( r, el.getVarIndex() );
 			List<Variable> variablesInTerm = varsOf(t, op);
-
-			// The same term variable (e.g., t09) can be filled by several columns
-			Set<QualifiedAttributeID> aliases = aliasMap.getAliasesFor(fragIndex, variablesInTerm);
+			
+			ExtendedTerm eT = new ExtendedTerm(t, variablesInTerm, aliasMap.getMapForFragment(fragIndex) );
+			
+			signatureBuilder.addOutVariableAndTerm(v, eT);
+						
 		    }
 		}
 	    }
-
+	    ExtendedRestriction eR = new ExtendedRestriction.Builder(r).signature(signatureBuilder.build()).build();
+	    restrictions.add(eR);
 	}
 	
-//	retrieveProjections(sql)
-	
-//  	It can be that a combination projects out twice the same variable. Hence, we need renaming for each. (why?)
-    	//	
-	
-	return null;
+	return new ExtendedCombinationRestriction(restrictions);
     }
 
     private String uniteAll(List<String> union) {
@@ -252,7 +251,7 @@ public class SQLCreator {
 
 	    // Transform the restriction in SQL
 	    Restriction r = combination.getFragmentOfIndex(fragIndex);
-	    List<String> signature = op.makeSignatureForFragment(fragIndex, mOutVariableToFragmentsVariables);
+	    List<String> signature = op.outVarsListForFragment(fragIndex, mOutVariableToFragmentsVariables);
 	    
 	    
 	    String sql = op.getSQLForDL(r.getDLog(), signature);
@@ -371,119 +370,4 @@ public class SQLCreator {
 };
 
 
-class CombinationRestriction{
-    private final List<Restriction> restrictions;
-    
-    CombinationRestriction( List<Restriction> restrictions){
-	this.restrictions = restrictions;
-    }
-    
-    List<Restriction> getRestrictions(){
-	return Collections.unmodifiableList(this.restrictions);
-    }
-    
-    int numFragments(){
-	return this.getRestrictions().size();
-    }
-    
-    Restriction getFragmentOfIndex( int index ){
-	return this.restrictions.get(index);
-    }
-}
 
-//Decorator pattern
-class SignatureDecorator{
-
-    private final Signature component;
-    
-    
-    SignatureDecorator( Signature component ){
-	this.component = component;
-    }
-    
-    // Decorator wrapping
-    public Template getTemplateOfIndex( int index ){
-	
-	return component.getTemplateOfIndex(index);
-    }
-    
-    @Override 
-    public boolean equals(Object other) {
-	if( other instanceof SignatureDecorator )
-	    return component.equals( ((SignatureDecorator) other).component );
-	else return false;
-    }
-    
-    @Override
-    public int hashCode(){
-	return component.hashCode();
-    }
-    
-    @Override
-    public String toString(){
-	return component.toString();
-    }
-};
-
-class ExtendedSignature extends SignatureDecorator{
-    
-    private final List<Variable> outVariables;
-    private final Map<Variable, Term> mOutVarToTerm;
-    private final Map<Variable, List<QualifiedAttributeID>> mTermVariableToQualifiedAttributes;
-
-    ExtendedSignature( Signature component, List<Variable> outVariables, Map<Variable, Term> mOutVarToTerm, 
-	    Map<Variable, List<QualifiedAttributeID>> mTermVariableToQualifiedAttributes ){
-	
-	super(component);
-	this.outVariables = outVariables;
-	this.mOutVarToTerm = mOutVarToTerm;
-	this.mTermVariableToQualifiedAttributes = mTermVariableToQualifiedAttributes;
-    }
-    
-    List<Variable> getOutVariables(){
-	return Collections.unmodifiableList(outVariables);
-    }
-    
-    Term getTermOf( Variable outVariable ){
-	return this.mOutVarToTerm.get(outVariable);
-    }
-    
-    List<QualifiedAttributeID> getQualifiedAttributesFor( Variable termVariable ){
-	return this.mTermVariableToQualifiedAttributes.get(termVariable);
-    }
-    // TODO Continua questa robaccia (magari usa altri files)
-};
-
-class RestrictionInfo{
-    
-    private final List<Variable> outVariables;
-    private final Map<Variable, Term> mOutVarToTerm;
-    private final Map<Variable, List<QualifiedAttributeID>> mTermVariableToQualifiedAttributes;
-    private final Restriction restriction;
-    
-    RestrictionInfo( List<Variable> outVariables, Map<Variable, Term> mOutVarToTerm, 
-	    Map<Variable, List<QualifiedAttributeID>> mTermVariableToQualifiedAttributes, Restriction combination ){
-	
-	this.outVariables = outVariables;
-	this.mOutVarToTerm = mOutVarToTerm;
-	this.mTermVariableToQualifiedAttributes = mTermVariableToQualifiedAttributes;
-	this.restriction = combination;
-    }
-    
-
-    List<Variable> getOutVariables(){
-	return Collections.unmodifiableList(outVariables);
-    }
-    
-    Term getTermOf( Variable outVariable ){
-	return this.mOutVarToTerm.get(outVariable);
-    }
-    
-    List<QualifiedAttributeID> getQualifiedAttributesFor( Variable termVariable ){
-	return this.mTermVariableToQualifiedAttributes.get(termVariable);
-    }
-    
-    Restriction getCombination(){
-	return this.restriction;
-    }
-};
