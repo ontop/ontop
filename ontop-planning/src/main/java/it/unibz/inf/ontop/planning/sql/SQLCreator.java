@@ -190,35 +190,40 @@ public class SQLCreator {
 
     private String makeFrom(ExtendedCombinationRestriction extendedCombination, OntopPlanning op) {
 
-	class LocalUtils{ // Helper class
-	    
-	    // Produce something like qview1."blabla" AS t1v1, ..., AS tnvm
-	    String renameProjections( String sql, ExtendedSignature eS ){
-		
-		List<String> splits = Arrays.asList( sql.split("UNION") );
-		
-		for( String cq : splits ){
-		    String proj = cq.substring(cq.indexOf("SELECT") + 6, cq.indexOf("FROM"));
-		    
-		    List<String> commaSplits = Arrays.asList(cq.split(","));
-		    StringBuilder commaSplitsRenamedBuilder = new StringBuilder();
-		    
-		    for( int termCounter = 0; termCounter < eS.getOutVariables().size(); ++termCounter ){
-			ExtendedTerm t = eS.getTermOf( eS.getOutVariables().get(termCounter) );
-			for( int termVarCounter = 0; termVarCounter < t.getTermVariables().size(); ++termVarCounter ){
-			    String aliasName = "t"+termCounter+"v"+termVarCounter;
-			    String newProjElement = commaSplits.get(termCounter + termVarCounter) + " AS " + aliasName;
-			    if( commaSplitsRenamedBuilder.length() > 0 )
-				commaSplitsRenamedBuilder.append(", ");
-			    commaSplitsRenamedBuilder.append(newProjElement);
-			}
-		    }
-		    String newSql = commaSplitsRenamedBuilder.toString() + cq.substring(cq.indexOf("FROM") + 4);
-		    System.out.println(newSql);
-		}
-		return null;
-	    }
-	}
+    	class LocalUtils{ // Helper class
+
+    		// Produce something like qview1."blabla" AS t1v1, ..., AS tnvm
+    		String renameProjections( String sql, ExtendedSignature eS ){
+
+    			List<String> splits = Arrays.asList( sql.split("UNION") );
+    			StringBuilder renamedSplitsBuilder = new StringBuilder();
+    			
+    			for( String cq : splits ){
+    				String proj = cq.substring(cq.indexOf("SELECT") + 6, cq.indexOf("FROM"));
+
+    				List<String> commaSplits = Arrays.asList(cq.split(","));
+    				StringBuilder commaSplitsRenamedBuilder = new StringBuilder();
+
+    				for( int termCounter = 0; termCounter < eS.getOutVariables().size(); ++termCounter ){
+    					ExtendedTerm t = eS.getTermOf( eS.getOutVariables().get(termCounter) );
+    					for( int termVarCounter = 0; termVarCounter < t.getTermVariables().size(); ++termVarCounter ){
+    						String aliasName = "t"+termCounter+"v"+termVarCounter;
+    						String newProjElement = commaSplits.get(termCounter + termVarCounter) + " AS " + aliasName;
+    						if( commaSplitsRenamedBuilder.length() > 0 )
+    							commaSplitsRenamedBuilder.append(", ");
+    						commaSplitsRenamedBuilder.append(newProjElement);
+    					}
+    				}
+    				String newSql = commaSplitsRenamedBuilder.toString() + cq.substring(cq.indexOf(" FROM"));
+    				
+    				if( renamedSplitsBuilder.length() > 0 ){
+    					renamedSplitsBuilder.append( "\nUNION\n" ); 
+    				}
+    				renamedSplitsBuilder.append( newSql );
+    			}
+    			return renamedSplitsBuilder.toString();
+    		}
+    	}
 	
 	LocalUtils utils = new LocalUtils();
 	StringBuilder builder = new StringBuilder();
