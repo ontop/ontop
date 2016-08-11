@@ -81,4 +81,15 @@ public class ExtendedSignature extends SignatureDecorator{
 	
 	return -1; // Not found
     }
+    
+    @Override
+    public String toString(){
+	StringBuilder builder = new StringBuilder();
+	
+	builder.append("Signature: " + super.toString() + "\n");
+	builder.append("Out Variables: " + this.getOutVariables() + "\n");
+	builder.append("Templates: " + this.templates + "\n");
+	
+	return builder.toString();
+    }
 };

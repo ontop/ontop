@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.planning.sql;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -10,7 +11,7 @@ public class CombinationRestriction{
     private final List<Restriction> restrictions;
     
     CombinationRestriction( List<Restriction> restrictions){
-	this.restrictions = restrictions;
+	this.restrictions = new ArrayList<>(restrictions);
     }
     
     List<Restriction> getRestrictions(){
@@ -23,5 +24,10 @@ public class CombinationRestriction{
     
     Restriction getFragmentOfIndex( int index ){
 	return this.restrictions.get(index);
+    }
+    
+    @Override
+    public String toString(){
+	return this.restrictions.toString();
     }
 }

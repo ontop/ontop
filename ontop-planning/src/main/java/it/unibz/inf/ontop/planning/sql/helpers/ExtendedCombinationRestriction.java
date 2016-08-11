@@ -11,15 +11,20 @@ public class ExtendedCombinationRestriction {
 	this.restrictions = extendedRestrictions;
     }
     
-    List<ExtendedRestriction> getRestrictions(){
+    public List<ExtendedRestriction> getRestrictions(){
 	return Collections.unmodifiableList(this.restrictions);
     }
     
-    int numFragments(){
+    public int numFragments(){
 	return this.getRestrictions().size();
     }
     
-    ExtendedRestriction getFragmentOfIndex( int index ){
+    public ExtendedRestriction getFragmentOfIndex( int index ){
 	return this.restrictions.get(index);
+    }
+    
+    @Override
+    public String toString(){
+	return this.restrictions.toString();
     }
 }

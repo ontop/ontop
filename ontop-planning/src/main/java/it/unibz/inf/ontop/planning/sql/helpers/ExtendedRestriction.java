@@ -36,4 +36,13 @@ public class ExtendedRestriction extends RestrictionDecorator {
 	return this.extendedSignature;
     }
     
+    @Override
+    public String toString(){
+	String decorated = "Restriction: " + super.toString();
+	String extended = "ExtendedSignature: " + this.getExtendedSignature() + "\n";
+	
+	return decorated + extended;
+    }
+    
+    
 }

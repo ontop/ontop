@@ -13,9 +13,10 @@ import java.util.List;
 public class Signature {
     
     private final List<Template> templates = new ArrayList<>();
-        
-    private Signature(List<Template> templates) {
-	this.templates.addAll(templates);
+            
+    private Signature(Builder builder) {
+	this.templates.addAll(builder.templates);
+	builder.templates.clear();
     }
     
     public Template getTemplateOfIndex( int index ){
@@ -51,8 +52,7 @@ public class Signature {
 	
 	
 	public Signature build(){
-	    Signature result = new Signature(templates);
-	    templates.clear();
+	    Signature result = new Signature(this);
 	    return result;
 	}
 	

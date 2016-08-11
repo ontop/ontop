@@ -28,6 +28,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.openrdf.query.algebra.Load;
+
 import com.google.common.collect.LinkedListMultimap;
 
 public class SQLCreator {
@@ -170,7 +172,13 @@ public class SQLCreator {
 	    
 	    ExtendedCombinationRestriction extendedCombination =  extendCombinationRestriction(combination, op, mOutVariableToFragmentsVariables, aliasMap);
 	    
-	    // Projection stucture: 
+	    // Let's make a projection
+	    String proj = makeProj(extendedCombination, op);
+	    
+	    // makeFrom 
+	    String from = makeFrom(extendedCombination, op);
+	    
+	    // Join condition
 	    String joinCondition = makeJoinCondition(combination, op, mOutVariableToFragmentsVariables, aliasMap); // ON f_0."wlbNpdidWellbore"=f_1."wlbNpdidWellbore" 
 	    union.add(joinCondition);
 	}
@@ -180,7 +188,142 @@ public class SQLCreator {
 	return body;
     }
 
-    
+    private String makeFrom(ExtendedCombinationRestriction extendedCombination, OntopPlanning op) {
+
+	class LocalUtils{ // Helper class
+	    
+	    // Produce something like qview1."blabla" AS t1v1, ..., AS tnvm
+	    String renameProjections( String sql, ExtendedSignature eS ){
+		
+		List<String> splits = Arrays.asList( sql.split("UNION") );
+		
+		for( String cq : splits ){
+		    String proj = cq.substring(cq.indexOf("SELECT") + 6, cq.indexOf("FROM"));
+		    
+		    List<String> commaSplits = Arrays.asList(cq.split(","));
+		    StringBuilder commaSplitsRenamedBuilder = new StringBuilder();
+		    
+		    for( int termCounter = 0; termCounter < eS.getOutVariables().size(); ++termCounter ){
+			ExtendedTerm t = eS.getTermOf( eS.getOutVariables().get(termCounter) );
+			for( int termVarCounter = 0; termVarCounter < t.getTermVariables().size(); ++termVarCounter ){
+			    String aliasName = "t"+termCounter+"v"+termVarCounter;
+			    String newProjElement = commaSplits.get(termCounter + termVarCounter) + " AS " + aliasName;
+			    if( commaSplitsRenamedBuilder.length() > 0 )
+				commaSplitsRenamedBuilder.append(", ");
+			    commaSplitsRenamedBuilder.append(newProjElement);
+			}
+		    }
+		    String newSql = commaSplitsRenamedBuilder.toString() + cq.substring(cq.indexOf("FROM") + 4);
+		    System.out.println(newSql);
+		}
+		return null;
+	    }
+	}
+	
+	LocalUtils utils = new LocalUtils();
+	StringBuilder builder = new StringBuilder();
+	int fragIndex = 0;
+	
+	for( ExtendedRestriction fragment : extendedCombination.getRestrictions() ){
+	    
+	    if( builder.length() > 0 ) builder.append(", ");
+	    
+	    ++fragIndex;
+	    
+	    ExtendedSignature eS = fragment.getExtendedSignature();
+	    
+	    List<String> variablesStrings = new ArrayList<>();
+	    
+	    for( Variable v : eS.getOutVariables() ){
+		variablesStrings.add(v.toString());
+	    }
+	    String sql = op.getSQLForDL(fragment.getDLog(), variablesStrings);
+	    
+	    // Prune SELECT * FROM ( ... )
+	    sql = sql.substring(sql.indexOf("(") + 1, sql.lastIndexOf(")"));
+	    
+	    utils.renameProjections(sql, eS);
+	    
+	    builder.append( sql + ")" + " f_"+fragIndex );
+	}
+	
+	return builder.toString();
+    }
+
+    /**
+     * 
+     * @param extendedCombination
+     * @param op
+     * @return SELECT template(f_1.blabla) AS x, template(f1.cici) as y, etc. FROM caca
+     */
+    private String makeProj(ExtendedCombinationRestriction extendedCombination, OntopPlanning op) {
+	
+	String CONCAT_OP = "||";
+		
+	StringBuilder builder = new StringBuilder();
+	
+	List<Variable> doneVars = new ArrayList<>();
+	
+	// OutVariables
+	
+	int fragIndex = 0;
+	for( ExtendedRestriction fragment : extendedCombination.getRestrictions() ){
+	    
+	    ++fragIndex;
+	    
+	    for( Variable v : fragment.getExtendedSignature().getOutVariables() ){
+		if( !doneVars.contains(v) ){
+		    
+		    if( builder.length() > 0 ) builder.append(", ");
+		    
+		    // AS v
+		    String as = " AS " + v;
+		    
+		    ExtendedTerm t = fragment.getExtendedSignature().getTermOf(v);
+		    String result = toSQLConcat( fragIndex, v, t, CONCAT_OP );
+		    
+		    builder.append(result);
+		    builder.append(as);
+		    
+		    
+		    doneVars.add(v);
+		}
+		
+	    }
+	}
+	return builder.toString();
+    }
+
+    private String toSQLConcat(int fragIndex, Variable v, ExtendedTerm t, String CONCAT_OP) {
+	
+	StringBuilder builder = new StringBuilder();
+	
+	List<String> splits = t.split();
+	
+	for( int i = 0; i < t.getTermVariables().size(); ++i ){
+	    
+	    if( i > 0 ) builder.append(" " + CONCAT_OP + " ");
+	    
+	    builder.append("'" + splits.get(i) + "'");
+	    builder.append(" " + CONCAT_OP + " ");
+	    
+	    QualifiedAttributeID qA = t.getAliasesFor(t.getTermVariables().get(i)).iterator().next();
+	    
+	    String replaced = "f_" + fragIndex + qA.toString().substring(qA.toString().indexOf("."), qA.toString().length()); 
+	    
+	    builder.append( replaced );
+	
+	    // http://sws.ifi.uio.no/data/npd-v2/wellbore/ || [qview1."wlbNpdidWellbore", qview2."wlbNpdidWellbore", qview3."wlbNpdidWellbore"] || /stratum/ || [qview1."lsuNpdidLithoStrat"]/cores
+	    
+	    
+	    if( (i == t.getTermVariables().size() -1)  && (i+1 < splits.size()) ){
+		builder.append(" " + CONCAT_OP + " ");
+		builder.append("'" + splits.get(i+1) + "'");
+	    }
+	}
+	return builder.toString();
+    }
+
     // SELECT f1.colName1, f1.colName2, ..
     // This work for a combination
     /**
@@ -206,6 +349,7 @@ public class SQLCreator {
 	    Restriction r = combination.getFragmentOfIndex(fragIndex);
 	    
 	    ExtendedSignature.Builder signatureBuilder = new ExtendedSignature.Builder();
+	    signatureBuilder.signature(r.getSignature());
 	    for( Variable v : mOutVariableToFragmentsVariables.keySet() ){
 		List<MFragIndexToVarIndex> list = mOutVariableToFragmentsVariables.get(v);
 		
@@ -253,12 +397,6 @@ public class SQLCreator {
 	    Restriction r = combination.getFragmentOfIndex(fragIndex);
 	    List<String> signature = op.outVarsListForFragment(fragIndex, mOutVariableToFragmentsVariables);
 	    
-	    
-	    String sql = op.getSQLForDL(r.getDLog(), signature);
-
-	    // Make the projLists for Joins
-	    List<String> projList = retrieveProjections(sql); // Retrieve the projection of sql
-
 	    // Update joins structurer	    
 	    for( Variable v : mOutVariableToFragmentsVariables.keySet() ){
 		List<MFragIndexToVarIndex> list = mOutVariableToFragmentsVariables.get(v);
