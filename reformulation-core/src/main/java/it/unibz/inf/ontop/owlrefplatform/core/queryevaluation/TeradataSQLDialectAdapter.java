@@ -48,13 +48,18 @@ public class TeradataSQLDialectAdapter extends SQL99DialectAdapter {
     }
 
     @Override
+    public String strLength(String str) {
+        return String.format("CHARACTER_LENGTH(%s)", str);
+    }
+
+    @Override
     public String strStartsOperator(){
-        return "SUBSTR(%1$s, 1, LENGTH(%2$s)) LIKE %2$s";
+        return "SUBSTR(%1$s, 1, CHARACTER_LENGTH(%2$s)) LIKE %2$s";
     }
 
     @Override
     public String strEndsOperator(){
-        return "SUBSTR(%1$s,LENGTH(%1$s) - LENGTH(%2$s) + 1, LENGTH(%2$s)) LIKE %2$s";
+        return "SUBSTR(%1$s,LENGTH(%1$s) - CHARACTER_LENGTH(%2$s) + 1, CHARACTER_LENGTH(%2$s)) LIKE %2$s";
     }
 
     @Override

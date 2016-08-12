@@ -88,12 +88,24 @@ public class TeradataSQLAdapterTest {
 //                        "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
 //                        "select ?x ?y where {?x :hasAccount ?y}";
 
+//            String sparqlQuery =
+//            "PREFIX : <http://www.semanticweb.org/elem/ontologies/2016/5/financial#>\n" +
+//                    "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
+//                    "select ?w where {?x a :Customer." +
+//                    "?x :hasFirstName ?w" +
+//                    " FILTER(STRLEN(?w) > 10)}\n";
+
             String sparqlQuery =
-            "PREFIX : <http://www.semanticweb.org/elem/ontologies/2016/5/financial#>\n" +
-                    "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
-                    "select ?w where {?x a :Customer." +
-                    "?x :hasFirstName ?w" +
-                    " FILTER(STRLEN(?w) > 10)}\n";
+                "PREFIX : <http://www.semanticweb.org/elem/ontologies/2016/5/financial#>\n" +
+                        "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
+                        "select ?x ?y where {?x :hasAccount ?y}" +
+                        "LIMIT 20";
+
+//            String sparqlQuery =
+//            "PREFIX : <http://www.semanticweb.org/elem/ontologies/2016/5/financial#>\n" +
+//                    "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
+//                    "select ?x where {?x a :Customer" +
+//                    "   FILTER(STRSTARTS(?x,\"A\"))}\n";
 
 
         try {
