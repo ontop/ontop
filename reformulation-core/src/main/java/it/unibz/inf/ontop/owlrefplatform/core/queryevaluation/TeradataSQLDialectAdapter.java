@@ -1,6 +1,6 @@
-package it.unibz.krdb.obda.owlrefplatform.core.queryevaluation;
+package it.unibz.inf.ontop.owlrefplatform.core.queryevaluation;
 
-import it.unibz.krdb.obda.parser.EncodeForURI;
+import it.unibz.inf.ontop.parser.EncodeForURI;
 
 import java.sql.Types;
 import java.util.Map;

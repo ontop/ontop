@@ -1,4 +1,4 @@
-package it.unibz.krdb.sql;
+package it.unibz.inf.ontop.sql;
 
 /*
  * #%L
