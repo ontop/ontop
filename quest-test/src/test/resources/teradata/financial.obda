@@ -40,6 +40,10 @@ source		select "cust_id" from "financial"."customer";
 
 mappingId	Customer has age
 target		:Customer/{cust_id} :hasAge {age} .
-source		select "cust_id" from "financial"."customer";
+source		select "cust_id", "age" from "financial"."customer_name";
+
+mappingId	Customer has First name
+target		:Customer/{cust_id} :hasFirstName {first_name} .
+source		select "cust_id", "first_name" from "financial"."customer_name";
 ]]
 

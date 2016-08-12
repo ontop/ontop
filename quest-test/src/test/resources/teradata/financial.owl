@@ -69,6 +69,15 @@
     
 
 
+    <!-- http://www.semanticweb.org/elem/ontologies/2016/5/financial#hasFirstName -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/elem/ontologies/2016/5/financial#hasFirstName">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/elem/ontologies/2016/5/financial#Customer"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2000/01/rdf-schema#Literal"/>
+    </owl:DatatypeProperty>
+    
+
+
     <!-- 
     ///////////////////////////////////////////////////////////////////////////////////////
     //

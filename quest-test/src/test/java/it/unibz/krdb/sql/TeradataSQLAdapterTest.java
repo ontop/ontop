@@ -88,11 +88,14 @@ public class TeradataSQLAdapterTest {
 //                "PREFIX : <http://www.semanticweb.org/elem/ontologies/2016/5/financial#>\n" +
 //                        "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
 //                        "select ?x ?y where {?x :hasAccount ?y}";
+
             String sparqlQuery =
             "PREFIX : <http://www.semanticweb.org/elem/ontologies/2016/5/financial#>\n" +
                     "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
-                    "select ?x where {?x a :Customer" +
-                    " FILTER(STRBEFORE(\"aabc\", \"bc\") > \"a\")}\n";
+                    "select ?w where {?x a :Customer." +
+                    "?x :hasFirstName ?w" +
+                    " FILTER(STRLEN(?w) > 10)}\n";
+
 
         try {
             long t1 = System.currentTimeMillis();
@@ -100,8 +103,8 @@ public class TeradataSQLAdapterTest {
             int columnSize = rs.getColumnCount();
             while (rs.nextRow()) {
                 for (int idx = 1; idx <= columnSize; idx++) {
-                    OWLObject binding = rs.getOWLObject(idx);
-                    System.out.print(binding.toString() + ", ");
+                    OWLLiteral binding = rs.getOWLLiteral(idx);
+                    System.out.print(binding.getLiteral()+ ", ");
                 }
                 System.out.print("\n");
             }
@@ -199,3 +202,9 @@ public class TeradataSQLAdapterTest {
 //                    "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
 //                    "select ?x where {?x a :Customer" +
 //                    " FILTER(STRBEFORE(\"aabc\", \"bc\") > \"a\")}\n";
+
+//    String sparqlQuery =
+//            "PREFIX : <http://www.semanticweb.org/elem/ontologies/2016/5/financial#>\n" +
+//                    "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
+//                    "select ?x ?y where {?x a :Customer" +
+//                    "   BIND(CONCAT(?x, \"elem\") AS ?y)}\n";
