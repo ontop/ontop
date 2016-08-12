@@ -24,6 +24,7 @@ public class ExtendedSignature extends SignatureDecorator{
     public static class Builder{
 	private List<Variable> outVariables;
 	private List<ExtendedTerm> templates;
+	
 	private Signature signature;
 	
 	public Builder(){

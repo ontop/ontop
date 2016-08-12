@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -17,12 +16,14 @@ public class ExtendedTerm extends TermDecorator {
 
     private List<Variable> variables;
     private Map<Variable, Set<QualifiedAttributeID>> aliases;
+    private int termID;
     
-    public ExtendedTerm(Term component, List<Variable> termVariables, Map<Variable, Set<QualifiedAttributeID>> aliases) {
+    public ExtendedTerm(Term component, List<Variable> termVariables, Map<Variable, Set<QualifiedAttributeID>> aliases, int termID) {
 	super(component);
 	
 	this.variables = termVariables;
 	this.aliases = new HashMap<>();
+	this.termID = termID;
 	
 	// Copy only the portion of the aliases relevant for the variables in the term
 	for( Variable v :  aliases.keySet() ){
@@ -39,6 +40,23 @@ public class ExtendedTerm extends TermDecorator {
     
     public Set<QualifiedAttributeID> getAliasesFor( Variable v ){
 	return this.aliases.get(v);
+    }
+    
+    /**
+     * 
+     * @param termVariable
+     * @return The name in the projection for the given termVariable
+     */
+    public String getProjNameForTermVariable( Variable termVariable ){
+	
+	String result = null;
+	
+	for( int i = 0; i < this.variables.size(); ++i ){
+	    if( this.variables.get(i).equals(termVariable) ){
+		result = "t"+this.termID+"v"+i;
+	    }
+	}
+	return result;
     }
     
     /**

@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.planning.sql;
 
 import it.unibz.inf.ontop.planning.OntopPlanning;
 import it.unibz.inf.ontop.planning.datatypes.MFragIndexToVarIndex;
+import it.unibz.inf.ontop.planning.datatypes.Pair;
 import it.unibz.inf.ontop.planning.datatypes.Restriction;
 import it.unibz.inf.ontop.planning.datatypes.Signature;
 import it.unibz.inf.ontop.planning.datatypes.Template;
@@ -90,7 +91,7 @@ public class SQLCreator {
      * 
      * Variable -> FragId -> [col1, ..., coln]
      */
-    private class JoinStructurer{
+    private class JoinStructurerOLD{
 	
 	private static final String FRAG_ID = "f_";
 	
@@ -145,6 +146,60 @@ public class SQLCreator {
 	    return " ON " + builder.toString();
 	}
     }
+    
+    private class JoinStructurer{
+	
+	private static final String FRAG_ID = "f_";
+	
+	// ExtendedTerm -> [f_1, f_2, ...] 
+	// Each term fills a join variable
+	private Map<ExtendedTerm, List<Integer>> state;
+
+	private JoinStructurer() {
+	    this.state = new HashMap<>();
+	}
+
+	private void add(ExtendedTerm term, int fragIndex) {
+	    if( !state.containsKey(term) ){
+		
+		List<Integer> toAdd = new ArrayList<>(); 
+		toAdd.add(fragIndex);
+		state.put(term, toAdd );
+	    }
+	}
+
+	@Override
+	public String toString(){
+	    return state.toString();
+	}
+	
+	public String joinString() {
+	    
+	    StringBuilder builder = new StringBuilder();
+	    
+	    for( ExtendedTerm t : this.state.keySet() ){
+		for( Variable termVar : t.getTermVariables() ){
+		    for( Integer fragIndex : this.state.get(t) ){
+			
+			String colName = JoinStructurer.FRAG_ID + fragIndex + "." + t.getProjNameForTermVariable(termVar);
+			
+			if( builder.toString().endsWith("=") ){
+			    builder.append(colName);
+			    builder.append(", ");
+			}
+			else{
+			    builder.append(colName + "=");
+			}
+			
+			//		    qA.
+		    }
+		    builder.deleteCharAt(builder.length() -2); // Remove , 
+		}
+	    }
+		
+		return " ON " + builder.toString();
+	    }
+    }
 
     // ***** ***** //
 
@@ -178,8 +233,10 @@ public class SQLCreator {
 	    // makeFrom 
 	    String from = makeFrom(extendedCombination, op);
 	    
+	    System.out.println(proj + from);
+	    
 	    // Join condition
-	    String joinCondition = makeJoinCondition(combination, op, mOutVariableToFragmentsVariables, aliasMap); // ON f_0."wlbNpdidWellbore"=f_1."wlbNpdidWellbore" 
+	    String joinCondition = makeJoinCondition(extendedCombination, op, mOutVariableToFragmentsVariables, aliasMap); // ON f_0."wlbNpdidWellbore"=f_1."wlbNpdidWellbore" 
 	    union.add(joinCondition);
 	}
 	
@@ -199,19 +256,21 @@ public class SQLCreator {
     			StringBuilder renamedSplitsBuilder = new StringBuilder();
     			
     			for( String cq : splits ){
-    				String proj = cq.substring(cq.indexOf("SELECT") + 6, cq.indexOf("FROM"));
+    				String proj = cq.substring(cq.indexOf("SELECT"), cq.indexOf("FROM"));
 
-    				List<String> commaSplits = Arrays.asList(cq.split(","));
+    				List<String> commaSplits = Arrays.asList(proj.split(","));
     				StringBuilder commaSplitsRenamedBuilder = new StringBuilder();
-
+    				
+    				
     				for( int termCounter = 0; termCounter < eS.getOutVariables().size(); ++termCounter ){
     					ExtendedTerm t = eS.getTermOf( eS.getOutVariables().get(termCounter) );
     					for( int termVarCounter = 0; termVarCounter < t.getTermVariables().size(); ++termVarCounter ){
-    						String aliasName = "t"+termCounter+"v"+termVarCounter;
-    						String newProjElement = commaSplits.get(termCounter + termVarCounter) + " AS " + aliasName;
-    						if( commaSplitsRenamedBuilder.length() > 0 )
-    							commaSplitsRenamedBuilder.append(", ");
-    						commaSplitsRenamedBuilder.append(newProjElement);
+    					    Variable termVar = t.getTermVariables().get(termVarCounter);
+    					    String projName = t.getProjNameForTermVariable(termVar);
+    					    String newProjElement = commaSplits.get(termCounter + termVarCounter) + " AS " + projName;
+    					    if( commaSplitsRenamedBuilder.length() > 0 )
+    						commaSplitsRenamedBuilder.append(", ");
+    					    commaSplitsRenamedBuilder.append(newProjElement);
     					}
     				}
     				String newSql = commaSplitsRenamedBuilder.toString() + cq.substring(cq.indexOf(" FROM"));
@@ -247,9 +306,9 @@ public class SQLCreator {
 	    // Prune SELECT * FROM ( ... )
 	    sql = sql.substring(sql.indexOf("(") + 1, sql.lastIndexOf(")"));
 	    
-	    utils.renameProjections(sql, eS);
+	    String renamedSql = utils.renameProjections(sql, eS);
 	    
-	    builder.append( sql + ")" + " f_"+fragIndex );
+	    builder.append( "(" + renamedSql + ")" + " f_"+fragIndex );
 	}
 	
 	return builder.toString();
@@ -285,6 +344,7 @@ public class SQLCreator {
 		    String as = " AS " + v;
 		    
 		    ExtendedTerm t = fragment.getExtendedSignature().getTermOf(v);
+		    
 		    String result = toSQLConcat( fragIndex, v, t, CONCAT_OP );
 		    
 		    builder.append(result);
@@ -293,7 +353,6 @@ public class SQLCreator {
 		    
 		    doneVars.add(v);
 		}
-		
 	    }
 	}
 	return builder.toString();
@@ -307,14 +366,18 @@ public class SQLCreator {
 	
 	for( int i = 0; i < t.getTermVariables().size(); ++i ){
 	    
+	    Variable termVar = t.getTermVariables().get(i);
+	    
 	    if( i > 0 ) builder.append(" " + CONCAT_OP + " ");
 	    
 	    builder.append("'" + splits.get(i) + "'");
 	    builder.append(" " + CONCAT_OP + " ");
 	    
-	    QualifiedAttributeID qA = t.getAliasesFor(t.getTermVariables().get(i)).iterator().next();
+//	    QualifiedAttributeID qA = t.getAliasesFor(t.getTermVariables().get(i)).iterator().next(); // Davide> Commented out after renaming term variables as v0t0 ...
+	    String qA = t.getProjNameForTermVariable(termVar);
 	    
-	    String replaced = "f_" + fragIndex + qA.toString().substring(qA.toString().indexOf("."), qA.toString().length()); 
+//	    String replaced = "f_" + fragIndex + qA.toString().substring(qA.toString().indexOf("."), qA.toString().length()); // Davide> Commented out after renaming term variables as v0t0 ... 
+	    String replaced = "f_" + fragIndex + "." + qA;
 	    
 	    builder.append( replaced );
 	
@@ -355,6 +418,8 @@ public class SQLCreator {
 	    
 	    ExtendedSignature.Builder signatureBuilder = new ExtendedSignature.Builder();
 	    signatureBuilder.signature(r.getSignature());
+	    
+	    int absoluteVarID = 0;
 	    for( Variable v : mOutVariableToFragmentsVariables.keySet() ){
 		List<MFragIndexToVarIndex> list = mOutVariableToFragmentsVariables.get(v);
 		
@@ -365,12 +430,13 @@ public class SQLCreator {
 			Term t = retrieveTerm( r, el.getVarIndex() );
 			List<Variable> variablesInTerm = varsOf(t, op);
 			
-			ExtendedTerm eT = new ExtendedTerm(t, variablesInTerm, aliasMap.getMapForFragment(fragIndex) );
+			ExtendedTerm eT = new ExtendedTerm(t, variablesInTerm, aliasMap.getMapForFragment(fragIndex), absoluteVarID);
 			
 			signatureBuilder.addOutVariableAndTerm(v, eT);
 						
 		    }
 		}
+		++absoluteVarID;
 	    }
 	    ExtendedRestriction eR = new ExtendedRestriction.Builder(r).signature(signatureBuilder.build()).build();
 	    restrictions.add(eR);
@@ -384,8 +450,8 @@ public class SQLCreator {
 	return null;
     }
 
-    private String makeJoinCondition(
-	    CombinationRestriction combination,
+    private String makeJoinConditionOLD(
+	    ExtendedCombinationRestriction extendedCombination,
 	    OntopPlanning op,
 	    LinkedListMultimap<Variable, MFragIndexToVarIndex> mOutVariableToFragmentsVariables, AliasMap aliasMap) {
 
@@ -394,16 +460,15 @@ public class SQLCreator {
 	JoinStructurer structurer = new JoinStructurer(); // Davide> At the moment I am re-creating this every time
 	                                  //       but this behavior could be optimized I think...
 
-	
-
-	for( int fragIndex = 0; fragIndex < combination.numFragments(); ++fragIndex ){
+	for( int fragIndex = 0; fragIndex < extendedCombination.numFragments(); ++fragIndex ){
 
 	    // Transform the restriction in SQL
-	    Restriction r = combination.getFragmentOfIndex(fragIndex);
+	    ExtendedRestriction r = extendedCombination.getFragmentOfIndex(fragIndex);
 	    List<String> signature = op.outVarsListForFragment(fragIndex, mOutVariableToFragmentsVariables);
 	    
 	    // Update joins structurer	    
 	    for( Variable v : mOutVariableToFragmentsVariables.keySet() ){
+		ExtendedTerm eT = r.getExtendedSignature().getTermOf(v);
 		List<MFragIndexToVarIndex> list = mOutVariableToFragmentsVariables.get(v);
 		if( list.size() > 1 ){
 		    // Join
@@ -426,7 +491,7 @@ public class SQLCreator {
 	System.out.println(result);
 	return result;
     }
-
+    
     private List<Variable> varsOf(Term t, OntopPlanning op) {
 
 	List<Variable> result = new ArrayList<>();
@@ -454,7 +519,7 @@ public class SQLCreator {
 	return result;
     }
 
-    private Term retrieveTerm(Restriction r, int varIndex) {
+    private Term retrieveTerm(ExtendedRestriction r, int varIndex) {
 
 	CQIE first = r.getDLog().getRules().iterator().next();
 	Term result = first.getHead().getTerm(varIndex);
