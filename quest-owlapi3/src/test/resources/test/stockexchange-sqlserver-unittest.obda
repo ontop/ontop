@@ -7,7 +7,7 @@
    <!ENTITY xsd: SYSTEM 'http://www.w3.org/2001/XMLSchema#'>
 ]>
 <OBDA version="1.0" xml:base="http://www.owl-ontologies.com/Ontology1207768242.owl#">
-  <mappings body="class it.unibz.krdb.obda.model.impl.SQLQueryImpl" headclass="class it.unibz.krdb.obda.model.impl.CQIEImpl" sourceuri="RandBStockExchange">
+  <mappings body="class it.unibz.inf.obda.model.impl.SQLQueryImpl" headclass="class it.unibz.inf.obda.model.impl.CQIEImpl" sourceuri="RandBStockExchange">
     <mapping id="mapping-addresses">
       <CQ string="Address(getAddressObj($id)),addressID(getAddressObj($id),$id),inStreet(getAddressObj($id),$street),hasNumber(getAddressObj($id),$number),inCity(getAddressObj($id),$city),inState(getAddressObj($id),$state),inCountry(getAddressObj($id),$country)"/>
       <SQLQuery string="select id, street, number, city, state, country from address"/>

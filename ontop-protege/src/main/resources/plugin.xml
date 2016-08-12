@@ -7,7 +7,7 @@
 		point="org.protege.editor.core.application.ViewComponent">
 		<label value="Datasource editor"/>
 		<class
-			value="org.semanticweb.ontop.protege.views.DatasourcesManagerView">
+			value="it.unibz.inf.ontop.protege.views.DatasourcesManagerView">
 		</class>
 		<headerColor value="8C1717"/>
 		<category value="ontop"/>
@@ -17,7 +17,7 @@
 		point="org.protege.editor.core.application.ViewComponent">
 		<label value="Mapping editor"/>
 		<class
-			value="org.semanticweb.ontop.protege.views.MappingsManagerView">
+			value="it.unibz.inf.ontop.protege.views.MappingsManagerView">
 		</class>
 		<headerColor value="8C1717"/>
 		<category value="ontop"/>
@@ -28,7 +28,7 @@
 		point="org.protege.editor.core.application.ViewComponent">
 		<label value="Mapping assistant"/>
 		<class
-			value="org.semanticweb.ontop.protege.views.MappingAssistantView">
+			value="it.unibz.inf.ontop.protege.views.MappingAssistantView">
 		</class>
 		<headerColor value="8C1717"/>
 		<category value="ontop"/>
@@ -40,7 +40,7 @@
 		point="org.protege.editor.core.application.ViewComponent">
 		<label value="Query manager"/>
 		<class
-			value="org.semanticweb.ontop.protege.views.QueryManagerView">
+			value="it.unibz.inf.ontop.protege.views.QueryManagerView">
 		</class>
 		<headerColor value="8C1717"/>
 		<category value="ontop"/>
@@ -50,7 +50,7 @@
 		point="org.protege.editor.core.application.ViewComponent">
 		<label value="ontop query editor"/>
 		<class
-			value="org.semanticweb.ontop.protege.views.QueryInterfaceView">
+			value="it.unibz.inf.ontop.protege.views.QueryInterfaceView">
 		</class>
 		<headerColor value="8C1717"/>
 		<category value="ontop"/>
@@ -62,7 +62,7 @@
 		point="org.protege.editor.core.application.WorkspaceTab">
 		<label value="Ontop Mappings"/>
 		<class
-			value="org.semanticweb.ontop.protege.gui.tab.OntopMappingsTab">
+			value="it.unibz.inf.ontop.protege.gui.tab.OntopMappingsTab">
 		</class>
 		<index value="X"/>
 		<editorKitId value="OWLEditorKit"/>
@@ -74,7 +74,7 @@
 		point="org.protege.editor.core.application.WorkspaceTab">
 		<label value="Ontop SPARQL"/>
 		<class
-			value="org.semanticweb.ontop.protege.gui.tab.OntopSPARQLTab">
+			value="it.unibz.inf.ontop.protege.gui.tab.OntopSPARQLTab">
 		</class>
 		<index value="X"/>
 		<editorKitId value="OWLEditorKit"/>
@@ -85,13 +85,13 @@
 	<!-- Editor Kit setup extensions -->	
 
   <extension id="OBDAEditorKitSynchronizerPlugin" point="org.protege.editor.core.application.EditorKitHook">
-  	<class value="org.semanticweb.ontop.protege.core.OBDAEditorKitSynchronizerPlugin"/>
+  	<class value="it.unibz.inf.ontop.protege.core.OBDAEditorKitSynchronizerPlugin"/>
   	<editorKitId value="OWLEditorKit"/>
   </extension>
   
   <extension id="reformulation-configuration" point="org.protege.editor.core.application.preferencespanel">
     <label value="Ontop Reasoner"/>
-    <class value="org.semanticweb.ontop.protege.gui.preferences.QuestPreferencesPanel"/>
+    <class value="it.unibz.inf.ontop.protege.gui.preferences.QuestPreferencesPanel"/>
   </extension>
   
   <!-- MENUS -->
@@ -105,8 +105,8 @@
 	
   <extension id="menu.ontop.materializemappings" point="org.protege.editor.core.application.EditorKitMenuAction">
 		<name value="Materialize triples..."/>
-		<toolTip value="Import OWL Assertions (ABox/Triples) from the mappings..."/>
-		<class value="org.semanticweb.ontop.protege.gui.action.AboxMaterializationAction"/>
+		<toolTip value="Dump OWL Assertions (ABox/Triples) derived by the mappings and ontology"/>
+		<class value="it.unibz.inf.ontop.protege.gui.action.AboxMaterializationAction"/>
 		<path value="it.unibz.inf.ontop.protege.menu.ontop/SlotA-A"/>
 		<editorKitId value="OWLEditorKit"/>
 	</extension>
@@ -114,7 +114,7 @@
    <extension id="menu.ontop.countmaterializedmappings" point="org.protege.editor.core.application.EditorKitMenuAction">
 		<name value="Display the mapping statistics..."/> 
 		<toolTip value="Provide information about the number of assertions (triples) from the mappings"/>
-		<class value="org.semanticweb.ontop.protege.gui.action.ABoxStatisticsAction"/>
+		<class value="it.unibz.inf.ontop.protege.gui.action.ABoxStatisticsAction"/>
 		<path value="it.unibz.inf.ontop.protege.menu.ontop/SlotB-A"/>
 		<editorKitId value="OWLEditorKit"/>
 	</extension>
@@ -122,7 +122,7 @@
 	 <extension id="menu.ontop.inconsistecychecking" point="org.protege.editor.core.application.EditorKitMenuAction">
 		<name value="Check for inconsistencies..."/> 
 		<toolTip value="Run consistency check regarding disjoint and functional properties"/>
-		<class value="org.semanticweb.ontop.protege.gui.action.InconsistencyCheckAction"/>
+		<class value="it.unibz.inf.ontop.protege.gui.action.InconsistencyCheckAction"/>
 		<path value="it.unibz.inf.ontop.protege.menu.ontop/SlotB-B"/>
 		<editorKitId value="OWLEditorKit"/>
 	</extension>
@@ -130,7 +130,7 @@
 	<extension id="menu.ontop.emptieschecking" point="org.protege.editor.core.application.EditorKitMenuAction">
 		<name value="Check for empties..."/> 
 		<toolTip value="Provide information about empty concepts and roles "/>
-		<class value="org.semanticweb.ontop.protege.gui.action.EmptiesCheckAction"/>
+		<class value="it.unibz.inf.ontop.protege.gui.action.EmptiesCheckAction"/>
 		<path value="it.unibz.inf.ontop.protege.menu.ontop/SlotB-C"/>
 		<editorKitId value="OWLEditorKit"/>
 	</extension>
@@ -138,7 +138,7 @@
 	 <extension id="menu.ontop.importr2rmlmappings" point="org.protege.editor.core.application.EditorKitMenuAction">
 		<name value="Import R2RML mappings..."/> 
 		<toolTip value="Import mappings from an R2RML mapping file"/>
-		<class value="org.semanticweb.ontop.protege.gui.action.R2RMLImportAction"/>
+		<class value="it.unibz.inf.ontop.protege.gui.action.R2RMLImportAction"/>
 		<path value="it.unibz.inf.ontop.protege.menu.ontop/SlotC-A"/>
 		<editorKitId value="OWLEditorKit"/>
 	</extension>
@@ -146,7 +146,7 @@
 	 <extension id="menu.ontop.exportr2rmlmappings" point="org.protege.editor.core.application.EditorKitMenuAction">
 		<name value="Export R2RML mappings..."/> 
 		<toolTip value="Export mappings as an R2RML mapping file"/>
-		<class value="org.semanticweb.ontop.protege.gui.action.R2RMLExportAction"/>
+		<class value="it.unibz.inf.ontop.protege.gui.action.R2RMLExportAction"/>
 		<path value="it.unibz.inf.ontop.protege.menu.ontop/SlotC-B"/>
 		<editorKitId value="OWLEditorKit"/>
 	</extension>
@@ -154,7 +154,7 @@
 	<extension id="menu.ontop.bootstrap" point="org.protege.editor.core.application.EditorKitMenuAction">
 		<name value="Generate ontology and mappings..."/>
 		<toolTip value="Automatically generates classes/propertis and mappings for a DB..."/>
-		<class value="org.semanticweb.ontop.protege.gui.action.BootstrapAction"/>
+		<class value="it.unibz.inf.ontop.protege.gui.action.BootstrapAction"/>
 		<path value="it.unibz.inf.ontop.protege.menu.ontop/SlotD-A"/>
 		<editorKitId value="OWLEditorKit"/>
 	</extension>
@@ -163,7 +163,7 @@
 	<extension id="quest.reasoner.factory"
              point="org.protege.editor.owl.inference_reasonerfactory">
     <name value="Ontop ${project.version}"/>
-    <class value="org.semanticweb.ontop.protege.core.OntopReasonerInfo"/>
+    <class value="it.unibz.inf.ontop.protege.core.OntopReasonerInfo"/>
   </extension>
 
     <!-- JDBC Preferences-->
