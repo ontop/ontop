@@ -101,7 +101,15 @@ public class QueryNodeNavigationTools {
         }
 
         /**
-         * Second choice: next sibling
+         * Second choice: next sibling of the current node or of an ancestor
+         */
+        return skipSubTreeAndContinueDepthFirst(query, currentNode);
+
+    }
+
+    public static Optional<QueryNode> skipSubTreeAndContinueDepthFirst(IntermediateQuery query, QueryNode currentNode) {
+        /**
+         * First choice: next sibling
          */
         Optional<QueryNode> optionalNextSibling = query.getNextSibling(currentNode);
         if (optionalNextSibling.isPresent()) {
