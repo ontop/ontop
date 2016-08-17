@@ -459,6 +459,12 @@ public class JgraphtQueryTreeComponent implements QueryTreeComponent {
 
     @Override
     public void insertParent(QueryNode childNode, QueryNode newParentNode) {
+        insertParent(childNode, newParentNode, Optional.empty());
+    }
+
+    @Override
+    public void insertParent(QueryNode childNode, QueryNode newParentNode,
+                             Optional<NonCommutativeOperatorNode.ArgumentPosition> optionalPosition) throws IllegalTreeUpdateException {
         throw new RuntimeException("TODO: support insertParent()");
     }
 

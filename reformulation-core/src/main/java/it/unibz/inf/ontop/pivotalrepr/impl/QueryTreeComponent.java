@@ -83,6 +83,12 @@ public interface QueryTreeComponent {
     void insertParent(QueryNode childNode, QueryNode newParentNode) throws IllegalTreeUpdateException;
 
     /**
+     * Inserts a new node between a node and its former parent (now grand-parent)
+     */
+    void insertParent(QueryNode childNode, QueryNode newParentNode, Optional<NonCommutativeOperatorNode.ArgumentPosition> optionalPosition)
+            throws IllegalTreeUpdateException;
+
+    /**
      * Returns a variable that is not used in the intermediate query.
      */
     Variable generateNewVariable();
