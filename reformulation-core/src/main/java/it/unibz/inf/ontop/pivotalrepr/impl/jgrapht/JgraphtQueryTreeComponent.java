@@ -469,6 +469,11 @@ public class JgraphtQueryTreeComponent implements QueryTreeComponent {
     }
 
     @Override
+    public void transferChild(QueryNode childNode, QueryNode formerParentNode, QueryNode newParentNode, Optional<NonCommutativeOperatorNode.ArgumentPosition> optionalPosition) throws IllegalTreeUpdateException {
+        throw new RuntimeException("TODO: support transferChild()");
+    }
+
+    @Override
     public Variable generateNewVariable() {
         throw new RuntimeException("TODO: support generateNewVariable()");
     }

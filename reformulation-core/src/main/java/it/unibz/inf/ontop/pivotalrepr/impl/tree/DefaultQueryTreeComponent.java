@@ -210,7 +210,13 @@ public class DefaultQueryTreeComponent implements QueryTreeComponent {
             throws IllegalTreeUpdateException {
         collectPossiblyNewVariables(newParentNode);
         tree.insertParent(childNode, newParentNode, optionalPosition);
+    }
 
+    @Override
+    public void transferChild(QueryNode childNode, QueryNode formerParentNode, QueryNode newParentNode,
+                              Optional<ArgumentPosition> optionalPosition) throws IllegalTreeUpdateException {
+
+        tree.transferChild(childNode, formerParentNode, newParentNode, optionalPosition);
     }
 
     @Override

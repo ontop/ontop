@@ -89,6 +89,14 @@ public interface QueryTreeComponent {
             throws IllegalTreeUpdateException;
 
     /**
+     * Transfers a child node from a parent to another parent
+     */
+    void transferChild(QueryNode childNode, QueryNode formerParentNode, QueryNode newParentNode,
+                       Optional<NonCommutativeOperatorNode.ArgumentPosition> optionalPosition)
+            throws IllegalTreeUpdateException;
+
+
+    /**
      * Returns a variable that is not used in the intermediate query.
      */
     Variable generateNewVariable();

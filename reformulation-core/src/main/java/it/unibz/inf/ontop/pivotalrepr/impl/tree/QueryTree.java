@@ -60,4 +60,7 @@ public interface QueryTree {
      * (since the latter are mutable by default).
      */
     QueryTree createSnapshot();
+
+    void transferChild(QueryNode childNode, QueryNode formerParentNode, QueryNode newParentNode,
+                       Optional<NonCommutativeOperatorNode.ArgumentPosition> optionalPosition);
 }

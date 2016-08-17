@@ -403,6 +403,18 @@ public class DefaultTree implements QueryTree {
                 newParentIndex, new HashSet<>(emptyNodes));
     }
 
+    @Override
+    public void transferChild(QueryNode childNode, QueryNode formerParentNode, QueryNode newParentNode,
+                              Optional<NonCommutativeOperatorNode.ArgumentPosition> optionalPosition) {
+
+        TreeNode formerParentTreeNode = accessTreeNode(formerParentNode);
+        TreeNode childTreeNode = accessTreeNode(childNode);
+
+        accessChildrenRelation(formerParentTreeNode).removeChild(childTreeNode);
+
+        addChild(newParentNode, childNode, optionalPosition, false, false);
+    }
+
     /**
      * Low-level
      */
