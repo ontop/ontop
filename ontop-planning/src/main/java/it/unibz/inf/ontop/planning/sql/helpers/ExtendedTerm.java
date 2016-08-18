@@ -23,7 +23,7 @@ public class ExtendedTerm extends TermDecorator {
 	
 	this.variables = termVariables;
 	this.aliases = new HashMap<>();
-	this.termID = termID;
+	this.termID = termID; // TODO Check when termID is filled, and HOW
 	
 	// Copy only the portion of the aliases relevant for the variables in the term
 	for( Variable v :  aliases.keySet() ){
@@ -34,6 +34,7 @@ public class ExtendedTerm extends TermDecorator {
 	
     }
     
+        
     public List<Variable> getTermVariables(){
 	return Collections.unmodifiableList(this.variables);
     }

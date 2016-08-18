@@ -1,5 +1,9 @@
 package it.unibz.inf.ontop.planning.datatypes;
 
+import it.unibz.inf.ontop.planning.sql.helpers.ExtendedTerm;
+import it.unibz.krdb.obda.model.Function;
+import it.unibz.krdb.obda.model.Term;
+
 /**
  * A template is a pair f/n, where f is a function
  * symbol and n is the arity for f.
@@ -18,6 +22,17 @@ package it.unibz.inf.ontop.planning.datatypes;
 public class Template{
     
     private String value;
+    private int arity;
+    
+    public Template( Term term ){
+	String templateString = takeTemplateString(term);
+	this.value = templateString;
+	this.arity = -1; // TODO Retrieve arities for all constructors
+	
+	if( term instanceof ExtendedTerm ){
+	    this.arity = ((ExtendedTerm)term).getTermVariables().size();
+	}
+    }
     
     public Template(String value){
 	this.value = value;
@@ -25,6 +40,10 @@ public class Template{
     
     public String getValue(){
 	return this.value;
+    }
+    
+    public int getArity(){
+	return this.arity;
     }
 
     @Override 
@@ -47,4 +66,20 @@ public class Template{
     public String toString(){
 	return this.value;
     }
+    
+    private String takeTemplateString(Term t) {
+	    assert (t instanceof Function) : "Assertion Failed: t is NOT an object or a data value\n";
+	    
+	    String result = null;
+	    
+	    String termString = t.toString();
+	    if( termString.startsWith("URI") ){
+		result = termString.substring( 0, termString.indexOf(",") ) + ")";
+	    }
+	    else{
+		result = termString.substring( 0, termString.indexOf("(") );
+	    }
+	    
+	    return result;
+	}
 };
