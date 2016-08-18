@@ -67,8 +67,8 @@ public class ExtendedTerm extends TermDecorator {
     /**
      * @return 
      * 
-     * URI("http://sws.ifi.uio.no/data/npd-v2/wellbore/{}/stratum/{}/cores",t9_7,t5_7) -> 
-     * http://www.w3.org/2001/XMLSchema#decimal(t1_7)
+     * URI("http://sws.ifi.uio.no/data/npd-v2/wellbore/{}/stratum/{}/cores",t9_7,t5_7) -> [http://sws.ifi.uio.no/data/npd-v2/wellbore/, /stratum/, /cores]
+     * http://www.w3.org/2001/XMLSchema#decimal(t1_7) -> [http://www.w3.org/2001/XMLSchema#string]
      *  
      */
     public List<String> split(){
@@ -102,5 +102,10 @@ public class ExtendedTerm extends TermDecorator {
 	builder.append("ALIASES: " + this.aliases.toString() + "\n");
 	
 	return builder.toString();
+    }
+
+
+    public boolean isURITemplate() {
+	return super.component.toString().startsWith("URI");
     }
 }

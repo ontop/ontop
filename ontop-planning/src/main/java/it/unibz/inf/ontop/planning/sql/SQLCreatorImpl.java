@@ -211,36 +211,63 @@ public class SQLCreatorImpl implements SQLCreator {
     }
 
     private String toSQLConcat(int fragIndex, Variable v, ExtendedTerm t, String CONCAT_OP) {
-
+	
 	StringBuilder builder = new StringBuilder();
-
 	List<String> splits = t.split();
-
+	
 	for( int i = 0; i < t.getTermVariables().size(); ++i ){
-	    
 	    Variable termVar = t.getTermVariables().get(i);
-
+	    String templatePortion = splits.get(i);
+	    
 	    if( i > 0 ) builder.append(" " + CONCAT_OP + " ");
-
-	    builder.append("'" + splits.get(i) + "'");
-	    builder.append(" " + CONCAT_OP + " ");
-
-	    //	    QualifiedAttributeID qA = t.getAliasesFor(t.getTermVariables().get(i)).iterator().next(); // Davide> Commented out after renaming term variables as v0t0 ...
-	    String qA = t.getProjNameForTermVariable(termVar);
-
-	    //	    String replaced = "f_" + fragIndex + qA.toString().substring(qA.toString().indexOf("."), qA.toString().length()); // Davide> Commented out after renaming term variables as v0t0 ... 
-	    String replaced = "f_" + fragIndex + "." + qA;
-
-	    builder.append( replaced );
-
-	    // http://sws.ifi.uio.no/data/npd-v2/wellbore/ || [qview1."wlbNpdidWellbore", qview2."wlbNpdidWellbore", qview3."wlbNpdidWellbore"] || /stratum/ || [qview1."lsuNpdidLithoStrat"]/cores
-
-
-	    if( (i == t.getTermVariables().size() -1)  && (i+1 < splits.size()) ){
-		builder.append(" " + CONCAT_OP + " ");
-		builder.append("'" + splits.get(i+1) + "'");
+	    
+	    if( t.isURITemplate() ){
+		builder.append( toSQLConcatForURITemplate( fragIndex, v, t, CONCAT_OP, termVar, templatePortion ) );
+		
+		if( (i == t.getTermVariables().size() -1)  && (i+1 < splits.size()) ){
+		    builder.append(" " + CONCAT_OP + " ");
+		    builder.append("'" + splits.get(i+1) + "'");
+		}
+	    }
+	    else{
+		builder.append( toSQLConcatForDatatypeTemplate( fragIndex, v, t, CONCAT_OP, termVar, templatePortion ) );
 	    }
 	}
+	return builder.toString();
+    }
+
+    // URI || 'f_1.t0v1'  
+    private String toSQLConcatForURITemplate( int fragIndex, Variable v, ExtendedTerm t, 
+	    String CONCAT_OP, Variable termVar, String templatePortion ){
+	
+	StringBuilder builder = new StringBuilder();
+	
+	builder.append("'" + templatePortion + "'");
+	builder.append(" " + CONCAT_OP + " ");
+	
+	String qA = t.getProjNameForTermVariable(termVar);
+	
+	String replaced = "f_" + fragIndex + "." + qA;
+	
+	builder.append( replaced );
+	
+	return builder.toString();
+    }
+    
+    // 'f_1.t0v1' || ^^xsd:string
+    private String toSQLConcatForDatatypeTemplate( int fragIndex, Variable v, ExtendedTerm t, 
+	    String CONCAT_OP, Variable termVar, String templatePortion ) {
+	
+	StringBuilder builder = new StringBuilder();
+	
+	String qA = t.getProjNameForTermVariable(termVar);
+	String replaced = "f_" + fragIndex + "." + qA;
+	
+	builder.append( replaced );
+	
+	builder.append(" " + CONCAT_OP + " ");
+	builder.append("'^^" + templatePortion + "'");
+	
 	return builder.toString();
     }
 
@@ -485,7 +512,7 @@ public class SQLCreatorImpl implements SQLCreator {
 		    builder.deleteCharAt(builder.length() -2); // Remove , 
 		}
 	    }
-	    return " ON " + builder.toString();
+	    return " WHERE " + builder.toString();
 	}
     };
 };

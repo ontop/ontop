@@ -94,6 +94,7 @@ public class OntopPlanningTest {
         System.out.println(sql);
     }
 
+    @Ignore
     @Test
     public void getSQLForFragments3() throws Exception {
 
