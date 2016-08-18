@@ -1,6 +1,6 @@
 package it.unibz.inf.ontop.planning.datatypes;
 
-import it.unibz.inf.ontop.planning.sql.helpers.ExtendedTerm;
+import it.unibz.inf.ontop.planning.sql.decorators.ExtendedTerm;
 import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.Term;
 

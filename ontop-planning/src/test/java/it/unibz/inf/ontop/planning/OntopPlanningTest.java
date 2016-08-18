@@ -10,6 +10,7 @@ import it.unibz.inf.ontop.planning.OntopPlanning;
 import it.unibz.inf.ontop.planning.datatypes.MFragIndexToVarIndex;
 import it.unibz.inf.ontop.planning.datatypes.Restriction;
 import it.unibz.inf.ontop.planning.sql.SQLCreator;
+import it.unibz.inf.ontop.planning.sql.SQLCreatorImpl;
 import it.unibz.inf.ontop.planning.utils.combinations.Combinator;
 import it.unibz.inf.ontop.planning.visitors.FragmentsVisitor;
 import it.unibz.krdb.obda.model.DatalogProgram;
@@ -122,8 +123,6 @@ public class OntopPlanningTest {
 
         OntopPlanning op = new OntopPlanning(owlfile, obdafile);
 
-//        String sql = op.getSQLForFragments(fragments);
-        
         List<DatalogProgram> programs = op.getDLogUnfoldingsForFragments(fragments);
         
         // {wc=[(fragIndex := 0, varIndex := 0)], x=[(fragIndex := 0, varIndex := 1), (fragIndex := 1, varIndex := 0)], ...}
@@ -135,29 +134,20 @@ public class OntopPlanningTest {
             List<Restriction> restrictions = op.splitDLogWRTTemplates(prog);
             fragmentsToRestrictions.add(restrictions);
         }
-                        
-        FragmentsVisitor visitor = new FragmentsVisitor(mOutVariableToFragmentsVariables);
+        
+        SQLCreator.Builder sqlCreatorBuilder = new SQLCreatorImpl.BuilderImpl();
+        FragmentsVisitor visitor = new FragmentsVisitor(mOutVariableToFragmentsVariables, sqlCreatorBuilder);
         
         Combinator<Restriction> combinator = new Combinator<Restriction>(fragmentsToRestrictions, visitor);
-        
         combinator.combine();
         
         // At this point, all combinations with joins over the same templates are stored in the 
         // visitor. Each of these combinations translate into a JUCQ.
         
-        SQLCreator sqlCreator = visitor.getSQLCreatorInstance();
-        
+        SQLCreator sqlCreator = sqlCreatorBuilder.build();
         String sql = sqlCreator.makeSQL(op, mOutVariableToFragmentsVariables);
 
         System.out.println(sql);
-        
-        //      op.pruneDLogPrograms(programs, joinOn);
-        
-        // For each joining template, produce DLog restrictions to that template
-        
-        
-        // TODO Finish him. BABBALITY.
-        
     }
 
 

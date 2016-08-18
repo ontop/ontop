@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.planning.sql.helpers;
+package it.unibz.inf.ontop.planning.sql.decorators;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -14,6 +14,10 @@ import it.unibz.krdb.sql.QualifiedAttributeID;
 
 public class ExtendedTerm extends TermDecorator {
 
+    /**
+     * 
+     */
+    private static final long serialVersionUID = -6636976173470073014L;
     private List<Variable> variables;
     private Map<Variable, Set<QualifiedAttributeID>> aliases;
     private int termID;
@@ -75,14 +79,12 @@ public class ExtendedTerm extends TermDecorator {
 	if( termString.startsWith("URI") ){
 	    String pruned = termString.substring(termString.indexOf("(") + 2, termString.indexOf(",") -1 ); // Remove apixes " too
 	    result = Arrays.asList(pruned.split("\\{"));
-//	    System.out.println(result);
 	    for( int i = 0; i < result.size(); ++i ){
 		String split = result.get(i);
 		split = split.replace('}', ' ');
 		split = split.trim();
 		result.set(i, split);
 	    }
-//	    System.out.println(splits);
 	}
 	else{
 	    String pruned = termString.substring(0, termString.indexOf("("));

@@ -17,32 +17,31 @@ public class FragmentsVisitor implements CombinationVisitor<Restriction>{
     
     // State
     private final LinkedListMultimap<Variable, MFragIndexToVarIndex> mOutVariableToFragmentsVariables;
-    private final SQLCreator sqlCreator;
+    private final SQLCreator.Builder sqlCreatorBuilder;
     
+    // Creation
     public FragmentsVisitor(
-	    LinkedListMultimap<Variable, MFragIndexToVarIndex> mOutVariableToFragmentsVariables) {
+	    LinkedListMultimap<Variable, MFragIndexToVarIndex> mOutVariableToFragmentsVariables, SQLCreator.Builder creator) {
 	this.mOutVariableToFragmentsVariables = mOutVariableToFragmentsVariables;	
-	this.sqlCreator = SQLCreator.getInstance();
+	this.sqlCreatorBuilder = creator;
     }
 
-    public SQLCreator getSQLCreatorInstance(){
-	return this.sqlCreator;
-    }
-    
-    private boolean joinVar(Variable v) {
-	return mOutVariableToFragmentsVariables.get(v).size() > 1;
-    }
-
+    // Visitor implementation
     @Override
     public void visit(List<Restriction> combination) {
 	// Check if if ALL THE JOINS are valid, by using mOutVariableToFragmentsVariables
-	
+
 	for( Variable v : mOutVariableToFragmentsVariables.keySet() ){
 	    if( joinVar(v) && checkTemplates(v, combination) ){
 		// The joins are on the same template, produce the SQL
-		sqlCreator.addValidCombination(combination);
+		sqlCreatorBuilder.addValidCombination(combination);
 	    }
 	}
+    }
+    
+    // Helpers
+    private boolean joinVar(Variable v) {
+	return mOutVariableToFragmentsVariables.get(v).size() > 1;
     }
 
     private boolean checkTemplates(Variable v, List<Restriction> combination) {

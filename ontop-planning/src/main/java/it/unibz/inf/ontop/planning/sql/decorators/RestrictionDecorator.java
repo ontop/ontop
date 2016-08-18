@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.planning.sql.helpers;
+package it.unibz.inf.ontop.planning.sql.decorators;
 
 import it.unibz.inf.ontop.planning.datatypes.Restriction;
 import it.unibz.inf.ontop.planning.datatypes.Signature;

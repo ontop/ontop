@@ -175,10 +175,6 @@ public class OntopPlanning {
 		assert false : "Unsupported";
 	    }
 	    else if( t instanceof Function ){
-		// Data and URIs
-//		System.out.println(t + " Function");
-//		System.out.println(takeTemplateString(t));
-
 		builder.template( new Template(takeTemplateString( t )) );
 	    }
 	}

@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.planning.sql.helpers;
+package it.unibz.inf.ontop.planning.sql.decorators;
 
 import java.util.Collections;
 import java.util.List;
