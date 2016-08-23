@@ -8,6 +8,7 @@ import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
 import it.unibz.inf.ontop.owlrefplatform.core.abox.SemanticIndexURIMap;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.*;
+import it.unibz.inf.ontop.owlrefplatform.core.benchmark.OntopBenchmark;
 import it.unibz.inf.ontop.owlrefplatform.core.queryevaluation.SPARQLQueryUtility;
 import it.unibz.inf.ontop.owlrefplatform.core.reformulation.QueryRewriter;
 import it.unibz.inf.ontop.owlrefplatform.core.srcquerygeneration.SQLQueryGenerator;
@@ -40,9 +41,9 @@ public class QuestQueryProcessor {
 	private final VocabularyValidator vocabularyValidator;
 	private final SemanticIndexURIMap uriMap;
 	private final SQLQueryGenerator datasourceQueryGenerator;
-	
+		
 	private static final Logger log = LoggerFactory.getLogger(QuestQueryProcessor.class);
-	
+		
 	public QuestQueryProcessor(QueryRewriter rewriter, LinearInclusionDependencies sigma, QuestUnfolder unfolder, 
 			VocabularyValidator vocabularyValidator, SemanticIndexURIMap uriMap, SQLQueryGenerator datasourceQueryGenerator) {
 		this.rewriter = rewriter;
@@ -161,22 +162,23 @@ public class QuestQueryProcessor {
 
 			log.debug("Start the rewriting process...");
 
-			//final long startTime0 = System.currentTimeMillis();
 			for (CQIE cq : newprogram.getRules())
 				CQCUtilities.optimizeQueryWithSigmaRules(cq.getBody(), sigma);
+			
+			long startTime = System.currentTimeMillis();
+			
 			DatalogProgram programAfterRewriting = rewriter.rewrite(newprogram);
-
-			//rewritingTime = System.currentTimeMillis() - startTime0;
-
-			//final long startTime = System.currentTimeMillis();
+			
+			long endTime = System.currentTimeMillis();
+			
+			long rewritingTime = endTime - startTime;
+			
 			log.debug("Start the partial evaluation process...");
 
-			//System.out.println("OUT " + programAfterRewriting);
-
+			startTime = System.currentTimeMillis();
 			DatalogProgram programAfterUnfolding = unfolder.unfold(programAfterRewriting);
+			
 			log.debug("Data atoms evaluated: \n{}", programAfterUnfolding);
-
-			//System.out.println("OUT UNFOLDED " + programAfterUnfolding);
 
 			List<CQIE> toRemove = new LinkedList<>();
 			for (CQIE rule : programAfterUnfolding.getRules()) {
@@ -208,11 +210,11 @@ public class QuestQueryProcessor {
 
 			log.debug("Boolean expression evaluated: \n{}", programAfterUnfolding);
 			log.debug("Partial evaluation ended.");
-			//unfoldingTime = System.currentTimeMillis() - startTime;
 
 			querySignatureCache.put(pq, translation.getSignature());
 
 			String sql;
+			
 			if (programAfterUnfolding.getRules().size() > 0) {
 				log.debug("Producing the SQL string...");
 				sql = datasourceQueryGenerator.generateSourceQuery(programAfterUnfolding, translation.getSignature());
@@ -221,7 +223,14 @@ public class QuestQueryProcessor {
 			else
 				sql = "";
 			
+			long unfoldingTime = System.currentTimeMillis() - startTime;
 			translatedSQLCache.put(pq, sql);
+			
+			// Davide> Benchmarking
+			OntopBenchmark.Builder builder = new OntopBenchmark.Builder(unfoldingTime, rewritingTime);
+			builder.programAfterRewriting(programAfterRewriting).programAfterUnfolding(programAfterUnfolding);
+			builder.build();
+			
 			return sql;
 		} 
 		catch (Exception e) {
