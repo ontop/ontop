@@ -2,7 +2,7 @@
 :		http://www.ontorais.de#
 owl:		http://www.w3.org/2002/07/owl#
 rdf:		http://www.w3.org/1999/02/22-rdf-syntax-ns#
-xml:		http://www.w3.org/XML/1998/namespace#
+xml:		http://www.w3.org/XML/1998/namespace
 xsd:		http://www.w3.org/2001/XMLSchema#
 rdfs:		http://www.w3.org/2000/01/rdf-schema#
 
@@ -43,84 +43,84 @@ target		<http://www.ontorais.de/ArchiveObject/{id}> a <http://www.ontorais.de/Ar
 source		SELECT id, financiallySupportedBy, title, archivalDate FROM prefix_http_www_ontorais_de_archiveobject
 
 mappingId	mapping_<http://www.ontorais.de/PhysicalObject>
-target		<http://www.ontorais.de/ArchiveObject/{id}> a <http://www.ontorais.de/PhysicalObject> ; <http://www.ontorais.de/financiallySupportedBy> {financiallySupportedBy}^^xsd:string ; <http://www.ontorais.de/title> {title}^^xsd:string ; <http://www.ontorais.de/archivalDate> {archivalDate}^^xsd:string . 
-source		SELECT id, financiallySupportedBy, title, archivalDate FROM prefix_http_www_ontorais_de_physicalobject
+target		<http://www.ontorais.de/ArchiveObject/{id}> a <http://www.ontorais.de/PhysicalObject> .
+source		SELECT id FROM prefix_http_www_ontorais_de_physicalobject
 
 mappingId	mapping_<http://www.ontorais.de/DigitalObject>
-target		<http://www.ontorais.de/ArchiveObject/{id}> a <http://www.ontorais.de/DigitalObject> ; <http://www.ontorais.de/financiallySupportedBy> {financiallySupportedBy}^^xsd:string ; <http://www.ontorais.de/title> {title}^^xsd:string ; <http://www.ontorais.de/archivalDate> {archivalDate}^^xsd:string . 
-source		SELECT id, financiallySupportedBy, title, archivalDate FROM prefix_http_www_ontorais_de_digitalobject
+target		<http://www.ontorais.de/ArchiveObject/{id}> a <http://www.ontorais.de/DigitalObject> .
+source		SELECT id FROM prefix_http_www_ontorais_de_digitalobject
 
 mappingId	mapping_<http://www.ontorais.de/Audio>
-target		<http://www.ontorais.de/ArchiveObject/{id}> a <http://www.ontorais.de/Audio> ; <http://www.ontorais.de/financiallySupportedBy> {financiallySupportedBy}^^xsd:string ; <http://www.ontorais.de/title> {title}^^xsd:string ; <http://www.ontorais.de/archivalDate> {archivalDate}^^xsd:string . 
-source		SELECT id, financiallySupportedBy, title, archivalDate FROM prefix_http_www_ontorais_de_audio
+target		<http://www.ontorais.de/ArchiveObject/{id}> a <http://www.ontorais.de/Audio> .
+source		SELECT id FROM prefix_http_www_ontorais_de_audio
 
 mappingId	mapping_<http://www.ontorais.de/AudioVisual>
-target		<http://www.ontorais.de/ArchiveObject/{id}> a <http://www.ontorais.de/AudioVisual> ; <http://www.ontorais.de/financiallySupportedBy> {financiallySupportedBy}^^xsd:string ; <http://www.ontorais.de/title> {title}^^xsd:string ; <http://www.ontorais.de/archivalDate> {archivalDate}^^xsd:string . 
-source		SELECT id, financiallySupportedBy, title, archivalDate FROM prefix_http_www_ontorais_de_audiovisual
+target		<http://www.ontorais.de/ArchiveObject/{id}> a <http://www.ontorais.de/AudioVisual> .
+source		SELECT id FROM prefix_http_www_ontorais_de_audiovisual
 
 mappingId	mapping_<http://www.ontorais.de/Software>
-target		<http://www.ontorais.de/ArchiveObject/{id}> a <http://www.ontorais.de/Software> ; <http://www.ontorais.de/financiallySupportedBy> {financiallySupportedBy}^^xsd:string ; <http://www.ontorais.de/title> {title}^^xsd:string ; <http://www.ontorais.de/archivalDate> {archivalDate}^^xsd:string . 
-source		SELECT id, financiallySupportedBy, title, archivalDate FROM prefix_http_www_ontorais_de_software
+target		<http://www.ontorais.de/ArchiveObject/{id}> a <http://www.ontorais.de/Software> .
+source		SELECT id FROM prefix_http_www_ontorais_de_software
 
 mappingId	mapping_<http://www.ontorais.de/SourceCode>
-target		<http://www.ontorais.de/ArchiveObject/{id}> a <http://www.ontorais.de/SourceCode> ; <http://www.ontorais.de/financiallySupportedBy> {financiallySupportedBy}^^xsd:string ; <http://www.ontorais.de/title> {title}^^xsd:string ; <http://www.ontorais.de/archivalDate> {archivalDate}^^xsd:string . 
-source		SELECT id, financiallySupportedBy, title, archivalDate FROM prefix_http_www_ontorais_de_sourcecode
+target		<http://www.ontorais.de/ArchiveObject/{id}> a <http://www.ontorais.de/SourceCode> .
+source		SELECT id FROM prefix_http_www_ontorais_de_sourcecode
 
 mappingId	mapping_<http://www.ontorais.de/Executable>
-target		<http://www.ontorais.de/ArchiveObject/{id}> a <http://www.ontorais.de/Executable> ; <http://www.ontorais.de/financiallySupportedBy> {financiallySupportedBy}^^xsd:string ; <http://www.ontorais.de/title> {title}^^xsd:string ; <http://www.ontorais.de/archivalDate> {archivalDate}^^xsd:string . 
-source		SELECT id, financiallySupportedBy, title, archivalDate FROM prefix_http_www_ontorais_de_executable
+target		<http://www.ontorais.de/ArchiveObject/{id}> a <http://www.ontorais.de/Executable> .
+source		SELECT id FROM prefix_http_www_ontorais_de_executable
 
 mappingId	mapping_<http://www.ontorais.de/VirtualMachine>
-target		<http://www.ontorais.de/ArchiveObject/{id}> a <http://www.ontorais.de/VirtualMachine> ; <http://www.ontorais.de/financiallySupportedBy> {financiallySupportedBy}^^xsd:string ; <http://www.ontorais.de/title> {title}^^xsd:string ; <http://www.ontorais.de/archivalDate> {archivalDate}^^xsd:string . 
-source		SELECT id, financiallySupportedBy, title, archivalDate FROM prefix_http_www_ontorais_de_virtualmachine
+target		<http://www.ontorais.de/ArchiveObject/{id}> a <http://www.ontorais.de/VirtualMachine> .
+source		SELECT id FROM prefix_http_www_ontorais_de_virtualmachine
 
 mappingId	mapping_<http://www.ontorais.de/Text>
-target		<http://www.ontorais.de/ArchiveObject/{id}> a <http://www.ontorais.de/Text> ; <http://www.ontorais.de/financiallySupportedBy> {financiallySupportedBy}^^xsd:string ; <http://www.ontorais.de/title> {title}^^xsd:string ; <http://www.ontorais.de/archivalDate> {archivalDate}^^xsd:string . 
-source		SELECT id, financiallySupportedBy, title, archivalDate FROM prefix_http_www_ontorais_de_text
+target		<http://www.ontorais.de/ArchiveObject/{id}> a <http://www.ontorais.de/Text> .
+source		SELECT id FROM prefix_http_www_ontorais_de_text
 
 mappingId	mapping_<http://www.ontorais.de/Publication>
-target		<http://www.ontorais.de/ArchiveObject/{id}> a <http://www.ontorais.de/Publication> ; <http://www.ontorais.de/abstract> {abstract}^^xsd:string ; <http://www.ontorais.de/note> {note}^^xsd:string ; <http://www.ontorais.de/financiallySupportedBy> {financiallySupportedBy}^^xsd:string ; <http://www.ontorais.de/title> {title}^^xsd:string ; <http://www.ontorais.de/archivalDate> {archivalDate}^^xsd:string . 
-source		SELECT id, abstract, note, financiallySupportedBy, title, archivalDate FROM prefix_http_www_ontorais_de_publication
+target		<http://www.ontorais.de/ArchiveObject/{id}> a <http://www.ontorais.de/Publication> .
+source		SELECT id FROM prefix_http_www_ontorais_de_publication
 
 mappingId	mapping_<http://www.ontorais.de/InProceedings>
-target		<http://www.ontorais.de/ArchiveObject/{id}> a <http://www.ontorais.de/InProceedings> ; <http://www.ontorais.de/abstract> {abstract}^^xsd:string ; <http://www.ontorais.de/note> {note}^^xsd:string ; <http://www.ontorais.de/financiallySupportedBy> {financiallySupportedBy}^^xsd:string ; <http://www.ontorais.de/title> {title}^^xsd:string ; <http://www.ontorais.de/archivalDate> {archivalDate}^^xsd:string . 
-source		SELECT id, abstract, note, financiallySupportedBy, title, archivalDate FROM prefix_http_www_ontorais_de_inproceedings
+target		<http://www.ontorais.de/ArchiveObject/{id}> a <http://www.ontorais.de/InProceedings>  .
+source		SELECT id FROM prefix_http_www_ontorais_de_inproceedings
 
 mappingId	mapping_<http://www.ontorais.de/Book>
-target		<http://www.ontorais.de/ArchiveObject/{id}> a <http://www.ontorais.de/Book> ; <http://www.ontorais.de/abstract> {abstract}^^xsd:string ; <http://www.ontorais.de/note> {note}^^xsd:string ; <http://www.ontorais.de/financiallySupportedBy> {financiallySupportedBy}^^xsd:string ; <http://www.ontorais.de/title> {title}^^xsd:string ; <http://www.ontorais.de/archivalDate> {archivalDate}^^xsd:string . 
-source		SELECT id, abstract, note, financiallySupportedBy, title, archivalDate FROM prefix_http_www_ontorais_de_book
+target		<http://www.ontorais.de/ArchiveObject/{id}> a <http://www.ontorais.de/Book> .
+source		SELECT id FROM prefix_http_www_ontorais_de_book
 
 mappingId	mapping_<http://www.ontorais.de/Manual>
-target		<http://www.ontorais.de/ArchiveObject/{id}> a <http://www.ontorais.de/Manual> ; <http://www.ontorais.de/abstract> {abstract}^^xsd:string ; <http://www.ontorais.de/note> {note}^^xsd:string ; <http://www.ontorais.de/financiallySupportedBy> {financiallySupportedBy}^^xsd:string ; <http://www.ontorais.de/title> {title}^^xsd:string ; <http://www.ontorais.de/archivalDate> {archivalDate}^^xsd:string . 
-source		SELECT id, abstract, note, financiallySupportedBy, title, archivalDate FROM prefix_http_www_ontorais_de_manual
+target		<http://www.ontorais.de/ArchiveObject/{id}> a <http://www.ontorais.de/Manual> .
+source		SELECT id FROM prefix_http_www_ontorais_de_manual
 
 mappingId	mapping_<http://www.ontorais.de/Report>
-target		<http://www.ontorais.de/ArchiveObject/{id}> a <http://www.ontorais.de/Report> ; <http://www.ontorais.de/abstract> {abstract}^^xsd:string ; <http://www.ontorais.de/note> {note}^^xsd:string ; <http://www.ontorais.de/financiallySupportedBy> {financiallySupportedBy}^^xsd:string ; <http://www.ontorais.de/title> {title}^^xsd:string ; <http://www.ontorais.de/archivalDate> {archivalDate}^^xsd:string . 
-source		SELECT id, abstract, note, financiallySupportedBy, title, archivalDate FROM prefix_http_www_ontorais_de_report
+target		<http://www.ontorais.de/ArchiveObject/{id}> a <http://www.ontorais.de/Report> .
+source		SELECT id FROM prefix_http_www_ontorais_de_report
 
 mappingId	mapping_<http://www.ontorais.de/PhDThesis>
-target		<http://www.ontorais.de/ArchiveObject/{id}> a <http://www.ontorais.de/PhDThesis> ; <http://www.ontorais.de/abstract> {abstract}^^xsd:string ; <http://www.ontorais.de/note> {note}^^xsd:string ; <http://www.ontorais.de/financiallySupportedBy> {financiallySupportedBy}^^xsd:string ; <http://www.ontorais.de/title> {title}^^xsd:string ; <http://www.ontorais.de/archivalDate> {archivalDate}^^xsd:string . 
-source		SELECT id, abstract, note, financiallySupportedBy, title, archivalDate FROM prefix_http_www_ontorais_de_phdthesis
+target		<http://www.ontorais.de/ArchiveObject/{id}> a <http://www.ontorais.de/PhDThesis>  .
+source		SELECT id FROM prefix_http_www_ontorais_de_phdthesis
 
 mappingId	mapping_<http://www.ontorais.de/Proceedings>
-target		<http://www.ontorais.de/ArchiveObject/{id}> a <http://www.ontorais.de/Proceedings> ; <http://www.ontorais.de/abstract> {abstract}^^xsd:string ; <http://www.ontorais.de/note> {note}^^xsd:string ; <http://www.ontorais.de/financiallySupportedBy> {financiallySupportedBy}^^xsd:string ; <http://www.ontorais.de/title> {title}^^xsd:string ; <http://www.ontorais.de/archivalDate> {archivalDate}^^xsd:string . 
-source		SELECT id, abstract, note, financiallySupportedBy, title, archivalDate FROM prefix_http_www_ontorais_de_proceedings
+target		<http://www.ontorais.de/ArchiveObject/{id}> a <http://www.ontorais.de/Proceedings> .
+source		SELECT id FROM prefix_http_www_ontorais_de_proceedings
 
 mappingId	mapping_<http://www.ontorais.de/Article>
-target		<http://www.ontorais.de/ArchiveObject/{id}> a <http://www.ontorais.de/Article> ; <http://www.ontorais.de/abstract> {abstract}^^xsd:string ; <http://www.ontorais.de/note> {note}^^xsd:string ; <http://www.ontorais.de/financiallySupportedBy> {financiallySupportedBy}^^xsd:string ; <http://www.ontorais.de/title> {title}^^xsd:string ; <http://www.ontorais.de/archivalDate> {archivalDate}^^xsd:string . 
-source		SELECT id, abstract, note, financiallySupportedBy, title, archivalDate FROM prefix_http_www_ontorais_de_article
+target		<http://www.ontorais.de/ArchiveObject/{id}> a <http://www.ontorais.de/Article> .
+source		SELECT id FROM prefix_http_www_ontorais_de_article
 
 mappingId	mapping_<http://www.ontorais.de/InBook>
-target		<http://www.ontorais.de/ArchiveObject/{id}> a <http://www.ontorais.de/InBook> ; <http://www.ontorais.de/abstract> {abstract}^^xsd:string ; <http://www.ontorais.de/note> {note}^^xsd:string ; <http://www.ontorais.de/financiallySupportedBy> {financiallySupportedBy}^^xsd:string ; <http://www.ontorais.de/title> {title}^^xsd:string ; <http://www.ontorais.de/archivalDate> {archivalDate}^^xsd:string . 
-source		SELECT id, abstract, note, financiallySupportedBy, title, archivalDate FROM prefix_http_www_ontorais_de_inbook
+target		<http://www.ontorais.de/ArchiveObject/{id}> a <http://www.ontorais.de/InBook> .
+source		SELECT id FROM prefix_http_www_ontorais_de_inbook
 
 mappingId	mapping_<http://www.ontorais.de/Masterthesis>
-target		<http://www.ontorais.de/ArchiveObject/{id}> a <http://www.ontorais.de/Masterthesis> ; <http://www.ontorais.de/abstract> {abstract}^^xsd:string ; <http://www.ontorais.de/note> {note}^^xsd:string ; <http://www.ontorais.de/financiallySupportedBy> {financiallySupportedBy}^^xsd:string ; <http://www.ontorais.de/title> {title}^^xsd:string ; <http://www.ontorais.de/archivalDate> {archivalDate}^^xsd:string . 
-source		SELECT id, abstract, note, financiallySupportedBy, title, archivalDate FROM prefix_http_www_ontorais_de_masterthesis
+target		<http://www.ontorais.de/ArchiveObject/{id}> a <http://www.ontorais.de/Masterthesis> .
+source		SELECT id FROM prefix_http_www_ontorais_de_masterthesis
 
 mappingId	mapping_<http://www.ontorais.de/Visual>
-target		<http://www.ontorais.de/ArchiveObject/{id}> a <http://www.ontorais.de/Visual> ; <http://www.ontorais.de/financiallySupportedBy> {financiallySupportedBy}^^xsd:string ; <http://www.ontorais.de/title> {title}^^xsd:string ; <http://www.ontorais.de/archivalDate> {archivalDate}^^xsd:string . 
-source		SELECT id, financiallySupportedBy, title, archivalDate FROM prefix_http_www_ontorais_de_visual
+target		<http://www.ontorais.de/ArchiveObject/{id}> a <http://www.ontorais.de/Visual> .
+source		SELECT id FROM prefix_http_www_ontorais_de_visual
 
 mappingId	mapping_<http://www.ontorais.de/ProjectElement>
 target		<http://www.ontorais.de/ProjectElement/{id}> a <http://www.ontorais.de/ProjectElement> . 
