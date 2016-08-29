@@ -243,8 +243,11 @@ public class QueryMergingTest {
         ConstructionNode expectedRootNode = mainQuery.getRootConstructionNode();
         expectedBuilder.init(mainQuery.getProjectionAtom(), expectedRootNode);
 
+        ConstructionNode uselessConstructionNode = new ConstructionNodeImpl(expectedRootNode.getChildVariables());
+        expectedBuilder.addChild(expectedRootNode, uselessConstructionNode);
+
         ExtensionalDataNode expectedDataNode = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE_1, X, INT_OF_THREE));
-        expectedBuilder.addChild(expectedRootNode, expectedDataNode);
+        expectedBuilder.addChild(uselessConstructionNode, expectedDataNode);
 
         optimizeAndCompare(mainQuery, subQueryBuilder.build(), expectedBuilder.build(), dataNode);
     }
@@ -284,8 +287,11 @@ public class QueryMergingTest {
         ConstructionNode expectedRootNode = mainQuery.getRootConstructionNode();
         expectedBuilder.init(mainQuery.getProjectionAtom(), expectedRootNode);
 
+        ConstructionNode uselessConstructionNode = new ConstructionNodeImpl(expectedRootNode.getChildVariables());
+        expectedBuilder.addChild(expectedRootNode, uselessConstructionNode);
+
         ExtensionalDataNode expectedDataNode = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE_1, X, X));
-        expectedBuilder.addChild(expectedRootNode, expectedDataNode);
+        expectedBuilder.addChild(uselessConstructionNode, expectedDataNode);
 
         optimizeAndCompare(mainQuery, subQueryBuilder.build(), expectedBuilder.build(), dataNode);
     }
@@ -343,10 +349,10 @@ public class QueryMergingTest {
          */
         IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
 
-        ConstructionNode rootNode = new ConstructionNodeImpl(ANS1_XY_ATOM.getVariables(),
+        ConstructionNode rootNode = new ConstructionNodeImpl(ANS1_X_ATOM.getVariables(),
                 new ImmutableSubstitutionImpl<>(ImmutableMap.of()), Optional.empty());
 
-        queryBuilder.init(ANS1_XY_ATOM, rootNode);
+        queryBuilder.init(ANS1_X_ATOM, rootNode);
 
         IntensionalDataNode dataNode = new IntensionalDataNodeImpl(
                 DATA_FACTORY.getDataAtom(P1_PREDICATE, X, INT_OF_THREE));
@@ -369,10 +375,13 @@ public class QueryMergingTest {
          */
         IntermediateQueryBuilder expectedBuilder = new DefaultIntermediateQueryBuilder(METADATA);
         ConstructionNode expectedRootNode = mainQuery.getRootConstructionNode();
-        expectedBuilder.init(ANS1_XY_ATOM, expectedRootNode);
+        expectedBuilder.init(ANS1_X_ATOM, expectedRootNode);
+
+        ConstructionNode uselessConstructionNode = new ConstructionNodeImpl(expectedRootNode.getChildVariables());
+        expectedBuilder.addChild(expectedRootNode, uselessConstructionNode);
 
         ExtensionalDataNode expectedDataNode = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE_1, X, THREE));
-        expectedBuilder.addChild(expectedRootNode, expectedDataNode);
+        expectedBuilder.addChild(uselessConstructionNode, expectedDataNode);
 
         optimizeAndCompare(mainQuery, subQueryBuilder.build(), expectedBuilder.build(), dataNode);
     }
@@ -761,7 +770,11 @@ public class QueryMergingTest {
         IntermediateQueryBuilder expectedBuilder = new DefaultIntermediateQueryBuilder(METADATA);
         ConstructionNode expectedRootNode = mainQuery.getRootConstructionNode();
         expectedBuilder.init(mainQuery.getProjectionAtom(), expectedRootNode);
-        expectedBuilder.addChild(expectedRootNode, tableNode);
+
+        ConstructionNode uselessConstructionNode = new ConstructionNodeImpl(expectedRootNode.getChildVariables());
+        expectedBuilder.addChild(expectedRootNode, uselessConstructionNode);
+
+        expectedBuilder.addChild(uselessConstructionNode, tableNode);
 
         optimizeAndCompare(mainQuery, subQueryBuilder.build(), expectedBuilder.build(), dataNode);
     }
