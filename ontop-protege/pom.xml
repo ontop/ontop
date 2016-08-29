@@ -271,6 +271,10 @@
             <groupId>com.github.jsqlparser</groupId>
             <artifactId>jsqlparser</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.functionaljava</groupId>
+            <artifactId>functionaljava</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
@@ -315,7 +319,7 @@
                         <!-- This makes sure any dependency in the obdalib <dependency> dependencies are packed
                         as .classes (uncompressed, no jars) and the rest is packed as .jars -->
                         <Embed-Dependency>
-                            *;groupId=it.unibz.inf.ontop.*;inline=true,*;groupId=it.unibz.krdb.obda.protege4.*;inline=true,*;groupId=!it.unibz.inf.ontop;scope=compile|runtime
+                            *;groupId=it.unibz.inf.ontop.*;inline=true,*;groupId=it.unibz.inf.ontop.protege4.*;inline=true,*;groupId=!it.unibz.inf.ontop;scope=compile|runtime
                         </Embed-Dependency>
 
 
