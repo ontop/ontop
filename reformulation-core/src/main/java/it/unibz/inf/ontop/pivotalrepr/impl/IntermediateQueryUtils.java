@@ -1,21 +1,22 @@
 package it.unibz.inf.ontop.pivotalrepr.impl;
 
-import java.util.AbstractMap;
-import java.util.Optional;
-
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import it.unibz.inf.ontop.model.*;
+import it.unibz.inf.ontop.model.DistinctVariableOnlyDataAtom;
+import it.unibz.inf.ontop.model.Variable;
+import it.unibz.inf.ontop.model.VariableGenerator;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.InjectiveVar2VarSubstitution;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.InjectiveVar2VarSubstitutionImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.NeutralSubstitution;
-import it.unibz.inf.ontop.pivotalrepr.impl.tree.DefaultIntermediateQueryBuilder;
 import it.unibz.inf.ontop.pivotalrepr.*;
+import it.unibz.inf.ontop.pivotalrepr.impl.tree.DefaultIntermediateQueryBuilder;
 import it.unibz.inf.ontop.utils.FunctionalTools;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
+import java.util.AbstractMap;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * TODO: explain
@@ -149,7 +150,7 @@ public class IntermediateQueryUtils {
                                                                                ImmutableSet<Variable> variables) {
         ImmutableMap<Variable, Variable> newMap = variables.stream()
                 .map(v -> new AbstractMap.SimpleEntry<>(v, variableGenerator.generateNewVariableIfConflicting(v)))
-                .filter(pair -> pair.getKey().equals(pair.getValue()))
+                .filter(pair -> ! pair.getKey().equals(pair.getValue()))
                 .collect(ImmutableCollectors.toMap());
 
         return new InjectiveVar2VarSubstitutionImpl(newMap);
