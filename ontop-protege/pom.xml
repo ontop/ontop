@@ -271,17 +271,10 @@
             <groupId>com.github.jsqlparser</groupId>
             <artifactId>jsqlparser</artifactId>
         </dependency>
-
-		<dependency>
-			<groupId>com.google.guava</groupId>
-			<artifactId>guava</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>org.functionaljava</groupId>
-			<artifactId>functionaljava</artifactId>
-		</dependency>
-
+        <dependency>
+            <groupId>org.functionaljava</groupId>
+            <artifactId>functionaljava</artifactId>
+        </dependency>
 		<dependency>
 			<groupId>com.google.inject</groupId>
 			<artifactId>guice</artifactId>
@@ -290,23 +283,18 @@
 			<groupId>com.google.inject.extensions</groupId>
 			<artifactId>guice-assistedinject</artifactId>
 		</dependency>
-
 		<dependency>
 			<groupId>javax.inject</groupId>
 			<artifactId>javax.inject</artifactId>
 		</dependency>
-
 		<dependency>
 			<groupId>com.google.code.findbugs</groupId>
 			<artifactId>jsr305</artifactId>
 		</dependency>
-
 		<dependency>
 			<groupId>aopalliance</groupId>
 			<artifactId>aopalliance</artifactId>
 		</dependency>
-
-
     </dependencies>
 
     <build>
@@ -351,7 +339,7 @@
                         <!-- This makes sure any dependency in the obdalib <dependency> dependencies are packed
                         as .classes (uncompressed, no jars) and the rest is packed as .jars -->
                         <Embed-Dependency>
-                            *;groupId=it.unibz.inf.ontop.*;inline=true,*;groupId=it.unibz.krdb.obda.protege4.*;inline=true,*;groupId=!it.unibz.inf.ontop;scope=compile|runtime
+                            *;groupId=it.unibz.inf.ontop.*;inline=true,*;groupId=it.unibz.inf.ontop.protege4.*;inline=true,*;groupId=!it.unibz.inf.ontop;scope=compile|runtime
                         </Embed-Dependency>
 
 
