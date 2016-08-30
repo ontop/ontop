@@ -56,13 +56,12 @@ public class LocalPropagationTools {
         /**
          * When the node has removed
          */
-        protected SubstitutionApplicationResults(N originalFocusNode, NodeTrackingResults<EmptyNode> emptyNodeResults) {
+        protected SubstitutionApplicationResults(NodeTrackingResults<? extends QueryNode> emptyNodeResults) {
             super(emptyNodeResults.getResultingQuery(),
                     emptyNodeResults.getOptionalNextSibling(),
                     emptyNodeResults.getOptionalClosestAncestor(), emptyNodeResults.getOptionalTracker());
             this.optionalSubst = Optional.empty();
             this.isReplacedByAChild = false;
-            // TODO:
         }
 
         public Optional<ImmutableSubstitution<? extends ImmutableTerm>> getOptionalSubstitution() {
@@ -75,7 +74,7 @@ public class LocalPropagationTools {
     }
 
     /**
-     * Applies the substitution to the newNode
+     * Applies the substitution to the newNode and its replacing child (if any)
      *
      * An AncestryTracker is only created in case of empty nodes (they are immediately removed).
      *
@@ -136,7 +135,7 @@ public class LocalPropagationTools {
                 // May restructure significantly the query
                 NodeTrackingResults<EmptyNode> removeEmptyNodeResults = query.applyProposal(removalProposal, true, true);
 
-                return new SubstitutionApplicationResults<>(node, removeEmptyNodeResults);
+                return new SubstitutionApplicationResults<>(removeEmptyNodeResults);
 
             default:
                 throw new IllegalStateException("Unknown local action: " + substitutionResults.getLocalAction());
