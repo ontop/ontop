@@ -83,13 +83,22 @@ public class IntermediateQueryUtils {
                     InjectiveVar2VarSubstitution disjointVariableSetRenaming = generateNotConflictingRenaming(
                             variableGenerator, def.getKnownVariables());
 
+                    ImmutableSet<Variable> freshVariables = ImmutableSet.copyOf(
+                            disjointVariableSetRenaming.getImmutableMap().values());
+
                     InjectiveVar2VarSubstitution headSubstitution = computeRenamingSubstitution(
                             disjointVariableSetRenaming.applyToDistinctVariableOnlyDataAtom(def.getProjectionAtom()),
                             projectionAtom)
                             .orElseThrow(() -> new IllegalStateException("Bug: unexpected incompatible atoms"));
 
                     InjectiveVar2VarSubstitution renamingSubstitution =
-                            headSubstitution.composeWithAndPreserveInjectivity(disjointVariableSetRenaming)
+                            /**
+                             * fresh variables are excluded from the domain of the renaming substitution
+                             *  since they are in use in the sub-query.
+                             *
+                             *  NB: this guarantees that the renaming substitution is injective
+                             */
+                            headSubstitution.composeWithAndPreserveInjectivity(disjointVariableSetRenaming, freshVariables)
                             .orElseThrow(()-> new IllegalStateException("Bug: the renaming substitution is not injective"));
 
                     appendDefinition(queryBuilder, unionNode, def, renamingSubstitution);
