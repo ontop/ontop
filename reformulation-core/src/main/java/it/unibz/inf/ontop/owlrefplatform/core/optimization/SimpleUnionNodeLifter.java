@@ -22,11 +22,11 @@ public class SimpleUnionNodeLifter implements UnionNodeLifter {
 
 
     @Override
-    public Optional<QueryNode> chooseLevelLift(IntermediateQuery currentQuery, UnionNode unionNode, ImmutableSet<Variable> unionVariables) {
+    public Optional<QueryNode> chooseLiftLevel(IntermediateQuery currentQuery, UnionNode unionNode, ImmutableSet<Variable> unionVariables) {
 
         // Non-final
         Optional<QueryNode> optionalParent = currentQuery.getParent(unionNode);
-        Set<Variable> projectedVariables = new HashSet<>();
+        Set<Variable> surroundingVariables = new HashSet<>();
 
         Optional<QueryNode> filterJoin = Optional.empty();
 
@@ -53,9 +53,12 @@ public class SimpleUnionNodeLifter implements UnionNodeLifter {
                     //get all projected variables from the children of the parent node
                     childrenParentNode.stream()
                             .filter(child -> !child.equals(unionNode))
-                            .forEach(child ->  projectedVariables.addAll(currentQuery.getVariables(child)));
+                            .forEach(child ->  surroundingVariables.addAll(currentQuery.getVariables(child)));
 
-                    if (projectedVariables.contains(variable)) {
+                    // get variable from the optional filter condition
+                    surroundingVariables.addAll(parentNode.getLocalVariables());
+
+                    if (surroundingVariables.contains(variable)) {
 
                         //if we found a filter node, we keep it as a possible point to lift the union,
                         //but continue to another ancestor searching for a better match

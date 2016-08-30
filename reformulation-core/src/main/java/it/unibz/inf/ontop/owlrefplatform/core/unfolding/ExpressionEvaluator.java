@@ -398,7 +398,14 @@ public class ExpressionEvaluator {
 		Term innerTerm = term.getTerm(0);
 		if (innerTerm instanceof Function) {
 			Function function = (Function) innerTerm;
-			return getDatatype(function);
+			Function datatype = getDatatype(function);
+
+			if(datatype !=null && datatype.equals(function)){
+				return term;
+			}
+			else{
+				return datatype;
+			}
 		}
 		return term;
 	}
@@ -420,10 +427,16 @@ public class ExpressionEvaluator {
 		else if (predicate == ExpressionOperation.ADD || predicate == ExpressionOperation.SUBTRACT || 
 				predicate == ExpressionOperation.MULTIPLY || predicate == ExpressionOperation.DIVIDE)
 		{
+
 			//return numerical if arguments have same type
 			Term arg1 = function.getTerm(0);
-			Predicate pred1 = getDatatypePredicate(arg1);
 			Term arg2 = function.getTerm(1);
+
+			if (arg1 instanceof Variable|| arg2 instanceof Variable){
+				return function;
+			}
+			Predicate pred1 = getDatatypePredicate(arg1);
+
 			Predicate pred2 = getDatatypePredicate(arg2);
 			if (pred1.equals(pred2) || (isDouble(pred1) && isNumeric(pred2))) {
 				return fac.getUriTemplateForDatatype(pred1.toString());
@@ -849,20 +862,35 @@ public class ExpressionEvaluator {
 	private Term evalUriFunctionsWithSingleTerm(Function uriFunction1, Function uriFunction2, boolean isEqual) {
 		Term term1 = uriFunction1.getTerm(0);
 		Term term2 = uriFunction2.getTerm(0);
-//		if (!(term1 instanceof ValueConstant)) {
-//			return null;
-//		}
+
 		if (term2 instanceof Variable) {
+
 			if (isEqual) {
 				return fac.getFunctionEQ(term2, term1);
 			} else {
+				if(term1 instanceof ValueConstant){
+					if (isEqual)
+						return fac.getFunctionEQ(term1, term2);
+					else
+						return fac.getFunctionNEQ(term1, term2);
+				}
 				return fac.getFunctionNEQ(term2, term1);
 			}
+
 		} else if (term2 instanceof ValueConstant) {
-			if (term1.equals(term2)) 
+
+			if (term1.equals(term2))
 				return fac.getBooleanConstant(isEqual);
-			else 
+			else
+				{
+				if (term1 instanceof Variable) {
+					if (isEqual)
+						return fac.getFunctionEQ(term1, term2);
+					else
+						return fac.getFunctionNEQ(term1, term2);
+				}
 				return fac.getBooleanConstant(!isEqual);
+			}
 		}
 		return null;
 	}

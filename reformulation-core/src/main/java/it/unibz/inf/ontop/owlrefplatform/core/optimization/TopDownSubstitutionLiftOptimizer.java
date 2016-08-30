@@ -137,7 +137,7 @@ public class TopDownSubstitutionLiftOptimizer implements SubstitutionLiftOptimiz
     private NextNodeAndQuery liftUnionToMatchingVariable(IntermediateQuery currentQuery, UnionNode currentUnionNode, ImmutableSet<Variable> unionVariables) throws EmptyQueryException {
 
 
-        Optional<QueryNode> parentNode = lifter.chooseLevelLift(currentQuery, currentUnionNode, unionVariables);
+        Optional<QueryNode> parentNode = lifter.chooseLiftLevel(currentQuery, currentUnionNode, unionVariables);
 
         if(parentNode.isPresent()){
 
