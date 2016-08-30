@@ -19,6 +19,9 @@ import org.junit.Test;
 
 import java.util.Optional;
 
+import static it.unibz.inf.ontop.model.ExpressionOperation.EQ;
+import static it.unibz.inf.ontop.model.ExpressionOperation.SPARQL_DATATYPE;
+import static it.unibz.inf.ontop.model.Predicate.COL_TYPE.INTEGER;
 import static it.unibz.inf.ontop.pivotalrepr.NonCommutativeOperatorNode.ArgumentPosition.LEFT;
 import static it.unibz.inf.ontop.pivotalrepr.NonCommutativeOperatorNode.ArgumentPosition.RIGHT;
 import static junit.framework.TestCase.assertTrue;
@@ -450,7 +453,7 @@ public class SubstitutionLiftTest {
 
     private ImmutableFunctionalTerm generateInt(VariableOrGroundTerm argument) {
         return DATA_FACTORY.getImmutableFunctionalTerm(
-                DATA_FACTORY.getDatatypeFactory().getTypePredicate(Predicate.COL_TYPE.INTEGER),
+                DATA_FACTORY.getDatatypeFactory().getTypePredicate(INTEGER),
                 argument);
     }
 
@@ -1061,7 +1064,73 @@ public class SubstitutionLiftTest {
 
     }
 
+    @Test
+    public void testCommutativeJoinAndNotMatchingDatatypes() throws EmptyQueryException {
+        //Construct unoptimized query
+        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
+        DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_2_PREDICATE, X, Y);
+        ConstructionNode rootNode = new ConstructionNodeImpl(projectionAtom.getVariables(),
+                new ImmutableSubstitutionImpl<>(ImmutableMap.of()), Optional.empty());
+        queryBuilder.init(projectionAtom, rootNode);
+
+        InnerJoinNode joinNode = new InnerJoinNodeImpl(Optional.of(DATA_FACTORY.getImmutableExpression(EQ,
+                buildSparqlDatatype(X), buildSparqlDatatype(Y))));
+        queryBuilder.addChild(rootNode,joinNode);
+
+        UnionNode unionNode =  new UnionNodeImpl(ImmutableSet.of(X));
+        queryBuilder.addChild(joinNode, unionNode);
+
+        ConstructionNode leftChildUnion = new ConstructionNodeImpl(unionNode.getVariables(),
+                new ImmutableSubstitutionImpl<>(ImmutableMap.of(X, generateInt(A) )),Optional.empty());
+
+        queryBuilder.addChild(unionNode, leftChildUnion);
+        queryBuilder.addChild(leftChildUnion, DATA_NODE_1 );
+
+        ConstructionNode rightChildUnion = new ConstructionNodeImpl(unionNode.getVariables(),
+                new ImmutableSubstitutionImpl<>(ImmutableMap.of(X, generateString(C) )),Optional.empty());
+
+        queryBuilder.addChild(unionNode, rightChildUnion);
+
+        queryBuilder.addChild(rightChildUnion, DATA_NODE_3 );
+
+        ConstructionNode otherNode = new ConstructionNodeImpl(ImmutableSet.of(Y),
+                new ImmutableSubstitutionImpl<>(ImmutableMap.of(Y, generateInt(DATA_FACTORY.getConstantLiteral("2", INTEGER)) )),Optional.empty());
+
+        queryBuilder.addChild(joinNode, otherNode);
+
+        //build unoptimized query
+        IntermediateQuery unOptimizedQuery = queryBuilder.build();
+        System.out.println("\nBefore optimization: \n" +  unOptimizedQuery);
+
+        IntermediateQueryBuilder expectedQueryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
+        ConstructionNode expectedRootNode = new ConstructionNodeImpl(projectionAtom.getVariables(),
+                new ImmutableSubstitutionImpl<>(ImmutableMap.of(X, generateInt(A), Y, generateInt(DATA_FACTORY.getConstantLiteral("2", INTEGER)))), Optional.empty());
+        expectedQueryBuilder.init(projectionAtom, expectedRootNode);
+
+        expectedQueryBuilder.addChild(expectedRootNode, DATA_NODE_1);
+        IntermediateQuery expectedQuery = expectedQueryBuilder.build();
+        System.out.println("\nExpected query: \n" +  expectedQuery);
+
+        IntermediateQueryOptimizer substitutionOptimizer = new TopDownSubstitutionLiftOptimizer();
+
+        IntermediateQuery optimizedQuery = substitutionOptimizer.optimize(unOptimizedQuery);
+
+        System.out.println("\nAfter optimization: \n" +  optimizedQuery);
+
+
+
+
+
+
+
+
+    }
+
     private static ExtensionalDataNode buildExtensionalDataNode(AtomPredicate predicate, VariableOrGroundTerm ... arguments) {
         return new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(predicate, arguments));
+    }
+
+    private static ImmutableFunctionalTerm buildSparqlDatatype(ImmutableTerm argument){
+        return DATA_FACTORY.getImmutableFunctionalTerm(SPARQL_DATATYPE, argument);
     }
 }
