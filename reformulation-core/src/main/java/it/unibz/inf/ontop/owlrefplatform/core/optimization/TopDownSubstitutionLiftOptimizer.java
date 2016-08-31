@@ -219,14 +219,22 @@ public class TopDownSubstitutionLiftOptimizer implements SubstitutionLiftOptimiz
                 NodeCentricOptimizationResults<QueryNode> results = currentQuery.applyProposal(proposal);
                 currentQuery = results.getResultingQuery();
                 optionalCurrentChild = results.getOptionalNextSibling();
-                Optional<QueryNode> newNodeOrReplacingChild = results.getNewNodeOrReplacingChild();
+                Optional<QueryNode> currentNode = results.getNewNodeOrReplacingChild();
 
-                currentJoinNode = currentQuery.getParent(
-                        newNodeOrReplacingChild
-                                .orElseThrow(() -> new IllegalStateException(
-                                        "The focus was expected to be kept or replaced, not removed")))
-                        .orElseThrow(() -> new IllegalStateException(
-                                "The focus node should still have a parent (a Join node)"));
+                //node has not been removed
+                if(currentNode.isPresent()) {
+                    currentJoinNode = currentQuery.getParent(
+                            currentNode
+                                    .orElseThrow(() -> new IllegalStateException(
+                                            "The focus was expected to be kept or replaced, not removed")))
+                            .orElseThrow(() -> new IllegalStateException(
+                                    "The focus node should still have a parent (a Join node)"));
+                }
+                else {
+
+                    return getNextNodeAndQuery(results);
+
+                }
 
             }
             else {
