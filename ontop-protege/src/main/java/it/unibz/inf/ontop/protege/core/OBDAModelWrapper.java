@@ -9,6 +9,7 @@ import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
 import it.unibz.inf.ontop.injection.OBDAFactoryWithException;
 import it.unibz.inf.ontop.io.InvalidDataSourceException;
 import it.unibz.inf.ontop.io.PrefixManager;
+import it.unibz.inf.ontop.io.SimplePrefixManager;
 import it.unibz.inf.ontop.mapping.MappingParser;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
@@ -17,11 +18,13 @@ import it.unibz.inf.ontop.ontology.OClass;
 import it.unibz.inf.ontop.ontology.ObjectPropertyExpression;
 import it.unibz.inf.ontop.ontology.OntologyVocabulary;
 import it.unibz.inf.ontop.ontology.impl.OntologyVocabularyImpl;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.util.*;
+import java.util.stream.Stream;
 
 /**
  * Mutable wrapper that follows the previous implementation of OBDAModel.
@@ -65,9 +68,24 @@ public class OBDAModelWrapper {
         return obdaModel;
     }
 
+    /**
+     * The mappings are merged, the sources and mappings are taken from the parsed model
+     * and the ontology taken from the previous model
+     *
+     * UGLY!
+     */
     public void parseMappings(File mappingFile) throws DuplicateMappingException, InvalidMappingException, InvalidDataSourceException, IOException {
         MappingParser mappingParser = nativeQLFactory.create(mappingFile);
-        obdaModel = mappingParser.getOBDAModel();
+        OBDAModel newObdaModel = mappingParser.getOBDAModel();
+
+        ImmutableMap<String, String> mergedPrefixes = Stream.concat(
+                obdaModel.getPrefixManager().getPrefixMap().entrySet().stream(),
+                newObdaModel.getPrefixManager().getPrefixMap().entrySet().stream())
+                .distinct()
+                .collect(ImmutableCollectors.toMap());
+
+        obdaModel = obdaModel.newModel(newObdaModel.getSources(), newObdaModel.getMappings(),
+                new SimplePrefixManager(mergedPrefixes));
     }
 
     public PrefixManager getPrefixManager() {
