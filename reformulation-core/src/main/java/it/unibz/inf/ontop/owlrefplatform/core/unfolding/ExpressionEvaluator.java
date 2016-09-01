@@ -102,6 +102,10 @@ public class ExpressionEvaluator {
 				return new Evaluation(true);
 			}
 		}
+		else if (evaluatedTerm instanceof Variable) {
+		    return new Evaluation(fac.getImmutableExpression(ExpressionOperation.IS_TRUE,
+                    ImmutabilityTools.convertIntoImmutableTerm(evaluatedTerm)));
+        }
 		else {
 			throw new RuntimeException("Unexpected term returned after evaluation: " + evaluatedTerm);
 		}
@@ -287,8 +291,11 @@ public class ExpressionEvaluator {
 				 || pred == ExpressionOperation.MULTIPLY || pred == ExpressionOperation.DIVIDE) {
 			
 			Function returnedDatatype = getDatatype(term);
-			if (returnedDatatype != null && isNumeric((ValueConstant) returnedDatatype.getTerm(0))) 
-				return term;
+            //expression has not been removed
+            if(returnedDatatype != null &&
+                    (returnedDatatype.getFunctionSymbol().equals(pred) || isNumeric((ValueConstant) returnedDatatype.getTerm(0)))){
+                return term;
+            }
 			else
 				return OBDAVocabulary.FALSE;
 			
@@ -398,14 +405,7 @@ public class ExpressionEvaluator {
 		Term innerTerm = term.getTerm(0);
 		if (innerTerm instanceof Function) {
 			Function function = (Function) innerTerm;
-			Function datatype = getDatatype(function);
-
-			if(datatype !=null && datatype.equals(function)){
-				return term;
-			}
-			else{
-				return datatype;
-			}
+			return getDatatype(function);
 		}
 		return term;
 	}
@@ -427,7 +427,6 @@ public class ExpressionEvaluator {
 		else if (predicate == ExpressionOperation.ADD || predicate == ExpressionOperation.SUBTRACT || 
 				predicate == ExpressionOperation.MULTIPLY || predicate == ExpressionOperation.DIVIDE)
 		{
-
 			//return numerical if arguments have same type
 			Term arg1 = function.getTerm(0);
 			Term arg2 = function.getTerm(1);

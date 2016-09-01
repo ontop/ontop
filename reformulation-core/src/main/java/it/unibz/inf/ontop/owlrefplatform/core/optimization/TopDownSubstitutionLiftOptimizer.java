@@ -175,10 +175,8 @@ public class TopDownSubstitutionLiftOptimizer implements SubstitutionLiftOptimiz
                     new SubstitutionPropagationProposalImpl<>(currentNode, optionalSubstitution.get());
 
             NodeCentricOptimizationResults<QueryNode> results = currentQuery.applyProposal(proposal);
-            currentQuery = results.getResultingQuery();
-            currentNode = results.getNewNodeOrReplacingChild()
-                    .orElseThrow(() -> new IllegalStateException(
-                            "The focus was expected to be kept or replaced, not removed"));
+            return getNextNodeAndQuery(results);
+
 
         }
 
