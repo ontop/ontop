@@ -499,7 +499,11 @@ public class ExpressionEvaluator {
 		// Create a default return constant: blank language with literal type.
 		Term emptyconstant = fac.getTypedTerm(fac.getConstantLiteral("", COL_TYPE.LITERAL), COL_TYPE.LITERAL);
 
-		if (!(innerTerm instanceof Function)) {
+        if (innerTerm instanceof Variable) {
+            return term;
+        }
+
+        if (!(innerTerm instanceof Function)) {
 			return emptyconstant;
 		} 
 		Function function = (Function) innerTerm;
