@@ -117,8 +117,8 @@ public interface Predicate {
 	boolean isAnnotationProperty();
 
 	boolean isDataProperty();
-	
-	
-	
+
+	boolean isSameAsProperty();
+
 	boolean isTriplePredicate();
 }

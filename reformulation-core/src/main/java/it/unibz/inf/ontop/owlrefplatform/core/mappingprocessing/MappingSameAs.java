@@ -66,7 +66,7 @@ public class MappingSameAs {
             Function atom = rule.getHead();
 
             Predicate predicate = atom.getFunctionSymbol();
-            if (predicate.getArity() == 2 && predicate.getName().equals(OBDAVocabulary.SAME_AS)) { // we check for owl same as
+            if (predicate.isSameAsProperty()) { // we check for owl same as
 
 
                 Term term1 = atom.getTerm(0);
@@ -115,7 +115,7 @@ public class MappingSameAs {
                 //predicate is object property
                 if (t1uri && t2uri ) {
 
-                    if(!predicate.getName().equals(OBDAVocabulary.SAME_AS)){
+                    if(!predicate.isSameAsProperty()){
 
                         Term prefix1 = term1.getTerm(0);
                         Term prefix2 =  term2.getTerm(0);
@@ -195,7 +195,7 @@ public class MappingSameAs {
             for (Function atom : body) {
                 Predicate p = atom.getFunctionSymbol();
 
-                if(p.getName().equals(OBDAVocabulary.SAME_AS)){
+                if(p.isSameAsProperty()){
                     Predicate pred = fac.getObjectPropertyPredicate(p.getName());
                     //need to add also the inverse
                     Function inverseAtom = fac.getFunction(pred, atom.getTerm(1), atom.getTerm(0));
