@@ -30,13 +30,47 @@ import org.semanticweb.owlapi.reasoner.OWLReasonerConfiguration;
 import org.semanticweb.owlapi.reasoner.OWLReasonerFactory;
 import org.semanticweb.owlapi.reasoner.ReasonerProgressMonitor;
 
+import java.util.Optional;
 import java.util.Properties;
 
 public class OntopReasonerInfo extends AbstractProtegeOWLReasonerInfo {
 
+	/**
+	 * Mutable
+	 */
+	private static class FlexibleConfigurationBuilder {
+		private Optional<Properties> optionalProperties = Optional.empty();
+		private Optional<OBDAModelWrapper> optionalObdaModelWrapper = Optional.empty();
+		private Optional<ImplicitDBConstraintsReader> optionalDBConstraintReader = Optional.empty();
+
+		public QuestConfiguration buildQuestConfiguration() {
+			QuestConfiguration.Builder builder = QuestConfiguration.defaultBuilder();
+			optionalProperties
+					.ifPresent(p -> builder.properties(p));
+			optionalObdaModelWrapper
+					.ifPresent(w -> builder.obdaModel(w.getCurrentImmutableOBDAModel()));
+			optionalDBConstraintReader
+					.ifPresent(r -> builder.dbConstraintsReader(r));
+
+			return builder.build();
+		}
+
+		public void setProperties(Properties properties) {
+			this.optionalProperties = Optional.of(properties);
+		}
+
+		public void setOBDAModelWrapper(OBDAModelWrapper modelWrapper) {
+			this.optionalObdaModelWrapper = Optional.of(modelWrapper);
+		}
+
+		public void setDBConstraintReader(ImplicitDBConstraintsReader dBConstraintReader) {
+			this.optionalDBConstraintReader = Optional.ofNullable(dBConstraintReader);
+		}
+	}
+
     private OntopOWLFactory factory = new OntopOWLFactory();
 
-    private final QuestConfiguration.Builder configBuilder = QuestConfiguration.defaultBuilder();
+    private final FlexibleConfigurationBuilder configBuilder = new FlexibleConfigurationBuilder();
 
     @Override
 	public BufferingMode getRecommendedBuffering() {
@@ -49,11 +83,11 @@ public class OntopReasonerInfo extends AbstractProtegeOWLReasonerInfo {
 	}
 
 	public void setPreferences(Properties preferences) {
-        configBuilder.properties(preferences);
+        configBuilder.setProperties(preferences);
 	}
 
-	public void setOBDAModel(OBDAModel model) {
-        configBuilder.obdaModel(model);
+	public void setOBDAModelWrapper(OBDAModelWrapper modelWrapper) {
+        configBuilder.setOBDAModelWrapper(modelWrapper);
 	}
 
 	/**
@@ -62,13 +96,11 @@ public class OntopReasonerInfo extends AbstractProtegeOWLReasonerInfo {
 	 * @param uc The user-supplied database constraints
 	 */
 	public void setImplicitDBConstraints(ImplicitDBConstraintsReader uc) {
-		if(uc == null)
-			throw new NullPointerException();
-        configBuilder.dbConstraintsReader(uc);
+		configBuilder.setDBConstraintReader(uc);
 	}
 
     @Override
     public OWLReasonerConfiguration getConfiguration(ReasonerProgressMonitor monitor) {
-		return new QuestOWLConfiguration(configBuilder.build(), monitor);
+		return new QuestOWLConfiguration(configBuilder.buildQuestConfiguration(), monitor);
     }
 }

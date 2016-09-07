@@ -578,7 +578,7 @@ public class OBDAModelManager implements Disposable {
                     DisposableProperties reasonerPreference = (DisposableProperties) owlEditorKit
                             .get(QuestCorePreferences.class.getName());
                     questfactory.setPreferences(reasonerPreference.clone());
-                    questfactory.setOBDAModel(activeOBDAModel.getCurrentImmutableOBDAModel());
+                    questfactory.setOBDAModelWrapper(activeOBDAModel);
                 }
 				return;
             }
@@ -630,7 +630,7 @@ public class OBDAModelManager implements Disposable {
                 OntopReasonerInfo questfactory = (OntopReasonerInfo) factory;
                 DisposableProperties reasonerPreference = (DisposableProperties) owlEditorKit.get(QuestCorePreferences.class.getName());
                 questfactory.setPreferences(reasonerPreference.clone());
-                questfactory.setOBDAModel(getActiveOBDAModelWrapper().getCurrentImmutableOBDAModel());
+                questfactory.setOBDAModelWrapper(getActiveOBDAModelWrapper());
                 if(applyUserConstraints)
                     questfactory.setImplicitDBConstraints(userConstraints);
             }
