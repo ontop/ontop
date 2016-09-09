@@ -16,7 +16,7 @@ target		<http://ontop/wellbore/{can_prov}/{can_id}> a :Wellbore .
 source		select can_id, can_prov from T_can_link
 
 mappingId	mappingT11
-target		<http://ontop/wellbore/{can_prov}/{can_id}> :inWell "{well}"; :name "{name}" .
+target		<http://ontop/wellbore/{can_prov}/{can_id}> :inWell "{well}" ; :name "{name}" .
 source		select can_id, can_prov, well, name from T1 , T_can_link WHERE T1.id=T_can_link.id1
 
 mappingId	mappingT2

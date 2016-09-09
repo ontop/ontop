@@ -9,10 +9,7 @@ import it.unibz.inf.ontop.model.impl.TermUtils;
 import it.unibz.inf.ontop.ontology.*;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.*;
 import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
-import it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing.MappingDataTypeRepair;
-import it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing.MappingSameAs;
-import it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing.TMappingExclusionConfig;
-import it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing.TMappingProcessor;
+import it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing.*;
 import it.unibz.inf.ontop.owlrefplatform.core.unfolding.DatalogUnfolder;
 import it.unibz.inf.ontop.parser.PreprocessProjection;
 import it.unibz.inf.ontop.utils.Mapping2DatalogConverter;
@@ -75,7 +72,9 @@ public class QuestUnfolder {
 		/**
 		 * add sameAsInverse
 		 */
-		mappings.addAll(MappingSameAs.addSameAsInverse(mappings));
+		if (sameAs) {
+			mappings.addAll(MappingSameAs.addSameAsInverse(mappings));
+		}
 
 		/** 
 		 * Substitute select * with column names  (performs the operation `in place')
@@ -131,6 +130,8 @@ public class QuestUnfolder {
 		// predicates and variables as class names (implemented in the
 		// sparql translator)
 		unfoldingProgram.addAll(generateTripleMappings(unfoldingProgram));
+
+		SameAsRewriting.getCanonicalSameAsMappings(unfoldingProgram);
 
 		if(log.isDebugEnabled()) {
 			String finalMappings = Joiner.on("\n").join(unfoldingProgram);

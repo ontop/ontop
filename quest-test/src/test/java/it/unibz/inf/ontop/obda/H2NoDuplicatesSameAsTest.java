@@ -61,7 +61,7 @@ public class H2NoDuplicatesSameAsTest {
 	private OWLOntology ontology;
 
 	final String owlfile = "src/test/resources/sameAs/wellbores-no-duplicates.owl";
-	final String obdafile = "src/test/resources/sameAs/wellbores-Tcan-linkingT.obda";
+	final String obdafile = "src/test/resources/sameAs/wellbores-same-as.obda";
 	private QuestOWL reasoner;
 	private Connection sqlConnection;
 
@@ -177,8 +177,8 @@ public class H2NoDuplicatesSameAsTest {
 		ArrayList<String> results = runTests(query);
 		ArrayList<String> expectedResults = new ArrayList<>();
 
-		assertEquals(expectedResults.size(), results.size() );
-		assertEquals(expectedResults, results);
+		assertEquals(20, results.size() );
+
     }
 
 	@Test
@@ -190,8 +190,7 @@ public class H2NoDuplicatesSameAsTest {
 		ArrayList<String> results = runTests(query);
 		ArrayList<String> expectedResults = new ArrayList<>();
 
-		assertEquals(expectedResults.size(), results.size() );
-		assertEquals(expectedResults, results);
+		assertEquals(5, results.size() );
 	}
 
 	@Test
@@ -205,12 +204,13 @@ public class H2NoDuplicatesSameAsTest {
 		ArrayList<String> results = runTests(query);
 		ArrayList<String> expectedResults = new ArrayList<>();
 
-		assertEquals(expectedResults.size(), results.size() );
-		assertEquals(expectedResults, results);
+		assertEquals(72, results.size() );
 	}
 
 	/**
-	 * TODO: transform the input mappings in wellbores-same-as to the mappings in wellbores-Tcan-linkingT
+	 * TODO: Transform the input mappings in wellbores-same-as to the mappings in wellbores-Tcan-linkingT
+	 * Some rules need to be fixed for the canonical uri. First column should refer to the provenance and the other to id
+	 * Add a new step at the end of T mapping to add the new mappings with the join
 	 *
 	 */
 
