@@ -23,8 +23,6 @@ public class OntopBenchmark {
     private final DatalogProgram programAfterUnfolding;
     private final DatalogProgram programAfterRewriting;
     
-    private static OntopBenchmark instance = null;
-
     public static class Builder{
 	// Required parameters
 	private final long rewritingTime;
@@ -51,8 +49,9 @@ public class OntopBenchmark {
 	    return this;
 	}
 	
-	public void build(){
-	    OntopBenchmark.instance = new OntopBenchmark(this);
+	public OntopBenchmark build(){
+	    OntopBenchmark instance = new OntopBenchmark(this);
+	    return instance;
 	}
     }
     
@@ -63,13 +62,7 @@ public class OntopBenchmark {
 	this.programAfterRewriting = builder.programAfterRewriting;
 	this.programAfterUnfolding = builder.programAfterUnfolding;
     }
-
-    // Public interface
-
-    public static OntopBenchmark getInstance() {
-	return instance;
-    }
-    
+ 
     /**
      * 
      * @return Time spent in the rewrite procedure
