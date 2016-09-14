@@ -118,9 +118,12 @@ public class QuestQueryProcessor {
 	public String getSQL(ParsedQuery pq) throws OBDAException {
 			
 		String cachedSQL = translatedSQLCache.get(pq);
-		if (cachedSQL != null)
-			return cachedSQL;
-		
+		if (cachedSQL != null){
+		    // Davide> Benchmarking
+		    OntopBenchmark.Builder builder = new OntopBenchmark.Builder(0, 0);
+		    builder.build();
+		    return cachedSQL;
+		}
 		try {
 			// log.debug("Input query:\n{}", strquery);
 			

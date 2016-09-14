@@ -57,11 +57,11 @@ public class OntopBenchmark {
     }
     
     private OntopBenchmark( Builder builder ){
-	rewritingTime = builder.rewritingTime;
-	unfoldingTime = builder.unfoldingTime;
+	this.rewritingTime = builder.rewritingTime;
+	this.unfoldingTime = builder.unfoldingTime;
 	 
 	this.programAfterRewriting = builder.programAfterRewriting;
-	programAfterUnfolding = builder.programAfterUnfolding;
+	this.programAfterUnfolding = builder.programAfterUnfolding;
     }
 
     // Public interface
@@ -88,7 +88,7 @@ public class OntopBenchmark {
     }
     public int getUCQSizeAfterRewriting() {
 	int result = 0;
-	if( this.programAfterRewriting.getRules() != null )
+	if( sizesCollected() )
 	    result = this.programAfterRewriting.getRules().size();
 
 	return result;
@@ -96,11 +96,13 @@ public class OntopBenchmark {
 
     public int getMinQuerySizeAfterRewriting() {
 	int toReturn = Integer.MAX_VALUE;
-	List<CQIE> rules = programAfterRewriting.getRules();
-	for (CQIE rule : rules) {
-	    int querySize = getBodySize(rule.getBody());
-	    if (querySize < toReturn) {
-		toReturn = querySize;
+	if( sizesCollected() ){
+	    List<CQIE> rules = programAfterRewriting.getRules();
+	    for (CQIE rule : rules) {
+		int querySize = getBodySize(rule.getBody());
+		if (querySize < toReturn) {
+		    toReturn = querySize;
+		}
 	    }
 	}
 	return toReturn;
@@ -108,11 +110,13 @@ public class OntopBenchmark {
 
     public int getMaxQuerySizeAfterRewriting() {
 	int toReturn = Integer.MIN_VALUE;
-	List<CQIE> rules = programAfterRewriting.getRules();
-	for (CQIE rule : rules) {
-	    int querySize = getBodySize(rule.getBody());
-	    if (querySize > toReturn) {
-		toReturn = querySize;
+	if( sizesCollected() ){
+	    List<CQIE> rules = programAfterRewriting.getRules();
+	    for (CQIE rule : rules) {
+		int querySize = getBodySize(rule.getBody());
+		if (querySize > toReturn) {
+		    toReturn = querySize;
+		}
 	    }
 	}
 	return toReturn;
@@ -120,7 +124,7 @@ public class OntopBenchmark {
 
     public int getUCQSizeAfterUnfolding() {
 	int result = 0;
-	if( programAfterUnfolding.getRules() != null )
+	if( sizesCollected() )
 	    result = programAfterUnfolding.getRules().size();
 
 	return result;
@@ -128,11 +132,13 @@ public class OntopBenchmark {
 
     public int getMinQuerySizeAfterUnfolding() {
 	int toReturn = Integer.MAX_VALUE;
-	List<CQIE> rules = programAfterUnfolding.getRules();
-	for (CQIE rule : rules) {
-	    int querySize = getBodySize(rule.getBody());
-	    if (querySize < toReturn) {
-		toReturn = querySize;
+	if( sizesCollected() ){
+	    List<CQIE> rules = programAfterUnfolding.getRules();
+	    for (CQIE rule : rules) {
+		int querySize = getBodySize(rule.getBody());
+		if (querySize < toReturn) {
+		    toReturn = querySize;
+		}
 	    }
 	}
 	return (toReturn == Integer.MAX_VALUE) ? 0 : toReturn;
@@ -140,15 +146,22 @@ public class OntopBenchmark {
 
     public int getMaxQuerySizeAfterUnfolding() {
 	int toReturn = Integer.MIN_VALUE;
-	List<CQIE> rules = programAfterUnfolding.getRules();
-	for (CQIE rule : rules) {
-	    int querySize = getBodySize(rule.getBody());
-	    if (querySize > toReturn) {
-		toReturn = querySize;
+	if( sizesCollected() ){
+	    List<CQIE> rules = programAfterUnfolding.getRules();
+	    for (CQIE rule : rules) {
+		int querySize = getBodySize(rule.getBody());
+		if (querySize > toReturn) {
+		    toReturn = querySize;
+		}
 	    }
 	}
 	return (toReturn == Integer.MIN_VALUE) ? 0 : toReturn;
     }    	
+    
+    private boolean sizesCollected(){
+	return this.programAfterRewriting != null && this.programAfterUnfolding != null 
+		&& this.programAfterRewriting.getRules() != null && this.programAfterUnfolding.getRules() != null;
+    }
     
     private int getBodySize(List<? extends Function> atoms) {
 	int counter = 0;
