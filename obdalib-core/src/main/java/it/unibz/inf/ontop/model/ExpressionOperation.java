@@ -168,4 +168,8 @@ public enum ExpressionOperation implements OperationPredicate {
 	public boolean isSameAsProperty() {
 		return false;
 	}
+	@Override
+	public boolean isCanonicalIRIProperty() {
+		return false;
+	}
 }

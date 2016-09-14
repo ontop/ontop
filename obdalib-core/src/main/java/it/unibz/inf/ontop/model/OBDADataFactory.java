@@ -82,7 +82,9 @@ public interface OBDADataFactory extends Serializable {
 	
 	public Predicate getClassPredicate(String name);
 
-	Predicate getOWLSameASPredicate();
+	public Predicate getOWLSameASPredicate();
+
+	public Predicate getOntopCanonicalIRI();
 	
 
 	public JdbcTypeMapper getJdbcTypeMapper();

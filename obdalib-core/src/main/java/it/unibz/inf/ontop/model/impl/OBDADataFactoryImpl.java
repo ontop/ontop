@@ -130,6 +130,11 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	}
 
 	@Override
+	public Predicate getOntopCanonicalIRI() {
+		return new PredicateImpl(OBDAVocabulary.CANONICAL_IRI, 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT });
+	}
+
+	@Override
 	@Deprecated
 	public URIConstant getConstantURI(String uriString) {
 		return new URIConstantImpl(uriString);

@@ -123,6 +123,8 @@ public class QuestUnfolder {
 			addSameAsMapping(unfoldingProgram);
 		}
 
+		unfoldingProgram = new CanonicalURIRewriter().buildCanonicalSameAsMappings(unfoldingProgram);
+
 		// Collecting URI templates
 		uriTemplateMatcher = UriTemplateMatcher.create(unfoldingProgram);
 
@@ -131,7 +133,6 @@ public class QuestUnfolder {
 		// sparql translator)
 		unfoldingProgram.addAll(generateTripleMappings(unfoldingProgram));
 
-		SameAsRewriting.getCanonicalSameAsMappings(unfoldingProgram);
 
 		if(log.isDebugEnabled()) {
 			String finalMappings = Joiner.on("\n").join(unfoldingProgram);

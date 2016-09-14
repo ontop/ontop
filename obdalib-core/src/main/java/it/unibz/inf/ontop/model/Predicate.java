@@ -120,5 +120,7 @@ public interface Predicate {
 
 	boolean isSameAsProperty();
 
+	boolean isCanonicalIRIProperty();
+
 	boolean isTriplePredicate();
 }

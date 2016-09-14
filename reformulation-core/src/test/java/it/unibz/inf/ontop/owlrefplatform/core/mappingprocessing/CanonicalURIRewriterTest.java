@@ -10,10 +10,10 @@ import java.util.LinkedList;
 import java.util.List;
 
 /**
- *Test correctness rewriting of sameAs mapping with canonical URI
+ *Test correctness rewriting of mappings having a canonical URI
  */
 
-public class SameAsRewritingTest {
+public class CanonicalURIRewriterTest {
 
 
     private static List<CQIE> mappings;
@@ -36,9 +36,9 @@ public class SameAsRewritingTest {
 
         //sameAs mappings
 
-        Function headM1 = getSameAsFunction(fac.getUriTemplate(canonURI,t1,t0), fac.getUriTemplate(epdsURI, t2));
-        Function headM2 = getSameAsFunction(fac.getUriTemplate(canonURI,t1,t0), fac.getUriTemplate(npdURI, t3));
-        Function headM3 = getSameAsFunction(fac.getUriTemplate(canonURI,t1,t0), fac.getUriTemplate(owURI, t4));
+        Function headM1 = getCanonURIFunction(fac.getUriTemplate(canonURI,t1,t0), fac.getUriTemplate(epdsURI, t2));
+        Function headM2 = getCanonURIFunction(fac.getUriTemplate(canonURI,t1,t0), fac.getUriTemplate(npdURI, t3));
+        Function headM3 = getCanonURIFunction(fac.getUriTemplate(canonURI,t1,t0), fac.getUriTemplate(owURI, t4));
 
         List<Function> bodyM1 = new LinkedList<>();
         List<Term> atomTerms1 = new LinkedList<>();
@@ -51,7 +51,7 @@ public class SameAsRewritingTest {
         Function tableT_can = getFunction("PUBLIC.T_CAN_LINK", new LinkedList<>(atomTerms1));
 
         bodyM1.add(tableT_can);
-        bodyM1.add(fac.getFunctionIsNotNull(t4));
+        bodyM1.add(fac.getFunctionIsNotNull(t2));
         bodyM1.add(fac.getFunctionIsNotNull(t0));
         bodyM1.add(fac.getFunctionIsNotNull(t1));
 
@@ -60,9 +60,9 @@ public class SameAsRewritingTest {
 
         List<Function> bodyM2 = new LinkedList<>();
         bodyM2.add(tableT_can);
-        bodyM2.add(fac.getFunctionIsNotNull(t4));
+        bodyM2.add(fac.getFunctionIsNotNull(t3));
         bodyM2.add(fac.getFunctionIsNotNull(t0));
-        bodyM2.add(fac.getFunctionIsNotNull(t2));
+        bodyM2.add(fac.getFunctionIsNotNull(t1));
 
         mappings.add(fac.getCQIE(headM2,bodyM2));
 
@@ -70,7 +70,7 @@ public class SameAsRewritingTest {
         bodyM3.add(tableT_can);
         bodyM3.add(fac.getFunctionIsNotNull(t4));
         bodyM3.add(fac.getFunctionIsNotNull(t0));
-        bodyM3.add(fac.getFunctionIsNotNull(t3));
+        bodyM3.add(fac.getFunctionIsNotNull(t1));
 
         mappings.add(fac.getCQIE(headM3,bodyM3));
 
@@ -115,11 +115,11 @@ public class SameAsRewritingTest {
         return fac.getFunction(fac.getPredicate(name, terms.size()), terms);
     }
 
-    private Function getSameAsFunction( Term term1, Term term2) {
+    private Function getCanonURIFunction( Term term1, Term term2) {
         List<Term> list = new ArrayList<>(2);
         list.add(term1);
         list.add(term2);
-        return fac.getFunction(fac.getOWLSameASPredicate(), list);
+        return fac.getFunction(fac.getOntopCanonicalIRI(), list);
     }
 
     private Function getDataPropertyFunction(String name, Term term1, Term term2, Predicate.COL_TYPE type) {
@@ -144,7 +144,7 @@ public class SameAsRewritingTest {
     @Test
     public void testSameAs1() throws Exception {
 
-        List<CQIE> canonicalSameAsMappings = SameAsRewriting.getCanonicalSameAsMappings(mappings);
+        List<CQIE> canonicalSameAsMappings = new CanonicalURIRewriter().buildCanonicalSameAsMappings(mappings);
 
         System.out.print(canonicalSameAsMappings);
 

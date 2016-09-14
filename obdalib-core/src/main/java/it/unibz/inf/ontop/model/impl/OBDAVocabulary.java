@@ -35,6 +35,8 @@ public class OBDAVocabulary {
 
 	public static final String SAME_AS = "http://www.w3.org/2002/07/owl#sameAs";
 
+	public static final String CANONICAL_IRI = "http://ontop.inf.unibz.it/pred#is_canonical_iri_of";
+
 	/* Common namespaces and prefixes */
 
 	public static final String NS_XSD = "http://www.w3.org/2001/XMLSchema#";

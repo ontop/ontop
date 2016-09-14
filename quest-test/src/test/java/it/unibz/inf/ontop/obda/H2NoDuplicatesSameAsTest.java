@@ -61,7 +61,7 @@ public class H2NoDuplicatesSameAsTest {
 	private OWLOntology ontology;
 
 	final String owlfile = "src/test/resources/sameAs/wellbores-no-duplicates.owl";
-	final String obdafile = "src/test/resources/sameAs/wellbores-same-as.obda";
+	final String obdafile = "src/test/resources/sameAs/wellbores-same-as-can.obda";
 	private QuestOWL reasoner;
 	private Connection sqlConnection;
 
