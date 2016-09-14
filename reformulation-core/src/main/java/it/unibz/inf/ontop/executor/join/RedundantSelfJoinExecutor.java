@@ -129,6 +129,7 @@ public class RedundantSelfJoinExecutor implements InnerJoinExecutor {
                                                 final QueryTreeComponent treeComponent)
             throws InvalidQueryOptimizationProposalException {
 
+        // Non-final
         InnerJoinNode topJoinNode = highLevelProposal.getFocusNode();
 
         ImmutableMultimap<AtomPredicate, DataNode> initialMap = extractDataNodes(query.getChildren(topJoinNode));
@@ -150,7 +151,7 @@ public class RedundantSelfJoinExecutor implements InnerJoinExecutor {
 
                 // SIDE-EFFECT on the tree component (and thus on the query)
                 NodeCentricOptimizationResults<InnerJoinNode> result = applyOptimization(query, treeComponent,
-                        highLevelProposal.getFocusNode(), concreteProposal);
+                        topJoinNode, concreteProposal);
 
                 /**
                  *
@@ -168,6 +169,8 @@ public class RedundantSelfJoinExecutor implements InnerJoinExecutor {
                         throw new IllegalStateException("The number of data atoms was expected to decrease, not increase");
                     }
                     // else, continue
+                    topJoinNode = result.getOptionalNewNode().get();
+
                 } else {
                     return result;
                 }
