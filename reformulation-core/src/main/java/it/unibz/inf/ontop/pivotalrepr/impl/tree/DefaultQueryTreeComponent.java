@@ -202,8 +202,21 @@ public class DefaultQueryTreeComponent implements QueryTreeComponent {
 
     @Override
     public void insertParent(QueryNode childNode, QueryNode newParentNode) throws IllegalTreeUpdateException {
+        insertParent(childNode, newParentNode, Optional.empty());
+    }
+
+    @Override
+    public void insertParent(QueryNode childNode, QueryNode newParentNode, Optional<ArgumentPosition> optionalPosition)
+            throws IllegalTreeUpdateException {
         collectPossiblyNewVariables(newParentNode);
-        tree.insertParent(childNode, newParentNode);
+        tree.insertParent(childNode, newParentNode, optionalPosition);
+    }
+
+    @Override
+    public void transferChild(QueryNode childNode, QueryNode formerParentNode, QueryNode newParentNode,
+                              Optional<ArgumentPosition> optionalPosition) throws IllegalTreeUpdateException {
+
+        tree.transferChild(childNode, formerParentNode, newParentNode, optionalPosition);
     }
 
     @Override

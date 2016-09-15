@@ -48,7 +48,7 @@ public interface QueryTree {
 
     Optional<NonCommutativeOperatorNode.ArgumentPosition> getOptionalPosition(QueryNode parentNode, QueryNode childNode);
 
-    void insertParent(QueryNode childNode, QueryNode newParentNode) throws IllegalTreeUpdateException;
+    void insertParent(QueryNode childNode, QueryNode newParentNode, Optional<NonCommutativeOperatorNode.ArgumentPosition> optionalPosition) throws IllegalTreeUpdateException;
 
     ImmutableSet<EmptyNode> getEmptyNodes();
 
@@ -60,4 +60,7 @@ public interface QueryTree {
      * (since the latter are mutable by default).
      */
     QueryTree createSnapshot();
+
+    void transferChild(QueryNode childNode, QueryNode formerParentNode, QueryNode newParentNode,
+                       Optional<NonCommutativeOperatorNode.ArgumentPosition> optionalPosition);
 }
