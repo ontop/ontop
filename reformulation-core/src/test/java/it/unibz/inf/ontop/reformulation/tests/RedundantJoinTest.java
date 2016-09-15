@@ -19,6 +19,7 @@ import it.unibz.inf.ontop.pivotalrepr.proposal.impl.InnerJoinOptimizationProposa
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.pivotalrepr.*;
 
+import static it.unibz.inf.ontop.model.ExpressionOperation.LT;
 import static junit.framework.TestCase.assertTrue;
 
 /**
@@ -422,6 +423,52 @@ public class RedundantJoinTest {
         queryBuilder1.init(projectionAtom1, constructionNode1);
 
         InnerJoinNode joinNode1 = new InnerJoinNodeImpl(Optional.<ImmutableExpression>empty());
+        queryBuilder1.addChild(constructionNode1, joinNode1);
+        ExtensionalDataNode dataNode5 =  new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, M, N, O));
+        ExtensionalDataNode dataNode6 =  new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE2_PREDICATE, M, N, O));
+
+        queryBuilder1.addChild(joinNode1, dataNode5);
+        queryBuilder1.addChild(joinNode1, dataNode6);
+
+        IntermediateQuery query1 = queryBuilder1.build();
+
+        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, query1));
+    }
+
+
+    @Test
+    public void testTopJoinUpdate() throws EmptyQueryException {
+        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(metadata);
+        DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE, M, N, O);
+        ConstructionNode constructionNode = new ConstructionNodeImpl(projectionAtom.getVariables());
+        queryBuilder.init(projectionAtom, constructionNode);
+        InnerJoinNode joinNode = new InnerJoinNodeImpl(Optional.of(DATA_FACTORY.getImmutableExpression(LT, O1, N1)));
+        queryBuilder.addChild(constructionNode, joinNode);
+        ExtensionalDataNode dataNode1 =  new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, M, N, O1));
+        ExtensionalDataNode dataNode2 =  new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, M, N1, O));
+        ExtensionalDataNode dataNode3 =  new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE2_PREDICATE, M, N, O1));
+        ExtensionalDataNode dataNode4 =  new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE2_PREDICATE, M1, N, O));
+
+        queryBuilder.addChild(joinNode, dataNode1);
+        queryBuilder.addChild(joinNode, dataNode2);
+        queryBuilder.addChild(joinNode, dataNode3);
+        queryBuilder.addChild(joinNode, dataNode4);
+
+        IntermediateQuery query = queryBuilder.build();
+        System.out.println("\nBefore optimization: \n" +  query);
+
+        IntermediateQuery optimizedQuery = query.applyProposal(new InnerJoinOptimizationProposalImpl(joinNode))
+                .getResultingQuery();
+
+        System.out.println("\n After optimization: \n" +  optimizedQuery);
+
+
+        IntermediateQueryBuilder queryBuilder1 = new DefaultIntermediateQueryBuilder(metadata);
+        DistinctVariableOnlyDataAtom projectionAtom1 = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE, M, N, O);
+        ConstructionNode constructionNode1 = new ConstructionNodeImpl(projectionAtom1.getVariables());
+        queryBuilder1.init(projectionAtom1, constructionNode1);
+
+        InnerJoinNode joinNode1 = new InnerJoinNodeImpl(Optional.of(DATA_FACTORY.getImmutableExpression(LT, O, N)));
         queryBuilder1.addChild(constructionNode1, joinNode1);
         ExtensionalDataNode dataNode5 =  new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, M, N, O));
         ExtensionalDataNode dataNode6 =  new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE2_PREDICATE, M, N, O));
