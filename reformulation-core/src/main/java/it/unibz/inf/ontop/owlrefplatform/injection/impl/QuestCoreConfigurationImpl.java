@@ -29,11 +29,14 @@ import java.util.Optional;
 import java.util.Properties;
 import java.util.stream.Stream;
 
+import static it.unibz.inf.ontop.owlrefplatform.injection.QuestCoreConfiguration.CardinalityPreservationMode.LOOSE;
+
 public class QuestCoreConfigurationImpl extends OBDACoreConfigurationImpl implements QuestCoreConfiguration {
 
     private final QuestCorePreferences preferences;
     private final QuestCoreOptions options;
     private final OptimizationConfiguration optimizationConfiguration;
+    private final CardinalityPreservationMode cardinalityMode;
 
     protected QuestCoreConfigurationImpl(QuestCorePreferences preferences, OBDAConfigurationOptions obdaOptions,
                                          QuestCoreOptions options) {
@@ -41,6 +44,9 @@ public class QuestCoreConfigurationImpl extends OBDACoreConfigurationImpl implem
         this.preferences = preferences;
         this.options = options;
         this.optimizationConfiguration = new OptimizationConfigurationImpl(generateOptimizationConfigurationMap());
+
+        // TODO: allow the other modes
+        cardinalityMode = LOOSE;
     }
 
     /**
@@ -107,6 +113,11 @@ public class QuestCoreConfigurationImpl extends OBDACoreConfigurationImpl implem
     @Override
     public OptimizationConfiguration getOptimizationConfiguration() {
         return optimizationConfiguration;
+    }
+
+    @Override
+    public CardinalityPreservationMode getCardinalityPreservationMode() {
+        return cardinalityMode;
     }
 
     public static class QuestCoreOptions {

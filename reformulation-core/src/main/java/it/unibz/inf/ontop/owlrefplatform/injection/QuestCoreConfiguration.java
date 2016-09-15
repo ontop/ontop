@@ -23,6 +23,8 @@ public interface QuestCoreConfiguration extends OBDACoreConfiguration {
 
     OptimizationConfiguration getOptimizationConfiguration();
 
+    CardinalityPreservationMode getCardinalityPreservationMode();
+
 
     static Builder<Builder<Builder<Builder<Builder<Builder<Builder<Builder<Builder<Builder<Builder<Builder<Builder>>>>>>>>>>>> defaultBuilder() {
         return new QuestCoreConfigurationImpl.BuilderImpl<>();
@@ -55,6 +57,23 @@ public interface QuestCoreConfiguration extends OBDACoreConfiguration {
         B enableExistentialReasoning(boolean enable);
 
         QuestCoreConfiguration build();
+    }
+
+    enum CardinalityPreservationMode {
+        /**
+         * Cardinality is not important and may not be respected
+         * (allows to optimize more)
+         */
+        LOOSE,
+        /**
+         * Cardinality is preserved in case a cardinality-sensitive
+         * aggregation function is detected.
+         */
+        STRICT_FOR_AGGREGATION,
+        /**
+         * Cardinality is strictly preserved
+         */
+        STRICT
     }
 
 }
