@@ -23,6 +23,7 @@ public class CanonicalURIRewriterTest {
     private static Variable t2 =fac.getVariable("t2");
     private static Variable t3 =fac.getVariable("t3");
     private static Variable t4 =fac.getVariable("t4");
+    private static Variable t5 =fac.getVariable("t5");
     private static ValueConstant canonURI = fac.getConstantLiteral("http://ontop/wellbore/{}/{}");
     private static ValueConstant npdURI = fac.getConstantLiteral("http://npd/wellbore/{}");
     private static ValueConstant epdsURI = fac.getConstantLiteral("http://epds/wellbore/{}");
@@ -75,38 +76,7 @@ public class CanonicalURIRewriterTest {
         mappings.add(fac.getCQIE(headM3,bodyM3));
 
 
-        //other mappings
-        Function headM4 = getDataPropertyFunction("http://ontop.inf.unibz.it/test/wellbore#name", fac.getUriTemplate(epdsURI,t0), t2, Predicate.COL_TYPE.LITERAL);
-        Function headM5 = getDataPropertyFunction("http://ontop.inf.unibz.it/test/wellbore#name", fac.getUriTemplate(npdURI,t0), t2, Predicate.COL_TYPE.LITERAL);
-        Function headM6 = getDataPropertyFunction("http://ontop.inf.unibz.it/test/wellbore#name", fac.getUriTemplate(owURI,t0), t2, Predicate.COL_TYPE.LITERAL);
 
-        List<Function> bodyM4 = new LinkedList<>();
-        List<Term> atomTerms2 = new LinkedList<>();
-        atomTerms2.add(t0);
-        atomTerms2.add(t1);
-        atomTerms2.add(t2);
-
-        Function tableEPDS = getFunction("PUBLIC.T1", new LinkedList<>(atomTerms2));
-        bodyM4.add(tableEPDS);
-        bodyM4.add(fac.getFunctionIsNotNull(t0));
-
-        mappings.add(fac.getCQIE(headM4,bodyM4));
-
-        List<Function> bodyM5 = new LinkedList<>();
-
-        Function tableNPD = getFunction("PUBLIC.T2", new LinkedList<>(atomTerms2));
-        bodyM5.add(tableNPD);
-        bodyM5.add(fac.getFunctionIsNotNull(t0));
-
-        mappings.add(fac.getCQIE(headM5,bodyM5));
-
-        List<Function> bodyM6 = new LinkedList<>();
-
-        Function tableOW = getFunction("PUBLIC.T3", new LinkedList<>(atomTerms2));
-        bodyM6.add(tableOW);
-        bodyM6.add(fac.getFunctionIsNotNull(t0));
-
-        mappings.add(fac.getCQIE(headM6,bodyM6));
 
 
     }
@@ -122,6 +92,10 @@ public class CanonicalURIRewriterTest {
         return fac.getFunction(fac.getOntopCanonicalIRI(), list);
     }
 
+    private Function getClassPropertyFunction(String name, Term term1) {
+        return fac.getFunction(fac.getClassPredicate(name), term1);
+
+    }
     private Function getDataPropertyFunction(String name, Term term1, Term term2, Predicate.COL_TYPE type) {
 
         List<Term> list = new ArrayList<>(2);
@@ -139,10 +113,152 @@ public class CanonicalURIRewriterTest {
 
     }
 
+    private void addDataPropertiesMappings(){
+
+        //other mappings with data property
+        Function headM1 = getDataPropertyFunction("http://ontop.inf.unibz.it/test/wellbore#name", fac.getUriTemplate(epdsURI,t0), t2, Predicate.COL_TYPE.LITERAL);
+        Function headM2 = getDataPropertyFunction("http://ontop.inf.unibz.it/test/wellbore#name", fac.getUriTemplate(npdURI,t0), t2, Predicate.COL_TYPE.LITERAL);
+        Function headM3 = getDataPropertyFunction("http://ontop.inf.unibz.it/test/wellbore#name", fac.getUriTemplate(owURI,t0), t2, Predicate.COL_TYPE.LITERAL);
+
+        List<Function> bodyM1 = new LinkedList<>();
+        List<Term> atomTerms = new LinkedList<>();
+        atomTerms.add(t0);
+        atomTerms.add(t1);
+        atomTerms.add(t2);
+
+        Function tableEPDS = getFunction("PUBLIC.T1", new LinkedList<>(atomTerms));
+        bodyM1.add(tableEPDS);
+        bodyM1.add(fac.getFunctionIsNotNull(t0));
+
+        mappings.add(fac.getCQIE(headM1,bodyM1));
+
+        List<Function> bodyM2 = new LinkedList<>();
+
+        Function tableNPD = getFunction("PUBLIC.T2", new LinkedList<>(atomTerms));
+        bodyM2.add(tableNPD);
+        bodyM2.add(fac.getFunctionIsNotNull(t0));
+
+        mappings.add(fac.getCQIE(headM2,bodyM2));
+
+        List<Function> bodyM3 = new LinkedList<>();
+
+        Function tableOW = getFunction("PUBLIC.T3", new LinkedList<>(atomTerms));
+        bodyM3.add(tableOW);
+        bodyM3.add(fac.getFunctionIsNotNull(t0));
+
+        mappings.add(fac.getCQIE(headM3,bodyM3));
+
+    }
+
+    private void addClassPropertiesMappings(){
+
+        //mappings with class
+        Function headM1 = getClassPropertyFunction("http://ontop.inf.unibz.it/test/wellbore#Wellbore", fac.getUriTemplate(epdsURI,t0));
+        Function headM2 = getClassPropertyFunction("http://ontop.inf.unibz.it/test/wellbore#Wellbore", fac.getUriTemplate(npdURI,t0));
+        Function headM3 = getClassPropertyFunction("http://ontop.inf.unibz.it/test/wellbore#Wellbore", fac.getUriTemplate(owURI,t0));
+
+        List<Function> bodyM1 = new LinkedList<>();
+        List<Term> atomTerms = new LinkedList<>();
+        atomTerms.add(t0);
+        atomTerms.add(t1);
+        atomTerms.add(t2);
+
+        Function tableEPDS = getFunction("PUBLIC.T1", new LinkedList<>(atomTerms));
+        bodyM1.add(tableEPDS);
+        bodyM1.add(fac.getFunctionIsNotNull(t0));
+
+        mappings.add(fac.getCQIE(headM1,bodyM1));
+
+        List<Function> bodyM2 = new LinkedList<>();
+
+        Function tableNPD = getFunction("PUBLIC.T2", new LinkedList<>(atomTerms));
+        bodyM2.add(tableNPD);
+        bodyM2.add(fac.getFunctionIsNotNull(t0));
+
+        mappings.add(fac.getCQIE(headM2,bodyM2));
+
+        List<Function> bodyM3 = new LinkedList<>();
+
+        Function tableOW = getFunction("PUBLIC.T3", new LinkedList<>(atomTerms));
+        bodyM3.add(tableOW);
+        bodyM3.add(fac.getFunctionIsNotNull(t0));
+
+        mappings.add(fac.getCQIE(headM3,bodyM3));
+
+    }
+
+    private void addObjectPropertiesMappings() {
+
+        //other mappings with object property
+        Function headM1 = getObjectPropertyFunction("http://ontop.inf.unibz.it/test/wellbore#checkedBy", fac.getUriTemplate(epdsURI,t0), fac.getUriTemplate(fac.getConstantLiteral("http://ontop.inf.unibz.it/test/wellbore#Technician"), t1) );
+        Function headM2 = getObjectPropertyFunction("http://ontop.inf.unibz.it/test/wellbore#checkedBy", fac.getUriTemplate(npdURI,t0), fac.getUriTemplate(fac.getConstantLiteral("http://ontop.inf.unibz.it/test/wellbore#Technician"), t1));
+        Function headM3 = getObjectPropertyFunction("http://ontop.inf.unibz.it/test/wellbore#checkedBy", fac.getUriTemplate(owURI,t0), fac.getUriTemplate(fac.getConstantLiteral("http://ontop.inf.unibz.it/test/wellbore#Technician"), t1));
+
+        List<Function> bodyM1 = new LinkedList<>();
+        List<Term> atomTerms = new LinkedList<>();
+        atomTerms.add(t0);
+        atomTerms.add(t1);
+        atomTerms.add(t2);
+
+        Function tableEPDS = getFunction("PUBLIC.T1", new LinkedList<>(atomTerms));
+        bodyM1.add(tableEPDS);
+        bodyM1.add(fac.getFunctionIsNotNull(t0));
+
+        mappings.add(fac.getCQIE(headM1,bodyM1));
+
+        List<Function> bodyM2 = new LinkedList<>();
+
+        Function tableNPD = getFunction("PUBLIC.T2", new LinkedList<>(atomTerms));
+        bodyM2.add(tableNPD);
+        bodyM2.add(fac.getFunctionIsNotNull(t0));
+
+        mappings.add(fac.getCQIE(headM2,bodyM2));
+
+        List<Function> bodyM3 = new LinkedList<>();
+
+        Function tableOW = getFunction("PUBLIC.T3", new LinkedList<>(atomTerms));
+        bodyM3.add(tableOW);
+        bodyM3.add(fac.getFunctionIsNotNull(t0));
+
+        mappings.add(fac.getCQIE(headM3,bodyM3));
+    }
+
+    private void addObjectPropertiesDoubleURIMappings() {
+
+        //other mappings with object property, having a wellbore as subject and object
+        Function headM1 = getObjectPropertyFunction("http://ontop.inf.unibz.it/test/wellbore#linkedTo", fac.getUriTemplate(epdsURI,t0), fac.getUriTemplate(npdURI,t4) );
+
+
+        List<Function> bodyM1 = new LinkedList<>();
+        List<Term> atomTerms = new LinkedList<>();
+        atomTerms.add(t0);
+        atomTerms.add(t1);
+        atomTerms.add(t2);
+
+        Function tableEPDS = getFunction("PUBLIC.T1", new LinkedList<>(atomTerms));
+        bodyM1.add(tableEPDS);
+        bodyM1.add(fac.getFunctionIsNotNull(t0));
+
+
+
+        List<Term> atomTerms2 = new LinkedList<>();
+        atomTerms2.add(t3);
+        atomTerms2.add(t4);
+        atomTerms2.add(t5);
+
+        Function tableNPD = getFunction("PUBLIC.T2", new LinkedList<>(atomTerms2));
+        bodyM1.add(tableNPD);
+        bodyM1.add(fac.getFunctionIsNotNull(t3));
+
+        mappings.add(fac.getCQIE(headM1,bodyM1));
+
+    }
 
 
     @Test
-    public void testSameAs1() throws Exception {
+    public void testSameAsClass() throws Exception {
+
+        addClassPropertiesMappings();
 
         List<CQIE> canonicalSameAsMappings = new CanonicalURIRewriter().buildCanonicalSameAsMappings(mappings);
 
@@ -150,11 +266,44 @@ public class CanonicalURIRewriterTest {
 
     }
 
+    @Test
+    public void testSameAsDataProperty() throws Exception {
 
+        addClassPropertiesMappings();
+        addDataPropertiesMappings();
 
+        List<CQIE> canonicalSameAsMappings = new CanonicalURIRewriter().buildCanonicalSameAsMappings(mappings);
 
+        System.out.print(canonicalSameAsMappings);
 
+    }
 
+    @Test
+    public void testSameAsObjectProperty() throws Exception {
+
+        addClassPropertiesMappings();
+        addDataPropertiesMappings();
+        addObjectPropertiesMappings();
+
+        List<CQIE> canonicalSameAsMappings = new CanonicalURIRewriter().buildCanonicalSameAsMappings(mappings);
+
+        System.out.print(canonicalSameAsMappings);
+
+    }
+
+    @Test
+    public void testSameAsObjectPropertyDoubleURI() throws Exception {
+
+        addClassPropertiesMappings();
+        addDataPropertiesMappings();
+        addObjectPropertiesMappings();
+        addObjectPropertiesDoubleURIMappings();
+
+        List<CQIE> canonicalSameAsMappings = new CanonicalURIRewriter().buildCanonicalSameAsMappings(mappings);
+
+        System.out.print(canonicalSameAsMappings);
+
+    }
 
 
 
