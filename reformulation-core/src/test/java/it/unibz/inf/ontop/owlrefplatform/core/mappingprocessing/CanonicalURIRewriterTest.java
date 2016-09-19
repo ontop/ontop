@@ -1,13 +1,20 @@
 package it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing;
 
+import com.google.common.base.Joiner;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
+import it.unibz.inf.ontop.owlrefplatform.core.QuestUnfolder;
 import org.junit.Before;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  *Test correctness rewriting of mappings having a canonical URI
@@ -18,12 +25,19 @@ public class CanonicalURIRewriterTest {
 
     private static List<CQIE> mappings;
     private static OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
+
     private static Variable t0 =fac.getVariable("t0");
     private static Variable t1 =fac.getVariable("t1");
     private static Variable t2 =fac.getVariable("t2");
     private static Variable t3 =fac.getVariable("t3");
     private static Variable t4 =fac.getVariable("t4");
     private static Variable t5 =fac.getVariable("t5");
+    private static Variable t0_can =fac.getVariable("t0_canonical");
+    private static Variable t1_can =fac.getVariable("t1_canonical");
+    private static Variable t2_can =fac.getVariable("t2_canonical");
+    private static Variable t3_can =fac.getVariable("t3_canonical");
+    private static Variable t4_can =fac.getVariable("t4_canonical");
+
     private static ValueConstant canonURI = fac.getConstantLiteral("http://ontop/wellbore/{}/{}");
     private static ValueConstant npdURI = fac.getConstantLiteral("http://npd/wellbore/{}");
     private static ValueConstant epdsURI = fac.getConstantLiteral("http://epds/wellbore/{}");
@@ -226,7 +240,7 @@ public class CanonicalURIRewriterTest {
     private void addObjectPropertiesDoubleURIMappings() {
 
         //other mappings with object property, having a wellbore as subject and object
-        Function headM1 = getObjectPropertyFunction("http://ontop.inf.unibz.it/test/wellbore#linkedTo", fac.getUriTemplate(epdsURI,t0), fac.getUriTemplate(npdURI,t4) );
+        Function headM1 = getObjectPropertyFunction("http://ontop.inf.unibz.it/test/wellbore#linkedTo", fac.getUriTemplate(epdsURI,t0), fac.getUriTemplate(npdURI,t3) );
 
 
         List<Function> bodyM1 = new LinkedList<>();
@@ -262,7 +276,33 @@ public class CanonicalURIRewriterTest {
 
         List<CQIE> canonicalSameAsMappings = new CanonicalURIRewriter().buildCanonicalSameAsMappings(mappings);
 
-        System.out.print(canonicalSameAsMappings);
+        System.out.print(Joiner.on("\n").join(canonicalSameAsMappings));
+
+        assertEquals(3, canonicalSameAsMappings.size() );
+        Function head = getClassPropertyFunction("http://ontop.inf.unibz.it/test/wellbore#Wellbore", fac.getUriTemplate(canonURI,t1_can,t0_can));
+        List<Function> body = new ArrayList<>();
+        List<Term> atomTerms1 = new LinkedList<>();
+        atomTerms1.add(t0_can);
+        atomTerms1.add(t1_can);
+        atomTerms1.add(t2_can);
+        atomTerms1.add(t3_can);
+        atomTerms1.add(t4_can);
+
+        Function tableT_can = getFunction("PUBLIC.T_CAN_LINK", new LinkedList<>(atomTerms1));
+        body.add(tableT_can);
+        body.add(fac.getFunctionIsNotNull(t2_can));
+        body.add(fac.getFunctionIsNotNull(t0_can));
+        body.add(fac.getFunctionIsNotNull(t1_can));
+
+        List<Term> atomTerms2 = new LinkedList<>();
+        atomTerms2.add(t2_can);
+        atomTerms2.add(t1);
+        atomTerms2.add(t2);
+
+        Function tableT1 = getFunction("PUBLIC.T1", new LinkedList<>(atomTerms2));
+        body.add(tableT1);
+
+        assertTrue(canonicalSameAsMappings.contains(fac.getCQIE(head,body)));
 
     }
 
@@ -274,7 +314,33 @@ public class CanonicalURIRewriterTest {
 
         List<CQIE> canonicalSameAsMappings = new CanonicalURIRewriter().buildCanonicalSameAsMappings(mappings);
 
-        System.out.print(canonicalSameAsMappings);
+        System.out.print(Joiner.on("\n").join(canonicalSameAsMappings));
+
+        assertEquals(6, canonicalSameAsMappings.size() );
+        Function head = getDataPropertyFunction("http://ontop.inf.unibz.it/test/wellbore#name", fac.getUriTemplate(canonURI,t1_can,t0_can), t2, Predicate.COL_TYPE.LITERAL);
+        List<Function> body = new ArrayList<>();
+        List<Term> atomTerms1 = new LinkedList<>();
+        atomTerms1.add(t0_can);
+        atomTerms1.add(t1_can);
+        atomTerms1.add(t2_can);
+        atomTerms1.add(t3_can);
+        atomTerms1.add(t4_can);
+
+        Function tableT_can = getFunction("PUBLIC.T_CAN_LINK", new LinkedList<>(atomTerms1));
+        body.add(tableT_can);
+        body.add(fac.getFunctionIsNotNull(t2_can));
+        body.add(fac.getFunctionIsNotNull(t0_can));
+        body.add(fac.getFunctionIsNotNull(t1_can));
+
+        List<Term> atomTerms2 = new LinkedList<>();
+        atomTerms2.add(t2_can);
+        atomTerms2.add(t1);
+        atomTerms2.add(t2);
+
+        Function tableT1 = getFunction("PUBLIC.T1", new LinkedList<>(atomTerms2));
+        body.add(tableT1);
+
+        assertTrue(canonicalSameAsMappings.contains(fac.getCQIE(head,body)));
 
     }
 
@@ -287,7 +353,33 @@ public class CanonicalURIRewriterTest {
 
         List<CQIE> canonicalSameAsMappings = new CanonicalURIRewriter().buildCanonicalSameAsMappings(mappings);
 
-        System.out.print(canonicalSameAsMappings);
+        System.out.print(Joiner.on("\n").join(canonicalSameAsMappings));
+
+        assertEquals(9, canonicalSameAsMappings.size() );
+        Function head = getObjectPropertyFunction("http://ontop.inf.unibz.it/test/wellbore#checkedBy", fac.getUriTemplate(canonURI,t1_can,t0_can),  fac.getUriTemplate(fac.getConstantLiteral("http://ontop.inf.unibz.it/test/wellbore#Technician"), t1));
+        List<Function> body = new ArrayList<>();
+        List<Term> atomTerms1 = new LinkedList<>();
+        atomTerms1.add(t0_can);
+        atomTerms1.add(t1_can);
+        atomTerms1.add(t2_can);
+        atomTerms1.add(t3_can);
+        atomTerms1.add(t4_can);
+
+        Function tableT_can = getFunction("PUBLIC.T_CAN_LINK", new LinkedList<>(atomTerms1));
+        body.add(tableT_can);
+        body.add(fac.getFunctionIsNotNull(t2_can));
+        body.add(fac.getFunctionIsNotNull(t0_can));
+        body.add(fac.getFunctionIsNotNull(t1_can));
+
+        List<Term> atomTerms2 = new LinkedList<>();
+        atomTerms2.add(t2_can);
+        atomTerms2.add(t1);
+        atomTerms2.add(t2);
+
+        Function tableT1 = getFunction("PUBLIC.T1", new LinkedList<>(atomTerms2));
+        body.add(tableT1);
+
+        assertTrue(canonicalSameAsMappings.contains(fac.getCQIE(head,body)));
 
     }
 
@@ -301,7 +393,42 @@ public class CanonicalURIRewriterTest {
 
         List<CQIE> canonicalSameAsMappings = new CanonicalURIRewriter().buildCanonicalSameAsMappings(mappings);
 
-        System.out.print(canonicalSameAsMappings);
+        System.out.print( Joiner.on("\n").join(canonicalSameAsMappings));
+
+        assertEquals(10, canonicalSameAsMappings.size() );
+        Function head = getObjectPropertyFunction("http://ontop.inf.unibz.it/test/wellbore#linkedTo", fac.getUriTemplate(canonURI,t1_can,t0_can), fac.getUriTemplate(canonURI,t1_can,t0_can) );
+        List<Function> body = new ArrayList<>();
+        List<Term> atomTerms1 = new ArrayList<>();
+        atomTerms1.add(t0_can);
+        atomTerms1.add(t1_can);
+        atomTerms1.add(t2_can);
+        atomTerms1.add(t3_can);
+        atomTerms1.add(t4_can);
+
+        Function tableT_can = getFunction("PUBLIC.T_CAN_LINK", new LinkedList<>(atomTerms1));
+        body.add(tableT_can);
+        body.add(fac.getFunctionIsNotNull(t3_can));
+        body.add(fac.getFunctionIsNotNull(t0_can));
+        body.add(fac.getFunctionIsNotNull(t1_can));
+        body.add(fac.getFunctionIsNotNull(t2_can));
+
+        List<Term> atomTerms2 = new ArrayList<>();
+        atomTerms2.add(t2_can);
+        atomTerms2.add(t1);
+        atomTerms2.add(t2);
+
+        Function tableT1 = getFunction("PUBLIC.T1", new LinkedList<>(atomTerms2));
+        body.add(tableT1);
+
+        List<Term> atomTerms = new ArrayList<>();
+        atomTerms.add(t3_can);
+        atomTerms.add(t4);
+        atomTerms.add(t5);
+
+        Function tableT2 = getFunction("PUBLIC.T2", new LinkedList<>(atomTerms));
+        body.add(tableT2);
+
+        assertTrue(canonicalSameAsMappings.contains(fac.getCQIE(head,body)));
 
     }
 

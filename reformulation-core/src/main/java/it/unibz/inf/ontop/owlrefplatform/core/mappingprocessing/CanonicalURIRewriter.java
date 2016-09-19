@@ -26,7 +26,7 @@ public class CanonicalURIRewriter {
 
     private Map<ValueConstant, List<Term>> uri_column_map;
 
-    private static final Logger log = LoggerFactory.getLogger(QuestUnfolder.class);
+    private static final Logger log = LoggerFactory.getLogger(CanonicalURIRewriter.class);
 
     private static final OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 
@@ -86,7 +86,7 @@ public class CanonicalURIRewriter {
                                 List<Term> newoURITerms = canonicaloURIMapping.getNewURITerms();
                                 List<Function> newoURIBody = canonicaloURIMapping.getNewURIBody();
 
-                                newMapping = fac.getCQIE(fac.getFunction(predicate, head.getTerm(0), fac.getUriTemplate(newoURITerms)), newoURIBody);
+                                newMapping = fac.getCQIE(fac.getFunction(predicate, headNewMapping.getTerm(0), fac.getUriTemplate(newoURITerms)), newoURIBody);
                             }
 
                         }
