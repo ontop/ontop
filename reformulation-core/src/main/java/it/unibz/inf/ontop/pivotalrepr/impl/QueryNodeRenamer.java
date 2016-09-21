@@ -41,7 +41,9 @@ public class QueryNodeRenamer implements HomogeneousQueryNodeTransformer {
 
     @Override
     public UnionNode transform(UnionNode unionNode){
-        return unionNode.clone();
+        return new UnionNodeImpl(renameProjectedVars(
+                unionNode.getVariables()));
+//        return unionNode.clone();
     }
 
     @Override
