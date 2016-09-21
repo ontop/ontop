@@ -226,7 +226,7 @@ public class H2ComplexSameAsTest {
 				"} UNION {?x owl:sameAs [ a :Wellbore ] }} ";
 
 		ArrayList<String> results = runTests(query, false);
-		assertEquals(25, results.size() );
+		assertEquals(18, results.size() );
 
 
 	}

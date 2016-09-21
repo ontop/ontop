@@ -49,9 +49,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 /***
- * Test same as using h2 simple database on wellbores
+ * Test use of canonical uri in h2 simple database on wellbores
  */
-public class H2NoDuplicatesSameAsTest {
+public class H2NoDuplicatesCanonicalURITest {
 
 	private OBDADataFactory fac;
 	private QuestOWLConnection conn;
@@ -68,20 +68,13 @@ public class H2NoDuplicatesSameAsTest {
 	@Before
 	public void setUp() throws Exception {
 
-			 sqlConnection= DriverManager.getConnection("jdbc:h2:mem:wellboresNoDuplicates","sa", "");
-			    java.sql.Statement s = sqlConnection.createStatement();
-			  
-//			    try {
-			    	String text = new Scanner( new File("src/test/resources/sameAs/wellbores-Tcan-linkingT.sql") ).useDelimiter("\\A").next();
-			    	s.execute(text);
-//			    	Server.startWebServer(sqlConnection);
-			    	 
-//			    } catch(SQLException sqle) {
-//			        System.out.println("Exception in creating db from script");
-//			    }
-			   
-			    s.close();
-		
+		sqlConnection= DriverManager.getConnection("jdbc:h2:mem:wellboresNoDuplicates","sa", "");
+		java.sql.Statement s = sqlConnection.createStatement();
+
+		String text = new Scanner( new File("src/test/resources/sameAs/wellbores-Tcan-linkingT.sql") ).useDelimiter("\\A").next();
+		s.execute(text);
+
+		s.close();
 		
 		// Loading the OWL file
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
@@ -102,10 +95,9 @@ public class H2NoDuplicatesSameAsTest {
 		QuestOWLConfiguration config;
 
 		config = QuestOWLConfiguration.builder().obdaModel(obdaModel).preferences(p).build();
-//				.sameAsMappings(true).build();
 
 
-		reasoner = (QuestOWL) factory.createReasoner(ontology, config);
+		reasoner = factory.createReasoner(ontology, config);
 
 		// Now we are ready for querying
 		conn = reasoner.getConnection();
@@ -206,13 +198,6 @@ public class H2NoDuplicatesSameAsTest {
 
 		assertEquals(72, results.size() );
 	}
-
-	/**
-	 * TODO: Transform the input mappings in wellbores-same-as to the mappings in wellbores-Tcan-linkingT
-	 * Some rules need to be fixed for the canonical uri. First column should refer to the provenance and the other to id
-	 * Add a new step at the end of T mapping to add the new mappings with the join
-	 *
-	 */
 
 
 

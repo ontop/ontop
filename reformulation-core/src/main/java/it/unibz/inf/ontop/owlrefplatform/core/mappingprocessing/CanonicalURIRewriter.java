@@ -42,6 +42,10 @@ public class CanonicalURIRewriter {
 
         analyzeCanonicalIRIMappings(mappings);
 
+        if(can_uri_map.isEmpty()){
+            return mappings;
+        }
+
         for (CQIE mapping : mappings) {
 
             CQIE newMapping = mapping;
@@ -182,15 +186,14 @@ public class CanonicalURIRewriter {
                 variables.forEach(variable -> map.put(variable, fac.getVariable(variable.getName() + "_canonical")));
 
                 SubstitutionImpl substitution = new SubstitutionImpl(map);
-
                 CQIE canonicalMapping = SubstitutionUtilities.applySubstitution(mapping, substitution, true);
 
+                //get template uri and columns of canonical uri and object uri
                 Function canonHead = canonicalMapping.getHead();
 
                 Function canonicalTerm = (Function) canonHead.getTerm(0);
                 Function objectTerm = (Function) canonHead.getTerm(1);
 
-                //get template uri and columns
                 ValueConstant canonURI = (ValueConstant) canonicalTerm.getTerm(0);
                 List<Term> canonURIColumns = canonicalTerm.getTerms().subList(1, canonicalTerm.getTerms().size());
 
@@ -198,11 +201,9 @@ public class CanonicalURIRewriter {
                 List<Term> objectURIColumns = objectTerm.getTerms().subList(1, objectTerm.getTerms().size());
 
                 can_uri_map.put(objectURI, canonURI);
-
-                //get column used in the template URI for the canonical uri and the object and keep the renamed mapping
-
                 uri_column_map.put(objectURI, objectURIColumns);
                 uri_column_map.put(canonURI, canonURIColumns);
+                //store the renamed mapping
                 uri_mapping_map.put(objectURI, canonicalMapping);
 
 
