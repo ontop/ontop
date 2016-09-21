@@ -28,6 +28,8 @@ import org.protege.editor.core.ui.action.ProtegeAction;
 import org.protege.editor.owl.OWLEditorKit;
 import org.protege.editor.owl.model.OWLModelManager;
 import org.protege.editor.owl.model.OWLWorkspace;
+import org.semanticweb.owlapi.model.IRI;
+import org.semanticweb.owlapi.model.OWLOntology;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -58,6 +60,7 @@ public class R2RMLExportAction extends ProtegeAction {
 		// Does nothing!
 	}
 
+        // Assumes initialise() has been run and has set modelManager to active OWLModelManager
 	@Override
 	public void actionPerformed(ActionEvent arg0) {
 
@@ -70,7 +73,12 @@ public class R2RMLExportAction extends ProtegeAction {
             else {
                 URI sourceID = obdaModel.getSources().get(0).getSourceID();
 
-                final JFileChooser fc = new JFileChooser();
+		// Get the path of the file of the active OWL model
+		OWLOntology activeOntology = modelManager.getActiveOntology();
+                IRI documentIRI = modelManager.getOWLOntologyManager().getOntologyDocumentIRI(activeOntology);
+		File ontologyDir = new File(documentIRI.toURI().getPath());
+		
+		final JFileChooser fc = new JFileChooser(ontologyDir);
                 fc.setSelectedFile(new File(sourceID + "-mappings.ttl"));
                 int approve = fc.showSaveDialog(workspace);
 

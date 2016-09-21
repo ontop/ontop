@@ -29,6 +29,9 @@ import it.unibz.inf.ontop.r2rml.R2RMLReader;
 import org.protege.editor.core.ui.action.ProtegeAction;
 import org.protege.editor.owl.OWLEditorKit;
 import org.protege.editor.owl.model.OWLWorkspace;
+import org.protege.editor.owl.model.OWLModelManager;
+import org.semanticweb.owlapi.model.IRI;
+import org.semanticweb.owlapi.model.OWLOntology;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,6 +46,7 @@ public class R2RMLImportAction extends ProtegeAction {
 
 	private OWLEditorKit editorKit = null;
 	private OBDAModel obdaModel = null;
+    	private OWLModelManager modelManager= null;
 
 	private Logger log = LoggerFactory.getLogger(R2RMLImportAction.class);
 
@@ -51,6 +55,7 @@ public class R2RMLImportAction extends ProtegeAction {
 		editorKit = (OWLEditorKit) getEditorKit();
 		obdaModel = ((OBDAModelManager) editorKit.get(OBDAModelImpl.class
 				.getName())).getActiveOBDAModel();
+		modelManager = editorKit.getOWLModelManager();
 	}
 
 	@Override
@@ -73,8 +78,12 @@ public class R2RMLImportAction extends ProtegeAction {
 					"Confirmation", JOptionPane.YES_NO_OPTION);
 
 			if (response == JOptionPane.YES_OPTION) {
-
-				final JFileChooser fc = new JFileChooser();
+				// Get the path of the file of the active OWL model
+				OWLOntology activeOntology = modelManager.getActiveOntology();
+				IRI documentIRI = modelManager.getOWLOntologyManager().getOntologyDocumentIRI(activeOntology);
+				File ontologyDir = new File(documentIRI.toURI().getPath());		
+				final JFileChooser fc = new JFileChooser(ontologyDir);
+		       
 				fc.showOpenDialog(workspace);
 				File file = null;
 				try {
