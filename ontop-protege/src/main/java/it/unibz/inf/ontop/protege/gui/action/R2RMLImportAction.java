@@ -109,7 +109,7 @@ public class R2RMLImportAction extends ProtegeAction {
 
 							}
 						}
-						JOptionPane.showMessageDialog(workspace, "R2rml Import completed. " );
+						JOptionPane.showMessageDialog(workspace, "R2RML Import completed. " );
 					} catch (DuplicateMappingException dm) {
 						JOptionPane.showMessageDialog(workspace, "Duplicate mapping id found. Please correct the Resource node name: " + dm.getLocalizedMessage());
 						throw new RuntimeException("Duplicate mapping found: " + dm.getMessage());
@@ -117,7 +117,7 @@ public class R2RMLImportAction extends ProtegeAction {
 
 					} catch (Exception e) {
 						JOptionPane.showMessageDialog(null, "An error occurred. For more info, see the logs.");
-						log.error("Error during r2rml import. \n");
+						log.error("Error during R2RML import. \n");
 						e.printStackTrace();
 					}
 

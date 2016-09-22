@@ -88,12 +88,12 @@ public class R2RMLExportAction extends ProtegeAction {
 
                     R2RMLWriter writer = new R2RMLWriter(obdaModel, sourceID, modelManager.getActiveOntology());
                     writer.write(file);
-                    JOptionPane.showMessageDialog(workspace, "R2rml Export completed.");
+                    JOptionPane.showMessageDialog(workspace, "R2RML Export completed.");
                 }
             }
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(null, "An error occurred. For more info, see the logs.");
-            log.error("Error during r2rml export. \n");
+            log.error("Error during R2RML export. \n");
             ex.printStackTrace();
         }
 
