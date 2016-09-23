@@ -21,9 +21,20 @@ package it.unibz.inf.ontop.owlrefplatform.core.queryevaluation;
  */
 
 import java.sql.Types;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 import java.util.regex.Pattern;
 
 public class PostgreSQLDialectAdapter extends SQL99DialectAdapter {
+
+	private static Map<Integer, String> SQL_DATATYPES;
+	static {
+		SQL_DATATYPES = new HashMap<>();
+		SQL_DATATYPES.put(Types.REAL, "DECIMAL");
+		SQL_DATATYPES.put(Types.DOUBLE, "DECIMAL");
+		SQL_DATATYPES.put(Types.VARCHAR, "VARCHAR(10485760)");
+	}
 
     private Pattern quotes = Pattern.compile("[\"`\\['].*[\"`\\]']");
 
@@ -40,7 +51,7 @@ public class PostgreSQLDialectAdapter extends SQL99DialectAdapter {
     @Override
 	public String strBefore(String str, String before) {
 		return String.format("LEFT(%s,CAST (SIGN(POSITION(%s IN %s))*(POSITION(%s IN %s)-1) AS INTEGER))", str, before, str, before, str);
-		}
+	}
     
     @Override
 	public String strStartsOperator(){
@@ -54,10 +65,9 @@ public class PostgreSQLDialectAdapter extends SQL99DialectAdapter {
     
     @Override
 	public String strAfter(String str, String after) {
-//SIGN return a double precision, we need to cast to numeric to avoid conversion exception while using substring
+		//SIGN return a double precision, we need to cast to numeric to avoid conversion exception while using substring
 		return String.format("SUBSTRING(%s,POSITION(%s IN %s) + LENGTH(%s), CAST( SIGN(POSITION(%s IN %s)) * LENGTH(%s) AS INTEGER))",
 				str, after, str , after , after, str, str);
-
 	}
 
     @Override
@@ -107,13 +117,9 @@ public class PostgreSQLDialectAdapter extends SQL99DialectAdapter {
 
 	@Override
 	public String sqlCast(String value, int type) {
-		String strType = null;
-		if (type == Types.VARCHAR) {
-			strType = "VARCHAR(10485760)";
-		} else {
-			throw new RuntimeException("Unsupported SQL type");
-		}
-		return "CAST(" + value + " AS " + strType + ")";
+		return Optional.ofNullable(SQL_DATATYPES.get(type))
+				.map(strType -> "CAST(" + value + " AS " + strType + ")")
+				.orElseGet(() -> super.sqlCast(value, type));
 	}
 	
 	/**
