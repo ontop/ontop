@@ -302,7 +302,8 @@ public class DefaultTree implements QueryTree {
     }
 
     @Override
-    public void insertParent(QueryNode childNode, QueryNode newParentNode) throws IllegalTreeUpdateException {
+    public void insertParent(QueryNode childNode, QueryNode newParentNode,
+                             Optional<NonCommutativeOperatorNode.ArgumentPosition> optionalPosition) throws IllegalTreeUpdateException {
         if (contains(newParentNode)) {
             throw new IllegalTreeUpdateException(newParentNode + " is already present so cannot be inserted again");
         }
@@ -322,7 +323,7 @@ public class DefaultTree implements QueryTree {
         childrenIndex.put(newParentTreeNode, createChildrenRelation(newParentTreeNode));
         changeChild(grandParentTreeNode, childTreeNode, newParentTreeNode);
 
-        addChild(newParentNode, childNode, Optional.<NonCommutativeOperatorNode.ArgumentPosition>empty(), false, false);
+        addChild(newParentNode, childNode, optionalPosition, false, false);
     }
 
     public ImmutableSet<EmptyNode> getEmptyNodes() {
@@ -400,6 +401,18 @@ public class DefaultTree implements QueryTree {
                 ));
         return new DefaultTree(newNodeIndex.get(rootNode.getQueryNode()), newNodeIndex, newChildrenIndex,
                 newParentIndex, new HashSet<>(emptyNodes));
+    }
+
+    @Override
+    public void transferChild(QueryNode childNode, QueryNode formerParentNode, QueryNode newParentNode,
+                              Optional<NonCommutativeOperatorNode.ArgumentPosition> optionalPosition) {
+
+        TreeNode formerParentTreeNode = accessTreeNode(formerParentNode);
+        TreeNode childTreeNode = accessTreeNode(childNode);
+
+        accessChildrenRelation(formerParentTreeNode).removeChild(childTreeNode);
+
+        addChild(newParentNode, childNode, optionalPosition, false, false);
     }
 
     /**
