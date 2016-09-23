@@ -50,7 +50,7 @@ public class OracleSQLDialectAdapter extends SQL99DialectAdapter {
 		SqlDatatypes.put(Types.CHAR, "CHAR");
 		SqlDatatypes.put(Types.VARCHAR, "VARCHAR(4000)");
 		SqlDatatypes.put(Types.CLOB, "CLOB");
-		SqlDatatypes.put(Types.TIMESTAMP, "TIMESTAMP");
+		SqlDatatypes.put(Types.TIMESTAMP, "VARCHAR(4000)");
 		SqlDatatypes.put(Types.INTEGER, "INTEGER");
 		SqlDatatypes.put(Types.BIGINT, "NUMBER(19)");
 		SqlDatatypes.put(Types.REAL, "NUMBER");
@@ -313,6 +313,47 @@ public class OracleSQLDialectAdapter extends SQL99DialectAdapter {
 		return bf.toString();
 	}
 
+	@Override
+	public String getSQLLexicalFormDatetimeStamp(String v) {
+		String datetime = v.replace('T', ' ');
+		int dotlocation = datetime.indexOf('.');
+		int zlocation = datetime.indexOf('Z');
+		int minuslocation = datetime.indexOf('-', 10); // added search from 10th pos, because we need to ignore minuses in date
+		int pluslocation = datetime.indexOf('+');
+		StringBuilder bf = new StringBuilder(datetime);
+		if (zlocation != -1) {
+			/*
+			 * replacing Z by +00:00
+			 */
+			bf.replace(zlocation, bf.length(), "+00:00");
+		}
+
+		if (dotlocation != -1) {
+			/*
+			 * Stripping the string from the presicion that is not supported by
+			 * SQL timestamps.
+			 */
+			// TODO we need to check which databases support fractional
+			// sections (e.g., oracle,db2, postgres)
+			// so that when supported, we use it.
+			int endlocation = Math.max(zlocation, Math.max(minuslocation, pluslocation));
+			if (endlocation == -1) {
+				endlocation = datetime.length();
+			}
+			bf.replace(dotlocation, endlocation, "");
+		}
+		bf.insert(0, "'");
+		bf.append("'");
+
+		/*
+		 * Oracle has a special treatment for datetime datatype such that it requires a default
+		 * datetime format. To have time zone as required by datetimestamp we can use to_timestamp_tz
+		 */
+		bf.insert(0, "to_timestamp_tz(");
+		bf.append(",'YYYY-MM-DD HH24:MI:SSTZH:TZM')");
+
+		return bf.toString();
+	}
 
 	@Override
 	public String nameTopVariable(String signatureVariableName, String suffix, Set<String> sqlVariableNames) {
