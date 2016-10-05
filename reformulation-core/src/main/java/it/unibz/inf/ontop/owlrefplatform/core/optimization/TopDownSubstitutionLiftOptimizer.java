@@ -52,8 +52,8 @@ public class TopDownSubstitutionLiftOptimizer implements SubstitutionLiftOptimiz
             log.debug(String.valueOf(nextNodeAndQuery.getNextQuery()));
 
         }
-        return removeUnnecessaryTrueNodes(nextNodeAndQuery.getNextQuery());    
-//        return nextNodeAndQuery.getNextQuery();
+        TrueNodesOptimizer trueNodesOptimizer = new TrueNodesOptimizer();
+        return trueNodesOptimizer.optimize(nextNodeAndQuery.getNextQuery());
     }
 
     private IntermediateQuery removeUnnecessaryTrueNodes(IntermediateQuery nextQuery) {
@@ -375,6 +375,5 @@ public class TopDownSubstitutionLiftOptimizer implements SubstitutionLiftOptimiz
                 .filter(m -> !m.isEmpty())
                 .map(ImmutableSubstitutionImpl::new);
     }
-    
 
 }

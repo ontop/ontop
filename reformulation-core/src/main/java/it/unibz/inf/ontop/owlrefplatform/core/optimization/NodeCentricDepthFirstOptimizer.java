@@ -47,7 +47,7 @@ public abstract class NodeCentricDepthFirstOptimizer<P extends SimpleNodeCentric
         while (optionalNextNode.isPresent()) {
             QueryNode currentNode = optionalNextNode.get();
 
-            Optional<P> optionalProposal = evaluateNode(currentNode);
+            Optional<P> optionalProposal = evaluateNode(currentNode,currentQuery);
 
             if (optionalProposal.isPresent()) {
                 NodeCentricOptimizationResults<? extends QueryNode> optimizationResults = currentQuery.applyProposal(
@@ -64,9 +64,11 @@ public abstract class NodeCentricDepthFirstOptimizer<P extends SimpleNodeCentric
         return currentQuery;
     }
 
+
+
     /**
      * TODO: do we need also the query?
      */
-    protected abstract Optional<P> evaluateNode(QueryNode node);
+    protected abstract Optional<P> evaluateNode(QueryNode node, IntermediateQuery query);
 
 }
