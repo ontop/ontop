@@ -85,6 +85,10 @@ public class QueryNodeRenamer implements HomogeneousQueryNodeTransformer {
         return emptyNode.clone();
     }
 
+    public TrueNode transform(TrueNode trueNode) {
+        return trueNode.clone();
+    }
+
     private Optional<ImmutableQueryModifiers> renameOptionalModifiers(Optional<ImmutableQueryModifiers> optionalModifiers) {
         if (optionalModifiers.isPresent()) {
             return renamingSubstitution.applyToQueryModifiers(optionalModifiers.get());
