@@ -48,7 +48,7 @@ public class SubstitutionLiftTest {
     private final AtomPredicate ANS1_ARITY_2_PREDICATE = new AtomPredicateImpl("ans1", 2);
     private final AtomPredicate ANS1_ARITY_3_PREDICATE = new AtomPredicateImpl("ans1", 3);
     private final AtomPredicate ANS1_ARITY_4_PREDICATE = new AtomPredicateImpl("ans1", 4);
-
+    private final AtomPredicate ANS1_ARITY_1_PREDICATE = new AtomPredicateImpl("ans1", 1);
 
     private static final OBDADataFactory DATA_FACTORY = OBDADataFactoryImpl.getInstance();
     private final Variable X = DATA_FACTORY.getVariable("x");
@@ -89,6 +89,7 @@ public class SubstitutionLiftTest {
     private ExtensionalDataNode DATA_NODE_5 = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE2_PREDICATE, C, D));
     private ExtensionalDataNode DATA_NODE_6 = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE3_PREDICATE, E, F));
     private ExtensionalDataNode DATA_NODE_7 = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE4_PREDICATE, G, H));
+    private ExtensionalDataNode DATA_NODE_8 = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE7_ARITY_1_PREDICATE,A));
 
     InnerJoinNode joinNode;
     UnionNode unionNode;
@@ -1066,6 +1067,150 @@ public class SubstitutionLiftTest {
         assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, expectedQuery));
 
     }
+
+
+    @Test
+    @Ignore
+    public void testTrueNodeCreationAndRemoval_RightChildOfJoin() throws EmptyQueryException {
+        //Construct unoptimized query
+        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
+        DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_2_PREDICATE, X, Y);
+        ConstructionNode rootNode = new ConstructionNodeImpl(projectionAtom.getVariables(),
+                new ImmutableSubstitutionImpl<>(ImmutableMap.of()), Optional.empty());
+        queryBuilder.init(projectionAtom, rootNode);
+
+        InnerJoinNode joinNode = new InnerJoinNodeImpl(Optional.of(DATA_FACTORY.getImmutableExpression(EQ,
+                buildSparqlDatatype(X), buildSparqlDatatype(Y))));
+        queryBuilder.addChild(rootNode,joinNode);
+
+        ConstructionNode leftCn = new ConstructionNodeImpl(ImmutableSet.of(X),
+                new ImmutableSubstitutionImpl<>(ImmutableMap.of(X, generateInt(A) )),Optional.empty());
+
+
+        queryBuilder.addChild(joinNode,leftCn);
+
+        queryBuilder.addChild(leftCn, DATA_NODE_8 );
+
+
+
+        ConstructionNode rightCn = new ConstructionNodeImpl(ImmutableSet.of(Y),
+                new ImmutableSubstitutionImpl<>(ImmutableMap.of(Y, generateInt(DATA_FACTORY.getConstantLiteral("2", INTEGER)) )),Optional.empty());
+
+        queryBuilder.addChild(joinNode, rightCn);
+
+        //build unoptimized query
+        IntermediateQuery unOptimizedQuery = queryBuilder.build();
+        System.out.println("\nBefore optimization: \n" +  unOptimizedQuery);
+
+
+        IntermediateQueryOptimizer substitutionOptimizer = new TopDownSubstitutionLiftOptimizer();
+
+        IntermediateQuery optimizedQuery = substitutionOptimizer.optimize(unOptimizedQuery);
+
+        System.out.println("\nAfter optimization: \n" +  optimizedQuery);
+        assertTrue(true);
+//        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, expectedQuery));
+
+    }
+
+    @Test
+    public void testTrueNodeCreationAndRemoval_LeftChildOfJoin() throws EmptyQueryException {
+        //Construct unoptimized query
+        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
+        DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_2_PREDICATE, X, Y);
+        ConstructionNode rootNode = new ConstructionNodeImpl(projectionAtom.getVariables(),
+                new ImmutableSubstitutionImpl<>(ImmutableMap.of()), Optional.empty());
+        queryBuilder.init(projectionAtom, rootNode);
+
+        InnerJoinNode joinNode = new InnerJoinNodeImpl(Optional.of(DATA_FACTORY.getImmutableExpression(EQ,
+                buildSparqlDatatype(X), buildSparqlDatatype(Y))));
+        queryBuilder.addChild(rootNode,joinNode);
+
+        ConstructionNode leftCn = new ConstructionNodeImpl(ImmutableSet.of(Y),
+                new ImmutableSubstitutionImpl<>(ImmutableMap.of(Y, generateInt(DATA_FACTORY.getConstantLiteral("2", INTEGER)) )),Optional.empty());
+
+        queryBuilder.addChild(joinNode, leftCn);
+        ConstructionNode rightCn = new ConstructionNodeImpl(ImmutableSet.of(X),
+                new ImmutableSubstitutionImpl<>(ImmutableMap.of(X, generateInt(A) )),Optional.empty());
+
+        queryBuilder.addChild(joinNode,rightCn);
+
+        queryBuilder.addChild(rightCn, DATA_NODE_8 );
+
+
+        //build unoptimized query
+        IntermediateQuery unOptimizedQuery = queryBuilder.build();
+        System.out.println("\nBefore optimization: \n" +  unOptimizedQuery);
+
+
+        // Expected query
+        IntermediateQueryBuilder expectedQueryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
+        ImmutableSubstitution expectedRootNodeSubstitution = new ImmutableSubstitutionImpl<>(ImmutableMap.of(X,
+                generateInt(A),Y, generateInt(DATA_FACTORY.getConstantLiteral("2", INTEGER))));
+        ConstructionNode expectedRootNode= new ConstructionNodeImpl(ImmutableSet.of(X,Y),expectedRootNodeSubstitution,
+                Optional.empty());
+        expectedQueryBuilder.init(projectionAtom, expectedRootNode);
+        expectedQueryBuilder.addChild(expectedRootNode, DATA_NODE_8 );
+
+        IntermediateQuery expectedQuery = expectedQueryBuilder.build();
+        System.out.println("\nExpected query: \n" +  expectedQuery);
+
+        // Optimize and compare
+        IntermediateQueryOptimizer substitutionOptimizer = new TopDownSubstitutionLiftOptimizer();
+        IntermediateQuery optimizedQuery = substitutionOptimizer.optimize(unOptimizedQuery);
+        System.out.println("\nAfter optimization: \n" +  optimizedQuery);
+
+        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, expectedQuery));
+
+    }
+
+    @Test
+    public void testTrueNodeRemoval() throws EmptyQueryException {
+
+        //Unoptimized query
+        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
+        DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_1_PREDICATE, X);
+        ConstructionNode rootNode = new ConstructionNodeImpl(projectionAtom.getVariables(),
+                new ImmutableSubstitutionImpl<>(ImmutableMap.of()), Optional.empty());
+        queryBuilder.init(projectionAtom, rootNode);
+
+
+        InnerJoinNode joinNode = new InnerJoinNodeImpl(Optional.empty());
+        queryBuilder.addChild(rootNode,joinNode);
+
+        TrueNode trueNode = new TrueNodeImpl();
+        queryBuilder.addChild(joinNode,trueNode);
+
+        ConstructionNode rightCn = new ConstructionNodeImpl(ImmutableSet.of(X),
+                new ImmutableSubstitutionImpl<>(ImmutableMap.of(X, generateInt(A) )),Optional.empty());
+
+        queryBuilder.addChild(joinNode,rightCn);
+
+        queryBuilder.addChild(rightCn, DATA_NODE_8 );
+
+        IntermediateQuery unOptimizedQuery = queryBuilder.build();
+        System.out.println("\nBefore true Node removal: \n" +  unOptimizedQuery);
+
+        // Expected query
+        IntermediateQueryBuilder expectedQueryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
+
+        ConstructionNode expectedRootNode= new ConstructionNodeImpl(ImmutableSet.of(X),
+                new ImmutableSubstitutionImpl<>(ImmutableMap.of(X, generateInt(A) )),Optional.empty());
+        expectedQueryBuilder.init(projectionAtom, expectedRootNode);
+        expectedQueryBuilder.addChild(expectedRootNode, DATA_NODE_8 );
+
+        IntermediateQuery expectedQuery = expectedQueryBuilder.build();
+        System.out.println("\nExpected query: \n" +  expectedQuery);
+
+        // Optimize and compare
+        IntermediateQueryOptimizer substitutionOptimizer = new TopDownSubstitutionLiftOptimizer();
+        IntermediateQuery optimizedQuery = substitutionOptimizer.optimize(unOptimizedQuery);
+
+        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, expectedQuery));
+    }
+
+
+
 
     @Test
     @Ignore
