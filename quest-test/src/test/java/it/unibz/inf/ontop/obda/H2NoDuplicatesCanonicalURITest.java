@@ -60,7 +60,7 @@ public class H2NoDuplicatesCanonicalURITest {
 	private OBDAModel obdaModel;
 	private OWLOntology ontology;
 
-	final String owlfile = "src/test/resources/sameAs/wellbores-no-duplicates.owl";
+	final String owlfile = "src/test/resources/sameAs/wellbores-same-as-can.owl";
 	final String obdafile = "src/test/resources/sameAs/wellbores-same-as-can.obda";
 	private QuestOWL reasoner;
 	private Connection sqlConnection;
@@ -68,12 +68,10 @@ public class H2NoDuplicatesCanonicalURITest {
 	@Before
 	public void setUp() throws Exception {
 
-		sqlConnection= DriverManager.getConnection("jdbc:h2:mem:wellboresNoDuplicates","sa", "");
+		sqlConnection = DriverManager.getConnection("jdbc:h2:mem:wellboresNoDuplicates","sa", "");
 		java.sql.Statement s = sqlConnection.createStatement();
-
-		String text = new Scanner( new File("src/test/resources/sameAs/wellbores-Tcan-linkingT.sql") ).useDelimiter("\\A").next();
+		String text = new Scanner( new File("src/test/resources/sameAs/wellbores-same-as-can.sql") ).useDelimiter("\\A").next();
 		s.execute(text);
-
 		s.close();
 		
 		// Loading the OWL file
@@ -96,13 +94,10 @@ public class H2NoDuplicatesCanonicalURITest {
 
 		config = QuestOWLConfiguration.builder().obdaModel(obdaModel).preferences(p).build();
 
-
 		reasoner = factory.createReasoner(ontology, config);
 
 		// Now we are ready for querying
 		conn = reasoner.getConnection();
-
-		
 	}
 
 
@@ -123,10 +118,7 @@ public class H2NoDuplicatesCanonicalURITest {
 		}
 	}
 
-
-
 	private ArrayList runTests(String query) throws Exception {
-
 		QuestOWLStatement st = conn.createStatement();
 		ArrayList<String> retVal = new ArrayList<>();
 		try {

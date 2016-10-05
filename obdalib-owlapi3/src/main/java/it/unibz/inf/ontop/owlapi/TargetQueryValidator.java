@@ -69,11 +69,11 @@ public class TargetQueryValidator implements TargetQueryVocabularyValidator {
 			boolean isAnnotProp = isAnnotationProperty(p);
 			boolean isTriple = isTriple(p);
 			boolean isSameAs = isSameAs(p);
-
+            boolean isCanonicalIRI = isCanonicalIRI(p);
 
 			// Check if the predicate contains in the ontology vocabulary as one
 			// of these components (i.e., class, object property, data property).
-			boolean isPredicateValid = isClass || isObjectProp || isDataProp || isAnnotProp || isTriple || isSameAs;
+			boolean isPredicateValid = isClass || isObjectProp || isDataProp || isAnnotProp || isTriple || isSameAs || isCanonicalIRI;
 
 			String debugMsg = "The predicate: [" + p.getName() + "]";
 			if (isPredicateValid) {
@@ -96,9 +96,12 @@ public class TargetQueryValidator implements TargetQueryVocabularyValidator {
 					predicate =  dataFactory.getOWLSameASPredicate();
 					debugMsg += " is the owl:sameAs property.";
 				}
-				else
-					predicate = dataFactory.getPredicate(p.getName(), atom.getArity());
-
+				else if (isCanonicalIRI){
+                    predicate =  dataFactory.getOntopCanonicalIRI();
+                    debugMsg += " is the ontop:is_canonical_iri_of property.";
+                } else {
+                    predicate = dataFactory.getPredicate(p.getName(), atom.getArity());
+                }
 				atom.setPredicate(predicate); // TODO Fix the API!
 //                log.debug(debugMsg);
 			} else {
@@ -147,4 +150,6 @@ public class TargetQueryValidator implements TargetQueryVocabularyValidator {
 	@Override
 	public boolean isSameAs(Predicate p) { return p.getName().equals(OBDAVocabulary.SAME_AS); }
 
+    //@Override
+    public boolean isCanonicalIRI(Predicate p) { return p.getName().equals(OBDAVocabulary.CANONICAL_IRI); }
 }

@@ -3,11 +3,8 @@ package it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing;
 import com.google.common.base.Joiner;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestUnfolder;
 import org.junit.Before;
 import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -20,7 +17,7 @@ import static org.junit.Assert.assertTrue;
  *Test correctness rewriting of mappings having a canonical URI
  */
 
-public class CanonicalURIRewriterTest {
+public class CanonicalIRIRewriterTest {
 
 
     private static List<CQIE> mappings;
@@ -274,7 +271,7 @@ public class CanonicalURIRewriterTest {
 
         addClassPropertiesMappings();
 
-        List<CQIE> canonicalSameAsMappings = new CanonicalURIRewriter().buildCanonicalSameAsMappings(mappings);
+        List<CQIE> canonicalSameAsMappings = new CanonicalIRIRewriter().buildCanonicalSameAsMappings(mappings);
 
         System.out.print(Joiner.on("\n").join(canonicalSameAsMappings));
 
@@ -312,7 +309,7 @@ public class CanonicalURIRewriterTest {
         addClassPropertiesMappings();
         addDataPropertiesMappings();
 
-        List<CQIE> canonicalSameAsMappings = new CanonicalURIRewriter().buildCanonicalSameAsMappings(mappings);
+        List<CQIE> canonicalSameAsMappings = new CanonicalIRIRewriter().buildCanonicalSameAsMappings(mappings);
 
         System.out.print(Joiner.on("\n").join(canonicalSameAsMappings));
 
@@ -351,7 +348,7 @@ public class CanonicalURIRewriterTest {
         addDataPropertiesMappings();
         addObjectPropertiesMappings();
 
-        List<CQIE> canonicalSameAsMappings = new CanonicalURIRewriter().buildCanonicalSameAsMappings(mappings);
+        List<CQIE> canonicalSameAsMappings = new CanonicalIRIRewriter().buildCanonicalSameAsMappings(mappings);
 
         System.out.print(Joiner.on("\n").join(canonicalSameAsMappings));
 
@@ -391,7 +388,7 @@ public class CanonicalURIRewriterTest {
         addObjectPropertiesMappings();
         addObjectPropertiesDoubleURIMappings();
 
-        List<CQIE> canonicalSameAsMappings = new CanonicalURIRewriter().buildCanonicalSameAsMappings(mappings);
+        List<CQIE> canonicalSameAsMappings = new CanonicalIRIRewriter().buildCanonicalSameAsMappings(mappings);
 
         System.out.print( Joiner.on("\n").join(canonicalSameAsMappings));
 

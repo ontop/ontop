@@ -18,15 +18,15 @@ target		<http://ontop/wellbore/{can_prov}/{can_id}> ontop:is_canonical_iri_of <h
 source		select can_id, can_prov, id1, id2, id3 from T_can_link
 
 mappingId	mappingT11
-target		<http://epds/wellbore/{id}> a :Wellbore ; :inWell "{well}" ; :name "{name}" .
+target		<http://epds/wellbore/{id}> a :Wellbore ; :inWell :well1/{well} ; :name "{name}" .
 source		select id, well, name from T1
 
 mappingId	mappingT2
-target		<http://npd/wellbore/{id}>  a :Wellbore ;  :inWell "{well}" ; :name "{name}" .
+target		<http://npd/wellbore/{id}>  a :Wellbore ;  :inWell :well2/{well} ; :name "{name}" .
 source		select id, well, name from T2
 
 mappingId	mappingT3
-target		<http://ow/wellbore/{id}>   a :Wellbore ;  :inWell "{well}" ; :name "{name}" .
+target		<http://ow/wellbore/{id}>   a :Wellbore ;  :inWell :well3/{well} ; :name "{name}" .
 source		select id, well, name from T3
 
 ]]

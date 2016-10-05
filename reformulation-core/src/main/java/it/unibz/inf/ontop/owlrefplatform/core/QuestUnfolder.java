@@ -69,24 +69,24 @@ public class QuestUnfolder {
 
 		mappings = vocabularyValidator.replaceEquivalences(mappings);
 
-		/**
+		/*
 		 * add sameAsInverse
 		 */
 		if (sameAs) {
 			mappings.addAll(MappingSameAs.addSameAsInverse(mappings));
 		}
 
-		/** 
+		/*
 		 * Substitute select * with column names  (performs the operation `in place')
 		 */
 		preprocessProjection(mappings, metadata);
 
-		/**
+		/*
 		 * Split the mapping (creates a new set of mappings)
 		 */
 		Collection<OBDAMappingAxiom> splittedMappings = MappingSplitter.splitMappings(mappings);
 		
-		/**
+		/*
 		 * Expand the meta mapping (creates a new set of mappings)
 		 */
 		MetaMappingExpander metaMappingExpander = new MetaMappingExpander(localConnection, metadata.getQuotedIDFactory());
@@ -123,7 +123,12 @@ public class QuestUnfolder {
 			addSameAsMapping(unfoldingProgram);
 		}
 
-		unfoldingProgram = new CanonicalURIRewriter().buildCanonicalSameAsMappings(unfoldingProgram);
+        if(log.isDebugEnabled()) {
+            String finalMappings = Joiner.on("\n").join(unfoldingProgram);
+            log.debug("Set of mappings before canonical URI rewriting: \n {}", finalMappings);
+        }
+
+		unfoldingProgram = new CanonicalIRIRewriter().buildCanonicalSameAsMappings(unfoldingProgram);
 
 		// Collecting URI templates
 		uriTemplateMatcher = UriTemplateMatcher.create(unfoldingProgram);
