@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.pivotalrepr.impl;
 
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.*;
+import it.unibz.inf.ontop.parser.WhereClauseVisitor;
 import it.unibz.inf.ontop.pivotalrepr.*;
 
 /**
@@ -46,6 +47,11 @@ public abstract class DataNodeImpl extends QueryNodeImpl implements DataNode {
 
     @Override
     public NodeTransformationProposal reactToEmptyChild(IntermediateQuery query, EmptyNode emptyChild) {
+        throw new UnsupportedOperationException("A DataNode is not expected to have a child");
+    }
+
+    @Override
+    public NodeTransformationProposal reactToTrueChildRemovalProposal(IntermediateQuery query, TrueNode trueChild) {
         throw new UnsupportedOperationException("A DataNode is not expected to have a child");
     }
 

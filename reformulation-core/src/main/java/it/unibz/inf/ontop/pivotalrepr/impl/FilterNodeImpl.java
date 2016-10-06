@@ -94,6 +94,11 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
     }
 
     @Override
+    public NodeTransformationProposal reactToTrueChildRemovalProposal(IntermediateQuery query, TrueNode trueNode) {
+        throw new UnsupportedOperationException("The TrueNode child of a FilterNode is not expected to be removed");
+    }
+
+    @Override
     public String toString() {
         return FILTER_NODE_STR + getOptionalFilterString();
     }

@@ -3,12 +3,11 @@ package it.unibz.inf.ontop.owlrefplatform.core.optimization;
 import it.unibz.inf.ontop.pivotalrepr.*;
 import it.unibz.inf.ontop.pivotalrepr.proposal.TrueNodeRemovalProposal;
 import it.unibz.inf.ontop.pivotalrepr.proposal.impl.TrueNodeRemovalProposalImpl;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Optional;
 
-/**
- * Created by jcorman on 05/10/16.
-*/
 
 /**
  * Removes and or lifts TrueNodes whenever possible.
@@ -37,13 +36,20 @@ import java.util.Optional;
  * nothing happens
  *
  *
- * The process is applied until no more TrueNode in the query can be removed
- *
+ * Several iterations over the whole tree may need to be applied,
+ * until no more TrueNode can be removed.
+ * The process terminates if no TrueNode has been removed during the latest tree traversal.
  */
 
+/**
+ * TODO: create an index of TrueNodes during the first traversal of the query, to access them directly if further iterations are needed
+ */
 
-public class TrueNodesOptimizer  extends NodeCentricDepthFirstOptimizer<TrueNodeRemovalProposal> {
+public class TrueNodesOptimizer extends NodeCentricDepthFirstOptimizer<TrueNodeRemovalProposal> {
 
+    private final Logger log = LoggerFactory.getLogger(TrueNodesOptimizer.class);
+
+    private  Boolean additionalIterationNeeded = true;
 
     TrueNodesOptimizer() {
         this(false);
@@ -56,11 +62,14 @@ public class TrueNodesOptimizer  extends NodeCentricDepthFirstOptimizer<TrueNode
     protected boolean isRemovableTrueNode(TrueNode node, IntermediateQuery currentQuery) {
         Optional<QueryNode> parentNode = currentQuery.getParent(node);
         if (parentNode.get() instanceof InnerJoinNode ||
-                parentNode.get() instanceof ConstructionNode){
+                parentNode.get() instanceof ConstructionNode ||
+                parentNode.get() instanceof TrueNode){
+            this.additionalIterationNeeded =true;
             return true;
         }
         if (parentNode.get() instanceof LeftJoinNode){
-            return  currentQuery.getFirstChild(parentNode.get()).get() == node;
+            this.additionalIterationNeeded =true;
+            return currentQuery.getOptionalPosition(node).equals(NonCommutativeOperatorNode.ArgumentPosition.RIGHT);
         }
         return false;
     }
@@ -74,5 +83,15 @@ public class TrueNodesOptimizer  extends NodeCentricDepthFirstOptimizer<TrueNode
                 map(n -> (TrueNode) n).
                 filter(n -> isRemovableTrueNode(n, currentQuery)).
                 map(TrueNodeRemovalProposalImpl::new);
+    }
+
+    @Override
+    protected IntermediateQuery optimizeQuery(IntermediateQuery intermediateQuery) throws EmptyQueryException {
+        while (additionalIterationNeeded){
+            additionalIterationNeeded=false;
+            log.debug("\n"+intermediateQuery.toString());
+            intermediateQuery = super.optimizeQuery(intermediateQuery);
+        }
+        return intermediateQuery;
     }
 }

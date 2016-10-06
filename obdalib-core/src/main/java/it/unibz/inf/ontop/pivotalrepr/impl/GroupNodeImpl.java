@@ -101,6 +101,11 @@ public class GroupNodeImpl extends QueryNodeImpl implements GroupNode {
     }
 
     @Override
+    public NodeTransformationProposal reactToTrueChildRemovalProposal(IntermediateQuery query, TrueNode trueNode) {
+        throw new UnsupportedOperationException("The TrueNode child of a GroupNode is not expected to be removed");
+    }
+
+    @Override
     public NodeTransformationProposal acceptNodeTransformer(HeterogeneousQueryNodeTransformer transformer) {
         return transformer.transform(this);
     }

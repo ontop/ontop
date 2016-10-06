@@ -24,8 +24,9 @@ public class NodeTransformationProposalImpl implements NodeTransformationProposa
             case NO_LOCAL_CHANGE:
                 throw new IllegalArgumentException("No new node has to be given when there is no change");
             case DECLARE_AS_EMPTY:
-            case DECLARE_AS_TRUE:
                 throw new IllegalArgumentException("No new node has to be given when the node is declared as empty");
+            case DECLARE_AS_TRUE:
+                throw new IllegalArgumentException("No new node has to be given when the node is declared as true");
         }
         this.state = state;
         this.optionalNewNodeOrReplacingChild = Optional.of(newNodeOrReplacingChild);

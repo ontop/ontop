@@ -19,7 +19,7 @@ public class TrueNodeRemovalExecutorImpl implements TrueNodeRemovalExecutor {
 
         TrueNode originalFocusNode = proposal.getFocusNode();
 
-        return reactToTrueChildNode(query, originalFocusNode, treeComponent);
+        return reactToTrueChildNodeRemovalProposal(query, originalFocusNode, treeComponent);
     }
 
     /**
@@ -27,26 +27,22 @@ public class TrueNodeRemovalExecutorImpl implements TrueNodeRemovalExecutor {
      *
      * Recursive!
      */
-    private static NodeCentricOptimizationResults<TrueNode> reactToTrueChildNode(IntermediateQuery query, TrueNode trueNode,
-                                                                        QueryTreeComponent treeComponent)
+    private static NodeCentricOptimizationResults<TrueNode> reactToTrueChildNodeRemovalProposal(IntermediateQuery query, TrueNode trueNode, QueryTreeComponent treeComponent)
             throws EmptyQueryException {
 
         QueryNode originalParentNode = query.getParent(trueNode).orElseThrow(EmptyQueryException::new);
 
         Optional<QueryNode> optionalOriginalNextSibling = query.getNextSibling(trueNode);
 
-        NodeTransformationProposal transformationProposal = originalParentNode.reactToTrueChild(query, trueNode);
-
-
-        QueryNode propagatingNode;
-        Optional<QueryNode> optionalClosestAncestorNode;
+        NodeTransformationProposal transformationProposal = originalParentNode.reactToTrueChildRemovalProposal(query, trueNode);
 
         switch (transformationProposal.getState()) {
             case NO_LOCAL_CHANGE:
+                treeComponent.removeSubTree(trueNode);
                 return new NodeCentricOptimizationResultsImpl<>(query, optionalOriginalNextSibling, Optional.of(originalParentNode));
             case REPLACE_BY_UNIQUE_NON_EMPTY_CHILD:
                 QueryNode replacingChild = transformationProposal.getOptionalNewNodeOrReplacingChild().get();
-                            treeComponent.replaceSubTree(originalParentNode, replacingChild);
+                treeComponent.replaceSubTree(originalParentNode, replacingChild);
                 return new NodeCentricOptimizationResultsImpl<>(query, transformationProposal.getOptionalNewNodeOrReplacingChild());
             case DECLARE_AS_TRUE:
                 TrueNode newTrueNode = new TrueNodeImpl();
@@ -55,7 +51,7 @@ public class TrueNodeRemovalExecutorImpl implements TrueNodeRemovalExecutor {
                 /**
                  * Tail-recursive (cascade)
                  */
-                return reactToTrueChildNode(query, newTrueNode, treeComponent);
+                return reactToTrueChildNodeRemovalProposal(query, newTrueNode, treeComponent);
 
             default:
                 throw new RuntimeException("Unexpected state: " + transformationProposal.getState());

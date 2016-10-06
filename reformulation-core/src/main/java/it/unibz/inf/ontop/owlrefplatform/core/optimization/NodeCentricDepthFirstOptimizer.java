@@ -36,7 +36,7 @@ public abstract class NodeCentricDepthFirstOptimizer<P extends SimpleNodeCentric
         }
     }
 
-    private IntermediateQuery optimizeQuery(IntermediateQuery initialQuery) throws EmptyQueryException {
+    protected IntermediateQuery optimizeQuery(IntermediateQuery initialQuery) throws EmptyQueryException {
 
         // Non-final
         Optional<QueryNode> optionalNextNode = Optional.of((QueryNode)initialQuery.getRootConstructionNode());
