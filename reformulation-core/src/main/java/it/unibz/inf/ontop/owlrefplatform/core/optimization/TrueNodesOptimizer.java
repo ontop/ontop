@@ -53,7 +53,7 @@ public class TrueNodesOptimizer  extends NodeCentricDepthFirstOptimizer<TrueNode
         super(canEmptyQuery);
     }
 
-    protected Boolean isRemovableTrueNode(TrueNode node, IntermediateQuery currentQuery) {
+    protected boolean isRemovableTrueNode(TrueNode node, IntermediateQuery currentQuery) {
         Optional<QueryNode> parentNode = currentQuery.getParent(node);
         if (parentNode.get() instanceof InnerJoinNode ||
                 parentNode.get() instanceof ConstructionNode){
