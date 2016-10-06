@@ -45,7 +45,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 /**
- * TODO: port it to RedundantJoinTest
+ * TODO: port it to RedundantSelfJoinTest
  */
 @Ignore
 public class DatalogUnfoldingUniqueConstraintOptimizationTests extends TestCase {
