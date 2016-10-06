@@ -172,6 +172,7 @@ public class ForeignKeyLeftJoinExecutor implements NodeCentricInternalExecutor<L
 
                 }
             }
+            throw new RuntimeException("TODO: continue");
         } else {
             return true;
         }
