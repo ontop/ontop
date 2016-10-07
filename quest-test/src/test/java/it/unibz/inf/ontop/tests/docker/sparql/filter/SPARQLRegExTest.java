@@ -26,7 +26,7 @@ import it.unibz.inf.ontop.model.OBDAModel;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
-import it.unibz.inf.ontop.owlrefplatform.owlapi3.*;
+import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import it.unibz.inf.ontop.utils.SQLScriptRunner;
 import org.junit.*;
 import org.semanticweb.owlapi.apibinding.OWLManager;
@@ -249,7 +249,7 @@ public class SPARQLRegExTest {
 	 */
 	@Test
 	public void testSingleColum2() throws Exception {
-		String query = "PREFIX : <http://www.ontop.org/> SELECT ?x ?name WHERE {?x :name ?name . FILTER regex(?name, \"ohn\")}";
+		String query = "PREFIX : <http://www.ontop.org/> SELECT ?x ?name WHERE {?x :name ?name . FILTER regex(?name, \"ABA\")}";
 		runTests(query, 2);
 	}
 

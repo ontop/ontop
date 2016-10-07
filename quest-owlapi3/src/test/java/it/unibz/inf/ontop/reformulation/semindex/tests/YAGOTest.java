@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.reformulation.semindex.tests;
 
 /*
  * #%L
- * ontop-quest-owlapi3
+ * ontop-quest-owlapi
  * %%
  * Copyright (C) 2009 - 2014 Free University of Bozen-Bolzano
  * %%
@@ -24,6 +24,8 @@ import it.unibz.inf.ontop.ontology.Ontology;
 import it.unibz.inf.ontop.ontology.OntologyFactory;
 import it.unibz.inf.ontop.ontology.OntologyVocabulary;
 import it.unibz.inf.ontop.ontology.impl.OntologyFactoryImpl;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
@@ -32,9 +34,6 @@ import java.io.InputStreamReader;
 import java.net.URISyntaxException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 
 public class YAGOTest {

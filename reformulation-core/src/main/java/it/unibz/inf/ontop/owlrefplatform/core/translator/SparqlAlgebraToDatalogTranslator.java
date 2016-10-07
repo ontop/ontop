@@ -20,25 +20,22 @@ package it.unibz.inf.ontop.owlrefplatform.core.translator;
  * #L%
  */
 
-import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.*;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.Predicate.COL_TYPE;
-import it.unibz.inf.ontop.model.ValueConstant;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
-import it.unibz.inf.ontop.model.impl.TermUtils;
 import it.unibz.inf.ontop.owlrefplatform.core.abox.SemanticIndexURIMap;
 import it.unibz.inf.ontop.model.UriTemplateMatcher;
 import it.unibz.inf.ontop.parser.EncodeForURI;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.openrdf.model.Literal;
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
 import org.openrdf.model.datatypes.XMLDatatypeUtil;
 import org.openrdf.model.vocabulary.RDF;
-import org.openrdf.query.Binding;
-import org.openrdf.query.BindingSet;
-import org.openrdf.query.QueryEvaluationException;
 import org.openrdf.query.algebra.*;
+import org.openrdf.query.algebra.ValueConstant;
 import org.openrdf.query.parser.ParsedGraphQuery;
 import org.openrdf.query.parser.ParsedQuery;
 import org.openrdf.query.parser.ParsedTupleQuery;
@@ -46,869 +43,747 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
+
 
 /***
  * Translate a SPARQL algebra expression into a Datalog program that has the
- * same semantics. We use the built-in predicates Join and Left join. The rules
- * in the program have always 1 or 2 operator atoms, plus (in)equality atoms
- * (due to filters).
+ * same semantics. We use the built-in predicates Join and LeftJoin.
  * 
- * This programs needs to be flattened by another procedure later.
- * 
- * @author mariano
+ * @author Roman Kontchakov
  */
 public class SparqlAlgebraToDatalogTranslator {
 
 	
-	private final OBDADataFactory ofac = OBDADataFactoryImpl.getInstance();
+	private static final OBDADataFactory ofac = OBDADataFactoryImpl.getInstance();
 	
-	private final DatatypeFactory dtfac = OBDADataFactoryImpl.getInstance().getDatatypeFactory();
+	private static final DatatypeFactory dtfac = OBDADataFactoryImpl.getInstance().getDatatypeFactory();
+
+    private static final Logger log = LoggerFactory.getLogger(SparqlAlgebraToDatalogTranslator.class);
 
 	private final UriTemplateMatcher uriTemplateMatcher;
-	private final SemanticIndexURIMap uriRef;  
-	
-	private static final Logger log = LoggerFactory.getLogger(SparqlAlgebraToDatalogTranslator.class);
-	
-	/**
+	private final SemanticIndexURIMap uriRef;
+
+    private final DatalogProgram program;
+    private int predicateIdx = 0;
+
+    /**
 	 * 
-	 * @param uriTemplateMatcher
-	 * @param uriRef is used only in the Semantic Index mode
+	 * @param uriTemplateMatcher matches URIs to templates (comes from mappings)
+	 * @param uriRef maps URIs to their integer identifiers (used only in the Semantic Index mode)
 	 */
-	
+
 	public SparqlAlgebraToDatalogTranslator(UriTemplateMatcher uriTemplateMatcher, SemanticIndexURIMap uriRef) {
 		this.uriTemplateMatcher = uriTemplateMatcher;
 		this.uriRef = uriRef;
-	}
-	
+
+        this.program = ofac.getDatalogProgram();
+    }
+
 	/**
 	 * Translate a given SPARQL query object to datalog program.
-	 * 
+     *
+     * IMPORTANT: this method should be called only once on each instance of the class
 	 *
-	 *            The Query object.
-	 * @return Datalog program that represents the construction of the SPARQL
-	 *         query.
+	 * @pq     SPARQL query object
+	 * @return our representation of the SPARQL query (as a datalog program)
 	 */
+	public SparqlQuery translate(ParsedQuery pq) {
 
-	public DatalogProgram translate(ParsedQuery pq) {
-		
+        if (predicateIdx != 0 || !program.getRules().isEmpty())
+            throw new RuntimeException("SparqlAlgebraToDatalogTranslator.translate can only be called once.");
+
 		TupleExpr te = pq.getTupleExpr();
 		log.debug("SPARQL algebra: \n{}", te);
+        //System.out.println("SPARQL algebra: \n" + te);
 
-		List<Term> answerVariables;
+        TranslationResult body = translate(te);
+
+        List<Term> answerVariables;
 		if (pq instanceof ParsedTupleQuery || pq instanceof ParsedGraphQuery) {
-			Set<String> signature = te.getBindingNames();
-			answerVariables = new ArrayList<>(signature.size());
-			for (String vs : signature) 
-				answerVariables.add(ofac.getVariable(vs));
-		}
-		else
-			answerVariables = Collections.emptyList(); 		// the signature of ASK queries is EMPTY
-		
-		DatalogProgram result = ofac.getDatalogProgram();
-		Function bodyAtom = translateTupleExpr(te, result, OBDAVocabulary.QUEST_QUERY + "0");
-		createRule(result, OBDAVocabulary.QUEST_QUERY, answerVariables, bodyAtom); // appends rule to the result
-		
-		return result;
-	}
-
-
-	/**
-	 * main translation method -- a recursive switch over all possible types of subexpressions
-	 * 
-	 * @param te
-	 * @param pr
-	 * @param newHeadName
-	 */
-	
-	private Function translateTupleExpr(TupleExpr te, DatalogProgram pr, String newHeadName) {
-		if (te instanceof Slice) {
-			// Add LIMIT and OFFSET modifiers, if any
-			Slice slice = (Slice)te;
-			pr.getQueryModifiers().setOffset(slice.getOffset());
-			pr.getQueryModifiers().setLimit(slice.getLimit());
-			return translateTupleExpr(slice.getArg(), pr, newHeadName); // narrow down the query
-		} 
-		else if (te instanceof Distinct) {
-			// Add DISTINCT modifier, if any
-			Distinct distinct = (Distinct) te;
-			pr.getQueryModifiers().setDistinct();
-			return translateTupleExpr(distinct.getArg(), pr, newHeadName); // narrow down the query
-		} 
-		else if (te instanceof Order) {
-			// Add ORDER BY modifier, if any
-			Order order = (Order) te;
-			for (OrderElem c : order.getElements()) {	
-				ValueExpr expression = c.getExpr();
-				if (!(expression instanceof Var)) {
-					throw new IllegalArgumentException("Error translating ORDER BY. "
-							+ "The current implementation can only sort by variables, this query has a more complex expression '" + expression + "'");
-				}
-				Var v = (Var) expression;
-				Variable var = ofac.getVariable(v.getName());
-				int direction =  c.isAscending() ? OrderCondition.ORDER_ASCENDING : OrderCondition.ORDER_DESCENDING; 
-				pr.getQueryModifiers().addOrderCondition(var, direction);
-			}
-			return translateTupleExpr(order.getArg(), pr, newHeadName); // narrow down the query
-		} 
-		else if (te instanceof Projection) {
-			return translate((Projection) te, pr, newHeadName);
-		} 
-		else if (te instanceof Filter) {
-			return translate((Filter) te, pr, newHeadName);
-		} 
-		else if (te instanceof StatementPattern) {
-			return translate((StatementPattern) te);		
-		} 
-		else if (te instanceof Join) {
-			return translate((Join) te, pr, newHeadName);
-		} 
-		else if (te instanceof Union) {
-			return translate((Union) te, pr, newHeadName);
-		} 
-		else if (te instanceof LeftJoin) {
-			return translate((LeftJoin) te, pr, newHeadName);
-		} 
-		else if (te instanceof Reduced) {
-			Reduced reduced = (Reduced)te;
-			return translateTupleExpr(reduced.getArg(), pr, newHeadName);
-		} 
-		else if (te instanceof Extension) { 
-			return translate((Extension) te, pr, newHeadName);
-		}
-		else if (te instanceof BindingSetAssignment) {
-			return createFilterValuesAtom((BindingSetAssignment)te);
-		}
-		
-		try {
-			throw new QueryEvaluationException("Operation not supported: " + te);
-		} catch (QueryEvaluationException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
-		return null;
-	}
-
-	private static Set<Variable> getVariables(Function atom) {
-		Set<Variable> set = new HashSet<>();
-		for (Term t : atom.getTerms())
-			if (t instanceof Variable)
-				set.add((Variable)t);
-		return set;
-	}
-	
-	private static List<Term> getUnion(Set<Variable> s1, Set<Variable> s2) {
-		// take the union of the *sets* of variables
-		Set<Term> vars = new HashSet<>();
-		vars.addAll(s1);
-		vars.addAll(s2);
-		// order is chosen arbitrarily but this is not a problem
-		// because it is chosen once and for all
-		List<Term> varList = new ArrayList<>(vars);
-		return varList;
-	}
-	
-	
-	private CQIE createRule(DatalogProgram pr, String headName, List<Term> headParameters, Function... body) {
-		Predicate pred = ofac.getPredicate(headName, headParameters.size());
-		Function head = ofac.getFunction(pred, headParameters);
-		CQIE rule = ofac.getCQIE(head, body);
-		pr.appendRule(rule);
-		return rule;
-	}
-	
-	/**
-	 * EXTEND { (T_j AS V_j) } EXPR
-	 * 
-	 * where the T_j are built from the variables X of EXPR,
-	 *   
-	 * adds the following rule:
-	 * 
-	 *   ans_i(X * T) :- ans_{i.0}(X)
-	 * 
-	 * @param extend
-	 * @param pr
-	 * @param newHeadName
-	 * @return 
-	 */
-	
-	private Function translate(Extension extend, DatalogProgram pr, String newHeadName) {
-
-		Function subAtom = translateTupleExpr(extend.getArg(), pr, newHeadName + "0");
-		Set<Variable> subVarSet = getVariables(subAtom);
-		
-		int sz = subVarSet.size() + extend.getElements().size();
-		List<Term> varList = new ArrayList<>(sz);
-		varList.addAll(subVarSet);
-		List<Term> termList = new ArrayList<>(sz);
-		termList.addAll(varList);
-		
-		for (ExtensionElem el: extend.getElements()) {
-			Variable var = ofac.getVariable(el.getName());
-			varList.add(var);
-			
-			Term term = getExpression(el.getExpr());			
-			termList.add(term);
-		}
-		CQIE rule = createRule(pr, newHeadName, termList, subAtom);
-		
-		Function newHeadAtom = ofac.getFunction(rule.getHead().getFunctionSymbol(), varList);
-		return newHeadAtom;
-	}
-
-
-	/**
-	 * EXPR_1 UNION EXPR_2
-	 * 
-	 * adds the following two rules
-	 * 
-	 * ans_i(X * X_1 * NULL_2) :- ans_{i.0}(X * X_1)
-	 * ans_i(X * NULL_1 * X_2) :- ans_{i.1}(X * X_2)
-	 * 
-	 * where NULL_i is the padding of X_i with NULLs 
-	 * 
-	 * @param union
-	 * @param pr
-	 * @param newHeadName
-	 * @return 
-	 */
-	
-	private Function translate(Union union, DatalogProgram pr, String  newHeadName) {
-		
-		Function leftAtom = translateTupleExpr(union.getLeftArg(), pr, newHeadName + "0");
-		Set<Variable> leftVars = getVariables(leftAtom);
-		
-		Function rightAtom = translateTupleExpr(union.getRightArg(), pr, newHeadName + "1");
-		Set<Variable> rightVars = getVariables(rightAtom);
-
-		List<Term> varList = getUnion(leftVars, rightVars);
-		
-		// left atom rule
-		List<Term> leftTermList = new ArrayList<>(varList.size());
-		for (Term t : varList) {
-			Term lt =  (leftVars.contains(t)) ? t : OBDAVocabulary.NULL;
-			leftTermList.add(lt);
-		}
-		CQIE leftRule = createRule(pr, newHeadName, leftTermList, leftAtom);
-
-		// right atom rule
-		List<Term> rightTermList = new ArrayList<>(varList.size());
-		for (Term t : varList) {
-			Term lt =  (rightVars.contains(t)) ? t : OBDAVocabulary.NULL;
-			rightTermList.add(lt);
-		}
-		CQIE rightRule = createRule(pr, newHeadName, rightTermList, rightAtom);
-		
-		Function atom = ofac.getFunction(rightRule.getHead().getFunctionSymbol(), varList);
-		return atom;
-	}
-
-	
-	/**
-	 * EXPR_1 JOIN EXPR_2
-	 * 
-	 * adds the following rule 
-	 * 
-	 * ans_i(X_1 U X_2) :- ans_{i.0}(X_1), ans_{i.1}(X_2)
-	 * 
-	 * @param join
-	 * @param pr
-	 * @param newHeadName
-	 * @return 
-	 */
-	
-	private Function translate(Join join, DatalogProgram pr, String  newHeadName)  {
-		
-		Function leftAtom = translateTupleExpr(join.getLeftArg(), pr, newHeadName + "0");
-		Function rightAtom = translateTupleExpr(join.getRightArg(), pr, newHeadName + "1");
-
-		List<Term> varList = getUnion(getVariables(leftAtom), getVariables(rightAtom));
-		CQIE rule = createRule(pr, newHeadName, varList, leftAtom, rightAtom);
-		return rule.getHead();
-	}
-	
-	/**
-	 * EXPR_1 OPT EXPR_2 FILTER F
-	 * 
-	 * ans_i(X_1 U X_2) :- LEFTJOIN(ans_{i.0}(X_1), ans_{i.1}(X_2), F(X_1 U X_2))
-	 * 
-	 * @param leftjoin
-	 * @param pr
-	 * @param newHeadName
-	 * @return 
-	 */
-
-	private Function translate(LeftJoin leftjoin, DatalogProgram pr, String  newHeadName) {
-		
-		Function leftAtom = translateTupleExpr(leftjoin.getLeftArg(), pr, newHeadName + "0");
-		Function rightAtom = translateTupleExpr(leftjoin.getRightArg(), pr, newHeadName + "1");
-
-		// the left join atom
-		Function joinAtom = ofac.getSPARQLLeftJoin(leftAtom, rightAtom);
-		// adding the conditions of the filter for the LeftJoin 
-		ValueExpr filter = leftjoin.getCondition();
-		if (filter != null) {
-			List<Term> joinTerms = joinAtom.getTerms();
-			joinTerms.add((Function) getExpression(filter));
-		}
-		
-		List<Term> varList = getUnion(getVariables(leftAtom), getVariables(rightAtom));
-		CQIE rule = createRule(pr, newHeadName, varList, joinAtom);
-		return rule.getHead();
-	}
-	
-	/**
-	 * PROJECT { V_j } EXPR
-	 * 
-	 * adds the following rule
-	 * 
-	 * ans_i(V) :- ans_{i.0}(X)
-	 * 
-	 * @param project
-	 * @param pr
-	 * @param newHeadName
-	 * @return 
-	 */
-
-	private Function translate(Projection project, DatalogProgram pr, String  newHeadName) {
-
-		Function atom = translateTupleExpr(project.getArg(), pr, newHeadName + "0");
-		
-		List<ProjectionElem> projectionElements = project.getProjectionElemList().getElements();
-		List<Term> varList = new  ArrayList<>(projectionElements.size());
-		for (ProjectionElem var : projectionElements)  {
-			// we assume here that the target name is "introduced" as one of the arguments of atom
-			// (this is normally done by an EXTEND inside the PROJECTION)
-			// first, we check whether this assumption can be made
-			if (!var.getSourceName().equals(var.getTargetName())) {
-				boolean found = false;
-				for (Term a : atom.getTerms())
-					if ((a instanceof Variable) && ((Variable)a).getName().equals(var.getSourceName())) {
-						found = true;
-						break;
-					}
-				if (!found)
-					throw new RuntimeException("Projection target of " + var + " not found in " + project.getArg());
-			}
-			varList.add(ofac.getVariable(var.getTargetName()));
-		}
-
-		CQIE rule = createRule(pr, newHeadName, varList, atom);
-		return rule.getHead();
-	}
-
-	/**
-	 * FILTER EXPR F
-	 * 
-	 * adds the following rule
-	 * 
-	 * ans_i(X U X') :- ans_{i.0}(X), F(X')
-	 * 
-	 * @param filter
-	 * @param pr
-	 * @param newHeadName
-	 * @return
-	 */
-	private Function translate(Filter filter, DatalogProgram pr, String  newHeadName) {
-
-		Function atom = translateTupleExpr(filter.getArg(), pr, newHeadName + "0");		
-		Set<Variable> atomVars = getVariables(atom);
-		
-		ValueExpr condition = filter.getCondition();
-		Function filterAtom;
-		if (condition instanceof Var) 
-			filterAtom = ofac.getFunctionIsTrue(getOntopTerm((Var) condition));
-		else 
-			filterAtom = (Function) getExpression(condition);
-		
-		Set<Variable> filterVars = new HashSet<>();
-		TermUtils.addReferencedVariablesTo(filterVars, filterAtom);
-		
-		List<Term> vars = getUnion(atomVars, filterVars);	
-		CQIE rule = createRule(pr, newHeadName, vars, atom, filterAtom);
-		return rule.getHead();
-	}
-
-	/***
-	 * This translates a single triple. 
-	 * 
-	 * @param triple
-	 * @return
-	 */
-	private Function translate(StatementPattern triple) {
-		
-		Var pred = triple.getPredicateVar();		
-		Value p = pred.getValue();
-		
-		if (!(p instanceof URI || (p == null))) {
-			// if predicate is a variable or literal
-			throw new RuntimeException("Unsupported query syntax");
-		}
-
-		Var obj = triple.getObjectVar();
-		
-		Var subj = triple.getSubjectVar();
-		Term sTerm = getOntopTerm(subj);
-		
-		if ((p != null) && p.toString().equals(RDF.TYPE.stringValue())) {
-			Value o = obj.getValue();
-			if (o == null) {
-				// object is a variable
-				Function rdfTypeConstant = ofac.getUriTemplate(ofac.getConstantLiteral(OBDAVocabulary.RDF_TYPE));
-				return ofac.getTripleAtom(sTerm, rdfTypeConstant, ofac.getVariable(obj.getName()));
-			} 
-			else if (o instanceof URI) {
-				// object is a URI of either a type of a class
-				URI objectUri = (URI)o; 
-				Predicate.COL_TYPE type = dtfac.getDatatype(objectUri);
-				Predicate predicate;
-				if (type != null) 
-					predicate = dtfac.getTypePredicate(type);
-	            else 
-					predicate = ofac.getClassPredicate(objectUri.stringValue());
-				
-				return ofac.getFunction(predicate, sTerm);
-			}
-			else  
-				throw new RuntimeException("Unsupported query syntax");
-		} 
-		else {			
-			// The predicate is NOT rdf:type
-			Term oTerm = getOntopTerm(obj); 
-			
-			if (p != null) {
-        		COL_TYPE subjectType = null; // are never changed
-				COL_TYPE objectType = null;
-				// either an object or a datatype property
-				Predicate predicate = ofac.getPredicate(p.stringValue(), new COL_TYPE[] { subjectType, objectType });
-				return ofac.getFunction(predicate, sTerm, oTerm);
-			} 
-			else 
-				return ofac.getTripleAtom(sTerm, ofac.getVariable(pred.getName()), oTerm);
-		}
-	}
-	
-	private Term getOntopTerm(Var subj) {
-		Value s = subj.getValue();
-		Term result = null;
-		if (s == null) {
-			result = ofac.getVariable(subj.getName());
-		} 
-		else if (s instanceof Literal) {
-			Literal object = (Literal) s;
-			URI type = object.getDatatype();
-			String value = object.getLabel();
-	
-			// Validating that the value is correct (lexically) with respect to the
-			// specified datatype
-			if (type != null) {
-				boolean valid = XMLDatatypeUtil.isValidValue(value, type);
-				if (!valid)
-					throw new RuntimeException("Invalid lexical form for datatype. Found: " + value);
-			}
-			
-			COL_TYPE objectType; 			
-			if (type == null) 
-				objectType = COL_TYPE.LITERAL;
-			else {
-				objectType = dtfac.getDatatype(type);
-		        if (objectType == null) 
-					throw new RuntimeException("Unsupported datatype: " + type.stringValue());
-			}
-			
-			// special case for decimal
-	        if ((objectType == COL_TYPE.DECIMAL) && !value.contains("."))  { 
-				// put the type as integer (decimal without fractions)
-				objectType = COL_TYPE.INTEGER;
-			} 
-	        
-			ValueConstant constant = ofac.getConstantLiteral(value, objectType);
-
-			// v1.7: We extend the syntax such that the data type of a
-			// constant is defined using a functional symbol.
-			if (objectType == COL_TYPE.LITERAL) {
-				// if the object has type LITERAL, check any language tag!
-				String lang = object.getLanguage();
-				if (lang != null && !lang.equals("")) {
-					result = ofac.getTypedTerm(constant, lang.toLowerCase());
-				} 
-				else {
-					result =  ofac.getTypedTerm(constant, objectType);
-				}
-			} 
-			else {
-				result = ofac.getTypedTerm(constant, objectType);
-			}
-		} 
-		else if (s instanceof URI) {
-			if (uriRef != null) {
-				// if in the Semantic Index mode 
-				int id = uriRef.getId(s.stringValue());
-				result = ofac.getUriTemplate(ofac.getConstantLiteral(String.valueOf(id), COL_TYPE.INTEGER));
-			} 
-			else {
-				String subject_URI = EncodeForURI.decodeURIEscapeCodes(s.stringValue());
-				result = uriTemplateMatcher.generateURIFunction(subject_URI);
-			}
-		}
-		
-		return result;
-	}
-
-	/**
-	 * Creates a "FILTER" atom out of VALUES bindings.
-	 */
-	private Function createFilterValuesAtom(BindingSetAssignment expression) {
-		Map<String, Variable> variableIndex = createVariableIndex(expression.getBindingNames());
-
-		/**
-		 * Example of a composite term corresponding to a binding: AND(EQ(X,1), EQ(Y,2))
-		 */
-		List<Function> bindingCompositeTerms = new ArrayList<>();
-
-		for (BindingSet bindingSet : expression.getBindingSets()) {
-			bindingCompositeTerms.add(createBindingCompositeTerm(variableIndex, bindingSet));
-		}
-
-		if(bindingCompositeTerms.isEmpty()) {
-			// TODO: find a better exception
-			throw new RuntimeException("Unsupported SPARQL query: VALUES entry without any binding!");
-		}
-
-		Function orAtom = buildBooleanTree(bindingCompositeTerms, ExpressionOperation.OR);
-		return orAtom;
-	}
-
-	private Map<String, Variable> createVariableIndex(Set<String> variableNames) {
-		Map<String, Variable> variableIndex = new HashMap<>();
-		for (String varName: variableNames) {
-			variableIndex.put(varName, ofac.getVariable(varName));
-		}
-		return variableIndex;
-	}
-
-	/**
-	 * Used for VALUES bindings
-	 */
-	private Function createBindingCompositeTerm(Map<String, Variable> variableIndex, BindingSet bindingSet) {
-		List<Function> bindingEqualityTerms = new ArrayList<>();
-
-		for (Binding binding : bindingSet) {
-			Variable variable = variableIndex.get(binding.getName());
-			if (variable == null) {
-				//TODO: find a better exception
-				throw new RuntimeException("Unknown variable " + binding.getName() + " used in the VALUES clause.");
-			}
-
-			Term valueTerm = getConstantExpression(binding.getValue());
-
-			Function equalityTerm = ofac.getFunction(ExpressionOperation.EQ, variable, valueTerm);
-			bindingEqualityTerms.add(equalityTerm);
-		}
-
-		if(bindingEqualityTerms.isEmpty()) {
-			//TODO: find a better exception
-			throw new RuntimeException("Empty binding sets are not accepted.");
-
-		}
-		return buildBooleanTree(bindingEqualityTerms, ExpressionOperation.AND);
-	}
-
-	/**
-	 * Builds a boolean tree (e.g. AND or OR-tree) out of boolean expressions.
-	 *
-	 * This approach is necessary because AND(..) and OR(..) have a 2-arity.
-	 *
-	 */
-	private Function buildBooleanTree(List<Function> booleanFctTerms, ExpressionOperation booleanFunctionSymbol) {
-		Function topFunction = null;
-		int termNb = booleanFctTerms.size();
-		for(int i=0; i < termNb; i+=2) {
-			Function newFunction;
-			if ((termNb - i) >= 2 ) {
-				newFunction = ofac.getFunction(booleanFunctionSymbol, booleanFctTerms.get(i), booleanFctTerms.get(i + 1));
-			}
-			else {
-				newFunction = booleanFctTerms.get(i);
-			}
-
-			if (topFunction == null)
-				topFunction = newFunction;
-			else
-				topFunction = ofac.getFunction(booleanFunctionSymbol, topFunction, newFunction);
-		}
-		return topFunction;
-	}
-	
-	
-
-
-	private Term getExpression(ValueExpr expr) {
-		if (expr instanceof Var) {
-			return getOntopTerm((Var) expr);
-		} 
-		else if (expr instanceof org.openrdf.query.algebra.ValueConstant) {
-			return getConstantExpression(((org.openrdf.query.algebra.ValueConstant) expr).getValue());
-		} 
-		else if (expr instanceof UnaryValueOperator) {
-			return getUnaryExpression((UnaryValueOperator) expr);
-		} 
-		else if (expr instanceof BinaryValueOperator) {
-			return getBinaryExpression((BinaryValueOperator) expr);
-		} 
-		else if (expr instanceof Bound) {	
-			return ofac.getFunctionIsNotNull(getOntopTerm(((Bound) expr).getArg()));
-		} 
-		else if (expr instanceof FunctionCall) {
-            return getFunctionCallTerm((FunctionCall)expr);
-		} 
-		throw new RuntimeException("The expression " + expr + " is not supported yet!");
-	}
-
-	private Term getConcat(List<ValueExpr> values) {
-		
-        Iterator<ValueExpr> iterator = values.iterator();
-        Term topConcat = getExpression(iterator.next());
-        
-        if (!iterator.hasNext())
-            throw new UnsupportedOperationException("Wrong number of arguments (found " + values.size() + 
-            					", at least 1) of SQL function CONCAT");
- 	  	
-        while (iterator.hasNext()) {
-            Term second_string = getExpression(iterator.next());
-            topConcat = ofac.getFunctionConcat(topConcat, second_string);                	
+            // order elements of the set in some way by converting it into the list
+            answerVariables = new ArrayList<>(body.variables);
         }
-        
-        return topConcat;		
-	}
-	
-	private Term getSubstring(List<ValueExpr> args) {
-
-		if (args.size() == 2) {
-			Term str = getExpression(args.get(0));
-			Term st = getExpression(args.get(1));
-			return ofac.getFunctionSubstring(str, st);
-		}
-		else if (args.size() == 3) {
-			Term str = getExpression(args.get(0));
-			Term st = getExpression(args.get(1));
-			Term en = getExpression(args.get(2));
-			return ofac.getFunctionSubstring(str, st, en);
-		}
-		else 
-			throw new UnsupportedOperationException("Wrong number of arguments (found "
-					+ args.size() + ", only 2 or 3 supported) for SQL SUBSTRING function");
-	}
-		
-	
-	private Term getReplace(List<ValueExpr> args) {
-		
-		if (args.size() == 2) {
-            Term t1 = getExpression(args.get(0));
-            Term out_string = getExpression(args.get(1));
-            Term in_string = ofac.getConstantLiteral("");
-            return ofac.getFunctionReplace(t1, out_string, in_string);
-		}
-		else if (args.size() == 3) {
-            Term t1 = getExpression(args.get(0));
-            Term out_string = getExpression(args.get(1));
-            Term in_string = getExpression(args.get(2));
-            return ofac.getFunctionReplace(t1, out_string, in_string);
-		}
-        else
-            throw new UnsupportedOperationException("Wrong number of arguments (found " 
-            		+ args.size() + ", only 2 or 3 supported) to sql function REPLACE");		
-	}
-	
-	// XPath 1.0 functions (XPath 1.1 has variants with more arguments)
-	private static final ImmutableMap<String, OperationPredicate> XPathFunctions =
-				new ImmutableMap.Builder<String, OperationPredicate>()
-						.put("http://www.w3.org/2005/xpath-functions#upper-case", ExpressionOperation.UCASE)
-						.put("http://www.w3.org/2005/xpath-functions#lower-case", ExpressionOperation.LCASE)
-						.put("http://www.w3.org/2005/xpath-functions#string-length", ExpressionOperation.STRLEN) 
-						.put("http://www.w3.org/2005/xpath-functions#substring-before", ExpressionOperation.STRBEFORE) 
-						.put("http://www.w3.org/2005/xpath-functions#substring-after", ExpressionOperation.STRAFTER) 
-						.put("http://www.w3.org/2005/xpath-functions#starts-with", ExpressionOperation.STR_STARTS) 
-						.put("http://www.w3.org/2005/xpath-functions#ends-with", ExpressionOperation.STR_ENDS) 
-						.put("http://www.w3.org/2005/xpath-functions#encode-for-uri", ExpressionOperation.ENCODE_FOR_URI) 
-						.put("http://www.w3.org/2005/xpath-functions#contains", ExpressionOperation.CONTAINS) 
-						.put("UUID", ExpressionOperation.UUID) 
-						.put("STRUUID", ExpressionOperation.STRUUID) 
-
-						.put("http://www.w3.org/2005/xpath-functions#numeric-abs", ExpressionOperation.ABS) 
-						.put("http://www.w3.org/2005/xpath-functions#numeric-ceil", ExpressionOperation.CEIL) 
-						.put("http://www.w3.org/2005/xpath-functions#numeric-floor", ExpressionOperation.FLOOR) 
-						.put("http://www.w3.org/2005/xpath-functions#numeric-round", ExpressionOperation.ROUND) 
-						.put("RAND", ExpressionOperation.RAND) 
-						
-						.put("http://www.w3.org/2005/xpath-functions#year-from-dateTime", ExpressionOperation.YEAR) 
-						.put("http://www.w3.org/2005/xpath-functions#day-from-dateTime", ExpressionOperation.DAY) 
-						.put("http://www.w3.org/2005/xpath-functions#month-from-dateTime", ExpressionOperation.MONTH) 
-						.put("http://www.w3.org/2005/xpath-functions#hours-from-dateTime", ExpressionOperation.HOURS) 
-						.put("http://www.w3.org/2005/xpath-functions#minutes-from-dateTime", ExpressionOperation.MINUTES) 
-						.put("http://www.w3.org/2005/xpath-functions#seconds-from-dateTime", ExpressionOperation.SECONDS) 
-						.put("NOW", ExpressionOperation.NOW) 
-						.put("TZ", ExpressionOperation.TZ) 
-					
-						.put("MD5", ExpressionOperation.MD5) 
-						.put("SHA1", ExpressionOperation.SHA1) 
-						.put("SHA256", ExpressionOperation.SHA256) 
-						.put("SHA512", ExpressionOperation.SHA512) 
-						.build();
-	
-	
-	
-	
-	
-    /** Return the Functions supported at the moment only
-     * concat and replace
-     * @param expr
-     * @return
-     */
-    private Term getFunctionCallTerm(FunctionCall expr) {
-    	
-    	OperationPredicate p = XPathFunctions.get(expr.getURI());
-    	if (p != null) {
-    		List<ValueExpr> args = expr.getArgs();
-    		if (args.size() != p.getArity()) {
-                throw new UnsupportedOperationException(
-                		"Wrong number of arguments (found " + args.size() + ", only " +
-                			 p.getArity() + "supported) for SPARQL " + expr.getURI() + "function");					
-    		}
-    		List<Term> terms = new ArrayList<>(args.size());
-    		for (ValueExpr a : args)
-    			terms.add(getExpression(a));
-    		Term fun = ofac.getFunction(p, terms);
-    		return fun;   		
-    	}
-    	
-    	// these are all special cases with **variable** number of arguments
-  
-        switch(expr.getURI()){
-         
-        	// at least one argument 
-            case "http://www.w3.org/2005/xpath-functions#concat":
-                return getConcat(expr.getArgs());
-
-            // 3 or 4 arguments (ROMAN 16 Dec 2015): check the actual implementation
-            case "http://www.w3.org/2005/xpath-functions#replace":
-                return getReplace(expr.getArgs());
-                
-            // 2 or 3 arguments    
-            case "http://www.w3.org/2005/xpath-functions#substring":
-            	return getSubstring(expr.getArgs()); 
-            	
-            default:
-                throw new RuntimeException("The builtin function " + expr.getURI() + " is not supported yet!");
+		else {
+            // ASK queries have no answer variables
+            answerVariables = Collections.emptyList();
         }
+
+        Predicate pred = ofac.getPredicate(OBDAVocabulary.QUEST_QUERY, answerVariables.size());
+        Function head = ofac.getFunction(pred, answerVariables);
+        appendRule(head, body.atoms);
+
+        List<String> signature = Lists.transform(answerVariables, t -> ((Variable)t).getName());
+
+        //System.out.println("PROGRAM\n" + program.program);
+		return new SparqlQuery(program, signature);
+	}
+
+    private static class TranslationResult {
+        final OBDADataFactory ofac = OBDADataFactoryImpl.getInstance();
+
+        final ImmutableList<Function> atoms;
+        final ImmutableSet<Variable> variables;
+        final boolean isBGP;
+
+        TranslationResult(ImmutableList<Function> atoms, ImmutableSet<Variable> variables, boolean isBGP) {
+            this.atoms = atoms;
+            this.variables = variables;
+            this.isBGP = isBGP;
+        }
+
+        /**
+         * Extends the current translation result with bindings coming from {@link Extension} (expr AS ?x) or {@link BindingSetAssignment} (VALUES in SPARQL)
+         *
+         * @param bindings   a stream of bindings. A binding is a pair of a variable, and a value/expression
+         * @param varMapper  a function from bindings to {@link Variable}s
+         * @param exprMapper a function maps a pair of a binding and a set variables to a {@link Term}
+         * @param <T>        A class for binding. E.g. {@link org.openrdf.query.Binding} or {@link org.openrdf.query.algebra.ExtensionElem}
+         * @return extended translation result
+         */
+        <T> TranslationResult extendWithBindings(Stream<T> bindings,
+                                                 java.util.function.Function<? super T, Variable> varMapper,
+                                                 java.util.function.BiFunction<? super T, ImmutableSet<Variable>, Term> exprMapper) {
+
+            Set<Variable> vars = new HashSet<>(variables);
+            Stream<Function> eqAtoms = bindings.map(b -> {
+                Term expr = exprMapper.apply(b, ImmutableSet.copyOf(vars));
+
+                Variable v = varMapper.apply(b);
+                if (!vars.add(v))
+                    throw new IllegalArgumentException("Duplicate binding for variable " + v);
+
+                return ofac.getFunctionEQ(v, expr);
+            });
+
+            return new TranslationResult(getAtomsExtended(eqAtoms), ImmutableSet.copyOf(vars), false);
+        }
+
+
+        ImmutableList<Function> getAtomsExtendedWithNulls(ImmutableSet<Variable> allVariables) {
+            Sets.SetView<Variable>  nullVariables = Sets.difference(allVariables, variables);
+            if (nullVariables.isEmpty())
+                return atoms;
+
+            return getAtomsExtended(nullVariables.stream().map(v -> ofac.getFunctionEQ(v, OBDAVocabulary.NULL)));
+        }
+
+        /**
+         * Extends the atoms in current translation result with {@code extension}
+         *
+         * @param extension a stream of functions to be added
+         * @return extended list of atoms
+         */
+        ImmutableList<Function> getAtomsExtended(Stream<Function> extension) {
+            return ImmutableList.copyOf(Iterables.concat(atoms, extension.collect(Collectors.toList())));
+
+//            ImmutableList.Builder builder = ImmutableList.<Function>builder().addAll(atoms)
+//                    .addAll(nullVariables.stream().map(v -> ofac.getFunctionEQ(v, OBDAVocabulary.NULL)).iterator());
+
+//            return builder.build();
+        }
+
+    }
+
+    private Function getFreshHead(List<Term> terms) {
+        Predicate pred = ofac.getPredicate(OBDAVocabulary.QUEST_QUERY + predicateIdx, terms.size());
+        predicateIdx++;
+        return ofac.getFunction(pred, terms);
+    }
+
+    private TranslationResult createFreshNode(ImmutableSet<Variable> vars) {
+        Function head = getFreshHead(new ArrayList<>(vars));
+        return new TranslationResult(ImmutableList.of(head), vars, false);
+    }
+
+    private Function wrapNonTriplePattern(TranslationResult sub) {
+        if (sub.atoms.size() > 1 || sub.atoms.get(0).isAlgebraFunction()) {
+            Function head = getFreshHead(new ArrayList<>(sub.variables));
+            appendRule(head, sub.atoms);
+            return head;
+        }
+        return sub.atoms.get(0);
+    }
+
+    private void appendRule(Function head, List<Function> body) {
+        CQIE rule = ofac.getCQIE(head, body);
+        program.appendRule(rule);
     }
 
 
-	private Term getConstantExpression(Value v) {
+    private TranslationResult translate(TupleExpr node) {
 
-		if (v instanceof Literal) {
-			Literal lit = (Literal)v;
-			URI type = lit.getDatatype();
-			COL_TYPE tp;
-			if (type == null) {
-				tp = COL_TYPE.LITERAL;
+        //System.out.println("node: \n" + node);
+
+        if (node instanceof Slice) {   // SLICE algebra operation
+            Slice slice = (Slice) node;
+            OBDAQueryModifiers modifiers = program.getQueryModifiers();
+            modifiers.setOffset(slice.getOffset());
+            modifiers.setLimit(slice.getLimit());
+            return translate(slice.getArg());
+        }
+        else if (node instanceof Distinct) { // DISTINCT algebra operation
+            Distinct distinct = (Distinct) node;
+            program.getQueryModifiers().setDistinct();
+            return translate(distinct.getArg());
+        }
+        else if (node instanceof Reduced) {  // REDUCED algebra operation
+            Reduced reduced = (Reduced) node;
+            return translate(reduced.getArg());
+        }
+        else if (node instanceof Order) {   // ORDER algebra operation
+            Order order = (Order) node;
+            OBDAQueryModifiers modifiers = program.getQueryModifiers();
+            for (OrderElem c : order.getElements()) {
+                ValueExpr expression = c.getExpr();
+                if (!(expression instanceof Var))
+                    throw new IllegalArgumentException("Error translating ORDER BY. "
+                            + "The current implementation can only sort by variables. "
+                            + "This query has a more complex expression '" + expression + "'");
+
+                Var v = (Var) expression;
+                Variable var = ofac.getVariable(v.getName());
+                int direction = c.isAscending() ? OrderCondition.ORDER_ASCENDING
+                        : OrderCondition.ORDER_DESCENDING;
+                modifiers.addOrderCondition(var, direction);
+            }
+            return translate(order.getArg());
+        }
+        else if (node instanceof StatementPattern) { // triple pattern
+            return translateTriplePattern((StatementPattern) node);
+        }
+        else if (node instanceof SingletonSet) {
+            // the empty BGP has no variables and gives a single solution mapping on every non-empty graph
+            return new TranslationResult(ImmutableList.of(), ImmutableSet.of(), true);
+        }
+        else if (node instanceof Join) {     // JOIN algebra operation
+            Join join = (Join) node;
+            TranslationResult a1 = translate(join.getLeftArg());
+            TranslationResult a2 = translate(join.getRightArg());
+            ImmutableSet<Variable> vars = Sets.union(a1.variables, a2.variables).immutableCopy();
+
+            if (a1.isBGP && a2.isBGP) {             // collect triple patterns into BGPs
+                ImmutableList<Function> atoms =
+                        ImmutableList.<Function>builder().addAll(a1.atoms).addAll(a2.atoms).build();
+                return new TranslationResult(atoms, vars, true);
+            }
+            else {
+                Function body = ofac.getSPARQLJoin(wrapNonTriplePattern(a1),
+                        wrapNonTriplePattern(a2));
+
+                return new TranslationResult(ImmutableList.of(body), vars, false);
+            }
+        }
+        else if (node instanceof LeftJoin) {  // OPTIONAL algebra operation
+            LeftJoin lj = (LeftJoin) node;
+            TranslationResult a1 = translate(lj.getLeftArg());
+            TranslationResult a2 = translate(lj.getRightArg());
+            ImmutableSet<Variable> vars = Sets.union(a1.variables, a2.variables).immutableCopy();
+
+            Function body = ofac.getSPARQLLeftJoin(wrapNonTriplePattern(a1),
+                    wrapNonTriplePattern(a2));
+
+            ValueExpr expr = lj.getCondition();
+            if (expr != null) {
+                Function f = getFilterExpression(expr, vars);
+                body.getTerms().add(f);
+            }
+
+            return new TranslationResult(ImmutableList.of(body), vars, false);
+        }
+        else if (node instanceof Union) {   // UNION algebra operation
+            Union union = (Union) node;
+            TranslationResult a1 = translate(union.getLeftArg());
+            TranslationResult a2 = translate(union.getRightArg());
+            ImmutableSet<Variable> vars = Sets.union(a1.variables, a2.variables).immutableCopy();
+
+            TranslationResult res = createFreshNode(vars);
+            appendRule(res.atoms.get(0), a1.getAtomsExtendedWithNulls(vars));
+            appendRule(res.atoms.get(0), a2.getAtomsExtendedWithNulls(vars));
+            return res;
+        }
+        else if (node instanceof Filter) {   // FILTER algebra operation
+            Filter filter = (Filter) node;
+            TranslationResult a = translate(filter.getArg());
+
+            Function f = getFilterExpression(filter.getCondition(), a.variables);
+            ImmutableList<Function> atoms = ImmutableList.<Function>builder().addAll(a.atoms).add(f).build();
+            // TODO: split ANDs in the FILTER?
+
+            return new TranslationResult(atoms, a.variables, false);
+        }
+        else if (node instanceof Projection) {  // PROJECT algebra operation
+            Projection projection = (Projection) node;
+            TranslationResult sub = translate(projection.getArg());
+
+            List<ProjectionElem> pes = projection.getProjectionElemList().getElements();
+            // the two lists are required to synchronise the order of variables
+            List<Term> sVars = new ArrayList<>(pes.size());
+            List<Term> tVars = new ArrayList<>(pes.size());
+            boolean noRenaming = true;
+            for (ProjectionElem pe : pes) {
+                Variable sVar = ofac.getVariable(pe.getSourceName());
+                if (!sub.variables.contains(sVar))
+                    throw new IllegalArgumentException("Projection source of " + pe
+                            + " not found in " + projection.getArg());
+                sVars.add(sVar);
+
+                Variable tVar = ofac.getVariable(pe.getTargetName());
+                tVars.add(tVar);
+
+                if (!sVar.equals(tVar))
+                    noRenaming = false;
+            }
+            if (noRenaming && sVars.containsAll(sub.variables)) // neither projection nor renaming
+                return sub;
+
+            ImmutableSet<Variable> vars = ImmutableSet.copyOf(
+                    tVars.stream().map(t -> (Variable) t).collect(Collectors.toSet()));
+
+            if (noRenaming)
+                return new TranslationResult(sub.atoms, vars, false);
+
+            Function head = getFreshHead(sVars);
+            appendRule(head, sub.atoms);
+
+            Function atom = ofac.getFunction(head.getFunctionSymbol(), tVars);
+            return new TranslationResult(ImmutableList.of(atom), vars, false);
+        }
+        else if (node instanceof Extension) {     // EXTEND algebra operation
+            Extension extension = (Extension) node;
+            TranslationResult sub = translate(extension.getArg());
+            final Stream<ExtensionElem> nontrivialBindings = extension.getElements().stream()
+                    // ignore EXTEND(P, v, v), which is sometimes introduced by Sesame SPARQL parser
+                    .filter(ee -> !(ee.getExpr() instanceof Var && ee.getName().equals(((Var) ee.getExpr()).getName())));
+            return sub.extendWithBindings(
+                    nontrivialBindings,
+                    ee -> ofac.getVariable(ee.getName()),
+                    (ee, vars) -> getExpression(ee.getExpr(), vars));
+        }
+        else if (node instanceof BindingSetAssignment) { // VALUES in SPARQL
+            BindingSetAssignment values = (BindingSetAssignment) node;
+
+            TranslationResult empty = new TranslationResult(ImmutableList.of(), ImmutableSet.of(), false);
+            List<TranslationResult> bindings =
+                    StreamSupport.stream(values.getBindingSets().spliterator(), false)
+                            .map(bs -> empty.extendWithBindings(
+                                    StreamSupport.stream(bs.spliterator(), false),
+                                    be -> ofac.getVariable(be.getName()),
+                                    (be, vars) -> getTermForLiteralOrIri(be.getValue())))
+                            .collect(Collectors.toList());
+
+            ImmutableSet<Variable> allVars = bindings.stream()
+                    .flatMap(s -> s.variables.stream())
+                    .collect(ImmutableCollectors.toSet());
+
+            TranslationResult res = createFreshNode(allVars);
+            bindings.forEach(p ->
+                    appendRule(res.atoms.get(0), p.getAtomsExtendedWithNulls(allVars)));
+            return res;
+        }
+        else if (node instanceof Group) {
+            throw new IllegalArgumentException("GROUP BY is not supported yet");
+        }
+        throw new IllegalArgumentException("Not supported: " + node);
+    }
+
+    /**
+     *
+     * @param expr  expression
+     * @param variables the set of variables that can occur in the expression
+     *                  (the rest will be replaced with NULL)
+     * @return
+     */
+
+    private Function getFilterExpression(ValueExpr expr, ImmutableSet<Variable> variables) {
+        Term term = getExpression(expr, variables);
+        // Effective Boolean Value (EBV): wrap in isTrue function if it is not a (Boolean) expression
+        if (term instanceof Function) {
+            Function f = (Function) term;
+            // TODO: check whether the return type is Boolean
+            return f;
+        }
+        return ofac.getFunctionIsTrue(term);
+    }
+
+	private TranslationResult translateTriplePattern(StatementPattern triple) {
+
+        // A triple pattern is member of the set (RDF-T + V) x (I + V) x (RDF-T + V)
+        // VarOrTerm ::=  Var | GraphTerm
+        // GraphTerm ::=  iri | RDFLiteral | NumericLiteral | BooleanLiteral | BlankNode | NIL
+
+        ImmutableSet.Builder<Variable> variables = ImmutableSet.builder();
+        Function atom;
+
+        Value s = triple.getSubjectVar().getValue();
+        Value p = triple.getPredicateVar().getValue();
+        Value o = triple.getObjectVar().getValue();
+
+        Term sTerm = (s == null) ? getTermForVariable(triple.getSubjectVar(), variables) : getTermForLiteralOrIri(s);
+
+		if (p == null) {
+			//  term variable term .
+            Term pTerm = getTermForVariable(triple.getPredicateVar(), variables);
+            Term oTerm = (o == null) ? getTermForVariable(triple.getObjectVar(), variables) : getTermForLiteralOrIri(o);
+			atom = ofac.getTripleAtom(sTerm, pTerm, oTerm);
+		}
+		else if (p instanceof URI) {
+			if (p.equals(RDF.TYPE)) {
+				if (o == null) {
+					// term rdf:type variable .
+					Term pTerm = ofac.getUriTemplate(ofac.getConstantLiteral(OBDAVocabulary.RDF_TYPE));
+                    Term oTerm = getTermForVariable(triple.getObjectVar(), variables);
+					atom = ofac.getTripleAtom(sTerm, pTerm, oTerm);
+				}
+				else if (o instanceof URI) {
+					// term rdf:type uri .
+					Predicate.COL_TYPE type = dtfac.getDatatype((URI)o);
+					if (type != null) // datatype
+						atom = ofac.getFunction(dtfac.getTypePredicate(type), sTerm);
+					else // class
+						atom = ofac.getFunction(ofac.getClassPredicate(o.stringValue()), sTerm);
+				}
+				else
+					throw new IllegalArgumentException("Unsupported query syntax");
 			}
 			else {
-				tp = dtfac.getDatatype(type);
-				if (tp == null) {
-					return ofac.getUriTemplateForDatatype(type.stringValue());
-				}				
+				// term uri term . (where uri is either an object or a datatype property)
+				Term oTerm = (o == null) ? getTermForVariable(triple.getObjectVar(), variables) : getTermForLiteralOrIri(o);
+				Predicate predicate = ofac.getPredicate(p.stringValue(), new COL_TYPE[] { null, null });
+				atom = ofac.getFunction(predicate, sTerm, oTerm);
 			}
-			
-			String constantString;
-			switch (tp) {
-				case INTEGER:
-				case NEGATIVE_INTEGER:
-				case NON_POSITIVE_INTEGER:
-				case POSITIVE_INTEGER:
-				case NON_NEGATIVE_INTEGER:
-					constantString = lit.integerValue().toString();
-					break;
-				case LONG:
-					constantString = lit.longValue() + "";
-					break;
-				case DECIMAL:
-					constantString = lit.decimalValue().toString();
-					break;
-				case FLOAT:
-					constantString = lit.floatValue() + "";
-					break;
-				case DOUBLE:
-					constantString = lit.doubleValue() + "";
-					break;
-				case INT:
-				case UNSIGNED_INT:
-					constantString = lit.intValue() + "";
-					break;
-				case DATETIME_STAMP:
-				case DATETIME:
-				case YEAR:
-				case DATE:
-				case TIME:
-					constantString = lit.calendarValue().toString();
-					break;
-				case BOOLEAN:
-					constantString = lit.booleanValue() + "";
-					break;
-				case STRING:
-				case LITERAL:
-					constantString = lit.stringValue() + "";
-					break;
-				default:
-					throw new RuntimeException("Undefined datatype: " + tp);
-			}
-			ValueConstant constant = ofac.getConstantLiteral(constantString, tp);
-			return ofac.getTypedTerm(constant, tp);	
-		} 
-		else if (v instanceof URI) {
-            Function constantFunction = uriTemplateMatcher.generateURIFunction(v.stringValue());
-            if (constantFunction.getArity() == 1)
-                constantFunction = ofac.getUriTemplateForDatatype(v.stringValue());
-            return constantFunction;
 		}
-		
-		throw new RuntimeException("The value " + v + " is not supported yet!");
+		else
+			// if predicate is a variable or literal
+			throw new RuntimeException("Unsupported query syntax");
+
+        return new TranslationResult(ImmutableList.of(atom), variables.build(), true);
 	}
 
-	private Term getUnaryExpression(UnaryValueOperator expr) {
+    private static Term getTermForVariable(Var v, ImmutableSet.Builder<Variable> variables) {
+        Variable var = ofac.getVariable(v.getName());
+        variables.add(var);
+        return var;
+    }
 
-		Term term = getExpression(expr.getArg());
+    private Term getTermForLiteralOrIri(Value v) {
 
-		if (expr instanceof Not) {
-			return ofac.getFunctionNOT(term);
+        if (v instanceof Literal)
+            return getTermForLiteral((Literal) v);
+        else if (v instanceof URI)
+            return getTermForIri((URI)v, false);
+
+        throw new RuntimeException("The value " + v + " is not supported yet!");
+    }
+
+    private static Term getTermForLiteral(Literal literal) {
+        URI typeURI = literal.getDatatype();
+        String value = literal.getLabel();
+
+        COL_TYPE type;
+        if (typeURI == null)
+            type = COL_TYPE.LITERAL;
+        else {
+            type = dtfac.getDatatype(typeURI);
+            if (type == null)
+                // ROMAN (27 June 2016): type1 in open-eq-05 test would not be supported in OWL
+                // the actual value is LOST here
+                return ofac.getUriTemplateForDatatype(typeURI.stringValue());
+                // old strict version:
+                // throw new RuntimeException("Unsupported datatype: " + typeURI);
+
+            // check if the value is (lexically) correct for the specified datatype
+            if (!XMLDatatypeUtil.isValidValue(value, typeURI))
+                throw new RuntimeException("Invalid lexical form for datatype. Found: " + value);
+        }
+
+        Term constant = ofac.getConstantLiteral(value, type);
+
+        // wrap the constant in its datatype function
+        if (type == COL_TYPE.LITERAL) {
+            // if the object has type LITERAL, check the language tag
+            String lang = literal.getLanguage();
+            if (lang != null && !lang.equals(""))
+                return ofac.getTypedTerm(constant, lang);
+        }
+        return ofac.getTypedTerm(constant, type);
+    }
+
+    /**
+     *
+     * @param v URI object
+     * @param unknownUrisToTemplates - the URIs are treated differently in triple patterns
+     *                               and filter expressions (this will be normalised later)
+     * @return term (URI template)
+     */
+
+    private Term getTermForIri(URI v, boolean unknownUrisToTemplates) {
+
+        String uri = EncodeForURI.decodeURIEscapeCodes(v.stringValue());
+
+        if (uriRef != null) {  // if in the Semantic Index mode
+            int id = uriRef.getId(uri);
+            if (id < 0 && unknownUrisToTemplates)  // URI is not found and need to wrap it in a template
+                return ofac.getUriTemplateForDatatype(uri);
+            else
+                return ofac.getUriTemplate(ofac.getConstantLiteral(String.valueOf(id), COL_TYPE.INTEGER));
+        }
+        else {
+            Function constantFunction = uriTemplateMatcher.generateURIFunction(uri);
+            if (constantFunction.getArity() == 1 && unknownUrisToTemplates) {
+                // ROMAN (27 June 2016: this means ZERO arguments, e.g., xsd:double or :z
+                // despite the name, this is NOT necessarily a datatype
+                constantFunction = ofac.getUriTemplateForDatatype(uri);
+            }
+            return constantFunction;
+        }
+    }
+
+    /**
+     *
+     * @param expr expression
+     * @param variables the set of variables that can occur in the expression
+     *                  (the rest will be replaced with NULL)
+     * @return term
+     */
+
+	private Term getExpression(ValueExpr expr, ImmutableSet<Variable> variables) {
+
+        // PrimaryExpression ::= BrackettedExpression | BuiltInCall | iriOrFunction |
+        //                          RDFLiteral | NumericLiteral | BooleanLiteral | Var
+        // iriOrFunction ::= iri ArgList?
+
+		if (expr instanceof Var) {
+            Var v = (Var) expr;
+            Variable var = ofac.getVariable(v.getName());
+            return variables.contains(var) ? var : OBDAVocabulary.NULL;
+		} 
+		else if (expr instanceof ValueConstant) {
+			Value v = ((ValueConstant) expr).getValue();
+            if (v instanceof Literal)
+                return getTermForLiteral((Literal) v);
+            else if (v instanceof URI)
+                return getTermForIri((URI)v, true);
+
+            throw new RuntimeException("The value " + v + " is not supported yet!");
+        }
+        else if (expr instanceof Bound) {
+            // BOUND (Sec 17.4.1.1)
+            // xsd:boolean  BOUND (variable var)
+            Var v = ((Bound) expr).getArg();
+            Variable var = ofac.getVariable(v.getName());
+            return variables.contains(var) ? ofac.getFunctionIsNotNull(var) : ofac.getBooleanConstant(false);
+        }
+        else if (expr instanceof UnaryValueOperator) {
+            Term term = getExpression(((UnaryValueOperator) expr).getArg(), variables);
+
+            if (expr instanceof Not) {
+                return ofac.getFunctionNOT(term);
+            }
+            else if (expr instanceof IsLiteral) {
+                return ofac.getFunction(ExpressionOperation.IS_LITERAL, term);
+            }
+            else if (expr instanceof IsURI) {
+                return ofac.getFunction(ExpressionOperation.IS_IRI, term);
+            }
+            else if (expr instanceof Str) {
+                return ofac.getFunction(ExpressionOperation.SPARQL_STR, term);
+            }
+            else if (expr instanceof Datatype) {
+                return ofac.getFunction(ExpressionOperation.SPARQL_DATATYPE, term);
+            }
+            else if (expr instanceof IsBNode) {
+                return ofac.getFunction(ExpressionOperation.IS_BLANK, term);
+            }
+            else if (expr instanceof Lang) {
+                ValueExpr arg = ((UnaryValueOperator) expr).getArg();
+                if (arg instanceof Var)
+                    return ofac.getFunction(ExpressionOperation.SPARQL_LANG, term);
+                else
+                    throw new RuntimeException("A variable or a value is expected in " + expr);
+            }
+            // other subclasses
+            // IRIFunction: IRI (Sec 17.4.2.8) for constructing IRIs
+            // IsNumeric:  isNumeric (Sec 17.4.2.4) for checking whether the argument is a numeric value
+            // AggregateOperatorBase: Avg, Min, Max, etc.
+            // Like:  ??
+            // IsResource: ??
+            // LocalName: ??
+            // Namespace: ??
+            // Label: ??
 		}
-		else if (expr instanceof IsLiteral) {
-			return ofac.getFunction(ExpressionOperation.IS_LITERAL, term);	
-		} 
-		else if (expr instanceof IsURI) {
-			return ofac.getFunction(ExpressionOperation.IS_IRI, term);
-		} 
-		else if (expr instanceof Str) {
-			return ofac.getFunction(ExpressionOperation.SPARQL_STR, term);
-		} 
-		else if (expr instanceof Datatype) {
-			return ofac.getFunction(ExpressionOperation.SPARQL_DATATYPE, term);
-		} 
-		else if (expr instanceof IsBNode) {
-			return ofac.getFunction(ExpressionOperation.IS_BLANK, term);
-		} 	
-		else if (expr instanceof Lang) {
-			ValueExpr arg = expr.getArg();
-			if (arg instanceof Var) 
-				return ofac.getFunction(ExpressionOperation.SPARQL_LANG, term);
-			else
-				throw new RuntimeException("A variable or a value is expected in " + expr);
+		else if (expr instanceof BinaryValueOperator) {
+            BinaryValueOperator bexpr = (BinaryValueOperator) expr;
+            Term term1 = getExpression(bexpr.getLeftArg(), variables);
+            Term term2 = getExpression(bexpr.getRightArg(), variables);
+
+            if (expr instanceof And) {
+                return ofac.getFunctionAND(term1, term2);
+            }
+            else if (expr instanceof Or) {
+                return ofac.getFunctionOR(term1, term2);
+            }
+            else if (expr instanceof SameTerm) {
+                // sameTerm (Sec 17.4.1.8)
+                // ROMAN (28 June 2016): strictly speaking it's not equality
+                return ofac.getFunctionEQ(term1, term2);
+            }
+            else if (expr instanceof Regex) {
+                // REGEX (Sec 17.4.3.14)
+                // xsd:boolean  REGEX (string literal text, simple literal pattern)
+                // xsd:boolean  REGEX (string literal text, simple literal pattern, simple literal flags)
+                Regex reg = (Regex) expr;
+                Term term3 = (reg.getFlagsArg() != null) ?
+                        getExpression(reg.getFlagsArg(), variables) : OBDAVocabulary.NULL;
+                return ofac.getFunction(ExpressionOperation.REGEX, term1, term2, term3);
+            }
+            else if (expr instanceof Compare) {
+                ExpressionOperation p = RelationalOperations.get(((Compare) expr).getOperator());
+                return ofac.getFunction(p, term1, term2);
+            }
+            else if (expr instanceof MathExpr) {
+                ExpressionOperation p = NumericalOperations.get(((MathExpr)expr).getOperator());
+                return ofac.getFunction(p, term1, term2);
+            }
+            else if (expr instanceof LangMatches) {
+                if (term2 instanceof Function) {
+                    Function f = (Function) term2;
+                    if (f.isDataTypeFunction()) {
+                        Term functionTerm = f.getTerm(0);
+                        if (functionTerm instanceof Constant) {
+                            Constant c = (Constant) functionTerm;
+                            term2 = ofac.getFunction(f.getFunctionSymbol(),
+                                    ofac.getConstantLiteral(c.getValue().toLowerCase(),
+                                            c.getType()));
+                        }
+                    }
+                }
+                return ofac.getLANGMATCHESFunction(term1, term2);
+            }
+        }
+		else if (expr instanceof FunctionCall) {
+            FunctionCall f = (FunctionCall) expr;
+
+            int arity = f.getArgs().size();
+            List<Term> terms = new ArrayList<>(arity);
+            for (ValueExpr a : f.getArgs())
+                terms.add(getExpression(a, variables));
+
+            OperationPredicate p = XPathFunctions.get(f.getURI());
+            if (p != null) {
+                if (arity != p.getArity())
+                    throw new UnsupportedOperationException(
+                            "Wrong number of arguments (found " + terms.size() + ", only " +
+                                    p.getArity() + "supported) for SPARQL " + f.getURI() + "function");
+
+                return ofac.getFunction(p, terms);
+            }
+
+            // these are all special cases with **variable** number of arguments
+
+            switch (f.getURI()) {
+                // CONCAT (Sec 17.4.3.12)
+                // string literal  CONCAT(string literal ltrl1 ... string literal ltrln)
+                case "http://www.w3.org/2005/xpath-functions#concat":
+                    if (arity < 1)
+                        throw new UnsupportedOperationException("Wrong number of arguments (found " + terms.size() +
+                                ", at least 1) for SPARQL function CONCAT");
+
+                    Term concat = terms.get(0);
+                    for (int i = 1; i < arity; i++) // .get(i) is OK because it's based on an array
+                        concat = ofac.getFunction(ExpressionOperation.CONCAT, concat, terms.get(i));
+                    return concat;
+
+                // REPLACE (Sec 17.4.3.15)
+                //string literal  REPLACE (string literal arg, simple literal pattern, simple literal replacement )
+                //string literal  REPLACE (string literal arg, simple literal pattern, simple literal replacement,  simple literal flags)
+                case "http://www.w3.org/2005/xpath-functions#replace":
+                    // TODO: the fourth argument is flags (see http://www.w3.org/TR/xpath-functions/#flags)
+                    Term flags;
+                    if (arity == 3)
+                        flags = ofac.getConstantLiteral("");
+                    else if (arity == 4)
+                        flags = terms.get(3);
+                    else
+                        throw new UnsupportedOperationException("Wrong number of arguments (found "
+                                + terms.size() + ", only 3 or 4 supported) for SPARQL function REPLACE");
+
+                    return ofac.getFunction(ExpressionOperation.REPLACE, terms.get(0), terms.get(1), terms.get(2), flags);
+
+
+                    // SUBSTR (Sec 17.4.3.3)
+                    // string literal  SUBSTR(string literal source, xsd:integer startingLoc)
+                    // string literal  SUBSTR(string literal source, xsd:integer startingLoc, xsd:integer length)
+                case "http://www.w3.org/2005/xpath-functions#substring":
+                    if (arity == 2)
+                        return ofac.getFunction(ExpressionOperation.SUBSTR2, terms.get(0), terms.get(1));
+                    else if (arity == 3)
+                        return ofac.getFunction(ExpressionOperation.SUBSTR3, terms.get(0), terms.get(1), terms.get(2));
+
+                    throw new UnsupportedOperationException("Wrong number of arguments (found "
+                            + terms.size() + ", only 2 or 3 supported) for SPARQL function SUBSTRING");
+
+                default:
+                    throw new RuntimeException("Function " + f.getURI() + " is not supported yet!");
+            }
 		}
-		
+        // other subclasses
+        // SubQueryValueOperator
+        // If
+        // BNodeGenerator
+        // NAryValueOperator (ListMemberOperator and Coalesce)
 		throw new RuntimeException("The expression " + expr + " is not supported yet!");
 	}
-	
-	private static final ImmutableMap<Compare.CompareOp, ExpressionOperation> relationalOperations = 
+
+    // XPath 1.0 functions (XPath 1.1 has variants with more arguments)
+    private static final ImmutableMap<String, OperationPredicate> XPathFunctions =
+            new ImmutableMap.Builder<String, OperationPredicate>()
+                    /*
+                     * String functions
+                     */
+                    .put("http://www.w3.org/2005/xpath-functions#upper-case", ExpressionOperation.UCASE)
+                    .put("http://www.w3.org/2005/xpath-functions#lower-case", ExpressionOperation.LCASE)
+                    .put("http://www.w3.org/2005/xpath-functions#string-length", ExpressionOperation.STRLEN)
+                    .put("http://www.w3.org/2005/xpath-functions#substring-before", ExpressionOperation.STRBEFORE)
+                    .put("http://www.w3.org/2005/xpath-functions#substring-after", ExpressionOperation.STRAFTER)
+                    .put("http://www.w3.org/2005/xpath-functions#starts-with", ExpressionOperation.STR_STARTS)
+                    .put("http://www.w3.org/2005/xpath-functions#ends-with", ExpressionOperation.STR_ENDS)
+                    .put("http://www.w3.org/2005/xpath-functions#encode-for-uri", ExpressionOperation.ENCODE_FOR_URI)
+                    .put("http://www.w3.org/2005/xpath-functions#contains", ExpressionOperation.CONTAINS)
+                    .put("UUID", ExpressionOperation.UUID)
+                    .put("STRUUID", ExpressionOperation.STRUUID)
+                    /*
+                     * Numerical functions
+                     */
+                    .put("http://www.w3.org/2005/xpath-functions#numeric-abs", ExpressionOperation.ABS)
+                    .put("http://www.w3.org/2005/xpath-functions#numeric-ceil", ExpressionOperation.CEIL)
+                    .put("http://www.w3.org/2005/xpath-functions#numeric-floor", ExpressionOperation.FLOOR)
+                    .put("http://www.w3.org/2005/xpath-functions#numeric-round", ExpressionOperation.ROUND)
+                    .put("RAND", ExpressionOperation.RAND)
+                    /*
+                     * Datetime functions
+                     */
+                    .put("http://www.w3.org/2005/xpath-functions#year-from-dateTime", ExpressionOperation.YEAR)
+                    .put("http://www.w3.org/2005/xpath-functions#day-from-dateTime", ExpressionOperation.DAY)
+                    .put("http://www.w3.org/2005/xpath-functions#month-from-dateTime", ExpressionOperation.MONTH)
+                    .put("http://www.w3.org/2005/xpath-functions#hours-from-dateTime", ExpressionOperation.HOURS)
+                    .put("http://www.w3.org/2005/xpath-functions#minutes-from-dateTime", ExpressionOperation.MINUTES)
+                    .put("http://www.w3.org/2005/xpath-functions#seconds-from-dateTime", ExpressionOperation.SECONDS)
+                    .put("NOW", ExpressionOperation.NOW)
+                    .put("TZ", ExpressionOperation.TZ)
+                    /*
+                     * Hash functions
+                     */
+                    .put("MD5", ExpressionOperation.MD5)
+                    .put("SHA1", ExpressionOperation.SHA1)
+                    .put("SHA256", ExpressionOperation.SHA256)
+                    .put("SHA512", ExpressionOperation.SHA512)
+                    .build();
+
+
+	private static final ImmutableMap<Compare.CompareOp, ExpressionOperation> RelationalOperations =
 			new ImmutableMap.Builder<Compare.CompareOp, ExpressionOperation>()
 				.put(Compare.CompareOp.EQ, ExpressionOperation.EQ)
 				.put(Compare.CompareOp.GE, ExpressionOperation.GTE)
@@ -918,65 +793,11 @@ public class SparqlAlgebraToDatalogTranslator {
 				.put(Compare.CompareOp.NE, ExpressionOperation.NEQ)
 				.build();
 
-	private static final ImmutableMap<MathExpr.MathOp, ExpressionOperation> numericalOperations = 
+	private static final ImmutableMap<MathExpr.MathOp, ExpressionOperation> NumericalOperations =
 			new ImmutableMap.Builder<MathExpr.MathOp, ExpressionOperation>()
 			.put(MathExpr.MathOp.PLUS, ExpressionOperation.ADD)
 			.put(MathExpr.MathOp.MINUS, ExpressionOperation.SUBTRACT)
 			.put(MathExpr.MathOp.MULTIPLY, ExpressionOperation.MULTIPLY)
 			.put(MathExpr.MathOp.DIVIDE, ExpressionOperation.DIVIDE)
 			.build();
-			
-	
-	private Term getBinaryExpression(BinaryValueOperator expr) {
-		
-		Term term1 = getExpression(expr.getLeftArg());
-		Term term2 = getExpression(expr.getRightArg());
-		
-		if (expr instanceof And) {
-			return ofac.getFunctionAND(term1, term2);
-		} 
-		else if (expr instanceof Or) {
-			return ofac.getFunctionOR(term1, term2);
-		}
-		else if (expr instanceof SameTerm) {
-			return ofac.getFunctionEQ(term1, term2);
-		} 
-		else if (expr instanceof Regex) { // sesame regex is Binary, Jena N-ary
-			Regex reg = (Regex) expr;
-			ValueExpr flags = reg.getFlagsArg();
-			Term term3 = (flags != null) ? getExpression(flags) : OBDAVocabulary.NULL;
-			return ofac.getFunction(ExpressionOperation.REGEX, term1, term2, term3);
-		}
-		else if (expr instanceof Compare) {
-			ExpressionOperation p = relationalOperations.get(((Compare) expr).getOperator());
-			return ofac.getFunction(p, term1, term2);
-		} 
-		else if (expr instanceof MathExpr) {
-			ExpressionOperation p = numericalOperations.get(((MathExpr)expr).getOperator());
-			return ofac.getFunction(p, term1, term2);
-		} 
-		else if (expr instanceof LangMatches) {
-			return ofac.getLANGMATCHESFunction(term1, toLowerCase(term2));
-		} 
-		
-		throw new RuntimeException("The expression " + expr + " is not supported yet!");
-	}
-
-	private Term toLowerCase(Term term) {
-		Term output = term;
-		if (term instanceof Function) {
-			Function f = (Function) term;
-			if (f.isDataTypeFunction()) {
-				Term functionTerm = f.getTerm(0);
-				if (functionTerm instanceof Constant) {
-					Constant c = (Constant) functionTerm;
-					output = ofac.getFunction(f.getFunctionSymbol(), 
-							 ofac.getConstantLiteral(c.getValue().toLowerCase(), 
-							 c.getType()));
-				}
-			}
-		}
-		return output;
-	}
-	
 }

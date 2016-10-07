@@ -9,9 +9,9 @@ package it.unibz.inf.ontop.owlrefplatform.core;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  *      http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -31,6 +31,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.sql.SQLException;
+import java.sql.SQLTimeoutException;
 import java.sql.Statement;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -66,7 +67,7 @@ public class QuestStatement implements OBDAStatement {
 
 	private enum QueryType {
 		SELECT,
-		ASK,
+		ASK,  
 		CONSTRUCT,
 		DESCRIBE
 	}
@@ -78,7 +79,7 @@ public class QuestStatement implements OBDAStatement {
 		private final List<String> signature;
 		private final QueryType type;
 		private final SesameConstructTemplate templ; // only for CONSTRUCT and DESCRIBE queries
-
+		
 		private TupleResultSet tupleResult;	  // only for SELECT and ASK queries
 		private GraphResultSet graphResult;   // only for CONSTRUCT and DESCRIBE queries
 		private Exception exception = null;
@@ -121,14 +122,14 @@ public class QuestStatement implements OBDAStatement {
 		public void run() {
 			try {
 				// Obtaining the query from the cache
-
+				 
 				log.debug("Executing the SQL query and get the result...");
 				if (sql.equals("")) {
-					if (type != QueryType.ASK)
+					if (type != QueryType.ASK) 
 						tupleResult = new EmptyTupleResultSet(signature, QuestStatement.this);
 					else
 						tupleResult = new BooleanResultSet(false, QuestStatement.this);
-				}
+				} 
 				else {
 					try {
 //                        FOR debugging H2 in-memory database
@@ -143,45 +144,66 @@ public class QuestStatement implements OBDAStatement {
 
 						// Store the SQL result to application result set.
 						switch (type) {
-							case SELECT:
-								if (questInstance.hasDistinctResultSet())
-									tupleResult = new QuestDistinctTupleResultSet(set, signature, QuestStatement.this);
-								else
-									tupleResult = new QuestTupleResultSet(set, signature, QuestStatement.this);
-								break;
-
-							case ASK:
-								tupleResult = new BooleanResultSet(set, QuestStatement.this);
-								break;
-
-							case CONSTRUCT:
-								TupleResultSet tuples = new QuestTupleResultSet(set, signature, QuestStatement.this);
-								graphResult = new QuestGraphResultSet(tuples, templ, false);
-								break;
-
-							case DESCRIBE:
-								tuples = new QuestTupleResultSet(set, signature, QuestStatement.this);
-								graphResult = new QuestGraphResultSet(tuples, templ, true);
-								break;
+						case SELECT:
+							if (questInstance.hasDistinctResultSet()) 
+								tupleResult = new QuestDistinctTupleResultSet(set, signature, QuestStatement.this);
+							else
+								tupleResult = new QuestTupleResultSet(set, signature, QuestStatement.this);
+							break;
+						
+						case ASK:
+							tupleResult = new BooleanResultSet(set, QuestStatement.this);
+							break;
+						
+						case CONSTRUCT:
+							TupleResultSet tuples = new QuestTupleResultSet(set, signature, QuestStatement.this);
+							graphResult = new QuestGraphResultSet(tuples, templ, false);
+							break;
+							
+						case DESCRIBE:
+							tuples = new QuestTupleResultSet(set, signature, QuestStatement.this);
+							graphResult = new QuestGraphResultSet(tuples, templ, true);
+							break;
 						}
 					}
+					catch (SQLTimeoutException e) {
+						log.warn("SQL execution is time out");
+//						if( set == null ){ // Exception SQLTimeout
+							tupleResult = new EmptyTupleResultSet(signature, QuestStatement.this);
+//						}
+					}
 					catch (SQLException e) {
+						final String MySQLTimeoutExceptionClassName = "com.mysql.jdbc.exceptions.MySQLTimeoutException";
+						final String PSQLExceptionClassName = "org.postgresql.util.PSQLException";
+
+						String exceptionClassName = e.getClass().getName();
+
+						// Since the exceptions of MySQL and Postgres are not extending SQLTimeoutException,
+						// the following hack is needed.
+						// See <http://bugs.mysql.com/bug.php?id=71589>
+						if(exceptionClassName.equals(MySQLTimeoutExceptionClassName)
+								|| exceptionClassName.equals(PSQLExceptionClassName)){
+							log.warn("SQL execution is time out");
+						} else {
 						exception = e;
 						log.error(e.getMessage(), e);
 						throw new OBDAException("Error executing SQL query: \n" + e.getMessage() + "\nSQL query:\n " + sql, e);
+						}
 					}
 				}
 				log.debug("Execution finished.\n");
-			}
+			} 
 			catch (Exception e) {
 				e.printStackTrace();
 				exception = e;
 				log.error(e.getMessage(), e);
-			}
+			} 
 			finally {
 				monitor.countDown();
 			}
 		}
+
+
 	}
 
 	/**
@@ -198,15 +220,15 @@ public class QuestStatement implements OBDAStatement {
 			if (SPARQLQueryUtility.isSelectQuery(pq)) {
 				TupleResultSet executedQuery = executeTupleQuery(strquery, pq, QueryType.SELECT);
 				return executedQuery;
-			}
+			} 
 			else if (SPARQLQueryUtility.isAskQuery(pq)) {
 				TupleResultSet executedQuery = executeTupleQuery(strquery, pq, QueryType.ASK);
 				return executedQuery;
-			}
+			} 
 			else if (SPARQLQueryUtility.isConstructQuery(pq)) {
 				GraphResultSet executedGraphQuery = executeGraphQuery(strquery, QueryType.CONSTRUCT);
-				return executedGraphQuery;
-			}
+				return executedGraphQuery;	
+			} 
 			else if (SPARQLQueryUtility.isDescribeQuery(pq)) {
 				// create list of URI constants we want to describe
 				List<String> constants = new LinkedList<>();
@@ -226,7 +248,7 @@ public class QuestStatement implements OBDAStatement {
 							}
 						}
 					}
-				}
+				} 
 				else if (SPARQLQueryUtility.isURIDescribe(strquery)) {
 					// DESCRIBE <uri> gives direct results, so we put the
 					// <uri> constant directly in the list of constants
@@ -245,11 +267,11 @@ public class QuestStatement implements OBDAStatement {
 					String str = SPARQLQueryUtility.getConstructSubjQuery(constant);
 					GraphResultSet set = executeGraphQuery(str, QueryType.DESCRIBE);
 					if (describeResultSet == null) { // just for the first time
-						describeResultSet = set;
-					}
+						describeResultSet = set;	
+					} 
 					else if (set != null) {
 						// 2nd and manyth times execute, but collect result into one object
-						while (set.hasNext())
+						while (set.hasNext()) 
 							describeResultSet.addNewResultSet(set.next());
 					}
 				}
@@ -259,9 +281,9 @@ public class QuestStatement implements OBDAStatement {
 					GraphResultSet set = executeGraphQuery(str, QueryType.DESCRIBE);
 					if (describeResultSet == null) { // just for the first time
 						describeResultSet = set;
-					}
+					} 
 					else if (set != null) {
-						while (set.hasNext())
+						while (set.hasNext()) 
 							describeResultSet.addNewResultSet(set.next());
 					}
 				}
@@ -270,18 +292,18 @@ public class QuestStatement implements OBDAStatement {
 		}
 		catch (MalformedQueryException e) {
 			throw new OBDAException(e);
-
+			
 		}
 		throw new OBDAException("Error, the result set was null");
 	}
-
+	
 
 
 
 	/**
 	 * The method executes select or ask queries by starting a new quest
 	 * execution thread
-	 *
+	 * 
 	 * @param strquery
 	 *            the select or ask query string
 	 * @param type  (SELECT or ASK)
@@ -301,26 +323,26 @@ public class QuestStatement implements OBDAStatement {
 	}
 
 	private GraphResultSet executeGraphQuery(String strquery, QueryType type) throws OBDAException {
-
+		
 		log.debug("Executing SPARQL query: \n{}", strquery);
-
+		
 		try {
 			// Here we need to get the template for the CONSTRUCT query results
 			SesameConstructTemplate templ = new SesameConstructTemplate(strquery);
 			String query = SPARQLQueryUtility.getSelectFromConstruct(strquery);
 			ParsedQuery pq = engine.getParsedQuery(query);
-
+			
 			QueryExecutionThread executionthread = startExecute(pq, type, templ);
 			GraphResultSet executedGraphQuery = executionthread.getGraphResult();
 			return executedGraphQuery;
-		}
+		} 
 		catch (MalformedQueryException e) {
 			e.printStackTrace();
 			throw new OBDAException(e);
 		}
 	}
-
-
+	
+	
 
 	/**
 	 * Internal method to start a new query execution thread type defines the
@@ -351,7 +373,7 @@ public class QuestStatement implements OBDAStatement {
 		return executionthread;
 	}
 
-
+	
 
 
 	/**
@@ -359,7 +381,7 @@ public class QuestStatement implements OBDAStatement {
 	 */
 	public long getTupleCount(String query) throws Exception {
 
-		ParsedQuery pq = engine.getParsedQuery(query);
+		ParsedQuery pq = engine.getParsedQuery(query); 
 		String unf = engine.getSQL(pq);
 		String newsql = "SELECT count(*) FROM (" + unf + ") t1";
 		if (!canceled) {
@@ -384,7 +406,7 @@ public class QuestStatement implements OBDAStatement {
 		}
 	}
 
-
+	
 	@Override
 	public void cancel() throws OBDAException {
 		canceled = true;
@@ -402,7 +424,7 @@ public class QuestStatement implements OBDAStatement {
 	public boolean isCanceled(){
 		return canceled;
 	}
-
+	
 	@Override
 	public int executeUpdate(String query) throws OBDAException {
 		throw new UnsupportedOperationException();
@@ -493,9 +515,9 @@ public class QuestStatement implements OBDAStatement {
 
 	/***
 	 * Inserts a stream of ABox assertions into the repository.
-	 *
+	 * 
 	 * @param data
-	 *
+	 * 
 	 * @throws SQLException
 	 */
 	public int insertData(Iterator<Assertion> data,  int commit, int batch) throws SQLException {
@@ -510,5 +532,5 @@ public class QuestStatement implements OBDAStatement {
 	public String getSPARQLRewriting(String query) throws OBDAException {
 		return engine.getSPARQLRewriting(query);
 	}
-
+	
 }

@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.reformulation.tests;
 
 /*
  * #%L
- * ontop-quest-owlapi3
+ * ontop-quest-owlapi
  * %%
  * Copyright (C) 2009 - 2014 Free University of Bozen-Bolzano
  * %%
@@ -26,7 +26,7 @@ import it.unibz.inf.ontop.model.OBDAModel;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
-import it.unibz.inf.ontop.owlrefplatform.owlapi3.*;
+import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import junit.framework.TestCase;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.io.ToStringRenderer;
@@ -45,17 +45,6 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Properties;
-
-import junit.framework.TestCase;
-
-import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.OWLIndividual;
-import org.semanticweb.owlapi.model.OWLLiteral;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
-import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /***
  * A simple test that check if the system is able to handle Mappings for

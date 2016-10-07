@@ -22,12 +22,9 @@ package it.unibz.inf.ontop.protege.utils;
 
 import com.google.common.collect.Iterables;
 
-import java.awt.Component;
-import java.awt.Container;
-import java.awt.FocusTraversalPolicy;
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Vector;
 
 public class CustomTraversalPolicy extends FocusTraversalPolicy {
 	List<Component> order;

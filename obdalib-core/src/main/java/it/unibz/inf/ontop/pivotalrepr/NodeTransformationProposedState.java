@@ -1,11 +1,14 @@
 package it.unibz.inf.ontop.pivotalrepr;
 
 /**
- * TODO: explain
+ * Transformation to the local node.
+ *
+ * This state is orthogonal to the propagation of "null" variables.
+ *
  */
 public enum NodeTransformationProposedState {
-    NO_CHANGE,
-    REPLACE_BY_UNIQUE_CHILD,
+    NO_LOCAL_CHANGE,
+    REPLACE_BY_UNIQUE_NON_EMPTY_CHILD,
     REPLACE_BY_NEW_NODE,
-    DELETE
+    DECLARE_AS_EMPTY
 }

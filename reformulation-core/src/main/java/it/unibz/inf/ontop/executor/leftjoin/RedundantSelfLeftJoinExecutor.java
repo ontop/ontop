@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.executor.leftjoin;
 
 import com.google.common.collect.*;
 import it.unibz.inf.ontop.executor.NodeCentricInternalExecutor;
+import it.unibz.inf.ontop.executor.SimpleNodeCentricInternalExecutor;
 import it.unibz.inf.ontop.executor.join.SelfJoinLikeExecutor;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.pivotalrepr.*;
@@ -30,7 +31,7 @@ import static it.unibz.inf.ontop.pivotalrepr.NonCommutativeOperatorNode.Argument
  */
 public class RedundantSelfLeftJoinExecutor
         extends SelfJoinLikeExecutor
-        implements NodeCentricInternalExecutor<LeftJoinNode, LeftJoinOptimizationProposal> {
+        implements SimpleNodeCentricInternalExecutor<LeftJoinNode, LeftJoinOptimizationProposal> {
 
     @Override
     public NodeCentricOptimizationResults<LeftJoinNode>

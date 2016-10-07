@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.pivotalrepr.impl.tree;
 
+import java.util.Map;
 import java.util.Optional;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.pivotalrepr.NonCommutativeOperatorNode;
@@ -7,6 +8,8 @@ import it.unibz.inf.ontop.pivotalrepr.QueryNode;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * TODO: explain
@@ -25,6 +28,11 @@ public class StandardChildrenRelation implements ChildrenRelation {
         this.children = new LinkedList<>();
     }
 
+    private StandardChildrenRelation(TreeNode parent, List<TreeNode> children) {
+        this.parent = parent;
+        this.children = children;
+    }
+
     @Override
     public TreeNode getParent() {
         return parent;
@@ -33,6 +41,11 @@ public class StandardChildrenRelation implements ChildrenRelation {
     @Override
     public ImmutableList<TreeNode> getChildren() {
         return ImmutableList.copyOf(children);
+    }
+
+    @Override
+    public Stream<TreeNode> getChildrenStream() {
+        return children.stream();
     }
 
     @Override
@@ -79,7 +92,40 @@ public class StandardChildrenRelation implements ChildrenRelation {
     }
 
     @Override
+    public Stream<QueryNode> getChildQueryNodeStream() {
+        return children.stream()
+                .map(TreeNode::getQueryNode);
+    }
+
+    @Override
     public Optional<NonCommutativeOperatorNode.ArgumentPosition> getOptionalPosition(TreeNode childTreeNode) {
         return Optional.empty();
+    }
+
+    @Override
+    public Optional<TreeNode> getChild(NonCommutativeOperatorNode.ArgumentPosition position) {
+        return Optional.empty();
+    }
+
+    @Override
+    public ChildrenRelation clone(Map<QueryNode, TreeNode> newNodeIndex) {
+        return new StandardChildrenRelation(parent.findNewTreeNode(newNodeIndex),
+                children.stream()
+                        .map(c -> c.findNewTreeNode(newNodeIndex))
+                        .collect(Collectors.toList()));
+    }
+
+    @Override
+    public ChildrenRelation convertToBinaryChildrenRelation() {
+        if (!children.isEmpty()) {
+            throw new IllegalStateException("Conversion from a standard to binary children relation is not supported " +
+                    "when there are children");
+        }
+        return new BinaryChildrenRelation(parent);
+    }
+
+    @Override
+    public ChildrenRelation convertToStandardChildrenRelation() {
+        return this;
     }
 }

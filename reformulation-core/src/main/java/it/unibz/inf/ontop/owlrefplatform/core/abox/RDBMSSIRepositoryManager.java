@@ -50,20 +50,9 @@ import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
-import java.sql.BatchUpdateException;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
+import java.sql.*;
 import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
 
 import org.slf4j.Logger;
@@ -423,7 +412,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 						failures.put(predicate, counter + 1);					
 					}
 				}
-				else /* (ax instanceof DataPropertyAssertion) */ {
+				else if (ax instanceof DataPropertyAssertion)  {
 					DataPropertyAssertion dpa = (DataPropertyAssertion)ax;
 					try {
 						process(conn, dpa, uriidStm, stmMap);				
@@ -437,6 +426,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 						failures.put(predicate, counter + 1);					
 					}
 				}
+
 
 				// Check if the batch count is already in the batch limit
 				if (batchCount == batchLimit) {
@@ -547,16 +537,19 @@ public class RDBMSSIRepositoryManager implements Serializable {
 
 	private void process(Connection conn, DataPropertyAssertion ax, PreparedStatement uriidStm, Map<SemanticIndexViewID, PreparedStatement> stmMap) throws SQLException {
 
-		// replace the property by its canonical representative 
+		// replace the property by its canonical representative
 		DataPropertyExpression dpe0 = ax.getProperty();
 		DataPropertyExpression dpe = reasonerDag.getDataPropertyDAG().getCanonicalForm(dpe0);		
 		int idx = cacheSI.getEntry(dpe).getIndex();
 		
 		ObjectConstant subject = ax.getSubject();
-		
+		int uri_id = getObjectConstantUriId(subject, uriidStm);
+
 		ValueConstant object = ax.getValue();
 		COL_TYPE objectType = object.getType();
-		
+
+		// ROMAN (28 June 2016): quite fragile because objectType is UNSUPPORTED for SHORT, BYTE, etc.
+		//                       a a workaround, obtain the URI ID first, without triggering an exception here
 		SemanticIndexView view =  views.getView(subject.getType(), objectType);
 		PreparedStatement stm = stmMap.get(view.getId());
 		if (stm == null) {
@@ -564,7 +557,6 @@ public class RDBMSSIRepositoryManager implements Serializable {
 			stmMap.put(view.getId(), stm);
 		}
 
-		int uri_id = getObjectConstantUriId(subject, uriidStm);
 		stm.setInt(1, uri_id);
 		
 		String value = object.getValue();
@@ -669,8 +661,8 @@ public class RDBMSSIRepositoryManager implements Serializable {
 		int uri_id = uriMap.getId(uri);
 		if (uri_id < 0) {
 			uri_id = maxURIId + 1;
-			uriMap.set(uri, uri_id);			
-			maxURIId++;		
+			uriMap.set(uri, uri_id);
+			maxURIId++;
 			
 			// Construct the database INSERT statement
 			uriidStm.setInt(1, uri_id);

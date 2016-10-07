@@ -20,12 +20,7 @@ package it.unibz.inf.ontop.protege.gui.action;
  * #L%
  */
 
-import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWL;
-
-import java.awt.event.ActionEvent;
-
-import javax.swing.JOptionPane;
-
+import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWL;
 import org.protege.editor.core.ui.action.ProtegeAction;
 import org.protege.editor.owl.OWLEditorKit;
 import org.protege.editor.owl.model.OWLModelManager;
@@ -33,6 +28,9 @@ import org.protege.editor.owl.model.OWLWorkspace;
 import org.semanticweb.owlapi.reasoner.OWLReasoner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.swing.*;
+import java.awt.event.ActionEvent;
 
 public class InconsistencyCheckAction extends ProtegeAction {
 	

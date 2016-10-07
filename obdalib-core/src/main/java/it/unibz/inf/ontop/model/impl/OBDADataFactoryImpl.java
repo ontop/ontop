@@ -86,9 +86,9 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	public JdbcTypeMapper getJdbcTypeMapper() {
 		return jdbcTypeMapper;
 	}
-	
-	
-		
+
+
+	@Override
 	public OBDAModel getOBDAModel() {
 		return new OBDAModelImpl();
 	}
@@ -107,22 +107,37 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 		return new PredicateImpl(uri, types.length, types);
 	}
 
-
+	@Override
 	public Predicate getObjectPropertyPredicate(String name) {
 		return new PredicateImpl(name, 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT });
 	}
 
+	@Override
 	public Predicate getDataPropertyPredicate(String name) {
 		return new PredicateImpl(name, 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.LITERAL });
 	}
+
+	@Override
 	public Predicate getDataPropertyPredicate(String name, COL_TYPE type) {
 		return new PredicateImpl(name, 2, new COL_TYPE[] { COL_TYPE.OBJECT, type }); // COL_TYPE.LITERAL
 	}
 
+	//defining annotation property we still don't know if the values that it will assume, will be an object or a data property
+	@Override
+	public Predicate getAnnotationPropertyPredicate(String name) {
+		return new PredicateImpl(name, 2, new COL_TYPE[]{Predicate.COL_TYPE.OBJECT, Predicate.COL_TYPE.NULL});
+	}
+
+	@Override
 	public Predicate getClassPredicate(String name) {
 		return new PredicateImpl(name, 1, new COL_TYPE[] { COL_TYPE.OBJECT });
 	}
-	
+
+	@Override
+	public Predicate getOWLSameASPredicate() {
+		return new PredicateImpl(OBDAVocabulary.SAME_AS, 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT });
+	}
+
 	@Override
 	@Deprecated
 	public URIConstant getConstantURI(String uriString) {
@@ -360,26 +375,12 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	}
 
 	@Override
-	public DatalogProgram getDatalogProgram(CQIE rule) {
-		DatalogProgram p = new DatalogProgramImpl();
-		p.appendRule(rule);
-		return p;
-	}
-
-	@Override
 	public DatalogProgram getDatalogProgram(OBDAQueryModifiers modifiers) {
 		DatalogProgram p = new DatalogProgramImpl();
 		p.getQueryModifiers().copy(modifiers);
 		return p;
 	}
-	
-	@Override
-	public DatalogProgram getDatalogProgram(Collection<CQIE> rules) {
-		DatalogProgram p = new DatalogProgramImpl();
-		p.appendRule(rules);
-		return p;
-	}
-	
+
 	@Override
 	public DatalogProgram getDatalogProgram(OBDAQueryModifiers modifiers, Collection<CQIE> rules) {
 		DatalogProgram p = new DatalogProgramImpl();
@@ -545,32 +546,7 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	public Expression getSQLFunctionLike(Term term1, Term term2) {
 		return getExpression(ExpressionOperation.SQL_LIKE, term1, term2);
 	}
-	
-	@Override
-	public Expression getFunctionRegex(Term term1, Term term2, Term term3) {
-		return getExpression(ExpressionOperation.REGEX, term1, term2, term3);
-	}
-	
-	@Override
-	public Expression getFunctionReplace(Term term1, Term term2, Term term3) {
-		return getExpression(ExpressionOperation.REPLACE, term1, term2, term3 );
-	}
-	
-    @Override
-    public Expression getFunctionConcat(Term term1, Term term2) {
-        return getExpression(ExpressionOperation.CONCAT, term1, term2);
-    }
 
-    @Override
-    public Expression getFunctionSubstring(Term term1, Term term2, Term term3) {
-        return getExpression(ExpressionOperation.SUBSTR, term1, term2, term3);
-    } //added by Nika
-
-	@Override
-	public Expression getFunctionSubstring(Term term1, Term term2) {
-		return getExpression(ExpressionOperation.SUBSTR, term1, term2);
-	}
-        
 	@Override
 	public Expression getFunctionCast(Term term1, Term term2) {
 		// TODO implement cast function

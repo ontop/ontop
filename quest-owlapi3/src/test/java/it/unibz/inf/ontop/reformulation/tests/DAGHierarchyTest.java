@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.reformulation.tests;
 
 /*
  * #%L
- * ontop-quest-owlapi3
+ * ontop-quest-owlapi
  * %%
  * Copyright (C) 2009 - 2014 Free University of Bozen-Bolzano
  * %%
@@ -25,7 +25,7 @@ import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.ontology.ClassExpression;
 import it.unibz.inf.ontop.ontology.ObjectPropertyExpression;
 import it.unibz.inf.ontop.ontology.Ontology;
-import it.unibz.inf.ontop.owlapi3.OWLAPITranslatorUtility;
+import it.unibz.inf.ontop.owlapi.OWLAPITranslatorUtility;
 import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.Equivalences;
 import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.EquivalencesDAG;
 import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
@@ -33,17 +33,6 @@ import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
 import it.unibz.inf.ontop.quest.dag.TestTBoxReasonerImpl_OnNamedDAG;
 import junit.framework.TestCase;
 
-import it.unibz.inf.ontop.ontology.ClassExpression;
-import it.unibz.inf.ontop.ontology.ObjectPropertyExpression;
-import it.unibz.inf.ontop.ontology.Ontology;
-import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.Equivalences;
-import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.EquivalencesDAG;
-import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
-import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
-import it.unibz.inf.ontop.quest.dag.TestTBoxReasonerImpl_OnNamedDAG;
-
-import java.io.File;
-import java.util.HashSet;
 import java.util.Set;
 
 public class DAGHierarchyTest extends TestCase {

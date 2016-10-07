@@ -22,15 +22,7 @@ package it.unibz.inf.ontop.model;
 
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -81,12 +73,12 @@ public class UriTemplateMatcher {
 					if (templateStrings.contains("(.+)")) {
 						continue;
 					}
+
 					Function templateFunction = ofac.getUriTemplate(ofac.getVariable("x"));
 					Pattern matcher = Pattern.compile("(.+)");
 					uriTemplateMatcher.uriTemplateMatcher.put(matcher, templateFunction);
 					templateStrings.add("(.+)");
-				} 
-				else {
+				} else {
 					ValueConstant template = (ValueConstant) fun.getTerms().get(0);
 					String templateString = template.getValue();
 					templateString = templateString.replace("{}", "(.+)");
@@ -94,9 +86,11 @@ public class UriTemplateMatcher {
 					if (templateStrings.contains(templateString)) {
 						continue;
 					}
-					Pattern mattcher = Pattern.compile(templateString);
-					uriTemplateMatcher.uriTemplateMatcher.put(mattcher, fun);
+
+					Pattern matcher = Pattern.compile(templateString);
+					uriTemplateMatcher.uriTemplateMatcher.put(matcher, fun);
 					templateStrings.add(templateString);
+
 				}
 			}
 		}

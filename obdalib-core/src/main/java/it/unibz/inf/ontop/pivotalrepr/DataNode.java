@@ -3,12 +3,11 @@ package it.unibz.inf.ontop.pivotalrepr;
 import it.unibz.inf.ontop.model.DataAtom;
 import it.unibz.inf.ontop.model.ImmutableSubstitution;
 import it.unibz.inf.ontop.model.ImmutableTerm;
-import it.unibz.inf.ontop.model.VariableOrGroundTerm;
 
 /**
  * TODO: describe
  */
-public interface DataNode extends ConstructionOrDataNode {
+public interface DataNode extends ExplicitVariableProjectionNode {
 
     /**
      * Data atom containing the projected variables
@@ -23,9 +22,9 @@ public interface DataNode extends ConstructionOrDataNode {
     @Override
     SubstitutionResults<? extends DataNode> applyAscendingSubstitution(
             ImmutableSubstitution<? extends ImmutableTerm> substitution,
-            QueryNode descendantNode, IntermediateQuery query);
+            QueryNode childNode, IntermediateQuery query);
 
     @Override
     SubstitutionResults<? extends DataNode> applyDescendingSubstitution(
-            ImmutableSubstitution<? extends ImmutableTerm> substitution);
+            ImmutableSubstitution<? extends ImmutableTerm> substitution, IntermediateQuery query);
 }

@@ -55,19 +55,17 @@ public class NodeCentricOptimizationResultsImpl<N extends QueryNode> extends Pro
      */
     public NodeCentricOptimizationResultsImpl(IntermediateQuery query, Optional<QueryNode> optionalReplacingChild) {
         super(query);
-        this.optionalReplacingChild = optionalReplacingChild;
-        this.optionalNextSibling = Optional.empty();
-        this.optionalNewNode = Optional.empty();
-        this.optionalClosestAncestor = Optional.empty();
-
         if (!optionalReplacingChild.isPresent()) {
             throw new IllegalArgumentException("A replacing child must be given (not optional in practise)");
         }
+        this.optionalReplacingChild = optionalReplacingChild;
+        this.optionalNextSibling =query.getNextSibling(optionalReplacingChild.get());
+        this.optionalNewNode = Optional.empty();
+        this.optionalClosestAncestor =  query.getParent(optionalReplacingChild.get());
+
+
     }
 
-    /**
-     * If absent, it means that the focus node has been deleted.
-     */
     @Override
     public Optional<N> getOptionalNewNode() {
         return optionalNewNode;
@@ -95,5 +93,12 @@ public class NodeCentricOptimizationResultsImpl<N extends QueryNode> extends Pro
     @Override
     public Optional<QueryNode> getOptionalReplacingChild() {
         return optionalReplacingChild;
+    }
+
+    @Override
+    public Optional<QueryNode> getNewNodeOrReplacingChild() {
+        return optionalNewNode
+                .map(Optional::<QueryNode>of)
+                .orElse(optionalReplacingChild);
     }
 }

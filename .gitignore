@@ -27,6 +27,9 @@ catalog-v*.xml
 \#*
 tmp.*
 
+# Antlr generated files
+*.tokens
+
 # Ontop specific
 plugin-runtime
 

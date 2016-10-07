@@ -41,13 +41,12 @@ public class JoinExtractionUtils {
         if (foldedExpression.isPresent()) {
             ExpressionEvaluator evaluator = new ExpressionEvaluator(metadata.getUriTemplateMatcher());
 
-            Optional<ImmutableExpression> optionalEvaluatedExpression = evaluator.evaluateExpression(
-                    foldedExpression.get());
-            if (optionalEvaluatedExpression.isPresent()) {
-                return optionalEvaluatedExpression;
+            ExpressionEvaluator.Evaluation evaluation = evaluator.evaluateExpression(foldedExpression.get());
+            if (evaluation.isFalse()) {
+                throw new UnsatisfiableExpressionException();
             }
             else {
-                throw new UnsatisfiableExpressionException();
+                return evaluation.getOptionalExpression();
             }
         }
         else {

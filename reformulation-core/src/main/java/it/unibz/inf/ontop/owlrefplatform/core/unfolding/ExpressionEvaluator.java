@@ -26,7 +26,6 @@ import it.unibz.inf.ontop.model.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.UnifierUtilities;
-import it.unibz.inf.ontop.model.UriTemplateMatcher;
 
 import java.util.*;
 
@@ -45,10 +44,36 @@ public class ExpressionEvaluator {
 		uriTemplateMatcher = matcher;
 	}
 
-	/**
-	 * No boolean expression (absent) if the evaluation returns false
-	 */
-	public Optional<ImmutableExpression> evaluateExpression(ImmutableExpression expression) {
+	public static class Evaluation {
+		private final Optional<ImmutableExpression> optionalExpression;
+		private final Optional<Boolean> optionalBooleanValue;
+
+		private Evaluation(ImmutableExpression expression) {
+			optionalExpression = Optional.of(expression);
+			optionalBooleanValue = Optional.empty();
+		}
+
+		private Evaluation(boolean value) {
+			optionalExpression = Optional.empty();
+			optionalBooleanValue = Optional.of(value);
+		}
+
+		public Optional<ImmutableExpression> getOptionalExpression() {
+			return optionalExpression;
+		}
+
+		public Optional<Boolean> getOptionalBooleanValue() {
+			return optionalBooleanValue;
+		}
+
+		public boolean isFalse() {
+			return optionalBooleanValue
+					.filter(v -> !v)
+					.isPresent();
+		}
+	}
+
+	public Evaluation evaluateExpression(ImmutableExpression expression) {
 		Expression mutableExpression = ImmutabilityTools.convertToMutableBooleanExpression(expression);
 
 		Term evaluatedTerm = evalOperation(mutableExpression);
@@ -65,17 +90,16 @@ public class ExpressionEvaluator {
 						+ evaluatedFunctionalTerm);
 			}
 
-			return Optional.of(fac.getImmutableExpression(
+			return new Evaluation(fac.getImmutableExpression(
 					fac.getExpression((OperationPredicate) predicate,
 							evaluatedFunctionalTerm.getTerms())));
 		}
 		else if (evaluatedTerm instanceof Constant) {
 			if (evaluatedTerm.equals(OBDAVocabulary.FALSE)) {
-				return Optional.empty();
+				return new Evaluation(false);
 			}
 			else {
-				return Optional.of(fac.getImmutableExpression(ExpressionOperation.AND, (Constant) evaluatedTerm,
-						OBDAVocabulary.TRUE));
+				return new Evaluation(true);
 			}
 		}
 		else {
@@ -653,7 +677,12 @@ public class ExpressionEvaluator {
 			} else {
 				teval1 = term.getTerm(0);
 			}
-		} else {
+		}
+		// This follows the SQL semantics NULL != NULL
+		else if (term.getTerm(0).equals(OBDAVocabulary.NULL)) {
+			return eq ? OBDAVocabulary.FALSE : OBDAVocabulary.TRUE;
+		}
+		else {
 			teval1 = eval(term.getTerm(0));
 		}
 
@@ -673,7 +702,12 @@ public class ExpressionEvaluator {
 			} else {
 				teval2 = term.getTerm(1);
 			}
-		} else {
+		}
+		// This follows the SQL semantics NULL != NULL
+		else if (term.getTerm(1).equals(OBDAVocabulary.NULL)) {
+			return eq ? OBDAVocabulary.FALSE : OBDAVocabulary.TRUE;
+		}
+		else {
 			teval2 = eval(term.getTerm(1));
 		}
 
@@ -836,7 +870,7 @@ public class ExpressionEvaluator {
 	private Term evalUriFunctionsWithMultipleTerms(Function uriFunction1, Function uriFunction2, boolean isEqual) {
 		Substitution theta = UnifierUtilities.getMGU(uriFunction1, uriFunction2);
 		if (theta == null) {
-			return fac.getBooleanConstant(isEqual);
+			return fac.getBooleanConstant(!isEqual);
 		} 
 		else {
 			boolean isEmpty = theta.isEmpty();

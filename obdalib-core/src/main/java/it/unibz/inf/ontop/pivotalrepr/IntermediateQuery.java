@@ -9,6 +9,7 @@ import it.unibz.inf.ontop.model.Variable;
 import it.unibz.inf.ontop.pivotalrepr.proposal.QueryOptimizationProposal;
 
 import java.util.Optional;
+import java.util.stream.Stream;
 
 /**
  *
@@ -24,6 +25,10 @@ public interface IntermediateQuery {
     ImmutableList<QueryNode> getNodesInTopDownOrder();
 
     ImmutableList<QueryNode> getChildren(QueryNode node);
+
+    Stream<QueryNode> getChildrenStream(QueryNode node);
+
+    Stream<QueryNode> getOtherChildrenStream(QueryNode parent, QueryNode childToOmmit);
 
     Optional<QueryNode> getChild(QueryNode currentNode, NonCommutativeOperatorNode.ArgumentPosition position);
 
@@ -76,14 +81,12 @@ public interface IntermediateQuery {
             throws InvalidQueryOptimizationProposalException, EmptyQueryException;
 
     /**
-     * Useful when converting a DatalogProgram into an IntermediateQuery.
-     *
-     * However, for unfolding IQ mappings, another method should be created.
-     *
-     * If the subQuery is irrelevant (cannot be merged in), it is simply ignored.
-     *
+     * May forbid the use of a StandardProposalExecutor and disable the (possible) validation tests
      */
-    void mergeSubQuery(IntermediateQuery subQuery) throws EmptyQueryException;
+    <R extends ProposalResults, P extends QueryOptimizationProposal<R>> R applyProposal(P propagationProposal,
+                                                                                        boolean requireUsingInternalExecutor,
+                                                                                        boolean disableValidation)
+            throws InvalidQueryOptimizationProposalException, EmptyQueryException;
 
     /**
      *
@@ -108,4 +111,19 @@ public interface IntermediateQuery {
     DistinctVariableOnlyDataAtom getProjectionAtom();
 
     ImmutableSet<Variable> getKnownVariables();
+
+    /**
+     * Keeps the same query node objects but clones the tree edges
+     * (since the latter are mutable by default).
+     *
+     * TODO: return an immutable Intermediate Query
+     */
+    IntermediateQuery createSnapshot();
+
+    boolean hasAncestor(QueryNode descendantNode, QueryNode ancestorNode);
+
+    /**
+     * Set of variables that are returned by the sub-tree.
+     */
+    ImmutableSet<Variable> getVariables(QueryNode subTreeRootNode);
 }

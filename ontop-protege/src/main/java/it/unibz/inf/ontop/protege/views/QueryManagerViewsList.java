@@ -20,9 +20,9 @@ package it.unibz.inf.ontop.protege.views;
  * #L%
  */
 
-import java.util.ArrayList;
-
 import org.protege.editor.core.Disposable;
+
+import java.util.ArrayList;
 
 /**
  * A holder for the list of all Query Managers views

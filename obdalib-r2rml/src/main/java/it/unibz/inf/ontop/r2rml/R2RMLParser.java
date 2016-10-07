@@ -213,8 +213,11 @@ public class R2RMLParser {
 
 		// process PREDICATEs
 		for (PredicateMap pm : pom.getPredicateMaps()) {
-			Predicate bodyPredicate = fac.getPredicate(pm.getConstant(), 2);
-			bodyPredicates.add(bodyPredicate);
+			String pmConstant = pm.getConstant();
+			if (pmConstant != null) {
+				Predicate bodyPredicate = fac.getPredicate(pmConstant, 2);
+				bodyPredicates.add(bodyPredicate);
+			}
 		}
 		return bodyPredicates;
 	}
@@ -512,8 +515,8 @@ public class R2RMLParser {
 		String string = (parsedString);
 		if (!string.contains("{")) {
 			if (type < 3) {
-				if (!string.startsWith("http://")) {
-					string = R2RMLVocabulary.baseuri + "{" + string + "}";
+    				if (!R2RMLVocabulary.isResourceString(string)) {
+						string = R2RMLVocabulary.prefixUri("{" + string + "}");
 					if (type == 2) {
 						string = "\"" + string + "\"";
 					}
@@ -522,8 +525,8 @@ public class R2RMLParser {
 				}
 			}
 		}
-		if (type == 1 && !string.startsWith("http://")) {
-			string = R2RMLVocabulary.baseuri + string;
+		if (type == 1) {
+			string = R2RMLVocabulary.prefixUri(string);
 		}
 
 		String str = string; //str for concat of constant literal
@@ -595,9 +598,9 @@ public class R2RMLParser {
 			// terms.add(0, uriTemplate);
 			return fac.getTypedTerm(uriTemplate, COL_TYPE.LITERAL);
 		case 4://concat
-			Function f = fac.getFunctionConcat(terms.get(0),terms.get(1));
+			Function f = fac.getFunction(ExpressionOperation.CONCAT, terms.get(0), terms.get(1));
             for(int j=2;j<terms.size();j++){
-                f = fac.getFunctionConcat(f,terms.get(j));
+                f = fac.getFunction(ExpressionOperation.CONCAT, f, terms.get(j));
             }
             return f;
 		}

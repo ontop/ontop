@@ -1,10 +1,8 @@
 package it.unibz.inf.ontop.executor.leftjoin;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
-import it.unibz.inf.ontop.executor.NodeCentricInternalExecutor;
-import it.unibz.inf.ontop.executor.join.SelfJoinLikeExecutor;
+import it.unibz.inf.ontop.executor.SimpleNodeCentricInternalExecutor;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.GroundExpressionImpl;
 import it.unibz.inf.ontop.pivotalrepr.*;
@@ -17,7 +15,6 @@ import it.unibz.inf.ontop.pivotalrepr.proposal.impl.NodeCentricOptimizationResul
 import it.unibz.inf.ontop.sql.*;
 
 import java.util.HashSet;
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -27,7 +24,7 @@ import static it.unibz.inf.ontop.pivotalrepr.NonCommutativeOperatorNode.Argument
 /**
  *
  */
-public class ForeignKeyLeftJoinExecutor implements NodeCentricInternalExecutor<LeftJoinNode, LeftJoinOptimizationProposal> {
+public class ForeignKeyLeftJoinExecutor implements SimpleNodeCentricInternalExecutor<LeftJoinNode, LeftJoinOptimizationProposal> {
 
     protected static class ConcreteProposal {
         private final boolean replaceLeftJoinByInnerJoin;

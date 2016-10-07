@@ -114,7 +114,7 @@ public class PushDownBooleanExpressionOptimizerTest {
         ConstructionNode constructionNode1 = new ConstructionNodeImpl(projectionAtom1.getVariables());
         InnerJoinNode joinNode1 = new InnerJoinNodeImpl(Optional.of(EXPRESSION1));
         ConstructionNode constructionNode2 = new ConstructionNodeImpl(projectionAtom2.getVariables());
-        UnionNode unionNode1 = new UnionNodeImpl();
+        UnionNode unionNode1 = new UnionNodeImpl(projectionAtom2.getVariables());
         ConstructionNode constructionNode3 = new ConstructionNodeImpl(projectionAtom2.getVariables());
         ConstructionNode constructionNode4 = new ConstructionNodeImpl(projectionAtom2.getVariables());
 
@@ -146,7 +146,7 @@ public class PushDownBooleanExpressionOptimizerTest {
         ConstructionNode constructionNode5 = new ConstructionNodeImpl(projectionAtom1.getVariables());
         InnerJoinNode joinNode2 = new InnerJoinNodeImpl(Optional.empty());
         ConstructionNode constructionNode6 = new ConstructionNodeImpl(projectionAtom2.getVariables());
-        UnionNode unionNode2 = new UnionNodeImpl();
+        UnionNode unionNode2 = new UnionNodeImpl(projectionAtom2.getVariables());
         ConstructionNode constructionNode7 = new ConstructionNodeImpl(projectionAtom2.getVariables());
         ConstructionNode constructionNode8 = new ConstructionNodeImpl(projectionAtom2.getVariables());
         FilterNode filterNode1 = new FilterNodeImpl(EXPRESSION1);

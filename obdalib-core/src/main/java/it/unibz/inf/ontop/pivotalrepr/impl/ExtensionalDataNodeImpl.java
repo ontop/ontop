@@ -40,13 +40,13 @@ public class ExtensionalDataNodeImpl extends DataNodeImpl implements Extensional
     @Override
     public SubstitutionResults<ExtensionalDataNode> applyAscendingSubstitution(
             ImmutableSubstitution<? extends ImmutableTerm> substitution,
-            QueryNode descendantNode, IntermediateQuery query) {
+            QueryNode childNode, IntermediateQuery query) {
         return applySubstitution((ExtensionalDataNode) this, substitution);
     }
 
     @Override
     public SubstitutionResults<ExtensionalDataNode> applyDescendingSubstitution(
-            ImmutableSubstitution<? extends ImmutableTerm> substitution) {
+            ImmutableSubstitution<? extends ImmutableTerm> substitution, IntermediateQuery query) {
         return applySubstitution((ExtensionalDataNode)this, substitution);
     }
 

@@ -2,8 +2,6 @@ package it.unibz.inf.ontop.reformulation.tests;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMultimap;
-import fj.P;
-import fj.P2;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.AtomPredicateImpl;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
@@ -11,11 +9,8 @@ import it.unibz.inf.ontop.pivotalrepr.*;
 import it.unibz.inf.ontop.pivotalrepr.equivalence.IQSyntacticEquivalenceChecker;
 import it.unibz.inf.ontop.pivotalrepr.impl.*;
 import it.unibz.inf.ontop.pivotalrepr.impl.tree.DefaultIntermediateQueryBuilder;
-import it.unibz.inf.ontop.pivotalrepr.proposal.InvalidQueryOptimizationProposalException;
-import it.unibz.inf.ontop.pivotalrepr.proposal.impl.InnerJoinOptimizationProposalImpl;
 import it.unibz.inf.ontop.pivotalrepr.proposal.impl.LeftJoinOptimizationProposalImpl;
 import it.unibz.inf.ontop.sql.*;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.sql.Types;
@@ -34,7 +29,8 @@ public class LeftJoinOptimizationTest {
     private final static AtomPredicate TABLE1_PREDICATE = new AtomPredicateImpl("table1", 3);
     private final static AtomPredicate TABLE2_PREDICATE = new AtomPredicateImpl("table2", 3);
     private final static AtomPredicate TABLE3_PREDICATE = new AtomPredicateImpl("table3", 3);
-    private final static AtomPredicate ANS1_PREDICATE = new AtomPredicateImpl("ans1", 3);
+    private final static AtomPredicate ANS1_ARITY_3_PREDICATE = new AtomPredicateImpl("ans1", 3);
+    private final static AtomPredicate ANS1_ARITY_4_PREDICATE = new AtomPredicateImpl("ans1", 4);
     private final static OBDADataFactory DATA_FACTORY = OBDADataFactoryImpl.getInstance();
     private final static Variable X = DATA_FACTORY.getVariable("X");
     private final static Variable Y = DATA_FACTORY.getVariable("Y");
@@ -112,7 +108,7 @@ public class LeftJoinOptimizationTest {
     public void testSelfJoinElimination1() throws EmptyQueryException {
 
         IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(metadata);
-        DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE, M, N, O);
+        DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_3_PREDICATE, M, N, O);
         ConstructionNode constructionNode = new ConstructionNodeImpl(projectionAtom.getVariables());
         queryBuilder.init(projectionAtom, constructionNode);
         LeftJoinNode leftJoinNode = new LeftJoinNodeImpl(
@@ -136,7 +132,7 @@ public class LeftJoinOptimizationTest {
 
 
         IntermediateQueryBuilder expectedQueryBuilder = new DefaultIntermediateQueryBuilder(metadata);
-        DistinctVariableOnlyDataAtom projectionAtom1 = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE, M, N, O);
+        DistinctVariableOnlyDataAtom projectionAtom1 = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_3_PREDICATE, M, N, O);
         ConstructionNode constructionNode1 = new ConstructionNodeImpl(projectionAtom1.getVariables());
         expectedQueryBuilder.init(projectionAtom1, constructionNode1);
 
@@ -152,7 +148,7 @@ public class LeftJoinOptimizationTest {
     public void testSelfJoinElimination2() throws EmptyQueryException {
 
         IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(metadata);
-        DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE, M, N, O);
+        DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_3_PREDICATE, M, N, O);
         ConstructionNode constructionNode = new ConstructionNodeImpl(projectionAtom.getVariables());
         queryBuilder.init(projectionAtom, constructionNode);
         LeftJoinNode leftJoinNode = new LeftJoinNodeImpl(
@@ -176,7 +172,7 @@ public class LeftJoinOptimizationTest {
 
 
         IntermediateQueryBuilder expectedQueryBuilder = new DefaultIntermediateQueryBuilder(metadata);
-        DistinctVariableOnlyDataAtom projectionAtom1 = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE, M, N, O);
+        DistinctVariableOnlyDataAtom projectionAtom1 = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_3_PREDICATE, M, N, O);
         ConstructionNode constructionNode1 = new ConstructionNodeImpl(projectionAtom1.getVariables());
         expectedQueryBuilder.init(projectionAtom1, constructionNode1);
         LeftJoinNode leftJoinNode1 = new LeftJoinNodeImpl(Optional.empty());
@@ -196,7 +192,7 @@ public class LeftJoinOptimizationTest {
     public void testLeftJoinElimination1() throws EmptyQueryException {
 
         IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(metadata);
-        DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE, M, M1, O, N1);
+        DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_4_PREDICATE, M, M1, O, N1);
         ConstructionNode constructionNode = new ConstructionNodeImpl(projectionAtom.getVariables());
         queryBuilder.init(projectionAtom, constructionNode);
         LeftJoinNode leftJoinNode = new LeftJoinNodeImpl(Optional.empty());
@@ -217,7 +213,7 @@ public class LeftJoinOptimizationTest {
 
 
         IntermediateQueryBuilder expectedQueryBuilder = new DefaultIntermediateQueryBuilder(metadata);
-        DistinctVariableOnlyDataAtom projectionAtom1 = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE, M, M1, O, N1);
+        DistinctVariableOnlyDataAtom projectionAtom1 = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_4_PREDICATE, M, M1, O, N1);
         ConstructionNode constructionNode1 = new ConstructionNodeImpl(projectionAtom1.getVariables());
         expectedQueryBuilder.init(projectionAtom1, constructionNode1);
 

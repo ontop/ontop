@@ -11,10 +11,11 @@ public interface CommutativeJoinOrFilterNode extends JoinOrFilterNode {
     @Override
     SubstitutionResults<? extends CommutativeJoinOrFilterNode> applyAscendingSubstitution(
             ImmutableSubstitution<? extends ImmutableTerm> substitution,
-            QueryNode descendantNode, IntermediateQuery query) throws QueryNodeSubstitutionException;
+            QueryNode childNode, IntermediateQuery query) throws QueryNodeSubstitutionException;
 
     @Override
     SubstitutionResults<? extends CommutativeJoinOrFilterNode> applyDescendingSubstitution(
-            ImmutableSubstitution<? extends ImmutableTerm> substitution) throws QueryNodeSubstitutionException;
+            ImmutableSubstitution<? extends ImmutableTerm> substitution, IntermediateQuery query)
+            throws QueryNodeSubstitutionException;
 
 }

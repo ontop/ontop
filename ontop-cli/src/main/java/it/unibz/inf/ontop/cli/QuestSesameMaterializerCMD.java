@@ -25,7 +25,7 @@ import it.unibz.inf.ontop.io.ModelIOManager;
 import it.unibz.inf.ontop.model.OBDAModel;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.ontology.Ontology;
-import it.unibz.inf.ontop.owlapi3.OWLAPITranslatorUtility;
+import it.unibz.inf.ontop.owlapi.OWLAPITranslatorUtility;
 import it.unibz.inf.ontop.r2rml.R2RMLReader;
 import it.unibz.inf.ontop.sesame.SesameMaterializer;
 import it.unibz.inf.ontop.sesame.SesameStatementIterator;

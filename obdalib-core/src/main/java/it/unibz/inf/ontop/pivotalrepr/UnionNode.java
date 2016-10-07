@@ -3,7 +3,10 @@ package it.unibz.inf.ontop.pivotalrepr;
 import it.unibz.inf.ontop.model.ImmutableTerm;
 import it.unibz.inf.ontop.model.ImmutableSubstitution;
 
-public interface UnionNode extends QueryNode {
+/**
+ * All its children are expected to project its projected variables
+ */
+public interface UnionNode extends ExplicitVariableProjectionNode {
 
     @Override
     UnionNode clone();
@@ -14,9 +17,9 @@ public interface UnionNode extends QueryNode {
     @Override
     SubstitutionResults<UnionNode> applyAscendingSubstitution(
             ImmutableSubstitution<? extends ImmutableTerm> substitution,
-            QueryNode descendantNode, IntermediateQuery query) ;
+            QueryNode childNode, IntermediateQuery query) ;
 
     @Override
     SubstitutionResults<UnionNode> applyDescendingSubstitution(
-            ImmutableSubstitution<? extends ImmutableTerm> substitution) ;
+            ImmutableSubstitution<? extends ImmutableTerm> substitution, IntermediateQuery query) ;
 }

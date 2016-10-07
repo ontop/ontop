@@ -28,9 +28,9 @@ public interface FilterNode extends CommutativeJoinOrFilterNode {
     @Override
     SubstitutionResults<FilterNode> applyAscendingSubstitution(
             ImmutableSubstitution<? extends ImmutableTerm> substitution,
-            QueryNode descendantNode, IntermediateQuery query);
+            QueryNode childNode, IntermediateQuery query);
 
     @Override
     SubstitutionResults<FilterNode> applyDescendingSubstitution(
-            ImmutableSubstitution<? extends ImmutableTerm> substitution);
+            ImmutableSubstitution<? extends ImmutableTerm> substitution, IntermediateQuery query);
 }

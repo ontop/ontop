@@ -20,19 +20,18 @@ package it.unibz.inf.ontop.protege.gui;
  * #L%
  */
 
-import java.util.List;
-import java.util.Vector;
+import it.unibz.inf.ontop.io.PrefixManager;
+import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLResultSet;
+import org.semanticweb.owlapi.io.ToStringRenderer;
+import org.semanticweb.owlapi.model.OWLException;
+import org.semanticweb.owlapi.model.OWLPropertyAssertionObject;
 
-import javax.swing.JOptionPane;
-import javax.swing.SwingUtilities;
+import javax.swing.*;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.TableModel;
-
-import it.unibz.inf.ontop.io.PrefixManager;
-import it.unibz.inf.ontop.owlrefplatform.owlapi3.QuestOWLResultSet;
-import org.semanticweb.owlapi.model.OWLException;
-import org.semanticweb.owlapi.model.OWLPropertyAssertionObject;
+import java.util.ArrayList;
+import java.util.List;
 
 public class OWLResultSetTableModel implements TableModel {
 
@@ -52,11 +51,11 @@ public class OWLResultSetTableModel implements TableModel {
 	Thread rowFetcher;
 
 	// Tabular data for exporting result
-	private Vector<String[]> tabularData;
-	// Vector data for presenting result to table GUI
-	private Vector<String[]> resultsTable;
+	private List<String[]> tabularData;
+	// List data for presenting result to table GUI
+	private List<String[]> resultsTable;
 
-	private Vector<TableModelListener> listener;
+	private List<TableModelListener> listeners;
 
 	private PrefixManager prefixman;
 
@@ -80,8 +79,8 @@ public class OWLResultSetTableModel implements TableModel {
 		numcols = results.getColumnCount();
 		numrows = 0;
 
-		resultsTable = new Vector<String[]>();
-		listener = new Vector<TableModelListener>();
+		resultsTable = new ArrayList<>();
+		listeners = new ArrayList<>();
 
 		fetchRowsAsync();
 	}
@@ -97,7 +96,8 @@ public class OWLResultSetTableModel implements TableModel {
 		RowFetcherError(Exception e){
 			this.e = e;
 		}
-		public void run(){
+		@Override
+        public void run(){
 			if(!stopFetching){
 				JOptionPane.showMessageDialog(
 						null,
@@ -108,7 +108,8 @@ public class OWLResultSetTableModel implements TableModel {
 	
 	private void fetchRowsAsync() throws OWLException{
 		rowFetcher = new Thread(){
-			public void run() {
+			@Override
+            public void run() {
 				try {
 					fetchRows(fetchSizeLimit);
 				} catch (Exception e){
@@ -126,7 +127,6 @@ public class OWLResultSetTableModel implements TableModel {
 	/**
 	 * Returns whether the table is still being populated by SQL fetched from the result object. 
 	 * Called from the QueryInterfacePanel to decide whether to continue updating the result count
-	 * @return
 	 */
 	public boolean isFetching(){
 		return this.isFetching;
@@ -142,7 +142,8 @@ public class OWLResultSetTableModel implements TableModel {
 		RowAdder(String[] crow){
 			this.crow = crow;
 		}
-		public void run(){
+		@Override
+        public void run(){
 			resultsTable.add(crow);
 			updateRowCount();
 			fireModelChangedEvent();
@@ -161,10 +162,9 @@ public class OWLResultSetTableModel implements TableModel {
 			for (int j = 0; j < numcols; j++) {
 				if(stopFetching)
 					break;
-				OWLPropertyAssertionObject constant = results
-						.getOWLPropertyAssertionObject(j + 1);
+				OWLPropertyAssertionObject constant = results.getOWLPropertyAssertionObject(j + 1);
 				if (constant != null) {
-					crow[j] = constant.toString();
+                    crow[j] = ToStringRenderer.getInstance().getRendering(constant);
 				}
 				else {
 					crow[j] = "";
@@ -187,7 +187,7 @@ public class OWLResultSetTableModel implements TableModel {
 	 */
 	public List<String[]> getTabularData() throws OWLException, InterruptedException {
 		if (tabularData == null) {
-			tabularData = new Vector<String[]>();
+			tabularData = new ArrayList<>();
 			String[] columnName = results.getSignature().toArray(new String[numcols]);		
 			// Append the column names
 			tabularData.add(columnName);
@@ -238,20 +238,28 @@ public class OWLResultSetTableModel implements TableModel {
 	/** Automatically close when we're garbage collected */
 	@Override
 	protected void finalize() {
-		close();
+        try {
+            super.finalize();
+        } catch (Throwable throwable) {
+            throwable.printStackTrace();
+        }
+        close();
 	}
 
 	// These two TableModel methods return the size of the table
-	public int getColumnCount() {
+	@Override
+    public int getColumnCount() {
 		return numcols;
 	}
 
-	public int getRowCount() {
+	@Override
+    public int getRowCount() {
 		return numrows;
 	}
 
 	// This TableModel method returns columns names from the ResultSetMetaData
-	public String getColumnName(int column) {
+	@Override
+    public String getColumnName(int column) {
 		try {
 			java.util.List<String> signature = results.getSignature();
 			if (signature != null && column < signature.size()) {
@@ -268,7 +276,8 @@ public class OWLResultSetTableModel implements TableModel {
 	// This TableModel method specifies the data type for each column.
 	// We could map SQL types to Java types, but for this example, we'll just
 	// convert all the returned data to strings.
-	public Class getColumnClass(int column) {
+	@Override
+    public Class getColumnClass(int column) {
 		return String.class;
 	}
 
@@ -279,7 +288,8 @@ public class OWLResultSetTableModel implements TableModel {
 	 * Note that SQL row and column numbers start at 1, but TableModel column
 	 * numbers start at 0.
 	 */
-	public Object getValueAt(int row, int column) {
+	@Override
+    public Object getValueAt(int row, int column) {
 		String value = resultsTable.get(row)[column];
 		if (value == null) {
 			return "";
@@ -300,27 +310,31 @@ public class OWLResultSetTableModel implements TableModel {
 
 
 	// Our table isn't editable
-	public boolean isCellEditable(int row, int column) {
+	@Override
+    public boolean isCellEditable(int row, int column) {
 		return false;
 	}
 
 	// Since its not editable, we don't need to implement these methods
-	public void setValueAt(Object value, int row, int column) {
+	@Override
+    public void setValueAt(Object value, int row, int column) {
 		// NO-OP
 	}
 
-	public void addTableModelListener(TableModelListener l) {
-		listener.add(l);
+	@Override
+    public void addTableModelListener(TableModelListener l) {
+		listeners.add(l);
 	}
 
-	public void removeTableModelListener(TableModelListener l) {
-		listener.remove(l);
+	@Override
+    public void removeTableModelListener(TableModelListener l) {
+		listeners.remove(l);
 	}
 
 
 	private void fireModelChangedEvent() {
-		for(int i = 0; !stopFetching && i < listener.size(); i++) {
-			TableModelListener tl = listener.get(i);
+		for(int i = 0; !stopFetching && i < listeners.size(); i++) {
+			TableModelListener tl = listeners.get(i);
 			synchronized (tl){
 				tl.tableChanged(new TableModelEvent(this));
 			}

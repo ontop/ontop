@@ -353,7 +353,7 @@ public class SelfJoinLikeExecutor {
             QueryTreeComponent treeComponent,
             N joinNode,
             ConcreteProposal proposal) {
-        switch(treeComponent.getCurrentSubNodesOf(joinNode).size()) {
+        switch(treeComponent.getChildren(joinNode).size()) {
             case 0:
                 throw new IllegalStateException("Self-join elimination MUST not eliminate ALL the nodes");
 

@@ -3,6 +3,7 @@
 joinConditions.obda
 npd-v2-ql_a.ttl
 npd-v2-ql_a.pretty.obda
+templatePredicate.obda
 simpleJoin.obda
 mapping.obda
 joinsinObjectMap.obda

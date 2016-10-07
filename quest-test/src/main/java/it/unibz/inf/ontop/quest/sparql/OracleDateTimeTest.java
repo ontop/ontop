@@ -23,27 +23,25 @@ package it.unibz.inf.ontop.quest.sparql;
  * #L%
  */
 
-import java.io.File;
-
-import it.unibz.inf.ontop.owlrefplatform.owlapi3.*;
-import junit.framework.TestCase;
-
+import it.unibz.inf.ontop.io.ModelIOManager;
 import it.unibz.inf.ontop.model.OBDADataFactory;
 import it.unibz.inf.ontop.model.OBDAModel;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
+import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
+import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
+import junit.framework.TestCase;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import it.unibz.inf.ontop.io.ModelIOManager;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLObject;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
-import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.File;
 
 /***
  * Tests that the system can handle the SPARQL "LIKE" keyword in the oracle setting

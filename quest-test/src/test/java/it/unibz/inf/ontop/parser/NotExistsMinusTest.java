@@ -29,7 +29,7 @@
 //import OBDADataFactoryImpl;
 //import QuestConstants;
 //import QuestPreferences;
-//import org.semanticweb.ontop.owlrefplatform.owlapi3.*;
+//import org.semanticweb.ontop.owlrefplatform.owlapi.*;
 //import org.semanticweb.owlapi.apibinding.OWLManager;
 //import org.semanticweb.owlapi.model.OWLNamedIndividual;
 //import org.semanticweb.owlapi.model.OWLOntology;

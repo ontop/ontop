@@ -23,6 +23,8 @@ package it.unibz.inf.ontop.model.impl;
 
 import it.unibz.inf.ontop.model.Variable;
 
+import java.util.stream.Stream;
+
 public class VariableImpl implements Variable, Comparable<Variable> {
 
 	private static final long serialVersionUID = 5723075311798541659L;
@@ -76,7 +78,12 @@ public class VariableImpl implements Variable, Comparable<Variable> {
 	}
 
 	@Override
+	public Stream<Variable> getVariableStream() {
+		return Stream.of(this);
+	}
+
+	@Override
 	public int compareTo(Variable other) {
-		return other.hashCode() - hashCode() ;
+		return name.compareTo(other.getName());
 	}
 }

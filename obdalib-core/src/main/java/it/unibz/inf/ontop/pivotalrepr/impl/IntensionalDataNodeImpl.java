@@ -33,13 +33,13 @@ public class IntensionalDataNodeImpl extends DataNodeImpl implements Intensional
     @Override
     public SubstitutionResults<IntensionalDataNode> applyAscendingSubstitution(
             ImmutableSubstitution<? extends ImmutableTerm> substitution,
-            QueryNode descendantNode, IntermediateQuery query) {
+            QueryNode childNode, IntermediateQuery query) {
         return applySubstitution((IntensionalDataNode)this, substitution);
     }
 
     @Override
     public SubstitutionResults<IntensionalDataNode> applyDescendingSubstitution(
-            ImmutableSubstitution<? extends ImmutableTerm> substitution) {
+            ImmutableSubstitution<? extends ImmutableTerm> substitution, IntermediateQuery query) {
         return applySubstitution((IntensionalDataNode)this, substitution);
     }
 

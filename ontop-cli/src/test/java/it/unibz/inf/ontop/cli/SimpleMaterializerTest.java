@@ -113,6 +113,7 @@ public class SimpleMaterializerTest {
                 "-o", outFile);
         assertEquals(5, numOfClassAssertions(outFile));
         assertEquals(0, numOfObjectPropertyAssertions(outFile));
+        assertEquals(2, numOfAnnotationAssertions(outFile));
     }
 
     @Test
@@ -136,6 +137,12 @@ public class SimpleMaterializerTest {
         OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
         OWLOntology ontology = manager.loadOntologyFromOntologyDocument(new File(owlFile));
         return ontology.getAxioms(AxiomType.OBJECT_PROPERTY_ASSERTION).size();
+    }
+
+    public int numOfAnnotationAssertions(String owlFile) throws OWLOntologyCreationException {
+        OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
+        OWLOntology ontology = manager.loadOntologyFromOntologyDocument(new File(owlFile));
+        return ontology.getAxioms(AxiomType.ANNOTATION_ASSERTION).size();
     }
 
 }

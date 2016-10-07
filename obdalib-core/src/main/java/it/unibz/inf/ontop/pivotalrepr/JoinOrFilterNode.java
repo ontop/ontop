@@ -16,10 +16,11 @@ public interface JoinOrFilterNode extends QueryNode {
     @Override
     SubstitutionResults<? extends JoinOrFilterNode> applyAscendingSubstitution(
             ImmutableSubstitution<? extends ImmutableTerm> substitution,
-            QueryNode descendantNode, IntermediateQuery query) throws QueryNodeSubstitutionException;
+            QueryNode childNode, IntermediateQuery query) throws QueryNodeSubstitutionException;
 
     @Override
     SubstitutionResults<? extends JoinOrFilterNode> applyDescendingSubstitution(
-            ImmutableSubstitution<? extends ImmutableTerm> substitution) throws QueryNodeSubstitutionException;
+            ImmutableSubstitution<? extends ImmutableTerm> substitution, IntermediateQuery query)
+            throws QueryNodeSubstitutionException;
 
 }

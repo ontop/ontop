@@ -30,6 +30,11 @@ public class DefaultIntermediateQueryBuilder implements IntermediateQueryBuilder
         if (tree != null)
             throw new IllegalArgumentException("Already initialized IntermediateQueryBuilder.");
 
+        if (!projectionAtom.getVariables().equals(rootConstructionNode.getVariables())) {
+            throw new IllegalArgumentException("The root construction node " + rootConstructionNode
+                    + " is not consistent with the projection atom " + projectionAtom);
+        }
+
         // TODO: use Guice to construct this tree
         tree = new DefaultTree(rootConstructionNode);
         this.projectionAtom = projectionAtom;

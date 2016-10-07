@@ -1,5 +1,8 @@
 package it.unibz.inf.ontop.pivotalrepr;
 
+import com.google.common.collect.ImmutableSet;
+import it.unibz.inf.ontop.model.Variable;
+
 import java.util.Optional;
 
 /**
@@ -9,5 +12,7 @@ public interface NodeTransformationProposal {
 
     NodeTransformationProposedState getState();
 
-    Optional<QueryNode> getOptionalNewNode();
+    Optional<QueryNode> getOptionalNewNodeOrReplacingChild();
+
+    ImmutableSet<Variable> getNullVariables();
 }

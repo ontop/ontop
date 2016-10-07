@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.*;
 
 import java.util.List;
+import java.util.stream.Stream;
 
 import static it.unibz.inf.ontop.model.impl.ImmutabilityTools.convertIntoImmutableTerm;
 
@@ -30,6 +31,11 @@ public abstract class ImmutableFunctionalTermImpl extends AbstractFunctionalTerm
         // No problem since the list is immutable
         this.terms = terms;
         string = null;
+
+        if (functor.getArity() != terms.size()) {
+            throw new IllegalArgumentException("Arity violation: " + functor + " was expecting " + functor.getArity()
+            + ", not " + terms.size());
+        }
     }
 
     protected ImmutableFunctionalTermImpl(Function functionalTermToClone) {
@@ -63,6 +69,11 @@ public abstract class ImmutableFunctionalTermImpl extends AbstractFunctionalTerm
     @Override
     public ImmutableSet<Variable> getVariables() {
         return ImmutableSet.copyOf(super.getVariables());
+    }
+
+    @Override
+    public Stream<Variable> getVariableStream() {
+        return super.getVariables().stream();
     }
 
 

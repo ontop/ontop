@@ -5,12 +5,13 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.*;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionImpl;
 import it.unibz.inf.ontop.pivotalrepr.ConstructionNode;
 import it.unibz.inf.ontop.pivotalrepr.ImmutableQueryModifiers;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.*;
+import java.util.stream.Stream;
 
 import static it.unibz.inf.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionTools.computeUnidirectionalSubstitution;
 
@@ -81,6 +82,63 @@ public class ConstructionNodeTools {
         }
     }
 
+    public static ConstructionNode merge(ConstructionNode parentConstructionNode,
+                                         ConstructionNode childConstructionNode) {
+
+        ImmutableSubstitution<ImmutableTerm> composition = childConstructionNode.getSubstitution().composeWith(
+                parentConstructionNode.getSubstitution());
+
+        ImmutableSet<Variable> projectedVariables = parentConstructionNode.getVariables();
+
+        ImmutableSubstitution<ImmutableTerm> newSubstitution = projectedVariables.containsAll(
+                childConstructionNode.getVariables())
+                ? composition
+                : new ImmutableSubstitutionImpl<>(
+                composition.getImmutableMap().entrySet().stream()
+                        .filter(e -> !projectedVariables.contains(e.getKey()))
+                        .collect(ImmutableCollectors.toMap()));
+
+        if (parentConstructionNode.getOptionalModifiers().isPresent()
+                && childConstructionNode.getOptionalModifiers().isPresent()) {
+            // TODO: find a better exception
+            throw new RuntimeException("TODO: support combination of modifiers");
+        }
+
+        // TODO: should update the modifiers?
+        Optional<ImmutableQueryModifiers> optionalModifiers = parentConstructionNode.getOptionalModifiers()
+                .map(Optional::of)
+                .orElseGet(childConstructionNode::getOptionalModifiers);
+
+        return new ConstructionNodeImpl(projectedVariables, newSubstitution, optionalModifiers);
+    }
+
+    public static ImmutableSet<Variable> computeNewProjectedVariables(
+            ImmutableSubstitution<? extends ImmutableTerm> descendingSubstitution, ImmutableSet<Variable> projectedVariables) {
+        ImmutableSet<Variable> tauDomain = descendingSubstitution.getDomain();
+
+        Stream<Variable> remainingVariableStream = projectedVariables.stream()
+                .filter(v -> !tauDomain.contains(v));
+
+        Stream<Variable> newVariableStream = descendingSubstitution.getImmutableMap().entrySet().stream()
+                .filter(e -> projectedVariables.contains(e.getKey()))
+                .map(Map.Entry::getValue)
+                .flatMap(ImmutableTerm::getVariableStream);
+
+        return Stream.concat(newVariableStream, remainingVariableStream)
+                .collect(ImmutableCollectors.toSet());
+    }
+
+    public static ImmutableSubstitution<ImmutableTerm> extractRelevantDescendingSubstitution(
+            ImmutableSubstitution<? extends ImmutableTerm> descendingSubstitution,
+            ImmutableSet<Variable> projectedVariables) {
+        ImmutableMap<Variable, ImmutableTerm> newSubstitutionMap = descendingSubstitution.getImmutableMap().entrySet().stream()
+                .filter(e -> projectedVariables.contains(e.getKey()))
+                .map(e -> (Map.Entry<Variable, ImmutableTerm>) e)
+                .collect(ImmutableCollectors.toMap());
+
+        return new ImmutableSubstitutionImpl<>(newSubstitutionMap);
+    }
+
 
     /**
      * TODO: explain
@@ -89,7 +147,7 @@ public class ConstructionNodeTools {
                                                                  ImmutableSubstitution<ImmutableTerm> additionalBindingsSubstitution)
             throws InconsistentBindingException {
 
-        ImmutableSet<Variable> projectedVariables = formerConstructionNode.getProjectedVariables();
+        ImmutableSet<Variable> projectedVariables = formerConstructionNode.getVariables();
 
         /**
          * TODO: explain why the composition is too rich
@@ -296,7 +354,7 @@ public class ConstructionNodeTools {
         /**
          * Checks that no projected but not-bound variable was proposed to be removed.
          */
-        ImmutableSet<Variable> projectedVariables = formerConstructionNode.getProjectedVariables();
+        ImmutableSet<Variable> projectedVariables = formerConstructionNode.getVariables();
         for (Variable variable : allVariablesToRemove) {
             if ((!localVariablesToRemove.contains(variable)) && projectedVariables.contains(variable)) {
                 throw new InconsistentBindingException("The variable to remove " + variable + " is projected but" +

@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.reformulation.tests;
 
 /*
  * #%L
- * ontop-quest-owlapi3
+ * ontop-quest-owlapi
  * %%
  * Copyright (C) 2009 - 2014 Free University of Bozen-Bolzano
  * %%
@@ -21,7 +21,7 @@ package it.unibz.inf.ontop.reformulation.tests;
  */
 
 import it.unibz.inf.ontop.ontology.*;
-import it.unibz.inf.ontop.owlapi3.OWLAPITranslatorUtility;
+import it.unibz.inf.ontop.owlapi.OWLAPITranslatorUtility;
 import junit.framework.TestCase;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.*;

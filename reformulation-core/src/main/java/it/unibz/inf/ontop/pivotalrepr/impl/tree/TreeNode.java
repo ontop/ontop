@@ -2,6 +2,8 @@ package it.unibz.inf.ontop.pivotalrepr.impl.tree;
 
 import it.unibz.inf.ontop.pivotalrepr.QueryNode;
 
+import java.util.Map;
+
 /**
  * Mutable and low-level.
  */
@@ -25,4 +27,14 @@ public class TreeNode {
         return "TN(" + queryNode + ")";
     }
 
+    /**
+     * Does not clone the query node
+     */
+    public TreeNode cloneShallowly() {
+        return new TreeNode(queryNode);
+    }
+
+    public TreeNode findNewTreeNode(Map<QueryNode, TreeNode> newNodeIndex) {
+        return newNodeIndex.get(queryNode);
+    }
 }

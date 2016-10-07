@@ -1,30 +1,27 @@
 package it.unibz.inf.ontop.sql;
 
-import it.unibz.inf.ontop.model.OBDADataFactory;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
 import it.unibz.inf.ontop.io.ModelIOManager;
+import it.unibz.inf.ontop.model.OBDADataFactory;
 import it.unibz.inf.ontop.model.OBDAException;
 import it.unibz.inf.ontop.model.OBDAModel;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
+import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLException;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
-import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import it.unibz.inf.ontop.owlrefplatform.owlapi3.*;
 
 import java.io.File;
 import java.util.Properties;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /**
  * When the ID is both used for creating the URI and as the literal of a datatype property.

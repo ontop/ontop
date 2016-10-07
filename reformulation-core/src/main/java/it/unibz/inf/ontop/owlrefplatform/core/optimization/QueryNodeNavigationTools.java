@@ -30,27 +30,6 @@ public class QueryNodeNavigationTools {
         }
     }
 
-    /**
-     * Updated node and query
-     */
-    public static class UpdatedNodeAndQuery<N extends QueryNode> {
-        private final N updatedQuery;
-        private final IntermediateQuery nextQuery;
-
-        public UpdatedNodeAndQuery(N updatedNode, IntermediateQuery nextQuery) {
-            this.updatedQuery = updatedNode;
-            this.nextQuery = nextQuery;
-        }
-
-        public N getUpdatedNode() {
-            return updatedQuery;
-        }
-
-        public IntermediateQuery getNextQuery() {
-            return nextQuery;
-        }
-    }
-
 
     /**
      * Depth-first exploration
@@ -122,7 +101,15 @@ public class QueryNodeNavigationTools {
         }
 
         /**
-         * Second choice: next sibling
+         * Second choice: next sibling of the current node or of an ancestor
+         */
+        return skipSubTreeAndContinueDepthFirst(query, currentNode);
+
+    }
+
+    public static Optional<QueryNode> skipSubTreeAndContinueDepthFirst(IntermediateQuery query, QueryNode currentNode) {
+        /**
+         * First choice: next sibling
          */
         Optional<QueryNode> optionalNextSibling = query.getNextSibling(currentNode);
         if (optionalNextSibling.isPresent()) {

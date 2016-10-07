@@ -21,22 +21,12 @@ package it.unibz.inf.ontop.sql;
 */
 
 
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.sql.Types;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
+import com.google.common.collect.ImmutableSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.collect.ImmutableSet;
+import java.sql.*;
+import java.util.*;
 
 /**
  * Retrieves the database metadata (table schema and database constraints) 
@@ -138,7 +128,7 @@ public class DBMetadataExtractor {
 		
 		QuotedIDFactory idfac;
 		// treat Exareme as a case-sensitive DB engine (like MS SQL Server)
-		if (md.supportsMixedCaseIdentifiers()) {
+		if (md.storesMixedCaseIdentifiers()) {
 			 //  MySQL
 			if (productName.contains("MySQL"))  {
 				//System.out.println("getIdentifierQuoteString: " + md.getIdentifierQuoteString());		
@@ -601,14 +591,20 @@ public class DBMetadataExtractor {
 				
 				if (builder != null) {
 					QuotedID attrId = QuotedID.createIdFromDatabaseRecord(idfac, rs.getString("COLUMN_NAME"));
-					// ASC_OR_DESC String => column sort sequence, "A" => ascending, "D" => descending, 
+					// ASC_OR_DESC String => column sort sequence, "A" => ascending, "D" => descending,
 					//        may be null if sort sequence is not supported; null when TYPE is tableIndexStatistic
 					// CARDINALITY int => When TYPE is tableIndexStatistic, then this is the number of rows in the table; 
 					//                      otherwise, it is the number of unique values in the index.
 					// PAGES int => When TYPE is tableIndexStatisic then this is the number of pages used for the table, 
 					//                    otherwise it is the number of pages used for the current index.
 					// FILTER_CONDITION String => Filter condition, if any. (may be null)
-					builder.add(relation.getAttribute(attrId));
+					Attribute attr = relation.getAttribute(attrId);
+					if (attr == null) { // Compensate for the bug in PostgreSQL JBDC driver that
+						// strips off the quatation marks
+						attrId = QuotedID.createIdFromDatabaseRecord(idfac, "\"" + rs.getString("COLUMN_NAME") + "\"");
+						attr = relation.getAttribute(attrId);
+					}
+					builder.add(attr);
 				}
 			}
 			if (builder != null)

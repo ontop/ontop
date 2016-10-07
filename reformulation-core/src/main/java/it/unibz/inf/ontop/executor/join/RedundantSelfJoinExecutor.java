@@ -1,15 +1,22 @@
 package it.unibz.inf.ontop.executor.join;
 
-import java.util.Optional;
 import com.google.common.collect.*;
-import it.unibz.inf.ontop.executor.NodeCentricInternalExecutor;
+import it.unibz.inf.ontop.executor.SimpleNodeCentricInternalExecutor;
+import it.unibz.inf.ontop.model.*;
+import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionImpl;
+import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.ImmutableUnificationTools;
+import it.unibz.inf.ontop.pivotalrepr.*;
+import it.unibz.inf.ontop.pivotalrepr.impl.ExtensionalDataNodeImpl;
+import it.unibz.inf.ontop.pivotalrepr.impl.FilterNodeImpl;
+import it.unibz.inf.ontop.pivotalrepr.impl.QueryTreeComponent;
 import it.unibz.inf.ontop.pivotalrepr.proposal.InnerJoinOptimizationProposal;
 import it.unibz.inf.ontop.pivotalrepr.proposal.InvalidQueryOptimizationProposalException;
 import it.unibz.inf.ontop.pivotalrepr.proposal.NodeCentricOptimizationResults;
+import it.unibz.inf.ontop.pivotalrepr.proposal.SubstitutionPropagationProposal;
 import it.unibz.inf.ontop.pivotalrepr.proposal.impl.NodeCentricOptimizationResultsImpl;
-import it.unibz.inf.ontop.pivotalrepr.impl.QueryTreeComponent;
-import it.unibz.inf.ontop.model.*;
-import it.unibz.inf.ontop.pivotalrepr.*;
+import it.unibz.inf.ontop.pivotalrepr.proposal.impl.SubstitutionPropagationProposalImpl;
+
+import java.util.Optional;
 
 /**
  * TODO: explain
@@ -19,9 +26,12 @@ import it.unibz.inf.ontop.pivotalrepr.*;
  * Naturally assumes that the data atoms are leafs.
  *
  */
-public class RedundantSelfJoinExecutor
-        extends SelfJoinLikeExecutor
-        implements NodeCentricInternalExecutor<InnerJoinNode, InnerJoinOptimizationProposal> {
+public class RedundantSelfJoinExecutor extends SelfJoinLikeExecutor implements InnerJoinExecutor {
+
+    /**
+     * Safety, to prevent infinite loops
+     */
+    private static final int MAX_ITERATIONS = 100;
 
 
     @Override
@@ -30,6 +40,7 @@ public class RedundantSelfJoinExecutor
                                                 final QueryTreeComponent treeComponent)
             throws InvalidQueryOptimizationProposalException {
 
+        // Non-final
         InnerJoinNode topJoinNode = highLevelProposal.getFocusNode();
 
         ImmutableMultimap<AtomPredicate, DataNode> initialMap = extractDataNodes(query.getChildren(topJoinNode));
@@ -37,10 +48,11 @@ public class RedundantSelfJoinExecutor
         /**
          * Tries to optimize if there are data nodes
          */
-        if (!initialMap.isEmpty()) {
+        int i=0;
+        while (!initialMap.isEmpty() && (i++ < MAX_ITERATIONS)) {
 
             // TODO: explain
-            ImmutableSet<Variable> variablesToKeep = query.getClosestConstructionNode(topJoinNode).getVariables();
+            ImmutableSet<Variable> variablesToKeep = query.getClosestConstructionNode(topJoinNode).getLocalVariables();
 
             Optional<ConcreteProposal> optionalConcreteProposal = propose(initialMap, variablesToKeep,
                     query.getMetadata().getUniqueConstraints());
@@ -49,10 +61,41 @@ public class RedundantSelfJoinExecutor
                 ConcreteProposal concreteProposal = optionalConcreteProposal.get();
 
                 // SIDE-EFFECT on the tree component (and thus on the query)
-                return applyOptimization(query, treeComponent, highLevelProposal.getFocusNode(),
-                        concreteProposal);
+                NodeCentricOptimizationResults<InnerJoinNode> result = applyOptimization(query, treeComponent,
+                        topJoinNode, concreteProposal);
+
+                /**
+                 *
+                 */
+                if (result.getOptionalNewNode().isPresent()) {
+                    int oldSize = initialMap.size();
+                    initialMap = extractDataNodes(result.getResultingQuery().getChildren(
+                            result.getOptionalNewNode().get()));
+                    int newSize = initialMap.size();
+
+                    if (oldSize == newSize) {
+                        return result;
+                    }
+                    else if (oldSize < newSize) {
+                        throw new IllegalStateException("The number of data atoms was expected to decrease, not increase");
+                    }
+                    // else, continue
+                    topJoinNode = result.getOptionalNewNode().get();
+
+                } else {
+                    return result;
+                }
             }
         }
+
+        /**
+         * Safety
+         */
+        if (i >= MAX_ITERATIONS) {
+            throw new IllegalStateException("Redundant self-join elimination loop has reached " +
+                    "the max iteration threshold (" + MAX_ITERATIONS + ")");
+        }
+
         // No optimization
         return new NodeCentricOptimizationResultsImpl<>(query, topJoinNode);
     }
