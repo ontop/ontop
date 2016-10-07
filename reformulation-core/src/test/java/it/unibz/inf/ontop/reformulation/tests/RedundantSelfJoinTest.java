@@ -15,6 +15,7 @@ import it.unibz.inf.ontop.pivotalrepr.equivalence.IQSyntacticEquivalenceChecker;
 import it.unibz.inf.ontop.pivotalrepr.impl.*;
 import it.unibz.inf.ontop.pivotalrepr.impl.tree.DefaultIntermediateQueryBuilder;
 import it.unibz.inf.ontop.pivotalrepr.proposal.InvalidQueryOptimizationProposalException;
+import it.unibz.inf.ontop.sql.DBMetadataExtractor;
 import org.junit.Ignore;
 import org.junit.Test;
 import it.unibz.inf.ontop.pivotalrepr.proposal.impl.InnerJoinOptimizationProposalImpl;
@@ -100,7 +101,10 @@ public class RedundantSelfJoinTest {
          */
         uniqueKeyBuilder.put(TABLE5_PREDICATE, ImmutableList.of(2));
 
-        return new MetadataForQueryOptimizationImpl(uniqueKeyBuilder.build(), new UriTemplateMatcher());
+        return new MetadataForQueryOptimizationImpl(
+                DBMetadataExtractor.createDummyMetadata(),
+                uniqueKeyBuilder.build(),
+                new UriTemplateMatcher());
     }
 
     @Test
