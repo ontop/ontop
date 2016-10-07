@@ -55,10 +55,6 @@ public class TopDownSubstitutionLiftOptimizer implements SubstitutionLiftOptimiz
         return nextNodeAndQuery.getNextQuery();
     }
 
-    private IntermediateQuery removeUnnecessaryTrueNodes(IntermediateQuery nextQuery) {
-        return null;
-    }
-
     private NextNodeAndQuery liftBindings(IntermediateQuery currentQuery, QueryNode currentNode)
             throws EmptyQueryException {
 
