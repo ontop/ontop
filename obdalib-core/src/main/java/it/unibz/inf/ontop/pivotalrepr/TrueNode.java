@@ -3,9 +3,6 @@ package it.unibz.inf.ontop.pivotalrepr;
 import it.unibz.inf.ontop.model.ImmutableSubstitution;
 import it.unibz.inf.ontop.model.ImmutableTerm;
 
-/**
- * Created by jcorman on 05/10/16.
- */
 public interface TrueNode extends QueryNode {
     @Override
     TrueNode clone();

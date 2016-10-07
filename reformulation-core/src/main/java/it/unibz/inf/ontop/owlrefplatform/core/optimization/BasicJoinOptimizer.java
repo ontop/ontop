@@ -19,12 +19,17 @@ public class BasicJoinOptimizer extends NodeCentricDepthFirstOptimizer<InnerJoin
         super(true);
     }
 
-    @Override
-    protected Optional<InnerJoinOptimizationProposal> evaluateNode(QueryNode node, IntermediateQuery query) {
+
+    private Optional<InnerJoinOptimizationProposal> evaluateNode(QueryNode node) {
         return Optional.of(node)
                 .filter(n -> n instanceof InnerJoinNode)
                 .map(n -> (InnerJoinNode) n)
                 .map(InnerJoinOptimizationProposalImpl::new);
+    }
+
+    @Override
+    protected Optional<InnerJoinOptimizationProposal> evaluateNode(QueryNode node, IntermediateQuery query) {
+        return evaluateNode(node);
     }
 
 }

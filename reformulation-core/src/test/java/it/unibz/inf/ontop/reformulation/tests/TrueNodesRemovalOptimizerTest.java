@@ -23,9 +23,6 @@ import static it.unibz.inf.ontop.pivotalrepr.NonCommutativeOperatorNode.Argument
 import static java.util.Optional.empty;
 import static org.junit.Assert.assertTrue;
 
-/**
- * Created by jcorman on 07/10/16.
- */
 public class TrueNodesRemovalOptimizerTest {
 
     private final AtomPredicate TABLE1_ARITY_1_PREDICATE = new AtomPredicateImpl("table1", 1);

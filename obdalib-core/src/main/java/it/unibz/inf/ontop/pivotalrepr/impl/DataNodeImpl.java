@@ -2,7 +2,6 @@ package it.unibz.inf.ontop.pivotalrepr.impl;
 
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.*;
-import it.unibz.inf.ontop.parser.WhereClauseVisitor;
 import it.unibz.inf.ontop.pivotalrepr.*;
 
 /**

@@ -9,9 +9,6 @@ import it.unibz.inf.ontop.pivotalrepr.*;
 import static it.unibz.inf.ontop.pivotalrepr.SubstitutionResults.LocalAction.DECLARE_AS_EMPTY;
 import static it.unibz.inf.ontop.pivotalrepr.SubstitutionResults.LocalAction.NO_CHANGE;
 
-/**
- * Created by jcorman on 05/10/16.
- */
 public class TrueNodeImpl implements TrueNode {
 
 

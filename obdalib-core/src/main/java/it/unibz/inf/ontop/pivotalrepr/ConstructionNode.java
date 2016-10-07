@@ -56,8 +56,8 @@ public interface ConstructionNode extends ExplicitVariableProjectionNode {
             ImmutableSubstitution<? extends ImmutableTerm> substitution,
             QueryNode childNode, IntermediateQuery query);
 
-//    @Override
-//    SubstitutionResults<ConstructionNode> applyDescendingSubstitution(
-//            ImmutableSubstitution<? extends ImmutableTerm> substitution, IntermediateQuery query)
-//            throws QueryNodeSubstitutionException;
+    @Override
+    SubstitutionResults<ConstructionNode> applyDescendingSubstitution(
+            ImmutableSubstitution<? extends ImmutableTerm> substitution, IntermediateQuery query)
+            throws QueryNodeSubstitutionException;
 }

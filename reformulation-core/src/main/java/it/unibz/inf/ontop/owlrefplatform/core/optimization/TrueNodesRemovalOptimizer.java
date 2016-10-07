@@ -1,5 +1,3 @@
-package it.unibz.inf.ontop.owlrefplatform.core.optimization;
-
 import it.unibz.inf.ontop.pivotalrepr.*;
 import it.unibz.inf.ontop.pivotalrepr.proposal.TrueNodeRemovalProposal;
 import it.unibz.inf.ontop.pivotalrepr.proposal.impl.TrueNodeRemovalProposalImpl;

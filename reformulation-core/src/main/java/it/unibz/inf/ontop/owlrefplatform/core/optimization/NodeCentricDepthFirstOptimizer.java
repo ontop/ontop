@@ -64,11 +64,5 @@ public abstract class NodeCentricDepthFirstOptimizer<P extends SimpleNodeCentric
         return currentQuery;
     }
 
-
-
-    /**
-     * TODO: do we need also the query?
-     */
     protected abstract Optional<P> evaluateNode(QueryNode node, IntermediateQuery query);
-
 }
