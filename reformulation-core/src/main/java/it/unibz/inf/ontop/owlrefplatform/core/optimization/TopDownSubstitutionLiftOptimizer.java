@@ -52,8 +52,7 @@ public class TopDownSubstitutionLiftOptimizer implements SubstitutionLiftOptimiz
             log.debug(String.valueOf(nextNodeAndQuery.getNextQuery()));
 
         }
-        TrueNodesOptimizer trueNodesOptimizer = new TrueNodesOptimizer();
-        return trueNodesOptimizer.optimize(nextNodeAndQuery.getNextQuery());
+        return nextNodeAndQuery.getNextQuery();
     }
 
     private IntermediateQuery removeUnnecessaryTrueNodes(IntermediateQuery nextQuery) {

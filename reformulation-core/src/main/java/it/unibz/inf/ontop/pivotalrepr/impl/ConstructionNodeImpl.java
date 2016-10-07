@@ -270,7 +270,7 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
      * TODO: explain
      */
     @Override
-    public SubstitutionResults<QueryNode> applyDescendingSubstitution(
+    public SubstitutionResults<ConstructionNode> applyDescendingSubstitution(
             ImmutableSubstitution<? extends ImmutableTerm> descendingSubstitution, IntermediateQuery query) {
 
         ImmutableSubstitution<ImmutableTerm> relevantSubstitution = extractRelevantDescendingSubstitution(
@@ -302,11 +302,9 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
          */
         if (newSubstitutions.bindings.isEmpty() && !newOptionalModifiers.isPresent()
                 && query.getRootConstructionNode() != this) {
-            if(query.getFirstChild(this).isPresent()){
-                return new SubstitutionResultsImpl<>(SubstitutionResults.LocalAction.REPLACE_BY_CHILD, Optional.of(substitutionToPropagate));
-            }
-            return new SubstitutionResultsImpl<>(new TrueNodeImpl());
+            return new SubstitutionResultsImpl<>(SubstitutionResults.LocalAction.REPLACE_BY_CHILD, Optional.of(substitutionToPropagate));
         }
+
         /**
          * New construction node
          */

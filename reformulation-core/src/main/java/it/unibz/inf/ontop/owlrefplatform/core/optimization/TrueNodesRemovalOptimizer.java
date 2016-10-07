@@ -8,20 +8,20 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Optional;
 
-
 /**
- * Removes and or lifts TrueNodes whenever possible.
+ * Removes TrueNodes whenever possible.
+ *
  * For each TrueNode n in the query,
  * let p be its parent node.
  *
- * If p is neither a JoinNode, a ConstructionNode or a TrueNode,
+ * If p is neither a (left or inner) join node, a construction node or a TrueNode,
  * then no action is taken.
  *
  * If p is a left join node,
  * and n is its left child,
  * then no action is taken either.
  *
- * If p is a ConstructionNode,
+ * If p is a construction node,
  * then n is removed.
  *
  * If p is a commutative join node,
@@ -45,21 +45,26 @@ import java.util.Optional;
  * TODO: create an index of TrueNodes during the first traversal of the query, to access them directly if further iterations are needed
  */
 
-public class TrueNodesOptimizer extends NodeCentricDepthFirstOptimizer<TrueNodeRemovalProposal> {
+public class TrueNodesRemovalOptimizer extends NodeCentricDepthFirstOptimizer<TrueNodeRemovalProposal> {
 
-    private final Logger log = LoggerFactory.getLogger(TrueNodesOptimizer.class);
+    private final Logger log = LoggerFactory.getLogger(TrueNodesRemovalOptimizer.class);
 
     private  Boolean additionalIterationNeeded = true;
 
-    TrueNodesOptimizer() {
-        this(false);
+    public TrueNodesRemovalOptimizer() {
+        super(false);
     }
 
-    TrueNodesOptimizer(boolean canEmptyQuery) {
-        super(canEmptyQuery);
+    @Override
+    protected Optional<TrueNodeRemovalProposal> evaluateNode(QueryNode currentNode, IntermediateQuery currentQuery) {
+        return Optional.of(currentNode).
+                filter(n -> n instanceof TrueNode).
+                map(n -> (TrueNode) n).
+                filter(n -> isRemovableTrueNode(n, currentQuery)).
+                map(TrueNodeRemovalProposalImpl::new);
     }
 
-    protected boolean isRemovableTrueNode(TrueNode node, IntermediateQuery currentQuery) {
+    private boolean isRemovableTrueNode(TrueNode node, IntermediateQuery currentQuery) {
         Optional<QueryNode> parentNode = currentQuery.getParent(node);
         if (parentNode.get() instanceof InnerJoinNode ||
                 parentNode.get() instanceof ConstructionNode ||
@@ -77,17 +82,6 @@ public class TrueNodesOptimizer extends NodeCentricDepthFirstOptimizer<TrueNodeR
             }
         }
         return false;
-    }
-
-
-
-    @Override
-    protected Optional<TrueNodeRemovalProposal> evaluateNode(QueryNode currentNode, IntermediateQuery currentQuery) {
-        return Optional.of(currentNode).
-                filter(n -> n instanceof TrueNode).
-                map(n -> (TrueNode) n).
-                filter(n -> isRemovableTrueNode(n, currentQuery)).
-                map(TrueNodeRemovalProposalImpl::new);
     }
 
     @Override
