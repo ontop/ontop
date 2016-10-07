@@ -35,12 +35,14 @@ public class StandardIntermediateQueryValidator implements IntermediateQueryVali
             ImmutableSet<Variable> unionProjectedVariables = unionNode.getVariables();
 
             for (QueryNode child : query.getChildren(unionNode)) {
-                ImmutableSet<Variable> childProjectedVariables = query.getVariables(child);
+                if(!(child instanceof TrueNode)) {
+                    ImmutableSet<Variable> childProjectedVariables = query.getVariables(child);
 
-                if (!childProjectedVariables.containsAll(unionProjectedVariables)) {
-                    throw new InvalidIntermediateQueryException("This child " + child
-                            + " does not project all the variables " +
-                            "required by the UNION node (" + unionProjectedVariables + ")\n" + query);
+                    if (!childProjectedVariables.containsAll(unionProjectedVariables)) {
+                        throw new InvalidIntermediateQueryException("This child " + child
+                                + " does not project all the variables " +
+                                "required by the UNION node (" + unionProjectedVariables + ")\n" + query);
+                    }
                 }
             }
         }

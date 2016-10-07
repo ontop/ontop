@@ -64,12 +64,17 @@ public class TrueNodesOptimizer extends NodeCentricDepthFirstOptimizer<TrueNodeR
         if (parentNode.get() instanceof InnerJoinNode ||
                 parentNode.get() instanceof ConstructionNode ||
                 parentNode.get() instanceof TrueNode){
-            this.additionalIterationNeeded =true;
+            this.additionalIterationNeeded = true;
             return true;
         }
         if (parentNode.get() instanceof LeftJoinNode){
-            this.additionalIterationNeeded =true;
-            return currentQuery.getOptionalPosition(node).equals(NonCommutativeOperatorNode.ArgumentPosition.RIGHT);
+            switch(currentQuery.getOptionalPosition(node).get()){
+                case LEFT:
+                    return false;
+                case RIGHT:
+                    this.additionalIterationNeeded = true;
+                    return true;
+            }
         }
         return false;
     }
