@@ -25,6 +25,7 @@ public class DefaultTree implements QueryTree {
     private final Map<TreeNode, ChildrenRelation> childrenIndex;
     private final Map<TreeNode, TreeNode> parentIndex;
     private final Set<EmptyNode> emptyNodes;
+    private final Set<TrueNode> trueNodes;
     private final Set<IntensionalDataNode> intensionalNodes;
 
 
@@ -33,6 +34,7 @@ public class DefaultTree implements QueryTree {
         childrenIndex = new HashMap<>();
         parentIndex = new HashMap<>();
         emptyNodes = new HashSet<>();
+        trueNodes = new HashSet<>();
         intensionalNodes = new HashSet<>();
 
         // Adds the root node
@@ -47,12 +49,14 @@ public class DefaultTree implements QueryTree {
                         Map<TreeNode, ChildrenRelation> childrenIndex,
                         Map<TreeNode, TreeNode> parentIndex,
                         Set<EmptyNode> emptyNodes,
+                        Set<TrueNode> trueNodes,
                         Set<IntensionalDataNode> intensionalNodes) {
         this.rootNode = rootNode;
         this.nodeIndex = nodeIndex;
         this.childrenIndex = childrenIndex;
         this.parentIndex = parentIndex;
         this.emptyNodes = emptyNodes;
+        this.trueNodes = trueNodes;
         this.intensionalNodes = intensionalNodes;
     }
 
@@ -344,6 +348,10 @@ public class DefaultTree implements QueryTree {
 //        }
     }
 
+    public ImmutableSet<TrueNode> getTrueNodes() {
+        return ImmutableSet.copyOf(trueNodes);
+    }
+
     @Override
     public ImmutableSet<IntensionalDataNode> getIntensionalNodes(){
         return ImmutableSet.copyOf(intensionalNodes);
@@ -406,7 +414,7 @@ public class DefaultTree implements QueryTree {
                         Map.Entry::getValue
                 ));
         return new DefaultTree(newNodeIndex.get(rootNode.getQueryNode()), newNodeIndex, newChildrenIndex,
-                newParentIndex, new HashSet<>(emptyNodes), new HashSet<>(intensionalNodes));
+                newParentIndex, new HashSet<>(emptyNodes), new HashSet<>(trueNodes), new HashSet<>(intensionalNodes));
     }
 
     @Override
@@ -511,7 +519,10 @@ public class DefaultTree implements QueryTree {
         if (queryNode instanceof EmptyNode) {
             emptyNodes.add((EmptyNode)queryNode);
 
-        }else if (queryNode instanceof IntensionalDataNode){
+        }else if (queryNode instanceof TrueNode){
+           trueNodes.add((TrueNode) queryNode);
+        }
+        else if (queryNode instanceof IntensionalDataNode){
             intensionalNodes.add((IntensionalDataNode) queryNode);
         }
     }
@@ -524,7 +535,8 @@ public class DefaultTree implements QueryTree {
 
         if (queryNode instanceof EmptyNode) {
             emptyNodes.remove(queryNode);
-
+        } else if (queryNode instanceof TrueNode) {
+            trueNodes.remove(queryNode);
         } else if (queryNode instanceof IntensionalDataNode){
             intensionalNodes.remove(queryNode);
         }

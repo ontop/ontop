@@ -49,6 +49,8 @@ public interface QueryTree {
 
     ImmutableSet<EmptyNode> getEmptyNodes();
 
+    ImmutableSet<TrueNode> getTrueNodes();
+
     QueryNode replaceNodeByChild(QueryNode parentNode,
                                  Optional<NonCommutativeOperatorNode.ArgumentPosition> optionalReplacingChildPosition);
 

@@ -58,6 +58,8 @@ public interface IntermediateQuery {
 
     Stream<IntensionalDataNode> getIntensionalNodes();
 
+    Stream<TrueNode> getTrueNodes();
+
     boolean contains(QueryNode node);
 
     /**

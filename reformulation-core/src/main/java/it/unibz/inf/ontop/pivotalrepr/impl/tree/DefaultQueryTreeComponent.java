@@ -72,6 +72,11 @@ public class DefaultQueryTreeComponent implements QueryTreeComponent {
     }
 
     @Override
+    public ImmutableSet<TrueNode> getTrueNodes() {
+        return tree.getTrueNodes();
+    }
+
+    @Override
     public ImmutableSet<IntensionalDataNode> getIntensionalNodes() {
         return tree.getIntensionalNodes();
     }

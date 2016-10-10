@@ -204,6 +204,11 @@ public class IntermediateQueryImpl implements IntermediateQuery {
     }
 
     @Override
+    public Stream<TrueNode> getTrueNodes(){
+        return treeComponent.getTrueNodes().stream();
+    }
+
+    @Override
     public boolean contains(QueryNode node) {
         return treeComponent.contains(node);
     }

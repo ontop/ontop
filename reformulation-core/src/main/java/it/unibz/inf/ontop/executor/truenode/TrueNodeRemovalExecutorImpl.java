@@ -10,9 +10,6 @@ import it.unibz.inf.ontop.pivotalrepr.proposal.impl.NodeCentricOptimizationResul
 
 import java.util.Optional;
 
-/**
- * Created by jcorman on 06/10/16.
- */
 public class TrueNodeRemovalExecutorImpl implements TrueNodeRemovalExecutor {
     @Override
     public NodeCentricOptimizationResults<TrueNode> apply(TrueNodeRemovalProposal proposal, IntermediateQuery query, QueryTreeComponent treeComponent) throws InvalidQueryOptimizationProposalException, EmptyQueryException {
@@ -22,11 +19,6 @@ public class TrueNodeRemovalExecutorImpl implements TrueNodeRemovalExecutor {
         return reactToTrueChildNodeRemovalProposal(query, originalFocusNode, treeComponent);
     }
 
-    /**
-     * TODO: explain
-     *
-     * Recursive!
-     */
     private static NodeCentricOptimizationResults<TrueNode> reactToTrueChildNodeRemovalProposal(IntermediateQuery query, TrueNode trueNode, QueryTreeComponent treeComponent)
             throws EmptyQueryException {
 
@@ -47,12 +39,7 @@ public class TrueNodeRemovalExecutorImpl implements TrueNodeRemovalExecutor {
             case DECLARE_AS_TRUE:
                 TrueNode newTrueNode = new TrueNodeImpl();
                 treeComponent.replaceSubTree(originalParentNode, newTrueNode);
-
-                /**
-                 * Tail-recursive (cascade)
-                 */
-                return reactToTrueChildNodeRemovalProposal(query, newTrueNode, treeComponent);
-
+                return new NodeCentricOptimizationResultsImpl<>(query, query.getNextSibling(newTrueNode), query.getParent(newTrueNode));
             default:
                 throw new RuntimeException("Unexpected state: " + transformationProposal.getState());
         }
