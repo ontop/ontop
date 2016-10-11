@@ -9,7 +9,9 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import static it.unibz.inf.ontop.model.Predicate.COL_TYPE.LITERAL;
 
@@ -149,7 +151,8 @@ public class TypeExtractor {
                                          * Otherwise, extracts the cast type of the variable by looking at its defining
                                          * data atom (normally intensional)
                                          */
-                                        .orElseGet(() -> getCastTypeFromSubRule(headArguments.get(i), rule.getBody(),
+                                        .orElseGet(() -> getCastTypeFromSubRule(headArguments.get(i),
+                                                extractDataAtoms(rule.getBody()).collect(ImmutableCollectors.toList()),
                                                 alreadyKnownCastTypes));
 
                                 indexedCastTypeBuilder.put(i, type);
@@ -173,21 +176,38 @@ public class TypeExtractor {
     }
 
     /**
+     * Extracts all the data atoms (without preserving the algebraic structure)
+     */
+    private static Stream<Function> extractDataAtoms(Collection<? extends Term> atoms) {
+        return atoms.stream()
+                .filter(t -> t instanceof Function)
+                .map(f -> (Function) f)
+                .flatMap(a -> {
+                    if (a.isDataFunction()) {
+                        return Stream.of(a);
+                    }
+                    else if (a.isAlgebraFunction()) {
+                        return extractDataAtoms(a.getTerms());
+                    }
+                    else {
+                        return Stream.empty();
+                    }
+                });
+    }
+
+    /**
      * Extracts the cast type of one projected variable
      * from the body atom that provides it.
      */
     private static Predicate.COL_TYPE getCastTypeFromSubRule(
             Term term,
-            List<Function> bodyAtoms,
+            ImmutableList<Function> bodyDataAtoms,
             Map<Predicate, ImmutableList<Predicate.COL_TYPE>> alreadyKnownCastTypes) {
 
         if (term instanceof Variable) {
             Variable variable = (Variable) term;
 
-            for (Function bodyDataAtom : bodyAtoms) {
-                if (!bodyDataAtom.isDataFunction()) {
-                    continue;
-                }
+            for (Function bodyDataAtom : bodyDataAtoms) {
 
                 List<Term> arguments = bodyDataAtom.getTerms();
                 for (int i = 0; i < arguments.size(); i++) {
