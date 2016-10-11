@@ -302,6 +302,9 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
          */
         if (newSubstitutions.bindings.isEmpty() && !newOptionalModifiers.isPresent()
                 && query.getRootConstructionNode() != this) {
+            if(query.getChildren(this).isEmpty()){
+                return new SubstitutionResultsImpl<>(SubstitutionResults.LocalAction.DECLARE_AS_TRUE);
+            }
             return new SubstitutionResultsImpl<>(SubstitutionResults.LocalAction.REPLACE_BY_CHILD, Optional.of(substitutionToPropagate));
         }
 

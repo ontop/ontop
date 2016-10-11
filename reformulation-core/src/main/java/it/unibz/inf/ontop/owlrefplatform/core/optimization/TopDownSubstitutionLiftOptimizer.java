@@ -50,9 +50,10 @@ public class TopDownSubstitutionLiftOptimizer implements SubstitutionLiftOptimiz
                     nextNodeAndQuery.getOptionalNextNode().get());
 
             log.debug(String.valueOf(nextNodeAndQuery.getNextQuery()));
-
         }
-        return nextNodeAndQuery.getNextQuery();
+
+        // remove unnecessary TrueNodes, which may have been introduced during substitution lift
+        return new TrueNodesRemovalOptimizer().optimize(nextNodeAndQuery.getNextQuery());
     }
 
     private NextNodeAndQuery liftBindings(IntermediateQuery currentQuery, QueryNode currentNode)

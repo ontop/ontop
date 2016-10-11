@@ -7,6 +7,7 @@ import it.unibz.inf.ontop.model.Variable;
 import it.unibz.inf.ontop.pivotalrepr.*;
 import it.unibz.inf.ontop.pivotalrepr.impl.EmptyNodeImpl;
 import it.unibz.inf.ontop.pivotalrepr.impl.QueryTreeComponent;
+import it.unibz.inf.ontop.pivotalrepr.impl.TrueNodeImpl;
 import it.unibz.inf.ontop.pivotalrepr.proposal.NodeTracker;
 import it.unibz.inf.ontop.pivotalrepr.proposal.NodeTrackingResults;
 import it.unibz.inf.ontop.pivotalrepr.proposal.RemoveEmptyNodeProposal;
@@ -117,6 +118,16 @@ public class LocalPropagationTools {
                         substitutionResults.getOptionalReplacingChildPosition());
 
                 return new SubstitutionApplicationResults<>(query, replacingChild, newSubstitution, true, optionalTracker);
+
+            case DECLARE_AS_TRUE:
+                TrueNode replacingNode = new TrueNodeImpl();
+                // The replaced node must already be a leaf,
+                // so we can perform a single node replacement
+                // (there is no reason here to delete its subtree)
+                optionalTracker.ifPresent(tr -> tr.recordReplacement(node, replacingNode));
+                treeComponent.replaceNode(node,replacingNode);
+
+                return new SubstitutionApplicationResults<>(query, replacingNode, newSubstitution, false, optionalTracker);
 
             case INSERT_CONSTRUCTION_NODE:
                 throw new IllegalStateException("Construction newNode insertion not expected " +

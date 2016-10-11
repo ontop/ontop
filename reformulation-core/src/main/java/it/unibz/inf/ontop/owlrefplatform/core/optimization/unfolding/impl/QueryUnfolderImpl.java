@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.AtomPredicate;
+import it.unibz.inf.ontop.owlrefplatform.core.optimization.TrueNodesRemovalOptimizer;
 import it.unibz.inf.ontop.owlrefplatform.core.optimization.unfolding.QueryUnfolder;
 import it.unibz.inf.ontop.pivotalrepr.EmptyQueryException;
 import it.unibz.inf.ontop.pivotalrepr.IntensionalDataNode;
@@ -52,6 +53,8 @@ public class QueryUnfolderImpl implements QueryUnfolder {
              */
             optionalCurrentIntensionalNode = query.getIntensionalNodes().findFirst();
         }
-        return query;
+
+        // remove unnecessary TrueNodes, which may have been introduced during substitution lift
+        return new TrueNodesRemovalOptimizer().optimize(query);
     }
 }
