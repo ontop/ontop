@@ -302,8 +302,9 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
          */
         if (newSubstitutions.bindings.isEmpty() && !newOptionalModifiers.isPresent()
                 && query.getRootConstructionNode() != this) {
-            return new SubstitutionResultsImpl<>(REPLACE_BY_CHILD, Optional.of(substitutionToPropagate));
+            return new SubstitutionResultsImpl<>(SubstitutionResults.LocalAction.REPLACE_BY_CHILD, Optional.of(substitutionToPropagate));
         }
+
         /**
          * New construction node
          */
@@ -331,6 +332,14 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
          * A construction node has only one child
          */
         return new NodeTransformationProposalImpl(NodeTransformationProposedState.DECLARE_AS_EMPTY, projectedVariables);
+    }
+
+    @Override
+    public NodeTransformationProposal reactToTrueChildRemovalProposal(IntermediateQuery query, TrueNode trueNode) {
+        if (this.getVariables().isEmpty()){
+           return new NodeTransformationProposalImpl(NodeTransformationProposedState.DECLARE_AS_TRUE, ImmutableSet.of());
+        }
+       return new NodeTransformationProposalImpl(NodeTransformationProposedState.NO_LOCAL_CHANGE, ImmutableSet.of());
     }
 
     @Override

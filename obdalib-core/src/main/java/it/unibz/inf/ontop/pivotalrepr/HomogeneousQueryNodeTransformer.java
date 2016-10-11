@@ -23,4 +23,6 @@ public interface HomogeneousQueryNodeTransformer<T1 extends QueryNodeTransformat
     GroupNode transform(GroupNode groupNode) throws T1, T2, NotNeededNodeException;
 
     EmptyNode transform(EmptyNode emptyNode);
+
+    TrueNode transform(TrueNode trueNode);
 }

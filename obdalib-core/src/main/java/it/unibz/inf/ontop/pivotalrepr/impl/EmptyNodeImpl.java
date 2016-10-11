@@ -69,7 +69,12 @@ public class EmptyNodeImpl extends QueryNodeImpl implements EmptyNode {
 
     @Override
     public NodeTransformationProposal reactToEmptyChild(IntermediateQuery query, EmptyNode emptyChild) {
-        throw new UnsupportedOperationException("A EmptyNode is not expected to have a child");
+        throw new UnsupportedOperationException("An EmptyNode is not expected to have a child");
+    }
+
+    @Override
+    public NodeTransformationProposal reactToTrueChildRemovalProposal(IntermediateQuery query, TrueNode trueChild) {
+        throw new UnsupportedOperationException("An EmptyNode is not expected to have a child");
     }
 
     @Override

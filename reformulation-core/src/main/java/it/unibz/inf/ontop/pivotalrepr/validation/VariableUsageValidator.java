@@ -41,6 +41,10 @@ public class VariableUsageValidator implements IntermediateQueryValidator {
         }
 
         @Override
+        public void visit(TrueNode trueNode) {
+        }
+
+        @Override
         public void visit(InnerJoinNode innerJoinNode) {
         }
 

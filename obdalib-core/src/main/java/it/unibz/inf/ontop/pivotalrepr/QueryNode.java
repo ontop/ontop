@@ -83,4 +83,6 @@ public interface QueryNode extends Cloneable {
     boolean isSyntacticallyEquivalentTo(QueryNode node);
 
     NodeTransformationProposal reactToEmptyChild(IntermediateQuery query, EmptyNode emptyChild);
+
+    NodeTransformationProposal reactToTrueChildRemovalProposal(IntermediateQuery query, TrueNode trueNode);
 }

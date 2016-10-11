@@ -52,7 +52,6 @@ public class TopDownSubstitutionLiftOptimizer implements SubstitutionLiftOptimiz
             log.debug(String.valueOf(nextNodeAndQuery.getNextQuery()));
 
         }
-
         return nextNodeAndQuery.getNextQuery();
     }
 
@@ -371,6 +370,5 @@ public class TopDownSubstitutionLiftOptimizer implements SubstitutionLiftOptimiz
                 .filter(m -> !m.isEmpty())
                 .map(ImmutableSubstitutionImpl::new);
     }
-
 
 }

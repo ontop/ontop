@@ -9,6 +9,7 @@ import it.unibz.inf.ontop.executor.join.JoinInternalCompositeExecutor;
 import it.unibz.inf.ontop.executor.pullout.PullVariableOutOfSubTreeExecutorImpl;
 import it.unibz.inf.ontop.executor.merging.QueryMergingExecutorImpl;
 import it.unibz.inf.ontop.executor.substitution.SubstitutionPropagationExecutorImpl;
+import it.unibz.inf.ontop.executor.truenode.TrueNodeRemovalExecutorImpl;
 import it.unibz.inf.ontop.executor.union.LiftUnionAsHighAsPossibleProposalExecutor;
 import it.unibz.inf.ontop.executor.union.UnionLiftInternalExecutorImpl;
 import it.unibz.inf.ontop.executor.unsatisfiable.RemoveEmptyNodesExecutorImpl;
@@ -89,6 +90,7 @@ public class IntermediateQueryImpl implements IntermediateQuery {
         internalExecutorMapBuilder.put(RemoveEmptyNodeProposal.class, RemoveEmptyNodesExecutorImpl.class);
         internalExecutorMapBuilder.put(QueryMergingProposal.class, QueryMergingExecutorImpl.class);
         internalExecutorMapBuilder.put(UnionLiftProposal.class, UnionLiftInternalExecutorImpl.class);
+        internalExecutorMapBuilder.put(TrueNodeRemovalProposal.class, TrueNodeRemovalExecutorImpl.class);
         INTERNAL_EXECUTOR_CLASSES = internalExecutorMapBuilder.build();
     }
 
@@ -199,6 +201,11 @@ public class IntermediateQueryImpl implements IntermediateQuery {
     @Override
     public Stream<IntensionalDataNode> getIntensionalNodes(){
         return treeComponent.getIntensionalNodes().stream();
+    }
+
+    @Override
+    public Stream<TrueNode> getTrueNodes(){
+        return treeComponent.getTrueNodes().stream();
     }
 
     @Override

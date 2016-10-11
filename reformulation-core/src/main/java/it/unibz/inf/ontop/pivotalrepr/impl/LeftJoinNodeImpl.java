@@ -18,6 +18,7 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import static it.unibz.inf.ontop.pivotalrepr.NodeTransformationProposedState.DECLARE_AS_EMPTY;
+import static it.unibz.inf.ontop.pivotalrepr.NodeTransformationProposedState.NO_LOCAL_CHANGE;
 import static it.unibz.inf.ontop.pivotalrepr.NodeTransformationProposedState.REPLACE_BY_UNIQUE_NON_EMPTY_CHILD;
 import static it.unibz.inf.ontop.pivotalrepr.NonCommutativeOperatorNode.ArgumentPosition.LEFT;
 import static it.unibz.inf.ontop.pivotalrepr.NonCommutativeOperatorNode.ArgumentPosition.RIGHT;
@@ -262,6 +263,23 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
                         otherChild, nullVariables);
             default:
                 throw new IllegalStateException("Unknown position: " + emptyNodePosition);
+        }
+    }
+
+    @Override
+    public NodeTransformationProposal reactToTrueChildRemovalProposal(IntermediateQuery query, TrueNode trueChild) {
+        ArgumentPosition trueNodePosition = query.getOptionalPosition(this, trueChild)
+                .orElseThrow(() -> new IllegalStateException("The deleted child of a LJ must have a position"));
+        QueryNode otherChild = query.getChild(this, (trueNodePosition == LEFT) ? RIGHT : LEFT)
+                .orElseThrow(() -> new IllegalStateException("The other child of a LJ is missing"));
+        switch(trueNodePosition) {
+            case LEFT:
+                throw new UnsupportedOperationException("A TrueNode in the left position of a LeftJoin should not be removed");
+            case RIGHT:
+                return new NodeTransformationProposalImpl(REPLACE_BY_UNIQUE_NON_EMPTY_CHILD,
+                        otherChild, ImmutableSet.of());
+            default:
+                throw new IllegalStateException("Unknown position: " + trueNodePosition);
         }
     }
 

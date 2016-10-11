@@ -152,6 +152,14 @@ public class JgraphtQueryTreeComponent implements QueryTreeComponent {
     }
 
     @Override
+    public ImmutableSet<TrueNode> getTrueNodes() {
+        return getNodesInTopDownOrder().stream()
+                .filter(n -> n instanceof TrueNode)
+                .map(n -> (TrueNode) n)
+                .collect(ImmutableCollectors.toSet());
+    }
+
+    @Override
     public ImmutableSet<IntensionalDataNode> getIntensionalNodes() {
         throw new RuntimeException("TO DO: support getting intensional nodes");
     }
