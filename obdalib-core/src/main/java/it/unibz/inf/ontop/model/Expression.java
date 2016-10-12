@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.model;
 
+import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.model.type.TermTypeException;
 
 import java.util.Optional;
@@ -28,6 +29,16 @@ public interface Expression extends Function {
             OperationPredicate predicate = getFunctionSymbol();
             return predicate.getTermTypeInferenceRule().inferType(
                     getTerms(), predicate.getArgumentTypes());
+        } catch (TermTypeException e) {
+            throw new TermTypeException(this, e);
+        }
+    }
+
+    default Optional<TermType> getOptionalTermType(ImmutableList<Optional<TermType>> actualArgumentTypes) {
+        try {
+            OperationPredicate predicate = getFunctionSymbol();
+            return predicate.getTermTypeInferenceRule().inferTypeFromArgumentTypes(
+                    actualArgumentTypes, predicate.getArgumentTypes());
         } catch (TermTypeException e) {
             throw new TermTypeException(this, e);
         }

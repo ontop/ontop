@@ -25,29 +25,37 @@ public abstract class AbstractTermTypeInferenceRule implements TermTypeInference
     public Optional<TermType> inferType(List<Term> terms, ImmutableList<Optional<Predicate.COL_TYPE>> expectedBaseTypes)
             throws TermTypeException {
 
-        /**
-         * TODO: restore inequality test between the arities
-         */
-        if (expectedBaseTypes.size() < terms.size()) {
-            throw new IllegalArgumentException("Arity mismatch between " + terms + " and " + expectedBaseTypes);
-        }
-
         ImmutableList<Optional<TermType>> argumentTypes = ImmutableList.copyOf(
                 terms.stream()
                         .map(TermTypeInferenceTools::inferType)
                         .collect(Collectors.toList()));
+        return inferTypeFromArgumentTypes(argumentTypes, expectedBaseTypes);
+
+    }
+
+    @Override
+    public Optional<TermType> inferTypeFromArgumentTypes(ImmutableList<Optional<TermType>> argumentTypes,
+                                                  ImmutableList<Optional<Predicate.COL_TYPE>> expectedBaseTypes)
+            throws TermTypeException {
+
+        /**
+         * TODO: restore inequality test between the arities
+         */
+        if (expectedBaseTypes.size() < argumentTypes.size()) {
+            throw new IllegalArgumentException("Arity mismatch between " + argumentTypes + " and " + expectedBaseTypes);
+        }
 
         /**
          * Checks the argument types
          */
-        IntStream.range(0, terms.size())
+        IntStream.range(0, argumentTypes.size())
                 .forEach(i -> argumentTypes.get(i)
                         .ifPresent(t -> expectedBaseTypes.get(i).ifPresent(expectedBaseType -> {
                             if (!t.isCompatibleWith(expectedBaseType)) {
-                                throw new TermTypeException(terms.get(i), DATA_FACTORY.getTermType(expectedBaseType), t);
+                                throw new TermTypeException(DATA_FACTORY.getTermType(expectedBaseType), t);
                             }
                         })));
-        doAdditionalChecks(terms, argumentTypes);
+        doAdditionalChecks(argumentTypes);
 
         return postprocessInferredType(reduceInferredTypes(argumentTypes));
     }
@@ -62,7 +70,7 @@ public abstract class AbstractTermTypeInferenceRule implements TermTypeInference
     /**
      * Hook, does nothing by default
      */
-    protected void doAdditionalChecks(List<Term> terms, ImmutableList<Optional<TermType>> argumentTypes)
+    protected void doAdditionalChecks(ImmutableList<Optional<TermType>> argumentTypes)
             throws TermTypeException {
     }
 
