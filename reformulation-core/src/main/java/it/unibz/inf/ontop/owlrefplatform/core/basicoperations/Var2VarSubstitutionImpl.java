@@ -106,6 +106,7 @@ public class Var2VarSubstitutionImpl extends AbstractImmutableSubstitutionImpl<V
             ImmutableMap<Variable, ImmutableTerm> newMap = ImmutableMap.copyOf(substitution.getImmutableMap().entrySet().stream()
                     .map(e -> new AbstractMap.SimpleEntry<>(applyToVariable(e.getKey()), apply(e.getValue())))
                     .distinct()
+                    .filter(e -> ! e.getKey().equals(e.getValue()))
                     .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue,
                             (e1, e2) -> {
                                 throw new NotASubstitutionException();
