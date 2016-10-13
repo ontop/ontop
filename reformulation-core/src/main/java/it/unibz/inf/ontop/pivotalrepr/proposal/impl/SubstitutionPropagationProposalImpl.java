@@ -1,7 +1,6 @@
 package it.unibz.inf.ontop.pivotalrepr.proposal.impl;
 
 import it.unibz.inf.ontop.model.ImmutableTerm;
-import it.unibz.inf.ontop.model.VariableOrGroundTerm;
 import it.unibz.inf.ontop.pivotalrepr.ExplicitVariableProjectionNode;
 import it.unibz.inf.ontop.pivotalrepr.QueryNode;
 import it.unibz.inf.ontop.pivotalrepr.proposal.InvalidQueryOptimizationProposalException;
@@ -15,13 +14,21 @@ public class SubstitutionPropagationProposalImpl<T extends QueryNode> implements
 
     public SubstitutionPropagationProposalImpl(
             T focusNode, ImmutableSubstitution<? extends ImmutableTerm> substitutionToPropagate) {
+        this(focusNode, substitutionToPropagate, true);
+    }
+
+    public SubstitutionPropagationProposalImpl(T focusNode,
+                                               ImmutableSubstitution<? extends ImmutableTerm> substitutionToPropagate,
+                                               boolean shouldCheckProjection) {
         this.focusNode = focusNode;
         this.substitutionToPropagate = substitutionToPropagate;
 
-        checkValidity();
+        if (shouldCheckProjection) {
+            checkProjection();
+        }
     }
 
-    private void checkValidity() {
+    private void checkProjection() {
         if (focusNode instanceof ExplicitVariableProjectionNode) {
             ExplicitVariableProjectionNode node = (ExplicitVariableProjectionNode) focusNode;
 

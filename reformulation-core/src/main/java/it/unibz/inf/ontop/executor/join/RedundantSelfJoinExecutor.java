@@ -532,11 +532,15 @@ public class RedundantSelfJoinExecutor implements InnerJoinExecutor {
                                                                  Optional<ImmutableSubstitution<VariableOrGroundTerm>> optionalSubstitution,
                                                                  N topNode) {
         if (optionalSubstitution.isPresent()) {
-
-            // TODO: filter the non-bound variables from the substitution before propagating!!!
-
+            /**
+             * Does not check if the topNode is projecting all the domain of the substitution.
+             *
+             * Why? Because the join may have been replaced by a single DataNode and the latter does not contain
+             * some variables that have disappeared.
+             *
+             */
             SubstitutionPropagationProposal<N> propagationProposal = new SubstitutionPropagationProposalImpl<>(
-                    topNode, optionalSubstitution.get());
+                    topNode, optionalSubstitution.get(), false);
 
             // Forces the use of an internal executor (the treeComponent must remain the same).
             try {
