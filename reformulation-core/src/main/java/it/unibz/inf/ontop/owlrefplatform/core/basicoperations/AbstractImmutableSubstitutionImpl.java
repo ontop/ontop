@@ -179,8 +179,11 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
             substitutionMap.put(localVariable, localEntry.getValue());
         }
 
-
-        return new ImmutableSubstitutionImpl<>(ImmutableMap.copyOf(substitutionMap));
+        return new ImmutableSubstitutionImpl<>(
+                substitutionMap.entrySet().stream()
+                        // Clean out entries like t/t
+                        .filter(entry -> !entry.getKey().equals(entry.getValue()))
+                        .collect(ImmutableCollectors.toMap()));
     }
 
     /**
