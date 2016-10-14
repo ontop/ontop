@@ -104,6 +104,11 @@ public class QueryMergingExecutorImpl implements QueryMergingExecutor {
                             }
                             return new AnalysisResults(originalNode, newNode,
                                     results.getSubstitutionToPropagate());
+
+                        case DECLARE_AS_TRUE:
+                            TrueNode trueNode = (TrueNode) results.getOptionalNewNode().get();
+                            return new AnalysisResults(originalNode, trueNode,
+                                    results.getSubstitutionToPropagate());
                         /**
                          * Recursive
                          */

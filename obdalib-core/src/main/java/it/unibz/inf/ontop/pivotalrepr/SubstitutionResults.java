@@ -18,6 +18,7 @@ public interface SubstitutionResults<T extends QueryNode> {
         NEW_NODE,
         REPLACE_BY_CHILD,
         INSERT_CONSTRUCTION_NODE,
+        DECLARE_AS_TRUE,
         DECLARE_AS_EMPTY
     }
 

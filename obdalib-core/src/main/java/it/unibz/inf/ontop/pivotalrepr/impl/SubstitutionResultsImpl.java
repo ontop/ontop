@@ -32,6 +32,7 @@ public class SubstitutionResultsImpl<T extends QueryNode> implements Substitutio
             case NEW_NODE:
             case INSERT_CONSTRUCTION_NODE:
             case DECLARE_AS_EMPTY:
+            case DECLARE_AS_TRUE:
                 throw new IllegalArgumentException("Wrong construction for " + localAction);
         }
         this.localAction = localAction;
@@ -53,6 +54,7 @@ public class SubstitutionResultsImpl<T extends QueryNode> implements Substitutio
             case NO_CHANGE:
             case REPLACE_BY_CHILD:
             case DECLARE_AS_EMPTY:
+            case DECLARE_AS_TRUE:
                 break;
             case NEW_NODE:
             case INSERT_CONSTRUCTION_NODE:
