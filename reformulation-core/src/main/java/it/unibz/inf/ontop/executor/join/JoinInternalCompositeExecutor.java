@@ -29,7 +29,7 @@ public class JoinInternalCompositeExecutor
 
         executorBuilder.add(new JoinBooleanExpressionExecutor());
         executorBuilder.add(new RedundantSelfJoinExecutor());
-        // executorBuilder.add(new RedundantJoinFKExecutor());
+        executorBuilder.add(new RedundantJoinFKExecutor());
 
         return executorBuilder.build();
     }
