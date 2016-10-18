@@ -222,9 +222,14 @@ public class QueryMergingExecutorImpl implements QueryMergingExecutor {
         InjectiveVar2VarSubstitution renamingSubstitution = generateNotConflictingRenaming(variableGenerator,
                 subQuery.getKnownVariables());
 
-        //HomogeneousQueryNodeTransformer renamer = createRenamer(renamingSubstitution);
-        IntermediateQuery renamedSubQuery = IntermediateQueryUtils.duplicateQueryAndTransformNodes(subQuery,
-                    createRenamer(renamingSubstitution));
+        IntermediateQuery renamedSubQuery;
+        if(renamingSubstitution.isEmpty()){
+            renamedSubQuery = subQuery;
+        } else {
+            QueryRenamer queryRenamer = new QueryRenamer(new QueryNodeRenamer(renamingSubstitution));
+            renamedSubQuery = queryRenamer.transform(subQuery);
+        }
+
         /**
          * Starting node: the root of the sub-query
          */

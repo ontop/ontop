@@ -22,6 +22,10 @@ public class QueryNodeRenamer implements HomogeneousQueryNodeTransformer {
         this.renamingSubstitution = renamingSubstitution;
     }
 
+    public InjectiveVar2VarSubstitution getRenamingSubstitution() {
+        return renamingSubstitution;
+    }
+
     @Override
     public FilterNode transform(FilterNode filterNode) {
         return new FilterNodeImpl(renameBooleanExpression(
