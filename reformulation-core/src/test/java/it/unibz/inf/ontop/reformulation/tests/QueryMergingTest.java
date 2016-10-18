@@ -20,6 +20,7 @@ import java.util.Optional;
 import static it.unibz.inf.ontop.model.Predicate.COL_TYPE.INTEGER;
 import static it.unibz.inf.ontop.pivotalrepr.equivalence.IQSyntacticEquivalenceChecker.areEquivalent;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 public class QueryMergingTest {
 
@@ -59,6 +60,8 @@ public class QueryMergingTest {
             P3_PREDICATE, ImmutableList.of(X));
     private static DistinctVariableOnlyDataAtom P4_X_ATOM = DATA_FACTORY.getDistinctVariableOnlyDataAtom(
             P4_PREDICATE, ImmutableList.of(X));
+    private static DistinctVariableOnlyDataAtom P4_Y_ATOM = DATA_FACTORY.getDistinctVariableOnlyDataAtom(
+            P4_PREDICATE, ImmutableList.of(Y));
     private static DistinctVariableOnlyDataAtom P5_X_ATOM = DATA_FACTORY.getDistinctVariableOnlyDataAtom(
             P5_PREDICATE, ImmutableList.of(X));
     private static URITemplatePredicate URI_PREDICATE_ONE_VAR = new URITemplatePredicateImpl(2);
@@ -1198,6 +1201,63 @@ public class QueryMergingTest {
         assertTrue(areEquivalent(mainQuery, expectedQuery));
     }
 
+
+
+    @Test
+    public void testDescendingSubstitutionOnRenamedNode() {
+        /**
+         * The bug was the following: during query merging (QueryMergingExecutorImpl.analyze()),
+         * variables of the current node were possibly renamed,
+         * and then a (possible) substitution applied to the renamed node.
+         * In some implementations (e.g. for ConstructionNode),
+         * the substitution method (QueryNode.applyDescendingSubstitution(node, query)) may require information about
+         * the node's parent/children.
+         * But the renamed node not being (yet) part of the query (as opposed to the original node),
+         * this raises an exception.
+         * This behavior has been prevented by performing variable renaming beforehand for the whole merged query,
+         * i.e. before starting substitution lift.
+          */
+        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
+
+        ConstructionNode rootNode = new ConstructionNodeImpl(ImmutableSet.of(X),
+                new ImmutableSubstitutionImpl<>(ImmutableMap.of()), Optional.empty());
+
+        queryBuilder.init(ANS1_X_ATOM, rootNode);
+
+        IntensionalDataNode intensionalDataNode = new IntensionalDataNodeImpl(
+                P3_X_ATOM);
+        queryBuilder.addChild(rootNode, intensionalDataNode);
+
+        IntermediateQuery mainQuery = queryBuilder.build();
+
+        System.out.println("main query:\n"+mainQuery);
+
+        /**
+         * Mapping
+         */
+        IntermediateQueryBuilder mappingBuilder = new DefaultIntermediateQueryBuilder(METADATA);
+        ConstructionNode mappingRootNode = new ConstructionNodeImpl(ImmutableSet.of(X));
+        mappingBuilder.init(P3_X_ATOM, mappingRootNode);
+        ExtensionalDataNode extensionalDataNode1 = new ExtensionalDataNodeImpl(P4_X_ATOM);
+        mappingBuilder.addChild(mappingRootNode, extensionalDataNode1);
+        IntermediateQuery mapping = mappingBuilder.build();
+        System.out.println("query to be merged:\n" +mapping);
+
+        /**
+         * Merging
+         */
+        QueryMergingProposal queryMerging = new QueryMergingProposalImpl(intensionalDataNode, Optional.ofNullable(mapping));
+        try {
+            mainQuery.applyProposal(queryMerging, true);
+        }catch (IllegalArgumentException|EmptyQueryException e){
+            e.printStackTrace();
+            fail();
+        }
+
+        System.out.println("merged query:\n" + mainQuery.getProjectionAtom() + ":-\n" +
+                mainQuery);
+
+    }
 
     private static IntermediateQuery createBasicSparqlQuery(
             ImmutableMap<Variable, ImmutableTerm> topBindings,

@@ -32,7 +32,7 @@ public class IntermediateQueryUtils {
     /**
      * Can be overwritten.
      */
-    protected IntermediateQueryBuilder newBuilder(MetadataForQueryOptimization metadata) {
+    private static IntermediateQueryBuilder newBuilder(MetadataForQueryOptimization metadata) {
         return new DefaultIntermediateQueryBuilder(metadata);
     }
 
@@ -230,70 +230,69 @@ public class IntermediateQueryUtils {
         return queryBuilder;
     }
 
-//    /**
-//     * TODO: explain
-//     *
-//     */
-//    public static IntermediateQueryBuilder convertToBuilderAndTransform(IntermediateQuery originalQuery,
-//                                                                        HomogeneousQueryNodeTransformer transformer)
-//            throws IntermediateQueryBuilderException, QueryNodeTransformationException, NotNeededNodeException {
-//        IntermediateQueryUtils utils = new IntermediateQueryUtils();
-//        return utils.convertToBuilderAndTransform(originalQuery, Optional.of(transformer));
-//    }
-//
-//    /**
-//     * TODO: explain
-//     *
-//     * TODO: avoid the use of a recursive method. Use a stack instead.
-//     *
-//     */
-//    protected IntermediateQueryBuilder convertToBuilderAndTransform(IntermediateQuery originalQuery,
-//                                                                  Optional<HomogeneousQueryNodeTransformer> optionalTransformer)
-//            throws IntermediateQueryBuilderException, QueryNodeTransformationException, NotNeededNodeException {
-//        IntermediateQueryBuilder queryBuilder = newBuilder(originalQuery.getMetadata());
-//
-//        // Clone of the original root node and apply the transformer if available.
-//        ConstructionNode originalRootNode = originalQuery.getRootConstructionNode();
-//        ConstructionNode newRootNode;
-//        if (optionalTransformer.isPresent()) {
-//            newRootNode =  originalRootNode.acceptNodeTransformer(optionalTransformer.get()).clone();
-//        }
-//        else {
-//            newRootNode = originalRootNode.clone();
-//        }
-//
-//        queryBuilder.init(projectionAtom, newRootNode);
-//
-//        return copyChildrenNodesToBuilder(originalQuery, queryBuilder, originalRootNode, newRootNode, optionalTransformer);
-//    }
-//
-//
-//    /**
-//     * TODO: replace this implementation by a non-recursive one.
-//     */
-//    private static IntermediateQueryBuilder copyChildrenNodesToBuilder(final IntermediateQuery originalQuery,
-//                                                                       IntermediateQueryBuilder queryBuilder,
-//                                                                       final QueryNode originalParentNode,
-//                                                                       final QueryNode newParentNode,
-//                                                                       Optional<HomogeneousQueryNodeTransformer> optionalTransformer)
-//            throws IntermediateQueryBuilderException, QueryNodeTransformationException, NotNeededNodeException {
-//        for(QueryNode originalChildNode : originalQuery.getChildren(originalParentNode)) {
-//
-//            // QueryNode are mutable
-//            QueryNode newChildNode;
-//            if (optionalTransformer.isPresent()) {
-//                newChildNode = originalChildNode.acceptNodeTransformer(optionalTransformer.get()).clone();
-//            } else {
-//                newChildNode = originalChildNode.clone();
-//            }
-//
-//            Optional<NonCommutativeOperatorNode.ArgumentPosition> optionalPosition = originalQuery.getOptionalPosition(originalParentNode, originalChildNode);
-//            queryBuilder.addChild(newParentNode, newChildNode, optionalPosition);
-//
-//            // Recursive call
-//            queryBuilder = copyChildrenNodesToBuilder(originalQuery, queryBuilder, originalChildNode, newChildNode, optionalTransformer);
-//        }
-//
-//        return queryBuilder;
-//    }
+    /**
+     * TODO: explain
+     *
+     */
+    public static IntermediateQueryBuilder convertToBuilderAndTransform(IntermediateQuery originalQuery,
+                                                                        HomogeneousQueryNodeTransformer transformer)
+            throws IntermediateQueryBuilderException, QueryNodeTransformationException, NotNeededNodeException {
+        return  convertToBuilderAndTransform(originalQuery, Optional.of(transformer));
+    }
+
+    /**
+     * TODO: explain
+     *
+     * TODO: avoid the use of a recursive method. Use a stack instead.
+     *
+     */
+    private static IntermediateQueryBuilder convertToBuilderAndTransform(IntermediateQuery originalQuery,
+                                                                  Optional<HomogeneousQueryNodeTransformer> optionalTransformer)
+            throws IntermediateQueryBuilderException, QueryNodeTransformationException, NotNeededNodeException {
+        IntermediateQueryBuilder queryBuilder = newBuilder(originalQuery.getMetadata());
+
+        // Clone the original root node and apply the transformer if available.
+        ConstructionNode originalRootNode = originalQuery.getRootConstructionNode().clone();
+        ConstructionNode newRootNode;
+        if (optionalTransformer.isPresent()) {
+            newRootNode =  originalRootNode.acceptNodeTransformer(optionalTransformer.get());
+        }
+        else {
+            newRootNode = originalRootNode.clone();
+        }
+
+        queryBuilder.init(originalQuery.getProjectionAtom(), newRootNode);
+
+        return copyChildrenNodesToBuilder(originalQuery, queryBuilder, originalRootNode, newRootNode, optionalTransformer);
+    }
+
+
+    /**
+     * TODO: replace this implementation by a non-recursive one.
+     */
+    private static IntermediateQueryBuilder copyChildrenNodesToBuilder(final IntermediateQuery originalQuery,
+                                                                       IntermediateQueryBuilder queryBuilder,
+                                                                       final QueryNode originalParentNode,
+                                                                       final QueryNode newParentNode,
+                                                                       Optional<HomogeneousQueryNodeTransformer> optionalTransformer)
+            throws IntermediateQueryBuilderException, QueryNodeTransformationException, NotNeededNodeException {
+        for(QueryNode originalChildNode : originalQuery.getChildren(originalParentNode)) {
+
+            // QueryNode are mutable
+            QueryNode newChildNode;
+            if (optionalTransformer.isPresent()) {
+                newChildNode = originalChildNode.acceptNodeTransformer(optionalTransformer.get()).clone();
+            } else {
+                newChildNode = originalChildNode.clone();
+            }
+
+            Optional<NonCommutativeOperatorNode.ArgumentPosition> optionalPosition = originalQuery.getOptionalPosition(originalParentNode, originalChildNode);
+            queryBuilder.addChild(newParentNode, newChildNode, optionalPosition);
+
+            // Recursive call
+            queryBuilder = copyChildrenNodesToBuilder(originalQuery, queryBuilder, originalChildNode, newChildNode, optionalTransformer);
+        }
+
+        return queryBuilder;
+    }
 }

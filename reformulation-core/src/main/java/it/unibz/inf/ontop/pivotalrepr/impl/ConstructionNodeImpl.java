@@ -296,7 +296,7 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
                 descendingSubstitution, substitutionToPropagate);
 
         /**
-         * The construction node is not be needed anymore
+         * The construction node is not needed anymore
          *
          * Currently, the root construction node is still required.
          */
