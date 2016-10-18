@@ -234,10 +234,20 @@ public class IntermediateQueryUtils {
      * TODO: explain
      *
      */
-    public static IntermediateQueryBuilder convertToBuilderAndTransform(IntermediateQuery originalQuery,
+    public static IntermediateQuery duplicateQueryAndTransformNodes(IntermediateQuery originalQuery,
+                                                                             HomogeneousQueryNodeTransformer transformer)
+            throws IntermediateQueryBuilderException, QueryNodeTransformationException, NotNeededNodeException {
+        return  convertToBuilderAndTransformNodes(originalQuery, transformer).build();
+    }
+
+    /**
+     * TODO: explain
+     *
+     */
+    public static IntermediateQueryBuilder convertToBuilderAndTransformNodes(IntermediateQuery originalQuery,
                                                                         HomogeneousQueryNodeTransformer transformer)
             throws IntermediateQueryBuilderException, QueryNodeTransformationException, NotNeededNodeException {
-        return  convertToBuilderAndTransform(originalQuery, Optional.of(transformer));
+        return  convertToBuilderAndTransformNodes(originalQuery, Optional.of(transformer));
     }
 
     /**
@@ -246,7 +256,7 @@ public class IntermediateQueryUtils {
      * TODO: avoid the use of a recursive method. Use a stack instead.
      *
      */
-    private static IntermediateQueryBuilder convertToBuilderAndTransform(IntermediateQuery originalQuery,
+    private static IntermediateQueryBuilder convertToBuilderAndTransformNodes(IntermediateQuery originalQuery,
                                                                   Optional<HomogeneousQueryNodeTransformer> optionalTransformer)
             throws IntermediateQueryBuilderException, QueryNodeTransformationException, NotNeededNodeException {
         IntermediateQueryBuilder queryBuilder = newBuilder(originalQuery.getMetadata());

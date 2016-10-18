@@ -8,10 +8,7 @@ import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.InjectiveVar2VarSubstitution;
 import it.unibz.inf.ontop.pivotalrepr.*;
-import it.unibz.inf.ontop.pivotalrepr.impl.EmptyNodeImpl;
-import it.unibz.inf.ontop.pivotalrepr.impl.IdentityQueryNodeTransformer;
-import it.unibz.inf.ontop.pivotalrepr.impl.QueryNodeRenamer;
-import it.unibz.inf.ontop.pivotalrepr.impl.QueryTreeComponent;
+import it.unibz.inf.ontop.pivotalrepr.impl.*;
 import it.unibz.inf.ontop.pivotalrepr.proposal.InvalidQueryOptimizationProposalException;
 import it.unibz.inf.ontop.pivotalrepr.proposal.ProposalResults;
 import it.unibz.inf.ontop.pivotalrepr.proposal.QueryMergingProposal;
@@ -61,7 +58,7 @@ public class QueryMergingExecutorImpl implements QueryMergingExecutor {
 
         private Transformation(IntermediateQuery query, QueryNode originalNode,
                                Optional<? extends ImmutableSubstitution<? extends ImmutableTerm>> substitutionToApply,
-                               HomogeneousQueryNodeTransformer renamer, QueryNode transformedParent,
+                               QueryNode transformedParent,
                                Optional<NonCommutativeOperatorNode.ArgumentPosition> optionalPosition) {
             this.transformedParent = transformedParent;
             this.optionalPosition = optionalPosition;
@@ -70,7 +67,7 @@ public class QueryMergingExecutorImpl implements QueryMergingExecutor {
              * May be recursive because some consecutive nodes in the sub-query may not be needed
              * (for instance construction nodes without any remaining binding)
              */
-            AnalysisResults analysisResults = analyze(query, originalNode, substitutionToApply, renamer);
+            AnalysisResults analysisResults = analyze(query, originalNode, substitutionToApply);
             this.nodeFromSubQuery = analysisResults.nodeFromSubQuery;
             this.transformedNode = analysisResults.transformedNode;
             this.substitutionToPropagate = analysisResults.optionalSubstitutionToPropagate;
@@ -82,8 +79,7 @@ public class QueryMergingExecutorImpl implements QueryMergingExecutor {
          */
         private static AnalysisResults analyze(
                 IntermediateQuery query, QueryNode originalNode,
-                Optional<? extends ImmutableSubstitution<? extends ImmutableTerm>> substitutionToApply,
-                HomogeneousQueryNodeTransformer renamer) {
+                Optional<? extends ImmutableSubstitution<? extends ImmutableTerm>> substitutionToApply) {
 //            try {
                 //QueryNode renamedNode = originalNode.acceptNodeTransformer(renamer);
 
@@ -114,13 +110,13 @@ public class QueryMergingExecutorImpl implements QueryMergingExecutor {
                                     .flatMap(position -> query.getChild(originalNode, position))
                                     .orElseGet(() -> query.getFirstChild(originalNode)
                                             .orElseThrow(() -> new IllegalStateException("No replacing child is available")));
-                            return analyze(query, replacingChild, results.getSubstitutionToPropagate(), renamer);
+                            return analyze(query, replacingChild, results.getSubstitutionToPropagate());
 
                         case INSERT_CONSTRUCTION_NODE:
                             throw new IllegalStateException("Construction node insertion not expected during query merging");
 
                         case DECLARE_AS_EMPTY:
-                            return analyze(query, new EmptyNodeImpl(query.getVariables(originalNode)), substitutionToApply, renamer);
+                            return analyze(query, new EmptyNodeImpl(query.getVariables(originalNode)), substitutionToApply);
 
                         default:
                             throw new IllegalStateException("Unknown local action:" + results.getLocalAction());
@@ -199,14 +195,18 @@ public class QueryMergingExecutorImpl implements QueryMergingExecutor {
      */
     protected static void mergeSubQuery(QueryTreeComponent treeComponent, IntermediateQuery subQuery,
                                         IntensionalDataNode intensionalDataNode) throws EmptyQueryException {
-        insertSubQuery(treeComponent, subQuery, intensionalDataNode);
+        try {
+            insertSubQuery(treeComponent, subQuery, intensionalDataNode);
+        } catch (NotNeededNodeException e) {
+            e.printStackTrace();
+        }
     }
 
     /**
      * TODO: explain
      */
     private static void insertSubQuery(final QueryTreeComponent treeComponent, final IntermediateQuery subQuery,
-                                       final IntensionalDataNode intensionalDataNode) {
+                                       final IntensionalDataNode intensionalDataNode) throws NotNeededNodeException {
 
         /**
          * Gets the parent of the intensional node and remove the latter
@@ -222,20 +222,21 @@ public class QueryMergingExecutorImpl implements QueryMergingExecutor {
         InjectiveVar2VarSubstitution renamingSubstitution = generateNotConflictingRenaming(variableGenerator,
                 subQuery.getKnownVariables());
 
-        HomogeneousQueryNodeTransformer renamer = createRenamer(renamingSubstitution);
-
+        //HomogeneousQueryNodeTransformer renamer = createRenamer(renamingSubstitution);
+        IntermediateQuery renamedSubQuery = IntermediateQueryUtils.duplicateQueryAndTransformNodes(subQuery,
+                    createRenamer(renamingSubstitution));
         /**
          * Starting node: the root of the sub-query
          */
-        ConstructionNode rootNode = subQuery.getRootConstructionNode();
+        ConstructionNode rootNode = renamedSubQuery.getRootConstructionNode();
         Optional<? extends ImmutableSubstitution<? extends ImmutableTerm>> optionalTau = Optional.of(extractSubstitution(
-                renamingSubstitution.applyToDistinctVariableOnlyDataAtom(subQuery.getProjectionAtom()),
+                renamingSubstitution.applyToDistinctVariableOnlyDataAtom(renamedSubQuery.getProjectionAtom()),
                 intensionalDataNode.getProjectionAtom()))
                 .filter(s -> !s.isEmpty());
 
         Queue<Transformation> originalNodesToVisit = new LinkedList<>();
-        originalNodesToVisit.add(new Transformation(subQuery, rootNode, optionalTau, renamer,
-                parentOfTheIntensionalNode, topOptionalPosition));
+        originalNodesToVisit.add(new Transformation(renamedSubQuery, rootNode, optionalTau, parentOfTheIntensionalNode,
+                topOptionalPosition));
 
 
         /**
@@ -265,11 +266,11 @@ public class QueryMergingExecutorImpl implements QueryMergingExecutor {
             if (!(nodeToInsert instanceof EmptyNode)) {
                 QueryNode originalNode = transformation.getNodeFromSubQuery();
 
-                subQuery.getChildren(originalNode).stream()
+                renamedSubQuery.getChildren(originalNode).stream()
                         .forEach(child ->
-                                originalNodesToVisit.add(new Transformation(subQuery, child,
-                                        substitutionToPropagate, renamer, nodeToInsert,
-                                        subQuery.getOptionalPosition(originalNode, child)
+                                originalNodesToVisit.add(new Transformation(renamedSubQuery, child,
+                                        substitutionToPropagate, nodeToInsert,
+                                        renamedSubQuery.getOptionalPosition(originalNode, child)
                                 )));
             }
         }
