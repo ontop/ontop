@@ -84,31 +84,28 @@ public class QueryMergingExecutorImpl implements QueryMergingExecutor {
                 IntermediateQuery query, QueryNode originalNode,
                 Optional<? extends ImmutableSubstitution<? extends ImmutableTerm>> substitutionToApply,
                 HomogeneousQueryNodeTransformer renamer) {
-            try {
-                QueryNode renamedNode = originalNode.acceptNodeTransformer(renamer);
+//            try {
+                //QueryNode renamedNode = originalNode.acceptNodeTransformer(renamer);
 
                 if (substitutionToApply.isPresent()) {
-                    SubstitutionResults<? extends QueryNode> results = renamedNode.applyDescendingSubstitution(
+                    SubstitutionResults<? extends QueryNode> results = originalNode.applyDescendingSubstitution(
                             substitutionToApply.get(), query);
 
                     switch (results.getLocalAction()) {
                         case NO_CHANGE:
-                            return new AnalysisResults(originalNode, renamedNode,
+                            return new AnalysisResults(originalNode, originalNode,
                                     results.getSubstitutionToPropagate());
 
                         case NEW_NODE:
+                        case DECLARE_AS_TRUE:
                             QueryNode newNode = results.getOptionalNewNode().get();
                             if (newNode == originalNode) {
-                                throw new IllegalStateException("NEW_NODE action must not return the same node. " +
+                                throw new IllegalStateException("NEW_NODE or DECLARE_AS_TRUE action must not return the same node. " +
                                         "Use NO_CHANGE instead.");
                             }
                             return new AnalysisResults(originalNode, newNode,
                                     results.getSubstitutionToPropagate());
 
-                        case DECLARE_AS_TRUE:
-                            TrueNode trueNode = (TrueNode) results.getOptionalNewNode().get();
-                            return new AnalysisResults(originalNode, trueNode,
-                                    results.getSubstitutionToPropagate());
                         /**
                          * Recursive
                          */
@@ -131,11 +128,11 @@ public class QueryMergingExecutorImpl implements QueryMergingExecutor {
                 }
                 else {
                     // Empty
-                    return new AnalysisResults(originalNode, renamedNode, Optional.empty());
+                    return new AnalysisResults(originalNode, originalNode, Optional.empty());
                 }
-            } catch (NotNeededNodeException e) {
-                throw new IllegalStateException("Unexpected exception: " + e);
-            }
+//            } catch (NotNeededNodeException e) {
+//                throw new IllegalStateException("Unexpected exception: " + e);
+//            }
         }
 
         public Optional<? extends ImmutableSubstitution<? extends ImmutableTerm>> getSubstitutionToPropagate() {
