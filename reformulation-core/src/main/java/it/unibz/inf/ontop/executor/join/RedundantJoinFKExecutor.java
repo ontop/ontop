@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
-import it.unibz.inf.ontop.model.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.Variable;
 import it.unibz.inf.ontop.model.VariableOrGroundTerm;
 import it.unibz.inf.ontop.pivotalrepr.*;
@@ -21,6 +20,7 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.AbstractMap.SimpleEntry;
 import java.util.Optional;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 /**
@@ -43,7 +43,11 @@ public class RedundantJoinFKExecutor implements InnerJoinExecutor {
         ImmutableSet<DataNode> nodesToRemove = findRedundantNodes(query, joinNode, dataNodeMap);
 
         if (!nodesToRemove.isEmpty()) {
-            throw new RuntimeException("TODO: remove the redundant nodes");
+
+            NodeCentricOptimizationResults<InnerJoinNode> result = applyOptimization(query, treeComponent,
+                    joinNode, nodesToRemove);
+
+            return result;
         }
         /**
          * No change
@@ -51,6 +55,17 @@ public class RedundantJoinFKExecutor implements InnerJoinExecutor {
         else {
             return new NodeCentricOptimizationResultsImpl<>(query, joinNode);
         }
+    }
+
+    private NodeCentricOptimizationResults<InnerJoinNode> applyOptimization(IntermediateQuery query,
+                                                                            QueryTreeComponent treeComponent,
+                                                                            InnerJoinNode joinNode,
+                                                                            ImmutableSet<DataNode> nodesToRemove) {
+
+        nodesToRemove.stream()
+                .forEach(treeComponent::removeSubTree);
+
+        return new NodeCentricOptimizationResultsImpl<>(query, joinNode);
     }
 
     /**
@@ -103,7 +118,7 @@ public class RedundantJoinFKExecutor implements InnerJoinExecutor {
                 .flatMap(s -> targetDataNodes.stream()
                         .filter(t -> areMatching(s,t,constraint)))
                 .distinct()
-                .filter(t -> areNonFKVariablesUnused(t, query, constraint));
+                .filter(t -> areNonFKColumnsUnused(t, query, constraint));
     }
 
     /**
@@ -121,23 +136,49 @@ public class RedundantJoinFKExecutor implements InnerJoinExecutor {
     }
 
     /**
-     * TODO: find a better name
-     *
      * TODO: explain
      */
-    private boolean areNonFKVariablesUnused(DataNode targetDataNode, IntermediateQuery query,
-                                            ForeignKeyConstraint constraint) {
-        /**
-         * TODO: use a more efficient implementation
-         */
-        VariableOccurrenceAnalyzer analyzer = new NaiveVariableOccurrenceAnalyzerImpl();
+    private boolean areNonFKColumnsUnused(DataNode targetDataNode, IntermediateQuery query,
+                                          ForeignKeyConstraint constraint) {
 
         ImmutableList<? extends VariableOrGroundTerm> targetArguments = targetDataNode.getProjectionAtom().getArguments();
-        return constraint.getComponents().stream()
-                .map(c -> targetArguments.get(c.getReference().getIndex() -1))
-                .filter(t -> t instanceof Variable)
+
+        ImmutableSet<Integer> fkTargetIndexes = constraint.getComponents().stream()
+                .map(c -> c.getReference().getIndex() - 1)
+                .collect(ImmutableCollectors.toSet());
+
+        /**
+         * Terms appearing in non-FK positions
+         */
+        ImmutableList<VariableOrGroundTerm> remainingTerms = IntStream.range(0, targetArguments.size())
+                .filter(i -> !fkTargetIndexes.contains(i))
+                .boxed()
+                .map(targetArguments::get)
+                .collect(ImmutableCollectors.toList());
+
+        /**
+         * Check usage in the data atom.
+         *
+         * 1 - They should all variables
+         * 2 - They should be no duplicate
+         * 3 - They must be distinct from the FK target terms
+         */
+        if ((!remainingTerms.stream().allMatch(t -> t instanceof Variable))
+            || (ImmutableSet.copyOf(remainingTerms).size() < remainingTerms.size())
+            || fkTargetIndexes.stream()
+                .map(targetArguments::get)
+                .anyMatch(remainingTerms::contains))
+            return false;
+
+        /**
+         * Check that the remaining variables are not used anywhere else
+         */
+        // TODO: use a more efficient implementation
+        VariableOccurrenceAnalyzer analyzer = new NaiveVariableOccurrenceAnalyzerImpl();
+
+        return remainingTerms.stream()
                 .map(v -> (Variable) v)
-                .allMatch(v -> analyzer.isVariableUsedSomewhereElse(query,targetDataNode,v));
+                .allMatch(v -> ! analyzer.isVariableUsedSomewhereElse(query, targetDataNode, v));
     }
 
     private Optional<DatabaseRelationDefinition> getDatabaseRelationByName(DBMetadata dbMetadata, String name) {
