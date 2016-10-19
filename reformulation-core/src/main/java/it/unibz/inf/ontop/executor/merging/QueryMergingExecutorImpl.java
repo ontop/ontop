@@ -80,55 +80,50 @@ public class QueryMergingExecutorImpl implements QueryMergingExecutor {
         private static AnalysisResults analyze(
                 IntermediateQuery query, QueryNode originalNode,
                 Optional<? extends ImmutableSubstitution<? extends ImmutableTerm>> substitutionToApply) {
-//            try {
-                //QueryNode renamedNode = originalNode.acceptNodeTransformer(renamer);
 
-                if (substitutionToApply.isPresent()) {
-                    SubstitutionResults<? extends QueryNode> results = originalNode.applyDescendingSubstitution(
-                            substitutionToApply.get(), query);
+            if (substitutionToApply.isPresent()) {
+                SubstitutionResults<? extends QueryNode> results = originalNode.applyDescendingSubstitution(
+                        substitutionToApply.get(), query);
 
-                    switch (results.getLocalAction()) {
-                        case NO_CHANGE:
-                            return new AnalysisResults(originalNode, originalNode,
-                                    results.getSubstitutionToPropagate());
+                switch (results.getLocalAction()) {
+                    case NO_CHANGE:
+                        return new AnalysisResults(originalNode, originalNode,
+                                results.getSubstitutionToPropagate());
 
-                        case NEW_NODE:
-                        case DECLARE_AS_TRUE:
-                            QueryNode newNode = results.getOptionalNewNode().get();
-                            if (newNode == originalNode) {
-                                throw new IllegalStateException("NEW_NODE or DECLARE_AS_TRUE action must not return the same node. " +
-                                        "Use NO_CHANGE instead.");
-                            }
-                            return new AnalysisResults(originalNode, newNode,
-                                    results.getSubstitutionToPropagate());
+                    case NEW_NODE:
+                    case DECLARE_AS_TRUE:
+                        QueryNode newNode = results.getOptionalNewNode().get();
+                        if (newNode == originalNode) {
+                            throw new IllegalStateException("NEW_NODE or DECLARE_AS_TRUE action must not return the same node. " +
+                                    "Use NO_CHANGE instead.");
+                        }
+                        return new AnalysisResults(originalNode, newNode,
+                                results.getSubstitutionToPropagate());
 
-                        /**
-                         * Recursive
-                         */
-                        case REPLACE_BY_CHILD:
-                            QueryNode replacingChild = results.getOptionalReplacingChildPosition()
-                                    .flatMap(position -> query.getChild(originalNode, position))
-                                    .orElseGet(() -> query.getFirstChild(originalNode)
-                                            .orElseThrow(() -> new IllegalStateException("No replacing child is available")));
-                            return analyze(query, replacingChild, results.getSubstitutionToPropagate());
+                    /**
+                     * Recursive
+                     */
+                    case REPLACE_BY_CHILD:
+                        QueryNode replacingChild = results.getOptionalReplacingChildPosition()
+                                .flatMap(position -> query.getChild(originalNode, position))
+                                .orElseGet(() -> query.getFirstChild(originalNode)
+                                        .orElseThrow(() -> new IllegalStateException("No replacing child is available")));
+                        return analyze(query, replacingChild, results.getSubstitutionToPropagate());
 
-                        case INSERT_CONSTRUCTION_NODE:
-                            throw new IllegalStateException("Construction node insertion not expected during query merging");
+                    case INSERT_CONSTRUCTION_NODE:
+                        throw new IllegalStateException("Construction node insertion not expected during query merging");
 
-                        case DECLARE_AS_EMPTY:
-                            return analyze(query, new EmptyNodeImpl(query.getVariables(originalNode)), substitutionToApply);
+                    case DECLARE_AS_EMPTY:
+                        return analyze(query, new EmptyNodeImpl(query.getVariables(originalNode)), substitutionToApply);
 
-                        default:
-                            throw new IllegalStateException("Unknown local action:" + results.getLocalAction());
-                    }
+                    default:
+                        throw new IllegalStateException("Unknown local action:" + results.getLocalAction());
                 }
-                else {
-                    // Empty
-                    return new AnalysisResults(originalNode, originalNode, Optional.empty());
-                }
-//            } catch (NotNeededNodeException e) {
-//                throw new IllegalStateException("Unexpected exception: " + e);
-//            }
+            }
+            else {
+                // Empty
+                return new AnalysisResults(originalNode, originalNode, Optional.empty());
+            }
         }
 
         public Optional<? extends ImmutableSubstitution<? extends ImmutableTerm>> getSubstitutionToPropagate() {
