@@ -10,9 +10,6 @@ import java.util.Optional;
 
 public abstract class QueryTransformer {
 
-
-    Logger log = LoggerFactory.getLogger(this.getClass());
-
     /**
      * TODO: explain
      */
@@ -67,9 +64,6 @@ public abstract class QueryTransformer {
                                                                 final QueryNode newParentNode,
                                                                 HomogeneousQueryNodeTransformer nodeTransformer)
             throws NotNeededNodeException {
-
-        log.debug(originalParentNode.toString());
-        log.debug(originalQuery.toString());
 
         for (QueryNode originalChildNode : originalQuery.getChildren(originalParentNode)) {
 
