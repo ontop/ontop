@@ -7,6 +7,7 @@ import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.Variable;
 import it.unibz.inf.ontop.model.VariableOrGroundTerm;
 import it.unibz.inf.ontop.pivotalrepr.*;
+import it.unibz.inf.ontop.pivotalrepr.impl.FilterNodeImpl;
 import it.unibz.inf.ontop.pivotalrepr.impl.NaiveVariableOccurrenceAnalyzerImpl;
 import it.unibz.inf.ontop.pivotalrepr.impl.QueryTreeComponent;
 import it.unibz.inf.ontop.pivotalrepr.proposal.InnerJoinOptimizationProposal;
@@ -62,10 +63,37 @@ public class RedundantJoinFKExecutor implements InnerJoinExecutor {
                                                                             InnerJoinNode joinNode,
                                                                             ImmutableSet<DataNode> nodesToRemove) {
 
+        /**
+         * First removes all the redundant nodes
+         */
         nodesToRemove.stream()
                 .forEach(treeComponent::removeSubTree);
 
-        return new NodeCentricOptimizationResultsImpl<>(query, joinNode);
+        /**
+         * Then replaces the join node if needed
+         */
+        switch (query.getChildren(joinNode).size()) {
+            case 0:
+                throw new IllegalStateException("Redundant join elimination should not eliminate all the children");
+            case 1:
+                QueryNode replacingChild = query.getFirstChild(joinNode).get();
+
+                if (joinNode.getOptionalFilterCondition().isPresent()) {
+                    FilterNode newFilterNode = new FilterNodeImpl(joinNode.getOptionalFilterCondition().get());
+                    treeComponent.replaceNode(joinNode, newFilterNode);
+                    /**
+                     * NB: the filter node is not declared as the replacing node but the child is.
+                     * Why? Because a JOIN with a filtering condition could decomposed into two different nodes.
+                     */
+                }
+                else {
+                    treeComponent.replaceNodeByChild(joinNode, Optional.empty());
+                }
+                return new NodeCentricOptimizationResultsImpl<>(query, Optional.of(replacingChild));
+
+            default:
+                return new NodeCentricOptimizationResultsImpl<>(query, joinNode);
+        }
     }
 
     /**
