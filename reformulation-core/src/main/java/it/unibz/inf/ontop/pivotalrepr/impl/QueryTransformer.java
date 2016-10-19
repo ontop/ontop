@@ -11,8 +11,6 @@ import java.util.Optional;
 public abstract class QueryTransformer {
 
 
-    Logger log = LoggerFactory.getLogger(this.getClass());
-
     /**
      * TODO: explain
      */
@@ -25,28 +23,27 @@ public abstract class QueryTransformer {
     public IntermediateQuery transform(IntermediateQuery originalQuery,
                                        Optional<HomogeneousQueryNodeTransformer> optionalNodeTransformer)
             throws IntermediateQueryBuilderException, QueryNodeTransformationException, NotNeededNodeException {
-        if (optionalNodeTransformer.isPresent()){
+        if (optionalNodeTransformer.isPresent()) {
             return transform(originalQuery, optionalNodeTransformer.get());
         }
         return IntermediateQueryUtils.convertToBuilder(originalQuery).build();
     }
 
 
-
     protected IntermediateQueryBuilder convertToBuilderAndTransform(IntermediateQuery originalQuery,
-                                                                  HomogeneousQueryNodeTransformer nodeTransformer)
+                                                                    HomogeneousQueryNodeTransformer nodeTransformer)
             throws NotNeededNodeException {
         return convertToBuilderAndTransform(originalQuery, nodeTransformer, originalQuery.getProjectionAtom());
     }
 
     /**
      * TODO: explain
-     *
+     * <p>
      * TODO: avoid the use of a recursive method. Use a stack instead.
      */
     protected IntermediateQueryBuilder convertToBuilderAndTransform(IntermediateQuery originalQuery,
-                                                                  HomogeneousQueryNodeTransformer nodeTransformer,
-                                                                  DistinctVariableOnlyDataAtom projectionAtom)
+                                                                    HomogeneousQueryNodeTransformer nodeTransformer,
+                                                                    DistinctVariableOnlyDataAtom projectionAtom)
             throws NotNeededNodeException {
         IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(originalQuery.getMetadata());
 
@@ -68,13 +65,10 @@ public abstract class QueryTransformer {
                                                                 HomogeneousQueryNodeTransformer nodeTransformer)
             throws NotNeededNodeException {
 
-        log.debug(originalParentNode.toString());
-        log.debug(originalQuery.toString());
-
         for (QueryNode originalChildNode : originalQuery.getChildren(originalParentNode)) {
 
             QueryNode newChildNode;
-                newChildNode = originalChildNode.acceptNodeTransformer(nodeTransformer);
+            newChildNode = originalChildNode.acceptNodeTransformer(nodeTransformer);
             Optional<NonCommutativeOperatorNode.ArgumentPosition> optionalPosition = originalQuery.getOptionalPosition(originalParentNode, originalChildNode);
             queryBuilder.addChild(newParentNode, newChildNode, optionalPosition);
 

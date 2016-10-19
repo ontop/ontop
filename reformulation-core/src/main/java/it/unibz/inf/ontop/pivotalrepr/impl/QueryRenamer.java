@@ -5,6 +5,7 @@ import it.unibz.inf.ontop.model.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.OBDADataFactory;
 import it.unibz.inf.ontop.model.Variable;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
+import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.InjectiveVar2VarSubstitutionImpl;
 import it.unibz.inf.ontop.pivotalrepr.*;
 
 public class QueryRenamer extends QueryTransformer {
@@ -16,6 +17,9 @@ public class QueryRenamer extends QueryTransformer {
         this.nodeRenamer = nodeRenamer;
     }
 
+    public QueryRenamer(InjectiveVar2VarSubstitutionImpl injectiveVar2VarSubstitution) {
+        this (new QueryNodeRenamer(injectiveVar2VarSubstitution));
+    }
 
     public IntermediateQuery transform(IntermediateQuery originalQuery)
             throws IntermediateQueryBuilderException, NotNeededNodeException {

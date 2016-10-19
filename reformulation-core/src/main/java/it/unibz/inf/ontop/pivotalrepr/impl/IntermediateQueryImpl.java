@@ -369,6 +369,10 @@ public class IntermediateQueryImpl implements IntermediateQuery {
         return treeComponent.generateNewVariable(formerVariable);
     }
 
+    public Variable renameAllVariablesWitSuffix() {
+        return treeComponent.generateNewVariable();
+    }
+
     /**
      * Not appearing in the interface because users do not
      * have to worry about it.
