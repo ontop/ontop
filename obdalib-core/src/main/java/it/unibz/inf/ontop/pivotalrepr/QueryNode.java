@@ -40,7 +40,7 @@ public interface QueryNode extends Cloneable {
      *
      */
     QueryNode acceptNodeTransformer(HomogeneousQueryNodeTransformer transformer)
-            throws QueryNodeTransformationException, NotNeededNodeException;
+            throws QueryNodeTransformationException;
 
     /**
      * "Accept" method for the "Visitor" pattern.

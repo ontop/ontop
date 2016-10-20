@@ -5,6 +5,5 @@ package it.unibz.inf.ontop.pivotalrepr;
  */
 public interface QueryTransformer {
 
-    IntermediateQuery transform(IntermediateQuery originalQuery)
-            throws IntermediateQueryBuilderException, NotNeededNodeException;
+    IntermediateQuery transform(IntermediateQuery originalQuery);
 }

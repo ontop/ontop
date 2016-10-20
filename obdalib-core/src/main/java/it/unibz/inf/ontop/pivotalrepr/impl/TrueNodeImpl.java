@@ -29,7 +29,7 @@ public class TrueNodeImpl implements TrueNode {
 
     @Override
     public TrueNode acceptNodeTransformer(HomogeneousQueryNodeTransformer transformer)
-            throws QueryNodeTransformationException, NotNeededNodeException {
+            throws QueryNodeTransformationException {
         return transformer.transform(this);
     }
 

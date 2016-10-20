@@ -209,12 +209,7 @@ public class QueryMergingExecutorImpl implements QueryMergingExecutor {
             renamedSubQuery = subQuery;
         } else {
             QueryTransformer queryRenamer = new QueryRenamer(renamingSubstitution);
-            try {
-                renamedSubQuery = queryRenamer.transform(subQuery);
-            } catch (NotNeededNodeException e) {
-                throw new IllegalStateException("A non-conflicting renaming should not make " +
-                        "a node be declared as not needed");
-            }
+            renamedSubQuery = queryRenamer.transform(subQuery);
         }
 
         /**

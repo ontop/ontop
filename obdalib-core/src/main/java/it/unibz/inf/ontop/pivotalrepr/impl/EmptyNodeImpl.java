@@ -25,7 +25,7 @@ public class EmptyNodeImpl extends QueryNodeImpl implements EmptyNode {
 
     @Override
     public EmptyNode acceptNodeTransformer(HomogeneousQueryNodeTransformer transformer)
-            throws QueryNodeTransformationException, NotNeededNodeException {
+            throws QueryNodeTransformationException {
         return transformer.transform(this);
     }
 

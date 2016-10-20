@@ -20,8 +20,7 @@ public abstract class NodeBasedQueryTransformer
 
 
     @Override
-    public IntermediateQuery transform(IntermediateQuery originalQuery)
-            throws IntermediateQueryBuilderException, NotNeededNodeException {
+    public IntermediateQuery transform(IntermediateQuery originalQuery) {
         DistinctVariableOnlyDataAtom transformedProjectionDataAtom =
                 transformProjectionAtom(originalQuery.getProjectionAtom());
         IntermediateQueryBuilder builder = convertToBuilderAndTransform(originalQuery, nodeTransformer,
@@ -39,8 +38,7 @@ public abstract class NodeBasedQueryTransformer
      */
     private IntermediateQueryBuilder convertToBuilderAndTransform(IntermediateQuery originalQuery,
                                                                   HomogeneousQueryNodeTransformer nodeTransformer,
-                                                                  DistinctVariableOnlyDataAtom transformedProjectionAtom)
-            throws NotNeededNodeException {
+                                                                  DistinctVariableOnlyDataAtom transformedProjectionAtom) {
         IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(originalQuery.getMetadata());
 
         // Clone the original root node and apply the transformer if available.
@@ -58,8 +56,7 @@ public abstract class NodeBasedQueryTransformer
                                                                 IntermediateQueryBuilder queryBuilder,
                                                                 final QueryNode originalParentNode,
                                                                 final QueryNode newParentNode,
-                                                                HomogeneousQueryNodeTransformer nodeTransformer)
-            throws NotNeededNodeException {
+                                                                HomogeneousQueryNodeTransformer nodeTransformer) {
 
         for (QueryNode originalChildNode : originalQuery.getChildren(originalParentNode)) {
 
