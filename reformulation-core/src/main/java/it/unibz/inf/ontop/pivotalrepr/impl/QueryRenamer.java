@@ -6,7 +6,6 @@ import it.unibz.inf.ontop.model.OBDADataFactory;
 import it.unibz.inf.ontop.model.Variable;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.InjectiveVar2VarSubstitution;
-import it.unibz.inf.ontop.pivotalrepr.*;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 public class QueryRenamer extends NodeBasedQueryTransformer {
