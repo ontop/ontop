@@ -12,7 +12,6 @@ import it.unibz.inf.ontop.owlrefplatform.core.optimization.unfolding.QueryUnfold
 import it.unibz.inf.ontop.pivotalrepr.EmptyQueryException;
 import it.unibz.inf.ontop.pivotalrepr.IntensionalDataNode;
 import it.unibz.inf.ontop.pivotalrepr.IntermediateQuery;
-import it.unibz.inf.ontop.pivotalrepr.NotNeededNodeException;
 import it.unibz.inf.ontop.pivotalrepr.impl.QueryRenamer;
 import it.unibz.inf.ontop.pivotalrepr.proposal.QueryMergingProposal;
 import it.unibz.inf.ontop.pivotalrepr.proposal.impl.QueryMergingProposalImpl;
@@ -78,12 +77,6 @@ public class QueryUnfolderImpl implements QueryUnfolder {
                         collect(Collectors.toMap(v -> v, v -> datafactory.getVariable(v.getName()+suffix)));
 
         QueryRenamer queryRenamer = new QueryRenamer(new InjectiveVar2VarSubstitutionImpl(substitutionMap));
-        IntermediateQuery renamedQuery = null;
-        try {
-            renamedQuery = queryRenamer.transform(query);
-        } catch (NotNeededNodeException e) {
-            e.printStackTrace();
-        }
-        return renamedQuery;
+        return queryRenamer.transform(query);
     }
 }

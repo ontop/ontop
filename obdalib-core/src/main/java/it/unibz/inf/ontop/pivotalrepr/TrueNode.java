@@ -9,7 +9,7 @@ public interface TrueNode extends QueryNode {
 
     @Override
     TrueNode acceptNodeTransformer(HomogeneousQueryNodeTransformer transformer)
-            throws QueryNodeTransformationException, NotNeededNodeException;
+            throws QueryNodeTransformationException;
 
     @Override
     SubstitutionResults<TrueNode> applyAscendingSubstitution(

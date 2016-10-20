@@ -3,55 +3,49 @@ package it.unibz.inf.ontop.pivotalrepr.impl;
 import it.unibz.inf.ontop.model.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.pivotalrepr.*;
 import it.unibz.inf.ontop.pivotalrepr.impl.tree.DefaultIntermediateQueryBuilder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.Optional;
 
-public abstract class QueryTransformer {
+/**
+ * Implementation based on a QueryNodeTransformer
+ */
+public abstract class NodeBasedQueryTransformer
+        implements QueryTransformer {
 
+    private final HomogeneousQueryNodeTransformer nodeTransformer;
 
-    /**
-     * TODO: explain
-     */
-    public IntermediateQuery transform(IntermediateQuery originalQuery,
-                                       HomogeneousQueryNodeTransformer nodeTransformer)
-            throws IntermediateQueryBuilderException, QueryNodeTransformationException, NotNeededNodeException {
-        return convertToBuilderAndTransform(originalQuery, nodeTransformer).build();
-    }
-
-    public IntermediateQuery transform(IntermediateQuery originalQuery,
-                                       Optional<HomogeneousQueryNodeTransformer> optionalNodeTransformer)
-            throws IntermediateQueryBuilderException, QueryNodeTransformationException, NotNeededNodeException {
-        if (optionalNodeTransformer.isPresent()) {
-            return transform(originalQuery, optionalNodeTransformer.get());
-        }
-        return IntermediateQueryUtils.convertToBuilder(originalQuery).build();
+    protected NodeBasedQueryTransformer(HomogeneousQueryNodeTransformer nodeTransformer) {
+        this.nodeTransformer = nodeTransformer;
     }
 
 
-    protected IntermediateQueryBuilder convertToBuilderAndTransform(IntermediateQuery originalQuery,
-                                                                    HomogeneousQueryNodeTransformer nodeTransformer)
-            throws NotNeededNodeException {
-        return convertToBuilderAndTransform(originalQuery, nodeTransformer, originalQuery.getProjectionAtom());
+    @Override
+    public IntermediateQuery transform(IntermediateQuery originalQuery) {
+        DistinctVariableOnlyDataAtom transformedProjectionDataAtom =
+                transformProjectionAtom(originalQuery.getProjectionAtom());
+        IntermediateQueryBuilder builder = convertToBuilderAndTransform(originalQuery, nodeTransformer,
+                transformedProjectionDataAtom);
+        return builder.build();
     }
+
+    protected abstract DistinctVariableOnlyDataAtom transformProjectionAtom(DistinctVariableOnlyDataAtom projectionAtom);
+
 
     /**
      * TODO: explain
      * <p>
      * TODO: avoid the use of a recursive method. Use a stack instead.
      */
-    protected IntermediateQueryBuilder convertToBuilderAndTransform(IntermediateQuery originalQuery,
-                                                                    HomogeneousQueryNodeTransformer nodeTransformer,
-                                                                    DistinctVariableOnlyDataAtom projectionAtom)
-            throws NotNeededNodeException {
+    private IntermediateQueryBuilder convertToBuilderAndTransform(IntermediateQuery originalQuery,
+                                                                  HomogeneousQueryNodeTransformer nodeTransformer,
+                                                                  DistinctVariableOnlyDataAtom transformedProjectionAtom) {
         IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(originalQuery.getMetadata());
 
         // Clone the original root node and apply the transformer if available.
         ConstructionNode originalRootNode = originalQuery.getRootConstructionNode();
         ConstructionNode newRootNode;
         newRootNode = originalRootNode.acceptNodeTransformer(nodeTransformer);
-        queryBuilder.init(projectionAtom, newRootNode);
+        queryBuilder.init(transformedProjectionAtom, newRootNode);
         return copyChildrenNodesToBuilder(originalQuery, queryBuilder, originalRootNode, newRootNode, nodeTransformer);
     }
 
@@ -62,8 +56,7 @@ public abstract class QueryTransformer {
                                                                 IntermediateQueryBuilder queryBuilder,
                                                                 final QueryNode originalParentNode,
                                                                 final QueryNode newParentNode,
-                                                                HomogeneousQueryNodeTransformer nodeTransformer)
-            throws NotNeededNodeException {
+                                                                HomogeneousQueryNodeTransformer nodeTransformer) {
 
         for (QueryNode originalChildNode : originalQuery.getChildren(originalParentNode)) {
 

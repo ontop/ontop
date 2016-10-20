@@ -189,20 +189,7 @@ public class QueryMergingExecutorImpl implements QueryMergingExecutor {
      *
      */
     protected static void mergeSubQuery(QueryTreeComponent treeComponent, IntermediateQuery subQuery,
-                                        IntensionalDataNode intensionalDataNode) throws EmptyQueryException {
-        try {
-            insertSubQuery(treeComponent, subQuery, intensionalDataNode);
-        } catch (NotNeededNodeException e) {
-            e.printStackTrace();
-        }
-    }
-
-    /**
-     * TODO: explain
-     */
-    private static void insertSubQuery(final QueryTreeComponent treeComponent, final IntermediateQuery subQuery,
-                                       final IntensionalDataNode intensionalDataNode) throws NotNeededNodeException {
-
+                                        IntensionalDataNode intensionalDataNode) {
         /**
          * Gets the parent of the intensional node and remove the latter
          */
@@ -221,7 +208,7 @@ public class QueryMergingExecutorImpl implements QueryMergingExecutor {
         if(renamingSubstitution.isEmpty()){
             renamedSubQuery = subQuery;
         } else {
-            QueryRenamer queryRenamer = new QueryRenamer(new QueryNodeRenamer(renamingSubstitution));
+            QueryTransformer queryRenamer = new QueryRenamer(renamingSubstitution);
             renamedSubQuery = queryRenamer.transform(subQuery);
         }
 

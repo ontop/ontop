@@ -182,13 +182,7 @@ public class IntermediateQueryUtils {
          * Renames all the nodes (new objects) and maps them to original nodes
          */
         ImmutableMap<QueryNode, QueryNode> renamedNodeMap = originalNodesInTopDownOrder.stream()
-                .map(n -> {
-                    try {
-                        return new AbstractMap.SimpleEntry<>(n, n.acceptNodeTransformer(nodeRenamer));
-                    } catch (NotNeededNodeException e) {
-                        throw new IllegalStateException("Unexpected exception: " + e);
-                    }
-                })
+                .map(n -> new AbstractMap.SimpleEntry<>(n, n.acceptNodeTransformer(nodeRenamer)))
                 .collect(ImmutableCollectors.toMap());
 
         /**
