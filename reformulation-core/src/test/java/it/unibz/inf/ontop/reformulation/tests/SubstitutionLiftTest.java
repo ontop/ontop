@@ -1068,8 +1068,10 @@ public class SubstitutionLiftTest {
 
     }
 
+    /**
+     * Currently runs the optimizer twice
+     */
     @Test
-    @Ignore
     public void testTrueNode() throws EmptyQueryException {
         //Construct unoptimized query
         IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
@@ -1118,7 +1120,11 @@ public class SubstitutionLiftTest {
 
         IntermediateQueryOptimizer substitutionOptimizer = new TopDownSubstitutionLiftOptimizer();
 
-        IntermediateQuery optimizedQuery = substitutionOptimizer.optimize(unOptimizedQuery);
+        /**
+         * TODO: remove this double call
+         */
+        IntermediateQuery optimizedQuery = substitutionOptimizer.optimize(
+                substitutionOptimizer.optimize(unOptimizedQuery));
 
         System.out.println("\nAfter optimization: \n" +  optimizedQuery);
 
