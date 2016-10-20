@@ -221,7 +221,7 @@ public class QueryMergingExecutorImpl implements QueryMergingExecutor {
         if(renamingSubstitution.isEmpty()){
             renamedSubQuery = subQuery;
         } else {
-            QueryRenamer queryRenamer = new QueryRenamer(new QueryNodeRenamer(renamingSubstitution));
+            QueryTransformer queryRenamer = new QueryRenamer(renamingSubstitution);
             renamedSubQuery = queryRenamer.transform(subQuery);
         }
 

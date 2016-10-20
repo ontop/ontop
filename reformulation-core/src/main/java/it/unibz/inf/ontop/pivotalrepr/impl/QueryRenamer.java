@@ -5,37 +5,29 @@ import it.unibz.inf.ontop.model.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.OBDADataFactory;
 import it.unibz.inf.ontop.model.Variable;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
+import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.InjectiveVar2VarSubstitution;
 import it.unibz.inf.ontop.pivotalrepr.*;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
-public class QueryRenamer extends QueryTransformer {
+public class QueryRenamer extends NodeBasedQueryTransformer {
 
     private final static OBDADataFactory DATA_FACTORY = OBDADataFactoryImpl.getInstance();
-    private QueryNodeRenamer nodeRenamer;
+    private final InjectiveVar2VarSubstitution renamingSubstitution;
 
-    public QueryRenamer(QueryNodeRenamer nodeRenamer) {
-        this.nodeRenamer = nodeRenamer;
+    public QueryRenamer(InjectiveVar2VarSubstitution injectiveVar2VarSubstitution) {
+        super(new QueryNodeRenamer(injectiveVar2VarSubstitution));
+        renamingSubstitution = injectiveVar2VarSubstitution;
     }
 
+    /**
+     * Renames the projected variables
+     */
+    @Override
+    protected DistinctVariableOnlyDataAtom transformProjectionAtom(DistinctVariableOnlyDataAtom atom) {
+        ImmutableList<Variable> newArguments = atom.getVariables().stream()
+                .map(renamingSubstitution::applyToVariable)
+                .collect(ImmutableCollectors.toList());
 
-    public IntermediateQuery transform(IntermediateQuery originalQuery)
-            throws IntermediateQueryBuilderException, NotNeededNodeException {
-        return transform(originalQuery, this.nodeRenamer);
-    }
-
-    public IntermediateQuery transform(IntermediateQuery originalQuery, QueryNodeRenamer nodeRenamer)
-            throws IntermediateQueryBuilderException, NotNeededNodeException {
-        DistinctVariableOnlyDataAtom renamedProjectionDataAtom =
-                renameProjectionAtomVariables(originalQuery.getProjectionAtom());
-        IntermediateQueryBuilder builder = super.convertToBuilderAndTransform(originalQuery, nodeRenamer, renamedProjectionDataAtom);
-        return builder.build();
-    }
-
-
-    private DistinctVariableOnlyDataAtom renameProjectionAtomVariables(DistinctVariableOnlyDataAtom atom) {
-        ImmutableList.Builder<Variable> argListBuilder = ImmutableList.builder();
-        for (Variable var : atom.getVariables()) {
-            argListBuilder.add(nodeRenamer.getRenamingSubstitution().applyToVariable(var));
-        }
-        return DATA_FACTORY.getDistinctVariableOnlyDataAtom(atom.getPredicate(), argListBuilder.build());
+        return DATA_FACTORY.getDistinctVariableOnlyDataAtom(atom.getPredicate(), newArguments);
     }
 }
