@@ -1253,6 +1253,64 @@ public class SubstitutionLiftTest {
 
     }
 
+    @Test(expected = EmptyQueryException.class)
+    public void testEmptySubstitutionToBeLifted() throws EmptyQueryException {
+
+        //Construct unoptimized query
+        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
+        DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_2_PREDICATE, X, Y);
+        ConstructionNode rootNode = new ConstructionNodeImpl(projectionAtom.getVariables());
+
+        queryBuilder.init(projectionAtom, rootNode);
+
+        //construct
+        joinNode = new InnerJoinNodeImpl(Optional.empty());
+        queryBuilder.addChild(rootNode, joinNode);
+
+        //construct left side join
+        LeftJoinNode leftJoinNode =  new LeftJoinNodeImpl(Optional.empty());
+        queryBuilder.addChild(joinNode, leftJoinNode);
+
+        ConstructionNode leftNode = new ConstructionNodeImpl(ImmutableSet.of(Y),
+                new ImmutableSubstitutionImpl<>(ImmutableMap.of(
+                        Y, generateURI1(B))),
+                Optional.empty());
+
+        queryBuilder.addChild(leftJoinNode, leftNode, LEFT);
+
+        queryBuilder.addChild(leftNode, DATA_NODE_9);
+
+        ConstructionNode rightNode = new ConstructionNodeImpl(ImmutableSet.of(X,Y),
+                new ImmutableSubstitutionImpl<>(ImmutableMap.of(X, generateURI2(C),
+                        Y, generateURI1(D))),
+                Optional.empty());
+
+        queryBuilder.addChild(leftJoinNode, rightNode, RIGHT);
+
+        queryBuilder.addChild(rightNode, DATA_NODE_3);
+
+
+        //construct right side join
+        ConstructionNode node1 = new ConstructionNodeImpl(ImmutableSet.of(X),
+                new ImmutableSubstitutionImpl<>(ImmutableMap.of(X, generateURI1(A))), Optional.empty());
+        queryBuilder.addChild(joinNode, node1);
+
+        queryBuilder.addChild(node1, DATA_NODE_8);
+
+        //build unoptimized query
+        IntermediateQuery unOptimizedQuery = queryBuilder.build();
+        System.out.println("\nBefore optimization: \n" +  unOptimizedQuery);
+
+
+        IntermediateQueryOptimizer substitutionOptimizer = new TopDownSubstitutionLiftOptimizer();
+
+        substitutionOptimizer.optimize(unOptimizedQuery);
+
+
+
+    }
+
+
     private static ExtensionalDataNode buildExtensionalDataNode(AtomPredicate predicate, VariableOrGroundTerm ... arguments) {
         return new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(predicate, arguments));
     }
