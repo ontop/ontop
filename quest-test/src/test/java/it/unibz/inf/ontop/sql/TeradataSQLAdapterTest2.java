@@ -92,6 +92,92 @@ public class TeradataSQLAdapterTest2 {
     }
 
     @Test
+    public void testFilter() throws Exception {
+
+        QuestPreferences p = new QuestPreferences();
+        p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
+
+
+        String sparqlQuery =
+            "PREFIX : <http://www.semanticweb.org/elem/ontologies/2016/5/financial#>\n" +
+                    "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
+                    "select ?w where {?x a :Customer." +
+                    "?x :hasFirstName ?w" +
+                    " FILTER(?w > \"Norma\")}\n";
+
+
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("Robyn");
+        expectedValues.add("Rhonda");
+         checkReturnedLiterals(p, sparqlQuery, expectedValues);
+    }
+
+    @Test
+    public void testContains() throws Exception {
+
+        QuestPreferences p = new QuestPreferences();
+        p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
+
+
+        String sparqlQuery =
+            "PREFIX : <http://www.semanticweb.org/elem/ontologies/2016/5/financial#>\n" +
+                    "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
+                    "select ?w where {?x a :Customer." +
+                    "?x :hasFirstName ?w" +
+                    " FILTER(CONTAINS(?w, \"honda\"))}\n";
+
+
+        List<String> expectedValues = new ArrayList<>();
+        //expectedValues.add("Robyn");
+        expectedValues.add("Rhonda");
+        checkReturnedLiterals(p, sparqlQuery, expectedValues);
+    }
+
+    @Test
+    public void testBind() throws Exception {
+
+        QuestPreferences p = new QuestPreferences();
+        p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
+
+
+        String sparqlQuery =
+            "PREFIX : <http://www.semanticweb.org/elem/ontologies/2016/5/financial#>\n" +
+                    "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
+                    "select ?w where {?x a :Customer." +
+                    "?x :hasFirstName ?y ." +
+                    "BIND(?y AS ?w)}";
+
+
+        List<String> expectedValues = new ArrayList<>();
+        //expectedValues.add("Robyn");
+        expectedValues.add("Dan");
+        expectedValues.add("Nick");
+        expectedValues.add("Kyle");
+        expectedValues.add("Cary");
+        expectedValues.add("Inge");
+        expectedValues.add("Dan");
+        expectedValues.add("Nick");
+        expectedValues.add("Kyle");
+        expectedValues.add("Cary");
+        expectedValues.add("Inge");
+        expectedValues.add("Robyn");
+        expectedValues.add("Rhonda");
+        expectedValues.add("Faye");
+        expectedValues.add("Eva");
+        expectedValues.add("Norma");
+        expectedValues.add("Robyn");
+        expectedValues.add("Rhonda");
+        expectedValues.add("Faye");
+        expectedValues.add("Eva");
+        expectedValues.add("Norma");
+
+        checkReturnedLiterals(p, sparqlQuery, expectedValues);
+    }
+
+    @Test
     public void testLimit() throws Exception {
 
         QuestPreferences p = new QuestPreferences();
