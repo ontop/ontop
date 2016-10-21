@@ -327,43 +327,6 @@ public class LeftJoinOptimizationTest {
 
 
     @Test
-    public void testLeftJoinEliminationWithFilterCondition1() throws EmptyQueryException {
-
-        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(metadata);
-        DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_4_PREDICATE, M, M1, O, N1);
-        ConstructionNode constructionNode = new ConstructionNodeImpl(projectionAtom.getVariables());
-        LeftJoinNode leftJoinNode = new LeftJoinNodeImpl(Optional.of(DATA_FACTORY.getImmutableExpression(ExpressionOperation.IS_NOT_NULL, N1)));
-        ExtensionalDataNode dataNode1 =  new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE2_PREDICATE, M, M1, O));
-        ExtensionalDataNode dataNode2 =  new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, M1, N1, O1));
-
-        queryBuilder.init(projectionAtom, constructionNode);
-        queryBuilder.addChild(constructionNode, leftJoinNode);
-        queryBuilder.addChild(leftJoinNode, dataNode1, LEFT);
-        queryBuilder.addChild(leftJoinNode, dataNode2, RIGHT);
-
-        IntermediateQuery query = queryBuilder.build();
-        System.out.println("\nBefore optimization: \n" +  query);
-
-        IntermediateQuery optimizedQuery = query.applyProposal(new LeftJoinOptimizationProposalImpl(leftJoinNode))
-                .getResultingQuery();
-
-        System.out.println("\n After optimization: \n" +  optimizedQuery);
-
-
-        IntermediateQueryBuilder expectedQueryBuilder = new DefaultIntermediateQueryBuilder(metadata);
-        expectedQueryBuilder.init(projectionAtom, constructionNode);
-        InnerJoinNode joinNode = new InnerJoinNodeImpl(Optional.empty());
-        expectedQueryBuilder.addChild(constructionNode, joinNode);
-        expectedQueryBuilder.addChild(joinNode, dataNode1);
-        expectedQueryBuilder.addChild(joinNode, dataNode2);
-
-        IntermediateQuery query1 = expectedQueryBuilder.build();
-
-        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, query1));
-    }
-
-
-    @Test
     public void testLeftJoinEliminationWithFilterCondition2() throws EmptyQueryException {
 
         IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(metadata);
@@ -399,54 +362,13 @@ public class LeftJoinOptimizationTest {
     }
 
     @Test
-    public void testLeftJoinEliminationWithFilterCondition3() throws EmptyQueryException {
-
-        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(metadata);
-        DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_4_PREDICATE, M, M1, O, N1);
-        ConstructionNode constructionNode = new ConstructionNodeImpl(projectionAtom.getVariables());
-        LeftJoinNode leftJoinNode = new LeftJoinNodeImpl(Optional.of(
-                DATA_FACTORY.getImmutableExpression(ExpressionOperation.AND,
-                        DATA_FACTORY.getImmutableExpression(ExpressionOperation.IS_NOT_NULL, N1),
-                        DATA_FACTORY.getImmutableExpression(ExpressionOperation.IS_NOT_NULL, O1))));
-        ExtensionalDataNode dataNode1 =  new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE2_PREDICATE, M, M1, O));
-        ExtensionalDataNode dataNode2 =  new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, M1, N1, O1));
-
-        queryBuilder.init(projectionAtom, constructionNode);
-        queryBuilder.addChild(constructionNode, leftJoinNode);
-        queryBuilder.addChild(leftJoinNode, dataNode1, LEFT);
-        queryBuilder.addChild(leftJoinNode, dataNode2, RIGHT);
-
-        IntermediateQuery query = queryBuilder.build();
-        System.out.println("\nBefore optimization: \n" +  query);
-
-        IntermediateQuery optimizedQuery = query.applyProposal(new LeftJoinOptimizationProposalImpl(leftJoinNode))
-                .getResultingQuery();
-
-        System.out.println("\n After optimization: \n" +  optimizedQuery);
-
-
-        IntermediateQueryBuilder expectedQueryBuilder = new DefaultIntermediateQueryBuilder(metadata);
-        expectedQueryBuilder.init(projectionAtom, constructionNode);
-        InnerJoinNode joinNode = new InnerJoinNodeImpl(Optional.empty());
-        expectedQueryBuilder.addChild(constructionNode, joinNode);
-        expectedQueryBuilder.addChild(joinNode, dataNode1);
-        expectedQueryBuilder.addChild(joinNode, dataNode2);
-
-        IntermediateQuery query1 = expectedQueryBuilder.build();
-
-        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, query1));
-    }
-
-    @Test
     public void testLeftJoinEliminationWithFilterCondition4() throws EmptyQueryException {
 
         IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(metadata);
         DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_4_PREDICATE, M, M1, O, N1);
         ConstructionNode constructionNode = new ConstructionNodeImpl(projectionAtom.getVariables());
         LeftJoinNode leftJoinNode = new LeftJoinNodeImpl(Optional.of(
-                DATA_FACTORY.getImmutableExpression(ExpressionOperation.AND,
-                        DATA_FACTORY.getImmutableExpression(ExpressionOperation.IS_NOT_NULL, N1),
-                        DATA_FACTORY.getImmutableExpression(ExpressionOperation.EQ, O1, TWO))));
+                        DATA_FACTORY.getImmutableExpression(ExpressionOperation.EQ, O1, TWO)));
         ExtensionalDataNode dataNode1 =  new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE2_PREDICATE, M, M1, O));
         ExtensionalDataNode dataNode2 =  new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, M1, N1, O1));
 
