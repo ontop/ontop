@@ -100,6 +100,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 				.put(ExpressionOperation.ADD, "%s + %s")
 				.put(ExpressionOperation.SUBTRACT, "%s - %s")
 				.put(ExpressionOperation.MULTIPLY, "%s * %s")
+				.put(ExpressionOperation.DIVIDE, "%s / %s")
 				.put(ExpressionOperation.ABS, "ABS(%s)")
 				.put(ExpressionOperation.CEIL, sqladapter.ceil())
 				.put(ExpressionOperation.FLOOR, "FLOOR(%s)")

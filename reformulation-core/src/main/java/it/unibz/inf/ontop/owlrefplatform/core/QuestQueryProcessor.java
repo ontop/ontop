@@ -41,9 +41,12 @@ public class QuestQueryProcessor {
 	private final VocabularyValidator vocabularyValidator;
 	private final SemanticIndexURIMap uriMap;
 	private final SQLQueryGenerator datasourceQueryGenerator;
-		
+
 	private static final Logger log = LoggerFactory.getLogger(QuestQueryProcessor.class);
-		
+
+	// Davide> Benchmark
+	private OntopBenchmark benchmarkObj = null;
+
 	public QuestQueryProcessor(QueryRewriter rewriter, LinearInclusionDependencies sigma, QuestUnfolder unfolder, 
 			VocabularyValidator vocabularyValidator, SemanticIndexURIMap uriMap, SQLQueryGenerator datasourceQueryGenerator) {
 		this.rewriter = rewriter;
@@ -118,9 +121,12 @@ public class QuestQueryProcessor {
 	public String getSQL(ParsedQuery pq) throws OBDAException {
 			
 		String cachedSQL = translatedSQLCache.get(pq);
-		if (cachedSQL != null)
-			return cachedSQL;
-		
+		if (cachedSQL != null){
+		    // Davide> Benchmarking
+		    OntopBenchmark.Builder builder = new OntopBenchmark.Builder(0, 0);
+		    this.benchmarkObj = builder.build();
+		    return cachedSQL;
+		}
 		try {
 			// log.debug("Input query:\n{}", strquery);
 			
@@ -164,20 +170,20 @@ public class QuestQueryProcessor {
 
 			for (CQIE cq : newprogram.getRules())
 				CQCUtilities.optimizeQueryWithSigmaRules(cq.getBody(), sigma);
-			
+
 			long startTime = System.currentTimeMillis();
-			
+
 			DatalogProgram programAfterRewriting = rewriter.rewrite(newprogram);
 			
 			long endTime = System.currentTimeMillis();
-			
+
 			long rewritingTime = endTime - startTime;
-			
+
 			log.debug("Start the partial evaluation process...");
 
 			startTime = System.currentTimeMillis();
 			DatalogProgram programAfterUnfolding = unfolder.unfold(programAfterRewriting);
-			
+
 			log.debug("Data atoms evaluated: \n{}", programAfterUnfolding);
 
 			List<CQIE> toRemove = new LinkedList<>();
@@ -214,7 +220,7 @@ public class QuestQueryProcessor {
 			querySignatureCache.put(pq, translation.getSignature());
 
 			String sql;
-			
+
 			if (programAfterUnfolding.getRules().size() > 0) {
 				log.debug("Producing the SQL string...");
 				sql = datasourceQueryGenerator.generateSourceQuery(programAfterUnfolding, translation.getSignature());
@@ -225,12 +231,12 @@ public class QuestQueryProcessor {
 			
 			long unfoldingTime = System.currentTimeMillis() - startTime;
 			translatedSQLCache.put(pq, sql);
-			
+
 			// Davide> Benchmarking
 			OntopBenchmark.Builder builder = new OntopBenchmark.Builder(unfoldingTime, rewritingTime);
 			builder.programAfterRewriting(programAfterRewriting).programAfterUnfolding(programAfterUnfolding);
-			builder.build();
-			
+			this.benchmarkObj = builder.build();
+
 			return sql;
 		} 
 		catch (Exception e) {
@@ -302,5 +308,10 @@ public class QuestQueryProcessor {
 			ex.setStackTrace(e.getStackTrace());
 			throw ex;
 		}
+	}
+
+	// Davide> Benchmark
+	public OntopBenchmark getBenchmarkObject() {
+	    return this.benchmarkObj;
 	}
 }
