@@ -6,6 +6,7 @@ import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.executor.InternalProposalExecutor;
 import it.unibz.inf.ontop.executor.expression.PushDownExpressionExecutorImpl;
 import it.unibz.inf.ontop.executor.join.JoinInternalCompositeExecutor;
+import it.unibz.inf.ontop.executor.leftjoin.LeftJoinInternalCompositeExecutor;
 import it.unibz.inf.ontop.executor.pullout.PullVariableOutOfSubTreeExecutorImpl;
 import it.unibz.inf.ontop.executor.merging.QueryMergingExecutorImpl;
 import it.unibz.inf.ontop.executor.substitution.SubstitutionPropagationExecutorImpl;
@@ -81,6 +82,7 @@ public class IntermediateQueryImpl implements IntermediateQuery {
         ImmutableMap.Builder<Class<? extends QueryOptimizationProposal>, Class<? extends InternalProposalExecutor>>
                 internalExecutorMapBuilder = ImmutableMap.builder();
         internalExecutorMapBuilder.put(InnerJoinOptimizationProposal.class, JoinInternalCompositeExecutor.class);
+        internalExecutorMapBuilder.put(LeftJoinOptimizationProposal.class, LeftJoinInternalCompositeExecutor.class);
         internalExecutorMapBuilder.put(SubstitutionPropagationProposal.class, SubstitutionPropagationExecutorImpl.class);
         internalExecutorMapBuilder.put(PushDownBooleanExpressionProposal.class, PushDownExpressionExecutorImpl.class);
         internalExecutorMapBuilder.put(GroundTermRemovalFromDataNodeProposal.class, GroundTermRemovalFromDataNodeExecutorImpl.class);

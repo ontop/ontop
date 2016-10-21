@@ -68,7 +68,7 @@ public class QuestUnfolder {
 
 		this.metadata = metadata;
 		this.pkeys = DBMetadataUtil.extractPKs(metadata);
-		this.metadataForQueryOptimization = new MetadataForQueryOptimizationImpl(convertPrimaryKeys(pkeys),
+		this.metadataForQueryOptimization = new MetadataForQueryOptimizationImpl(metadata, convertPrimaryKeys(pkeys),
 				uriTemplateMatcher);
 
 		// for eliminating redundancy from the unfolding program
