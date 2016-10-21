@@ -29,7 +29,7 @@ import static org.junit.Assert.assertTrue;
 /**
  * Created by elem on 06/07/16.
  */
-public class TeradataSQLAdapterTest2 {
+public class TeradataSQLAdapterTest {
 
     private OBDADataFactory fac;
     private Connection conn;
@@ -221,28 +221,28 @@ public class TeradataSQLAdapterTest2 {
         checkReturnedLiterals(p, sparqlQuery, expectedValues);
     }
 
-    @Test
-    public void testStrEnds() throws Exception {
-
-        QuestPreferences p = new QuestPreferences();
-        p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-
-
-        String sparqlQuery =
-                "PREFIX : <http://www.semanticweb.org/elem/ontologies/2016/5/financial#>\n" +
-                        "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
-                        "select ?w where {?x a :Customer. " +
-                        "?x :hasFirstName ?w." +
-                        "   FILTER(STRLEN(?w) > 5)}\n";
-
-
-
-        List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("Rhonda");
-
-        checkReturnedLiterals(p, sparqlQuery, expectedValues);
-    }
+//    @Test
+//    public void testStrEnds() throws Exception {
+//
+//        QuestPreferences p = new QuestPreferences();
+//        p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+//        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
+//
+//
+//        String sparqlQuery =
+//                "PREFIX : <http://www.semanticweb.org/elem/ontologies/2016/5/financial#>\n" +
+//                        "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
+//                        "select ?w where {?x a :Customer. " +
+//                        "?x :hasFirstName ?w." +
+//                        "   FILTER(STRLEN(?w) > 5)}\n";
+//
+//
+//
+//        List<String> expectedValues = new ArrayList<>();
+//        expectedValues.add("Rhonda");
+//
+//        checkReturnedLiterals(p, sparqlQuery, expectedValues);
+//    }
 
 
     private void checkReturnedLiterals(QuestPreferences p, String query, List<String> expectedValues) throws Exception {
