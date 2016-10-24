@@ -755,7 +755,7 @@ public class CanonicalIRIOntowisTest {
     static class QueryTemplates{
 
         private final static String SPARQL_BEGIN =  "PREFIX :	<http://www.example.org/> "
-                + "SELECT DISTINCT *  "
+                + "SELECT *  "
                 + "WHERE {";
         private final static String SPARQL_END = "}";
 
