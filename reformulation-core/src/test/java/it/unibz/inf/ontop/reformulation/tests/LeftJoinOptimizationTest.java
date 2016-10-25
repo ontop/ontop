@@ -27,7 +27,9 @@ import static junit.framework.TestCase.assertTrue;
 public class LeftJoinOptimizationTest {
 
     private final static AtomPredicate TABLE1_PREDICATE = new AtomPredicateImpl("table1", 3);
+    private final static AtomPredicate TABLE1a_PREDICATE = new AtomPredicateImpl("table1a", 4);
     private final static AtomPredicate TABLE2_PREDICATE = new AtomPredicateImpl("table2", 3);
+    private final static AtomPredicate TABLE2a_PREDICATE = new AtomPredicateImpl("table2a", 3);
     private final static AtomPredicate TABLE3_PREDICATE = new AtomPredicateImpl("table3", 3);
     private final static AtomPredicate ANS1_ARITY_3_PREDICATE = new AtomPredicateImpl("ans1", 3);
     private final static AtomPredicate ANS1_ARITY_4_PREDICATE = new AtomPredicateImpl("ans1", 4);
@@ -39,6 +41,7 @@ public class LeftJoinOptimizationTest {
 
     private final static Variable M = DATA_FACTORY.getVariable("m");
     private final static Variable M1 = DATA_FACTORY.getVariable("m1");
+    private final static Variable M2 = DATA_FACTORY.getVariable("m2");
     private final static Variable N = DATA_FACTORY.getVariable("n");
     private final static Variable N1 = DATA_FACTORY.getVariable("n1");
     private final static Variable N2 = DATA_FACTORY.getVariable("n2");
@@ -64,11 +67,13 @@ public class LeftJoinOptimizationTest {
          * Table 1: non-composite unique constraint and regular field
          */
         uniqueKeyBuilder.put(TABLE1_PREDICATE, ImmutableList.of(1));
+        uniqueKeyBuilder.put(TABLE1a_PREDICATE, ImmutableList.of(1));
 
         /**
          * Table 2: non-composite unique constraint and regular field
          */
-        uniqueKeyBuilder.put(TABLE2_PREDICATE, ImmutableList.of(2));
+        uniqueKeyBuilder.put(TABLE2_PREDICATE, ImmutableList.of(1));
+        uniqueKeyBuilder.put(TABLE2a_PREDICATE, ImmutableList.of(1));
         /**
          * Table 3: composite unique constraint over the first TWO columns
          */
@@ -76,27 +81,49 @@ public class LeftJoinOptimizationTest {
 
         DBMetadata dbMetadata = DBMetadataExtractor.createDummyMetadata();
         QuotedIDFactory idFactory = dbMetadata.getQuotedIDFactory();
+
         DatabaseRelationDefinition table1Def = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null,
                 TABLE1_PREDICATE.getName()));
-        Attribute pk1 = table1Def.addAttribute(idFactory.createAttributeID("col1"), Types.INTEGER, null, false);
+        Attribute table1Col1 = table1Def.addAttribute(idFactory.createAttributeID("col1"), Types.INTEGER, null, false);
         table1Def.addAttribute(idFactory.createAttributeID("col2"), Types.INTEGER, null, false);
-        table1Def.addAttribute(idFactory.createAttributeID("col3"), Types.INTEGER, null, false);
-        table1Def.addUniqueConstraint(UniqueConstraint.primaryKeyOf(pk1));
+        table1Def.addAttribute(idFactory.createAttributeID("col3"), Types.INTEGER, null, true);
+        table1Def.addUniqueConstraint(UniqueConstraint.primaryKeyOf(table1Col1));
 
         DatabaseRelationDefinition table2Def = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null,
                 TABLE2_PREDICATE.getName()));
-        Attribute pk2 = table2Def.addAttribute(idFactory.createAttributeID("col1"), Types.INTEGER, null, false);
+        Attribute table2Col1 = table2Def.addAttribute(idFactory.createAttributeID("col1"), Types.INTEGER, null, false);
         Attribute table2Col2 = table2Def.addAttribute(idFactory.createAttributeID("col2"), Types.INTEGER, null, false);
         table2Def.addAttribute(idFactory.createAttributeID("col3"), Types.INTEGER, null, false);
-        table2Def.addUniqueConstraint(UniqueConstraint.primaryKeyOf(pk2));
-        table2Def.addForeignKeyConstraint(ForeignKeyConstraint.of("fk2-1", table2Col2, pk1));
+        table2Def.addUniqueConstraint(UniqueConstraint.primaryKeyOf(table2Col1));
+        table2Def.addForeignKeyConstraint(ForeignKeyConstraint.of("fk2-1", table2Col2, table1Col1));
 
         DatabaseRelationDefinition table3Def = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null,
-                TABLE2_PREDICATE.getName()));
+                TABLE3_PREDICATE.getName()));
         Attribute table3Col1 = table3Def.addAttribute(idFactory.createAttributeID("col1"), Types.INTEGER, null, false);
         Attribute table3Col2 = table3Def.addAttribute(idFactory.createAttributeID("col2"), Types.INTEGER, null, false);
         table3Def.addAttribute(idFactory.createAttributeID("col3"), Types.INTEGER, null, false);
         table3Def.addUniqueConstraint(UniqueConstraint.primaryKeyOf(table3Col1, table3Col2));
+
+
+        DatabaseRelationDefinition table1aDef = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null,
+                TABLE1a_PREDICATE.getName()));
+        Attribute table1aCol1 = table1aDef.addAttribute(idFactory.createAttributeID("col1"), Types.INTEGER, null, false);
+        Attribute table1aCol2 = table1aDef.addAttribute(idFactory.createAttributeID("col2"), Types.INTEGER, null, false);
+        table1aDef.addAttribute(idFactory.createAttributeID("col3"), Types.INTEGER, null, false);
+        table1aDef.addAttribute(idFactory.createAttributeID("col4"), Types.INTEGER, null, false);
+        table1aDef.addUniqueConstraint(UniqueConstraint.primaryKeyOf(table1aCol1));
+
+        DatabaseRelationDefinition table2aDef = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null,
+                TABLE2a_PREDICATE.getName()));
+        Attribute table2aCol1 = table2aDef.addAttribute(idFactory.createAttributeID("col1"), Types.INTEGER, null, false);
+        Attribute table2aCol2 = table2aDef.addAttribute(idFactory.createAttributeID("col2"), Types.INTEGER, null, false);
+        Attribute table2aCol3 = table2aDef.addAttribute(idFactory.createAttributeID("col3"), Types.INTEGER, null, false);
+        table2aDef.addUniqueConstraint(UniqueConstraint.primaryKeyOf(table2aCol1));
+        ForeignKeyConstraint.Builder fkBuilder = ForeignKeyConstraint.builder(table2aDef, table1aDef);
+        fkBuilder.add(table2aCol2, table1aCol1);
+        fkBuilder.add(table2aCol3, table1aCol2);
+        table2aDef.addForeignKeyConstraint(fkBuilder.build("composite-fk"));
+
 
         return new MetadataForQueryOptimizationImpl(dbMetadata, uniqueKeyBuilder.build(), new UriTemplateMatcher());
     }
@@ -178,10 +205,8 @@ public class LeftJoinOptimizationTest {
         LeftJoinNode leftJoinNode1 = new LeftJoinNodeImpl(Optional.empty());
         expectedQueryBuilder.addChild(constructionNode1, leftJoinNode1);
 
-        ExtensionalDataNode dataNode5 =  new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, M, N, O1));
-        ExtensionalDataNode dataNode6 =  new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, M1, N, O));
-        expectedQueryBuilder.addChild(leftJoinNode1, dataNode5, LEFT);
-        expectedQueryBuilder.addChild(leftJoinNode1, dataNode6, RIGHT);
+        expectedQueryBuilder.addChild(leftJoinNode1, dataNode1, LEFT);
+        expectedQueryBuilder.addChild(leftJoinNode1, dataNode2, RIGHT);
 
         IntermediateQuery query1 = expectedQueryBuilder.build();
 
@@ -218,11 +243,154 @@ public class LeftJoinOptimizationTest {
         expectedQueryBuilder.init(projectionAtom1, constructionNode1);
 
         InnerJoinNode joinNode = new InnerJoinNodeImpl(Optional.empty());
-        ExtensionalDataNode dataNode5 =  new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE2_PREDICATE, M, M1, O));
-        ExtensionalDataNode dataNode6 =  new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, M1, N1, O1));
         expectedQueryBuilder.addChild(constructionNode1, joinNode);
-        expectedQueryBuilder.addChild(joinNode, dataNode5);
-        expectedQueryBuilder.addChild(joinNode, dataNode6);
+        expectedQueryBuilder.addChild(joinNode, dataNode1);
+        expectedQueryBuilder.addChild(joinNode, dataNode2);
+
+        IntermediateQuery query1 = expectedQueryBuilder.build();
+
+        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, query1));
+    }
+
+
+    @Test
+    public void testLeftJoinElimination2() throws EmptyQueryException {
+
+        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(metadata);
+        DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_4_PREDICATE, M, M1, M2, N1);
+        ConstructionNode constructionNode = new ConstructionNodeImpl(projectionAtom.getVariables());
+        queryBuilder.init(projectionAtom, constructionNode);
+        LeftJoinNode leftJoinNode = new LeftJoinNodeImpl(Optional.empty());
+        queryBuilder.addChild(constructionNode, leftJoinNode);
+        ExtensionalDataNode dataNode1 =  new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE2a_PREDICATE, M, M1, M2));
+        ExtensionalDataNode dataNode2 =  new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE1a_PREDICATE, M1, M2, N1, O1));
+
+        queryBuilder.addChild(leftJoinNode, dataNode1, LEFT);
+        queryBuilder.addChild(leftJoinNode, dataNode2, RIGHT);
+
+        IntermediateQuery query = queryBuilder.build();
+        System.out.println("\nBefore optimization: \n" +  query);
+
+        IntermediateQuery optimizedQuery = query.applyProposal(new LeftJoinOptimizationProposalImpl(leftJoinNode))
+                .getResultingQuery();
+
+        System.out.println("\n After optimization: \n" +  optimizedQuery);
+
+
+        IntermediateQueryBuilder expectedQueryBuilder = new DefaultIntermediateQueryBuilder(metadata);
+        expectedQueryBuilder.init(projectionAtom, constructionNode);
+
+        InnerJoinNode joinNode = new InnerJoinNodeImpl(Optional.empty());
+        expectedQueryBuilder.addChild(constructionNode, joinNode);
+        expectedQueryBuilder.addChild(joinNode, dataNode1);
+        expectedQueryBuilder.addChild(joinNode, dataNode2);
+
+        IntermediateQuery query1 = expectedQueryBuilder.build();
+
+        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, query1));
+    }
+
+    @Test
+    public void testLeftJoinElimination3() throws EmptyQueryException {
+
+        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(metadata);
+        DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_4_PREDICATE, M, M1, M2, N1);
+        ConstructionNode constructionNode = new ConstructionNodeImpl(projectionAtom.getVariables());
+        LeftJoinNode leftJoinNode = new LeftJoinNodeImpl(Optional.empty());
+        ExtensionalDataNode dataNode1 =  new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE2a_PREDICATE, M, M1, M2));
+        ExtensionalDataNode dataNode2 =  new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE1a_PREDICATE, M1, M, N1, O1));
+
+        queryBuilder.init(projectionAtom, constructionNode);
+        queryBuilder.addChild(constructionNode, leftJoinNode);
+        queryBuilder.addChild(leftJoinNode, dataNode1, LEFT);
+        queryBuilder.addChild(leftJoinNode, dataNode2, RIGHT);
+
+        IntermediateQuery query = queryBuilder.build();
+        System.out.println("\nBefore optimization: \n" +  query);
+
+        IntermediateQuery optimizedQuery = query.applyProposal(new LeftJoinOptimizationProposalImpl(leftJoinNode))
+                .getResultingQuery();
+
+        System.out.println("\n After optimization: \n" +  optimizedQuery);
+
+
+        IntermediateQueryBuilder expectedQueryBuilder = new DefaultIntermediateQueryBuilder(metadata);
+        expectedQueryBuilder.init(projectionAtom, constructionNode);
+        expectedQueryBuilder.addChild(constructionNode, leftJoinNode);
+        expectedQueryBuilder.addChild(leftJoinNode, dataNode1, LEFT);
+        expectedQueryBuilder.addChild(leftJoinNode, dataNode2, RIGHT);
+
+        IntermediateQuery query1 = expectedQueryBuilder.build();
+
+        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, query1));
+    }
+
+
+    @Test
+    public void testLeftJoinEliminationWithFilterCondition2() throws EmptyQueryException {
+
+        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(metadata);
+        DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_4_PREDICATE, M, M1, O, N1);
+        ConstructionNode constructionNode = new ConstructionNodeImpl(projectionAtom.getVariables());
+        LeftJoinNode leftJoinNode = new LeftJoinNodeImpl(Optional.of(DATA_FACTORY.getImmutableExpression(ExpressionOperation.IS_NOT_NULL, N1)));
+        ExtensionalDataNode dataNode1 =  new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE2_PREDICATE, M, M1, O));
+        ExtensionalDataNode dataNode2 =  new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, M1, O1, N1));
+
+        queryBuilder.init(projectionAtom, constructionNode);
+        queryBuilder.addChild(constructionNode, leftJoinNode);
+        queryBuilder.addChild(leftJoinNode, dataNode1, LEFT);
+        queryBuilder.addChild(leftJoinNode, dataNode2, RIGHT);
+
+        IntermediateQuery query = queryBuilder.build();
+        System.out.println("\nBefore optimization: \n" +  query);
+
+        IntermediateQuery optimizedQuery = query.applyProposal(new LeftJoinOptimizationProposalImpl(leftJoinNode))
+                .getResultingQuery();
+
+        System.out.println("\n After optimization: \n" +  optimizedQuery);
+
+
+        IntermediateQueryBuilder expectedQueryBuilder = new DefaultIntermediateQueryBuilder(metadata);
+        expectedQueryBuilder.init(projectionAtom, constructionNode);
+        expectedQueryBuilder.addChild(constructionNode, leftJoinNode);
+        expectedQueryBuilder.addChild(leftJoinNode, dataNode1, LEFT);
+        expectedQueryBuilder.addChild(leftJoinNode, dataNode2, RIGHT);
+
+        IntermediateQuery query1 = expectedQueryBuilder.build();
+
+        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, query1));
+    }
+
+    @Test
+    public void testLeftJoinEliminationWithFilterCondition4() throws EmptyQueryException {
+
+        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(metadata);
+        DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_4_PREDICATE, M, M1, O, N1);
+        ConstructionNode constructionNode = new ConstructionNodeImpl(projectionAtom.getVariables());
+        LeftJoinNode leftJoinNode = new LeftJoinNodeImpl(Optional.of(
+                        DATA_FACTORY.getImmutableExpression(ExpressionOperation.EQ, O1, TWO)));
+        ExtensionalDataNode dataNode1 =  new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE2_PREDICATE, M, M1, O));
+        ExtensionalDataNode dataNode2 =  new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, M1, N1, O1));
+
+        queryBuilder.init(projectionAtom, constructionNode);
+        queryBuilder.addChild(constructionNode, leftJoinNode);
+        queryBuilder.addChild(leftJoinNode, dataNode1, LEFT);
+        queryBuilder.addChild(leftJoinNode, dataNode2, RIGHT);
+
+        IntermediateQuery query = queryBuilder.build();
+        System.out.println("\nBefore optimization: \n" +  query);
+
+        IntermediateQuery optimizedQuery = query.applyProposal(new LeftJoinOptimizationProposalImpl(leftJoinNode))
+                .getResultingQuery();
+
+        System.out.println("\n After optimization: \n" +  optimizedQuery);
+
+
+        IntermediateQueryBuilder expectedQueryBuilder = new DefaultIntermediateQueryBuilder(metadata);
+        expectedQueryBuilder.init(projectionAtom, constructionNode);
+        expectedQueryBuilder.addChild(constructionNode, leftJoinNode);
+        expectedQueryBuilder.addChild(leftJoinNode, dataNode1, LEFT);
+        expectedQueryBuilder.addChild(leftJoinNode, dataNode2, RIGHT);
 
         IntermediateQuery query1 = expectedQueryBuilder.build();
 
