@@ -6,6 +6,7 @@ import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
 import it.unibz.inf.ontop.owlrefplatform.core.abox.SemanticIndexURIMap;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.*;
 import it.unibz.inf.ontop.owlrefplatform.core.optimization.BasicJoinOptimizer;
+import it.unibz.inf.ontop.owlrefplatform.core.optimization.BasicLeftJoinOptimizer;
 import it.unibz.inf.ontop.owlrefplatform.core.queryevaluation.SPARQLQueryUtility;
 import it.unibz.inf.ontop.owlrefplatform.core.reformulation.QueryRewriter;
 import it.unibz.inf.ontop.owlrefplatform.core.srcquerygeneration.SQLQueryGenerator;
@@ -232,6 +233,10 @@ public class QuestQueryProcessor {
 
 					log.debug("New lifted query: \n" + intermediateQuery.toString());
 
+
+					BasicLeftJoinOptimizer leftJoinOptimizer = new BasicLeftJoinOptimizer();
+					intermediateQuery = leftJoinOptimizer.optimize(intermediateQuery);
+					log.debug("New query after left join optimization: \n" + intermediateQuery.toString());
 
 					BasicJoinOptimizer joinOptimizer = new BasicJoinOptimizer();
 					intermediateQuery = joinOptimizer.optimize(intermediateQuery);
