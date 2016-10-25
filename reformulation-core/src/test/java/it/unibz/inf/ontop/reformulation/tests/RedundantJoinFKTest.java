@@ -27,10 +27,10 @@ import static junit.framework.TestCase.assertTrue;
  */
 public class RedundantJoinFKTest {
 
-    private final static AtomPredicate TABLE1_PREDICATE = new AtomPredicateImpl("table1", 2);
-    private final static AtomPredicate TABLE2_PREDICATE = new AtomPredicateImpl("table2", 2);
-    private final static AtomPredicate TABLE3_PREDICATE = new AtomPredicateImpl("table3", 3);
-    private final static AtomPredicate TABLE4_PREDICATE = new AtomPredicateImpl("table4", 3);
+    private final static AtomPredicate TABLE1_PREDICATE = new AtomPredicateImpl("TABLE1", 2);
+    private final static AtomPredicate TABLE2_PREDICATE = new AtomPredicateImpl("TABLE2", 2);
+    private final static AtomPredicate TABLE3_PREDICATE = new AtomPredicateImpl("TABLE3", 3);
+    private final static AtomPredicate TABLE4_PREDICATE = new AtomPredicateImpl("TABLE4", 3);
     private final static AtomPredicate ANS1_PREDICATE = new AtomPredicateImpl("ans1", 1);
     private final static OBDADataFactory DATA_FACTORY = OBDADataFactoryImpl.getInstance();
     private final static Variable X = DATA_FACTORY.getVariable("X");
