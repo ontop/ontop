@@ -233,13 +233,13 @@ public class QuestQueryProcessor {
 				log.debug("New lifted query: \n" + intermediateQuery.toString());
 
 
-					BasicLeftJoinOptimizer leftJoinOptimizer = new BasicLeftJoinOptimizer();
-					intermediateQuery = leftJoinOptimizer.optimize(intermediateQuery);
-					log.debug("New query after left join optimization: \n" + intermediateQuery.toString());
+				BasicLeftJoinOptimizer leftJoinOptimizer = new BasicLeftJoinOptimizer();
+				intermediateQuery = leftJoinOptimizer.optimize(intermediateQuery);
+				log.debug("New query after left join optimization: \n" + intermediateQuery.toString());
 
-					BasicJoinOptimizer joinOptimizer = new BasicJoinOptimizer();
-					intermediateQuery = joinOptimizer.optimize(intermediateQuery);
-					log.debug("New query after join optimization: \n" + intermediateQuery.toString());
+				BasicJoinOptimizer joinOptimizer = new BasicJoinOptimizer();
+				intermediateQuery = joinOptimizer.optimize(intermediateQuery);
+				log.debug("New query after join optimization: \n" + intermediateQuery.toString());
 
 
 				programAfterUnfolding = IntermediateQueryToDatalogTranslator.translate(intermediateQuery);
