@@ -2,11 +2,15 @@ package it.unibz.inf.ontop.reformulation.tests;
 
 import java.util.Optional;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMultimap;
+import com.google.common.collect.ImmutableSet;
 import fj.P;
 import fj.P2;
 import it.unibz.inf.ontop.model.impl.AtomPredicateImpl;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
+import it.unibz.inf.ontop.model.impl.URITemplatePredicateImpl;
+import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionImpl;
 import it.unibz.inf.ontop.pivotalrepr.equivalence.IQSyntacticEquivalenceChecker;
 import it.unibz.inf.ontop.pivotalrepr.impl.*;
 import it.unibz.inf.ontop.pivotalrepr.impl.tree.DefaultIntermediateQueryBuilder;
@@ -22,20 +26,29 @@ import static it.unibz.inf.ontop.model.ExpressionOperation.LT;
 import static junit.framework.TestCase.assertTrue;
 
 /**
- * TODO: explain
+ * Optimizations for inner joins based on unique constraints (like PKs).
+ *
+ * For self-joins
+ *
  */
-
-public class RedundantJoinTest {
+public class RedundantSelfJoinTest {
 
     private final static AtomPredicate TABLE1_PREDICATE = new AtomPredicateImpl("table1", 3);
     private final static AtomPredicate TABLE2_PREDICATE = new AtomPredicateImpl("table2", 3);
     private final static AtomPredicate TABLE3_PREDICATE = new AtomPredicateImpl("table3", 3);
+    private final static AtomPredicate TABLE4_PREDICATE = new AtomPredicateImpl("table4", 2);
+    private final static AtomPredicate TABLE5_PREDICATE = new AtomPredicateImpl("table5", 2);
     private final static AtomPredicate ANS1_PREDICATE = new AtomPredicateImpl("ans1", 3);
     private final static AtomPredicate ANS1_PREDICATE_1 = new AtomPredicateImpl("ans1", 1);
     private final static OBDADataFactory DATA_FACTORY = OBDADataFactoryImpl.getInstance();
     private final static Variable X = DATA_FACTORY.getVariable("X");
     private final static Variable Y = DATA_FACTORY.getVariable("Y");
-    private final static Variable Z = DATA_FACTORY.getVariable("z");
+    private final static Variable Z = DATA_FACTORY.getVariable("Z");
+    private final static Variable A = DATA_FACTORY.getVariable("A");
+    private final static Variable B = DATA_FACTORY.getVariable("B");
+    private final static Variable C = DATA_FACTORY.getVariable("C");
+    private final static Variable D = DATA_FACTORY.getVariable("D");
+    private final static Variable P1 = DATA_FACTORY.getVariable("P");
     private final static Constant TWO = DATA_FACTORY.getConstantLiteral("2");
 
     private final static Variable M = DATA_FACTORY.getVariable("m");
@@ -52,7 +65,11 @@ public class RedundantJoinTest {
 
     private final MetadataForQueryOptimization metadata;
 
-    public RedundantJoinTest() {
+    private static URITemplatePredicate URI_PREDICATE_ONE_VAR =  new URITemplatePredicateImpl(2);
+    private static Constant URI_TEMPLATE_STR_1 =  DATA_FACTORY.getConstantLiteral("http://example.org/ds1/{}");
+    private static Constant URI_TEMPLATE_STR_2 =  DATA_FACTORY.getConstantLiteral("http://example.org/ds2/{}");
+
+    public RedundantSelfJoinTest() {
         metadata = initMetadata();
     }
 
@@ -68,10 +85,21 @@ public class RedundantJoinTest {
          * Table 2: non-composite unique constraint and regular field
          */
         uniqueKeyBuilder.put(TABLE2_PREDICATE, ImmutableList.of(2));
+
         /**
          * Table 3: composite unique constraint over the first TWO columns
          */
         uniqueKeyBuilder.put(TABLE3_PREDICATE, ImmutableList.of(1, 2));
+
+        /**
+         * Table 4: composite unique constraint over the first column
+         */
+        uniqueKeyBuilder.put(TABLE4_PREDICATE, ImmutableList.of(1));
+
+        /**
+         * Table 5: composite unique constraint over the second column
+         */
+        uniqueKeyBuilder.put(TABLE5_PREDICATE, ImmutableList.of(2));
 
         return new MetadataForQueryOptimizationImpl(
                 DBMetadataExtractor.createDummyMetadata(),
@@ -496,5 +524,12 @@ public class RedundantJoinTest {
         return P.p(queryBuilder, joinNode);
     }
 
+    private static ImmutableFunctionalTerm generateURI1(VariableOrGroundTerm argument) {
+        return DATA_FACTORY.getImmutableFunctionalTerm(URI_PREDICATE_ONE_VAR, URI_TEMPLATE_STR_1, argument);
+    }
+
+    private static ImmutableFunctionalTerm generateURI2(VariableOrGroundTerm argument) {
+        return DATA_FACTORY.getImmutableFunctionalTerm(URI_PREDICATE_ONE_VAR, URI_TEMPLATE_STR_2, argument);
+    }
 
 }
