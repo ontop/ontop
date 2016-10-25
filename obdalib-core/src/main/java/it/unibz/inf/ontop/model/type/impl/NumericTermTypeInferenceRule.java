@@ -24,15 +24,15 @@ public class NumericTermTypeInferenceRule extends UnifierTermTypeInferenceRule {
     /**
      * Checks that all the terms are numeric
      */
-    protected void doAdditionalChecks(List<Term> terms, ImmutableList<Optional<TermType>> argumentTypes)
+    protected void doAdditionalChecks(ImmutableList<Optional<TermType>> argumentTypes)
             throws TermTypeException {
-        IntStream.range(0, terms.size())
+        IntStream.range(0, argumentTypes.size())
                 .forEach(i ->  {
                     if(!argumentTypes.get(i)
                             .map(t -> NUMERIC_TYPES.contains(t.getColType()))
                             .orElse(true)) {
                         // TODO: refactor the exception
-                        throw new TermTypeException(terms.get(i), null, argumentTypes.get(i).get());
+                        throw new TermTypeException(null, argumentTypes.get(i).get());
                     }
                 });
     }

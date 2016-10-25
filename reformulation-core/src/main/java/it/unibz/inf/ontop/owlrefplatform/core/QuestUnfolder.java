@@ -1,7 +1,9 @@
 package it.unibz.inf.ontop.owlrefplatform.core;
 
 import com.google.common.base.Joiner;
-import com.google.common.collect.*;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMultimap;
+import com.google.common.collect.Multimap;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.AtomPredicateImpl;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
@@ -18,10 +20,10 @@ import it.unibz.inf.ontop.owlrefplatform.core.unfolding.DatalogUnfolder;
 import it.unibz.inf.ontop.parser.PreprocessProjection;
 import it.unibz.inf.ontop.pivotalrepr.MetadataForQueryOptimization;
 import it.unibz.inf.ontop.pivotalrepr.impl.MetadataForQueryOptimizationImpl;
+import it.unibz.inf.ontop.sql.DBMetadata;
 import it.unibz.inf.ontop.utils.Mapping2DatalogConverter;
 import it.unibz.inf.ontop.utils.MappingSplitter;
 import it.unibz.inf.ontop.utils.MetaMappingExpander;
-import it.unibz.inf.ontop.sql.DBMetadata;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.statement.select.Select;
@@ -145,7 +147,7 @@ public class QuestUnfolder {
 			String finalMappings = Joiner.on("\n").join(unfoldingProgram);
 			log.debug("Final set of mappings: \n {}", finalMappings);
 		}
-		
+
 		unfolder = new DatalogUnfolder(unfoldingProgram, pkeys);
 		
 		this.ufp = unfoldingProgram;
@@ -205,8 +207,8 @@ public class QuestUnfolder {
 			String finalMappings = Joiner.on("\n").join(unfoldingProgram);
 			log.debug("Final set of mappings: \n {}", finalMappings);
 		}
-		
-		unfolder = new DatalogUnfolder(unfoldingProgram, pkeys);	
+
+		unfolder = new DatalogUnfolder(unfoldingProgram, pkeys);
 		
 		this.ufp = unfoldingProgram;
 	}
@@ -492,6 +494,9 @@ public class QuestUnfolder {
 		return objectPropertiesMapped;
 	}
 
+	public ImmutableMultimap<Predicate, CQIE> getMappings(){
+		return unfolder.getMappings();
+	}
 
 
 	public DatalogProgram unfold(DatalogProgram programAfterRewriting) {

@@ -60,11 +60,7 @@ public class PullVariableOutOfDataNodeExecutorImpl implements PullVariableOutOfD
                                                                       IntermediateQuery query,
                                                                       QueryTreeComponent treeComponent)
             throws InvalidQueryOptimizationProposalException {
-        try {
-            return pullOut(proposal, query, treeComponent);
-        } catch (NotNeededNodeException e) {
-            throw new RuntimeException("Unexpected exception: " + e.getMessage());
-        }
+        return pullOut(proposal, query, treeComponent);
     }
 
     /**
@@ -74,7 +70,7 @@ public class PullVariableOutOfDataNodeExecutorImpl implements PullVariableOutOfD
                                                                          IntermediateQuery query,
                                                                          QueryTreeComponent treeComponent)
             throws InvalidQueryOptimizationProposalException, IllegalTreeUpdateException, QueryNodeTransformationException,
-            NotNeededNodeException, QueryNodeSubstitutionException {
+            QueryNodeSubstitutionException {
         DataNode originalFocusNode = proposal.getFocusNode();
         ImmutableMap<Integer, VariableRenaming> renamingMap = generateRenamingMap(originalFocusNode, proposal.getIndexes(),
                 query);
@@ -227,7 +223,7 @@ public class PullVariableOutOfDataNodeExecutorImpl implements PullVariableOutOfD
      */
     protected FocusNodeUpdate generateNewFocusNodeAndSubstitution(DataNode originalFocusNode,
                                                                   ImmutableMap<Integer, VariableRenaming> renamingMap)
-            throws QueryNodeTransformationException, NotNeededNodeException, QueryNodeSubstitutionException {
+            throws QueryNodeTransformationException, QueryNodeSubstitutionException {
 
         if (originalFocusNode instanceof ConstructionNode) {
             return generateUpdate4ConstructionNode((ConstructionNode) originalFocusNode, renamingMap);

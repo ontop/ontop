@@ -21,15 +21,18 @@ package it.unibz.inf.ontop.owlrefplatform.core.translator;
  */
 
 
-import java.util.*;
-
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.*;
-import it.unibz.inf.ontop.model.impl.*;
-import it.unibz.inf.ontop.utils.ImmutableCollectors;
-import org.slf4j.LoggerFactory;
+import it.unibz.inf.ontop.model.impl.AtomPredicateImpl;
+import it.unibz.inf.ontop.model.impl.ImmutabilityTools;
+import it.unibz.inf.ontop.model.impl.MutableQueryModifiersImpl;
+import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.pivotalrepr.*;
+import it.unibz.inf.ontop.pivotalrepr.impl.ConstructionNodeImpl;
+import org.slf4j.LoggerFactory;
+
+import java.util.*;
 
 import static it.unibz.inf.ontop.model.impl.ImmutabilityTools.convertToMutableFunction;
 
@@ -45,17 +48,19 @@ import static it.unibz.inf.ontop.model.impl.ImmutabilityTools.convertToMutableFu
 public class IntermediateQueryToDatalogTranslator {
 
 
-	private static class RuleHead {
-		public final ConstructionNode constructionNode;
-		public final DataAtom atom;
 
-		private RuleHead(ConstructionNode constructionNode, DataAtom headAtom) {
-			this.constructionNode = constructionNode;
-			this.atom = headAtom;
-		}
+	private static class RuleHead {
+		public final ImmutableSubstitution<ImmutableTerm> substitution;
+		public final DataAtom atom;
+		public final Optional<QueryNode> optionalChildNode;
+
+		private RuleHead(ImmutableSubstitution<ImmutableTerm> substitution, DataAtom atom, Optional<QueryNode> optionalChildNode) {
+			this.atom = atom;
+            this.substitution = substitution;
+            this.optionalChildNode = optionalChildNode;
+        }
 	}
 
-	
 	private final static OBDADataFactory ofac = OBDADataFactoryImpl.getInstance();
 	
 	//private final DatatypeFactory dtfac = OBDADataFactoryImpl.getInstance().getDatatypeFactory();
@@ -115,7 +120,7 @@ public class IntermediateQueryToDatalogTranslator {
 	private void translate(IntermediateQuery query, DatalogProgram pr, ConstructionNode root) {
 
 		Queue<RuleHead> heads = new LinkedList<>();
-		heads.add(new RuleHead(root, query.getProjectionAtom()));
+		heads.add(new RuleHead(root.getSubstitution(), query.getProjectionAtom(),query.getFirstChild(root)));
 
 		// Mutable (append-only)
 		Map<ConstructionNode, DataAtom> subQueryProjectionAtoms = new HashMap<>();
@@ -127,7 +132,7 @@ public class IntermediateQueryToDatalogTranslator {
 			RuleHead head = heads.poll();
 
 			//Applying substitutions in the head.
-			ImmutableFunctionalTerm substitutedHeadAtom = head.constructionNode.getSubstitution().applyToFunctionalTerm(
+			ImmutableFunctionalTerm substitutedHeadAtom = head.substitution.applyToFunctionalTerm(
 					head.atom);
 
 			List<Function> atoms = new LinkedList<>();
@@ -137,13 +142,11 @@ public class IntermediateQueryToDatalogTranslator {
 
 			pr.appendRule(newrule);
 
-			//Iterating over the nodes and constructing the rule
-			for (QueryNode node : query.getChildren(head.constructionNode)) {
+            head.optionalChildNode.ifPresent(node -> {
+                List<Function> uAtoms = getAtomFrom(query, node, heads, subQueryProjectionAtoms);
+                newrule.getBody().addAll(uAtoms);
+            });
 
-				List<Function> uAtoms = getAtomFrom(query, node, heads, subQueryProjectionAtoms);
-				newrule.getBody().addAll(uAtoms);
-
-			} //end-for
 		}
 	}
 
@@ -167,10 +170,10 @@ public class IntermediateQueryToDatalogTranslator {
 			ConstructionNode constructionNode = (ConstructionNode) node;
 			DataAtom projectionAtom = Optional.ofNullable(
 					subQueryProjectionAtoms.get(constructionNode))
-					.map(atom -> adaptProjectionAtom(atom, constructionNode))
+					//.map(atom -> adaptProjectionAtom(atom, constructionNode))
 					.orElseGet(() -> generateProjectionAtom(constructionNode.getVariables()));
 
-			heads.add(new RuleHead(constructionNode, projectionAtom));
+			heads.add(new RuleHead(constructionNode.getSubstitution(), projectionAtom,te.getFirstChild(constructionNode)));
 			subQueryProjectionAtoms.put(constructionNode, projectionAtom);
 			Function mutAt = convertToMutableFunction(projectionAtom);
 			body.add(mutAt);
@@ -242,51 +245,43 @@ public class IntermediateQueryToDatalogTranslator {
 
 		} else if (node instanceof UnionNode) {
 
-			ConstructionNode parentNode = te.getParent(node)
+			Optional<ConstructionNode> parentNode = te.getParent(node)
 					.filter(p -> p instanceof ConstructionNode)
-					.map(p -> (ConstructionNode) p)
-					.orElseThrow(() -> new IllegalStateException("Invalid IQ: " +
-							"a UNION node must have a ConstructionNode as parent"));
+					.map(p -> (ConstructionNode) p);
 
-			DistinctVariableOnlyDataAtom childIdealProjectionAtom = generateProjectionAtom(
-					parentNode.getVariables());
-			
-			for (QueryNode child : te.getChildren(node)) {
-				ConstructionNode childConstructionNode =(ConstructionNode) child;
-				DataAtom childAtom = adaptProjectionAtom(childIdealProjectionAtom, childConstructionNode);
-				subQueryProjectionAtoms.put(childConstructionNode, childAtom);
-				heads.add(new RuleHead(childConstructionNode, childAtom));
-		
-			} //end for
+			DistinctVariableOnlyDataAtom freshHeadAtom;
+			if(parentNode.isPresent()) {
+				freshHeadAtom = generateProjectionAtom(parentNode.get().getChildVariables());
+			}
+			else{
+				freshHeadAtom = generateProjectionAtom(((UnionNode) node).getVariables());
+			}
 
-			Function bodyAtom = convertToMutableFunction(childIdealProjectionAtom);
+
+            for (QueryNode child : te.getChildren(node)) {
+
+                if (child instanceof ConstructionNode) {
+                    ConstructionNode cn = (ConstructionNode) child;
+                    Optional<QueryNode> grandChild = te.getFirstChild(cn);
+                    subQueryProjectionAtoms.put(cn, freshHeadAtom);
+                    heads.add(new RuleHead(cn.getSubstitution(), freshHeadAtom, grandChild));
+                } else {
+                    ConstructionNode cn = new ConstructionNodeImpl(((UnionNode) node).getVariables());
+                    subQueryProjectionAtoms.put(cn, freshHeadAtom);
+                    heads.add(new RuleHead(cn.getSubstitution(), freshHeadAtom, Optional.ofNullable(child)));
+                }
+
+
+            } //end for
+
+			Function bodyAtom = convertToMutableFunction(freshHeadAtom);
 			body.add(bodyAtom);
 			return body;
-			
 
-						
 		} else {
-			 throw new UnsupportedOperationException("Type od node in the intermediate tree is unknown!!");
+			 throw new UnsupportedOperationException("Type of node in the intermediate tree is unknown!!");
 		}
-	
-	}
 
-	private DataAtom adaptProjectionAtom(DataAtom idealProjectionAtom, ConstructionNode constructionNode) {
-		ImmutableList<? extends VariableOrGroundTerm> arguments = idealProjectionAtom.getArguments();
-		ImmutableSet<Variable> projectedVariables = constructionNode.getVariables();
-
-		if (ImmutableSet.copyOf(arguments).equals(projectedVariables)) {
-			return idealProjectionAtom;
-		}
-		else {
-			ImmutableList<VariableOrGroundTerm> newArguments = arguments.stream()
-					.map(arg -> projectedVariables.contains(arg)
-							? arg
-							: OBDAVocabulary.NULL)
-					.collect(ImmutableCollectors.toList());
-
-			return ofac.getDataAtom(idealProjectionAtom.getPredicate(), newArguments);
-		}
 	}
 
 	private DistinctVariableOnlyDataAtom generateProjectionAtom(ImmutableSet<Variable> projectedVariables) {

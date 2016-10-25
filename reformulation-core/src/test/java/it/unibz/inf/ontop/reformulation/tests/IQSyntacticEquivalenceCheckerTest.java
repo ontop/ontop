@@ -19,7 +19,6 @@ import org.junit.Test;
 
 import java.util.Optional;
 
-import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.TestCase.assertTrue;
 

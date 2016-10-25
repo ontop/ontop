@@ -102,6 +102,10 @@ public class ExpressionEvaluator {
 				return new Evaluation(true);
 			}
 		}
+		else if (evaluatedTerm instanceof Variable) {
+		    return new Evaluation(fac.getImmutableExpression(ExpressionOperation.IS_TRUE,
+                    ImmutabilityTools.convertIntoImmutableTerm(evaluatedTerm)));
+        }
 		else {
 			throw new RuntimeException("Unexpected term returned after evaluation: " + evaluatedTerm);
 		}
@@ -287,8 +291,11 @@ public class ExpressionEvaluator {
 				 || pred == ExpressionOperation.MULTIPLY || pred == ExpressionOperation.DIVIDE) {
 			
 			Function returnedDatatype = getDatatype(term);
-			if (returnedDatatype != null && isNumeric((ValueConstant) returnedDatatype.getTerm(0))) 
-				return term;
+            //expression has not been removed
+            if(returnedDatatype != null &&
+                    (returnedDatatype.getFunctionSymbol().equals(pred) || isNumeric((ValueConstant) returnedDatatype.getTerm(0)))){
+                return term;
+            }
 			else
 				return OBDAVocabulary.FALSE;
 			
@@ -422,8 +429,13 @@ public class ExpressionEvaluator {
 		{
 			//return numerical if arguments have same type
 			Term arg1 = function.getTerm(0);
-			Predicate pred1 = getDatatypePredicate(arg1);
 			Term arg2 = function.getTerm(1);
+
+			if (arg1 instanceof Variable|| arg2 instanceof Variable){
+				return function;
+			}
+			Predicate pred1 = getDatatypePredicate(arg1);
+
 			Predicate pred2 = getDatatypePredicate(arg2);
 			if (pred1.equals(pred2) || (isDouble(pred1) && isNumeric(pred2))) {
 				return fac.getUriTemplateForDatatype(pred1.toString());
@@ -487,7 +499,11 @@ public class ExpressionEvaluator {
 		// Create a default return constant: blank language with literal type.
 		Term emptyconstant = fac.getTypedTerm(fac.getConstantLiteral("", COL_TYPE.LITERAL), COL_TYPE.LITERAL);
 
-		if (!(innerTerm instanceof Function)) {
+        if (innerTerm instanceof Variable) {
+            return term;
+        }
+
+        if (!(innerTerm instanceof Function)) {
 			return emptyconstant;
 		} 
 		Function function = (Function) innerTerm;
@@ -849,20 +865,35 @@ public class ExpressionEvaluator {
 	private Term evalUriFunctionsWithSingleTerm(Function uriFunction1, Function uriFunction2, boolean isEqual) {
 		Term term1 = uriFunction1.getTerm(0);
 		Term term2 = uriFunction2.getTerm(0);
-//		if (!(term1 instanceof ValueConstant)) {
-//			return null;
-//		}
+
 		if (term2 instanceof Variable) {
+
 			if (isEqual) {
 				return fac.getFunctionEQ(term2, term1);
 			} else {
+				if(term1 instanceof ValueConstant){
+					if (isEqual)
+						return fac.getFunctionEQ(term1, term2);
+					else
+						return fac.getFunctionNEQ(term1, term2);
+				}
 				return fac.getFunctionNEQ(term2, term1);
 			}
+
 		} else if (term2 instanceof ValueConstant) {
-			if (term1.equals(term2)) 
+
+			if (term1.equals(term2))
 				return fac.getBooleanConstant(isEqual);
-			else 
+			else
+				{
+				if (term1 instanceof Variable) {
+					if (isEqual)
+						return fac.getFunctionEQ(term1, term2);
+					else
+						return fac.getFunctionNEQ(term1, term2);
+				}
 				return fac.getBooleanConstant(!isEqual);
+			}
 		}
 		return null;
 	}

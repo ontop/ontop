@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.model.type;
 
 import com.google.common.collect.ImmutableList;
+import it.unibz.inf.ontop.model.Predicate;
 import it.unibz.inf.ontop.model.Predicate.COL_TYPE;
 import it.unibz.inf.ontop.model.Term;
 import it.unibz.inf.ontop.model.TermType;
@@ -18,5 +19,13 @@ public interface TermTypeInferenceRule {
      *
      */
     Optional<TermType> inferType(List<Term> terms, ImmutableList<Optional<COL_TYPE>> expectedBaseTypes)
+            throws TermTypeException;
+
+    /**
+     * TODO: explain
+     *
+     */
+    Optional<TermType> inferTypeFromArgumentTypes(ImmutableList<Optional<TermType>> actualArgumentTypes,
+                                                  ImmutableList<Optional<COL_TYPE>> expectedBaseTypes)
             throws TermTypeException;
 }

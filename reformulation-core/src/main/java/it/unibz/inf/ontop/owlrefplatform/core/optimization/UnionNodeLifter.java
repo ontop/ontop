@@ -22,7 +22,7 @@ public interface UnionNodeLifter {
      * @param unionVariables variables usually coming from conflicting bindings in the unionNode
      * @return querynode to which the union will be lifted, if possible
      */
-    public Optional<QueryNode> chooseLevelLift(IntermediateQuery currentQuery, UnionNode unionNode, ImmutableSet<Variable> unionVariables);
+    public Optional<QueryNode> chooseLiftLevel(IntermediateQuery currentQuery, UnionNode unionNode, ImmutableSet<Variable> unionVariables);
 
 
 }

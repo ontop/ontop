@@ -16,6 +16,11 @@ public class TermTypeException extends OntopRuntimeException {
                 + ", actual: " + actualTermType);
     }
 
+    public TermTypeException(TermType expectedTermType, TermType actualTermType) {
+        super("Incompatible type inferred " + ": expected: " + expectedTermType
+                + ", actual: " + actualTermType);
+    }
+
     /**
      * Incompatibility detected in an expression
      */

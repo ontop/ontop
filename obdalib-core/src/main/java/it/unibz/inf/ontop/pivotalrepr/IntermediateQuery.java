@@ -3,9 +3,9 @@ package it.unibz.inf.ontop.pivotalrepr;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.DistinctVariableOnlyDataAtom;
+import it.unibz.inf.ontop.model.Variable;
 import it.unibz.inf.ontop.pivotalrepr.proposal.InvalidQueryOptimizationProposalException;
 import it.unibz.inf.ontop.pivotalrepr.proposal.ProposalResults;
-import it.unibz.inf.ontop.model.Variable;
 import it.unibz.inf.ontop.pivotalrepr.proposal.QueryOptimizationProposal;
 
 import java.util.Optional;
@@ -55,6 +55,10 @@ public interface IntermediateQuery {
      * TODO: find a better name
      */
     ImmutableList<QueryNode> getSubTreeNodesInTopDownOrder(QueryNode currentNode);
+
+    Stream<IntensionalDataNode> getIntensionalNodes();
+
+    Stream<TrueNode> getTrueNodes();
 
     boolean contains(QueryNode node);
 

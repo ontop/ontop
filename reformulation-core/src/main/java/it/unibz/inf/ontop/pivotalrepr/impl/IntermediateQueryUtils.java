@@ -1,21 +1,22 @@
 package it.unibz.inf.ontop.pivotalrepr.impl;
 
-import java.util.AbstractMap;
-import java.util.Optional;
-
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import it.unibz.inf.ontop.model.*;
+import it.unibz.inf.ontop.model.DistinctVariableOnlyDataAtom;
+import it.unibz.inf.ontop.model.Variable;
+import it.unibz.inf.ontop.model.VariableGenerator;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.InjectiveVar2VarSubstitution;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.InjectiveVar2VarSubstitutionImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.NeutralSubstitution;
-import it.unibz.inf.ontop.pivotalrepr.impl.tree.DefaultIntermediateQueryBuilder;
 import it.unibz.inf.ontop.pivotalrepr.*;
+import it.unibz.inf.ontop.pivotalrepr.impl.tree.DefaultIntermediateQueryBuilder;
 import it.unibz.inf.ontop.utils.FunctionalTools;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
+import java.util.AbstractMap;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * TODO: explain
@@ -31,7 +32,7 @@ public class IntermediateQueryUtils {
     /**
      * Can be overwritten.
      */
-    protected IntermediateQueryBuilder newBuilder(MetadataForQueryOptimization metadata) {
+    private static IntermediateQueryBuilder newBuilder(MetadataForQueryOptimization metadata) {
         return new DefaultIntermediateQueryBuilder(metadata);
     }
 
@@ -82,13 +83,22 @@ public class IntermediateQueryUtils {
                     InjectiveVar2VarSubstitution disjointVariableSetRenaming = generateNotConflictingRenaming(
                             variableGenerator, def.getKnownVariables());
 
+                    ImmutableSet<Variable> freshVariables = ImmutableSet.copyOf(
+                            disjointVariableSetRenaming.getImmutableMap().values());
+
                     InjectiveVar2VarSubstitution headSubstitution = computeRenamingSubstitution(
                             disjointVariableSetRenaming.applyToDistinctVariableOnlyDataAtom(def.getProjectionAtom()),
                             projectionAtom)
                             .orElseThrow(() -> new IllegalStateException("Bug: unexpected incompatible atoms"));
 
                     InjectiveVar2VarSubstitution renamingSubstitution =
-                            headSubstitution.composeWithAndPreserveInjectivity(disjointVariableSetRenaming)
+                            /**
+                             * fresh variables are excluded from the domain of the renaming substitution
+                             *  since they are in use in the sub-query.
+                             *
+                             *  NB: this guarantees that the renaming substitution is injective
+                             */
+                            headSubstitution.composeWithAndPreserveInjectivity(disjointVariableSetRenaming, freshVariables)
                             .orElseThrow(()-> new IllegalStateException("Bug: the renaming substitution is not injective"));
 
                     appendDefinition(queryBuilder, unionNode, def, renamingSubstitution);
@@ -149,7 +159,7 @@ public class IntermediateQueryUtils {
                                                                                ImmutableSet<Variable> variables) {
         ImmutableMap<Variable, Variable> newMap = variables.stream()
                 .map(v -> new AbstractMap.SimpleEntry<>(v, variableGenerator.generateNewVariableIfConflicting(v)))
-                .filter(pair -> pair.getKey().equals(pair.getValue()))
+                .filter(pair -> ! pair.getKey().equals(pair.getValue()))
                 .collect(ImmutableCollectors.toMap());
 
         return new InjectiveVar2VarSubstitutionImpl(newMap);
@@ -167,13 +177,7 @@ public class IntermediateQueryUtils {
          * Renames all the nodes (new objects) and maps them to original nodes
          */
         ImmutableMap<QueryNode, QueryNode> renamedNodeMap = originalNodesInTopDownOrder.stream()
-                .map(n -> {
-                    try {
-                        return new AbstractMap.SimpleEntry<>(n, n.acceptNodeTransformer(nodeRenamer));
-                    } catch (NotNeededNodeException e) {
-                        throw new IllegalStateException("Unexpected exception: " + e);
-                    }
-                })
+                .map(n -> new AbstractMap.SimpleEntry<>(n, n.acceptNodeTransformer(nodeRenamer)))
                 .collect(ImmutableCollectors.toMap());
 
         /**
@@ -220,70 +224,4 @@ public class IntermediateQueryUtils {
         return queryBuilder;
     }
 
-//    /**
-//     * TODO: explain
-//     *
-//     */
-//    public static IntermediateQueryBuilder convertToBuilderAndTransform(IntermediateQuery originalQuery,
-//                                                                        HomogeneousQueryNodeTransformer transformer)
-//            throws IntermediateQueryBuilderException, QueryNodeTransformationException, NotNeededNodeException {
-//        IntermediateQueryUtils utils = new IntermediateQueryUtils();
-//        return utils.convertToBuilderAndTransform(originalQuery, Optional.of(transformer));
-//    }
-//
-//    /**
-//     * TODO: explain
-//     *
-//     * TODO: avoid the use of a recursive method. Use a stack instead.
-//     *
-//     */
-//    protected IntermediateQueryBuilder convertToBuilderAndTransform(IntermediateQuery originalQuery,
-//                                                                  Optional<HomogeneousQueryNodeTransformer> optionalTransformer)
-//            throws IntermediateQueryBuilderException, QueryNodeTransformationException, NotNeededNodeException {
-//        IntermediateQueryBuilder queryBuilder = newBuilder(originalQuery.getMetadata());
-//
-//        // Clone of the original root node and apply the transformer if available.
-//        ConstructionNode originalRootNode = originalQuery.getRootConstructionNode();
-//        ConstructionNode newRootNode;
-//        if (optionalTransformer.isPresent()) {
-//            newRootNode =  originalRootNode.acceptNodeTransformer(optionalTransformer.get()).clone();
-//        }
-//        else {
-//            newRootNode = originalRootNode.clone();
-//        }
-//
-//        queryBuilder.init(projectionAtom, newRootNode);
-//
-//        return copyChildrenNodesToBuilder(originalQuery, queryBuilder, originalRootNode, newRootNode, optionalTransformer);
-//    }
-//
-//
-//    /**
-//     * TODO: replace this implementation by a non-recursive one.
-//     */
-//    private static IntermediateQueryBuilder copyChildrenNodesToBuilder(final IntermediateQuery originalQuery,
-//                                                                       IntermediateQueryBuilder queryBuilder,
-//                                                                       final QueryNode originalParentNode,
-//                                                                       final QueryNode newParentNode,
-//                                                                       Optional<HomogeneousQueryNodeTransformer> optionalTransformer)
-//            throws IntermediateQueryBuilderException, QueryNodeTransformationException, NotNeededNodeException {
-//        for(QueryNode originalChildNode : originalQuery.getChildren(originalParentNode)) {
-//
-//            // QueryNode are mutable
-//            QueryNode newChildNode;
-//            if (optionalTransformer.isPresent()) {
-//                newChildNode = originalChildNode.acceptNodeTransformer(optionalTransformer.get()).clone();
-//            } else {
-//                newChildNode = originalChildNode.clone();
-//            }
-//
-//            Optional<NonCommutativeOperatorNode.ArgumentPosition> optionalPosition = originalQuery.getOptionalPosition(originalParentNode, originalChildNode);
-//            queryBuilder.addChild(newParentNode, newChildNode, optionalPosition);
-//
-//            // Recursive call
-//            queryBuilder = copyChildrenNodesToBuilder(originalQuery, queryBuilder, originalChildNode, newChildNode, optionalTransformer);
-//        }
-//
-//        return queryBuilder;
-//    }
 }

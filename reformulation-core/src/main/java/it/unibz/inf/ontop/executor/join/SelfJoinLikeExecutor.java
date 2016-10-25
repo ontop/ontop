@@ -401,7 +401,7 @@ public class SelfJoinLikeExecutor {
             // TODO: filter the non-bound variables from the substitution before propagating!!!
 
             SubstitutionPropagationProposal<N> propagationProposal = new SubstitutionPropagationProposalImpl<>(
-                    topNode, optionalSubstitution.get());
+                    topNode, optionalSubstitution.get(), false);
 
             // Forces the use of an internal executor (the treeComponent must remain the same).
             try {

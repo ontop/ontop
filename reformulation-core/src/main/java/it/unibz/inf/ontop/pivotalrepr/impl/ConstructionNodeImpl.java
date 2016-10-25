@@ -23,7 +23,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static it.unibz.inf.ontop.owlrefplatform.core.basicoperations.ImmutableUnificationTools.computeMGUS;
-import static it.unibz.inf.ontop.pivotalrepr.SubstitutionResults.LocalAction.*;
+import static it.unibz.inf.ontop.pivotalrepr.SubstitutionResults.LocalAction.DECLARE_AS_EMPTY;
+import static it.unibz.inf.ontop.pivotalrepr.SubstitutionResults.LocalAction.REPLACE_BY_CHILD;
 import static it.unibz.inf.ontop.pivotalrepr.impl.ConstructionNodeTools.computeNewProjectedVariables;
 import static it.unibz.inf.ontop.pivotalrepr.impl.ConstructionNodeTools.extractRelevantDescendingSubstitution;
 
@@ -100,6 +101,19 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
     public ConstructionNode acceptNodeTransformer(HomogeneousQueryNodeTransformer transformer)
             throws QueryNodeTransformationException {
         return transformer.transform(this);
+    }
+
+    @Override
+    public ImmutableSet<Variable> getChildVariables() {
+        ImmutableSet<Variable> variableDefinedByBindings = substitution.getDomain();
+
+        Stream<Variable> variablesRequiredByBindings = substitution.getImmutableMap().values().stream()
+                .flatMap(t -> t.getVariableStream());
+
+        //return only the variables that are also used in the bindings for the child of the construction node
+        return Stream.concat(projectedVariables.stream(), variablesRequiredByBindings)
+                .filter(v -> !variableDefinedByBindings.contains(v))
+                .collect(ImmutableCollectors.toSet());
     }
 
     @Override
@@ -282,14 +296,18 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
                 descendingSubstitution, substitutionToPropagate);
 
         /**
-         * The construction node is not be needed anymore
+         * The construction node is not needed anymore
          *
          * Currently, the root construction node is still required.
          */
         if (newSubstitutions.bindings.isEmpty() && !newOptionalModifiers.isPresent()
                 && query.getRootConstructionNode() != this) {
-            return new SubstitutionResultsImpl<>(REPLACE_BY_CHILD, Optional.of(substitutionToPropagate));
+            if(query.getChildren(this).isEmpty()){
+                return new SubstitutionResultsImpl<>(SubstitutionResults.LocalAction.DECLARE_AS_TRUE);
+            }
+            return new SubstitutionResultsImpl<>(SubstitutionResults.LocalAction.REPLACE_BY_CHILD, Optional.of(substitutionToPropagate));
         }
+
         /**
          * New construction node
          */
@@ -317,6 +335,14 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
          * A construction node has only one child
          */
         return new NodeTransformationProposalImpl(NodeTransformationProposedState.DECLARE_AS_EMPTY, projectedVariables);
+    }
+
+    @Override
+    public NodeTransformationProposal reactToTrueChildRemovalProposal(IntermediateQuery query, TrueNode trueNode) {
+        if (this.getVariables().isEmpty()){
+           return new NodeTransformationProposalImpl(NodeTransformationProposedState.DECLARE_AS_TRUE, ImmutableSet.of());
+        }
+       return new NodeTransformationProposalImpl(NodeTransformationProposedState.NO_LOCAL_CHANGE, ImmutableSet.of());
     }
 
     @Override

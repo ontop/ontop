@@ -1,17 +1,16 @@
 package it.unibz.inf.ontop.pivotalrepr.impl.jgrapht;
 
-import java.util.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import it.unibz.inf.ontop.model.Variable;
 import it.unibz.inf.ontop.pivotalrepr.*;
+import it.unibz.inf.ontop.pivotalrepr.impl.IllegalTreeException;
 import it.unibz.inf.ontop.pivotalrepr.impl.IllegalTreeUpdateException;
+import it.unibz.inf.ontop.pivotalrepr.impl.QueryTreeComponent;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.jgrapht.experimental.dag.DirectedAcyclicGraph;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.traverse.TopologicalOrderIterator;
-import it.unibz.inf.ontop.model.Variable;
-import it.unibz.inf.ontop.pivotalrepr.impl.IllegalTreeException;
-import it.unibz.inf.ontop.pivotalrepr.impl.QueryTreeComponent;
 
 import java.util.*;
 import java.util.stream.Stream;
@@ -150,6 +149,19 @@ public class JgraphtQueryTreeComponent implements QueryTreeComponent {
                 .filter(n -> n instanceof EmptyNode)
                 .map(n -> (EmptyNode) n)
                 .collect(ImmutableCollectors.toSet());
+    }
+
+    @Override
+    public ImmutableSet<TrueNode> getTrueNodes() {
+        return getNodesInTopDownOrder().stream()
+                .filter(n -> n instanceof TrueNode)
+                .map(n -> (TrueNode) n)
+                .collect(ImmutableCollectors.toSet());
+    }
+
+    @Override
+    public ImmutableSet<IntensionalDataNode> getIntensionalNodes() {
+        throw new RuntimeException("TO DO: support getting intensional nodes");
     }
 
     @Override

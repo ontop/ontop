@@ -8,10 +8,7 @@ import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.InjectiveVar2VarSubstitution;
 import it.unibz.inf.ontop.pivotalrepr.*;
-import it.unibz.inf.ontop.pivotalrepr.impl.EmptyNodeImpl;
-import it.unibz.inf.ontop.pivotalrepr.impl.IdentityQueryNodeTransformer;
-import it.unibz.inf.ontop.pivotalrepr.impl.QueryNodeRenamer;
-import it.unibz.inf.ontop.pivotalrepr.impl.QueryTreeComponent;
+import it.unibz.inf.ontop.pivotalrepr.impl.*;
 import it.unibz.inf.ontop.pivotalrepr.proposal.InvalidQueryOptimizationProposalException;
 import it.unibz.inf.ontop.pivotalrepr.proposal.ProposalResults;
 import it.unibz.inf.ontop.pivotalrepr.proposal.QueryMergingProposal;
@@ -22,7 +19,6 @@ import it.unibz.inf.ontop.utils.FunctionalTools;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Optional;
 import java.util.Queue;
 
@@ -62,7 +58,7 @@ public class QueryMergingExecutorImpl implements QueryMergingExecutor {
 
         private Transformation(IntermediateQuery query, QueryNode originalNode,
                                Optional<? extends ImmutableSubstitution<? extends ImmutableTerm>> substitutionToApply,
-                               HomogeneousQueryNodeTransformer renamer, QueryNode transformedParent,
+                               QueryNode transformedParent,
                                Optional<NonCommutativeOperatorNode.ArgumentPosition> optionalPosition) {
             this.transformedParent = transformedParent;
             this.optionalPosition = optionalPosition;
@@ -71,7 +67,7 @@ public class QueryMergingExecutorImpl implements QueryMergingExecutor {
              * May be recursive because some consecutive nodes in the sub-query may not be needed
              * (for instance construction nodes without any remaining binding)
              */
-            AnalysisResults analysisResults = analyze(query, originalNode, substitutionToApply, renamer);
+            AnalysisResults analysisResults = analyze(query, originalNode, substitutionToApply);
             this.nodeFromSubQuery = analysisResults.nodeFromSubQuery;
             this.transformedNode = analysisResults.transformedNode;
             this.substitutionToPropagate = analysisResults.optionalSubstitutionToPropagate;
@@ -83,55 +79,50 @@ public class QueryMergingExecutorImpl implements QueryMergingExecutor {
          */
         private static AnalysisResults analyze(
                 IntermediateQuery query, QueryNode originalNode,
-                Optional<? extends ImmutableSubstitution<? extends ImmutableTerm>> substitutionToApply,
-                HomogeneousQueryNodeTransformer renamer) {
-            try {
-                QueryNode renamedNode = originalNode.acceptNodeTransformer(renamer);
+                Optional<? extends ImmutableSubstitution<? extends ImmutableTerm>> substitutionToApply) {
 
-                if (substitutionToApply.isPresent()) {
-                    SubstitutionResults<? extends QueryNode> results = renamedNode.applyDescendingSubstitution(
-                            substitutionToApply.get(), query);
+            if (substitutionToApply.isPresent()) {
+                SubstitutionResults<? extends QueryNode> results = originalNode.applyDescendingSubstitution(
+                        substitutionToApply.get(), query);
 
-                    switch (results.getLocalAction()) {
-                        case NO_CHANGE:
-                            return new AnalysisResults(originalNode, renamedNode,
-                                    results.getSubstitutionToPropagate());
+                switch (results.getLocalAction()) {
+                    case NO_CHANGE:
+                        return new AnalysisResults(originalNode, originalNode,
+                                results.getSubstitutionToPropagate());
 
-                        case NEW_NODE:
-                            QueryNode newNode = results.getOptionalNewNode().get();
-                            if (newNode == originalNode) {
-                                throw new IllegalStateException("NEW_NODE action must not return the same node. " +
-                                        "Use NO_CHANGE instead.");
-                            }
-                            return new AnalysisResults(originalNode, newNode,
-                                    results.getSubstitutionToPropagate());
-                        /**
-                         * Recursive
-                         */
-                        case REPLACE_BY_CHILD:
-                            QueryNode replacingChild = results.getOptionalReplacingChildPosition()
-                                    .flatMap(position -> query.getChild(originalNode, position))
-                                    .orElseGet(() -> query.getFirstChild(originalNode)
-                                            .orElseThrow(() -> new IllegalStateException("No replacing child is available")));
-                            return analyze(query, replacingChild, results.getSubstitutionToPropagate(), renamer);
+                    case NEW_NODE:
+                    case DECLARE_AS_TRUE:
+                        QueryNode newNode = results.getOptionalNewNode().get();
+                        if (newNode == originalNode) {
+                            throw new IllegalStateException("NEW_NODE or DECLARE_AS_TRUE action must not return the same node. " +
+                                    "Use NO_CHANGE instead.");
+                        }
+                        return new AnalysisResults(originalNode, newNode,
+                                results.getSubstitutionToPropagate());
 
-                        case INSERT_CONSTRUCTION_NODE:
-                            throw new IllegalStateException("Construction node insertion not expected during query merging");
+                    /**
+                     * Recursive
+                     */
+                    case REPLACE_BY_CHILD:
+                        QueryNode replacingChild = results.getOptionalReplacingChildPosition()
+                                .flatMap(position -> query.getChild(originalNode, position))
+                                .orElseGet(() -> query.getFirstChild(originalNode)
+                                        .orElseThrow(() -> new IllegalStateException("No replacing child is available")));
+                        return analyze(query, replacingChild, results.getSubstitutionToPropagate());
 
-                        case DECLARE_AS_EMPTY:
-                            return new AnalysisResults(originalNode,
-                                    new EmptyNodeImpl(query.getVariables(originalNode)),
-                                    Optional.empty());
-                        default:
-                            throw new IllegalStateException("Unknown local action:" + results.getLocalAction());
-                    }
+                    case INSERT_CONSTRUCTION_NODE:
+                        throw new IllegalStateException("Construction node insertion not expected during query merging");
+
+                    case DECLARE_AS_EMPTY:
+                        return analyze(query, new EmptyNodeImpl(query.getVariables(originalNode)), substitutionToApply);
+
+                    default:
+                        throw new IllegalStateException("Unknown local action:" + results.getLocalAction());
                 }
-                else {
-                    // Empty
-                    return new AnalysisResults(originalNode, renamedNode, Optional.empty());
-                }
-            } catch (NotNeededNodeException e) {
-                throw new IllegalStateException("Unexpected exception: " + e);
+            }
+            else {
+                // Empty
+                return new AnalysisResults(originalNode, originalNode, Optional.empty());
             }
         }
 
@@ -164,15 +155,16 @@ public class QueryMergingExecutorImpl implements QueryMergingExecutor {
     public ProposalResults apply(QueryMergingProposal proposal, IntermediateQuery mainQuery,
                                  QueryTreeComponent treeComponent)
             throws InvalidQueryOptimizationProposalException, EmptyQueryException {
-        IntermediateQuery subQuery = proposal.getSubQuery();
 
-        List<IntensionalDataNode> localDataNodes = findIntensionalDataNodes(mainQuery, subQuery.getProjectionAtom());
-
-        for (IntensionalDataNode localDataNode : localDataNodes) {
-            mergeSubQuery(treeComponent, subQuery, localDataNode);
+        Optional<IntermediateQuery> optionalSubQuery = proposal.getSubQuery();
+        if (optionalSubQuery.isPresent()) {
+            mergeSubQuery(treeComponent, optionalSubQuery.get(), proposal.getIntensionalNode());
+        }
+        else {
+            removeUnsatisfiedNode(treeComponent, proposal.getIntensionalNode());
         }
 
-        // Non-final
+        // Non-final
         Optional<EmptyNode> nextEmptyNode = treeComponent.getEmptyNodes().stream()
                 .findFirst();
         while (nextEmptyNode.isPresent()) {
@@ -186,16 +178,10 @@ public class QueryMergingExecutorImpl implements QueryMergingExecutor {
         return new ProposalResultsImpl(mainQuery);
     }
 
-    /**
-     * Finds intensional data nodes that matches a data atom.
-     */
-    private ImmutableList<IntensionalDataNode> findIntensionalDataNodes(IntermediateQuery query,
-                                                                        DataAtom subsumingDataAtom) {
-        return query.getNodesInTopDownOrder().stream()
-                .filter(n -> n instanceof IntensionalDataNode)
-                .map(n -> (IntensionalDataNode)n)
-                .filter(n -> subsumingDataAtom.hasSamePredicateAndArity(n.getProjectionAtom()))
-                .collect(ImmutableCollectors.toList());
+    private void removeUnsatisfiedNode(QueryTreeComponent treeComponent, IntensionalDataNode intensionalNode) {
+
+        EmptyNode emptyNode = new EmptyNodeImpl(intensionalNode.getVariables());
+        treeComponent.replaceSubTree(intensionalNode, emptyNode);
     }
 
     /**
@@ -203,16 +189,7 @@ public class QueryMergingExecutorImpl implements QueryMergingExecutor {
      *
      */
     protected static void mergeSubQuery(QueryTreeComponent treeComponent, IntermediateQuery subQuery,
-                                        IntensionalDataNode intensionalDataNode) throws EmptyQueryException {
-        insertSubQuery(treeComponent, subQuery, intensionalDataNode);
-    }
-
-    /**
-     * TODO: explain
-     */
-    private static void insertSubQuery(final QueryTreeComponent treeComponent, final IntermediateQuery subQuery,
-                                       final IntensionalDataNode intensionalDataNode) {
-
+                                        IntensionalDataNode intensionalDataNode) {
         /**
          * Gets the parent of the intensional node and remove the latter
          */
@@ -227,20 +204,26 @@ public class QueryMergingExecutorImpl implements QueryMergingExecutor {
         InjectiveVar2VarSubstitution renamingSubstitution = generateNotConflictingRenaming(variableGenerator,
                 subQuery.getKnownVariables());
 
-        HomogeneousQueryNodeTransformer renamer = createRenamer(renamingSubstitution);
+        IntermediateQuery renamedSubQuery;
+        if(renamingSubstitution.isEmpty()){
+            renamedSubQuery = subQuery;
+        } else {
+            QueryTransformer queryRenamer = new QueryRenamer(renamingSubstitution);
+            renamedSubQuery = queryRenamer.transform(subQuery);
+        }
 
         /**
          * Starting node: the root of the sub-query
          */
-        ConstructionNode rootNode = subQuery.getRootConstructionNode();
+        ConstructionNode rootNode = renamedSubQuery.getRootConstructionNode();
         Optional<? extends ImmutableSubstitution<? extends ImmutableTerm>> optionalTau = Optional.of(extractSubstitution(
-                renamingSubstitution.applyToDistinctVariableOnlyDataAtom(subQuery.getProjectionAtom()),
+                renamingSubstitution.applyToDistinctVariableOnlyDataAtom(renamedSubQuery.getProjectionAtom()),
                 intensionalDataNode.getProjectionAtom()))
                 .filter(s -> !s.isEmpty());
 
         Queue<Transformation> originalNodesToVisit = new LinkedList<>();
-        originalNodesToVisit.add(new Transformation(subQuery, rootNode, optionalTau, renamer,
-                parentOfTheIntensionalNode, topOptionalPosition));
+        originalNodesToVisit.add(new Transformation(renamedSubQuery, rootNode, optionalTau, parentOfTheIntensionalNode,
+                topOptionalPosition));
 
 
         /**
@@ -270,11 +253,11 @@ public class QueryMergingExecutorImpl implements QueryMergingExecutor {
             if (!(nodeToInsert instanceof EmptyNode)) {
                 QueryNode originalNode = transformation.getNodeFromSubQuery();
 
-                subQuery.getChildren(originalNode).stream()
+                renamedSubQuery.getChildren(originalNode).stream()
                         .forEach(child ->
-                                originalNodesToVisit.add(new Transformation(subQuery, child,
-                                        substitutionToPropagate, renamer, nodeToInsert,
-                                        subQuery.getOptionalPosition(originalNode, child)
+                                originalNodesToVisit.add(new Transformation(renamedSubQuery, child,
+                                        substitutionToPropagate, nodeToInsert,
+                                        renamedSubQuery.getOptionalPosition(originalNode, child)
                                 )));
             }
         }

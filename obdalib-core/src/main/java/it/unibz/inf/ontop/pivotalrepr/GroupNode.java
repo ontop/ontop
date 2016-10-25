@@ -17,7 +17,7 @@ public interface GroupNode extends QueryNode {
 
     @Override
     GroupNode acceptNodeTransformer(HomogeneousQueryNodeTransformer transformer)
-            throws QueryNodeTransformationException, NotNeededNodeException;
+            throws QueryNodeTransformationException;
 
     @Override
     SubstitutionResults<GroupNode> applyAscendingSubstitution(
