@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
+import it.unibz.inf.ontop.model.AtomPredicate;
 import it.unibz.inf.ontop.model.Variable;
 import it.unibz.inf.ontop.model.VariableOrGroundTerm;
 import it.unibz.inf.ontop.pivotalrepr.*;
@@ -14,9 +15,7 @@ import it.unibz.inf.ontop.pivotalrepr.proposal.InnerJoinOptimizationProposal;
 import it.unibz.inf.ontop.pivotalrepr.proposal.InvalidQueryOptimizationProposalException;
 import it.unibz.inf.ontop.pivotalrepr.proposal.NodeCentricOptimizationResults;
 import it.unibz.inf.ontop.pivotalrepr.proposal.impl.NodeCentricOptimizationResultsImpl;
-import it.unibz.inf.ontop.sql.DBMetadata;
-import it.unibz.inf.ontop.sql.DatabaseRelationDefinition;
-import it.unibz.inf.ontop.sql.ForeignKeyConstraint;
+import it.unibz.inf.ontop.sql.*;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.AbstractMap.SimpleEntry;
@@ -107,7 +106,7 @@ public class RedundantJoinFKExecutor implements InnerJoinExecutor {
         return query.getChildren(joinNode).stream()
                 .filter(c -> c instanceof DataNode)
                 .map(c -> (DataNode) c)
-                .map(c -> getDatabaseRelationByName(dbMetadata, c.getProjectionAtom().getPredicate().getName())
+                .map(c -> getDatabaseRelationByName(dbMetadata, c.getProjectionAtom().getPredicate())
                         .map(r -> new SimpleEntry<DatabaseRelationDefinition, DataNode>(r, c)))
                 .filter(Optional::isPresent)
                 .map(Optional::get)
@@ -209,13 +208,16 @@ public class RedundantJoinFKExecutor implements InnerJoinExecutor {
                 .allMatch(v -> ! analyzer.isVariableUsedSomewhereElse(query, targetDataNode, v));
     }
 
-    private Optional<DatabaseRelationDefinition> getDatabaseRelationByName(DBMetadata dbMetadata, String name) {
-        for(DatabaseRelationDefinition relation: dbMetadata.getDatabaseRelations()) {
-            if(relation.getID().getTableName().equalsIgnoreCase(name)) {
-                return Optional.of(relation);
-            }
-        }
-        // throw new IllegalStateException("No relation found for " + name);
-        return Optional.empty();
+    private Optional<DatabaseRelationDefinition> getDatabaseRelationByName(DBMetadata dbMetadata, AtomPredicate predicate) {
+
+        RelationID relationId = Relation2DatalogPredicate.createRelationFromPredicateName(dbMetadata.getQuotedIDFactory(),
+                predicate);
+
+        return Optional.ofNullable(dbMetadata.getRelation(relationId))
+                /**
+                 * Here we only consider DB relations
+                 */
+                .filter(r -> r instanceof DatabaseRelationDefinition)
+                .map(r -> (DatabaseRelationDefinition) r);
     }
 }
