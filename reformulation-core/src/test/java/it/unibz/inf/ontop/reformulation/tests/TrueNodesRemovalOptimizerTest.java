@@ -13,6 +13,7 @@ import it.unibz.inf.ontop.pivotalrepr.*;
 import it.unibz.inf.ontop.pivotalrepr.equivalence.IQSyntacticEquivalenceChecker;
 import it.unibz.inf.ontop.pivotalrepr.impl.*;
 import it.unibz.inf.ontop.pivotalrepr.impl.tree.DefaultIntermediateQueryBuilder;
+import it.unibz.inf.ontop.sql.DBMetadataExtractor;
 import org.junit.Test;
 
 import java.util.Optional;
@@ -42,6 +43,7 @@ public class TrueNodesRemovalOptimizerTest {
     private ExtensionalDataNode DATA_NODE_2 = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE2_ARITY_1_PREDICATE, B));
 
     private MetadataForQueryOptimization METADATA = new MetadataForQueryOptimizationImpl(
+            DBMetadataExtractor.createDummyMetadata(),
             ImmutableMultimap.of(),
             new UriTemplateMatcher());
 

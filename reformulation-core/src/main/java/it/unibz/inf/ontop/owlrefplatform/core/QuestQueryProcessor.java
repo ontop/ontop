@@ -7,6 +7,7 @@ import it.unibz.inf.ontop.owlrefplatform.core.abox.SemanticIndexURIMap;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.*;
 import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import it.unibz.inf.ontop.owlrefplatform.core.optimization.BasicJoinOptimizer;
+import it.unibz.inf.ontop.owlrefplatform.core.optimization.BasicLeftJoinOptimizer;
 import it.unibz.inf.ontop.owlrefplatform.core.optimization.IntermediateQueryOptimizer;
 import it.unibz.inf.ontop.owlrefplatform.core.optimization.TopDownSubstitutionLiftOptimizer;
 import it.unibz.inf.ontop.owlrefplatform.core.optimization.unfolding.QueryUnfolder;
@@ -55,7 +56,7 @@ public class QuestQueryProcessor {
 	 * Old-style Datalog unfolder (not used for unfolding anymore)
 	 */
 	protected final QuestUnfolder unfolder;
-	
+
 	private static final Logger log = LoggerFactory.getLogger(QuestQueryProcessor.class);
 	private static final OBDADataFactory DATA_FACTORY = OBDADataFactoryImpl.getInstance();
 
@@ -232,9 +233,13 @@ public class QuestQueryProcessor {
 				log.debug("New lifted query: \n" + intermediateQuery.toString());
 
 
-				BasicJoinOptimizer joinOptimizer = new BasicJoinOptimizer();
-				intermediateQuery = joinOptimizer.optimize(intermediateQuery);
-				log.debug("New query after join optimization: \n" + intermediateQuery.toString());
+					BasicLeftJoinOptimizer leftJoinOptimizer = new BasicLeftJoinOptimizer();
+					intermediateQuery = leftJoinOptimizer.optimize(intermediateQuery);
+					log.debug("New query after left join optimization: \n" + intermediateQuery.toString());
+
+					BasicJoinOptimizer joinOptimizer = new BasicJoinOptimizer();
+					intermediateQuery = joinOptimizer.optimize(intermediateQuery);
+					log.debug("New query after join optimization: \n" + intermediateQuery.toString());
 
 
 				programAfterUnfolding = IntermediateQueryToDatalogTranslator.translate(intermediateQuery);
