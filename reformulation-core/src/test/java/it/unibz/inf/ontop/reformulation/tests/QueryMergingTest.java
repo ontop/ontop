@@ -8,6 +8,8 @@ import it.unibz.inf.ontop.model.impl.AtomPredicateImpl;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.model.impl.URITemplatePredicateImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionImpl;
+import it.unibz.inf.ontop.owlrefplatform.core.optimization.unfolding.QueryUnfolder;
+import it.unibz.inf.ontop.owlrefplatform.core.optimization.unfolding.impl.QueryUnfolderImpl;
 import it.unibz.inf.ontop.pivotalrepr.*;
 import it.unibz.inf.ontop.pivotalrepr.impl.*;
 import it.unibz.inf.ontop.pivotalrepr.impl.tree.DefaultIntermediateQueryBuilder;
@@ -15,7 +17,9 @@ import it.unibz.inf.ontop.pivotalrepr.proposal.QueryMergingProposal;
 import it.unibz.inf.ontop.pivotalrepr.proposal.impl.QueryMergingProposalImpl;
 import org.junit.Test;
 
-import java.util.Optional;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Stream;
 
 import static it.unibz.inf.ontop.model.Predicate.COL_TYPE.INTEGER;
 import static it.unibz.inf.ontop.pivotalrepr.equivalence.IQSyntacticEquivalenceChecker.areEquivalent;
@@ -1129,7 +1133,6 @@ public class QueryMergingTest {
     @Test
     public void testUnionSameVariable() {
 
-
         /**
          * Original query
          */
@@ -1257,6 +1260,58 @@ public class QueryMergingTest {
         System.out.println("merged query:\n" + mainQuery.getProjectionAtom() + ":-\n" +
                 mainQuery);
 
+    }
+
+    @Test
+    public void testOfflineMappingAssertionsRenaming() {
+
+        List<IntermediateQuery> mappingAssertions = new ArrayList<>();
+        DataAtom[] dataAtoms = new DataAtom[]{
+                P3_X_ATOM,
+                P3_X_ATOM,
+                P1_ATOM
+        };
+        DistinctVariableOnlyDataAtom[] projectionAtoms = new DistinctVariableOnlyDataAtom[]{
+                P4_X_ATOM,
+                P5_X_ATOM,
+                P2_ATOM
+        };
+
+        /**
+         * Mappings assertions
+         */
+        for (int i =0; i < projectionAtoms.length;  i++){
+            IntermediateQueryBuilder mappingBuilder = new DefaultIntermediateQueryBuilder(METADATA);
+            ConstructionNode mappingRootNode = new ConstructionNodeImpl(projectionAtoms[i].getVariables());
+            mappingBuilder.init(projectionAtoms[i], mappingRootNode);
+            ExtensionalDataNode extensionalDataNode = new ExtensionalDataNodeImpl(dataAtoms[i]);
+            mappingBuilder.addChild(mappingRootNode, extensionalDataNode);
+            IntermediateQuery mappingAssertion = mappingBuilder.build();
+            mappingAssertions.add(mappingAssertion);
+            System.out.println("Mapping assertion "+i+":\n" +mappingAssertion);
+        }
+
+        /**
+         * Renaming
+         */
+        QueryUnfolder queryUnfolder= new QueryUnfolderImpl(mappingAssertions.stream());
+
+        /**
+         * Test whether two mapping assertions share a variable
+         */
+        System.out.println("After renaming:");
+        Set<Variable> variableUnion = new HashSet<Variable>();
+        for (IntermediateQuery mappingAssertion: queryUnfolder.getMappingIndex().values()){
+            System.out.println(mappingAssertion);
+            ImmutableSet<Variable> mappingAssertionVariables = mappingAssertion.getVariables(mappingAssertion.getRootConstructionNode());
+            if(Stream.of(mappingAssertionVariables)
+                    .anyMatch(v -> variableUnion.contains(v))){
+                fail();
+                break;
+            }
+            variableUnion.addAll(mappingAssertionVariables);
+            System.out.println("All variables thus far: "+variableUnion+"\n");
+        }
     }
 
     private static IntermediateQuery createBasicSparqlQuery(
