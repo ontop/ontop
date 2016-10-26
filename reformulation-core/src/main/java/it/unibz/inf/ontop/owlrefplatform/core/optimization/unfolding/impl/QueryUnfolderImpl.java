@@ -16,7 +16,6 @@ import it.unibz.inf.ontop.pivotalrepr.impl.QueryRenamer;
 import it.unibz.inf.ontop.pivotalrepr.proposal.QueryMergingProposal;
 import it.unibz.inf.ontop.pivotalrepr.proposal.impl.QueryMergingProposalImpl;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
-
 import java.util.AbstractMap;
 import java.util.Map;
 import java.util.Optional;
@@ -31,7 +30,7 @@ public class QueryUnfolderImpl implements QueryUnfolder {
     public  QueryUnfolderImpl(Stream<IntermediateQuery> mappingStream) {
         AtomicInteger i = new AtomicInteger(0);
         mappingIndex = mappingStream
-              .map(m -> appendSuffixToAllVariableNames(m, i.incrementAndGet()))
+              .map(m -> appendSuffixToVariableNames(m, i.incrementAndGet()))
               .map(m -> new AbstractMap.SimpleEntry<>(m.getProjectionAtom().getPredicate(), m))
               .collect(ImmutableCollectors.toMap());
     }
@@ -70,12 +69,11 @@ public class QueryUnfolderImpl implements QueryUnfolder {
         return new TrueNodesRemovalOptimizer().optimize(query);
     }
 
-    private IntermediateQuery appendSuffixToAllVariableNames(IntermediateQuery query, int suffix) {
+    private IntermediateQuery appendSuffixToVariableNames(IntermediateQuery query, int suffix) {
         OBDADataFactory datafactory = OBDADataFactoryImpl.getInstance();
         Map<Variable, Variable> substitutionMap =
-                query.getVariables(query.getRootConstructionNode()).stream().
-                        collect(Collectors.toMap(v -> v, v -> datafactory.getVariable(v.getName()+suffix)));
-
+                query.getKnownVariables().stream()
+                        .collect(Collectors.toMap(v -> v, v -> datafactory.getVariable(v.getName()+"_"+suffix)));
         QueryRenamer queryRenamer = new QueryRenamer(new InjectiveVar2VarSubstitutionImpl(substitutionMap));
         return queryRenamer.transform(query);
     }
