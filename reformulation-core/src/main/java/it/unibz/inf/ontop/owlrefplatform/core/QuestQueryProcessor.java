@@ -6,10 +6,7 @@ import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
 import it.unibz.inf.ontop.owlrefplatform.core.abox.SemanticIndexURIMap;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.*;
 import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
-import it.unibz.inf.ontop.owlrefplatform.core.optimization.BasicJoinOptimizer;
-import it.unibz.inf.ontop.owlrefplatform.core.optimization.BasicLeftJoinOptimizer;
-import it.unibz.inf.ontop.owlrefplatform.core.optimization.IntermediateQueryOptimizer;
-import it.unibz.inf.ontop.owlrefplatform.core.optimization.TopDownSubstitutionLiftOptimizer;
+import it.unibz.inf.ontop.owlrefplatform.core.optimization.*;
 import it.unibz.inf.ontop.owlrefplatform.core.optimization.unfolding.QueryUnfolder;
 import it.unibz.inf.ontop.owlrefplatform.core.optimization.unfolding.impl.QueryUnfolderImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.queryevaluation.SPARQLQueryUtility;
@@ -241,16 +238,29 @@ public class QuestQueryProcessor {
 				intermediateQuery = joinOptimizer.optimize(intermediateQuery);
 				log.debug("New query after join optimization: \n" + intermediateQuery.toString());
 
+				GroundTermRemovalFromDataNodeReshaper groundTermNormalizer = new GroundTermRemovalFromDataNodeReshaper();
+				intermediateQuery = groundTermNormalizer.optimize(intermediateQuery);
+				log.debug("New query after removing ground terms: \n" + intermediateQuery.toString());
+
+				PullOutVariableOptimizer pullOutVariableNormalizer = new PullOutVariableOptimizer();
+				intermediateQuery = pullOutVariableNormalizer.optimize(intermediateQuery);
+				log.debug("New query after pulling out equalities: \n" + intermediateQuery.toString());
 
 				programAfterUnfolding = IntermediateQueryToDatalogTranslator.translate(intermediateQuery);
 
 				log.debug("New Datalog query: \n" + programAfterUnfolding.toString());
 
+				/**
+				 * TODO: try to get rid of this flattener
+				 */
 				programAfterUnfolding = FunctionFlattener.flattenDatalogProgram(programAfterUnfolding);
 				log.debug("New flattened Datalog query: \n" + programAfterUnfolding.toString());
 
-				log.debug("Pulling out equalities...");
-
+				/**
+				 * This code is only partially useful (for properly dealing with boolean expressions) anymore
+				 * TODO: get rid of it
+				 */
+				log.debug("Datalog syntax normalizer (low-level)...");
 				PullOutEqualityNormalizer normalizer = new PullOutEqualityNormalizerImpl();
 
 				List<CQIE> normalizedRules = new ArrayList<>();
@@ -260,6 +270,7 @@ public class QuestQueryProcessor {
 
 				OBDAQueryModifiers queryModifiers = programAfterUnfolding.getQueryModifiers();
 				programAfterUnfolding = DATA_FACTORY.getDatalogProgram(queryModifiers, normalizedRules);
+				log.debug("Normalized Datalog query: \n" + programAfterUnfolding.toString());
 
 			} catch (DatalogProgram2QueryConverter.InvalidDatalogProgramException e) {
 				throw new OBDAException(e.getLocalizedMessage());
