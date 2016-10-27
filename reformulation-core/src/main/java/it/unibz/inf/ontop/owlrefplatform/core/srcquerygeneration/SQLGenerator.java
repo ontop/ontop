@@ -1277,6 +1277,8 @@ public class SQLGenerator implements SQLQueryGenerator {
 		if (ht instanceof URIConstant) {
 			URIConstant uc = (URIConstant) ht;
 			mainColumn = sqladapter.getSQLLexicalFormString(uc.getURI().toString());
+		} else if (ht instanceof ValueConstant) {
+			mainColumn = getSQLLexicalForm((ValueConstant) ht);
 		} else if (ht instanceof Variable) {
 			Variable termVar = (Variable) ht;
 			mainColumn = getSQLString(termVar, index, false);
