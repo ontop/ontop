@@ -73,7 +73,7 @@ public class QueryUnfolderImpl implements QueryUnfolder {
         OBDADataFactory datafactory = OBDADataFactoryImpl.getInstance();
         Map<Variable, Variable> substitutionMap =
                 query.getKnownVariables().stream()
-                        .collect(Collectors.toMap(v -> v, v -> datafactory.getVariable(v.getName()+"_"+suffix)));
+                        .collect(Collectors.toMap(v -> v, v -> datafactory.getVariable(v.getName()+"m"+suffix)));
         QueryRenamer queryRenamer = new QueryRenamer(new InjectiveVar2VarSubstitutionImpl(substitutionMap));
         return queryRenamer.transform(query);
     }
