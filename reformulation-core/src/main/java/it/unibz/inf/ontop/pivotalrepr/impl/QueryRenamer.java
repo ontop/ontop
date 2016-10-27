@@ -23,7 +23,7 @@ public class QueryRenamer extends NodeBasedQueryTransformer {
      */
     @Override
     protected DistinctVariableOnlyDataAtom transformProjectionAtom(DistinctVariableOnlyDataAtom atom) {
-        ImmutableList<Variable> newArguments = atom.getVariables().stream()
+        ImmutableList<Variable> newArguments = atom.getArguments().stream()
                 .map(renamingSubstitution::applyToVariable)
                 .collect(ImmutableCollectors.toList());
 
