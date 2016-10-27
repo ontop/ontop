@@ -49,9 +49,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 /***
- * Test use of canonical uri in h2 simple database on wellbores
+ * Test use of canonical iri in h2 simple database on wellbores
  */
-public class H2NoDuplicatesCanonicalURITest {
+public class H2NoDuplicatesCanonicalIRITest {
 
 	private OBDADataFactory fac;
 	private QuestOWLConnection conn;
@@ -152,7 +152,7 @@ public class H2NoDuplicatesCanonicalURITest {
 
 
 	@Test
-    public void testSameAs1() throws Exception {
+    public void testCanIRI1() throws Exception {
         String query =  "PREFIX : <http://ontop.inf.unibz.it/test/wellbore#> Select DISTINCT ?x ?y  WHERE{\n" +
 				"?x a :Wellbore .\n" +
 				"?x :inWell ?y .\n" +
@@ -166,19 +166,19 @@ public class H2NoDuplicatesCanonicalURITest {
     }
 
 	@Test
-	public void testSameAs2() throws Exception {
+	public void testCanIRI2() throws Exception {
 		String query =  "PREFIX : <http://ontop.inf.unibz.it/test/wellbore#> Select DISTINCT ?x WHERE{\n" +
 				"?x a :Wellbore .\n" +
 				"}\n";
 
 		ArrayList<String> results = runTests(query);
-		ArrayList<String> expectedResults = new ArrayList<>();
+
 
 		assertEquals(5, results.size() );
 	}
 
 	@Test
-	public void testSameAs3() throws Exception {
+	public void testCanIRI3() throws Exception {
 		String query =  "PREFIX : <http://ontop.inf.unibz.it/test/wellbore#> Select DISTINCT ?x ?y ?z WHERE{\n" +
 				"?x a :Wellbore .\n" +
 				"?x :inWell ?y .\n" +
@@ -186,9 +186,21 @@ public class H2NoDuplicatesCanonicalURITest {
 				"}\n";
 
 		ArrayList<String> results = runTests(query);
-		ArrayList<String> expectedResults = new ArrayList<>();
+
 
 		assertEquals(72, results.size() );
+	}
+
+	@Test
+	public void testCanIRI4() throws Exception {
+		String query =  "PREFIX : <http://ontop.inf.unibz.it/test/wellbore#> Select DISTINCT ?x ?y WHERE{\n" +
+				"?x a :Well .\n" +
+				"?x :hasWellbore ?y .\n" +
+				"}\n";
+
+		ArrayList<String> results = runTests(query);
+
+		assertEquals(8, results.size() );
 	}
 
 

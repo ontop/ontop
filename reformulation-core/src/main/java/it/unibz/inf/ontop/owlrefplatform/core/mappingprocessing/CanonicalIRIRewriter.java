@@ -22,8 +22,8 @@ public class CanonicalIRIRewriter {
     //rewritten mappings
     private List<CQIE> outputMappings;
 
-    // ?     -> ?
-    private Map<ValueConstant, ValueConstant> can_uri_map;
+    // original uri     -> canonical iri
+    private Map<ValueConstant, ValueConstant> can_iri_map;
 
     private Map<ValueConstant, CQIE> uri_mapping_map;
 
@@ -38,21 +38,20 @@ public class CanonicalIRIRewriter {
     public List<CQIE> buildCanonicalSameAsMappings(List<CQIE> mappings) {
 
         outputMappings = new ArrayList<>();
-        can_uri_map = new HashMap<>();
+        can_iri_map = new HashMap<>();
         uri_mapping_map = new HashMap<>();
         uri_column_map = new HashMap<>();
 
         analyzeCanonicalIRIMappings(mappings);
 
         // When no Canonical IRI is used, do nothing
-        if (can_uri_map.isEmpty()) {
+        if (can_iri_map.isEmpty()) {
             return mappings;
         }
 
         for (CQIE mapping : mappings) {
 
-            // clone ??
-            CQIE newMapping = mapping;
+            Optional<CQIE> newMapping = Optional.empty();
 
             Function head = mapping.getHead();
 
@@ -65,60 +64,63 @@ public class CanonicalIRIRewriter {
 
             if (predicate.isObjectProperty()) {
 
-
-
-
                 Term subjectURI = head.getTerm(0);
 
+                Term templateSubURI = null;
+
+                //if subjectURI is an IRI get canonicalIRI
                 if (subjectURI instanceof Function) {
+                    templateSubURI = ((Function) subjectURI).getTerm(0);
+                }
 
-                    Term templatesURI = ((Function) subjectURI).getTerm(0);
 
-                    if (can_uri_map.containsKey(templatesURI)) {
+                if (templateSubURI != null && can_iri_map.containsKey(templateSubURI)) {
 
-                        CanonicalURIMapping canonicalsURIMapping = new CanonicalURIMapping(mapping, (Function) subjectURI).create();
+                    CanonicalURIMapping canonicalsURIMapping = new CanonicalURIMapping(mapping, (Function) subjectURI).create();
 
-                        final Function newHead = canonicalsURIMapping.getNewHeadTerm();
-                        List<Function> newsURIBody = canonicalsURIMapping.getNewURIBody();
+                    final Function newHead = canonicalsURIMapping.getNewHeadTerm();
+                    List<Function> newsURIBody = canonicalsURIMapping.getNewURIBody();
 
-                        newMapping = fac.getCQIE(fac.getFunction(predicate, newHead, head.getTerm(1)), newsURIBody);
+                    newMapping = Optional.of(fac.getCQIE(fac.getFunction(predicate, newHead, head.getTerm(1)), newsURIBody));
 
-                        Function headNewMapping = newMapping.getHead();
+                    Function headNewMapping = newMapping.get().getHead();
 
-                        Term objectURI = headNewMapping.getTerm(1);
+                    Term objectURI = headNewMapping.getTerm(1);
 
-                        if (objectURI instanceof Function) {
+                    //if objectURI is an IRI get canonicalIRI
+                    if (objectURI instanceof Function) {
 
-                            Function objectURINewMapping = (Function) objectURI;
+                        Function objectURINewMapping = (Function) objectURI;
 
-                            Term templateoURINewMapping = objectURINewMapping.getTerm(0);
+                        Term templateObjURINewMapping = objectURINewMapping.getTerm(0);
 
-                            if (can_uri_map.containsKey(templateoURINewMapping)) {
 
-                                CanonicalURIMapping canonicaloURIMapping = new CanonicalURIMapping(newMapping, objectURINewMapping).create();
-                                final Function newHead1 = canonicaloURIMapping.getNewHeadTerm();
-                                List<Function> newoURIBody = canonicaloURIMapping.getNewURIBody();
+                        if (can_iri_map.containsKey(templateObjURINewMapping)) {
 
-                                newMapping = fac.getCQIE(fac.getFunction(predicate, headNewMapping.getTerm(0), newHead1), newoURIBody);
-                            }
+                            CanonicalURIMapping canonicaloURIMapping = new CanonicalURIMapping(newMapping.get(), objectURINewMapping).create();
+                            final Function newSubjectHead = canonicaloURIMapping.getNewHeadTerm();
+                            List<Function> newoURIBody = canonicaloURIMapping.getNewURIBody();
 
+                            newMapping = Optional.of(fac.getCQIE(fac.getFunction(predicate, headNewMapping.getTerm(0), newSubjectHead), newoURIBody));
                         }
 
                     }
-                }
-                // subjectURI is an IRI
-                else {
+
+                // if subjectURI does not have a canonicalIRI
+                } else {
+                    //if objectURI is an IRI  get canonicalIRI
                     Term objectURI = head.getTerm(1);
 
                     if (objectURI instanceof Function) {
-                        Term templateoURI = ((Function) objectURI).getTerm(0);
+                        Term templateObjURI = ((Function) objectURI).getTerm(0);
 
-                        if (can_uri_map.containsKey(templateoURI)) {
+
+                        if (can_iri_map.containsKey(templateObjURI)) {
                             CanonicalURIMapping canonicaloURIMapping = new CanonicalURIMapping(mapping, (Function) objectURI).create();
-                            List<Term> newoURITerms = canonicaloURIMapping.getNewURITerms();
+                            final Function newObjectHead = canonicaloURIMapping.getNewHeadTerm();
                             List<Function> newoURIBody = canonicaloURIMapping.getNewURIBody();
 
-                            newMapping = fac.getCQIE(fac.getFunction(predicate, head.getTerm(0), fac.getUriTemplate(newoURITerms)), newoURIBody);
+                            newMapping = Optional.of(fac.getCQIE(fac.getFunction(predicate, head.getTerm(0), newObjectHead), newoURIBody));
 
                         }
                     }
@@ -128,16 +130,17 @@ public class CanonicalIRIRewriter {
             } else if (predicate.isDataProperty()) {
                 Term subjectURI = head.getTerm(0);
 
+                //if subjectURI is an IRI get canonicalIRI
                 if (subjectURI instanceof Function) {
 
                     Term templateURI = ((Function) subjectURI).getTerm(0);
 
-                    if (can_uri_map.containsKey(templateURI)) {
+                    if (can_iri_map.containsKey(templateURI)) {
                         CanonicalURIMapping canonicalURIMapping = new CanonicalURIMapping(mapping, (Function) subjectURI).create();
-                        List<Term> newURITerms = canonicalURIMapping.getNewURITerms();
+                        final Function newObjectHead = canonicalURIMapping.getNewHeadTerm();
                         List<Function> newURIBody = canonicalURIMapping.getNewURIBody();
 
-                        newMapping = fac.getCQIE(fac.getFunction(predicate, fac.getUriTemplate(newURITerms), head.getTerm(1)), newURIBody);
+                        newMapping = Optional.of(fac.getCQIE(fac.getFunction(predicate, newObjectHead, head.getTerm(1)), newURIBody));
 
                     }
 
@@ -147,30 +150,28 @@ public class CanonicalIRIRewriter {
 
                 Term subjectURI = head.getTerm(0);
 
+                //if subjectURI is an IRI get canonicalIRI
                 if (subjectURI instanceof Function) {
 
                     Term templateURI = ((Function) subjectURI).getTerm(0);
 
-                    if (can_uri_map.containsKey(templateURI)) {
+                    if (can_iri_map.containsKey(templateURI)) {
 
                         CanonicalURIMapping canonicalURIMapping = new CanonicalURIMapping(mapping, (Function) subjectURI).create();
-                        List<Term> newURITerms = canonicalURIMapping.getNewURITerms();
+                        final Function newSubjectTerm = canonicalURIMapping.getNewHeadTerm();
                         List<Function> newURIBody = canonicalURIMapping.getNewURIBody();
 
-                        newMapping = fac.getCQIE(fac.getFunction(predicate, fac.getUriTemplate(newURITerms)), newURIBody);
+                        newMapping = Optional.of(fac.getCQIE(fac.getFunction(predicate, newSubjectTerm), newURIBody));
 
                     }
                 }
 
             }
 
-
-
             head.getTerms().stream().map(term -> canonicalTerm(term)).collect(Collectors.toList());
 
+            outputMappings.add(newMapping.orElse(mapping.clone()));
 
-
-            outputMappings.add(newMapping);
         }
 
         return outputMappings;
@@ -189,7 +190,7 @@ public class CanonicalIRIRewriter {
     }
 
 
-    //get the canonicalIRIs
+    //get the canonicalIRIs from the original mappings
     private void analyzeCanonicalIRIMappings(List<CQIE> mappings) {
 
         for (CQIE mapping : mappings) {
@@ -226,7 +227,7 @@ public class CanonicalIRIRewriter {
                 ValueConstant objectURI = (ValueConstant) objectTerm.getTerm(0);
                 List<Term> objectURIColumns = objectTerm.getTerms().subList(1, objectTerm.getTerms().size());
 
-                can_uri_map.put(objectURI, canonURI);
+                can_iri_map.put(objectURI, canonURI);
                 uri_column_map.put(objectURI, objectURIColumns);
                 uri_column_map.put(canonURI, canonURIColumns);
                 //store the renamed mapping
@@ -249,9 +250,9 @@ public class CanonicalIRIRewriter {
 
         }
 
-        public List<Term> getNewURITerms() {
-            return newURITerms;
-        }
+//        public List<Term> getNewURITerms() {
+//            return newURITerms;
+//        }
 
         public Function getNewHeadTerm() {return fac.getUriTemplate(newURITerms);}
 
@@ -261,11 +262,11 @@ public class CanonicalIRIRewriter {
             return newURIBody;
         }
 
-
+//        substitute the old uri with the new canonical iri
         public CanonicalURIMapping create() {
 
             //get the canonical version of the uri and useful columns
-            ValueConstant canonicalTemplateURI = can_uri_map.get(templateURI);
+            ValueConstant canonicalTemplateURI = can_iri_map.get(templateURI);
             newURITerms = new ArrayList<>();
             List<Term> termsURI = new ArrayList<>();
             newURITerms.add(canonicalTemplateURI);

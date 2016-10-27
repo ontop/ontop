@@ -17,6 +17,12 @@ CREATE TABLE T3 (
     name character varying(100),
 );
 
+CREATE TABLE W1 (
+    id integer NOT NULL,
+    name character varying(100),
+    wellbore integer
+);
+
 CREATE TABLE T_can_link (
     can_id integer NOT NULL,
     can_prov INTEGER NOT NULL,
@@ -38,6 +44,11 @@ INSERT INTO T3 VALUES (5, 'OtherWell', 'w35');
 INSERT INTO T3 VALUES (6, 'TiredOne', 'w36');
 INSERT INTO T3 VALUES (10, 'ColdBridge', 'w310');
 INSERT INTO T3 VALUES (7, 'Heather', 'w37');
+
+INSERT INTO W1 VALUES (1, 'GreenPeace', 1);
+INSERT INTO W1 VALUES (2, 'BigBucks', 3);
+INSERT INTO W1 VALUES (3, 'HealthyWell', 6);
+INSERT INTO W1 VALUES (4, 'NoMore', 7);
 
 
 INSERT INTO T_can_link VALUES (1,1,1,3,5) ;

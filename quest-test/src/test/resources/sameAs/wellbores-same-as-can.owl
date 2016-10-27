@@ -19,7 +19,7 @@
     
 
 
-    <!-- http://ontop.inf.unibz.it/test/wellbore#inWell -->
+    <!-- http://ontop.inf.unibz.it/test/wellbore#name -->
 
     <owl:DatatypeProperty rdf:about="http://ontop.inf.unibz.it/test/wellbore#name"/>
 
@@ -27,11 +27,19 @@
 
     <owl:ObjectProperty rdf:about="http://ontop.inf.unibz.it/test/wellbore#inWell"/>
 
+    <!-- http://ontop.inf.unibz.it/test/wellbore#hasWellbore -->
+
+    <owl:ObjectProperty rdf:about="http://ontop.inf.unibz.it/test/wellbore#hasWellbore"/>
+
 
 
     <!-- http://ontop.inf.unibz.it/test/wellbore#Wellbore -->
 
     <owl:Class rdf:about="http://ontop.inf.unibz.it/test/wellbore#Wellbore"/>
+
+    <!-- http://ontop.inf.unibz.it/test/wellbore#Well -->
+
+    <owl:Class rdf:about="http://ontop.inf.unibz.it/test/wellbore#Well"/>
 
 
 

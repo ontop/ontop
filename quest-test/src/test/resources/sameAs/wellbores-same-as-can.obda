@@ -6,6 +6,7 @@ ontop:    http://ontop.inf.unibz.it/pred#
 epds: http://epds/wellbore/
 npd: http://npd/wellbore/
 ow: http://ow/wellbore/
+well: http://ontop.inf.unibz.it/test/well/
 
 [SourceDeclaration]
 sourceUri	WellboreDataset
@@ -21,15 +22,19 @@ target		<http://ontop/wellbore/{can_prov}/{can_id}> ontop:is_canonical_iri_of ep
 source		select can_id, can_prov, id1, id2, id3 from T_can_link
 
 mappingId	mappingT11
-target		<http://epds/wellbore/{id}> a :Wellbore ; :inWell "{well}" ; :name :{name} .
+target		<http://epds/wellbore/{id}> a :Wellbore ; :inWell well:{well} ; :name "{name}" .
 source		select id, well, name from T1
 
 mappingId	mappingT2
-target		<http://npd/wellbore/{id}>  a :Wellbore ;  :inWell "{well}" ; :name :{name} .
+target		<http://npd/wellbore/{id}>  a :Wellbore ;  :inWell :{well} ; :name "{name}" .
 source		select id, well, name from T2
 
 mappingId	mappingT3
-target		<http://ow/wellbore/{id}>   a :Wellbore ;  :inWell "{well}" ; :name :{name} .
+target		<http://ow/wellbore/{id}>   a :Wellbore ;  :inWell :{well} ; :name "{name}" .
 source		select id, well, name from T3
+
+mappingId	mappingW1
+target		well:{name} a :Well ;  :hasWellbore <http://epds/wellbore/{wellbore}>  .
+source		select name, wellbore from W1
 
 ]]
