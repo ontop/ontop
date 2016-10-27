@@ -6,4 +6,4 @@ normal-test:
 ontop-test:
   script:
       - set MAVEN_OPTS="-Xms6000m -Xmx8000m"
-      - cd quest-test && mvn install -DskipTests=false --fail-never
+      -  mvn install -DskipTests=true && cd quest-test && mvn install -DskipTests=false --fail-at-end --fail-never
