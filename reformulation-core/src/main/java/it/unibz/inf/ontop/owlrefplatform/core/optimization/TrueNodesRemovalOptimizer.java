@@ -61,17 +61,15 @@ public class TrueNodesRemovalOptimizer extends NodeCentricDepthFirstOptimizer<Tr
                 map(TrueNodeRemovalProposalImpl::new);
     }
 
-    private boolean isRemovableTrueNode(TrueNode node, IntermediateQuery currentQuery) {
-        Optional<QueryNode> parentNode = currentQuery.getParent(node);
-        if (parentNode.get() instanceof InnerJoinNode ||
-                parentNode.get() instanceof ConstructionNode ||
-                parentNode.get() instanceof TrueNode) {
-            return true;
-        }
-        if (parentNode.get() instanceof LeftJoinNode && currentQuery.getOptionalPosition(node).get() == RIGHT) {
-            return true;
-        }
-        return false;
+    private boolean isRemovableTrueNode(TrueNode node, IntermediateQuery query) {
+        Optional<QueryNode> parentNode = query.getParent(node);
+
+        return parentNode.isPresent() &&
+                (parentNode.get() instanceof InnerJoinNode ||
+                        parentNode.get() instanceof ConstructionNode ||
+                        parentNode.get() instanceof TrueNode ||
+                            (parentNode.get() instanceof LeftJoinNode &&
+                                        query.getOptionalPosition(node).get() == RIGHT));
     }
 
     /**
