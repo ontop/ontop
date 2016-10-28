@@ -32,8 +32,10 @@ import org.openrdf.model.Resource;
 import org.openrdf.model.Statement;
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
+import org.openrdf.model.impl.StatementImpl;
 
-public class SesameStatement implements Statement {
+public class SesameStatement extends StatementImpl {
+
     private static final long serialVersionUID = 3398547980791013746L;
     
 	private Resource subject = null;
@@ -41,10 +43,47 @@ public class SesameStatement implements Statement {
 	private Value object = null;
 	private Resource context = null;
 
-	private SesameHelper helper = new SesameHelper();
+	private static SesameHelper HELPER = new SesameHelper();
 
+
+	public static SesameStatement getInstance(Assertion assertion) {
+		if (assertion instanceof ObjectPropertyAssertion) {
+			return new SesameStatement((ObjectPropertyAssertion) assertion);
+		} else if (assertion instanceof DataPropertyAssertion) {
+			return new SesameStatement((DataPropertyAssertion) assertion);
+		} else if (assertion instanceof ClassAssertion) {
+			return new SesameStatement((ClassAssertion) assertion);
+		} else {
+			throw new RuntimeException("");
+		}
+	}
+
+	private SesameStatement(ObjectPropertyAssertion assertion) {
+		super(HELPER.getResource(assertion.getSubject()),
+				HELPER.createURI(assertion.getProperty().getPredicate().getName().toString()),
+				HELPER.getResource(assertion.getObject()));
+	}
+
+	private SesameStatement(DataPropertyAssertion assertion) {
+		super(HELPER.getResource(assertion.getSubject()),
+				HELPER.createURI(assertion.getProperty().getPredicate().getName().toString()),
+				HELPER.getLiteral(assertion.getValue())
+				);
+
+		if (!(assertion.getValue() instanceof ValueConstant)) {
+			throw new RuntimeException("Invalid constant as object!" + assertion.getValue());
+		}
+	}
+
+	private SesameStatement(ClassAssertion assertion) {
+		super(HELPER.getResource(assertion.getIndividual()),
+				HELPER.createURI(OBDAVocabulary.RDF_TYPE),
+				HELPER.createURI(assertion.getConcept().getPredicate().getName().toString()));
+	}
+
+
+	/*
 	public SesameStatement(Assertion assertion) {
-		
 		if (assertion instanceof ObjectPropertyAssertion) {
 			//object or data property assertion
 			ObjectPropertyAssertion ba = (ObjectPropertyAssertion) assertion;
@@ -53,9 +92,10 @@ public class SesameStatement implements Statement {
 			ObjectConstant obj = ba.getObject();
 			
 			// convert string into respective type
-			subject = helper.getResource(subj);
-			predicate = helper.createURI(pred.getName().toString()); // URI	
-			object = helper.getResource(obj);
+
+			subject = HELPER.getResource(subj);
+			predicate = HELPER.createURI(pred.getName().toString()); // URI
+			object = HELPER.getResource(obj);
 		} 
 		else if (assertion instanceof DataPropertyAssertion) {
 			//object or data property assertion
@@ -65,11 +105,12 @@ public class SesameStatement implements Statement {
 			ValueConstant obj = ba.getValue();
 			
 			// convert string into respective type
-			subject = helper.getResource(subj);	
-			predicate = helper.createURI(pred.getName().toString()); // URI
+			subject = HELPER.getResource(subj);
+			predicate = HELPER.createURI(pred.getName().toString()); // URI
 			
-			if (obj instanceof ValueConstant)
-				object = helper.getLiteral((ValueConstant)obj);		
+			if (obj instanceof ValueConstant) {
+				object = HELPER.getLiteral((ValueConstant) obj);
+			}
 			else 
 				throw new RuntimeException("Invalid constant as object!" + obj);
 		} 
@@ -80,29 +121,12 @@ public class SesameStatement implements Statement {
 			Predicate obj = ua.getConcept().getPredicate();
 			
 			// convert string into respective type
-			subject = helper.getResource(subj);
-			predicate = helper.createURI(OBDAVocabulary.RDF_TYPE); // URI
-			object = helper.createURI(obj.getName().toString());	
+			subject = HELPER.getResource(subj);
+			predicate = HELPER.createURI(OBDAVocabulary.RDF_TYPE); // URI
+			object = HELPER.createURI(obj.getName().toString());
 		}
 	}
-	
-
-	public Resource getSubject() {
-		return subject;
-	}
-
-	public URI getPredicate() {
-		return predicate;
-	}
-
-	public Value getObject() {
-		return object;
-	}
-
-	public Resource getContext() {
-		// TODO Auto-generated method stub
-		return context;
-	}
+	*/
 
     @Override
     public boolean equals(Object o) {
@@ -122,13 +146,4 @@ public class SesameStatement implements Statement {
 
         return true;
     }
-
-
-
-
-
-	@Override
-	public String toString() {
-		return "("+subject+", "+predicate+", "+object+")";
-	}
 }
