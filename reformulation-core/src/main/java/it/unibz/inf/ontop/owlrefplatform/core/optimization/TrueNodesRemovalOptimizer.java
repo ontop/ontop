@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.owlrefplatform.core.optimization;
 import it.unibz.inf.ontop.pivotalrepr.*;
 import it.unibz.inf.ontop.pivotalrepr.proposal.TrueNodeRemovalProposal;
 import it.unibz.inf.ontop.pivotalrepr.proposal.impl.TrueNodeRemovalProposalImpl;
+import it.unibz.inf.ontop.pivotalrepr.validation.InvalidIntermediateQueryException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -63,13 +64,15 @@ public class TrueNodesRemovalOptimizer extends NodeCentricDepthFirstOptimizer<Tr
 
     private boolean isRemovableTrueNode(TrueNode node, IntermediateQuery query) {
         Optional<QueryNode> parentNode = query.getParent(node);
-
-        return parentNode.isPresent() &&
-                (parentNode.get() instanceof InnerJoinNode ||
-                        parentNode.get() instanceof ConstructionNode ||
-                        parentNode.get() instanceof TrueNode ||
-                            (parentNode.get() instanceof LeftJoinNode &&
-                                        query.getOptionalPosition(node).get() == RIGHT));
+        if (!parentNode.isPresent()){
+            throw new InvalidIntermediateQueryException("a TrueNode should have a parent node");
+        }
+        return parentNode.get() instanceof InnerJoinNode ||
+                parentNode.get() instanceof TrueNode ||
+                (parentNode.get() instanceof LeftJoinNode &&
+                        query.getOptionalPosition(node).get() == RIGHT) ||
+                (parentNode.get() instanceof ConstructionNode &&
+                        !(query.getRootConstructionNode() == parentNode.get()));
     }
 
     /**

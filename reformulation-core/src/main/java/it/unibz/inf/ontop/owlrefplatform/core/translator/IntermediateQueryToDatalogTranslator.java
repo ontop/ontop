@@ -278,6 +278,9 @@ public class IntermediateQueryToDatalogTranslator {
 			body.add(bodyAtom);
 			return body;
 
+		} else if (node instanceof TrueNode) {
+			return body;
+
 		} else {
 			 throw new UnsupportedOperationException("Type of node in the intermediate tree is unknown!!");
 		}
