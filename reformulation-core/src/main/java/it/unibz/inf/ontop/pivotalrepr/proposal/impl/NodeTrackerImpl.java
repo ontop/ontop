@@ -31,7 +31,6 @@ public class NodeTrackerImpl implements NodeTracker {
             }
 
             this.newNode = Optional.empty();
-            QueryNode replacingChild = optionalReplacingChild.get();
 
             this.replacingChild = optionalReplacingChild;
             this.nextSibling = Optional.empty();
@@ -80,14 +79,6 @@ public class NodeTrackerImpl implements NodeTracker {
 
     }
 
-
-    //private final QueryNode originalDescendantNode;
-
-    /**
-     * From the oldest ancestor to the parent
-     */
-    //private final ImmutableList<QueryNode> originalAncestors;
-
     // Original parent -> replacing child
     private final Map<QueryNode, QueryNode> childReplacement;
     private final BiMap<QueryNode, QueryNode> nodeUpdate;
@@ -116,8 +107,6 @@ public class NodeTrackerImpl implements NodeTracker {
     private final Set<QueryNode> droppedNodes;
 
     public NodeTrackerImpl() {
-        //originalDescendantNode = descendantNode;
-        //originalAncestors = query.getAncestors(descendantNode).reverse();
         childReplacement = new HashMap<>();
         nodeUpdate = HashBiMap.create();
         closestAncestorMap = new HashMap<>();
@@ -144,43 +133,6 @@ public class NodeTrackerImpl implements NodeTracker {
          */
         query.getParent(ancestorNode)
                 .ifPresent(p -> closestAncestorMap.put(ancestorNode, p));
-
-//        Optional<QueryNode> optionalAncestorOfRemovedDescendents = query.getParent(ancestorNode);
-//
-//        Optional<QueryNode> optionalOriginalNode = getRelatedNodeInOriginalAncestry(ancestorNode);
-//        Optional<QueryNode> optionalOriginOfReplacingNode = getRelatedNodeInOriginalAncestry(replacingDescendantNode);
-//        if (optionalOriginalNode.isPresent()) {
-//
-//            /**
-//             * If the replacing node is not part of this ancestry, removes all the descendants.
-//             * If it is part of it, removes all the intermediate descendants between the ancestor
-//             * and the replacing descendants
-//             *
-//             */
-//            for (int i = originalAncestors.indexOf(optionalOriginalNode.get())+ 1; i < originalAncestors.size(); i++) {
-//                QueryNode originalDescendantNode = originalAncestors.get(i);
-//                if (optionalOriginOfReplacingNode.isPresent() &&
-//                        originalDescendantNode == optionalOriginOfReplacingNode.get()) {
-//                    break;
-//                }
-//
-//                Optional<QueryNode> optionalCurrentDescendantNode = getCurrentNode(originalDescendantNode);
-//                if (optionalCurrentDescendantNode.isPresent()) {
-//                    QueryNode currentDescendantNode = optionalCurrentDescendantNode.get();
-//
-//                    if (query.contains(currentDescendantNode)) {
-//                        recordUpcomingRemoval(currentDescendantNode, query.getNextSibling(originalDescendantNode),
-//                                optionalAncestorOfRemovedDescendents);
-//                    }
-//                    else {
-//                        throw new RuntimeException("TODO: find a way to get the next sibling of an already " +
-//                                "removed node");
-//                        //recordUpcomingRemoval(descendentNode, Optional.empty(), optionalAncestorOfRemovedDescendents);
-//                    }
-//
-//                }
-//            }
-//        }
     }
 
     @Override
@@ -232,54 +184,6 @@ public class NodeTrackerImpl implements NodeTracker {
                 .ifPresent(a -> closestAncestorMap.put(node, a));
     }
 
-//    @Override
-//    public void recordResults(IntermediateQuery query, QueryNode originalFocusNode,
-//                              NodeCentricOptimizationResults<? extends QueryNode> propagationResults) {
-//        Optional<? extends QueryNode> optionalNewNode = propagationResults.getOptionalNewNode();
-//        /**
-//         * Standard replacement
-//         */
-//        if (optionalNewNode.isPresent()) {
-//            QueryNode newNode = optionalNewNode.get();
-//            if (newNode != originalFocusNode) {
-//                recordReplacement(originalFocusNode, newNode);
-//            }
-//        }
-//        /**
-//         * Replacement by a child
-//         */
-//        else if (propagationResults.getOptionalReplacingChild().isPresent()) {
-//            recordUpcomingReplacementByChild(query, originalFocusNode, propagationResults.getOptionalReplacingChild().get());
-//        }
-//        /**
-//         * Otherwise, we interpret this removal as an uselessness declaration.
-//         */
-//        else {
-//            recordUpcomingRemoval(originalFocusNode, propagationResults.getOptionalNextSibling(),
-//                    propagationResults.getOptionalClosestAncestor());
-//        }
-//    }
-
-//    /**
-//     * Some nodes may not be related to the original ancestry (e.g. some replacing nodes)
-//     */
-//    private Optional<QueryNode> getRelatedNodeInOriginalAncestry(QueryNode node) {
-//        if (originalAncestors.contains(node)) {
-//            return Optional.of(node);
-//        }
-//        else if (nodeUpdate.containsValue(node)) {
-//            // Recursive
-//            return getRelatedNodeInOriginalAncestry(nodeUpdate.inverse().get(node));
-//        }
-//        else {
-//            return Optional.empty();
-//        }
-//    }
-
-//    @Override
-//    public boolean hasChanged(QueryNode ancestorNode) {
-//        throw new RuntimeException("TODO: implement");
-//    }
 
     @Override
     public <N extends QueryNode> NodeUpdate<N> getUpdate(IntermediateQuery query, N node) {
@@ -322,13 +226,7 @@ public class NodeTrackerImpl implements NodeTracker {
             if (optionalNewAncestor.isPresent()) {
                 return optionalNewAncestor;
             }
-            Optional<QueryNode> optionalReplacingAncestor = ancestorUpdate.getReplacingChild();
-            if (optionalReplacingAncestor.isPresent()) {
-                throw new RuntimeException("TODO: support ancestors that are replaced by their child");
-            }
-            else {
-                return ancestorUpdate.getOptionalClosestAncestor(query);
-            }
+            return ancestorUpdate.getOptionalClosestAncestor(query);
         }
         else if (nodeUpdate.containsKey(node)) {
             return getClosestAncestor(query, nodeUpdate.get(node));
@@ -437,21 +335,4 @@ public class NodeTrackerImpl implements NodeTracker {
             return node;
         }
     }
-
-
-//    @Override
-//    public <N extends QueryNode> Optional<N> getCurrentNode(N node) {
-//        if (droppedNodes.contains(node)) {
-//            return Optional.empty();
-//        }
-//        else if (nodeUpdate.containsKey(node)) {
-//            return getCurrentNode((N) nodeUpdate.get(node));
-//        }
-//        else if (childReplacement.containsKey(node)) {
-//            return Optional.empty();
-//        }
-//        else {
-//            return Optional.of(node);
-//        }
-//    }
 }
