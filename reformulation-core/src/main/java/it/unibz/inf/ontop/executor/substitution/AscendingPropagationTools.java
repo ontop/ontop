@@ -290,9 +290,8 @@ public class AscendingPropagationTools {
                 break;
             }
 
-            NodeTrackingResults<QueryNode> propagationResults = propagateSubstitutionDownToNodes(
-                        params.focusNode, params.otherChildren.stream(), params.substitution, query, treeComponent,
-                    optionalNodeTracker);
+            propagateSubstitutionDownToNodes(params.focusNode, params.otherChildren.stream(), params.substitution,
+                    query, treeComponent, Optional.of(tracker));
         }
 
         NodeTracker.NodeUpdate<T> update = tracker.getUpdate(query, originalFocusNode);

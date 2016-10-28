@@ -226,13 +226,7 @@ public class NodeTrackerImpl implements NodeTracker {
             if (optionalNewAncestor.isPresent()) {
                 return optionalNewAncestor;
             }
-            Optional<QueryNode> optionalReplacingAncestor = ancestorUpdate.getReplacingChild();
-            if (optionalReplacingAncestor.isPresent()) {
-                throw new RuntimeException("TODO: support ancestors that are replaced by their child");
-            }
-            else {
-                return ancestorUpdate.getOptionalClosestAncestor(query);
-            }
+            return ancestorUpdate.getOptionalClosestAncestor(query);
         }
         else if (nodeUpdate.containsKey(node)) {
             return getClosestAncestor(query, nodeUpdate.get(node));
