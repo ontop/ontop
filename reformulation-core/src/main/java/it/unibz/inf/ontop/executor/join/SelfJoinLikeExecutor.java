@@ -15,7 +15,6 @@ import it.unibz.inf.ontop.pivotalrepr.proposal.impl.SubstitutionPropagationPropo
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.*;
-import java.util.stream.Stream;
 
 public class SelfJoinLikeExecutor {
 
@@ -126,6 +125,47 @@ public class SelfJoinLikeExecutor {
 
     }
 
+    /**
+     * Mutable object (for efficiency)
+     */
+    private static class Dominance {
+
+        private final List<DataNode> locallyDominants;
+        private final Set<DataNode> removalNodes;
+
+        public Dominance() {
+            this(Lists.newArrayList(), Sets.newHashSet());
+        }
+
+        private Dominance(List<DataNode> locallyDominants, Set<DataNode> removalNodes) {
+            this.locallyDominants = locallyDominants;
+            this.removalNodes = removalNodes;
+        }
+
+        public Dominance update(Collection<DataNode> sameRowDataNodes) {
+            DataNode locallyDominantNode = sameRowDataNodes.stream()
+                    .filter(locallyDominants::contains)
+                    .findFirst()
+                    .orElseGet(() -> sameRowDataNodes.stream()
+                                .findFirst()
+                                .orElseThrow(() -> new IllegalStateException("Should be at least one node")));
+            locallyDominants.add(locallyDominantNode);
+
+            /**
+             * Adds all the non-dominants to the removal set.
+             */
+            sameRowDataNodes.stream()
+                    .filter(n -> n != locallyDominantNode)
+                    .forEach(removalNodes::add);
+
+            return this;
+        }
+
+        private final ImmutableSet<DataNode> getRemovalNodes() {
+            return ImmutableSet.copyOf(removalNodes);
+        }
+    }
+
 
     protected static ImmutableMultimap<AtomPredicate, DataNode> extractDataNodes(ImmutableList<QueryNode> siblings) {
         ImmutableMultimap.Builder<AtomPredicate, DataNode> mapBuilder = ImmutableMultimap.builder();
@@ -147,66 +187,45 @@ public class SelfJoinLikeExecutor {
             ImmutableMultimap<ImmutableList<VariableOrGroundTerm>, DataNode> groupingMap)
     throws AtomUnificationException {
 
-        /**
-         * Collection of unifying substitutions
-         */
-        ImmutableList.Builder<ImmutableSubstitution<VariableOrGroundTerm>> substitutionBuilder = ImmutableList.builder();
-
-        /**
-         * Decreasing order in term of dominance
-         */
-        List<DataNode> locallyDominantNodes = Lists.newArrayList();
+        ImmutableCollection<Collection<DataNode>> dataNodeGroups = groupingMap.asMap().values();
 
         try {
             /**
-             * All the nodes that have been at least once dominated (--> could thus be removed)
-             *
-             * Non-parallellisable
+             * Collection of unifying substitutions
              */
-            ImmutableSet<DataNode> removableNodes = groupingMap.asMap().values().stream()
-                    .flatMap(redundantNodes -> {
-                        switch (redundantNodes.size()) {
-                            case 0:
-                            case 1:
-                                return Stream.empty();
-                            default:
-                                /**
-                                 * Adds a new unifying substitution to the list
-                                 */
-                                try {
-                                    ImmutableSubstitution<VariableOrGroundTerm> unifier = unifyRedundantNodes(redundantNodes);
-                                    if (!unifier.isEmpty()) {
-                                        substitutionBuilder.add(unifier);
+            ImmutableSet<ImmutableSubstitution<VariableOrGroundTerm>> unifyingSubstitutions =
+                    dataNodeGroups.stream()
+                            .filter(g -> g.size() > 1)
+                            .map(redundantNodes -> {
+                                    try {
+                                        return unifyRedundantNodes(redundantNodes);
+                                    } catch (AtomUnificationException e) {
+                                        throw new AtomUnificationRuntimeException(e);
                                     }
-                                } catch (AtomUnificationException e) {
-                                    throw new AtomUnificationRuntimeException(e);
-                                }
+                            })
+                            .filter(s -> !s.isEmpty())
+                            .collect(ImmutableCollectors.toSet());
+            /**
+             * All the nodes that have been at least once dominated (--> could thus be removed).
+             *
+             * Not parallellizable
+             */
+            ImmutableSet<DataNode> removableNodes = ImmutableSet.copyOf(dataNodeGroups.stream()
+                    .filter(sameRowDataNodes -> sameRowDataNodes.size() > 1)
+                    .reduce(
+                            new Dominance(),
+                            Dominance::update,
+                            (dom1, dom2) -> {
+                                throw new IllegalStateException("Cannot be run in parallel");
+                            })
+                    .getRemovalNodes());
 
-                                DataNode locallyDominantNode = redundantNodes.stream()
-                                        .filter(locallyDominantNodes::contains)
-                                        .findFirst()
-                                        .orElseGet(() -> {
-                                            DataNode newDominant = redundantNodes.stream()
-                                                    .findFirst()
-                                                    .orElseThrow(() -> new IllegalStateException("Should be at least one node"));
-                                            locallyDominantNodes.add(newDominant);
-                                            return newDominant;
-                                        });
-
-                                /**
-                                 * Returns all the locally non-dominant nodes
-                                 */
-                                return redundantNodes.stream()
-                                        .filter(n -> n != locallyDominantNode);
-                        }
-                    })
-                    .collect(ImmutableCollectors.toSet());
-
-            ImmutableSet<DataNode> keptNodes = groupingMap.values().stream()
+            ImmutableSet<DataNode> keptNodes = dataNodeGroups.stream()
+                    .flatMap(Collection::stream)
                     .filter(n -> !removableNodes.contains(n))
                     .collect(ImmutableCollectors.toSet());
 
-            return new PredicateLevelProposal(keptNodes, substitutionBuilder.build(), removableNodes);
+            return new PredicateLevelProposal(keptNodes, unifyingSubstitutions, removableNodes);
 
             /**
              * Trick: rethrow the exception
