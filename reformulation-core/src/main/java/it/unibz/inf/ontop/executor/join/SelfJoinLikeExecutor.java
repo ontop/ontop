@@ -12,8 +12,10 @@ import it.unibz.inf.ontop.pivotalrepr.proposal.NodeCentricOptimizationResults;
 import it.unibz.inf.ontop.pivotalrepr.proposal.SubstitutionPropagationProposal;
 import it.unibz.inf.ontop.pivotalrepr.proposal.impl.NodeCentricOptimizationResultsImpl;
 import it.unibz.inf.ontop.pivotalrepr.proposal.impl.SubstitutionPropagationProposalImpl;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Stream;
 
 public class SelfJoinLikeExecutor {
 
@@ -23,6 +25,17 @@ public class SelfJoinLikeExecutor {
      * TODO: find valid cases
      */
     protected static final class AtomUnificationException extends Exception {
+    }
+
+    /**
+     * Unchecked temporary variant of AtomUnificationException, so that the functional style can still be used.
+     */
+    private static final class AtomUnificationRuntimeException extends RuntimeException {
+        public final AtomUnificationException checkedException;
+
+        public AtomUnificationRuntimeException(AtomUnificationException e) {
+            this.checkedException = e;
+        }
     }
 
 
@@ -41,6 +54,11 @@ public class SelfJoinLikeExecutor {
             this.keptDataNodes = keptDataNodes;
             this.substitutions = substitutions;
             this.removedDataNodes = removedDataNodes;
+
+            if (keptDataNodes.stream()
+                    .anyMatch(removedDataNodes::contains)) {
+                throw new IllegalStateException("A node cannot be kept and removed at the same time");
+            }
         }
 
         /**
@@ -121,50 +139,81 @@ public class SelfJoinLikeExecutor {
     }
 
     /**
-     * groupingMap groups data nodes that are being joined on the primary keys
+     * groupingMap groups data nodes that are being joined on the unique constraints
      *
      * creates proposal to unify redundant nodes
      */
     protected static PredicateLevelProposal proposeForGroupingMap(
             ImmutableMultimap<ImmutableList<VariableOrGroundTerm>, DataNode> groupingMap)
     throws AtomUnificationException {
-        /**
-         * Not yet unified
-         */
-        ImmutableList.Builder<DataNode> keptDataNodeBuilder = ImmutableList.builder();
-        ImmutableList.Builder<DataNode> removedDataNodeBuilder = ImmutableList.builder();
 
         /**
-         * TODO: explain
+         * Collection of unifying substitutions
          */
         ImmutableList.Builder<ImmutableSubstitution<VariableOrGroundTerm>> substitutionBuilder = ImmutableList.builder();
 
-        for (ImmutableList<VariableOrGroundTerm> argumentList : groupingMap.keySet()) {
-            ImmutableCollection<DataNode> redundantNodes = groupingMap.get(argumentList);
-            switch (redundantNodes.size()) {
-                case 0:
-                    // Should not happen
-                    break;
-                case 1:
-                    keptDataNodeBuilder.add(redundantNodes.iterator().next());
-                    break;
-                default:
-                    ImmutableSubstitution<VariableOrGroundTerm> unifier = unifyRedundantNodes(redundantNodes);
-                    if (!unifier.isEmpty()) {
-                        substitutionBuilder.add(unifier);
-                    }
+        /**
+         * Decreasing order in term of dominance
+         */
+        List<DataNode> locallyDominantNodes = Lists.newArrayList();
 
-                    UnmodifiableIterator<DataNode> nodeIterator = redundantNodes.iterator();
-                    /**
-                     *Keeps only the first data node
-                     */
-                    keptDataNodeBuilder.add(nodeIterator.next());
-                    removedDataNodeBuilder.addAll(nodeIterator);
-            }
+        try {
+            /**
+             * All the nodes that have been at least once dominated (--> could thus be removed)
+             *
+             * Non-parallellisable
+             */
+            ImmutableSet<DataNode> removableNodes = groupingMap.asMap().values().stream()
+                    .flatMap(redundantNodes -> {
+                        switch (redundantNodes.size()) {
+                            case 0:
+                            case 1:
+                                return Stream.empty();
+                            default:
+                                /**
+                                 * Adds a new unifying substitution to the list
+                                 */
+                                try {
+                                    ImmutableSubstitution<VariableOrGroundTerm> unifier = unifyRedundantNodes(redundantNodes);
+                                    if (!unifier.isEmpty()) {
+                                        substitutionBuilder.add(unifier);
+                                    }
+                                } catch (AtomUnificationException e) {
+                                    throw new AtomUnificationRuntimeException(e);
+                                }
+
+                                DataNode locallyDominantNode = redundantNodes.stream()
+                                        .filter(locallyDominantNodes::contains)
+                                        .findFirst()
+                                        .orElseGet(() -> {
+                                            DataNode newDominant = redundantNodes.stream()
+                                                    .findFirst()
+                                                    .orElseThrow(() -> new IllegalStateException("Should be at least one node"));
+                                            locallyDominantNodes.add(newDominant);
+                                            return newDominant;
+                                        });
+
+                                /**
+                                 * Returns all the locally non-dominant nodes
+                                 */
+                                return redundantNodes.stream()
+                                        .filter(n -> n != locallyDominantNode);
+                        }
+                    })
+                    .collect(ImmutableCollectors.toSet());
+
+            ImmutableSet<DataNode> keptNodes = groupingMap.values().stream()
+                    .filter(n -> !removableNodes.contains(n))
+                    .collect(ImmutableCollectors.toSet());
+
+            return new PredicateLevelProposal(keptNodes, substitutionBuilder.build(), removableNodes);
+
+            /**
+             * Trick: rethrow the exception
+              */
+        } catch (AtomUnificationRuntimeException e) {
+            throw e.checkedException;
         }
-        return new PredicateLevelProposal(keptDataNodeBuilder.build(), substitutionBuilder.build(),
-                removedDataNodeBuilder.build());
-
     }
 
     protected static Optional<ConcreteProposal> createConcreteProposal(
@@ -220,7 +269,7 @@ public class SelfJoinLikeExecutor {
 
 
     protected static ImmutableSubstitution<VariableOrGroundTerm> unifyRedundantNodes(
-            ImmutableCollection<DataNode> redundantNodes) throws AtomUnificationException {
+            Collection<DataNode> redundantNodes) throws AtomUnificationException {
         // Non-final
         ImmutableSubstitution<VariableOrGroundTerm> accumulatedSubstitution = new ImmutableSubstitutionImpl<>(
                 ImmutableMap.<Variable, VariableOrGroundTerm>of());
@@ -233,7 +282,7 @@ public class SelfJoinLikeExecutor {
             return accumulatedSubstitution;
         }
 
-        UnmodifiableIterator<DataNode> nodeIterator = redundantNodes.iterator();
+        Iterator<DataNode> nodeIterator = redundantNodes.iterator();
 
         // Non-final
         DataAtom accumulatedAtom = nodeIterator.next().getProjectionAtom();
