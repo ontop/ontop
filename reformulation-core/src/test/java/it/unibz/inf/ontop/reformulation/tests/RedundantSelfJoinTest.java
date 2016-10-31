@@ -40,6 +40,7 @@ public class RedundantSelfJoinTest {
     private final static AtomPredicate TABLE3_PREDICATE = new AtomPredicateImpl("table3", 3);
     private final static AtomPredicate TABLE4_PREDICATE = new AtomPredicateImpl("table4", 2);
     private final static AtomPredicate TABLE5_PREDICATE = new AtomPredicateImpl("table5", 2);
+    private final static AtomPredicate TABLE6_PREDICATE = new AtomPredicateImpl("table6", 3);
     private final static AtomPredicate ANS1_PREDICATE = new AtomPredicateImpl("ans1", 3);
     private final static AtomPredicate ANS1_PREDICATE_1 = new AtomPredicateImpl("ans1", 1);
     private final static OBDADataFactory DATA_FACTORY = OBDADataFactoryImpl.getInstance();
@@ -94,14 +95,21 @@ public class RedundantSelfJoinTest {
         uniqueKeyBuilder.put(TABLE3_PREDICATE, ImmutableList.of(1, 2));
 
         /**
-         * Table 4: composite unique constraint over the first column
+         * Table 4: unique constraint over the first column
          */
         uniqueKeyBuilder.put(TABLE4_PREDICATE, ImmutableList.of(1));
 
         /**
-         * Table 5: composite unique constraint over the second column
+         * Table 5: unique constraint over the second column
          */
         uniqueKeyBuilder.put(TABLE5_PREDICATE, ImmutableList.of(2));
+
+        /**
+         * Table 6: two atomic unique constraints over the first and third columns
+         */
+        uniqueKeyBuilder.put(TABLE6_PREDICATE, ImmutableList.of(1));
+        uniqueKeyBuilder.put(TABLE6_PREDICATE, ImmutableList.of(3));
+
 
         return new MetadataForQueryOptimizationImpl(
                 DBMetadataExtractor.createDummyMetadata(),
@@ -601,6 +609,119 @@ public class RedundantSelfJoinTest {
         IntermediateQuery query1 = queryBuilder1.build();
 
         assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, query1));
+    }
+
+    @Test
+    public void testDoubleUniqueConstraints1() throws EmptyQueryException {
+        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(metadata);
+        DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE, M, N, O);
+        ConstructionNode constructionNode = new ConstructionNodeImpl(projectionAtom.getVariables());
+        queryBuilder.init(projectionAtom, constructionNode);
+        InnerJoinNode joinNode = new InnerJoinNodeImpl(Optional.empty());
+        queryBuilder.addChild(constructionNode, joinNode);
+
+        ExtensionalDataNode dataNode1 =  new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE6_PREDICATE, M, N, O));
+        ExtensionalDataNode dataNode2 =  new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE6_PREDICATE, M, N1, TWO));
+
+        queryBuilder.addChild(joinNode, dataNode1);
+        queryBuilder.addChild(joinNode, dataNode2);
+
+        IntermediateQuery query = queryBuilder.build();
+        System.out.println("\nBefore optimization: \n" +  query);
+
+        IntermediateQueryBuilder expectedQueryBuilder = new DefaultIntermediateQueryBuilder(metadata);
+        ConstructionNode newConstructionNode = new ConstructionNodeImpl(projectionAtom.getVariables(),
+                new ImmutableSubstitutionImpl<>(ImmutableMap.of(O, TWO)), Optional.empty());
+        expectedQueryBuilder.init(projectionAtom, newConstructionNode);
+
+        ExtensionalDataNode dataNode3 =  new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE6_PREDICATE, M, N, TWO));
+        expectedQueryBuilder.addChild(newConstructionNode, dataNode3);
+
+        IntermediateQuery expectedQuery = expectedQueryBuilder.build();
+        System.out.println("\n Expected query : \n" +  expectedQuery);
+
+        IntermediateQuery optimizedQuery = query.applyProposal(new InnerJoinOptimizationProposalImpl(joinNode))
+                .getResultingQuery();
+        System.out.println("\n After optimization: \n" +  optimizedQuery);
+
+        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, expectedQuery));
+    }
+
+    @Test
+    public void testDoubleUniqueConstraints2() throws EmptyQueryException {
+        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(metadata);
+        DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE, M, N, O);
+        ConstructionNode constructionNode = new ConstructionNodeImpl(projectionAtom.getVariables());
+        queryBuilder.init(projectionAtom, constructionNode);
+        InnerJoinNode joinNode = new InnerJoinNodeImpl(Optional.empty());
+        queryBuilder.addChild(constructionNode, joinNode);
+
+        ExtensionalDataNode dataNode1 =  new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE6_PREDICATE, M, N, O1));
+        ExtensionalDataNode dataNode2 =  new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE6_PREDICATE, M, N1, O));
+        ExtensionalDataNode dataNode3 =  new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE6_PREDICATE, TWO, N2, O));
+
+        queryBuilder.addChild(joinNode, dataNode1);
+        queryBuilder.addChild(joinNode, dataNode2);
+        queryBuilder.addChild(joinNode, dataNode3);
+
+        IntermediateQuery query = queryBuilder.build();
+        System.out.println("\nBefore optimization: \n" +  query);
+
+        IntermediateQueryBuilder expectedQueryBuilder = new DefaultIntermediateQueryBuilder(metadata);
+        ConstructionNode newConstructionNode = new ConstructionNodeImpl(projectionAtom.getVariables(),
+                new ImmutableSubstitutionImpl<>(ImmutableMap.of(M, TWO)), Optional.empty());
+        expectedQueryBuilder.init(projectionAtom, newConstructionNode);
+
+        ExtensionalDataNode expectedDataNode =  new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE6_PREDICATE, TWO, N, O));
+        expectedQueryBuilder.addChild(newConstructionNode, expectedDataNode);
+
+        IntermediateQuery expectedQuery = expectedQueryBuilder.build();
+        System.out.println("\n Expected query : \n" +  expectedQuery);
+
+        IntermediateQuery optimizedQuery = query.applyProposal(new InnerJoinOptimizationProposalImpl(joinNode))
+                .getResultingQuery();
+        System.out.println("\n After optimization: \n" +  optimizedQuery);
+
+        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, expectedQuery));
+    }
+
+    @Test
+    public void testDoubleUniqueConstraints3() throws EmptyQueryException {
+        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(metadata);
+        DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE, M, N, O);
+        ConstructionNode constructionNode = new ConstructionNodeImpl(projectionAtom.getVariables());
+        queryBuilder.init(projectionAtom, constructionNode);
+        InnerJoinNode joinNode = new InnerJoinNodeImpl(Optional.empty());
+        queryBuilder.addChild(constructionNode, joinNode);
+
+        ExtensionalDataNode dataNode1 =  new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE6_PREDICATE, M, N, O1));
+        ExtensionalDataNode dataNode2 =  new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE6_PREDICATE, M, N1, O));
+        ExtensionalDataNode dataNode3 =  new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE6_PREDICATE, TWO, N1, O2));
+
+        queryBuilder.addChild(joinNode, dataNode1);
+        queryBuilder.addChild(joinNode, dataNode2);
+        queryBuilder.addChild(joinNode, dataNode3);
+
+        IntermediateQuery query = queryBuilder.build();
+        System.out.println("\nBefore optimization: \n" +  query);
+
+        IntermediateQueryBuilder expectedQueryBuilder = new DefaultIntermediateQueryBuilder(metadata);
+        expectedQueryBuilder.init(projectionAtom, constructionNode);
+        expectedQueryBuilder.addChild(constructionNode, joinNode);
+
+        ExtensionalDataNode expectedDataNode1 =  new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE6_PREDICATE, M, N, O));
+        expectedQueryBuilder.addChild(joinNode, expectedDataNode1);
+        ExtensionalDataNode expectedDataNode2 =  new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE6_PREDICATE, TWO, N, O2));
+        expectedQueryBuilder.addChild(joinNode, expectedDataNode2);
+
+        IntermediateQuery expectedQuery = expectedQueryBuilder.build();
+        System.out.println("\n Expected query : \n" +  expectedQuery);
+
+        IntermediateQuery optimizedQuery = query.applyProposal(new InnerJoinOptimizationProposalImpl(joinNode))
+                .getResultingQuery();
+        System.out.println("\n After optimization: \n" +  optimizedQuery);
+
+        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, expectedQuery));
     }
 
 
