@@ -47,12 +47,16 @@ import java.util.Collection;
 public class OntopMaterialize extends OntopReasoningCommandBase {
 
     private static final int TRIPLE_LIMIT_PER_FILE = 500000;
+    private static final String RDF_XML = "rdfxml";
+    private static final String OWL_XML = "owlxml";
+    private static final String TURTLE = "turtle";
+    private static final String N3 = "n3";
 
     @Option(type = OptionType.COMMAND, name = {"-f", "--format"}, title = "outputFormat",
             description = "The format of the materialized ontology. " +
                     //" Options: rdfxml, owlxml, turtle, n3. " +
                     "Default: rdfxml")
-    @AllowedValues(allowedValues = {"rdfxml", "owlxml", "turtle", "n3"})
+    @AllowedValues(allowedValues = {RDF_XML, OWL_XML, TURTLE, N3})
     public String format;
 
     @Option(type = OptionType.COMMAND, name = {"--separate-files"}, title = "output to separate files",
@@ -188,7 +192,25 @@ public class OntopMaterialize extends OntopReasoningCommandBase {
      */
     private int serializeTripleBatch(OWLOntology ontology, QuestOWLIndividualAxiomIterator iterator,
                                             String filePrefix, String predicateName, int fileCount, String format) throws Exception {
-        String fileName = filePrefix + fileCount + ".owl";
+        String suffix;
+
+        switch (format) {
+            case RDF_XML:
+                suffix = ".rdf";
+                break;
+            case OWL_XML:
+                suffix = ".owl";
+                break;
+            case TURTLE:
+                suffix = ".ttl";
+                break;
+            case N3:
+                suffix = ".n3";
+                break;
+            default:
+                throw new Exception("Unknown format: " + format);
+        }
+        String fileName = filePrefix + fileCount + suffix;
 
         OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 

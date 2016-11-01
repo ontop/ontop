@@ -42,8 +42,10 @@ import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Scanner;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 /***
@@ -131,7 +133,7 @@ public class H2ComplexSameAsTest {
 
 
 
-	private void runTests(String query, boolean sameAs) throws Exception {
+	private ArrayList runTests(String query, boolean sameAs) throws Exception {
 
 		// Creating a new instance of the reasoner
 		QuestOWLFactory factory = new QuestOWLFactory();
@@ -144,13 +146,16 @@ public class H2ComplexSameAsTest {
 		conn = reasoner.getConnection();
 
 		QuestOWLStatement st = conn.createStatement();
-		String retval;
+		ArrayList<String> retVal = new ArrayList<>();
 		try {
 			QuestOWLResultSet rs = st.executeTuple(query);
 			while(rs.nextRow()) {
 				for (String s : rs.getSignature()) {
 					OWLObject binding = rs.getOWLObject(s);
-					log.debug((s + ":  " + ToStringRenderer.getInstance().getRendering(binding)));
+
+					String rendering = ToStringRenderer.getInstance().getRendering(binding);
+					retVal.add(rendering);
+					log.debug((s + ":  " + rendering));
 
 				}
 			}
@@ -167,18 +172,49 @@ public class H2ComplexSameAsTest {
 			conn.close();
 			reasoner.dispose();
 		}
+		return retVal;
 
 	}
 
 
-    @Test
+
+	@Test
     public void testSameAs1() throws Exception {
         String query =  "PREFIX : <http://ontop.inf.unibz.it/test/wellbore#> SELECT ?x\n" +
                 "WHERE {\n" +
                 "   ?x  a :Wellbore . \n" +
                 "}";
 
-        runTests(query, true);
+		ArrayList<String> results = runTests(query, true);
+		ArrayList<String> expectedResults = new ArrayList<>();
+		expectedResults.add("<http://ontop.inf.unibz.it/test/wellbore#uri1-1>");
+		expectedResults.add("<http://ontop.inf.unibz.it/test/wellbore#uri1-2>");
+		expectedResults.add("<http://ontop.inf.unibz.it/test/wellbore#uri2-1>");
+		expectedResults.add("<http://ontop.inf.unibz.it/test/wellbore#uri2-2>");
+		expectedResults.add("<http://ontop.inf.unibz.it/test/wellbore#uri2-3>");
+		expectedResults.add("<http://ontop.inf.unibz.it/test/wellbore#uri3-2>");
+		expectedResults.add("<http://ontop.inf.unibz.it/test/wellbore#uri3-1>");
+		expectedResults.add("<http://ontop.inf.unibz.it/test/wellbore#uri3-3>");
+		expectedResults.add("<http://ontop.inf.unibz.it/test/wellbore#uri1-1>");
+		expectedResults.add("<http://ontop.inf.unibz.it/test/wellbore#uri1-2>");
+		expectedResults.add("<http://ontop.inf.unibz.it/test/wellbore#uri3-2>");
+		expectedResults.add("<http://ontop.inf.unibz.it/test/wellbore#uri3-1>");
+		expectedResults.add("<http://ontop.inf.unibz.it/test/wellbore#uri2-1>");
+		expectedResults.add("<http://ontop.inf.unibz.it/test/wellbore#uri2-2>");
+		expectedResults.add("<http://ontop.inf.unibz.it/test/wellbore/Katian>");
+		expectedResults.add("<http://ontop.inf.unibz.it/test/wellbore/Bill>");
+		expectedResults.add("<http://ontop.inf.unibz.it/test/wellbore#uri3-1>");
+		expectedResults.add("<http://ontop.inf.unibz.it/test/wellbore#uri3-2>");
+		expectedResults.add("<http://ontop.inf.unibz.it/test/wellbore#uri3-4>");
+		expectedResults.add("<http://ontop.inf.unibz.it/test/wellbore#uri3-3>");
+		expectedResults.add("<http://ontop.inf.unibz.it/test/wellbore#uri2-1>");
+		expectedResults.add("<http://ontop.inf.unibz.it/test/wellbore#uri2-2>");
+		expectedResults.add("<http://ontop.inf.unibz.it/test/wellbore#uri2-3>");
+		expectedResults.add("<http://ontop.inf.unibz.it/test/wellbore#uri1-1>");
+		expectedResults.add("<http://ontop.inf.unibz.it/test/wellbore#uri1-2>");
+
+		assertEquals(expectedResults.size(), results.size() );
+		assertEquals(expectedResults, results);
 
     }
 
@@ -189,7 +225,9 @@ public class H2ComplexSameAsTest {
 				" {  ?x  a :Wellbore . \n" +
 				"} UNION {?x owl:sameAs [ a :Wellbore ] }} ";
 
-		runTests(query, false);
+		ArrayList<String> results = runTests(query, false);
+		assertEquals(25, results.size() );
+
 
 	}
 
@@ -201,7 +239,8 @@ public class H2ComplexSameAsTest {
                 "   ?x  :hasName ?y . \n" +
                 "}";
 
-		 runTests(query, true);
+		ArrayList<String> results = runTests(query, true);
+		assertEquals(54, results.size() );
 
 	}
 
@@ -212,9 +251,11 @@ public class H2ComplexSameAsTest {
                 " ?x :hasName ?y .\n" +
                 " ?x :isActive ?z .}\n";
 
-        runTests(query, true);
+		ArrayList<String> results = runTests(query, true);
+		assertEquals(294, results.size() );
 
-    }
+
+	}
 
 	@Test
 	public void testSameAs3b() throws Exception {
@@ -222,7 +263,8 @@ public class H2ComplexSameAsTest {
 				"SELECT * WHERE { ?x a :Wellbore .\n" +
 				" ?x :isActive ?z .}\n";
 
-		runTests(query, true);
+		ArrayList<String> results = runTests(query, true);
+		assertEquals(80, results.size() );
 
 	}
 
@@ -232,7 +274,8 @@ public class H2ComplexSameAsTest {
                 "SELECT * WHERE { ?x a :Wellbore .\n" +
                 " ?x :isHappy ?z .}\n";
 
-        runTests(query, true);
+		ArrayList<String> results = runTests(query, true);
+		assertEquals(46, results.size() );
 
     }
 
@@ -242,8 +285,8 @@ public class H2ComplexSameAsTest {
                 "SELECT * WHERE { " +
                 " ?x :hasOwner ?y .}\n";
 
-        runTests(query, true);
-
+		ArrayList<String> results = runTests(query, true);
+		assertEquals(24, results.size() );
     }
 
 	@Test
@@ -253,7 +296,8 @@ public class H2ComplexSameAsTest {
 				"?x  a :Wellbore ." +
 				" ?x :hasOwner ?y .}\n";
 
-		runTests(query, true);
+		ArrayList<String> results = runTests(query, true);
+		assertEquals(72, results.size() );
 
 	}
 
