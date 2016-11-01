@@ -3,7 +3,6 @@ package it.unibz.inf.ontop.sql.parser;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import com.sun.istack.internal.Nullable;
 import it.unibz.inf.ontop.model.Function;
 import it.unibz.inf.ontop.model.Variable;
 import it.unibz.inf.ontop.sql.QualifiedAttributeID;
@@ -93,8 +92,8 @@ public class RelationalExpression {
      * @param s2 a set of relations
      * @return the union of s1 and s2
      */
-    private static ImmutableSet<RelationID> relationSetUnion(@Nullable ImmutableSet<RelationID> s1,
-                                                             @Nullable ImmutableSet<RelationID> s2) {
+    private static ImmutableSet<RelationID> relationSetUnion(ImmutableSet<RelationID> s1,
+                                                             ImmutableSet<RelationID> s2) {
         if (s1 == null)
             return s2;
 
