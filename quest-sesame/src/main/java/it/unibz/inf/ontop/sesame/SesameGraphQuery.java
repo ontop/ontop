@@ -56,7 +56,7 @@ public class SesameGraphQuery extends SesameAbstractQuery implements GraphQuery 
 
 	private Statement createStatement(Assertion assertion) {
 
-		Statement stm = SesameHelper.getStatement(assertion);
+		Statement stm = SesameHelper.createStatement(assertion);
 		if (stm.getSubject()!=null && stm.getPredicate()!=null && stm.getObject()!=null)
 			return stm;
 		else 
