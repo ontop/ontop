@@ -1,20 +1,13 @@
 package it.unibz.inf.ontop.executor.join;
 
 import com.google.common.collect.*;
-import it.unibz.inf.ontop.executor.SimpleNodeCentricInternalExecutor;
 import it.unibz.inf.ontop.model.*;
-import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionImpl;
-import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.ImmutableUnificationTools;
 import it.unibz.inf.ontop.pivotalrepr.*;
-import it.unibz.inf.ontop.pivotalrepr.impl.ExtensionalDataNodeImpl;
-import it.unibz.inf.ontop.pivotalrepr.impl.FilterNodeImpl;
+import it.unibz.inf.ontop.pivotalrepr.impl.EmptyNodeImpl;
 import it.unibz.inf.ontop.pivotalrepr.impl.QueryTreeComponent;
-import it.unibz.inf.ontop.pivotalrepr.proposal.InnerJoinOptimizationProposal;
-import it.unibz.inf.ontop.pivotalrepr.proposal.InvalidQueryOptimizationProposalException;
-import it.unibz.inf.ontop.pivotalrepr.proposal.NodeCentricOptimizationResults;
-import it.unibz.inf.ontop.pivotalrepr.proposal.SubstitutionPropagationProposal;
+import it.unibz.inf.ontop.pivotalrepr.proposal.*;
 import it.unibz.inf.ontop.pivotalrepr.proposal.impl.NodeCentricOptimizationResultsImpl;
-import it.unibz.inf.ontop.pivotalrepr.proposal.impl.SubstitutionPropagationProposalImpl;
+import it.unibz.inf.ontop.pivotalrepr.proposal.impl.RemoveEmptyNodeProposalImpl;
 
 import java.util.Optional;
 
@@ -38,7 +31,7 @@ public class RedundantSelfJoinExecutor extends SelfJoinLikeExecutor implements I
     public NodeCentricOptimizationResults<InnerJoinNode> apply(final InnerJoinOptimizationProposal highLevelProposal,
                                                 final IntermediateQuery query,
                                                 final QueryTreeComponent treeComponent)
-            throws InvalidQueryOptimizationProposalException {
+            throws InvalidQueryOptimizationProposalException, EmptyQueryException {
 
         // Non-final
         InnerJoinNode topJoinNode = highLevelProposal.getFocusNode();
@@ -54,37 +47,43 @@ public class RedundantSelfJoinExecutor extends SelfJoinLikeExecutor implements I
             // TODO: explain
             ImmutableSet<Variable> variablesToKeep = query.getClosestConstructionNode(topJoinNode).getLocalVariables();
 
-            Optional<ConcreteProposal> optionalConcreteProposal = propose(initialMap, variablesToKeep,
-                    query.getMetadata().getUniqueConstraints());
+            try {
+                Optional<ConcreteProposal> optionalConcreteProposal = propose(initialMap, variablesToKeep,
+                        query.getMetadata().getUniqueConstraints());
 
-            if (optionalConcreteProposal.isPresent()) {
-                ConcreteProposal concreteProposal = optionalConcreteProposal.get();
+                if (optionalConcreteProposal.isPresent()) {
+                    ConcreteProposal concreteProposal = optionalConcreteProposal.get();
 
-                // SIDE-EFFECT on the tree component (and thus on the query)
-                NodeCentricOptimizationResults<InnerJoinNode> result = applyOptimization(query, treeComponent,
-                        topJoinNode, concreteProposal);
+                    // SIDE-EFFECT on the tree component (and thus on the query)
+                    NodeCentricOptimizationResults<InnerJoinNode> result = applyOptimization(query, treeComponent,
+                            topJoinNode, concreteProposal);
 
-                /**
-                 *
-                 */
-                if (result.getOptionalNewNode().isPresent()) {
-                    int oldSize = initialMap.size();
-                    initialMap = extractDataNodes(result.getResultingQuery().getChildren(
-                            result.getOptionalNewNode().get()));
-                    int newSize = initialMap.size();
+                    /**
+                     *
+                     */
+                    if (result.getOptionalNewNode().isPresent()) {
+                        int oldSize = initialMap.size();
+                        initialMap = extractDataNodes(result.getResultingQuery().getChildren(
+                                result.getOptionalNewNode().get()));
+                        int newSize = initialMap.size();
 
-                    if (oldSize == newSize) {
+                        if (oldSize == newSize) {
+                            return result;
+                        } else if (oldSize < newSize) {
+                            throw new IllegalStateException("The number of data atoms was expected to decrease, not increase");
+                        }
+                        // else, continue
+                        topJoinNode = result.getOptionalNewNode().get();
+
+                    } else {
                         return result;
                     }
-                    else if (oldSize < newSize) {
-                        throw new IllegalStateException("The number of data atoms was expected to decrease, not increase");
-                    }
-                    // else, continue
-                    topJoinNode = result.getOptionalNewNode().get();
-
-                } else {
-                    return result;
                 }
+                /**
+                 * No unification --> empty result
+                 */
+            } catch (AtomUnificationException e) {
+                return removeSubTree(query, treeComponent, topJoinNode);
             }
         }
 
@@ -100,9 +99,13 @@ public class RedundantSelfJoinExecutor extends SelfJoinLikeExecutor implements I
         return new NodeCentricOptimizationResultsImpl<>(query, topJoinNode);
     }
 
+    /**
+     * Throws an AtomUnificationException when the results are guaranteed to be empty
+     */
     private Optional<ConcreteProposal> propose(ImmutableMultimap<AtomPredicate, DataNode> initialDataNodeMap,
                                                ImmutableSet<Variable> variablesToKeep,
-                                               ImmutableMultimap<AtomPredicate, ImmutableList<Integer>> primaryKeys) {
+                                               ImmutableMultimap<AtomPredicate, ImmutableList<Integer>> primaryKeys)
+            throws AtomUnificationException {
 
         ImmutableList.Builder<PredicateLevelProposal> proposalListBuilder = ImmutableList.builder();
 
@@ -110,15 +113,7 @@ public class RedundantSelfJoinExecutor extends SelfJoinLikeExecutor implements I
             ImmutableCollection<DataNode> initialNodes = initialDataNodeMap.get(predicate);
             PredicateLevelProposal predicateProposal;
             if (primaryKeys.containsKey(predicate)) {
-                try {
-                    predicateProposal = proposePerPredicate(initialNodes, primaryKeys.get(predicate));
-                }
-                /**
-                 * Fall back to the default predicate proposal: doing nothing
-                 */
-                catch (AtomUnificationException e) {
-                    predicateProposal = new PredicateLevelProposal(initialNodes);
-                }
+                predicateProposal = proposePerPredicate(initialNodes, primaryKeys.get(predicate));
             }
             else {
                 predicateProposal = new PredicateLevelProposal(initialNodes);
@@ -181,6 +176,29 @@ public class RedundantSelfJoinExecutor extends SelfJoinLikeExecutor implements I
 
         return getJoinNodeCentricOptimizationResults(query, treeComponent, topJoinNode, proposal);
     }
+    
+    private NodeCentricOptimizationResults<InnerJoinNode> removeSubTree(IntermediateQuery query,
+                                                                        QueryTreeComponent treeComponent,
+                                                                        InnerJoinNode topJoinNode) throws EmptyQueryException {
+        /**
+         * Replaces by an EmptyNode
+         */
+        EmptyNode emptyNode = new EmptyNodeImpl(query.getVariables(topJoinNode));
+        treeComponent.replaceSubTree(topJoinNode, emptyNode);
 
+        /**
+         * Removes the empty node
+         * (may throw an EmptyQuery)
+         */
+        RemoveEmptyNodeProposal removalProposal = new RemoveEmptyNodeProposalImpl(emptyNode, false);
+        NodeTrackingResults<EmptyNode> removalResults = query.applyProposal(removalProposal, true);
+
+        /**
+         * If the query is not empty, changes the type of the results
+         */
+        return new NodeCentricOptimizationResultsImpl<>(query,
+                removalResults.getOptionalNextSibling(),
+                removalResults.getOptionalClosestAncestor());
+    }
 
 }

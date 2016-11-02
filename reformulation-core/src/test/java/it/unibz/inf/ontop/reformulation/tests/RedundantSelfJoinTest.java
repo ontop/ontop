@@ -9,12 +9,14 @@ import fj.P;
 import fj.P2;
 import it.unibz.inf.ontop.model.impl.AtomPredicateImpl;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
+import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
 import it.unibz.inf.ontop.model.impl.URITemplatePredicateImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionImpl;
 import it.unibz.inf.ontop.pivotalrepr.equivalence.IQSyntacticEquivalenceChecker;
 import it.unibz.inf.ontop.pivotalrepr.impl.*;
 import it.unibz.inf.ontop.pivotalrepr.impl.tree.DefaultIntermediateQueryBuilder;
 import it.unibz.inf.ontop.pivotalrepr.proposal.InvalidQueryOptimizationProposalException;
+import it.unibz.inf.ontop.pivotalrepr.proposal.NodeCentricOptimizationResults;
 import it.unibz.inf.ontop.sql.DBMetadataExtractor;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -23,9 +25,12 @@ import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.pivotalrepr.*;
 
 import static it.unibz.inf.ontop.model.ExpressionOperation.LT;
+import static it.unibz.inf.ontop.model.impl.OBDAVocabulary.NULL;
 import static it.unibz.inf.ontop.pivotalrepr.NonCommutativeOperatorNode.ArgumentPosition.LEFT;
 import static it.unibz.inf.ontop.pivotalrepr.NonCommutativeOperatorNode.ArgumentPosition.RIGHT;
+import static junit.framework.Assert.assertEquals;
 import static junit.framework.TestCase.assertTrue;
+import static org.junit.Assert.assertFalse;
 
 /**
  * Optimizations for inner joins based on unique constraints (like PKs).
@@ -52,6 +57,7 @@ public class RedundantSelfJoinTest {
     private final static Variable C = DATA_FACTORY.getVariable("C");
     private final static Variable D = DATA_FACTORY.getVariable("D");
     private final static Variable P1 = DATA_FACTORY.getVariable("P");
+    private final static Constant ONE = DATA_FACTORY.getConstantLiteral("1");
     private final static Constant TWO = DATA_FACTORY.getConstantLiteral("2");
 
     private final static Variable M = DATA_FACTORY.getVariable("m");
@@ -722,6 +728,84 @@ public class RedundantSelfJoinTest {
         System.out.println("\n After optimization: \n" +  optimizedQuery);
 
         assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, expectedQuery));
+    }
+
+    @Test(expected = EmptyQueryException.class)
+    public void testNonUnification1() throws EmptyQueryException {
+        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(metadata);
+        DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE, M, N, O);
+        ConstructionNode constructionNode = new ConstructionNodeImpl(projectionAtom.getVariables());
+        queryBuilder.init(projectionAtom, constructionNode);
+        InnerJoinNode joinNode = new InnerJoinNodeImpl(Optional.empty());
+        queryBuilder.addChild(constructionNode, joinNode);
+
+        ExtensionalDataNode dataNode1 =  new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE6_PREDICATE, M, N, O1));
+        ExtensionalDataNode dataNode2 =  new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE6_PREDICATE, M, ONE, O));
+        ExtensionalDataNode dataNode3 =  new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE6_PREDICATE, TWO, TWO, O));
+
+        queryBuilder.addChild(joinNode, dataNode1);
+        queryBuilder.addChild(joinNode, dataNode2);
+        queryBuilder.addChild(joinNode, dataNode3);
+
+        IntermediateQuery query = queryBuilder.build();
+        System.out.println("\nBefore optimization: \n" +  query);
+
+        IntermediateQuery optimizedQuery = query.applyProposal(new InnerJoinOptimizationProposalImpl(joinNode))
+                .getResultingQuery();
+        System.out.println("\n Optimized query (should not be produced): \n" +  optimizedQuery);
+    }
+
+    @Test
+    public void testNonUnification2() throws EmptyQueryException {
+        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(metadata);
+        DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE, M, N, O);
+        ConstructionNode constructionNode = new ConstructionNodeImpl(projectionAtom.getVariables());
+        queryBuilder.init(projectionAtom, constructionNode);
+
+        LeftJoinNode leftJoinNode = new LeftJoinNodeImpl(Optional.empty());
+        queryBuilder.addChild(constructionNode, leftJoinNode);
+
+        ConstructionNode leftConstructionNode = new ConstructionNodeImpl(ImmutableSet.of(M));
+        queryBuilder.addChild(leftJoinNode, leftConstructionNode, LEFT);
+        ExtensionalDataNode dataNode1 =  new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, M, N2, O2));
+        queryBuilder.addChild(leftConstructionNode, dataNode1);
+
+        InnerJoinNode joinNode = new InnerJoinNodeImpl(Optional.empty());
+        queryBuilder.addChild(leftJoinNode, joinNode, RIGHT);
+
+        ExtensionalDataNode dataNode2 =  new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE6_PREDICATE, M, N, O1));
+        ExtensionalDataNode dataNode3 =  new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE6_PREDICATE, M, ONE, O));
+        ExtensionalDataNode dataNode4 =  new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE6_PREDICATE, TWO, TWO, O));
+
+        queryBuilder.addChild(joinNode, dataNode2);
+        queryBuilder.addChild(joinNode, dataNode3);
+        queryBuilder.addChild(joinNode, dataNode4);
+
+        IntermediateQuery query = queryBuilder.build();
+        System.out.println("\nBefore optimization: \n" +  query);
+
+
+        IntermediateQueryBuilder expectedQueryBuilder = new DefaultIntermediateQueryBuilder(metadata);
+        ConstructionNode newRootNode = new ConstructionNodeImpl(projectionAtom.getVariables(),
+                new ImmutableSubstitutionImpl<>(ImmutableMap.of(N, NULL, O, NULL)), Optional.empty());
+        expectedQueryBuilder.init(projectionAtom, newRootNode);
+        expectedQueryBuilder.addChild(newRootNode, leftConstructionNode);
+        expectedQueryBuilder.addChild(leftConstructionNode, dataNode1);
+
+        IntermediateQuery expectedQuery = expectedQueryBuilder.build();
+        System.out.println("\n Expected query : \n" +  expectedQuery);
+
+        NodeCentricOptimizationResults<InnerJoinNode> results = query.applyProposal(new InnerJoinOptimizationProposalImpl(joinNode));
+        IntermediateQuery optimizedQuery = results.getResultingQuery();
+
+        System.out.println("\n Optimized query: \n" +  optimizedQuery);
+
+        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, expectedQuery));
+
+        Optional<QueryNode> optionalClosestAncestor = results.getOptionalClosestAncestor();
+        assertTrue(optionalClosestAncestor.isPresent());
+        assertTrue(optionalClosestAncestor.get().isSyntacticallyEquivalentTo(newRootNode));
+        assertFalse(results.getOptionalNextSibling().isPresent());
     }
 
 
