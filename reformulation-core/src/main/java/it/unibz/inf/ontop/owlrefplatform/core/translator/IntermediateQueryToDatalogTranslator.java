@@ -279,6 +279,11 @@ public class IntermediateQueryToDatalogTranslator {
 			return body;
 
 		} else if (node instanceof TrueNode) {
+			/**
+			 * Does not add an atom into the query.
+			 *
+			 * TODO: what should we do when it is the left child of a LJ?
+			 */
 			return body;
 
 		} else {

@@ -63,16 +63,17 @@ public class TrueNodesRemovalOptimizer extends NodeCentricDepthFirstOptimizer<Tr
     }
 
     private boolean isRemovableTrueNode(TrueNode node, IntermediateQuery query) {
-        Optional<QueryNode> parentNode = query.getParent(node);
-        if (!parentNode.isPresent()){
-            throw new InvalidIntermediateQueryException("a TrueNode should have a parent node");
-        }
-        return parentNode.get() instanceof InnerJoinNode ||
-                parentNode.get() instanceof TrueNode ||
-                (parentNode.get() instanceof LeftJoinNode &&
-                        query.getOptionalPosition(node).get() == RIGHT) ||
-                (parentNode.get() instanceof ConstructionNode &&
-                        !(query.getRootConstructionNode() == parentNode.get()));
+        QueryNode parentNode = query.getParent(node)
+                .orElseThrow(() -> new InvalidIntermediateQueryException("a TrueNode should have a parent node"));
+
+        return parentNode instanceof InnerJoinNode ||
+                parentNode instanceof TrueNode ||
+                (parentNode instanceof LeftJoinNode &&
+                        query.getOptionalPosition(node)
+                                .orElseThrow(() -> new IllegalStateException("Children of a LJ must have positions"))
+                                == RIGHT) ||
+                (parentNode instanceof ConstructionNode &&
+                        (query.getRootConstructionNode() != parentNode));
     }
 
     /**
