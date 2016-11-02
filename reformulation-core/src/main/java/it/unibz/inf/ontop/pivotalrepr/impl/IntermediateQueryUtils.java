@@ -4,8 +4,11 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.DistinctVariableOnlyDataAtom;
+import it.unibz.inf.ontop.model.OBDADataFactory;
 import it.unibz.inf.ontop.model.Variable;
 import it.unibz.inf.ontop.model.VariableGenerator;
+import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
+import it.unibz.inf.ontop.model.impl.VariableImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.InjectiveVar2VarSubstitution;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.InjectiveVar2VarSubstitutionImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.NeutralSubstitution;
@@ -16,7 +19,9 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.AbstractMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * TODO: explain
@@ -223,5 +228,6 @@ public class IntermediateQueryUtils {
 
         return queryBuilder;
     }
+
 
 }

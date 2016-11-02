@@ -1277,12 +1277,17 @@ public class SQLGenerator implements SQLQueryGenerator {
 		if (ht instanceof URIConstant) {
 			URIConstant uc = (URIConstant) ht;
 			mainColumn = sqladapter.getSQLLexicalFormString(uc.getURI().toString());
+			/**
+			 * TODO: we should not have to treat NULL as a special case! It is because this constant is currently
+			 * a STRING!
+			 */
+		} else if (ht == OBDAVocabulary.NULL) {
+			mainColumn = "NULL";
+		} else if (ht instanceof ValueConstant) {
+			mainColumn = getSQLLexicalForm((ValueConstant) ht);
 		} else if (ht instanceof Variable) {
 			Variable termVar = (Variable) ht;
 			mainColumn = getSQLString(termVar, index, false);
-
-		} else if (ht == OBDAVocabulary.NULL) {
-			mainColumn = "NULL";
 		} else if (ht instanceof Function) {
 			/*
 			 * if it's a function we need to get the nested value if its a
@@ -2066,6 +2071,8 @@ public class SQLGenerator implements SQLQueryGenerator {
 		case POSITIVE_INTEGER:
 		case NON_NEGATIVE_INTEGER:
 			return constant.getValue();
+		case NULL:
+			return "NULL";
 		default:
 			return "'" + constant.getValue() + "'";
 		}
