@@ -20,8 +20,6 @@ package it.unibz.inf.ontop.sesame;
  * #L%
  */
 
-import it.unibz.inf.ontop.model.ObjectConstant;
-import it.unibz.inf.ontop.model.Predicate;
 import it.unibz.inf.ontop.model.ValueConstant;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
 import it.unibz.inf.ontop.ontology.Assertion;
@@ -34,6 +32,7 @@ import org.openrdf.model.URI;
 import org.openrdf.model.Value;
 import org.openrdf.model.impl.StatementImpl;
 
+@Deprecated
 public class SesameStatement extends StatementImpl {
 
     private static final long serialVersionUID = 3398547980791013746L;
@@ -80,53 +79,6 @@ public class SesameStatement extends StatementImpl {
 				HELPER.createURI(OBDAVocabulary.RDF_TYPE),
 				HELPER.createURI(assertion.getConcept().getPredicate().getName().toString()));
 	}
-
-
-	/*
-	public SesameStatement(Assertion assertion) {
-		if (assertion instanceof ObjectPropertyAssertion) {
-			//object or data property assertion
-			ObjectPropertyAssertion ba = (ObjectPropertyAssertion) assertion;
-			ObjectConstant subj = ba.getSubject();
-			Predicate pred = ba.getProperty().getPredicate();
-			ObjectConstant obj = ba.getObject();
-			
-			// convert string into respective type
-
-			subject = HELPER.getResource(subj);
-			predicate = HELPER.createURI(pred.getName().toString()); // URI
-			object = HELPER.getResource(obj);
-		} 
-		else if (assertion instanceof DataPropertyAssertion) {
-			//object or data property assertion
-			DataPropertyAssertion ba = (DataPropertyAssertion) assertion;
-			ObjectConstant subj = ba.getSubject();
-			Predicate pred = ba.getProperty().getPredicate();
-			ValueConstant obj = ba.getValue();
-			
-			// convert string into respective type
-			subject = HELPER.getResource(subj);
-			predicate = HELPER.createURI(pred.getName().toString()); // URI
-			
-			if (obj instanceof ValueConstant) {
-				object = HELPER.getLiteral((ValueConstant) obj);
-			}
-			else 
-				throw new RuntimeException("Invalid constant as object!" + obj);
-		} 
-		else if (assertion instanceof ClassAssertion) { 
-			//class assertion
-			ClassAssertion ua = (ClassAssertion) assertion;
-			ObjectConstant subj = ua.getIndividual();
-			Predicate obj = ua.getConcept().getPredicate();
-			
-			// convert string into respective type
-			subject = HELPER.getResource(subj);
-			predicate = HELPER.createURI(OBDAVocabulary.RDF_TYPE); // URI
-			object = HELPER.createURI(obj.getName().toString());
-		}
-	}
-	*/
 
     @Override
     public boolean equals(Object o) {

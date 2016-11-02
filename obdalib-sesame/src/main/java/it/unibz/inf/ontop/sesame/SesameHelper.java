@@ -4,7 +4,13 @@ import it.unibz.inf.ontop.model.BNode;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.Predicate.COL_TYPE;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
+import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
+import it.unibz.inf.ontop.ontology.Assertion;
+import it.unibz.inf.ontop.ontology.ClassAssertion;
+import it.unibz.inf.ontop.ontology.DataPropertyAssertion;
+import it.unibz.inf.ontop.ontology.ObjectPropertyAssertion;
 import org.openrdf.model.*;
+import org.openrdf.model.impl.StatementImpl;
 import org.openrdf.model.impl.ValueFactoryImpl;
 
 public class SesameHelper {
@@ -60,5 +66,39 @@ public class SesameHelper {
 		return fact.createURI(uri);
 	}
 
+	public static Statement getStatement(Assertion assertion) {
+		if (assertion instanceof ObjectPropertyAssertion) {
+			return getStatement((ObjectPropertyAssertion) assertion);
+		} else if (assertion instanceof DataPropertyAssertion) {
+			return getStatement((DataPropertyAssertion) assertion);
+		} else if (assertion instanceof ClassAssertion) {
+			return getStatement((ClassAssertion) assertion);
+		} else {
+			// TODO: exception message
+			throw new RuntimeException("");
+		}
+	}
 
+	private static Statement getStatement(ObjectPropertyAssertion assertion) {
+		return new StatementImpl(getResource(assertion.getSubject()),
+				createURI(assertion.getProperty().getPredicate().getName().toString()),
+				getResource(assertion.getObject()));
+	}
+
+	private static Statement getStatement(DataPropertyAssertion assertion) {
+		if (!(assertion.getValue() instanceof ValueConstant)) {
+			throw new RuntimeException("Invalid constant as object!" + assertion.getValue());
+		}
+
+		return new StatementImpl(getResource(assertion.getSubject()),
+				createURI(assertion.getProperty().getPredicate().getName().toString()),
+				getLiteral(assertion.getValue())
+		);
+	}
+
+	private static Statement getStatement(ClassAssertion assertion) {
+		return new StatementImpl(getResource(assertion.getIndividual()),
+				createURI(OBDAVocabulary.RDF_TYPE),
+				createURI(assertion.getConcept().getPredicate().getName().toString()));
+	}
 }
