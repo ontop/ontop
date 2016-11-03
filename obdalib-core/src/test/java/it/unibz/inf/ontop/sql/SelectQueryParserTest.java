@@ -38,7 +38,7 @@ public class SelectQueryParserTest {
         relation2.addAttribute(attv, 0, "INT", false);
 
         SelectQueryParser parser = new SelectQueryParser(metadata);
-        final CQIE parse = parser.parse("SELECT * FROM P, Q");
+        final CQIE parse = parser.parse("SELECT A, B FROM P, Q"); //todo: fix this when the column reference A is ambiguous should rise an error!!
         System.out.println(parse);
 
         assertTrue( parse.getHead().getTerms().size()==0);

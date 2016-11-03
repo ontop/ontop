@@ -13,6 +13,7 @@ import static org.junit.Assert.*;
 
 /**
  * Created by Roman Kontchakov on 01/11/2016.
+ *
  */
 public class RelationalExpressionTest {
 
