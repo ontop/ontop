@@ -66,5 +66,6 @@ public class RelationalExpressionTest {
 
         assertTrue(relationalExpression.getAtoms().indexOf(f1)>=0);
         assertTrue(relationalExpression.getAtoms().indexOf(f2)>0);
+
     }
 }
