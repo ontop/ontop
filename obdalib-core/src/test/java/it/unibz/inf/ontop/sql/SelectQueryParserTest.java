@@ -1,9 +1,12 @@
 package it.unibz.inf.ontop.sql;
 
+import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.sql.parser.SelectQueryParser;
 import org.junit.Test;
+
+import static org.junit.Assert.assertTrue;
 
 /**
  * Created by Roman Kontchakov on 01/11/2016.
@@ -35,8 +38,30 @@ public class SelectQueryParserTest {
         relation2.addAttribute(attv, 0, "INT", false);
 
         SelectQueryParser parser = new SelectQueryParser(metadata);
+        final CQIE parse = parser.parse("SELECT * FROM P, Q");
+        System.out.println(parse);
 
-        System.out.println(parser.parse("SELECT * FROM P, Q"));
+        assertTrue( parse.getHead().getTerms().size()==0);
+        assertTrue( parse.getReferencedVariables().size()==4 );
+
+
+        Variable a1 = FACTORY.getVariable("A1");
+        Variable b1 = FACTORY.getVariable("B1");
+
+        Function atomP = FACTORY.getFunction(
+                FACTORY.getPredicate("P", new Predicate.COL_TYPE[] { null, null }),
+                ImmutableList.of(a1, b1));
+
+        assertTrue( parse.getBody().contains(atomP));
+
+        Variable a2 = FACTORY.getVariable("A2"); // variable are key sensitive
+        Variable c2 = FACTORY.getVariable("C2");
+
+        Function atomQ = FACTORY.getFunction(
+                FACTORY.getPredicate("Q", new Predicate.COL_TYPE[] { null, null }),
+                ImmutableList.of(a2, c2));
+
+        assertTrue( parse.getBody().contains(atomQ));
     }
 
 }

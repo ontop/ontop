@@ -8,7 +8,8 @@ import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.sql.parser.RelationalExpression;
 import org.junit.Test;
 
-import javax.management.relation.Relation;
+
+import static org.junit.Assert.*;
 
 /**
  * Created by Roman Kontchakov on 01/11/2016.
@@ -60,6 +61,10 @@ public class RelationalExpressionTest {
 
         System.out.println(re1);
         System.out.println(re2);
-        System.out.println(RelationalExpression.crossJoin(re1, re2));
+        final RelationalExpression relationalExpression = RelationalExpression.crossJoin(re1, re2);
+        System.out.println(relationalExpression);
+
+        assertTrue(relationalExpression.getAtoms().indexOf(f1)>=0);
+        assertTrue(relationalExpression.getAtoms().indexOf(f2)>0);
     }
 }
