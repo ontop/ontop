@@ -300,8 +300,7 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
          *
          * Currently, the root construction node is still required.
          */
-        if (newSubstitutions.bindings.isEmpty() && !newOptionalModifiers.isPresent()
-                && query.getRootConstructionNode() != this) {
+        if (newSubstitutions.bindings.isEmpty() && !newOptionalModifiers.isPresent()) {
             if(query.getChildren(this).isEmpty()){
                 return new SubstitutionResultsImpl<>(SubstitutionResults.LocalAction.DECLARE_AS_TRUE);
             }
