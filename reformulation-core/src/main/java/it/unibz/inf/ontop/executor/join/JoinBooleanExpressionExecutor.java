@@ -47,7 +47,7 @@ public class JoinBooleanExpressionExecutor implements InnerJoinExecutor {
          * The filter condition cannot be satisfied --> the join node and its sub-tree is thus removed from the tree.
          * Returns no join node.
          */
-        catch (InsatisfiedExpressionException e) {
+        catch (UnsatisfiableExpressionException e) {
 
             EmptyNode replacingEmptyNode = new EmptyNodeImpl(query.getVariables(originalTopJoinNode));
             treeComponent.replaceSubTree(originalTopJoinNode, replacingEmptyNode);

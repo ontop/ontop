@@ -16,6 +16,7 @@ import it.unibz.inf.ontop.pivotalrepr.equivalence.IQSyntacticEquivalenceChecker;
 import it.unibz.inf.ontop.pivotalrepr.impl.*;
 import it.unibz.inf.ontop.pivotalrepr.impl.tree.DefaultIntermediateQueryBuilder;
 import org.junit.Ignore;
+import it.unibz.inf.ontop.sql.DBMetadataExtractor;
 import org.junit.Test;
 
 import java.util.Optional;
@@ -98,6 +99,7 @@ public class SubstitutionLiftTest {
             ExpressionOperation.GT, Z, Y);
 
     private MetadataForQueryOptimization METADATA = new MetadataForQueryOptimizationImpl(
+            DBMetadataExtractor.createDummyMetadata(),
             ImmutableMultimap.of(),
             new UriTemplateMatcher());
 
@@ -1308,6 +1310,59 @@ public class SubstitutionLiftTest {
 
 
 
+    }
+
+    @Test
+    public void testUnionRemoval() throws EmptyQueryException {
+        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
+        DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_2_PREDICATE, X, Y);
+        ConstructionNode rootNode = new ConstructionNodeImpl(projectionAtom.getVariables());
+
+        queryBuilder.init(projectionAtom, rootNode);
+
+        UnionNode unionNode = new UnionNodeImpl(projectionAtom.getVariables());
+        queryBuilder.addChild(rootNode, unionNode);
+
+        InnerJoinNode joinNode = new InnerJoinNodeImpl(Optional.empty());
+        queryBuilder.addChild(unionNode, joinNode);
+
+        ConstructionNode constructionNode1 = new ConstructionNodeImpl(projectionAtom.getVariables(),
+                new ImmutableSubstitutionImpl<>(ImmutableMap.of(
+                        X, generateURI1(A),
+                        Y, generateURI2(B))), Optional.empty());
+        queryBuilder.addChild(joinNode, constructionNode1);
+        queryBuilder.addChild(constructionNode1, DATA_NODE_1);
+
+        ConstructionNode constructionNode2 = new ConstructionNodeImpl(projectionAtom.getVariables(),
+                new ImmutableSubstitutionImpl<>(ImmutableMap.of(
+                        X, generateURI2(C),
+                        Y, generateURI2(D))), Optional.empty());
+        queryBuilder.addChild(joinNode, constructionNode2);
+        queryBuilder.addChild(constructionNode2, DATA_NODE_3);
+
+        ConstructionNode constructionNode3 = new ConstructionNodeImpl(projectionAtom.getVariables(),
+                new ImmutableSubstitutionImpl<>(ImmutableMap.of(
+                        X, generateURI1(E),
+                        Y, generateURI2(F))), Optional.empty());
+        queryBuilder.addChild(unionNode, constructionNode3);
+        queryBuilder.addChild(constructionNode3, DATA_NODE_6);
+
+        IntermediateQuery unOptimizedQuery = queryBuilder.build();
+        System.out.println("\nBefore optimization: \n" +  unOptimizedQuery);
+
+
+        IntermediateQueryBuilder expectedQueryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
+        expectedQueryBuilder.init(projectionAtom, constructionNode3);
+        expectedQueryBuilder.addChild(constructionNode3, DATA_NODE_6);
+        IntermediateQuery expectedQuery = expectedQueryBuilder.build();
+
+        System.out.println("\nExpected query: \n" +  expectedQuery);
+
+
+        IntermediateQueryOptimizer substitutionOptimizer = new TopDownSubstitutionLiftOptimizer();
+        IntermediateQuery optimizedQuery = substitutionOptimizer.optimize(unOptimizedQuery);
+
+        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, expectedQuery));
     }
 
 

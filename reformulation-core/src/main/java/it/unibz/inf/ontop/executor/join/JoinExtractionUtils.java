@@ -21,7 +21,7 @@ public class JoinExtractionUtils {
     /**
      * TODO: explain
      */
-    public static class InsatisfiedExpressionException extends Exception  {
+    public static class UnsatisfiableExpressionException extends Exception  {
     }
 
 
@@ -32,7 +32,7 @@ public class JoinExtractionUtils {
      */
     public static Optional<ImmutableExpression> extractFoldAndOptimizeBooleanExpressions(
             ImmutableList<JoinOrFilterNode> filterAndJoinNodes, MetadataForQueryOptimization metadata)
-            throws InsatisfiedExpressionException {
+            throws UnsatisfiableExpressionException {
 
         ImmutableList<ImmutableExpression> booleanExpressions = extractBooleanExpressions(
                 filterAndJoinNodes);
@@ -43,7 +43,7 @@ public class JoinExtractionUtils {
 
             ExpressionEvaluator.Evaluation evaluation = evaluator.evaluateExpression(foldedExpression.get());
             if (evaluation.isFalse()) {
-                throw new InsatisfiedExpressionException();
+                throw new UnsatisfiableExpressionException();
             }
             else {
                 return evaluation.getOptionalExpression();

@@ -25,7 +25,6 @@ import it.unibz.inf.ontop.model.OBDAException;
 import it.unibz.inf.ontop.ontology.Assertion;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestDBConnection;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestDBStatement;
-import it.unibz.inf.ontop.sesame.SesameStatement;
 
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -57,7 +56,7 @@ public class SesameGraphQuery extends SesameAbstractQuery implements GraphQuery 
 
 	private Statement createStatement(Assertion assertion) {
 
-		SesameStatement stm = new SesameStatement(assertion);
+		Statement stm = SesameHelper.createStatement(assertion);
 		if (stm.getSubject()!=null && stm.getPredicate()!=null && stm.getObject()!=null)
 			return stm;
 		else 
