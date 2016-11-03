@@ -15,12 +15,16 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * Rewrite the sameAs mappings to use the canonical uri
+ * Rewrite the mappings to use the canonical iri
+ *
  */
 public class CanonicalIRIRewriter {
 
     //rewritten mappings
     private List<CQIE> outputMappings;
+
+    // original uri     -> canonical iri
+    private Map<ValueConstant, String> can_iri_rename;
 
     // original uri     -> canonical iri
     private Map<ValueConstant, ValueConstant> can_iri_map;
@@ -38,6 +42,7 @@ public class CanonicalIRIRewriter {
     public List<CQIE> buildCanonicalSameAsMappings(List<CQIE> mappings) {
 
         outputMappings = new ArrayList<>();
+        can_iri_rename = new HashMap<>();
         can_iri_map = new HashMap<>();
         uri_mapping_map = new HashMap<>();
         uri_column_map = new HashMap<>();
@@ -98,10 +103,10 @@ public class CanonicalIRIRewriter {
                         if (can_iri_map.containsKey(templateObjURINewMapping)) {
 
                             CanonicalURIMapping canonicaloURIMapping = new CanonicalURIMapping(newMapping.get(), objectURINewMapping).create();
-                            final Function newSubjectHead = canonicaloURIMapping.getNewHeadTerm();
+                            final Function newObjectHead = canonicaloURIMapping.getNewHeadTerm();
                             List<Function> newoURIBody = canonicaloURIMapping.getNewURIBody();
 
-                            newMapping = Optional.of(fac.getCQIE(fac.getFunction(predicate, headNewMapping.getTerm(0), newSubjectHead), newoURIBody));
+                            newMapping = Optional.of(fac.getCQIE(fac.getFunction(predicate, headNewMapping.getTerm(0), newObjectHead), newoURIBody));
                         }
 
                     }
@@ -168,7 +173,7 @@ public class CanonicalIRIRewriter {
 
             }
 
-            head.getTerms().stream().map(term -> canonicalTerm(term)).collect(Collectors.toList());
+//            head.getTerms().stream().map(term -> canonicalTerm(term)).collect(Collectors.toList());
 
             outputMappings.add(newMapping.orElse(mapping.clone()));
 
@@ -204,13 +209,19 @@ public class CanonicalIRIRewriter {
                 //rename all the variables to avoid conflicts while merging the mappings
                 Set<Variable> variables = mapping.getReferencedVariables();
 
+
+                Function headURI = (Function) head.getTerm(0);
+                String rename = can_iri_rename.get(headURI.getTerm(0));
+                if(rename ==null){
+                    rename = "_canonical"+can_iri_rename.size();
+                    can_iri_rename.put((ValueConstant) headURI.getTerm(0), rename);
+                }
+
+                final String finalRename = rename;
                 Map<Variable, Term> map = variables.stream()
                         .collect(Collectors.toMap(
                                 var -> var,
-                                var -> fac.getVariable(var.getName() + "_canonical")));
-
-//                Map<Variable, Term> map = new HashMap<>();
-//                variables.forEach(variable -> map.put(variable, fac.getVariable(variable.getName() + "_canonical")));
+                                var -> fac.getVariable(var.getName() + finalRename)));
 
                 Substitution substitution = new SubstitutionImpl(map);
                 CQIE canonicalMapping = SubstitutionUtilities.applySubstitution(mapping, substitution, true);
@@ -227,7 +238,10 @@ public class CanonicalIRIRewriter {
                 ValueConstant objectURI = (ValueConstant) objectTerm.getTerm(0);
                 List<Term> objectURIColumns = objectTerm.getTerms().subList(1, objectTerm.getTerms().size());
 
+                //store the canonical iri of the object uri
                 can_iri_map.put(objectURI, canonURI);
+
+                //store the columns
                 uri_column_map.put(objectURI, objectURIColumns);
                 uri_column_map.put(canonURI, canonURIColumns);
                 //store the renamed mapping

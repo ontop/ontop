@@ -31,6 +31,14 @@ CREATE TABLE T_can_link (
     id3 INTEGER
 );
 
+CREATE TABLE T_can_well_link (
+    can_id integer NOT NULL,
+    can_prov character varying(100) NOT NULL,
+    id1 character varying(100),
+    id2 character varying(100)
+);
+
+
 INSERT INTO T1 VALUES (1, 'GreenPeace', 'w11');
 INSERT INTO T1 VALUES (3, 'BigBucks', 'w13');
 INSERT INTO T1 VALUES (6, 'HealthyWell', 'w16');
@@ -57,6 +65,16 @@ INSERT INTO T_can_link VALUES (1,3,3,null,null) ;
 INSERT INTO T_can_link VALUES (6,1,6,null, 10) ;
 INSERT INTO T_can_link VALUES (7,1,7,7,7) ;
 
+INSERT INTO T_can_well_link VALUES (1,1,'GreenPeace',null) ;
+INSERT INTO T_can_well_link VALUES (2,1,'BigBucks',null) ;
+INSERT INTO T_can_well_link VALUES (3,1,'HealthyWell',null) ;
+INSERT INTO T_can_well_link VALUES (4,1,'NoMore',null) ;
+INSERT INTO T_can_well_link VALUES (5,2, null, 'BucksBig' ) ;
+INSERT INTO T_can_well_link VALUES (6,2, null, 'FilthyRich') ;
+INSERT INTO T_can_well_link VALUES (7,2, null, 'OtherWell') ;
+INSERT INTO T_can_well_link VALUES (8,2, null, 'TiredOne') ;
+INSERT INTO T_can_well_link VALUES (9,2, null, 'ColdBridge') ;
+INSERT INTO T_can_well_link VALUES (10,2, null, 'Heather') ;
 
 
 ALTER TABLE T1

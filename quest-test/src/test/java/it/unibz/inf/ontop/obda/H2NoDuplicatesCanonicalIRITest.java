@@ -50,6 +50,7 @@ import static org.junit.Assert.assertTrue;
 
 /***
  * Test use of canonical iri in h2 simple database on wellbores
+ * @see it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing.CanonicalIRIRewriter
  */
 public class H2NoDuplicatesCanonicalIRITest {
 
@@ -153,6 +154,7 @@ public class H2NoDuplicatesCanonicalIRITest {
 
 	@Test
     public void testCanIRI1() throws Exception {
+
         String query =  "PREFIX : <http://ontop.inf.unibz.it/test/wellbore#> Select DISTINCT ?x ?y  WHERE{\n" +
 				"?x a :Wellbore .\n" +
 				"?x :inWell ?y .\n" +
@@ -203,6 +205,38 @@ public class H2NoDuplicatesCanonicalIRITest {
 		assertEquals(8, results.size() );
 	}
 
+	@Test
+	public void testCanIRI5() throws Exception {
+		String query =  "PREFIX : <http://ontop.inf.unibz.it/test/wellbore#> Select * WHERE{\n" +
+				"?x :inWell ?y .\n" +
+				"}\n";
+
+		ArrayList<String> results = runTests(query);
+
+		assertEquals(20, results.size() );
+	}
+
+	@Test
+	public void testCanIRI6() throws Exception {
+		String query =  "PREFIX : <http://ontop.inf.unibz.it/test/wellbore#> Select DISTINCT ?x WHERE{\n" +
+				"?x a :Well .\n" +
+				"}\n";
+
+		ArrayList<String> results = runTests(query);
+
+		assertEquals(4, results.size() );
+	}
+
+	@Test
+	public void testCanIRI7() throws Exception {
+		String query =  "PREFIX : <http://ontop.inf.unibz.it/test/wellbore#> Select * WHERE{\n" +
+				"?x :hasWellbore ?y .\n" +
+				"}\n";
+
+		ArrayList<String> results = runTests(query);
+
+		assertEquals(8, results.size() );
+	}
 
 
 }

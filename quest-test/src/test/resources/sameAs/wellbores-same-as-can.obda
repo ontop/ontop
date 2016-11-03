@@ -21,8 +21,8 @@ mappingId	mapping_can
 target		<http://ontop/wellbore/{can_prov}/{can_id}> ontop:is_canonical_iri_of epds:{id1} , npd:{id2} , ow:{id3} .
 source		select can_id, can_prov, id1, id2, id3 from T_can_link
 
-mappingId	mappingT11
-target		<http://epds/wellbore/{id}> a :Wellbore ; :inWell well:{well} ; :name "{name}" .
+mappingId	mappingT1
+target		<http://epds/wellbore/{id}> a :Wellbore ; :inWell well:{well} ; :name "{name}"  .
 source		select id, well, name from T1
 
 mappingId	mappingT2
@@ -34,7 +34,12 @@ target		<http://ow/wellbore/{id}>   a :Wellbore ;  :inWell :{well} ; :name "{nam
 source		select id, well, name from T3
 
 mappingId	mappingW1
-target		well:{name} a :Well ;  :hasWellbore <http://epds/wellbore/{wellbore}>  .
+target		well:{name} a :Well ;  :hasWellbore epds:{wellbore}  .
 source		select name, wellbore from W1
+
+mappingId	mapping_can_well
+target		<http://ontop/well/{can_prov}/{can_id}> ontop:is_canonical_iri_of well:{id1} , :{id2}  .
+source		select can_id, can_prov, id1, id2 from T_can_well_link
+
 
 ]]

@@ -282,7 +282,7 @@ public class H2ComplexSameAsTest {
     @Test
     public void testSameAs5() throws Exception {
         String query =  "PREFIX : <http://ontop.inf.unibz.it/test/wellbore#> \n" +
-                "SELECT * WHERE { " +
+                "SELECT DISTINCT  * WHERE { " +
                 " ?x :hasOwner ?y .}\n";
 
 		ArrayList<String> results = runTests(query, true);
@@ -292,12 +292,12 @@ public class H2ComplexSameAsTest {
 	@Test
 	public void testSameAs6() throws Exception {
 		String query =  "PREFIX : <http://ontop.inf.unibz.it/test/wellbore#> \n" +
-				"SELECT * WHERE { " +
+				"SELECT DISTINCT * WHERE { " +
 				"?x  a :Wellbore ." +
 				" ?x :hasOwner ?y .}\n";
 
 		ArrayList<String> results = runTests(query, true);
-		assertEquals(72, results.size() );
+		assertEquals(24, results.size() );
 
 	}
 
