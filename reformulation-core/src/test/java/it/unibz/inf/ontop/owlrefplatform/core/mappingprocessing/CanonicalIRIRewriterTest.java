@@ -29,11 +29,11 @@ public class CanonicalIRIRewriterTest {
     private static Variable t3 =fac.getVariable("t3");
     private static Variable t4 =fac.getVariable("t4");
     private static Variable t5 =fac.getVariable("t5");
-    private static Variable t0_can =fac.getVariable("t0_canonical");
-    private static Variable t1_can =fac.getVariable("t1_canonical");
-    private static Variable t2_can =fac.getVariable("t2_canonical");
-    private static Variable t3_can =fac.getVariable("t3_canonical");
-    private static Variable t4_can =fac.getVariable("t4_canonical");
+    private static Variable t0_can =fac.getVariable("t0_canonical0");
+    private static Variable t1_can =fac.getVariable("t1_canonical0");
+    private static Variable t2_can =fac.getVariable("t2_canonical0");
+    private static Variable t3_can =fac.getVariable("t3_canonical0");
+    private static Variable t4_can =fac.getVariable("t4_canonical0");
 
     private static ValueConstant canonURI = fac.getConstantLiteral("http://ontop/wellbore/{}/{}");
     private static ValueConstant npdURI = fac.getConstantLiteral("http://npd/wellbore/{}");
