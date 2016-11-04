@@ -1,22 +1,15 @@
 package it.unibz.inf.ontop.executor.leftjoin;
 
 import com.google.common.collect.*;
-import it.unibz.inf.ontop.executor.NodeCentricInternalExecutor;
 import it.unibz.inf.ontop.executor.SimpleNodeCentricInternalExecutor;
 import it.unibz.inf.ontop.executor.join.SelfJoinLikeExecutor;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.pivotalrepr.*;
-import it.unibz.inf.ontop.pivotalrepr.impl.FilterNodeImpl;
-import it.unibz.inf.ontop.pivotalrepr.impl.InnerJoinNodeImpl;
 import it.unibz.inf.ontop.pivotalrepr.impl.QueryTreeComponent;
 import it.unibz.inf.ontop.pivotalrepr.proposal.*;
 import it.unibz.inf.ontop.pivotalrepr.proposal.impl.NodeCentricOptimizationResultsImpl;
-import it.unibz.inf.ontop.sql.*;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 import static it.unibz.inf.ontop.pivotalrepr.NonCommutativeOperatorNode.ArgumentPosition.LEFT;
 import static it.unibz.inf.ontop.pivotalrepr.NonCommutativeOperatorNode.ArgumentPosition.RIGHT;
@@ -117,10 +110,51 @@ public class RedundantSelfLeftJoinExecutor
             ImmutableCollection<ImmutableList<Integer>> collectionOfPrimaryKeyPositions)
             throws AtomUnificationException {
 
-        ImmutableMultimap<ImmutableList<VariableOrGroundTerm>, DataNode> groupingMap =
-                groupByPrimaryKeyArguments(leftDataNode, rightDataNode, collectionOfPrimaryKeyPositions);
+        /**
+         * There exists a valid substitution from the rightDataNode to the leftDataNode. Hence, we can
+         * get rid of the rightDataNode as in the inner join case.
+         */
 
-        return proposeForGroupingMap(groupingMap);
+        if(existsSubstitutionFromRightToLeft(leftDataNode, rightDataNode)) {
+            ImmutableMultimap<ImmutableList<VariableOrGroundTerm>, DataNode> groupingMap =
+                    groupByPrimaryKeyArguments(leftDataNode, rightDataNode, collectionOfPrimaryKeyPositions);
+
+            return proposeForGroupingMap(groupingMap);
+        } else {
+            return new PredicateLevelProposal(ImmutableList.of(leftDataNode, rightDataNode));
+        }
+    }
+
+    private boolean existsSubstitutionFromRightToLeft(DataNode leftDataNode, DataNode rightDataNode) {
+        Map<Variable, VariableOrGroundTerm> substitutionProposal = new HashMap<>();
+
+        for(int i=0; i< leftDataNode.getProjectionAtom().getEffectiveArity(); i++) {
+            VariableOrGroundTerm leftTerm = leftDataNode.getProjectionAtom().getTerm(i);
+            VariableOrGroundTerm rightTerm = rightDataNode.getProjectionAtom().getTerm(i);
+
+            if(rightTerm instanceof GroundTerm) {
+                if(!rightTerm.equals(leftTerm)) {
+                    /**
+                     * not a valid substitution when we try to map a constant to a different constant
+                     */
+                    return false;
+                } else {
+                    // do nothing
+                }
+            } else if(substitutionProposal.containsKey(rightTerm)) {
+                if( !substitutionProposal.get(rightTerm).equals(leftTerm)) {
+                    /**
+                     * not a valid substitution when we try to map a variable to two different terms
+                     */
+                    return false;
+                }
+
+            } else {
+                substitutionProposal.put((Variable)rightTerm, leftTerm);
+            }
+        }
+
+        return true;
     }
 
     /**
