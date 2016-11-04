@@ -128,7 +128,7 @@ public class QuestUnfolder {
             log.debug("Set of mappings before canonical URI rewriting: \n {}", finalMappings);
         }
 
-		unfoldingProgram = new CanonicalIRIRewriter().buildCanonicalSameAsMappings(unfoldingProgram);
+		unfoldingProgram = new CanonicalIRIRewriter().buildCanonicalIRIMappings(unfoldingProgram);
 
 		// Collecting URI templates
 		uriTemplateMatcher = UriTemplateMatcher.create(unfoldingProgram);
