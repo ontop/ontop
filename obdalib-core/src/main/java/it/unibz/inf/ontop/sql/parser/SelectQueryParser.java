@@ -72,7 +72,7 @@ public class SelectQueryParser {
                         current = RelationalExpression.naturalJoin(current, right);
                     }else if( join.isInner() ) {
                         if (join.getOnExpression() != null) {
-                            RelationalExpression on =  getRelationalExpression(join.getOnExpression());
+                            ImmutableList<Function> on =  getAtomsFromExpression(join.getOnExpression());
                             current = RelationalExpression.joinOn(current, right, on);
                         }else if ( join.getUsingColumns() != null ){
                              current = RelationalExpression.joinUsing(current, right, join.getUsingColumns());
@@ -253,17 +253,19 @@ public class SelectQueryParser {
 
 
 
-    private RelationalExpression getRelationalExpression(Expression onExpressionItem) {
-        return new ExpressionItemProcessor(onExpressionItem).result;
+    private ImmutableList<Function> getAtomsFromExpression(Expression onExpressionItem) {
+        return new ExpressionItemProcessor(onExpressionItem).atoms;
     }
 
 
     private  class  ExpressionItemProcessor implements ExpressionVisitor{
-        private  Logger logger = LoggerFactory.getLogger(getClass());
-        private RelationalExpression result = null;
+        private Logger logger = LoggerFactory.getLogger(getClass());
+        private ImmutableList<Function> atoms = null;
+        private ImmutableList.Builder<Function> atomsListBuilder = null;
 
         ExpressionItemProcessor(Expression onExpressionItem) {
             onExpressionItem.accept(this);
+            atoms = atomsListBuilder.build();
         }
 
         @Override

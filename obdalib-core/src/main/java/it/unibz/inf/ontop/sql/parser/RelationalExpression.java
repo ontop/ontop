@@ -110,12 +110,12 @@ public class RelationalExpression {
      * @param on
      * @return
      */
-    public static RelationalExpression joinOn(RelationalExpression e1, RelationalExpression e2, RelationalExpression on) {
+    public static RelationalExpression joinOn(RelationalExpression e1, RelationalExpression e2, ImmutableList<Function> on) {
         // follow the case of the cross join
         RelationalExpression e =  RelationalExpression.crossJoin(e1,e2);
         // and add an atom for the expression
         ImmutableList<Function> atoms = ImmutableList.<Function>builder()
-                .addAll(e.atoms).addAll(on.atoms). build();
+                .addAll(e.atoms).addAll(on). build();
 
         return new RelationalExpression(atoms, e.attributes, e.attributeOccurrences);
     }
@@ -129,6 +129,7 @@ public class RelationalExpression {
      * @return
      */
     public static RelationalExpression joinUsing(RelationalExpression e1, RelationalExpression e2, List<Column> usingColumns) {
+        // TODO: Implement the case
         return e1;
     }
 
