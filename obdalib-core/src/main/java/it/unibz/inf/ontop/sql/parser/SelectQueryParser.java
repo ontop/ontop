@@ -24,6 +24,7 @@ import java.util.List;
 
 /**
  * Created by Roman Kontchakov on 01/11/2016.
+ *
  */
 public class SelectQueryParser {
 
@@ -61,7 +62,15 @@ public class SelectQueryParser {
                     RelationalExpression right = getRelationalExpression(join.getRightItem());
                     if (join.isCross() || join.isSimple())
                         current = RelationalExpression.crossJoin(current, right);
-                    // TODO: handle other types of joins
+                    else if  ( join.isNatural() ){
+                        current = RelationalExpression.naturalJoin(current, right);
+                    }else if( join.isInner() ) {
+                        if (join.getOnExpression() != null) {
+                            current = RelationalExpression.joinOn(current, right);
+                        }else if ( join.getUsingColumns() != null ){
+                            current = RelationalExpression.joinUsing(current, right);
+                        }
+                    }
                 }
             }
 

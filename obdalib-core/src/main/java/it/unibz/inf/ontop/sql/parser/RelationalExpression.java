@@ -85,6 +85,41 @@ public class RelationalExpression {
         return new RelationalExpression(atoms, attributes, attributeOccurrences);
     }
 
+
+    /**
+     * NATURAL JOIN of two relations (also denoted by , in SQL)
+     *
+     * @param e1
+     * @param e2
+     * @return
+     */
+    public static RelationalExpression naturalJoin(RelationalExpression e1, RelationalExpression e2) {
+        return  e1;
+    }
+
+
+    /**
+     * JOIN ON of two relations (also denoted by , in SQL)
+     *
+     * @param e1
+     * @param e2
+     * @return
+     */
+    public static RelationalExpression joinOn(RelationalExpression e1, RelationalExpression e2) {
+        return e1;
+    }
+
+    /**
+     * JOIN USING of two relations (also denoted by , in SQL)
+     *
+     * @param e1
+     * @param e2
+     * @return
+     */
+    public static RelationalExpression joinUsing(RelationalExpression e1, RelationalExpression e2) {
+        return e1;
+    }
+
     /**
      * treats null values as empty sets
      *
@@ -107,4 +142,7 @@ public class RelationalExpression {
     public String toString() {
         return "RelationalExpression : " + atoms + "\n" + attributes + "\n" + attributeOccurrences;
     }
+
+
+
 }
