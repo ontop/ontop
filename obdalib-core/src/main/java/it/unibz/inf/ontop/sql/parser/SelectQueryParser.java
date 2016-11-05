@@ -5,7 +5,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.Function;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
+import it.unibz.inf.ontop.model.impl.*;
 import it.unibz.inf.ontop.parser.*;
 import it.unibz.inf.ontop.sql.*;
 import it.unibz.inf.ontop.sql.parser.exceptions.InvalidSelectQuery;
@@ -33,16 +33,16 @@ import java.util.List;
  *
  */
 public class SelectQueryParser {
+    public static final String QUERY_NOT_SUPPORTED = "Query not yet supported";
 
+    private static Logger log = LoggerFactory.getLogger(SQLQueryDeepParser.class);
     private final DBMetadata metadata;
+    private int relationIndex = 0;
 
     public SelectQueryParser(DBMetadata metadata) {
         this.metadata = metadata;
     }
 
-    public static final String QUERY_NOT_SUPPORTED = "Query not yet supported";
-
-    private static Logger log = LoggerFactory.getLogger(SQLQueryDeepParser.class);
 
     public CQIE parse(String sql) {
 
@@ -72,8 +72,9 @@ public class SelectQueryParser {
                         current = RelationalExpression.naturalJoin(current, right);
                     }else if( join.isInner() ) {
                         if (join.getOnExpression() != null) {
-                            ImmutableList<Function> on =  getAtomsFromExpression(join.getOnExpression());
-                            current = RelationalExpression.joinOn(current, right, on);
+                            current = RelationalExpression.crossJoin( current, right);
+                            ImmutableList<Function> on =  getAtomsFromExpression(current, join.getOnExpression());
+                            current = RelationalExpression.joinOn(current, on);
                         }else if ( join.getUsingColumns() != null ){
                              current = RelationalExpression.joinUsing(current, right, join.getUsingColumns());
                         }
@@ -107,9 +108,6 @@ public class SelectQueryParser {
         }
         return parsedSql;
     }
-
-
-
 
     private ParserViewDefinition createViewDefinition(String sql) {
 
@@ -181,16 +179,10 @@ public class SelectQueryParser {
         return viewDefinition;
     }
 
-
-
-
-
-
     private RelationalExpression getRelationalExpression(FromItem fromItem) {
         return new FromItemProcessor(fromItem).result;
     }
 
-    private static int relationIndex = 0;
 
     private class FromItemProcessor implements FromItemVisitor {
 
@@ -230,6 +222,8 @@ public class SelectQueryParser {
                     attributesBuilder.build(), occurrencesBuilder.build());
         }
 
+
+
         @Override
         public void visit(SubSelect subSelect) {
             // TODO: implementation
@@ -253,19 +247,36 @@ public class SelectQueryParser {
 
 
 
-    private ImmutableList<Function> getAtomsFromExpression(Expression onExpressionItem) {
-        return new ExpressionItemProcessor(onExpressionItem).atoms;
+    private ImmutableList<Function> getAtomsFromExpression(RelationalExpression current, Expression onExpressionItem) {
+
+
+
+        return new ExpressionItemProcessor(current, onExpressionItem).getAtoms();
     }
 
 
     private  class  ExpressionItemProcessor implements ExpressionVisitor{
         private Logger logger = LoggerFactory.getLogger(getClass());
-        private ImmutableList<Function> atoms = null;
-        private ImmutableList.Builder<Function> atomsListBuilder = null;
+        ImmutableMap.Builder attributesBuilder = ImmutableMap.<QualifiedAttributeID, Variable>builder();
 
-        ExpressionItemProcessor(Expression onExpressionItem) {
+        private ImmutableList.Builder<Function> atomsListBuilder = new ImmutableList.Builder<>();
+        private ImmutableList.Builder<Column> columnsListBuilder = new ImmutableList.Builder<>();
+        private final RelationalExpression current;
+
+        final OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
+
+
+        ExpressionItemProcessor(RelationalExpression current, Expression onExpressionItem) {
+            this.current = current;
             onExpressionItem.accept(this);
-            atoms = atomsListBuilder.build();
+        }
+
+        public ImmutableList<Function> getAtoms(){
+            return atomsListBuilder.build();
+        }
+
+        public ImmutableList<Column> getColumns(){
+            return  columnsListBuilder.build();
         }
 
         @Override
@@ -367,16 +378,44 @@ public class SelectQueryParser {
         @Override
         public void visit(EqualsTo equalsTo) {
             logger.debug("Visit EqualsTo");
+            Term[] terms = getTermsJoinColumn(equalsTo);
+            atomsListBuilder.add(fac.getFunction(ExpressionOperation.EQ, terms[0], terms[1]));
+        }
+
+        private Term[] getTermsJoinColumn(BinaryExpression  expression){
+            ExpressionItemProcessor columItemVisitor = new ExpressionItemProcessor(current, expression.getLeftExpression());
+            if  ( columItemVisitor.getColumns().isEmpty() || columItemVisitor.getColumns().size() > 1 )
+                throw new UnsupportedSelectQuery("Only columns are not supported on equalsTo", expression.getLeftExpression());
+            final QualifiedAttributeID  leftAttribute = getAttributeFromColumn(columItemVisitor.getColumns().get(0));
+            final Term firstTerm = current.getAttributes().get(leftAttribute).clone();
+
+            columItemVisitor = new ExpressionItemProcessor(current, expression.getRightExpression());
+            if  ( columItemVisitor.getColumns().isEmpty() || columItemVisitor.getColumns().size() > 1  )
+                throw new UnsupportedSelectQuery("SubSelect are not supported", expression.getRightExpression());
+            final QualifiedAttributeID  rightAttribute = getAttributeFromColumn(columItemVisitor.getColumns().get(0));
+            final Term secondTerm = current.getAttributes().get(rightAttribute).clone();
+            return new Term[]{ firstTerm, secondTerm};
+        }
+
+
+        private QualifiedAttributeID getAttributeFromColumn(Column column){
+            final QuotedID attributeID = metadata.getQuotedIDFactory().createAttributeID(column.getColumnName());
+            final RelationID relationID = metadata.getQuotedIDFactory().createRelationID(null, column.getTable().getName());
+            return new QualifiedAttributeID(relationID, attributeID );
         }
 
         @Override
         public void visit(GreaterThan greaterThan) {
             logger.debug("Visit GreaterThan");
+            Term[] terms = getTermsJoinColumn(greaterThan);
+            atomsListBuilder.add(fac.getFunction(ExpressionOperation.GT, terms[0], terms[1]));
         }
 
         @Override
         public void visit(GreaterThanEquals greaterThanEquals) {
             logger.debug("Visit GreaterThanEquals");
+            Term[] terms = getTermsJoinColumn(greaterThanEquals);
+            atomsListBuilder.add(fac.getFunction(ExpressionOperation.GTE, terms[0], terms[1]));
         }
 
         @Override
@@ -392,32 +431,39 @@ public class SelectQueryParser {
         @Override
         public void visit(LikeExpression likeExpression) {
             logger.debug("Visit LikeExpression");
+            // TODO: Does like is present?
         }
 
         @Override
         public void visit(MinorThan minorThan) {
             logger.debug("Visit MinorThan");
+            Term[] terms = getTermsJoinColumn(minorThan);
+            atomsListBuilder.add(fac.getFunction(ExpressionOperation.LT, terms[0], terms[1]));
         }
 
         @Override
         public void visit(MinorThanEquals minorThanEquals) {
             logger.debug("Visit MinorThanEquals");
+            Term[] terms = getTermsJoinColumn(minorThanEquals);
+            atomsListBuilder.add(fac.getFunction(ExpressionOperation.LTE, terms[0], terms[1]));
         }
 
         @Override
         public void visit(NotEqualsTo notEqualsTo) {
             logger.debug("Visit NotEqualsTo");
-
+            Term[] terms = getTermsJoinColumn(notEqualsTo);
+            atomsListBuilder.add(fac.getFunction(ExpressionOperation.NEQ, terms[0], terms[1]));
         }
 
         @Override
         public void visit(Column tableColumn) {
             logger.debug("Visit Column ", tableColumn);
+            columnsListBuilder.add(tableColumn);
         }
 
         @Override
         public void visit(SubSelect subSelect) {
-            logger.debug("Visit SubSelect");
+            throw new UnsupportedSelectQuery("SubSelect are not supported", subSelect);
         }
 
         @Override
@@ -507,7 +553,7 @@ public class SelectQueryParser {
 
         @Override
         public void visit(JsonExpression jsonExpr) {
-            logger.debug("Visit JsonExpression");
+            throw new UnsupportedSelectQuery("JsonExpression are not supported", jsonExpr);
         }
 
         @Override
@@ -515,5 +561,9 @@ public class SelectQueryParser {
             logger.debug("Visit RegExpMySQLOperator");
         }
     }
+
+
+
+
 
 }

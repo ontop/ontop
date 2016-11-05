@@ -53,6 +53,10 @@ public class RelationalExpression {
         return atoms;
     }
 
+    public ImmutableMap<QualifiedAttributeID, Variable>  getAttributes(){
+        return attributes;
+    }
+
     /**
      * CROSS JOIN of two relations (also denoted by , in SQL)
      *
@@ -106,18 +110,16 @@ public class RelationalExpression {
      * JOIN ON of two relations (also denoted by , in SQL)
      *
      * @param e1
-     * @param e2
      * @param on
      * @return
      */
-    public static RelationalExpression joinOn(RelationalExpression e1, RelationalExpression e2, ImmutableList<Function> on) {
-        // follow the case of the cross join
-        RelationalExpression e =  RelationalExpression.crossJoin(e1,e2);
+    public static RelationalExpression joinOn(RelationalExpression e1, ImmutableList<Function> on) {
+
         // and add an atom for the expression
         ImmutableList<Function> atoms = ImmutableList.<Function>builder()
-                .addAll(e.atoms).addAll(on). build();
+                .addAll(e1.atoms).addAll(on). build();
 
-        return new RelationalExpression(atoms, e.attributes, e.attributeOccurrences);
+        return new RelationalExpression(atoms, e1.attributes, e1.attributeOccurrences);
     }
 
     /**
