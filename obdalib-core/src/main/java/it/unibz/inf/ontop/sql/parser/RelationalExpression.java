@@ -8,7 +8,10 @@ import it.unibz.inf.ontop.model.Variable;
 import it.unibz.inf.ontop.sql.QualifiedAttributeID;
 import it.unibz.inf.ontop.sql.QuotedID;
 import it.unibz.inf.ontop.sql.RelationID;
+import net.sf.jsqlparser.expression.Expression;
+import net.sf.jsqlparser.schema.Column;
 
+import java.util.List;
 import java.util.stream.Collectors;
 
 /**
@@ -94,6 +97,7 @@ public class RelationalExpression {
      * @return
      */
     public static RelationalExpression naturalJoin(RelationalExpression e1, RelationalExpression e2) {
+        // TODO: Implement the case
         return  e1;
     }
 
@@ -103,10 +107,17 @@ public class RelationalExpression {
      *
      * @param e1
      * @param e2
+     * @param on
      * @return
      */
-    public static RelationalExpression joinOn(RelationalExpression e1, RelationalExpression e2) {
-        return e1;
+    public static RelationalExpression joinOn(RelationalExpression e1, RelationalExpression e2, RelationalExpression on) {
+        // follow the case of the cross join
+        RelationalExpression e =  RelationalExpression.crossJoin(e1,e2);
+        // and add an atom for the expression
+        ImmutableList<Function> atoms = ImmutableList.<Function>builder()
+                .addAll(e.atoms).addAll(on.atoms). build();
+
+        return new RelationalExpression(atoms, e.attributes, e.attributeOccurrences);
     }
 
     /**
@@ -114,9 +125,10 @@ public class RelationalExpression {
      *
      * @param e1
      * @param e2
+     * @param usingColumns
      * @return
      */
-    public static RelationalExpression joinUsing(RelationalExpression e1, RelationalExpression e2) {
+    public static RelationalExpression joinUsing(RelationalExpression e1, RelationalExpression e2, List<Column> usingColumns) {
         return e1;
     }
 

@@ -10,6 +10,7 @@ import static org.junit.Assert.assertTrue;
 
 /**
  * Created by Roman Kontchakov on 01/11/2016.
+ *
  */
 public class SelectQueryParserTest {
 

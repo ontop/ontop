@@ -4,12 +4,18 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.*;
+import it.unibz.inf.ontop.model.Function;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.parser.*;
 import it.unibz.inf.ontop.sql.*;
 import it.unibz.inf.ontop.sql.parser.exceptions.InvalidSelectQuery;
 import it.unibz.inf.ontop.sql.parser.exceptions.UnsupportedSelectQuery;
 import net.sf.jsqlparser.JSQLParserException;
+import net.sf.jsqlparser.expression.*;
+import net.sf.jsqlparser.expression.operators.arithmetic.*;
+import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
+import net.sf.jsqlparser.expression.operators.conditional.OrExpression;
+import net.sf.jsqlparser.expression.operators.relational.*;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.parser.ParseException;
 import net.sf.jsqlparser.schema.Column;
@@ -66,9 +72,10 @@ public class SelectQueryParser {
                         current = RelationalExpression.naturalJoin(current, right);
                     }else if( join.isInner() ) {
                         if (join.getOnExpression() != null) {
-                            current = RelationalExpression.joinOn(current, right);
+                            RelationalExpression on =  getRelationalExpression(join.getOnExpression());
+                            current = RelationalExpression.joinOn(current, right, on);
                         }else if ( join.getUsingColumns() != null ){
-                            current = RelationalExpression.joinUsing(current, right);
+                             current = RelationalExpression.joinUsing(current, right, join.getUsingColumns());
                         }
                     }
                 }
@@ -100,6 +107,7 @@ public class SelectQueryParser {
         }
         return parsedSql;
     }
+
 
 
 
@@ -177,6 +185,7 @@ public class SelectQueryParser {
 
 
 
+
     private RelationalExpression getRelationalExpression(FromItem fromItem) {
         return new FromItemProcessor(fromItem).result;
     }
@@ -239,6 +248,269 @@ public class SelectQueryParser {
         @Override
         public void visit(ValuesList valuesList) {
             throw new UnsupportedSelectQuery("ValuesLists are not supported", valuesList);
+        }
+    }
+
+
+
+    private RelationalExpression getRelationalExpression(Expression onExpressionItem) {
+        return new ExpressionItemProcessor(onExpressionItem).result;
+    }
+
+
+    private  class  ExpressionItemProcessor implements ExpressionVisitor{
+        private  Logger logger = LoggerFactory.getLogger(getClass());
+        private RelationalExpression result = null;
+
+        ExpressionItemProcessor(Expression onExpressionItem) {
+            onExpressionItem.accept(this);
+        }
+
+        @Override
+        public void visit(NullValue nullValue) {
+            logger.debug("Visit NullValue");
+
+        }
+
+        @Override
+        public void visit(net.sf.jsqlparser.expression.Function function) {
+            logger.debug("Visit Function");
+        }
+
+        @Override
+        public void visit(SignedExpression signedExpression) {
+            logger.debug("Visit signedExpression");
+        }
+
+        @Override
+        public void visit(JdbcParameter jdbcParameter) {
+            logger.debug("Visit jdbcParameter");
+        }
+
+        @Override
+        public void visit(JdbcNamedParameter jdbcNamedParameter) {
+            logger.debug("Visit jdbcNamedParameter");
+        }
+
+        @Override
+        public void visit(DoubleValue doubleValue) {
+            logger.debug("Visit doubleValue");
+        }
+
+        @Override
+        public void visit(LongValue longValue) {
+            logger.debug("Visit longValue");
+        }
+
+        @Override
+        public void visit(DateValue dateValue) {
+            logger.debug("Visit dateValue");
+        }
+
+        @Override
+        public void visit(TimeValue timeValue) {
+            logger.debug("Visit timeValue");
+        }
+
+        @Override
+        public void visit(TimestampValue timestampValue) {
+            logger.debug("Visit timestampValue");
+        }
+
+        @Override
+        public void visit(Parenthesis parenthesis) {
+            logger.debug("Visit parenthesis");
+        }
+
+        @Override
+        public void visit(StringValue stringValue) {
+            logger.debug("Visit stringValue");
+        }
+
+        @Override
+        public void visit(Addition addition) {
+            logger.debug("Visit addition");
+        }
+
+        @Override
+        public void visit(Division division) {
+            logger.debug("Visit division");
+        }
+
+        @Override
+        public void visit(Multiplication multiplication) {
+            logger.debug("Visit multiplication");
+        }
+
+        @Override
+        public void visit(Subtraction subtraction) {
+            logger.debug("Visit subtraction");
+        }
+
+        @Override
+        public void visit(AndExpression andExpression) {
+            logger.debug("Visit andExpression");
+        }
+
+        @Override
+        public void visit(OrExpression orExpression) {
+            logger.debug("Visit orExpression");
+        }
+
+        @Override
+        public void visit(Between between) {
+            logger.debug("Visit Between");
+        }
+
+        @Override
+        public void visit(EqualsTo equalsTo) {
+            logger.debug("Visit EqualsTo");
+        }
+
+        @Override
+        public void visit(GreaterThan greaterThan) {
+            logger.debug("Visit GreaterThan");
+        }
+
+        @Override
+        public void visit(GreaterThanEquals greaterThanEquals) {
+            logger.debug("Visit GreaterThanEquals");
+        }
+
+        @Override
+        public void visit(InExpression inExpression) {
+            logger.debug("Visit InExpression");
+        }
+
+        @Override
+        public void visit(IsNullExpression isNullExpression) {
+            logger.debug("Visit IsNullExpression");
+        }
+
+        @Override
+        public void visit(LikeExpression likeExpression) {
+            logger.debug("Visit LikeExpression");
+        }
+
+        @Override
+        public void visit(MinorThan minorThan) {
+            logger.debug("Visit MinorThan");
+        }
+
+        @Override
+        public void visit(MinorThanEquals minorThanEquals) {
+            logger.debug("Visit MinorThanEquals");
+        }
+
+        @Override
+        public void visit(NotEqualsTo notEqualsTo) {
+            logger.debug("Visit NotEqualsTo");
+
+        }
+
+        @Override
+        public void visit(Column tableColumn) {
+            logger.debug("Visit Column ", tableColumn);
+        }
+
+        @Override
+        public void visit(SubSelect subSelect) {
+            logger.debug("Visit SubSelect");
+        }
+
+        @Override
+        public void visit(CaseExpression caseExpression) {
+            logger.debug("Visit CaseExpression");
+        }
+
+        @Override
+        public void visit(WhenClause whenClause) {
+            logger.debug("Visit WhenClause");
+        }
+
+        @Override
+        public void visit(ExistsExpression existsExpression) {
+            logger.debug("Visit ExistsExpression");
+        }
+
+        @Override
+        public void visit(AllComparisonExpression allComparisonExpression) {
+            logger.debug("Visit AllComparisonExpression");
+        }
+
+        @Override
+        public void visit(AnyComparisonExpression anyComparisonExpression) {
+            logger.debug("Visit AnyComparisonExpression");
+        }
+
+        @Override
+        public void visit(Concat concat) {
+            logger.debug("Visit Concat");
+        }
+
+        @Override
+        public void visit(Matches matches) {
+            logger.debug("Visit Matches");
+        }
+
+        @Override
+        public void visit(BitwiseAnd bitwiseAnd) {
+            logger.debug("Visit BitwiseAnd");
+        }
+
+        @Override
+        public void visit(BitwiseOr bitwiseOr) {
+            logger.debug("Visit BitwiseOr");
+        }
+
+        @Override
+        public void visit(BitwiseXor bitwiseXor) {
+            logger.debug("Visit BitwiseXor");
+        }
+
+        @Override
+        public void visit(CastExpression cast) {
+            logger.debug("Visit CastExpression");
+        }
+
+        @Override
+        public void visit(Modulo modulo) {
+            logger.debug("Visit Modulo");
+        }
+
+        @Override
+        public void visit(AnalyticExpression aexpr) {
+            logger.debug("Visit AnalyticExpression");
+        }
+
+        @Override
+        public void visit(ExtractExpression eexpr) {
+            logger.debug("Visit ExtractExpression");
+        }
+
+        @Override
+        public void visit(IntervalExpression iexpr) {
+            logger.debug("Visit IntervalExpression");
+        }
+
+        @Override
+        public void visit(OracleHierarchicalExpression oexpr) {
+            logger.debug("Visit OracleHierarchicalExpression");
+        }
+
+        @Override
+        public void visit(RegExpMatchOperator rexpr) {
+            logger.debug("Visit RegExpMatchOperator");
+        }
+
+        @Override
+        public void visit(JsonExpression jsonExpr) {
+            logger.debug("Visit JsonExpression");
+        }
+
+        @Override
+        public void visit(RegExpMySQLOperator regExpMySQLOperator) {
+            logger.debug("Visit RegExpMySQLOperator");
         }
     }
 
