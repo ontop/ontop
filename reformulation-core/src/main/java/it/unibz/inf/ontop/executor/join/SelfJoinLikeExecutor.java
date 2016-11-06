@@ -444,41 +444,49 @@ public class SelfJoinLikeExecutor {
                     newTopNode = uniqueChild;
                 }
 
-                QueryNode updatedTopNode = propagateSubstitution(query, proposal.getOptionalSubstitution(), newTopNode);
-                return new NodeCentricOptimizationResultsImpl<>(query, Optional.of(updatedTopNode));
-
+                NodeCentricOptimizationResults<QueryNode> propagationResults = propagateSubstitution(query,
+                        proposal.getOptionalSubstitution(), newTopNode);
+                /**
+                 * Converts it into NodeCentricOptimizationResults over the focus node
+                 */
+                return propagationResults.getNewNodeOrReplacingChild()
+                        // Replaces a descendant
+                        .map(child -> new NodeCentricOptimizationResultsImpl<N>(query, Optional.of(child)))
+                        // The sub-tree of the join is removed
+                        .orElseGet(() -> new NodeCentricOptimizationResultsImpl<N>(query,
+                                propagationResults.getOptionalNextSibling(),
+                                propagationResults.getOptionalClosestAncestor()));
             /**
              * Multiple children, keep the top join node
              */
             default:
-                N updatedLeftJoinNode = propagateSubstitution(
-                        query, proposal.getOptionalSubstitution(), joinNode);
-                return new NodeCentricOptimizationResultsImpl<>(query, updatedLeftJoinNode);
+                return propagateSubstitution(query, proposal.getOptionalSubstitution(), joinNode);
         }
     }
 
     /**
-     *  Applies the substitution from the topNode
+     *  Applies the substitution from the topNode.
+     *
+     *  NB: the topNode can be a JoinLikeNode, a replacing FilterNode or the replacing child
      */
-    private static <N extends QueryNode> N propagateSubstitution(
+    private static <T extends QueryNode> NodeCentricOptimizationResults<T> propagateSubstitution(
             IntermediateQuery query,
             Optional<ImmutableSubstitution<VariableOrGroundTerm>> optionalSubstitution,
-            N topNode) {
+            T topNode) {
         if (optionalSubstitution.isPresent()) {
 
             // TODO: filter the non-bound variables from the substitution before propagating!!!
 
-            SubstitutionPropagationProposal<N> propagationProposal = new SubstitutionPropagationProposalImpl<>(
+            SubstitutionPropagationProposal<T> propagationProposal = new SubstitutionPropagationProposalImpl<>(
                     topNode, optionalSubstitution.get(), false);
 
             // Forces the use of an internal executor (the treeComponent must remain the same).
             try {
-                NodeCentricOptimizationResults<N> results = query.applyProposal(propagationProposal, true);
+                return query.applyProposal(propagationProposal, true);
 
-                return results.getOptionalNewNode()
-                        .orElseThrow(() -> new IllegalStateException(
-                                "No focus node returned after the substitution propagation"));
-
+                /**
+                 * TODO: accept EmptyQueryException
+                 */
             } catch (EmptyQueryException e) {
                 throw new IllegalStateException("Internal inconsistency error: propagation the substitution " +
                         "leads to an empty query: " + optionalSubstitution.get());
@@ -488,7 +496,7 @@ public class SelfJoinLikeExecutor {
          * No substitution to propagate
          */
         else {
-            return topNode;
+            return new NodeCentricOptimizationResultsImpl<>(query, topNode);
         }
 
     }
