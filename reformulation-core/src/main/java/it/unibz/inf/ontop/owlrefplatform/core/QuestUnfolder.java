@@ -265,9 +265,12 @@ public class QuestUnfolder {
 		}
 	}
 
+	/**
+	 * Returns false if it detects that the variable is guaranteed not being null.
+     */
 	private boolean isNullable(Variable variable, List<Function> bodyAtoms) {
 		/**
-		 * Only checks for
+		 * NB: only looks for data atoms in a flat mapping (no algebraic (meta-)predicate such as LJ).
 		 */
 		ImmutableList<Function> definingAtoms = bodyAtoms.stream()
 				.filter(Function::isDataFunction)
