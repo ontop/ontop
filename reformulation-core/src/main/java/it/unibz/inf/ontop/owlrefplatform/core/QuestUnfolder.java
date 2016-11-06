@@ -20,7 +20,8 @@ import it.unibz.inf.ontop.owlrefplatform.core.unfolding.DatalogUnfolder;
 import it.unibz.inf.ontop.parser.PreprocessProjection;
 import it.unibz.inf.ontop.pivotalrepr.MetadataForQueryOptimization;
 import it.unibz.inf.ontop.pivotalrepr.impl.MetadataForQueryOptimizationImpl;
-import it.unibz.inf.ontop.sql.DBMetadata;
+import it.unibz.inf.ontop.sql.*;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.Mapping2DatalogConverter;
 import it.unibz.inf.ontop.utils.MappingSplitter;
 import it.unibz.inf.ontop.utils.MetaMappingExpander;
@@ -33,6 +34,7 @@ import org.slf4j.LoggerFactory;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.*;
+import java.util.stream.IntStream;
 
 public class QuestUnfolder {
 
@@ -253,13 +255,86 @@ public class QuestUnfolder {
 			Set<Variable> headvars = new HashSet<>();
 			TermUtils.addReferencedVariablesTo(headvars, mapping.getHead());
 			for (Variable var : headvars) {
-				Function notnull = fac.getFunctionIsNotNull(var);
-				   List<Function> body = mapping.getBody();
-				   if (!body.contains(notnull)) 
-					   body.add(notnull);
+				List<Function> body = mapping.getBody();
+				if (isNullable(var, body)) {
+					Function notnull = fac.getFunctionIsNotNull(var);
+					if (!body.contains(notnull))
+						body.add(notnull);
+				}
 			}
 		}
 	}
+
+	private boolean isNullable(Variable variable, List<Function> bodyAtoms) {
+		/**
+		 * Only checks for
+		 */
+		ImmutableList<Function> definingAtoms = bodyAtoms.stream()
+				.filter(Function::isDataFunction)
+				.filter(a -> a.containsTerm(variable))
+				.collect(ImmutableCollectors.toList());
+
+		switch(definingAtoms.size()) {
+			case 0:
+				// May happen if a meta-predicate is used
+				return true;
+			case 1:
+				break;
+			/**
+			 * Implicit joining conditions so not nullable.
+			 *
+			 * Rare.
+			 */
+			default:
+				return false;
+		}
+
+		Function definingAtom = definingAtoms.get(0);
+
+		/**
+		 * Look for non-null
+		 */
+		if (hasNonNullColumnForVariable(definingAtom, variable))
+			return false;
+
+		/**
+		 * TODO: check filtering conditions
+		 */
+
+		/**
+		 * Implicit equality inside the data atom.
+		 *
+		 * Rare.
+		 */
+		if (definingAtom.getTerms().stream()
+				.filter(t -> t.equals(variable))
+				.count() > 1) {
+			return false;
+		}
+
+		/**
+		 * No constraint found --> may be null
+		 */
+		return true;
+	}
+
+	private boolean hasNonNullColumnForVariable(Function atom, Variable variable) {
+		RelationID relationId = Relation2DatalogPredicate.createRelationFromPredicateName(metadata.getQuotedIDFactory(),
+				atom.getFunctionSymbol());
+		DatabaseRelationDefinition relation = metadata.getDatabaseRelation(relationId);
+
+		if (relation == null)
+			return false;
+
+		List<Term> arguments = atom.getTerms();
+
+		// NB: DB column indexes start at 1.
+		return IntStream.range(1, arguments.size() + 1)
+				.filter(i -> arguments.get(i - 1).equals(variable))
+				.mapToObj(relation::getAttribute)
+				.anyMatch(att -> !att.canNull());
+	}
+
 
 	/**
 	 * Normalize language tags (make them lower-case) and equalities 
