@@ -261,6 +261,8 @@ public class SelectQueryParser {
 
         private ImmutableList.Builder<Function> atomsListBuilder = new ImmutableList.Builder<>();
         private ImmutableList.Builder<Column> columnsListBuilder = new ImmutableList.Builder<>();
+
+        private ImmutableList.Builder<Term> valuesListBuilder = new ImmutableList.Builder<>();
         private final RelationalExpression current;
 
         final OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
@@ -278,6 +280,11 @@ public class SelectQueryParser {
         public ImmutableList<Column> getColumns(){
             return  columnsListBuilder.build();
         }
+
+        public ImmutableList<Term> getValues() {
+            return valuesListBuilder.build();
+        }
+
 
         @Override
         public void visit(NullValue nullValue) {
@@ -308,71 +315,89 @@ public class SelectQueryParser {
         @Override
         public void visit(DoubleValue doubleValue) {
             logger.debug("Visit doubleValue");
+            valuesListBuilder.add( fac.getConstantLiteral(doubleValue.toString()));
         }
 
         @Override
         public void visit(LongValue longValue) {
             logger.debug("Visit longValue");
+            valuesListBuilder.add( fac.getConstantLiteral(longValue.toString()));
         }
 
         @Override
         public void visit(DateValue dateValue) {
             logger.debug("Visit dateValue");
+            valuesListBuilder.add( fac.getConstantLiteral(dateValue.toString()));
         }
 
         @Override
         public void visit(TimeValue timeValue) {
             logger.debug("Visit timeValue");
+            valuesListBuilder.add( fac.getConstantLiteral(timeValue.toString()));
         }
 
         @Override
         public void visit(TimestampValue timestampValue) {
             logger.debug("Visit timestampValue");
+            valuesListBuilder.add( fac.getConstantLiteral(timestampValue.toString()));
         }
 
         @Override
         public void visit(Parenthesis parenthesis) {
             logger.debug("Visit parenthesis");
+            throw new UnsupportedSelectQuery("Unsupported parenthesis ", parenthesis);
         }
 
         @Override
         public void visit(StringValue stringValue) {
             logger.debug("Visit stringValue");
+            valuesListBuilder.add( fac.getConstantLiteral(stringValue.getValue()));
+
         }
 
         @Override
         public void visit(Addition addition) {
             logger.debug("Visit addition");
+            throw new UnsupportedSelectQuery("Unsupported addition operations ", addition);
         }
 
         @Override
         public void visit(Division division) {
             logger.debug("Visit division");
+            throw new UnsupportedSelectQuery("Unsupported division operations ", division);
         }
 
         @Override
         public void visit(Multiplication multiplication) {
             logger.debug("Visit multiplication");
+            throw new UnsupportedSelectQuery("Unsupported division operations ", multiplication);
         }
 
         @Override
         public void visit(Subtraction subtraction) {
             logger.debug("Visit subtraction");
+            throw new UnsupportedSelectQuery("Unsupported division operations ", subtraction);
         }
 
         @Override
         public void visit(AndExpression andExpression) {
             logger.debug("Visit andExpression");
+            // TODO: this should be supported
+
         }
 
         @Override
         public void visit(OrExpression orExpression) {
             logger.debug("Visit orExpression");
+            // TODO: this should be supported
+
+
         }
 
         @Override
         public void visit(Between between) {
             logger.debug("Visit Between");
+             // TODO: this has to be implemented
         }
 
         @Override
@@ -383,17 +408,27 @@ public class SelectQueryParser {
         }
 
         private Term[] getTermsJoinColumn(BinaryExpression  expression){
-            ExpressionItemProcessor columItemVisitor = new ExpressionItemProcessor(current, expression.getLeftExpression());
-            if  ( columItemVisitor.getColumns().isEmpty() || columItemVisitor.getColumns().size() > 1 )
-                throw new UnsupportedSelectQuery("Only columns are not supported on equalsTo", expression.getLeftExpression());
-            final QualifiedAttributeID  leftAttribute = getAttributeFromColumn(columItemVisitor.getColumns().get(0));
-            final Term firstTerm = current.getAttributes().get(leftAttribute).clone();
+            ExpressionItemProcessor columnItemVisitor = new ExpressionItemProcessor(current, expression.getLeftExpression());
 
-            columItemVisitor = new ExpressionItemProcessor(current, expression.getRightExpression());
-            if  ( columItemVisitor.getColumns().isEmpty() || columItemVisitor.getColumns().size() > 1  )
-                throw new UnsupportedSelectQuery("SubSelect are not supported", expression.getRightExpression());
-            final QualifiedAttributeID  rightAttribute = getAttributeFromColumn(columItemVisitor.getColumns().get(0));
-            final Term secondTerm = current.getAttributes().get(rightAttribute).clone();
+            Term firstTerm;
+            if  ( !(columnItemVisitor.getColumns().isEmpty() || columnItemVisitor.getColumns().size() > 1 ) ){
+                final QualifiedAttributeID leftAttribute = getAttributeFromColumn(columnItemVisitor.getColumns().get(0));
+                firstTerm = current.getAttributes().get(leftAttribute).clone();
+            }else if ( ! (columnItemVisitor.getValues().isEmpty() || columnItemVisitor.getValues().size()>1 ) ) {
+                firstTerm = columnItemVisitor.getValues().get(0);
+            }else
+                throw new UnsupportedSelectQuery("unsupported operation", expression.getLeftExpression());
+
+            Term secondTerm;
+            columnItemVisitor = new ExpressionItemProcessor(current, expression.getRightExpression());
+            if  ( !( columnItemVisitor.getColumns().isEmpty() || columnItemVisitor.getColumns().size() > 1 ) ) {
+                final QualifiedAttributeID rightAttribute = getAttributeFromColumn(columnItemVisitor.getColumns().get(0));
+                secondTerm = current.getAttributes().get(rightAttribute).clone();
+            }else if ( !(columnItemVisitor.getValues().isEmpty() || columnItemVisitor.getValues().size()>1 ) ){
+                secondTerm = columnItemVisitor.getValues().get(0);
+            }else
+                throw new UnsupportedSelectQuery("unsupported operation", expression.getRightExpression());
+
             return new Term[]{ firstTerm, secondTerm};
         }
 

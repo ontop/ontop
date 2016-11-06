@@ -192,6 +192,28 @@ public class SelectQueryParserTest {
         assertTrue( parse.getBody().contains(atomQ));
     }
 
+    @Test
+    public void innerJoinOn_EQ_CONSTANT_INT_Test() {
+        DBMetadata metadata = getDummyMetadata();
+
+
+        SelectQueryParser parser = new SelectQueryParser(metadata);
+
+        final CQIE parse = parser.parse("SELECT P.A, P.C FROM P INNER JOIN  Q on P.A = 1");
+        System.out.println(parse);
+
+        assertTrue( parse.getHead().getTerms().size()==0);
+        assertTrue( parse.getReferencedVariables().size()==4 );
+
+        Variable a1 = FACTORY.getVariable("A1");
+        ValueConstant a2 = FACTORY.getConstantLiteral("1"); // variable are key sensitive
+
+
+        Function atomQ = FACTORY.getFunction(ExpressionOperation.EQ, ImmutableList.of(a1, a2));
+
+        assertTrue( parse.getBody().contains(atomQ));
+    }
+
     private DBMetadata getDummyMetadata(){
         DBMetadata metadata = DBMetadataExtractor.createDummyMetadata();
 
