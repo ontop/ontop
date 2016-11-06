@@ -61,6 +61,7 @@ public class RedundantSelfJoinTest {
     private final static Variable P1 = DATA_FACTORY.getVariable("P");
     private final static Constant ONE = DATA_FACTORY.getConstantLiteral("1");
     private final static Constant TWO = DATA_FACTORY.getConstantLiteral("2");
+    private final static Constant THREE = DATA_FACTORY.getConstantLiteral("3");
 
     private final static Variable M = DATA_FACTORY.getVariable("m");
     private final static Variable M1 = DATA_FACTORY.getVariable("m1");
@@ -856,6 +857,32 @@ public class RedundantSelfJoinTest {
         assertFalse(results.getOptionalNewNode().isPresent());
         assertTrue(results.getOptionalReplacingChild().isPresent());
         assertTrue(results.getOptionalReplacingChild().get().isSyntacticallyEquivalentTo(dataNode5));
+    }
+
+    @Test(expected = EmptyQueryException.class)
+    public void testInsatisfiedJoiningCondition() throws EmptyQueryException {
+
+        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(metadata);
+        DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE, M, N, O);
+        ConstructionNode constructionNode = new ConstructionNodeImpl(projectionAtom.getVariables());
+        queryBuilder.init(projectionAtom, constructionNode);
+
+        ImmutableExpression joiningCondition = DATA_FACTORY.getImmutableExpression(OR,
+                DATA_FACTORY.getImmutableExpression(EQ, O, TWO),
+                DATA_FACTORY.getImmutableExpression(EQ, O, THREE));
+
+        InnerJoinNode joinNode = new InnerJoinNodeImpl(Optional.of(joiningCondition));
+        queryBuilder.addChild(constructionNode, joinNode);
+        ExtensionalDataNode dataNode1 =  new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, M, N, ONE));
+        ExtensionalDataNode dataNode2 =  new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, M, N1, O));
+
+        queryBuilder.addChild(joinNode, dataNode1);
+        queryBuilder.addChild(joinNode, dataNode2);
+
+        IntermediateQuery query = queryBuilder.build();
+        System.out.println("\nBefore optimization: \n" +  query);
+
+        query.applyProposal(new InnerJoinOptimizationProposalImpl(joinNode));
     }
 
 
