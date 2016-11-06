@@ -261,10 +261,10 @@ public class Mapping2DatalogConverter {
     	return idfac.getIDQuotationString() + s + idfac.getIDQuotationString();
     }
     
-    public static final class AttributeLookupTable {
+    private static final class AttributeLookupTable {
     	private final Map<QualifiedAttributeID, Term> lookupTable = new HashMap<>();
 
-        public void put(RelationID relationId, QuotedID attributeId, Term expression) {
+        void put(RelationID relationId, QuotedID attributeId, Term expression) {
     		QualifiedAttributeID qualifiedId = new QualifiedAttributeID(relationId, attributeId);
     		Term prev = lookupTable.put(qualifiedId, expression);
     		if (prev != null && !prev.equals(expression)) {
@@ -358,7 +358,7 @@ public class Mapping2DatalogConverter {
     /**
      * This visitor class converts the SQL Expression to a Function
      */
-    public static class Expression2FunctionConverter implements ExpressionVisitor {
+   private static class Expression2FunctionConverter implements ExpressionVisitor {
 
         private final AttributeLookupTable lookupTable;
         private final QuotedIDFactory idfac; 
