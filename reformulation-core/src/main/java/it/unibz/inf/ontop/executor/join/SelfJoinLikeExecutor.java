@@ -420,7 +420,7 @@ public class SelfJoinLikeExecutor {
             IntermediateQuery query,
             QueryTreeComponent treeComponent,
             N joinNode,
-            ConcreteProposal proposal) {
+            ConcreteProposal proposal) throws EmptyQueryException {
         switch(treeComponent.getChildren(joinNode).size()) {
             case 0:
                 throw new IllegalStateException("Self-join elimination MUST not eliminate ALL the nodes");
@@ -472,7 +472,7 @@ public class SelfJoinLikeExecutor {
     private static <T extends QueryNode> NodeCentricOptimizationResults<T> propagateSubstitution(
             IntermediateQuery query,
             Optional<ImmutableSubstitution<VariableOrGroundTerm>> optionalSubstitution,
-            T topNode) {
+            T topNode) throws EmptyQueryException {
         if (optionalSubstitution.isPresent()) {
 
             // TODO: filter the non-bound variables from the substitution before propagating!!!
@@ -481,16 +481,7 @@ public class SelfJoinLikeExecutor {
                     topNode, optionalSubstitution.get(), false);
 
             // Forces the use of an internal executor (the treeComponent must remain the same).
-            try {
-                return query.applyProposal(propagationProposal, true);
-
-                /**
-                 * TODO: accept EmptyQueryException
-                 */
-            } catch (EmptyQueryException e) {
-                throw new IllegalStateException("Internal inconsistency error: propagation the substitution " +
-                        "leads to an empty query: " + optionalSubstitution.get());
-            }
+            return query.applyProposal(propagationProposal, true);
         }
         /**
          * No substitution to propagate
