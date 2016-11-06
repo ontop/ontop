@@ -113,11 +113,11 @@ public class RelationalExpression {
      * @param on
      * @return
      */
-    public static RelationalExpression joinOn(RelationalExpression e1, ImmutableList<Function> on) {
+    public static RelationalExpression joinOn(RelationalExpression e1, Function on) {
 
         // and add an atom for the expression
         ImmutableList<Function> atoms = ImmutableList.<Function>builder()
-                .addAll(e1.atoms).addAll(on). build();
+                .addAll(e1.atoms).add(on).build();
 
         return new RelationalExpression(atoms, e1.attributes, e1.attributeOccurrences);
     }

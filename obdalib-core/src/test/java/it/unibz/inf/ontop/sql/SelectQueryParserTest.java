@@ -206,7 +206,7 @@ public class SelectQueryParserTest {
         assertTrue( parse.getReferencedVariables().size()==4 );
 
         Variable a1 = FACTORY.getVariable("A1");
-        ValueConstant a2 = FACTORY.getConstantLiteral("1"); // variable are key sensitive
+        ValueConstant a2 = FACTORY. getConstantLiteral("1", Predicate.COL_TYPE.LONG); // variable are key sensitive
 
 
         Function atomQ = FACTORY.getFunction(ExpressionOperation.EQ, ImmutableList.of(a1, a2));
