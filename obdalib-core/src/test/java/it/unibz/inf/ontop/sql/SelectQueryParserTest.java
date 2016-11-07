@@ -67,7 +67,7 @@ public class SelectQueryParserTest {
 
 
         SelectQueryParser parser = new SelectQueryParser(metadata);
-        final CQIE parse = parser.parse("SELECT P.A, P.C FROM P INNER JOIN  Q on P.A = Q.A ");
+        final CQIE parse = parser.parse("SELECT A, C FROM P INNER JOIN  Q on P.A = Q.A ");
         System.out.println(parse);
 
         assertTrue( parse.getHead().getTerms().size()==0);
@@ -89,7 +89,7 @@ public class SelectQueryParserTest {
 
 
         SelectQueryParser parser = new SelectQueryParser(metadata);
-        final CQIE parse = parser.parse("SELECT P.A, P.C FROM P INNER JOIN  Q on P.A >= Q.A ");
+        final CQIE parse = parser.parse("SELECT A, C FROM P INNER JOIN  Q on P.A >= Q.A ");
         System.out.println(parse);
 
         assertTrue( parse.getHead().getTerms().size()==0);
@@ -111,7 +111,7 @@ public class SelectQueryParserTest {
 
         SelectQueryParser parser = new SelectQueryParser(metadata);
 
-        final CQIE parse = parser.parse("SELECT P.A, P.C FROM P INNER JOIN  Q on P.A >Q.A");
+        final CQIE parse = parser.parse("SELECT A, C FROM P INNER JOIN  Q on P.A >Q.A");
         System.out.println(parse);
 
         assertTrue( parse.getHead().getTerms().size()==0);
@@ -133,7 +133,7 @@ public class SelectQueryParserTest {
 
         SelectQueryParser parser = new SelectQueryParser(metadata);
 
-        final CQIE parse = parser.parse("SELECT P.A, P.C FROM P INNER JOIN  Q on P.A < Q.A");
+        final CQIE parse = parser.parse("SELECT A, C FROM P INNER JOIN  Q on P.A < Q.A");
         System.out.println(parse);
 
         assertTrue( parse.getHead().getTerms().size()==0);
@@ -155,7 +155,7 @@ public class SelectQueryParserTest {
 
         SelectQueryParser parser = new SelectQueryParser(metadata);
 
-        final CQIE parse = parser.parse("SELECT P.A, P.C FROM P INNER JOIN  Q on P.A <= Q.A");
+        final CQIE parse = parser.parse("SELECT A, C FROM P INNER JOIN  Q on P.A <= Q.A");
         System.out.println(parse);
 
         assertTrue( parse.getHead().getTerms().size()==0);
@@ -177,7 +177,7 @@ public class SelectQueryParserTest {
 
         SelectQueryParser parser = new SelectQueryParser(metadata);
 
-        final CQIE parse = parser.parse("SELECT P.A, P.C FROM P INNER JOIN  Q on P.A <> Q.A");
+        final CQIE parse = parser.parse("SELECT A, C FROM P INNER JOIN  Q on P.A <> Q.A");
         System.out.println(parse);
 
         assertTrue( parse.getHead().getTerms().size()==0);
@@ -199,7 +199,7 @@ public class SelectQueryParserTest {
 
         SelectQueryParser parser = new SelectQueryParser(metadata);
 
-        final CQIE parse = parser.parse("SELECT P.A, P.C FROM P INNER JOIN  Q on P.A = 1");
+        final CQIE parse = parser.parse("SELECT A, C FROM P INNER JOIN  Q on P.A = 1");
         System.out.println(parse);
 
         assertTrue( parse.getHead().getTerms().size()==0);
@@ -213,6 +213,31 @@ public class SelectQueryParserTest {
 
         assertTrue( parse.getBody().contains(atomQ));
     }
+
+    @Test
+    public void in_condition_Test() {
+        final DBMetadata metadata = getDummyMetadata();
+        final SelectQueryParser parser = new SelectQueryParser(metadata);
+
+        final CQIE parse = parser.parse("SELECT A, B FROM P where P.A IN ( 1, 2 )");
+        System.out.println(parse);
+        assertTrue( parse.getHead().getTerms().size()==0);
+
+        final Variable a1 = FACTORY.getVariable("A1");
+        final ValueConstant v1 = FACTORY. getConstantLiteral("1", Predicate.COL_TYPE.LONG); // variable are key sensitive
+        final ValueConstant v2 = FACTORY. getConstantLiteral("2", Predicate.COL_TYPE.LONG);
+
+
+        final Function atom = FACTORY.getFunction(ExpressionOperation.OR, ImmutableList.of(a1, v1));
+
+        atom.updateTerms(ImmutableList.of (
+                FACTORY.getFunction(ExpressionOperation.EQ, ImmutableList.of(a1, v2)),
+                FACTORY.getFunction(ExpressionOperation.EQ, ImmutableList.of(a1, v1))));
+
+        assertTrue( parse.getBody().contains(atom));
+    }
+
+
 
     private DBMetadata getDummyMetadata(){
         DBMetadata metadata = DBMetadataExtractor.createDummyMetadata();

@@ -74,13 +74,19 @@ public class SelectQueryParser {
                         if (join.getOnExpression() != null) {
                             current = RelationalExpression.crossJoin( current, right);
                             Function on =  getAtomsFromExpression(current, join.getOnExpression());
-                            current = RelationalExpression.joinOn(current, on);
+                            current = RelationalExpression.addAtom(current, on);
                         }else if ( join.getUsingColumns() != null ){
                              current = RelationalExpression.joinUsing(current, right, join.getUsingColumns());
                         }
                     }
                 }
             }
+
+            if (plainSelect.getWhere() != null ) {
+                final Function atomsFromExpression = getAtomsFromExpression(current, plainSelect.getWhere());
+                current = RelationalExpression.addAtom(current, atomsFromExpression);
+            }
+
 
             final OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
             // TODO: proper handling of the head predicate
@@ -245,8 +251,8 @@ public class SelectQueryParser {
         }
     }
 
-    private Function getAtomsFromExpression(RelationalExpression current, Expression onExpressionItem) {
-        return new ExpressionOperator(current.getAttributes(), metadata.getQuotedIDFactory()).convert(onExpressionItem);
+    private Function getAtomsFromExpression(RelationalExpression current, Expression expression) {
+        return new ExpressionOperator(current.getAttributes(), metadata.getQuotedIDFactory()).convert(expression);
     }
 
 
@@ -511,11 +517,10 @@ public class SelectQueryParser {
             Expression inside = expression.getExpression();
 
             //Consider the case of NOT(...)
-            if (expression.isNot()) {
+            if (expression.isNot())
                 result = FACTORY.getFunctionNOT(visitEx(inside));
-            } else {
+            else
                 result = visitEx(inside);
-            }
         }
 
         @Override
@@ -556,19 +561,19 @@ public class SelectQueryParser {
 
         @Override
         public void visit(Between expression) {
-            Expression leftExpression = expression.getLeftExpression();
+            final Expression leftExpression = expression.getLeftExpression();
             Expression e1 = expression.getBetweenExpressionStart();
             Expression e2 = expression.getBetweenExpressionEnd();
 
-            GreaterThanEquals gte = new GreaterThanEquals();
+            final GreaterThanEquals gte = new GreaterThanEquals();
             gte.setLeftExpression(leftExpression);
             gte.setRightExpression(e1);
 
-            MinorThanEquals mte = new MinorThanEquals();
+            final MinorThanEquals mte = new MinorThanEquals();
             mte.setLeftExpression(leftExpression);
             mte.setRightExpression(e2);
 
-            AndExpression e = new AndExpression(gte, mte);
+            final AndExpression e = new AndExpression(gte, mte);
             result = visitEx(e);
         }
 
@@ -591,21 +596,24 @@ public class SelectQueryParser {
         public void visit(InExpression expression) {
             Expression left = expression.getLeftExpression();
             ExpressionList rightItemsList = (ExpressionList) expression.getRightItemsList();
+            if (rightItemsList == null)
+                throw new UnsupportedOperationException();
 
-            List<EqualsTo> equalsToList = new ArrayList<>();
-            for (Expression item : rightItemsList.getExpressions()) {
-                EqualsTo eq = new EqualsTo();
+            final ImmutableList.Builder<EqualsTo> builderEqualsToList = new ImmutableList.Builder<>();
+            rightItemsList.getExpressions().forEach( item -> {
+                final EqualsTo eq = new EqualsTo();
                 eq.setLeftExpression(left);
                 eq.setRightExpression(item);
-                equalsToList.add(eq);
-            }
+                builderEqualsToList.add(eq);
+            });
+            ImmutableList<EqualsTo> equalsToList = builderEqualsToList.build();
             int size = equalsToList.size();
             if (size > 1) {
-                OrExpression or = new OrExpression(equalsToList.get(size - 1),
-                        equalsToList.get(size - 2));
-                for (int i = size - 3; i >= 0; i--) {
+                OrExpression or = new OrExpression(equalsToList.get(size - 1), equalsToList.get(size - 2));
+
+                for (int i = size - 3; i >= 0; i--)
                     or = new OrExpression(equalsToList.get(i), or);
-                }
+
                 result = visitEx(or);
             } else {
                 result = visitEx(equalsToList.get(0));

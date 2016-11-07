@@ -107,17 +107,17 @@ public class RelationalExpression {
 
 
     /**
-     * JOIN ON of two relations (also denoted by , in SQL)
+     * Add an atom {@link Function} to {@link RelationalExpression}
      *
-     * @param e1
-     * @param on
-     * @return
+     * @param e1 ia a {@link RelationalExpression)
+     * @param atom {@link Function}
+     * @return a {@link RelationalExpression}
      */
-    public static RelationalExpression joinOn(RelationalExpression e1, Function on) {
+    public static RelationalExpression addAtom(RelationalExpression e1, Function atom) {
 
         // and add an atom for the expression
         ImmutableList<Function> atoms = ImmutableList.<Function>builder()
-                .addAll(e1.atoms).add(on).build();
+                .addAll(e1.atoms).add(atom).build();
 
         return new RelationalExpression(atoms, e1.attributes, e1.attributeOccurrences);
     }
