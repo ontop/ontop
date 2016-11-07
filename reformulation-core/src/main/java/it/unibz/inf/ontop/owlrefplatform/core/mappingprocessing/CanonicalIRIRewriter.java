@@ -20,6 +20,7 @@ import java.util.stream.Collectors;
  */
 public class CanonicalIRIRewriter {
 
+    //used to recognize if we are working on the subject or object of the mapping target
     private enum Position {
 
         SUBJECT (0),
@@ -41,15 +42,10 @@ public class CanonicalIRIRewriter {
     //rewritten mappings
     private List<CQIE> outputMappings;
 
-    // original uri     -> canonical iri
-    private Map<ValueConstant, String> can_iri_rename;
+    // canonical iri -> suffix for variable renaming
+    private Map<ValueConstant, String> canIriVariablesSuffix;
 
-    // original uri     -> canonical iri
-    private Map<ValueConstant, ValueConstant> can_iri_map;
-
-    private Map<ValueConstant, CQIE> uri_mapping_map;
-
-    private Map<ValueConstant, List<Term>> uri_column_map;
+    private Map<ValueConstant, CQIE> uriMappingMap;
 
     private static final Logger log = LoggerFactory.getLogger(CanonicalIRIRewriter.class);
 
@@ -60,15 +56,14 @@ public class CanonicalIRIRewriter {
     public List<CQIE> buildCanonicalIRIMappings(List<CQIE> mappings) {
 
         outputMappings = new ArrayList<>();
-        can_iri_rename = new HashMap<>();
-        can_iri_map = new HashMap<>();
-        uri_mapping_map = new HashMap<>();
-        uri_column_map = new HashMap<>();
+        canIriVariablesSuffix = new HashMap<>();;
+        uriMappingMap = new HashMap<>();
 
+        //search for ontop:is_canonical_iri_of in the mappings
         analyzeCanonicalIRIMappings(mappings);
 
         // When no Canonical IRI is used, do nothing
-        if (can_iri_map.isEmpty()) {
+        if (uriMappingMap.isEmpty()) {
             return mappings;
         }
 
@@ -85,18 +80,15 @@ public class CanonicalIRIRewriter {
                 continue;
             }
 
-
             Term subjectURI = head.getTerm(0);
 
-            Term templateSubURI = null;
-
+            Term templateSubURI;
             //if subjectURI is an IRI get canonicalIRI
             if (subjectURI instanceof Function) {
 
                 templateSubURI = ((Function) subjectURI).getTerm(0);
 
-
-                if (can_iri_map.containsKey(templateSubURI)) {
+                if (uriMappingMap.containsKey(templateSubURI)) {
 
                     newMapping = Optional.of(new CanonicalURIMapping(mapping, (Function) subjectURI, Position.SUBJECT).create());
                 }
@@ -107,18 +99,16 @@ public class CanonicalIRIRewriter {
                 CQIE mapping2 = newMapping.orElse(mapping);
 
                 Function headNewMapping = mapping2.getHead();
-
                 Term objectURI = headNewMapping.getTerm(1);
 
                 //if objectURI is an IRI get canonicalIRI
                 if (objectURI instanceof Function) {
 
                     Function objectURINewMapping = (Function) objectURI;
-
                     Term templateObjURINewMapping = objectURINewMapping.getTerm(0);
 
 
-                    if (can_iri_map.containsKey(templateObjURINewMapping)) {
+                    if (uriMappingMap.containsKey(templateObjURINewMapping)) {
 
                         newMapping = Optional.of(new CanonicalURIMapping(mapping2, (Function) objectURI, Position.OBJECT).create());
 
@@ -151,12 +141,17 @@ public class CanonicalIRIRewriter {
                 //rename all the variables to avoid conflicts while merging the mappings
                 Set<Variable> variables = mapping.getReferencedVariables();
 
-
                 Function headURI = (Function) head.getTerm(0);
-                String rename = can_iri_rename.get(headURI.getTerm(0));
+                ValueConstant canonicalIRIName = (ValueConstant) headURI.getTerm(0);
+
+                Function objectTerm = (Function) head.getTerm(1);
+                ValueConstant objectURIName = (ValueConstant) objectTerm.getTerm(0);
+
+                //get or assign a suffix for each canonicalIRI
+                String rename = canIriVariablesSuffix.get(canonicalIRIName);
                 if(rename ==null){
-                    rename = "_canonical"+can_iri_rename.size();
-                    can_iri_rename.put((ValueConstant) headURI.getTerm(0), rename);
+                    rename = "_canonical"+ canIriVariablesSuffix.size();
+                    canIriVariablesSuffix.put(canonicalIRIName, rename);
                 }
 
                 final String finalRename = rename;
@@ -165,29 +160,12 @@ public class CanonicalIRIRewriter {
                                 var -> var,
                                 var -> fac.getVariable(var.getName() + finalRename)));
 
+                //apply substitution for variables renaming
                 Substitution substitution = new SubstitutionImpl(map);
                 CQIE canonicalMapping = SubstitutionUtilities.applySubstitution(mapping, substitution, true);
 
-                //get template uri and columns of canonical uri and object uri
-                Function canonHead = canonicalMapping.getHead();
-
-                Function canonicalTerm = (Function) canonHead.getTerm(0);
-                Function objectTerm = (Function) canonHead.getTerm(1);
-
-                ValueConstant canonURI = (ValueConstant) canonicalTerm.getTerm(0);
-                List<Term> canonURIColumns = canonicalTerm.getTerms().subList(1, canonicalTerm.getTerms().size());
-
-                ValueConstant objectURI = (ValueConstant) objectTerm.getTerm(0);
-                List<Term> objectURIColumns = objectTerm.getTerms().subList(1, objectTerm.getTerms().size());
-
-                //store the canonical iri of the object uri
-                can_iri_map.put(objectURI, canonURI);
-
-                //store the columns
-                uri_column_map.put(objectURI, objectURIColumns);
-                uri_column_map.put(canonURI, canonURIColumns);
                 //store the renamed mapping
-                uri_mapping_map.put(objectURI, canonicalMapping);
+                uriMappingMap.put(objectURIName, canonicalMapping);
             }
         }
     }
@@ -210,19 +188,12 @@ public class CanonicalIRIRewriter {
         public CQIE create() {
 
             //get the canonical version of the uri and useful columns
-            ValueConstant canonicalTemplateURI = can_iri_map.get(templateURI);
-            List<Term> newURITerms = new ArrayList<>();
-            List<Term> termsURI = new ArrayList<>();
-            newURITerms.add(canonicalTemplateURI);
-            List<Term> columnsCanonURI = uri_column_map.get(canonicalTemplateURI);
-            newURITerms.addAll(columnsCanonURI);
-            final Function templateCanURI = fac.getUriTemplate(newURITerms);
+            CQIE canonicalMapping = uriMappingMap.get(templateURI);
+            Function canonHead = canonicalMapping.getHead();
+            final Function templateCanURI = (Function) canonHead.getTerm(0);
 
-            //get template uri and table column name
-            List<Term> columnsURI = uri_column_map.get(templateURI);
-            termsURI.add(templateURI);
-            termsURI.addAll(columnsURI);
-            Function target = fac.getUriTemplate(termsURI);
+            //get templateuri
+            Function target = (Function) canonHead.getTerm(1);
 
             //get substitution
             Substitution subs = UnifierUtilities.getMGU(uriTerm, target);
@@ -232,7 +203,6 @@ public class CanonicalIRIRewriter {
             currentHead.setTerm(termPosition.getPosition(), templateCanURI);
 
             List<Function> newURIBody = new ArrayList<>();
-            CQIE canonicalMapping = uri_mapping_map.get(templateURI);
             newURIBody.addAll(canonicalMapping.getBody());
             newMapping.getBody().stream().filter(m -> !newURIBody.contains(m)).forEach(m -> newURIBody.add(m));
             newMapping.updateBody(newURIBody);
