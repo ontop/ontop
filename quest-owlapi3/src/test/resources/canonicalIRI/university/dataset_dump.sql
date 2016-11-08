@@ -81,7 +81,7 @@ INSERT INTO "uni2"."person"
 (3, 'cez85', 'Céline', 'Mendez', 2),
 (4, 'eay75', 'Edward','May', 8),
 (5, 'rrd70', 'Rachel', 'Ward', 8),
-(6, 'mth89', 'Mary','Smith', 1);
+(6, 'mth89', 'Mary','Smith', 2);
 
 INSERT INTO "uni2"."course"
 ("cid", "lecturer", "lab_teacher", "topic") VALUES

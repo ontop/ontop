@@ -4,6 +4,8 @@ package it.unibz.inf.ontop.reformulation.tests;
 import it.unibz.inf.ontop.io.QueryIOManager;
 import it.unibz.inf.ontop.model.OBDAModel;
 
+import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
+import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import it.unibz.inf.ontop.querymanager.QueryController;
 import it.unibz.inf.ontop.querymanager.QueryControllerGroup;
@@ -14,6 +16,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.io.ToStringRenderer;
+import org.semanticweb.owlapi.model.OWLException;
 import org.semanticweb.owlapi.model.OWLObject;
 import org.semanticweb.owlapi.model.OWLOntology;
 
@@ -52,12 +55,14 @@ public class CanonicalIRIUniversityTest {
 
         OBDAModel obdaModel = new MappingLoader().loadFromOBDAFile(obdaFile);
 
+        QuestPreferences preference = new QuestPreferences() ;
+        preference.setCurrentValueOf(QuestPreferences.REWRITE, QuestConstants.TRUE);
 		/*
 		 * Create the instance of Quest OWL reasoner.
 		 */
         QuestOWLFactory factory = new QuestOWLFactory();
 
-        QuestOWLConfiguration config = QuestOWLConfiguration.builder().obdaModel(obdaModel).build();
+        QuestOWLConfiguration config = QuestOWLConfiguration.builder().obdaModel(obdaModel).preferences(preference).build();
 
         reasoner = factory.createReasoner(ontology, config);
         conn = reasoner.getConnection();
@@ -82,7 +87,7 @@ public class CanonicalIRIUniversityTest {
         }
     }
 
-    @Test
+    @Ignore
     public void testUniversity() throws Exception {
 
 
@@ -159,6 +164,11 @@ public class CanonicalIRIUniversityTest {
                 "  }\n" +
                 "}";
 
+        runQuery(query);
+
+    }
+
+    private void runQuery(String query) throws OWLException {
         QuestOWLStatement st = conn.createStatement();
         ArrayList<String> retVal = new ArrayList<>();
         try {
@@ -185,43 +195,17 @@ public class CanonicalIRIUniversityTest {
             conn.close();
             reasoner.dispose();
         }
-
     }
 
     @Test
-    public void testDistinct() throws Exception {
+    public void testDistinctResults() throws Exception {
         String query = "PREFIX : <http://example.org/voc#>\n" +
                 "PREFIX foaf: <http://xmlns.com/foaf/0.1/>\n" +
                 "SELECT DISTINCT ?teacher ?lastName {\n " +
             "  ?teacher a :Teacher ; foaf:lastName ?lastName .\n" +
                     "}\n";
 
-        QuestOWLStatement st = conn.createStatement();
-        ArrayList<String> retVal = new ArrayList<>();
-        try {
-            QuestOWLResultSet rs = st.executeTuple(query);
-            while(rs.nextRow()) {
-                for (String s : rs.getSignature()) {
-                    OWLObject binding = rs.getOWLObject(s);
-
-                    String rendering = ToStringRenderer.getInstance().getRendering(binding);
-                    retVal.add(rendering);
-                    System.out.println((s + ":  " + rendering));
-                }
-            }
-
-        } catch (Exception e) {
-            throw e;
-        } finally {
-            try {
-
-            } catch (Exception e) {
-                st.close();
-                assertTrue(false);
-            }
-            conn.close();
-            reasoner.dispose();
-        }
+        runQuery(query);
 
     }
 
@@ -230,38 +214,29 @@ public class CanonicalIRIUniversityTest {
 
         String query =
                 "PREFIX : <http://example.org/voc#>\n" +
-                "\n" +
-                "SELECT ?researcher\n" +
-                "WHERE {\n" +
-                "   ?researcher a :Researcher .\n" +
-                "}";
+                        "\n" +
+                        "SELECT ?researcher\n" +
+                        "WHERE {\n" +
+                        "   ?researcher a :Researcher .\n" +
+                        "}";
 
-        QuestOWLStatement st = conn.createStatement();
-        ArrayList<String> retVal = new ArrayList<>();
-        try {
-            QuestOWLResultSet rs = st.executeTuple(query);
-            while(rs.nextRow()) {
-                for (String s : rs.getSignature()) {
-                    OWLObject binding = rs.getOWLObject(s);
+        runQuery(query);
 
-                    String rendering = ToStringRenderer.getInstance().getRendering(binding);
-                    retVal.add(rendering);
-                    System.out.println((s + ":  " + rendering));
-                }
-            }
 
-        } catch (Exception e) {
-            throw e;
-        } finally {
-            try {
+    }
 
-            } catch (Exception e) {
-                st.close();
-                assertTrue(false);
-            }
-            conn.close();
-            reasoner.dispose();
-        }
+    @Test
+    public void testSupervisedByProfessor() throws Exception {
+
+        String query =
+                "PREFIX : <http://example.org/voc#>\n" +
+                        "\n" +
+                        "SELECT ?x\n" +
+                        "WHERE {\n" +
+                        "   ?x :isSupervisedBy [ a :Professor ] .\n" +
+                        "}";
+
+        runQuery(query);
 
 
     }

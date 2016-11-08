@@ -204,7 +204,10 @@ public class CanonicalIRIRewriter {
 
             List<Function> newURIBody = new ArrayList<>();
             newURIBody.addAll(canonicalMapping.getBody());
-            newMapping.getBody().stream().filter(m -> !newURIBody.contains(m)).forEach(m -> newURIBody.add(m));
+            //get body values from the new mapping that have not been added already from the body of the canonical mapping
+            newURIBody.addAll(newMapping.getBody().stream()
+                                .filter(m -> !newURIBody.contains(m))
+                                .collect(Collectors.toList()));
             newMapping.updateBody(newURIBody);
 
             return newMapping;
