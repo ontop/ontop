@@ -1460,9 +1460,11 @@ public class DatalogUnfolder {
                  * guarantees there wont be any other redundant atom.
                  */
 				Substitution mgu = null;
-				
+
+                Function tempatom = null;
+
                 for (int idx2 = 0; idx2 < termidx.peek(); idx2++) {
-                    Function tempatom = innerAtoms.get(idx2);
+                    tempatom = innerAtoms.get(idx2);
 
                     // predicates are different, atoms cannot be unified
                     if (!tempatom.getFunctionSymbol().equals(newatom.getFunctionSymbol())) 
@@ -1494,6 +1496,10 @@ public class DatalogUnfolder {
                 }
 
 				SubstitutionUtilities.applySubstitution(partialEvalution, mgu, false);
+
+                log.debug("The Unique Constraint {}{} is used for eliminating the redundant self join of {} and {}",
+                        newatom.getFunctionSymbol(), pKey, newatom, tempatom);
+
                 innerAtoms.remove(newatomidx);
                 newatomidx -= 1;
                 newatomcount -= 1;
@@ -1501,7 +1507,7 @@ public class DatalogUnfolder {
             }
 		}
 
-		/***
+		/*
 		 * As the result of optimizing PKs, it can be that JOINs become invalid,
 		 * i.e., they contian one single data item (no longer a join). In this
 		 * case we need to eliminate the join atom attach the inner atoms to the
