@@ -33,13 +33,10 @@ public class ConditionalAsLeftJoinTest {
     private static final String OWL_FILE = "src/test/resources/test/conditional_leftjoin/conditional_leftjoin_test.owl";
     private static final String ODBA_FILE = "src/test/resources/test/conditional_leftjoin/conditional_leftjoin_test.obda";
 
-
     private OBDADataFactory fac;
     private Connection conn;
-
     private OBDAModel obdaModel;
     private OWLOntology ontology;
-
 
     @Before
     public void setUp() throws Exception {
