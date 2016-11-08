@@ -2259,6 +2259,14 @@ public class SQLGenerator implements SQLQueryGenerator {
 				}
 				throw new RuntimeException("Impossible to get data definition for: " + atom + ", type: " + def);
 			}
+
+			/**
+			 * Special case of nullary atoms
+			 */
+			else if(atom.getArity() == 0){
+				return sqladapter.getDummyTable();
+			}
+
 			/**
 			 * Special case.
 			 * For atoms nested in a LJ.

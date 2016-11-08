@@ -6,10 +6,15 @@ import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.AtomPredicateImpl;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
+import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.FunctionFlattener;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionImpl;
+import it.unibz.inf.ontop.owlrefplatform.core.queryevaluation.PostgreSQLDialectAdapter;
+import it.unibz.inf.ontop.owlrefplatform.core.srcquerygeneration.SQLGenerator;
+import it.unibz.inf.ontop.owlrefplatform.core.srcquerygeneration.SQLQueryGenerator;
 import it.unibz.inf.ontop.pivotalrepr.*;
 import it.unibz.inf.ontop.pivotalrepr.impl.*;
 import it.unibz.inf.ontop.pivotalrepr.impl.tree.DefaultIntermediateQueryBuilder;
+import it.unibz.inf.ontop.sql.*;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -19,9 +24,6 @@ import java.util.Optional;
 import static org.junit.Assert.assertTrue;
 
 
-/**
- * Created by jcorman on 22/09/16.
- */
 public class IntermediateQueryToDatalogTranslatorTest {
 
     private static MetadataForQueryOptimization METADATA = new EmptyMetadataForQueryOptimization();
@@ -116,5 +118,42 @@ public class IntermediateQueryToDatalogTranslatorTest {
     }
 
 
+    @Test
+    public void testTrueNodeAsLeftJoinLeftChild() {
+
+        /**
+         * Intermediate query
+         */
+        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
+
+        ConstructionNode rootNode = new ConstructionNodeImpl(ImmutableSet.of(X),
+                new ImmutableSubstitutionImpl<>(ImmutableMap.of()), Optional.empty());
+
+        queryBuilder.init(ANS1_X_ATOM,rootNode);
+
+        LeftJoinNode leftJoinNode = new LeftJoinNodeImpl(Optional.empty());
+        queryBuilder.addChild(rootNode, leftJoinNode);
+
+        TrueNode trueNode = new TrueNodeImpl();
+        queryBuilder.addChild(leftJoinNode, trueNode, NonCommutativeOperatorNode.ArgumentPosition.LEFT);
+        ExtensionalDataNode extensionalDataNode = new ExtensionalDataNodeImpl(P1_X_ATOM);
+        queryBuilder.addChild(leftJoinNode, extensionalDataNode, NonCommutativeOperatorNode.ArgumentPosition.RIGHT);
+
+        IntermediateQuery inputQuery = queryBuilder.build();
+
+        System.out.println("input query:\n" + inputQuery.getProjectionAtom() + ":-\n" +
+                inputQuery);
+
+        DatalogProgram dp = IntermediateQueryToDatalogTranslator.translate(inputQuery);
+        System.out.println(dp);
+        dp = FunctionFlattener.flattenDatalogProgram(dp);
+        System.out.println(dp);
+        DBMetadata dbMetadata = DBMetadataExtractor.createDummyMetadata();
+
+        QuotedIDFactory idfac = dbMetadata.getQuotedIDFactory();
+        dbMetadata.createDatabaseRelation(idfac.createRelationID("p1",""));
+        SQLQueryGenerator sqlQueryGenerator = new SQLGenerator(dbMetadata, new PostgreSQLDialectAdapter());
+        sqlQueryGenerator.generateSourceQuery(dp, ImmutableList.of("x"));
+    }
 }
 
