@@ -163,7 +163,8 @@ public class RedundantSelfJoinExecutor extends SelfJoinLikeExecutor implements I
     private NodeCentricOptimizationResults<InnerJoinNode> applyOptimization(IntermediateQuery query,
                                                                                      QueryTreeComponent treeComponent,
                                                                                      InnerJoinNode topJoinNode,
-                                                                                     ConcreteProposal proposal) {
+                                                                                     ConcreteProposal proposal)
+            throws EmptyQueryException {
         /**
          * First, add and remove non-top nodes
          */
