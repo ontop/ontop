@@ -22,6 +22,7 @@ package it.unibz.inf.ontop.owlrefplatform.core;
 
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.ontology.Assertion;
+import it.unibz.inf.ontop.owlrefplatform.core.benchmark.OntopBenchmark;
 import it.unibz.inf.ontop.owlrefplatform.core.queryevaluation.SPARQLQueryUtility;
 import it.unibz.inf.ontop.owlrefplatform.core.resultset.*;
 import it.unibz.inf.ontop.owlrefplatform.core.translator.SesameConstructTemplate;
@@ -531,6 +532,13 @@ public class QuestStatement implements OBDAStatement {
 	@Override
 	public String getSPARQLRewriting(String query) throws OBDAException {
 		return engine.getSPARQLRewriting(query);
+	}
+
+
+
+
+	public OntopBenchmark getBenchmarkObject() {
+	    return engine.getBenchmarkObject();
 	}
 	
 }

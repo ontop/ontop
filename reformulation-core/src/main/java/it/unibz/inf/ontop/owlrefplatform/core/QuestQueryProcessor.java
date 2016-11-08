@@ -43,6 +43,9 @@ public class QuestQueryProcessor {
 	private final SQLQueryGenerator datasourceQueryGenerator;
 		
 	private static final Logger log = LoggerFactory.getLogger(QuestQueryProcessor.class);
+	
+	// Davide> Benchmark
+	private OntopBenchmark benchmarkObj = null;
 		
 	public QuestQueryProcessor(QueryRewriter rewriter, LinearInclusionDependencies sigma, QuestUnfolder unfolder, 
 			VocabularyValidator vocabularyValidator, SemanticIndexURIMap uriMap, SQLQueryGenerator datasourceQueryGenerator) {
@@ -118,9 +121,12 @@ public class QuestQueryProcessor {
 	public String getSQL(ParsedQuery pq) throws OBDAException {
 			
 		String cachedSQL = translatedSQLCache.get(pq);
-		if (cachedSQL != null)
-			return cachedSQL;
-		
+		if (cachedSQL != null){
+		    // Davide> Benchmarking
+		    OntopBenchmark.Builder builder = new OntopBenchmark.Builder(0, 0);
+		    this.benchmarkObj = builder.build();
+		    return cachedSQL;
+		}
 		try {
 			// log.debug("Input query:\n{}", strquery);
 			
@@ -229,7 +235,7 @@ public class QuestQueryProcessor {
 			// Davide> Benchmarking
 			OntopBenchmark.Builder builder = new OntopBenchmark.Builder(unfoldingTime, rewritingTime);
 			builder.programAfterRewriting(programAfterRewriting).programAfterUnfolding(programAfterUnfolding);
-			builder.build();
+			this.benchmarkObj = builder.build();
 			
 			return sql;
 		} 
@@ -302,5 +308,10 @@ public class QuestQueryProcessor {
 			ex.setStackTrace(e.getStackTrace());
 			throw ex;
 		}
+	}
+
+	// Davide> Benchmark
+	public OntopBenchmark getBenchmarkObject() {
+	    return this.benchmarkObj;
 	}
 }
