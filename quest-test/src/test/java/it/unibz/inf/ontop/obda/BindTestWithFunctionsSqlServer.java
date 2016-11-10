@@ -159,10 +159,10 @@ public class BindTestWithFunctionsSqlServer {
 
 
         List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"1\"^^xsd:decimal");
-        expectedValues.add("\"1\"^^xsd:decimal");
-        expectedValues.add("\"1\"^^xsd:decimal");
-        expectedValues.add("\"1\"^^xsd:decimal");
+        expectedValues.add("\"1.0000\"^^xsd:decimal");
+        expectedValues.add("\"1.0000\"^^xsd:decimal");
+        expectedValues.add("\"1.0000\"^^xsd:decimal");
+        expectedValues.add("\"1.0000\"^^xsd:decimal");
         checkReturnedValues(p, queryBind, expectedValues);
     }
 
@@ -184,10 +184,10 @@ public class BindTestWithFunctionsSqlServer {
                 + "}";
 
         List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"0\"^^xsd:decimal");
-        expectedValues.add("\"0\"^^xsd:decimal");
-        expectedValues.add("\"0\"^^xsd:decimal");
-        expectedValues.add("\"0\"^^xsd:decimal");
+        expectedValues.add("\"0.0000\"^^xsd:decimal");
+        expectedValues.add("\"0.0000\"^^xsd:decimal");
+        expectedValues.add("\"0.0000\"^^xsd:decimal");
+        expectedValues.add("\"0.0000\"^^xsd:decimal");
         checkReturnedValues(p, queryBind, expectedValues);
     }
 
@@ -235,10 +235,10 @@ public class BindTestWithFunctionsSqlServer {
                 + "}";
 
         List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"8.5000\"");
-        expectedValues.add("\"5.7500\"");
-        expectedValues.add("\"6.7000\"");
-        expectedValues.add("\"1.5000\"");
+        expectedValues.add("\"8.5000\"^^xsd:decimal");
+        expectedValues.add("\"5.7500\"^^xsd:decimal");
+        expectedValues.add("\"6.7000\"^^xsd:decimal");
+        expectedValues.add("\"1.5000\"^^xsd:decimal");
         checkReturnedValues(p, queryBind, expectedValues);
 	}
 
@@ -866,10 +866,10 @@ public class BindTestWithFunctionsSqlServer {
 
 
         List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"52\"^^xsd:decimal");
-        expectedValues.add("\"0\"^^xsd:decimal");
-        expectedValues.add("\"6\"^^xsd:decimal");
-        expectedValues.add("\"0\"^^xsd:decimal");
+        expectedValues.add("\"52.0000\"^^xsd:decimal");
+        expectedValues.add("\"0.0000\"^^xsd:decimal");
+        expectedValues.add("\"6.0000\"^^xsd:decimal");
+        expectedValues.add("\"0.0000\"^^xsd:decimal");
         checkReturnedValues(p, queryBind, expectedValues);
     }
 
