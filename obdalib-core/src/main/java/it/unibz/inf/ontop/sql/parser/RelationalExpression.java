@@ -3,16 +3,22 @@ package it.unibz.inf.ontop.sql.parser;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import it.unibz.inf.ontop.model.ExpressionOperation;
 import it.unibz.inf.ontop.model.Function;
 import it.unibz.inf.ontop.model.Variable;
 import it.unibz.inf.ontop.sql.QualifiedAttributeID;
 import it.unibz.inf.ontop.sql.QuotedID;
 import it.unibz.inf.ontop.sql.RelationID;
+import it.unibz.inf.ontop.sql.parser.exceptions.UnsupportedSelectQuery;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.schema.Column;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Created by Roman Kontchakov on 01/11/2016.
@@ -101,23 +107,26 @@ public class RelationalExpression {
      * @return
      */
     public static RelationalExpression naturalJoin(RelationalExpression e1, RelationalExpression e2) {
-        // TODO: Implement the case
-        return  e1;
+        final RelationalExpression ret = RelationalExpression.crossJoin(e1, e2);
+
+
+
+        return ret;
     }
 
 
     /**
-     * Add an atom {@link Function} to {@link RelationalExpression}
+     * Add an {@link ImmutableList} of atoms {@link Function} to {@link RelationalExpression}
      *
      * @param e1 ia a {@link RelationalExpression)
-     * @param atom {@link Function}
+     * @param atomsToAdd {@link ImmutableList} of {@link Function}
      * @return a {@link RelationalExpression}
      */
-    public static RelationalExpression addAtom(RelationalExpression e1, Function atom) {
+    public static RelationalExpression addAtoms(RelationalExpression e1, ImmutableList<Function> atomsToAdd) {
 
         // and add an atom for the expression
         ImmutableList<Function> atoms = ImmutableList.<Function>builder()
-                .addAll(e1.atoms).add(atom).build();
+                .addAll(e1.atoms).addAll(atomsToAdd).build();
 
         return new RelationalExpression(atoms, e1.attributes, e1.attributeOccurrences);
     }
