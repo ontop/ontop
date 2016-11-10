@@ -219,6 +219,8 @@ public class DBMetadataExtractor {
 			dt = OracleTypeFixer;
 		else if (productName.contains("MySQL"))
 			dt = MySQLTypeFixer;
+		else if (productName.contains("Microsoft SQL Server"))
+			dt = SQLServerTypeFixer;
 
 		List<DatabaseRelationDefinition> extractedRelations = new LinkedList<>();
 		
@@ -468,13 +470,21 @@ public class DBMetadataExtractor {
 			//    http://www.oracle.com/technetwork/database/enterprise-edition/jdbc-faq-090281.html#08_01
 			
 			if (dataType == Types.TIMESTAMP && typeName.equals("DATE")) 
-				dataType = Types.DATE;
-			return dataType;
+				return Types.DATE;
+			else if (typeName.equals("TIMESTAMP(6) WITH TIME ZONE"))
+				return Types.TIMESTAMP_WITH_TIMEZONE;
+			else
+				return dataType;
 		}};
-	
-	
-	
-	
+
+	private static final DatatypeNormalizer SQLServerTypeFixer = (dataType, typeName) -> {
+        if (typeName.equals("datetimeoffset"))
+            return Types.TIMESTAMP;
+		else
+        	return dataType;
+    };
+
+
 	/**
 	 * Prints column names of a given table.
      *

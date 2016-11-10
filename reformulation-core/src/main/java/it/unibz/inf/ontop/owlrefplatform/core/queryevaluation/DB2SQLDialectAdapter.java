@@ -29,7 +29,7 @@ public class DB2SQLDialectAdapter extends SQL99DialectAdapter {
 	static {
 		SqlDatatypes = new HashMap<Integer, String>();
 		SqlDatatypes.put(Types.INTEGER, "INTEGER");
-		SqlDatatypes.put(Types.DECIMAL, "DECIMAL");
+		SqlDatatypes.put(Types.DECIMAL, "DECFLOAT");
 		SqlDatatypes.put(Types.REAL, "REAL");
 		SqlDatatypes.put(Types.FLOAT, "DOUBLE");
 		SqlDatatypes.put(Types.DOUBLE, "DOUBLE");

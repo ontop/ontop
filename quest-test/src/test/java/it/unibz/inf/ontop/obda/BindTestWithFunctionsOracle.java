@@ -181,10 +181,10 @@ public class BindTestWithFunctionsOracle {
                 + "}";
 
         List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"8.5\"");
-        expectedValues.add("\"5.75\"");
-        expectedValues.add("\"6.7\"");
-        expectedValues.add("\"1.5\"");
+        expectedValues.add("\"8.5\"^^xsd:decimal");
+        expectedValues.add("\"5.75\"^^xsd:decimal");
+        expectedValues.add("\"6.7\"^^xsd:decimal");
+        expectedValues.add("\"1.5\"^^xsd:decimal");
         checkReturnedValues(p, queryBind, expectedValues);
 	}
 
