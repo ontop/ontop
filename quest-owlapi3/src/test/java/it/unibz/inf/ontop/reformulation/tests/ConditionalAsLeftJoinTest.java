@@ -107,7 +107,6 @@ public class ConditionalAsLeftJoinTest {
                 "PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\n" +
                 "PREFIX xml: <http://www.w3.org/XML/1998/namespace>\n" +
                 "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
-                "PREFIX zip: <http://www.semanticweb.org/ontologies/2016/10/untitled-ontology-2#zipCodehttp://www.w3.org/2001/XMLSchema#>\n" +
                 "SELECT ?a \n" +
                 "WHERE {\n" +
                 " :Tartaruga a :VegetarianRestaurant .\n" +

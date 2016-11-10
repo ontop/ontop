@@ -2264,7 +2264,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 			 * Special case of nullary atoms
 			 */
 			else if(atom.getArity() == 0){
-				return sqladapter.getDummyTable();
+				return "(" + sqladapter.getDummyTable() + ") tdummy";
 			}
 
 			/**

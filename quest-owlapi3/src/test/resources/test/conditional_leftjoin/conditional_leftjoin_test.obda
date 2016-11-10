@@ -15,10 +15,6 @@ password	sa
 driverClass	org.h2.Driver
 
 [MappingDeclaration] @collection [[
-mappingId	MAPID-334c5aa6389a46a1a40ce4ca2597ae1e
-target		:{restaurantName} a :VegetarianRestaurant .
-source		SELECT restaurantName from restaurants WHERE restaurantName='Tartaruga';
-
 mappingId	MAPID-e601171745c0418c936b64d4abc06923
 target		:{restaurantName} :hasAddress :{address} . 
 source		SELECT restaurantName, address FROM restaurants;

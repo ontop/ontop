@@ -41,6 +41,25 @@
     <!-- http://www.semanticweb.org/ontologies/2016/10/untitled-ontology-2#VegetarianRestaurant -->
 
     <owl:Class rdf:about="http://www.semanticweb.org/ontologies/2016/10/untitled-ontology-2#VegetarianRestaurant"/>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Individuals
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2016/10/untitled-ontology-2#Tartaruga -->
+
+    <owl:NamedIndividual rdf:about="http://www.semanticweb.org/ontologies/2016/10/untitled-ontology-2#Tartaruga">
+        <rdf:type rdf:resource="http://www.semanticweb.org/ontologies/2016/10/untitled-ontology-2#VegetarianRestaurant"/>
+    </owl:NamedIndividual>
 </rdf:RDF>
 
 
