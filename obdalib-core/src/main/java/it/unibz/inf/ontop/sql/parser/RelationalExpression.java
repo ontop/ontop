@@ -3,9 +3,8 @@ package it.unibz.inf.ontop.sql.parser;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import it.unibz.inf.ontop.model.ExpressionOperation;
-import it.unibz.inf.ontop.model.Function;
-import it.unibz.inf.ontop.model.Variable;
+import it.unibz.inf.ontop.model.*;
+import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.sql.QualifiedAttributeID;
 import it.unibz.inf.ontop.sql.QuotedID;
 import it.unibz.inf.ontop.sql.RelationID;
@@ -13,10 +12,7 @@ import it.unibz.inf.ontop.sql.parser.exceptions.UnsupportedSelectQuery;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.schema.Column;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -27,7 +23,7 @@ public class RelationalExpression {
     private ImmutableList<Function> atoms;
     private ImmutableMap<QualifiedAttributeID, Variable> attributes;
     private ImmutableMap<QuotedID, ImmutableSet<RelationID>> attributeOccurrences;
-
+    private static final OBDADataFactory FACTORY = OBDADataFactoryImpl.getInstance();
     /**
      * constructs a relation expression
      *
@@ -107,11 +103,36 @@ public class RelationalExpression {
      * @return
      */
     public static RelationalExpression naturalJoin(RelationalExpression e1, RelationalExpression e2) {
-        final RelationalExpression ret = RelationalExpression.crossJoin(e1, e2);
+        RelationalExpression current =  RelationalExpression.crossJoin( e1, e2);
 
+        final Set<List<QualifiedAttributeID>> commonAttributes =
+                current.getAttributes().keySet().stream()
+                        .collect(Collectors.groupingBy(g -> g.getAttribute()))
+                        .entrySet().stream().filter(p -> p.getValue().size() > 1 && p.getValue().stream().allMatch( q-> q.getRelation() != null ))
+                        .collect(Collectors.toMap(f -> f.getKey(), f -> f.getValue())).values()
+                        .stream().collect(Collectors.toSet());
 
+        ImmutableList.Builder<Function> builder = ImmutableList.builder();
+        if ( commonAttributes != null ) {
+            final RelationalExpression finalCurrent = current;
+            commonAttributes.stream().forEach( l->  {
+                ImmutableList.Builder<Term> eqTermsBuilder= new ImmutableList.Builder<>();
+                l.forEach(p-> {
+                    final Term variable = finalCurrent.getAttributes().get(p);
+                    if (variable == null)
+                        throw new UnsupportedOperationException(); // todo: find a better exception
+                    else
+                        eqTermsBuilder.add(variable);
+                });
+                builder.add(FACTORY.getFunction(ExpressionOperation.EQ, eqTermsBuilder.build()));
+            });
+        }
+        ImmutableList<Function> atomsToAdd =   builder.build();
+        current = RelationalExpression.addAtoms( current, atomsToAdd );
 
-        return ret;
+        // TODO: add attributeOccurrences   { C  → F1.attr-in(C) | C ∈ S }
+
+        return current;
     }
 
 
@@ -130,6 +151,8 @@ public class RelationalExpression {
 
         return new RelationalExpression(atoms, e1.attributes, e1.attributeOccurrences);
     }
+
+
 
     /**
      * JOIN USING of two relations (also denoted by , in SQL)

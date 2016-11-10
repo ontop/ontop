@@ -37,7 +37,7 @@ import java.util.stream.Collectors;
  */
 public class SelectQueryParser {
     public static final String QUERY_NOT_SUPPORTED = "Query not yet supported";
-    private static final OBDADataFactory FACTORY = OBDADataFactoryImpl.getInstance();
+    // private static final OBDADataFactory FACTORY = OBDADataFactoryImpl.getInstance();
     private static Logger log = LoggerFactory.getLogger(SQLQueryDeepParser.class);
     private final DBMetadata metadata;
     private int relationIndex = 0;
@@ -72,16 +72,13 @@ public class SelectQueryParser {
                     if (join.isCross() || join.isSimple())
                         current = RelationalExpression.crossJoin(current, right);
                     else if  ( join.isNatural() ){
-                        current = RelationalExpression.crossJoin(current, right);
-                        final ImmutableList<Function> common = getNaturalJoinAtoms(current);
-                        current = RelationalExpression.addAtoms(current, common);
+                        current = RelationalExpression.naturalJoin(current, right);
                     }else if( join.isInner() ) {
                         if (join.getOnExpression() != null) {
                             current = RelationalExpression.crossJoin( current, right);
                             Function on =  getAtomsFromExpression(current, join.getOnExpression());
                             current = RelationalExpression.addAtoms(current, ImmutableList.of(on));
                         }else if ( join.getUsingColumns() != null ){
-
                             current = RelationalExpression.joinUsing(current, right, join.getUsingColumns());
                         }
                     }
@@ -121,34 +118,6 @@ public class SelectQueryParser {
         return parsedSql;
     }
 
-
-    private ImmutableList<Function> getNaturalJoinAtoms(RelationalExpression current){
-
-        final Set<List<QualifiedAttributeID>> commonAttributes =
-                current.getAttributes().keySet().stream()
-                        .collect(Collectors.groupingBy(g -> g.getAttribute()))
-                        .entrySet().stream().filter(
-                        p -> p.getValue().size() > 1 && p.getValue().stream().allMatch( q-> q.getRelation() != null ))
-                        .collect(Collectors.toMap(f -> f.getKey(), f -> f.getValue())).values()
-                        .stream().collect(Collectors.toSet());
-
-        ImmutableList.Builder<Function> builder = ImmutableList.<Function>builder();
-        if ( commonAttributes != null ) {
-            commonAttributes.stream().forEach( l->  {
-                ImmutableList.Builder<Term> eqTermsBuilder= new ImmutableList.Builder<>();
-                l.forEach( p-> {
-                    final Term variable = current.getAttributes().get(p);
-                    if (variable == null)
-                        throw new UnsupportedOperationException(); // todo: find a better exception
-                    else
-                        eqTermsBuilder.add(variable);
-
-                });
-                builder.add(FACTORY.getFunction(ExpressionOperation.EQ, eqTermsBuilder.build()));
-            });
-        }
-        return  builder.build();
-    }
 
     private ParserViewDefinition createViewDefinition(String sql) {
 
