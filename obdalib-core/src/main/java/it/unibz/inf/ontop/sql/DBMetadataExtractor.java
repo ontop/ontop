@@ -219,6 +219,8 @@ public class DBMetadataExtractor {
 			dt = OracleTypeFixer;
 		else if (productName.contains("MySQL"))
 			dt = MySQLTypeFixer;
+		else if (productName.contains("Microsoft SQL Server"))
+			dt = SQLServerTypeFixer;
 
 		List<DatabaseRelationDefinition> extractedRelations = new LinkedList<>();
 		
@@ -474,10 +476,15 @@ public class DBMetadataExtractor {
 			else
 				return dataType;
 		}};
-	
-	
-	
-	
+
+	private static final DatatypeNormalizer SQLServerTypeFixer = (dataType, typeName) -> {
+        if (typeName.equals("datetimeoffset"))
+            return Types.TIMESTAMP;
+		else
+        	return dataType;
+    };
+
+
 	/**
 	 * Prints column names of a given table.
      *
