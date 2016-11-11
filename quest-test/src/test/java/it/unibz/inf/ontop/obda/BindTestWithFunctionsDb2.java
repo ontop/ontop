@@ -237,10 +237,10 @@ public class BindTestWithFunctionsDb2 {
                 + "}";
 
         List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"8.5000\"");
-        expectedValues.add("\"5.7500\"");
-        expectedValues.add("\"6.7000\"");
-        expectedValues.add("\"1.5000\"");
+        expectedValues.add("\"8.5000\"^^xsd:decimal");
+        expectedValues.add("\"5.7500\"^^xsd:decimal");
+        expectedValues.add("\"6.7000\"^^xsd:decimal");
+        expectedValues.add("\"1.5000\"^^xsd:decimal");
         checkReturnedValues(p, queryBind, expectedValues);
 	}
 
@@ -810,9 +810,9 @@ public class BindTestWithFunctionsDb2 {
 
         List<String> expectedValues = new ArrayList<>();
         expectedValues.add("\"52.000000\"^^xsd:decimal");
-        expectedValues.add("\".000000\"^^xsd:decimal");
+        expectedValues.add("\"0.000000\"^^xsd:decimal");
         expectedValues.add("\"6.000000\"^^xsd:decimal");
-        expectedValues.add("\".000000\"^^xsd:decimal");
+        expectedValues.add("\"0.000000\"^^xsd:decimal");
         checkReturnedValues(p, queryBind, expectedValues);
     }
 
