@@ -18,6 +18,7 @@ import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.statement.select.SubSelect;
 
 import java.util.List;
+import java.util.function.BinaryOperator;
 
 /**
  * Created by Roman Kontchakov on 10/11/2016.
@@ -63,17 +64,29 @@ public class ExpressionParser {
      */
     private class ExpressionVisitorImpl implements ExpressionVisitor {
 
-        private Term result; // CAREFUL: this variable changes all the time
+        private Term result; // CAREFUL: this variable gets reset in each visit method implementation
 
-        /**
-         * Visits the expression and gets the result
-         */
+        // TODO: use this method instead of the one below
+        // see example in Addition
+        private void visitBinaryExpression(BinaryExpression expression, BinaryOperator<Term> op) {
+            Expression left = expression.getLeftExpression();
+            left.accept(this);
+            Term leftTerm = result;
+
+            Expression right = expression.getRightExpression();
+            right.accept(this);
+            Term rightTerm = result;
+
+            result = op.apply(leftTerm, rightTerm);
+        }
+
+        // TODO: to be eliminated
         private Term visitEx(Expression expression) {
             expression.accept(this);
             return this.result;
         }
 
-        // TODO: get rid of this method - careful expansion in respective places
+        // TODO: get rid of this method - see above
         private void visitBinaryExpression(BinaryExpression expression){
             Expression left = expression.getLeftExpression();
             Expression right = expression.getRightExpression();
@@ -258,32 +271,32 @@ public class ExpressionParser {
 
         @Override
         public void visit(DoubleValue expression) {
-            String termRightName = expression.toString();
-            result = FACTORY.getConstantLiteral(termRightName, Predicate.COL_TYPE.DOUBLE);
+            result = FACTORY.getConstantLiteral(expression.toString(), Predicate.COL_TYPE.DOUBLE);
         }
 
         @Override
         public void visit(LongValue expression) {
-            String termRightName = expression.getStringValue();
-            result = FACTORY.getConstantLiteral(termRightName, Predicate.COL_TYPE.LONG);
+            result = FACTORY.getConstantLiteral(expression.getStringValue(), Predicate.COL_TYPE.LONG);
+        }
+
+        @Override
+        public void visit(StringValue expression) {
+            result = FACTORY.getConstantLiteral(expression.getValue(), Predicate.COL_TYPE.STRING);
         }
 
         @Override
         public void visit(DateValue expression) {
-            String termRightName = expression.getValue().toString();
-            result = FACTORY.getConstantLiteral(termRightName, Predicate.COL_TYPE.DATE);
+            result = FACTORY.getConstantLiteral(expression.getValue().toString(), Predicate.COL_TYPE.DATE);
         }
 
         @Override
         public void visit(TimeValue expression) {
-            String termRightName = expression.getValue().toString();
-            result = FACTORY.getConstantLiteral(termRightName, Predicate.COL_TYPE.TIME);
+            result = FACTORY.getConstantLiteral(expression.getValue().toString(), Predicate.COL_TYPE.TIME);
         }
 
         @Override
         public void visit(TimestampValue expression) {
-            String termRightName = expression.getValue().toString();
-            result = FACTORY.getConstantLiteral(termRightName, Predicate.COL_TYPE.DATETIME);
+            result = FACTORY.getConstantLiteral(expression.getValue().toString(), Predicate.COL_TYPE.DATETIME);
         }
 
         @Override
@@ -298,14 +311,9 @@ public class ExpressionParser {
         }
 
         @Override
-        public void visit(StringValue expression) {
-            String termRightName = expression.getValue();
-            result = FACTORY.getConstantLiteral(termRightName, Predicate.COL_TYPE.STRING);
-        }
-
-        @Override
         public void visit(Addition addition) {
-            visitBinaryExpression(addition);
+            visitBinaryExpression(addition,
+                    (t1, t2) -> FACTORY.getFunction(ExpressionOperation.ADD, t1, t2));
         }
 
         @Override
@@ -484,11 +492,13 @@ public class ExpressionParser {
         }
 
         @Override
+        // TODO: this should be supported
         public void visit(CaseExpression caseExpression) {
             throw new UnsupportedOperationException();
         }
 
         @Override
+        // TODO: this should be supported
         public void visit(WhenClause whenClause) {
             throw new UnsupportedOperationException();
         }
@@ -509,6 +519,7 @@ public class ExpressionParser {
         }
 
         @Override
+        // TODO: use new visitBinaryExpression
         public void visit(Concat concat) {
             Expression left = concat.getLeftExpression();
             Expression right = concat.getRightExpression();

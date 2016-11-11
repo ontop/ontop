@@ -8,6 +8,7 @@ import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.sql.QualifiedAttributeID;
 import it.unibz.inf.ontop.sql.QuotedID;
 import it.unibz.inf.ontop.sql.RelationID;
+import it.unibz.inf.ontop.sql.parser.exceptions.InvalidSelectQuery;
 import it.unibz.inf.ontop.sql.parser.exceptions.UnsupportedSelectQuery;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.schema.Column;
@@ -55,7 +56,7 @@ public class RelationalExpression {
         return atoms;
     }
 
-    public ImmutableMap<QualifiedAttributeID, Variable>  getAttributes(){
+    public ImmutableMap<QualifiedAttributeID, Variable> getAttributes() {
         return attributes;
     }
 
@@ -103,8 +104,11 @@ public class RelationalExpression {
      * @return
      */
     public static RelationalExpression naturalJoin(RelationalExpression e1, RelationalExpression e2) {
+
+        // TODO: NATURAL JOIN is NOT a particular case of CROSS JOIN
         RelationalExpression current =  RelationalExpression.crossJoin( e1, e2);
 
+        // TODO: use .attributes instead of .getAttrbutes()
         final Set<List<QualifiedAttributeID>> commonAttributes =
                 current.getAttributes().keySet().stream()
                         .collect(Collectors.groupingBy(g -> g.getAttribute()))
@@ -120,7 +124,8 @@ public class RelationalExpression {
                 l.forEach(p-> {
                     final Term variable = finalCurrent.getAttributes().get(p);
                     if (variable == null)
-                        throw new UnsupportedOperationException(); // todo: find a better exception
+                        // TODO: fix arguments
+                        throw new InvalidSelectQuery("write an explanation", null);
                     else
                         eqTermsBuilder.add(variable);
                 });
@@ -143,6 +148,7 @@ public class RelationalExpression {
      * @param atomsToAdd {@link ImmutableList} of {@link Function}
      * @return a {@link RelationalExpression}
      */
+    // TODO: i'm not sure this method is helpful (to be removed)
     public static RelationalExpression addAtoms(RelationalExpression e1, ImmutableList<Function> atomsToAdd) {
 
         // and add an atom for the expression
