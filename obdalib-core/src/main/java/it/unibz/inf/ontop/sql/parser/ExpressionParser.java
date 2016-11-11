@@ -23,6 +23,7 @@ import java.util.function.BinaryOperator;
 /**
  * Created by Roman Kontchakov on 10/11/2016.
  */
+
 public class ExpressionParser {
 
     private final QuotedIDFactory idfac;
@@ -251,23 +252,9 @@ public class ExpressionParser {
             }
         }
 
-        // TODO: not sure should not be supported
-        @Override
-        public void visit(SignedExpression signedExpression) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public void visit(JdbcParameter jdbcParameter) {
-            // TODO:  exception
-            // do nothing
-        }
-
-        @Override
-        public void visit(JdbcNamedParameter jdbcNamedParameter) {
-            // TODO:  exception
-            // do nothing
-        }
+        /*
+                CONSTANT EXPRESSIONS
+         */
 
         @Override
         public void visit(DoubleValue expression) {
@@ -299,16 +286,9 @@ public class ExpressionParser {
             result = FACTORY.getConstantLiteral(expression.getValue().toString(), Predicate.COL_TYPE.DATETIME);
         }
 
-        @Override
-        public void visit(Parenthesis expression) {
-            Expression inside = expression.getExpression();
-
-            //Consider the case of NOT(...)
-            if (expression.isNot())
-                result = FACTORY.getFunctionNOT(visitEx(inside));
-            else
-                result = visitEx(inside);
-        }
+        /*
+            BINARY OPERATIONS
+        */
 
         @Override
         public void visit(Addition addition) {
@@ -317,8 +297,8 @@ public class ExpressionParser {
         }
 
         @Override
-        public void visit(Division division) {
-            visitBinaryExpression(division);
+        public void visit(Subtraction subtraction) {
+            visitBinaryExpression(subtraction);
         }
 
         @Override
@@ -327,9 +307,76 @@ public class ExpressionParser {
         }
 
         @Override
-        public void visit(Subtraction subtraction) {
-            visitBinaryExpression(subtraction);
+        public void visit(Division division) {
+            visitBinaryExpression(division);
         }
+
+        @Override
+        public void visit(Modulo modulo) {
+            throw new UnsupportedOperationException();
+        }
+
+
+        @Override
+        // TODO: use new visitBinaryExpression
+        public void visit(Concat concat) {
+            Expression left = concat.getLeftExpression();
+            Expression right = concat.getRightExpression();
+            Term l = visitEx(left);
+            Term r = visitEx(right);
+            result = FACTORY.getFunction(ExpressionOperation.CONCAT, l, r);
+        }
+
+
+
+        @Override
+        public void visit(EqualsTo expression) {
+            visitBinaryExpression(expression);
+        }
+
+        @Override
+        public void visit(GreaterThan expression) {
+            visitBinaryExpression(expression);
+        }
+
+        @Override
+        public void visit(GreaterThanEquals expression) {
+            visitBinaryExpression(expression);
+        }
+
+        @Override
+        public void visit(MinorThan minorThan) {
+            visitBinaryExpression(minorThan);
+        }
+
+        @Override
+        public void visit(MinorThanEquals minorThanEquals) {
+            visitBinaryExpression(minorThanEquals);
+        }
+
+        @Override
+        public void visit(NotEqualsTo notEqualsTo) {
+            visitBinaryExpression(notEqualsTo);
+        }
+
+
+
+        @Override
+        public void visit(RegExpMySQLOperator regExpMySQLOperator) {
+            visitBinaryExpression(regExpMySQLOperator);
+        }
+
+        @Override
+        public void visit(LikeExpression likeExpression) {
+            visitBinaryExpression(likeExpression);
+        }
+
+        @Override
+        public void visit(RegExpMatchOperator expression) {
+            visitBinaryExpression(expression);
+        }
+
+
 
         @Override
         public void visit(AndExpression andExpression) {
@@ -340,6 +387,8 @@ public class ExpressionParser {
         public void visit(OrExpression orExpression) {
             visitBinaryExpression(orExpression);
         }
+
+
 
         @Override
         public void visit(Between expression) {
@@ -360,20 +409,6 @@ public class ExpressionParser {
             result = visitEx(e);
         }
 
-        @Override
-        public void visit(EqualsTo expression) {
-            visitBinaryExpression(expression);
-        }
-
-        @Override
-        public void visit(GreaterThan expression) {
-            visitBinaryExpression(expression);
-        }
-
-        @Override
-        public void visit(GreaterThanEquals expression) {
-            visitBinaryExpression(expression);
-        }
 
         @Override
         public void visit(InExpression expression) {
@@ -406,8 +441,13 @@ public class ExpressionParser {
             }
         }
 
+        /*
+                UNARY OPERATIONS
+         */
+
         @Override
         public void visit(IsNullExpression expression) {
+            // TODO: why not process as the usual subexpression?
             Column column = (Column)expression.getLeftExpression();
             Term var = getVariable(column);
             // TODO: not runtime exception
@@ -424,24 +464,23 @@ public class ExpressionParser {
         }
 
         @Override
-        public void visit(LikeExpression likeExpression) {
-            visitBinaryExpression(likeExpression);
+        public void visit(Parenthesis expression) {
+            Expression inside = expression.getExpression();
+
+            //Consider the case of NOT(...)
+            if (expression.isNot())
+                result = FACTORY.getFunctionNOT(visitEx(inside));
+            else
+                result = visitEx(inside);
         }
 
+        // TODO: not sure should not be supported
         @Override
-        public void visit(MinorThan minorThan) {
-            visitBinaryExpression(minorThan);
+        public void visit(SignedExpression signedExpression) {
+            throw new UnsupportedOperationException();
         }
 
-        @Override
-        public void visit(MinorThanEquals minorThanEquals) {
-            visitBinaryExpression(minorThanEquals);
-        }
 
-        @Override
-        public void visit(NotEqualsTo notEqualsTo) {
-            visitBinaryExpression(notEqualsTo);
-        }
 
         @Override
         public void visit(Column expression) {
@@ -487,11 +526,6 @@ public class ExpressionParser {
         }
 
         @Override
-        public void visit(SubSelect subSelect) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
         // TODO: this should be supported
         public void visit(CaseExpression caseExpression) {
             throw new UnsupportedOperationException();
@@ -503,50 +537,6 @@ public class ExpressionParser {
             throw new UnsupportedOperationException();
         }
 
-        @Override
-        public void visit(ExistsExpression existsExpression) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public void visit(AllComparisonExpression allComparisonExpression) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public void visit(AnyComparisonExpression anyComparisonExpression) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        // TODO: use new visitBinaryExpression
-        public void visit(Concat concat) {
-            Expression left = concat.getLeftExpression();
-            Expression right = concat.getRightExpression();
-            Term l = visitEx(left);
-            Term r = visitEx(right);
-            result = FACTORY.getFunction(ExpressionOperation.CONCAT, l, r);
-        }
-
-        @Override
-        public void visit(Matches matches) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public void visit(BitwiseAnd bitwiseAnd) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public void visit(BitwiseOr bitwiseOr) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public void visit(BitwiseXor bitwiseXor) {
-            throw new UnsupportedOperationException();
-        }
 
         @Override
         public void visit(CastExpression expression) {
@@ -572,8 +562,41 @@ public class ExpressionParser {
 
         }
 
+
+
         @Override
-        public void visit(Modulo modulo) {
+        public void visit(SubSelect subSelect) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public void visit(ExistsExpression existsExpression) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public void visit(AllComparisonExpression allComparisonExpression) { throw new UnsupportedOperationException(); }
+
+        @Override
+        public void visit(AnyComparisonExpression anyComparisonExpression) { throw new UnsupportedOperationException(); }
+
+        @Override
+        public void visit(Matches matches) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public void visit(BitwiseAnd bitwiseAnd) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public void visit(BitwiseOr bitwiseOr) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public void visit(BitwiseXor bitwiseXor) {
             throw new UnsupportedOperationException();
         }
 
@@ -598,19 +621,22 @@ public class ExpressionParser {
         }
 
         @Override
-        public void visit(RegExpMatchOperator expression) {
-            visitBinaryExpression(expression);
-        }
-
-        @Override
         public void visit(JsonExpression jsonExpr) {
             throw new UnsupportedOperationException();
         }
 
         @Override
-        public void visit(RegExpMySQLOperator regExpMySQLOperator) {
-            visitBinaryExpression(regExpMySQLOperator);
+        public void visit(JdbcParameter jdbcParameter) {
+            // TODO:  exception
+            // do nothing
         }
+
+        @Override
+        public void visit(JdbcNamedParameter jdbcNamedParameter) {
+            // TODO:  exception
+            // do nothing
+        }
+
     }
 
 }
