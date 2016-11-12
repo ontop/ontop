@@ -109,34 +109,33 @@ public class RelationalExpression {
      */
     public static RelationalExpression naturalJoin(RelationalExpression e1, RelationalExpression e2) {
 
-        // All the common columns
-        ImmutableMap<QualifiedAttributeID, Variable> commonAttributes = ImmutableMap.<QualifiedAttributeID, Variable>builder()
-                .putAll(e1.attributes.keySet().stream()
-                        .filter(id -> (id.getRelation() != null) && ! e2.isAbsent(id.getAttribute()))
-                        .collect(Collectors.toMap(id -> id, id -> e1.attributes.get(id))))
-                .putAll(e2.attributes.keySet().stream()
-                    .filter(id -> (id.getRelation() != null) && ! e1.isAbsent(id.getAttribute()))
-                    .collect(Collectors.toMap(id -> id, id -> e2.attributes.get(id)))).build();
+        ImmutableSet<QualifiedAttributeID> sharedAttributes = ImmutableSet.<QualifiedAttributeID>builder()
+                .addAll(e1.attributes.keySet().stream()
+                                .filter(id -> (id.getRelation() == null) && !(e2.isAbsent(id.getAttribute())))
+                                .collect(Collectors.toSet()))
+               .build();
 
-        // Every column in the first (left) table that is not a common column
-        // Every column in the second (right) table that is not a common column
-        ImmutableMap<QualifiedAttributeID, Variable> leftAndRightAttributes = ImmutableMap.<QualifiedAttributeID, Variable>builder()
-                .putAll(e1.attributes.keySet().stream()
-                        .filter(id -> !commonAttributes.containsKey(id) && (id.getRelation() != null) || e2.isAbsent(id.getAttribute()))
-                        .collect(Collectors.toMap(id -> id, id -> e1.attributes.get(id))))
-                .putAll(e2.attributes.keySet().stream()
-                        .filter(id -> !commonAttributes.containsKey(id) && (id.getRelation() != null) || e1.isAbsent(id.getAttribute()))
-                        .collect(Collectors.toMap(id -> id, id -> e2.attributes.get(id))))
-                .build();
+        ImmutableSet<QuotedID> sharedAttributesValue = ImmutableSet.<QuotedID>builder().addAll(
+                sharedAttributes.stream().map(p -> p.getAttribute()).collect(Collectors.toSet())).build();
 
         ImmutableMap<QualifiedAttributeID, Variable> attributes = ImmutableMap.<QualifiedAttributeID, Variable>builder()
-            .putAll(commonAttributes).putAll( leftAndRightAttributes ).build();
-
-        final ImmutableList<Term> eqTerms = ImmutableList.copyOf( commonAttributes.values());
-        ImmutableList<Function> atoms = ImmutableList.<Function>builder()
-                .addAll(e1.atoms).addAll(e2.atoms)
-                .add(FACTORY.getFunction(ExpressionOperation.EQ, eqTerms))
+                .putAll(e1.attributes.keySet().stream()
+                        .filter(id -> !sharedAttributesValue.contains( id.getAttribute()) || e2.isAbsent(id.getAttribute() ))
+                        .collect(Collectors.toMap(id -> id, id -> e1.attributes.get(id) )))
+                .putAll(e2.attributes.keySet().stream()
+                        .filter(id -> ! sharedAttributesValue.contains( id.getAttribute()) || e1.isAbsent(id.getAttribute() ) )
+                        .collect(Collectors.toMap(id -> id, id -> e2.attributes.get(id)) ))
+                .putAll(e1.attributes.keySet().stream()
+                        .filter( sharedAttributes::contains  )
+                        .collect(Collectors.toMap(id -> id, id -> e1.attributes.get(id))))
                 .build();
+
+        ImmutableList.Builder<Function> atomsBuilder =  new ImmutableList.Builder<>();
+        atomsBuilder.addAll(e1.atoms).addAll(e2.atoms);
+
+        sharedAttributes.forEach( id ->
+            atomsBuilder.add(FACTORY.getFunction(ExpressionOperation.EQ, ImmutableList.of ( e1.attributes.get(id),  e2.attributes.get(id) ))));
+
 
         // TODO: add attributeOccurrences   { C  → F1.attr-in(C) | C ∈ S }
         ImmutableSet<QuotedID> keys = ImmutableSet.<QuotedID>builder()
@@ -150,7 +149,7 @@ public class RelationalExpression {
                                 e1.attributeOccurrences.get(id),
                                 e2.attributeOccurrences.get(id)))));
 
-        return new RelationalExpression(atoms, attributes, attributeOccurrences);
+        return new RelationalExpression(atomsBuilder.build(), attributes, attributeOccurrences);
 
     }
 
