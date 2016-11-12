@@ -22,6 +22,7 @@ import java.util.function.BinaryOperator;
 
 /**
  * Created by Roman Kontchakov on 10/11/2016.
+ *
  */
 
 public class ExpressionParser {

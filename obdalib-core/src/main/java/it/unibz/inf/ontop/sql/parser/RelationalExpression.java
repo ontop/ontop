@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.*;
+import it.unibz.inf.ontop.model.Function;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.sql.Attribute;
 import it.unibz.inf.ontop.sql.QualifiedAttributeID;
@@ -15,6 +16,7 @@ import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.schema.Column;
 
 import java.util.*;
+import java.util.function.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -117,20 +119,18 @@ public class RelationalExpression {
                     .collect(Collectors.toMap(id -> id, id -> e2.attributes.get(id)))).build();
 
         // Every column in the first (left) table that is not a common column
-        ImmutableMap<QualifiedAttributeID, Variable> leftAttributes = ImmutableMap.<QualifiedAttributeID, Variable>builder()
+        // Every column in the second (right) table that is not a common column
+        ImmutableMap<QualifiedAttributeID, Variable> leftAndRightAttributes = ImmutableMap.<QualifiedAttributeID, Variable>builder()
                 .putAll(e1.attributes.keySet().stream()
                         .filter(id -> !commonAttributes.containsKey(id) && (id.getRelation() != null) || e2.isAbsent(id.getAttribute()))
-                        .collect(Collectors.toMap(id -> id, id -> e1.attributes.get(id)))).build();
-
-        // Every column in the second (right) table that is not a common column
-        ImmutableMap<QualifiedAttributeID, Variable> rightAttributes = ImmutableMap.<QualifiedAttributeID, Variable>builder()
+                        .collect(Collectors.toMap(id -> id, id -> e1.attributes.get(id))))
                 .putAll(e2.attributes.keySet().stream()
                         .filter(id -> !commonAttributes.containsKey(id) && (id.getRelation() != null) || e1.isAbsent(id.getAttribute()))
                         .collect(Collectors.toMap(id -> id, id -> e2.attributes.get(id))))
                 .build();
 
         ImmutableMap<QualifiedAttributeID, Variable> attributes = ImmutableMap.<QualifiedAttributeID, Variable>builder()
-            .putAll(commonAttributes).putAll( leftAttributes ).putAll(rightAttributes).build();
+            .putAll(commonAttributes).putAll( leftAndRightAttributes ).build();
 
         final ImmutableList<Term> eqTerms = ImmutableList.copyOf( commonAttributes.values());
         ImmutableList<Function> atoms = ImmutableList.<Function>builder()
@@ -163,7 +163,7 @@ public class RelationalExpression {
      * @return a {@link RelationalExpression}
      */
     // TODO: i'm not sure this method is helpful (to be removed)
-    public static RelationalExpression addAtoms(RelationalExpression e1, ImmutableList<Function> atomsToAdd) {
+    public static RelationalExpression addAtoms(RelationalExpression e1,  ImmutableList<Function> atomsToAdd) {
 
         // and add an atom for the expression
         ImmutableList<Function> atoms = ImmutableList.<Function>builder()
@@ -172,6 +172,23 @@ public class RelationalExpression {
         return new RelationalExpression(atoms, e1.attributes, e1.attributeOccurrences);
     }
 
+    /**
+     *
+     * @param e1 is a {@link RelationalExpression)
+     * @param e2 is a {@link RelationalExpression)
+     * @param getAtomFromOnExpression is a function that given a {@link RelationalExpression} returns an atom form an ON {@link Expression}
+     * @return a {@link RelationalExpression}
+     */
+    public static RelationalExpression joinOn(RelationalExpression e1, RelationalExpression e2, java.util.function.Function<RelationalExpression, Function> getAtomOnExpression) {
+
+        RelationalExpression current = RelationalExpression.crossJoin(e1,e2);
+        final Function atomOn = getAtomOnExpression.apply(current);
+        // and add an atom for the ON expression
+        ImmutableList<Function> atoms = ImmutableList.<Function>builder()
+                .addAll(current.getAtoms()).add(atomOn).build();
+
+        return new RelationalExpression(atoms, e1.attributes, e1.attributeOccurrences);
+    }
 
 
     /**

@@ -75,9 +75,7 @@ public class SelectQueryParser {
                         current = RelationalExpression.naturalJoin(current, right);
                     }else if( join.isInner() ) {
                         if (join.getOnExpression() != null) {
-                            current = RelationalExpression.crossJoin( current, right);
-                            Function on =  getAtomsFromExpression(current, join.getOnExpression());
-                            current = RelationalExpression.addAtoms(current, ImmutableList.of(on));
+                            current = RelationalExpression.joinOn( current, right, expression -> getAtomsFromExpression(expression, join.getOnExpression()));
                         }else if ( join.getUsingColumns() != null ){
                             current = RelationalExpression.joinUsing(current, right, join.getUsingColumns());
                         }
