@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
+import it.unibz.inf.ontop.sql.Attribute;
 import it.unibz.inf.ontop.sql.QualifiedAttributeID;
 import it.unibz.inf.ontop.sql.QuotedID;
 import it.unibz.inf.ontop.sql.RelationID;
@@ -131,15 +132,11 @@ public class RelationalExpression {
         ImmutableMap<QualifiedAttributeID, Variable> attributes = ImmutableMap.<QualifiedAttributeID, Variable>builder()
             .putAll(commonAttributes).putAll( leftAttributes ).putAll(rightAttributes).build();
 
-        final ImmutableList.Builder<Term> eqTermsBuilder= new ImmutableList.Builder<>();
-        commonAttributes.values().forEach(eqTermsBuilder::add);
-
+        final ImmutableList<Term> eqTerms = ImmutableList.copyOf( commonAttributes.values());
         ImmutableList<Function> atoms = ImmutableList.<Function>builder()
                 .addAll(e1.atoms).addAll(e2.atoms)
-                .add(FACTORY.getFunction(ExpressionOperation.EQ, eqTermsBuilder.build()))
+                .add(FACTORY.getFunction(ExpressionOperation.EQ, eqTerms))
                 .build();
-
-
 
         // TODO: add attributeOccurrences   { C  → F1.attr-in(C) | C ∈ S }
         ImmutableSet<QuotedID> keys = ImmutableSet.<QuotedID>builder()
