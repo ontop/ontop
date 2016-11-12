@@ -19,6 +19,7 @@ import java.util.stream.Stream;
 
 /**
  * Created by Roman Kontchakov on 01/11/2016.
+ *
  */
 public class RelationalExpression {
     private ImmutableList<Function> atoms;
@@ -105,39 +106,55 @@ public class RelationalExpression {
      */
     public static RelationalExpression naturalJoin(RelationalExpression e1, RelationalExpression e2) {
 
-        // TODO: NATURAL JOIN is NOT a particular case of CROSS JOIN
-        RelationalExpression current =  RelationalExpression.crossJoin( e1, e2);
+        // All the common columns
+        ImmutableMap<QualifiedAttributeID, Variable> commonAttributes = ImmutableMap.<QualifiedAttributeID, Variable>builder()
+                .putAll(e1.attributes.keySet().stream()
+                        .filter(id -> (id.getRelation() != null) && ! e2.isAbsent(id.getAttribute()))
+                        .collect(Collectors.toMap(id -> id, id -> e1.attributes.get(id))))
+                .putAll(e2.attributes.keySet().stream()
+                    .filter(id -> (id.getRelation() != null) && ! e1.isAbsent(id.getAttribute()))
+                    .collect(Collectors.toMap(id -> id, id -> e2.attributes.get(id)))).build();
 
-        // TODO: use .attributes instead of .getAttrbutes()
-        final Set<List<QualifiedAttributeID>> commonAttributes =
-                current.getAttributes().keySet().stream()
-                        .collect(Collectors.groupingBy(g -> g.getAttribute()))
-                        .entrySet().stream().filter(p -> p.getValue().size() > 1 && p.getValue().stream().allMatch( q-> q.getRelation() != null ))
-                        .collect(Collectors.toMap(f -> f.getKey(), f -> f.getValue())).values()
-                        .stream().collect(Collectors.toSet());
+        // Every column in the first (left) table that is not a common column
+        ImmutableMap<QualifiedAttributeID, Variable> leftAttributes = ImmutableMap.<QualifiedAttributeID, Variable>builder()
+                .putAll(e1.attributes.keySet().stream()
+                        .filter(id -> !commonAttributes.containsKey(id) && (id.getRelation() != null) || e2.isAbsent(id.getAttribute()))
+                        .collect(Collectors.toMap(id -> id, id -> e1.attributes.get(id)))).build();
 
-        ImmutableList.Builder<Function> builder = ImmutableList.builder();
-        if ( commonAttributes != null ) {
-            final RelationalExpression finalCurrent = current;
-            commonAttributes.stream().forEach( l->  {
-                ImmutableList.Builder<Term> eqTermsBuilder= new ImmutableList.Builder<>();
-                l.forEach(p-> {
-                    final Term variable = finalCurrent.getAttributes().get(p);
-                    if (variable == null)
-                        // TODO: fix arguments
-                        throw new InvalidSelectQuery("write an explanation", null);
-                    else
-                        eqTermsBuilder.add(variable);
-                });
-                builder.add(FACTORY.getFunction(ExpressionOperation.EQ, eqTermsBuilder.build()));
-            });
-        }
-        ImmutableList<Function> atomsToAdd =   builder.build();
-        current = RelationalExpression.addAtoms( current, atomsToAdd );
+        // Every column in the second (right) table that is not a common column
+        ImmutableMap<QualifiedAttributeID, Variable> rightAttributes = ImmutableMap.<QualifiedAttributeID, Variable>builder()
+                .putAll(e2.attributes.keySet().stream()
+                        .filter(id -> !commonAttributes.containsKey(id) && (id.getRelation() != null) || e1.isAbsent(id.getAttribute()))
+                        .collect(Collectors.toMap(id -> id, id -> e2.attributes.get(id))))
+                .build();
+
+        ImmutableMap<QualifiedAttributeID, Variable> attributes = ImmutableMap.<QualifiedAttributeID, Variable>builder()
+            .putAll(commonAttributes).putAll( leftAttributes ).putAll(rightAttributes).build();
+
+        final ImmutableList.Builder<Term> eqTermsBuilder= new ImmutableList.Builder<>();
+        commonAttributes.values().forEach(eqTermsBuilder::add);
+
+        ImmutableList<Function> atoms = ImmutableList.<Function>builder()
+                .addAll(e1.atoms).addAll(e2.atoms)
+                .add(FACTORY.getFunction(ExpressionOperation.EQ, eqTermsBuilder.build()))
+                .build();
+
+
 
         // TODO: add attributeOccurrences   { C  → F1.attr-in(C) | C ∈ S }
+        ImmutableSet<QuotedID> keys = ImmutableSet.<QuotedID>builder()
+                .addAll(e1.attributeOccurrences.keySet())
+                .addAll(e2.attributeOccurrences.keySet())
+                .build();
 
-        return current;
+        ImmutableMap<QuotedID, ImmutableSet<RelationID>> attributeOccurrences = ImmutableMap.copyOf(
+                keys.stream().collect(Collectors.toMap(id -> id,
+                        id -> relationSetUnion(
+                                e1.attributeOccurrences.get(id),
+                                e2.attributeOccurrences.get(id)))));
+
+        return new RelationalExpression(atoms, attributes, attributeOccurrences);
+
     }
 
 
