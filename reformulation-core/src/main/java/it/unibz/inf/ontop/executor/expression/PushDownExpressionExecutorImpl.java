@@ -1,7 +1,6 @@
 package it.unibz.inf.ontop.executor.expression;
 
 import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.executor.SimpleNodeCentricInternalExecutor;
 import it.unibz.inf.ontop.model.ImmutableExpression;
 import it.unibz.inf.ontop.model.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.pivotalrepr.*;
@@ -32,7 +31,7 @@ public class PushDownExpressionExecutorImpl implements PushDownExpressionExecuto
             throws InvalidQueryOptimizationProposalException {
         JoinOrFilterNode focusNode = proposal.getFocusNode();
 
-        for (Map.Entry<JoinOrFilterNode, Collection<ImmutableExpression>> targetEntry : proposal.getDirectRecipients().asMap().entrySet()) {
+        for (Map.Entry<CommutativeJoinOrFilterNode, Collection<ImmutableExpression>> targetEntry : proposal.getNewDirectRecipients().asMap().entrySet()) {
             updateJoinOrFilterNode(treeComponent, targetEntry.getKey(), targetEntry.getValue());
         }
 

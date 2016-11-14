@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.pivotalrepr.proposal.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMultimap;
 import it.unibz.inf.ontop.model.ImmutableExpression;
+import it.unibz.inf.ontop.pivotalrepr.CommutativeJoinOrFilterNode;
 import it.unibz.inf.ontop.pivotalrepr.JoinOrFilterNode;
 import it.unibz.inf.ontop.pivotalrepr.proposal.PushDownBooleanExpressionProposal;
 import it.unibz.inf.ontop.pivotalrepr.QueryNode;
@@ -10,12 +11,12 @@ import it.unibz.inf.ontop.pivotalrepr.QueryNode;
 
 public class PushDownBooleanExpressionProposalImpl implements PushDownBooleanExpressionProposal {
     private final JoinOrFilterNode focusNode;
-    private final ImmutableMultimap<JoinOrFilterNode, ImmutableExpression> directRecipients;
+    private final ImmutableMultimap<CommutativeJoinOrFilterNode, ImmutableExpression> directRecipients;
     private final ImmutableMultimap<QueryNode, ImmutableExpression> childOfFilterNodesToCreate;
     private final ImmutableList<ImmutableExpression> expressionsToKeep;
 
     public PushDownBooleanExpressionProposalImpl(
-            JoinOrFilterNode focusNode, ImmutableMultimap<JoinOrFilterNode, ImmutableExpression> directRecipients,
+            JoinOrFilterNode focusNode, ImmutableMultimap<CommutativeJoinOrFilterNode, ImmutableExpression> directRecipients,
             ImmutableMultimap<QueryNode, ImmutableExpression> childOfFilterNodesToCreate,
             ImmutableList<ImmutableExpression> expressionsToKeep) {
 
@@ -26,7 +27,7 @@ public class PushDownBooleanExpressionProposalImpl implements PushDownBooleanExp
     }
 
     @Override
-    public ImmutableMultimap<JoinOrFilterNode, ImmutableExpression> getDirectRecipients() {
+    public ImmutableMultimap<CommutativeJoinOrFilterNode, ImmutableExpression> getNewDirectRecipients() {
         return directRecipients;
     }
 

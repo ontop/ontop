@@ -201,13 +201,15 @@ public class PushDownBooleanExpressionOptimizerTest {
         DistinctVariableOnlyDataAtom projectionAtom2 = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE1, X, Y, Z, W);
         ConstructionNode constructionNode2 = new ConstructionNodeImpl(projectionAtom1.getVariables());
         FilterNode filterNode1 = new FilterNodeImpl(ImmutabilityTools.foldBooleanExpressions(EXPRESSION4, EXPRESSION5).get());
+        FilterNode filterNode2 = new FilterNodeImpl(ImmutabilityTools.foldBooleanExpressions(EXPRESSION4, EXPRESSION5).get());
         LeftJoinNode leftJoinNode1 = new LeftJoinNodeImpl(Optional.empty());
 
         queryBuilder2.init(projectionAtom2, constructionNode2);
         queryBuilder2.addChild(constructionNode2, filterNode1);
         queryBuilder2.addChild(filterNode1, leftJoinNode1);
         queryBuilder2.addChild(leftJoinNode1, dataNode1, NonCommutativeOperatorNode.ArgumentPosition.LEFT);
-        queryBuilder2.addChild(leftJoinNode1, dataNode2, NonCommutativeOperatorNode.ArgumentPosition.RIGHT);
+        queryBuilder2.addChild(leftJoinNode1, filterNode2, NonCommutativeOperatorNode.ArgumentPosition.RIGHT);
+        queryBuilder2.addChild(filterNode2, dataNode2);
 
         IntermediateQuery query2 = queryBuilder2.build();
 
@@ -307,6 +309,7 @@ public class PushDownBooleanExpressionOptimizerTest {
         DistinctVariableOnlyDataAtom projectionAtom2 = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE1, X, Y, Z, W);
         ConstructionNode constructionNode2 = new ConstructionNodeImpl(projectionAtom1.getVariables());
         InnerJoinNode joinNode2 = new InnerJoinNodeImpl(Optional.of(EXPRESSION6));
+        FilterNode filterNode1 = new FilterNodeImpl(EXPRESSION6);
         LeftJoinNode leftJoinNode2 = new LeftJoinNodeImpl(Optional.empty());
 
         queryBuilder2.init(projectionAtom2, constructionNode2);
@@ -314,7 +317,8 @@ public class PushDownBooleanExpressionOptimizerTest {
         queryBuilder2.addChild(joinNode2, dataNode1);
         queryBuilder2.addChild(joinNode2, leftJoinNode2);
         queryBuilder2.addChild(leftJoinNode2, dataNode2, NonCommutativeOperatorNode.ArgumentPosition.LEFT);
-        queryBuilder2.addChild(leftJoinNode2, dataNode3, NonCommutativeOperatorNode.ArgumentPosition.RIGHT);
+        queryBuilder2.addChild(leftJoinNode2, filterNode1, NonCommutativeOperatorNode.ArgumentPosition.RIGHT);
+        queryBuilder2.addChild(filterNode1, dataNode3);
 
         IntermediateQuery query2 = queryBuilder2.build();
 
