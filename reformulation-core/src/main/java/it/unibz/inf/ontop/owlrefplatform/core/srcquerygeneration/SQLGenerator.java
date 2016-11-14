@@ -247,7 +247,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 			final String outerViewName = "SUB_QVIEW";
 			String subquery = generateQuery(signature, ruleIndex, predicatesInBottomUp, extensionalPredicates);
 
-			String modifier = "";
+			String modifier;
 
 			List<OrderCondition> conditions = queryProgram.getQueryModifiers().getSortConditions();
 
@@ -259,15 +259,18 @@ public class SQLGenerator implements SQLQueryGenerator {
 			// List<OrderCondition> conditions =
 			// query.getQueryModifiers().getSortConditions();
 
-
-			if (!conditions.isEmpty()) {
-				modifier += sqladapter.sqlOrderBy(conditions, outerViewName)
-						+ "\n";
-			}
 			long limit = queryProgram.getQueryModifiers().getLimit();
 			long offset = queryProgram.getQueryModifiers().getOffset();
-			if (limit != -1 || offset != -1) {
-				modifier += sqladapter.sqlSlice(limit, offset) + "\n";
+
+			if (!conditions.isEmpty()) {
+				modifier = sqladapter.sqlOrderByAndSlice(conditions, outerViewName, limit, offset)
+						+ "\n";
+			}
+			else if (limit != -1 || offset != -1) {
+				modifier = sqladapter.sqlSlice(limit, offset) + "\n";
+			}
+			else {
+				modifier = "";
 			}
 
 			String sql = "SELECT *\n";
