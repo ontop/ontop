@@ -214,7 +214,7 @@ public class RelationalExpression {
             if (!e1.isUnique(id) || !e2.isUnique(id))
                 throw new UnsupportedOperationException("ambiguous column attributes in using statement");
 
-        if (!areRelationAliasesConsistent(e1.attributes, e2.attributes))
+        if (!relationAliasesConsistent(e1.attributes, e2.attributes))
             throw new UnsupportedOperationException("Relation alias occurs in both arguments of the join", null);
 
         ImmutableMap<QualifiedAttributeID, Variable> attributes = ImmutableMap.<QualifiedAttributeID, Variable>builder()
@@ -250,12 +250,11 @@ public class RelationalExpression {
                 .build();
 
         Map<QuotedID, ImmutableSet<RelationID>> attributeOccurrences =
-                keys.stream().collect(Collectors.toMap(id -> id,
-                        id -> usingColumns.contains(id)
-                                ? e1.attributeOccurrences.get(id)
-                                : relationSetUnion(
-                                e1.attributeOccurrences.get(id),
-                                e2.attributeOccurrences.get(id))));
+                attributeOccurrencesKeys(e1, e2).stream()
+                        .collect(Collectors.toMap(identity(),
+                                id -> usingColumns.contains(id)
+                                        ? e1.attributeOccurrences.get(id)
+                                        : attribiteOccuurencesUnion(id, e1, e2)));
 
         return new RelationalExpression(atoms, attributes, ImmutableMap.copyOf(attributeOccurrences));
     }
