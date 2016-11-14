@@ -84,8 +84,8 @@ public class SelectQueryParser {
             }
 
             if (plainSelect.getWhere() != null ) {
-                final Function atomsFromExpression = getAtomsFromExpression(current, plainSelect.getWhere());
-                current = RelationalExpression.addAtoms(current, ImmutableList.of(atomsFromExpression));
+                Function atomsFromExpression = getAtomsFromExpression(current, plainSelect.getWhere());
+                current = RelationalExpression.addAtoms(current, atomsFromExpression);
             }
 
 
