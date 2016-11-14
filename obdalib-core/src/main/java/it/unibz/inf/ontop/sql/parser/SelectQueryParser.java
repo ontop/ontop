@@ -74,11 +74,14 @@ public class SelectQueryParser {
                     else if  ( join.isNatural() ){
                         current = RelationalExpression.naturalJoin(current, right);
                     }else if( join.isInner() ) {
-                        if (join.getOnExpression() != null) {
+                        if (join.getOnExpression() != null)
                             current = RelationalExpression.joinOn( current, right, expression -> getAtomsFromExpression(expression, join.getOnExpression()));
-                        }else if ( join.getUsingColumns() != null ){
-                            current = RelationalExpression.joinUsing(current, right, join.getUsingColumns());
-                        }
+                    }else if ( join.getUsingColumns() != null ){
+                        current = RelationalExpression.joinUsing(current, right,
+                                new  ImmutableSet.Builder<QuotedID>().addAll(
+                                        join.getUsingColumns().stream()
+                                                .map(p-> metadata.getQuotedIDFactory().createAttributeID( p.getColumnName() ) )
+                                                .collect(Collectors.toSet())).build());
                     }
                 }
             }

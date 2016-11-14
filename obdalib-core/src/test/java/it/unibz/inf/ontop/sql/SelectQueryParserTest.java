@@ -236,6 +236,29 @@ public class SelectQueryParserTest {
         assertTrue( parse.getBody().contains(atomQ));
     }
 
+
+    @Test
+    public void join_using_Test() {
+        DBMetadata metadata = getDummyMetadata();
+
+
+        SelectQueryParser parser = new SelectQueryParser(metadata);
+
+        final CQIE parse = parser.parse("SELECT A, C FROM P JOIN Q USING (A)");
+        System.out.println(parse);
+
+        assertTrue( parse.getHead().getTerms().size()==0);
+        assertTrue( parse.getReferencedVariables().size()==4 );
+
+        Variable a1 = FACTORY.getVariable("A1");
+        Variable a2 =FACTORY.getVariable("A2");
+
+
+        Function atomQ = FACTORY.getFunction(ExpressionOperation.EQ, ImmutableList.of(a1, a2));
+
+        assertTrue( parse.getBody().contains(atomQ));
+    }
+
     @Test
     public void in_condition_Test() {
         final DBMetadata metadata = getDummyMetadata();
