@@ -214,6 +214,8 @@ public class RelationalExpression {
             if (!e1.isUnique(id) || !e2.isUnique(id))
                 throw new UnsupportedOperationException("ambiguous column attributes in using statement");
 
+        // TODO: create a new method to avoid duplicating code (see naturalJoin)
+
         if (!relationAliasesConsistent(e1.attributes, e2.attributes))
             throw new UnsupportedOperationException("Relation alias occurs in both arguments of the join", null);
 
@@ -240,10 +242,12 @@ public class RelationalExpression {
                 .addAll(e1.atoms)
                 .addAll(e2.atoms)
                 .addAll(usingColumns.stream()
+                        // TODO: why can't you use e1.attributes and e2.attributes instead?
                         .map(id -> FACTORY.getFunction(ExpressionOperation.EQ,
                                e1QuotedID.get( id ), e2QuotedID.get(id))).collect(Collectors.toList()))
                 .build();
 
+        // TODO: this is not even needed
         ImmutableSet<QuotedID> keys = ImmutableSet.<QuotedID>builder()
                 .addAll(e1.attributeOccurrences.keySet())
                 .addAll(e2.attributeOccurrences.keySet())
