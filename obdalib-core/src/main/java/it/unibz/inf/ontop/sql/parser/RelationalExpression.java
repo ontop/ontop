@@ -36,7 +36,6 @@ public class RelationalExpression {
      * @param attributes           is an {@link ImmutableMap}<{@link QualifiedAttributeID}, {@link Variable}>
      * @param attributeOccurrences is an {@link ImmutableMap}<{@link QuotedID}, {@link ImmutableSet}<{@link RelationID}>>
      */
-
     public RelationalExpression(ImmutableList<Function> atoms,
                                 ImmutableMap<QualifiedAttributeID, Variable> attributes,
                                 ImmutableMap<QuotedID, ImmutableSet<RelationID>> attributeOccurrences) {
@@ -103,7 +102,7 @@ public class RelationalExpression {
         Map<QuotedID, ImmutableSet<RelationID>> attributeOccurrences =
                 attributeOccurrencesKeys(e1, e2).stream()
                         .collect(Collectors.toMap(identity(),
-                            id -> attribiteOccuurencesUnion(id, e1, e2)));
+                                id -> attribiteOccuurencesUnion(id, e1, e2)));
 
         return new RelationalExpression(atoms, attributes, ImmutableMap.copyOf(attributeOccurrences));
     }
@@ -132,12 +131,12 @@ public class RelationalExpression {
     /**
      * NATURAL JOIN of two relations
      *
-     * @param e1 is a {@link RelationalExpression)
-     * @param e2 is a {@link RelationalExpression)
+     * @param e1               is a {@link RelationalExpression)
+     * @param e2               is a {@link RelationalExpression)
      * @param sharedAttributes is a {@link Set}<{@link QuotedID}>
      * @return a {@link RelationalExpression}
      */
-    private static RelationalExpression naturalJoin (RelationalExpression e1, RelationalExpression e2, Set<QuotedID> sharedAttributes){
+    private static RelationalExpression naturalJoin(RelationalExpression e1, RelationalExpression e2, Set<QuotedID> sharedAttributes) {
         // TODO: better exception? more informative error message?
         if (sharedAttributes.stream().anyMatch(id -> e1.isAmbiguous(id) || e2.isAmbiguous(id)))
             throw new UnsupportedOperationException("common ambiguous attribute in select");
@@ -145,15 +144,11 @@ public class RelationalExpression {
         ImmutableMap<QualifiedAttributeID, Variable> attributes = ImmutableMap.<QualifiedAttributeID, Variable>builder()
                 .putAll(e1.filterAttributes(id ->
                         (id.getRelation() != null && !sharedAttributes.contains(id.getAttribute()))
-                                || (id.getRelation() == null && e2.isAbsent(id.getAttribute()))))
-
+                                || (id.getRelation() == null && e2.isAbsent(id.getAttribute()))
+                                || (id.getRelation() == null && sharedAttributes.contains(id.getAttribute()))))
                 .putAll(e2.filterAttributes(id ->
-                        (id.getRelation() !=null && !sharedAttributes.contains(id.getAttribute()))
+                        (id.getRelation() != null && !sharedAttributes.contains(id.getAttribute()))
                                 || (id.getRelation() == null && e1.isAbsent(id.getAttribute()))))
-                // TODO: merge into the first group?
-                .putAll(e1.filterAttributes(id ->
-                        id.getRelation() == null && sharedAttributes.contains(id.getAttribute())))
-
                 .build();
 
         ImmutableList<Function> atoms = ImmutableList.<Function>builder()
@@ -173,8 +168,6 @@ public class RelationalExpression {
 
         return new RelationalExpression(atoms, attributes, ImmutableMap.copyOf(attributeOccurrences));
     }
-
-
 
 
     /**
@@ -226,7 +219,7 @@ public class RelationalExpression {
             if (!e1.isUnique(id) || !e2.isUnique(id))
                 throw new UnsupportedOperationException("ambiguous column attributes in using statement");
 
-        return RelationalExpression.naturalJoin( e1, e2, usingColumns );
+        return RelationalExpression.naturalJoin(e1, e2, usingColumns);
     }
 
     /**
@@ -237,7 +230,7 @@ public class RelationalExpression {
      * @return the union of occurrences of id in e1 and e2
      */
     private static ImmutableSet<RelationID> attribiteOccuurencesUnion(QuotedID id,
-                                                             RelationalExpression e1, RelationalExpression e2) {
+                                                                      RelationalExpression e1, RelationalExpression e2) {
 
         ImmutableSet<RelationID> s1 = e1.attributeOccurrences.get(id);
         ImmutableSet<RelationID> s2 = e2.attributeOccurrences.get(id);
@@ -261,9 +254,9 @@ public class RelationalExpression {
 
     private Map<QualifiedAttributeID, Variable> filterAttributes(java.util.function.Predicate<QualifiedAttributeID> condition) {
 
-            return attributes.entrySet().stream()
-                    .filter(e -> condition.test(e.getKey()))
-                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        return attributes.entrySet().stream()
+                .filter(e -> condition.test(e.getKey()))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
     /**
