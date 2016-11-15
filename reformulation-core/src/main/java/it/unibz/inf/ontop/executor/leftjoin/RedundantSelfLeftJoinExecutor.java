@@ -139,8 +139,7 @@ public class RedundantSelfLeftJoinExecutor
             DataNode rightDataNode,
             IntermediateQuery query,
             QueryTreeComponent treeComponent,
-            LeftJoinNode leftJoinNode)
-    {
+            LeftJoinNode leftJoinNode) throws EmptyQueryException {
 
         ImmutableMultimap<ImmutableList<VariableOrGroundTerm>, DataNode> groupingMap =
                 groupByPrimaryKeyArguments(leftDataNode, rightDataNode,
