@@ -289,7 +289,7 @@ public class PushDownBooleanExpressionOptimizerImpl implements PushDownBooleanEx
         if(selectedSubtreeRoots.isEmpty()){
             ImmutableSet<Variable> allProjectedVariables = allProjectedVariablesBuilder.build();
             /**
-             * If all variables of the expression are projected out by some subtree,
+             * If the union of all subtree's variables is a superset of the expression's variables,
              * keep the expression at the provider's level (otherwise the expression will be dropped)
              */
             if(allProjectedVariables.containsAll(expressionVariables)){
