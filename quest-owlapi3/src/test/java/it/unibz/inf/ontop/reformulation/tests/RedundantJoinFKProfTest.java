@@ -32,7 +32,7 @@ public class RedundantJoinFKProfTest {
     private static final String CREATE_SCRIPT = "src/test/resources/test/redundant_join/redundant_join_fk_create.sql";
     private static final String DROP_SCRIPT = "src/test/resources/test/redundant_join/redundant_join_fk_drop.sql";
     private static final String OWL_FILE = "src/test/resources/test/redundant_join/redundant_join_fk_test.owl";
-    private static final String ODBA_FILE = "src/test/resources/test/redundant_join/redundant_jon_fk_test.obda";
+    private static final String ODBA_FILE = "src/test/resources/test/redundant_join/redundant_join_fk_test.obda";
     private static final String NO_OPTIMIZATION_MSG = "The table professors should not be used";
 
 
