@@ -87,15 +87,6 @@ public class PushDownBooleanExpressionOptimizerImpl implements PushDownBooleanEx
         }
     }
 
-    private static class SubtreeRequirements {
-        public final boolean acceptsExpression;
-        public final boolean keepExpressionAtProviderLevel;
-
-        private SubtreeRequirements(boolean acceptsExpression, boolean keepExpressionAtProviderLevel) {
-            this.acceptsExpression = acceptsExpression;
-            this.keepExpressionAtProviderLevel=keepExpressionAtProviderLevel;
-        }
-    }
 
     private Recipient getProviderAsRecipientNode(QueryNode queryNode){
         if(queryNode instanceof CommutativeJoinOrFilterNode){
@@ -105,70 +96,6 @@ public class PushDownBooleanExpressionOptimizerImpl implements PushDownBooleanEx
             return new Recipient((LeftJoinNode) queryNode, true);
         }
         throw new IllegalStateException("Only Join or Filter Nodes may provide a boolean expression");
-    }
-
-    /**
-     * Takes a node p providing an expression e,
-     * and a child n of p.
-     * Determines:
-     * - whether the subtree rooted in n can propagate e
-     * - whether n (by itself) enforces that and p must keep e
-     * (note that this does not prevent e to be also duplicated down)
-     */
-    private SubtreeRequirements getSubtreeRequirements(IntermediateQuery query, QueryNode root, ImmutableSet<Variable> expressionVariables, ImmutableSet<Variable> projectedVariables){
-       /**
-        * If all of e's variables are projected out by the subtree rooted in n,
-        * then it is a propagating subtree
-        */
-       if(projectedVariables.containsAll(expressionVariables)){
-           /**
-            * Specific case of a LeftJoinNode rooted subtree
-            */
-           if(root instanceof LeftJoinNode){
-               return getLeftJoinRootedSubtreeRequirements((LeftJoinNode) root, query, expressionVariables, projectedVariables);
-           }
-           /**
-            * By default, no requirement on p
-            */
-           return new SubtreeRequirements(true, false);
-       }
-       /**
-        * If only some of e's variables are projected out by the subtree rooted in n,
-        * then it is not a propagating subtree, and there is no requirement on p
-        */
-        if(expressionVariables.stream().anyMatch(projectedVariables::contains)){
-                return new SubtreeRequirements(false, false);
-        }
-        /**
-         * Otherwise, the subtree rooted in n is not propagating,
-         * and there is no requirement on p
-         */
-        return new SubtreeRequirements(false,false);
-    }
-
-
-    /**
-     * Takes a node p providing an expression e,
-     * and a leftJoin child n of p,
-     * such that the subtree rooted in n projects out al variables of e.
-     * Determines whether n (by itself) enforces that and p must keep e
-     * (note that this does not prevent e to be also duplicated down)
-     */
-    private SubtreeRequirements getLeftJoinRootedSubtreeRequirements(LeftJoinNode root, IntermediateQuery query, ImmutableSet<Variable> expressionVariables, ImmutableSet<Variable> projectedVariables) {
-        /**
-         * If the right child of n projects out all variables of e,
-         * then p must keep the expression,
-         */
-        QueryNode rightChild = query.getChild(root, RIGHT)
-                .orElseThrow(() -> new IllegalTreeException("a LeftJoinNode is expected to have a right child"));
-        if (query.getVariables(rightChild).containsAll(expressionVariables)){
-            return new SubtreeRequirements(true, true);
-        }
-        /**
-         * Otherwise, no requirement on p
-         */
-        return new SubtreeRequirements(true, false);
-
     }
 
 
@@ -270,7 +197,7 @@ public class PushDownBooleanExpressionOptimizerImpl implements PushDownBooleanEx
          * Other node (useful for extension)
          */
         else {
-            return makeProposalUnexpectedFocusNode(currentQuery, focusNode);
+            return makeProposalForUnexpectedFocusNode(currentQuery, focusNode);
         }
     }
 
@@ -279,8 +206,8 @@ public class PushDownBooleanExpressionOptimizerImpl implements PushDownBooleanEx
      *
      * By default, does not make a proposal
      */
-    protected Optional<PushDownBooleanExpressionProposal> makeProposalUnexpectedFocusNode(IntermediateQuery currentQuery,
-                                                                                          JoinOrFilterNode focusNode) {
+    protected Optional<PushDownBooleanExpressionProposal> makeProposalForUnexpectedFocusNode(IntermediateQuery currentQuery,
+                                                                                             JoinOrFilterNode focusNode) {
         return Optional.empty();
     }
 
@@ -331,40 +258,43 @@ public class PushDownBooleanExpressionOptimizerImpl implements PushDownBooleanEx
     private Stream<Recipient> selectRecipients(IntermediateQuery query, JoinOrFilterNode providerNode,
                                                ImmutableList<QueryNode> candidateSubtreeRoots,
                                                ImmutableExpression expression) {
-       ImmutableList.Builder<QueryNode> selectedSubtreeRootsBuilder = ImmutableList.builder();
+        ImmutableList.Builder<QueryNode> selectedSubtreeRootsBuilder = ImmutableList.builder();
+        //Union of variables projected out by candidate subtrees
+        ImmutableSet.Builder<Variable> allProjectedVariablesBuilder = ImmutableSet.builder();
         // Non-final
         boolean mustKeepAtProviderLevel = false;
 
+        ImmutableSet<Variable> expressionVariables = expression.getVariables();
         for(QueryNode candidateSubtreeRoot : candidateSubtreeRoots) {
-            ImmutableSet<Variable> expressionVariables = expression.getVariables();
             ImmutableSet<Variable> projectedVariables = query.getVariables(candidateSubtreeRoot);
+            allProjectedVariablesBuilder.addAll(projectedVariables);
 
-            SubtreeRequirements subtreeRequirements = getSubtreeRequirements(query, candidateSubtreeRoot,
-                    expressionVariables, projectedVariables);
-            /**
-             * If at least one subtree requires it,
-             * the boolean expression must remain at the provider's level
-             * (note that this does not prevent the expression to be also propagated down)
-             */
-            if (subtreeRequirements.keepExpressionAtProviderLevel){
-                mustKeepAtProviderLevel = true;
-            }
-            /**
-             * If the subtree accepts the expression,
-             * propagate it down
-             */
-            if(subtreeRequirements.acceptsExpression){
+            if (projectedVariables.containsAll(expressionVariables)) {
                 selectedSubtreeRootsBuilder.add(candidateSubtreeRoot);
+                if (candidateSubtreeRoot instanceof LeftJoinNode) {
+                    QueryNode rightChild = query.getChild(candidateSubtreeRoot, RIGHT)
+                            .orElseThrow(() -> new IllegalTreeException("a LeftJoinNode is expected to have a right child"));
+                    if (query.getVariables(rightChild).containsAll(expressionVariables)) {
+                        mustKeepAtProviderLevel = true;
+                    }
+                }
             }
         }
 
+
         ImmutableList<QueryNode> selectedSubtreeRoots = selectedSubtreeRootsBuilder.build();
         /**
-         * If no candidate subtree has been selected,
-         * keep the expression at the provider's level
+         * If no candidate subtree has been selected
          */
         if(selectedSubtreeRoots.isEmpty()){
-            mustKeepAtProviderLevel = true;
+            ImmutableSet<Variable> allProjectedVariables = allProjectedVariablesBuilder.build();
+            /**
+             * If all variables of the expression are projected out by some subtree,
+             * keep the expression at the provider's level (otherwise the expression will be dropped)
+             */
+            if(allProjectedVariables.containsAll(expressionVariables)){
+                mustKeepAtProviderLevel = true;
+            }
         }
 
         Stream<Recipient> childRecipients = selectedSubtreeRoots.stream()
