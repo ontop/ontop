@@ -52,22 +52,42 @@ public class RedundantSelfLeftJoinExecutor
             DataNode leftDataNode = (DataNode) leftChild;
             DataNode rightDataNode = (DataNode) rightChild;
 
-            AtomPredicate leftPredicate = leftDataNode.getProjectionAtom().getPredicate();
-            AtomPredicate rightPredicate = rightDataNode.getProjectionAtom().getPredicate();
-
-            if(leftPredicate.equals(rightPredicate)) {
-                /**
-                 * the left and the right predicates are the same,
-                 * so we deal with self left join
-                 */
-                if (query.getMetadata().getUniqueConstraints().containsKey(leftPredicate)) {
-                    return tryToOptimizeSelfJoin(leftDataNode, rightDataNode, query, treeComponent, leftJoinNode);
-                }
+            if (isSelfLeftJoin(leftDataNode, rightDataNode, query.getMetadata())) {
+                return tryToOptimizeSelfJoin(leftDataNode, rightDataNode, query, treeComponent, leftJoinNode);
             }
         }
 
         // No optimization
         return new NodeCentricOptimizationResultsImpl<>(query, leftJoinNode);
+    }
+
+    /**
+     * Checks if we are dealing with self left join, i.e.,
+     * the left and the right predicates are the same, and
+     * the join is over the keys
+     */
+    private boolean isSelfLeftJoin(DataNode leftDataNode, DataNode rightDataNode, MetadataForQueryOptimization metadata) {
+        AtomPredicate leftPredicate = leftDataNode.getProjectionAtom().getPredicate();
+        AtomPredicate rightPredicate = rightDataNode.getProjectionAtom().getPredicate();
+
+        if(leftPredicate.equals(rightPredicate)) {
+            if(metadata.getUniqueConstraints().containsKey(leftPredicate)) {
+                ImmutableMultimap<ImmutableList<VariableOrGroundTerm>, DataNode> groupingMap =
+                        groupByPrimaryKeyArguments(leftDataNode, rightDataNode,
+                                metadata.getUniqueConstraints().get(leftDataNode.getProjectionAtom().getPredicate()));
+
+                for(ImmutableList<VariableOrGroundTerm> variables: groupingMap.keySet()) {
+                    /**
+                     * At least for one unique constraint, the left and the right data nodes
+                     * join on the key positions. Hence, it is a self join.
+                     */
+                    if(groupingMap.get(variables).size() == 2) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
     }
 
     private NodeCentricOptimizationResults<LeftJoinNode> tryToOptimizeSelfJoin(DataNode leftDataNode, DataNode rightDataNode,

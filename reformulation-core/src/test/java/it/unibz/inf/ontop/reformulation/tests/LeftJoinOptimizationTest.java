@@ -278,7 +278,10 @@ public class LeftJoinOptimizationTest {
         System.out.println("\nBefore optimization: \n" +  query);
 
         try {
-            query.applyProposal(new LeftJoinOptimizationProposalImpl(leftJoinNode)).getResultingQuery();
+            IntermediateQuery optimizedQuery = query.applyProposal(new LeftJoinOptimizationProposalImpl(leftJoinNode)).getResultingQuery();
+            System.out.println("\n After optimization: \n" +  optimizedQuery);
+            System.out.println("\n Expected query: \n" +  "empty query");
+            assertTrue(false);
         } catch (EmptyQueryException e) {
             System.out.println("\n After optimization: \n" +  "empty query");
             System.out.println("\n Expected query: \n" +  "empty query");
@@ -341,6 +344,66 @@ public class LeftJoinOptimizationTest {
                 .getResultingQuery();
 
         System.out.println("\n After optimization: \n" +  optimizedQuery);
+
+        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, expectedQuery));
+    }
+
+    @Test
+    public void testNoSelfLeftJoin1() throws EmptyQueryException {
+
+        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(metadata);
+        DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_2_PREDICATE, M, N);
+        ConstructionNode constructionNode = new ConstructionNodeImpl(projectionAtom.getVariables());
+        queryBuilder.init(projectionAtom, constructionNode);
+        LeftJoinNode leftJoinNode = new LeftJoinNodeImpl(Optional.empty());
+        queryBuilder.addChild(constructionNode, leftJoinNode);
+        ExtensionalDataNode dataNode1 =  new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, M, N1, ONE));
+        ExtensionalDataNode dataNode2 =  new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, N1, N, TWO));
+
+        queryBuilder.addChild(leftJoinNode, dataNode1, LEFT);
+        queryBuilder.addChild(leftJoinNode, dataNode2, RIGHT);
+
+        IntermediateQuery query = queryBuilder.build();
+        System.out.println("\nBefore optimization: \n" +  query);
+
+        IntermediateQuery expectedQuery = query.createSnapshot();
+
+        IntermediateQuery optimizedQuery = query.applyProposal(new LeftJoinOptimizationProposalImpl(leftJoinNode))
+                .getResultingQuery();
+
+        System.out.println("\n After optimization: \n" +  optimizedQuery);
+
+        System.out.println("\n Expected query: \n" +  expectedQuery);
+
+        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, expectedQuery));
+    }
+
+    @Test
+    public void testNoSelfLeftJoin2() throws EmptyQueryException {
+
+        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(metadata);
+        DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_2_PREDICATE, M, N);
+        ConstructionNode constructionNode = new ConstructionNodeImpl(projectionAtom.getVariables());
+        queryBuilder.init(projectionAtom, constructionNode);
+        LeftJoinNode leftJoinNode = new LeftJoinNodeImpl(Optional.empty());
+        queryBuilder.addChild(constructionNode, leftJoinNode);
+        ExtensionalDataNode dataNode1 =  new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, M, N1, ONE));
+        ExtensionalDataNode dataNode2 =  new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, N1, M, M));
+
+        queryBuilder.addChild(leftJoinNode, dataNode1, LEFT);
+        queryBuilder.addChild(leftJoinNode, dataNode2, RIGHT);
+
+        IntermediateQuery query = queryBuilder.build();
+        System.out.println("\nBefore optimization: \n" +  query);
+
+        IntermediateQuery expectedQuery = query.createSnapshot();
+
+        IntermediateQuery optimizedQuery = query.applyProposal(new LeftJoinOptimizationProposalImpl(leftJoinNode))
+                .getResultingQuery();
+
+        System.out.println("\n After optimization: \n" +  optimizedQuery);
+
+        System.out.println("\n Expected query: \n" +  expectedQuery);
 
         assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, expectedQuery));
     }
