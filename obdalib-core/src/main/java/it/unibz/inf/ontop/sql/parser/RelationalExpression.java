@@ -148,8 +148,8 @@ public class RelationalExpression {
                 .addAll(e1.atoms)
                 .addAll(e2.atoms)
                 .addAll(sharedAttributes.stream()
-                        .map(id -> FACTORY.getFunctionEQ(e1.attributes.get(id), e2.attributes.get(id)))
-                        .iterator())
+                        .map(id -> new QualifiedAttributeID(null, id))
+                        .map(id -> FACTORY.getFunctionEQ(e1.attributes.get(id), e2.attributes.get(id))).iterator())
                 .build();
 
         Map<QuotedID, ImmutableSet<RelationID>> attributeOccurrences =
