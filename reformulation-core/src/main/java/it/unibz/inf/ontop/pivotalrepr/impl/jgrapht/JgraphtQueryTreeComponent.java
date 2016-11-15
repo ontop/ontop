@@ -366,7 +366,7 @@ public class JgraphtQueryTreeComponent implements QueryTreeComponent {
     }
 
     @Override
-    public QueryNode removeOrReplaceNodeByUniqueChildren(QueryNode node) throws IllegalTreeUpdateException {
+    public QueryNode removeOrReplaceNodeByUniqueChild(QueryNode node) throws IllegalTreeUpdateException {
         ImmutableList<QueryNode> children = getChildren(node);
         int nbChildren = children.size();
         switch(nbChildren) {
