@@ -277,7 +277,7 @@ public class RedundantSelfLeftJoinExecutor
     private NodeCentricOptimizationResults<LeftJoinNode> applyOptimization(IntermediateQuery query,
                                                                            QueryTreeComponent treeComponent,
                                                                            LeftJoinNode leftJoinNode,
-                                                                           ConcreteProposal proposal) {
+                                                                           ConcreteProposal proposal) throws EmptyQueryException {
         /**
          * First, add and remove non-top nodes
          */

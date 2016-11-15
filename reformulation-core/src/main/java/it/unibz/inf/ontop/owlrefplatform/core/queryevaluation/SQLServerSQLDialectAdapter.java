@@ -34,13 +34,13 @@ public class SQLServerSQLDialectAdapter extends SQL99DialectAdapter {
 		SqlDatatypes = new HashMap<>();
 		SqlDatatypes.put(Types.INTEGER, "INT");
 		SqlDatatypes.put(Types.BIGINT, "BIGINT");
-		SqlDatatypes.put(Types.DECIMAL, "DECIMAL");
+		SqlDatatypes.put(Types.DECIMAL, "DECIMAL(38,4)");
 		SqlDatatypes.put(Types.REAL, "FLOAT");
 		SqlDatatypes.put(Types.FLOAT, "DECIMAL");
 		SqlDatatypes.put(Types.DOUBLE, "DECIMAL");
 //		SqlDatatypes.put(Types.DOUBLE, "DECIMAL"); // it fails aggregate test with double
 		SqlDatatypes.put(Types.CHAR, "CHAR");
-		SqlDatatypes.put(Types.VARCHAR, "VARCHAR");  // for korean, chinese, etc characters we need to use utf8
+		SqlDatatypes.put(Types.VARCHAR, "VARCHAR(8000)");  // for korean, chinese, etc characters we need to use utf8
 		SqlDatatypes.put(Types.DATE, "DATETIME");
 		SqlDatatypes.put(Types.TIME, "TIME");
 		SqlDatatypes.put(Types.TIMESTAMP, "DATETIME");
