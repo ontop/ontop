@@ -72,28 +72,31 @@ public class QuestUnfolder {
 
 		mappings = vocabularyValidator.replaceEquivalences(mappings);
 
-		/**
-		 * add sameAsInverse
-		 */
-		mappings.addAll(MappingSameAs.addSameAsInverse(mappings));
 
-		/** 
+		/*
 		 * Substitute select * with column names  (performs the operation `in place')
 		 */
 		preprocessProjection(mappings, metadata);
 
-		/**
+		/*
 		 * Split the mapping (creates a new set of mappings)
 		 */
 		Collection<OBDAMappingAxiom> splittedMappings = MappingSplitter.splitMappings(mappings);
-		
-		/**
+
+		/*
 		 * Expand the meta mapping (creates a new set of mappings)
 		 */
 		MetaMappingExpander metaMappingExpander = new MetaMappingExpander(localConnection, metadata.getQuotedIDFactory());
 		Collection<OBDAMappingAxiom> expandedMappings = metaMappingExpander.expand(splittedMappings);
-		
-		List<CQIE> unfoldingProgram = Mapping2DatalogConverter.constructDatalogProgram(expandedMappings, metadata);
+
+        /*
+         * add sameAsInverse
+         */
+        if (sameAs) {
+            expandedMappings = MappingSameAs.addSameAsInverse(expandedMappings);
+        }
+
+        List<CQIE> unfoldingProgram = Mapping2DatalogConverter.constructDatalogProgram(expandedMappings, metadata);
 		
 		
 		log.debug("Original mapping size: {}", unfoldingProgram.size());
