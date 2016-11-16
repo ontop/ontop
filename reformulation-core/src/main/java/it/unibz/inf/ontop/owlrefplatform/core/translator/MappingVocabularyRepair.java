@@ -22,6 +22,7 @@ package it.unibz.inf.ontop.owlrefplatform.core.translator;
 
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
+import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
 import it.unibz.inf.ontop.ontology.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -106,16 +107,28 @@ public class MappingVocabularyRepair {
                 Predicate predicate = urimap.get(predTarget.getName());
                 if (predicate == null) {
                     if (!predTarget.isTriplePredicate()) {
-                        log.warn("WARNING: Mapping references an unknown class/property: " + predTarget.getName());
+
+
+                        String predName = predTarget.getName();
+                        if(predName.equals(OBDAVocabulary.SAME_AS)) {
+
+                            // In case of sameAs property we know we are working with 2 uris, and we need an object property
+                            newatom = fixSameAsPredicate (mapping, predName, arguments);
+
+                        }
+                        else
+                        {
+                            log.warn("WARNING: Mapping references an unknown class/property: " + predTarget.getName());
 
 						/*
                          * All this part is to handle the case where the predicate or the class is defined
 						 * by the mapping but not present in the ontology.
 						 */
-                        newatom = fixUndeclaredPredicate(mapping, predTarget, arguments);
+                            newatom = fixUndeclaredPredicate(mapping, predName, arguments);
+                        }
                     } else {
 
-                        newatom = fixTripleAtom(mapping, arguments, predicate);
+                        newatom = fixTripleAtom(mapping, arguments);
                     }
                 } else {
 
@@ -132,7 +145,53 @@ public class MappingVocabularyRepair {
         return result;
     }
 
-    private static Function fixTripleAtom(OBDAMappingAxiom mapping, List<Term> arguments, Predicate predicate) {
+    private static Function fixSameAsPredicate(OBDAMappingAxiom mapping, String sameAsPredName, List<Term> arguments) {
+
+        Function fixedTarget;
+        if (arguments.size() == 2) {
+            Term t0 = arguments.get(0);
+            Term t1 = arguments.get(1);
+            if (t0 instanceof Function && t1 instanceof Function) {
+
+
+
+                    Function ft0 = (Function) t0;
+                    Function ft1 = (Function) t1;
+
+                    boolean t0uri = (ft0.getFunctionSymbol() instanceof URITemplatePredicate);
+                    boolean t1uri = (ft1.getFunctionSymbol() instanceof URITemplatePredicate);
+
+                    if (t0uri && t1uri) {
+                        Predicate pred = dfac.getObjectPropertyPredicate(sameAsPredName);
+                        fixedTarget = dfac.getFunction(pred, t0, t1);
+
+                    } else {
+                        String message = String.format("" +
+                                "Error with property <%s> used in the mapping\n" +
+                                "   %s \n" +
+                                "The reason is: \n" +
+                                "owl:sameAs should be used between two IRIs, use  `<{val}>` to build an IRI for the object {%s} .. ", sameAsPredName, mapping, t1);
+
+                        throw new IllegalArgumentException(message);
+                    }
+
+            } else {
+                String message = String.format("" +
+                        "Error with property <%s> used in the mapping\n" +
+                        "%s \n" +
+                        "The reason is: \n" +
+                        "the subject {%s} or the object {%s} in the mapping is not an iri. Solution: Solution: use `<{val}>` for IRI retrieved from columns or `prefix:{val}` for URI template. ", sameAsPredName, mapping, t0, t1);
+
+                throw new IllegalArgumentException(message);
+            }
+        } else {
+
+            throw new IllegalArgumentException("ERROR: Predicate has an incorrect arity: " + sameAsPredName);
+        }
+        return fixedTarget;
+    }
+
+    private static Function fixTripleAtom(OBDAMappingAxiom mapping, List<Term> arguments) {
         Function newatom;
         Term t0 = arguments.get(0);
         if ((t0 instanceof Function) && ((Function) t0).getFunctionSymbol() instanceof URITemplatePredicate) {
@@ -245,19 +304,19 @@ public class MappingVocabularyRepair {
         return newatom;
     }
 
-    private static Function fixUndeclaredPredicate(OBDAMappingAxiom mapping, Predicate undeclaredPredicate, List<Term> arguments) {
+    private static Function fixUndeclaredPredicate(OBDAMappingAxiom mapping, String undeclaredPredName, List<Term> arguments) {
         Function fixedTarget;
         if (arguments.size() == 1) {
             Term t0 = arguments.get(0);
             if ((t0 instanceof Function) && ((Function)t0).getFunctionSymbol() instanceof URITemplatePredicate) {
-                Predicate pred = dfac.getClassPredicate(undeclaredPredicate.getName());
+                Predicate pred = dfac.getClassPredicate(undeclaredPredName);
                 fixedTarget = dfac.getFunction(pred, arguments.get(0));
             } else {
                 String message = String.format("" +
                         "Error with class <%s> used in the mapping\n" +
                         "%s \n" +
                         "The reason is: \n" +
-                        "the subject {%s} in the mapping is not an iri. Solution: use `<{val}>` for IRI retrieved from columns or `prefix:{val}` for URI template. ", undeclaredPredicate.getName(), mapping, t0);
+                        "the subject {%s} in the mapping is not an iri. Solution: use `<{val}>` for IRI retrieved from columns or `prefix:{val}` for URI template. ", undeclaredPredName, mapping, t0);
                 throw new IllegalArgumentException(message);
             }
         } else if (arguments.size() == 2) {
@@ -274,10 +333,10 @@ public class MappingVocabularyRepair {
                     boolean t1uri = (ft1.getFunctionSymbol() instanceof URITemplatePredicate);
 
                     if (t0uri && t1uri) {
-                        Predicate pred = dfac.getObjectPropertyPredicate(undeclaredPredicate.getName());
+                        Predicate pred = dfac.getObjectPropertyPredicate(undeclaredPredName);
                         fixedTarget = dfac.getFunction(pred, t0, t1);
                     } else {
-                        Predicate pred = dfac.getDataPropertyPredicate(undeclaredPredicate.getName());
+                        Predicate pred = dfac.getDataPropertyPredicate(undeclaredPredName);
                         fixedTarget = dfac.getFunction(pred, t0, t1);
                     }
                 } else {
@@ -288,7 +347,7 @@ public class MappingVocabularyRepair {
                             "   %s \n" +
                             "The reason is: \n" +
                             "1. the property is not declared in the ontology; and \n" +
-                            "2. the object {%s} in the mapping is untyped. Solution: use `{val}^^xsd:string` for literal and `<{val}>` for IRI. ", undeclaredPredicate.getName(), mapping, t1);
+                            "2. the object {%s} in the mapping is untyped. Solution: use `{val}^^xsd:string` for literal and `<{val}>` for IRI. ", undeclaredPredName, mapping, t1);
 
                     throw new IllegalArgumentException(message);
                 }
@@ -297,13 +356,13 @@ public class MappingVocabularyRepair {
                         "Error with property <%s> used in the mapping\n" +
                         "%s \n" +
                         "The reason is: \n" +
-                        "the subject {%s} in the mapping is not an iri. Solution: Solution: use `<{val}>` for IRI retrieved from columns or `prefix:{val}` for URI template. ", undeclaredPredicate.getName(), mapping, t0);
+                        "the subject {%s} in the mapping is not an iri. Solution: Solution: use `<{val}>` for IRI retrieved from columns or `prefix:{val}` for URI template. ", undeclaredPredName, mapping, t0);
 
                 throw new IllegalArgumentException(message);
             }
         } else {
-            System.err.println("ERROR: Predicate has an incorrect arity: " + undeclaredPredicate.getName());
-            throw new IllegalArgumentException("ERROR: Predicate has an incorrect arity: " + undeclaredPredicate.getName());
+            System.err.println("ERROR: Predicate has an incorrect arity: " + undeclaredPredName);
+            throw new IllegalArgumentException("ERROR: Predicate has an incorrect arity: " + undeclaredPredName);
         }
         return fixedTarget;
     }
