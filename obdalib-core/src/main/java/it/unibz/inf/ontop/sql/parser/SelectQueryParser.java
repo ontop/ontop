@@ -10,6 +10,7 @@ import it.unibz.inf.ontop.parser.*;
 import it.unibz.inf.ontop.sql.*;
 import it.unibz.inf.ontop.sql.parser.exceptions.InvalidSelectQuery;
 import it.unibz.inf.ontop.sql.parser.exceptions.UnsupportedSelectQuery;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.*;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
@@ -63,25 +64,29 @@ public class SelectQueryParser {
             if (plainSelect.getJoins() != null) {
                 for (Join join : plainSelect.getJoins()) {
                     RelationalExpression right = getRelationalExpression(join.getRightItem());
-                    if (join.isCross() || join.isSimple())
+                    if (join.isCross() || join.isSimple()) {
                         current = RelationalExpression.crossJoin(current, right);
-                    else if  ( join.isNatural() ){
+                    }
+                    else if (join.isNatural()) {
                         current = RelationalExpression.naturalJoin(current, right);
-                    }else if( join.isInner() ) {
+                    }
+                    else if (join.isInner()) { // TODO: not sure isNatural and isInner are disjoint
                         if (join.getOnExpression() != null)
-                            current = RelationalExpression.joinOn( current, right, expression -> getAtomsFromExpression(expression, join.getOnExpression()));
-                    }else if ( join.getUsingColumns() != null ){
+                            current = RelationalExpression.joinOn(current, right,
+                                    expression -> getAtomsFromExpression(expression, join.getOnExpression()));
+                        // TODO: what about ELSE?
+                    }
+                    else if (join.getUsingColumns() != null) { //TODO: not sure this is disjoint with isInner
                         current = RelationalExpression.joinUsing(current, right,
-                                new  ImmutableSet.Builder<QuotedID>().addAll(
                                         join.getUsingColumns().stream()
-                                                .map(p-> metadata.getQuotedIDFactory().createAttributeID( p.getColumnName() ) )
-                                                .collect(Collectors.toSet())).build());
+                                                .map(p -> metadata.getQuotedIDFactory().createAttributeID(p.getColumnName()))
+                                                .collect(ImmutableCollectors.toSet()));
                     }
                 }
             }
 
-            if (plainSelect.getWhere() != null ) {
-                Function atomsFromExpression = getAtomsFromExpression(current.getAttributes(), plainSelect.getWhere());
+            if (plainSelect.getWhere() != null) {
+                ImmutableList<Function> atomsFromExpression = getAtomsFromExpression(current.getAttributes(), plainSelect.getWhere());
                 current = RelationalExpression.addAtoms(current, atomsFromExpression);
             }
 
@@ -113,10 +118,10 @@ public class SelectQueryParser {
         return parsedSql;
     }
 
-    private Function getAtomsFromExpression(ImmutableMap<QualifiedAttributeID, Variable> attributes, Expression expression) {
+    private ImmutableList<Function> getAtomsFromExpression(ImmutableMap<QualifiedAttributeID, Variable> attributes, Expression expression) {
         // TODO: move declaration of parser to the more appropriate place
         ExpressionParser parser = new ExpressionParser(attributes, metadata.getQuotedIDFactory());
-        return parser.convert(expression);
+        return ImmutableList.of(parser.convert(expression));
     }
 
 

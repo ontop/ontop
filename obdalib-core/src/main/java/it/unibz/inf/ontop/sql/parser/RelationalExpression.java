@@ -81,19 +81,18 @@ public class RelationalExpression {
      * @return a {@link RelationalExpression}
      */
     public static RelationalExpression crossJoin(RelationalExpression e1, RelationalExpression e2) {
-        return crossJoin(e1, e2, null);
+        return joinOn(e1, e2, att -> ImmutableList.of());
     }
 
+
     /**
-     * CROSS JOIN of two relations (also denoted by , in SQL)
-     *
      * @param e1                  is a {@link RelationalExpression)
      * @param e2                  is a {@link RelationalExpression)
-     * @param getAtomOnExpression is a {@link java.util.function.Function} <{@link ImmutableMap}<{@link QualifiedAttributeID}, {@link Variable}>
+     * @param getAtomOnExpression is a {@link java.util.function.Function} <{@link ImmutableMap}<{@link QualifiedAttributeID}, {@link ImmutableList}<{@link Function}>}>
      * @return a {@link RelationalExpression}
      */
-    private static RelationalExpression crossJoin(RelationalExpression e1, RelationalExpression e2,
-                                                  java.util.function.Function<ImmutableMap<QualifiedAttributeID, Variable>, Function> getAtomOnExpression) {
+    static RelationalExpression joinOn(RelationalExpression e1, RelationalExpression e2,
+                                       java.util.function.Function<ImmutableMap<QualifiedAttributeID, Variable>, ImmutableList<Function>> getAtomOnExpression) {
 
         // TODO: better exception?
         if (!relationAliasesConsistent(e1.attributes, e2.attributes))
@@ -108,30 +107,17 @@ public class RelationalExpression {
 
                 .build();
 
-        ImmutableList.Builder<Function> atomsBuilder = ImmutableList.builder();
-        atomsBuilder.addAll(e1.atoms).addAll(e2.atoms);
-        if (getAtomOnExpression != null)
-            atomsBuilder.add(getAtomOnExpression.apply(attributes)).build();
+        ImmutableList<Function> atoms = ImmutableList.<Function>builder()
+                .addAll(e1.atoms)
+                .addAll(e2.atoms)
+                .addAll(getAtomOnExpression.apply(attributes))
+                .build();
 
-       Map<QuotedID, ImmutableSet<RelationID>> attributeOccurrences =
-                getAttributeOccurrences(e1,e2, id -> attributeOccurrencesUnion(id, e1, e2));
+        ImmutableMap<QuotedID, ImmutableSet<RelationID>> attributeOccurrences =
+                getAttributeOccurrences(e1, e2, id -> attributeOccurrencesUnion(id, e1, e2));
 
-        return new RelationalExpression(atomsBuilder.build(), attributes, ImmutableMap.copyOf(attributeOccurrences));
+        return new RelationalExpression(atoms, attributes, attributeOccurrences);
     }
-
-    /**
-     * @param e1                  is a {@link RelationalExpression)
-     * @param e2                  is a {@link RelationalExpression)
-     * @param getAtomOnExpression is a {@link java.util.function.Function} <{@link ImmutableMap}<{@link QualifiedAttributeID}, {@link Variable}>
-     * @return a {@link RelationalExpression}
-     */
-    static RelationalExpression joinOn(RelationalExpression e1, RelationalExpression e2,
-                                       java.util.function.Function<ImmutableMap<QualifiedAttributeID, Variable>, Function> getAtomOnExpression) {
-
-        return crossJoin(e1, e2, getAtomOnExpression);
-
-    }
-
 
     /**
      * NATURAL JOIN of two relations
@@ -165,7 +151,8 @@ public class RelationalExpression {
      * @param usingColumns is a {@link ImmutableSet}<{@link QuotedID}>
      * @return a {@link RelationalExpression)
      */
-    static RelationalExpression joinUsing(RelationalExpression e1, RelationalExpression e2, ImmutableSet<QuotedID> usingColumns) {
+    static RelationalExpression joinUsing(RelationalExpression e1, RelationalExpression e2,
+                                          ImmutableSet<QuotedID> usingColumns) {
 
         // TODO: better exception?
         if (!relationAliasesConsistent(e1.attributes, e2.attributes))
@@ -187,8 +174,7 @@ public class RelationalExpression {
      * @param usingAttributes is a {@link Set}<{@link QuotedID}>
      * @return a {@link RelationalExpression}
      */
-    private static RelationalExpression internalJoinUsing(RelationalExpression e1,
-                                                          RelationalExpression e2,
+    private static RelationalExpression internalJoinUsing(RelationalExpression e1, RelationalExpression e2,
                                                           ImmutableSet<QuotedID> usingAttributes) {
 
         ImmutableMap<QualifiedAttributeID, Variable> attributes = ImmutableMap.<QualifiedAttributeID, Variable>builder()
@@ -208,13 +194,16 @@ public class RelationalExpression {
                 .addAll(e2.atoms)
                 .addAll(usingAttributes.stream()
                         .map(id -> new QualifiedAttributeID(null, id))
-                        .map(id -> FACTORY.getFunctionEQ(e1.attributes.get(id), e2.attributes.get(id))).iterator())
+                        // TODO: add a check that the attributes exist?
+                        .map(id -> FACTORY.getFunctionEQ(e1.attributes.get(id), e2.attributes.get(id)))
+                        .iterator())
                 .build();
 
-        ImmutableMap<QuotedID, ImmutableSet<RelationID>> attributeOccurrences = getAttributeOccurrences( e1, e2 ,
-                                id -> usingAttributes.contains(id)
-                                        ? e1.attributeOccurrences.get(id)
-                                        : attributeOccurrencesUnion(id, e1, e2));
+        ImmutableMap<QuotedID, ImmutableSet<RelationID>> attributeOccurrences =
+                getAttributeOccurrences(e1, e2,
+                        id -> usingAttributes.contains(id)
+                                ? e1.attributeOccurrences.get(id)
+                                : attributeOccurrencesUnion(id, e1, e2));
 
         return new RelationalExpression(atoms, attributes, attributeOccurrences);
     }
@@ -224,23 +213,20 @@ public class RelationalExpression {
      * Add an {@link ImmutableList} of atoms {@link Function} to {@link RelationalExpression}
      *
      * @param e1         ia a {@link RelationalExpression)
-     * @param atomsToAdd {@link ImmutableList} of {@link Function}
+     * @param atoms {@link ImmutableList} of {@link Function}
      * @return a {@link RelationalExpression}
      */
     // TODO: i'm not sure this method is helpful (to be removed)
-    static RelationalExpression addAtoms(RelationalExpression e1, Function atom) {
-
-        // and add an atom for the expression
-        ImmutableList<Function> atoms = ImmutableList.<Function>builder()
-                .addAll(e1.atoms).add(atom).build();
-
-        return new RelationalExpression(atoms, e1.attributes, e1.attributeOccurrences);
+    static RelationalExpression addAtoms(RelationalExpression e1, ImmutableList<Function> atoms) {
+        return new RelationalExpression(ImmutableList.<Function>builder()
+                .addAll(e1.atoms).addAll(atoms).build(), e1.attributes, e1.attributeOccurrences);
     }
 
 
     /**
      * treats null values as empty sets
      *
+     * @param id 
      * @param e1 a relational expression
      * @param e2 a relational expression
      * @return the union of occurrences of id in e1 and e2
@@ -260,14 +246,6 @@ public class RelationalExpression {
         return ImmutableSet.<RelationID>builder().addAll(s1).addAll(s2).build();
     }
 
-    // TODO: make this part of a filterAttribute-type method
-    private static ImmutableSet<QuotedID> attributeOccurrencesKeys(RelationalExpression e1,
-                                                                   RelationalExpression e2) {
-        return ImmutableSet.<QuotedID>builder()
-                .addAll(e1.attributeOccurrences.keySet())
-                .addAll(e2.attributeOccurrences.keySet())
-                .build();
-    }
 
     private ImmutableMap<QualifiedAttributeID, Variable> filterAttributes(java.util.function.Predicate<QualifiedAttributeID> condition) {
 
@@ -277,16 +255,18 @@ public class RelationalExpression {
     }
 
 
-    private static ImmutableMap<QuotedID, ImmutableSet<RelationID> > getAttributeOccurrences(RelationalExpression e1,
-                                                                                             RelationalExpression e2,
-                                                                                             java.util.function.Function< QuotedID, ImmutableSet<RelationID>>
-                                                                                                    collector ) {
+    private static ImmutableMap<QuotedID, ImmutableSet<RelationID>> getAttributeOccurrences(RelationalExpression e1,
+                                                                                            RelationalExpression e2,
+                                                                                            java.util.function.Function<QuotedID, ImmutableSet<RelationID>>
+                                                                                                    collector) {
 
-        final ImmutableMap<QuotedID, ImmutableSet<RelationID>> collect = attributeOccurrencesKeys(e1, e2).stream()
+        ImmutableSet<QuotedID> keys = ImmutableSet.<QuotedID>builder()
+                .addAll(e1.attributeOccurrences.keySet())
+                .addAll(e2.attributeOccurrences.keySet())
+                .build();
+
+        return keys.stream()
                 .collect(ImmutableCollectors.toMap(identity(), collector::apply));
-
-        return collect;
-
     }
 
 
