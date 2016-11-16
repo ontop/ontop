@@ -63,7 +63,7 @@ public class PushDownBooleanExpressionOptimizerTest {
     }
 
     @Test
-    public void testJoiningConditionTest1() throws EmptyQueryException {
+    public void testJoiningCondition1() throws EmptyQueryException {
 
         IntermediateQueryBuilder queryBuilder1 = new DefaultIntermediateQueryBuilder(metadata);
         DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE1, X, Y, Z, W);
@@ -107,7 +107,7 @@ public class PushDownBooleanExpressionOptimizerTest {
     }
 
     @Test
-    public void testJoiningConditionTest2 () throws EmptyQueryException {
+    public void testJoiningCondition2 () throws EmptyQueryException {
 
         IntermediateQueryBuilder queryBuilder1 = new DefaultIntermediateQueryBuilder(metadata);
         DistinctVariableOnlyDataAtom projectionAtom1 = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE2, X, Y, Z);
@@ -174,7 +174,7 @@ public class PushDownBooleanExpressionOptimizerTest {
     }
 
     @Test
-    public void testJoiningConditionTest3 () throws EmptyQueryException {
+    public void testJoiningCondition3 () throws EmptyQueryException {
 
         IntermediateQueryBuilder queryBuilder1 = new DefaultIntermediateQueryBuilder(metadata);
         DistinctVariableOnlyDataAtom projectionAtom1 = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE1, X, Y, Z, W);
@@ -221,7 +221,7 @@ public class PushDownBooleanExpressionOptimizerTest {
     }
 
     @Test
-    public void testJoiningConditionTest4 () throws EmptyQueryException {
+    public void testJoiningCondition4 () throws EmptyQueryException {
 
         IntermediateQueryBuilder queryBuilder1 = new DefaultIntermediateQueryBuilder(metadata);
         DistinctVariableOnlyDataAtom projectionAtom1 = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE3, X, Y, Z, W, A);
@@ -279,7 +279,7 @@ public class PushDownBooleanExpressionOptimizerTest {
     }
 
     @Test
-    public void testJoiningConditionTest5 () throws EmptyQueryException {
+    public void testJoiningCondition5 () throws EmptyQueryException {
 
         IntermediateQueryBuilder queryBuilder1 = new DefaultIntermediateQueryBuilder(metadata);
         DistinctVariableOnlyDataAtom projectionAtom1 = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE1, X, Y, Z, W);
@@ -331,7 +331,7 @@ public class PushDownBooleanExpressionOptimizerTest {
     }
 
     @Test
-    public void testJoiningConditionTest6 () throws EmptyQueryException {
+    public void testLeftJoinCondition1 () throws EmptyQueryException {
 
         IntermediateQueryBuilder queryBuilder1 = new DefaultIntermediateQueryBuilder(metadata);
         DistinctVariableOnlyDataAtom projectionAtom1 = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE1, W, X, Y, Z);
@@ -383,7 +383,7 @@ public class PushDownBooleanExpressionOptimizerTest {
     }
 
     @Test
-    public void testJoiningConditionTest7 () throws EmptyQueryException {
+    public void testLeftJoinCondition2 () throws EmptyQueryException {
 
         IntermediateQueryBuilder queryBuilder1 = new DefaultIntermediateQueryBuilder(metadata);
         DistinctVariableOnlyDataAtom projectionAtom1 = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE1, W, X, Y, Z);
@@ -435,7 +435,7 @@ public class PushDownBooleanExpressionOptimizerTest {
     }
 
     @Test
-    public void testJoiningConditionTest8 () throws EmptyQueryException {
+    public void testLeftJoinAndFilterCondition1 () throws EmptyQueryException {
 
         IntermediateQueryBuilder queryBuilder1 = new DefaultIntermediateQueryBuilder(metadata);
         DistinctVariableOnlyDataAtom projectionAtom1 = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE1, W, X, Y, Z);
@@ -488,7 +488,7 @@ public class PushDownBooleanExpressionOptimizerTest {
 
     }
     @Test
-    public void testJoiningConditionTest9 () throws EmptyQueryException {
+    public void testLeftJoinAndFilterCondition2 () throws EmptyQueryException {
 
         IntermediateQueryBuilder queryBuilder1 = new DefaultIntermediateQueryBuilder(metadata);
         DistinctVariableOnlyDataAtom projectionAtom1 = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE1, W, X, Y, Z);
