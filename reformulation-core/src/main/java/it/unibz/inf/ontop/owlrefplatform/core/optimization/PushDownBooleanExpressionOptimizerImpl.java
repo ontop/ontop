@@ -259,15 +259,12 @@ public class PushDownBooleanExpressionOptimizerImpl implements PushDownBooleanEx
                                                ImmutableList<QueryNode> candidateSubtreeRoots,
                                                ImmutableExpression expression) {
         ImmutableList.Builder<QueryNode> selectedSubtreeRootsBuilder = ImmutableList.builder();
-        //Union of variables projected out by candidate subtrees
-        ImmutableSet.Builder<Variable> allProjectedVariablesBuilder = ImmutableSet.builder();
         // Non-final
         boolean mustKeepAtProviderLevel = false;
 
         ImmutableSet<Variable> expressionVariables = expression.getVariables();
         for(QueryNode candidateSubtreeRoot : candidateSubtreeRoots) {
             ImmutableSet<Variable> projectedVariables = query.getVariables(candidateSubtreeRoot);
-            allProjectedVariablesBuilder.addAll(projectedVariables);
 
             if (projectedVariables.containsAll(expressionVariables)) {
                 selectedSubtreeRootsBuilder.add(candidateSubtreeRoot);
@@ -284,17 +281,11 @@ public class PushDownBooleanExpressionOptimizerImpl implements PushDownBooleanEx
 
         ImmutableList<QueryNode> selectedSubtreeRoots = selectedSubtreeRootsBuilder.build();
         /**
-         * If no candidate subtree has been selected
+         * If no candidate subtree has been selected,
+         * keep the expression at the provider's level (otherwise the expression will be dropped)
          */
         if(selectedSubtreeRoots.isEmpty()){
-            ImmutableSet<Variable> allProjectedVariables = allProjectedVariablesBuilder.build();
-            /**
-             * If the union of all subtree's variables is a superset of the expression's variables,
-             * keep the expression at the provider's level (otherwise the expression will be dropped)
-             */
-            if(allProjectedVariables.containsAll(expressionVariables)){
                 mustKeepAtProviderLevel = true;
-            }
         }
 
         Stream<Recipient> childRecipients = selectedSubtreeRoots.stream()
