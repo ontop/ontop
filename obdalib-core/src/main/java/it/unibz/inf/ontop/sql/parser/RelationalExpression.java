@@ -12,7 +12,6 @@ import it.unibz.inf.ontop.sql.QuotedID;
 import it.unibz.inf.ontop.sql.RelationID;
 import it.unibz.inf.ontop.sql.parser.exceptions.InvalidSelectQuery;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
-import net.sf.jsqlparser.expression.Expression;
 
 import java.util.Map;
 import java.util.Set;
@@ -83,13 +82,23 @@ public class RelationalExpression {
      * @return a {@link RelationalExpression}
      */
     public static RelationalExpression crossJoin(RelationalExpression e1, RelationalExpression e2) {
+       return crossJoin( e1,e2, null);
+    }
+
+    /**
+     * CROSS JOIN of two relations (also denoted by , in SQL)
+     *
+     * @param e1 is a {@link RelationalExpression)
+     * @param e2 is a {@link RelationalExpression)
+     * @param getAtomOnExpression is a {@link java.util.function.Function} <{@link ImmutableMap}<{@link QualifiedAttributeID}, {@link Variable}>
+     * @return a {@link RelationalExpression}
+     */
+    private  static RelationalExpression crossJoin(RelationalExpression e1, RelationalExpression e2,
+                                                 java.util.function.Function<ImmutableMap<QualifiedAttributeID, Variable>, Function>getAtomOnExpression) {
 
         // TODO: better exception?
         if (!relationAliasesConsistent(e1.attributes, e2.attributes))
             throw new InvalidSelectQuery("Relation alias occurs in both arguments of the join", null);
-
-        ImmutableList<Function> atoms = ImmutableList.<Function>builder()
-                .addAll(e1.atoms).addAll(e2.atoms).build();
 
         ImmutableMap<QualifiedAttributeID, Variable> attributes = ImmutableMap.<QualifiedAttributeID, Variable>builder()
                 .putAll(e1.filterAttributes(id ->
@@ -100,31 +109,31 @@ public class RelationalExpression {
 
                 .build();
 
+        ImmutableList.Builder<Function> atomsBuilder  =  ImmutableList.builder();
+        atomsBuilder.addAll(e1.atoms).addAll(e2.atoms);
+        if ( getAtomOnExpression != null  )
+            atomsBuilder.add(getAtomOnExpression.apply(attributes)).build();
+
         // TODO: refactor in a separate method
         Map<QuotedID, ImmutableSet<RelationID>> attributeOccurrences =
                 attributeOccurrencesKeys(e1, e2).stream()
                         .collect(Collectors.toMap(identity(),
                                 id -> attributeOccurrencesUnion(id, e1, e2)));
 
-        return new RelationalExpression(atoms, attributes, ImmutableMap.copyOf(attributeOccurrences));
+        return new RelationalExpression(atomsBuilder.build(), attributes, ImmutableMap.copyOf(attributeOccurrences));
     }
 
     /**
      * @param e1                      is a {@link RelationalExpression)
      * @param e2                      is a {@link RelationalExpression)
-     * @param getAtomFromOnExpression is a function that given a {@link RelationalExpression} returns an atom form an ON {@link Expression}
+     * * @param getAtomOnExpression is a {@link java.util.function.Function} <{@link ImmutableMap}<{@link QualifiedAttributeID}, {@link Variable}>
      * @return a {@link RelationalExpression}
      */
     static RelationalExpression joinOn(RelationalExpression e1, RelationalExpression e2,
-                                       java.util.function.Function<RelationalExpression, Function> getAtomOnExpression) {
+                                       java.util.function.Function<ImmutableMap<QualifiedAttributeID, Variable>, Function>getAtomOnExpression) {
 
-        RelationalExpression e = crossJoin(e1, e2);
-        ImmutableList<Function> atoms = ImmutableList.<Function>builder()
-                .addAll(e.atoms).add(getAtomOnExpression.apply(e)).build();
+        return  crossJoin(e1,e2, getAtomOnExpression);
 
-        // TODO: this creates an unnecessary RelationalExpression instance and an extra List,
-        // TODO: refactor crossJoin so that it takes an extra parameter
-        return new RelationalExpression(atoms, e.attributes, e.attributeOccurrences);
     }
 
 

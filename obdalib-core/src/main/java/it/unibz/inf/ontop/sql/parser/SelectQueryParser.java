@@ -81,7 +81,7 @@ public class SelectQueryParser {
             }
 
             if (plainSelect.getWhere() != null ) {
-                Function atomsFromExpression = getAtomsFromExpression(current, plainSelect.getWhere());
+                Function atomsFromExpression = getAtomsFromExpression(current.getAttributes(), plainSelect.getWhere());
                 current = RelationalExpression.addAtoms(current, atomsFromExpression);
             }
 
@@ -111,6 +111,12 @@ public class SelectQueryParser {
             parsedSql = null;
         }
         return parsedSql;
+    }
+
+    private Function getAtomsFromExpression(ImmutableMap<QualifiedAttributeID, Variable> attributes, Expression expression) {
+        // TODO: move declaration of parser to the more approprote place
+        ExpressionParser parser = new ExpressionParser(attributes, metadata.getQuotedIDFactory());
+        return parser.convert(expression);
     }
 
 
@@ -250,11 +256,6 @@ public class SelectQueryParser {
         }
     }
 
-    private Function getAtomsFromExpression(RelationalExpression current, Expression expression) {
-        // TODO: move declaration of parser to the more approprote place
-        ExpressionParser parser = new ExpressionParser(current.getAttributes(), metadata.getQuotedIDFactory());
-        return parser.convert(expression);
-    }
 
 
 
