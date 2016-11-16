@@ -11,6 +11,7 @@ import it.unibz.inf.ontop.sql.QualifiedAttributeID;
 import it.unibz.inf.ontop.sql.QuotedID;
 import it.unibz.inf.ontop.sql.RelationID;
 import it.unibz.inf.ontop.sql.parser.exceptions.InvalidSelectQuery;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import net.sf.jsqlparser.expression.Expression;
 
 import java.util.Map;
@@ -99,13 +100,33 @@ public class RelationalExpression {
 
                 .build();
 
+        // TODO: refactor in a separate method
         Map<QuotedID, ImmutableSet<RelationID>> attributeOccurrences =
                 attributeOccurrencesKeys(e1, e2).stream()
                         .collect(Collectors.toMap(identity(),
-                                id -> attribiteOccuurencesUnion(id, e1, e2)));
+                                id -> attributeOccurrencesUnion(id, e1, e2)));
 
         return new RelationalExpression(atoms, attributes, ImmutableMap.copyOf(attributeOccurrences));
     }
+
+    /**
+     * @param e1                      is a {@link RelationalExpression)
+     * @param e2                      is a {@link RelationalExpression)
+     * @param getAtomFromOnExpression is a function that given a {@link RelationalExpression} returns an atom form an ON {@link Expression}
+     * @return a {@link RelationalExpression}
+     */
+    static RelationalExpression joinOn(RelationalExpression e1, RelationalExpression e2,
+                                       java.util.function.Function<RelationalExpression, Function> getAtomOnExpression) {
+
+        RelationalExpression e = crossJoin(e1, e2);
+        ImmutableList<Function> atoms = ImmutableList.<Function>builder()
+                .addAll(e.atoms).add(getAtomOnExpression.apply(e)).build();
+
+        // TODO: this creates an unnecessary RelationalExpression instance and an extra List,
+        // TODO: refactor crossJoin so that it takes an extra parameter
+        return new RelationalExpression(atoms, e.attributes, e.attributeOccurrences);
+    }
+
 
 
     /**
@@ -121,52 +142,80 @@ public class RelationalExpression {
         if (!relationAliasesConsistent(e1.attributes, e2.attributes))
             throw new InvalidSelectQuery("Relation alias occurs in both arguments of the join", null);
 
-        Set<QuotedID> sharedAttributes = e1.attributeOccurrences.keySet().stream()
+        ImmutableSet<QuotedID> sharedAttributes = e1.attributeOccurrences.keySet().stream()
                 .filter(id -> !e1.isAbsent(id) && !e2.isAbsent(id))
-                .collect(Collectors.toSet());
+                .collect(ImmutableCollectors.toSet());
 
-        return naturalJoin(e1, e2, sharedAttributes);
-    }
-
-    /**
-     * NATURAL JOIN of two relations
-     *
-     * @param e1               is a {@link RelationalExpression)
-     * @param e2               is a {@link RelationalExpression)
-     * @param sharedAttributes is a {@link Set}<{@link QuotedID}>
-     * @return a {@link RelationalExpression}
-     */
-    private static RelationalExpression naturalJoin(RelationalExpression e1, RelationalExpression e2, Set<QuotedID> sharedAttributes) {
         // TODO: better exception? more informative error message?
         if (sharedAttributes.stream().anyMatch(id -> e1.isAmbiguous(id) || e2.isAmbiguous(id)))
             throw new UnsupportedOperationException("common ambiguous attribute in select");
 
+        return internalJoinUsing(e1, e2, sharedAttributes);
+    }
+
+    /**
+     * JOIN USING of two relations
+     *
+     * @param e1           is a {@link RelationalExpression)
+     * @param e2           is a {@link RelationalExpression)
+     * @param usingColumns is a {@link ImmutableSet}<{@link QuotedID}>
+     * @return a {@link RelationalExpression)
+     */
+    static RelationalExpression joinUsing(RelationalExpression e1, RelationalExpression e2, ImmutableSet<QuotedID> usingColumns) {
+
+        // TODO: better exception?
+        if (!relationAliasesConsistent(e1.attributes, e2.attributes))
+            throw new InvalidSelectQuery("Relation alias occurs in both arguments of the join", null);
+
+        // TODO: use anyMatch
+        for (QuotedID id : usingColumns)
+            if (!e1.isUnique(id) || !e2.isUnique(id))
+                throw new UnsupportedOperationException("ambiguous column attributes in using statement");
+
+        return RelationalExpression.internalJoinUsing(e1, e2, usingColumns);
+    }
+
+    /**
+     * JOIN USING of two relations
+     *
+     * @param e1               is a {@link RelationalExpression)
+     * @param e2               is a {@link RelationalExpression)
+     * @param usingAttributes is a {@link Set}<{@link QuotedID}>
+     * @return a {@link RelationalExpression}
+     */
+    private static RelationalExpression internalJoinUsing(RelationalExpression e1,
+                                                    RelationalExpression e2,
+                                                    ImmutableSet<QuotedID> usingAttributes) {
+
         ImmutableMap<QualifiedAttributeID, Variable> attributes = ImmutableMap.<QualifiedAttributeID, Variable>builder()
                 .putAll(e1.filterAttributes(id ->
-                        (id.getRelation() != null && !sharedAttributes.contains(id.getAttribute()))
+                        (id.getRelation() != null && !usingAttributes.contains(id.getAttribute()))
                                 || (id.getRelation() == null && e2.isAbsent(id.getAttribute()))
-                                || (id.getRelation() == null && sharedAttributes.contains(id.getAttribute()))))
+                                || (id.getRelation() == null && usingAttributes.contains(id.getAttribute()))))
+
                 .putAll(e2.filterAttributes(id ->
-                        (id.getRelation() != null && !sharedAttributes.contains(id.getAttribute()))
+                        (id.getRelation() != null && !usingAttributes.contains(id.getAttribute()))
                                 || (id.getRelation() == null && e1.isAbsent(id.getAttribute()))))
+
                 .build();
 
         ImmutableList<Function> atoms = ImmutableList.<Function>builder()
                 .addAll(e1.atoms)
                 .addAll(e2.atoms)
-                .addAll(sharedAttributes.stream()
+                .addAll(usingAttributes.stream()
                         .map(id -> new QualifiedAttributeID(null, id))
                         .map(id -> FACTORY.getFunctionEQ(e1.attributes.get(id), e2.attributes.get(id))).iterator())
                 .build();
 
-        Map<QuotedID, ImmutableSet<RelationID>> attributeOccurrences =
+        // TODO: refactor into a separate method
+        ImmutableMap<QuotedID, ImmutableSet<RelationID>> attributeOccurrences =
                 attributeOccurrencesKeys(e1, e2).stream()
-                        .collect(Collectors.toMap(identity(),
-                                id -> sharedAttributes.contains(id)
+                        .collect(ImmutableCollectors.toMap(identity(),
+                                id -> usingAttributes.contains(id)
                                         ? e1.attributeOccurrences.get(id)
-                                        : attribiteOccuurencesUnion(id, e1, e2)));
+                                        : attributeOccurrencesUnion(id, e1, e2)));
 
-        return new RelationalExpression(atoms, attributes, ImmutableMap.copyOf(attributeOccurrences));
+        return new RelationalExpression(atoms, attributes, attributeOccurrences);
     }
 
 
@@ -187,40 +236,6 @@ public class RelationalExpression {
         return new RelationalExpression(atoms, e1.attributes, e1.attributeOccurrences);
     }
 
-    /**
-     * @param e1                      is a {@link RelationalExpression)
-     * @param e2                      is a {@link RelationalExpression)
-     * @param getAtomFromOnExpression is a function that given a {@link RelationalExpression} returns an atom form an ON {@link Expression}
-     * @return a {@link RelationalExpression}
-     */
-    static RelationalExpression joinOn(RelationalExpression e1, RelationalExpression e2, java.util.function.Function<RelationalExpression, Function> getAtomOnExpression) {
-
-        RelationalExpression current = RelationalExpression.crossJoin(e1, e2);
-        Function atomOn = getAtomOnExpression.apply(current);
-        // and add an atom for the ON expression
-        ImmutableList<Function> atoms = ImmutableList.<Function>builder()
-                .addAll(current.getAtoms()).add(atomOn).build();
-
-        return new RelationalExpression(atoms, e1.attributes, e1.attributeOccurrences);
-    }
-
-
-    /**
-     * JOIN USING of two relations
-     *
-     * @param e1           is a {@link RelationalExpression)
-     * @param e2           is a {@link RelationalExpression)
-     * @param usingColumns is a {@link ImmutableSet}<{@link QuotedID}>
-     * @return a {@link RelationalExpression)
-     */
-    static RelationalExpression joinUsing(RelationalExpression e1, RelationalExpression e2, ImmutableSet<QuotedID> usingColumns) {
-
-        for (QuotedID id : usingColumns)
-            if (!e1.isUnique(id) || !e2.isUnique(id))
-                throw new UnsupportedOperationException("ambiguous column attributes in using statement");
-
-        return RelationalExpression.naturalJoin(e1, e2, usingColumns);
-    }
 
     /**
      * treats null values as empty sets
@@ -229,7 +244,7 @@ public class RelationalExpression {
      * @param e2 a relational expression
      * @return the union of occurrences of id in e1 and e2
      */
-    private static ImmutableSet<RelationID> attribiteOccuurencesUnion(QuotedID id,
+    private static ImmutableSet<RelationID> attributeOccurrencesUnion(QuotedID id,
                                                                       RelationalExpression e1, RelationalExpression e2) {
 
         ImmutableSet<RelationID> s1 = e1.attributeOccurrences.get(id);
@@ -244,6 +259,7 @@ public class RelationalExpression {
         return ImmutableSet.<RelationID>builder().addAll(s1).addAll(s2).build();
     }
 
+    // TODO: make this part of a filterAttribute-type method
     private static ImmutableSet<QuotedID> attributeOccurrencesKeys(RelationalExpression e1,
                                                                    RelationalExpression e2) {
         return ImmutableSet.<QuotedID>builder()
@@ -252,11 +268,11 @@ public class RelationalExpression {
                 .build();
     }
 
-    private Map<QualifiedAttributeID, Variable> filterAttributes(java.util.function.Predicate<QualifiedAttributeID> condition) {
+    private ImmutableMap<QualifiedAttributeID, Variable> filterAttributes(java.util.function.Predicate<QualifiedAttributeID> condition) {
 
         return attributes.entrySet().stream()
                 .filter(e -> condition.test(e.getKey()))
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+                .collect(ImmutableCollectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
     /**
@@ -265,13 +281,18 @@ public class RelationalExpression {
      * @param attributes1 is an {@link ImmutableMap}<{@link QualifiedAttributeID}, {@link Variable}>
      * @param attributes2 is an {@link ImmutableMap}<{@link QualifiedAttributeID}, {@link Variable}>
      */
-    private static boolean relationAliasesConsistent(ImmutableMap<QualifiedAttributeID, Variable> attributes1, ImmutableMap<QualifiedAttributeID, Variable> attributes2) {
+    private static boolean relationAliasesConsistent(ImmutableMap<QualifiedAttributeID, Variable> attributes1,
+                                                     ImmutableMap<QualifiedAttributeID, Variable> attributes2) {
+        // the first one is mutable
         Set<RelationID> alias1 = attributes1.keySet().stream()
                 .filter(key -> key.getRelation() != null)
                 .map(QualifiedAttributeID::getRelation).collect(Collectors.toSet());
-        Set<RelationID> alias2 = attributes2.keySet().stream()
+
+        ImmutableSet<RelationID> alias2 = attributes2.keySet().stream()
                 .filter(key -> key.getRelation() != null)
-                .map(QualifiedAttributeID::getRelation).collect(Collectors.toSet());
+                .map(QualifiedAttributeID::getRelation).collect(ImmutableCollectors.toSet());
+
+        // TODO: a better way of checking non-emptiness of intersection without actually constructing it?
         alias1.retainAll(alias2); // intersection
         return alias1.isEmpty();
     }
