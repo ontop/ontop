@@ -121,7 +121,7 @@ public class SelectQueryParser {
     private ImmutableList<Function> getAtomsFromExpression(ImmutableMap<QualifiedAttributeID, Variable> attributes, Expression expression) {
         // TODO: move declaration of parser to the more appropriate place
         ExpressionParser parser = new ExpressionParser(attributes, metadata.getQuotedIDFactory());
-        return ImmutableList.of(parser.convert(expression));
+        return parser.convert(expression);
     }
 
 

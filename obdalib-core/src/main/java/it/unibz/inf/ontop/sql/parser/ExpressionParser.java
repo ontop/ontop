@@ -40,9 +40,32 @@ public class ExpressionParser {
         this.idfac = idfac;
     }
 
-    public Function convert(Expression expression) {
+    public ImmutableList<Function> convert(Expression expression) {
         ExpressionVisitorImpl visitor = new ExpressionVisitorImpl();
-        return (Function)visitor.translate(expression);
+
+        if (expression instanceof AndExpression) {
+            ImmutableList.Builder<Function> builder = ImmutableList.builder();
+            do {
+                AndExpression and = (AndExpression) expression;
+                // for a sequence of AND operations, JSQLParser makes the right argument simple
+                builder.add(translateIntoFunction(visitor, and.getRightExpression()));
+                // and the left argument complex (nested AND)
+                expression = and.getLeftExpression();
+            } while (expression instanceof AndExpression);
+
+            builder.add(translateIntoFunction(visitor, expression));
+            return builder.build().reverse();
+        }
+        return ImmutableList.of(translateIntoFunction(visitor, expression));
+    }
+
+    private static Function translateIntoFunction(ExpressionVisitorImpl visitor, Expression expression) {
+        Term t = visitor.translate(expression);
+        if (t instanceof Function)
+            return (Function)t;
+
+        // TODO: better handling of the situation?
+        throw new RuntimeException("");
     }
 
     // TODO: this class is being reviewed

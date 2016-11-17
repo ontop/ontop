@@ -226,7 +226,7 @@ public class RelationalExpression {
     /**
      * treats null values as empty sets
      *
-     * @param id 
+     * @param id
      * @param e1 a relational expression
      * @param e2 a relational expression
      * @return the union of occurrences of id in e1 and e2
