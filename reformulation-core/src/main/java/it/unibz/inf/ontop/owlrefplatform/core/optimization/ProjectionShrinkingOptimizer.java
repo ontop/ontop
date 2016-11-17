@@ -40,8 +40,8 @@ public class ProjectionShrinkingOptimizer implements IntermediateQueryOptimizer 
         Optional<QueryNode> optionalNextNode;
         Optional<ProjectionShrinkingProposal> optionalProposal = Optional.empty();
 
-        if (focusNode instanceof JoinLikeNode) {
-            updateEncounteredVariables((JoinLikeNode) focusNode, query, allRetainedVariables);
+        if (focusNode instanceof JoinOrFilterNode) {
+            allRetainedVariables = updateEncounteredVariables((JoinOrFilterNode) focusNode, query, allRetainedVariables);
         } else if (focusNode instanceof UnionNode || focusNode instanceof ConstructionNode) {
             optionalProposal = makeProposal((ExplicitVariableProjectionNode) focusNode, query, allRetainedVariables);
         }
@@ -74,30 +74,36 @@ public class ProjectionShrinkingOptimizer implements IntermediateQueryOptimizer 
     }
 
 
-    private ImmutableSet<Variable> updateEncounteredVariables(JoinLikeNode joinLikeNode, IntermediateQuery query,
+    private ImmutableSet<Variable> updateEncounteredVariables(JoinOrFilterNode joinOrFilterNode, IntermediateQuery query,
                                                               ImmutableSet<Variable> allRetainedVariables) {
-        ImmutableList.Builder<Variable> newVariablesBuilder = ImmutableList.builder();
+
         /**
-         * Add all variables encountered in explicit joining conditions
+         * Add all variables encountered in filtering or explicit joining conditions
          */
-        Optional<ImmutableExpression> explicitJoiningCondition = joinLikeNode.getOptionalFilterCondition();
+        Set<Variable> joinOrFilterVariables = new HashSet<>();
+        Optional<ImmutableExpression> explicitJoiningCondition = joinOrFilterNode.getOptionalFilterCondition();
         if (explicitJoiningCondition.isPresent()) {
-            newVariablesBuilder.addAll(explicitJoiningCondition.get().getVariables());
+            joinOrFilterVariables.addAll(explicitJoiningCondition.get().getVariables());
         }
 
         /**
-         * Add all variables encountered in implicit joining conditions (i.e. shared by at least two children subtrees)
+         * Add all variables encountered in implicit joining conditions,
+         * i.e. projected out by at least two children subtrees of a JoinLikeNnode
          */
-        Set<Variable> encounteredVariables = new HashSet<>();
+
         Set<Variable> repeatedVariables = new HashSet<>();
-        for (QueryNode child : query.getChildren(joinLikeNode)) {
-            for (Variable v : child.getLocalVariables()) {
-                if (encounteredVariables.contains(v)) {
-                    repeatedVariables.add(v);
+        if (joinOrFilterNode instanceof JoinLikeNode) {
+            Set<Variable> encounteredVariables = new HashSet<>();
+            for (QueryNode child : query.getChildren(joinOrFilterNode)) {
+                for (Variable v : query.getVariables(child)) {
+                    if (encounteredVariables.contains(v)) {
+                        repeatedVariables.add(v);
+                    }
+                    encounteredVariables.add(v);
                 }
-                encounteredVariables.add(v);
             }
         }
-        return ImmutableSet.copyOf(Sets.union(allRetainedVariables, repeatedVariables));
+        joinOrFilterVariables.addAll(repeatedVariables);
+        return ImmutableSet.copyOf(Sets.union(allRetainedVariables, joinOrFilterVariables));
     }
 }
