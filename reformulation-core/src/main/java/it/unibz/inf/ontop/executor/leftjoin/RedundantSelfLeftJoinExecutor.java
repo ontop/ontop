@@ -97,6 +97,13 @@ public class RedundantSelfLeftJoinExecutor
             throws EmptyQueryException {
 
         /**
+         * No optimization if a left join condition is present
+         */
+        if(leftJoinNode.getOptionalFilterCondition().isPresent()) {
+            return new NodeCentricOptimizationResultsImpl<>(query, leftJoinNode);
+        }
+
+        /**
          * There exists a valid substitution from the rightDataNode to the leftDataNode. Hence, we can
          * get rid of the rightDataNode as in the inner join case.
          */
