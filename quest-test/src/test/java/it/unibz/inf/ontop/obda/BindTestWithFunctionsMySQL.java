@@ -262,10 +262,10 @@ public class BindTestWithFunctionsMySQL {
                 + "}";
 
         List<String> expectedValues = new ArrayList<>();
-         expectedValues.add("\"8.5000\"");
-         expectedValues.add("\"5.7500\"");
-         expectedValues.add("\"6.7000\"");
-         expectedValues.add("\"1.5000\"");
+         expectedValues.add("\"9\"^^xsd:decimal");
+         expectedValues.add("\"6\"^^xsd:decimal");
+         expectedValues.add("\"7\"^^xsd:decimal");
+         expectedValues.add("\"2\"^^xsd:decimal");
         checkReturnedValues(p, queryBind, expectedValues);
 	}
 
@@ -287,10 +287,10 @@ public class BindTestWithFunctionsMySQL {
                 + "}";
 
         List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"42.50\"^^xsd:decimal");
-        expectedValues.add("\"23.00\"^^xsd:decimal");
-        expectedValues.add("\"33.50\"^^xsd:decimal");
-        expectedValues.add("\"10.00\"^^xsd:decimal");
+        expectedValues.add("\"43\"^^xsd:decimal");
+        expectedValues.add("\"23\"^^xsd:decimal");
+        expectedValues.add("\"34\"^^xsd:decimal");
+        expectedValues.add("\"10\"^^xsd:decimal");
         checkReturnedValues(p, queryBind, expectedValues);
     }
 
