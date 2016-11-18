@@ -65,4 +65,8 @@ public interface QueryTree {
 
     void transferChild(QueryNode childNode, QueryNode formerParentNode, QueryNode newParentNode,
                        Optional<NonCommutativeOperatorNode.ArgumentPosition> optionalPosition);
+
+
+
+    int getVersionNumber();
 }

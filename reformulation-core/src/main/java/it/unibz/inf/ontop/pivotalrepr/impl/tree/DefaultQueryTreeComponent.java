@@ -269,6 +269,11 @@ public class DefaultQueryTreeComponent implements QueryTreeComponent {
         }
     }
 
+    @Override
+    public int getVersionNumber() {
+        return tree.getVersionNumber();
+    }
+
     private Stream<Variable> getProjectedVariableStream(QueryNode node) {
         if (node instanceof ExplicitVariableProjectionNode) {
             return ((ExplicitVariableProjectionNode) node).getVariables().stream();

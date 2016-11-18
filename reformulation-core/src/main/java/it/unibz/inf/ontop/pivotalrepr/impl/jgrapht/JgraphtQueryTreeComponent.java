@@ -515,6 +515,11 @@ public class JgraphtQueryTreeComponent implements QueryTreeComponent {
         throw new RuntimeException("TODO: support getVariables");
     }
 
+    @Override
+    public int getVersionNumber() {
+        throw new RuntimeException("TODO: support getVersionNumber");
+    }
+
     private void addChild(QueryNode parentNode, QueryNode childNode, boolean isNew) throws IllegalTreeUpdateException {
 
         if (parentNode instanceof NonCommutativeOperatorNode) {
