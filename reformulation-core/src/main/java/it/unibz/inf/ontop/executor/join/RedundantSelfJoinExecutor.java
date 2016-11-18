@@ -51,7 +51,10 @@ public class RedundantSelfJoinExecutor extends SelfJoinLikeExecutor implements I
                 Optional<ConcreteProposal> optionalConcreteProposal = propose(initialMap, variablesToKeep,
                         query.getMetadata().getUniqueConstraints());
 
-                if (optionalConcreteProposal.isPresent()) {
+                if (!optionalConcreteProposal.isPresent()) {
+                    break;
+                }
+                else {
                     ConcreteProposal concreteProposal = optionalConcreteProposal.get();
 
                     // SIDE-EFFECT on the tree component (and thus on the query)
