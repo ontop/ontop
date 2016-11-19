@@ -223,7 +223,6 @@ public class RelationalExpression {
                 .addAll(e1.atoms).addAll(where.apply(e1.attributes)).build(), e1.attributes, e1.attributeOccurrences);
     }
 
-
     /**
      * treats null values as empty sets
      *

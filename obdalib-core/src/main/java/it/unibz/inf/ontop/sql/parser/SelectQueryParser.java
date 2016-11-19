@@ -69,18 +69,16 @@ public class SelectQueryParser {
                     else if (join.isNatural()) {
                         current = RelationalExpression.naturalJoin(current, right);
                     }
-                    else if (join.isInner()) { // TODO: not sure isNatural and isInner are disjoint
-                        if (join.getOnExpression() != null)
+                    else if (join.isInner() ) {
+                        if (join.getOnExpression() != null) {
                             current = RelationalExpression.joinOn(current, right,
                                     expression -> getAtomsFromExpression(expression, join.getOnExpression()));
-                        // TODO: what about ELSE?
-                    }
-                    else if (join.getUsingColumns() != null) { //TODO: not sure this is disjoint with isInner
-                        current = RelationalExpression.joinUsing(current, right,
-                                        join.getUsingColumns().stream()
-                                                .map(p -> metadata.getQuotedIDFactory().createAttributeID(p.getColumnName()))
-                                                .collect(ImmutableCollectors.toSet()));
-                    }
+                        }else if (join.getUsingColumns() != null) {
+                            current = joinUsing(current, right, join);
+                        }
+                    }else if (join.getUsingColumns() != null)
+                        current = joinUsing(current, right, join);
+
                 }
             }
 
@@ -100,6 +98,7 @@ public class SelectQueryParser {
             errors = true;
         }
 
+
         if (parsedSql == null || errors) {
             log.warn("The following query couldn't be parsed. " +
                     "This means Quest will need to use nested subqueries (views) to use this mappings. " +
@@ -114,6 +113,15 @@ public class SelectQueryParser {
         }
         return parsedSql;
     }
+
+
+    private RelationalExpression joinUsing (RelationalExpression e1, RelationalExpression e2, Join join  ){
+        return  RelationalExpression.joinUsing(e1, e2,
+                join.getUsingColumns().stream()
+                        .map(p -> metadata.getQuotedIDFactory().createAttributeID(p.getColumnName()))
+                        .collect(ImmutableCollectors.toSet()));
+    }
+
 
     private ImmutableList<Function> getAtomsFromExpression(ImmutableMap<QualifiedAttributeID, Variable> attributes, Expression expression) {
         // TODO: move declaration of parser to the more appropriate place

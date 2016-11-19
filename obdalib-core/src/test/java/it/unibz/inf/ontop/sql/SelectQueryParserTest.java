@@ -208,8 +208,9 @@ public class SelectQueryParserTest {
         DBMetadata metadata = createMetadata();
         SelectQueryParser parser = new SelectQueryParser(metadata);
         // column reference "a" is ambiguous
-        final CQIE parse = parser.parse("SELECT A, P.B, R.C, D FROM P NATURAL JOIN Q INNER JOIN  R on Q.C =  R.C;");
-        System.out.println("column reference \"a\" is ambiguous --- this is wrongly parsed: " + parse);
+        String sql = "SELECT A, P.B, R.C, D FROM P NATURAL JOIN Q INNER JOIN  R on Q.C =  R.C;";
+        final CQIE parse = parser.parse(sql);
+        System.out.println("\n" + sql + "\n" + "column reference \"a\" is ambiguous --- this is wrongly parsed:\n" + parse);
     }
 
     @Test
@@ -296,6 +297,28 @@ public class SelectQueryParserTest {
 
 
     @Test
+    public void join_using_inner_Test() {
+        DBMetadata metadata = createMetadata();
+
+
+        SelectQueryParser parser = new SelectQueryParser(metadata);
+
+        final CQIE parse = parser.parse("SELECT A, C FROM P INNER JOIN Q USING (A)");
+        System.out.println(parse);
+
+        assertTrue( parse.getHead().getTerms().size()==0);
+        assertTrue( parse.getReferencedVariables().size()==4 );
+
+        Variable a1 = FACTORY.getVariable("A1");
+        Variable a2 =FACTORY.getVariable("A2");
+
+
+        Function atomQ = FACTORY.getFunction(ExpressionOperation.EQ, ImmutableList.of(a1, a2));
+
+        assertTrue( parse.getBody().contains(atomQ));
+    }
+
+    @Test
     public void join_using_Test() {
         DBMetadata metadata = createMetadata();
 
@@ -316,6 +339,7 @@ public class SelectQueryParserTest {
 
         assertTrue( parse.getBody().contains(atomQ));
     }
+
 
     @Test
     public void in_condition_Test() {
