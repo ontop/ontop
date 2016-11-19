@@ -61,6 +61,27 @@ public class SelectQueryParserTest {
 
 
 
+    @Test // TODO: does relationAliasesConsistent check is wrong?
+    public void innerJoinOn_Same_Table_Test() {
+        DBMetadata metadata = createMetadata();
+
+
+        SelectQueryParser parser = new SelectQueryParser(metadata);
+        final CQIE parse = parser.parse("SELECT p1.A, p2.B FROM P p1 INNER JOIN  P p2 on p1.A = p2.A ");
+        System.out.println(parse);
+
+        assertTrue( parse.getHead().getTerms().size()==0);
+        assertTrue( parse.getReferencedVariables().size()==4 );
+
+        Variable a1 = FACTORY.getVariable("A1");
+        Variable a2 = FACTORY.getVariable("A2"); // variable are key sensitive
+
+
+        Function atomQ = FACTORY.getFunction(ExpressionOperation.EQ, ImmutableList.of(a1, a2));
+
+        assertTrue( parse.getBody().contains(atomQ));
+    }
+
 
     @Test
     public void innerJoinOn_EQ_Test() {
