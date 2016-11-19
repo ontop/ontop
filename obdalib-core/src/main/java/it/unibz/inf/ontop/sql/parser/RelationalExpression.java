@@ -192,7 +192,14 @@ public class RelationalExpression {
                 .addAll(e2.atoms)
                 .addAll(usingAttributes.stream()
                         .map(id -> new QualifiedAttributeID(null, id))
-                        .map(id -> getFunctionEQ(e1.attributes.get(id), e2.attributes.get(id), id))
+                        .map(id -> {
+                            // TODO: this will be removed later, when OBDA factory will start checking non-nulls
+                            Variable v1 = e1.attributes.get(id);
+                            Variable v2 = e2.attributes.get(id);
+                            if (v1 == null || v2 == null)
+                                throw new UnsupportedOperationException("Not found the related atom variable of " + id.toString());
+                            return FACTORY.getFunctionEQ(v1, v2);
+                        })
                         .iterator())
                 .build();
 
@@ -243,13 +250,6 @@ public class RelationalExpression {
 
         return ImmutableSet.<RelationID>builder().addAll(s1).addAll(s2).build();
     }
-
-
-   private static Function getFunctionEQ(Variable a, Variable b, QualifiedAttributeID id) {
-       if ( a == null || b == null)
-           throw new UnsupportedOperationException("Not found the related atom variable of " + id.toString());
-       return FACTORY.getFunctionEQ(a, b);
-   }
 
     private ImmutableMap<QualifiedAttributeID, Variable> filterAttributes(java.util.function.Predicate<QualifiedAttributeID> condition) {
 

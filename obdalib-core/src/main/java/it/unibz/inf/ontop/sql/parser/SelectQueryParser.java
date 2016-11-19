@@ -62,6 +62,7 @@ public class SelectQueryParser {
             RelationalExpression current = getRelationalExpression(plainSelect.getFromItem());
             if (plainSelect.getJoins() != null) {
                 for (Join join : plainSelect.getJoins()) {
+                    // TODO: add exceptions for unsupported types of joins (e.g., left join)
                     RelationalExpression right = getRelationalExpression(join.getRightItem());
                     if (join.isCross() || join.isSimple()) {
                         current = RelationalExpression.crossJoin(current, right);
@@ -69,21 +70,24 @@ public class SelectQueryParser {
                     else if (join.isNatural()) {
                         current = RelationalExpression.naturalJoin(current, right);
                     }
-                    else if (join.isInner() ) {
+                    else if (join.isInner()) {
                         if (join.getOnExpression() != null) {
                             current = RelationalExpression.joinOn(current, right,
                                     expression -> getAtomsFromExpression(expression, join.getOnExpression()));
-                        }else if (join.getUsingColumns() != null) {
+                        }
+                        else if (join.getUsingColumns() != null) {
                             current = joinUsing(current, right, join);
                         }
-                    }else if (join.getUsingColumns() != null)
+                    }
+                    else if (join.getUsingColumns() != null)
+                        // TODO: this appears redundant - what exactly are the allowed combinations?
                         current = joinUsing(current, right, join);
 
                 }
             }
 
             if (plainSelect.getWhere() != null)
-                current = RelationalExpression.where( current, rel -> getAtomsFromExpression(rel, plainSelect.getWhere()));
+                current = RelationalExpression.where(current, rel -> getAtomsFromExpression(rel, plainSelect.getWhere()));
 
 
             final OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
