@@ -193,7 +193,7 @@ public class RelationalExpression {
                 .addAll(e2.atoms)
                 .addAll(usingAttributes.stream()
                         .map(id -> new QualifiedAttributeID(null, id))
-                        .filter( id->  e1.attributes.get(id) != null  && e2.attributes.get(id) != null )
+                        .filter(id->  e1.attributes.get(id) != null && e2.attributes.get(id) != null )
                         .map(id -> FACTORY.getFunctionEQ(e1.attributes.get(id), e2.attributes.get(id)))
                         .iterator())
                 .build();
@@ -287,9 +287,7 @@ public class RelationalExpression {
                 .filter(key -> key.getRelation() != null)
                 .map(QualifiedAttributeID::getRelation).collect(ImmutableCollectors.toSet());
 
-        // TODO: a better way of checking non-emptiness of intersection without actually constructing it?
-        alias1.retainAll(alias2); // intersection
-        return alias1.isEmpty();
+        return ! alias1.stream().anyMatch(alias2::contains);
     }
 
 
