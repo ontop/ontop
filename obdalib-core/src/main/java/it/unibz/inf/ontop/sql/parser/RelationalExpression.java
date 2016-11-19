@@ -159,8 +159,8 @@ public class RelationalExpression {
         if (!relationAliasesConsistent(e1.attributes, e2.attributes))
             throw new InvalidSelectQuery("Relation alias occurs in both arguments of the join", null);
 
-        if ( usingColumns.stream().anyMatch( id-> !e1.isUnique(id) || !e2.isUnique(id) ) )
-                throw new UnsupportedOperationException("ambiguous column attributes in using statement");
+        if (usingColumns.stream().anyMatch(id -> !e1.isUnique(id) || !e2.isUnique(id)))
+            throw new UnsupportedOperationException("ambiguous column attributes in using statement");
 
         return RelationalExpression.internalJoinUsing(e1, e2, usingColumns);
     }
@@ -193,7 +193,7 @@ public class RelationalExpression {
                 .addAll(e2.atoms)
                 .addAll(usingAttributes.stream()
                         .map(id -> new QualifiedAttributeID(null, id))
-                        .filter(id->  e1.attributes.get(id) != null && e2.attributes.get(id) != null )
+                        .filter(id -> e1.attributes.get(id) != null && e2.attributes.get(id) != null)
                         .map(id -> FACTORY.getFunctionEQ(e1.attributes.get(id), e2.attributes.get(id)))
                         .iterator())
                 .build();
@@ -209,16 +209,18 @@ public class RelationalExpression {
 
 
     /**
-     * Add an {@link ImmutableList} of atoms {@link Function} to {@link RelationalExpression}
+     * Used for relation's where expression
      *
-     * @param e1         ia a {@link RelationalExpression)
-     * @param atoms {@link ImmutableList} of {@link Function}
+     * @param e1    ia a {@link RelationalExpression}
+     * @param where is a {@link java.util.function.Function}<{@link ImmutableMap}<{@link QualifiedAttributeID}, {@link Variable}>,
+     *              {@link ImmutableList}<{@link Function}> }
      * @return a {@link RelationalExpression}
      */
-    // TODO: i'm not sure this method is helpful (to be removed)
-    static RelationalExpression addAtoms(RelationalExpression e1, ImmutableList<Function> atoms) {
+    static RelationalExpression where(RelationalExpression e1,
+                                      java.util.function.Function<ImmutableMap<QualifiedAttributeID, Variable>, ImmutableList<Function>> where) {
+
         return new RelationalExpression(ImmutableList.<Function>builder()
-                .addAll(e1.atoms).addAll(atoms).build(), e1.attributes, e1.attributeOccurrences);
+                .addAll(e1.atoms).addAll(where.apply(e1.attributes)).build(), e1.attributes, e1.attributeOccurrences);
     }
 
 
@@ -265,9 +267,8 @@ public class RelationalExpression {
                 .build();
 
         return keys.stream()
-                .collect(ImmutableCollectors.toMap(identity(), collector::apply));
+                .collect(ImmutableCollectors.toMap(identity(), collector));
     }
-
 
 
     /**
@@ -287,7 +288,7 @@ public class RelationalExpression {
                 .filter(key -> key.getRelation() != null)
                 .map(QualifiedAttributeID::getRelation).collect(ImmutableCollectors.toSet());
 
-        return ! alias1.stream().anyMatch(alias2::contains);
+        return !alias1.stream().anyMatch(alias2::contains);
     }
 
 

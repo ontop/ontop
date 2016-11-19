@@ -24,7 +24,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * Created by Roman Kontchakov on 01/11/2016.
@@ -85,10 +84,8 @@ public class SelectQueryParser {
                 }
             }
 
-            if (plainSelect.getWhere() != null) {
-                ImmutableList<Function> atomsFromExpression = getAtomsFromExpression(current.getAttributes(), plainSelect.getWhere());
-                current = RelationalExpression.addAtoms(current, atomsFromExpression);
-            }
+            if (plainSelect.getWhere() != null)
+                current = RelationalExpression.where( current, rel -> getAtomsFromExpression(rel, plainSelect.getWhere()));
 
 
             final OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
