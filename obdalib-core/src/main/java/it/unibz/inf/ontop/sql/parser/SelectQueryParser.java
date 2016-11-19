@@ -223,18 +223,24 @@ public class SelectQueryParser {
                 throw new InvalidSelectQuery("Table " + id + " not found in metadata", tableName);
             relationIndex++;
 
+            RelationID aliasId = (tableName.getAlias() != null)
+                ? idfac.createRelationID(null, tableName.getAlias().getName())
+                : relation.getID();
+
             final OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
             List<Term> terms = new ArrayList<>(relation.getAttributes().size());
             ImmutableMap.Builder attributesBuilder = ImmutableMap.<QualifiedAttributeID, Variable>builder();
             ImmutableMap.Builder occurrencesBuilder = ImmutableMap.<QuotedID, ImmutableSet<RelationID>>builder();
             for (Attribute attribute : relation.getAttributes()) {
-                Variable var = fac.getVariable(attribute.getID().getName() + relationIndex);
+                QuotedID attributeId = attribute.getID();
+
+                Variable var = fac.getVariable(attributeId.getName() + relationIndex);
                 terms.add(var);
 
-                attributesBuilder.put(attribute.getQualifiedID(), var);
-                attributesBuilder.put(new QualifiedAttributeID(null, attribute.getID()), var);
+                attributesBuilder.put(new QualifiedAttributeID(aliasId, attributeId), var);
+                attributesBuilder.put(new QualifiedAttributeID(null, attributeId), var);
 
-                occurrencesBuilder.put(attribute.getID(), ImmutableSet.of(relation.getID()));
+                occurrencesBuilder.put(attributeId, ImmutableSet.of(aliasId));
             }
             // Create an atom for a particular table
             Function atom = Relation2DatalogPredicate.getAtom(relation, terms);
