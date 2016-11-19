@@ -15,7 +15,6 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import static java.util.function.Function.identity;
 
@@ -193,9 +192,7 @@ public class RelationalExpression {
                 .addAll(e2.atoms)
                 .addAll(usingAttributes.stream()
                         .map(id -> new QualifiedAttributeID(null, id))
-                        // TODO: throw an exception if id is not found in either of the ei
-                        //.filter(id -> e1.attributes.get(id) != null && e2.attributes.get(id) != null)
-                        .map(id -> FACTORY.getFunctionEQ(e1.attributes.get(id), e2.attributes.get(id)))
+                        .map(id -> getFunctionEQ(e1.attributes.get(id), e2.attributes.get(id), id))
                         .iterator())
                 .build();
 
@@ -247,6 +244,12 @@ public class RelationalExpression {
         return ImmutableSet.<RelationID>builder().addAll(s1).addAll(s2).build();
     }
 
+
+   private static Function getFunctionEQ(Variable a, Variable b, QualifiedAttributeID id) {
+       if ( a == null || b == null)
+           throw new UnsupportedOperationException("Not found the related atom variable of " + id.toString());
+       return FACTORY.getFunctionEQ(a, b);
+   }
 
     private ImmutableMap<QualifiedAttributeID, Variable> filterAttributes(java.util.function.Predicate<QualifiedAttributeID> condition) {
 
