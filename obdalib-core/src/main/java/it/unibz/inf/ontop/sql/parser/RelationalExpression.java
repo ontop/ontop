@@ -193,7 +193,8 @@ public class RelationalExpression {
                 .addAll(e2.atoms)
                 .addAll(usingAttributes.stream()
                         .map(id -> new QualifiedAttributeID(null, id))
-                        .filter(id -> e1.attributes.get(id) != null && e2.attributes.get(id) != null)
+                        // TODO: throw an exception if id is not found in either of the ei
+                        //.filter(id -> e1.attributes.get(id) != null && e2.attributes.get(id) != null)
                         .map(id -> FACTORY.getFunctionEQ(e1.attributes.get(id), e2.attributes.get(id)))
                         .iterator())
                 .build();
@@ -279,9 +280,9 @@ public class RelationalExpression {
     private static boolean relationAliasesConsistent(ImmutableMap<QualifiedAttributeID, Variable> attributes1,
                                                      ImmutableMap<QualifiedAttributeID, Variable> attributes2) {
         // the first one is mutable
-        Set<RelationID> alias1 = attributes1.keySet().stream()
+        ImmutableSet<RelationID> alias1 = attributes1.keySet().stream()
                 .filter(key -> key.getRelation() != null)
-                .map(QualifiedAttributeID::getRelation).collect(Collectors.toSet());
+                .map(QualifiedAttributeID::getRelation).collect(ImmutableCollectors.toSet());
 
         ImmutableSet<RelationID> alias2 = attributes2.keySet().stream()
                 .filter(key -> key.getRelation() != null)
