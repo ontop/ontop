@@ -5,6 +5,7 @@ import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.sql.parser.SelectQueryParser;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import static junit.framework.TestCase.assertEquals;
@@ -192,6 +193,34 @@ public class SelectQueryParserTest {
         assertTrue( parse.getBody().contains(atomQ));
     }
 
+    @Test(expected =UnsupportedOperationException.class)
+    public void innerJoinOn_naturalJoin_ambiguity_Test() {
+        DBMetadata metadata = createMetadata();
+        SelectQueryParser parser = new SelectQueryParser(metadata);
+        // common column name "A" appears more than once in left table
+        parser.parse("SELECT A, C FROM P INNER JOIN  Q on P.A =  Q.A NATURAL JOIN  R ");
+    }
+
+
+    //TODO: In this case column reference "a" is ambiguous. Does this should be check during the "selection" operation handler?
+    @Test(expected =UnsupportedOperationException.class)
+    public void innerJoinOn_naturalJoin_ambiguity2_Test() {
+        DBMetadata metadata = createMetadata();
+        SelectQueryParser parser = new SelectQueryParser(metadata);
+        // column reference "a" is ambiguous
+        final CQIE parse = parser.parse("SELECT A, P.B, R.C, D FROM P NATURAL JOIN Q INNER JOIN  R on Q.C =  R.C;");
+        System.out.println("column reference \"a\" is ambiguous --- this is wrongly parsed: " + parse);
+    }
+
+    @Test
+    public void innerJoinOn_naturalJoin_Test() {
+        DBMetadata metadata = createMetadata();
+        SelectQueryParser parser = new SelectQueryParser(metadata);
+        // common column name "A" appears more than once in left table
+        final CQIE parse = parser.parse("SELECT P.A, P.B, R.C, D FROM P NATURAL JOIN Q INNER JOIN  R on Q.C =  R.C;");
+        System.out.println(parse);
+    }
+
     @Test
     public void innerJoinOn_AND_Test() {
         DBMetadata metadata = createMetadata();
@@ -315,20 +344,33 @@ public class SelectQueryParserTest {
         DBMetadata metadata = DBMetadataExtractor.createDummyMetadata();
 
         RelationID table1 = MDFAC.createRelationID(null, "P");
-        QuotedID attx = MDFAC.createAttributeID("A");
-        QuotedID atty = MDFAC.createAttributeID("B");
+        QuotedID attx0 = MDFAC.createAttributeID("A");
+        QuotedID atty0 = MDFAC.createAttributeID("B");
 
         DatabaseRelationDefinition relation1 = metadata.createDatabaseRelation(table1);
-        relation1.addAttribute(attx, 0, "INT", false);
-        relation1.addAttribute(atty, 0, "INT", false);
+        relation1.addAttribute(attx0, 0, "INT", false);
+        relation1.addAttribute(atty0, 0, "INT", false);
 
         RelationID table2 = MDFAC.createRelationID(null, "Q");
-        QuotedID attu = MDFAC.createAttributeID("A");
-        QuotedID attv = MDFAC.createAttributeID("C");
+        QuotedID attx1 = MDFAC.createAttributeID("A");
+        QuotedID atty1 = MDFAC.createAttributeID("C");
 
         DatabaseRelationDefinition relation2 = metadata.createDatabaseRelation(table2);
-        relation2.addAttribute(attu, 0, "INT", false);
-        relation2.addAttribute(attv, 0, "INT", false);
+        relation2.addAttribute(attx1, 0, "INT", false);
+        relation2.addAttribute(atty1, 0, "INT", false);
+
+
+        RelationID table3 = MDFAC.createRelationID(null, "R");
+        QuotedID attx3 = MDFAC.createAttributeID("A");
+        QuotedID atty3 = MDFAC.createAttributeID("B");
+        QuotedID attu3 = MDFAC.createAttributeID("C");
+        QuotedID attv3 = MDFAC.createAttributeID("D");
+
+        DatabaseRelationDefinition relation3= metadata.createDatabaseRelation(table3);
+        relation3.addAttribute(attx3, 0, "INT", false);
+        relation3.addAttribute(atty3, 0, "INT", false);
+        relation3.addAttribute(attu3, 0, "INT", false);
+        relation3.addAttribute(attv3, 0, "INT", false);
         return metadata;
     }
 
