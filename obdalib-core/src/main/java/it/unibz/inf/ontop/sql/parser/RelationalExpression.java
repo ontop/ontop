@@ -21,6 +21,7 @@ import static java.util.function.Function.identity;
 
 /**
  * Created by Roman Kontchakov on 01/11/2016.
+ *
  */
 public class RelationalExpression {
     private ImmutableList<Function> atoms;
@@ -158,9 +159,7 @@ public class RelationalExpression {
         if (!relationAliasesConsistent(e1.attributes, e2.attributes))
             throw new InvalidSelectQuery("Relation alias occurs in both arguments of the join", null);
 
-        // TODO: use anyMatch
-        for (QuotedID id : usingColumns)
-            if (!e1.isUnique(id) || !e2.isUnique(id))
+        if ( usingColumns.stream().anyMatch( id-> !e1.isUnique(id) || !e2.isUnique(id) ) )
                 throw new UnsupportedOperationException("ambiguous column attributes in using statement");
 
         return RelationalExpression.internalJoinUsing(e1, e2, usingColumns);
@@ -194,7 +193,7 @@ public class RelationalExpression {
                 .addAll(e2.atoms)
                 .addAll(usingAttributes.stream()
                         .map(id -> new QualifiedAttributeID(null, id))
-                        // TODO: add a check that the attributes exist?
+                        .filter( id->  e1.attributes.get(id) != null  && e2.attributes.get(id) != null )
                         .map(id -> FACTORY.getFunctionEQ(e1.attributes.get(id), e2.attributes.get(id)))
                         .iterator())
                 .build();
@@ -226,7 +225,7 @@ public class RelationalExpression {
     /**
      * treats null values as empty sets
      *
-     * @param id
+     * @param id is a {@link QuotedID}
      * @param e1 a relational expression
      * @param e2 a relational expression
      * @return the union of occurrences of id in e1 and e2
