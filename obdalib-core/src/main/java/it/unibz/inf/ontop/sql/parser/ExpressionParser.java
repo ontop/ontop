@@ -28,45 +28,59 @@ import java.util.function.UnaryOperator;
  *
  */
 
-public class ExpressionParser {
+public class ExpressionParser implements java.util.function.Function<ImmutableMap<QualifiedAttributeID, Variable>, ImmutableList<Function>> {
 
     private final QuotedIDFactory idfac;
-    private final ImmutableMap<QualifiedAttributeID, Variable> attributes;
+    private final Expression expression;
 
     private static final OBDADataFactory FACTORY = OBDADataFactoryImpl.getInstance();
 
-    public ExpressionParser(ImmutableMap<QualifiedAttributeID, Variable> attributes, QuotedIDFactory idfac) {
-        this.attributes = attributes;
+    public ExpressionParser(QuotedIDFactory idfac, Expression expression) {
         this.idfac = idfac;
+        this.expression = expression;
     }
 
-    public ImmutableList<Function> convert(Expression expression) {
-        ExpressionVisitorImpl visitor = new ExpressionVisitorImpl();
+    public static ExpressionParser empty() {
+        return new ExpressionParser (null, null) {
+            @Override
+            public ImmutableList<Function> apply(ImmutableMap<QualifiedAttributeID, Variable> attributes) {
+                return ImmutableList.of();
+            }
+        };
+    }
 
-        if (expression instanceof AndExpression) {
+    @Override
+    public ImmutableList<Function> apply(ImmutableMap<QualifiedAttributeID, Variable> attributes) {
+
+        ExpressionVisitorImpl visitor = new ExpressionVisitorImpl(attributes);
+
+        Expression current = expression;
+
+        if (current instanceof AndExpression) {
             ImmutableList.Builder<Function> builder = ImmutableList.builder();
             do {
-                AndExpression and = (AndExpression) expression;
+                AndExpression and = (AndExpression) current;
                 // for a sequence of AND operations, JSQLParser makes the right argument simple
                 builder.add(translateIntoFunction(visitor, and.getRightExpression()));
                 // and the left argument complex (nested AND)
-                expression = and.getLeftExpression();
-            } while (expression instanceof AndExpression);
+                current = and.getLeftExpression();
+            } while (current instanceof AndExpression);
 
-            builder.add(translateIntoFunction(visitor, expression));
+            builder.add(translateIntoFunction(visitor, current));
             return builder.build().reverse();
         }
-        return ImmutableList.of(translateIntoFunction(visitor, expression));
+        return ImmutableList.of(translateIntoFunction(visitor, current));
     }
 
-    private static Function translateIntoFunction(ExpressionVisitorImpl visitor, Expression expression) {
-        Term t = visitor.translate(expression);
+    private static Function translateIntoFunction(ExpressionVisitorImpl visitor, Expression current) {
+        Term t = visitor.translate(current);
         if (t instanceof Function)
             return (Function)t;
 
         // TODO: better handling of the situation?
         throw new RuntimeException("");
     }
+
 
     // TODO: this class is being reviewed
 
@@ -82,7 +96,13 @@ public class ExpressionParser {
      */
     private class ExpressionVisitorImpl implements ExpressionVisitor {
 
+        private final ImmutableMap<QualifiedAttributeID, Variable> attributes;
+
         private Term result; // CAREFUL: this variable gets reset in each visit method implementation
+
+        ExpressionVisitorImpl(ImmutableMap<QualifiedAttributeID, Variable> attributes) {
+            this.attributes = attributes;
+        }
 
         private Term translate(Expression expression) {
             expression.accept(this);

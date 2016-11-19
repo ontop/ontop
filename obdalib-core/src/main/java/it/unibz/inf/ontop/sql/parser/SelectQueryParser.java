@@ -73,7 +73,7 @@ public class SelectQueryParser {
                     else if (join.isInner()) {
                         if (join.getOnExpression() != null) {
                             current = RelationalExpression.joinOn(current, right,
-                                    expression -> getAtomsFromExpression(expression, join.getOnExpression()));
+                                    new ExpressionParser(metadata.getQuotedIDFactory(), join.getOnExpression()));
                         }
                         else if (join.getUsingColumns() != null) {
                             current = joinUsing(current, right, join);
@@ -87,8 +87,8 @@ public class SelectQueryParser {
             }
 
             if (plainSelect.getWhere() != null)
-                current = RelationalExpression.where(current, rel -> getAtomsFromExpression(rel, plainSelect.getWhere()));
-
+                current = RelationalExpression.where(current,
+                        new ExpressionParser(metadata.getQuotedIDFactory(), plainSelect.getWhere()));
 
             final OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
             // TODO: proper handling of the head predicate
@@ -124,13 +124,6 @@ public class SelectQueryParser {
                 join.getUsingColumns().stream()
                         .map(p -> metadata.getQuotedIDFactory().createAttributeID(p.getColumnName()))
                         .collect(ImmutableCollectors.toSet()));
-    }
-
-
-    private ImmutableList<Function> getAtomsFromExpression(ImmutableMap<QualifiedAttributeID, Variable> attributes, Expression expression) {
-        // TODO: move declaration of parser to the more appropriate place
-        ExpressionParser parser = new ExpressionParser(attributes, metadata.getQuotedIDFactory());
-        return parser.convert(expression);
     }
 
 

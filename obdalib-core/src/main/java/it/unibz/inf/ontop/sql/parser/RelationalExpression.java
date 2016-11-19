@@ -81,7 +81,7 @@ public class RelationalExpression {
      * @return a {@link RelationalExpression}
      */
     public static RelationalExpression crossJoin(RelationalExpression e1, RelationalExpression e2) {
-        return joinOn(e1, e2, att -> ImmutableList.of());
+        return joinOn(e1, e2, ExpressionParser.empty());
     }
 
 
@@ -92,7 +92,7 @@ public class RelationalExpression {
      * @return a {@link RelationalExpression}
      */
     static RelationalExpression joinOn(RelationalExpression e1, RelationalExpression e2,
-                                       java.util.function.Function<ImmutableMap<QualifiedAttributeID, Variable>, ImmutableList<Function>> getAtomOnExpression) {
+                                       ExpressionParser getAtomOnExpression) {
 
         // TODO: better exception?
         if (!relationAliasesConsistent(e1.attributes, e2.attributes))
@@ -217,12 +217,10 @@ public class RelationalExpression {
      * Used for relation's where expression
      *
      * @param e1    ia a {@link RelationalExpression}
-     * @param where is a {@link java.util.function.Function}<{@link ImmutableMap}<{@link QualifiedAttributeID}, {@link Variable}>,
-     *              {@link ImmutableList}<{@link Function}> }
+     * @param where is a {@link ExpressionParser }
      * @return a {@link RelationalExpression}
      */
-    static RelationalExpression where(RelationalExpression e1,
-                                      java.util.function.Function<ImmutableMap<QualifiedAttributeID, Variable>, ImmutableList<Function>> where) {
+    static RelationalExpression where(RelationalExpression e1, ExpressionParser where) {
 
         return new RelationalExpression(ImmutableList.<Function>builder()
                 .addAll(e1.atoms).addAll(where.apply(e1.attributes)).build(), e1.attributes, e1.attributeOccurrences);
