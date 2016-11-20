@@ -23,7 +23,6 @@ import java.util.List;
 import java.util.function.BinaryOperator;
 import java.util.function.UnaryOperator;
 
-import static net.sf.jsqlparser.expression.operators.relational.SupportsOldOracleJoinSyntax.NO_ORACLE_JOIN;
 
 /**
  * Created by Roman Kontchakov on 10/11/2016.
@@ -392,7 +391,7 @@ public class ExpressionParser implements java.util.function.Function<ImmutableMa
                 throw new UnsupportedSelectQueryException("IN is supported only with ExpressionList on the right-hand side", expression);
 
             Expression left = expression.getLeftExpression();
-            if (left == null || expression.getOldOracleJoinSyntax() != NO_ORACLE_JOIN)
+            if (left == null || expression.getOldOracleJoinSyntax() != SupportsOldOracleJoinSyntax.NO_ORACLE_JOIN)
                 throw new UnsupportedSelectQueryException("IN is supported only with Expression on the left-hand side (and no Oracle OUTER JOIN syntax)", expression);
 
             ImmutableList<Function> equalities = ImmutableList.<Function>builder()
@@ -404,16 +403,19 @@ public class ExpressionParser implements java.util.function.Function<ImmutableMa
                         }).iterator())
                     .build();
 
+            Function atom;
             switch (equalities.size()) {
                 case 0:
                     throw new InvalidSelectQueryException("IN must contain at least one expression", expression);
                 case 1:
-                    result = equalities.get(0);
+                    atom = equalities.get(0);
                     break;
                 default:
-                    result = equalities.reverse().stream()
+                    atom = equalities.reverse().stream()
                             .reduce(null, (a, b) -> (a == null) ? b : FACTORY.getFunctionOR(b,a));
             }
+
+            result = expression.isNot() ? FACTORY.getFunctionNOT(atom) : atom;
         }
 
         /*
