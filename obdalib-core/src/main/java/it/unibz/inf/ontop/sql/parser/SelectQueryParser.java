@@ -84,7 +84,7 @@ public class SelectQueryParser {
                         }
                     }
                     else if (join.getUsingColumns() != null)
-                        // on the join only  UsingColumns and RightItem -> SELECT A, C FROM P JOIN Q USING (A)
+                        // on the join expression is only present UsingColumns and RightItem for example: SELECT A, C FROM P JOIN Q USING (A)
                         current = joinUsing(current, right, join);
 
                 }
