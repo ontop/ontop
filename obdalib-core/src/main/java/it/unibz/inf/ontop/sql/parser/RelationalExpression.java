@@ -10,7 +10,7 @@ import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.sql.QualifiedAttributeID;
 import it.unibz.inf.ontop.sql.QuotedID;
 import it.unibz.inf.ontop.sql.RelationID;
-import it.unibz.inf.ontop.sql.parser.exceptions.InvalidSelectQuery;
+import it.unibz.inf.ontop.sql.parser.exceptions.InvalidSelectQueryEcxeption;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Map;
@@ -96,7 +96,7 @@ public class RelationalExpression {
 
         // TODO: better exception?
         if (!relationAliasesConsistent(e1.attributes, e2.attributes))
-            throw new InvalidSelectQuery("Relation alias occurs in both arguments of the join", null);
+            throw new InvalidSelectQueryEcxeption("Relation alias occurs in both arguments of the join", null);
 
         ImmutableMap<QualifiedAttributeID, Variable> attributes = ImmutableMap.<QualifiedAttributeID, Variable>builder()
                 .putAll(e1.filterAttributes(id ->
@@ -130,7 +130,7 @@ public class RelationalExpression {
 
         // TODO: better exception?
         if (!relationAliasesConsistent(e1.attributes, e2.attributes))
-            throw new InvalidSelectQuery("Relation alias occurs in both arguments of the join", null);
+            throw new InvalidSelectQueryEcxeption("Relation alias occurs in both arguments of the join", null);
 
         ImmutableSet<QuotedID> sharedAttributes = e1.attributeOccurrences.keySet().stream()
                 .filter(id -> !e1.isAbsent(id) && !e2.isAbsent(id))
@@ -156,7 +156,7 @@ public class RelationalExpression {
 
         // TODO: better exception?
         if (!relationAliasesConsistent(e1.attributes, e2.attributes))
-            throw new InvalidSelectQuery("Relation alias occurs in both arguments of the join", null);
+            throw new InvalidSelectQueryEcxeption("Relation alias occurs in both arguments of the join", null);
 
         if (usingColumns.stream().anyMatch(id -> !e1.isUnique(id) || !e2.isUnique(id)))
             throw new UnsupportedOperationException("ambiguous column attributes in using statement");
