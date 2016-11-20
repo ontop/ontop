@@ -9,6 +9,7 @@ import it.unibz.inf.ontop.model.impl.*;
 import it.unibz.inf.ontop.parser.*;
 import it.unibz.inf.ontop.sql.*;
 import it.unibz.inf.ontop.sql.parser.exceptions.InvalidSelectQuery;
+import it.unibz.inf.ontop.sql.parser.exceptions.UnsupportedQueryException;
 import it.unibz.inf.ontop.sql.parser.exceptions.UnsupportedSelectQuery;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import net.sf.jsqlparser.JSQLParserException;
@@ -62,7 +63,10 @@ public class SelectQueryParser {
             RelationalExpression current = getRelationalExpression(plainSelect.getFromItem());
             if (plainSelect.getJoins() != null) {
                 for (Join join : plainSelect.getJoins()) {
-                    // TODO: add exceptions for unsupported types of joins (e.g., left join)
+                    // join query expressions not supported
+                    if ( join.isFull() || join.isOuter() || join.isRight() || join.isLeft() )
+                        throw new UnsupportedQueryException("Unsupported join query expression", statement);
+
                     RelationalExpression right = getRelationalExpression(join.getRightItem());
                     if (join.isCross() || join.isSimple()) {
                         current = RelationalExpression.crossJoin(current, right);
@@ -80,7 +84,7 @@ public class SelectQueryParser {
                         }
                     }
                     else if (join.getUsingColumns() != null)
-                        // TODO: this appears redundant - what exactly are the allowed combinations?
+                        // on the join only  UsingColumns and RightItem -> SELECT A, C FROM P JOIN Q USING (A)
                         current = joinUsing(current, right, join);
 
                 }

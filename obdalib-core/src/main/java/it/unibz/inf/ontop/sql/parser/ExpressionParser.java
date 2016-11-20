@@ -35,7 +35,7 @@ public class ExpressionParser implements java.util.function.Function<ImmutableMa
 
     private static final OBDADataFactory FACTORY = OBDADataFactoryImpl.getInstance();
 
-    public ExpressionParser(QuotedIDFactory idfac, Expression expression) {
+    public   ExpressionParser(QuotedIDFactory idfac, Expression expression) {
         this.idfac = idfac;
         this.expression = expression;
     }

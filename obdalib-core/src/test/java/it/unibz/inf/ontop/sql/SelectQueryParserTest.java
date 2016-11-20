@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.sql.parser.SelectQueryParser;
+import it.unibz.inf.ontop.sql.parser.exceptions.UnsupportedQueryException;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -384,6 +385,46 @@ public class SelectQueryParserTest {
     }
 
 
+
+    @Test(expected =UnsupportedQueryException.class)
+    public void left_outer_Join_Test() {
+        DBMetadata metadata = createMetadata();
+        SelectQueryParser parser = new SelectQueryParser(metadata);
+        // common column name "A" appears more than once in left table
+        parser.parse("SELECT A, C FROM P LEFT  OUTER JOIN  Q on P.A =  Q.A ");
+    }
+
+    @Test(expected =UnsupportedQueryException.class)
+    public void right_outer_Join_Test() {
+        DBMetadata metadata = createMetadata();
+        SelectQueryParser parser = new SelectQueryParser(metadata);
+        // common column name "A" appears more than once in left table
+        parser.parse("SELECT A, C FROM P RIGHT  OUTER JOIN  Q on P.A =  Q.A ");
+    }
+
+    @Test(expected =UnsupportedQueryException.class)
+    public void right_Join_Test() {
+        DBMetadata metadata = createMetadata();
+        SelectQueryParser parser = new SelectQueryParser(metadata);
+        // common column name "A" appears more than once in left table
+        parser.parse("SELECT A, C FROM P RIGHT JOIN  Q on P.A =  Q.A ");
+    }
+
+    @Test(expected =UnsupportedQueryException.class)
+    public void left_Join_Test() {
+        DBMetadata metadata = createMetadata();
+        SelectQueryParser parser = new SelectQueryParser(metadata);
+        // common column name "A" appears more than once in left table
+        parser.parse("SELECT A, C FROM P LEFT JOIN  Q on P.A =  Q.A ");
+    }
+
+    @Test(expected =UnsupportedQueryException.class)
+    public void full_outer_Join_Test() {
+        DBMetadata metadata = createMetadata();
+        SelectQueryParser parser = new SelectQueryParser(metadata);
+        // common column name "A" appears more than once in left table
+        parser.parse("SELECT A, C FROM P FULL OUTER JOIN  Q on P.A =  Q.A ");
+    }
 
     private DBMetadata createMetadata(){
         DBMetadata metadata = DBMetadataExtractor.createDummyMetadata();
