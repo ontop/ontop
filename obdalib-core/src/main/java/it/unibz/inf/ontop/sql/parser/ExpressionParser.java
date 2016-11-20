@@ -23,6 +23,8 @@ import java.util.List;
 import java.util.function.BinaryOperator;
 import java.util.function.UnaryOperator;
 
+import static net.sf.jsqlparser.expression.operators.relational.SupportsOldOracleJoinSyntax.NO_ORACLE_JOIN;
+
 /**
  * Created by Roman Kontchakov on 10/11/2016.
  *
@@ -31,13 +33,13 @@ import java.util.function.UnaryOperator;
 public class ExpressionParser implements java.util.function.Function<ImmutableMap<QualifiedAttributeID, Variable>, ImmutableList<Function>> {
 
     private final QuotedIDFactory idfac;
-    private final Expression expression;
+    private final Expression root;
 
     private static final OBDADataFactory FACTORY = OBDADataFactoryImpl.getInstance();
 
     public   ExpressionParser(QuotedIDFactory idfac, Expression expression) {
         this.idfac = idfac;
-        this.expression = expression;
+        this.root = expression;
     }
 
     public static ExpressionParser empty() {
@@ -53,33 +55,26 @@ public class ExpressionParser implements java.util.function.Function<ImmutableMa
     public ImmutableList<Function> apply(ImmutableMap<QualifiedAttributeID, Variable> attributes) {
 
         ExpressionVisitorImpl visitor = new ExpressionVisitorImpl(attributes);
-
-        Expression current = expression;
+        Expression current = root;
 
         if (current instanceof AndExpression) {
             ImmutableList.Builder<Function> builder = ImmutableList.builder();
             do {
                 AndExpression and = (AndExpression) current;
                 // for a sequence of AND operations, JSQLParser makes the right argument simple
-                builder.add(translateIntoFunction(visitor, and.getRightExpression()));
+                builder.add(visitor.getFunction(and.getRightExpression()));
                 // and the left argument complex (nested AND)
                 current = and.getLeftExpression();
             } while (current instanceof AndExpression);
 
-            builder.add(translateIntoFunction(visitor, current));
+            builder.add(visitor.getFunction(current));
+
+            // restore the original order
             return builder.build().reverse();
         }
-        return ImmutableList.of(translateIntoFunction(visitor, current));
+        return ImmutableList.of(visitor.getFunction(current));
     }
 
-    private static Function translateIntoFunction(ExpressionVisitorImpl visitor, Expression current) {
-        Term t = visitor.translate(current);
-        if (t instanceof Function)
-            return (Function)t;
-
-        // TODO: better handling of the situation?
-        throw new RuntimeException("");
-    }
 
 
     // TODO: this class is being reviewed
@@ -104,32 +99,41 @@ public class ExpressionParser implements java.util.function.Function<ImmutableMa
             this.attributes = attributes;
         }
 
-        private Term translate(Expression expression) {
+        private Function getFunction(Expression expression) {
+            Term t = getTerm(expression);
+            if (t instanceof Function)
+                return (Function)t;
+
+            // TODO: better handling of the situation?
+            throw new RuntimeException("");
+        }
+
+        private Term getTerm(Expression expression) {
             expression.accept(this);
             return this.result;
         }
 
-        private void visitBinaryExpression(BinaryExpression expression, BinaryOperator<Term> op) {
-            Term leftTerm = translate(expression.getLeftExpression());
-            Term rightTerm = translate(expression.getRightExpression());
+        private void process(BinaryExpression expression, BinaryOperator<Term> op) {
+            Term leftTerm = getTerm(expression.getLeftExpression());
+            Term rightTerm = getTerm(expression.getRightExpression());
             Term expTerm = op.apply(leftTerm, rightTerm);
 
             result = expression.isNot() ? FACTORY.getFunctionNOT(expTerm) : expTerm;
         }
 
         // CAREFUL: the first argument is NOT the composite term, but rather its argument
-        private void visitUnaryExpression(Expression arg, boolean isNot, UnaryOperator<Term> op) {
-            Term term = translate(arg);
+        private void process(Expression arg, boolean isNot, UnaryOperator<Term> op) {
+            Term term = getTerm(arg);
             Term expTerm = op.apply(term);
 
             result = isNot ? FACTORY.getFunctionNOT(expTerm) : expTerm;
         }
 
-
-        @Override
-        public void visit(NullValue nullValue) {
-            throw new UnsupportedOperationException();
+        private void process(String value, Predicate.COL_TYPE datatype) {
+            result =  FACTORY.getConstantLiteral(value, datatype);
         }
+
+
 
         @Override
         public void visit(net.sf.jsqlparser.expression.Function func) {
@@ -138,12 +142,12 @@ public class ExpressionParser implements java.util.function.Function<ImmutableMa
 
             if (functionName.equals("regexp_like")) {
                 if (expressions.size() == 2 || expressions.size() == 3) {
-                    Term t1 = translate(expressions.get(0));  // a source string
-                    Term t2 = translate(expressions.get(1)); // a regex pattern
+                    Term t1 = getTerm(expressions.get(0));  // a source string
+                    Term t2 = getTerm(expressions.get(1)); // a regex pattern
 
                     // the third parameter is optional for match_parameter in regexp_like
                     Term t3 = (expressions.size() == 3)
-                            ? translate(expressions.get(2))
+                            ? getTerm(expressions.get(2))
                             : FACTORY.getConstantLiteral("");
 
                     result = FACTORY.getFunction(ExpressionOperation.REGEX, t1, t2, t3);
@@ -153,12 +157,12 @@ public class ExpressionParser implements java.util.function.Function<ImmutableMa
             }
             else if (functionName.endsWith("replace")) {
                 if (expressions.size() == 2 || expressions.size() == 3) {
-                    Term t1 = translate(expressions.get(0));
-                    Term t2 = translate(expressions.get(1)); // second parameter is a string
+                    Term t1 = getTerm(expressions.get(0));
+                    Term t2 = getTerm(expressions.get(1)); // second parameter is a string
 
                     // Term t3 is optional: no string means delete occurrences of second param
                     Term t3 =  (expressions.size() == 3)
-                            ? translate(expressions.get(2))
+                            ? getTerm(expressions.get(2))
                             : FACTORY.getConstantLiteral("");
 
                     result = FACTORY.getFunction(ExpressionOperation.REPLACE, t1, t2, t3,
@@ -174,12 +178,12 @@ public class ExpressionParser implements java.util.function.Function<ImmutableMa
                 // TODO: this loop is incorrect for size > 3, fix it
                 for (int i = 0; i < nParameters; i += 2) {
                     if (topConcat == null) {
-                        Term t1 = translate(expressions.get(i));
-                        Term t2 = translate(expressions.get(i + 1));
+                        Term t1 = getTerm(expressions.get(i));
+                        Term t2 = getTerm(expressions.get(i + 1));
                         topConcat = FACTORY.getFunction(ExpressionOperation.CONCAT, t1, t2);
                     }
                     else {
-                        Term t2 = translate(expressions.get(i));
+                        Term t2 = getTerm(expressions.get(i));
                         topConcat = FACTORY.getFunction(ExpressionOperation.CONCAT, topConcat, t2);
                     }
                 }
@@ -194,33 +198,44 @@ public class ExpressionParser implements java.util.function.Function<ImmutableMa
          */
 
         @Override
+        public void visit(NullValue expression) {
+            throw new UnsupportedSelectQueryException("NULL is not supported", expression);
+        }
+
+        @Override
         public void visit(DoubleValue expression) {
-            result = FACTORY.getConstantLiteral(expression.toString(), Predicate.COL_TYPE.DOUBLE);
+            process(expression.toString(), Predicate.COL_TYPE.DOUBLE);
         }
 
         @Override
         public void visit(LongValue expression) {
-            result = FACTORY.getConstantLiteral(expression.getStringValue(), Predicate.COL_TYPE.LONG);
+            process(expression.getStringValue(), Predicate.COL_TYPE.LONG);
         }
 
         @Override
         public void visit(StringValue expression) {
-            result = FACTORY.getConstantLiteral(expression.getValue(), Predicate.COL_TYPE.STRING);
+            process(expression.getValue(), Predicate.COL_TYPE.STRING);
         }
 
         @Override
         public void visit(DateValue expression) {
-            result = FACTORY.getConstantLiteral(expression.getValue().toString(), Predicate.COL_TYPE.DATE);
+            process(expression.getValue().toString(), Predicate.COL_TYPE.DATE);
         }
 
         @Override
         public void visit(TimeValue expression) {
-            result = FACTORY.getConstantLiteral(expression.getValue().toString(), Predicate.COL_TYPE.TIME);
+            process(expression.getValue().toString(), Predicate.COL_TYPE.TIME);
         }
 
         @Override
         public void visit(TimestampValue expression) {
-            result = FACTORY.getConstantLiteral(expression.getValue().toString(), Predicate.COL_TYPE.DATETIME);
+            process(expression.getValue().toString(), Predicate.COL_TYPE.DATETIME);
+        }
+
+        @Override
+        public void visit(IntervalExpression expression) {
+            // example: INTERVAL '4 5:12' DAY TO MINUTE
+            throw new UnsupportedSelectQueryException("Temporal INTERVALs are not supported yet", expression);
         }
 
         /*
@@ -228,90 +243,78 @@ public class ExpressionParser implements java.util.function.Function<ImmutableMa
         */
 
         @Override
-        public void visit(Addition addition) {
-            visitBinaryExpression(addition,
-                    (t1, t2) -> FACTORY.getFunction(ExpressionOperation.ADD, t1, t2));
+        public void visit(Addition expression) {
+            process(expression, (t1, t2) -> FACTORY.getFunction(ExpressionOperation.ADD, t1, t2));
         }
 
         @Override
-        public void visit(Subtraction subtraction) {
-            visitBinaryExpression(subtraction,
-                    (t1, t2) -> FACTORY.getFunction(ExpressionOperation.SUBTRACT, t1, t2));
+        public void visit(Subtraction expression) {
+            process(expression, (t1, t2) -> FACTORY.getFunction(ExpressionOperation.SUBTRACT, t1, t2));
         }
 
         @Override
-        public void visit(Multiplication multiplication) {
-            visitBinaryExpression(multiplication,
-                    (t1, t2) -> FACTORY.getFunction(ExpressionOperation.MULTIPLY, t1, t2));
+        public void visit(Multiplication expression) {
+            process(expression, (t1, t2) -> FACTORY.getFunction(ExpressionOperation.MULTIPLY, t1, t2));
         }
 
         @Override
-        public void visit(Division division) {
-            visitBinaryExpression(division,
-                    (t1, t2) -> FACTORY.getFunction(ExpressionOperation.DIVIDE, t1, t2));
-        }
-
-        // TODO: introduce operation and implement
-        @Override
-        public void visit(Modulo modulo) {
-            throw new UnsupportedSelectQueryException("Not supported yet", modulo);
+        public void visit(Division expression) {
+            process(expression, (t1, t2) -> FACTORY.getFunction(ExpressionOperation.DIVIDE, t1, t2));
         }
 
         @Override
-        public void visit(Concat concat) {
-            visitBinaryExpression(concat,
-                    (t1, t2) -> FACTORY.getFunction(ExpressionOperation.CONCAT, t1, t2));
+        public void visit(Modulo expression) {
+            // TODO: introduce operation and implement
+            throw new UnsupportedSelectQueryException("MODULO is not supported yet", expression);
+        }
+
+        @Override
+        public void visit(Concat expression) {
+            process(expression, (t1, t2) -> FACTORY.getFunction(ExpressionOperation.CONCAT, t1, t2));
         }
 
 
 
         @Override
         public void visit(EqualsTo expression) {
-            visitBinaryExpression(expression,
-                    (t1, t2) -> FACTORY.getFunction(ExpressionOperation.EQ, t1, t2));
+            process(expression, (t1, t2) -> FACTORY.getFunction(ExpressionOperation.EQ, t1, t2));
         }
 
         @Override
         public void visit(GreaterThan expression) {
-            visitBinaryExpression(expression,
-                    (t1, t2) -> FACTORY.getFunction(ExpressionOperation.GT, t1, t2));
+            process(expression, (t1, t2) -> FACTORY.getFunction(ExpressionOperation.GT, t1, t2));
         }
 
         @Override
         public void visit(GreaterThanEquals expression) {
-            visitBinaryExpression(expression,
-                    (t1, t2) -> FACTORY.getFunction(ExpressionOperation.GTE, t1, t2));
+            process(expression, (t1, t2) -> FACTORY.getFunction(ExpressionOperation.GTE, t1, t2));
         }
 
         @Override
-        public void visit(MinorThan minorThan) {
-            visitBinaryExpression(minorThan,
-                    (t1, t2) -> FACTORY.getFunction(ExpressionOperation.LT, t1, t2));
+        public void visit(MinorThan expression) {
+            process(expression, (t1, t2) -> FACTORY.getFunction(ExpressionOperation.LT, t1, t2));
         }
 
         @Override
-        public void visit(MinorThanEquals minorThanEquals) {
-            visitBinaryExpression(minorThanEquals,
-                    (t1, t2) -> FACTORY.getFunction(ExpressionOperation.LTE, t1, t2));
+        public void visit(MinorThanEquals expression) {
+            process(expression, (t1, t2) -> FACTORY.getFunction(ExpressionOperation.LTE, t1, t2));
         }
 
         @Override
-        public void visit(NotEqualsTo notEqualsTo) {
-            visitBinaryExpression(notEqualsTo,
-                    (t1, t2) -> FACTORY.getFunction(ExpressionOperation.NEQ, t1, t2));
+        public void visit(NotEqualsTo expression) {
+            process(expression, (t1, t2) -> FACTORY.getFunction(ExpressionOperation.NEQ, t1, t2));
         }
 
 
-
         @Override
-        public void visit(LikeExpression likeExpression) {
-            visitBinaryExpression(likeExpression, (t1, t2) -> FACTORY.getSQLFunctionLike(t1, t2));
+        public void visit(LikeExpression expression) {
+            process(expression, (t1, t2) -> FACTORY.getSQLFunctionLike(t1, t2));
         }
 
         @Override
-        public void visit(RegExpMySQLOperator regExpMySQLOperator) {
+        public void visit(RegExpMySQLOperator expression) {
             Term flags;
-            switch (regExpMySQLOperator.getOperatorType()) {
+            switch (expression.getOperatorType()) {
                 case MATCH_CASESENSITIVE:
                     flags = FACTORY.getConstantLiteral("");
                     break;
@@ -319,10 +322,9 @@ public class ExpressionParser implements java.util.function.Function<ImmutableMa
                     flags = FACTORY.getConstantLiteral("i");
                     break;
                 default:
-                    throw new UnsupportedOperationException("Unknown operator: " + regExpMySQLOperator);
+                    throw new InvalidSelectQueryException("Unknown operator: ", expression);
             }
-            visitBinaryExpression(regExpMySQLOperator,
-                    (t1, t2) ->  FACTORY.getFunction(ExpressionOperation.REGEX, t1, t2, flags));
+            process(expression, (t1, t2) ->  FACTORY.getFunction(ExpressionOperation.REGEX, t1, t2, flags));
         }
 
         @Override
@@ -347,36 +349,35 @@ public class ExpressionParser implements java.util.function.Function<ImmutableMa
                     not = true;
                     break;
                 default:
-                    throw new UnsupportedOperationException("Unknown operator: " + expression);
+                    throw new InvalidSelectQueryException("Unknown operator: ", expression);
             }
-            visitBinaryExpression(expression, (t1, t2) ->  not
+            process(expression, (t1, t2) ->  not
                     ? FACTORY.getFunctionNOT(FACTORY.getFunction(ExpressionOperation.REGEX, t1, t2, flags))
                     : FACTORY.getFunction(ExpressionOperation.REGEX, t1, t2, flags));
         }
 
 
-
         @Override
-        public void visit(AndExpression andExpression) {
-            visitBinaryExpression(andExpression, (t1, t2) -> FACTORY.getFunctionAND(t1, t2));
+        public void visit(AndExpression expression) {
+            process(expression, (t1, t2) -> FACTORY.getFunctionAND(t1, t2));
         }
 
         @Override
-        public void visit(OrExpression orExpression) {
-            visitBinaryExpression(orExpression, (t1, t2) -> FACTORY.getFunctionOR(t1, t2));
+        public void visit(OrExpression expression) {
+            process(expression, (t1, t2) -> FACTORY.getFunctionOR(t1, t2));
         }
 
 
 
         @Override
         public void visit(Between expression) {
-            Term t1 = translate(expression.getLeftExpression());
-            Term t2 = translate(expression.getBetweenExpressionStart());
-            Term atom1 = FACTORY.getFunction(ExpressionOperation.GTE, t1, t2);
+            Term t1 = getTerm(expression.getLeftExpression());
+            Term t2 = getTerm(expression.getBetweenExpressionStart());
+            Function atom1 = FACTORY.getFunction(ExpressionOperation.GTE, t1, t2);
 
-            Term t3 = translate(expression.getLeftExpression());
-            Term t4 = translate(expression.getBetweenExpressionEnd());
-            Term atom2 = FACTORY.getFunction(ExpressionOperation.LTE, t3, t4);
+            Term t3 = getTerm(expression.getLeftExpression());
+            Term t4 = getTerm(expression.getBetweenExpressionEnd());
+            Function atom2 = FACTORY.getFunction(ExpressionOperation.LTE, t3, t4);
 
             result = FACTORY.getFunctionAND(atom1, atom2);
         }
@@ -385,32 +386,33 @@ public class ExpressionParser implements java.util.function.Function<ImmutableMa
         @Override
         public void visit(InExpression expression) {
 
-            // TODO: replace with "native" FACTORY.get.. calls
+            ItemsList right = expression.getRightItemsList();
+            // right can be SubSelect, ExpressionList and MultiExpressionList
+            if (!(right instanceof ExpressionList))
+                throw new UnsupportedSelectQueryException("IN is supported only with ExpressionList on the right-hand side", expression);
 
             Expression left = expression.getLeftExpression();
-            // rightItemsList can be SubSelect, ExpressionList and MultiExpressionList
-            ExpressionList rightItemsList = (ExpressionList) expression.getRightItemsList();
-            if (rightItemsList == null)
-                throw new UnsupportedOperationException();
+            if (left == null || expression.getOldOracleJoinSyntax() != NO_ORACLE_JOIN)
+                throw new UnsupportedSelectQueryException("IN is supported only with Expression on the left-hand side (and no Oracle OUTER JOIN syntax)", expression);
 
-            final ImmutableList.Builder<EqualsTo> builderEqualsToList = new ImmutableList.Builder<>();
-            rightItemsList.getExpressions().forEach( item -> {
-                final EqualsTo eq = new EqualsTo();
-                eq.setLeftExpression(left);
-                eq.setRightExpression(item);
-                builderEqualsToList.add(eq);
-            });
-            ImmutableList<EqualsTo> equalsToList = builderEqualsToList.build();
-            int size = equalsToList.size();
-            if (size > 1) {
-                OrExpression or = new OrExpression(equalsToList.get(size - 1), equalsToList.get(size - 2));
+            ImmutableList<Function> equalities = ImmutableList.<Function>builder()
+                    .addAll(((ExpressionList)right).getExpressions().stream()
+                        .map(item -> {
+                            Term t1 = getTerm(expression.getLeftExpression());
+                            Term t2 = getTerm(item);
+                            return FACTORY.getFunctionEQ(t1, t2);
+                        }).iterator())
+                    .build();
 
-                for (int i = size - 3; i >= 0; i--)
-                    or = new OrExpression(equalsToList.get(i), or);
-
-                result = translate(or);
-            } else {
-                result = translate(equalsToList.get(0));
+            switch (equalities.size()) {
+                case 0:
+                    throw new InvalidSelectQueryException("IN must contain at least one expression", expression);
+                case 1:
+                    result = equalities.get(0);
+                    break;
+                default:
+                    result = equalities.reverse().stream()
+                            .reduce(null, (a, b) -> (a == null) ? b : FACTORY.getFunctionOR(b,a));
             }
         }
 
@@ -420,20 +422,18 @@ public class ExpressionParser implements java.util.function.Function<ImmutableMa
 
         @Override
         public void visit(IsNullExpression expression) {
-            visitUnaryExpression(expression.getLeftExpression(), expression.isNot(),
-                    t -> FACTORY.getFunctionIsNull(t));
+            process(expression.getLeftExpression(), expression.isNot(), t -> FACTORY.getFunctionIsNull(t));
         }
 
         @Override
         public void visit(Parenthesis expression) {
-            visitUnaryExpression(expression.getExpression(), expression.isNot(),
-                    UnaryOperator.identity());
+            process(expression.getExpression(), expression.isNot(), UnaryOperator.identity());
         }
 
         @Override
-        public void visit(SignedExpression signedExpression) {
+        public void visit(SignedExpression expression) {
             UnaryOperator<Term> op;
-            switch (signedExpression.getSign()) {
+            switch (expression.getSign()) {
                 case '-' :
                     op = t -> FACTORY.getFunction(ExpressionOperation.MINUS, t);
                     break;
@@ -441,10 +441,17 @@ public class ExpressionParser implements java.util.function.Function<ImmutableMa
                     op = UnaryOperator.identity();
                     break;
                 default:
-                    throw new UnsupportedOperationException("Unknown operator: " + signedExpression);
+                    throw new InvalidSelectQueryException("Unknown operator: ", expression);
             }
-            visitUnaryExpression(signedExpression.getExpression(), false, op);
+            process(expression.getExpression(), false, op);
         }
+
+        @Override
+        public void visit(ExtractExpression expression) {
+            // Example: EXTRACT(month FROM order_date)
+            throw new UnsupportedSelectQueryException("EXTRACT is not supported yet", expression);
+        }
+
 
 
 
@@ -559,60 +566,51 @@ public class ExpressionParser implements java.util.function.Function<ImmutableMa
 
 
         @Override
-        public void visit(BitwiseAnd bitwiseAnd) {
-            throw new UnsupportedSelectQueryException("Bitwise AND not supported", bitwiseAnd);
+        public void visit(BitwiseAnd expression) {
+            throw new UnsupportedSelectQueryException("Bitwise AND is not supported", expression);
         }
 
         @Override
-        public void visit(BitwiseOr bitwiseOr) {
-            throw new UnsupportedSelectQueryException("Bitwise OR not supported", bitwiseOr);
+        public void visit(BitwiseOr expression) {
+            throw new UnsupportedSelectQueryException("Bitwise OR is not supported", expression);
         }
 
         @Override
-        public void visit(BitwiseXor bitwiseXor) {
-            throw new UnsupportedSelectQueryException("Bitwise XOR not supported", bitwiseXor);
+        public void visit(BitwiseXor expression) {
+            throw new UnsupportedSelectQueryException("Bitwise XOR is not supported", expression);
         }
 
         @Override
         public void visit(AnalyticExpression expression) {
-            throw new UnsupportedSelectQueryException("Analytic expressions not supported", expression);
+            throw new UnsupportedSelectQueryException("Analytic expressions is not supported", expression);
         }
 
-        // TODO: check
-        @Override
-        public void visit(ExtractExpression expression) {
-            throw new UnsupportedOperationException();
-        }
-
-        // TODO: check
-        @Override
-        public void visit(IntervalExpression expression) {
-            throw new UnsupportedOperationException();
-        }
 
         @Override
         public void visit(OracleHierarchicalExpression expression) {
-            throw new UnsupportedSelectQueryException("Oracle hierarchical expressions not supported", expression);
+            throw new UnsupportedSelectQueryException("Oracle hierarchical expressions is not supported", expression);
         }
 
         @Override
-        public void visit(Matches matches) {
-            throw new UnsupportedSelectQueryException("Oracle join syntax not supported", matches);
+        public void visit(Matches expression) {
+            throw new UnsupportedSelectQueryException("Oracle join syntax not supported", expression);
+        }
+
+
+
+        @Override
+        public void visit(JsonExpression expression) {
+            throw new InvalidSelectQueryException("JSON expressions are not allowed", expression);
         }
 
         @Override
-        public void visit(JsonExpression jsonExpr) {
-            throw new InvalidSelectQueryException("JSON expressions are not allowed", jsonExpr);
+        public void visit(JdbcParameter expression) {
+            throw new InvalidSelectQueryException("JDBC parameters are not allowed", expression);
         }
 
         @Override
-        public void visit(JdbcParameter jdbcParameter) {
-            throw new InvalidSelectQueryException("JDBC parameters are not allowed", jdbcParameter);
-        }
-
-        @Override
-        public void visit(JdbcNamedParameter jdbcNamedParameter) {
-            throw new InvalidSelectQueryException("JDBC named parameters are not allowed", jdbcNamedParameter);
+        public void visit(JdbcNamedParameter expression) {
+            throw new InvalidSelectQueryException("JDBC named parameters are not allowed", expression);
         }
     }
 }

@@ -328,7 +328,6 @@ public class SelectQueryParserTest {
         System.out.println(parse);
     }
 
-
     @Test
     public void join_using_inner_Test() {
         DBMetadata metadata = createMetadata();
@@ -379,22 +378,41 @@ public class SelectQueryParserTest {
         final DBMetadata metadata = createMetadata();
         final SelectQueryParser parser = new SelectQueryParser(metadata);
 
-        final CQIE parse = parser.parse("SELECT A, B FROM P where P.A IN ( 1, 2 )");
+        final CQIE parse = parser.parse("SELECT A, B FROM P where P.A IN ( 1, 2, 3 )");
         System.out.println(parse);
-        assertTrue( parse.getHead().getTerms().size()==0);
+        assertEquals(0, parse.getHead().getTerms().size());
 
         final Variable a1 = FACTORY.getVariable("A1");
         final ValueConstant v1 = FACTORY. getConstantLiteral("1", Predicate.COL_TYPE.LONG); // variable are key sensitive
         final ValueConstant v2 = FACTORY. getConstantLiteral("2", Predicate.COL_TYPE.LONG);
+        final ValueConstant v3 = FACTORY. getConstantLiteral("3", Predicate.COL_TYPE.LONG);
 
+        final Function atom = FACTORY.getFunction(ExpressionOperation.OR, ImmutableList.of(
+                FACTORY.getFunction(ExpressionOperation.EQ, ImmutableList.of(a1, v1)),
+                FACTORY.getFunction(ExpressionOperation.OR, ImmutableList.of(
+                    FACTORY.getFunction(ExpressionOperation.EQ, ImmutableList.of(a1, v2)),
+                    FACTORY.getFunction(ExpressionOperation.EQ, ImmutableList.of(a1, v3))))
+               ));
 
-        final Function atom = FACTORY.getFunction(ExpressionOperation.OR, ImmutableList.of (
-                FACTORY.getFunction(ExpressionOperation.EQ, ImmutableList.of(a1, v2)),
-                FACTORY.getFunction(ExpressionOperation.EQ, ImmutableList.of(a1, v1))));
-
-        assertTrue( parse.getBody().contains(atom));
+        assertTrue(parse.getBody().contains(atom));
     }
 
+    @Test
+    public void in_condition1_Test() {
+        final DBMetadata metadata = createMetadata();
+        final SelectQueryParser parser = new SelectQueryParser(metadata);
+
+        final CQIE parse = parser.parse("SELECT A, B FROM P where P.A IN ( 1 )");
+        System.out.println(parse);
+        assertEquals(0, parse.getHead().getTerms().size());
+
+        final Variable a1 = FACTORY.getVariable("A1");
+        final ValueConstant v1 = FACTORY. getConstantLiteral("1", Predicate.COL_TYPE.LONG); // variable are key sensitive
+
+        final Function atom = FACTORY.getFunction(ExpressionOperation.EQ, ImmutableList.of(a1, v1));
+
+        assertTrue(parse.getBody().contains(atom));
+    }
 
 
     @Test(expected =UnsupportedSelectQueryException.class)
