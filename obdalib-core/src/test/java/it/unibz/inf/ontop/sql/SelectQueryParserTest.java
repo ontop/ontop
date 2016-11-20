@@ -317,6 +317,17 @@ public class SelectQueryParserTest {
         assertTrue( parse.getBody().contains(atomQ));
     }
 
+    @Test
+    public void subjoin_Test() {
+        DBMetadata metadata = createMetadata();
+
+
+        SelectQueryParser parser = new SelectQueryParser(metadata);
+
+        final CQIE parse = parser.parse("SELECT A, C FROM R JOIN (P NATURAL JOIN Q) AS S ON R.A = S.A");
+        System.out.println(parse);
+    }
+
 
     @Test
     public void join_using_inner_Test() {

@@ -8,7 +8,7 @@ import it.unibz.inf.ontop.model.Function;
 import it.unibz.inf.ontop.model.impl.*;
 import it.unibz.inf.ontop.parser.*;
 import it.unibz.inf.ontop.sql.*;
-import it.unibz.inf.ontop.sql.parser.exceptions.InvalidSelectQueryEcxeption;
+import it.unibz.inf.ontop.sql.parser.exceptions.InvalidSelectQueryException;
 import it.unibz.inf.ontop.sql.parser.exceptions.UnsupportedSelectQueryException;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import net.sf.jsqlparser.JSQLParserException;
@@ -48,7 +48,7 @@ public class SelectQueryParser {
         try {
             Statement statement = CCJSqlParserUtil.parse(sql);
             if (!(statement instanceof Select))
-                throw new InvalidSelectQueryEcxeption("The inserted query is not a SELECT statement", statement);
+                throw new InvalidSelectQueryException("The inserted query is not a SELECT statement", statement);
 
             Select select = (Select) statement;
 
@@ -219,7 +219,7 @@ public class SelectQueryParser {
             // Construct the predicate using the table name
             DatabaseRelationDefinition relation = metadata.getDatabaseRelation(id);
             if (relation == null)
-                throw new InvalidSelectQueryEcxeption("Table " + id + " not found in metadata", tableName);
+                throw new InvalidSelectQueryException("Table " + id + " not found in metadata", tableName);
             relationIndex++;
 
             RelationID aliasId = (tableName.getAlias() != null)
@@ -257,6 +257,7 @@ public class SelectQueryParser {
 
         @Override
         public void visit(SubJoin subjoin) {
+            // TODO: implementation (similar to SubSelect, even simpler)
             throw new UnsupportedSelectQueryException("Subjoins are not supported", subjoin);
         }
 

@@ -9,9 +9,9 @@ package it.unibz.inf.ontop.sql.parser.exceptions;
  * Such a query cannot be translated into any internal representation.
  *
  */
-public class InvalidSelectQueryEcxeption extends RuntimeException {
+public class InvalidSelectQueryException extends RuntimeException {
 
-    public InvalidSelectQueryEcxeption(String message, Object object) {
+    public InvalidSelectQueryException(String message, Object object) {
         super(message + " "  + object.toString());
     }
 }

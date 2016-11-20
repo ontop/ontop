@@ -9,7 +9,7 @@ import it.unibz.inf.ontop.sql.QualifiedAttributeID;
 import it.unibz.inf.ontop.sql.QuotedID;
 import it.unibz.inf.ontop.sql.QuotedIDFactory;
 import it.unibz.inf.ontop.sql.RelationID;
-import it.unibz.inf.ontop.sql.parser.exceptions.InvalidSelectQueryEcxeption;
+import it.unibz.inf.ontop.sql.parser.exceptions.InvalidSelectQueryException;
 import it.unibz.inf.ontop.sql.parser.exceptions.UnsupportedSelectQueryException;
 import net.sf.jsqlparser.expression.*;
 import net.sf.jsqlparser.expression.operators.arithmetic.*;
@@ -90,7 +90,7 @@ public class ExpressionParser implements java.util.function.Function<ImmutableMa
      *
      * Exceptions
      *      - UnsupportedOperationException: an internal error (due to the unexpected bahaviour of JSQLparser)
-     *      - InvalidSelectQueryEcxeption: the input is not a valid mapping query
+     *      - InvalidSelectQueryException: the input is not a valid mapping query
      *      - UnsupportedSelectQueryException: the input cannot be converted into a CQ and needs to be wrapped
      *
      */
@@ -149,7 +149,7 @@ public class ExpressionParser implements java.util.function.Function<ImmutableMa
                     result = FACTORY.getFunction(ExpressionOperation.REGEX, t1, t2, t3);
                 }
                 else
-                    throw new InvalidSelectQueryEcxeption("Wrong number of arguments for SQL function REGEX_LIKE", func);
+                    throw new InvalidSelectQueryException("Wrong number of arguments for SQL function REGEX_LIKE", func);
             }
             else if (functionName.endsWith("replace")) {
                 if (expressions.size() == 2 || expressions.size() == 3) {
@@ -165,7 +165,7 @@ public class ExpressionParser implements java.util.function.Function<ImmutableMa
                             FACTORY.getConstantLiteral("")); // the 4th argument is flags
                 }
                 else
-                    throw new InvalidSelectQueryEcxeption("Wrong number of arguments in SQL function REPLACE", func);
+                    throw new InvalidSelectQueryException("Wrong number of arguments in SQL function REPLACE", func);
             }
             else if (functionName.endsWith("concat")){
 
@@ -602,17 +602,17 @@ public class ExpressionParser implements java.util.function.Function<ImmutableMa
 
         @Override
         public void visit(JsonExpression jsonExpr) {
-            throw new InvalidSelectQueryEcxeption("JSON expressions are not allowed", jsonExpr);
+            throw new InvalidSelectQueryException("JSON expressions are not allowed", jsonExpr);
         }
 
         @Override
         public void visit(JdbcParameter jdbcParameter) {
-            throw new InvalidSelectQueryEcxeption("JDBC parameters are not allowed", jdbcParameter);
+            throw new InvalidSelectQueryException("JDBC parameters are not allowed", jdbcParameter);
         }
 
         @Override
         public void visit(JdbcNamedParameter jdbcNamedParameter) {
-            throw new InvalidSelectQueryEcxeption("JDBC named parameters are not allowed", jdbcNamedParameter);
+            throw new InvalidSelectQueryException("JDBC named parameters are not allowed", jdbcNamedParameter);
         }
     }
 }
