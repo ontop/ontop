@@ -9,8 +9,8 @@ import it.unibz.inf.ontop.sql.QualifiedAttributeID;
 import it.unibz.inf.ontop.sql.QuotedID;
 import it.unibz.inf.ontop.sql.QuotedIDFactory;
 import it.unibz.inf.ontop.sql.RelationID;
-import it.unibz.inf.ontop.sql.parser.exceptions.InvalidSelectQuery;
-import it.unibz.inf.ontop.sql.parser.exceptions.UnsupportedSelectQuery;
+import it.unibz.inf.ontop.sql.parser.exceptions.InvalidSelectQueryEcxeption;
+import it.unibz.inf.ontop.sql.parser.exceptions.UnsupportedSelectQueryException;
 import net.sf.jsqlparser.expression.*;
 import net.sf.jsqlparser.expression.operators.arithmetic.*;
 import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
@@ -90,8 +90,8 @@ public class ExpressionParser implements java.util.function.Function<ImmutableMa
      *
      * Exceptions
      *      - UnsupportedOperationException: an internal error (due to the unexpected bahaviour of JSQLparser)
-     *      - InvalidSelectQuery: the input is not a valid mapping query
-     *      - UnsupportedSelectQuery: the input cannot be converted into a CQ and needs to be wrapped
+     *      - InvalidSelectQueryEcxeption: the input is not a valid mapping query
+     *      - UnsupportedSelectQueryException: the input cannot be converted into a CQ and needs to be wrapped
      *
      */
     private class ExpressionVisitorImpl implements ExpressionVisitor {
@@ -149,7 +149,7 @@ public class ExpressionParser implements java.util.function.Function<ImmutableMa
                     result = FACTORY.getFunction(ExpressionOperation.REGEX, t1, t2, t3);
                 }
                 else
-                    throw new InvalidSelectQuery("Wrong number of arguments for SQL function REGEX_LIKE", func);
+                    throw new InvalidSelectQueryEcxeption("Wrong number of arguments for SQL function REGEX_LIKE", func);
             }
             else if (functionName.endsWith("replace")) {
                 if (expressions.size() == 2 || expressions.size() == 3) {
@@ -165,7 +165,7 @@ public class ExpressionParser implements java.util.function.Function<ImmutableMa
                             FACTORY.getConstantLiteral("")); // the 4th argument is flags
                 }
                 else
-                    throw new InvalidSelectQuery("Wrong number of arguments in SQL function REPLACE", func);
+                    throw new InvalidSelectQueryEcxeption("Wrong number of arguments in SQL function REPLACE", func);
             }
             else if (functionName.endsWith("concat")){
 
@@ -186,7 +186,7 @@ public class ExpressionParser implements java.util.function.Function<ImmutableMa
                 result = topConcat;
             }
             else
-                throw new UnsupportedSelectQuery("Unsupported function ", func);
+                throw new UnsupportedSelectQueryException("Unsupported function ", func);
         }
 
         /*
@@ -254,7 +254,7 @@ public class ExpressionParser implements java.util.function.Function<ImmutableMa
         // TODO: introduce operation and implement
         @Override
         public void visit(Modulo modulo) {
-            throw new UnsupportedSelectQuery("Not supported yet", modulo);
+            throw new UnsupportedSelectQueryException("Not supported yet", modulo);
         }
 
         @Override
@@ -560,22 +560,22 @@ public class ExpressionParser implements java.util.function.Function<ImmutableMa
 
         @Override
         public void visit(BitwiseAnd bitwiseAnd) {
-            throw new UnsupportedSelectQuery("Bitwise AND not supported", bitwiseAnd);
+            throw new UnsupportedSelectQueryException("Bitwise AND not supported", bitwiseAnd);
         }
 
         @Override
         public void visit(BitwiseOr bitwiseOr) {
-            throw new UnsupportedSelectQuery("Bitwise OR not supported", bitwiseOr);
+            throw new UnsupportedSelectQueryException("Bitwise OR not supported", bitwiseOr);
         }
 
         @Override
         public void visit(BitwiseXor bitwiseXor) {
-            throw new UnsupportedSelectQuery("Bitwise XOR not supported", bitwiseXor);
+            throw new UnsupportedSelectQueryException("Bitwise XOR not supported", bitwiseXor);
         }
 
         @Override
         public void visit(AnalyticExpression expression) {
-            throw new UnsupportedSelectQuery("Analytic expressions not supported", expression);
+            throw new UnsupportedSelectQueryException("Analytic expressions not supported", expression);
         }
 
         // TODO: check
@@ -592,27 +592,27 @@ public class ExpressionParser implements java.util.function.Function<ImmutableMa
 
         @Override
         public void visit(OracleHierarchicalExpression expression) {
-            throw new UnsupportedSelectQuery("Oracle hierarchical expressions not supported", expression);
+            throw new UnsupportedSelectQueryException("Oracle hierarchical expressions not supported", expression);
         }
 
         @Override
         public void visit(Matches matches) {
-            throw new UnsupportedSelectQuery("Oracle join syntax not supported", matches);
+            throw new UnsupportedSelectQueryException("Oracle join syntax not supported", matches);
         }
 
         @Override
         public void visit(JsonExpression jsonExpr) {
-            throw new InvalidSelectQuery("JSON expressions are not allowed", jsonExpr);
+            throw new InvalidSelectQueryEcxeption("JSON expressions are not allowed", jsonExpr);
         }
 
         @Override
         public void visit(JdbcParameter jdbcParameter) {
-            throw new InvalidSelectQuery("JDBC parameters are not allowed", jdbcParameter);
+            throw new InvalidSelectQueryEcxeption("JDBC parameters are not allowed", jdbcParameter);
         }
 
         @Override
         public void visit(JdbcNamedParameter jdbcNamedParameter) {
-            throw new InvalidSelectQuery("JDBC named parameters are not allowed", jdbcNamedParameter);
+            throw new InvalidSelectQueryEcxeption("JDBC named parameters are not allowed", jdbcNamedParameter);
         }
     }
 }

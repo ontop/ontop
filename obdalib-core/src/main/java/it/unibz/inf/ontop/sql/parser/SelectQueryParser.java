@@ -8,12 +8,10 @@ import it.unibz.inf.ontop.model.Function;
 import it.unibz.inf.ontop.model.impl.*;
 import it.unibz.inf.ontop.parser.*;
 import it.unibz.inf.ontop.sql.*;
-import it.unibz.inf.ontop.sql.parser.exceptions.InvalidSelectQuery;
-import it.unibz.inf.ontop.sql.parser.exceptions.UnsupportedQueryException;
-import it.unibz.inf.ontop.sql.parser.exceptions.UnsupportedSelectQuery;
+import it.unibz.inf.ontop.sql.parser.exceptions.InvalidSelectQueryEcxeption;
+import it.unibz.inf.ontop.sql.parser.exceptions.UnsupportedSelectQueryException;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import net.sf.jsqlparser.JSQLParserException;
-import net.sf.jsqlparser.expression.*;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.parser.ParseException;
 import net.sf.jsqlparser.schema.Column;
@@ -50,43 +48,50 @@ public class SelectQueryParser {
         try {
             Statement statement = CCJSqlParserUtil.parse(sql);
             if (!(statement instanceof Select))
-                throw new InvalidSelectQuery("The inserted query is not a SELECT statement", statement);
+                throw new InvalidSelectQueryEcxeption("The inserted query is not a SELECT statement", statement);
 
             Select select = (Select) statement;
 
             SelectBody selectBody = select.getSelectBody();
             if (!(selectBody instanceof PlainSelect))
-                throw new UnsupportedSelectQuery("Complex SELECT statements are not supported", selectBody);
+                throw new UnsupportedSelectQueryException("Complex SELECT statements are not supported", selectBody);
 
             PlainSelect plainSelect = (PlainSelect)selectBody;
 
             RelationalExpression current = getRelationalExpression(plainSelect.getFromItem());
             if (plainSelect.getJoins() != null) {
                 for (Join join : plainSelect.getJoins()) {
-                    // join query expressions not supported
-                    if ( join.isFull() || join.isOuter() || join.isRight() || join.isLeft() )
-                        throw new UnsupportedQueryException("Unsupported join query expression", statement);
+                    if (join.isFull() || join.isRight() || join.isLeft() || join.isOuter())
+                        throw new UnsupportedSelectQueryException("LEFT/RIGHT/FULL OUTER JOINs are not supported", statement);
+
+                    // TODO: check SQL grammars of other databases
+                    // http://dev.mysql.com/doc/refman/5.7/en/join.html:
+                    // In MySQL, JOIN, CROSS JOIN, and INNER JOIN are syntactic equivalents
+                    // (they can replace each other). In standard SQL, they are not equivalent.
+                    // INNER JOIN is used with an ON clause, CROSS JOIN is used otherwise.
 
                     RelationalExpression right = getRelationalExpression(join.getRightItem());
                     if (join.isCross() || join.isSimple()) {
                         current = RelationalExpression.crossJoin(current, right);
                     }
-                    else if (join.isNatural()) {
+                    else if (join.isNatural()) { // can also be INNER, can it not?
                         current = RelationalExpression.naturalJoin(current, right);
                     }
-                    else if (join.isInner()) {
-                        if (join.getOnExpression() != null) {
+                    //else if (join.isInner()) {
+                        else if (join.getOnExpression() != null) {
                             current = RelationalExpression.joinOn(current, right,
                                     new ExpressionParser(metadata.getQuotedIDFactory(), join.getOnExpression()));
                         }
                         else if (join.getUsingColumns() != null) {
-                            current = joinUsing(current, right, join);
+                            current = RelationalExpression.joinUsing(current, right,
+                                    join.getUsingColumns().stream()
+                                            .map(p -> metadata.getQuotedIDFactory().createAttributeID(p.getColumnName()))
+                                            .collect(ImmutableCollectors.toSet()));
                         }
-                    }
-                    else if (join.getUsingColumns() != null)
-                        // on the join expression is only present UsingColumns and RightItem for example: SELECT A, C FROM P JOIN Q USING (A)
-                        current = joinUsing(current, right, join);
-
+                    //}
+                    //else if (join.getUsingColumns() != null)
+                    //    // on the join expression is only present UsingColumns and RightItem for example: SELECT A, C FROM P JOIN Q USING (A)
+                    //    current = joinUsing(current, right, join);
                 }
             }
 
@@ -122,13 +127,6 @@ public class SelectQueryParser {
         return parsedSql;
     }
 
-
-    private RelationalExpression joinUsing (RelationalExpression e1, RelationalExpression e2, Join join  ){
-        return  RelationalExpression.joinUsing(e1, e2,
-                join.getUsingColumns().stream()
-                        .map(p -> metadata.getQuotedIDFactory().createAttributeID(p.getColumnName()))
-                        .collect(ImmutableCollectors.toSet()));
-    }
 
 
     private ParserViewDefinition createViewDefinition(String sql) {
@@ -221,7 +219,7 @@ public class SelectQueryParser {
             // Construct the predicate using the table name
             DatabaseRelationDefinition relation = metadata.getDatabaseRelation(id);
             if (relation == null)
-                throw new InvalidSelectQuery("Table " + id + " not found in metadata", tableName);
+                throw new InvalidSelectQueryEcxeption("Table " + id + " not found in metadata", tableName);
             relationIndex++;
 
             RelationID aliasId = (tableName.getAlias() != null)
@@ -259,17 +257,17 @@ public class SelectQueryParser {
 
         @Override
         public void visit(SubJoin subjoin) {
-            throw new UnsupportedSelectQuery("Subjoins are not supported", subjoin);
+            throw new UnsupportedSelectQueryException("Subjoins are not supported", subjoin);
         }
 
         @Override
         public void visit(LateralSubSelect lateralSubSelect) {
-            throw new UnsupportedSelectQuery("LateralSubSelects are not supported", lateralSubSelect);
+            throw new UnsupportedSelectQueryException("LateralSubSelects are not supported", lateralSubSelect);
         }
 
         @Override
         public void visit(ValuesList valuesList) {
-            throw new UnsupportedSelectQuery("ValuesLists are not supported", valuesList);
+            throw new UnsupportedSelectQueryException("ValuesLists are not supported", valuesList);
         }
     }
 

@@ -8,9 +8,9 @@ package it.unibz.inf.ontop.sql.parser.exceptions;
  * an internal representation.
  *
  */
-public class UnsupportedSelectQuery extends RuntimeException {
+public class UnsupportedSelectQueryException extends RuntimeException {
 
-    public UnsupportedSelectQuery(String message, Object object) {
+    public UnsupportedSelectQueryException(String message, Object object) {
         super(message + " "  + object.toString());
     }
 }
