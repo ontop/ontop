@@ -112,24 +112,30 @@ public class ExpressionParser implements java.util.function.Function<ImmutableMa
             return this.result;
         }
 
+        private void setResult(boolean isNot, Term term) {
+            result = isNot ? FACTORY.getFunctionNOT(term) : term;
+        }
+
+        private java.util.function.UnaryOperator<Term> getNot(boolean isNot) {
+            return isNot ? term -> FACTORY.getFunctionNOT(term) : UnaryOperator.identity();
+        }
+
         private void process(BinaryExpression expression, BinaryOperator<Term> op) {
             Term leftTerm = getTerm(expression.getLeftExpression());
             Term rightTerm = getTerm(expression.getRightExpression());
             Term expTerm = op.apply(leftTerm, rightTerm);
-
-            result = expression.isNot() ? FACTORY.getFunctionNOT(expTerm) : expTerm;
+            setResult(expression.isNot(), expTerm);
         }
 
         // CAREFUL: the first argument is NOT the composite term, but rather its argument
         private void process(Expression arg, boolean isNot, UnaryOperator<Term> op) {
             Term term = getTerm(arg);
             Term expTerm = op.apply(term);
-
-            result = isNot ? FACTORY.getFunctionNOT(expTerm) : expTerm;
+            setResult(isNot, expTerm);
         }
 
         private void process(String value, Predicate.COL_TYPE datatype) {
-            result =  FACTORY.getConstantLiteral(value, datatype);
+            result = FACTORY.getConstantLiteral(value, datatype);
         }
 
 
@@ -378,7 +384,7 @@ public class ExpressionParser implements java.util.function.Function<ImmutableMa
             Term t4 = getTerm(expression.getBetweenExpressionEnd());
             Function atom2 = FACTORY.getFunction(ExpressionOperation.LTE, t3, t4);
 
-            result = FACTORY.getFunctionAND(atom1, atom2);
+            setResult(expression.isNot(), FACTORY.getFunctionAND(atom1, atom2));
         }
 
 
@@ -415,7 +421,7 @@ public class ExpressionParser implements java.util.function.Function<ImmutableMa
                             .reduce(null, (a, b) -> (a == null) ? b : FACTORY.getFunctionOR(b,a));
             }
 
-            result = expression.isNot() ? FACTORY.getFunctionNOT(atom) : atom;
+            setResult(expression.isNot(), atom);
         }
 
         /*
@@ -511,14 +517,13 @@ public class ExpressionParser implements java.util.function.Function<ImmutableMa
         //      * [WHEN condition THEN expression]...
         //      * [ELSE expression]
         //      * END
-        public void visit(CaseExpression caseExpression) {
-            throw new UnsupportedOperationException();
+        public void visit(CaseExpression expression) {
+            throw new UnsupportedSelectQueryException("CASE is not supported yet", expression);
         }
 
         @Override
-        // TODO: this should be supported
-        public void visit(WhenClause whenClause) {
-            throw new UnsupportedOperationException();
+        public void visit(WhenClause expression) {
+            throw new UnsupportedSelectQueryException("CASE is not supported yet", expression);
         }
 
 
@@ -549,20 +554,24 @@ public class ExpressionParser implements java.util.function.Function<ImmutableMa
 
 
         @Override
-        public void visit(SubSelect subSelect) {
-            throw new UnsupportedOperationException();
+        public void visit(SubSelect expression) {
+            throw new UnsupportedSelectQueryException("SubSelect is not supported yet", expression);
         }
 
         @Override
-        public void visit(ExistsExpression existsExpression) {
-            throw new UnsupportedOperationException();
+        public void visit(ExistsExpression expression) {
+            throw new UnsupportedSelectQueryException("EXISTS is not supported yet", expression);
         }
 
         @Override
-        public void visit(AllComparisonExpression allComparisonExpression) { throw new UnsupportedOperationException(); }
+        public void visit(AllComparisonExpression expression) {
+            throw new UnsupportedSelectQueryException("ALL is not supported yet", expression);
+        }
 
         @Override
-        public void visit(AnyComparisonExpression anyComparisonExpression) { throw new UnsupportedOperationException(); }
+        public void visit(AnyComparisonExpression expression) {
+            throw new UnsupportedSelectQueryException("ANY is not supported yet", expression);
+        }
 
 
 
