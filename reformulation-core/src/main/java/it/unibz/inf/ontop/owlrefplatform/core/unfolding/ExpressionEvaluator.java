@@ -544,17 +544,26 @@ public class ExpressionEvaluator {
 
 	private Term evalRegex(Function term) {
 //
-		Term eval1 = eval(term.getTerm(0));
-		Term eval2 = eval(term.getTerm(1));
+		Term eval1 = term.getTerm(0);
+		Term eval2 = term.getTerm(1);
 		if (eval1 instanceof Function) {
-
-			if (eval2 instanceof Function) {
-
-				return fac.getFunction(term.getFunctionSymbol(), eval1, eval2, term.getTerm(2));
+			Function function1 = (Function) eval1;
+			if (!function1.isDataTypeFunction()
+					&& !(function1 instanceof URITemplatePredicate)
+					&&!(function1 instanceof BNodePredicate)){
+				eval1 = eval(term.getTerm(0));
 			}
-			return fac.getFunction(term.getFunctionSymbol(), eval1,term.getTerm(1),term.getTerm(2));
 		}
-		return term;
+		if (eval2 instanceof Function) {
+			Function function2 = (Function) eval2;
+			if(!function2.isDataTypeFunction()) {
+				eval2 = eval(term.getTerm(1));
+			}
+
+		}
+		return fac.getFunction(term.getFunctionSymbol(), eval1, eval2, term.getTerm(2));
+
+		//TODO:  ADD check for other function (not only datatype case)
 	}
 
 	private Term evalIsNullNotNull(Function term, boolean isnull) {
