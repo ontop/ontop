@@ -112,11 +112,7 @@ public class ExpressionParser implements java.util.function.Function<ImmutableMa
             return this.result;
         }
 
-        private void setResult(boolean isNot, Term term) {
-            result = isNot ? FACTORY.getFunctionNOT(term) : term;
-        }
-
-        private java.util.function.UnaryOperator<Term> getNot(boolean isNot) {
+        private java.util.function.UnaryOperator<Term> notOperation(boolean isNot) {
             return isNot ? term -> FACTORY.getFunctionNOT(term) : UnaryOperator.identity();
         }
 
@@ -124,14 +120,14 @@ public class ExpressionParser implements java.util.function.Function<ImmutableMa
             Term leftTerm = getTerm(expression.getLeftExpression());
             Term rightTerm = getTerm(expression.getRightExpression());
             Term expTerm = op.apply(leftTerm, rightTerm);
-            setResult(expression.isNot(), expTerm);
+            result = notOperation(expression.isNot()).apply(expTerm);
         }
 
         // CAREFUL: the first argument is NOT the composite term, but rather its argument
-        private void process(Expression arg, boolean isNot, UnaryOperator<Term> op) {
+        private void process(Expression arg, UnaryOperator<Term> op) {
             Term term = getTerm(arg);
             Term expTerm = op.apply(term);
-            setResult(isNot, expTerm);
+            result = expTerm;
         }
 
         private void process(String value, Predicate.COL_TYPE datatype) {
@@ -327,7 +323,7 @@ public class ExpressionParser implements java.util.function.Function<ImmutableMa
                     flags = FACTORY.getConstantLiteral("i");
                     break;
                 default:
-                    throw new InvalidSelectQueryException("Unknown operator: ", expression);
+                    throw new UnsupportedOperationException();
             }
             process(expression, (t1, t2) ->  FACTORY.getFunction(ExpressionOperation.REGEX, t1, t2, flags));
         }
@@ -354,7 +350,7 @@ public class ExpressionParser implements java.util.function.Function<ImmutableMa
                     not = true;
                     break;
                 default:
-                    throw new InvalidSelectQueryException("Unknown operator: ", expression);
+                    throw new UnsupportedOperationException();
             }
             process(expression, (t1, t2) ->  not
                     ? FACTORY.getFunctionNOT(FACTORY.getFunction(ExpressionOperation.REGEX, t1, t2, flags))
@@ -384,7 +380,7 @@ public class ExpressionParser implements java.util.function.Function<ImmutableMa
             Term t4 = getTerm(expression.getBetweenExpressionEnd());
             Function atom2 = FACTORY.getFunction(ExpressionOperation.LTE, t3, t4);
 
-            setResult(expression.isNot(), FACTORY.getFunctionAND(atom1, atom2));
+            result = notOperation(expression.isNot()).apply(FACTORY.getFunctionAND(atom1, atom2));
         }
 
 
@@ -421,7 +417,7 @@ public class ExpressionParser implements java.util.function.Function<ImmutableMa
                             .reduce(null, (a, b) -> (a == null) ? b : FACTORY.getFunctionOR(b,a));
             }
 
-            setResult(expression.isNot(), atom);
+            result = notOperation(expression.isNot()).apply(atom);
         }
 
         /*
@@ -430,12 +426,13 @@ public class ExpressionParser implements java.util.function.Function<ImmutableMa
 
         @Override
         public void visit(IsNullExpression expression) {
-            process(expression.getLeftExpression(), expression.isNot(), t -> FACTORY.getFunctionIsNull(t));
+            process(expression.getLeftExpression(),
+                    t -> notOperation(expression.isNot()).apply(FACTORY.getFunctionIsNull(t)));
         }
 
         @Override
         public void visit(Parenthesis expression) {
-            process(expression.getExpression(), expression.isNot(), UnaryOperator.identity());
+            process(expression.getExpression(), notOperation(expression.isNot()));
         }
 
         @Override
@@ -449,9 +446,9 @@ public class ExpressionParser implements java.util.function.Function<ImmutableMa
                     op = UnaryOperator.identity();
                     break;
                 default:
-                    throw new InvalidSelectQueryException("Unknown operator: ", expression);
+                    throw new UnsupportedOperationException();
             }
-            process(expression.getExpression(), false, op);
+            process(expression.getExpression(), op);
         }
 
         @Override
