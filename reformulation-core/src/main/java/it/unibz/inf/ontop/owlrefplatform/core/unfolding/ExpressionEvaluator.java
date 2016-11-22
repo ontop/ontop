@@ -545,26 +545,42 @@ public class ExpressionEvaluator {
 	private Term evalRegex(Function term) {
 //
 		Term eval1 = term.getTerm(0);
-		Term eval2 = term.getTerm(1);
-		if (eval1 instanceof Function) {
-			Function function1 = (Function) eval1;
-			if (!function1.isDataTypeFunction()
-					&& !(function1 instanceof URITemplatePredicate)
-					&&!(function1 instanceof BNodePredicate)){
-				eval1 = eval(term.getTerm(0));
-			}
-		}
-		if (eval2 instanceof Function) {
-			Function function2 = (Function) eval2;
-			if(!function2.isDataTypeFunction()) {
-				eval2 = eval(term.getTerm(1));
-			}
+		eval1 = evalRegexSingleExpression(eval1);
 
-		}
-		return fac.getFunction(term.getFunctionSymbol(), eval1, eval2, term.getTerm(2));
+        Term eval2 = term.getTerm(1);
+		eval2 = evalRegexSingleExpression(eval2);
 
-		//TODO:  ADD check for other function (not only datatype case)
+        Term eval3 = term.getTerm(2);
+        eval3 = evalRegexSingleExpression(eval3);
+
+        if(eval1.equals(OBDAVocabulary.FALSE)
+                || eval2.equals(OBDAVocabulary.FALSE)
+                || eval3.equals(OBDAVocabulary.FALSE))
+        {
+            return OBDAVocabulary.FALSE;
+        }
+
+        return fac.getFunction(term.getFunctionSymbol(), eval1, eval2, term.getTerm(2));
+
 	}
+
+	private Term evalRegexSingleExpression(Term expr){
+
+        if (expr instanceof Function) {
+            Function function1 = (Function) expr;
+            Predicate predicate1 = function1.getFunctionSymbol();
+            if((predicate1 instanceof URITemplatePredicate)
+                    ||(predicate1 instanceof BNodePredicate)) {
+                return OBDAVocabulary.FALSE;
+            }
+            if (!function1.isDataTypeFunction()){
+                return evalRegexSingleExpression( eval(expr));
+
+            }
+        }
+        return expr;
+
+    }
 
 	private Term evalIsNullNotNull(Function term, boolean isnull) {
 		Term innerTerm = term.getTerms().get(0);
@@ -670,7 +686,6 @@ public class ExpressionEvaluator {
 		Term teval2;
 		if (term.getTerm(1) instanceof Function) {
 			Function t2 = (Function) term.getTerm(1);
-			Predicate p2 = t2.getFunctionSymbol();
 			if (!(t2.isDataTypeFunction())) {
 				teval2 = eval(term.getTerm(1));
 				if (teval2 == null) {
@@ -730,7 +745,7 @@ public class ExpressionEvaluator {
 				/*
 				 * Evaluate both terms by comparing their datatypes
 				 */
-				if (dtfac.isLiteral(pred1) && dtfac.isLiteral(pred2)) { // R: replaced incorrect check 
+				if (dtfac.isLiteral(pred1) && dtfac.isLiteral(pred2)) { // R: replaced incorrect check
 																		//  pred1 == fac.getDataTypePredicateLiteral()
 																		// && pred2 == fac.getDataTypePredicateLiteral())
 																	    // which does not work for LITERAL_LANG
