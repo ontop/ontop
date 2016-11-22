@@ -885,6 +885,74 @@ public class RedundantSelfJoinTest {
         query.applyProposal(new InnerJoinOptimizationProposalImpl(joinNode));
     }
 
+    @Test
+    public void testNoModification1() throws EmptyQueryException {
+
+        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(metadata);
+        DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE, M, N, O);
+        ConstructionNode constructionNode = new ConstructionNodeImpl(projectionAtom.getVariables());
+        queryBuilder.init(projectionAtom, constructionNode);
+
+        ImmutableExpression joiningCondition = DATA_FACTORY.getImmutableExpression(OR,
+                DATA_FACTORY.getImmutableExpression(EQ, TWO, O),
+                DATA_FACTORY.getImmutableExpression(EQ, THREE, O));
+
+        InnerJoinNode joinNode = new InnerJoinNodeImpl(Optional.of(joiningCondition));
+        queryBuilder.addChild(constructionNode, joinNode);
+        ExtensionalDataNode dataNode1 =  new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, M, N, ONE));
+        ExtensionalDataNode dataNode2 =  new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE2_PREDICATE, M, N1, O));
+
+        queryBuilder.addChild(joinNode, dataNode1);
+        queryBuilder.addChild(joinNode, dataNode2);
+
+        IntermediateQuery query = queryBuilder.build();
+        int initialVersion = query.getVersionNumber();
+
+        IntermediateQuery expectedQuery = query.createSnapshot();
+
+        System.out.println("\nBefore optimization: \n" +  query);
+
+        query.applyProposal(new InnerJoinOptimizationProposalImpl(joinNode), true);
+
+        System.out.println("\nAfter optimization: \n" +  query);
+
+
+        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(query, expectedQuery));
+        assertEquals("The version number has changed", initialVersion, query.getVersionNumber());
+    }
+
+    @Test
+    public void testNoModification2() throws EmptyQueryException {
+
+        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(metadata);
+        DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE, M, N, O);
+        ConstructionNode constructionNode = new ConstructionNodeImpl(projectionAtom.getVariables());
+        queryBuilder.init(projectionAtom, constructionNode);
+
+        InnerJoinNode joinNode = new InnerJoinNodeImpl(Optional.empty());
+        queryBuilder.addChild(constructionNode, joinNode);
+        ExtensionalDataNode dataNode1 =  new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, M, N, ONE));
+        ExtensionalDataNode dataNode2 =  new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE2_PREDICATE, M, N1, O));
+
+        queryBuilder.addChild(joinNode, dataNode1);
+        queryBuilder.addChild(joinNode, dataNode2);
+
+        IntermediateQuery query = queryBuilder.build();
+        int initialVersion = query.getVersionNumber();
+
+        IntermediateQuery expectedQuery = query.createSnapshot();
+
+        System.out.println("\nBefore optimization: \n" +  query);
+
+        query.applyProposal(new InnerJoinOptimizationProposalImpl(joinNode), true);
+
+        System.out.println("\nAfter optimization: \n" +  query);
+
+
+        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(query, expectedQuery));
+        assertEquals("The version number has changed", initialVersion, query.getVersionNumber());
+    }
+
 
     private static P2<IntermediateQueryBuilder, InnerJoinNode> initAns1(MetadataForQueryOptimization metadata)
             throws IntermediateQueryBuilderException {
