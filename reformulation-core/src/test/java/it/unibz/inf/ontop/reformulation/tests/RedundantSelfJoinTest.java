@@ -894,8 +894,8 @@ public class RedundantSelfJoinTest {
         queryBuilder.init(projectionAtom, constructionNode);
 
         ImmutableExpression joiningCondition = DATA_FACTORY.getImmutableExpression(OR,
-                DATA_FACTORY.getImmutableExpression(EQ, TWO, O),
-                DATA_FACTORY.getImmutableExpression(EQ, THREE, O));
+                DATA_FACTORY.getImmutableExpression(EQ, O, TWO),
+                DATA_FACTORY.getImmutableExpression(EQ, O, THREE));
 
         InnerJoinNode joinNode = new InnerJoinNodeImpl(Optional.of(joiningCondition));
         queryBuilder.addChild(constructionNode, joinNode);
@@ -913,7 +913,6 @@ public class RedundantSelfJoinTest {
         System.out.println("\nBefore optimization: \n" +  query);
 
         query.applyProposal(new InnerJoinOptimizationProposalImpl(joinNode), true);
-
         System.out.println("\nAfter optimization: \n" +  query);
 
 
