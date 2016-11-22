@@ -372,6 +372,28 @@ public class SelectQueryParserTest {
         assertTrue( parse.getBody().contains(atomQ));
     }
 
+    @Test
+    public void concat_Test() {
+        final DBMetadata metadata = createMetadata();
+        final SelectQueryParser parser = new SelectQueryParser(metadata);
+
+        final CQIE parse = parser.parse("SELECT A FROM P where A = CONCAT('A', A, 'B')");
+        System.out.println(parse);
+        assertEquals(0, parse.getHead().getTerms().size());
+
+        final Variable a1 = FACTORY.getVariable("A1");
+        final ValueConstant v1 = FACTORY.getConstantLiteral("A", Predicate.COL_TYPE.STRING); // variable are key sensitive
+        final ValueConstant v2 = FACTORY.getConstantLiteral("B", Predicate.COL_TYPE.STRING);
+
+        final Function atom = FACTORY.getFunction(ExpressionOperation.EQ, a1,
+                FACTORY.getFunction(ExpressionOperation.CONCAT, ImmutableList.of(v1,
+                        FACTORY.getFunction(ExpressionOperation.CONCAT, a1, v2))
+        ));
+
+        System.out.println(atom);
+        assertTrue(parse.getBody().contains(atom));
+    }
+
 
     @Test
     public void in_condition_Test() {
@@ -383,9 +405,9 @@ public class SelectQueryParserTest {
         assertEquals(0, parse.getHead().getTerms().size());
 
         final Variable a1 = FACTORY.getVariable("A1");
-        final ValueConstant v1 = FACTORY. getConstantLiteral("1", Predicate.COL_TYPE.LONG); // variable are key sensitive
-        final ValueConstant v2 = FACTORY. getConstantLiteral("2", Predicate.COL_TYPE.LONG);
-        final ValueConstant v3 = FACTORY. getConstantLiteral("3", Predicate.COL_TYPE.LONG);
+        final ValueConstant v1 = FACTORY.getConstantLiteral("1", Predicate.COL_TYPE.LONG); // variable are key sensitive
+        final ValueConstant v2 = FACTORY.getConstantLiteral("2", Predicate.COL_TYPE.LONG);
+        final ValueConstant v3 = FACTORY.getConstantLiteral("3", Predicate.COL_TYPE.LONG);
 
         final Function atom = FACTORY.getFunction(ExpressionOperation.OR, ImmutableList.of(
                 FACTORY.getFunction(ExpressionOperation.EQ, ImmutableList.of(a1, v1)),
@@ -407,7 +429,7 @@ public class SelectQueryParserTest {
         assertEquals(0, parse.getHead().getTerms().size());
 
         final Variable a1 = FACTORY.getVariable("A1");
-        final ValueConstant v1 = FACTORY. getConstantLiteral("1", Predicate.COL_TYPE.LONG); // variable are key sensitive
+        final ValueConstant v1 = FACTORY.getConstantLiteral("1", Predicate.COL_TYPE.LONG); // variable are key sensitive
 
         final Function atom = FACTORY.getFunction(ExpressionOperation.EQ, ImmutableList.of(a1, v1));
 

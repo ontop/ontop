@@ -11,12 +11,15 @@ import it.unibz.inf.ontop.sql.QuotedIDFactory;
 import it.unibz.inf.ontop.sql.RelationID;
 import it.unibz.inf.ontop.sql.parser.exceptions.InvalidSelectQueryException;
 import it.unibz.inf.ontop.sql.parser.exceptions.UnsupportedSelectQueryException;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import net.sf.jsqlparser.expression.*;
 import net.sf.jsqlparser.expression.operators.arithmetic.*;
 import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
 import net.sf.jsqlparser.expression.operators.conditional.OrExpression;
 import net.sf.jsqlparser.expression.operators.relational.*;
 import net.sf.jsqlparser.schema.Column;
+import net.sf.jsqlparser.schema.Table;
+import net.sf.jsqlparser.statement.create.table.ColDataType;
 import net.sf.jsqlparser.statement.select.SubSelect;
 
 import java.util.List;
@@ -98,13 +101,13 @@ public class ExpressionParser implements java.util.function.Function<ImmutableMa
             this.attributes = attributes;
         }
 
+        // TODO: double-check this
         private Function getFunction(Expression expression) {
             Term t = getTerm(expression);
             if (t instanceof Function)
                 return (Function)t;
 
-            // TODO: better handling of the situation?
-            throw new RuntimeException("");
+            throw new UnsupportedSelectQueryException("Unexpected conversion to Boolean", expression);
         }
 
         private Term getTerm(Expression expression) {
@@ -139,56 +142,47 @@ public class ExpressionParser implements java.util.function.Function<ImmutableMa
         @Override
         public void visit(net.sf.jsqlparser.expression.Function func) {
             String functionName = func.getName().toLowerCase();
-            List<Expression> expressions = func.getParameters().getExpressions();
+            List<Expression> args = func.getParameters().getExpressions();
+            int arity = args.size();
 
             if (functionName.equals("regexp_like")) {
-                if (expressions.size() == 2 || expressions.size() == 3) {
-                    Term t1 = getTerm(expressions.get(0));  // a source string
-                    Term t2 = getTerm(expressions.get(1)); // a regex pattern
-
-                    // the third parameter is optional for match_parameter in regexp_like
-                    Term t3 = (expressions.size() == 3)
-                            ? getTerm(expressions.get(2))
-                            : FACTORY.getConstantLiteral("");
-
-                    result = FACTORY.getFunction(ExpressionOperation.REGEX, t1, t2, t3);
-                }
-                else
+                if (arity != 2 && arity != 3)
                     throw new InvalidSelectQueryException("Wrong number of arguments for SQL function REGEX_LIKE", func);
+
+                Term t1 = getTerm(args.get(0));  // a source string
+                Term t2 = getTerm(args.get(1)); // a regex pattern
+
+                // the third parameter is optional for match_parameter in regexp_like
+                Term t3 = (arity == 3) ? getTerm(args.get(2)) : FACTORY.getConstantLiteral("");
+
+                result = FACTORY.getFunction(ExpressionOperation.REGEX, t1, t2, t3);
             }
             else if (functionName.endsWith("replace")) {
-                if (expressions.size() == 2 || expressions.size() == 3) {
-                    Term t1 = getTerm(expressions.get(0));
-                    Term t2 = getTerm(expressions.get(1)); // second parameter is a string
-
-                    // Term t3 is optional: no string means delete occurrences of second param
-                    Term t3 =  (expressions.size() == 3)
-                            ? getTerm(expressions.get(2))
-                            : FACTORY.getConstantLiteral("");
-
-                    result = FACTORY.getFunction(ExpressionOperation.REPLACE, t1, t2, t3,
-                            FACTORY.getConstantLiteral("")); // the 4th argument is flags
-                }
-                else
+                if (arity != 2 && arity != 3)
                     throw new InvalidSelectQueryException("Wrong number of arguments in SQL function REPLACE", func);
-            }
-            else if (functionName.endsWith("concat")){
 
-                int nParameters = expressions.size();
-                Function topConcat = null;
-                // TODO: this loop is incorrect for size > 3, fix it
-                for (int i = 0; i < nParameters; i += 2) {
-                    if (topConcat == null) {
-                        Term t1 = getTerm(expressions.get(i));
-                        Term t2 = getTerm(expressions.get(i + 1));
-                        topConcat = FACTORY.getFunction(ExpressionOperation.CONCAT, t1, t2);
-                    }
-                    else {
-                        Term t2 = getTerm(expressions.get(i));
-                        topConcat = FACTORY.getFunction(ExpressionOperation.CONCAT, topConcat, t2);
-                    }
-                }
-                result = topConcat;
+                Term t1 = getTerm(args.get(0));
+                Term t2 = getTerm(args.get(1)); // second parameter is a string
+
+                // Term t3 is optional: no string means delete occurrences of second param
+                Term t3 =  (arity == 3) ? getTerm(args.get(2)) : FACTORY.getConstantLiteral("");
+
+                result = FACTORY.getFunction(ExpressionOperation.REPLACE, t1, t2, t3,
+                            FACTORY.getConstantLiteral("")); // the 4th argument is flags
+            }
+            else if (functionName.endsWith("concat")) {
+                ImmutableList<Term> terms = args.stream()
+                        .map(t -> getTerm(t))
+                        .collect(ImmutableCollectors.toList());
+
+                // need to reverse the list to obtain the required order
+                // (note that b and a are swapped)
+                Term term =  terms.reverse().stream()
+                        .reduce(null, (a, b) -> (a == null)
+                                ? b
+                                : FACTORY.getFunction(ExpressionOperation.CONCAT, b, a));
+
+                result = term;
             }
             else
                 throw new UnsupportedSelectQueryException("Unsupported function ", func);
@@ -352,9 +346,8 @@ public class ExpressionParser implements java.util.function.Function<ImmutableMa
                 default:
                     throw new UnsupportedOperationException();
             }
-            process(expression, (t1, t2) ->  not
-                    ? FACTORY.getFunctionNOT(FACTORY.getFunction(ExpressionOperation.REGEX, t1, t2, flags))
-                    : FACTORY.getFunction(ExpressionOperation.REGEX, t1, t2, flags));
+            process(expression, (t1, t2) ->
+                    notOperation(not).apply(FACTORY.getFunction(ExpressionOperation.REGEX, t1, t2, flags)));
         }
 
 
@@ -414,7 +407,7 @@ public class ExpressionParser implements java.util.function.Function<ImmutableMa
                     break;
                 default:
                     atom = equalities.reverse().stream()
-                            .reduce(null, (a, b) -> (a == null) ? b : FACTORY.getFunctionOR(b,a));
+                            .reduce(null, (a, b) -> (a == null) ? b : FACTORY.getFunctionOR(b, a));
             }
 
             result = notOperation(expression.isNot()).apply(atom);
@@ -462,38 +455,29 @@ public class ExpressionParser implements java.util.function.Function<ImmutableMa
 
         @Override
         public void visit(Column expression) {
-
             QuotedID column = idfac.createAttributeID(expression.getColumnName());
-            RelationID relation = null;
-            if (expression.getTable().getName() != null)
-                relation = idfac.createRelationID(expression.getTable().getSchemaName(), expression.getTable().getName());
-
+            Table table = expression.getTable();
+            RelationID relation = (table != null) && (table.getName() != null)
+                ? idfac.createRelationID(table.getSchemaName(), table.getName())
+                : null;
             QualifiedAttributeID qa = new QualifiedAttributeID(relation, column);
+            Variable var = attributes.get(qa);
 
-            Term term = attributes.get(qa);
-
-            if (term != null) {
-                /*
-                 * If the termName is not null, create a variable
-                 */
-                result = term;
+            if (var != null) {
+                 // if it is an attribute name (qualified or not)
+                result = var;
             }
             else {
-                // TODO: careful here
-                // Constructs constant
-                // if the columns contains a boolean value
+                // TODO: careful here - could be a built-in function with no arguments
                 String columnName = expression.getColumnName();
                 // check whether it is an SQL boolean value
                 String lowerCase = columnName.toLowerCase();
-                if (lowerCase.equals("true")) {
+                if (lowerCase.equals("true"))
                     result = FACTORY.getBooleanConstant(true);
-                }
-                else if (lowerCase.equals("false")) {
+                else if (lowerCase.equals("false"))
                     result = FACTORY.getBooleanConstant(false);
-                }
                 else
-                    throw new RuntimeException( "Unable to find column name for variable: "
-                            + columnName);
+                    throw new UnsupportedSelectQueryException("Unable to find column name for variable: ", expression);
             }
 
         }
@@ -526,26 +510,11 @@ public class ExpressionParser implements java.util.function.Function<ImmutableMa
 
         @Override
         public void visit(CastExpression expression) {
-            // TODO
-            Expression column = expression.getLeftExpression();
-            String columnName = column.toString();
-            //    String variableName = attributes.lookup(columnName);
-            //    if (variableName == null) {
-            //        throw new RuntimeException(
-            //                "Unable to find column name for variable: " + columnName);
-            //    }
-            //    Term var = FACTORY.getVariable(variableName);
-
-            //     ColDataType datatype = expression.getType();
-
-
-
-            //    Term var2 = null;
-
-            //first value is a column, second value is a datatype. It can  also have the size
-
-            //    result = FACTORY.getFunctionCast(var, var2);
-
+            Term term = getTerm(expression.getLeftExpression());
+            ColDataType type = expression.getType();
+            String datatype = type.getDataType();
+            // TODO: proper datatype conversion is required at this stage
+            // result = FACTORY.getFunctionCast(term, datatype);
         }
 
 
@@ -556,6 +525,7 @@ public class ExpressionParser implements java.util.function.Function<ImmutableMa
         }
 
         @Override
+        // TODO: this probably could be supported
         public void visit(ExistsExpression expression) {
             throw new UnsupportedSelectQueryException("EXISTS is not supported yet", expression);
         }
