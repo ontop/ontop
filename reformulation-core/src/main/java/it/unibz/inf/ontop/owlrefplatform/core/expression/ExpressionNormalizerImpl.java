@@ -109,6 +109,15 @@ public class ExpressionNormalizerImpl implements ExpressionNormalizer {
             return -1;
         else if (a2 instanceof ImmutableFunctionalTerm) {
             ImmutableFunctionalTerm f2 = (ImmutableFunctionalTerm) a2;
+
+            /**
+             * Non-ground first (seems to be required by the current ExpressionEvaluator...)
+             */
+            if (f1.isGround() && (!f2.isGround()))
+                return 1;
+            else if ((!f1.isGround()) && f2.isGround())
+                return -1;
+
             int functionSymbolComparison = f1.getFunctionSymbol().hashCode() - f2.getFunctionSymbol().hashCode();
             if (functionSymbolComparison != 0)
                 return functionSymbolComparison;
