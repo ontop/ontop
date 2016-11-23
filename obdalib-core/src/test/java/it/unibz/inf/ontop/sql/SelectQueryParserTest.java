@@ -372,6 +372,40 @@ public class SelectQueryParserTest {
         assertTrue( parse.getBody().contains(atomQ));
     }
 
+
+    @Test
+    public void join_using_2_Test() {
+        DBMetadata metadata = createMetadata();
+
+
+        SelectQueryParser parser = new SelectQueryParser(metadata);
+
+        final CQIE parse = parser.parse("SELECT Q.A, R.B FROM Q JOIN R USING (A,B)");
+        System.out.println(parse);
+
+        assertTrue( parse.getHead().getTerms().size()==0);
+        assertTrue( parse.getReferencedVariables().size()==4 );
+
+        Variable a1 = FACTORY.getVariable("A1");
+        Variable a2 =FACTORY.getVariable("A2");
+
+
+        Function atomQ_A= FACTORY.getFunction(ExpressionOperation.EQ, ImmutableList.of(a1, a2));
+
+
+        Variable b1 = FACTORY.getVariable("B1");
+        Variable b2 =FACTORY.getVariable("B2");
+
+
+        Function atomQ_B = FACTORY.getFunction(ExpressionOperation.EQ, ImmutableList.of(b1, b2));
+
+
+        assertTrue( parse.getBody().contains(atomQ_A));
+        assertTrue( parse.getBody().contains(atomQ_B));
+
+    }
+
+
     @Test
     public void concat_Test() {
         final DBMetadata metadata = createMetadata();
@@ -474,8 +508,20 @@ public class SelectQueryParserTest {
         DBMetadata metadata = createMetadata();
         SelectQueryParser parser = new SelectQueryParser(metadata);
         // common column name "A" appears more than once in left table
-        parser.parse("SELECT A, C FROM P FULL OUTER JOIN  Q on P.A =  Q.A ");
+        parser.parse("SELECT A, C FROM P FULL OUTER JOIN  Pon P.A =  Q.A ");
     }
+
+
+
+    @Test()
+    public void full_natural_Join_3_Test() {
+        DBMetadata metadata = createMetadata();
+        SelectQueryParser parser = new SelectQueryParser(metadata);
+        // common column name "A" appears more than once in left table
+        parser.parse("SELECT * FROM P NATURAL JOIN Q NATURAL JOIN R");
+    }
+
+
 
     private DBMetadata createMetadata(){
         DBMetadata metadata = DBMetadataExtractor.createDummyMetadata();
