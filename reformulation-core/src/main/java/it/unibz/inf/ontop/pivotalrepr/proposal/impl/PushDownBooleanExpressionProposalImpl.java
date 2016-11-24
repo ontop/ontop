@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.pivotalrepr.proposal.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMultimap;
 import it.unibz.inf.ontop.model.ImmutableExpression;
+import it.unibz.inf.ontop.pivotalrepr.CommutativeJoinOrFilterNode;
 import it.unibz.inf.ontop.pivotalrepr.JoinOrFilterNode;
 import it.unibz.inf.ontop.pivotalrepr.proposal.PushDownBooleanExpressionProposal;
 import it.unibz.inf.ontop.pivotalrepr.QueryNode;
@@ -10,29 +11,29 @@ import it.unibz.inf.ontop.pivotalrepr.QueryNode;
 
 public class PushDownBooleanExpressionProposalImpl implements PushDownBooleanExpressionProposal {
     private final JoinOrFilterNode focusNode;
-    private final ImmutableMultimap<JoinOrFilterNode, ImmutableExpression> directRecipients;
-    private final ImmutableMultimap<QueryNode, ImmutableExpression> childOfFilterNodesToCreate;
+    private final ImmutableMultimap<CommutativeJoinOrFilterNode, ImmutableExpression> newDirectRecipientNodes;
+    private final ImmutableMultimap<QueryNode, ImmutableExpression> indirectRecipientNodes;
     private final ImmutableList<ImmutableExpression> expressionsToKeep;
 
     public PushDownBooleanExpressionProposalImpl(
-            JoinOrFilterNode focusNode, ImmutableMultimap<JoinOrFilterNode, ImmutableExpression> directRecipients,
-            ImmutableMultimap<QueryNode, ImmutableExpression> childOfFilterNodesToCreate,
+            JoinOrFilterNode focusNode, ImmutableMultimap<CommutativeJoinOrFilterNode, ImmutableExpression> newDirectRecipientNodes,
+            ImmutableMultimap<QueryNode, ImmutableExpression> indirectRecipientNodes,
             ImmutableList<ImmutableExpression> expressionsToKeep) {
 
         this.focusNode = focusNode;
-        this.directRecipients = directRecipients;
-        this.childOfFilterNodesToCreate = childOfFilterNodesToCreate;
+        this.newDirectRecipientNodes = newDirectRecipientNodes;
+        this.indirectRecipientNodes = indirectRecipientNodes;
         this.expressionsToKeep = expressionsToKeep;
     }
 
     @Override
-    public ImmutableMultimap<JoinOrFilterNode, ImmutableExpression> getDirectRecipients() {
-        return directRecipients;
+    public ImmutableMultimap<CommutativeJoinOrFilterNode, ImmutableExpression> getNewDirectRecipientNodes() {
+        return newDirectRecipientNodes;
     }
 
     @Override
-    public ImmutableMultimap<QueryNode, ImmutableExpression> getChildOfFilterNodesToCreate() {
-        return childOfFilterNodesToCreate;
+    public ImmutableMultimap<QueryNode, ImmutableExpression> getIndirectRecipientNodes() {
+        return indirectRecipientNodes;
     }
 
     @Override

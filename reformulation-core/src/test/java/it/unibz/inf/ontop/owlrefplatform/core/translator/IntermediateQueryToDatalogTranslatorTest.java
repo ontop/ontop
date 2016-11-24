@@ -19,9 +19,6 @@ import java.util.Optional;
 import static org.junit.Assert.assertTrue;
 
 
-/**
- * Created by jcorman on 22/09/16.
- */
 public class IntermediateQueryToDatalogTranslatorTest {
 
     private static MetadataForQueryOptimization METADATA = new EmptyMetadataForQueryOptimization();
@@ -114,7 +111,5 @@ public class IntermediateQueryToDatalogTranslatorTest {
 
         assertTrue(thrownException == null);
     }
-
-
 }
 

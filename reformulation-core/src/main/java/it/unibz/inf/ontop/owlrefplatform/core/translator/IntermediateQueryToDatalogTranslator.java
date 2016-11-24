@@ -22,12 +22,14 @@ package it.unibz.inf.ontop.owlrefplatform.core.translator;
 
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.AtomPredicateImpl;
 import it.unibz.inf.ontop.model.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.model.impl.MutableQueryModifiersImpl;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
+import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionImpl;
 import it.unibz.inf.ontop.pivotalrepr.*;
 import it.unibz.inf.ontop.pivotalrepr.impl.ConstructionNodeImpl;
 import org.slf4j.LoggerFactory;
@@ -279,11 +281,17 @@ public class IntermediateQueryToDatalogTranslator {
 			return body;
 
 		} else if (node instanceof TrueNode) {
+
 			/**
-			 * Does not add an atom into the query.
 			 *
 			 * TODO: what should we do when it is the left child of a LJ?
+             *
+			 * Add a 0-ary atom
 			 */
+			//DataAtom projectionAtom = generateProjectionAtom(ImmutableSet.of());
+			//heads.add(new RuleHead(new ImmutableSubstitutionImpl<>(ImmutableMap.of()), projectionAtom,Optional.empty()));
+			//return body;
+			body.add(ofac.getDistinctVariableOnlyDataAtom(new AtomPredicateImpl("dummy", 0), ImmutableList.of()));
 			return body;
 
 		} else {

@@ -8,6 +8,8 @@ import it.unibz.inf.ontop.model.ImmutableExpression;
 import it.unibz.inf.ontop.model.Variable;
 import it.unibz.inf.ontop.owlrefplatform.core.optimization.QueryNodeNavigationTools.NextNodeAndQuery;
 import it.unibz.inf.ontop.pivotalrepr.*;
+import it.unibz.inf.ontop.pivotalrepr.impl.IllegalTreeException;
+import it.unibz.inf.ontop.pivotalrepr.impl.IllegalTreeUpdateException;
 import it.unibz.inf.ontop.pivotalrepr.proposal.NodeCentricOptimizationResults;
 import it.unibz.inf.ontop.pivotalrepr.proposal.PushDownBooleanExpressionProposal;
 import it.unibz.inf.ontop.pivotalrepr.proposal.impl.PushDownBooleanExpressionProposalImpl;
@@ -21,7 +23,6 @@ import java.util.stream.Stream;
 
 import static it.unibz.inf.ontop.owlrefplatform.core.optimization.QueryNodeNavigationTools.getDepthFirstNextNode;
 import static it.unibz.inf.ontop.owlrefplatform.core.optimization.QueryNodeNavigationTools.getNextNodeAndQuery;
-import static it.unibz.inf.ontop.pivotalrepr.NonCommutativeOperatorNode.ArgumentPosition.LEFT;
 import static it.unibz.inf.ontop.pivotalrepr.NonCommutativeOperatorNode.ArgumentPosition.RIGHT;
 
 /**
@@ -29,44 +30,44 @@ import static it.unibz.inf.ontop.pivotalrepr.NonCommutativeOperatorNode.Argument
  */
 public class PushDownBooleanExpressionOptimizerImpl implements PushDownBooleanExpressionOptimizer {
 
-    private enum ChildRequirement {
-        /**
-         * The projected variables of the child are independent of the expression
-         */
-        NO_NEED,
-        /**
-         * The child sub-tree can apply the condition to itself
-         */
-        CAN_TAKE,
-        /**
-         * The child requires the parent to apply the condition only if
-         * no siblings does it.
-         */
-        KEEP_IT_IF_NO_SIBLING_TAKES_IT
-    }
-
     /**
-     * TODO: explain
+     * A recipient node n receives a boolean expression e being propagated down,
+     * only if all variables of e are projected out by the subtree rooted in n.
+     * n may be either:
+     * - a direct recipient of e, if it natively supports boolean expressions (JoinOrFilterNode)
+     * - an indirect recipient of e,
+     * and a parent filter node for n will be created as the direct recipient of e.
+     *
+     * Note that a lefJoinNode may be either a direct recipient node (if it is also the provider node),
+     * or an indirect one
      */
     private static class Recipient {
-        public final Optional<QueryNode> indirectRecipientNode;
         public final Optional<JoinOrFilterNode> directRecipientNode;
+        public final Optional<QueryNode> indirectRecipientNode;
 
-        private Recipient(boolean isDirect, QueryNode recipientNode) {
-            if (isDirect) {
-                if (recipientNode instanceof JoinOrFilterNode) {
-                    directRecipientNode = Optional.of((JoinOrFilterNode) recipientNode);
-                    indirectRecipientNode = Optional.empty();
-                }
-                else {
-                    throw new IllegalArgumentException("A direct recipient mode must be a JoinOrFilterNode");
-                }
-            }
-            else {
-                indirectRecipientNode = Optional.of(recipientNode);
+        private Recipient(LeftJoinNode root, boolean isDirectRecipient) {
+            if(isDirectRecipient){
+                directRecipientNode = Optional.of(root);
+                indirectRecipientNode = Optional.empty();
+            }else{
                 directRecipientNode = Optional.empty();
+                indirectRecipientNode = Optional.of(root);
             }
         }
+
+        private Recipient(QueryNode root) {
+            if(root instanceof LeftJoinNode) {
+                throw new IllegalStateException("For LeftJoin recipient nodes, use the other constructor");
+            }
+            if(root instanceof CommutativeJoinOrFilterNode){
+                directRecipientNode = Optional.of((JoinOrFilterNode) root);
+                indirectRecipientNode = Optional.empty();
+            }else{
+                directRecipientNode = Optional.empty();
+                indirectRecipientNode = Optional.of(root);
+            }
+        }
+
         @Override
         public boolean equals(Object o) {
             if (this == o) return true;
@@ -87,6 +88,17 @@ public class PushDownBooleanExpressionOptimizerImpl implements PushDownBooleanEx
     }
 
 
+    private Recipient getProviderAsRecipientNode(QueryNode queryNode){
+        if(queryNode instanceof CommutativeJoinOrFilterNode){
+            return new Recipient(queryNode);
+        }
+        if(queryNode instanceof LeftJoinNode){
+            return new Recipient((LeftJoinNode) queryNode, true);
+        }
+        throw new IllegalStateException("Only Join or Filter Nodes may provide a boolean expression");
+    }
+
+
     /**
      * High-level method
      */
@@ -96,10 +108,8 @@ public class PushDownBooleanExpressionOptimizerImpl implements PushDownBooleanEx
     }
 
     /**
-     *
      * Tries to optimize all the JoinOrFilterNodes, ONE BY ONE.
      * Navigates in a top-down fashion.
-     *
      */
     private IntermediateQuery pushDownExpressions(final IntermediateQuery initialQuery) {
         // Non-final
@@ -187,7 +197,7 @@ public class PushDownBooleanExpressionOptimizerImpl implements PushDownBooleanEx
          * Other node (useful for extension)
          */
         else {
-            return makeProposalUnexpectedFocusNode(currentQuery, focusNode);
+            return makeProposalForUnexpectedFocusNode(currentQuery, focusNode);
         }
     }
 
@@ -196,8 +206,8 @@ public class PushDownBooleanExpressionOptimizerImpl implements PushDownBooleanEx
      *
      * By default, does not make a proposal
      */
-    protected Optional<PushDownBooleanExpressionProposal> makeProposalUnexpectedFocusNode(IntermediateQuery currentQuery,
-                                                                                          JoinOrFilterNode focusNode) {
+    protected Optional<PushDownBooleanExpressionProposal> makeProposalForUnexpectedFocusNode(IntermediateQuery currentQuery,
+                                                                                             JoinOrFilterNode focusNode) {
         return Optional.empty();
     }
 
@@ -223,202 +233,233 @@ public class PushDownBooleanExpressionOptimizerImpl implements PushDownBooleanEx
         ImmutableSet<ImmutableExpression> booleanExpressions = optionalNestedExpression.get().flattenAND();
 
         /**
-         * For each boolean expression, looks for recipient nodes.
-         *
+         * For each boolean expression, looks for recipients.
          */
         ImmutableMultimap<Recipient, ImmutableExpression> recipientMap = booleanExpressions.stream()
                 .flatMap(ex -> selectRecipients(currentQuery, providerNode, preSelectedChildren, ex)
-                        .map(recipient -> new SimpleEntry<Recipient, ImmutableExpression>(recipient, ex)))
+                        .map(recipient -> new SimpleEntry<>(recipient, ex)))
                 .collect(ImmutableCollectors.toMultimap());
 
         return buildProposal(providerNode, recipientMap);
     }
 
+
+    /**
+     * For an expression e, a (filter or join) node p providing e,
+     * and a list S of preselected candidate subtrees for propagation,
+     * decides whether e should remain attached to p,
+     * and/or which subtree in S e should be propagated to.
+     * Also selects the recipient for e in each of these selected subtrees.
+     *
+     * If e should remain attached to p,
+     * then p is simply returned among the recipients (not that p may or may not be the only recipient)
+     *
+     */
     private Stream<Recipient> selectRecipients(IntermediateQuery query, JoinOrFilterNode providerNode,
-                                                     ImmutableList<QueryNode> preSelectedChildren,
-                                                     ImmutableExpression expression) {
-        // Roots of the sub-trees
-        ImmutableList.Builder<QueryNode> recipientChildSubTreeBuilder = ImmutableList.builder();
+                                               ImmutableList<QueryNode> candidateSubtreeRoots,
+                                               ImmutableExpression expression) {
+        ImmutableList.Builder<QueryNode> selectedSubtreeRootsBuilder = ImmutableList.builder();
         // Non-final
-        boolean requireASiblingToTakeIt = false;
+        boolean mustKeepAtProviderLevel = false;
 
-        for(QueryNode child : preSelectedChildren) {
-            switch(getChildRequirement(query, child, expression)) {
-                case NO_NEED:
-                    break;
-                case CAN_TAKE:
-                    recipientChildSubTreeBuilder.add(child);
-                    break;
-                case KEEP_IT_IF_NO_SIBLING_TAKES_IT:
-                    requireASiblingToTakeIt = true;
-                    break;
-            }
-        }
-        ImmutableList<QueryNode> recipientChildSubTrees = recipientChildSubTreeBuilder.build();
-
-        final boolean providerMustKeepExpression =
-                (requireASiblingToTakeIt && recipientChildSubTrees.isEmpty());
-
-        Stream<Recipient> childRecipientStream = recipientChildSubTrees.stream()
-                .flatMap(child -> findRecipients(query, child, providerNode, expression));
-
-        Stream<Recipient> providerRecipientStream = providerMustKeepExpression
-                ? Stream.of(new Recipient(true, providerNode))
-                : Stream.empty();
-
-        return Stream.concat(providerRecipientStream, childRecipientStream)
-                .distinct();
-    }
-
-    /**
-     * TODO: explain
-     */
-    private ChildRequirement getChildRequirement(IntermediateQuery query, QueryNode child,
-                                                 ImmutableExpression expression) {
         ImmutableSet<Variable> expressionVariables = expression.getVariables();
+        for(QueryNode candidateSubtreeRoot : candidateSubtreeRoots) {
+            ImmutableSet<Variable> projectedVariables = query.getVariables(candidateSubtreeRoot);
 
-        ImmutableSet<Variable> projectedVariables = query.getVariables(child);
+            if (projectedVariables.containsAll(expressionVariables)) {
+                selectedSubtreeRootsBuilder.add(candidateSubtreeRoot);
+                if (candidateSubtreeRoot instanceof LeftJoinNode) {
+                    QueryNode rightChild = query.getChild(candidateSubtreeRoot, RIGHT)
+                            .orElseThrow(() -> new IllegalTreeException("a LeftJoinNode is expected to have a right child"));
+                    if (query.getVariables(rightChild).containsAll(expressionVariables)) {
+                        mustKeepAtProviderLevel = true;
+                    }
+                }
+            }
+        }
 
+
+        ImmutableList<QueryNode> selectedSubtreeRoots = selectedSubtreeRootsBuilder.build();
         /**
-         * All the expression variables are projected: the current node is the recipient
+         * If no candidate subtree has been selected,
+         * keep the expression at the provider's level (otherwise the expression will be dropped)
          */
-        if (projectedVariables.containsAll(expressionVariables)) {
-            return ChildRequirement.CAN_TAKE;
+        if(selectedSubtreeRoots.isEmpty()){
+                mustKeepAtProviderLevel = true;
         }
-        /**
-         * One part of the expression variables are projected: the expression must remain at the provider level
-         * if no other child takes it
-         */
-        else if (expressionVariables.stream().anyMatch(projectedVariables::contains)) {
-            return ChildRequirement.KEEP_IT_IF_NO_SIBLING_TAKES_IT;
-        }
-        /**
-         * This data node is independent of the expression.
-         */
-        else {
-            return ChildRequirement.NO_NEED;
-        }
+
+        Stream<Recipient> childRecipients = selectedSubtreeRoots.stream()
+                .flatMap(subtreeRoot -> findRecipientsInSelectedSubtree(query, subtreeRoot, providerNode, expression));
+
+
+        Stream<Recipient> recipients = mustKeepAtProviderLevel?
+                Stream.of(getProviderAsRecipientNode(providerNode)):
+                Stream.empty();
+
+        return Stream.concat(recipients, childRecipients).distinct();
     }
+
+
 
     /**
      * TODO: explain
      */
-    private Stream<Recipient> findRecipients(IntermediateQuery query, QueryNode currentNode, JoinOrFilterNode providerNode,
-                                             ImmutableExpression expression) {
+    private Stream<Recipient> findRecipientsInSelectedSubtree(IntermediateQuery query, QueryNode subtreeRoot, JoinOrFilterNode providerNode,
+                                                              ImmutableExpression expression) {
 
-        if (currentNode instanceof CommutativeJoinOrFilterNode) {
-            return findRecipientsInCommutativeJoinOrFilter(query, expression, providerNode,
-                    (CommutativeJoinOrFilterNode) currentNode);
+        if (subtreeRoot instanceof CommutativeJoinOrFilterNode) {
+            return findRecipientsInCommutativeJoinOrFilterRootedSubtree((CommutativeJoinOrFilterNode) subtreeRoot);
         }
-        /**
-         * May be recursive
-         */
-        else if (currentNode instanceof LeftJoinNode) {
-            return findRecipientsInLeftJoin(query, expression, providerNode, (LeftJoinNode) currentNode);
-        }
-        else if (currentNode instanceof DataNode) {
-            return findRecipientsInDataNode(query, expression, providerNode, (DataNode) currentNode);
-        }
-        /**
-         * Recursive: find the recipients in the children
-         */
-        else if ((currentNode instanceof ConstructionNode)
-                || (currentNode instanceof UnionNode)) {
 
-            ImmutableList<QueryNode> children = query.getChildren(currentNode);
-            if (children.isEmpty()) {
-                throw new IllegalStateException("Children expected for " + currentNode);
+        if (subtreeRoot instanceof DataNode) {
+            return findRecipientsInDataNodeRootedSubtree(query, expression, providerNode, (DataNode) subtreeRoot);
+        }
+
+        /**
+         * Possible (indirect) recursion
+         */
+        if (subtreeRoot instanceof LeftJoinNode) {
+            return findRecipientsInLeftJoinRootedSubtree(query, expression, providerNode, (LeftJoinNode) subtreeRoot);
+        }
+
+        /**
+         * Possible (indirect) recursion
+         */
+        if (subtreeRoot instanceof UnionNode) {
+            return findRecipientsInUnionNodeRootedSubtree(query, expression, providerNode, (UnionNode) subtreeRoot);
+        }
+
+        /**
+         * Possible (indirect) recursion
+         */
+        if (subtreeRoot instanceof ConstructionNode){
+            return findRecipientsInConstructionNodeRootedSubtree(query, expression, providerNode, (ConstructionNode) subtreeRoot);
+        }
+
+        if (subtreeRoot instanceof TrueNode) {
+            /**
+             * Limit case (boolean expressions without variables)
+             */
+            if(expression.getVariables().isEmpty()){
+                return findRecipientsInTrueNodeRootedSubtree(query, providerNode, (TrueNode) subtreeRoot);
             }
-            // Recursion
-            return children.stream()
-                    .flatMap(c -> findRecipients(query, c, providerNode, expression));
+            throw new IllegalTreeUpdateException("a TrueNode does not project out variables");
+        }
+        else if(subtreeRoot instanceof EmptyNode) {
+            throw new IllegalTreeException("This query should not contain an EmptyNode");
         }
         /**
-         * Default
+         * for GroupNodes only (not supported yet) ?
          */
-        else {
-            return selectRecipientsUnexceptedNode(query, expression, providerNode, currentNode);
+        else{
+            return findRecipientsInUnexpectedNodeRootedSubtree(query, expression, providerNode, subtreeRoot);
         }
     }
 
-    private Stream<Recipient> findRecipientsInCommutativeJoinOrFilter(IntermediateQuery query,
-                                                                      ImmutableExpression expression,
-                                                                      JoinOrFilterNode providerNode,
-                                                                      CommutativeJoinOrFilterNode currentNode) {
-        return Stream.of(new Recipient(true, currentNode));
+    private Stream<Recipient> findRecipientsInUnionNodeRootedSubtree(IntermediateQuery query, ImmutableExpression expression, JoinOrFilterNode providerNode, UnionNode subtreeRoot) {
+            ImmutableList<QueryNode> children = query.getChildren(subtreeRoot);
+            if (children.isEmpty()) {
+                throw new IllegalStateException("Children expected for " + subtreeRoot);
+            }
+            /**
+             * Possible (indirect) recursion
+             */
+            return selectRecipients(query, providerNode, children, expression);
+    }
+
+    private Stream<Recipient> findRecipientsInConstructionNodeRootedSubtree(IntermediateQuery query, ImmutableExpression expression, JoinOrFilterNode providerNode, ConstructionNode subtreeRoot) {
+        ImmutableList<QueryNode> children = query.getChildren(subtreeRoot);
+        if (children.size() != 1) {
+            throw new IllegalStateException("Exactly one child expected for " + subtreeRoot);
+        }
+        /** Possible (indirect) recursion */
+        return selectRecipients(query, providerNode, children, expression);
+    }
+
+    private Stream<Recipient> findRecipientsInCommutativeJoinOrFilterRootedSubtree(CommutativeJoinOrFilterNode currentNode) {
+        return Stream.of(new Recipient(currentNode));
     }
 
     /**
-     * TODO: should we also propagate the expression on the right for PERFORMANCE reasons only?
-     * Relevant cases are probably very rare.
+     * This methods only propagates down an expression e coming from a provider parent p of a LJ node n,
+     * and not the joining condition of n.
+     *
+     * e is not added to the joining condition of n,
+     * but may be propagated down directly to the children subtrees of n
+     *
      */
-    private Stream<Recipient> findRecipientsInLeftJoin(IntermediateQuery query,
-                                                       ImmutableExpression expression,
-                                                       JoinOrFilterNode providerNode,
-                                                       LeftJoinNode currentNode) {
-        QueryNode leftChild = query.getChild(currentNode, LEFT)
-                .orElseThrow(() -> new IllegalStateException("The LJ node was expected to have a left child"));
-
-        ImmutableSet<Variable> projectedVariablesOnTheLeft = query.getVariables(leftChild);
-
+    private Stream<Recipient> findRecipientsInLeftJoinRootedSubtree(IntermediateQuery query,
+                                                                    ImmutableExpression expression,
+                                                                    JoinOrFilterNode providerNode,
+                                                                    LeftJoinNode currentNode) {
+        Stream<Recipient> recipients;
         /**
-         * Can propagate the expression to the left child
+         * If the provider is the parent of the left join node
          */
-        if (projectedVariablesOnTheLeft.containsAll(expression.getVariables())) {
-            // Recursion on findRecipients()
-            return findRecipients(query, leftChild, providerNode, expression);
-        }
-        /**
-         * Tries to reuse the filter node above if it is its parent
-         */
-        else if (query.getParent(currentNode)
-                    .filter(p -> p == providerNode)
-                    .isPresent()) {
+        if (query.getParent(currentNode)
+                .filter(p -> p == providerNode)
+                .isPresent()) {
             /**
-             * Keep the expression in the provider node
-             */
-            return Stream.of(new Recipient(true, providerNode));
+            *  Look for recipients in right and left subtrees (note that if there is none,
+             *  the provider node will be returned as the only recipient)
+            */
+            recipients = selectRecipients(query, providerNode, query.getChildren(currentNode), expression);
         }
         else {
             /**
-             * Inserts a Filter node above the LJ
+             * Ask for a filter node to be created above the leftJoinNode
              */
-            return Stream.of(new Recipient(false, currentNode));
-
+            recipients = Stream.of(new Recipient(currentNode, false));
         }
-
-
+        return  recipients;
     }
 
 
-    private Stream<Recipient> findRecipientsInDataNode(IntermediateQuery query, ImmutableExpression expression,
-                                                       JoinOrFilterNode providerNode, DataNode currentNode) {
+    private Stream<Recipient> findRecipientsInDataNodeRootedSubtree(IntermediateQuery query, ImmutableExpression expression,
+                                                                    JoinOrFilterNode providerNode, DataNode currentNode) {
         if (query.getParent(currentNode)
                 .filter(p -> p == providerNode)
                 .isPresent()) {
             /**
              * Keep the expression in the provider node
              */
-            return Stream.of(new Recipient(true, providerNode));
+            return Stream.of(getProviderAsRecipientNode(providerNode));
         }
         else {
             /**
              * Ask for a filter node to be created above this data node
              */
-            return Stream.of(new Recipient(false, currentNode));
+            return Stream.of(new Recipient(currentNode));
         }
     }
 
+    private Stream<Recipient> findRecipientsInTrueNodeRootedSubtree(IntermediateQuery query,
+                                                                    JoinOrFilterNode providerNode, TrueNode currentNode) {
+        if (query.getParent(currentNode)
+                .filter(p -> p == providerNode)
+                .isPresent()) {
+            /**
+             * Keep the expression in the provider node
+             */
+            return Stream.of(getProviderAsRecipientNode(providerNode));
+        }
+        else {
+            /**
+             * Ask for a filter node to be created above this data node
+             */
+            return Stream.of(new Recipient(currentNode));
+        }
+    }
 
     /**
      * Hook
      *
      * By default, does not push down (no optimization)
      */
-    protected Stream<Recipient> selectRecipientsUnexceptedNode(IntermediateQuery currentQuery,
-                                                               ImmutableExpression expression,
-                                                               JoinOrFilterNode providerNode, QueryNode currentNode) {
-        return Stream.of(new Recipient(true, providerNode));
+    protected Stream<Recipient> findRecipientsInUnexpectedNodeRootedSubtree(IntermediateQuery currentQuery,
+                                                                            ImmutableExpression expression,
+                                                                            JoinOrFilterNode providerNode, QueryNode currentNode) {
+        return Stream.of(getProviderAsRecipientNode(providerNode));
     }
 
     /**
@@ -428,19 +469,25 @@ public class PushDownBooleanExpressionOptimizerImpl implements PushDownBooleanEx
             JoinOrFilterNode providerNode, ImmutableMultimap<Recipient, ImmutableExpression> recipientMap) {
 
         ImmutableCollection<Map.Entry<Recipient, ImmutableExpression>> recipientEntries = recipientMap.entries();
-
-        ImmutableMultimap<JoinOrFilterNode, ImmutableExpression> directRecipients = recipientEntries.stream()
+        /**
+         * Collect new direct recipients nodes for each expression,
+         * filtering out provider nodes, and therefore also LeftJoinNodes.
+         */
+        ImmutableMultimap<CommutativeJoinOrFilterNode, ImmutableExpression> directRecipientNodes = recipientEntries.stream()
                 .filter(e -> e.getKey().directRecipientNode.isPresent())
-                .map(e -> new AbstractMap.SimpleEntry<>(e.getKey().directRecipientNode.get(), e.getValue()))
-                .filter(e -> e.getKey() != providerNode)
+                .filter(e -> e.getKey().directRecipientNode.get() != providerNode)
+                .map(e -> new AbstractMap.SimpleEntry<>(
+                        (CommutativeJoinOrFilterNode)e.getKey().directRecipientNode.get(),  e.getValue()))
                 .collect(ImmutableCollectors.toMultimap());
-
-        ImmutableMultimap<QueryNode, ImmutableExpression> childOfFilterNodesToCreate = recipientEntries.stream()
+        /**
+         * Collect indirect recipient nodes
+         */
+        ImmutableMultimap<QueryNode, ImmutableExpression> indirectRecipientNodes = recipientEntries.stream()
                 .filter(e -> e.getKey().indirectRecipientNode.isPresent())
                 .map(e -> new AbstractMap.SimpleEntry<>(e.getKey().indirectRecipientNode.get(), e.getValue()))
                 .collect(ImmutableCollectors.toMultimap());
 
-        if (directRecipients.isEmpty() && childOfFilterNodesToCreate.isEmpty()) {
+        if (directRecipientNodes.isEmpty() && indirectRecipientNodes.isEmpty()) {
             return Optional.empty();
         }
         else {
@@ -450,9 +497,8 @@ public class PushDownBooleanExpressionOptimizerImpl implements PushDownBooleanEx
                     .map(Map.Entry::getValue)
                     .collect(ImmutableCollectors.toList());
 
-            return Optional.of(new PushDownBooleanExpressionProposalImpl(providerNode, directRecipients,
-                    childOfFilterNodesToCreate, expressionsToKeep));
+            return Optional.of(new PushDownBooleanExpressionProposalImpl(providerNode, directRecipientNodes,
+                    indirectRecipientNodes, expressionsToKeep));
         }
     }
-
 }

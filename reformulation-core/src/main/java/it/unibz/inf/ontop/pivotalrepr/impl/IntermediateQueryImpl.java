@@ -7,6 +7,7 @@ import it.unibz.inf.ontop.executor.InternalProposalExecutor;
 import it.unibz.inf.ontop.executor.expression.PushDownExpressionExecutorImpl;
 import it.unibz.inf.ontop.executor.join.JoinInternalCompositeExecutor;
 import it.unibz.inf.ontop.executor.leftjoin.LeftJoinInternalCompositeExecutor;
+import it.unibz.inf.ontop.executor.projection.ProjectionShrinkingExecutorImpl;
 import it.unibz.inf.ontop.executor.pullout.PullVariableOutOfSubTreeExecutorImpl;
 import it.unibz.inf.ontop.executor.merging.QueryMergingExecutorImpl;
 import it.unibz.inf.ontop.executor.substitution.SubstitutionPropagationExecutorImpl;
@@ -18,6 +19,7 @@ import it.unibz.inf.ontop.model.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.Variable;
 import it.unibz.inf.ontop.executor.groundterm.GroundTermRemovalFromDataNodeExecutorImpl;
 import it.unibz.inf.ontop.executor.pullout.PullVariableOutOfDataNodeExecutorImpl;
+import it.unibz.inf.ontop.pivotalrepr.proposal.impl.ProjectionShrinkingProposalImpl;
 import it.unibz.inf.ontop.pivotalrepr.validation.IntermediateQueryValidator;
 import it.unibz.inf.ontop.pivotalrepr.validation.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.pivotalrepr.validation.StandardIntermediateQueryValidator;
@@ -93,6 +95,7 @@ public class IntermediateQueryImpl implements IntermediateQuery {
         internalExecutorMapBuilder.put(QueryMergingProposal.class, QueryMergingExecutorImpl.class);
         internalExecutorMapBuilder.put(UnionLiftProposal.class, UnionLiftInternalExecutorImpl.class);
         internalExecutorMapBuilder.put(TrueNodeRemovalProposal.class, TrueNodeRemovalExecutorImpl.class);
+        internalExecutorMapBuilder.put(ProjectionShrinkingProposal.class, ProjectionShrinkingExecutorImpl.class);
         INTERNAL_EXECUTOR_CLASSES = internalExecutorMapBuilder.build();
     }
 

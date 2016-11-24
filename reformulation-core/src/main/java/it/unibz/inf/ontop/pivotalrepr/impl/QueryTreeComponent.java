@@ -61,7 +61,7 @@ public interface QueryTreeComponent {
     /**
      * TODO: explain
      */
-    QueryNode removeOrReplaceNodeByUniqueChildren(QueryNode node) throws IllegalTreeUpdateException;
+    QueryNode removeOrReplaceNodeByUniqueChild(QueryNode node) throws IllegalTreeUpdateException;
 
     /**
      * TODO: explain
