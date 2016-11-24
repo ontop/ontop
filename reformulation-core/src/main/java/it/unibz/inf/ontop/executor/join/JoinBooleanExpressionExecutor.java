@@ -62,15 +62,24 @@ public class JoinBooleanExpressionExecutor implements InnerJoinExecutor {
         }
 
         /**
-         * Optimized join node
+         * If something has changed
          */
-        InnerJoinNode newJoinNode = new InnerJoinNodeImpl(optionalAggregatedFilterCondition);
+        if ((filterOrJoinNodes.size() > 1)
+                || (!optionalAggregatedFilterCondition.equals(originalTopJoinNode.getOptionalFilterCondition()))) {
+            /**
+             * Optimized join node
+             */
+            InnerJoinNode newJoinNode = new InnerJoinNodeImpl(optionalAggregatedFilterCondition);
 
-        Optional<ArgumentPosition> optionalPosition = treeComponent.getOptionalPosition(parentNode, originalTopJoinNode);
-        treeComponent.replaceNodesByOneNode(ImmutableList.<QueryNode>copyOf(filterOrJoinNodes), newJoinNode, parentNode,
-                optionalPosition);
+            Optional<ArgumentPosition> optionalPosition = treeComponent.getOptionalPosition(parentNode, originalTopJoinNode);
+            treeComponent.replaceNodesByOneNode(ImmutableList.<QueryNode>copyOf(filterOrJoinNodes), newJoinNode, parentNode,
+                    optionalPosition);
 
-        return new NodeCentricOptimizationResultsImpl<>(query, newJoinNode);
+            return new NodeCentricOptimizationResultsImpl<>(query, newJoinNode);
+        }
+        else {
+            return new NodeCentricOptimizationResultsImpl<>(query, originalTopJoinNode);
+        }
     }
 
 

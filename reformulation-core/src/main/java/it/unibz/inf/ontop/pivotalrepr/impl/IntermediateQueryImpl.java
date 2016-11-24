@@ -148,6 +148,11 @@ public class IntermediateQueryImpl implements IntermediateQuery {
     }
 
     @Override
+    public int getVersionNumber() {
+        return treeComponent.getVersionNumber();
+    }
+
+    @Override
     public MetadataForQueryOptimization getMetadata() {
         return metadata;
     }

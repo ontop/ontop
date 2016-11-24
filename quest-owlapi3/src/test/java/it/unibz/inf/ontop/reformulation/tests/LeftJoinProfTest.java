@@ -129,7 +129,6 @@ public class LeftJoinProfTest {
         assertFalse(NO_SELF_LJ_OPTIMIZATION_MSG, containsMoreThanOneOccurrence(sql, "\"PROFESSORS\""));
     }
 
-    @Ignore("Not supported yet")
     @Test
     public void testFullName1() throws Exception {
 
@@ -155,7 +154,6 @@ public class LeftJoinProfTest {
         assertFalse(NO_SELF_LJ_OPTIMIZATION_MSG, containsMoreThanOneOccurrence(sql, "\"PROFESSORS\""));
     }
 
-    @Ignore("TODO: add the fix point to enable it")
     @Test
     public void testFullName2() throws Exception {
 

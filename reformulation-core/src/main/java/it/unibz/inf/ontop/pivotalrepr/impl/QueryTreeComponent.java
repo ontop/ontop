@@ -132,4 +132,11 @@ public interface QueryTreeComponent {
     QueryTreeComponent createSnapshot();
 
     ImmutableSet<Variable> getVariables(QueryNode node);
+
+
+    /**
+     * The version number of the query.
+     * Used in fixed-point optimization.
+     */
+    int getVersionNumber();
 }
