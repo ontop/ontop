@@ -253,6 +253,32 @@ public class LeftJoinProfTest {
         assertFalse(sql.toUpperCase().contains("LEFT"));
     }
 
+    @Ignore
+    @Test
+    public void testCourseJoinOnLeft1() throws Exception {
+
+        String query =  "PREFIX : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#>\n" +
+                "\n" +
+                "SELECT DISTINCT ?v\n" +
+                "WHERE {\n" +
+                "   ?p :firstName ?f ; \n" +
+                "      :teaches ?c .\n" +
+                "   OPTIONAL {\n" +
+                "     ?p :lastName ?v\n" +
+                "  }\n" +
+                "FILTER (bound(?f))" +
+                "}";
+
+        List<String> expectedValues = ImmutableList.of(
+                "Smith", "Poppins", "Depp"
+        );
+        String sql = checkReturnedValuesAndReturnSql(query, expectedValues);
+
+        System.out.println("SQL Query: \n" + sql);
+
+        assertFalse(sql.toUpperCase().contains("LEFT"));
+    }
+
     private static boolean containsMoreThanOneOccurrence(String query, String pattern) {
         int firstOccurrenceIndex = query.indexOf(pattern);
         if (firstOccurrenceIndex >= 0) {
