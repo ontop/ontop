@@ -10,6 +10,8 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import static junit.framework.TestCase.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -513,12 +515,38 @@ public class SelectQueryParserTest {
 
 
 
+
+
+
+
     @Test()
     public void full_natural_Join_3_Test() {
         DBMetadata metadata = createMetadata();
         SelectQueryParser parser = new SelectQueryParser(metadata);
         // common column name "A" appears more than once in left table
-        parser.parse("SELECT * FROM P NATURAL JOIN Q NATURAL JOIN R");
+        final CQIE parse = parser.parse("SELECT * FROM P NATURAL JOIN Q NATURAL JOIN R");
+
+        assertFalse( parse.getBody().isEmpty());
+    }
+
+
+    @Test()
+    public void full_natural_Join_REDUCE_Test() {
+        DBMetadata metadata = createMetadata();
+        SelectQueryParser parser = new SelectQueryParser(metadata);
+        // common column name "A" appears more than once in left table
+        final CQIE parse = parser.parse("SELECT * FROM P AS dp INNER REDUCE JOIN Q AS fis ON dp.A = fis.B");
+        assertNull( parse); // ******* This query cannot be parsed because MS-SQL REDUCE operator
+    }
+
+
+    @Test()
+    public void full_natural_Join_REDISTRIBUTE_Test() {
+        DBMetadata metadata = createMetadata();
+        SelectQueryParser parser = new SelectQueryParser(metadata);
+        // common column name "A" appears more than once in left table
+        final CQIE parse = parser.parse("SELECT * FROM P AS dp INNER REDISTRIBUTE JOIN Q AS fis ON dp.A = fis.B");
+        assertNull( parse); // ******* This query cannot be parsed because MS-SQL REDISTRIBUTE operator
     }
 
 
