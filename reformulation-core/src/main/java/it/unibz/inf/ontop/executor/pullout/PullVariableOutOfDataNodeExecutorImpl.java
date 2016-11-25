@@ -139,7 +139,7 @@ public class PullVariableOutOfDataNodeExecutorImpl implements PullVariableOutOfD
                 }
 
             }
-            else if (ancestorNode instanceof ConstructionNode) {
+            else if (ancestorNode instanceof ConstructionNode || ancestorNode instanceof UnionNode) {
                 return insertFilterNode(treeComponent, lastChildNode, newEqualities);
             }
             /**

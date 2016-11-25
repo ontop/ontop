@@ -19,7 +19,7 @@ import java.util.Optional;
 /**
  * TODO: explain
  */
-public class PushDownExpressionExecutorImpl implements PushDownExpressionExecutor {
+public class PushDownBooleanExpressionExecutorImpl implements PushDownExpressionExecutor {
 
     /**
      * TODO: explain
