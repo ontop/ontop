@@ -440,7 +440,7 @@ public class SelfJoinLikeExecutor {
                     treeComponent.replaceNode(joinNode, newTopNode);
                 }
                 else {
-                    treeComponent.removeOrReplaceNodeByUniqueChildren(joinNode);
+                    treeComponent.removeOrReplaceNodeByUniqueChild(joinNode);
                     newTopNode = uniqueChild;
                 }
 

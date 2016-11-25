@@ -9,7 +9,6 @@ import it.unibz.inf.ontop.model.Variable;
 import it.unibz.inf.ontop.pivotalrepr.*;
 import it.unibz.inf.ontop.pivotalrepr.impl.EmptyNodeImpl;
 import it.unibz.inf.ontop.pivotalrepr.impl.QueryTreeComponent;
-import it.unibz.inf.ontop.pivotalrepr.impl.TrueNodeImpl;
 import it.unibz.inf.ontop.pivotalrepr.proposal.NodeTracker;
 import it.unibz.inf.ontop.pivotalrepr.proposal.NodeTrackingResults;
 import it.unibz.inf.ontop.pivotalrepr.proposal.RemoveEmptyNodeProposal;
@@ -223,7 +222,7 @@ public class AscendingPropagationTools {
                 optionalAncestryTracker.ifPresent(tr -> tr.recordUpcomingReplacementByChild(query, currentAncestor,
                         replacingChild));
 
-                treeComponent.removeOrReplaceNodeByUniqueChildren(currentAncestor);
+                treeComponent.removeOrReplaceNodeByUniqueChild(currentAncestor);
 
                 otherChildren = childOfAncestor != replacingChild
                         ? Stream.of(replacingChild)

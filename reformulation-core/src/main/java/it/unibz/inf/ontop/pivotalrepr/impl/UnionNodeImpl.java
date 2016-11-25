@@ -128,7 +128,7 @@ public class UnionNodeImpl extends QueryNodeImpl implements UnionNode {
 
     @Override
     public ImmutableSet<Variable> getLocalVariables() {
-        return ImmutableSet.of();
+        return projectedVariables;
     }
 
     @Override

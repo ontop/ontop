@@ -123,7 +123,7 @@ public class LocalPropagationTools {
                 TrueNode replacingNode = new TrueNodeImpl();
                 // The replaced node must already be a leaf,
                 // so we can perform a single node replacement
-                // (there is no reason here to delete its subtree)
+                // (there is no need here to delete its subtree)
                 optionalTracker.ifPresent(tr -> tr.recordReplacement(node, replacingNode));
                 treeComponent.replaceNode(node,replacingNode);
 

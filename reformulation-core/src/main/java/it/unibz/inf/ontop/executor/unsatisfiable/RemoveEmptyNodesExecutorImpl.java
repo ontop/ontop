@@ -1,7 +1,6 @@
 package it.unibz.inf.ontop.executor.unsatisfiable;
 
 import com.google.common.collect.ImmutableSet;
-import it.unibz.inf.ontop.executor.NodeCentricInternalExecutor;
 import it.unibz.inf.ontop.model.Constant;
 import it.unibz.inf.ontop.model.ImmutableSubstitution;
 import it.unibz.inf.ontop.model.Variable;
@@ -146,7 +145,7 @@ public class RemoveEmptyNodesExecutorImpl implements RemoveEmptyNodesExecutor {
 
         if (isReplacedByUniqueChild) {
             treeComponent.removeSubTree(emptyNode);
-            treeComponent.removeOrReplaceNodeByUniqueChildren(parentNode);
+            treeComponent.removeOrReplaceNodeByUniqueChild(parentNode);
         }
         else {
             treeComponent.replaceSubTree(parentNode, newReplacingNodeOrPromotedChild);
