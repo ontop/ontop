@@ -20,7 +20,7 @@ public class PushUpBooleanExpressionExecutorImpl implements PushUpBooleanExpress
                 orElseThrow(() -> new IllegalStateException("Invalid proposal: the focus node must provide a boolean expression"));
 
         /**
-         * Extend the projections on the path from provider to recipient
+         * Extend the projections on the path from provider to blocking node
          */
         for (ExplicitVariableProjectionNode projector : proposal.getInbetweenProjectors()) {
             Optional<ExplicitVariableProjectionNode> replacingProjector = getProjectorReplacementNode(projector, expressionToPropagate);
@@ -36,9 +36,9 @@ public class PushUpBooleanExpressionExecutorImpl implements PushUpBooleanExpress
             JoinOrFilterNode replacingRecipient = getRecipientReplacementNode(proposal.getRecipientNode().get(), expressionToPropagate);
             treeComponent.replaceNode(proposal.getRecipientNode().get(), replacingRecipient);
         } else {
-            QueryNode formerRootChild = query.getFirstChild(query.getRootConstructionNode())
-                    .orElseThrow(() -> new IllegalStateException("This query is supposed to have more than two nodes"));
-            treeComponent.insertParent(new FilterNodeImpl(expressionToPropagate), formerRootChild);
+            for (QueryNode childOfBlockingNode : query.getChildren(proposal.getBlockingNode())) {
+                treeComponent.insertParent(new FilterNodeImpl(expressionToPropagate), childOfBlockingNode);
+            }
         }
 
         /**
@@ -79,7 +79,7 @@ public class PushUpBooleanExpressionExecutorImpl implements PushUpBooleanExpress
                     ((ConstructionNode) replacedNode).getSubstitution(),
                     ((ConstructionNode) replacedNode).getOptionalModifiers()));
         } else {
-            throw new IllegalStateException("unsupported node type");
+            throw new IllegalStateException("Unsupported node type");
         }
     }
 
@@ -88,7 +88,7 @@ public class PushUpBooleanExpressionExecutorImpl implements PushUpBooleanExpress
         if (replacedNode instanceof InnerJoinNode) {
             return new InnerJoinNodeImpl(Optional.of(combinedExpression));
         } else if (replacedNode instanceof LeftJoinNode) {
-                return new LeftJoinNodeImpl(Optional.of(combinedExpression));
+            return new LeftJoinNodeImpl(Optional.of(combinedExpression));
         } else if (replacedNode instanceof FilterNode) {
             return new FilterNodeImpl(combinedExpression);
         } else {

@@ -13,29 +13,35 @@ import static it.unibz.inf.ontop.pivotalrepr.NonCommutativeOperatorNode.Argument
 
 /**
  * Tries to push (explicit) boolean expressions as high as possible in the algebraic tree.
- * The optimized query has a FilterNode or InnerJoinNode as the child of the root ConstructionNode,
- * which supports all pushed up boolean expressions.
  * If needed, a FilterNode is created for this purpose.
  * <p>
  * Note that is may be desirable to make implicit boolean expressions (variable equalities) explicit beforehand,
  * using the dedicated optimizer.
  * <p>
  * The rules for propagating up are simple.
- * The recipient of an expression e being propagated up can only be:
- * - a left join node, iff e is propagated up from its right child subtree,
- * and in this case, e is not propagated further.
- * - the (FilterNode or InnerJoinNode) child of the root ConstructionNode
+ * The expression is always propagated up, until we reach:
+ * - a left join node j from its right subtree: j becomes the new recipient,
+ * and e is not propagated further.
+ * - a union node u (resp. the root construction node r): e is not propagated further,
+ * and for each child n of u (resp. the unique child n of r),
+ * if n is a filter or inner join,
+ * then n becomes the recipient for e.
+ * Otherwise a fresh filter node is inserted between u (resp. r) and n to support e.
  * <p>
- * Note that some projections (ConstructionNode and UnionNode) may be extended during the process.
- * More exactly, each projecting node on the path from the provider to the recipient node will see its set of projected
+ * <p>
+ * Note that some projections (ConstructionNode)
+ * More exactly, each construction node on the path from the provider to the recipient node will see its set of projected
  * variables extended with all variables appearing in e.
+ *
+ * TODO: can be improved by propagating up (sub) boolean expressions which are present in all branches of a union node.
+ *
  */
 
 public class PushUpBooleanExpressionOptimizerImpl implements PushUpBooleanExpressionOptimizer {
 
     @Override
     public IntermediateQuery optimize(IntermediateQuery query) throws EmptyQueryException {
-        return optimizeSubtree(query.getRootConstructionNode(),query);
+        return optimizeSubtree(query.getRootConstructionNode(), query);
     }
 
     private IntermediateQuery optimizeSubtree(QueryNode focusNode, IntermediateQuery query) throws EmptyQueryException {
@@ -65,37 +71,35 @@ public class PushUpBooleanExpressionOptimizerImpl implements PushUpBooleanExpres
         }
         ImmutableList.Builder<ExplicitVariableProjectionNode> inbetweenProjectorsBuilder = ImmutableList.builder();
         QueryNode currentChildNode = focusNode;
-        QueryNode currentParentNode;
+        QueryNode currentParentNode = currentChildNode;
         Optional<JoinOrFilterNode> recipient;
 
-        do {
-            currentParentNode = query.getParent(currentChildNode)
+        do{
+            currentChildNode = currentParentNode;
+            currentParentNode = query.getParent(currentParentNode)
                     .orElseThrow(() -> new InvalidIntermediateQueryException("This node must have a parent node"));
-
-            if (currentParentNode instanceof ExplicitVariableProjectionNode) {
+            if (currentParentNode instanceof ConstructionNode && currentParentNode != query.getRootConstructionNode()) {
                 inbetweenProjectorsBuilder.add((ExplicitVariableProjectionNode) currentParentNode);
             }
             if (currentParentNode instanceof LeftJoinNode) {
                 recipient = Optional.of((JoinOrFilterNode) currentParentNode);
-                if (query.getOptionalPosition(focusNode).orElseThrow(() -> new IllegalStateException("The child of a LeftJoin node must have a position")) == RIGHT) {
-                    return Optional.of(new PushUpBooleanExpressionProposalImpl(focusNode, recipient, inbetweenProjectorsBuilder.build()));
+                if (query.getOptionalPosition(focusNode)
+                        .orElseThrow(() -> new IllegalStateException("The child of a LeftJoin node must have a position"))
+                        == RIGHT) {
+                    return Optional.of(
+                            new PushUpBooleanExpressionProposalImpl(focusNode, currentParentNode, recipient, inbetweenProjectorsBuilder.build()));
                 }
             }
         }
-        while (currentParentNode != query.getRootConstructionNode());
-        /**
-         * If this instruction is reached, the current parent node must be the root ConstructionNode
-         */
-        QueryNode rootChild = query.getFirstChild(currentParentNode).orElseThrow(() -> new InvalidIntermediateQueryException("this query ahs a CommutativeJoinOrFilterNode," +
-                "so it has at least two nodes"));
+        while (!(currentParentNode instanceof UnionNode) && (currentParentNode != query.getRootConstructionNode()));
 
-        if (rootChild == focusNode) {
+        if (currentChildNode == focusNode) {
             return Optional.empty();
         }
-        recipient = rootChild instanceof CommutativeJoinOrFilterNode ?
-                Optional.of((CommutativeJoinNode) rootChild) :
+        recipient = currentChildNode instanceof CommutativeJoinOrFilterNode ?
+                Optional.of((CommutativeJoinNode) currentChildNode) :
                 Optional.empty();
 
-        return Optional.of(new PushUpBooleanExpressionProposalImpl(focusNode, recipient, inbetweenProjectorsBuilder.build()));
+        return Optional.of(new PushUpBooleanExpressionProposalImpl(focusNode, currentParentNode, recipient, inbetweenProjectorsBuilder.build()));
     }
 }
