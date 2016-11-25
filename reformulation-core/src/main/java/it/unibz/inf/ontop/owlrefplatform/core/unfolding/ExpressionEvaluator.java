@@ -26,6 +26,8 @@ import it.unibz.inf.ontop.model.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.UnifierUtilities;
+import it.unibz.inf.ontop.owlrefplatform.core.expression.ExpressionNormalizer;
+import it.unibz.inf.ontop.owlrefplatform.core.expression.ExpressionNormalizerImpl;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -49,8 +51,10 @@ public class ExpressionEvaluator {
 		private final Optional<ImmutableExpression> optionalExpression;
 		private final Optional<Boolean> optionalBooleanValue;
 
+		private static final ExpressionNormalizer NORMALIZER = new ExpressionNormalizerImpl();
+
 		private Evaluation(ImmutableExpression expression) {
-			optionalExpression = Optional.of(expression);
+			optionalExpression = Optional.of(NORMALIZER.normalize(expression));
 			optionalBooleanValue = Optional.empty();
 		}
 
