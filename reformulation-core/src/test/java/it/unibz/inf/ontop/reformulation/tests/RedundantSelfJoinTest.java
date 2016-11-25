@@ -50,6 +50,7 @@ public class RedundantSelfJoinTest {
     private final static AtomPredicate TABLE6_PREDICATE = new AtomPredicateImpl("table6", 3);
     private final static AtomPredicate ANS1_PREDICATE = new AtomPredicateImpl("ans1", 3);
     private final static AtomPredicate ANS1_PREDICATE_1 = new AtomPredicateImpl("ans1", 1);
+    private final static AtomPredicate ANS1_PREDICATE_2 = new AtomPredicateImpl("ans1", 2);
     private final static OBDADataFactory DATA_FACTORY = OBDADataFactoryImpl.getInstance();
     private final static Variable X = DATA_FACTORY.getVariable("X");
     private final static Variable Y = DATA_FACTORY.getVariable("Y");
@@ -950,6 +951,56 @@ public class RedundantSelfJoinTest {
 
         assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(query, expectedQuery));
         assertEquals("The version number has changed", initialVersion, query.getVersionNumber());
+    }
+
+    @Test
+    public void testOptimizationOnRightPartOfLJ1() throws EmptyQueryException {
+        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(metadata);
+        DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_2, M, O);
+        ConstructionNode constructionNode = new ConstructionNodeImpl(projectionAtom.getVariables());
+        queryBuilder.init(projectionAtom, constructionNode);
+
+        LeftJoinNode ljNode = new LeftJoinNodeImpl(Optional.empty());
+        queryBuilder.addChild(constructionNode, ljNode);
+
+        ExtensionalDataNode leftNode = new ExtensionalDataNodeImpl(
+                DATA_FACTORY.getDataAtom(TABLE4_PREDICATE, M, N));
+
+        queryBuilder.addChild(ljNode, leftNode, LEFT);
+
+        InnerJoinNode joinNode = new InnerJoinNodeImpl(Optional.empty());
+        queryBuilder.addChild(ljNode, joinNode, RIGHT);
+
+        ExtensionalDataNode dataNode2 = new ExtensionalDataNodeImpl(
+                DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, M, N, O));
+        queryBuilder.addChild(joinNode, dataNode2);
+
+
+        ExtensionalDataNode dataNode3 = new ExtensionalDataNodeImpl(
+                DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, M, M, O));
+        queryBuilder.addChild(joinNode, dataNode3);
+
+        IntermediateQuery query = queryBuilder.build();
+
+        System.out.println("\nBefore optimization: \n" +  query);
+
+
+
+        DefaultIntermediateQueryBuilder expectedQueryBuilder = new DefaultIntermediateQueryBuilder(metadata);
+        expectedQueryBuilder.init(projectionAtom, constructionNode);
+
+        LeftJoinNode newLJNode = new LeftJoinNodeImpl(Optional.of(DATA_FACTORY.getImmutableExpression(EQ, M, N)));
+        expectedQueryBuilder.addChild(constructionNode, newLJNode);
+        expectedQueryBuilder.addChild(newLJNode, leftNode, LEFT);
+        expectedQueryBuilder.addChild(newLJNode, dataNode3, RIGHT);
+
+        IntermediateQuery expectedQuery = expectedQueryBuilder.build();
+        System.out.println("\nExpected query: \n" +  expectedQuery);
+
+        query.applyProposal(new InnerJoinOptimizationProposalImpl(joinNode), true);
+        System.out.println("\nAfter optimization: \n" +  query);
+
+        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(query, expectedQuery));
     }
 
 
