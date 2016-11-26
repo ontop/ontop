@@ -97,7 +97,7 @@ public class PushUpBooleanExpressionOptimizerImpl implements PushUpBooleanExpres
             return Optional.empty();
         }
         recipient = currentChildNode instanceof CommutativeJoinOrFilterNode ?
-                Optional.of((CommutativeJoinNode) currentChildNode) :
+                Optional.of((CommutativeJoinOrFilterNode) currentChildNode) :
                 Optional.empty();
 
         return Optional.of(new PushUpBooleanExpressionProposalImpl(focusNode, currentParentNode, recipient, inbetweenProjectorsBuilder.build()));

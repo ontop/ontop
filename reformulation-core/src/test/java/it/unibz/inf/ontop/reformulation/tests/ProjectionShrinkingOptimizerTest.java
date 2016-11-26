@@ -120,7 +120,7 @@ public class ProjectionShrinkingOptimizerTest {
 
         System.out.println("\nBefore optimization: \n" +  query1);
 
-        IntermediateQuery query2 = IntermediateQueryUtils.convertToBuilder(query1).build();
+        IntermediateQuery query2 = query1.createSnapshot();
 
         ProjectionShrinkingOptimizer projectionShrinkingOptimizer = new ProjectionShrinkingOptimizerImpl();
         IntermediateQuery optimizedQuery = projectionShrinkingOptimizer.optimize(query1);
@@ -205,7 +205,7 @@ public class ProjectionShrinkingOptimizerTest {
 
         IntermediateQuery query1 = queryBuilder1.build();
 
-        IntermediateQuery query2 = IntermediateQueryUtils.convertToBuilder(query1).build();
+        IntermediateQuery query2 = query1.createSnapshot();
         System.out.println("\nBefore optimization: \n" +  query1);
 
 
@@ -373,7 +373,7 @@ public class ProjectionShrinkingOptimizerTest {
 
         System.out.println("\nBefore optimization: \n" +  query1);
 
-        IntermediateQuery query2 = IntermediateQueryUtils.convertToBuilder(query1).build();
+        IntermediateQuery query2 = query1.createSnapshot();
 
         ProjectionShrinkingOptimizer projectionShrinkingOptimizer = new ProjectionShrinkingOptimizerImpl();
         IntermediateQuery optimizedQuery = projectionShrinkingOptimizer.optimize(query1);

@@ -37,7 +37,7 @@ public class PushUpBooleanExpressionExecutorImpl implements PushUpBooleanExpress
             treeComponent.replaceNode(proposal.getRecipientNode().get(), replacingRecipient);
         } else {
             for (QueryNode childOfBlockingNode : query.getChildren(proposal.getBlockingNode())) {
-                treeComponent.insertParent(new FilterNodeImpl(expressionToPropagate), childOfBlockingNode);
+                treeComponent.insertParent(childOfBlockingNode, new FilterNodeImpl(expressionToPropagate));
             }
         }
 
