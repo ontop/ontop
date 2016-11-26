@@ -6,13 +6,10 @@ import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.sql.parser.SelectQueryParser;
 import it.unibz.inf.ontop.sql.parser.exceptions.UnsupportedSelectQueryException;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import static junit.framework.TestCase.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /**
  * Created by Roman Kontchakov on 01/11/2016.
@@ -523,7 +520,6 @@ public class SelectQueryParserTest {
     public void full_natural_Join_3_Test() {
         DBMetadata metadata = createMetadata();
         SelectQueryParser parser = new SelectQueryParser(metadata);
-        // common column name "A" appears more than once in left table
         final CQIE parse = parser.parse("SELECT * FROM P NATURAL JOIN Q NATURAL JOIN R");
 
         assertFalse( parse.getBody().isEmpty());
@@ -534,7 +530,6 @@ public class SelectQueryParserTest {
     public void full_natural_Join_REDUCE_Test() {
         DBMetadata metadata = createMetadata();
         SelectQueryParser parser = new SelectQueryParser(metadata);
-        // common column name "A" appears more than once in left table
         final CQIE parse = parser.parse("SELECT * FROM P AS dp INNER REDUCE JOIN Q AS fis ON dp.A = fis.B");
         assertNull( parse); // ******* This query cannot be parsed because MS-SQL REDUCE operator
     }
@@ -544,10 +539,88 @@ public class SelectQueryParserTest {
     public void full_natural_Join_REDISTRIBUTE_Test() {
         DBMetadata metadata = createMetadata();
         SelectQueryParser parser = new SelectQueryParser(metadata);
-        // common column name "A" appears more than once in left table
         final CQIE parse = parser.parse("SELECT * FROM P AS dp INNER REDISTRIBUTE JOIN Q AS fis ON dp.A = fis.B");
         assertNull( parse); // ******* This query cannot be parsed because MS-SQL REDISTRIBUTE operator
     }
+
+    @Test()
+    public void full_natural_Join_REPLICATE_Test() {
+        DBMetadata metadata = createMetadata();
+        SelectQueryParser parser = new SelectQueryParser(metadata);
+
+        final CQIE parse = parser.parse("SELECT * FROM P AS dp INNER REPLICATE JOIN Q AS fis ON dp.A = fis.B");
+        assertNull( parse); // ******* This query cannot be parsed because MS-SQL REDISTRIBUTE operator
+    }
+
+
+
+
+    @Test()
+    public void full_natural_Join_Plus_Oracle_Test() {
+        DBMetadata metadata = createMetadata();
+        SelectQueryParser parser = new SelectQueryParser(metadata);
+        // common column name "A" appears more than once in left table
+        final CQIE parse = parser.parse("SELECT A, B FROM P  WHERE P.A(+) = P.B;");
+        assertFalse( parse.getBody().isEmpty()); // The (+) operator does not produce an outer join if you specify one table in the outer query and the other table in an inner query.
+    }
+
+
+    @Test()
+    public void full_natural_Join_Plus_2_Oracle_Test() {
+        DBMetadata metadata = createMetadata();
+        SelectQueryParser parser = new SelectQueryParser(metadata);
+//        Users familiar with the traditional Oracle Database outer joins syntax will recognize the same query in this form:
+        final CQIE parse = parser.parse("SELECT A, B FROM P  WHERE P.A(+) = P.A;");
+        assertFalse( parse.getBody().isEmpty());
+    }
+
+
+
+
+    @Test(expected = UnsupportedOperationException.class)
+    public void using_should_not_work_Test() {
+        DBMetadata metadata = createMetadata();
+        SelectQueryParser parser = new SelectQueryParser(metadata);
+        // ERROR: common column name "a" appears more than once in left table
+        final CQIE parse = parser.parse("SELECT * FROM Q INNER JOIN P ON P.A=Q.A  INNER JOIN  R USING (A) ;");
+        assertNull( parse);
+    }
+
+    @Test()
+    public void simple_join_not_allowed(){
+        // PostgreSQL  rises an error executing  this query
+        // ERROR: common column name "a" appears more than once in left table
+        // The parser instead goes ahead
+        DBMetadata metadata = createMetadata();
+        SelectQueryParser parser = new SelectQueryParser(metadata);
+        final CQIE parse = parser.parse("SELECT * FROM  Q, R  INNER JOIN  P  ON  P.A=Q.A;");
+        assertNull( parse);
+    }
+
+
+    @Test()
+    public void joins_allowed_to_parse(){
+        final SelectQueryParser parser = new SelectQueryParser(createMetadata());
+        ImmutableList.of("SELECT * FROM Q  ,  P  ; ",
+        "SELECT * FROM Q NATURAL JOIN  P  ;",
+        "SELECT * FROM Q CROSS JOIN  P  ;",
+        "SELECT * FROM Q INNER JOIN  P  ON  P.A=Q.A;",
+        "SELECT * FROM Q INNER JOIN  P  USING (A) ;",
+        "SELECT * FROM Q , R ,  P  ;",
+        "SELECT * FROM Q  NATURAL JOIN  P  , R;",
+        "SELECT * FROM Q  CROSS JOIN  P  , R;",
+        "SELECT * FROM Q  INNER JOIN  P  ON  P.A=Q.A, R;",
+        "SELECT * FROM Q  INNER JOIN  P  USING (A) , R;",
+        "SELECT * FROM Q INNER JOIN P ON P.A=Q.A  ,  R  ;",
+        "SELECT * FROM Q INNER JOIN P ON P.A=Q.A  INNER JOIN  R  ON  R.A=Q.A ;")
+                .forEach( query -> {
+                    final CQIE parse = parser.parse("SELECT A, B FROM P  WHERE P.A(+) = P.B;");
+                    assertFalse( parse.getBody().isEmpty());
+                });
+
+    }
+
+
 
 
 
