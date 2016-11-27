@@ -18,8 +18,8 @@ import static it.unibz.inf.ontop.pivotalrepr.NonCommutativeOperatorNode.Argument
  * Note that is may be desirable to make implicit boolean expressions (variable equalities) explicit beforehand,
  * using the dedicated optimizer.
  * <p>
- * The rules for propagating up are simple.
- * The expression is always propagated up, until we reach:
+ * The rules for propagating up are the following.
+ * An expression e is always propagated up, until we reach:
  * - a left join node j from its right subtree: j becomes the new recipient,
  * and e is not propagated further.
  * - a union node u (resp. the root construction node r): e is not propagated further,
@@ -29,11 +29,12 @@ import static it.unibz.inf.ontop.pivotalrepr.NonCommutativeOperatorNode.Argument
  * Otherwise a fresh filter node is inserted between u (resp. r) and n to support e.
  * <p>
  * <p>
- * Note that some projections (ConstructionNode)
+ * Note that some projections may need to be extended.
  * More exactly, each construction node on the path from the provider to the recipient node will see its set of projected
  * variables extended with all variables appearing in e.
  * <p>
- * TODO: can be improved by propagating up (sub) boolean expressions which are present in all branches of a union node.
+ *
+ * TODO: can be improved by propagating up (sub) boolean expressions which are present in all branches of a union node,
  */
 
 public class PushUpBooleanExpressionOptimizerImpl implements PushUpBooleanExpressionOptimizer {
