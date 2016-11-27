@@ -32,9 +32,8 @@ import static it.unibz.inf.ontop.pivotalrepr.NonCommutativeOperatorNode.Argument
  * Note that some projections (ConstructionNode)
  * More exactly, each construction node on the path from the provider to the recipient node will see its set of projected
  * variables extended with all variables appearing in e.
- *
+ * <p>
  * TODO: can be improved by propagating up (sub) boolean expressions which are present in all branches of a union node.
- *
  */
 
 public class PushUpBooleanExpressionOptimizerImpl implements PushUpBooleanExpressionOptimizer {
@@ -74,7 +73,7 @@ public class PushUpBooleanExpressionOptimizerImpl implements PushUpBooleanExpres
         QueryNode currentParentNode = currentChildNode;
         Optional<JoinOrFilterNode> recipient;
 
-        do{
+        do {
             currentChildNode = currentParentNode;
             currentParentNode = query.getParent(currentParentNode)
                     .orElseThrow(() -> new InvalidIntermediateQueryException("This node must have a parent node"));

@@ -45,7 +45,7 @@ public class PushUpBooleanExpressionOptimizerTest {
     private final static ImmutableExpression EXPRESSION3 = DATA_FACTORY.getImmutableExpression(
             ExpressionOperation.GTE, W, Z);
     private final static ImmutableExpression EXPRESSION4 = DATA_FACTORY.getImmutableExpression(
-            ExpressionOperation.NEQ, V, W);
+            ExpressionOperation.LT, V, W);
     private final static ImmutableExpression EXPRESSION5 = DATA_FACTORY.getImmutableExpression(
             ExpressionOperation.NEQ, X, DATA_FACTORY.getConstantLiteral("a"));
 
@@ -268,7 +268,7 @@ public class PushUpBooleanExpressionOptimizerTest {
 
         queryBuilder2.init(projectionAtom, constructionNode);
         queryBuilder2.addChild(constructionNode, filterNode2);
-        queryBuilder2.addChild(filterNode2,joinNode2);
+        queryBuilder2.addChild(filterNode2, joinNode2);
         queryBuilder2.addChild(joinNode2, dataNode1);
         queryBuilder2.addChild(joinNode2, dataNode2);
         IntermediateQuery query2 = queryBuilder2.build();
@@ -416,7 +416,7 @@ public class PushUpBooleanExpressionOptimizerTest {
         DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE1, X);
         ConstructionNode constructionNode1 = new ConstructionNodeImpl(projectionAtom.getVariables());
         InnerJoinNode joinNode1 = new InnerJoinNodeImpl(Optional.empty());
-        ConstructionNode constructionNode2 = new ConstructionNodeImpl(ImmutableSet.of(X), ImmutableMap.of(X,generateURI(Y,Z)));
+        ConstructionNode constructionNode2 = new ConstructionNodeImpl(ImmutableSet.of(X), ImmutableMap.of(X, generateURI(Y, Z)));
         FilterNode filterNode = new FilterNodeImpl(EXPRESSION2);
         ExtensionalDataNode dataNode1 = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, X, W));
         ExtensionalDataNode dataNode2 = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE2_PREDICATE, Y, Z));
@@ -437,7 +437,7 @@ public class PushUpBooleanExpressionOptimizerTest {
         System.out.println("\nAfter optimization: \n" + optimizedQuery);
 
         IntermediateQueryBuilder queryBuilder2 = new DefaultIntermediateQueryBuilder(metadata);
-        ConstructionNode constructionNode3 = new ConstructionNodeImpl(ImmutableSet.of(X,Y,Z), ImmutableMap.of(X,generateURI(Y,Z)));
+        ConstructionNode constructionNode3 = new ConstructionNodeImpl(ImmutableSet.of(X, Y, Z), ImmutableMap.of(X, generateURI(Y, Z)));
         InnerJoinNode joinNode2 = new InnerJoinNodeImpl(Optional.of(EXPRESSION2));
 
         queryBuilder2.init(projectionAtom, constructionNode1);
@@ -452,65 +452,70 @@ public class PushUpBooleanExpressionOptimizerTest {
         assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, query2));
     }
 
-//    @Test
-//    public void testPropagationWithIntermediateProjectors() throws EmptyQueryException {
-//        IntermediateQueryBuilder queryBuilder1 = new DefaultIntermediateQueryBuilder(metadata);
-//        DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE1, X);
-//        ConstructionNode constructionNode1 = new ConstructionNodeImpl(projectionAtom.getVariables());
-//        FilterNode filterNode1 = new FilterNodeImpl(EXPRESSION5);
-//        ConstructionNode constructionNode2 = new ConstructionNodeImpl(ImmutableSet.of(X), ImmutableMap.of(X,generateURI(Y,Z)));
-//        InnerJoinNode joinNode2 = new InnerJoinNodeImpl(Optional.of(EXPRESSION2));
-//        ConstructionNode constructionNode3 = new ConstructionNodeImpl(ImmutableSet.of(Z), ImmutableMap.of(Z,generateURI(V,W)));
-//        FilterNode filterNode2 = new FilterNodeImpl(EXPRESSION4);
-//        ExtensionalDataNode dataNode1 = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE5_PREDICATE, X));
-//        ExtensionalDataNode dataNode2 = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE2_PREDICATE, Y, Z));
-//        ExtensionalDataNode dataNode3 = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE2_PREDICATE, V,W));
-//
-//        queryBuilder1.init(projectionAtom, constructionNode1);
-//        queryBuilder1.addChild(constructionNode1, filterNode1);
-//        queryBuilder1.addChild(filterNode1, constructionNode2);
-//        queryBuilder1.addChild(constructionNode2, joinNode2);
-//        queryBuilder1.addChild(joinNode2, dataNode1);
-//        queryBuilder1.addChild(filterNode, dataNode2);
-//        IntermediateQuery query1 = queryBuilder1.build();
-//
-//        System.out.println("\nBefore optimization: \n" + query1);
-//
-//        PushUpBooleanExpressionOptimizer pushUpBooleanExpressionOptimizer = new PushUpBooleanExpressionOptimizerImpl();
-//        IntermediateQuery optimizedQuery = pushUpBooleanExpressionOptimizer.optimize(query1);
-//
-//        System.out.println("\nAfter optimization: \n" + optimizedQuery);
-//
-//        IntermediateQueryBuilder queryBuilder2 = new DefaultIntermediateQueryBuilder(metadata);
-//        ConstructionNode constructionNode3 = new ConstructionNodeImpl(ImmutableSet.of(X,Y,Z), ImmutableMap.of(X,generateURI(Y,Z)));
-//        InnerJoinNode joinNode2 = new InnerJoinNodeImpl(Optional.of(EXPRESSION2));
-//
-//        queryBuilder2.init(projectionAtom, constructionNode1);
-//        queryBuilder2.addChild(constructionNode1, joinNode2);
-//        queryBuilder2.addChild(joinNode2, dataNode1);
-//        queryBuilder2.addChild(joinNode2, constructionNode3);
-//        queryBuilder2.addChild(constructionNode3, dataNode2);
-//        IntermediateQuery query2 = queryBuilder2.build();
-//
-//        System.out.println("\nExpected: \n" + query2);
-//
-//        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, query2));
-//    }
-//
-//    @Test
-//    public void testComplexCase1() throws EmptyQueryException {
-//    }
-//
-//    @Test
-//    public void testComplexCase2() throws EmptyQueryException {
-//
-//    }
+    @Test
+    public void testPropagationWithIntermediateProjectors() throws EmptyQueryException {
+        IntermediateQueryBuilder queryBuilder1 = new DefaultIntermediateQueryBuilder(metadata);
+        DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE1, X);
+        ConstructionNode constructionNode1 = new ConstructionNodeImpl(projectionAtom.getVariables());
+        FilterNode filterNode1 = new FilterNodeImpl(EXPRESSION5);
+        ConstructionNode constructionNode2 = new ConstructionNodeImpl(ImmutableSet.of(X), ImmutableMap.of(X, generateURI(Y, Z)));
+        InnerJoinNode joinNode1 = new InnerJoinNodeImpl(Optional.of(EXPRESSION2));
+        ConstructionNode constructionNode3 = new ConstructionNodeImpl(ImmutableSet.of(Z), ImmutableMap.of(Z, generateURI(V, W)));
+        FilterNode filterNode2 = new FilterNodeImpl(EXPRESSION4);
+        ExtensionalDataNode dataNode1 = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE5_PREDICATE, Y));
+        ExtensionalDataNode dataNode2 = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE2_PREDICATE, V, W));
+
+        queryBuilder1.init(projectionAtom, constructionNode1);
+        queryBuilder1.addChild(constructionNode1, filterNode1);
+        queryBuilder1.addChild(filterNode1, constructionNode2);
+        queryBuilder1.addChild(constructionNode2, joinNode1);
+        queryBuilder1.addChild(joinNode1, dataNode1);
+        queryBuilder1.addChild(joinNode1, constructionNode3);
+        queryBuilder1.addChild(constructionNode3, filterNode2);
+        queryBuilder1.addChild(filterNode2, dataNode2);
+        IntermediateQuery query1 = queryBuilder1.build();
+
+        System.out.println("\nBefore optimization: \n" + query1);
+
+        PushUpBooleanExpressionOptimizer pushUpBooleanExpressionOptimizer = new PushUpBooleanExpressionOptimizerImpl();
+        IntermediateQuery optimizedQuery = pushUpBooleanExpressionOptimizer.optimize(query1);
+
+        System.out.println("\nAfter optimization: \n" + optimizedQuery);
+
+        IntermediateQueryBuilder queryBuilder2 = new DefaultIntermediateQueryBuilder(metadata);
+        FilterNode filterNode3 = new FilterNodeImpl(ImmutabilityTools.foldBooleanExpressions(EXPRESSION5, EXPRESSION2, EXPRESSION4).get());
+        ConstructionNode constructionNode4 = new ConstructionNodeImpl(ImmutableSet.of(V, W, X, Y, Z), ImmutableMap.of(X, generateURI(Y, Z)));
+        InnerJoinNode joinNode2 = new InnerJoinNodeImpl(Optional.empty());
+        ConstructionNode constructionNode5 = new ConstructionNodeImpl(ImmutableSet.of(V, W, Z), ImmutableMap.of(Z, generateURI(V, W)));
+
+        queryBuilder2.init(projectionAtom, constructionNode1);
+        queryBuilder2.addChild(constructionNode1, filterNode3);
+        queryBuilder2.addChild(filterNode3, constructionNode4);
+        queryBuilder2.addChild(constructionNode4, joinNode2);
+        queryBuilder2.addChild(joinNode2, dataNode1);
+        queryBuilder2.addChild(joinNode2, constructionNode5);
+        queryBuilder2.addChild(constructionNode5, dataNode2);
+        IntermediateQuery query2 = queryBuilder2.build();
+
+        System.out.println("\nExpected: \n" + query2);
+
+        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, query2));
+    }
+
+    @Test
+    public void testComplexCase1() throws EmptyQueryException {
+    }
+
+    @Test
+    public void testComplexCase2() throws EmptyQueryException {
+
+    }
 
     private static ImmutableFunctionalTerm generateURI(VariableOrGroundTerm... arguments) {
-        URITemplatePredicate uriTemplatePredicate =  new URITemplatePredicateImpl(arguments.length+1);
-        String uriTemplateString =  "http://example.org/ds1/";
-        for (VariableOrGroundTerm argument : arguments){
-            uriTemplateString = uriTemplateString.toString()+"{}";
+        URITemplatePredicate uriTemplatePredicate = new URITemplatePredicateImpl(arguments.length + 1);
+        String uriTemplateString = "http://example.org/ds1/";
+        for (VariableOrGroundTerm argument : arguments) {
+            uriTemplateString = uriTemplateString.toString() + "{}";
         }
         Constant uriTemplate = DATA_FACTORY.getConstantLiteral(uriTemplateString);
         ImmutableList.Builder<ImmutableTerm> builder = ImmutableList.builder();
