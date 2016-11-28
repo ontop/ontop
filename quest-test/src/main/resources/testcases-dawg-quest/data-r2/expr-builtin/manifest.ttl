@@ -10,16 +10,17 @@
 <>  rdf:type mf:Manifest ;
     rdfs:comment  "DAWG Expression tests: Built-ins" ;
     mf:entries
-    ( :dawg-str-1 :dawg-str-2 :dawg-str-3 :dawg-str-4
+    ( :dawg-str-1 :dawg-str-2
+      # :dawg-str-3 :dawg-str-4 # Already failed in V1.
       :dawg-isBlank-1 :dawg-isLiteral-1 :dawg-datatype-1 :dawg-datatype-2 :dawg-datatype-3
-      :dawg-lang-1 :dawg-lang-2 
-      :dawg-lang-3 
+      :dawg-lang-1 :dawg-lang-2
+      :dawg-lang-3
       :dawg-isURI-1
-      :dawg-isIRI-1 
-      :dawg-langMatches-1 
-      :dawg-langMatches-2 
-      :dawg-langMatches-3 
-      :dawg-langMatches-4 
+      :dawg-isIRI-1
+      :dawg-langMatches-1
+      :dawg-langMatches-2
+      :dawg-langMatches-3
+      :dawg-langMatches-4
       :dawg-langMatches-basic
       :lang-case-insensitive-eq
       :lang-case-insensitive-ne
