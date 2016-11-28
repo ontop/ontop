@@ -122,6 +122,9 @@ public class QuestUnfolder {
 		 // of all mappings to preserve SQL-RDF semantics
 		extendTypesWithMetadataAndAddNOTNULL(unfoldingProgram, reformulationReasoner, vocabularyValidator);
 
+		// Collecting URI templates
+		uriTemplateMatcher = UriTemplateMatcher.create(unfoldingProgram);
+
 		// Adding ontology assertions (ABox) as rules (facts, head with no body).
 		List<AnnotationAssertion> annotationAssertions;
 		if (queryingAnnotationsInOntology) {
@@ -136,9 +139,6 @@ public class QuestUnfolder {
 		if (sameAs) {
 			addSameAsMapping(unfoldingProgram);
 		}
-
-		// Collecting URI templates
-		uriTemplateMatcher = UriTemplateMatcher.create(unfoldingProgram);
 
 		// Adding "triple(x,y,z)" mappings for support of unbounded
 		// predicates and variables as class names (implemented in the
@@ -383,10 +383,10 @@ public class QuestUnfolder {
 		int count = 0;
 		for (ClassAssertion ca : cas) {
 			// no blank nodes are supported here
-			URIConstant c = (URIConstant)ca.getIndividual();
+			URIConstant c = (URIConstant) ca.getIndividual();
 			Predicate p = ca.getConcept().getPredicate();
-			Function head = fac.getFunction(p, 
-							fac.getUriTemplate(fac.getConstantLiteral(c.getURI())));
+			Function head = fac.getFunction(p,
+					uriTemplateMatcher.generateURIFunction(c.getURI()));
 			CQIE rule = fac.getCQIE(head, Collections.<Function> emptyList());
 				
 			unfoldingProgram.add(rule);
@@ -400,9 +400,9 @@ public class QuestUnfolder {
 			URIConstant s = (URIConstant)pa.getSubject();
 			URIConstant o = (URIConstant)pa.getObject();
 			Predicate p = pa.getProperty().getPredicate();
-			Function head = fac.getFunction(p, 
-							fac.getUriTemplate(fac.getConstantLiteral(s.getURI())), 
-							fac.getUriTemplate(fac.getConstantLiteral(o.getURI())));
+			Function head = fac.getFunction(p,
+							uriTemplateMatcher.generateURIFunction(s.getURI()),
+							uriTemplateMatcher.generateURIFunction(o.getURI()));
 			CQIE rule = fac.getCQIE(head, Collections.<Function> emptyList());
 				
 			unfoldingProgram.add(rule);

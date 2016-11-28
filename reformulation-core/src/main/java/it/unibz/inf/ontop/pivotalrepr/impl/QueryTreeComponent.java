@@ -61,7 +61,7 @@ public interface QueryTreeComponent {
     /**
      * TODO: explain
      */
-    QueryNode removeOrReplaceNodeByUniqueChildren(QueryNode node) throws IllegalTreeUpdateException;
+    QueryNode removeOrReplaceNodeByUniqueChild(QueryNode node) throws IllegalTreeUpdateException;
 
     /**
      * TODO: explain
@@ -132,4 +132,11 @@ public interface QueryTreeComponent {
     QueryTreeComponent createSnapshot();
 
     ImmutableSet<Variable> getVariables(QueryNode node);
+
+
+    /**
+     * The version number of the query.
+     * Used in fixed-point optimization.
+     */
+    int getVersionNumber();
 }

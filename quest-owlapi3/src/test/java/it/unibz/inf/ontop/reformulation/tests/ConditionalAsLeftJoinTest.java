@@ -24,29 +24,24 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static junit.framework.TestCase.assertTrue;
 
-public class RedundantJoinFKProfTest {
+public class ConditionalAsLeftJoinTest {
 
-    private static final String CREATE_SCRIPT = "src/test/resources/test/redundant_join/redundant_join_fk_create.sql";
-    private static final String DROP_SCRIPT = "src/test/resources/test/redundant_join/redundant_join_fk_drop.sql";
-    private static final String OWL_FILE = "src/test/resources/test/redundant_join/redundant_join_fk_test.owl";
-    private static final String ODBA_FILE = "src/test/resources/test/redundant_join/redundant_join_fk_test.obda";
-    private static final String NO_OPTIMIZATION_MSG = "The table professors should not be used";
-
+    private static final String CREATE_SCRIPT = "src/test/resources/test/conditional_leftjoin/conditional_leftjoin_create.sql";
+    private static final String DROP_SCRIPT = "src/test/resources/test/conditional_leftjoin/conditional_leftjoin_drop.sql";
+    private static final String OWL_FILE = "src/test/resources/test/conditional_leftjoin/conditional_leftjoin_test.owl";
+    private static final String ODBA_FILE = "src/test/resources/test/conditional_leftjoin/conditional_leftjoin_test.obda";
 
     private OBDADataFactory fac;
     private Connection conn;
-
     private OBDAModel obdaModel;
     private OWLOntology ontology;
-
 
     @Before
     public void setUp() throws Exception {
 
-        String url = "jdbc:h2:mem:professor";
+        String url = "jdbc:h2:mem:restaurant";
         String username = "sa";
         String password = "sa";
 
@@ -106,28 +101,24 @@ public class RedundantJoinFKProfTest {
     @Test
     public void testQuery() throws Exception {
 
-        String query =  "PREFIX : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#>\n" +
+        String query = "PREFIX : <http://www.semanticweb.org/ontologies/2016/10/untitled-ontology-2#>\n" +
                 "PREFIX owl: <http://www.w3.org/2002/07/owl#>\n" +
                 "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
                 "PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\n" +
                 "PREFIX xml: <http://www.w3.org/XML/1998/namespace>\n" +
                 "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
-                "SELECT * {\n" +
-                "?p a :Professor ; :teaches ?c .\n" +
+                "SELECT ?a \n" +
+                "WHERE {\n" +
+                " :Tartaruga a :VegetarianRestaurant .\n" +
+                "OPTIONAL { :Tartaruga :hasAddress ?a }\n" +
                 "}";
 
 
         List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("<http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#professor/1>");
-        expectedValues.add("<http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#professor/1>");
-        expectedValues.add("<http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#professor/3>");
-        expectedValues.add("<http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#professor/8>");
+        expectedValues.add("<http://www.semanticweb.org/ontologies/2016/10/untitled-ontology-2#aa>");
         String sql = checkReturnedValuesAndReturnSql(query, expectedValues);
 
         System.out.println("SQL Query: \n" + sql);
-
-        assertFalse(NO_OPTIMIZATION_MSG, sql.contains("professors"));
-        assertFalse(NO_OPTIMIZATION_MSG, sql.contains("PROFESSORS"));
     }
 
     private String checkReturnedValuesAndReturnSql(String query, List<String> expectedValues) throws Exception {
@@ -147,8 +138,7 @@ public class RedundantJoinFKProfTest {
             sql = st.getUnfolding(query);
             QuestOWLResultSet rs = st.executeTuple(query);
             while (rs.nextRow()) {
-                OWLObject ind1 = rs.getOWLObject("p");
-                // log.debug(ind1.toString());
+                OWLObject ind1 = rs.getOWLObject("a");
                 returnedValues.add(ind1.toString());
                 java.lang.System.out.println(ind1);
                 i++;

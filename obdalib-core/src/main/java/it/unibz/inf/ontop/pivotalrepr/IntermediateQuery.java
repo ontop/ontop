@@ -130,4 +130,8 @@ public interface IntermediateQuery {
      * Set of variables that are returned by the sub-tree.
      */
     ImmutableSet<Variable> getVariables(QueryNode subTreeRootNode);
+
+
+
+    int getVersionNumber();
 }

@@ -24,7 +24,7 @@ public class NodeCentricOptimizationResultsImpl<N extends QueryNode> extends Pro
     }
 
     /**
-     * When the focus node has been removed and not declared as been replaced by its first child.
+     * When the focus node has been removed and not declared as being replaced by its first child.
      *
      */
     public NodeCentricOptimizationResultsImpl(IntermediateQuery query,
@@ -37,7 +37,7 @@ public class NodeCentricOptimizationResultsImpl<N extends QueryNode> extends Pro
         this.optionalReplacingChild = Optional.empty();
 
         /**
-         * Checks the closest ancestor is the parent of the next sibling
+         * Checks if the closest ancestor is the parent of the next sibling
          * (if any of course).
          */
         if (optionalNextSibling.isPresent() && optionalClosestAncestor.isPresent()) {
@@ -56,7 +56,7 @@ public class NodeCentricOptimizationResultsImpl<N extends QueryNode> extends Pro
     public NodeCentricOptimizationResultsImpl(IntermediateQuery query, Optional<QueryNode> optionalReplacingChild) {
         super(query);
         if (!optionalReplacingChild.isPresent()) {
-            throw new IllegalArgumentException("A replacing child must be given (not optional in practise)");
+            throw new IllegalArgumentException("A replacing child must be given (not optional in practice)");
         }
         this.optionalReplacingChild = optionalReplacingChild;
         this.optionalNextSibling =query.getNextSibling(optionalReplacingChild.get());

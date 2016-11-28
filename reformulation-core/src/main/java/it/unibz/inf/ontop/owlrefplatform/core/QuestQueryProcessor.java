@@ -230,13 +230,17 @@ public class QuestQueryProcessor {
 				log.debug("New lifted query: \n" + intermediateQuery.toString());
 
 
-				BasicLeftJoinOptimizer leftJoinOptimizer = new BasicLeftJoinOptimizer();
-				intermediateQuery = leftJoinOptimizer.optimize(intermediateQuery);
-				log.debug("New query after left join optimization: \n" + intermediateQuery.toString());
+				JoinLikeOptimizer joinLikeOptimizer = new FixedPointJoinLikeOptimizer();
+				intermediateQuery = joinLikeOptimizer.optimize(intermediateQuery);
+				log.debug("New query after fixed point join optimization: \n" + intermediateQuery.toString());
 
-				BasicJoinOptimizer joinOptimizer = new BasicJoinOptimizer();
-				intermediateQuery = joinOptimizer.optimize(intermediateQuery);
-				log.debug("New query after join optimization: \n" + intermediateQuery.toString());
+//				BasicLeftJoinOptimizer leftJoinOptimizer = new BasicLeftJoinOptimizer();
+//				intermediateQuery = leftJoinOptimizer.optimize(intermediateQuery);
+//				log.debug("New query after left join optimization: \n" + intermediateQuery.toString());
+//
+//				BasicJoinOptimizer joinOptimizer = new BasicJoinOptimizer();
+//				intermediateQuery = joinOptimizer.optimize(intermediateQuery);
+//				log.debug("New query after join optimization: \n" + intermediateQuery.toString());
 
 				GroundTermRemovalFromDataNodeReshaper groundTermNormalizer = new GroundTermRemovalFromDataNodeReshaper();
 				intermediateQuery = groundTermNormalizer.optimize(intermediateQuery);

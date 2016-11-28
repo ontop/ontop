@@ -34,7 +34,7 @@ public class TrueNodeRemovalExecutorImpl implements TrueNodeRemovalExecutor {
                 return new NodeCentricOptimizationResultsImpl<>(query, optionalOriginalNextSibling, Optional.of(originalParentNode));
             case REPLACE_BY_UNIQUE_NON_EMPTY_CHILD:
                 treeComponent.removeSubTree(trueNode);
-                treeComponent.removeOrReplaceNodeByUniqueChildren(originalParentNode);
+                treeComponent.removeOrReplaceNodeByUniqueChild(originalParentNode);
                 return new NodeCentricOptimizationResultsImpl<>(query, transformationProposal.getOptionalNewNodeOrReplacingChild());
             case DECLARE_AS_TRUE:
                 TrueNode newTrueNode = new TrueNodeImpl();

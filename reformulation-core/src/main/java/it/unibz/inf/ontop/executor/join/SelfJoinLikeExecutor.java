@@ -272,9 +272,15 @@ public class SelfJoinLikeExecutor {
             removedDataNodeBuilder.addAll(predicateProposal.getRemovedDataNodes());
         }
 
+        ImmutableSet<DataNode> newDataNodes = newDataNodeBuilder.build();
+        ImmutableSet<DataNode> removedDataNodes = removedDataNodeBuilder.build();
 
-        return Optional.of(new ConcreteProposal(newDataNodeBuilder.build(), optionalMergedSubstitution,
-                removedDataNodeBuilder.build()));
+        if (newDataNodes.isEmpty()
+                && removedDataNodes.isEmpty()
+                && (! optionalMergedSubstitution.isPresent()))
+            return Optional.empty();
+
+        return Optional.of(new ConcreteProposal(newDataNodes, optionalMergedSubstitution, removedDataNodes));
     }
 
     private static DataNode createNewDataNode(DataNode previousDataNode, DataAtom newDataAtom) {
@@ -440,7 +446,7 @@ public class SelfJoinLikeExecutor {
                     treeComponent.replaceNode(joinNode, newTopNode);
                 }
                 else {
-                    treeComponent.removeOrReplaceNodeByUniqueChildren(joinNode);
+                    treeComponent.removeOrReplaceNodeByUniqueChild(joinNode);
                     newTopNode = uniqueChild;
                 }
 

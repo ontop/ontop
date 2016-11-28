@@ -84,8 +84,8 @@ public class ForeignKeyLeftJoinExecutor implements SimpleNodeCentricInternalExec
          * we check whether there are foreign key constraints
          */
 
-        DatabaseRelationDefinition leftPredicateDatabaseRelation = getDatabaseRelationByName(metadata.getDBMetadata(), leftPredicate.getName());
-        DatabaseRelationDefinition rightPredicateDatabaseRelation = getDatabaseRelationByName(metadata.getDBMetadata(), rightPredicate.getName());
+        DatabaseRelationDefinition leftPredicateDatabaseRelation = getDatabaseRelation(metadata.getDBMetadata(), leftPredicate);
+        DatabaseRelationDefinition rightPredicateDatabaseRelation = getDatabaseRelation(metadata.getDBMetadata(), rightPredicate);
 
 
         if(leftPredicateDatabaseRelation != null && rightPredicateDatabaseRelation != null) {
@@ -129,13 +129,13 @@ public class ForeignKeyLeftJoinExecutor implements SimpleNodeCentricInternalExec
         return false;
     }
 
-    private DatabaseRelationDefinition getDatabaseRelationByName(DBMetadata dbMetadata, String name) {
-        for(DatabaseRelationDefinition relation: dbMetadata.getDatabaseRelations()) {
-            if(relation.getID().getTableName().equalsIgnoreCase(name)) {
-                return relation;
-            }
-        }
-        return null;
+    private DatabaseRelationDefinition getDatabaseRelation(DBMetadata dbMetadata, AtomPredicate predicate) {
+
+        RelationID relationId = Relation2DatalogPredicate.createRelationFromPredicateName(
+                dbMetadata.getQuotedIDFactory(),
+                predicate);
+
+        return dbMetadata.getDatabaseRelation(relationId);
     }
 
 

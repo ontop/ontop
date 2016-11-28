@@ -53,8 +53,8 @@ public class SubstitutionResultsImpl<T extends QueryNode> implements Substitutio
         switch (localAction) {
             case NO_CHANGE:
             case REPLACE_BY_CHILD:
-            case DECLARE_AS_EMPTY:
             case DECLARE_AS_TRUE:
+            case DECLARE_AS_EMPTY:
                 break;
             case NEW_NODE:
             case INSERT_CONSTRUCTION_NODE:

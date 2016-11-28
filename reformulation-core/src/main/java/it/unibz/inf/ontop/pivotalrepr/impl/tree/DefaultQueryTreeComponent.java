@@ -159,7 +159,7 @@ public class DefaultQueryTreeComponent implements QueryTreeComponent {
     }
 
     @Override
-    public QueryNode removeOrReplaceNodeByUniqueChildren(QueryNode node) throws IllegalTreeUpdateException {
+    public QueryNode removeOrReplaceNodeByUniqueChild(QueryNode node) throws IllegalTreeUpdateException {
         return tree.removeOrReplaceNodeByUniqueChild(node);
     }
 
@@ -267,6 +267,11 @@ public class DefaultQueryTreeComponent implements QueryTreeComponent {
             return getProjectedVariableStream(node)
                     .collect(ImmutableCollectors.toSet());
         }
+    }
+
+    @Override
+    public int getVersionNumber() {
+        return tree.getVersionNumber();
     }
 
     private Stream<Variable> getProjectedVariableStream(QueryNode node) {
