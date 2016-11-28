@@ -27,8 +27,8 @@ public interface ImmutableSubstitution<T extends ImmutableTerm> extends LocallyI
     ImmutableTerm apply(ImmutableTerm term);
 
     /**
-     * This method can be applied to simple variables 
-     * 
+     * This method can be applied to simple variables
+     *
      */
     ImmutableTerm applyToVariable(Variable variable);
 

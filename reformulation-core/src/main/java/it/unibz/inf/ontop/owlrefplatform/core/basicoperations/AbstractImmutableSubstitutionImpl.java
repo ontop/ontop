@@ -326,8 +326,7 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
                 : intermediateMap.entrySet().stream()
                 .collect(ImmutableCollectors.toMap(
                         Map.Entry::getKey,
-                        // TODO: generalize that
-                        e -> (T) renamingSubstitution.apply(e.getValue())
+                        e -> renamingSubstitution.applyToTerm(e.getValue())
                 ));
         return constructNewSubstitution(orientedMap);
     }

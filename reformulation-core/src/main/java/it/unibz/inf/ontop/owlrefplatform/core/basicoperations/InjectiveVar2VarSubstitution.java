@@ -17,7 +17,7 @@ public interface InjectiveVar2VarSubstitution extends Var2VarSubstitution {
     /**
      * Applies it (the Var2VarSubstitution) on the keys and values of the given substitution.
      */
-    ImmutableSubstitution<ImmutableTerm> applyRenaming(ImmutableSubstitution<? extends ImmutableTerm> substitutionToRename);
+    <T extends ImmutableTerm> ImmutableSubstitution<T> applyRenaming(ImmutableSubstitution<T> substitutionToRename);
 
     /**
      * { (x,y) | (x,y) \in (this o otherSubstitution), x not excluded }
@@ -31,6 +31,4 @@ public interface InjectiveVar2VarSubstitution extends Var2VarSubstitution {
      */
     Optional<InjectiveVar2VarSubstitution> composeWithAndPreserveInjectivity(InjectiveVar2VarSubstitution otherSubstitution,
                                                                              Set<Variable> variablesToExcludeFromTheDomain);
-
-
 }
