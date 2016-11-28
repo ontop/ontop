@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.utils;
 
 import com.google.common.collect.*;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.BiConsumer;
@@ -81,6 +82,30 @@ public class ImmutableCollectors {
                 // Finisher
                 ImmutableMap.Builder::<K,U>build,
                 Collector.Characteristics.UNORDERED);
+    }
+
+    public static <T, K, U> Collector<T, ? ,ImmutableMap<K,U>> toMap(Function<? super T, ? extends K> keyMapper,
+                                                                     Function<? super T, ? extends U> valueMapper,
+                                                                     BinaryOperator<U> mergeFunction) {
+        return Collector.of(
+                // Supplier
+                Maps::<K,U>newHashMap,
+                // Accumulator
+                (m, e) -> m.merge(keyMapper.apply(e), valueMapper.apply(e), mergeFunction),
+                // Merger
+                mapMerger(mergeFunction),
+                // Finisher
+                ImmutableMap::copyOf,
+                Collector.Characteristics.UNORDERED);
+    }
+
+    private static <K, U>
+    BinaryOperator<Map<K,U>> mapMerger(BinaryOperator<U> mergeFunction) {
+        return (m1, m2) -> {
+            for (Map.Entry<K,U> e : m2.entrySet())
+                m1.merge(e.getKey(), e.getValue(), mergeFunction);
+            return m1;
+        };
     }
 
     public static <T extends Map.Entry<K,U>, K, U> Collector<T, ? ,ImmutableMap<K,U>> toMap() {
