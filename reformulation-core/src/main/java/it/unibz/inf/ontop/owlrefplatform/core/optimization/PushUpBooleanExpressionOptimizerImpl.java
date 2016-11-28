@@ -88,9 +88,8 @@ public class PushUpBooleanExpressionOptimizerImpl implements PushUpBooleanExpres
             }
         }
         while (!fixPointReached);
-        return  query;
+        return query;
     }
-
 
 
     private Optional<PushUpBooleanExpressionProposal> makeNodeCentricProposal(CommutativeJoinOrFilterNode providerNode,
@@ -186,8 +185,9 @@ public class PushUpBooleanExpressionOptimizerImpl implements PushUpBooleanExpres
         // If there is something to propagate
         if (propagatedExpressionsConjunction.isPresent()) {
 
-            // Make a propagation proposal for the first child of the UnionNode
+            // A propagation proposal for the first child of the UnionNode
             Optional<PushUpBooleanExpressionProposal> firstChildProposal = Optional.empty();
+            // Keeps track of the possibly non propagated subexpression for each child of the UnionNode
             ImmutableMap.Builder<CommutativeJoinOrFilterNode,
                     Optional<ImmutableExpression>> childToRetainedExpressionBuilder = ImmutableMap.builder();
 
@@ -200,7 +200,6 @@ public class PushUpBooleanExpressionOptimizerImpl implements PushUpBooleanExpres
                         fullBooleanExpression.flattenAND().stream()
                                 .filter(e -> !propagatedExpressions.contains(e)));
 
-                // For each child, keep track of the possibly non propagated subexpression
                 childToRetainedExpressionBuilder.put((CommutativeJoinOrFilterNode) child,
                         nonPropagatedExpressionsConjunction);
 
@@ -211,13 +210,15 @@ public class PushUpBooleanExpressionOptimizerImpl implements PushUpBooleanExpres
                             .orElseThrow(() -> new IllegalStateException("This proposal cannot be empty")));
                 }
             }
-            // Extend the proposal for the first child with all non propagated expressions
+            // Extend the proposal made for the first child with all the non propagated expressions
             return Optional.of(mergeProposals(firstChildProposal.get(), childToRetainedExpressionBuilder.build()));
         }
         return Optional.empty();
     }
 
-    private PushUpBooleanExpressionProposal mergeProposals(PushUpBooleanExpressionProposal partialProposal, ImmutableMap<CommutativeJoinOrFilterNode, Optional<ImmutableExpression>> providerToRetainedExpression) {
+    private PushUpBooleanExpressionProposal mergeProposals(PushUpBooleanExpressionProposal partialProposal,
+                                                           ImmutableMap<CommutativeJoinOrFilterNode,
+                                                                   Optional<ImmutableExpression>> providerToRetainedExpression) {
         return new PushUpBooleanExpressionProposalImpl(partialProposal.getPropagatedExpression(),
                 providerToRetainedExpression,
                 partialProposal.getUpMostPropagatingNode(),

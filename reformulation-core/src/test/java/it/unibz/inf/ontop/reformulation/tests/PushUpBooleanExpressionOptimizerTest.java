@@ -29,9 +29,12 @@ public class PushUpBooleanExpressionOptimizerTest {
     private final static AtomPredicate TABLE3_PREDICATE = new AtomPredicateImpl("table3", 3);
     private final static AtomPredicate TABLE4_PREDICATE = new AtomPredicateImpl("table4", 3);
     private final static AtomPredicate TABLE5_PREDICATE = new AtomPredicateImpl("table5", 1);
+    private final static AtomPredicate TABLE6_PREDICATE = new AtomPredicateImpl("table6", 3);
+    private final static AtomPredicate TABLE7_PREDICATE = new AtomPredicateImpl("table7", 4);
     private final static AtomPredicate ANS1_PREDICATE1 = new AtomPredicateImpl("ans1", 1);
     private final static AtomPredicate ANS1_PREDICATE3 = new AtomPredicateImpl("ans1", 3);
     private final static OBDADataFactory DATA_FACTORY = OBDADataFactoryImpl.getInstance();
+    private final static Variable U = DATA_FACTORY.getVariable("U");
     private final static Variable V = DATA_FACTORY.getVariable("V");
     private final static Variable W = DATA_FACTORY.getVariable("W");
     private final static Variable X = DATA_FACTORY.getVariable("X");
@@ -503,7 +506,7 @@ public class PushUpBooleanExpressionOptimizerTest {
     }
 
     @Test
-    public void testPropagationThroughUnion1() throws EmptyQueryException {
+    public void testCompletePropagationThroughUnion() throws EmptyQueryException {
         IntermediateQueryBuilder queryBuilder1 = new DefaultIntermediateQueryBuilder(metadata);
         DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE1, X);
         ConstructionNode constructionNode = new ConstructionNodeImpl(projectionAtom.getVariables());
@@ -530,13 +533,158 @@ public class PushUpBooleanExpressionOptimizerTest {
 
         IntermediateQueryBuilder queryBuilder2 = new DefaultIntermediateQueryBuilder(metadata);
         FilterNode filterNode3 = new FilterNodeImpl(EXPRESSION1);
-        UnionNode unionNode2 = new UnionNodeImpl(ImmutableSet.of(X,Z));
+        UnionNode unionNode2 = new UnionNodeImpl(ImmutableSet.of(X, Z));
 
         queryBuilder2.init(projectionAtom, constructionNode);
         queryBuilder2.addChild(constructionNode, filterNode3);
         queryBuilder2.addChild(filterNode3, unionNode2);
         queryBuilder2.addChild(unionNode2, dataNode1);
         queryBuilder2.addChild(unionNode2, dataNode2);
+        IntermediateQuery query2 = queryBuilder2.build();
+
+        System.out.println("\nExpected: \n" + query2);
+
+        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, query2));
+    }
+
+    @Test
+    public void testNoPropagationThroughUnion() throws EmptyQueryException {
+        IntermediateQueryBuilder queryBuilder1 = new DefaultIntermediateQueryBuilder(metadata);
+        DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE1, X);
+        ConstructionNode constructionNode = new ConstructionNodeImpl(projectionAtom.getVariables());
+        UnionNode unionNode1 = new UnionNodeImpl(ImmutableSet.of(X));
+        FilterNode filterNode1 = new FilterNodeImpl(EXPRESSION1);
+        FilterNode filterNode2 = new FilterNodeImpl(EXPRESSION3);
+        ExtensionalDataNode dataNode1 = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE3_PREDICATE, X, Y, Z));
+        ExtensionalDataNode dataNode2 = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE4_PREDICATE, W, X, Z));
+
+        queryBuilder1.init(projectionAtom, constructionNode);
+        queryBuilder1.addChild(constructionNode, unionNode1);
+        queryBuilder1.addChild(unionNode1, filterNode1);
+        queryBuilder1.addChild(unionNode1, filterNode2);
+        queryBuilder1.addChild(filterNode1, dataNode1);
+        queryBuilder1.addChild(filterNode2, dataNode2);
+        IntermediateQuery query1 = queryBuilder1.build();
+
+        System.out.println("\nBefore optimization: \n" + query1);
+
+        PushUpBooleanExpressionOptimizer pushUpBooleanExpressionOptimizer = new PushUpBooleanExpressionOptimizerImpl();
+        IntermediateQuery optimizedQuery = pushUpBooleanExpressionOptimizer.optimize(query1);
+
+        System.out.println("\nAfter optimization: \n" + optimizedQuery);
+
+        IntermediateQuery query2 = query1.createSnapshot();
+
+        System.out.println("\nExpected: \n" + query2);
+
+        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, query2));
+    }
+
+    @Test
+    public void testPartialPropagationThroughUnion() throws EmptyQueryException {
+        IntermediateQueryBuilder queryBuilder1 = new DefaultIntermediateQueryBuilder(metadata);
+        DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE1, X);
+        ConstructionNode constructionNode = new ConstructionNodeImpl(projectionAtom.getVariables());
+        UnionNode unionNode1 = new UnionNodeImpl(ImmutableSet.of(X));
+        FilterNode filterNode1 = new FilterNodeImpl(ImmutabilityTools.foldBooleanExpressions(EXPRESSION1, EXPRESSION2).get());
+        FilterNode filterNode2 = new FilterNodeImpl(ImmutabilityTools.foldBooleanExpressions(EXPRESSION1, EXPRESSION3).get());
+        FilterNode filterNode3 = new FilterNodeImpl(EXPRESSION1);
+        ExtensionalDataNode dataNode1 = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE3_PREDICATE, X, Y, Z));
+        ExtensionalDataNode dataNode2 = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE4_PREDICATE, W, X, Z));
+        ExtensionalDataNode dataNode3 = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE6_PREDICATE, X, V, Z));
+
+        queryBuilder1.init(projectionAtom, constructionNode);
+        queryBuilder1.addChild(constructionNode, unionNode1);
+        queryBuilder1.addChild(unionNode1, filterNode1);
+        queryBuilder1.addChild(unionNode1, filterNode2);
+        queryBuilder1.addChild(unionNode1, filterNode3);
+        queryBuilder1.addChild(filterNode1, dataNode1);
+        queryBuilder1.addChild(filterNode2, dataNode2);
+        queryBuilder1.addChild(filterNode3, dataNode3);
+        IntermediateQuery query1 = queryBuilder1.build();
+
+        System.out.println("\nBefore optimization: \n" + query1);
+
+        PushUpBooleanExpressionOptimizer pushUpBooleanExpressionOptimizer = new PushUpBooleanExpressionOptimizerImpl();
+        IntermediateQuery optimizedQuery = pushUpBooleanExpressionOptimizer.optimize(query1);
+
+        System.out.println("\nAfter optimization: \n" + optimizedQuery);
+
+        IntermediateQueryBuilder queryBuilder2 = new DefaultIntermediateQueryBuilder(metadata);
+        FilterNode filterNode4 = new FilterNodeImpl(EXPRESSION1);
+        FilterNode filterNode5 = new FilterNodeImpl(EXPRESSION2);
+        FilterNode filterNode6 = new FilterNodeImpl(EXPRESSION3);
+        UnionNode unionNode2 = new UnionNodeImpl(ImmutableSet.of(X, Z));
+
+        queryBuilder2.init(projectionAtom, constructionNode);
+        queryBuilder2.addChild(constructionNode, filterNode4);
+        queryBuilder2.addChild(filterNode4, unionNode2);
+        queryBuilder2.addChild(unionNode2, filterNode5);
+        queryBuilder2.addChild(unionNode2, filterNode6);
+        queryBuilder2.addChild(unionNode2, dataNode3);
+        queryBuilder2.addChild(filterNode5, dataNode1);
+        queryBuilder2.addChild(filterNode6, dataNode2);
+        IntermediateQuery query2 = queryBuilder2.build();
+
+        System.out.println("\nExpected: \n" + query2);
+
+        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, query2));
+    }
+
+    @Test
+    public void testMultiplePropagationsThroughUnion() throws EmptyQueryException {
+        IntermediateQueryBuilder queryBuilder1 = new DefaultIntermediateQueryBuilder(metadata);
+        DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE1, X);
+        ConstructionNode constructionNode1 = new ConstructionNodeImpl(projectionAtom.getVariables());
+        UnionNode unionNode1 = new UnionNodeImpl(ImmutableSet.of(X));
+        ConstructionNode constructionNode2 = new ConstructionNodeImpl(ImmutableSet.of(X),
+                ImmutableMap.of(X, generateURI(Y)));
+        UnionNode unionNode2 = new UnionNodeImpl(ImmutableSet.of(Y));
+        FilterNode filterNode1 = new FilterNodeImpl(ImmutabilityTools.foldBooleanExpressions(EXPRESSION3, EXPRESSION5).get());
+        FilterNode filterNode2 = new FilterNodeImpl(EXPRESSION3);
+        FilterNode filterNode3 = new FilterNodeImpl(ImmutabilityTools.foldBooleanExpressions(EXPRESSION3, EXPRESSION2).get());
+        ExtensionalDataNode dataNode1 = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE3_PREDICATE, X, W, Z));
+        ExtensionalDataNode dataNode2 = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE4_PREDICATE, W, Y, Z));
+        ExtensionalDataNode dataNode3 = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE7_PREDICATE, Y, W, U, Z));
+
+        queryBuilder1.init(projectionAtom, constructionNode1);
+        queryBuilder1.addChild(constructionNode1, unionNode1);
+        queryBuilder1.addChild(unionNode1, filterNode1);
+        queryBuilder1.addChild(unionNode1, constructionNode2);
+        queryBuilder1.addChild(filterNode1, dataNode1);
+        queryBuilder1.addChild(constructionNode2, unionNode2);
+        queryBuilder1.addChild(unionNode2, filterNode2);
+        queryBuilder1.addChild(unionNode2, filterNode3);
+        queryBuilder1.addChild(filterNode2, dataNode2);
+        queryBuilder1.addChild(filterNode3, dataNode3);
+        IntermediateQuery query1 = queryBuilder1.build();
+
+        System.out.println("\nBefore optimization: \n" + query1);
+
+        PushUpBooleanExpressionOptimizer pushUpBooleanExpressionOptimizer = new PushUpBooleanExpressionOptimizerImpl();
+        IntermediateQuery optimizedQuery = pushUpBooleanExpressionOptimizer.optimize(query1);
+
+        System.out.println("\nAfter optimization: \n" + optimizedQuery);
+
+        IntermediateQueryBuilder queryBuilder2 = new DefaultIntermediateQueryBuilder(metadata);
+        FilterNode filterNode4 = new FilterNodeImpl(EXPRESSION3);
+        FilterNode filterNode5 = new FilterNodeImpl(EXPRESSION5);
+        FilterNode filterNode6 = new FilterNodeImpl(EXPRESSION2);
+        UnionNode unionNode3 = new UnionNodeImpl(ImmutableSet.of(W, X, Z));
+        UnionNode unionNode4 = new UnionNodeImpl(ImmutableSet.of(W, Y, Z));
+        ConstructionNode constructionNode3 = new ConstructionNodeImpl(ImmutableSet.of(X, W, Z),
+                ImmutableMap.of(X, generateURI(Y)));
+
+        queryBuilder2.init(projectionAtom, constructionNode1);
+        queryBuilder2.addChild(constructionNode1, filterNode4);
+        queryBuilder2.addChild(filterNode4, unionNode3);
+        queryBuilder2.addChild(unionNode3, filterNode5);
+        queryBuilder2.addChild(unionNode3, constructionNode3);
+        queryBuilder2.addChild(filterNode5, dataNode1);
+        queryBuilder2.addChild(constructionNode3, unionNode4);
+        queryBuilder2.addChild(unionNode4, dataNode2);
+        queryBuilder2.addChild(unionNode4, filterNode6);
+        queryBuilder2.addChild(filterNode6, dataNode3);
         IntermediateQuery query2 = queryBuilder2.build();
 
         System.out.println("\nExpected: \n" + query2);
