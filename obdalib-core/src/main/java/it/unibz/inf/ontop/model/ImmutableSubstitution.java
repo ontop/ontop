@@ -1,6 +1,8 @@
 package it.unibz.inf.ontop.model;
 
 import java.util.Optional;
+
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 
@@ -78,7 +80,7 @@ public interface ImmutableSubstitution<T extends ImmutableTerm> extends LocallyI
     /**
      * Returns a similar substitution that avoids (if possible) to substitute certain variables.
      */
-    ImmutableSubstitution<T> orientate(ImmutableSet<Variable> variablesToTryToKeep);
+    ImmutableSubstitution<T> orientate(ImmutableList<Variable> priorityVariables);
 
     Optional<ImmutableExpression> convertIntoBooleanExpression();
 

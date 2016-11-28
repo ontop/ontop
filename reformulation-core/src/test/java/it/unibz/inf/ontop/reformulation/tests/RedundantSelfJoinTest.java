@@ -1033,16 +1033,18 @@ public class RedundantSelfJoinTest {
         System.out.println("\nBefore optimization: \n" +  query);
 
         DefaultIntermediateQueryBuilder expectedQueryBuilder = new DefaultIntermediateQueryBuilder(metadata);
-        expectedQueryBuilder.init(projectionAtom, constructionNode);
+        ConstructionNode newConstructionNode = new ConstructionNodeImpl(
+                projectionAtom.getVariables(),
+                new ImmutableSubstitutionImpl<>(ImmutableMap.of(O, M)),
+                Optional.empty());
+        expectedQueryBuilder.init(projectionAtom, newConstructionNode);
 
-        LeftJoinNode newLJNode = new LeftJoinNodeImpl(foldBooleanExpressions(
-                DATA_FACTORY.getImmutableExpression(EQ, M, O),
-                DATA_FACTORY.getImmutableExpression(EQ, N, O)));
-        expectedQueryBuilder.addChild(constructionNode, newLJNode);
+        LeftJoinNode newLJNode = new LeftJoinNodeImpl(Optional.of(DATA_FACTORY.getImmutableExpression(EQ, M, N)));
+        expectedQueryBuilder.addChild(newConstructionNode, newLJNode);
         expectedQueryBuilder.addChild(newLJNode, leftNode, LEFT);
 
         ExtensionalDataNode dataNode4 = new ExtensionalDataNodeImpl(
-                DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, O, O, O));
+                DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, M, M, M));
         expectedQueryBuilder.addChild(newLJNode, dataNode4, RIGHT);
 
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();

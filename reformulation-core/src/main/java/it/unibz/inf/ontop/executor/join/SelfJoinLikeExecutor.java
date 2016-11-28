@@ -15,6 +15,9 @@ import it.unibz.inf.ontop.pivotalrepr.proposal.impl.SubstitutionPropagationPropo
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.*;
+import java.util.stream.Stream;
+
+import static it.unibz.inf.ontop.pivotalrepr.NonCommutativeOperatorNode.ArgumentPosition.LEFT;
 
 public class SelfJoinLikeExecutor {
 
@@ -237,10 +240,10 @@ public class SelfJoinLikeExecutor {
 
     protected static Optional<ConcreteProposal> createConcreteProposal(
             ImmutableList<PredicateLevelProposal> predicateProposals,
-            ImmutableSet<Variable> variablesToKeep) {
+            ImmutableList<Variable> priorityVariables) {
         Optional<ImmutableSubstitution<VariableOrGroundTerm>> optionalMergedSubstitution;
         try {
-            optionalMergedSubstitution = mergeSubstitutions(predicateProposals, variablesToKeep);
+            optionalMergedSubstitution = mergeSubstitutions(predicateProposals, priorityVariables);
         } catch (AtomUnificationException e) {
             return Optional.empty();
         }
@@ -321,7 +324,7 @@ public class SelfJoinLikeExecutor {
     }
 
     protected static Optional<ImmutableSubstitution<VariableOrGroundTerm>> mergeSubstitutions(
-            ImmutableList<PredicateLevelProposal> predicateProposals, ImmutableSet<Variable> variablesToTryToKeep)
+            ImmutableList<PredicateLevelProposal> predicateProposals, ImmutableList<Variable> priorityVariables)
             throws AtomUnificationException {
         ImmutableList<ImmutableSubstitution<VariableOrGroundTerm>> substitutions = extractSubstitutions(predicateProposals);
 
@@ -347,10 +350,8 @@ public class SelfJoinLikeExecutor {
             }
         }
 
-        if (optionalAccumulatedSubstitution.isPresent()) {
-            return Optional.of(optionalAccumulatedSubstitution.get().orientate(variablesToTryToKeep));
-        }
-        return optionalAccumulatedSubstitution;
+        return optionalAccumulatedSubstitution
+                .map(s -> s.orientate(priorityVariables));
     }
 
     protected static ImmutableList<ImmutableSubstitution<VariableOrGroundTerm>> extractSubstitutions(
@@ -498,5 +499,32 @@ public class SelfJoinLikeExecutor {
 
     }
 
+    /**
+     * TODO: implement seriously
+     */
+    protected ImmutableList<Variable> prioritizeVariables(IntermediateQuery query, JoinLikeNode joinLikeNode) {
+
+        /**
+         * Sequential (order matters)
+         */
+        return query.getAncestors(joinLikeNode).reverse().stream()
+                .sequential()
+                .flatMap(n -> extractPriorityVariables(query, n))
+                .distinct()
+                .collect(ImmutableCollectors.toList());
+    }
+
+    private Stream<Variable> extractPriorityVariables(IntermediateQuery query, QueryNode node) {
+        if (node instanceof ExplicitVariableProjectionNode)
+            return ((ExplicitVariableProjectionNode)node).getVariables().stream();
+        else if (node instanceof LeftJoinNode) {
+            return query.getChild(node, LEFT)
+                    .map(c -> query.getVariables(c).stream())
+                    .orElseThrow(() -> new IllegalStateException("A LJ must have a left child"));
+        }
+        else {
+            return Stream.empty();
+        }
+    }
 
 }

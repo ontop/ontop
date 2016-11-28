@@ -281,34 +281,55 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
     protected abstract ImmutableSubstitution<T> constructNewSubstitution(ImmutableMap<Variable, T> map);
 
     @Override
-    public ImmutableSubstitution<T> orientate(ImmutableSet<Variable> variablesToTryToKeep) {
-        if (variablesToTryToKeep.isEmpty() || isEmpty()) {
+    public ImmutableSubstitution<T> orientate(ImmutableList<Variable> priorityVariables) {
+        if (priorityVariables.isEmpty() || isEmpty()) {
             return this;
         }
 
-        ImmutableMap.Builder<Variable, T> mapBuilder = ImmutableMap.builder();
+        ImmutableMap.Builder<Variable, T> intermediateMapBuilder = ImmutableMap.builder();
+        ImmutableMap.Builder<Variable, Variable> renamingBuilder = ImmutableMap.builder();
+
         for (Variable replacedVariable : getImmutableMap().keySet()) {
             T target = get(replacedVariable);
-            if ((target instanceof Variable) && (variablesToTryToKeep.contains(replacedVariable))) {
+            if ((target instanceof Variable) && (priorityVariables.contains(replacedVariable))) {
                 Variable targetVariable = (Variable) target;
 
+                int replacedVariableIndex = priorityVariables.indexOf(replacedVariable);
+                int targetVariableIndex = priorityVariables.indexOf(targetVariable);
+
                 /**
-                 * TODO: explain
+                 * If the priority of the target variable is less important than the replaced one
+                 *    --> swap them
                  */
-                if (!variablesToTryToKeep.contains(targetVariable)) {
+                if ((targetVariableIndex < 0) || (replacedVariableIndex < targetVariableIndex)) {
                     // Inverses the variables
                     // NB: now we know that T extends Variable
-                    mapBuilder.put(targetVariable, (T)replacedVariable);
+                    intermediateMapBuilder.put(targetVariable, (T)replacedVariable);
+                    renamingBuilder.put(targetVariable, replacedVariable);
                     continue;
                 }
             }
             /**
              * By default, keep the entry
              */
-            mapBuilder.put(replacedVariable, target);
+            intermediateMapBuilder.put(replacedVariable, target);
         }
 
-        return constructNewSubstitution(mapBuilder.build());
+        /**
+         * Applies the renaming
+         */
+        InjectiveVar2VarSubstitution renamingSubstitution = new InjectiveVar2VarSubstitutionImpl(renamingBuilder.build());
+        ImmutableMap<Variable, T> intermediateMap = intermediateMapBuilder.build();
+
+        ImmutableMap<Variable, T> orientedMap = renamingSubstitution.isEmpty()
+                ? intermediateMap
+                : intermediateMap.entrySet().stream()
+                .collect(ImmutableCollectors.toMap(
+                        Map.Entry::getKey,
+                        // TODO: generalize that
+                        e -> (T) renamingSubstitution.apply(e.getValue())
+                ));
+        return constructNewSubstitution(orientedMap);
     }
 
     @Override
