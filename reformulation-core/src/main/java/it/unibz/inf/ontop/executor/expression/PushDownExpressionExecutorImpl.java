@@ -1,7 +1,6 @@
 package it.unibz.inf.ontop.executor.expression;
 
 import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.executor.SimpleNodeCentricInternalExecutor;
 import it.unibz.inf.ontop.model.ImmutableExpression;
 import it.unibz.inf.ontop.model.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.pivotalrepr.*;
@@ -32,25 +31,25 @@ public class PushDownExpressionExecutorImpl implements PushDownExpressionExecuto
             throws InvalidQueryOptimizationProposalException {
         JoinOrFilterNode focusNode = proposal.getFocusNode();
 
-        for (Map.Entry<JoinOrFilterNode, Collection<ImmutableExpression>> targetEntry : proposal.getDirectRecipients().asMap().entrySet()) {
-            updateJoinOrFilterNode(treeComponent, targetEntry.getKey(), targetEntry.getValue());
+        for (Map.Entry<CommutativeJoinOrFilterNode, Collection<ImmutableExpression>> targetEntry : proposal.getNewDirectRecipientNodes().asMap().entrySet()) {
+            updateNewDirectRecipientNode(treeComponent, targetEntry.getKey(), targetEntry.getValue());
         }
 
         for (Map.Entry<QueryNode, Collection<ImmutableExpression>> targetEntry :
-                proposal.getChildOfFilterNodesToCreate().asMap().entrySet()) {
-            updateChildOfFilter(treeComponent, targetEntry.getKey(), targetEntry.getValue());
+                proposal.getIndirectRecipientNodes().asMap().entrySet()) {
+            updateIndirectRecipientNode(treeComponent, targetEntry.getKey(), targetEntry.getValue());
         }
 
         QueryNode firstChild = query.getFirstChild(focusNode)
-                .orElseThrow(() -> new InvalidQueryOptimizationProposalException("The focus node has no children"));
+                .orElseThrow(() -> new InvalidQueryOptimizationProposalException("The focus node has no child"));
 
         return updateFocusNode(treeComponent, focusNode, proposal.getExpressionsToKeep())
                 .map(n -> new NodeCentricOptimizationResultsImpl<>(query, n))
                 .orElseGet(() -> new NodeCentricOptimizationResultsImpl<>(query, Optional.of(firstChild)));
     }
 
-    private void updateChildOfFilter(QueryTreeComponent treeComponent, QueryNode targetNode,
-                                     Collection<ImmutableExpression> additionalExpressions) {
+    private void updateIndirectRecipientNode(QueryTreeComponent treeComponent, QueryNode targetNode,
+                                             Collection<ImmutableExpression> additionalExpressions) {
         ImmutableExpression foldedExpression = ImmutabilityTools.foldBooleanExpressions(
                 ImmutableList.copyOf(additionalExpressions)).get();
         FilterNode newFilterNode = new FilterNodeImpl(foldedExpression);
@@ -58,8 +57,8 @@ public class PushDownExpressionExecutorImpl implements PushDownExpressionExecuto
         treeComponent.insertParent(targetNode, newFilterNode);
     }
 
-    private void updateJoinOrFilterNode(QueryTreeComponent treeComponent, JoinOrFilterNode targetNode,
-                                        Collection<ImmutableExpression> additionalExpressions) {
+    private void updateNewDirectRecipientNode(QueryTreeComponent treeComponent, JoinOrFilterNode targetNode,
+                                              Collection<ImmutableExpression> additionalExpressions) {
         ImmutableList.Builder<ImmutableExpression> expressionBuilder = ImmutableList.builder();
         Optional<ImmutableExpression> optionalFormerExpression = targetNode.getOptionalFilterCondition();
         if (optionalFormerExpression.isPresent()) {
@@ -84,7 +83,7 @@ public class PushDownExpressionExecutorImpl implements PushDownExpressionExecuto
          */
         else {
             try {
-                treeComponent.removeOrReplaceNodeByUniqueChildren(focusNode);
+                treeComponent.removeOrReplaceNodeByUniqueChild(focusNode);
             } catch (IllegalTreeUpdateException e) {
                 throw new InvalidQueryOptimizationProposalException("Problem when removing a filter node: " + e.getMessage());
             }
@@ -92,9 +91,6 @@ public class PushDownExpressionExecutorImpl implements PushDownExpressionExecuto
         return optionalNewFocusNode;
     }
 
-    /**
-     * TODO: explain
-     */
     private static Optional<JoinOrFilterNode> generateNewJoinOrFilterNode(JoinOrFilterNode formerNode,
                                                                           ImmutableList<ImmutableExpression> newExpressions) {
         Optional<ImmutableExpression> optionalExpression = ImmutabilityTools.foldBooleanExpressions(

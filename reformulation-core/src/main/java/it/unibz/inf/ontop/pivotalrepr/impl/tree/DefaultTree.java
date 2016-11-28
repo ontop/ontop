@@ -27,6 +27,7 @@ public class DefaultTree implements QueryTree {
     private final Set<EmptyNode> emptyNodes;
     private final Set<TrueNode> trueNodes;
     private final Set<IntensionalDataNode> intensionalNodes;
+    private int versionNumber;
 
 
     protected DefaultTree(ConstructionNode rootQueryNode) {
@@ -42,6 +43,8 @@ public class DefaultTree implements QueryTree {
         insertNodeIntoIndex(rootQueryNode, rootNode);
         childrenIndex.put(rootNode, createChildrenRelation(rootNode));
         // No parent
+
+        versionNumber = 1;
     }
 
     private DefaultTree(TreeNode rootNode,
@@ -50,7 +53,8 @@ public class DefaultTree implements QueryTree {
                         Map<TreeNode, TreeNode> parentIndex,
                         Set<EmptyNode> emptyNodes,
                         Set<TrueNode> trueNodes,
-                        Set<IntensionalDataNode> intensionalNodes) {
+                        Set<IntensionalDataNode> intensionalNodes,
+                        int versionNumber) {
         this.rootNode = rootNode;
         this.nodeIndex = nodeIndex;
         this.childrenIndex = childrenIndex;
@@ -58,6 +62,7 @@ public class DefaultTree implements QueryTree {
         this.emptyNodes = emptyNodes;
         this.trueNodes = trueNodes;
         this.intensionalNodes = intensionalNodes;
+        this.versionNumber = versionNumber;
     }
 
     @Override
@@ -414,7 +419,7 @@ public class DefaultTree implements QueryTree {
                         Map.Entry::getValue
                 ));
         return new DefaultTree(newNodeIndex.get(rootNode.getQueryNode()), newNodeIndex, newChildrenIndex,
-                newParentIndex, new HashSet<>(emptyNodes), new HashSet<>(trueNodes), new HashSet<>(intensionalNodes));
+                newParentIndex, new HashSet<>(emptyNodes), new HashSet<>(trueNodes), new HashSet<>(intensionalNodes), versionNumber);
     }
 
     @Override
@@ -427,6 +432,15 @@ public class DefaultTree implements QueryTree {
         accessChildrenRelation(formerParentTreeNode).removeChild(childTreeNode);
 
         addChild(newParentNode, childNode, optionalPosition, false, false);
+    }
+
+    @Override
+    public int getVersionNumber() {
+        return versionNumber;
+    }
+
+    private void updateVersionNumber() {
+        versionNumber++;
     }
 
     /**
@@ -525,6 +539,7 @@ public class DefaultTree implements QueryTree {
         else if (queryNode instanceof IntensionalDataNode){
             intensionalNodes.add((IntensionalDataNode) queryNode);
         }
+        updateVersionNumber();
     }
 
     /**
@@ -540,6 +555,7 @@ public class DefaultTree implements QueryTree {
         } else if (queryNode instanceof IntensionalDataNode){
             intensionalNodes.remove(queryNode);
         }
+        updateVersionNumber();
     }
 
 }

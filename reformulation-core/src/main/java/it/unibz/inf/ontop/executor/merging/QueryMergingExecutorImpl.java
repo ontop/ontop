@@ -91,15 +91,17 @@ public class QueryMergingExecutorImpl implements QueryMergingExecutor {
                                 results.getSubstitutionToPropagate());
 
                     case NEW_NODE:
-                    case DECLARE_AS_TRUE:
                         QueryNode newNode = results.getOptionalNewNode().get();
                         if (newNode == originalNode) {
-                            throw new IllegalStateException("NEW_NODE or DECLARE_AS_TRUE action must not return the same node. " +
+                            throw new IllegalStateException("NEW_NODE action must not return the same node. " +
                                     "Use NO_CHANGE instead.");
                         }
                         return new AnalysisResults(originalNode, newNode,
                                 results.getSubstitutionToPropagate());
 
+                    case DECLARE_AS_TRUE:
+                        return new AnalysisResults(originalNode, new TrueNodeImpl(),
+                                Optional.empty());
                     /**
                      * Recursive
                      */

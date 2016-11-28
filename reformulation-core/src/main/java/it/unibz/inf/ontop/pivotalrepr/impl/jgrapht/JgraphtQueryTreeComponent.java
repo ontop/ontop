@@ -366,7 +366,7 @@ public class JgraphtQueryTreeComponent implements QueryTreeComponent {
     }
 
     @Override
-    public QueryNode removeOrReplaceNodeByUniqueChildren(QueryNode node) throws IllegalTreeUpdateException {
+    public QueryNode removeOrReplaceNodeByUniqueChild(QueryNode node) throws IllegalTreeUpdateException {
         ImmutableList<QueryNode> children = getChildren(node);
         int nbChildren = children.size();
         switch(nbChildren) {
@@ -513,6 +513,11 @@ public class JgraphtQueryTreeComponent implements QueryTreeComponent {
     @Override
     public ImmutableSet<Variable> getVariables(QueryNode node) {
         throw new RuntimeException("TODO: support getVariables");
+    }
+
+    @Override
+    public int getVersionNumber() {
+        throw new RuntimeException("TODO: support getVersionNumber");
     }
 
     private void addChild(QueryNode parentNode, QueryNode childNode, boolean isNew) throws IllegalTreeUpdateException {

@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.pivotalrepr.proposal;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMultimap;
 import it.unibz.inf.ontop.model.ImmutableExpression;
+import it.unibz.inf.ontop.pivotalrepr.CommutativeJoinOrFilterNode;
 import it.unibz.inf.ontop.pivotalrepr.JoinOrFilterNode;
 import it.unibz.inf.ontop.pivotalrepr.QueryNode;
 
@@ -12,22 +13,21 @@ import it.unibz.inf.ontop.pivotalrepr.QueryNode;
 public interface PushDownBooleanExpressionProposal extends SimpleNodeCentricOptimizationProposal<JoinOrFilterNode> {
 
     /**
-     * TODO: explain
-     *
-     * Nodes that can directly receive these additional conditions
+     * Roots of the subtrees receiving the boolean expression e being propagated down,
+     * only if these roots natively support e (they must be CommutativeJoin or FilterNodes)
      */
-    ImmutableMultimap<JoinOrFilterNode, ImmutableExpression> getDirectRecipients();
+    ImmutableMultimap<CommutativeJoinOrFilterNode, ImmutableExpression> getNewDirectRecipientNodes();
 
     /**
-     * TODO: find a better name
-     *
-     * These QueryNode require new FilterNodes to be inserted as their parents.
-     * The filter nodes will receive the corresponding conditions.
+     * Roots of the subtrees receiving the boolean expression e being propagated down,
+     * only if these roots do not natively support e (they are not CommutativeJoin or FilterNodes).
+     * A new parent FilterNode will be created for each of these roots,
+     * in order to support e
      */
-    ImmutableMultimap<QueryNode, ImmutableExpression> getChildOfFilterNodesToCreate();
+    ImmutableMultimap<QueryNode, ImmutableExpression> getIndirectRecipientNodes();
 
     /**
-     * TODO: explain
+     * Boolean expressions which remain at the provider's level (but may also be propagated down)
      */
     ImmutableList<ImmutableExpression> getExpressionsToKeep();
 }

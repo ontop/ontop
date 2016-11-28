@@ -47,8 +47,6 @@ import static it.unibz.inf.ontop.pivotalrepr.NonCommutativeOperatorNode.Argument
 
 public class TrueNodesRemovalOptimizer extends NodeCentricDepthFirstOptimizer<TrueNodeRemovalProposal> {
 
-    private final Logger log = LoggerFactory.getLogger(TrueNodesRemovalOptimizer.class);
-
     public TrueNodesRemovalOptimizer() {
         super(false);
     }

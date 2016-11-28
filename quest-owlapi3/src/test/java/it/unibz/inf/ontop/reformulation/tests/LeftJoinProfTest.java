@@ -129,7 +129,6 @@ public class LeftJoinProfTest {
         assertFalse(NO_SELF_LJ_OPTIMIZATION_MSG, containsMoreThanOneOccurrence(sql, "\"PROFESSORS\""));
     }
 
-    @Ignore("Not supported yet")
     @Test
     public void testFullName1() throws Exception {
 
@@ -155,7 +154,6 @@ public class LeftJoinProfTest {
         assertFalse(NO_SELF_LJ_OPTIMIZATION_MSG, containsMoreThanOneOccurrence(sql, "\"PROFESSORS\""));
     }
 
-    @Ignore("TODO: add the fix point to enable it")
     @Test
     public void testFullName2() throws Exception {
 
@@ -243,6 +241,32 @@ public class LeftJoinProfTest {
                 "   OPTIONAL {\n" +
                 "     ?p :lastName ?v\n" +
                 "  }\n" +
+                "}";
+
+        List<String> expectedValues = ImmutableList.of(
+                "Smith", "Poppins", "Depp"
+        );
+        String sql = checkReturnedValuesAndReturnSql(query, expectedValues);
+
+        System.out.println("SQL Query: \n" + sql);
+
+        assertFalse(sql.toUpperCase().contains("LEFT"));
+    }
+
+    @Ignore
+    @Test
+    public void testCourseJoinOnLeft1() throws Exception {
+
+        String query =  "PREFIX : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#>\n" +
+                "\n" +
+                "SELECT DISTINCT ?v\n" +
+                "WHERE {\n" +
+                "   ?p :firstName ?f ; \n" +
+                "      :teaches ?c .\n" +
+                "   OPTIONAL {\n" +
+                "     ?p :lastName ?v\n" +
+                "  }\n" +
+                "FILTER (bound(?f))" +
                 "}";
 
         List<String> expectedValues = ImmutableList.of(
