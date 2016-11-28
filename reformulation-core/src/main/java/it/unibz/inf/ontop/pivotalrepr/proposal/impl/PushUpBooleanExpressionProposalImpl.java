@@ -1,6 +1,8 @@
 package it.unibz.inf.ontop.pivotalrepr.proposal.impl;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import it.unibz.inf.ontop.model.ImmutableExpression;
 import it.unibz.inf.ontop.pivotalrepr.*;
 import it.unibz.inf.ontop.pivotalrepr.proposal.PushUpBooleanExpressionProposal;
 
@@ -8,39 +10,32 @@ import java.util.Optional;
 
 public class PushUpBooleanExpressionProposalImpl implements PushUpBooleanExpressionProposal {
 
-    //Node providing the expression to pushed up
-    private final CommutativeJoinOrFilterNode providerNode;
-
-    private final QueryNode blockingNode;
+    private final ImmutableExpression propagatedExpression;
+    private final ImmutableMap<CommutativeJoinOrFilterNode, Optional<ImmutableExpression>> providerToNonPropagatedExpression;
+    private final QueryNode upMostPropagatingNode;
     private final Optional<JoinOrFilterNode> recipientNode;
+
     private final ImmutableList<ExplicitVariableProjectionNode> inbetweenProjectors;
 
-    public PushUpBooleanExpressionProposalImpl(CommutativeJoinOrFilterNode providerNode,
-                                               QueryNode blockingNode,
+    public PushUpBooleanExpressionProposalImpl(ImmutableExpression propagatedExpression,
+                                               ImmutableMap<CommutativeJoinOrFilterNode, Optional<ImmutableExpression>> providerToNonPropagatedExpression,
+                                               QueryNode upMostPropagatingNode,
                                                Optional<JoinOrFilterNode> recipientNode,
                                                ImmutableList<ExplicitVariableProjectionNode> inbetweenProjectors) {
-        if (!(
-                (blockingNode instanceof UnionNode) ||
-                        (blockingNode instanceof ConstructionNode) ||
-                        (blockingNode instanceof LeftJoinNode)
-        )){
-         throw new IllegalStateException("a node blocking up propagation of a boolean expression must be a ConstructionNode," +
-                 "UnionNode or LeftJoinNode");
-        }
-        this.blockingNode = blockingNode;
-        this.providerNode = providerNode;
+        this.propagatedExpression = propagatedExpression;
+        this.providerToNonPropagatedExpression = providerToNonPropagatedExpression;
+        this.upMostPropagatingNode = upMostPropagatingNode;
         this.recipientNode = recipientNode;
         this.inbetweenProjectors = inbetweenProjectors;
     }
-
 
     public Optional<JoinOrFilterNode> getRecipientNode() {
         return recipientNode;
     }
 
     @Override
-    public QueryNode getBlockingNode() {
-        return blockingNode;
+    public QueryNode getUpMostPropagatingNode() {
+        return upMostPropagatingNode;
     }
 
     public ImmutableList<ExplicitVariableProjectionNode> getInbetweenProjectors() {
@@ -48,7 +43,11 @@ public class PushUpBooleanExpressionProposalImpl implements PushUpBooleanExpress
     }
 
     @Override
-    public CommutativeJoinOrFilterNode getFocusNode() {
-        return providerNode;
+    public ImmutableExpression getPropagatedExpression() {
+        return propagatedExpression;
+    }
+
+    public ImmutableMap<CommutativeJoinOrFilterNode, Optional<ImmutableExpression>> getProviderToNonPropagatedExpression() {
+        return providerToNonPropagatedExpression;
     }
 }

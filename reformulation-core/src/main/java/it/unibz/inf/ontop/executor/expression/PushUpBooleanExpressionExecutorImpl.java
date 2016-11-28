@@ -6,18 +6,31 @@ import it.unibz.inf.ontop.model.Variable;
 import it.unibz.inf.ontop.model.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.pivotalrepr.*;
 import it.unibz.inf.ontop.pivotalrepr.impl.*;
-import it.unibz.inf.ontop.pivotalrepr.proposal.InvalidQueryOptimizationProposalException;
-import it.unibz.inf.ontop.pivotalrepr.proposal.NodeCentricOptimizationResults;
-import it.unibz.inf.ontop.pivotalrepr.proposal.PushUpBooleanExpressionProposal;
-import it.unibz.inf.ontop.pivotalrepr.proposal.impl.NodeCentricOptimizationResultsImpl;
+import it.unibz.inf.ontop.pivotalrepr.proposal.*;
+import it.unibz.inf.ontop.pivotalrepr.proposal.impl.PushUpBooleanExpressionResults;
+import it.unibz.inf.ontop.pivotalrepr.proposal.impl.PushUpBooleanExpressionResultsImpl;
 
+import java.util.Map;
 import java.util.Optional;
 
 public class PushUpBooleanExpressionExecutorImpl implements PushUpBooleanExpressionExecutor {
+
+
     @Override
-    public NodeCentricOptimizationResults<CommutativeJoinOrFilterNode> apply(PushUpBooleanExpressionProposal proposal, IntermediateQuery query, QueryTreeComponent treeComponent) throws InvalidQueryOptimizationProposalException, EmptyQueryException {
-        ImmutableExpression expressionToPropagate = proposal.getFocusNode().getOptionalFilterCondition().
-                orElseThrow(() -> new IllegalStateException("Invalid proposal: the focus node must provide a boolean expression"));
+    public PushUpBooleanExpressionResults apply(PushUpBooleanExpressionProposal proposal, IntermediateQuery query,
+                                                QueryTreeComponent treeComponent)
+            throws InvalidQueryOptimizationProposalException, EmptyQueryException {
+        ImmutableExpression expressionToPropagate = proposal.getPropagatedExpression();
+
+        /**
+         * Create or update the recipient node
+         */
+        if (proposal.getRecipientNode().isPresent()) {
+            JoinOrFilterNode replacingRecipient = getRecipientReplacementNode(proposal.getRecipientNode().get(), expressionToPropagate);
+            treeComponent.replaceNode(proposal.getRecipientNode().get(), replacingRecipient);
+        } else {
+            treeComponent.insertParent(proposal.getUpMostPropagatingNode(), new FilterNodeImpl(expressionToPropagate));
+        }
 
         /**
          * Extend the projections on the path from provider to blocking node
@@ -29,30 +42,24 @@ public class PushUpBooleanExpressionExecutorImpl implements PushUpBooleanExpress
             }
         }
 
+
         /**
-         * Create or update the recipient node
+         * Replace or delete the nodes providing the expression
          */
-        if (proposal.getRecipientNode().isPresent()) {
-            JoinOrFilterNode replacingRecipient = getRecipientReplacementNode(proposal.getRecipientNode().get(), expressionToPropagate);
-            treeComponent.replaceNode(proposal.getRecipientNode().get(), replacingRecipient);
-        } else {
-            for (QueryNode childOfBlockingNode : query.getChildren(proposal.getBlockingNode())) {
-                treeComponent.insertParent(childOfBlockingNode, new FilterNodeImpl(expressionToPropagate));
+        ImmutableSet.Builder<QueryNode> providerReplacementNodesBuilder = ImmutableSet.builder();
+        for(Map.Entry<CommutativeJoinOrFilterNode, Optional<ImmutableExpression>> entry : proposal.getProviderToNonPropagatedExpression().entrySet()){
+            Optional<CommutativeJoinOrFilterNode> replacingProvider = getProviderReplacementNode(entry.getKey(),
+                    entry.getValue());
+            if (replacingProvider.isPresent()) {
+                treeComponent.replaceNode(entry.getKey(), replacingProvider.get());
+                providerReplacementNodesBuilder.add(replacingProvider.get());
+            } else {
+                providerReplacementNodesBuilder.add(treeComponent.removeOrReplaceNodeByUniqueChild(entry.getKey()));
             }
         }
-
-        /**
-         * Replace (JoinNode) or delete (FilterNode) the node providing the expression
-         */
-        Optional<CommutativeJoinOrFilterNode> replacingProvider = getProviderReplacementNode(proposal.getFocusNode());
-        if (replacingProvider.isPresent()) {
-            treeComponent.replaceNode(proposal.getFocusNode(), replacingProvider.get());
-            return new NodeCentricOptimizationResultsImpl<>(query, replacingProvider.get());
-        }
-        QueryNode replacingChild = treeComponent.removeOrReplaceNodeByUniqueChild(proposal.getFocusNode());
-        return new NodeCentricOptimizationResultsImpl<>(query, Optional.of(replacingChild));
-
+        return new PushUpBooleanExpressionResultsImpl(providerReplacementNodesBuilder.build(), query);
     }
+
 
 
     private ImmutableExpression getCombinedExpression(ImmutableExpression expressionToPropagate, JoinOrFilterNode recipientNode) {
@@ -96,13 +103,18 @@ public class PushUpBooleanExpressionExecutorImpl implements PushUpBooleanExpress
         }
     }
 
-    private Optional<CommutativeJoinOrFilterNode> getProviderReplacementNode(CommutativeJoinOrFilterNode providerNode) {
+    private Optional<CommutativeJoinOrFilterNode> getProviderReplacementNode(CommutativeJoinOrFilterNode providerNode,
+                                                                             Optional<ImmutableExpression> nonPropagatedExpression) {
         if (providerNode instanceof InnerJoinNode) {
-            return Optional.of(new InnerJoinNodeImpl(Optional.empty()));
+            return Optional.of(new InnerJoinNodeImpl(nonPropagatedExpression));
         } else if (providerNode instanceof FilterNode) {
+            if (nonPropagatedExpression.isPresent()) {
+                return Optional.of(new FilterNodeImpl(nonPropagatedExpression.get()));
+            }
             return Optional.empty();
         } else {
             throw new IllegalStateException("Invalid proposal: A CommutativeJoinOrFilterNode must be a commutative join or filter node");
         }
     }
+
 }

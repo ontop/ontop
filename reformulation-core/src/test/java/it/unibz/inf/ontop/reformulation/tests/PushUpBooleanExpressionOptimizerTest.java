@@ -503,13 +503,47 @@ public class PushUpBooleanExpressionOptimizerTest {
     }
 
     @Test
-    public void testComplexCase1() throws EmptyQueryException {
+    public void testPropagationThroughUnion1() throws EmptyQueryException {
+        IntermediateQueryBuilder queryBuilder1 = new DefaultIntermediateQueryBuilder(metadata);
+        DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE1, X);
+        ConstructionNode constructionNode = new ConstructionNodeImpl(projectionAtom.getVariables());
+        UnionNode unionNode1 = new UnionNodeImpl(ImmutableSet.of(X));
+        FilterNode filterNode1 = new FilterNodeImpl(EXPRESSION1);
+        FilterNode filterNode2 = new FilterNodeImpl(EXPRESSION1);
+        ExtensionalDataNode dataNode1 = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE3_PREDICATE, X, Y, Z));
+        ExtensionalDataNode dataNode2 = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE4_PREDICATE, W, X, Z));
+
+        queryBuilder1.init(projectionAtom, constructionNode);
+        queryBuilder1.addChild(constructionNode, unionNode1);
+        queryBuilder1.addChild(unionNode1, filterNode1);
+        queryBuilder1.addChild(unionNode1, filterNode2);
+        queryBuilder1.addChild(filterNode1, dataNode1);
+        queryBuilder1.addChild(filterNode2, dataNode2);
+        IntermediateQuery query1 = queryBuilder1.build();
+
+        System.out.println("\nBefore optimization: \n" + query1);
+
+        PushUpBooleanExpressionOptimizer pushUpBooleanExpressionOptimizer = new PushUpBooleanExpressionOptimizerImpl();
+        IntermediateQuery optimizedQuery = pushUpBooleanExpressionOptimizer.optimize(query1);
+
+        System.out.println("\nAfter optimization: \n" + optimizedQuery);
+
+        IntermediateQueryBuilder queryBuilder2 = new DefaultIntermediateQueryBuilder(metadata);
+        FilterNode filterNode3 = new FilterNodeImpl(EXPRESSION1);
+        UnionNode unionNode2 = new UnionNodeImpl(ImmutableSet.of(X,Z));
+
+        queryBuilder2.init(projectionAtom, constructionNode);
+        queryBuilder2.addChild(constructionNode, filterNode3);
+        queryBuilder2.addChild(filterNode3, unionNode2);
+        queryBuilder2.addChild(unionNode2, dataNode1);
+        queryBuilder2.addChild(unionNode2, dataNode2);
+        IntermediateQuery query2 = queryBuilder2.build();
+
+        System.out.println("\nExpected: \n" + query2);
+
+        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, query2));
     }
 
-    @Test
-    public void testComplexCase2() throws EmptyQueryException {
-
-    }
 
     private static ImmutableFunctionalTerm generateURI(VariableOrGroundTerm... arguments) {
         URITemplatePredicate uriTemplatePredicate = new URITemplatePredicateImpl(arguments.length + 1);
