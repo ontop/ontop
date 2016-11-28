@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.owlrefplatform.core.basicoperations;
 import java.util.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
@@ -286,49 +287,51 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
             return this;
         }
 
-        ImmutableMap.Builder<Variable, T> intermediateMapBuilder = ImmutableMap.builder();
-        ImmutableMap.Builder<Variable, Variable> renamingBuilder = ImmutableMap.builder();
+        ImmutableMap<Variable, T> localMap = getImmutableMap();
 
-        for (Variable replacedVariable : getImmutableMap().keySet()) {
-            T target = get(replacedVariable);
-            if ((target instanceof Variable) && (priorityVariables.contains(replacedVariable))) {
-                Variable targetVariable = (Variable) target;
+        ImmutableMap<Variable, Variable> renamingMap = localMap.entrySet().stream()
+                // Will produce some results only if T is compatible with Variable
+                .filter(e -> e.getValue() instanceof Variable)
+                .filter(e -> {
+                    int replacedVariableIndex = priorityVariables.indexOf(e.getKey());
+                    int targetVariableIndex = priorityVariables.indexOf(e.getValue());
+                    return replacedVariableIndex >= 0 && ((targetVariableIndex < 0)
+                            || (replacedVariableIndex < targetVariableIndex));
+                })
+                .collect(ImmutableCollectors.toMap(
+                        e -> (Variable) e.getValue(),
+                        Map.Entry::getKey,
+                        (v1, v2) -> priorityVariables.indexOf(v1) <= priorityVariables.indexOf(v2) ? v1 : v2
+                ));
 
-                int replacedVariableIndex = priorityVariables.indexOf(replacedVariable);
-                int targetVariableIndex = priorityVariables.indexOf(targetVariable);
 
-                /**
-                 * If the priority of the target variable is less important than the replaced one
-                 *    --> swap them
-                 */
-                if ((targetVariableIndex < 0) || (replacedVariableIndex < targetVariableIndex)) {
-                    // Inverses the variables
-                    // NB: now we know that T extends Variable
-                    intermediateMapBuilder.put(targetVariable, (T)replacedVariable);
-                    renamingBuilder.put(targetVariable, replacedVariable);
-                    continue;
-                }
-            }
-            /**
-             * By default, keep the entry
-             */
-            intermediateMapBuilder.put(replacedVariable, target);
-        }
 
         /**
          * Applies the renaming
          */
-        InjectiveVar2VarSubstitution renamingSubstitution = new InjectiveVar2VarSubstitutionImpl(renamingBuilder.build());
-        ImmutableMap<Variable, T> intermediateMap = intermediateMapBuilder.build();
+        if (renamingMap.isEmpty()) {
+            return this;
+        }
+        else {
+            Var2VarSubstitution renamingSubstitution = new Var2VarSubstitutionImpl(renamingMap);
 
-        ImmutableMap<Variable, T> orientedMap = renamingSubstitution.isEmpty()
-                ? intermediateMap
-                : intermediateMap.entrySet().stream()
-                .collect(ImmutableCollectors.toMap(
-                        Map.Entry::getKey,
-                        e -> renamingSubstitution.applyToTerm(e.getValue())
-                ));
-        return constructNewSubstitution(orientedMap);
+            ImmutableMap<Variable, T> orientedMap = Stream.concat(
+                    localMap.entrySet().stream()
+                            /**
+                             * Removes entries that will be reversed
+                             */
+                            .filter(e -> !Optional.ofNullable(renamingMap.get(e.getValue()))
+                                    .filter(newValue -> newValue.equals(e.getKey()))
+                                    .isPresent()),
+                    renamingMap.entrySet().stream()
+                            .map(e -> (Map.Entry<Variable, T>) e))
+                    .collect(ImmutableCollectors.toMap(
+                            Map.Entry::getKey,
+                            e -> renamingSubstitution.applyToTerm(e.getValue())
+                    ));
+
+            return constructNewSubstitution(orientedMap);
+        }
     }
 
     @Override
