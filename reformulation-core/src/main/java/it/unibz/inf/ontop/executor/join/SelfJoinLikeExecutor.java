@@ -5,6 +5,7 @@ import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.ImmutableUnificationTools;
 import it.unibz.inf.ontop.pivotalrepr.*;
+import it.unibz.inf.ontop.pivotalrepr.NonCommutativeOperatorNode.ArgumentPosition;
 import it.unibz.inf.ontop.pivotalrepr.impl.ExtensionalDataNodeImpl;
 import it.unibz.inf.ontop.pivotalrepr.impl.FilterNodeImpl;
 import it.unibz.inf.ontop.pivotalrepr.impl.QueryTreeComponent;
@@ -166,6 +167,16 @@ public class SelfJoinLikeExecutor {
 
         private final ImmutableSet<DataNode> getRemovalNodes() {
             return ImmutableSet.copyOf(removalNodes);
+        }
+    }
+
+    private static class ParentAndChildPosition {
+        public final QueryNode parent;
+        public final Optional<ArgumentPosition> position;
+
+        private ParentAndChildPosition(QueryNode parent, Optional<ArgumentPosition> position) {
+            this.parent = parent;
+            this.position = position;
         }
     }
 
@@ -507,20 +518,51 @@ public class SelfJoinLikeExecutor {
         /**
          * Sequential (order matters)
          */
-        return query.getAncestors(joinLikeNode).reverse().stream()
+        return extractAncestors(query, joinLikeNode).stream()
                 .sequential()
-                .flatMap(n -> extractPriorityVariables(query, n))
+                .flatMap(p -> extractPriorityVariables(query, p.parent, p.position))
                 .distinct()
                 .collect(ImmutableCollectors.toList());
     }
 
-    private Stream<Variable> extractPriorityVariables(IntermediateQuery query, QueryNode node) {
+    private ImmutableList<ParentAndChildPosition> extractAncestors(IntermediateQuery query, QueryNode node) {
+        // Non-final
+        Optional<QueryNode> optionalAncestor = query.getParent(node);
+        QueryNode ancestorChild = node;
+
+        ImmutableList.Builder<ParentAndChildPosition> listBuilder = ImmutableList.builder();
+
+        while (optionalAncestor.isPresent()) {
+            QueryNode ancestor = optionalAncestor.get();
+            listBuilder.add(new ParentAndChildPosition(ancestor, query.getOptionalPosition(ancestor, ancestorChild)));
+
+            optionalAncestor = query.getParent(ancestor);
+            ancestorChild = ancestor;
+        }
+
+        return listBuilder.build();
+    }
+
+
+    private Stream<Variable> extractPriorityVariables(IntermediateQuery query, QueryNode node,
+                                                      Optional<ArgumentPosition> childPosition) {
         if (node instanceof ExplicitVariableProjectionNode)
             return ((ExplicitVariableProjectionNode)node).getVariables().stream();
+
+        /**
+         * LJ: look for variables on the left
+         *     only when the focus node is on the right
+         */
         else if (node instanceof LeftJoinNode) {
-            return query.getChild(node, LEFT)
-                    .map(c -> query.getVariables(c).stream())
-                    .orElseThrow(() -> new IllegalStateException("A LJ must have a left child"));
+            switch (childPosition.get()) {
+                case RIGHT:
+                    return query.getChild(node, LEFT)
+                            .map(c -> query.getVariables(c).stream())
+                            .orElseThrow(() -> new IllegalStateException("A LJ must have a left child"));
+                case LEFT:
+                default:
+                    return Stream.empty();
+            }
         }
         else {
             return Stream.empty();
