@@ -121,9 +121,9 @@ public class R2RMLWriter {
 		 * If a mapping axiom with id j is split into multiple ones,
 		 * each of then will have "j"+"d"+int as an identifier
 		 */
-		String delimiterSubtring = getSplitMappingAxiomIdDelimiterSubstring(mappingAxioms);
+		String delimiterSubstring = getSplitMappingAxiomIdDelimiterSubstring(mappingAxioms);
 		return mappingAxioms.stream()
-				.flatMap(m -> splitMappingAxiom(m, delimiterSubtring).stream())
+				.flatMap(m -> splitMappingAxiom(m, delimiterSubstring).stream())
 				.collect(ImmutableCollectors.toSet());
 	}
 
@@ -131,7 +131,7 @@ public class R2RMLWriter {
 		String delimiterSubstring = "";
 		boolean matched = false;
 		do {
-			delimiterSubstring += "s";
+			delimiterSubstring += "_";
 			Pattern pattern = Pattern.compile(delimiterSubstring + "(\\d)*$");
 			matched = mappingAxioms.stream()
 					.anyMatch(a -> pattern.matcher(a.getId()).matches());
