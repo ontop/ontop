@@ -10,6 +10,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import static junit.framework.TestCase.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -519,6 +520,64 @@ public class SelectQueryParserTest {
         SelectQueryParser parser = new SelectQueryParser(metadata);
         // common column name "A" appears more than once in left table
         parser.parse("SELECT * FROM P NATURAL JOIN Q NATURAL JOIN R");
+    }
+
+
+    @Test
+    public void select__Join_2_Test() {
+        DBMetadata metadata = createMetadata();
+        SelectQueryParser parser = new SelectQueryParser(metadata);
+        // common column name "A" appears more than once in left table
+        final CQIE parse = parser.parse("SELECT a.A, b.B FROM P AS a JOIN R AS b  ON (a.A = b.B);");
+
+        assertNotNull(parse);
+    }
+
+    @Test
+    public void parser_combination_query_test() {
+        final DBMetadata metadata = createMetadata();
+        final String select = "SELECT * FROM Q ";
+        final String[] outerJoinTypes = {"", "RIGHT", "NATURAL", "FULL", "LEFT", "CROSS"};
+        final String[] joinTypes = {"", "OUTER", "INNER"};
+        final String[] joinCondition = {"", "ON", "USING"};
+        final String usingField = "(A)";
+        final String onCondition = "Q.A=P.A";
+        final String lastQuery = select + ", P" ;
+        int i = 0;
+        for (String a : outerJoinTypes) {
+            for (String b : joinTypes) {
+                for (String c : joinCondition) {
+                    System.out.println("*** Test n. " + ++i);
+                    StringBuilder sb = new StringBuilder(select)
+                            .append(" ")
+                            .append(b).append(" JOIN P ")
+                            .append(c).append(" ");
+                    if ( c.equals("USING"))
+                        sb.append(usingField).append(" ");
+                    else if ( c.equals("ON"))
+                        sb.append(onCondition).append(" ");
+                    sb.append(";");
+                    String query = sb.toString();
+                    parseQueryTest(query, metadata, i);
+                }
+            }
+        }
+        parseQueryTest(lastQuery, metadata, i);
+    }
+
+    private void  parseQueryTest(String query, DBMetadata metadata, int i){
+        System.out.println(query);
+        SelectQueryParser parser = new SelectQueryParser(metadata);
+        try {
+            final CQIE parse = parser.parse(query);
+            if (parse.getBody().isEmpty() )
+                System.out.println("!!!! CQIE Body is empty!");
+            else
+                System.out.println("OK - CQIE Body contains " + parse.getBody().size() + " atom/s."  );
+        }catch (Exception e){
+            System.out.println(e.getClass().getCanonicalName() + "  occurred during test n. " +i  + "!!!"  );
+        }
+        System.out.println(" **********************\n ");
     }
 
 
