@@ -75,7 +75,7 @@ public class QueryNodeRenamer implements HomogeneousQueryNodeTransformer {
     public GroupNode transform(GroupNode groupNode) {
         ImmutableList.Builder<NonGroundTerm> renamedTermBuilder = ImmutableList.builder();
         for (NonGroundTerm term : groupNode.getGroupingTerms()) {
-            renamedTermBuilder.add(renamingSubstitution.applyToNonGroundTerm(term));
+            renamedTermBuilder.add(renamingSubstitution.applyToTerm(term));
         }
         return new GroupNodeImpl(renamedTermBuilder.build());
     }
@@ -106,7 +106,7 @@ public class QueryNodeRenamer implements HomogeneousQueryNodeTransformer {
     private DataAtom renameDataAtom(DataAtom atom) {
         ImmutableList.Builder<VariableOrGroundTerm> argListBuilder = ImmutableList.builder();
         for (VariableOrGroundTerm term : atom.getArguments()) {
-            argListBuilder.add(renamingSubstitution.applyToVariableOrGroundTerm(term));
+            argListBuilder.add(renamingSubstitution.applyToTerm(term));
         }
         return DATA_FACTORY.getDataAtom(atom.getPredicate(), argListBuilder.build());
     }

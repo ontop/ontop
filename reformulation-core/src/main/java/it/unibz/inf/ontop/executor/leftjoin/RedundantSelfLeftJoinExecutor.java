@@ -152,13 +152,13 @@ public class RedundantSelfLeftJoinExecutor
                 groupByPrimaryKeyArguments(leftDataNode, rightDataNode,
                         query.getMetadata().getUniqueConstraints().get(leftDataNode.getProjectionAtom().getPredicate()));
 
-        ImmutableSet<Variable> variablesToKeep = query.getClosestConstructionNode(leftJoinNode).getVariables();
+        ImmutableList<Variable> priorityVariables = prioritizeVariables(query, leftJoinNode);
 
         try {
             PredicateLevelProposal predicateLevelProposal = proposeForGroupingMap(groupingMap);
             Optional<ConcreteProposal> optionalConcreteProposal = createConcreteProposal(
                     ImmutableList.of(predicateLevelProposal),
-                    variablesToKeep);
+                    priorityVariables);
             if (optionalConcreteProposal.isPresent()) {
                 ConcreteProposal concreteProposal = optionalConcreteProposal.get();
 

@@ -5,6 +5,7 @@ import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.ImmutableUnificationTools;
 import it.unibz.inf.ontop.pivotalrepr.*;
+import it.unibz.inf.ontop.pivotalrepr.NonCommutativeOperatorNode.ArgumentPosition;
 import it.unibz.inf.ontop.pivotalrepr.impl.ExtensionalDataNodeImpl;
 import it.unibz.inf.ontop.pivotalrepr.impl.FilterNodeImpl;
 import it.unibz.inf.ontop.pivotalrepr.impl.QueryTreeComponent;
@@ -15,6 +16,9 @@ import it.unibz.inf.ontop.pivotalrepr.proposal.impl.SubstitutionPropagationPropo
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.*;
+import java.util.stream.Stream;
+
+import static it.unibz.inf.ontop.pivotalrepr.NonCommutativeOperatorNode.ArgumentPosition.LEFT;
 
 public class SelfJoinLikeExecutor {
 
@@ -166,6 +170,16 @@ public class SelfJoinLikeExecutor {
         }
     }
 
+    private static class ParentAndChildPosition {
+        public final QueryNode parent;
+        public final Optional<ArgumentPosition> position;
+
+        private ParentAndChildPosition(QueryNode parent, Optional<ArgumentPosition> position) {
+            this.parent = parent;
+            this.position = position;
+        }
+    }
+
 
     protected static ImmutableMultimap<AtomPredicate, DataNode> extractDataNodes(ImmutableList<QueryNode> siblings) {
         ImmutableMultimap.Builder<AtomPredicate, DataNode> mapBuilder = ImmutableMultimap.builder();
@@ -237,10 +251,10 @@ public class SelfJoinLikeExecutor {
 
     protected static Optional<ConcreteProposal> createConcreteProposal(
             ImmutableList<PredicateLevelProposal> predicateProposals,
-            ImmutableSet<Variable> variablesToKeep) {
+            ImmutableList<Variable> priorityVariables) {
         Optional<ImmutableSubstitution<VariableOrGroundTerm>> optionalMergedSubstitution;
         try {
-            optionalMergedSubstitution = mergeSubstitutions(predicateProposals, variablesToKeep);
+            optionalMergedSubstitution = mergeSubstitutions(predicateProposals, priorityVariables);
         } catch (AtomUnificationException e) {
             return Optional.empty();
         }
@@ -321,7 +335,7 @@ public class SelfJoinLikeExecutor {
     }
 
     protected static Optional<ImmutableSubstitution<VariableOrGroundTerm>> mergeSubstitutions(
-            ImmutableList<PredicateLevelProposal> predicateProposals, ImmutableSet<Variable> variablesToTryToKeep)
+            ImmutableList<PredicateLevelProposal> predicateProposals, ImmutableList<Variable> priorityVariables)
             throws AtomUnificationException {
         ImmutableList<ImmutableSubstitution<VariableOrGroundTerm>> substitutions = extractSubstitutions(predicateProposals);
 
@@ -347,10 +361,8 @@ public class SelfJoinLikeExecutor {
             }
         }
 
-        if (optionalAccumulatedSubstitution.isPresent()) {
-            return Optional.of(optionalAccumulatedSubstitution.get().orientate(variablesToTryToKeep));
-        }
-        return optionalAccumulatedSubstitution;
+        return optionalAccumulatedSubstitution
+                .map(s -> s.orientate(priorityVariables));
     }
 
     protected static ImmutableList<ImmutableSubstitution<VariableOrGroundTerm>> extractSubstitutions(
@@ -498,5 +510,63 @@ public class SelfJoinLikeExecutor {
 
     }
 
+    /**
+     * TODO: implement seriously
+     */
+    protected ImmutableList<Variable> prioritizeVariables(IntermediateQuery query, JoinLikeNode joinLikeNode) {
+
+        /**
+         * Sequential (order matters)
+         */
+        return extractAncestors(query, joinLikeNode).stream()
+                .sequential()
+                .flatMap(p -> extractPriorityVariables(query, p.parent, p.position))
+                .distinct()
+                .collect(ImmutableCollectors.toList());
+    }
+
+    private ImmutableList<ParentAndChildPosition> extractAncestors(IntermediateQuery query, QueryNode node) {
+        // Non-final
+        Optional<QueryNode> optionalAncestor = query.getParent(node);
+        QueryNode ancestorChild = node;
+
+        ImmutableList.Builder<ParentAndChildPosition> listBuilder = ImmutableList.builder();
+
+        while (optionalAncestor.isPresent()) {
+            QueryNode ancestor = optionalAncestor.get();
+            listBuilder.add(new ParentAndChildPosition(ancestor, query.getOptionalPosition(ancestor, ancestorChild)));
+
+            optionalAncestor = query.getParent(ancestor);
+            ancestorChild = ancestor;
+        }
+
+        return listBuilder.build();
+    }
+
+
+    private Stream<Variable> extractPriorityVariables(IntermediateQuery query, QueryNode node,
+                                                      Optional<ArgumentPosition> childPosition) {
+        if (node instanceof ExplicitVariableProjectionNode)
+            return ((ExplicitVariableProjectionNode)node).getVariables().stream();
+
+        /**
+         * LJ: look for variables on the left
+         *     only when the focus node is on the right
+         */
+        else if (node instanceof LeftJoinNode) {
+            switch (childPosition.get()) {
+                case RIGHT:
+                    return query.getChild(node, LEFT)
+                            .map(c -> query.getVariables(c).stream())
+                            .orElseThrow(() -> new IllegalStateException("A LJ must have a left child"));
+                case LEFT:
+                default:
+                    return Stream.empty();
+            }
+        }
+        else {
+            return Stream.empty();
+        }
+    }
 
 }
