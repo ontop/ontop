@@ -17,8 +17,8 @@ import static junit.framework.TestCase.assertTrue;
 public class OBDAMappingTransformerDebugTest {
 
     @Test
-    public void testMultipleSubjectsInMapping() {
-        File mapFile = new File("src/test/resources/obdaMappingtransformer_tests.obda");
+    public void testMultipleSubjectsInMappingTarget() {
+        File mapFile = new File("src/test/resources/obdaMappingTransformerTests/splitMappingAxiomBySubject.obda");
         URI obdaURI = mapFile.toURI();
         OBDAModel model = OBDADataFactoryImpl.getInstance()
                 .getOBDAModel();
@@ -33,6 +33,9 @@ public class OBDAMappingTransformerDebugTest {
         R2RMLWriter writer = new R2RMLWriter(model, srcURI);
 
         Collection<TriplesMap> tripleMaps = writer.getTripleMaps();
+        for (TriplesMap tripleMap : tripleMaps) {
+            System.out.println(tripleMap);
+        }
         assertTrue(tripleMaps.size() > 1);
     }
 
@@ -43,6 +46,29 @@ public class OBDAMappingTransformerDebugTest {
 
     @Test
     public void testPredicateMapTranslation() {
+        File mapFile = new File("src/test/resources/obdaMappingTransformerTests/predicateMap.obda");
+        URI obdaURI = mapFile.toURI();
+        OBDAModel model = OBDADataFactoryImpl.getInstance()
+                .getOBDAModel();
+        ModelIOManager modelIO = new ModelIOManager(model);
+        try {
+            modelIO.load(new File(obdaURI));
+        } catch (IOException | InvalidMappingException e) {
+            e.printStackTrace();
+        }
+        URI srcURI = model.getSources().get(0).getSourceID();
+
+        R2RMLWriter writer = new R2RMLWriter(model, srcURI);
+
+        Collection<TriplesMap> tripleMaps = writer.getTripleMaps();
+        assertTrue(tripleMaps.stream().findFirst()
+                .filter(m -> m.getPredicateObjectMap(0).getPredicateMap(0).getTemplate() != null)
+                .isPresent());
+
+//        for(TriplesMap  tripleMap : tripleMaps){
+//            System.out.println(tripleMap.getSubjectMap());
+//            System.out.println(tripleMap.getPredicateObjectMap(0));
 
     }
+
 }

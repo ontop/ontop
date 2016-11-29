@@ -43,6 +43,8 @@ import org.semanticweb.owlapi.model.OWLOntology;
 import java.io.*;
 import java.net.URI;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 
@@ -114,25 +116,46 @@ public class R2RMLWriter {
 	}
 
 	private ImmutableSet<OBDAMappingAxiom> splitMappingAxioms(List<OBDAMappingAxiom> mappingAxioms) {
+		/**
+		 * Delimiter string d used for assigning ids to split mapping axioms.
+		 * If a mapping axiom with id j is split into multiple ones,
+		 * each of then will have "j"+"d"+int as an identifier
+		 */
+		String delimiterSubtring = getSplitMappingAxiomIdDelimiterSubstring(mappingAxioms);
 		return mappingAxioms.stream()
-				.flatMap(m -> splitMappingAxiom(m).stream())
+				.flatMap(m -> splitMappingAxiom(m, delimiterSubtring).stream())
 				.collect(ImmutableCollectors.toSet());
 	}
 
-	private ImmutableList<OBDAMappingAxiom> splitMappingAxiom(OBDAMappingAxiom mappingAxiom) {
+	private String getSplitMappingAxiomIdDelimiterSubstring(List<OBDAMappingAxiom> mappingAxioms) {
+		String delimiterSubstring = "";
+		boolean matched = false;
+		do {
+			delimiterSubstring += "s";
+			Pattern pattern = Pattern.compile(delimiterSubstring + "(\\d)*$");
+			matched = mappingAxioms.stream()
+					.anyMatch(a -> pattern.matcher(a.getId()).matches());
+		} while(matched);
+		return delimiterSubstring;
+	}
+
+	private ImmutableList<OBDAMappingAxiom> splitMappingAxiom(OBDAMappingAxiom mappingAxiom, String delimiterSubstring) {
 		Multimap<Function, Function> subjectTermToTargetTriples = ArrayListMultimap.create();
 		for(Function targetTriple : mappingAxiom.getTargetQuery()){
 			Function subjectTerm = getFirstFunctionalTerm(targetTriple)
 						.orElseThrow( () -> new IllegalStateException("Invalid OBDA mapping"));
 			subjectTermToTargetTriples.put(subjectTerm, targetTriple);
 		}
+		// If the partition per target triple subject is non trivial
 		if(subjectTermToTargetTriples.size() > 1){
+			// Create ids for the new mapping axioms
 			Map<Function, String> subjectTermToMappingIndex = new HashMap<>();
 			int i = 1;
 			for (Function subjectTerm : subjectTermToTargetTriples.keySet()){
-				subjectTermToMappingIndex.put(subjectTerm, mappingAxiom.getId()+"."+i);
+				subjectTermToMappingIndex.put(subjectTerm, mappingAxiom.getId()+delimiterSubstring+i);
 				i++;
 			}
+			// Generate one mapping axiom per subject
 			return subjectTermToTargetTriples.asMap().entrySet().stream()
 					.map(e -> OBDA_DATA_FACTORY.getRDBMSMappingAxiom(
 							subjectTermToMappingIndex.get(e.getKey()),

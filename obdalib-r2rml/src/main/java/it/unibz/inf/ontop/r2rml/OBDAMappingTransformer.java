@@ -41,10 +41,8 @@ import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.*;
 import org.semanticweb.owlapi.search.EntitySearcher;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
+
 /**
  * Transform OBDA mappings in R2rml mappings
  * @author Sarah, Mindas, Timi, Guohui, Martin
@@ -288,7 +286,8 @@ public class OBDAMappingTransformer {
 			Predicate pred = func.getFunctionSymbol();
 			String predName = pred.getName();
 			URI predUri = null; String predURIString ="";
-			
+			Optional<Template> templp = Optional.empty();
+
 			if (pred.isTriplePredicate()) {
 				//triple
 				Function predf = (Function)func.getTerm(1);
@@ -298,9 +297,10 @@ public class OBDAMappingTransformer {
 						predUri = vf.createURI(pred.getName());
 					}
 					else {
-						//custom predicate
+						//template
 						predURIString = URITemplates.getUriTemplateString(predf, prefixmng);
 						predUri = vf.createURI(predURIString);
+                        templp = Optional.of(mfact.createTemplate(subjectTemplate));
 					}
 				}	
 			} 
@@ -320,8 +320,9 @@ public class OBDAMappingTransformer {
 				sm.addClass(predUri);
 				
 			} else {
-//                PredicateMap predM = null;
-				PredicateMap predM = mfact.createPredicateMap(TermMapType.CONSTANT_VALUED, predURIString);
+				PredicateMap predM = templp.isPresent()?
+				mfact.createPredicateMap(templp.get()):
+				mfact.createPredicateMap(TermMapType.CONSTANT_VALUED, predURIString);
 				ObjectMap obm = null; PredicateObjectMap pom = null;
                 Term object = null;
 				if (!pred.isTriplePredicate()) {
