@@ -40,11 +40,6 @@ public class OBDAMappingTransformerDebugTest {
     }
 
     @Test
-    public void testTripleMapIdPreservation() {
-
-    }
-
-    @Test
     public void testPredicateMapTranslation() {
         File mapFile = new File("src/test/resources/obdaMappingTransformerTests/predicateMap.obda");
         URI obdaURI = mapFile.toURI();
@@ -60,15 +55,8 @@ public class OBDAMappingTransformerDebugTest {
 
         R2RMLWriter writer = new R2RMLWriter(model, srcURI);
 
-        Collection<TriplesMap> tripleMaps = writer.getTripleMaps();
-        assertTrue(tripleMaps.stream().findFirst()
+        assertTrue(writer.getTripleMaps().stream().findFirst()
                 .filter(m -> m.getPredicateObjectMap(0).getPredicateMap(0).getTemplate() != null)
                 .isPresent());
-
-//        for(TriplesMap  tripleMap : tripleMaps){
-//            System.out.println(tripleMap.getSubjectMap());
-//            System.out.println(tripleMap.getPredicateObjectMap(0));
-
     }
-
 }
