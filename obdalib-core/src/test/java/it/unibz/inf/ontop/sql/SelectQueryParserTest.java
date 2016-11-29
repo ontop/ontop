@@ -6,11 +6,10 @@ import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.sql.parser.SelectQueryParser;
 import it.unibz.inf.ontop.sql.parser.exceptions.UnsupportedSelectQueryException;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import static junit.framework.TestCase.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /**
  * Created by Roman Kontchakov on 01/11/2016.
@@ -373,7 +372,7 @@ public class SelectQueryParserTest {
     }
 
 
-    @Test
+    @Test //todo: this should works
     public void join_using_2_Test() {
         DBMetadata metadata = createMetadata();
 
@@ -508,7 +507,8 @@ public class SelectQueryParserTest {
         DBMetadata metadata = createMetadata();
         SelectQueryParser parser = new SelectQueryParser(metadata);
         // common column name "A" appears more than once in left table
-        parser.parse("SELECT A, C FROM P FULL OUTER JOIN  Pon P.A =  Q.A ");
+        final CQIE parse = parser.parse("SELECT A, C FROM P FULL OUTER JOIN  Pon P.A =  Q.A ");
+        assertNull( parse);
     }
 
 
