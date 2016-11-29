@@ -20,6 +20,7 @@ package it.unibz.inf.ontop.r2rml;
  * #L%
  */
 
+import com.google.common.collect.ImmutableMap;
 import eu.optique.api.mapping.*;
 import eu.optique.api.mapping.TermMap.TermMapType;
 import eu.optique.api.mapping.impl.sesame.SesameR2RMLMappingManagerFactory;
@@ -248,19 +249,19 @@ public class OBDAMappingTransformer {
 	}
 
 	/**
-	 * Get R2RML TriplesMap from OBDA mapping axiom
+	 * Get R2RML TriplesMaps from OBDA mapping axiom
 	 * @param axiom
 	 * @param prefixmng
 	 * @return
 	 */
-	public TriplesMap getTriplesMap(OBDAMappingAxiom axiom,
-			PrefixManager prefixmng) {
-		
+	public TriplesMap getTripleMap(OBDAMappingAxiom axiom,
+									PrefixManager prefixmng) {
+
 		SQLQueryImpl squery = (SQLQueryImpl) axiom.getSourceQuery();
 		List<Function> tquery = axiom.getTargetQuery();
-		
+
 		String random_number = IDGenerator.getNextUniqueID("");
-		
+
 		//triplesMap node
 		String mapping_id = axiom.getId();
 		if (!mapping_id.startsWith("http://"))
