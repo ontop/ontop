@@ -288,6 +288,13 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
         }
 
         ImmutableMap<Variable, T> localMap = getImmutableMap();
+        ImmutableSet<Variable> domain = getDomain();
+
+        if (localMap.values().stream()
+                .flatMap(ImmutableTerm::getVariableStream)
+                .anyMatch(domain::contains)) {
+            throw new UnsupportedOperationException("The orientate() method requires the domain and the range to be disjoint");
+        }
 
         ImmutableMap<Variable, Variable> renamingMap = localMap.entrySet().stream()
                 // Will produce some results only if T is compatible with Variable

@@ -78,7 +78,14 @@ public interface ImmutableSubstitution<T extends ImmutableTerm> extends LocallyI
     ImmutableSubstitution<ImmutableTerm> applyToTarget(ImmutableSubstitution<? extends ImmutableTerm> otherSubstitution);
 
     /**
-     * Returns a similar substitution that avoids (if possible) to substitute certain variables.
+     * Returns a "similar" substitution that avoids (if possible) to substitute certain variables.
+     *
+     * Acts on equality between variables.
+     *
+     * The first variable in the list has the highest priority.
+     *
+     * This method requires the domain and the range to be disjoint.
+     *
      */
     ImmutableSubstitution<T> orientate(ImmutableList<Variable> priorityVariables);
 
