@@ -42,7 +42,6 @@ import java.io.FileReader;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.sql.Statement;
 
 /***
  * A simple test that check if the system is able to handle Mappings for
@@ -53,12 +52,6 @@ import java.sql.Statement;
  * there and then query on top.
  */
 public class SPARQLRegExTest {
-	
-	
-	private String JDBC_URL = "";
-	private String JDBC_USERNAME = "";
-	private String JDBC_PASSWORD = "";
-	private String JDBC_CLASS = "";
 	
 
 	// TODO We need to extend this test to import the contents of the mappings
@@ -77,28 +70,6 @@ public class SPARQLRegExTest {
 
 	private static Connection sqlConnection;
 
-	private static void runUpdateOnSQLDB(String sqlscript,
-			Connection sqlConnection) throws Exception {
-
-		Statement st = sqlConnection.createStatement();
-
-		FileReader reader = new FileReader(sqlscript);
-		BufferedReader in = new BufferedReader(reader);
-		StringBuilder bf = new StringBuilder();
-		String line = in.readLine();
-		while (line != null) {
-			bf.append(line);
-			bf.append("\n");
-			line = in.readLine();
-		}
-		in.close();
-
-		System.out.println(bf.toString());
-		st.executeUpdate(bf.toString());
-		if (!sqlConnection.getAutoCommit())
-			sqlConnection.commit();
-	}
-
 	@Before
 	public void init() {
 
@@ -116,17 +87,6 @@ public class SPARQLRegExTest {
 		String username = "fish";
 		String password = "fish";
 
-		// String url =
-		// "jdbc:mysql://33.33.33.1:3306/ontop?sessionVariables=sql_mode='ANSI'&allowMultiQueries=true";
-		// String url = "jdbc:postgresql://localhost/ontop";
-		// String url = "jdbc:db2://192.168.99.100:50000/ontop";
-		// String url = "jdbc:oracle:thin:@192.168.99.100:49161:xe";
-
-		// String username = "db2inst1";
-		// String password = "ontop";
-
-		// system/oracle
-
 		System.out.println("Test");
 		fac = OBDADataFactoryImpl.getInstance();
 
@@ -135,8 +95,6 @@ public class SPARQLRegExTest {
 			sqlConnection = DriverManager
 					.getConnection(url, username, password);
 
-			// runUpdateOnSQLDB("src/test/resources/reverse-uri-test.sql",
-			// sqlConnection);
 
 			FileReader reader = new FileReader(
 					"src/test/resources/sparql-regex-test.sql");
@@ -251,6 +209,19 @@ public class SPARQLRegExTest {
 	public void testSingleColum2() throws Exception {
 		String query = "PREFIX : <http://www.ontop.org/> SELECT ?x ?name WHERE {?x :name ?name . FILTER regex(?name, \"ABA\")}";
 		runTests(query, 2);
+	}
+
+	@Test
+	public void testRegexOnURIStr() throws Exception {
+		String query = "PREFIX : <http://www.ontop.org/> SELECT ?x ?name WHERE {?x :name ?name . FILTER regex(str(?x), \"ABA\")}";
+		runTests(query, 2);
+	}
+
+	// we should not return results when we execute a regex on a uri without the use of str function
+	@Test
+	public void testRegexOnURI() throws Exception {
+		String query = "PREFIX : <http://www.ontop.org/> SELECT ?x ?name WHERE {?x :name ?name . FILTER regex(?x, \"ABA\")}";
+		runTests(query, 0);
 	}
 
 }

@@ -49,7 +49,6 @@ public class TopDownSubstitutionLiftOptimizer implements SubstitutionLiftOptimiz
             nextNodeAndQuery = liftBindings(nextNodeAndQuery.getNextQuery(),
                     nextNodeAndQuery.getOptionalNextNode().get());
 
-            log.debug(String.valueOf(nextNodeAndQuery.getNextQuery()));
         }
 
         // remove unnecessary TrueNodes, which may have been introduced during substitution lift

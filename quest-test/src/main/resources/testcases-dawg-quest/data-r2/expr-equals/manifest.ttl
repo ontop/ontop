@@ -11,7 +11,7 @@
     ( 
         :eq-1 :eq-2 
         #:eq-3 # ERROR: The case of Literal or String datatype in the filter
-        :eq-4 
+        #:eq-4 # Already failing in V1. Bad datatype handling by the classic mode.
         :eq-5 
         :eq-2-1 
         #:eq-2-2 # WON'T FIX

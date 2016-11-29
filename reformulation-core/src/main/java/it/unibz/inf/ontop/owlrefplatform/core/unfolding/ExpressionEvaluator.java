@@ -29,7 +29,10 @@ import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.UnifierUtilities;
 import it.unibz.inf.ontop.owlrefplatform.core.expression.ExpressionNormalizer;
 import it.unibz.inf.ontop.owlrefplatform.core.expression.ExpressionNormalizerImpl;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 
 public class ExpressionEvaluator {
@@ -39,8 +42,6 @@ public class ExpressionEvaluator {
 	private final OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 	
 	private final DatatypeFactory dtfac = OBDADataFactoryImpl.getInstance().getDatatypeFactory();
-	
-	private boolean regexFlag = false;
 
 	public ExpressionEvaluator(UriTemplateMatcher matcher) {
 		uriTemplateMatcher = matcher;
@@ -114,34 +115,7 @@ public class ExpressionEvaluator {
 			throw new RuntimeException("Unexpected term returned after evaluation: " + evaluatedTerm);
 		}
 	}
-	
-	public void evaluateExpressions(DatalogProgram p) {
-		List<CQIE> toremove = new LinkedList<>();
-		for (CQIE q : p.getRules()) {
-			setRegexFlag(false); // reset the ObjectConstant flag
-			boolean empty = evaluateExpressions(q.getBody());
-			if (empty) 
-				toremove.add(q);
-		}
-		p.removeRules(toremove);
-	}
 
-	private boolean evaluateExpressions(List<Function> body) {
-		for (int atomidx = 0; atomidx < body.size(); atomidx++) {
-			Function atom = body.get(atomidx);
-			Term newatom = eval(atom);
-			if (newatom == OBDAVocabulary.TRUE) {
-				body.remove(atomidx);
-				atomidx -= 1;
-				continue;
-			} 
-			else if (newatom == OBDAVocabulary.FALSE) {
-				return true;
-			}
-			body.set(atomidx, (Function)newatom);
-		}
-		return false;
-	}
 
 	private Term eval(Term expr) {
 		if (expr instanceof Variable) 
@@ -223,19 +197,7 @@ public class ExpressionEvaluator {
 				return expr;
 			}
 		}
-		if (p.getName().toUpperCase().contains("QUEST_OBJECT_PROPERTY_ASSERTION")) {
-			// ROMAN (26 Sep 2015): what exactly is the meaning of this check?
-			setRegexFlag(true);
-		}
 		return expr;
-	}
-
-	private void setRegexFlag(boolean b) {
-		regexFlag = b;
-	}
-	
-	private boolean isObjectConstant() {
-		return regexFlag;
 	}
 
 	private Term evalOperation(Function term) {
@@ -270,7 +232,8 @@ public class ExpressionEvaluator {
 			return evalIsBlank(term);
 		} else if (pred == ExpressionOperation.IS_IRI) {
 			return evalIsIri(term);
-		} else if (pred == ExpressionOperation.LANGMATCHES) {
+		}
+		else if (pred == ExpressionOperation.LANGMATCHES) {
 			return evalLangMatches(term);
 		} else if (pred == ExpressionOperation.REGEX) {
 			return evalRegex(term);
@@ -342,20 +305,7 @@ public class ExpressionEvaluator {
 	}
 
 	/*
-	 * Expression evaluator for isURI() function
-	 */
-	private Term evalIsUri(Function term) {
-		Term teval = eval(term.getTerm(0));
-		if (teval instanceof Function) {
-			Function function = (Function) teval;
-			Predicate predicate = function.getFunctionSymbol();
-			return fac.getBooleanConstant(predicate instanceof URITemplatePredicate);
-		}
-		return term;
-	}
-
-	/*
-	 * Expression evaluator for isIRI() function
+	 * Expression evaluator for isIRI() and isURI() function
 	 */
 	private Term evalIsIri(Function term) {
 		Term teval = eval(term.getTerm(0));
@@ -597,17 +547,44 @@ public class ExpressionEvaluator {
 	}
 
 	private Term evalRegex(Function term) {
-		Term innerTerm = term.getTerm(0);
-		if (innerTerm instanceof Function) {
-			Function f = (Function) innerTerm;
-			Predicate functionSymbol = f.getFunctionSymbol();
-			if (isObjectConstant()) {
-				setRegexFlag(false);
-				return fac.getBooleanConstant(functionSymbol.equals(ExpressionOperation.SPARQL_STR));
-			}
-		}
-		return term;
+//
+		Term eval1 = term.getTerm(0);
+		eval1 = evalRegexSingleExpression(eval1);
+
+        Term eval2 = term.getTerm(1);
+		eval2 = evalRegexSingleExpression(eval2);
+
+        Term eval3 = term.getTerm(2);
+        eval3 = evalRegexSingleExpression(eval3);
+
+        if(eval1.equals(OBDAVocabulary.FALSE)
+                || eval2.equals(OBDAVocabulary.FALSE)
+                || eval3.equals(OBDAVocabulary.FALSE))
+        {
+            return OBDAVocabulary.FALSE;
+        }
+
+        return fac.getFunction(term.getFunctionSymbol(), eval1, eval2, term.getTerm(2));
+
 	}
+
+	private Term evalRegexSingleExpression(Term expr){
+
+        if (expr instanceof Function) {
+            Function function1 = (Function) expr;
+            Predicate predicate1 = function1.getFunctionSymbol();
+            if((predicate1 instanceof URITemplatePredicate)
+                    ||(predicate1 instanceof BNodePredicate)) {
+                return OBDAVocabulary.FALSE;
+            }
+            if (!function1.isDataTypeFunction()){
+                return evalRegexSingleExpression( eval(expr));
+
+            }
+        }
+        return expr;
+
+    }
 
 	private Term evalIsNullNotNull(Function term, boolean isnull) {
 		Term innerTerm = term.getTerms().get(0);
@@ -713,7 +690,6 @@ public class ExpressionEvaluator {
 		Term teval2;
 		if (term.getTerm(1) instanceof Function) {
 			Function t2 = (Function) term.getTerm(1);
-			Predicate p2 = t2.getFunctionSymbol();
 			if (!(t2.isDataTypeFunction())) {
 				teval2 = eval(term.getTerm(1));
 				if (teval2 == null) {
@@ -773,7 +749,7 @@ public class ExpressionEvaluator {
 				/*
 				 * Evaluate both terms by comparing their datatypes
 				 */
-				if (dtfac.isLiteral(pred1) && dtfac.isLiteral(pred2)) { // R: replaced incorrect check 
+				if (dtfac.isLiteral(pred1) && dtfac.isLiteral(pred2)) { // R: replaced incorrect check
 																		//  pred1 == fac.getDataTypePredicateLiteral()
 																		// && pred2 == fac.getDataTypePredicateLiteral())
 																	    // which does not work for LITERAL_LANG
