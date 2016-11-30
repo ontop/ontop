@@ -15,7 +15,7 @@ import static org.junit.Assert.*;
 
 /**
  * Created by Roman Kontchakov on 01/11/2016.
- *
+ * -
  */
 public class SelectQueryParserTest {
 
@@ -25,7 +25,7 @@ public class SelectQueryParserTest {
 
 
     @Before
-    public void beforeEachTest(){
+    public void beforeEachTest() {
         FACTORY = OBDADataFactoryImpl.getInstance();
         METADATA = DBMetadataExtractor.createDummyMetadata();
         MDFAC = METADATA.getQuotedIDFactory();
@@ -46,7 +46,7 @@ public class SelectQueryParserTest {
         Variable b1 = FACTORY.getVariable("B1");
 
         Function atomP = FACTORY.getFunction(
-                FACTORY.getPredicate("P", new Predicate.COL_TYPE[] { null, null }),
+                FACTORY.getPredicate("P", new Predicate.COL_TYPE[]{null, null}),
                 ImmutableList.of(a1, b1));
 
         assertTrue(parse.getBody().contains(atomP));
@@ -55,12 +55,11 @@ public class SelectQueryParserTest {
         Variable c2 = FACTORY.getVariable("C2");
 
         Function atomQ = FACTORY.getFunction(
-                FACTORY.getPredicate("Q", new Predicate.COL_TYPE[] { null, null }),
+                FACTORY.getPredicate("Q", new Predicate.COL_TYPE[]{null, null}),
                 ImmutableList.of(a2, c2));
 
         assertTrue(parse.getBody().contains(atomQ));
     }
-
 
 
     @Test // TODO: does relationAliasesConsistent check is wrong?
@@ -72,8 +71,8 @@ public class SelectQueryParserTest {
         final CQIE parse = parser.parse("SELECT p1.A, p2.B FROM P p1 INNER JOIN  P p2 on p1.A = p2.A ");
         System.out.println(parse);
 
-        assertTrue( parse.getHead().getTerms().size()==0);
-        assertTrue( parse.getReferencedVariables().size()==4 );
+        assertTrue(parse.getHead().getTerms().size() == 0);
+        assertTrue(parse.getReferencedVariables().size() == 4);
 
         Variable a1 = FACTORY.getVariable("A1");
         Variable a2 = FACTORY.getVariable("A2"); // variable are key sensitive
@@ -81,7 +80,7 @@ public class SelectQueryParserTest {
 
         Function atomQ = FACTORY.getFunction(ExpressionOperation.EQ, ImmutableList.of(a1, a2));
 
-        assertTrue( parse.getBody().contains(atomQ));
+        assertTrue(parse.getBody().contains(atomQ));
     }
 
 
@@ -94,8 +93,8 @@ public class SelectQueryParserTest {
         final CQIE parse = parser.parse("SELECT A, C FROM P INNER JOIN  Q on P.A = Q.A ");
         System.out.println(parse);
 
-        assertTrue( parse.getHead().getTerms().size()==0);
-        assertTrue( parse.getReferencedVariables().size()==4 );
+        assertTrue(parse.getHead().getTerms().size() == 0);
+        assertTrue(parse.getReferencedVariables().size() == 4);
 
         Variable a1 = FACTORY.getVariable("A1");
         Variable a2 = FACTORY.getVariable("A2"); // variable are key sensitive
@@ -103,7 +102,7 @@ public class SelectQueryParserTest {
 
         Function atomQ = FACTORY.getFunction(ExpressionOperation.EQ, ImmutableList.of(a1, a2));
 
-        assertTrue( parse.getBody().contains(atomQ));
+        assertTrue(parse.getBody().contains(atomQ));
     }
 
 
@@ -116,8 +115,8 @@ public class SelectQueryParserTest {
         final CQIE parse = parser.parse("SELECT A, C FROM P INNER JOIN  Q on P.A >= Q.A ");
         System.out.println(parse);
 
-        assertTrue( parse.getHead().getTerms().size()==0);
-        assertTrue( parse.getReferencedVariables().size()==4 );
+        assertTrue(parse.getHead().getTerms().size() == 0);
+        assertTrue(parse.getReferencedVariables().size() == 4);
 
         Variable a1 = FACTORY.getVariable("A1");
         Variable a2 = FACTORY.getVariable("A2"); // variable are key sensitive
@@ -125,7 +124,7 @@ public class SelectQueryParserTest {
 
         Function atomQ = FACTORY.getFunction(ExpressionOperation.GTE, ImmutableList.of(a1, a2));
 
-        assertTrue( parse.getBody().contains(atomQ));
+        assertTrue(parse.getBody().contains(atomQ));
     }
 
     @Test
@@ -138,8 +137,8 @@ public class SelectQueryParserTest {
         final CQIE parse = parser.parse("SELECT A, C FROM P INNER JOIN  Q on P.A >Q.A");
         System.out.println(parse);
 
-        assertTrue( parse.getHead().getTerms().size()==0);
-        assertTrue( parse.getReferencedVariables().size()==4 );
+        assertTrue(parse.getHead().getTerms().size() == 0);
+        assertTrue(parse.getReferencedVariables().size() == 4);
 
         Variable a1 = FACTORY.getVariable("A1");
         Variable a2 = FACTORY.getVariable("A2"); // variable are key sensitive
@@ -147,7 +146,7 @@ public class SelectQueryParserTest {
 
         Function atomQ = FACTORY.getFunction(ExpressionOperation.GT, ImmutableList.of(a1, a2));
 
-        assertTrue( parse.getBody().contains(atomQ));
+        assertTrue(parse.getBody().contains(atomQ));
     }
 
     @Test
@@ -160,8 +159,8 @@ public class SelectQueryParserTest {
         final CQIE parse = parser.parse("SELECT A, C FROM P INNER JOIN  Q on P.A < Q.A");
         System.out.println(parse);
 
-        assertTrue( parse.getHead().getTerms().size()==0);
-        assertTrue( parse.getReferencedVariables().size()==4 );
+        assertTrue(parse.getHead().getTerms().size() == 0);
+        assertTrue(parse.getReferencedVariables().size() == 4);
 
         Variable a1 = FACTORY.getVariable("A1");
         Variable a2 = FACTORY.getVariable("A2"); // variable are key sensitive
@@ -169,7 +168,7 @@ public class SelectQueryParserTest {
 
         Function atomQ = FACTORY.getFunction(ExpressionOperation.LT, ImmutableList.of(a1, a2));
 
-        assertTrue( parse.getBody().contains(atomQ));
+        assertTrue(parse.getBody().contains(atomQ));
     }
 
     @Test
@@ -182,8 +181,8 @@ public class SelectQueryParserTest {
         final CQIE parse = parser.parse("SELECT A, C FROM P INNER JOIN  Q on P.A <= Q.A");
         System.out.println(parse);
 
-        assertTrue( parse.getHead().getTerms().size()==0);
-        assertTrue( parse.getReferencedVariables().size()==4 );
+        assertTrue(parse.getHead().getTerms().size() == 0);
+        assertTrue(parse.getReferencedVariables().size() == 4);
 
         Variable a1 = FACTORY.getVariable("A1");
         Variable a2 = FACTORY.getVariable("A2"); // variable are key sensitive
@@ -191,7 +190,7 @@ public class SelectQueryParserTest {
 
         Function atomQ = FACTORY.getFunction(ExpressionOperation.LTE, ImmutableList.of(a1, a2));
 
-        assertTrue( parse.getBody().contains(atomQ));
+        assertTrue(parse.getBody().contains(atomQ));
     }
 
     @Test
@@ -204,8 +203,8 @@ public class SelectQueryParserTest {
         final CQIE parse = parser.parse("SELECT A, C FROM P INNER JOIN  Q on P.A <> Q.A");
         System.out.println(parse);
 
-        assertTrue( parse.getHead().getTerms().size()==0);
-        assertTrue( parse.getReferencedVariables().size()==4 );
+        assertTrue(parse.getHead().getTerms().size() == 0);
+        assertTrue(parse.getReferencedVariables().size() == 4);
 
         Variable a1 = FACTORY.getVariable("A1");
         Variable a2 = FACTORY.getVariable("A2"); // variable are key sensitive
@@ -213,10 +212,10 @@ public class SelectQueryParserTest {
 
         Function atomQ = FACTORY.getFunction(ExpressionOperation.NEQ, ImmutableList.of(a1, a2));
 
-        assertTrue( parse.getBody().contains(atomQ));
+        assertTrue(parse.getBody().contains(atomQ));
     }
 
-    @Test(expected =UnsupportedOperationException.class)
+    @Test(expected = UnsupportedOperationException.class)
     public void innerJoinOn_naturalJoin_ambiguity_Test() {
         DBMetadata metadata = createMetadata();
         SelectQueryParser parser = new SelectQueryParser(metadata);
@@ -226,7 +225,7 @@ public class SelectQueryParserTest {
 
 
     //TODO: In this case column reference "a" is ambiguous. Does this should be check during the "selection" operation handler?
-    @Test(expected =UnsupportedOperationException.class)
+    @Test(expected = UnsupportedOperationException.class)
     public void innerJoinOn_naturalJoin_ambiguity2_Test() {
         DBMetadata metadata = createMetadata();
         SelectQueryParser parser = new SelectQueryParser(metadata);
@@ -284,16 +283,16 @@ public class SelectQueryParserTest {
         final CQIE parse = parser.parse("SELECT A, C FROM P INNER JOIN  Q on P.A = 1");
         System.out.println(parse);
 
-        assertTrue( parse.getHead().getTerms().size()==0);
-        assertTrue( parse.getReferencedVariables().size()==4 );
+        assertTrue(parse.getHead().getTerms().size() == 0);
+        assertTrue(parse.getReferencedVariables().size() == 4);
 
         Variable a1 = FACTORY.getVariable("A1");
-        ValueConstant a2 = FACTORY. getConstantLiteral("1", Predicate.COL_TYPE.LONG); // variable are key sensitive
+        ValueConstant a2 = FACTORY.getConstantLiteral("1", Predicate.COL_TYPE.LONG); // variable are key sensitive
 
 
         Function atomQ = FACTORY.getFunction(ExpressionOperation.EQ, ImmutableList.of(a1, a2));
 
-        assertTrue( parse.getBody().contains(atomQ));
+        assertTrue(parse.getBody().contains(atomQ));
     }
 
     @Test
@@ -306,16 +305,16 @@ public class SelectQueryParserTest {
         final CQIE parse = parser.parse("SELECT A, C FROM P NATURAL JOIN  Q");
         System.out.println(parse);
 
-        assertTrue( parse.getHead().getTerms().size()==0);
-        assertTrue( parse.getReferencedVariables().size()==4 );
+        assertTrue(parse.getHead().getTerms().size() == 0);
+        assertTrue(parse.getReferencedVariables().size() == 4);
 
         Variable a1 = FACTORY.getVariable("A1");
-        Variable a2 =FACTORY.getVariable("A2");
+        Variable a2 = FACTORY.getVariable("A2");
 
 
         Function atomQ = FACTORY.getFunction(ExpressionOperation.EQ, ImmutableList.of(a1, a2));
 
-        assertTrue( parse.getBody().contains(atomQ));
+        assertTrue(parse.getBody().contains(atomQ));
     }
 
     @Test
@@ -339,16 +338,16 @@ public class SelectQueryParserTest {
         final CQIE parse = parser.parse("SELECT A, C FROM P INNER JOIN Q USING (A)");
         System.out.println(parse);
 
-        assertTrue( parse.getHead().getTerms().size()==0);
-        assertTrue( parse.getReferencedVariables().size()==4 );
+        assertTrue(parse.getHead().getTerms().size() == 0);
+        assertTrue(parse.getReferencedVariables().size() == 4);
 
         Variable a1 = FACTORY.getVariable("A1");
-        Variable a2 =FACTORY.getVariable("A2");
+        Variable a2 = FACTORY.getVariable("A2");
 
 
         Function atomQ = FACTORY.getFunction(ExpressionOperation.EQ, ImmutableList.of(a1, a2));
 
-        assertTrue( parse.getBody().contains(atomQ));
+        assertTrue(parse.getBody().contains(atomQ));
     }
 
     @Test
@@ -361,16 +360,16 @@ public class SelectQueryParserTest {
         final CQIE parse = parser.parse("SELECT A, C FROM P JOIN Q USING (A)");
         System.out.println(parse);
 
-        assertTrue( parse.getHead().getTerms().size()==0);
-        assertTrue( parse.getReferencedVariables().size()==4 );
+        assertTrue(parse.getHead().getTerms().size() == 0);
+        assertTrue(parse.getReferencedVariables().size() == 4);
 
         Variable a1 = FACTORY.getVariable("A1");
-        Variable a2 =FACTORY.getVariable("A2");
+        Variable a2 = FACTORY.getVariable("A2");
 
 
         Function atomQ = FACTORY.getFunction(ExpressionOperation.EQ, ImmutableList.of(a1, a2));
 
-        assertTrue( parse.getBody().contains(atomQ));
+        assertTrue(parse.getBody().contains(atomQ));
     }
 
 
@@ -384,25 +383,25 @@ public class SelectQueryParserTest {
         final CQIE parse = parser.parse("SELECT Q.A, R.B FROM Q JOIN R USING (A,B)");
         System.out.println(parse);
 
-        assertTrue( parse.getHead().getTerms().size()==0);
-        assertTrue( parse.getReferencedVariables().size()==4 );
+        assertTrue(parse.getHead().getTerms().size() == 0);
+        assertTrue(parse.getReferencedVariables().size() == 4);
 
         Variable a1 = FACTORY.getVariable("A1");
-        Variable a2 =FACTORY.getVariable("A2");
+        Variable a2 = FACTORY.getVariable("A2");
 
 
-        Function atomQ_A= FACTORY.getFunction(ExpressionOperation.EQ, ImmutableList.of(a1, a2));
+        Function atomQ_A = FACTORY.getFunction(ExpressionOperation.EQ, ImmutableList.of(a1, a2));
 
 
         Variable b1 = FACTORY.getVariable("B1");
-        Variable b2 =FACTORY.getVariable("B2");
+        Variable b2 = FACTORY.getVariable("B2");
 
 
         Function atomQ_B = FACTORY.getFunction(ExpressionOperation.EQ, ImmutableList.of(b1, b2));
 
 
-        assertTrue( parse.getBody().contains(atomQ_A));
-        assertTrue( parse.getBody().contains(atomQ_B));
+        assertTrue(parse.getBody().contains(atomQ_A));
+        assertTrue(parse.getBody().contains(atomQ_B));
 
     }
 
@@ -423,7 +422,7 @@ public class SelectQueryParserTest {
         final Function atom = FACTORY.getFunction(ExpressionOperation.EQ, a1,
                 FACTORY.getFunction(ExpressionOperation.CONCAT, ImmutableList.of(v1,
                         FACTORY.getFunction(ExpressionOperation.CONCAT, a1, v2))
-        ));
+                ));
 
         System.out.println(atom);
         assertTrue(parse.getBody().contains(atom));
@@ -447,9 +446,9 @@ public class SelectQueryParserTest {
         final Function atom = FACTORY.getFunction(ExpressionOperation.OR, ImmutableList.of(
                 FACTORY.getFunction(ExpressionOperation.EQ, ImmutableList.of(a1, v1)),
                 FACTORY.getFunction(ExpressionOperation.OR, ImmutableList.of(
-                    FACTORY.getFunction(ExpressionOperation.EQ, ImmutableList.of(a1, v2)),
-                    FACTORY.getFunction(ExpressionOperation.EQ, ImmutableList.of(a1, v3))))
-               ));
+                        FACTORY.getFunction(ExpressionOperation.EQ, ImmutableList.of(a1, v2)),
+                        FACTORY.getFunction(ExpressionOperation.EQ, ImmutableList.of(a1, v3))))
+        ));
 
         assertTrue(parse.getBody().contains(atom));
     }
@@ -472,7 +471,7 @@ public class SelectQueryParserTest {
     }
 
 
-    @Test(expected =UnsupportedSelectQueryException.class)
+    @Test(expected = UnsupportedSelectQueryException.class)
     public void left_outer_Join_Test() {
         DBMetadata metadata = createMetadata();
         SelectQueryParser parser = new SelectQueryParser(metadata);
@@ -480,7 +479,7 @@ public class SelectQueryParserTest {
         parser.parse("SELECT A, C FROM P LEFT  OUTER JOIN  Q on P.A =  Q.A ");
     }
 
-    @Test(expected =UnsupportedSelectQueryException.class)
+    @Test(expected = UnsupportedSelectQueryException.class)
     public void right_outer_Join_Test() {
         DBMetadata metadata = createMetadata();
         SelectQueryParser parser = new SelectQueryParser(metadata);
@@ -488,7 +487,7 @@ public class SelectQueryParserTest {
         parser.parse("SELECT A, C FROM P RIGHT  OUTER JOIN  Q on P.A =  Q.A ");
     }
 
-    @Test(expected =UnsupportedSelectQueryException.class)
+    @Test(expected = UnsupportedSelectQueryException.class)
     public void right_Join_Test() {
         DBMetadata metadata = createMetadata();
         SelectQueryParser parser = new SelectQueryParser(metadata);
@@ -496,7 +495,7 @@ public class SelectQueryParserTest {
         parser.parse("SELECT A, C FROM P RIGHT JOIN  Q on P.A =  Q.A ");
     }
 
-    @Test(expected =UnsupportedSelectQueryException.class)
+    @Test(expected = UnsupportedSelectQueryException.class)
     public void left_Join_Test() {
         DBMetadata metadata = createMetadata();
         SelectQueryParser parser = new SelectQueryParser(metadata);
@@ -504,19 +503,14 @@ public class SelectQueryParserTest {
         parser.parse("SELECT A, C FROM P LEFT JOIN  Q on P.A =  Q.A ");
     }
 
-    @Test(expected =UnsupportedSelectQueryException.class)
+    @Test(expected = UnsupportedSelectQueryException.class)
     public void full_outer_Join_Test() {
         DBMetadata metadata = createMetadata();
         SelectQueryParser parser = new SelectQueryParser(metadata);
         // common column name "A" appears more than once in left table
         final CQIE parse = parser.parse("SELECT A, C FROM P FULL OUTER JOIN  Pon P.A =  Q.A ");
-        assertNull( parse);
+        assertNull(parse);
     }
-
-
-
-
-
 
 
     @Test()
@@ -525,7 +519,7 @@ public class SelectQueryParserTest {
         SelectQueryParser parser = new SelectQueryParser(metadata);
         final CQIE parse = parser.parse("SELECT * FROM P NATURAL JOIN Q NATURAL JOIN R");
 
-        assertFalse( parse.getBody().isEmpty());
+        assertFalse(parse.getBody().isEmpty());
     }
 
 
@@ -534,7 +528,7 @@ public class SelectQueryParserTest {
         DBMetadata metadata = createMetadata();
         SelectQueryParser parser = new SelectQueryParser(metadata);
         final CQIE parse = parser.parse("SELECT * FROM P AS dp INNER REDUCE JOIN Q AS fis ON dp.A = fis.B");
-        assertNull( parse); // ******* This query cannot be parsed because MS-SQL REDUCE operator
+        assertNull(parse); // ******* This query cannot be parsed because MS-SQL REDUCE operator
     }
 
 
@@ -543,7 +537,7 @@ public class SelectQueryParserTest {
         DBMetadata metadata = createMetadata();
         SelectQueryParser parser = new SelectQueryParser(metadata);
         final CQIE parse = parser.parse("SELECT * FROM P AS dp INNER REDISTRIBUTE JOIN Q AS fis ON dp.A = fis.B");
-        assertNull( parse); // ******* This query cannot be parsed because MS-SQL REDISTRIBUTE operator
+        assertNull(parse); // ******* This query cannot be parsed because MS-SQL REDISTRIBUTE operator
     }
 
     @Test()
@@ -552,10 +546,8 @@ public class SelectQueryParserTest {
         SelectQueryParser parser = new SelectQueryParser(metadata);
 
         final CQIE parse = parser.parse("SELECT * FROM P AS dp INNER REPLICATE JOIN Q AS fis ON dp.A = fis.B");
-        assertNull( parse); // ******* This query cannot be parsed because MS-SQL REDISTRIBUTE operator
+        assertNull(parse); // ******* This query cannot be parsed because MS-SQL REDISTRIBUTE operator
     }
-
-
 
 
     @Test()
@@ -564,7 +556,7 @@ public class SelectQueryParserTest {
         SelectQueryParser parser = new SelectQueryParser(metadata);
         // common column name "A" appears more than once in left table
         final CQIE parse = parser.parse("SELECT A, B FROM P  WHERE P.A(+) = P.B;");
-        assertFalse( parse.getBody().isEmpty()); // The (+) operator does not produce an outer join if you specify one table in the outer query and the other table in an inner query.
+        assertFalse(parse.getBody().isEmpty()); // The (+) operator does not produce an outer join if you specify one table in the outer query and the other table in an inner query.
     }
 
 
@@ -574,10 +566,8 @@ public class SelectQueryParserTest {
         SelectQueryParser parser = new SelectQueryParser(metadata);
 //        Users familiar with the traditional Oracle Database outer joins syntax will recognize the same query in this form:
         final CQIE parse = parser.parse("SELECT A, B FROM P  WHERE P.A(+) = P.A;");
-        assertFalse( parse.getBody().isEmpty());
+        assertFalse(parse.getBody().isEmpty());
     }
-
-
 
 
     @Test(expected = UnsupportedOperationException.class)
@@ -586,45 +576,109 @@ public class SelectQueryParserTest {
         SelectQueryParser parser = new SelectQueryParser(metadata);
         // ERROR: common column name "a" appears more than once in left table
         final CQIE parse = parser.parse("SELECT * FROM Q INNER JOIN P ON P.A=Q.A  INNER JOIN  R USING (A) ;");
-        assertNull( parse);
-    }
-
-    @Test()
-    public void simple_join_not_allowed(){
-        // PostgreSQL  rises an error executing  this query
-        // ERROR: common column name "a" appears more than once in left table
-        // The parser instead goes ahead
-        DBMetadata metadata = createMetadata();
-        SelectQueryParser parser = new SelectQueryParser(metadata);
-        final CQIE parse = parser.parse("SELECT * FROM  Q, R  INNER JOIN  P  ON  P.A=Q.A;");
-        assertNull( parse);
+        assertNull(parse);
     }
 
 
+
     @Test()
-    public void joins_allowed_to_parse(){
+    public void joins_allowed_to_parse() {
         final SelectQueryParser parser = new SelectQueryParser(createMetadata());
-        ImmutableList.of("SELECT * FROM Q  ,  P  ; ",
-        "SELECT * FROM Q NATURAL JOIN  P  ;",
-        "SELECT * FROM Q CROSS JOIN  P  ;",
-        "SELECT * FROM Q INNER JOIN  P  ON  P.A=Q.A;",
-        "SELECT * FROM Q INNER JOIN  P  USING (A) ;",
-        "SELECT * FROM Q , R ,  P  ;",
-        "SELECT * FROM Q  NATURAL JOIN  P  , R;",
-        "SELECT * FROM Q  CROSS JOIN  P  , R;",
-        "SELECT * FROM Q  INNER JOIN  P  ON  P.A=Q.A, R;",
-        "SELECT * FROM Q  INNER JOIN  P  USING (A) , R;",
-        "SELECT * FROM Q INNER JOIN P ON P.A=Q.A  ,  R  ;",
-        "SELECT * FROM Q INNER JOIN P ON P.A=Q.A  INNER JOIN  R  ON  R.A=Q.A ;")
-                .forEach( query -> {
+        ImmutableList.of(
+                "SELECT * FROM P, Q;",
+                "SELECT * FROM P NATURAL JOIN  Q;",
+                "SELECT * FROM P CROSS JOIN  Q;",
+                "SELECT * FROM P JOIN  Q ON P.A = Q.A;",
+                "SELECT * FROM P INNER JOIN  Q ON P.A = Q.A;",
+                "SELECT * FROM P JOIN  Q USING(A);",
+                "SELECT * FROM P INNER JOIN  Q USING(A);")
+                .forEach(query -> {
                     final CQIE parse = parser.parse("SELECT A, B FROM P  WHERE P.A(+) = P.B;");
-                    assertFalse( parse.getBody().isEmpty());
+                    assertFalse(parse.getBody().isEmpty());
+                    System.out.println(query + " - OK!");
                 });
 
     }
 
 
+    @Test()
+    public void joins_invalid_to_parse() {
+        final SelectQueryParser parser = new SelectQueryParser(createMetadata());
+        ImmutableList.of(
+                "SELECT * FROM P JOIN  Q;",
+                "SELECT * FROM P RIGHT JOIN  Q;",
+                "SELECT * FROM P FULL JOIN  Q;",
+                "SELECT * FROM P LEFT JOIN  Q;",
+                "SELECT * FROM P OUTER JOIN  Q;",
+                "SELECT * FROM P RIGHT OUTER JOIN  Q;",
+                "SELECT * FROM P NATURAL OUTER JOIN  Q;",
+                "SELECT * FROM P FULL OUTER JOIN  Q;",
+                "SELECT * FROM P LEFT OUTER JOIN  Q;",
+                "SELECT * FROM P CROSS OUTER JOIN  Q;",
+                "SELECT * FROM P INNER JOIN  Q;",
+                "SELECT * FROM P RIGHT INNER JOIN  Q;",
+                "SELECT * FROM P NATURAL INNER JOIN  Q;",
+                "SELECT * FROM P FULL INNER JOIN  Q;",
+                "SELECT * FROM P LEFT INNER JOIN  Q;",
+                "SELECT * FROM P CROSS INNER JOIN  Q;",
+                "SELECT * FROM P NATURAL JOIN  Q ON P.A = Q.A;",
+                "SELECT * FROM P CROSS JOIN  Q ON P.A = Q.A;",
+                "SELECT * FROM P OUTER JOIN  Q ON P.A = Q.A;",
+                "SELECT * FROM P NATURAL OUTER JOIN  Q ON P.A = Q.A;",
+                "SELECT * FROM P CROSS OUTER JOIN  Q ON P.A = Q.A;",
+                "SELECT * FROM P RIGHT INNER JOIN  Q ON P.A = Q.A;",
+                "SELECT * FROM P NATURAL INNER JOIN  Q ON P.A = Q.A;",
+                "SELECT * FROM P FULL INNER JOIN  Q ON P.A = Q.A;",
+                "SELECT * FROM P LEFT INNER JOIN  Q ON P.A = Q.A;",
+                "SELECT * FROM P CROSS INNER JOIN  Q ON P.A = Q.A;",
+                "SELECT * FROM P NATURAL JOIN  Q USING(A);",
+                "SELECT * FROM P CROSS JOIN  Q USING(A);",
+                "SELECT * FROM P OUTER JOIN  Q USING(A);",
+                "SELECT * FROM P NATURAL OUTER JOIN  Q USING(A);",
+                "SELECT * FROM P CROSS OUTER JOIN  USING(A);",
+                "SELECT * FROM P RIGHT INNER JOIN  Q USING(A);",
+                "SELECT * FROM P NATURAL INNER JOIN  Q USING(A);",
+                "SELECT * FROM P FULL INNER JOIN  Q USING(A);",
+                "SELECT * FROM P LEFT INNER JOIN  Q USING(A);",
+                "SELECT * FROM P CROSS INNER JOIN  Q USING(A);")
+                .forEach(query -> {
+                    Exception e = null;
+                    try {
+                        final CQIE parse = parser.parse("SELECT A, B FROM P  WHERE P.A(+) = P.B;");
+                        System.out.println(query + " - Wrong!");
+                    } catch (Exception ex) { // todo: specialise exception
+                        System.out.println(query + " - OK");
+                        e = ex;
+                    }
+                    assertNotNull(e);
 
+                });
+
+    }
+
+    @Test()
+    public void joins_not_supported_to_parse() {
+        final SelectQueryParser parser = new SelectQueryParser(createMetadata());
+        ImmutableList.of(
+                "SELECT * FROM P RIGHT JOIN  Q ON P.A = Q.A;",
+                "SELECT * FROM P FULL JOIN  Q ON P.A = Q.A;",
+                "SELECT * FROM P LEFT JOIN  Q ON P.A = Q.A;",
+                "SELECT * FROM P RIGHT OUTER JOIN  Q ON P.A = Q.A;",
+                "SELECT * FROM P FULL OUTER JOIN  Q ON P.A = Q.A;",
+                "SELECT * FROM P LEFT OUTER JOIN  Q ON P.A = Q.A;")
+                .forEach(query -> {
+                    Exception e = null;
+                    try {
+                        final CQIE parse = parser.parse("SELECT A, B FROM P  WHERE P.A(+) = P.B;");
+                        System.out.println(query + " - Wrong!");
+                    } catch (Exception ex) { // todo: specialise exception
+                        System.out.println(query + " - OK");
+                        e = ex;
+                    }
+                    assertNotNull(e);
+
+                });
+    }
 
     @Test
     public void select__Join_2_Test() {
@@ -642,7 +696,7 @@ public class SelectQueryParserTest {
         final String[] outerJoinTypes = {"", " RIGHT", " NATURAL", " FULL", " LEFT", " CROSS"};
         final String[] joinTypes = {"", " OUTER", " INNER"};
         final String[] joinCondition = {"", " ON P.A = Q.A", " USING (A)"};
-        final String firstQuery = select + ", Q;" ;
+        final String firstQuery = select + ", Q;";
         int i = 0;
         parseQueryTest(firstQuery, i);
         for (String c : joinCondition) {
@@ -661,20 +715,18 @@ public class SelectQueryParserTest {
         }
     }
 
-    private void  parseQueryTest(String query, int i){
+    private void parseQueryTest(String query, int i) {
         try {
             System.out.print("" + i + ": " + query);
             Statement statement = CCJSqlParserUtil.parse(query);
             System.out.println(" OK");
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             System.out.println(" " + e.getClass().getCanonicalName() + "  occurred");
         }
     }
 
 
-
-    private DBMetadata createMetadata(){
+    private DBMetadata createMetadata() {
         DBMetadata metadata = DBMetadataExtractor.createDummyMetadata();
 
         RelationID table1 = MDFAC.createRelationID(null, "P");
@@ -700,15 +752,13 @@ public class SelectQueryParserTest {
         QuotedID attu3 = MDFAC.createAttributeID("C");
         QuotedID attv3 = MDFAC.createAttributeID("D");
 
-        DatabaseRelationDefinition relation3= metadata.createDatabaseRelation(table3);
+        DatabaseRelationDefinition relation3 = metadata.createDatabaseRelation(table3);
         relation3.addAttribute(attx3, 0, "INT", false);
         relation3.addAttribute(atty3, 0, "INT", false);
         relation3.addAttribute(attu3, 0, "INT", false);
         relation3.addAttribute(attv3, 0, "INT", false);
         return metadata;
     }
-
-
 
 
 }
