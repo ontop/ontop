@@ -538,7 +538,10 @@ public class ExpressionEvaluator {
 		else if (teval1 instanceof Function && innerTerm2 instanceof Function) {
 			Function f1 = (Function) teval1;
 			Function f2 = (Function) innerTerm2;
-			return evalLangMatches(fac.getLANGMATCHESFunction(f1.getTerm(0), 
+			if(f1.isOperation()){
+				return term;
+			}
+			return evalLangMatches(fac.getLANGMATCHESFunction(f1.getTerm(0),
 					f2.getTerm(0)));
 		} 
 		else {

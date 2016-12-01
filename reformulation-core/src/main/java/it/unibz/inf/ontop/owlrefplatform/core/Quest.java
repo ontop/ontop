@@ -271,10 +271,10 @@ public class Quest implements Serializable {
 	}
 
 	/**
-	 * Enable/Disable querying annotation properties defined in the ontology
+	 * Enable/Disable querying sameAs properties defined in the mapping
 	 * It overrides the value defined in QuestPreferences
 	 *
-	 * @param queryingAnnotationsInOntology
+	 * @param sameAsInMapping
 	 */
 
 	public void setSameAsInMapping(boolean sameAsInMapping) {

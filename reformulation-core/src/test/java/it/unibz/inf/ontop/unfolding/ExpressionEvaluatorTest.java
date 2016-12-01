@@ -20,6 +20,7 @@ import it.unibz.inf.ontop.pivotalrepr.impl.InnerJoinNodeImpl;
 import it.unibz.inf.ontop.pivotalrepr.impl.MetadataForQueryOptimizationImpl;
 import it.unibz.inf.ontop.pivotalrepr.impl.tree.DefaultIntermediateQueryBuilder;
 import it.unibz.inf.ontop.sql.DBMetadataExtractor;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.Optional;
@@ -52,6 +53,8 @@ public class ExpressionEvaluatorTest {
     private ExtensionalDataNode DATA_NODE_1 = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, A, B));
     private ExtensionalDataNode DATA_NODE_2 = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE2_PREDICATE, C, D));
     private ExtensionalDataNode EXPECTED_DATA_NODE_2 = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE2_PREDICATE, A, D));
+    private ExtensionalDataNode EXP_DATA_NODE_1 = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, C, B));
+    private ExtensionalDataNode EXP_DATA_NODE_2 = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE2_PREDICATE, C, D));
 
     private final ImmutableExpression EXPR_LANG = DATA_FACTORY.getImmutableExpression(
             ExpressionOperation.SPARQL_LANG, W );
@@ -66,19 +69,24 @@ public class ExpressionEvaluatorTest {
 
     private final ImmutableExpression EXPR_LANGMATCHES2 = DATA_FACTORY.getImmutableExpression(
             ExpressionOperation.LANGMATCHES, EXPR_LANG, langValue);
-    private final ImmutableExpression NOT_NULL =  DATA_FACTORY.getImmutableExpression(ExpressionOperation.IS_NOT_NULL, W);
+
 
     private MetadataForQueryOptimization METADATA = new MetadataForQueryOptimizationImpl(
             DBMetadataExtractor.createDummyMetadata(),
             ImmutableMultimap.of(),
             new UriTemplateMatcher());
 
-    @Test
+    /**
+     * test LangMatches matching a  lang function with a constant value
+     * (this case should not happen)
+     * @throws EmptyQueryException
+     */
+    @Ignore
     public void testLangLeftNodeConstant() throws EmptyQueryException {
 
         //Construct unoptimized query
         IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
-        DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_3_PREDICATE, X, Y,W);
+        DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_3_PREDICATE, X, Y, W);
         ConstructionNode rootNode = new ConstructionNodeImpl(projectionAtom.getVariables());
 
         queryBuilder.init(projectionAtom, rootNode);
@@ -153,7 +161,38 @@ public class ExpressionEvaluatorTest {
         return expectedQuery;
     }
 
+    private IntermediateQuery getExpectedQuery2() {
+        //----------------------------------------------------------------------
+        // Construct expected query
+        IntermediateQueryBuilder expectedQueryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
 
+
+        DistinctVariableOnlyDataAtom expectedProjectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_3_PREDICATE, X, Y, W);
+        ConstructionNode expectedRootNode = new ConstructionNodeImpl(expectedProjectionAtom.getVariables(),
+                new ImmutableSubstitutionImpl<>(ImmutableMap.of(X, generateURI1(C), Y, generateInt(D), W, generateLangString(B, langValueConstant))),
+                Optional.empty());
+
+        expectedQueryBuilder.init(expectedProjectionAtom, expectedRootNode);
+
+        //construct expected innerjoin
+
+        InnerJoinNode expectedJoinNode = new InnerJoinNodeImpl(Optional.empty());
+        expectedQueryBuilder.addChild(expectedRootNode, expectedJoinNode);
+
+        expectedQueryBuilder.addChild(expectedJoinNode, EXP_DATA_NODE_2);
+
+        expectedQueryBuilder.addChild(expectedJoinNode, EXP_DATA_NODE_1);
+
+        //build expected query
+        IntermediateQuery expectedQuery = expectedQueryBuilder.build();
+        System.out.println("\n Expected query: \n" +  expectedQuery);
+        return expectedQuery;
+    }
+
+    /**
+     * test LangMatches matching a lang function with a  typed literal value
+     * @throws EmptyQueryException
+     */
     @Test
     public void testLangLeftNodeFunction() throws EmptyQueryException {
 
@@ -206,6 +245,10 @@ public class ExpressionEvaluatorTest {
 
     }
 
+    /**
+     * test LangMatches matching a lang function with a typed literal value
+     * @throws EmptyQueryException
+     */
 
     @Test
     public void testLangRightNode() throws EmptyQueryException {
@@ -218,7 +261,7 @@ public class ExpressionEvaluatorTest {
         queryBuilder.init(projectionAtom, rootNode);
 
         //construct innerjoin
-        InnerJoinNode joinNode = new InnerJoinNodeImpl(Optional.of(EXPR_LANGMATCHES1));
+        InnerJoinNode joinNode = new InnerJoinNodeImpl(Optional.of(EXPR_LANGMATCHES2));
         queryBuilder.addChild(rootNode, joinNode);
 
         //construct left side join
@@ -252,7 +295,7 @@ public class ExpressionEvaluatorTest {
 
         System.out.println("\nAfter optimization: \n" +  optimizedQuery);
 
-        IntermediateQuery expectedQuery = getExpectedQuery();
+        IntermediateQuery expectedQuery = getExpectedQuery2();
         assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, expectedQuery));
     }
 
