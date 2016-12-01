@@ -8,7 +8,7 @@ rdfs:		http://www.w3.org/2000/01/rdf-schema#
 
 [SourceDeclaration]
 sourceUri	RandBStockExchange
-connectionUrl	jdbc:mysql://10.7.20.39/stockexchange
+connectionUrl	jdbc:mysql://10.7.20.39/stockexchange_new
 username	fish
 password	fish
 driverClass	com.mysql.jdbc.Driver
@@ -18,21 +18,17 @@ mappingId	mapping-addresses
 target		:address-{id} a :Address ; :addressID {id} ; :inStreet {street} ; :hasNumber {number} ; :inCity {city} ; :inState {state} ; :inCountry {country} . 
 source		select id, street, number, city, state, country from address
 
-mappingId	mapping-brokers
-target		:person-{id} a :StockBroker ; :firstName {name} ; :lastName {lastname} ; :dateOfBirth {dateofbirth} ; :ssn {ssn} . 
-source		select id, name, lastname, dateofbirth, ssn from broker
+mappingId	mapping-person
+target		:person-{id} a :PhysicalPerson ; :firstName {name} ; :lastName {lastname} ; :dateOfBirth {dateofbirth} ; :ssn {ssn} ; :hasAddress :address-{addressid} .
+source		select * from person
 
-mappingId	mapping-broker-address
-target		:person-{id} :hasAddress :address-{addressid} . 
-source		select id, addressid from broker
+mappingId	mapping-brokers
+target		:person-{id} a :StockBroker  .
+source		select id from broker
 
 mappingId	mapping-investors
-target		:person-{id} a :Investor ; :firstName {name} ; :lastName {lastname} ; :dateOfBirth {dateofbirth} ; :ssn {ssn} . 
-source		select id, name, lastname, dateofbirth, ssn from client
-
-mappingId	mapping-investor-address
-target		:person-{id} :hasAddress :address-{addressid} . 
-source		select id, name, lastname, addressid from client
+target		:person-{id} a :Investor .
+source		select id from client
 
 mappingId	mapping-companies
 target		:company-{id} a :Company ; :companyName {name} ; :marketShares {marketshares} ; :netWorth {networth} . 
@@ -48,15 +44,15 @@ source		select id, numberofshares, sharetype, description from stockinformation
 
 mappingId	mapping-stockbooks
 target		:stockbook-{date} a :StockExchangeList ; :listdate {date} . 
-source		select distinct date from stockbooklist
+source		select date from stockbooklist
 
 mappingId	mapping-tradesOnBehalfOf-physical
 target		:person-{brokerid} :tradesOnBehalfOf :person-{clientid} . 
-source		select brokerid, clientid from brokerworksfor where clientid IS NOT NULL
+source		select brokerid, clientid from brokerworksfor
 
 mappingId	mapping-tradesOnBehalfOf-legal
 target		:person-{brokerid} :tradesOnBehalfOf :company-{companyid} . 
-source		select brokerid, companyid from brokerworksfor where companyid IS NOT NULL
+source		select brokerid, companyid from brokerworksfor
 
 mappingId	mapping-transactions
 target		:transaction-{id} a :Transaction ; :transactionID {id} ; :transactionDate {date} ; :amountOfTransaction {amount} . 
@@ -64,11 +60,11 @@ source		select id, date, amount from transaction
 
 mappingId	mapping-transaction-roles-persons
 target		:transaction-{id} :isExecutedBy :person-{brokerid} ; :isExecutedFor :person-{forclientid} ; :involvesInstrument :stock-{stockid} . 
-source		select id, brokerid, forclientid, stockid from transaction where forclientid IS NOT NULL
+source		select id, brokerid, forclientid, stockid from transaction
 
 mappingId	mapping-transaction-roles-companies
 target		:transaction-{id} :isExecutedBy :person-{brokerid} ; :isExecutedFor :company-{forcompanyid} ; :involvesInstrument :stock-{stockid} . 
-source		select id, brokerid, forcompanyid, stockid from transaction where forcompanyid IS NOT NULL
+source		select id, brokerid, forcompanyid, stockid from transaction
 
 mappingId	mapping-stock-company
 target		:stock-{id} :belongsToCompany :company-{companyid} . 
