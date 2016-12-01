@@ -12,9 +12,10 @@ public interface Var2VarSubstitution extends ImmutableSubstitution<Variable> {
     @Override
     Variable applyToVariable(Variable variable);
 
-    VariableOrGroundTerm applyToVariableOrGroundTerm(VariableOrGroundTerm term);
-
-    NonGroundTerm applyToNonGroundTerm(NonGroundTerm term);
+    /**
+     * Guarantees that the term type is preserved
+     */
+    <T extends ImmutableTerm> T applyToTerm(T term);
 
     Optional<ImmutableQueryModifiers> applyToQueryModifiers(ImmutableQueryModifiers immutableQueryModifiers);
 
@@ -23,8 +24,8 @@ public interface Var2VarSubstitution extends ImmutableSubstitution<Variable> {
      *
      * Returns Optional.empty() if the results is not a substitution (incompatible entries)
      */
-    Optional<ImmutableSubstitution<ImmutableTerm>> applyToSubstitution(
-            ImmutableSubstitution<? extends ImmutableTerm> substitution);
+    <T extends ImmutableTerm>
+    Optional<ImmutableSubstitution<T>> applyToSubstitution(ImmutableSubstitution<T> substitution);
 
     Var2VarSubstitution composeWithVar2Var(Var2VarSubstitution g);
 }

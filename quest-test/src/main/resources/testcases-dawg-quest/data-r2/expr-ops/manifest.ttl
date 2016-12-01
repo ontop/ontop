@@ -9,10 +9,13 @@
     rdfs:comment "SPARQL tests - XPath operators in FILTERs" ;
     mf:entries
     ( 
-        :ge-1 :le-1 
+        :ge-1 
+	:le-1 
         :mul-1 
-        :plus-1 :minus-1 :unplus-1 
-        :unminus-1
+        :plus-1 
+	:minus-1 
+	:unplus-1 
+       :unminus-1
     ).
 
 

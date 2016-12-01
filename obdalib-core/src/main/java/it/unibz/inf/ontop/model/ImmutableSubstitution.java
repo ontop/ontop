@@ -1,6 +1,8 @@
 package it.unibz.inf.ontop.model;
 
 import java.util.Optional;
+
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 
@@ -25,8 +27,8 @@ public interface ImmutableSubstitution<T extends ImmutableTerm> extends LocallyI
     ImmutableTerm apply(ImmutableTerm term);
 
     /**
-     * This method can be applied to simple variables 
-     * 
+     * This method can be applied to simple variables
+     *
      */
     ImmutableTerm applyToVariable(Variable variable);
 
@@ -76,9 +78,16 @@ public interface ImmutableSubstitution<T extends ImmutableTerm> extends LocallyI
     ImmutableSubstitution<ImmutableTerm> applyToTarget(ImmutableSubstitution<? extends ImmutableTerm> otherSubstitution);
 
     /**
-     * Returns a similar substitution that avoids (if possible) to substitute certain variables.
+     * Returns a "similar" substitution that avoids (if possible) to substitute certain variables.
+     *
+     * Acts on equality between variables.
+     *
+     * The first variable in the list has the highest priority.
+     *
+     * This method requires the domain and the range to be disjoint.
+     *
      */
-    ImmutableSubstitution<T> orientate(ImmutableSet<Variable> variablesToTryToKeep);
+    ImmutableSubstitution<T> orientate(ImmutableList<Variable> priorityVariables);
 
     Optional<ImmutableExpression> convertIntoBooleanExpression();
 

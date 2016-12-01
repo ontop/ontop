@@ -1,6 +1,7 @@
 @prefix rs:      <http://www.w3.org/2001/sw/DataAccess/tests/result-set#> .
 @prefix foaf:    <http://xmlns.com/foaf/0.1/> .
 @prefix rdf:     <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix x:     <http://www.w3.org/xx#> .
 
 []    rdf:type      rs:ResultSet ;
       rs:resultVariable  "person" ;
@@ -12,20 +13,20 @@
       rs:solution   [ rs:binding    [ rs:value      <tag:alice@example:foafUri> ;
                                       rs:variable   "person"
                                     ] ;
-                      rs:binding    [ rs:value      "WhoMe?" ;
+                      rs:binding    [ rs:value      x:WhoMe ;
                                       rs:variable   "nick"
                                     ];
                       rs:binding    [ rs:value      <http://example.com/alice.png> ;
                                       rs:variable   "img"
                                     ];
-                      rs:binding    [ rs:value      "Alice" ;
+                      rs:binding    [ rs:value      x:Alice ;
                                       rs:variable   "name"
                                     ]
                     ] ;
       rs:solution   [ rs:binding    [ rs:value      <tag:john@example:foafUri> ;
                                       rs:variable   "person"
                                     ] ;
-                      rs:binding    [ rs:value      "jDoe" ;
+                      rs:binding    [ rs:value      x:jDoe ;
                                       rs:variable   "nick"
                                     ];
                       rs:binding    [ rs:value      <http://example.com/people/johnDoe> ;

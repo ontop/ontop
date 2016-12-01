@@ -5,16 +5,23 @@
     xmlns="http://www.w3.org/2005/sparql-results#" >
   <head>
     <variable name="s"/>
+     <variable name="o"/>
   </head>
   <results>
     <result>
       <binding name="s">
         <uri>http://example.org/x3</uri>
       </binding>
+	 <binding name="o">
+        <literal datatype="http://www.w3.org/2001/XMLSchema#integer">3</literal>
+      </binding>
     </result>
     <result>
       <binding name="s">
         <uri>http://example.org/x4</uri>
+      </binding>
+       <binding name="o">
+        <literal datatype="http://www.w3.org/2001/XMLSchema#integer">4</literal>
       </binding>
     </result>
   </results>
