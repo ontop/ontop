@@ -35,20 +35,20 @@ public class InjectiveVar2VarSubstitutionImpl extends Var2VarSubstitutionImpl im
     }
 
     @Override
-    public ImmutableSubstitution<ImmutableTerm> applyRenaming(ImmutableSubstitution<? extends ImmutableTerm> substitutionToRename) {
+    public <T extends ImmutableTerm> ImmutableSubstitution<T> applyRenaming(ImmutableSubstitution<T> substitutionToRename) {
         if (isEmpty) {
-            return (ImmutableSubstitution<ImmutableTerm>)substitutionToRename;
+            return substitutionToRename;
         }
 
-        ImmutableMap.Builder<Variable, ImmutableTerm> substitutionMapBuilder = ImmutableMap.builder();
+        ImmutableMap.Builder<Variable, T> substitutionMapBuilder = ImmutableMap.builder();
 
         /**
          * Substitutes the keys and values of the substitution to rename.
          */
-        for (Map.Entry<Variable, ? extends ImmutableTerm> originalEntry : substitutionToRename.getImmutableMap().entrySet()) {
+        for (Map.Entry<Variable, T> originalEntry : substitutionToRename.getImmutableMap().entrySet()) {
 
             Variable convertedVariable = applyToVariable(originalEntry.getKey());
-            ImmutableTerm convertedTargetTerm = apply(originalEntry.getValue());
+            T convertedTargetTerm = applyToTerm(originalEntry.getValue());
 
             // Safe because the local substitution is injective
             substitutionMapBuilder.put(convertedVariable, convertedTargetTerm);
@@ -76,9 +76,8 @@ public class InjectiveVar2VarSubstitutionImpl extends Var2VarSubstitutionImpl im
      * More efficient implementation
      */
     @Override
-    public Optional<ImmutableSubstitution<ImmutableTerm>> applyToSubstitution(
-            ImmutableSubstitution<? extends ImmutableTerm> substitution) {
+    public <T extends ImmutableTerm> Optional<ImmutableSubstitution<T>> applyToSubstitution(
+            ImmutableSubstitution<T> substitution) {
         return Optional.of(applyRenaming(substitution));
     }
-
 }
