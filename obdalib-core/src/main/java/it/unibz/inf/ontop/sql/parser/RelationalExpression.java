@@ -76,23 +76,23 @@ public class RelationalExpression {
     /**
      * CROSS JOIN of two relations (also denoted by , in SQL)
      *
-     * @param e1 is a {@link RelationalExpression)
-     * @param e2 is a {@link RelationalExpression)
+     * @param e1 is a {@link RelationalExpression}
+     * @param e2 is a {@link RelationalExpression}
      * @return a {@link RelationalExpression}
      */
     public static RelationalExpression crossJoin(RelationalExpression e1, RelationalExpression e2) {
-        return joinOn(e1, e2, ExpressionParser.empty());
+        return joinOn(e1, e2, BooleanExpressionParser.empty());
     }
 
 
     /**
-     * @param e1                  is a {@link RelationalExpression)
-     * @param e2                  is a {@link RelationalExpression)
-     * @param getAtomOnExpression is a {@link java.util.function.Function} <{@link ImmutableMap}<{@link QualifiedAttributeID}, {@link ImmutableList}<{@link Function}>}>
+     * @param e1                  is a {@link RelationalExpression}
+     * @param e2                  is a {@link RelationalExpression}
+     * @param getAtomOnExpression is a {@link BooleanExpressionParser}
      * @return a {@link RelationalExpression}
      */
     static RelationalExpression joinOn(RelationalExpression e1, RelationalExpression e2,
-                                       ExpressionParser getAtomOnExpression) {
+                                       BooleanExpressionParser getAtomOnExpression) {
 
         // TODO: better exception?
         if (!relationAliasesConsistent(e1.attributes, e2.attributes))
@@ -146,8 +146,8 @@ public class RelationalExpression {
     /**
      * JOIN USING of two relations
      *
-     * @param e1           is a {@link RelationalExpression)
-     * @param e2           is a {@link RelationalExpression)
+     * @param e1           is a {@link RelationalExpression}
+     * @param e2           is a {@link RelationalExpression}
      * @param usingColumns is a {@link ImmutableSet}<{@link QuotedID}>
      * @return a {@link RelationalExpression)
      */
@@ -167,8 +167,8 @@ public class RelationalExpression {
     /**
      * JOIN USING of two relations
      *
-     * @param e1              is a {@link RelationalExpression)
-     * @param e2              is a {@link RelationalExpression)
+     * @param e1              is a {@link RelationalExpression}
+     * @param e2              is a {@link RelationalExpression}
      * @param usingAttributes is a {@link Set}<{@link QuotedID}>
      * @return a {@link RelationalExpression}
      */
@@ -217,10 +217,10 @@ public class RelationalExpression {
      * Used for relation's where expression
      *
      * @param e1    ia a {@link RelationalExpression}
-     * @param where is a {@link ExpressionParser }
+     * @param where is a {@link BooleanExpressionParser }
      * @return a {@link RelationalExpression}
      */
-    static RelationalExpression where(RelationalExpression e1, ExpressionParser where) {
+    static RelationalExpression where(RelationalExpression e1, BooleanExpressionParser where) {
 
         return new RelationalExpression(ImmutableList.<Function>builder()
                 .addAll(e1.atoms).addAll(where.apply(e1.attributes)).build(), e1.attributes, e1.attributeOccurrences);
@@ -230,8 +230,8 @@ public class RelationalExpression {
      * treats null values as empty sets
      *
      * @param id is a {@link QuotedID}
-     * @param e1 a relational expression
-     * @param e2 a relational expression
+     * @param e1 a {@link RelationalExpression}
+     * @param e2 a {@link RelationalExpression}
      * @return the union of occurrences of id in e1 and e2
      */
     private static ImmutableSet<RelationID> attributeOccurrencesUnion(QuotedID id,

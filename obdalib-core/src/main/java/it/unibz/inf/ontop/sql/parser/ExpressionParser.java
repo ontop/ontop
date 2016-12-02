@@ -32,7 +32,7 @@ import java.util.function.UnaryOperator;
  *
  */
 
-public class ExpressionParser implements java.util.function.Function<ImmutableMap<QualifiedAttributeID, Variable>, ImmutableList<Function>> {
+public class ExpressionParser implements java.util.function.Function<ImmutableMap<QualifiedAttributeID, Variable>, Term> {
 
     private final QuotedIDFactory idfac;
     private final Expression root;
@@ -44,38 +44,12 @@ public class ExpressionParser implements java.util.function.Function<ImmutableMa
         this.root = expression;
     }
 
-    public static ExpressionParser empty() {
-        return new ExpressionParser (null, null) {
-            @Override
-            public ImmutableList<Function> apply(ImmutableMap<QualifiedAttributeID, Variable> attributes) {
-                return ImmutableList.of();
-            }
-        };
-    }
-
     @Override
-    public ImmutableList<Function> apply(ImmutableMap<QualifiedAttributeID, Variable> attributes) {
-
+    public Term apply(ImmutableMap<QualifiedAttributeID, Variable> attributes) {
         ExpressionVisitorImpl visitor = new ExpressionVisitorImpl(attributes);
-        Expression current = root;
-
-        if (current instanceof AndExpression) {
-            ImmutableList.Builder<Function> builder = ImmutableList.builder();
-            do {
-                AndExpression and = (AndExpression) current;
-                // for a sequence of AND operations, JSQLParser makes the right argument simple
-                builder.add(visitor.getFunction(and.getRightExpression()));
-                // and the left argument complex (nested AND)
-                current = and.getLeftExpression();
-            } while (current instanceof AndExpression);
-
-            builder.add(visitor.getFunction(current));
-
-            // restore the original order
-            return builder.build().reverse();
-        }
-        return ImmutableList.of(visitor.getFunction(current));
+        return visitor.getTerm(root);
     }
+
 
 
 
@@ -99,15 +73,6 @@ public class ExpressionParser implements java.util.function.Function<ImmutableMa
 
         ExpressionVisitorImpl(ImmutableMap<QualifiedAttributeID, Variable> attributes) {
             this.attributes = attributes;
-        }
-
-        // TODO: double-check this
-        private Function getFunction(Expression expression) {
-            Term t = getTerm(expression);
-            if (t instanceof Function)
-                return (Function)t;
-
-            throw new UnsupportedSelectQueryException("Unexpected conversion to Boolean", expression);
         }
 
         private Term getTerm(Expression expression) {
@@ -137,6 +102,10 @@ public class ExpressionParser implements java.util.function.Function<ImmutableMa
             result = FACTORY.getConstantLiteral(value, datatype);
         }
 
+
+        //
+        //
+        //
 
 
         @Override

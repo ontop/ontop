@@ -80,7 +80,7 @@ public class SelectQueryParser {
                     //else if (join.isInner()) {
                         else if (join.getOnExpression() != null) {
                             current = RelationalExpression.joinOn(current, right,
-                                    new ExpressionParser(metadata.getQuotedIDFactory(), join.getOnExpression()));
+                                    new BooleanExpressionParser(metadata.getQuotedIDFactory(), join.getOnExpression()));
                         }
                         else if (join.getUsingColumns() != null) {
                             current = RelationalExpression.joinUsing(current, right,
@@ -97,7 +97,7 @@ public class SelectQueryParser {
 
             if (plainSelect.getWhere() != null)
                 current = RelationalExpression.where(current,
-                        new ExpressionParser(metadata.getQuotedIDFactory(), plainSelect.getWhere()));
+                        new BooleanExpressionParser(metadata.getQuotedIDFactory(), plainSelect.getWhere()));
 
             final OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
             // TODO: proper handling of the head predicate
