@@ -1,22 +1,15 @@
 package it.unibz.inf.ontop.reformulation.tests;
 
 import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.io.ModelIOManager;
-import it.unibz.inf.ontop.model.OBDADataFactory;
-import it.unibz.inf.ontop.model.OBDAModel;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
+import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLLiteral;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.sql.Connection;
@@ -37,12 +30,7 @@ public class LeftJoinProfTest {
     private static final String ODBA_FILE = "src/test/resources/test/redundant_join/redundant_join_fk_test.obda";
     private static final String NO_SELF_LJ_OPTIMIZATION_MSG = "The table professors should be used only once";
 
-
-    private OBDADataFactory fac;
     private Connection conn;
-
-    private OBDAModel obdaModel;
-    private OWLOntology ontology;
 
 
     @Before
@@ -52,7 +40,6 @@ public class LeftJoinProfTest {
         String username = "sa";
         String password = "sa";
 
-        fac = OBDADataFactoryImpl.getInstance();
         conn = DriverManager.getConnection(url, username, password);
         Statement st = conn.createStatement();
 
@@ -69,15 +56,6 @@ public class LeftJoinProfTest {
 
         st.executeUpdate(bf.toString());
         conn.commit();
-
-        // Loading the OWL file
-        OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-        ontology = manager.loadOntologyFromOntologyDocument((new File(OWL_FILE)));
-
-        // Loading the OBDA data
-        obdaModel = fac.getOBDAModel();
-        ModelIOManager ioManager = new ModelIOManager(obdaModel);
-        ioManager.load(ODBA_FILE);
     }
 
     @After
@@ -290,8 +268,11 @@ public class LeftJoinProfTest {
     private String checkReturnedValuesAndReturnSql(String query, List<String> expectedValues) throws Exception {
 
         QuestOWLFactory factory = new QuestOWLFactory();
-        QuestOWLConfiguration config = QuestOWLConfiguration.builder().obdaModel(obdaModel).build();
-        QuestOWL reasoner = factory.createReasoner(ontology, config);
+        QuestConfiguration config = QuestConfiguration.defaultBuilder()
+                .nativeOntopMappingFile(ODBA_FILE)
+                .ontologyFile(OWL_FILE)
+                .build();
+        QuestOWL reasoner = factory.createReasoner(config);
 
         // Now we are ready for querying
         QuestOWLConnection conn = reasoner.getConnection();

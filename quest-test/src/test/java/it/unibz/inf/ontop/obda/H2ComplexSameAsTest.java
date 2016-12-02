@@ -20,6 +20,7 @@ package it.unibz.inf.ontop.obda;
  * #L%
  */
 
+import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import org.junit.After;
