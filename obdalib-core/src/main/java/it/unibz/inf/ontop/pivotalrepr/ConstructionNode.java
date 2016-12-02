@@ -1,9 +1,11 @@
 package it.unibz.inf.ontop.pivotalrepr;
 
-import java.util.Optional;
-
+import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.ImmutableSubstitution;
 import it.unibz.inf.ontop.model.ImmutableTerm;
+import it.unibz.inf.ontop.model.Variable;
+
+import java.util.Optional;
 
 /**
  * Head node an IntermediateQuery
@@ -29,6 +31,11 @@ public interface ConstructionNode extends ExplicitVariableProjectionNode {
     @Override
     ConstructionNode acceptNodeTransformer(HomogeneousQueryNodeTransformer transformer)
             throws QueryNodeTransformationException;
+
+    /**
+     * Variables that have to be provided by the child
+     */
+    ImmutableSet<Variable> getChildVariables();
 
     /**
      * TODO: find a better name and a better explanation.

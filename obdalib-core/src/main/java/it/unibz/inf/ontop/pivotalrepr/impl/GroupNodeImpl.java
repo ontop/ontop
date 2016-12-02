@@ -41,8 +41,7 @@ public class GroupNodeImpl extends QueryNodeImpl implements GroupNode {
     }
 
     @Override
-    public GroupNode acceptNodeTransformer(HomogeneousQueryNodeTransformer transformer) throws QueryNodeTransformationException,
-            NotNeededNodeException {
+    public GroupNode acceptNodeTransformer(HomogeneousQueryNodeTransformer transformer) throws QueryNodeTransformationException {
         return transformer.transform(this);
     }
 
@@ -100,6 +99,11 @@ public class GroupNodeImpl extends QueryNodeImpl implements GroupNode {
          * TODO: what is really projected by a group node?
          */
         return new NodeTransformationProposalImpl(DECLARE_AS_EMPTY, emptyChild.getVariables());
+    }
+
+    @Override
+    public NodeTransformationProposal reactToTrueChildRemovalProposal(IntermediateQuery query, TrueNode trueNode) {
+        throw new UnsupportedOperationException("The TrueNode child of a GroupNode is not expected to be removed");
     }
 
     @Override

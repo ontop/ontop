@@ -415,6 +415,8 @@ public class Quest implements Serializable, IQuest {
 						nativeQLFactory);
 
 				if (inmemory) {
+
+					log.warn("Semantic index mode initializing: \nString operation over URI are not supported in this mode ");
 					// we work in memory (with H2), the database is clean and
 					// Quest will insert new Abox assertions into the database.
 					dataRepository.generateMetadata();
@@ -490,23 +492,6 @@ public class Quest implements Serializable, IQuest {
 			else
 				unfolder.setupInSemanticIndexMode(mappings, dbConnector, reformulationReasoner, metadata);
 
-			if (dataRepository != null)
-				dataRepository.addRepositoryChangedListener(new RepositoryChangedListener() {
-					@Override
-					public void repositoryChanged() {
-						engine.clearNativeQueryCache();
-						try {
-							//
-							unfolder.setupInSemanticIndexMode(dataRepository.getMappings(), dbConnector, reformulationReasoner,
-									metadata);
-							log.debug("Mappings and unfolder have been updated after inserts to the semantic index DB");
-						}
-						catch (Exception e) {
-							log.error("Error updating Semantic Index mappings", e);
-						}
-					}
-				});
-
 
 			/* The active ABox dependencies */
 			LinearInclusionDependencies sigma = LinearInclusionDependencies.getABoxDependencies(reformulationReasoner, true);
@@ -541,6 +526,21 @@ public class Quest implements Serializable, IQuest {
 			engine = new QuestQueryProcessor(rewriter, sigma, unfolder, vocabularyValidator, getUriMap(),
 					dataSourceQueryGenerator, queryCache, distinctResultSet, injector);
 
+			if (dataRepository != null)
+				dataRepository.addRepositoryChangedListener(new RepositoryChangedListener() {
+					@Override
+					public void repositoryChanged() {
+						engine.clearNativeQueryCache();
+						try {
+							//
+							engine = engine.changeMappings(dataRepository.getMappings(), reformulationReasoner);
+							log.debug("Mappings and unfolder have been updated after inserts to the semantic index DB");
+						}
+						catch (Exception e) {
+							log.error("Error updating Semantic Index mappings", e);
+						}
+					}
+				});
 
 			log.debug("... Quest has been initialized.");
 		}

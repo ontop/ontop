@@ -7,6 +7,7 @@ import it.unibz.inf.ontop.model.Variable;
 import it.unibz.inf.ontop.pivotalrepr.*;
 import it.unibz.inf.ontop.pivotalrepr.impl.EmptyNodeImpl;
 import it.unibz.inf.ontop.pivotalrepr.impl.QueryTreeComponent;
+import it.unibz.inf.ontop.pivotalrepr.impl.TrueNodeImpl;
 import it.unibz.inf.ontop.pivotalrepr.proposal.NodeTracker;
 import it.unibz.inf.ontop.pivotalrepr.proposal.NodeTrackingResults;
 import it.unibz.inf.ontop.pivotalrepr.proposal.RemoveEmptyNodeProposal;
@@ -56,13 +57,12 @@ public class LocalPropagationTools {
         /**
          * When the node has removed
          */
-        protected SubstitutionApplicationResults(N originalFocusNode, NodeTrackingResults<EmptyNode> emptyNodeResults) {
+        protected SubstitutionApplicationResults(NodeTrackingResults<? extends QueryNode> emptyNodeResults) {
             super(emptyNodeResults.getResultingQuery(),
                     emptyNodeResults.getOptionalNextSibling(),
                     emptyNodeResults.getOptionalClosestAncestor(), emptyNodeResults.getOptionalTracker());
             this.optionalSubst = Optional.empty();
             this.isReplacedByAChild = false;
-            // TODO:
         }
 
         public Optional<ImmutableSubstitution<? extends ImmutableTerm>> getOptionalSubstitution() {
@@ -75,7 +75,7 @@ public class LocalPropagationTools {
     }
 
     /**
-     * Applies the substitution to the newNode
+     * Applies the substitution to the newNode and its replacing child (if any)
      *
      * An AncestryTracker is only created in case of empty nodes (they are immediately removed).
      *
@@ -119,6 +119,16 @@ public class LocalPropagationTools {
 
                 return new SubstitutionApplicationResults<>(query, replacingChild, newSubstitution, true, optionalTracker);
 
+            case DECLARE_AS_TRUE:
+                TrueNode replacingNode = new TrueNodeImpl();
+                // The replaced node must already be a leaf,
+                // so we can perform a single node replacement
+                // (there is no need here to delete its subtree)
+                optionalTracker.ifPresent(tr -> tr.recordReplacement(node, replacingNode));
+                treeComponent.replaceNode(node,replacingNode);
+
+                return new SubstitutionApplicationResults<>(query, replacingNode, newSubstitution, false, optionalTracker);
+
             case INSERT_CONSTRUCTION_NODE:
                 throw new IllegalStateException("Construction newNode insertion not expected " +
                         "while pushing a substitution down");
@@ -136,7 +146,7 @@ public class LocalPropagationTools {
                 // May restructure significantly the query
                 NodeTrackingResults<EmptyNode> removeEmptyNodeResults = query.applyProposal(removalProposal, true, true);
 
-                return new SubstitutionApplicationResults<>(node, removeEmptyNodeResults);
+                return new SubstitutionApplicationResults<>(removeEmptyNodeResults);
 
             default:
                 throw new IllegalStateException("Unknown local action: " + substitutionResults.getLocalAction());

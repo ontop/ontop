@@ -104,6 +104,14 @@ public class StandardIntermediateQueryValidator implements IntermediateQueryVali
                         + " has a child.\n" + query);
             }
         }
+
+        @Override
+        public void visit(TrueNode trueNode) {
+            if (query.getChildren(trueNode).size() != 0) {
+                throw new InvalidIntermediateQueryException("TRUENODE node " + trueNode
+                        + " has a child.\n" + query);
+            }
+        }
     }
 
     /**

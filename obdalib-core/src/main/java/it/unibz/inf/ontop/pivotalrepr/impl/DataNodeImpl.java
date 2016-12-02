@@ -49,4 +49,9 @@ public abstract class DataNodeImpl extends QueryNodeImpl implements DataNode {
         throw new UnsupportedOperationException("A DataNode is not expected to have a child");
     }
 
+    @Override
+    public NodeTransformationProposal reactToTrueChildRemovalProposal(IntermediateQuery query, TrueNode trueChild) {
+        throw new UnsupportedOperationException("A DataNode is not expected to have a child");
+    }
+
 }

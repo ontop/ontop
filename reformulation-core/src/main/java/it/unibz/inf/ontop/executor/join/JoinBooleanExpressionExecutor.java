@@ -47,7 +47,7 @@ public class JoinBooleanExpressionExecutor implements InnerJoinExecutor {
          * The filter condition cannot be satisfied --> the join node and its sub-tree is thus removed from the tree.
          * Returns no join node.
          */
-        catch (InsatisfiedExpressionException e) {
+        catch (UnsatisfiableExpressionException e) {
 
             EmptyNode replacingEmptyNode = new EmptyNodeImpl(query.getVariables(originalTopJoinNode));
             treeComponent.replaceSubTree(originalTopJoinNode, replacingEmptyNode);
@@ -62,15 +62,24 @@ public class JoinBooleanExpressionExecutor implements InnerJoinExecutor {
         }
 
         /**
-         * Optimized join node
+         * If something has changed
          */
-        InnerJoinNode newJoinNode = new InnerJoinNodeImpl(optionalAggregatedFilterCondition);
+        if ((filterOrJoinNodes.size() > 1)
+                || (!optionalAggregatedFilterCondition.equals(originalTopJoinNode.getOptionalFilterCondition()))) {
+            /**
+             * Optimized join node
+             */
+            InnerJoinNode newJoinNode = new InnerJoinNodeImpl(optionalAggregatedFilterCondition);
 
-        Optional<ArgumentPosition> optionalPosition = treeComponent.getOptionalPosition(parentNode, originalTopJoinNode);
-        treeComponent.replaceNodesByOneNode(ImmutableList.<QueryNode>copyOf(filterOrJoinNodes), newJoinNode, parentNode,
-                optionalPosition);
+            Optional<ArgumentPosition> optionalPosition = treeComponent.getOptionalPosition(parentNode, originalTopJoinNode);
+            treeComponent.replaceNodesByOneNode(ImmutableList.<QueryNode>copyOf(filterOrJoinNodes), newJoinNode, parentNode,
+                    optionalPosition);
 
-        return new NodeCentricOptimizationResultsImpl<>(query, newJoinNode);
+            return new NodeCentricOptimizationResultsImpl<>(query, newJoinNode);
+        }
+        else {
+            return new NodeCentricOptimizationResultsImpl<>(query, originalTopJoinNode);
+        }
     }
 
 

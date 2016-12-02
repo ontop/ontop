@@ -25,6 +25,7 @@ import it.unibz.inf.ontop.model.Function;
 import it.unibz.inf.ontop.model.Substitution;
 import it.unibz.inf.ontop.model.Term;
 import it.unibz.inf.ontop.model.Variable;
+import it.unibz.inf.ontop.model.impl.BNodeConstantImpl;
 import it.unibz.inf.ontop.model.impl.FunctionalTermImpl;
 import it.unibz.inf.ontop.model.impl.URIConstantImpl;
 import it.unibz.inf.ontop.model.impl.ValueConstantImpl;
@@ -240,9 +241,13 @@ public class SubstitutionImpl implements AppendableSubstitution {
             // equal, in which case there the substitution is empty
 
             if (/*(term1 instanceof VariableImpl) ||*/ (term1 instanceof FunctionalTermImpl)
-                    || (term1 instanceof ValueConstantImpl) || (term1 instanceof URIConstantImpl)) {
+                    || (term1 instanceof ValueConstantImpl)
+                    || (term1 instanceof URIConstantImpl)
+                    || (term1 instanceof BNodeConstantImpl)
+                    ) {
 
                 // ROMAN: why is BNodeConstantImpl not mentioned?
+                // BC: let's accept it, templates for Bnodes should be supported
 
                 if (term1.equals(term2))
                     return new NeutralSubstitution();

@@ -20,9 +20,6 @@ package it.unibz.inf.ontop.owlrefplatform.core.unfolding;
  * #L%
  */
 
-import java.util.*;
-
-import java.util.Optional;
 import com.google.common.collect.*;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
@@ -34,9 +31,12 @@ import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.EQNormalizer;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.SubstitutionUtilities;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.UnifierUtilities;
 import it.unibz.inf.ontop.utils.DatalogDependencyGraphGenerator;
-import it.unibz.inf.ontop.utils.QueryUtils;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.AbstractMap.SimpleEntry;
+import java.util.*;
 
 import static it.unibz.inf.ontop.model.impl.DatalogTools.isLeftJoinOrJoinAtom;
 
@@ -64,6 +64,7 @@ public class DatalogUnfolder {
     private static final OBDADataFactory termFactory = OBDADataFactoryImpl.getInstance();
 
     private final ImmutableMultimap<Predicate, List<Integer>> primaryKeys;
+
     private final Map<Predicate, List<CQIE>> mappings;
     private final Multimap<Predicate,Integer> multiTypedFunctionSymbolIndex;
 
@@ -129,6 +130,13 @@ public class DatalogUnfolder {
 
     public ImmutableList<Predicate> getExtensionalPredicates() {
         return ImmutableList.copyOf(extensionalPredicates);
+    }
+
+    public ImmutableMultimap<Predicate, CQIE> getMappings() {
+        return mappings.entrySet().stream()
+                .flatMap(e -> e.getValue().stream()
+                        .map(v -> new SimpleEntry<>(e.getKey(), v)))
+                .collect(ImmutableCollectors.toMultimap());
     }
 
     /**

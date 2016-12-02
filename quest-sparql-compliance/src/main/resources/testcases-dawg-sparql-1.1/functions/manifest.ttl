@@ -21,7 +21,7 @@
 	# :ceil01
 	# :floor01
 	# :round01
-	 :concat01
+	# :concat01 # Ontop V3: dynamic typing is currently disabled.
 	# :concat02
 	# :substring01
 	# :substring02

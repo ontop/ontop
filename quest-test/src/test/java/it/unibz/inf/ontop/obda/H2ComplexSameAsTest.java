@@ -35,7 +35,9 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Scanner;
+import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -143,8 +145,8 @@ public class H2ComplexSameAsTest {
                 "   ?x  a :Wellbore . \n" +
                 "}";
 
-		ArrayList<String> results = runTests(query, true);
-		ArrayList<String> expectedResults = new ArrayList<>();
+		Set<String> results = ImmutableSet.copyOf(runTests(query, true));
+		Set<String> expectedResults = new HashSet<>();
 		expectedResults.add("<http://ontop.inf.unibz.it/test/wellbore#uri1-1>");
 		expectedResults.add("<http://ontop.inf.unibz.it/test/wellbore#uri1-2>");
 		expectedResults.add("<http://ontop.inf.unibz.it/test/wellbore#uri2-1>");
@@ -205,12 +207,12 @@ public class H2ComplexSameAsTest {
     @Test
     public void testSameAs3() throws Exception {
         String query =  "PREFIX : <http://ontop.inf.unibz.it/test/wellbore#> \n" +
-                "SELECT * WHERE { ?x a :Wellbore .\n" +
+                "SELECT DISTINCT * WHERE { ?x a :Wellbore .\n" +
                 " ?x :hasName ?y .\n" +
                 " ?x :isActive ?z .}\n";
 
 		ArrayList<String> results = runTests(query, true);
-		assertEquals(294, results.size() );
+		assertEquals(33, results.size() );
 
 
 	}
@@ -218,11 +220,11 @@ public class H2ComplexSameAsTest {
 	@Test
 	public void testSameAs3b() throws Exception {
 		String query =  "PREFIX : <http://ontop.inf.unibz.it/test/wellbore#> \n" +
-				"SELECT * WHERE { ?x a :Wellbore .\n" +
+				"SELECT DISTINCT * WHERE { ?x a :Wellbore .\n" +
 				" ?x :isActive ?z .}\n";
 
 		ArrayList<String> results = runTests(query, true);
-		assertEquals(80, results.size() );
+		assertEquals(16, results.size() );
 
 	}
 
@@ -250,12 +252,12 @@ public class H2ComplexSameAsTest {
 	@Test
 	public void testSameAs6() throws Exception {
 		String query =  "PREFIX : <http://ontop.inf.unibz.it/test/wellbore#> \n" +
-				"SELECT * WHERE { " +
+				"SELECT DISTINCT * WHERE { " +
 				"?x  a :Wellbore ." +
 				" ?x :hasOwner ?y .}\n";
 
 		ArrayList<String> results = runTests(query, true);
-		assertEquals(72, results.size() );
+		assertEquals(24, results.size() );
 
 	}
 

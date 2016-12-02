@@ -16,11 +16,11 @@ import it.unibz.inf.ontop.pivotalrepr.*;
 import it.unibz.inf.ontop.pivotalrepr.equivalence.IQSyntacticEquivalenceChecker;
 import it.unibz.inf.ontop.pivotalrepr.impl.*;
 import it.unibz.inf.ontop.pivotalrepr.impl.tree.DefaultIntermediateQueryBuilder;
+import it.unibz.inf.ontop.sql.DBMetadataExtractor;
 import org.junit.Test;
 
 import java.util.Optional;
 
-import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.TestCase.assertTrue;
 
@@ -60,7 +60,10 @@ public class IQSyntacticEquivalenceCheckerTest {
          */
         uniqueKeyBuilder.put(TABLE1_PREDICATE, ImmutableList.of(1));
 
-        return new MetadataForQueryOptimizationImpl(uniqueKeyBuilder.build(), new UriTemplateMatcher());
+        return new MetadataForQueryOptimizationImpl(
+                DBMetadataExtractor.createDummyMetadata(),
+                uniqueKeyBuilder.build(),
+                new UriTemplateMatcher());
     }
 
     @Test

@@ -3,16 +3,14 @@ package it.unibz.inf.ontop.owlrefplatform.core.basicoperations;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import it.unibz.inf.ontop.model.Var2VarSubstitution;
 import it.unibz.inf.ontop.model.Variable;
 import it.unibz.inf.ontop.model.ImmutableSubstitution;
 import it.unibz.inf.ontop.model.ImmutableTerm;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
-import java.util.AbstractMap;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Stream;
+import java.util.Set;
 
 import static it.unibz.inf.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionTools.isInjective;
 
@@ -37,20 +35,20 @@ public class InjectiveVar2VarSubstitutionImpl extends Var2VarSubstitutionImpl im
     }
 
     @Override
-    public ImmutableSubstitution<ImmutableTerm> applyRenaming(ImmutableSubstitution<? extends ImmutableTerm> substitutionToRename) {
+    public <T extends ImmutableTerm> ImmutableSubstitution<T> applyRenaming(ImmutableSubstitution<T> substitutionToRename) {
         if (isEmpty) {
-            return (ImmutableSubstitution<ImmutableTerm>)substitutionToRename;
+            return substitutionToRename;
         }
 
-        ImmutableMap.Builder<Variable, ImmutableTerm> substitutionMapBuilder = ImmutableMap.builder();
+        ImmutableMap.Builder<Variable, T> substitutionMapBuilder = ImmutableMap.builder();
 
         /**
          * Substitutes the keys and values of the substitution to rename.
          */
-        for (Map.Entry<Variable, ? extends ImmutableTerm> originalEntry : substitutionToRename.getImmutableMap().entrySet()) {
+        for (Map.Entry<Variable, T> originalEntry : substitutionToRename.getImmutableMap().entrySet()) {
 
             Variable convertedVariable = applyToVariable(originalEntry.getKey());
-            ImmutableTerm convertedTargetTerm = apply(originalEntry.getValue());
+            T convertedTargetTerm = applyToTerm(originalEntry.getValue());
 
             // Safe because the local substitution is injective
             substitutionMapBuilder.put(convertedVariable, convertedTargetTerm);
@@ -61,8 +59,11 @@ public class InjectiveVar2VarSubstitutionImpl extends Var2VarSubstitutionImpl im
 
     @Override
     public Optional<InjectiveVar2VarSubstitution> composeWithAndPreserveInjectivity(
-            InjectiveVar2VarSubstitution g) {
-        ImmutableMap<Variable, Variable> newMap = composeRenaming(g);
+            InjectiveVar2VarSubstitution g, Set<Variable> variablesToExcludeFromTheDomain) {
+        ImmutableMap<Variable, Variable> newMap = composeRenaming(g)
+                // Removes some excluded entries
+                .filter(e -> !variablesToExcludeFromTheDomain.contains(e.getKey()))
+                .collect(ImmutableCollectors.toMap());
 
         return Optional.of(newMap)
                 .filter(ImmutableSubstitutionTools::isInjective)
@@ -75,9 +76,8 @@ public class InjectiveVar2VarSubstitutionImpl extends Var2VarSubstitutionImpl im
      * More efficient implementation
      */
     @Override
-    public Optional<ImmutableSubstitution<ImmutableTerm>> applyToSubstitution(
-            ImmutableSubstitution<? extends ImmutableTerm> substitution) {
+    public <T extends ImmutableTerm> Optional<ImmutableSubstitution<T>> applyToSubstitution(
+            ImmutableSubstitution<T> substitution) {
         return Optional.of(applyRenaming(substitution));
     }
-
 }

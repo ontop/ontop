@@ -586,12 +586,6 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 		}
 
 		List<Term> joinTerms = new ArrayList<>(leftAtoms);
-		/**
-		 * We need an (boolean) expression to separate the left and the right parts
-		 */
-		if (!leftAtoms.get(leftAtoms.size() - 1).isOperation()) {
-			joinTerms.add(getExpression(ExpressionOperation.OR, OBDAVocabulary.TRUE, OBDAVocabulary.TRUE));
-		}
 
 		joinTerms.addAll(rightAtoms);
 

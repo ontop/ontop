@@ -117,13 +117,18 @@ public class UnionNodeImpl extends QueryNodeImpl implements UnionNode {
     }
 
     @Override
+    public NodeTransformationProposal reactToTrueChildRemovalProposal(IntermediateQuery query, TrueNode trueNode) {
+        throw new UnsupportedOperationException("The TrueNode child of a UnionNode is not expected to be removed");
+    }
+
+    @Override
     public NodeTransformationProposal acceptNodeTransformer(HeterogeneousQueryNodeTransformer transformer) {
         return transformer.transform(this);
     }
 
     @Override
     public ImmutableSet<Variable> getLocalVariables() {
-        return ImmutableSet.of();
+        return projectedVariables;
     }
 
     @Override

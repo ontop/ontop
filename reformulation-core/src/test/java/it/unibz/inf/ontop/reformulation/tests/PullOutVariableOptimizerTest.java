@@ -13,6 +13,7 @@ import it.unibz.inf.ontop.pivotalrepr.*;
 import it.unibz.inf.ontop.pivotalrepr.equivalence.IQSyntacticEquivalenceChecker;
 import it.unibz.inf.ontop.pivotalrepr.impl.*;
 import it.unibz.inf.ontop.pivotalrepr.impl.tree.DefaultIntermediateQueryBuilder;
+import it.unibz.inf.ontop.sql.DBMetadataExtractor;
 import org.junit.Test;
 
 import java.util.Optional;
@@ -72,7 +73,10 @@ public class PullOutVariableOptimizerTest {
 
     private static MetadataForQueryOptimization initMetadata() {
         ImmutableMultimap.Builder<AtomPredicate, ImmutableList<Integer>> uniqueKeyBuilder = ImmutableMultimap.builder();
-        return new MetadataForQueryOptimizationImpl(uniqueKeyBuilder.build(), new UriTemplateMatcher());
+        return new MetadataForQueryOptimizationImpl(
+                DBMetadataExtractor.createDummyMetadata(),
+                uniqueKeyBuilder.build(),
+                new UriTemplateMatcher());
     }
 
     @Test

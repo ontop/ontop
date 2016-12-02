@@ -5,8 +5,6 @@ import it.unibz.inf.ontop.model.ImmutableSubstitution;
 import it.unibz.inf.ontop.model.ImmutableTerm;
 import it.unibz.inf.ontop.model.Variable;
 
-import java.util.Optional;
-
 /**
  * Immutable.
  *
@@ -42,7 +40,7 @@ public interface QueryNode extends Cloneable {
      *
      */
     QueryNode acceptNodeTransformer(HomogeneousQueryNodeTransformer transformer)
-            throws QueryNodeTransformationException, NotNeededNodeException;
+            throws QueryNodeTransformationException;
 
     /**
      * "Accept" method for the "Visitor" pattern.
@@ -85,4 +83,6 @@ public interface QueryNode extends Cloneable {
     boolean isSyntacticallyEquivalentTo(QueryNode node);
 
     NodeTransformationProposal reactToEmptyChild(IntermediateQuery query, EmptyNode emptyChild);
+
+    NodeTransformationProposal reactToTrueChildRemovalProposal(IntermediateQuery query, TrueNode trueNode);
 }

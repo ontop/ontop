@@ -18,7 +18,6 @@ import it.unibz.inf.ontop.pivotalrepr.impl.tree.DefaultIntermediateQueryBuilder;
 import it.unibz.inf.ontop.pivotalrepr.proposal.NodeTracker;
 import it.unibz.inf.ontop.pivotalrepr.proposal.NodeTrackingResults;
 import it.unibz.inf.ontop.pivotalrepr.proposal.impl.RemoveEmptyNodeProposalImpl;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.Optional;
@@ -31,9 +30,7 @@ import static org.junit.Assert.assertTrue;
 
 public class EmptyNodeRemovalTest {
 
-    private static MetadataForQueryOptimization METADATA = new MetadataForQueryOptimizationImpl(
-            ImmutableMultimap.of(),
-            new UriTemplateMatcher());
+    private static MetadataForQueryOptimization METADATA = new EmptyMetadataForQueryOptimization();
     private static boolean REQUIRE_USING_IN_PLACE_EXECUTOR = true;
     private static final OBDADataFactory DATA_FACTORY = OBDADataFactoryImpl.getInstance();
     private static AtomPredicate ANS1_PREDICATE = new AtomPredicateImpl("ans1", 2);

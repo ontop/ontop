@@ -10,6 +10,7 @@ import it.unibz.inf.ontop.pivotalrepr.QueryNodeSubstitutionException;
 import it.unibz.inf.ontop.pivotalrepr.impl.QueryTreeComponent;
 import it.unibz.inf.ontop.pivotalrepr.proposal.InvalidQueryOptimizationProposalException;
 import it.unibz.inf.ontop.pivotalrepr.proposal.NodeCentricOptimizationResults;
+import it.unibz.inf.ontop.pivotalrepr.proposal.NodeTracker;
 import it.unibz.inf.ontop.pivotalrepr.proposal.SubstitutionPropagationProposal;
 import it.unibz.inf.ontop.pivotalrepr.proposal.impl.NodeCentricOptimizationResultsImpl;
 
@@ -54,8 +55,8 @@ public class SubstitutionPropagationExecutorImpl<N extends QueryNode>
         /**
          * First to the focus node
          */
-        SubstitutionApplicationResults<N> localApplicationResults = applySubstitutionToNode(originalFocusNode,
-                substitutionToPropagate, query, treeComponent, Optional.empty());
+        SubstitutionApplicationResults<N> localApplicationResults = applySubstitutionToFocusNode(originalFocusNode,
+                substitutionToPropagate, query, treeComponent);
 
         QueryNode newFocusOrReplacingChildNode = localApplicationResults.getNewNodeOrReplacingChild()
                 .orElseThrow(() -> new InvalidQueryOptimizationProposalException(
@@ -99,6 +100,52 @@ public class SubstitutionPropagationExecutorImpl<N extends QueryNode>
 
 
     }
+
+    /**
+     * In case the focus is replaced by a child, applies the substitution recursively
+     */
+    private SubstitutionApplicationResults<N> applySubstitutionToFocusNode(N originalFocusNode,
+                                                                           ImmutableSubstitution<? extends ImmutableTerm> substitutionToPropagate,
+                                                                           IntermediateQuery query,
+                                                                           QueryTreeComponent treeComponent) throws EmptyQueryException {
+
+        SubstitutionApplicationResults<N> localApplicationResults = applySubstitutionToNode(originalFocusNode,
+                substitutionToPropagate, query, treeComponent, Optional.empty());
+
+        if (localApplicationResults.getOptionalReplacingChild().isPresent()) {
+            QueryNode replacingChild = localApplicationResults.getOptionalReplacingChild().get();
+
+            Optional<ImmutableSubstitution<? extends ImmutableTerm>> newSubstitution = localApplicationResults.getOptionalSubstitution();
+            Optional<NodeTracker> optionalTracker = localApplicationResults.getOptionalTracker();
+
+            /**
+             * Applies the substitution to the replacing child (recursive)
+             */
+            if (newSubstitution.isPresent()) {
+                SubstitutionApplicationResults<QueryNode> replacingChildResults = applySubstitutionToNode(
+                        replacingChild, newSubstitution.get(), query, treeComponent, optionalTracker);
+
+                // The replacing child of the replacing child is the new replacing child
+                Optional<QueryNode> optionalNewReplacingChild = replacingChildResults.getNewNodeOrReplacingChild();
+                if (optionalNewReplacingChild.isPresent()) {
+                    return new SubstitutionApplicationResults<>(query, optionalNewReplacingChild.get(),
+                            replacingChildResults.getOptionalSubstitution(), true, optionalTracker);
+                }
+                /**
+                 * No replacing child after applying the substitution (--> is empty)
+                 */
+                else {
+                    return new SubstitutionApplicationResults<N>(replacingChildResults);
+                }
+            }
+        }
+
+        /**
+         * By default, no recursion
+         */
+        return localApplicationResults;
+    }
+
 
     private NodeCentricOptimizationResults<N> propagateDown(IntermediateQuery query, QueryTreeComponent treeComponent,
                                                             SubstitutionApplicationResults<N> localApplicationResults)

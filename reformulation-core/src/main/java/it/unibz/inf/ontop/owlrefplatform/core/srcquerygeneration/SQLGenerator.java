@@ -21,8 +21,9 @@ package it.unibz.inf.ontop.owlrefplatform.core.srcquerygeneration;
  */
 
 
-import java.util.Optional;
+import com.google.common.base.Joiner;
 import com.google.common.collect.*;
+import it.unibz.inf.ontop.model.*;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.model.Predicate.COL_TYPE;
@@ -31,7 +32,6 @@ import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
 import it.unibz.inf.ontop.model.impl.RDBMSourceParameterConstants;
 import it.unibz.inf.ontop.model.impl.TermUtils;
 import it.unibz.inf.ontop.owlrefplatform.core.ExecutableQuery;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
 import it.unibz.inf.ontop.owlrefplatform.injection.QuestCorePreferences;
 import it.unibz.inf.ontop.owlrefplatform.core.SQLExecutableQuery;
 import it.unibz.inf.ontop.owlrefplatform.core.abox.SemanticIndexURIMap;
@@ -49,19 +49,15 @@ import it.unibz.inf.ontop.parser.EncodeForURI;
 import it.unibz.inf.ontop.pivotalrepr.IntermediateQuery;
 import it.unibz.inf.ontop.sql.*;
 import it.unibz.inf.ontop.utils.DatalogDependencyGraphGenerator;
+import org.openrdf.model.Literal;
+import org.openrdf.model.vocabulary.XMLSchema;
+import org.slf4j.LoggerFactory;
 
 import java.sql.Types;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-
-import org.openrdf.model.Literal;
-import org.openrdf.model.vocabulary.XMLSchema;
-import org.slf4j.LoggerFactory;
-
-import com.google.common.base.Joiner;
-import it.unibz.inf.ontop.model.*;
 
 import static it.unibz.inf.ontop.model.Predicate.COL_TYPE.*;
 
@@ -285,7 +281,7 @@ public class SQLGenerator implements NativeQueryGenerator {
 			final String outerViewName = "SUB_QVIEW";
 			String subquery = generateQuery(signature, ruleIndex, predicatesInBottomUp, extensionalPredicates);
 
-			String modifier = "";
+			String modifier;
 
 			List<OrderCondition> conditions = queryProgram.getQueryModifiers().getSortConditions();
 
@@ -297,15 +293,18 @@ public class SQLGenerator implements NativeQueryGenerator {
 			// List<OrderCondition> conditions =
 			// query.getQueryModifiers().getSortConditions();
 
-
-			if (!conditions.isEmpty()) {
-				modifier += sqladapter.sqlOrderBy(conditions, outerViewName)
-						+ "\n";
-			}
 			long limit = queryProgram.getQueryModifiers().getLimit();
 			long offset = queryProgram.getQueryModifiers().getOffset();
-			if (limit != -1 || offset != -1) {
-				modifier += sqladapter.sqlSlice(limit, offset) + "\n";
+
+			if (!conditions.isEmpty()) {
+				modifier = sqladapter.sqlOrderByAndSlice(conditions, outerViewName, limit, offset)
+						+ "\n";
+			}
+			else if (limit != -1 || offset != -1) {
+				modifier = sqladapter.sqlSlice(limit, offset) + "\n";
+			}
+			else {
+				modifier = "";
 			}
 
 			String sql = "SELECT *\n";
@@ -386,10 +385,10 @@ public class SQLGenerator implements NativeQueryGenerator {
 	 *            The index that maps intentional predicates to its rules
 	 * @param predicatesInBottomUp
 	 *            The topologically ordered predicates in
-	 *            <code> query </query>.
+	 *            <code> query </code>.
 	 * @param extensionalPredicates
 	 *            The predicates that are not defined by any rule in <code>
-	 *            query </query>
+	 *            query </code>
 	 * @return
 	 * @throws OBDAException
 	 */
@@ -748,7 +747,7 @@ public class SQLGenerator implements NativeQueryGenerator {
 	 * Escapes view names.
 	 */
 	private static String escapeName(String name) {
-		return name.replace('.', '_').replace(':', '_').replace('/', '_');
+		return name.replace('.', '_').replace(':', '_').replace('/', '_').replace(' ', '_');
 	}
 
 	/***
@@ -1346,12 +1345,17 @@ public class SQLGenerator implements NativeQueryGenerator {
 		if (ht instanceof URIConstant) {
 			URIConstant uc = (URIConstant) ht;
 			mainColumn = sqladapter.getSQLLexicalFormString(uc.getURI().toString());
+			/**
+			 * TODO: we should not have to treat NULL as a special case! It is because this constant is currently
+			 * a STRING!
+			 */
+		} else if (ht == OBDAVocabulary.NULL) {
+			mainColumn = "NULL";
+		} else if (ht instanceof ValueConstant) {
+			mainColumn = getSQLLexicalForm((ValueConstant) ht);
 		} else if (ht instanceof Variable) {
 			Variable termVar = (Variable) ht;
 			mainColumn = getSQLString(termVar, index, false);
-
-		} else if (ht == OBDAVocabulary.NULL) {
-			mainColumn = "NULL";
 		} else if (ht instanceof Function) {
 			/*
 			 * if it's a function we need to get the nested value if its a
@@ -2135,6 +2139,8 @@ public class SQLGenerator implements NativeQueryGenerator {
 		case POSITIVE_INTEGER:
 		case NON_NEGATIVE_INTEGER:
 			return constant.getValue();
+		case NULL:
+			return "NULL";
 		default:
 			return "'" + constant.getValue() + "'";
 		}
@@ -2321,6 +2327,14 @@ public class SQLGenerator implements NativeQueryGenerator {
 				}
 				throw new RuntimeException("Impossible to get data definition for: " + atom + ", type: " + def);
 			}
+
+			/**
+			 * Special case of nullary atoms
+			 */
+			else if(atom.getArity() == 0){
+				return "(" + sqladapter.getDummyTable() + ") tdummy";
+			}
+
 			/**
 			 * Special case.
 			 * For atoms nested in a LJ.

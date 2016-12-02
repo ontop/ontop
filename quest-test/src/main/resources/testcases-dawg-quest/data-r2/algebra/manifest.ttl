@@ -9,10 +9,10 @@
     rdfs:label "Algebra" ;
     mf:entries
     (   
-        :nested-opt-1 
-        :nested-opt-2 
-        :opt-filter-1 
-        :opt-filter-2 
+        #:nested-opt-1 # ERROR NOT WELL-DESIGNED QUERY !!!
+        #:nested-opt-2 # ERROR NOT WELL-DESIGNED QUERY !!!
+       # :opt-filter-1 # ERROR NOT WELL-DESIGNED QUERY !!!
+       # :opt-filter-2 # ERROR NOT WELL-DESIGNED QUERY !!!
         #:opt-filter-3 # ERROR
         :filter-place-1 
         :filter-place-2 
@@ -20,7 +20,7 @@
         :filter-nested-1 
         #:filter-nested-2 # ERROR 
         #:filter-scope-1 # ERROR
-        :join-scope-1
+        #:join-scope-1# ERROR NOT WELL-DESIGNED QUERY !!!
         #:join-combo-1 # ERROR
         #:join-combo-2 # WON'T FIX: graph
     ) .

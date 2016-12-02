@@ -2,10 +2,8 @@ package it.unibz.inf.ontop.pivotalrepr.impl;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import it.unibz.inf.ontop.model.ImmutableExpression;
-import it.unibz.inf.ontop.model.ImmutableSubstitution;
-import it.unibz.inf.ontop.model.ImmutableTerm;
-import it.unibz.inf.ontop.model.Variable;
+import it.unibz.inf.ontop.model.*;
+import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.unfolding.ExpressionEvaluator;
@@ -17,6 +15,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import static it.unibz.inf.ontop.model.impl.ImmutabilityTools.foldBooleanExpressions;
 import static it.unibz.inf.ontop.pivotalrepr.NodeTransformationProposedState.DECLARE_AS_EMPTY;
 import static it.unibz.inf.ontop.pivotalrepr.NodeTransformationProposedState.REPLACE_BY_UNIQUE_NON_EMPTY_CHILD;
 import static it.unibz.inf.ontop.pivotalrepr.NonCommutativeOperatorNode.ArgumentPosition.LEFT;
@@ -33,6 +32,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
 
 
     private static final String LEFT_JOIN_NODE_STR = "LJ";
+    private static final OBDADataFactory DATA_FACTORY = OBDADataFactoryImpl.getInstance();
 
     public LeftJoinNodeImpl(Optional<ImmutableExpression> optionalJoinCondition) {
         super(optionalJoinCondition);
@@ -73,21 +73,32 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
                 .orElseThrow(() -> new IllegalStateException("No left child for the LJ"));
         ImmutableSet<Variable> leftVariables = query.getVariables(leftChild);
 
+        ImmutableSet<? extends Map.Entry<Variable, ? extends ImmutableTerm>> substitutionEntries =
+                substitution.getImmutableMap().entrySet();
+
         /**
          * New substitution: only concerns variables specific to the right
          */
-        ImmutableMap<Variable, ImmutableTerm> newSubstitutionMap = substitution.getImmutableMap().entrySet().stream()
+        ImmutableMap<Variable, ImmutableTerm> newSubstitutionMap = substitutionEntries.stream()
                 .filter(e -> !leftVariables.contains(e.getKey()))
                 .map(e -> (Map.Entry<Variable, ImmutableTerm>)e)
                 .collect(ImmutableCollectors.toMap());
         ImmutableSubstitution<ImmutableTerm> newSubstitution = new ImmutableSubstitutionImpl<>(newSubstitutionMap);
 
         /**
+         * New equalities (which could not be propagated)
+         */
+        Optional<ImmutableExpression> optionalNewEqualities = foldBooleanExpressions(substitutionEntries.stream()
+                .filter(e -> leftVariables.contains(e.getKey()))
+                .map(e -> DATA_FACTORY.getImmutableExpression(
+                        ExpressionOperation.EQ, e.getKey(), e.getValue())));
+
+        /**
          * Updates the joining conditions (may add new equalities)
          * and propagates the new substitution if the conditions still holds.
          *
          */
-        return computeAndEvaluateNewCondition(substitution, query)
+        return computeAndEvaluateNewCondition(substitution, query, optionalNewEqualities)
                 .map(ev -> applyEvaluation(query, ev, newSubstitution, Optional.of(leftVariables), Provenance.FROM_RIGHT))
                 .orElseGet(() -> new SubstitutionResultsImpl<>(this, newSubstitution));
     }
@@ -113,7 +124,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
          * and propagates the same substitution if the conditions still holds.
          *
          */
-        return computeAndEvaluateNewCondition(substitution, query)
+        return computeAndEvaluateNewCondition(substitution, query, Optional.empty())
                 .map(ev -> applyEvaluation(query, ev, substitution, Optional.of(rightVariables), Provenance.FROM_LEFT))
                 .orElseGet(() -> new SubstitutionResultsImpl<>(this, substitution));
     }
@@ -262,6 +273,23 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
                         otherChild, nullVariables);
             default:
                 throw new IllegalStateException("Unknown position: " + emptyNodePosition);
+        }
+    }
+
+    @Override
+    public NodeTransformationProposal reactToTrueChildRemovalProposal(IntermediateQuery query, TrueNode trueChild) {
+        ArgumentPosition trueNodePosition = query.getOptionalPosition(this, trueChild)
+                .orElseThrow(() -> new IllegalStateException("The deleted child of a LJ must have a position"));
+        QueryNode otherChild = query.getChild(this, (trueNodePosition == LEFT) ? RIGHT : LEFT)
+                .orElseThrow(() -> new IllegalStateException("The other child of a LJ is missing"));
+        switch(trueNodePosition) {
+            case LEFT:
+                throw new UnsupportedOperationException("A TrueNode in the left position of a LeftJoin should not be removed");
+            case RIGHT:
+                return new NodeTransformationProposalImpl(REPLACE_BY_UNIQUE_NON_EMPTY_CHILD,
+                        otherChild, ImmutableSet.of());
+            default:
+                throw new IllegalStateException("Unknown position: " + trueNodePosition);
         }
     }
 

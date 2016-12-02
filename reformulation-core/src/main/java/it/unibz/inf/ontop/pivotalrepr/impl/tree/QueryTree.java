@@ -2,11 +2,8 @@ package it.unibz.inf.ontop.pivotalrepr.impl.tree;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import it.unibz.inf.ontop.pivotalrepr.NonCommutativeOperatorNode;
-import it.unibz.inf.ontop.pivotalrepr.EmptyNode;
+import it.unibz.inf.ontop.pivotalrepr.*;
 import it.unibz.inf.ontop.pivotalrepr.impl.IllegalTreeUpdateException;
-import it.unibz.inf.ontop.pivotalrepr.ConstructionNode;
-import it.unibz.inf.ontop.pivotalrepr.QueryNode;
 
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -52,8 +49,13 @@ public interface QueryTree {
 
     ImmutableSet<EmptyNode> getEmptyNodes();
 
+    ImmutableSet<TrueNode> getTrueNodes();
+
     QueryNode replaceNodeByChild(QueryNode parentNode,
                                  Optional<NonCommutativeOperatorNode.ArgumentPosition> optionalReplacingChildPosition);
+
+    ImmutableSet<IntensionalDataNode> getIntensionalNodes();
+
 
     /**
      * Keeps the same query node objects but clones the tree edges
@@ -63,4 +65,8 @@ public interface QueryTree {
 
     void transferChild(QueryNode childNode, QueryNode formerParentNode, QueryNode newParentNode,
                        Optional<NonCommutativeOperatorNode.ArgumentPosition> optionalPosition);
+
+
+
+    int getVersionNumber();
 }

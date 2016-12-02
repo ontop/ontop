@@ -22,6 +22,8 @@ package it.unibz.inf.ontop.owlrefplatform.core.basicoperations;
 
 
 import java.util.Optional;
+
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.*;
@@ -100,7 +102,7 @@ public class NeutralSubstitution extends LocallyImmutableSubstitutionImpl implem
     }
 
     @Override
-    public ImmutableSubstitution<ImmutableTerm> orientate(ImmutableSet<Variable> variablesToTryToKeep) {
+    public ImmutableSubstitution<ImmutableTerm> orientate(ImmutableList<Variable> priorityVariables) {
         return this;
     }
 

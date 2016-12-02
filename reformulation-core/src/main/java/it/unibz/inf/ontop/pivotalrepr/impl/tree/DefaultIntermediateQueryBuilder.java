@@ -1,6 +1,5 @@
 package it.unibz.inf.ontop.pivotalrepr.impl.tree;
 
-import java.util.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Injector;
 import it.unibz.inf.ontop.model.DistinctVariableOnlyDataAtom;
@@ -10,6 +9,8 @@ import it.unibz.inf.ontop.pivotalrepr.NonCommutativeOperatorNode.ArgumentPositio
 import it.unibz.inf.ontop.pivotalrepr.impl.IllegalTreeUpdateException;
 import it.unibz.inf.ontop.pivotalrepr.impl.IntermediateQueryImpl;
 import it.unibz.inf.ontop.pivotalrepr.impl.QueryTreeComponent;
+
+import java.util.Optional;
 
 /**
  * TODO: explain

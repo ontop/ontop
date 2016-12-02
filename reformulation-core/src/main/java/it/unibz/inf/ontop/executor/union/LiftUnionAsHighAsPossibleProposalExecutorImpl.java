@@ -18,13 +18,9 @@ public class LiftUnionAsHighAsPossibleProposalExecutorImpl implements LiftUnionA
                 inputQuery.getInjector());
 
         ConstructionNode rootNode = inputQuery.getRootConstructionNode();
-        try {
-            ConstructionNode newRootNode = rootNode.acceptNodeTransformer(queryNodeCloner);
-            builder.init(inputQuery.getProjectionAtom(), newRootNode);
-            recursive(unionNode, targetQueryNode, builder, inputQuery, rootNode, newRootNode, Optional.<Integer>empty());
-        } catch (NotNeededNodeException e) {
-            throw new IllegalStateException("LiftUnionAsHighAsPossibleProposalExecutor should not remove any node");
-        }
+        ConstructionNode newRootNode = rootNode.acceptNodeTransformer(queryNodeCloner);
+        builder.init(inputQuery.getProjectionAtom(), newRootNode);
+        recursive(unionNode, targetQueryNode, builder, inputQuery, rootNode, newRootNode, Optional.empty());
         return builder.build();
     }
 
@@ -32,7 +28,7 @@ public class LiftUnionAsHighAsPossibleProposalExecutorImpl implements LiftUnionA
     public void recursive(UnionNode unionNode, QueryNode targetNode, IntermediateQueryBuilder builder,
                           IntermediateQuery query, QueryNode parentNode,
                           QueryNode newParentNode, Optional<Integer> optionalBranchIndexInsideUnion)
-            throws QueryNodeTransformationException, NotNeededNodeException, IntermediateQueryBuilderException {
+            throws QueryNodeTransformationException, IntermediateQueryBuilderException {
 
         for (QueryNode subNode : query.getChildren(parentNode)) {
 

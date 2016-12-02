@@ -15,6 +15,7 @@ import it.unibz.inf.ontop.pivotalrepr.proposal.RemoveEmptyNodeProposal;
 import it.unibz.inf.ontop.pivotalrepr.proposal.impl.NodeTrackerImpl;
 import it.unibz.inf.ontop.pivotalrepr.proposal.impl.NodeTrackingResultsImpl;
 import it.unibz.inf.ontop.pivotalrepr.proposal.impl.RemoveEmptyNodeProposalImpl;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -82,13 +83,13 @@ public class AscendingPropagationTools {
     private static class DescendingPropagationParams {
 
         public final QueryNode focusNode;
-        public final Stream<QueryNode> otherChildren;
+        public final ImmutableList<QueryNode> otherChildren;
         public final ImmutableSubstitution<? extends ImmutableTerm> substitution;
 
         public DescendingPropagationParams(QueryNode focusNode, Stream<QueryNode> otherChildren,
                                            ImmutableSubstitution<? extends ImmutableTerm> substitution) {
             this.focusNode = focusNode;
-            this.otherChildren = otherChildren;
+            this.otherChildren = otherChildren.collect(ImmutableCollectors.toList());
             this.substitution = substitution;
         }
     }
@@ -221,7 +222,7 @@ public class AscendingPropagationTools {
                 optionalAncestryTracker.ifPresent(tr -> tr.recordUpcomingReplacementByChild(query, currentAncestor,
                         replacingChild));
 
-                treeComponent.removeOrReplaceNodeByUniqueChildren(currentAncestor);
+                treeComponent.removeOrReplaceNodeByUniqueChild(currentAncestor);
 
                 otherChildren = childOfAncestor != replacingChild
                         ? Stream.of(replacingChild)
@@ -288,9 +289,8 @@ public class AscendingPropagationTools {
                 break;
             }
 
-            NodeTrackingResults<QueryNode> propagationResults = propagateSubstitutionDownToNodes(
-                        params.focusNode, params.otherChildren, params.substitution, query, treeComponent,
-                    optionalNodeTracker);
+            propagateSubstitutionDownToNodes(params.focusNode, params.otherChildren.stream(), params.substitution,
+                    query, treeComponent, Optional.of(tracker));
         }
 
         NodeTracker.NodeUpdate<T> update = tracker.getUpdate(query, originalFocusNode);
@@ -319,6 +319,6 @@ public class AscendingPropagationTools {
                 optionalAncestryTracker.isPresent()
                 ? new RemoveEmptyNodeProposalImpl(replacingEmptyNode, optionalAncestryTracker.get())
                 : new RemoveEmptyNodeProposalImpl(replacingEmptyNode, false);
-        return query.applyProposal(proposal, true);
+        return query.applyProposal(proposal, true, true);
     }
 }

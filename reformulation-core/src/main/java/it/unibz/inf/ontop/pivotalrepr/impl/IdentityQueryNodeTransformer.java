@@ -47,7 +47,10 @@ public class IdentityQueryNodeTransformer implements HomogeneousQueryNodeTransfo
     }
 
     @Override
-    public EmptyNode transform(EmptyNode emptyNode) {
-        return emptyNode;
-    }
+    public EmptyNode transform(EmptyNode emptyNode) { return emptyNode; }
+
+    @Override
+    public TrueNode transform(TrueNode trueNode) { return trueNode; }
+
 }
+

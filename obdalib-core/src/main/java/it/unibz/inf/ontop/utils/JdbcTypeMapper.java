@@ -55,6 +55,7 @@ public class JdbcTypeMapper {
 		sqlToQuest.put(Types.DATE, COL_TYPE.DATE);
 		sqlToQuest.put(Types.TIME, COL_TYPE.TIME);
 		sqlToQuest.put(Types.TIMESTAMP, COL_TYPE.DATETIME); //GX: needs check
+		sqlToQuest.put(Types.TIMESTAMP_WITH_TIMEZONE, COL_TYPE.DATETIME); //BC: needs check
 		sqlToQuest.put(Types.BOOLEAN, COL_TYPE.BOOLEAN);
 		sqlToQuest.put(Types.BIT, COL_TYPE.BOOLEAN);
 //		typeMapper.put(Types.BINARY, dfac.getDataTypePredicateBinary());

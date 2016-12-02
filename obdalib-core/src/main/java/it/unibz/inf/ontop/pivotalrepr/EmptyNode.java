@@ -15,7 +15,7 @@ public interface EmptyNode extends ExplicitVariableProjectionNode {
 
     @Override
     EmptyNode acceptNodeTransformer(HomogeneousQueryNodeTransformer transformer)
-            throws QueryNodeTransformationException, NotNeededNodeException;
+            throws QueryNodeTransformationException;
 
     @Override
     SubstitutionResults<EmptyNode> applyAscendingSubstitution(

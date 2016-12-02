@@ -61,27 +61,6 @@ public class Var2VarSubstitutionImpl extends AbstractImmutableSubstitutionImpl<V
     }
 
     @Override
-    public VariableOrGroundTerm applyToVariableOrGroundTerm(VariableOrGroundTerm term) {
-        if (term instanceof Variable) {
-            return applyToVariable((Variable)term);
-        }
-
-        return term;
-    }
-
-    @Override
-    public NonGroundTerm applyToNonGroundTerm(NonGroundTerm term) {
-        if (term instanceof Variable) {
-            return applyToVariable((Variable) term);
-        }
-        /**
-         * If not a variable, is a functional term.
-         */
-        return new NonGroundFunctionalTermImpl(
-                applyToFunctionalTerm((ImmutableFunctionalTerm) term));
-    }
-
-    @Override
     public Optional<ImmutableQueryModifiers> applyToQueryModifiers(ImmutableQueryModifiers immutableQueryModifiers) {
         ImmutableList.Builder<OrderCondition> orderConditionBuilder = ImmutableList.builder();
 
@@ -96,17 +75,18 @@ public class Var2VarSubstitutionImpl extends AbstractImmutableSubstitutionImpl<V
      * TODO: directly build an ImmutableMap
      */
     @Override
-    public Optional<ImmutableSubstitution<ImmutableTerm>> applyToSubstitution(
-            ImmutableSubstitution<? extends ImmutableTerm> substitution) {
+    public <T extends ImmutableTerm> Optional<ImmutableSubstitution<T>> applyToSubstitution(
+            ImmutableSubstitution<T> substitution) {
 
         if (isEmpty()) {
             return Optional.of(new ImmutableSubstitutionImpl<>(substitution.getImmutableMap()));
         }
 
         try {
-            ImmutableMap<Variable, ImmutableTerm> newMap = ImmutableMap.copyOf(substitution.getImmutableMap().entrySet().stream()
-                    .map(e -> new AbstractMap.SimpleEntry<>(applyToVariable(e.getKey()), apply(e.getValue())))
+            ImmutableMap<Variable, T> newMap = ImmutableMap.copyOf(substitution.getImmutableMap().entrySet().stream()
+                    .map(e -> new AbstractMap.SimpleEntry<>(applyToVariable(e.getKey()), applyToTerm(e.getValue())))
                     .distinct()
+                    .filter(e -> ! e.getKey().equals(e.getValue()))
                     .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue,
                             (e1, e2) -> {
                                 throw new NotASubstitutionException();
@@ -159,10 +139,16 @@ public class Var2VarSubstitutionImpl extends AbstractImmutableSubstitutionImpl<V
 
     @Override
     public Var2VarSubstitution composeWithVar2Var(Var2VarSubstitution g) {
-        return new Var2VarSubstitutionImpl(composeRenaming(g));
+        return new Var2VarSubstitutionImpl(composeRenaming(g)
+                .collect(ImmutableCollectors.toMap()));
     }
 
-    protected ImmutableMap<Variable, Variable> composeRenaming(Var2VarSubstitution g ) {
+    @Override
+    public <T extends ImmutableTerm> T applyToTerm(T term) {
+        return (T) super.apply(term);
+    }
+
+    protected Stream<Map.Entry<Variable, Variable>> composeRenaming(Var2VarSubstitution g ) {
         ImmutableSet<Variable> gDomain = g.getDomain();
 
         Stream<Map.Entry<Variable, Variable>> gEntryStream = g.getImmutableMap().entrySet().stream()
@@ -172,7 +158,6 @@ public class Var2VarSubstitutionImpl extends AbstractImmutableSubstitutionImpl<V
                 .filter(e -> !gDomain.contains(e.getKey()));
 
         return Stream.concat(gEntryStream, localEntryStream)
-                .filter(e -> !e.getKey().equals(e.getValue()))
-                .collect(ImmutableCollectors.toMap());
+                .filter(e -> !e.getKey().equals(e.getValue()));
     }
 }

@@ -36,7 +36,9 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Scanner;
+import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -162,8 +164,8 @@ public class H2SameAsTest {
                 "   ?x  :hasName ?y . \n" +
                 "}";
 
-		ArrayList<String> results = runTests(query, true);
-		ArrayList<String> expectedResults = new ArrayList<>();
+		Set<String> results = ImmutableSet.copyOf(runTests(query, true));
+		Set<String> expectedResults = new HashSet<>();
 		expectedResults.add("<http://ontop.inf.unibz.it/test/wellbore#spain-991>");
 		expectedResults.add("\"Aleksi\"");
 		expectedResults.add("<http://ontop.inf.unibz.it/test/wellbore#finland-1>");

@@ -98,7 +98,8 @@ public class UnionFriendlyBindingExtractor implements BindingExtractor {
         Stream<Map.Entry<Variable, ImmutableTerm>> childBindings = query.getChildren(currentNode).stream()
                 .flatMap(c -> extractBindings(query, c).getMergedBindings());
 
-        return Stream.concat(localBindings, childBindings);
+        return Stream.concat(localBindings, childBindings)
+                .filter(e -> currentNode.getVariables().contains(e.getKey()));
     }
 
     /**

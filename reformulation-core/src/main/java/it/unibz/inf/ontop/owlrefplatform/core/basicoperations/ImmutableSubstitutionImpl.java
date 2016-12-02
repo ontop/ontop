@@ -21,6 +21,14 @@ public class ImmutableSubstitutionImpl<T extends ImmutableTerm> extends Abstract
 
     public ImmutableSubstitutionImpl(ImmutableMap<Variable, ? extends T> substitutionMap) {
         this.map = (ImmutableMap<Variable, T>) substitutionMap;
+
+        if (substitutionMap.entrySet().stream()
+                .anyMatch(e -> e.getKey().equals(e.getValue()))
+                ) {
+            throw new IllegalArgumentException("Please do not insert entries like t/t in your substitution " +
+                    "(for efficiency reasons)\n. Substitution: " + substitutionMap);
+        }
+
     }
 
     @Override

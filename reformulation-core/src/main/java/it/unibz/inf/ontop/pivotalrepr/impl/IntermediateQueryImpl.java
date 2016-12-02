@@ -114,7 +114,7 @@ public class IntermediateQueryImpl implements IntermediateQuery {
     @Override
     public Stream<QueryNode> getOtherChildrenStream(QueryNode parent, QueryNode childToOmmit) {
         return treeComponent.getChildrenStream(parent)
-                .filter(c -> ! (c == childToOmmit));
+                .filter(c -> c != childToOmmit);
     }
 
     /**
@@ -128,6 +128,11 @@ public class IntermediateQueryImpl implements IntermediateQuery {
     @Override
     public ImmutableSet<Variable> getVariables(QueryNode subTreeRootNode) {
         return treeComponent.getVariables(subTreeRootNode);
+    }
+
+    @Override
+    public int getVersionNumber() {
+        return treeComponent.getVersionNumber();
     }
 
     @Override
@@ -184,6 +189,16 @@ public class IntermediateQueryImpl implements IntermediateQuery {
     @Override
     public ImmutableList<QueryNode> getSubTreeNodesInTopDownOrder(QueryNode currentNode) {
         return treeComponent.getSubTreeNodesInTopDownOrder(currentNode);
+    }
+
+    @Override
+    public Stream<IntensionalDataNode> getIntensionalNodes(){
+        return treeComponent.getIntensionalNodes().stream();
+    }
+
+    @Override
+    public Stream<TrueNode> getTrueNodes(){
+        return treeComponent.getTrueNodes().stream();
     }
 
     @Override
@@ -342,6 +357,10 @@ public class IntermediateQueryImpl implements IntermediateQuery {
     @Override
     public Variable generateNewVariable(Variable formerVariable) {
         return treeComponent.generateNewVariable(formerVariable);
+    }
+
+    public Variable renameAllVariablesWitSuffix() {
+        return treeComponent.generateNewVariable();
     }
 
     /**

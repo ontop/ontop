@@ -7,13 +7,14 @@ import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
 import it.unibz.inf.ontop.owlrefplatform.core.abox.SemanticIndexURIMap;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.*;
-import it.unibz.inf.ontop.owlrefplatform.core.optimization.BasicJoinOptimizer;
+import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
+import it.unibz.inf.ontop.owlrefplatform.core.optimization.*;
+import it.unibz.inf.ontop.owlrefplatform.core.optimization.unfolding.QueryUnfolder;
+import it.unibz.inf.ontop.owlrefplatform.core.optimization.unfolding.impl.QueryUnfolderImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.queryevaluation.SPARQLQueryUtility;
 import it.unibz.inf.ontop.owlrefplatform.core.reformulation.QueryRewriter;
 import it.unibz.inf.ontop.owlrefplatform.core.srcquerygeneration.NativeQueryGenerator;
 import it.unibz.inf.ontop.owlrefplatform.core.translator.*;
-import it.unibz.inf.ontop.owlrefplatform.core.unfolding.DatalogUnfolder;
-import it.unibz.inf.ontop.owlrefplatform.core.unfolding.ExpressionEvaluator;
 import it.unibz.inf.ontop.pivotalrepr.EmptyQueryException;
 import it.unibz.inf.ontop.pivotalrepr.IntermediateQuery;
 import it.unibz.inf.ontop.pivotalrepr.datalog.DatalogProgram2QueryConverter;
@@ -21,6 +22,7 @@ import it.unibz.inf.ontop.renderer.DatalogProgramRenderer;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Stream;
 
 import org.openrdf.query.MalformedQueryException;
 import org.openrdf.query.QueryLanguage;
@@ -29,6 +31,8 @@ import org.openrdf.query.parser.QueryParser;
 import org.openrdf.query.parser.QueryParserUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static it.unibz.inf.ontop.pivotalrepr.datalog.Mapping2QueryConverter.convertMappings;
 
 /**
  * BC: TODO: make it explicitly immutable
@@ -39,11 +43,16 @@ public class QuestQueryProcessor {
 
 	private final QueryRewriter rewriter;
 	private final LinearInclusionDependencies sigma;
-	protected final QuestUnfolder unfolder;
 	private final VocabularyValidator vocabularyValidator;
 	private final SemanticIndexURIMap uriMap;
 	private final NativeQueryGenerator datasourceQueryGenerator;
 	private final QueryCache queryCache;
+
+	private final QueryUnfolder queryUnfolder;
+	/**
+	 * Old-style Datalog unfolder (not used for unfolding anymore)
+	 */
+	protected final QuestUnfolder unfolder;
 	
 	private static final Logger log = LoggerFactory.getLogger(QuestQueryProcessor.class);
 	private static final OBDADataFactory DATA_FACTORY = OBDADataFactoryImpl.getInstance();
@@ -58,12 +67,30 @@ public class QuestQueryProcessor {
 		this.rewriter = rewriter;
 		this.sigma = sigma;
 		this.unfolder = unfolder;
+
+		Stream<IntermediateQuery> intermediateQueryStream =
+				convertMappings(unfolder.getMappings(), unfolder.getExtensionalPredicates(), unfolder.getMetadataForQueryOptimization());
+
+		this.queryUnfolder = new QueryUnfolderImpl(intermediateQueryStream);
+
 		this.vocabularyValidator = vocabularyValidator;
 		this.uriMap = uriMap;
 		this.datasourceQueryGenerator = datasourceQueryGenerator;
 		this.queryCache = queryCache;
 		this.hasDistinctResultSet = hasDistinctResultSet;
 		this.injector = injector;
+	}
+
+	/**
+	 * Returns a new QuestQueryProcessor(will be immutable in the future)
+	 *
+	 * Specific to the Classic A-box mode!
+	 */
+	public QuestQueryProcessor changeMappings(Collection<OBDAMappingAxiom> mappings, TBoxReasoner reformulationReasoner) {
+		// TODO: clone it and then configure it
+		// TODO: check that it is in the classic A-box mode
+		unfolder.setupInSemanticIndexMode(mappings, reformulationReasoner);
+		return new QuestQueryProcessor(rewriter, sigma, unfolder, vocabularyValidator, uriMap, datasourceQueryGenerator);
 	}
 
 	/**
@@ -177,60 +204,80 @@ public class QuestQueryProcessor {
 			//rewritingTime = System.currentTimeMillis() - startTime0;
 
 			//final long startTime = System.currentTimeMillis();
-			log.debug("Start the partial evaluation process...");
 
-			DatalogUnfolder datalogUnfolder = unfolder.getDatalogUnfolder();
-
-			// TODO: make it final
-			DatalogProgram programAfterUnfolding = datalogUnfolder
-					.unfold(programAfterRewriting,
-							"ans1", QuestConstants.BUP, true);
-			log.debug("Data atoms evaluated: \n{}", programAfterUnfolding);
-
-			//System.out.println("OUT UNFOLDED " + programAfterUnfolding);
-
-			List<CQIE> toRemove = new LinkedList<>();
-			for (CQIE rule : programAfterUnfolding.getRules()) {
-				Predicate headPredicate = rule.getHead().getFunctionSymbol();
-				if (!headPredicate.getName().equals(OBDAVocabulary.QUEST_QUERY)) {
-					toRemove.add(rule);
-				}
-			}
-			programAfterUnfolding.removeRules(toRemove);
-			log.debug("Irrelevant rules removed: \n{}", programAfterUnfolding);
-
-			ExpressionEvaluator evaluator = new ExpressionEvaluator(unfolder.getUriTemplateMatcher());
-			evaluator.evaluateExpressions(programAfterUnfolding);
-			log.debug("Boolean expression evaluated: \n{}", programAfterUnfolding);
-
+			DatalogProgram programAfterUnfolding;
 			try {
-				if (programAfterUnfolding.getRules().isEmpty()) {
-					throw new EmptyQueryException();
-				}
-
-
 				IntermediateQuery intermediateQuery = DatalogProgram2QueryConverter.convertDatalogProgram(
-						unfolder.getMetadataForQueryOptimization(), programAfterUnfolding,
-						datalogUnfolder.getExtensionalPredicates(), injector);
-				log.debug("New directly translated intermediate query: \n" + intermediateQuery.toString());
+						unfolder.getMetadataForQueryOptimization(), programAfterRewriting,
+						unfolder.getExtensionalPredicates());
+				log.debug("Directly translated (SPARQL) intermediate query: \n" + intermediateQuery.toString());
 
-				// BasicTypeLiftOptimizer typeLiftOptimizer = new BasicTypeLiftOptimizer();
-				// intermediateQuery = typeLiftOptimizer.optimize(intermediateQuery);
+				log.debug("Start the unfolding...");
+
+				intermediateQuery = queryUnfolder.optimize(intermediateQuery);
+
+				log.debug("Unfolded query: \n" + intermediateQuery.toString());
+
+
+				//lift bindings and union when it is possible
+				IntermediateQueryOptimizer substitutionOptimizer = new TopDownSubstitutionLiftOptimizer();
+				intermediateQuery = substitutionOptimizer.optimize(intermediateQuery);
+
 
 				log.debug("New lifted query: \n" + intermediateQuery.toString());
 
 
-				BasicJoinOptimizer joinOptimizer = new BasicJoinOptimizer();
-				intermediateQuery = joinOptimizer.optimize(intermediateQuery);
-				log.debug("New query after join optimization: \n" + intermediateQuery.toString());
+				JoinLikeOptimizer joinLikeOptimizer = new FixedPointJoinLikeOptimizer();
+				intermediateQuery = joinLikeOptimizer.optimize(intermediateQuery);
+				log.debug("New query after fixed point join optimization: \n" + intermediateQuery.toString());
 
-				log.debug("Partial evaluation ended.");
+//				BasicLeftJoinOptimizer leftJoinOptimizer = new BasicLeftJoinOptimizer();
+//				intermediateQuery = leftJoinOptimizer.optimize(intermediateQuery);
+//				log.debug("New query after left join optimization: \n" + intermediateQuery.toString());
+//
+//				BasicJoinOptimizer joinOptimizer = new BasicJoinOptimizer();
+//				intermediateQuery = joinOptimizer.optimize(intermediateQuery);
+//				log.debug("New query after join optimization: \n" + intermediateQuery.toString());
 
 				executableQuery = generateExecutableQuery(intermediateQuery, ImmutableList.copyOf(translation.getSignature()),
 						optionalConstructTemplate);
 				queryCache.put(pq, executableQuery);
 				return executableQuery;
 
+
+				GroundTermRemovalFromDataNodeReshaper groundTermNormalizer = new GroundTermRemovalFromDataNodeReshaper();
+				intermediateQuery = groundTermNormalizer.optimize(intermediateQuery);
+				log.debug("New query after removing ground terms: \n" + intermediateQuery.toString());
+
+				PullOutVariableOptimizer pullOutVariableNormalizer = new PullOutVariableOptimizer();
+				intermediateQuery = pullOutVariableNormalizer.optimize(intermediateQuery);
+				log.debug("New query after pulling out equalities: \n" + intermediateQuery.toString());
+
+				programAfterUnfolding = IntermediateQueryToDatalogTranslator.translate(intermediateQuery);
+
+				log.debug("New Datalog query: \n" + programAfterUnfolding.toString());
+
+				/**
+				 * TODO: try to get rid of this flattener
+				 */
+				programAfterUnfolding = FunctionFlattener.flattenDatalogProgram(programAfterUnfolding);
+				log.debug("New flattened Datalog query: \n" + programAfterUnfolding.toString());
+
+				/**
+				 * This code is only partially useful (for properly dealing with boolean expressions) anymore
+				 * TODO: get rid of it
+				 */
+				log.debug("Datalog syntax normalizer (low-level)...");
+				PullOutEqualityNormalizer normalizer = new PullOutEqualityNormalizerImpl();
+
+				List<CQIE> normalizedRules = new ArrayList<>();
+				for (CQIE rule: programAfterUnfolding.getRules()) {
+					normalizedRules.add(normalizer.normalizeByPullingOutEqualities(rule));
+				}
+
+				OBDAQueryModifiers queryModifiers = programAfterUnfolding.getQueryModifiers();
+				programAfterUnfolding = DATA_FACTORY.getDatalogProgram(queryModifiers, normalizedRules);
+				log.debug("Normalized Datalog query: \n" + programAfterUnfolding.toString());
 
 			} catch (DatalogProgram2QueryConverter.InvalidDatalogProgramException e) {
 				throw new OBDAException(e.getLocalizedMessage());

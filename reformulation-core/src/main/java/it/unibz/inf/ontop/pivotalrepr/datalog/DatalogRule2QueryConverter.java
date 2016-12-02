@@ -114,11 +114,23 @@ public class DatalogRule2QueryConverter {
                 optionalModifiers);
 
         List<Function> bodyAtoms = List.iterableList(datalogRule.getBody());
-        AtomClassification atomClassification = new AtomClassification(bodyAtoms);
+        if (bodyAtoms.isEmpty()) {
+            return createFact(metadata, rootNode, projectionAtom);
+        }
+        else {
+            AtomClassification atomClassification = new AtomClassification(bodyAtoms);
 
-        return createDefinition(metadata, rootNode, projectionAtom, tablePredicates,
-                atomClassification.dataAndCompositeAtoms, atomClassification.booleanAtoms,
-                atomClassification.optionalGroupAtom, injector);
+            return createDefinition(metadata, rootNode, projectionAtom, tablePredicates,
+                    atomClassification.dataAndCompositeAtoms, atomClassification.booleanAtoms,
+                    atomClassification.optionalGroupAtom, injector);
+        }
+    }
+
+    private static IntermediateQuery createFact(MetadataForQueryOptimization metadata, ConstructionNode rootNode,
+                                                DistinctVariableOnlyDataAtom projectionAtom) {
+        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(metadata);
+        queryBuilder.init(projectionAtom, rootNode);
+        return queryBuilder.build();
     }
 
 

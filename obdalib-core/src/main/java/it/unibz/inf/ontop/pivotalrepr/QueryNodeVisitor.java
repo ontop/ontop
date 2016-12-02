@@ -25,4 +25,6 @@ public interface QueryNodeVisitor {
     void visit(GroupNode groupNode);
 
     void visit(EmptyNode emptyNode);
+
+    void visit(TrueNode trueNode);
 }

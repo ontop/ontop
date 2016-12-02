@@ -6,9 +6,9 @@ import fj.data.Set;
 import fj.data.TreeMap;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.Function;
-
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
+import it.unibz.inf.ontop.model.impl.DatalogTools;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
+import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 
 import java.util.*;
 
@@ -80,19 +80,13 @@ public class PullOutEqualityNormalizerImpl implements PullOutEqualityNormalizer 
          * Applies the substitution resulting from the data and composite atoms to the other atoms (filter, group atoms).
          */
         final Var2VarSubstitution substitution = mainAtomsResult.getVar2VarSubstitution();
-        List<Function> otherAtoms = initialAtoms.filter(new F<Function, Boolean>() {
-            @Override
-            public Boolean f(Function atom) {
-                return !isDataOrLeftJoinOrJoinAtom(atom);
-            }
-        }).map(new F<Function, Function>() {
-                    @Override
-                    public Function f(Function atom) {
-                        Function newAtom = (Function) atom.clone();
-                        // SIDE-EFFECT on the newly created object
-                        SubstitutionUtilities.applySubstitution(newAtom, substitution);
-                        return newAtom;
-            }
+        List<Function> otherAtoms = initialAtoms
+                .filter(atom -> !isDataOrLeftJoinOrJoinAtom(atom))
+                .map(atom -> {
+                    Function newAtom = (Function) atom.clone();
+                    // SIDE-EFFECT on the newly created object
+                    SubstitutionUtilities.applySubstitution(newAtom, substitution);
+                    return newAtom;
         });
 
         /**
@@ -122,41 +116,24 @@ public class PullOutEqualityNormalizerImpl implements PullOutEqualityNormalizer 
         /**
          * Normalizes the composite atoms.
          */
-        List<PullOutEqLocalNormResult> compositeAtomResults = sameLevelAtoms.filter(new F<Function, Boolean>() {
-            @Override
-            public Boolean f(Function atom) {
-                return isLeftJoinOrJoinAtom(atom);
-            }
-        }).map(new F<Function, PullOutEqLocalNormResult>() {
-            @Override
-            public PullOutEqLocalNormResult f(Function atom) {
-                return normalizeCompositeAtom(atom, variableDispatcher);
-            }
-        });
-        List<Function> secondNonPushableAtoms = compositeAtomResults.bind(new F<PullOutEqLocalNormResult, List<Function>>() {
-            @Override
-            public List<Function> f(PullOutEqLocalNormResult result) {
-                return result.getNonPushableAtoms();
-            }
-        });
-        List<Function> secondPushableAtoms = compositeAtomResults.bind(new F<PullOutEqLocalNormResult, List<Function>>() {
-            @Override
-            public List<Function> f(PullOutEqLocalNormResult result) {
-                return result.getPushableBoolAtoms();
-            }
-        });
+        List<PullOutEqLocalNormResult> compositeAtomResults = sameLevelAtoms
+                .filter(DatalogTools::isLeftJoinOrJoinAtom)
+                .map(atom -> normalizeCompositeAtom(atom, variableDispatcher));
+
+        List<Function> secondNonPushableAtoms = compositeAtomResults
+                .bind(PullOutEqLocalNormResult::getNonPushableAtoms);
+
+        List<Function> secondPushableAtoms = compositeAtomResults
+                .bind(PullOutEqLocalNormResult::getPushableBoolAtoms);
 
         /**
          * Merges all the substitutions (one per composite atom and one for all data atoms) into one.
          *
          * Additional equalities might be produced during this process.
          */
-        List<Var2VarSubstitution> substitutionsToMerge = compositeAtomResults.map(new F<PullOutEqLocalNormResult, Var2VarSubstitution>() {
-            @Override
-            public Var2VarSubstitution f(PullOutEqLocalNormResult result) {
-                return result.getVar2VarSubstitution();
-            }
-        }).snoc(dataAtomSubstitution);
+        List<Var2VarSubstitution> substitutionsToMerge = compositeAtomResults
+                .map(PullOutEqLocalNormResult::getVar2VarSubstitution).snoc(dataAtomSubstitution);
+
         P2<Var2VarSubstitution, List<Function>> substitutionResult = mergeSubstitutions(substitutionsToMerge);
         Var2VarSubstitution mergedSubstitution = substitutionResult._1();
         List<Function> additionalEqualities = substitutionResult._2();
@@ -181,29 +158,18 @@ public class PullOutEqualityNormalizerImpl implements PullOutEqualityNormalizer 
         /**
          * Normalizes all the data atoms.
          */
-        List<Function> dataAtoms = sameLevelAtoms.filter(new F<Function, Boolean>() {
-            @Override
-            public Boolean f(Function atom) {
-                return atom.isDataFunction();
-            }
-        });
-        List<P3<Term, List<P2<Variable, Variable>>, List<P2<Variable, Constant>>>> atomResults = dataAtoms.map(
-                new F<Function, P3<Term, List<P2<Variable, Variable>>, List<P2<Variable, Constant>>>>() {
-                    @Override
-                    public P3<Term, List<P2<Variable, Variable>>, List<P2<Variable, Constant>>> f(Function atom) {
-                        // Uses the fact atoms are encoded as functional terms
-                        return normalizeFunctionalTermInDataAtom(atom, variableDispatcher);
-                    }
-                });
-        List<Function> normalizedDataAtoms = atomResults.map(new F<P3<Term, List<P2<Variable, Variable>>, List<P2<Variable, Constant>>>, Function>() {
-            @Override
-            public Function f(P3<Term, List<P2<Variable, Variable>>, List<P2<Variable, Constant>>> triple) {
-                return (Function) triple._1();
-            }
-        });
+        List<Function> dataAtoms = sameLevelAtoms
+                .filter(Function::isDataFunction);
+
+        List<P3<Term, List<P2<Variable, Variable>>, List<P2<Variable, Constant>>>> atomResults = dataAtoms
+                // Uses the fact atoms are encoded as functional terms
+                .map(atom -> normalizeFunctionalTermInDataAtom(atom, variableDispatcher));
+
+        List<Function> normalizedDataAtoms = atomResults
+                .map(triple -> (Function) triple._1());
         // Variable-Variable equalities
-        List<P2<Variable, Variable>> variableRenamings = atomResults.bind(
-                P3.<Term, List<P2<Variable, Variable>>, List<P2<Variable, Constant>>>__2());
+        List<P2<Variable, Variable>> variableRenamings = atomResults
+                .bind(P3.<Term, List<P2<Variable, Variable>>, List<P2<Variable, Constant>>>__2());
 
         /**
          * Merges the variable renamings into a substitution and a list of variable-to-variable equalities.
@@ -438,37 +404,20 @@ public class PullOutEqualityNormalizerImpl implements PullOutEqualityNormalizer 
          * Normalizes sub-terms.
          */
         List<P3<Term, List<P2<Variable, Variable>>, List<P2<Variable, Constant>>>> subTermResults =
-                List.iterableList(functionalTerm.getTerms()).map(new F<Term, P3<Term, List<P2<Variable, Variable>>, List<P2<Variable, Constant>>>>() {
-                    @Override
-                    public P3<Term, List<P2<Variable, Variable>>, List<P2<Variable, Constant>>> f(Term term) {
-                        return normalizeTermInDataAtom(term, variableDispatcher);
-                    }
-                });
+                List.iterableList(functionalTerm.getTerms())
+                        .map(term -> normalizeTermInDataAtom(term, variableDispatcher));
 
         /**
          * Retrieves normalized sub-terms.
          */
-        List<Term> newSubTerms = subTermResults.map(new F<P3<Term, List<P2<Variable, Variable>>, List<P2<Variable, Constant>>>, Term>() {
-            @Override
-            public Term f(P3<Term, List<P2<Variable, Variable>>, List<P2<Variable, Constant>>> p3) {
-                return p3._1();
-            }
-        });
+        List<Term> newSubTerms = subTermResults.map(P3::_1);
         Function newFunctionalTerm = constructNewFunction(functionalTerm.getFunctionSymbol(), newSubTerms);
 
         /**
          * Concatenates variable-to-variable renamings and variable-to-constant pairs.
          */
-        List<P2<Variable, Variable>> variableRenamings = subTermResults.bind(new F<P3<Term, List<P2<Variable, Variable>>, List<P2<Variable, Constant>>>, List<P2<Variable, Variable>>>() {
-            @Override
-            public List<P2<Variable, Variable>> f(P3<Term, List<P2<Variable, Variable>>, List<P2<Variable, Constant>>> p3) { return p3._2();
-            }
-        });
-        List<P2<Variable, Constant>> variableConstantPairs = subTermResults.bind(new F<P3<Term, List<P2<Variable, Variable>>, List<P2<Variable, Constant>>>, List<P2<Variable, Constant>>>() {
-            @Override
-            public List<P2<Variable, Constant>> f(P3<Term, List<P2<Variable, Variable>>, List<P2<Variable, Constant>>> p3) { return p3._3();
-            }
-        });
+        List<P2<Variable, Variable>> variableRenamings = subTermResults.bind(P3::_2);
+        List<P2<Variable, Constant>> variableConstantPairs = subTermResults.bind(P3::_3);
 
 
         return P.p((Term) newFunctionalTerm, variableRenamings, variableConstantPairs);
@@ -485,14 +434,10 @@ public class PullOutEqualityNormalizerImpl implements PullOutEqualityNormalizer 
         /**
          * Transforms the substitutions into list of variable-to-variable pairs and concatenates them.
          */
-        List<P2<Variable, Variable>> renamingPairs = substitutionsToMerge.bind(
-                new F<Var2VarSubstitution, List<P2<Variable, Variable>>>() {
-            @Override
-            public List<P2<Variable, Variable>> f(Var2VarSubstitution substitution) {
+        List<P2<Variable, Variable>> renamingPairs = substitutionsToMerge
                 // Transforms the map of the substitution in a list of pairs
-                return TreeMap.fromMutableMap(VARIABLE_ORD, substitution.getImmutableMap()).toStream().toList();
-            }
-        });
+                .bind(substitution -> TreeMap.fromMutableMap(VARIABLE_ORD, substitution.getImmutableMap())
+                        .toStream().toList());
 
         /**
          * Merges renaming variable-to-variable pairs into a substitution
@@ -520,34 +465,21 @@ public class PullOutEqualityNormalizerImpl implements PullOutEqualityNormalizer 
                 /**
                  * and converts the list of target variables into a set.
                  */
-                map(new F<List<Variable>, Set<Variable>>() {
-            @Override
-            public Set<Variable> f(List<Variable> equivalentVariables) {
-                return Set.iterableSet(VARIABLE_ORD, equivalentVariables);
-            }
-        });
+                map(equivalentVariables -> Set.iterableSet(VARIABLE_ORD, equivalentVariables));
 
         /**
          * Generates equalities between the target variables
          */
-        List<Function> newEqualities = commonMap.values().bind(new F<Set<Variable>, List<Function>>() {
-            @Override
-            public List<Function> f(Set<Variable> equivalentVariables) {
-                return generateVariableEqualities(equivalentVariables);
-            }
-        });
+        List<Function> newEqualities = commonMap.values()
+                .bind(PullOutEqualityNormalizerImpl::generateVariableEqualities);
 
         /**
          * Selects the target variables for the one-to-one substitution map.
          *
          * Selection consists in taking the first element of set.
          */
-        TreeMap<Variable, Variable> mergedMap = commonMap.map(new F<Set<Variable>, Variable>() {
-            @Override
-            public Variable f(Set<Variable> variables) {
-                return variables.toList().head();
-            }
-        });
+        TreeMap<Variable, Variable> mergedMap = commonMap
+                .map(variables -> variables.toList().head());
         Var2VarSubstitution mergedSubstitution = new Var2VarSubstitutionImpl(mergedMap);
 
         return P.p(mergedSubstitution, newEqualities);
@@ -557,12 +489,8 @@ public class PullOutEqualityNormalizerImpl implements PullOutEqualityNormalizer 
      * Converts the variable-to-constant pairs into a list of equalities.
      */
     private static List<Function> generateVariableConstantEqualities(List<P2<Variable, Constant>> varConstantPairs) {
-        return varConstantPairs.map(new F<P2<Variable, Constant>, Function>() {
-            @Override
-            public Function f(P2<Variable, Constant> pair) {
-                return DATA_FACTORY.getFunctionEQ(pair._1(), pair._2());
-            }
-        });
+        return varConstantPairs
+                .map((F<P2<Variable, Constant>, Function>) pair -> DATA_FACTORY.getFunctionEQ(pair._1(), pair._2()));
     }
 
     /**
@@ -571,12 +499,8 @@ public class PullOutEqualityNormalizerImpl implements PullOutEqualityNormalizer 
     private static List<Function> generateVariableEqualities(Set<Variable> equivalentVariables) {
         List<Variable> variableList = equivalentVariables.toList();
         List<P2<Variable, Variable>> variablePairs = variableList.zip(variableList.tail());
-        return variablePairs.map(new F<P2<Variable, Variable>, Function>() {
-            @Override
-            public Function f(P2<Variable, Variable> pair) {
-                return DATA_FACTORY.getFunctionEQ(pair._1(), pair._2());
-            }
-        });
+        return variablePairs
+                .map((F<P2<Variable, Variable>, Function>) pair -> DATA_FACTORY.getFunctionEQ(pair._1(), pair._2()));
     }
 
 
@@ -599,12 +523,7 @@ public class PullOutEqualityNormalizerImpl implements PullOutEqualityNormalizer 
     public static P2<List<Function>, List<Function>> splitLeftJoinSubAtoms(List<Function> ljSubAtoms) {
 
         // TODO: make it static (performance improvement).
-        F<Function, Boolean> isNotDataOrCompositeAtomFct = new F<Function, Boolean>() {
-            @Override
-            public Boolean f(Function atom) {
-                return !(isDataOrLeftJoinOrJoinAtom(atom));
-            }
-        };
+        F<Function, Boolean> isNotDataOrCompositeAtomFct = atom -> !(isDataOrLeftJoinOrJoinAtom(atom));
 
         /**
          * Left: left of the first data/composite atom (usually empty).
@@ -632,18 +551,9 @@ public class PullOutEqualityNormalizerImpl implements PullOutEqualityNormalizer 
      * Only boolean atoms are pushable.
      */
     private static P2<List<Function>,List<Function>> splitPushableAtoms(List<Function> atoms) {
-        List<Function> nonPushableAtoms = atoms.filter(new F<Function, Boolean>() {
-            @Override
-            public Boolean f(Function atom) {
-                return !isPushable(atom);
-            }
-        });
-        List<Function> pushableAtoms = atoms.filter(new F<Function, Boolean>() {
-            @Override
-            public Boolean f(Function atom) {
-                return isPushable(atom);
-            }
-        });
+        List<Function> nonPushableAtoms = atoms
+                .filter(atom -> !isPushable(atom));
+        List<Function> pushableAtoms = atoms.filter(PullOutEqualityNormalizerImpl::isPushable);
 
         return P.p(nonPushableAtoms, pushableAtoms);
     }

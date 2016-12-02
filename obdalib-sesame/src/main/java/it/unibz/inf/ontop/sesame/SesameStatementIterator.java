@@ -47,7 +47,7 @@ public class SesameStatementIterator implements Iterator<Statement> {
 
 	public Statement next() {
 		Assertion assertion = iterator.next();
-		Statement individual = new SesameStatement(assertion);
+		Statement individual = SesameHelper.createStatement(assertion);
 		return individual;
 	}
 
