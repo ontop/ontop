@@ -22,6 +22,9 @@ package it.unibz.inf.ontop.obda;
 
 import it.unibz.inf.ontop.reformulation.tests.AbstractBindTestWithFunctions;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Class to test if functions on Strings and Numerics in SPARQL are working properly.
  * Refer in particular to the class {@link it.unibz.inf.ontop.owlrefplatform.core.translator.SparqlAlgebraToDatalogTranslator}
@@ -35,5 +38,15 @@ public class BindTestWithFunctionsMySQL extends AbstractBindTestWithFunctions {
 
     public BindTestWithFunctionsMySQL() {
         super(owlfile, obdafile);
+    }
+
+    @Override
+    protected List<String> getRoundExpectedValues() {
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"0, 43\"");
+        expectedValues.add("\"0, 23\"");
+        expectedValues.add("\"0, 34\"");
+        expectedValues.add("\"0, 10\"");
+        return expectedValues;
     }
 }

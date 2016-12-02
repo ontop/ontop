@@ -138,12 +138,16 @@ public abstract class AbstractBindTestWithFunctions {
                 + "   BIND (FLOOR(?discount) AS ?w)\n"
                 + "}";
 
+        checkReturnedValues(queryBind, getFloorExpectedValues());
+    }
+
+    protected List<String> getFloorExpectedValues() {
         List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"0.0\"^^xsd:decimal");
-        expectedValues.add("\"0.0\"^^xsd:decimal");
-        expectedValues.add("\"0.0\"^^xsd:decimal");
-        expectedValues.add("\"0.0\"^^xsd:decimal");
-        checkReturnedValues(queryBind, expectedValues);
+        expectedValues.add("\"0\"^^xsd:decimal");
+        expectedValues.add("\"0\"^^xsd:decimal");
+        expectedValues.add("\"0\"^^xsd:decimal");
+        expectedValues.add("\"0\"^^xsd:decimal");
+        return expectedValues;
     }
 
 
@@ -159,12 +163,17 @@ public abstract class AbstractBindTestWithFunctions {
                 + "   BIND (CONCAT(ROUND(?discount),', ',ROUND(?p)) AS ?w)\n"
                 + "}";
 
+
+        checkReturnedValues(queryBind, getRoundExpectedValues());
+    }
+
+    protected List<String> getRoundExpectedValues() {
         List<String> expectedValues = new ArrayList<>();
         expectedValues.add("\"0.0, 43.0\"");
         expectedValues.add("\"0.0, 23.0\"");
         expectedValues.add("\"0.0, 34.0\"");
         expectedValues.add("\"0.0, 10.0\"");
-        checkReturnedValues(queryBind, expectedValues);
+        return expectedValues;
     }
 
     @Test
@@ -179,12 +188,16 @@ public abstract class AbstractBindTestWithFunctions {
                 + "   BIND (ABS((?p - ?discount*?p) - ?p)  AS ?w)\n"
                 + "}";
 
+        checkReturnedValues(queryBind, getAbsExpectedValues());
+    }
+
+    protected List<String> getAbsExpectedValues() {
         List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"8.6\"^^xsd:decimal");
+        expectedValues.add("\"8.5\"^^xsd:decimal");
         expectedValues.add("\"5.75\"^^xsd:decimal");
-        expectedValues.add("\"6.8\"^^xsd:decimal");
-        expectedValues.add("\"1.50\"^^xsd:decimal");
-        checkReturnedValues(queryBind, expectedValues);
+        expectedValues.add("\"6.7\"^^xsd:decimal");
+        expectedValues.add("\"1.5\"^^xsd:decimal");
+        return expectedValues;
     }
 
 	/*
@@ -511,7 +524,7 @@ public abstract class AbstractBindTestWithFunctions {
         List<String> expectedValues = new ArrayList<>();
         expectedValues.add("\"6\"^^xsd:integer");
         expectedValues.add("\"12\"^^xsd:integer");
-        expectedValues.add("\"7\"^^xsd:integer");
+        expectedValues.add("\"9\"^^xsd:integer");
         expectedValues.add("\"11\"^^xsd:integer");
         checkReturnedValues(queryBind, expectedValues);
     }
@@ -556,7 +569,7 @@ public abstract class AbstractBindTestWithFunctions {
         List<String> expectedValues = new ArrayList<>();
         expectedValues.add("\"5\"^^xsd:integer");
         expectedValues.add("\"8\"^^xsd:integer");
-        expectedValues.add("\"1\"^^xsd:integer");
+        expectedValues.add("\"21\"^^xsd:integer");
         expectedValues.add("\"5\"^^xsd:integer");
         checkReturnedValues(queryBind, expectedValues);
     }
@@ -597,14 +610,18 @@ public abstract class AbstractBindTestWithFunctions {
                 + "   BIND (HOURS(?year) AS ?w)\n"
                 + "}";
 
+        checkReturnedValues(queryBind, getHoursExpectedValues());
+    }
 
+    protected List<String> getHoursExpectedValues() {
         List<String> expectedValues = new ArrayList<>();
         expectedValues.add("\"18\"^^xsd:integer");
-        expectedValues.add("\"0\"^^xsd:integer");
-        expectedValues.add("\"0\"^^xsd:integer");
-        expectedValues.add("\"0\"^^xsd:integer");
-        checkReturnedValues(queryBind, expectedValues);
+        expectedValues.add("\"12\"^^xsd:integer");
+        expectedValues.add("\"9\"^^xsd:integer");
+        expectedValues.add("\"7\"^^xsd:integer");
+        return expectedValues;
     }
+
 
     @Test
     public void testSeconds() throws Exception {

@@ -22,6 +22,11 @@ package it.unibz.inf.ontop.obda;
 
 
 import it.unibz.inf.ontop.reformulation.tests.AbstractBindTestWithFunctions;
+import org.junit.Ignore;
+import org.junit.Test;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Class to test if functions on Strings and Numerics in SPARQL are working properly.
@@ -37,4 +42,41 @@ public class BindTestWithFunctionsOracle extends AbstractBindTestWithFunctions {
     public BindTestWithFunctionsOracle() {
         super(owlfile, obdafile);
     }
+
+    @Override
+    protected List<String> getAbsExpectedValues() {
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"8.5\"^^xsd:decimal");
+        expectedValues.add("\"5.75\"^^xsd:decimal");
+        expectedValues.add("\"6.7\"^^xsd:decimal");
+        expectedValues.add("\"1.5\"^^xsd:decimal");
+        return expectedValues;
+    }
+
+    @Ignore("Not yet supported")
+    @Test
+    @Override
+    public void testHash() {
+    }
+
+    @Override
+    protected List<String> getHoursExpectedValues() {
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"10\"^^xsd:integer");
+        expectedValues.add("\"11\"^^xsd:integer");
+        expectedValues.add("\"9\"^^xsd:integer");
+        expectedValues.add("\"6\"^^xsd:integer");
+        return expectedValues;
+    }
+
+    @Override
+    protected List<String> getRoundExpectedValues() {
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"0, 43\"");
+        expectedValues.add("\"0, 23\"");
+        expectedValues.add("\"0, 34\"");
+        expectedValues.add("\"0, 10\"");
+        return expectedValues;
+    }
+
 }

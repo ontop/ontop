@@ -23,6 +23,9 @@ package it.unibz.inf.ontop.obda;
 
 import it.unibz.inf.ontop.reformulation.tests.AbstractBindTestWithFunctions;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Class to test if functions on Strings and Numerics in SPARQL are working properly.
  * Refer in particular to the class {@link it.unibz.inf.ontop.owlrefplatform.core.translator.SparqlAlgebraToDatalogTranslator}
@@ -35,5 +38,35 @@ public class BindTestWithFunctionsSqlServer extends AbstractBindTestWithFunction
 
     public BindTestWithFunctionsSqlServer() {
         super(owlfile, obdafile);
+    }
+
+    @Override
+    protected List<String> getAbsExpectedValues() {
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"8.5000\"^^xsd:decimal");
+        expectedValues.add("\"5.7500\"^^xsd:decimal");
+        expectedValues.add("\"6.7000\"^^xsd:decimal");
+        expectedValues.add("\"1.5000\"^^xsd:decimal");
+        return expectedValues;
+    }
+
+    @Override
+    protected List<String> getFloorExpectedValues() {
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"0.0000\"^^xsd:decimal");
+        expectedValues.add("\"0.0000\"^^xsd:decimal");
+        expectedValues.add("\"0.0000\"^^xsd:decimal");
+        expectedValues.add("\"0.0000\"^^xsd:decimal");
+        return expectedValues;
+    }
+
+    @Override
+    protected List<String> getRoundExpectedValues() {
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"0.00, 43.00\"");
+        expectedValues.add("\"0.00, 23.00\"");
+        expectedValues.add("\"0.00, 34.00\"");
+        expectedValues.add("\"0.00, 10.00\"");
+        return expectedValues;
     }
 }
