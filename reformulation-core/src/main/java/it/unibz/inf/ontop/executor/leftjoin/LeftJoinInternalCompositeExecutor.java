@@ -15,7 +15,7 @@ import java.util.Optional;
  * TODO: explain
  */
 public class LeftJoinInternalCompositeExecutor extends SimpleNodeCentricInternalCompositeExecutor<LeftJoinNode,
-        LeftJoinOptimizationProposal> {
+        LeftJoinOptimizationProposal> implements LeftJoinExecutor {
 
     @Override
     protected Optional<LeftJoinOptimizationProposal> createNewProposalFromFocusNode(LeftJoinNode focusNode) {

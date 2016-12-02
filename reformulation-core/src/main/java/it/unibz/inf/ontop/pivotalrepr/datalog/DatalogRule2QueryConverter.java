@@ -115,7 +115,7 @@ public class DatalogRule2QueryConverter {
 
         List<Function> bodyAtoms = List.iterableList(datalogRule.getBody());
         if (bodyAtoms.isEmpty()) {
-            return createFact(metadata, rootNode, projectionAtom);
+            return createFact(metadata, rootNode, projectionAtom, injector);
         }
         else {
             AtomClassification atomClassification = new AtomClassification(bodyAtoms);
@@ -127,8 +127,8 @@ public class DatalogRule2QueryConverter {
     }
 
     private static IntermediateQuery createFact(MetadataForQueryOptimization metadata, ConstructionNode rootNode,
-                                                DistinctVariableOnlyDataAtom projectionAtom) {
-        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(metadata);
+                                                DistinctVariableOnlyDataAtom projectionAtom, Injector injector) {
+        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(metadata, injector);
         queryBuilder.init(projectionAtom, rootNode);
         return queryBuilder.build();
     }

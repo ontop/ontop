@@ -481,7 +481,7 @@ public class Quest implements Serializable, IQuest {
     		VocabularyValidator vocabularyValidator = new VocabularyValidator(reformulationReasoner,
 					inputOntology.getVocabulary(), nativeQLFactory);
 
-            final QuestUnfolder unfolder = new QuestUnfolder(nativeQLFactory, mapping2DatalogConverter);
+            final QuestUnfolder unfolder = new QuestUnfolder(nativeQLFactory, mapping2DatalogConverter, preferences);
 
 			/*
 			 * T-Mappings and Fact mappings
@@ -490,7 +490,7 @@ public class Quest implements Serializable, IQuest {
 				unfolder.setupInVirtualMode(mappings, metadata, dbConnector, vocabularyValidator, reformulationReasoner,
 						inputOntology, excludeFromTMappings);
 			else
-				unfolder.setupInSemanticIndexMode(mappings, dbConnector, reformulationReasoner, metadata);
+				unfolder.setupInSemanticIndexMode(mappings, reformulationReasoner, metadata);
 
 
 			/* The active ABox dependencies */

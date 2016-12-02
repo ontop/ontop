@@ -1,7 +1,6 @@
 package it.unibz.inf.ontop.reformulation.tests;
 
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Injector;
 import it.unibz.inf.ontop.model.*;
@@ -18,7 +17,6 @@ import it.unibz.inf.ontop.pivotalrepr.equivalence.IQSyntacticEquivalenceChecker;
 import it.unibz.inf.ontop.pivotalrepr.impl.*;
 import it.unibz.inf.ontop.pivotalrepr.impl.tree.DefaultIntermediateQueryBuilder;
 import org.junit.Ignore;
-import it.unibz.inf.ontop.sql.DBMetadataExtractor;
 import org.junit.Test;
 
 import java.util.Optional;
@@ -100,10 +98,7 @@ public class SubstitutionLiftTest {
     private final ImmutableExpression EXPRESSIONGT = DATA_FACTORY.getImmutableExpression(
             ExpressionOperation.GT, Z, Y);
 
-    private MetadataForQueryOptimization METADATA = new MetadataForQueryOptimizationImpl(
-            DBMetadataExtractor.createDummyMetadata(),
-            ImmutableMultimap.of(),
-            new UriTemplateMatcher());
+    private MetadataForQueryOptimization METADATA = new EmptyMetadataForQueryOptimization();
 
     private static final Injector INJECTOR = QuestCoreConfiguration.defaultBuilder().build().getInjector();
 
@@ -1080,7 +1075,7 @@ public class SubstitutionLiftTest {
     @Test
     public void testTrueNode() throws EmptyQueryException {
         //Construct unoptimized query
-        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
+        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(METADATA, INJECTOR);
         DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_2_PREDICATE, X, Y);
         ConstructionNode rootNode = new ConstructionNodeImpl(projectionAtom.getVariables(),
                 new ImmutableSubstitutionImpl<>(ImmutableMap.of()), Optional.empty());
@@ -1115,7 +1110,7 @@ public class SubstitutionLiftTest {
         IntermediateQuery unOptimizedQuery = queryBuilder.build();
         System.out.println("\nBefore optimization: \n" +  unOptimizedQuery);
 
-        IntermediateQueryBuilder expectedQueryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
+        IntermediateQueryBuilder expectedQueryBuilder = new DefaultIntermediateQueryBuilder(METADATA, INJECTOR);
         ConstructionNode expectedRootNode = new ConstructionNodeImpl(projectionAtom.getVariables(),
                 new ImmutableSubstitutionImpl<>(ImmutableMap.of(X, generateInt(A), Y, generateInt(DATA_FACTORY.getConstantLiteral("2", INTEGER)))), Optional.empty());
         expectedQueryBuilder.init(projectionAtom, expectedRootNode);
@@ -1144,7 +1139,7 @@ public class SubstitutionLiftTest {
     @Test
     public void testJoinAndNotMatchingDatatypesDoubleRun() throws EmptyQueryException {
         //Construct unoptimized query
-        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
+        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(METADATA, INJECTOR);
         DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_2_PREDICATE, X, Y);
         ConstructionNode rootNode = new ConstructionNodeImpl(projectionAtom.getVariables(),
                 new ImmutableSubstitutionImpl<>(ImmutableMap.of()), Optional.empty());
@@ -1181,7 +1176,7 @@ public class SubstitutionLiftTest {
         IntermediateQuery unOptimizedQuery = queryBuilder.build();
         System.out.println("\nBefore optimization: \n" +  unOptimizedQuery);
 
-        IntermediateQueryBuilder expectedQueryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
+        IntermediateQueryBuilder expectedQueryBuilder = new DefaultIntermediateQueryBuilder(METADATA, INJECTOR);
         ConstructionNode expectedRootNode = new ConstructionNodeImpl(projectionAtom.getVariables(),
                 new ImmutableSubstitutionImpl<>(ImmutableMap.of(X, generateInt(A), Y, generateInt(F))), Optional.empty());
         expectedQueryBuilder.init(projectionAtom, expectedRootNode);
@@ -1213,7 +1208,7 @@ public class SubstitutionLiftTest {
     @Ignore
     public void testDatatypeExpressionEvaluator() throws EmptyQueryException {
         //Construct unoptimized query
-        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
+        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(METADATA, INJECTOR);
         DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_2_PREDICATE, X, Y);
         ConstructionNode rootNode = new ConstructionNodeImpl(projectionAtom.getVariables(),
                 new ImmutableSubstitutionImpl<>(ImmutableMap.of()), Optional.empty());
@@ -1236,7 +1231,7 @@ public class SubstitutionLiftTest {
         System.out.println("\nBefore optimization: \n" + unOptimizedQuery);
 
         // Expected query
-        IntermediateQueryBuilder expectedQueryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
+        IntermediateQueryBuilder expectedQueryBuilder = new DefaultIntermediateQueryBuilder(METADATA, INJECTOR);
         ImmutableSubstitution expectedRootNodeSubstitution = new ImmutableSubstitutionImpl<>(ImmutableMap.of(X,
                 generateInt(A), Y, generateInt(B)));
         ConstructionNode expectedRootNode = new ConstructionNodeImpl(ImmutableSet.of(X, Y), expectedRootNodeSubstitution,
@@ -1263,7 +1258,7 @@ public class SubstitutionLiftTest {
     public void testEmptySubstitutionToBeLifted() throws EmptyQueryException {
 
         //Construct unoptimized query
-        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
+        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(METADATA, INJECTOR);
         DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_2_PREDICATE, X, Y);
         ConstructionNode rootNode = new ConstructionNodeImpl(projectionAtom.getVariables());
 
@@ -1318,7 +1313,7 @@ public class SubstitutionLiftTest {
 
     @Test
     public void testUnionRemoval() throws EmptyQueryException {
-        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
+        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(METADATA, INJECTOR);
         DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_2_PREDICATE, X, Y);
         ConstructionNode rootNode = new ConstructionNodeImpl(projectionAtom.getVariables());
 
@@ -1355,7 +1350,7 @@ public class SubstitutionLiftTest {
         System.out.println("\nBefore optimization: \n" +  unOptimizedQuery);
 
 
-        IntermediateQueryBuilder expectedQueryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
+        IntermediateQueryBuilder expectedQueryBuilder = new DefaultIntermediateQueryBuilder(METADATA, INJECTOR);
         expectedQueryBuilder.init(projectionAtom, constructionNode3);
         expectedQueryBuilder.addChild(constructionNode3, DATA_NODE_6);
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();

@@ -1,16 +1,10 @@
 package it.unibz.inf.ontop.owlrefplatform.core.basicoperations;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
-import it.unibz.inf.ontop.model.CQIE;
-import it.unibz.inf.ontop.model.Function;
-import it.unibz.inf.ontop.model.OBDADataFactory;
-import it.unibz.inf.ontop.model.Predicate;
-import it.unibz.inf.ontop.model.Variable;
+import com.google.common.collect.ImmutableMultimap;
+import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.ontology.ClassExpression;
 import it.unibz.inf.ontop.ontology.DataPropertyExpression;
@@ -25,8 +19,20 @@ public class LinearInclusionDependencies {
 
     private static final OBDADataFactory ofac = OBDADataFactoryImpl.getInstance();
     
-	private final Map<Predicate, List<CQIE>> rules = new HashMap<>();
-	
+	private final Map<Predicate, List<CQIE>> rules;
+
+	public LinearInclusionDependencies() {
+		rules = new HashMap<>();
+	}
+
+	public LinearInclusionDependencies(ImmutableMultimap<AtomPredicate, CQIE> predicateRuleMap) {
+		rules = predicateRuleMap.asMap().entrySet().stream()
+				.collect(Collectors.toMap(
+						Map.Entry::getKey,
+						e -> new ArrayList<>(e.getValue())
+				));
+	}
+
 	public List<CQIE> getRules(Predicate pred) {
 		List<CQIE> rrs = rules.get(pred);
 		if (rrs == null)

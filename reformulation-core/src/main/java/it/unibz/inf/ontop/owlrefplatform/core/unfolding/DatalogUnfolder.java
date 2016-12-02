@@ -63,7 +63,7 @@ public class DatalogUnfolder {
     private static final Logger log = LoggerFactory.getLogger(DatalogUnfolder.class);
     private static final OBDADataFactory termFactory = OBDADataFactoryImpl.getInstance();
 
-    private final ImmutableMultimap<Predicate, List<Integer>> primaryKeys;
+    private final ImmutableMultimap<Predicate, ImmutableList<Integer>> primaryKeys;
 
     private final Map<Predicate, List<CQIE>> mappings;
     private final Multimap<Predicate,Integer> multiTypedFunctionSymbolIndex;
@@ -80,13 +80,13 @@ public class DatalogUnfolder {
     private final List<Predicate> extensionalPredicates;
 
     public DatalogUnfolder(List<CQIE> rules) {
-        this(rules, ArrayListMultimap.<Predicate, List<Integer>>create());
+        this(rules, ArrayListMultimap.<Predicate, ImmutableList<Integer>>create());
     }
 
-    public DatalogUnfolder(DatalogProgram unfoldingProgram, Multimap<Predicate, List<Integer>> primaryKeys) {
+    public DatalogUnfolder(DatalogProgram unfoldingProgram, Multimap<? extends Predicate, ImmutableList<Integer>> primaryKeys) {
         this(unfoldingProgram.getRules(), primaryKeys);
     }
-    public DatalogUnfolder(List<CQIE> unfoldingProgram, Multimap<Predicate, List<Integer>> primaryKeys) {
+    public DatalogUnfolder(List<CQIE> unfoldingProgram, Multimap<? extends Predicate, ImmutableList<Integer>> primaryKeys) {
         /**
          * Creating a local index for the rules according to their predicate
          */
@@ -2168,7 +2168,7 @@ public class DatalogUnfolder {
             if (!newatom.isDataFunction())
                 continue;
 
-            Collection<List<Integer>> pKeys = primaryKeys.get(newatom.getFunctionSymbol());
+            Collection<ImmutableList<Integer>> pKeys = primaryKeys.get(newatom.getFunctionSymbol());
 
             for(List<Integer> pKey : pKeys){
 

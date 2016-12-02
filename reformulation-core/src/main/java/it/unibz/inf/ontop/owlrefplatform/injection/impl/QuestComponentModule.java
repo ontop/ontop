@@ -5,10 +5,13 @@ import com.google.inject.Module;
 import it.unibz.inf.ontop.executor.expression.PushDownExpressionExecutor;
 import it.unibz.inf.ontop.executor.groundterm.GroundTermRemovalFromDataNodeExecutor;
 import it.unibz.inf.ontop.executor.join.InnerJoinExecutor;
+import it.unibz.inf.ontop.executor.leftjoin.LeftJoinExecutor;
 import it.unibz.inf.ontop.executor.merging.QueryMergingExecutor;
+import it.unibz.inf.ontop.executor.projection.ProjectionShrinkingExecutor;
 import it.unibz.inf.ontop.executor.pullout.PullVariableOutOfDataNodeExecutor;
 import it.unibz.inf.ontop.executor.pullout.PullVariableOutOfSubTreeExecutor;
 import it.unibz.inf.ontop.executor.substitution.SubstitutionPropagationExecutor;
+import it.unibz.inf.ontop.executor.truenode.TrueNodeRemovalExecutor;
 import it.unibz.inf.ontop.executor.union.UnionLiftInternalExecutor;
 import it.unibz.inf.ontop.executor.unsatisfiable.RemoveEmptyNodesExecutor;
 import it.unibz.inf.ontop.injection.impl.OBDAAbstractModule;
@@ -67,6 +70,9 @@ public class QuestComponentModule extends OBDAAbstractModule {
         bindFromPreferences(RemoveEmptyNodesExecutor.class);
         bindFromPreferences(QueryMergingExecutor.class);
         bindFromPreferences(UnionLiftInternalExecutor.class);
+        bindFromPreferences(LeftJoinExecutor.class);
+        bindFromPreferences(ProjectionShrinkingExecutor.class);
+        bindFromPreferences(TrueNodeRemovalExecutor.class);
 
 
         // Releases the configuration (enables some GC)

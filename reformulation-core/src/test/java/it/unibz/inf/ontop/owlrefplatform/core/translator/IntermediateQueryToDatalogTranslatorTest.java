@@ -3,10 +3,12 @@ package it.unibz.inf.ontop.owlrefplatform.core.translator;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import com.google.inject.Injector;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.AtomPredicateImpl;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionImpl;
+import it.unibz.inf.ontop.owlrefplatform.injection.QuestCoreConfiguration;
 import it.unibz.inf.ontop.pivotalrepr.*;
 import it.unibz.inf.ontop.pivotalrepr.impl.*;
 import it.unibz.inf.ontop.pivotalrepr.impl.tree.DefaultIntermediateQueryBuilder;
@@ -39,6 +41,8 @@ public class IntermediateQueryToDatalogTranslatorTest {
     private static Predicate P1_DATALOG_PREDICATE;
     private static Predicate P2_DATALOG_PREDICATE;
 
+    private static final Injector INJECTOR = QuestCoreConfiguration.defaultBuilder().build().getInjector();
+
     static {
         ANS1_DATALOG_PREDICATE = DATA_FACTORY.getClassPredicate("ans1");
         ANSSQ1_DATALOG_PREDICATE = DATA_FACTORY.getClassPredicate("ansSQ1");
@@ -53,7 +57,7 @@ public class IntermediateQueryToDatalogTranslatorTest {
         /**
          * Original query
          */
-        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
+        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(METADATA, INJECTOR);
 
         ConstructionNode rootNode = new ConstructionNodeImpl(ImmutableSet.of(X),
                 new ImmutableSubstitutionImpl<>(ImmutableMap.of()), Optional.empty());

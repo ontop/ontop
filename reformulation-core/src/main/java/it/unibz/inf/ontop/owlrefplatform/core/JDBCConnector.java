@@ -1,10 +1,8 @@
 package it.unibz.inf.ontop.owlrefplatform.core;
 
-import com.google.common.collect.Multimap;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 import it.unibz.inf.ontop.model.*;
-import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.DBMetadataUtil;
 import it.unibz.inf.ontop.owlrefplatform.injection.QuestCorePreferences;
 import it.unibz.inf.ontop.sql.ImplicitDBConstraintsReader;
 import net.sf.jsqlparser.JSQLParserException;
@@ -170,14 +168,6 @@ public class JDBCConnector implements DBConnector {
         DBMetadataExtractor dataSourceMetadataExtractor = nativeQLFactory.create();
         return dataSourceMetadataExtractor.extract(obdaSource, obdaModel, new JDBCConnectionWrapper(localConnection),
                 partiallyDefinedMetadata);
-    }
-
-    @Override
-    public Multimap<Predicate, List<Integer>> extractUniqueConstraints(DataSourceMetadata metadata) {
-        if (!(metadata instanceof DBMetadata)) {
-            throw new IllegalArgumentException("Was expecting a DBMetadata");
-        }
-        return DBMetadataUtil.extractPKs((DBMetadata) metadata);
     }
 
     private Collection<OBDAMappingAxiom> expandMetaMappings(Collection<OBDAMappingAxiom> mappingAxioms,
@@ -350,16 +340,6 @@ public class JDBCConnector implements DBConnector {
         }
 
         return mappingAxioms;
-    }
-
-    @Override
-    public LinearInclusionDependencies generateFKRules(DataSourceMetadata metadata) {
-        if (metadata instanceof DBMetadata) {
-            return DBMetadataUtil.generateFKRules((DBMetadata)metadata);
-        }
-        else {
-            throw new IllegalArgumentException("A SQL-specific DBMetadata was expected");
-        }
     }
 
     @Override

@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.pivotalrepr.impl;
 
+import com.google.inject.Injector;
 import it.unibz.inf.ontop.model.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.pivotalrepr.*;
 import it.unibz.inf.ontop.pivotalrepr.impl.tree.DefaultIntermediateQueryBuilder;
@@ -24,7 +25,7 @@ public abstract class NodeBasedQueryTransformer
         DistinctVariableOnlyDataAtom transformedProjectionDataAtom =
                 transformProjectionAtom(originalQuery.getProjectionAtom());
         IntermediateQueryBuilder builder = convertToBuilderAndTransform(originalQuery, nodeTransformer,
-                transformedProjectionDataAtom);
+                transformedProjectionDataAtom, originalQuery.getInjector());
         return builder.build();
     }
 
@@ -38,8 +39,9 @@ public abstract class NodeBasedQueryTransformer
      */
     private IntermediateQueryBuilder convertToBuilderAndTransform(IntermediateQuery originalQuery,
                                                                   HomogeneousQueryNodeTransformer nodeTransformer,
-                                                                  DistinctVariableOnlyDataAtom transformedProjectionAtom) {
-        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(originalQuery.getMetadata());
+                                                                  DistinctVariableOnlyDataAtom transformedProjectionAtom,
+                                                                  Injector injector) {
+        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(originalQuery.getMetadata(), injector);
 
         // Clone the original root node and apply the transformer if available.
         ConstructionNode originalRootNode = originalQuery.getRootConstructionNode();

@@ -15,7 +15,7 @@ import it.unibz.inf.ontop.pivotalrepr.*;
 import it.unibz.inf.ontop.pivotalrepr.impl.*;
 import it.unibz.inf.ontop.pivotalrepr.impl.tree.DefaultIntermediateQueryBuilder;
 import it.unibz.inf.ontop.pivotalrepr.validation.InvalidIntermediateQueryException;
-import it.unibz.inf.ontop.sql.DBMetadataExtractor;
+import it.unibz.inf.ontop.sql.RDBMetadataExtractionTools;
 import org.junit.Test;
 
 import java.util.Optional;
@@ -55,7 +55,7 @@ public class IQValidationTest {
         uniqueKeyBuilder.put(TABLE1_PREDICATE, ImmutableList.of(1));
 
         return new MetadataForQueryOptimizationImpl(
-                DBMetadataExtractor.createDummyMetadata(),
+                RDBMetadataExtractionTools.createDummyMetadata(),
                 uniqueKeyBuilder.build(),
                 new UriTemplateMatcher());
     }

@@ -18,7 +18,7 @@ import it.unibz.inf.ontop.pivotalrepr.impl.*;
 import it.unibz.inf.ontop.pivotalrepr.impl.tree.DefaultIntermediateQueryBuilder;
 import it.unibz.inf.ontop.pivotalrepr.proposal.InvalidQueryOptimizationProposalException;
 import it.unibz.inf.ontop.pivotalrepr.proposal.impl.UnionLiftProposalImpl;
-import it.unibz.inf.ontop.sql.DBMetadataExtractor;
+import it.unibz.inf.ontop.sql.RDBMetadataExtractionTools;
 import org.junit.Test;
 
 import java.util.Optional;
@@ -74,7 +74,7 @@ public class UnionLiftInternalTest {
 
     private static MetadataForQueryOptimization initMetadata() {
         ImmutableMultimap.Builder<AtomPredicate, ImmutableList<Integer>> uniqueKeyBuilder = ImmutableMultimap.builder();
-        return new MetadataForQueryOptimizationImpl(DBMetadataExtractor.createDummyMetadata(),
+        return new MetadataForQueryOptimizationImpl(RDBMetadataExtractionTools.createDummyMetadata(),
                 uniqueKeyBuilder.build(), new UriTemplateMatcher());
     }
 

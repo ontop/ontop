@@ -7,10 +7,13 @@ import it.unibz.inf.ontop.executor.InternalProposalExecutor;
 import it.unibz.inf.ontop.executor.expression.PushDownExpressionExecutor;
 import it.unibz.inf.ontop.executor.groundterm.GroundTermRemovalFromDataNodeExecutor;
 import it.unibz.inf.ontop.executor.join.InnerJoinExecutor;
+import it.unibz.inf.ontop.executor.leftjoin.LeftJoinExecutor;
 import it.unibz.inf.ontop.executor.merging.QueryMergingExecutor;
+import it.unibz.inf.ontop.executor.projection.ProjectionShrinkingExecutor;
 import it.unibz.inf.ontop.executor.pullout.PullVariableOutOfDataNodeExecutor;
 import it.unibz.inf.ontop.executor.pullout.PullVariableOutOfSubTreeExecutor;
 import it.unibz.inf.ontop.executor.substitution.SubstitutionPropagationExecutor;
+import it.unibz.inf.ontop.executor.truenode.TrueNodeRemovalExecutor;
 import it.unibz.inf.ontop.executor.union.UnionLiftInternalExecutor;
 import it.unibz.inf.ontop.executor.unsatisfiable.RemoveEmptyNodesExecutor;
 import it.unibz.inf.ontop.injection.InvalidOBDAConfigurationException;
@@ -107,6 +110,9 @@ public class QuestCoreConfigurationImpl extends OBDACoreConfigurationImpl implem
         internalExecutorMapBuilder.put(RemoveEmptyNodeProposal.class, RemoveEmptyNodesExecutor.class);
         internalExecutorMapBuilder.put(QueryMergingProposal.class, QueryMergingExecutor.class);
         internalExecutorMapBuilder.put(UnionLiftProposal.class, UnionLiftInternalExecutor.class);
+        internalExecutorMapBuilder.put(LeftJoinOptimizationProposal.class, LeftJoinExecutor.class);
+        internalExecutorMapBuilder.put(ProjectionShrinkingProposal.class, ProjectionShrinkingExecutor.class);
+        internalExecutorMapBuilder.put(TrueNodeRemovalProposal.class, TrueNodeRemovalExecutor.class);
         return internalExecutorMapBuilder.build();
     }
 

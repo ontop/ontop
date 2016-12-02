@@ -55,7 +55,6 @@ public class QuestQueryProcessor {
 	protected final QuestUnfolder unfolder;
 	
 	private static final Logger log = LoggerFactory.getLogger(QuestQueryProcessor.class);
-	private static final OBDADataFactory DATA_FACTORY = OBDADataFactoryImpl.getInstance();
 	private final boolean hasDistinctResultSet;
 	private final Injector injector;
 
@@ -69,7 +68,8 @@ public class QuestQueryProcessor {
 		this.unfolder = unfolder;
 
 		Stream<IntermediateQuery> intermediateQueryStream =
-				convertMappings(unfolder.getMappings(), unfolder.getExtensionalPredicates(), unfolder.getMetadataForQueryOptimization());
+				convertMappings(unfolder.getMappings(), unfolder.getExtensionalPredicates(),
+						unfolder.getMetadataForQueryOptimization(), injector);
 
 		this.queryUnfolder = new QueryUnfolderImpl(intermediateQueryStream);
 
@@ -89,8 +89,10 @@ public class QuestQueryProcessor {
 	public QuestQueryProcessor changeMappings(Collection<OBDAMappingAxiom> mappings, TBoxReasoner reformulationReasoner) {
 		// TODO: clone it and then configure it
 		// TODO: check that it is in the classic A-box mode
-		unfolder.setupInSemanticIndexMode(mappings, reformulationReasoner);
-		return new QuestQueryProcessor(rewriter, sigma, unfolder, vocabularyValidator, uriMap, datasourceQueryGenerator);
+		unfolder.changeMappings(mappings, reformulationReasoner);
+		queryCache.clear();
+		return new QuestQueryProcessor(rewriter, sigma, unfolder, vocabularyValidator, uriMap, datasourceQueryGenerator,
+				queryCache, hasDistinctResultSet, injector);
 	}
 
 	/**
@@ -107,10 +109,13 @@ public class QuestQueryProcessor {
 	}
 
 	
-	private DatalogProgram translateAndPreProcess(ParsedQuery pq)  {
-
+	private DatalogProgram translateAndPreProcess(ParsedQuery pq) {
 		SparqlAlgebraToDatalogTranslator translator = new SparqlAlgebraToDatalogTranslator(unfolder.getUriTemplateMatcher(), uriMap);
 		SparqlQuery translation = translator.translate(pq);
+		return preProcess(translation);
+	}
+
+	private DatalogProgram preProcess(SparqlQuery translation) {
 		DatalogProgram program = translation.getProgram();
 		log.debug("Datalog program translated from the SPARQL query: \n{}", program);
 
@@ -155,37 +160,9 @@ public class QuestQueryProcessor {
 			return executableQuery;
 
 		try {
-			// log.debug("Input query:\n{}", strquery);
-			
 			SparqlAlgebraToDatalogTranslator translator = new SparqlAlgebraToDatalogTranslator(unfolder.getUriTemplateMatcher(), uriMap);
 			SparqlQuery translation = translator.translate(pq);
-			DatalogProgram program = translation.getProgram();
-			log.debug("Datalog program translated from the SPARQL query: \n{}", program);
-			//System.out.println("OUT " + program);
-
-			SameAsRewriter sameAs = new SameAsRewriter(unfolder.getSameAsDataPredicatesAndClasses(), unfolder.getSameAsObjectPredicates());
-			program = sameAs.getSameAsRewriting(program);
-			//System.out.println("SAMEAS" + program);
-
-			log.debug("Replacing equivalences...");
-			DatalogProgram newprogramEq = OBDADataFactoryImpl.getInstance().getDatalogProgram(program.getQueryModifiers());
-			Predicate topLevelPredicate = null;
-			for (CQIE query : program.getRules()) {
-				// TODO: fix cloning
-				CQIE rule = query.clone();
-				// TODO: get rid of EQNormalizer
-				EQNormalizer.enforceEqualities(rule);
-
-				CQIE newquery = vocabularyValidator.replaceEquivalences(rule);
-				if (newquery.getHead().getFunctionSymbol().getName().equals(OBDAVocabulary.QUEST_QUERY))
-					topLevelPredicate = newquery.getHead().getFunctionSymbol();
-				newprogramEq.appendRule(newquery);
-			}
-			log.debug("Program before flattening: \n{}", newprogramEq);
-
-			SPARQLQueryFlattener fl = new SPARQLQueryFlattener(newprogramEq);
-			List<CQIE> p = fl.flatten(newprogramEq.getRules(topLevelPredicate).get(0));
-			DatalogProgram newprogram = OBDADataFactoryImpl.getInstance().getDatalogProgram(program.getQueryModifiers(), p);
+			DatalogProgram newprogram = preProcess(translation);
 
 			for (CQIE q : newprogram.getRules()) 
 				DatalogNormalizer.unfoldJoinTrees(q);
@@ -209,7 +186,7 @@ public class QuestQueryProcessor {
 			try {
 				IntermediateQuery intermediateQuery = DatalogProgram2QueryConverter.convertDatalogProgram(
 						unfolder.getMetadataForQueryOptimization(), programAfterRewriting,
-						unfolder.getExtensionalPredicates());
+						unfolder.getExtensionalPredicates(), injector);
 				log.debug("Directly translated (SPARQL) intermediate query: \n" + intermediateQuery.toString());
 
 				log.debug("Start the unfolding...");
@@ -243,41 +220,6 @@ public class QuestQueryProcessor {
 						optionalConstructTemplate);
 				queryCache.put(pq, executableQuery);
 				return executableQuery;
-
-
-				GroundTermRemovalFromDataNodeReshaper groundTermNormalizer = new GroundTermRemovalFromDataNodeReshaper();
-				intermediateQuery = groundTermNormalizer.optimize(intermediateQuery);
-				log.debug("New query after removing ground terms: \n" + intermediateQuery.toString());
-
-				PullOutVariableOptimizer pullOutVariableNormalizer = new PullOutVariableOptimizer();
-				intermediateQuery = pullOutVariableNormalizer.optimize(intermediateQuery);
-				log.debug("New query after pulling out equalities: \n" + intermediateQuery.toString());
-
-				programAfterUnfolding = IntermediateQueryToDatalogTranslator.translate(intermediateQuery);
-
-				log.debug("New Datalog query: \n" + programAfterUnfolding.toString());
-
-				/**
-				 * TODO: try to get rid of this flattener
-				 */
-				programAfterUnfolding = FunctionFlattener.flattenDatalogProgram(programAfterUnfolding);
-				log.debug("New flattened Datalog query: \n" + programAfterUnfolding.toString());
-
-				/**
-				 * This code is only partially useful (for properly dealing with boolean expressions) anymore
-				 * TODO: get rid of it
-				 */
-				log.debug("Datalog syntax normalizer (low-level)...");
-				PullOutEqualityNormalizer normalizer = new PullOutEqualityNormalizerImpl();
-
-				List<CQIE> normalizedRules = new ArrayList<>();
-				for (CQIE rule: programAfterUnfolding.getRules()) {
-					normalizedRules.add(normalizer.normalizeByPullingOutEqualities(rule));
-				}
-
-				OBDAQueryModifiers queryModifiers = programAfterUnfolding.getQueryModifiers();
-				programAfterUnfolding = DATA_FACTORY.getDatalogProgram(queryModifiers, normalizedRules);
-				log.debug("Normalized Datalog query: \n" + programAfterUnfolding.toString());
 
 			} catch (DatalogProgram2QueryConverter.InvalidDatalogProgramException e) {
 				throw new OBDAException(e.getLocalizedMessage());

@@ -32,6 +32,8 @@ import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
 import it.unibz.inf.ontop.model.impl.RDBMSourceParameterConstants;
 import it.unibz.inf.ontop.model.impl.TermUtils;
 import it.unibz.inf.ontop.owlrefplatform.core.ExecutableQuery;
+import it.unibz.inf.ontop.owlrefplatform.core.optimization.GroundTermRemovalFromDataNodeReshaper;
+import it.unibz.inf.ontop.owlrefplatform.core.optimization.PullOutVariableOptimizer;
 import it.unibz.inf.ontop.owlrefplatform.injection.QuestCorePreferences;
 import it.unibz.inf.ontop.owlrefplatform.core.SQLExecutableQuery;
 import it.unibz.inf.ontop.owlrefplatform.core.abox.SemanticIndexURIMap;
@@ -323,30 +325,41 @@ public class SQLGenerator implements NativeQueryGenerator {
 	 * TODO: explain
 	 */
 	protected static DatalogProgram convertAndPrepare(IntermediateQuery intermediateQuery) {
-		DatalogProgram unfolding = IntermediateQueryToDatalogTranslator.translate(intermediateQuery);
+		GroundTermRemovalFromDataNodeReshaper groundTermNormalizer = new GroundTermRemovalFromDataNodeReshaper();
+		intermediateQuery = groundTermNormalizer.optimize(intermediateQuery);
+		log.debug("New query after removing ground terms: \n" + intermediateQuery.toString());
 
-		log.debug("New Datalog query: \n" + unfolding.toString());
+		PullOutVariableOptimizer pullOutVariableNormalizer = new PullOutVariableOptimizer();
+		intermediateQuery = pullOutVariableNormalizer.optimize(intermediateQuery);
+		log.debug("New query after pulling out equalities: \n" + intermediateQuery.toString());
 
-		unfolding = FunctionFlattener.flattenDatalogProgram(unfolding);
-		log.debug("New flattened Datalog query: \n" + unfolding.toString());
+		DatalogProgram datalogProgram = IntermediateQueryToDatalogTranslator.translate(intermediateQuery);
 
-		log.debug("Pulling out equalities...");
+		log.debug("New Datalog query: \n" + datalogProgram.toString());
 
-		//TODO: use Guice instead
+		/**
+		 * TODO: try to get rid of this flattener
+		 */
+		datalogProgram = FunctionFlattener.flattenDatalogProgram(datalogProgram);
+		log.debug("New flattened Datalog query: \n" + datalogProgram.toString());
+
+		/**
+		 * This code is only partially useful (for properly dealing with boolean expressions) anymore
+		 * TODO: get rid of it
+		 */
+		log.debug("Datalog syntax normalizer (low-level)...");
 		PullOutEqualityNormalizer normalizer = new PullOutEqualityNormalizerImpl();
 
 		List<CQIE> normalizedRules = new ArrayList<>();
-		for (CQIE rule: unfolding.getRules()) {
+		for (CQIE rule: datalogProgram.getRules()) {
 			normalizedRules.add(normalizer.normalizeByPullingOutEqualities(rule));
 		}
 
-		OBDAQueryModifiers queryModifiers = unfolding.getQueryModifiers();
-		unfolding = obdaDataFactory.getDatalogProgram(queryModifiers, normalizedRules);
+		OBDAQueryModifiers queryModifiers = datalogProgram.getQueryModifiers();
+		datalogProgram = obdaDataFactory.getDatalogProgram(queryModifiers, normalizedRules);
+		log.debug("Normalized Datalog query: \n" + datalogProgram.toString());
 
-		log.debug("\n Partial evaluation ended.\n{}", unfolding);
-
-		return unfolding;
-
+		return datalogProgram;
 	}
 
 	@Override
