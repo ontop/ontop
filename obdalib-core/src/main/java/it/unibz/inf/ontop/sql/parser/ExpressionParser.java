@@ -349,35 +349,58 @@ public class ExpressionParser implements java.util.function.Function<ImmutableMa
         @Override
         public void visit(InExpression expression) {
 
-            ItemsList right = expression.getRightItemsList();
-            // right can be SubSelect, ExpressionList and MultiExpressionList
-            if (!(right instanceof ExpressionList))
-                throw new UnsupportedSelectQueryException("IN is supported only with ExpressionList on the right-hand side", expression);
-
-            Expression left = expression.getLeftExpression();
-            if (left == null || expression.getOldOracleJoinSyntax() != SupportsOldOracleJoinSyntax.NO_ORACLE_JOIN)
-                throw new UnsupportedSelectQueryException("IN is supported only with Expression on the left-hand side (and no Oracle OUTER JOIN syntax)", expression);
-
-            ImmutableList<Function> equalities = ImmutableList.<Function>builder()
-                    .addAll(((ExpressionList)right).getExpressions().stream()
-                        .map(item -> {
-                            Term t1 = getTerm(expression.getLeftExpression());
-                            Term t2 = getTerm(item);
-                            return FACTORY.getFunctionEQ(t1, t2);
-                        }).iterator())
-                    .build();
+            if (expression.getOldOracleJoinSyntax() != SupportsOldOracleJoinSyntax.NO_ORACLE_JOIN)
+                throw new UnsupportedSelectQueryException("Oracle OUTER JOIN syntax is not supported", expression);
 
             Function atom;
-            switch (equalities.size()) {
-                case 0:
-                    throw new InvalidSelectQueryException("IN must contain at least one expression", expression);
-                case 1:
-                    atom = equalities.get(0);
-                    break;
-                default:
-                    atom = equalities.reverse().stream()
-                            .reduce(null, (a, b) -> (a == null) ? b : FACTORY.getFunctionOR(b, a));
+            Expression left = expression.getLeftExpression();
+            if (left != null) {
+                ItemsList right = expression.getRightItemsList();
+                // right can be SubSelect, ExpressionList and MultiExpressionList
+                if (right instanceof SubSelect)
+                    throw new UnsupportedSelectQueryException("SubSelect in IN is not supported", expression);
+                if (right instanceof MultiExpressionList)
+                    throw new InvalidSelectQueryException("MultiExpressionList is not allowed with a single expression on the left in IN", expression);
+
+                ImmutableList<Function> equalities = ImmutableList.<Function>builder()
+                        .addAll(((ExpressionList)right).getExpressions().stream()
+                                .map(item -> {
+                                    Term t1 = getTerm(expression.getLeftExpression());
+                                    Term t2 = getTerm(item);
+                                    return FACTORY.getFunctionEQ(t1, t2);
+                                }).iterator())
+                        .build();
+
+                switch (equalities.size()) {
+                    case 0:
+                        throw new InvalidSelectQueryException("IN must contain at least one expression", expression);
+                    case 1:
+                        atom = equalities.get(0);
+                        break;
+                    default:
+                        atom = equalities.reverse().stream()
+                                .reduce(null, (a, b) -> (a == null) ? b : FACTORY.getFunctionOR(b, a));
+                }
             }
+            else {
+                ItemsList list = expression.getLeftItemsList();
+                if (!(list instanceof ExpressionList))
+                    throw new InvalidSelectQueryException("Only ExpressionList is allowed on the left of IN", expression);
+
+                ItemsList right = expression.getRightItemsList();
+                // right can be SubSelect, ExpressionList and MultiExpressionList
+                if (right instanceof SubSelect)
+                    throw new UnsupportedSelectQueryException("SubSelect in IN is not supported", expression);
+                if (right instanceof ExpressionList)
+                    throw new InvalidSelectQueryException("ExpressionList is not allowed with an ExpressionList on the left in IN", expression);
+
+                // TODO: finish
+                ExpressionList leftList = (ExpressionList)list;
+                leftList.getExpressions();
+
+                atom = null;
+            }
+
 
             result = notOperation(expression.isNot()).apply(atom);
         }
@@ -399,18 +422,16 @@ public class ExpressionParser implements java.util.function.Function<ImmutableMa
 
         @Override
         public void visit(SignedExpression expression) {
-            UnaryOperator<Term> op;
             switch (expression.getSign()) {
                 case '-' :
-                    op = t -> FACTORY.getFunction(ExpressionOperation.MINUS, t);
+                    process(expression.getExpression(),  t -> FACTORY.getFunction(ExpressionOperation.MINUS, t));
                     break;
                 case '+':
-                    op = UnaryOperator.identity();
+                    process(expression.getExpression(), UnaryOperator.identity());
                     break;
                 default:
                     throw new UnsupportedOperationException();
             }
-            process(expression.getExpression(), op);
         }
 
         @Override
@@ -473,7 +494,7 @@ public class ExpressionParser implements java.util.function.Function<ImmutableMa
 
         @Override
         public void visit(WhenClause expression) {
-            throw new UnsupportedSelectQueryException("CASE is not supported yet", expression);
+            throw new UnsupportedSelectQueryException("CASE/WHEN is not supported yet", expression);
         }
 
 

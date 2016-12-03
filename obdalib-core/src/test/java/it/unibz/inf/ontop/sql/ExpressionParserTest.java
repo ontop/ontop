@@ -478,6 +478,49 @@ public class ExpressionParserTest {
                 FACTORY.getConstantLiteral("3", COL_TYPE.LONG))), translation);
     }
 
+    @Test
+    public void in_Test() throws JSQLParserException {
+        String sql = "SELECT X AS A FROM DUMMY WHERE X IN (1, 3)";
+
+        Variable v = FACTORY.getVariable("x0");
+
+        ExpressionParser parser = new ExpressionParser(IDFAC, getWhereExpression(sql));
+        Term translation = parser.apply(ImmutableMap.of(
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+
+        System.out.println(translation);
+
+        assertEquals(FACTORY.getFunction(ExpressionOperation.OR,
+                FACTORY.getFunction(ExpressionOperation.EQ,
+                        v,
+                        FACTORY.getConstantLiteral("1", COL_TYPE.LONG)),
+                FACTORY.getFunction(ExpressionOperation.EQ,
+                        v,
+                        FACTORY.getConstantLiteral("3", COL_TYPE.LONG))), translation);
+    }
+
+    @Test
+    public void not_In_Test() throws JSQLParserException {
+        String sql = "SELECT X AS A FROM DUMMY WHERE X NOT IN (1, 3)";
+
+        Variable v = FACTORY.getVariable("x0");
+
+        ExpressionParser parser = new ExpressionParser(IDFAC, getWhereExpression(sql));
+        Term translation = parser.apply(ImmutableMap.of(
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+
+        System.out.println(translation);
+
+        assertEquals(FACTORY.getFunction(ExpressionOperation.NOT,
+                    FACTORY.getFunction(ExpressionOperation.OR,
+                    FACTORY.getFunction(ExpressionOperation.EQ,
+                            v,
+                            FACTORY.getConstantLiteral("1", COL_TYPE.LONG)),
+                    FACTORY.getFunction(ExpressionOperation.EQ,
+                            v,
+                            FACTORY.getConstantLiteral("3", COL_TYPE.LONG)))), translation);
+    }
+
     private Expression getExpression(String sql) throws JSQLParserException {
         Statement statement = CCJSqlParserUtil.parse(sql);
         SelectItem si = ((PlainSelect)((Select)statement).getSelectBody()).getSelectItems().get(0);
