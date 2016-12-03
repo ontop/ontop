@@ -1,10 +1,8 @@
 package it.unibz.inf.ontop.sql;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
-import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
 import it.unibz.inf.ontop.sql.parser.ExpressionParser;
 import it.unibz.inf.ontop.sql.parser.exceptions.UnsupportedSelectQueryException;
 import net.sf.jsqlparser.JSQLParserException;
@@ -265,6 +263,24 @@ public class ExpressionParserTest {
     }
 
     @Test
+    public void notEqualsTo_Bang_Test() throws JSQLParserException {
+        String sql = "SELECT X AS A FROM DUMMY WHERE X != 'B'";
+
+        Variable v = FACTORY.getVariable("x0");
+
+        ExpressionParser parser = new ExpressionParser(IDFAC, getWhereExpression(sql));
+        Term translation = parser.apply(ImmutableMap.of(
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+
+        System.out.println(translation);
+
+        assertEquals(FACTORY.getFunction(
+                ExpressionOperation.NEQ,
+                v,
+                FACTORY.getConstantLiteral("B", COL_TYPE.STRING)), translation);
+    }
+
+    @Test
     public void greaterThan_Test() throws JSQLParserException {
         String sql = "SELECT X AS A FROM DUMMY WHERE X > 3";
 
@@ -334,6 +350,132 @@ public class ExpressionParserTest {
                 ExpressionOperation.LTE,
                 v,
                 FACTORY.getConstantLiteral("3", COL_TYPE.LONG)), translation);
+    }
+
+    @Test
+    public void not_EqualsTo_Test() throws JSQLParserException {
+        String sql = "SELECT X AS A FROM DUMMY WHERE NOT X = 'B'";
+
+        Variable v = FACTORY.getVariable("x0");
+
+        ExpressionParser parser = new ExpressionParser(IDFAC, getWhereExpression(sql));
+        Term translation = parser.apply(ImmutableMap.of(
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+
+        System.out.println(translation);
+
+        assertEquals(FACTORY.getFunction(ExpressionOperation.NOT, FACTORY.getFunction(
+                ExpressionOperation.EQ,
+                v,
+                FACTORY.getConstantLiteral("B", COL_TYPE.STRING))), translation);
+    }
+
+    @Test
+    public void not_NotEqualsTo_Test() throws JSQLParserException {
+        String sql = "SELECT X AS A FROM DUMMY WHERE NOT X <> 'B'";
+
+        Variable v = FACTORY.getVariable("x0");
+
+        ExpressionParser parser = new ExpressionParser(IDFAC, getWhereExpression(sql));
+        Term translation = parser.apply(ImmutableMap.of(
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+
+        System.out.println(translation);
+
+        assertEquals(FACTORY.getFunction(ExpressionOperation.NOT, FACTORY.getFunction(
+                ExpressionOperation.NEQ,
+                v,
+                FACTORY.getConstantLiteral("B", COL_TYPE.STRING))), translation);
+    }
+
+    @Test
+    public void not_NotEqualsTo_Bang_Test() throws JSQLParserException {
+        String sql = "SELECT X AS A FROM DUMMY WHERE NOT X != 'B'";
+
+        Variable v = FACTORY.getVariable("x0");
+
+        ExpressionParser parser = new ExpressionParser(IDFAC, getWhereExpression(sql));
+        Term translation = parser.apply(ImmutableMap.of(
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+
+        System.out.println(translation);
+
+        assertEquals(FACTORY.getFunction(ExpressionOperation.NOT, FACTORY.getFunction(
+                ExpressionOperation.NEQ,
+                v,
+                FACTORY.getConstantLiteral("B", COL_TYPE.STRING))), translation);
+    }
+
+    @Test
+    public void not_GreaterThan_Test() throws JSQLParserException {
+        String sql = "SELECT X AS A FROM DUMMY WHERE NOT X > 3";
+
+        Variable v = FACTORY.getVariable("x0");
+
+        ExpressionParser parser = new ExpressionParser(IDFAC, getWhereExpression(sql));
+        Term translation = parser.apply(ImmutableMap.of(
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+
+        System.out.println(translation);
+
+        assertEquals(FACTORY.getFunction(ExpressionOperation.NOT, FACTORY.getFunction(
+                ExpressionOperation.GT,
+                v,
+                FACTORY.getConstantLiteral("3", COL_TYPE.LONG))), translation);
+    }
+
+    @Test
+    public void not_GreaterThanEquals_Test() throws JSQLParserException {
+        String sql = "SELECT X AS A FROM DUMMY WHERE NOT X >= 3";
+
+        Variable v = FACTORY.getVariable("x0");
+
+        ExpressionParser parser = new ExpressionParser(IDFAC, getWhereExpression(sql));
+        Term translation = parser.apply(ImmutableMap.of(
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+
+        System.out.println(translation);
+
+        assertEquals(FACTORY.getFunction(ExpressionOperation.NOT, FACTORY.getFunction(
+                ExpressionOperation.GTE,
+                v,
+                FACTORY.getConstantLiteral("3", COL_TYPE.LONG))), translation);
+    }
+
+    @Test
+    public void not_MinorThan_Test() throws JSQLParserException {
+        String sql = "SELECT X AS A FROM DUMMY WHERE NOT X < 3";
+
+        Variable v = FACTORY.getVariable("x0");
+
+        ExpressionParser parser = new ExpressionParser(IDFAC, getWhereExpression(sql));
+        Term translation = parser.apply(ImmutableMap.of(
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+
+        System.out.println(translation);
+
+        assertEquals(FACTORY.getFunction(ExpressionOperation.NOT, FACTORY.getFunction(
+                ExpressionOperation.LT,
+                v,
+                FACTORY.getConstantLiteral("3", COL_TYPE.LONG))), translation);
+    }
+
+    @Test
+    public void not_MinorThanEquals_Test() throws JSQLParserException {
+        String sql = "SELECT X AS A FROM DUMMY WHERE NOT X <= 3";
+
+        Variable v = FACTORY.getVariable("x0");
+
+        ExpressionParser parser = new ExpressionParser(IDFAC, getWhereExpression(sql));
+        Term translation = parser.apply(ImmutableMap.of(
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+
+        System.out.println(translation);
+
+        assertEquals(FACTORY.getFunction(ExpressionOperation.NOT, FACTORY.getFunction(
+                ExpressionOperation.LTE,
+                v,
+                FACTORY.getConstantLiteral("3", COL_TYPE.LONG))), translation);
     }
 
     private Expression getExpression(String sql) throws JSQLParserException {
