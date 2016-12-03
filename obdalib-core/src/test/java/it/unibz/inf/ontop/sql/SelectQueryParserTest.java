@@ -27,7 +27,7 @@ public class SelectQueryParserTest {
     }
 
     @Test
-    public void simpleJoin_Test() {
+    public void simple_join_test() {
         DBMetadata metadata = createMetadata();
 
         SelectQueryParser parser = new SelectQueryParser(metadata);
@@ -57,8 +57,8 @@ public class SelectQueryParserTest {
     }
 
 
-    @Test // TODO: does relationAliasesConsistent check is wrong?
-    public void innerJoinOn_Same_Table_Test() {
+    @Test
+    public void inner_join_on_same_table_test() {
         DBMetadata metadata = createMetadata();
 
         SelectQueryParser parser = new SelectQueryParser(metadata);
@@ -78,7 +78,7 @@ public class SelectQueryParserTest {
 
 
     @Test
-    public void innerJoinOn_EQ_Test() {
+    public void inner_join_on_EQ_test() {
         DBMetadata metadata = createMetadata();
 
         SelectQueryParser parser = new SelectQueryParser(metadata);
@@ -98,7 +98,7 @@ public class SelectQueryParserTest {
 
 
     @Test
-    public void innerJoinOn_GTE_Test() {
+    public void inner_join_on_GTE_test() {
         DBMetadata metadata = createMetadata();
 
         SelectQueryParser parser = new SelectQueryParser(metadata);
@@ -117,7 +117,7 @@ public class SelectQueryParserTest {
     }
 
     @Test
-    public void innerJoinOn_GT_Test() {
+    public void inner_join_on_GT_test() {
         DBMetadata metadata = createMetadata();
 
 
@@ -138,7 +138,7 @@ public class SelectQueryParserTest {
     }
 
     @Test
-    public void innerJoinOn_LT_Test() {
+    public void inner_join_on_LT_test() {
         DBMetadata metadata = createMetadata();
 
         SelectQueryParser parser = new SelectQueryParser(metadata);
@@ -158,7 +158,7 @@ public class SelectQueryParserTest {
     }
 
     @Test
-    public void innerJoinOn_LTE_Test() {
+    public void inner_join_on_LTE_test() {
         DBMetadata metadata = createMetadata();
 
         SelectQueryParser parser = new SelectQueryParser(metadata);
@@ -178,7 +178,7 @@ public class SelectQueryParserTest {
     }
 
     @Test
-    public void innerJoinOn_NEQ_Test() {
+    public void inner_join_on_NEQ_test() {
         DBMetadata metadata = createMetadata();
 
         SelectQueryParser parser = new SelectQueryParser(metadata);
@@ -198,7 +198,7 @@ public class SelectQueryParserTest {
     }
 
     @Test(expected = UnsupportedOperationException.class)
-    public void innerJoinOn_naturalJoin_ambiguity_Test() {
+    public void inner_join_on_inner_join_ambiguity_test() {
         DBMetadata metadata = createMetadata();
         SelectQueryParser parser = new SelectQueryParser(metadata);
         // common column name "A" appears more than once in left table
@@ -208,7 +208,7 @@ public class SelectQueryParserTest {
 
     //TODO: In this case column reference "a" is ambiguous. Does this should be check during the "selection" operation handler?
     @Test(expected = UnsupportedOperationException.class)
-    public void innerJoinOn_naturalJoin_ambiguity2_Test() {
+    public void inner_join_on_inner_join_ambiguity2_test() {
         DBMetadata metadata = createMetadata();
         SelectQueryParser parser = new SelectQueryParser(metadata);
         // column reference "a" is ambiguous
@@ -218,7 +218,7 @@ public class SelectQueryParserTest {
     }
 
     @Test
-    public void innerJoinOn_naturalJoin_Test() {
+    public void inner_join_on_inner_join_test() {
         DBMetadata metadata = createMetadata();
         SelectQueryParser parser = new SelectQueryParser(metadata);
         // common column name "A" appears more than once in left table
@@ -227,7 +227,7 @@ public class SelectQueryParserTest {
     }
 
     @Test
-    public void innerJoinOn_AND_Test() {
+    public void inner_join_on_AND_test() {
         DBMetadata metadata = createMetadata();
 
         SelectQueryParser parser = new SelectQueryParser(metadata);
@@ -256,7 +256,7 @@ public class SelectQueryParserTest {
     }
 
     @Test
-    public void innerJoinOn_EQ_CONSTANT_INT_Test() {
+    public void inner_join_on_EQ_constant_int_test() {
         DBMetadata metadata = createMetadata();
 
         SelectQueryParser parser = new SelectQueryParser(metadata);
@@ -276,7 +276,7 @@ public class SelectQueryParserTest {
     }
 
     @Test
-    public void natural_join_Test() {
+    public void natural_join_test() {
         DBMetadata metadata = createMetadata();
 
         SelectQueryParser parser = new SelectQueryParser(metadata);
@@ -296,7 +296,7 @@ public class SelectQueryParserTest {
     }
 
     @Test
-    public void subjoin_Test() {
+    public void subjoin_test() {
         DBMetadata metadata = createMetadata();
 
         SelectQueryParser parser = new SelectQueryParser(metadata);
@@ -306,7 +306,7 @@ public class SelectQueryParserTest {
     }
 
     @Test
-    public void join_using_inner_Test() {
+    public void join_using_inner_test() {
         DBMetadata metadata = createMetadata();
 
         SelectQueryParser parser = new SelectQueryParser(metadata);
@@ -326,7 +326,7 @@ public class SelectQueryParserTest {
     }
 
     @Test
-    public void join_using_Test() {
+    public void join_using_test() {
         DBMetadata metadata = createMetadata();
 
 
@@ -349,7 +349,7 @@ public class SelectQueryParserTest {
 
 
     @Test //todo: this should works
-    public void join_using_2_Test() {
+    public void join_using_2_test() {
         DBMetadata metadata = createMetadata();
 
         SelectQueryParser parser = new SelectQueryParser(metadata);
@@ -376,7 +376,7 @@ public class SelectQueryParserTest {
 
 
     @Test
-    public void concat_Test() {
+    public void concat_test() {
         DBMetadata metadata = createMetadata();
         SelectQueryParser parser = new SelectQueryParser(metadata);
 
@@ -399,7 +399,7 @@ public class SelectQueryParserTest {
 
 
     @Test
-    public void in_condition_Test() {
+    public void in_condition_test() {
         DBMetadata metadata = createMetadata();
         SelectQueryParser parser = new SelectQueryParser(metadata);
 
@@ -423,7 +423,7 @@ public class SelectQueryParserTest {
     }
 
     @Test
-    public void in_condition1_Test() {
+    public void in_condition1_test() {
         DBMetadata metadata = createMetadata();
         SelectQueryParser parser = new SelectQueryParser(metadata);
 
@@ -441,7 +441,7 @@ public class SelectQueryParserTest {
 
 
     @Test(expected = UnsupportedSelectQueryException.class)
-    public void left_outer_Join_Test() {
+    public void left_outer_join_test() {
         DBMetadata metadata = createMetadata();
         SelectQueryParser parser = new SelectQueryParser(metadata);
         // common column name "A" appears more than once in left table
@@ -449,7 +449,7 @@ public class SelectQueryParserTest {
     }
 
     @Test(expected = UnsupportedSelectQueryException.class)
-    public void right_outer_Join_Test() {
+    public void right_outer_join_test() {
         DBMetadata metadata = createMetadata();
         SelectQueryParser parser = new SelectQueryParser(metadata);
         // common column name "A" appears more than once in left table
@@ -457,7 +457,7 @@ public class SelectQueryParserTest {
     }
 
     @Test(expected = UnsupportedSelectQueryException.class)
-    public void right_Join_Test() {
+    public void right_join_test() {
         DBMetadata metadata = createMetadata();
         SelectQueryParser parser = new SelectQueryParser(metadata);
         // common column name "A" appears more than once in left table
@@ -465,7 +465,7 @@ public class SelectQueryParserTest {
     }
 
     @Test(expected = UnsupportedSelectQueryException.class)
-    public void left_Join_Test() {
+    public void left_join_test() {
         DBMetadata metadata = createMetadata();
         SelectQueryParser parser = new SelectQueryParser(metadata);
         // common column name "A" appears more than once in left table
@@ -473,18 +473,15 @@ public class SelectQueryParserTest {
     }
 
     @Test(expected = UnsupportedSelectQueryException.class)
-    public void full_outer_Join_Test() {
+    public void full_outer_join_test() {
         DBMetadata metadata = createMetadata();
         SelectQueryParser parser = new SelectQueryParser(metadata);
         // common column name "A" appears more than once in left table
         CQIE parse = parser.parse("SELECT A, C FROM P FULL OUTER JOIN  P on P.A =  Q.A ");
     }
 
-
-
-
     @Test(expected = UnsupportedOperationException.class)
-    public void ambiguous_using_parameter_Test() {
+    public void ambiguous_using_parameter_test() {
         DBMetadata metadata = createMetadata();
         SelectQueryParser parser = new SelectQueryParser(metadata);
         // ERROR: common column name "a" appears more than once in left table
@@ -492,31 +489,100 @@ public class SelectQueryParserTest {
         assertNull(parse);
     }
 
-
-
-
-    @Test() // todo: make a one for each case
-    public void joins_allowed_to_parse() {
+    @Test()
+    public void allowed_simple_join_test(){
         SelectQueryParser parser = new SelectQueryParser(createMetadata());
-        ImmutableList.of(
-                "SELECT * FROM P, Q;",
-                "SELECT * FROM P NATURAL JOIN  Q;",
-                "SELECT * FROM P CROSS JOIN  Q;",
-                "SELECT * FROM P JOIN  Q ON P.A = Q.A;",
-                "SELECT * FROM P INNER JOIN  Q ON P.A = Q.A;",
-                "SELECT * FROM P JOIN  Q USING(A);",
-                "SELECT * FROM P INNER JOIN  Q USING(A);")
-                .forEach(query -> {
-                    final CQIE parse = parser.parse( query);
-                    assertFalse(parse.getBody().isEmpty());
-                    System.out.println(query + " - OK!");
-                });
+        CQIE parse = parser.parse( "SELECT * FROM P, Q;");
+        assert_allowed_join_common(parse);
+        assert_allowed_join_EQ_atom(parse, false);
+    }
+
+    @Test()
+    public void allowed_natural_join_test(){
+        SelectQueryParser parser = new SelectQueryParser(createMetadata());
+        CQIE parse = parser.parse( "SELECT * FROM P NATURAL JOIN  Q;");
+        assert_allowed_join_common(parse);
+        assert_allowed_join_EQ_atom(parse, true);
+    }
+
+    @Test()
+    public void allowed_cross_join_test(){
+        SelectQueryParser parser = new SelectQueryParser(createMetadata());
+        CQIE parse = parser.parse( "SELECT * FROM P CROSS JOIN  Q;");
+        assert_allowed_join_common(parse);
+        assert_allowed_join_EQ_atom(parse, false);
+    }
+
+    @Test()
+    public void allowed_join_on_test(){
+        SelectQueryParser parser = new SelectQueryParser(createMetadata());
+        CQIE parse = parser.parse( "SELECT * FROM P JOIN  Q ON P.A = Q.A;");
+        assert_allowed_join_common(parse);
+        assert_allowed_join_EQ_atom(parse, true);
+    }
+
+    @Test()
+    public void allowed_inner_join_on_test(){
+        SelectQueryParser parser = new SelectQueryParser(createMetadata());
+        CQIE parse = parser.parse( "SELECT * FROM P INNER JOIN  Q ON P.A = Q.A;");
+        assert_allowed_join_common(parse);
+        assert_allowed_join_EQ_atom(parse, true);
+    }
+
+    @Test()
+    public void allowed_join_using_test(){
+        SelectQueryParser parser = new SelectQueryParser(createMetadata());
+        CQIE parse = parser.parse( "SELECT * FROM P JOIN  Q USING(A);");
+        assert_allowed_join_common(parse);
+        assert_allowed_join_EQ_atom(parse, true);
+    }
+
+    @Test()
+    public void allowed_inner_join_using_test(){
+        SelectQueryParser parser = new SelectQueryParser(createMetadata());
+        CQIE parse = parser.parse( "SELECT * FROM P INNER JOIN  Q USING(A);");
+        assert_allowed_join_common(parse);
+        assert_allowed_join_EQ_atom(parse, true);
+    }
+
+    private void assert_allowed_join_common(CQIE parse){
+        Variable a1 = FACTORY.getVariable("A1");
+        Variable b1 = FACTORY.getVariable("B1");
+
+        Function atomP = FACTORY.getFunction(
+                FACTORY.getPredicate("P", new Predicate.COL_TYPE[]{null, null}),
+                ImmutableList.of(a1, b1));
+
+        assertTrue(parse.getBody().contains(atomP));
+
+        Variable a2 = FACTORY.getVariable("A2"); // variable are key sensitive
+        Variable c2 = FACTORY.getVariable("C2");
+
+        Function atomQ = FACTORY.getFunction(
+                FACTORY.getPredicate("Q", new Predicate.COL_TYPE[]{null, null}),
+                ImmutableList.of(a2, c2));
+
+        assertTrue(parse.getBody().contains(atomQ));
+
+        //assertEquals(0, parse.getHead().getTerms().size());
+        assertEquals(4, parse.getReferencedVariables().size());
 
     }
 
+    private void assert_allowed_join_EQ_atom(CQIE parse, boolean exist) {
+        Variable a1 = FACTORY.getVariable("A1");
+        Variable a2 = FACTORY.getVariable("A2");
+        Function atomEQ = FACTORY.getFunction(ExpressionOperation.EQ, ImmutableList.of(a1, a2));
+        if (exist)
+            assertTrue(parse.getBody().contains(atomEQ));
+        else
+            assertFalse(parse.getBody().contains(atomEQ));
+    }
+    //end region
+
 
     @Test()
-    public void joins_invalid_to_parse_JSQL_error() {
+    public void invalid_joins_to_parse_JSQL_error_test() {
         // During this tests the parser rises ParseException
         // todo: this should be categorised as invalid mapping which cannot be supported
 
@@ -555,7 +621,7 @@ public class SelectQueryParserTest {
     }
 
     @Test()
-    public void joins_invalid_to_parse() {
+    public void invalid_joins_to_parse_test() {
         final SelectQueryParser parser = new SelectQueryParser(createMetadata());
         ImmutableList.of(
                 "SELECT * FROM P JOIN  Q;",
@@ -604,7 +670,7 @@ public class SelectQueryParserTest {
     }
 
     @Test
-    public void select__Join_2_Test() {
+    public void select_join_2_test() {
         DBMetadata metadata = createMetadata();
         SelectQueryParser parser = new SelectQueryParser(metadata);
         // common column name "A" appears more than once in left table
