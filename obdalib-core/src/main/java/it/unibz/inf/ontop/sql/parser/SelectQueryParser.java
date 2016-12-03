@@ -68,10 +68,10 @@ public class SelectQueryParser {
                         throw new UnsupportedSelectQueryException("JOIN syntax not supported", statement);
 
                     if ( join.isInner() &&  join.getUsingColumns() == null && join.getOnExpression() == null  )
-                        throw new UnsupportedSelectQueryException("INNER JOIN is only supporting with  USING or ON operators", statement);
+                        throw new UnsupportedSelectQueryException("INNER JOIN is only supported with USING or ON operators", statement);
 
                     if ( ( join.isNatural()  || join.isCross() ) && ( join.getUsingColumns() != null || join.getOnExpression() != null  )  )
-                        throw new UnsupportedSelectQueryException("NATURAL/CROSS JOINs are not supporting any USING or ON operators", statement);
+                        throw new UnsupportedSelectQueryException("NATURAL/CROSS JOINs are not supported any USING or ON operators", statement);
 
                     // TODO: check SQL grammars of other databases
                     // http://dev.mysql.com/doc/refman/5.7/en/join.html:
