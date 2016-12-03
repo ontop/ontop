@@ -25,6 +25,7 @@ import net.sf.jsqlparser.statement.select.SubSelect;
 import java.util.List;
 import java.util.function.BinaryOperator;
 import java.util.function.UnaryOperator;
+import java.util.stream.Stream;
 
 
 /**
@@ -352,7 +353,7 @@ public class ExpressionParser implements java.util.function.Function<ImmutableMa
             if (expression.getOldOracleJoinSyntax() != SupportsOldOracleJoinSyntax.NO_ORACLE_JOIN)
                 throw new UnsupportedSelectQueryException("Oracle OUTER JOIN syntax is not supported", expression);
 
-            Function atom;
+            Stream<Function> stream;
             Expression left = expression.getLeftExpression();
             if (left != null) {
                 ItemsList right = expression.getRightItemsList();
@@ -362,25 +363,12 @@ public class ExpressionParser implements java.util.function.Function<ImmutableMa
                 if (right instanceof MultiExpressionList)
                     throw new InvalidSelectQueryException("MultiExpressionList is not allowed with a single expression on the left in IN", expression);
 
-                ImmutableList<Function> equalities = ImmutableList.<Function>builder()
-                        .addAll(((ExpressionList)right).getExpressions().stream()
+                stream = ((ExpressionList)right).getExpressions().stream()
                                 .map(item -> {
                                     Term t1 = getTerm(expression.getLeftExpression());
                                     Term t2 = getTerm(item);
                                     return FACTORY.getFunctionEQ(t1, t2);
-                                }).iterator())
-                        .build();
-
-                switch (equalities.size()) {
-                    case 0:
-                        throw new InvalidSelectQueryException("IN must contain at least one expression", expression);
-                    case 1:
-                        atom = equalities.get(0);
-                        break;
-                    default:
-                        atom = equalities.reverse().stream()
-                                .reduce(null, (a, b) -> (a == null) ? b : FACTORY.getFunctionOR(b, a));
-                }
+                                });
             }
             else {
                 ItemsList list = expression.getLeftItemsList();
@@ -394,15 +382,46 @@ public class ExpressionParser implements java.util.function.Function<ImmutableMa
                 if (right instanceof ExpressionList)
                     throw new InvalidSelectQueryException("ExpressionList is not allowed with an ExpressionList on the left in IN", expression);
 
-                // TODO: finish
-                ExpressionList leftList = (ExpressionList)list;
-                leftList.getExpressions();
+                /* MultiExpressionList is not supported by JSQLParser
 
-                atom = null;
+                List<Expression> leftList = ((ExpressionList)list).getExpressions();
+
+                stream = ((MultiExpressionList)right).getExprList().stream().map(el -> {
+                    List<Expression> rightList  = el.getExpressions();
+                    if (leftList.size() != rightList.size())
+                        throw new InvalidSelectQueryException("Mismatch in the length of the lists", expression);
+
+                    return getEqLists(leftList, rightList).reverse().stream()
+                            .reduce(null, (a, b) -> (a == null) ? b : FACTORY.getFunctionAND(b, a));
+                }); */
+                throw new InvalidSelectQueryException("not possible in the current JSQLParser", expression);
             }
 
+            ImmutableList<Function> equalities =
+                    ImmutableList.<Function>builder().addAll(stream.iterator()).build();
 
+            Function atom;
+            switch (equalities.size()) {
+                case 0:
+                    throw new InvalidSelectQueryException("IN must contain at least one expression", expression);
+                case 1:
+                    atom = equalities.get(0);
+                    break;
+                default:
+                    atom = equalities.reverse().stream()
+                            .reduce(null, (a, b) -> (a == null) ? b : FACTORY.getFunctionOR(b, a));
+            }
             result = notOperation(expression.isNot()).apply(atom);
+        }
+
+        private ImmutableList<Function> getEqLists(List<Expression> leftList, List<Expression> rightList) {
+            ImmutableList.Builder<Function> builder = ImmutableList.builder();
+            for (int i = 0; i < leftList.size(); i++) {
+                Term t1 = getTerm(leftList.get(i));
+                Term t2 = getTerm(rightList.get(i));
+                builder.add(FACTORY.getFunctionEQ(t1, t2));
+            }
+            return builder.build();
         }
 
         /*

@@ -14,6 +14,7 @@ import net.sf.jsqlparser.statement.select.Select;
 import net.sf.jsqlparser.statement.select.SelectExpressionItem;
 import net.sf.jsqlparser.statement.select.SelectItem;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import static it.unibz.inf.ontop.model.Predicate.*;
@@ -520,6 +521,38 @@ public class ExpressionParserTest {
                             v,
                             FACTORY.getConstantLiteral("3", COL_TYPE.LONG)))), translation);
     }
+
+    @Ignore
+    @Test
+    public void in_Multi_Test() throws JSQLParserException {
+        String sql = "SELECT X AS A FROM DUMMY WHERE (X, Y) IN ((1, 3), (2,4))";
+
+        Variable v1 = FACTORY.getVariable("x0");
+        Variable v2 = FACTORY.getVariable("y0");
+
+        ExpressionParser parser = new ExpressionParser(IDFAC, getWhereExpression(sql));
+        Term translation = parser.apply(ImmutableMap.of(
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v1,
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("Y")), v2));
+
+        System.out.println(translation);
+
+        assertEquals(FACTORY.getFunction(ExpressionOperation.OR,
+                FACTORY.getFunction(ExpressionOperation.AND,
+                    FACTORY.getFunction(ExpressionOperation.EQ,
+                        v1,
+                        FACTORY.getConstantLiteral("1", COL_TYPE.LONG)),
+                    FACTORY.getFunction(ExpressionOperation.EQ,
+                        v2,
+                        FACTORY.getConstantLiteral("3", COL_TYPE.LONG))),
+                FACTORY.getFunction(ExpressionOperation.EQ,
+                        v1,
+                        FACTORY.getConstantLiteral("2", COL_TYPE.LONG)),
+                FACTORY.getFunction(ExpressionOperation.EQ,
+                        v2,
+                        FACTORY.getConstantLiteral("4", COL_TYPE.LONG))), translation);
+    }
+
 
     private Expression getExpression(String sql) throws JSQLParserException {
         Statement statement = CCJSqlParserUtil.parse(sql);
