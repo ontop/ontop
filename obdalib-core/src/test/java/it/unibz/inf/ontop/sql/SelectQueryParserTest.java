@@ -332,7 +332,7 @@ public class SelectQueryParserTest {
 
         SelectQueryParser parser = new SelectQueryParser(metadata);
 
-        CQIE parse = parser.parse("SELECT A, C FROM P JOIN Q USING (A)");
+        CQIE parse = parser.parse("SELECT A, C FROM P INNER JOIN Q USING (A)");
         System.out.println(parse);
 
         assertTrue(parse.getHead().getTerms().size() == 0);
@@ -354,7 +354,7 @@ public class SelectQueryParserTest {
 
         SelectQueryParser parser = new SelectQueryParser(metadata);
 
-        CQIE parse = parser.parse("SELECT Q.A, R.B FROM Q JOIN R USING (A,B)");
+        CQIE parse = parser.parse("SELECT Q.A, R.B FROM Q INNER JOIN R USING (A,B)");
         System.out.println(parse);
 
         assertTrue(parse.getHead().getTerms().size() == 0);
@@ -570,27 +570,19 @@ public class SelectQueryParserTest {
 
 
     @Test()
-    public void joins_invalid_to_parse() {
-        final SelectQueryParser parser = new SelectQueryParser(createMetadata());
+    public void joins_invalid_to_parse_JSQL_error() {
+        // During this tests the parser rises ParseException
+        // todo: this should be categorised as invalid mapping which cannot be supported
+
         ImmutableList.of(
-                "SELECT * FROM P JOIN  Q;",
-                "SELECT * FROM P RIGHT JOIN  Q;",
-                "SELECT * FROM P FULL JOIN  Q;",
-                "SELECT * FROM P LEFT JOIN  Q;",
                 "SELECT * FROM P OUTER JOIN  Q;",
-                "SELECT * FROM P RIGHT OUTER JOIN  Q;",
                 "SELECT * FROM P NATURAL OUTER JOIN  Q;",
-                "SELECT * FROM P FULL OUTER JOIN  Q;",
-                "SELECT * FROM P LEFT OUTER JOIN  Q;",
                 "SELECT * FROM P CROSS OUTER JOIN  Q;",
-                "SELECT * FROM P INNER JOIN  Q;",
                 "SELECT * FROM P RIGHT INNER JOIN  Q;",
                 "SELECT * FROM P NATURAL INNER JOIN  Q;",
                 "SELECT * FROM P FULL INNER JOIN  Q;",
                 "SELECT * FROM P LEFT INNER JOIN  Q;",
                 "SELECT * FROM P CROSS INNER JOIN  Q;",
-                "SELECT * FROM P NATURAL JOIN  Q ON P.A = Q.A;",
-                "SELECT * FROM P CROSS JOIN  Q ON P.A = Q.A;",
                 "SELECT * FROM P OUTER JOIN  Q ON P.A = Q.A;",
                 "SELECT * FROM P NATURAL OUTER JOIN  Q ON P.A = Q.A;",
                 "SELECT * FROM P CROSS OUTER JOIN  Q ON P.A = Q.A;",
@@ -599,8 +591,6 @@ public class SelectQueryParserTest {
                 "SELECT * FROM P FULL INNER JOIN  Q ON P.A = Q.A;",
                 "SELECT * FROM P LEFT INNER JOIN  Q ON P.A = Q.A;",
                 "SELECT * FROM P CROSS INNER JOIN  Q ON P.A = Q.A;",
-                "SELECT * FROM P NATURAL JOIN  Q USING(A);",
-                "SELECT * FROM P CROSS JOIN  Q USING(A);",
                 "SELECT * FROM P OUTER JOIN  Q USING(A);",
                 "SELECT * FROM P NATURAL OUTER JOIN  Q USING(A);",
                 "SELECT * FROM P CROSS OUTER JOIN  USING(A);",
@@ -608,11 +598,35 @@ public class SelectQueryParserTest {
                 "SELECT * FROM P NATURAL INNER JOIN  Q USING(A);",
                 "SELECT * FROM P FULL INNER JOIN  Q USING(A);",
                 "SELECT * FROM P LEFT INNER JOIN  Q USING(A);",
-                "SELECT * FROM P CROSS INNER JOIN  Q USING(A);")
+                "SELECT * FROM P CROSS INNER JOIN  Q USING(A);"
+        ).forEach(query -> {
+            final SelectQueryParser parser = new SelectQueryParser(createMetadata());
+            parser.parse(query);
+            assertTrue( parser.isParseException());
+       });
+    }
+
+    @Test()
+    public void joins_invalid_to_parse() {
+        final SelectQueryParser parser = new SelectQueryParser(createMetadata());
+        ImmutableList.of(
+                "SELECT * FROM P JOIN  Q;",
+                "SELECT * FROM P RIGHT OUTER JOIN  Q;",
+                "SELECT * FROM P RIGHT JOIN  Q;",
+                "SELECT * FROM P FULL JOIN  Q;",
+                "SELECT * FROM P LEFT JOIN  Q;",
+                "SELECT * FROM P FULL OUTER JOIN  Q;",
+                "SELECT * FROM P LEFT OUTER JOIN  Q;",
+                "SELECT * FROM P INNER JOIN  Q;",
+                "SELECT * FROM P NATURAL JOIN  Q ON P.A = Q.A;",
+                "SELECT * FROM P CROSS JOIN  Q ON P.A = Q.A;",
+                "SELECT * FROM P NATURAL JOIN  Q USING(A);",
+                "SELECT * FROM P CROSS JOIN  Q USING(A);"
+                )
                 .forEach(query -> {
                     Exception e = null;
                     try {
-                        final CQIE parse = parser.parse("SELECT A, B FROM P  WHERE P.A(+) = P.B;");
+                        parser.parse(query);
                         System.out.println(query + " - Wrong!");
                     } catch (Exception ex) { // todo: specialise exception
                         System.out.println(query + " - OK");
@@ -637,7 +651,7 @@ public class SelectQueryParserTest {
                 .forEach(query -> {
                     Exception e = null;
                     try {
-                        final CQIE parse = parser.parse("SELECT A, B FROM P  WHERE P.A(+) = P.B;");
+                        final CQIE parse = parser.parse(query);
                         System.out.println(query + " - Wrong!");
                     } catch (Exception ex) { // todo: specialise exception
                         System.out.println(query + " - OK");

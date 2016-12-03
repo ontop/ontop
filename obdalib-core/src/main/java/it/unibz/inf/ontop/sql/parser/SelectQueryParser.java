@@ -35,14 +35,14 @@ public class SelectQueryParser {
     private final DBMetadata metadata;
     private int relationIndex = 0;
 
+    private boolean parseException;
+
     public SelectQueryParser(DBMetadata metadata) {
         this.metadata = metadata;
     }
 
-
     public CQIE parse(String sql) {
-
-        boolean errors = false;
+        parseException = false;
         CQIE parsedSql = null;
 
         try {
@@ -63,6 +63,15 @@ public class SelectQueryParser {
                 for (Join join : plainSelect.getJoins()) {
                     if (join.isFull() || join.isRight() || join.isLeft() || join.isOuter())
                         throw new UnsupportedSelectQueryException("LEFT/RIGHT/FULL OUTER JOINs are not supported", statement);
+
+                    if ( !( join.isNatural() || join.isInner() || join.isSimple() || join.isCross() ))
+                        throw new UnsupportedSelectQueryException("JOIN syntax not supported", statement);
+
+                    if ( join.isInner() &&  join.getUsingColumns() == null && join.getOnExpression() == null  )
+                        throw new UnsupportedSelectQueryException("INNER JOIN is only supporting with  USING or ON operators", statement);
+
+                    if ( ( join.isNatural()  || join.isCross() ) && ( join.getUsingColumns() != null || join.getOnExpression() != null  )  )
+                        throw new UnsupportedSelectQueryException("NATURAL/CROSS JOINs are not supporting any USING or ON operators", statement);
 
                     // TODO: check SQL grammars of other databases
                     // http://dev.mysql.com/doc/refman/5.7/en/join.html:
@@ -108,11 +117,11 @@ public class SelectQueryParser {
         catch (JSQLParserException e) {
             if (e.getCause() instanceof ParseException)
                 log.warn("Parse exception, check no SQL reserved keywords have been used "+ e.getCause().getMessage());
-            errors = true;
+            parseException = true;
         }
 
 
-        if (parsedSql == null || errors) {
+        if (parsedSql == null || parseException) {
             log.warn("The following query couldn't be parsed. " +
                     "This means Quest will need to use nested subqueries (views) to use this mappings. " +
                     "This is not good for SQL performance, specially in MySQL. " +
@@ -127,7 +136,9 @@ public class SelectQueryParser {
         return parsedSql;
     }
 
-
+    public boolean isParseException() {
+        return parseException;
+    }
 
     private ParserViewDefinition createViewDefinition(String sql) {
 
