@@ -601,8 +601,10 @@ public class SelectQueryParserTest {
                 "SELECT * FROM P CROSS INNER JOIN  Q USING(A);"
         ).forEach(query -> {
             final SelectQueryParser parser = new SelectQueryParser(createMetadata());
-            parser.parse(query);
+            final CQIE parse = parser.parse(query);
             assertTrue( parser.isParseException());
+            assertNull(parse);
+
        });
     }
 
@@ -623,19 +625,7 @@ public class SelectQueryParserTest {
                 "SELECT * FROM P NATURAL JOIN  Q USING(A);",
                 "SELECT * FROM P CROSS JOIN  Q USING(A);"
                 )
-                .forEach(query -> {
-                    Exception e = null;
-                    try {
-                        parser.parse(query);
-                        System.out.println(query + " - Wrong!");
-                    } catch (Exception ex) { // todo: specialise exception
-                        System.out.println(query + " - OK");
-                        e = ex;
-                    }
-                    assertNotNull(e);
-
-                });
-
+                .forEach(this::assertUnsupported);
     }
 
     @Test()
@@ -648,18 +638,23 @@ public class SelectQueryParserTest {
                 "SELECT * FROM P RIGHT OUTER JOIN  Q ON P.A = Q.A;",
                 "SELECT * FROM P FULL OUTER JOIN  Q ON P.A = Q.A;",
                 "SELECT * FROM P LEFT OUTER JOIN  Q ON P.A = Q.A;")
-                .forEach(query -> {
-                    Exception e = null;
-                    try {
-                        final CQIE parse = parser.parse(query);
-                        System.out.println(query + " - Wrong!");
-                    } catch (Exception ex) { // todo: specialise exception
-                        System.out.println(query + " - OK");
-                        e = ex;
-                    }
-                    assertNotNull(e);
+                .forEach(this::assertUnsupported);
+    }
 
-                });
+    private void  assertUnsupported(String query ){
+        final SelectQueryParser parser = new SelectQueryParser(createMetadata());
+        Exception e = null;
+        CQIE parse = null;
+        try {
+            parse = parser.parse(query);
+            System.out.println(query + " - Wrong!");
+        } catch (UnsupportedSelectQueryException ex) { // todo: specialise exception
+            System.out.println(query + " - OK");
+            e = ex;
+        }
+        assertNotNull(e);
+        assertNull(parse);
+
     }
 
     @Test
