@@ -481,65 +481,10 @@ public class SelectQueryParserTest {
     }
 
 
-    @Test()
-    public void full_natural_Join_3_Test() {
-        DBMetadata metadata = createMetadata();
-        SelectQueryParser parser = new SelectQueryParser(metadata);
-        CQIE parse = parser.parse("SELECT * FROM P NATURAL JOIN Q NATURAL JOIN R");
-
-        assertFalse(parse.getBody().isEmpty());
-    }
-
-
-    @Test()
-    public void full_natural_Join_REDUCE_Test() {
-        DBMetadata metadata = createMetadata();
-        SelectQueryParser parser = new SelectQueryParser(metadata);
-        CQIE parse = parser.parse("SELECT * FROM P AS dp INNER REDUCE JOIN Q AS fis ON dp.A = fis.B");
-        assertNull(parse); // ******* This query cannot be parsed because MS-SQL REDUCE operator
-    }
-
-
-    @Test()
-    public void full_natural_Join_REDISTRIBUTE_Test() {
-        DBMetadata metadata = createMetadata();
-        SelectQueryParser parser = new SelectQueryParser(metadata);
-        CQIE parse = parser.parse("SELECT * FROM P AS dp INNER REDISTRIBUTE JOIN Q AS fis ON dp.A = fis.B");
-        assertNull(parse); // ******* This query cannot be parsed because MS-SQL REDISTRIBUTE operator
-    }
-
-    @Test()
-    public void full_natural_Join_REPLICATE_Test() {
-        DBMetadata metadata = createMetadata();
-        SelectQueryParser parser = new SelectQueryParser(metadata);
-
-        CQIE parse = parser.parse("SELECT * FROM P AS dp INNER REPLICATE JOIN Q AS fis ON dp.A = fis.B");
-        assertNull(parse); // ******* This query cannot be parsed because MS-SQL REDISTRIBUTE operator
-    }
-
-
-    @Test()
-    public void full_natural_Join_Plus_Oracle_Test() {
-        DBMetadata metadata = createMetadata();
-        SelectQueryParser parser = new SelectQueryParser(metadata);
-        // common column name "A" appears more than once in left table
-        CQIE parse = parser.parse("SELECT A, B FROM P  WHERE P.A(+) = P.B;");
-        assertFalse(parse.getBody().isEmpty()); // The (+) operator does not produce an outer join if you specify one table in the outer query and the other table in an inner query.
-    }
-
-
-    @Test()
-    public void full_natural_Join_Plus_2_Oracle_Test() {
-        DBMetadata metadata = createMetadata();
-        SelectQueryParser parser = new SelectQueryParser(metadata);
-//        Users familiar with the traditional Oracle Database outer joins syntax will recognize the same query in this form:
-        CQIE parse = parser.parse("SELECT A, B FROM P  WHERE P.A(+) = P.A;");
-        assertFalse( parse.getBody().isEmpty());
-    }
 
 
     @Test(expected = UnsupportedOperationException.class)
-    public void using_should_not_work_Test() {
+    public void ambiguous_using_parameter_Test() {
         DBMetadata metadata = createMetadata();
         SelectQueryParser parser = new SelectQueryParser(metadata);
         // ERROR: common column name "a" appears more than once in left table
@@ -549,7 +494,8 @@ public class SelectQueryParserTest {
 
 
 
-    @Test()
+
+    @Test() // todo: make a one for each case
     public void joins_allowed_to_parse() {
         SelectQueryParser parser = new SelectQueryParser(createMetadata());
         ImmutableList.of(
@@ -561,7 +507,7 @@ public class SelectQueryParserTest {
                 "SELECT * FROM P JOIN  Q USING(A);",
                 "SELECT * FROM P INNER JOIN  Q USING(A);")
                 .forEach(query -> {
-                    final CQIE parse = parser.parse("SELECT A, B FROM P  WHERE P.A(+) = P.B;");
+                    final CQIE parse = parser.parse( query);
                     assertFalse(parse.getBody().isEmpty());
                     System.out.println(query + " - OK!");
                 });

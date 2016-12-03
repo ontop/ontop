@@ -29,8 +29,6 @@ import java.util.List;
  *
  */
 public class SelectQueryParser {
-    public static final String QUERY_NOT_SUPPORTED = "Query not yet supported";
-    // private static final OBDADataFactory FACTORY = OBDADataFactoryImpl.getInstance();
     private static Logger log = LoggerFactory.getLogger(SQLQueryDeepParser.class);
     private final DBMetadata metadata;
     private int relationIndex = 0;
@@ -64,7 +62,8 @@ public class SelectQueryParser {
                     if (join.isFull() || join.isRight() || join.isLeft() || join.isOuter())
                         throw new UnsupportedSelectQueryException("LEFT/RIGHT/FULL OUTER JOINs are not supported", statement);
 
-                    if ( !( join.isNatural() || join.isInner() || join.isSimple() || join.isCross() ))
+                    if ( !( join.isNatural() || join.isInner() || join.isSimple() || join.isCross() )
+                            && ! ( join.getOnExpression() != null || join.getUsingColumns() != null  ))
                         throw new UnsupportedSelectQueryException("JOIN syntax not supported", statement);
 
                     if ( join.isInner() &&  join.getUsingColumns() == null && join.getOnExpression() == null  )
