@@ -26,36 +26,6 @@ public class SelectQueryParserTest {
         FACTORY = OBDADataFactoryImpl.getInstance();
     }
 
-    @Test
-    public void simple_join_old_test() {
-        DBMetadata metadata = createMetadata();
-
-        SelectQueryParser parser = new SelectQueryParser(metadata);
-        CQIE parse = parser.parse("SELECT A, B FROM P, Q"); //todo: fix this when the column reference A is ambiguous should throw an exception!!
-        System.out.println(parse);
-
-        assertEquals(0, parse.getHead().getTerms().size());
-        assertEquals(4, parse.getReferencedVariables().size());
-
-        Variable a1 = FACTORY.getVariable("A1");
-        Variable b1 = FACTORY.getVariable("B1");
-
-        Function atomP = FACTORY.getFunction(
-                FACTORY.getPredicate("P", new Predicate.COL_TYPE[]{null, null}),
-                ImmutableList.of(a1, b1));
-
-        assertTrue(parse.getBody().contains(atomP));
-
-        Variable a2 = FACTORY.getVariable("A2"); // variable are key sensitive
-        Variable c2 = FACTORY.getVariable("C2");
-
-        Function atomQ = FACTORY.getFunction(
-                FACTORY.getPredicate("Q", new Predicate.COL_TYPE[]{null, null}),
-                ImmutableList.of(a2, c2));
-
-        assertTrue(parse.getBody().contains(atomQ));
-    }
-
 
     @Test
     public void inner_join_on_same_table_test() {
@@ -275,25 +245,6 @@ public class SelectQueryParserTest {
         assertTrue(parse.getBody().contains(atomQ));
     }
 
-    @Test
-    public void natural_join_old_test() {
-        DBMetadata metadata = createMetadata();
-
-        SelectQueryParser parser = new SelectQueryParser(metadata);
-
-        CQIE parse = parser.parse("SELECT A, C FROM P NATURAL JOIN  Q");
-        System.out.println(parse);
-
-        assertEquals(0, parse.getHead().getTerms().size());
-        assertEquals(4, parse.getReferencedVariables().size());
-
-        Variable a1 = FACTORY.getVariable("A1");
-        Variable a2 = FACTORY.getVariable("A2");
-
-        Function atomQ = FACTORY.getFunction(ExpressionOperation.EQ, ImmutableList.of(a1, a2));
-
-        assertTrue(parse.getBody().contains(atomQ));
-    }
 
     @Test
     public void subjoin_test() {
@@ -319,28 +270,6 @@ public class SelectQueryParserTest {
 
         Variable a1 = FACTORY.getVariable("A1");
         Variable a2 = FACTORY.getVariable("A2");
-
-        Function atomQ = FACTORY.getFunction(ExpressionOperation.EQ, ImmutableList.of(a1, a2));
-
-        assertTrue(parse.getBody().contains(atomQ));
-    }
-
-    @Test
-    public void join_using_old_test() {
-        DBMetadata metadata = createMetadata();
-
-
-        SelectQueryParser parser = new SelectQueryParser(metadata);
-
-        CQIE parse = parser.parse("SELECT A, C FROM P INNER JOIN Q USING (A)");
-        System.out.println(parse);
-
-        assertTrue(parse.getHead().getTerms().size() == 0);
-        assertTrue(parse.getReferencedVariables().size() == 4);
-
-        Variable a1 = FACTORY.getVariable("A1");
-        Variable a2 = FACTORY.getVariable("A2");
-
 
         Function atomQ = FACTORY.getFunction(ExpressionOperation.EQ, ImmutableList.of(a1, a2));
 

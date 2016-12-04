@@ -73,6 +73,10 @@ public class RelationalExpression {
         return attributes;
     }
 
+    public ImmutableMap<QuotedID, ImmutableSet<RelationID>> getAttributeOccurrences() {
+        return attributeOccurrences;
+    }
+
     /**
      * CROSS JOIN of two relations (also denoted by , in SQL)
      *

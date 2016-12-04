@@ -32,7 +32,7 @@ public class SelectQueryParser {
     private static Logger log = LoggerFactory.getLogger(SQLQueryDeepParser.class);
     private final DBMetadata metadata;
     private int relationIndex = 0;
-
+    private Statement statement;
     private boolean parseException;
 
     public SelectQueryParser(DBMetadata metadata) {
@@ -44,7 +44,7 @@ public class SelectQueryParser {
         CQIE parsedSql = null;
 
         try {
-            Statement statement = CCJSqlParserUtil.parse(sql);
+            statement = CCJSqlParserUtil.parse(sql);
             if (!(statement instanceof Select))
                 throw new InvalidSelectQueryException("The inserted query is not a SELECT statement", statement);
 
@@ -54,53 +54,12 @@ public class SelectQueryParser {
             if (!(selectBody instanceof PlainSelect))
                 throw new UnsupportedSelectQueryException("Complex SELECT statements are not supported", selectBody);
 
-            PlainSelect plainSelect = (PlainSelect)selectBody;
+            PlainSelect plainSelect = (PlainSelect) selectBody;
 
             RelationalExpression current = getRelationalExpression(plainSelect.getFromItem());
             if (plainSelect.getJoins() != null) {
-                for (Join join : plainSelect.getJoins()) {
-                    if (join.isFull() || join.isRight() || join.isLeft() || join.isOuter())
-                        throw new UnsupportedSelectQueryException("LEFT/RIGHT/FULL OUTER JOINs are not supported", statement);
-
-                    if ( !( join.isNatural() || join.isInner() || join.isSimple() || join.isCross() )
-                            && ! ( join.getOnExpression() != null || join.getUsingColumns() != null  ))
-                        throw new UnsupportedSelectQueryException("JOIN syntax not supported", statement);
-
-                    if ( join.isInner() &&  join.getUsingColumns() == null && join.getOnExpression() == null  )
-                        throw new UnsupportedSelectQueryException("INNER JOIN is only supported with USING or ON operators", statement);
-
-                    if ( ( join.isNatural()  || join.isCross() ) && ( join.getUsingColumns() != null || join.getOnExpression() != null  )  )
-                        throw new UnsupportedSelectQueryException("In NATURAL/CROSS JOINs are not supported any USING or ON operators", statement);
-
-                    // TODO: check SQL grammars of other databases
-                    // http://dev.mysql.com/doc/refman/5.7/en/join.html:
-                    // In MySQL, JOIN, CROSS JOIN, and INNER JOIN are syntactic equivalents
-                    // (they can replace each other). In standard SQL, they are not equivalent.
-                    // INNER JOIN is used with an ON clause, CROSS JOIN is used otherwise.
-
-                    RelationalExpression right = getRelationalExpression(join.getRightItem());
-                    if (join.isCross() || join.isSimple()) {
-                        current = RelationalExpression.crossJoin(current, right);
-                    }
-                    else if (join.isNatural()) { // can also be INNER, can it not?
-                        current = RelationalExpression.naturalJoin(current, right);
-                    }
-                    //else if (join.isInner()) {
-                        else if (join.getOnExpression() != null) {
-                            current = RelationalExpression.joinOn(current, right,
-                                    new BooleanExpressionParser(metadata.getQuotedIDFactory(), join.getOnExpression()));
-                        }
-                        else if (join.getUsingColumns() != null) {
-                            current = RelationalExpression.joinUsing(current, right,
-                                    join.getUsingColumns().stream()
-                                            .map(p -> metadata.getQuotedIDFactory().createAttributeID(p.getColumnName()))
-                                            .collect(ImmutableCollectors.toSet()));
-                        }
-                    //}
-                    //else if (join.getUsingColumns() != null)
-                    //    // on the join expression is only present UsingColumns and RightItem for example: SELECT A, C FROM P JOIN Q USING (A)
-                    //    current = joinUsing(current, right, join);
-                }
+                for (Join join : plainSelect.getJoins())
+                    current = parseJoin(current, join);
             }
 
             if (plainSelect.getWhere() != null)
@@ -110,12 +69,11 @@ public class SelectQueryParser {
             final OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
             // TODO: proper handling of the head predicate
             parsedSql = fac.getCQIE(
-                    fac.getFunction(fac.getPredicate("Q", new Predicate.COL_TYPE[] {})),
+                    fac.getFunction(fac.getPredicate("Q", new Predicate.COL_TYPE[]{})),
                     current.getAtoms());
-        }
-        catch (JSQLParserException e) {
+        } catch (JSQLParserException e) {
             if (e.getCause() instanceof ParseException)
-                log.warn("Parse exception, check no SQL reserved keywords have been used "+ e.getCause().getMessage());
+                log.warn("Parse exception, check no SQL reserved keywords have been used " + e.getCause().getMessage());
             parseException = true;
         }
 
@@ -139,6 +97,51 @@ public class SelectQueryParser {
         return parseException;
     }
 
+    private RelationalExpression parseJoin(RelationalExpression current, Join join) {
+        if (join.isFull() || join.isRight() || join.isLeft() || join.isOuter())
+            throw new UnsupportedSelectQueryException("LEFT/RIGHT/FULL OUTER JOINs are not supported", statement);
+
+        if (!(join.isNatural() || join.isInner() || join.isSimple() || join.isCross())
+                && !(join.getOnExpression() != null || join.getUsingColumns() != null))
+            throw new UnsupportedSelectQueryException("JOIN syntax not supported", statement);
+
+        if (join.isInner() && join.getUsingColumns() == null && join.getOnExpression() == null)
+            throw new UnsupportedSelectQueryException("INNER JOIN is only supported with USING or ON operators", statement);
+
+        if ((join.isNatural() || join.isCross()) && (join.getUsingColumns() != null || join.getOnExpression() != null))
+            throw new UnsupportedSelectQueryException("In NATURAL/CROSS JOINs are not supported any USING or ON operators", statement);
+
+        // TODO: check SQL grammars of other databases
+        // http://dev.mysql.com/doc/refman/5.7/en/join.html:
+        // In MySQL, JOIN, CROSS JOIN, and INNER JOIN are syntactic equivalents
+        // (they can replace each other). In standard SQL, they are not equivalent.
+        // INNER JOIN is used with an ON clause, CROSS JOIN is used otherwise.
+
+        RelationalExpression right = getRelationalExpression(join.getRightItem());
+        if (join.isCross() || join.isSimple()) {
+            current = RelationalExpression.crossJoin(current, right);
+        } else if (join.isNatural()) { // can also be INNER, can it not?
+            current = RelationalExpression.naturalJoin(current, right);
+        }
+        //else if (join.isInner()) {
+        else if (join.getOnExpression() != null) {
+            current = RelationalExpression.joinOn(current, right,
+                    new BooleanExpressionParser(metadata.getQuotedIDFactory(), join.getOnExpression()));
+        } else if (join.getUsingColumns() != null) {
+            current = RelationalExpression.joinUsing(current, right,
+                    join.getUsingColumns().stream()
+                            .map(p -> metadata.getQuotedIDFactory().createAttributeID(p.getColumnName()))
+                            .collect(ImmutableCollectors.toSet()));
+        }
+        //}
+        //else if (join.getUsingColumns() != null)
+        //    // on the join expression is only present UsingColumns and RightItem for example: SELECT A, C FROM P JOIN Q USING (A)
+        //    current = joinUsing(current, right, join);
+
+        return current;
+    }
+
+
     private ParserViewDefinition createViewDefinition(String sql) {
 
         QuotedIDFactory idfac = metadata.getQuotedIDFactory();
@@ -161,8 +164,7 @@ public class SelectQueryParser {
 
                 viewDefinition.addAttribute(new QualifiedAttributeID(relationId, columnId));
             }
-        }
-        else {
+        } else {
             int start = "select".length();
             int end = sql.toLowerCase().indexOf("from");
             if (end == -1)
@@ -180,9 +182,9 @@ public class SelectQueryParser {
                 String columnName = col.trim();
 
     			/*
-    			 * Take the alias name if the column name has it.
+                 * Take the alias name if the column name has it.
     			 */
-                final String[] aliasSplitters = new String[] { " as ",  " AS " };
+                final String[] aliasSplitters = new String[]{" as ", " AS "};
 
                 for (String aliasSplitter : aliasSplitters) {
                     if (columnName.contains(aliasSplitter)) { // has an alias
@@ -233,8 +235,8 @@ public class SelectQueryParser {
             relationIndex++;
 
             RelationID aliasId = (tableName.getAlias() != null)
-                ? idfac.createRelationID(null, tableName.getAlias().getName())
-                : relation.getID();
+                    ? idfac.createRelationID(null, tableName.getAlias().getName())
+                    : relation.getID();
 
             final OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
             List<Term> terms = new ArrayList<>(relation.getAttributes().size());
@@ -259,7 +261,6 @@ public class SelectQueryParser {
         }
 
 
-
         @Override
         public void visit(SubSelect subSelect) {
             // TODO: implementation
@@ -268,7 +269,26 @@ public class SelectQueryParser {
         @Override
         public void visit(SubJoin subjoin) {
             // TODO: implementation (similar to SubSelect, even simpler)
-            throw new UnsupportedSelectQueryException("Subjoins are not supported", subjoin);
+            QuotedIDFactory idfac = metadata.getQuotedIDFactory();
+            result = getRelationalExpression(subjoin.getLeft());
+            result = parseJoin(result, subjoin.getJoin());
+            RelationID aliasId = idfac.createRelationID(null, subjoin.getAlias().getName());
+            ImmutableMap.Builder<QuotedID, ImmutableSet<RelationID>> occurrencesBuilder = ImmutableMap.builder();
+            ImmutableMap.Builder<QualifiedAttributeID, Variable> attributesBuilder = ImmutableMap.builder();
+            ImmutableMap<QualifiedAttributeID, Variable> attributes = result.getAttributes();
+            attributes.entrySet().stream()
+                    .filter(f -> f.getKey().getRelation() == null)
+                    .forEach(e -> {
+                        attributesBuilder.put(new QualifiedAttributeID(aliasId, e.getKey().getAttribute()), e.getValue());
+                        ImmutableSet.Builder<RelationID> relationIDS  = new ImmutableSet.Builder<>();
+                        relationIDS.addAll(result.getAttributeOccurrences().get(e.getKey().getAttribute()));
+                        relationIDS.add(aliasId);
+                        occurrencesBuilder.put(e.getKey().getAttribute(), relationIDS.build());
+                    });
+            attributesBuilder.putAll(result.getAttributes());
+            result = new RelationalExpression(result.getAtoms(),
+                    attributesBuilder.build(), occurrencesBuilder.build());
+
         }
 
         @Override
@@ -281,9 +301,6 @@ public class SelectQueryParser {
             throw new UnsupportedSelectQueryException("ValuesLists are not supported", valuesList);
         }
     }
-
-
-
 
 
 }
