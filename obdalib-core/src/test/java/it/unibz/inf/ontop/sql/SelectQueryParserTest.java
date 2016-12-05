@@ -257,8 +257,10 @@ public class SelectQueryParserTest {
 
         CQIE parse = parser.parse("SELECT A, C FROM R JOIN (P NATURAL JOIN Q) AS S ON R.A = S.A");
         System.out.println(parse);
+        // TODO: complete test
     }
 
+    // TODO: redundant, remove
     @Test
     public void join_using_inner_test() {
         DBMetadata metadata = createMetadata();
@@ -280,6 +282,7 @@ public class SelectQueryParserTest {
     }
 
 
+    // TODO: merge into the regular series of tests below
     @Test //todo: this should work
     public void join_using_2_test() {
         DBMetadata metadata = createMetadata();
@@ -372,6 +375,7 @@ public class SelectQueryParserTest {
     }
 
 
+    // TODO: these tests are redundant - covered by unsupported_joins_test - remove
     @Test(expected = UnsupportedSelectQueryException.class)
     public void left_outer_join_test() {
         DBMetadata metadata = createMetadata();

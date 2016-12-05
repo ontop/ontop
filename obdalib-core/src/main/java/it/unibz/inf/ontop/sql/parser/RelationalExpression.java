@@ -73,10 +73,6 @@ public class RelationalExpression {
         return attributes;
     }
 
-    public ImmutableMap<QuotedID, ImmutableSet<RelationID>> getAttributeOccurrences() {
-        return attributeOccurrences;
-    }
-
     /**
      * CROSS JOIN of two relations (also denoted by , in SQL)
      *
@@ -95,7 +91,7 @@ public class RelationalExpression {
      * @param getAtomOnExpression is a {@link BooleanExpressionParser}
      * @return a {@link RelationalExpression}
      */
-    static RelationalExpression joinOn(RelationalExpression e1, RelationalExpression e2,
+    public static RelationalExpression joinOn(RelationalExpression e1, RelationalExpression e2,
                                        BooleanExpressionParser getAtomOnExpression) {
 
         // TODO: better exception?
@@ -130,7 +126,7 @@ public class RelationalExpression {
      * @param e2 is a {@link RelationalExpression)
      * @return a {@link RelationalExpression}
      */
-    static RelationalExpression naturalJoin(RelationalExpression e1, RelationalExpression e2) {
+    public static RelationalExpression naturalJoin(RelationalExpression e1, RelationalExpression e2) {
 
         // TODO: better exception?
         if (!relationAliasesConsistent(e1.attributes, e2.attributes))
@@ -155,7 +151,7 @@ public class RelationalExpression {
      * @param usingColumns is a {@link ImmutableSet}<{@link QuotedID}>
      * @return a {@link RelationalExpression)
      */
-    static RelationalExpression joinUsing(RelationalExpression e1, RelationalExpression e2,
+    public static RelationalExpression joinUsing(RelationalExpression e1, RelationalExpression e2,
                                           ImmutableSet<QuotedID> usingColumns) {
 
         // TODO: better exception?
@@ -217,6 +213,37 @@ public class RelationalExpression {
     }
 
 
+    public static RelationalExpression create(ImmutableList<Function> atoms, ImmutableMap<QuotedID, Variable> unqualifiedAttributes, RelationID alias) {
+
+        ImmutableMap<QualifiedAttributeID, Variable> attributes = ImmutableMap.<QualifiedAttributeID, Variable>builder()
+                .putAll(unqualifiedAttributes.entrySet().stream()
+                        .collect(ImmutableCollectors.toMap(
+                                f -> new QualifiedAttributeID(alias, f.getKey()),
+                                Map.Entry::getValue)))
+                .putAll(unqualifiedAttributes.entrySet().stream()
+                        .collect(ImmutableCollectors.toMap(
+                                f -> new QualifiedAttributeID(null, f.getKey()),
+                                Map.Entry::getValue)))
+                .build();
+
+        ImmutableMap<QuotedID, ImmutableSet<RelationID>> attributeOccurrences =
+                unqualifiedAttributes.keySet().stream()
+                        .collect(ImmutableCollectors.toMap(identity(), id -> ImmutableSet.of(alias)));
+
+        return new RelationalExpression(atoms, attributes, attributeOccurrences);
+    }
+
+    public static RelationalExpression alias(RelationalExpression e, RelationID alias) {
+
+        ImmutableMap<QuotedID, Variable> unqualifiedAttributes =
+                e.attributes.entrySet().stream()
+                        .filter(f -> f.getKey().getRelation() == null)
+                        .collect(ImmutableCollectors.toMap(
+                                f -> f.getKey().getAttribute(), Map.Entry::getValue));
+
+        return create(e.atoms, unqualifiedAttributes, alias);
+    }
+
     /**
      * Used for relation's where expression
      *
@@ -257,7 +284,7 @@ public class RelationalExpression {
 
         return attributes.entrySet().stream()
                 .filter(e -> condition.test(e.getKey()))
-                .collect(ImmutableCollectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+                .collect(ImmutableCollectors.toMap());
     }
 
 
