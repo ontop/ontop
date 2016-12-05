@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.sql.parser.SelectQueryParser;
+import it.unibz.inf.ontop.sql.parser.exceptions.InvalidSelectQueryException;
 import it.unibz.inf.ontop.sql.parser.exceptions.UnsupportedSelectQueryException;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.statement.Statement;
@@ -196,6 +197,8 @@ public class SelectQueryParserTest {
         System.out.println(parse);
     }
 
+    // TODO: remove tests on different types of expressions - there is another test that does the job
+
     @Test
     public void inner_join_on_AND_test() {
         DBMetadata metadata = createMetadata();
@@ -277,7 +280,7 @@ public class SelectQueryParserTest {
     }
 
 
-    @Test //todo: this should works
+    @Test //todo: this should work
     public void join_using_2_test() {
         DBMetadata metadata = createMetadata();
 
@@ -513,8 +516,8 @@ public class SelectQueryParserTest {
 
 
     @Test()
-    public void invalid_joins_to_parse_JSQL_error_test() {
-        // During this tests the parser rises ParseException
+    public void parse_exception_test() {
+        // During this tests the parser throws a ParseException
         // todo: this should be categorised as invalid mapping which cannot be supported
 
         ImmutableList.of(
@@ -545,59 +548,66 @@ public class SelectQueryParserTest {
         ).forEach(query -> {
             SelectQueryParser parser = new SelectQueryParser(createMetadata());
             CQIE parse = parser.parse(query);
-            assertTrue( parser.isParseException());
+            assertTrue(parser.isParseException());
             assertNull(parse);
-
        });
     }
 
     @Test()
-    public void invalid_joins_to_parse_test() {
+    public void invalid_joins_test() {
         ImmutableList.of(
                 "SELECT * FROM P JOIN  Q;",
-                "SELECT * FROM P RIGHT OUTER JOIN  Q;",
-                "SELECT * FROM P RIGHT JOIN  Q;",
-                "SELECT * FROM P FULL JOIN  Q;",
-                "SELECT * FROM P LEFT JOIN  Q;",
-                "SELECT * FROM P FULL OUTER JOIN  Q;",
-                "SELECT * FROM P LEFT OUTER JOIN  Q;",
                 "SELECT * FROM P INNER JOIN  Q;",
                 "SELECT * FROM P NATURAL JOIN  Q ON P.A = Q.A;",
                 "SELECT * FROM P CROSS JOIN  Q ON P.A = Q.A;",
                 "SELECT * FROM P NATURAL JOIN  Q USING(A);",
                 "SELECT * FROM P CROSS JOIN  Q USING(A);"
                 )
-                .forEach(this::assertUnsupported);
+                .forEach(query -> {
+            SelectQueryParser parser = new SelectQueryParser(createMetadata());
+            Exception e = null;
+            try {
+                CQIE parse = parser.parse(query);
+                System.out.println(query + " - Wrong!");
+            }
+            catch (InvalidSelectQueryException ex) {
+                System.out.println(query + " - OK");
+                e = ex;
+            }
+            assertNotNull(e);
+        });
     }
 
     @Test()
-    public void joins_not_supported_to_parse() {
+    public void unsupported_joins_test() {
         ImmutableList.of(
+                "SELECT * FROM P RIGHT OUTER JOIN  Q;",
+                "SELECT * FROM P RIGHT JOIN  Q;",
+                "SELECT * FROM P FULL JOIN  Q;",
+                "SELECT * FROM P LEFT JOIN  Q;",
+                "SELECT * FROM P FULL OUTER JOIN  Q;",
+                "SELECT * FROM P LEFT OUTER JOIN  Q;",
                 "SELECT * FROM P RIGHT JOIN  Q ON P.A = Q.A;",
                 "SELECT * FROM P FULL JOIN  Q ON P.A = Q.A;",
                 "SELECT * FROM P LEFT JOIN  Q ON P.A = Q.A;",
                 "SELECT * FROM P RIGHT OUTER JOIN  Q ON P.A = Q.A;",
                 "SELECT * FROM P FULL OUTER JOIN  Q ON P.A = Q.A;",
                 "SELECT * FROM P LEFT OUTER JOIN  Q ON P.A = Q.A;")
-                .forEach(this::assertUnsupported);
+                .forEach(query -> {
+            SelectQueryParser parser = new SelectQueryParser(createMetadata());
+            Exception e = null;
+            try {
+                CQIE parse = parser.parse(query);
+                System.out.println(query + " - Wrong!");
+            }
+            catch (UnsupportedSelectQueryException ex) {
+                System.out.println(query + " - OK");
+                e = ex;
+            }
+            assertNotNull(e);
+        });
     }
 
-    private void  assertUnsupported(String query ){
-        SelectQueryParser parser = new SelectQueryParser(createMetadata());
-        Exception e = null;
-        CQIE parse = null;
-        try {
-            parse = parser.parse(query);
-            System.out.println(query + " - Wrong!");
-        }
-        catch (UnsupportedSelectQueryException ex) { // todo: specialise exception
-            System.out.println(query + " - OK");
-            e = ex;
-        }
-        assertNotNull(e);
-        assertNull(parse);
-
-    }
 
     @Test
     public void select_join_2_test() {

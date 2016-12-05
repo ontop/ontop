@@ -98,45 +98,49 @@ public class SelectQueryParser {
     }
 
     private RelationalExpression parseJoin(RelationalExpression current, Join join) {
+
         if (join.isFull() || join.isRight() || join.isLeft() || join.isOuter())
             throw new UnsupportedSelectQueryException("LEFT/RIGHT/FULL OUTER JOINs are not supported", statement);
 
-        if (!(join.isNatural() || join.isInner() || join.isSimple() || join.isCross())
-                && !(join.getOnExpression() != null || join.getUsingColumns() != null))
-            throw new UnsupportedSelectQueryException("JOIN syntax not supported", statement);
-
-        if (join.isInner() && join.getUsingColumns() == null && join.getOnExpression() == null)
-            throw new UnsupportedSelectQueryException("INNER JOIN is only supported with USING or ON operators", statement);
-
-        if ((join.isNatural() || join.isCross()) && (join.getUsingColumns() != null || join.getOnExpression() != null))
-            throw new UnsupportedSelectQueryException("In NATURAL/CROSS JOINs are not supported any USING or ON operators", statement);
-
-        // TODO: check SQL grammars of other databases
-        // http://dev.mysql.com/doc/refman/5.7/en/join.html:
-        // In MySQL, JOIN, CROSS JOIN, and INNER JOIN are syntactic equivalents
-        // (they can replace each other). In standard SQL, they are not equivalent.
-        // INNER JOIN is used with an ON clause, CROSS JOIN is used otherwise.
-
         RelationalExpression right = getRelationalExpression(join.getRightItem());
-        if (join.isCross() || join.isSimple()) {
+        if (join.isSimple()) {
             current = RelationalExpression.crossJoin(current, right);
-        } else if (join.isNatural()) { // can also be INNER, can it not?
+        }
+        else if (join.isCross()) {
+            if (join.getOnExpression() != null || join.getUsingColumns() != null)
+                throw new InvalidSelectQueryException("CROSS JOIN cannot have USING/ON conditions", statement);
+
+            if (join.isInner())
+                throw new InvalidSelectQueryException("CROSS INNER JOIN is not allowed", statement);
+
+            current = RelationalExpression.crossJoin(current, right);
+        }
+        else if (join.isNatural()) {
+            if (join.getOnExpression() != null || join.getUsingColumns() != null)
+                throw new InvalidSelectQueryException("NATURAL JOIN cannot have USING/ON conditions", statement);
+
+            if (join.isInner())
+                throw new InvalidSelectQueryException("NATURAL INNER JOIN is not allowed", statement);
+
             current = RelationalExpression.naturalJoin(current, right);
         }
-        //else if (join.isInner()) {
-        else if (join.getOnExpression() != null) {
-            current = RelationalExpression.joinOn(current, right,
-                    new BooleanExpressionParser(metadata.getQuotedIDFactory(), join.getOnExpression()));
-        } else if (join.getUsingColumns() != null) {
-            current = RelationalExpression.joinUsing(current, right,
-                    join.getUsingColumns().stream()
-                            .map(p -> metadata.getQuotedIDFactory().createAttributeID(p.getColumnName()))
-                            .collect(ImmutableCollectors.toSet()));
+        else {
+            if (join.getOnExpression() != null) {
+                if (join.getUsingColumns() !=null)
+                    throw new InvalidSelectQueryException("JOIN cannot have both USING and ON", statement);
+
+                current = RelationalExpression.joinOn(current, right,
+                        new BooleanExpressionParser(metadata.getQuotedIDFactory(), join.getOnExpression()));
+            }
+            else if (join.getUsingColumns() != null) {
+                current = RelationalExpression.joinUsing(current, right,
+                        join.getUsingColumns().stream()
+                                .map(p -> metadata.getQuotedIDFactory().createAttributeID(p.getColumnName()))
+                                .collect(ImmutableCollectors.toSet()));
+            }
+            else
+                throw new InvalidSelectQueryException("[INNER] JOIN requires either ON or USING", statement);
         }
-        //}
-        //else if (join.getUsingColumns() != null)
-        //    // on the join expression is only present UsingColumns and RightItem for example: SELECT A, C FROM P JOIN Q USING (A)
-        //    current = joinUsing(current, right, join);
 
         return current;
     }
@@ -226,7 +230,8 @@ public class SelectQueryParser {
 
         @Override
         public void visit(Table tableName) {
-            final QuotedIDFactory idfac = metadata.getQuotedIDFactory();
+            QuotedIDFactory idfac = metadata.getQuotedIDFactory();
+
             RelationID id = idfac.createRelationID(tableName.getSchemaName(), tableName.getName());
             // Construct the predicate using the table name
             DatabaseRelationDefinition relation = metadata.getDatabaseRelation(id);
@@ -238,11 +243,11 @@ public class SelectQueryParser {
                     ? idfac.createRelationID(null, tableName.getAlias().getName())
                     : relation.getID();
 
-            final OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
+            OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
             List<Term> terms = new ArrayList<>(relation.getAttributes().size());
             ImmutableMap.Builder attributesBuilder = ImmutableMap.<QualifiedAttributeID, Variable>builder();
             ImmutableMap.Builder occurrencesBuilder = ImmutableMap.<QuotedID, ImmutableSet<RelationID>>builder();
-            for (Attribute attribute : relation.getAttributes()) {
+            relation.getAttributes().forEach(attribute -> {
                 QuotedID attributeId = attribute.getID();
 
                 Variable var = fac.getVariable(attributeId.getName() + relationIndex);
@@ -252,7 +257,7 @@ public class SelectQueryParser {
                 attributesBuilder.put(new QualifiedAttributeID(null, attributeId), var);
 
                 occurrencesBuilder.put(attributeId, ImmutableSet.of(aliasId));
-            }
+            });
             // Create an atom for a particular table
             Function atom = Relation2DatalogPredicate.getAtom(relation, terms);
 
@@ -268,25 +273,26 @@ public class SelectQueryParser {
 
         @Override
         public void visit(SubJoin subjoin) {
-            // TODO: implementation (similar to SubSelect, even simpler)
             QuotedIDFactory idfac = metadata.getQuotedIDFactory();
-            result = getRelationalExpression(subjoin.getLeft());
-            result = parseJoin(result, subjoin.getJoin());
+
+            RelationalExpression left = getRelationalExpression(subjoin.getLeft());
+            RelationalExpression join = parseJoin(left, subjoin.getJoin());
             RelationID aliasId = idfac.createRelationID(null, subjoin.getAlias().getName());
+
             ImmutableMap.Builder<QuotedID, ImmutableSet<RelationID>> occurrencesBuilder = ImmutableMap.builder();
             ImmutableMap.Builder<QualifiedAttributeID, Variable> attributesBuilder = ImmutableMap.builder();
-            ImmutableMap<QualifiedAttributeID, Variable> attributes = result.getAttributes();
+            ImmutableMap<QualifiedAttributeID, Variable> attributes = join.getAttributes();
             attributes.entrySet().stream()
                     .filter(f -> f.getKey().getRelation() == null)
                     .forEach(e -> {
                         attributesBuilder.put(new QualifiedAttributeID(aliasId, e.getKey().getAttribute()), e.getValue());
                         ImmutableSet.Builder<RelationID> relationIDS  = new ImmutableSet.Builder<>();
-                        relationIDS.addAll(result.getAttributeOccurrences().get(e.getKey().getAttribute()));
+                        relationIDS.addAll(join.getAttributeOccurrences().get(e.getKey().getAttribute()));
                         relationIDS.add(aliasId);
                         occurrencesBuilder.put(e.getKey().getAttribute(), relationIDS.build());
                     });
-            attributesBuilder.putAll(result.getAttributes());
-            result = new RelationalExpression(result.getAtoms(),
+            attributesBuilder.putAll(join.getAttributes());
+            result = new RelationalExpression(join.getAtoms(),
                     attributesBuilder.build(), occurrencesBuilder.build());
 
         }
