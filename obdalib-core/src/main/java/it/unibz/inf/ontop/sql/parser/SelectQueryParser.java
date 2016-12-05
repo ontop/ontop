@@ -266,11 +266,11 @@ public class SelectQueryParser {
 
         @Override
         public void visit(SubJoin subjoin) {
-            RelationalExpression left = getRelationalExpression(subjoin.getLeft());
-            RelationalExpression join = join(left, subjoin.getJoin());
-
             if (subjoin.getAlias() == null || subjoin.getAlias().getName() == null)
                 throw new InvalidSelectQueryException("SUBJOIN must have an alias", subjoin);
+
+            RelationalExpression left = getRelationalExpression(subjoin.getLeft());
+            RelationalExpression join = join(left, subjoin.getJoin());
 
             RelationID aliasId = idfac.createRelationID(null, subjoin.getAlias().getName());
 
