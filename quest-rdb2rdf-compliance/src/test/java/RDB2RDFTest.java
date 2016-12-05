@@ -18,19 +18,12 @@
  * #L%
  */
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.PrintWriter;
-import java.io.StringWriter;
+import java.io.*;
 import java.net.URL;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.util.Collection;
-import java.util.List;
-import java.util.Properties;
-import java.util.Set;
+import java.util.*;
 
 import com.google.common.base.Charsets;
 import com.google.common.base.Objects;
@@ -103,7 +96,7 @@ public class RDB2RDFTest {
 
 	private static OWLOntology EMPTY_ONT;
 	private static Properties PROPERTIES;
-
+	
 
 	/**
 	 * Terms used in the manifest files of RDB2RDF test suite
@@ -262,7 +255,14 @@ public class RDB2RDFTest {
 				.properties(PROPERTIES)
 				.ontology(EMPTY_ONT);
 		if (mappingFile != null) {
-			configBuilder.r2rmlMappingFile(mappingFile);
+			String absoluteFilePath = Optional.ofNullable(getClass().getResource(mappingFile))
+					.map(URL::getFile)
+					.orElseThrow(() -> new IllegalArgumentException("The mappingFile " + mappingFile
+							+ " has not been found"));
+			configBuilder.r2rmlMappingFile(absoluteFilePath);
+		}
+		else {
+			throw new IllegalStateException("Mapping are expected! " + mappingFile);
 		}
 		SesameVirtualRepo repo = new SesameVirtualRepo(name, configBuilder.build());
 		repo.initialize();
