@@ -82,7 +82,13 @@ public class ExpressionParser implements java.util.function.Function<ImmutableMa
         }
 
         private java.util.function.UnaryOperator<Term> notOperation(boolean isNot) {
-            return isNot ? term -> FACTORY.getFunctionNOT(term) : UnaryOperator.identity();
+            return isNot
+                    // cancel double negation
+                    ? term -> ((term instanceof Function) &&
+                            ((Function)term).getFunctionSymbol() == ExpressionOperation.NOT)
+                            ? ((Function)term).getTerm(0)
+                            : FACTORY.getFunctionNOT(term)
+                    : UnaryOperator.identity();
         }
 
         private void process(BinaryExpression expression, BinaryOperator<Term> op) {
@@ -291,6 +297,9 @@ public class ExpressionParser implements java.util.function.Function<ImmutableMa
             }
             process(expression, (t1, t2) ->  FACTORY.getFunction(ExpressionOperation.REGEX, t1, t2, flags));
         }
+
+        // POSIX Regular Expressions
+        // e.g., https://www.postgresql.org/docs/9.6/static/functions-matching.html#FUNCTIONS-POSIX-REGEXP
 
         @Override
         public void visit(RegExpMatchOperator expression) {
