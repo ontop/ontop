@@ -48,6 +48,8 @@ public class SelectQueryParserTest {
     }
 
 
+    // TODO: the tests with different forms of filters are subsumed by ExpressionParserTest and should be removed
+
     @Test
     public void inner_join_on_EQ_test() {
         DBMetadata metadata = createMetadata();
@@ -257,7 +259,7 @@ public class SelectQueryParserTest {
         System.out.println(parse);
 
         Function atom_R = FACTORY.getFunction(
-                FACTORY.getPredicate("R", new Predicate.COL_TYPE[]{null, null}),
+                FACTORY.getPredicate("R", new Predicate.COL_TYPE[]{null, null, null, null}),
                 ImmutableList.of(FACTORY.getVariable("A1"), FACTORY.getVariable("B1"),
                         FACTORY.getVariable("C1"), FACTORY.getVariable("D1")));
 
@@ -278,7 +280,6 @@ public class SelectQueryParserTest {
         assertTrue(parse.getBody().contains(atom_R));
         assertTrue(parse.getBody().contains(atom_P));
         assertTrue(parse.getBody().contains(atom_Q));
-        assertTrue(parse.getBody().contains(atom_P));
         assertTrue(parse.getBody().contains(atom_EQ1));
         assertTrue(parse.getBody().contains(atom_EQ2));
     }
@@ -340,7 +341,7 @@ public class SelectQueryParserTest {
         assertEquals(0, parse.getHead().getTerms().size());
 
         Variable a1 = FACTORY.getVariable("A1");
-        ValueConstant v1 = FACTORY.getConstantLiteral("1", Predicate.COL_TYPE.LONG); // variable are key sensitive
+        ValueConstant v1 = FACTORY.getConstantLiteral("1", Predicate.COL_TYPE.LONG);
 
         Function atom = FACTORY.getFunction(ExpressionOperation.EQ, ImmutableList.of(a1, v1));
 
@@ -350,7 +351,6 @@ public class SelectQueryParserTest {
 
     // -----------------------------------------------------
     // NEW TESTS
-    // TODO: remove the tests above that are subsumed by the tests below
 
     @Test()
     public void simple_join_test() {
@@ -409,21 +409,16 @@ public class SelectQueryParserTest {
     }
 
     private void assert_join_common(CQIE parse) {
-        Variable a1 = FACTORY.getVariable("A1");
-        Variable b1 = FACTORY.getVariable("B1");
 
         Function atomP = FACTORY.getFunction(
                 FACTORY.getPredicate("P", new Predicate.COL_TYPE[]{null, null}),
-                ImmutableList.of(a1, b1));
+                ImmutableList.of(FACTORY.getVariable("A1"), FACTORY.getVariable("B1")));
 
         assertTrue(parse.getBody().contains(atomP));
 
-        Variable a2 = FACTORY.getVariable("A2"); // variable are key sensitive
-        Variable c2 = FACTORY.getVariable("C2");
-
         Function atomQ = FACTORY.getFunction(
                 FACTORY.getPredicate("Q", new Predicate.COL_TYPE[]{null, null}),
-                ImmutableList.of(a2, c2));
+                ImmutableList.of(FACTORY.getVariable("A2"), FACTORY.getVariable("C2")));
 
         assertTrue(parse.getBody().contains(atomQ));
 
@@ -434,9 +429,8 @@ public class SelectQueryParserTest {
     private void assert_contains_EQ_atom(CQIE parse) {
         assertEquals(3, parse.getBody().size());
 
-        Variable a1 = FACTORY.getVariable("A1");
-        Variable a2 = FACTORY.getVariable("A2");
-        Function atomEQ = FACTORY.getFunction(ExpressionOperation.EQ, ImmutableList.of(a1, a2));
+        Function atomEQ = FACTORY.getFunction(ExpressionOperation.EQ,
+                ImmutableList.of(FACTORY.getVariable("A1"), FACTORY.getVariable("A2")));
         assertTrue(parse.getBody().contains(atomEQ));
     }
     //end region
@@ -496,7 +490,8 @@ public class SelectQueryParserTest {
                     try {
                         CQIE parse = parser.parse(query);
                         System.out.println(query + " - Wrong!");
-                    } catch (InvalidSelectQueryException ex) {
+                    }
+                    catch (InvalidSelectQueryException ex) {
                         System.out.println(query + " - OK");
                         e = ex;
                     }
@@ -525,7 +520,8 @@ public class SelectQueryParserTest {
                     try {
                         CQIE parse = parser.parse(query);
                         System.out.println(query + " - Wrong!");
-                    } catch (UnsupportedSelectQueryException ex) {
+                    }
+                    catch (UnsupportedSelectQueryException ex) {
                         System.out.println(query + " - OK");
                         e = ex;
                     }
@@ -545,15 +541,11 @@ public class SelectQueryParserTest {
         assertTrue(parse.getHead().getTerms().size() == 0);
         assertTrue(parse.getReferencedVariables().size() == 4);
 
-        Variable a1 = FACTORY.getVariable("A1");
-        Variable a2 = FACTORY.getVariable("A2");
+        Function atomQ_A = FACTORY.getFunction(ExpressionOperation.EQ,
+                ImmutableList.of(FACTORY.getVariable("A1"), FACTORY.getVariable("A2")));
 
-        Function atomQ_A = FACTORY.getFunction(ExpressionOperation.EQ, ImmutableList.of(a1, a2));
-
-        Variable b1 = FACTORY.getVariable("B1");
-        Variable b2 = FACTORY.getVariable("B2");
-
-        Function atomQ_B = FACTORY.getFunction(ExpressionOperation.EQ, ImmutableList.of(b1, b2));
+        Function atomQ_B = FACTORY.getFunction(ExpressionOperation.EQ,
+                ImmutableList.of(FACTORY.getVariable("B1"), FACTORY.getVariable("B2")));
 
         assertTrue(parse.getBody().contains(atomQ_A));
         assertTrue(parse.getBody().contains(atomQ_B));
@@ -578,7 +570,8 @@ public class SelectQueryParserTest {
             System.out.print("" + i + ": " + query);
             Statement statement = CCJSqlParserUtil.parse(query);
             System.out.println(" OK");
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             System.out.println(" " + e.getClass().getCanonicalName() + "  occurred");
         }
 
@@ -591,7 +584,8 @@ public class SelectQueryParserTest {
                         System.out.print("" + i + ": " + query);
                         Statement statement = CCJSqlParserUtil.parse(query);
                         System.out.println(" OK");
-                    } catch (Exception e) {
+                    }
+                    catch (Exception e) {
                         System.out.println(" " + e.getClass().getCanonicalName() + "  occurred");
                     }
                 }
