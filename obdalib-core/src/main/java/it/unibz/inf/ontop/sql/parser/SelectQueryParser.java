@@ -50,23 +50,7 @@ public class SelectQueryParser {
             if (!(statement instanceof Select))
                 throw new InvalidSelectQueryException("The inserted query is not a SELECT statement", statement);
 
-            Select select = (Select) statement;
-
-            SelectBody selectBody = select.getSelectBody();
-            if (!(selectBody instanceof PlainSelect))
-                throw new UnsupportedSelectQueryException("Complex SELECT statements are not supported", selectBody);
-
-            PlainSelect plainSelect = (PlainSelect) selectBody;
-
-            RelationalExpression current = getRelationalExpression(plainSelect.getFromItem());
-            if (plainSelect.getJoins() != null) {
-                for (Join join : plainSelect.getJoins())
-                    current = join(current, join);
-            }
-
-            if (plainSelect.getWhere() != null)
-                current = RelationalExpression.where(current,
-                        new BooleanExpressionParser(idfac, plainSelect.getWhere()));
+            RelationalExpression current = parseBody(((Select) statement).getSelectBody());
 
             final OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
             // TODO: proper handling of the head predicate
@@ -97,6 +81,25 @@ public class SelectQueryParser {
 
     public boolean isParseException() {
         return parseException;
+    }
+
+    private RelationalExpression parseBody(SelectBody selectBody){
+
+        if (!(selectBody instanceof PlainSelect))
+            throw new UnsupportedSelectQueryException("Complex SELECT statements are not supported", selectBody);
+
+        PlainSelect plainSelect = (PlainSelect) selectBody;
+
+        RelationalExpression current = getRelationalExpression(plainSelect.getFromItem());
+        if (plainSelect.getJoins() != null) {
+            for (Join join : plainSelect.getJoins())
+                current = join(current, join);
+        }
+
+        if (plainSelect.getWhere() != null)
+            current = RelationalExpression.where(current,
+                    new BooleanExpressionParser(idfac, plainSelect.getWhere()));
+        return current;
     }
 
     private RelationalExpression join(RelationalExpression left, Join join) {
@@ -259,9 +262,15 @@ public class SelectQueryParser {
 
         @Override
         public void visit(SubSelect subSelect) {
-            // TODO: implementation
+            // TODO: implementation -
+            // TODO: this is not yet done
+            if (subSelect.getAlias() == null || subSelect.getAlias().getName() == null)
+                throw new InvalidSelectQueryException("SUB-SELECT must have an alias", subSelect);
 
-            // use RelationalExpression.alias at the end
+            RelationalExpression current = parseBody(subSelect.getSelectBody());
+
+            RelationID aliasId = idfac.createRelationID(null, subSelect.getAlias().getName());
+            result = RelationalExpression.alias(current, aliasId);
         }
 
         @Override
