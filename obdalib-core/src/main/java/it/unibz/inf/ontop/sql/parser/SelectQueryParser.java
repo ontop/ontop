@@ -11,6 +11,8 @@ import it.unibz.inf.ontop.sql.parser.exceptions.InvalidSelectQueryException;
 import it.unibz.inf.ontop.sql.parser.exceptions.UnsupportedSelectQueryException;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import net.sf.jsqlparser.JSQLParserException;
+import net.sf.jsqlparser.expression.Alias;
+import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.parser.ParseException;
 import net.sf.jsqlparser.schema.Column;
@@ -22,6 +24,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by Roman Kontchakov on 01/11/2016.
@@ -83,12 +86,24 @@ public class SelectQueryParser {
         return parseException;
     }
 
-    private RelationalExpression parseBody(SelectBody selectBody){
+    private RelationalExpression parseBody(SelectBody selectBody) {
 
         if (!(selectBody instanceof PlainSelect))
             throw new UnsupportedSelectQueryException("Complex SELECT statements are not supported", selectBody);
 
         PlainSelect plainSelect = (PlainSelect) selectBody;
+
+        if (plainSelect.getDistinct() != null)
+            throw new UnsupportedSelectQueryException("DISTINCT is not supported", selectBody);
+
+        if (plainSelect.getGroupByColumnReferences() != null || plainSelect.getHaving() != null)
+            throw new UnsupportedSelectQueryException("GROUP BY / HAVING is not supported", selectBody);
+
+        if (plainSelect.getLimit() != null)
+            throw new UnsupportedSelectQueryException("LIMIT is not supported", selectBody);
+
+        if (plainSelect.getOrderByElements() != null)
+            throw new UnsupportedSelectQueryException("ORDER BY is not supported", selectBody);
 
         RelationalExpression current = getRelationalExpression(plainSelect.getFromItem());
         if (plainSelect.getJoins() != null) {
@@ -96,10 +111,26 @@ public class SelectQueryParser {
                 current = join(current, join);
         }
 
-        if (plainSelect.getWhere() != null)
-            current = RelationalExpression.where(current,
-                    new BooleanExpressionParser(idfac, plainSelect.getWhere()));
-        return current;
+        ImmutableList<Function> atoms = (plainSelect.getWhere() == null)
+                ? current.getAtoms()
+                : ImmutableList.<Function>builder()
+                    .addAll(current.getAtoms())
+                    .addAll(new BooleanExpressionParser(idfac, plainSelect.getWhere()).apply(current.getAttributes()))
+                    .build();
+
+        ImmutableMap.Builder attributesBuilder = ImmutableMap.<QualifiedAttributeID, Variable>builder();
+        SelectItemProcessor sip = new SelectItemProcessor(current.getAttributes());
+        plainSelect.getSelectItems().forEach(si -> {
+            ImmutableMap<QualifiedAttributeID, Variable> attrs = sip.getAttributes(si);
+            if (attrs == null)
+                throw new InvalidSelectQueryException("Column " + si + " not found in the query", selectBody);
+
+            // TODO: add a check that the keys in attrs do not intersect
+
+            attributesBuilder.putAll(attrs);
+        });
+
+        return new RelationalExpression(atoms, attributesBuilder.build(), null);
     }
 
     private RelationalExpression join(RelationalExpression left, Join join) {
@@ -297,5 +328,63 @@ public class SelectQueryParser {
         }
     }
 
+    private class SelectItemProcessor implements SelectItemVisitor {
+        final ImmutableMap<QualifiedAttributeID, Variable> attributes;
 
+        ImmutableMap<QualifiedAttributeID, Variable> map;
+
+        SelectItemProcessor(ImmutableMap<QualifiedAttributeID, Variable> attributes) {
+            this.attributes = attributes;
+        }
+
+        ImmutableMap<QualifiedAttributeID, Variable> getAttributes(SelectItem si) {
+            si.accept(this);
+            return map;
+        }
+
+        @Override
+        public void visit(AllColumns allColumns) {
+            map = attributes.entrySet().stream()
+                    .filter(e -> e.getKey().getRelation() == null)
+                    .collect(ImmutableCollectors.toMap());
+        }
+
+        @Override
+        public void visit(AllTableColumns allTableColumns) {
+            Table table = allTableColumns.getTable();
+            RelationID id = idfac.createRelationID(table.getSchemaName(), table.getName());
+
+            map = attributes.entrySet().stream()
+                    .filter(e -> e.getKey().getRelation().equals(id))
+                    .collect(ImmutableCollectors.toMap(
+                            e -> new QualifiedAttributeID(null, e.getKey().getAttribute()),
+                            Map.Entry::getValue));
+        }
+
+        @Override
+        public void visit(SelectExpressionItem selectExpressionItem) {
+            Expression expr = selectExpressionItem.getExpression();
+            if (!(expr instanceof Column))
+                throw new UnsupportedSelectQueryException("Complex expressions in SELECT are not supported", selectExpressionItem);
+
+            Column column = (Column) expr;
+            QuotedID id = idfac.createAttributeID(column.getColumnName());
+            Table table = column.getTable();
+            QualifiedAttributeID attr = (table == null || table.getName() == null)
+                    ? new QualifiedAttributeID(null, id)
+                    : new QualifiedAttributeID(idfac.createRelationID(table.getSchemaName(), table.getName()), id);
+
+            Variable var = attributes.get(attr);
+            if (var != null) {
+                Alias columnAlias = selectExpressionItem.getAlias();
+                QuotedID name = (columnAlias == null || columnAlias.getName() == null)
+                        ? id
+                        : idfac.createAttributeID(columnAlias.getName());
+
+                map = ImmutableMap.of(new QualifiedAttributeID(null, name), var);
+            }
+            else
+                map = null;
+        }
+    }
 }

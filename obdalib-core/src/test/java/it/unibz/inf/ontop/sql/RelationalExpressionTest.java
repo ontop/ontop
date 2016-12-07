@@ -22,14 +22,14 @@ public class RelationalExpressionTest {
     private static QuotedIDFactory MDFAC = METADATA.getQuotedIDFactory();
 
     @Test
-    public void f() {
+    public void cross_join_test() {
 
         Variable x = FACTORY.getVariable("x");
         Variable y = FACTORY.getVariable("y");
 
         Function f1 = FACTORY.getFunction(
                 FACTORY.getPredicate("P", new Predicate.COL_TYPE[] { null, null }),
-                ImmutableList.<Term>of(x, y));
+                ImmutableList.of(x, y));
 
         RelationID table1 = MDFAC.createRelationID(null, "P");
         QuotedID attx = MDFAC.createAttributeID("A");
@@ -47,7 +47,7 @@ public class RelationalExpressionTest {
 
         Function f2 = FACTORY.getFunction(
                 FACTORY.getPredicate("Q", new Predicate.COL_TYPE[] { null, null }),
-                ImmutableList.<Term>of(u, v));
+                ImmutableList.of(u, v));
 
         RelationID table2 = MDFAC.createRelationID(null, "Q");
         QuotedID attu = MDFAC.createAttributeID("A");
@@ -62,11 +62,22 @@ public class RelationalExpressionTest {
 
         System.out.println(re1);
         System.out.println(re2);
-        final RelationalExpression relationalExpression = RelationalExpression.crossJoin(re1, re2);
+
+        RelationalExpression relationalExpression = RelationalExpression.crossJoin(re1, re2);
         System.out.println(relationalExpression);
 
-        assertTrue(relationalExpression.getAtoms().indexOf(f1)>=0);
-        assertTrue(relationalExpression.getAtoms().indexOf(f2)>0);
+        assertTrue(relationalExpression.getAtoms().contains(f1));
+        assertTrue(relationalExpression.getAtoms().contains(f2));
 
+        ImmutableMap<QualifiedAttributeID, Variable> attrs = relationalExpression.getAttributes();
+
+        assertEquals(x, attrs.get(new QualifiedAttributeID(table1, attx)));
+        assertEquals(null, attrs.get(new QualifiedAttributeID(null, attx)));
+        assertEquals(y, attrs.get(new QualifiedAttributeID(table1, atty)));
+        assertEquals(y, attrs.get(new QualifiedAttributeID(null, atty)));
+        assertEquals(u, attrs.get(new QualifiedAttributeID(table2, attu)));
+        assertEquals(null, attrs.get(new QualifiedAttributeID(null, attu)));
+        assertEquals(v, attrs.get(new QualifiedAttributeID(table2, attv)));
+        assertEquals(v, attrs.get(new QualifiedAttributeID(null, attv)));
     }
 }
