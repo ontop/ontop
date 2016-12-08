@@ -234,7 +234,7 @@ public class ExpressionParserTest {
     }
 
     @Test
-    public void concat_Test_2() throws JSQLParserException {
+    public void concat_2_Test() throws JSQLParserException {
         String sql = "SELECT CONCAT('A', X, 'B') FROM DUMMY";
         Variable v = FACTORY.getVariable("x0");
         ExpressionParser parser = new ExpressionParser(IDFAC, getExpression(sql));
