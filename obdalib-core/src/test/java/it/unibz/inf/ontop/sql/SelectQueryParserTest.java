@@ -39,14 +39,22 @@ public class SelectQueryParserTest {
         assertEquals(0, parse.getHead().getTerms().size());
         assertEquals(4, parse.getReferencedVariables().size());
 
-        Variable a1 = FACTORY.getVariable("A1");
-        Variable a2 = FACTORY.getVariable("A2"); // variable are key sensitive
+        Function atom_EQ = FACTORY.getFunction(ExpressionOperation.EQ,
+                ImmutableList.of(FACTORY.getVariable("A1"), FACTORY.getVariable("A2")));
 
-        Function atomQ = FACTORY.getFunction(ExpressionOperation.EQ, ImmutableList.of(a1, a2));
+        Function atom_P_1 = FACTORY.getFunction(
+                FACTORY.getPredicate("P", new Predicate.COL_TYPE[]{null, null}),
+                ImmutableList.of(FACTORY.getVariable("A1"), FACTORY.getVariable("B1")));
+
+        Function atom_P_2 = FACTORY.getFunction(
+                FACTORY.getPredicate("P", new Predicate.COL_TYPE[]{null, null}),
+                ImmutableList.of(FACTORY.getVariable("A2"), FACTORY.getVariable("B2")));
 
         assertEquals(3, parse.getBody().size());
-        assertTrue(parse.getBody().contains(atomQ));
-        // TODO: add two more atoms
+        assertTrue(parse.getBody().contains(atom_EQ));
+        assertTrue(parse.getBody().contains(atom_P_1));
+        assertTrue(parse.getBody().contains(atom_P_2));
+
     }
 
 
@@ -69,67 +77,13 @@ public class SelectQueryParserTest {
         System.out.println("\n" + sql + "\n" + "column reference \"a\" is ambiguous --- this is wrongly parsed:\n" + parse);
     }
 
-    @Test
+    @Test(expected = InvalidSelectQueryException.class)
     public void inner_join_on_inner_join_test() {
         DBMetadata metadata = createMetadata();
         SelectQueryParser parser = new SelectQueryParser(metadata);
         // common column name "A" appears more than once in left table
-        CQIE parse = parser.parse("SELECT P.A, P.B, R.C, D FROM P NATURAL JOIN Q INNER JOIN  R on Q.C =  R.C;");
-        System.out.println(parse);
+        parser.parse("SELECT A, P.B, R.C, D FROM P NATURAL JOIN Q INNER JOIN  R on Q.C =  R.C;");
     }
-
-    // TODO: remove tests on different types of expressions - there is another test that does the job
-
-    @Test
-    public void inner_join_on_AND_test() {
-        DBMetadata metadata = createMetadata();
-
-        SelectQueryParser parser = new SelectQueryParser(metadata);
-
-        CQIE parse = parser.parse("SELECT P.A, Q.C FROM P INNER JOIN  Q on P.A <> Q.A AND P.A = 2 AND Q.A = 3");
-        System.out.println(parse);
-
-        assertEquals(0, parse.getHead().getTerms().size());
-        assertEquals(4, parse.getReferencedVariables().size());
-
-        assertEquals(5, parse.getBody().size());
-
-        Variable a1 = FACTORY.getVariable("A1");
-        Variable a2 = FACTORY.getVariable("A2"); // variable are key sensitive
-        ValueConstant v2 = FACTORY.getConstantLiteral("2", Predicate.COL_TYPE.LONG);
-        ValueConstant v3 = FACTORY.getConstantLiteral("3", Predicate.COL_TYPE.LONG);
-
-        Function atomQ = FACTORY.getFunction(ExpressionOperation.NEQ, ImmutableList.of(a1, a2));
-        assertEquals(atomQ, parse.getBody().get(2));
-
-        Function atomQ2 = FACTORY.getFunction(ExpressionOperation.EQ, ImmutableList.of(a1, v2));
-        assertEquals(atomQ2, parse.getBody().get(3));
-
-        Function atomQ3 = FACTORY.getFunction(ExpressionOperation.EQ, ImmutableList.of(a2, v3));
-        assertEquals(atomQ3, parse.getBody().get(4));
-    }
-
-    @Test
-    public void inner_join_on_EQ_constant_int_test() {
-        DBMetadata metadata = createMetadata();
-
-        SelectQueryParser parser = new SelectQueryParser(metadata);
-
-        CQIE parse = parser.parse("SELECT P.A, Q.C FROM P INNER JOIN  Q on P.A = 1");
-        System.out.println(parse);
-
-        assertEquals(0, parse.getHead().getTerms().size());
-        assertEquals(4, parse.getReferencedVariables().size());
-
-        Variable a1 = FACTORY.getVariable("A1");
-        ValueConstant a2 = FACTORY.getConstantLiteral("1", Predicate.COL_TYPE.LONG); // variable are key sensitive
-
-        Function atomQ = FACTORY.getFunction(ExpressionOperation.EQ, ImmutableList.of(a1, a2));
-
-        assertEquals(1, parse.getBody().size());
-        assertTrue(parse.getBody().contains(atomQ));
-    }
-
 
     @Test
     public void subjoin_test() {
@@ -165,7 +119,6 @@ public class SelectQueryParserTest {
         assertTrue(parse.getBody().contains(atom_EQ2));
     }
 
-    // TODO: remove tests that are covered by ExpressionParserTest
 
     @Test
     public void concat_test() {
@@ -189,47 +142,6 @@ public class SelectQueryParserTest {
         assertTrue(parse.getBody().contains(atom));
     }
 
-
-    @Test
-    public void in_condition_test() {
-        DBMetadata metadata = createMetadata();
-        SelectQueryParser parser = new SelectQueryParser(metadata);
-
-        CQIE parse = parser.parse("SELECT A, B FROM P where P.A IN ( 1, 2, 3 )");
-        System.out.println(parse);
-        assertEquals(0, parse.getHead().getTerms().size());
-
-        Variable a1 = FACTORY.getVariable("A1");
-        ValueConstant v1 = FACTORY.getConstantLiteral("1", Predicate.COL_TYPE.LONG); // variable are key sensitive
-        ValueConstant v2 = FACTORY.getConstantLiteral("2", Predicate.COL_TYPE.LONG);
-        ValueConstant v3 = FACTORY.getConstantLiteral("3", Predicate.COL_TYPE.LONG);
-
-        Function atom = FACTORY.getFunction(ExpressionOperation.OR, ImmutableList.of(
-                FACTORY.getFunction(ExpressionOperation.EQ, ImmutableList.of(a1, v1)),
-                FACTORY.getFunction(ExpressionOperation.OR, ImmutableList.of(
-                        FACTORY.getFunction(ExpressionOperation.EQ, ImmutableList.of(a1, v2)),
-                        FACTORY.getFunction(ExpressionOperation.EQ, ImmutableList.of(a1, v3))))
-        ));
-
-        assertTrue(parse.getBody().contains(atom));
-    }
-
-    @Test
-    public void in_condition1_test() {
-        DBMetadata metadata = createMetadata();
-        SelectQueryParser parser = new SelectQueryParser(metadata);
-
-        CQIE parse = parser.parse("SELECT A, B FROM P where P.A IN ( 1 )");
-        System.out.println(parse);
-        assertEquals(0, parse.getHead().getTerms().size());
-
-        Variable a1 = FACTORY.getVariable("A1");
-        ValueConstant v1 = FACTORY.getConstantLiteral("1", Predicate.COL_TYPE.LONG);
-
-        Function atom = FACTORY.getFunction(ExpressionOperation.EQ, ImmutableList.of(a1, v1));
-
-        assertTrue(parse.getBody().contains(atom));
-    }
 
 
     // -----------------------------------------------------

@@ -1,11 +1,14 @@
 package it.unibz.inf.ontop.sql;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.sql.parser.ExpressionParser;
+import it.unibz.inf.ontop.sql.parser.SelectQueryParser;
 import it.unibz.inf.ontop.sql.parser.exceptions.InvalidSelectQueryException;
 import it.unibz.inf.ontop.sql.parser.exceptions.UnsupportedSelectQueryException;
+import junit.framework.TestCase;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
@@ -21,6 +24,7 @@ import org.junit.rules.ExpectedException;
 
 import static it.unibz.inf.ontop.model.Predicate.*;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Created by Roman Kontchakov on 02/12/2016.
@@ -32,7 +36,7 @@ public class ExpressionParserTest {
     private QuotedIDFactory IDFAC;
 
     @Before
-    public void beforeEachTest(){
+    public void beforeEachTest() {
         FACTORY = OBDADataFactoryImpl.getInstance();
         METADATA = DBMetadataExtractor.createDummyMetadata();
         IDFAC = METADATA.getQuotedIDFactory();
@@ -227,6 +231,24 @@ public class ExpressionParserTest {
                 ExpressionOperation.CONCAT,
                 v,
                 FACTORY.getConstantLiteral("B", COL_TYPE.STRING)), translation);
+    }
+
+    @Test
+    public void concat_Test_2() throws JSQLParserException {
+        String sql = "SELECT CONCAT('A', X, 'B') FROM DUMMY";
+        Variable v = FACTORY.getVariable("x0");
+        ExpressionParser parser = new ExpressionParser(IDFAC, getExpression(sql));
+        Term translation = parser.apply(ImmutableMap.of(
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+
+
+        assertEquals(FACTORY.getFunction(
+                ExpressionOperation.CONCAT, FACTORY.getConstantLiteral("A", COL_TYPE.STRING),
+                FACTORY.getFunction(
+                        ExpressionOperation.CONCAT,
+                        v,
+                        FACTORY.getConstantLiteral("B", COL_TYPE.STRING))), translation);
+
     }
 
     @Test
@@ -515,13 +537,13 @@ public class ExpressionParserTest {
         System.out.println(translation);
 
         assertEquals(FACTORY.getFunction(ExpressionOperation.NOT,
-                    FACTORY.getFunction(ExpressionOperation.OR,
-                    FACTORY.getFunction(ExpressionOperation.EQ,
-                            v,
-                            FACTORY.getConstantLiteral("1", COL_TYPE.LONG)),
-                    FACTORY.getFunction(ExpressionOperation.EQ,
-                            v,
-                            FACTORY.getConstantLiteral("3", COL_TYPE.LONG)))), translation);
+                FACTORY.getFunction(ExpressionOperation.OR,
+                        FACTORY.getFunction(ExpressionOperation.EQ,
+                                v,
+                                FACTORY.getConstantLiteral("1", COL_TYPE.LONG)),
+                        FACTORY.getFunction(ExpressionOperation.EQ,
+                                v,
+                                FACTORY.getConstantLiteral("3", COL_TYPE.LONG)))), translation);
     }
 
     @Ignore
@@ -541,12 +563,12 @@ public class ExpressionParserTest {
 
         assertEquals(FACTORY.getFunction(ExpressionOperation.OR,
                 FACTORY.getFunction(ExpressionOperation.AND,
-                    FACTORY.getFunction(ExpressionOperation.EQ,
-                        v1,
-                        FACTORY.getConstantLiteral("1", COL_TYPE.LONG)),
-                    FACTORY.getFunction(ExpressionOperation.EQ,
-                        v2,
-                        FACTORY.getConstantLiteral("3", COL_TYPE.LONG))),
+                        FACTORY.getFunction(ExpressionOperation.EQ,
+                                v1,
+                                FACTORY.getConstantLiteral("1", COL_TYPE.LONG)),
+                        FACTORY.getFunction(ExpressionOperation.EQ,
+                                v2,
+                                FACTORY.getConstantLiteral("3", COL_TYPE.LONG))),
                 FACTORY.getFunction(ExpressionOperation.EQ,
                         v1,
                         FACTORY.getConstantLiteral("2", COL_TYPE.LONG)),
@@ -600,12 +622,12 @@ public class ExpressionParserTest {
         System.out.println(translation);
 
         assertEquals(FACTORY.getFunction(ExpressionOperation.AND,
-                        FACTORY.getFunction(ExpressionOperation.GTE,
-                                v,
-                                FACTORY.getConstantLiteral("1", COL_TYPE.LONG)),
-                        FACTORY.getFunction(ExpressionOperation.LTE,
-                                v,
-                                FACTORY.getConstantLiteral("3", COL_TYPE.LONG))), translation);
+                FACTORY.getFunction(ExpressionOperation.GTE,
+                        v,
+                        FACTORY.getConstantLiteral("1", COL_TYPE.LONG)),
+                FACTORY.getFunction(ExpressionOperation.LTE,
+                        v,
+                        FACTORY.getConstantLiteral("3", COL_TYPE.LONG))), translation);
     }
 
     @Test
@@ -622,12 +644,12 @@ public class ExpressionParserTest {
 
         assertEquals(FACTORY.getFunction(ExpressionOperation.NOT,
                 FACTORY.getFunction(ExpressionOperation.AND,
-                    FACTORY.getFunction(ExpressionOperation.GTE,
-                            v,
-                            FACTORY.getConstantLiteral("1", COL_TYPE.LONG)),
-                    FACTORY.getFunction(ExpressionOperation.LTE,
-                            v,
-                            FACTORY.getConstantLiteral("3", COL_TYPE.LONG)))), translation);
+                        FACTORY.getFunction(ExpressionOperation.GTE,
+                                v,
+                                FACTORY.getConstantLiteral("1", COL_TYPE.LONG)),
+                        FACTORY.getFunction(ExpressionOperation.LTE,
+                                v,
+                                FACTORY.getConstantLiteral("3", COL_TYPE.LONG)))), translation);
     }
 
     @Test
@@ -643,8 +665,8 @@ public class ExpressionParserTest {
         System.out.println(translation);
 
         assertEquals(FACTORY.getFunction(ExpressionOperation.SQL_LIKE,
-                        v,
-                        FACTORY.getConstantLiteral("_A%", COL_TYPE.STRING)), translation);
+                v,
+                FACTORY.getConstantLiteral("_A%", COL_TYPE.STRING)), translation);
     }
 
     @Test
@@ -661,8 +683,8 @@ public class ExpressionParserTest {
 
         assertEquals(FACTORY.getFunction(ExpressionOperation.NOT,
                 FACTORY.getFunction(ExpressionOperation.SQL_LIKE,
-                    v,
-                    FACTORY.getConstantLiteral("_A%", COL_TYPE.STRING))), translation);
+                        v,
+                        FACTORY.getConstantLiteral("_A%", COL_TYPE.STRING))), translation);
     }
 
     @Test
@@ -678,9 +700,9 @@ public class ExpressionParserTest {
         System.out.println(translation);
 
         assertEquals(FACTORY.getFunction(ExpressionOperation.REGEX,
-                        v,
-                        FACTORY.getConstantLiteral("A.*B", COL_TYPE.STRING),
-                        FACTORY.getConstantLiteral("", COL_TYPE.STRING)), translation);
+                v,
+                FACTORY.getConstantLiteral("A.*B", COL_TYPE.STRING),
+                FACTORY.getConstantLiteral("", COL_TYPE.STRING)), translation);
     }
 
     @Test
@@ -697,9 +719,9 @@ public class ExpressionParserTest {
 
         assertEquals(FACTORY.getFunction(ExpressionOperation.NOT,
                 FACTORY.getFunction(ExpressionOperation.REGEX,
-                    v,
-                    FACTORY.getConstantLiteral("A.*B", COL_TYPE.STRING),
-                    FACTORY.getConstantLiteral("", COL_TYPE.STRING))), translation);
+                        v,
+                        FACTORY.getConstantLiteral("A.*B", COL_TYPE.STRING),
+                        FACTORY.getConstantLiteral("", COL_TYPE.STRING))), translation);
     }
 
     @Test
@@ -753,9 +775,9 @@ public class ExpressionParserTest {
 
         assertEquals(FACTORY.getFunction(ExpressionOperation.NOT,
                 FACTORY.getFunction(ExpressionOperation.REGEX,
-                    v,
-                    FACTORY.getConstantLiteral("A.*B", COL_TYPE.STRING),
-                    FACTORY.getConstantLiteral("", COL_TYPE.STRING))), translation);
+                        v,
+                        FACTORY.getConstantLiteral("A.*B", COL_TYPE.STRING),
+                        FACTORY.getConstantLiteral("", COL_TYPE.STRING))), translation);
     }
 
     @Test
@@ -771,9 +793,9 @@ public class ExpressionParserTest {
         System.out.println(translation);
 
         assertEquals(FACTORY.getFunction(ExpressionOperation.REGEX,
-                        v,
-                        FACTORY.getConstantLiteral("A.*B", COL_TYPE.STRING),
-                        FACTORY.getConstantLiteral("", COL_TYPE.STRING)), translation);
+                v,
+                FACTORY.getConstantLiteral("A.*B", COL_TYPE.STRING),
+                FACTORY.getConstantLiteral("", COL_TYPE.STRING)), translation);
     }
 
     @Test
@@ -790,9 +812,9 @@ public class ExpressionParserTest {
 
         assertEquals(FACTORY.getFunction(ExpressionOperation.NOT,
                 FACTORY.getFunction(ExpressionOperation.REGEX,
-                    v,
-                    FACTORY.getConstantLiteral("A.*B", COL_TYPE.STRING),
-                    FACTORY.getConstantLiteral("i", COL_TYPE.STRING))), translation);
+                        v,
+                        FACTORY.getConstantLiteral("A.*B", COL_TYPE.STRING),
+                        FACTORY.getConstantLiteral("i", COL_TYPE.STRING))), translation);
     }
 
     @Test
@@ -808,11 +830,10 @@ public class ExpressionParserTest {
         System.out.println(translation);
 
         assertEquals(FACTORY.getFunction(ExpressionOperation.REGEX,
-                        v,
-                        FACTORY.getConstantLiteral("A.*B", COL_TYPE.STRING),
-                        FACTORY.getConstantLiteral("i", COL_TYPE.STRING)), translation);
+                v,
+                FACTORY.getConstantLiteral("A.*B", COL_TYPE.STRING),
+                FACTORY.getConstantLiteral("i", COL_TYPE.STRING)), translation);
     }
-
 
 
     @Test
@@ -865,9 +886,9 @@ public class ExpressionParserTest {
 
         assertEquals(FACTORY.getFunction(ExpressionOperation.NOT,
                 FACTORY.getFunction(ExpressionOperation.REGEX,
-                    v,
-                    FACTORY.getConstantLiteral("A.*B", COL_TYPE.STRING),
-                    FACTORY.getConstantLiteral("", COL_TYPE.STRING))), translation);
+                        v,
+                        FACTORY.getConstantLiteral("A.*B", COL_TYPE.STRING),
+                        FACTORY.getConstantLiteral("", COL_TYPE.STRING))), translation);
     }
 
     @Test
@@ -884,9 +905,9 @@ public class ExpressionParserTest {
 
         assertEquals(FACTORY.getFunction(ExpressionOperation.NOT,
                 FACTORY.getFunction(ExpressionOperation.REGEX,
-                    v,
-                    FACTORY.getConstantLiteral("A.*B", COL_TYPE.STRING),
-                    FACTORY.getConstantLiteral("i", COL_TYPE.STRING))), translation);
+                        v,
+                        FACTORY.getConstantLiteral("A.*B", COL_TYPE.STRING),
+                        FACTORY.getConstantLiteral("i", COL_TYPE.STRING))), translation);
     }
 
     @Test
@@ -944,8 +965,8 @@ public class ExpressionParserTest {
         System.out.println(translation);
 
         assertEquals(FACTORY.getFunction(ExpressionOperation.GTE,
-                        v,
-                        FACTORY.getConstantLiteral("1", COL_TYPE.LONG)), translation);
+                v,
+                FACTORY.getConstantLiteral("1", COL_TYPE.LONG)), translation);
     }
 
     @Test
@@ -962,8 +983,8 @@ public class ExpressionParserTest {
 
         assertEquals(FACTORY.getFunction(ExpressionOperation.NOT,
                 FACTORY.getFunction(ExpressionOperation.GTE,
-                    v,
-                    FACTORY.getConstantLiteral("1", COL_TYPE.LONG))), translation);
+                        v,
+                        FACTORY.getConstantLiteral("1", COL_TYPE.LONG))), translation);
     }
 
     @Test
@@ -1169,12 +1190,12 @@ public class ExpressionParserTest {
 
     private Expression getExpression(String sql) throws JSQLParserException {
         Statement statement = CCJSqlParserUtil.parse(sql);
-        SelectItem si = ((PlainSelect)((Select)statement).getSelectBody()).getSelectItems().get(0);
-        return ((SelectExpressionItem)si).getExpression();
+        SelectItem si = ((PlainSelect) ((Select) statement).getSelectBody()).getSelectItems().get(0);
+        return ((SelectExpressionItem) si).getExpression();
     }
 
     private Expression getWhereExpression(String sql) throws JSQLParserException {
         Statement statement = CCJSqlParserUtil.parse(sql);
-        return ((PlainSelect)((Select)statement).getSelectBody()).getWhere();
+        return ((PlainSelect) ((Select) statement).getSelectBody()).getWhere();
     }
 }
