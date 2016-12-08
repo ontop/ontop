@@ -57,8 +57,7 @@ public class SelectQueryParserTest {
     }
 
 
-    //TODO: In this case column reference "a" is ambiguous. Does this should be check during the "selection" operation handler?
-    @Test(expected = UnsupportedOperationException.class)
+    @Test(expected = InvalidSelectQueryException.class)
     public void inner_join_on_inner_join_ambiguity2_test() {
         DBMetadata metadata = createMetadata();
         SelectQueryParser parser = new SelectQueryParser(metadata);
@@ -85,7 +84,7 @@ public class SelectQueryParserTest {
 
         SelectQueryParser parser = new SelectQueryParser(metadata);
 
-        CQIE parse = parser.parse("SELECT A, C FROM P INNER JOIN  Q on P.A <> Q.A AND P.A = 2 AND Q.A = 3");
+        CQIE parse = parser.parse("SELECT P.A, Q.C FROM P INNER JOIN  Q on P.A <> Q.A AND P.A = 2 AND Q.A = 3");
         System.out.println(parse);
 
         assertEquals(0, parse.getHead().getTerms().size());
@@ -114,7 +113,7 @@ public class SelectQueryParserTest {
 
         SelectQueryParser parser = new SelectQueryParser(metadata);
 
-        CQIE parse = parser.parse("SELECT A, C FROM P INNER JOIN  Q on P.A = 1");
+        CQIE parse = parser.parse("SELECT P.A, Q.C FROM P INNER JOIN  Q on P.A = 1");
         System.out.println(parse);
 
         assertEquals(0, parse.getHead().getTerms().size());
@@ -133,7 +132,7 @@ public class SelectQueryParserTest {
     public void subjoin_test() {
         DBMetadata metadata = createMetadata();
         SelectQueryParser parser = new SelectQueryParser(metadata);
-        CQIE parse = parser.parse("SELECT A, C FROM R JOIN (P NATURAL JOIN Q) AS S ON R.A = S.A");
+        CQIE parse = parser.parse("SELECT S.A, S.C FROM R JOIN (P NATURAL JOIN Q) AS S ON R.A = S.A");
         System.out.println(parse);
 
         Function atom_R = FACTORY.getFunction(
@@ -241,8 +240,10 @@ public class SelectQueryParserTest {
     @Test()
     public void natural_join_test() {
         SelectQueryParser parser = new SelectQueryParser(createMetadata());
-        CQIE parse = parser.parse("SELECT * FROM P NATURAL JOIN  Q;");
+        CQIE parse = parser.parse("SELECT A FROM P NATURAL JOIN  Q;");
+        System.out.println( parse);
         assert_join_common(parse);
+
         assert_contains_EQ_atom(parse);
     }
 
