@@ -44,11 +44,10 @@ public class RedundantSelfJoinExecutor extends SelfJoinLikeExecutor implements I
         int i=0;
         while (!initialMap.isEmpty() && (i++ < MAX_ITERATIONS)) {
 
-            // TODO: explain
-            ImmutableSet<Variable> variablesToKeep = query.getClosestConstructionNode(topJoinNode).getLocalVariables();
+            ImmutableList<Variable> priorityVariables = prioritizeVariables(query, topJoinNode);
 
             try {
-                Optional<ConcreteProposal> optionalConcreteProposal = propose(initialMap, variablesToKeep,
+                Optional<ConcreteProposal> optionalConcreteProposal = propose(initialMap, priorityVariables,
                         query.getMetadata().getUniqueConstraints());
 
                 if (!optionalConcreteProposal.isPresent()) {
@@ -106,7 +105,7 @@ public class RedundantSelfJoinExecutor extends SelfJoinLikeExecutor implements I
      * Throws an AtomUnificationException when the results are guaranteed to be empty
      */
     private Optional<ConcreteProposal> propose(ImmutableMultimap<AtomPredicate, DataNode> initialDataNodeMap,
-                                               ImmutableSet<Variable> variablesToKeep,
+                                               ImmutableList<Variable> priorityVariables,
                                                ImmutableMultimap<AtomPredicate, ImmutableList<Integer>> primaryKeys)
             throws AtomUnificationException {
 
@@ -124,7 +123,7 @@ public class RedundantSelfJoinExecutor extends SelfJoinLikeExecutor implements I
             proposalListBuilder.add(predicateProposal);
         }
 
-        return createConcreteProposal(proposalListBuilder.build(), variablesToKeep);
+        return createConcreteProposal(proposalListBuilder.build(), priorityVariables);
     }
 
     /**
