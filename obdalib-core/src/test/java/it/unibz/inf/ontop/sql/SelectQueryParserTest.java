@@ -44,7 +44,9 @@ public class SelectQueryParserTest {
 
         Function atomQ = FACTORY.getFunction(ExpressionOperation.EQ, ImmutableList.of(a1, a2));
 
+        assertEquals(3, parse.getBody().size());
         assertTrue(parse.getBody().contains(atomQ));
+        // TODO: add two more atoms
     }
 
 
@@ -125,6 +127,7 @@ public class SelectQueryParserTest {
 
         Function atomQ = FACTORY.getFunction(ExpressionOperation.EQ, ImmutableList.of(a1, a2));
 
+        assertEquals(1, parse.getBody().size());
         assertTrue(parse.getBody().contains(atomQ));
     }
 
@@ -155,12 +158,15 @@ public class SelectQueryParserTest {
         Function atom_EQ2= FACTORY.getFunction(ExpressionOperation.EQ,
                 ImmutableList.of(FACTORY.getVariable("A2"),  FACTORY.getVariable("A3")));
 
+        assertEquals(5, parse.getBody().size());
         assertTrue(parse.getBody().contains(atom_R));
         assertTrue(parse.getBody().contains(atom_P));
         assertTrue(parse.getBody().contains(atom_Q));
         assertTrue(parse.getBody().contains(atom_EQ1));
         assertTrue(parse.getBody().contains(atom_EQ2));
     }
+
+    // TODO: remove tests that are covered by ExpressionParserTest
 
     @Test
     public void concat_test() {

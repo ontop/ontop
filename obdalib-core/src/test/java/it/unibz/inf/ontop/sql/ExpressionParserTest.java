@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.sql.parser.ExpressionParser;
+import it.unibz.inf.ontop.sql.parser.exceptions.InvalidSelectQueryException;
 import it.unibz.inf.ontop.sql.parser.exceptions.UnsupportedSelectQueryException;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.Expression;
@@ -16,6 +17,7 @@ import net.sf.jsqlparser.statement.select.SelectItem;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import static it.unibz.inf.ontop.model.Predicate.*;
 import static org.junit.Assert.assertEquals;
@@ -992,6 +994,176 @@ public class ExpressionParserTest {
         System.out.println(translation);
 
         assertEquals(FACTORY.getFunction(ExpressionOperation.MINUS, v), translation);
+    }
+
+    @Test(expected = UnsupportedSelectQueryException.class)
+    public void case_When_Test() throws JSQLParserException {
+        String sql = "SELECT CASE A WHEN 1 THEN 3 ELSE 4 END FROM DUMMY;";
+
+        Variable v = FACTORY.getVariable("x0");
+
+        ExpressionParser parser = new ExpressionParser(IDFAC, getExpression(sql));
+
+        Term translation = parser.apply(ImmutableMap.of(
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("A")), v));
+    }
+
+    @Test(expected = UnsupportedSelectQueryException.class)
+    public void subSelect_Test() throws JSQLParserException {
+        String sql = "SELECT (SELECT A FROM Q WHERE A = P.B) AS C FROM P;";
+
+        Variable v = FACTORY.getVariable("x0");
+
+        ExpressionParser parser = new ExpressionParser(IDFAC, getExpression(sql));
+
+        Term translation = parser.apply(ImmutableMap.of(
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("A")), v));
+    }
+
+    @Test(expected = UnsupportedSelectQueryException.class)
+    public void exists_Test() throws JSQLParserException {
+        String sql = "SELECT * FROM P WHERE EXISTS (SELECT * FROM Q WHERE A = P.B);";
+
+        Variable v = FACTORY.getVariable("x0");
+
+        ExpressionParser parser = new ExpressionParser(IDFAC, getWhereExpression(sql));
+
+        Term translation = parser.apply(ImmutableMap.of(
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("A")), v));
+    }
+
+    @Test(expected = UnsupportedSelectQueryException.class)
+    public void not_Exists_Test() throws JSQLParserException {
+        String sql = "SELECT * FROM P WHERE NOT EXISTS (SELECT * FROM Q WHERE A = P.B);";
+
+        Variable v = FACTORY.getVariable("x0");
+
+        ExpressionParser parser = new ExpressionParser(IDFAC, getWhereExpression(sql));
+
+        Term translation = parser.apply(ImmutableMap.of(
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("A")), v));
+    }
+
+    @Test(expected = UnsupportedSelectQueryException.class)
+    public void allComparison_Test() throws JSQLParserException {
+        String sql = "SELECT * FROM P WHERE A > ALL (SELECT C FROM Q WHERE A = P.B);";
+
+        Variable v = FACTORY.getVariable("x0");
+
+        ExpressionParser parser = new ExpressionParser(IDFAC, getWhereExpression(sql));
+
+        Term translation = parser.apply(ImmutableMap.of(
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("A")), v));
+    }
+
+    @Test(expected = UnsupportedSelectQueryException.class)
+    public void anyComparison_Test() throws JSQLParserException {
+        String sql = "SELECT * FROM P WHERE A > ANY (SELECT C FROM Q WHERE A = P.B);";
+
+        Variable v = FACTORY.getVariable("x0");
+
+        ExpressionParser parser = new ExpressionParser(IDFAC, getWhereExpression(sql));
+
+        Term translation = parser.apply(ImmutableMap.of(
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("A")), v));
+    }
+
+    @Test(expected = UnsupportedSelectQueryException.class)
+    public void bitwiseAnd_Test() throws JSQLParserException {
+        String sql = "SELECT X & Y AS A FROM DUMMY";
+
+        Variable v = FACTORY.getVariable("x0");
+        Variable u = FACTORY.getVariable("y0");
+
+        ExpressionParser parser = new ExpressionParser(IDFAC, getExpression(sql));
+        Term translation = parser.apply(ImmutableMap.of(
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v,
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("Y")), u));
+    }
+
+    @Test(expected = UnsupportedSelectQueryException.class)
+    public void bitwiseOr_Test() throws JSQLParserException {
+        String sql = "SELECT X | Y AS A FROM DUMMY";
+
+        Variable v = FACTORY.getVariable("x0");
+        Variable u = FACTORY.getVariable("y0");
+
+        ExpressionParser parser = new ExpressionParser(IDFAC, getExpression(sql));
+        Term translation = parser.apply(ImmutableMap.of(
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v,
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("Y")), u));
+    }
+
+    @Test(expected = UnsupportedSelectQueryException.class)
+    public void bitwiseXor_Test() throws JSQLParserException {
+        String sql = "SELECT X ^ Y AS A FROM DUMMY";
+
+        Variable v = FACTORY.getVariable("x0");
+        Variable u = FACTORY.getVariable("y0");
+
+        ExpressionParser parser = new ExpressionParser(IDFAC, getExpression(sql));
+        Term translation = parser.apply(ImmutableMap.of(
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v,
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("Y")), u));
+    }
+
+    @Test(expected = UnsupportedSelectQueryException.class)
+    public void extract_Test() throws JSQLParserException {
+        String sql = "SELECT EXTRACT(MONTH FROM CURRENT_DATE) AS C FROM DUMMY";
+
+        Variable v = FACTORY.getVariable("x0");
+
+        ExpressionParser parser = new ExpressionParser(IDFAC, getExpression(sql));
+        Term translation = parser.apply(ImmutableMap.of(
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+    }
+
+    @Test(expected = UnsupportedSelectQueryException.class)
+    public void interval_Test() throws JSQLParserException {
+        String sql = "SELECT INTERVAL '31' DAY FROM DUMMY;";
+
+        ExpressionParser parser = new ExpressionParser(IDFAC, getExpression(sql));
+        Term translation = parser.apply(ImmutableMap.of());
+    }
+
+    @Test(expected = UnsupportedSelectQueryException.class)
+    public void analyticExpression_Test() throws JSQLParserException {
+        String sql = "SELECT LAG(A) OVER () FROM P;";
+
+        ExpressionParser parser = new ExpressionParser(IDFAC, getExpression(sql));
+        Term translation = parser.apply(ImmutableMap.of());
+    }
+
+    @Test(expected = UnsupportedSelectQueryException.class)
+    public void jsonExpression_Test() throws JSQLParserException {
+        String sql = "SELECT A->'B' FROM DUMMY;";
+
+        ExpressionParser parser = new ExpressionParser(IDFAC, getExpression(sql));
+        Term translation = parser.apply(ImmutableMap.of());
+    }
+
+    @Test(expected = InvalidSelectQueryException.class)
+    public void jdbcParameter_Test() throws JSQLParserException {
+        String sql = "SELECT A FROM P WHERE B = ?;";
+
+        Variable v = FACTORY.getVariable("x0");
+
+        ExpressionParser parser = new ExpressionParser(IDFAC, getWhereExpression(sql));
+
+        Term translation = parser.apply(ImmutableMap.of(
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("B")), v));
+    }
+
+    @Test(expected = InvalidSelectQueryException.class)
+    public void jdbcNamedParameter_Test() throws JSQLParserException {
+        String sql = "SELECT A FROM P WHERE B = :name;";
+
+        Variable v = FACTORY.getVariable("x0");
+
+        ExpressionParser parser = new ExpressionParser(IDFAC, getWhereExpression(sql));
+
+        Term translation = parser.apply(ImmutableMap.of(
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("B")), v));
     }
 
 

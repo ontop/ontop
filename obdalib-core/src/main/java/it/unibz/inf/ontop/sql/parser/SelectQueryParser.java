@@ -105,6 +105,9 @@ public class SelectQueryParser {
         if (plainSelect.getOrderByElements() != null)
             throw new UnsupportedSelectQueryException("ORDER BY is not supported", selectBody);
 
+        if (plainSelect.getOracleHierarchical() != null)
+            throw new UnsupportedSelectQueryException("Oracle START WITH ... CONNECT BY is not supported", selectBody);
+
         RelationalExpression current = getRelationalExpression(plainSelect.getFromItem());
         if (plainSelect.getJoins() != null) {
             for (Join join : plainSelect.getJoins())

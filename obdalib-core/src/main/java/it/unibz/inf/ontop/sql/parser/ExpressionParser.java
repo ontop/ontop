@@ -518,6 +518,9 @@ public class ExpressionParser implements java.util.function.Function<ImmutableMa
         //      * END
         public void visit(CaseExpression expression) {
             throw new UnsupportedSelectQueryException("CASE is not supported yet", expression);
+            // expression.getSwitchExpression();
+            // expression.getWhenClauses();
+            // expression.getElseExpression();
         }
 
         @Override
@@ -581,22 +584,20 @@ public class ExpressionParser implements java.util.function.Function<ImmutableMa
             throw new UnsupportedSelectQueryException("Analytic expressions is not supported", expression);
         }
 
-
+        // OracleHierarchicalExpression can only occur in the form of a clause after WHERE
         @Override
         public void visit(OracleHierarchicalExpression expression) {
-            throw new UnsupportedSelectQueryException("Oracle hierarchical expressions is not supported", expression);
+            throw new UnsupportedOperationException("Unexpected Oracle START WITH ... CONNECT BY");
         }
 
         @Override
         public void visit(Matches expression) {
-            throw new UnsupportedSelectQueryException("Oracle join syntax not supported", expression);
+            throw new UnsupportedSelectQueryException("Oracle @@ not supported", expression);
         }
-
-
 
         @Override
         public void visit(JsonExpression expression) {
-            throw new InvalidSelectQueryException("JSON expressions are not allowed", expression);
+            throw new UnsupportedSelectQueryException("JSON expressions are not supported", expression);
         }
 
         @Override
