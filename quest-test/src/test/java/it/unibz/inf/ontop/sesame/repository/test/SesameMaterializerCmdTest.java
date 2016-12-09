@@ -63,7 +63,7 @@ public class SesameMaterializerCmdTest extends TestCase {
 		OBDACoreConfiguration configuration = OBDACoreConfiguration.defaultBuilder()
 				.nativeOntopMappingFile("src/test/resources/materializer/MaterializeTest.obda")
 				.build();
-        model = configuration.loadProvidedInputMappings();
+        model = configuration.loadProvidedMapping();
     }
 	
 	public void setUpOnto() throws OWLOntologyCreationException {

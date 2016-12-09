@@ -113,7 +113,7 @@ public class QuestOWLMaterializerTest extends TestCase {
         /*
          * Load the OBDA model from an external .obda file
          */
-        OBDAModel model = configuration.loadProvidedInputMappings();
+        OBDAModel model = configuration.loadProvidedMapping();
 
 			QuestMaterializer mat = new QuestMaterializer(model, false);
 			Iterator<Assertion> iterator = mat.getAssertionIterator();
@@ -147,7 +147,7 @@ public class QuestOWLMaterializerTest extends TestCase {
 				.nativeOntopMappingFile(f)
 				.build();
 
-            OBDAModel model = configuration.loadProvidedInputMappings();
+            OBDAModel model = configuration.loadProvidedMapping();
 
 			// read onto
 			Ontology onto =  OWLAPITranslatorUtility.translateImportsClosure(

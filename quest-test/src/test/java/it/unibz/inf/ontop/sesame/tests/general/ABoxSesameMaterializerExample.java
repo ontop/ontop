@@ -53,7 +53,7 @@ public class ABoxSesameMaterializerExample {
 				.nativeOntopMappingFile(inputFile)
 				.build();
 
-		OBDAModel obdaModel = configuration.loadProvidedInputMappings();
+		OBDAModel obdaModel = configuration.loadProvidedMapping();
 
 		SesameMaterializer materializer = new SesameMaterializer(obdaModel, DO_STREAM_RESULTS);
 		

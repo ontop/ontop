@@ -86,7 +86,7 @@ public class QuestDBVirtualStore extends QuestDBAbstractStore {
 			throw new IllegalArgumentException("Virtual mode was expected in QuestDBVirtualStore!");
 
 		//obtain the model
-		OBDAModel obdaModel = config.loadInputMappings()
+		OBDAModel obdaModel = config.loadMapping()
 				//obtain model from direct mapping RDB2RDF method
 				// TODO: refactor this hack
 				.orElseGet(this::getOBDAModelDM);

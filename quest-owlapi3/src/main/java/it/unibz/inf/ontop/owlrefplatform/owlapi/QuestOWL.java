@@ -153,7 +153,7 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 		this.componentFactory = injector.getInstance(QuestComponentFactory.class);
 
 		try {
-			obdaModel = questConfiguration.loadInputMappings();
+			obdaModel = questConfiguration.loadMapping();
 			/**
 			 * Mapping parsing exceptions are re-thrown as configuration exceptions.
 			 */

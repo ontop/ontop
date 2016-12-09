@@ -22,13 +22,7 @@ package it.unibz.inf.ontop.owlrefplatform.owlapi.example;
 
 import java.io.*;
 
-import com.google.inject.Guice;
-import com.google.inject.Injector;
-import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
 import it.unibz.inf.ontop.injection.QuestConfiguration;
-import it.unibz.inf.ontop.injection.impl.OBDACoreModule;
-import it.unibz.inf.ontop.injection.OBDAProperties;
-import it.unibz.inf.ontop.mapping.MappingParser;
 import it.unibz.inf.ontop.model.OBDAModel;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.OWLAPIMaterializer;
 import it.unibz.inf.ontop.owlapi.QuestOWLIndividualAxiomIterator;
@@ -56,7 +50,7 @@ public class ABoxMaterializerExample {
 				.nativeOntopMappingFile(inputFile)
 				.build();
 
-        OBDAModel obdaModel = configuration.loadProvidedInputMappings();
+        OBDAModel obdaModel = configuration.loadProvidedMapping();
 
 		/*
 		 * Start materializing data from database to triples.

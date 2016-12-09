@@ -54,7 +54,7 @@ public class OBDACoreConfigurationImpl implements OBDACoreConfiguration {
     }
 
     @Override
-    public Optional<OBDAModel> loadInputMappings() throws InvalidDataSourceException, IOException, InvalidMappingException {
+    public Optional<OBDAModel> loadMapping() throws InvalidDataSourceException, IOException, InvalidMappingException {
         if (options.predefinedMappingModel.isPresent()) {
             return options.predefinedMappingModel;
         }

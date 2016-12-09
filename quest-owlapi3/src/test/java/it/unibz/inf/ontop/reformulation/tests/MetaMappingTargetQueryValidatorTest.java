@@ -21,7 +21,6 @@ package it.unibz.inf.ontop.reformulation.tests;
  */
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.sql.Connection;
@@ -29,24 +28,13 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-import com.google.inject.Guice;
-import com.google.inject.Injector;
 import it.unibz.inf.ontop.exception.InvalidMappingException;
 import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.io.InvalidDataSourceException;
 import junit.framework.TestCase;
 
-import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
-import it.unibz.inf.ontop.injection.impl.OBDACoreModule;
-import it.unibz.inf.ontop.injection.OBDAProperties;
-import it.unibz.inf.ontop.mapping.MappingParser;
-import it.unibz.inf.ontop.model.OBDADataFactory;
 import it.unibz.inf.ontop.model.OBDAModel;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.owlapi.OBDAModelValidator;
-import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -131,7 +119,7 @@ public class MetaMappingTargetQueryValidatorTest extends TestCase {
 				.nativeOntopMappingFile(obdafile)
 				.build();
 
-		OBDAModel obdaModel = configuration.loadProvidedInputMappings();
+		OBDAModel obdaModel = configuration.loadProvidedMapping();
 
 		// run validator
 		try {

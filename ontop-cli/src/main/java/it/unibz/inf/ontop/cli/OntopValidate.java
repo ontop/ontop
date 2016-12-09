@@ -4,7 +4,6 @@ import com.github.rvesse.airline.annotations.Command;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import it.unibz.inf.ontop.exception.InvalidMappingException;
-import it.unibz.inf.ontop.exception.InvalidPredicateDeclarationException;
 import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.io.InvalidDataSourceException;
 import org.semanticweb.owlapi.model.*;
@@ -98,7 +97,7 @@ public class OntopValidate extends OntopReasoningCommandBase {
         if (punning) System.exit(1);
 
         try {
-            config.loadInputMappings();
+            config.loadMapping();
         } catch (IOException | InvalidDataSourceException | InvalidMappingException e) {
             System.out.format("ERROR: There is a problem loading the mapping file %s\n", mappingFile);
             e.printStackTrace();

@@ -137,7 +137,7 @@ public class OntopMaterialize extends OntopReasoningCommandBase {
             }
 
 
-            OBDAModel obdaModel = configuration.loadProvidedInputMappings();
+            OBDAModel obdaModel = configuration.loadProvidedMapping();
 
             Ontology inputOntology = OWLAPITranslatorUtility.translate(ontology);
 
@@ -253,7 +253,7 @@ public class OntopMaterialize extends OntopReasoningCommandBase {
 
             QuestConfiguration configuration = configBuilder.build();
 
-            OBDAModel obdaModel = configuration.loadProvidedInputMappings();
+            OBDAModel obdaModel = configuration.loadProvidedMapping();
 
             OWLOntology ontology;
             OWLAPIMaterializer materializer;
