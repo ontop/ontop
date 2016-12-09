@@ -36,7 +36,7 @@ public class SelectQueryParserTest {
         CQIE parse = parser.parse("SELECT p1.A, p2.B FROM P p1 INNER JOIN  P p2 on p1.A = p2.A ");
         System.out.println(parse);
 
-        assertEquals(0, parse.getHead().getTerms().size());
+        assertEquals(2, parse.getHead().getTerms().size());
         assertEquals(4, parse.getReferencedVariables().size());
 
         Function atom_EQ = FACTORY.getFunction(ExpressionOperation.EQ,

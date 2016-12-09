@@ -25,6 +25,7 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Created by Roman Kontchakov on 01/11/2016.
@@ -54,12 +55,15 @@ public class SelectQueryParser {
                 throw new InvalidSelectQueryException("The inserted query is not a SELECT statement", statement);
 
             RelationalExpression current = parseBody(((Select) statement).getSelectBody());
-
             final OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
+
             // TODO: proper handling of the head predicate
-            parsedSql = fac.getCQIE(
-                    fac.getFunction(fac.getPredicate("Q", new Predicate.COL_TYPE[]{})),
-                    current.getAtoms());
+            Function head = fac.getFunction(
+                    fac.getPredicate("Q", new Predicate.COL_TYPE[current.getAttributes().size()]),
+                    current.getAttributes().values().stream().collect(ImmutableCollectors.toList()));
+
+            parsedSql = fac.getCQIE(head, current.getAtoms());
+
         } catch (JSQLParserException e) {
             if (e.getCause() instanceof ParseException)
                 log.warn("Parse exception, check no SQL reserved keywords have been used " + e.getCause().getMessage());
@@ -123,6 +127,7 @@ public class SelectQueryParser {
 
         ImmutableMap.Builder attributesBuilder = ImmutableMap.<QualifiedAttributeID, Variable>builder();
         SelectItemProcessor sip = new SelectItemProcessor(current.getAttributes());
+
         plainSelect.getSelectItems().forEach(si -> {
             ImmutableMap<QualifiedAttributeID, Variable> attrs = sip.getAttributes(si);
             if (attrs == null)
