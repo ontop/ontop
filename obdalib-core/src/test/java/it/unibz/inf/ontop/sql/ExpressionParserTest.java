@@ -265,6 +265,28 @@ public class ExpressionParserTest {
     }
 
     @Test
+    public void equal_concat_Test() throws JSQLParserException {
+        String sql = "SELECT X FROM DUMMY WHERE X=CONCAT('A', X, 'B')";
+
+        Variable v = FACTORY.getVariable("x0");
+
+        ExpressionParser parser = new ExpressionParser(IDFAC, getWhereExpression(sql));
+        Term translation = parser.apply(ImmutableMap.of(
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+
+        System.out.println(translation);
+
+        assertEquals(FACTORY.getFunction( ExpressionOperation.EQ, v,
+                FACTORY.getFunction(
+                    ExpressionOperation.CONCAT, FACTORY.getConstantLiteral("A", COL_TYPE.STRING),
+                        FACTORY.getFunction(
+                                ExpressionOperation.CONCAT,
+                                v,
+                                FACTORY.getConstantLiteral("B", COL_TYPE.STRING)))), translation);
+
+    }
+
+    @Test
     public void notEqualsTo_Test() throws JSQLParserException {
         String sql = "SELECT X AS A FROM DUMMY WHERE X <> 'B'";
 

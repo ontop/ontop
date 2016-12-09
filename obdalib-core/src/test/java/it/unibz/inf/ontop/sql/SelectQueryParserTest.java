@@ -119,31 +119,6 @@ public class SelectQueryParserTest {
         assertTrue(parse.getBody().contains(atom_EQ2));
     }
 
-    // TODO: if it is this not covered by ExpressionParserTest, then move it there
-    @Test
-    public void concat_test() {
-        DBMetadata metadata = createMetadata();
-        SelectQueryParser parser = new SelectQueryParser(metadata);
-
-        CQIE parse = parser.parse("SELECT A FROM P where A = CONCAT('A', A, 'B')");
-        System.out.println(parse);
-        assertEquals(0, parse.getHead().getTerms().size());
-
-        Variable a1 = FACTORY.getVariable("A1");
-        ValueConstant v1 = FACTORY.getConstantLiteral("A", Predicate.COL_TYPE.STRING); // variable are key sensitive
-        ValueConstant v2 = FACTORY.getConstantLiteral("B", Predicate.COL_TYPE.STRING);
-
-        Function atom = FACTORY.getFunction(ExpressionOperation.EQ, a1,
-                FACTORY.getFunction(ExpressionOperation.CONCAT, ImmutableList.of(v1,
-                        FACTORY.getFunction(ExpressionOperation.CONCAT, a1, v2))
-                ));
-
-        System.out.println(atom);
-        assertTrue(parse.getBody().contains(atom));
-    }
-
-
-
     // -----------------------------------------------------
     // NEW TESTS
 
