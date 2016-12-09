@@ -119,7 +119,7 @@ public class SelectQueryParserTest {
         assertTrue(parse.getBody().contains(atom_EQ2));
     }
 
-
+    // TODO: if it is this not covered by ExpressionParserTest, then move it there
     @Test
     public void concat_test() {
         DBMetadata metadata = createMetadata();
