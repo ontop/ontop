@@ -45,10 +45,10 @@ public class RelationalExpression {
     }
 
     /**
-     * Checks if the attributeOccurrences contains the {@link QuotedID} attribute
+     * checks if the attributeOccurrences contains the attribute
      *
-     * @param attribute is a  {@link QuotedID}
-     * @return true if attributeOccurrences contains the {@link QuotedID} attribute otherwise false
+     * @param attribute a  {@link QuotedID}
+     * @return true if attributeOccurrences contains the attribute otherwise false
      */
 
     private boolean isAbsent(QuotedID attribute) {
@@ -80,7 +80,7 @@ public class RelationalExpression {
      * @param re1 a {@link RelationalExpression}
      * @param re2 a {@link RelationalExpression}
      * @return a {@link RelationalExpression}
-     * @throw {@link IllegalJoinException}
+     * @throws IllegalJoinException if the same alias occurs in both arguments
      */
     public static RelationalExpression crossJoin(RelationalExpression re1, RelationalExpression re2) throws IllegalJoinException {
         return joinOn(re1, re2, BooleanExpressionParser.empty());
@@ -94,7 +94,7 @@ public class RelationalExpression {
      * @param re2 a {@link RelationalExpression}
      * @param getAtomOnExpression a {@link BooleanExpressionParser}
      * @return a {@link RelationalExpression}
-     * @throw {@link IllegalJoinException}
+     * @throws IllegalJoinException if the same alias occurs in both arguments
      */
     public static RelationalExpression joinOn(RelationalExpression re1, RelationalExpression re2,
                                        BooleanExpressionParser getAtomOnExpression) throws IllegalJoinException {
@@ -128,8 +128,10 @@ public class RelationalExpression {
      * @param re1 a {@link RelationalExpression}
      * @param re2 a {@link RelationalExpression}
      * @return a {@link RelationalExpression}
-     * @throw {@link IllegalJoinException}
+     * @throws IllegalJoinException if the same alias occurs in both arguments
+     *          or one of the shared attributes is ambiguous
      */
+
     public static RelationalExpression naturalJoin(RelationalExpression re1, RelationalExpression re2) throws IllegalJoinException {
 
         checkRelationAliasesConsistency(re1, re2);
@@ -156,8 +158,10 @@ public class RelationalExpression {
      * @param re2 a {@link RelationalExpression}
      * @param using a {@link ImmutableSet}<{@link QuotedID}>
      * @return a {@link RelationalExpression}
-     * @throw {@link IllegalJoinException}
+     * @throws IllegalJoinException if the same alias occurs in both arguments
+     *          or one of the `using' attributes is ambiguous or absent
      */
+
     public static RelationalExpression joinUsing(RelationalExpression re1, RelationalExpression re2,
                                           ImmutableSet<QuotedID> using) throws IllegalJoinException {
 
@@ -235,9 +239,9 @@ public class RelationalExpression {
     /**
      *
      * @param atoms a {@link ImmutableList}<{@link Function}>
-     * @param unqualifiedAttributes
+     * @param unqualifiedAttributes a {@link ImmutableMap}<{@link QuotedID}, {@link Variable}>
      * @param alias a {@link QuotedID}
-     * @return
+     * @return a {@link RelationalExpression}
      */
 
     public static RelationalExpression create(ImmutableList<Function> atoms, ImmutableMap<QuotedID, Variable> unqualifiedAttributes, RelationID alias) {
@@ -261,10 +265,11 @@ public class RelationalExpression {
     }
 
     /**
+     * (relational expression) AS A
      *
      * @param re a {@link RelationalExpression}
      * @param alias a {@link QuotedID}
-     * @return
+     * @return a {@link RelationalExpression}
      */
 
     public static RelationalExpression alias(RelationalExpression re, RelationID alias) {
@@ -331,8 +336,9 @@ public class RelationalExpression {
      *
      * @param re1 a {@link RelationalExpression}
      * @param re2 a {@link RelationalExpression}
-     * @throw {@link IllegalJoinException}
+     * @throws IllegalJoinException if the same alias occurs in both arguments
      */
+
     private static void checkRelationAliasesConsistency(RelationalExpression re1, RelationalExpression re2) throws IllegalJoinException {
 
         ImmutableSet<RelationID> alias1 = re1.attributes.keySet().stream()
