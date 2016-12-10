@@ -211,7 +211,7 @@ public class ExpressionParserTest {
     }
 
     @Test
-    public void concat_Test() throws JSQLParserException {
+    public void concat_2_Test() throws JSQLParserException {
         String sql = "SELECT X || 'B' AS A FROM DUMMY";
 
         Variable v = FACTORY.getVariable("x0");
@@ -229,8 +229,8 @@ public class ExpressionParserTest {
     }
 
     @Test
-    public void concat_2_Test() throws JSQLParserException {
-        String sql = "SELECT CONCAT('A', X, 'B') FROM DUMMY";
+    public void concat_3_Test() throws JSQLParserException {
+        String sql = "SELECT 'A' || X || 'B' FROM DUMMY";
         Variable v = FACTORY.getVariable("x0");
         ExpressionParser parser = new ExpressionParser(IDFAC, getExpression(sql));
         Term translation = parser.apply(ImmutableMap.of(
@@ -238,12 +238,29 @@ public class ExpressionParserTest {
 
 
         assertEquals(FACTORY.getFunction(
-                ExpressionOperation.CONCAT, FACTORY.getConstantLiteral("A", COL_TYPE.STRING),
+                ExpressionOperation.CONCAT,
                 FACTORY.getFunction(
                         ExpressionOperation.CONCAT,
-                        v,
-                        FACTORY.getConstantLiteral("B", COL_TYPE.STRING))), translation);
+                        FACTORY.getConstantLiteral("A", COL_TYPE.STRING),
+                        v),
+                        FACTORY.getConstantLiteral("B", COL_TYPE.STRING)), translation);
+    }
 
+    @Test
+    public void concat_function_Test() throws JSQLParserException {
+        String sql = "SELECT CONCAT('A', X, 'B') FROM DUMMY";
+        Variable v = FACTORY.getVariable("x0");
+        ExpressionParser parser = new ExpressionParser(IDFAC, getExpression(sql));
+        Term translation = parser.apply(ImmutableMap.of(
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+
+        assertEquals(FACTORY.getFunction(
+                ExpressionOperation.CONCAT,
+                FACTORY.getFunction(
+                        ExpressionOperation.CONCAT,
+                        FACTORY.getConstantLiteral("A", COL_TYPE.STRING),
+                        v),
+                FACTORY.getConstantLiteral("B", COL_TYPE.STRING)), translation);
     }
 
     // Boolean expressions are not allowed in the SELECT clause
@@ -1199,6 +1216,43 @@ public class ExpressionParserTest {
                 new QualifiedAttributeID(IDFAC.createRelationID(null, "Q"), IDFAC.createAttributeID("A")), u));
     }
 
+    @Test
+    public void true_column_Test() throws JSQLParserException {
+        String sql = "SELECT * FROM P WHERE A = true";
+
+        Variable v = FACTORY.getVariable("x0");
+
+        ExpressionParser parser = new ExpressionParser(IDFAC, getWhereExpression(sql));
+
+        Term translation = parser.apply(ImmutableMap.of(
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("A")), v));
+
+        System.out.println(translation);
+
+        assertEquals(FACTORY.getFunction(
+                ExpressionOperation.EQ,
+                v,
+                FACTORY.getBooleanConstant(true)), translation);
+    }
+
+    @Test
+    public void false_column_Test() throws JSQLParserException {
+        String sql = "SELECT * FROM P WHERE A = false";
+
+        Variable v = FACTORY.getVariable("x0");
+
+        ExpressionParser parser = new ExpressionParser(IDFAC, getWhereExpression(sql));
+
+        Term translation = parser.apply(ImmutableMap.of(
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("A")), v));
+
+        System.out.println(translation);
+
+        assertEquals(FACTORY.getFunction(
+                ExpressionOperation.EQ,
+                v,
+                FACTORY.getBooleanConstant(false)), translation);
+    }
 
     private Expression getExpression(String sql) throws JSQLParserException {
         Statement statement = CCJSqlParserUtil.parse(sql);
