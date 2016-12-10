@@ -98,6 +98,16 @@ public class ExpressionParser implements java.util.function.Function<ImmutableMa
             result = notOperation(expression.isNot()).apply(expTerm);
         }
 
+        private void processOJ(OldOracleJoinBinaryExpression expression, BinaryOperator<Term> op) {
+            if (expression.getOraclePriorPosition() != SupportsOldOracleJoinSyntax.NO_ORACLE_PRIOR)
+                throw new UnsupportedSelectQueryException("Oracle PRIOR is not supported", expression);
+
+            if (expression.getOldOracleJoinSyntax() != SupportsOldOracleJoinSyntax.NO_ORACLE_JOIN)
+                throw new UnsupportedSelectQueryException("Old Oracle OUTER JOIN syntax is not supported", expression);
+
+            process(expression, op);
+        }
+
         // CAREFUL: the first argument is NOT the composite term, but rather its argument
         private void process(Expression arg, UnaryOperator<Term> op) {
             Term term = getTerm(arg);
@@ -248,32 +258,32 @@ public class ExpressionParser implements java.util.function.Function<ImmutableMa
 
         @Override
         public void visit(EqualsTo expression) {
-            process(expression, (t1, t2) -> FACTORY.getFunction(ExpressionOperation.EQ, t1, t2));
+            processOJ(expression, (t1, t2) -> FACTORY.getFunction(ExpressionOperation.EQ, t1, t2));
         }
 
         @Override
         public void visit(GreaterThan expression) {
-            process(expression, (t1, t2) -> FACTORY.getFunction(ExpressionOperation.GT, t1, t2));
+            processOJ(expression, (t1, t2) -> FACTORY.getFunction(ExpressionOperation.GT, t1, t2));
         }
 
         @Override
         public void visit(GreaterThanEquals expression) {
-            process(expression, (t1, t2) -> FACTORY.getFunction(ExpressionOperation.GTE, t1, t2));
+            processOJ(expression, (t1, t2) -> FACTORY.getFunction(ExpressionOperation.GTE, t1, t2));
         }
 
         @Override
         public void visit(MinorThan expression) {
-            process(expression, (t1, t2) -> FACTORY.getFunction(ExpressionOperation.LT, t1, t2));
+            processOJ(expression, (t1, t2) -> FACTORY.getFunction(ExpressionOperation.LT, t1, t2));
         }
 
         @Override
         public void visit(MinorThanEquals expression) {
-            process(expression, (t1, t2) -> FACTORY.getFunction(ExpressionOperation.LTE, t1, t2));
+            processOJ(expression, (t1, t2) -> FACTORY.getFunction(ExpressionOperation.LTE, t1, t2));
         }
 
         @Override
         public void visit(NotEqualsTo expression) {
-            process(expression, (t1, t2) -> FACTORY.getFunction(ExpressionOperation.NEQ, t1, t2));
+            processOJ(expression, (t1, t2) -> FACTORY.getFunction(ExpressionOperation.NEQ, t1, t2));
         }
 
 
@@ -593,6 +603,7 @@ public class ExpressionParser implements java.util.function.Function<ImmutableMa
         @Override
         public void visit(Matches expression) {
             throw new UnsupportedSelectQueryException("Oracle @@ not supported", expression);
+            // would be processOJ
         }
 
         @Override

@@ -58,7 +58,7 @@ public class SelectQueryParserTest {
     }
 
 
-    @Test(expected = UnsupportedOperationException.class)
+    @Test(expected = InvalidSelectQueryException.class)
     public void inner_join_on_inner_join_ambiguity_test() {
         DBMetadata metadata = createMetadata();
         SelectQueryParser parser = new SelectQueryParser(metadata);
@@ -308,11 +308,11 @@ public class SelectQueryParserTest {
 
         SelectQueryParser parser = new SelectQueryParser(metadata);
 
-        CQIE parse = parser.parse("SELECT Q.A, R.B FROM Q INNER JOIN R USING (A,B)");
+        CQIE parse = parser.parse("SELECT A, B FROM P INNER JOIN R USING (A,B)");
         System.out.println(parse);
 
-        assertTrue(parse.getHead().getTerms().size() == 0);
-        assertTrue(parse.getReferencedVariables().size() == 4);
+        assertEquals(2, parse.getHead().getTerms().size());
+        assertEquals(6, parse.getReferencedVariables().size());
 
         Function atomQ_A = FACTORY.getFunction(ExpressionOperation.EQ,
                 ImmutableList.of(FACTORY.getVariable("A1"), FACTORY.getVariable("A2")));

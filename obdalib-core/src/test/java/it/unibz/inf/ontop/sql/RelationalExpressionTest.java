@@ -6,6 +6,7 @@ import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.sql.parser.RelationalExpression;
+import it.unibz.inf.ontop.sql.parser.exceptions.IllegalJoinException;
 import org.junit.Test;
 
 
@@ -22,7 +23,7 @@ public class RelationalExpressionTest {
     private static QuotedIDFactory MDFAC = METADATA.getQuotedIDFactory();
 
     @Test
-    public void cross_join_test() {
+    public void cross_join_test() throws IllegalJoinException {
 
         Variable x = FACTORY.getVariable("x");
         Variable y = FACTORY.getVariable("y");

@@ -246,6 +246,9 @@ public class ExpressionParserTest {
 
     }
 
+    // Boolean expressions are not allowed in the SELECT clause
+    // so, the tests below depend on the WHERE clause
+
     @Test
     public void equalsTo_Test() throws JSQLParserException {
         String sql = "SELECT X AS A FROM DUMMY WHERE X = 'B'";
@@ -262,28 +265,6 @@ public class ExpressionParserTest {
                 ExpressionOperation.EQ,
                 v,
                 FACTORY.getConstantLiteral("B", COL_TYPE.STRING)), translation);
-    }
-
-    @Test
-    public void equal_concat_Test() throws JSQLParserException {
-        String sql = "SELECT X FROM DUMMY WHERE X=CONCAT('A', X, 'B')";
-
-        Variable v = FACTORY.getVariable("x0");
-
-        ExpressionParser parser = new ExpressionParser(IDFAC, getWhereExpression(sql));
-        Term translation = parser.apply(ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
-
-        System.out.println(translation);
-
-        assertEquals(FACTORY.getFunction( ExpressionOperation.EQ, v,
-                FACTORY.getFunction(
-                    ExpressionOperation.CONCAT, FACTORY.getConstantLiteral("A", COL_TYPE.STRING),
-                        FACTORY.getFunction(
-                                ExpressionOperation.CONCAT,
-                                v,
-                                FACTORY.getConstantLiteral("B", COL_TYPE.STRING)))), translation);
-
     }
 
     @Test
@@ -1202,6 +1183,20 @@ public class ExpressionParserTest {
 
         Term translation = parser.apply(ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("B")), v));
+    }
+
+    @Test(expected = UnsupportedSelectQueryException.class)
+    public void oracle_OuterJoin_Test() throws JSQLParserException {
+        String sql = "SELECT * FROM P, Q WHERE P.A = Q.A(+)";
+
+        Variable v = FACTORY.getVariable("x0");
+        Variable u = FACTORY.getVariable("y0");
+
+        ExpressionParser parser = new ExpressionParser(IDFAC, getWhereExpression(sql));
+
+        Term translation = parser.apply(ImmutableMap.of(
+                new QualifiedAttributeID(IDFAC.createRelationID(null,"P"), IDFAC.createAttributeID("A")), v,
+                new QualifiedAttributeID(IDFAC.createRelationID(null, "Q"), IDFAC.createAttributeID("A")), u));
     }
 
 

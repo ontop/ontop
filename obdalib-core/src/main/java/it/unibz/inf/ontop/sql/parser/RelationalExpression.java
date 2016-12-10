@@ -10,7 +10,7 @@ import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.sql.QualifiedAttributeID;
 import it.unibz.inf.ontop.sql.QuotedID;
 import it.unibz.inf.ontop.sql.RelationID;
-import it.unibz.inf.ontop.sql.parser.exceptions.InvalidSelectQueryException;
+import it.unibz.inf.ontop.sql.parser.exceptions.IllegalJoinException;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Map;
@@ -32,9 +32,9 @@ public class RelationalExpression {
     /**
      * constructs a relation expression
      *
-     * @param atoms                is an {@link ImmutableList}<{@link Function}>
-     * @param attributes           is an {@link ImmutableMap}<{@link QualifiedAttributeID}, {@link Variable}>
-     * @param attributeOccurrences is an {@link ImmutableMap}<{@link QuotedID}, {@link ImmutableSet}<{@link RelationID}>>
+     * @param atoms                an {@link ImmutableList}<{@link Function}>
+     * @param attributes           an {@link ImmutableMap}<{@link QualifiedAttributeID}, {@link Variable}>
+     * @param attributeOccurrences an {@link ImmutableMap}<{@link QuotedID}, {@link ImmutableSet}<{@link RelationID}>>
      */
     public RelationalExpression(ImmutableList<Function> atoms,
                                 ImmutableMap<QualifiedAttributeID, Variable> attributes,
@@ -75,29 +75,31 @@ public class RelationalExpression {
     }
 
     /**
-     * CROSS JOIN of two relations (also denoted by , in SQL)
+     * CROSS JOIN (also denoted by , in SQL)
      *
-     * @param re1 is a {@link RelationalExpression}
-     * @param re2 is a {@link RelationalExpression}
+     * @param re1 a {@link RelationalExpression}
+     * @param re2 a {@link RelationalExpression}
      * @return a {@link RelationalExpression}
+     * @throw {@link IllegalJoinException}
      */
-    public static RelationalExpression crossJoin(RelationalExpression re1, RelationalExpression re2) {
+    public static RelationalExpression crossJoin(RelationalExpression re1, RelationalExpression re2) throws IllegalJoinException {
         return joinOn(re1, re2, BooleanExpressionParser.empty());
     }
 
 
     /**
-     * @param re1 is a {@link RelationalExpression}
-     * @param re2 is a {@link RelationalExpression}
-     * @param getAtomOnExpression is a {@link BooleanExpressionParser}
+     * JOIN ON
+     *
+     * @param re1 a {@link RelationalExpression}
+     * @param re2 a {@link RelationalExpression}
+     * @param getAtomOnExpression a {@link BooleanExpressionParser}
      * @return a {@link RelationalExpression}
+     * @throw {@link IllegalJoinException}
      */
     public static RelationalExpression joinOn(RelationalExpression re1, RelationalExpression re2,
-                                       BooleanExpressionParser getAtomOnExpression) {
+                                       BooleanExpressionParser getAtomOnExpression) throws IllegalJoinException {
 
-        // TODO: better exception?
-        if (!relationAliasesConsistent(re1.attributes, re2.attributes))
-            throw new InvalidSelectQueryException("Relation alias occurs in both arguments of the join", null);
+        checkRelationAliasesConsistency(re1, re2);
 
         ImmutableMap<QualifiedAttributeID, Variable> attributes = ImmutableMap.<QualifiedAttributeID, Variable>builder()
                 .putAll(re1.filterAttributes(id ->
@@ -121,56 +123,71 @@ public class RelationalExpression {
     }
 
     /**
-     * NATURAL JOIN of two relations
+     * NATURAL JOIN
      *
-     * @param re1 is a {@link RelationalExpression)
-     * @param re2 is a {@link RelationalExpression)
+     * @param re1 a {@link RelationalExpression}
+     * @param re2 a {@link RelationalExpression}
      * @return a {@link RelationalExpression}
+     * @throw {@link IllegalJoinException}
      */
-    public static RelationalExpression naturalJoin(RelationalExpression re1, RelationalExpression re2) {
+    public static RelationalExpression naturalJoin(RelationalExpression re1, RelationalExpression re2) throws IllegalJoinException {
 
-        // TODO: better exception?
-        if (!relationAliasesConsistent(re1.attributes, re2.attributes))
-            throw new InvalidSelectQueryException("Relation alias occurs in both arguments of the join", null);
+        checkRelationAliasesConsistency(re1, re2);
 
         ImmutableSet<QuotedID> shared = re1.attributeOccurrences.keySet().stream()
                 .filter(id -> !re1.isAbsent(id) && !re2.isAbsent(id))
                 .collect(ImmutableCollectors.toSet());
 
-        // TODO: better exception? more informative error message?
         if (shared.stream().anyMatch(id -> re1.isAmbiguous(id) || re2.isAmbiguous(id)))
-            throw new UnsupportedOperationException("common ambiguous attribute in select");
+            throw new IllegalJoinException(re1, re2,
+                    "Ambiguous common attribute " +
+                            shared.stream()
+                                    .filter(id -> re1.isAmbiguous(id) || re2.isAmbiguous(id))
+                                    .collect(ImmutableCollectors.toList()) +
+                            " in NATURAL JOIN");
 
         return internalJoinUsing(re1, re2, shared);
     }
 
     /**
-     * JOIN USING of two relations
+     * JOIN USING
      *
-     * @param re1 is a {@link RelationalExpression}
-     * @param re2 is a {@link RelationalExpression}
-     * @param using is a {@link ImmutableSet}<{@link QuotedID}>
-     * @return a {@link RelationalExpression)
+     * @param re1 a {@link RelationalExpression}
+     * @param re2 a {@link RelationalExpression}
+     * @param using a {@link ImmutableSet}<{@link QuotedID}>
+     * @return a {@link RelationalExpression}
+     * @throw {@link IllegalJoinException}
      */
     public static RelationalExpression joinUsing(RelationalExpression re1, RelationalExpression re2,
-                                          ImmutableSet<QuotedID> using) {
+                                          ImmutableSet<QuotedID> using) throws IllegalJoinException {
 
-        // TODO: better exception?
-        if (!relationAliasesConsistent(re1.attributes, re2.attributes))
-            throw new InvalidSelectQueryException("Relation alias occurs in both arguments of the join", null);
+        checkRelationAliasesConsistency(re1, re2);
 
-        if (using.stream().anyMatch(id -> !re1.isUnique(id) || !re2.isUnique(id)))
-            throw new UnsupportedOperationException("ambiguous column attributes in using statement");
+        if (using.stream().anyMatch(id -> !re1.isUnique(id) || !re2.isUnique(id))) {
+
+            ImmutableList<QuotedID> notFound = using.stream()
+                    .filter(id -> re1.isAbsent(id) || re2.isAbsent(id))
+                    .collect(ImmutableCollectors.toList());
+
+            ImmutableList<QuotedID> ambiguous = using.stream()
+                    .filter(id -> re1.isAmbiguous(id) || re2.isAmbiguous(id))
+                    .collect(ImmutableCollectors.toList());
+
+            throw new IllegalJoinException(re1, re2,
+                    (!notFound.isEmpty() ? "Attribute " + notFound + " in USING cannot be found" : "") +
+                    (!notFound.isEmpty() && !ambiguous.isEmpty() ? ", " : "") +
+                    (!ambiguous.isEmpty() ? "Attribute " + ambiguous + " in USING are ambiguous" : ""));
+        }
 
         return RelationalExpression.internalJoinUsing(re1, re2, using);
     }
 
     /**
-     * JOIN USING of two relations
+     * internal implementation of JOIN USING and NATURAL JOIN
      *
-     * @param re1 is a {@link RelationalExpression}
-     * @param re2 is a {@link RelationalExpression}
-     * @param using is a {@link Set}<{@link QuotedID}>
+     * @param re1 a {@link RelationalExpression}
+     * @param re2 a {@link RelationalExpression}
+     * @param using a {@link Set}<{@link QuotedID}>
      * @return a {@link RelationalExpression}
      */
     private static RelationalExpression internalJoinUsing(RelationalExpression re1, RelationalExpression re2,
@@ -196,9 +213,11 @@ public class RelationalExpression {
                         .map(id -> {
                             // TODO: this will be removed later, when OBDA factory will start checking non-nulls
                             Variable v1 = re1.attributes.get(id);
+                            if (v1 == null)
+                                throw new IllegalArgumentException("Variable " + id + " not found in " + re1);
                             Variable v2 = re2.attributes.get(id);
-                            if (v1 == null || v2 == null)
-                                throw new UnsupportedOperationException("Not found the related atom variable of " + id.toString());
+                            if (v2 == null)
+                                throw new IllegalArgumentException("Variable " + id + " not found in " + re2);
                             return FACTORY.getFunctionEQ(v1, v2);
                         })
                         .iterator())
@@ -215,9 +234,9 @@ public class RelationalExpression {
 
     /**
      *
-     * @param atoms
+     * @param atoms a {@link ImmutableList}<{@link Function}>
      * @param unqualifiedAttributes
-     * @param alias
+     * @param alias a {@link QuotedID}
      * @return
      */
 
@@ -243,8 +262,8 @@ public class RelationalExpression {
 
     /**
      *
-     * @param re
-     * @param alias
+     * @param re a {@link RelationalExpression}
+     * @param alias a {@link QuotedID}
      * @return
      */
 
@@ -263,7 +282,7 @@ public class RelationalExpression {
     /**
      * treats null values as empty sets
      *
-     * @param id is a {@link QuotedID}
+     * @param id a {@link QuotedID}
      * @param re1 a {@link RelationalExpression}
      * @param re2 a {@link RelationalExpression}
      * @return the union of occurrences of id in e1 and e2
@@ -308,29 +327,33 @@ public class RelationalExpression {
 
 
     /**
-     * return false if a relation alias occurs in both arguments of the join.
+     * throw IllegalJoinException if a relation alias occurs in both arguments of the join
      *
-     * @param attributes1 is an {@link ImmutableMap}<{@link QualifiedAttributeID}, {@link Variable}>
-     * @param attributes2 is an {@link ImmutableMap}<{@link QualifiedAttributeID}, {@link Variable}>
+     * @param re1 a {@link RelationalExpression}
+     * @param re2 a {@link RelationalExpression}
+     * @throw {@link IllegalJoinException}
      */
-    private static boolean relationAliasesConsistent(ImmutableMap<QualifiedAttributeID, Variable> attributes1,
-                                                     ImmutableMap<QualifiedAttributeID, Variable> attributes2) {
-        // the first one is mutable
-        ImmutableSet<RelationID> alias1 = attributes1.keySet().stream()
+    private static void checkRelationAliasesConsistency(RelationalExpression re1, RelationalExpression re2) throws IllegalJoinException {
+
+        ImmutableSet<RelationID> alias1 = re1.attributes.keySet().stream()
                 .filter(id -> id.getRelation() != null)
                 .map(QualifiedAttributeID::getRelation).collect(ImmutableCollectors.toSet());
 
-        ImmutableSet<RelationID> alias2 = attributes2.keySet().stream()
+        ImmutableSet<RelationID> alias2 = re2.attributes.keySet().stream()
                 .filter(id -> id.getRelation() != null)
                 .map(QualifiedAttributeID::getRelation).collect(ImmutableCollectors.toSet());
 
-        return !alias1.stream().anyMatch(alias2::contains);
+        if (alias1.stream().anyMatch(alias2::contains))
+            throw new IllegalJoinException(re1, re2 ,"Relation alias " +
+                    alias1.stream().filter(alias2::contains).collect(ImmutableCollectors.toList()) +
+                    " occurs in both arguments of the JOIN");
+
     }
 
 
     @Override
     public String toString() {
-        return "RelationalExpression : " + atoms + "\n" + attributes + "\n" + attributeOccurrences;
+        return "RelationalExpression : " + atoms + " with " + attributes + " and " + attributeOccurrences;
     }
 
 

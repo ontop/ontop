@@ -7,6 +7,7 @@ import it.unibz.inf.ontop.model.Function;
 import it.unibz.inf.ontop.model.impl.*;
 import it.unibz.inf.ontop.parser.*;
 import it.unibz.inf.ontop.sql.*;
+import it.unibz.inf.ontop.sql.parser.exceptions.IllegalJoinException;
 import it.unibz.inf.ontop.sql.parser.exceptions.InvalidSelectQueryException;
 import it.unibz.inf.ontop.sql.parser.exceptions.UnsupportedSelectQueryException;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -25,7 +26,6 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * Created by Roman Kontchakov on 01/11/2016.
@@ -54,7 +54,7 @@ public class SelectQueryParser {
             if (!(statement instanceof Select))
                 throw new InvalidSelectQueryException("The inserted query is not a SELECT statement", statement);
 
-            RelationalExpression current = parseBody(((Select) statement).getSelectBody());
+            RelationalExpression current = select(((Select) statement).getSelectBody());
             final OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 
             // TODO: proper handling of the head predicate
@@ -64,7 +64,8 @@ public class SelectQueryParser {
 
             parsedSql = fac.getCQIE(head, current.getAtoms());
 
-        } catch (JSQLParserException e) {
+        }
+        catch (JSQLParserException e) {
             if (e.getCause() instanceof ParseException)
                 log.warn("Parse exception, check no SQL reserved keywords have been used " + e.getCause().getMessage());
             parseException = true;
@@ -90,7 +91,7 @@ public class SelectQueryParser {
         return parseException;
     }
 
-    private RelationalExpression parseBody(SelectBody selectBody) {
+    private RelationalExpression select(SelectBody selectBody) {
 
         if (!(selectBody instanceof PlainSelect))
             throw new UnsupportedSelectQueryException("Complex SELECT statements are not supported", selectBody);
@@ -101,21 +102,29 @@ public class SelectQueryParser {
             throw new UnsupportedSelectQueryException("DISTINCT is not supported", selectBody);
 
         if (plainSelect.getGroupByColumnReferences() != null || plainSelect.getHaving() != null)
-            throw new UnsupportedSelectQueryException("GROUP BY / HAVING is not supported", selectBody);
+            throw new UnsupportedSelectQueryException("GROUP BY / HAVING are not supported", selectBody);
 
-        if (plainSelect.getLimit() != null)
-            throw new UnsupportedSelectQueryException("LIMIT is not supported", selectBody);
+        if (plainSelect.getLimit() != null || plainSelect.getTop() != null)
+            throw new UnsupportedSelectQueryException("LIMIT / TOP are not supported", selectBody);
 
         if (plainSelect.getOrderByElements() != null)
             throw new UnsupportedSelectQueryException("ORDER BY is not supported", selectBody);
 
-        if (plainSelect.getOracleHierarchical() != null)
-            throw new UnsupportedSelectQueryException("Oracle START WITH ... CONNECT BY is not supported", selectBody);
+        if (plainSelect.getOracleHierarchical() != null || plainSelect.isOracleSiblings())
+            throw new UnsupportedSelectQueryException("Oracle START WITH ... CONNECT BY / ORDER SIBLINGS BY are not supported", selectBody);
+
+        if (plainSelect.getIntoTables() != null)
+            throw new InvalidSelectQueryException("SELECT INTO is not allowed in mappings", selectBody);
 
         RelationalExpression current = getRelationalExpression(plainSelect.getFromItem());
         if (plainSelect.getJoins() != null) {
             for (Join join : plainSelect.getJoins())
-                current = join(current, join);
+                try {
+                    current = join(current, join);
+                }
+                catch (IllegalJoinException e) {
+                    throw new InvalidSelectQueryException(e.toString(), plainSelect);
+                }
         }
 
         ImmutableList<Function> atoms = (plainSelect.getWhere() == null)
@@ -133,15 +142,22 @@ public class SelectQueryParser {
             if (attrs == null)
                 throw new InvalidSelectQueryException("Column " + si + " not found in the query", selectBody);
 
-            // TODO: add a check that the keys in attrs do not intersect
-
+            // attributesBuilder.build() below checks that the keys in attrs do not intersect
             attributesBuilder.putAll(attrs);
         });
 
-        return new RelationalExpression(atoms, attributesBuilder.build(), null);
+        ImmutableMap<QualifiedAttributeID, Variable> attributes;
+        try {
+            attributes = attributesBuilder.build();
+        }
+        catch (IllegalArgumentException e) {
+            throw new InvalidSelectQueryException(e.getMessage(), selectBody);
+        }
+
+        return new RelationalExpression(atoms, attributes, null);
     }
 
-    private RelationalExpression join(RelationalExpression left, Join join) {
+    private RelationalExpression join(RelationalExpression left, Join join) throws IllegalJoinException {
 
         if (join.isFull() || join.isRight() || join.isLeft() || join.isOuter())
             throw new UnsupportedSelectQueryException("LEFT/RIGHT/FULL OUTER JOINs are not supported", join);
@@ -272,7 +288,7 @@ public class SelectQueryParser {
         public void visit(Table tableName) {
 
             RelationID id = idfac.createRelationID(tableName.getSchemaName(), tableName.getName());
-            // Construct the predicate using the table name
+            // construct the predicate using the table name
             DatabaseRelationDefinition relation = metadata.getDatabaseRelation(id);
             if (relation == null)
                 throw new InvalidSelectQueryException("Table " + id + " not found in metadata", tableName);
@@ -292,7 +308,7 @@ public class SelectQueryParser {
                 terms.add(var);
                 attributes.put(attributeId, var);
             });
-            // Create an atom for a particular table
+            // create an atom for a particular table
             Function atom = Relation2DatalogPredicate.getAtom(relation, terms);
 
             result = RelationalExpression.create(ImmutableList.of(atom), attributes.build(), aliasId);
@@ -301,12 +317,10 @@ public class SelectQueryParser {
 
         @Override
         public void visit(SubSelect subSelect) {
-            // TODO: implementation -
-            // TODO: this is not yet done
             if (subSelect.getAlias() == null || subSelect.getAlias().getName() == null)
                 throw new InvalidSelectQueryException("SUB-SELECT must have an alias", subSelect);
 
-            RelationalExpression current = parseBody(subSelect.getSelectBody());
+            RelationalExpression current = select(subSelect.getSelectBody());
 
             RelationID aliasId = idfac.createRelationID(null, subSelect.getAlias().getName());
             result = RelationalExpression.alias(current, aliasId);
@@ -315,13 +329,18 @@ public class SelectQueryParser {
         @Override
         public void visit(SubJoin subjoin) {
             if (subjoin.getAlias() == null || subjoin.getAlias().getName() == null)
-                throw new InvalidSelectQueryException("SUBJOIN must have an alias", subjoin);
+                throw new InvalidSelectQueryException("SUB-JOIN must have an alias", subjoin);
 
             RelationalExpression left = getRelationalExpression(subjoin.getLeft());
-            RelationalExpression join = join(left, subjoin.getJoin());
+            RelationalExpression join;
+            try {
+                join = join(left, subjoin.getJoin());
+            }
+            catch (IllegalJoinException e) {
+                throw new InvalidSelectQueryException(e.toString(), subjoin);
+            }
 
             RelationID aliasId = idfac.createRelationID(null, subjoin.getAlias().getName());
-
             result = RelationalExpression.alias(join, aliasId);
         }
 
@@ -392,7 +411,7 @@ public class SelectQueryParser {
                 map = ImmutableMap.of(new QualifiedAttributeID(null, name), var);
             }
             else
-                map = null;
+                map = null; // error: attribute not found
         }
     }
 }
