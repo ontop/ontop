@@ -504,4 +504,6 @@ public class RelationalExpressionTest {
         RelationalExpression.joinUsing(re1, re2, ImmutableSet.of( MDFAC.createAttributeID("A") ) );
     }
 
+    //todo : this is not yet completed. It needs to include all the public methods present in RelationalExpression
+
 }
