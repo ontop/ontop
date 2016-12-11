@@ -1,9 +1,14 @@
 package it.unibz.inf.ontop.injection.impl;
 
 
-import it.unibz.inf.ontop.injection.InvalidOBDAConfigurationException;
-import it.unibz.inf.ontop.injection.QuestConfiguration;
-import it.unibz.inf.ontop.injection.QuestPreferences;
+import com.google.inject.Injector;
+import it.unibz.inf.ontop.injection.*;
+import it.unibz.inf.ontop.io.InvalidDataSourceException;
+import it.unibz.inf.ontop.model.OBDADataFactory;
+import it.unibz.inf.ontop.model.OBDADataSource;
+import it.unibz.inf.ontop.model.OBDAModel;
+import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
+import it.unibz.inf.ontop.owlapi.directmapping.DirectMappingEngine;
 import it.unibz.inf.ontop.owlrefplatform.injection.impl.QuestCoreConfigurationImpl;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLOntology;
@@ -15,6 +20,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.sql.SQLException;
 import java.util.Optional;
 import java.util.Properties;
 
@@ -83,16 +89,53 @@ public class QuestConfigurationImpl extends QuestCoreConfigurationImpl implement
         }
     }
 
+    @Override
+    protected boolean isMappingDefined() {
+        return super.isMappingDefined() || options.sourceToBootstrap.isPresent();
+    }
+
+    /**
+     * May bootstrap the ontology
+     *
+     * TODO: better handle exceptions
+     */
+    @Override
+    protected Optional<OBDAModel> loadAlternativeMapping() throws InvalidDataSourceException {
+        if (options.sourceToBootstrap.isPresent()) {
+
+            Injector injector = getInjector();
+
+            DirectMappingEngine dm = new DirectMappingEngine(options.bootstrappingBaseIRI.get(),
+                    0,
+                    injector.getInstance(NativeQueryLanguageComponentFactory.class),
+                    injector.getInstance(OBDAFactoryWithException.class));
+            try {
+                return Optional.of(dm.extractMappings(options.sourceToBootstrap.get()));
+            } catch (SQLException e) {
+                throw new InvalidDataSourceException("Direct mapping boostrapping error: " + e.getMessage());
+            }
+        }
+        else {
+            return Optional.empty();
+        }
+    }
+
     public static class QuestOptions {
 
         private final Optional<OWLOntology> ontology;
         private final Optional<File> ontologyFile;
         private final Optional<URL> ontologyURL;
+        private final Optional<OBDADataSource> sourceToBootstrap;
+        private final Optional<String> bootstrappingBaseIRI;
 
-        public QuestOptions(Optional<OWLOntology> ontology, Optional<File> ontologyFile, Optional<URL> ontologyURL) {
+        public QuestOptions(Optional<OWLOntology> ontology, Optional<File> ontologyFile, Optional<URL> ontologyURL,
+                            Optional<OBDADataSource> sourceToBootstrap,
+                            Optional<String> bootstrappingBaseIRI) {
             this.ontology = ontology;
             this.ontologyFile = ontologyFile;
             this.ontologyURL = ontologyURL;
+            this.sourceToBootstrap = sourceToBootstrap;
+            this.bootstrappingBaseIRI = bootstrappingBaseIRI;
         }
     }
 
@@ -107,6 +150,8 @@ public class QuestConfigurationImpl extends QuestCoreConfigurationImpl implement
         private Optional<OWLOntology> ontology = Optional.empty();
         private boolean isOntologyDefined = false;
         private Optional<URL> ontologyURL = Optional.empty() ;
+        private Optional<OBDADataSource> sourceToBootstrap = Optional.empty();
+        private Optional<String> boostrappingBaseIri = Optional.empty();
 
         @Override
         public B ontologyFile(@Nonnull String urlOrPath) {
@@ -161,6 +206,17 @@ public class QuestConfigurationImpl extends QuestCoreConfigurationImpl implement
             return (B) this;
         }
 
+        @Override
+        public B bootstrapMapping(OBDADataSource source, String baseIRI) {
+            if (isMappingDefined()) {
+                throw new InvalidOBDAConfigurationException("OBDA model or mappings already defined!");
+            }
+            declareMappingDefined();
+            sourceToBootstrap = Optional.of(source);
+            boostrappingBaseIri = Optional.of(baseIRI);
+            return (B) this;
+        }
+
         /**
          * TODO: explain
          * TODO: find a better term
@@ -194,7 +250,7 @@ public class QuestConfigurationImpl extends QuestCoreConfigurationImpl implement
         }
 
         protected final QuestOptions createQuestArguments() {
-            return new QuestOptions(ontology, ontologyFile, ontologyURL);
+            return new QuestOptions(ontology, ontologyFile, ontologyURL, sourceToBootstrap, boostrappingBaseIri);
         }
 
     }

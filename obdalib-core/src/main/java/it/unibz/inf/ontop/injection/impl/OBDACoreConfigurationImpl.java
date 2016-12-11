@@ -79,8 +79,11 @@ public class OBDACoreConfigurationImpl implements OBDACoreConfiguration {
             MappingParser parser = nativeQLFactory.create(options.mappingGraph.get());
             return Optional.of(parser.getOBDAModel());
         }
+        /**
+         * Hook
+         */
         else {
-            return Optional.empty();
+            return loadAlternativeMapping();
         }
     }
 
@@ -92,13 +95,24 @@ public class OBDACoreConfigurationImpl implements OBDACoreConfiguration {
         // TODO: complete if multiple alternatives for building the OBDAModel are provided
     }
 
-    protected boolean areMappingsDefined() {
+    /**
+     * Please overload isMappingDefined() instead.
+     */
+    protected boolean isInputMappingDefined() {
         return obdaProperties.contains(OBDAProperties.MAPPING_FILE_PATH)
                 || options.mappingFile.isPresent()
                 || options.mappingGraph.isPresent()
                 || options.mappingReader.isPresent()
                 || options.predefinedMappingModel.isPresent();
     }
+
+    /**
+     * To be overloaded
+     */
+    protected boolean isMappingDefined() {
+        return isInputMappingDefined();
+    }
+
 
     @Override
     public final Injector getInjector() {
@@ -111,6 +125,15 @@ public class OBDACoreConfigurationImpl implements OBDACoreConfiguration {
     @Override
     public Optional<ImplicitDBConstraintsReader> getImplicitDBConstraintsReader() {
         return options.implicitDBConstraintsReader;
+    }
+
+    /**
+     * To be overloaded.
+     *
+     * By default, returns nothing.
+     */
+    protected Optional<OBDAModel> loadAlternativeMapping() throws InvalidDataSourceException {
+        return Optional.empty();
     }
 
     /**
@@ -159,27 +182,27 @@ public class OBDACoreConfigurationImpl implements OBDACoreConfiguration {
         private Optional<String> jdbcUrl = Optional.empty();
 
         private boolean useR2rml = false;
-        private boolean areMappingsDefined = false;
+        private boolean isMappingDefined = false;
 
         /**
          * Not for end-users! Please consider giving a mapping file or a mapping reader.
          */
         @Override
         public B obdaModel(@Nonnull OBDAModel obdaModel) {
-            if (areMappingsDefined) {
+            if (isMappingDefined) {
                 throw new InvalidOBDAConfigurationException("OBDA model or mappings already defined!");
             }
-            areMappingsDefined = true;
+            declareMappingDefined();
             this.obdaModel = Optional.of(obdaModel);
             return (B) this;
         }
 
         @Override
         public B nativeOntopMappingFile(@Nonnull File mappingFile) {
-            if (areMappingsDefined) {
+            if (isMappingDefined) {
                 throw new InvalidOBDAConfigurationException("OBDA model or mappings already defined!");
             }
-            areMappingsDefined = true;
+            declareMappingDefined();
             this.mappingFile = Optional.of(mappingFile);
             return (B) this;
         }
@@ -192,20 +215,20 @@ public class OBDACoreConfigurationImpl implements OBDACoreConfiguration {
 
         @Override
         public B nativeOntopMappingReader(@Nonnull Reader mappingReader) {
-            if (areMappingsDefined) {
+            if (isMappingDefined) {
                 throw new InvalidOBDAConfigurationException("OBDA model or mappings already defined!");
             }
-            areMappingsDefined = true;
+            declareMappingDefined();
             this.mappingReader = Optional.of(mappingReader);
             return (B) this;
         }
 
         @Override
         public B r2rmlMappingFile(@Nonnull File mappingFile) {
-            if (areMappingsDefined) {
+            if (isMappingDefined) {
                 throw new InvalidOBDAConfigurationException("OBDA model or mappings already defined!");
             }
-            areMappingsDefined = true;
+            declareMappingDefined();
             useR2rml = true;
             this.mappingFile = Optional.of(mappingFile);
             return (B) this;
@@ -213,10 +236,10 @@ public class OBDACoreConfigurationImpl implements OBDACoreConfiguration {
 
         @Override
         public B r2rmlMappingFile(@Nonnull String mappingFilename) {
-            if (areMappingsDefined) {
+            if (isMappingDefined) {
                 throw new InvalidOBDAConfigurationException("OBDA model or mappings already defined!");
             }
-            areMappingsDefined = true;
+            declareMappingDefined();
             useR2rml = true;
 
             try {
@@ -240,10 +263,10 @@ public class OBDACoreConfigurationImpl implements OBDACoreConfiguration {
 
         @Override
         public B r2rmlMappingReader(@Nonnull Reader mappingReader) {
-            if (areMappingsDefined) {
+            if (isMappingDefined) {
                 throw new InvalidOBDAConfigurationException("OBDA model or mappings already defined!");
             }
-            areMappingsDefined = true;
+            declareMappingDefined();
             useR2rml = true;
             this.mappingReader = Optional.of(mappingReader);
             return (B) this;
@@ -251,10 +274,10 @@ public class OBDACoreConfigurationImpl implements OBDACoreConfiguration {
 
         @Override
         public B r2rmlMappingGraph(@Nonnull Model rdfGraph) {
-            if (areMappingsDefined) {
+            if (isMappingDefined) {
                 throw new InvalidOBDAConfigurationException("OBDA model or mappings already defined!");
             }
-            areMappingsDefined = true;
+            declareMappingDefined();
             useR2rml = true;
             this.mappingGraph = Optional.of(rdfGraph);
             return (B) this;
@@ -334,6 +357,17 @@ public class OBDACoreConfigurationImpl implements OBDACoreConfiguration {
         }
 
         /**
+         * Allows to detect double mapping definition (error).
+         */
+        protected final void declareMappingDefined() {
+            isMappingDefined = true;
+        }
+
+        protected final boolean isMappingDefined() {
+            return isMappingDefined;
+        }
+
+        /**
          * TODO: explain
          * TODO: find a better term
          *
@@ -377,10 +411,10 @@ public class OBDACoreConfigurationImpl implements OBDACoreConfiguration {
         }
 
         protected final void setMappingFile(String mappingFilename) {
-            if (areMappingsDefined) {
+            if (isMappingDefined) {
                 throw new InvalidOBDAConfigurationException("OBDA model or mappings already defined!");
             }
-            areMappingsDefined = true;
+            declareMappingDefined();
             try {
                 URI fileURI = new URI(mappingFilename);
                 String scheme = fileURI.getScheme();

@@ -58,12 +58,12 @@ public class QuestCoreConfigurationImpl extends OBDACoreConfigurationImpl implem
     @Override
     public void validate() throws InvalidOBDAConfigurationException {
 
-        boolean areMappings = areMappingsDefined();
+        boolean isMapping = isMappingDefined();
 
-        if ((!areMappings) && preferences.isInVirtualMode()) {
-            throw new InvalidOBDAConfigurationException("mappings are not specified in virtual mode", this);
-        } else if (areMappings && (!preferences.isInVirtualMode())) {
-            throw new InvalidOBDAConfigurationException("mappings are specified in classic A-box mode", this);
+        if ((!isMapping) && preferences.isInVirtualMode()) {
+            throw new InvalidOBDAConfigurationException("Mapping is not specified in virtual mode", this);
+        } else if (isMapping && (!preferences.isInVirtualMode())) {
+            throw new InvalidOBDAConfigurationException("Mapping is specified in classic A-box mode", this);
         }
         /**
          * TODO: complete

@@ -34,6 +34,10 @@ import com.google.common.collect.Sets;
 import com.google.common.io.Resources;
 import it.unibz.inf.ontop.injection.OBDAProperties;
 import it.unibz.inf.ontop.injection.QuestConfiguration;
+import it.unibz.inf.ontop.model.OBDADataFactory;
+import it.unibz.inf.ontop.model.OBDADataSource;
+import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
+import it.unibz.inf.ontop.model.impl.RDBMSourceParameterConstants;
 import it.unibz.inf.ontop.owlrefplatform.injection.QuestCorePreferences;
 import it.unibz.inf.ontop.sesame.SesameVirtualRepo;
 import org.junit.AfterClass;
@@ -96,7 +100,7 @@ public class RDB2RDFTest {
 
 	private static OWLOntology EMPTY_ONT;
 	private static Properties PROPERTIES;
-	
+	private static OBDADataFactory DATA_FACTORY = OBDADataFactoryImpl.getInstance();
 
 	/**
 	 * Terms used in the manifest files of RDB2RDF test suite
@@ -262,11 +266,29 @@ public class RDB2RDFTest {
 			configBuilder.r2rmlMappingFile(absoluteFilePath);
 		}
 		else {
-			throw new IllegalStateException("Mapping are expected! " + mappingFile);
+			configBuilder.bootstrapMapping(getMemOBDADataSource(), "http://example.org/base");
 		}
 		SesameVirtualRepo repo = new SesameVirtualRepo(name, configBuilder.build());
 		repo.initialize();
 		return repo;
+	}
+
+	private static OBDADataSource getMemOBDADataSource() {
+
+		String driver = "org.h2.Driver";
+		String url = "jdbc:h2:mem:questrepository";
+		String username = "sa";
+		String password = "";
+
+		OBDADataSource obdaSource = DATA_FACTORY.getDataSource(java.net.URI.create("http://www.obda.org/ABOXDUMP" + System.currentTimeMillis()));
+		obdaSource.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, driver);
+		obdaSource.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, password);
+		obdaSource.setParameter(RDBMSourceParameterConstants.DATABASE_URL, url);
+		obdaSource.setParameter(RDBMSourceParameterConstants.DATABASE_USERNAME, username);
+		obdaSource.setParameter(RDBMSourceParameterConstants.IS_IN_MEMORY, "true");
+		obdaSource.setParameter(RDBMSourceParameterConstants.USE_DATASOURCE_FOR_ABOXDUMP, "true");
+
+		return (obdaSource);
 	}
 
 	protected static void clearDB() throws Exception {
