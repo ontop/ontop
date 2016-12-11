@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.sql.parser;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import it.unibz.inf.ontop.exception.InvalidMappingException;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.Function;
 import it.unibz.inf.ontop.model.impl.*;
@@ -56,6 +57,9 @@ public class SelectQueryParser {
 
             RelationalExpression current = select(((Select) statement).getSelectBody());
             final OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
+
+            if ( current.getAttributes() == null || current.getAttributes().isEmpty() )
+                throw new InvalidSelectQueryException("The current relational expression does not contain any projected attributes", current.getAttributes() );
 
             // TODO: proper handling of the head predicate
             Function head = fac.getFunction(
