@@ -11,7 +11,6 @@ import it.unibz.inf.ontop.sql.QuotedIDFactory;
 import it.unibz.inf.ontop.sql.RelationID;
 import it.unibz.inf.ontop.sql.parser.exceptions.InvalidSelectQueryException;
 import it.unibz.inf.ontop.sql.parser.exceptions.UnsupportedSelectQueryException;
-import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import net.sf.jsqlparser.expression.*;
 import net.sf.jsqlparser.expression.operators.arithmetic.*;
 import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
@@ -22,7 +21,7 @@ import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.create.table.ColDataType;
 import net.sf.jsqlparser.statement.select.SubSelect;
 
-import java.util.List;
+import java.util.function.BiFunction;
 import java.util.function.BinaryOperator;
 import java.util.function.UnaryOperator;
 import java.util.stream.Stream;
@@ -54,6 +53,125 @@ public class ExpressionParser implements java.util.function.Function<ImmutableMa
 
 
 
+    // ---------------------------------------------------------------
+    // supported SQL functions
+    // (WARNING: not all combinations of the parameters are supported)
+    // ---------------------------------------------------------------
+
+    private static final ImmutableMap<String, BiFunction<ImmutableList<Term>, net.sf.jsqlparser.expression.Function, Function>>
+            FUNCTIONS = ImmutableMap.<String, BiFunction<ImmutableList<Term>, net.sf.jsqlparser.expression.Function, Function>>builder()
+                .put("REGEXP_LIKE", ExpressionParser::get_REGEXP_LIKE)
+                .put("REGEXP_REPLACE", ExpressionParser::get_REGEXP_REPLACE)
+                .put("REPLACE", ExpressionParser::get_REPLACE)
+                .put("CONCAT", ExpressionParser::get_CONCAT)
+                .put("SUBSTR", ExpressionParser::get_SUBSTR)
+                .put("SUBSTRING", ExpressionParser::get_SUBSTR)
+                .put("LCASE", ExpressionParser::get_LCASE)
+                .put("LOWER", ExpressionParser::get_LCASE)
+                .put("UCASE", ExpressionParser::get_UCASE)
+                .put("UPPER", ExpressionParser::get_UCASE)
+                .put("LENGTH", ExpressionParser::get_STRLEN)
+                .build();
+
+    private static Function get_REGEXP_LIKE(ImmutableList<Term> terms, net.sf.jsqlparser.expression.Function expression) {
+        // Oracle only:
+        // a source string, a regex pattern (POSIX regular expression), an optional flags
+        switch (terms.size()) {
+            case 2:
+                return FACTORY.getFunction(
+                        ExpressionOperation.REGEX, terms.get(0), terms.get(1), FACTORY.getConstantLiteral(""));
+            case 3:
+                return FACTORY.getFunction(
+                        ExpressionOperation.REGEX, terms.get(0), terms.get(1), terms.get(2));
+        }
+        throw new InvalidSelectQueryException("Wrong number of arguments for SQL function", expression);
+    }
+
+    private static Function get_REGEXP_REPLACE(ImmutableList<Term> terms, net.sf.jsqlparser.expression.Function expression) {
+        Term flags;
+        switch (terms.size()) {
+            case 3:
+                // either Oracle or PostgreSQL, without flags
+                flags = FACTORY.getConstantLiteral(""); // the 4th argument is flags
+                break;
+            case 4:
+                if (((ValueConstant)terms.get(3)).getType() == Predicate.COL_TYPE.STRING) {
+                    // PostgreSQL
+                    flags =  terms.get(3);
+                    // check that flags is either ig or g
+                }
+                else
+                    throw new UnsupportedSelectQueryException("Unsupported SQL function", expression);
+                break;
+            case 6:
+                // Oracle
+                // check terms.get(3) and  terms.get(4) are 1 and 0, respectively
+                flags = terms.get(5); // check that the flags is a combination of imx
+                break;
+            default:
+                throw new UnsupportedSelectQueryException("Unsupported SQL function", expression);
+        }
+
+        return FACTORY.getFunction(
+                ExpressionOperation.REPLACE, terms.get(0), terms.get(1), terms.get(2), flags);
+    }
+
+    private static Function get_REPLACE(ImmutableList<Term> terms, net.sf.jsqlparser.expression.Function expression) {
+        Term flags = FACTORY.getConstantLiteral("");
+        switch (terms.size()) {
+            case 2:
+                return FACTORY.getFunction(
+                        ExpressionOperation.REPLACE, terms.get(0), terms.get(1),
+                        FACTORY.getConstantLiteral(""), flags);
+            case 3:
+                return FACTORY.getFunction(
+                        ExpressionOperation.REPLACE, terms.get(0), terms.get(1), terms.get(2), flags);
+
+        }
+        throw new InvalidSelectQueryException("Wrong number of arguments in SQL function", expression);
+    }
+
+    private static Function get_CONCAT(ImmutableList<Term> terms, net.sf.jsqlparser.expression.Function expression) {
+        return (Function)
+                terms.stream()  // left recursion to match || in JSQLParser
+                        .reduce(null, (a, b) -> (a == null)
+                                ? b
+                                : FACTORY.getFunction(ExpressionOperation.CONCAT, a, b));
+    }
+
+    private static Function get_SUBSTR(ImmutableList<Term> terms, net.sf.jsqlparser.expression.Function expression) {
+        switch (terms.size()) {
+            case 2:
+                return FACTORY.getFunction(ExpressionOperation.SUBSTR2, terms.get(0), terms.get(1));
+            case 3:
+                return FACTORY.getFunction(ExpressionOperation.SUBSTR3, terms.get(0), terms.get(1), terms.get(2));
+        }
+        // DB2 has 4
+        throw new UnsupportedSelectQueryException("Unsupported SQL function", expression);
+    }
+
+    private static Function get_LCASE(ImmutableList<Term> terms, net.sf.jsqlparser.expression.Function expression) {
+        if (terms.size() == 1)
+            return FACTORY.getFunction(ExpressionOperation.LCASE, terms.get(0));
+        // DB2 has 3
+        throw new UnsupportedSelectQueryException("Unsupported SQL function", expression);
+    }
+
+    private static Function get_UCASE(ImmutableList<Term> terms, net.sf.jsqlparser.expression.Function expression) {
+        if (terms.size() == 1)
+            return FACTORY.getFunction(ExpressionOperation.UCASE, terms.get(0));
+        // DB2 has 3
+        throw new UnsupportedSelectQueryException("Unsupported SQL function", expression);
+    }
+
+    private static Function get_STRLEN(ImmutableList<Term> terms, net.sf.jsqlparser.expression.Function expression) {
+        if (terms.size() == 1)
+            return FACTORY.getFunction(ExpressionOperation.STRLEN, terms.get(0));
+
+        throw new InvalidSelectQueryException("Wrong number of arguments in SQL function", expression);
+    }
+
+
     // TODO: this class is being reviewed
 
 
@@ -70,7 +188,9 @@ public class ExpressionParser implements java.util.function.Function<ImmutableMa
 
         private final ImmutableMap<QualifiedAttributeID, Variable> attributes;
 
-        private Term result; // CAREFUL: this variable gets reset in each visit method implementation
+        // CAREFUL: this variable gets reset in each visit method implementation
+        // concurrent evaluation is not possible
+        private Term result;
 
         ExpressionVisitorImpl(ImmutableMap<QualifiedAttributeID, Variable> attributes) {
             this.attributes = attributes;
@@ -120,83 +240,27 @@ public class ExpressionParser implements java.util.function.Function<ImmutableMa
         }
 
 
-        //
-        //
-        //
-
-
         @Override
         public void visit(net.sf.jsqlparser.expression.Function expression) {
-            String functionName = expression.getName().toLowerCase();
-            List<Expression> args = expression.getParameters().getExpressions();
-            int arity = args.size();
+            // do not use ImmutableCollectors.toList because this cannot be done concurrently
+            ImmutableList<Term> terms = ImmutableList.<Term>builder()
+                    .addAll(expression.getParameters().getExpressions().stream()
+                        .map(t -> getTerm(t)).iterator())
+                    .build();
 
-            switch (functionName) {
-                case "regexp_like": {// Oracle only (?)
-                    if (arity != 2 && arity != 3)
-                        throw new InvalidSelectQueryException("Wrong number of arguments for SQL function REGEXP_LIKE", expression);
+            BiFunction<ImmutableList<Term>, net.sf.jsqlparser.expression.Function, Function> function
+                    = FUNCTIONS.get(expression.getName().toUpperCase());
 
-                    Term t1 = getTerm(args.get(0));  // a source string
-                    Term t2 = getTerm(args.get(1)); // a regex pattern (POSIX regular expression)
+            if (function == null)
+                throw new UnsupportedSelectQueryException("Unsupported SQL function", expression);
 
-                    // match_parameter is optional
-                    Term t3 = (arity == 3) ? getTerm(args.get(2)) : FACTORY.getConstantLiteral("");
-
-                    result = FACTORY.getFunction(ExpressionOperation.REGEX, t1, t2, t3);
-                    break;
-                }
-                case "regexp_replace":
-                    // in Oracle
-                    // source_char is a character expression that serves as the search value.
-                    // pattern is the regular expression.
-                    // replace_string [OPT]
-                    // position [OPT] is a positive integer indicating the character of source_char where Oracle should begin the search.
-                    //      The default is 1, meaning that Oracle begins the search at the first character of source_char.
-                    // occurrence [OPT] is a nonnegative integer indicating the occurrence of the replace operation:
-                    //      If you specify 0, then Oracle replaces all occurrences of the match.
-                    //      If you specify a positive integer n, then Oracle replaces the nth occurrence.
-                    // match_parameter [OPT]
-                    // in Postgres:
-                    // regexp_replace(string text, pattern text, replacement text [, flags text])
-                    // replace(string text, from text, to text)
-                case "replace": {
-                    if (arity != 2 && arity != 3)
-                        throw new InvalidSelectQueryException("Wrong number of arguments in SQL function REPLACE", expression);
-
-                    Term t1 = getTerm(args.get(0));
-                    Term t2 = getTerm(args.get(1)); // second parameter is a search string
-
-                    // third argument is optional: if empty then all occurrences of the second param are removed
-                    Term t3 = (arity == 3) ? getTerm(args.get(2)) : FACTORY.getConstantLiteral("");
-
-                    result = FACTORY.getFunction(ExpressionOperation.REPLACE, t1, t2, t3,
-                            FACTORY.getConstantLiteral("")); // the 4th argument is flags
-                    break;
-                }
-                case "concat": {
-                    ImmutableList<Term> terms = args.stream()
-                            .map(t -> getTerm(t))
-                            .collect(ImmutableCollectors.toList());
-
-                    // left recursion
-                    Term term =  terms.stream()
-                            .reduce(null, (a, b) -> (a == null)
-                                    ? b
-                                    : FACTORY.getFunction(ExpressionOperation.CONCAT, a, b));
-
-                    result = term;
-                    break;
-                }
-                case "substr":
-                case "substring":
-                default:
-                    throw new UnsupportedSelectQueryException("Unsupported function ", expression);
-            }
+            result = function.apply(terms, expression);
         }
 
-        /*
-                CONSTANT EXPRESSIONS
-         */
+
+        // ------------------------------------------------------------
+        //        CONSTANT EXPRESSIONS
+        // ------------------------------------------------------------
 
         @Override
         public void visit(NullValue expression) {
@@ -239,9 +303,9 @@ public class ExpressionParser implements java.util.function.Function<ImmutableMa
             throw new UnsupportedSelectQueryException("Temporal INTERVALs are not supported yet", expression);
         }
 
-        /*
-            BINARY OPERATIONS
-        */
+        // ------------------------------------------------------------
+        //        BINARY OPERATIONS
+        // ------------------------------------------------------------
 
         @Override
         public void visit(Addition expression) {
@@ -436,6 +500,7 @@ public class ExpressionParser implements java.util.function.Function<ImmutableMa
                 throw new InvalidSelectQueryException("not possible in the current JSQLParser", expression);
             }
 
+            // do not use ImmutableCollectors.toList because this cannot be done concurrently
             ImmutableList<Function> equalities =
                     ImmutableList.<Function>builder().addAll(stream.iterator()).build();
 
@@ -535,7 +600,6 @@ public class ExpressionParser implements java.util.function.Function<ImmutableMa
 
 
         @Override
-        // TODO: this should be supported
         // Syntax:
         //      * CASE
         //      * WHEN condition THEN expression
@@ -548,6 +612,7 @@ public class ExpressionParser implements java.util.function.Function<ImmutableMa
         //      * [WHEN condition THEN expression]...
         //      * [ELSE expression]
         //      * END
+
         public void visit(CaseExpression expression) {
             throw new UnsupportedSelectQueryException("CASE is not supported yet", expression);
             // expression.getSwitchExpression();
