@@ -102,6 +102,11 @@ public class RDB2RDFTest {
 	private static Properties PROPERTIES;
 	private static OBDADataFactory DATA_FACTORY = OBDADataFactoryImpl.getInstance();
 
+	private static final String JDBC_URL = "jdbc:h2:mem:questrepository";
+	private static final String DB_USER = "sa";
+	private static final String DB_PASSWORD = "";
+	private static final String JDBC_DRIVER = "org.h2.Driver";
+
 	/**
 	 * Terms used in the manifest files of RDB2RDF test suite
 	 */
@@ -223,10 +228,10 @@ public class RDB2RDFTest {
 		PROPERTIES = new Properties();
 
 		PROPERTIES.setProperty(OBDAProperties.DB_NAME, "h2");
-		PROPERTIES.setProperty(OBDAProperties.DB_USER, "sa");
-		PROPERTIES.setProperty(OBDAProperties.DB_PASSWORD, "");
-		PROPERTIES.setProperty(OBDAProperties.JDBC_URL, "jdbc:h2:mem:questrepository");
-		PROPERTIES.setProperty(OBDAProperties.JDBC_DRIVER, "org.h2.Driver");
+		PROPERTIES.setProperty(OBDAProperties.DB_USER, DB_USER);
+		PROPERTIES.setProperty(OBDAProperties.DB_PASSWORD, DB_PASSWORD);
+		PROPERTIES.setProperty(OBDAProperties.JDBC_URL, JDBC_URL);
+		PROPERTIES.setProperty(OBDAProperties.JDBC_DRIVER, JDBC_DRIVER);
 		PROPERTIES.setProperty(QuestCorePreferences.BASE_IRI, BASE_IRI);
 	}
 
@@ -266,7 +271,7 @@ public class RDB2RDFTest {
 			configBuilder.r2rmlMappingFile(absoluteFilePath);
 		}
 		else {
-			configBuilder.bootstrapMapping(getMemOBDADataSource(), "http://example.org/base");
+			configBuilder.bootstrapMapping(getMemOBDADataSource(), BASE_IRI);
 		}
 		SesameVirtualRepo repo = new SesameVirtualRepo(name, configBuilder.build());
 		repo.initialize();
@@ -275,20 +280,15 @@ public class RDB2RDFTest {
 
 	private static OBDADataSource getMemOBDADataSource() {
 
-		String driver = "org.h2.Driver";
-		String url = "jdbc:h2:mem:questrepository";
-		String username = "sa";
-		String password = "";
-
 		OBDADataSource obdaSource = DATA_FACTORY.getDataSource(java.net.URI.create("http://www.obda.org/ABOXDUMP" + System.currentTimeMillis()));
-		obdaSource.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, driver);
-		obdaSource.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, password);
-		obdaSource.setParameter(RDBMSourceParameterConstants.DATABASE_URL, url);
-		obdaSource.setParameter(RDBMSourceParameterConstants.DATABASE_USERNAME, username);
+		obdaSource.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, JDBC_DRIVER);
+		obdaSource.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, DB_PASSWORD);
+		obdaSource.setParameter(RDBMSourceParameterConstants.DATABASE_URL, JDBC_URL);
+		obdaSource.setParameter(RDBMSourceParameterConstants.DATABASE_USERNAME, DB_USER);
 		obdaSource.setParameter(RDBMSourceParameterConstants.IS_IN_MEMORY, "true");
 		obdaSource.setParameter(RDBMSourceParameterConstants.USE_DATASOURCE_FOR_ABOXDUMP, "true");
 
-		return (obdaSource);
+		return obdaSource;
 	}
 
 	protected static void clearDB() throws Exception {
