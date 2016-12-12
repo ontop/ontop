@@ -21,15 +21,10 @@ package it.unibz.inf.ontop.owlrefplatform.questdb;
  */
 
 
-import java.net.URI;
-import java.util.HashSet;
 import java.util.Optional;
-import java.util.Set;
 
 import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.injection.QuestPreferences;
-import it.unibz.inf.ontop.model.OBDADataFactory;
-import it.unibz.inf.ontop.model.OBDADataSource;
 import it.unibz.inf.ontop.model.OBDAException;
 import it.unibz.inf.ontop.model.OBDAModel;
 import it.unibz.inf.ontop.ontology.OntologyFactory;
@@ -37,12 +32,9 @@ import it.unibz.inf.ontop.owlrefplatform.core.IQuest;
 import it.unibz.inf.ontop.owlrefplatform.core.IQuestConnection;
 import it.unibz.inf.ontop.owlrefplatform.injection.QuestCorePreferences;
 
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
-import it.unibz.inf.ontop.model.impl.RDBMSourceParameterConstants;
 import it.unibz.inf.ontop.ontology.Ontology;
 import it.unibz.inf.ontop.ontology.impl.OntologyFactoryImpl;
 import it.unibz.inf.ontop.owlapi.OWLAPITranslatorUtility;
-import it.unibz.inf.ontop.owlapi.directmapping.DirectMappingEngine;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -59,7 +51,6 @@ public class QuestDBVirtualStore extends QuestDBAbstractStore {
 
 	private static Logger log = LoggerFactory.getLogger(QuestDBVirtualStore.class);
 
-	private static OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 	private static final OntologyFactory ofac = OntologyFactoryImpl.getInstance();
 
 	private IQuest questInstance;
@@ -87,11 +78,8 @@ public class QuestDBVirtualStore extends QuestDBAbstractStore {
 
 		//obtain the model
 		OBDAModel obdaModel = config.loadMapping()
-				//obtain model from direct mapping RDB2RDF method
-				// TODO: refactor this hack
-				.orElseGet(this::getOBDAModelDM);
-				//.orElseThrow(() -> new IllegalStateException("Mapping are required in virtual A-box mode " +
-				//		"so a configuration validation error should have already been thrown"));
+				.orElseThrow(() -> new IllegalStateException("Mapping are required in virtual A-box mode " +
+						"so a configuration validation error should have already been thrown"));
 
 		//obtain the ontology
 		Optional<OWLOntology> optionalInputOntology = config.loadInputOntology();
@@ -101,59 +89,9 @@ public class QuestDBVirtualStore extends QuestDBAbstractStore {
 
 		obdaModel.getOntologyVocabulary().merge(tbox.getVocabulary());
 
-		/**
-		 * TODO: should we keep this hack??? What is its point?
-		 */
-		if ((!optionalInputOntology.isPresent()) && obdaModel.getSources().size() == 0) {
-			Set<OBDADataSource> dataSources = new HashSet<>(obdaModel.getSources());
-			dataSources.add(getMemOBDADataSource("MemH2"));
-			obdaModel = obdaModel.newModel(dataSources, obdaModel.getMappings());
-		}
-
 		//set up Quest
 		questInstance = getComponentFactory().create(tbox, Optional.of(obdaModel), config.getDatasourceMetadata());
 	}
-
-	/**
-	 * Create an in-memory H2 database data source
-	 * @param name - the datasource name
-	 * @return the created OBDADataSource
-	 */
-	private static OBDADataSource getMemOBDADataSource(String name) {
-
-		String driver = "org.h2.Driver";
-		String url = "jdbc:h2:mem:questrepository";
-		String username = "sa";
-		String password = "";
-
-		OBDADataSource obdaSource = fac.getDataSource(URI.create("http://www.obda.org/ABOXDUMP" + System.currentTimeMillis()));
-		obdaSource.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, driver);
-		obdaSource.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, password);
-		obdaSource.setParameter(RDBMSourceParameterConstants.DATABASE_URL, url);
-		obdaSource.setParameter(RDBMSourceParameterConstants.DATABASE_USERNAME, username);
-		obdaSource.setParameter(RDBMSourceParameterConstants.IS_IN_MEMORY, "true");
-		obdaSource.setParameter(RDBMSourceParameterConstants.USE_DATASOURCE_FOR_ABOXDUMP, "true");
-		
-		return (obdaSource);
-	}
-
-	/**
-	 * Generate an OBDAModel from Direct Mapping (Bootstrapping)
-	 * @return the OBDAModel
-	 */
-	private OBDAModel getOBDAModelDM() {
-
-		DirectMappingEngine dm = new DirectMappingEngine("http://example.org/base", 0,
-                getNativeQLFactory(), getOBDAFactory());
-		try {
-			OBDAModel model = dm.extractMappings(getMemOBDADataSource("H2m"));
-			return model;
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return null;
-	}
-
 
 	/**
 	 * Must be called once after the constructor call and before any queries are run, that is,
