@@ -172,6 +172,31 @@ public class SelectQueryParserTest {
         assert_contains_EQ_atom(parse);
     }
 
+    @Test(expected = UnsupportedSelectQueryException.class)
+    public void select_no_from_test() {
+        SelectQueryParser parser = new SelectQueryParser(createMetadata());
+        CQIE parse = parser.parse("SELECT 1");
+        assert_join_common(parse);
+        assert_contains_EQ_atom(parse);
+    }
+
+    @Test(expected = UnsupportedSelectQueryException.class)
+    public void select_one_complex_expression_test() {
+        SelectQueryParser parser = new SelectQueryParser(createMetadata());
+        CQIE parse = parser.parse("SELECT 1 FROM Q");
+        assert_join_common(parse);
+        assert_contains_EQ_atom(parse);
+    }
+
+
+    @Test(expected = InvalidSelectQueryException.class)
+    public void select_one_complex_expression_test2() {
+        SelectQueryParser parser = new SelectQueryParser(createMetadata());
+        CQIE parse = parser.parse("SELECT R FROM Q");
+        assert_join_common(parse);
+        assert_contains_EQ_atom(parse);
+    }
+
     @Test()
     public void inner_join_using_test() {
         SelectQueryParser parser = new SelectQueryParser(createMetadata());

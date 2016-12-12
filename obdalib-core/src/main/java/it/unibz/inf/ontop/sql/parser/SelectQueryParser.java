@@ -58,9 +58,6 @@ public class SelectQueryParser {
             RelationalExpression current = select(((Select) statement).getSelectBody());
             final OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 
-            if ( current.getAttributes() == null || current.getAttributes().isEmpty() )
-                throw new InvalidSelectQueryException("The current relational expression does not contain any projected attributes", current.getAttributes() );
-
             // TODO: proper handling of the head predicate
             Function head = fac.getFunction(
                     fac.getPredicate("Q", new Predicate.COL_TYPE[current.getAttributes().size()]),
@@ -119,6 +116,9 @@ public class SelectQueryParser {
 
         if (plainSelect.getIntoTables() != null)
             throw new InvalidSelectQueryException("SELECT INTO is not allowed in mappings", selectBody);
+
+        if (plainSelect.getFromItem() == null)
+            throw new UnsupportedSelectQueryException("SELECT without FROM is not supported", selectBody);
 
         RelationalExpression current = getRelationalExpression(plainSelect.getFromItem());
         if (plainSelect.getJoins() != null) {
