@@ -11,6 +11,7 @@ import it.unibz.inf.ontop.sql.parser.exceptions.IllegalJoinException;
 import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
+import org.junit.Before;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -25,49 +26,66 @@ public class RelationalExpressionTest {
     private static OBDADataFactory FACTORY = OBDADataFactoryImpl.getInstance();
     private static DBMetadata METADATA = DBMetadataExtractor.createDummyMetadata();
     private static QuotedIDFactory MDFAC = METADATA.getQuotedIDFactory();
+    private Variable x, y, u, v;
+    private Function f1, f2, eq;
+    private RelationID table1, table2;
+    private QuotedID attx, atty, attu, attv;
+    private RelationalExpression re1, re2;
+    private EqualsTo onExpression;
 
-    @Test
-    public void cross_join_test() throws IllegalJoinException {
+    @Before
+    public void setupTest(){
+        x = FACTORY.getVariable("x");
+        y = FACTORY.getVariable("y");
 
-        Variable x = FACTORY.getVariable("x");
-        Variable y = FACTORY.getVariable("y");
-
-        Function f1 = FACTORY.getFunction(
+        f1 = FACTORY.getFunction(
                 FACTORY.getPredicate("P", new Predicate.COL_TYPE[] { null, null }),
                 ImmutableList.of(x, y));
 
-        RelationID table1 = MDFAC.createRelationID(null, "P");
-        QuotedID attx = MDFAC.createAttributeID("A");
-        QuotedID atty = MDFAC.createAttributeID("B");
+        table1 = MDFAC.createRelationID(null, "P");
+        attx = MDFAC.createAttributeID("A");
+        atty = MDFAC.createAttributeID("B");
 
-        RelationalExpression re1 = new RelationalExpression(ImmutableList.of(f1),
+        re1 = new RelationalExpression(ImmutableList.of(f1),
                 ImmutableMap.of(new QualifiedAttributeID(table1, attx), x,
                         new QualifiedAttributeID(table1, atty), y,
                         new QualifiedAttributeID(null, attx), x,
                         new QualifiedAttributeID(null, atty), y),
                 ImmutableMap.of(attx, ImmutableSet.of(table1), atty, ImmutableSet.of(table1)));
 
-        Variable u = FACTORY.getVariable("u");
-        Variable v = FACTORY.getVariable("v");
+        u = FACTORY.getVariable("u");
+        v = FACTORY.getVariable("v");
 
-        Function f2 = FACTORY.getFunction(
+        f2 = FACTORY.getFunction(
                 FACTORY.getPredicate("Q", new Predicate.COL_TYPE[] { null, null }),
                 ImmutableList.of(u, v));
 
-        RelationID table2 = MDFAC.createRelationID(null, "Q");
-        QuotedID attu = MDFAC.createAttributeID("A");
-        QuotedID attv = MDFAC.createAttributeID("C");
+        table2 = MDFAC.createRelationID(null, "Q");
+        attu = MDFAC.createAttributeID("A");
+        attv = MDFAC.createAttributeID("C");
 
-        RelationalExpression re2 = new RelationalExpression(ImmutableList.of(f2),
+        re2 = new RelationalExpression(ImmutableList.of(f2),
                 ImmutableMap.of(new QualifiedAttributeID(table2, attu), u,
                         new QualifiedAttributeID(table2, attv), v,
                         new QualifiedAttributeID(null, attu), u,
                         new QualifiedAttributeID(null, attv), v),
                 ImmutableMap.of(attu, ImmutableSet.of(table2), attv, ImmutableSet.of(table2)));
 
-        System.out.println(re1);
-        System.out.println(re2);
 
+
+
+        eq = FACTORY.getFunction(ExpressionOperation.EQ, ImmutableList.of(x, u));
+
+        onExpression = new EqualsTo();
+        onExpression.setLeftExpression( new Column(new Table("P"), "A"));
+        onExpression.setRightExpression( new Column(new Table("Q"), "A"));
+
+        System.out.println("****************************************************");
+
+    }
+
+    @Test
+    public void cross_join_test() throws IllegalJoinException {
         RelationalExpression relationalExpression = RelationalExpression.crossJoin(re1, re2);
         System.out.println(relationalExpression);
 
@@ -84,42 +102,13 @@ public class RelationalExpressionTest {
         assertEquals(null, attrs.get(new QualifiedAttributeID(null, attu)));
         assertEquals(v, attrs.get(new QualifiedAttributeID(table2, attv)));
         assertEquals(v, attrs.get(new QualifiedAttributeID(null, attv)));
-    }
 
+    }
 
     @Test(expected = IllegalJoinException.class)
     public void cross_join_exception_test() throws IllegalJoinException {
 
-        Variable x = FACTORY.getVariable("x");
-        Variable y = FACTORY.getVariable("y");
-
-        Function f1 = FACTORY.getFunction(
-                FACTORY.getPredicate("P", new Predicate.COL_TYPE[] { null, null }),
-                ImmutableList.of(x, y));
-
-        RelationID table1 = MDFAC.createRelationID(null, "P");
-        QuotedID attx = MDFAC.createAttributeID("A");
-        QuotedID atty = MDFAC.createAttributeID("B");
-
-        RelationalExpression re1 = new RelationalExpression(ImmutableList.of(f1),
-                ImmutableMap.of(new QualifiedAttributeID(table1, attx), x,
-                        new QualifiedAttributeID(table1, atty), y,
-                        new QualifiedAttributeID(null, attx), x,
-                        new QualifiedAttributeID(null, atty), y),
-                ImmutableMap.of(attx, ImmutableSet.of(table1), atty, ImmutableSet.of(table1)));
-
-        Variable u = FACTORY.getVariable("u");
-        Variable v = FACTORY.getVariable("v");
-
-        Function f2 = FACTORY.getFunction(
-                FACTORY.getPredicate("Q", new Predicate.COL_TYPE[] { null, null }),
-                ImmutableList.of(u, v));
-
-        RelationID table2 = MDFAC.createRelationID(null, "Q");
-        QuotedID attu = MDFAC.createAttributeID("A");
-        QuotedID attv = MDFAC.createAttributeID("C");
-
-        RelationalExpression re2 = new RelationalExpression(ImmutableList.of(f2),
+        re2 = new RelationalExpression(ImmutableList.of(f2),
                 ImmutableMap.of(
                         new QualifiedAttributeID(table2, attu), u,
                         new QualifiedAttributeID(table2, attv), v,
@@ -137,51 +126,10 @@ public class RelationalExpressionTest {
     @Test
     public void join_on_test() throws IllegalJoinException {
 
-        Variable x = FACTORY.getVariable("x");
-        Variable y = FACTORY.getVariable("y");
-
-        Function f1 = FACTORY.getFunction(
-                FACTORY.getPredicate("P", new Predicate.COL_TYPE[] { null, null }),
-                ImmutableList.of(x, y));
-
-        RelationID table1 = MDFAC.createRelationID(null, "P");
-        QuotedID attx = MDFAC.createAttributeID("A");
-        QuotedID atty = MDFAC.createAttributeID("B");
-
-        RelationalExpression re1 = new RelationalExpression(ImmutableList.of(f1),
-                ImmutableMap.of(new QualifiedAttributeID(table1, attx), x,
-                        new QualifiedAttributeID(table1, atty), y,
-                        new QualifiedAttributeID(null, attx), x,
-                        new QualifiedAttributeID(null, atty), y),
-                ImmutableMap.of(attx, ImmutableSet.of(table1), atty, ImmutableSet.of(table1)));
-
-        Variable u = FACTORY.getVariable("u");
-        Variable v = FACTORY.getVariable("v");
-
-        Function f2 = FACTORY.getFunction(
-                FACTORY.getPredicate("Q", new Predicate.COL_TYPE[] { null, null }),
-                ImmutableList.of(u, v));
-
-        RelationID table2 = MDFAC.createRelationID(null, "Q");
-        QuotedID attu = MDFAC.createAttributeID("A");
-        QuotedID attv = MDFAC.createAttributeID("C");
-
-        RelationalExpression re2 = new RelationalExpression(ImmutableList.of(f2),
-                ImmutableMap.of(new QualifiedAttributeID(table2, attu), u,
-                        new QualifiedAttributeID(table2, attv), v,
-                        new QualifiedAttributeID(null, attu), u,
-                        new QualifiedAttributeID(null, attv), v),
-                ImmutableMap.of(attu, ImmutableSet.of(table2), attv, ImmutableSet.of(table2)));
-
-        Function eq = FACTORY.getFunction(ExpressionOperation.EQ, ImmutableList.of(x, u));
-
         System.out.println(re1);
         System.out.println(re2);
         System.out.println(eq);
 
-        EqualsTo onExpression = new EqualsTo();
-        onExpression.setLeftExpression( new Column(new Table("P"), "A"));
-        onExpression.setRightExpression( new Column(new Table("Q"), "A"));
         RelationalExpression relationalExpression = RelationalExpression.joinOn(re1, re2,
                  new BooleanExpressionParser(MDFAC, onExpression));
 
@@ -208,36 +156,8 @@ public class RelationalExpressionTest {
 
     @Test(expected = IllegalJoinException.class)
     public void join_on_exception_test() throws IllegalJoinException {
-
-        Variable x = FACTORY.getVariable("x");
-        Variable y = FACTORY.getVariable("y");
-
-        Function f1 = FACTORY.getFunction(
-                FACTORY.getPredicate("P", new Predicate.COL_TYPE[] { null, null }),
-                ImmutableList.of(x, y));
-
-        RelationID table1 = MDFAC.createRelationID(null, "P");
-        QuotedID attx = MDFAC.createAttributeID("A");
-        QuotedID atty = MDFAC.createAttributeID("B");
-
-        RelationalExpression re1 = new RelationalExpression(ImmutableList.of(f1),
-                ImmutableMap.of(new QualifiedAttributeID(table1, attx), x,
-                        new QualifiedAttributeID(table1, atty), y,
-                        new QualifiedAttributeID(null, attx), x,
-                        new QualifiedAttributeID(null, atty), y),
-                ImmutableMap.of(attx, ImmutableSet.of(table1), atty, ImmutableSet.of(table1)));
-
-        Variable u = FACTORY.getVariable("u");
-        Variable v = FACTORY.getVariable("v");
-
-        Function f2 = FACTORY.getFunction(
-                FACTORY.getPredicate("Q", new Predicate.COL_TYPE[] { null, null }),
-                ImmutableList.of(u, v));
-
-        RelationID table2 = MDFAC.createRelationID(null, "Q");
-        QuotedID attu = MDFAC.createAttributeID("A");
-        QuotedID attv = MDFAC.createAttributeID("C");
-
+        System.out.println(re1);
+        System.out.println(re2);
 
         RelationalExpression re2 = new RelationalExpression(ImmutableList.of(f2),
                 ImmutableMap.of(
@@ -248,55 +168,12 @@ public class RelationalExpressionTest {
                         new QualifiedAttributeID(null, attv), v),
                 ImmutableMap.of(attu, ImmutableSet.of(table2), attv, ImmutableSet.of(table2)));
 
-        EqualsTo onExpression = new EqualsTo();
-        onExpression.setLeftExpression( new Column(new Table("P"), "A"));
-        onExpression.setRightExpression( new Column(new Table("Q"), "A"));
-        RelationalExpression.joinOn(re1, re2,
+      RelationalExpression.joinOn(re1, re2,
                 new BooleanExpressionParser(MDFAC, onExpression));
     }
 
-
     @Test
     public void natural_join_test() throws IllegalJoinException {
-
-        Variable x = FACTORY.getVariable("x");
-        Variable y = FACTORY.getVariable("y");
-
-        Function f1 = FACTORY.getFunction(
-                FACTORY.getPredicate("P", new Predicate.COL_TYPE[] { null, null }),
-                ImmutableList.of(x, y));
-
-        RelationID table1 = MDFAC.createRelationID(null, "P");
-        QuotedID attx = MDFAC.createAttributeID("A");
-        QuotedID atty = MDFAC.createAttributeID("B");
-
-        RelationalExpression re1 = new RelationalExpression(ImmutableList.of(f1),
-                ImmutableMap.of(new QualifiedAttributeID(table1, attx), x,
-                        new QualifiedAttributeID(table1, atty), y,
-                        new QualifiedAttributeID(null, attx), x,
-                        new QualifiedAttributeID(null, atty), y),
-                ImmutableMap.of(attx, ImmutableSet.of(table1), atty, ImmutableSet.of(table1)));
-
-        Variable u = FACTORY.getVariable("u");
-        Variable v = FACTORY.getVariable("v");
-
-        Function f2 = FACTORY.getFunction(
-                FACTORY.getPredicate("Q", new Predicate.COL_TYPE[] { null, null }),
-                ImmutableList.of(u, v));
-
-        RelationID table2 = MDFAC.createRelationID(null, "Q");
-        QuotedID attu = MDFAC.createAttributeID("A");
-        QuotedID attv = MDFAC.createAttributeID("C");
-
-        RelationalExpression re2 = new RelationalExpression(ImmutableList.of(f2),
-                ImmutableMap.of(new QualifiedAttributeID(table2, attu), u,
-                        new QualifiedAttributeID(table2, attv), v,
-                        new QualifiedAttributeID(null, attu), u,
-                        new QualifiedAttributeID(null, attv), v),
-                ImmutableMap.of(attu, ImmutableSet.of(table2), attv, ImmutableSet.of(table2)));
-
-        Function eq = FACTORY.getFunction(ExpressionOperation.EQ, ImmutableList.of(x, u));
-
         System.out.println(re1);
         System.out.println(re2);
         System.out.println(eq);
@@ -321,43 +198,8 @@ public class RelationalExpressionTest {
 
     @Test(expected = IllegalJoinException.class)
     public void natural_join_ambiguity_test() throws IllegalJoinException {
-
-        Variable x = FACTORY.getVariable("x");
-        Variable y = FACTORY.getVariable("y");
-
-        Function f1 = FACTORY.getFunction(
-                FACTORY.getPredicate("P", new Predicate.COL_TYPE[] { null, null }),
-                ImmutableList.of(x, y));
-
-        RelationID table1 = MDFAC.createRelationID(null, "P");
-        QuotedID attx = MDFAC.createAttributeID("A");
-        QuotedID atty = MDFAC.createAttributeID("B");
-
-        RelationalExpression re1 = new RelationalExpression(ImmutableList.of(f1),
-                ImmutableMap.of(new QualifiedAttributeID(table1, attx), x,
-                        new QualifiedAttributeID(table1, atty), y,
-                        new QualifiedAttributeID(null, attx), x,
-                        new QualifiedAttributeID(null, atty), y),
-                ImmutableMap.of(attx, ImmutableSet.of(table1), atty, ImmutableSet.of(table1)));
-
-        Variable u = FACTORY.getVariable("u");
-        Variable v = FACTORY.getVariable("v");
-
-        Function f2 = FACTORY.getFunction(
-                FACTORY.getPredicate("Q", new Predicate.COL_TYPE[] { null, null }),
-                ImmutableList.of(u, v));
-
-        RelationID table2 = MDFAC.createRelationID(null, "Q");
-        QuotedID attu = MDFAC.createAttributeID("A");
-        QuotedID attv = MDFAC.createAttributeID("C");
-
-        RelationalExpression re2 = new RelationalExpression(ImmutableList.of(f2),
-                ImmutableMap.of(new QualifiedAttributeID(table2, attu), u,
-                        new QualifiedAttributeID(table2, attv), v,
-                        new QualifiedAttributeID(null, attu), u,
-                        new QualifiedAttributeID(null, attv), v),
-                ImmutableMap.of(attu, ImmutableSet.of(table2), attv, ImmutableSet.of(table2)));
-
+        System.out.println(re1);
+        System.out.println(re2);
 
         Variable w = FACTORY.getVariable("u");
         Variable z = FACTORY.getVariable("v");
@@ -378,14 +220,6 @@ public class RelationalExpressionTest {
                         new QualifiedAttributeID(null, attz), z),
                 ImmutableMap.of(attw, ImmutableSet.of(table3), attz, ImmutableSet.of(table3)));
 
-
-        System.out.println(re1);
-        System.out.println(re2);
-
-
-        EqualsTo onExpression = new EqualsTo();
-        onExpression.setLeftExpression( new Column(new Table("P"), "A"));
-        onExpression.setRightExpression( new Column(new Table("Q"), "A"));
         RelationalExpression relationalExpression = RelationalExpression.joinOn(re1, re2,
                 new BooleanExpressionParser(MDFAC, onExpression));
 
@@ -399,56 +233,16 @@ public class RelationalExpressionTest {
 
     @Test()
     public void join_using_test() throws IllegalJoinException {
-        Variable x = FACTORY.getVariable("x");
-        Variable y = FACTORY.getVariable("y");
-
-        Function f1 = FACTORY.getFunction(
-                FACTORY.getPredicate("P", new Predicate.COL_TYPE[] { null, null }),
-                ImmutableList.of(x, y));
-
-        RelationID table1 = MDFAC.createRelationID(null, "P");
-        QuotedID attx = MDFAC.createAttributeID("A");
-        QuotedID atty = MDFAC.createAttributeID("B");
-
-        RelationalExpression re1 = new RelationalExpression(ImmutableList.of(f1),
-                ImmutableMap.of(new QualifiedAttributeID(table1, attx), x,
-                        new QualifiedAttributeID(table1, atty), y,
-                        new QualifiedAttributeID(null, attx), x,
-                        new QualifiedAttributeID(null, atty), y),
-                ImmutableMap.of(attx, ImmutableSet.of(table1), atty, ImmutableSet.of(table1)));
-
-        Variable u = FACTORY.getVariable("u");
-        Variable v = FACTORY.getVariable("v");
-
-        Function f2 = FACTORY.getFunction(
-                FACTORY.getPredicate("Q", new Predicate.COL_TYPE[] { null, null }),
-                ImmutableList.of(u, v));
-
-        RelationID table2 = MDFAC.createRelationID(null, "Q");
-        QuotedID attu = MDFAC.createAttributeID("A");
-        QuotedID attv = MDFAC.createAttributeID("C");
-
-        RelationalExpression re2 = new RelationalExpression(ImmutableList.of(f2),
-                ImmutableMap.of(new QualifiedAttributeID(table2, attu), u,
-                        new QualifiedAttributeID(table2, attv), v,
-                        new QualifiedAttributeID(null, attu), u,
-                        new QualifiedAttributeID(null, attv), v),
-                ImmutableMap.of(attu, ImmutableSet.of(table2), attv, ImmutableSet.of(table2)));
-
-        Function eq = FACTORY.getFunction(ExpressionOperation.EQ, ImmutableList.of(x, u));
-
         System.out.println(re1);
         System.out.println(re2);
         System.out.println(eq);
 
         RelationalExpression relationalExpression = RelationalExpression.joinUsing(re1, re2, ImmutableSet.of( MDFAC.createAttributeID("A") ) );
-
         System.out.println(relationalExpression);
 
         assertTrue(relationalExpression.getAtoms().contains(f1));
         assertTrue(relationalExpression.getAtoms().contains(f2));
         assertTrue(relationalExpression.getAtoms().contains(eq));
-
 
         ImmutableMap<QualifiedAttributeID, Variable> attrs = relationalExpression.getAttributes();
         assertEquals(x, attrs.get(new QualifiedAttributeID(null, attx)) );
@@ -459,39 +253,14 @@ public class RelationalExpressionTest {
 
     }
 
-
     @Test(expected = IllegalJoinException.class)
     public void join_using_exception_test() throws IllegalJoinException {
-        Variable x = FACTORY.getVariable("x");
-        Variable y = FACTORY.getVariable("y");
 
-        Function f1 = FACTORY.getFunction(
-                FACTORY.getPredicate("P", new Predicate.COL_TYPE[] { null, null }),
-                ImmutableList.of(x, y));
+        table2 = MDFAC.createRelationID(null, "Q");
+        attu = MDFAC.createAttributeID("C");
+        attv = MDFAC.createAttributeID("D");
 
-        RelationID table1 = MDFAC.createRelationID(null, "P");
-        QuotedID attx = MDFAC.createAttributeID("A");
-        QuotedID atty = MDFAC.createAttributeID("B");
-
-        RelationalExpression re1 = new RelationalExpression(ImmutableList.of(f1),
-                ImmutableMap.of(new QualifiedAttributeID(table1, attx), x,
-                        new QualifiedAttributeID(table1, atty), y,
-                        new QualifiedAttributeID(null, attx), x,
-                        new QualifiedAttributeID(null, atty), y),
-                ImmutableMap.of(attx, ImmutableSet.of(table1), atty, ImmutableSet.of(table1)));
-
-        Variable u = FACTORY.getVariable("u");
-        Variable v = FACTORY.getVariable("v");
-
-        Function f2 = FACTORY.getFunction(
-                FACTORY.getPredicate("Q", new Predicate.COL_TYPE[] { null, null }),
-                ImmutableList.of(u, v));
-
-        RelationID table2 = MDFAC.createRelationID(null, "Q");
-        QuotedID attu = MDFAC.createAttributeID("C");
-        QuotedID attv = MDFAC.createAttributeID("D");
-
-        RelationalExpression re2 = new RelationalExpression(ImmutableList.of(f2),
+        re2 = new RelationalExpression(ImmutableList.of(f2),
                 ImmutableMap.of(new QualifiedAttributeID(table2, attu), u,
                         new QualifiedAttributeID(table2, attv), v,
                         new QualifiedAttributeID(null, attu), u,
