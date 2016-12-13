@@ -223,7 +223,7 @@ public class QuestQueryProcessor {
 
 
 				//lift bindings and union when it is possible
-				IntermediateQueryOptimizer substitutionOptimizer = new TopDownSubstitutionLiftOptimizer();
+				IntermediateQueryOptimizer substitutionOptimizer = new FixedPointSubstitutionLiftOptimizer();
 				intermediateQuery = substitutionOptimizer.optimize(intermediateQuery);
 
 

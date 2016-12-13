@@ -9,9 +9,9 @@ import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.model.impl.URITemplatePredicateImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.optimization.FixedPointJoinLikeOptimizer;
+import it.unibz.inf.ontop.owlrefplatform.core.optimization.FixedPointSubstitutionLiftOptimizer;
 import it.unibz.inf.ontop.owlrefplatform.core.optimization.IntermediateQueryOptimizer;
 import it.unibz.inf.ontop.owlrefplatform.core.optimization.JoinLikeOptimizer;
-import it.unibz.inf.ontop.owlrefplatform.core.optimization.TopDownSubstitutionLiftOptimizer;
 import it.unibz.inf.ontop.pivotalrepr.*;
 import it.unibz.inf.ontop.pivotalrepr.equivalence.IQSyntacticEquivalenceChecker;
 import it.unibz.inf.ontop.pivotalrepr.impl.ConstructionNodeImpl;
@@ -118,9 +118,7 @@ public class ExpressionEvaluatorTest {
         System.out.println("\nBefore optimization: \n" +  unOptimizedQuery);
 
 
-        IntermediateQueryOptimizer substitutionOptimizer = new TopDownSubstitutionLiftOptimizer();
-
-
+        IntermediateQueryOptimizer substitutionOptimizer = new FixedPointSubstitutionLiftOptimizer();
         unOptimizedQuery = substitutionOptimizer.optimize(unOptimizedQuery);
 
         JoinLikeOptimizer joinLikeOptimizer = new FixedPointJoinLikeOptimizer();
@@ -230,9 +228,7 @@ public class ExpressionEvaluatorTest {
         System.out.println("\nBefore optimization: \n" +  unOptimizedQuery);
 
 
-        IntermediateQueryOptimizer substitutionOptimizer = new TopDownSubstitutionLiftOptimizer();
-
-
+        IntermediateQueryOptimizer substitutionOptimizer = new FixedPointSubstitutionLiftOptimizer();
         unOptimizedQuery = substitutionOptimizer.optimize(unOptimizedQuery);
 
         JoinLikeOptimizer joinLikeOptimizer = new FixedPointJoinLikeOptimizer();
@@ -288,9 +284,7 @@ public class ExpressionEvaluatorTest {
         System.out.println("\nBefore optimization: \n" +  unOptimizedQuery);
 
 
-        IntermediateQueryOptimizer substitutionOptimizer = new TopDownSubstitutionLiftOptimizer();
-
-
+        IntermediateQueryOptimizer substitutionOptimizer = new FixedPointSubstitutionLiftOptimizer();
         IntermediateQuery optimizedQuery = substitutionOptimizer.optimize(unOptimizedQuery);
 
         System.out.println("\nAfter optimization: \n" +  optimizedQuery);
