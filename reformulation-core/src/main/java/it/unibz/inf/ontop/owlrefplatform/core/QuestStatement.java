@@ -167,7 +167,7 @@ public class QuestStatement implements OBDAStatement {
 						}
 					}
 					catch (SQLTimeoutException e) {
-						log.warn("SQL execution is time out");
+						log.warn("SQL execution is time out "+ e.getMessage());
 //						if( set == null ){ // Exception SQLTimeout
 							tupleResult = new EmptyTupleResultSet(signature, QuestStatement.this);
 //						}
@@ -183,7 +183,7 @@ public class QuestStatement implements OBDAStatement {
 						// See <http://bugs.mysql.com/bug.php?id=71589>
 						if(exceptionClassName.equals(MySQLTimeoutExceptionClassName)
 								|| exceptionClassName.equals(PSQLExceptionClassName)){
-							log.warn("SQL execution is time out");
+							log.warn("SQL execution is time out "  +e.getMessage());
 						} else {
 						exception = e;
 						log.error(e.getMessage(), e);
