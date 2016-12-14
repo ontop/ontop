@@ -81,6 +81,7 @@ public class ExpressionParser implements java.util.function.Function<ImmutableMa
                 return FACTORY.getFunction(
                         ExpressionOperation.REGEX, terms.get(0), terms.get(1), FACTORY.getConstantLiteral(""));
             case 3:
+                // check the flag?
                 return FACTORY.getFunction(
                         ExpressionOperation.REGEX, terms.get(0), terms.get(1), terms.get(2));
         }
@@ -105,8 +106,12 @@ public class ExpressionParser implements java.util.function.Function<ImmutableMa
                 break;
             case 6:
                 // Oracle
-                // check terms.get(3) and  terms.get(4) are 1 and 0, respectively
-                flags = terms.get(5); // check that the flags is a combination of imx
+                if (!terms.get(3).equals(FACTORY.getConstantLiteral("1", Predicate.COL_TYPE.LONG))
+                        || !terms.get(4).equals(FACTORY.getConstantLiteral("0", Predicate.COL_TYPE.LONG)))
+                    throw new UnsupportedSelectQueryException("Unsupported SQL function", expression);
+
+                // check that the flags is a combination of imx
+                flags = terms.get(5);
                 break;
             default:
                 throw new UnsupportedSelectQueryException("Unsupported SQL function", expression);

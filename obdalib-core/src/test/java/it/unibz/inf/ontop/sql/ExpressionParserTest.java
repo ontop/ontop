@@ -247,7 +247,7 @@ public class ExpressionParserTest {
     }
 
     @Test
-    public void concat_function_Test() throws JSQLParserException {
+    public void function_CONCAT_Test() throws JSQLParserException {
         String sql = "SELECT CONCAT('A', X, 'B') FROM DUMMY";
         Variable v = FACTORY.getVariable("x0");
         ExpressionParser parser = new ExpressionParser(IDFAC, getExpression(sql));
@@ -1253,6 +1253,384 @@ public class ExpressionParserTest {
                 v,
                 FACTORY.getBooleanConstant(false)), translation);
     }
+
+    @Test
+    public void function_REGEXP_LIKE_Test() throws JSQLParserException {
+        String sql = "SELECT REGEXP_LIKE(X, '^Ste(v|ph)en$')  AS A FROM DUMMY";
+
+        Variable v = FACTORY.getVariable("x0");
+
+        ExpressionParser parser = new ExpressionParser(IDFAC, getExpression(sql));
+        Term translation = parser.apply(ImmutableMap.of(
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+
+        System.out.println(translation);
+
+        assertEquals(FACTORY.getFunction(ExpressionOperation.REGEX, v,
+                FACTORY.getConstantLiteral("^Ste(v|ph)en$"),
+                FACTORY.getConstantLiteral("")), translation);
+    }
+
+    @Test
+    public void function_REGEXP_LIKE_3_Test() throws JSQLParserException {
+        String sql = "SELECT REGEXP_LIKE(X, '^Ste(v|ph)en$', 'i')  AS A FROM DUMMY";
+
+        Variable v = FACTORY.getVariable("x0");
+
+        ExpressionParser parser = new ExpressionParser(IDFAC, getExpression(sql));
+        Term translation = parser.apply(ImmutableMap.of(
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+
+        System.out.println(translation);
+
+        assertEquals(FACTORY.getFunction(ExpressionOperation.REGEX, v,
+                FACTORY.getConstantLiteral("^Ste(v|ph)en$"),
+                FACTORY.getConstantLiteral("i")), translation);
+    }
+
+    @Test(expected = InvalidSelectQueryException.class)
+    public void function_REGEXP_LIKE_4_Test() throws JSQLParserException {
+        String sql = "SELECT REGEXP_LIKE(X, '^Ste(v|ph)en$', 'i', '')  AS A FROM DUMMY";
+
+        Variable v = FACTORY.getVariable("x0");
+
+        ExpressionParser parser = new ExpressionParser(IDFAC, getExpression(sql));
+        Term translation = parser.apply(ImmutableMap.of(
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+    }
+
+    @Test
+    public void function_REGEXP_REPLACE_Test() throws JSQLParserException {
+        String sql = "SELECT REGEXP_REPLACE(X, '^Ste(v|ph)en$', '')  AS A FROM DUMMY";
+
+        Variable v = FACTORY.getVariable("x0");
+
+        ExpressionParser parser = new ExpressionParser(IDFAC, getExpression(sql));
+        Term translation = parser.apply(ImmutableMap.of(
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+
+        System.out.println(translation);
+
+        assertEquals(FACTORY.getFunction(ExpressionOperation.REPLACE, v,
+                FACTORY.getConstantLiteral("^Ste(v|ph)en$"),
+                FACTORY.getConstantLiteral(""),
+                FACTORY.getConstantLiteral("")), translation);
+    }
+
+    @Test
+    public void function_REGEXP_REPLACE_4_Test() throws JSQLParserException {
+        String sql = "SELECT REGEXP_REPLACE(X, '^Ste(v|ph)en$', '', 'i')  AS A FROM DUMMY";
+
+        Variable v = FACTORY.getVariable("x0");
+
+        ExpressionParser parser = new ExpressionParser(IDFAC, getExpression(sql));
+        Term translation = parser.apply(ImmutableMap.of(
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+
+        System.out.println(translation);
+
+        assertEquals(FACTORY.getFunction(ExpressionOperation.REPLACE, v,
+                FACTORY.getConstantLiteral("^Ste(v|ph)en$"),
+                FACTORY.getConstantLiteral(""),
+                FACTORY.getConstantLiteral("i")), translation);
+    }
+
+    @Test
+    public void function_REGEXP_REPLACE_6_Test() throws JSQLParserException {
+        String sql = "SELECT REGEXP_REPLACE(X, '^Ste(v|ph)en$', '', 1, 0, 'i')  AS A FROM DUMMY";
+
+        Variable v = FACTORY.getVariable("x0");
+
+        ExpressionParser parser = new ExpressionParser(IDFAC, getExpression(sql));
+        Term translation = parser.apply(ImmutableMap.of(
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+
+        System.out.println(translation);
+
+        assertEquals(FACTORY.getFunction(ExpressionOperation.REPLACE, v,
+                FACTORY.getConstantLiteral("^Ste(v|ph)en$"),
+                FACTORY.getConstantLiteral(""),
+                FACTORY.getConstantLiteral("i")), translation);
+    }
+
+    @Test(expected = UnsupportedSelectQueryException.class)
+    public void function_REGEXP_REPLACE_6a_Test() throws JSQLParserException {
+        String sql = "SELECT REGEXP_REPLACE(X, '^Ste(v|ph)en$', '', 2, 0, 'i')  AS A FROM DUMMY";
+
+        Variable v = FACTORY.getVariable("x0");
+
+        ExpressionParser parser = new ExpressionParser(IDFAC, getExpression(sql));
+        Term translation = parser.apply(ImmutableMap.of(
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+    }
+
+    @Test(expected = UnsupportedSelectQueryException.class)
+    public void function_REGEXP_REPLACE_7_Test() throws JSQLParserException {
+        String sql = "SELECT REGEXP_REPLACE(X, '^Ste(v|ph)en$', '', 1, 0, 'i', '')  AS A FROM DUMMY";
+
+        Variable v = FACTORY.getVariable("x0");
+
+        ExpressionParser parser = new ExpressionParser(IDFAC, getExpression(sql));
+        Term translation = parser.apply(ImmutableMap.of(
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+    }
+
+    @Test
+    public void function_REPLACE_Test() throws JSQLParserException {
+        String sql = "SELECT REPLACE(X,'J') AS A FROM DUMMY";
+
+        Variable v = FACTORY.getVariable("x0");
+
+        ExpressionParser parser = new ExpressionParser(IDFAC, getExpression(sql));
+        Term translation = parser.apply(ImmutableMap.of(
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+
+        System.out.println(translation);
+
+        assertEquals(FACTORY.getFunction(ExpressionOperation.REPLACE, v,
+                FACTORY.getConstantLiteral("J"),
+                FACTORY.getConstantLiteral(""),
+                FACTORY.getConstantLiteral("")), translation);
+    }
+
+    @Test
+    public void function_REPLACE_3_Test() throws JSQLParserException {
+        String sql = "SELECT REPLACE(X, 'J', 'BL')  AS A FROM DUMMY";
+
+        Variable v = FACTORY.getVariable("x0");
+
+        ExpressionParser parser = new ExpressionParser(IDFAC, getExpression(sql));
+        Term translation = parser.apply(ImmutableMap.of(
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+
+        System.out.println(translation);
+
+        assertEquals(FACTORY.getFunction(ExpressionOperation.REPLACE, v,
+                FACTORY.getConstantLiteral("J"),
+                FACTORY.getConstantLiteral("BL"),
+                FACTORY.getConstantLiteral("")), translation);
+    }
+
+    @Test(expected = InvalidSelectQueryException.class)
+    public void function_REPLACE_4_Test() throws JSQLParserException {
+        String sql = "SELECT REPLACE(X, 'J', 'BL', 'i')  AS A FROM DUMMY";
+
+        Variable v = FACTORY.getVariable("x0");
+
+        ExpressionParser parser = new ExpressionParser(IDFAC, getExpression(sql));
+        Term translation = parser.apply(ImmutableMap.of(
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+    }
+
+    @Test
+    public void function_SUBSTR_2_Test() throws JSQLParserException {
+        String sql = "SELECT SUBSTR(X, 1) AS A FROM DUMMY";
+
+        Variable v = FACTORY.getVariable("x0");
+
+        ExpressionParser parser = new ExpressionParser(IDFAC, getExpression(sql));
+        Term translation = parser.apply(ImmutableMap.of(
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+
+        System.out.println(translation);
+
+        assertEquals(FACTORY.getFunction(ExpressionOperation.SUBSTR2, v,
+                FACTORY.getConstantLiteral("1", COL_TYPE.LONG)), translation);
+    }
+
+    @Test
+    public void function_SUBSTR_3_Test() throws JSQLParserException {
+        String sql = "SELECT SUBSTR(X, 1, 2) AS A FROM DUMMY";
+
+        Variable v = FACTORY.getVariable("x0");
+
+        ExpressionParser parser = new ExpressionParser(IDFAC, getExpression(sql));
+        Term translation = parser.apply(ImmutableMap.of(
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+
+        System.out.println(translation);
+
+        assertEquals(FACTORY.getFunction(ExpressionOperation.SUBSTR3, v,
+                FACTORY.getConstantLiteral("1", COL_TYPE.LONG),
+                FACTORY.getConstantLiteral("2", COL_TYPE.LONG)), translation);
+    }
+
+    @Test
+    public void function_SUBSTRING_2_Test() throws JSQLParserException {
+        String sql = "SELECT SUBSTRING(X, 1) AS A FROM DUMMY";
+
+        Variable v = FACTORY.getVariable("x0");
+
+        ExpressionParser parser = new ExpressionParser(IDFAC, getExpression(sql));
+        Term translation = parser.apply(ImmutableMap.of(
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+
+        System.out.println(translation);
+
+        assertEquals(FACTORY.getFunction(ExpressionOperation.SUBSTR2, v,
+                FACTORY.getConstantLiteral("1", COL_TYPE.LONG)), translation);
+    }
+
+    @Test
+    public void function_SUBSTRING_3_Test() throws JSQLParserException {
+        String sql = "SELECT SUBSTRING(X, 1, 2) AS A FROM DUMMY";
+
+        Variable v = FACTORY.getVariable("x0");
+
+        ExpressionParser parser = new ExpressionParser(IDFAC, getExpression(sql));
+        Term translation = parser.apply(ImmutableMap.of(
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+
+        System.out.println(translation);
+
+        assertEquals(FACTORY.getFunction(ExpressionOperation.SUBSTR3, v,
+                FACTORY.getConstantLiteral("1", COL_TYPE.LONG),
+                FACTORY.getConstantLiteral("2", COL_TYPE.LONG)), translation);
+    }
+
+    @Test
+    public void function_LCASE_Test() throws JSQLParserException {
+        String sql = "SELECT LCASE(X) AS A FROM DUMMY";
+
+        Variable v = FACTORY.getVariable("x0");
+
+        ExpressionParser parser = new ExpressionParser(IDFAC, getExpression(sql));
+        Term translation = parser.apply(ImmutableMap.of(
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+
+        System.out.println(translation);
+
+        assertEquals(FACTORY.getFunction(ExpressionOperation.LCASE, v), translation);
+    }
+
+    @Test(expected = UnsupportedSelectQueryException.class)
+    public void function_LCASE_2_Test() throws JSQLParserException {
+        String sql = "SELECT LCASE(X, 'A') AS A FROM DUMMY";
+
+        Variable v = FACTORY.getVariable("x0");
+
+        ExpressionParser parser = new ExpressionParser(IDFAC, getExpression(sql));
+        Term translation = parser.apply(ImmutableMap.of(
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+    }
+
+    @Test
+    public void function_LOWER_Test() throws JSQLParserException {
+        String sql = "SELECT LOWER(X) AS A FROM DUMMY";
+
+        Variable v = FACTORY.getVariable("x0");
+
+        ExpressionParser parser = new ExpressionParser(IDFAC, getExpression(sql));
+        Term translation = parser.apply(ImmutableMap.of(
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+
+        System.out.println(translation);
+
+        assertEquals(FACTORY.getFunction(ExpressionOperation.LCASE, v), translation);
+    }
+
+    @Test(expected = UnsupportedSelectQueryException.class)
+    public void function_LOWER_2_Test() throws JSQLParserException {
+        String sql = "SELECT LOWER(X, 'A') AS A FROM DUMMY";
+
+        Variable v = FACTORY.getVariable("x0");
+
+        ExpressionParser parser = new ExpressionParser(IDFAC, getExpression(sql));
+        Term translation = parser.apply(ImmutableMap.of(
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+    }
+
+    @Test
+    public void function_UCASE_Test() throws JSQLParserException {
+        String sql = "SELECT UCASE(X) AS A FROM DUMMY";
+
+        Variable v = FACTORY.getVariable("x0");
+
+        ExpressionParser parser = new ExpressionParser(IDFAC, getExpression(sql));
+        Term translation = parser.apply(ImmutableMap.of(
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+
+        System.out.println(translation);
+
+        assertEquals(FACTORY.getFunction(ExpressionOperation.UCASE, v), translation);
+    }
+
+    @Test(expected = UnsupportedSelectQueryException.class)
+    public void function_UCASE_2_Test() throws JSQLParserException {
+        String sql = "SELECT UCASE(X, 'A') AS A FROM DUMMY";
+
+        Variable v = FACTORY.getVariable("x0");
+
+        ExpressionParser parser = new ExpressionParser(IDFAC, getExpression(sql));
+        Term translation = parser.apply(ImmutableMap.of(
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+    }
+
+    @Test
+    public void function_UPPER_Test() throws JSQLParserException {
+        String sql = "SELECT UPPER(X) AS A FROM DUMMY";
+
+        Variable v = FACTORY.getVariable("x0");
+
+        ExpressionParser parser = new ExpressionParser(IDFAC, getExpression(sql));
+        Term translation = parser.apply(ImmutableMap.of(
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+
+        System.out.println(translation);
+
+        assertEquals(FACTORY.getFunction(ExpressionOperation.UCASE, v), translation);
+    }
+
+    @Test(expected = UnsupportedSelectQueryException.class)
+    public void function_UPPER_2_Test() throws JSQLParserException {
+        String sql = "SELECT UPPER(X, 'A') AS A FROM DUMMY";
+
+        Variable v = FACTORY.getVariable("x0");
+
+        ExpressionParser parser = new ExpressionParser(IDFAC, getExpression(sql));
+        Term translation = parser.apply(ImmutableMap.of(
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+    }
+
+    @Test
+    public void function_LENGTH_Test() throws JSQLParserException {
+        String sql = "SELECT LENGTH(X) AS A FROM DUMMY";
+
+        Variable v = FACTORY.getVariable("x0");
+
+        ExpressionParser parser = new ExpressionParser(IDFAC, getExpression(sql));
+        Term translation = parser.apply(ImmutableMap.of(
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+
+        System.out.println(translation);
+
+        assertEquals(FACTORY.getFunction(ExpressionOperation.STRLEN, v), translation);
+    }
+
+    @Test(expected = InvalidSelectQueryException.class)
+    public void function_LENGTH_2_Test() throws JSQLParserException {
+        String sql = "SELECT LENGTH(X, 'A') AS A FROM DUMMY";
+
+        Variable v = FACTORY.getVariable("x0");
+
+        ExpressionParser parser = new ExpressionParser(IDFAC, getExpression(sql));
+        Term translation = parser.apply(ImmutableMap.of(
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+    }
+
+    @Test(expected = UnsupportedSelectQueryException.class)
+    public void function_LEN_Test() throws JSQLParserException {
+        String sql = "SELECT LEN(X) AS A FROM DUMMY";
+
+        Variable v = FACTORY.getVariable("x0");
+
+        ExpressionParser parser = new ExpressionParser(IDFAC, getExpression(sql));
+        Term translation = parser.apply(ImmutableMap.of(
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+    }
+
+
+
 
     private Expression getExpression(String sql) throws JSQLParserException {
         Statement statement = CCJSqlParserUtil.parse(sql);
