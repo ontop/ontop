@@ -8,8 +8,8 @@ import it.unibz.inf.ontop.model.impl.AtomPredicateImpl;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.model.impl.URITemplatePredicateImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionImpl;
+import it.unibz.inf.ontop.owlrefplatform.core.optimization.FixedPointBindingLiftOptimizer;
 import it.unibz.inf.ontop.owlrefplatform.core.optimization.FixedPointJoinLikeOptimizer;
-import it.unibz.inf.ontop.owlrefplatform.core.optimization.FixedPointSubstitutionLiftOptimizer;
 import it.unibz.inf.ontop.owlrefplatform.core.optimization.IntermediateQueryOptimizer;
 import it.unibz.inf.ontop.owlrefplatform.core.optimization.JoinLikeOptimizer;
 import it.unibz.inf.ontop.pivotalrepr.*;
@@ -20,7 +20,6 @@ import it.unibz.inf.ontop.pivotalrepr.impl.InnerJoinNodeImpl;
 import it.unibz.inf.ontop.pivotalrepr.impl.MetadataForQueryOptimizationImpl;
 import it.unibz.inf.ontop.pivotalrepr.impl.tree.DefaultIntermediateQueryBuilder;
 import it.unibz.inf.ontop.sql.DBMetadataExtractor;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.Optional;
@@ -63,11 +62,10 @@ public class ExpressionEvaluatorTest {
     private Constant langValueConstant =  DATA_FACTORY.getConstantLiteral("en.us");
     private ImmutableFunctionalTerm langValue =  generateLiteral(langValueConstant);
 
+    private final ImmutableExpression EXPR_EQ = DATA_FACTORY.getImmutableExpression(
+            ExpressionOperation.EQ, B, langValueConstant );
 
-    private final ImmutableExpression EXPR_LANGMATCHES1 = DATA_FACTORY.getImmutableExpression(
-            ExpressionOperation.LANGMATCHES, EXPR_LANG, langValueConstant );
-
-    private final ImmutableExpression EXPR_LANGMATCHES2 = DATA_FACTORY.getImmutableExpression(
+    private final ImmutableExpression EXPR_LANGMATCHES = DATA_FACTORY.getImmutableExpression(
             ExpressionOperation.LANGMATCHES, EXPR_LANG, langValue);
 
 
@@ -81,8 +79,8 @@ public class ExpressionEvaluatorTest {
      * (this case should not happen)
      * @throws EmptyQueryException
      */
-    @Ignore
-    public void testLangLeftNodeConstant() throws EmptyQueryException {
+    @Test
+    public void testLangLeftNodeVariable() throws EmptyQueryException {
 
         //Construct unoptimized query
         IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
@@ -92,12 +90,12 @@ public class ExpressionEvaluatorTest {
         queryBuilder.init(projectionAtom, rootNode);
 
         //construct innerjoin
-        InnerJoinNode joinNode = new InnerJoinNodeImpl(Optional.of(EXPR_LANGMATCHES1));
+        InnerJoinNode joinNode = new InnerJoinNodeImpl(Optional.of(EXPR_LANGMATCHES));
         queryBuilder.addChild(rootNode, joinNode);
 
         //construct left side join
         ConstructionNode leftNode = new ConstructionNodeImpl(ImmutableSet.of(X,W),
-                new ImmutableSubstitutionImpl<>(ImmutableMap.of(X, generateURI1(A), W, generateLangString(B,langValueConstant))), Optional.empty());
+                new ImmutableSubstitutionImpl<>(ImmutableMap.of(X, generateURI1(A), W, generateLangString(B,B))), Optional.empty());
         queryBuilder.addChild(joinNode, leftNode);
 
         queryBuilder.addChild(leftNode, DATA_NODE_1);
@@ -118,7 +116,7 @@ public class ExpressionEvaluatorTest {
         System.out.println("\nBefore optimization: \n" +  unOptimizedQuery);
 
 
-        IntermediateQueryOptimizer substitutionOptimizer = new FixedPointSubstitutionLiftOptimizer();
+        IntermediateQueryOptimizer substitutionOptimizer = new FixedPointBindingLiftOptimizer();
         unOptimizedQuery = substitutionOptimizer.optimize(unOptimizedQuery);
 
         JoinLikeOptimizer joinLikeOptimizer = new FixedPointJoinLikeOptimizer();
@@ -139,14 +137,14 @@ public class ExpressionEvaluatorTest {
 
         DistinctVariableOnlyDataAtom expectedProjectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_3_PREDICATE, X, Y, W);
         ConstructionNode expectedRootNode = new ConstructionNodeImpl(expectedProjectionAtom.getVariables(),
-                new ImmutableSubstitutionImpl<>(ImmutableMap.of(X, generateURI1(A), Y, generateInt(D), W, generateLangString(B, langValueConstant))),
+                new ImmutableSubstitutionImpl<>(ImmutableMap.of( W, generateLangString(B, B), X, generateURI1(A), Y, generateInt(D))),
                 Optional.empty());
 
         expectedQueryBuilder.init(expectedProjectionAtom, expectedRootNode);
 
         //construct expected innerjoin
 
-        InnerJoinNode expectedJoinNode = new InnerJoinNodeImpl(Optional.empty());
+        InnerJoinNode expectedJoinNode = new InnerJoinNodeImpl(Optional.of(EXPR_EQ));
         expectedQueryBuilder.addChild(expectedRootNode, expectedJoinNode);
 
         expectedQueryBuilder.addChild(expectedJoinNode, DATA_NODE_1);
@@ -202,7 +200,7 @@ public class ExpressionEvaluatorTest {
         queryBuilder.init(projectionAtom, rootNode);
 
         //construct innerjoin
-        InnerJoinNode joinNode = new InnerJoinNodeImpl(Optional.of(EXPR_LANGMATCHES2));
+        InnerJoinNode joinNode = new InnerJoinNodeImpl(Optional.of(EXPR_LANGMATCHES));
         queryBuilder.addChild(rootNode, joinNode);
 
         //construct left side join
@@ -228,7 +226,7 @@ public class ExpressionEvaluatorTest {
         System.out.println("\nBefore optimization: \n" +  unOptimizedQuery);
 
 
-        IntermediateQueryOptimizer substitutionOptimizer = new FixedPointSubstitutionLiftOptimizer();
+        IntermediateQueryOptimizer substitutionOptimizer = new FixedPointBindingLiftOptimizer();
         unOptimizedQuery = substitutionOptimizer.optimize(unOptimizedQuery);
 
         JoinLikeOptimizer joinLikeOptimizer = new FixedPointJoinLikeOptimizer();
@@ -257,7 +255,7 @@ public class ExpressionEvaluatorTest {
         queryBuilder.init(projectionAtom, rootNode);
 
         //construct innerjoin
-        InnerJoinNode joinNode = new InnerJoinNodeImpl(Optional.of(EXPR_LANGMATCHES2));
+        InnerJoinNode joinNode = new InnerJoinNodeImpl(Optional.of(EXPR_LANGMATCHES));
         queryBuilder.addChild(rootNode, joinNode);
 
         //construct left side join
@@ -284,7 +282,7 @@ public class ExpressionEvaluatorTest {
         System.out.println("\nBefore optimization: \n" +  unOptimizedQuery);
 
 
-        IntermediateQueryOptimizer substitutionOptimizer = new FixedPointSubstitutionLiftOptimizer();
+        IntermediateQueryOptimizer substitutionOptimizer = new FixedPointBindingLiftOptimizer();
         IntermediateQuery optimizedQuery = substitutionOptimizer.optimize(unOptimizedQuery);
 
         System.out.println("\nAfter optimization: \n" +  optimizedQuery);
@@ -302,6 +300,12 @@ public class ExpressionEvaluatorTest {
                 DATA_FACTORY.getDatatypeFactory().getTypePredicate(Predicate.COL_TYPE.LITERAL_LANG),
                 argument1, argument2);
     }
+    private ImmutableFunctionalTerm generateLangString(VariableOrGroundTerm argument1, VariableOrGroundTerm argument2) {
+        return DATA_FACTORY.getImmutableFunctionalTerm(
+                DATA_FACTORY.getDatatypeFactory().getTypePredicate(Predicate.COL_TYPE.LITERAL_LANG),
+                argument1, argument2);
+    }
+
 
     private ImmutableFunctionalTerm generateLiteral(Constant argument1) {
         return DATA_FACTORY.getImmutableFunctionalTerm(
