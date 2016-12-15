@@ -1455,6 +1455,18 @@ public class ExpressionParserTest {
                 FACTORY.getConstantLiteral("2", COL_TYPE.LONG)), translation);
     }
 
+    @Test (expected = JSQLParserException.class)
+    public void function_SQL_SUBSTRING_Test() throws JSQLParserException {
+        // SQL:99 SUBSTRING cannot be supported because of JSQLParser
+        String sql = "SELECT SUBSTRING(X FROM 1 FOR 2) AS A FROM DUMMY";
+
+        Variable v = FACTORY.getVariable("x0");
+
+        ExpressionParser parser = new ExpressionParser(IDFAC, getExpression(sql));
+        Term translation = parser.apply(ImmutableMap.of(
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+    }
+
     @Test
     public void function_SUBSTRING_2_Test() throws JSQLParserException {
         String sql = "SELECT SUBSTRING(X, 1) AS A FROM DUMMY";
