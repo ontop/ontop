@@ -123,13 +123,7 @@ public class ExpressionEvaluatorTest {
         IntermediateQuery optimizedQuery = joinLikeOptimizer.optimize(unOptimizedQuery);
 
         System.out.println("\nAfter optimization: \n" +  optimizedQuery);
-        IntermediateQuery expectedQuery = getExpectedQuery();
 
-
-        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, expectedQuery));
-    }
-
-    private IntermediateQuery getExpectedQuery() {
         //----------------------------------------------------------------------
         // Construct expected query
         IntermediateQueryBuilder expectedQueryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
@@ -145,6 +139,35 @@ public class ExpressionEvaluatorTest {
         //construct expected innerjoin
 
         InnerJoinNode expectedJoinNode = new InnerJoinNodeImpl(Optional.of(EXPR_EQ));
+        expectedQueryBuilder.addChild(expectedRootNode, expectedJoinNode);
+
+        expectedQueryBuilder.addChild(expectedJoinNode, DATA_NODE_1);
+
+        expectedQueryBuilder.addChild(expectedJoinNode, EXPECTED_DATA_NODE_2);
+
+        //build expected query
+        IntermediateQuery expectedQuery = expectedQueryBuilder.build();
+        System.out.println("\n Expected query: \n" +  expectedQuery);
+
+        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, expectedQuery));
+    }
+
+    private IntermediateQuery getExpectedQuery() {
+        //----------------------------------------------------------------------
+        // Construct expected query
+        IntermediateQueryBuilder expectedQueryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
+
+
+        DistinctVariableOnlyDataAtom expectedProjectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_3_PREDICATE, X, Y, W);
+        ConstructionNode expectedRootNode = new ConstructionNodeImpl(expectedProjectionAtom.getVariables(),
+                new ImmutableSubstitutionImpl<>(ImmutableMap.of(X, generateURI1(A), Y, generateInt(D), W, generateLangString(B, langValueConstant))),
+                Optional.empty());
+
+        expectedQueryBuilder.init(expectedProjectionAtom, expectedRootNode);
+
+        //construct expected innerjoin
+
+        InnerJoinNode expectedJoinNode = new InnerJoinNodeImpl(Optional.empty());
         expectedQueryBuilder.addChild(expectedRootNode, expectedJoinNode);
 
         expectedQueryBuilder.addChild(expectedJoinNode, DATA_NODE_1);
