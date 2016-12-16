@@ -30,8 +30,8 @@ public class RelationalExpressionTest {
     private Function f1, f2, eq;
     private Variable x, y, u, v;
     private QualifiedAttributeID qaTx, qaTy, qaNx, qaNy, qaTu, qaTv, qaNu, qaNv;
-    private RelationID table2;
-    private QuotedID attu, attv;
+    private RelationID table1, table2;
+    private QuotedID attx, atty, attu, attv;
     private RelationalExpression re1, re2;
     private EqualsTo onExpression;
 
@@ -44,9 +44,9 @@ public class RelationalExpressionTest {
                 FACTORY.getPredicate("P", new Predicate.COL_TYPE[] { null, null }),
                 ImmutableList.of(x, y));
 
-        RelationID table1 = MDFAC.createRelationID(null, "P");
-        QuotedID attx = MDFAC.createAttributeID("A");
-        QuotedID atty = MDFAC.createAttributeID("B");
+        table1 = MDFAC.createRelationID(null, "P");
+        attx = MDFAC.createAttributeID("A");
+        atty = MDFAC.createAttributeID("B");
 
         qaTx = new QualifiedAttributeID(table1, attx);
         qaTy = new QualifiedAttributeID(table1, atty);
@@ -194,7 +194,7 @@ public class RelationalExpressionTest {
     @Test(expected = IllegalJoinException.class)
     public void join_using_exception_test() throws IllegalJoinException {
 
-        // a new relationId without any common attribute is created to simulate and
+        // a new relationId without any common attribute is created to simulate an exception
         RelationID table2 = MDFAC.createRelationID(null, "Q");
         attu = MDFAC.createAttributeID("C");
         attv = MDFAC.createAttributeID("D");
@@ -209,6 +209,41 @@ public class RelationalExpressionTest {
         RelationalExpression.joinUsing(re1, re2, ImmutableSet.of(MDFAC.createAttributeID("A")));
     }
 
+    @Test
+    public void alias_test() {
+        RelationID tableAlias = MDFAC.createRelationID(null, "S");
+        QualifiedAttributeID qaAx = new QualifiedAttributeID(tableAlias, attx);
+        QualifiedAttributeID qaAy = new QualifiedAttributeID(tableAlias, atty);
+
+        System.out.println(re1);
+        RelationalExpression actual =  RelationalExpression.alias(re1, tableAlias );
+        System.out.println(actual);
+
+        assertTrue(actual.getAtoms().contains(f1));
+
+        ImmutableMap<QualifiedAttributeID, Variable> attrs = actual.getAttributes();
+        assertEquals(x, attrs.get(qaNx));
+        assertEquals(y, attrs.get(qaNy));
+        assertEquals(x, attrs.get(qaAx));
+        assertEquals(y, attrs.get(qaAy));
+
+    }
+
+    @Test
+    public void  create_test(){
+       RelationalExpression actual = RelationalExpression.create(re1.getAtoms(),
+                ImmutableMap.of(attx, x, atty, y),
+                table1);
+        System.out.println(actual);
+
+        ImmutableMap<QualifiedAttributeID, Variable> attrs = actual.getAttributes();
+        assertEquals(x, attrs.get(qaNx));
+        assertEquals(y, attrs.get(qaNy));
+        assertEquals(x, attrs.get(qaTx));
+        assertEquals(y, attrs.get(qaTy));
+
+
+    }
 
     private RelationalExpression getRelationWithCommonAttr() {
         return  new RelationalExpression(ImmutableList.of(f2),
@@ -232,8 +267,6 @@ public class RelationalExpressionTest {
         assertEquals(v, attrs.get(qaTv));
         assertEquals(v, attrs.get(qaNv));
 
-
-
     }
 
     private void crossJoinOnCommonAsserts(RelationalExpression relationalExpression ){
@@ -250,8 +283,6 @@ public class RelationalExpressionTest {
         assertEquals(v, attrs.get(qaTv));
         assertEquals(v, attrs.get(qaNv));
     }
-
-    //todo : this is not yet completed. It needs to include all the public methods present in RelationalExpression
 
 
 }
