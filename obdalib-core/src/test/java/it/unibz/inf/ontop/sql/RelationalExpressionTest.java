@@ -102,9 +102,9 @@ public class RelationalExpressionTest {
         System.out.println(re1);
         System.out.println(re2);
 
-        // TODO: why is re2 reset?
-        re2 = getCommonAttributeBetweenTable();
-        RelationalExpression.crossJoin(re1, re2);
+        //  It is created a new relation which contains common attribute with re1.
+        RelationalExpression relationWithCommonAttr = getRelationWithCommonAttr();
+        RelationalExpression.crossJoin(re1, relationWithCommonAttr);
     }
 
     @Test
@@ -127,9 +127,9 @@ public class RelationalExpressionTest {
         System.out.println(re1);
         System.out.println(re2);
 
-        re2 = getCommonAttributeBetweenTable();
+        RelationalExpression relationWithCommonAttr = getRelationWithCommonAttr();
 
-        RelationalExpression.joinOn(re1, re2, new BooleanExpressionParser(MDFAC, onExpression));
+        RelationalExpression.joinOn(re1, relationWithCommonAttr, new BooleanExpressionParser(MDFAC, onExpression));
     }
 
     @Test
@@ -193,8 +193,8 @@ public class RelationalExpressionTest {
     @Test(expected = IllegalJoinException.class)
     public void join_using_exception_test() throws IllegalJoinException {
 
-        // TODO: check why table2 is re-created here
-        table2 = MDFAC.createRelationID(null, "Q");
+        // a new relationId without any common attribute is created to simulate and
+        RelationID table2 = MDFAC.createRelationID(null, "Q");
         attu = MDFAC.createAttributeID("C");
         attv = MDFAC.createAttributeID("D");
 
@@ -208,10 +208,8 @@ public class RelationalExpressionTest {
         RelationalExpression.joinUsing(re1, re2, ImmutableSet.of(MDFAC.createAttributeID("A")));
     }
 
-    //todo : this is not yet completed. It needs to include all the public methods present in RelationalExpression
 
-    // TODO: i'm noy sure I understand the name
-    private RelationalExpression getCommonAttributeBetweenTable() {
+    private RelationalExpression getRelationWithCommonAttr() {
         return  new RelationalExpression(ImmutableList.of(f2),
                 ImmutableMap.of(qaTu, u, qaTv, v, qaNu, u, qaTy, y, qaNv, v),
                 ImmutableMap.of(attu, ImmutableSet.of(table2), attv, ImmutableSet.of(table2)));
@@ -224,12 +222,16 @@ public class RelationalExpressionTest {
         assertTrue(relationalExpression.getAtoms().contains(eq));
 
         ImmutableMap<QualifiedAttributeID, Variable> attrs = relationalExpression.getAttributes();
-        // TODO: add assertEquals(null, a) for all a that should not be in the map
+
         assertEquals(x, attrs.get(qaNx));
+        assertEquals(null, attrs.get(qaTx));
         assertEquals(y, attrs.get(qaTy));
         assertEquals(y, attrs.get(qaNy));
+        assertEquals(null, attrs.get(qaTu));
         assertEquals(v, attrs.get(qaTv));
         assertEquals(v, attrs.get(qaNv));
+
+
 
     }
 
@@ -247,5 +249,8 @@ public class RelationalExpressionTest {
         assertEquals(v, attrs.get(qaTv));
         assertEquals(v, attrs.get(qaNv));
     }
+
+    //todo : this is not yet completed. It needs to include all the public methods present in RelationalExpression
+
 
 }
