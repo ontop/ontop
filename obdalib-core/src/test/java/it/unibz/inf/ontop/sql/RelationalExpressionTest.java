@@ -100,10 +100,11 @@ public class RelationalExpressionTest {
     @Test(expected = IllegalJoinException.class)
     public void cross_join_exception_test() throws IllegalJoinException {
         System.out.println(re1);
-        System.out.println(re2);
 
-        //  It is created a new relation which contains common attribute with re1.
         RelationalExpression relationWithCommonAttr = getRelationWithCommonAttr();
+        //  It is created a new relation which contains common attribute with re1.
+        System.out.println(relationWithCommonAttr);
+
         RelationalExpression.crossJoin(re1, relationWithCommonAttr);
     }
 
@@ -125,9 +126,9 @@ public class RelationalExpressionTest {
     @Test(expected = IllegalJoinException.class)
     public void join_on_exception_test() throws IllegalJoinException {
         System.out.println(re1);
-        System.out.println(re2);
 
         RelationalExpression relationWithCommonAttr = getRelationWithCommonAttr();
+        System.out.println(relationWithCommonAttr);
 
         RelationalExpression.joinOn(re1, relationWithCommonAttr, new BooleanExpressionParser(MDFAC, onExpression));
     }
