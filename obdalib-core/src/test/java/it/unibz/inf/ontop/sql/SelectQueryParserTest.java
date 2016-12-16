@@ -327,7 +327,7 @@ public class SelectQueryParserTest {
                 });
     }
 
-    @Test //todo: this should work
+    @Test
     public void join_using_2_test() {
         DBMetadata metadata = createMetadata();
 
