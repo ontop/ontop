@@ -63,8 +63,12 @@ public class SelectQueryParser {
                     fac.getPredicate("Q", new Predicate.COL_TYPE[current.getAttributes().size()]),
                     current.getAttributes().values().stream().collect(ImmutableCollectors.toList()));
 
-            parsedSql = fac.getCQIE(head, current.getAtoms());
+            ImmutableList<Function> atoms = ImmutableList.<Function>builder()
+                    .addAll(current.getDataAtoms())
+                    .addAll(current.getFilterAtoms())
+                    .build();
 
+            parsedSql = fac.getCQIE(head, atoms);
         }
         catch (JSQLParserException e) {
             if (e.getCause() instanceof ParseException)
@@ -131,10 +135,10 @@ public class SelectQueryParser {
                 }
         }
 
-        ImmutableList<Function> atoms = (plainSelect.getWhere() == null)
-                ? current.getAtoms()
+        ImmutableList<Function> filterAtoms = (plainSelect.getWhere() == null)
+                ? current.getFilterAtoms()
                 : ImmutableList.<Function>builder()
-                    .addAll(current.getAtoms())
+                    .addAll(current.getFilterAtoms())
                     .addAll(new BooleanExpressionParser(idfac, plainSelect.getWhere()).apply(current.getAttributes()))
                     .build();
 
@@ -158,7 +162,7 @@ public class SelectQueryParser {
             throw new InvalidSelectQueryException(e.getMessage(), selectBody);
         }
 
-        return new RelationalExpression(atoms, attributes, null);
+        return new RelationalExpression(current.getDataAtoms(), filterAtoms, attributes, null);
     }
 
     private RelationalExpression join(RelationalExpression left, Join join) throws IllegalJoinException {
@@ -315,7 +319,7 @@ public class SelectQueryParser {
             // create an atom for a particular table
             Function atom = Relation2DatalogPredicate.getAtom(relation, terms);
 
-            result = RelationalExpression.create(ImmutableList.of(atom), attributes.build(), aliasId);
+            result = RelationalExpression.create(ImmutableList.of(atom), ImmutableList.of(), attributes.build(), aliasId);
         }
 
 

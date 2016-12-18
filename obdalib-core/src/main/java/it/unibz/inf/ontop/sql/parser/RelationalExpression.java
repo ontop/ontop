@@ -13,6 +13,7 @@ import it.unibz.inf.ontop.sql.RelationID;
 import it.unibz.inf.ontop.sql.parser.exceptions.IllegalJoinException;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
@@ -23,7 +24,8 @@ import static java.util.function.Function.identity;
  *
  */
 public class RelationalExpression {
-    private ImmutableList<Function> atoms;
+    private ImmutableList<Function> dataAtoms;
+    private ImmutableList<Function> filterAtoms;
     private ImmutableMap<QualifiedAttributeID, Variable> attributes;
     private ImmutableMap<QuotedID, ImmutableSet<RelationID>> attributeOccurrences;
 
@@ -32,14 +34,17 @@ public class RelationalExpression {
     /**
      * constructs a relation expression
      *
-     * @param atoms                an {@link ImmutableList}<{@link Function}>
+     * @param dataAtoms            an {@link ImmutableList}<{@link Function}>
+     * @param filterAtoms          an {@link ImmutableList}<{@link Function}>
      * @param attributes           an {@link ImmutableMap}<{@link QualifiedAttributeID}, {@link Variable}>
      * @param attributeOccurrences an {@link ImmutableMap}<{@link QuotedID}, {@link ImmutableSet}<{@link RelationID}>>
      */
-    public RelationalExpression(ImmutableList<Function> atoms,
+    public RelationalExpression(ImmutableList<Function> dataAtoms,
+                                ImmutableList<Function> filterAtoms,
                                 ImmutableMap<QualifiedAttributeID, Variable> attributes,
                                 ImmutableMap<QuotedID, ImmutableSet<RelationID>> attributeOccurrences) {
-        this.atoms = atoms;
+        this.dataAtoms = dataAtoms;
+        this.filterAtoms = filterAtoms;
         this.attributes = attributes;
         this.attributeOccurrences = attributeOccurrences;
     }
@@ -66,8 +71,12 @@ public class RelationalExpression {
         return (occurrences != null) && occurrences.size() == 1;
     }
 
-    public ImmutableList<Function> getAtoms() {
-        return atoms;
+    public ImmutableList<Function> getDataAtoms() {
+        return dataAtoms;
+    }
+
+    public ImmutableList<Function> getFilterAtoms() {
+        return filterAtoms;
     }
 
     public ImmutableMap<QualifiedAttributeID, Variable> getAttributes() {
@@ -101,25 +110,18 @@ public class RelationalExpression {
 
         checkRelationAliasesConsistency(re1, re2);
 
-        ImmutableMap<QualifiedAttributeID, Variable> attributes = ImmutableMap.<QualifiedAttributeID, Variable>builder()
-                .putAll(re1.filterAttributes(id ->
-                        (id.getRelation() != null) || re2.isAbsent(id.getAttribute())))
+        ImmutableMap<QualifiedAttributeID, Variable> attributes = merge(
+                re1.selectAttributes(id ->
+                        (id.getRelation() != null) || re2.isAbsent(id.getAttribute())),
 
-                .putAll(re2.filterAttributes(id ->
-                        (id.getRelation() != null) || re1.isAbsent(id.getAttribute())))
+                re2.selectAttributes(id ->
+                        (id.getRelation() != null) || re1.isAbsent(id.getAttribute())));
 
-                .build();
-
-        ImmutableList<Function> atoms = ImmutableList.<Function>builder()
-                .addAll(re1.atoms)
-                .addAll(re2.atoms)
-                .addAll(getAtomOnExpression.apply(attributes))
-                .build();
-
-        ImmutableMap<QuotedID, ImmutableSet<RelationID>> attributeOccurrences =
-                getAttributeOccurrences(re1, re2, id -> attributeOccurrencesUnion(id, re1, re2));
-
-        return new RelationalExpression(atoms, attributes, attributeOccurrences);
+        return new RelationalExpression(
+                union(re1.dataAtoms, re2.dataAtoms),
+                union(re1.filterAtoms, re2.filterAtoms, getAtomOnExpression.apply(attributes).iterator()),
+                attributes,
+                getAttributeOccurrences(re1, re2, id -> attributeOccurrencesUnion(id, re1, re2)));
     }
 
     /**
@@ -197,22 +199,18 @@ public class RelationalExpression {
     private static RelationalExpression internalJoinUsing(RelationalExpression re1, RelationalExpression re2,
                                                           ImmutableSet<QuotedID> using) {
 
-        ImmutableMap<QualifiedAttributeID, Variable> attributes = ImmutableMap.<QualifiedAttributeID, Variable>builder()
-                .putAll(re1.filterAttributes(id ->
+        ImmutableMap<QualifiedAttributeID, Variable> attributes = merge(
+                re1.selectAttributes(id ->
                         (id.getRelation() != null && !using.contains(id.getAttribute()))
                                 || (id.getRelation() == null && re2.isAbsent(id.getAttribute()))
-                                || (id.getRelation() == null && using.contains(id.getAttribute()))))
+                                || (id.getRelation() == null && using.contains(id.getAttribute()))),
 
-                .putAll(re2.filterAttributes(id ->
+                re2.selectAttributes(id ->
                         (id.getRelation() != null && !using.contains(id.getAttribute()))
-                                || (id.getRelation() == null && re1.isAbsent(id.getAttribute()))))
+                                || (id.getRelation() == null && re1.isAbsent(id.getAttribute()))));
 
-                .build();
-
-        ImmutableList<Function> atoms = ImmutableList.<Function>builder()
-                .addAll(re1.atoms)
-                .addAll(re2.atoms)
-                .addAll(using.stream()
+        ImmutableList<Function> filterAtoms = union(re1.filterAtoms, re2.filterAtoms,
+                using.stream()
                         .map(id -> new QualifiedAttributeID(null, id))
                         .map(id -> {
                             // TODO: this will be removed later, when OBDA factory will start checking non-nulls
@@ -224,8 +222,7 @@ public class RelationalExpression {
                                 throw new IllegalArgumentException("Variable " + id + " not found in " + re2);
                             return FACTORY.getFunctionEQ(v1, v2);
                         })
-                        .iterator())
-                .build();
+                        .iterator());
 
         ImmutableMap<QuotedID, ImmutableSet<RelationID>> attributeOccurrences =
                 getAttributeOccurrences(re1, re2,
@@ -233,35 +230,37 @@ public class RelationalExpression {
                                 ? re1.attributeOccurrences.get(id)
                                 : attributeOccurrencesUnion(id, re1, re2));
 
-        return new RelationalExpression(atoms, attributes, attributeOccurrences);
+        return new RelationalExpression(union(re1.dataAtoms, re2.dataAtoms), filterAtoms, attributes, attributeOccurrences);
     }
 
     /**
      *
-     * @param atoms a {@link ImmutableList}<{@link Function}>
+     * @param dataAtoms a {@link ImmutableList}<{@link Function}>
+     * @param filterAtoms a {@link ImmutableList}<{@link Function}>
      * @param unqualifiedAttributes a {@link ImmutableMap}<{@link QuotedID}, {@link Variable}>
      * @param alias a {@link QuotedID}
      * @return a {@link RelationalExpression}
      */
 
-    public static RelationalExpression create(ImmutableList<Function> atoms, ImmutableMap<QuotedID, Variable> unqualifiedAttributes, RelationID alias) {
+    public static RelationalExpression create(ImmutableList<Function> dataAtoms,
+                                              ImmutableList<Function> filterAtoms,
+                                              ImmutableMap<QuotedID, Variable> unqualifiedAttributes,
+                                              RelationID alias) {
 
-        ImmutableMap<QualifiedAttributeID, Variable> attributes = ImmutableMap.<QualifiedAttributeID, Variable>builder()
-                .putAll(unqualifiedAttributes.entrySet().stream()
+        ImmutableMap<QualifiedAttributeID, Variable> attributes = merge(
+                unqualifiedAttributes.entrySet().stream()
                         .collect(ImmutableCollectors.toMap(
-                                e -> new QualifiedAttributeID(alias, e.getKey()),
-                                Map.Entry::getValue)))
-                .putAll(unqualifiedAttributes.entrySet().stream()
+                                e -> new QualifiedAttributeID(alias, e.getKey()), Map.Entry::getValue)),
+
+                unqualifiedAttributes.entrySet().stream()
                         .collect(ImmutableCollectors.toMap(
-                                e -> new QualifiedAttributeID(null, e.getKey()),
-                                Map.Entry::getValue)))
-                .build();
+                                e -> new QualifiedAttributeID(null, e.getKey()), Map.Entry::getValue)));
 
         ImmutableMap<QuotedID, ImmutableSet<RelationID>> attributeOccurrences =
                 unqualifiedAttributes.keySet().stream()
                         .collect(ImmutableCollectors.toMap(identity(), id -> ImmutableSet.of(alias)));
 
-        return new RelationalExpression(atoms, attributes, attributeOccurrences);
+        return new RelationalExpression(dataAtoms, filterAtoms, attributes, attributeOccurrences);
     }
 
     /**
@@ -280,9 +279,21 @@ public class RelationalExpression {
                         .collect(ImmutableCollectors.toMap(
                                 e -> e.getKey().getAttribute(), Map.Entry::getValue));
 
-        return create(re.atoms, unqualifiedAttributes, alias);
+        return create(re.dataAtoms, re.filterAtoms, unqualifiedAttributes, alias);
     }
 
+
+    private static ImmutableList<Function> union(ImmutableList<Function> atoms1, ImmutableList<Function> atoms2) {
+        return ImmutableList.<Function>builder().addAll(atoms1).addAll(atoms2).build();
+    }
+
+    private static ImmutableList<Function> union(ImmutableList<Function> atoms1, ImmutableList<Function> atoms2, Iterator<Function> atoms3) {
+        return ImmutableList.<Function>builder().addAll(atoms1).addAll(atoms2).addAll(atoms3).build();
+    }
+
+    private static ImmutableMap<QualifiedAttributeID, Variable> merge(ImmutableMap<QualifiedAttributeID, Variable> att1, ImmutableMap<QualifiedAttributeID, Variable> att2) {
+        return ImmutableMap.<QualifiedAttributeID, Variable>builder().putAll(att1).putAll(att2).build();
+    }
 
     /**
      * treats null values as empty sets
@@ -308,7 +319,7 @@ public class RelationalExpression {
         return ImmutableSet.<RelationID>builder().addAll(s1).addAll(s2).build();
     }
 
-    private ImmutableMap<QualifiedAttributeID, Variable> filterAttributes(java.util.function.Predicate<QualifiedAttributeID> condition) {
+    private ImmutableMap<QualifiedAttributeID, Variable> selectAttributes(java.util.function.Predicate<QualifiedAttributeID> condition) {
 
         return attributes.entrySet().stream()
                 .filter(e -> condition.test(e.getKey()))
@@ -359,7 +370,10 @@ public class RelationalExpression {
 
     @Override
     public String toString() {
-        return "RelationalExpression : " + atoms + " with " + attributes + " and " + attributeOccurrences;
+        return "RelationalExpression : " + dataAtoms +
+                " FILTER " + filterAtoms +
+                " with " + attributes +
+                " and " + attributeOccurrences;
     }
 
 
