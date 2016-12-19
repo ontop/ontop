@@ -9,7 +9,7 @@ import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
 import it.unibz.inf.ontop.model.impl.URITemplatePredicateImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionImpl;
-import it.unibz.inf.ontop.owlrefplatform.core.optimization.FixedPointSubstitutionLiftOptimizer;
+import it.unibz.inf.ontop.owlrefplatform.core.optimization.FixedPointBindingLiftOptimizer;
 import it.unibz.inf.ontop.owlrefplatform.core.optimization.IntermediateQueryOptimizer;
 import it.unibz.inf.ontop.pivotalrepr.*;
 import it.unibz.inf.ontop.pivotalrepr.equivalence.IQSyntacticEquivalenceChecker;
@@ -31,7 +31,7 @@ import static junit.framework.TestCase.assertTrue;
 /**
  * Test the top down substitution lift optimizer
  */
-public class SubstitutionLiftTest {
+public class BindingLiftTest {
 
 
     private final AtomPredicate TABLE1_PREDICATE = new AtomPredicateImpl("table1", 2);
@@ -102,7 +102,7 @@ public class SubstitutionLiftTest {
             ImmutableMultimap.of(),
             new UriTemplateMatcher());
 
-    public SubstitutionLiftTest() {
+    public BindingLiftTest() {
 
     }
 
@@ -161,7 +161,7 @@ public class SubstitutionLiftTest {
         System.out.println("\nBefore optimization: \n" +  unOptimizedQuery);
 
 
-        IntermediateQueryOptimizer substitutionOptimizer = new FixedPointSubstitutionLiftOptimizer();
+        IntermediateQueryOptimizer substitutionOptimizer = new FixedPointBindingLiftOptimizer();
 
 
         IntermediateQuery optimizedQuery = substitutionOptimizer.optimize(unOptimizedQuery);
@@ -262,7 +262,7 @@ public class SubstitutionLiftTest {
         System.out.println("\nBefore optimization: \n" +  unOptimizedQuery);
 
 
-        IntermediateQueryOptimizer substitutionOptimizer = new FixedPointSubstitutionLiftOptimizer();
+        IntermediateQueryOptimizer substitutionOptimizer = new FixedPointBindingLiftOptimizer();
 
 
         IntermediateQuery optimizedQuery = substitutionOptimizer.optimize(unOptimizedQuery);
@@ -383,7 +383,7 @@ public class SubstitutionLiftTest {
         IntermediateQuery unOptimizedQuery = queryBuilder.build();
         System.out.println("\nBefore optimization: \n" +  unOptimizedQuery);
 
-        IntermediateQueryOptimizer substitutionOptimizer = new FixedPointSubstitutionLiftOptimizer();
+        IntermediateQueryOptimizer substitutionOptimizer = new FixedPointBindingLiftOptimizer();
 
         IntermediateQuery optimizedQuery = substitutionOptimizer.optimize(unOptimizedQuery);
 
@@ -526,7 +526,7 @@ public class SubstitutionLiftTest {
         IntermediateQuery unOptimizedQuery = queryBuilder.build();
         System.out.println("\nBefore optimization: \n" +  unOptimizedQuery);
 
-        IntermediateQueryOptimizer substitutionOptimizer = new FixedPointSubstitutionLiftOptimizer();
+        IntermediateQueryOptimizer substitutionOptimizer = new FixedPointBindingLiftOptimizer();
 
         IntermediateQuery optimizedQuery = substitutionOptimizer.optimize(unOptimizedQuery);
 
@@ -703,7 +703,7 @@ public class SubstitutionLiftTest {
 
         System.out.println("\nExpected  query: \n" +  expectedQuery);
 
-        IntermediateQueryOptimizer substitutionOptimizer = new FixedPointSubstitutionLiftOptimizer();
+        IntermediateQueryOptimizer substitutionOptimizer = new FixedPointBindingLiftOptimizer();
 
         IntermediateQuery optimizedQuery = substitutionOptimizer.optimize(unOptimizedQuery);
 
@@ -781,7 +781,7 @@ public class SubstitutionLiftTest {
         System.out.println("\nBefore optimization: \n" +  unOptimizedQuery);
 
 
-        IntermediateQueryOptimizer substitutionOptimizer = new FixedPointSubstitutionLiftOptimizer();
+        IntermediateQueryOptimizer substitutionOptimizer = new FixedPointBindingLiftOptimizer();
 
 
         IntermediateQuery optimizedQuery = substitutionOptimizer.optimize(unOptimizedQuery);
@@ -909,7 +909,7 @@ public class SubstitutionLiftTest {
         System.out.println("\nBefore optimization: \n" +  unOptimizedQuery);
 
 
-        IntermediateQueryOptimizer substitutionOptimizer = new FixedPointSubstitutionLiftOptimizer();
+        IntermediateQueryOptimizer substitutionOptimizer = new FixedPointBindingLiftOptimizer();
 
 
 
@@ -1016,7 +1016,7 @@ public class SubstitutionLiftTest {
         System.out.println("\nBefore optimization: \n" +  unOptimizedQuery);
 
 
-        IntermediateQueryOptimizer substitutionOptimizer = new FixedPointSubstitutionLiftOptimizer();
+        IntermediateQueryOptimizer substitutionOptimizer = new FixedPointBindingLiftOptimizer();
 
 
 
@@ -1114,7 +1114,7 @@ public class SubstitutionLiftTest {
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
         System.out.println("\nExpected query: \n" +  expectedQuery);
 
-        IntermediateQueryOptimizer substitutionOptimizer = new FixedPointSubstitutionLiftOptimizer();
+        IntermediateQueryOptimizer substitutionOptimizer = new FixedPointBindingLiftOptimizer();
 
         /**
          * TODO: remove this double call
@@ -1184,7 +1184,7 @@ public class SubstitutionLiftTest {
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
         System.out.println("\nExpected query: \n" +  expectedQuery);
 
-        IntermediateQueryOptimizer substitutionOptimizer = new FixedPointSubstitutionLiftOptimizer();
+        IntermediateQueryOptimizer substitutionOptimizer = new FixedPointBindingLiftOptimizer();
 
         IntermediateQuery optimizedQuery = substitutionOptimizer.optimize(unOptimizedQuery);
 
@@ -1236,7 +1236,7 @@ public class SubstitutionLiftTest {
         System.out.println("\nExpected query: \n" + expectedQuery);
 
         // Optimize and compare
-        IntermediateQueryOptimizer substitutionOptimizer = new FixedPointSubstitutionLiftOptimizer();
+        IntermediateQueryOptimizer substitutionOptimizer = new FixedPointBindingLiftOptimizer();
         IntermediateQuery optimizedQuery = substitutionOptimizer.optimize(unOptimizedQuery);
         System.out.println("\nAfter optimization: \n" + optimizedQuery);
 
@@ -1293,7 +1293,7 @@ public class SubstitutionLiftTest {
         System.out.println("\nBefore optimization: \n" +  unOptimizedQuery);
 
 
-        IntermediateQueryOptimizer substitutionOptimizer = new FixedPointSubstitutionLiftOptimizer();
+        IntermediateQueryOptimizer substitutionOptimizer = new FixedPointBindingLiftOptimizer();
 
         substitutionOptimizer.optimize(unOptimizedQuery);
 
@@ -1348,7 +1348,7 @@ public class SubstitutionLiftTest {
         System.out.println("\nExpected query: \n" +  expectedQuery);
 
 
-        IntermediateQueryOptimizer substitutionOptimizer = new FixedPointSubstitutionLiftOptimizer();
+        IntermediateQueryOptimizer substitutionOptimizer = new FixedPointBindingLiftOptimizer();
         IntermediateQuery optimizedQuery = substitutionOptimizer.optimize(unOptimizedQuery);
 
         assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, expectedQuery));

@@ -8,9 +8,10 @@ import org.slf4j.LoggerFactory;
 /**
  *
  */
-public class FixedPointSubstitutionLiftOptimizer implements SubstitutionLiftOptimizer {
+public class FixedPointBindingLiftOptimizer implements BindingLiftOptimizer {
 
-    private static final Logger log = LoggerFactory.getLogger(FixedPointSubstitutionLiftOptimizer.class);
+    private static final Logger log = LoggerFactory.getLogger(FixedPointBindingLiftOptimizer.class);
+    private static final int LOOPS = 10;
 
     @Override
     public IntermediateQuery optimize(IntermediateQuery query) throws EmptyQueryException {
@@ -21,16 +22,18 @@ public class FixedPointSubstitutionLiftOptimizer implements SubstitutionLiftOpti
         do {
             oldVersionNumber = query.getVersionNumber();
 
-            TopDownSubstitutionLiftOptimizer substLiftOptimizer = new TopDownSubstitutionLiftOptimizer();
+            TopDownBindingLiftOptimizer substLiftOptimizer = new TopDownBindingLiftOptimizer();
             query = substLiftOptimizer.optimize(query);
             log.debug("New query after substitution lift optimization: \n" + query.toString());
             countVersion++;
 
-        } while( oldVersionNumber != query.getVersionNumber() && countVersion != 4 );
+            if(countVersion == LOOPS){
+                throw new IllegalStateException("Too many substitution lift optimizations are executed");
+            }
 
-        if(countVersion == 4){
-            throw new IllegalStateException("Too many substitution lift optimizations are required");
-        }
+        } while( oldVersionNumber != query.getVersionNumber() );
+
+
 
         return query;
     }

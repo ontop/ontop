@@ -8,8 +8,6 @@ import it.unibz.inf.ontop.model.impl.AtomPredicateImpl;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.model.impl.URITemplatePredicateImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionImpl;
-import it.unibz.inf.ontop.owlrefplatform.core.optimization.IntermediateQueryOptimizer;
-import it.unibz.inf.ontop.owlrefplatform.core.optimization.TopDownSubstitutionLiftOptimizer;
 import it.unibz.inf.ontop.owlrefplatform.core.optimization.unfolding.QueryUnfolder;
 import it.unibz.inf.ontop.owlrefplatform.core.optimization.unfolding.impl.QueryUnfolderImpl;
 import it.unibz.inf.ontop.pivotalrepr.*;

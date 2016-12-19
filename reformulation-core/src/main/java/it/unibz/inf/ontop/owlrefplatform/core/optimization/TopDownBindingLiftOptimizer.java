@@ -28,7 +28,7 @@ import static it.unibz.inf.ontop.pivotalrepr.NonCommutativeOperatorNode.Argument
  * Uses {@link UnionFriendlyBindingExtractor}, {@link SubstitutionPropagationProposal} and {@link UnionLiftProposal}
  *
  */
-public class TopDownSubstitutionLiftOptimizer implements SubstitutionLiftOptimizer {
+public class TopDownBindingLiftOptimizer implements BindingLiftOptimizer {
 
     private final SimpleUnionNodeLifter lifter = new SimpleUnionNodeLifter();
     private final UnionFriendlyBindingExtractor extractor = new UnionFriendlyBindingExtractor();

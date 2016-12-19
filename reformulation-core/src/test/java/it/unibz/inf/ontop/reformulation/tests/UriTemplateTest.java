@@ -8,8 +8,8 @@ import it.unibz.inf.ontop.model.impl.AtomPredicateImpl;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.model.impl.URITemplatePredicateImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionImpl;
-import it.unibz.inf.ontop.owlrefplatform.core.optimization.FixedPointSubstitutionLiftOptimizer;
-import it.unibz.inf.ontop.owlrefplatform.core.optimization.SubstitutionLiftOptimizer;
+import it.unibz.inf.ontop.owlrefplatform.core.optimization.BindingLiftOptimizer;
+import it.unibz.inf.ontop.owlrefplatform.core.optimization.FixedPointBindingLiftOptimizer;
 import it.unibz.inf.ontop.pivotalrepr.*;
 import it.unibz.inf.ontop.pivotalrepr.impl.*;
 import it.unibz.inf.ontop.pivotalrepr.impl.tree.DefaultIntermediateQueryBuilder;
@@ -124,7 +124,7 @@ public class UriTemplateTest {
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
         System.out.println("\n Expected query : \n" +  expectedQuery);
 
-        SubstitutionLiftOptimizer optimizer = new FixedPointSubstitutionLiftOptimizer();
+        BindingLiftOptimizer optimizer = new FixedPointBindingLiftOptimizer();
         IntermediateQuery optimizedQuery = optimizer.optimize(initialQuery);
 
         System.out.println("\n After optimization: \n" +  optimizedQuery);
