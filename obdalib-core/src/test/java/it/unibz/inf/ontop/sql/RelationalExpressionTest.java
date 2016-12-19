@@ -104,8 +104,7 @@ public class RelationalExpressionTest {
         System.out.println(re1);
 
         RelationalExpression relationWithCommonAttr = getRelationWithCommonAttr();
-        //  It is created a new relation which contains common attribute with re1.
-        // TODO: fix grammar
+        // relationWithCommonAttr which contains common attributes is created to simulate an exception.
         System.out.println(relationWithCommonAttr);
 
         RelationalExpression.crossJoin(re1, relationWithCommonAttr);
@@ -200,14 +199,11 @@ public class RelationalExpressionTest {
 
         // a new relationId without any common attribute is created to simulate an exception
         RelationID table2 = MDFAC.createRelationID(null, "Q");
-        // TODO: why are these overwritten?
-        attu = MDFAC.createAttributeID("C");
-        attv = MDFAC.createAttributeID("D");
 
-        re2 = new RelationalExpression(ImmutableList.of(f2),
+        RelationalExpression re2 = new RelationalExpression(ImmutableList.of(f2),
                 ImmutableList.of(),
                 ImmutableMap.of(qaTu, u, qaTv, v, qaNu, u, qaNv, v),
-                ImmutableMap.of(attu, ImmutableSet.of(table2), attv, ImmutableSet.of(table2)));
+                ImmutableMap.of( MDFAC.createAttributeID("C"), ImmutableSet.of(table2), MDFAC.createAttributeID("D"), ImmutableSet.of(table2)));
 
         System.out.println(re1);
         System.out.println(re2);
