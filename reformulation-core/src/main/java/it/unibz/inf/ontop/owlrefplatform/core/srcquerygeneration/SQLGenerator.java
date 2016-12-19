@@ -95,7 +95,7 @@ public class SQLGenerator implements NativeQueryGenerator {
 
 	private static final String INDENT = "    ";
 
-	private final DBMetadata metadata;
+	private final RDBMetadata metadata;
 	private final SQLDialectAdapter sqladapter;
 
 
@@ -126,22 +126,22 @@ public class SQLGenerator implements NativeQueryGenerator {
 			.getLogger(SQLGenerator.class);
 
     @AssistedInject
-	private SQLGenerator(@Assisted DataSourceMetadata metadata, @Assisted OBDADataSource dataSource, QuestCorePreferences preferences) {
+	private SQLGenerator(@Assisted DBMetadata metadata, @Assisted OBDADataSource dataSource, QuestCorePreferences preferences) {
         // TODO: make these attributes immutable.
         //TODO: avoid the null value
         this(metadata, dataSource, null, preferences);
     }
 
 	@AssistedInject
-	private SQLGenerator(@Assisted DataSourceMetadata metadata, @Assisted OBDADataSource dataSource,
+	private SQLGenerator(@Assisted DBMetadata metadata, @Assisted OBDADataSource dataSource,
 						 @Assisted SemanticIndexURIMap uriRefIds, QuestCorePreferences preferences) {
 		String driverURI = dataSource.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER);
 
-		if (!(metadata instanceof DBMetadata)) {
+		if (!(metadata instanceof RDBMetadata)) {
 			throw new IllegalArgumentException("Not a DBMetadata!");
 		}
 
-		this.metadata = (DBMetadata)metadata;
+		this.metadata = (RDBMetadata)metadata;
 		this.sqladapter = SQLAdapterFactory.getSQLDialectAdapter(driverURI,this.metadata.getDbmsVersion(), preferences);
 		this.operations = buildOperations(sqladapter);
 		this.distinctResultSet = preferences.isDistinctPostProcessingEnabled();
@@ -170,7 +170,7 @@ public class SQLGenerator implements NativeQueryGenerator {
 	/**
 	 * For clone purposes only
 	 */
-	private SQLGenerator(DBMetadata metadata, SQLDialectAdapter sqlAdapter, boolean generatingReplace,
+	private SQLGenerator(RDBMetadata metadata, SQLDialectAdapter sqlAdapter, boolean generatingReplace,
 						 boolean isSI, String replace1, String replace2, boolean distinctResultSet,
 						 SemanticIndexURIMap uriRefIds) {
 		if (isSI && uriRefIds == null) {
@@ -685,7 +685,7 @@ public class SQLGenerator implements NativeQueryGenerator {
 	 * @throws Exception
 	 */
 
-	private ParserViewDefinition createViewFrom(Predicate pred, DBMetadata metadata,
+	private ParserViewDefinition createViewFrom(Predicate pred, RDBMetadata metadata,
 												Multimap<Predicate, CQIE> ruleIndex,
 												Map<Predicate, ParserViewDefinition> subQueryDefinitions,
 												ImmutableMap<CQIE, ImmutableList<Optional<TermType>>> termTypeMap,

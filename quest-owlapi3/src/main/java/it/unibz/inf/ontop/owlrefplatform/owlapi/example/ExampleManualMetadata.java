@@ -10,7 +10,7 @@ import it.unibz.inf.ontop.owlrefplatform.injection.QuestComponentFactory;
 import it.unibz.inf.ontop.owlrefplatform.injection.QuestCoreConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLConnection;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLStatement;
-import it.unibz.inf.ontop.sql.DBMetadata;
+import it.unibz.inf.ontop.sql.RDBMetadata;
 import it.unibz.inf.ontop.sql.RDBMetadataExtractionTools;
 import it.unibz.inf.ontop.sql.DatabaseRelationDefinition;
 import it.unibz.inf.ontop.sql.QuotedIDFactory;
@@ -72,7 +72,7 @@ private void setup()  throws Exception {
 	qst = connOWL.createStatement();
 }
 
-private void defMeasTable(DBMetadata dbMetadata, String name) {
+private void defMeasTable(RDBMetadata dbMetadata, String name) {
 	QuotedIDFactory idfac = dbMetadata.getQuotedIDFactory();
 	DatabaseRelationDefinition tableDefinition = dbMetadata.createDatabaseRelation(idfac.createRelationID(null, name));
 	tableDefinition.addAttribute(idfac.createAttributeID("timestamp"), java.sql.Types.TIMESTAMP, null, false);
@@ -81,7 +81,7 @@ private void defMeasTable(DBMetadata dbMetadata, String name) {
 	tableDefinition.addAttribute(idfac.createAttributeID("sensor"), java.sql.Types.VARCHAR, null, false);
 }
 
-private void defMessTable(DBMetadata dbMetadata, String name) {
+private void defMessTable(RDBMetadata dbMetadata, String name) {
 	QuotedIDFactory idfac = dbMetadata.getQuotedIDFactory();
 	DatabaseRelationDefinition tableDefinition = dbMetadata.createDatabaseRelation(idfac.createRelationID(null, name));
 	tableDefinition.addAttribute(idfac.createAttributeID("timestamp"), java.sql.Types.TIMESTAMP, null, false);
@@ -89,14 +89,14 @@ private void defMessTable(DBMetadata dbMetadata, String name) {
 	tableDefinition.addAttribute(idfac.createAttributeID("assembly"), java.sql.Types.VARCHAR, null, false);
 }
 
-private void defStaticTable(DBMetadata dbMetadata, String name) {
+private void defStaticTable(RDBMetadata dbMetadata, String name) {
 	QuotedIDFactory idfac = dbMetadata.getQuotedIDFactory();
 	DatabaseRelationDefinition tableDefinition = dbMetadata.createDatabaseRelation(idfac.createRelationID(null, name));
 	tableDefinition.addAttribute(idfac.createAttributeID("domain"), java.sql.Types.VARCHAR, null, false);
 	tableDefinition.addAttribute(idfac.createAttributeID("range"), java.sql.Types.VARCHAR, null, false);
 }
-private DBMetadata getMeta(){
-	DBMetadata dbMetadata = RDBMetadataExtractionTools.createDummyMetadata();
+private RDBMetadata getMeta(){
+	RDBMetadata dbMetadata = RDBMetadataExtractionTools.createDummyMetadata();
 
 	defMeasTable(dbMetadata, "burner");
 	defMessTable(dbMetadata, "events");

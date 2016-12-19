@@ -2,7 +2,6 @@ package it.unibz.inf.ontop.owlrefplatform.core;
 
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.nativeql.DBMetadataException;
-import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.LinearInclusionDependencies;
 
 import java.util.Collection;
 
@@ -22,9 +21,9 @@ public interface DBConnector {
     void disconnect() throws OBDAException;
     void dispose();
 
-    DataSourceMetadata extractDBMetadata(OBDAModel obdaModel) throws DBMetadataException;
+    DBMetadata extractDBMetadata(OBDAModel obdaModel) throws DBMetadataException;
 
-    DataSourceMetadata extractDBMetadata(OBDAModel obdaModel, DataSourceMetadata partiallyDefinedMetadata)
+    DBMetadata extractDBMetadata(OBDAModel obdaModel, DBMetadata partiallyDefinedMetadata)
             throws DBMetadataException;
 
 
@@ -41,8 +40,8 @@ public interface DBConnector {
     IQuestConnection getConnection() throws OBDAException;
 
     Collection<OBDAMappingAxiom> applyDBSpecificNormalization(Collection<OBDAMappingAxiom> mappingAxioms,
-                                                              DataSourceMetadata metadata) throws OBDAException;
+                                                              DBMetadata metadata) throws OBDAException;
 
-    void completePredefinedMetadata(DataSourceMetadata metadata);
+    void completePredefinedMetadata(DBMetadata metadata);
 
 }

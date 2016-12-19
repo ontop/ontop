@@ -18,9 +18,8 @@ import it.unibz.inf.ontop.model.impl.RDBMSourceParameterConstants;
 import it.unibz.inf.ontop.nativeql.DBMetadataException;
 import it.unibz.inf.ontop.nativeql.DBMetadataExtractor;
 import it.unibz.inf.ontop.nativeql.JDBCConnectionWrapper;
-import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.LinearInclusionDependencies;
 import it.unibz.inf.ontop.parser.PreprocessProjection;
-import it.unibz.inf.ontop.sql.DBMetadata;
+import it.unibz.inf.ontop.sql.RDBMetadata;
 import it.unibz.inf.ontop.utils.MetaMappingExpander;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -157,13 +156,13 @@ public class JDBCConnector implements DBConnector {
     }
 
     @Override
-    public DataSourceMetadata extractDBMetadata(OBDAModel obdaModel) throws DBMetadataException {
+    public DBMetadata extractDBMetadata(OBDAModel obdaModel) throws DBMetadataException {
         DBMetadataExtractor dataSourceMetadataExtractor = nativeQLFactory.create();
         return dataSourceMetadataExtractor.extract(obdaSource, obdaModel, new JDBCConnectionWrapper(localConnection));
     }
 
     @Override
-    public DataSourceMetadata extractDBMetadata(OBDAModel obdaModel, DataSourceMetadata partiallyDefinedMetadata)
+    public DBMetadata extractDBMetadata(OBDAModel obdaModel, DBMetadata partiallyDefinedMetadata)
             throws DBMetadataException {
         DBMetadataExtractor dataSourceMetadataExtractor = nativeQLFactory.create();
         return dataSourceMetadataExtractor.extract(obdaSource, obdaModel, new JDBCConnectionWrapper(localConnection),
@@ -314,7 +313,7 @@ public class JDBCConnector implements DBConnector {
      *
      */
     private Collection<OBDAMappingAxiom> preprocessProjection(Collection<OBDAMappingAxiom> mappingAxioms,
-                                                              DBMetadata dbMetadata)
+                                                              RDBMetadata dbMetadata)
             throws OBDAException {
         for (OBDAMappingAxiom axiom : mappingAxioms) {
             String sourceString = axiom.getSourceQuery().toString();
@@ -344,13 +343,13 @@ public class JDBCConnector implements DBConnector {
 
     @Override
     public Collection<OBDAMappingAxiom> applyDBSpecificNormalization(Collection<OBDAMappingAxiom> mappingAxioms,
-                                                                     final DataSourceMetadata metadata) throws OBDAException {
+                                                                     final DBMetadata metadata) throws OBDAException {
         /** Substitute select * with column names (in the SQL case) **/
 
-        if (!(metadata instanceof DBMetadata)) {
+        if (!(metadata instanceof RDBMetadata)) {
             throw new IllegalArgumentException("The JDBC connector expects a SQL-specific DBMetadata");
         }
-        DBMetadata dbMetadata = (DBMetadata) metadata;
+        RDBMetadata dbMetadata = (RDBMetadata) metadata;
 
         mappingAxioms = preprocessProjection(mappingAxioms, dbMetadata);
 
@@ -362,21 +361,21 @@ public class JDBCConnector implements DBConnector {
         /**
          * Expand the meta mapping
          */
-        Collection<OBDAMappingAxiom> expandedMappingAxioms = expandMetaMappings(splitMappingsAxioms, dbMetadata);
+        Collection<OBDAMappingAxiom> expandedMappingAxioms = expandMetaMappings(splitMappingsAxioms, metadata);
 
         return expandedMappingAxioms;
     }
 
     @Override
-    public void completePredefinedMetadata(DataSourceMetadata metadata) {
-        if (!(metadata instanceof DBMetadata)) {
+    public void completePredefinedMetadata(DBMetadata metadata) {
+        if (!(metadata instanceof RDBMetadata)) {
             throw new IllegalArgumentException("DBMetadata is required");
         }
 
         //Adds keys from the text file
         if (userConstraints != null) {
-            userConstraints.insertUniqueConstraints((DBMetadata) metadata);
-            userConstraints.insertForeignKeyConstraints((DBMetadata) metadata);
+            userConstraints.insertUniqueConstraints(metadata);
+            userConstraints.insertForeignKeyConstraints(metadata);
         }
     }
 }

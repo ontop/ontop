@@ -21,7 +21,6 @@ package it.unibz.inf.ontop.owlapi.directmapping;
  */
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
 import it.unibz.inf.ontop.injection.OBDAFactoryWithException;
@@ -33,7 +32,7 @@ import it.unibz.inf.ontop.ontology.OClass;
 import it.unibz.inf.ontop.ontology.ObjectPropertyExpression;
 import it.unibz.inf.ontop.ontology.OntologyVocabulary;
 import it.unibz.inf.ontop.ontology.impl.OntologyVocabularyImpl;
-import it.unibz.inf.ontop.sql.DBMetadata;
+import it.unibz.inf.ontop.sql.RDBMetadata;
 import it.unibz.inf.ontop.sql.RDBMetadataExtractionTools;
 import it.unibz.inf.ontop.sql.DatabaseRelationDefinition;
 import it.unibz.inf.ontop.sql.JDBCConnectionManager;
@@ -159,14 +158,14 @@ public class DirectMappingEngine {
 		OBDAModel updatedModel = model.newModel(dataSources, model.getMappings());
 
 		Connection conn = connManager.getConnection(source);
-		DBMetadata metadata = RDBMetadataExtractionTools.createMetadata(conn);
+		RDBMetadata metadata = RDBMetadataExtractionTools.createMetadata(conn);
 		// this operation is EXPENSIVE
 		RDBMetadataExtractionTools.loadMetadata(metadata, conn, null);
 		return bootstrapMappings(metadata, updatedModel,source.getSourceID());
 	}
 
 
-	public OBDAModel bootstrapMappings(DBMetadata metadata, OBDAModel model, URI sourceUri) throws DuplicateMappingException {
+	public OBDAModel bootstrapMappings(RDBMetadata metadata, OBDAModel model, URI sourceUri) throws DuplicateMappingException {
 		if (baseIRI == null || baseIRI.isEmpty())
 			this.baseIRI = model.getPrefixManager().getDefaultPrefix();
 		Collection<DatabaseRelationDefinition> tables = metadata.getDatabaseRelations();

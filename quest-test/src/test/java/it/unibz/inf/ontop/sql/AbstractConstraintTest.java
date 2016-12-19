@@ -32,7 +32,7 @@ import java.util.List;
 
 public abstract class AbstractConstraintTest extends TestCase {
 	
-	private DBMetadata metadata;
+	private RDBMetadata metadata;
 	
 	private static final String TB_BOOK = "Book";
 	private static final String TB_WRITER = "Writer";

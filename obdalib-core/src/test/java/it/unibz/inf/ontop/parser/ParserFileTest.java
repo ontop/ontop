@@ -30,7 +30,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Injector;
 import it.unibz.inf.ontop.injection.OBDACoreConfiguration;
-import it.unibz.inf.ontop.sql.DBMetadata;
+import it.unibz.inf.ontop.sql.RDBMetadata;
 import it.unibz.inf.ontop.sql.QuotedIDFactory;
 import it.unibz.inf.ontop.sql.RDBMetadataExtractionTools;
 import junit.framework.TestCase;
@@ -130,7 +130,7 @@ public class ParserFileTest extends TestCase {
 
 	private void execute(OBDAModel model, URI identifier) {
 
-		DBMetadata dbMetadata = RDBMetadataExtractionTools.createDummyMetadata();
+		RDBMetadata dbMetadata = RDBMetadataExtractionTools.createDummyMetadata();
 		QuotedIDFactory idfac = dbMetadata.getQuotedIDFactory();
 
         /**

@@ -84,13 +84,13 @@ public class OracleSesameLIMITTest  {
 		conn.close();
 	}
 
-	private void defTable(DBMetadata dbMetadata, String schema, String name) {
+	private void defTable(RDBMetadata dbMetadata, String schema, String name) {
 		QuotedIDFactory idfac = dbMetadata.getQuotedIDFactory();
 		DatabaseRelationDefinition tableDefinition = dbMetadata.createDatabaseRelation(idfac.createRelationID(schema, name));
 		tableDefinition.addAttribute(idfac.createAttributeID("country_name"), java.sql.Types.VARCHAR, null, false);
 	}
-	private DBMetadata getMeta(String driver_class){
-		DBMetadata dbMetadata = RDBMetadataExtractionTools.createDummyMetadata(driver_class);
+	private RDBMetadata getMeta(String driver_class){
+		RDBMetadata dbMetadata = RDBMetadataExtractionTools.createDummyMetadata(driver_class);
 		QuotedIDFactory idfac = dbMetadata.getQuotedIDFactory();
 		defTable(dbMetadata, "hr", "countries");
 		defTable(dbMetadata, "HR", "countries");

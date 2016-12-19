@@ -27,7 +27,7 @@ import java.util.Properties;
 
 public abstract class AbstractDbMetadataInfoTest extends TestCase {
 	
-	private DBMetadata metadata;
+	private RDBMetadata metadata;
 	
 	@Override
 	public void setUp() {

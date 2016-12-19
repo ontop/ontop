@@ -154,7 +154,7 @@ public class Quest implements Serializable, IQuest {
 				
 
 
-	private DataSourceMetadata metadata;
+	private DBMetadata metadata;
 
 	//private DBConnector dbConnector;
 
@@ -194,7 +194,7 @@ public class Quest implements Serializable, IQuest {
 	 */
 	@Inject
 	private Quest(@Assisted Ontology tbox, @Assisted Optional<OBDAModel> obdaModel,
-				  @Assisted Optional<DataSourceMetadata> inputMetadata,
+				  @Assisted Optional<DBMetadata> inputMetadata,
 				  QuestCorePreferences config, NativeQueryLanguageComponentFactory nativeQLFactory,
 				  OBDAFactoryWithException obdaFactory, QuestComponentFactory questComponentFactory,
 				  MappingVocabularyFixer mappingVocabularyFixer, TMappingExclusionConfig excludeFromTMappings,
@@ -590,7 +590,7 @@ public class Quest implements Serializable, IQuest {
 	}
 
 	@Override
-	public DataSourceMetadata getMetaData() {
+	public DBMetadata getMetaData() {
 		return metadata;
 	}
 

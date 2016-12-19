@@ -3,6 +3,7 @@
  */
 package it.unibz.inf.ontop.sql;
 
+import it.unibz.inf.ontop.model.DBMetadata;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

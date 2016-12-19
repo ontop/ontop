@@ -30,7 +30,7 @@ import it.unibz.inf.ontop.model.OBDADataFactory;
 import it.unibz.inf.ontop.model.OBDAMappingAxiom;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.parser.TurtleOBDASyntaxParser;
-import it.unibz.inf.ontop.sql.DBMetadata;
+import it.unibz.inf.ontop.sql.RDBMetadata;
 import it.unibz.inf.ontop.sql.RDBMetadataExtractionTools;
 import it.unibz.inf.ontop.sql.QuotedIDFactory;
 import it.unibz.inf.ontop.sql.DatabaseRelationDefinition;
@@ -49,7 +49,7 @@ public class Mapping2DatalogConverterTest extends TestCase {
     private final NativeQueryLanguageComponentFactory factory;
 	private final Injector injector;
 
-	private DBMetadata md = RDBMetadataExtractionTools.createDummyMetadata();
+	private RDBMetadata md = RDBMetadataExtractionTools.createDummyMetadata();
 	private PrefixManager pm;
 
     public Mapping2DatalogConverterTest() {

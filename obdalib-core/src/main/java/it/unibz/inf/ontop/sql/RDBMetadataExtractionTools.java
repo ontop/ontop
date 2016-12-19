@@ -22,6 +22,7 @@ package it.unibz.inf.ontop.sql;
 
 
 import com.google.common.collect.ImmutableSet;
+import it.unibz.inf.ontop.model.DBMetadata;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -105,12 +106,12 @@ public class RDBMetadataExtractionTools {
 	private static Logger log = LoggerFactory.getLogger(RDBMetadataExtractionTools.class);
 
 	
-	public static DBMetadata createDummyMetadata() {
+	public static RDBMetadata createDummyMetadata() {
 		return createDummyMetadata("dummy class");
 	}
 	
-	public static DBMetadata createDummyMetadata(String driver_class) {
-		return new DBMetadata(driver_class, null, null, "", new QuotedIDFactoryStandardSQL("\""));
+	public static RDBMetadata createDummyMetadata(String driver_class) {
+		return new RDBMetadata(driver_class, null, null, "", new QuotedIDFactoryStandardSQL("\""));
 	}
 	
 	
@@ -121,7 +122,7 @@ public class RDBMetadataExtractionTools {
 	 * @throws SQLException 
 	 */
 
-	public static DBMetadata createMetadata(Connection conn) throws SQLException  {
+	public static RDBMetadata createMetadata(Connection conn) throws SQLException  {
 		
 		final DatabaseMetaData md = conn.getMetaData();
 		String productName = md.getDatabaseProductName();
@@ -161,7 +162,7 @@ public class RDBMetadataExtractionTools {
 			}
 		}
 		
-		DBMetadata metadata = new DBMetadata(md.getDriverName(), md.getDriverVersion(), 
+		RDBMetadata metadata = new RDBMetadata(md.getDriverName(), md.getDriverVersion(),
 							productName, md.getDatabaseProductVersion(), idfac);
 		
 		return metadata;	
@@ -177,7 +178,7 @@ public class RDBMetadataExtractionTools {
 	 * @return The database metadata object.
 	 */
 
-	public static void loadMetadata(DBMetadata metadata, Connection conn, Set<RelationID> realTables) throws SQLException {
+	public static void loadMetadata(RDBMetadata metadata, Connection conn, Set<RelationID> realTables) throws SQLException {
 		
 		if (printouts)
 			System.out.println("GETTING METADATA WITH " + conn + " ON " + realTables);

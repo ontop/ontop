@@ -16,7 +16,6 @@ import it.unibz.inf.ontop.pivotalrepr.impl.*;
 import it.unibz.inf.ontop.pivotalrepr.impl.tree.DefaultIntermediateQueryBuilder;
 import it.unibz.inf.ontop.pivotalrepr.proposal.impl.LeftJoinOptimizationProposalImpl;
 import it.unibz.inf.ontop.sql.*;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.sql.Types;
@@ -89,7 +88,7 @@ public class LeftJoinOptimizationTest {
          */
         uniqueKeyBuilder.put(TABLE3_PREDICATE, ImmutableList.of(1, 2));
 
-        DBMetadata dbMetadata = RDBMetadataExtractionTools.createDummyMetadata();
+        RDBMetadata dbMetadata = RDBMetadataExtractionTools.createDummyMetadata();
         QuotedIDFactory idFactory = dbMetadata.getQuotedIDFactory();
 
         DatabaseRelationDefinition table1Def = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null,

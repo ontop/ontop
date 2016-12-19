@@ -58,7 +58,7 @@ import java.util.Set;
 public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 
 	private final QuestPreferences preferences;
-	private final Optional<DataSourceMetadata> inputDBMetadata;
+	private final Optional<DBMetadata> inputDBMetadata;
 	StructuralReasoner structuralReasoner;
 
     private final Version version;

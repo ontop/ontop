@@ -24,7 +24,7 @@ import it.unibz.inf.ontop.model.impl.TermUtils;
 import it.unibz.inf.ontop.owlrefplatform.injection.QuestCorePreferences;
 import it.unibz.inf.ontop.pivotalrepr.MetadataForQueryOptimization;
 import it.unibz.inf.ontop.pivotalrepr.impl.MetadataForQueryOptimizationImpl;
-import it.unibz.inf.ontop.sql.DBMetadata;
+import it.unibz.inf.ontop.sql.RDBMetadata;
 import it.unibz.inf.ontop.sql.DatabaseRelationDefinition;
 import it.unibz.inf.ontop.sql.Relation2DatalogPredicate;
 import it.unibz.inf.ontop.sql.RelationID;
@@ -82,7 +82,7 @@ public class QuestUnfolder {
     /**
 	 * Setting up the unfolder and SQL generation
 	 */
-	public void setupInVirtualMode(Collection<OBDAMappingAxiom> mappingAxioms, DataSourceMetadata metadata,
+	public void setupInVirtualMode(Collection<OBDAMappingAxiom> mappingAxioms, DBMetadata metadata,
 								   DBConnector dbConnector,
 								   VocabularyValidator vocabularyValidator, TBoxReasoner reformulationReasoner,
 								   Ontology inputOntology, TMappingExclusionConfig excludeFromTMappings)
@@ -141,10 +141,7 @@ public class QuestUnfolder {
 		log.debug("Final set of mappings: \n {}", Joiner.on("\n").join(unfoldingProgram));
 
 		uniqueConstraints = metadata.extractUniqueConstraints();
-		/**
-		 * TODO: remove this cast
-		 */
-		metadataForQueryOptimization = new MetadataForQueryOptimizationImpl((DBMetadata)metadata, uniqueConstraints,
+		metadataForQueryOptimization = new MetadataForQueryOptimizationImpl(metadata, uniqueConstraints,
 				uriTemplateMatcher);
 		unfolder = new DatalogUnfolder(unfoldingProgram, uniqueConstraints);
 		
@@ -153,7 +150,7 @@ public class QuestUnfolder {
 
 	public void setupInSemanticIndexMode(Collection<OBDAMappingAxiom> mappings,
 										 TBoxReasoner reformulationReasoner,
-										 DataSourceMetadata metadata) throws OBDAException {
+										 DBMetadata metadata) throws OBDAException {
 
 
 		List<CQIE> unfoldingProgram = mapping2DatalogConvertor.constructDatalogProgram(mappings,
@@ -179,7 +176,7 @@ public class QuestUnfolder {
 		/**
 		 * TODO: refactor this !!!
 		 */
-		metadataForQueryOptimization = new MetadataForQueryOptimizationImpl((DBMetadata) metadata, uniqueConstraints, uriTemplateMatcher);
+		metadataForQueryOptimization = new MetadataForQueryOptimizationImpl(metadata, uniqueConstraints, uriTemplateMatcher);
 		unfolder = new DatalogUnfolder(unfoldingProgram, uniqueConstraints);
 
 		this.ufp = unfoldingProgram;
@@ -329,9 +326,9 @@ public class QuestUnfolder {
 	 */
 
 	public void extendTypesWithMetadata(List<CQIE> unfoldingProgram, TBoxReasoner tBoxReasoner,
-										VocabularyValidator vocabularyValidator, DataSourceMetadata metadata) throws OBDAException {
-		if (metadata instanceof DBMetadata) {
-			MappingDataTypeRepair typeRepair = new MappingDataTypeRepair((DBMetadata)metadata, tBoxReasoner,
+										VocabularyValidator vocabularyValidator, DBMetadata metadata) throws OBDAException {
+		if (metadata instanceof RDBMetadata) {
+			MappingDataTypeRepair typeRepair = new MappingDataTypeRepair(metadata, tBoxReasoner,
 					vocabularyValidator);
 
 			for (CQIE rule : unfoldingProgram) {
@@ -353,7 +350,7 @@ public class QuestUnfolder {
 	 * @param metadata
 	 */
 
-	public static void addNOTNULLToMappings(List<CQIE> unfoldingProgram, DataSourceMetadata metadata) {
+	public static void addNOTNULLToMappings(List<CQIE> unfoldingProgram, DBMetadata metadata) {
 
 		for (CQIE mapping : unfoldingProgram) {
 			Set<Variable> headvars = new HashSet<>();
@@ -372,7 +369,7 @@ public class QuestUnfolder {
 	/**
 	 * Returns false if it detects that the variable is guaranteed not being null.
 	 */
-	private static boolean isNullable(Variable variable, List<Function> bodyAtoms, DataSourceMetadata metadata) {
+	private static boolean isNullable(Variable variable, List<Function> bodyAtoms, DBMetadata metadata) {
 		/**
 		 * NB: only looks for data atoms in a flat mapping (no algebraic (meta-)predicate such as LJ).
 		 */
@@ -425,7 +422,7 @@ public class QuestUnfolder {
 		return true;
 	}
 
-	private static boolean hasNonNullColumnForVariable(Function atom, Variable variable, DataSourceMetadata metadata) {
+	private static boolean hasNonNullColumnForVariable(Function atom, Variable variable, DBMetadata metadata) {
 		RelationID relationId = Relation2DatalogPredicate.createRelationFromPredicateName(metadata.getQuotedIDFactory(),
 				atom.getFunctionSymbol());
 		DatabaseRelationDefinition relation = metadata.getDatabaseRelation(relationId);
@@ -443,7 +440,7 @@ public class QuestUnfolder {
 	}
 
 
-	public List<CQIE> applyTMappings(List<CQIE> unfoldingProgram, TBoxReasoner reformulationReasoner, boolean full, DataSourceMetadata metadata,
+	public List<CQIE> applyTMappings(List<CQIE> unfoldingProgram, TBoxReasoner reformulationReasoner, boolean full, DBMetadata metadata,
 							   TMappingExclusionConfig excludeFromTMappings) throws OBDAException {
 
 		final long startTime = System.currentTimeMillis();

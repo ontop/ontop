@@ -38,7 +38,6 @@ public class QuotedIDFactoryIdentity implements QuotedIDFactory {
 	/**
 	 * used only in DBMetadataExtractor
 	 */
-	
 	QuotedIDFactoryIdentity(String quotationString) {
 		this.quotationString = quotationString;
 	}

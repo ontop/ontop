@@ -18,7 +18,7 @@ import it.unibz.inf.ontop.executor.union.UnionLiftInternalExecutor;
 import it.unibz.inf.ontop.executor.unsatisfiable.RemoveEmptyNodesExecutor;
 import it.unibz.inf.ontop.injection.InvalidOBDAConfigurationException;
 import it.unibz.inf.ontop.injection.impl.OBDACoreConfigurationImpl;
-import it.unibz.inf.ontop.model.DataSourceMetadata;
+import it.unibz.inf.ontop.model.DBMetadata;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
 import it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing.TMappingExclusionConfig;
 import it.unibz.inf.ontop.owlrefplatform.injection.QuestCoreConfiguration;
@@ -78,7 +78,7 @@ public class QuestCoreConfigurationImpl extends OBDACoreConfigurationImpl implem
     }
 
     @Override
-    public Optional<DataSourceMetadata> getDatasourceMetadata() {
+    public Optional<DBMetadata> getDatasourceMetadata() {
         return options.dbMetadata;
     }
 
@@ -128,11 +128,11 @@ public class QuestCoreConfigurationImpl extends OBDACoreConfigurationImpl implem
 
     public static class QuestCoreOptions {
         public final Optional<TMappingExclusionConfig> excludeFromTMappings;
-        public final Optional<DataSourceMetadata> dbMetadata;
+        public final Optional<DBMetadata> dbMetadata;
 
 
         public QuestCoreOptions(Optional<TMappingExclusionConfig> excludeFromTMappings,
-                                Optional<DataSourceMetadata> dbMetadata) {
+                                Optional<DBMetadata> dbMetadata) {
             this.excludeFromTMappings = excludeFromTMappings;
             this.dbMetadata = dbMetadata;
         }
@@ -151,7 +151,7 @@ public class QuestCoreConfigurationImpl extends OBDACoreConfigurationImpl implem
         private Optional<Boolean> encodeIRISafely = Optional.empty();
         private Optional<Boolean> sameAsMappings = Optional.empty();
         private Optional<Boolean> optimizeEquivalences = Optional.empty();
-        private Optional<DataSourceMetadata> dbMetadata = Optional.empty();
+        private Optional<DBMetadata> dbMetadata = Optional.empty();
         private Optional<Boolean> existentialReasoning = Optional.empty();
 
         public BuilderImpl() {
@@ -164,7 +164,7 @@ public class QuestCoreConfigurationImpl extends OBDACoreConfigurationImpl implem
         }
 
         @Override
-        public B dbMetadata(@Nonnull DataSourceMetadata dbMetadata) {
+        public B dbMetadata(@Nonnull DBMetadata dbMetadata) {
             this.dbMetadata = Optional.of(dbMetadata);
             return (B) this;
         }

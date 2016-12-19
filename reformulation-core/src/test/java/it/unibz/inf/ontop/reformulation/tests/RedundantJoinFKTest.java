@@ -73,7 +73,7 @@ public class RedundantJoinFKTest {
         /**
          * build the FKs
          */
-        DBMetadata dbMetadata = RDBMetadataExtractionTools.createDummyMetadata();
+        RDBMetadata dbMetadata = RDBMetadataExtractionTools.createDummyMetadata();
         QuotedIDFactory idFactory = dbMetadata.getQuotedIDFactory();
         DatabaseRelationDefinition table1Def = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null,
                 TABLE1_PREDICATE.getName()));

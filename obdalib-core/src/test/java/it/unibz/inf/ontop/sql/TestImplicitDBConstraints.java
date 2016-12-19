@@ -12,7 +12,7 @@ import static org.junit.Assert.assertTrue;
 
 public class TestImplicitDBConstraints {
 
-	DBMetadata md;
+	RDBMetadata md;
 	QuotedIDFactory idfac;
 	
 	@Before

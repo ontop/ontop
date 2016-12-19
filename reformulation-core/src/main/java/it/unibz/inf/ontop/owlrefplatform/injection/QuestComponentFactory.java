@@ -8,18 +8,18 @@ import it.unibz.inf.ontop.owlrefplatform.core.DBConnector;
 import it.unibz.inf.ontop.owlrefplatform.core.IQuest;
 import it.unibz.inf.ontop.owlrefplatform.core.abox.SemanticIndexURIMap;
 import it.unibz.inf.ontop.owlrefplatform.core.srcquerygeneration.NativeQueryGenerator;
-import it.unibz.inf.ontop.model.DataSourceMetadata;
+import it.unibz.inf.ontop.model.DBMetadata;
 
 import java.util.Optional;
 
 public interface QuestComponentFactory {
 
     IQuest create(Ontology inputTBox, @Assisted Optional<OBDAModel> inputMappings,
-                  @Assisted Optional<DataSourceMetadata> inputMetadata);
+                  @Assisted Optional<DBMetadata> inputMetadata);
 
-    NativeQueryGenerator create(DataSourceMetadata metadata, OBDADataSource dataSource);
-    NativeQueryGenerator create(DataSourceMetadata metadata, OBDADataSource dataSource,
-                                       SemanticIndexURIMap uriRefIds);
+    NativeQueryGenerator create(DBMetadata metadata, OBDADataSource dataSource);
+    NativeQueryGenerator create(DBMetadata metadata, OBDADataSource dataSource,
+                                SemanticIndexURIMap uriRefIds);
 
     DBConnector create(OBDADataSource obdaDataSource, IQuest questInstance);
 }

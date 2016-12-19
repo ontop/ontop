@@ -36,7 +36,7 @@ import it.unibz.inf.ontop.model.OBDASQLQuery;
 import it.unibz.inf.ontop.model.Predicate;
 import it.unibz.inf.ontop.model.Term;
 import it.unibz.inf.ontop.model.Variable;
-import it.unibz.inf.ontop.sql.DBMetadata;
+import it.unibz.inf.ontop.sql.RDBMetadata;
 
 import java.util.*;
 
@@ -59,13 +59,13 @@ public class Mapping2DatalogConverter implements IMapping2DatalogConverter {
 	/**
 	 * Creates a mapping analyzer by taking into account the OBDA model.
 	 */
-	public ImmutableList<CQIE> constructDatalogProgram(Collection<OBDAMappingAxiom> mappings, DataSourceMetadata metadata) {
+	public ImmutableList<CQIE> constructDatalogProgram(Collection<OBDAMappingAxiom> mappings, DBMetadata metadata) {
 
-        if (!(metadata instanceof DBMetadata)) {
+        if (!(metadata instanceof RDBMetadata)) {
             throw new IllegalArgumentException("A DBMetadata was expected");
         }
 
-        DBMetadata dbMetadata = (DBMetadata) metadata;
+        RDBMetadata dbMetadata = (RDBMetadata) metadata;
 		
 		ImmutableList.Builder<CQIE> listBuilder = ImmutableList.builder();
 		List<String> errorMessages = new ArrayList<>();
@@ -151,7 +151,7 @@ public class Mapping2DatalogConverter implements IMapping2DatalogConverter {
      * @param parsedSQLQuery
      * @param lookupTable
      */
-    private static void addTableAtoms(List<Function> bodyAtoms, ParsedSQLQuery parsedSQLQuery, AttributeLookupTable lookupTable, DBMetadata dbMetadata) throws JSQLParserException {
+    private static void addTableAtoms(List<Function> bodyAtoms, ParsedSQLQuery parsedSQLQuery, AttributeLookupTable lookupTable, RDBMetadata dbMetadata) throws JSQLParserException {
         // Tables mentioned in the SQL query
         Map<RelationID, RelationID> tables = parsedSQLQuery.getTables();
 
@@ -297,7 +297,7 @@ public class Mapping2DatalogConverter implements IMapping2DatalogConverter {
      * Creates a lookupTable:
      * (1) Collects all the possible column names from the tables mentioned in the query, and aliases.
       */
-    private static AttributeLookupTable createLookupTable(ParsedSQLQuery queryParsed, DBMetadata dbMetadata, QuotedIDFactory idfac) throws JSQLParserException {
+    private static AttributeLookupTable createLookupTable(ParsedSQLQuery queryParsed, RDBMetadata dbMetadata, QuotedIDFactory idfac) throws JSQLParserException {
     	AttributeLookupTable lookupTable = new AttributeLookupTable();
 
 		Map<RelationID, RelationID> tables = queryParsed.getTables();

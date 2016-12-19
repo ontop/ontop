@@ -1,7 +1,7 @@
 package it.unibz.inf.ontop.owlrefplatform.injection;
 
 import it.unibz.inf.ontop.injection.OBDACoreConfiguration;
-import it.unibz.inf.ontop.model.DataSourceMetadata;
+import it.unibz.inf.ontop.model.DBMetadata;
 import it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing.TMappingExclusionConfig;
 import it.unibz.inf.ontop.owlrefplatform.injection.impl.QuestCoreConfigurationImpl;
 import it.unibz.inf.ontop.pivotalrepr.OptimizationConfiguration;
@@ -17,7 +17,7 @@ public interface QuestCoreConfiguration extends OBDACoreConfiguration {
 
     Optional<TMappingExclusionConfig> getTmappingExclusions();
 
-    Optional<DataSourceMetadata> getDatasourceMetadata();
+    Optional<DBMetadata> getDatasourceMetadata();
 
     QuestCorePreferences getPreferences();
 
@@ -41,7 +41,7 @@ public interface QuestCoreConfiguration extends OBDACoreConfiguration {
 
         B tMappingExclusionConfig(@Nonnull TMappingExclusionConfig config);
 
-        B dbMetadata(@Nonnull DataSourceMetadata dbMetadata);
+        B dbMetadata(@Nonnull DBMetadata dbMetadata);
 
         B enableOntologyAnnotationQuerying(boolean queryingAnnotationsInOntology);
 

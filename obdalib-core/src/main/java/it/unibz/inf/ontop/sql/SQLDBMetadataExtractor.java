@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.sql;
 
 
 import it.unibz.inf.ontop.injection.OBDAProperties;
-import it.unibz.inf.ontop.model.DataSourceMetadata;
+import it.unibz.inf.ontop.model.DBMetadata;
 import it.unibz.inf.ontop.model.OBDADataSource;
 import it.unibz.inf.ontop.model.OBDAModel;
 import it.unibz.inf.ontop.nativeql.DBConnectionWrapper;
@@ -47,12 +47,12 @@ public class SQLDBMetadataExtractor implements DBMetadataExtractor {
      * Expects the DBConnectionWrapper to wrap a JDBC connection.
      */
     @Override
-    public DBMetadata extract(OBDADataSource dataSource, OBDAModel obdaModel, DBConnectionWrapper dbConnection)
+    public RDBMetadata extract(OBDADataSource dataSource, OBDAModel obdaModel, DBConnectionWrapper dbConnection)
             throws DBMetadataException {
 
         Connection connection = (Connection) dbConnection.getConnection();
         try {
-            DBMetadata metadata = RDBMetadataExtractionTools.createMetadata(connection);
+            RDBMetadata metadata = RDBMetadataExtractionTools.createMetadata(connection);
             return extract(dataSource, obdaModel, dbConnection, metadata);
         } catch (SQLException e) {
             throw new DBMetadataException(e.getMessage());
@@ -60,16 +60,16 @@ public class SQLDBMetadataExtractor implements DBMetadataExtractor {
     }
 
     @Override
-    public DBMetadata extract(OBDADataSource dataSource, OBDAModel model, @Nullable DBConnectionWrapper dbConnection,
-                                      DataSourceMetadata partiallyDefinedMetadata) throws DBMetadataException {
+    public RDBMetadata extract(OBDADataSource dataSource, OBDAModel model, @Nullable DBConnectionWrapper dbConnection,
+                               DBMetadata partiallyDefinedMetadata) throws DBMetadataException {
 
-        if (!(partiallyDefinedMetadata instanceof DBMetadata)) {
+        if (!(partiallyDefinedMetadata instanceof RDBMetadata)) {
             throw new IllegalArgumentException("Was expecting a DBMetadata");
         }
 
         Connection connection = (Connection) dbConnection.getConnection();
         try {
-            DBMetadata metadata = (DBMetadata) partiallyDefinedMetadata;
+            RDBMetadata metadata = (RDBMetadata) partiallyDefinedMetadata;
 
             // if we have to parse the full metadata or just the table list in the mappings
             if (obtainFullMetadata) {

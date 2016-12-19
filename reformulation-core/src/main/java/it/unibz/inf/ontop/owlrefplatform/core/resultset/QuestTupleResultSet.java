@@ -26,7 +26,6 @@ import it.unibz.inf.ontop.model.Predicate.COL_TYPE;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestStatement;
 import it.unibz.inf.ontop.owlrefplatform.core.abox.SemanticIndexURIMap;
-import it.unibz.inf.ontop.sql.DBMetadata;
 
 import java.net.URISyntaxException;
 import java.sql.*;
@@ -91,7 +90,7 @@ public class QuestTupleResultSet implements TupleResultSet {
 			columnMap.put(signature.get(j - 1), j);
 		}
 
-		DataSourceMetadata metadata = st.questInstance.getMetaData();
+		DBMetadata metadata = st.questInstance.getMetaData();
 		String vendor =  metadata.getDriverName();
 		isOracle = vendor.contains("Oracle");
 		isMsSQL = vendor.contains("SQL Server");

@@ -41,7 +41,7 @@ public interface IQuest {
 
     Optional<RDBMSSIRepositoryManager> getOptionalSemanticIndexRepository();
 
-    DataSourceMetadata getMetaData();
+    DBMetadata getMetaData();
 
     ImmutableOntologyVocabulary getVocabulary();
 
