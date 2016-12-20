@@ -15,6 +15,7 @@ import it.unibz.inf.ontop.pivotalrepr.equivalence.IQSyntacticEquivalenceChecker;
 import it.unibz.inf.ontop.pivotalrepr.impl.*;
 import it.unibz.inf.ontop.pivotalrepr.impl.tree.DefaultIntermediateQueryBuilder;
 import it.unibz.inf.ontop.pivotalrepr.proposal.InvalidQueryOptimizationProposalException;
+import it.unibz.inf.ontop.pivotalrepr.proposal.NodeCentricOptimizationResults;
 import it.unibz.inf.ontop.pivotalrepr.proposal.impl.UnionLiftProposalImpl;
 import it.unibz.inf.ontop.sql.DBMetadataExtractor;
 import org.junit.Test;
@@ -253,6 +254,399 @@ public class UnionLiftInternalTest {
         System.out.println("\n Expected query: \n" +  expectedQuery);
 
         assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, expectedQuery));
+    }
+
+    @Test
+    public void unionLiftFirstUnion () throws EmptyQueryException {
+
+        /**
+         * Original Query
+         */
+
+        AtomPredicate TABLE_1 = new AtomPredicateImpl("table1", 2);
+        AtomPredicate TABLE_2 = new AtomPredicateImpl("table2", 2);
+        AtomPredicate TABLE_3 = new AtomPredicateImpl("table3", 2);
+        AtomPredicate TABLE_4 = new AtomPredicateImpl("table4", 2);
+        AtomPredicate TABLE_5 = new AtomPredicateImpl("table5", 3);
+
+        DistinctVariableOnlyDataAtom ROOT_CONSTRUCTION_NODE_ATOM =
+                DATA_FACTORY.getDistinctVariableOnlyDataAtom(
+                        P3_PREDICATE, ImmutableList.of(A, B, C));
+
+        IntermediateQueryBuilder originalBuilder = new DefaultIntermediateQueryBuilder(metadata);
+
+        ConstructionNode rootConstructionNode = new ConstructionNodeImpl(ROOT_CONSTRUCTION_NODE_ATOM.getVariables(),
+                new ImmutableSubstitutionImpl<>(ImmutableMap.of()), Optional.empty());
+
+        UnionNode unionNode1  = new UnionNodeImpl(ImmutableSet.of(A, B, C));
+        InnerJoinNode joinNode = new InnerJoinNodeImpl(Optional.empty());
+        UnionNode unionNode21 = new UnionNodeImpl(ImmutableSet.of(A, B));
+        UnionNode unionNode22  = new UnionNodeImpl(ImmutableSet.of(A, C));
+
+        ExtensionalDataNode table1DataNode = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE_1, A, B));
+        ExtensionalDataNode table2DataNode = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE_2, A, B));
+        ExtensionalDataNode table3DataNode = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE_3, A, B));
+        ExtensionalDataNode table4DataNode = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE_4, A, C));
+        ExtensionalDataNode table5DataNode = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE_5, A, B, C));
+
+        originalBuilder.init(ROOT_CONSTRUCTION_NODE_ATOM, rootConstructionNode);
+        originalBuilder.addChild(rootConstructionNode, unionNode1);
+        originalBuilder.addChild(unionNode1, joinNode);
+        originalBuilder.addChild(unionNode1, table5DataNode);
+        originalBuilder.addChild(joinNode, table4DataNode);
+        originalBuilder.addChild(joinNode, unionNode21);
+        originalBuilder.addChild(joinNode, unionNode22);
+        originalBuilder.addChild(unionNode21, table1DataNode);
+        originalBuilder.addChild(unionNode21, table2DataNode);
+        originalBuilder.addChild(unionNode21, table3DataNode);
+        originalBuilder.addChild(unionNode22, table4DataNode.clone());
+        originalBuilder.addChild(unionNode22, table5DataNode.clone());
+
+
+        IntermediateQuery originalQuery = originalBuilder.build();
+
+        System.out.println("\n Original query: \n" +  originalQuery);
+
+        NodeCentricOptimizationResults<UnionNode> unionNodeNodeCentricOptimizationResults = originalQuery.applyProposal(new UnionLiftProposalImpl(unionNode21, joinNode));
+        IntermediateQuery optimizedQuery = unionNodeNodeCentricOptimizationResults
+                .getResultingQuery();
+
+        System.out.println("\n Optimized query: \n" +  optimizedQuery);
+
+        /**
+         * Expected Query
+         */
+        IntermediateQueryBuilder expectedBuilder = new DefaultIntermediateQueryBuilder(metadata);
+
+        UnionNode unionNode3 = new UnionNodeImpl(ImmutableSet.of(A, B, C));
+        UnionNode unionNode4 = new UnionNodeImpl(ImmutableSet.of(A, B, C));
+        InnerJoinNode joinNode2 = new InnerJoinNodeImpl(Optional.empty());
+        InnerJoinNode joinNode3 = new InnerJoinNodeImpl(Optional.empty());
+        InnerJoinNode joinNode4 = new InnerJoinNodeImpl(Optional.empty());
+        UnionNode unionNode5 = new UnionNodeImpl(ImmutableSet.of(A, C));
+        UnionNode unionNode6 = new UnionNodeImpl(ImmutableSet.of(A, C));
+        UnionNode unionNode7 = new UnionNodeImpl(ImmutableSet.of(A, C));
+
+        expectedBuilder.init(ROOT_CONSTRUCTION_NODE_ATOM, rootConstructionNode);
+        expectedBuilder.addChild(rootConstructionNode, unionNode3);
+        expectedBuilder.addChild(unionNode3, unionNode4);
+        expectedBuilder.addChild(unionNode3, table5DataNode);
+        expectedBuilder.addChild(unionNode4, joinNode2);
+        expectedBuilder.addChild(unionNode4, joinNode3);
+        expectedBuilder.addChild(unionNode4, joinNode4);
+        expectedBuilder.addChild(joinNode2, table4DataNode);
+        expectedBuilder.addChild(joinNode2, table1DataNode);
+        expectedBuilder.addChild(joinNode2, unionNode5);
+        expectedBuilder.addChild(unionNode5, table4DataNode.clone());
+        expectedBuilder.addChild(unionNode5, table5DataNode.clone());
+        expectedBuilder.addChild(joinNode3, table4DataNode.clone());
+        expectedBuilder.addChild(joinNode3, table2DataNode);
+        expectedBuilder.addChild(joinNode3, unionNode6);
+        expectedBuilder.addChild(unionNode6, table4DataNode.clone());
+        expectedBuilder.addChild(unionNode6, table5DataNode.clone());
+        expectedBuilder.addChild(joinNode4, table4DataNode.clone());
+        expectedBuilder.addChild(joinNode4, table3DataNode);
+        expectedBuilder.addChild(joinNode4, unionNode7);
+        expectedBuilder.addChild(unionNode7, table4DataNode.clone());
+        expectedBuilder.addChild(unionNode7, table5DataNode.clone());
+
+        IntermediateQuery expectedQuery = expectedBuilder.build();
+
+        System.out.println("\n Expected query: \n" +  expectedQuery);
+
+        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, expectedQuery));
+    }
+
+    @Test
+    public void unionLiftSecondUnion () throws EmptyQueryException {
+
+        /**
+         * Original Query
+         */
+
+        AtomPredicate TABLE_1 = new AtomPredicateImpl("table1", 2);
+        AtomPredicate TABLE_2 = new AtomPredicateImpl("table2", 2);
+        AtomPredicate TABLE_3 = new AtomPredicateImpl("table3", 2);
+        AtomPredicate TABLE_4 = new AtomPredicateImpl("table4", 2);
+        AtomPredicate TABLE_5 = new AtomPredicateImpl("table5", 3);
+
+        DistinctVariableOnlyDataAtom ROOT_CONSTRUCTION_NODE_ATOM =
+                DATA_FACTORY.getDistinctVariableOnlyDataAtom(
+                        P3_PREDICATE, ImmutableList.of(A, B, C));
+
+        IntermediateQueryBuilder originalBuilder = new DefaultIntermediateQueryBuilder(metadata);
+
+        ConstructionNode rootConstructionNode = new ConstructionNodeImpl(ROOT_CONSTRUCTION_NODE_ATOM.getVariables(),
+                new ImmutableSubstitutionImpl<>(ImmutableMap.of()), Optional.empty());
+
+        UnionNode unionNode1  = new UnionNodeImpl(ImmutableSet.of(A, B, C));
+        InnerJoinNode joinNode = new InnerJoinNodeImpl(Optional.empty());
+        UnionNode unionNode21 = new UnionNodeImpl(ImmutableSet.of(A, B));
+        UnionNode unionNode22  = new UnionNodeImpl(ImmutableSet.of(A, C));
+
+        ExtensionalDataNode table1DataNode = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE_1, A, B));
+        ExtensionalDataNode table2DataNode = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE_2, A, B));
+        ExtensionalDataNode table3DataNode = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE_3, A, B));
+        ExtensionalDataNode table4DataNode = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE_4, A, C));
+        ExtensionalDataNode table5DataNode = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE_5, A, B, C));
+
+        originalBuilder.init(ROOT_CONSTRUCTION_NODE_ATOM, rootConstructionNode);
+        originalBuilder.addChild(rootConstructionNode, unionNode1);
+        originalBuilder.addChild(unionNode1, joinNode);
+        originalBuilder.addChild(unionNode1, table5DataNode);
+        originalBuilder.addChild(joinNode, table4DataNode);
+        originalBuilder.addChild(joinNode, unionNode21);
+        originalBuilder.addChild(joinNode, unionNode22);
+        originalBuilder.addChild(unionNode21, table1DataNode);
+        originalBuilder.addChild(unionNode21, table2DataNode);
+        originalBuilder.addChild(unionNode21, table3DataNode);
+        originalBuilder.addChild(unionNode22, table4DataNode.clone());
+        originalBuilder.addChild(unionNode22, table5DataNode.clone());
+
+
+        IntermediateQuery originalQuery = originalBuilder.build();
+
+        System.out.println("\n Original query: \n" +  originalQuery);
+
+        NodeCentricOptimizationResults<UnionNode> unionNodeNodeCentricOptimizationResults = originalQuery.applyProposal(new UnionLiftProposalImpl(unionNode22, joinNode));
+        IntermediateQuery optimizedQuery = unionNodeNodeCentricOptimizationResults
+                .getResultingQuery();
+
+        System.out.println("\n Optimized query: \n" +  optimizedQuery);
+
+        /**
+         * Expected Query
+         */
+        IntermediateQueryBuilder expectedBuilder = new DefaultIntermediateQueryBuilder(metadata);
+
+        UnionNode unionNode3 = new UnionNodeImpl(ImmutableSet.of(A, B, C));
+        UnionNode unionNode4 = new UnionNodeImpl(ImmutableSet.of(A, B, C));
+        InnerJoinNode joinNode2 = new InnerJoinNodeImpl(Optional.empty());
+        InnerJoinNode joinNode3 = new InnerJoinNodeImpl(Optional.empty());
+        UnionNode unionNode5 = new UnionNodeImpl(ImmutableSet.of(A, B));
+        UnionNode unionNode6 = new UnionNodeImpl(ImmutableSet.of(A, B));
+
+
+        expectedBuilder.init(ROOT_CONSTRUCTION_NODE_ATOM, rootConstructionNode);
+        expectedBuilder.addChild(rootConstructionNode, unionNode3);
+        expectedBuilder.addChild(unionNode3, unionNode4);
+        expectedBuilder.addChild(unionNode3, table5DataNode);
+        expectedBuilder.addChild(unionNode4, joinNode2);
+        expectedBuilder.addChild(unionNode4, joinNode3);
+        expectedBuilder.addChild(joinNode2, table4DataNode);
+        expectedBuilder.addChild(joinNode2, unionNode5);
+        expectedBuilder.addChild(joinNode2, table4DataNode.clone());
+        expectedBuilder.addChild(unionNode5, table1DataNode.clone());
+        expectedBuilder.addChild(unionNode5, table2DataNode.clone());
+        expectedBuilder.addChild(unionNode5, table3DataNode.clone());
+        expectedBuilder.addChild(joinNode3, table4DataNode.clone());
+        expectedBuilder.addChild(joinNode3, unionNode6);
+        expectedBuilder.addChild(joinNode3, table5DataNode.clone());
+        expectedBuilder.addChild(unionNode6, table1DataNode.clone());
+        expectedBuilder.addChild(unionNode6, table2DataNode.clone());
+        expectedBuilder.addChild(unionNode6, table3DataNode.clone());
+
+        IntermediateQuery expectedQuery = expectedBuilder.build();
+
+        System.out.println("\n Expected query: \n" +  expectedQuery);
+
+        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, expectedQuery));
+    }
+
+    @Test
+    public void unionLiftDoubleLift () throws EmptyQueryException {
+
+        /**
+         * Original Query
+         */
+
+        AtomPredicate TABLE_1 = new AtomPredicateImpl("table1", 2);
+        AtomPredicate TABLE_2 = new AtomPredicateImpl("table2", 2);
+        AtomPredicate TABLE_3 = new AtomPredicateImpl("table3", 2);
+        AtomPredicate TABLE_4 = new AtomPredicateImpl("table4", 2);
+        AtomPredicate TABLE_5 = new AtomPredicateImpl("table5", 3);
+
+        DistinctVariableOnlyDataAtom ROOT_CONSTRUCTION_NODE_ATOM =
+                DATA_FACTORY.getDistinctVariableOnlyDataAtom(
+                        P3_PREDICATE, ImmutableList.of(A, B, C));
+
+        IntermediateQueryBuilder originalBuilder = new DefaultIntermediateQueryBuilder(metadata);
+
+        ConstructionNode rootConstructionNode = new ConstructionNodeImpl(ROOT_CONSTRUCTION_NODE_ATOM.getVariables(),
+                new ImmutableSubstitutionImpl<>(ImmutableMap.of()), Optional.empty());
+
+        UnionNode unionNode1  = new UnionNodeImpl(ImmutableSet.of(A, B, C));
+        InnerJoinNode joinNode = new InnerJoinNodeImpl(Optional.empty());
+        UnionNode unionNode21 = new UnionNodeImpl(ImmutableSet.of(A, B));
+        UnionNode unionNode22  = new UnionNodeImpl(ImmutableSet.of(A, C));
+        InnerJoinNode joinNode1 = new InnerJoinNodeImpl(Optional.empty());
+
+        ExtensionalDataNode table1DataNode = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE_1, A, B));
+        ExtensionalDataNode table2DataNode = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE_2, A, B));
+        ExtensionalDataNode table3DataNode = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE_3, A, B));
+        ExtensionalDataNode table4DataNode = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE_4, A, C));
+        ExtensionalDataNode table5DataNode = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE_5, A, B, C));
+
+        originalBuilder.init(ROOT_CONSTRUCTION_NODE_ATOM, rootConstructionNode);
+        originalBuilder.addChild(rootConstructionNode, unionNode1);
+        originalBuilder.addChild(unionNode1, joinNode);
+        originalBuilder.addChild(unionNode1, table5DataNode);
+
+        originalBuilder.addChild(joinNode, unionNode21);
+        originalBuilder.addChild(joinNode, unionNode22);
+        originalBuilder.addChild(joinNode, table4DataNode);
+        originalBuilder.addChild(unionNode21, table1DataNode);
+        originalBuilder.addChild(unionNode21, table2DataNode);
+        originalBuilder.addChild(unionNode21, table3DataNode);
+        originalBuilder.addChild(unionNode22, table4DataNode.clone());
+        originalBuilder.addChild(unionNode22, table5DataNode.clone());
+        originalBuilder.addChild(unionNode22, joinNode1);
+        originalBuilder.addChild(joinNode1, table4DataNode.clone());
+        originalBuilder.addChild(joinNode1, table4DataNode.clone());
+
+
+
+        IntermediateQuery originalQuery = originalBuilder.build();
+
+        System.out.println("\n Original query: \n" +  originalQuery);
+
+        NodeCentricOptimizationResults<UnionNode> unionNodeNodeCentricOptimizationResults = originalQuery.applyProposal(new UnionLiftProposalImpl(unionNode21, joinNode));
+        IntermediateQuery optimizedQuery = unionNodeNodeCentricOptimizationResults
+                .getResultingQuery();
+
+        System.out.println("\n Optimized query: \n" +  optimizedQuery);
+
+        /**
+         * Expected Query
+         */
+        IntermediateQueryBuilder expectedBuilder = new DefaultIntermediateQueryBuilder(metadata);
+
+        UnionNode unionNode3 = new UnionNodeImpl(ImmutableSet.of(A, B, C));
+        UnionNode unionNode4 = new UnionNodeImpl(ImmutableSet.of(A, B, C));
+        UnionNode unionNode5 = new UnionNodeImpl(ImmutableSet.of(A,C));
+        UnionNode unionNode6 = new UnionNodeImpl(ImmutableSet.of(A,C));
+        UnionNode unionNode7 = new UnionNodeImpl(ImmutableSet.of(A,C));
+        InnerJoinNode joinNode2 = new InnerJoinNodeImpl(Optional.empty());
+        InnerJoinNode joinNode3 = new InnerJoinNodeImpl(Optional.empty());
+        InnerJoinNode joinNode4 = new InnerJoinNodeImpl(Optional.empty());
+        InnerJoinNode joinNode5 = new InnerJoinNodeImpl(Optional.empty());
+        InnerJoinNode joinNode6 = new InnerJoinNodeImpl(Optional.empty());
+        InnerJoinNode joinNode7 = new InnerJoinNodeImpl(Optional.empty());
+
+
+        expectedBuilder.init(ROOT_CONSTRUCTION_NODE_ATOM, rootConstructionNode);
+        expectedBuilder.addChild(rootConstructionNode, unionNode3);
+        expectedBuilder.addChild(unionNode3, unionNode4);
+        expectedBuilder.addChild(unionNode3, table5DataNode);
+        expectedBuilder.addChild(unionNode4, joinNode2);
+        expectedBuilder.addChild(unionNode4, joinNode3);
+        expectedBuilder.addChild(unionNode4, joinNode4);
+        expectedBuilder.addChild(joinNode2, table1DataNode);
+        expectedBuilder.addChild(joinNode2, unionNode5);
+        expectedBuilder.addChild(unionNode5, table4DataNode.clone());
+        expectedBuilder.addChild(unionNode5, table5DataNode.clone());
+        expectedBuilder.addChild(unionNode5, joinNode5);
+        expectedBuilder.addChild(joinNode5, table4DataNode.clone());
+        expectedBuilder.addChild(joinNode5, table4DataNode.clone());
+        expectedBuilder.addChild(joinNode2, table4DataNode);
+        expectedBuilder.addChild(joinNode3, table2DataNode);
+        expectedBuilder.addChild(joinNode3, unionNode6);
+        expectedBuilder.addChild(unionNode6, table4DataNode.clone());
+        expectedBuilder.addChild(unionNode6, table5DataNode.clone());
+        expectedBuilder.addChild(unionNode6, joinNode6);
+        expectedBuilder.addChild(joinNode6, table4DataNode.clone());
+        expectedBuilder.addChild(joinNode6, table4DataNode.clone());
+        expectedBuilder.addChild(joinNode3, table4DataNode.clone());
+        expectedBuilder.addChild(joinNode4, table3DataNode);
+        expectedBuilder.addChild(joinNode4, unionNode7);
+        expectedBuilder.addChild(unionNode7, table4DataNode.clone());
+        expectedBuilder.addChild(unionNode7, table5DataNode.clone());
+        expectedBuilder.addChild(unionNode7, joinNode7);
+        expectedBuilder.addChild(joinNode7, table4DataNode.clone());
+        expectedBuilder.addChild(joinNode7, table4DataNode.clone());
+        expectedBuilder.addChild(joinNode4, table4DataNode.clone());
+
+        IntermediateQuery expectedQuery = expectedBuilder.build();
+
+        System.out.println("\n Expected query: \n" +  expectedQuery);
+
+        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, expectedQuery));
+
+
+        System.out.println("\n Continue from the expected query: \n" +  expectedQuery);
+
+        NodeCentricOptimizationResults<UnionNode> unionNodeNodeCentricOptimizationResults2 = expectedQuery.applyProposal(new UnionLiftProposalImpl(unionNode5, joinNode2));
+        IntermediateQuery optimizedQuery2 = unionNodeNodeCentricOptimizationResults2
+                .getResultingQuery();
+
+        System.out.println("\n Optimized query: \n" +  optimizedQuery2);
+
+        /**
+         * Second Expected Query
+         */
+        IntermediateQueryBuilder expectedBuilder2 = new DefaultIntermediateQueryBuilder(metadata);
+
+        UnionNode unionNode8 = new UnionNodeImpl(ImmutableSet.of(A, B, C));
+        UnionNode unionNode9 = new UnionNodeImpl(ImmutableSet.of(A, B, C));
+        UnionNode unionNode10 = new UnionNodeImpl(ImmutableSet.of(A, B, C));
+        UnionNode unionNode11 = new UnionNodeImpl(ImmutableSet.of(A,C));
+        UnionNode unionNode12 = new UnionNodeImpl(ImmutableSet.of(A,C));
+        InnerJoinNode joinNode8 = new InnerJoinNodeImpl(Optional.empty());
+        InnerJoinNode joinNode9 = new InnerJoinNodeImpl(Optional.empty());
+        InnerJoinNode joinNode10 = new InnerJoinNodeImpl(Optional.empty());
+        InnerJoinNode joinNode11 = new InnerJoinNodeImpl(Optional.empty());
+        InnerJoinNode joinNode12 = new InnerJoinNodeImpl(Optional.empty());
+        InnerJoinNode joinNode13 = new InnerJoinNodeImpl(Optional.empty());
+        InnerJoinNode joinNode14 = new InnerJoinNodeImpl(Optional.empty());
+        InnerJoinNode joinNode15 = new InnerJoinNodeImpl(Optional.empty());
+
+
+        expectedBuilder2.init(ROOT_CONSTRUCTION_NODE_ATOM, rootConstructionNode);
+        expectedBuilder2.addChild(rootConstructionNode, unionNode8);
+        expectedBuilder2.addChild(unionNode8, unionNode9);
+        expectedBuilder2.addChild(unionNode8, table5DataNode);
+        expectedBuilder2.addChild(unionNode9, unionNode10);
+        expectedBuilder2.addChild(unionNode9, joinNode9);
+        expectedBuilder2.addChild(unionNode9, joinNode10);
+        expectedBuilder2.addChild(unionNode10, joinNode8);
+        expectedBuilder2.addChild(joinNode8, table1DataNode.clone());
+        expectedBuilder2.addChild(joinNode8, table4DataNode.clone());
+        expectedBuilder2.addChild(joinNode8, table4DataNode.clone());
+        expectedBuilder2.addChild(unionNode10, joinNode11);
+        expectedBuilder2.addChild(joinNode11, table1DataNode.clone());
+        expectedBuilder2.addChild(joinNode11, table5DataNode.clone());
+        expectedBuilder2.addChild(joinNode11, table4DataNode.clone());
+        expectedBuilder2.addChild(unionNode10, joinNode12);
+        expectedBuilder2.addChild(joinNode12, table1DataNode.clone());
+        expectedBuilder2.addChild(joinNode12, joinNode13);
+        expectedBuilder2.addChild(joinNode12, table4DataNode.clone());
+        expectedBuilder2.addChild(joinNode13, table4DataNode.clone());
+        expectedBuilder2.addChild(joinNode13, table4DataNode.clone());
+        expectedBuilder2.addChild(joinNode9, table2DataNode.clone());
+        expectedBuilder2.addChild(joinNode9, unionNode11);
+        expectedBuilder2.addChild(unionNode11,  table4DataNode.clone());
+        expectedBuilder2.addChild(unionNode11,  table5DataNode.clone());
+        expectedBuilder2.addChild(unionNode11,  joinNode14);
+        expectedBuilder2.addChild(joinNode14, table4DataNode.clone());
+        expectedBuilder2.addChild(joinNode14, table4DataNode.clone());
+        expectedBuilder2.addChild(joinNode9, table4DataNode.clone());
+        expectedBuilder2.addChild(joinNode10, table3DataNode.clone());
+        expectedBuilder2.addChild(joinNode10, unionNode12);
+        expectedBuilder2.addChild(unionNode12,  table4DataNode.clone());
+        expectedBuilder2.addChild(unionNode12,  table5DataNode.clone());
+        expectedBuilder2.addChild(unionNode12,  joinNode15);
+        expectedBuilder2.addChild(joinNode15, table4DataNode.clone());
+        expectedBuilder2.addChild(joinNode15, table4DataNode.clone());
+        expectedBuilder2.addChild(joinNode10, table4DataNode.clone());
+
+
+
+
+        IntermediateQuery expectedQuery2 = expectedBuilder2.build();
+
+        System.out.println("\n Expected query: \n" +  expectedQuery2);
+
+        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery2, expectedQuery2));
     }
 
     @Test(expected = InvalidQueryOptimizationProposalException.class)
