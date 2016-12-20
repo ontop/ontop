@@ -18,7 +18,7 @@
       :query-6
       :query-7
       :query-8
-      :query-10  # original query
+     #:query-10  # original query
       :query-10b # with modification, removing casting call xsd:double(str(?price)) in ORDER BY
       :query-11
 

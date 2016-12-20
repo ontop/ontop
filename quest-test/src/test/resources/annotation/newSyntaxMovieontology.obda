@@ -38,10 +38,6 @@ mappingId	Person has Birth Date
 target		imdb:name/{person_id} dbpedia:birthDate {dob}^^xsd:string . 
 source		select person_id, info as dob from person_info where info_type_id = 21
 
-mappingId	BirthDate has Label
-target		dbpedia:birthDate rdfs:label <{dob}> .
-source		select person_id, info as dob from person_info where info_type_id = 21
-
 mappingId	Person has Birth Name
 target		imdb:name/{person_id} dbpedia:birthName {name}^^xsd:string .
 source		select name.id as person_id, name.name as name from name

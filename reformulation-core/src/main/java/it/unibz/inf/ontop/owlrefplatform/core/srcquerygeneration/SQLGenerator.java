@@ -1600,14 +1600,15 @@ public class SQLGenerator implements SQLQueryGenerator {
 			URIConstant uc = (URIConstant) t;
 			return sqladapter.getSQLLexicalFormString(uc.getURI());
 		}
-
-		/*
-		 * Unsupported case
+		/**
+		 * Complex first argument: treats it as a string and ignore other arguments
 		 */
-		throw new IllegalArgumentException(
-				"Error, cannot generate URI constructor clause for a term: "
-						+ ov.toString());
-
+		else {
+			/*
+			 * The function is for example of the form uri(CONCAT("string",x)),we simply return the value from the database.
+			 */
+			return getSQLString(t, index, false);
+		}
 	}
 
 	// TODO: move to SQLAdapter
