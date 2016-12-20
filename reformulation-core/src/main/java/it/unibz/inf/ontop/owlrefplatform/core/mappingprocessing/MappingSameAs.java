@@ -20,10 +20,12 @@ package it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing;
  * #L%
  */
 
+import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
 import it.unibz.inf.ontop.utils.IDGenerator;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.*;
 
@@ -184,31 +186,20 @@ public class MappingSameAs {
     /* add the inverse of the same as present in the mapping */
 
     public static Collection<OBDAMappingAxiom> addSameAsInverse(Collection<OBDAMappingAxiom> mappings) {
+        final ImmutableList<OBDAMappingAxiom> newMappingsForInverseSameAs = mappings.stream()
+                // the targets are already split. We have only one target atom
+                .filter(map -> map.getTargetQuery().get(0).getFunctionSymbol().getName().equals(OBDAVocabulary.SAME_AS))
+                .map(map -> {
+                    Function target = map.getTargetQuery().get(0);
+                    String newId = IDGenerator.getNextUniqueID(map.getId() + "#");
+                    Function inverseAtom = fac.getFunction(target.getFunctionSymbol(), target.getTerm(1), target.getTerm(0));
+                    return fac.getRDBMSMappingAxiom(newId, map.getSourceQuery(), ImmutableList.of(inverseAtom));
+                })
+                .collect(ImmutableCollectors.toList());
 
+        mappings.addAll(newMappingsForInverseSameAs);
 
-        Collection<OBDAMappingAxiom> results = new LinkedList<>();
-        for (OBDAMappingAxiom mapping : mappings) {
-            List<Function> body  = mapping.getTargetQuery();
-            List<Function> newTargetBody = new LinkedList<>();
-
-
-            for (Function atom : body) {
-                Predicate p = atom.getFunctionSymbol();
-
-                if(p.getName().equals(OBDAVocabulary.SAME_AS)){
-                    Predicate pred = fac.getObjectPropertyPredicate(p.getName());
-                    //need to add also the inverse
-                    Function inverseAtom = fac.getFunction(pred, atom.getTerm(1), atom.getTerm(0));
-                    newTargetBody.add(inverseAtom);
-
-                }
-
-            }
-            String newId = IDGenerator.getNextUniqueID(mapping.getId() + "#");
-//            CQIE newTargetQuery = fac.getCQIE(targetQuery.getHead(), newTargetBody);
-            results.add(fac.getRDBMSMappingAxiom(newId, mapping.getSourceQuery(), newTargetBody));
-        }
-        return results;
+        return mappings;
     }
 }
 

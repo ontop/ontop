@@ -20,7 +20,10 @@ import it.unibz.inf.ontop.owlrefplatform.core.unfolding.DatalogUnfolder;
 import it.unibz.inf.ontop.parser.PreprocessProjection;
 import it.unibz.inf.ontop.pivotalrepr.MetadataForQueryOptimization;
 import it.unibz.inf.ontop.pivotalrepr.impl.MetadataForQueryOptimizationImpl;
-import it.unibz.inf.ontop.sql.*;
+import it.unibz.inf.ontop.sql.DBMetadata;
+import it.unibz.inf.ontop.sql.DatabaseRelationDefinition;
+import it.unibz.inf.ontop.sql.Relation2DatalogPredicate;
+import it.unibz.inf.ontop.sql.RelationID;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.Mapping2DatalogConverter;
 import it.unibz.inf.ontop.utils.MappingSplitter;
@@ -85,11 +88,6 @@ public class QuestUnfolder {
 
 		mappings = vocabularyValidator.replaceEquivalences(mappings);
 
-		/**
-		 * add sameAsInverse
-		 */
-		mappings.addAll(MappingSameAs.addSameAsInverse(mappings));
-
 		/** 
 		 * Substitute select * with column names  (performs the operation `in place')
 		 */
@@ -105,7 +103,14 @@ public class QuestUnfolder {
 		 */
 		MetaMappingExpander metaMappingExpander = new MetaMappingExpander(localConnection, metadata.getQuotedIDFactory());
 		Collection<OBDAMappingAxiom> expandedMappings = metaMappingExpander.expand(splittedMappings);
-		
+
+		/*
+         * add sameAsInverse
+         */
+		if (sameAs) {
+			expandedMappings = MappingSameAs.addSameAsInverse(expandedMappings);
+		}
+
 		List<CQIE> unfoldingProgram = Mapping2DatalogConverter.constructDatalogProgram(expandedMappings, metadata);
 		
 		

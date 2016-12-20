@@ -268,7 +268,7 @@ public class H2SameAsTest {
 		expectedResults.add("<http://ontop.inf.unibz.it/test/wellbore#finland-2>");
 		expectedResults.add("\"Eljas\"");
 		expectedResults.add("\"100\"^^xsd:integer");
-		assertEquals(expectedResults.size(), results.size() );
+		assertEquals(15, results.size() );
 		assertEquals(expectedResults, results);
 
     }
@@ -285,7 +285,7 @@ public class H2SameAsTest {
 
 	}
 
-	@Test
+	@Test //missing the inverse
 	public void testNoSameAs2b() throws Exception {
 		String query =  "PREFIX : <http://ontop.inf.unibz.it/test/wellbore#>" +
 				"PREFIX owl: <http://www.w3.org/2002/07/owl#>" +
@@ -293,7 +293,7 @@ public class H2SameAsTest {
 
 		// Bind (?n ?y)
 		ArrayList<String> results = runTests(query, false);
-		assertEquals(15, results.size() );
+		assertEquals(12, results.size() );
 
 	}
 
