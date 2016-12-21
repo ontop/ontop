@@ -27,6 +27,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Locale;
 
+import com.ibm.db2.jcc.am.re;
 import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.model.OBDADataFactory;
 import it.unibz.inf.ontop.model.Predicate;
@@ -116,13 +117,17 @@ public abstract class AbstractBindTestWithFunctions {
                 + "   BIND (CEIL(?discount) AS ?w)\n"
                 + "}";
 
+        checkReturnedValues(queryBind, getCeilExpectedValues());
+    }
 
+    protected List<String> getCeilExpectedValues() {
         List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"1.0\"^^xsd:decimal");
-        expectedValues.add("\"1.0\"^^xsd:decimal");
-        expectedValues.add("\"1.0\"^^xsd:decimal");
-        expectedValues.add("\"1.0\"^^xsd:decimal");
-        checkReturnedValues(queryBind, expectedValues);
+        expectedValues.add("\"1\"^^xsd:decimal");
+        expectedValues.add("\"1\"^^xsd:decimal");
+        expectedValues.add("\"1\"^^xsd:decimal");
+        expectedValues.add("\"1\"^^xsd:decimal");
+
+        return expectedValues;
     }
 
 
@@ -520,13 +525,17 @@ public abstract class AbstractBindTestWithFunctions {
                 + "   BIND (MONTH(?year) AS ?w)\n"
                 + "}";
 
+        checkReturnedValues(queryBind, getMonthExpectedValues());
+    }
 
+    protected List<String> getMonthExpectedValues() {
         List<String> expectedValues = new ArrayList<>();
         expectedValues.add("\"6\"^^xsd:integer");
         expectedValues.add("\"12\"^^xsd:integer");
         expectedValues.add("\"9\"^^xsd:integer");
         expectedValues.add("\"11\"^^xsd:integer");
-        checkReturnedValues(queryBind, expectedValues);
+
+        return expectedValues;
     }
 
     @Test
@@ -543,13 +552,17 @@ public abstract class AbstractBindTestWithFunctions {
                 + "   BIND (YEAR(?year) AS ?w)\n"
                 + "}";
 
+        checkReturnedValues(queryBind, getYearExpectedValues());
+    }
 
+    protected List<String> getYearExpectedValues() {
         List<String> expectedValues = new ArrayList<>();
         expectedValues.add("\"2014\"^^xsd:integer");
         expectedValues.add("\"2011\"^^xsd:integer");
-        expectedValues.add("\"1866\"^^xsd:integer");
+        expectedValues.add("\"2015\"^^xsd:integer");
         expectedValues.add("\"1967\"^^xsd:integer");
-        checkReturnedValues(queryBind, expectedValues);
+
+        return expectedValues;
     }
 
     @Test
@@ -565,13 +578,17 @@ public abstract class AbstractBindTestWithFunctions {
                 + "   BIND (DAY(?year) AS ?w)\n"
                 + "}";
 
+        checkReturnedValues(queryBind, getDayExpectedValues());
+    }
 
+    protected List<String> getDayExpectedValues() {
         List<String> expectedValues = new ArrayList<>();
         expectedValues.add("\"5\"^^xsd:integer");
         expectedValues.add("\"8\"^^xsd:integer");
         expectedValues.add("\"21\"^^xsd:integer");
         expectedValues.add("\"5\"^^xsd:integer");
-        checkReturnedValues(queryBind, expectedValues);
+
+        return expectedValues;
     }
 
     @Test
@@ -590,9 +607,9 @@ public abstract class AbstractBindTestWithFunctions {
 
         List<String> expectedValues = new ArrayList<>();
         expectedValues.add("\"47\"^^xsd:integer");
-        expectedValues.add("\"0\"^^xsd:integer");
-        expectedValues.add("\"0\"^^xsd:integer");
-        expectedValues.add("\"0\"^^xsd:integer");
+        expectedValues.add("\"30\"^^xsd:integer");
+        expectedValues.add("\"23\"^^xsd:integer");
+        expectedValues.add("\"50\"^^xsd:integer");
         checkReturnedValues(queryBind, expectedValues);
     }
 
@@ -637,13 +654,17 @@ public abstract class AbstractBindTestWithFunctions {
                 + "   BIND (SECONDS(?year) AS ?w)\n"
                 + "}";
 
+        checkReturnedValues(queryBind, getSecondsExpectedValues());
+    }
 
+    protected List<String> getSecondsExpectedValues() {
         List<String> expectedValues = new ArrayList<>();
         expectedValues.add("\"52\"^^xsd:decimal");
         expectedValues.add("\"0\"^^xsd:decimal");
+        expectedValues.add("\"6\"^^xsd:decimal");
         expectedValues.add("\"0\"^^xsd:decimal");
-        expectedValues.add("\"0\"^^xsd:decimal");
-        checkReturnedValues(queryBind, expectedValues);
+
+        return expectedValues;
     }
 
     @Test

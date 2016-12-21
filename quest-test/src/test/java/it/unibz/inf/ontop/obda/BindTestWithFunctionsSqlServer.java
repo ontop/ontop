@@ -69,4 +69,26 @@ public class BindTestWithFunctionsSqlServer extends AbstractBindTestWithFunction
         expectedValues.add("\"0.00, 10.00\"");
         return expectedValues;
     }
+
+    @Override
+    protected List<String> getCeilExpectedValues() {
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"1.0000\"^^xsd:decimal");
+        expectedValues.add("\"1.0000\"^^xsd:decimal");
+        expectedValues.add("\"1.0000\"^^xsd:decimal");
+        expectedValues.add("\"1.0000\"^^xsd:decimal");
+
+        return expectedValues;
+    }
+
+    @Override
+    protected List<String> getSecondsExpectedValues() {
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"52.0000\"^^xsd:decimal");
+        expectedValues.add("\"0.0000\"^^xsd:decimal");
+        expectedValues.add("\"6.0000\"^^xsd:decimal");
+        expectedValues.add("\"0.0000\"^^xsd:decimal");
+
+        return expectedValues;
+    }
 }

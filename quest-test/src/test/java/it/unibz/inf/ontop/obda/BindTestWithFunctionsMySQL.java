@@ -49,4 +49,24 @@ public class BindTestWithFunctionsMySQL extends AbstractBindTestWithFunctions {
         expectedValues.add("\"0, 10\"");
         return expectedValues;
     }
+
+    @Override
+    protected List<String> getYearExpectedValues() {
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"2014\"^^xsd:integer");
+        expectedValues.add("\"2011\"^^xsd:integer");
+        expectedValues.add("\"2015\"^^xsd:integer");
+        expectedValues.add("\"1970\"^^xsd:integer");
+
+        return expectedValues;
+    }
+
+    protected List<String> getAbsExpectedValues() {
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"9\"^^xsd:decimal");
+        expectedValues.add("\"6\"^^xsd:decimal");
+        expectedValues.add("\"7\"^^xsd:decimal");
+        expectedValues.add("\"2\"^^xsd:decimal");
+        return expectedValues;
+    }
 }

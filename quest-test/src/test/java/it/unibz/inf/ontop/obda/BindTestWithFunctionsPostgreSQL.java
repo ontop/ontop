@@ -78,4 +78,24 @@ public class BindTestWithFunctionsPostgreSQL extends AbstractBindTestWithFunctio
         expectedValues.add("\"0, 10\"");
         return expectedValues;
     }
+
+    protected List<String> getMonthExpectedValues() {
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"7\"^^xsd:integer");
+        expectedValues.add("\"12\"^^xsd:integer");
+        expectedValues.add("\"9\"^^xsd:integer");
+        expectedValues.add("\"11\"^^xsd:integer");
+
+        return expectedValues;
+    }
+
+    protected List<String> getDayExpectedValues() {
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"14\"^^xsd:integer");
+        expectedValues.add("\"8\"^^xsd:integer");
+        expectedValues.add("\"21\"^^xsd:integer");
+        expectedValues.add("\"5\"^^xsd:integer");
+
+        return expectedValues;
+    }
 }
