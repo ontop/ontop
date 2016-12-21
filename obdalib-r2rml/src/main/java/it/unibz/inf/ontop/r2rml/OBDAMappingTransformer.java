@@ -20,9 +20,8 @@ package it.unibz.inf.ontop.r2rml;
  * #L%
  */
 
-import eu.optique.api.mapping.*;
 import eu.optique.api.mapping.TermMap.TermMapType;
-import eu.optique.api.mapping.impl.sesame.SesameR2RMLMappingManagerFactory;
+import eu.optique.api.mapping.impl.rdf4j.RDF4JR2RMLMappingManagerFactory;
 import it.unibz.inf.ontop.io.PrefixManager;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
@@ -37,30 +36,23 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import org.openrdf.model.Resource;
-import org.openrdf.model.Statement;
-import org.openrdf.model.URI;
-import org.openrdf.model.ValueFactory;
-import org.openrdf.model.impl.ValueFactoryImpl;
-import it.unibz.inf.ontop.io.PrefixManager;
-import it.unibz.inf.ontop.utils.IDGenerator;
+import org.eclipse.rdf4j.model.Resource;
+import org.eclipse.rdf4j.model.Statement;
+import org.eclipse.rdf4j.model.URI;
+import org.eclipse.rdf4j.model.ValueFactory;
+import org.eclipse.rdf4j.model.impl.ValueFactoryImpl;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
-import java.util.Set;
+
 import eu.optique.api.mapping.LogicalTable;
 import eu.optique.api.mapping.MappingFactory;
 import eu.optique.api.mapping.ObjectMap;
 import eu.optique.api.mapping.PredicateMap;
 import eu.optique.api.mapping.PredicateObjectMap;
 import eu.optique.api.mapping.R2RMLMappingManager;
-import eu.optique.api.mapping.R2RMLMappingManagerFactory;
 import eu.optique.api.mapping.SubjectMap;
 import eu.optique.api.mapping.Template;
-import eu.optique.api.mapping.TermMap.TermMapType;
 import eu.optique.api.mapping.TriplesMap;
-import it.unibz.inf.ontop.model.*;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.*;
 import org.semanticweb.owlapi.search.EntitySearcher;
@@ -288,7 +280,7 @@ public class OBDAMappingTransformer {
 			mapping_id = "http://example.org/" + mapping_id;
 		Resource mainNode = vf.createURI(mapping_id);
 
-        R2RMLMappingManager mm = new SesameR2RMLMappingManagerFactory().getR2RMLMappingManager();
+        R2RMLMappingManager mm = new RDF4JR2RMLMappingManagerFactory().getR2RMLMappingManager();
 		MappingFactory mfact = mm.getMappingFactory();
 		
 		//Table

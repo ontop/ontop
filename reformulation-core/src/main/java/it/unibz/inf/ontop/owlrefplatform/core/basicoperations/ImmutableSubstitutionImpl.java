@@ -5,7 +5,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
-import org.openrdf.query.algebra.Var;
+import org.eclipse.rdf4j.query.algebra.Var;
 
 import java.util.AbstractMap;
 import java.util.Map;

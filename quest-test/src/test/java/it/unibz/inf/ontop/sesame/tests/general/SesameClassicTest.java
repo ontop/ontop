@@ -24,24 +24,24 @@ import java.io.IOException;
 
 import junit.framework.TestCase;
 
-import org.openrdf.model.Literal;
-import org.openrdf.model.Statement;
-import org.openrdf.model.Value;
-import org.openrdf.model.ValueFactory;
-import org.openrdf.model.vocabulary.RDF;
-import org.openrdf.query.BindingSet;
-import org.openrdf.query.BooleanQuery;
-import org.openrdf.query.GraphQuery;
-import org.openrdf.query.GraphQueryResult;
-import org.openrdf.query.MalformedQueryException;
-import org.openrdf.query.QueryEvaluationException;
-import org.openrdf.query.QueryLanguage;
-import org.openrdf.query.TupleQuery;
-import org.openrdf.query.TupleQueryResult;
-import org.openrdf.repository.Repository;
-import org.openrdf.repository.RepositoryException;
-import org.openrdf.rio.RDFFormat;
-import org.openrdf.rio.RDFParseException;
+import org.eclipse.rdf4j.model.Literal;
+import org.eclipse.rdf4j.model.Statement;
+import org.eclipse.rdf4j.model.Value;
+import org.eclipse.rdf4j.model.ValueFactory;
+import org.eclipse.rdf4j.model.vocabulary.RDF;
+import org.eclipse.rdf4j.query.BindingSet;
+import org.eclipse.rdf4j.query.BooleanQuery;
+import org.eclipse.rdf4j.query.GraphQuery;
+import org.eclipse.rdf4j.query.GraphQueryResult;
+import org.eclipse.rdf4j.query.MalformedQueryException;
+import org.eclipse.rdf4j.query.QueryEvaluationException;
+import org.eclipse.rdf4j.query.QueryLanguage;
+import org.eclipse.rdf4j.query.TupleQuery;
+import org.eclipse.rdf4j.query.TupleQueryResult;
+import org.eclipse.rdf4j.repository.Repository;
+import org.eclipse.rdf4j.repository.RepositoryException;
+import org.eclipse.rdf4j.rio.RDFFormat;
+import org.eclipse.rdf4j.rio.RDFParseException;
 import it.unibz.inf.ontop.sesame.RepositoryConnection;
 import it.unibz.inf.ontop.sesame.SesameClassicInMemoryRepo;
 
@@ -78,10 +78,10 @@ public class SesameClassicTest extends TestCase {
 		ValueFactory f = repo.getValueFactory();
 
 		// create some resources and literals to make statements out of
-		org.openrdf.model.URI alice = f.createURI(baseURI+"Alice");
-		org.openrdf.model.URI bob = f.createURI(baseURI+"Bob");
-		org.openrdf.model.URI age = f.createURI(baseURI + "age");
-		org.openrdf.model.URI person = f.createURI(baseURI+ "Person");
+		org.eclipse.rdf4j.model.URI alice = f.createURI(baseURI+"Alice");
+		org.eclipse.rdf4j.model.URI bob = f.createURI(baseURI+"Bob");
+		org.eclipse.rdf4j.model.URI age = f.createURI(baseURI + "age");
+		org.eclipse.rdf4j.model.URI person = f.createURI(baseURI+ "Person");
 		Literal bobsAge = f.createLiteral(5);
 		Literal alicesAge = f.createLiteral(14);
 

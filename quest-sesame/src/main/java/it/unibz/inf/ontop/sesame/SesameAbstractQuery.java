@@ -19,13 +19,13 @@
  */
 package it.unibz.inf.ontop.sesame;
 
-import org.openrdf.model.Literal;
-import org.openrdf.model.URI;
-import org.openrdf.model.Value;
-import org.openrdf.query.BindingSet;
-import org.openrdf.query.Dataset;
-import org.openrdf.query.Query;
-import org.openrdf.query.impl.MapBindingSet;
+import org.eclipse.rdf4j.model.Literal;
+import org.eclipse.rdf4j.model.URI;
+import org.eclipse.rdf4j.model.Value;
+import org.eclipse.rdf4j.query.BindingSet;
+import org.eclipse.rdf4j.query.Dataset;
+import org.eclipse.rdf4j.query.Query;
+import org.eclipse.rdf4j.query.impl.MapBindingSet;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestDBConnection;
 
 public abstract class SesameAbstractQuery implements Query {
@@ -95,7 +95,7 @@ public abstract class SesameAbstractQuery implements Query {
         this.queryTimeout = maxQueryTime;
     }
 
-    //all code below is copy-pasted from org.openrdf.repository.sparql.query.SPARQLOperation
+    //all code below is copy-pasted from org.eclipse.rdf4j.repository.sparql.query.SPARQLOperation
     protected String getQueryString() {
         if (bindings.size() == 0)
             return queryString;

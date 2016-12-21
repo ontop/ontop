@@ -7,12 +7,12 @@ import java.util.List;
 import java.util.Map;
 
 import it.unibz.inf.ontop.model.DatatypePredicate;
-import org.openrdf.model.URI;
-import org.openrdf.model.ValueFactory;
-import org.openrdf.model.impl.ValueFactoryImpl;
-import org.openrdf.model.vocabulary.RDF;
-import org.openrdf.model.vocabulary.RDFS;
-import org.openrdf.model.vocabulary.XMLSchema;
+import org.eclipse.rdf4j.model.URI;
+import org.eclipse.rdf4j.model.ValueFactory;
+import org.eclipse.rdf4j.model.impl.ValueFactoryImpl;
+import org.eclipse.rdf4j.model.vocabulary.RDF;
+import org.eclipse.rdf4j.model.vocabulary.RDFS;
+import org.eclipse.rdf4j.model.vocabulary.XMLSchema;
 
 import it.unibz.inf.ontop.model.DatatypeFactory;
 import it.unibz.inf.ontop.model.Predicate;
@@ -68,7 +68,7 @@ public class DatatypeFactoryImpl implements DatatypeFactory {
 		mapCOLTYPEtoPredicate.put(COL_TYPE.LITERAL_LANG, RDFS_LITERAL_LANG);
 	}
 	
-	private DatatypePredicate registerType(org.openrdf.model.URI uri, COL_TYPE type) {
+	private DatatypePredicate registerType(org.eclipse.rdf4j.model.URI uri, COL_TYPE type) {
 		String sURI = uri.toString();
 		mapURItoCOLTYPE.put(sURI, type);  
 		mapCOLTYPEtoURI.put(type, uri); 

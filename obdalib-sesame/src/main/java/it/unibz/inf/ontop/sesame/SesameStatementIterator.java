@@ -24,7 +24,7 @@ import it.unibz.inf.ontop.ontology.Assertion;
 
 import java.util.Iterator;
 
-import org.openrdf.model.Statement;
+import org.eclipse.rdf4j.model.Statement;
 import it.unibz.inf.ontop.ontology.Assertion;
 
 /***

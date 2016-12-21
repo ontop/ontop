@@ -21,7 +21,7 @@ package it.unibz.inf.ontop.quest.scenarios;
  */
 
 import it.unibz.inf.ontop.injection.QuestConfiguration;
-import org.openrdf.repository.Repository;
+import org.eclipse.rdf4j.repository.Repository;
 import it.unibz.inf.ontop.sesame.SesameVirtualRepo;
 
 public abstract class QuestVirtualScenarioParent extends QuestScenarioParent {

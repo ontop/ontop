@@ -28,18 +28,18 @@ import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestDBConnection;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestDBStatement;
 import it.unibz.inf.ontop.owlrefplatform.core.SIQuestDBStatement;
-import org.openrdf.OpenRDFUtil;
-import org.openrdf.model.*;
-import org.openrdf.model.impl.NamespaceImpl;
-import org.openrdf.model.impl.ValueFactoryImpl;
-import org.openrdf.query.*;
-import org.openrdf.query.parser.*;
-import org.openrdf.repository.Repository;
-import org.openrdf.repository.RepositoryException;
-import org.openrdf.repository.RepositoryResult;
-import org.openrdf.repository.UnknownTransactionStateException;
-import org.openrdf.rio.*;
-import org.openrdf.rio.helpers.BasicParserSettings;
+import org.eclipse.rdf4j.OpenRDFUtil;
+import org.eclipse.rdf4j.model.*;
+import org.eclipse.rdf4j.model.impl.NamespaceImpl;
+import org.eclipse.rdf4j.model.impl.ValueFactoryImpl;
+import org.eclipse.rdf4j.query.*;
+import org.eclipse.rdf4j.query.parser.*;
+import org.eclipse.rdf4j.repository.Repository;
+import org.eclipse.rdf4j.repository.RepositoryException;
+import org.eclipse.rdf4j.repository.RepositoryResult;
+import org.eclipse.rdf4j.repository.UnknownTransactionStateException;
+import org.eclipse.rdf4j.rio.*;
+import org.eclipse.rdf4j.rio.helpers.BasicParserSettings;
 
 import java.io.*;
 import java.net.URISyntaxException;
@@ -47,7 +47,7 @@ import java.net.URL;
 import java.sql.SQLException;
 import java.util.*;
 
-public class RepositoryConnection implements org.openrdf.repository.RepositoryConnection, AutoCloseable {
+public class RepositoryConnection implements org.eclipse.rdf4j.repository.RepositoryConnection, AutoCloseable {
 
 	private SesameAbstractRepo repository;
 	private QuestDBConnection questConn;
@@ -212,7 +212,7 @@ public class RepositoryConnection implements org.openrdf.repository.RepositoryCo
      }
 
 	@Override
-    public void add(Resource subject, org.openrdf.model.URI predicate, Value object, Resource... contexts)
+    public void add(Resource subject, org.eclipse.rdf4j.model.URI predicate, Value object, Resource... contexts)
 			throws RepositoryException {
 		//Adds a statement with the specified subject, predicate and object to this repository, 
 		//optionally to one or more named contexts. 
@@ -421,7 +421,7 @@ throw new RuntimeException(e);
     }
 
     protected void removeWithoutCommit(Resource subject,
-    		org.openrdf.model.URI predicate, Value object, Resource... contexts)
+    		org.eclipse.rdf4j.model.URI predicate, Value object, Resource... contexts)
     	throws RepositoryException{
     	
     	throw new RepositoryException("Removal not supported!");
@@ -481,7 +481,7 @@ throw new RuntimeException(e);
 	}
 
 	@Override
-    public void exportStatements(Resource subj, org.openrdf.model.URI  pred, Value obj,
+    public void exportStatements(Resource subj, org.eclipse.rdf4j.model.URI  pred, Value obj,
                                  boolean includeInferred, RDFHandler handler, Resource... contexts)
 			throws RepositoryException, RDFHandlerException {
 		//Exports all statements with a specific subject, predicate 
@@ -549,7 +549,7 @@ throw new RuntimeException(e);
 	}
 
 	@Override
-    public RepositoryResult<Statement> getStatements(Resource subj, org.openrdf.model.URI pred,
+    public RepositoryResult<Statement> getStatements(Resource subj, org.eclipse.rdf4j.model.URI pred,
                                                      Value obj, boolean includeInferred, Resource... contexts)
 			throws RepositoryException {
 		//Gets all statements with a specific subject, 
@@ -627,7 +627,7 @@ throw new RuntimeException(e);
 	}
 
 	@Override
-    public boolean hasStatement(Resource subj, org.openrdf.model.URI pred, Value obj,
+    public boolean hasStatement(Resource subj, org.eclipse.rdf4j.model.URI pred, Value obj,
                                 boolean includeInferred, Resource... contexts) throws RepositoryException {
 		//Checks whether the repository contains statements with a specific subject, 
 		//predicate and/or object, optionally in the specified contexts. 
@@ -828,7 +828,7 @@ throw new RuntimeException(e);
 	}
 
 	@Override
-    public void remove(Resource subject, org.openrdf.model.URI predicate, Value object, Resource... contexts)
+    public void remove(Resource subject, org.eclipse.rdf4j.model.URI predicate, Value object, Resource... contexts)
 			throws RepositoryException {
 		//Removes the statement(s) with the specified subject, predicate and object 
 		//from the repository, optionally restricted to the specified contexts. 

@@ -19,9 +19,9 @@ package it.unibz.inf.ontop.sesame;
  * limitations under the License.
  * #L%
  */
-import org.openrdf.repository.config.RepositoryConfigException;
-import org.openrdf.repository.config.RepositoryFactory;
-import org.openrdf.repository.config.RepositoryImplConfig;
+import org.eclipse.rdf4j.repository.config.RepositoryConfigException;
+import org.eclipse.rdf4j.repository.config.RepositoryFactory;
+import org.eclipse.rdf4j.repository.config.RepositoryImplConfig;
 
 public class SesameRepositoryFactory implements RepositoryFactory {
 

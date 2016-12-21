@@ -25,10 +25,10 @@ import it.unibz.inf.ontop.model.ObjectConstant;
 import it.unibz.inf.ontop.model.TupleResultSet;
 import it.unibz.inf.ontop.model.ValueConstant;
 import it.unibz.inf.ontop.sesame.SesameHelper;
-import org.openrdf.model.Value;
-import org.openrdf.query.Binding;
-import org.openrdf.query.BindingSet;
-import org.openrdf.query.impl.BindingImpl;
+import org.eclipse.rdf4j.model.Value;
+import org.eclipse.rdf4j.query.Binding;
+import org.eclipse.rdf4j.query.BindingSet;
+import org.eclipse.rdf4j.query.impl.BindingImpl;
 
 import java.util.Iterator;
 import java.util.LinkedList;

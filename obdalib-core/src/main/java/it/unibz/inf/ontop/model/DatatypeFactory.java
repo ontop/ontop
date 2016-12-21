@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.model;
 
 import java.util.List;
 
-import org.openrdf.model.URI;
+import org.eclipse.rdf4j.model.URI;
 
 import it.unibz.inf.ontop.model.Predicate.COL_TYPE;
 

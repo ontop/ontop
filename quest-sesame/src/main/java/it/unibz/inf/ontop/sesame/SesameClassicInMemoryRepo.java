@@ -26,7 +26,7 @@ import it.unibz.inf.ontop.owlrefplatform.injection.QuestCorePreferences;
 
 import java.util.Properties;
 
-import org.openrdf.query.Dataset;
+import org.eclipse.rdf4j.query.Dataset;
 
 public class SesameClassicInMemoryRepo extends SesameClassicRepo {
 

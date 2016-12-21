@@ -27,9 +27,9 @@ import java.io.OutputStreamWriter;
 
 import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.sesame.SesameStatementIterator;
-import org.openrdf.model.Statement;
-import org.openrdf.rio.RDFWriter;
-import org.openrdf.rio.n3.N3Writer;
+import org.eclipse.rdf4j.model.Statement;
+import org.eclipse.rdf4j.rio.RDFWriter;
+import org.eclipse.rdf4j.rio.n3.N3Writer;
 import it.unibz.inf.ontop.model.OBDAModel;
 import it.unibz.inf.ontop.sesame.SesameMaterializer;
 

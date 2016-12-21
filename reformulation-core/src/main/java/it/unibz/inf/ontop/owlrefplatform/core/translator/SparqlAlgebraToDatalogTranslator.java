@@ -29,16 +29,17 @@ import it.unibz.inf.ontop.owlrefplatform.core.abox.SemanticIndexURIMap;
 import it.unibz.inf.ontop.model.UriTemplateMatcher;
 import it.unibz.inf.ontop.parser.EncodeForURI;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
-import org.openrdf.model.Literal;
-import org.openrdf.model.URI;
-import org.openrdf.model.Value;
-import org.openrdf.model.datatypes.XMLDatatypeUtil;
-import org.openrdf.model.vocabulary.RDF;
-import org.openrdf.query.algebra.*;
-import org.openrdf.query.algebra.ValueConstant;
-import org.openrdf.query.parser.ParsedGraphQuery;
-import org.openrdf.query.parser.ParsedQuery;
-import org.openrdf.query.parser.ParsedTupleQuery;
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.Literal;
+import org.eclipse.rdf4j.model.URI;
+import org.eclipse.rdf4j.model.Value;
+import org.eclipse.rdf4j.model.datatypes.XMLDatatypeUtil;
+import org.eclipse.rdf4j.model.vocabulary.RDF;
+import org.eclipse.rdf4j.query.algebra.*;
+import org.eclipse.rdf4j.query.algebra.ValueConstant;
+import org.eclipse.rdf4j.query.parser.ParsedGraphQuery;
+import org.eclipse.rdf4j.query.parser.ParsedQuery;
+import org.eclipse.rdf4j.query.parser.ParsedTupleQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -140,7 +141,7 @@ public class SparqlAlgebraToDatalogTranslator {
          * @param bindings   a stream of bindings. A binding is a pair of a variable, and a value/expression
          * @param varMapper  a function from bindings to {@link Variable}s
          * @param exprMapper a function maps a pair of a binding and a set variables to a {@link Term}
-         * @param <T>        A class for binding. E.g. {@link org.openrdf.query.Binding} or {@link org.openrdf.query.algebra.ExtensionElem}
+         * @param <T>        A class for binding. E.g. {@link org.eclipse.rdf4j.query.Binding} or {@link org.eclipse.rdf4j.query.algebra.ExtensionElem}
          * @return extended translation result
          */
         <T> TranslationResult extendWithBindings(Stream<T> bindings,
@@ -479,7 +480,7 @@ public class SparqlAlgebraToDatalogTranslator {
     }
 
     private static Term getTermForLiteral(Literal literal) {
-        URI typeURI = literal.getDatatype();
+        IRI typeURI = literal.getDatatype();
         String value = literal.getLabel();
 
         COL_TYPE type;
@@ -504,9 +505,9 @@ public class SparqlAlgebraToDatalogTranslator {
         // wrap the constant in its datatype function
         if (type == COL_TYPE.LITERAL) {
             // if the object has type LITERAL, check the language tag
-            String lang = literal.getLanguage();
-            if (lang != null && !lang.equals(""))
-                return ofac.getTypedTerm(constant, lang);
+            Optional<String> lang = literal.getLanguage();
+            if (lang.isPresent() && !lang.get().equals(""))
+                return ofac.getTypedTerm(constant, lang.get());
         }
         return ofac.getTypedTerm(constant, type);
     }

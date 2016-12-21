@@ -27,8 +27,8 @@ import it.unibz.inf.ontop.model.LanguageTag;
 import it.unibz.inf.ontop.model.TermType;
 import it.unibz.inf.ontop.utils.IDGenerator;
 import it.unibz.inf.ontop.utils.JdbcTypeMapper;
-import org.openrdf.model.ValueFactory;
-import org.openrdf.model.impl.ValueFactoryImpl;
+import org.eclipse.rdf4j.model.ValueFactory;
+import org.eclipse.rdf4j.model.impl.ValueFactoryImpl;
 
 
 import java.net.URI;

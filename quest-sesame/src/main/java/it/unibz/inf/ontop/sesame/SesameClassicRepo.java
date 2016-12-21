@@ -26,8 +26,8 @@ import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestDBConnection;
 import it.unibz.inf.ontop.owlrefplatform.injection.QuestCorePreferences;
 import it.unibz.inf.ontop.owlrefplatform.questdb.QuestDBClassicStore;
-import org.openrdf.query.Dataset;
-import org.openrdf.repository.RepositoryException;
+import org.eclipse.rdf4j.query.Dataset;
+import org.eclipse.rdf4j.repository.RepositoryException;
 
 public class SesameClassicRepo extends SesameAbstractRepo {
 

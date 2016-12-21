@@ -20,7 +20,7 @@ package it.unibz.inf.ontop.sesame.tests.general;
  * #L%
  */
 import org.junit.Test;
-import org.openrdf.repository.manager.RemoteRepositoryManager;
+import org.eclipse.rdf4j.repository.manager.RemoteRepositoryManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -22,9 +22,9 @@ package it.unibz.inf.ontop.sesame;
 
 import it.unibz.inf.ontop.model.OBDAException;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestDBConnection;
-import org.openrdf.model.ValueFactory;
-import org.openrdf.model.impl.ValueFactoryImpl;
-import org.openrdf.repository.RepositoryException;
+import org.eclipse.rdf4j.model.ValueFactory;
+import org.eclipse.rdf4j.model.impl.ValueFactoryImpl;
+import org.eclipse.rdf4j.repository.RepositoryException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,7 +33,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public abstract class SesameAbstractRepo implements
-		org.openrdf.repository.Repository, AutoCloseable {
+		org.eclipse.rdf4j.repository.Repository, AutoCloseable {
 
 	private Map<String, String> namespaces;
 	private static final Logger logger = LoggerFactory.getLogger(SesameAbstractRepo.class);

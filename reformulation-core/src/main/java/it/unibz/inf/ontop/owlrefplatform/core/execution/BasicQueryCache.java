@@ -3,7 +3,7 @@ package it.unibz.inf.ontop.owlrefplatform.core.execution;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.owlrefplatform.core.ExecutableQuery;
 import it.unibz.inf.ontop.owlrefplatform.core.QueryCache;
-import org.openrdf.query.parser.ParsedQuery;
+import org.eclipse.rdf4j.query.parser.ParsedQuery;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;

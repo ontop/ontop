@@ -27,7 +27,7 @@ import it.unibz.inf.ontop.owlrefplatform.core.QuestDBConnection;
 import it.unibz.inf.ontop.owlrefplatform.injection.QuestCorePreferences;
 import it.unibz.inf.ontop.owlrefplatform.questdb.QuestDBVirtualStore;
 
-import org.openrdf.repository.RepositoryException;
+import org.eclipse.rdf4j.repository.RepositoryException;
 public class SesameVirtualRepo extends SesameAbstractRepo {
 
 	private QuestDBVirtualStore virtualStore;

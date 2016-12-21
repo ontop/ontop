@@ -20,9 +20,9 @@ package it.unibz.inf.ontop.sesame;
  * #L%
  */
 
-import org.openrdf.query.BooleanQuery;
-import org.openrdf.query.MalformedQueryException;
-import org.openrdf.query.QueryEvaluationException;
+import org.eclipse.rdf4j.query.BooleanQuery;
+import org.eclipse.rdf4j.query.MalformedQueryException;
+import org.eclipse.rdf4j.query.QueryEvaluationException;
 
 import it.unibz.inf.ontop.model.OBDAQueryModifiers;
 import it.unibz.inf.ontop.model.TupleResultSet;

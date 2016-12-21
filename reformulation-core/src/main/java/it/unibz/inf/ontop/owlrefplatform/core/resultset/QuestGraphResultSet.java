@@ -29,9 +29,9 @@ import it.unibz.inf.ontop.ontology.AssertionFactory;
 import it.unibz.inf.ontop.ontology.InconsistentOntologyException;
 import it.unibz.inf.ontop.ontology.impl.AssertionFactoryImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.translator.SesameConstructTemplate;
-import org.openrdf.model.impl.LiteralImpl;
-import org.openrdf.model.impl.URIImpl;
-import org.openrdf.query.algebra.*;
+import org.eclipse.rdf4j.model.impl.LiteralImpl;
+import org.eclipse.rdf4j.model.impl.URIImpl;
+import org.eclipse.rdf4j.query.algebra.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -176,7 +176,7 @@ public class QuestGraphResultSet implements GraphResultSet {
 		}
 		
 		if (node_name.charAt(0) == '-') {
-			org.openrdf.query.algebra.ValueConstant vc = (org.openrdf.query.algebra.ValueConstant) ve;
+			org.eclipse.rdf4j.query.algebra.ValueConstant vc = (org.eclipse.rdf4j.query.algebra.ValueConstant) ve;
 			 if (vc.getValue() instanceof URIImpl) {
 				 constant = dfac.getConstantURI(vc.getValue().stringValue());
 			 } else if (vc.getValue() instanceof LiteralImpl) {

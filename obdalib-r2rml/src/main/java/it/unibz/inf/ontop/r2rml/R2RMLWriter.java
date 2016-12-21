@@ -25,18 +25,17 @@ package it.unibz.inf.ontop.r2rml;
  */
 
 import eu.optique.api.mapping.R2RMLMappingManager;
-import eu.optique.api.mapping.R2RMLMappingManagerFactory;
 import eu.optique.api.mapping.TriplesMap;
-import eu.optique.api.mapping.impl.sesame.SesameR2RMLMappingManagerFactory;
+import eu.optique.api.mapping.impl.rdf4j.RDF4JR2RMLMappingManagerFactory;
 import it.unibz.inf.ontop.io.PrefixManager;
 import it.unibz.inf.ontop.model.OBDAMappingAxiom;
 import it.unibz.inf.ontop.model.OBDAModel;
-import org.openrdf.model.Graph;
-import org.openrdf.model.Model;
-import org.openrdf.model.Statement;
-import org.openrdf.model.impl.GraphImpl;
-import org.openrdf.rio.RDFFormat;
-import org.openrdf.rio.Rio;
+import org.eclipse.rdf4j.model.Graph;
+import org.eclipse.rdf4j.model.Model;
+import org.eclipse.rdf4j.model.Statement;
+import org.eclipse.rdf4j.model.impl.GraphImpl;
+import org.eclipse.rdf4j.rio.RDFFormat;
+import org.eclipse.rdf4j.rio.Rio;
 import org.semanticweb.owlapi.model.OWLOntology;
 
 import java.io.*;
@@ -138,7 +137,7 @@ public class R2RMLWriter {
      */
     public void write(OutputStream os) throws Exception {
         try {
-            R2RMLMappingManager mm = new SesameR2RMLMappingManagerFactory().getR2RMLMappingManager();
+            R2RMLMappingManager mm = new RDF4JR2RMLMappingManagerFactory().getR2RMLMappingManager();
             Collection<TriplesMap> coll = getTriplesMaps();
             Model out = mm.exportMappings(coll, Model.class);
             Rio.write(out, os, RDFFormat.TURTLE);

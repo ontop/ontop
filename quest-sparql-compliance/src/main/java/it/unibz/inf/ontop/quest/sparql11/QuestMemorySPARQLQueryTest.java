@@ -21,8 +21,8 @@ package it.unibz.inf.ontop.quest.sparql11;
  */
 
 import junit.framework.Test;
-import org.openrdf.query.Dataset;
-import org.openrdf.repository.Repository;
+import org.eclipse.rdf4j.query.Dataset;
+import org.eclipse.rdf4j.repository.Repository;
 import it.unibz.inf.ontop.sesame.SesameClassicInMemoryRepo;
 
 

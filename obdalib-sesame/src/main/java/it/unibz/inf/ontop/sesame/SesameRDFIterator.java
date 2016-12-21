@@ -34,17 +34,18 @@ import it.unibz.inf.ontop.ontology.impl.AssertionFactoryImpl;
 
 import java.util.Iterator;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
-import org.openrdf.model.BNode;
-import org.openrdf.model.Literal;
-import org.openrdf.model.Resource;
-import org.openrdf.model.Statement;
-import org.openrdf.model.URI;
-import org.openrdf.model.Value;
-import org.openrdf.rio.RDFHandlerException;
-import org.openrdf.rio.helpers.RDFHandlerBase;
+import org.eclipse.rdf4j.model.BNode;
+import org.eclipse.rdf4j.model.Literal;
+import org.eclipse.rdf4j.model.Resource;
+import org.eclipse.rdf4j.model.Statement;
+import org.eclipse.rdf4j.model.URI;
+import org.eclipse.rdf4j.model.Value;
+import org.eclipse.rdf4j.rio.RDFHandlerException;
+import org.eclipse.rdf4j.rio.helpers.RDFHandlerBase;
 
 public class SesameRDFIterator extends RDFHandlerBase implements Iterator<Assertion> {
 	
@@ -180,9 +181,9 @@ public class SesameRDFIterator extends RDFHandlerBase implements Iterator<Assert
 				} 
 				else if (currObject instanceof Literal) {
 					Literal l = (Literal) currObject;				
-					String lang = l.getLanguage();
+					Optional<String> lang = l.getLanguage();
 					ValueConstant c2;
-					if (lang == null) {
+					if (!lang.isPresent()) {
 						URI datatype = l.getDatatype();
 						Predicate.COL_TYPE type; 
 						
@@ -198,7 +199,7 @@ public class SesameRDFIterator extends RDFHandlerBase implements Iterator<Assert
 						c2 = obdafac.getConstantLiteral(l.getLabel(), type);
 					} 
 					else {
-						c2 = obdafac.getConstantLiteral(l.getLabel(), lang);
+						c2 = obdafac.getConstantLiteral(l.getLabel(), lang.get());
 					}
 					assertion = ofac.createDataPropertyAssertion(currentPredicate.getName(), c, c2);			
 				} 
