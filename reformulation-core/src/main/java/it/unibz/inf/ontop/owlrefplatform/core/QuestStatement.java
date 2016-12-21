@@ -136,6 +136,9 @@ public abstract class QuestStatement implements IQuestStatement {
 							resultSet = executeDescribeQuery(executableQuery);
 							break;
 						}
+						/**
+                         * TODO: re-handle the timeout exception.
+						 */
 				} catch (NativeQueryExecutionException e) {
 						exception = e;
 						log.error(e.getMessage(), e);

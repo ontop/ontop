@@ -1,8 +1,6 @@
 package it.unibz.inf.ontop.reformulation.tests;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Injector;
 import it.unibz.inf.ontop.model.*;
@@ -10,8 +8,8 @@ import it.unibz.inf.ontop.model.impl.AtomPredicateImpl;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.model.impl.URITemplatePredicateImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionImpl;
-import it.unibz.inf.ontop.owlrefplatform.core.optimization.SubstitutionLiftOptimizer;
-import it.unibz.inf.ontop.owlrefplatform.core.optimization.TopDownSubstitutionLiftOptimizer;
+import it.unibz.inf.ontop.owlrefplatform.core.optimization.BindingLiftOptimizer;
+import it.unibz.inf.ontop.owlrefplatform.core.optimization.FixedPointBindingLiftOptimizer;
 import it.unibz.inf.ontop.owlrefplatform.injection.QuestCoreConfiguration;
 import it.unibz.inf.ontop.pivotalrepr.*;
 import it.unibz.inf.ontop.pivotalrepr.impl.*;
@@ -124,7 +122,7 @@ public class UriTemplateTest {
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
         System.out.println("\n Expected query : \n" +  expectedQuery);
 
-        SubstitutionLiftOptimizer optimizer = new TopDownSubstitutionLiftOptimizer();
+        BindingLiftOptimizer optimizer = new FixedPointBindingLiftOptimizer();
         IntermediateQuery optimizedQuery = optimizer.optimize(initialQuery);
 
         System.out.println("\n After optimization: \n" +  optimizedQuery);

@@ -4,7 +4,6 @@ package it.unibz.inf.ontop.unfold;
 import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import org.junit.Test;
-import org.semanticweb.owlapi.io.ToStringRenderer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,8 +33,8 @@ public class AnnotationMovieTest {
 
 
 
-        String results = runTestQuery(queryBind);
-        assertEquals("\"ημερομηνία_γέννησης\"@el", results);
+        int results = runTestQuery(queryBind);
+        assertEquals(4, results);
     }
 
 
@@ -55,8 +54,8 @@ public class AnnotationMovieTest {
 
 
 
-        String results = runTestQuery(queryBind);
-        assertEquals("<http://www.imdb.com/title/Bästisar>", results);
+        int results = runTestQuery(queryBind);
+        assertEquals(444090, results);
     }
 
     @Test
@@ -75,8 +74,8 @@ public class AnnotationMovieTest {
 
 
 
-        String results = runTestQuery(queryBind);
-        assertEquals("\"2006\"", results);
+        int results = runTestQuery(queryBind);
+        assertEquals(443300, results);
     }
 
     @Test
@@ -95,8 +94,8 @@ public class AnnotationMovieTest {
 
 
 
-        String results = runTestQuery(queryBind);
-        assertEquals("\"$446,237 (Worldwide)\"^^xsd:string", results);
+        int results = runTestQuery(queryBind);
+        assertEquals(112576, results);
     }
 
 
@@ -116,8 +115,8 @@ public class AnnotationMovieTest {
 
 
 
-        String results = runTestQuery(queryBind);
-        assertEquals("\"389486\"^^xsd:integer", results);
+        int results = runTestQuery(queryBind);
+        assertEquals(876722, results);
     }
 
     @Test //no check is executed to verify that the value is a valid uri
@@ -136,8 +135,8 @@ public class AnnotationMovieTest {
 
 
 
-        String results = runTestQuery(queryBind);
-        assertEquals("<1>", results);
+        int results = runTestQuery(queryBind);
+        assertEquals(7530011, results);
     }
 
     @Test //no class in the ontology
@@ -155,8 +154,8 @@ public class AnnotationMovieTest {
 
 
 
-        String results = runTestQuery(queryBind);
-        assertEquals("<http://www.imdb.com/name/1>", results);
+        int results = runTestQuery(queryBind);
+        assertEquals(7530011, results);
     }
 
     @Test //no dataproperty in the ontology
@@ -174,8 +173,9 @@ public class AnnotationMovieTest {
 
 
 
-        String results = runTestQuery(queryBind);
-        assertEquals("\"113564\"^^xsd:int", results);
+        int results = runTestQuery(queryBind);
+        assertEquals(705859, results);
+
     }
 
     @Test //no objectproperty in the ontology
@@ -193,12 +193,13 @@ public class AnnotationMovieTest {
 
 
 
-        String results = runTestQuery(queryBind);
-        assertEquals("<http://www.movieontology.org/2009/10/01/movieontology.owl#movie78543>", results);
+        int results = runTestQuery(queryBind);
+        assertEquals(444090, results);
+
     }
 
 
-    private String runTestQuery(String query) throws Exception {
+    private int runTestQuery(String query) throws Exception {
 
         // Creating a new instance of the reasoner
         QuestOWLFactory factory = new QuestOWLFactory();
@@ -231,7 +232,6 @@ public class AnnotationMovieTest {
                     log.debug("Example result " + res.getSignature().get(i - 1) + " = " + res.getOWLObject(i));
 
                 }
-                result = ToStringRenderer.getInstance().getRendering(res.getOWLObject("r"));
             }
         }
         log.debug("Total results: {}", count);
@@ -244,7 +244,7 @@ public class AnnotationMovieTest {
         conn.close();
         reasoner.dispose();
 
-        return result;
+        return count;
 
 
 

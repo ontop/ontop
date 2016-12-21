@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.ImmutableSubstitution;
 import it.unibz.inf.ontop.model.ImmutableTerm;
 import it.unibz.inf.ontop.model.Variable;
-import it.unibz.inf.ontop.owlrefplatform.core.Quest;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.optimization.QueryNodeNavigationTools.NextNodeAndQuery;
 import it.unibz.inf.ontop.pivotalrepr.*;
@@ -14,8 +13,6 @@ import it.unibz.inf.ontop.pivotalrepr.proposal.UnionLiftProposal;
 import it.unibz.inf.ontop.pivotalrepr.proposal.impl.SubstitutionPropagationProposalImpl;
 import it.unibz.inf.ontop.pivotalrepr.proposal.impl.UnionLiftProposalImpl;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.HashSet;
 import java.util.Optional;
@@ -31,9 +28,8 @@ import static it.unibz.inf.ontop.pivotalrepr.NonCommutativeOperatorNode.Argument
  * Uses {@link UnionFriendlyBindingExtractor}, {@link SubstitutionPropagationProposal} and {@link UnionLiftProposal}
  *
  */
-public class TopDownSubstitutionLiftOptimizer implements SubstitutionLiftOptimizer {
+public class TopDownBindingLiftOptimizer implements BindingLiftOptimizer {
 
-    private final Logger log = LoggerFactory.getLogger(Quest.class);
     private final SimpleUnionNodeLifter lifter = new SimpleUnionNodeLifter();
     private final UnionFriendlyBindingExtractor extractor = new UnionFriendlyBindingExtractor();
 
@@ -163,6 +159,13 @@ public class TopDownSubstitutionLiftOptimizer implements SubstitutionLiftOptimiz
             throws EmptyQueryException {
 
         QueryNode currentNode = initialConstrNode;
+
+        Optional<QueryNode> parentNode = currentQuery.getParent(currentNode);
+        if(parentNode.isPresent()){
+            if (parentNode.get() instanceof UnionNode){
+                return new NextNodeAndQuery(getDepthFirstNextNode(currentQuery, currentNode), currentQuery);
+            }
+        }
 
         //extract substitution from the construction node
         Optional<ImmutableSubstitution<ImmutableTerm>> optionalSubstitution = extractor.extractInSubTree(
