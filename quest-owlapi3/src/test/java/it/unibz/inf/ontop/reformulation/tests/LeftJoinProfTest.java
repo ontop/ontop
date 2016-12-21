@@ -371,7 +371,7 @@ public class LeftJoinProfTest {
                 "ORDER BY ?v";
 
         List<String> expectedValues = ImmutableList.of(
-                "Depp", "Dodero", "Gamper", "Helmer", "Jackson", "Pitt", "Poppins", "Rog", "Smith");
+                "Depp", "Dodero", "Gamper", "Helmer", "Jackson", "Pitt", "Poppins", "Smith");
         String sql = checkReturnedValuesAndReturnSql(query, expectedValues);
 
         System.out.println("SQL Query: \n" + sql);
@@ -399,7 +399,7 @@ public class LeftJoinProfTest {
                 "ORDER BY ?v";
 
         List<String> expectedValues = ImmutableList.of(
-                "Depp", "Dodero", "Gamper", "Helmer", "Jackson", "Pitt", "Poppins", "Rog", "Smith");
+                "Depp", "Dodero", "Gamper", "Helmer", "Jackson", "Pitt", "Poppins", "Smith");
         String sql = checkReturnedValuesAndReturnSql(query, expectedValues);
 
         System.out.println("SQL Query: \n" + sql);

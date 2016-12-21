@@ -52,7 +52,7 @@ public class RedundantSelfLeftJoinExecutor
             DataNode leftDataNode = (DataNode) leftChild;
             DataNode rightDataNode = (DataNode) rightChild;
 
-            if (isSelfLeftJoin(leftDataNode, rightDataNode, query.getMetadata())) {
+            if (isOptimizableSelfLeftJoin(leftDataNode, rightDataNode, query.getMetadata())) {
                 return tryToOptimizeSelfJoin(leftDataNode, rightDataNode, query, treeComponent, leftJoinNode);
             }
         }
@@ -62,11 +62,11 @@ public class RedundantSelfLeftJoinExecutor
     }
 
     /**
-     * Checks if we are dealing with self left join, i.e.,
+     * Checks if we are dealing with optimizable self left join, i.e.,
      * the left and the right predicates are the same, and
      * the join is over the keys
      */
-    private boolean isSelfLeftJoin(DataNode leftDataNode, DataNode rightDataNode, MetadataForQueryOptimization metadata) {
+    private boolean isOptimizableSelfLeftJoin(DataNode leftDataNode, DataNode rightDataNode, MetadataForQueryOptimization metadata) {
         AtomPredicate leftPredicate = leftDataNode.getProjectionAtom().getPredicate();
         AtomPredicate rightPredicate = rightDataNode.getProjectionAtom().getPredicate();
 
@@ -79,7 +79,7 @@ public class RedundantSelfLeftJoinExecutor
                 for(ImmutableList<VariableOrGroundTerm> variables: groupingMap.keySet()) {
                     /**
                      * At least for one unique constraint, the left and the right data nodes
-                     * join on the key positions. Hence, it is a self join.
+                     * join on the key positions. Hence, it is an optimizable self join.
                      */
                     if(groupingMap.get(variables).size() == 2) {
                         return true;
@@ -100,6 +100,13 @@ public class RedundantSelfLeftJoinExecutor
          * No optimization if a left join condition is present
          */
         if(leftJoinNode.getOptionalFilterCondition().isPresent()) {
+            return new NodeCentricOptimizationResultsImpl<>(query, leftJoinNode);
+        }
+
+        /**
+         * No optimization if there are implicit equalities between terms at different positions
+         */
+        if(containsImplicitEqualities(leftDataNode, rightDataNode)) {
             return new NodeCentricOptimizationResultsImpl<>(query, leftJoinNode);
         }
 
@@ -132,6 +139,32 @@ public class RedundantSelfLeftJoinExecutor
             default:
                 throw new IllegalStateException("Unexpected action " + action);
         }
+    }
+
+    /**
+     * For two optimizable data nodes with the same predicate, we check
+     * whether there are implicit equalities.
+     *
+     * We only count the equalities between variables at different positions.
+     */
+    private boolean containsImplicitEqualities(DataNode leftDataNode, DataNode rightDataNode) {
+
+        int n=leftDataNode.getProjectionAtom().getEffectiveArity();
+        for(int i=0; i<n; i++) {
+            VariableOrGroundTerm leftTerm = leftDataNode.getProjectionAtom().getTerm(i);
+            if(leftTerm instanceof GroundTerm)
+                continue;
+
+            for(int j=0; j<n; j++) {
+                if(i != j) {
+                    VariableOrGroundTerm rightTerm = rightDataNode.getProjectionAtom().getTerm(j);
+                    if(leftTerm.equals(rightTerm)) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
     }
 
 
@@ -219,6 +252,15 @@ public class RedundantSelfLeftJoinExecutor
     private Action existsSubstitutionFromRightToLeft(DataNode leftDataNode, DataNode rightDataNode) {
         Map<Variable, VariableOrGroundTerm> substitutionProposal = new HashMap<>();
 
+        /**
+         * Next, we check whether there are no implicit equalities derived from other
+         * joining variables, not on the primary key positions
+         */
+        //ImmutableSet<Variable> joiningVariables = getJoiningVariables(leftDataNode, rightDataNode);
+
+        //if(Sets.difference(joiningVariables, ImmutableSet.copyOf(variables)).isEmpty()) {
+        //}
+
         for(int i=0; i< leftDataNode.getProjectionAtom().getEffectiveArity(); i++) {
             VariableOrGroundTerm leftTerm = leftDataNode.getProjectionAtom().getTerm(i);
             VariableOrGroundTerm rightTerm = rightDataNode.getProjectionAtom().getTerm(i);
@@ -261,7 +303,7 @@ public class RedundantSelfLeftJoinExecutor
 
     /**
      * left and right data nodes and collectionOfPrimaryKeyPositions are given for the same predicate
-     * TODO: explain and rename
+     * Collects the data nodes where a variable on the primary key position occurs.
      */
     private static ImmutableMultimap<ImmutableList<VariableOrGroundTerm>, DataNode> groupByPrimaryKeyArguments(
             DataNode leftDataNode,
@@ -274,6 +316,24 @@ public class RedundantSelfLeftJoinExecutor
             groupingMapBuilder.put(extractPrimaryKeyArguments(rightDataNode.getProjectionAtom(), primaryKeyPositions), rightDataNode);
         }
         return groupingMapBuilder.build();
+    }
+
+    private static ImmutableSet<Variable> getJoiningVariables(DataNode leftDataNode, DataNode rightDataNode) {
+        Multimap<Variable, DataNode> mapBuilder = ArrayListMultimap.create();
+        for (Variable variable : leftDataNode.getVariables()) {
+            mapBuilder.put(variable, leftDataNode);
+        }
+        for (Variable variable : rightDataNode.getVariables()) {
+            mapBuilder.put(variable, rightDataNode);
+        }
+
+        Set<Variable> joiningVariables = new HashSet<>();
+        for(Variable var: mapBuilder.keySet()) {
+            if(mapBuilder.get(var).size() > 1) {
+                joiningVariables.add(var);
+            }
+        }
+        return ImmutableSet.copyOf(joiningVariables);
     }
 
     /**
