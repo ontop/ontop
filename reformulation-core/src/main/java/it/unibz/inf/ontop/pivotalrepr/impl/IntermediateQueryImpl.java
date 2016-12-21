@@ -5,28 +5,26 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.executor.InternalProposalExecutor;
 import it.unibz.inf.ontop.executor.expression.PushDownExpressionExecutorImpl;
+import it.unibz.inf.ontop.executor.groundterm.GroundTermRemovalFromDataNodeExecutorImpl;
 import it.unibz.inf.ontop.executor.join.JoinInternalCompositeExecutor;
 import it.unibz.inf.ontop.executor.leftjoin.LeftJoinInternalCompositeExecutor;
-import it.unibz.inf.ontop.executor.projection.ProjectionShrinkingExecutorImpl;
-import it.unibz.inf.ontop.executor.pullout.PullVariableOutOfSubTreeExecutorImpl;
 import it.unibz.inf.ontop.executor.merging.QueryMergingExecutorImpl;
+import it.unibz.inf.ontop.executor.projection.ProjectionShrinkingExecutorImpl;
+import it.unibz.inf.ontop.executor.pullout.PullVariableOutOfDataNodeExecutorImpl;
+import it.unibz.inf.ontop.executor.pullout.PullVariableOutOfSubTreeExecutorImpl;
 import it.unibz.inf.ontop.executor.substitution.SubstitutionPropagationExecutorImpl;
 import it.unibz.inf.ontop.executor.truenode.TrueNodeRemovalExecutorImpl;
-import it.unibz.inf.ontop.executor.union.LiftUnionAsHighAsPossibleProposalExecutor;
 import it.unibz.inf.ontop.executor.union.UnionLiftInternalExecutorImpl;
 import it.unibz.inf.ontop.executor.unsatisfiable.RemoveEmptyNodesExecutorImpl;
 import it.unibz.inf.ontop.model.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.Variable;
-import it.unibz.inf.ontop.executor.groundterm.GroundTermRemovalFromDataNodeExecutorImpl;
-import it.unibz.inf.ontop.executor.pullout.PullVariableOutOfDataNodeExecutorImpl;
-import it.unibz.inf.ontop.pivotalrepr.proposal.impl.ProjectionShrinkingProposalImpl;
+import it.unibz.inf.ontop.pivotalrepr.*;
+import it.unibz.inf.ontop.pivotalrepr.proposal.*;
 import it.unibz.inf.ontop.pivotalrepr.validation.IntermediateQueryValidator;
 import it.unibz.inf.ontop.pivotalrepr.validation.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.pivotalrepr.validation.StandardIntermediateQueryValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import it.unibz.inf.ontop.pivotalrepr.*;
-import it.unibz.inf.ontop.pivotalrepr.proposal.*;
 
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -67,15 +65,6 @@ public class IntermediateQueryImpl implements IntermediateQuery {
 
     private final DistinctVariableOnlyDataAtom projectionAtom;
 
-
-    /**
-     * TODO: explain
-     */
-    private static final ImmutableMap<Class<? extends QueryOptimizationProposal>, Class<? extends StandardProposalExecutor>> STD_EXECUTOR_CLASSES;
-    static {
-        STD_EXECUTOR_CLASSES = ImmutableMap.<Class<? extends QueryOptimizationProposal>, Class<? extends StandardProposalExecutor>>of(
-                LiftUnionAsHighAsPossibleProposal.class, LiftUnionAsHighAsPossibleProposalExecutor.class);
-    }
 
     /**
      * TODO: explain
@@ -250,25 +239,8 @@ public class IntermediateQueryImpl implements IntermediateQuery {
          */
         Class<?>[] proposalClassHierarchy = proposal.getClass().getInterfaces();
 
-        if (!requireUsingInternalExecutor) {
-            /**
-             * First look for a standard executor
-             */
-            for (Class proposalClass : proposalClassHierarchy) {
-                if (STD_EXECUTOR_CLASSES.containsKey(proposalClass)) {
-                    StandardProposalExecutor<P, R> executor;
-                    try {
-                        executor = STD_EXECUTOR_CLASSES.get(proposalClass).newInstance();
-                    } catch (InstantiationException | IllegalAccessException e) {
-                        throw new RuntimeException(e.getMessage());
-                    }
-                    return executor.apply(proposal, this);
-                }
-            }
-        }
-
         /**
-         * Then, look for a internal one
+         * Look for a internal one
          */
         for (Class proposalClass : proposalClassHierarchy) {
             if (INTERNAL_EXECUTOR_CLASSES.containsKey(proposalClass)) {
