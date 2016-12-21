@@ -31,6 +31,16 @@ import static it.unibz.inf.ontop.owlrefplatform.core.optimization.QueryNodeNavig
  */
 public class PullOutVariableOptimizer implements IntermediateQueryOptimizer {
 
+    private static class ParentNextChild {
+        final Optional<QueryNode> nextChild;
+        final JoinLikeNode parent;
+
+        private ParentNextChild(Optional<QueryNode> nextChild, JoinLikeNode parent) {
+            this.nextChild = nextChild;
+            this.parent = parent;
+        }
+    }
+
     @Override
     public IntermediateQuery optimize(IntermediateQuery query) {
         try {
@@ -86,42 +96,54 @@ public class PullOutVariableOptimizer implements IntermediateQueryOptimizer {
      * Looks at the projected variables by all the child sub-trees and does the appropriate renamings.
      *
      */
-    private NextNodeAndQuery optimizeJoinLikeNodeChildren(IntermediateQuery initialQuery, JoinLikeNode initialJoinLikeNode)
+    private NextNodeAndQuery optimizeJoinLikeNodeChildren(IntermediateQuery query, JoinLikeNode initialJoinLikeNode)
             throws EmptyQueryException {
 
-        Optional<QueryNode> optionalFirstChild = initialQuery.getFirstChild(initialJoinLikeNode);
-
         // Non-final
-        Optional<QueryNode> optionalNextChild = optionalFirstChild
-                .flatMap(initialQuery::getNextSibling);
+        Optional<QueryNode> optionalCurrentChild = query.getFirstChild(initialJoinLikeNode);
+        JoinLikeNode currentJoinLikeNode = initialJoinLikeNode;
+
+        while (optionalCurrentChild.isPresent()) {
+            ParentNextChild parentNextChild = optimizeFollowingChildren(query, optionalCurrentChild.get(), currentJoinLikeNode);
+            optionalCurrentChild = parentNextChild.nextChild;
+            currentJoinLikeNode = parentNextChild.parent;
+        }
+
+        return new NextNodeAndQuery(getDepthFirstNextNode(query, currentJoinLikeNode),
+                query);
+    }
+
+    /**
+     * For one child, renames the variables of the following ones if they conflicting with its own variables
+     */
+    private ParentNextChild optimizeFollowingChildren(IntermediateQuery query, QueryNode focusChild,
+                                                          JoinLikeNode initialJoinLikeNode)
+            throws EmptyQueryException {
+        // Non-final
+        Optional<QueryNode> optionalNextChild = query.getNextSibling(focusChild);
 
         /**
          * Less than 2 children: nothing to be done here
          */
         if (!optionalNextChild.isPresent()) {
-            return new NextNodeAndQuery(getDepthFirstNextNode(initialQuery, initialJoinLikeNode),
-                    initialQuery);
+            return new ParentNextChild(Optional.empty(), initialJoinLikeNode);
         }
 
-        Set<Variable> variablesFromOtherSubTrees = new HashSet<>(initialQuery.getVariables(
-                optionalFirstChild.get()));
+        Set<Variable> variablesFromOtherSubTrees = new HashSet<>(query.getVariables(
+                focusChild));
 
         // Non-final variables
-        IntermediateQuery currentQuery = initialQuery;
         JoinLikeNode currentJoinLikeNode = initialJoinLikeNode;
 
 
         /**
-         * TODO: explain
+         * Loops over the following children
          */
         while (optionalNextChild.isPresent()){
 
             QueryNode childNode = optionalNextChild.get();
 
-            ImmutableSet<Variable> projectedVariablesByThisChild = currentQuery.getVariables(childNode);
-
-            // To trick the compiler
-            final IntermediateQuery query = currentQuery;
+            ImmutableSet<Variable> projectedVariablesByThisChild = query.getVariables(childNode);
 
             ImmutableMap<Variable, Variable> substitutionMap = projectedVariablesByThisChild.stream()
                     .filter(variablesFromOtherSubTrees::contains)
@@ -129,7 +151,7 @@ public class PullOutVariableOptimizer implements IntermediateQueryOptimizer {
                     .collect(ImmutableCollectors.toMap());
 
             if (substitutionMap.isEmpty()) {
-                optionalNextChild = currentQuery.getNextSibling(childNode);
+                optionalNextChild = query.getNextSibling(childNode);
             }
             else {
                 variablesFromOtherSubTrees.addAll(substitutionMap.keySet());
@@ -139,21 +161,19 @@ public class PullOutVariableOptimizer implements IntermediateQueryOptimizer {
                 PullVariableOutOfSubTreeProposal<JoinLikeNode> proposal = new PullVariableOutOfSubTreeProposalImpl<>(
                         currentJoinLikeNode, renamingSubstitution, childNode);
 
-                PullVariableOutOfSubTreeResults<JoinLikeNode> results = currentQuery.applyProposal(proposal);
+                PullVariableOutOfSubTreeResults<JoinLikeNode> results = query.applyProposal(proposal, true);
 
                 /**
                  * Updates the "iterated" variables
                  */
                 currentJoinLikeNode = results.getOptionalNewNode()
                         .orElseThrow(() -> new IllegalStateException("The JoinLikeNode was expected to be preserved"));
-                currentQuery = results.getResultingQuery();
 
-                optionalNextChild = currentQuery.getNextSibling(results.getNewSubTreeRoot());
+                optionalNextChild = query.getNextSibling(results.getNewSubTreeRoot());
             }
         }
 
-        return new NextNodeAndQuery(getDepthFirstNextNode(currentQuery, currentJoinLikeNode),
-                currentQuery);
+        return new ParentNextChild(query.getNextSibling(focusChild), currentJoinLikeNode);
     }
 
 
