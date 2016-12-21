@@ -27,6 +27,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Locale;
 
+import com.ibm.db2.jcc.am.re;
 import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.model.OBDADataFactory;
 import it.unibz.inf.ontop.model.Predicate;
@@ -116,13 +117,17 @@ public abstract class AbstractBindTestWithFunctions {
                 + "   BIND (CEIL(?discount) AS ?w)\n"
                 + "}";
 
+        checkReturnedValues(queryBind, getCeilExpectedValues());
+    }
 
+    protected List<String> getCeilExpectedValues() {
         List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"1.0\"^^xsd:decimal");
-        expectedValues.add("\"1.0\"^^xsd:decimal");
-        expectedValues.add("\"1.0\"^^xsd:decimal");
-        expectedValues.add("\"1.0\"^^xsd:decimal");
-        checkReturnedValues(queryBind, expectedValues);
+        expectedValues.add("\"1\"^^xsd:decimal");
+        expectedValues.add("\"1\"^^xsd:decimal");
+        expectedValues.add("\"1\"^^xsd:decimal");
+        expectedValues.add("\"1\"^^xsd:decimal");
+
+        return expectedValues;
     }
 
 
@@ -467,14 +472,18 @@ public abstract class AbstractBindTestWithFunctions {
                 + "   BIND (STRBEFORE(?title,\"ti\") AS ?w)\n"
                 + "}";
 
+        checkReturnedValues(queryBind, getBindWithBeforeExpectedValues());
 
+    }
+
+    protected List<String> getBindWithBeforeExpectedValues() {
         List<String> expectedValues = new ArrayList<>();
         expectedValues.add("\"\"@en");  // ROMAN (23 Dec 2015): now the language tag is handled correctly
         expectedValues.add("\"The Seman\"@en");
         expectedValues.add("\"\"@en");
         expectedValues.add("\"The Logic Book: Introduc\"@en");
-        checkReturnedValues(queryBind, expectedValues);
 
+        return expectedValues;
     }
 
 
@@ -490,14 +499,18 @@ public abstract class AbstractBindTestWithFunctions {
                 + "   BIND (STRAFTER(?title,\"The\") AS ?w)\n"
                 + "}";
 
+        checkReturnedValues(queryBind, getBindWithAfterExpectedValues());
 
+    }
+
+    protected List<String> getBindWithAfterExpectedValues() {
         List<String> expectedValues = new ArrayList<>();
         expectedValues.add("\"\"@en");  // ROMAN (23 Dec 2015): now the language tag is handled correctly
         expectedValues.add("\" Semantic Web\"@en");
         expectedValues.add("\"\"@en");
         expectedValues.add("\" Logic Book: Introduction, Second Edition\"@en");
-        checkReturnedValues(queryBind, expectedValues);
 
+        return expectedValues;
     }
 
 
@@ -520,13 +533,17 @@ public abstract class AbstractBindTestWithFunctions {
                 + "   BIND (MONTH(?year) AS ?w)\n"
                 + "}";
 
+        checkReturnedValues(queryBind, getMonthExpectedValues());
+    }
 
+    protected List<String> getMonthExpectedValues() {
         List<String> expectedValues = new ArrayList<>();
         expectedValues.add("\"6\"^^xsd:integer");
         expectedValues.add("\"12\"^^xsd:integer");
         expectedValues.add("\"9\"^^xsd:integer");
         expectedValues.add("\"11\"^^xsd:integer");
-        checkReturnedValues(queryBind, expectedValues);
+
+        return expectedValues;
     }
 
     @Test
@@ -543,13 +560,17 @@ public abstract class AbstractBindTestWithFunctions {
                 + "   BIND (YEAR(?year) AS ?w)\n"
                 + "}";
 
+        checkReturnedValues(queryBind, getYearExpectedValues());
+    }
 
+    protected List<String> getYearExpectedValues() {
         List<String> expectedValues = new ArrayList<>();
         expectedValues.add("\"2014\"^^xsd:integer");
         expectedValues.add("\"2011\"^^xsd:integer");
-        expectedValues.add("\"1866\"^^xsd:integer");
+        expectedValues.add("\"2015\"^^xsd:integer");
         expectedValues.add("\"1967\"^^xsd:integer");
-        checkReturnedValues(queryBind, expectedValues);
+
+        return expectedValues;
     }
 
     @Test
@@ -565,13 +586,17 @@ public abstract class AbstractBindTestWithFunctions {
                 + "   BIND (DAY(?year) AS ?w)\n"
                 + "}";
 
+        checkReturnedValues(queryBind, getDayExpectedValues());
+    }
 
+    protected List<String> getDayExpectedValues() {
         List<String> expectedValues = new ArrayList<>();
         expectedValues.add("\"5\"^^xsd:integer");
         expectedValues.add("\"8\"^^xsd:integer");
         expectedValues.add("\"21\"^^xsd:integer");
         expectedValues.add("\"5\"^^xsd:integer");
-        checkReturnedValues(queryBind, expectedValues);
+
+        return expectedValues;
     }
 
     @Test
@@ -590,9 +615,9 @@ public abstract class AbstractBindTestWithFunctions {
 
         List<String> expectedValues = new ArrayList<>();
         expectedValues.add("\"47\"^^xsd:integer");
-        expectedValues.add("\"0\"^^xsd:integer");
-        expectedValues.add("\"0\"^^xsd:integer");
-        expectedValues.add("\"0\"^^xsd:integer");
+        expectedValues.add("\"30\"^^xsd:integer");
+        expectedValues.add("\"23\"^^xsd:integer");
+        expectedValues.add("\"50\"^^xsd:integer");
         checkReturnedValues(queryBind, expectedValues);
     }
 
@@ -637,13 +662,17 @@ public abstract class AbstractBindTestWithFunctions {
                 + "   BIND (SECONDS(?year) AS ?w)\n"
                 + "}";
 
+        checkReturnedValues(queryBind, getSecondsExpectedValues());
+    }
 
+    protected List<String> getSecondsExpectedValues() {
         List<String> expectedValues = new ArrayList<>();
         expectedValues.add("\"52\"^^xsd:decimal");
         expectedValues.add("\"0\"^^xsd:decimal");
+        expectedValues.add("\"6\"^^xsd:decimal");
         expectedValues.add("\"0\"^^xsd:decimal");
-        expectedValues.add("\"0\"^^xsd:decimal");
-        checkReturnedValues(queryBind, expectedValues);
+
+        return expectedValues;
     }
 
     @Test
@@ -767,7 +796,11 @@ public abstract class AbstractBindTestWithFunctions {
             while (rs.nextRow()) {
                 OWLObject ind1 = rs.getOWLObject("w");
                 // log.debug(ind1.toString());
-                returnedValues.add(ind1.toString());
+                if (ind1 != null) {
+                    returnedValues.add(ind1.toString());
+                } else {
+                    returnedValues.add(null);
+                }
                 java.lang.System.out.println(ind1);
                 i++;
             }

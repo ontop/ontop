@@ -48,6 +48,18 @@ public class BindTestWithFunctionsDb2 extends AbstractBindTestWithFunctions {
     public void testHash() {
     }
 
+    @Ignore("Not yet supported")
+    @Test
+    @Override
+    public void testUuid() {
+    }
+
+    @Ignore("Not yet supported")
+    @Test
+    @Override
+    public void testStrUuid() {
+    }
+
 //    @Ignore("Not yet supported")
 //    @Test
 //    @Override
@@ -77,6 +89,28 @@ public class BindTestWithFunctionsDb2 extends AbstractBindTestWithFunctions {
         expectedValues.add("\".00, 23.00\"");
         expectedValues.add("\".00, 34.00\"");
         expectedValues.add("\".00, 10.00\"");
+        return expectedValues;
+    }
+
+    @Override
+    protected List<String> getYearExpectedValues() {
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"2014\"^^xsd:integer");
+        expectedValues.add("\"2011\"^^xsd:integer");
+        expectedValues.add("\"2015\"^^xsd:integer");
+        expectedValues.add("\"1970\"^^xsd:integer");
+
+        return expectedValues;
+    }
+
+    @Override
+    protected List<String> getSecondsExpectedValues() {
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"52.000000\"^^xsd:decimal");
+        expectedValues.add("\"0.000000\"^^xsd:decimal");
+        expectedValues.add("\"6.000000\"^^xsd:decimal");
+        expectedValues.add("\"0.000000\"^^xsd:decimal");
+
         return expectedValues;
     }
 }
