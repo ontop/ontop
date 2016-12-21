@@ -42,7 +42,8 @@ public class PullOutVariableOptimizerTest {
     private final static Variable Y1 = DATA_FACTORY.getVariable("Yf1");
     private final static Variable Y2 = DATA_FACTORY.getVariable("Yf2");
     private final static Variable Z = DATA_FACTORY.getVariable("Z");
-    private final static Variable Z1 = DATA_FACTORY.getVariable("Zf1");
+    private final static Variable Z0 = DATA_FACTORY.getVariable("Zf0");
+    private final static Variable Z2 = DATA_FACTORY.getVariable("Zf2");
     private final static Variable W = DATA_FACTORY.getVariable("W");
     private final static Variable R = DATA_FACTORY.getVariable("R");
     private final static Variable S = DATA_FACTORY.getVariable("S");
@@ -64,8 +65,10 @@ public class PullOutVariableOptimizerTest {
             EQ, X0, X4);
     private final static ImmutableExpression EXPRESSION8 = DATA_FACTORY.getImmutableExpression(
             EQ, X0, X5);
-    private final static ImmutableExpression EXPRESSION_Z_Z1 = DATA_FACTORY.getImmutableExpression(
-            EQ, Z, Z1);
+    private final static ImmutableExpression EXPRESSION_Z_Z0 = DATA_FACTORY.getImmutableExpression(
+            EQ, Z, Z0);
+    private final static ImmutableExpression EXPRESSION_Z_Z2 = DATA_FACTORY.getImmutableExpression(
+            EQ, Z, Z2);
 
 
     private final MetadataForQueryOptimization metadata;
@@ -206,10 +209,10 @@ public class PullOutVariableOptimizerTest {
         ConstructionNode constructionNode2 = new ConstructionNodeImpl(projectionAtom.getVariables());
 
         InnerJoinNode joinNode2 = new InnerJoinNodeImpl(ImmutabilityTools.foldBooleanExpressions(
-                EXPRESSION1, EXPRESSION2, EXPRESSION_Z_Z1));
+                EXPRESSION1, EXPRESSION2, EXPRESSION_Z_Z2));
         ExtensionalDataNode newDataNode2 = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE2_PREDICATE, X0, Z));
         ExtensionalDataNode newDataNode4 = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE3_PREDICATE, W, Y1));
-        ExtensionalDataNode newDataNode5 = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE3_PREDICATE, T, Z1));
+        ExtensionalDataNode newDataNode5 = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE3_PREDICATE, T, Z2));
 
         queryBuilder2.init(projectionAtom2, constructionNode2);
         queryBuilder2.addChild(constructionNode2, joinNode2);
@@ -257,8 +260,8 @@ public class PullOutVariableOptimizerTest {
         DistinctVariableOnlyDataAtom projectionAtom2 = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE2, X, Y, Z);
         ConstructionNode constructionNode2 = new ConstructionNodeImpl(projectionAtom.getVariables());
 
-        InnerJoinNode joinNode2 = new InnerJoinNodeImpl(Optional.of(EXPRESSION_Z_Z1));
-        ExtensionalDataNode newDataNode3 = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE3_PREDICATE, T, Z1));
+        InnerJoinNode joinNode2 = new InnerJoinNodeImpl(Optional.of(EXPRESSION_Z_Z0));
+        ExtensionalDataNode newDataNode3 = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE3_PREDICATE, T, Z0));
 
         queryBuilder2.init(projectionAtom2, constructionNode2);
         queryBuilder2.addChild(constructionNode2, joinNode2);
