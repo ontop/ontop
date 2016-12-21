@@ -142,10 +142,14 @@ public class RedundantSelfLeftJoinExecutor
     }
 
     /**
-     * For two optimizable data nodes with the same predicate, we check
-     * whether there are implicit equalities.
+     * For two optimizable data nodes with the same predicate, we perform
+     * a simple check on whether there are implicit equalities
+     * between variables at different positions.
      *
-     * We only count the equalities between variables at different positions.
+     * E.g., this method detects that R(x1,x2,x3,x4) and R(x1,x3,x5,x6) contain an e
+     * xplicit inequality given by the variable x3.
+     *
+     * But it does not detect in this case: R(x1,x2,x3,x4) and R(x1,x5,x5,x6).
      */
     private boolean containsImplicitEqualities(DataNode leftDataNode, DataNode rightDataNode) {
 
