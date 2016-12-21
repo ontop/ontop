@@ -19,10 +19,6 @@ package it.unibz.inf.ontop.r2rml;
  * limitations under the License.
  * #L%
  */
-/**
- * @author timea bagosi
- * Class responsible to write an r2rml turtle file given an obda model
- */
 
 import com.google.common.collect.*;
 import eu.optique.api.mapping.R2RMLMappingManager;
@@ -43,33 +39,19 @@ import org.semanticweb.owlapi.model.OWLOntology;
 import java.io.*;
 import java.net.URI;
 import java.util.*;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 
 public class R2RMLWriter {
 
-	private BufferedWriter out;
-	private List<OBDAMappingAxiom> mappings;
+    private List<OBDAMappingAxiom> mappings;
 	private URI sourceUri;
 	private PrefixManager prefixmng;
 	private OWLOntology ontology;
 	private final OBDADataFactory OBDA_DATA_FACTORY = OBDADataFactoryImpl.getInstance();
 
-	public R2RMLWriter(File file, OBDAModel obdamodel, URI sourceURI, OWLOntology ontology)
-	{
-		this(obdamodel, sourceURI, ontology);
-		try {
-			this.out = new BufferedWriter(new FileWriter(file));
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
-
-	public R2RMLWriter(OBDAModel obdamodel, URI sourceURI, OWLOntology ontology)
+    public R2RMLWriter(OBDAModel obdamodel, URI sourceURI, OWLOntology ontology)
 	{
 		this.sourceUri = sourceURI;
 		this.mappings = obdamodel.getMappings(sourceUri);
@@ -81,12 +63,8 @@ public class R2RMLWriter {
 		this(obdamodel, sourceURI, null);
 	}
 
-	public R2RMLWriter(File file, OBDAModel obdamodel, URI sourceURI){
-		this(file, obdamodel, sourceURI, null);
-	}
 
-
-	/**
+    /**
 	 * call this method if you need the RDF Graph
 	 * that represents the R2RML mappings
 	 * @return an RDF Graph
@@ -116,7 +94,7 @@ public class R2RMLWriter {
 	}
 
 	private ImmutableSet<OBDAMappingAxiom> splitMappingAxioms(List<OBDAMappingAxiom> mappingAxioms) {
-		/**
+		/*
 		 * Delimiter string d used for assigning ids to split mapping axioms.
 		 * If a mapping axiom with id j is split into multiple ones,
 		 * each of then will have "j"+"d"+int as an identifier
@@ -129,7 +107,7 @@ public class R2RMLWriter {
 
 	private String getSplitMappingAxiomIdDelimiterSubstring(List<OBDAMappingAxiom> mappingAxioms) {
 		String delimiterSubstring = "";
-		boolean matched = false;
+		boolean matched;
 		do {
 			delimiterSubstring += "_";
 			Pattern pattern = Pattern.compile(delimiterSubstring + "(\\d)*$");
