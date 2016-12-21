@@ -406,6 +406,32 @@ public class EmptyNodeRemovalTest {
     }
 
     @Test(expected = EmptyQueryException.class)
+    public void testJoin3() throws EmptyQueryException {
+        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(METADATA, INJECTOR);
+
+        ConstructionNode rootNode = new ConstructionNodeImpl(PROJECTION_ATOM.getVariables(),
+                new ImmutableSubstitutionImpl<>(ImmutableMap.of(X, generateURI1(A), Y, generateURI1(B))),
+                Optional.empty());
+        queryBuilder.init(PROJECTION_ATOM, rootNode);
+
+        InnerJoinNode joinNode = new InnerJoinNodeImpl(Optional.empty());
+        queryBuilder.addChild(rootNode, joinNode);
+
+        queryBuilder.addChild(joinNode, DATA_NODE_1);
+
+        EmptyNode emptyNode = new EmptyNodeImpl(ImmutableSet.of());
+        queryBuilder.addChild(joinNode, emptyNode);
+
+        IntermediateQuery query = queryBuilder.build();
+
+        System.out.println("\n Unsatisfiable query: \n" +  query);
+
+        // Should throw an exception
+        query.applyProposal(new RemoveEmptyNodeProposalImpl(emptyNode, true), REQUIRE_USING_IN_PLACE_EXECUTOR);
+        System.err.println("\n Failure: this query should have been declared as unsatisfiable: \n" +  query);
+    }
+
+    @Test(expected = EmptyQueryException.class)
     public void testJoinLJ1() throws EmptyQueryException {
         IntermediateQuery query = generateJoinLJInitialQuery(
                 Optional.of(DATA_FACTORY.getImmutableExpression(ExpressionOperation.EQ, B, C)), B);

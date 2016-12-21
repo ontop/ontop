@@ -6,7 +6,7 @@ import com.google.common.io.CharStreams;
 import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import org.junit.Test;
-import org.semanticweb.owlapi.io.ToStringRenderer;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,7 +27,7 @@ public class AnnotationTest {
     final String owlFile = "src/test/resources/annotation/doid.owl";
     final String obdaFile = "src/test/resources/annotation/doid.obda";
 
-    private String runTestQuery1() throws Exception {
+    private int runTestQuery1() throws Exception {
 
         // Creating a new instance of the reasoner
         QuestOWLFactory factory = new QuestOWLFactory();
@@ -52,7 +52,7 @@ public class AnnotationTest {
         long end = System.nanoTime();
 
         double time = (end - start) / 1000;
-        String result = "";
+
         int count = 0;
         while (res.nextRow()) {
             count += 1;
@@ -61,7 +61,7 @@ public class AnnotationTest {
                     log.debug("Example result " + res.getSignature().get(i - 1) + " = " + res.getOWLObject(i));
 
                 }
-                result = ToStringRenderer.getInstance().getRendering(res.getOWLObject("x"));
+
             }
         }
         log.debug("Total results: {}", count);
@@ -74,7 +74,7 @@ public class AnnotationTest {
         conn.close();
         reasoner.dispose();
 
-        return result;
+        return count;
     }
 
 
@@ -82,8 +82,8 @@ public class AnnotationTest {
     @Test
     public void testAnnotationInOntology() throws Exception {
 
-        String results = runTestQuery1();
-        assertEquals("<http://purl.obolibrary.org/obo/DOID_0060293>", results);
+        int results = runTestQuery1();
+        assertEquals(76, results);
     }
 
 
