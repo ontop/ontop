@@ -20,33 +20,15 @@ package it.unibz.inf.ontop.owlrefplatform.core.abox;
  * #L%
  */
 
-import it.unibz.inf.ontop.model.BNode;
-import it.unibz.inf.ontop.model.Function;
-import it.unibz.inf.ontop.model.OBDADataFactory;
-import it.unibz.inf.ontop.model.OBDAException;
-import it.unibz.inf.ontop.model.OBDAMappingAxiom;
-import it.unibz.inf.ontop.model.ObjectConstant;
-import it.unibz.inf.ontop.model.Predicate;
+import com.google.common.base.Joiner;
+import com.google.common.collect.ImmutableMap;
+import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.Predicate.COL_TYPE;
-import it.unibz.inf.ontop.model.URIConstant;
-import it.unibz.inf.ontop.model.ValueConstant;
-import it.unibz.inf.ontop.model.Variable;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
-import it.unibz.inf.ontop.ontology.Assertion;
-import it.unibz.inf.ontop.ontology.ClassExpression;
-import it.unibz.inf.ontop.ontology.DataPropertyAssertion;
-import it.unibz.inf.ontop.ontology.DataPropertyExpression;
-import it.unibz.inf.ontop.ontology.ImmutableOntologyVocabulary;
-import it.unibz.inf.ontop.ontology.ObjectPropertyAssertion;
-import it.unibz.inf.ontop.ontology.ObjectPropertyExpression;
-import it.unibz.inf.ontop.ontology.ClassAssertion;
-import it.unibz.inf.ontop.ontology.OClass;
-import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.Equivalences;
-import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.EquivalencesDAG;
-import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.Interval;
-import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.SemanticIndexCache;
-import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.SemanticIndexRange;
-import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
+import it.unibz.inf.ontop.ontology.*;
+import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -55,12 +37,6 @@ import java.sql.ResultSet;
 import java.util.*;
 import java.util.Map.Entry;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.google.common.base.Joiner;
-import com.google.common.collect.ImmutableMap;
-import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.*;
 
 /**
  * Store ABox assertions in the DB

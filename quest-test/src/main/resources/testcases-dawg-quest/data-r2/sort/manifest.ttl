@@ -15,9 +15,9 @@
       :dawg-sort-7 
       :dawg-sort-8
       :dawg-sort-9 :dawg-sort-10 
-      #:dawg-sort-numbers # WON'T FIX
-      #:dawg-sort-builtin # WON'T FIX
-      #:dawg-sort-function # WON'T FIX
+      # :dawg-sort-numbers # WON'T FIX
+      # :dawg-sort-builtin # WON'T FIX
+      # :dawg-sort-function # WON'T FIX
     ).
 
 :dawg-sort-1 a mf:QueryEvaluationTest;

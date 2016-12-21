@@ -75,7 +75,7 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
             return new SubstitutionResultsImpl<>(DECLARE_AS_EMPTY);
         }
 
-        return computeAndEvaluateNewCondition(substitution, query)
+        return computeAndEvaluateNewCondition(substitution, query, Optional.empty())
                 .map(ev -> applyEvaluation(ev, substitution))
                 .orElseGet(() -> new SubstitutionResultsImpl<>(NO_CHANGE, Optional.of(substitution)));
     }
@@ -109,67 +109,9 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
 
     @Override
     public NodeTransformationProposal reactToEmptyChild(IntermediateQuery query, EmptyNode emptyChild) {
-        ImmutableList<QueryNode> remainingChildren = query.getChildrenStream(this)
-                .filter(c -> c != emptyChild)
-                .collect(ImmutableCollectors.toList());
 
-        ImmutableSet<Variable> variablesProjectedByDeletedChild = emptyChild.getVariables();
-        ImmutableSet<Variable> otherNodesProjectedVariables = query.getVariables(this);
-
-        /**
-         * If there is an implicit equality involving one null variables, the join is empty.
-         */
-        if (otherNodesProjectedVariables.stream()
-                .anyMatch(variablesProjectedByDeletedChild::contains)) {
-            return rejectInnerJoin(otherNodesProjectedVariables, variablesProjectedByDeletedChild);
-        }
-
-        Optional<ImmutableExpression> formerCondition = getOptionalFilterCondition();
-
-        Optional<ExpressionEvaluator.Evaluation> optionalEvaluation = formerCondition
-                .map(cond -> computeNullSubstitution(variablesProjectedByDeletedChild).applyToBooleanExpression(cond))
-                .map(cond -> new ExpressionEvaluator(query.getMetadata().getUriTemplateMatcher())
-                        .evaluateExpression(cond));
-
-        /**
-         * The new condition is not satisfied anymore
-         */
-        if (optionalEvaluation
-                .filter(ExpressionEvaluator.Evaluation::isFalse)
-                .isPresent()) {
-            // Reject
-            return rejectInnerJoin(otherNodesProjectedVariables, variablesProjectedByDeletedChild);
-        }
-        /**
-         * The condition still holds
-         */
-        else {
-            Optional<ImmutableExpression> newCondition = optionalEvaluation
-                    .flatMap(ExpressionEvaluator.Evaluation::getOptionalExpression);
-
-            switch (remainingChildren.size()) {
-                case 0:
-                    return new NodeTransformationProposalImpl(NodeTransformationProposedState.DECLARE_AS_EMPTY,
-                            variablesProjectedByDeletedChild);
-                case 1:
-                    if (newCondition.isPresent()) {
-                        return new NodeTransformationProposalImpl(REPLACE_BY_NEW_NODE,
-                                new FilterNodeImpl(newCondition.get()),
-                                variablesProjectedByDeletedChild);
-                    } else {
-                        return new NodeTransformationProposalImpl(REPLACE_BY_UNIQUE_NON_EMPTY_CHILD, remainingChildren.get(0),
-                                variablesProjectedByDeletedChild);
-                    }
-                default:
-                    if (newCondition.equals(formerCondition)) {
-                        return new NodeTransformationProposalImpl(NO_LOCAL_CHANGE, variablesProjectedByDeletedChild);
-                    } else {
-                        return new NodeTransformationProposalImpl(REPLACE_BY_NEW_NODE,
-                                new InnerJoinNodeImpl(newCondition),
-                                variablesProjectedByDeletedChild);
-                    }
-            }
-        }
+        return new NodeTransformationProposalImpl(NodeTransformationProposedState.DECLARE_AS_EMPTY,
+                query.getVariables(this));
     }
 
     @Override
@@ -192,12 +134,6 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
             default:
                 return new NodeTransformationProposalImpl(NO_LOCAL_CHANGE, ImmutableSet.of());
         }
-    }
-
-    private NodeTransformationProposal rejectInnerJoin(ImmutableSet<Variable> otherNodesProjectedVariables,
-                                                       ImmutableSet<Variable> variablesProjectedByDeletedChild) {
-        return new NodeTransformationProposalImpl(NodeTransformationProposedState.DECLARE_AS_EMPTY,
-                union(otherNodesProjectedVariables, variablesProjectedByDeletedChild));
     }
 
     @Override

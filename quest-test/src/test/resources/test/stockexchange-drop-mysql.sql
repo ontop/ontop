@@ -1,8 +1,1 @@
-DROP TABLE address;
-DROP TABLE broker;
-DROP TABLE brokerworksfor;
-DROP TABLE client;
-DROP TABLE company;
-DROP TABLE stockbooklist;
-DROP TABLE stockinformation;
-DROP TABLE transaction;
+DROP DATABASE IF EXISTS stockexchange_new;

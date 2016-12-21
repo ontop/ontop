@@ -21,11 +21,12 @@ package it.unibz.inf.ontop.owlrefplatform.core.srcquerygeneration;
  */
 
 
+import com.google.common.base.Joiner;
 import com.google.common.collect.*;
+import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.Predicate.COL_TYPE;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
-import it.unibz.inf.ontop.model.TermType;
 import it.unibz.inf.ontop.model.impl.TermUtils;
 import it.unibz.inf.ontop.owlrefplatform.core.abox.SemanticIndexURIMap;
 import it.unibz.inf.ontop.owlrefplatform.core.abox.XsdDatatypeConverter;
@@ -35,19 +36,15 @@ import it.unibz.inf.ontop.owlrefplatform.core.queryevaluation.SQLDialectAdapter;
 import it.unibz.inf.ontop.parser.EncodeForURI;
 import it.unibz.inf.ontop.sql.*;
 import it.unibz.inf.ontop.utils.DatalogDependencyGraphGenerator;
+import org.openrdf.model.Literal;
+import org.openrdf.model.vocabulary.XMLSchema;
+import org.slf4j.LoggerFactory;
 
 import java.sql.Types;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-
-import org.openrdf.model.Literal;
-import org.openrdf.model.vocabulary.XMLSchema;
-import org.slf4j.LoggerFactory;
-
-import com.google.common.base.Joiner;
-import it.unibz.inf.ontop.model.*;
 
 import static it.unibz.inf.ontop.model.Predicate.COL_TYPE.*;
 
@@ -247,7 +244,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 			final String outerViewName = "SUB_QVIEW";
 			String subquery = generateQuery(signature, ruleIndex, predicatesInBottomUp, extensionalPredicates);
 
-			String modifier = "";
+			String modifier;
 
 			List<OrderCondition> conditions = queryProgram.getQueryModifiers().getSortConditions();
 
@@ -259,15 +256,18 @@ public class SQLGenerator implements SQLQueryGenerator {
 			// List<OrderCondition> conditions =
 			// query.getQueryModifiers().getSortConditions();
 
-
-			if (!conditions.isEmpty()) {
-				modifier += sqladapter.sqlOrderBy(conditions, outerViewName)
-						+ "\n";
-			}
 			long limit = queryProgram.getQueryModifiers().getLimit();
 			long offset = queryProgram.getQueryModifiers().getOffset();
-			if (limit != -1 || offset != -1) {
-				modifier += sqladapter.sqlSlice(limit, offset) + "\n";
+
+			if (!conditions.isEmpty()) {
+				modifier = sqladapter.sqlOrderByAndSlice(conditions, outerViewName, limit, offset)
+						+ "\n";
+			}
+			else if (limit != -1 || offset != -1) {
+				modifier = sqladapter.sqlSlice(limit, offset) + "\n";
+			}
+			else {
+				modifier = "";
 			}
 
 			String sql = "SELECT *\n";
@@ -317,10 +317,10 @@ public class SQLGenerator implements SQLQueryGenerator {
 	 *            The index that maps intentional predicates to its rules
 	 * @param predicatesInBottomUp
 	 *            The topologically ordered predicates in
-	 *            <code> query </query>.
+	 *            <code> query </code>.
 	 * @param extensionalPredicates
 	 *            The predicates that are not defined by any rule in <code>
-	 *            query </query>
+	 *            query </code>
 	 * @return
 	 * @throws OBDAException
 	 */
@@ -1600,14 +1600,15 @@ public class SQLGenerator implements SQLQueryGenerator {
 			URIConstant uc = (URIConstant) t;
 			return sqladapter.getSQLLexicalFormString(uc.getURI());
 		}
-
-		/*
-		 * Unsupported case
+		/**
+		 * Complex first argument: treats it as a string and ignore other arguments
 		 */
-		throw new IllegalArgumentException(
-				"Error, cannot generate URI constructor clause for a term: "
-						+ ov.toString());
-
+		else {
+			/*
+			 * The function is for example of the form uri(CONCAT("string",x)),we simply return the value from the database.
+			 */
+			return getSQLString(t, index, false);
+		}
 	}
 
 	// TODO: move to SQLAdapter

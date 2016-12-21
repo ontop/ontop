@@ -20,8 +20,6 @@ package it.unibz.inf.ontop.owlrefplatform.core;
  * #L%
  */
 
-import it.unibz.inf.ontop.owlrefplatform.core.srcquerygeneration.SQLGenerator;
-import it.unibz.inf.ontop.sql.*;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.model.impl.RDBMSourceParameterConstants;
@@ -40,15 +38,17 @@ import it.unibz.inf.ontop.owlrefplatform.core.queryevaluation.SQLDialectAdapter;
 import it.unibz.inf.ontop.owlrefplatform.core.reformulation.DummyReformulator;
 import it.unibz.inf.ontop.owlrefplatform.core.reformulation.QueryRewriter;
 import it.unibz.inf.ontop.owlrefplatform.core.reformulation.TreeWitnessRewriter;
+import it.unibz.inf.ontop.owlrefplatform.core.srcquerygeneration.SQLGenerator;
 import it.unibz.inf.ontop.owlrefplatform.core.srcquerygeneration.SQLQueryGenerator;
 import it.unibz.inf.ontop.owlrefplatform.core.translator.MappingVocabularyRepair;
+import it.unibz.inf.ontop.sql.*;
 import it.unibz.inf.ontop.utils.MappingParser;
 import net.sf.jsqlparser.JSQLParserException;
 import org.apache.tomcat.jdbc.pool.DataSource;
 import org.apache.tomcat.jdbc.pool.PoolProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import java.sql.Statement;
+
 import java.io.Serializable;
 import java.net.URI;
 import java.security.InvalidParameterException;
@@ -271,10 +271,10 @@ public class Quest implements Serializable {
 	}
 
 	/**
-	 * Enable/Disable querying annotation properties defined in the ontology
+	 * Enable/Disable querying sameAs properties defined in the mapping
 	 * It overrides the value defined in QuestPreferences
 	 *
-	 * @param queryingAnnotationsInOntology
+	 * @param sameAsInMapping
 	 */
 
 	public void setSameAsInMapping(boolean sameAsInMapping) {
@@ -487,6 +487,8 @@ public class Quest implements Serializable {
 				dataRepository = new RDBMSSIRepositoryManager(reformulationReasoner, inputOntology.getVocabulary());
 
 				if (inmemory) {
+
+					log.warn("Semantic index mode initializing: \nString operation over URI are not supported in this mode ");
 					// we work in memory (with H2), the database is clean and 
 					// Quest will insert new Abox assertions into the database.
 					dataRepository.generateMetadata();

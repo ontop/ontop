@@ -12,7 +12,6 @@ import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import org.junit.Before;
 import org.junit.Test;
 import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.io.ToStringRenderer;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.slf4j.Logger;
@@ -57,7 +56,7 @@ public class AnnotationTest {
 
     }
 
-    private String runTestQuery1(QuestPreferences p) throws Exception {
+    private int runTestQuery1(QuestPreferences p) throws Exception {
 
         // Creating a new instance of the reasoner
         QuestOWLFactory factory = new QuestOWLFactory();
@@ -78,7 +77,7 @@ public class AnnotationTest {
         long end = System.nanoTime();
 
         double time = (end - start) / 1000;
-        String result = "";
+
         int count = 0;
         while (res.nextRow()) {
             count += 1;
@@ -87,7 +86,7 @@ public class AnnotationTest {
                     log.debug("Example result " + res.getSignature().get(i - 1) + " = " + res.getOWLObject(i));
 
                 }
-                result = ToStringRenderer.getInstance().getRendering(res.getOWLObject("x"));
+
             }
         }
         log.debug("Total results: {}", count);
@@ -100,7 +99,7 @@ public class AnnotationTest {
         conn.close();
         reasoner.dispose();
 
-        return result;
+        return count;
     }
 
 
@@ -110,8 +109,8 @@ public class AnnotationTest {
 
         QuestPreferences p = new QuestPreferences();
 
-        String results = runTestQuery1(p);
-        assertEquals("<http://purl.obolibrary.org/obo/DOID_0060293>", results);
+        int results = runTestQuery1(p);
+        assertEquals(76 , results);
     }
 
 
