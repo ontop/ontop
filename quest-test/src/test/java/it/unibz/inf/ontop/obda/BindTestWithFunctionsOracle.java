@@ -79,4 +79,26 @@ public class BindTestWithFunctionsOracle extends AbstractBindTestWithFunctions {
         return expectedValues;
     }
 
+    @Override
+    protected List<String> getBindWithAfterExpectedValues() {
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add(null);  // ROMAN (23 Dec 2015): now the language tag is handled correctly
+        expectedValues.add("\" Semantic Web\"@en");
+        expectedValues.add(null);
+        expectedValues.add("\" Logic Book: Introduction, Second Edition\"@en");
+
+        return expectedValues;
+    }
+
+    @Override
+    protected List<String> getBindWithBeforeExpectedValues() {
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add(null);  // ROMAN (23 Dec 2015): now the language tag is handled correctly
+        expectedValues.add("\"The Seman\"@en");
+        expectedValues.add(null);
+        expectedValues.add("\"The Logic Book: Introduc\"@en");
+
+        return expectedValues;
+    }
+
 }

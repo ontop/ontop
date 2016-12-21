@@ -472,14 +472,18 @@ public abstract class AbstractBindTestWithFunctions {
                 + "   BIND (STRBEFORE(?title,\"ti\") AS ?w)\n"
                 + "}";
 
+        checkReturnedValues(queryBind, getBindWithBeforeExpectedValues());
 
+    }
+
+    protected List<String> getBindWithBeforeExpectedValues() {
         List<String> expectedValues = new ArrayList<>();
         expectedValues.add("\"\"@en");  // ROMAN (23 Dec 2015): now the language tag is handled correctly
         expectedValues.add("\"The Seman\"@en");
         expectedValues.add("\"\"@en");
         expectedValues.add("\"The Logic Book: Introduc\"@en");
-        checkReturnedValues(queryBind, expectedValues);
 
+        return expectedValues;
     }
 
 
@@ -495,14 +499,18 @@ public abstract class AbstractBindTestWithFunctions {
                 + "   BIND (STRAFTER(?title,\"The\") AS ?w)\n"
                 + "}";
 
+        checkReturnedValues(queryBind, getBindWithAfterExpectedValues());
 
+    }
+
+    protected List<String> getBindWithAfterExpectedValues() {
         List<String> expectedValues = new ArrayList<>();
         expectedValues.add("\"\"@en");  // ROMAN (23 Dec 2015): now the language tag is handled correctly
         expectedValues.add("\" Semantic Web\"@en");
         expectedValues.add("\"\"@en");
         expectedValues.add("\" Logic Book: Introduction, Second Edition\"@en");
-        checkReturnedValues(queryBind, expectedValues);
 
+        return expectedValues;
     }
 
 
@@ -788,7 +796,11 @@ public abstract class AbstractBindTestWithFunctions {
             while (rs.nextRow()) {
                 OWLObject ind1 = rs.getOWLObject("w");
                 // log.debug(ind1.toString());
-                returnedValues.add(ind1.toString());
+                if (ind1 != null) {
+                    returnedValues.add(ind1.toString());
+                } else {
+                    returnedValues.add(null);
+                }
                 java.lang.System.out.println(ind1);
                 i++;
             }

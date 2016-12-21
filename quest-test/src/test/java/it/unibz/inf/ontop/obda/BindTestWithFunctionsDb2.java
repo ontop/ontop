@@ -48,6 +48,18 @@ public class BindTestWithFunctionsDb2 extends AbstractBindTestWithFunctions {
     public void testHash() {
     }
 
+    @Ignore("Not yet supported")
+    @Test
+    @Override
+    public void testUuid() {
+    }
+
+    @Ignore("Not yet supported")
+    @Test
+    @Override
+    public void testStrUuid() {
+    }
+
 //    @Ignore("Not yet supported")
 //    @Test
 //    @Override
