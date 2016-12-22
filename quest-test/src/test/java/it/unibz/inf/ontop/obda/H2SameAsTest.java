@@ -290,7 +290,7 @@ public class H2SameAsTest {
 
 		// Bind (?n ?y)
 		ArrayList<String> results = runTests(query, false);
-		assertEquals(15, results.size() );
+		assertEquals(12, results.size() );
 
 	}
 

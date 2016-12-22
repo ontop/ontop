@@ -110,7 +110,7 @@ public class MappingVocabularyRepair {
 
 
                         String predName = predTarget.getName();
-                        if(predName.equals(OBDAVocabulary.SAME_AS)) {
+                        if(predName.equals(OBDAVocabulary.SAME_AS) || predName.equals(OBDAVocabulary.CANONICAL_IRI)) {
 
                             // In case of sameAs property we know we are working with 2 uris, and we need an object property
                             newatom = fixSameAsPredicate (mapping, predName, arguments);
