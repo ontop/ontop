@@ -69,12 +69,6 @@ public class QuestUnfolder {
 
 		mappings = vocabularyValidator.replaceEquivalences(mappings);
 
-		/*
-		 * add sameAsInverse
-		 */
-		if (sameAs) {
-			mappings.addAll(MappingSameAs.addSameAsInverse(mappings));
-		}
 
 		/*
 		 * Substitute select * with column names  (performs the operation `in place')
@@ -85,14 +79,21 @@ public class QuestUnfolder {
 		 * Split the mapping (creates a new set of mappings)
 		 */
 		Collection<OBDAMappingAxiom> splittedMappings = MappingSplitter.splitMappings(mappings);
-		
+
 		/*
 		 * Expand the meta mapping (creates a new set of mappings)
 		 */
 		MetaMappingExpander metaMappingExpander = new MetaMappingExpander(localConnection, metadata.getQuotedIDFactory());
 		Collection<OBDAMappingAxiom> expandedMappings = metaMappingExpander.expand(splittedMappings);
-		
-		List<CQIE> unfoldingProgram = Mapping2DatalogConverter.constructDatalogProgram(expandedMappings, metadata);
+
+        /*
+         * add sameAsInverse
+         */
+        if (sameAs) {
+            expandedMappings = MappingSameAs.addSameAsInverse(expandedMappings);
+        }
+
+        List<CQIE> unfoldingProgram = Mapping2DatalogConverter.constructDatalogProgram(expandedMappings, metadata);
 		
 		
 		log.debug("Original mapping size: {}", unfoldingProgram.size());
@@ -125,7 +126,7 @@ public class QuestUnfolder {
 
         if(log.isDebugEnabled()) {
             String finalMappings = Joiner.on("\n").join(unfoldingProgram);
-            log.debug("Set of mappings before canonical URI rewriting: \n {}", finalMappings);
+            log.debug("Set of mappings before canonical IRI rewriting: \n {}", finalMappings);
         }
 
 		unfoldingProgram = new CanonicalIRIRewriter().buildCanonicalIRIMappings(unfoldingProgram);

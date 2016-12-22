@@ -20,6 +20,7 @@ package it.unibz.inf.ontop.obda;
  * #L%
  */
 
+import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.io.ModelIOManager;
 import it.unibz.inf.ontop.model.OBDADataFactory;
 import it.unibz.inf.ontop.model.OBDAModel;
@@ -27,6 +28,7 @@ import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
+import jdk.nashorn.internal.ir.annotations.Immutable;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -180,55 +182,43 @@ public class H2ComplexSameAsTest {
 
 	@Test
     public void testSameAs1() throws Exception {
-        String query =  "PREFIX : <http://ontop.inf.unibz.it/test/wellbore#> SELECT ?x\n" +
+        String query =  "PREFIX : <http://ontop.inf.unibz.it/test/wellbore#> " +
+                "SELECT DISTINCT ?x\n" +
                 "WHERE {\n" +
                 "   ?x  a :Wellbore . \n" +
                 "}";
 
-		ArrayList<String> results = runTests(query, true);
-		ArrayList<String> expectedResults = new ArrayList<>();
-		expectedResults.add("<http://ontop.inf.unibz.it/test/wellbore#uri1-1>");
-		expectedResults.add("<http://ontop.inf.unibz.it/test/wellbore#uri1-2>");
-		expectedResults.add("<http://ontop.inf.unibz.it/test/wellbore#uri2-1>");
-		expectedResults.add("<http://ontop.inf.unibz.it/test/wellbore#uri2-2>");
-		expectedResults.add("<http://ontop.inf.unibz.it/test/wellbore#uri2-3>");
-		expectedResults.add("<http://ontop.inf.unibz.it/test/wellbore#uri3-2>");
-		expectedResults.add("<http://ontop.inf.unibz.it/test/wellbore#uri3-1>");
-		expectedResults.add("<http://ontop.inf.unibz.it/test/wellbore#uri3-3>");
-		expectedResults.add("<http://ontop.inf.unibz.it/test/wellbore#uri1-1>");
-		expectedResults.add("<http://ontop.inf.unibz.it/test/wellbore#uri1-2>");
-		expectedResults.add("<http://ontop.inf.unibz.it/test/wellbore#uri3-2>");
-		expectedResults.add("<http://ontop.inf.unibz.it/test/wellbore#uri3-1>");
-		expectedResults.add("<http://ontop.inf.unibz.it/test/wellbore#uri2-1>");
-		expectedResults.add("<http://ontop.inf.unibz.it/test/wellbore#uri2-2>");
-		expectedResults.add("<http://ontop.inf.unibz.it/test/wellbore/Katian>");
-		expectedResults.add("<http://ontop.inf.unibz.it/test/wellbore/Bill>");
-		expectedResults.add("<http://ontop.inf.unibz.it/test/wellbore#uri3-1>");
-		expectedResults.add("<http://ontop.inf.unibz.it/test/wellbore#uri3-2>");
-		expectedResults.add("<http://ontop.inf.unibz.it/test/wellbore#uri3-4>");
-		expectedResults.add("<http://ontop.inf.unibz.it/test/wellbore#uri3-3>");
-		expectedResults.add("<http://ontop.inf.unibz.it/test/wellbore#uri2-1>");
-		expectedResults.add("<http://ontop.inf.unibz.it/test/wellbore#uri2-2>");
-		expectedResults.add("<http://ontop.inf.unibz.it/test/wellbore#uri2-3>");
-		expectedResults.add("<http://ontop.inf.unibz.it/test/wellbore#uri1-1>");
-		expectedResults.add("<http://ontop.inf.unibz.it/test/wellbore#uri1-2>");
+        final ImmutableSet<String> results = ImmutableSet.<String>copyOf(runTests(query, true));
 
-		assertEquals(expectedResults.size(), results.size() );
+        ImmutableSet<String> expectedResults =
+                ImmutableSet.<String>builder()
+                        .add("<http://ontop.inf.unibz.it/test/wellbore/Katian>")
+                        .add("<http://ontop.inf.unibz.it/test/wellbore/Bill>")
+                        .add("<http://ontop.inf.unibz.it/test/wellbore#uri1-1>")
+                        .add("<http://ontop.inf.unibz.it/test/wellbore#uri1-2>")
+                        .add("<http://ontop.inf.unibz.it/test/wellbore#uri2-1>")
+                        .add("<http://ontop.inf.unibz.it/test/wellbore#uri2-2>")
+                        .add("<http://ontop.inf.unibz.it/test/wellbore#uri2-3>")
+                        .add("<http://ontop.inf.unibz.it/test/wellbore#uri3-1>")
+                        .add("<http://ontop.inf.unibz.it/test/wellbore#uri3-2>")
+                        .add("<http://ontop.inf.unibz.it/test/wellbore#uri3-3>")
+                        .add("<http://ontop.inf.unibz.it/test/wellbore#uri3-4>")
+                        .build();
+        assertEquals(expectedResults.size(), results.size() );
 		assertEquals(expectedResults, results);
 
     }
 
 	@Test
 	public void testNoSameAs1() throws Exception {
-		String query =  "PREFIX : <http://ontop.inf.unibz.it/test/wellbore#> SELECT ?x\n" +
+		String query =  "PREFIX : <http://ontop.inf.unibz.it/test/wellbore#> " +
+                "SELECT DISTINCT ?x\n" +
 				"WHERE {\n" +
 				" {  ?x  a :Wellbore . \n" +
 				"} UNION {?x owl:sameAs [ a :Wellbore ] }} ";
 
 		ArrayList<String> results = runTests(query, false);
-		assertEquals(18, results.size() );
-
-
+		assertEquals(11, results.size() );
 	}
 
 	@Test
@@ -298,7 +288,6 @@ public class H2ComplexSameAsTest {
 
 		ArrayList<String> results = runTests(query, true);
 		assertEquals(24, results.size() );
-
 	}
 
 
