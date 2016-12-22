@@ -132,6 +132,10 @@ public class QuestUnfolder {
 		else{
 			annotationAssertions = Collections.emptyList();
 		}
+
+		// Temporary (needed by the assertions)
+		uriTemplateMatcher = UriTemplateMatcher.create(unfoldingProgram);
+
 		addAssertionsAsFacts(unfoldingProgram, inputOntology.getClassAssertions(),
 				inputOntology.getObjectPropertyAssertions(), inputOntology.getDataPropertyAssertions(), annotationAssertions);
 
