@@ -126,6 +126,7 @@ public class RelationalExpressionTest {
         System.out.println(relationalExpression);
 
         crossJoinAndJoinOnCommonAsserts(relationalExpression);
+        assertTrue(relationalExpression.getFilterAtoms().isEmpty());
     }
 
     @Test(expected = IllegalJoinException.class)
@@ -298,6 +299,7 @@ public class RelationalExpressionTest {
         assertEquals(null, attrs.get(qaTu));
         assertEquals(v, attrs.get(qaTv));
         assertEquals(v, attrs.get(qaNv));
+
     }
 
     private void crossJoinAndJoinOnCommonAsserts(RelationalExpression relationalExpression ){
@@ -313,6 +315,7 @@ public class RelationalExpressionTest {
         assertEquals(null, attrs.get(qaNu));
         assertEquals(v, attrs.get(qaTv));
         assertEquals(v, attrs.get(qaNv));
+
     }
 
 
