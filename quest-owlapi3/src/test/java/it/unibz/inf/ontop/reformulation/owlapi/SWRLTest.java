@@ -6,6 +6,7 @@ import junit.framework.TestCase;
 import org.junit.Test;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.*;
+import org.semanticweb.owlapi.vocab.XSDVocabulary;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -150,7 +151,18 @@ public void testVisitorPropertyExample() throws Exception {
 
 		
 	}
-	
+
+	@Test
+	public void test(){
+        OWLOntologyManager man = OWLManager.createOWLOntologyManager();
+        fac = man.getOWLDataFactory();
+        final OWLAnnotationProperty temporalOp = fac.getOWLAnnotationProperty(IRI.create("urn:temporalOperator"));
+
+        final IRI iri1 = IRI.create("urn:[-][0,1h]Hurricane");
+
+        final XSDVocabulary duration = XSDVocabulary.DURATION;
+    }
+
 	
 
 }

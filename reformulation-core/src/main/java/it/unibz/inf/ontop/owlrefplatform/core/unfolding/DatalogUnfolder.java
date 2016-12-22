@@ -2182,11 +2182,12 @@ public class DatalogUnfolder {
                  * of this optimization at each step of the derivation tree
                  * guarantees there wont be any other redundant atom.
                  */
+				Substitution mgu = null;
+                Function tempatom = null;
                 Function replacement = null;
-
-                Substitution mgu1 = null;
+				
                 for (int idx2 = 0; idx2 < termidx.peek(); idx2++) {
-                    Function tempatom = innerAtoms.get(idx2);
+                    tempatom = innerAtoms.get(idx2);
 
                     if (!tempatom.getFunctionSymbol().equals(newatom.getFunctionSymbol())) {
                         /*
@@ -2205,8 +2206,8 @@ public class DatalogUnfolder {
 
                     if (redundant) {
                         /* found a candidate replacement atom */
-                        mgu1 = UnifierUtilities.getMGU(newatom, tempatom);
-                        if (mgu1 != null) {
+                        mgu = UnifierUtilities.getMGU(newatom, tempatom);
+                        if (mgu != null) {
                             replacement = tempatom;
                             break;
                         }
@@ -2217,14 +2218,18 @@ public class DatalogUnfolder {
                 if (replacement == null)
                     continue;
 
-                if (mgu1 == null)
+                if (mgu == null)
                     throw new RuntimeException("Unexpected case found while performing JOIN elimination. Contact the authors for debugging.");
 
                 if (currentAtom.isAlgebraFunction() && (currentAtom.getFunctionSymbol() == OBDAVocabulary.SPARQL_LEFTJOIN)) {
                     continue;
                 }
 
-                SubstitutionUtilities.applySubstitution(partialEvalution, mgu1, false);
+				SubstitutionUtilities.applySubstitution(partialEvalution, mgu, false);
+
+                log.debug("The Unique Constraint {}{} is used for eliminating the redundant self join of {} and {}",
+                        newatom.getFunctionSymbol(), pKey, newatom, tempatom);
+
                 innerAtoms.remove(newatomidx);
                 newatomidx -= 1;
                 newatomcount -= 1;
@@ -2232,13 +2237,13 @@ public class DatalogUnfolder {
             }
         }
 
-        /***
-         * As the result of optimizing PKs, it can be that JOINs become invalid,
-         * i.e., they contian one single data item (no longer a join). In this
-         * case we need to eliminate the join atom attach the inner atoms to the
-         * parent of the join (body or another join/leftjoin). This is done with
-         * the normalizer.
-         */
+		/*
+		 * As the result of optimizing PKs, it can be that JOINs become invalid,
+		 * i.e., they contian one single data item (no longer a join). In this
+		 * case we need to eliminate the join atom attach the inner atoms to the
+		 * parent of the join (body or another join/leftjoin). This is done with
+		 * the normalizer.
+		 */
 
         int dataAtoms = DatalogNormalizer.countDataItems(innerAtoms);
         if (dataAtoms == 1) {

@@ -31,6 +31,7 @@ import it.unibz.inf.ontop.owlapi.OWLAPIABoxIterator;
 import it.unibz.inf.ontop.owlapi.OWLAPIIndividualTranslator;
 import it.unibz.inf.ontop.owlapi.OntopOWLException;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestStatement;
+import it.unibz.inf.ontop.owlrefplatform.core.benchmark.OntopBenchmark;
 import it.unibz.inf.ontop.owlrefplatform.core.queryevaluation.SPARQLQueryUtility;
 import it.unibz.inf.ontop.sesame.SesameRDFIterator;
 import org.openrdf.query.parser.ParsedQuery;
@@ -385,5 +386,4 @@ public class QuestOWLStatement implements AutoCloseable {
 		}
 		return axiomList;
 	}
-
 }

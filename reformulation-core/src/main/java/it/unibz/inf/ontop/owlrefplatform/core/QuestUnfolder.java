@@ -12,10 +12,7 @@ import it.unibz.inf.ontop.model.impl.TermUtils;
 import it.unibz.inf.ontop.ontology.*;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.*;
 import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
-import it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing.MappingDataTypeRepair;
-import it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing.MappingSameAs;
-import it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing.TMappingExclusionConfig;
-import it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing.TMappingProcessor;
+import it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing.*;
 import it.unibz.inf.ontop.owlrefplatform.core.unfolding.DatalogUnfolder;
 import it.unibz.inf.ontop.parser.PreprocessProjection;
 import it.unibz.inf.ontop.pivotalrepr.MetadataForQueryOptimization;
@@ -88,17 +85,17 @@ public class QuestUnfolder {
 
 		mappings = vocabularyValidator.replaceEquivalences(mappings);
 
-		/** 
+		/**
 		 * Substitute select * with column names  (performs the operation `in place')
 		 */
 		preprocessProjection(mappings, metadata);
 
-		/**
+		/*
 		 * Split the mapping (creates a new set of mappings)
 		 */
 		Collection<OBDAMappingAxiom> splittedMappings = MappingSplitter.splitMappings(mappings);
-		
-		/**
+
+		/*
 		 * Expand the meta mapping (creates a new set of mappings)
 		 */
 		MetaMappingExpander metaMappingExpander = new MetaMappingExpander(localConnection, metadata.getQuotedIDFactory());
@@ -127,9 +124,6 @@ public class QuestUnfolder {
 		 // of all mappings to preserve SQL-RDF semantics
 		extendTypesWithMetadataAndAddNOTNULL(unfoldingProgram, reformulationReasoner, vocabularyValidator);
 
-		// Collecting URI templates
-		uriTemplateMatcher = UriTemplateMatcher.create(unfoldingProgram);
-
 		// Adding ontology assertions (ABox) as rules (facts, head with no body).
 		List<AnnotationAssertion> annotationAssertions;
 		if (queryingAnnotationsInOntology) {
@@ -144,6 +138,16 @@ public class QuestUnfolder {
 		if (sameAs) {
 			addSameAsMapping(unfoldingProgram);
 		}
+
+        if(log.isDebugEnabled()) {
+            String finalMappings = Joiner.on("\n").join(unfoldingProgram);
+            log.debug("Set of mappings before canonical IRI rewriting: \n {}", finalMappings);
+        }
+
+		unfoldingProgram = new CanonicalIRIRewriter().buildCanonicalIRIMappings(unfoldingProgram);
+
+		// Collecting URI templates
+		uriTemplateMatcher = UriTemplateMatcher.create(unfoldingProgram);
 
 		// Adding "triple(x,y,z)" mappings for support of unbounded
 		// predicates and variables as class names (implemented in the
