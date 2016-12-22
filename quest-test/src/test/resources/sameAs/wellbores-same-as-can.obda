@@ -2,7 +2,7 @@
 :		http://ontop.inf.unibz.it/test/wellbore#
 owl:    http://www.w3.org/2002/07/owl#
 xsd:    http://www.w3.org/2001/XMLSchema#
-obda:    https://w3id.org/obda.vocabulary#
+obda:    https://w3id.org/obda/vocabulary#
 epds: http://epds/wellbore/
 npd: http://npd/wellbore/
 ow: http://ow/wellbore/
