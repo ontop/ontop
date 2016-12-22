@@ -1,0 +1,61 @@
+@prefix : <http://example.org/voc#> .
+@prefix ex: <http://example.org/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+
+: a owl:Ontology .
+#: owl:imports <http://xmlns.com/foaf/0.1/> .
+
+# Classes
+
+foaf:Person a owl:Class .
+
+:Teacher rdfs:subClassOf foaf:Person .
+:ExternalTeacher rdfs:subClassOf :Teacher .
+
+:Researcher rdfs:subClassOf foaf:Person .
+
+:Student rdfs:subClassOf foaf:Person .
+:UndergraduateStudent rdfs:subClassOf :Student .
+:GraduateStudent rdfs:subClassOf :Student,
+   [ a owl:Restriction ;
+     owl:onProperty :isSupervisedBy ;
+     owl:someValuesFrom :Professor ] .
+:PhDStudent rdfs:subClassOf :GraduateStudent, :Researcher .
+
+:PostDoc rdfs:subClassOf :Researcher .
+:Professor rdfs:subClassOf :Researcher, :Teacher .
+:FullProfessor rdfs:subClassOf :Professor .
+:AssociateProfessor rdfs:subClassOf :Professor .
+:AssistantProfessor rdfs:subClassOf :Professor .
+
+:Course a owl:Class .
+
+# Properties
+
+foaf:firstName rdf:type owl:DatatypeProperty ;
+               rdfs:domain foaf:Person ;
+               rdfs:range rdfs:Literal .
+			   
+foaf:lastName rdf:type owl:DatatypeProperty ;
+              rdfs:domain foaf:Person ;
+              rdfs:range rdfs:Literal .
+
+:teaches a owl:ObjectProperty ; 
+		rdfs:domain :Teacher ;
+    	rdfs:range :Course .	
+
+:isTaughtBy owl:inverseOf :teaches .
+
+:givesLecture rdfs:subPropertyOf :teaches .
+:givesLab rdfs:subPropertyOf :teaches .
+
+:title a owl:DatatypeProperty ;
+	rdfs:range xsd:string .
+
+:isSupervisedBy a owl:ObjectProperty .
+
