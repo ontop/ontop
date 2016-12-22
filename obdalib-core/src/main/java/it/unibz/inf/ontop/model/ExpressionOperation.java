@@ -162,5 +162,14 @@ public enum ExpressionOperation implements OperationPredicate {
 	@Override
 	public boolean isAnnotationProperty() {
 		return false;
-	}	
+	}
+
+	@Override
+	public boolean isSameAsProperty() {
+		return false;
+	}
+	@Override
+	public boolean isCanonicalIRIProperty() {
+		return false;
+	}
 }

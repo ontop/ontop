@@ -9,9 +9,9 @@ package it.unibz.inf.ontop.obda;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  *      http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -72,19 +72,19 @@ public class H2ComplexSameAsTest {
 
 			 sqlConnection= DriverManager.getConnection("jdbc:h2:mem:wellboresComplex","sa", "");
 			    java.sql.Statement s = sqlConnection.createStatement();
-
+			  
 //			    try {
 			    	String text = new Scanner( new File("src/test/resources/sameAs/wellbore-complex-h2.sql") ).useDelimiter("\\A").next();
 			    	s.execute(text);
 //			    	Server.startWebServer(sqlConnection);
-
+			    	 
 //			    } catch(SQLException sqle) {
 //			        System.out.println("Exception in creating db from script");
 //			    }
-
+			   
 			    s.close();
-
-
+		
+		
 		// Loading the OWL file
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 		ontology = manager.loadOntologyFromOntologyDocument((new File(owlfile)));
@@ -92,10 +92,10 @@ public class H2ComplexSameAsTest {
 		// Loading the OBDA data
 		fac = OBDADataFactoryImpl.getInstance();
 		obdaModel = fac.getOBDAModel();
-
+		
 		ModelIOManager ioManager = new ModelIOManager(obdaModel);
 		ioManager.load(obdafile);
-
+	
 		QuestPreferences p = new QuestPreferences();
 		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
 		p.setCurrentValueOf(QuestPreferences.OBTAIN_FULL_METADATA, QuestConstants.FALSE);
@@ -112,7 +112,7 @@ public class H2ComplexSameAsTest {
 		// Now we are ready for querying
 		conn = reasoner.getConnection();
 
-
+		
 	}
 
 
@@ -266,12 +266,13 @@ public class H2ComplexSameAsTest {
 
 		ArrayList<String> results = runTests(query, true);
 		assertEquals(46, results.size() );
+
     }
 
     @Test
     public void testSameAs5() throws Exception {
         String query =  "PREFIX : <http://ontop.inf.unibz.it/test/wellbore#> \n" +
-                "SELECT * WHERE { " +
+                "SELECT DISTINCT  * WHERE { " +
                 " ?x :hasOwner ?y .}\n";
 
 		ArrayList<String> results = runTests(query, true);
@@ -281,13 +282,21 @@ public class H2ComplexSameAsTest {
 	@Test
 	public void testSameAs6() throws Exception {
 		String query =  "PREFIX : <http://ontop.inf.unibz.it/test/wellbore#> \n" +
-				"SELECT * WHERE { " +
+				"SELECT DISTINCT * WHERE { " +
 				"?x  a :Wellbore ." +
 				" ?x :hasOwner ?y .}\n";
 
 		ArrayList<String> results = runTests(query, true);
-		assertEquals(72, results.size() );
+		assertEquals(24, results.size() );
 	}
 
-}
+
+
+
+
+
+
+
+
+    }
 

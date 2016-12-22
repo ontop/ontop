@@ -14,6 +14,8 @@ import junit.framework.TestCase;
 import org.junit.Test;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.AxiomType;
+import org.semanticweb.owlapi.model.IRI;
+import org.semanticweb.owlapi.model.OWLAnnotationProperty;
 import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLDataFactory;
 import org.semanticweb.owlapi.model.OWLEntity;
@@ -23,6 +25,7 @@ import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.model.SWRLAtom;
 import org.semanticweb.owlapi.model.SWRLRule;
 import org.semanticweb.owlapi.model.SWRLVariable;
+import org.semanticweb.owlapi.vocab.XSDVocabulary;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -161,6 +164,17 @@ public void testVisitorPropertyExample() throws Exception {
 
 		
 	}
+
+	@Test
+	public void test(){
+        OWLOntologyManager man = OWLManager.createOWLOntologyManager();
+        fac = man.getOWLDataFactory();
+        final OWLAnnotationProperty temporalOp = fac.getOWLAnnotationProperty(IRI.create("urn:temporalOperator"));
+
+        final IRI iri1 = IRI.create("urn:[-][0,1h]Hurricane");
+
+        final XSDVocabulary duration = XSDVocabulary.DURATION;
+    }
 	
 	
 

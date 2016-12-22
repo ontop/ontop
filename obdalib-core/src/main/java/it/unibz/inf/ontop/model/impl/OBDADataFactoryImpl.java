@@ -125,8 +125,13 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	}
 
 	@Override
-	public Predicate getOWLSameASPredicate() {
+	public Predicate getOWLSameAsPredicate() {
 		return new PredicateImpl(OBDAVocabulary.SAME_AS, 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT });
+	}
+
+	@Override
+	public Predicate getOBDACanonicalIRI() {
+		return new PredicateImpl(OBDAVocabulary.CANONICAL_IRI, 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT });
 	}
 
 	@Override
