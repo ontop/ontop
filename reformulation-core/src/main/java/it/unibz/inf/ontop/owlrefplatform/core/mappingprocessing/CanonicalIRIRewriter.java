@@ -59,7 +59,7 @@ public class CanonicalIRIRewriter {
         canIriVariablesSuffix = new HashMap<>();;
         uriMappingMap = new HashMap<>();
 
-        //search for ontop:is_canonical_iri_of in the mappings
+        //search for obda:isCanonicalIriOf in the mappings
         analyzeCanonicalIRIMappings(mappings);
 
         // When no Canonical IRI is used, do nothing

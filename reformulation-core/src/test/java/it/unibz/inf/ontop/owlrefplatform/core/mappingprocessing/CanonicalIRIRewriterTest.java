@@ -101,7 +101,7 @@ public class CanonicalIRIRewriterTest {
         List<Term> list = new ArrayList<>(2);
         list.add(term1);
         list.add(term2);
-        return fac.getFunction(fac.getOntopCanonicalIRI(), list);
+        return fac.getFunction(fac.getOBDACanonicalIRI(), list);
     }
 
     private Function getClassPropertyFunction(String name, Term term1) {

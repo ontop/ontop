@@ -2,7 +2,7 @@
 :		http://www.example.org/
 owl:    http://www.w3.org/2002/07/owl#
 xsd:    http://www.w3.org/2001/XMLSchema#
-ontop:  http://ontop.inf.unibz.it/pred#
+obda:   https://w3id.org/obda/vocabulary#
 
 [SourceDeclaration]
 sourceUri	viewTest
@@ -49,7 +49,7 @@ target		:A3/{unique2Tab3} :S3 {unique1Tab3}^^xsd:integer .
 source		SELECT unique2Tab3, unique1Tab3 FROM Tab3
 
 mappingId	MAPID-CanonURI123
-target		<http://ontop/wisconsis/{provenance}/{canonical}> ontop:is_canonical_iri_of :A1/{unique21}, :A2/{unique22} .
+target		<http://ontop/wisconsis/{provenance}/{canonical}> obda:isCanonicalIRIOf :A1/{unique21}, :A2/{unique22} .
 source		SELECT canonical, provenance, unique21, unique22 FROM can123ten
 
 ]]

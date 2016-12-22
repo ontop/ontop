@@ -93,12 +93,12 @@ public class TargetQueryValidator implements TargetQueryVocabularyValidator {
                     debugMsg += " is an Annotation property.";
                 }
 				else if (isSameAs){
-					predicate =  dataFactory.getOWLSameASPredicate();
+					predicate =  dataFactory.getOWLSameAsPredicate();
 					debugMsg += " is the owl:sameAs property.";
 				}
 				else if (isCanonicalIRI){
-                    predicate =  dataFactory.getOntopCanonicalIRI();
-                    debugMsg += " is the ontop:is_canonical_iri_of property.";
+                    predicate =  dataFactory.getOBDACanonicalIRI();
+                    debugMsg += " is the obda:isCanonicalIRIOf property.";
                 } else {
                     predicate = dataFactory.getPredicate(p.getName(), atom.getArity());
                 }
