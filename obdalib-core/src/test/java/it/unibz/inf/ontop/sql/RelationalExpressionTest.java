@@ -208,8 +208,19 @@ public class RelationalExpressionTest {
         naturalUsingCommonAsserts(relationalExpression);
     }
 
+
     @Test(expected = IllegalJoinException.class)
     public void join_using_exception_test() throws IllegalJoinException {
+        System.out.println(re1);
+        System.out.println(re1_1);
+
+        RelationalExpression relationalExpression = RelationalExpression.joinUsing(re1, re1_1,
+                ImmutableSet.of(MDFAC.createAttributeID("A")));
+        System.out.println(relationalExpression);
+    }
+
+    @Test(expected = IllegalJoinException.class)
+    public void join_using_no_commons_test() throws IllegalJoinException {
 
         // a new relationId without any common attribute with the re1 is created to simulate an exception
         RelationalExpression re2 =  RelationalExpression.create (ImmutableList.of(f2),
@@ -222,6 +233,21 @@ public class RelationalExpressionTest {
 
         RelationalExpression.joinUsing(re1, re2, ImmutableSet.of(MDFAC.createAttributeID("A")));
     }
+
+    @Test(expected = IllegalJoinException.class)
+    public void join_using_ambiguity_test() throws IllegalJoinException {
+        System.out.println(re1);
+        System.out.println(re2);
+
+        RelationalExpression relationalExpression = RelationalExpression.joinOn(re1, re2,
+                new BooleanExpressionParser(MDFAC, onExpression));
+
+        System.out.println(relationalExpression);
+        System.out.println(re3);
+
+        RelationalExpression.joinUsing(relationalExpression, re3, ImmutableSet.of(MDFAC.createAttributeID("A")));
+    }
+
 
     @Test
     public void alias_test() {
