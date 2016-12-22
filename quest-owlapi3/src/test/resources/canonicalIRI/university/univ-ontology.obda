@@ -7,7 +7,7 @@ xml:		http://www.w3.org/XML/1998/namespace
 xsd:		http://www.w3.org/2001/XMLSchema#
 foaf:		http://xmlns.com/foaf/0.1/
 rdfs:		http://www.w3.org/2000/01/rdf-schema#
-ontop:    http://ontop.inf.unibz.it/pred#
+obda:       https://w3id.org/obda/vocabulary#
 
 [SourceDeclaration]
 sourceUri	university
@@ -85,15 +85,15 @@ target		ex:uni2/person/{lab_teacher} :givesLab ex:uni2/course/{cid} .
 source		SELECT * FROM "uni2"."course"
 
 mappingId	mapping_canUni1
-target		<http://ontop/uni/{a_ssn}> ontop:is_canonical_iri_of ex:uni1/academic/{a_id} .
+target		<http://ontop/uni/{a_ssn}> obda:isCanonicalIRIOf ex:uni1/academic/{a_id} .
 source		select "a_id","a_ssn" FROM "uni1"."academic"
 
 mappingId	mapping_canUni2
-target		<http://ontop/uni/{pssn}> ontop:is_canonical_iri_of ex:uni2/person/{pid} .
+target		<http://ontop/uni/{pssn}> obda:isCanonicalIRIOf ex:uni2/person/{pid} .
 source		select "pid","pssn" FROM "uni2"."person"
 
 mappingId	mapping_canUni3
-target		<http://ontop/uni/{s_ssn}> ontop:is_canonical_iri_of ex:uni1/student/{s_id} .
+target		<http://ontop/uni/{s_ssn}> obda:isCanonicalIRIOf ex:uni1/student/{s_id} .
 source		select "s_id","s_ssn" FROM "uni1"."student"
 
 

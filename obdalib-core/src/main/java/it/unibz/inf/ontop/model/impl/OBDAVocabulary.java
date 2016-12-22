@@ -35,7 +35,7 @@ public class OBDAVocabulary {
 
 	public static final String SAME_AS = "http://www.w3.org/2002/07/owl#sameAs";
 
-	public static final String CANONICAL_IRI = "http://ontop.inf.unibz.it/pred#is_canonical_iri_of";
+	public static final String CANONICAL_IRI = "https://w3id.org/obda/vocabulary#isCanonicalIRIOf";
 
 	/* Common namespaces and prefixes */
 
@@ -43,12 +43,12 @@ public class OBDAVocabulary {
 	public static final String NS_RDF = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
 	public static final String NS_RDFS = "http://www.w3.org/2000/01/rdf-schema#";
 	public static final String NS_OWL = "http://www.w3.org/2002/07/owl#";
-	public static final String NS_QUEST = "http://obda.org/quest#";
+	public static final String NS_OBDA = "https://w3id.org/obda/vocabulary#";
 	public static final String PREFIX_XSD = "xsd:";
 	public static final String PREFIX_RDF = "rdf:";
 	public static final String PREFIX_RDFS = "rdfs:";
 	public static final String PREFIX_OWL = "owl:";
-	public static final String PREFIX_QUEST = "quest:";
+	public static final String PREFIX_OBDA = "obda:";
 
 	// TODO: to be removed
 	public static final String RDFS_LITERAL_URI = "http://www.w3.org/2000/01/rdf-schema#Literal";

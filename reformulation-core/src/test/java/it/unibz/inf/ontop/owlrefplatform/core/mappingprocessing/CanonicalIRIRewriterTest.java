@@ -49,9 +49,9 @@ public class CanonicalIRIRewriterTest {
 
         //sameAs mappings
 
-        Function headM1 = getCanonURIFunction(fac.getUriTemplate(canonURI,t1,t0), fac.getUriTemplate(epdsURI, t2));
-        Function headM2 = getCanonURIFunction(fac.getUriTemplate(canonURI,t1,t0), fac.getUriTemplate(npdURI, t3));
-        Function headM3 = getCanonURIFunction(fac.getUriTemplate(canonURI,t1,t0), fac.getUriTemplate(owURI, t4));
+        Function headM1 = getCanonIRIFunction(fac.getUriTemplate(canonURI,t1,t0), fac.getUriTemplate(epdsURI, t2));
+        Function headM2 = getCanonIRIFunction(fac.getUriTemplate(canonURI,t1,t0), fac.getUriTemplate(npdURI, t3));
+        Function headM3 = getCanonIRIFunction(fac.getUriTemplate(canonURI,t1,t0), fac.getUriTemplate(owURI, t4));
 
         List<Function> bodyM1 = new LinkedList<>();
         List<Term> atomTerms1 = new LinkedList<>();
@@ -97,7 +97,7 @@ public class CanonicalIRIRewriterTest {
         return fac.getFunction(fac.getPredicate(name, terms.size()), terms);
     }
 
-    private Function getCanonURIFunction( Term term1, Term term2) {
+    private Function getCanonIRIFunction(Term term1, Term term2) {
         List<Term> list = new ArrayList<>(2);
         list.add(term1);
         list.add(term2);

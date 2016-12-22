@@ -90,7 +90,7 @@ public class CanonicalIRIRewriter {
 
                 if (uriMappingMap.containsKey(templateSubURI)) {
 
-                    newMapping = Optional.of(new CanonicalURIMapping(mapping, (Function) subjectURI, Position.SUBJECT).create());
+                    newMapping = Optional.of(new CanonicalIRIMapping(mapping, (Function) subjectURI, Position.SUBJECT).create());
                 }
             }
 
@@ -110,7 +110,7 @@ public class CanonicalIRIRewriter {
 
                     if (uriMappingMap.containsKey(templateObjURINewMapping)) {
 
-                        newMapping = Optional.of(new CanonicalURIMapping(mapping2, (Function) objectURI, Position.OBJECT).create());
+                        newMapping = Optional.of(new CanonicalIRIMapping(mapping2, (Function) objectURI, Position.OBJECT).create());
 
                     }
 
@@ -170,13 +170,13 @@ public class CanonicalIRIRewriter {
         }
     }
 
-    private class CanonicalURIMapping {
+    private class CanonicalIRIMapping {
         private CQIE mapping;
         private Term templateURI;
         private Function uriTerm;
         private Position termPosition;
 
-        public CanonicalURIMapping(CQIE mapping, Function uriTerm, Position termPosition) {
+        public CanonicalIRIMapping(CQIE mapping, Function uriTerm, Position termPosition) {
             this.mapping = mapping;
             this.uriTerm = uriTerm;
             this.templateURI = uriTerm.getTerm(0);
