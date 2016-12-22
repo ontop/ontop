@@ -107,7 +107,8 @@ public class RelationalExpressionTest {
         onExpression.setRightExpression(new Column(new Table("Q"), "A"));
 
         // this relation contains just a common attribute with the RelationalExpression "re1"
-        // and it is used to simulate an exception during the operations of "cross join" and "join on"
+        // and it is used to simulate an exception during the operations of:
+        // "cross join" and "join on" and "natural join"
         re1_1 = RelationalExpression.create(ImmutableList.of(f2),
                 ImmutableList.of(),
                 ImmutableMap.of(attX, x),
@@ -168,6 +169,15 @@ public class RelationalExpressionTest {
         System.out.println(relationalExpression);
 
         naturalUsingCommonAsserts(relationalExpression);
+    }
+
+    @Test(expected = IllegalJoinException.class)
+    public void natural_join_exception_test() throws IllegalJoinException {
+        System.out.println(re1);
+        System.out.println(re1_1);
+
+        RelationalExpression relationalExpression = RelationalExpression.naturalJoin(re1, re1_1);
+        System.out.println(relationalExpression);
     }
 
     @Test(expected = IllegalJoinException.class)
