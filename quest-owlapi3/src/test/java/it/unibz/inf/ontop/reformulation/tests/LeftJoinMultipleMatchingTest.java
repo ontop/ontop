@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.obda;
+package it.unibz.inf.ontop.reformulation.tests;
 
 /**
  * Test case for Rais ontology.
