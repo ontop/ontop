@@ -334,7 +334,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 
 		 Map<Predicate, ParserViewDefinition> subQueryDefinitions = new HashMap<>();
 
-		TypeExtractor.TypeResults typeResults = TypeExtractor.extractTypes(ruleIndex, predicatesInBottomUp);
+		TypeExtractor.TypeResults typeResults = TypeExtractor.extractTypes(ruleIndex, predicatesInBottomUp, metadata);
 
 		ImmutableMap<CQIE, ImmutableList<Optional<TermType>>> termTypeMap = typeResults.getTermTypeMap();
 		ImmutableMap<Predicate, ImmutableList<COL_TYPE>> castTypeMap = typeResults.getCastTypeMap();
