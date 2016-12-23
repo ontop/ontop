@@ -20,7 +20,7 @@ package it.unibz.inf.ontop.quest.datatypes;
  * #L%
  */
 
-import info.aduna.io.IOUtil;
+import org.eclipse.rdf4j.common.io.IOUtil;
 import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.quest.ResultSetInfo;
 import it.unibz.inf.ontop.quest.ResultSetInfoTupleUtil;
@@ -244,7 +244,7 @@ public abstract class QuestDatatypeParent extends TestCase {
 	}
 	
 	private Set<Statement> readGraphResultSetInfo() throws Exception {
-		RDFFormat rdfFormat = Rio.getParserFormatForFileName(resultFileURL);
+		RDFFormat rdfFormat = Rio.getParserFormatForFileName(resultFileURL).get();
 		if (rdfFormat != null) {
 			RDFParser parser = Rio.createParser(rdfFormat);
 

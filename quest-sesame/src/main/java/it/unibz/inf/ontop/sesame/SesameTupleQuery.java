@@ -83,4 +83,14 @@ public class SesameTupleQuery extends SesameAbstractQuery implements TupleQuery 
 		}
 		handler.endQueryResult();
 	}
+
+    @Override
+    public void setMaxExecutionTime(int maxExecTime) {
+        throw new UnsupportedOperationException("not implemented");
+    }
+
+    @Override
+    public int getMaxExecutionTime() {
+        throw new UnsupportedOperationException("not implemented");
+    }
 }

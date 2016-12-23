@@ -20,7 +20,7 @@ package it.unibz.inf.ontop.quest.scenarios;
  * #L%
  */
 
-import info.aduna.io.IOUtil;
+import org.eclipse.rdf4j.common.io.IOUtil;
 import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.query.*;
 import org.eclipse.rdf4j.repository.Repository;
@@ -297,7 +297,7 @@ public abstract class QuestParallelScenario {
         }
 
         private Set<Statement> readGraphResultSetInfo() throws Exception {
-            RDFFormat rdfFormat = Rio.getParserFormatForFileName(resultFileURL);
+            RDFFormat rdfFormat = Rio.getParserFormatForFileName(resultFileURL).get();
             if (rdfFormat != null) {
                 RDFParser parser = Rio.createParser(rdfFormat, dataRep.getValueFactory());
                 ParserConfig config = parser.getParserConfig();

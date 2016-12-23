@@ -80,4 +80,13 @@ public class SesameBooleanQuery extends SesameAbstractQuery implements BooleanQu
 
 	}
 
+    @Override
+    public void setMaxExecutionTime(int maxExecTime) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public int getMaxExecutionTime() {
+        throw new UnsupportedOperationException();
+    }
 }

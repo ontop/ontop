@@ -20,8 +20,8 @@ package it.unibz.inf.ontop.quest.sparql11;
  * #L%
  */
 
-import info.aduna.io.FileUtil;
-import info.aduna.io.ZipUtil;
+import org.eclipse.rdf4j.common.io.FileUtil;
+import org.eclipse.rdf4j.common.io.ZipUtil;
 import junit.framework.TestResult;
 import junit.framework.TestSuite;
 import org.eclipse.rdf4j.OpenRDFUtil;

@@ -20,9 +20,9 @@ package it.unibz.inf.ontop.sesame.completeness.test;
  * #L%
  */
 
-import info.aduna.io.IOUtil;
-import info.aduna.iteration.Iterations;
-import info.aduna.text.StringUtil;
+import org.eclipse.rdf4j.common.io.IOUtil;
+import org.eclipse.rdf4j.common.iteration.Iterations;
+import org.eclipse.rdf4j.common.text.StringUtil;
 import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWL;
 import it.unibz.inf.ontop.sesame.SesameClassicRepo;
@@ -387,8 +387,8 @@ public abstract class CompletenessParent extends TestCase {
 					Literal leftLit = (Literal)value1;
 					Literal rightLit = (Literal)value2;
 
-					URI dt1 = leftLit.getDatatype();
-					URI dt2 = rightLit.getDatatype();
+					IRI dt1 = leftLit.getDatatype();
+					IRI dt2 = rightLit.getDatatype();
 
 					if (dt1 != null && dt2 != null && dt1.equals(dt2)
 							&& XMLDatatypeUtil.isValidValue(leftLit.getLabel(), dt1)
@@ -480,11 +480,11 @@ public abstract class CompletenessParent extends TestCase {
 	}
 	
 	private TupleQueryResult readExpectedTupleQueryResult() throws Exception {
-		TupleQueryResultFormat tqrFormat = QueryResultIO.getParserFormatForFileName(resultFile);
-		if (tqrFormat != null) {
+		Optional<QueryResultFormat> tqrFormat = QueryResultIO.getParserFormatForFileName(resultFile);
+		if (tqrFormat.isPresent()) {
 			InputStream in = new URL(resultFile).openStream();
 			try {
-				TupleQueryResultParser parser = QueryResultIO.createParser(tqrFormat);
+				TupleQueryResultParser parser = QueryResultIO.createTupleParser(tqrFormat.get());
 				parser.setValueFactory(repository.getValueFactory());
 
 				TupleQueryResultBuilder qrBuilder = new TupleQueryResultBuilder();
@@ -502,9 +502,9 @@ public abstract class CompletenessParent extends TestCase {
 	}
 	
 	private Set<Statement> readExpectedGraphQueryResult() throws Exception {
-		RDFFormat rdfFormat = Rio.getParserFormatForFileName(resultFile);
-		if (rdfFormat != null) {
-			RDFParser parser = Rio.createParser(rdfFormat, repository.getValueFactory());
+		Optional<RDFFormat> rdfFormat = Rio.getParserFormatForFileName(resultFile);
+		if (rdfFormat.isPresent()) {
+			RDFParser parser = Rio.createParser(rdfFormat.get(), repository.getValueFactory());
 			ParserConfig config = parser.getParserConfig();
 			// To emulate DatatypeHandling.IGNORE 
 			config.addNonFatalError(BasicParserSettings.FAIL_ON_UNKNOWN_DATATYPES);
@@ -531,16 +531,13 @@ public abstract class CompletenessParent extends TestCase {
 	}
 
 	private boolean readExpectedBooleanQueryResult() throws Exception {
-		BooleanQueryResultFormat bqrFormat = BooleanQueryResultParserRegistry
+		Optional<QueryResultFormat> bqrFormat = BooleanQueryResultParserRegistry
 				.getInstance().getFileFormatForFileName(resultFile);
 
-		if (bqrFormat != null) {
-			InputStream in = new URL(resultFile).openStream();
-			try {
-				return QueryResultIO.parse(in, bqrFormat);
-			} finally {
-				in.close();
-			}
+		if (bqrFormat.isPresent()) {
+            try (InputStream in = new URL(resultFile).openStream()) {
+                return QueryResultIO.parseBoolean(in, bqrFormat.get());
+            }
 		} else {
 			Set<Statement> resultGraph = readExpectedGraphQueryResult();
 			return DAWGTestResultSetUtil.toBooleanQueryResult(resultGraph);

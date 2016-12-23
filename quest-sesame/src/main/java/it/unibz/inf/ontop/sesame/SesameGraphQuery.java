@@ -36,6 +36,7 @@ import org.eclipse.rdf4j.query.GraphQuery;
 import org.eclipse.rdf4j.query.GraphQueryResult;
 import org.eclipse.rdf4j.query.MalformedQueryException;
 import org.eclipse.rdf4j.query.QueryEvaluationException;
+import org.eclipse.rdf4j.query.algebra.evaluation.iterator.CollectionIteration;
 import org.eclipse.rdf4j.query.impl.GraphQueryResultImpl;
 import org.eclipse.rdf4j.rio.RDFHandler;
 import org.eclipse.rdf4j.rio.RDFHandlerException;
@@ -84,7 +85,8 @@ public class SesameGraphQuery extends SesameAbstractQuery implements GraphQuery 
 				}
 			}
 			
-			return new GraphQueryResultImpl(namespaces, results.iterator());
+			//return new GraphQueryResultImpl(namespaces, results.iterator());
+            return new GraphQueryResultImpl(namespaces, new CollectionIteration<>(results));
 			
 		} catch (OBDAException e) {
 			throw new QueryEvaluationException(e);
@@ -115,4 +117,14 @@ public class SesameGraphQuery extends SesameAbstractQuery implements GraphQuery 
 		handler.endRDF();
 
 	}
+
+    @Override
+    public void setMaxExecutionTime(int maxExecTime) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public int getMaxExecutionTime() {
+        throw new UnsupportedOperationException();
+    }
 }

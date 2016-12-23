@@ -20,14 +20,16 @@ package it.unibz.inf.ontop.sesame;
  * #L%
  */
 
-import info.aduna.iteration.CloseableIteration;
-import info.aduna.iteration.CloseableIteratorIteration;
-import info.aduna.iteration.Iteration;
+import org.eclipse.rdf4j.common.iteration.CloseableIteration;
+import org.eclipse.rdf4j.common.iteration.CloseableIteratorIteration;
+import org.eclipse.rdf4j.common.iteration.Iteration;
 import it.unibz.inf.ontop.model.OBDAException;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestDBConnection;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestDBStatement;
 import it.unibz.inf.ontop.owlrefplatform.core.SIQuestDBStatement;
+
+import org.eclipse.rdf4j.IsolationLevel;
 import org.eclipse.rdf4j.OpenRDFUtil;
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.impl.NamespaceImpl;
@@ -119,88 +121,56 @@ public class RepositoryConnection implements org.eclipse.rdf4j.repository.Reposi
 
 	}
 
-	@Override
-    public <E extends Exception> void add(
-			Iteration<? extends Statement, E> statementIter, Resource... contexts)
-			throws RepositoryException, E {
-		//Adds the supplied statements to this repository, optionally to one or more named contexts. 
-		  OpenRDFUtil.verifyContextNotNull(contexts);
-
-          boolean autoCommit = isAutoCommit();
-          setAutoCommit(false);
-
-          try {
-                  addWithoutCommit((Iterator<Statement>) statementIter, contexts);
-                  
-          } catch (RepositoryException e) {
-              if (autoCommit) {
-                  rollback();
-              }
-              throw e;
-          } catch (RuntimeException e) {
-              if (autoCommit) {
-                  rollback();
-              }
-              throw e;
-          } catch (Exception e) {
-        	  throw new RepositoryException(e);
-		} finally {
-              setAutoCommit(autoCommit);
-              autoCommit();
-          }
-
-	}
-
 
 	@Override
-    public void add(File file, String baseURI, RDFFormat dataFormat, Resource... contexts)
+    public void add(File file, String baseIRI, RDFFormat dataFormat, Resource... contexts)
 			throws IOException, RDFParseException, RepositoryException {
 		//Adds RDF data from the specified file to a specific contexts in the repository. 
 
-		if (baseURI == null) {
-			// default baseURI to file
-			baseURI = file.toURI().toString();
+		if (baseIRI == null) {
+			// default baseIRI to file
+			baseIRI = file.toURI().toString();
 		}
 
 		InputStream in = new FileInputStream(file);
 
 		try {
-			add(in, baseURI, dataFormat, contexts);
+			add(in, baseIRI, dataFormat, contexts);
 		} finally {
 			in.close();
 		}
 	}
 
 	 @Override
-     public void add(URL url, String baseURI, RDFFormat dataFormat,
+     public void add(URL url, String baseIRI, RDFFormat dataFormat,
                      Resource... contexts) throws IOException,
              RDFParseException, RepositoryException {
 		// Adds the RDF data that can be found at the specified URL to the
 		// repository,
 		// optionally to one or more named contexts.
-		if (baseURI == null) {
-			baseURI = url.toExternalForm();
+		if (baseIRI == null) {
+			baseIRI = url.toExternalForm();
 		}
 
 		InputStream in = url.openStream();
 
 		try {
-			add(in, baseURI, dataFormat, contexts);
+			add(in, baseIRI, dataFormat, contexts);
 		} finally {
 			in.close();
 		}
      }
 
      @Override
-     public void add(InputStream in, String baseURI,
+     public void add(InputStream in, String baseIRI,
                      RDFFormat dataFormat, Resource... contexts)
              throws IOException, RDFParseException, RepositoryException {
  		//Adds RDF data from an InputStream to the repository, optionally to one or more named contexts. 
-         addInputStreamOrReader(in, baseURI, dataFormat, contexts);
+         addInputStreamOrReader(in, baseIRI, dataFormat, contexts);
      }
 
      @Override
-     public void add(Reader reader, String baseURI,
+     public void add(Reader reader, String baseIRI,
                      RDFFormat dataFormat, Resource... contexts)
              throws IOException, RDFParseException, RepositoryException {
     	//Adds RDF data from a Reader to the repository, optionally to one or more 
@@ -208,18 +178,18 @@ public class RepositoryConnection implements org.eclipse.rdf4j.repository.Reposi
  		//you have to be careful not to destroy the data's character encoding by 
  		//enforcing a default character encoding upon the bytes. \
  		//If possible, adding such data using an InputStream is to be preferred.
-         addInputStreamOrReader(reader, baseURI, dataFormat, contexts);
+         addInputStreamOrReader(reader, baseIRI, dataFormat, contexts);
      }
 
 	@Override
-    public void add(Resource subject, org.eclipse.rdf4j.model.URI predicate, Value object, Resource... contexts)
+    public void add(Resource subject, org.eclipse.rdf4j.model.IRI predicate, Value object, Resource... contexts)
 			throws RepositoryException {
 		//Adds a statement with the specified subject, predicate and object to this repository, 
 		//optionally to one or more named contexts. 
 		OpenRDFUtil.verifyContextNotNull(contexts);
 		ValueFactory vf = new ValueFactoryImpl();
 		
-		Statement st = vf.createStatement(subject, vf.createURI(predicate.toString()), object);
+		Statement st = vf.createStatement(subject, vf.createIRI(predicate.toString()), object);
 		
 		add(st, contexts);
 		
@@ -233,8 +203,8 @@ public class RepositoryConnection implements org.eclipse.rdf4j.repository.Reposi
      * @param inputStreamOrReader
      *        An {@link InputStream} or {@link Reader} containing RDF data that
      *        must be added to the repository.
-     * @param baseURI
-     *        The base URI for the data.
+     * @param baseIRI
+     *        The base IRI for the data.
      * @param dataFormat
      *        The file format of the data.
      * @param contexts
@@ -247,7 +217,7 @@ public class RepositoryConnection implements org.eclipse.rdf4j.repository.Reposi
      * @throws RepositoryException
      */
     protected void addInputStreamOrReader(Object inputStreamOrReader,
-            String baseURI, RDFFormat dataFormat, Resource... contexts)
+            String baseIRI, RDFFormat dataFormat, Resource... contexts)
             throws IOException, RDFParseException, RepositoryException {
     	
     	if ( repository.getType() == QuestConstants.VIRTUAL)
@@ -292,7 +262,7 @@ public class RepositoryConnection implements org.eclipse.rdf4j.repository.Reposi
            // System.out.println("Parsing... ");
 			QuestDBStatement questStm = questConn.createStatement();
     		
-            Thread insert = new Thread(new Insert(rdfParser, (InputStream)inputStreamOrReader, baseURI));
+            Thread insert = new Thread(new Insert(rdfParser, (InputStream)inputStreamOrReader, baseIRI));
             Thread process = new Thread(new Process(rdfHandler, questStm));
             
             //start threads
@@ -322,18 +292,18 @@ public class RepositoryConnection implements org.eclipse.rdf4j.repository.Reposi
           private class Insert implements Runnable{
         	  private RDFParser rdfParser;
         	  private InputStream inputStreamOrReader;
-        	  private String baseURI;
-        	  public Insert(RDFParser rdfParser, InputStream inputStreamOrReader, String baseURI)
+        	  private String baseIRI;
+        	  public Insert(RDFParser rdfParser, InputStream inputStreamOrReader, String baseIRI)
         	  {
         		  this.rdfParser = rdfParser;
         		  this.inputStreamOrReader = inputStreamOrReader;
-        		  this.baseURI = baseURI;
+        		  this.baseIRI = baseIRI;
         	  }
         	  @Override
               public void run()
         	  {
         		  try {
-					rdfParser.parse((InputStream) inputStreamOrReader, baseURI);
+					rdfParser.parse((InputStream) inputStreamOrReader, baseIRI);
 				} catch (Exception e) {
 throw new RuntimeException(e);
 				}
@@ -365,9 +335,9 @@ throw new RuntimeException(e);
       
   
     protected void addWithoutCommit(Iterator< Statement> stmIterator, Resource... contexts)
-    throws RepositoryException, OBDAException, URISyntaxException {
+    throws RepositoryException, OBDAException {
     	
-    	if ( repository.getType() == QuestConstants.VIRTUAL)
+    	if ( repository.getType().equals(QuestConstants.VIRTUAL))
 			throw new RepositoryException();
     	
     	
@@ -421,7 +391,7 @@ throw new RuntimeException(e);
     }
 
     protected void removeWithoutCommit(Resource subject,
-    		org.eclipse.rdf4j.model.URI predicate, Value object, Resource... contexts)
+    		org.eclipse.rdf4j.model.IRI predicate, Value object, Resource... contexts)
     	throws RepositoryException{
     	
     	throw new RepositoryException("Removal not supported!");
@@ -480,28 +450,28 @@ throw new RuntimeException(e);
         exportStatements(null, null, null, false, handler, contexts);
 	}
 
-	@Override
-    public void exportStatements(Resource subj, org.eclipse.rdf4j.model.URI  pred, Value obj,
-                                 boolean includeInferred, RDFHandler handler, Resource... contexts)
-			throws RepositoryException, RDFHandlerException {
-		//Exports all statements with a specific subject, predicate 
-		//and/or object from the repository, optionally from the specified contexts. 
-		RepositoryResult<Statement> stms = getStatements(subj, pred, obj, includeInferred, contexts);
-
-		handler.startRDF();
-		// handle
-		if (stms != null) {
-			while (stms.hasNext()) {
-				{
-					Statement st = stms.next();
-					if (st!=null)
-						handler.handleStatement(st);
-				}
-			}
-		}
-		handler.endRDF();
-
-	}
+//	@Override
+//    public void exportStatements(Resource subj, org.eclipse.rdf4j.model.IRI  pred, Value obj,
+//                                 boolean includeInferred, RDFHandler handler, Resource... contexts)
+//			throws RepositoryException, RDFHandlerException {
+//		//Exports all statements with a specific subject, predicate
+//		//and/or object from the repository, optionally from the specified contexts.
+//		RepositoryResult<Statement> stms = getStatements(subj, pred, obj, includeInferred, contexts);
+//
+//		handler.startRDF();
+//		// handle
+//		if (stms != null) {
+//			while (stms.hasNext()) {
+//				{
+//					Statement st = stms.next();
+//					if (st!=null)
+//						handler.handleStatement(st);
+//				}
+//			}
+//		}
+//		handler.endRDF();
+//
+//	}
 
 	@Override
     public RepositoryResult<Resource> getContextIDs()
@@ -549,7 +519,7 @@ throw new RuntimeException(e);
 	}
 
 	@Override
-    public RepositoryResult<Statement> getStatements(Resource subj, org.eclipse.rdf4j.model.URI pred,
+    public RepositoryResult<Statement> getStatements(Resource subj, org.eclipse.rdf4j.model.IRI pred,
                                                      Value obj, boolean includeInferred, Resource... contexts)
 			throws RepositoryException {
 		//Gets all statements with a specific subject, 
@@ -563,7 +533,7 @@ throw new RuntimeException(e);
 			s = "?s ";
 		else {		
 			s = subj.toString();
-			if (subj instanceof URI) {
+			if (subj instanceof IRI) {
 				s = "<" + s + ">";
 			}
 		}
@@ -575,7 +545,7 @@ throw new RuntimeException(e);
 		if (obj == null)
 			o = " ?o ";
 		else {
-			if (obj instanceof URI) {
+			if (obj instanceof IRI) {
 				o = "<" + obj.stringValue() + ">";
 			} else {
 				o = obj.stringValue();
@@ -627,7 +597,7 @@ throw new RuntimeException(e);
 	}
 
 	@Override
-    public boolean hasStatement(Resource subj, org.eclipse.rdf4j.model.URI pred, Value obj,
+    public boolean hasStatement(Resource subj, org.eclipse.rdf4j.model.IRI pred, Value obj,
                                 boolean includeInferred, Resource... contexts) throws RepositoryException {
 		//Checks whether the repository contains statements with a specific subject, 
 		//predicate and/or object, optionally in the specified contexts. 
@@ -665,19 +635,19 @@ throw new RuntimeException(e);
     public BooleanQuery prepareBooleanQuery(QueryLanguage ql, String query)
 			throws RepositoryException, MalformedQueryException {
 		//Prepares true/false queries. In case the query contains 
-		//relative URIs that need to be resolved against an external base URI, 
+		//relative IRIs that need to be resolved against an external base IRI,
 		//one should use prepareBooleanQuery(QueryLanguage, String, String) instead. 
         return prepareBooleanQuery(ql, query, null);
     }
 
 	@Override
     public BooleanQuery prepareBooleanQuery(QueryLanguage ql, String queryString,
-                                            String baseURI) throws RepositoryException, MalformedQueryException {
+                                            String baseIRI) throws RepositoryException, MalformedQueryException {
 		//Prepares true/false queries. 
 		if (ql != QueryLanguage.SPARQL)
 			throw new MalformedQueryException("SPARQL query expected!");
 
-		return new SesameBooleanQuery(queryString, baseURI, questConn);
+		return new SesameBooleanQuery(queryString, baseIRI, questConn);
 		
 	}
 
@@ -685,19 +655,19 @@ throw new RuntimeException(e);
     public GraphQuery prepareGraphQuery(QueryLanguage ql, String queryString)
 			throws RepositoryException, MalformedQueryException {
 		//Prepares queries that produce RDF graphs. In case the query 
-		//contains relative URIs that need to be resolved against an 
-		//external base URI, one should use prepareGraphQuery(QueryLanguage, String, String) instead. 
+		//contains relative IRIs that need to be resolved against an
+		//external base IRI, one should use prepareGraphQuery(QueryLanguage, String, String) instead.
 		return prepareGraphQuery(ql, queryString, null);
 	}
 
 	@Override
     public GraphQuery prepareGraphQuery(QueryLanguage ql, String queryString,
-                                        String baseURI) throws RepositoryException, MalformedQueryException {
+                                        String baseIRI) throws RepositoryException, MalformedQueryException {
 		//Prepares queries that produce RDF graphs. 
 		if (ql != QueryLanguage.SPARQL)
 			throw new MalformedQueryException("SPARQL query expected!");
 
-		return new SesameGraphQuery(queryString, baseURI, questConn);
+		return new SesameGraphQuery(queryString, baseIRI, questConn);
 			
 	}
 
@@ -705,25 +675,25 @@ throw new RuntimeException(e);
     public Query prepareQuery(QueryLanguage ql, String query)
 			throws RepositoryException, MalformedQueryException {
 		//Prepares a query for evaluation on this repository (optional operation).
-		//In case the query contains relative URIs that need to be resolved against 
-		//an external base URI, one should use prepareQuery(QueryLanguage, String, String) instead. 
+		//In case the query contains relative IRIs that need to be resolved against
+		//an external base IRI, one should use prepareQuery(QueryLanguage, String, String) instead.
         return prepareQuery(ql, query, null);
     }
 
 	@Override
-    public Query prepareQuery(QueryLanguage ql, String queryString, String baseURI)
+    public Query prepareQuery(QueryLanguage ql, String queryString, String baseIRI)
 			throws RepositoryException, MalformedQueryException {
 		if (ql != QueryLanguage.SPARQL)
 			throw new MalformedQueryException("SPARQL query expected! ");
 		
-		ParsedQuery q = QueryParserUtil.parseQuery(QueryLanguage.SPARQL, queryString, baseURI);
+		ParsedQuery q = QueryParserUtil.parseQuery(QueryLanguage.SPARQL, queryString, baseIRI);
 		
 		if (q instanceof ParsedTupleQuery)
-			return prepareTupleQuery(ql,queryString, baseURI);
+			return prepareTupleQuery(ql,queryString, baseIRI);
 		else if (q instanceof ParsedBooleanQuery)
-			return prepareBooleanQuery(ql, queryString, baseURI);
+			return prepareBooleanQuery(ql, queryString, baseIRI);
 		else if (q instanceof ParsedGraphQuery)
-			return prepareGraphQuery(ql, queryString, baseURI);
+			return prepareGraphQuery(ql, queryString, baseIRI);
 		else 
 			throw new MalformedQueryException("Unrecognized query type. " + queryString);
 		
@@ -733,20 +703,20 @@ throw new RuntimeException(e);
     public TupleQuery prepareTupleQuery(QueryLanguage ql, String query)
 			throws RepositoryException, MalformedQueryException {
 		//Prepares a query that produces sets of value tuples. 
-		//In case the query contains relative URIs that need to be 
-		//resolved against an external base URI, one should use 
+		//In case the query contains relative IRIs that need to be
+		//resolved against an external base IRI, one should use
 		//prepareTupleQuery(QueryLanguage, String, String) instead. 
         return this.prepareTupleQuery(ql, query, "");
     }
 
 	@Override
     public TupleQuery prepareTupleQuery(QueryLanguage ql, String queryString,
-                                        String baseURI) throws RepositoryException, MalformedQueryException {
+                                        String baseIRI) throws RepositoryException, MalformedQueryException {
 		//Prepares a query that produces sets of value tuples. 
 		if (ql != QueryLanguage.SPARQL)
 			throw new MalformedQueryException("SPARQL query expected!");
 
-			return new SesameTupleQuery(queryString, baseURI, questConn);
+			return new SesameTupleQuery(queryString, baseIRI, questConn);
 
 	}
 
@@ -779,7 +749,7 @@ throw new RuntimeException(e);
 	@Override
     public void remove(Iterable<? extends Statement> statements, Resource... contexts)
 			throws RepositoryException {
-		//Removes the supplied statements from the specified contexts in this repository. 
+		//Removes the supplied statements from the specified contexts in this repository.
 		 OpenRDFUtil.verifyContextNotNull(contexts);
 
          begin();
@@ -788,7 +758,7 @@ throw new RuntimeException(e);
              for (Statement st : statements) {
                  remove(st, contexts);
              }
-         } catch (RepositoryException | RuntimeException e) {
+         } catch (RuntimeException e) {
              if (autoCommit) {
                  rollback();
              }
@@ -799,36 +769,9 @@ throw new RuntimeException(e);
 
 	}
 
-	@Override
-    public <E extends Exception> void remove(
-			Iteration<? extends Statement, E> statementIter, Resource... contexts)
-			throws RepositoryException, E {
-		//Removes the supplied statements from a specific context in this repository, 
-		//ignoring any context information carried by the statements themselves. 
-		begin();
-
-        try {
-            while (statementIter.hasNext()) {
-                remove(statementIter.next(), contexts);
-            }
-        } catch (RepositoryException e) {
-            if (autoCommit) {
-                rollback();
-            }
-            throw e;
-        } catch (RuntimeException e) {
-            if (autoCommit) {
-                rollback();
-            }
-            throw e;
-        } finally {
-            autoCommit();
-        }
-
-	}
 
 	@Override
-    public void remove(Resource subject, org.eclipse.rdf4j.model.URI predicate, Value object, Resource... contexts)
+    public void remove(Resource subject, org.eclipse.rdf4j.model.IRI predicate, Value object, Resource... contexts)
 			throws RepositoryException {
 		//Removes the statement(s) with the specified subject, predicate and object 
 		//from the repository, optionally restricted to the specified contexts. 
@@ -939,6 +882,56 @@ throw new RuntimeException(e);
 			RepositoryException {
 		// TODO Auto-generated method stub
 		return this.isActive;
+	}
+
+
+
+
+	@Override
+	public void exportStatements(Resource subj, IRI pred, Value obj, boolean includeInferred, RDFHandler handler,
+			Resource... contexts) throws RepositoryException, RDFHandlerException {
+		// TODO Auto-generated method stub
+		throw new UnsupportedOperationException();
+	}
+
+
+	@Override
+	public void setIsolationLevel(IsolationLevel level) throws IllegalStateException {
+		// TODO Auto-generated method stub
+		throw new UnsupportedOperationException();
+	}
+
+
+	@Override
+	public IsolationLevel getIsolationLevel() {
+		// TODO Auto-generated method stub
+		throw new UnsupportedOperationException();
+	}
+
+
+	@Override
+	public void begin(IsolationLevel level) throws RepositoryException {
+		// TODO Auto-generated method stub
+		throw new UnsupportedOperationException();
+	}
+
+
+	@Override
+	public <E extends Exception> void add(
+			org.eclipse.rdf4j.common.iteration.Iteration<? extends Statement, E> statements, Resource... contexts)
+			throws RepositoryException, E {
+		// TODO Auto-generated method stub
+		throw new UnsupportedOperationException();
+	}
+
+
+
+	@Override
+	public <E extends Exception> void remove(
+			org.eclipse.rdf4j.common.iteration.Iteration<? extends Statement, E> statements, Resource... contexts)
+			throws RepositoryException, E {
+		// TODO Auto-generated method stub
+		throw new UnsupportedOperationException();
 	}
 
 

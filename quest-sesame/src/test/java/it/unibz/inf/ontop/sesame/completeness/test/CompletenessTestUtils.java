@@ -20,8 +20,8 @@ package it.unibz.inf.ontop.sesame.completeness.test;
  * #L%
  */
 
-import info.aduna.io.FileUtil;
-import info.aduna.io.ZipUtil;
+import org.eclipse.rdf4j.common.io.FileUtil;
+import org.eclipse.rdf4j.common.io.ZipUtil;
 
 import java.io.File;
 import java.io.IOException;
