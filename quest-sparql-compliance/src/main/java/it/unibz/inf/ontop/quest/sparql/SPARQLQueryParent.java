@@ -712,13 +712,12 @@ public abstract class SPARQLQueryParent extends TestCase {
 	private boolean readExpectedBooleanQueryResult()
 		throws Exception
 	{
-		BooleanQueryResultFormat bqrFormat = (BooleanQueryResultFormat) BooleanQueryResultParserRegistry.getInstance().getFileFormatForFileName(
-				resultFileURL).get();
+		Optional<QueryResultFormat> bqrFormat = BooleanQueryResultParserRegistry.getInstance().getFileFormatForFileName(resultFileURL);
 
-		if (bqrFormat != null) {
+		if (bqrFormat.isPresent()) {
 			InputStream in = new URL(resultFileURL).openStream();
 			try {
-				return QueryResultIO.parseBoolean(in, bqrFormat);
+				return QueryResultIO.parseBoolean(in, bqrFormat.get());
 			}
 			finally {
 				in.close();

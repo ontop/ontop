@@ -64,7 +64,7 @@ public class SesameGraphQuery extends SesameAbstractQuery implements GraphQuery 
 			return null;
 	}
 
-        @Override
+    @Override
 	public GraphQueryResult evaluate() throws QueryEvaluationException {
 		GraphResultSet res = null;
 		QuestDBStatement stm = null;

@@ -20,6 +20,7 @@ package it.unibz.inf.ontop.quest.sparql11;
  * #L%
  */
 
+import it.unibz.inf.ontop.quest.sparql.SPARQLQueryParent;
 import org.eclipse.rdf4j.common.io.FileUtil;
 import org.eclipse.rdf4j.common.io.ZipUtil;
 import junit.framework.TestResult;
