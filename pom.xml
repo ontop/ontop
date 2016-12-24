@@ -77,7 +77,8 @@
 		<module>quest-test</module>
 
 		<module>ontop-docker-test-env</module>
-	</modules>
+        <module>ontop-rdf4j-workbench</module>
+    </modules>
 
 	<profiles>
 		<profile>

@@ -45,7 +45,7 @@ public class SesameRepositoryFactory implements RepositoryFactory {
             throw new RepositoryConfigException("The given repository config is not of the right type " +
                     "(SesameRepositoryConfig was expected).");
         }
-        /**
+        /*
          * Construction is delegated to the config object (for validation purposes).
          * See SesameRepositoryConfig for further explanations about this unusual pattern.
          */

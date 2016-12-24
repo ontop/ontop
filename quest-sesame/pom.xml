@@ -91,8 +91,10 @@
 			<scope>test</scope>
 		</dependency>
 
-
-
+        <dependency>
+            <groupId>org.eclipse.rdf4j</groupId>
+            <artifactId>rdf4j-queryalgebra-evaluation</artifactId>
+        </dependency>
 
 		<dependency>
 			<groupId>org.eclipse.rdf4j</groupId>
@@ -135,10 +137,7 @@
 			<groupId>eu.optique-project</groupId>
 			<artifactId>r2rml-api-rdf4j-bridge</artifactId>			
 		</dependency>
-        <dependency>
-            <groupId>org.eclipse.rdf4j</groupId>
-            <artifactId>rdf4j-queryalgebra-evaluation</artifactId>
-        </dependency>
+
     </dependencies>
 
 </project>

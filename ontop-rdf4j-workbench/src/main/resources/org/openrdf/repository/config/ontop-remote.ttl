@@ -1,0 +1,16 @@
+#
+# Sesame configuration template for a main-memory repository
+#
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>.
+@prefix rep: <http://www.openrdf.org/config/repository#>.
+@prefix obda: <http://inf.unibz.it/krdb/obda/quest#>.
+
+[] a rep:Repository ;
+   rep:repositoryID "{%Repository ID|myOntopRemote%}" ;
+   rdfs:label "{%Repository title|Ontop Remote store%}" ;
+    rep:repositoryImpl [
+      rep:repositoryType "obda:OntopRepository" ;
+      obda:quest_type "ontop-remote" ;
+	obda:owlfile "{%Owl File%}";
+      
+   ].
