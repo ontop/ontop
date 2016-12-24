@@ -11,6 +11,6 @@ package it.unibz.inf.ontop.sql.parser.exceptions;
 public class UnsupportedSelectQueryException extends RuntimeException {
 
     public UnsupportedSelectQueryException(String message, Object object) {
-        super(message + " "  + object.toString());
+        super(message + " "  + object);
     }
 }

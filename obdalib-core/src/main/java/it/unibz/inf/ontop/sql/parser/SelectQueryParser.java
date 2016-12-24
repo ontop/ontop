@@ -39,61 +39,54 @@ public class SelectQueryParser {
     private final QuotedIDFactory idfac;
 
     private int relationIndex = 0;
-    private boolean parseException;
 
     public SelectQueryParser(DBMetadata metadata) {
         this.metadata = metadata;
         this.idfac = metadata.getQuotedIDFactory();
     }
 
-    public CQIE parse(String sql) {
-        parseException = false;
-        CQIE parsedSql = null;
-
+    public RelationalExpression parse(String sql) {
         try {
             Statement statement = CCJSqlParserUtil.parse(sql);
             if (!(statement instanceof Select))
                 throw new InvalidSelectQueryException("The inserted query is not a SELECT statement", statement);
 
-            RelationalExpression current = select(((Select) statement).getSelectBody());
-            final OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
-
-            // TODO: proper handling of the head predicate
-            Function head = fac.getFunction(
-                    fac.getPredicate("Q", new Predicate.COL_TYPE[current.getAttributes().size()]),
-                    current.getAttributes().values().stream().collect(ImmutableCollectors.toList()));
-
-            ImmutableList<Function> atoms = ImmutableList.<Function>builder()
-                    .addAll(current.getDataAtoms())
-                    .addAll(current.getFilterAtoms())
-                    .build();
-
-            parsedSql = fac.getCQIE(head, atoms);
+            RelationalExpression re = select(((Select) statement).getSelectBody());
+            return re;
+//            final OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
+//
+//            Function head = fac.getFunction(
+//                    fac.getPredicate("Q", new Predicate.COL_TYPE[current.getAttributes().size()]),
+//                    current.getAttributes().values().stream().collect(ImmutableCollectors.toList()));
+//
+//            ImmutableList<Function> atoms = ImmutableList.<Function>builder()
+//                    .addAll(current.getDataAtoms())
+//                    .addAll(current.getFilterAtoms())
+//                    .build();
+//
+//            parsedSql = fac.getCQIE(head, atoms);
         }
         catch (JSQLParserException e) {
-            if (e.getCause() instanceof ParseException)
-                log.warn("Parse exception, check no SQL reserved keywords have been used " + e.getCause().getMessage());
-            parseException = true;
+            throw new UnsupportedSelectQueryException("Cannot parse: " + sql, null);
+//            if (e.getCause() instanceof ParseException)
+//                log.warn("Parse exception, check no SQL reserved keywords have been used " + e.getCause().getMessage());
+//            parseException = true;
         }
-
-
-        if (parsedSql == null || parseException) {
-            log.warn("The following query couldn't be parsed. " +
-                    "This means Quest will need to use nested subqueries (views) to use this mappings. " +
-                    "This is not good for SQL performance, specially in MySQL. " +
-                    "Try to simplify your query to allow Quest to parse it. " +
-                    "If you think this query is already simple and should be parsed by Quest, " +
-                    "please contact the authors. \nQuery: '{}'", sql);
-
-            ParserViewDefinition viewDef = createViewDefinition(sql);
-            // TODO: proper handling
-            parsedSql = null;
-        }
-        return parsedSql;
-    }
-
-    public boolean isParseException() {
-        return parseException;
+//
+//
+//        if (parsedSql == null || parseException) {
+//            log.warn("The following query couldn't be parsed. " +
+//                    "This means Quest will need to use nested subqueries (views) to use this mappings. " +
+//                    "This is not good for SQL performance, specially in MySQL. " +
+//                    "Try to simplify your query to allow Quest to parse it. " +
+//                    "If you think this query is already simple and should be parsed by Quest, " +
+//                    "please contact the authors. \nQuery: '{}'", sql);
+//
+//            ParserViewDefinition viewDef = createViewDefinition(sql);
+//            // TODO: proper handling
+//            parsedSql = null;
+//        }
+//        return parsedSql;
     }
 
     private RelationalExpression select(SelectBody selectBody) {
