@@ -23,6 +23,20 @@ import static org.junit.Assert.*;
  */
 public class SelectQueryParserTest {
 
+    private static final String P = "P";
+    private static final String Q = "Q";
+    private static final String R = "R";
+
+    private static final String A1 = "A1";
+    private static final String A2 = "A2";
+    private static final String A3 = "A3";
+    private static final String B1 = "B1";
+    private static final String B2 = "B2";
+    private static final String C1 = "C1";
+    private static final String C2 = "C2";
+    private static final String C3 = "C3";
+    private static final String D1 = "D1";
+
     private OBDADataFactory FACTORY;
 
     @Before
@@ -40,10 +54,8 @@ public class SelectQueryParserTest {
 //        assertEquals(2, parse.getHead().getTerms().size());
 //        assertEquals(4, parse.getReferencedVariables().size());
 
-        assertMatches(createEQ("A1", "A2"), re.getFilterAtoms());
-
-        assertMatches(createDataAtom("P", "A1", "B1"),
-                createDataAtom("P", "A2", "B2"), re.getDataAtoms());
+        assertMatches(ImmutableList.of(eqOf(A1, A2)), re.getFilterAtoms());
+        assertMatches(ImmutableList.of(dataAtomOf(P, A1, B1), dataAtomOf(P, A2, B2)), re.getDataAtoms());
     }
 
 
@@ -77,82 +89,67 @@ public class SelectQueryParserTest {
         RelationalExpression re = parser.parse("SELECT S.A, S.C FROM R JOIN (P NATURAL JOIN Q) AS S ON R.A = S.A");
         System.out.println(re);
 
-        assertMatches(createEQ("A1", "A2"), createEQ("A2","A3"), re.getFilterAtoms());
-
-        assertMatches(createDataAtom("R", "A1", "B1", "C1", "D1"),
-                createDataAtom("P", "A2", "B2"),
-                createDataAtom("Q","A3", "C3"),
-                re.getDataAtoms());
+        assertMatches(ImmutableList.of(eqOf(A1, A2), eqOf(A2, A3)), re.getFilterAtoms());
+        assertMatches(ImmutableList.of(dataAtomOf(R, A1, B1, C1, D1),
+                dataAtomOf(P, A2, B2), dataAtomOf(Q, A3, C3)), re.getDataAtoms());
     }
 
     // -----------------------------------------------------
     // NEW TESTS
 
-    @Test()
+    @Test
     public void simple_join_test() {
         SelectQueryParser parser = new SelectQueryParser(createMetadata());
         RelationalExpression re = parser.parse("SELECT * FROM P, Q;");
 
-        assertMatches(createDataAtom("P", "A1", "B1"),
-                createDataAtom("Q","A2", "C2"), re.getDataAtoms());
-
-        assertEquals(0, re.getFilterAtoms().size());
+        assertMatches(ImmutableList.of(), re.getFilterAtoms());
+        assertMatches(ImmutableList.of(dataAtomOf(P, A1, B1), dataAtomOf(Q, A2, C2)), re.getDataAtoms());
     }
 
-    @Test()
+    @Test
     public void natural_join_test() {
         SelectQueryParser parser = new SelectQueryParser(createMetadata());
         RelationalExpression re = parser.parse("SELECT A FROM P NATURAL JOIN  Q;");
         System.out.println(re);
 
-        assertMatches(createDataAtom("P", "A1", "B1"),
-                createDataAtom("Q","A2", "C2"), re.getDataAtoms());
-
-        assertMatches(createEQ("A1", "A2"), re.getFilterAtoms());
+        assertMatches(ImmutableList.of(eqOf(A1, A2)), re.getFilterAtoms());
+        assertMatches(ImmutableList.of(dataAtomOf(P, A1, B1), dataAtomOf(Q, A2, C2)), re.getDataAtoms());
     }
 
-    @Test()
+    @Test
     public void cross_join_test() {
         SelectQueryParser parser = new SelectQueryParser(createMetadata());
         RelationalExpression re = parser.parse("SELECT * FROM P CROSS JOIN  Q;");
 
-        assertMatches(createDataAtom("P", "A1", "B1"),
-                createDataAtom("Q","A2", "C2"), re.getDataAtoms());
-
-        assertEquals(0, re.getFilterAtoms().size());
+        assertMatches(ImmutableList.of(), re.getFilterAtoms());
+        assertMatches(ImmutableList.of(dataAtomOf(P, A1, B1), dataAtomOf(Q, A2, C2)), re.getDataAtoms());
     }
 
-    @Test()
+    @Test
     public void join_on_test() {
         SelectQueryParser parser = new SelectQueryParser(createMetadata());
         RelationalExpression re = parser.parse("SELECT * FROM P JOIN  Q ON P.A = Q.A;");
 
-        assertMatches(createDataAtom("P", "A1", "B1"),
-                createDataAtom("Q","A2", "C2"), re.getDataAtoms());
-
-        assertMatches(createEQ("A1", "A2"), re.getFilterAtoms());
+        assertMatches(ImmutableList.of(eqOf(A1, A2)), re.getFilterAtoms());
+        assertMatches(ImmutableList.of(dataAtomOf(P, A1, B1), dataAtomOf(Q, A2, C2)), re.getDataAtoms());
     }
 
-    @Test()
+    @Test
     public void inner_join_on_test() {
         SelectQueryParser parser = new SelectQueryParser(createMetadata());
         RelationalExpression re = parser.parse("SELECT * FROM P INNER JOIN  Q ON P.A = Q.A;");
 
-        assertMatches(createDataAtom("P", "A1", "B1"),
-                createDataAtom("Q","A2", "C2"), re.getDataAtoms());
-
-        assertMatches(createEQ("A1", "A2"), re.getFilterAtoms());
+        assertMatches(ImmutableList.of(eqOf(A1, A2)), re.getFilterAtoms());
+        assertMatches(ImmutableList.of(dataAtomOf(P, A1, B1), dataAtomOf(Q, A2, C2)), re.getDataAtoms());
     }
 
-    @Test()
+    @Test
     public void join_using_test() {
         SelectQueryParser parser = new SelectQueryParser(createMetadata());
         RelationalExpression re = parser.parse("SELECT * FROM P JOIN  Q USING(A);");
 
-        assertMatches(createDataAtom("P", "A1", "B1"),
-                createDataAtom("Q","A2", "C2"), re.getDataAtoms());
-
-        assertMatches(createEQ("A1", "A2"), re.getFilterAtoms());
+        assertMatches(ImmutableList.of(eqOf(A1, A2)), re.getFilterAtoms());
+        assertMatches(ImmutableList.of(dataAtomOf(P, A1, B1), dataAtomOf(Q, A2, C2)), re.getDataAtoms());
     }
 
     @Test(expected = UnsupportedSelectQueryException.class)
@@ -174,22 +171,20 @@ public class SelectQueryParserTest {
         parser.parse("SELECT R FROM Q");
     }
 
-    @Test()
+    @Test
     public void inner_join_using_test() {
         SelectQueryParser parser = new SelectQueryParser(createMetadata());
         RelationalExpression re = parser.parse("SELECT * FROM P INNER JOIN  Q USING(A);");
 
-        assertMatches(createDataAtom("P", "A1", "B1"),
-                createDataAtom("Q","A2", "C2"), re.getDataAtoms());
-
-        assertMatches(createEQ("A1", "A2"), re.getFilterAtoms());
+        assertMatches(ImmutableList.of(eqOf(A1, A2)), re.getFilterAtoms());
+        assertMatches(ImmutableList.of(dataAtomOf(P, A1, B1), dataAtomOf(Q, A2, C2)), re.getDataAtoms());
     }
 
     //end region
 
 
 
-    @Test()
+    @Test
     public void parse_exception_test() {
         // During this tests the parser throws a ParseException
         // todo: this should be categorised as invalid mapping which cannot be supported
@@ -234,7 +229,7 @@ public class SelectQueryParserTest {
         });
     }
 
-    @Test()
+    @Test
     public void invalid_joins_test() {
         ImmutableList.of(
                 "SELECT * FROM P JOIN  Q;",
@@ -243,23 +238,22 @@ public class SelectQueryParserTest {
                 "SELECT * FROM P CROSS JOIN  Q ON P.A = Q.A;",
                 "SELECT * FROM P NATURAL JOIN  Q USING(A);",
                 "SELECT * FROM P CROSS JOIN  Q USING(A);"
-        )
-                .forEach(query -> {
-                    SelectQueryParser parser = new SelectQueryParser(createMetadata());
-                    Exception e = null;
-                    try {
-                        parser.parse(query);
-                        System.out.println(query + " - Wrong!");
-                    }
-                    catch (InvalidSelectQueryException ex) {
-                        System.out.println(query + " - OK");
-                        e = ex;
-                    }
-                    assertNotNull(e);
-                });
+        ).forEach(query -> {
+            SelectQueryParser parser = new SelectQueryParser(createMetadata());
+            Exception e = null;
+            try {
+                parser.parse(query);
+                System.out.println(query + " - Wrong!");
+            }
+            catch (InvalidSelectQueryException ex) {
+                System.out.println(query + " - OK");
+                e = ex;
+            }
+            assertNotNull(e);
+        });
     }
 
-    @Test()
+    @Test
     public void unsupported_joins_test() {
         ImmutableList.of(
                 "SELECT * FROM P RIGHT OUTER JOIN  Q;",
@@ -273,20 +267,20 @@ public class SelectQueryParserTest {
                 "SELECT * FROM P LEFT JOIN  Q ON P.A = Q.A;",
                 "SELECT * FROM P RIGHT OUTER JOIN  Q ON P.A = Q.A;",
                 "SELECT * FROM P FULL OUTER JOIN  Q ON P.A = Q.A;",
-                "SELECT * FROM P LEFT OUTER JOIN  Q ON P.A = Q.A;")
-                .forEach(query -> {
-                    SelectQueryParser parser = new SelectQueryParser(createMetadata());
-                    Exception e = null;
-                    try {
-                        parser.parse(query);
-                        System.out.println(query + " - Wrong!");
-                    }
-                    catch (UnsupportedSelectQueryException ex) {
-                        System.out.println(query + " - OK");
-                        e = ex;
-                    }
-                    assertNotNull(e);
-                });
+                "SELECT * FROM P LEFT OUTER JOIN  Q ON P.A = Q.A;"
+        ).forEach(query -> {
+            SelectQueryParser parser = new SelectQueryParser(createMetadata());
+            Exception e = null;
+            try {
+                parser.parse(query);
+                System.out.println(query + " - Wrong!");
+            }
+            catch (UnsupportedSelectQueryException ex) {
+                System.out.println(query + " - OK");
+                e = ex;
+            }
+            assertNotNull(e);
+        });
     }
 
     @Test
@@ -302,7 +296,7 @@ public class SelectQueryParserTest {
         assertEquals(2, re.getDataAtoms().size());
         // TODO: add data atoms asserts
 
-        assertMatches(createEQ("A1", "A2"), createEQ("B1", "B2"), re.getFilterAtoms());
+        assertMatches(ImmutableList.of(eqOf(A1, A2), eqOf(B1, B2)), re.getFilterAtoms());
     }
 
     @Test
@@ -356,9 +350,8 @@ public class SelectQueryParserTest {
         RelationalExpression re = parser.parse(query);
         System.out.print(re);
 
-        assertEquals(0, re.getFilterAtoms().size());
-
-        assertMatches(createDataAtom("P", "A1", "B1"), re.getDataAtoms());
+        assertMatches(ImmutableList.of(), re.getFilterAtoms());
+        assertMatches(ImmutableList.of(dataAtomOf(P, A1, B1)), re.getDataAtoms());
     }
 
     @Test
@@ -368,9 +361,8 @@ public class SelectQueryParserTest {
         RelationalExpression re = parser.parse(query);
         System.out.print(re);
 
-        assertEquals(0, re.getFilterAtoms().size());
-
-        assertMatches(createDataAtom("P","A1", "B1"), re.getDataAtoms());
+        assertMatches(ImmutableList.of(), re.getFilterAtoms());
+        assertMatches(ImmutableList.of(dataAtomOf(P, A1, B1)), re.getDataAtoms());
     }
 
     @Test
@@ -380,10 +372,8 @@ public class SelectQueryParserTest {
         RelationalExpression re = parser.parse(query);
         System.out.print(re);
 
-        assertMatches(createDataAtom("P","A1","B1"),
-                createDataAtom("Q","A2", "C2"), re.getDataAtoms());
-
-        assertEquals(0, re.getFilterAtoms().size());
+        assertMatches(ImmutableList.of(), re.getFilterAtoms());
+        assertMatches(ImmutableList.of(dataAtomOf(P, A1, B1), dataAtomOf(Q, A2, C2)), re.getDataAtoms());
     }
 
 
@@ -394,79 +384,54 @@ public class SelectQueryParserTest {
         RelationalExpression re = parser.parse(query);
         System.out.print(re);
 
-        assertMatches(createDataAtom("P","A1","B1"),
-                createDataAtom("Q","A2", "C2"), re.getDataAtoms());
-
-        assertEquals(0, re.getFilterAtoms().size());
+        assertMatches(ImmutableList.of(), re.getFilterAtoms());
+        assertMatches(ImmutableList.of(dataAtomOf(P, A1, B1), dataAtomOf(Q, A2, C2)), re.getDataAtoms());
     }
 
 
     // END SUB SELECT TESTS
 
-    private Function createEQ(String var1, String var2) {
+    private Function eqOf(String var1, String var2) {
         return FACTORY.getFunction(ExpressionOperation.EQ,
                 ImmutableList.of(FACTORY.getVariable(var1), FACTORY.getVariable(var2)));
     }
 
-    private Function createDataAtom(String predicate, String var1, String var2) {
+    private Function dataAtomOf(String predicate, String var1, String var2) {
         return FACTORY.getFunction(FACTORY.getPredicate(predicate, new Predicate.COL_TYPE[]{ null, null }),
                 ImmutableList.of(FACTORY.getVariable(var1), FACTORY.getVariable(var2)));
     }
 
-    private Function createDataAtom(String predicate, String var1, String var2, String var3, String var4) {
+    private Function dataAtomOf(String predicate, String var1, String var2, String var3, String var4) {
         return FACTORY.getFunction(FACTORY.getPredicate(predicate, new Predicate.COL_TYPE[]{ null, null, null, null }),
                 ImmutableList.of(FACTORY.getVariable(var1), FACTORY.getVariable(var2), FACTORY.getVariable(var3), FACTORY.getVariable(var4)));
     }
 
-    private void assertMatches(Function f, List<Function> list) {
-        assertEquals(1, list.size());
-        assertTrue(list.contains(f));
+    private void assertMatches(ImmutableList<Function> list0, List<Function> list) {
+        assertEquals(list0.size(), list.size());
+        list0.forEach(a -> { assertTrue(list.contains(a)); });
     }
 
-    private void assertMatches(Function f1, Function f2, List<Function> list) {
-        assertEquals(2, list.size());
-        assertTrue(list.contains(f1));
-        assertTrue(list.contains(f2));
-    }
-
-    private void assertMatches(Function f1, Function f2, Function f3, List<Function> list) {
-        assertEquals(3, list.size());
-        assertTrue(list.contains(f1));
-        assertTrue(list.contains(f2));
-        assertTrue(list.contains(f3));
-    }
 
     private DBMetadata createMetadata() {
         DBMetadata metadata = DBMetadataExtractor.createDummyMetadata();
         QuotedIDFactory idfac = metadata.getQuotedIDFactory();
 
-        RelationID table1 = idfac.createRelationID(null, "P");
-        QuotedID attx0 = idfac.createAttributeID("A");
-        QuotedID atty0 = idfac.createAttributeID("B");
+        DatabaseRelationDefinition relation1 =
+                metadata.createDatabaseRelation(idfac.createRelationID(null, P));
+        relation1.addAttribute(idfac.createAttributeID("A"), 0, "INT", false);
+        relation1.addAttribute(idfac.createAttributeID("B"), 0, "INT", false);
 
-        DatabaseRelationDefinition relation1 = metadata.createDatabaseRelation(table1);
-        relation1.addAttribute(attx0, 0, "INT", false);
-        relation1.addAttribute(atty0, 0, "INT", false);
+        DatabaseRelationDefinition relation2 =
+                metadata.createDatabaseRelation(idfac.createRelationID(null, Q));
+        relation2.addAttribute(idfac.createAttributeID("A"), 0, "INT", false);
+        relation2.addAttribute(idfac.createAttributeID("C"), 0, "INT", false);
 
-        RelationID table2 = idfac.createRelationID(null, "Q");
-        QuotedID attx1 = idfac.createAttributeID("A");
-        QuotedID atty1 = idfac.createAttributeID("C");
-
-        DatabaseRelationDefinition relation2 = metadata.createDatabaseRelation(table2);
-        relation2.addAttribute(attx1, 0, "INT", false);
-        relation2.addAttribute(atty1, 0, "INT", false);
-
-        RelationID table3 = idfac.createRelationID(null, "R");
-        QuotedID attx3 = idfac.createAttributeID("A");
-        QuotedID atty3 = idfac.createAttributeID("B");
-        QuotedID attu3 = idfac.createAttributeID("C");
-        QuotedID attv3 = idfac.createAttributeID("D");
-
-        DatabaseRelationDefinition relation3 = metadata.createDatabaseRelation(table3);
-        relation3.addAttribute(attx3, 0, "INT", false);
-        relation3.addAttribute(atty3, 0, "INT", false);
-        relation3.addAttribute(attu3, 0, "INT", false);
-        relation3.addAttribute(attv3, 0, "INT", false);
+        DatabaseRelationDefinition relation3 =
+                metadata.createDatabaseRelation(idfac.createRelationID(null, R));
+        relation3.addAttribute(idfac.createAttributeID("A"), 0, "INT", false);
+        relation3.addAttribute(idfac.createAttributeID("B"), 0, "INT", false);
+        relation3.addAttribute(idfac.createAttributeID("C"), 0, "INT", false);
+        relation3.addAttribute(idfac.createAttributeID("D"), 0, "INT", false);
 
         return metadata;
     }
