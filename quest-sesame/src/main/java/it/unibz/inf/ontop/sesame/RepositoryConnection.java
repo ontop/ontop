@@ -20,43 +20,78 @@ package it.unibz.inf.ontop.sesame;
  * #L%
  */
 
-import org.eclipse.rdf4j.common.iteration.CloseableIteration;
-import org.eclipse.rdf4j.common.iteration.CloseableIteratorIteration;
-import org.eclipse.rdf4j.common.iteration.Iteration;
 import it.unibz.inf.ontop.model.OBDAException;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestDBConnection;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestDBStatement;
 import it.unibz.inf.ontop.owlrefplatform.core.SIQuestDBStatement;
-
 import org.eclipse.rdf4j.IsolationLevel;
+import org.eclipse.rdf4j.IsolationLevels;
 import org.eclipse.rdf4j.OpenRDFUtil;
-import org.eclipse.rdf4j.model.*;
+import org.eclipse.rdf4j.common.iteration.CloseableIteration;
+import org.eclipse.rdf4j.common.iteration.CloseableIteratorIteration;
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.Namespace;
+import org.eclipse.rdf4j.model.Resource;
+import org.eclipse.rdf4j.model.Statement;
+import org.eclipse.rdf4j.model.Value;
+import org.eclipse.rdf4j.model.ValueFactory;
 import org.eclipse.rdf4j.model.impl.NamespaceImpl;
+import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.model.impl.ValueFactoryImpl;
-import org.eclipse.rdf4j.query.*;
-import org.eclipse.rdf4j.query.parser.*;
+import org.eclipse.rdf4j.query.BooleanQuery;
+import org.eclipse.rdf4j.query.GraphQuery;
+import org.eclipse.rdf4j.query.GraphQueryResult;
+import org.eclipse.rdf4j.query.MalformedQueryException;
+import org.eclipse.rdf4j.query.Query;
+import org.eclipse.rdf4j.query.QueryEvaluationException;
+import org.eclipse.rdf4j.query.QueryLanguage;
+import org.eclipse.rdf4j.query.TupleQuery;
+import org.eclipse.rdf4j.query.Update;
+import org.eclipse.rdf4j.query.parser.ParsedBooleanQuery;
+import org.eclipse.rdf4j.query.parser.ParsedGraphQuery;
+import org.eclipse.rdf4j.query.parser.ParsedQuery;
+import org.eclipse.rdf4j.query.parser.ParsedTupleQuery;
+import org.eclipse.rdf4j.query.parser.QueryParserUtil;
 import org.eclipse.rdf4j.repository.Repository;
 import org.eclipse.rdf4j.repository.RepositoryException;
 import org.eclipse.rdf4j.repository.RepositoryResult;
 import org.eclipse.rdf4j.repository.UnknownTransactionStateException;
-import org.eclipse.rdf4j.rio.*;
+import org.eclipse.rdf4j.rio.ParserConfig;
+import org.eclipse.rdf4j.rio.RDFFormat;
+import org.eclipse.rdf4j.rio.RDFHandler;
+import org.eclipse.rdf4j.rio.RDFHandlerException;
+import org.eclipse.rdf4j.rio.RDFParseException;
+import org.eclipse.rdf4j.rio.RDFParser;
+import org.eclipse.rdf4j.rio.Rio;
+import org.eclipse.rdf4j.rio.UnsupportedRDFormatException;
 import org.eclipse.rdf4j.rio.helpers.BasicParserSettings;
 
-import java.io.*;
-import java.net.URISyntaxException;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.Reader;
 import java.net.URL;
-import java.sql.SQLException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 
+// TODO(Xiao): separate the implementation into two subclasses for virtual and classic modes
 public class RepositoryConnection implements org.eclipse.rdf4j.repository.RepositoryConnection, AutoCloseable {
 
-	private SesameAbstractRepo repository;
+    private static final String ONTOP_VIRTUAL_REPOSITORY_IS_READ_ONLY = "Ontop virtual repository is read-only.";
+    private SesameAbstractRepo repository;
 	private QuestDBConnection questConn;
     private boolean isOpen;
     private boolean autoCommit;
     private boolean isActive;
-    private  RDFParser rdfParser;
+    private RDFParser rdfParser;
 
 	
 	public RepositoryConnection(SesameAbstractRepo rep, QuestDBConnection connection) throws OBDAException
@@ -81,7 +116,7 @@ public class RepositoryConnection implements org.eclipse.rdf4j.repository.Reposi
 		}
 		try {
 			begin();
-			List<Statement> l = new ArrayList<Statement>();
+			List<Statement> l = new ArrayList<>();
 			l.add(st);
 			Iterator<Statement> iterator = l.iterator();
 			addWithoutCommit(iterator, contexts);
@@ -101,7 +136,7 @@ public class RepositoryConnection implements org.eclipse.rdf4j.repository.Reposi
          begin();
 
          try {
-                 addWithoutCommit((Iterator<Statement>) statements, contexts);
+             addWithoutCommit((Iterator<Statement>) statements, contexts);
              
          } catch (RepositoryException e) {
              if (autoCommit) {
@@ -132,13 +167,9 @@ public class RepositoryConnection implements org.eclipse.rdf4j.repository.Reposi
 			baseIRI = file.toURI().toString();
 		}
 
-		InputStream in = new FileInputStream(file);
-
-		try {
-			add(in, baseIRI, dataFormat, contexts);
-		} finally {
-			in.close();
-		}
+        try (InputStream in = new FileInputStream(file)) {
+            add(in, baseIRI, dataFormat, contexts);
+        }
 	}
 
 	 @Override
@@ -152,13 +183,9 @@ public class RepositoryConnection implements org.eclipse.rdf4j.repository.Reposi
 			baseIRI = url.toExternalForm();
 		}
 
-		InputStream in = url.openStream();
-
-		try {
-			add(in, baseIRI, dataFormat, contexts);
-		} finally {
-			in.close();
-		}
+         try (InputStream in = url.openStream()) {
+             add(in, baseIRI, dataFormat, contexts);
+         }
      }
 
      @Override
@@ -187,13 +214,11 @@ public class RepositoryConnection implements org.eclipse.rdf4j.repository.Reposi
 		//Adds a statement with the specified subject, predicate and object to this repository, 
 		//optionally to one or more named contexts. 
 		OpenRDFUtil.verifyContextNotNull(contexts);
-		ValueFactory vf = new ValueFactoryImpl();
+		ValueFactory vf = SimpleValueFactory.getInstance();
 		
 		Statement st = vf.createStatement(subject, vf.createIRI(predicate.toString()), object);
 		
 		add(st, contexts);
-		
-
 	}
 	
 	 /**
@@ -211,16 +236,12 @@ public class RepositoryConnection implements org.eclipse.rdf4j.repository.Reposi
      *        The context to which the data should be added in case
      *        <tt>enforceContext</tt> is <tt>true</tt>. The value
      *        <tt>null</tt> indicates the null context.
-     * @throws IOException
-     * @throws UnsupportedRDFormatException
-     * @throws RDFParseException
-     * @throws RepositoryException
      */
     protected void addInputStreamOrReader(Object inputStreamOrReader,
             String baseIRI, RDFFormat dataFormat, Resource... contexts)
             throws IOException, RDFParseException, RepositoryException {
     	
-    	if ( repository.getType() == QuestConstants.VIRTUAL)
+    	if (Objects.equals(repository.getType(), QuestConstants.VIRTUAL))
 			throw new RepositoryException();
     	
         OpenRDFUtil.verifyContextNotNull(contexts);
@@ -785,7 +806,6 @@ throw new RuntimeException(e);
     public void removeNamespace(String key) throws RepositoryException {
 		//Removes a namespace declaration by removing the association between a prefix and a namespace name. 
 		repository.removeNamespace(key);
-		
 	}
 
 	@Override
@@ -850,7 +870,6 @@ throw new RuntimeException(e);
     public void setParserConfig(ParserConfig config) {
 		//Set the parser configuration this connection should use for RDFParser-based operations. 
 		rdfParser.setParserConfig(config);
-		
 	}
 
 	@Override
@@ -880,12 +899,8 @@ throw new RuntimeException(e);
 	@Override
 	public boolean isActive() throws UnknownTransactionStateException,
 			RepositoryException {
-		// TODO Auto-generated method stub
 		return this.isActive;
 	}
-
-
-
 
 	@Override
 	public void exportStatements(Resource subj, IRI pred, Value obj, boolean includeInferred, RDFHandler handler,
@@ -894,25 +909,20 @@ throw new RuntimeException(e);
 		throw new UnsupportedOperationException();
 	}
 
-
 	@Override
 	public void setIsolationLevel(IsolationLevel level) throws IllegalStateException {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException();
+        if(level != IsolationLevels.NONE)
+            throw new UnsupportedOperationException();
 	}
-
 
 	@Override
 	public IsolationLevel getIsolationLevel() {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException();
+		return IsolationLevels.NONE;
 	}
-
 
 	@Override
 	public void begin(IsolationLevel level) throws RepositoryException {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException();
+        // do nothing
 	}
 
 
@@ -920,23 +930,14 @@ throw new RuntimeException(e);
 	public <E extends Exception> void add(
 			org.eclipse.rdf4j.common.iteration.Iteration<? extends Statement, E> statements, Resource... contexts)
 			throws RepositoryException, E {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException();
+		throw new UnsupportedOperationException(ONTOP_VIRTUAL_REPOSITORY_IS_READ_ONLY);
 	}
-
-
 
 	@Override
 	public <E extends Exception> void remove(
 			org.eclipse.rdf4j.common.iteration.Iteration<? extends Statement, E> statements, Resource... contexts)
 			throws RepositoryException, E {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException(ONTOP_VIRTUAL_REPOSITORY_IS_READ_ONLY);
 	}
-
-
-
-	
-
 
 }
