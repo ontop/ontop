@@ -57,7 +57,7 @@
 						</th>
 						<td>
 							<input type="text" id="owlfile"
-								name="OWL File" size="48" value="" />
+								name="owlfile" size="48" value="" />
 						</td>
 						<td>
 							<xsl:value-of select="$ontop-owlfilecommentvirt.label" />
@@ -71,7 +71,7 @@
 						</th>
 						<td>
 							<input type="text" id="obdafile"
-								name="Obda File" size="48" value="" />
+								name="obdafile" size="48" value="" />
 						</td>
 						<td>
 							<xsl:value-of select="$ontop-obdafilecomment.label" />
