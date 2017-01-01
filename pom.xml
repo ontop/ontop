@@ -68,16 +68,16 @@
 		<module>obdalib-r2rml</module>
 		<module>quest-owlapi3</module>
 		<module>quest-distribution</module>
-		<module>quest-sparql-compliance</module>
+        <module>ontop-rdf4j-workbench</module>
+        <module>ontop-rdf4j-server</module>
+        <module>quest-sparql-compliance</module>
 		<module>quest-sesame</module>
 		<module>quest-db</module>
 		<module>quest-rdb2rdf-compliance</module>
 		<module>ontop-protege</module>
 		<module>ontop-cli</module>
 		<module>quest-test</module>
-
 		<module>ontop-docker-test-env</module>
-        <module>ontop-rdf4j-workbench</module>
     </modules>
 
 	<profiles>
