@@ -72,8 +72,8 @@ public class SesameGraphQuery extends SesameAbstractQuery implements GraphQuery 
 			stm = conn.createStatement();
 			res = (GraphResultSet) stm.execute(getQueryString());
 			
-			Map<String, String> namespaces = new HashMap<String, String>();
-			List<Statement> results = new LinkedList<Statement>();
+			Map<String, String> namespaces = new HashMap<>();
+			List<Statement> results = new LinkedList<>();
 			if (res != null) {
 				while (res.hasNext()) {
 					List<Assertion> chunk = res.next();
