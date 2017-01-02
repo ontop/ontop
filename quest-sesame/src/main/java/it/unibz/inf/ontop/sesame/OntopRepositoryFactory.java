@@ -23,7 +23,7 @@ import org.eclipse.rdf4j.repository.config.RepositoryConfigException;
 import org.eclipse.rdf4j.repository.config.RepositoryFactory;
 import org.eclipse.rdf4j.repository.config.RepositoryImplConfig;
 
-public class SesameRepositoryFactory implements RepositoryFactory {
+public class OntopRepositoryFactory implements RepositoryFactory {
 
     public static final String REPOSITORY_TYPE = "obda:OntopRepository";
 
@@ -31,8 +31,8 @@ public class SesameRepositoryFactory implements RepositoryFactory {
         return REPOSITORY_TYPE;
     }
 
-    public SesameRepositoryConfig getConfig() {
-        return new SesameRepositoryConfig();
+    public OntopRepositoryConfig getConfig() {
+        return new OntopRepositoryConfig();
     }
 
 
@@ -41,14 +41,14 @@ public class SesameRepositoryFactory implements RepositoryFactory {
      */
     public SesameAbstractRepo getRepository(RepositoryImplConfig config)
             throws RepositoryConfigException {
-        if (!(config instanceof SesameRepositoryConfig)) {
+        if (!(config instanceof OntopRepositoryConfig)) {
             throw new RepositoryConfigException("The given repository config is not of the right type " +
-                    "(SesameRepositoryConfig was expected).");
+                    "(OntopRepositoryConfig was expected).");
         }
         /*
          * Construction is delegated to the config object (for validation purposes).
-         * See SesameRepositoryConfig for further explanations about this unusual pattern.
+         * See OntopRepositoryConfig for further explanations about this unusual pattern.
          */
-        return ((SesameRepositoryConfig) config).buildRepository();
+        return ((OntopRepositoryConfig) config).buildRepository();
     }
 }

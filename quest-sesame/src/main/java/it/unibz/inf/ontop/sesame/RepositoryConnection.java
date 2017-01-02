@@ -64,7 +64,6 @@ import org.eclipse.rdf4j.rio.RDFHandlerException;
 import org.eclipse.rdf4j.rio.RDFParseException;
 import org.eclipse.rdf4j.rio.RDFParser;
 import org.eclipse.rdf4j.rio.Rio;
-import org.eclipse.rdf4j.rio.UnsupportedRDFormatException;
 import org.eclipse.rdf4j.rio.helpers.BasicParserSettings;
 
 import java.io.File;
@@ -471,28 +470,26 @@ throw new RuntimeException(e);
         exportStatements(null, null, null, false, handler, contexts);
 	}
 
-//	@Override
-//    public void exportStatements(Resource subj, org.eclipse.rdf4j.model.IRI  pred, Value obj,
-//                                 boolean includeInferred, RDFHandler handler, Resource... contexts)
-//			throws RepositoryException, RDFHandlerException {
-//		//Exports all statements with a specific subject, predicate
-//		//and/or object from the repository, optionally from the specified contexts.
-//		RepositoryResult<Statement> stms = getStatements(subj, pred, obj, includeInferred, contexts);
-//
-//		handler.startRDF();
-//		// handle
-//		if (stms != null) {
-//			while (stms.hasNext()) {
-//				{
-//					Statement st = stms.next();
-//					if (st!=null)
-//						handler.handleStatement(st);
-//				}
-//			}
-//		}
-//		handler.endRDF();
-//
-//	}
+    @Override
+    public void exportStatements(Resource subj, IRI pred, Value obj,
+                                 boolean includeInferred, RDFHandler handler, Resource... contexts)
+            throws RepositoryException, RDFHandlerException {
+        //Exports all statements with a specific subject, predicate
+        //and/or object from the repository, optionally from the specified contexts.
+        RepositoryResult<Statement> stms = getStatements(subj, pred, obj, includeInferred, contexts);
+
+        handler.startRDF();
+        // handle
+        if (stms != null) {
+            while (stms.hasNext()) {
+                Statement st = stms.next();
+                if (st != null)
+                    handler.handleStatement(st);
+            }
+        }
+        handler.endRDF();
+
+    }
 
 	@Override
     public RepositoryResult<Resource> getContextIDs()
@@ -900,13 +897,6 @@ throw new RuntimeException(e);
 	public boolean isActive() throws UnknownTransactionStateException,
 			RepositoryException {
 		return this.isActive;
-	}
-
-	@Override
-	public void exportStatements(Resource subj, IRI pred, Value obj, boolean includeInferred, RDFHandler handler,
-			Resource... contexts) throws RepositoryException, RDFHandlerException {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException();
 	}
 
 	@Override

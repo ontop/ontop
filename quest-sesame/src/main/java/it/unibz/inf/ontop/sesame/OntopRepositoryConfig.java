@@ -19,47 +19,34 @@ package it.unibz.inf.ontop.sesame;
  * limitations under the License.
  * #L%
  */
-/*
- * Copyright Aduna (http://www.aduna-software.com/) (c) 2007.
- *
- * Licensed under the Aduna BSD-style license.
- */
 
-
-import java.io.File;
-import java.util.Properties;
-
-import com.sun.org.apache.xpath.internal.operations.Mod;
 import it.unibz.inf.ontop.injection.OBDAProperties;
 import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
 import it.unibz.inf.ontop.owlrefplatform.injection.QuestCorePreferences;
-import org.eclipse.rdf4j.model.Graph;
 import org.eclipse.rdf4j.model.IRI;
-import org.eclipse.rdf4j.model.Literal;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.Resource;
-import org.eclipse.rdf4j.model.URI;
 import org.eclipse.rdf4j.model.ValueFactory;
+import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.model.impl.ValueFactoryImpl;
-import org.eclipse.rdf4j.model.util.GraphUtil;
-import org.eclipse.rdf4j.model.util.GraphUtilException;
+import org.eclipse.rdf4j.repository.config.AbstractRepositoryImplConfig;
 import org.eclipse.rdf4j.repository.config.RepositoryConfigException;
-import org.eclipse.rdf4j.repository.config.RepositoryImplConfigBase;
 
+import java.io.File;
+import java.util.Properties;
+
+import static org.eclipse.rdf4j.model.util.Models.objectLiteral;
+import static org.eclipse.rdf4j.repository.config.RepositoryConfigSchema.REPOSITORYID;
 import static org.eclipse.rdf4j.repository.config.RepositoryConfigSchema.REPOSITORYTYPE;
 
 
-
-public class SesameRepositoryConfig extends RepositoryImplConfigBase {
+public class OntopRepositoryConfig extends AbstractRepositoryImplConfig {
 
     public static final String NAMESPACE = "http://inf.unibz.it/krdb/obda/quest#";
 
     /** <tt>http://inf.unibz.it/krdb/obda/quest#quest_type</tt> */
     public final static IRI QUEST_TYPE;
-
-    /** <tt>http://inf.unibz.it/krdb/obda/quest#name</tt> */
-    public final static IRI NAME;
 
     /** <tt>http://inf.unibz.it/krdb/obda/quest#owlFile/tt> */
     public final static IRI OWLFILE;
@@ -78,7 +65,8 @@ public class SesameRepositoryConfig extends RepositoryImplConfigBase {
     static {
         ValueFactory factory = ValueFactoryImpl.getInstance();
         QUEST_TYPE = factory.createIRI(NAMESPACE, "quest_type");
-        NAME = factory.createIRI(NAMESPACE, "repo_name");
+        //NAME = factory.createIRI(NAMESPACE, "repo_name");
+        //REPO_ID = factory.createIRI("http://www.openrdf.org/config/repository#repositoryID");
         OWLFILE = factory.createIRI(NAMESPACE, "owlfile");
         OBDAFILE = factory.createIRI(NAMESPACE, "obdafile");
         EXISTENTIAL = factory.createIRI(NAMESPACE, "existential");
@@ -102,8 +90,8 @@ public class SesameRepositoryConfig extends RepositoryImplConfigBase {
     /**
      * Creates a new RepositoryConfigImpl.
      */
-    public SesameRepositoryConfig() {
-    	super(SesameRepositoryFactory.REPOSITORY_TYPE);
+    public OntopRepositoryConfig() {
+    	super(OntopRepositoryFactory.REPOSITORY_TYPE);
         repository = null;
     }
     
@@ -136,22 +124,22 @@ public class SesameRepositoryConfig extends RepositoryImplConfigBase {
             throw new RepositoryConfigException("No type specified for repository implementation.");
         }
         try {
-            /**
+            /*
              * Ontology file
              */
             if (owlFile == null) {
-                throw new RepositoryConfigException("No Owl file specified for repository creation!");
+                throw new RepositoryConfigException("No OWL file specified for repository creation!");
             }
             if ((!owlFile.exists())) {
-                throw new RepositoryConfigException(String.format("The Owl file %s does not exist!",
+                throw new RepositoryConfigException(String.format("The OWL file %s does not exist!",
                         owlFile.getAbsolutePath()));
             }
             if (!owlFile.canRead()) {
-                throw new RepositoryConfigException(String.format("The Owl file %s is not accessible!",
+                throw new RepositoryConfigException(String.format("The OWL file %s is not accessible!",
                         owlFile.getAbsolutePath()));
             }
 
-            /**
+            /*
              * Mapping file
              */
             if (quest_type.equals(VIRTUAL_QUEST_TYPE)) {
@@ -169,7 +157,7 @@ public class SesameRepositoryConfig extends RepositoryImplConfigBase {
                 }
             }
         }
-        /**
+        /*
          * Sometimes thrown when there is no access right to the files.
          */
         catch (SecurityException e) {
@@ -185,25 +173,25 @@ public class SesameRepositoryConfig extends RepositoryImplConfigBase {
      *
      * This method is usually called two times:
      *   - At validation time (see validate() ).
-     *   - At the repository construction time (see SesameRepositoryFactory.getRepository() ).
+     *   - At the repository construction time (see OntopRepositoryFactory.getRepository() ).
      *
      * However, the repository is only build once and then kept in cache.
      */
     public SesameAbstractRepo buildRepository() throws RepositoryConfigException {
-        /**
+        /*
          * Cache (computed only once)
          */
         if (repository != null)
             return repository;
 
-        /**
+        /*
          * Common validation.
          * May throw a RepositoryConfigException
          */
         validateFields();
 
         try {
-            /**
+            /*
              * Creates the repository according to the Quest type.
              */
             QuestConfiguration configuration;
@@ -270,13 +258,13 @@ public class SesameRepositoryConfig extends RepositoryImplConfigBase {
                     throw new RepositoryConfigException("Unknown mode: " + quest_type);
             }
         }
-        /**
+        /*
          * Problem during the repository instantiation.
          *   --> Exception is re-thrown as a RepositoryConfigException.
          */
         catch(Exception e)
         {   e.printStackTrace();
-            throw new RepositoryConfigException("Could not create Sesame Repo! Reason: " + e.getMessage());
+            throw new RepositoryConfigException("Could not create RDF4J Repository! Reason: " + e.getMessage());
         }
         return repository;
     }
@@ -286,14 +274,14 @@ public class SesameRepositoryConfig extends RepositoryImplConfigBase {
     public Resource export(Model graph) {
     	Resource implNode = super.export(graph);
     	
-        ValueFactory vf = graph.getValueFactory();
+        ValueFactory vf = SimpleValueFactory.getInstance();
 
         if (quest_type != null) {
             graph.add(implNode, QUEST_TYPE, vf.createLiteral(quest_type));
         }
-        if (name != null) {
-            graph.add(implNode, NAME, vf.createLiteral(name));
-        }
+//        if (name != null) {
+//            graph.add(implNode, REPO_ID, vf.createLiteral(name));
+//        }
         if (owlFile != null) {
             graph.add(implNode, OWLFILE, vf.createLiteral(owlFile.getAbsolutePath()));
         }
@@ -312,43 +300,34 @@ public class SesameRepositoryConfig extends RepositoryImplConfigBase {
 
     @Override
     public void parse(Model graph, Resource implNode)
-            throws RepositoryConfigException
-    {
-    	super.parse(graph, implNode);
-            try {
-                Literal typeLit = GraphUtil.getOptionalObjectLiteral(graph, implNode, REPOSITORYTYPE);
-                if (typeLit != null) {
-                    setType(typeLit.getLabel());
-                }
-                Literal qtypeLit = GraphUtil.getOptionalObjectLiteral(graph, implNode, QUEST_TYPE);
-                if (qtypeLit != null) {
-                    this.quest_type = qtypeLit.getLabel();
-                }
-                Literal name = GraphUtil.getOptionalObjectLiteral(graph, implNode, NAME);
-                if (name != null) {
-                    setName(name.getLabel());
-                }
-                Literal owlfile = GraphUtil.getOptionalObjectLiteral(graph, implNode, OWLFILE);
-                if (owlfile != null) {
-                    this.owlFile = new File(owlfile.getLabel());
-                }
-                Literal obdafile = GraphUtil.getOptionalObjectLiteral(graph, implNode, OBDAFILE);
-                if (obdafile != null) {
-                    this.obdaFile = new File(obdafile.getLabel());
-                }
-                Literal existl = GraphUtil.getOptionalObjectLiteral(graph, implNode, EXISTENTIAL);
-                if (existl != null) {
-                    this.existential = existl.booleanValue();
-                }
-                Literal rewr = GraphUtil.getOptionalObjectLiteral(graph, implNode, REWRITING);
-                if (rewr != null) {
-                    this.rewriting = rewr.getLabel();
-                }
-                
-            }
-            catch (GraphUtilException e) {
-                throw new RepositoryConfigException(e.getMessage(), e);
-            }
+            throws RepositoryConfigException {
+        super.parse(graph, implNode);
+        try {
+            // use repositoryID as name
+            objectLiteral(graph.filter(null, REPOSITORYID, null))
+                    .ifPresent(lit -> this.setName(lit.getLabel()));
+
+            objectLiteral(graph.filter(implNode, REPOSITORYTYPE, null))
+                    .ifPresent(lit -> setType(lit.getLabel()));
+
+            objectLiteral(graph.filter(implNode, QUEST_TYPE, null))
+                    .ifPresent(lit -> this.quest_type = lit.getLabel());
+
+            objectLiteral(graph.filter(implNode, OWLFILE, null))
+                    .ifPresent(lit -> this.owlFile = new File(lit.getLabel()));
+
+            objectLiteral(graph.filter(implNode, OBDAFILE, null))
+                    .ifPresent(lit -> this.obdaFile = new File(lit.getLabel()));
+
+            objectLiteral(graph.filter(implNode, EXISTENTIAL, null))
+                    .ifPresent(lit -> this.existential = lit.booleanValue());
+
+            objectLiteral(graph.filter(implNode, REWRITING, null))
+                    .ifPresent(lit -> this.rewriting = lit.getLabel());
+
+        } catch (Exception e) {
+            throw new RepositoryConfigException(e.getMessage(), e);
+        }
     }
 
 }
