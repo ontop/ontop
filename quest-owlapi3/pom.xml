@@ -43,12 +43,7 @@
 			<artifactId>ontop-reformulation-core</artifactId>
 			<version>${project.version}</version>
 		</dependency>
-		<dependency>
-			<groupId>${project.groupId}</groupId>
-			<artifactId>ontop-obdalib-rdf4j</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		
+
 		<dependency>
 			<groupId>net.sourceforge.owlapi</groupId>
 			<artifactId>owlapi-api</artifactId>

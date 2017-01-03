@@ -42,11 +42,6 @@
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
-			<artifactId>ontop-obdalib-rdf4j</artifactId>
-			<groupId>${project.groupId}</groupId>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency>
 			<artifactId>ontop-reformulation-core</artifactId>
 			<groupId>${project.groupId}</groupId>
 			<version>${project.version}</version>

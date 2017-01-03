@@ -227,14 +227,14 @@ public class QuestOWLStatement implements IQuestOWLStatement {
 	}
 
 	private class Process implements Runnable {
-		private RDF4JRDFIterator iterator;
+		private Iterator<Assertion> iterator;
 		private IQuestStatement questStmt;
 
 		int insertCount = -1;
 		private int commitsize;
 		private int batchsize;
 
-		public Process(RDF4JRDFIterator iterator, IQuestStatement qstm, int commitsize, int batchsize) throws OBDAException {
+		public Process(Iterator<Assertion> iterator, IQuestStatement qstm, int commitsize, int batchsize) throws OBDAException {
 			this.iterator = iterator;
 			this.questStmt = qstm;
 			this.commitsize = commitsize;
