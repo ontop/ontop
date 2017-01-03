@@ -133,7 +133,7 @@
         <antlr.version>3.5.2</antlr.version>
         <airline.version>2.1.0</airline.version>
         <tomcat-jdbc.version>9.0.0.M1</tomcat-jdbc.version>
-        <r2rml-api.version>0.3.2-SNAPSHOT</r2rml-api.version>
+        <r2rml-api.version>0.4.0</r2rml-api.version>
         <jetty.version>9.4.0.v20161208</jetty.version>
     </properties>
 
