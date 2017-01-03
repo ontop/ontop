@@ -30,8 +30,8 @@ import it.unibz.inf.ontop.owlapi.OWLAPITranslatorUtility;
 import it.unibz.inf.ontop.owlapi.QuestOWLIndividualAxiomIterator;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.OWLAPIMaterializer;
 import it.unibz.inf.ontop.rdf4j.SesameMaterializer;
-import it.unibz.inf.ontop.rdf4j.RDF4JStatementIterator;
 import junit.framework.TestCase;
+import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.rio.RDFHandler;
 import org.eclipse.rdf4j.rio.n3.N3Writer;
 import org.eclipse.rdf4j.rio.rdfxml.RDFXMLWriter;
@@ -45,6 +45,7 @@ import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 
 import java.io.*;
+import java.util.Iterator;
 
 public class SesameMaterializerCmdTest extends TestCase {
 
@@ -82,7 +83,7 @@ public class SesameMaterializerCmdTest extends TestCase {
 		String outfile = out.getAbsolutePath();
 		System.out.println(outfile);
 		SesameMaterializer materializer = new SesameMaterializer(model, DO_STREAM_RESULTS);
-		RDF4JStatementIterator iterator = materializer.getIterator();
+		Iterator<Statement> iterator = materializer.getIterator();
 		Writer writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(out), "UTF-8")); 
 		RDFHandler handler = new N3Writer(writer);
 		handler.startRDF();
@@ -109,7 +110,7 @@ public class SesameMaterializerCmdTest extends TestCase {
 
 		// output
 		SesameMaterializer materializer = new SesameMaterializer(model, DO_STREAM_RESULTS);
-		RDF4JStatementIterator iterator = materializer.getIterator();
+		Iterator<Statement> iterator = materializer.getIterator();
 		Writer writer = new BufferedWriter(new OutputStreamWriter(
 				new FileOutputStream(out), "UTF-8"));
 		RDFHandler handler = new TurtleWriter(writer);
@@ -136,7 +137,7 @@ public class SesameMaterializerCmdTest extends TestCase {
 
 		// output
 		SesameMaterializer materializer = new SesameMaterializer(model, DO_STREAM_RESULTS);
-		RDF4JStatementIterator iterator = materializer.getIterator();
+		Iterator<Statement> iterator = materializer.getIterator();
 		Writer writer = new BufferedWriter(new OutputStreamWriter(
 				new FileOutputStream(out), "UTF-8"));
 		RDFHandler handler = new RDFXMLWriter(writer);
@@ -163,7 +164,7 @@ public class SesameMaterializerCmdTest extends TestCase {
 		
 		setUpOnto();
 		SesameMaterializer materializer = new SesameMaterializer(model, onto, DO_STREAM_RESULTS);
-		RDF4JStatementIterator iterator = materializer.getIterator();
+		Iterator<Statement> iterator = materializer.getIterator();
 		Writer writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(out), "UTF-8")); 
 		RDFHandler handler = new N3Writer(writer);
 		handler.startRDF();
@@ -190,7 +191,7 @@ public class SesameMaterializerCmdTest extends TestCase {
 		setUpOnto();
 		// output
 		SesameMaterializer materializer = new SesameMaterializer(model, onto, DO_STREAM_RESULTS);
-		RDF4JStatementIterator iterator = materializer.getIterator();
+		Iterator<Statement> iterator = materializer.getIterator();
 		Writer writer = new BufferedWriter(new OutputStreamWriter(
 				new FileOutputStream(out), "UTF-8"));
 		RDFHandler handler = new TurtleWriter(writer);
@@ -218,7 +219,7 @@ public class SesameMaterializerCmdTest extends TestCase {
 		setUpOnto();
 		// output
 		SesameMaterializer materializer = new SesameMaterializer(model, onto, DO_STREAM_RESULTS);
-		RDF4JStatementIterator iterator = materializer.getIterator();
+		Iterator<Statement> iterator = materializer.getIterator();
 		Writer writer = new BufferedWriter(new OutputStreamWriter(
 				new FileOutputStream(out), "UTF-8"));
 		RDFHandler handler = new RDFXMLWriter(writer);

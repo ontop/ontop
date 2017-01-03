@@ -20,10 +20,12 @@ package it.unibz.inf.ontop.rdf4j;
  * #L%
  */
 
+import com.google.common.collect.Iterators;
 import it.unibz.inf.ontop.model.OBDAModel;
 import it.unibz.inf.ontop.ontology.Assertion;
 import it.unibz.inf.ontop.ontology.Ontology;
 import it.unibz.inf.ontop.owlrefplatform.core.abox.QuestMaterializer;
+import org.eclipse.rdf4j.model.Statement;
 
 import java.util.Iterator;
 
@@ -41,8 +43,8 @@ public class SesameMaterializer {
 			 assertions = materializer.getAssertionIterator();
 		}
 		
-		public RDF4JStatementIterator getIterator() {
-			return new RDF4JStatementIterator(assertions);
+		public Iterator<Statement> getIterator() {
+            return Iterators.transform(assertions, RDF4JHelper::createStatement);
 		}
 		
 		public void disconnect() {
