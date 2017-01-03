@@ -70,17 +70,20 @@ else
 fi
 
 # location for protege clean folder
-PROTEGE_COPY_FILENAME=Protege-5.0.0-platform-independent
-PROTEGE_MAIN_FOLDER_NAME=Protege-5.0.0
-PROTEGE_MAIN_PLUGIN=ontop-protege-plugin
+PROTEGE_COPY_FILENAME=Protege-5.1.0-platform-independent
+PROTEGE_MAIN_FOLDER_NAME=Protege-5.1.0
 
-# location and name for jetty distribution (should be ZIP)
+# location and name for jetty distribution (should be zip)
 JETTY_COPY_FILENAME=jetty-distribution-9.4.0.v20161208
 JETTY_INNER_FOLDERNAME=jetty-distribution-9.4.0.v20161208
 
+# location and name for tomcat distribution (should be zip)
+TOMCAT_FILENAME=apache-tomcat-8.5.9
+
 # folder names of the output
 PROTEGE_DIST=ontop-protege
-QUEST_JETTY_DIST=ontop-jetty
+ONTOP_JETTY_DIST=ontop-jetty
+ONTOP_TOMCAT_DIST=ontop-tomcat
 ONTOP_DIST=ontop-dist
 
 # jar name of the pretege plugin
@@ -164,16 +167,38 @@ echo " Building  Jetty distribution package    "
 echo "-----------------------------------------"
 echo ""
 
-rm -fr ${QUEST_JETTY_DIST}
-mkdir ${QUEST_JETTY_DIST}
-cp ${ONTOP_DEP_HOME}/${JETTY_COPY_FILENAME}.zip ${QUEST_JETTY_DIST}/ontop-jetty-bundle-${VERSION}.zip || exit 1
+rm -fr ${ONTOP_JETTY_DIST}
+mkdir ${ONTOP_JETTY_DIST}
+cp ${ONTOP_DEP_HOME}/${JETTY_COPY_FILENAME}.zip ${ONTOP_JETTY_DIST}/ontop-jetty-bundle-${VERSION}.zip || exit 1
 
 JETTY_FOLDER=${JETTY_INNER_FOLDERNAME}
-cd ${QUEST_JETTY_DIST}
+cd ${ONTOP_JETTY_DIST}
 mkdir -p ${JETTY_INNER_FOLDERNAME}/webapps
 cp ${BUILD_ROOT}/distribution/ontop-webapps/*.war ${JETTY_FOLDER}/webapps
 
 zip ontop-jetty-bundle-${VERSION}.zip ${JETTY_FOLDER}/webapps/* || exit 1
+
+rm -fr ${JETTY_FOLDER}
+cd ${BUILD_ROOT}/distribution
+
+# Packaging the sesame jetty distribution
+#
+echo ""
+echo "========================================="
+echo " Building Tomcat distribution package    "
+echo "-----------------------------------------"
+echo ""
+
+rm -fr ${ONTOP_TOMCAT_DIST}
+mkdir ${ONTOP_TOMCAT_DIST}
+cp ${ONTOP_DEP_HOME}/${TOMCAT_FILENAME}.zip ${ONTOP_TOMCAT_DIST}/ontop-tomcat-bundle-${VERSION}.zip || exit 1
+
+# JETTY_FOLDER=${ONTOP_TOMCAT_DIST}
+cd ${ONTOP_TOMCAT_DIST}
+mkdir -p ${ONTOP_TOMCAT_DIST}/webapps
+cp ${BUILD_ROOT}/distribution/ontop-webapps/*.war ${ONTOP_TOMCAT_DIST}/webapps
+
+zip ontop-tomcat-bundle-${VERSION}.zip ${ONTOP_TOMCAT_DIST}/webapps/* || exit 1
 
 rm -fr ${JETTY_FOLDER}
 cd ${BUILD_ROOT}/distribution
