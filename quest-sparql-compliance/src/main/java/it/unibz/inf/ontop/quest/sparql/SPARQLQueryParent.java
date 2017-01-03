@@ -168,7 +168,7 @@ public abstract class SPARQLQueryParent extends TestCase {
 		throws Exception
 	{
 		Repository repo = newRepository();
-//		RepositoryConnection con = repo.getConnection();
+//		OntopRepositoryConnection con = repo.getConnection();
 //		try {
 //			con.clear();
 //			con.clearNamespaces();

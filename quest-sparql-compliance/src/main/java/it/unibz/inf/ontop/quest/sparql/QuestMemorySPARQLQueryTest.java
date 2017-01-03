@@ -25,7 +25,7 @@ import junit.framework.Test;
 import org.eclipse.rdf4j.query.Dataset;
 import org.eclipse.rdf4j.repository.Repository;
 
-import it.unibz.inf.ontop.sesame.SesameClassicInMemoryRepo;
+import it.unibz.inf.ontop.rdf4j.repository.OntopClassicInMemoryRepository;
 
 public class QuestMemorySPARQLQueryTest extends SPARQLQueryParent {
 
@@ -67,7 +67,7 @@ public class QuestMemorySPARQLQueryTest extends SPARQLQueryParent {
 	@Override
 	protected Repository newRepository() {
 		try {
-			SesameClassicInMemoryRepo repo = new SesameClassicInMemoryRepo(
+			OntopClassicInMemoryRepository repo = new OntopClassicInMemoryRepository(
 					"QuestSPARQLTest", dataset);
 			repo.initialize();
 			return repo;

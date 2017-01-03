@@ -26,7 +26,7 @@ import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestDBConnection;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestDBStatement;
 import it.unibz.inf.ontop.owlrefplatform.injection.QuestCorePreferences;
-import it.unibz.inf.ontop.sesame.SesameVirtualRepo;
+import it.unibz.inf.ontop.rdf4j.repository.OntopVirtualRepository;
 
 import java.util.Properties;
 
@@ -69,7 +69,7 @@ public class OracleSesameLIMITTest  {
 				.properties(p)
 				.build();
 
-		SesameVirtualRepo qest1 = new SesameVirtualRepo("dbname", configuration);
+		OntopVirtualRepository qest1 = new OntopVirtualRepository("dbname", configuration);
 		qest1.initialize();
 		/*
 		 * Prepare the data connection for querying.

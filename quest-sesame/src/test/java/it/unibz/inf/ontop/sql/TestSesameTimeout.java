@@ -10,6 +10,8 @@ import java.util.Properties;
 import java.util.Scanner;
 
 import it.unibz.inf.ontop.injection.QuestConfiguration;
+import it.unibz.inf.ontop.rdf4j.repository.OntopRepositoryConnection;
+import it.unibz.inf.ontop.rdf4j.repository.OntopVirtualRepository;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -19,12 +21,10 @@ import org.eclipse.rdf4j.query.QueryLanguage;
 import org.eclipse.rdf4j.query.TupleQuery;
 import org.eclipse.rdf4j.query.TupleQueryResult;
 import it.unibz.inf.ontop.injection.OBDAProperties;
-import it.unibz.inf.ontop.sesame.RepositoryConnection;
-import it.unibz.inf.ontop.sesame.SesameVirtualRepo;
 
 /**
  * Tests that user-applied constraints can be provided through
- * sesameWrapper.SesameVirtualRepo
+ * sesameWrapper.OntopVirtualRepository
  * with manually instantiated metadata.
  *
  * This is quite similar to the setting in the optique platform
@@ -43,7 +43,7 @@ public class TestSesameTimeout {
 	static String uc_create = "src/test/resources/userconstraints/create.sql";
 
 	private Connection sqlConnection;
-	private RepositoryConnection conn;
+	private OntopRepositoryConnection conn;
 	
 
 	@Before
@@ -81,7 +81,7 @@ public class TestSesameTimeout {
 				.properties(p)
 				.build();
 
-		SesameVirtualRepo repo = new SesameVirtualRepo("", configuration);
+		OntopVirtualRepository repo = new OntopVirtualRepository("", configuration);
 		repo.initialize();
 		/*
 		 * Prepare the data connection for querying.
@@ -123,7 +123,7 @@ public class TestSesameTimeout {
         	result.close();
         } catch (QueryEvaluationException e) {
         	long end = System.currentTimeMillis();
-        	assertTrue(e.toString().indexOf("SesameTupleQuery timed out. More than 1 seconds passed") >= 0);
+        	assertTrue(e.toString().indexOf("OntopTupleQuery timed out. More than 1 seconds passed") >= 0);
         	assertTrue(end - start >= 1000);
         	exceptionThrown = true;
         } 

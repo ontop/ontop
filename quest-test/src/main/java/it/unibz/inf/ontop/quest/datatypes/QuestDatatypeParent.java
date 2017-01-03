@@ -25,16 +25,14 @@ import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.quest.ResultSetInfo;
 import it.unibz.inf.ontop.quest.ResultSetInfoTupleUtil;
 
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.LinkedHashSet;
-import java.util.Properties;
 import java.util.Set;
 
-import it.unibz.inf.ontop.sesame.SesameVirtualRepo;
+import it.unibz.inf.ontop.rdf4j.repository.OntopVirtualRepository;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
@@ -58,9 +56,6 @@ import org.eclipse.rdf4j.rio.Rio;
 import org.eclipse.rdf4j.rio.helpers.BasicParserSettings;
 import org.eclipse.rdf4j.rio.helpers.StatementCollector;
 import org.eclipse.rdf4j.sail.memory.MemoryStore;
-import it.unibz.inf.ontop.quest.ResultSetInfo;
-import it.unibz.inf.ontop.quest.ResultSetInfoTupleUtil;
-import it.unibz.inf.ontop.sesame.SesameVirtualRepo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -128,7 +123,7 @@ public abstract class QuestDatatypeParent extends TestCase {
 		if ((parameterFileURL != null) && (!parameterFileURL.isEmpty()))
 				configBuilder.propertyFile(parameterFileURL);
 
-		SesameVirtualRepo repo = new SesameVirtualRepo(getName(), configBuilder.build());
+		OntopVirtualRepository repo = new OntopVirtualRepository(getName(), configBuilder.build());
 		repo.initialize();
 		return repo;
 	}

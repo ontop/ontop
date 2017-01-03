@@ -39,7 +39,7 @@ import it.unibz.inf.ontop.model.OBDADataSource;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.model.impl.RDBMSourceParameterConstants;
 import it.unibz.inf.ontop.owlrefplatform.injection.QuestCorePreferences;
-import it.unibz.inf.ontop.sesame.SesameVirtualRepo;
+import it.unibz.inf.ontop.rdf4j.repository.OntopVirtualRepository;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -273,7 +273,7 @@ public class RDB2RDFTest {
 		else {
 			configBuilder.bootstrapMapping(getMemOBDADataSource(), BASE_IRI);
 		}
-		SesameVirtualRepo repo = new SesameVirtualRepo(name, configBuilder.build());
+		OntopVirtualRepository repo = new OntopVirtualRepository(name, configBuilder.build());
 		repo.initialize();
 		return repo;
 	}

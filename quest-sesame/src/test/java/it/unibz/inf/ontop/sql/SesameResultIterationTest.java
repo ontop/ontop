@@ -12,8 +12,8 @@ import java.sql.SQLException;
 import java.util.Properties;
 import java.util.Scanner;
 
-import it.unibz.inf.ontop.sesame.RepositoryConnection;
-import it.unibz.inf.ontop.sesame.SesameVirtualRepo;
+import it.unibz.inf.ontop.rdf4j.repository.OntopRepositoryConnection;
+import it.unibz.inf.ontop.rdf4j.repository.OntopVirtualRepository;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -25,7 +25,7 @@ import org.eclipse.rdf4j.query.TupleQueryResult;
 
 /**
  * Tests that user-applied constraints can be provided through
- * sesameWrapper.SesameVirtualRepo
+ * sesameWrapper.OntopVirtualRepository
  * with manually instantiated metadata.
  * <p>
  * This is quite similar to the setting in the optique platform
@@ -58,7 +58,7 @@ public class SesameResultIterationTest {
     static String jdbcUrl = "jdbc:h2:mem:countries_iteration_test";
 
     private Connection sqlConnection;
-    private RepositoryConnection conn;
+    private OntopRepositoryConnection conn;
 
 
     @Before
@@ -95,7 +95,7 @@ public class SesameResultIterationTest {
                 .properties(p)
                 .build();
 
-        SesameVirtualRepo repo = new SesameVirtualRepo("", configuration);
+        OntopVirtualRepository repo = new OntopVirtualRepository("", configuration);
         repo.initialize();
         /*
 		 * Prepare the data connection for querying.
