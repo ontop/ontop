@@ -41,8 +41,8 @@ public class SesameMaterializer {
 			 assertions = materializer.getAssertionIterator();
 		}
 		
-		public SesameStatementIterator getIterator() {
-			return new SesameStatementIterator(assertions);
+		public RDF4JStatementIterator getIterator() {
+			return new RDF4JStatementIterator(assertions);
 		}
 		
 		public void disconnect() {

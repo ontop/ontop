@@ -34,7 +34,7 @@ import it.unibz.inf.ontop.owlrefplatform.core.ExecutableQuery;
 import it.unibz.inf.ontop.owlrefplatform.core.IQuestStatement;
 import it.unibz.inf.ontop.owlrefplatform.core.SQLExecutableQuery;
 import it.unibz.inf.ontop.owlrefplatform.core.queryevaluation.SPARQLQueryUtility;
-import it.unibz.inf.ontop.rdf4j.SesameRDFIterator;
+import it.unibz.inf.ontop.rdf4j.RDF4JRDFIterator;
 import org.eclipse.rdf4j.query.parser.ParsedQuery;
 import org.eclipse.rdf4j.rio.ParserConfig;
 import org.eclipse.rdf4j.rio.RDFFormat;
@@ -167,7 +167,7 @@ public class QuestOWLStatement implements IQuestOWLStatement {
 			boolean autoCommit = conn.getAutoCommit();
 			conn.setAutoCommit(false);
 
-			SesameRDFIterator rdfHandler = new SesameRDFIterator();
+			RDF4JRDFIterator rdfHandler = new RDF4JRDFIterator();
 			rdfParser.setRDFHandler(rdfHandler);
 
 			BufferedReader reader = new BufferedReader(new FileReader(owlFile));
@@ -227,14 +227,14 @@ public class QuestOWLStatement implements IQuestOWLStatement {
 	}
 
 	private class Process implements Runnable {
-		private SesameRDFIterator iterator;
+		private RDF4JRDFIterator iterator;
 		private IQuestStatement questStmt;
 
 		int insertCount = -1;
 		private int commitsize;
 		private int batchsize;
 
-		public Process(SesameRDFIterator iterator, IQuestStatement qstm, int commitsize, int batchsize) throws OBDAException {
+		public Process(RDF4JRDFIterator iterator, IQuestStatement qstm, int commitsize, int batchsize) throws OBDAException {
 			this.iterator = iterator;
 			this.questStmt = qstm;
 			this.commitsize = commitsize;

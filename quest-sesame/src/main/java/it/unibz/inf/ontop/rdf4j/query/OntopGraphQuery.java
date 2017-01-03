@@ -31,7 +31,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import it.unibz.inf.ontop.rdf4j.SesameHelper;
+import it.unibz.inf.ontop.rdf4j.RDF4JHelper;
 import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.query.GraphQuery;
 import org.eclipse.rdf4j.query.GraphQueryResult;
@@ -58,7 +58,7 @@ public class OntopGraphQuery extends AbstractOntopQuery implements GraphQuery {
 
 	private Statement createStatement(Assertion assertion) {
 
-		Statement stm = SesameHelper.createStatement(assertion);
+		Statement stm = RDF4JHelper.createStatement(assertion);
 		if (stm.getSubject()!=null && stm.getPredicate()!=null && stm.getObject()!=null)
 			return stm;
 		else 

@@ -26,7 +26,7 @@ import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
 
 import it.unibz.inf.ontop.injection.QuestConfiguration;
-import it.unibz.inf.ontop.rdf4j.SesameStatementIterator;
+import it.unibz.inf.ontop.rdf4j.RDF4JStatementIterator;
 import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.rio.RDFWriter;
 import org.eclipse.rdf4j.rio.n3.N3Writer;
@@ -63,7 +63,7 @@ public class ABoxSesameMaterializerExample {
 		/*
 		 * Obtain the triples iterator
 		 */
-		SesameStatementIterator triplesIter = materializer.getIterator();
+		RDF4JStatementIterator triplesIter = materializer.getIterator();
 		
 		/*
 		 * Print the triples into an external file.

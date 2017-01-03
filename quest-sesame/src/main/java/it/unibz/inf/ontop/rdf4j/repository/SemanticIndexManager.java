@@ -28,7 +28,7 @@ import it.unibz.inf.ontop.owlrefplatform.core.abox.RDBMSSIRepositoryManager;
 import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWL;
-import it.unibz.inf.ontop.rdf4j.SesameRDFIterator;
+import it.unibz.inf.ontop.rdf4j.RDF4JRDFIterator;
 import org.eclipse.rdf4j.rio.RDFHandlerException;
 import org.eclipse.rdf4j.rio.RDFParseException;
 import org.eclipse.rdf4j.rio.turtle.TurtleParser;
@@ -123,7 +123,7 @@ public class SemanticIndexManager {
 		final TurtleParser parser = new TurtleParser();
 		// NTriplesParser parser = new NTriplesParser();
 
-		final SesameRDFIterator aBoxIter = new SesameRDFIterator();
+		final RDF4JRDFIterator aBoxIter = new RDF4JRDFIterator();
 		
 		parser.setRDFHandler(aBoxIter);
 

@@ -32,11 +32,10 @@ import org.eclipse.rdf4j.model.Statement;
  * each data source.
  * 
  */
-public class SesameStatementIterator implements Iterator<Statement> {
+public class RDF4JStatementIterator implements Iterator<Statement> {
 	private final Iterator<Assertion> iterator;	
-	
 
-	public SesameStatementIterator(Iterator<Assertion> it) {
+	public RDF4JStatementIterator(Iterator<Assertion> it) {
 		this.iterator = it;
 	}
 
@@ -46,13 +45,8 @@ public class SesameStatementIterator implements Iterator<Statement> {
 
 	public Statement next() {
 		Assertion assertion = iterator.next();
-		Statement individual = SesameHelper.createStatement(assertion);
+		Statement individual = RDF4JHelper.createStatement(assertion);
 		return individual;
 	}
 
-	public void remove() {
-		throw new UnsupportedOperationException("This iterator is read-only");
-	}
-	
-	
 }

@@ -430,7 +430,7 @@ public class SparqlAlgebraToDatalogTranslator {
             Term oTerm = (o == null) ? getTermForVariable(triple.getObjectVar(), variables) : getTermForLiteralOrIri(o);
 			atom = ofac.getTripleAtom(sTerm, pTerm, oTerm);
 		}
-		else if (p instanceof URI) {
+		else if (p instanceof IRI) {
 			if (p.equals(RDF.TYPE)) {
 				if (o == null) {
 					// term rdf:type variable .
@@ -440,7 +440,7 @@ public class SparqlAlgebraToDatalogTranslator {
 				}
 				else if (o instanceof URI) {
 					// term rdf:type uri .
-					Predicate.COL_TYPE type = dtfac.getDatatype((URI)o);
+					Predicate.COL_TYPE type = dtfac.getDatatype((IRI)o);
 					if (type != null) // datatype
 						atom = ofac.getFunction(dtfac.getTypePredicate(type), sTerm);
 					else // class

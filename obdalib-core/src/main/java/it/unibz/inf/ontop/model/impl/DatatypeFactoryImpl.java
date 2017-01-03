@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import it.unibz.inf.ontop.model.DatatypePredicate;
-import org.eclipse.rdf4j.model.URI;
+import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.ValueFactory;
 import org.eclipse.rdf4j.model.impl.ValueFactoryImpl;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
@@ -36,7 +36,7 @@ public class DatatypeFactoryImpl implements DatatypeFactory {
 	private final DatatypePredicate XSD_DATE, XSD_TIME, XSD_YEAR;
 	
 	private final Map<String, COL_TYPE> mapURItoCOLTYPE = new HashMap<>();
-	private final Map<COL_TYPE, URI> mapCOLTYPEtoURI = new HashMap<>();
+	private final Map<COL_TYPE, IRI> mapCOLTYPEtoURI = new HashMap<>();
 	private final Map<COL_TYPE, DatatypePredicate> mapCOLTYPEtoPredicate = new HashMap<>();
 	private final List<Predicate> predicateList = new LinkedList<>();
 	
@@ -48,7 +48,7 @@ public class DatatypeFactoryImpl implements DatatypeFactory {
 		XSD_STRING = registerType(XMLSchema.STRING, COL_TYPE.STRING);  // 7 "http://www.w3.org/2001/XMLSchema#string"
 		XSD_DATETIME = registerType(XMLSchema.DATETIME, COL_TYPE.DATETIME); // 8 "http://www.w3.org/2001/XMLSchema#dateTime"
 		ValueFactory factory = new ValueFactoryImpl();
-		URI datetimestamp = factory.createURI("http://www.w3.org/2001/XMLSchema#dateTimeStamp"); // value datetime stamp is missing in XMLSchema
+		IRI datetimestamp = factory.createIRI("http://www.w3.org/2001/XMLSchema#dateTimeStamp"); // value datetime stamp is missing in XMLSchema
 		XSD_DATETIME_STAMP = registerType(datetimestamp, COL_TYPE.DATETIME_STAMP);
 		XSD_BOOLEAN = registerType(XMLSchema.BOOLEAN, COL_TYPE.BOOLEAN);  // 9 "http://www.w3.org/2001/XMLSchema#boolean"
 		XSD_DATE = registerType(XMLSchema.DATE, COL_TYPE.DATE);  // 10 "http://www.w3.org/2001/XMLSchema#date";
@@ -68,7 +68,7 @@ public class DatatypeFactoryImpl implements DatatypeFactory {
 		mapCOLTYPEtoPredicate.put(COL_TYPE.LITERAL_LANG, RDFS_LITERAL_LANG);
 	}
 	
-	private DatatypePredicate registerType(org.eclipse.rdf4j.model.URI uri, COL_TYPE type) {
+	private DatatypePredicate registerType(org.eclipse.rdf4j.model.IRI uri, COL_TYPE type) {
 		String sURI = uri.toString();
 		mapURItoCOLTYPE.put(sURI, type);  
 		mapCOLTYPEtoURI.put(type, uri); 
@@ -84,12 +84,12 @@ public class DatatypeFactoryImpl implements DatatypeFactory {
 	}
 	
 	@Override
-	public COL_TYPE getDatatype(URI uri) {
+	public COL_TYPE getDatatype(IRI uri) {
 		return mapURItoCOLTYPE.get(uri.stringValue());
 	}
 	
 	@Override
-	public URI getDatatypeURI(COL_TYPE type) {
+	public IRI getDatatypeURI(COL_TYPE type) {
 		return mapCOLTYPEtoURI.get(type);
 	}
 	

@@ -24,7 +24,7 @@ import it.unibz.inf.ontop.model.Constant;
 import it.unibz.inf.ontop.model.ObjectConstant;
 import it.unibz.inf.ontop.model.TupleResultSet;
 import it.unibz.inf.ontop.model.ValueConstant;
-import it.unibz.inf.ontop.rdf4j.SesameHelper;
+import it.unibz.inf.ontop.rdf4j.RDF4JHelper;
 import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.query.Binding;
 import org.eclipse.rdf4j.query.BindingSet;
@@ -43,7 +43,7 @@ public class OntopBindingSet implements BindingSet {
     private final Set<String> bindingnames;
 //	private List<String> signature;
 
-    private final SesameHelper helper = new SesameHelper();
+    private final RDF4JHelper helper = new RDF4JHelper();
 
     public OntopBindingSet(TupleResultSet set, Set<String> bindingnames) {
         this.bindingnames = bindingnames;
@@ -80,10 +80,10 @@ public class OntopBindingSet implements BindingSet {
                 }
                 else {
                     if (c instanceof ValueConstant) {
-                        value = SesameHelper.getLiteral((ValueConstant)c);
+                        value = RDF4JHelper.getLiteral((ValueConstant)c);
                     }
                     else {
-                        value = SesameHelper.getResource((ObjectConstant)c);
+                        value = RDF4JHelper.getResource((ObjectConstant)c);
                     }
                 }
             }

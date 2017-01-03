@@ -31,6 +31,15 @@ import it.unibz.inf.ontop.ontology.Assertion;
 import it.unibz.inf.ontop.ontology.AssertionFactory;
 import it.unibz.inf.ontop.ontology.InconsistentOntologyException;
 import it.unibz.inf.ontop.ontology.impl.AssertionFactoryImpl;
+import org.eclipse.rdf4j.model.BNode;
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.Literal;
+import org.eclipse.rdf4j.model.Resource;
+import org.eclipse.rdf4j.model.Statement;
+import org.eclipse.rdf4j.model.URI;
+import org.eclipse.rdf4j.model.Value;
+import org.eclipse.rdf4j.rio.RDFHandlerException;
+import org.eclipse.rdf4j.rio.helpers.AbstractRDFHandler;
 
 import java.util.Iterator;
 import java.util.NoSuchElementException;
@@ -38,16 +47,8 @@ import java.util.Optional;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
-import org.eclipse.rdf4j.model.BNode;
-import org.eclipse.rdf4j.model.Literal;
-import org.eclipse.rdf4j.model.Resource;
-import org.eclipse.rdf4j.model.Statement;
-import org.eclipse.rdf4j.model.URI;
-import org.eclipse.rdf4j.model.Value;
-import org.eclipse.rdf4j.rio.RDFHandlerException;
-import org.eclipse.rdf4j.rio.helpers.RDFHandlerBase;
-
-public class SesameRDFIterator extends RDFHandlerBase implements Iterator<Assertion> {
+// TODO(xiao): find a proper name (the original name was SesameRDFIterator)
+public class RDF4JRDFIterator extends AbstractRDFHandler implements Iterator<Assertion> {
 	
 	private final OBDADataFactory obdafac = OBDADataFactoryImpl.getInstance();
 	private final AssertionFactory ofac = AssertionFactoryImpl.getInstance();
@@ -60,11 +61,11 @@ public class SesameRDFIterator extends RDFHandlerBase implements Iterator<Assert
 	private boolean endRDF = false;
 	private boolean fromIterator = false;
 
-	public SesameRDFIterator() {
+	public RDF4JRDFIterator() {
 		buffer = new ArrayBlockingQueue<Statement>(size, true);
 	}
 
-	public SesameRDFIterator(Iterator<Statement> it) {
+	public RDF4JRDFIterator(Iterator<Statement> it) {
 		this.iterator = it;
 		this.fromIterator = true;
 	}
@@ -135,7 +136,7 @@ public class SesameRDFIterator extends RDFHandlerBase implements Iterator<Assert
 		Resource currSubject = st.getSubject();
 		
 		ObjectConstant c = null;
-		if (currSubject instanceof URI) {
+		if (currSubject instanceof IRI) {
 			c = obdafac.getConstantURI(currSubject.stringValue());
 		} else if (currSubject instanceof BNode) {
 			c = obdafac.getConstantBNode(currSubject.stringValue());
@@ -143,7 +144,7 @@ public class SesameRDFIterator extends RDFHandlerBase implements Iterator<Assert
 			throw new RuntimeException("Unsupported subject found in triple: "	+ st.toString() + " (Required URI or BNode)");
 		}
 
-		URI currPredicate = st.getPredicate();
+		IRI currPredicate = st.getPredicate();
 		Value currObject = st.getObject();
 
 		Predicate currentPredicate = null;
@@ -171,7 +172,7 @@ public class SesameRDFIterator extends RDFHandlerBase implements Iterator<Assert
 				assertion = ofac.createClassAssertion(currentPredicate.getName(), c);
 			} 
 			else if (currentPredicate.getArity() == 2) {
-				if (currObject instanceof URI) {
+				if (currObject instanceof IRI) {
 					ObjectConstant c2 = obdafac.getConstantURI(currObject.stringValue());
 					assertion = ofac.createObjectPropertyAssertion(currentPredicate.getName(), c, c2);
 				} 
@@ -184,7 +185,7 @@ public class SesameRDFIterator extends RDFHandlerBase implements Iterator<Assert
 					Optional<String> lang = l.getLanguage();
 					ValueConstant c2;
 					if (!lang.isPresent()) {
-						URI datatype = l.getDatatype();
+						IRI datatype = l.getDatatype();
 						Predicate.COL_TYPE type; 
 						
 						if (datatype == null) {

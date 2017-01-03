@@ -25,7 +25,7 @@ import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestDBConnection;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestDBStatement;
 import it.unibz.inf.ontop.owlrefplatform.core.SIQuestDBStatement;
-import it.unibz.inf.ontop.rdf4j.SesameRDFIterator;
+import it.unibz.inf.ontop.rdf4j.RDF4JRDFIterator;
 import it.unibz.inf.ontop.rdf4j.query.OntopBooleanQuery;
 import it.unibz.inf.ontop.rdf4j.query.OntopGraphQuery;
 import it.unibz.inf.ontop.rdf4j.query.OntopTupleQuery;
@@ -266,7 +266,7 @@ public class OntopRepositoryConnection implements org.eclipse.rdf4j.repository.R
         boolean autoCommit = isAutoCommit();
         begin();        
         
-        SesameRDFIterator rdfHandler = new SesameRDFIterator();
+        RDF4JRDFIterator rdfHandler = new RDF4JRDFIterator();
         rdfParser.setRDFHandler(rdfHandler);
         
         
@@ -336,9 +336,9 @@ throw new RuntimeException(e);
           }
           
           private class Process implements Runnable{
-        	  private SesameRDFIterator iterator;
+        	  private RDF4JRDFIterator iterator;
         	  private QuestDBStatement questStmt;
-        	  public Process(SesameRDFIterator iterator, QuestDBStatement qstm) throws OBDAException
+        	  public Process(RDF4JRDFIterator iterator, QuestDBStatement qstm) throws OBDAException
         	  {
         		  this.iterator = iterator;
         		  this.questStmt = qstm;
@@ -371,7 +371,7 @@ throw new RuntimeException(e);
     	boolean currCommit = autoCommit;
     	autoCommit = false;
  
-    	SesameRDFIterator it = new SesameRDFIterator(stmIterator);
+    	RDF4JRDFIterator it = new RDF4JRDFIterator(stmIterator);
     	
     	//insert data   useFile=false, batch=0
 		SIQuestDBStatement questStm = null;
