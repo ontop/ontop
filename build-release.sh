@@ -17,8 +17,8 @@
 
 if type -p java; then
     JAVA=java
-elif [[ -n "$JAVA_HOME" ]] && [[ -x "$JAVA_HOME/bin/java" ]]; then
-    JAVA="$JAVA_HOME/bin/java"
+elif [[ -n "${JAVA_HOME}" ]] && [[ -x "${JAVA_HOME}/bin/java" ]]; then
+    JAVA="${JAVA_HOME}/bin/java"
 else
     echo "ERROR: Java is not installed!"
     exit 1
@@ -101,7 +101,7 @@ echo " Cleaning                                "
 echo "-----------------------------------------"
 echo ""
 
-mvn clean
+mvn clean -q
 
 echo ""
 echo "========================================="
@@ -110,7 +110,7 @@ echo "-----------------------------------------"
 echo ""
 
 
-mvn install -DskipTests || exit 1
+mvn install -DskipTests -q || exit 1
 
 VERSION=$(cat ${BUILD_ROOT}/obdalib-core/target/classes/version.properties | sed 's/version=\(.*\)/\1/')
 
@@ -142,7 +142,7 @@ mv ${PROTEGE_COPY_FILENAME}.zip ontop-protege-bundle-${VERSION}.zip
 rm -fr ${PROTEGE_MAIN_FOLDER_NAME}
 cd ${BUILD_ROOT}/distribution
 
-# Packing the sesame distribution
+# Packing the rdf4j distribution
 #
 echo ""
 echo "========================================="
@@ -159,7 +159,7 @@ cd ${BUILD_ROOT}/distribution/ontop-webapps
 zip -r ontop-webapps-${VERSION}.zip *.war
 cd ${BUILD_ROOT}/distribution
 
-# Packaging the sesame jetty distribution
+# Packaging the rdf4j jetty distribution
 #
 echo ""
 echo "========================================="
@@ -181,7 +181,7 @@ zip ontop-jetty-bundle-${VERSION}.zip ${JETTY_FOLDER}/webapps/* || exit 1
 rm -fr ${JETTY_FOLDER}
 cd ${BUILD_ROOT}/distribution
 
-# Packaging the sesame jetty distribution
+# Packaging the tomcat distribution
 #
 echo ""
 echo "========================================="
@@ -193,14 +193,13 @@ rm -fr ${ONTOP_TOMCAT_DIST}
 mkdir ${ONTOP_TOMCAT_DIST}
 cp ${ONTOP_DEP_HOME}/${TOMCAT_FILENAME}.zip ${ONTOP_TOMCAT_DIST}/ontop-tomcat-bundle-${VERSION}.zip || exit 1
 
-# JETTY_FOLDER=${ONTOP_TOMCAT_DIST}
 cd ${ONTOP_TOMCAT_DIST}
-mkdir -p ${ONTOP_TOMCAT_DIST}/webapps
-cp ${BUILD_ROOT}/distribution/ontop-webapps/*.war ${ONTOP_TOMCAT_DIST}/webapps
+mkdir -p ${TOMCAT_FILENAME}/webapps
+cp ${BUILD_ROOT}/distribution/ontop-webapps/*.war ${TOMCAT_FILENAME}/webapps
 
-zip ontop-tomcat-bundle-${VERSION}.zip ${ONTOP_TOMCAT_DIST}/webapps/* || exit 1
+zip ontop-tomcat-bundle-${VERSION}.zip ${TOMCAT_FILENAME}/webapps/* || exit 1
 
-rm -fr ${JETTY_FOLDER}
+rm -fr ${TOMCAT_FILENAME}
 cd ${BUILD_ROOT}/distribution
 
 # Packaging the cli distribution

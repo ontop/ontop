@@ -602,11 +602,10 @@
 				<version>2.0.1</version>
 			</dependency>
 
-            <!-- https://mvnrepository.com/artifact/org.eclipse.jetty/jetty-http -->
             <dependency>
-                <groupId>org.eclipse.jetty</groupId>
-                <artifactId>jetty-client</artifactId>
-                <version>${jetty.version}</version>
+                <groupId>org.osgi</groupId>
+                <artifactId>org.osgi.core</artifactId>
+                <version>6.0.0</version>
             </dependency>
         </dependencies>
 	</dependencyManagement>
