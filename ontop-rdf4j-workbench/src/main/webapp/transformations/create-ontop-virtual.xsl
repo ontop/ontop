@@ -89,31 +89,12 @@
 							<xsl:value-of select="$ontop-existential.label" />
 						</th>
 						<td>
-							<input type="radio" id="existential"
-								name="Existential reasoning" size="48" value="true" />
-							<xsl:value-of select="$true.label" />
-							<xsl:value-of select="$false.label" />
+							<input type="checkbox" id="existential"
+								name="Existential reasoning" size="48" value="true"/>
 						</td>
 						<td>
 							<xsl:value-of select="$ontop-exist.label" />
 							<a href="https://babbage.inf.unibz.it/trac/obdapublic/wiki/ObdalibQuestReasoning#QuestReasoning">OntopReasoning</a>.
-						</td>
-					</tr>
-					<tr>
-						<th>
-							<xsl:value-of
-								select="$ontop-rewriting.label" />
-						</th>
-						<td>
-							<select id="rewriting" name="Rewriting technique">
-								<option  value="TreeWitness" selected="selected">
-									TreeWitness
-								</option>
-							</select>
-						</td>
-						<td>
-							<xsl:value-of select="$ontop-rewr.label" />
-							<a href="https://babbage.inf.unibz.it/trac/obdapublic/wiki/ObdalibQuestRewriting">OntopRewriting</a>.
 						</td>
 					</tr>
 					<tr>
