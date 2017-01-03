@@ -74,14 +74,12 @@ PROTEGE_COPY_FILENAME=Protege-5.0.0-platform-independent
 PROTEGE_MAIN_FOLDER_NAME=Protege-5.0.0
 PROTEGE_MAIN_PLUGIN=ontop-protege-plugin
 
-# name of the wars for sesame and workbench WEB-APPs  (these have to be already customized with stylesheets)
-OPENRDF_SESAME_FILENAME=rdf4j-server
-OPENRDF_WORKBENCH_FILENAME=rdf4j-workbench
-ONTOP_SESAME_WEBAPPS=ontop-sesame-webapps
+# location and name for jetty distribution (should be ZIP)
+JETTY_COPY_FILENAME=jetty-distribution-9.4.0.v20161208
+JETTY_INNER_FOLDERNAME=jetty-distribution-9.4.0.v20161208
 
 # folder names of the output
 PROTEGE_DIST=ontop-protege
-QUEST_SESAME_DIST=ontop-rdf4j
 QUEST_JETTY_DIST=ontop-jetty
 ONTOP_DIST=ontop-dist
 
@@ -124,14 +122,14 @@ rm -fr ${BUILD_ROOT}/ontop-protege/dist
 cd ${BUILD_ROOT}/ontop-protege/
 mvn bundle:bundle -DskipTests  || exit 1
 
-rm -fr ${BUILD_ROOT}/quest-distribution/${PROTEGE_DIST}
-mkdir ${BUILD_ROOT}/quest-distribution/${PROTEGE_DIST}
+rm -fr ${BUILD_ROOT}/distribution/${PROTEGE_DIST}
+mkdir ${BUILD_ROOT}/distribution/${PROTEGE_DIST}
 cp target/${PROTEGE_PLUGIN_NAME}-${VERSION}.jar \
-  ${BUILD_ROOT}/quest-distribution/${PROTEGE_DIST}/${PROTEGE_PLUGIN_NAME}-${VERSION}.jar
+  ${BUILD_ROOT}/distribution/${PROTEGE_DIST}/${PROTEGE_PLUGIN_NAME}-${VERSION}.jar
 
-cp ${ONTOP_DEP_HOME}/${PROTEGE_COPY_FILENAME}.zip ${BUILD_ROOT}/quest-distribution/${PROTEGE_DIST}/  || exit 1
+cp ${ONTOP_DEP_HOME}/${PROTEGE_COPY_FILENAME}.zip ${BUILD_ROOT}/distribution/${PROTEGE_DIST}/  || exit 1
 
-cd ${BUILD_ROOT}/quest-distribution/${PROTEGE_DIST}/
+cd ${BUILD_ROOT}/distribution/${PROTEGE_DIST}/
 
 mkdir -p ${PROTEGE_MAIN_FOLDER_NAME}/plugins
 cp ${PROTEGE_PLUGIN_NAME}-${VERSION}.jar ${PROTEGE_MAIN_FOLDER_NAME}/plugins/
@@ -139,22 +137,24 @@ zip ${PROTEGE_COPY_FILENAME}.zip ${PROTEGE_MAIN_FOLDER_NAME}/plugins/*
 mv ${PROTEGE_COPY_FILENAME}.zip ontop-protege-bundle-${VERSION}.zip
 
 rm -fr ${PROTEGE_MAIN_FOLDER_NAME}
-cd ${BUILD_ROOT}/quest-distribution
+cd ${BUILD_ROOT}/distribution
 
 # Packing the sesame distribution
 #
 echo ""
 echo "========================================="
-echo " Building Sesame distribution package    "
+echo " Building RDF4J distribution package    "
 echo "-----------------------------------------"
 echo ""
 
-mkdir -p ${BUILD_ROOT}/quest-distribution/ontop-webapps
+mkdir -p ${BUILD_ROOT}/distribution/ontop-webapps
 
-cp ${BUILD_ROOT}/ontop-rdf4j-server/target/rdf4j-server.war ${BUILD_ROOT}/quest-distribution/ontop-webapps
-cp ${BUILD_ROOT}/ontop-rdf4j-workbench/target/rdf4j-workbench.war ${BUILD_ROOT}/quest-distribution/ontop-webapps
+cp ${BUILD_ROOT}/rdf4j-webapps/rdf4j-server/target/rdf4j-server.war ${BUILD_ROOT}/distribution/ontop-webapps
+cp ${BUILD_ROOT}/rdf4j-webapps/rdf4j-workbench/target/rdf4j-workbench.war ${BUILD_ROOT}/distribution/ontop-webapps
 
-cd ${BUILD_ROOT}/quest-distribution
+cd ${BUILD_ROOT}/distribution/ontop-webapps
+zip -r ontop-webapps-${VERSION}.zip *.war
+cd ${BUILD_ROOT}/distribution
 
 # Packaging the sesame jetty distribution
 #
@@ -162,6 +162,8 @@ echo ""
 echo "========================================="
 echo " Building  Jetty distribution package    "
 echo "-----------------------------------------"
+echo ""
+
 rm -fr ${QUEST_JETTY_DIST}
 mkdir ${QUEST_JETTY_DIST}
 cp ${ONTOP_DEP_HOME}/${JETTY_COPY_FILENAME}.zip ${QUEST_JETTY_DIST}/ontop-jetty-bundle-${VERSION}.zip || exit 1
@@ -169,24 +171,26 @@ cp ${ONTOP_DEP_HOME}/${JETTY_COPY_FILENAME}.zip ${QUEST_JETTY_DIST}/ontop-jetty-
 JETTY_FOLDER=${JETTY_INNER_FOLDERNAME}
 cd ${QUEST_JETTY_DIST}
 mkdir -p ${JETTY_INNER_FOLDERNAME}/webapps
-cp ${BUILD_ROOT}/quest-distribution/ontop-webapps/*.war ${JETTY_FOLDER}/webapps
+cp ${BUILD_ROOT}/distribution/ontop-webapps/*.war ${JETTY_FOLDER}/webapps
 
 zip ontop-jetty-bundle-${VERSION}.zip ${JETTY_FOLDER}/webapps/* || exit 1
 
 rm -fr ${JETTY_FOLDER}
-cd ${BUILD_ROOT}/quest-distribution
+cd ${BUILD_ROOT}/distribution
 
-# Packaging the OWL-API distribution
+# Packaging the cli distribution
 #
 echo ""
 echo "========================================="
 echo " Building Ontop distribution package     "
 echo "-----------------------------------------"
+echo ""
+
 mvn assembly:assembly
 rm -fr ${ONTOP_DIST}
 mkdir ${ONTOP_DIST}
 echo "[INFO] Copying files..."
-cp target/ontop-distribution-${VERSION}.zip ${ONTOP_DIST}/ontop-dist
+cp target/ontop-distribution-${VERSION}.zip ${ONTOP_DIST}
 
 echo ""
 echo "========================================="

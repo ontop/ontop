@@ -62,9 +62,8 @@
 		<module>obdalib-owlapi3</module>
 		<module>obdalib-r2rml</module>
 		<module>quest-owlapi3</module>
-		<module>quest-distribution</module>
-        <module>ontop-rdf4j-workbench</module>
-        <module>ontop-rdf4j-server</module>
+		<module>distribution</module>
+        <module>rdf4j-webapps</module>
         <module>quest-sparql-compliance</module>
 		<module>quest-sesame</module>
 		<module>quest-db</module>
