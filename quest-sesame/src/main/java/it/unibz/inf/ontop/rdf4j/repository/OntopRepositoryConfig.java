@@ -59,7 +59,10 @@ public class OntopRepositoryConfig extends AbstractRepositoryImplConfig {
     public final static IRI REWRITING;
 
     public final static String VIRTUAL_QUEST_TYPE = "ontop-virtual";
+
+    @Deprecated
     public final static String REMOTE_QUEST_TYPE = "ontop-remote";
+
     public final static String IN_MEMORY_QUEST_TYPE = "ontop-inmemory";
     
     static {

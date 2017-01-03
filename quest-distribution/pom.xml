@@ -9,7 +9,11 @@
 	<artifactId>ontop-distribution</artifactId>
 	<name>ontop-distribution</name>
 	<description>Builds the distribution files for quest and the core apis.</description>
-	
+
+    <properties>
+        <assembly.appendAssemblyId>false</assembly.appendAssemblyId>
+    </properties>
+
 	<dependencies>
 		<dependency>
 			<groupId>${project.groupId}</groupId>
@@ -46,7 +50,6 @@
 			<artifactId>ontop-cli</artifactId>
 			<version>${project.version}</version>
 		</dependency>
-
 	</dependencies>
 	
 	<build>
@@ -67,9 +70,7 @@
 				<version>2.2.1</version>
 				<configuration>
 					<descriptors>
-						<descriptor>quest-bin.xml</descriptor>
-						<descriptor>quest-sesame-bin.xml</descriptor>
-						<descriptor>dependencies.xml</descriptor>
+						<descriptor>src/assembly/ontop-distribution-bin.xml</descriptor>
 					</descriptors>
 				</configuration>
 			</plugin>

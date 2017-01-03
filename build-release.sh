@@ -52,7 +52,7 @@ echo ""
 # location for the build ROOT folder (i.e. the directory of this script)
 BUILD_ROOT="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-# location for the build dependencies home 
+# location for the build dependencies home
 ONTOP_DEP_HOME=${BUILD_ROOT}/ontop-build-dependencies
 
 
@@ -74,26 +74,19 @@ PROTEGE_COPY_FILENAME=Protege-5.0.0-platform-independent
 PROTEGE_MAIN_FOLDER_NAME=Protege-5.0.0
 PROTEGE_MAIN_PLUGIN=ontop-protege-plugin
 
-# location and name for jetty distribution (should be ZIP)
-JETTY_COPY_FILENAME=jetty-distribution-8.1.9
-JETTY_INNER_FOLDERNAME=jetty-distribution-8.1.9
-
 # name of the wars for sesame and workbench WEB-APPs  (these have to be already customized with stylesheets)
-OPENRDF_SESAME_FILENAME=openrdf-sesame
-OPENRDF_WORKBENCH_FILENAME=openrdf-workbench
+OPENRDF_SESAME_FILENAME=rdf4j-server
+OPENRDF_WORKBENCH_FILENAME=rdf4j-workbench
 ONTOP_SESAME_WEBAPPS=ontop-sesame-webapps
 
 # folder names of the output
 PROTEGE_DIST=ontop-protege
-QUEST_SESAME_DIST=ontop-sesame
+QUEST_SESAME_DIST=ontop-rdf4j
 QUEST_JETTY_DIST=ontop-jetty
 ONTOP_DIST=ontop-dist
 
 # jar name of the pretege plugin
 PROTEGE_PLUGIN_NAME=it.unibz.inf.ontop.protege
-
-export VERSION=3.0
-export REVISION=0-SNAPSHOT
 
 #
 # Start building the packages
@@ -156,25 +149,11 @@ echo " Building Sesame distribution package    "
 echo "-----------------------------------------"
 echo ""
 
-rm -fr ${QUEST_SESAME_DIST}
-mkdir -p ${QUEST_SESAME_DIST}/WEB-INF/lib
-mvn assembly:assembly -DskipTests  || exit 1
-cp target/ontop-distribution-${VERSION}-sesame-bin.jar ${QUEST_SESAME_DIST}/WEB-INF/lib/ontop-distribution-${VERSION}.jar || exit 1
-unzip -q -d ${QUEST_SESAME_DIST}/WEB-INF/lib/ target/ontop-distribution-${VERSION}-dependencies.zip || exit 1
-cp ${ONTOP_DEP_HOME}/${OPENRDF_SESAME_FILENAME}.war ${QUEST_SESAME_DIST}/
-cp ${ONTOP_DEP_HOME}/${OPENRDF_WORKBENCH_FILENAME}.war ${QUEST_SESAME_DIST}/
+mkdir -p ${BUILD_ROOT}/quest-distribution/ontop-webapps
 
-cd ${QUEST_SESAME_DIST}
-echo ""
-echo "[INFO] Adding QuestSesame and dependency JARs to openrdf-sesame.war"
-jar -uf ${OPENRDF_SESAME_FILENAME}.war WEB-INF/lib/* || exit 1
+cp ${BUILD_ROOT}/ontop-rdf4j-server/target/rdf4j-server.war ${BUILD_ROOT}/quest-distribution/ontop-webapps
+cp ${BUILD_ROOT}/ontop-rdf4j-workbench/target/rdf4j-workbench.war ${BUILD_ROOT}/quest-distribution/ontop-webapps
 
-echo "[INFO] Adding QuestSesame and dependency JARs to openrdf-workbench.war"
-jar -uf ${OPENRDF_WORKBENCH_FILENAME}.war WEB-INF/lib/* || exit 1
-
-zip ${ONTOP_SESAME_WEBAPPS}-${VERSION}.zip ${OPENRDF_SESAME_FILENAME}.war ${OPENRDF_WORKBENCH_FILENAME}.war || exit 1
-
-rm -fr WEB-INF
 cd ${BUILD_ROOT}/quest-distribution
 
 # Packaging the sesame jetty distribution
@@ -190,8 +169,7 @@ cp ${ONTOP_DEP_HOME}/${JETTY_COPY_FILENAME}.zip ${QUEST_JETTY_DIST}/ontop-jetty-
 JETTY_FOLDER=${JETTY_INNER_FOLDERNAME}
 cd ${QUEST_JETTY_DIST}
 mkdir -p ${JETTY_INNER_FOLDERNAME}/webapps
-cp ${BUILD_ROOT}/quest-distribution/${QUEST_SESAME_DIST}/${OPENRDF_SESAME_FILENAME}.war ${JETTY_FOLDER}/webapps
-cp ${BUILD_ROOT}/quest-distribution/${QUEST_SESAME_DIST}/${OPENRDF_WORKBENCH_FILENAME}.war ${JETTY_FOLDER}/webapps
+cp ${BUILD_ROOT}/quest-distribution/ontop-webapps/*.war ${JETTY_FOLDER}/webapps
 
 zip ontop-jetty-bundle-${VERSION}.zip ${JETTY_FOLDER}/webapps/* || exit 1
 
@@ -204,10 +182,11 @@ echo ""
 echo "========================================="
 echo " Building Ontop distribution package     "
 echo "-----------------------------------------"
+mvn assembly:assembly
 rm -fr ${ONTOP_DIST}
 mkdir ${ONTOP_DIST}
 echo "[INFO] Copying files..."
-cp target/ontop-distribution-${VERSION}-bin.zip ${ONTOP_DIST}/ontop-distribution-${VERSION}.zip
+cp target/ontop-distribution-${VERSION}.zip ${ONTOP_DIST}/ontop-dist
 
 echo ""
 echo "========================================="
