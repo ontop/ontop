@@ -17,33 +17,4 @@
         <module>rdf4j-server</module>
     </modules>
 
-    <dependencies>
-        <dependency>
-            <groupId>it.unibz.inf.ontop</groupId>
-            <artifactId>ontop-quest-rdf4j</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-
-        <!-- for debugging -->
-        <dependency>
-            <groupId>javax.servlet</groupId>
-            <artifactId>servlet-api</artifactId>
-            <version>2.5</version>
-            <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.eclipse.rdf4j</groupId>
-            <artifactId>rdf4j-runtime</artifactId>
-            <version>${rdf4j.version}</version>
-            <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.eclipse.rdf4j</groupId>
-            <artifactId>rdf4j-config</artifactId>
-            <version>${rdf4j.version}</version>
-            <scope>provided</scope>
-        </dependency>
-    </dependencies>
 </project>

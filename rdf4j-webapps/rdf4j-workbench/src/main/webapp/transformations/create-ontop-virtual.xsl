@@ -58,11 +58,10 @@
 						<td>
 							<input type="text" id="owlfile"
 								name="owlfile" size="48" value="" />
-						</td>
+                        </td>
 						<td>
 							<xsl:value-of select="$ontop-owlfilecommentvirt.label" />
 							<a href="https://github.com/ontop/ontop/wiki/ObdalibOwlFile">OntopOwl</a>.
-							
 						</td>
 					</tr>
 					<tr>
