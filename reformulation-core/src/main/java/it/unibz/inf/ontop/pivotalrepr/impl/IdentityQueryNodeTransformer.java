@@ -42,11 +42,6 @@ public class IdentityQueryNodeTransformer implements HomogeneousQueryNodeTransfo
     }
 
     @Override
-    public GroupNode transform(GroupNode groupNode) {
-        return groupNode;
-    }
-
-    @Override
     public EmptyNode transform(EmptyNode emptyNode) { return emptyNode; }
 
     @Override
