@@ -7,7 +7,6 @@ import it.unibz.inf.ontop.pivotalrepr.*;
 
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.InjectiveVar2VarSubstitution;
-import it.unibz.inf.ontop.pivotalrepr.*;
 
 import java.util.Optional;
 import java.util.stream.Collectors;

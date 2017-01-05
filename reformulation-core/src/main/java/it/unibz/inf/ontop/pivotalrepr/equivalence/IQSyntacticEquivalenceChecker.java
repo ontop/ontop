@@ -5,7 +5,6 @@ import it.unibz.inf.ontop.pivotalrepr.*;
 
 import java.util.LinkedList;
 import java.util.Queue;
-import java.util.logging.Filter;
 
 /**
  * TODO explain

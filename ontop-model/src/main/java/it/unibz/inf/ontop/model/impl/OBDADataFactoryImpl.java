@@ -20,18 +20,14 @@ package it.unibz.inf.ontop.model.impl;
  * #L%
  */
 
-import com.google.common.base.Preconditions;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.Predicate.COL_TYPE;
 import it.unibz.inf.ontop.model.LanguageTag;
 import it.unibz.inf.ontop.model.TermType;
-import it.unibz.inf.ontop.utils.IDGenerator;
-import it.unibz.inf.ontop.utils.JdbcTypeMapper;
 import org.openrdf.model.ValueFactory;
 import org.openrdf.model.impl.ValueFactoryImpl;
 
 
-import java.net.URI;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -48,7 +44,6 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	private static OBDADataFactory instance = null;
 	private static ValueFactory irifactory = null;
 	private DatatypeFactoryImpl datatypes = null;
-	private final JdbcTypeMapper jdbcTypeMapper =  new JdbcTypeMapper();
 
 	// Only builds these TermTypes once.
 	private final Map<COL_TYPE, TermType> termTypeCache = new ConcurrentHashMap<>();
@@ -80,13 +75,6 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 		}
 		return datatypes;
 	}
-
-	
-	@Override 
-	public JdbcTypeMapper getJdbcTypeMapper() {
-		return jdbcTypeMapper;
-	}
-
 
 	@Deprecated
 	public PredicateImpl getPredicate(String name, int arity) {
@@ -355,11 +343,6 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	}
 
 	@Override
-	public OBDADataSource getDataSource(URI id) {
-		return new DataSourceImpl(id);
-	}
-
-	@Override
 	public CQIE getCQIE(Function head, Function... body) {
 		return new CQIEImpl(head, body);
 	}
@@ -387,11 +370,6 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 		p.appendRule(rules);
 		p.getQueryModifiers().copy(modifiers);
 		return p;
-	}
-
-	@Override
-	public SQLQueryImpl getSQLQuery(String query) {
-		return new SQLQueryImpl(query);
 	}
 
 	@Override
@@ -539,30 +517,6 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	public Expression getFunctionCast(Term term1, Term term2) {
 		// TODO implement cast function
 		return getExpression(ExpressionOperation.QUEST_CAST, term1, term2);
-	}
-	
-	@Override
-	public OBDADataSource getJDBCDataSource(String jdbcurl, String username, 
-			String password, String driverclass) {
-		URI id = URI.create(UUID.randomUUID().toString());
-		return getJDBCDataSource(id.toString(), jdbcurl, username, password, driverclass);
-	}
-
-	@Override
-	public OBDADataSource getJDBCDataSource(String sourceuri, String jdbcurl, 
-			String username, String password, String driverclass) {
-        Preconditions.checkNotNull(sourceuri, "sourceuri is null");
-        Preconditions.checkNotNull(jdbcurl, "jdbcurl is null");
-        Preconditions.checkNotNull(password, "password is null");
-        Preconditions.checkNotNull(username, "username is null");
-        Preconditions.checkNotNull(driverclass, "driverclass is null");
-
-        DataSourceImpl source = new DataSourceImpl(URI.create(sourceuri));
-		source.setParameter(RDBMSourceParameterConstants.DATABASE_URL, jdbcurl);
-		source.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, password);
-		source.setParameter(RDBMSourceParameterConstants.DATABASE_USERNAME, username);
-		source.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, driverclass);
-		return source;
 	}
 
 	

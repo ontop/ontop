@@ -1,7 +1,9 @@
 package it.unibz.inf.ontop.io;
 
 import it.unibz.inf.ontop.injection.OBDAProperties;
+import it.unibz.inf.ontop.model.MappingFactory;
 import it.unibz.inf.ontop.model.OBDADataSource;
+import it.unibz.inf.ontop.model.impl.MappingFactoryImpl;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.model.impl.RDBMSourceParameterConstants;
 
@@ -13,6 +15,7 @@ import java.net.URI;
 public class OBDADataSourceFromConfigExtractor {
 
     private final OBDADataSource dataSource;
+    private static final MappingFactory MAPPING_FACTORY = MappingFactoryImpl.getInstance();
 
     public OBDADataSourceFromConfigExtractor(OBDAProperties properties)
             throws InvalidDataSourceException {
@@ -34,7 +37,7 @@ public class OBDADataSourceFromConfigExtractor {
         String password = extractProperty(OBDAProperties.DB_PASSWORD, properties);
         String driver = extractProperty(OBDAProperties.JDBC_DRIVER, properties);
 
-        OBDADataSource source = OBDADataFactoryImpl.getInstance().getDataSource(URI.create(id));
+        OBDADataSource source = MAPPING_FACTORY.getDataSource(URI.create(id));
         source.setParameter(RDBMSourceParameterConstants.DATABASE_URL, url);
         source.setParameter(RDBMSourceParameterConstants.DATABASE_USERNAME, username);
         source.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, password);

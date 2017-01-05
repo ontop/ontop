@@ -25,19 +25,17 @@ import java.net.URI;
 import java.sql.Connection;
 import java.util.Properties;
 
-import com.google.inject.Guice;
 import com.google.inject.Injector;
 import it.unibz.inf.ontop.injection.OBDACoreConfiguration;
 import it.unibz.inf.ontop.injection.QuestConfiguration;
+import it.unibz.inf.ontop.model.MappingFactory;
+import it.unibz.inf.ontop.model.impl.MappingFactoryImpl;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import junit.framework.TestCase;
 
 import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
-import it.unibz.inf.ontop.injection.impl.OBDACoreModule;
 import it.unibz.inf.ontop.io.QueryIOManager;
-import it.unibz.inf.ontop.model.OBDADataFactory;
 import it.unibz.inf.ontop.model.OBDADataSource;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.model.impl.RDBMSourceParameterConstants;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
 import it.unibz.inf.ontop.owlrefplatform.injection.QuestCorePreferences;
@@ -66,7 +64,7 @@ public class SemanticIndexManagerLUBMMySQLTest extends TestCase {
 	
 	String owlfile = "../quest-owlapi3/src/test/resources/test/lubm-ex-20-uni1/University0_0.owl";
 
-	OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
+	private static final MappingFactory MAPPING_FACTORY = MappingFactoryImpl.getInstance();
 	private OWLOntology ontology;
 	private OWLOntologyManager manager;
 	private OBDADataSource source;
@@ -77,7 +75,7 @@ public class SemanticIndexManagerLUBMMySQLTest extends TestCase {
 		manager = OWLManager.createOWLOntologyManager();
 		ontology = manager.loadOntologyFromOntologyDocument(new File(owlfile));
 
-		source = fac.getDataSource(URI.create("http://www.obda.org/ABOXDUMP1testx1"));
+		source = MAPPING_FACTORY.getDataSource(URI.create("http://www.obda.org/ABOXDUMP1testx1"));
 		source.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, driver);
 		source.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, password);
 		source.setParameter(RDBMSourceParameterConstants.DATABASE_URL, url);

@@ -26,6 +26,7 @@ import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
 import it.unibz.inf.ontop.injection.OBDAFactoryWithException;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.Predicate.COL_TYPE;
+import it.unibz.inf.ontop.model.impl.MappingFactoryImpl;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.ontology.DataPropertyExpression;
 import it.unibz.inf.ontop.ontology.OClass;
@@ -53,6 +54,7 @@ import java.util.*;
  */
 public class DirectMappingEngine {
 
+	private static final MappingFactory MAPPING_FACTORY = MappingFactoryImpl.getInstance();
 	private final NativeQueryLanguageComponentFactory nativeQLFactory;
 	private final OBDAFactoryWithException obdaFactory;
 	private JDBCConnectionManager connManager = null;
@@ -211,12 +213,12 @@ public class DirectMappingEngine {
 		DirectMappingAxiomProducer dmap = new DirectMappingAxiomProducer(baseUri, dfac);
 
 		List<OBDAMappingAxiom> axioms = new ArrayList<>();
-		axioms.add(nativeQLFactory.create("MAPPING-ID"+ currentMappingIndex, dfac.getSQLQuery(dmap.getSQL(table)), dmap.getCQ(table)));
+		axioms.add(nativeQLFactory.create("MAPPING-ID"+ currentMappingIndex, MAPPING_FACTORY.getSQLQuery(dmap.getSQL(table)), dmap.getCQ(table)));
 		currentMappingIndex++;
 		
 		Map<String, List<Function>> refAxioms = dmap.getRefAxioms(table);
 		for (Map.Entry<String, List<Function>> e : refAxioms.entrySet()) {
-            OBDASQLQuery sqlQuery = dfac.getSQLQuery(e.getKey());
+            OBDASQLQuery sqlQuery = MAPPING_FACTORY.getSQLQuery(e.getKey());
             List<Function> targetQuery = e.getValue();
             axioms.add(nativeQLFactory.create("MAPPING-ID"+ currentMappingIndex, sqlQuery, targetQuery));
 			currentMappingIndex++;

@@ -1,7 +1,6 @@
 package it.unibz.inf.ontop.executor.join;
 
 import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.executor.SimpleNodeCentricInternalExecutor;
 import it.unibz.inf.ontop.model.ImmutableExpression;
 import it.unibz.inf.ontop.pivotalrepr.*;
 import it.unibz.inf.ontop.pivotalrepr.NonCommutativeOperatorNode.ArgumentPosition;

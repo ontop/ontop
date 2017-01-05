@@ -26,6 +26,7 @@ import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.injection.QuestPreferences;
 import it.unibz.inf.ontop.io.PrefixManager;
 import it.unibz.inf.ontop.model.*;
+import it.unibz.inf.ontop.model.impl.MappingFactoryImpl;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.model.impl.RDBMSourceParameterConstants;
 import it.unibz.inf.ontop.ontology.OClass;
@@ -80,6 +81,7 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
     private boolean isSubjectClassValid = true;
 	
 	private static final OBDADataFactory dfac = OBDADataFactoryImpl.getInstance();
+	private static final MappingFactory MAPPING_FACTORY = MappingFactoryImpl.getInstance();
 
 	private static final String EMPTY_TEXT = "";
 
@@ -528,7 +530,7 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 				return;
 			}
 			// Create the mapping axiom
-            OBDAMappingAxiom mappingAxiom = nativeQLFactory.create(dfac.getSQLQuery(source), target);
+            OBDAMappingAxiom mappingAxiom = nativeQLFactory.create(MAPPING_FACTORY.getSQLQuery(source), target);
 			obdaModel.addMapping(selectedSource.getSourceID(), mappingAxiom, false);
 			
 			// Clear the form afterwards

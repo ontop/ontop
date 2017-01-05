@@ -24,9 +24,9 @@ import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
 import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.injection.OBDAProperties;
 import it.unibz.inf.ontop.io.QueryIOManager;
-import it.unibz.inf.ontop.model.OBDADataFactory;
+import it.unibz.inf.ontop.model.MappingFactory;
 import it.unibz.inf.ontop.model.OBDADataSource;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
+import it.unibz.inf.ontop.model.impl.MappingFactoryImpl;
 import it.unibz.inf.ontop.model.impl.RDBMSourceParameterConstants;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
 import it.unibz.inf.ontop.owlrefplatform.injection.QuestCorePreferences;
@@ -64,7 +64,7 @@ public class LUBM50Tests {
 
 	String owlfile = "../quest-owlapi3/src/test/resources/test/lubm-ex-20-uni1/LUBM-ex-20.owl";
 
-	OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
+	private static final MappingFactory MAPPING_FACTORY = MappingFactoryImpl.getInstance();
 	private final OWLOntology ontology;
 	private OBDADataSource source;
 	private final NativeQueryLanguageComponentFactory nativeQLFactory;
@@ -105,7 +105,7 @@ public class LUBM50Tests {
 
 		ontology = config.loadProvidedInputOntology();
 
-		source = fac.getDataSource(URI.create("http://www.obda.org/ABOXDUMP1testx1"));
+		source = MAPPING_FACTORY.getDataSource(URI.create("http://www.obda.org/ABOXDUMP1testx1"));
 		source.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, driver);
 		source.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, password);
 		source.setParameter(RDBMSourceParameterConstants.DATABASE_URL, url);

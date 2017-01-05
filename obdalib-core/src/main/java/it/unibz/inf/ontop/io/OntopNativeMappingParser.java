@@ -31,6 +31,7 @@ import com.google.inject.assistedinject.AssistedInject;
 
 import it.unibz.inf.ontop.exception.*;
 import it.unibz.inf.ontop.model.*;
+import it.unibz.inf.ontop.model.impl.MappingFactoryImpl;
 import it.unibz.inf.ontop.ontology.ImmutableOntologyVocabulary;
 import it.unibz.inf.ontop.ontology.OntologyVocabulary;
 import it.unibz.inf.ontop.ontology.impl.OntologyVocabularyImpl;
@@ -74,7 +75,7 @@ public class OntopNativeMappingParser implements MappingParser {
     protected static final String END_COLLECTION_SYMBOL = "]]";
     protected static final String COMMENT_SYMBOL = ";";
 
-    private static final OBDADataFactory DATA_FACTORY = OBDADataFactoryImpl.getInstance();
+    private static final MappingFactory MAPPING_FACTORY = MappingFactoryImpl.getInstance();
     private static final Logger LOG = LoggerFactory.getLogger(OntopNativeMappingParser.class);
 
     private final NativeQueryLanguageComponentFactory nativeQLFactory;
@@ -285,7 +286,7 @@ public class OntopNativeMappingParser implements MappingParser {
             if (parameter.equals(Label.sourceUri.name())) {
                 URI sourceUri = URI.create(inputParameter);
                 // TODO: use a modern factory instead
-                dataSource = DATA_FACTORY.getDataSource(sourceUri);
+                dataSource = MAPPING_FACTORY.getDataSource(sourceUri);
             } else if (parameter.equals(Label.connectionUrl.name())) {
                 dataSource.setParameter(DATABASE_URL, inputParameter);
             } else if (parameter.equals(Label.username.name())) {
@@ -442,7 +443,7 @@ public class OntopNativeMappingParser implements MappingParser {
     private static List<OBDAMappingAxiom> addNewMapping(String mappingId, String sourceQuery, List<Function> targetQuery,
                                                         List<OBDAMappingAxiom> currentSourceMappings,
                                                         NativeQueryLanguageComponentFactory nativeQLFactory) {
-        OBDAMappingAxiom mapping = nativeQLFactory.create(mappingId, DATA_FACTORY.getSQLQuery(sourceQuery), targetQuery);
+        OBDAMappingAxiom mapping = nativeQLFactory.create(mappingId, MAPPING_FACTORY.getSQLQuery(sourceQuery), targetQuery);
         if (!currentSourceMappings.contains(mapping)) {
             currentSourceMappings.add(mapping);
         }

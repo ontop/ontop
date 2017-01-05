@@ -2,7 +2,6 @@ package it.unibz.inf.ontop.pivotalrepr.impl;
 
 import it.unibz.inf.ontop.model.DataAtom;
 import it.unibz.inf.ontop.model.ImmutableTerm;
-import it.unibz.inf.ontop.model.VariableOrGroundTerm;
 import it.unibz.inf.ontop.model.ImmutableSubstitution;
 import it.unibz.inf.ontop.pivotalrepr.*;
 

@@ -20,15 +20,8 @@ package it.unibz.inf.ontop.owlrefplatform.core.abox;
  * #L%
  */
 
-import it.unibz.inf.ontop.model.DatatypeFactory;
-import it.unibz.inf.ontop.model.Function;
-import it.unibz.inf.ontop.model.Term;
-import it.unibz.inf.ontop.model.OBDADataFactory;
-import it.unibz.inf.ontop.model.OBDADataSource;
-import it.unibz.inf.ontop.model.OBDALibConstants;
-import it.unibz.inf.ontop.model.OBDAMappingAxiom;
-import it.unibz.inf.ontop.model.OBDAModel;
-import it.unibz.inf.ontop.model.Predicate;
+import it.unibz.inf.ontop.model.*;
+
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.net.URI;
@@ -43,6 +36,7 @@ import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
 import it.unibz.inf.ontop.injection.OBDAFactoryWithException;
 import it.unibz.inf.ontop.io.PrefixManager;
 import it.unibz.inf.ontop.model.Predicate.COL_TYPE;
+import it.unibz.inf.ontop.model.impl.MappingFactoryImpl;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.model.impl.RDBMSourceParameterConstants;
 import it.unibz.inf.ontop.ontology.Assertion;
@@ -58,6 +52,7 @@ import junit.framework.TestCase;
 public class VirtualABoxMaterializerTest extends TestCase {
 
 	private final OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
+	private static final MappingFactory MAPPING_FACTORY = MappingFactoryImpl.getInstance();
 	private final NativeQueryLanguageComponentFactory nativeQLFactory;
 	private final OBDAFactoryWithException obdaFactory;
 
@@ -104,7 +99,7 @@ public class VirtualABoxMaterializerTest extends TestCase {
 		String username = "sa";
 		String password = "";
 
-		OBDADataSource source = fac.getDataSource(URI.create("http://www.obda.org/testdb1"));
+		OBDADataSource source = MAPPING_FACTORY.getDataSource(URI.create("http://www.obda.org/testdb1"));
 		source.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, driver);
 		source.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, password);
 		source.setParameter(RDBMSourceParameterConstants.DATABASE_URL, url);
@@ -160,7 +155,7 @@ public class VirtualABoxMaterializerTest extends TestCase {
 		body.add(fac.getFunction(hasschool, objectTerm, fac.getVariable("schooluri")));
 		body.add(fac.getFunction(school, fac.getVariable("schooluri")));
 
-		OBDAMappingAxiom map1 = nativeQLFactory.create(fac.getSQLQuery(sql), body);
+		OBDAMappingAxiom map1 = nativeQLFactory.create(MAPPING_FACTORY.getSQLQuery(sql), body);
 
         Set<OBDADataSource> dataSources = new HashSet<>();
         Map<URI, ImmutableList<OBDAMappingAxiom>> mappings = new HashMap<>();
@@ -200,7 +195,7 @@ public class VirtualABoxMaterializerTest extends TestCase {
             String username = "sa";
             String password = "";
 
-            OBDADataSource source = fac.getDataSource(URI.create("http://www.obda.org/testdb3"));
+            OBDADataSource source = MAPPING_FACTORY.getDataSource(URI.create("http://www.obda.org/testdb3"));
             source.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, driver);
             source.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, password);
             source.setParameter(RDBMSourceParameterConstants.DATABASE_URL, url);
@@ -226,7 +221,7 @@ public class VirtualABoxMaterializerTest extends TestCase {
 
             dataSources.add(source);
 
-            OBDADataSource source2 = fac.getDataSource(URI.create("http://www.obda.org/testdb2"));
+            OBDADataSource source2 = MAPPING_FACTORY.getDataSource(URI.create("http://www.obda.org/testdb2"));
             source2.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, driver);
             source2.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, password);
             source2.setParameter(RDBMSourceParameterConstants.DATABASE_URL, url);
@@ -267,7 +262,7 @@ public class VirtualABoxMaterializerTest extends TestCase {
 		body.add(fac.getFunction(hasschool, objectTerm, fac.getVariable("schooluri")));
 		body.add(fac.getFunction(school, fac.getVariable("schooluri")));
 
-            OBDAMappingAxiom map1 = nativeQLFactory.create(fac.getSQLQuery(sql), body);
+            OBDAMappingAxiom map1 = nativeQLFactory.create(MAPPING_FACTORY.getSQLQuery(sql), body);
 
             mappingIndex.put(source.getSourceID(), ImmutableList.of(map1));
             mappingIndex.put(source2.getSourceID(), ImmutableList.of(map1));
@@ -304,7 +299,7 @@ public class VirtualABoxMaterializerTest extends TestCase {
 		String username = "sa";
 		String password = "";
 
-		OBDADataSource source = fac.getDataSource(URI.create("http://www.obda.org/testdb4"));
+		OBDADataSource source = MAPPING_FACTORY.getDataSource(URI.create("http://www.obda.org/testdb4"));
 		source.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, driver);
 		source.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, password);
 		source.setParameter(RDBMSourceParameterConstants.DATABASE_URL, url);
@@ -330,7 +325,7 @@ public class VirtualABoxMaterializerTest extends TestCase {
 
         dataSources.add(source);
 
-		OBDADataSource source2 = fac.getDataSource(URI.create("http://www.obda.org/testdb5"));
+		OBDADataSource source2 = MAPPING_FACTORY.getDataSource(URI.create("http://www.obda.org/testdb5"));
 		source2.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, driver);
 		source2.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, password);
 		source2.setParameter(RDBMSourceParameterConstants.DATABASE_URL, url);
@@ -339,7 +334,7 @@ public class VirtualABoxMaterializerTest extends TestCase {
 		source2.setParameter(RDBMSourceParameterConstants.USE_DATASOURCE_FOR_ABOXDUMP, "true");
         dataSources.add(source2);
 
-		OBDADataSource source3 = fac.getDataSource(URI.create("http://www.obda.org/testdb6"));
+		OBDADataSource source3 = MAPPING_FACTORY.getDataSource(URI.create("http://www.obda.org/testdb6"));
 		source3.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, driver);
 		source3.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, password);
 		source3.setParameter(RDBMSourceParameterConstants.DATABASE_URL, url);
@@ -380,7 +375,7 @@ public class VirtualABoxMaterializerTest extends TestCase {
 		body.add(fac.getFunction(hasschool, objectTerm, fac.getVariable("schooluri")));
 		body.add(fac.getFunction(school, fac.getVariable("schooluri")));
 
-		OBDAMappingAxiom map1 = nativeQLFactory.create(fac.getSQLQuery(sql), body);
+		OBDAMappingAxiom map1 = nativeQLFactory.create(MAPPING_FACTORY.getSQLQuery(sql), body);
 
         PrefixManager prefixManager = nativeQLFactory.create(new HashMap<String, String>());
         OBDAModel model = obdaFactory.createOBDAModel(dataSources, mappingIndex, prefixManager, new OntologyVocabularyImpl());
@@ -410,7 +405,7 @@ public class VirtualABoxMaterializerTest extends TestCase {
 		String username = "sa";
 		String password = "";
 
-		OBDADataSource source = fac.getDataSource(URI.create("http://www.obda.org/testdb7"));
+		OBDADataSource source = MAPPING_FACTORY.getDataSource(URI.create("http://www.obda.org/testdb7"));
 		source.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, driver);
 		source.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, password);
 		source.setParameter(RDBMSourceParameterConstants.DATABASE_URL, url);
@@ -436,7 +431,7 @@ public class VirtualABoxMaterializerTest extends TestCase {
 
         dataSources.add(source);
 
-		OBDADataSource source2 = fac.getDataSource(URI.create("http://www.obda.org/testdb8"));
+		OBDADataSource source2 = MAPPING_FACTORY.getDataSource(URI.create("http://www.obda.org/testdb8"));
 		source2.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, driver);
 		source2.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, password);
 		source2.setParameter(RDBMSourceParameterConstants.DATABASE_URL, url);
@@ -445,7 +440,7 @@ public class VirtualABoxMaterializerTest extends TestCase {
 		source2.setParameter(RDBMSourceParameterConstants.USE_DATASOURCE_FOR_ABOXDUMP, "true");
         dataSources.add(source2);
 
-		OBDADataSource source3 = fac.getDataSource(URI.create("http://www.obda.org/testdb9"));
+		OBDADataSource source3 = MAPPING_FACTORY.getDataSource(URI.create("http://www.obda.org/testdb9"));
 		source3.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, driver);
 		source3.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, password);
 		source3.setParameter(RDBMSourceParameterConstants.DATABASE_URL, url);
@@ -481,7 +476,7 @@ public class VirtualABoxMaterializerTest extends TestCase {
 		String username = "sa";
 		String password = "";
 
-		OBDADataSource source = fac.getDataSource(URI.create("http://www.obda.org/testdb11"));
+		OBDADataSource source = MAPPING_FACTORY.getDataSource(URI.create("http://www.obda.org/testdb11"));
 		source.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, driver);
 		source.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, password);
 		source.setParameter(RDBMSourceParameterConstants.DATABASE_URL, url);
@@ -507,7 +502,7 @@ public class VirtualABoxMaterializerTest extends TestCase {
 
 		dataSources.add(source);
 
-		OBDADataSource source2 = fac.getDataSource(URI.create("http://www.obda.org/testdb12"));
+		OBDADataSource source2 = MAPPING_FACTORY.getDataSource(URI.create("http://www.obda.org/testdb12"));
 		source2.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, driver);
 		source2.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, password);
 		source2.setParameter(RDBMSourceParameterConstants.DATABASE_URL, url);
@@ -516,7 +511,7 @@ public class VirtualABoxMaterializerTest extends TestCase {
 		source2.setParameter(RDBMSourceParameterConstants.USE_DATASOURCE_FOR_ABOXDUMP, "true");
         dataSources.add(source2);
 
-		OBDADataSource source3 = fac.getDataSource(URI.create("http://www.obda.org/testdb13"));
+		OBDADataSource source3 = MAPPING_FACTORY.getDataSource(URI.create("http://www.obda.org/testdb13"));
 		source3.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, driver);
 		source3.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, password);
 		source3.setParameter(RDBMSourceParameterConstants.DATABASE_URL, url);
@@ -557,7 +552,7 @@ public class VirtualABoxMaterializerTest extends TestCase {
 		body.add(fac.getFunction(hasschool, objectTerm, fac.getVariable("schooluri")));
 		body.add(fac.getFunction(school, fac.getVariable("schooluri")));
 
-		OBDAMappingAxiom map1 = nativeQLFactory.create(fac.getSQLQuery(sql), body);
+		OBDAMappingAxiom map1 = nativeQLFactory.create(MAPPING_FACTORY.getSQLQuery(sql), body);
 
         mappingIndex.put(source2.getSourceID(), ImmutableList.of(map1));
 
@@ -590,7 +585,7 @@ public class VirtualABoxMaterializerTest extends TestCase {
         final Set<OBDADataSource> dataSources = new HashSet<>();
         final Map<URI, ImmutableList<OBDAMappingAxiom>> mappingIndex = new HashMap<>();
 
-		OBDADataSource source = fac.getDataSource(URI.create("http://www.obda.org/testdb100"));
+		OBDADataSource source = MAPPING_FACTORY.getDataSource(URI.create("http://www.obda.org/testdb100"));
 		source.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, driver);
 		source.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, password);
 		source.setParameter(RDBMSourceParameterConstants.DATABASE_URL, url);
@@ -659,12 +654,12 @@ public class VirtualABoxMaterializerTest extends TestCase {
 //		body.add(fac.getFunctionalTerm(school, fac.getVariable("schooluri")));
 
 		
-		OBDAMappingAxiom map1 = nativeQLFactory.create(fac.getSQLQuery(sql1), Arrays.asList(fac.getFunction(person, objectTerm)));
-		OBDAMappingAxiom map2 = nativeQLFactory.create(fac.getSQLQuery(sql2), Arrays.asList(fac.getFunction(fn, objectTerm, firstNameVariable)));
-		OBDAMappingAxiom map3 = nativeQLFactory.create(fac.getSQLQuery(sql3), Arrays.asList(fac.getFunction(ln, objectTerm, lastNameVariable)));
-		OBDAMappingAxiom map4 = nativeQLFactory.create(fac.getSQLQuery(sql4), Arrays.asList(fac.getFunction(age, objectTerm, ageVariable)));
-		OBDAMappingAxiom map5 = nativeQLFactory.create(fac.getSQLQuery(sql5), Arrays.asList(fac.getFunction(hasschool, objectTerm, schoolUriVariable)));
-		OBDAMappingAxiom map6 = nativeQLFactory.create(fac.getSQLQuery(sql6), Arrays.asList(fac.getFunction(school, schoolUriVariable)));
+		OBDAMappingAxiom map1 = nativeQLFactory.create(MAPPING_FACTORY.getSQLQuery(sql1), Arrays.asList(fac.getFunction(person, objectTerm)));
+		OBDAMappingAxiom map2 = nativeQLFactory.create(MAPPING_FACTORY.getSQLQuery(sql2), Arrays.asList(fac.getFunction(fn, objectTerm, firstNameVariable)));
+		OBDAMappingAxiom map3 = nativeQLFactory.create(MAPPING_FACTORY.getSQLQuery(sql3), Arrays.asList(fac.getFunction(ln, objectTerm, lastNameVariable)));
+		OBDAMappingAxiom map4 = nativeQLFactory.create(MAPPING_FACTORY.getSQLQuery(sql4), Arrays.asList(fac.getFunction(age, objectTerm, ageVariable)));
+		OBDAMappingAxiom map5 = nativeQLFactory.create(MAPPING_FACTORY.getSQLQuery(sql5), Arrays.asList(fac.getFunction(hasschool, objectTerm, schoolUriVariable)));
+		OBDAMappingAxiom map6 = nativeQLFactory.create(MAPPING_FACTORY.getSQLQuery(sql6), Arrays.asList(fac.getFunction(school, schoolUriVariable)));
 
         dataSources.add(source);
         mappingIndex.put(source.getSourceID(), ImmutableList.of(map1, map2, map3, map4, map5, map6));

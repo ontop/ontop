@@ -3,12 +3,10 @@ package it.unibz.inf.ontop.model.type.impl;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.model.OBDADataFactory;
-import it.unibz.inf.ontop.model.Term;
 import it.unibz.inf.ontop.model.TermType;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.model.type.TermTypeException;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.stream.IntStream;
 

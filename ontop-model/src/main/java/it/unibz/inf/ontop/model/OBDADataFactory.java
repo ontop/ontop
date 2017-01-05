@@ -22,14 +22,12 @@ package it.unibz.inf.ontop.model;
 
 
 import java.io.Serializable;
-import java.net.URI;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.model.Predicate.COL_TYPE;
-import it.unibz.inf.ontop.utils.JdbcTypeMapper;
 
 public interface OBDADataFactory extends Serializable {
 	
@@ -45,8 +43,6 @@ public interface OBDADataFactory extends Serializable {
 	public VariableOnlyDataAtom getVariableOnlyDataAtom(AtomPredicate predicate, Variable... terms);
 
 	public VariableOnlyDataAtom getVariableOnlyDataAtom(AtomPredicate predicate, ImmutableList<Variable> terms);
-
-	public OBDADataSource getDataSource(URI id);
 
 	public DatalogProgram getDatalogProgram();
 	
@@ -90,11 +86,6 @@ public interface OBDADataFactory extends Serializable {
 	public Predicate getOWLSameAsPredicate();
 
 	public Predicate getOBDACanonicalIRI();
-	
-
-	public JdbcTypeMapper getJdbcTypeMapper();
-
-	
 
 	/*
 	 * Built-in function predicates
@@ -204,16 +195,6 @@ public interface OBDADataFactory extends Serializable {
 	 * Casting values cast(source-value AS destination-type)
 	 */
 	public Expression getFunctionCast(Term term1, Term term2);
-	
-	/*
-	 * JDBC objects
-	 */
-
-	public OBDADataSource getJDBCDataSource(String jdbcurl, String username,
-			String password, String driverclass);
-
-	public OBDADataSource getJDBCDataSource(String sourceuri, String jdbcurl,
-			String username, String password, String driverclass);
 
 	/**
 	 * Construct a {@link URIConstant} object. This type of term is written as a
@@ -315,8 +296,6 @@ public interface OBDADataFactory extends Serializable {
 	 * @return the variable object.
 	 */
 	public Variable getVariable(String name);
-
-	public OBDASQLQuery getSQLQuery(String query);
 
 	/* SPARQL meta-predicates */
 	

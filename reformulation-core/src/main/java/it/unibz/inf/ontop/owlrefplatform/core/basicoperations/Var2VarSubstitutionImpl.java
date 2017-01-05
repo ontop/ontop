@@ -9,7 +9,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import fj.data.TreeMap;
 import it.unibz.inf.ontop.model.*;
-import it.unibz.inf.ontop.model.impl.NonGroundFunctionalTermImpl;
 
 import it.unibz.inf.ontop.pivotalrepr.ImmutableQueryModifiers;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;

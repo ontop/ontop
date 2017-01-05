@@ -6,7 +6,7 @@ import it.unibz.inf.ontop.model.DBMetadata;
 import it.unibz.inf.ontop.model.UriTemplateMatcher;
 import it.unibz.inf.ontop.pivotalrepr.MetadataForQueryOptimization;
 import it.unibz.inf.ontop.model.AtomPredicate;
-import it.unibz.inf.ontop.sql.RDBMetadataExtractionTools;
+import it.unibz.inf.ontop.sql.DBMetadataTestingTools;
 
 /**
  * Provides no metadata
@@ -25,6 +25,6 @@ public class EmptyMetadataForQueryOptimization implements MetadataForQueryOptimi
 
     @Override
     public DBMetadata getDBMetadata() {
-        return RDBMetadataExtractionTools.createDummyMetadata();
+        return DBMetadataTestingTools.createDummyMetadata();
     }
 }

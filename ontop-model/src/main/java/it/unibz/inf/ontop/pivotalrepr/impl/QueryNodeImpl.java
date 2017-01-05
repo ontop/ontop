@@ -1,7 +1,6 @@
 package it.unibz.inf.ontop.pivotalrepr.impl;
 
 import it.unibz.inf.ontop.pivotalrepr.QueryNode;
-import it.unibz.inf.ontop.pivotalrepr.*;
 
 
 public abstract class QueryNodeImpl implements QueryNode {

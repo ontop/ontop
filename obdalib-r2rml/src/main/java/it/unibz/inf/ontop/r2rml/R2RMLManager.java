@@ -30,6 +30,7 @@ import eu.optique.api.mapping.PredicateObjectMap;
 import eu.optique.api.mapping.RefObjectMap;
 import eu.optique.api.mapping.TriplesMap;
 import it.unibz.inf.ontop.model.*;
+import it.unibz.inf.ontop.model.impl.MappingFactoryImpl;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
 import it.unibz.inf.ontop.model.impl.TermUtils;
@@ -53,6 +54,7 @@ import org.openrdf.rio.helpers.StatementCollector;
 public class R2RMLManager {
 
 	private OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
+	private static final MappingFactory MAPPING_FACTORY = MappingFactoryImpl.getInstance();
 	private R2RMLParser r2rmlParser;
 	private Model myModel;
 	private final NativeQueryLanguageComponentFactory nativeQLFactory;
@@ -151,7 +153,7 @@ public class R2RMLManager {
 		List<Function> body = getMappingTripleAtoms(tm);
 		//Function head = getHeadAtom(body);
 		//CQIE targetQuery = fac.getCQIE(head, body);
-		OBDAMappingAxiom mapping = nativeQLFactory.create("mapping-"+tm.hashCode(), fac.getSQLQuery(sourceQuery), body);
+		OBDAMappingAxiom mapping = nativeQLFactory.create("mapping-"+tm.hashCode(), MAPPING_FACTORY.getSQLQuery(sourceQuery), body);
         if (body.isEmpty()){
             //we do not have a target query
             System.out.println("WARNING a mapping without target query will not be introduced : "+ mapping.toString());
@@ -209,7 +211,7 @@ public class R2RMLManager {
 			}
 			//finally, create mapping and add it to the list
                 //use referenceObjectMap robm as id, because there could be multiple joinCondition in the same triple map
-			OBDAMappingAxiom mapping = nativeQLFactory.create("mapping-join-"+robm.hashCode(), fac.getSQLQuery(sourceQuery), body);
+			OBDAMappingAxiom mapping = nativeQLFactory.create("mapping-join-"+robm.hashCode(), MAPPING_FACTORY.getSQLQuery(sourceQuery), body);
 			System.out.println("WARNING joinMapping introduced : "+mapping.toString());
 			joinMappings.add(mapping);
 		}

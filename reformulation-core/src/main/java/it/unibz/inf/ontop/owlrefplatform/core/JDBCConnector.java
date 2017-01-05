@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.owlrefplatform.core;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 import it.unibz.inf.ontop.model.*;
+import it.unibz.inf.ontop.model.impl.MappingFactoryImpl;
 import it.unibz.inf.ontop.owlrefplatform.injection.QuestCorePreferences;
 import it.unibz.inf.ontop.sql.ImplicitDBConstraintsReader;
 import net.sf.jsqlparser.JSQLParserException;
@@ -13,7 +14,6 @@ import org.apache.tomcat.jdbc.pool.PoolProperties;
 import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
 import it.unibz.inf.ontop.mapping.MappingSplitter;
 
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.model.impl.RDBMSourceParameterConstants;
 import it.unibz.inf.ontop.nativeql.DBMetadataException;
 import it.unibz.inf.ontop.nativeql.DBMetadataExtractor;
@@ -36,7 +36,7 @@ import java.util.stream.Collectors;
  */
 public class JDBCConnector implements DBConnector {
 
-    private static final OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
+    private static final MappingFactory MAPPING_FACTORY = MappingFactoryImpl.getInstance();
 
     private final IQuest questInstance;
     private final QuestCorePreferences questCorePreferences;
@@ -329,7 +329,7 @@ public class JDBCConnector implements DBConnector {
                         .collect(Collectors.toSet());
                 PreprocessProjection ps = new PreprocessProjection(dbMetadata);
                 String query = ps.getMappingQuery(select, variables);
-                axiom.setSourceQuery(fac.getSQLQuery(query));
+                axiom.setSourceQuery(MAPPING_FACTORY.getSQLQuery(query));
 
             } catch (JSQLParserException e) {
                 log.debug("SQL Query cannot be preprocessed by the parser");

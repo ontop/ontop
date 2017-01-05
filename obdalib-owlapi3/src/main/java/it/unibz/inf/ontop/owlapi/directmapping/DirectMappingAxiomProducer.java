@@ -23,6 +23,7 @@ package it.unibz.inf.ontop.owlapi.directmapping;
 import com.google.common.base.Joiner;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.Predicate.COL_TYPE;
+import it.unibz.inf.ontop.model.impl.MappingFactoryImpl;
 import it.unibz.inf.ontop.parser.EncodeForURI;
 import it.unibz.inf.ontop.sql.*;
 import it.unibz.inf.ontop.sql.ForeignKeyConstraint.Component;
@@ -36,6 +37,7 @@ public class DirectMappingAxiomProducer {
 	private final String baseIRI;
 
 	private final OBDADataFactory df;
+	private static final MappingFactory MAPPING_FACTORY = MappingFactoryImpl.getInstance();
 
 	public DirectMappingAxiomProducer(String baseIRI, OBDADataFactory dfac) {
 		this.df = dfac;
@@ -122,7 +124,7 @@ public class DirectMappingAxiomProducer {
 		atoms.add(df.getFunction(df.getClassPredicate(getTableIRI(table.getID())), sub));
 
 		//DataType Atoms
-		JdbcTypeMapper typeMapper = df.getJdbcTypeMapper();
+		JdbcTypeMapper typeMapper = MAPPING_FACTORY.getJdbcTypeMapper();
 		for (Attribute att : table.getAttributes()) {
 			Predicate.COL_TYPE type = typeMapper.getPredicate(att.getType());
 			Variable objV = df.getVariable(att.getID().getName());

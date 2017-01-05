@@ -3,7 +3,6 @@ package it.unibz.inf.ontop.executor.groundterm;
 import java.util.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMultimap;
-import it.unibz.inf.ontop.executor.InternalProposalExecutor;
 import it.unibz.inf.ontop.model.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.pivotalrepr.impl.ExtensionalDataNodeImpl;

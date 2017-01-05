@@ -22,6 +22,7 @@ package it.unibz.inf.ontop.utils;
 
 import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
 import it.unibz.inf.ontop.model.*;
+import it.unibz.inf.ontop.model.impl.MappingFactoryImpl;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
 import it.unibz.inf.ontop.parser.SQLQueryShallowParser;
@@ -62,6 +63,7 @@ public class MetaMappingExpander {
 	private final QuotedIDFactory idfac;
 	private final OBDADataFactory dfac = OBDADataFactoryImpl.getInstance();
 	private final NativeQueryLanguageComponentFactory nativeQLFactory;
+	private static final MappingFactory MAPPING_FACTORY = MappingFactoryImpl.getInstance();
 
     /**
 	 *
@@ -287,7 +289,7 @@ public class MetaMappingExpander {
 		newSourceParsedQuery.setWhereClause(selection);
 		
 		String newSourceQuerySQL = newSourceParsedQuery.toString();
-		OBDASQLQuery newSourceQuery =  dfac.getSQLQuery(newSourceQuerySQL);
+		OBDASQLQuery newSourceQuery =  MAPPING_FACTORY.getSQLQuery(newSourceQuerySQL);
 
 		OBDAMappingAxiom newMapping = nativeQLFactory.create(id, newSourceQuery,
 										Collections.singletonList(newTargetBody));

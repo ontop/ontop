@@ -1,8 +1,6 @@
 package it.unibz.inf.ontop.executor.leftjoin;
 
 import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.executor.NodeCentricInternalCompositeExecutor;
-import it.unibz.inf.ontop.executor.NodeCentricInternalExecutor;
 import it.unibz.inf.ontop.executor.SimpleNodeCentricInternalCompositeExecutor;
 import it.unibz.inf.ontop.executor.SimpleNodeCentricInternalExecutor;
 import it.unibz.inf.ontop.pivotalrepr.LeftJoinNode;

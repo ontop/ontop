@@ -34,9 +34,9 @@ import com.google.common.collect.Sets;
 import com.google.common.io.Resources;
 import it.unibz.inf.ontop.injection.OBDAProperties;
 import it.unibz.inf.ontop.injection.QuestConfiguration;
-import it.unibz.inf.ontop.model.OBDADataFactory;
+import it.unibz.inf.ontop.model.MappingFactory;
 import it.unibz.inf.ontop.model.OBDADataSource;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
+import it.unibz.inf.ontop.model.impl.MappingFactoryImpl;
 import it.unibz.inf.ontop.model.impl.RDBMSourceParameterConstants;
 import it.unibz.inf.ontop.owlrefplatform.injection.QuestCorePreferences;
 import it.unibz.inf.ontop.sesame.SesameVirtualRepo;
@@ -100,7 +100,7 @@ public class RDB2RDFTest {
 
 	private static OWLOntology EMPTY_ONT;
 	private static Properties PROPERTIES;
-	private static OBDADataFactory DATA_FACTORY = OBDADataFactoryImpl.getInstance();
+	private static final MappingFactory MAPPING_FACTORY = MappingFactoryImpl.getInstance();
 
 	private static final String JDBC_URL = "jdbc:h2:mem:questrepository";
 	private static final String DB_USER = "sa";
@@ -280,7 +280,7 @@ public class RDB2RDFTest {
 
 	private static OBDADataSource getMemOBDADataSource() {
 
-		OBDADataSource obdaSource = DATA_FACTORY.getDataSource(java.net.URI.create("http://www.obda.org/ABOXDUMP" + System.currentTimeMillis()));
+		OBDADataSource obdaSource = MAPPING_FACTORY.getDataSource(java.net.URI.create("http://www.obda.org/ABOXDUMP" + System.currentTimeMillis()));
 		obdaSource.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, JDBC_DRIVER);
 		obdaSource.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, DB_PASSWORD);
 		obdaSource.setParameter(RDBMSourceParameterConstants.DATABASE_URL, JDBC_URL);

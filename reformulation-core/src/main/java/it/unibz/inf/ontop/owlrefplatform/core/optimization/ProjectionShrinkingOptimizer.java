@@ -1,6 +1,5 @@
 package it.unibz.inf.ontop.owlrefplatform.core.optimization;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import it.unibz.inf.ontop.model.ImmutableExpression;

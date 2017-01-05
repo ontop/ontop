@@ -1,12 +1,11 @@
 package it.unibz.inf.ontop.pivotalrepr.datalog;
 
 import java.util.Optional;
-import com.google.common.collect.ImmutableList;
+
 import com.google.inject.Injector;
 import fj.P2;
 import fj.data.List;
 import it.unibz.inf.ontop.model.impl.DatalogTools;
-import it.unibz.inf.ontop.model.impl.NonGroundFunctionalTermImpl;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.PullOutEqualityNormalizerImpl;

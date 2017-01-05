@@ -22,6 +22,7 @@ package it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing;
 
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.FunctionalTermImpl;
+import it.unibz.inf.ontop.model.impl.MappingFactoryImpl;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.ontology.DataPropertyRangeExpression;
 import it.unibz.inf.ontop.ontology.DataRangeExpression;
@@ -46,6 +47,7 @@ public class MappingDataTypeRepair {
 	private final VocabularyValidator qvv;
 
   	private static final OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
+    private static final MappingFactory MAPPING_FACTORY = MappingFactoryImpl.getInstance();
     private static final Logger log = LoggerFactory.getLogger(MappingDataTypeRepair.class);
 
     /**
@@ -287,7 +289,7 @@ public class MappingDataTypeRepair {
 		RelationDefinition td = metadata.getRelation(tableId);
 		Attribute attribute = td.getAttribute(ip.pos);
 
-		Predicate.COL_TYPE type =  fac.getJdbcTypeMapper().getPredicate(attribute.getType());
+		Predicate.COL_TYPE type =  MAPPING_FACTORY.getJdbcTypeMapper().getPredicate(attribute.getType());
 		return type;
 	}
 
