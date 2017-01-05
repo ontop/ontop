@@ -19,7 +19,7 @@ public interface InternalProposalExecutor<P extends QueryOptimizationProposal<R>
     /**
      * TODO: explain
      */
-    public R apply(P proposal, IntermediateQuery query, QueryTreeComponent treeComponent)
+    R apply(P proposal, IntermediateQuery query, QueryTreeComponent treeComponent)
             throws InvalidQueryOptimizationProposalException, EmptyQueryException;
 
 }

@@ -8,8 +8,6 @@ import it.unibz.inf.ontop.model.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.Variable;
 import it.unibz.inf.ontop.pivotalrepr.validation.IntermediateQueryValidator;
 import it.unibz.inf.ontop.pivotalrepr.validation.InvalidIntermediateQueryException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import it.unibz.inf.ontop.pivotalrepr.*;
 import it.unibz.inf.ontop.pivotalrepr.proposal.*;
 
@@ -34,8 +32,6 @@ public class IntermediateQueryImpl implements IntermediateQuery {
             super(message);
         }
     }
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(IntermediateQueryImpl.class);
 
     /**
      * TODO: use Guice to replace it.
@@ -317,10 +313,6 @@ public class IntermediateQueryImpl implements IntermediateQuery {
     @Override
     public Variable generateNewVariable(Variable formerVariable) {
         return treeComponent.generateNewVariable(formerVariable);
-    }
-
-    public Variable renameAllVariablesWitSuffix() {
-        return treeComponent.generateNewVariable();
     }
 
     /**
