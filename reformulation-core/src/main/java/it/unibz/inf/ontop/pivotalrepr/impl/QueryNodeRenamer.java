@@ -74,15 +74,6 @@ public class QueryNodeRenamer implements HomogeneousQueryNodeTransformer {
     }
 
     @Override
-    public GroupNode transform(GroupNode groupNode) {
-        ImmutableList.Builder<NonGroundTerm> renamedTermBuilder = ImmutableList.builder();
-        for (NonGroundTerm term : groupNode.getGroupingTerms()) {
-            renamedTermBuilder.add(renamingSubstitution.applyToTerm(term));
-        }
-        return new GroupNodeImpl(renamedTermBuilder.build());
-    }
-
-    @Override
     public EmptyNode transform(EmptyNode emptyNode) {
         return emptyNode.clone();
     }

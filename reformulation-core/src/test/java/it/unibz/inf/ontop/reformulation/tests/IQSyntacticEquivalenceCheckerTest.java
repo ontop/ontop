@@ -47,7 +47,7 @@ public class IQSyntacticEquivalenceCheckerTest {
     private final MetadataForQueryOptimization metadata;
 
     private static final Injector INJECTOR = QuestCoreConfiguration.defaultBuilder().build().getInjector();
-    
+
     public IQSyntacticEquivalenceCheckerTest() {
         metadata = initMetadata();
     }
@@ -435,67 +435,67 @@ public class IQSyntacticEquivalenceCheckerTest {
         assertFalse(IQSyntacticEquivalenceChecker.areEquivalent(query, query1));
     }
 
-    @Test
-    public void testGroupNodeEquivalence() {
-        ConstructionNode constructionNode = new ConstructionNodeImpl(ImmutableSet.of(X));
-        DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_VAR1_PREDICATE, X);
-        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(metadata, INJECTOR);
-        queryBuilder.init(projectionAtom, constructionNode);
-        ImmutableList.Builder<NonGroundTerm> termBuilder = ImmutableList.builder();
-        termBuilder.add(X);
-        GroupNode groupNode = new GroupNodeImpl(termBuilder.build());
-        ExtensionalDataNode dataNode = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE2_PREDICATE, X, Z));
-        queryBuilder.addChild(constructionNode, groupNode);
-        queryBuilder.addChild(groupNode, dataNode);
+//    @Test
+//    public void testGroupNodeEquivalence() {
+//        ConstructionNode constructionNode = new ConstructionNodeImpl(ImmutableSet.of(X));
+//        DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_VAR1_PREDICATE, X);
+//        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(metadata, INJECTOR);
+//        queryBuilder.init(projectionAtom, constructionNode);
+//        ImmutableList.Builder<NonGroundTerm> termBuilder = ImmutableList.builder();
+//        termBuilder.add(X);
+//        GroupNode groupNode = new GroupNodeImpl(termBuilder.build());
+//        ExtensionalDataNode dataNode = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE2_PREDICATE, X, Z));
+//        queryBuilder.addChild(constructionNode, groupNode);
+//        queryBuilder.addChild(groupNode, dataNode);
+//
+//        IntermediateQuery query = queryBuilder.build();
+//
+//        ConstructionNode constructionNode1 = new ConstructionNodeImpl(ImmutableSet.of(X));
+//        DistinctVariableOnlyDataAtom projectionAtom1 = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_VAR1_PREDICATE, X);
+//        IntermediateQueryBuilder queryBuilder1 = new DefaultIntermediateQueryBuilder(metadata, INJECTOR);
+//        queryBuilder1.init(projectionAtom1, constructionNode1);
+//        ImmutableList.Builder<NonGroundTerm> termBuilder1 = ImmutableList.builder();
+//        termBuilder1.add(X);
+//        GroupNode groupNode1 = new GroupNodeImpl(termBuilder1.build());
+//        ExtensionalDataNode dataNode1 = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE2_PREDICATE, X, Z));
+//        queryBuilder1.addChild(constructionNode1, groupNode1);
+//        queryBuilder1.addChild(groupNode1, dataNode1);
+//
+//        IntermediateQuery query1 = queryBuilder1.build();
+//
+//        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(query, query1));
+//    }
 
-        IntermediateQuery query = queryBuilder.build();
-
-        ConstructionNode constructionNode1 = new ConstructionNodeImpl(ImmutableSet.of(X));
-        DistinctVariableOnlyDataAtom projectionAtom1 = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_VAR1_PREDICATE, X);
-        IntermediateQueryBuilder queryBuilder1 = new DefaultIntermediateQueryBuilder(metadata, INJECTOR);
-        queryBuilder1.init(projectionAtom1, constructionNode1);
-        ImmutableList.Builder<NonGroundTerm> termBuilder1 = ImmutableList.builder();
-        termBuilder1.add(X);
-        GroupNode groupNode1 = new GroupNodeImpl(termBuilder1.build());
-        ExtensionalDataNode dataNode1 = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE2_PREDICATE, X, Z));
-        queryBuilder1.addChild(constructionNode1, groupNode1);
-        queryBuilder1.addChild(groupNode1, dataNode1);
-
-        IntermediateQuery query1 = queryBuilder1.build();
-
-        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(query, query1));
-    }
-
-    @Test
-    public void testGroupNodeNodeNotEquivalence() {
-        ConstructionNode constructionNode = new ConstructionNodeImpl(ImmutableSet.of(X));
-        DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_VAR1_PREDICATE, X);
-        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(metadata, INJECTOR);
-        queryBuilder.init(projectionAtom, constructionNode);
-        ImmutableList.Builder<NonGroundTerm> termBuilder = ImmutableList.builder();
-        termBuilder.add(X);
-        GroupNode groupNode = new GroupNodeImpl(termBuilder.build());
-        ExtensionalDataNode dataNode = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE2_PREDICATE, X, Y));
-        queryBuilder.addChild(constructionNode, groupNode);
-        queryBuilder.addChild(groupNode, dataNode);
-
-        IntermediateQuery query = queryBuilder.build();
-
-        ConstructionNode constructionNode1 = new ConstructionNodeImpl(ImmutableSet.of(X));
-        DistinctVariableOnlyDataAtom projectionAtom1 = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_VAR1_PREDICATE, X);
-        IntermediateQueryBuilder queryBuilder1 = new DefaultIntermediateQueryBuilder(metadata, INJECTOR);
-        queryBuilder1.init(projectionAtom1, constructionNode1);
-        ImmutableList.Builder<NonGroundTerm> termBuilder1 = ImmutableList.builder();
-        termBuilder1.add(Y);
-        GroupNode groupNode1 = new GroupNodeImpl(termBuilder1.build());
-        ExtensionalDataNode dataNode1 = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE2_PREDICATE, X, Y));
-        queryBuilder1.addChild(constructionNode1, groupNode1);
-        queryBuilder1.addChild(groupNode1, dataNode1);
-
-        IntermediateQuery query1 = queryBuilder1.build();
-
-        assertFalse(IQSyntacticEquivalenceChecker.areEquivalent(query, query1));
-    }
+//    @Test
+//    public void testGroupNodeNodeNotEquivalence() {
+//        ConstructionNode constructionNode = new ConstructionNodeImpl(ImmutableSet.of(X));
+//        DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_VAR1_PREDICATE, X);
+//        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(metadata, INJECTOR);
+//        queryBuilder.init(projectionAtom, constructionNode);
+//        ImmutableList.Builder<NonGroundTerm> termBuilder = ImmutableList.builder();
+//        termBuilder.add(X);
+//        GroupNode groupNode = new GroupNodeImpl(termBuilder.build());
+//        ExtensionalDataNode dataNode = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE2_PREDICATE, X, Y));
+//        queryBuilder.addChild(constructionNode, groupNode);
+//        queryBuilder.addChild(groupNode, dataNode);
+//
+//        IntermediateQuery query = queryBuilder.build();
+//
+//        ConstructionNode constructionNode1 = new ConstructionNodeImpl(ImmutableSet.of(X));
+//        DistinctVariableOnlyDataAtom projectionAtom1 = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_VAR1_PREDICATE, X);
+//        IntermediateQueryBuilder queryBuilder1 = new DefaultIntermediateQueryBuilder(metadata, INJECTOR);
+//        queryBuilder1.init(projectionAtom1, constructionNode1);
+//        ImmutableList.Builder<NonGroundTerm> termBuilder1 = ImmutableList.builder();
+//        termBuilder1.add(Y);
+//        GroupNode groupNode1 = new GroupNodeImpl(termBuilder1.build());
+//        ExtensionalDataNode dataNode1 = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE2_PREDICATE, X, Y));
+//        queryBuilder1.addChild(constructionNode1, groupNode1);
+//        queryBuilder1.addChild(groupNode1, dataNode1);
+//
+//        IntermediateQuery query1 = queryBuilder1.build();
+//
+//        assertFalse(IQSyntacticEquivalenceChecker.areEquivalent(query, query1));
+//    }
 
     @Test
     public void testConstructionNodeEquivalence() {

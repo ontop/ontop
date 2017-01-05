@@ -159,8 +159,9 @@ public class DatalogRule2QueryConverter {
              */
             QueryNode intermediateNode;
             if (optionalGroupAtom.isPresent()) {
-                intermediateNode = createGroupNode(optionalGroupAtom.get());
-                queryBuilder.addChild(rootNode, intermediateNode);
+                throw new RuntimeException("Conversion of the GROUP atom is not supported yet");
+                // intermediateNode = createGroupNode(optionalGroupAtom.get());
+                // queryBuilder.addChild(rootNode, intermediateNode);
             }
             else {
                 intermediateNode = rootNode;
@@ -189,25 +190,6 @@ public class DatalogRule2QueryConverter {
         catch (IntermediateQueryBuilderException e) {
             throw new DatalogProgram2QueryConverter.InvalidDatalogProgramException(e.getMessage());
         }
-    }
-
-    /**
-     * TODO: explain it
-     */
-    private static GroupNode createGroupNode(Function groupAtom) throws DatalogProgram2QueryConverter.InvalidDatalogProgramException {
-        ImmutableList.Builder<NonGroundTerm> termBuilder = ImmutableList.builder();
-        for (Term term : groupAtom.getTerms()) {
-            if (term instanceof NonGroundTerm) {
-                termBuilder.add((NonGroundTerm) term);
-            }
-            else if ((term instanceof Function) && (!((Function)term).getVariables().isEmpty())) {
-                termBuilder.add(new NonGroundFunctionalTermImpl((Function)term));
-            }
-            else {
-                throw new DatalogProgram2QueryConverter.InvalidDatalogProgramException("Ground term found in a GROUP atom: " + term);
-            }
-        }
-        return new GroupNodeImpl(termBuilder.build());
     }
 
     /**

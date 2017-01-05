@@ -2,7 +2,6 @@ package it.unibz.inf.ontop.reformulation.tests;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Injector;
 import it.unibz.inf.ontop.model.*;
@@ -755,116 +754,116 @@ public class EmptyNodeRemovalTest {
         optimizeAndCompare(queryBuilder.build(), expectedQueryBuilder.build(), emptyNode);
     }
 
-    @Test
-    public void testGroup1() throws EmptyQueryException {
-        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(METADATA, INJECTOR);
-
-        ConstructionNode rootNode = new ConstructionNodeImpl(PROJECTION_ATOM.getVariables(),
-                new ImmutableSubstitutionImpl<>(ImmutableMap.of(X, generateURI1(A),
-                        Y, generateURI1(B))),
-                Optional.empty());
-        queryBuilder.init(PROJECTION_ATOM, rootNode);
-
-        GroupNode groupNode = new GroupNodeImpl(ImmutableList.of(A, B));
-        queryBuilder.addChild(rootNode, groupNode);
-
-        LeftJoinNode lj1 = new LeftJoinNodeImpl(Optional.empty());
-        queryBuilder.addChild(groupNode, lj1);
-        queryBuilder.addChild(lj1, DATA_NODE_2, LEFT);
-        EmptyNode emptyNode = new EmptyNodeImpl(ImmutableSet.of(B));
-        queryBuilder.addChild(lj1, emptyNode, RIGHT);
-
-        /**
-         * Expected query
-         */
-        IntermediateQueryBuilder expectedQueryBuilder = new DefaultIntermediateQueryBuilder(METADATA, INJECTOR);
-        ConstructionNode newRootNode = new ConstructionNodeImpl(PROJECTION_ATOM.getVariables(),
-                new ImmutableSubstitutionImpl<>(ImmutableMap.of(X, generateURI1(A),
-                        Y, OBDAVocabulary.NULL)),
-                Optional.empty());
-        expectedQueryBuilder.init(PROJECTION_ATOM, newRootNode);
-
-        GroupNode newGroupNode = new GroupNodeImpl(ImmutableList.of(A));
-        expectedQueryBuilder.addChild(newRootNode, newGroupNode);
-        expectedQueryBuilder.addChild(newGroupNode, DATA_NODE_2);
-
-        optimizeAndCompare(queryBuilder.build(), expectedQueryBuilder.build(), emptyNode);
-    }
-
-    @Test
-    public void testGroup2() throws EmptyQueryException {
-        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(METADATA, INJECTOR);
-
-        ConstructionNode rootNode = new ConstructionNodeImpl(PROJECTION_ATOM.getVariables(),
-                new ImmutableSubstitutionImpl<>(ImmutableMap.of(X, generateURI1(A),
-                        Y, DATA_FACTORY.getImmutableExpression(ExpressionOperation.AVG, B))),
-                Optional.empty());
-        queryBuilder.init(PROJECTION_ATOM, rootNode);
-
-        GroupNode groupNode = new GroupNodeImpl(ImmutableList.of(A));
-        queryBuilder.addChild(rootNode, groupNode);
-
-        LeftJoinNode lj1 = new LeftJoinNodeImpl(Optional.empty());
-        queryBuilder.addChild(groupNode, lj1);
-        queryBuilder.addChild(lj1, DATA_NODE_2, LEFT);
-        EmptyNode emptyNode = new EmptyNodeImpl(ImmutableSet.of(B));
-        queryBuilder.addChild(lj1, emptyNode, RIGHT);
-
-        /**
-         * Expected query
-         */
-        IntermediateQueryBuilder expectedQueryBuilder = new DefaultIntermediateQueryBuilder(METADATA, INJECTOR);
-        ConstructionNode newRootNode = new ConstructionNodeImpl(PROJECTION_ATOM.getVariables(),
-                new ImmutableSubstitutionImpl<>(ImmutableMap.of(X, generateURI1(A),
-                        Y, OBDAVocabulary.NULL)),
-                Optional.empty());
-        expectedQueryBuilder.init(PROJECTION_ATOM, newRootNode);
-
-        GroupNode newGroupNode = new GroupNodeImpl(ImmutableList.of(A));
-        expectedQueryBuilder.addChild(newRootNode, newGroupNode);
-        expectedQueryBuilder.addChild(newGroupNode, DATA_NODE_2);
-
-        optimizeAndCompare(queryBuilder.build(), expectedQueryBuilder.build(), emptyNode);
-    }
-
-    /**
-     * Not sure about grouping by "null".
-     */
-    @Test
-    public void testGroup3() throws EmptyQueryException {
-        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(METADATA, INJECTOR);
-
-        ConstructionNode rootNode = new ConstructionNodeImpl(PROJECTION_ATOM.getVariables(),
-                new ImmutableSubstitutionImpl<>(ImmutableMap.of(
-                        X, DATA_FACTORY.getImmutableExpression(ExpressionOperation.AVG, A),
-                        Y, generateURI1(B))),
-                Optional.empty());
-        queryBuilder.init(PROJECTION_ATOM, rootNode);
-
-        GroupNode groupNode = new GroupNodeImpl(ImmutableList.of(B));
-        queryBuilder.addChild(rootNode, groupNode);
-
-        LeftJoinNode lj1 = new LeftJoinNodeImpl(Optional.empty());
-        queryBuilder.addChild(groupNode, lj1);
-        queryBuilder.addChild(lj1, DATA_NODE_2, LEFT);
-        EmptyNode emptyNode = new EmptyNodeImpl(ImmutableSet.of(B));
-        queryBuilder.addChild(lj1, emptyNode, RIGHT);
-
-        /**
-         * Expected query
-         */
-        IntermediateQueryBuilder expectedQueryBuilder = new DefaultIntermediateQueryBuilder(METADATA, INJECTOR);
-        ConstructionNode newRootNode = new ConstructionNodeImpl(PROJECTION_ATOM.getVariables(),
-                new ImmutableSubstitutionImpl<>(ImmutableMap.of(
-                        X, DATA_FACTORY.getImmutableExpression(ExpressionOperation.AVG, A),
-                        Y, OBDAVocabulary.NULL)),
-                Optional.empty());
-        expectedQueryBuilder.init(PROJECTION_ATOM, newRootNode);
-
-        expectedQueryBuilder.addChild(newRootNode, DATA_NODE_2);
-
-        optimizeAndCompare(queryBuilder.build(), expectedQueryBuilder.build(), emptyNode);
-    }
+//    @Test
+//    public void testGroup1() throws EmptyQueryException {
+//        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(METADATA, INJECTOR);
+//
+//        ConstructionNode rootNode = new ConstructionNodeImpl(PROJECTION_ATOM.getVariables(),
+//                new ImmutableSubstitutionImpl<>(ImmutableMap.of(X, generateURI1(A),
+//                        Y, generateURI1(B))),
+//                Optional.empty());
+//        queryBuilder.init(PROJECTION_ATOM, rootNode);
+//
+//        GroupNode groupNode = new GroupNodeImpl(ImmutableList.of(A, B));
+//        queryBuilder.addChild(rootNode, groupNode);
+//
+//        LeftJoinNode lj1 = new LeftJoinNodeImpl(Optional.empty());
+//        queryBuilder.addChild(groupNode, lj1);
+//        queryBuilder.addChild(lj1, DATA_NODE_2, LEFT);
+//        EmptyNode emptyNode = new EmptyNodeImpl(ImmutableSet.of(B));
+//        queryBuilder.addChild(lj1, emptyNode, RIGHT);
+//
+//        /**
+//         * Expected query
+//         */
+//        IntermediateQueryBuilder expectedQueryBuilder = new DefaultIntermediateQueryBuilder(METADATA, INJECTOR);
+//        ConstructionNode newRootNode = new ConstructionNodeImpl(PROJECTION_ATOM.getVariables(),
+//                new ImmutableSubstitutionImpl<>(ImmutableMap.of(X, generateURI1(A),
+//                        Y, OBDAVocabulary.NULL)),
+//                Optional.empty());
+//        expectedQueryBuilder.init(PROJECTION_ATOM, newRootNode);
+//
+//        GroupNode newGroupNode = new GroupNodeImpl(ImmutableList.of(A));
+//        expectedQueryBuilder.addChild(newRootNode, newGroupNode);
+//        expectedQueryBuilder.addChild(newGroupNode, DATA_NODE_2);
+//
+//        optimizeAndCompare(queryBuilder.build(), expectedQueryBuilder.build(), emptyNode);
+//    }
+//
+//    @Test
+//    public void testGroup2() throws EmptyQueryException {
+//        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
+//
+//        ConstructionNode rootNode = new ConstructionNodeImpl(PROJECTION_ATOM.getVariables(),
+//                new ImmutableSubstitutionImpl<>(ImmutableMap.of(X, generateURI1(A),
+//                        Y, DATA_FACTORY.getImmutableExpression(ExpressionOperation.AVG, B))),
+//                Optional.empty());
+//        queryBuilder.init(PROJECTION_ATOM, rootNode);
+//
+//        GroupNode groupNode = new GroupNodeImpl(ImmutableList.of(A));
+//        queryBuilder.addChild(rootNode, groupNode);
+//
+//        LeftJoinNode lj1 = new LeftJoinNodeImpl(Optional.empty());
+//        queryBuilder.addChild(groupNode, lj1);
+//        queryBuilder.addChild(lj1, DATA_NODE_2, LEFT);
+//        EmptyNode emptyNode = new EmptyNodeImpl(ImmutableSet.of(B));
+//        queryBuilder.addChild(lj1, emptyNode, RIGHT);
+//
+//        /**
+//         * Expected query
+//         */
+//        IntermediateQueryBuilder expectedQueryBuilder = new DefaultIntermediateQueryBuilder(METADATA, INJECTOR);
+//        ConstructionNode newRootNode = new ConstructionNodeImpl(PROJECTION_ATOM.getVariables(),
+//                new ImmutableSubstitutionImpl<>(ImmutableMap.of(X, generateURI1(A),
+//                        Y, OBDAVocabulary.NULL)),
+//                Optional.empty());
+//        expectedQueryBuilder.init(PROJECTION_ATOM, newRootNode);
+//
+//        GroupNode newGroupNode = new GroupNodeImpl(ImmutableList.of(A));
+//        expectedQueryBuilder.addChild(newRootNode, newGroupNode);
+//        expectedQueryBuilder.addChild(newGroupNode, DATA_NODE_2);
+//
+//        optimizeAndCompare(queryBuilder.build(), expectedQueryBuilder.build(), emptyNode);
+//    }
+//
+//    /**
+//     * Not sure about grouping by "null".
+//     */
+//    @Test
+//    public void testGroup3() throws EmptyQueryException {
+//        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(METADATA, INJECTOR);
+//
+//        ConstructionNode rootNode = new ConstructionNodeImpl(PROJECTION_ATOM.getVariables(),
+//                new ImmutableSubstitutionImpl<>(ImmutableMap.of(
+//                        X, DATA_FACTORY.getImmutableExpression(ExpressionOperation.AVG, A),
+//                        Y, generateURI1(B))),
+//                Optional.empty());
+//        queryBuilder.init(PROJECTION_ATOM, rootNode);
+//
+//        GroupNode groupNode = new GroupNodeImpl(ImmutableList.of(B));
+//        queryBuilder.addChild(rootNode, groupNode);
+//
+//        LeftJoinNode lj1 = new LeftJoinNodeImpl(Optional.empty());
+//        queryBuilder.addChild(groupNode, lj1);
+//        queryBuilder.addChild(lj1, DATA_NODE_2, LEFT);
+//        EmptyNode emptyNode = new EmptyNodeImpl(ImmutableSet.of(B));
+//        queryBuilder.addChild(lj1, emptyNode, RIGHT);
+//
+//        /**
+//         * Expected query
+//         */
+//        IntermediateQueryBuilder expectedQueryBuilder = new DefaultIntermediateQueryBuilder(METADATA, INJECTOR);
+//        ConstructionNode newRootNode = new ConstructionNodeImpl(PROJECTION_ATOM.getVariables(),
+//                new ImmutableSubstitutionImpl<>(ImmutableMap.of(
+//                        X, DATA_FACTORY.getImmutableExpression(ExpressionOperation.AVG, A),
+//                        Y, OBDAVocabulary.NULL)),
+//                Optional.empty());
+//        expectedQueryBuilder.init(PROJECTION_ATOM, newRootNode);
+//
+//        expectedQueryBuilder.addChild(newRootNode, DATA_NODE_2);
+//
+//        optimizeAndCompare(queryBuilder.build(), expectedQueryBuilder.build(), emptyNode);
+//    }
 
 
     private static NodeTracker optimizeAndCompare(IntermediateQuery query, IntermediateQuery expectedQuery,
@@ -888,41 +887,41 @@ public class EmptyNodeRemovalTest {
 
     }
 
-    @Test
-    public void testIsNotNullBinding() throws EmptyQueryException {
-        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(METADATA, INJECTOR);
-
-        ConstructionNode rootNode = new ConstructionNodeImpl(PROJECTION_ATOM.getVariables(),
-                new ImmutableSubstitutionImpl<>(ImmutableMap.of(X, generateURI1(A),
-                        Y, DATA_FACTORY.getImmutableExpression(ExpressionOperation.IS_NOT_NULL, B))),
-                Optional.empty());
-        queryBuilder.init(PROJECTION_ATOM, rootNode);
-
-        GroupNode groupNode = new GroupNodeImpl(ImmutableList.of(A));
-        queryBuilder.addChild(rootNode, groupNode);
-
-        LeftJoinNode lj1 = new LeftJoinNodeImpl(Optional.empty());
-        queryBuilder.addChild(groupNode, lj1);
-        queryBuilder.addChild(lj1, DATA_NODE_2, LEFT);
-        EmptyNode emptyNode = new EmptyNodeImpl(ImmutableSet.of(B));
-        queryBuilder.addChild(lj1, emptyNode, RIGHT);
-
-        /**
-         * Expected query
-         */
-        IntermediateQueryBuilder expectedQueryBuilder = new DefaultIntermediateQueryBuilder(METADATA, INJECTOR);
-        ConstructionNode newRootNode = new ConstructionNodeImpl(PROJECTION_ATOM.getVariables(),
-                new ImmutableSubstitutionImpl<>(ImmutableMap.of(X, generateURI1(A),
-                        Y, DATA_FACTORY.getImmutableExpression(ExpressionOperation.IS_NOT_NULL, OBDAVocabulary.NULL))),
-                Optional.empty());
-        expectedQueryBuilder.init(PROJECTION_ATOM, newRootNode);
-
-        GroupNode newGroupNode = new GroupNodeImpl(ImmutableList.of(A));
-        expectedQueryBuilder.addChild(newRootNode, newGroupNode);
-        expectedQueryBuilder.addChild(newGroupNode, DATA_NODE_2);
-
-        optimizeAndCompare(queryBuilder.build(), expectedQueryBuilder.build(), emptyNode);
-    }
+//    @Test
+//    public void testGroupIsNotNullBinding() throws EmptyQueryException {
+//        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(METADATA, INJECTOR);
+//
+//        ConstructionNode rootNode = new ConstructionNodeImpl(PROJECTION_ATOM.getVariables(),
+//                new ImmutableSubstitutionImpl<>(ImmutableMap.of(X, generateURI1(A),
+//                        Y, DATA_FACTORY.getImmutableExpression(ExpressionOperation.IS_NOT_NULL, B))),
+//                Optional.empty());
+//        queryBuilder.init(PROJECTION_ATOM, rootNode);
+//
+//        GroupNode groupNode = new GroupNodeImpl(ImmutableList.of(A));
+//        queryBuilder.addChild(rootNode, groupNode);
+//
+//        LeftJoinNode lj1 = new LeftJoinNodeImpl(Optional.empty());
+//        queryBuilder.addChild(groupNode, lj1);
+//        queryBuilder.addChild(lj1, DATA_NODE_2, LEFT);
+//        EmptyNode emptyNode = new EmptyNodeImpl(ImmutableSet.of(B));
+//        queryBuilder.addChild(lj1, emptyNode, RIGHT);
+//
+//        /**
+//         * Expected query
+//         */
+//        IntermediateQueryBuilder expectedQueryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
+//        ConstructionNode newRootNode = new ConstructionNodeImpl(PROJECTION_ATOM.getVariables(),
+//                new ImmutableSubstitutionImpl<>(ImmutableMap.of(X, generateURI1(A),
+//                        Y, DATA_FACTORY.getImmutableExpression(ExpressionOperation.IS_NOT_NULL, OBDAVocabulary.NULL))),
+//                Optional.empty());
+//        expectedQueryBuilder.init(PROJECTION_ATOM, newRootNode);
+//
+//        GroupNode newGroupNode = new GroupNodeImpl(ImmutableList.of(A));
+//        expectedQueryBuilder.addChild(newRootNode, newGroupNode);
+//        expectedQueryBuilder.addChild(newGroupNode, DATA_NODE_2);
+//
+//        optimizeAndCompare(queryBuilder.build(), expectedQueryBuilder.build(), emptyNode);
+//    }
 
 
     private static ImmutableFunctionalTerm generateURI1(VariableOrGroundTerm argument) {

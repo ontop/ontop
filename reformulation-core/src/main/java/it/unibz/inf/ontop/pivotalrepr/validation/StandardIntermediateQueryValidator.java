@@ -90,14 +90,6 @@ public class StandardIntermediateQueryValidator implements IntermediateQueryVali
         }
 
         @Override
-        public void visit(GroupNode groupNode) {
-            if (query.getChildren(groupNode).size() != 1) {
-                throw new InvalidIntermediateQueryException("GROUP node " + groupNode
-                        + " does not have a child.\n" + query);
-            }
-        }
-
-        @Override
         public void visit(EmptyNode emptyNode) {
             if (query.getChildren(emptyNode).size() != 0) {
                 throw new InvalidIntermediateQueryException("EMPTY node " + emptyNode
