@@ -398,5 +398,5 @@ public abstract class QuestStatement implements IQuestStatement {
 			throw new OBDAException(e);
 		}
 	}
-	
+
 }

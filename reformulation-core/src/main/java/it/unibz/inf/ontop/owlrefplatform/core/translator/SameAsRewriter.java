@@ -118,7 +118,7 @@ public class SameAsRewriter {
 
         //create statement pattern for same as create owl:sameAs(anon-y1, y)
         //it will be the right atom of the join
-        Predicate sameAs = ofac.getOWLSameASPredicate();
+        Predicate sameAs = ofac.getOWLSameAsPredicate();
         Term sTerm2 = unboundleftAtom.getTerm(1);
         Term oTerm2 = leftAtom.getTerm(1);
         Function rightAtomJoin2 = ofac.getFunction(sameAs, sTerm2, oTerm2);
@@ -184,7 +184,7 @@ public class SameAsRewriter {
         //given a data property ex hasProperty (x, y)
         //create statement pattern for same as create owl:sameAs( anon-x, y)
         //it will be the right atom of the join
-        Predicate predicate = ofac.getOWLSameASPredicate();
+        Predicate predicate = ofac.getOWLSameAsPredicate();
         Term sTerm = leftAtom.getTerm(0);
         Term oTerm = ofac.getVariable("anon-"+ bnode +leftAtom.getTerm(0));
         Function rightAtomJoin = ofac.getFunction(predicate, sTerm, oTerm);
@@ -210,7 +210,7 @@ public class SameAsRewriter {
         //create statement pattern for same as create owl:sameAs(anon-y, y)
         //it will be the right atom of the join
 
-        Predicate predicate = ofac.getOWLSameASPredicate();
+        Predicate predicate = ofac.getOWLSameAsPredicate();
         Term sTerm2 = ofac.getVariable("anon-"+ bnode +leftAtom.getTerm(1));
         Term oTerm2 = leftAtom.getTerm(1);
         Function rightAtomJoin2 = ofac.getFunction(predicate, sTerm2, oTerm2);

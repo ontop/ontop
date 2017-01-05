@@ -7,24 +7,23 @@ import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 
-
 public class InteractiveExample {
 
-	/*
-	 * Use the sample database using H2 from
-	 * https://github.com/ontop/ontop/wiki/InstallingTutorialDatabases
-	 * 
-	 * Please use the pre-bundled H2 server from the above link
-	 * 
-	 */
-	final String owlfile = "src/main/resources/example/npd_no_spatial_db2.owl";
-	final String obdafile = "src/main/resources/example/npd_no_spatial_db2.obda";
-	
-	// Exclude from T-Mappings
-	final String tMappingsConfFile = "src/main/resources/example/tMappingsConf.conf";
+    /*
+     * Use the sample database using H2 from
+     * https://github.com/ontop/ontop/wiki/InstallingTutorialDatabases
+     *
+     * Please use the pre-bundled H2 server from the above link
+     *
+     */
+    final String owlfile = "src/main/resources/example/npd-benchmark-1.9/npd-v2-ql.owl";
+    final String obdafile = "src/main/resources/example/npd-benchmark-1.9/npd-v2-ql-mysql-ontop1.17.obda";
+
+    // Exclude from T-Mappings
+    final String tMappingsConfFile = "src/main/resources/example/tMappingsConf.conf";
 
 	public void runQuery() throws Exception {
-		
+
 //		/*
 //		 * T-Mappings Handling!!
 //		 */
@@ -39,13 +38,10 @@ public class InteractiveExample {
         QuestOWL reasoner = factory.createReasoner(config);
 
 
-		String outFile = "src/main/resources/davide/QueriesStdout/prova";
-
-
-		/*
-		 * Prepare the data connection for querying.
-		 */
-		QuestOWLConnection conn = reasoner.getConnection();
+	/*
+	 * Prepare the data connection for querying.
+	 */
+	QuestOWLConnection conn = reasoner.getConnection();
 
 		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 		QuestOWLStatement st = conn.createStatement();
@@ -59,8 +55,6 @@ public class InteractiveExample {
 				}
 				String sparqlQuery = builder.toString();
 				System.out.println(sparqlQuery);
-				System.out.println("INSERT A LABEL");
-				String label = br.readLine();
 				QuestOWLResultSet rs = st.executeTuple(sparqlQuery);
 				rs.close();
 				
@@ -95,10 +89,10 @@ public class InteractiveExample {
 		try {
 			InteractiveExample example = new InteractiveExample();
 
-				example.runQuery();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+	    example.runQuery();
+	} catch (Exception e) {
+	    e.printStackTrace();
 	}
+    }
 }
 

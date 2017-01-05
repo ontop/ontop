@@ -1,56 +1,15 @@
 <?xml version="1.0"?>
-
-
-<!DOCTYPE rdf:RDF [
-    <!ENTITY owl "http://www.w3.org/2002/07/owl#" >
-    <!ENTITY xsd "http://www.w3.org/2001/XMLSchema#" >
-    <!ENTITY rdfs "http://www.w3.org/2000/01/rdf-schema#" >
-    <!ENTITY rdf "http://www.w3.org/1999/02/22-rdf-syntax-ns#" >
-]>
-
-
 <rdf:RDF xmlns="http://ontop.inf.unibz.it/test/wellbore#"
      xml:base="http://ontop.inf.unibz.it/test/wellbore"
-     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
      xmlns:owl="http://www.w3.org/2002/07/owl#"
      xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
-     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#">
     <owl:Ontology rdf:about="http://ontop.inf.unibz.it/test/wellbore"/>
     
 
+
     <!-- 
-    ///////////////////////////////////////////////////////////////////////////////////////
-    //
-    // Datatype Properties
-    //
-    ///////////////////////////////////////////////////////////////////////////////////////
-     -->
-
-    
-
-
-    <!-- http://ontop.inf.unibz.it/test/wellbore#hasName -->
-
-    <owl:DatatypeProperty rdf:about="http://ontop.inf.unibz.it/test/wellbore#hasName"/>
-
-    <!-- http://ontop.inf.unibz.it/test/wellbore#inWell -->
-
-    <owl:DatatypeProperty rdf:about="http://ontop.inf.unibz.it/test/wellbore#inWell"/>
-
-    <!-- http://ontop.inf.unibz.it/test/wellbore#isHappy -->
-
-    <owl:DatatypeProperty rdf:about="http://ontop.inf.unibz.it/test/wellbore#isHappy"/>
-
-    <!-- http://ontop.inf.unibz.it/test/wellbore#hasDepth -->
-
-    <owl:DatatypeProperty rdf:about="http://ontop.inf.unibz.it/test/wellbore#hasDepth"/>
-
-    <!-- http://ontop.inf.unibz.it/test/wellbore#isActive -->
-
-    <owl:DatatypeProperty rdf:about="http://ontop.inf.unibz.it/test/wellbore#isActive"/>
-
-
- <!--
     ///////////////////////////////////////////////////////////////////////////////////////
     //
     // Object Properties
@@ -58,13 +17,56 @@
     ///////////////////////////////////////////////////////////////////////////////////////
      -->
 
-
+    
 
 
     <!-- http://ontop.inf.unibz.it/test/wellbore#hasOwner -->
 
-   <owl:ObjectProperty rdf:about="http://ontop.inf.unibz.it/test/wellbore#hasOwner"/>
+    <owl:ObjectProperty rdf:about="http://ontop.inf.unibz.it/test/wellbore#hasOwner">
+        <rdfs:domain rdf:resource="http://ontop.inf.unibz.it/test/wellbore#Wellbore"/>
+    </owl:ObjectProperty>
+    
 
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Data properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://ontop.inf.unibz.it/test/wellbore#hasDepth -->
+
+    <owl:DatatypeProperty rdf:about="http://ontop.inf.unibz.it/test/wellbore#hasDepth"/>
+    
+
+
+    <!-- http://ontop.inf.unibz.it/test/wellbore#hasName -->
+
+    <owl:DatatypeProperty rdf:about="http://ontop.inf.unibz.it/test/wellbore#hasName"/>
+    
+
+
+    <!-- http://ontop.inf.unibz.it/test/wellbore#inWell -->
+
+    <owl:DatatypeProperty rdf:about="http://ontop.inf.unibz.it/test/wellbore#inWell"/>
+    
+
+
+    <!-- http://ontop.inf.unibz.it/test/wellbore#isActive -->
+
+    <owl:DatatypeProperty rdf:about="http://ontop.inf.unibz.it/test/wellbore#isActive"/>
+    
+
+
+    <!-- http://ontop.inf.unibz.it/test/wellbore#isHappy -->
+
+    <owl:DatatypeProperty rdf:about="http://ontop.inf.unibz.it/test/wellbore#isHappy"/>
+    
 
 
     <!-- 
@@ -81,31 +83,37 @@
     <!-- http://ontop.inf.unibz.it/test/wellbore#Wellbore -->
 
     <owl:Class rdf:about="http://ontop.inf.unibz.it/test/wellbore#Wellbore"/>
+    
 
 
-     <!--
-     ///////////////////////////////////////////////////////////////////////////////////////
-     //
-     // Individuals
-     //
-     ///////////////////////////////////////////////////////////////////////////////////////
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Individuals
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
      -->
 
+    
+
+
+    <!-- http://ontop.inf.unibz.it/test/wellbore/Bill -->
+
     <owl:NamedIndividual rdf:about="http://ontop.inf.unibz.it/test/wellbore/Bill">
-    <rdf:type rdf:resource="http://ontop.inf.unibz.it/test/wellbore#Wellbore"/>
+        <rdf:type rdf:resource="http://ontop.inf.unibz.it/test/wellbore#Wellbore"/>
+        <owl:sameAs rdf:resource="http://ontop.inf.unibz.it/test/wellbore/Katian"/>
     </owl:NamedIndividual>
+    
+
+
+    <!-- http://ontop.inf.unibz.it/test/wellbore/Katian -->
 
     <owl:NamedIndividual rdf:about="http://ontop.inf.unibz.it/test/wellbore/Katian">
         <rdf:type rdf:resource="http://ontop.inf.unibz.it/test/wellbore#Wellbore"/>
-        <owl:sameAs rdf:resource="http://ontop.inf.unibz.it/test/wellbore/Bill"/>
     </owl:NamedIndividual>
-
-
-
-
 </rdf:RDF>
 
 
 
-<!-- Generated by the OWL API (version 3.4.2) http://owlapi.sourceforge.net -->
+<!-- Generated by the OWL API (version 4.2.6.20160910-2108) https://github.com/owlcs/owlapi -->
 
