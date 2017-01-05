@@ -1,8 +1,6 @@
 package it.unibz.inf.ontop.injection.impl;
 
 
-import com.google.inject.Guice;
-import com.google.inject.Injector;
 import com.google.inject.Module;
 import it.unibz.inf.ontop.exception.InvalidMappingException;
 import it.unibz.inf.ontop.injection.*;
@@ -14,38 +12,36 @@ import org.openrdf.model.Model;
 
 import javax.annotation.Nonnull;
 import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Optional;
 import java.util.Properties;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class OBDACoreConfigurationImpl implements OBDACoreConfiguration {
+public class OBDACoreConfigurationImpl extends OntopModelConfigurationImpl implements OBDACoreConfiguration {
 
     private final OBDAProperties obdaProperties;
     private final OBDAConfigurationOptions options;
 
-    // Late-building
-    private Injector injector;
-
     protected OBDACoreConfigurationImpl(OBDAProperties obdaProperties,
+                                        OntopModelConfigurationOptions modelOptions,
                                         OBDAConfigurationOptions options) {
+        super(obdaProperties, modelOptions);
         this.obdaProperties = obdaProperties;
         this.options = options;
-        // Will be built on-demand
-        injector = null;
     }
 
     /**
      * To be overloaded
      *
      */
+    @Override
     protected Stream<Module> buildGuiceModules() {
-        return Stream.of(new OBDACoreModule(this));
+        return Stream.concat(
+                super.buildGuiceModules(),
+                Stream.of(new OBDACoreModule(this)));
     }
 
     @Override
@@ -91,7 +87,7 @@ public class OBDACoreConfigurationImpl implements OBDACoreConfiguration {
      * TODO: complete
      */
     @Override
-    public void validate() throws InvalidOBDAConfigurationException {
+    public void validate() throws InvalidOntopConfigurationException {
         // TODO: complete if multiple alternatives for building the OBDAModel are provided
     }
 
@@ -111,15 +107,6 @@ public class OBDACoreConfigurationImpl implements OBDACoreConfiguration {
      */
     protected boolean isMappingDefined() {
         return isInputMappingDefined();
-    }
-
-
-    @Override
-    public final Injector getInjector() {
-        if (injector == null) {
-            injector = Guice.createInjector(buildGuiceModules().collect(Collectors.toList()));
-        }
-        return injector;
     }
 
     @Override
@@ -164,7 +151,9 @@ public class OBDACoreConfigurationImpl implements OBDACoreConfiguration {
      * Builder
      *
      */
-    public static class BuilderImpl<B extends Builder, P extends OBDAProperties, C extends OBDACoreConfiguration> implements Builder<B> {
+    public static class BuilderImpl<B extends OBDACoreConfiguration.Builder, P extends OBDAProperties, C extends OBDACoreConfiguration>
+            extends OntopModelConfigurationImpl.BuilderImpl<B,P,C>
+            implements OBDACoreConfiguration.Builder<B> {
 
         /**
          * Please make sure it is an instance of B!
@@ -177,7 +166,6 @@ public class OBDACoreConfigurationImpl implements OBDACoreConfiguration {
         private Optional<File> mappingFile = Optional.empty();
         private Optional<Reader> mappingReader = Optional.empty();
         private Optional<Model> mappingGraph = Optional.empty();
-        private Optional<Properties> properties = Optional.empty();
         private Optional<Boolean> obtainFullMetadata = Optional.empty();
         private Optional<String> jdbcUrl = Optional.empty();
 
@@ -190,7 +178,7 @@ public class OBDACoreConfigurationImpl implements OBDACoreConfiguration {
         @Override
         public B obdaModel(@Nonnull OBDAModel obdaModel) {
             if (isMappingDefined) {
-                throw new InvalidOBDAConfigurationException("OBDA model or mappings already defined!");
+                throw new InvalidOntopConfigurationException("OBDA model or mappings already defined!");
             }
             declareMappingDefined();
             this.obdaModel = Optional.of(obdaModel);
@@ -200,7 +188,7 @@ public class OBDACoreConfigurationImpl implements OBDACoreConfiguration {
         @Override
         public B nativeOntopMappingFile(@Nonnull File mappingFile) {
             if (isMappingDefined) {
-                throw new InvalidOBDAConfigurationException("OBDA model or mappings already defined!");
+                throw new InvalidOntopConfigurationException("OBDA model or mappings already defined!");
             }
             declareMappingDefined();
             this.mappingFile = Optional.of(mappingFile);
@@ -216,7 +204,7 @@ public class OBDACoreConfigurationImpl implements OBDACoreConfiguration {
         @Override
         public B nativeOntopMappingReader(@Nonnull Reader mappingReader) {
             if (isMappingDefined) {
-                throw new InvalidOBDAConfigurationException("OBDA model or mappings already defined!");
+                throw new InvalidOntopConfigurationException("OBDA model or mappings already defined!");
             }
             declareMappingDefined();
             this.mappingReader = Optional.of(mappingReader);
@@ -226,7 +214,7 @@ public class OBDACoreConfigurationImpl implements OBDACoreConfiguration {
         @Override
         public B r2rmlMappingFile(@Nonnull File mappingFile) {
             if (isMappingDefined) {
-                throw new InvalidOBDAConfigurationException("OBDA model or mappings already defined!");
+                throw new InvalidOntopConfigurationException("OBDA model or mappings already defined!");
             }
             declareMappingDefined();
             useR2rml = true;
@@ -237,7 +225,7 @@ public class OBDACoreConfigurationImpl implements OBDACoreConfiguration {
         @Override
         public B r2rmlMappingFile(@Nonnull String mappingFilename) {
             if (isMappingDefined) {
-                throw new InvalidOBDAConfigurationException("OBDA model or mappings already defined!");
+                throw new InvalidOntopConfigurationException("OBDA model or mappings already defined!");
             }
             declareMappingDefined();
             useR2rml = true;
@@ -252,19 +240,19 @@ public class OBDACoreConfigurationImpl implements OBDACoreConfiguration {
                     this.mappingFile = Optional.of(new File(fileURI));
                 }
                 else {
-                    throw new InvalidOBDAConfigurationException("Currently only local files are supported" +
+                    throw new InvalidOntopConfigurationException("Currently only local files are supported" +
                             "as R2RML mapping files");
                 }
                 return (B) this;
             } catch (URISyntaxException e) {
-                throw new InvalidOBDAConfigurationException("Invalid mapping file path: " + e.getMessage());
+                throw new InvalidOntopConfigurationException("Invalid mapping file path: " + e.getMessage());
             }
         }
 
         @Override
         public B r2rmlMappingReader(@Nonnull Reader mappingReader) {
             if (isMappingDefined) {
-                throw new InvalidOBDAConfigurationException("OBDA model or mappings already defined!");
+                throw new InvalidOntopConfigurationException("OBDA model or mappings already defined!");
             }
             declareMappingDefined();
             useR2rml = true;
@@ -275,52 +263,12 @@ public class OBDACoreConfigurationImpl implements OBDACoreConfiguration {
         @Override
         public B r2rmlMappingGraph(@Nonnull Model rdfGraph) {
             if (isMappingDefined) {
-                throw new InvalidOBDAConfigurationException("OBDA model or mappings already defined!");
+                throw new InvalidOntopConfigurationException("OBDA model or mappings already defined!");
             }
             declareMappingDefined();
             useR2rml = true;
             this.mappingGraph = Optional.of(rdfGraph);
             return (B) this;
-        }
-
-        /**
-         * Have precedence over other parameters
-         */
-        @Override
-        public B properties(@Nonnull Properties properties) {
-            this.properties = Optional.of(properties);
-            return (B) this;
-        }
-
-        @Override
-        public B propertyFile(String propertyFilePath) {
-            try {
-                URI fileURI = new URI(propertyFilePath);
-                String scheme = fileURI.getScheme();
-                if (scheme == null) {
-                    return propertyFile(new File(fileURI.getPath()));
-                }
-                else if (scheme.equals("file")) {
-                    return propertyFile(new File(fileURI));
-                }
-                else {
-                    throw new InvalidOBDAConfigurationException("Currently only local property files are supported.");
-                }
-            } catch (URISyntaxException e) {
-                throw new InvalidOBDAConfigurationException("Invalid property file path: " + e.getMessage());
-            }
-        }
-
-        @Override
-        public B propertyFile(File propertyFile) {
-            try {
-                Properties p = new Properties();
-                p.load(new FileReader(propertyFile));
-                return properties(p);
-
-            } catch (IOException e) {
-                throw new InvalidOBDAConfigurationException("Cannot reach the property file: " + propertyFile);
-            }
         }
 
         @Override
@@ -341,21 +289,6 @@ public class OBDACoreConfigurationImpl implements OBDACoreConfiguration {
             return (B) this;
         }
 
-        @Override
-        public final C build() {
-            Properties p = generateProperties();
-
-            /**
-             * User-provided properties have the highest precedence.
-             */
-            properties.ifPresent(p::putAll);
-
-            P obdaProperties = createOBDAProperties(p);
-
-            return createConfiguration(obdaProperties);
-
-        }
-
         /**
          * Allows to detect double mapping definition (error).
          */
@@ -367,14 +300,9 @@ public class OBDACoreConfigurationImpl implements OBDACoreConfiguration {
             return isMappingDefined;
         }
 
-        /**
-         * TODO: explain
-         * TODO: find a better term
-         *
-         * Can be overloaded (for extensions)
-         */
+        @Override
         protected Properties generateProperties() {
-            Properties p = new Properties();
+            Properties p = super.generateProperties();
 
             // Never puts the mapping file path
 
@@ -389,7 +317,8 @@ public class OBDACoreConfigurationImpl implements OBDACoreConfiguration {
          *
          * Default implementation for P == OBDAProperties
          */
-        protected P createOBDAProperties(Properties p) {
+        @Override
+        protected P createOntopModelProperties(Properties p) {
             return (P) new OBDAPropertiesImpl(p, useR2rml);
         }
 
@@ -398,8 +327,10 @@ public class OBDACoreConfigurationImpl implements OBDACoreConfiguration {
          *
          * Default implementation for P == OBDAConfiguration
          */
+        @Override
         protected C createConfiguration(P obdaProperties) {
-            return (C) new OBDACoreConfigurationImpl(obdaProperties, createOBDAConfigurationArguments());
+            return (C) new OBDACoreConfigurationImpl(obdaProperties, createOntopModelConfigurationArguments(),
+                    createOBDAConfigurationArguments());
         }
 
         protected final OBDAConfigurationOptions createOBDAConfigurationArguments() {
@@ -412,7 +343,7 @@ public class OBDACoreConfigurationImpl implements OBDACoreConfiguration {
 
         protected final void setMappingFile(String mappingFilename) {
             if (isMappingDefined) {
-                throw new InvalidOBDAConfigurationException("OBDA model or mappings already defined!");
+                throw new InvalidOntopConfigurationException("OBDA model or mappings already defined!");
             }
             declareMappingDefined();
             try {
@@ -425,11 +356,11 @@ public class OBDACoreConfigurationImpl implements OBDACoreConfiguration {
                     this.mappingFile = Optional.of(new File(fileURI));
                 }
                 else {
-                    throw new InvalidOBDAConfigurationException("Currently only local files are supported" +
+                    throw new InvalidOntopConfigurationException("Currently only local files are supported" +
                             "as mapping files");
                 }
             } catch (URISyntaxException e) {
-                throw new InvalidOBDAConfigurationException("Invalid mapping file path: " + e.getMessage());
+                throw new InvalidOntopConfigurationException("Invalid mapping file path: " + e.getMessage());
             }
         }
     }

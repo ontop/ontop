@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.reformulation.tests;
+package it.unibz.inf.ontop.iq;
 
 
 import com.google.common.collect.ImmutableList;
@@ -10,12 +10,12 @@ import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.AtomPredicateImpl;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionImpl;
-import it.unibz.inf.ontop.owlrefplatform.injection.QuestCoreConfiguration;
+import it.unibz.inf.ontop.injection.OntopModelConfiguration;
 import it.unibz.inf.ontop.pivotalrepr.*;
 import it.unibz.inf.ontop.pivotalrepr.impl.*;
 import it.unibz.inf.ontop.pivotalrepr.impl.tree.DefaultIntermediateQueryBuilder;
 import it.unibz.inf.ontop.pivotalrepr.validation.InvalidIntermediateQueryException;
-import it.unibz.inf.ontop.sql.RDBMetadataExtractionTools;
+import it.unibz.inf.ontop.sql.DBMetadataTestingTools;
 import org.junit.Test;
 
 import java.util.Optional;
@@ -40,7 +40,7 @@ public class IQValidationTest {
 
     private final MetadataForQueryOptimization metadata;
 
-    private static final Injector INJECTOR = QuestCoreConfiguration.defaultBuilder().build().getInjector();
+    private static final Injector INJECTOR = OntopModelConfiguration.defaultBuilder().build().getInjector();
 
     public IQValidationTest() {
         metadata = initMetadata();
@@ -55,7 +55,7 @@ public class IQValidationTest {
         uniqueKeyBuilder.put(TABLE1_PREDICATE, ImmutableList.of(1));
 
         return new MetadataForQueryOptimizationImpl(
-                RDBMetadataExtractionTools.createDummyMetadata(),
+                DBMetadataTestingTools.createDummyMetadata(),
                 uniqueKeyBuilder.build(),
                 new UriTemplateMatcher());
     }

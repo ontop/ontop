@@ -15,7 +15,7 @@ import java.util.Optional;
  * TODO: update this description
  *
  */
-public interface OBDAProperties {
+public interface OBDAProperties extends OntopModelProperties {
 
     //-------------------
     // High-level methods
@@ -45,19 +45,4 @@ public interface OBDAProperties {
 
     String MAPPING_FILE_PATH = "MAPPING_FILE_PATH";
 
-
-    //-------------------
-    // Low-level methods
-    //-------------------
-
-    Optional<Boolean> getBoolean(String key);
-    boolean getRequiredBoolean(String key);
-
-    Optional<Integer> getInteger(String key);
-    int getRequiredInteger(String key);
-
-    Optional<String> getProperty(String key);
-    String getRequiredProperty(String key);
-
-    boolean contains(Object key);
 }

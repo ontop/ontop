@@ -21,8 +21,6 @@ public interface QuestCoreConfiguration extends OBDACoreConfiguration {
 
     QuestCorePreferences getPreferences();
 
-    OptimizationConfiguration getOptimizationConfiguration();
-
     CardinalityPreservationMode getCardinalityPreservationMode();
 
 

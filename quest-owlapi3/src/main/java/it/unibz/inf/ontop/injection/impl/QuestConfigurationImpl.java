@@ -4,10 +4,8 @@ package it.unibz.inf.ontop.injection.impl;
 import com.google.inject.Injector;
 import it.unibz.inf.ontop.injection.*;
 import it.unibz.inf.ontop.io.InvalidDataSourceException;
-import it.unibz.inf.ontop.model.OBDADataFactory;
 import it.unibz.inf.ontop.model.OBDADataSource;
 import it.unibz.inf.ontop.model.OBDAModel;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.owlapi.directmapping.DirectMappingEngine;
 import it.unibz.inf.ontop.owlrefplatform.injection.impl.QuestCoreConfigurationImpl;
 import org.semanticweb.owlapi.apibinding.OWLManager;
@@ -29,9 +27,10 @@ public class QuestConfigurationImpl extends QuestCoreConfigurationImpl implement
     private final QuestOptions options;
     private final QuestPreferences preferences;
 
-    protected QuestConfigurationImpl(QuestPreferences preferences, OBDAConfigurationOptions obdaOptions,
-                                     QuestCoreOptions coreOptions, QuestOptions options) {
-        super(preferences, obdaOptions, coreOptions);
+    protected QuestConfigurationImpl(QuestPreferences preferences, OntopModelConfigurationOptions modelOptions,
+                                     OBDAConfigurationOptions obdaOptions, QuestCoreOptions coreOptions,
+                                     QuestOptions options) {
+        super(preferences, modelOptions, obdaOptions, coreOptions);
         this.preferences = preferences;
         this.options = options;
     }
@@ -178,7 +177,7 @@ public class QuestConfigurationImpl extends QuestCoreConfigurationImpl implement
         @Override
         public B ontologyFile(@Nonnull URL url) {
                 if (isOntologyDefined) {
-                    throw new InvalidOBDAConfigurationException("Ontology already defined!");
+                    throw new InvalidOntopConfigurationException("Ontology already defined!");
                 }
                 isOntologyDefined = true;
                 this.ontologyURL = Optional.of(url);
@@ -189,7 +188,7 @@ public class QuestConfigurationImpl extends QuestCoreConfigurationImpl implement
         @Override
         public B ontologyFile(@Nonnull File owlFile) {
             if (isOntologyDefined) {
-                throw new InvalidOBDAConfigurationException("Ontology already defined!");
+                throw new InvalidOntopConfigurationException("Ontology already defined!");
             }
             isOntologyDefined = true;
             this.ontologyFile = Optional.of(owlFile);
@@ -199,7 +198,7 @@ public class QuestConfigurationImpl extends QuestCoreConfigurationImpl implement
         @Override
         public B ontology(@Nonnull OWLOntology ontology) {
             if (isOntologyDefined) {
-                throw new InvalidOBDAConfigurationException("Ontology already defined!");
+                throw new InvalidOntopConfigurationException("Ontology already defined!");
             }
             isOntologyDefined = true;
             this.ontology = Optional.of(ontology);
@@ -209,7 +208,7 @@ public class QuestConfigurationImpl extends QuestCoreConfigurationImpl implement
         @Override
         public B bootstrapMapping(OBDADataSource source, String baseIRI) {
             if (isMappingDefined()) {
-                throw new InvalidOBDAConfigurationException("OBDA model or mappings already defined!");
+                throw new InvalidOntopConfigurationException("OBDA model or mappings already defined!");
             }
             declareMappingDefined();
             sourceToBootstrap = Optional.of(source);
@@ -236,7 +235,7 @@ public class QuestConfigurationImpl extends QuestCoreConfigurationImpl implement
          * Default implementation for P == QuestPreferences
          */
         @Override
-        protected P createOBDAProperties(Properties p) {
+        protected P createOntopModelProperties(Properties p) {
             return (P) new QuestPreferencesImpl(p, isR2rml());
         }
 
@@ -245,8 +244,8 @@ public class QuestConfigurationImpl extends QuestCoreConfigurationImpl implement
          */
         @Override
         protected C createConfiguration(P questPreferences) {
-            return (C) new QuestConfigurationImpl(questPreferences, createOBDAConfigurationArguments(),
-                    createQuestCoreArguments(), createQuestArguments());
+            return (C) new QuestConfigurationImpl(questPreferences, createOntopModelConfigurationArguments(),
+                    createOBDAConfigurationArguments(), createQuestCoreArguments(), createQuestArguments());
         }
 
         protected final QuestOptions createQuestArguments() {

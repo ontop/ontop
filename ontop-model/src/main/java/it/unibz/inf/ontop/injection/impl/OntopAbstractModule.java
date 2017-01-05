@@ -3,17 +3,17 @@ package it.unibz.inf.ontop.injection.impl;
 import com.google.inject.AbstractModule;
 import com.google.inject.Module;
 import com.google.inject.assistedinject.FactoryModuleBuilder;
-import it.unibz.inf.ontop.injection.OBDAProperties;
+import it.unibz.inf.ontop.injection.OntopModelProperties;
 
 import java.util.List;
 
 /**
  * TODO: add generic code about property analysis
  */
-public abstract class OBDAAbstractModule extends AbstractModule {
+public abstract class OntopAbstractModule extends AbstractModule {
 
     /**
-     * Interface not found in the configuration or impossibility to load the
+     * Interface not found in the properties or impossibility to load the
      * declared implementation class.
      */
     public class UnknownClassException extends RuntimeException {
@@ -22,16 +22,16 @@ public abstract class OBDAAbstractModule extends AbstractModule {
         }
     }
 
-    private final OBDAProperties configuration;
+    private final OntopModelProperties properties;
 
-    protected OBDAAbstractModule(OBDAProperties configuration) {
-        this.configuration = configuration;
+    protected OntopAbstractModule(OntopModelProperties configuration) {
+        this.properties = configuration;
     }
 
     public Class getImplementation(String interfaceClassName) throws UnknownClassException {
-        String implementationClassName = configuration.getProperty(interfaceClassName)
+        String implementationClassName = properties.getProperty(interfaceClassName)
                 .orElseThrow(() -> new UnknownClassException(String.format(
-                        "No entry for the interface %s in the configuration.",
+                        "No entry for the interface %s in the properties.",
                         interfaceClassName)));
 
         try {
@@ -57,11 +57,11 @@ public abstract class OBDAAbstractModule extends AbstractModule {
      * TO be called by sub-classes, inside the configure() method.
      */
     protected void configureCoreConfiguration() {
-        bind(OBDAProperties.class).toInstance(configuration);
+        bind(OntopModelProperties.class).toInstance(properties);
     }
 
-    protected OBDAProperties getPreferences() {
-        return configuration;
+    protected OntopModelProperties getProperties() {
+        return properties;
     }
 
     /**

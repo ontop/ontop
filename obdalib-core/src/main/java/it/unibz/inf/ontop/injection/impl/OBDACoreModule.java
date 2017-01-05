@@ -6,6 +6,7 @@ import com.google.inject.util.Providers;
 import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
 import it.unibz.inf.ontop.injection.OBDACoreConfiguration;
 import it.unibz.inf.ontop.injection.OBDAFactoryWithException;
+import it.unibz.inf.ontop.injection.OBDAProperties;
 import it.unibz.inf.ontop.io.PrefixManager;
 import it.unibz.inf.ontop.mapping.MappingParser;
 import it.unibz.inf.ontop.model.OBDAMappingAxiom;
@@ -16,7 +17,7 @@ import it.unibz.inf.ontop.utils.IMapping2DatalogConverter;
 
 import java.util.Optional;
 
-public class OBDACoreModule extends OBDAAbstractModule {
+public class OBDACoreModule extends OntopAbstractModule {
 
     // Keeps track of the config until module configuration
     private OBDACoreConfiguration configuration;
@@ -30,11 +31,17 @@ public class OBDACoreModule extends OBDAAbstractModule {
         Optional<ImplicitDBConstraintsReader> optionalDBConstraints = configuration.getImplicitDBConstraintsReader();
         if (optionalDBConstraints.isPresent()) {
             bind(ImplicitDBConstraintsReader.class).toInstance(optionalDBConstraints.get());
-        }
-        else {
+        } else {
             bind(ImplicitDBConstraintsReader.class).toProvider(Providers.<ImplicitDBConstraintsReader>of(null));
         }
     }
+
+    @Override
+    protected void configureCoreConfiguration() {
+        super.configureCoreConfiguration();
+        bind(OBDAProperties.class).toInstance((OBDAProperties)getProperties());
+    }
+
 
     @Override
     protected void configure() {

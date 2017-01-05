@@ -16,7 +16,7 @@ import it.unibz.inf.ontop.executor.substitution.SubstitutionPropagationExecutor;
 import it.unibz.inf.ontop.executor.truenode.TrueNodeRemovalExecutor;
 import it.unibz.inf.ontop.executor.union.UnionLiftInternalExecutor;
 import it.unibz.inf.ontop.executor.unsatisfiable.RemoveEmptyNodesExecutor;
-import it.unibz.inf.ontop.injection.InvalidOBDAConfigurationException;
+import it.unibz.inf.ontop.injection.InvalidOntopConfigurationException;
 import it.unibz.inf.ontop.injection.impl.OBDACoreConfigurationImpl;
 import it.unibz.inf.ontop.model.DBMetadata;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
@@ -38,16 +38,14 @@ public class QuestCoreConfigurationImpl extends OBDACoreConfigurationImpl implem
 
     private final QuestCorePreferences preferences;
     private final QuestCoreOptions options;
-    private final OptimizationConfiguration optimizationConfiguration;
     private final CardinalityPreservationMode cardinalityMode;
 
-    protected QuestCoreConfigurationImpl(QuestCorePreferences preferences, OBDAConfigurationOptions obdaOptions,
+    protected QuestCoreConfigurationImpl(QuestCorePreferences preferences, OntopModelConfigurationOptions modelOptions,
+                                         OBDAConfigurationOptions obdaOptions,
                                          QuestCoreOptions options) {
-        super(preferences, obdaOptions);
+        super(preferences, modelOptions, obdaOptions);
         this.preferences = preferences;
         this.options = options;
-        this.optimizationConfiguration = new OptimizationConfigurationImpl(generateOptimizationConfigurationMap());
-
         // TODO: allow the other modes
         cardinalityMode = LOOSE;
     }
@@ -56,14 +54,14 @@ public class QuestCoreConfigurationImpl extends OBDACoreConfigurationImpl implem
      * TODO: complete
      */
     @Override
-    public void validate() throws InvalidOBDAConfigurationException {
+    public void validate() throws InvalidOntopConfigurationException {
 
         boolean isMapping = isMappingDefined();
 
         if ((!isMapping) && preferences.isInVirtualMode()) {
-            throw new InvalidOBDAConfigurationException("Mapping is not specified in virtual mode", this);
+            throw new InvalidOntopConfigurationException("Mapping is not specified in virtual mode", this);
         } else if (isMapping && (!preferences.isInVirtualMode())) {
-            throw new InvalidOBDAConfigurationException("Mapping is specified in classic A-box mode", this);
+            throw new InvalidOntopConfigurationException("Mapping is specified in classic A-box mode", this);
         }
         /**
          * TODO: complete
@@ -97,10 +95,13 @@ public class QuestCoreConfigurationImpl extends OBDACoreConfigurationImpl implem
     /**
      * Can be overloaded by sub-classes
      */
+    @Override
     protected ImmutableMap<Class<? extends QueryOptimizationProposal>, Class<? extends InternalProposalExecutor>>
     generateOptimizationConfigurationMap() {
         ImmutableMap.Builder<Class<? extends QueryOptimizationProposal>, Class<? extends InternalProposalExecutor>>
                 internalExecutorMapBuilder = ImmutableMap.builder();
+        internalExecutorMapBuilder.putAll(super.generateOptimizationConfigurationMap());
+
         internalExecutorMapBuilder.put(InnerJoinOptimizationProposal.class, InnerJoinExecutor.class);
         internalExecutorMapBuilder.put(SubstitutionPropagationProposal.class, SubstitutionPropagationExecutor.class);
         internalExecutorMapBuilder.put(PushDownBooleanExpressionProposal.class, PushDownExpressionExecutor.class);
@@ -114,11 +115,6 @@ public class QuestCoreConfigurationImpl extends OBDACoreConfigurationImpl implem
         internalExecutorMapBuilder.put(ProjectionShrinkingProposal.class, ProjectionShrinkingExecutor.class);
         internalExecutorMapBuilder.put(TrueNodeRemovalProposal.class, TrueNodeRemovalExecutor.class);
         return internalExecutorMapBuilder.build();
-    }
-
-    @Override
-    public OptimizationConfiguration getOptimizationConfiguration() {
-        return optimizationConfiguration;
     }
 
     @Override
@@ -220,7 +216,7 @@ public class QuestCoreConfigurationImpl extends OBDACoreConfigurationImpl implem
          * Default implementation for P == QuestCorePreferences
          */
         @Override
-        protected P createOBDAProperties(Properties p) {
+        protected P createOntopModelProperties(Properties p) {
             return (P) new QuestCorePreferencesImpl(p, isR2rml());
         }
 
@@ -229,8 +225,8 @@ public class QuestCoreConfigurationImpl extends OBDACoreConfigurationImpl implem
          */
         @Override
         protected C createConfiguration(P questPreferences) {
-            return (C) new QuestCoreConfigurationImpl(questPreferences, createOBDAConfigurationArguments(),
-                    createQuestCoreArguments());
+            return (C) new QuestCoreConfigurationImpl(questPreferences, createOntopModelConfigurationArguments(),
+                    createOBDAConfigurationArguments(), createQuestCoreArguments());
         }
 
         protected final QuestCoreOptions createQuestCoreArguments() {

@@ -1,6 +1,5 @@
 package it.unibz.inf.ontop.injection;
 
-import com.google.inject.Injector;
 import it.unibz.inf.ontop.exception.InvalidMappingException;
 import it.unibz.inf.ontop.injection.impl.OBDACoreConfigurationImpl;
 import it.unibz.inf.ontop.io.InvalidDataSourceException;
@@ -13,16 +12,13 @@ import java.io.File;
 import java.io.IOException;
 import java.io.Reader;
 import java.util.Optional;
-import java.util.Properties;
 
 /**
  * TODO: explain
  */
-public interface OBDACoreConfiguration {
+public interface OBDACoreConfiguration extends OntopModelConfiguration {
 
     OBDAProperties getOBDAProperties();
-
-    Injector getInjector();
 
     Optional<ImplicitDBConstraintsReader> getImplicitDBConstraintsReader();
 
@@ -40,8 +36,6 @@ public interface OBDACoreConfiguration {
                         "Do not call this method unless you are sure of the mapping provision."));
     }
 
-    void validate() throws InvalidOBDAConfigurationException;
-
     /**
      * Default builder
      */
@@ -52,7 +46,7 @@ public interface OBDACoreConfiguration {
     /**
      * TODO: explain
      */
-    interface Builder<B extends Builder> {
+    interface Builder<B extends Builder> extends OntopModelConfiguration.Builder<B> {
 
         B obdaModel(@Nonnull OBDAModel obdaModel);
 
@@ -69,10 +63,6 @@ public interface OBDACoreConfiguration {
         B r2rmlMappingReader(@Nonnull Reader mappingReader);
 
         B r2rmlMappingGraph(@Nonnull Model rdfGraph);
-
-        B properties(@Nonnull Properties properties);
-        B propertyFile(String propertyFilePath);
-        B propertyFile(File propertyFile);
 
         B dbConstraintsReader(@Nonnull ImplicitDBConstraintsReader constraints);
 

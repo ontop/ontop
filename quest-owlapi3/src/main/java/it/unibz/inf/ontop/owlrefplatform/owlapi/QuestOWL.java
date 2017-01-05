@@ -22,7 +22,7 @@ package it.unibz.inf.ontop.owlrefplatform.owlapi;
 
 import com.google.inject.Injector;
 import it.unibz.inf.ontop.exception.InvalidMappingException;
-import it.unibz.inf.ontop.injection.InvalidOBDAConfigurationException;
+import it.unibz.inf.ontop.injection.InvalidOntopConfigurationException;
 import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.injection.QuestPreferences;
 import it.unibz.inf.ontop.io.InvalidDataSourceException;
@@ -143,7 +143,7 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 		 */
 		try {
 			questConfiguration.validate();
-		} catch (InvalidOBDAConfigurationException e) {
+		} catch (InvalidOntopConfigurationException e) {
 			throw new IllegalConfigurationException(e.getMessage(), owlConfiguration);
 		}
 

@@ -14,7 +14,7 @@ import it.unibz.inf.ontop.executor.substitution.SubstitutionPropagationExecutor;
 import it.unibz.inf.ontop.executor.truenode.TrueNodeRemovalExecutor;
 import it.unibz.inf.ontop.executor.union.UnionLiftInternalExecutor;
 import it.unibz.inf.ontop.executor.unsatisfiable.RemoveEmptyNodesExecutor;
-import it.unibz.inf.ontop.injection.impl.OBDAAbstractModule;
+import it.unibz.inf.ontop.injection.impl.OntopAbstractModule;
 import it.unibz.inf.ontop.owlrefplatform.core.DBConnector;
 import it.unibz.inf.ontop.owlrefplatform.core.IQuest;
 import it.unibz.inf.ontop.owlrefplatform.core.QueryCache;
@@ -30,7 +30,7 @@ import it.unibz.inf.ontop.pivotalrepr.validation.IntermediateQueryValidator;
 /**
  * TODO: describe
  */
-public class QuestComponentModule extends OBDAAbstractModule {
+public class QuestComponentModule extends OntopAbstractModule {
 
     // Temporary
     private QuestCoreConfiguration configuration;
@@ -43,8 +43,7 @@ public class QuestComponentModule extends OBDAAbstractModule {
     @Override
     protected void configureCoreConfiguration() {
         super.configureCoreConfiguration();
-        bind(QuestCorePreferences.class).toInstance((QuestCorePreferences) getPreferences());
-        bind(OptimizationConfiguration.class).toInstance(configuration.getOptimizationConfiguration());
+        bind(QuestCorePreferences.class).toInstance((QuestCorePreferences) getProperties());
     }
 
     @Override
@@ -59,7 +58,6 @@ public class QuestComponentModule extends OBDAAbstractModule {
         install(componentFactoryModule);
         bindFromPreferences(MappingVocabularyFixer.class);
         bindFromPreferences(QueryCache.class);
-        bindFromPreferences(IntermediateQueryValidator.class);
         // Executors
         bindFromPreferences(InnerJoinExecutor.class);
         bindFromPreferences(SubstitutionPropagationExecutor.class);
