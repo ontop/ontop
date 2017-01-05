@@ -57,16 +57,6 @@
 			<artifactId>sesame-queryparser-sparql</artifactId>
 		</dependency>
 
-<!--  		<dependency>
-  			<groupId>net.sf.jgrapht</groupId>
-  			<artifactId>jgrapht</artifactId>
-		</dependency> -->
-		
-		<dependency>
-				<groupId>org.javabits.jgrapht</groupId>
-				<artifactId>jgrapht-core</artifactId>
-		</dependency>
-
 		<dependency>
     		<groupId>com.google.guava</groupId>
     		<artifactId>guava</artifactId>
