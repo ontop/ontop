@@ -229,16 +229,16 @@ public class IQValidationTest {
         IntermediateQuery query = queryBuilder.build();
     }
 
-    @Test(expected = InvalidIntermediateQueryException.class)
-    public void testGroupNodeChildren() {
-        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(metadata);
-        GroupNode groupNode = new GroupNodeImpl(ImmutableList.of(Z));
-        ConstructionNode constructionNode = new ConstructionNodeImpl(ImmutableSet.of(Z));
-        DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_VAR1_PREDICATE, Z);
-        queryBuilder.init(projectionAtom, constructionNode);
-        queryBuilder.addChild(constructionNode, groupNode);
-        IntermediateQuery query = queryBuilder.build();
-    }
+//    @Test(expected = InvalidIntermediateQueryException.class)
+//    public void testGroupNodeChildren() {
+//        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(metadata);
+//        GroupNode groupNode = new GroupNodeImpl(ImmutableList.of(Z));
+//        ConstructionNode constructionNode = new ConstructionNodeImpl(ImmutableSet.of(Z));
+//        DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_VAR1_PREDICATE, Z);
+//        queryBuilder.init(projectionAtom, constructionNode);
+//        queryBuilder.addChild(constructionNode, groupNode);
+//        IntermediateQuery query = queryBuilder.build();
+//    }
 
     @Test(expected = InvalidIntermediateQueryException.class)
     public void testEmptyNodeChildren() {

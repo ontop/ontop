@@ -142,13 +142,6 @@ public class PullVariableOutOfDataNodeExecutorImpl implements PullVariableOutOfD
             else if (ancestorNode instanceof ConstructionNode) {
                 return insertFilterNode(treeComponent, lastChildNode, newEqualities);
             }
-            /**
-             * Continues to the next ancestor
-             */
-            else if (ancestorNode instanceof GroupNode) {
-                optionalAncestorNode = treeComponent.getParent(ancestorNode);
-                lastChildNode = ancestorNode;
-            }
             else {
                 throw new RuntimeException("Unsupported ancestor node : " + ancestorNode);
             }
