@@ -26,9 +26,8 @@ public class OBDACoreConfigurationImpl extends OntopModelConfigurationImpl imple
     private final OBDAConfigurationOptions options;
 
     protected OBDACoreConfigurationImpl(OBDAProperties obdaProperties,
-                                        OntopModelConfigurationOptions modelOptions,
                                         OBDAConfigurationOptions options) {
-        super(obdaProperties, modelOptions);
+        super(obdaProperties, options.modelOptions);
         this.obdaProperties = obdaProperties;
         this.options = options;
     }
@@ -135,31 +134,23 @@ public class OBDACoreConfigurationImpl extends OntopModelConfigurationImpl imple
         public final Optional<Model> mappingGraph;
         public final Optional<OBDAModel> predefinedMappingModel;
         public final Optional<ImplicitDBConstraintsReader> implicitDBConstraintsReader;
+        public final OntopModelConfigurationOptions modelOptions;
 
         public OBDAConfigurationOptions(Optional<File> mappingFile, Optional<Reader> mappingReader, Optional<Model> mappingGraph,
                                         Optional<OBDAModel> predefinedMappingModel,
-                                        Optional<ImplicitDBConstraintsReader> implicitDBConstraintsReader) {
+                                        Optional<ImplicitDBConstraintsReader> implicitDBConstraintsReader,
+                                        OntopModelConfigurationOptions modelOptions) {
             this.mappingFile = mappingFile;
             this.mappingReader = mappingReader;
             this.mappingGraph = mappingGraph;
             this.predefinedMappingModel = predefinedMappingModel;
             this.implicitDBConstraintsReader = implicitDBConstraintsReader;
+            this.modelOptions = modelOptions;
         }
     }
 
-    /**
-     * Builder
-     *
-     */
-    public static class BuilderImpl<B extends OBDACoreConfiguration.Builder, P extends OBDAProperties, C extends OBDACoreConfiguration>
-            extends OntopModelConfigurationImpl.BuilderImpl<B,P,C>
-            implements OBDACoreConfiguration.Builder<B> {
-
-        /**
-         * Please make sure it is an instance of B!
-         */
-        public BuilderImpl() {
-        }
+    protected static class DefaultOBDACoreBuilderFragment<B extends OBDACoreConfiguration.Builder>
+            implements OBDACoreBuilderFragment<B> {
 
         private Optional<ImplicitDBConstraintsReader> userConstraints = Optional.empty();
         private Optional<OBDAModel> obdaModel = Optional.empty();
@@ -300,9 +291,8 @@ public class OBDACoreConfigurationImpl extends OntopModelConfigurationImpl imple
             return isMappingDefined;
         }
 
-        @Override
-        protected Properties generateProperties() {
-            Properties p = super.generateProperties();
+        protected Properties generateUserProperties() {
+            Properties p = new Properties();
 
             // Never puts the mapping file path
 
@@ -310,31 +300,6 @@ public class OBDACoreConfigurationImpl extends OntopModelConfigurationImpl imple
             jdbcUrl.ifPresent(u -> p.put(OBDAProperties.JDBC_URL, u));
 
             return p;
-        }
-
-        /**
-         * To be overloaded by specialized classes (extensions).
-         *
-         * Default implementation for P == OBDAProperties
-         */
-        @Override
-        protected P createOntopModelProperties(Properties p) {
-            return (P) new OBDAPropertiesImpl(p, useR2rml);
-        }
-
-        /**
-         * To be overloaded by specialized classes (extensions).
-         *
-         * Default implementation for P == OBDAConfiguration
-         */
-        @Override
-        protected C createConfiguration(P obdaProperties) {
-            return (C) new OBDACoreConfigurationImpl(obdaProperties, createOntopModelConfigurationArguments(),
-                    createOBDAConfigurationArguments());
-        }
-
-        protected final OBDAConfigurationOptions createOBDAConfigurationArguments() {
-            return new OBDAConfigurationOptions(mappingFile, mappingReader, mappingGraph, obdaModel, userConstraints);
         }
 
         protected boolean isR2rml() {
@@ -362,6 +327,64 @@ public class OBDACoreConfigurationImpl extends OntopModelConfigurationImpl imple
             } catch (URISyntaxException e) {
                 throw new InvalidOntopConfigurationException("Invalid mapping file path: " + e.getMessage());
             }
+        }
+
+        protected final OBDAConfigurationOptions generateOBDAConfigurationOptions(OntopModelConfigurationOptions modelOptions) {
+            return new OBDAConfigurationOptions(mappingFile, mappingReader, mappingGraph, obdaModel, userConstraints,
+                    modelOptions);
+        }
+    }
+
+    protected static abstract class OBDACoreConfigurationBuilderMixin<B extends OBDACoreConfiguration.Builder>
+            extends DefaultOBDACoreBuilderFragment<B>
+            implements OBDACoreConfiguration.Builder<B> {
+
+        private final DefaultOntopModelBuilderFragment<B> modelBuilderFragment;
+
+        protected OBDACoreConfigurationBuilderMixin() {
+            modelBuilderFragment = new DefaultOntopModelBuilderFragment<>();
+        }
+
+        @Override
+        public B properties(@Nonnull Properties properties) {
+            return modelBuilderFragment.properties(properties);
+        }
+
+        @Override
+        public B propertyFile(String propertyFilePath) {
+            return modelBuilderFragment.propertyFile(propertyFilePath);
+        }
+
+        @Override
+        public B propertyFile(File propertyFile) {
+            return modelBuilderFragment.propertyFile(propertyFile);
+        }
+
+        @Override
+        protected Properties generateUserProperties() {
+            Properties userProperties = super.generateUserProperties();
+            userProperties.putAll(modelBuilderFragment.generateUserProperties());
+
+            return userProperties;
+        }
+
+        protected final OBDAConfigurationOptions generateOBDAConfigurationOptions() {
+            return generateOBDAConfigurationOptions(modelBuilderFragment.generateOntopModelConfigurationOptions());
+        }
+    }
+
+
+    public static class BuilderImpl<B extends OBDACoreConfiguration.Builder>
+            extends OBDACoreConfigurationBuilderMixin<B> {
+
+        @Override
+        public OBDACoreConfiguration build() {
+            Properties userProperties = generateUserProperties();
+
+            OBDAConfigurationOptions options = generateOBDAConfigurationOptions();
+            OBDAProperties confProperties = new OBDAPropertiesImpl(userProperties, isR2rml());
+
+            return new OBDACoreConfigurationImpl(confProperties, options);
         }
     }
 

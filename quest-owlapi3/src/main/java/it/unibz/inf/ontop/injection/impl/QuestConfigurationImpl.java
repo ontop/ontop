@@ -7,7 +7,6 @@ import it.unibz.inf.ontop.io.InvalidDataSourceException;
 import it.unibz.inf.ontop.model.OBDADataSource;
 import it.unibz.inf.ontop.model.OBDAModel;
 import it.unibz.inf.ontop.owlapi.directmapping.DirectMappingEngine;
-import it.unibz.inf.ontop.owlrefplatform.injection.impl.QuestCoreConfigurationImpl;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
@@ -36,7 +35,7 @@ public class QuestConfigurationImpl extends QuestCoreConfigurationImpl implement
     }
 
     @Override
-    public QuestPreferences getPreferences() {
+    public QuestPreferences getProperties() {
         return preferences;
     }
 
@@ -224,7 +223,7 @@ public class QuestConfigurationImpl extends QuestCoreConfigurationImpl implement
          */
         @Override
         protected Properties generateProperties() {
-            Properties p = super.generateProperties();
+            Properties p = super.generateUserProperties();
 
             // Does not create new property entries
 
@@ -244,8 +243,8 @@ public class QuestConfigurationImpl extends QuestCoreConfigurationImpl implement
          */
         @Override
         protected C createConfiguration(P questPreferences) {
-            return (C) new QuestConfigurationImpl(questPreferences, createOntopModelConfigurationArguments(),
-                    createOBDAConfigurationArguments(), createQuestCoreArguments(), createQuestArguments());
+            return (C) new QuestConfigurationImpl(questPreferences, generateOntopModelConfigurationOptions(),
+                    createOBDAConfigurationOptions(), createQuestCoreOptions(), createQuestArguments());
         }
 
         protected final QuestOptions createQuestArguments() {

@@ -1,12 +1,9 @@
-package it.unibz.inf.ontop.owlrefplatform.injection.impl;
+package it.unibz.inf.ontop.injection.impl;
 
 
-import it.unibz.inf.ontop.injection.impl.OBDAPropertiesImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.inf.ontop.owlrefplatform.injection.QuestCorePreferences;
+import it.unibz.inf.ontop.injection.QuestCorePreferences;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Properties;
 
 public class QuestCorePreferencesImpl extends OBDAPropertiesImpl implements QuestCorePreferences {
@@ -25,12 +22,17 @@ public class QuestCorePreferencesImpl extends OBDAPropertiesImpl implements Ques
         super(loadQuestPreferences(userPreferences), isR2rml);
     }
 
-
     private static Properties loadQuestPreferences(Properties userPreferences) {
-        Properties properties = loadDefaultPropertiesFromFile(QuestCorePreferences.class, DEFAULT_QUEST_PROPERTIES_FILE);
+        Properties properties = OntopOptimizationPropertiesImpl.loadDefaultOptimizationProperties();
+        properties.putAll(loadDefaultQuestCorePreferences());
         properties.putAll(userPreferences);
         return properties;
     }
+
+    public static Properties loadDefaultQuestCorePreferences() {
+        return loadDefaultPropertiesFromFile(QuestCorePreferences.class, DEFAULT_QUEST_PROPERTIES_FILE);
+    }
+
 
     @Override
     public boolean isOntologyAnnotationQueryingEnabled() {

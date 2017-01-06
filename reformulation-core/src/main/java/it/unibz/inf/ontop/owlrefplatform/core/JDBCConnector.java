@@ -4,7 +4,7 @@ import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.MappingFactoryImpl;
-import it.unibz.inf.ontop.owlrefplatform.injection.QuestCorePreferences;
+import it.unibz.inf.ontop.injection.QuestCorePreferences;
 import it.unibz.inf.ontop.sql.ImplicitDBConstraintsReader;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;

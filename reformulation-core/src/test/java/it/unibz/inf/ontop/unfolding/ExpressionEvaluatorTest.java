@@ -13,7 +13,7 @@ import it.unibz.inf.ontop.owlrefplatform.core.optimization.FixedPointBindingLift
 import it.unibz.inf.ontop.owlrefplatform.core.optimization.FixedPointJoinLikeOptimizer;
 import it.unibz.inf.ontop.owlrefplatform.core.optimization.IntermediateQueryOptimizer;
 import it.unibz.inf.ontop.owlrefplatform.core.optimization.JoinLikeOptimizer;
-import it.unibz.inf.ontop.owlrefplatform.injection.QuestCoreConfiguration;
+import it.unibz.inf.ontop.injection.QuestCoreConfiguration;
 import it.unibz.inf.ontop.pivotalrepr.*;
 import it.unibz.inf.ontop.pivotalrepr.equivalence.IQSyntacticEquivalenceChecker;
 import it.unibz.inf.ontop.pivotalrepr.impl.ConstructionNodeImpl;

@@ -13,7 +13,7 @@ import java.util.Properties;
  */
 public interface OntopModelConfiguration {
 
-    OntopModelProperties getOntopModelProperties();
+    OntopModelProperties getProperties();
 
     OptimizationConfiguration getOptimizationConfiguration();
 
@@ -31,7 +31,7 @@ public interface OntopModelConfiguration {
     /**
      * TODO: explain
      */
-    interface Builder<B extends Builder> {
+    interface OntopModelBuilderFragment<B extends Builder> {
 
         B properties(@Nonnull Properties properties);
         B propertyFile(String propertyFilePath);
@@ -39,6 +39,12 @@ public interface OntopModelConfiguration {
 
         // TODO: enable it later
         // B cardinalityPreservationMode(OntopModelProperties.CardinalityPreservationMode mode);
+    }
+
+    /**
+     * TODO: explain
+     */
+    interface Builder<B extends Builder> extends OntopModelBuilderFragment<B> {
 
         OntopModelConfiguration build();
     }

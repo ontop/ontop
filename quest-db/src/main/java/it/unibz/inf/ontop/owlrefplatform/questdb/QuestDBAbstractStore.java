@@ -28,8 +28,8 @@ import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.injection.OBDAFactoryWithException;
 import it.unibz.inf.ontop.owlrefplatform.core.IQuestConnection;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestDBConnection;
-import it.unibz.inf.ontop.owlrefplatform.injection.QuestCorePreferences;
-import it.unibz.inf.ontop.owlrefplatform.injection.QuestComponentFactory;
+import it.unibz.inf.ontop.injection.QuestCorePreferences;
+import it.unibz.inf.ontop.injection.QuestComponentFactory;
 import it.unibz.inf.ontop.model.OBDAException;
 
 public abstract class QuestDBAbstractStore implements Serializable {

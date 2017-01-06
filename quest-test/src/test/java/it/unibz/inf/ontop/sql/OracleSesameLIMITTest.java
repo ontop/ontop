@@ -25,7 +25,7 @@ import static org.junit.Assert.assertTrue;
 import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestDBConnection;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestDBStatement;
-import it.unibz.inf.ontop.owlrefplatform.injection.QuestCorePreferences;
+import it.unibz.inf.ontop.injection.QuestCorePreferences;
 import it.unibz.inf.ontop.sesame.SesameVirtualRepo;
 
 import java.util.Properties;

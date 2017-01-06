@@ -30,7 +30,7 @@ import it.unibz.inf.ontop.model.OBDAModel;
 import it.unibz.inf.ontop.ontology.OntologyFactory;
 import it.unibz.inf.ontop.owlrefplatform.core.IQuest;
 import it.unibz.inf.ontop.owlrefplatform.core.IQuestConnection;
-import it.unibz.inf.ontop.owlrefplatform.injection.QuestCorePreferences;
+import it.unibz.inf.ontop.injection.QuestCorePreferences;
 
 import it.unibz.inf.ontop.ontology.Ontology;
 import it.unibz.inf.ontop.ontology.impl.OntologyFactoryImpl;
@@ -70,7 +70,7 @@ public class QuestDBVirtualStore extends QuestDBAbstractStore {
 		// TODO: re-cast the exception to a Sesame-specific one
 		config.validate();
 
-		QuestPreferences preferences = config.getPreferences();
+		QuestPreferences preferences = config.getProperties();
 
 		//we are working in virtual mode
 		if (!preferences.isInVirtualMode())

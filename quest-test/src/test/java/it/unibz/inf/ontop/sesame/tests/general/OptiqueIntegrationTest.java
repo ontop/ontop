@@ -1,20 +1,11 @@
 package it.unibz.inf.ontop.sesame.tests.general;
 
-import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.inf.ontop.owlrefplatform.injection.QuestCorePreferences;
+import it.unibz.inf.ontop.injection.QuestCorePreferences;
 
 import java.util.Properties;
 
-import junit.framework.TestCase;
-
 import org.junit.Test;
-import org.openrdf.query.QueryLanguage;
-import org.openrdf.query.TupleQuery;
-import org.openrdf.query.TupleQueryResult;
-import org.openrdf.repository.Repository;
-import org.openrdf.repository.RepositoryException;
-import it.unibz.inf.ontop.sesame.SesameVirtualRepo;
 
 
 public class OptiqueIntegrationTest extends AbstractVirtualSesameTest {

@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.owlrefplatform.injection;
+package it.unibz.inf.ontop.injection;
 
 /*
  * #%L
@@ -20,17 +20,13 @@ package it.unibz.inf.ontop.owlrefplatform.injection;
  * #L%
  */
 
-import it.unibz.inf.ontop.injection.OBDAProperties;
-
-import java.util.List;
-
 
 /**
  * A class that represents the preferences overwritten by the user.
  *
  * Immutable class.
  */
-public interface QuestCorePreferences extends OBDAProperties {
+public interface QuestCorePreferences extends OBDAProperties, OntopOptimizationProperties {
 
 	boolean isOntologyAnnotationQueryingEnabled();
 

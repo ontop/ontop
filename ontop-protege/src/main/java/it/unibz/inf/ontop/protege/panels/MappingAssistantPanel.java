@@ -990,7 +990,7 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 						final String dbType = selectedSource.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER);
 
                         //TODO: find a way to get the current preferences. Necessary if an third-party adapter should be used.
-						QuestPreferences defaultPreferences = QuestConfiguration.defaultBuilder().build().getPreferences();
+						QuestPreferences defaultPreferences = QuestConfiguration.defaultBuilder().build().getProperties();
 						SQLDialectAdapter sqlDialect = SQLAdapterFactory.getSQLDialectAdapter(dbType, "", defaultPreferences);
 						String sqlString = txtQueryEditor.getText();
 

@@ -2,7 +2,6 @@ package it.unibz.inf.ontop.injection.impl;
 
 
 import it.unibz.inf.ontop.injection.QuestPreferences;
-import it.unibz.inf.ontop.owlrefplatform.injection.impl.QuestCorePreferencesImpl;
 
 import java.util.Optional;
 import java.util.Properties;

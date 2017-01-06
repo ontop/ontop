@@ -32,8 +32,8 @@ import it.unibz.inf.ontop.owlapi.OWLAPIABoxIterator;
 import it.unibz.inf.ontop.owlapi.OWLAPITranslatorUtility;
 import it.unibz.inf.ontop.owlrefplatform.core.*;
 import it.unibz.inf.ontop.owlrefplatform.core.abox.QuestMaterializer;
-import it.unibz.inf.ontop.owlrefplatform.injection.QuestComponentFactory;
-import it.unibz.inf.ontop.owlrefplatform.injection.QuestCorePreferences;
+import it.unibz.inf.ontop.injection.QuestComponentFactory;
+import it.unibz.inf.ontop.injection.QuestCorePreferences;
 import it.unibz.inf.ontop.utils.VersionInfo;
 import org.semanticweb.owlapi.model.*;
 import org.semanticweb.owlapi.reasoner.*;
@@ -134,7 +134,7 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
         super(rootOntology, owlConfiguration, BufferingMode.BUFFERING);
 
 		QuestConfiguration questConfiguration = owlConfiguration.getQuestConfiguration();
-		preferences = questConfiguration.getPreferences();
+		preferences = questConfiguration.getProperties();
 		inputDBMetadata = questConfiguration.getDatasourceMetadata();
 
 

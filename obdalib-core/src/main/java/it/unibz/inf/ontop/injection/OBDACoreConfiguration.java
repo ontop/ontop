@@ -46,7 +46,7 @@ public interface OBDACoreConfiguration extends OntopModelConfiguration {
     /**
      * TODO: explain
      */
-    interface Builder<B extends Builder> extends OntopModelConfiguration.Builder<B> {
+    interface OBDACoreBuilderFragment<B extends Builder> {
 
         B obdaModel(@Nonnull OBDAModel obdaModel);
 
@@ -69,9 +69,11 @@ public interface OBDACoreConfiguration extends OntopModelConfiguration {
         B enableFullMetadataExtraction(boolean obtainFullMetadata);
 
         B jdbcUrl(String jdbcUrl);
+    }
 
+    interface Builder<B extends Builder> extends OBDACoreBuilderFragment<B>, OntopModelConfiguration.Builder<B> {
+
+        @Override
         OBDACoreConfiguration build();
-
-
     }
 }

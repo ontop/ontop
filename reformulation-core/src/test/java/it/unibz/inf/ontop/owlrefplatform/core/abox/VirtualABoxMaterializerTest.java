@@ -41,7 +41,7 @@ import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.model.impl.RDBMSourceParameterConstants;
 import it.unibz.inf.ontop.ontology.Assertion;
 import it.unibz.inf.ontop.ontology.impl.OntologyVocabularyImpl;
-import it.unibz.inf.ontop.owlrefplatform.injection.QuestCoreConfiguration;
+import it.unibz.inf.ontop.injection.QuestCoreConfiguration;
 import it.unibz.inf.ontop.sql.JDBCConnectionManager;
 
 import java.util.LinkedList;

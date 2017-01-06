@@ -43,9 +43,8 @@ import java.net.URI;
 import java.sql.SQLException;
 import java.util.*;
 
-import it.unibz.inf.ontop.owlrefplatform.injection.QuestComponentFactory;
-import it.unibz.inf.ontop.owlrefplatform.injection.QuestCoreConfiguration;
-import it.unibz.inf.ontop.owlrefplatform.injection.QuestCorePreferences;
+import it.unibz.inf.ontop.injection.QuestComponentFactory;
+import it.unibz.inf.ontop.injection.QuestCoreConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

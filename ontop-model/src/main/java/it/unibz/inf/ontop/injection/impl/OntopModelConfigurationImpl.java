@@ -75,7 +75,7 @@ public class OntopModelConfigurationImpl implements OntopModelConfiguration {
     }
 
     @Override
-    public OntopModelProperties getOntopModelProperties() {
+    public OntopModelProperties getProperties() {
         return properties;
     }
 
@@ -89,32 +89,21 @@ public class OntopModelConfigurationImpl implements OntopModelConfiguration {
         }
     }
 
-    /**
-     * Builder
-     *
-     */
-    public static class BuilderImpl<B extends Builder, P extends OntopModelProperties, C extends OntopModelConfiguration>
-            implements Builder<B> {
+    protected static class DefaultOntopModelBuilderFragment<B extends Builder> implements OntopModelBuilderFragment<B> {
 
-        private Optional<Properties> properties = Optional.empty();
-
-        /**
-         * Please make sure it is an instance of B!
-         */
-        public BuilderImpl() {
-        }
+        private Optional<Properties> inputProperties = Optional.empty();
 
         /**
          * Have precedence over other parameters
          */
         @Override
-        public B properties(@Nonnull Properties properties) {
-            this.properties = Optional.of(properties);
+        public final B properties(@Nonnull Properties properties) {
+            this.inputProperties = Optional.of(properties);
             return (B) this;
         }
 
         @Override
-        public B propertyFile(String propertyFilePath) {
+        public final B propertyFile(String propertyFilePath) {
             try {
                 URI fileURI = new URI(propertyFilePath);
                 String scheme = fileURI.getScheme();
@@ -133,7 +122,7 @@ public class OntopModelConfigurationImpl implements OntopModelConfiguration {
         }
 
         @Override
-        public B propertyFile(File propertyFile) {
+        public final B propertyFile(File propertyFile) {
             try {
                 Properties p = new Properties();
                 p.load(new FileReader(propertyFile));
@@ -144,44 +133,39 @@ public class OntopModelConfigurationImpl implements OntopModelConfiguration {
             }
         }
 
-        @Override
-        public final C build() {
-            Properties p = generateProperties();
-
-            /**
-             * User-provided properties have the highest precedence.
-             */
-            properties.ifPresent(p::putAll);
-
-            P ontopProperties = createOntopModelProperties(p);
-
-            return createConfiguration(ontopProperties);
-        }
-
         /**
-         * To be overloaded by specialized classes (extensions).
          *
-         * Default implementation for P == OntopModelProperties
+         * Derived properties have the highest precedence over input properties.
+         *
+         * Can be overloaded. Don't forget to call the parent!
+         *
          */
-        protected P createOntopModelProperties(Properties p) {
-            return (P) new OntopModelPropertiesImpl(p);
+        protected Properties generateUserProperties() {
+            // NB: in the future, we may also produce additional local properties.
+            return inputProperties
+                    .orElseGet(Properties::new);
         }
 
-        /**
-         * To be overloaded by specialized classes (extensions).
-         *
-         * Default implementation for P == OntopModelProperties
-         */
-        protected C createConfiguration(P ontopProperties) {
-            return (C) new OntopModelConfigurationImpl(ontopProperties, createOntopModelConfigurationArguments());
-        }
-
-        protected final OntopModelConfigurationOptions createOntopModelConfigurationArguments() {
+        protected final OntopModelConfigurationOptions generateOntopModelConfigurationOptions() {
             return new OntopModelConfigurationOptions();
         }
 
-        protected Properties generateProperties() {
-            return new Properties();
+    }
+
+    /**
+     * Builder
+     *
+     */
+    public final static class BuilderImpl<B extends Builder> extends DefaultOntopModelBuilderFragment<B>
+            implements Builder<B> {
+
+        @Override
+        public final OntopModelConfiguration build() {
+            Properties p = generateUserProperties();
+
+            return new OntopModelConfigurationImpl(
+                    new OntopModelPropertiesImpl(p),
+                    generateOntopModelConfigurationOptions());
         }
     }
 }

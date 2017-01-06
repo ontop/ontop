@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.owlrefplatform.injection;
+package it.unibz.inf.ontop.injection;
 
 import com.google.inject.assistedinject.Assisted;
 import it.unibz.inf.ontop.model.OBDADataSource;

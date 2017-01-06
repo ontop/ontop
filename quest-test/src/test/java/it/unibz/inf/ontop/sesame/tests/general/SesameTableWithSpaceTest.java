@@ -3,7 +3,7 @@ package it.unibz.inf.ontop.sesame.tests.general;
 
 import it.unibz.inf.ontop.injection.QuestConfiguration;
 import junit.framework.TestCase;
-import it.unibz.inf.ontop.owlrefplatform.injection.QuestCorePreferences;
+import it.unibz.inf.ontop.injection.QuestCorePreferences;
 import org.junit.Test;
 import org.openrdf.model.Model;
 import org.openrdf.model.impl.LinkedHashModel;

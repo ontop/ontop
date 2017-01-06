@@ -38,7 +38,7 @@ import it.unibz.inf.ontop.model.OBDAException;
 import it.unibz.inf.ontop.model.TupleResultSet;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestDBStatement;
-import it.unibz.inf.ontop.owlrefplatform.injection.QuestCorePreferences;
+import it.unibz.inf.ontop.injection.QuestCorePreferences;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -38,7 +38,7 @@ import org.openrdf.query.TupleQuery;
 import org.openrdf.query.TupleQueryResult;
 import it.unibz.inf.ontop.injection.OBDAProperties;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.inf.ontop.owlrefplatform.injection.QuestCorePreferences;
+import it.unibz.inf.ontop.injection.QuestCorePreferences;
 import it.unibz.inf.ontop.sesame.RepositoryConnection;
 import it.unibz.inf.ontop.sesame.SesameVirtualRepo;
 

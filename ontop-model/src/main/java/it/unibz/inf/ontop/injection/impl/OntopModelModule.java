@@ -9,7 +9,7 @@ public class OntopModelModule extends OntopAbstractModule {
     private OntopModelConfiguration configuration;
 
     protected OntopModelModule(OntopModelConfiguration configuration) {
-        super(configuration.getOntopModelProperties());
+        super(configuration.getProperties());
         // Temporary
         this.configuration = configuration;
     }

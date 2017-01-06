@@ -1,0 +1,246 @@
+package it.unibz.inf.ontop.injection.impl;
+
+
+import com.google.inject.Module;
+import it.unibz.inf.ontop.injection.InvalidOntopConfigurationException;
+import it.unibz.inf.ontop.injection.impl.OntopOptimizationConfigurationImpl.DefaultOntopOptimizationBuilderFragment;
+import it.unibz.inf.ontop.injection.impl.OntopOptimizationConfigurationImpl.OntopOptimizationConfigurationOptions;
+import it.unibz.inf.ontop.model.DBMetadata;
+import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
+import it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing.TMappingExclusionConfig;
+import it.unibz.inf.ontop.injection.QuestCoreConfiguration;
+import it.unibz.inf.ontop.injection.QuestCorePreferences;
+
+import javax.annotation.Nonnull;
+import java.util.Optional;
+import java.util.Properties;
+import java.util.stream.Stream;
+
+public class QuestCoreConfigurationImpl extends OBDACoreConfigurationImpl implements QuestCoreConfiguration {
+
+    private final QuestCorePreferences preferences;
+    private final QuestCoreOptions options;
+    // Concrete implementation due to the "mixin style" (indirect inheritance)
+    private final OntopOptimizationConfigurationImpl optimizationConfiguration;
+
+    protected QuestCoreConfigurationImpl(QuestCorePreferences preferences, QuestCoreOptions options) {
+        super(preferences, options.obdaOptions);
+        this.preferences = preferences;
+        this.options = options;
+        this.optimizationConfiguration = new OntopOptimizationConfigurationImpl(preferences, options.optimizationOptions);
+    }
+
+    /**
+     * TODO: complete
+     */
+    @Override
+    public void validate() throws InvalidOntopConfigurationException {
+
+        boolean isMapping = isMappingDefined();
+
+        if ((!isMapping) && preferences.isInVirtualMode()) {
+            throw new InvalidOntopConfigurationException("Mapping is not specified in virtual mode", this);
+        } else if (isMapping && (!preferences.isInVirtualMode())) {
+            throw new InvalidOntopConfigurationException("Mapping is specified in classic A-box mode", this);
+        }
+        /**
+         * TODO: complete
+         */
+
+        // TODO: check the types of some Object properties.
+    }
+
+    @Override
+    public Optional<TMappingExclusionConfig> getTmappingExclusions() {
+        return options.excludeFromTMappings;
+    }
+
+    @Override
+    public Optional<DBMetadata> getDatasourceMetadata() {
+        return options.dbMetadata;
+    }
+
+    @Override
+    public QuestCorePreferences getProperties() {
+        return preferences;
+    }
+
+    @Override
+    protected Stream<Module> buildGuiceModules() {
+        return Stream.concat(
+                super.buildGuiceModules(),
+                Stream.concat(optimizationConfiguration.buildGuiceModules(),
+                    Stream.of(new QuestComponentModule(this))));
+    }
+
+    public static class QuestCoreOptions {
+        public final Optional<TMappingExclusionConfig> excludeFromTMappings;
+        public final Optional<DBMetadata> dbMetadata;
+        private final OBDAConfigurationOptions obdaOptions;
+        private final OntopOptimizationConfigurationOptions optimizationOptions;
+
+
+        public QuestCoreOptions(Optional<TMappingExclusionConfig> excludeFromTMappings,
+                                Optional<DBMetadata> dbMetadata, OBDAConfigurationOptions obdaOptions,
+                                OntopOptimizationConfigurationOptions optimizationOptions) {
+            this.excludeFromTMappings = excludeFromTMappings;
+            this.dbMetadata = dbMetadata;
+            this.obdaOptions = obdaOptions;
+            this.optimizationOptions = optimizationOptions;
+        }
+    }
+
+
+    protected static class DefaultQuestCoreBuilderFragment<B extends QuestCoreConfiguration.Builder>
+        implements QuestCoreBuilderFragment<B> {
+
+        private Optional<TMappingExclusionConfig> excludeFromTMappings = Optional.empty();
+
+        private Optional<Boolean> queryingAnnotationsInOntology = Optional.empty();
+        private Optional<Boolean> encodeIRISafely = Optional.empty();
+        private Optional<Boolean> sameAsMappings = Optional.empty();
+        private Optional<Boolean> optimizeEquivalences = Optional.empty();
+        private Optional<DBMetadata> dbMetadata = Optional.empty();
+        private Optional<Boolean> existentialReasoning = Optional.empty();
+
+        @Override
+        public B tMappingExclusionConfig(@Nonnull TMappingExclusionConfig config) {
+            this.excludeFromTMappings = Optional.of(config);
+            return (B) this;
+        }
+
+        @Override
+        public B dbMetadata(@Nonnull DBMetadata dbMetadata) {
+            this.dbMetadata = Optional.of(dbMetadata);
+            return (B) this;
+        }
+
+        @Override
+        public B enableOntologyAnnotationQuerying(boolean queryingAnnotationsInOntology) {
+            this.queryingAnnotationsInOntology = Optional.of(queryingAnnotationsInOntology);
+            return (B) this;
+        }
+
+        @Override
+        public B enableIRISafeEncoding(boolean enable) {
+            this.encodeIRISafely = Optional.of(enable);
+            return (B) this;
+        }
+
+        @Override
+        public B sameAsMappings(boolean sameAsMappings) {
+            this.sameAsMappings = Optional.of(sameAsMappings);
+            return (B) this;
+        }
+
+        @Override
+        public B enableEquivalenceOptimization(boolean enable) {
+            this.optimizeEquivalences = Optional.of(enable);
+            return (B) this;
+        }
+
+        @Override
+        public B enableExistentialReasoning(boolean enable) {
+            this.existentialReasoning = Optional.of(enable);
+            return (B) this;
+
+        }
+
+        protected Properties generateUserProperties() {
+            Properties p = new Properties();
+
+            queryingAnnotationsInOntology.ifPresent(b -> p.put(QuestCorePreferences.ANNOTATIONS_IN_ONTO, b));
+            encodeIRISafely.ifPresent(e -> p.put(QuestCorePreferences.SQL_GENERATE_REPLACE, e));
+            sameAsMappings.ifPresent(b -> p.put(QuestCorePreferences.SAME_AS, b));
+            optimizeEquivalences.ifPresent(b -> p.put(QuestCorePreferences.OPTIMIZE_EQUIVALENCES, b));
+            existentialReasoning.ifPresent(r -> {
+                p.put(QuestCorePreferences.REWRITE, r);
+                p.put(QuestCorePreferences.REFORMULATION_TECHNIQUE, QuestConstants.TW);
+            });
+
+            return p;
+        }
+
+        protected final QuestCoreOptions generateQuestCoreOptions(OBDAConfigurationOptions obdaOptions,
+                                                                  OntopOptimizationConfigurationOptions optimizationOptions) {
+            return new QuestCoreOptions(excludeFromTMappings, dbMetadata, obdaOptions, optimizationOptions);
+        }
+    }
+
+
+    protected abstract static class QuestCoreConfigurationBuilderMixin<B extends QuestCoreConfiguration.Builder>
+        extends OBDACoreConfigurationBuilderMixin<B>
+        implements QuestCoreConfiguration.Builder<B> {
+
+        private final DefaultQuestCoreBuilderFragment<B> questCoreBuilderFragment;
+        private final DefaultOntopOptimizationBuilderFragment<B> optimizationBuilderFragment;
+
+        protected QuestCoreConfigurationBuilderMixin() {
+            questCoreBuilderFragment = new DefaultQuestCoreBuilderFragment<B>();
+            optimizationBuilderFragment = new DefaultOntopOptimizationBuilderFragment<B>();
+        }
+
+        @Override
+        public B tMappingExclusionConfig(@Nonnull TMappingExclusionConfig config) {
+            return questCoreBuilderFragment.tMappingExclusionConfig(config);
+        }
+
+        @Override
+        public B dbMetadata(@Nonnull DBMetadata dbMetadata) {
+            return questCoreBuilderFragment.dbMetadata(dbMetadata);
+        }
+
+        @Override
+        public B enableOntologyAnnotationQuerying(boolean queryingAnnotationsInOntology) {
+            return questCoreBuilderFragment.enableOntologyAnnotationQuerying(queryingAnnotationsInOntology);
+        }
+
+        @Override
+        public B enableIRISafeEncoding(boolean enable) {
+            return questCoreBuilderFragment.enableIRISafeEncoding(enable);
+        }
+
+        @Override
+        public B sameAsMappings(boolean sameAsMappings) {
+            return questCoreBuilderFragment.sameAsMappings(sameAsMappings);
+        }
+
+        @Override
+        public B enableEquivalenceOptimization(boolean enable) {
+            return questCoreBuilderFragment.enableEquivalenceOptimization(enable);
+        }
+
+        @Override
+        public B enableExistentialReasoning(boolean enable) {
+            return questCoreBuilderFragment.enableExistentialReasoning(enable);
+        }
+
+        @Override
+        protected Properties generateUserProperties() {
+            Properties userProperties = super.generateUserProperties();
+            userProperties.putAll(optimizationBuilderFragment.generateProperties());
+            userProperties.putAll(questCoreBuilderFragment.generateUserProperties());
+            return userProperties;
+        }
+
+        protected final QuestCoreOptions generateQuestCoreOptions() {
+            OBDAConfigurationOptions obdaOptions = generateOBDAConfigurationOptions();
+
+            return questCoreBuilderFragment.generateQuestCoreOptions(obdaOptions,
+                    optimizationBuilderFragment.generateOntopOptimizationConfigurationOptions(obdaOptions.modelOptions));
+        }
+    }
+
+
+    public static final class BuilderImpl<B extends QuestCoreConfiguration.Builder>
+            extends QuestCoreConfigurationBuilderMixin<B> {
+
+        @Override
+        public QuestCoreConfiguration build() {
+            Properties userProperties = generateUserProperties();
+            QuestCorePreferences preferences = new QuestCorePreferencesImpl(userProperties, isR2rml());
+
+            return new QuestCoreConfigurationImpl(preferences, generateQuestCoreOptions());
+        }
+    }
+}

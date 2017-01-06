@@ -18,7 +18,7 @@ import it.unibz.inf.ontop.owlrefplatform.core.unfolding.DatalogUnfolder;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
 import it.unibz.inf.ontop.model.impl.TermUtils;
-import it.unibz.inf.ontop.owlrefplatform.injection.QuestCorePreferences;
+import it.unibz.inf.ontop.injection.QuestCorePreferences;
 import it.unibz.inf.ontop.pivotalrepr.MetadataForQueryOptimization;
 import it.unibz.inf.ontop.pivotalrepr.impl.MetadataForQueryOptimizationImpl;
 import it.unibz.inf.ontop.sql.RDBMetadata;

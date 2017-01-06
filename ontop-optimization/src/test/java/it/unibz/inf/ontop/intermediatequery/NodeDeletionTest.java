@@ -3,11 +3,9 @@ package it.unibz.inf.ontop.intermediatequery;
 import java.util.Optional;
 
 import com.google.common.collect.ImmutableSet;
-import com.google.inject.Injector;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.AtomPredicateImpl;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
-import it.unibz.inf.ontop.owlrefplatform.injection.QuestCoreConfiguration;
 import org.junit.Test;
 import it.unibz.inf.ontop.owlrefplatform.core.optimization.BasicJoinOptimizer;
 import it.unibz.inf.ontop.pivotalrepr.EmptyQueryException;
@@ -16,6 +14,7 @@ import it.unibz.inf.ontop.pivotalrepr.impl.*;
 import it.unibz.inf.ontop.pivotalrepr.impl.tree.DefaultIntermediateQueryBuilder;
 import it.unibz.inf.ontop.pivotalrepr.*;
 
+import static it.unibz.inf.ontop.OptimizationTestingTools.INJECTOR;
 import static junit.framework.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -26,8 +25,6 @@ public class NodeDeletionTest {
 
     private static final OBDADataFactory DATA_FACTORY = OBDADataFactoryImpl.getInstance();
     private static final MetadataForQueryOptimization METADATA = new EmptyMetadataForQueryOptimization();
-
-    private static final Injector INJECTOR = QuestCoreConfiguration.defaultBuilder().build().getInjector();
 
     @Test(expected = EmptyQueryException.class)
     public void testSimpleJoin() throws IntermediateQueryBuilderException, EmptyQueryException {

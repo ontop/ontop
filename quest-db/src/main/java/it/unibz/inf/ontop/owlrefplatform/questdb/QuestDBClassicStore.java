@@ -34,7 +34,7 @@ import it.unibz.inf.ontop.owlapi.OWLAPIABoxIterator;
 import it.unibz.inf.ontop.owlapi.OWLAPITranslatorUtility;
 import it.unibz.inf.ontop.owlrefplatform.core.IQuest;
 import it.unibz.inf.ontop.owlrefplatform.core.IQuestConnection;
-import it.unibz.inf.ontop.owlrefplatform.injection.QuestCorePreferences;
+import it.unibz.inf.ontop.injection.QuestCorePreferences;
 import org.openrdf.model.Literal;
 import org.openrdf.model.Resource;
 import org.openrdf.model.Statement;
@@ -98,7 +98,7 @@ public class QuestDBClassicStore extends QuestDBAbstractStore {
 				// Default empty Ontology
 				.orElseGet(() -> ofac.createOntology(ofac.createVocabulary()));
 
-		createInstance(tbox, config.getPreferences());
+		createInstance(tbox, config.getProperties());
 	}
 
 	/**
@@ -107,7 +107,7 @@ public class QuestDBClassicStore extends QuestDBAbstractStore {
 	public QuestDBClassicStore(String name, Dataset data, QuestConfiguration config) throws Exception {
 		super(name, config);
 		Ontology tbox = loadTBoxFromDataset(data);
-		createInstance(tbox, config.getPreferences());
+		createInstance(tbox, config.getProperties());
 	}
 
 	private void createInstance(Ontology tbox, QuestPreferences preferences) throws Exception {

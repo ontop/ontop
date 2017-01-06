@@ -21,7 +21,7 @@ package it.unibz.inf.ontop.owlrefplatform.core.queryevaluation;
  */
 
 
-import it.unibz.inf.ontop.owlrefplatform.injection.QuestCorePreferences;
+import it.unibz.inf.ontop.injection.QuestCorePreferences;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

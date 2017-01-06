@@ -1,10 +1,8 @@
-package it.unibz.inf.ontop.owlrefplatform.injection;
+package it.unibz.inf.ontop.injection;
 
-import it.unibz.inf.ontop.injection.OBDACoreConfiguration;
 import it.unibz.inf.ontop.model.DBMetadata;
 import it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing.TMappingExclusionConfig;
-import it.unibz.inf.ontop.owlrefplatform.injection.impl.QuestCoreConfigurationImpl;
-import it.unibz.inf.ontop.pivotalrepr.OptimizationConfiguration;
+import it.unibz.inf.ontop.injection.impl.QuestCoreConfigurationImpl;
 
 import javax.annotation.Nonnull;
 import java.util.Optional;
@@ -13,13 +11,14 @@ import java.util.Optional;
  * TODO: explain
  *
  */
-public interface QuestCoreConfiguration extends OBDACoreConfiguration {
+public interface QuestCoreConfiguration extends OBDACoreConfiguration, OntopOptimizationConfiguration {
 
     Optional<TMappingExclusionConfig> getTmappingExclusions();
 
     Optional<DBMetadata> getDatasourceMetadata();
 
-    QuestCorePreferences getPreferences();
+    @Override
+    QuestCorePreferences getProperties();
 
 
     static Builder<Builder<Builder<Builder<Builder<Builder<Builder<Builder<Builder<Builder<Builder<Builder<Builder>>>>>>>>>>>> defaultBuilder() {
@@ -33,8 +32,7 @@ public interface QuestCoreConfiguration extends OBDACoreConfiguration {
      * Not the classic A-box mode is not intended to be used by end-users (but for test purposes).
      *
      */
-    interface Builder<B extends Builder> extends OBDACoreConfiguration.Builder<B> {
-
+    interface QuestCoreBuilderFragment<B extends Builder> {
         B tMappingExclusionConfig(@Nonnull TMappingExclusionConfig config);
 
         B dbMetadata(@Nonnull DBMetadata dbMetadata);
@@ -51,7 +49,13 @@ public interface QuestCoreConfiguration extends OBDACoreConfiguration {
         B enableEquivalenceOptimization(boolean enable);
 
         B enableExistentialReasoning(boolean enable);
+    }
 
+    interface Builder<B extends Builder> extends QuestCoreBuilderFragment<B>,
+            OBDACoreConfiguration.Builder<B>,
+            OntopOptimizationConfiguration.Builder<B> {
+
+        @Override
         QuestCoreConfiguration build();
     }
 }

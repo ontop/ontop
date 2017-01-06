@@ -2,7 +2,6 @@ package it.unibz.inf.ontop.injection;
 
 import it.unibz.inf.ontop.injection.impl.QuestConfigurationImpl;
 import it.unibz.inf.ontop.model.OBDADataSource;
-import it.unibz.inf.ontop.owlrefplatform.injection.QuestCoreConfiguration;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
@@ -19,7 +18,7 @@ import java.util.Optional;
 public interface QuestConfiguration extends QuestCoreConfiguration {
 
     @Override
-    QuestPreferences getPreferences();
+    QuestPreferences getProperties();
 
     Optional<OWLOntology> loadInputOntology() throws OWLOntologyCreationException;
 

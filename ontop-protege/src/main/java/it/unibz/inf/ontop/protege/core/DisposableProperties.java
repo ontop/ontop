@@ -26,7 +26,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
-import static it.unibz.inf.ontop.owlrefplatform.injection.QuestCorePreferences.*;
+import static it.unibz.inf.ontop.injection.QuestCorePreferences.*;
 
 /**
  * Mutable
