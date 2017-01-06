@@ -15,6 +15,7 @@ public class OntopModelPropertiesImpl implements OntopModelProperties {
     private static final String DEFAULT_PROPERTIES_FILE = "default.properties";
     private static final Logger LOG = LoggerFactory.getLogger(OntopModelProperties.class);
     private final Properties properties;
+    private final CardinalityPreservationMode cardinalityMode;
 
     /**
      * Beware: immutable class!
@@ -33,6 +34,16 @@ public class OntopModelPropertiesImpl implements OntopModelProperties {
          * Overloads the default properties.
          */
         properties.putAll(userProperties);
+
+        String cardinalityModeString = Optional.ofNullable(properties.getProperty(OntopModelProperties.CARDINALITY_MODE))
+                .orElseThrow(() -> new InvalidOntopConfigurationException(CARDINALITY_MODE + " key is missing"));
+
+        try {
+            cardinalityMode = CardinalityPreservationMode.valueOf(cardinalityModeString);
+        } catch (IllegalArgumentException e) {
+            throw new InvalidOntopConfigurationException("Invalid value for " + CARDINALITY_MODE
+                    + ": is " + cardinalityModeString);
+        }
     }
 
     protected static Properties loadDefaultPropertiesFromFile(Class localClass, String fileName) {
@@ -57,6 +68,14 @@ public class OntopModelPropertiesImpl implements OntopModelProperties {
      */
     public Object get(Object key) {
         return properties.get(key);
+    }
+
+    /**
+     * TODO: make it configurable
+     */
+    @Override
+    public CardinalityPreservationMode getCardinalityPreservationMode() {
+        return cardinalityMode;
     }
 
     /**

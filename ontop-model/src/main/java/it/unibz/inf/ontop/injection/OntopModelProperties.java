@@ -7,6 +7,10 @@ import java.util.Optional;
  */
 public interface OntopModelProperties {
 
+
+    CardinalityPreservationMode getCardinalityPreservationMode();
+
+
     //-------------------
     // Low-level methods
     //-------------------
@@ -21,4 +25,27 @@ public interface OntopModelProperties {
     String getRequiredProperty(String key);
 
     boolean contains(Object key);
+
+    enum CardinalityPreservationMode {
+        /**
+         * Cardinality is not important and may not be respected
+         * (allows to optimize more)
+         */
+        LOOSE,
+        /**
+         * Cardinality is preserved in case a cardinality-sensitive
+         * aggregation function is detected.
+         */
+        STRICT_FOR_AGGREGATION,
+        /**
+         * Cardinality is strictly preserved
+         */
+        STRICT
+    }
+
+    //-------
+    // Keys
+    //-------
+
+    String CARDINALITY_MODE = "CARDINALITY_MODE";
 }

@@ -297,7 +297,7 @@ public class PullOutEqualityNormalizerImpl implements PullOutEqualityNormalizer 
              * Folds the joining conditions (they will remain in the JOIN meta-atom, they are not pushed)
              * and finally folds the Join meta-atom to respected its 3-arity.
              */
-            Function joiningCondition = foldBooleanConditions(normalizationResult.getPushableBoolAtoms());
+            Function joiningCondition = DatalogTools.foldBooleanConditions(normalizationResult.getPushableBoolAtoms());
             Function normalizedJoinMetaAtom = foldJoin(normalizationResult.getNonPushableAtoms(),joiningCondition);
 
             /**

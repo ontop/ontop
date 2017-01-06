@@ -37,6 +37,9 @@ public interface OntopModelConfiguration {
         B propertyFile(String propertyFilePath);
         B propertyFile(File propertyFile);
 
+        // TODO: enable it later
+        // B cardinalityPreservationMode(OntopModelProperties.CardinalityPreservationMode mode);
+
         OntopModelConfiguration build();
     }
 }

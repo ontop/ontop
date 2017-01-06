@@ -62,6 +62,7 @@
 
 	<modules>
 		<module>ontop-model</module>
+		<module>ontop-optimization</module>
 		<module>obdalib-core</module>
 		<module>reformulation-core</module>
 		<module>obdalib-owlapi3</module>

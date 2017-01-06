@@ -23,8 +23,6 @@ import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
 import it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing.TMappingExclusionConfig;
 import it.unibz.inf.ontop.owlrefplatform.injection.QuestCoreConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.injection.QuestCorePreferences;
-import it.unibz.inf.ontop.pivotalrepr.OptimizationConfiguration;
-import it.unibz.inf.ontop.pivotalrepr.impl.OptimizationConfigurationImpl;
 import it.unibz.inf.ontop.pivotalrepr.proposal.*;
 
 import javax.annotation.Nonnull;
@@ -32,13 +30,10 @@ import java.util.Optional;
 import java.util.Properties;
 import java.util.stream.Stream;
 
-import static it.unibz.inf.ontop.owlrefplatform.injection.QuestCoreConfiguration.CardinalityPreservationMode.LOOSE;
-
 public class QuestCoreConfigurationImpl extends OBDACoreConfigurationImpl implements QuestCoreConfiguration {
 
     private final QuestCorePreferences preferences;
     private final QuestCoreOptions options;
-    private final CardinalityPreservationMode cardinalityMode;
 
     protected QuestCoreConfigurationImpl(QuestCorePreferences preferences, OntopModelConfigurationOptions modelOptions,
                                          OBDAConfigurationOptions obdaOptions,
@@ -46,8 +41,6 @@ public class QuestCoreConfigurationImpl extends OBDACoreConfigurationImpl implem
         super(preferences, modelOptions, obdaOptions);
         this.preferences = preferences;
         this.options = options;
-        // TODO: allow the other modes
-        cardinalityMode = LOOSE;
     }
 
     /**
@@ -115,11 +108,6 @@ public class QuestCoreConfigurationImpl extends OBDACoreConfigurationImpl implem
         internalExecutorMapBuilder.put(ProjectionShrinkingProposal.class, ProjectionShrinkingExecutor.class);
         internalExecutorMapBuilder.put(TrueNodeRemovalProposal.class, TrueNodeRemovalExecutor.class);
         return internalExecutorMapBuilder.build();
-    }
-
-    @Override
-    public CardinalityPreservationMode getCardinalityPreservationMode() {
-        return cardinalityMode;
     }
 
     public static class QuestCoreOptions {
