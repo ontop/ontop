@@ -94,7 +94,7 @@ public class R2RMLWriter {
 		OBDAMappingTransformer transformer = new OBDAMappingTransformer();
 		transformer.setOntology(ontology);
 		return  splitMappingAxioms(this.mappings).stream()
-				.map(a -> transformer.getTripleMap(a, prefixmng))
+				.map(a -> transformer.getTriplesMap(a, prefixmng))
 				.collect(Collectors.toList());
 	}
 
