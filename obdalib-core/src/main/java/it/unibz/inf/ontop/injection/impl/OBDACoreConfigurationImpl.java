@@ -152,6 +152,8 @@ public class OBDACoreConfigurationImpl extends OntopModelConfigurationImpl imple
     protected static class DefaultOBDACoreBuilderFragment<B extends OBDACoreConfiguration.Builder>
             implements OBDACoreBuilderFragment<B> {
 
+        private final B builder;
+
         private Optional<ImplicitDBConstraintsReader> userConstraints = Optional.empty();
         private Optional<OBDAModel> obdaModel = Optional.empty();
         private Optional<File> mappingFile = Optional.empty();
@@ -164,6 +166,20 @@ public class OBDACoreConfigurationImpl extends OntopModelConfigurationImpl imple
         private boolean isMappingDefined = false;
 
         /**
+         * Default constructor
+         */
+        protected DefaultOBDACoreBuilderFragment(B builder) {
+            this.builder = builder;
+        }
+
+        /**
+         * Only for sub-classes!
+         */
+        protected DefaultOBDACoreBuilderFragment() {
+            this.builder = (B) this;
+        }
+
+        /**
          * Not for end-users! Please consider giving a mapping file or a mapping reader.
          */
         @Override
@@ -173,7 +189,7 @@ public class OBDACoreConfigurationImpl extends OntopModelConfigurationImpl imple
             }
             declareMappingDefined();
             this.obdaModel = Optional.of(obdaModel);
-            return (B) this;
+            return builder;
         }
 
         @Override
@@ -183,13 +199,13 @@ public class OBDACoreConfigurationImpl extends OntopModelConfigurationImpl imple
             }
             declareMappingDefined();
             this.mappingFile = Optional.of(mappingFile);
-            return (B) this;
+            return builder;
         }
 
         @Override
         public B nativeOntopMappingFile(@Nonnull String mappingFilename) {
             setMappingFile(mappingFilename);
-            return (B) this;
+            return builder;
         }
 
         @Override
@@ -199,7 +215,7 @@ public class OBDACoreConfigurationImpl extends OntopModelConfigurationImpl imple
             }
             declareMappingDefined();
             this.mappingReader = Optional.of(mappingReader);
-            return (B) this;
+            return builder;
         }
 
         @Override
@@ -210,7 +226,7 @@ public class OBDACoreConfigurationImpl extends OntopModelConfigurationImpl imple
             declareMappingDefined();
             useR2rml = true;
             this.mappingFile = Optional.of(mappingFile);
-            return (B) this;
+            return builder;
         }
 
         @Override
@@ -234,7 +250,7 @@ public class OBDACoreConfigurationImpl extends OntopModelConfigurationImpl imple
                     throw new InvalidOntopConfigurationException("Currently only local files are supported" +
                             "as R2RML mapping files");
                 }
-                return (B) this;
+                return builder;
             } catch (URISyntaxException e) {
                 throw new InvalidOntopConfigurationException("Invalid mapping file path: " + e.getMessage());
             }
@@ -248,7 +264,7 @@ public class OBDACoreConfigurationImpl extends OntopModelConfigurationImpl imple
             declareMappingDefined();
             useR2rml = true;
             this.mappingReader = Optional.of(mappingReader);
-            return (B) this;
+            return builder;
         }
 
         @Override
@@ -259,25 +275,25 @@ public class OBDACoreConfigurationImpl extends OntopModelConfigurationImpl imple
             declareMappingDefined();
             useR2rml = true;
             this.mappingGraph = Optional.of(rdfGraph);
-            return (B) this;
+            return builder;
         }
 
         @Override
         public B dbConstraintsReader(@Nonnull ImplicitDBConstraintsReader constraints) {
             this.userConstraints = Optional.of(constraints);
-            return (B) this;
+            return builder;
         }
 
         @Override
         public B enableFullMetadataExtraction(boolean obtainFullMetadata) {
             this.obtainFullMetadata = Optional.of(obtainFullMetadata);
-            return (B) this;
+            return builder;
         }
 
         @Override
         public B jdbcUrl(String jdbcUrl) {
             this.jdbcUrl = Optional.of(jdbcUrl);
-            return (B) this;
+            return builder;
         }
 
         /**
@@ -342,7 +358,7 @@ public class OBDACoreConfigurationImpl extends OntopModelConfigurationImpl imple
         private final DefaultOntopModelBuilderFragment<B> modelBuilderFragment;
 
         protected OBDACoreConfigurationBuilderMixin() {
-            modelBuilderFragment = new DefaultOntopModelBuilderFragment<>();
+            modelBuilderFragment = new DefaultOntopModelBuilderFragment<>((B) this);
         }
 
         @Override

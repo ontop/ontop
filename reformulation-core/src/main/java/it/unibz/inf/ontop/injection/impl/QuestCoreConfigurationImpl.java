@@ -1,7 +1,9 @@
 package it.unibz.inf.ontop.injection.impl;
 
 
+import com.google.common.collect.ImmutableMap;
 import com.google.inject.Module;
+import it.unibz.inf.ontop.executor.InternalProposalExecutor;
 import it.unibz.inf.ontop.injection.InvalidOntopConfigurationException;
 import it.unibz.inf.ontop.injection.impl.OntopOptimizationConfigurationImpl.DefaultOntopOptimizationBuilderFragment;
 import it.unibz.inf.ontop.injection.impl.OntopOptimizationConfigurationImpl.OntopOptimizationConfigurationOptions;
@@ -10,6 +12,7 @@ import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
 import it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing.TMappingExclusionConfig;
 import it.unibz.inf.ontop.injection.QuestCoreConfiguration;
 import it.unibz.inf.ontop.injection.QuestCorePreferences;
+import it.unibz.inf.ontop.pivotalrepr.proposal.QueryOptimizationProposal;
 
 import javax.annotation.Nonnull;
 import java.util.Optional;
@@ -28,6 +31,20 @@ public class QuestCoreConfigurationImpl extends OBDACoreConfigurationImpl implem
         this.preferences = preferences;
         this.options = options;
         this.optimizationConfiguration = new OntopOptimizationConfigurationImpl(preferences, options.optimizationOptions);
+    }
+
+    /**
+     * Can be overloaded by sub-classes
+     */
+    @Override
+    protected ImmutableMap<Class<? extends QueryOptimizationProposal>, Class<? extends InternalProposalExecutor>>
+    generateOptimizationConfigurationMap() {
+        ImmutableMap.Builder<Class<? extends QueryOptimizationProposal>, Class<? extends InternalProposalExecutor>>
+                internalExecutorMapBuilder = ImmutableMap.builder();
+        internalExecutorMapBuilder.putAll(super.generateOptimizationConfigurationMap());
+        internalExecutorMapBuilder.putAll(optimizationConfiguration.generateOptimizationConfigurationMap());
+
+        return internalExecutorMapBuilder.build();
     }
 
     /**
@@ -94,6 +111,8 @@ public class QuestCoreConfigurationImpl extends OBDACoreConfigurationImpl implem
     protected static class DefaultQuestCoreBuilderFragment<B extends QuestCoreConfiguration.Builder>
         implements QuestCoreBuilderFragment<B> {
 
+        private final B builder;
+
         private Optional<TMappingExclusionConfig> excludeFromTMappings = Optional.empty();
 
         private Optional<Boolean> queryingAnnotationsInOntology = Optional.empty();
@@ -103,46 +122,57 @@ public class QuestCoreConfigurationImpl extends OBDACoreConfigurationImpl implem
         private Optional<DBMetadata> dbMetadata = Optional.empty();
         private Optional<Boolean> existentialReasoning = Optional.empty();
 
+        protected DefaultQuestCoreBuilderFragment(B builder) {
+            this.builder = builder;
+        }
+
+        /**
+         * For sub-classes only!!
+         */
+        protected DefaultQuestCoreBuilderFragment() {
+            this.builder = (B) this;
+        }
+
         @Override
         public B tMappingExclusionConfig(@Nonnull TMappingExclusionConfig config) {
             this.excludeFromTMappings = Optional.of(config);
-            return (B) this;
+            return builder;
         }
 
         @Override
         public B dbMetadata(@Nonnull DBMetadata dbMetadata) {
             this.dbMetadata = Optional.of(dbMetadata);
-            return (B) this;
+            return builder;
         }
 
         @Override
         public B enableOntologyAnnotationQuerying(boolean queryingAnnotationsInOntology) {
             this.queryingAnnotationsInOntology = Optional.of(queryingAnnotationsInOntology);
-            return (B) this;
+            return builder;
         }
 
         @Override
         public B enableIRISafeEncoding(boolean enable) {
             this.encodeIRISafely = Optional.of(enable);
-            return (B) this;
+            return builder;
         }
 
         @Override
         public B sameAsMappings(boolean sameAsMappings) {
             this.sameAsMappings = Optional.of(sameAsMappings);
-            return (B) this;
+            return builder;
         }
 
         @Override
         public B enableEquivalenceOptimization(boolean enable) {
             this.optimizeEquivalences = Optional.of(enable);
-            return (B) this;
+            return builder;
         }
 
         @Override
         public B enableExistentialReasoning(boolean enable) {
             this.existentialReasoning = Optional.of(enable);
-            return (B) this;
+            return builder;
 
         }
 
@@ -176,8 +206,9 @@ public class QuestCoreConfigurationImpl extends OBDACoreConfigurationImpl implem
         private final DefaultOntopOptimizationBuilderFragment<B> optimizationBuilderFragment;
 
         protected QuestCoreConfigurationBuilderMixin() {
-            questCoreBuilderFragment = new DefaultQuestCoreBuilderFragment<B>();
-            optimizationBuilderFragment = new DefaultOntopOptimizationBuilderFragment<B>();
+            B builder = (B) this;
+            questCoreBuilderFragment = new DefaultQuestCoreBuilderFragment<>(builder);
+            optimizationBuilderFragment = new DefaultOntopOptimizationBuilderFragment<>(builder);
         }
 
         @Override

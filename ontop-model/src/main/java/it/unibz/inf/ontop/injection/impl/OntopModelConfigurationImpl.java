@@ -27,26 +27,37 @@ public class OntopModelConfigurationImpl implements OntopModelConfiguration {
 
     private final OntopModelConfigurationOptions options;
     private final OntopModelProperties properties;
-    private final OptimizationConfiguration optimizationConfiguration;
+    private OptimizationConfiguration optimizationConfiguration;
     private Injector injector;
 
     protected OntopModelConfigurationImpl(OntopModelProperties properties, OntopModelConfigurationOptions options) {
         this.properties = properties;
         this.options = options;
-        this.optimizationConfiguration = new OptimizationConfigurationImpl(generateOptimizationConfigurationMap());
+
         // Will be built on-demand
-        injector = null;
+        this.optimizationConfiguration = null;
+        this.injector = null;
     }
 
     @Override
     public OptimizationConfiguration getOptimizationConfiguration() {
+        if (optimizationConfiguration == null)
+            optimizationConfiguration = new OptimizationConfigurationImpl(generateOptimizationConfigurationMap());
+
         return optimizationConfiguration;
     }
 
     @Override
     public final Injector getInjector() {
         if (injector == null) {
-            injector = Guice.createInjector(buildGuiceModules().collect(Collectors.toList()));
+            injector = Guice.createInjector(buildGuiceModules()
+                    .collect(Collectors.toMap(
+                            // Group modules per class
+                            Module::getClass,
+                            m -> m,
+                            // Two instances of the same class: takes the first one (both are expected to be equivalent)
+                            (m1, m2) -> m1
+                    )).values());
         }
         return injector;
     }
@@ -91,6 +102,23 @@ public class OntopModelConfigurationImpl implements OntopModelConfiguration {
 
     protected static class DefaultOntopModelBuilderFragment<B extends Builder> implements OntopModelBuilderFragment<B> {
 
+        private final B builder;
+
+        /**
+         * To be called when NOT INHERITING
+         */
+        protected DefaultOntopModelBuilderFragment(B builder) {
+            this.builder = builder;
+        }
+
+        /**
+         * To be called ONLY by sub-classes
+         */
+        protected DefaultOntopModelBuilderFragment() {
+            this.builder = (B) this;
+        }
+
+
         private Optional<Properties> inputProperties = Optional.empty();
 
         /**
@@ -99,7 +127,7 @@ public class OntopModelConfigurationImpl implements OntopModelConfiguration {
         @Override
         public final B properties(@Nonnull Properties properties) {
             this.inputProperties = Optional.of(properties);
-            return (B) this;
+            return builder;
         }
 
         @Override

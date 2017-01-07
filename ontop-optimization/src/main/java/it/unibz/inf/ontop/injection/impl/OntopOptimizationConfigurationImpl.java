@@ -86,6 +86,22 @@ public class OntopOptimizationConfigurationImpl extends OntopModelConfigurationI
     protected static class DefaultOntopOptimizationBuilderFragment<B extends OntopOptimizationConfiguration.Builder>
             implements OntopOptimizationBuilderFragment<B> {
 
+        private final B builder;
+
+        /**
+         * For sub-classes ONLY!
+         */
+        protected DefaultOntopOptimizationBuilderFragment() {
+            builder = (B) this;
+        }
+
+        /**
+         * When not inheriting
+         */
+        protected DefaultOntopOptimizationBuilderFragment(B builder) {
+            this.builder = builder;
+        }
+
         protected Properties generateProperties() {
             return new Properties();
         }
@@ -108,7 +124,7 @@ public class OntopOptimizationConfigurationImpl extends OntopModelConfigurationI
         private final DefaultOntopOptimizationBuilderFragment<B> optimizationBuilderFragment;
 
         protected AbstractOntopOptimizationBuilderMixin() {
-            optimizationBuilderFragment = new DefaultOntopOptimizationBuilderFragment<>();
+            optimizationBuilderFragment = new DefaultOntopOptimizationBuilderFragment<>((B)this);
         }
 
         @Override
