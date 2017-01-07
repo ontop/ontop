@@ -88,7 +88,7 @@ public class SimplePrefixManager extends AbstractPrefixManager {
         prefixToURIMap.put(OBDAVocabulary.PREFIX_RDFS, OBDAVocabulary.NS_RDFS);
         prefixToURIMap.put(OBDAVocabulary.PREFIX_OWL, OBDAVocabulary.NS_OWL);
         prefixToURIMap.put(OBDAVocabulary.PREFIX_XSD, OBDAVocabulary.NS_XSD);
-        prefixToURIMap.put(OBDAVocabulary.PREFIX_QUEST, OBDAVocabulary.NS_QUEST);
+        prefixToURIMap.put(OBDAVocabulary.PREFIX_OBDA, OBDAVocabulary.NS_OBDA);
         return prefixToURIMap;
 	}
 

@@ -34,6 +34,9 @@ import org.protege.editor.core.Disposable;
 import org.protege.editor.core.ui.action.ProtegeAction;
 import org.protege.editor.owl.OWLEditorKit;
 import org.protege.editor.owl.model.OWLWorkspace;
+import org.protege.editor.owl.model.OWLModelManager;
+import org.semanticweb.owlapi.model.IRI;
+import org.semanticweb.owlapi.model.OWLOntology;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,6 +51,7 @@ public class R2RMLImportAction extends ProtegeAction {
 
 	private OWLEditorKit editorKit = null;
 	private OBDAModelWrapper obdaModelController = null;
+	private OWLModelManager modelManager;
 
 	private Logger log = LoggerFactory.getLogger(R2RMLImportAction.class);
 
@@ -56,6 +60,7 @@ public class R2RMLImportAction extends ProtegeAction {
 		editorKit = (OWLEditorKit) getEditorKit();
 		obdaModelController = ((OBDAModelManager) editorKit.get(OBDAModelImpl.class
 				.getName())).getActiveOBDAModelWrapper();
+		modelManager = editorKit.getOWLWorkspace().getOWLModelManager();
 	}
 
 	@Override
@@ -76,8 +81,12 @@ public class R2RMLImportAction extends ProtegeAction {
 					"Confirmation", JOptionPane.YES_NO_OPTION);
 
 			if (response == JOptionPane.YES_OPTION) {
+				// Get the path of the file of the active OWL model
+				OWLOntology activeOntology = modelManager.getActiveOntology();
+				IRI documentIRI = modelManager.getOWLOntologyManager().getOntologyDocumentIRI(activeOntology);
+				File ontologyDir = new File(documentIRI.toURI().getPath());
+				final JFileChooser fc = new JFileChooser(ontologyDir);
 
-				final JFileChooser fc = new JFileChooser();
 				fc.showOpenDialog(workspace);
 				File file = null;
 				try {
@@ -114,13 +123,13 @@ public class R2RMLImportAction extends ProtegeAction {
 								obdaModelController.addMapping(sourceID, mapping, false);
 							}
 						}
-						JOptionPane.showMessageDialog(workspace, "R2rml Import completed. ");
+						JOptionPane.showMessageDialog(workspace, "R2RML Import completed. " );
 					} catch (DuplicateMappingException dm) {
 						JOptionPane.showMessageDialog(workspace, "Duplicate mapping id found. Please correct the Resource node name: " + dm.getLocalizedMessage());
 						throw new RuntimeException("Duplicate mapping found: " + dm.getMessage());
 					} catch (Exception e) {
 						JOptionPane.showMessageDialog(null, "An error occurred. For more info, see the logs.");
-						log.error("Error during r2rml import. \n");
+						log.error("Error during R2RML import. \n");
 						e.printStackTrace();
 					}
 

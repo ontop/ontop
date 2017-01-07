@@ -12,10 +12,7 @@ import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.EQNormalizer;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.LinearInclusionDependencies;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.VocabularyValidator;
 import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
-import it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing.MappingDataTypeRepair;
-import it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing.MappingSameAs;
-import it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing.TMappingExclusionConfig;
-import it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing.TMappingProcessor;
+import it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing.*;
 import it.unibz.inf.ontop.owlrefplatform.core.unfolding.DatalogUnfolder;
 
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
@@ -93,6 +90,14 @@ public class QuestUnfolder {
 		Collection<OBDAMappingAxiom> normalizedMappingAxioms = dbConnector.applyDBSpecificNormalization(mappingAxioms,
 				metadata);
 
+		/*
+         * add sameAsInverse
+         */
+		if (preferences.isSameAsInMappingsEnabled()) {
+			normalizedMappingAxioms = MappingSameAs.addSameAsInverse(normalizedMappingAxioms, nativeQLFactory);
+		}
+
+
 		List<CQIE> unfoldingProgram = mapping2DatalogConvertor.constructDatalogProgram(normalizedMappingAxioms, metadata);
 
 
@@ -115,9 +120,6 @@ public class QuestUnfolder {
 		extendTypesWithMetadata(unfoldingProgram, reformulationReasoner, vocabularyValidator, metadata);
 		addNOTNULLToMappings(unfoldingProgram, metadata);
 
-		// Collecting URI templates
-		uriTemplateMatcher = UriTemplateMatcher.create(unfoldingProgram);
-
 		// Adding ontology assertions (ABox) as rules (facts, head with no body).
 		List<AnnotationAssertion> annotationAssertions;
 		if (preferences.isOntologyAnnotationQueryingEnabled()) {
@@ -126,12 +128,26 @@ public class QuestUnfolder {
 		else{
 			annotationAssertions = Collections.emptyList();
 		}
+
+		// Temporary (needed by the assertions)
+		uriTemplateMatcher = UriTemplateMatcher.create(unfoldingProgram);
+
 		addAssertionsAsFacts(unfoldingProgram, inputOntology.getClassAssertions(),
 				inputOntology.getObjectPropertyAssertions(), inputOntology.getDataPropertyAssertions(), annotationAssertions);
 
 		if (preferences.isSameAsInMappingsEnabled()) {
 			addSameAsMapping(unfoldingProgram);
 		}
+
+        if(log.isDebugEnabled()) {
+            String finalMappings = Joiner.on("\n").join(unfoldingProgram);
+            log.debug("Set of mappings before canonical IRI rewriting: \n {}", finalMappings);
+        }
+
+		unfoldingProgram = new CanonicalIRIRewriter().buildCanonicalIRIMappings(unfoldingProgram);
+
+		// Collecting URI templates
+		uriTemplateMatcher = UriTemplateMatcher.create(unfoldingProgram);
 
 		// Adding "triple(x,y,z)" mappings for support of unbounded
 		// predicates and variables as class names (implemented in the

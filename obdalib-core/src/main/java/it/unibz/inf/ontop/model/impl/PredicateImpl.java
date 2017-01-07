@@ -22,6 +22,8 @@ package it.unibz.inf.ontop.model.impl;
 
 import it.unibz.inf.ontop.model.*;
 
+import static it.unibz.inf.ontop.model.impl.OBDAVocabulary.CANONICAL_IRI;
+import static it.unibz.inf.ontop.model.impl.OBDAVocabulary.SAME_AS;
 
 public class PredicateImpl implements Predicate {
 
@@ -101,7 +103,18 @@ public class PredicateImpl implements Predicate {
 		return (arity == 2 && getType(0) == COL_TYPE.OBJECT && getType(1) == COL_TYPE.LITERAL); 
 	}
 
-    @Override
+	@Override
+	public boolean isSameAsProperty() {
+		return (arity == 2 && name.equals(SAME_AS) && getType(0) == COL_TYPE.OBJECT && getType(1) == COL_TYPE.OBJECT);
+	}
+
+	@Override
+	public boolean isCanonicalIRIProperty() {
+		return (arity == 2 && name.equals(CANONICAL_IRI) && getType(0) == COL_TYPE.OBJECT && getType(1) == COL_TYPE.OBJECT);
+	}
+
+
+	@Override
 	public boolean isTriplePredicate() {
 		return (arity == 3 && name.equals(QUEST_TRIPLE_PRED.getName()));
 	}

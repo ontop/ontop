@@ -186,6 +186,16 @@ public enum ExpressionOperation implements OperationPredicate {
 		return false;
 	}
 
+	@Override
+	public boolean isSameAsProperty() {
+		return false;
+	}
+
+	@Override
+	public boolean isCanonicalIRIProperty() {
+		return false;
+	}
+
 	public TermTypeInferenceRule getTermTypeInferenceRule() {
 		return termTypeInferenceRule;
 	}

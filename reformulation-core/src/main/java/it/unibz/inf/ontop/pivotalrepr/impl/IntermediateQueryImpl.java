@@ -1,25 +1,13 @@
 package it.unibz.inf.ontop.pivotalrepr.impl;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Injector;
 import it.unibz.inf.ontop.executor.InternalProposalExecutor;
-import it.unibz.inf.ontop.executor.expression.PushDownExpressionExecutor;
-import it.unibz.inf.ontop.executor.join.JoinInternalCompositeExecutor;
-import it.unibz.inf.ontop.executor.pullout.PullVariableOutOfSubTreeExecutor;
-import it.unibz.inf.ontop.executor.merging.QueryMergingExecutor;
-import it.unibz.inf.ontop.executor.substitution.SubstitutionPropagationExecutor;
-import it.unibz.inf.ontop.executor.union.LiftUnionAsHighAsPossibleProposalExecutor;
-import it.unibz.inf.ontop.executor.union.UnionLiftInternalExecutor;
-import it.unibz.inf.ontop.executor.unsatisfiable.RemoveEmptyNodesExecutor;
 import it.unibz.inf.ontop.model.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.Variable;
-import it.unibz.inf.ontop.executor.groundterm.GroundTermRemovalFromDataNodeExecutor;
-import it.unibz.inf.ontop.executor.pullout.PullVariableOutOfDataNodeExecutor;
 import it.unibz.inf.ontop.pivotalrepr.validation.IntermediateQueryValidator;
 import it.unibz.inf.ontop.pivotalrepr.validation.InvalidIntermediateQueryException;
-import it.unibz.inf.ontop.pivotalrepr.validation.StandardIntermediateQueryValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import it.unibz.inf.ontop.pivotalrepr.*;
@@ -68,16 +56,6 @@ public class IntermediateQueryImpl implements IntermediateQuery {
     private final OptimizationConfiguration optimizationConfiguration;
 
     private final IntermediateQueryValidator validator;
-
-
-    /**
-     * TODO: explain
-     */
-    private static final ImmutableMap<Class<? extends QueryOptimizationProposal>, Class<? extends StandardProposalExecutor>> STD_EXECUTOR_CLASSES;
-    static {
-        STD_EXECUTOR_CLASSES = ImmutableMap.<Class<? extends QueryOptimizationProposal>, Class<? extends StandardProposalExecutor>>of(
-                LiftUnionAsHighAsPossibleProposal.class, LiftUnionAsHighAsPossibleProposalExecutor.class);
-    }
 
 
     /**
@@ -231,27 +209,9 @@ public class IntermediateQueryImpl implements IntermediateQuery {
          * It assumes that the concrete proposal classes DIRECTLY
          * implements a registered interface (extending QueryOptimizationProposal).
          */
-        Class<?>[] proposalClassHierarchy = proposal.getClass().getInterfaces();
-
-        if (!requireUsingInternalExecutor) {
-            /**
-             * First look for a standard executor
-             */
-            for (Class proposalClass : proposalClassHierarchy) {
-                if (STD_EXECUTOR_CLASSES.containsKey(proposalClass)) {
-                    StandardProposalExecutor<P, R> executor;
-                    try {
-                        executor = STD_EXECUTOR_CLASSES.get(proposalClass).newInstance();
-                    } catch (InstantiationException | IllegalAccessException e) {
-                        throw new RuntimeException(e.getMessage());
-                    }
-                    return executor.apply(proposal, this);
-                }
-            }
-        }
 
         /**
-         * Then, look for a internal one
+         * Look for a internal one
          */
         Optional<Class<? extends InternalProposalExecutor>> optionalExecutorClass =
                 optimizationConfiguration.getProposalExecutorInterface(proposal.getClass());

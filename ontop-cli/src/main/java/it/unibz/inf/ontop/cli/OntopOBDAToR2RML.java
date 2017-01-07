@@ -90,7 +90,7 @@ public class OntopOBDAToR2RML implements OntopCommand {
         /**
          * render the mapping in the (ugly) Turtle syntax and save it to a string
          */
-        R2RMLWriter writer = new R2RMLWriter(model, srcURI, ontology);
+        R2RMLWriter writer = new R2RMLWriter(model, srcURI, ontology, config.getInjector());
 
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 

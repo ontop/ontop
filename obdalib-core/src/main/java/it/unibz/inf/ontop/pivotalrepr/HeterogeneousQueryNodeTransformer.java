@@ -19,8 +19,6 @@ public interface HeterogeneousQueryNodeTransformer<P extends NodeTransformationP
 
     P transform(ConstructionNode constructionNode);
 
-    P transform(GroupNode groupNode);
-
     P transform(EmptyNode emptyNode);
 
     P transform(TrueNode trueNode);

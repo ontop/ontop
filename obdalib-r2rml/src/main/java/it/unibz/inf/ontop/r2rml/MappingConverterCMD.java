@@ -84,7 +84,7 @@ class MappingConverterCMD {
 							.loadOntologyFromOntologyDocument((new File(owlfile)));
 				}
 
-				R2RMLWriter writer = new R2RMLWriter(model, srcURI, ontology);
+				R2RMLWriter writer = new R2RMLWriter(model, srcURI, ontology, configuration.getInjector());
 				// writer.writePretty(out);
 				writer.write(out);
 				System.out.println("R2RML mapping file " + outfile

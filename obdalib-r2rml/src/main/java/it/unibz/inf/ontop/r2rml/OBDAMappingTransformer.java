@@ -34,6 +34,7 @@ import it.unibz.inf.ontop.utils.URITemplates;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import org.eclipse.rdf4j.model.Resource;
@@ -261,19 +262,19 @@ public class OBDAMappingTransformer {
 	}
 
 	/**
-	 * Get R2RML TriplesMap from OBDA mapping axiom
+	 * Get R2RML TriplesMaps from OBDA mapping axiom
 	 * @param axiom
 	 * @param prefixmng
 	 * @return
 	 */
-	public TriplesMap getTriplesMap(OBDAMappingAxiom axiom,
-			PrefixManager prefixmng) {
-		
+	public TriplesMap getTripleMap(OBDAMappingAxiom axiom,
+									PrefixManager prefixmng) {
+
 		SQLQueryImpl squery = (SQLQueryImpl) axiom.getSourceQuery();
 		List<Function> tquery = axiom.getTargetQuery();
-		
+
 		String random_number = IDGenerator.getNextUniqueID("");
-		
+
 		//triplesMap node
 		String mapping_id = axiom.getId();
 		if (!mapping_id.startsWith("http://"))
@@ -292,7 +293,7 @@ public class OBDAMappingTransformer {
 		Template templs = mfact.createTemplate(subjectTemplate);
 		SubjectMap sm = mfact.createSubjectMap(templs);
 		
-		TriplesMap tm = mfact.createTriplesMap(lt, sm);
+		TriplesMap tm = mfact.createTriplesMap(lt, sm, axiom.getId());
 		
 		//process target query
 		for (Function func : tquery) {
@@ -300,7 +301,8 @@ public class OBDAMappingTransformer {
 			Predicate pred = func.getFunctionSymbol();
 			String predName = pred.getName();
 			URI predUri = null; String predURIString ="";
-			
+			Optional<Template> templp = Optional.empty();
+
 			if (pred.isTriplePredicate()) {
 				//triple
 				Function predf = (Function)func.getTerm(1);
@@ -310,9 +312,10 @@ public class OBDAMappingTransformer {
 						predUri = vf.createURI(pred.getName());
 					}
 					else {
-						//custom predicate
+						//template
 						predURIString = URITemplates.getUriTemplateString(predf, prefixmng);
 						predUri = vf.createURI(predURIString);
+                        templp = Optional.of(mfact.createTemplate(subjectTemplate));
 					}
 				}	
 			} 
@@ -332,8 +335,9 @@ public class OBDAMappingTransformer {
 				sm.addClass(predUri);
 				
 			} else {
-//                PredicateMap predM = null;
-				PredicateMap predM = mfact.createPredicateMap(TermMapType.CONSTANT_VALUED, predURIString);
+				PredicateMap predM = templp.isPresent()?
+				mfact.createPredicateMap(templp.get()):
+				mfact.createPredicateMap(TermMapType.CONSTANT_VALUED, predURIString);
 				ObjectMap obm = null; PredicateObjectMap pom = null;
                 Term object = null;
 				if (!pred.isTriplePredicate()) {

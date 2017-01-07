@@ -398,5 +398,4 @@ public class QuestOWLStatement implements IQuestOWLStatement {
 		}
 		return axiomList;
 	}
-
 }
