@@ -35,7 +35,7 @@ public interface QuestConfiguration extends QuestCoreConfiguration {
         return new QuestConfigurationImpl.BuilderImpl<>();
     }
 
-    interface Builder<B extends Builder> extends QuestCoreConfiguration.Builder<B> {
+    interface QuestConfigurationBuilderFragment<B extends Builder> {
 
         B ontologyFile(@Nonnull String urlOrPath);
 
@@ -49,7 +49,12 @@ public interface QuestConfiguration extends QuestCoreConfiguration {
          * Cannot be used together with a pre-defined mapping
          */
         B bootstrapMapping(OBDADataSource source, String baseIRI);
+    }
 
+    interface Builder<B extends Builder> extends QuestConfigurationBuilderFragment<B>,
+            QuestCoreConfiguration.Builder<B> {
+
+        @Override
         QuestConfiguration build();
     }
 }
