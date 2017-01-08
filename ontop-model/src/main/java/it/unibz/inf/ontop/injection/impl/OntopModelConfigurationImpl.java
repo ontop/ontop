@@ -103,6 +103,7 @@ public class OntopModelConfigurationImpl implements OntopModelConfiguration {
     protected static class DefaultOntopModelBuilderFragment<B extends Builder> implements OntopModelBuilderFragment<B> {
 
         private final B builder;
+        private Optional<Boolean> testMode = Optional.empty();
 
         /**
          * To be called when NOT INHERITING
@@ -161,6 +162,12 @@ public class OntopModelConfigurationImpl implements OntopModelConfiguration {
             }
         }
 
+        @Override
+        public B enableTestMode() {
+            testMode = Optional.of(true);
+            return builder;
+        }
+
         /**
          *
          * Derived properties have the highest precedence over input properties.
@@ -169,9 +176,10 @@ public class OntopModelConfigurationImpl implements OntopModelConfiguration {
          *
          */
         protected Properties generateUserProperties() {
-            // NB: in the future, we may also produce additional local properties.
-            return inputProperties
-                    .orElseGet(Properties::new);
+            Properties properties = new Properties();
+            inputProperties.ifPresent(properties::putAll);
+            testMode.ifPresent(isEnabled -> properties.put(OntopModelProperties.TEST_MODE, isEnabled));
+            return properties;
         }
 
         protected final OntopModelConfigurationOptions generateOntopModelConfigurationOptions() {

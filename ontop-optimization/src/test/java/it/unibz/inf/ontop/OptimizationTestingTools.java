@@ -7,6 +7,7 @@ import it.unibz.inf.ontop.injection.OntopOptimizationConfiguration;
 public class OptimizationTestingTools {
 
     public static final Injector INJECTOR = OntopOptimizationConfiguration.defaultBuilder()
+            .enableTestMode()
             .build()
             .getInjector();
 

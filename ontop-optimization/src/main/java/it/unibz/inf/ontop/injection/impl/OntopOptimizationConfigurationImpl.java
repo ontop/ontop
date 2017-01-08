@@ -15,7 +15,6 @@ import it.unibz.inf.ontop.executor.substitution.SubstitutionPropagationExecutor;
 import it.unibz.inf.ontop.executor.truenode.TrueNodeRemovalExecutor;
 import it.unibz.inf.ontop.executor.union.UnionLiftInternalExecutor;
 import it.unibz.inf.ontop.executor.unsatisfiable.RemoveEmptyNodesExecutor;
-import it.unibz.inf.ontop.injection.OntopModelProperties;
 import it.unibz.inf.ontop.injection.OntopOptimizationConfiguration;
 import it.unibz.inf.ontop.injection.OntopOptimizationProperties;
 import it.unibz.inf.ontop.pivotalrepr.proposal.*;
@@ -26,7 +25,7 @@ import java.util.stream.Stream;
 public class OntopOptimizationConfigurationImpl extends OntopModelConfigurationImpl
         implements OntopOptimizationConfiguration {
 
-    protected OntopOptimizationConfigurationImpl(OntopModelProperties properties, OntopOptimizationConfigurationOptions options) {
+    protected OntopOptimizationConfigurationImpl(OntopOptimizationProperties properties, OntopOptimizationConfigurationOptions options) {
         super(properties, options.getModelOptions());
     }
 

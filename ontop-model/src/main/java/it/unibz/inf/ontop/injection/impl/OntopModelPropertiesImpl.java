@@ -16,6 +16,7 @@ public class OntopModelPropertiesImpl implements OntopModelProperties {
     private static final Logger LOG = LoggerFactory.getLogger(OntopModelProperties.class);
     private final Properties properties;
     private final CardinalityPreservationMode cardinalityMode;
+    private final boolean testMode;
 
     /**
      * Beware: immutable class!
@@ -35,15 +36,37 @@ public class OntopModelPropertiesImpl implements OntopModelProperties {
          */
         properties.putAll(userProperties);
 
-        String cardinalityModeString = Optional.ofNullable(properties.getProperty(OntopModelProperties.CARDINALITY_MODE))
+        cardinalityMode = extractCardinalityMode(properties);
+        testMode = extractBoolean(properties, OntopModelProperties.TEST_MODE);
+    }
+
+    private static CardinalityPreservationMode extractCardinalityMode(Properties properties)
+            throws InvalidOntopConfigurationException {
+        Object cardinalityModeObject = Optional.ofNullable(properties.get(OntopModelProperties.CARDINALITY_MODE))
                 .orElseThrow(() -> new InvalidOntopConfigurationException(CARDINALITY_MODE + " key is missing"));
 
-        try {
-            cardinalityMode = CardinalityPreservationMode.valueOf(cardinalityModeString);
-        } catch (IllegalArgumentException e) {
-            throw new InvalidOntopConfigurationException("Invalid value for " + CARDINALITY_MODE
-                    + ": is " + cardinalityModeString);
+        if (cardinalityModeObject instanceof String) {
+            try {
+                return CardinalityPreservationMode.valueOf((String)cardinalityModeObject);
+            } catch (IllegalArgumentException e) {
+            }
         }
+        else if (cardinalityModeObject instanceof CardinalityPreservationMode)
+            return (CardinalityPreservationMode) cardinalityModeObject;
+
+        throw new InvalidOntopConfigurationException("Invalid value for " + CARDINALITY_MODE
+                + ": is " + cardinalityModeObject);
+    }
+
+    private static boolean extractBoolean(Properties properties, String key) {
+        Object value = Optional.ofNullable(properties.get(key))
+                .orElseThrow(() -> new InvalidOntopConfigurationException(key + " key is missing"));
+        if (value instanceof Boolean)
+            return (Boolean) value;
+        else if (value instanceof String)
+            return Boolean.valueOf((String) value);
+        else
+            throw new InvalidOntopConfigurationException("Invalid value for " + key + ": is " + value);
     }
 
     protected static Properties loadDefaultPropertiesFromFile(Class localClass, String fileName) {
@@ -76,6 +99,11 @@ public class OntopModelPropertiesImpl implements OntopModelProperties {
     @Override
     public CardinalityPreservationMode getCardinalityPreservationMode() {
         return cardinalityMode;
+    }
+
+    @Override
+    public boolean isTestModeEnabled() {
+        return testMode;
     }
 
     /**
