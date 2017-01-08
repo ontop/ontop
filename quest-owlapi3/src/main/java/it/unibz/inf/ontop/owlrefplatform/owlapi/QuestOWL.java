@@ -34,6 +34,7 @@ import it.unibz.inf.ontop.owlrefplatform.core.*;
 import it.unibz.inf.ontop.owlrefplatform.core.abox.QuestMaterializer;
 import it.unibz.inf.ontop.injection.QuestComponentFactory;
 import it.unibz.inf.ontop.injection.QuestCorePreferences;
+import it.unibz.inf.ontop.pivotalrepr.utils.ExecutorRegistry;
 import it.unibz.inf.ontop.utils.VersionInfo;
 import org.semanticweb.owlapi.model.*;
 import org.semanticweb.owlapi.reasoner.*;
@@ -89,7 +90,7 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 
 	private final Optional<OBDAModel> obdaModel;
 
-	private final Injector injector;
+	private final ExecutorRegistry executorRegistry;
 
 	private IQuest questInstance = null;
 
@@ -149,7 +150,9 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 
         this.structuralReasoner = new StructuralReasoner(rootOntology, owlConfiguration, BufferingMode.BUFFERING);
 
-		injector = questConfiguration.getInjector();
+		executorRegistry = questConfiguration.getExecutorRegistry();
+
+		Injector injector = questConfiguration.getInjector();
 		this.componentFactory = injector.getInstance(QuestComponentFactory.class);
 
 		try {
@@ -238,7 +241,7 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 		// pm.reasonerTaskStarted("Classifying...");
 		// pm.reasonerTaskBusy();
 
-		questInstance = componentFactory.create(translatedOntologyMerge, obdaModel, inputDBMetadata);
+		questInstance = componentFactory.create(translatedOntologyMerge, obdaModel, inputDBMetadata, executorRegistry);
 		
 		Set<OWLOntology> importsClosure = man.getImportsClosure(getRootOntology());
 		
@@ -247,7 +250,7 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 			// pm.reasonerTaskProgressChanged(1, 4);
 
 			// Setup repository
-			questInstance.setupRepository(injector);
+			questInstance.setupRepository();
 			// pm.reasonerTaskProgressChanged(2, 4);
 
 			// Retrives the connection from Quest

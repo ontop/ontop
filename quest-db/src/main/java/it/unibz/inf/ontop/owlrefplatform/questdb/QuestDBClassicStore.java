@@ -35,6 +35,7 @@ import it.unibz.inf.ontop.owlapi.OWLAPITranslatorUtility;
 import it.unibz.inf.ontop.owlrefplatform.core.IQuest;
 import it.unibz.inf.ontop.owlrefplatform.core.IQuestConnection;
 import it.unibz.inf.ontop.injection.QuestCorePreferences;
+import it.unibz.inf.ontop.pivotalrepr.utils.ExecutorRegistry;
 import org.openrdf.model.Literal;
 import org.openrdf.model.Resource;
 import org.openrdf.model.Statement;
@@ -111,8 +112,8 @@ public class QuestDBClassicStore extends QuestDBAbstractStore {
 	}
 
 	private void createInstance(Ontology tbox, QuestPreferences preferences) throws Exception {
-        questInstance = getComponentFactory().create(tbox, Optional.empty(), Optional.empty());
-		questInstance.setupRepository(getInjector());
+        questInstance = getComponentFactory().create(tbox, Optional.empty(), Optional.empty(), getExecutorRegistry());
+		questInstance.setupRepository();
 		
 		final boolean bObtainFromOntology = preferences.getRequiredBoolean(QuestCorePreferences.OBTAIN_FROM_ONTOLOGY);
 		final boolean bObtainFromMappings = preferences.getRequiredBoolean(QuestCorePreferences.OBTAIN_FROM_MAPPINGS);

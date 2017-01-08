@@ -90,7 +90,8 @@ public class QuestDBVirtualStore extends QuestDBAbstractStore {
 		obdaModel.getOntologyVocabulary().merge(tbox.getVocabulary());
 
 		//set up Quest
-		questInstance = getComponentFactory().create(tbox, Optional.of(obdaModel), config.getDatasourceMetadata());
+		questInstance = getComponentFactory().create(tbox, Optional.of(obdaModel), config.getDatasourceMetadata(),
+				config.getExecutorRegistry());
 	}
 
 	/**
@@ -105,7 +106,7 @@ public class QuestDBVirtualStore extends QuestDBAbstractStore {
 			log.warn("Double initialization of QuestDBVirtualStore");
 		} else {
 			this.isinitalized = true;
-			questInstance.setupRepository(getInjector());
+			questInstance.setupRepository();
 		}
 	}
 	

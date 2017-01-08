@@ -60,8 +60,9 @@ private void setup()  throws Exception {
 	IQuest quest = componentFactory.create(
 			OWLAPITranslatorUtility.translateImportsClosure(ontology),
 			Optional.of(obdaModel),
-			Optional.empty());
-	quest.setupRepository(injector);
+			Optional.empty(),
+			configuration.getExecutorRegistry());
+	quest.setupRepository();
 	
 	/*
 	 * Prepare the data connection for querying.

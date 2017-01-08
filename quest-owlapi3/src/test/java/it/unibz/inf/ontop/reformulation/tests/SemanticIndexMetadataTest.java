@@ -110,8 +110,9 @@ public class SemanticIndexMetadataTest  extends TestCase {
 
 			Injector injector = config.getInjector();
 			QuestComponentFactory componentFactory = injector.getInstance(QuestComponentFactory.class);
-			IQuest questInstance = componentFactory.create(ont, Optional.empty(), Optional.empty());
-			questInstance.setupRepository(injector);
+			IQuest questInstance = componentFactory.create(ont, Optional.empty(), Optional.empty(),
+					config.getExecutorRegistry());
+			questInstance.setupRepository();
 			
 			RDBMSSIRepositoryManager si = questInstance.getOptionalSemanticIndexRepository().get();
 			
