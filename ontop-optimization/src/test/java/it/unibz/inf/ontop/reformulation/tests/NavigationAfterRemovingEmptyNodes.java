@@ -2,15 +2,12 @@ package it.unibz.inf.ontop.reformulation.tests;
 
 
 import com.google.common.collect.ImmutableSet;
-import com.google.inject.Injector;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.AtomPredicateImpl;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.model.impl.URITemplatePredicateImpl;
-import it.unibz.inf.ontop.injection.QuestCoreConfiguration;
 import it.unibz.inf.ontop.pivotalrepr.*;
 import it.unibz.inf.ontop.pivotalrepr.impl.*;
-import it.unibz.inf.ontop.pivotalrepr.impl.tree.DefaultIntermediateQueryBuilder;
 import it.unibz.inf.ontop.pivotalrepr.proposal.InnerJoinOptimizationProposal;
 import it.unibz.inf.ontop.pivotalrepr.proposal.NodeCentricOptimizationResults;
 import it.unibz.inf.ontop.pivotalrepr.proposal.RemoveEmptyNodeProposal;
@@ -22,6 +19,7 @@ import java.util.Optional;
 
 import static junit.framework.Assert.assertTrue;
 import static junit.framework.TestCase.assertFalse;
+import static it.unibz.inf.ontop.OptimizationTestingTools.*;
 
 public class NavigationAfterRemovingEmptyNodes {
 
@@ -67,15 +65,12 @@ public class NavigationAfterRemovingEmptyNodes {
     private static final ExtensionalDataNode DATA_NODE_6 = buildExtensionalDataNode(TABLE3_PREDICATE, E, F);
     private static final ExtensionalDataNode DATA_NODE_7 = buildExtensionalDataNode(TABLE4_PREDICATE, G, H);
 
-    private static final MetadataForQueryOptimization METADATA = new EmptyMetadataForQueryOptimization();
     private static final boolean REQUIRE_USING_IN_PLACE_EXECUTOR = true;
-
-    private static final Injector INJECTOR = QuestCoreConfiguration.defaultBuilder().build().getInjector();
 
 
     @Test
     public void testNextSiblingInitiallyFar() throws EmptyQueryException {
-        IntermediateQueryBuilder initialQueryBuilder = new DefaultIntermediateQueryBuilder(METADATA, INJECTOR);
+        IntermediateQueryBuilder initialQueryBuilder = createQueryBuilder(EMPTY_METADATA);
         DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_1_PREDICATE, A);
 
         ConstructionNode initialRootNode = new ConstructionNodeImpl(projectionAtom.getVariables());
@@ -115,7 +110,7 @@ public class NavigationAfterRemovingEmptyNodes {
 
     @Test
     public void testInsatisfiedJoinCondition() throws EmptyQueryException {
-        IntermediateQueryBuilder initialQueryBuilder = new DefaultIntermediateQueryBuilder(METADATA, INJECTOR);
+        IntermediateQueryBuilder initialQueryBuilder = createQueryBuilder(EMPTY_METADATA);
         DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_1_PREDICATE, A);
 
         ConstructionNode initialRootNode = new ConstructionNodeImpl(projectionAtom.getVariables());

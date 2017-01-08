@@ -2,7 +2,6 @@ package it.unibz.inf.ontop.reformulation.tests;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import com.google.inject.Injector;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.AtomPredicateImpl;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
@@ -10,15 +9,14 @@ import it.unibz.inf.ontop.model.impl.URITemplatePredicateImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.optimization.BindingLiftOptimizer;
 import it.unibz.inf.ontop.owlrefplatform.core.optimization.FixedPointBindingLiftOptimizer;
-import it.unibz.inf.ontop.injection.QuestCoreConfiguration;
 import it.unibz.inf.ontop.pivotalrepr.*;
 import it.unibz.inf.ontop.pivotalrepr.impl.*;
-import it.unibz.inf.ontop.pivotalrepr.impl.tree.DefaultIntermediateQueryBuilder;
 import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.Optional;
 
+import static it.unibz.inf.ontop.OptimizationTestingTools.*;
 import static it.unibz.inf.ontop.model.ExpressionOperation.CONCAT;
 import static it.unibz.inf.ontop.model.ExpressionOperation.EQ;
 import static it.unibz.inf.ontop.pivotalrepr.NonCommutativeOperatorNode.ArgumentPosition.LEFT;
@@ -51,7 +49,6 @@ public class UriTemplateTest {
     private final static AtomPredicate ANS1_PREDICATE_1 = new AtomPredicateImpl("ans1", 1);
 
     private final MetadataForQueryOptimization metadata;
-    private static final Injector INJECTOR = QuestCoreConfiguration.defaultBuilder().build().getInjector();
 
     public UriTemplateTest() {
         metadata = initMetadata();
@@ -67,7 +64,7 @@ public class UriTemplateTest {
     @Ignore
     @Test
     public void testCompatibleUriTemplates1() throws EmptyQueryException {
-        IntermediateQueryBuilder initialQueryBuilder = new DefaultIntermediateQueryBuilder(metadata, INJECTOR);
+        IntermediateQueryBuilder initialQueryBuilder = createQueryBuilder(metadata);
 
         DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_1, X);
         ConstructionNode rootNode = new ConstructionNodeImpl(projectionAtom.getVariables());
@@ -107,7 +104,7 @@ public class UriTemplateTest {
         System.out.println("\nBefore optimization: \n" +  initialQuery);
 
 
-        IntermediateQueryBuilder expectedQueryBuilder = new DefaultIntermediateQueryBuilder(metadata, INJECTOR);
+        IntermediateQueryBuilder expectedQueryBuilder = initialQuery.newBuilder();
         expectedQueryBuilder.init(projectionAtom, leftConstructionNode);
 
         InnerJoinNode newJoinNode = new InnerJoinNodeImpl(Optional.of(

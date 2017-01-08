@@ -31,7 +31,7 @@ public class NodeDeletionTest {
         ConstructionNode rootNode = new ConstructionNodeImpl(ImmutableSet.of(x));
         DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(new AtomPredicateImpl("ans1", 1), x);
 
-        IntermediateQueryBuilder queryBuilder = MODEL_FACTORY.create(EMPTY_METADATA, EXECUTOR_REGISTRY);
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder(EMPTY_METADATA);
         queryBuilder.init(projectionAtom, rootNode);
 
         ValueConstant falseValue = DATA_FACTORY.getBooleanConstant(false);
@@ -67,7 +67,7 @@ public class NodeDeletionTest {
         DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(
                 new AtomPredicateImpl("ans1", 2), x, y);
 
-        IntermediateQueryBuilder queryBuilder = MODEL_FACTORY.create(EMPTY_METADATA, EXECUTOR_REGISTRY);
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder(EMPTY_METADATA);
         queryBuilder.init(projectionAtom, rootNode);
 
         ValueConstant falseValue = DATA_FACTORY.getBooleanConstant(false);
@@ -117,7 +117,7 @@ public class NodeDeletionTest {
 
         ConstructionNode rootNode = new ConstructionNodeImpl(projectedVariables);
 
-        IntermediateQueryBuilder queryBuilder = MODEL_FACTORY.create(EMPTY_METADATA, EXECUTOR_REGISTRY);
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder(EMPTY_METADATA);
         queryBuilder.init(projectionAtom, rootNode);
 
         ValueConstant falseValue = DATA_FACTORY.getBooleanConstant(false);
@@ -190,7 +190,7 @@ public class NodeDeletionTest {
         ConstructionNode rootNode = new ConstructionNodeImpl(projectedVariables);
 
 
-        IntermediateQueryBuilder queryBuilder = MODEL_FACTORY.create(EMPTY_METADATA, EXECUTOR_REGISTRY);
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder(EMPTY_METADATA);
         queryBuilder.init(projectionAtom, rootNode);
 
         ValueConstant falseValue = DATA_FACTORY.getBooleanConstant(false);
@@ -257,7 +257,7 @@ public class NodeDeletionTest {
         DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(
                 new AtomPredicateImpl("ans1", 2), x, y);
 
-        IntermediateQueryBuilder queryBuilder = MODEL_FACTORY.create(EMPTY_METADATA, EXECUTOR_REGISTRY);
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder(EMPTY_METADATA);
         queryBuilder.init(projectionAtom, rootNode);
 
         ValueConstant falseValue = DATA_FACTORY.getBooleanConstant(false);

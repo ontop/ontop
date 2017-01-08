@@ -25,13 +25,10 @@ import java.util.Optional;
 import com.google.common.collect.ImmutableList;
 
 import com.google.inject.Inject;
-import com.google.inject.Injector;
 import com.google.inject.assistedinject.Assisted;
 
 import it.unibz.inf.ontop.exception.DuplicateMappingException;
-import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
-import it.unibz.inf.ontop.injection.OBDAFactoryWithException;
-import it.unibz.inf.ontop.injection.OBDAProperties;
+import it.unibz.inf.ontop.injection.*;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.io.PrefixManager;
 import it.unibz.inf.ontop.model.impl.MappingFactoryImpl;
@@ -53,8 +50,7 @@ import it.unibz.inf.ontop.model.impl.RDBMSourceParameterConstants;
 import it.unibz.inf.ontop.ontology.Ontology;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.VocabularyValidator;
 import it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing.TMappingExclusionConfig;
-import it.unibz.inf.ontop.injection.QuestComponentFactory;
-import it.unibz.inf.ontop.injection.QuestCorePreferences;
+import it.unibz.inf.ontop.pivotalrepr.utils.ExecutorRegistry;
 import it.unibz.inf.ontop.sql.ImplicitDBConstraintsReader;
 import it.unibz.inf.ontop.utils.IMapping2DatalogConverter;
 import org.slf4j.Logger;
@@ -70,6 +66,7 @@ public class Quest implements Serializable, IQuest {
 
 	private static final long serialVersionUID = -6074403119825754295L;
 	private static final MappingFactory MAPPING_FACTORY = MappingFactoryImpl.getInstance();
+
 	// Whether to print primary and foreign keys to stdout.
 	private boolean printKeys;
 
@@ -172,6 +169,9 @@ public class Quest implements Serializable, IQuest {
 	private DBConnector dbConnector;
 	private final QueryCache queryCache;
 
+	private final OntopModelFactory modelFactory;
+	private final ExecutorRegistry executorRegistry;
+
 	/***
 	 * Will prepare an instance of quest in classic or virtual ABox mode. If the
 	 * mappings are not null, then org.obda.owlreformulationplatform.aboxmode
@@ -197,10 +197,12 @@ public class Quest implements Serializable, IQuest {
 	@Inject
 	private Quest(@Assisted Ontology tbox, @Assisted Optional<OBDAModel> obdaModel,
 				  @Assisted Optional<DBMetadata> inputMetadata,
+				  @Assisted ExecutorRegistry executorRegistry,
 				  QuestCorePreferences config, NativeQueryLanguageComponentFactory nativeQLFactory,
 				  OBDAFactoryWithException obdaFactory, QuestComponentFactory questComponentFactory,
 				  MappingVocabularyFixer mappingVocabularyFixer, TMappingExclusionConfig excludeFromTMappings,
-				  IMapping2DatalogConverter mapping2DatalogConverter, QueryCache queryCache) throws DuplicateMappingException {
+				  IMapping2DatalogConverter mapping2DatalogConverter, QueryCache queryCache,
+				  OntopModelFactory modelFactory) throws DuplicateMappingException {
 		if (tbox == null)
 			throw new InvalidParameterException("TBox cannot be null");
 
@@ -210,6 +212,8 @@ public class Quest implements Serializable, IQuest {
 		this.mappingVocabularyFixer = mappingVocabularyFixer;
 		this.mapping2DatalogConverter = mapping2DatalogConverter;
 		this.queryCache = queryCache;
+		this.modelFactory = modelFactory;
+		this.executorRegistry = executorRegistry;
 
 		inputOntology = tbox;
 
@@ -326,9 +330,8 @@ public class Quest implements Serializable, IQuest {
 	 * creating the instance.
 	 * 
 	 * @throws Exception
-	 * @param injector
 	 */
-	public void setupRepository(Injector injector) throws Exception {
+	public void setupRepository() throws Exception {
 
 		OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 
@@ -526,7 +529,7 @@ public class Quest implements Serializable, IQuest {
 			 * Done, sending a new reasoner with the modules we just configured
 			 */
 			engine = new QuestQueryProcessor(rewriter, sigma, unfolder, vocabularyValidator, getUriMap(),
-					dataSourceQueryGenerator, queryCache, distinctResultSet, injector);
+					dataSourceQueryGenerator, queryCache, distinctResultSet, modelFactory, executorRegistry);
 
 			if (dataRepository != null)
 				dataRepository.addRepositoryChangedListener(new RepositoryChangedListener() {

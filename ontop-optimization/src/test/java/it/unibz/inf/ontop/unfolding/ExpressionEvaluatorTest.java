@@ -1,9 +1,7 @@
 package it.unibz.inf.ontop.unfolding;
 
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
-import com.google.inject.Injector;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.AtomPredicateImpl;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
@@ -13,19 +11,16 @@ import it.unibz.inf.ontop.owlrefplatform.core.optimization.FixedPointBindingLift
 import it.unibz.inf.ontop.owlrefplatform.core.optimization.FixedPointJoinLikeOptimizer;
 import it.unibz.inf.ontop.owlrefplatform.core.optimization.IntermediateQueryOptimizer;
 import it.unibz.inf.ontop.owlrefplatform.core.optimization.JoinLikeOptimizer;
-import it.unibz.inf.ontop.injection.QuestCoreConfiguration;
 import it.unibz.inf.ontop.pivotalrepr.*;
 import it.unibz.inf.ontop.pivotalrepr.equivalence.IQSyntacticEquivalenceChecker;
 import it.unibz.inf.ontop.pivotalrepr.impl.ConstructionNodeImpl;
 import it.unibz.inf.ontop.pivotalrepr.impl.ExtensionalDataNodeImpl;
 import it.unibz.inf.ontop.pivotalrepr.impl.InnerJoinNodeImpl;
-import it.unibz.inf.ontop.pivotalrepr.impl.MetadataForQueryOptimizationImpl;
-import it.unibz.inf.ontop.pivotalrepr.impl.tree.DefaultIntermediateQueryBuilder;
-import it.unibz.inf.ontop.sql.RDBMetadataExtractionTools;
 import org.junit.Test;
 
 import java.util.Optional;
 
+import static it.unibz.inf.ontop.OptimizationTestingTools.*;
 import static it.unibz.inf.ontop.model.Predicate.COL_TYPE.INTEGER;
 import static junit.framework.TestCase.assertTrue;
 
@@ -70,14 +65,6 @@ public class ExpressionEvaluatorTest {
     private final ImmutableExpression EXPR_LANGMATCHES = DATA_FACTORY.getImmutableExpression(
             ExpressionOperation.LANGMATCHES, EXPR_LANG, langValue);
 
-
-    private static final Injector INJECTOR = QuestCoreConfiguration.defaultBuilder().build().getInjector();
-
-    private static MetadataForQueryOptimization METADATA = new MetadataForQueryOptimizationImpl(
-            RDBMetadataExtractionTools.createDummyMetadata(),
-            ImmutableMultimap.of(),
-            new UriTemplateMatcher());
-
     /**
      * test LangMatches matching a  lang function with a constant value
      * (this case should not happen)
@@ -87,7 +74,7 @@ public class ExpressionEvaluatorTest {
     public void testLangLeftNodeVariable() throws EmptyQueryException {
 
         //Construct unoptimized query
-        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(METADATA, INJECTOR);
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder(EMPTY_METADATA);;
         DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_3_PREDICATE, X, Y, W);
         ConstructionNode rootNode = new ConstructionNodeImpl(projectionAtom.getVariables());
 
@@ -130,7 +117,7 @@ public class ExpressionEvaluatorTest {
 
         //----------------------------------------------------------------------
         // Construct expected query
-        IntermediateQueryBuilder expectedQueryBuilder = new DefaultIntermediateQueryBuilder(METADATA, INJECTOR);
+        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(EMPTY_METADATA);;
 
 
         DistinctVariableOnlyDataAtom expectedProjectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_3_PREDICATE, X, Y, W);
@@ -159,7 +146,7 @@ public class ExpressionEvaluatorTest {
     private IntermediateQuery getExpectedQuery() {
         //----------------------------------------------------------------------
         // Construct expected query
-        IntermediateQueryBuilder expectedQueryBuilder = new DefaultIntermediateQueryBuilder(METADATA, INJECTOR);
+        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(EMPTY_METADATA);;
 
 
         DistinctVariableOnlyDataAtom expectedProjectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_3_PREDICATE, X, Y, W);
@@ -187,7 +174,7 @@ public class ExpressionEvaluatorTest {
     private IntermediateQuery getExpectedQuery2() {
         //----------------------------------------------------------------------
         // Construct expected query
-        IntermediateQueryBuilder expectedQueryBuilder = new DefaultIntermediateQueryBuilder(METADATA, INJECTOR);
+        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(EMPTY_METADATA);;
 
 
         DistinctVariableOnlyDataAtom expectedProjectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_3_PREDICATE, X, Y, W);
@@ -220,7 +207,7 @@ public class ExpressionEvaluatorTest {
     public void testLangLeftNodeFunction() throws EmptyQueryException {
 
         //Construct unoptimized query
-        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(METADATA, INJECTOR);
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder(EMPTY_METADATA);;
         DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_3_PREDICATE, X, Y,W);
         ConstructionNode rootNode = new ConstructionNodeImpl(projectionAtom.getVariables());
 
@@ -275,7 +262,7 @@ public class ExpressionEvaluatorTest {
     public void testLangRightNode() throws EmptyQueryException {
 
         //Construct unoptimized query
-        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(METADATA, INJECTOR);
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder(EMPTY_METADATA);;
         DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_3_PREDICATE, X, Y,W);
         ConstructionNode rootNode = new ConstructionNodeImpl(projectionAtom.getVariables());
 

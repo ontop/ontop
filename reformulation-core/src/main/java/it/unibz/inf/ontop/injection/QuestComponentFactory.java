@@ -9,13 +9,14 @@ import it.unibz.inf.ontop.owlrefplatform.core.IQuest;
 import it.unibz.inf.ontop.owlrefplatform.core.abox.SemanticIndexURIMap;
 import it.unibz.inf.ontop.owlrefplatform.core.srcquerygeneration.NativeQueryGenerator;
 import it.unibz.inf.ontop.model.DBMetadata;
+import it.unibz.inf.ontop.pivotalrepr.utils.ExecutorRegistry;
 
 import java.util.Optional;
 
 public interface QuestComponentFactory {
 
     IQuest create(Ontology inputTBox, @Assisted Optional<OBDAModel> inputMappings,
-                  @Assisted Optional<DBMetadata> inputMetadata);
+                  @Assisted Optional<DBMetadata> inputMetadata, ExecutorRegistry executorRegistry);
 
     NativeQueryGenerator create(DBMetadata metadata, OBDADataSource dataSource);
     NativeQueryGenerator create(DBMetadata metadata, OBDADataSource dataSource,

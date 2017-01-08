@@ -157,10 +157,11 @@ public class QuestMaterializer {
 		
 		//preferences.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
 
-		questInstance = questComponentFactory.create(ontology, Optional.of(this.model), Optional.empty());
+		questInstance = questComponentFactory.create(ontology, Optional.of(this.model), Optional.empty(),
+				configuration.getExecutorRegistry());
 		// Was an ugly way to ask for also querying the annotations
 
-		questInstance.setupRepository(injector);
+		questInstance.setupRepository();
 	}
 
 

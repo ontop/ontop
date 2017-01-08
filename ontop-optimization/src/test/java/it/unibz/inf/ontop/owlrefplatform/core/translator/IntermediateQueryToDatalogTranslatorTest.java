@@ -3,27 +3,24 @@ package it.unibz.inf.ontop.owlrefplatform.core.translator;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import com.google.inject.Injector;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.AtomPredicateImpl;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionImpl;
-import it.unibz.inf.ontop.injection.QuestCoreConfiguration;
 import it.unibz.inf.ontop.pivotalrepr.*;
 import it.unibz.inf.ontop.pivotalrepr.impl.*;
-import it.unibz.inf.ontop.pivotalrepr.impl.tree.DefaultIntermediateQueryBuilder;
 import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import static it.unibz.inf.ontop.OptimizationTestingTools.*;
 import static org.junit.Assert.assertTrue;
 
 
 public class IntermediateQueryToDatalogTranslatorTest {
 
-    private static MetadataForQueryOptimization METADATA = new EmptyMetadataForQueryOptimization();
     private static final OBDADataFactory DATA_FACTORY = OBDADataFactoryImpl.getInstance();
     private static Variable X = DATA_FACTORY.getVariable("x");
     private static AtomPredicate ANS1_IQ_PREDICATE = new AtomPredicateImpl("ans1", 1);
@@ -41,8 +38,6 @@ public class IntermediateQueryToDatalogTranslatorTest {
     private static Predicate P1_DATALOG_PREDICATE;
     private static Predicate P2_DATALOG_PREDICATE;
 
-    private static final Injector INJECTOR = QuestCoreConfiguration.defaultBuilder().build().getInjector();
-
     static {
         ANS1_DATALOG_PREDICATE = DATA_FACTORY.getClassPredicate("ans1");
         ANSSQ1_DATALOG_PREDICATE = DATA_FACTORY.getClassPredicate("ansSQ1");
@@ -57,7 +52,7 @@ public class IntermediateQueryToDatalogTranslatorTest {
         /**
          * Original query
          */
-        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(METADATA, INJECTOR);
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder(EMPTY_METADATA);
 
         ConstructionNode rootNode = new ConstructionNodeImpl(ImmutableSet.of(X),
                 new ImmutableSubstitutionImpl<>(ImmutableMap.of()), Optional.empty());

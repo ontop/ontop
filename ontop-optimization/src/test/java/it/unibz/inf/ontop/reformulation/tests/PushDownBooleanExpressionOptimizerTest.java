@@ -1,17 +1,14 @@
 package it.unibz.inf.ontop.reformulation.tests;
 
-import com.google.inject.Injector;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.AtomPredicateImpl;
 import it.unibz.inf.ontop.model.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.optimization.PushDownBooleanExpressionOptimizer;
 import it.unibz.inf.ontop.owlrefplatform.core.optimization.PushDownBooleanExpressionOptimizerImpl;
-import it.unibz.inf.ontop.injection.QuestCoreConfiguration;
 import it.unibz.inf.ontop.pivotalrepr.*;
 import it.unibz.inf.ontop.pivotalrepr.equivalence.IQSyntacticEquivalenceChecker;
 import it.unibz.inf.ontop.pivotalrepr.impl.*;
-import it.unibz.inf.ontop.pivotalrepr.impl.tree.DefaultIntermediateQueryBuilder;
 import org.junit.Test;
 
 import java.util.Optional;
@@ -19,6 +16,8 @@ import java.util.Optional;
 import static it.unibz.inf.ontop.pivotalrepr.NonCommutativeOperatorNode.ArgumentPosition.LEFT;
 import static it.unibz.inf.ontop.pivotalrepr.NonCommutativeOperatorNode.ArgumentPosition.RIGHT;
 import static junit.framework.TestCase.assertTrue;
+
+import static it.unibz.inf.ontop.OptimizationTestingTools.*;
 
 
 public class PushDownBooleanExpressionOptimizerTest {
@@ -54,22 +53,10 @@ public class PushDownBooleanExpressionOptimizerTest {
     private final static ImmutableExpression EXPRESSION7 = DATA_FACTORY.getImmutableExpression(
             ExpressionOperation.EQ, X, Y);
 
-    private final MetadataForQueryOptimization metadata;
-
-    private static final Injector INJECTOR = QuestCoreConfiguration.defaultBuilder().build().getInjector();
-
-    public PushDownBooleanExpressionOptimizerTest() {
-        this.metadata = initMetadata();
-    }
-
-    private static MetadataForQueryOptimization initMetadata() {
-        return new EmptyMetadataForQueryOptimization();
-    }
-
     @Test
     public void testJoiningCondition1() throws EmptyQueryException {
 
-        IntermediateQueryBuilder queryBuilder1 = new DefaultIntermediateQueryBuilder(metadata, INJECTOR);
+        IntermediateQueryBuilder queryBuilder1 = createQueryBuilder(EMPTY_METADATA);
         DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE1, X, Y, Z, W);
         ConstructionNode constructionNode = new ConstructionNodeImpl(projectionAtom.getVariables());
         queryBuilder1.init(projectionAtom, constructionNode);
@@ -92,7 +79,7 @@ public class PushDownBooleanExpressionOptimizerTest {
 
         System.out.println("\nAfter optimization: \n" +  optimizedQuery);
 
-        IntermediateQueryBuilder queryBuilder2 = new DefaultIntermediateQueryBuilder(metadata, INJECTOR);
+        IntermediateQueryBuilder queryBuilder2 = createQueryBuilder(EMPTY_METADATA);
         DistinctVariableOnlyDataAtom projectionAtom2 = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE1, X, Y, Z, W);
         ConstructionNode constructionNode2 = new ConstructionNodeImpl(projectionAtom.getVariables());
         queryBuilder2.init(projectionAtom2, constructionNode2);
@@ -113,7 +100,7 @@ public class PushDownBooleanExpressionOptimizerTest {
     @Test
     public void testJoiningCondition2 () throws EmptyQueryException {
 
-        IntermediateQueryBuilder queryBuilder1 = new DefaultIntermediateQueryBuilder(metadata, INJECTOR);
+        IntermediateQueryBuilder queryBuilder1 = createQueryBuilder(EMPTY_METADATA);
         DistinctVariableOnlyDataAtom projectionAtom1 = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE2, X, Y, Z);
         DistinctVariableOnlyDataAtom projectionAtom2 = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS2_PREDICATE1, X, Z);
 
@@ -147,7 +134,7 @@ public class PushDownBooleanExpressionOptimizerTest {
 
         System.out.println("\nAfter optimization: \n" +  optimizedQuery);
 
-        IntermediateQueryBuilder queryBuilder2 = new DefaultIntermediateQueryBuilder(metadata, INJECTOR);
+        IntermediateQueryBuilder queryBuilder2 = createQueryBuilder(EMPTY_METADATA);
 
         ConstructionNode constructionNode5 = new ConstructionNodeImpl(projectionAtom1.getVariables());
         InnerJoinNode joinNode2 = new InnerJoinNodeImpl(Optional.empty());
@@ -180,7 +167,7 @@ public class PushDownBooleanExpressionOptimizerTest {
     @Test
     public void testJoiningCondition3 () throws EmptyQueryException {
 
-        IntermediateQueryBuilder queryBuilder1 = new DefaultIntermediateQueryBuilder(metadata, INJECTOR);
+        IntermediateQueryBuilder queryBuilder1 = createQueryBuilder(EMPTY_METADATA);
         DistinctVariableOnlyDataAtom projectionAtom1 = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE1, X, Y, Z, W);
         ConstructionNode constructionNode1 = new ConstructionNodeImpl(projectionAtom1.getVariables());
         FilterNode filterNode = new FilterNodeImpl(ImmutabilityTools.foldBooleanExpressions(EXPRESSION4, EXPRESSION5).get());
@@ -203,7 +190,7 @@ public class PushDownBooleanExpressionOptimizerTest {
 
         System.out.println("\nAfter optimization: \n" +  optimizedQuery);
 
-        IntermediateQueryBuilder queryBuilder2 = new DefaultIntermediateQueryBuilder(metadata, INJECTOR);
+        IntermediateQueryBuilder queryBuilder2 = createQueryBuilder(EMPTY_METADATA);
         DistinctVariableOnlyDataAtom projectionAtom2 = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE1, X, Y, Z, W);
         ConstructionNode constructionNode2 = new ConstructionNodeImpl(projectionAtom1.getVariables());
         FilterNode filterNode1 = new FilterNodeImpl(ImmutabilityTools.foldBooleanExpressions(EXPRESSION4, EXPRESSION5).get());
@@ -227,7 +214,7 @@ public class PushDownBooleanExpressionOptimizerTest {
     @Test
     public void testJoiningCondition4 () throws EmptyQueryException {
 
-        IntermediateQueryBuilder queryBuilder1 = new DefaultIntermediateQueryBuilder(metadata, INJECTOR);
+        IntermediateQueryBuilder queryBuilder1 = createQueryBuilder(EMPTY_METADATA);
         DistinctVariableOnlyDataAtom projectionAtom1 = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE3, X, Y, Z, W, A);
         ConstructionNode constructionNode1 = new ConstructionNodeImpl(projectionAtom1.getVariables());
         InnerJoinNode joinNode1 = new InnerJoinNodeImpl(Optional.of(EXPRESSION1));
@@ -257,7 +244,7 @@ public class PushDownBooleanExpressionOptimizerTest {
         System.out.println("\nAfter optimization: \n" +  optimizedQuery);
 
 
-        IntermediateQueryBuilder queryBuilder2 = new DefaultIntermediateQueryBuilder(metadata, INJECTOR);
+        IntermediateQueryBuilder queryBuilder2 = createQueryBuilder(EMPTY_METADATA);
         DistinctVariableOnlyDataAtom projectionAtom2 = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE3, X, Y, Z, W, A);
         ConstructionNode constructionNode2 = new ConstructionNodeImpl(projectionAtom1.getVariables());
         InnerJoinNode joinNode2 = new InnerJoinNodeImpl(Optional.empty());
@@ -285,7 +272,7 @@ public class PushDownBooleanExpressionOptimizerTest {
     @Test
     public void testJoiningCondition5 () throws EmptyQueryException {
 
-        IntermediateQueryBuilder queryBuilder1 = new DefaultIntermediateQueryBuilder(metadata, INJECTOR);
+        IntermediateQueryBuilder queryBuilder1 = createQueryBuilder(EMPTY_METADATA);
         DistinctVariableOnlyDataAtom projectionAtom1 = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE1, X, Y, Z, W);
         ConstructionNode constructionNode1 = new ConstructionNodeImpl(projectionAtom1.getVariables());
         InnerJoinNode joinNode1 = new InnerJoinNodeImpl(Optional.of(EXPRESSION6));
@@ -311,7 +298,7 @@ public class PushDownBooleanExpressionOptimizerTest {
         System.out.println("\nAfter optimization: \n" +  optimizedQuery);
 
 
-        IntermediateQueryBuilder queryBuilder2 = new DefaultIntermediateQueryBuilder(metadata, INJECTOR);
+        IntermediateQueryBuilder queryBuilder2 = createQueryBuilder(EMPTY_METADATA);
         DistinctVariableOnlyDataAtom projectionAtom2 = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE1, X, Y, Z, W);
         ConstructionNode constructionNode2 = new ConstructionNodeImpl(projectionAtom1.getVariables());
         InnerJoinNode joinNode2 = new InnerJoinNodeImpl(Optional.of(EXPRESSION6));
@@ -337,7 +324,7 @@ public class PushDownBooleanExpressionOptimizerTest {
     @Test
     public void testLeftJoinCondition1 () throws EmptyQueryException {
 
-        IntermediateQueryBuilder queryBuilder1 = new DefaultIntermediateQueryBuilder(metadata, INJECTOR);
+        IntermediateQueryBuilder queryBuilder1 = createQueryBuilder(EMPTY_METADATA);
         DistinctVariableOnlyDataAtom projectionAtom1 = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE1, W, X, Y, Z);
         ConstructionNode constructionNode1 = new ConstructionNodeImpl(projectionAtom1.getVariables());
         LeftJoinNode leftJoinNode1 = new LeftJoinNodeImpl(Optional.of(EXPRESSION7));
@@ -364,7 +351,7 @@ public class PushDownBooleanExpressionOptimizerTest {
         System.out.println("\nAfter optimization: \n" +  optimizedQuery);
 
 
-        IntermediateQueryBuilder queryBuilder2 = new DefaultIntermediateQueryBuilder(metadata, INJECTOR);
+        IntermediateQueryBuilder queryBuilder2 = createQueryBuilder(EMPTY_METADATA);
         DistinctVariableOnlyDataAtom projectionAtom2 = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE1, W, X, Y, Z);
         ConstructionNode constructionNode2 = new ConstructionNodeImpl(projectionAtom1.getVariables());
         LeftJoinNode leftJoinNode2 = new LeftJoinNodeImpl(Optional.of(EXPRESSION7));
@@ -389,7 +376,7 @@ public class PushDownBooleanExpressionOptimizerTest {
     @Test
     public void testLeftJoinCondition2 () throws EmptyQueryException {
 
-        IntermediateQueryBuilder queryBuilder1 = new DefaultIntermediateQueryBuilder(metadata, INJECTOR);
+        IntermediateQueryBuilder queryBuilder1 = createQueryBuilder(EMPTY_METADATA);
         DistinctVariableOnlyDataAtom projectionAtom1 = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE1, W, X, Y, Z);
         ConstructionNode constructionNode1 = new ConstructionNodeImpl(projectionAtom1.getVariables());
         LeftJoinNode leftJoinNode1 = new LeftJoinNodeImpl(Optional.of(EXPRESSION7));
@@ -416,7 +403,7 @@ public class PushDownBooleanExpressionOptimizerTest {
         System.out.println("\nAfter optimization: \n" +  optimizedQuery);
 
 
-        IntermediateQueryBuilder queryBuilder2 = new DefaultIntermediateQueryBuilder(metadata, INJECTOR);
+        IntermediateQueryBuilder queryBuilder2 = createQueryBuilder(EMPTY_METADATA);
         DistinctVariableOnlyDataAtom projectionAtom2 = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE1, W, X, Y, Z);
         ConstructionNode constructionNode2 = new ConstructionNodeImpl(projectionAtom1.getVariables());
         LeftJoinNode leftJoinNode2 = new LeftJoinNodeImpl(Optional.empty());
@@ -441,7 +428,7 @@ public class PushDownBooleanExpressionOptimizerTest {
     @Test
     public void testLeftJoinAndFilterCondition1 () throws EmptyQueryException {
 
-        IntermediateQueryBuilder queryBuilder1 = new DefaultIntermediateQueryBuilder(metadata, INJECTOR);
+        IntermediateQueryBuilder queryBuilder1 = createQueryBuilder(EMPTY_METADATA);
         DistinctVariableOnlyDataAtom projectionAtom1 = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE1, W, X, Y, Z);
         ConstructionNode constructionNode1 = new ConstructionNodeImpl(projectionAtom1.getVariables());
         FilterNode filterNode1 = new FilterNodeImpl(EXPRESSION6);
@@ -470,7 +457,7 @@ public class PushDownBooleanExpressionOptimizerTest {
         System.out.println("\nAfter optimization: \n" +  optimizedQuery);
 
 
-        IntermediateQueryBuilder queryBuilder2 = new DefaultIntermediateQueryBuilder(metadata, INJECTOR);
+        IntermediateQueryBuilder queryBuilder2 = createQueryBuilder(EMPTY_METADATA);
         DistinctVariableOnlyDataAtom projectionAtom2 = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE1, W, X, Y, Z);
         ConstructionNode constructionNode2 = new ConstructionNodeImpl(projectionAtom1.getVariables());
         LeftJoinNode leftJoinNode2 = new LeftJoinNodeImpl(Optional.of(EXPRESSION7));
@@ -494,7 +481,7 @@ public class PushDownBooleanExpressionOptimizerTest {
     @Test
     public void testLeftJoinAndFilterCondition2 () throws EmptyQueryException {
 
-        IntermediateQueryBuilder queryBuilder1 = new DefaultIntermediateQueryBuilder(metadata, INJECTOR);
+        IntermediateQueryBuilder queryBuilder1 = createQueryBuilder(EMPTY_METADATA);
         DistinctVariableOnlyDataAtom projectionAtom1 = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE1, W, X, Y, Z);
         ConstructionNode constructionNode1 = new ConstructionNodeImpl(projectionAtom1.getVariables());
         FilterNode filterNode1 = new FilterNodeImpl(EXPRESSION1);
@@ -523,7 +510,7 @@ public class PushDownBooleanExpressionOptimizerTest {
         System.out.println("\nAfter optimization: \n" +  optimizedQuery);
 
 
-        IntermediateQueryBuilder queryBuilder2 = new DefaultIntermediateQueryBuilder(metadata, INJECTOR);
+        IntermediateQueryBuilder queryBuilder2 = createQueryBuilder(EMPTY_METADATA);
         DistinctVariableOnlyDataAtom projectionAtom2 = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE1, W, X, Y, Z);
         ConstructionNode constructionNode2 = new ConstructionNodeImpl(projectionAtom1.getVariables());
         FilterNode filterNode2 = new FilterNodeImpl(EXPRESSION1);

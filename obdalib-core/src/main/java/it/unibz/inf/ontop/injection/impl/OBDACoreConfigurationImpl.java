@@ -377,6 +377,11 @@ public class OBDACoreConfigurationImpl extends OntopModelConfigurationImpl imple
         }
 
         @Override
+        public B enableTestMode() {
+            return modelBuilderFragment.enableTestMode();
+        }
+
+        @Override
         protected Properties generateUserProperties() {
             Properties userProperties = super.generateUserProperties();
             userProperties.putAll(modelBuilderFragment.generateUserProperties());
