@@ -29,13 +29,6 @@ public class IntermediateQueryUtils {
     }
 
     /**
-     * Can be overwritten.
-     */
-    protected IntermediateQueryBuilder newBuilder(MetadataForQueryOptimization metadata, Injector injector) {
-        return new DefaultIntermediateQueryBuilder(metadata, injector);
-    }
-
-    /**
      * TODO: describe
      */
     public static Optional<IntermediateQuery> mergeDefinitions(List<IntermediateQuery> predicateDefinitions) {
@@ -64,8 +57,7 @@ public class IntermediateQueryUtils {
         ConstructionNode rootNode = new ConstructionNodeImpl(projectionAtom.getVariables(),
                 new NeutralSubstitution(), optionalTopModifiers);
 
-        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(firstDefinition.getMetadata(),
-                firstDefinition.getInjector());
+        IntermediateQueryBuilder queryBuilder = firstDefinition.newBuilder();
         queryBuilder.init(projectionAtom, rootNode);
 
         UnionNode unionNode = new UnionNodeImpl(projectionAtom.getVariables());
@@ -211,8 +203,7 @@ public class IntermediateQueryUtils {
                 .map(n -> new AbstractMap.SimpleEntry<>(n, n.clone()))
                 .collect(ImmutableCollectors.toMap());
 
-        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(originalQuery.getMetadata(),
-                originalQuery.getInjector());
+        IntermediateQueryBuilder queryBuilder = originalQuery.newBuilder();
         queryBuilder.init(originalQuery.getProjectionAtom(),
                 (ConstructionNode) cloneNodeMap.get(originalQuery.getRootConstructionNode()));
 

@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.pivotalrepr;
 
 import java.util.Optional;
 import com.google.common.collect.ImmutableList;
+import it.unibz.inf.ontop.injection.OntopModelFactory;
 import it.unibz.inf.ontop.model.DistinctVariableOnlyDataAtom;
 
 /**

@@ -8,8 +8,8 @@ import it.unibz.inf.ontop.executor.InternalProposalExecutor;
 import it.unibz.inf.ontop.injection.InvalidOntopConfigurationException;
 import it.unibz.inf.ontop.injection.OntopModelConfiguration;
 import it.unibz.inf.ontop.injection.OntopModelProperties;
-import it.unibz.inf.ontop.pivotalrepr.OptimizationConfiguration;
-import it.unibz.inf.ontop.pivotalrepr.impl.OptimizationConfigurationImpl;
+import it.unibz.inf.ontop.pivotalrepr.utils.ExecutorRegistry;
+import it.unibz.inf.ontop.pivotalrepr.utils.impl.CachingExecutorRegistry;
 import it.unibz.inf.ontop.pivotalrepr.proposal.QueryOptimizationProposal;
 
 import javax.annotation.Nonnull;
@@ -27,7 +27,7 @@ public class OntopModelConfigurationImpl implements OntopModelConfiguration {
 
     private final OntopModelConfigurationOptions options;
     private final OntopModelProperties properties;
-    private OptimizationConfiguration optimizationConfiguration;
+    private ExecutorRegistry executorRegistry;
     private Injector injector;
 
     protected OntopModelConfigurationImpl(OntopModelProperties properties, OntopModelConfigurationOptions options) {
@@ -35,16 +35,16 @@ public class OntopModelConfigurationImpl implements OntopModelConfiguration {
         this.options = options;
 
         // Will be built on-demand
-        this.optimizationConfiguration = null;
+        this.executorRegistry = null;
         this.injector = null;
     }
 
     @Override
-    public OptimizationConfiguration getOptimizationConfiguration() {
-        if (optimizationConfiguration == null)
-            optimizationConfiguration = new OptimizationConfigurationImpl(generateOptimizationConfigurationMap());
-
-        return optimizationConfiguration;
+    public ExecutorRegistry getExecutorRegistry() {
+        if (executorRegistry == null) {
+            executorRegistry = new CachingExecutorRegistry(getInjector(), generateOptimizationConfigurationMap());
+        }
+        return executorRegistry;
     }
 
     @Override
@@ -89,6 +89,7 @@ public class OntopModelConfigurationImpl implements OntopModelConfiguration {
     public OntopModelProperties getProperties() {
         return properties;
     }
+
 
     /**
      * Groups all the options required by the OntopModelConfiguration.

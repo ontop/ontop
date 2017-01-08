@@ -22,4 +22,10 @@ public interface InternalProposalExecutor<P extends QueryOptimizationProposal<R>
     R apply(P proposal, IntermediateQuery query, QueryTreeComponent treeComponent)
             throws InvalidQueryOptimizationProposalException, EmptyQueryException;
 
+    /**
+     * Not safe by default
+     */
+    default boolean isThreadSafe() {
+        return false;
+    }
 }

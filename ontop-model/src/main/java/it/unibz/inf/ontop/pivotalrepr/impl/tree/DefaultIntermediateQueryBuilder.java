@@ -1,13 +1,18 @@
 package it.unibz.inf.ontop.pivotalrepr.impl.tree;
 
 import com.google.common.collect.ImmutableList;
-import com.google.inject.Injector;
+import com.google.inject.assistedinject.Assisted;
+import com.google.inject.assistedinject.AssistedInject;
+import it.unibz.inf.ontop.injection.OntopModelFactory;
+import it.unibz.inf.ontop.injection.OntopModelProperties;
 import it.unibz.inf.ontop.model.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.pivotalrepr.*;
 import it.unibz.inf.ontop.pivotalrepr.NonCommutativeOperatorNode.ArgumentPosition;
 import it.unibz.inf.ontop.pivotalrepr.impl.IllegalTreeUpdateException;
 import it.unibz.inf.ontop.pivotalrepr.impl.IntermediateQueryImpl;
 import it.unibz.inf.ontop.pivotalrepr.impl.QueryTreeComponent;
+import it.unibz.inf.ontop.pivotalrepr.utils.ExecutorRegistry;
+import it.unibz.inf.ontop.pivotalrepr.validation.IntermediateQueryValidator;
 
 import java.util.Optional;
 
@@ -17,16 +22,27 @@ import java.util.Optional;
 public class DefaultIntermediateQueryBuilder implements IntermediateQueryBuilder {
 
     private final MetadataForQueryOptimization metadata;
-    private final Injector injector;
+    private final ExecutorRegistry executorRegistry;
+    private final OntopModelFactory modelFactory;
+    private final IntermediateQueryValidator validator;
+    private final OntopModelProperties settings;
     private DistinctVariableOnlyDataAtom projectionAtom;
     private QueryTree tree;
     private boolean canEdit;
 
-    public DefaultIntermediateQueryBuilder(MetadataForQueryOptimization metadata, Injector injector) {
+    @AssistedInject
+    private DefaultIntermediateQueryBuilder(@Assisted MetadataForQueryOptimization metadata,
+                                            @Assisted ExecutorRegistry executorRegistry,
+                                            OntopModelFactory modelFactory,
+                                            IntermediateQueryValidator validator,
+                                            OntopModelProperties settings) {
         this.metadata = metadata;
+        this.executorRegistry = executorRegistry;
+        this.modelFactory = modelFactory;
+        this.validator = validator;
+        this.settings = settings;
         tree = null;
         canEdit = true;
-        this.injector = injector;
     }
 
 
@@ -84,7 +100,8 @@ public class DefaultIntermediateQueryBuilder implements IntermediateQueryBuilder
     public IntermediateQuery build() throws IntermediateQueryBuilderException{
         checkInitialization();
 
-        IntermediateQuery query = buildQuery(metadata, projectionAtom, new DefaultQueryTreeComponent(tree), injector);
+        IntermediateQuery query = buildQuery(metadata, projectionAtom, new DefaultQueryTreeComponent(tree),
+                executorRegistry, validator, settings);
         canEdit = false;
         return query;
     }
@@ -94,8 +111,11 @@ public class DefaultIntermediateQueryBuilder implements IntermediateQueryBuilder
      */
     protected IntermediateQuery buildQuery(MetadataForQueryOptimization metadata,
                                            DistinctVariableOnlyDataAtom projectionAtom,
-                                           QueryTreeComponent treeComponent, Injector injector) {
-        return new IntermediateQueryImpl(metadata, projectionAtom, treeComponent, injector);
+                                           QueryTreeComponent treeComponent, ExecutorRegistry executorRegistry,
+                                           IntermediateQueryValidator validator, OntopModelProperties settings) {
+
+        return new IntermediateQueryImpl(metadata, projectionAtom, treeComponent, executorRegistry, validator,
+                settings, modelFactory);
     }
 
     private void checkInitialization() throws IntermediateQueryBuilderException {

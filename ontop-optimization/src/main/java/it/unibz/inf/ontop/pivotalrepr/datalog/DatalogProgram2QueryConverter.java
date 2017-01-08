@@ -1,15 +1,16 @@
 package it.unibz.inf.ontop.pivotalrepr.datalog;
 
-import com.google.inject.Injector;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
+import it.unibz.inf.ontop.injection.OntopModelFactory;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.pivotalrepr.*;
 import it.unibz.inf.ontop.pivotalrepr.impl.ImmutableQueryModifiersImpl;
 import it.unibz.inf.ontop.pivotalrepr.impl.IntermediateQueryUtils;
 import it.unibz.inf.ontop.pivotalrepr.proposal.QueryMergingProposal;
 import it.unibz.inf.ontop.pivotalrepr.proposal.impl.QueryMergingProposalImpl;
+import it.unibz.inf.ontop.pivotalrepr.utils.ExecutorRegistry;
 import it.unibz.inf.ontop.utils.DatalogDependencyGraphGenerator;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
@@ -51,7 +52,9 @@ public class DatalogProgram2QueryConverter {
      */
     public static IntermediateQuery convertDatalogProgram(MetadataForQueryOptimization metadata,
                                                           DatalogProgram queryProgram,
-                                                          Collection<Predicate> tablePredicates, Injector injector)
+                                                          Collection<Predicate> tablePredicates,
+                                                          OntopModelFactory modelFactory,
+                                                          ExecutorRegistry executorRegistry)
             throws InvalidDatalogProgramException, EmptyQueryException {
         List<CQIE> rules = queryProgram.getRules();
 
@@ -74,7 +77,7 @@ public class DatalogProgram2QueryConverter {
          * TODO: explain
          */
         IntermediateQuery intermediateQuery = convertDatalogDefinitions(metadata, rootPredicate, ruleIndex, tablePredicates,
-                topQueryModifiers, injector).get();
+                topQueryModifiers, modelFactory, executorRegistry).get();
 
         /**
          * Rules (sub-queries)
@@ -82,7 +85,7 @@ public class DatalogProgram2QueryConverter {
         for (int i=1; i < topDownPredicates.size() ; i++) {
             Predicate datalogAtomPredicate  = topDownPredicates.get(i);
             Optional<IntermediateQuery> optionalSubQuery = convertDatalogDefinitions(metadata, datalogAtomPredicate,
-                    ruleIndex, tablePredicates, NO_QUERY_MODIFIER, injector);
+                    ruleIndex, tablePredicates, NO_QUERY_MODIFIER, modelFactory, executorRegistry);
             if (optionalSubQuery.isPresent()) {
 
                 ImmutableSet<IntensionalDataNode> intensionalMatches = findIntensionalDataNodes(intermediateQuery,
@@ -113,11 +116,12 @@ public class DatalogProgram2QueryConverter {
      * TODO: explain and comment
      */
     protected static Optional<IntermediateQuery> convertDatalogDefinitions(MetadataForQueryOptimization metadata,
-                                                                         Predicate datalogAtomPredicate,
-                                                                         Multimap<Predicate, CQIE> datalogRuleIndex,
-                                                                         Collection<Predicate> tablePredicates,
-                                                                         Optional<ImmutableQueryModifiers> optionalModifiers,
-                                                                         Injector injector)
+                                                                           Predicate datalogAtomPredicate,
+                                                                           Multimap<Predicate, CQIE> datalogRuleIndex,
+                                                                           Collection<Predicate> tablePredicates,
+                                                                           Optional<ImmutableQueryModifiers> optionalModifiers,
+                                                                           OntopModelFactory modelFactory,
+                                                                           ExecutorRegistry executorRegistry)
             throws InvalidDatalogProgramException {
         Collection<CQIE> atomDefinitions = datalogRuleIndex.get(datalogAtomPredicate);
         switch(atomDefinitions.size()) {
@@ -125,13 +129,14 @@ public class DatalogProgram2QueryConverter {
                 return Optional.empty();
             case 1:
                 CQIE definition = atomDefinitions.iterator().next();
-                return Optional.of(convertDatalogRule(metadata, definition, tablePredicates, optionalModifiers, injector));
+                return Optional.of(convertDatalogRule(metadata, definition, tablePredicates, optionalModifiers,
+                        modelFactory, executorRegistry));
             default:
                 List<IntermediateQuery> convertedDefinitions = new ArrayList<>();
                 for (CQIE datalogAtomDefinition : atomDefinitions) {
                     convertedDefinitions.add(
                             convertDatalogRule(metadata, datalogAtomDefinition, tablePredicates,
-                                    Optional.<ImmutableQueryModifiers>empty(), injector));
+                                    Optional.<ImmutableQueryModifiers>empty(), modelFactory, executorRegistry));
                 }
                 return IntermediateQueryUtils.mergeDefinitions(convertedDefinitions, optionalModifiers);
         }

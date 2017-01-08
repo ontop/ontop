@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.injection;
 
 import com.google.inject.Injector;
 import it.unibz.inf.ontop.injection.impl.OntopModelConfigurationImpl;
-import it.unibz.inf.ontop.pivotalrepr.OptimizationConfiguration;
+import it.unibz.inf.ontop.pivotalrepr.utils.ExecutorRegistry;
 
 import javax.annotation.Nonnull;
 import java.io.File;
@@ -15,7 +15,7 @@ public interface OntopModelConfiguration {
 
     OntopModelProperties getProperties();
 
-    OptimizationConfiguration getOptimizationConfiguration();
+    ExecutorRegistry getExecutorRegistry();
 
     Injector getInjector();
 

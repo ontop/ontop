@@ -132,7 +132,10 @@ public interface IntermediateQuery {
      */
     ImmutableSet<Variable> getVariables(QueryNode subTreeRootNode);
 
-    Injector getInjector();
-
     int getVersionNumber();
+
+    /**
+     * Creates a uninitialized query builder.
+     */
+    IntermediateQueryBuilder newBuilder();
 }

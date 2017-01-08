@@ -2,10 +2,12 @@ package it.unibz.inf.ontop.pivotalrepr.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import com.google.inject.Injector;
 import it.unibz.inf.ontop.executor.InternalProposalExecutor;
+import it.unibz.inf.ontop.injection.OntopModelFactory;
+import it.unibz.inf.ontop.injection.OntopModelProperties;
 import it.unibz.inf.ontop.model.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.Variable;
+import it.unibz.inf.ontop.pivotalrepr.utils.ExecutorRegistry;
 import it.unibz.inf.ontop.pivotalrepr.validation.IntermediateQueryValidator;
 import it.unibz.inf.ontop.pivotalrepr.validation.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.pivotalrepr.*;
@@ -48,26 +50,32 @@ public class IntermediateQueryImpl implements IntermediateQuery {
 
     private final DistinctVariableOnlyDataAtom projectionAtom;
 
-    private final Injector injector;
-    private final OptimizationConfiguration optimizationConfiguration;
+    private final ExecutorRegistry executorRegistry;
 
     private final IntermediateQueryValidator validator;
+
+    private final OntopModelProperties settings;
+
+    private final OntopModelFactory modelFactory;
 
 
     /**
      * For IntermediateQueryBuilders ONLY!!
      */
     public IntermediateQueryImpl(MetadataForQueryOptimization metadata, DistinctVariableOnlyDataAtom projectionAtom,
-                                 QueryTreeComponent treeComponent, Injector injector) {
+                                 QueryTreeComponent treeComponent, ExecutorRegistry executorRegistry,
+                                 IntermediateQueryValidator validator, OntopModelProperties settings,
+                                 OntopModelFactory modelFactory) {
         this.metadata = metadata;
         this.projectionAtom = projectionAtom;
         this.treeComponent = treeComponent;
-        this.injector = injector;
-        this.optimizationConfiguration = injector.getInstance(OptimizationConfiguration.class);
-        this.validator = injector.getInstance(IntermediateQueryValidator.class);
+        this.executorRegistry = executorRegistry;
+        this.validator = validator;
+        this.settings = settings;
+        this.modelFactory = modelFactory;
 
-        // TODO: disable it in production
-        this.validate();
+        if (settings.isTestModeEnabled())
+            validate();
     }
 
     @Override
@@ -82,7 +90,8 @@ public class IntermediateQueryImpl implements IntermediateQuery {
 
     @Override
     public IntermediateQuery createSnapshot() {
-        return new IntermediateQueryImpl(metadata, projectionAtom, treeComponent.createSnapshot(), injector);
+        return new IntermediateQueryImpl(metadata, projectionAtom, treeComponent.createSnapshot(),
+                executorRegistry, validator, settings, modelFactory);
     }
 
     @Override
@@ -107,6 +116,11 @@ public class IntermediateQueryImpl implements IntermediateQuery {
     @Override
     public int getVersionNumber() {
         return treeComponent.getVersionNumber();
+    }
+
+    @Override
+    public IntermediateQueryBuilder newBuilder() {
+        return modelFactory.create(metadata, executorRegistry);
     }
 
     @Override
@@ -181,7 +195,7 @@ public class IntermediateQueryImpl implements IntermediateQuery {
     }
 
     /**
-     * TODO: make this extensible by using Guice as a dependency-injection solution for loading arbitrary ProposalExecutor
+     * TODO: remove this method
      */
     @Override
     public <R extends ProposalResults, P extends QueryOptimizationProposal<R>> R applyProposal(P proposal,
@@ -190,48 +204,30 @@ public class IntermediateQueryImpl implements IntermediateQuery {
         return applyProposal(proposal, requireUsingInternalExecutor, false);
     }
 
+    /**
+     * TODO: remove requireUsingInternalExecutor
+     */
     @Override
     public <R extends ProposalResults, P extends QueryOptimizationProposal<R>> R applyProposal(P proposal,
                                                                                                boolean requireUsingInternalExecutor,
                                                                                                boolean disableValidationTests)
             throws InvalidQueryOptimizationProposalException, EmptyQueryException {
 
-        if (!disableValidationTests) {
-            // TODO: disable it in production
+        if ((!disableValidationTests) && settings.isTestModeEnabled()) {
             validate();
         }
 
-        /**
-         * It assumes that the concrete proposal classes DIRECTLY
-         * implements a registered interface (extending QueryOptimizationProposal).
-         */
+        InternalProposalExecutor<P, R> executor = executorRegistry.getExecutor(proposal);
 
         /**
-         * Look for a internal one
+         * Has a SIDE-EFFECT on the tree component.
          */
-        Optional<Class<? extends InternalProposalExecutor>> optionalExecutorClass =
-                optimizationConfiguration.getProposalExecutorInterface(proposal.getClass());
-
-        if (optionalExecutorClass.isPresent()) {
-            InternalProposalExecutor<P, R> executor = injector.getInstance(optionalExecutorClass.get());
-
-            /**
-             * Has a SIDE-EFFECT on the tree component.
-             */
-            R results = executor.apply(proposal, this, treeComponent);
-            if (!disableValidationTests) {
-                // TODO: disable it in production
-                validate();
-            }
-            return results;
+        R results = executor.apply(proposal, this, treeComponent);
+        if ((!disableValidationTests) && settings.isTestModeEnabled()) {
+            validate();
         }
 
-        if (requireUsingInternalExecutor) {
-            throw new RuntimeException("No INTERNAL executor found for a proposal of the type " + proposal.getClass());
-        }
-        else {
-            throw new RuntimeException("No executor found for a proposal of the type " + proposal.getClass());
-        }
+        return results;
     }
 
     @Override
@@ -331,10 +327,5 @@ public class IntermediateQueryImpl implements IntermediateQuery {
 
     private void validate() throws InvalidIntermediateQueryException {
         validator.validate(this);
-    }
-
-    @Override
-    public Injector getInjector() {
-        return injector;
     }
 }

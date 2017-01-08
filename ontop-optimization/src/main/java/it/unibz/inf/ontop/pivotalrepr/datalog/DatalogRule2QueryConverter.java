@@ -2,19 +2,19 @@ package it.unibz.inf.ontop.pivotalrepr.datalog;
 
 import java.util.Optional;
 
-import com.google.inject.Injector;
 import fj.P2;
 import fj.data.List;
+import it.unibz.inf.ontop.injection.OntopModelFactory;
 import it.unibz.inf.ontop.model.impl.DatalogTools;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.PullOutEqualityNormalizerImpl;
 import it.unibz.inf.ontop.pivotalrepr.NonCommutativeOperatorNode.ArgumentPosition;
 import it.unibz.inf.ontop.pivotalrepr.impl.*;
-import it.unibz.inf.ontop.pivotalrepr.impl.tree.DefaultIntermediateQueryBuilder;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.pivotalrepr.*;
 import it.unibz.inf.ontop.pivotalrepr.impl.ConstructionNodeImpl;
+import it.unibz.inf.ontop.pivotalrepr.utils.ExecutorRegistry;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -101,7 +101,8 @@ public class DatalogRule2QueryConverter {
     public static IntermediateQuery convertDatalogRule(MetadataForQueryOptimization metadata, CQIE datalogRule,
                                                        Collection<Predicate> tablePredicates,
                                                        Optional<ImmutableQueryModifiers> optionalModifiers,
-                                                       Injector injector)
+                                                       OntopModelFactory modelFactory,
+                                                       ExecutorRegistry executorRegistry)
             throws DatalogProgram2QueryConverter.InvalidDatalogProgramException {
 
         P2<DistinctVariableOnlyDataAtom, ImmutableSubstitution<ImmutableTerm>> decomposition =
@@ -114,20 +115,21 @@ public class DatalogRule2QueryConverter {
 
         List<Function> bodyAtoms = List.iterableList(datalogRule.getBody());
         if (bodyAtoms.isEmpty()) {
-            return createFact(metadata, rootNode, projectionAtom, injector);
+            return createFact(metadata, rootNode, projectionAtom, executorRegistry, modelFactory);
         }
         else {
             AtomClassification atomClassification = new AtomClassification(bodyAtoms);
 
             return createDefinition(metadata, rootNode, projectionAtom, tablePredicates,
                     atomClassification.dataAndCompositeAtoms, atomClassification.booleanAtoms,
-                    atomClassification.optionalGroupAtom, injector);
+                    atomClassification.optionalGroupAtom, modelFactory, executorRegistry);
         }
     }
 
     private static IntermediateQuery createFact(MetadataForQueryOptimization metadata, ConstructionNode rootNode,
-                                                DistinctVariableOnlyDataAtom projectionAtom, Injector injector) {
-        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(metadata, injector);
+                                                DistinctVariableOnlyDataAtom projectionAtom, ExecutorRegistry executorRegistry,
+                                                OntopModelFactory modelFactory) {
+        IntermediateQueryBuilder queryBuilder = modelFactory.create(metadata, executorRegistry);
         queryBuilder.init(projectionAtom, rootNode);
         return queryBuilder.build();
     }
@@ -140,7 +142,9 @@ public class DatalogRule2QueryConverter {
                                                       DistinctVariableOnlyDataAtom projectionAtom,
                                                       Collection<Predicate> tablePredicates,
                                                       List<Function> dataAndCompositeAtoms,
-                                                      List<Function> booleanAtoms, Optional<Function> optionalGroupAtom, Injector injector)
+                                                      List<Function> booleanAtoms, Optional<Function> optionalGroupAtom,
+                                                      OntopModelFactory modelFactory,
+                                                      ExecutorRegistry executorRegistry)
             throws DatalogProgram2QueryConverter.InvalidDatalogProgramException {
         /**
          * TODO: explain
@@ -148,7 +152,7 @@ public class DatalogRule2QueryConverter {
         Optional<JoinOrFilterNode> optionalFilterOrJoinNode = createFilterOrJoinNode(dataAndCompositeAtoms, booleanAtoms);
 
         // Non final
-        IntermediateQueryBuilder queryBuilder = new DefaultIntermediateQueryBuilder(metadata, injector);
+        IntermediateQueryBuilder queryBuilder = modelFactory.create(metadata, executorRegistry);
 
         try {
             queryBuilder.init(projectionAtom, rootNode);
