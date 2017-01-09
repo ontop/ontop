@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.executor.merging;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.inject.Singleton;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.InjectiveVar2VarSubstitution;
@@ -23,6 +24,7 @@ import java.util.Queue;
 
 import static it.unibz.inf.ontop.pivotalrepr.impl.IntermediateQueryUtils.generateNotConflictingRenaming;
 
+@Singleton
 public class QueryMergingExecutorImpl implements QueryMergingExecutor {
 
     /**

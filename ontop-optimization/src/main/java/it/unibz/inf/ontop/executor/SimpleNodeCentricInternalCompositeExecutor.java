@@ -12,5 +12,5 @@ public abstract class SimpleNodeCentricInternalCompositeExecutor<
         extends NodeCentricInternalCompositeExecutor<N, NodeCentricOptimizationResults<N>, P> {
 
     @Override
-    protected abstract ImmutableList<SimpleNodeCentricInternalExecutor<N, P>> createExecutors();
+    protected abstract ImmutableList<SimpleNodeCentricInternalExecutor<N, P>> getExecutors();
 }

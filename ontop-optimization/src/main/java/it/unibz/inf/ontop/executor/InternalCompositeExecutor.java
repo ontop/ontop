@@ -21,7 +21,7 @@ public abstract class InternalCompositeExecutor<P extends QueryOptimizationPropo
     public R apply(final P initialProposal, IntermediateQuery query, final QueryTreeComponent treeComponent)
             throws InvalidQueryOptimizationProposalException, EmptyQueryException {
 
-        ImmutableList<? extends InternalProposalExecutor<P, R>> executors = createExecutors();
+        ImmutableList<? extends InternalProposalExecutor<P, R>> executors = getExecutors();
         Iterator<? extends InternalProposalExecutor<P, R>> executorIterator = executors.iterator();
 
         // Non-final
@@ -42,7 +42,7 @@ public abstract class InternalCompositeExecutor<P extends QueryOptimizationPropo
 
     protected abstract Optional<P> createNewProposal(R results);
 
-    protected abstract ImmutableList<? extends InternalProposalExecutor<P, R>> createExecutors();
+    protected abstract ImmutableList<? extends InternalProposalExecutor<P, R>> getExecutors();
 
 
 }

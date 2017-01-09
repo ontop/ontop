@@ -35,5 +35,5 @@ public abstract class NodeCentricInternalCompositeExecutor<
     protected abstract Optional<P> createNewProposalFromFocusNode(N focusNode);
 
     @Override
-    protected abstract ImmutableList<? extends NodeCentricInternalExecutor<N, R, P>> createExecutors();
+    protected abstract ImmutableList<? extends NodeCentricInternalExecutor<N, R, P>> getExecutors();
 }

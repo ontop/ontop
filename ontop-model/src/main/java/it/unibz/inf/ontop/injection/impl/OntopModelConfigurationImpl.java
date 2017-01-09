@@ -9,7 +9,7 @@ import it.unibz.inf.ontop.injection.InvalidOntopConfigurationException;
 import it.unibz.inf.ontop.injection.OntopModelConfiguration;
 import it.unibz.inf.ontop.injection.OntopModelSettings;
 import it.unibz.inf.ontop.pivotalrepr.utils.ExecutorRegistry;
-import it.unibz.inf.ontop.pivotalrepr.utils.impl.CachingExecutorRegistry;
+import it.unibz.inf.ontop.pivotalrepr.utils.impl.StandardExecutorRegistry;
 import it.unibz.inf.ontop.pivotalrepr.proposal.QueryOptimizationProposal;
 
 import javax.annotation.Nonnull;
@@ -42,7 +42,7 @@ public class OntopModelConfigurationImpl implements OntopModelConfiguration {
     @Override
     public ExecutorRegistry getExecutorRegistry() {
         if (executorRegistry == null) {
-            executorRegistry = new CachingExecutorRegistry(getInjector(), generateOptimizationConfigurationMap());
+            executorRegistry = new StandardExecutorRegistry(getInjector(), generateOptimizationConfigurationMap());
         }
         return executorRegistry;
     }

@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.executor.pullout;
 
+import com.google.inject.Singleton;
 import it.unibz.inf.ontop.model.ImmutableExpression;
 import it.unibz.inf.ontop.model.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.InjectiveVar2VarSubstitution;
@@ -20,6 +21,7 @@ import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
 /**
  * TODO: explain
  */
+@Singleton
 public class PullVariableOutOfSubTreeExecutorImpl<N extends JoinLikeNode> implements PullVariableOutOfSubTreeExecutor<N> {
 
     @Override

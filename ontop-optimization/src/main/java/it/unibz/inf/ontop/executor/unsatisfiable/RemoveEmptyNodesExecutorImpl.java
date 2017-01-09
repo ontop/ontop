@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.executor.unsatisfiable;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.inject.Singleton;
 import it.unibz.inf.ontop.model.Constant;
 import it.unibz.inf.ontop.model.ImmutableSubstitution;
 import it.unibz.inf.ontop.model.Variable;
@@ -21,6 +22,7 @@ import static it.unibz.inf.ontop.owlrefplatform.core.basicoperations.ImmutableSu
 /**
  * TODO: explain
  */
+@Singleton
 public class RemoveEmptyNodesExecutorImpl implements RemoveEmptyNodesExecutor {
 
     /**

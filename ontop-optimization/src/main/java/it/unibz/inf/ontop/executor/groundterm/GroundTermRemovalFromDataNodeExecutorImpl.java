@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.executor.groundterm;
 import java.util.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMultimap;
+import com.google.inject.Singleton;
 import it.unibz.inf.ontop.model.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.pivotalrepr.impl.ExtensionalDataNodeImpl;
 import it.unibz.inf.ontop.pivotalrepr.impl.FilterNodeImpl;
@@ -23,6 +24,7 @@ import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
 /**
  * TODO: explain
  */
+@Singleton
 public class GroundTermRemovalFromDataNodeExecutorImpl implements
         GroundTermRemovalFromDataNodeExecutor {
 

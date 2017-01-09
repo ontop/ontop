@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.executor.leftjoin;
 
 import com.google.common.collect.*;
+import com.google.inject.Singleton;
 import it.unibz.inf.ontop.executor.SimpleNodeCentricInternalExecutor;
 import it.unibz.inf.ontop.executor.join.SelfJoinLikeExecutor;
 import it.unibz.inf.ontop.model.*;
@@ -27,6 +28,7 @@ import static it.unibz.inf.ontop.pivotalrepr.NonCommutativeOperatorNode.Argument
  * Naturally assumes that the data atoms are leafs.
  *
  */
+@Singleton
 public class RedundantSelfLeftJoinExecutor
         extends SelfJoinLikeExecutor
         implements SimpleNodeCentricInternalExecutor<LeftJoinNode, LeftJoinOptimizationProposal> {

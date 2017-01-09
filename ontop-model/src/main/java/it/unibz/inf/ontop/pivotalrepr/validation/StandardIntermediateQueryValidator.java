@@ -1,13 +1,20 @@
 package it.unibz.inf.ontop.pivotalrepr.validation;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import it.unibz.inf.ontop.model.Variable;
 import it.unibz.inf.ontop.pivotalrepr.*;
 
 /**
  * Checks the QueryNode and their children
  */
+@Singleton
 public class StandardIntermediateQueryValidator implements IntermediateQueryValidator {
+
+    @Inject
+    protected StandardIntermediateQueryValidator() {
+    }
 
     protected static class ValidationVisitor implements QueryNodeVisitor {
 

@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.executor.join;
 
 import com.google.common.collect.ImmutableList;
+import com.google.inject.Singleton;
 import it.unibz.inf.ontop.model.ImmutableExpression;
 import it.unibz.inf.ontop.pivotalrepr.*;
 import it.unibz.inf.ontop.pivotalrepr.NonCommutativeOperatorNode.ArgumentPosition;
@@ -21,6 +22,7 @@ import static it.unibz.inf.ontop.executor.join.JoinExtractionUtils.*;
 /**
 * TODO: explain
 */
+@Singleton
 public class JoinBooleanExpressionExecutor implements InnerJoinExecutor {
 
     /**

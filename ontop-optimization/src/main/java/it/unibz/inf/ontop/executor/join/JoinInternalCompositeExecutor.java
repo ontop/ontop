@@ -1,6 +1,8 @@
 package it.unibz.inf.ontop.executor.join;
 
 import com.google.common.collect.ImmutableList;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import it.unibz.inf.ontop.executor.SimpleNodeCentricInternalCompositeExecutor;
 import it.unibz.inf.ontop.executor.SimpleNodeCentricInternalExecutor;
 import it.unibz.inf.ontop.pivotalrepr.InnerJoinNode;
@@ -12,9 +14,25 @@ import java.util.Optional;
 /**
  * TODO: explain
  */
+@Singleton
 public class JoinInternalCompositeExecutor
         extends SimpleNodeCentricInternalCompositeExecutor<InnerJoinNode, InnerJoinOptimizationProposal>
         implements InnerJoinExecutor {
+
+    private final ImmutableList<SimpleNodeCentricInternalExecutor<InnerJoinNode, InnerJoinOptimizationProposal>> executors;
+
+    @Inject
+    private JoinInternalCompositeExecutor(JoinBooleanExpressionExecutor expressionExecutor,
+                                          RedundantSelfJoinExecutor selfJoinExecutor,
+                                          RedundantJoinFKExecutor fkExecutor) {
+        ImmutableList.Builder<SimpleNodeCentricInternalExecutor<InnerJoinNode, InnerJoinOptimizationProposal>>
+                executorBuilder = ImmutableList.builder();
+        executorBuilder.add(expressionExecutor);
+        executorBuilder.add(selfJoinExecutor);
+        executorBuilder.add(fkExecutor);
+
+        executors = executorBuilder.build();
+    }
 
     @Override
     protected Optional<InnerJoinOptimizationProposal> createNewProposalFromFocusNode(InnerJoinNode focusNode) {
@@ -23,14 +41,7 @@ public class JoinInternalCompositeExecutor
     }
 
     @Override
-    protected ImmutableList<SimpleNodeCentricInternalExecutor<InnerJoinNode, InnerJoinOptimizationProposal>> createExecutors() {
-
-        ImmutableList.Builder<SimpleNodeCentricInternalExecutor<InnerJoinNode, InnerJoinOptimizationProposal>> executorBuilder = ImmutableList.builder();
-
-        executorBuilder.add(new JoinBooleanExpressionExecutor());
-        executorBuilder.add(new RedundantSelfJoinExecutor());
-        executorBuilder.add(new RedundantJoinFKExecutor());
-
-        return executorBuilder.build();
+    protected ImmutableList<SimpleNodeCentricInternalExecutor<InnerJoinNode, InnerJoinOptimizationProposal>> getExecutors() {
+        return executors;
     }
 }
