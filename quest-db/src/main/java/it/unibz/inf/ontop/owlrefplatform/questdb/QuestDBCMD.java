@@ -38,7 +38,7 @@ import it.unibz.inf.ontop.model.OBDAException;
 import it.unibz.inf.ontop.model.TupleResultSet;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestDBStatement;
-import it.unibz.inf.ontop.injection.QuestCorePreferences;
+import it.unibz.inf.ontop.injection.QuestCoreSettings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -458,7 +458,7 @@ public class QuestDBCMD {
 		Properties prop = new Properties();
 		try {
 			// By default
-			prop.put(QuestCorePreferences.ABOX_MODE, QuestConstants.CLASSIC);
+			prop.put(QuestCoreSettings.ABOX_MODE, QuestConstants.CLASSIC);
 			prop.load(new FileReader(new File(getFileURI(paramfile))));
 
 			QuestConfiguration configuration = QuestConfiguration.defaultBuilder()

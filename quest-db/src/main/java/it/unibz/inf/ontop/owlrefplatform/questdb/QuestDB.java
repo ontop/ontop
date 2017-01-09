@@ -32,7 +32,7 @@ import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.model.OBDAException;
 import it.unibz.inf.ontop.owlrefplatform.core.*;
 
-import it.unibz.inf.ontop.injection.QuestCorePreferences;
+import it.unibz.inf.ontop.injection.QuestCoreSettings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -223,7 +223,7 @@ public class QuestDB {
 		try {
 			QuestDBConnection conn = dbstore.getConnection();
 			boolean classic = ! dbstore.getPreferences().isInVirtualMode();
-			boolean inmemory = dbstore.getPreferences().getRequiredProperty(QuestCorePreferences.STORAGE_LOCATION)
+			boolean inmemory = dbstore.getPreferences().getRequiredProperty(QuestCoreSettings.STORAGE_LOCATION)
 					.equals(QuestConstants.INMEMORY);
 			if (classic && inmemory) {
 				// V1

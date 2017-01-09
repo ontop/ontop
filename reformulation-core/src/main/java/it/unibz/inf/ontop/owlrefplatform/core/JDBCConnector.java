@@ -4,7 +4,7 @@ import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.MappingFactoryImpl;
-import it.unibz.inf.ontop.injection.QuestCorePreferences;
+import it.unibz.inf.ontop.injection.QuestCoreSettings;
 import it.unibz.inf.ontop.sql.ImplicitDBConstraintsReader;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
@@ -39,7 +39,7 @@ public class JDBCConnector implements DBConnector {
     private static final MappingFactory MAPPING_FACTORY = MappingFactoryImpl.getInstance();
 
     private final IQuest questInstance;
-    private final QuestCorePreferences questCorePreferences;
+    private final QuestCoreSettings questCoreSettings;
 
     /**
      * This represents user-supplied constraints, i.e. primary
@@ -78,9 +78,9 @@ public class JDBCConnector implements DBConnector {
     @Inject
     private JDBCConnector(@Assisted OBDADataSource obdaDataSource, @Assisted IQuest questInstance,
                           NativeQueryLanguageComponentFactory nativeQLFactory,
-                          QuestCorePreferences preferences,
+                          QuestCoreSettings preferences,
                           @Nullable ImplicitDBConstraintsReader userConstraints) {
-        this.questCorePreferences = preferences;
+        this.questCoreSettings = preferences;
         this.obdaSource = obdaDataSource;
         this.questInstance = questInstance;
         this.nativeQLFactory = nativeQLFactory;
@@ -280,7 +280,7 @@ public class JDBCConnector implements DBConnector {
     @Override
     public IQuestConnection getNonPoolConnection() throws OBDAException {
 
-        return new QuestConnection(this, questInstance, getSQLConnection(), questCorePreferences);
+        return new QuestConnection(this, questInstance, getSQLConnection(), questCoreSettings);
     }
 
     /***
@@ -302,7 +302,7 @@ public class JDBCConnector implements DBConnector {
     @Override
     public IQuestConnection getConnection() throws OBDAException {
 
-        return new QuestConnection(this, questInstance, getSQLPoolConnection(), questCorePreferences);
+        return new QuestConnection(this, questInstance, getSQLPoolConnection(), questCoreSettings);
     }
 
     /***

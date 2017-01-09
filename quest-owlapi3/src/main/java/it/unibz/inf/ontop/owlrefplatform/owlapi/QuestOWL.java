@@ -24,7 +24,7 @@ import com.google.inject.Injector;
 import it.unibz.inf.ontop.exception.InvalidMappingException;
 import it.unibz.inf.ontop.injection.InvalidOntopConfigurationException;
 import it.unibz.inf.ontop.injection.QuestConfiguration;
-import it.unibz.inf.ontop.injection.QuestPreferences;
+import it.unibz.inf.ontop.injection.QuestSettings;
 import it.unibz.inf.ontop.io.InvalidDataSourceException;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.ontology.*;
@@ -33,7 +33,7 @@ import it.unibz.inf.ontop.owlapi.OWLAPITranslatorUtility;
 import it.unibz.inf.ontop.owlrefplatform.core.*;
 import it.unibz.inf.ontop.owlrefplatform.core.abox.QuestMaterializer;
 import it.unibz.inf.ontop.injection.QuestComponentFactory;
-import it.unibz.inf.ontop.injection.QuestCorePreferences;
+import it.unibz.inf.ontop.injection.QuestCoreSettings;
 import it.unibz.inf.ontop.pivotalrepr.utils.ExecutorRegistry;
 import it.unibz.inf.ontop.utils.VersionInfo;
 import org.semanticweb.owlapi.model.*;
@@ -58,7 +58,7 @@ import java.util.Set;
  */
 public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 
-	private final QuestPreferences preferences;
+	private final QuestSettings preferences;
 	private final Optional<DBMetadata> inputDBMetadata;
 	StructuralReasoner structuralReasoner;
 
@@ -135,7 +135,7 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
         super(rootOntology, owlConfiguration, BufferingMode.BUFFERING);
 
 		QuestConfiguration questConfiguration = owlConfiguration.getQuestConfiguration();
-		preferences = questConfiguration.getProperties();
+		preferences = questConfiguration.getSettings();
 		inputDBMetadata = questConfiguration.getDatasourceMetadata();
 
 
@@ -232,9 +232,9 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 
 		log.debug("Initializing a new Quest instance...");
 
-		final boolean bObtainFromOntology = preferences.getBoolean(QuestCorePreferences.OBTAIN_FROM_ONTOLOGY)
+		final boolean bObtainFromOntology = preferences.getBoolean(QuestCoreSettings.OBTAIN_FROM_ONTOLOGY)
 				.orElseThrow(() -> new IllegalStateException("Missing property: OBTAIN_FROM_ONTOLOGY"));
-		final boolean bObtainFromMappings = preferences.getBoolean(QuestCorePreferences.OBTAIN_FROM_MAPPINGS)
+		final boolean bObtainFromMappings = preferences.getBoolean(QuestCoreSettings.OBTAIN_FROM_MAPPINGS)
 				.orElseThrow(() -> new IllegalStateException("Missing property: OBTAIN_FROM_MAPPINGS"));
 		final boolean isVirtualMode = preferences.isInVirtualMode();
 

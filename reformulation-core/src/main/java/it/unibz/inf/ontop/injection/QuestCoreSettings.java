@@ -26,7 +26,7 @@ package it.unibz.inf.ontop.injection;
  *
  * Immutable class.
  */
-public interface QuestCorePreferences extends OBDAProperties, OntopOptimizationProperties {
+public interface QuestCoreSettings extends OBDASettings, OntopOptimizationSettings {
 
 	boolean isOntologyAnnotationQueryingEnabled();
 
@@ -93,11 +93,11 @@ public interface QuestCorePreferences extends OBDAProperties, OntopOptimizationP
     //@Deprecated
 	//public static final String JDBC_URL = OBDAProperties.JDBC_URL;
     @Deprecated
-	String DBNAME = OBDAProperties.DB_NAME;
+	String DBNAME = OBDASettings.DB_NAME;
     @Deprecated
-	String DBUSER = OBDAProperties.DB_USER;
+	String DBUSER = OBDASettings.DB_USER;
     @Deprecated
-	String DBPASSWORD = OBDAProperties.DB_PASSWORD;
+	String DBPASSWORD = OBDASettings.DB_PASSWORD;
 
 	String PRINT_KEYS = "PRINT_KEYS";
 

@@ -13,7 +13,7 @@ import java.util.Properties;
  */
 public interface OntopModelConfiguration {
 
-    OntopModelProperties getProperties();
+    OntopModelSettings getSettings();
 
     ExecutorRegistry getExecutorRegistry();
 

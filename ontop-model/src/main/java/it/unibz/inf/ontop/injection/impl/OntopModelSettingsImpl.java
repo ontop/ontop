@@ -1,7 +1,7 @@
 package it.unibz.inf.ontop.injection.impl;
 
 import it.unibz.inf.ontop.injection.InvalidOntopConfigurationException;
-import it.unibz.inf.ontop.injection.OntopModelProperties;
+import it.unibz.inf.ontop.injection.OntopModelSettings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -10,10 +10,10 @@ import java.io.InputStream;
 import java.util.Optional;
 import java.util.Properties;
 
-public class OntopModelPropertiesImpl implements OntopModelProperties {
+public class OntopModelSettingsImpl implements OntopModelSettings {
 
     private static final String DEFAULT_PROPERTIES_FILE = "default.properties";
-    private static final Logger LOG = LoggerFactory.getLogger(OntopModelProperties.class);
+    private static final Logger LOG = LoggerFactory.getLogger(OntopModelSettings.class);
     private final Properties properties;
     private final CardinalityPreservationMode cardinalityMode;
     private final boolean testMode;
@@ -26,23 +26,23 @@ public class OntopModelPropertiesImpl implements OntopModelProperties {
      * Changing the Properties object afterwards will not have any effect
      * on this OntopModelProperties object.
      */
-    protected OntopModelPropertiesImpl(Properties userProperties) {
+    protected OntopModelSettingsImpl(Properties userProperties) {
         /**
          * Loads default properties
          */
-        properties = loadDefaultPropertiesFromFile(OntopModelProperties.class, DEFAULT_PROPERTIES_FILE);
+        properties = loadDefaultPropertiesFromFile(OntopModelSettings.class, DEFAULT_PROPERTIES_FILE);
         /**
          * Overloads the default properties.
          */
         properties.putAll(userProperties);
 
         cardinalityMode = extractCardinalityMode(properties);
-        testMode = extractBoolean(properties, OntopModelProperties.TEST_MODE);
+        testMode = extractBoolean(properties, OntopModelSettings.TEST_MODE);
     }
 
     private static CardinalityPreservationMode extractCardinalityMode(Properties properties)
             throws InvalidOntopConfigurationException {
-        Object cardinalityModeObject = Optional.ofNullable(properties.get(OntopModelProperties.CARDINALITY_MODE))
+        Object cardinalityModeObject = Optional.ofNullable(properties.get(OntopModelSettings.CARDINALITY_MODE))
                 .orElseThrow(() -> new InvalidOntopConfigurationException(CARDINALITY_MODE + " key is missing"));
 
         if (cardinalityModeObject instanceof String) {

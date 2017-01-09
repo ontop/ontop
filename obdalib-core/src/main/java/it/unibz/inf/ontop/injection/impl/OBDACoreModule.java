@@ -6,7 +6,7 @@ import com.google.inject.util.Providers;
 import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
 import it.unibz.inf.ontop.injection.OBDACoreConfiguration;
 import it.unibz.inf.ontop.injection.OBDAFactoryWithException;
-import it.unibz.inf.ontop.injection.OBDAProperties;
+import it.unibz.inf.ontop.injection.OBDASettings;
 import it.unibz.inf.ontop.io.PrefixManager;
 import it.unibz.inf.ontop.mapping.MappingParser;
 import it.unibz.inf.ontop.model.OBDAMappingAxiom;
@@ -23,7 +23,7 @@ public class OBDACoreModule extends OntopAbstractModule {
     private OBDACoreConfiguration configuration;
 
     protected OBDACoreModule(OBDACoreConfiguration configuration) {
-        super(configuration.getOBDAProperties());
+        super(configuration.getSettings());
         this.configuration = configuration;
     }
 
@@ -39,7 +39,7 @@ public class OBDACoreModule extends OntopAbstractModule {
     @Override
     protected void configureCoreConfiguration() {
         super.configureCoreConfiguration();
-        bind(OBDAProperties.class).toInstance((OBDAProperties)getProperties());
+        bind(OBDASettings.class).toInstance((OBDASettings)getProperties());
     }
 
 

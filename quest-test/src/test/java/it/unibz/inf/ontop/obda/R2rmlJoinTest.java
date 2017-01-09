@@ -4,7 +4,7 @@ import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import org.junit.Test;
 import it.unibz.inf.ontop.io.QueryIOManager;
-import it.unibz.inf.ontop.injection.QuestCorePreferences;
+import it.unibz.inf.ontop.injection.QuestCoreSettings;
 import it.unibz.inf.ontop.querymanager.QueryController;
 import it.unibz.inf.ontop.querymanager.QueryControllerGroup;
 import it.unibz.inf.ontop.querymanager.QueryControllerQuery;
@@ -87,10 +87,10 @@ public class R2rmlJoinTest {
     @Test
     public void testR2rml() throws Exception {
         Properties p = new Properties();
-        p.setProperty(QuestCorePreferences.DB_USER, "mssql");
-        p.setProperty(QuestCorePreferences.DB_PASSWORD, "obdaps83");
-        p.setProperty(QuestCorePreferences.JDBC_URL, "jdbc:sqlserver://10.7.20.91;databaseName=OREDA_OPTIQUE");
-        p.setProperty(QuestCorePreferences.JDBC_DRIVER, "com.microsoft.sqlserver.jdbc.SQLServerDriver");
+        p.setProperty(QuestCoreSettings.DB_USER, "mssql");
+        p.setProperty(QuestCoreSettings.DB_PASSWORD, "obdaps83");
+        p.setProperty(QuestCoreSettings.JDBC_URL, "jdbc:sqlserver://10.7.20.91;databaseName=OREDA_OPTIQUE");
+        p.setProperty(QuestCoreSettings.JDBC_DRIVER, "com.microsoft.sqlserver.jdbc.SQLServerDriver");
 
         log.info("Loading r2rml file");
 

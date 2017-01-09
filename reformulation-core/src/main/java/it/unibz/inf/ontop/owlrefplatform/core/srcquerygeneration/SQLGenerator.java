@@ -31,7 +31,7 @@ import it.unibz.inf.ontop.model.impl.*;
 import it.unibz.inf.ontop.owlrefplatform.core.ExecutableQuery;
 import it.unibz.inf.ontop.owlrefplatform.core.optimization.GroundTermRemovalFromDataNodeReshaper;
 import it.unibz.inf.ontop.owlrefplatform.core.optimization.PullOutVariableOptimizer;
-import it.unibz.inf.ontop.injection.QuestCorePreferences;
+import it.unibz.inf.ontop.injection.QuestCoreSettings;
 import it.unibz.inf.ontop.owlrefplatform.core.SQLExecutableQuery;
 import it.unibz.inf.ontop.owlrefplatform.core.abox.SemanticIndexURIMap;
 import it.unibz.inf.ontop.owlrefplatform.core.abox.XsdDatatypeConverter;
@@ -124,7 +124,7 @@ public class SQLGenerator implements NativeQueryGenerator {
 			.getLogger(SQLGenerator.class);
 
     @AssistedInject
-	private SQLGenerator(@Assisted DBMetadata metadata, @Assisted OBDADataSource dataSource, QuestCorePreferences preferences) {
+	private SQLGenerator(@Assisted DBMetadata metadata, @Assisted OBDADataSource dataSource, QuestCoreSettings preferences) {
         // TODO: make these attributes immutable.
         //TODO: avoid the null value
         this(metadata, dataSource, null, preferences);
@@ -132,7 +132,7 @@ public class SQLGenerator implements NativeQueryGenerator {
 
 	@AssistedInject
 	private SQLGenerator(@Assisted DBMetadata metadata, @Assisted OBDADataSource dataSource,
-						 @Assisted SemanticIndexURIMap uriRefIds, QuestCorePreferences preferences) {
+						 @Assisted SemanticIndexURIMap uriRefIds, QuestCoreSettings preferences) {
 		String driverURI = dataSource.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER);
 
 		if (!(metadata instanceof RDBMetadata)) {

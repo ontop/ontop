@@ -18,7 +18,7 @@ import it.unibz.inf.ontop.owlrefplatform.core.unfolding.DatalogUnfolder;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
 import it.unibz.inf.ontop.model.impl.TermUtils;
-import it.unibz.inf.ontop.injection.QuestCorePreferences;
+import it.unibz.inf.ontop.injection.QuestCoreSettings;
 import it.unibz.inf.ontop.pivotalrepr.MetadataForQueryOptimization;
 import it.unibz.inf.ontop.pivotalrepr.impl.MetadataForQueryOptimizationImpl;
 import it.unibz.inf.ontop.sql.RDBMetadata;
@@ -38,7 +38,7 @@ import java.util.stream.IntStream;
 public class QuestUnfolder {
 
 	private final NativeQueryLanguageComponentFactory nativeQLFactory;
-	private final QuestCorePreferences preferences;
+	private final QuestCoreSettings preferences;
 	/* The active unfolding engine */
 	private DatalogUnfolder unfolder;
 
@@ -69,7 +69,7 @@ public class QuestUnfolder {
 	//private boolean applyExcludeFromTMappings = false;
 	public QuestUnfolder(NativeQueryLanguageComponentFactory nativeQLFactory,
 						 IMapping2DatalogConverter mapping2DatalogConvertor,
-						 QuestCorePreferences preferences) throws Exception{
+						 QuestCoreSettings preferences) throws Exception{
 		this.nativeQLFactory = nativeQLFactory;
 		this.mapping2DatalogConvertor = mapping2DatalogConvertor;
 		this.preferences = preferences;

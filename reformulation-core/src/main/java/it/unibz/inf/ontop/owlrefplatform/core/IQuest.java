@@ -8,8 +8,7 @@ import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.ontology.ImmutableOntologyVocabulary;
 import it.unibz.inf.ontop.owlrefplatform.core.abox.RDBMSSIRepositoryManager;
 import it.unibz.inf.ontop.owlrefplatform.core.abox.SemanticIndexURIMap;
-import it.unibz.inf.ontop.injection.QuestCorePreferences;
-import it.unibz.inf.ontop.pivotalrepr.utils.ExecutorRegistry;
+import it.unibz.inf.ontop.injection.QuestCoreSettings;
 
 /**
  * Automatically extracted.
@@ -22,7 +21,7 @@ public interface IQuest {
 
     void dispose();
 
-    QuestCorePreferences getPreferences();
+    QuestCoreSettings getPreferences();
 
     void setupRepository() throws Exception;
 

@@ -1,10 +1,9 @@
 package it.unibz.inf.ontop.io;
 
-import it.unibz.inf.ontop.injection.OBDAProperties;
+import it.unibz.inf.ontop.injection.OBDASettings;
 import it.unibz.inf.ontop.model.MappingFactory;
 import it.unibz.inf.ontop.model.OBDADataSource;
 import it.unibz.inf.ontop.model.impl.MappingFactoryImpl;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.model.impl.RDBMSourceParameterConstants;
 
 import java.net.URI;
@@ -17,7 +16,7 @@ public class OBDADataSourceFromConfigExtractor {
     private final OBDADataSource dataSource;
     private static final MappingFactory MAPPING_FACTORY = MappingFactoryImpl.getInstance();
 
-    public OBDADataSourceFromConfigExtractor(OBDAProperties properties)
+    public OBDADataSourceFromConfigExtractor(OBDASettings properties)
             throws InvalidDataSourceException {
         dataSource = extractProperties(properties);
     }
@@ -26,16 +25,16 @@ public class OBDADataSourceFromConfigExtractor {
         return dataSource;
     }
 
-    private static OBDADataSource extractProperties(OBDAProperties properties)
+    private static OBDADataSource extractProperties(OBDASettings properties)
             throws InvalidDataSourceException {
         if (properties == null)
             throw new IllegalArgumentException("OBDA properties must not be null");
 
-        String id = extractProperty(OBDAProperties.DB_NAME, properties);
-        String url = extractProperty(OBDAProperties.JDBC_URL, properties);
-        String username = extractProperty(OBDAProperties.DB_USER, properties);
-        String password = extractProperty(OBDAProperties.DB_PASSWORD, properties);
-        String driver = extractProperty(OBDAProperties.JDBC_DRIVER, properties);
+        String id = extractProperty(OBDASettings.DB_NAME, properties);
+        String url = extractProperty(OBDASettings.JDBC_URL, properties);
+        String username = extractProperty(OBDASettings.DB_USER, properties);
+        String password = extractProperty(OBDASettings.DB_PASSWORD, properties);
+        String driver = extractProperty(OBDASettings.JDBC_DRIVER, properties);
 
         OBDADataSource source = MAPPING_FACTORY.getDataSource(URI.create(id));
         source.setParameter(RDBMSourceParameterConstants.DATABASE_URL, url);
@@ -46,7 +45,7 @@ public class OBDADataSourceFromConfigExtractor {
         return source;
     }
 
-    private static String extractProperty(String propertyName, OBDAProperties properties)
+    private static String extractProperty(String propertyName, OBDASettings properties)
             throws InvalidDataSourceException {
         return properties.getProperty(propertyName)
                 .orElseThrow(() -> new InvalidDataSourceException(String.format("Property %s is missing in the configuration." +

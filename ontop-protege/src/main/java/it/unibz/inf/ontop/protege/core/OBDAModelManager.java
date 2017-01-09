@@ -31,7 +31,7 @@ import it.unibz.inf.ontop.io.QueryIOManager;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.owlapi.OBDAModelValidator;
-import it.unibz.inf.ontop.injection.QuestCorePreferences;
+import it.unibz.inf.ontop.injection.QuestCoreSettings;
 import it.unibz.inf.ontop.protege.utils.DialogUtils;
 import it.unibz.inf.ontop.querymanager.*;
 import it.unibz.inf.ontop.sql.ImplicitDBConstraintsReader;
@@ -576,7 +576,7 @@ public class OBDAModelManager implements Disposable {
                 if (fac instanceof OntopReasonerInfo) {
                     OntopReasonerInfo questfactory = (OntopReasonerInfo) fac;
                     DisposableProperties reasonerPreference = (DisposableProperties) owlEditorKit
-                            .get(QuestCorePreferences.class.getName());
+                            .get(QuestCoreSettings.class.getName());
                     questfactory.setPreferences(reasonerPreference.clone());
                     questfactory.setOBDAModelWrapper(activeOBDAModel);
                 }
@@ -628,7 +628,7 @@ public class OBDAModelManager implements Disposable {
 			ProtegeOWLReasonerInfo factory = owlEditorKit.getOWLModelManager().getOWLReasonerManager().getCurrentReasonerFactory();
 			if (factory instanceof OntopReasonerInfo) {
                 OntopReasonerInfo questfactory = (OntopReasonerInfo) factory;
-                DisposableProperties reasonerPreference = (DisposableProperties) owlEditorKit.get(QuestCorePreferences.class.getName());
+                DisposableProperties reasonerPreference = (DisposableProperties) owlEditorKit.get(QuestCoreSettings.class.getName());
                 questfactory.setPreferences(reasonerPreference.clone());
                 questfactory.setOBDAModelWrapper(getActiveOBDAModelWrapper());
                 if(applyUserConstraints)

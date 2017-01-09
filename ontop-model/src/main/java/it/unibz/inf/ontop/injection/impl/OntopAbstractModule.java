@@ -3,7 +3,7 @@ package it.unibz.inf.ontop.injection.impl;
 import com.google.inject.AbstractModule;
 import com.google.inject.Module;
 import com.google.inject.assistedinject.FactoryModuleBuilder;
-import it.unibz.inf.ontop.injection.OntopModelProperties;
+import it.unibz.inf.ontop.injection.OntopModelSettings;
 
 import java.util.List;
 
@@ -22,9 +22,9 @@ public abstract class OntopAbstractModule extends AbstractModule {
         }
     }
 
-    private final OntopModelProperties properties;
+    private final OntopModelSettings properties;
 
-    protected OntopAbstractModule(OntopModelProperties configuration) {
+    protected OntopAbstractModule(OntopModelSettings configuration) {
         this.properties = configuration;
     }
 
@@ -57,10 +57,10 @@ public abstract class OntopAbstractModule extends AbstractModule {
      * TO be called by sub-classes, inside the configure() method.
      */
     protected void configureCoreConfiguration() {
-        bind(OntopModelProperties.class).toInstance(properties);
+        bind(OntopModelSettings.class).toInstance(properties);
     }
 
-    protected OntopModelProperties getProperties() {
+    protected OntopModelSettings getProperties() {
         return properties;
     }
 

@@ -5,7 +5,7 @@ import it.unibz.inf.ontop.injection.impl.OntopOptimizationConfigurationImpl;
 public interface OntopOptimizationConfiguration extends OntopModelConfiguration {
 
     @Override
-    OntopOptimizationProperties getProperties();
+    OntopOptimizationSettings getSettings();
 
     /**
      * Default builder

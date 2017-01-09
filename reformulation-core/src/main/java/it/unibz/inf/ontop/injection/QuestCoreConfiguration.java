@@ -18,7 +18,7 @@ public interface QuestCoreConfiguration extends OBDACoreConfiguration, OntopOpti
     Optional<DBMetadata> getDatasourceMetadata();
 
     @Override
-    QuestCorePreferences getProperties();
+    QuestCoreSettings getSettings();
 
 
     static Builder<Builder<Builder<Builder<Builder<Builder<Builder<Builder<Builder<Builder<Builder<Builder<Builder>>>>>>>>>>>> defaultBuilder() {

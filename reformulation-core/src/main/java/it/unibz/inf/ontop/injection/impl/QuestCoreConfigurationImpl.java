@@ -11,7 +11,7 @@ import it.unibz.inf.ontop.model.DBMetadata;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
 import it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing.TMappingExclusionConfig;
 import it.unibz.inf.ontop.injection.QuestCoreConfiguration;
-import it.unibz.inf.ontop.injection.QuestCorePreferences;
+import it.unibz.inf.ontop.injection.QuestCoreSettings;
 import it.unibz.inf.ontop.pivotalrepr.proposal.QueryOptimizationProposal;
 
 import javax.annotation.Nonnull;
@@ -21,16 +21,16 @@ import java.util.stream.Stream;
 
 public class QuestCoreConfigurationImpl extends OBDACoreConfigurationImpl implements QuestCoreConfiguration {
 
-    private final QuestCorePreferences preferences;
+    private final QuestCoreSettings settings;
     private final QuestCoreOptions options;
     // Concrete implementation due to the "mixin style" (indirect inheritance)
     private final OntopOptimizationConfigurationImpl optimizationConfiguration;
 
-    protected QuestCoreConfigurationImpl(QuestCorePreferences preferences, QuestCoreOptions options) {
-        super(preferences, options.obdaOptions);
-        this.preferences = preferences;
+    protected QuestCoreConfigurationImpl(QuestCoreSettings settings, QuestCoreOptions options) {
+        super(settings, options.obdaOptions);
+        this.settings = settings;
         this.options = options;
-        this.optimizationConfiguration = new OntopOptimizationConfigurationImpl(preferences, options.optimizationOptions);
+        this.optimizationConfiguration = new OntopOptimizationConfigurationImpl(settings, options.optimizationOptions);
     }
 
     /**
@@ -55,9 +55,9 @@ public class QuestCoreConfigurationImpl extends OBDACoreConfigurationImpl implem
 
         boolean isMapping = isMappingDefined();
 
-        if ((!isMapping) && preferences.isInVirtualMode()) {
+        if ((!isMapping) && settings.isInVirtualMode()) {
             throw new InvalidOntopConfigurationException("Mapping is not specified in virtual mode", this);
-        } else if (isMapping && (!preferences.isInVirtualMode())) {
+        } else if (isMapping && (!settings.isInVirtualMode())) {
             throw new InvalidOntopConfigurationException("Mapping is specified in classic A-box mode", this);
         }
         /**
@@ -78,8 +78,8 @@ public class QuestCoreConfigurationImpl extends OBDACoreConfigurationImpl implem
     }
 
     @Override
-    public QuestCorePreferences getProperties() {
-        return preferences;
+    public QuestCoreSettings getSettings() {
+        return settings;
     }
 
     @Override
@@ -179,13 +179,13 @@ public class QuestCoreConfigurationImpl extends OBDACoreConfigurationImpl implem
         protected Properties generateUserProperties() {
             Properties p = new Properties();
 
-            queryingAnnotationsInOntology.ifPresent(b -> p.put(QuestCorePreferences.ANNOTATIONS_IN_ONTO, b));
-            encodeIRISafely.ifPresent(e -> p.put(QuestCorePreferences.SQL_GENERATE_REPLACE, e));
-            sameAsMappings.ifPresent(b -> p.put(QuestCorePreferences.SAME_AS, b));
-            optimizeEquivalences.ifPresent(b -> p.put(QuestCorePreferences.OPTIMIZE_EQUIVALENCES, b));
+            queryingAnnotationsInOntology.ifPresent(b -> p.put(QuestCoreSettings.ANNOTATIONS_IN_ONTO, b));
+            encodeIRISafely.ifPresent(e -> p.put(QuestCoreSettings.SQL_GENERATE_REPLACE, e));
+            sameAsMappings.ifPresent(b -> p.put(QuestCoreSettings.SAME_AS, b));
+            optimizeEquivalences.ifPresent(b -> p.put(QuestCoreSettings.OPTIMIZE_EQUIVALENCES, b));
             existentialReasoning.ifPresent(r -> {
-                p.put(QuestCorePreferences.REWRITE, r);
-                p.put(QuestCorePreferences.REFORMULATION_TECHNIQUE, QuestConstants.TW);
+                p.put(QuestCoreSettings.REWRITE, r);
+                p.put(QuestCoreSettings.REFORMULATION_TECHNIQUE, QuestConstants.TW);
             });
 
             return p;
@@ -247,15 +247,15 @@ public class QuestCoreConfigurationImpl extends OBDACoreConfigurationImpl implem
         }
 
         @Override
-        protected Properties generateUserProperties() {
-            Properties userProperties = super.generateUserProperties();
-            userProperties.putAll(optimizationBuilderFragment.generateProperties());
-            userProperties.putAll(questCoreBuilderFragment.generateUserProperties());
-            return userProperties;
+        protected Properties generateProperties() {
+            Properties properties = super.generateProperties();
+            properties.putAll(optimizationBuilderFragment.generateProperties());
+            properties.putAll(questCoreBuilderFragment.generateUserProperties());
+            return properties;
         }
 
         protected final QuestCoreOptions generateQuestCoreOptions() {
-            OBDAConfigurationOptions obdaOptions = generateOBDAConfigurationOptions();
+            OBDAConfigurationOptions obdaOptions = generateOBDACoreOptions();
 
             return questCoreBuilderFragment.generateQuestCoreOptions(obdaOptions,
                     optimizationBuilderFragment.generateOntopOptimizationConfigurationOptions(obdaOptions.modelOptions));
@@ -268,10 +268,10 @@ public class QuestCoreConfigurationImpl extends OBDACoreConfigurationImpl implem
 
         @Override
         public QuestCoreConfiguration build() {
-            Properties userProperties = generateUserProperties();
-            QuestCorePreferences preferences = new QuestCorePreferencesImpl(userProperties, isR2rml());
+            Properties properties = generateProperties();
+            QuestCoreSettings settings = new QuestCoreSettingsImpl(properties, isR2rml());
 
-            return new QuestCoreConfigurationImpl(preferences, generateQuestCoreOptions());
+            return new QuestCoreConfigurationImpl(settings, generateQuestCoreOptions());
         }
     }
 }

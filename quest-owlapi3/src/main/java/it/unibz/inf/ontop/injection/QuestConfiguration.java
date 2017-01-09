@@ -18,7 +18,7 @@ import java.util.Optional;
 public interface QuestConfiguration extends QuestCoreConfiguration {
 
     @Override
-    QuestPreferences getProperties();
+    QuestSettings getSettings();
 
     Optional<OWLOntology> loadInputOntology() throws OWLOntologyCreationException;
 

@@ -4,7 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.executor.InternalProposalExecutor;
 import it.unibz.inf.ontop.injection.OntopModelFactory;
-import it.unibz.inf.ontop.injection.OntopModelProperties;
+import it.unibz.inf.ontop.injection.OntopModelSettings;
 import it.unibz.inf.ontop.model.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.Variable;
 import it.unibz.inf.ontop.pivotalrepr.utils.ExecutorRegistry;
@@ -54,7 +54,7 @@ public class IntermediateQueryImpl implements IntermediateQuery {
 
     private final IntermediateQueryValidator validator;
 
-    private final OntopModelProperties settings;
+    private final OntopModelSettings settings;
 
     private final OntopModelFactory modelFactory;
 
@@ -64,7 +64,7 @@ public class IntermediateQueryImpl implements IntermediateQuery {
      */
     public IntermediateQueryImpl(MetadataForQueryOptimization metadata, DistinctVariableOnlyDataAtom projectionAtom,
                                  QueryTreeComponent treeComponent, ExecutorRegistry executorRegistry,
-                                 IntermediateQueryValidator validator, OntopModelProperties settings,
+                                 IntermediateQueryValidator validator, OntopModelSettings settings,
                                  OntopModelFactory modelFactory) {
         this.metadata = metadata;
         this.projectionAtom = projectionAtom;

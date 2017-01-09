@@ -25,7 +25,7 @@ import it.unibz.inf.ontop.model.Predicate;
 import it.unibz.inf.ontop.ontology.Ontology;
 import it.unibz.inf.ontop.owlapi.OWLAPITranslatorUtility;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.inf.ontop.injection.QuestCorePreferences;
+import it.unibz.inf.ontop.injection.QuestCoreSettings;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import org.junit.After;
 import org.junit.Before;
@@ -108,8 +108,8 @@ public class QuestOWLEmptyEntitiesCheckerTest {
 		onto =  OWLAPITranslatorUtility.translate(ontology);
 
 		Properties p = new Properties();
-		p.setProperty(QuestCorePreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-		p.setProperty(QuestCorePreferences.OBTAIN_FULL_METADATA, QuestConstants.FALSE);
+		p.setProperty(QuestCoreSettings.ABOX_MODE, QuestConstants.VIRTUAL);
+		p.setProperty(QuestCoreSettings.OBTAIN_FULL_METADATA, QuestConstants.FALSE);
 		// Creating a new instance of the reasoner
 		QuestOWLFactory factory = new QuestOWLFactory();
         QuestConfiguration config = QuestConfiguration.defaultBuilder()

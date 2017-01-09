@@ -26,7 +26,7 @@ import java.net.URL;
 import java.util.*;
 
 import it.unibz.inf.ontop.injection.QuestConfiguration;
-import it.unibz.inf.ontop.injection.QuestPreferences;
+import it.unibz.inf.ontop.injection.QuestSettings;
 import it.unibz.inf.ontop.model.OBDAException;
 import it.unibz.inf.ontop.model.OBDAModel;
 import it.unibz.inf.ontop.ontology.OntologyVocabulary;
@@ -34,8 +34,7 @@ import it.unibz.inf.ontop.owlapi.OWLAPIABoxIterator;
 import it.unibz.inf.ontop.owlapi.OWLAPITranslatorUtility;
 import it.unibz.inf.ontop.owlrefplatform.core.IQuest;
 import it.unibz.inf.ontop.owlrefplatform.core.IQuestConnection;
-import it.unibz.inf.ontop.injection.QuestCorePreferences;
-import it.unibz.inf.ontop.pivotalrepr.utils.ExecutorRegistry;
+import it.unibz.inf.ontop.injection.QuestCoreSettings;
 import org.openrdf.model.Literal;
 import org.openrdf.model.Resource;
 import org.openrdf.model.Statement;
@@ -99,7 +98,7 @@ public class QuestDBClassicStore extends QuestDBAbstractStore {
 				// Default empty Ontology
 				.orElseGet(() -> ofac.createOntology(ofac.createVocabulary()));
 
-		createInstance(tbox, config.getProperties());
+		createInstance(tbox, config.getSettings());
 	}
 
 	/**
@@ -108,15 +107,15 @@ public class QuestDBClassicStore extends QuestDBAbstractStore {
 	public QuestDBClassicStore(String name, Dataset data, QuestConfiguration config) throws Exception {
 		super(name, config);
 		Ontology tbox = loadTBoxFromDataset(data);
-		createInstance(tbox, config.getProperties());
+		createInstance(tbox, config.getSettings());
 	}
 
-	private void createInstance(Ontology tbox, QuestPreferences preferences) throws Exception {
+	private void createInstance(Ontology tbox, QuestSettings preferences) throws Exception {
         questInstance = getComponentFactory().create(tbox, Optional.empty(), Optional.empty(), getExecutorRegistry());
 		questInstance.setupRepository();
 		
-		final boolean bObtainFromOntology = preferences.getRequiredBoolean(QuestCorePreferences.OBTAIN_FROM_ONTOLOGY);
-		final boolean bObtainFromMappings = preferences.getRequiredBoolean(QuestCorePreferences.OBTAIN_FROM_MAPPINGS);
+		final boolean bObtainFromOntology = preferences.getRequiredBoolean(QuestCoreSettings.OBTAIN_FROM_ONTOLOGY);
+		final boolean bObtainFromMappings = preferences.getRequiredBoolean(QuestCoreSettings.OBTAIN_FROM_MAPPINGS);
 		IQuestConnection conn = questInstance.getNonPoolConnection();
         //TODO: avoid this cast
 		SIQuestStatement st = conn.createSIStatement();
@@ -158,7 +157,7 @@ public class QuestDBClassicStore extends QuestDBAbstractStore {
 	}
 
 	@Override
-	public QuestCorePreferences getPreferences() {
+	public QuestCoreSettings getPreferences() {
 		return questInstance.getPreferences();
 	}
 

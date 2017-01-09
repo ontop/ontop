@@ -22,13 +22,13 @@ import java.util.stream.Stream;
 
 public class OBDACoreConfigurationImpl extends OntopModelConfigurationImpl implements OBDACoreConfiguration {
 
-    private final OBDAProperties obdaProperties;
+    private final OBDASettings settings;
     private final OBDAConfigurationOptions options;
 
-    protected OBDACoreConfigurationImpl(OBDAProperties obdaProperties,
+    protected OBDACoreConfigurationImpl(OBDASettings settings,
                                         OBDAConfigurationOptions options) {
-        super(obdaProperties, options.modelOptions);
-        this.obdaProperties = obdaProperties;
+        super(settings, options.modelOptions);
+        this.settings = settings;
         this.options = options;
     }
 
@@ -44,8 +44,8 @@ public class OBDACoreConfigurationImpl extends OntopModelConfigurationImpl imple
     }
 
     @Override
-    public OBDAProperties getOBDAProperties() {
-        return obdaProperties;
+    public OBDASettings getSettings() {
+        return settings;
     }
 
     @Override
@@ -59,7 +59,7 @@ public class OBDACoreConfigurationImpl extends OntopModelConfigurationImpl imple
 
         Optional<File> optionalMappingFile = options.mappingFile
                 .map(Optional::of)
-                .orElseGet(() -> obdaProperties.getMappingFilePath()
+                .orElseGet(() -> settings.getMappingFilePath()
                         .map(File::new));
 
         if (optionalMappingFile.isPresent()) {
@@ -94,7 +94,7 @@ public class OBDACoreConfigurationImpl extends OntopModelConfigurationImpl imple
      * Please overload isMappingDefined() instead.
      */
     protected boolean isInputMappingDefined() {
-        return obdaProperties.contains(OBDAProperties.MAPPING_FILE_PATH)
+        return settings.contains(OBDASettings.MAPPING_FILE_PATH)
                 || options.mappingFile.isPresent()
                 || options.mappingGraph.isPresent()
                 || options.mappingReader.isPresent()
@@ -307,13 +307,13 @@ public class OBDACoreConfigurationImpl extends OntopModelConfigurationImpl imple
             return isMappingDefined;
         }
 
-        protected Properties generateUserProperties() {
+        protected Properties generateProperties() {
             Properties p = new Properties();
 
             // Never puts the mapping file path
 
-            obtainFullMetadata.ifPresent(m -> p.put(OBDAProperties.OBTAIN_FULL_METADATA, m));
-            jdbcUrl.ifPresent(u -> p.put(OBDAProperties.JDBC_URL, u));
+            obtainFullMetadata.ifPresent(m -> p.put(OBDASettings.OBTAIN_FULL_METADATA, m));
+            jdbcUrl.ifPresent(u -> p.put(OBDASettings.JDBC_URL, u));
 
             return p;
         }
@@ -345,7 +345,7 @@ public class OBDACoreConfigurationImpl extends OntopModelConfigurationImpl imple
             }
         }
 
-        protected final OBDAConfigurationOptions generateOBDAConfigurationOptions(OntopModelConfigurationOptions modelOptions) {
+        protected final OBDAConfigurationOptions generateOBDACoreOptions(OntopModelConfigurationOptions modelOptions) {
             return new OBDAConfigurationOptions(mappingFile, mappingReader, mappingGraph, obdaModel, userConstraints,
                     modelOptions);
         }
@@ -382,15 +382,15 @@ public class OBDACoreConfigurationImpl extends OntopModelConfigurationImpl imple
         }
 
         @Override
-        protected Properties generateUserProperties() {
-            Properties userProperties = super.generateUserProperties();
-            userProperties.putAll(modelBuilderFragment.generateUserProperties());
+        protected Properties generateProperties() {
+            Properties properties = super.generateProperties();
+            properties.putAll(modelBuilderFragment.generateProperties());
 
-            return userProperties;
+            return properties;
         }
 
-        protected final OBDAConfigurationOptions generateOBDAConfigurationOptions() {
-            return generateOBDAConfigurationOptions(modelBuilderFragment.generateOntopModelConfigurationOptions());
+        protected final OBDAConfigurationOptions generateOBDACoreOptions() {
+            return generateOBDACoreOptions(modelBuilderFragment.generateModelOptions());
         }
     }
 
@@ -400,12 +400,12 @@ public class OBDACoreConfigurationImpl extends OntopModelConfigurationImpl imple
 
         @Override
         public OBDACoreConfiguration build() {
-            Properties userProperties = generateUserProperties();
+            Properties properties = generateProperties();
 
-            OBDAConfigurationOptions options = generateOBDAConfigurationOptions();
-            OBDAProperties confProperties = new OBDAPropertiesImpl(userProperties, isR2rml());
+            OBDAConfigurationOptions options = generateOBDACoreOptions();
+            OBDASettings settings = new OBDASettingsImpl(properties, isR2rml());
 
-            return new OBDACoreConfigurationImpl(confProperties, options);
+            return new OBDACoreConfigurationImpl(settings, options);
         }
     }
 

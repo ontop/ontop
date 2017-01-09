@@ -18,7 +18,8 @@ import java.util.Optional;
  */
 public interface OBDACoreConfiguration extends OntopModelConfiguration {
 
-    OBDAProperties getOBDAProperties();
+    @Override
+    OBDASettings getSettings();
 
     Optional<ImplicitDBConstraintsReader> getImplicitDBConstraintsReader();
 

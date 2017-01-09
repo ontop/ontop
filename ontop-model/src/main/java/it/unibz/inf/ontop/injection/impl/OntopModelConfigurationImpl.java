@@ -7,7 +7,7 @@ import com.google.inject.Module;
 import it.unibz.inf.ontop.executor.InternalProposalExecutor;
 import it.unibz.inf.ontop.injection.InvalidOntopConfigurationException;
 import it.unibz.inf.ontop.injection.OntopModelConfiguration;
-import it.unibz.inf.ontop.injection.OntopModelProperties;
+import it.unibz.inf.ontop.injection.OntopModelSettings;
 import it.unibz.inf.ontop.pivotalrepr.utils.ExecutorRegistry;
 import it.unibz.inf.ontop.pivotalrepr.utils.impl.CachingExecutorRegistry;
 import it.unibz.inf.ontop.pivotalrepr.proposal.QueryOptimizationProposal;
@@ -26,12 +26,12 @@ import java.util.stream.Stream;
 public class OntopModelConfigurationImpl implements OntopModelConfiguration {
 
     private final OntopModelConfigurationOptions options;
-    private final OntopModelProperties properties;
+    private final OntopModelSettings settings;
     private ExecutorRegistry executorRegistry;
     private Injector injector;
 
-    protected OntopModelConfigurationImpl(OntopModelProperties properties, OntopModelConfigurationOptions options) {
-        this.properties = properties;
+    protected OntopModelConfigurationImpl(OntopModelSettings settings, OntopModelConfigurationOptions options) {
+        this.settings = settings;
         this.options = options;
 
         // Will be built on-demand
@@ -86,8 +86,8 @@ public class OntopModelConfigurationImpl implements OntopModelConfiguration {
     }
 
     @Override
-    public OntopModelProperties getProperties() {
-        return properties;
+    public OntopModelSettings getSettings() {
+        return settings;
     }
 
 
@@ -176,14 +176,14 @@ public class OntopModelConfigurationImpl implements OntopModelConfiguration {
          * Can be overloaded. Don't forget to call the parent!
          *
          */
-        protected Properties generateUserProperties() {
+        protected Properties generateProperties() {
             Properties properties = new Properties();
             inputProperties.ifPresent(properties::putAll);
-            testMode.ifPresent(isEnabled -> properties.put(OntopModelProperties.TEST_MODE, isEnabled));
+            testMode.ifPresent(isEnabled -> properties.put(OntopModelSettings.TEST_MODE, isEnabled));
             return properties;
         }
 
-        protected final OntopModelConfigurationOptions generateOntopModelConfigurationOptions() {
+        protected final OntopModelConfigurationOptions generateModelOptions() {
             return new OntopModelConfigurationOptions();
         }
 
@@ -198,11 +198,11 @@ public class OntopModelConfigurationImpl implements OntopModelConfiguration {
 
         @Override
         public final OntopModelConfiguration build() {
-            Properties p = generateUserProperties();
+            Properties p = generateProperties();
 
             return new OntopModelConfigurationImpl(
-                    new OntopModelPropertiesImpl(p),
-                    generateOntopModelConfigurationOptions());
+                    new OntopModelSettingsImpl(p),
+                    generateModelOptions());
         }
     }
 }

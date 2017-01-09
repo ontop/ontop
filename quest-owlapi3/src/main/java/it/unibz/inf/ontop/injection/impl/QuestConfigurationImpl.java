@@ -25,17 +25,17 @@ import java.util.function.Supplier;
 public class QuestConfigurationImpl extends QuestCoreConfigurationImpl implements QuestConfiguration {
 
     private final QuestOptions options;
-    private final QuestPreferences preferences;
+    private final QuestSettings settings;
 
-    protected QuestConfigurationImpl(QuestPreferences preferences, QuestOptions options) {
-        super(preferences, options.coreOptions);
-        this.preferences = preferences;
+    protected QuestConfigurationImpl(QuestSettings settings, QuestOptions options) {
+        super(settings, options.coreOptions);
+        this.settings = settings;
         this.options = options;
     }
 
     @Override
-    public QuestPreferences getProperties() {
-        return preferences;
+    public QuestSettings getSettings() {
+        return settings;
     }
 
     @Override
@@ -77,7 +77,7 @@ public class QuestConfigurationImpl extends QuestCoreConfigurationImpl implement
         if (options.ontologyURL.isPresent()) {
             return options.ontologyURL;
         }
-        Optional<String> optionalString = preferences.getOntologyURL();
+        Optional<String> optionalString = settings.getOntologyURL();
         if (optionalString.isPresent()) {
             return Optional.of(new URL(optionalString.get()));
         }
@@ -238,7 +238,7 @@ public class QuestConfigurationImpl extends QuestCoreConfigurationImpl implement
             return new QuestOptions(ontology, ontologyFile, ontologyURL, sourceToBootstrap, boostrappingBaseIri, coreOptions);
         }
 
-        protected Properties generateUserProperties() {
+        protected Properties generateProperties() {
             Properties p = new Properties();
             // Does not create new property entries
             return p;
@@ -282,6 +282,13 @@ public class QuestConfigurationImpl extends QuestCoreConfigurationImpl implement
             return questBuilderFragment.bootstrapMapping(source, baseIRI);
         }
 
+        @Override
+        protected Properties generateProperties() {
+            Properties properties = super.generateProperties();
+            properties.putAll(questBuilderFragment.generateProperties());
+            return properties;
+        }
+
         protected final QuestOptions generateQuestOptions() {
             return questBuilderFragment.generateQuestOptions(generateQuestCoreOptions());
         }
@@ -292,10 +299,10 @@ public class QuestConfigurationImpl extends QuestCoreConfigurationImpl implement
 
         @Override
         public QuestConfiguration build() {
-            Properties properties = generateUserProperties();
-            QuestPreferences preferences = new QuestPreferencesImpl(properties, isR2rml());
+            Properties properties = generateProperties();
+            QuestSettings settings = new QuestSettingsImpl(properties, isR2rml());
 
-            return new QuestConfigurationImpl(preferences, generateQuestOptions());
+            return new QuestConfigurationImpl(settings, generateQuestOptions());
         }
     }
 }

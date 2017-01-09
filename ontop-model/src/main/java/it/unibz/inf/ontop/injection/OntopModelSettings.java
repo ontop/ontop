@@ -5,7 +5,7 @@ import java.util.Optional;
 /**
  * TODO: explain
  */
-public interface OntopModelProperties {
+public interface OntopModelSettings {
 
 
     CardinalityPreservationMode getCardinalityPreservationMode();

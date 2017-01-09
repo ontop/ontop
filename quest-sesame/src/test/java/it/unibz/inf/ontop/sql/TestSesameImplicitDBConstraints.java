@@ -11,12 +11,12 @@ import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestDBConnection;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestDBStatement;
-import it.unibz.inf.ontop.injection.QuestCorePreferences;
+import it.unibz.inf.ontop.injection.QuestCoreSettings;
 import org.junit.After;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
-import it.unibz.inf.ontop.injection.OBDAProperties;
+import it.unibz.inf.ontop.injection.OBDASettings;
 import it.unibz.inf.ontop.sesame.SesameVirtualRepo;
 
 /**
@@ -72,12 +72,12 @@ public class TestSesameImplicitDBConstraints {
 		 * "Virtual ABox" mode
 		 */
 		Properties p = new Properties();
-		p.setProperty(QuestCorePreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-		p.setProperty(OBDAProperties.DB_NAME, "countries");
-		p.setProperty(OBDAProperties.JDBC_URL, "jdbc:h2:mem:countries");
-		p.setProperty(OBDAProperties.DB_USER, "sa");
-		p.setProperty(OBDAProperties.DB_PASSWORD, "");
-		p.setProperty(OBDAProperties.JDBC_DRIVER, "org.h2.Driver");
+		p.setProperty(QuestCoreSettings.ABOX_MODE, QuestConstants.VIRTUAL);
+		p.setProperty(OBDASettings.DB_NAME, "countries");
+		p.setProperty(OBDASettings.JDBC_URL, "jdbc:h2:mem:countries");
+		p.setProperty(OBDASettings.DB_USER, "sa");
+		p.setProperty(OBDASettings.DB_PASSWORD, "");
+		p.setProperty(OBDASettings.JDBC_DRIVER, "org.h2.Driver");
 
 		QuestConfiguration.Builder configurationBuilder = QuestConfiguration.defaultBuilder()
 				.ontologyFile(owlfile)

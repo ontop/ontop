@@ -5,7 +5,7 @@ import java.util.Optional;
 /**
  * TODO: explain
  */
-public interface QuestPreferences extends QuestCorePreferences {
+public interface QuestSettings extends QuestCoreSettings {
 
     Optional<String> getOntologyURL();
 

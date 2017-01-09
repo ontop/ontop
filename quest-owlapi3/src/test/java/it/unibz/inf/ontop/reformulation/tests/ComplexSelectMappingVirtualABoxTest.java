@@ -24,7 +24,7 @@ import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.model.OBDADataFactory;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.inf.ontop.injection.QuestCorePreferences;
+import it.unibz.inf.ontop.injection.QuestCoreSettings;
 import it.unibz.inf.ontop.owlrefplatform.core.SQLExecutableQuery;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import org.junit.After;
@@ -177,8 +177,8 @@ public class ComplexSelectMappingVirtualABoxTest  {
 	public void testReplace() throws Exception {
 
 		Properties p = new Properties();
-		p.put(QuestCorePreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-        p.put(QuestCorePreferences.SQL_GENERATE_REPLACE, QuestConstants.FALSE);
+		p.put(QuestCoreSettings.ABOX_MODE, QuestConstants.VIRTUAL);
+        p.put(QuestCoreSettings.SQL_GENERATE_REPLACE, QuestConstants.FALSE);
 
 		this.query = "PREFIX : <http://it.unibz.inf/obda/test/simple#> SELECT * WHERE { ?x :U ?z. }";
 
@@ -191,7 +191,7 @@ public class ComplexSelectMappingVirtualABoxTest  {
     public void testReplaceValue() throws Exception {
 
         Properties p = new Properties();
-        p.put(QuestCorePreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+        p.put(QuestCoreSettings.ABOX_MODE, QuestConstants.VIRTUAL);
 		this.query = "PREFIX : <http://it.unibz.inf/obda/test/simple#> SELECT * WHERE { ?x :U4 ?z . }";
 
         String val = runTests(p);
@@ -202,7 +202,7 @@ public class ComplexSelectMappingVirtualABoxTest  {
 	public void testConcat() throws Exception {
 
 		Properties p = new Properties();
-		p.put(QuestCorePreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+		p.put(QuestCoreSettings.ABOX_MODE, QuestConstants.VIRTUAL);
 		this.query = "PREFIX : <http://it.unibz.inf/obda/test/simple#> SELECT * WHERE { ?x :U2 ?z. }";
 
         String val = runTests(p);
@@ -213,7 +213,7 @@ public class ComplexSelectMappingVirtualABoxTest  {
 	public void testDoubleConcat() throws Exception {
 
 		Properties p = new Properties();
-		p.put(QuestCorePreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+		p.put(QuestCoreSettings.ABOX_MODE, QuestConstants.VIRTUAL);
 
 		this.query = "PREFIX : <http://it.unibz.inf/obda/test/simple#> SELECT * WHERE { ?x :U2 ?z; :U3 ?w. }";
 
@@ -225,7 +225,7 @@ public class ComplexSelectMappingVirtualABoxTest  {
     public void testConcat2() throws Exception {
 
 		Properties p = new Properties();
-		p.put(QuestCorePreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+		p.put(QuestCoreSettings.ABOX_MODE, QuestConstants.VIRTUAL);
 
         this.query = "PREFIX : <http://it.unibz.inf/obda/test/simple#> SELECT * WHERE { ?x :U5 ?z. }";
 
@@ -237,7 +237,7 @@ public class ComplexSelectMappingVirtualABoxTest  {
     public void testConcat3() throws Exception {
 
 		Properties p = new Properties();
-		p.put(QuestCorePreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+		p.put(QuestCoreSettings.ABOX_MODE, QuestConstants.VIRTUAL);
 
         this.query = "PREFIX : <http://it.unibz.inf/obda/test/simple#> SELECT * WHERE { ?x :U6 ?z. }";
 
@@ -249,7 +249,7 @@ public class ComplexSelectMappingVirtualABoxTest  {
     public void testConcat4() throws Exception {
 
 		Properties p = new Properties();
-		p.put(QuestCorePreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+		p.put(QuestCoreSettings.ABOX_MODE, QuestConstants.VIRTUAL);
 
         this.query = "PREFIX : <http://it.unibz.inf/obda/test/simple#> SELECT * WHERE { ?x :U7 ?z. }";
 
@@ -261,7 +261,7 @@ public class ComplexSelectMappingVirtualABoxTest  {
     public void testConcat5() throws Exception {
 
 		Properties p = new Properties();
-		p.put(QuestCorePreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+		p.put(QuestCoreSettings.ABOX_MODE, QuestConstants.VIRTUAL);
 
         this.query = "PREFIX : <http://it.unibz.inf/obda/test/simple#> SELECT * WHERE { ?x :U8 ?z. }";
 
@@ -273,7 +273,7 @@ public class ComplexSelectMappingVirtualABoxTest  {
     public void testConcatAndReplaceUri() throws Exception {
 
         Properties p = new Properties();
-        p.put(QuestCorePreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+        p.put(QuestCoreSettings.ABOX_MODE, QuestConstants.VIRTUAL);
 
         this.query = "PREFIX : <http://it.unibz.inf/obda/test/simple#> SELECT * WHERE { ?x :U9 ?z. }";
 

@@ -139,7 +139,7 @@ public class Quest implements Serializable, IQuest {
 
 	private OBDADataSource obdaSource;
 
-	private QuestCorePreferences preferences;
+	private QuestCoreSettings preferences;
 
 	private boolean inmemory;
 
@@ -198,7 +198,7 @@ public class Quest implements Serializable, IQuest {
 	private Quest(@Assisted Ontology tbox, @Assisted Optional<OBDAModel> obdaModel,
 				  @Assisted Optional<DBMetadata> inputMetadata,
 				  @Assisted ExecutorRegistry executorRegistry,
-				  QuestCorePreferences config, NativeQueryLanguageComponentFactory nativeQLFactory,
+				  QuestCoreSettings config, NativeQueryLanguageComponentFactory nativeQLFactory,
 				  OBDAFactoryWithException obdaFactory, QuestComponentFactory questComponentFactory,
 				  MappingVocabularyFixer mappingVocabularyFixer, TMappingExclusionConfig excludeFromTMappings,
 				  IMapping2DatalogConverter mapping2DatalogConverter, QueryCache queryCache,
@@ -271,39 +271,39 @@ public class Quest implements Serializable, IQuest {
 	}
 
 	@Override
-	public QuestCorePreferences getPreferences() {
+	public QuestCoreSettings getPreferences() {
 		return preferences;
 	}
 
 
-	private void setPreferences(QuestCorePreferences preferences) {
+	private void setPreferences(QuestCoreSettings preferences) {
 		this.preferences = preferences;
 
 		reformulate = preferences.isRewritingEnabled();
-		reformulationTechnique = preferences.getProperty(QuestCorePreferences.REFORMULATION_TECHNIQUE);
+		reformulationTechnique = preferences.getProperty(QuestCoreSettings.REFORMULATION_TECHNIQUE);
 		bOptimizeEquivalences = preferences.isEquivalenceOptimizationEnabled();
 
 		/**
 		 * Classic A-box specific configuration
 		 */
-		bObtainFromOntology = preferences.getRequiredBoolean(QuestCorePreferences.OBTAIN_FROM_ONTOLOGY);
-		bObtainFromMappings = preferences.getRequiredBoolean(QuestCorePreferences.OBTAIN_FROM_MAPPINGS);
+		bObtainFromOntology = preferences.getRequiredBoolean(QuestCoreSettings.OBTAIN_FROM_ONTOLOGY);
+		bObtainFromMappings = preferences.getRequiredBoolean(QuestCoreSettings.OBTAIN_FROM_MAPPINGS);
 		isVirtualMode = preferences.isInVirtualMode();
-		aboxSchemaType = preferences.getProperty(QuestCorePreferences.DBTYPE);
-		inmemory = preferences.getRequiredProperty(QuestCorePreferences.STORAGE_LOCATION)
+		aboxSchemaType = preferences.getProperty(QuestCoreSettings.DBTYPE);
+		inmemory = preferences.getRequiredProperty(QuestCoreSettings.STORAGE_LOCATION)
 				.equals(QuestConstants.INMEMORY);
 
 		printKeys = preferences.isKeyPrintingEnabled();
 
 		if (!inmemory) {
-			aboxJdbcURL = preferences.getProperty(QuestCorePreferences.JDBC_URL)
+			aboxJdbcURL = preferences.getProperty(QuestCoreSettings.JDBC_URL)
 					.orElseThrow(() -> new IllegalStateException("JDBC_URL must have a default value"));
 
-			aboxJdbcUser = preferences.getProperty(OBDAProperties.DB_USER)
+			aboxJdbcUser = preferences.getProperty(OBDASettings.DB_USER)
 					.orElseThrow(() -> new IllegalStateException("DB_USER must have a default value"));
-			aboxJdbcPassword = preferences.getProperty(OBDAProperties.DB_PASSWORD)
+			aboxJdbcPassword = preferences.getProperty(OBDASettings.DB_PASSWORD)
 					.orElseThrow(() -> new IllegalStateException("DB_PASSWORD must have a default value"));
-			aboxJdbcDriver = preferences.getProperty(OBDAProperties.JDBC_DRIVER)
+			aboxJdbcDriver = preferences.getProperty(OBDASettings.JDBC_DRIVER)
 					.orElseThrow(() -> new IllegalStateException("JDBC_DRIVER must have a default value"));
 		}
 
@@ -516,7 +516,7 @@ public class Quest implements Serializable, IQuest {
 			else if (QuestConstants.TW.equals(reformulationTechnique.get()))
 				rewriter = new TreeWitnessRewriter();
 			else
-				throw new IllegalArgumentException("Invalid value for argument: " + QuestCorePreferences.REFORMULATION_TECHNIQUE);
+				throw new IllegalArgumentException("Invalid value for argument: " + QuestCoreSettings.REFORMULATION_TECHNIQUE);
 
 			rewriter.setTBox(reformulationReasoner, inputOntology.getVocabulary(), sigma);
 

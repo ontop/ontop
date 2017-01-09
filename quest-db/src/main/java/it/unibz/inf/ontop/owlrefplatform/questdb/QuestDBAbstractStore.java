@@ -28,7 +28,7 @@ import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.injection.OBDAFactoryWithException;
 import it.unibz.inf.ontop.owlrefplatform.core.IQuestConnection;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestDBConnection;
-import it.unibz.inf.ontop.injection.QuestCorePreferences;
+import it.unibz.inf.ontop.injection.QuestCoreSettings;
 import it.unibz.inf.ontop.injection.QuestComponentFactory;
 import it.unibz.inf.ontop.model.OBDAException;
 import it.unibz.inf.ontop.pivotalrepr.utils.ExecutorRegistry;
@@ -63,7 +63,7 @@ public abstract class QuestDBAbstractStore implements Serializable {
 	}
 	
 	/* Move to query time ? */
-	public abstract QuestCorePreferences getPreferences();
+	public abstract QuestCoreSettings getPreferences();
 
 	public QuestDBConnection getConnection() throws OBDAException {
 	//	System.out.println("getquestdbconn..");

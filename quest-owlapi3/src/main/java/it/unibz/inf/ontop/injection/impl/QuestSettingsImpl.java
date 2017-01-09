@@ -1,14 +1,14 @@
 package it.unibz.inf.ontop.injection.impl;
 
 
-import it.unibz.inf.ontop.injection.QuestPreferences;
+import it.unibz.inf.ontop.injection.QuestSettings;
 
 import java.util.Optional;
 import java.util.Properties;
 
-public class QuestPreferencesImpl extends QuestCorePreferencesImpl implements QuestPreferences {
+public class QuestSettingsImpl extends QuestCoreSettingsImpl implements QuestSettings {
 
-    protected QuestPreferencesImpl(Properties userPreferences, boolean isR2rml) {
+    protected QuestSettingsImpl(Properties userPreferences, boolean isR2rml) {
         super(userPreferences, isR2rml);
     }
 

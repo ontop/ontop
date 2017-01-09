@@ -15,7 +15,7 @@ import java.util.Optional;
  * TODO: update this description
  *
  */
-public interface OBDAProperties extends OntopModelProperties {
+public interface OBDASettings extends OntopModelSettings {
 
     //-------------------
     // High-level methods

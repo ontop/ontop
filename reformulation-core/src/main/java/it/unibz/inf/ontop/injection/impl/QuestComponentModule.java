@@ -10,7 +10,7 @@ import it.unibz.inf.ontop.owlrefplatform.core.srcquerygeneration.NativeQueryGene
 import it.unibz.inf.ontop.owlrefplatform.core.translator.MappingVocabularyFixer;
 import it.unibz.inf.ontop.injection.QuestComponentFactory;
 import it.unibz.inf.ontop.injection.QuestCoreConfiguration;
-import it.unibz.inf.ontop.injection.QuestCorePreferences;
+import it.unibz.inf.ontop.injection.QuestCoreSettings;
 
 /**
  * TODO: describe
@@ -21,14 +21,14 @@ public class QuestComponentModule extends OntopAbstractModule {
     private QuestCoreConfiguration configuration;
 
     protected QuestComponentModule(QuestCoreConfiguration configuration) {
-        super(configuration.getProperties());
+        super(configuration.getSettings());
         this.configuration = configuration;
     }
 
     @Override
     protected void configureCoreConfiguration() {
         super.configureCoreConfiguration();
-        bind(QuestCorePreferences.class).toInstance((QuestCorePreferences) getProperties());
+        bind(QuestCoreSettings.class).toInstance((QuestCoreSettings) getProperties());
     }
 
     @Override

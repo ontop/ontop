@@ -7,7 +7,7 @@ import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.model.OBDAException;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
 import it.unibz.inf.ontop.owlrefplatform.core.SQLExecutableQuery;
-import it.unibz.inf.ontop.injection.QuestCorePreferences;
+import it.unibz.inf.ontop.injection.QuestCoreSettings;
 import it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing.TMappingExclusionConfig;
 import org.semanticweb.owlapi.model.*;
 
@@ -359,7 +359,7 @@ public class QuestOWLExample_ReasoningDisabled {
 		 * "Virtual ABox" mode
 		 */
         Properties p = new Properties();
-        p.put(QuestCorePreferences.SQL_GENERATE_REPLACE, QuestConstants.FALSE);
+        p.put(QuestCoreSettings.SQL_GENERATE_REPLACE, QuestConstants.FALSE);
 
 //		TEST preference.setCurrentValueOf(QuestPreferences.T_MAPPINGS, QuestConstants.FALSE); // Disable T_Mappings
 

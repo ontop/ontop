@@ -4,7 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.injection.OntopModelFactory;
-import it.unibz.inf.ontop.injection.OntopModelProperties;
+import it.unibz.inf.ontop.injection.OntopModelSettings;
 import it.unibz.inf.ontop.model.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.pivotalrepr.*;
 import it.unibz.inf.ontop.pivotalrepr.NonCommutativeOperatorNode.ArgumentPosition;
@@ -25,7 +25,7 @@ public class DefaultIntermediateQueryBuilder implements IntermediateQueryBuilder
     private final ExecutorRegistry executorRegistry;
     private final OntopModelFactory modelFactory;
     private final IntermediateQueryValidator validator;
-    private final OntopModelProperties settings;
+    private final OntopModelSettings settings;
     private DistinctVariableOnlyDataAtom projectionAtom;
     private QueryTree tree;
     private boolean canEdit;
@@ -35,7 +35,7 @@ public class DefaultIntermediateQueryBuilder implements IntermediateQueryBuilder
                                             @Assisted ExecutorRegistry executorRegistry,
                                             OntopModelFactory modelFactory,
                                             IntermediateQueryValidator validator,
-                                            OntopModelProperties settings) {
+                                            OntopModelSettings settings) {
         this.metadata = metadata;
         this.executorRegistry = executorRegistry;
         this.modelFactory = modelFactory;
@@ -112,7 +112,7 @@ public class DefaultIntermediateQueryBuilder implements IntermediateQueryBuilder
     protected IntermediateQuery buildQuery(MetadataForQueryOptimization metadata,
                                            DistinctVariableOnlyDataAtom projectionAtom,
                                            QueryTreeComponent treeComponent, ExecutorRegistry executorRegistry,
-                                           IntermediateQueryValidator validator, OntopModelProperties settings) {
+                                           IntermediateQueryValidator validator, OntopModelSettings settings) {
 
         return new IntermediateQueryImpl(metadata, projectionAtom, treeComponent, executorRegistry, validator,
                 settings, modelFactory);

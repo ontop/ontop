@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.reformulation.tests;
 
 import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.inf.ontop.injection.QuestCorePreferences;
+import it.unibz.inf.ontop.injection.QuestCoreSettings;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWL;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLFactory;
 import junit.framework.TestCase;
@@ -42,10 +42,10 @@ public class MovieOntologyTest extends TestCase {
 	public void testOntologyLoad() throws Exception {
 
 		Properties p = new Properties();
-		p.setProperty(QuestCorePreferences.REFORMULATION_TECHNIQUE, QuestConstants.TW);
+		p.setProperty(QuestCoreSettings.REFORMULATION_TECHNIQUE, QuestConstants.TW);
 		// p.setProperty(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC_INDEX);
-		p.setProperty(QuestCorePreferences.ABOX_MODE, QuestConstants.VIRTUAL); // CLASSIC IS A TRIPLE STORE
-		p.setProperty(QuestCorePreferences.OPTIMIZE_EQUIVALENCES, "true");
+		p.setProperty(QuestCoreSettings.ABOX_MODE, QuestConstants.VIRTUAL); // CLASSIC IS A TRIPLE STORE
+		p.setProperty(QuestCoreSettings.OPTIMIZE_EQUIVALENCES, "true");
 		//p.setProperty(QuestPreferences.OBTAIN_FROM_ONTOLOGY, "true");
 		p.setProperty("rewrite", "true");
 	

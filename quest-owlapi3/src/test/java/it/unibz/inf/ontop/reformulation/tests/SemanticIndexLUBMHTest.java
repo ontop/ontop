@@ -23,7 +23,7 @@ package it.unibz.inf.ontop.reformulation.tests;
 import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.io.QueryIOManager;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.inf.ontop.injection.QuestCorePreferences;
+import it.unibz.inf.ontop.injection.QuestCoreSettings;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import it.unibz.inf.ontop.querymanager.QueryController;
 import it.unibz.inf.ontop.querymanager.QueryControllerEntity;
@@ -51,8 +51,8 @@ public class SemanticIndexLUBMHTest extends TestCase {
 		long start = System.nanoTime();
 
         Properties p = new Properties();
-        p.setProperty(QuestCorePreferences.DBTYPE, QuestConstants.SEMANTIC_INDEX);
-        p.setProperty(QuestCorePreferences.ABOX_MODE, QuestConstants.CLASSIC);
+        p.setProperty(QuestCoreSettings.DBTYPE, QuestConstants.SEMANTIC_INDEX);
+        p.setProperty(QuestCoreSettings.ABOX_MODE, QuestConstants.CLASSIC);
 
 		QuestOWLFactory factory = new QuestOWLFactory();
         QuestConfiguration config = QuestConfiguration.defaultBuilder()

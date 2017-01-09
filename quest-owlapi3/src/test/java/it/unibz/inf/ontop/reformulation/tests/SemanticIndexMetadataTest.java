@@ -9,7 +9,7 @@ import it.unibz.inf.ontop.ontology.impl.OntologyFactoryImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.IQuest;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
 import it.unibz.inf.ontop.injection.QuestComponentFactory;
-import it.unibz.inf.ontop.injection.QuestCorePreferences;
+import it.unibz.inf.ontop.injection.QuestCoreSettings;
 import it.unibz.inf.ontop.owlrefplatform.core.abox.RDBMSSIRepositoryManager;
 
 import java.io.BufferedReader;
@@ -84,12 +84,12 @@ public class SemanticIndexMetadataTest  extends TestCase {
 		//prepareTestQueries(tuples);
 		{
 			Properties p = new Properties();
-			p.put(QuestCorePreferences.REFORMULATION_TECHNIQUE, QuestConstants.TW);
-			p.put(QuestCorePreferences.DBTYPE, QuestConstants.SEMANTIC_INDEX);
-			p.put(QuestCorePreferences.ABOX_MODE, QuestConstants.CLASSIC);
-			p.put(QuestCorePreferences.OPTIMIZE_EQUIVALENCES, "true");
-			p.put(QuestCorePreferences.OBTAIN_FROM_ONTOLOGY, "true");
-			p.put(QuestCorePreferences.STORAGE_LOCATION, QuestConstants.INMEMORY);
+			p.put(QuestCoreSettings.REFORMULATION_TECHNIQUE, QuestConstants.TW);
+			p.put(QuestCoreSettings.DBTYPE, QuestConstants.SEMANTIC_INDEX);
+			p.put(QuestCoreSettings.ABOX_MODE, QuestConstants.CLASSIC);
+			p.put(QuestCoreSettings.OPTIMIZE_EQUIVALENCES, "true");
+			p.put(QuestCoreSettings.OBTAIN_FROM_ONTOLOGY, "true");
+			p.put(QuestCoreSettings.STORAGE_LOCATION, QuestConstants.INMEMORY);
 			
 			p.setProperty("rewrite", "true");
 

@@ -10,7 +10,7 @@ import it.unibz.inf.ontop.pivotalrepr.validation.IntermediateQueryValidator;
 public class OntopModelModule extends OntopAbstractModule {
 
     protected OntopModelModule(OntopModelConfiguration configuration) {
-        super(configuration.getProperties());
+        super(configuration.getSettings());
     }
 
     @Override

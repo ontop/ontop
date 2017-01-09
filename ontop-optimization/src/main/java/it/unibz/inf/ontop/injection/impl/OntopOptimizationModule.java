@@ -14,14 +14,14 @@ import it.unibz.inf.ontop.executor.truenode.TrueNodeRemovalExecutor;
 import it.unibz.inf.ontop.executor.union.UnionLiftInternalExecutor;
 import it.unibz.inf.ontop.executor.unsatisfiable.RemoveEmptyNodesExecutor;
 import it.unibz.inf.ontop.injection.OntopOptimizationConfiguration;
-import it.unibz.inf.ontop.injection.OntopOptimizationProperties;
+import it.unibz.inf.ontop.injection.OntopOptimizationSettings;
 
 public class OntopOptimizationModule extends OntopAbstractModule {
 
     private OntopOptimizationConfiguration configuration;
 
     protected OntopOptimizationModule(OntopOptimizationConfiguration configuration) {
-        super(configuration.getProperties());
+        super(configuration.getSettings());
         // Temporary (will be dropped)
         this.configuration = configuration;
     }
@@ -29,7 +29,7 @@ public class OntopOptimizationModule extends OntopAbstractModule {
 
     @Override
     protected void configure() {
-        bind(OntopOptimizationProperties.class).toInstance(configuration.getProperties());
+        bind(OntopOptimizationSettings.class).toInstance(configuration.getSettings());
 
         // Executors
         bindFromPreferences(InnerJoinExecutor.class);

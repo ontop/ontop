@@ -16,7 +16,7 @@ import it.unibz.inf.ontop.executor.truenode.TrueNodeRemovalExecutor;
 import it.unibz.inf.ontop.executor.union.UnionLiftInternalExecutor;
 import it.unibz.inf.ontop.executor.unsatisfiable.RemoveEmptyNodesExecutor;
 import it.unibz.inf.ontop.injection.OntopOptimizationConfiguration;
-import it.unibz.inf.ontop.injection.OntopOptimizationProperties;
+import it.unibz.inf.ontop.injection.OntopOptimizationSettings;
 import it.unibz.inf.ontop.pivotalrepr.proposal.*;
 
 import java.util.Properties;
@@ -25,8 +25,8 @@ import java.util.stream.Stream;
 public class OntopOptimizationConfigurationImpl extends OntopModelConfigurationImpl
         implements OntopOptimizationConfiguration {
 
-    protected OntopOptimizationConfigurationImpl(OntopOptimizationProperties properties, OntopOptimizationConfigurationOptions options) {
-        super(properties, options.getModelOptions());
+    protected OntopOptimizationConfigurationImpl(OntopOptimizationSettings settings, OntopOptimizationConfigurationOptions options) {
+        super(settings, options.getModelOptions());
     }
 
     public static class OntopOptimizationConfigurationOptions {
@@ -42,8 +42,8 @@ public class OntopOptimizationConfigurationImpl extends OntopModelConfigurationI
     }
 
     @Override
-    public OntopOptimizationProperties getProperties() {
-        return (OntopOptimizationProperties) super.getProperties();
+    public OntopOptimizationSettings getSettings() {
+        return (OntopOptimizationSettings) super.getSettings();
     }
 
     /**
@@ -127,17 +127,17 @@ public class OntopOptimizationConfigurationImpl extends OntopModelConfigurationI
         }
 
         @Override
-        protected Properties generateUserProperties() {
+        protected Properties generateProperties() {
             // Properties from OntopModelBuilderFragmentImpl
-            Properties userProperties = super.generateUserProperties();
+            Properties properties = super.generateProperties();
             // Higher priority (however should be orthogonal) for the OntopOptimizationBuilderFragment.
-            userProperties.putAll(optimizationBuilderFragment.generateProperties());
+            properties.putAll(optimizationBuilderFragment.generateProperties());
 
-            return userProperties;
+            return properties;
         }
 
         protected OntopOptimizationConfigurationOptions generateOntopOptimizationConfigurationOptions() {
-            OntopModelConfigurationOptions modelOptions = generateOntopModelConfigurationOptions();
+            OntopModelConfigurationOptions modelOptions = generateModelOptions();
             return optimizationBuilderFragment.generateOntopOptimizationConfigurationOptions(modelOptions);
         }
     }
@@ -148,12 +148,12 @@ public class OntopOptimizationConfigurationImpl extends OntopModelConfigurationI
 
         @Override
         public OntopOptimizationConfiguration build() {
-            Properties userProperties = generateUserProperties();
+            Properties properties = generateProperties();
 
             OntopOptimizationConfigurationOptions options = generateOntopOptimizationConfigurationOptions();
-            OntopOptimizationProperties confProperties = new OntopOptimizationPropertiesImpl(userProperties);
+            OntopOptimizationSettings settings = new OntopOptimizationSettingsImpl(properties);
 
-            return new OntopOptimizationConfigurationImpl(confProperties, options);
+            return new OntopOptimizationConfigurationImpl(settings, options);
         }
     }
 }

@@ -33,14 +33,14 @@ public class SesameClassicRepo extends SesameAbstractRepo {
 	private final QuestDBClassicStore classicStore;
 	
 	public SesameClassicRepo(String name, QuestConfiguration config) throws Exception {
-		if (config.getProperties().isInVirtualMode()) {
+		if (config.getSettings().isInVirtualMode()) {
 			throw new RepositoryException("Must be in classic A-box mode!");
 		}
 		this.classicStore = new QuestDBClassicStore(name, config);
 	}
 	
 	public SesameClassicRepo(String name, Dataset data, QuestConfiguration config) throws Exception {
-		if (config.getProperties().isInVirtualMode()) {
+		if (config.getSettings().isInVirtualMode()) {
 			throw new RepositoryException("Must be in classic A-box mode!");
 		}
 		this.classicStore = new QuestDBClassicStore(name, data, config);

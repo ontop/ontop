@@ -29,10 +29,10 @@ package it.unibz.inf.ontop.sesame;
 import java.io.File;
 import java.util.Properties;
 
-import it.unibz.inf.ontop.injection.OBDAProperties;
+import it.unibz.inf.ontop.injection.OBDASettings;
 import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.inf.ontop.injection.QuestCorePreferences;
+import it.unibz.inf.ontop.injection.QuestCoreSettings;
 import org.openrdf.model.Graph;
 import org.openrdf.model.Literal;
 import org.openrdf.model.Resource;
@@ -206,24 +206,24 @@ public class SesameRepositoryConfig extends RepositoryImplConfigBase {
             QuestConfiguration configuration;
             Properties p = new Properties();
             if (existential) {
-                p.setProperty(QuestCorePreferences.REWRITE, "true");
+                p.setProperty(QuestCoreSettings.REWRITE, "true");
             } else {
-                p.setProperty(QuestCorePreferences.REWRITE, "false");
+                p.setProperty(QuestCoreSettings.REWRITE, "false");
             }
             if (rewriting.equals("TreeWitness")) {
-                p.setProperty(QuestCorePreferences.REFORMULATION_TECHNIQUE, QuestConstants.TW);
+                p.setProperty(QuestCoreSettings.REFORMULATION_TECHNIQUE, QuestConstants.TW);
             } else if (rewriting.equals("Default")) {
-                p.setProperty(QuestCorePreferences.REFORMULATION_TECHNIQUE, QuestConstants.UCQBASED);
+                p.setProperty(QuestCoreSettings.REFORMULATION_TECHNIQUE, QuestConstants.UCQBASED);
             }
 
             switch (quest_type) {
                 case IN_MEMORY_QUEST_TYPE:
-                    p.setProperty(QuestCorePreferences.ABOX_MODE, QuestConstants.CLASSIC);
-                    p.setProperty(QuestCorePreferences.OPTIMIZE_EQUIVALENCES, "true");
-                    p.setProperty(QuestCorePreferences.OBTAIN_FROM_MAPPINGS, "false");
-                    p.setProperty(QuestCorePreferences.OBTAIN_FROM_ONTOLOGY, "false");
-                    p.setProperty(QuestCorePreferences.DBTYPE, QuestConstants.SEMANTIC_INDEX);
-                    p.setProperty(QuestCorePreferences.STORAGE_LOCATION, QuestConstants.INMEMORY);
+                    p.setProperty(QuestCoreSettings.ABOX_MODE, QuestConstants.CLASSIC);
+                    p.setProperty(QuestCoreSettings.OPTIMIZE_EQUIVALENCES, "true");
+                    p.setProperty(QuestCoreSettings.OBTAIN_FROM_MAPPINGS, "false");
+                    p.setProperty(QuestCoreSettings.OBTAIN_FROM_ONTOLOGY, "false");
+                    p.setProperty(QuestCoreSettings.DBTYPE, QuestConstants.SEMANTIC_INDEX);
+                    p.setProperty(QuestCoreSettings.STORAGE_LOCATION, QuestConstants.INMEMORY);
 
                     configuration = QuestConfiguration.defaultBuilder()
                             .ontologyFile(owlFile)
@@ -236,17 +236,17 @@ public class SesameRepositoryConfig extends RepositoryImplConfigBase {
                     // TODO: rewriting not considered in the ported code. Should we consider it?
                     p = new Properties();
 
-                    p.setProperty(QuestCorePreferences.ABOX_MODE, QuestConstants.CLASSIC);
-                    p.setProperty(QuestCorePreferences.OPTIMIZE_EQUIVALENCES, "true");
+                    p.setProperty(QuestCoreSettings.ABOX_MODE, QuestConstants.CLASSIC);
+                    p.setProperty(QuestCoreSettings.OPTIMIZE_EQUIVALENCES, "true");
                     // TODO: no mappings, so this option looks inconsistent
-                    p.setProperty(QuestCorePreferences.OBTAIN_FROM_MAPPINGS, "true");
-                    p.setProperty(QuestCorePreferences.OBTAIN_FROM_ONTOLOGY, "false");
-                    p.setProperty(QuestCorePreferences.DBTYPE, QuestConstants.SEMANTIC_INDEX);
-                    p.setProperty(QuestCorePreferences.STORAGE_LOCATION, QuestConstants.JDBC);
-                    p.setProperty(OBDAProperties.JDBC_DRIVER, "org.h2.Driver");
-                    p.setProperty(OBDAProperties.JDBC_URL, "jdbc:h2:mem:stockclient1");
-                    p.setProperty(OBDAProperties.DB_USER, "sa");
-                    p.setProperty(OBDAProperties.DB_PASSWORD, "");
+                    p.setProperty(QuestCoreSettings.OBTAIN_FROM_MAPPINGS, "true");
+                    p.setProperty(QuestCoreSettings.OBTAIN_FROM_ONTOLOGY, "false");
+                    p.setProperty(QuestCoreSettings.DBTYPE, QuestConstants.SEMANTIC_INDEX);
+                    p.setProperty(QuestCoreSettings.STORAGE_LOCATION, QuestConstants.JDBC);
+                    p.setProperty(OBDASettings.JDBC_DRIVER, "org.h2.Driver");
+                    p.setProperty(OBDASettings.JDBC_URL, "jdbc:h2:mem:stockclient1");
+                    p.setProperty(OBDASettings.DB_USER, "sa");
+                    p.setProperty(OBDASettings.DB_PASSWORD, "");
 
                     configuration = QuestConfiguration.defaultBuilder()
                             .ontologyFile(owlFile)

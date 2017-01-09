@@ -1,11 +1,11 @@
 package it.unibz.inf.ontop.injection.impl;
 
-import it.unibz.inf.ontop.injection.OntopOptimizationProperties;
+import it.unibz.inf.ontop.injection.OntopOptimizationSettings;
 
 import java.util.Properties;
 
-public class OntopOptimizationPropertiesImpl extends OntopModelPropertiesImpl
-        implements OntopOptimizationProperties {
+public class OntopOptimizationSettingsImpl extends OntopModelSettingsImpl
+        implements OntopOptimizationSettings {
 
     private static final String DEFAULT_FILE = "optimization-default.properties";
 
@@ -19,7 +19,7 @@ public class OntopOptimizationPropertiesImpl extends OntopModelPropertiesImpl
      *
      * @param userProperties
      */
-    protected OntopOptimizationPropertiesImpl(Properties userProperties) {
+    protected OntopOptimizationSettingsImpl(Properties userProperties) {
         super(loadProperties(userProperties));
     }
 
@@ -30,6 +30,6 @@ public class OntopOptimizationPropertiesImpl extends OntopModelPropertiesImpl
     }
 
     public static Properties loadDefaultOptimizationProperties() {
-        return loadDefaultPropertiesFromFile(OntopOptimizationProperties.class, DEFAULT_FILE);
+        return loadDefaultPropertiesFromFile(OntopOptimizationSettings.class, DEFAULT_FILE);
     }
 }

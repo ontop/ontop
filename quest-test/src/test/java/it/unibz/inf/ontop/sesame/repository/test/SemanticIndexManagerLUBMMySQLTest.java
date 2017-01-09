@@ -38,7 +38,7 @@ import it.unibz.inf.ontop.io.QueryIOManager;
 import it.unibz.inf.ontop.model.OBDADataSource;
 import it.unibz.inf.ontop.model.impl.RDBMSourceParameterConstants;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.inf.ontop.injection.QuestCorePreferences;
+import it.unibz.inf.ontop.injection.QuestCoreSettings;
 import it.unibz.inf.ontop.querymanager.QueryController;
 import it.unibz.inf.ontop.querymanager.QueryControllerEntity;
 import it.unibz.inf.ontop.querymanager.QueryControllerQuery;
@@ -146,14 +146,14 @@ public class SemanticIndexManagerLUBMMySQLTest extends TestCase {
 
 	public void test3InitializingQuest() throws Exception {
 		Properties p = new Properties();
-		p.setProperty(QuestCorePreferences.DBTYPE, QuestConstants.SEMANTIC_INDEX);
-		p.setProperty(QuestCorePreferences.ABOX_MODE, QuestConstants.CLASSIC);
-		p.setProperty(QuestCorePreferences.STORAGE_LOCATION, QuestConstants.JDBC);
-		p.setProperty(QuestCorePreferences.OBTAIN_FROM_ONTOLOGY, "false");
-		p.setProperty(QuestCorePreferences.JDBC_DRIVER, driver);
-		p.setProperty(QuestCorePreferences.JDBC_URL, url);
-		p.setProperty(QuestCorePreferences.DB_USER, username);
-		p.setProperty(QuestCorePreferences.DB_PASSWORD, password);
+		p.setProperty(QuestCoreSettings.DBTYPE, QuestConstants.SEMANTIC_INDEX);
+		p.setProperty(QuestCoreSettings.ABOX_MODE, QuestConstants.CLASSIC);
+		p.setProperty(QuestCoreSettings.STORAGE_LOCATION, QuestConstants.JDBC);
+		p.setProperty(QuestCoreSettings.OBTAIN_FROM_ONTOLOGY, "false");
+		p.setProperty(QuestCoreSettings.JDBC_DRIVER, driver);
+		p.setProperty(QuestCoreSettings.JDBC_URL, url);
+		p.setProperty(QuestCoreSettings.DB_USER, username);
+		p.setProperty(QuestCoreSettings.DB_PASSWORD, password);
 
 
 		QuestOWLFactory factory = new QuestOWLFactory();
