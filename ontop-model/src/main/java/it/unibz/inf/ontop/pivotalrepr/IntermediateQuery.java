@@ -8,6 +8,7 @@ import it.unibz.inf.ontop.model.Variable;
 import it.unibz.inf.ontop.pivotalrepr.proposal.InvalidQueryOptimizationProposalException;
 import it.unibz.inf.ontop.pivotalrepr.proposal.ProposalResults;
 import it.unibz.inf.ontop.pivotalrepr.proposal.QueryOptimizationProposal;
+import it.unibz.inf.ontop.pivotalrepr.utils.ExecutorRegistry;
 
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -138,4 +139,12 @@ public interface IntermediateQuery {
      * Creates a uninitialized query builder.
      */
     IntermediateQueryBuilder newBuilder();
+
+    /**
+     * Not for end-users!
+     *
+     * Needed using when using specialized intermediate queries
+     *
+     */
+    ExecutorRegistry getExecutorRegistry();
 }

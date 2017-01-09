@@ -325,6 +325,11 @@ public class IntermediateQueryImpl implements IntermediateQuery {
         return PRINTER.stringify(this);
     }
 
+    @Override
+    public ExecutorRegistry getExecutorRegistry() {
+        return executorRegistry;
+    }
+
     private void validate() throws InvalidIntermediateQueryException {
         validator.validate(this);
     }

@@ -31,7 +31,7 @@ public class DefaultIntermediateQueryBuilder implements IntermediateQueryBuilder
     private boolean canEdit;
 
     @AssistedInject
-    private DefaultIntermediateQueryBuilder(@Assisted MetadataForQueryOptimization metadata,
+    protected DefaultIntermediateQueryBuilder(@Assisted MetadataForQueryOptimization metadata,
                                             @Assisted ExecutorRegistry executorRegistry,
                                             OntopModelFactory modelFactory,
                                             IntermediateQueryValidator validator,
@@ -100,8 +100,7 @@ public class DefaultIntermediateQueryBuilder implements IntermediateQueryBuilder
     public IntermediateQuery build() throws IntermediateQueryBuilderException{
         checkInitialization();
 
-        IntermediateQuery query = buildQuery(metadata, projectionAtom, new DefaultQueryTreeComponent(tree),
-                executorRegistry, validator, settings);
+        IntermediateQuery query = buildQuery(metadata, projectionAtom, new DefaultQueryTreeComponent(tree));
         canEdit = false;
         return query;
     }
@@ -111,8 +110,7 @@ public class DefaultIntermediateQueryBuilder implements IntermediateQueryBuilder
      */
     protected IntermediateQuery buildQuery(MetadataForQueryOptimization metadata,
                                            DistinctVariableOnlyDataAtom projectionAtom,
-                                           QueryTreeComponent treeComponent, ExecutorRegistry executorRegistry,
-                                           IntermediateQueryValidator validator, OntopModelSettings settings) {
+                                           QueryTreeComponent treeComponent) {
 
         return new IntermediateQueryImpl(metadata, projectionAtom, treeComponent, executorRegistry, validator,
                 settings, modelFactory);
@@ -141,5 +139,21 @@ public class DefaultIntermediateQueryBuilder implements IntermediateQueryBuilder
             throws IntermediateQueryBuilderException {
         checkInitialization();
         return tree.getChildren(node);
+    }
+
+    protected ExecutorRegistry getExecutorRegistry() {
+        return executorRegistry;
+    }
+
+    protected OntopModelFactory getModelFactory() {
+        return modelFactory;
+    }
+
+    protected IntermediateQueryValidator getValidator() {
+        return validator;
+    }
+
+    protected OntopModelSettings getSettings() {
+        return settings;
     }
 }
