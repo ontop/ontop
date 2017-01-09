@@ -5,13 +5,11 @@ import java.util.Optional;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.AtomPredicateImpl;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import org.junit.Test;
 import it.unibz.inf.ontop.owlrefplatform.core.optimization.BasicJoinOptimizer;
 import it.unibz.inf.ontop.pivotalrepr.EmptyQueryException;
 import it.unibz.inf.ontop.owlrefplatform.core.optimization.IntermediateQueryOptimizer;
 import it.unibz.inf.ontop.pivotalrepr.impl.*;
-import it.unibz.inf.ontop.pivotalrepr.impl.tree.DefaultIntermediateQueryBuilder;
 import it.unibz.inf.ontop.pivotalrepr.*;
 
 import static it.unibz.inf.ontop.OptimizationTestingTools.*;
@@ -22,8 +20,6 @@ import static org.junit.Assert.assertTrue;
  * TODO: test
  */
 public class NodeDeletionTest {
-
-    private static final OBDADataFactory DATA_FACTORY = OBDADataFactoryImpl.getInstance();
 
     @Test(expected = EmptyQueryException.class)
     public void testSimpleJoin() throws IntermediateQueryBuilderException, EmptyQueryException {

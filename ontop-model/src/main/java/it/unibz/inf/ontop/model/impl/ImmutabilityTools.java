@@ -11,9 +11,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Stream;
 
-public class ImmutabilityTools {
+import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
 
-    private final static OBDADataFactory DATA_FACTORY = OBDADataFactoryImpl.getInstance();
+public class ImmutabilityTools {
 
     /**
      * In case the term is functional, creates an immutable copy of it.

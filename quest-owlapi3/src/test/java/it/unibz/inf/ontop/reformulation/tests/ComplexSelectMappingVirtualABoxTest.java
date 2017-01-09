@@ -21,8 +21,6 @@ package it.unibz.inf.ontop.reformulation.tests;
  */
 
 import it.unibz.inf.ontop.injection.QuestConfiguration;
-import it.unibz.inf.ontop.model.OBDADataFactory;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
 import it.unibz.inf.ontop.injection.QuestCoreSettings;
 import it.unibz.inf.ontop.owlrefplatform.core.SQLExecutableQuery;
@@ -55,8 +53,6 @@ import static org.junit.Assert.assertTrue;
  */
 
 public class ComplexSelectMappingVirtualABoxTest  {
-
-	private OBDADataFactory fac;
 	private Connection conn;
 
 	String query = null;
@@ -77,8 +73,6 @@ public class ComplexSelectMappingVirtualABoxTest  {
 		String url = "jdbc:h2:mem:questjunitdb";
 		String username = "sa";
 		String password = "";
-
-		fac = OBDADataFactoryImpl.getInstance();
 
 		conn = DriverManager.getConnection(url, username, password);
 		Statement st = conn.createStatement();

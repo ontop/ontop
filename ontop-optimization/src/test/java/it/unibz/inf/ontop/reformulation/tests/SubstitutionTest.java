@@ -5,16 +5,14 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.AtomPredicateImpl;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionImpl;
 import org.junit.Test;
 
+import static it.unibz.inf.ontop.OptimizationTestingTools.*;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 public class SubstitutionTest {
 
-    private static final OBDADataFactory DATA_FACTORY = OBDADataFactoryImpl.getInstance();
     private static final Variable W = DATA_FACTORY.getVariable("w");
     private static final Variable X = DATA_FACTORY.getVariable("x");
     private static final Variable Y = DATA_FACTORY.getVariable("y");

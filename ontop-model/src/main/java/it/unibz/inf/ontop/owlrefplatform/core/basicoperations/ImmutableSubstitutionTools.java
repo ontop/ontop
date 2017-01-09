@@ -8,7 +8,6 @@ import com.google.common.collect.ImmutableSet;
 import fj.P;
 import fj.P2;
 import it.unibz.inf.ontop.model.*;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.model.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -23,7 +22,6 @@ import static it.unibz.inf.ontop.model.impl.GroundTermTools.isGroundTerm;
 public class ImmutableSubstitutionTools {
 
     private static final ImmutableSubstitution<ImmutableTerm> EMPTY_SUBSTITUTION = new NeutralSubstitution();
-    private static final OBDADataFactory DATA_FACTORY = OBDADataFactoryImpl.getInstance();
 
 
     /**

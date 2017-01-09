@@ -30,7 +30,7 @@ import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.model.Predicate.COL_TYPE;
 
 public interface OBDADataFactory extends Serializable {
-	
+
 	public DatatypeFactory getDatatypeFactory();
 
 	public CQIE getCQIE(Function head, Function... body);

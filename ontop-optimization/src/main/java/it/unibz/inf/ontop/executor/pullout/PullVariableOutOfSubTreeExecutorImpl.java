@@ -1,9 +1,7 @@
 package it.unibz.inf.ontop.executor.pullout;
 
 import it.unibz.inf.ontop.model.ImmutableExpression;
-import it.unibz.inf.ontop.model.OBDADataFactory;
 import it.unibz.inf.ontop.model.impl.ImmutabilityTools;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.InjectiveVar2VarSubstitution;
 import it.unibz.inf.ontop.pivotalrepr.*;
 import it.unibz.inf.ontop.pivotalrepr.impl.QueryTreeComponent;
@@ -17,13 +15,12 @@ import java.util.stream.Stream;
 
 import static it.unibz.inf.ontop.executor.substitution.DescendingPropagationTools.propagateSubstitutionDown;
 import static it.unibz.inf.ontop.model.ExpressionOperation.EQ;
+import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
 
 /**
  * TODO: explain
  */
 public class PullVariableOutOfSubTreeExecutorImpl<N extends JoinLikeNode> implements PullVariableOutOfSubTreeExecutor<N> {
-
-    private static final OBDADataFactory DATA_FACTORY = OBDADataFactoryImpl.getInstance();
 
     @Override
     public PullVariableOutOfSubTreeResults<N> apply(PullVariableOutOfSubTreeProposal<N> proposal,

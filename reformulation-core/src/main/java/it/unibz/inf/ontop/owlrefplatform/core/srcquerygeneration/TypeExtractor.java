@@ -2,7 +2,6 @@ package it.unibz.inf.ontop.owlrefplatform.core.srcquerygeneration;
 
 import com.google.common.collect.*;
 import it.unibz.inf.ontop.model.*;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.model.type.impl.TermTypeInferenceTools;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
@@ -12,14 +11,14 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static it.unibz.inf.ontop.model.Predicate.COL_TYPE.LITERAL;
+import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
 
 /**
  * Extracts the TermTypes and the cast types from a set of Datalog rules.
  */
 public class TypeExtractor {
 
-    private static final TermType LITERAL_TYPE = OBDADataFactoryImpl.getInstance()
-            .getTermType(LITERAL);
+    private static final TermType LITERAL_TYPE = DATA_FACTORY.getTermType(LITERAL);
 
     public static class TypeResults {
         private final ImmutableMap<CQIE, ImmutableList<Optional<TermType>>> termTypeMap;

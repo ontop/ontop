@@ -7,11 +7,11 @@ import it.unibz.inf.ontop.model.*;
 
 import it.unibz.inf.ontop.model.impl.AtomPredicateImpl;
 import it.unibz.inf.ontop.model.impl.ImmutabilityTools;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 
 import java.util.*;
 
 import static it.unibz.inf.ontop.model.impl.ImmutabilityTools.convertToMutableFunction;
+import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
 import static it.unibz.inf.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionTools.convertSubstitution;
 
 /**
@@ -167,11 +167,10 @@ public class ImmutableUnificationTools {
         ImmutableList<ImmutableTerm> firstArgList = firstArgListBuilder.build();
         ImmutableList<ImmutableTerm> secondArgList = secondArgListBuilder.build();
 
-        OBDADataFactory factory = OBDADataFactoryImpl.getInstance();
         Predicate predicate = new AtomPredicateImpl(PREDICATE_STR, firstArgList.size());
 
-        ImmutableFunctionalTerm functionalTerm1 = factory.getImmutableFunctionalTerm(predicate, firstArgList);
-        ImmutableFunctionalTerm functionalTerm2 = factory.getImmutableFunctionalTerm(predicate, secondArgList);
+        ImmutableFunctionalTerm functionalTerm1 = DATA_FACTORY.getImmutableFunctionalTerm(predicate, firstArgList);
+        ImmutableFunctionalTerm functionalTerm2 = DATA_FACTORY.getImmutableFunctionalTerm(predicate, secondArgList);
 
         return computeMGU(functionalTerm1, functionalTerm2);
     }

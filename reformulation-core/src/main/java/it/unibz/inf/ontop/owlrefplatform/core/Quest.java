@@ -45,7 +45,6 @@ import it.unibz.inf.ontop.owlrefplatform.core.reformulation.TreeWitnessRewriter;
 import it.unibz.inf.ontop.owlrefplatform.core.srcquerygeneration.NativeQueryGenerator;
 import it.unibz.inf.ontop.owlrefplatform.core.translator.MappingVocabularyFixer;
 
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.model.impl.RDBMSourceParameterConstants;
 import it.unibz.inf.ontop.ontology.Ontology;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.VocabularyValidator;
@@ -332,8 +331,6 @@ public class Quest implements Serializable, IQuest {
 	 * @throws Exception
 	 */
 	public void setupRepository() throws Exception {
-
-		OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 
 		log.debug("Initializing Quest...");
 

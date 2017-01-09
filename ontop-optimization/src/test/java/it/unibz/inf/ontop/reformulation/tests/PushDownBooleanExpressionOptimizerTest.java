@@ -3,7 +3,6 @@ package it.unibz.inf.ontop.reformulation.tests;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.AtomPredicateImpl;
 import it.unibz.inf.ontop.model.impl.ImmutabilityTools;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.optimization.PushDownBooleanExpressionOptimizer;
 import it.unibz.inf.ontop.owlrefplatform.core.optimization.PushDownBooleanExpressionOptimizerImpl;
 import it.unibz.inf.ontop.pivotalrepr.*;
@@ -31,7 +30,6 @@ public class PushDownBooleanExpressionOptimizerTest {
     private final static AtomPredicate ANS1_PREDICATE2 = new AtomPredicateImpl("ans1", 3);
     private final static AtomPredicate ANS1_PREDICATE3 = new AtomPredicateImpl("ans1", 5);
     private final static AtomPredicate ANS2_PREDICATE1 = new AtomPredicateImpl("ans2", 2);
-    private final static OBDADataFactory DATA_FACTORY = OBDADataFactoryImpl.getInstance();
     private final static Variable X = DATA_FACTORY.getVariable("X");
     private final static Variable Y = DATA_FACTORY.getVariable("Y");
     private final static Variable Z = DATA_FACTORY.getVariable("Z");

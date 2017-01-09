@@ -4,7 +4,6 @@ import java.util.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMultimap;
 import it.unibz.inf.ontop.model.impl.ImmutabilityTools;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.pivotalrepr.impl.ExtensionalDataNodeImpl;
 import it.unibz.inf.ontop.pivotalrepr.impl.FilterNodeImpl;
 import it.unibz.inf.ontop.pivotalrepr.impl.IntensionalDataNodeImpl;
@@ -19,13 +18,13 @@ import it.unibz.inf.ontop.pivotalrepr.*;
 import java.util.Collection;
 import java.util.Map;
 
+import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
+
 /**
  * TODO: explain
  */
 public class GroundTermRemovalFromDataNodeExecutorImpl implements
         GroundTermRemovalFromDataNodeExecutor {
-
-    private static final OBDADataFactory DATA_FACTORY = OBDADataFactoryImpl.getInstance();
 
     private static class VariableGroundTermPair {
         public final Variable variable;

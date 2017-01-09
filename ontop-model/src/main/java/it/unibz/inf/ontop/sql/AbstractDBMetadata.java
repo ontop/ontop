@@ -2,13 +2,12 @@ package it.unibz.inf.ontop.sql;
 
 import com.google.common.collect.ImmutableMultimap;
 import it.unibz.inf.ontop.model.*;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 
 import java.util.*;
 
-public abstract class AbstractDBMetadata implements DBMetadata {
+import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
 
-    private static OBDADataFactory DATA_FACTORY = OBDADataFactoryImpl.getInstance();
+public abstract class AbstractDBMetadata implements DBMetadata {
 
     @Override
     public ImmutableMultimap<AtomPredicate, CQIE> generateFKRules() {

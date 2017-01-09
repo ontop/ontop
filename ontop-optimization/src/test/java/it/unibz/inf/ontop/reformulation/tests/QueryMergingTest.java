@@ -5,7 +5,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.AtomPredicateImpl;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.model.impl.URITemplatePredicateImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.optimization.unfolding.QueryUnfolder;
@@ -28,7 +27,6 @@ import static it.unibz.inf.ontop.OptimizationTestingTools.*;
 public class QueryMergingTest {
 
     private static boolean REQUIRE_USING_IN_PLACE_EXECUTOR = true;
-    private static final OBDADataFactory DATA_FACTORY = OBDADataFactoryImpl.getInstance();
     private static AtomPredicate ANS0_PREDICATE = new AtomPredicateImpl("ans1", 0);
     private static AtomPredicate ANS1_PREDICATE = new AtomPredicateImpl("ans1", 2);
     private static AtomPredicate ANS2_PREDICATE = new AtomPredicateImpl("ans1", 1);

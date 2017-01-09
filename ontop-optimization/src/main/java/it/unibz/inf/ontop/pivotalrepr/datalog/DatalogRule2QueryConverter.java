@@ -6,7 +6,6 @@ import fj.P2;
 import fj.data.List;
 import it.unibz.inf.ontop.injection.OntopModelFactory;
 import it.unibz.inf.ontop.model.impl.DatalogTools;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.PullOutEqualityNormalizerImpl;
 import it.unibz.inf.ontop.pivotalrepr.NonCommutativeOperatorNode.ArgumentPosition;
@@ -18,6 +17,8 @@ import it.unibz.inf.ontop.pivotalrepr.utils.ExecutorRegistry;
 
 import java.util.Collection;
 import java.util.HashSet;
+
+import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
 
 /**
  * Converts a Datalog rule into an intermediate query.
@@ -90,7 +91,6 @@ public class DatalogRule2QueryConverter {
     }
 
 
-    private static final OBDADataFactory DATA_FACTORY = OBDADataFactoryImpl.getInstance();
     private static final Optional<ArgumentPosition> NO_POSITION = Optional.empty();
     private static final Optional<ArgumentPosition> LEFT_POSITION = Optional.of(ArgumentPosition.LEFT);
     private static final Optional<ArgumentPosition> RIGHT_POSITION = Optional.of(ArgumentPosition.RIGHT);

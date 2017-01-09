@@ -20,11 +20,11 @@ package it.unibz.inf.ontop.ontology.impl;
  * #L%
  */
 
-import it.unibz.inf.ontop.model.OBDADataFactory;
 import it.unibz.inf.ontop.model.Predicate;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.ontology.ObjectPropertyExpression;
 import it.unibz.inf.ontop.ontology.ObjectSomeValuesFrom;
+
+import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
 
 /**
  * Represents ObjectPropertyExpression from the OWL 2 QL Specification
@@ -56,8 +56,6 @@ public class ObjectPropertyExpressionImpl implements ObjectPropertyExpression {
 	public static final String owlTopObjectPropertyIRI = "http://www.w3.org/2002/07/owl#topObjectProperty";
 	public static final String owlBottomObjectPropertyIRI = "http://www.w3.org/2002/07/owl#bottomObjectProperty";
 	
-	private static final OBDADataFactory ofac = OBDADataFactoryImpl.getInstance();
-	
 	static final ObjectPropertyExpression owlTopObjectProperty = new ObjectPropertyExpressionImpl(owlTopObjectPropertyIRI); 
 	static final ObjectPropertyExpression owlBottomObjectProperty = new ObjectPropertyExpressionImpl(owlBottomObjectPropertyIRI); 
 
@@ -68,7 +66,7 @@ public class ObjectPropertyExpressionImpl implements ObjectPropertyExpression {
 	 */
 	
 	ObjectPropertyExpressionImpl(String name) {
-		this.predicate = ofac.getObjectPropertyPredicate(name);
+		this.predicate = DATA_FACTORY.getObjectPropertyPredicate(name);
 		this.isInverse = false;
 		this.string = name;
 		this.isTop = name.equals(owlTopObjectPropertyIRI);

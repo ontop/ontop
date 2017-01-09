@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.AtomPredicateImpl;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.model.impl.URITemplatePredicateImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.optimization.FixedPointBindingLiftOptimizer;
@@ -34,7 +33,6 @@ public class ExpressionEvaluatorTest {
 
     private final static AtomPredicate ANS1_ARITY_3_PREDICATE = new AtomPredicateImpl("ans1", 3);
 
-    private static final OBDADataFactory DATA_FACTORY = OBDADataFactoryImpl.getInstance();
     private final Variable X = DATA_FACTORY.getVariable("x");
     private final Variable Y = DATA_FACTORY.getVariable("y");
     private final Variable W = DATA_FACTORY.getVariable("w");

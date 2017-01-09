@@ -27,7 +27,6 @@ import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.AtomPredicateImpl;
 import it.unibz.inf.ontop.model.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.model.impl.MutableQueryModifiersImpl;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.pivotalrepr.*;
 import it.unibz.inf.ontop.pivotalrepr.impl.ConstructionNodeImpl;
 import org.slf4j.LoggerFactory;
@@ -35,6 +34,7 @@ import org.slf4j.LoggerFactory;
 import java.util.*;
 
 import static it.unibz.inf.ontop.model.impl.ImmutabilityTools.convertToMutableFunction;
+import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
 
 /***
  * Translate a intermediate queries expression into a Datalog program that has the
@@ -60,8 +60,6 @@ public class IntermediateQueryToDatalogTranslator {
             this.optionalChildNode = optionalChildNode;
         }
 	}
-
-	private final static OBDADataFactory ofac = OBDADataFactoryImpl.getInstance();
 	
 	//private final DatatypeFactory dtfac = OBDADataFactoryImpl.getInstance().getDatatypeFactory();
 
@@ -96,10 +94,10 @@ public class IntermediateQueryToDatalogTranslator {
 			OBDAQueryModifiers mutableModifiers = new MutableQueryModifiersImpl(immutableQueryModifiers);
 			// TODO: support GROUP BY (distinct QueryNode)
 
-            dProgram = ofac.getDatalogProgram(mutableModifiers);
+            dProgram = DATA_FACTORY.getDatalogProgram(mutableModifiers);
 		}
         else {
-            dProgram = ofac.getDatalogProgram();
+            dProgram = DATA_FACTORY.getDatalogProgram();
         }
 
 		translate(query,  dProgram, root);
@@ -138,7 +136,7 @@ public class IntermediateQueryToDatalogTranslator {
 			List<Function> atoms = new LinkedList<>();
 
 			//Constructing the rule
-			CQIE newrule = ofac.getCQIE(convertToMutableFunction(substitutedHeadAtom), atoms);
+			CQIE newrule = DATA_FACTORY.getCQIE(convertToMutableFunction(substitutedHeadAtom), atoms);
 
 			pr.appendRule(newrule);
 
@@ -234,11 +232,11 @@ public class IntermediateQueryToDatalogTranslator {
 			if (filter.isPresent()){
 				ImmutableExpression filter2 = filter.get();
 				Expression mutFilter =  ImmutabilityTools.convertToMutableBooleanExpression(filter2);
-				Function newLJAtom = ofac.getSPARQLLeftJoin(atomsListLeft, atomsListRight, Optional.of(mutFilter));
+				Function newLJAtom = DATA_FACTORY.getSPARQLLeftJoin(atomsListLeft, atomsListRight, Optional.of(mutFilter));
 				body.add(newLJAtom);
 				return body;
 			}else{
-				Function newLJAtom = ofac.getSPARQLLeftJoin(atomsListLeft, atomsListRight, Optional.empty());
+				Function newLJAtom = DATA_FACTORY.getSPARQLLeftJoin(atomsListLeft, atomsListRight, Optional.empty());
 				body.add(newLJAtom);
 				return body;
 			}
@@ -289,7 +287,7 @@ public class IntermediateQueryToDatalogTranslator {
 			//DataAtom projectionAtom = generateProjectionAtom(ImmutableSet.of());
 			//heads.add(new RuleHead(new ImmutableSubstitutionImpl<>(ImmutableMap.of()), projectionAtom,Optional.empty()));
 			//return body;
-			body.add(ofac.getDistinctVariableOnlyDataAtom(new AtomPredicateImpl("dummy", 0), ImmutableList.of()));
+			body.add(DATA_FACTORY.getDistinctVariableOnlyDataAtom(new AtomPredicateImpl("dummy", 0), ImmutableList.of()));
 			return body;
 
 		} else {
@@ -300,7 +298,7 @@ public class IntermediateQueryToDatalogTranslator {
 
 	private DistinctVariableOnlyDataAtom generateProjectionAtom(ImmutableSet<Variable> projectedVariables) {
 		AtomPredicate newPredicate = new AtomPredicateImpl("ansSQ" + ++subQueryCounter, projectedVariables.size());
-		return ofac.getDistinctVariableOnlyDataAtom(newPredicate, ImmutableList.copyOf(projectedVariables));
+		return DATA_FACTORY.getDistinctVariableOnlyDataAtom(newPredicate, ImmutableList.copyOf(projectedVariables));
 	}
 
 	private static Function getSPARQLJoin(List<Function> atoms, Optional<Function> optionalCondition) {
@@ -320,8 +318,8 @@ public class IntermediateQueryToDatalogTranslator {
 		}
 
 		return optionalCondition.isPresent()
-				? ofac.getSPARQLJoin(atoms.get(0), rightTerm, optionalCondition.get())
-				: ofac.getSPARQLJoin(atoms.get(0), rightTerm);
+				? DATA_FACTORY.getSPARQLJoin(atoms.get(0), rightTerm, optionalCondition.get())
+				: DATA_FACTORY.getSPARQLJoin(atoms.get(0), rightTerm);
 	}
 
 }

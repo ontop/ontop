@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.AtomPredicateImpl;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.optimization.ProjectionShrinkingOptimizer;
 import it.unibz.inf.ontop.pivotalrepr.*;
@@ -26,7 +25,6 @@ public class ProjectionShrinkingOptimizerTest {
     private final static AtomPredicate TABLE4_PREDICATE = new AtomPredicateImpl("table4", 3);
     private final static AtomPredicate TABLE5_PREDICATE = new AtomPredicateImpl("table5", 3);
     private final static AtomPredicate ANS1_PREDICATE1 = new AtomPredicateImpl("ans1", 1);
-    private final static OBDADataFactory DATA_FACTORY = OBDADataFactoryImpl.getInstance();
     private final static Variable X = DATA_FACTORY.getVariable("X");
     private final static Variable Y = DATA_FACTORY.getVariable("Y");
     private final static Variable Z = DATA_FACTORY.getVariable("Z");

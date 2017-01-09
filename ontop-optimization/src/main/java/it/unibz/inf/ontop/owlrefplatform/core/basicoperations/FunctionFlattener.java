@@ -4,10 +4,11 @@ import fj.F;
 import fj.data.List;
 import it.unibz.inf.ontop.model.*;
 
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
 
 import java.util.ArrayList;
+
+import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
 
 /**
  * Flattens JOINs and AND atoms that are found at the top of a Datalog body.
@@ -18,7 +19,6 @@ import java.util.ArrayList;
 public class FunctionFlattener {
 
     private final static List<Function> EMPTY_ATOM_LIST = List.nil();
-    private final static OBDADataFactory DATA_FACTORY = OBDADataFactoryImpl.getInstance();
 
 
     /**

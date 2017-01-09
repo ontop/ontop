@@ -8,12 +8,12 @@ import it.unibz.inf.ontop.model.*;
 
 import java.util.ArrayList;
 
+import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
+
 /**
  * Tool methods when manipulate some Datalog programs and their rules.
  */
 public class DatalogTools {
-
-    private final static OBDADataFactory DATA_FACTORY = OBDADataFactoryImpl.getInstance();
     private final static Expression TRUE_EQ = DATA_FACTORY.getFunctionEQ(OBDAVocabulary.TRUE, OBDAVocabulary.TRUE);
 
     private final static  F<Function, Boolean> IS_DATA_OR_LJ_OR_JOIN_ATOM_FCT = new F<Function, Boolean>() {

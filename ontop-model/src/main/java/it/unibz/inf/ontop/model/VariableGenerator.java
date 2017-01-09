@@ -1,11 +1,12 @@
 package it.unibz.inf.ontop.model;
 
 import com.google.common.collect.ImmutableSet;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
+
+import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
 
 /**
  * Generates new variables that are guaranteed to not conflict with
@@ -16,7 +17,6 @@ import java.util.Set;
 public class VariableGenerator {
 
     private int count;
-    private final OBDADataFactory dataFactory;
     private final Set<Variable> knownVariables;
 
     private static String SUFFIX_PREFIX = "f";
@@ -24,7 +24,6 @@ public class VariableGenerator {
 
     public VariableGenerator(Collection<Variable> knownVariables) {
         count = 0;
-        dataFactory = OBDADataFactoryImpl.getInstance();
         this.knownVariables = new HashSet<>(knownVariables);
     }
 
@@ -33,7 +32,6 @@ public class VariableGenerator {
      */
     public VariableGenerator(CQIE initialRule) {
         count = 0;
-        dataFactory = OBDADataFactoryImpl.getInstance();
         knownVariables = initialRule.getReferencedVariables();
     }
 
@@ -51,7 +49,7 @@ public class VariableGenerator {
     public Variable generateNewVariableFromVar(Variable previousVariable) {
         Variable newVariable;
         do {
-            newVariable = dataFactory.getVariable(previousVariable.getName() + SUFFIX_PREFIX + (count++));
+            newVariable = DATA_FACTORY.getVariable(previousVariable.getName() + SUFFIX_PREFIX + (count++));
         } while(knownVariables.contains(newVariable));
 
         knownVariables.add(newVariable);
@@ -64,7 +62,7 @@ public class VariableGenerator {
     public Variable generateNewVariableIfConflicting(Variable previousVariable) {
         Variable newVariable = previousVariable;
         while(knownVariables.contains(newVariable)) {
-            newVariable = dataFactory.getVariable(previousVariable.getName() + SUFFIX_PREFIX + (count++));
+            newVariable = DATA_FACTORY.getVariable(previousVariable.getName() + SUFFIX_PREFIX + (count++));
         }
 
         knownVariables.add(newVariable);
@@ -77,7 +75,7 @@ public class VariableGenerator {
     public Variable generateNewVariable() {
         Variable newVariable;
         do {
-            newVariable = dataFactory.getVariable(SUFFIX_PREFIX + (count++));
+            newVariable = DATA_FACTORY.getVariable(SUFFIX_PREFIX + (count++));
         } while(knownVariables.contains(newVariable));
 
         knownVariables.add(newVariable);

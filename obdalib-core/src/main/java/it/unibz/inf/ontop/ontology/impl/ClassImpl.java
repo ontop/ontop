@@ -20,10 +20,10 @@ package it.unibz.inf.ontop.ontology.impl;
  * #L%
  */
 
-import it.unibz.inf.ontop.model.OBDADataFactory;
 import it.unibz.inf.ontop.model.Predicate;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.ontology.OClass;
+
+import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
 
 public class ClassImpl implements OClass {
 
@@ -35,14 +35,12 @@ public class ClassImpl implements OClass {
 
 	static final String owlThingIRI = "http://www.w3.org/2002/07/owl#Thing";
 	static final String owlNothingIRI  = "http://www.w3.org/2002/07/owl#Nothing";
-
-   	private static final OBDADataFactory ofac = OBDADataFactoryImpl.getInstance();
 	
     public static final OClass owlThing = new ClassImpl(owlThingIRI); 
     public static final OClass owlNothing = new ClassImpl(owlNothingIRI); 
     	
 	ClassImpl(String name) {
-		this.predicate = ofac.getClassPredicate(name);
+		this.predicate = DATA_FACTORY.getClassPredicate(name);
 		this.name = name;
 		this.isNothing = name.equals(owlNothingIRI);
 		this.isThing = name.equals(owlThingIRI);

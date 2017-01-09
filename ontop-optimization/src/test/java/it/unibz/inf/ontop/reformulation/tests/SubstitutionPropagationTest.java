@@ -5,7 +5,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.AtomPredicateImpl;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
 import it.unibz.inf.ontop.model.impl.URITemplatePredicateImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionImpl;
@@ -42,8 +41,6 @@ public class SubstitutionPropagationTest {
     private static final AtomPredicate ANS1_PREDICATE = new AtomPredicateImpl("ans1", 2);
 
 
-
-    private static final OBDADataFactory DATA_FACTORY = OBDADataFactoryImpl.getInstance();
     private static final Variable X = DATA_FACTORY.getVariable("x");
     private static final Variable Y = DATA_FACTORY.getVariable("y");
     private static final Variable W = DATA_FACTORY.getVariable("w");

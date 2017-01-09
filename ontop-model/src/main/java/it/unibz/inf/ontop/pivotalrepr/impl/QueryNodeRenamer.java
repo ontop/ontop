@@ -5,18 +5,18 @@ import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.pivotalrepr.*;
 
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.InjectiveVar2VarSubstitution;
 
 import java.util.Optional;
 import java.util.stream.Collectors;
+
+import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
 
 /**
  * Renames query nodes according to one renaming substitution.
  */
 public class QueryNodeRenamer implements HomogeneousQueryNodeTransformer {
 
-    private final static OBDADataFactory DATA_FACTORY = OBDADataFactoryImpl.getInstance();
     private final InjectiveVar2VarSubstitution renamingSubstitution;
 
     public QueryNodeRenamer(InjectiveVar2VarSubstitution renamingSubstitution) {

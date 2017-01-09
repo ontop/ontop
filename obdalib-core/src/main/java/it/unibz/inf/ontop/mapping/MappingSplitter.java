@@ -25,7 +25,6 @@ import java.util.*;
 import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
 import it.unibz.inf.ontop.model.*;
 
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.utils.IDGenerator;
 
 /**
@@ -47,8 +46,6 @@ public class MappingSplitter {
 														NativeQueryLanguageComponentFactory nativeQLFactory) {
 
 		List<OBDAMappingAxiom> newMappings = new ArrayList<>();
-		
-		OBDADataFactory dfac = OBDADataFactoryImpl.getInstance();
 
 		for (OBDAMappingAxiom mapping : mappingAxioms) {
 			List<Function> bodyAtoms = mapping.getTargetQuery();

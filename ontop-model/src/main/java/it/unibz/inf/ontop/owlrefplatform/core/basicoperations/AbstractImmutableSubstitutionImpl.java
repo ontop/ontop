@@ -3,22 +3,20 @@ package it.unibz.inf.ontop.owlrefplatform.core.basicoperations;
 import java.util.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.*;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.*;
 import java.util.stream.Stream;
+
+import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
 
 /**
  * Common abstract class for ImmutableSubstitutionImpl and Var2VarSubstitutionImpl
  */
 public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm> extends LocallyImmutableSubstitutionImpl
         implements ImmutableSubstitution<T> {
-
-    private static final OBDADataFactory DATA_FACTORY = OBDADataFactoryImpl.getInstance();
 
     @Override
     public ImmutableTerm apply(ImmutableTerm term) {

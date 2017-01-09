@@ -10,7 +10,6 @@ import it.unibz.inf.ontop.pivotalrepr.DataNode;
 import it.unibz.inf.ontop.pivotalrepr.impl.IntensionalDataNodeImpl;
 
 import it.unibz.inf.ontop.model.impl.AtomPredicateImpl;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionImpl;
 import it.unibz.inf.ontop.pivotalrepr.impl.ExtensionalDataNodeImpl;
 
@@ -19,10 +18,9 @@ import java.util.Collection;
 import static it.unibz.inf.ontop.model.impl.GroundTermTools.castIntoGroundTerm;
 import static it.unibz.inf.ontop.model.impl.GroundTermTools.isGroundTerm;
 import static it.unibz.inf.ontop.model.impl.ImmutabilityTools.convertIntoImmutableTerm;
+import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
 
 public class DatalogConversionTools {
-
-    private static final OBDADataFactory DATA_FACTORY = OBDADataFactoryImpl.getInstance();
 
     /**
      * TODO: explain

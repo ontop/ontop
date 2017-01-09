@@ -4,17 +4,15 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableTable;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.Predicate.COL_TYPE;
-import it.unibz.inf.ontop.model.impl.LanguageTagImpl;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
 import it.unibz.inf.ontop.model.TermType;
-import it.unibz.inf.ontop.model.impl.TermTypeImpl;
 import it.unibz.inf.ontop.model.type.TermTypeException;
 
 import java.util.Map;
 import java.util.Optional;
 
 import static it.unibz.inf.ontop.model.Predicate.COL_TYPE.*;
+import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
 
 public class TermTypeInferenceTools {
 
@@ -91,7 +89,6 @@ public class TermTypeInferenceTools {
         return tableBuilder.build();
     }
 
-    private static final OBDADataFactory DATA_FACTORY = OBDADataFactoryImpl.getInstance();
     private static final Optional<TermType> OPTIONAL_OBJECT_TERM_TYPE = Optional.of(DATA_FACTORY.getTermType(OBJECT));
     private static final Optional<TermType> OPTIONAL_BNODE_TERM_TYPE = Optional.of(DATA_FACTORY.getTermType(BNODE));
     private static final Optional<TermType> OPTIONAL_NULL_TERM_TYPE = Optional.of(DATA_FACTORY.getTermType(NULL));

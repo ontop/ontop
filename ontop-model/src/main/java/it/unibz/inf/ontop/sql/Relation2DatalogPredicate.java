@@ -3,14 +3,12 @@ package it.unibz.inf.ontop.sql;
 import java.util.List;
 
 import it.unibz.inf.ontop.model.Function;
-import it.unibz.inf.ontop.model.OBDADataFactory;
 import it.unibz.inf.ontop.model.Predicate;
 import it.unibz.inf.ontop.model.Term;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
+
+import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
 
 public class Relation2DatalogPredicate {
-
-	private static OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 
 	public static Predicate createPredicateFromRelation(RelationDefinition r) {
 		RelationID id = r.getID();
@@ -21,7 +19,7 @@ public class Relation2DatalogPredicate {
 		else
 			name = name + "." + id.getTableName();
 		
-		Predicate pred = fac.getPredicate(name, r.getAttributes().size());
+		Predicate pred = DATA_FACTORY.getPredicate(name, r.getAttributes().size());
 		return pred;
 	}
 	
@@ -30,7 +28,7 @@ public class Relation2DatalogPredicate {
 			throw new IllegalArgumentException("The number of terms does not match the arity of relation");
 		
 		Predicate pred = createPredicateFromRelation(r);
-		return fac.getFunction(pred, terms);
+		return DATA_FACTORY.getFunction(pred, terms);
 	}
 	
 	/**

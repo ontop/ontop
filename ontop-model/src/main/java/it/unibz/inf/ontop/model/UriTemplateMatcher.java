@@ -20,15 +20,13 @@ package it.unibz.inf.ontop.model;
  * #L%
  */
 
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
-
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class UriTemplateMatcher {
+import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
 
-	private static final OBDADataFactory ofac = OBDADataFactoryImpl.getInstance();
+public class UriTemplateMatcher {
 
 	private final Map<Pattern, Function> uriTemplateMatcher = new HashMap<>();
 	
@@ -74,7 +72,7 @@ public class UriTemplateMatcher {
 						continue;
 					}
 
-					Function templateFunction = ofac.getUriTemplate(ofac.getVariable("x"));
+					Function templateFunction = DATA_FACTORY.getUriTemplate(DATA_FACTORY.getVariable("x"));
 					Pattern matcher = Pattern.compile("(.+)");
 					uriTemplateMatcher.uriTemplateMatcher.put(matcher, templateFunction);
 					templateStrings.add("(.+)");
@@ -138,9 +136,9 @@ public class UriTemplateMatcher {
 					values.add(baseParameter);
 					for (int i = 0; i < matcher.groupCount(); i++) {
 						String value = matcher.group(i + 1);
-						values.add(ofac.getConstantLiteral(value));
+						values.add(DATA_FACTORY.getConstantLiteral(value));
 					}
-					functionURI = ofac.getUriTemplate(values);
+					functionURI = DATA_FACTORY.getUriTemplate(values);
 				}
 			} 
 			else if (baseParameter instanceof Variable) {
@@ -148,7 +146,7 @@ public class UriTemplateMatcher {
 				 * This is a direct mapping to a column, uri(x)
 				 * we need to match x with the subjectURI
 				 */
-				functionURI = ofac.getUriTemplate(ofac.getConstantLiteral(uriString));
+				functionURI = DATA_FACTORY.getUriTemplate(DATA_FACTORY.getConstantLiteral(uriString));
 			}
 			break;
 		}
@@ -156,7 +154,7 @@ public class UriTemplateMatcher {
 			/* If we cannot match against a template, we try to match against the most general template (which will
 			 * generate empty queries later in the query answering process
 			 */
-			functionURI = ofac.getUriTemplate(ofac.getConstantLiteral(uriString));
+			functionURI = DATA_FACTORY.getUriTemplate(DATA_FACTORY.getConstantLiteral(uriString));
 		}
 			
 		return functionURI;

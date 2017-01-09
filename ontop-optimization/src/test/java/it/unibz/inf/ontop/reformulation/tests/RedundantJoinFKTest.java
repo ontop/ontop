@@ -5,7 +5,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMultimap;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.AtomPredicateImpl;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.model.impl.URITemplatePredicateImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionImpl;
 import it.unibz.inf.ontop.pivotalrepr.*;
@@ -33,7 +32,6 @@ public class RedundantJoinFKTest {
     private final static AtomPredicate TABLE3_PREDICATE = new AtomPredicateImpl("TABLE3", 3);
     private final static AtomPredicate TABLE4_PREDICATE = new AtomPredicateImpl("TABLE4", 3);
     private final static AtomPredicate ANS1_PREDICATE = new AtomPredicateImpl("ans1", 1);
-    private final static OBDADataFactory DATA_FACTORY = OBDADataFactoryImpl.getInstance();
     private final static Variable X = DATA_FACTORY.getVariable("X");
     private final static Variable A = DATA_FACTORY.getVariable("A");
     private final static Variable B = DATA_FACTORY.getVariable("B");

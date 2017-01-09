@@ -4,11 +4,9 @@ package it.unibz.inf.ontop.parser;
 
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.Predicate.COL_TYPE;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
 import it.unibz.inf.ontop.utils.QueryUtils;
 
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -30,12 +28,8 @@ import org.antlr.runtime.RecognizerSharedState;
 import org.antlr.runtime.Token;
 import org.antlr.runtime.TokenStream;
 
-
-
-import org.antlr.runtime.*;
-import java.util.Stack;
-import java.util.List;
-import java.util.ArrayList;
+import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATATYPE_FACTORY;
+import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
 
 @SuppressWarnings("all")
 public class TurtleOBDAParser extends Parser {
@@ -158,10 +152,6 @@ public class TurtleOBDAParser extends Parser {
 	/** All variables */
 	private Set<Term> variableSet = new HashSet<Term>();
 
-	/** A factory to construct the predicates and terms */
-	private static final OBDADataFactory dfac = OBDADataFactoryImpl.getInstance();
-	private static final DatatypeFactory dtfac = OBDADataFactoryImpl.getInstance().getDatatypeFactory();
-
 	private String error = "";
 
 	public String getError() {
@@ -211,13 +201,13 @@ public class TurtleOBDAParser extends Parser {
 		   if (size == 1) {
 		      FormatString token = tokens.get(0);
 		      if (token instanceof FixedString) {
-		          ValueConstant uriTemplate = dfac.getConstantLiteral(token.toString()); // a single URI template
-		          toReturn = dfac.getUriTemplate(uriTemplate);
+		          ValueConstant uriTemplate = DATA_FACTORY.getConstantLiteral(token.toString()); // a single URI template
+		          toReturn = DATA_FACTORY.getUriTemplate(uriTemplate);
 		      }
 		      else if (token instanceof ColumnString) {
 		         // a single URI template
-		         Variable column = dfac.getVariable(token.toString());
-		         toReturn = dfac.getUriTemplate(column);
+		         Variable column = DATA_FACTORY.getVariable(token.toString());
+		         toReturn = DATA_FACTORY.getUriTemplate(column);
 		      }
 		   }
 		   else {
@@ -228,13 +218,13 @@ public class TurtleOBDAParser extends Parser {
 		         }
 		         else if (token instanceof ColumnString) {
 		            sb.append(PLACEHOLDER);
-		            Variable column = dfac.getVariable(token.toString());
+		            Variable column = DATA_FACTORY.getVariable(token.toString());
 		            terms.add(column);
 		         }
 		      }
-		      ValueConstant uriTemplate = dfac.getConstantLiteral(sb.toString()); // complete URI template
+		      ValueConstant uriTemplate = DATA_FACTORY.getConstantLiteral(sb.toString()); // complete URI template
 		      terms.add(0, uriTemplate);
-		      toReturn = dfac.getUriTemplate(terms);
+		      toReturn = DATA_FACTORY.getUriTemplate(terms);
 		   }
 		   return toReturn;
 		}
@@ -309,11 +299,11 @@ public class TurtleOBDAParser extends Parser {
 		      if (i > 0){
 		    	 st = str.substring(0,i);
 		    	 st = st.replace("\\\\", "");
-		         terms.add(dfac.getConstantLiteral(st));
+		         terms.add(DATA_FACTORY.getConstantLiteral(st));
 		         str = str.substring(str.indexOf("{", i), str.length());
 		      }else if (i == 0){
 		         j = str.indexOf("}");
-		         terms.add(dfac.getVariable(str.substring(1,j)));
+		         terms.add(DATA_FACTORY.getVariable(str.substring(1,j)));
 		         str = str.substring(j+1,str.length());
 		      } else {
 		    	  break;
@@ -321,7 +311,7 @@ public class TurtleOBDAParser extends Parser {
 		   }
 		   if(!str.equals("")){
 		      str = str.replace("\\\\", "");
-		      terms.add(dfac.getConstantLiteral(str));
+		      terms.add(DATA_FACTORY.getConstantLiteral(str));
 		   }
 		   return terms;
 		}
@@ -337,9 +327,9 @@ public class TurtleOBDAParser extends Parser {
 	          return v;
 		   }
 
-		   Function f = dfac.getFunction(ExpressionOperation.CONCAT, terms.get(0), terms.get(1));
+		   Function f = DATA_FACTORY.getFunction(ExpressionOperation.CONCAT, terms.get(0), terms.get(1));
 	           for(int j=2;j<terms.size();j++) {
-	              f = dfac.getFunction(ExpressionOperation.CONCAT, f, terms.get(j));
+	              f = DATA_FACTORY.getFunction(ExpressionOperation.CONCAT, f, terms.get(j));
 	           }
 
 		   return f;
@@ -362,36 +352,36 @@ public class TurtleOBDAParser extends Parser {
 			             if (object instanceof  Function) {
 			                  if(QueryUtils.isGrounded(object)) {
 			                      ValueConstant c = ((ValueConstant) ((Function) object).getTerm(0));  // it has to be a URI constant
-			                      Predicate predicate = dfac.getClassPredicate(c.getValue());
-			                      atom = dfac.getFunction(predicate, subject);
+			                      Predicate predicate = DATA_FACTORY.getClassPredicate(c.getValue());
+			                      atom = DATA_FACTORY.getFunction(predicate, subject);
 			                  } else {
-			                       atom = dfac.getTripleAtom(subject, pred, object);
+			                       atom = DATA_FACTORY.getTripleAtom(subject, pred, object);
 			                  }
 			             }
 			             else if (object instanceof  Variable){
-			                  Term uriOfPred = dfac.getUriTemplate(pred);
-			                  Term uriOfObject = dfac.getUriTemplate(object);
-			                  atom = dfac.getTripleAtom(subject, uriOfPred,  uriOfObject);
+			                  Term uriOfPred = DATA_FACTORY.getUriTemplate(pred);
+			                  Term uriOfObject = DATA_FACTORY.getUriTemplate(object);
+			                  atom = DATA_FACTORY.getTripleAtom(subject, uriOfPred,  uriOfObject);
 			              }
 			             else {
 			                  throw new IllegalArgumentException("parser cannot handle object " + object);
 			              }
 			        } else if( ! QueryUtils.isGrounded(pred) ){
-			             atom = dfac.getTripleAtom(subject, pred,  object);
+			             atom = DATA_FACTORY.getTripleAtom(subject, pred,  object);
 			        } else {
-	                			             //Predicate predicate = dfac.getPredicate(pred.toString(), 2); // the data type cannot be determined here!
+	                			             //Predicate predicate = DATA_FACTORY.getPredicate(pred.toString(), 2); // the data type cannot be determined here!
 	                			             Predicate predicate;
 	                			             if(pred instanceof Function) {
 	                							 ValueConstant pr = (ValueConstant) ((Function) pred).getTerm(0);
 	                							 if (object instanceof Variable) {
-	                								 predicate = dfac.getPredicate(pr.getValue(), 2);
+	                								 predicate = DATA_FACTORY.getPredicate(pr.getValue(), 2);
 	                							 } else {
 	                								 if (object instanceof Function) {
 	                									 if (((Function) object).getFunctionSymbol() instanceof URITemplatePredicate) {
 
-	                										 predicate = dfac.getObjectPropertyPredicate(pr.getValue());
+	                										 predicate = DATA_FACTORY.getObjectPropertyPredicate(pr.getValue());
 	                									 } else {
-	                										 predicate = dfac.getDataPropertyPredicate(pr.getValue());
+	                										 predicate = DATA_FACTORY.getDataPropertyPredicate(pr.getValue());
 	                									 }
 	                								 }
 	                									 else {
@@ -401,7 +391,7 @@ public class TurtleOBDAParser extends Parser {
 	                						 }else {
 	                			                  throw new IllegalArgumentException("predicate should be a URI Function");
 	                			             }
-	                			             atom = dfac.getFunction(predicate, subject, object);
+	                			             atom = DATA_FACTORY.getFunction(predicate, subject, object);
 	                			       }
 	                			       return atom;
 		  }
@@ -942,8 +932,8 @@ public class TurtleOBDAParser extends Parser {
 					{
 					match(input,77,FOLLOW_77_in_verb300); 
 
-					  Term constant = dfac.getConstantLiteral(OBDAVocabulary.RDF_TYPE);
-					  value = dfac.getUriTemplate(constant);
+					  Term constant = DATA_FACTORY.getConstantLiteral(OBDAVocabulary.RDF_TYPE);
+					  value = DATA_FACTORY.getUriTemplate(constant);
 					  
 					}
 					break;
@@ -1447,7 +1437,7 @@ public class TurtleOBDAParser extends Parser {
 			{
 			STRING_WITH_CURLY_BRACKET19=(Token)match(input,STRING_WITH_CURLY_BRACKET,FOLLOW_STRING_WITH_CURLY_BRACKET_in_variable542); 
 
-			      value = dfac.getVariable(removeBrackets((STRING_WITH_CURLY_BRACKET19!=null?STRING_WITH_CURLY_BRACKET19.getText():null)));
+			      value = DATA_FACTORY.getVariable(removeBrackets((STRING_WITH_CURLY_BRACKET19!=null?STRING_WITH_CURLY_BRACKET19.getText():null)));
 			      variableSet.add(value);
 			    
 			}
@@ -1492,8 +1482,8 @@ public class TurtleOBDAParser extends Parser {
 
 			      String functionName = resource20.toString();
 			      int arity = terms21.size();
-			      Predicate functionSymbol = dfac.getPredicate(functionName, arity);
-			      value = dfac.getFunction(functionSymbol, terms21);
+			      Predicate functionSymbol = DATA_FACTORY.getPredicate(functionName, arity);
+			      value = DATA_FACTORY.getFunction(functionSymbol, terms21);
 			    
 			}
 
@@ -1571,7 +1561,7 @@ public class TurtleOBDAParser extends Parser {
 
 					      Variable var = variable22;
 					      Term lang = language23;   
-					      value = dfac.getTypedTerm(var, lang);
+					      value = DATA_FACTORY.getTypedTerm(var, lang);
 
 					    
 					}
@@ -1598,11 +1588,11 @@ public class TurtleOBDAParser extends Parser {
 					    } else {
 					        throw new IllegalArgumentException("resource25 should be an URI");
 					    }
-					    Predicate.COL_TYPE type = dtfac.getDatatype(functionName);
+					    Predicate.COL_TYPE type = DATATYPE_FACTORY.getDatatype(functionName);
 					    if (type == null)  
 					 	  throw new RuntimeException("ERROR. A mapping involves an unsupported datatype. \nOffending datatype:" + functionName);
 					    
-					      value = dfac.getTypedTerm(var, type);
+					      value = DATA_FACTORY.getTypedTerm(var, type);
 
 						
 					     
@@ -1659,7 +1649,7 @@ public class TurtleOBDAParser extends Parser {
 					state._fsp--;
 
 
-					    	value = dfac.getConstantLiteral((languageTag26!=null?input.toString(languageTag26.start,languageTag26.stop):null).toLowerCase(), COL_TYPE.STRING);
+					    	value = DATA_FACTORY.getConstantLiteral((languageTag26!=null?input.toString(languageTag26.start,languageTag26.stop):null).toLowerCase(), COL_TYPE.STRING);
 					    
 					}
 					break;
@@ -1946,23 +1936,23 @@ public class TurtleOBDAParser extends Parser {
 					       if (literal instanceof Function){
 					          Function f = (Function)stringLiteral32;
 					          if (lang != null){
-					             value = dfac.getTypedTerm(f,lang);
+					             value = DATA_FACTORY.getTypedTerm(f,lang);
 					          }else{
-					             value = dfac.getTypedTerm(f, COL_TYPE.LITERAL);
+					             value = DATA_FACTORY.getTypedTerm(f, COL_TYPE.LITERAL);
 					          }       
 					       }else{
 
 					       //if variable we cannot assign a datatype yet
 					       if (literal instanceof Variable)
 					       {
-					            value = dfac.getTypedTerm(literal, COL_TYPE.LITERAL);
+					            value = DATA_FACTORY.getTypedTerm(literal, COL_TYPE.LITERAL);
 					       }
 					       else{
 					          ValueConstant constant = (ValueConstant)stringLiteral32;
 					          if (lang != null) {
-						     value = dfac.getTypedTerm(constant, lang);
+						     value = DATA_FACTORY.getTypedTerm(constant, lang);
 					          } else {
-					      	     value = dfac.getTypedTerm(constant, COL_TYPE.LITERAL);
+					      	     value = DATA_FACTORY.getTypedTerm(constant, COL_TYPE.LITERAL);
 					          }
 					       }
 					       }
@@ -2033,7 +2023,7 @@ public class TurtleOBDAParser extends Parser {
 			      if (str.contains("{")){
 			      	value = getNestedConcat(str);
 			      }else{
-			      	value = dfac.getConstantLiteral(str.substring(1, str.length()-1), COL_TYPE.LITERAL); // without the double quotes
+			      	value = DATA_FACTORY.getConstantLiteral(str.substring(1, str.length()-1), COL_TYPE.LITERAL); // without the double quotes
 			      }
 			    
 			}
@@ -2080,14 +2070,14 @@ public class TurtleOBDAParser extends Parser {
 			          if (resource38 instanceof Function){
 			          	    String functionName = ( (ValueConstant) ((Function)resource38).getTerm(0) ).getValue();
 
-			                    Predicate.COL_TYPE type = dtfac.getDatatype(functionName);
+			                    Predicate.COL_TYPE type = DATATYPE_FACTORY.getDatatype(functionName);
 			                    if (type == null) {
 			                      throw new RuntimeException("Unsupported datatype: " + functionName);
 			                    }
-			                    value = dfac.getTypedTerm(stringValue, type);
+			                    value = DATA_FACTORY.getTypedTerm(stringValue, type);
 			                    }
 			           else {
-			          value = dfac.getTypedTerm(stringValue, COL_TYPE.LITERAL);
+			          value = DATA_FACTORY.getTypedTerm(stringValue, COL_TYPE.LITERAL);
 			          }
 
 			  
@@ -2395,8 +2385,8 @@ public class TurtleOBDAParser extends Parser {
 					{
 					TRUE42=(Token)match(input,TRUE,FOLLOW_TRUE_in_booleanLiteral931); 
 
-					  ValueConstant trueConstant = dfac.getConstantLiteral((TRUE42!=null?TRUE42.getText():null), COL_TYPE.LITERAL);
-					  value = dfac.getTypedTerm(trueConstant, COL_TYPE.BOOLEAN); 
+					  ValueConstant trueConstant = DATA_FACTORY.getConstantLiteral((TRUE42!=null?TRUE42.getText():null), COL_TYPE.LITERAL);
+					  value = DATA_FACTORY.getTypedTerm(trueConstant, COL_TYPE.BOOLEAN);
 					}
 					break;
 				case 2 :
@@ -2404,8 +2394,8 @@ public class TurtleOBDAParser extends Parser {
 					{
 					FALSE43=(Token)match(input,FALSE,FOLLOW_FALSE_in_booleanLiteral940); 
 
-					  ValueConstant falseConstant = dfac.getConstantLiteral((FALSE43!=null?FALSE43.getText():null), COL_TYPE.LITERAL);
-					  value = dfac.getTypedTerm(falseConstant, COL_TYPE.BOOLEAN);
+					  ValueConstant falseConstant = DATA_FACTORY.getConstantLiteral((FALSE43!=null?FALSE43.getText():null), COL_TYPE.LITERAL);
+					  value = DATA_FACTORY.getTypedTerm(falseConstant, COL_TYPE.BOOLEAN);
 					  
 					}
 					break;
@@ -2465,8 +2455,8 @@ public class TurtleOBDAParser extends Parser {
 					{
 					INTEGER44=(Token)match(input,INTEGER,FOLLOW_INTEGER_in_numericUnsigned959); 
 
-					  ValueConstant integerConstant = dfac.getConstantLiteral((INTEGER44!=null?INTEGER44.getText():null), COL_TYPE.LITERAL);
-					  value = dfac.getTypedTerm(integerConstant, COL_TYPE.INTEGER);
+					  ValueConstant integerConstant = DATA_FACTORY.getConstantLiteral((INTEGER44!=null?INTEGER44.getText():null), COL_TYPE.LITERAL);
+					  value = DATA_FACTORY.getTypedTerm(integerConstant, COL_TYPE.INTEGER);
 					  
 					}
 					break;
@@ -2475,8 +2465,8 @@ public class TurtleOBDAParser extends Parser {
 					{
 					DOUBLE45=(Token)match(input,DOUBLE,FOLLOW_DOUBLE_in_numericUnsigned967); 
 
-					  ValueConstant doubleConstant = dfac.getConstantLiteral((DOUBLE45!=null?DOUBLE45.getText():null), COL_TYPE.LITERAL);
-					  value = dfac.getTypedTerm(doubleConstant, COL_TYPE.DOUBLE);
+					  ValueConstant doubleConstant = DATA_FACTORY.getConstantLiteral((DOUBLE45!=null?DOUBLE45.getText():null), COL_TYPE.LITERAL);
+					  value = DATA_FACTORY.getTypedTerm(doubleConstant, COL_TYPE.DOUBLE);
 					  
 					}
 					break;
@@ -2485,8 +2475,8 @@ public class TurtleOBDAParser extends Parser {
 					{
 					DECIMAL46=(Token)match(input,DECIMAL,FOLLOW_DECIMAL_in_numericUnsigned976); 
 
-					  ValueConstant decimalConstant = dfac.getConstantLiteral((DECIMAL46!=null?DECIMAL46.getText():null), COL_TYPE.LITERAL);
-					  value = dfac.getTypedTerm(decimalConstant, COL_TYPE.DECIMAL);
+					  ValueConstant decimalConstant = DATA_FACTORY.getConstantLiteral((DECIMAL46!=null?DECIMAL46.getText():null), COL_TYPE.LITERAL);
+					  value = DATA_FACTORY.getTypedTerm(decimalConstant, COL_TYPE.DECIMAL);
 					   
 					}
 					break;
@@ -2546,8 +2536,8 @@ public class TurtleOBDAParser extends Parser {
 					{
 					INTEGER_POSITIVE47=(Token)match(input,INTEGER_POSITIVE,FOLLOW_INTEGER_POSITIVE_in_numericPositive995); 
 
-					   ValueConstant integerConstant = dfac.getConstantLiteral((INTEGER_POSITIVE47!=null?INTEGER_POSITIVE47.getText():null), COL_TYPE.LITERAL);
-					   value = dfac.getTypedTerm(integerConstant, COL_TYPE.INTEGER);
+					   ValueConstant integerConstant = DATA_FACTORY.getConstantLiteral((INTEGER_POSITIVE47!=null?INTEGER_POSITIVE47.getText():null), COL_TYPE.LITERAL);
+					   value = DATA_FACTORY.getTypedTerm(integerConstant, COL_TYPE.INTEGER);
 					  
 					}
 					break;
@@ -2556,8 +2546,8 @@ public class TurtleOBDAParser extends Parser {
 					{
 					DOUBLE_POSITIVE48=(Token)match(input,DOUBLE_POSITIVE,FOLLOW_DOUBLE_POSITIVE_in_numericPositive1003); 
 
-					  ValueConstant doubleConstant = dfac.getConstantLiteral((DOUBLE_POSITIVE48!=null?DOUBLE_POSITIVE48.getText():null), COL_TYPE.LITERAL);
-					  value = dfac.getTypedTerm(doubleConstant, COL_TYPE.DOUBLE);
+					  ValueConstant doubleConstant = DATA_FACTORY.getConstantLiteral((DOUBLE_POSITIVE48!=null?DOUBLE_POSITIVE48.getText():null), COL_TYPE.LITERAL);
+					  value = DATA_FACTORY.getTypedTerm(doubleConstant, COL_TYPE.DOUBLE);
 					  
 					}
 					break;
@@ -2566,8 +2556,8 @@ public class TurtleOBDAParser extends Parser {
 					{
 					DECIMAL_POSITIVE49=(Token)match(input,DECIMAL_POSITIVE,FOLLOW_DECIMAL_POSITIVE_in_numericPositive1012); 
 
-					  ValueConstant decimalConstant = dfac.getConstantLiteral((DECIMAL_POSITIVE49!=null?DECIMAL_POSITIVE49.getText():null), COL_TYPE.LITERAL);
-					  value = dfac.getTypedTerm(decimalConstant, COL_TYPE.DECIMAL);
+					  ValueConstant decimalConstant = DATA_FACTORY.getConstantLiteral((DECIMAL_POSITIVE49!=null?DECIMAL_POSITIVE49.getText():null), COL_TYPE.LITERAL);
+					  value = DATA_FACTORY.getTypedTerm(decimalConstant, COL_TYPE.DECIMAL);
 					   
 					}
 					break;
@@ -2627,8 +2617,8 @@ public class TurtleOBDAParser extends Parser {
 					{
 					INTEGER_NEGATIVE50=(Token)match(input,INTEGER_NEGATIVE,FOLLOW_INTEGER_NEGATIVE_in_numericNegative1031); 
 
-					  ValueConstant integerConstant = dfac.getConstantLiteral((INTEGER_NEGATIVE50!=null?INTEGER_NEGATIVE50.getText():null), COL_TYPE.LITERAL);
-					  value = dfac.getTypedTerm(integerConstant, COL_TYPE.INTEGER);
+					  ValueConstant integerConstant = DATA_FACTORY.getConstantLiteral((INTEGER_NEGATIVE50!=null?INTEGER_NEGATIVE50.getText():null), COL_TYPE.LITERAL);
+					  value = DATA_FACTORY.getTypedTerm(integerConstant, COL_TYPE.INTEGER);
 					  
 					}
 					break;
@@ -2637,8 +2627,8 @@ public class TurtleOBDAParser extends Parser {
 					{
 					DOUBLE_NEGATIVE51=(Token)match(input,DOUBLE_NEGATIVE,FOLLOW_DOUBLE_NEGATIVE_in_numericNegative1039); 
 
-					   ValueConstant doubleConstant = dfac.getConstantLiteral((DOUBLE_NEGATIVE51!=null?DOUBLE_NEGATIVE51.getText():null), COL_TYPE.LITERAL);
-					   value = dfac.getTypedTerm(doubleConstant, COL_TYPE.DOUBLE);
+					   ValueConstant doubleConstant = DATA_FACTORY.getConstantLiteral((DOUBLE_NEGATIVE51!=null?DOUBLE_NEGATIVE51.getText():null), COL_TYPE.LITERAL);
+					   value = DATA_FACTORY.getTypedTerm(doubleConstant, COL_TYPE.DOUBLE);
 					  
 					}
 					break;
@@ -2647,8 +2637,8 @@ public class TurtleOBDAParser extends Parser {
 					{
 					DECIMAL_NEGATIVE52=(Token)match(input,DECIMAL_NEGATIVE,FOLLOW_DECIMAL_NEGATIVE_in_numericNegative1048); 
 
-					  ValueConstant decimalConstant = dfac.getConstantLiteral((DECIMAL_NEGATIVE52!=null?DECIMAL_NEGATIVE52.getText():null), COL_TYPE.LITERAL);
-					  value = dfac.getTypedTerm(decimalConstant, COL_TYPE.DECIMAL);
+					  ValueConstant decimalConstant = DATA_FACTORY.getConstantLiteral((DECIMAL_NEGATIVE52!=null?DECIMAL_NEGATIVE52.getText():null), COL_TYPE.LITERAL);
+					  value = DATA_FACTORY.getTypedTerm(decimalConstant, COL_TYPE.DECIMAL);
 					  
 					}
 					break;

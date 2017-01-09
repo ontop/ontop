@@ -4,14 +4,14 @@ import java.util.Optional;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.model.ExpressionOperation;
 import it.unibz.inf.ontop.model.ImmutableExpression;
-import it.unibz.inf.ontop.model.OBDADataFactory;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.unfolding.ExpressionEvaluator;
 import it.unibz.inf.ontop.pivotalrepr.*;
 
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Queue;
+
+import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
 
 /**
  * TODO: describe
@@ -23,9 +23,6 @@ public class JoinExtractionUtils {
      */
     public static class UnsatisfiableExpressionException extends Exception  {
     }
-
-
-    private static final OBDADataFactory DATA_FACTORY = OBDADataFactoryImpl.getInstance();
 
     /**
      * TODO: explain

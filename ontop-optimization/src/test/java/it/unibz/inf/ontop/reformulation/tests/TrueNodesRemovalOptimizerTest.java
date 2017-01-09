@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.AtomPredicateImpl;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.optimization.IntermediateQueryOptimizer;
 import it.unibz.inf.ontop.owlrefplatform.core.optimization.TrueNodesRemovalOptimizer;
@@ -32,7 +31,6 @@ public class TrueNodesRemovalOptimizerTest {
     private final AtomPredicate ANS1_ARITY_1_PREDICATE = new AtomPredicateImpl("ans1", 1);
     private final AtomPredicate ANS1_ARITY_2_PREDICATE = new AtomPredicateImpl("ans1", 2);
 
-    private static final OBDADataFactory DATA_FACTORY = OBDADataFactoryImpl.getInstance();
     private final Variable A = DATA_FACTORY.getVariable("a");
     private final Variable B = DATA_FACTORY.getVariable("b");
     private final Variable X = DATA_FACTORY.getVariable("x");

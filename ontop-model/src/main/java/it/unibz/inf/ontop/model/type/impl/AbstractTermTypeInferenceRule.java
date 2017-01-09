@@ -1,11 +1,9 @@
 package it.unibz.inf.ontop.model.type.impl;
 
 import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.model.OBDADataFactory;
 import it.unibz.inf.ontop.model.Predicate;
 import it.unibz.inf.ontop.model.Term;
 import it.unibz.inf.ontop.model.TermType;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.model.type.TermTypeException;
 import it.unibz.inf.ontop.model.type.TermTypeInferenceRule;
 
@@ -14,12 +12,12 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
+
 /**
  * TODO: explain
  */
 public abstract class AbstractTermTypeInferenceRule implements TermTypeInferenceRule {
-
-    private static final OBDADataFactory DATA_FACTORY = OBDADataFactoryImpl.getInstance();
 
     @Override
     public Optional<TermType> inferType(List<Term> terms, ImmutableList<Optional<Predicate.COL_TYPE>> expectedBaseTypes)

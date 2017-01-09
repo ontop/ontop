@@ -7,7 +7,6 @@ import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.AtomPredicateImpl;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionImpl;
 import it.unibz.inf.ontop.pivotalrepr.*;
@@ -30,7 +29,6 @@ public class IQSyntacticEquivalenceCheckerTest {
     private final static AtomPredicate ANS1_PREDICATE = new AtomPredicateImpl("ans1", 3);
     private final static AtomPredicate ANS2_PREDICATE = new AtomPredicateImpl("ans2", 2);
     private final static AtomPredicate ANS1_VAR1_PREDICATE = new AtomPredicateImpl("ans1", 1);
-    private final static OBDADataFactory DATA_FACTORY = OBDADataFactoryImpl.getInstance();
     private final static Variable X = DATA_FACTORY.getVariable("x");
     private final static Variable Y = DATA_FACTORY.getVariable("y");
     private final static Variable Z = DATA_FACTORY.getVariable("z");

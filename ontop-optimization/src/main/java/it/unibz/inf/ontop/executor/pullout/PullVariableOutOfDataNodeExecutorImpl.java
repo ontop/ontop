@@ -5,7 +5,6 @@ import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.executor.substitution.DescendingPropagationTools;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.ImmutabilityTools;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.InjectiveVar2VarSubstitution;
 import it.unibz.inf.ontop.pivotalrepr.*;
 import it.unibz.inf.ontop.pivotalrepr.impl.FilterNodeImpl;
@@ -18,6 +17,8 @@ import it.unibz.inf.ontop.pivotalrepr.proposal.impl.NodeCentricOptimizationResul
 
 import java.util.Optional;
 
+import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
+
 
 /**
  * TODO: explain
@@ -28,8 +29,6 @@ import java.util.Optional;
  *
  */
 public class PullVariableOutOfDataNodeExecutorImpl implements PullVariableOutOfDataNodeExecutor {
-
-    private static final OBDADataFactory DATA_FACTORY = OBDADataFactoryImpl.getInstance();
 
     private static class VariableRenaming {
         public final Variable originalVariable;

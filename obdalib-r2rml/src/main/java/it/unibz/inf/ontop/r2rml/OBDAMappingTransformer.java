@@ -20,12 +20,10 @@ package it.unibz.inf.ontop.r2rml;
  * #L%
  */
 
-import eu.optique.api.mapping.*;
 import eu.optique.api.mapping.TermMap.TermMapType;
 import eu.optique.api.mapping.impl.sesame.SesameR2RMLMappingManagerFactory;
 import it.unibz.inf.ontop.io.PrefixManager;
 import it.unibz.inf.ontop.model.*;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
 import it.unibz.inf.ontop.model.impl.SQLQueryImpl;
 import it.unibz.inf.ontop.renderer.TargetQueryRenderer;
@@ -40,8 +38,6 @@ import org.openrdf.model.Statement;
 import org.openrdf.model.URI;
 import org.openrdf.model.ValueFactory;
 import org.openrdf.model.impl.ValueFactoryImpl;
-import it.unibz.inf.ontop.io.PrefixManager;
-import it.unibz.inf.ontop.utils.IDGenerator;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -52,15 +48,14 @@ import eu.optique.api.mapping.ObjectMap;
 import eu.optique.api.mapping.PredicateMap;
 import eu.optique.api.mapping.PredicateObjectMap;
 import eu.optique.api.mapping.R2RMLMappingManager;
-import eu.optique.api.mapping.R2RMLMappingManagerFactory;
 import eu.optique.api.mapping.SubjectMap;
 import eu.optique.api.mapping.Template;
-import eu.optique.api.mapping.TermMap.TermMapType;
 import eu.optique.api.mapping.TriplesMap;
-import it.unibz.inf.ontop.model.*;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.*;
 import org.semanticweb.owlapi.search.EntitySearcher;
+
+import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
 
 /**
  * Transform OBDA mappings in R2rml mappings
@@ -164,7 +159,7 @@ public class OBDAMappingTransformer {
 				if (predf.getFunctionSymbol() instanceof URITemplatePredicate) {
 					if (predf.getTerms().size() == 1) //fixed string
 					{
-						pred = OBDADataFactoryImpl.getInstance().getPredicate(((ValueConstant)(predf.getTerm(0))).getValue(), 1);
+						pred = DATA_FACTORY.getPredicate(((ValueConstant)(predf.getTerm(0))).getValue(), 1);
 						predUri = vf.createURI(pred.getName());
 					}
 				    else {
@@ -312,7 +307,7 @@ public class OBDAMappingTransformer {
 				Function predf = (Function)func.getTerm(1);
 				if (predf.getFunctionSymbol() instanceof URITemplatePredicate) {
 					if (predf.getTerms().size() == 1) { //fixed string 
-						pred = OBDADataFactoryImpl.getInstance().getPredicate(((ValueConstant)(predf.getTerm(0))).getValue(), 1);
+						pred = DATA_FACTORY.getPredicate(((ValueConstant)(predf.getTerm(0))).getValue(), 1);
 						predUri = vf.createURI(pred.getName());
 					}
 					else {

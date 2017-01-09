@@ -3,17 +3,17 @@ package it.unibz.inf.ontop.sesame;
 import it.unibz.inf.ontop.model.BNode;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.Predicate.COL_TYPE;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
 import it.unibz.inf.ontop.ontology.*;
 import org.openrdf.model.*;
 import org.openrdf.model.impl.StatementImpl;
 import org.openrdf.model.impl.ValueFactoryImpl;
 
+import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATATYPE_FACTORY;
+
 public class SesameHelper {
 
 	private static final ValueFactory fact = new ValueFactoryImpl();
-	private static final DatatypeFactory dtfac = OBDADataFactoryImpl.getInstance().getDatatypeFactory();
 	
 	public static Resource getResource(ObjectConstant obj) {
 		if (obj instanceof BNode)
@@ -32,11 +32,11 @@ public class SesameHelper {
 			return value;
 		}
 		else if (literal.getType() == COL_TYPE.OBJECT) {
-			Literal value = fact.createLiteral(literal.getValue(), dtfac.getDatatypeURI(COL_TYPE.STRING));
+			Literal value = fact.createLiteral(literal.getValue(), DATATYPE_FACTORY.getDatatypeURI(COL_TYPE.STRING));
 			return value;
 		}	
 		else {
-			URI datatype = dtfac.getDatatypeURI(literal.getType());
+			URI datatype = DATATYPE_FACTORY.getDatatypeURI(literal.getType());
 			if (datatype == null)
 				throw new RuntimeException("Found unknown TYPE for constant: " + literal + " with COL_TYPE="+ literal.getType());
 			

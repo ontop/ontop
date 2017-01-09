@@ -5,9 +5,9 @@ import com.google.common.collect.ImmutableList;
 import fj.P2;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.AtomPredicateImpl;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import org.junit.Test;
 
+import static it.unibz.inf.ontop.OptimizationTestingTools.*;
 import static it.unibz.inf.ontop.model.Predicate.COL_TYPE.INTEGER;
 import static it.unibz.inf.ontop.pivotalrepr.datalog.DatalogConversionTools.convertFromDatalogDataAtom;
 import static org.junit.Assert.assertEquals;
@@ -19,7 +19,6 @@ import static org.junit.Assert.assertTrue;
  */
 public class Datalog2IQConversionTest {
 
-    private static final OBDADataFactory DATA_FACTORY = OBDADataFactoryImpl.getInstance();
     private static final Variable X = DATA_FACTORY.getVariable("x");
     private static final Variable Y = DATA_FACTORY.getVariable("y");
     private static final Constant TWO = DATA_FACTORY.getConstantLiteral("2", INTEGER);

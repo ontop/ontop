@@ -8,11 +8,11 @@ import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.Function;
 import it.unibz.inf.ontop.model.impl.DatalogTools;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 
 import java.util.*;
 
 import static it.unibz.inf.ontop.model.impl.DatalogTools.*;
+import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
 
 /**
  * Default implementation of PullOutEqualityNormalizer. Is Left-Join aware.
@@ -34,7 +34,6 @@ import static it.unibz.inf.ontop.model.impl.DatalogTools.*;
  */
 public class PullOutEqualityNormalizerImpl implements PullOutEqualityNormalizer {
 
-    private final static OBDADataFactory DATA_FACTORY = OBDADataFactoryImpl.getInstance();
     private final static Ord<Variable> VARIABLE_ORD = Ord.hashEqualsOrd();
     private final static List<P2<Variable, Constant>> EMPTY_VARIABLE_CONSTANT_LIST = List.nil();
     private final static List<P2<Variable, Variable>> EMPTY_VARIABLE_RENAMING_LIST = List.nil();

@@ -2,14 +2,12 @@ package it.unibz.inf.ontop.owlrefplatform.core.expression;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.model.*;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
+
+import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
 
 
 public class ExpressionNormalizerImpl implements ExpressionNormalizer {
-
-    private final OBDADataFactory DATA_FACTORY = OBDADataFactoryImpl.getInstance();
-
 
     @Override
     public ImmutableExpression normalize(ImmutableExpression expression) {

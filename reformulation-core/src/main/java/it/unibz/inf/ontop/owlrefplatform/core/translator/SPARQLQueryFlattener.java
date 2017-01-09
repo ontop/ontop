@@ -8,7 +8,6 @@ import java.util.ListIterator;
 import java.util.Stack;
 
 import it.unibz.inf.ontop.model.*;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.EQNormalizer;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.SubstitutionUtilities;
@@ -16,9 +15,9 @@ import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.UnifierUtilities;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class SPARQLQueryFlattener {
+import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
 
-	private static final OBDADataFactory termFactory = OBDADataFactoryImpl.getInstance();
+public class SPARQLQueryFlattener {
 
 	private static final Logger log = LoggerFactory.getLogger(SPARQLQueryFlattener.class);
 
@@ -261,7 +260,7 @@ public class SPARQLQueryFlattener {
 
         List<CQIE> result = new LinkedList<>();
         for (CQIE candidateRule : definitions) {
-            CQIE freshRule = termFactory.getFreshCQIECopy(candidateRule);
+            CQIE freshRule = DATA_FACTORY.getFreshCQIECopy(candidateRule);
             // IMPORTANT: getMGU changes arguments
             Substitution mgu = UnifierUtilities.getMGU(freshRule.getHead(), atom);
             if (mgu == null) {
@@ -336,7 +335,7 @@ public class SPARQLQueryFlattener {
 		
 		Function foldedJoinAtom = dataAtomsList.remove(0);
 		for (Function a : dataAtomsList)
-			foldedJoinAtom = termFactory.getSPARQLJoin(foldedJoinAtom, a);
+			foldedJoinAtom = DATA_FACTORY.getSPARQLJoin(foldedJoinAtom, a);
 		
 		otherAtomsList.add(0, foldedJoinAtom);
 		

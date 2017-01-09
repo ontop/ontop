@@ -23,7 +23,6 @@ package it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.FunctionalTermImpl;
 import it.unibz.inf.ontop.model.impl.MappingFactoryImpl;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.ontology.DataPropertyRangeExpression;
 import it.unibz.inf.ontop.ontology.DataRangeExpression;
 import it.unibz.inf.ontop.ontology.Datatype;
@@ -39,6 +38,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
+
 public class MappingDataTypeRepair {
 
 	private final DBMetadata metadata;
@@ -46,7 +47,6 @@ public class MappingDataTypeRepair {
 	private final Map<Predicate, Datatype> dataTypesMap;
 	private final VocabularyValidator qvv;
 
-  	private static final OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
     private static final MappingFactory MAPPING_FACTORY = MappingFactoryImpl.getInstance();
     private static final Logger log = LoggerFactory.getLogger(MappingDataTypeRepair.class);
 
@@ -177,7 +177,7 @@ public class MappingDataTypeRepair {
                     //assign the datatype of the ontology
                     if (!isBooleanDB2(dataType.getPredicate())) {
                         Predicate replacement = dataType.getPredicate();
-                        Term newTerm = fac.getFunction(replacement, function);
+                        Term newTerm = DATA_FACTORY.getFunction(replacement, function);
                         atom.setTerm(position, newTerm);
                     }
                 }
@@ -206,7 +206,7 @@ public class MappingDataTypeRepair {
 
                         //No Boolean datatype in DB2 database, the value in the database is used
                         Predicate.COL_TYPE type = getDataType(termOccurenceIndex, variable);
-                        Term newTerm = fac.getTypedTerm(variable, type);
+                        Term newTerm = DATA_FACTORY.getTypedTerm(variable, type);
                         log.warn("Datatype for the value " +variable + "of the property "+ predicate+ " has been inferred from the database");
                         atom.setTerm(position, newTerm);
                     }
@@ -230,18 +230,18 @@ public class MappingDataTypeRepair {
             Term newTerm;
             if (dataType == null || isBooleanDB2(dataType.getPredicate())) {
                 Predicate.COL_TYPE type = getDataType(termOccurenceIndex, variable);
-                newTerm = fac.getTypedTerm(variable, type);
+                newTerm = DATA_FACTORY.getTypedTerm(variable, type);
                 log.warn("Datatype for the value " +variable + "of the property "+ predicate+ " has been inferred from the database");
             }
             else {
                 Predicate replacement = dataType.getPredicate();
-                newTerm = fac.getFunction(replacement, variable);
+                newTerm = DATA_FACTORY.getFunction(replacement, variable);
             }
 
             atom.setTerm(position, newTerm);
         }
         else if (term instanceof ValueConstant) {
-            Term newTerm = fac.getTypedTerm(term, Predicate.COL_TYPE.LITERAL);
+            Term newTerm = DATA_FACTORY.getTypedTerm(term, Predicate.COL_TYPE.LITERAL);
             atom.setTerm(position, newTerm);
         }
     }
@@ -254,7 +254,7 @@ public class MappingDataTypeRepair {
     private boolean isBooleanDB2(Predicate dataType){
 
         if (isDB2){
-            if (fac.getDatatypeFactory().isBoolean(dataType)) {
+            if (DATA_FACTORY.getDatatypeFactory().isBoolean(dataType)) {
                 log.warn("Boolean dataType do not exist in DB2 database, the value in the database metadata is used instead.");
                 return true;
             }

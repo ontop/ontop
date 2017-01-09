@@ -3,9 +3,7 @@ package it.unibz.inf.ontop.owlrefplatform.core.optimization.unfolding.impl;
 
 import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.model.AtomPredicate;
-import it.unibz.inf.ontop.model.OBDADataFactory;
 import it.unibz.inf.ontop.model.Variable;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.InjectiveVar2VarSubstitutionImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.optimization.TrueNodesRemovalOptimizer;
 import it.unibz.inf.ontop.owlrefplatform.core.optimization.unfolding.QueryUnfolder;
@@ -22,6 +20,8 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
 
 public class QueryUnfolderImpl implements QueryUnfolder {
 
@@ -70,10 +70,9 @@ public class QueryUnfolderImpl implements QueryUnfolder {
     }
 
     private IntermediateQuery appendSuffixToVariableNames(IntermediateQuery query, int suffix) {
-        OBDADataFactory datafactory = OBDADataFactoryImpl.getInstance();
         Map<Variable, Variable> substitutionMap =
                 query.getKnownVariables().stream()
-                        .collect(Collectors.toMap(v -> v, v -> datafactory.getVariable(v.getName()+"m"+suffix)));
+                        .collect(Collectors.toMap(v -> v, v -> DATA_FACTORY.getVariable(v.getName()+"m"+suffix)));
         QueryRenamer queryRenamer = new QueryRenamer(new InjectiveVar2VarSubstitutionImpl(substitutionMap));
         return queryRenamer.transform(query);
     }

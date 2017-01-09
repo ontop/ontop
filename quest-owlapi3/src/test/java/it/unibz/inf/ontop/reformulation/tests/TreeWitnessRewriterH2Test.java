@@ -73,7 +73,6 @@ public class TreeWitnessRewriterH2Test{
 	// TODO We need to extend this test to import the contents of the mappings
 	// into OWL and repeat everything taking form OWL
 
-	private OBDADataFactory fac;
 	private Connection conn;
 
 	Logger log = LoggerFactory.getLogger(this.getClass());
@@ -145,8 +144,6 @@ public class TreeWitnessRewriterH2Test{
 		String url = "jdbc:h2:mem:questjunitdb";
 		String username = "sa";
 		String password = "";
-
-		fac = OBDADataFactoryImpl.getInstance();
 
 		conn = DriverManager.getConnection(url, username, password);
 		Statement st = conn.createStatement();

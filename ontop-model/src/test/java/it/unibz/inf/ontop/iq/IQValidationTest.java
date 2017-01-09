@@ -8,7 +8,6 @@ import com.google.common.collect.ImmutableSet;
 import com.google.inject.Injector;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.AtomPredicateImpl;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionImpl;
 import it.unibz.inf.ontop.injection.OntopModelConfiguration;
 import it.unibz.inf.ontop.pivotalrepr.*;
@@ -28,7 +27,6 @@ public class IQValidationTest {
     private final static AtomPredicate TABLE2_PREDICATE = new AtomPredicateImpl("table1", 2);
     private final static AtomPredicate P3_PREDICATE = new AtomPredicateImpl("p1", 3);
     private final static AtomPredicate ANS1_VAR1_PREDICATE = new AtomPredicateImpl("ans1", 1);
-    private final static OBDADataFactory DATA_FACTORY = OBDADataFactoryImpl.getInstance();
     private final static Variable X = DATA_FACTORY.getVariable("x");
     private final static Variable Y = DATA_FACTORY.getVariable("y");
     private final static Variable Z = DATA_FACTORY.getVariable("z");

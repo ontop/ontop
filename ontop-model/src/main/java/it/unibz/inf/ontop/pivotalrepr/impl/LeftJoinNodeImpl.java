@@ -3,7 +3,6 @@ package it.unibz.inf.ontop.pivotalrepr.impl;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.*;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.unfolding.ExpressionEvaluator;
@@ -16,6 +15,7 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import static it.unibz.inf.ontop.model.impl.ImmutabilityTools.foldBooleanExpressions;
+import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
 import static it.unibz.inf.ontop.pivotalrepr.NodeTransformationProposedState.DECLARE_AS_EMPTY;
 import static it.unibz.inf.ontop.pivotalrepr.NodeTransformationProposedState.REPLACE_BY_UNIQUE_NON_EMPTY_CHILD;
 import static it.unibz.inf.ontop.pivotalrepr.NonCommutativeOperatorNode.ArgumentPosition.LEFT;
@@ -32,7 +32,6 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
 
 
     private static final String LEFT_JOIN_NODE_STR = "LJ";
-    private static final OBDADataFactory DATA_FACTORY = OBDADataFactoryImpl.getInstance();
 
     public LeftJoinNodeImpl(Optional<ImmutableExpression> optionalJoinCondition) {
         super(optionalJoinCondition);

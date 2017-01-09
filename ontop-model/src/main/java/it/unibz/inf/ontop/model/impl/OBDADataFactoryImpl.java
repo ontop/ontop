@@ -40,40 +40,19 @@ import static it.unibz.inf.ontop.model.impl.DataAtomTools.isVariableOnly;
 public class OBDADataFactoryImpl implements OBDADataFactory {
 
 	private static final long serialVersionUID = 1851116693137470887L;
-	
+
 	private static OBDADataFactory instance = null;
 	private static ValueFactory irifactory = null;
-	private DatatypeFactoryImpl datatypes = null;
 
 	// Only builds these TermTypes once.
 	private final Map<COL_TYPE, TermType> termTypeCache = new ConcurrentHashMap<>();
 
 	private static int counter = 0;
-	
-	private OBDADataFactoryImpl() {
-		// protected constructor prevents instantiation from other classes.
-	}
+	private final DatatypeFactory datatypeFactory;
 
-	public static OBDADataFactory getInstance() {
-		if (instance == null) {
-			instance = new OBDADataFactoryImpl();
-		}
-		return instance;
-	}
-	
-	public static ValueFactory getIRIFactory() {
-		if (irifactory == null) {
-			irifactory = new ValueFactoryImpl();
-		}
-		return irifactory;
-	}
-	
-	@Override
-	public DatatypeFactory getDatatypeFactory() {
-		if (datatypes == null) {
-			datatypes = new DatatypeFactoryImpl();
-		}
-		return datatypes;
+	OBDADataFactoryImpl(DatatypeFactory datatypeFactory) {
+		// protected constructor prevents instantiation from other classes.
+		this.datatypeFactory = datatypeFactory;
 	}
 
 	@Deprecated
@@ -144,7 +123,7 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 
 	@Override
 	public Function getTypedTerm(Term value, COL_TYPE type) {
-		Predicate pred = getDatatypeFactory().getTypePredicate(type);
+		Predicate pred = datatypeFactory.getTypePredicate(type);
 		if (pred == null)
 			throw new RuntimeException("Unknown data type!");
 		
@@ -158,14 +137,14 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 
 	@Override
 	public Function getTypedTerm(Term value, Term language) {
-		Predicate pred = getDatatypeFactory().getTypePredicate(COL_TYPE.LITERAL_LANG);
+		Predicate pred = datatypeFactory.getTypePredicate(COL_TYPE.LITERAL_LANG);
 		return getFunction(pred, value, language);
 	}
 
 	@Override
 	public Function getTypedTerm(Term value, String language) {
 		Term lang = getConstantLiteral(language.toLowerCase(), COL_TYPE.LITERAL);		
-		Predicate pred = getDatatypeFactory().getTypePredicate(COL_TYPE.LITERAL_LANG);
+		Predicate pred = datatypeFactory.getTypePredicate(COL_TYPE.LITERAL_LANG);
 		return getFunction(pred, value, lang);
 	}
 	
@@ -340,6 +319,11 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 		else {
 			return new VariableOnlyDataAtomImpl(predicate, arguments);
 		}
+	}
+
+	@Override
+	public DatatypeFactory getDatatypeFactory() {
+		return datatypeFactory;
 	}
 
 	@Override

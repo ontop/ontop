@@ -3,7 +3,6 @@ package it.unibz.inf.ontop.pivotalrepr.impl;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.ImmutabilityTools;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.unfolding.ExpressionEvaluator;
 import it.unibz.inf.ontop.pivotalrepr.IntermediateQuery;
 import it.unibz.inf.ontop.pivotalrepr.JoinLikeNode;
@@ -13,8 +12,6 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 public abstract class JoinLikeNodeImpl extends JoinOrFilterNodeImpl implements JoinLikeNode {
-
-    private static final OBDADataFactory DATA_FACTORY = OBDADataFactoryImpl.getInstance();
 
     protected JoinLikeNodeImpl(Optional<ImmutableExpression> optionalJoinCondition) {
         super(optionalJoinCondition);

@@ -3,7 +3,6 @@ package it.unibz.inf.ontop.reformulation.tests;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.AtomPredicateImpl;
 import it.unibz.inf.ontop.model.impl.ImmutabilityTools;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.optimization.PullOutVariableOptimizer;
 import it.unibz.inf.ontop.pivotalrepr.*;
 import it.unibz.inf.ontop.pivotalrepr.equivalence.IQSyntacticEquivalenceChecker;
@@ -28,7 +27,6 @@ public class PullOutVariableOptimizerTest {
     private final static AtomPredicate ANS1_PREDICATE2 = new AtomPredicateImpl("ans1", 3);
     private final static AtomPredicate ANS1_PREDICATE3 = new AtomPredicateImpl("ans1", 2);
 
-    private final static OBDADataFactory DATA_FACTORY = OBDADataFactoryImpl.getInstance();
     private final static Variable X = DATA_FACTORY.getVariable("X");
     private final static Variable X0 = DATA_FACTORY.getVariable("Xf0");
     private final static Variable X1 = DATA_FACTORY.getVariable("Xf1");

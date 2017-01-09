@@ -7,6 +7,7 @@ import java.util.Optional;
 
 import static it.unibz.inf.ontop.model.Predicate.COL_TYPE.LITERAL;
 import static it.unibz.inf.ontop.model.Predicate.COL_TYPE.LITERAL_LANG;
+import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
 
 /**
  * TODO: integrate into a factory
@@ -17,7 +18,7 @@ public class TermTypeImpl implements TermType {
     private final Optional<LanguageTag> optionalLangTagConstant;
     private final Optional<Term> optionalLangTagTerm;
     private static final Optional<TermType> OPTIONAL_LITERAL_TERM_TYPE = Optional.of(
-            OBDADataFactoryImpl.getInstance().getTermType(LITERAL));
+            DATA_FACTORY.getTermType(LITERAL));
 
     /**
      * Only for langString WHEN the languageTag is constant.

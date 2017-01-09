@@ -6,6 +6,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import com.google.inject.Singleton;
 import it.unibz.inf.ontop.model.DatatypePredicate;
 import org.openrdf.model.URI;
 import org.openrdf.model.ValueFactory;
@@ -18,6 +19,7 @@ import it.unibz.inf.ontop.model.DatatypeFactory;
 import it.unibz.inf.ontop.model.Predicate;
 import it.unibz.inf.ontop.model.Predicate.COL_TYPE;
 
+@Singleton
 public class DatatypeFactoryImpl implements DatatypeFactory {
 
 	
@@ -39,7 +41,7 @@ public class DatatypeFactoryImpl implements DatatypeFactory {
 	private final Map<COL_TYPE, URI> mapCOLTYPEtoURI = new HashMap<>();
 	private final Map<COL_TYPE, DatatypePredicate> mapCOLTYPEtoPredicate = new HashMap<>();
 	private final List<Predicate> predicateList = new LinkedList<>();
-	
+
 	DatatypeFactoryImpl() {
 		RDFS_LITERAL = registerType(RDFS.LITERAL, COL_TYPE.LITERAL); // 3 "http://www.w3.org/2000/01/rdf-schema#Literal"
 		XSD_INTEGER = registerType(XMLSchema.INTEGER, COL_TYPE.INTEGER);  //  4 "http://www.w3.org/2001/XMLSchema#integer";

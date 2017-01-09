@@ -3,7 +3,6 @@ package it.unibz.inf.ontop.owlrefplatform.core;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.injection.OntopModelFactory;
 import it.unibz.inf.ontop.model.*;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
 import it.unibz.inf.ontop.owlrefplatform.core.abox.SemanticIndexURIMap;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.*;
@@ -33,6 +32,7 @@ import org.openrdf.query.parser.QueryParserUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
 import static it.unibz.inf.ontop.pivotalrepr.datalog.Mapping2QueryConverter.convertMappings;
 
 /**
@@ -127,7 +127,7 @@ public class QuestQueryProcessor {
 		//System.out.println("SAMEAS" + program);
 
 		log.debug("Replacing equivalences...");
-		DatalogProgram newprogramEq = OBDADataFactoryImpl.getInstance().getDatalogProgram(program.getQueryModifiers());
+		DatalogProgram newprogramEq = DATA_FACTORY.getDatalogProgram(program.getQueryModifiers());
 		Predicate topLevelPredicate = null;
 		for (CQIE query : program.getRules()) {
 			// TODO: fix cloning
@@ -143,7 +143,7 @@ public class QuestQueryProcessor {
 
 		SPARQLQueryFlattener fl = new SPARQLQueryFlattener(newprogramEq);
 		List<CQIE> p = fl.flatten(newprogramEq.getRules(topLevelPredicate).get(0));
-		DatalogProgram newprogram = OBDADataFactoryImpl.getInstance().getDatalogProgram(program.getQueryModifiers(), p);
+		DatalogProgram newprogram = DATA_FACTORY.getDatalogProgram(program.getQueryModifiers(), p);
 
 		return newprogram;
 	}

@@ -5,7 +5,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.*;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionImpl;
 import it.unibz.inf.ontop.pivotalrepr.ConstructionNode;
 import it.unibz.inf.ontop.pivotalrepr.IntermediateQuery;
@@ -17,6 +16,8 @@ import java.util.AbstractMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
+
+import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
 
 /**
  * Only deals with construction and union nodes
@@ -45,8 +46,6 @@ public class UnionFriendlyBindingExtractor implements BindingExtractor {
 
         }
     }
-
-    private static final OBDADataFactory DATA_FACTORY = OBDADataFactoryImpl.getInstance();
 
     @Override
     public Extraction extractInSubTree(IntermediateQuery query, QueryNode subTreeRootNode) {

@@ -3,12 +3,14 @@
 package it.unibz.inf.ontop.parser;
 
 import it.unibz.inf.ontop.model.*;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
 import org.antlr.runtime.BitSet;
 import org.antlr.runtime.*;
 
 import java.util.*;
+
+import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATATYPE_FACTORY;
+import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
 
 @SuppressWarnings("all")
 public class DatalogParser extends Parser {
@@ -105,10 +107,6 @@ public class DatalogParser extends Parser {
 	/** Set of variable terms */
 	private HashSet<Variable> variables = new HashSet<Variable>();
 
-	/** A factory to construct the predicates and terms */
-	private static final OBDADataFactory dfac = OBDADataFactoryImpl.getInstance();
-	private final DatatypeFactory dtfac = OBDADataFactoryImpl.getInstance().getDatatypeFactory();
-
 	/** Select all flag */
 	private boolean isSelectAll = false;
 
@@ -165,7 +163,7 @@ public class DatalogParser extends Parser {
 		CQIE rule2 =null;
 
 
-		  value = dfac.getDatalogProgram();
+		  value = DATA_FACTORY.getDatalogProgram();
 		  CQIE rule = null;
 
 		try {
@@ -246,8 +244,8 @@ public class DatalogParser extends Parser {
 					        int size = variableList.size(); 
 					        
 					        // Get the predicate atom
-					        Predicate predicate = dfac.getPredicate(name, size);
-					        Function newhead = dfac.getFunction(predicate, variableList);
+					        Predicate predicate = DATA_FACTORY.getPredicate(name, size);
+					        Function newhead = DATA_FACTORY.getFunction(predicate, variableList);
 					        rule.updateHead(newhead);
 					        
 					        isSelectAll = false;  
@@ -539,7 +537,7 @@ public class DatalogParser extends Parser {
 					state._fsp--;
 					if (state.failed) return value;
 					if ( state.backtracking==0 ) {
-					      value = dfac.getCQIE(null, body8);
+					      value = DATA_FACTORY.getCQIE(null, body8);
 					    }
 					}
 					break;
@@ -642,7 +640,7 @@ public class DatalogParser extends Parser {
 					state._fsp--;
 					if (state.failed) return value;
 					if ( state.backtracking==0 ) {
-					      value = dfac.getCQIE(head10, body11);
+					      value = DATA_FACTORY.getCQIE(head10, body11);
 					    }
 					}
 					break;
@@ -655,7 +653,7 @@ public class DatalogParser extends Parser {
 					if (state.failed) return value;
 					match(input,INV_IMPLIES,FOLLOW_INV_IMPLIES_in_datalog_syntax_alt278); if (state.failed) return value;
 					if ( state.backtracking==0 ) {
-					      value = dfac.getCQIE(head12, new LinkedList<Function>());
+					      value = DATA_FACTORY.getCQIE(head12, new LinkedList<Function>());
 					    }
 					}
 					break;
@@ -712,7 +710,7 @@ public class DatalogParser extends Parser {
 					state._fsp--;
 					if (state.failed) return value;
 					if ( state.backtracking==0 ) {
-					      value = dfac.getCQIE(head13, new LinkedList<Function>());
+					      value = DATA_FACTORY.getCQIE(head13, new LinkedList<Function>());
 					    }
 					}
 					break;
@@ -815,7 +813,7 @@ public class DatalogParser extends Parser {
 					state._fsp--;
 					if (state.failed) return value;
 					if ( state.backtracking==0 ) {
-					      value = dfac.getCQIE(head15, body16);
+					      value = DATA_FACTORY.getCQIE(head15, body16);
 					    }
 					}
 					break;
@@ -828,7 +826,7 @@ public class DatalogParser extends Parser {
 					if (state.failed) return value;
 					match(input,IMPLIES,FOLLOW_IMPLIES_in_swirl_syntax_alt349); if (state.failed) return value;
 					if ( state.backtracking==0 ) {
-					      value = dfac.getCQIE(null, body17);
+					      value = DATA_FACTORY.getCQIE(null, body17);
 					    }
 					}
 					break;
@@ -1003,13 +1001,13 @@ public class DatalogParser extends Parser {
 			      Vector<Term> elements = terms20;
 			      if (elements == null)
 			        elements = new Vector<Term>();
-			      Predicate predicate = dfac.getPredicate(uri, elements.size());
+			      Predicate predicate = DATA_FACTORY.getPredicate(uri, elements.size());
 			      
 			      Vector<Term> terms = terms20;
 			      if (terms == null)
 			        terms = new Vector<Term>();
 			        
-			      value = dfac.getFunction(predicate, terms);
+			      value = DATA_FACTORY.getFunction(predicate, terms);
 			    }
 			}
 
@@ -1342,7 +1340,7 @@ public class DatalogParser extends Parser {
 					state._fsp--;
 					if (state.failed) return value;
 					if ( state.backtracking==0 ) { 
-					      value = dfac.getVariable((id28!=null?input.toString(id28.start,id28.stop):null));
+					      value = DATA_FACTORY.getVariable((id28!=null?input.toString(id28.start,id28.stop):null));
 					      variables.add(value); // collect the variable terms.
 					    }
 					}
@@ -1352,7 +1350,7 @@ public class DatalogParser extends Parser {
 					{
 					match(input,ASTERISK,FOLLOW_ASTERISK_in_variable_term609); if (state.failed) return value;
 					if ( state.backtracking==0 ) {
-					      value = dfac.getVariable(OBDA_SELECT_ALL);
+					      value = DATA_FACTORY.getVariable(OBDA_SELECT_ALL);
 					      isSelectAll = true;
 					    }
 					}
@@ -1404,7 +1402,7 @@ public class DatalogParser extends Parser {
 			      	}
 			      }
 			      
-			      value = dfac.getConstantLiteral(literal);
+			      value = DATA_FACTORY.getConstantLiteral(literal);
 			    }
 			}
 
@@ -1450,16 +1448,16 @@ public class DatalogParser extends Parser {
 			      int arity = terms31.size();
 			    
 			      if (functionName.equals(OBDAVocabulary.QUEST_URI)) {
-					     value = dfac.getUriTemplate(terms31);
+					     value = DATA_FACTORY.getUriTemplate(terms31);
 				  }
 			      else {
 				      Predicate functionSymbol;
-				      Predicate.COL_TYPE type = dtfac.getDatatype(functionName);
+				      Predicate.COL_TYPE type = DATATYPE_FACTORY.getDatatype(functionName);
 				      if (type != null) 
-				    	  value = dfac.getTypedTerm(terms31.get(0), type);
+				    	  value = DATA_FACTORY.getTypedTerm(terms31.get(0), type);
 				      else {
-						  functionSymbol = dfac.getPredicate(functionName, arity);
-					      value = dfac.getFunction(functionSymbol, terms31);
+						  functionSymbol = DATA_FACTORY.getPredicate(functionName, arity);
+					      value = DATA_FACTORY.getFunction(functionSymbol, terms31);
 				      }
 			      }
 			    	  
@@ -1501,7 +1499,7 @@ public class DatalogParser extends Parser {
 			if (state.failed) return value;
 			if ( state.backtracking==0 ) { 
 			      uriText = (uri32!=null?input.toString(uri32.start,uri32.stop):null);      
-			      value = dfac.getConstantURI(uriText);
+			      value = DATA_FACTORY.getConstantURI(uriText);
 			    }
 			}
 

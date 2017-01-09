@@ -27,7 +27,6 @@ import it.unibz.inf.ontop.injection.OBDAFactoryWithException;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.Predicate.COL_TYPE;
 import it.unibz.inf.ontop.model.impl.MappingFactoryImpl;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.ontology.DataPropertyExpression;
 import it.unibz.inf.ontop.ontology.OClass;
 import it.unibz.inf.ontop.ontology.ObjectPropertyExpression;
@@ -43,6 +42,8 @@ import java.net.URI;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.*;
+
+import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
 
 
 /***
@@ -208,9 +209,8 @@ public class DirectMappingEngine {
 	 *  @return a List of OBDAMappingAxiom-s
 	 */
 	public List<OBDAMappingAxiom> getMapping(DatabaseRelationDefinition table, String baseUri) {
-		OBDADataFactory dfac = OBDADataFactoryImpl.getInstance();
 
-		DirectMappingAxiomProducer dmap = new DirectMappingAxiomProducer(baseUri, dfac);
+		DirectMappingAxiomProducer dmap = new DirectMappingAxiomProducer(baseUri, DATA_FACTORY);
 
 		List<OBDAMappingAxiom> axioms = new ArrayList<>();
 		axioms.add(nativeQLFactory.create("MAPPING-ID"+ currentMappingIndex, MAPPING_FACTORY.getSQLQuery(dmap.getSQL(table)), dmap.getCQ(table)));

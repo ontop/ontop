@@ -6,7 +6,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.*;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.ImmutableUnificationTools;
@@ -23,7 +22,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static it.unibz.inf.ontop.owlrefplatform.core.basicoperations.ImmutableUnificationTools.computeMGUS;
+import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
 import static it.unibz.inf.ontop.pivotalrepr.SubstitutionResults.LocalAction.DECLARE_AS_EMPTY;
 import static it.unibz.inf.ontop.pivotalrepr.impl.ConstructionNodeTools.computeNewProjectedVariables;
 import static it.unibz.inf.ontop.pivotalrepr.impl.ConstructionNodeTools.extractRelevantDescendingSubstitution;
@@ -49,7 +48,6 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
 
 
     private static Logger LOGGER = LoggerFactory.getLogger(ConstructionNodeImpl.class);
-    private static OBDADataFactory DATA_FACTORY = OBDADataFactoryImpl.getInstance();
     private static int CONVERGENCE_BOUND = 5;
 
     private final Optional<ImmutableQueryModifiers> optionalModifiers;

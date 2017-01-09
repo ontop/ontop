@@ -24,10 +24,8 @@ import it.unibz.inf.ontop.model.CQIE;
 import it.unibz.inf.ontop.model.DatalogProgram;
 import it.unibz.inf.ontop.model.Function;
 import it.unibz.inf.ontop.model.Term;
-import it.unibz.inf.ontop.model.OBDADataFactory;
 import it.unibz.inf.ontop.model.Predicate;
 import it.unibz.inf.ontop.model.Variable;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.ontology.ClassExpression;
 import it.unibz.inf.ontop.ontology.DataPropertyExpression;
 import it.unibz.inf.ontop.ontology.ImmutableOntologyVocabulary;
@@ -52,6 +50,8 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
+
 
 /**
  * 
@@ -59,7 +59,6 @@ import org.slf4j.LoggerFactory;
 
 public class TreeWitnessRewriter implements QueryRewriter {
 
-	private static final OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 	private static final Logger log = LoggerFactory.getLogger(TreeWitnessRewriter.class);
 
 	private TBoxReasoner reasoner;
@@ -99,15 +98,15 @@ public class TreeWitnessRewriter implements QueryRewriter {
 	 */
 	
 	private static Function getHeadAtom(String base, String suffix, List<Term> arguments) {
-		Predicate predicate = fac.getPredicate(base + suffix, arguments.size());
-		return fac.getFunction(predicate, arguments);
+		Predicate predicate = DATA_FACTORY.getPredicate(base + suffix, arguments.size());
+		return DATA_FACTORY.getFunction(predicate, arguments);
 	}
 	
 	private int freshVarIndex = 0;
 	
 	private Variable getFreshVariable() {
 		freshVarIndex++;
-		return fac.getVariable("twr" + freshVarIndex); 
+		return DATA_FACTORY.getVariable("twr" + freshVarIndex);
 	}
 	
 	/*
@@ -123,17 +122,17 @@ public class TreeWitnessRewriter implements QueryRewriter {
 			log.debug("  BASIC CONCEPT: {}", con);
 			Function atom; 
 			if (con instanceof OClass) {
-				atom = fac.getFunction(((OClass)con).getPredicate(), r0);
+				atom = DATA_FACTORY.getFunction(((OClass)con).getPredicate(), r0);
 			}
 			else if (con instanceof ObjectSomeValuesFrom) {
 				ObjectPropertyExpression some = ((ObjectSomeValuesFrom)con).getProperty();
 				atom = (!some.isInverse()) ?  
-						fac.getFunction(some.getPredicate(), r0, getFreshVariable()) : 
-							fac.getFunction(some.getPredicate(), getFreshVariable(), r0);  						 
+						DATA_FACTORY.getFunction(some.getPredicate(), r0, getFreshVariable()) :
+							DATA_FACTORY.getFunction(some.getPredicate(), getFreshVariable(), r0);
 			}
 			else {
 				DataPropertyExpression some = ((DataSomeValuesFrom)con).getProperty();
-				atom = fac.getFunction(some.getPredicate(), r0, getFreshVariable());
+				atom = DATA_FACTORY.getFunction(some.getPredicate(), r0, getFreshVariable());
 			}
 			genAtoms.add(atom);
 		}
@@ -156,7 +155,7 @@ public class TreeWitnessRewriter implements QueryRewriter {
 		if (cc.hasNoFreeTerms()) {  
 			if (!cc.isDegenerate() || cc.getLoop() != null) 
 				for (Function a : getAtomsForGenerators(tws.getGeneratorsOfDetachedCC(), getFreshVariable())) {
-					outputRules.add(fac.getCQIE(headAtom, a)); 
+					outputRules.add(DATA_FACTORY.getCQIE(headAtom, a));
 				}
 		}
 
@@ -169,12 +168,12 @@ public class TreeWitnessRewriter implements QueryRewriter {
 			Iterator<Term> i = tw.getRoots().iterator();
 			Term r0 = i.next();
 			while (i.hasNext()) 
-				twf.add(fac.getFunctionEQ(i.next(), r0));
+				twf.add(DATA_FACTORY.getFunctionEQ(i.next(), r0));
 			
 			// root atoms
 			for (Function a : tw.getRootAtoms()) {
 				Predicate predicate = a.getFunctionSymbol();
-				twf.add((predicate.getArity() == 1) ? fac.getFunction(predicate, r0) : fac.getFunction(predicate, r0, r0));
+				twf.add((predicate.getArity() == 1) ? DATA_FACTORY.getFunction(predicate, r0) : DATA_FACTORY.getFunction(predicate, r0, r0));
 			}
 			
 			List<Function> genAtoms = getAtomsForGenerators(tw.getGenerators(), r0);			
@@ -227,10 +226,10 @@ public class TreeWitnessRewriter implements QueryRewriter {
 						Function twAtom = getHeadAtom(headURI, "_TW_" + (edgeDP.getRules().size() + 1), cc.getVariables());
 						mainbody.add(twAtom);				
 						for (List<Function> twfa : tw.getFormula())
-							edgeDP.appendRule(fac.getCQIE(twAtom, twfa));
+							edgeDP.appendRule(DATA_FACTORY.getCQIE(twAtom, twfa));
 					}	
 					mainbody.addAll(cc.getNonDLAtoms());					
-					outputRules.add(fac.getCQIE(headAtom, mainbody)); 
+					outputRules.add(DATA_FACTORY.getCQIE(headAtom, mainbody));
 				}
 			}
 			else {
@@ -251,18 +250,18 @@ public class TreeWitnessRewriter implements QueryRewriter {
 								
 								LinkedList<Function> edgeAtoms = new LinkedList<Function>(); 
 								edgeAtoms.addAll(edge.getAtoms());
-								edgeDP.appendRule(fac.getCQIE(edgeAtom, edgeAtoms));													
+								edgeDP.appendRule(DATA_FACTORY.getCQIE(edgeAtom, edgeAtoms));
 							}
 							
 							for (List<Function> twfa : tw.getFormula())
-								edgeDP.appendRule(fac.getCQIE(edgeAtom, twfa));
+								edgeDP.appendRule(DATA_FACTORY.getCQIE(edgeAtom, twfa));
 						}
 					
 					if (edgeAtom == null) // no tree witnesses -- direct insertion into the main body
 						mainbody.addAll(edge.getAtoms());
 				}
 				mainbody.addAll(cc.getNonDLAtoms());
-				outputRules.add(fac.getCQIE(headAtom, mainbody)); 
+				outputRules.add(DATA_FACTORY.getCQIE(headAtom, mainbody));
 			}
 		}
 		else {
@@ -273,7 +272,7 @@ public class TreeWitnessRewriter implements QueryRewriter {
 			if (loop != null)
 				loopbody.addAll(loop.getAtoms());
 			loopbody.addAll(cc.getNonDLAtoms());
-			outputRules.add(fac.getCQIE(headAtom, loopbody)); 
+			outputRules.add(DATA_FACTORY.getCQIE(headAtom, loopbody));
 		}
 		return outputRules;
 	}
@@ -287,7 +286,7 @@ public class TreeWitnessRewriter implements QueryRewriter {
 		
 		List<CQIE> outputRules = new LinkedList<>();
 		DatalogProgram ccDP = null;
-		DatalogProgram edgeDP = fac.getDatalogProgram();
+		DatalogProgram edgeDP = DATA_FACTORY.getDatalogProgram();
 
 		for (CQIE cqie : dp.getRules()) {
 			List<QueryConnectedComponent> ccs = QueryConnectedComponent.getConnectedComponents(cqie);	
@@ -302,7 +301,7 @@ public class TreeWitnessRewriter implements QueryRewriter {
 			}
 			else {
 				if (ccDP == null)
-					ccDP = fac.getDatalogProgram();
+					ccDP = DATA_FACTORY.getDatalogProgram();
 				String cqieURI = cqieAtom.getFunctionSymbol().getName();
 				List<Function> ccBody = new ArrayList<Function>(ccs.size());
 				for (QueryConnectedComponent cc : ccs) {
@@ -314,7 +313,7 @@ public class TreeWitnessRewriter implements QueryRewriter {
 					ccDP.appendRule(list);
 					ccBody.add(ccAtom);
 				}
-				outputRules.add(fac.getCQIE(cqieAtom, ccBody));
+				outputRules.add(DATA_FACTORY.getCQIE(cqieAtom, ccBody));
 			}
 		}
 		
@@ -323,7 +322,7 @@ public class TreeWitnessRewriter implements QueryRewriter {
 			log.debug("EDGE DEFS\n{}", edgeDP);			
 			outputRules = DatalogQueryServices.plugInDefinitions(outputRules, edgeDP);
 			if (ccDP != null)
-				ccDP = fac.getDatalogProgram(dp.getQueryModifiers(),
+				ccDP = DATA_FACTORY.getDatalogProgram(dp.getQueryModifiers(),
 						DatalogQueryServices.plugInDefinitions(ccDP.getRules(), edgeDP));
 			log.debug("INLINE EDGE PROGRAM\n{}CC DEFS\n{}", outputRules, ccDP);
 		}
@@ -336,7 +335,7 @@ public class TreeWitnessRewriter implements QueryRewriter {
 		if (outputRules.size() > 1) 
 			CQCUtilities.removeContainedQueries(outputRules, dataDependenciesCQC);
 		
-		DatalogProgram output = fac.getDatalogProgram(dp.getQueryModifiers(), outputRules);
+		DatalogProgram output = DATA_FACTORY.getDatalogProgram(dp.getQueryModifiers(), outputRules);
 		for (CQIE cq : output.getRules())
 			CQCUtilities.optimizeQueryWithSigmaRules(cq.getBody(), sigma);
 

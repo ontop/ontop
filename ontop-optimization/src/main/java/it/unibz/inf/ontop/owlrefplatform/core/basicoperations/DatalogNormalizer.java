@@ -22,7 +22,6 @@ package it.unibz.inf.ontop.owlrefplatform.core.basicoperations;
 
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.Predicate.COL_TYPE;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
 import it.unibz.inf.ontop.model.impl.TermUtils;
 
@@ -34,10 +33,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
+
 public class DatalogNormalizer {
-
-	private final static OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
-
 
 	/***
 	 * This expands all Join that can be directly added as conjuncts to a
@@ -121,7 +119,7 @@ public class DatalogNormalizer {
 		 * generated. It always merges from the left to the right.
 		 */
 		while (dataAtoms.size() > 2) {
-			Function joinAtom = fac.getSPARQLJoin(dataAtoms.remove(0), dataAtoms.remove(0));
+			Function joinAtom = DATA_FACTORY.getSPARQLJoin(dataAtoms.remove(0), dataAtoms.remove(0));
 			joinAtom.getTerms().addAll(booleanAtoms);
 			booleanAtoms.clear();
 
@@ -199,8 +197,8 @@ public class DatalogNormalizer {
 				booleanAtoms += 1;
 		}
 		if (isLeftJoin && booleanAtoms == 0) {
-			Function trivialEquality = fac.getFunctionEQ(fac.getConstantLiteral("1", COL_TYPE.INTEGER),
-					fac.getConstantLiteral("1", COL_TYPE.INTEGER));
+			Function trivialEquality = DATA_FACTORY.getFunctionEQ(DATA_FACTORY.getConstantLiteral("1", COL_TYPE.INTEGER),
+					DATA_FACTORY.getConstantLiteral("1", COL_TYPE.INTEGER));
 			leftJoin.getTerms().add(trivialEquality);
 		}
 	}
@@ -267,7 +265,7 @@ public class DatalogNormalizer {
 						 * a new variable and register in the substitutions, and
 						 * replace the current value with a fresh one.
 						 */
-						var2 = fac.getVariable(var1.getName() + "f" + newVarCounter[0]);
+						var2 = DATA_FACTORY.getVariable(var1.getName() + "f" + newVarCounter[0]);
 
 						substitutions.put(var1, var2);
 						subterms.set(j, var2);
@@ -281,10 +279,10 @@ public class DatalogNormalizer {
 						 */
 
 						if (atom.isDataFunction()) {
-							Variable newVariable = fac.getVariable(var1.getName() + newVarCounter[0]);
+							Variable newVariable = DATA_FACTORY.getVariable(var1.getName() + newVarCounter[0]);
 
 							subterms.set(j, newVariable);
-							Function equality = fac.getFunctionEQ(var2, newVariable);
+							Function equality = DATA_FACTORY.getFunctionEQ(var2, newVariable);
 							eqList.add(equality);
 
 						} else { // if its not data function, just replace
@@ -303,9 +301,9 @@ public class DatalogNormalizer {
 					 */
 					// only relevant if in data function?
 					if (atom.isDataFunction()) {
-						Variable var = fac.getVariable("f" + newVarCounter[0]);
+						Variable var = DATA_FACTORY.getVariable("f" + newVarCounter[0]);
 						newVarCounter[0] += 1;
-						Function equality = fac.getFunctionEQ(var, subTerm);
+						Function equality = DATA_FACTORY.getFunctionEQ(var, subTerm);
 						subterms.set(j, var);
 						eqList.add(equality);
 					}
@@ -364,7 +362,7 @@ public class DatalogNormalizer {
 			List<Term> varList = new ArrayList<>(equalitySets.get(k));
 			for (int i = 0; i < varList.size() - 1; i++) {
 				for (int j = i + 1; j < varList.size(); j++) {
-					Function equality = fac.getFunctionEQ(varList.get(i), varList.get(j));
+					Function equality = DATA_FACTORY.getFunctionEQ(varList.get(i), varList.get(j));
 					boolSet.add(equality);
 				}
 			}

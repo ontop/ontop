@@ -23,7 +23,6 @@ package it.unibz.inf.ontop.utils;
 import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.MappingFactoryImpl;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
 import it.unibz.inf.ontop.parser.SQLQueryShallowParser;
 import it.unibz.inf.ontop.sql.QualifiedAttributeID;
@@ -49,6 +48,8 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.*;
 
+import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
+
 
 /**
  * 
@@ -61,7 +62,6 @@ public class MetaMappingExpander {
 	
 	private final Connection connection;
 	private final QuotedIDFactory idfac;
-	private final OBDADataFactory dfac = OBDADataFactoryImpl.getInstance();
 	private final NativeQueryLanguageComponentFactory nativeQLFactory;
 	private static final MappingFactory MAPPING_FACTORY = MappingFactoryImpl.getInstance();
 
@@ -449,12 +449,12 @@ public class MetaMappingExpander {
 		
 		Function result = null;
 		if (arity == 1) {
-			Predicate p = dfac.getClassPredicate(predName);
-			result = dfac.getFunction(p, atom.getTerm(0));
+			Predicate p = DATA_FACTORY.getClassPredicate(predName);
+			result = DATA_FACTORY.getFunction(p, atom.getTerm(0));
 		} 
 		else if (arity == 2) {
-			Predicate p = dfac.getObjectPropertyPredicate(predName);
-			result = dfac.getFunction(p, atom.getTerm(0), atom.getTerm(2));
+			Predicate p = DATA_FACTORY.getObjectPropertyPredicate(predName);
+			result = DATA_FACTORY.getFunction(p, atom.getTerm(0), atom.getTerm(2));
 		}
 		return result;
 	}

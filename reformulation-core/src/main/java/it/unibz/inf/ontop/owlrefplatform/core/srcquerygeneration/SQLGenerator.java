@@ -59,6 +59,8 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static it.unibz.inf.ontop.model.Predicate.COL_TYPE.*;
+import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATATYPE_FACTORY;
+import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
 
 /**
  * This class generates an SQLExecutableQuery from the datalog program coming from the
@@ -113,10 +115,7 @@ public class SQLGenerator implements NativeQueryGenerator {
 
 	private Map<Predicate, String> sqlAnsViewMap;
 
-	private static final OBDADataFactory obdaDataFactory = OBDADataFactoryImpl.getInstance();
 	private static final MappingFactory MAPPING_FACTORY = MappingFactoryImpl.getInstance();
-
-	private final DatatypeFactory dtfac = OBDADataFactoryImpl.getInstance().getDatatypeFactory();
 
 	private final ImmutableMap<ExpressionOperation, String> operations;
 
@@ -354,7 +353,7 @@ public class SQLGenerator implements NativeQueryGenerator {
 		}
 
 		OBDAQueryModifiers queryModifiers = datalogProgram.getQueryModifiers();
-		datalogProgram = obdaDataFactory.getDatalogProgram(queryModifiers, normalizedRules);
+		datalogProgram = DATA_FACTORY.getDatalogProgram(queryModifiers, normalizedRules);
 		log.debug("Normalized Datalog query: \n" + datalogProgram.toString());
 
 		return datalogProgram;
@@ -1227,7 +1226,7 @@ public class SQLGenerator implements NativeQueryGenerator {
 			Function f = (Function) term;
 			if (f.isDataTypeFunction()) {
 				Predicate p = f.getFunctionSymbol();
-				COL_TYPE type = dtfac.getDatatype(p.toString());
+				COL_TYPE type = DATATYPE_FACTORY.getDatatype(p.toString());
 				return MAPPING_FACTORY.getJdbcTypeMapper().getSQLType(type);
 			}
 			// Return varchar for unknown
@@ -1619,7 +1618,7 @@ public class SQLGenerator implements NativeQueryGenerator {
 			 */
 			if (ov.getTerms().size() > 1) {
 				int size = ov.getTerms().size();
-				if (dtfac.isLiteral(pred)) {
+				if (DATATYPE_FACTORY.isLiteral(pred)) {
 					size--;
 				}
 				for (int termIndex = 1; termIndex < size; termIndex++) {
