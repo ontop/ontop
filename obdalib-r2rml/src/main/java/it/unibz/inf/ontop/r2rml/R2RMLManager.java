@@ -30,13 +30,12 @@ import eu.optique.api.mapping.PredicateObjectMap;
 import eu.optique.api.mapping.RefObjectMap;
 import eu.optique.api.mapping.TriplesMap;
 import it.unibz.inf.ontop.model.*;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
+import it.unibz.inf.ontop.model.impl.MappingFactoryImpl;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
 import it.unibz.inf.ontop.model.impl.TermUtils;
+import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
+import java.io.*;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -45,39 +44,34 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import com.google.common.collect.ImmutableList;
 import org.openrdf.model.Model;
-import org.openrdf.model.Resource;
 import org.openrdf.model.impl.LinkedHashModel;
-import org.openrdf.rio.RDFFormat;
-import org.openrdf.rio.RDFParser;
-import org.openrdf.rio.Rio;
+import org.openrdf.rio.*;
 import org.openrdf.rio.helpers.StatementCollector;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
-import java.net.URL;
-import java.util.*;
+import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
 
 public class R2RMLManager {
-	
-	private OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
+
+	private static final MappingFactory MAPPING_FACTORY = MappingFactoryImpl.getInstance();
 	private R2RMLParser r2rmlParser;
 	private Model myModel;
-	
+	private final NativeQueryLanguageComponentFactory nativeQLFactory;
+
 	/**
 	 * Constructor to start parsing R2RML mappings from file.
 	 * @param file - the full path of the file
 	 */
-	public R2RMLManager(String file) throws Exception {
-		this(new File(file));
+	public R2RMLManager(String file, NativeQueryLanguageComponentFactory nativeQLFactory) throws RDFParseException, IOException, RDFHandlerException {
+		this(new File(file), nativeQLFactory);
 	}
 	
 	/**
 	 * Constructor to start parsing R2RML mappings from file.
 	 * @param file - the File object
 	 */
-	public R2RMLManager(File file) throws Exception {
+	public R2RMLManager(File file, NativeQueryLanguageComponentFactory nativeQLFactory) throws IOException, RDFParseException, RDFHandlerException {
 
 			myModel = new LinkedHashModel();			
 			RDFParser parser = Rio.createParser(RDFFormat.TURTLE);
@@ -88,15 +82,18 @@ public class R2RMLManager {
 			parser.parse(in, documentUrl.toString());
 			r2rmlParser = new R2RMLParser();
 
+			this.nativeQLFactory = nativeQLFactory;
+
 	}
 	
 	/**
 	 * Constructor to start the parser from an RDF Model
 	 * @param model - the sesame Model containing mappings
 	 */
-	public R2RMLManager(Model model){
+	public R2RMLManager(Model model, NativeQueryLanguageComponentFactory nativeQLFactory){
 		myModel = model;
 		r2rmlParser = new R2RMLParser();
+		this.nativeQLFactory = nativeQLFactory;
 	}
 	
 	/**
@@ -113,9 +110,9 @@ public class R2RMLManager {
 	 * @param myModel - the Model structure containing mappings
 	 * @return ArrayList<OBDAMappingAxiom> - list of mapping axioms read from the Model
 	 */
-	public ArrayList<OBDAMappingAxiom> getMappings(Model myModel) {
+	public ImmutableList<OBDAMappingAxiom> getMappings(Model myModel) {
 
-		ArrayList<OBDAMappingAxiom> mappings = new ArrayList<OBDAMappingAxiom>();
+		List<OBDAMappingAxiom> mappings = new ArrayList<OBDAMappingAxiom>();
 
 		// retrieve the TriplesMap nodes
 		Collection<TriplesMap> tripleMaps = r2rmlParser.getMappingNodes(myModel);
@@ -143,7 +140,7 @@ public class R2RMLManager {
 				throw new RuntimeException(e);
 			}
 		}
-		return mappings;
+		return ImmutableList.copyOf(mappings);
 	}
 	/**
 	 * Get OBDA mapping axiom from R2RML TriplesMap 
@@ -155,8 +152,8 @@ public class R2RMLManager {
 		String sourceQuery = r2rmlParser.getSQLQuery(tm);
 		List<Function> body = getMappingTripleAtoms(tm);
 		//Function head = getHeadAtom(body);
-		//CQIE targetQuery = fac.getCQIE(head, body);
-		OBDAMappingAxiom mapping = fac.getRDBMSMappingAxiom("mapping-"+tm.hashCode(), fac.getSQLQuery(sourceQuery), body);
+		//CQIE targetQuery = DATA_FACTORY.getCQIE(head, body);
+		OBDAMappingAxiom mapping = nativeQLFactory.create("mapping-"+tm.hashCode(), MAPPING_FACTORY.getSQLQuery(sourceQuery), body);
         if (body.isEmpty()){
             //we do not have a target query
             System.out.println("WARNING a mapping without target query will not be introduced : "+ mapping.toString());
@@ -202,19 +199,19 @@ public class R2RMLManager {
 				
 			List<Predicate> joinPredicates = r2rmlParser.getBodyPredicates(pobm);
 			for (Predicate pred : joinPredicates) {
-				Function bodyAtom = fac.getFunction(pred, terms);
+				Function bodyAtom = DATA_FACTORY.getFunction(pred, terms);
 				body.add(bodyAtom);
 			}
 
 			//Function head = getHeadAtom(body);
-			//CQIE targetQuery = fac.getCQIE(head, body);
+			//CQIE targetQuery = DATA_FACTORY.getCQIE(head, body);
 			
 			if (sourceQuery.isEmpty()) {
 				throw new Exception("Could not create source query for join in "+tm.toString());
 			}
 			//finally, create mapping and add it to the list
                 //use referenceObjectMap robm as id, because there could be multiple joinCondition in the same triple map
-			OBDAMappingAxiom mapping = fac.getRDBMSMappingAxiom("mapping-join-"+robm.hashCode(), fac.getSQLQuery(sourceQuery), body);
+			OBDAMappingAxiom mapping = nativeQLFactory.create("mapping-join-"+robm.hashCode(), MAPPING_FACTORY.getSQLQuery(sourceQuery), body);
 			System.out.println("WARNING joinMapping introduced : "+mapping.toString());
 			joinMappings.add(mapping);
 		}
@@ -235,7 +232,7 @@ public class R2RMLManager {
 		}
 		int arity = vars.size();
 		List<Term> dvars = new ArrayList<Term>(vars);
-		Function head = fac.getFunction(fac.getPredicate(OBDALibConstants.QUERY_HEAD, arity), dvars);
+		Function head = DATA_FACTORY.getFunction(DATA_FACTORY.getPredicate(OBDALibConstants.QUERY_HEAD, arity), dvars);
 		return head;
 	}
 	
@@ -255,7 +252,7 @@ public class R2RMLManager {
 		//get any class predicates, construct atom Class(subject), add to body
 		List<Predicate> classPredicates = r2rmlParser.getClassPredicates();
 		for (Predicate classPred : classPredicates) {
-			body.add(fac.getFunction(classPred, subjectAtom));
+			body.add(DATA_FACTORY.getFunction(classPred, subjectAtom));
 		}		
 
 		for (PredicateObjectMap pom : tm.getPredicateObjectMaps()) {
@@ -294,14 +291,14 @@ public class R2RMLManager {
 						if (term0 instanceof Function) {
 							Function constPred = (Function) term0;
 							Predicate newpred = constPred.getFunctionSymbol();
-							Function bodyAtom = fac.getFunction(newpred, subjectAtom);
+							Function bodyAtom = DATA_FACTORY.getFunction(newpred, subjectAtom);
 							body.add(bodyAtom);
 						}
-						else if (term0 instanceof ValueConstant) {							
+						else if (term0 instanceof ValueConstant) {
 							ValueConstant vconst = (ValueConstant) term0;
 							String predName = vconst.getValue();
-							Predicate newpred = fac.getPredicate(predName, 1);
-							Function bodyAtom = fac.getFunction(newpred, subjectAtom);
+							Predicate newpred = DATA_FACTORY.getPredicate(predName, 1);
+							Function bodyAtom = DATA_FACTORY.getFunction(newpred, subjectAtom);
 							body.add(bodyAtom);
 						} 
 						else 
@@ -310,16 +307,16 @@ public class R2RMLManager {
 					else { // if object is a variable
 						// TODO (ROMAN): double check -- the list terms appears to accumulate the PO pairs
 						//Predicate newpred = OBDAVocabulary.QUEST_TRIPLE_PRED;
-						Function rdftype = fac.getUriTemplate(fac.getConstantLiteral(OBDAVocabulary.RDF_TYPE));
+						Function rdftype = DATA_FACTORY.getUriTemplate(DATA_FACTORY.getConstantLiteral(OBDAVocabulary.RDF_TYPE));
 						//terms.add(rdftype);
 						//terms.add(objectAtom);
-						Function bodyAtom = fac.getTripleAtom(subjectAtom, rdftype, objectAtom);
-						body.add(bodyAtom); // fac.getFunction(newpred, terms)
+						Function bodyAtom = DATA_FACTORY.getTripleAtom(subjectAtom, rdftype, objectAtom);
+						body.add(bodyAtom); // DATA_FACTORY.getFunction(newpred, terms)
 					}
 				} 
 				else {
 					// create predicate(subject, object) and add it to the body
-					Function bodyAtom = fac.getFunction(bodyPred, subjectAtom, objectAtom);
+					Function bodyAtom = DATA_FACTORY.getFunction(bodyPred, subjectAtom, objectAtom);
 					body.add(bodyAtom);
 				}
 			}
@@ -330,7 +327,7 @@ public class R2RMLManager {
 				//Predicate newpred = OBDAVocabulary.QUEST_TRIPLE_PRED;
 				//terms.add(predFunction);
 				//terms.add(objectAtom);
-				Function bodyAtom = fac.getTripleAtom(subjectAtom, predFunction, objectAtom);
+				Function bodyAtom = DATA_FACTORY.getTripleAtom(subjectAtom, predFunction, objectAtom);
 				body.add(bodyAtom);   // objectAtom
 			}
 		}

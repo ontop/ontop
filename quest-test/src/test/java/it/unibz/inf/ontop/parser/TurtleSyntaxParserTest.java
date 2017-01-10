@@ -20,6 +20,7 @@ package it.unibz.inf.ontop.parser;
  * #L%
  */
 
+import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.io.PrefixManager;
 import it.unibz.inf.ontop.io.SimplePrefixManager;
 import org.junit.Test;
@@ -251,8 +252,7 @@ public class TurtleSyntaxParserTest {
 	}
 	
 	private boolean parse(String input) {
-		TurtleOBDASyntaxParser parser = new TurtleOBDASyntaxParser();
-		parser.setPrefixManager(getPrefixManager());
+		TurtleOBDASyntaxParser parser = new TurtleOBDASyntaxParser(getPrefixManager().getPrefixMap());
 
 		try {
 			parser.parse(input);
@@ -267,9 +267,8 @@ public class TurtleSyntaxParserTest {
 	}
 	
 	private PrefixManager getPrefixManager() {
-		PrefixManager pm = new SimplePrefixManager();
-		pm.addPrefix(PrefixManager.DEFAULT_PREFIX, "http://obda.inf.unibz.it/testcase#");
-		pm.addPrefix("ex:", "http://www.example.org/");
-		return pm;
+		return new SimplePrefixManager(ImmutableMap.of(
+				PrefixManager.DEFAULT_PREFIX, "http://obda.inf.unibz.it/testcase#",
+				"ex:", "http://www.example.org/"));
 	}
 }

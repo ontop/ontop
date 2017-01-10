@@ -1,19 +1,10 @@
 package it.unibz.inf.ontop.sql;
 
-import it.unibz.inf.ontop.io.ModelIOManager;
-import it.unibz.inf.ontop.model.OBDADataFactory;
-import it.unibz.inf.ontop.model.OBDAModel;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
+import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import org.junit.Test;
-import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLObject;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
 
-import java.io.File;
 
 public class MonetDBTest {
 
@@ -25,33 +16,16 @@ public class MonetDBTest {
 
         @Test
         public void runQuery() throws Exception {
-            /* 
-             * Load the ontology from an external .owl file. 
-            */
-            OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-            OWLOntology ontology = manager.loadOntologyFromOntologyDocument(new File(owlfile));
-
-            /* 
-            * Load the OBDA model from an external .obda file 
-            */
-            OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
-            OBDAModel obdaModel = fac.getOBDAModel();
-            ModelIOManager ioManager = new ModelIOManager(obdaModel);
-            ioManager.load(obdafile);
-
-            /* 
-            * * Prepare the configuration for the Quest instance. The example below shows the setup for 
-            * * "Virtual ABox" mode 
-            */
-            QuestPreferences preference = new QuestPreferences();
-            preference.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
 
             /* 
             * Create the instance of Quest OWL reasoner. 
             */
             QuestOWLFactory factory = new QuestOWLFactory();
-            QuestOWLConfiguration config = QuestOWLConfiguration.builder().obdaModel(obdaModel).preferences(preference).build();
-            QuestOWL reasoner = factory.createReasoner(ontology, config);
+            QuestConfiguration config = QuestConfiguration.defaultBuilder()
+                    .nativeOntopMappingFile(obdafile)
+                    .ontologyFile(owlfile)
+                    .build();
+            QuestOWL reasoner = factory.createReasoner(config);
 
             /* 
             * Prepare the data connection for querying. 

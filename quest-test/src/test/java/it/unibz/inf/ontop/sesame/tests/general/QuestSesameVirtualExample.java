@@ -20,14 +20,15 @@ package it.unibz.inf.ontop.sesame.tests.general;
  * #L%
  */
 
-import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
+import it.unibz.inf.ontop.injection.QuestConfiguration;
+import it.unibz.inf.ontop.injection.QuestCoreSettings;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.List;
+import java.util.Properties;
 
 import org.openrdf.model.Model;
 import org.openrdf.model.Value;
@@ -42,8 +43,6 @@ import org.openrdf.rio.RDFFormat;
 import org.openrdf.rio.RDFParser;
 import org.openrdf.rio.Rio;
 import org.openrdf.rio.helpers.StatementCollector;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
 import it.unibz.inf.ontop.sesame.SesameVirtualRepo;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLOntology;
@@ -69,7 +68,12 @@ public class QuestSesameVirtualExample {
 		 * existential reasoning and the rewriting technique is using
 		 * TreeWitness algorithm.
 		 */
-		Repository repo = new SesameVirtualRepo("virtualExample", owlFile, obdaFile, false, "TreeWitness");
+		QuestConfiguration configuration = QuestConfiguration.defaultBuilder()
+				.ontologyFile(owlFile)
+				.nativeOntopMappingFile(obdaFile)
+				.build();
+
+		Repository repo = new SesameVirtualRepo("virtualExample", configuration);
 		
 
 		/*
@@ -152,18 +156,22 @@ public class QuestSesameVirtualExample {
 		parser.setRDFHandler(collector);
 		parser.parse(in, documentUrl.toString());
 		
-		QuestPreferences pref = new QuestPreferences();
-		pref.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-		pref.setCurrentValueOf(QuestPreferences.REWRITE, "true");
-		pref.setCurrentValueOf(QuestPreferences.REFORMULATION_TECHNIQUE, QuestConstants.TW);
+		Properties p = new Properties();
 		//set jdbc params in config
-		pref.setCurrentValueOf(QuestPreferences.DBNAME, "books");
-		pref.setCurrentValueOf(QuestPreferences.JDBC_URL, "jdbc:mysql://10.7.20.39/books?sessionVariables=sql_mode='ANSI'");
-		pref.setCurrentValueOf(QuestPreferences.DBUSER, "fish");
-		pref.setCurrentValueOf(QuestPreferences.DBPASSWORD, "fish");
-		pref.setCurrentValueOf(QuestPreferences.JDBC_DRIVER, "com.mysql.jdbc.Driver");
+		p.setProperty(QuestCoreSettings.DB_NAME, "books");
+		p.setProperty(QuestCoreSettings.JDBC_URL, "jdbc:mysql://10.7.20.39/books?sessionVariables=sql_mode='ANSI'");
+		p.setProperty(QuestCoreSettings.DB_USER, "fish");
+		p.setProperty(QuestCoreSettings.DB_PASSWORD, "fish");
+		p.setProperty(QuestCoreSettings.JDBC_DRIVER, "com.mysql.jdbc.Driver");
+
+		QuestConfiguration configuration = QuestConfiguration.defaultBuilder()
+				.ontologyFile(owlFile)
+				.r2rmlMappingFile(ttlFile)
+				.enableExistentialReasoning(true)
+				.properties(p)
+				.build();
 		
-		Repository repo = new SesameVirtualRepo("virtualExample2", owlontology, myModel, pref);
+		Repository repo = new SesameVirtualRepo("virtualExample2", configuration);
 
 		System.out.println(myModel);
 		/*

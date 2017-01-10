@@ -1,19 +1,17 @@
 package it.unibz.inf.ontop.owlrefplatform.owlapi.example;
 
-
-import it.unibz.inf.ontop.io.ModelIOManager;
-import it.unibz.inf.ontop.model.OBDADataFactory;
+import com.google.inject.Injector;
+import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
+import it.unibz.inf.ontop.mapping.MappingParser;
 import it.unibz.inf.ontop.model.OBDAModel;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.owlapi.OWLAPITranslatorUtility;
-import it.unibz.inf.ontop.owlrefplatform.core.Quest;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestConnection;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
+import it.unibz.inf.ontop.owlrefplatform.core.*;
+import it.unibz.inf.ontop.injection.QuestComponentFactory;
+import it.unibz.inf.ontop.injection.QuestCoreConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLConnection;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLStatement;
-import it.unibz.inf.ontop.sql.DBMetadata;
-import it.unibz.inf.ontop.sql.DBMetadataExtractor;
+import it.unibz.inf.ontop.sql.RDBMetadata;
+import it.unibz.inf.ontop.sql.RDBMetadataExtractionTools;
 import it.unibz.inf.ontop.sql.DatabaseRelationDefinition;
 import it.unibz.inf.ontop.sql.QuotedIDFactory;
 import org.semanticweb.owlapi.apibinding.OWLManager;
@@ -21,6 +19,7 @@ import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 
 import java.io.File;
+import java.util.Optional;
 
 /**
  * This class shows how to create an instance of quest giving the metadata manually 
@@ -43,34 +42,38 @@ private void setup()  throws Exception {
 	OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 	OWLOntology ontology = manager.loadOntologyFromOntologyDocument(new File(owlfile));
 
-	/*
-	 * Load the OBDA model from an external .obda file
-	 */
-	OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
-	OBDAModel obdaModel = fac.getOBDAModel();
-	ModelIOManager ioManager = new ModelIOManager(obdaModel);
-	ioManager.load(obdafile);
+	QuestCoreConfiguration configuration = QuestCoreConfiguration.defaultBuilder()
+			.nativeOntopMappingFile(obdafile)
+			.dbMetadata(getMeta())
+			.build();
+	Injector injector = configuration.getInjector();
+	NativeQueryLanguageComponentFactory nativeQLFactory = injector.getInstance(NativeQueryLanguageComponentFactory.class);
+	QuestComponentFactory componentFactory = injector.getInstance(QuestComponentFactory.class);
+
+	MappingParser mappingParser = nativeQLFactory.create(new File(obdafile));
+	OBDAModel obdaModel = mappingParser.getOBDAModel();
 	
 	/*
 	 * Prepare the configuration for the Quest instance. The example below shows the setup for
 	 * "Virtual ABox" mode
 	 */
-	QuestPreferences preference = new QuestPreferences();
-	preference.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-	DBMetadata dbMetadata = getMeta();
-	Quest qest = new Quest(OWLAPITranslatorUtility.translateImportsClosure(ontology), obdaModel, dbMetadata, preference);
-	qest.setupRepository();
+	IQuest quest = componentFactory.create(
+			OWLAPITranslatorUtility.translateImportsClosure(ontology),
+			Optional.of(obdaModel),
+			Optional.empty(),
+			configuration.getExecutorRegistry());
+	quest.setupRepository();
 	
 	/*
 	 * Prepare the data connection for querying.
 	 */
 	
-	QuestConnection conn =qest.getConnection();
+	IQuestConnection conn =quest.getConnection();
 	QuestOWLConnection connOWL = new QuestOWLConnection(conn);
 	qst = connOWL.createStatement();
 }
 
-private void defMeasTable(DBMetadata dbMetadata, String name) {
+private void defMeasTable(RDBMetadata dbMetadata, String name) {
 	QuotedIDFactory idfac = dbMetadata.getQuotedIDFactory();
 	DatabaseRelationDefinition tableDefinition = dbMetadata.createDatabaseRelation(idfac.createRelationID(null, name));
 	tableDefinition.addAttribute(idfac.createAttributeID("timestamp"), java.sql.Types.TIMESTAMP, null, false);
@@ -79,7 +82,7 @@ private void defMeasTable(DBMetadata dbMetadata, String name) {
 	tableDefinition.addAttribute(idfac.createAttributeID("sensor"), java.sql.Types.VARCHAR, null, false);
 }
 
-private void defMessTable(DBMetadata dbMetadata, String name) {
+private void defMessTable(RDBMetadata dbMetadata, String name) {
 	QuotedIDFactory idfac = dbMetadata.getQuotedIDFactory();
 	DatabaseRelationDefinition tableDefinition = dbMetadata.createDatabaseRelation(idfac.createRelationID(null, name));
 	tableDefinition.addAttribute(idfac.createAttributeID("timestamp"), java.sql.Types.TIMESTAMP, null, false);
@@ -87,14 +90,14 @@ private void defMessTable(DBMetadata dbMetadata, String name) {
 	tableDefinition.addAttribute(idfac.createAttributeID("assembly"), java.sql.Types.VARCHAR, null, false);
 }
 
-private void defStaticTable(DBMetadata dbMetadata, String name) {
+private void defStaticTable(RDBMetadata dbMetadata, String name) {
 	QuotedIDFactory idfac = dbMetadata.getQuotedIDFactory();
 	DatabaseRelationDefinition tableDefinition = dbMetadata.createDatabaseRelation(idfac.createRelationID(null, name));
 	tableDefinition.addAttribute(idfac.createAttributeID("domain"), java.sql.Types.VARCHAR, null, false);
 	tableDefinition.addAttribute(idfac.createAttributeID("range"), java.sql.Types.VARCHAR, null, false);
 }
-private DBMetadata getMeta(){
-	DBMetadata dbMetadata = DBMetadataExtractor.createDummyMetadata();
+private RDBMetadata getMeta(){
+	RDBMetadata dbMetadata = RDBMetadataExtractionTools.createDummyMetadata();
 
 	defMeasTable(dbMetadata, "burner");
 	defMessTable(dbMetadata, "events");

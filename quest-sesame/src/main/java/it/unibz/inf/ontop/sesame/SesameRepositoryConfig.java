@@ -27,7 +27,12 @@ package it.unibz.inf.ontop.sesame;
 
 
 import java.io.File;
+import java.util.Properties;
 
+import it.unibz.inf.ontop.injection.OBDASettings;
+import it.unibz.inf.ontop.injection.QuestConfiguration;
+import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
+import it.unibz.inf.ontop.injection.QuestCoreSettings;
 import org.openrdf.model.Graph;
 import org.openrdf.model.Literal;
 import org.openrdf.model.Resource;
@@ -98,65 +103,15 @@ public class SesameRepositoryConfig extends RepositoryImplConfigBase {
     	super(SesameRepositoryFactory.REPOSITORY_TYPE);
         repository = null;
     }
-
-  
-    
-    public String getQuestType() {
-        return quest_type;
-    }
-
-    public void setQuestType(String quest_type) {
-        this.quest_type = quest_type;
-    }
     
     public String getName()
     {
     	return name;
     }
-    
+
     public void setName(String name)
     {
     	this.name = name;
-    }
-    
-    public File getOwlFile()
-    {
-    	return owlFile;
-    }
-
-    public void setOwlFile(String fileName)
-    {
-    	this.owlFile = new File(fileName);
-    }
-    
-    public File getObdaFile()
-    {
-    	return obdaFile;
-    }
-    
-    public void setObdaFile(String fileName)
-    {
-    	this.obdaFile = new File(fileName);
-    }
-
-    public boolean getExistential()
-    {
-    	return existential;
-    }
-    
-    public void setExistential(boolean ex)
-    {
-    	this.existential = ex;
-    }
-    
-    public String getRewriting()
-    {
-    	return this.rewriting;
-    }
-    
-    public void setRewriting(String rew)
-    {
-    	this.rewriting = rew;
     }
 
     /**
@@ -248,16 +203,65 @@ public class SesameRepositoryConfig extends RepositoryImplConfigBase {
             /**
              * Creates the repository according to the Quest type.
              */
+            QuestConfiguration configuration;
+            Properties p = new Properties();
+            if (existential) {
+                p.setProperty(QuestCoreSettings.REWRITE, "true");
+            } else {
+                p.setProperty(QuestCoreSettings.REWRITE, "false");
+            }
+            if (rewriting.equals("TreeWitness")) {
+                p.setProperty(QuestCoreSettings.REFORMULATION_TECHNIQUE, QuestConstants.TW);
+            } else if (rewriting.equals("Default")) {
+                p.setProperty(QuestCoreSettings.REFORMULATION_TECHNIQUE, QuestConstants.UCQBASED);
+            }
+
             switch (quest_type) {
                 case IN_MEMORY_QUEST_TYPE:
-                    repository = new SesameClassicInMemoryRepo(name, owlFile.getAbsolutePath(), existential, rewriting);
+                    p.setProperty(QuestCoreSettings.ABOX_MODE, QuestConstants.CLASSIC);
+                    p.setProperty(QuestCoreSettings.OPTIMIZE_EQUIVALENCES, "true");
+                    p.setProperty(QuestCoreSettings.OBTAIN_FROM_MAPPINGS, "false");
+                    p.setProperty(QuestCoreSettings.OBTAIN_FROM_ONTOLOGY, "false");
+                    p.setProperty(QuestCoreSettings.DBTYPE, QuestConstants.SEMANTIC_INDEX);
+                    p.setProperty(QuestCoreSettings.STORAGE_LOCATION, QuestConstants.INMEMORY);
+
+                    configuration = QuestConfiguration.defaultBuilder()
+                            .ontologyFile(owlFile)
+                            .properties(p)
+                            .build();
+                    repository = new SesameClassicRepo(name, configuration);
+
                     break;
                 case REMOTE_QUEST_TYPE:
-                    repository = new SesameClassicJDBCRepo(name, owlFile.getAbsolutePath());
+                    // TODO: rewriting not considered in the ported code. Should we consider it?
+                    p = new Properties();
+
+                    p.setProperty(QuestCoreSettings.ABOX_MODE, QuestConstants.CLASSIC);
+                    p.setProperty(QuestCoreSettings.OPTIMIZE_EQUIVALENCES, "true");
+                    // TODO: no mappings, so this option looks inconsistent
+                    p.setProperty(QuestCoreSettings.OBTAIN_FROM_MAPPINGS, "true");
+                    p.setProperty(QuestCoreSettings.OBTAIN_FROM_ONTOLOGY, "false");
+                    p.setProperty(QuestCoreSettings.DBTYPE, QuestConstants.SEMANTIC_INDEX);
+                    p.setProperty(QuestCoreSettings.STORAGE_LOCATION, QuestConstants.JDBC);
+                    p.setProperty(OBDASettings.JDBC_DRIVER, "org.h2.Driver");
+                    p.setProperty(OBDASettings.JDBC_URL, "jdbc:h2:mem:stockclient1");
+                    p.setProperty(OBDASettings.DB_USER, "sa");
+                    p.setProperty(OBDASettings.DB_PASSWORD, "");
+
+                    configuration = QuestConfiguration.defaultBuilder()
+                            .ontologyFile(owlFile)
+                            .properties(p)
+                            .build();
+                    repository = new SesameClassicRepo(name, configuration);
                     break;
                 case VIRTUAL_QUEST_TYPE:
-                    repository = new SesameVirtualRepo(name, owlFile.getAbsolutePath(), obdaFile.getAbsolutePath(),
-                            existential, rewriting);
+                    configuration = QuestConfiguration.defaultBuilder()
+                            // TODO: consider also r2rml
+                            .nativeOntopMappingFile(obdaFile)
+                            .ontologyFile(owlFile)
+                            .properties(p)
+                            .build();
+                    repository = new SesameVirtualRepo(name, configuration);
                     break;
                 default:
                     throw new RepositoryConfigException("Unknown mode: " + quest_type);
@@ -293,9 +297,9 @@ public class SesameRepositoryConfig extends RepositoryImplConfigBase {
         if (obdaFile != null) {
             graph.add(implNode, OBDAFILE, vf.createLiteral(obdaFile.getAbsolutePath()));
         }
-        if (existential == false || existential == true) {
-        	graph.add(implNode, EXISTENTIAL, vf.createLiteral(existential));
-        }
+
+        graph.add(implNode, EXISTENTIAL, vf.createLiteral(existential));
+
         if (rewriting != null) {
             graph.add(implNode, REWRITING, vf.createLiteral(rewriting));
         }
@@ -315,7 +319,7 @@ public class SesameRepositoryConfig extends RepositoryImplConfigBase {
                 }
                 Literal qtypeLit = GraphUtil.getOptionalObjectLiteral(graph, implNode, QUEST_TYPE);
                 if (qtypeLit != null) {
-                    setQuestType(qtypeLit.getLabel());
+                    this.quest_type = qtypeLit.getLabel();
                 }
                 Literal name = GraphUtil.getOptionalObjectLiteral(graph, implNode, NAME);
                 if (name != null) {
@@ -323,19 +327,19 @@ public class SesameRepositoryConfig extends RepositoryImplConfigBase {
                 }
                 Literal owlfile = GraphUtil.getOptionalObjectLiteral(graph, implNode, OWLFILE);
                 if (owlfile != null) {
-                    setOwlFile(owlfile.getLabel());
+                    this.owlFile = new File(owlfile.getLabel());
                 }
                 Literal obdafile = GraphUtil.getOptionalObjectLiteral(graph, implNode, OBDAFILE);
                 if (obdafile != null) {
-                    setObdaFile(obdafile.getLabel());
+                    this.obdaFile = new File(obdafile.getLabel());
                 }
                 Literal existl = GraphUtil.getOptionalObjectLiteral(graph, implNode, EXISTENTIAL);
                 if (existl != null) {
-                    setExistential(existl.booleanValue());
+                    this.existential = existl.booleanValue();
                 }
                 Literal rewr = GraphUtil.getOptionalObjectLiteral(graph, implNode, REWRITING);
                 if (rewr != null) {
-                    setRewriting(rewr.getLabel());
+                    this.rewriting = rewr.getLabel();
                 }
                 
             }

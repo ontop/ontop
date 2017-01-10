@@ -1,12 +1,9 @@
 package it.unibz.inf.ontop.sesame.tests.general;
 
-import it.unibz.inf.ontop.io.ModelIOManager;
-import it.unibz.inf.ontop.model.OBDAModel;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
+import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
+import it.unibz.inf.ontop.injection.QuestCoreSettings;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWL;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLFactory;
 import org.junit.Before;
 import org.junit.Test;
@@ -14,6 +11,7 @@ import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.*;
 
 import java.io.File;
+import java.util.Properties;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -27,9 +25,8 @@ public class InconsistencyCheckingVirtualTest {
 	private QuestOWL reasoner;
 	private OWLOntology ontology;
 	private OWLOntologyManager manager;
-	private OBDAModel obdaModel;
 	
-	QuestPreferences p;
+	Properties p;
 	
 	String prefix = "http://meraka/moss/exampleBooks.owl#";
 	OWLClass c1 = Class(IRI.create(prefix + "AudioBook"));
@@ -49,11 +46,10 @@ public class InconsistencyCheckingVirtualTest {
 	@Before
 	public void setUp() throws Exception {
 
-		p = new QuestPreferences();
-		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, QuestConstants.TRUE);
-		p.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_ONTOLOGY, QuestConstants.TRUE);
-		
+		p = new Properties();
+		// ???
+		p.setProperty(QuestCoreSettings.OBTAIN_FROM_ONTOLOGY, QuestConstants.TRUE);
+
 		manager = OWLManager.createOWLOntologyManager();
 		try {
 			ontology = manager.loadOntologyFromOntologyDocument(new File(owlfile));
@@ -71,15 +67,16 @@ public class InconsistencyCheckingVirtualTest {
 	}
 	
 	private void startReasoner(){
-		
-		obdaModel = OBDADataFactoryImpl.getInstance().getOBDAModel();
-		ModelIOManager mng = new ModelIOManager(obdaModel);
+
+        // Creating a new instance of the reasoner
+        QuestOWLFactory factory = new QuestOWLFactory();
+        QuestConfiguration config = QuestConfiguration.defaultBuilder()
+                .nativeOntopMappingFile(new File(obdafile))
+				.ontology(ontology)
+				.properties(p)
+				.build();
 		try {
-			mng.load(new File(obdafile));
-	        // Creating a new instance of the reasoner
-	        QuestOWLFactory factory = new QuestOWLFactory();
-	        QuestOWLConfiguration config = QuestOWLConfiguration.builder().obdaModel(obdaModel).preferences(p).build();
-	        reasoner = factory.createReasoner(ontology, config);
+	        reasoner = factory.createReasoner(config);
 
 		} catch (Exception e) {
 			e.printStackTrace();

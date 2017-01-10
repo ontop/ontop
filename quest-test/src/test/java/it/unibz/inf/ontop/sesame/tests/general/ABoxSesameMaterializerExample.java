@@ -20,21 +20,18 @@ package it.unibz.inf.ontop.sesame.tests.general;
  * #L%
  */
 
-import it.unibz.inf.ontop.io.ModelIOManager;
-import it.unibz.inf.ontop.model.OBDADataFactory;
-import it.unibz.inf.ontop.model.OBDAModel;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
-import it.unibz.inf.ontop.sesame.SesameMaterializer;
-import it.unibz.inf.ontop.sesame.SesameStatementIterator;
-
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
 
+import it.unibz.inf.ontop.injection.QuestConfiguration;
+import it.unibz.inf.ontop.sesame.SesameStatementIterator;
 import org.openrdf.model.Statement;
 import org.openrdf.rio.RDFWriter;
 import org.openrdf.rio.n3.N3Writer;
+import it.unibz.inf.ontop.model.OBDAModel;
+import it.unibz.inf.ontop.sesame.SesameMaterializer;
 
 public class ABoxSesameMaterializerExample {
 
@@ -52,17 +49,11 @@ public class ABoxSesameMaterializerExample {
 	
 	public void generateTriples() throws Exception {
 
-		/*
-		 * Load the OBDA model from an external .obda file
-		 */
-		OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
-		OBDAModel obdaModel = fac.getOBDAModel();
-		ModelIOManager ioManager = new ModelIOManager(obdaModel);
-		ioManager.load(inputFile);
+		QuestConfiguration configuration = QuestConfiguration.defaultBuilder()
+				.nativeOntopMappingFile(inputFile)
+				.build();
 
-		/*
-		 * Start materializing data from database to triples.
-		 */
+		OBDAModel obdaModel = configuration.loadProvidedMapping();
 
 		SesameMaterializer materializer = new SesameMaterializer(obdaModel, DO_STREAM_RESULTS);
 		

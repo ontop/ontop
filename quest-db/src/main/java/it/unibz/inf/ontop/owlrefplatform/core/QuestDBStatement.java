@@ -20,13 +20,21 @@ package it.unibz.inf.ontop.owlrefplatform.core;
  * #L%
  */
 
-import it.unibz.inf.ontop.io.ModelIOManager;
+import java.io.File;
+import java.net.URI;
+import java.util.Iterator;
+import java.util.Optional;
+import java.util.Set;
+
 import it.unibz.inf.ontop.model.*;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
-import it.unibz.inf.ontop.ontology.Assertion;
 import it.unibz.inf.ontop.owlapi.OWLAPIABoxIterator;
+import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
+import it.unibz.inf.ontop.mapping.MappingParser;
+
+import it.unibz.inf.ontop.ontology.Assertion;
 import it.unibz.inf.ontop.owlrefplatform.core.abox.NTripleAssertionIterator;
 import it.unibz.inf.ontop.owlrefplatform.core.abox.QuestMaterializer;
+import org.openrdf.query.MalformedQueryException;
 import org.openrdf.query.parser.ParsedQuery;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.IRI;
@@ -35,28 +43,31 @@ import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.net.URI;
-import java.sql.SQLException;
-import java.util.Iterator;
-import java.util.Set;
+/**
+ * Implementation of QuestDBStatement.
+ *
+ * TODO: rename it QuestDBStatementImpl.
+ */
+// DISABLED TEMPORARILY FOR MERGING PURPOSES (NOT BREAKING CLIENTS WITH this ugly name IQquestOWLStatement)
+//public class QuestDBStatement implements IQuestDBStatement {
+public class QuestDBStatement implements IQuestDBStatement {
 
-public class QuestDBStatement implements OBDAStatement {
-
-	private final QuestStatement st;
-
+	private final IQuestStatement st;
+	private final NativeQueryLanguageComponentFactory nativeQLFactory;
 	private final Logger log = LoggerFactory.getLogger(QuestDBStatement.class);
 
 	private transient OWLOntologyManager man = OWLManager.createOWLOntologyManager();
 
-	protected QuestDBStatement(QuestStatement st) {
+	public QuestDBStatement(IQuestStatement st, NativeQueryLanguageComponentFactory nativeQLFactory) {
+        this.nativeQLFactory = nativeQLFactory;
 		this.st = st;
 	}
 
-	public int add(Iterator<Assertion> data) throws SQLException {
+	public int add(Iterator<Assertion> data) throws OBDAException {
 		return st.insertData(data, -1, -1);
 	}
 
-	public int add(Iterator<Assertion> data, int commit, int batch) throws SQLException {
+	public int add(Iterator<Assertion> data, int commit, int batch) throws OBDAException {
 		return st.insertData(data, commit, batch);
 	}
 
@@ -83,7 +94,7 @@ public class QuestDBStatement implements OBDAStatement {
 				OWLOntology owlontology = man.loadOntologyFromOntologyDocument(IRI.create(rdffile));
 				Set<OWLOntology> ontos = man.getImportsClosure(owlontology);
 				
-				OWLAPIABoxIterator aBoxIter = new OWLAPIABoxIterator(ontos, st.questInstance.getVocabulary());
+				OWLAPIABoxIterator aBoxIter = new OWLAPIABoxIterator(ontos, st.getQuestInstance().getVocabulary());
 				result = st.insertData(aBoxIter, /*useFile,*/ commit, batch);
 			} 
 			else if (ext.toLowerCase().equals(".nt")) {				
@@ -104,9 +115,9 @@ public class QuestDBStatement implements OBDAStatement {
 		Iterator<Assertion> assertionIter = null;
 		QuestMaterializer materializer = null;
 		try {
-			OBDAModel obdaModel = OBDADataFactoryImpl.getInstance().getOBDAModel();
-			ModelIOManager io = new ModelIOManager(obdaModel);
-			io.load(uri.toString());
+            MappingParser parser = nativeQLFactory.create(new File(uri));
+            OBDAModel obdaModel = parser.getOBDAModel();
+
 			materializer = new QuestMaterializer(obdaModel, false);
 			assertionIter =  materializer.getAssertionIterator();
 			int result = st.insertData(assertionIter, /*useFile,*/ commit, batch);
@@ -145,7 +156,6 @@ public class QuestDBStatement implements OBDAStatement {
 	public int executeUpdate(String query) throws OBDAException {
 		return st.executeUpdate(query);
 	}
-
 
 	@Override
 	public int getFetchSize() throws OBDAException {
@@ -192,22 +202,38 @@ public class QuestDBStatement implements OBDAStatement {
 		st.setQueryTimeout(seconds);
 	}
 
-	/*
-	 * QuestSpecific
+	@Override
+	public String getRewriting(String sparqlQuery) throws OBDAException {
+		try {
+		QuestQueryProcessor queryProcessor = st.getQuestInstance().getEngine();
+		ParsedQuery sparqlTree = queryProcessor.getParsedQuery(sparqlQuery);
+		return queryProcessor.getRewriting(sparqlTree);
+		} catch (MalformedQueryException e) {
+			throw new OBDAException(e);
+		}
+	}
+
+	/**
+	 * Ontop is not SQL-specific anymore.
+	 *
+	 * Use getExecutableQuery instead.
 	 */
-	
-	public String getSQL(String query) throws Exception {
-		ParsedQuery pq = st.questInstance.getEngine().getParsedQuery(query); 
-		return st.questInstance.getEngine().getSQL(pq);
+	@Deprecated
+	public String getSQL(String sparqlQuery) throws OBDAException {
+		ExecutableQuery executableQuery = getExecutableQuery(sparqlQuery);
+		return ((SQLExecutableQuery) executableQuery).getSQL();
 	}
 
 	@Override
-	public String getSPARQLRewriting(String query) throws OBDAException {
-		return st.getSPARQLRewriting(query);
-	}
-
-	public String getRewriting(String query) throws Exception {
-		ParsedQuery pq = st.questInstance.getEngine().getParsedQuery(query); 
-		return st.questInstance.getEngine().getRewriting(pq);
+	public ExecutableQuery getExecutableQuery(String sparqlQuery) throws OBDAException {
+		try {
+			QuestQueryProcessor queryProcessor = st.getQuestInstance().getEngine();
+			ParsedQuery pq = queryProcessor.getParsedQuery(sparqlQuery);
+			// TODO: extract the construction template when existing
+			return queryProcessor.translateIntoNativeQuery(
+					pq, Optional.empty());
+		} catch (MalformedQueryException e) {
+			throw new OBDAException(e);
+		}
 	}
 }

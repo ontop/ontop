@@ -27,7 +27,7 @@ import it.unibz.inf.ontop.model.OBDAException;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestDBConnection;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestDBStatement;
-import it.unibz.inf.ontop.sesame.SesameRDFIterator;
+import it.unibz.inf.ontop.owlrefplatform.core.SIQuestDBStatement;
 import org.openrdf.OpenRDFUtil;
 import org.openrdf.model.*;
 import org.openrdf.model.impl.NamespaceImpl;
@@ -55,7 +55,6 @@ public class RepositoryConnection implements org.openrdf.repository.RepositoryCo
     private boolean autoCommit;
     private boolean isActive;
     private  RDFParser rdfParser;
-    private QuestDBStatement questStm;
 
 	
 	public RepositoryConnection(SesameAbstractRepo rep, QuestDBConnection connection) throws OBDAException
@@ -238,7 +237,7 @@ public class RepositoryConnection implements org.openrdf.repository.RepositoryCo
      *        The base URI for the data.
      * @param dataFormat
      *        The file format of the data.
-     * @param context
+     * @param contexts
      *        The context to which the data should be added in case
      *        <tt>enforceContext</tt> is <tt>true</tt>. The value
      *        <tt>null</tt> indicates the null context.
@@ -291,7 +290,7 @@ public class RepositoryConnection implements org.openrdf.repository.RepositoryCo
             }
             
            // System.out.println("Parsing... ");
-            questStm = questConn.createStatement();
+			QuestDBStatement questStm = questConn.createStatement();
     		
             Thread insert = new Thread(new Insert(rdfParser, (InputStream)inputStreamOrReader, baseURI));
             Thread process = new Thread(new Process(rdfHandler, questStm));
@@ -357,7 +356,7 @@ throw new RuntimeException(e);
         		    try {
 						questStmt.add(iterator, boolToInt(autoCommit), 5000);
         		    	
-					} catch (SQLException e) {
+					} catch (OBDAException e) {
 						throw new RuntimeException(e);
 					}
         	  }
@@ -381,14 +380,17 @@ throw new RuntimeException(e);
     	SesameRDFIterator it = new SesameRDFIterator(stmIterator);
     	
     	//insert data   useFile=false, batch=0
-    	try {	
-    		questStm = questConn.createStatement();
+		SIQuestDBStatement questStm = null;
+    	try {
+			// Statement insertion is only supported in the classic A-box mode
+    		questStm = questConn.createSIStatement();
 			questStm.add(it);
-		} catch (SQLException e) {
+		} catch (OBDAException e) {
 			throw new RepositoryException(e);
 		}
     	finally{
-    		questStm.close();
+			if (questStm != null)
+    			questStm.close();
     	}
 		
 		autoCommit = currCommit;

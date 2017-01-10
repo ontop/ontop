@@ -20,25 +20,18 @@ package it.unibz.inf.ontop.sql;
  * #L%
  */
 
-import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
+import static org.junit.Assert.assertTrue;
+
+import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestDBConnection;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestDBStatement;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
-import it.unibz.inf.ontop.r2rml.R2RMLManager;
-
+import it.unibz.inf.ontop.injection.QuestCoreSettings;
 import it.unibz.inf.ontop.sesame.SesameVirtualRepo;
+
+import java.util.Properties;
+
 import org.junit.After;
 import org.junit.Test;
-import org.openrdf.model.Model;
-import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.io.File;
-
-import static org.junit.Assert.assertTrue;
 
 /***
  * Tests that the SPARQL LIMIT statement is correctly translated to WHERE ROWNUM <= x in oracle
@@ -49,8 +42,6 @@ public class OracleSesameLIMITTest  {
 	private QuestDBConnection conn;
 	private QuestDBStatement qst;
 
-	Logger log = LoggerFactory.getLogger(this.getClass());
-
 	final String owlfile = "resources/oraclesql/o.owl";
 	final String r2rmlfile = "resources/oraclesql/o.ttl";
 
@@ -58,50 +49,27 @@ public class OracleSesameLIMITTest  {
 	 * 	prepare ontop for rewriting and unfolding steps 
 	 */
 	public void init(String jdbc_driver_class)  throws Exception {
-
-		DBMetadata dbMetadata;
-		QuestPreferences preference;
-		OWLOntology ontology;
-		Model model;
-
-		/*
-		 * Load the ontology from an external .owl file.
-		 */
-		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-		ontology = manager.loadOntologyFromOntologyDocument(new File(owlfile));
-
-		/*
-		 * Load the OBDA model from an external .r2rml file
-		 */
-		R2RMLManager rmanager = new R2RMLManager(r2rmlfile);
-		model = rmanager.getModel();
-		/*
-		OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
-		obdaModel = fac.getOBDAModel();
-		ModelIOManager ioManager = new ModelIOManager(obdaModel);
-		ioManager.load(obdafile);
-		 */
 		/*
 		 * Prepare the configuration for the Quest instance. The example below shows the setup for
 		 * "Virtual ABox" mode
 		 */
-		preference = new QuestPreferences();
-		preference.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-		preference.setCurrentValueOf(QuestPreferences.REWRITE, "true");
-		preference.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "false");
-		preference.setCurrentValueOf(QuestPreferences.REFORMULATION_TECHNIQUE,
-				QuestConstants.TW);
+		Properties p = new Properties();
+		p.setProperty(QuestCoreSettings.DB_NAME, "db");
+		p.setProperty(QuestCoreSettings.JDBC_URL, "jdbc:oracle:thin:@//10.7.20.91:1521/xe");
+		p.setProperty(QuestCoreSettings.DB_USER, "system");
+		p.setProperty(QuestCoreSettings.DB_PASSWORD, "obdaps83");
+		p.setProperty(QuestCoreSettings.JDBC_DRIVER, jdbc_driver_class);
 
-		preference.setCurrentValueOf(QuestPreferences.DBNAME, "db");
-		preference.setCurrentValueOf(QuestPreferences.JDBC_URL, "jdbc:oracle:thin:@//10.7.20.91:1521/xe");
-		preference.setCurrentValueOf(QuestPreferences.DBUSER, "system");
-		preference.setCurrentValueOf(QuestPreferences.DBPASSWORD, "obdaps83");
-		preference.setCurrentValueOf(QuestPreferences.JDBC_DRIVER, jdbc_driver_class);
+		QuestConfiguration configuration = QuestConfiguration.defaultBuilder()
+				.enableEquivalenceOptimization(false)
+				.enableExistentialReasoning(true)
+				.dbMetadata(getMeta(jdbc_driver_class))
+				.ontologyFile(owlfile)
+				.r2rmlMappingFile(r2rmlfile)
+				.properties(p)
+				.build();
 
-		dbMetadata = getMeta(jdbc_driver_class);
-		SesameVirtualRepo qest1;
-
-		qest1 = new SesameVirtualRepo("dbname", ontology, model, dbMetadata, preference);
+		SesameVirtualRepo qest1 = new SesameVirtualRepo("dbname", configuration);
 		qest1.initialize();
 		/*
 		 * Prepare the data connection for querying.
@@ -116,13 +84,13 @@ public class OracleSesameLIMITTest  {
 		conn.close();
 	}
 
-	private void defTable(DBMetadata dbMetadata, String schema, String name) {
+	private void defTable(RDBMetadata dbMetadata, String schema, String name) {
 		QuotedIDFactory idfac = dbMetadata.getQuotedIDFactory();
 		DatabaseRelationDefinition tableDefinition = dbMetadata.createDatabaseRelation(idfac.createRelationID(schema, name));
 		tableDefinition.addAttribute(idfac.createAttributeID("country_name"), java.sql.Types.VARCHAR, null, false);
 	}
-	private DBMetadata getMeta(String driver_class){
-		DBMetadata dbMetadata = DBMetadataExtractor.createDummyMetadata(driver_class);
+	private RDBMetadata getMeta(String driver_class){
+		RDBMetadata dbMetadata = RDBMetadataExtractionTools.createDummyMetadata(driver_class);
 		QuotedIDFactory idfac = dbMetadata.getQuotedIDFactory();
 		defTable(dbMetadata, "hr", "countries");
 		defTable(dbMetadata, "HR", "countries");

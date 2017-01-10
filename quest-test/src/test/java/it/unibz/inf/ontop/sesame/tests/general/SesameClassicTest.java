@@ -24,8 +24,6 @@ import java.io.IOException;
 
 import junit.framework.TestCase;
 
-import it.unibz.inf.ontop.sesame.RepositoryConnection;
-import it.unibz.inf.ontop.sesame.SesameClassicInMemoryRepo;
 import org.openrdf.model.Literal;
 import org.openrdf.model.Statement;
 import org.openrdf.model.Value;
@@ -44,6 +42,8 @@ import org.openrdf.repository.Repository;
 import org.openrdf.repository.RepositoryException;
 import org.openrdf.rio.RDFFormat;
 import org.openrdf.rio.RDFParseException;
+import it.unibz.inf.ontop.sesame.RepositoryConnection;
+import it.unibz.inf.ontop.sesame.SesameClassicInMemoryRepo;
 
 
 public class SesameClassicTest extends TestCase {

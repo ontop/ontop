@@ -20,20 +20,7 @@ package it.unibz.inf.ontop.reformulation.tests;
  * #L%
  */
 
-import it.unibz.inf.ontop.io.ModelIOManager;
-import it.unibz.inf.ontop.model.OBDADataFactory;
-import it.unibz.inf.ontop.model.OBDAModel;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
-import it.unibz.inf.ontop.owlapi.OBDAModelValidator;
-import junit.framework.TestCase;
-import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.sql.Connection;
@@ -41,9 +28,19 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+import it.unibz.inf.ontop.exception.InvalidMappingException;
+import it.unibz.inf.ontop.injection.QuestConfiguration;
+import it.unibz.inf.ontop.io.InvalidDataSourceException;
+import junit.framework.TestCase;
+
+import it.unibz.inf.ontop.model.OBDAModel;
+import it.unibz.inf.ontop.owlapi.OBDAModelValidator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 
 /**
- * This test is adapted from {@link it.unibz.inf.ontop.reformulation.tests#SimpleMappingVirtualABoxTest}.
+ * This test is adapted from SimpleMappingVirtualABoxTest.
  *
  * A simple test that check if the system is able to handle Mappings for
  * classes/roles and attributes even if there are no URI templates. i.e., the
@@ -55,12 +52,9 @@ import java.sql.Statement;
 public class MetaMappingTargetQueryValidatorTest extends TestCase {
 
 
-	private OBDADataFactory fac;
 	private Connection conn;
 
 	Logger log = LoggerFactory.getLogger(this.getClass());
-	private OBDAModel obdaModel;
-	private OWLOntology ontology;
 
 	final String owlfile = "src/test/resources/test/metamapping.owl";
 	final String obdafile = "src/test/resources/test/metamapping.obda";
@@ -77,8 +71,6 @@ public class MetaMappingTargetQueryValidatorTest extends TestCase {
 		String username = "sa";
 		String password = "";
 
-		fac = OBDADataFactoryImpl.getInstance();
-
 		conn = DriverManager.getConnection(url, username, password);
 		Statement st = conn.createStatement();
 
@@ -93,17 +85,6 @@ public class MetaMappingTargetQueryValidatorTest extends TestCase {
 
 		st.executeUpdate(bf.toString());
 		conn.commit();
-
-		// Loading the OWL file
-		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-		ontology = manager.loadOntologyFromOntologyDocument((new File(owlfile)));
-
-		// Loading the OBDA data
-		obdaModel = fac.getOBDAModel();
-		
-		ModelIOManager ioManager = new ModelIOManager(obdaModel);
-		ioManager.load(obdafile);
-		
 	}
 
 	@Override
@@ -132,12 +113,18 @@ public class MetaMappingTargetQueryValidatorTest extends TestCase {
 		conn.commit();
 	}
 
-	public void testValidate(){
+	public void testValidate() throws InvalidDataSourceException, IOException, InvalidMappingException {
 
-		// run validador
+		QuestConfiguration configuration = QuestConfiguration.defaultBuilder()
+				.nativeOntopMappingFile(obdafile)
+				.build();
+
+		OBDAModel obdaModel = configuration.loadProvidedMapping();
+
+		// run validator
 		try {
 			OBDAModelValidator.validate(obdaModel);
-		} 
+		}
 		catch (Exception e) {
 			fail("The target query has problem:" + e.getMessage());
 		}

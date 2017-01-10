@@ -32,18 +32,18 @@
 //import Function;
 //import Predicate;
 //import Term;
-//import org.semanticweb.ontop.ontology.Axiom;
-//import org.semanticweb.ontop.ontology.BasicClassDescription;
-//import org.semanticweb.ontop.ontology.ClassDescription;
+//import it.unibz.inf.ontop.ontology.Axiom;
+//import it.unibz.inf.ontop.ontology.BasicClassDescription;
+//import it.unibz.inf.ontop.ontology.ClassDescription;
 //import OClass;
 //import Ontology;
 //import OntologyFactory;
-//import org.semanticweb.ontop.ontology.Property;
-//import org.semanticweb.ontop.ontology.PropertySomeClassRestriction;
-//import org.semanticweb.ontop.ontology.PropertySomeRestriction;
+//import it.unibz.inf.ontop.ontology.Property;
+//import it.unibz.inf.ontop.ontology.PropertySomeClassRestriction;
+//import it.unibz.inf.ontop.ontology.PropertySomeRestriction;
 //import OntologyFactoryImpl;
-//import org.semanticweb.ontop.ontology.impl.SubClassAxiomImpl;
-//import org.semanticweb.ontop.ontology.impl.SubPropertyAxiomImpl;
+//import it.unibz.inf.ontop.ontology.impl.SubClassAxiomImpl;
+//import it.unibz.inf.ontop.ontology.impl.SubPropertyAxiomImpl;
 //import org.slf4j.Logger;
 //import org.slf4j.LoggerFactory;
 //

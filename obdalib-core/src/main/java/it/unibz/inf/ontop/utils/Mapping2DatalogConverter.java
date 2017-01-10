@@ -20,26 +20,21 @@ package it.unibz.inf.ontop.utils;
  * #L%
  */
 
+import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.Function;
 import it.unibz.inf.ontop.model.Predicate.COL_TYPE;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.parser.SQLQueryDeepParser;
 import it.unibz.inf.ontop.sql.*;
 import it.unibz.inf.ontop.sql.api.*;
-import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
 import it.unibz.inf.ontop.model.CQIE;
 import it.unibz.inf.ontop.model.Constant;
-import it.unibz.inf.ontop.model.Function;
-import it.unibz.inf.ontop.model.OBDADataFactory;
 import it.unibz.inf.ontop.model.OBDAMappingAxiom;
 import it.unibz.inf.ontop.model.OBDASQLQuery;
 import it.unibz.inf.ontop.model.Predicate;
-import it.unibz.inf.ontop.model.Predicate.COL_TYPE;
 import it.unibz.inf.ontop.model.Term;
 import it.unibz.inf.ontop.model.Variable;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
-import it.unibz.inf.ontop.sql.DBMetadata;
+import it.unibz.inf.ontop.sql.RDBMetadata;
 
 import java.util.*;
 
@@ -55,16 +50,22 @@ import net.sf.jsqlparser.statement.select.SubSelect;
 
 import com.google.common.collect.ImmutableMap;
 
-public class Mapping2DatalogConverter {
+import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
 
-	private static final OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
+public class Mapping2DatalogConverter implements IMapping2DatalogConverter {
 
 	/**
 	 * Creates a mapping analyzer by taking into account the OBDA model.
 	 */
-	public static List<CQIE> constructDatalogProgram(Collection<OBDAMappingAxiom> mappings, DBMetadata dbMetadata) {
+	public ImmutableList<CQIE> constructDatalogProgram(Collection<OBDAMappingAxiom> mappings, DBMetadata metadata) {
+
+        if (!(metadata instanceof RDBMetadata)) {
+            throw new IllegalArgumentException("A DBMetadata was expected");
+        }
+
+        RDBMetadata dbMetadata = (RDBMetadata) metadata;
 		
-		List<CQIE> datalogProgram = new LinkedList<>();
+		ImmutableList.Builder<CQIE> listBuilder = ImmutableList.builder();
 		List<String> errorMessages = new ArrayList<>();
 		
 		QuotedIDFactory idfac = dbMetadata.getQuotedIDFactory();
@@ -74,7 +75,7 @@ public class Mapping2DatalogConverter {
 				// Obtain the target and source query from each mapping axiom in
 				// the model.
 
-				OBDASQLQuery sourceQuery = mappingAxiom.getSourceQuery();
+				OBDASQLQuery sourceQuery = (OBDASQLQuery) mappingAxiom.getSourceQuery();
 
 				// Parse the SQL query tree from the source query
 				ParsedSQLQuery parsedSQLQuery = SQLQueryDeepParser.parse(dbMetadata, sourceQuery.toString());
@@ -113,8 +114,8 @@ public class Mapping2DatalogConverter {
                 	// (includes dealing with functions like concat as well).
                     Function head = (Function)renameVariables(atom, lookupTable, idfac);
                     // Create a new rule from the new head and the body
-                    CQIE rule = fac.getCQIE(head, bodyAtoms);
-                    datalogProgram.add(rule);
+                    CQIE rule = DATA_FACTORY.getCQIE(head, bodyAtoms);
+                    listBuilder.add(rule);
                 }
 			} 
 			catch (Exception e) {
@@ -136,7 +137,7 @@ public class Mapping2DatalogConverter {
 			throw  new IllegalArgumentException(msg);
 		}
 
-		return datalogProgram;
+		return listBuilder.build();
 	}
 
 
@@ -148,7 +149,7 @@ public class Mapping2DatalogConverter {
      * @param parsedSQLQuery
      * @param lookupTable
      */
-    private static void addTableAtoms(List<Function> bodyAtoms, ParsedSQLQuery parsedSQLQuery, AttributeLookupTable lookupTable, DBMetadata dbMetadata) throws JSQLParserException {
+    private static void addTableAtoms(List<Function> bodyAtoms, ParsedSQLQuery parsedSQLQuery, AttributeLookupTable lookupTable, RDBMetadata dbMetadata) throws JSQLParserException {
         // Tables mentioned in the SQL query
         Map<RelationID, RelationID> tables = parsedSQLQuery.getTables();
 
@@ -250,7 +251,7 @@ public class Mapping2DatalogConverter {
             for (Term innerTerm : terms) 
                 newTerms.add(renameVariables(innerTerm, lookupTable, idfac));
             
-            return fac.getFunction(func.getFunctionSymbol(), newTerms);
+            return DATA_FACTORY.getFunction(func.getFunctionSymbol(), newTerms);
         } 
         else if (term instanceof Constant) {
             return term.clone();
@@ -294,7 +295,7 @@ public class Mapping2DatalogConverter {
      * Creates a lookupTable:
      * (1) Collects all the possible column names from the tables mentioned in the query, and aliases.
       */
-    private static AttributeLookupTable createLookupTable(ParsedSQLQuery queryParsed, DBMetadata dbMetadata, QuotedIDFactory idfac) throws JSQLParserException {
+    private static AttributeLookupTable createLookupTable(ParsedSQLQuery queryParsed, RDBMetadata dbMetadata, QuotedIDFactory idfac) throws JSQLParserException {
     	AttributeLookupTable lookupTable = new AttributeLookupTable();
 
 		Map<RelationID, RelationID> tables = queryParsed.getTables();
@@ -314,7 +315,7 @@ public class Mapping2DatalogConverter {
             
  			for (Attribute attribute : tableDefinition.getAttributes()) {
 
-				Term var = fac.getVariable("t" + index);
+				Term var = DATA_FACTORY.getVariable("t" + index);
 				QuotedID attributeId = attribute.getID();
 
 				lookupTable.put(null, attributeId, var);
@@ -402,38 +403,38 @@ public class Mapping2DatalogConverter {
             String op = expression.getStringExpression();
             Predicate p = operations.get(op);
             if (p != null) {
-            	compositeTerm = fac.getFunction(p, t1, t2);
+            	compositeTerm = DATA_FACTORY.getFunction(p, t1, t2);
             }
             else {
                 switch (op) {
                 case "AND":
-                    compositeTerm = fac.getFunctionAND(t1, t2);
+                    compositeTerm = DATA_FACTORY.getFunctionAND(t1, t2);
                     break;
                 case "OR":
-                    compositeTerm = fac.getFunctionOR(t1, t2);
+                    compositeTerm = DATA_FACTORY.getFunctionOR(t1, t2);
                     break;
                 case "LIKE":
-                    compositeTerm = fac.getSQLFunctionLike(t1, t2);
+                    compositeTerm = DATA_FACTORY.getSQLFunctionLike(t1, t2);
                     break;
                 case "~":
-                    compositeTerm = fac.getFunction(ExpressionOperation.REGEX, t1, t2, fac.getConstantLiteral(""));
+                    compositeTerm = DATA_FACTORY.getFunction(ExpressionOperation.REGEX, t1, t2, DATA_FACTORY.getConstantLiteral(""));
                     break;
                 case "~*":
-                    compositeTerm = fac.getFunction(ExpressionOperation.REGEX, t1, t2, fac.getConstantLiteral("i")); // i flag for case insensitivity
+                    compositeTerm = DATA_FACTORY.getFunction(ExpressionOperation.REGEX, t1, t2, DATA_FACTORY.getConstantLiteral("i")); // i flag for case insensitivity
                     break;
                 case "!~":
-                    compositeTerm = fac.getFunctionNOT(
-                            fac.getFunction(ExpressionOperation.REGEX, t1, t2, fac.getConstantLiteral("")));
+                    compositeTerm = DATA_FACTORY.getFunctionNOT(
+                            DATA_FACTORY.getFunction(ExpressionOperation.REGEX, t1, t2, DATA_FACTORY.getConstantLiteral("")));
                     break;
                 case "!~*":
-                    compositeTerm = fac.getFunctionNOT(
-                            fac.getFunction(ExpressionOperation.REGEX,t1, t2, fac.getConstantLiteral("i")));
+                    compositeTerm = DATA_FACTORY.getFunctionNOT(
+                            DATA_FACTORY.getFunction(ExpressionOperation.REGEX,t1, t2, DATA_FACTORY.getConstantLiteral("i")));
                     break;
                 case "REGEXP":
-                    compositeTerm = fac.getFunction(ExpressionOperation.REGEX, t1, t2, fac.getConstantLiteral("i"));
+                    compositeTerm = DATA_FACTORY.getFunction(ExpressionOperation.REGEX, t1, t2, DATA_FACTORY.getConstantLiteral("i"));
                     break;
                 case "REGEXP BINARY":
-                    compositeTerm = fac.getFunction(ExpressionOperation.REGEX, t1, t2, fac.getConstantLiteral(""));
+                    compositeTerm = DATA_FACTORY.getFunction(ExpressionOperation.REGEX, t1, t2, DATA_FACTORY.getConstantLiteral(""));
                     break;
                 default:
                     throw new UnsupportedOperationException("Unknown operator: " + op);
@@ -473,9 +474,9 @@ public class Mapping2DatalogConverter {
                         t3 = visitEx(third);
                     } 
                     else {
-                        t3 = fac.getConstantLiteral("");
+                        t3 = DATA_FACTORY.getConstantLiteral("");
                     }
-                    result = fac.getFunction(ExpressionOperation.REGEX, t1, t2, t3);
+                    result = DATA_FACTORY.getFunction(ExpressionOperation.REGEX, t1, t2, t3);
                 } 
                 else
                 	throw new UnsupportedOperationException("Wrong number of arguments (found " + expressions.size() + ", only 2 or 3 supported) to sql function Regex");
@@ -506,10 +507,10 @@ public class Mapping2DatalogConverter {
                         in_string = visitEx(third);
                     } 
                     else {
-                        in_string = fac.getConstantLiteral("");
+                        in_string = DATA_FACTORY.getConstantLiteral("");
                     }
-                    result = fac.getFunction(ExpressionOperation.REPLACE, t1, out_string, in_string,
-                                fac.getConstantLiteral("")); // the 4th argument is flags
+                    result = DATA_FACTORY.getFunction(ExpressionOperation.REPLACE, t1, out_string, in_string,
+                                DATA_FACTORY.getConstantLiteral("")); // the 4th argument is flags
                 } 
                 else
                     throw new UnsupportedOperationException("Wrong number of arguments (found " + expressions.size() + ", only 2 or 3 supported) to sql function REPLACE");
@@ -531,14 +532,14 @@ public class Mapping2DatalogConverter {
                         Expression second = expressions.get(i+1);
                         Term second_string = visitEx(second);
 
-                        topConcat = fac.getFunction(ExpressionOperation.CONCAT, first_string, second_string);
+                        topConcat = DATA_FACTORY.getFunction(ExpressionOperation.CONCAT, first_string, second_string);
                     }
                     else {
 
                         Expression second = expressions.get(i);
                         Term second_string = visitEx(second);
 
-                        topConcat = fac.getFunction(ExpressionOperation.CONCAT, topConcat, second_string);
+                        topConcat = DATA_FACTORY.getFunction(ExpressionOperation.CONCAT, topConcat, second_string);
                     }
 
                 }
@@ -568,31 +569,31 @@ public class Mapping2DatalogConverter {
         @Override
         public void visit(DoubleValue expression) {
             String termRightName = expression.toString();
-            result = fac.getConstantLiteral(termRightName, COL_TYPE.DOUBLE);
+            result = DATA_FACTORY.getConstantLiteral(termRightName, COL_TYPE.DOUBLE);
         }
 
         @Override
         public void visit(LongValue expression) {
             String termRightName = expression.getStringValue();
-            result = fac.getConstantLiteral(termRightName, COL_TYPE.LONG);
+            result = DATA_FACTORY.getConstantLiteral(termRightName, COL_TYPE.LONG);
         }
 
         @Override
         public void visit(DateValue expression) {
             String termRightName = expression.getValue().toString();
-            result = fac.getConstantLiteral(termRightName, COL_TYPE.DATE);
+            result = DATA_FACTORY.getConstantLiteral(termRightName, COL_TYPE.DATE);
         }
 
         @Override
         public void visit(TimeValue expression) {
             String termRightName = expression.getValue().toString();
-            result = fac.getConstantLiteral(termRightName, COL_TYPE.TIME);
+            result = DATA_FACTORY.getConstantLiteral(termRightName, COL_TYPE.TIME);
         }
 
         @Override
         public void visit(TimestampValue expression) {
             String termRightName = expression.getValue().toString();
-            result = fac.getConstantLiteral(termRightName, COL_TYPE.DATETIME);
+            result = DATA_FACTORY.getConstantLiteral(termRightName, COL_TYPE.DATETIME);
         }
 
         @Override
@@ -601,7 +602,7 @@ public class Mapping2DatalogConverter {
 
             //Consider the case of NOT(...)
             if (expression.isNot()) {
-                result = fac.getFunctionNOT(visitEx(inside));
+                result = DATA_FACTORY.getFunctionNOT(visitEx(inside));
             } else {
                 result = visitEx(inside);
             }
@@ -610,7 +611,7 @@ public class Mapping2DatalogConverter {
         @Override
         public void visit(StringValue expression) {
             String termRightName = expression.getValue();
-            result = fac.getConstantLiteral(termRightName, COL_TYPE.STRING);
+            result = DATA_FACTORY.getConstantLiteral(termRightName, COL_TYPE.STRING);
         }
 
         @Override
@@ -712,9 +713,9 @@ public class Mapping2DatalogConverter {
             }
 
             if (!expression.isNot()) {
-                result = fac.getFunctionIsNull(var);
+                result = DATA_FACTORY.getFunctionIsNull(var);
             } else {
-                result = fac.getFunctionIsNotNull(var);
+                result = DATA_FACTORY.getFunctionIsNotNull(var);
             }
         }
 
@@ -756,10 +757,10 @@ public class Mapping2DatalogConverter {
                 // check whether it is an SQL boolean value
                 String lowerCase = columnName.toLowerCase();
                 if (lowerCase.equals("true")) {
-                    result = fac.getBooleanConstant(true);
+                    result = DATA_FACTORY.getBooleanConstant(true);
                 }
                 else if (lowerCase.equals("false")) {
-                	result = fac.getBooleanConstant(false);
+                	result = DATA_FACTORY.getBooleanConstant(false);
                 }
                 else
                     throw new RuntimeException( "Unable to find column name for variable: "
@@ -816,7 +817,7 @@ public class Mapping2DatalogConverter {
         	Expression right = concat.getRightExpression();
         	Term l = visitEx(left);
         	Term r = visitEx(right);
-        	result = fac.getFunction(ExpressionOperation.CONCAT, l, r);
+        	result = DATA_FACTORY.getFunction(ExpressionOperation.CONCAT, l, r);
         }
 
         @Override
@@ -849,7 +850,7 @@ public class Mapping2DatalogConverter {
         //        throw new RuntimeException(
         //                "Unable to find column name for variable: " + columnName);
         //    }
-        //    Term var = fac.getVariable(variableName);
+        //    Term var = DATA_FACTORY.getVariable(variableName);
 
        //     ColDataType datatype = expression.getType();
 
@@ -859,7 +860,7 @@ public class Mapping2DatalogConverter {
 
             //first value is a column, second value is a datatype. It can  also have the size
 
-        //    result = fac.getFunctionCast(var, var2);
+        //    result = DATA_FACTORY.getFunctionCast(var, var2);
 
         }
 

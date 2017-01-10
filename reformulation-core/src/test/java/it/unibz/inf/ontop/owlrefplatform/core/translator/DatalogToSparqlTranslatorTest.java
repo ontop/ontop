@@ -20,12 +20,12 @@ package it.unibz.inf.ontop.owlrefplatform.core.translator;
  * #L%
  */
 
+import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.io.PrefixManager;
 import it.unibz.inf.ontop.io.SimplePrefixManager;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.Predicate.COL_TYPE;
 import it.unibz.inf.ontop.model.impl.MutableQueryModifiersImpl;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
 
 import java.util.Arrays;
@@ -34,18 +34,17 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 
+import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
+
 @SuppressWarnings("deprecation")
 public class DatalogToSparqlTranslatorTest {
 
 	private DatalogToSparqlTranslator datalogTranslator;
 	private PrefixManager prefixManager;
 
-	private static OBDADataFactory dataFactory = OBDADataFactoryImpl.getInstance();
-
 	@Before
 	public void setup() {
-		prefixManager = new SimplePrefixManager();
-		prefixManager.addPrefix(":", "http://example.org/");
+		prefixManager = new SimplePrefixManager(ImmutableMap.of(":", "http://example.org/"));
 		datalogTranslator = new DatalogToSparqlTranslator(prefixManager);
 	}
 
@@ -57,7 +56,7 @@ public class DatalogToSparqlTranslatorTest {
 		/**
 		 * ans1(x) :- Student(x)
 		 */
-		CQIE query = dataFactory.getCQIE(ans1, student);
+		CQIE query = DATA_FACTORY.getCQIE(ans1, student);
 		DatalogProgram datalog = createDatalogProgram(query);
 		
 		// Translate the datalog and display the returned SPARQL string
@@ -72,7 +71,7 @@ public class DatalogToSparqlTranslatorTest {
 		/**
 		 * ans1(x) :- Student(x), firstName(x,a)
 		 */
-		CQIE query = dataFactory.getCQIE(ans1, student, firstName);
+		CQIE query = DATA_FACTORY.getCQIE(ans1, student, firstName);
 		DatalogProgram datalog = createDatalogProgram(query);
 		
 		// Translate the datalog and display the returned SPARQL string
@@ -89,8 +88,8 @@ public class DatalogToSparqlTranslatorTest {
 		 * ans1(x,a) :- ans2(x,a)
 		 * ans2(x,a) :- Student(x), firstName(x,a)
 		 */
-		CQIE query = dataFactory.getCQIE(ans1, ans2);
-		CQIE rule1 = dataFactory.getCQIE(ans2, student, firstName);
+		CQIE query = DATA_FACTORY.getCQIE(ans1, ans2);
+		CQIE rule1 = DATA_FACTORY.getCQIE(ans2, student, firstName);
 		DatalogProgram datalog = createDatalogProgram(query, rule1);
 		
 		// Translate the datalog and display the returned SPARQL string
@@ -109,9 +108,9 @@ public class DatalogToSparqlTranslatorTest {
 		 * ans2(x,a,b) :- Student(x), ans3(x,a,b)
 		 * ans3(x,a,b) :- firstName(x,a), lastName(x,b)
 		 */
-		CQIE query = dataFactory.getCQIE(ans1, ans2);
-		CQIE rule1 = dataFactory.getCQIE(ans2, student, ans3);
-		CQIE rule2 = dataFactory.getCQIE(ans3, firstName, lastName);
+		CQIE query = DATA_FACTORY.getCQIE(ans1, ans2);
+		CQIE rule1 = DATA_FACTORY.getCQIE(ans2, student, ans3);
+		CQIE rule2 = DATA_FACTORY.getCQIE(ans3, firstName, lastName);
 		
 		DatalogProgram datalog = createDatalogProgram(query, rule1, rule2);
 		
@@ -123,12 +122,12 @@ public class DatalogToSparqlTranslatorTest {
 	public void testSimpleQueryWithCondition() {
 		
 		Function ans1 = createQuery(x, a);
-		Function cond = dataFactory.getFunctionEQ(a, c1);
+		Function cond = DATA_FACTORY.getFunctionEQ(a, c1);
 		
 		/**
 		 * ans1(x) :- Student(x), firstName(x,a), EQ(a,"John")
 		 */
-		CQIE query = dataFactory.getCQIE(ans1, student, firstName, cond);
+		CQIE query = DATA_FACTORY.getCQIE(ans1, student, firstName, cond);
 		DatalogProgram datalog = createDatalogProgram(query);
 		
 		// Translate the datalog and display the returned SPARQL string
@@ -139,17 +138,17 @@ public class DatalogToSparqlTranslatorTest {
 	public void testSimpleQueryWithMoreConditions() {
 		
 		Function ans1 = createQuery(x, a);
-		Function cond1 = dataFactory.getFunctionEQ(a, c1);
-		Function cond2 = dataFactory.getFunctionNEQ(b, c2);
-		Function cond3 = dataFactory.getFunction(ExpressionOperation.GT, c, c3);
-		Function cond4 = dataFactory.getFunction(ExpressionOperation.GTE, d, c4);
-		Function cond5 = dataFactory.getFunction(ExpressionOperation.LT, e, c5);
+		Function cond1 = DATA_FACTORY.getFunctionEQ(a, c1);
+		Function cond2 = DATA_FACTORY.getFunctionNEQ(b, c2);
+		Function cond3 = DATA_FACTORY.getFunction(ExpressionOperation.GT, c, c3);
+		Function cond4 = DATA_FACTORY.getFunction(ExpressionOperation.GTE, d, c4);
+		Function cond5 = DATA_FACTORY.getFunction(ExpressionOperation.LT, e, c5);
 		
 		/**
 		 * ans1(x) :- Student(x), firstName(x,a), lastName(x,b), age(x,c), grade(x,d), enrollmentDate(x,e),
 		 * 			  EQ(a,"John"), NEQ(b,"Smith"), GT(c,22), GTE(d,35), LT(e,"2012-01-01 00:00:00")
 		 */
-		CQIE query = dataFactory.getCQIE(ans1, student, firstName, lastName, age, grade, enrollmentDate, cond1, cond2, cond3, cond4, cond5);
+		CQIE query = DATA_FACTORY.getCQIE(ans1, student, firstName, lastName, age, grade, enrollmentDate, cond1, cond2, cond3, cond4, cond5);
 		DatalogProgram datalog = createDatalogProgram(query);
 		
 		// Translate the datalog and display the returned SPARQL string
@@ -161,14 +160,14 @@ public class DatalogToSparqlTranslatorTest {
 		
 		Function ans1 = createQuery(x, a);
 		Function ans2 = createRule(ANS2, x, a);
-		Function cond = dataFactory.getFunctionEQ(a, c1);
+		Function cond = DATA_FACTORY.getFunctionEQ(a, c1);
 		
 		/**
 		 * ans1(x,a) :- Student(x), ans2(x,a)
 		 * ans2(x,a) :- firstName(x,a), EQ(a,"John)
 		 */
-		CQIE query = dataFactory.getCQIE(ans1, student, ans2);
-		CQIE rule1 = dataFactory.getCQIE(ans2, firstName, cond);
+		CQIE query = DATA_FACTORY.getCQIE(ans1, student, ans2);
+		CQIE rule1 = DATA_FACTORY.getCQIE(ans2, firstName, cond);
 		DatalogProgram datalog = createDatalogProgram(query, rule1);
 		
 		// Translate the datalog and display the returned SPARQL string
@@ -184,11 +183,11 @@ public class DatalogToSparqlTranslatorTest {
 		Function ans4 = createRule(ANS4, x, c);
 		Function ans5 = createRule(ANS5, x, d);
 		Function ans6 = createRule(ANS6, x, e);
-		Function cond1 = dataFactory.getFunctionEQ(a, c1);
-		Function cond2 = dataFactory.getFunctionNEQ(b, c2);
-		Function cond3 = dataFactory.getFunction(ExpressionOperation.GT, c, c3);
-		Function cond4 = dataFactory.getFunction(ExpressionOperation.GTE, d, c4);
-		Function cond5 = dataFactory.getFunction(ExpressionOperation.LT, e, c5);
+		Function cond1 = DATA_FACTORY.getFunctionEQ(a, c1);
+		Function cond2 = DATA_FACTORY.getFunctionNEQ(b, c2);
+		Function cond3 = DATA_FACTORY.getFunction(ExpressionOperation.GT, c, c3);
+		Function cond4 = DATA_FACTORY.getFunction(ExpressionOperation.GTE, d, c4);
+		Function cond5 = DATA_FACTORY.getFunction(ExpressionOperation.LT, e, c5);
 		
 		/**
 		 * ans1(x) :- Student(x), ans2(x,a)
@@ -198,12 +197,12 @@ public class DatalogToSparqlTranslatorTest {
 		 * ans5(x,d) :- grade(x,d), GTE(d,35), ans6(x,e)
 		 * ans6(x,e) :- enrollmentDate(x,e), LT(e,"2012-01-01 00:00:00")
 		 */
-		CQIE query = dataFactory.getCQIE(ans1, student, ans2);
-		CQIE rule1 = dataFactory.getCQIE(ans2, firstName, cond1, ans3);
-		CQIE rule2 = dataFactory.getCQIE(ans3, lastName, cond2, ans4);
-		CQIE rule3 = dataFactory.getCQIE(ans4, age, cond3, ans5);
-		CQIE rule4 = dataFactory.getCQIE(ans5, grade, cond4, ans6);
-		CQIE rule5 = dataFactory.getCQIE(ans6, enrollmentDate, cond5);
+		CQIE query = DATA_FACTORY.getCQIE(ans1, student, ans2);
+		CQIE rule1 = DATA_FACTORY.getCQIE(ans2, firstName, cond1, ans3);
+		CQIE rule2 = DATA_FACTORY.getCQIE(ans3, lastName, cond2, ans4);
+		CQIE rule3 = DATA_FACTORY.getCQIE(ans4, age, cond3, ans5);
+		CQIE rule4 = DATA_FACTORY.getCQIE(ans5, grade, cond4, ans6);
+		CQIE rule5 = DATA_FACTORY.getCQIE(ans6, enrollmentDate, cond5);
 		
 		DatalogProgram datalog = createDatalogProgram(query, rule1, rule2, rule3, rule4, rule5);
 		
@@ -215,20 +214,20 @@ public class DatalogToSparqlTranslatorTest {
 	public void testSimpleQueryWithNestedConditions() {
 		
 		Function ans1 = createQuery(x, a);
-		Function cond1 = dataFactory.getFunctionEQ(a, c1);
-		Function cond2 = dataFactory.getFunctionNEQ(b, c2);
-		Function cond3 = dataFactory.getFunction(ExpressionOperation.GT, c, c3);
-		Function cond4 = dataFactory.getFunction(ExpressionOperation.GTE, d, c4);
-		Function cond5 = dataFactory.getFunction(ExpressionOperation.LT, e, c5);
-		Function cond6 = dataFactory.getFunctionAND(cond3, cond4);
-		Function cond7 = dataFactory.getFunctionOR(cond6, cond5);
+		Function cond1 = DATA_FACTORY.getFunctionEQ(a, c1);
+		Function cond2 = DATA_FACTORY.getFunctionNEQ(b, c2);
+		Function cond3 = DATA_FACTORY.getFunction(ExpressionOperation.GT, c, c3);
+		Function cond4 = DATA_FACTORY.getFunction(ExpressionOperation.GTE, d, c4);
+		Function cond5 = DATA_FACTORY.getFunction(ExpressionOperation.LT, e, c5);
+		Function cond6 = DATA_FACTORY.getFunctionAND(cond3, cond4);
+		Function cond7 = DATA_FACTORY.getFunctionOR(cond6, cond5);
 		
 		/**
 		 * ans1(x) :- Student(x), firstName(x,a), lastName(x,b), age(x,c), grade(x,d), enrollmentDate(x,e),
 		 * 			  EQ(a,"John"), NEQ(b,"Smith"), 
 		 * 			  OR(AND(GT(c,22), GTE(d,35)), LT(e,"2012-01-01 00:00:00"))
 		 */
-		CQIE query = dataFactory.getCQIE(ans1, student, firstName, lastName, age, grade, enrollmentDate, cond1, cond2, cond7);
+		CQIE query = DATA_FACTORY.getCQIE(ans1, student, firstName, lastName, age, grade, enrollmentDate, cond1, cond2, cond7);
 		DatalogProgram datalog = createDatalogProgram(query);
 		
 		// Translate the datalog and display the returned SPARQL string
@@ -247,10 +246,10 @@ public class DatalogToSparqlTranslatorTest {
 		 * ans2(x) :- MasterStudent(x)
 		 * ans2(x) :- DoctoralStudent(x)
 		 */
-		CQIE query = dataFactory.getCQIE(ans1, ans2);
-		CQIE rule1 = dataFactory.getCQIE(ans2, bachelorStudent);
-		CQIE rule2 = dataFactory.getCQIE(ans2, masterStudent);
-		CQIE rule3 = dataFactory.getCQIE(ans2, doctoralStudent);
+		CQIE query = DATA_FACTORY.getCQIE(ans1, ans2);
+		CQIE rule1 = DATA_FACTORY.getCQIE(ans2, bachelorStudent);
+		CQIE rule2 = DATA_FACTORY.getCQIE(ans2, masterStudent);
+		CQIE rule3 = DATA_FACTORY.getCQIE(ans2, doctoralStudent);
 		
 		DatalogProgram datalog = createDatalogProgram(query, rule1, rule2, rule3);
 		
@@ -273,12 +272,12 @@ public class DatalogToSparqlTranslatorTest {
 		 * ans3(x,y) :- hasElementaryCourse(x,y)
 		 * ans3(x,y) :- hasAdvancedCourse(x,y)
 		 */
-		CQIE query = dataFactory.getCQIE(ans1, ans2, ans3);
-		CQIE rule1 = dataFactory.getCQIE(ans2, bachelorStudent);
-		CQIE rule2 = dataFactory.getCQIE(ans2, masterStudent);
-		CQIE rule3 = dataFactory.getCQIE(ans2, doctoralStudent);
-		CQIE rule4 = dataFactory.getCQIE(ans3, hasElementaryCourse);
-		CQIE rule5 = dataFactory.getCQIE(ans3, hasAdvancedCourse);
+		CQIE query = DATA_FACTORY.getCQIE(ans1, ans2, ans3);
+		CQIE rule1 = DATA_FACTORY.getCQIE(ans2, bachelorStudent);
+		CQIE rule2 = DATA_FACTORY.getCQIE(ans2, masterStudent);
+		CQIE rule3 = DATA_FACTORY.getCQIE(ans2, doctoralStudent);
+		CQIE rule4 = DATA_FACTORY.getCQIE(ans3, hasElementaryCourse);
+		CQIE rule5 = DATA_FACTORY.getCQIE(ans3, hasAdvancedCourse);
 		
 		DatalogProgram datalog = createDatalogProgram(query, rule1, rule2, rule3, rule4, rule5);
 		
@@ -302,12 +301,12 @@ public class DatalogToSparqlTranslatorTest {
 		 * ans3(x) :- MasterStudent(x)
 		 * ans4(x) :- DoctoralStudent(x)
 		 */
-		CQIE query1 = dataFactory.getCQIE(ans1, ans2);
-		CQIE query2 = dataFactory.getCQIE(ans1, ans3);
-		CQIE query3 = dataFactory.getCQIE(ans1, ans4);
-		CQIE rule1 = dataFactory.getCQIE(ans2, bachelorStudent);
-		CQIE rule2 = dataFactory.getCQIE(ans3, masterStudent);
-		CQIE rule3 = dataFactory.getCQIE(ans4, doctoralStudent);
+		CQIE query1 = DATA_FACTORY.getCQIE(ans1, ans2);
+		CQIE query2 = DATA_FACTORY.getCQIE(ans1, ans3);
+		CQIE query3 = DATA_FACTORY.getCQIE(ans1, ans4);
+		CQIE rule1 = DATA_FACTORY.getCQIE(ans2, bachelorStudent);
+		CQIE rule2 = DATA_FACTORY.getCQIE(ans3, masterStudent);
+		CQIE rule3 = DATA_FACTORY.getCQIE(ans4, doctoralStudent);
 		
 		DatalogProgram datalog = createDatalogProgram(query1, query2, query3, rule1, rule2, rule3);
 		
@@ -321,16 +320,16 @@ public class DatalogToSparqlTranslatorTest {
 		Function ans1 = createQuery(x, a, b);
 		Function ans2 = createRule(ANS2, x, a);
 		Function ans3 = createRule(ANS3, x, b);
-		Function join = dataFactory.getSPARQLJoin(ans2, ans3);
+		Function join = DATA_FACTORY.getSPARQLJoin(ans2, ans3);
 		
 		/**
 		 * ans1(x,a,b) :- Join(ans2(x,a), ans3(x,b))
 		 * ans2(x,a) :- firstName(x,a)
 		 * ans3(x,b) :- lastName(x,b)
 		 */
-		CQIE query = dataFactory.getCQIE(ans1, join);
-		CQIE rule1 = dataFactory.getCQIE(ans2, firstName);
-		CQIE rule2 = dataFactory.getCQIE(ans3, lastName);
+		CQIE query = DATA_FACTORY.getCQIE(ans1, join);
+		CQIE rule1 = DATA_FACTORY.getCQIE(ans2, firstName);
+		CQIE rule2 = DATA_FACTORY.getCQIE(ans3, lastName);
 		
 		DatalogProgram datalog = createDatalogProgram(query, rule1, rule2);
 		
@@ -346,8 +345,8 @@ public class DatalogToSparqlTranslatorTest {
 		Function ans3 = createRule(ANS3, x, b, c);
 		Function ans4 = createRule(ANS4, x, b);
 		Function ans5 = createRule(ANS5, x, c);
-		Function join1 = dataFactory.getSPARQLJoin(ans2, ans3);
-		Function join2 = dataFactory.getSPARQLJoin(ans4, ans5);
+		Function join1 = DATA_FACTORY.getSPARQLJoin(ans2, ans3);
+		Function join2 = DATA_FACTORY.getSPARQLJoin(ans4, ans5);
 		
 		/**
 		 * ans1(x,a,b) :- Join(ans2(x,a), ans3(x,b,c))
@@ -356,11 +355,11 @@ public class DatalogToSparqlTranslatorTest {
 		 * ans4(x,b) :- lastName(x,b)
 		 * ans5(x,c) :- age(x,c)
 		 */
-		CQIE query = dataFactory.getCQIE(ans1, join1);
-		CQIE rule1 = dataFactory.getCQIE(ans2, firstName);
-		CQIE rule2 = dataFactory.getCQIE(ans3, join2);
-		CQIE rule3 = dataFactory.getCQIE(ans4, lastName);
-		CQIE rule4 = dataFactory.getCQIE(ans5, age);
+		CQIE query = DATA_FACTORY.getCQIE(ans1, join1);
+		CQIE rule1 = DATA_FACTORY.getCQIE(ans2, firstName);
+		CQIE rule2 = DATA_FACTORY.getCQIE(ans3, join2);
+		CQIE rule3 = DATA_FACTORY.getCQIE(ans4, lastName);
+		CQIE rule4 = DATA_FACTORY.getCQIE(ans5, age);
 		
 		DatalogProgram datalog = createDatalogProgram(query, rule1, rule2, rule3, rule4);
 		
@@ -374,16 +373,16 @@ public class DatalogToSparqlTranslatorTest {
 		Function ans1 = createQuery(x, a, b);
 		Function ans2 = createRule(ANS2, x, a);
 		Function ans3 = createRule(ANS3, x, b);
-		Function leftJoin = dataFactory.getSPARQLLeftJoin(ans2, ans3);
+		Function leftJoin = DATA_FACTORY.getSPARQLLeftJoin(ans2, ans3);
 		
 		/**
 		 * ans1(x,a,b) :- LeftJoin(ans2(x,a), ans3(x,b))
 		 * ans2(x,a) :- firstName(x,a)
 		 * ans3(x,b) :- lastName(x,b)
 		 */
-		CQIE query = dataFactory.getCQIE(ans1, leftJoin);
-		CQIE rule1 = dataFactory.getCQIE(ans2, firstName);
-		CQIE rule2 = dataFactory.getCQIE(ans3, lastName);
+		CQIE query = DATA_FACTORY.getCQIE(ans1, leftJoin);
+		CQIE rule1 = DATA_FACTORY.getCQIE(ans2, firstName);
+		CQIE rule2 = DATA_FACTORY.getCQIE(ans3, lastName);
 		
 		DatalogProgram datalog = createDatalogProgram(query, rule1, rule2);
 		
@@ -399,8 +398,8 @@ public class DatalogToSparqlTranslatorTest {
 		Function ans3 = createRule(ANS3, x, b, c);
 		Function ans4 = createRule(ANS4, x, b);
 		Function ans5 = createRule(ANS5, x, c);
-		Function join1 = dataFactory.getSPARQLLeftJoin(ans2, ans3);
-		Function join2 = dataFactory.getSPARQLLeftJoin(ans4, ans5);
+		Function join1 = DATA_FACTORY.getSPARQLLeftJoin(ans2, ans3);
+		Function join2 = DATA_FACTORY.getSPARQLLeftJoin(ans4, ans5);
 		
 		/**
 		 * ans1(x,a,b) :- LeftJoin(ans2(x,a), ans3(x,b,c))
@@ -409,11 +408,11 @@ public class DatalogToSparqlTranslatorTest {
 		 * ans4(x,b) :- lastName(x,b)
 		 * ans5(x,c) :- age(x,c)
 		 */
-		CQIE query = dataFactory.getCQIE(ans1, join1);
-		CQIE rule1 = dataFactory.getCQIE(ans2, firstName);
-		CQIE rule2 = dataFactory.getCQIE(ans3, join2);
-		CQIE rule3 = dataFactory.getCQIE(ans4, lastName);
-		CQIE rule4 = dataFactory.getCQIE(ans5, age);
+		CQIE query = DATA_FACTORY.getCQIE(ans1, join1);
+		CQIE rule1 = DATA_FACTORY.getCQIE(ans2, firstName);
+		CQIE rule2 = DATA_FACTORY.getCQIE(ans3, join2);
+		CQIE rule3 = DATA_FACTORY.getCQIE(ans4, lastName);
+		CQIE rule4 = DATA_FACTORY.getCQIE(ans5, age);
 		
 		DatalogProgram datalog = createDatalogProgram(query, rule1, rule2, rule3, rule4);
 		
@@ -429,8 +428,8 @@ public class DatalogToSparqlTranslatorTest {
 		Function ans3 = createRule(ANS3, x, b, c);
 		Function ans4 = createRule(ANS4, x, b);
 		Function ans5 = createRule(ANS5, x, c);
-		Function join1 = dataFactory.getSPARQLLeftJoin(ans2, ans3);
-		Function join2 = dataFactory.getSPARQLJoin(ans4, ans5);
+		Function join1 = DATA_FACTORY.getSPARQLLeftJoin(ans2, ans3);
+		Function join2 = DATA_FACTORY.getSPARQLJoin(ans4, ans5);
 		
 		/**
 		 * ans1(x,a,b) :- LeftJoin(ans2(x,a), ans3(x,b,c))
@@ -439,11 +438,11 @@ public class DatalogToSparqlTranslatorTest {
 		 * ans4(x,b) :- lastName(x,b)
 		 * ans5(x,c) :- age(x,c)
 		 */
-		CQIE query = dataFactory.getCQIE(ans1, join1);
-		CQIE rule1 = dataFactory.getCQIE(ans2, firstName);
-		CQIE rule2 = dataFactory.getCQIE(ans3, join2);
-		CQIE rule3 = dataFactory.getCQIE(ans4, lastName);
-		CQIE rule4 = dataFactory.getCQIE(ans5, age);
+		CQIE query = DATA_FACTORY.getCQIE(ans1, join1);
+		CQIE rule1 = DATA_FACTORY.getCQIE(ans2, firstName);
+		CQIE rule2 = DATA_FACTORY.getCQIE(ans3, join2);
+		CQIE rule3 = DATA_FACTORY.getCQIE(ans4, lastName);
+		CQIE rule4 = DATA_FACTORY.getCQIE(ans5, age);
 		
 		DatalogProgram datalog = createDatalogProgram(query, rule1, rule2, rule3, rule4);
 		
@@ -457,7 +456,7 @@ public class DatalogToSparqlTranslatorTest {
 		Function ans1 = createQuery(x);
 		Function ans2 = createRule(ANS2, x);
 		Function ans3 = createRule(ANS3, x, d);
-		Function join = dataFactory.getSPARQLJoin(ans2, ans3);
+		Function join = DATA_FACTORY.getSPARQLJoin(ans2, ans3);
 		
 		/**
 		 * ans1(x) :- Join(ans2(x), ans3(x,d))
@@ -466,11 +465,11 @@ public class DatalogToSparqlTranslatorTest {
 		 * ans2(x) :- DoctoralStudent(x)
 		 * ans3(x,d) :- grade(x,d)
 		 */
-		CQIE query = dataFactory.getCQIE(ans1, join);
-		CQIE rule1 = dataFactory.getCQIE(ans2, bachelorStudent);
-		CQIE rule2 = dataFactory.getCQIE(ans2, masterStudent);
-		CQIE rule3 = dataFactory.getCQIE(ans2, doctoralStudent);
-		CQIE rule4 = dataFactory.getCQIE(ans3, grade);
+		CQIE query = DATA_FACTORY.getCQIE(ans1, join);
+		CQIE rule1 = DATA_FACTORY.getCQIE(ans2, bachelorStudent);
+		CQIE rule2 = DATA_FACTORY.getCQIE(ans2, masterStudent);
+		CQIE rule3 = DATA_FACTORY.getCQIE(ans2, doctoralStudent);
+		CQIE rule4 = DATA_FACTORY.getCQIE(ans3, grade);
 		
 		DatalogProgram datalog = createDatalogProgram(query, rule1, rule2, rule3, rule4);
 		
@@ -486,8 +485,8 @@ public class DatalogToSparqlTranslatorTest {
 		Function ans3 = createRule(ANS3, x, a, b);
 		Function ans4 = createRule(ANS4, x, a);
 		Function ans5 = createRule(ANS5, x, b);
-		Function join1 = dataFactory.getSPARQLJoin(ans2, ans3);
-		Function join2 = dataFactory.getSPARQLJoin(ans4, ans5);
+		Function join1 = DATA_FACTORY.getSPARQLJoin(ans2, ans3);
+		Function join2 = DATA_FACTORY.getSPARQLJoin(ans4, ans5);
 		
 		/**
 		 * ans1(x,a,b) :- Join(ans2(x), ans3(x,a,b))
@@ -498,13 +497,13 @@ public class DatalogToSparqlTranslatorTest {
 		 * ans4(x,a) :- firstName(x,a)
 		 * ans5(x,b) :- lastName(x,b)
 		 */
-		CQIE query = dataFactory.getCQIE(ans1, join1);
-		CQIE rule1 = dataFactory.getCQIE(ans2, bachelorStudent);
-		CQIE rule2 = dataFactory.getCQIE(ans2, masterStudent);
-		CQIE rule3 = dataFactory.getCQIE(ans2, doctoralStudent);
-		CQIE rule4 = dataFactory.getCQIE(ans3, join2);
-		CQIE rule5 = dataFactory.getCQIE(ans4, firstName);
-		CQIE rule6 = dataFactory.getCQIE(ans5, lastName);
+		CQIE query = DATA_FACTORY.getCQIE(ans1, join1);
+		CQIE rule1 = DATA_FACTORY.getCQIE(ans2, bachelorStudent);
+		CQIE rule2 = DATA_FACTORY.getCQIE(ans2, masterStudent);
+		CQIE rule3 = DATA_FACTORY.getCQIE(ans2, doctoralStudent);
+		CQIE rule4 = DATA_FACTORY.getCQIE(ans3, join2);
+		CQIE rule5 = DATA_FACTORY.getCQIE(ans4, firstName);
+		CQIE rule6 = DATA_FACTORY.getCQIE(ans5, lastName);
 		
 		DatalogProgram datalog = createDatalogProgram(query, rule1, rule2, rule3, rule4, rule5, rule6);
 		
@@ -518,7 +517,7 @@ public class DatalogToSparqlTranslatorTest {
 		Function ans1 = createQuery(x);
 		Function ans2 = createRule(ANS2, x);
 		Function ans3 = createRule(ANS3, x, d);
-		Function join = dataFactory.getSPARQLLeftJoin(ans2, ans3);
+		Function join = DATA_FACTORY.getSPARQLLeftJoin(ans2, ans3);
 		
 		/**
 		 * ans1(x) :- LeftJoin(ans2(x), ans3(x,d))
@@ -527,11 +526,11 @@ public class DatalogToSparqlTranslatorTest {
 		 * ans2(x) :- DoctoralStudent(x)
 		 * ans3(x,d) :- grade(x,d)
 		 */
-		CQIE query = dataFactory.getCQIE(ans1, join);
-		CQIE rule1 = dataFactory.getCQIE(ans2, bachelorStudent);
-		CQIE rule2 = dataFactory.getCQIE(ans2, masterStudent);
-		CQIE rule3 = dataFactory.getCQIE(ans2, doctoralStudent);
-		CQIE rule4 = dataFactory.getCQIE(ans3, grade);
+		CQIE query = DATA_FACTORY.getCQIE(ans1, join);
+		CQIE rule1 = DATA_FACTORY.getCQIE(ans2, bachelorStudent);
+		CQIE rule2 = DATA_FACTORY.getCQIE(ans2, masterStudent);
+		CQIE rule3 = DATA_FACTORY.getCQIE(ans2, doctoralStudent);
+		CQIE rule4 = DATA_FACTORY.getCQIE(ans3, grade);
 		
 		DatalogProgram datalog = createDatalogProgram(query, rule1, rule2, rule3, rule4);
 		
@@ -547,8 +546,8 @@ public class DatalogToSparqlTranslatorTest {
 		Function ans3 = createRule(ANS3, x, a, b);
 		Function ans4 = createRule(ANS4, x, a);
 		Function ans5 = createRule(ANS5, x, b);
-		Function join1 = dataFactory.getSPARQLLeftJoin(ans2, ans3);
-		Function join2 = dataFactory.getSPARQLLeftJoin(ans4, ans5);
+		Function join1 = DATA_FACTORY.getSPARQLLeftJoin(ans2, ans3);
+		Function join2 = DATA_FACTORY.getSPARQLLeftJoin(ans4, ans5);
 		
 		/**
 		 * ans1(x,a,b) :- LeftJoin(ans2(x), ans3(x,a,b))
@@ -559,13 +558,13 @@ public class DatalogToSparqlTranslatorTest {
 		 * ans4(x,a) :- firstName(x,a)
 		 * ans5(x,b) :- lastName(x,b)
 		 */
-		CQIE query = dataFactory.getCQIE(ans1, join1);
-		CQIE rule1 = dataFactory.getCQIE(ans2, bachelorStudent);
-		CQIE rule2 = dataFactory.getCQIE(ans2, masterStudent);
-		CQIE rule3 = dataFactory.getCQIE(ans2, doctoralStudent);
-		CQIE rule4 = dataFactory.getCQIE(ans3, join2);
-		CQIE rule5 = dataFactory.getCQIE(ans4, firstName);
-		CQIE rule6 = dataFactory.getCQIE(ans5, lastName);
+		CQIE query = DATA_FACTORY.getCQIE(ans1, join1);
+		CQIE rule1 = DATA_FACTORY.getCQIE(ans2, bachelorStudent);
+		CQIE rule2 = DATA_FACTORY.getCQIE(ans2, masterStudent);
+		CQIE rule3 = DATA_FACTORY.getCQIE(ans2, doctoralStudent);
+		CQIE rule4 = DATA_FACTORY.getCQIE(ans3, join2);
+		CQIE rule5 = DATA_FACTORY.getCQIE(ans4, firstName);
+		CQIE rule6 = DATA_FACTORY.getCQIE(ans5, lastName);
 		
 		DatalogProgram datalog = createDatalogProgram(query, rule1, rule2, rule3, rule4, rule5, rule6);
 		
@@ -581,8 +580,8 @@ public class DatalogToSparqlTranslatorTest {
 		Function ans3 = createRule(ANS3, x, a, b);
 		Function ans4 = createRule(ANS4, x, a);
 		Function ans5 = createRule(ANS5, x, b);
-		Function join1 = dataFactory.getSPARQLJoin(ans2, ans3);
-		Function join2 = dataFactory.getSPARQLLeftJoin(ans4, ans5);
+		Function join1 = DATA_FACTORY.getSPARQLJoin(ans2, ans3);
+		Function join2 = DATA_FACTORY.getSPARQLLeftJoin(ans4, ans5);
 		
 		/**
 		 * ans1(x,a,b) :- Join(ans2(x), ans3(x,a,b))
@@ -593,13 +592,13 @@ public class DatalogToSparqlTranslatorTest {
 		 * ans4(x,a) :- firstName(x,a)
 		 * ans5(x,b) :- lastName(x,b)
 		 */
-		CQIE query = dataFactory.getCQIE(ans1, join1);
-		CQIE rule1 = dataFactory.getCQIE(ans2, bachelorStudent);
-		CQIE rule2 = dataFactory.getCQIE(ans2, masterStudent);
-		CQIE rule3 = dataFactory.getCQIE(ans2, doctoralStudent);
-		CQIE rule4 = dataFactory.getCQIE(ans3, join2);
-		CQIE rule5 = dataFactory.getCQIE(ans4, firstName);
-		CQIE rule6 = dataFactory.getCQIE(ans5, lastName);
+		CQIE query = DATA_FACTORY.getCQIE(ans1, join1);
+		CQIE rule1 = DATA_FACTORY.getCQIE(ans2, bachelorStudent);
+		CQIE rule2 = DATA_FACTORY.getCQIE(ans2, masterStudent);
+		CQIE rule3 = DATA_FACTORY.getCQIE(ans2, doctoralStudent);
+		CQIE rule4 = DATA_FACTORY.getCQIE(ans3, join2);
+		CQIE rule5 = DATA_FACTORY.getCQIE(ans4, firstName);
+		CQIE rule6 = DATA_FACTORY.getCQIE(ans5, lastName);
 		
 		DatalogProgram datalog = createDatalogProgram(query, rule1, rule2, rule3, rule4, rule5, rule6);
 		
@@ -619,9 +618,9 @@ public class DatalogToSparqlTranslatorTest {
 		 * ans2(x,a,b) :- Student(x), ans3(x,a,b)
 		 * ans3(x,a,b) :- firstName(x,a), lastName(x,b)
 		 */
-		CQIE query = dataFactory.getCQIE(ans1, ans2);
-		CQIE rule1 = dataFactory.getCQIE(ans2, student, ans3);
-		CQIE rule2 = dataFactory.getCQIE(ans3, firstName, lastName);
+		CQIE query = DATA_FACTORY.getCQIE(ans1, ans2);
+		CQIE rule1 = DATA_FACTORY.getCQIE(ans2, student, ans3);
+		CQIE rule2 = DATA_FACTORY.getCQIE(ans3, firstName, lastName);
 		
 		OBDAQueryModifiers modifiers = new MutableQueryModifiersImpl();
 		modifiers.setDistinct();
@@ -638,28 +637,28 @@ public class DatalogToSparqlTranslatorTest {
 
 	private Function createQuery(Variable... vars) {
 		int arity = vars.length;
-		Predicate queryPredicate = dataFactory.getPredicate(OBDAVocabulary.QUEST_QUERY, arity);
-		return dataFactory.getFunction(queryPredicate, vars);
+		Predicate queryPredicate = DATA_FACTORY.getPredicate(OBDAVocabulary.QUEST_QUERY, arity);
+		return DATA_FACTORY.getFunction(queryPredicate, vars);
 	}
 
 	private Function createRule(String ruleName, Variable... vars) {
 		int arity = vars.length;
-		Predicate rulePredicate = dataFactory.getPredicate(ruleName, arity);
-		return dataFactory.getFunction(rulePredicate, vars);
+		Predicate rulePredicate = DATA_FACTORY.getPredicate(ruleName, arity);
+		return DATA_FACTORY.getFunction(rulePredicate, vars);
 	}
 
 	private DatalogProgram createDatalogProgram(OBDAQueryModifiers modifiers, CQIE... queryAndRules) {
 		List<CQIE> program = Arrays.asList(queryAndRules);
-		return dataFactory.getDatalogProgram(modifiers, program);
+		return DATA_FACTORY.getDatalogProgram(modifiers, program);
 	}
 
 	private DatalogProgram createDatalogProgram(CQIE... queryAndRules) {
 		List<CQIE> program = Arrays.asList(queryAndRules);
-		DatalogProgram dp =  dataFactory.getDatalogProgram();
+		DatalogProgram dp =  DATA_FACTORY.getDatalogProgram();
 		dp.appendRule(program);
 		return dp;
 	}
-	
+
 	private void translateAndDisplayOutput(String title, DatalogProgram datalog) {
 		final String sparqlOutput = datalogTranslator.translate(datalog);
 		StringBuilder sb = new StringBuilder();
@@ -696,20 +695,20 @@ public class DatalogToSparqlTranslatorTest {
 	private static Predicate predHasAdvancedCourse;
 	
 	static {
-		predStudent = dataFactory.getClassPredicate("http://example.org/Student");
-		predBachelorStudent = dataFactory.getClassPredicate("http://example.org/BachelorStudent");
-		predMasterStudent = dataFactory.getClassPredicate("http://example.org/MasterStudent");
-		predDoctoralStudent = dataFactory.getClassPredicate("http://example.org/DoctoralStudent");
+		predStudent = DATA_FACTORY.getClassPredicate("http://example.org/Student");
+		predBachelorStudent = DATA_FACTORY.getClassPredicate("http://example.org/BachelorStudent");
+		predMasterStudent = DATA_FACTORY.getClassPredicate("http://example.org/MasterStudent");
+		predDoctoralStudent = DATA_FACTORY.getClassPredicate("http://example.org/DoctoralStudent");
 		
-		predFirstName = dataFactory.getDataPropertyPredicate("http://example.org/firstName", COL_TYPE.STRING);
-		predLastName = dataFactory.getDataPropertyPredicate("http://example.org/lastName", COL_TYPE.STRING);
-		predAge = dataFactory.getDataPropertyPredicate("http://example.org/age", COL_TYPE.INTEGER);
-		predGrade = dataFactory.getDataPropertyPredicate("http://example.org/grade", COL_TYPE.DECIMAL);
-		predEnrollmentDate = dataFactory.getDataPropertyPredicate("http://example.org/enrollmentDate", COL_TYPE.DATETIME);
+		predFirstName = DATA_FACTORY.getDataPropertyPredicate("http://example.org/firstName", COL_TYPE.STRING);
+		predLastName = DATA_FACTORY.getDataPropertyPredicate("http://example.org/lastName", COL_TYPE.STRING);
+		predAge = DATA_FACTORY.getDataPropertyPredicate("http://example.org/age", COL_TYPE.INTEGER);
+		predGrade = DATA_FACTORY.getDataPropertyPredicate("http://example.org/grade", COL_TYPE.DECIMAL);
+		predEnrollmentDate = DATA_FACTORY.getDataPropertyPredicate("http://example.org/enrollmentDate", COL_TYPE.DATETIME);
 		
-		predHasCourse = dataFactory.getObjectPropertyPredicate("http://example.org/hasCourse");
-		predHasElementaryCourse = dataFactory.getObjectPropertyPredicate("http://example.org/hasElementaryCourse");
-		predHasAdvancedCourse = dataFactory.getObjectPropertyPredicate("http://example.org/hasAdvancedCourse");
+		predHasCourse = DATA_FACTORY.getObjectPropertyPredicate("http://example.org/hasCourse");
+		predHasElementaryCourse = DATA_FACTORY.getObjectPropertyPredicate("http://example.org/hasElementaryCourse");
+		predHasAdvancedCourse = DATA_FACTORY.getObjectPropertyPredicate("http://example.org/hasAdvancedCourse");
 	}
 	
 	private static Variable x;
@@ -724,16 +723,16 @@ public class DatalogToSparqlTranslatorTest {
 	private static Variable f;
 	
 	static {
-		x = dataFactory.getVariable("x");
-		y = dataFactory.getVariable("y");
-		z = dataFactory.getVariable("z");
+		x = DATA_FACTORY.getVariable("x");
+		y = DATA_FACTORY.getVariable("y");
+		z = DATA_FACTORY.getVariable("z");
 		
-		a = dataFactory.getVariable("a");
-		b = dataFactory.getVariable("b");
-		c = dataFactory.getVariable("c");
-		d = dataFactory.getVariable("d");
-		e = dataFactory.getVariable("e");
-		f = dataFactory.getVariable("f");
+		a = DATA_FACTORY.getVariable("a");
+		b = DATA_FACTORY.getVariable("b");
+		c = DATA_FACTORY.getVariable("c");
+		d = DATA_FACTORY.getVariable("d");
+		e = DATA_FACTORY.getVariable("e");
+		f = DATA_FACTORY.getVariable("f");
 	}
 	
 	private static Constant c1;
@@ -743,11 +742,11 @@ public class DatalogToSparqlTranslatorTest {
 	private static Constant c5;
 	
 	static {
-		c1 = dataFactory.getConstantLiteral("John", COL_TYPE.STRING);
-		c2 = dataFactory.getConstantLiteral("Smith", COL_TYPE.STRING);
-		c3 = dataFactory.getConstantLiteral("25", COL_TYPE.INTEGER);
-		c4 = dataFactory.getConstantLiteral("48.50", COL_TYPE.DECIMAL);
-		c5 = dataFactory.getConstantLiteral("2012-03-20 00:00:00", COL_TYPE.DATETIME);
+		c1 = DATA_FACTORY.getConstantLiteral("John", COL_TYPE.STRING);
+		c2 = DATA_FACTORY.getConstantLiteral("Smith", COL_TYPE.STRING);
+		c3 = DATA_FACTORY.getConstantLiteral("25", COL_TYPE.INTEGER);
+		c4 = DATA_FACTORY.getConstantLiteral("48.50", COL_TYPE.DECIMAL);
+		c5 = DATA_FACTORY.getConstantLiteral("2012-03-20 00:00:00", COL_TYPE.DATETIME);
 	}
 	
 	private static Function student;
@@ -766,19 +765,19 @@ public class DatalogToSparqlTranslatorTest {
 	private static Function hasAdvancedCourse;
 	
 	static {
-		student = dataFactory.getFunction(predStudent, x);
-		bachelorStudent = dataFactory.getFunction(predBachelorStudent, x);
-		masterStudent = dataFactory.getFunction(predMasterStudent, x);
-		doctoralStudent = dataFactory.getFunction(predDoctoralStudent, x);
+		student = DATA_FACTORY.getFunction(predStudent, x);
+		bachelorStudent = DATA_FACTORY.getFunction(predBachelorStudent, x);
+		masterStudent = DATA_FACTORY.getFunction(predMasterStudent, x);
+		doctoralStudent = DATA_FACTORY.getFunction(predDoctoralStudent, x);
 		
-		firstName = dataFactory.getFunction(predFirstName, x, a);
-		lastName = dataFactory.getFunction(predLastName, x, b);
-		age = dataFactory.getFunction(predAge, x, c);
-		grade = dataFactory.getFunction(predGrade, x, d);
-		enrollmentDate = dataFactory.getFunction(predEnrollmentDate, x, e);
+		firstName = DATA_FACTORY.getFunction(predFirstName, x, a);
+		lastName = DATA_FACTORY.getFunction(predLastName, x, b);
+		age = DATA_FACTORY.getFunction(predAge, x, c);
+		grade = DATA_FACTORY.getFunction(predGrade, x, d);
+		enrollmentDate = DATA_FACTORY.getFunction(predEnrollmentDate, x, e);
 		
-		hasCourse = dataFactory.getFunction(predHasCourse, x, y);
-		hasElementaryCourse = dataFactory.getFunction(predHasElementaryCourse, x, y);
-		hasAdvancedCourse = dataFactory.getFunction(predHasAdvancedCourse, x, y);
+		hasCourse = DATA_FACTORY.getFunction(predHasCourse, x, y);
+		hasElementaryCourse = DATA_FACTORY.getFunction(predHasElementaryCourse, x, y);
+		hasAdvancedCourse = DATA_FACTORY.getFunction(predHasAdvancedCourse, x, y);
 	}
 }

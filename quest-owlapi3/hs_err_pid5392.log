@@ -448,7 +448,7 @@ Dynamic libraries:
 
 VM Arguments:
 jvm_args: -agentlib:jdwp=transport=dt_socket,address=127.0.0.1:59072,suspend=y,server=n -ea -Dfile.encoding=UTF-8 
-java_command: com.intellij.rt.execution.junit.JUnitStarter -ideVersion5 org.semanticweb.ontop.reformulation.tests.BindTest,testBind
+java_command: com.intellij.rt.execution.junit.JUnitStarter -ideVersion5 BindTest,testBind
 Launcher Type: SUN_STANDARD
 
 Environment Variables:

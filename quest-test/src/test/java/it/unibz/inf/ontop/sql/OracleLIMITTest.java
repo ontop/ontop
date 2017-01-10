@@ -20,25 +20,30 @@ package it.unibz.inf.ontop.sql;
  * #L%
  */
 
-import it.unibz.inf.ontop.io.ModelIOManager;
-import it.unibz.inf.ontop.model.OBDADataFactory;
-import it.unibz.inf.ontop.model.OBDAException;
-import it.unibz.inf.ontop.model.OBDAModel;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
+
+
+import java.io.File;
+import java.io.IOException;
+
+import it.unibz.inf.ontop.injection.QuestConfiguration;
+import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWL;
+import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLConnection;
+import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLFactory;
+import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLStatement;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import it.unibz.inf.ontop.exception.DuplicateMappingException;
+import it.unibz.inf.ontop.exception.InvalidMappingException;
+import it.unibz.inf.ontop.io.InvalidDataSourceException;
+import it.unibz.inf.ontop.model.OBDAException;
+import it.unibz.inf.ontop.owlrefplatform.core.SQLExecutableQuery;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLException;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.File;
 
 import static org.junit.Assert.assertTrue;
 
@@ -47,14 +52,11 @@ import static org.junit.Assert.assertTrue;
  * Tests with both valid versions of the oracle driverClass string in the SourceDeclaration of the obda file
  */
 public class OracleLIMITTest  {
-
-	private OBDADataFactory fac;
 	private QuestOWLConnection conn;
 
 	Logger log = LoggerFactory.getLogger(this.getClass());
-	private OBDAModel obdaModel;
 	private OWLOntology ontology;
-
+	
 	final String owlfile = "resources/oraclesql/o.owl";
 	final String obdafile1 = "resources/oraclesql/o1.obda";
 	final String obdafile2 = "resources/oraclesql/o2.obda";
@@ -62,13 +64,11 @@ public class OracleLIMITTest  {
 
 	@Before
 	public void setUp() throws Exception {
-        // Loading the OWL file
+		
+		
+		// Loading the OWL file
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 		ontology = manager.loadOntologyFromOntologyDocument((new File(owlfile)));
-
-		// Loading the OBDA data
-		fac = OBDADataFactoryImpl.getInstance();
-		obdaModel = fac.getOBDAModel();
 	}
 
 	@After
@@ -78,23 +78,25 @@ public class OracleLIMITTest  {
 	}
 	
 
-	private void runQuery() throws OBDAException, OWLException {
-		
-		QuestPreferences p = new QuestPreferences();
-		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-		p.setCurrentValueOf(QuestPreferences.OBTAIN_FULL_METADATA, QuestConstants.FALSE);
-		// Creating a new instance of the reasoner
-	    // Creating a new instance of the reasoner
-        QuestOWLFactory factory = new QuestOWLFactory();
-        QuestOWLConfiguration config = QuestOWLConfiguration.builder().obdaModel(obdaModel).preferences(p).build();
-        reasoner = factory.createReasoner(ontology, config);
-        
+	private void runQuery(String obdaFileName) throws OBDAException, OWLException, IOException,
+            InvalidMappingException, DuplicateMappingException, InvalidDataSourceException {
+
+		QuestOWLFactory factory = new QuestOWLFactory();
+
+		QuestConfiguration configuration = QuestConfiguration.defaultBuilder()
+				.ontologyFile(owlfile)
+				.nativeOntopMappingFile(obdaFileName)
+				.enableFullMetadataExtraction(false)
+				.build();
+
+		reasoner = factory.createReasoner(configuration);
+
 		// Now we are ready for querying
 		conn = reasoner.getConnection();
 		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT * WHERE {?x a :Country} LIMIT 10";
 		
 		QuestOWLStatement st = conn.createStatement();
-		String sql = st.getUnfolding(query);
+		String sql = ((SQLExecutableQuery)st.getExecutableQuery(query)).getSQL();;
 		boolean m = sql.matches("(?ms)(.*)WHERE ROWNUM <= 10(.*)");
 		assertTrue(m);
 	}
@@ -108,10 +110,7 @@ public class OracleLIMITTest  {
 	 */
 	@Test
 	public void testWithShortDriverString() throws Exception {
-		
-		ModelIOManager ioManager = new ModelIOManager(obdaModel);
-		ioManager.load(obdafile1);
-		runQuery();
+		runQuery(obdafile1);
 	}
 
 	
@@ -123,10 +122,7 @@ public class OracleLIMITTest  {
 	 */
 	@Test
 	public void testWithLongDriverString() throws Exception {
-		
-		ModelIOManager ioManager = new ModelIOManager(obdaModel);
-		ioManager.load(obdafile2);
-		runQuery();
+		runQuery(obdafile2);
 	}
 
 	

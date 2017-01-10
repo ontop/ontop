@@ -1,20 +1,11 @@
 package it.unibz.inf.ontop.owlrefplatform.sql;
 
-import it.unibz.inf.ontop.io.ModelIOManager;
-import it.unibz.inf.ontop.model.OBDADataFactory;
-import it.unibz.inf.ontop.model.OBDAModel;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
+import it.unibz.inf.ontop.injection.QuestConfiguration;
+import it.unibz.inf.ontop.owlrefplatform.core.SQLExecutableQuery;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.sql.Connection;
@@ -33,16 +24,7 @@ import static org.junit.Assert.assertFalse;
 
 public class TestSQLBlankLines {
 
-
-	private OBDADataFactory fac;
 	private QuestOWLConnection conn;
-
-	Logger log = LoggerFactory.getLogger(this.getClass());
-	private OBDAModel obdaModel;
-	private OWLOntology ontology;
-	private QuestOWLFactory factory;
-
-
 	private QuestOWL reasoner;
 
 
@@ -50,7 +32,6 @@ public class TestSQLBlankLines {
 	final String obdafile = "src/test/resources/sqlgenerator/blanklines.obda";
 
 	private Connection sqlConnection;
-
 
 
 
@@ -89,25 +70,19 @@ public class TestSQLBlankLines {
 
 			s.close();
 			// Loading the OWL file
-			OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-			ontology = manager.loadOntologyFromOntologyDocument((new File(owlfile)));
 
-			// Loading the OBDA data
-			fac = OBDADataFactoryImpl.getInstance();
-			obdaModel = fac.getOBDAModel();
-
-			ModelIOManager ioManager = new ModelIOManager(obdaModel);
-			ioManager.load(obdafile);
-
-			QuestPreferences p = new QuestPreferences();
-			p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-			p.setCurrentValueOf(QuestPreferences.OBTAIN_FULL_METADATA, QuestConstants.FALSE);
 			// Creating a new instance of the reasoner
-			this.factory = new QuestOWLFactory();
-	        QuestOWLConfiguration config = QuestOWLConfiguration.builder().obdaModel(obdaModel).preferences(p).build();
-	        reasoner = factory.createReasoner(ontology, config);
+			QuestOWLFactory factory = new QuestOWLFactory();
+	        QuestConfiguration config = QuestConfiguration.defaultBuilder()
+					.ontologyFile(owlfile)
+					.nativeOntopMappingFile(obdafile)
+					.build();
+	        reasoner = factory.createReasoner(config);
 
-			
+			// Now we are ready for querying
+			conn = reasoner.getConnection();
+
+
 		} catch (Exception exc) {
 			try {
 				tearDown();
@@ -121,14 +96,11 @@ public class TestSQLBlankLines {
 	@Test
 	public void testNoSQLBlankLines() throws Exception {
 
-		// Now we are ready for querying
-		conn = reasoner.getConnection();
-		
 		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT * WHERE {?x a :Class1}";
 		QuestOWLStatement st = conn.createStatement();
 
 
-		String sql = st.getUnfolding(query);
+		String sql = ((SQLExecutableQuery)st.getExecutableQuery(query)).getSQL();
 		boolean m = sql.matches("(?ms)(.*)\\n\\n(.*)");
 		assertFalse(m);
 	}

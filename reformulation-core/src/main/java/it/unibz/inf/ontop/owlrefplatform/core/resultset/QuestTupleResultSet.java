@@ -23,10 +23,8 @@ package it.unibz.inf.ontop.owlrefplatform.core.resultset;
 
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.Predicate.COL_TYPE;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestStatement;
 import it.unibz.inf.ontop.owlrefplatform.core.abox.SemanticIndexURIMap;
-import it.unibz.inf.ontop.sql.DBMetadata;
 
 import java.net.URISyntaxException;
 import java.sql.*;
@@ -36,6 +34,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+
+import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
 
 public class QuestTupleResultSet implements TupleResultSet {
 
@@ -56,7 +56,6 @@ public class QuestTupleResultSet implements TupleResultSet {
 
 	private int bnodeCounter = 0;
 
-	private final OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 	private final SemanticIndexURIMap uriMap;
 	
 	private final boolean isOracle;
@@ -204,7 +203,7 @@ public class QuestTupleResultSet implements TupleResultSet {
 							 // we leave realValue as it is.
 						}
 					}
-					result = fac.getConstantURI(value.trim());
+					result = DATA_FACTORY.getConstantURI(value.trim());
 					break;
 					
 				case BNODE:
@@ -214,7 +213,7 @@ public class QuestTupleResultSet implements TupleResultSet {
 						bnodeCounter += 1;
 						bnodeMap.put(value, scopedLabel);
 					}
-					result = fac.getConstantBNode(scopedLabel);
+					result = DATA_FACTORY.getConstantBNode(scopedLabel);
 					break;
 					/**
                      * TODO: the language tag should be reserved to LITERAL_LANG
@@ -226,31 +225,31 @@ public class QuestTupleResultSet implements TupleResultSet {
 					// properly.
 					String language = rs.getString(column - 1);
 					if (language == null || language.trim().equals("")) 
-						result = fac.getConstantLiteral(value);
+						result = DATA_FACTORY.getConstantLiteral(value);
 					else 
-						result = fac.getConstantLiteral(value, language);
+						result = DATA_FACTORY.getConstantLiteral(value, language);
 					break;
 					
 				case BOOLEAN:
 					boolean bvalue = rs.getBoolean(column);
-					result = fac.getBooleanConstant(bvalue);
+					result = DATA_FACTORY.getBooleanConstant(bvalue);
 					break;
 				
 				case DOUBLE:
 					double d = rs.getDouble(column);
 					String s = formatter.format(d); // format name into correct double representation
-					result = fac.getConstantLiteral(s, type);
+					result = DATA_FACTORY.getConstantLiteral(s, type);
 					break;
 
                 case INT:
                     int intValue = rs.getInt(column);
-                    result = fac.getConstantLiteral(String.valueOf(intValue), type);
+                    result = DATA_FACTORY.getConstantLiteral(String.valueOf(intValue), type);
                     break;
 
                 case LONG:
                 case UNSIGNED_INT:
                     long longValue = rs.getLong(column);
-                    result = fac.getConstantLiteral(String.valueOf(longValue), type);
+                    result = DATA_FACTORY.getConstantLiteral(String.valueOf(longValue), type);
                     break;
 
                 case INTEGER:
@@ -265,7 +264,7 @@ public class QuestTupleResultSet implements TupleResultSet {
                     String integerString = dotIndex >= 0
                             ? value.substring(0, dotIndex)
                             : value;
-                    result = fac.getConstantLiteral(integerString, type);
+                    result = DATA_FACTORY.getConstantLiteral(integerString, type);
                     break;
 
                 case DATETIME:
@@ -276,14 +275,14 @@ public class QuestTupleResultSet implements TupleResultSet {
                     To overcome the problem we create a new Timestamp */
                     try {
                         Timestamp tsvalue = rs.getTimestamp(column);
-                        result = fac.getConstantLiteral(tsvalue.toString().replace(' ', 'T'), COL_TYPE.DATETIME);
+                        result = DATA_FACTORY.getConstantLiteral(tsvalue.toString().replace(' ', 'T'), COL_TYPE.DATETIME);
                     }
                     catch (Exception e) {
                         if (isMsSQL || isOracle) {
                             try {
                             	java.util.Date date = dateFormat.parse(value);
                                 Timestamp ts = new Timestamp(date.getTime());
-                                result = fac.getConstantLiteral(ts.toString().replace(' ', 'T'), COL_TYPE.DATETIME);
+                                result = DATA_FACTORY.getConstantLiteral(ts.toString().replace(' ', 'T'), COL_TYPE.DATETIME);
                             } 
                             catch (ParseException pe) {
                                 throw new RuntimeException(pe);
@@ -296,7 +295,7 @@ public class QuestTupleResultSet implements TupleResultSet {
                
 				case DATETIME_STAMP:    
 					if (!isOracle) {
-						result = fac.getConstantLiteral(value.replaceFirst(" ", "T").replaceAll(" ", ""), COL_TYPE.DATETIME_STAMP);					
+						result = DATA_FACTORY.getConstantLiteral(value.replaceFirst(" ", "T").replaceAll(" ", ""), COL_TYPE.DATETIME_STAMP);
 					}
 					else {
 						/* oracle has the type timestamptz. The format returned by getString is not a valid xml format
@@ -309,7 +308,7 @@ public class QuestTupleResultSet implements TupleResultSet {
 							
 							java.util.Date date = dateFormat.parse(datetime);
 							Timestamp ts = new Timestamp(date.getTime());
-							result = fac.getConstantLiteral(ts.toString().replaceFirst(" ", "T").replaceAll(" ", "")+timezone, COL_TYPE.DATETIME_STAMP);
+							result = DATA_FACTORY.getConstantLiteral(ts.toString().replaceFirst(" ", "T").replaceAll(" ", "")+timezone, COL_TYPE.DATETIME_STAMP);
 						} 
 						catch (ParseException pe) {
 							throw new RuntimeException(pe);
@@ -320,7 +319,7 @@ public class QuestTupleResultSet implements TupleResultSet {
 				case DATE:
 					if (!isOracle) {
 						Date dvalue = rs.getDate(column);
-						result = fac.getConstantLiteral(dvalue.toString(), COL_TYPE.DATE);
+						result = DATA_FACTORY.getConstantLiteral(dvalue.toString(), COL_TYPE.DATE);
 					} 
 					else {
 						try {
@@ -330,17 +329,17 @@ public class QuestTupleResultSet implements TupleResultSet {
 						catch (ParseException e) {
 							throw new RuntimeException(e);
 						}
-						result = fac.getConstantLiteral(value.toString(), COL_TYPE.DATE);
+						result = DATA_FACTORY.getConstantLiteral(value.toString(), COL_TYPE.DATE);
 					}
 					break;
 					
 				case TIME:
 					Time tvalue = rs.getTime(column);						
-					result = fac.getConstantLiteral(tvalue.toString().replace(' ', 'T'), COL_TYPE.TIME);
+					result = DATA_FACTORY.getConstantLiteral(tvalue.toString().replace(' ', 'T'), COL_TYPE.TIME);
 					break;
 				
 				default:
-					result = fac.getConstantLiteral(value, type);
+					result = DATA_FACTORY.getConstantLiteral(value, type);
 				}
 			}
 		} 

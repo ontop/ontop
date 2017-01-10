@@ -23,9 +23,9 @@ package it.unibz.inf.ontop.sesame.completeness.test;
 import info.aduna.io.IOUtil;
 import info.aduna.iteration.Iterations;
 import info.aduna.text.StringUtil;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
+import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWL;
-import it.unibz.inf.ontop.sesame.SesameClassicInMemoryRepo;
+import it.unibz.inf.ontop.sesame.SesameClassicRepo;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 import org.openrdf.model.*;
@@ -48,10 +48,6 @@ import org.openrdf.rio.Rio;
 import org.openrdf.rio.helpers.BasicParserSettings;
 import org.openrdf.rio.helpers.StatementCollector;
 import org.openrdf.sail.memory.MemoryStore;
-import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyCreationException;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -74,9 +70,6 @@ public abstract class CompletenessParent extends TestCase {
 	
 	protected final boolean laxCardinality = false;
 	
-	protected QuestPreferences preferences;
-	protected OWLOntology ontology;
-	
 	protected Repository repository;
 
 	protected QuestOWL reasoner;
@@ -97,18 +90,19 @@ public abstract class CompletenessParent extends TestCase {
 		queryFile = sparqlf;
 	}
 
-	protected void loadReasonerParameters(String path) throws IOException {
-		preferences = new QuestPreferences();
-		preferences.load(new URL(path).openStream());
-	}
+	protected Properties loadReasonerParameters(String path) throws IOException {
+		Properties p = new Properties();
+		p.load(new URL(path).openStream());
+		return p;
 
-	protected void loadOntology(String path) throws OWLOntologyCreationException, IOException {
-		OWLOntologyManager owlManager = OWLManager.createOWLOntologyManager();
-		ontology = owlManager.loadOntologyFromOntologyDocument(new URL(path).openStream());
 	}
 
 	protected Repository createRepository() throws Exception {
-		SesameClassicInMemoryRepo repository = new SesameClassicInMemoryRepo("CompletenessTest", ontologyFile, parameterFile);
+		QuestConfiguration configuration = QuestConfiguration.defaultBuilder()
+				.properties(loadReasonerParameters(parameterFile))
+				.ontologyFile(ontologyFile)
+				.build();
+		SesameClassicRepo repository = new SesameClassicRepo("CompletenessTest", configuration);
 		repository.initialize();
 		return repository;
 	}

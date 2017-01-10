@@ -20,45 +20,53 @@ package it.unibz.inf.ontop.owlrefplatform.core;
  * #L%
  */
 
-import java.sql.Connection;
-
+import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
 import it.unibz.inf.ontop.model.OBDAConnection;
 import it.unibz.inf.ontop.model.OBDAException;
 
+/**
+ * High-level OBDAConnection used by Sesame.
+ */
 
 public class QuestDBConnection implements OBDAConnection {
 
-	private final QuestConnection conn;
+	private final IQuestConnection conn;
+    private final NativeQueryLanguageComponentFactory nativeQLFactory;
 
-	public QuestDBConnection(QuestConnection conn) {
+    public QuestDBConnection(IQuestConnection conn,
+                             NativeQueryLanguageComponentFactory nativeQLFactory) {
 		this.conn = conn;
+        this.nativeQLFactory = nativeQLFactory;
 	}
 
 	@Override
 	public void close() throws OBDAException {
 		conn.close();
-
 	}
 
-	public Connection getConnection() {
-		return conn.getConnection();
-	}
-	
+	/**
+	 * For the virtual and classic mode.
+	 */
 	@Override
 	public QuestDBStatement createStatement() throws OBDAException {
-		return new QuestDBStatement(conn.createStatement());
+		return new QuestDBStatement(conn.createStatement(), nativeQLFactory);
+	}
+
+	/**
+	 * For the classic mode only (usage of a Semantic Index repository).
+	 */
+	public SIQuestDBStatement createSIStatement() throws OBDAException {
+		return new SIQuestDBStatementImpl(conn.createSIStatement(), nativeQLFactory);
 	}
 
 	@Override
 	public void commit() throws OBDAException {
 		conn.commit();
-
 	}
 
 	@Override
 	public void setAutoCommit(boolean autocommit) throws OBDAException {
 		conn.setAutoCommit(autocommit);
-
 	}
 
 	@Override

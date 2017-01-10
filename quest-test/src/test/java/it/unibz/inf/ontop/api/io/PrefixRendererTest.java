@@ -25,46 +25,44 @@ import it.unibz.inf.ontop.model.CQIE;
 import it.unibz.inf.ontop.model.DatalogProgram;
 import it.unibz.inf.ontop.model.Function;
 import it.unibz.inf.ontop.model.Term;
-import it.unibz.inf.ontop.model.OBDADataFactory;
 import it.unibz.inf.ontop.model.impl.FunctionalTermImpl;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.io.PrefixManager;
 
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 import junit.framework.TestCase;
+
+import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
 
 //import com.hp.hpl.jena.iri.IRIFactory;
 
 public class PrefixRendererTest extends TestCase {
 
-	private PrefixManager pm;
+    // Mutable
+    private Map<String, String> prefixes;
+
 	private DatalogProgram query;
 	private CQIE rule1;
 	
 	public void setUp() throws Exception {
-		pm = new SimplePrefixManager();
-		OBDADataFactory pfac = OBDADataFactoryImpl.getInstance();
-		OBDADataFactory tfac = OBDADataFactoryImpl.getInstance();
-		query = tfac.getDatalogProgram();
+		prefixes = new HashMap<>();
+		query = DATA_FACTORY.getDatalogProgram();
 
 		LinkedList<Term> innerterms = new LinkedList<Term>();
-		innerterms.add(tfac.getVariable("id"));
+		innerterms.add(DATA_FACTORY.getVariable("id"));
 		
 //		IRIFactory fact = new IRIFactory();
 
 		List<Term> terms = new LinkedList<Term>();
-		terms.add(tfac.getFunction(pfac.getPredicate("http://obda.org/onto.owl#person-individual", 1), innerterms));
+		terms.add(DATA_FACTORY.getFunction(DATA_FACTORY.getPredicate("http://obda.org/onto.owl#person-individual", 1), innerterms));
 
-		Function body = tfac.getFunction(pfac.getClassPredicate("http://obda.org/onto.owl#Person"), terms);
+		Function body = DATA_FACTORY.getFunction(DATA_FACTORY.getClassPredicate("http://obda.org/onto.owl#Person"), terms);
 
 		terms = new LinkedList<Term>();
-		terms.add(tfac.getVariable("id"));
-		Function head = tfac.getFunction(pfac.getPredicate("http://obda.org/predicates#q", 1), terms);
+		terms.add(DATA_FACTORY.getVariable("id"));
+		Function head = DATA_FACTORY.getFunction(DATA_FACTORY.getPredicate("http://obda.org/predicates#q", 1), terms);
 
-		rule1 = tfac.getCQIE(head, Collections.singletonList(body));
+		rule1 = DATA_FACTORY.getCQIE(head, Collections.singletonList(body));
 		query.appendRule(rule1);
 	}
 
@@ -73,7 +71,8 @@ public class PrefixRendererTest extends TestCase {
 	 * short form and those who don't have it are renderered with the full uri
 	 */
 	public void testNamespace1() {
-		pm.addPrefix(PrefixManager.DEFAULT_PREFIX, "http://obda.org/onto.owl#");
+		prefixes.put(PrefixManager.DEFAULT_PREFIX, "http://obda.org/onto.owl#");
+        PrefixManager pm = new SimplePrefixManager(prefixes);
 		String name = pm.getShortForm(query.getRules().get(0).getHead().getFunctionSymbol().toString(), true);
 		assertTrue(name, name.equals("http://obda.org/predicates#q"));
 
@@ -84,7 +83,8 @@ public class PrefixRendererTest extends TestCase {
 		name = pm.getShortForm(((FunctionalTermImpl)atom0.getTerms().get(0)).getFunctionSymbol().toString(), true);
 		assertTrue(name, name.equals("&:;person-individual"));
 
-		pm.addPrefix(PrefixManager.DEFAULT_PREFIX, "http://obda.org/predicates#");
+        prefixes.put(PrefixManager.DEFAULT_PREFIX, "http://obda.org/predicates#");
+        pm = new SimplePrefixManager(prefixes);
 		name = pm.getShortForm(query.getRules().get(0).getHead().getFunctionSymbol().toString(), true);
 		assertTrue(name, name.equals("&:;q"));
 
@@ -100,9 +100,10 @@ public class PrefixRendererTest extends TestCase {
 	 * This test checks if the prefix are properly handled
 	 */
 	public void testPrefix1() {
-		pm.addPrefix(PrefixManager.DEFAULT_PREFIX, "http://obda.org/onto.owl#");
-		pm.addPrefix("obdap:", "http://obda.org/predicates#");
+        prefixes.put(PrefixManager.DEFAULT_PREFIX, "http://obda.org/onto.owl#");
+        prefixes.put("obdap:", "http://obda.org/predicates#");
 
+        PrefixManager pm = new SimplePrefixManager(prefixes);
 		String name = pm.getShortForm(query.getRules().get(0).getHead().getFunctionSymbol().toString(), false);
 		assertTrue(name, name.equals("obdap:q"));
 
@@ -113,8 +114,9 @@ public class PrefixRendererTest extends TestCase {
 		name = pm.getShortForm(((FunctionalTermImpl) atom0.getTerms().get(0)).getFunctionSymbol().toString(), false);
 		assertTrue(name, name.equals(":person-individual"));
 
-		pm.addPrefix(PrefixManager.DEFAULT_PREFIX, "http://obda.org/predicates#");
-		pm.addPrefix("onto:", "http://obda.org/onto.owl#");
+        prefixes.put(PrefixManager.DEFAULT_PREFIX, "http://obda.org/predicates#");
+        prefixes.put("onto:", "http://obda.org/onto.owl#");
+        pm = new SimplePrefixManager(prefixes);
 		name = pm.getShortForm(query.getRules().get(0).getHead().getFunctionSymbol().toString(), false);
 		assertTrue(name, name.equals(":q"));
 

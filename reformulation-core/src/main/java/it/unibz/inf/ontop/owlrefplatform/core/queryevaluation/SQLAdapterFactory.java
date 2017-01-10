@@ -21,6 +21,7 @@ package it.unibz.inf.ontop.owlrefplatform.core.queryevaluation;
  */
 
 
+import it.unibz.inf.ontop.injection.QuestCoreSettings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,7 +29,7 @@ public class SQLAdapterFactory {
 
 	private static Logger log = LoggerFactory.getLogger(SQLAdapterFactory.class);
 
-	public static SQLDialectAdapter getSQLDialectAdapter(String className, String databaseName) {
+	public static SQLDialectAdapter getSQLDialectAdapter(String className, String databaseName, QuestCoreSettings preferences) {
 
 		switch (className) {
 			case "org.postgresql.Driver":
@@ -58,7 +59,14 @@ public class SQLAdapterFactory {
 			default:
 				log.warn("WARNING: the specified driver doesn't correspond to any of the drivers officially supported by Ontop.");
 				log.warn("WARNING: Contact the authors for further support.");
-				return new SQL99DialectAdapter();
+				String adapterClassName = preferences.getProperty(SQLDialectAdapter.class.getCanonicalName())
+						.orElseThrow(() -> new IllegalStateException("No default SQLDialectAdapter provided"));
+				try {
+					Class adapterClass = Class.forName(adapterClassName);
+					return (SQLDialectAdapter) adapterClass.getConstructor().newInstance();
+				} catch (Exception e) {
+				 throw new RuntimeException("Impossible to initialize the SQL adapter: " + e.getMessage());
+            }
 		}
 
 		

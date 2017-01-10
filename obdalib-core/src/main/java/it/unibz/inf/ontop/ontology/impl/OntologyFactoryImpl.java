@@ -32,6 +32,7 @@ import it.unibz.inf.ontop.ontology.*;
  */
 
 
+
 public class OntologyFactoryImpl implements OntologyFactory {
 
 	private static final OntologyFactoryImpl instance = new OntologyFactoryImpl();

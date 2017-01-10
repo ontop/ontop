@@ -14,6 +14,7 @@ import org.jgrapht.graph.EdgeReversedGraph;
 import org.jgrapht.graph.SimpleDirectedGraph;
 import org.jgrapht.traverse.DepthFirstIterator;
 import org.jgrapht.traverse.GraphIterator;
+import it.unibz.inf.ontop.ontology.*;
 
 import java.util.HashMap;
 import java.util.LinkedList;

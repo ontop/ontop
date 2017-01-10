@@ -21,10 +21,11 @@ package it.unibz.inf.ontop.r2rml;
  */
 
 import com.google.common.collect.*;
+import com.google.inject.Injector;
 import eu.optique.api.mapping.R2RMLMappingManager;
-import eu.optique.api.mapping.R2RMLMappingManagerFactory;
 import eu.optique.api.mapping.TriplesMap;
 import eu.optique.api.mapping.impl.sesame.SesameR2RMLMappingManagerFactory;
+import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
 import it.unibz.inf.ontop.io.PrefixManager;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
@@ -46,22 +47,19 @@ import java.util.stream.Collectors;
 
 public class R2RMLWriter {
 
-    private List<OBDAMappingAxiom> mappings;
+	private List<OBDAMappingAxiom> mappings;
 	private URI sourceUri;
 	private PrefixManager prefixmng;
 	private OWLOntology ontology;
-	private final OBDADataFactory OBDA_DATA_FACTORY = OBDADataFactoryImpl.getInstance();
+	private final NativeQueryLanguageComponentFactory nativeQLFactory;
 
-    public R2RMLWriter(OBDAModel obdamodel, URI sourceURI, OWLOntology ontology)
+    public R2RMLWriter(OBDAModel obdamodel, URI sourceURI, OWLOntology ontology, Injector injector)
 	{
 		this.sourceUri = sourceURI;
 		this.mappings = obdamodel.getMappings(sourceUri);
 		this.prefixmng = obdamodel.getPrefixManager();
 		this.ontology = ontology;
-	}
-
-	public R2RMLWriter(OBDAModel obdamodel, URI sourceURI){
-		this(obdamodel, sourceURI, null);
+		this.nativeQLFactory = injector.getInstance(NativeQueryLanguageComponentFactory.class);
 	}
 
 
@@ -136,7 +134,7 @@ public class R2RMLWriter {
 			}
 			// Generate one mapping axiom per subject
 			return subjectTermToTargetTriples.asMap().entrySet().stream()
-					.map(e -> OBDA_DATA_FACTORY.getRDBMSMappingAxiom(
+					.map(e -> nativeQLFactory.create(
 							subjectTermToMappingIndex.get(e.getKey()),
 							mappingAxiom.getSourceQuery(),
 							new ArrayList<Function>(e.getValue())))
@@ -183,28 +181,6 @@ public class R2RMLWriter {
         } catch (Exception e) {
             e.printStackTrace();
 			throw e;
-        }
-    }
-
-	
-	public static void main(String args[])
-	{
-		String file = "/Users/mindaugas/r2rml/test2.ttl";
-		try {
-		R2RMLReader reader = new R2RMLReader(file);
-		OWLOntology ontology = null;
-
-		R2RMLWriter writer = new R2RMLWriter(reader.readModel(URI.create("test")),URI.create("test"), ontology);
-		File out = new File("/Users/mindaugas/r2rml/out.ttl");
-//		Graph g = writer.getGraph();
-//		Iterator<Statement> st = g.iterator();
-//		while (st.hasNext())
-//			System.out.println(st.next());
-
-			writer.write(out);
-		} catch (Exception e) {
-			e.printStackTrace();
 		}
-
 	}
 }

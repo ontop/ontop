@@ -21,25 +21,17 @@ package it.unibz.inf.ontop.unfold;
  */
 
 
-import it.unibz.inf.ontop.io.ModelIOManager;
-import it.unibz.inf.ontop.model.OBDADataFactory;
-import it.unibz.inf.ontop.model.OBDAModel;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
+import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import it.unibz.inf.ontop.utils.SQLScriptRunner;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.io.ToStringRenderer;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileReader;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -50,11 +42,7 @@ import static org.junit.Assert.assertFalse;
 
 public class URITemplateMatcherTest {
 
-	private OBDADataFactory fac;
-
 	Logger log = LoggerFactory.getLogger(this.getClass());
-	private OBDAModel obdaModel;
-	private OWLOntology ontology;
 
 	final String owlFile = "src/test/resources/oboe-core.owl";
 	final String obdaFile = "src/test/resources/oboe-coreURIconstants.obda";
@@ -69,8 +57,6 @@ public class URITemplateMatcherTest {
 		String username = "sa";
 		String password = "test";
 
-		fac = OBDADataFactoryImpl.getInstance();
-
 		sqlConnection = DriverManager
 				.getConnection(url, username, password);
 
@@ -78,17 +64,6 @@ public class URITemplateMatcherTest {
 		BufferedReader in = new BufferedReader(reader);
 		SQLScriptRunner runner = new SQLScriptRunner(sqlConnection, true, false);
 		runner.runScript(in);
-
-		// Loading the OWL file
-		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-		ontology = manager.loadOntologyFromOntologyDocument((new File(owlFile)));
-
-		// Loading the OBDA data
-		obdaModel = fac.getOBDAModel();
-
-		ModelIOManager ioManager = new ModelIOManager(obdaModel);
-		ioManager.load(obdaFile);
-
 	}
 
 	@After
@@ -110,7 +85,7 @@ public class URITemplateMatcherTest {
 
 	@Test
 	public void testURIConstant() throws Exception {
-		QuestPreferences p = new QuestPreferences();
+
 
 		String queryBind = "PREFIX : <http://www.ola.fr#>\n" +
 				"  PREFIX oboe-core: <http://ecoinformatics.org/oboe/oboe.1.0/oboe-core.owl#>\n" +
@@ -121,13 +96,13 @@ public class URITemplateMatcherTest {
 
 
 
-		String results = runTestQuery(p, queryBind);
+		String results = runTestQuery(queryBind);
 		assertEquals("<http://www.ola.fr#measurement/unit/name/1>", results);
 	}
 
 	@Test
 	public void testURIConstant2() throws Exception {
-		QuestPreferences p = new QuestPreferences();
+
 
 		String queryBind = "PREFIX : <http://www.ola.fr#>\n" +
 				"  PREFIX oboe-core: <http://ecoinformatics.org/oboe/oboe.1.0/oboe-core.owl#>\n" +
@@ -137,17 +112,21 @@ public class URITemplateMatcherTest {
 
 
 
-		String results = runTestQuery(p, queryBind);
+		String results = runTestQuery(queryBind);
 		assertEquals("<http://urlconstants.org/32>", results);
 	}
 
 
-	private String runTestQuery(QuestPreferences p, String query) throws Exception {
+	private String runTestQuery(String query) throws Exception {
 
 		// Creating a new instance of the reasoner
 		QuestOWLFactory factory = new QuestOWLFactory();
-		QuestOWLConfiguration config = QuestOWLConfiguration.builder().obdaModel(obdaModel).preferences(p).queryingAnnotationsInOntology(true).build();
-		QuestOWL reasoner = factory.createReasoner(ontology, config);
+		QuestConfiguration config = QuestConfiguration.defaultBuilder()
+				.nativeOntopMappingFile(obdaFile)
+				.ontologyFile(owlFile)
+				.enableOntologyAnnotationQuerying(true)
+				.build();
+		QuestOWL reasoner = factory.createReasoner(config);
 
 		// Now we are ready for querying
 		QuestOWLConnection conn = reasoner.getConnection();

@@ -20,33 +20,27 @@ package it.unibz.inf.ontop.reformulation.tests;
  * #L%
  */
 
-import it.unibz.inf.ontop.io.ModelIOManager;
-import it.unibz.inf.ontop.model.OBDADataFactory;
-import it.unibz.inf.ontop.model.OBDAModel;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
+import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
+import it.unibz.inf.ontop.injection.QuestCoreSettings;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLIndividual;
 import org.semanticweb.owlapi.model.OWLLiteral;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.reasoner.ReasonerInternalException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Properties;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -56,13 +50,9 @@ import static org.junit.Assert.assertTrue;
  */
 public class ComplexWhereMappingTest {
 
-
-	private OBDADataFactory fac;
 	private Connection conn;
 
 	Logger log = LoggerFactory.getLogger(this.getClass());
-	private OBDAModel obdaModel;
-	private OWLOntology ontology;
 
 	final String owlfile = "src/test/resources/test/complexmapping.owl";
 	final String obdafile = "src/test/resources/test/complexwheremapping.obda";
@@ -79,8 +69,6 @@ public class ComplexWhereMappingTest {
 		String username = "sa";
 		String password = "";
 
-		fac = OBDADataFactoryImpl.getInstance();
-
 		conn = DriverManager.getConnection(url, username, password);
 		Statement st = conn.createStatement();
 
@@ -95,17 +83,6 @@ public class ComplexWhereMappingTest {
 
 		st.executeUpdate(bf.toString());
 		conn.commit();
-
-		// Loading the OWL file
-		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-		ontology = manager.loadOntologyFromOntologyDocument((new File(owlfile)));
-
-		// Loading the OBDA data
-		obdaModel = fac.getOBDAModel();
-
-		ModelIOManager ioManager = new ModelIOManager(obdaModel);
-		ioManager.load(obdafile);
-
 	}
 
 	@After
@@ -134,10 +111,10 @@ public class ComplexWhereMappingTest {
 		conn.commit();
 	}
 
-	private void runTests(QuestOWLConfiguration config) throws Exception {
+	private void runTests(QuestConfiguration config) throws Exception {
 
         QuestOWLFactory factory = new QuestOWLFactory();
-        QuestOWL reasoner = factory.createReasoner(ontology, config);
+        QuestOWL reasoner = factory.createReasoner(config);
 
 		// Now we are ready for querying
 		QuestOWLConnection conn = reasoner.getConnection();
@@ -167,10 +144,14 @@ public class ComplexWhereMappingTest {
     @Test
 	public void testViEqSig() throws Exception {
 
-		QuestPreferences p = new QuestPreferences();
-		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-        QuestOWLConfiguration config = QuestOWLConfiguration.builder().obdaModel(obdaModel).preferences(p).build();
+		Properties p = new Properties();
+		p.put(QuestCoreSettings.ABOX_MODE, QuestConstants.VIRTUAL);
+		p.put(QuestCoreSettings.OPTIMIZE_EQUIVALENCES, "true");
+		QuestConfiguration config = QuestConfiguration.defaultBuilder()
+				.nativeOntopMappingFile(obdafile)
+				.ontologyFile(owlfile)
+				.properties(p)
+				.build();
 
 		runTests(config);
 	}
@@ -178,11 +159,14 @@ public class ComplexWhereMappingTest {
     @Test(expected = ReasonerInternalException.class)
     public void testClassicEqSig() throws Exception {
 
-		QuestPreferences p = new QuestPreferences();
-		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
-		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-		p.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_MAPPINGS, "true");
-        QuestOWLConfiguration config = QuestOWLConfiguration.builder().preferences(p).build();
+		Properties p = new Properties();
+		p.put(QuestCoreSettings.ABOX_MODE, QuestConstants.CLASSIC);
+		p.put(QuestCoreSettings.OPTIMIZE_EQUIVALENCES, "true");
+		p.put(QuestCoreSettings.OBTAIN_FROM_MAPPINGS, "true");
+		QuestConfiguration config = QuestConfiguration.defaultBuilder()
+				.ontologyFile(owlfile)
+				.properties(p)
+				.build();
 
 		runTests(config);
 	}

@@ -23,6 +23,7 @@ package it.unibz.inf.ontop.sesame.tests.general;
 import java.io.File;
 import java.util.List;
 
+import it.unibz.inf.ontop.sesame.SesameClassicInMemoryRepo;
 import org.openrdf.model.Value;
 import org.openrdf.query.BindingSet;
 import org.openrdf.query.QueryLanguage;
@@ -31,7 +32,6 @@ import org.openrdf.query.TupleQueryResult;
 import org.openrdf.repository.Repository;
 import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.rio.RDFFormat;
-import it.unibz.inf.ontop.sesame.SesameClassicInMemoryRepo;
 
 public class QuestSesameInMemoryExample {
 

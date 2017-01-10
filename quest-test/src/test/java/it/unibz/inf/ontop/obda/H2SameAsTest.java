@@ -21,21 +21,14 @@ package it.unibz.inf.ontop.obda;
  */
 
 import com.google.common.collect.ImmutableSet;
-import it.unibz.inf.ontop.io.ModelIOManager;
-import it.unibz.inf.ontop.model.OBDADataFactory;
-import it.unibz.inf.ontop.model.OBDAModel;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
+import it.unibz.inf.ontop.injection.QuestConfiguration;
+
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.io.ToStringRenderer;
 import org.semanticweb.owlapi.model.OWLObject;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -56,12 +49,9 @@ import static org.junit.Assert.assertTrue;
  */
 public class H2SameAsTest {
 
-	private OBDADataFactory fac;
 	private QuestOWLConnection conn;
 
 	Logger log = LoggerFactory.getLogger(this.getClass());
-	private OBDAModel obdaModel;
-	private OWLOntology ontology;
 
 	final String owlfile = "src/test/resources/sameAs/wellbores.owl";
 	final String obdafile = "src/test/resources/sameAs/wellbores.obda";
@@ -84,26 +74,6 @@ public class H2SameAsTest {
 //			    }
 			   
 			    s.close();
-		
-		
-		// Loading the OWL file
-		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-		ontology = manager.loadOntologyFromOntologyDocument((new File(owlfile)));
-
-		// Loading the OBDA data
-		fac = OBDADataFactoryImpl.getInstance();
-		obdaModel = fac.getOBDAModel();
-		
-		ModelIOManager ioManager = new ModelIOManager(obdaModel);
-		ioManager.load(obdafile);
-	
-		QuestPreferences p = new QuestPreferences();
-		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-		p.setCurrentValueOf(QuestPreferences.OBTAIN_FULL_METADATA, QuestConstants.FALSE);
-
-
-
-		
 	}
 
 
@@ -131,9 +101,14 @@ public class H2SameAsTest {
 		// Creating a new instance of the reasoner
 		QuestOWLFactory factory = new QuestOWLFactory();
 
-		QuestOWLConfiguration config = QuestOWLConfiguration.builder().obdaModel(obdaModel).sameAsMappings(sameAs).build();
+		QuestConfiguration config = QuestConfiguration.defaultBuilder()
+				.ontologyFile(owlfile)
+				.nativeOntopMappingFile(obdafile)
+				.sameAsMappings(sameAs)
+				.enableFullMetadataExtraction(false)
+				.build();
 
-		reasoner = (QuestOWL) factory.createReasoner(ontology, config);
+		reasoner =  factory.createReasoner(config);
 
 		// Now we are ready for querying
 		conn = reasoner.getConnection();

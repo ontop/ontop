@@ -20,16 +20,13 @@ package it.unibz.inf.ontop.reformulation.tests;
  * #L%
  */
 
-import it.unibz.inf.ontop.io.ModelIOManager;
+import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.model.OBDAModel;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.ontology.Assertion;
 import it.unibz.inf.ontop.ontology.ClassAssertion;
 import it.unibz.inf.ontop.ontology.ObjectPropertyAssertion;
 import it.unibz.inf.ontop.ontology.Ontology;
 import it.unibz.inf.ontop.owlapi.OWLAPITranslatorUtility;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
 import it.unibz.inf.ontop.owlrefplatform.core.abox.QuestMaterializer;
 import junit.framework.Assert;
 import junit.framework.TestCase;
@@ -45,7 +42,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.Iterator;
+import java.util.*;
 
 public class QuestOWLMaterializerTest extends TestCase {
 
@@ -53,12 +50,8 @@ public class QuestOWLMaterializerTest extends TestCase {
 
 	private Logger log =  LoggerFactory.getLogger(this.getClass());
 
-	private static QuestPreferences prefs;
-	static {
-		prefs = new QuestPreferences();
-		prefs.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-		prefs.setCurrentValueOf(QuestPreferences.REWRITE, QuestConstants.TRUE);
-	}
+    public QuestOWLMaterializerTest() {
+    }
 
 	@Override
 	public void setUp() throws Exception {
@@ -110,21 +103,29 @@ public class QuestOWLMaterializerTest extends TestCase {
 
 	public void testDataWithModel() throws Exception {
 	
-			File f = new File("src/test/resources/test/materializer/MaterializeTest.obda");
-			OBDAModel model = OBDADataFactoryImpl.getInstance().getOBDAModel();
-			ModelIOManager man = new ModelIOManager(model);
-			man.load(f);
-			QuestMaterializer mat = new QuestMaterializer(model, prefs, false);
+	    File f = new File("src/test/resources/test/materializer/MaterializeTest.obda");
+
+		QuestConfiguration configuration = QuestConfiguration.defaultBuilder()
+				.ontologyFile("src/test/resources/test/materializer/MaterializeTest.owl")
+				.nativeOntopMappingFile(f)
+				.build();
+
+        /*
+         * Load the OBDA model from an external .obda file
+         */
+        OBDAModel model = configuration.loadProvidedMapping();
+
+			QuestMaterializer mat = new QuestMaterializer(model, false);
 			Iterator<Assertion> iterator = mat.getAssertionIterator();
 			int classAss = 0;
 			int propAss = 0;
 			int objAss = 0;
 			while (iterator.hasNext()) {
 				Assertion assertion = iterator.next();
-				if (assertion instanceof ClassAssertion) 
+				if (assertion instanceof ClassAssertion)
 					classAss++;
 				
-				else if (assertion instanceof ObjectPropertyAssertion) 
+				else if (assertion instanceof ObjectPropertyAssertion)
 					objAss++;
 				
 				else // DataPropertyAssertion
@@ -140,17 +141,22 @@ public class QuestOWLMaterializerTest extends TestCase {
 
 			// read model
 			File f = new File("src/test/resources/test/materializer/MaterializeTest.obda");
-			OBDAModel model = OBDADataFactoryImpl.getInstance().getOBDAModel();
-			ModelIOManager man = new ModelIOManager(model);
-			man.load(f);
-			
-			// read onto 
-			Ontology onto =  OWLAPITranslatorUtility.loadOntologyFromFile("src/test/resources/test/materializer/MaterializeTest.owl");
+
+		QuestConfiguration configuration = QuestConfiguration.defaultBuilder()
+				.ontologyFile("src/test/resources/test/materializer/MaterializeTest.owl")
+				.nativeOntopMappingFile(f)
+				.build();
+
+            OBDAModel model = configuration.loadProvidedMapping();
+
+			// read onto
+			Ontology onto =  OWLAPITranslatorUtility.translateImportsClosure(
+					configuration.loadProvidedInputOntology());
 			System.out.println(onto.getSubClassAxioms());
 			System.out.println(onto.getSubObjectPropertyAxioms());
 			System.out.println(onto.getSubDataPropertyAxioms());
 			
-			QuestMaterializer mat = new QuestMaterializer(model, onto, prefs, false);
+			QuestMaterializer mat = new QuestMaterializer(model, onto, false);
 			Iterator<Assertion> iterator = mat.getAssertionIterator();
 			int classAss = 0;
 			int propAss = 0;

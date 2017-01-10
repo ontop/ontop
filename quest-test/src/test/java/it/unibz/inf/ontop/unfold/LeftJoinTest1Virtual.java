@@ -20,136 +20,25 @@ package it.unibz.inf.ontop.unfold;
  * #L%
  */
 
-import it.unibz.inf.ontop.io.ModelIOManager;
-import it.unibz.inf.ontop.model.OBDADataFactory;
-import it.unibz.inf.ontop.model.OBDAModel;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
-import org.junit.Before;
+import it.unibz.inf.ontop.quest.AbstractVirtualModeTest;
 import org.junit.Test;
-import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.io.File;
-import java.sql.Connection;
-import java.util.Properties;
-
-import static org.junit.Assert.assertEquals;
 
 /**
  * Class to check the translation of the combination of Optional/Union in SPARQL into Datalog, and finally 
  * SQL
  * @author Minda, Guohui, mrezk
  */
-public class LeftJoinTest1Virtual{
+public class LeftJoinTest1Virtual extends AbstractVirtualModeTest {
+	//private static Logger log = LoggerFactory.getLogger(LeftJoinTest1Virtual.class);
 
-	private OBDADataFactory fac;
-	private Connection conn;
+	private static final String owlfile = "src/test/resources/person.owl";
+	private static final String obdafile = "src/test/resources/person1.obda";
 
-	Logger log = LoggerFactory.getLogger(this.getClass());
-	private OBDAModel obdaModel;
-	private OWLOntology ontology;
+    public LeftJoinTest1Virtual() {
+        super(owlfile, obdafile);
+    }
 
-	final String owlfile = "src/test/resources/person.owl";
-	final String obdafile = "src/test/resources/person1.obda";
-
-	@Before
-	public void setUp() throws Exception {
-		//String url = "jdbc:h2:mem:ljtest;DATABASE_TO_UPPER=FALSE";
-		//String username = "sa";
-		//String password = "";
-
-		
-		String url = "jdbc:mysql://obdalin3:3306/optional_test";
-		String username = "fish";
-		String password = "fish";
-
-		fac = OBDADataFactoryImpl.getInstance();
-/*
-		conn = DriverManager.getConnection(url, username, password);
-		log.debug("Creating in-memory DB and inserting data!");
-		Statement st = conn.createStatement();
-		FileReader reader = new FileReader("src/test/resources/create_optional.sql");
-		BufferedReader in = new BufferedReader(reader);
-		StringBuilder bf = new StringBuilder();
-		String line = in.readLine();
-		while (line != null) {
-			bf.append(line + "\n");
-			line = in.readLine();
-		}
-
-		st.executeUpdate(bf.toString());
-		conn.commit();
-		log.debug("Data loaded!");
-*/
-		// Loading the OWL file
-		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-		ontology = manager.loadOntologyFromOntologyDocument((new File(owlfile)));
-
-		// Loading the OBDA data
-		obdaModel = fac.getOBDAModel();
-		
-		ModelIOManager ioManager = new ModelIOManager(obdaModel);
-		ioManager.load(obdafile);
-		
-	}
-
-	private void runTests(Properties p, String query, int expectedvalue) throws Exception {
-
-		// Creating a new instance of the reasoner
-		QuestOWLFactory factory = new QuestOWLFactory();
-		QuestOWLConfiguration config = QuestOWLConfiguration.builder()
-				.obdaModel(obdaModel)
-				.preferences(new QuestPreferences(p))
-				.build();
-
-		QuestOWL reasoner =factory.createReasoner(ontology, config);
-
-		// Now we are ready for querying
-		QuestOWLConnection conn = reasoner.getConnection();
-		QuestOWLStatement st = conn.createStatement();
-
-
-		try {
-
-			executeQueryAssertResults(query, st, expectedvalue);
-
-		} catch (Exception e) {
-			throw e;
-		} finally {
-			try {
-
-			} catch (Exception e) {
-				st.close();
-			}
-			conn.close();
-			reasoner.dispose();
-		}
-	}
-	
-	public void executeQueryAssertResults(String query, QuestOWLStatement st, int expectedRows) throws Exception {
-		QuestOWLResultSet rs = st.executeTuple(query);
-		int count = 0;
-		while (rs.nextRow()) {
-			count++;
-			for (int i = 1; i <= rs.getColumnCount(); i++) {
-				String varName = rs.getSignature().get(i-1);
-				System.out.print(varName);
-				//System.out.print("=" + rs.getOWLObject(i));
-				System.out.print("=" + rs.getOWLObject(varName));
-				System.out.print(" ");
-			}
-			System.out.println();
-		}
-		rs.close();
-		assertEquals(expectedRows, count);
-	}
-
-	@Test
+    @Test
 	public void testLeftJoin1() throws Exception {
 
 		String query2 = "PREFIX : <http://www.example.org/test#> "
@@ -157,9 +46,7 @@ public class LeftJoinTest1Virtual{
 				+ "WHERE {?p a :Person . ?p :name ?name . "
 				+ "  OPTIONAL {?p :nick11 ?nick1} "
 				+ "  OPTIONAL {?p :nick22 ?nick2} }";
-		
-		QuestPreferences p = new QuestPreferences();
-		runTests(p,query2,4);
+		countResults(query2, 4);
 	}
 	
 	@Test
@@ -173,9 +60,8 @@ public class LeftJoinTest1Virtual{
 				+ "   ?p :nick1 ?nick1 "
 				+ "   OPTIONAL {"
 				+ "     {?p :nick2 ?nick2 } UNION {?p :nick22 ?nick22} } } }";
-		
-		QuestPreferences p = new QuestPreferences();
-		runTests(p,query6,4);
+
+		countResults(query6, 4);
 	}
 
 	@Test
@@ -187,9 +73,8 @@ public class LeftJoinTest1Virtual{
 				+ "  ?p a :Person . "
 				+ "  ?p :name ?name ."
 				+ "    OPTIONAL {?p :age ?age} }";
-		
-		QuestPreferences p = new QuestPreferences();
-		runTests(p,query5,4);
+
+		countResults(query5,4);
 	}
 	@Test
 	public void testLeftJoin4() throws Exception {
@@ -202,8 +87,8 @@ public class LeftJoinTest1Virtual{
 
 	
 		
-		QuestPreferences p = new QuestPreferences();
-		runTests(p,query4,4);
+
+		countResults(query4,4);
 	}	
 	
 	
@@ -216,8 +101,8 @@ public class LeftJoinTest1Virtual{
 				+ "		OPTIONAL {?p :nick11 ?nick1} }";
 		
 		
-		QuestPreferences p = new QuestPreferences();
-		runTests(p,query3,4);
+
+		countResults(query3, 4);
 	}	
 	
 	@Test
@@ -231,9 +116,8 @@ public class LeftJoinTest1Virtual{
 				+ "  OPTIONAL {"
 				+ "    ?p :nick11 ?nick11 "
 				+ "    OPTIONAL { {?p :nick33 ?nick33 } UNION {?p :nick22 ?nick22} } } }";
-		
-		QuestPreferences p = new QuestPreferences();
-		runTests(p,query7,4);
+
+		countResults(query7, 4);
 	}	
 	
 	@Test
@@ -242,9 +126,8 @@ public class LeftJoinTest1Virtual{
 		String query1 = "PREFIX : <http://www.example.org/test#> "
 				+ "SELECT DISTINCT * WHERE "
 				+ "{?p a :Person . ?p :name ?name . ?p :age ?age }";
-		
-		QuestPreferences p = new QuestPreferences();
-		runTests(p,query1,3);
+
+		countResults(query1,3);
 	}	
 
 
@@ -261,10 +144,8 @@ public class LeftJoinTest1Virtual{
 				+ "    OPTIONAL {"
 				+ "      ?p :nick1 ?nick1 "
 				+ "      OPTIONAL {?p :nick2 ?nick2. FILTER (?nick2 = 'alice2')} } } }";
-		
-		
-		QuestPreferences p = new QuestPreferences();
-		runTests(p,query_multi7,4);
+
+		countResults(query_multi7,4);
 	}	
 
 	@Test
@@ -280,10 +161,8 @@ public class LeftJoinTest1Virtual{
 				+ "      ?p :nick1 ?nick1 "
 				+ "      OPTIONAL {?p :nick2 ?nick2} } } }";
 		
-		
-		
-		QuestPreferences p = new QuestPreferences();
-		runTests(p,query_multi6,4);
+
+		countResults(query_multi6,4);
 	}	
 
 
@@ -294,36 +173,32 @@ public class LeftJoinTest1Virtual{
 		
 		String query_multi = "PREFIX : <http://www.example.org/test#> SELECT DISTINCT * WHERE "
 				+ "{?p a :Person . OPTIONAL {{?p :salary ?salary .} UNION   {?p :name ?name .}}}";
-		
-		QuestPreferences p = new QuestPreferences();
-		runTests(p,query_multi,4);
+
+		countResults(query_multi,4);
 	}	
 	
 	@Test
 	public void testLeftJoin11() throws Exception {
 		
 		String query_multi1 = "PREFIX : <http://www.example.org/test#> SELECT DISTINCT * WHERE {?p a :Person . ?p :name ?name }";
-		
-		QuestPreferences p = new QuestPreferences();
-		runTests(p,query_multi1,4);
+
+		countResults(query_multi1,4);
 	}		
 	
 	@Test
 	public void testLeftJoin12() throws Exception {
 		
 		String query_multi2 = "PREFIX : <http://www.example.org/test#> SELECT DISTINCT * WHERE {?p a :Person . OPTIONAL {?p :name ?name} }";
-		
-		QuestPreferences p = new QuestPreferences();
-		runTests(p,query_multi2,4);
+
+		countResults(query_multi2,4);
 	}		
 	
 	@Test
 	public void testLeftJoin13() throws Exception {
 		
 		String query_multi3 = "PREFIX : <http://www.example.org/test#> SELECT DISTINCT * WHERE {?p :name ?name . OPTIONAL {?p :nick1 ?nick1} }";
-		
-		QuestPreferences p = new QuestPreferences();
-		runTests(p,query_multi3,4);
+
+		countResults(query_multi3,4);
 	}		
 	
 	@Test
@@ -331,9 +206,8 @@ public class LeftJoinTest1Virtual{
 		
 
 		String query_multi4 = "PREFIX : <http://www.example.org/test#> SELECT DISTINCT * WHERE {?p a :Person . OPTIONAL {?p :name ?name . OPTIONAL {?p :nick1 ?nick1} } }";
-		
-		QuestPreferences p = new QuestPreferences();
-		runTests(p,query_multi4,4);
+
+		countResults(query_multi4,4);
 	}		
 	
 	@Test
@@ -342,8 +216,7 @@ public class LeftJoinTest1Virtual{
 
 		String query_multi5 = "PREFIX : <http://www.example.org/test#> SELECT DISTINCT * WHERE {?p a :Person . OPTIONAL {?p :name ?name . OPTIONAL {?p :nick1 ?nick1} OPTIONAL {?p :nick2 ?nick2} } }";
 
-		QuestPreferences p = new QuestPreferences();
-		runTests(p,query_multi5,4);
+		countResults(query_multi5,4);
 	}	
 	
 	@Test
@@ -351,9 +224,8 @@ public class LeftJoinTest1Virtual{
 		
 
 		String query_multi7 = "PREFIX : <http://www.example.org/test#> SELECT ?person ?name ?nick1 ?nick2 WHERE{ ?person :name ?name . OPTIONAL { { ?person :nick1 ?nick1 } UNION { ?person :nick2 ?nick2 } FILTER ( bound( ?nick1 ) && bound( ?nick2) ) } }";
-		
-		QuestPreferences p = new QuestPreferences();
-		runTests(p,query_multi7,4);
+
+		countResults(query_multi7,4);
 	}
 	
 	@Test
@@ -361,9 +233,8 @@ public class LeftJoinTest1Virtual{
 		
 
 		String query_multi7 = "PREFIX : <http://www.example.org/test#> SELECT ?person ?name ?nick1 ?nick2 WHERE{ ?person :name ?name . OPTIONAL { { ?person :nick1 ?nick1 } UNION { ?person :nick2 ?nick2 } FILTER ( bound( ?nick1 ) ) } }";
-		
-		QuestPreferences p = new QuestPreferences();
-		runTests(p,query_multi7,4);
+
+		countResults(query_multi7,4);
 	}
 
 	@Test
@@ -371,9 +242,8 @@ public class LeftJoinTest1Virtual{
 		
 
 		String query_multi7 = "PREFIX : <http://www.example.org/test#> SELECT ?person ?nick1 ?nick2 WHERE{ { ?person :nick1 ?nick1 } UNION { ?person :nick2 ?nick2 } FILTER ( bound( ?nick1 ) ) }";
-		
-		QuestPreferences p = new QuestPreferences();
-		runTests(p,query_multi7,2);
+
+		countResults(query_multi7,2);
 	}
 
 	@Test
@@ -381,9 +251,8 @@ public class LeftJoinTest1Virtual{
 		
 
 		String query_multi7 = "PREFIX : <http://www.example.org/test#> SELECT ?person ?nick1 ?nick2 WHERE{ { ?person :nick1 ?nick1 } UNION { ?person :nick2 ?nick2 } }";
-		
-		QuestPreferences p = new QuestPreferences();
-		runTests(p,query_multi7,4);
+
+		countResults(query_multi7,4);
 	}
 
 	@Test
@@ -391,9 +260,8 @@ public class LeftJoinTest1Virtual{
 		
 
 		String query_multi7 = "PREFIX : <http://www.example.org/test#> SELECT ?person ?name ?nick1 ?nick2 WHERE{ ?person :name ?name . OPTIONAL { ?person :nick1 ?nick1 . ?person :nick2 ?nick2 . FILTER ( bound( ?nick1 ) && bound( ?nick2) ) } }";
-		
-		QuestPreferences p = new QuestPreferences();
-		runTests(p,query_multi7,4);
+
+		countResults(query_multi7,4);
 	}
 
 }

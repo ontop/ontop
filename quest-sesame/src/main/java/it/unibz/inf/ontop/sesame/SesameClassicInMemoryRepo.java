@@ -20,56 +20,60 @@ package it.unibz.inf.ontop.sesame;
  * #L%
  */
 
+import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
+import it.unibz.inf.ontop.injection.QuestCoreSettings;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.net.URI;
+import java.util.Properties;
 
 import org.openrdf.query.Dataset;
 
 public class SesameClassicInMemoryRepo extends SesameClassicRepo {
-	
-	private static QuestPreferences p = new QuestPreferences();
 
 	public SesameClassicInMemoryRepo(String name, String tboxFile, boolean existential, String rewriting) throws Exception {
-		super();
-		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
-		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-		p.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_MAPPINGS, "false");
-		p.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_ONTOLOGY, "false");
-		p.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC_INDEX); 
-		p.setCurrentValueOf(QuestPreferences.STORAGE_LOCATION, QuestConstants.INMEMORY);
+		super(name, buildConfiguration(tboxFile, existential, rewriting));
+	}
+
+	private static QuestConfiguration buildConfiguration(String tboxFile, boolean existential, String rewriting) {
+		Properties props = new Properties();
+		props.setProperty(QuestCoreSettings.ABOX_MODE, QuestConstants.CLASSIC);
+		props.setProperty(QuestCoreSettings.OPTIMIZE_EQUIVALENCES, "true");
+		props.setProperty(QuestCoreSettings.OBTAIN_FROM_MAPPINGS, "false");
+		props.setProperty(QuestCoreSettings.OBTAIN_FROM_ONTOLOGY, "false");
+		props.setProperty(QuestCoreSettings.DBTYPE, QuestConstants.SEMANTIC_INDEX);
+		props.setProperty(QuestCoreSettings.STORAGE_LOCATION, QuestConstants.INMEMORY);
 		if (existential) {
-			p.setCurrentValueOf(QuestPreferences.REWRITE, "true");
+			props.setProperty(QuestCoreSettings.REWRITE, "true");
 		} else {
-			p.setCurrentValueOf(QuestPreferences.REWRITE, "false");
+			props.setProperty(QuestCoreSettings.REWRITE, "false");
 		}
 		if (rewriting.equals("TreeWitness")) {
-			p.setCurrentValueOf(QuestPreferences.REFORMULATION_TECHNIQUE, QuestConstants.TW);
+			props.setProperty(QuestCoreSettings.REFORMULATION_TECHNIQUE, QuestConstants.TW);
 		} else if (rewriting.equals("Default")) {
-			p.setCurrentValueOf(QuestPreferences.REFORMULATION_TECHNIQUE, QuestConstants.UCQBASED);
+			props.setProperty(QuestCoreSettings.REFORMULATION_TECHNIQUE, QuestConstants.UCQBASED);
 		}
-		createStore(name, tboxFile, p); 
+
+		return QuestConfiguration.defaultBuilder()
+				.ontologyFile(tboxFile)
+				.properties(props)
+				.build();
 	}
-	
+
 	public SesameClassicInMemoryRepo(String name, Dataset data) throws Exception {
-		super();
-		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
-		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-		p.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_MAPPINGS, "false");
-		p.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_ONTOLOGY, "false");
-		p.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC_INDEX); 
-		p.setCurrentValueOf(QuestPreferences.STORAGE_LOCATION, QuestConstants.INMEMORY);
-		
-		createStore(name, data, p); 
+		super(name, data, buildConfiguration());
 	}
-	
-	public SesameClassicInMemoryRepo(String name, String tboxFilePath, String configFilePath) throws Exception {
-		super();
-		File configFile = new File(URI.create(configFilePath));
-		p.readDefaultPropertiesFile(new FileInputStream(configFile));
-		createStore(name, tboxFilePath, p);
+
+	private static QuestConfiguration buildConfiguration() {
+		Properties props = new Properties();
+		props.setProperty(QuestCoreSettings.ABOX_MODE, QuestConstants.CLASSIC);
+		props.setProperty(QuestCoreSettings.OPTIMIZE_EQUIVALENCES, "true");
+		props.setProperty(QuestCoreSettings.OBTAIN_FROM_MAPPINGS, "false");
+		props.setProperty(QuestCoreSettings.OBTAIN_FROM_ONTOLOGY, "false");
+		props.setProperty(QuestCoreSettings.DBTYPE, QuestConstants.SEMANTIC_INDEX);
+		props.setProperty(QuestCoreSettings.STORAGE_LOCATION, QuestConstants.INMEMORY);
+
+		return QuestConfiguration.defaultBuilder()
+				.properties(props)
+				.build();
 	}
 }

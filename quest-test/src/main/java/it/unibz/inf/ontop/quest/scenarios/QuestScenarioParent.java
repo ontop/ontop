@@ -34,6 +34,7 @@ import java.util.Set;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
+import it.unibz.inf.ontop.quest.ResultSetInfoTupleUtil;
 import org.openrdf.model.Statement;
 import org.openrdf.model.URI;
 import org.openrdf.query.BindingSet;

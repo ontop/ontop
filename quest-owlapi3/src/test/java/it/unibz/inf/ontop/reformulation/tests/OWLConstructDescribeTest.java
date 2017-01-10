@@ -20,20 +20,15 @@ package it.unibz.inf.ontop.reformulation.tests;
  * #L%
  */
 
-import it.unibz.inf.ontop.model.OBDADataFactory;
-import it.unibz.inf.ontop.model.OBDAModel;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
+import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
+import it.unibz.inf.ontop.injection.QuestCoreSettings;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import org.junit.*;
-import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLAxiom;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
 
-import java.io.File;
 import java.util.List;
+import java.util.Properties;
 
 /**
  * This unit test is for testing correctness of construct and describe queries
@@ -46,20 +41,13 @@ import java.util.List;
 @Ignore // GUOHUI: 2016-01-16 SI+Mapping mode is disabled
 public class OWLConstructDescribeTest{
 
-    OWLOntology ontology = null;
-	OBDAModel obdaModel = null;
 	QuestOWL reasoner = null;
 	QuestOWLConnection conn = null;
 	QuestOWLStatement st = null;
-	OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 	String owlFile = "src/test/resources/describeConstruct.owl";
 	
 	@Before
 	public void setUp() throws Exception {
-		
-			// Loading the OWL file
-			OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-			ontology = manager.loadOntologyFromOntologyDocument(new File(owlFile));
 
 //			String driver = "org.h2.Driver";
 //			String url = "jdbc:h2:mem:aboxdumptestx1";
@@ -76,25 +64,16 @@ public class OWLConstructDescribeTest{
 //
 //			obdaModel = fac.getOBDAModel();
 //			obdaModel.addSource(source);
-			
-			QuestPreferences p = new QuestPreferences();
-			p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
-			p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-			p.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_MAPPINGS, "false");
-			p.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_ONTOLOGY, "true");
-			p.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC_INDEX); 
-			p.setCurrentValueOf(QuestPreferences.STORAGE_LOCATION, QuestConstants.INMEMORY);
-			p.setCurrentValueOf(QuestPreferences.REWRITE, "false");
-			p.setCurrentValueOf(QuestPreferences.REFORMULATION_TECHNIQUE, QuestConstants.TW);
-			QuestOWLFactory factory = new QuestOWLFactory();
-//			factory.setOBDAController(obdaModel);
-			//factory.setPreferenceHolder(p);
-			//reasoner.setPreferences(preferences);
-			//reasoner = factory.createReasoner(ontology, new SimpleConfiguration());
-			
-	        QuestOWLConfiguration config = QuestOWLConfiguration.builder().obdaModel(obdaModel).build();
-	        reasoner = factory.createReasoner(ontology, config);
 
+			Properties p = new Properties();
+			p.put(QuestCoreSettings.ABOX_MODE, QuestConstants.CLASSIC);
+
+		    QuestOWLFactory factory = new QuestOWLFactory();
+		    QuestConfiguration config = QuestConfiguration.defaultBuilder()
+					.ontologyFile(owlFile)
+					.properties(p)
+					.build();
+		    reasoner = factory.createReasoner(config);
 			conn = reasoner.getConnection();
 			st = conn.createStatement();
 		

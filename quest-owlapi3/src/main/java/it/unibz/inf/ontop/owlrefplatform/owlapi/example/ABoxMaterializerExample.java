@@ -20,18 +20,13 @@ package it.unibz.inf.ontop.owlrefplatform.owlapi.example;
  * #L%
  */
 
-import it.unibz.inf.ontop.io.ModelIOManager;
-import it.unibz.inf.ontop.model.OBDADataFactory;
-import it.unibz.inf.ontop.model.OBDAModel;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
-import it.unibz.inf.ontop.owlapi.QuestOWLIndividualAxiomIterator;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.OWLAPIMaterializer;
-import org.semanticweb.owlapi.model.OWLIndividualAxiom;
+import java.io.*;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.PrintWriter;
+import it.unibz.inf.ontop.injection.QuestConfiguration;
+import it.unibz.inf.ontop.model.OBDAModel;
+import it.unibz.inf.ontop.owlrefplatform.owlapi.OWLAPIMaterializer;
+import it.unibz.inf.ontop.owlapi.QuestOWLIndividualAxiomIterator;
+import org.semanticweb.owlapi.model.OWLIndividualAxiom;
 
 /**
  * A very simple example that shows how to generate triples in an N-Triple file,
@@ -51,13 +46,11 @@ public class ABoxMaterializerExample {
 	
 	public void generateTriples() throws Exception {
 
-		/*
-		 * Load the OBDA model from an external .obda file
-		 */
-		OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
-		OBDAModel obdaModel = fac.getOBDAModel();
-		ModelIOManager ioManager = new ModelIOManager(obdaModel);
-		ioManager.load(inputFile);
+		QuestConfiguration configuration = QuestConfiguration.defaultBuilder()
+				.nativeOntopMappingFile(inputFile)
+				.build();
+
+        OBDAModel obdaModel = configuration.loadProvidedMapping();
 
 		/*
 		 * Start materializing data from database to triples.
@@ -88,7 +81,7 @@ public class ABoxMaterializerExample {
 				out.println(individual.toString());
 			}
 			out.flush();
-		} 
+		}
 		}
 	}
 

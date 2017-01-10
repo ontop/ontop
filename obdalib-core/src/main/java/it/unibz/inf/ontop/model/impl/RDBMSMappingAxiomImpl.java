@@ -20,29 +20,46 @@ package it.unibz.inf.ontop.model.impl;
  * #L%
  */
 
+import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.google.inject.assistedinject.Assisted;
+import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.model.Function;
-import it.unibz.inf.ontop.model.OBDAMappingAxiom;
 import it.unibz.inf.ontop.model.OBDASQLQuery;
+import it.unibz.inf.ontop.model.SourceQuery;
+import it.unibz.inf.ontop.sql.RDBMSMappingAxiom;
+import it.unibz.inf.ontop.utils.IDGenerator;
 
-public class RDBMSMappingAxiomImpl extends AbstractOBDAMappingAxiom implements OBDAMappingAxiom {
+public class RDBMSMappingAxiomImpl extends AbstractOBDAMappingAxiom implements RDBMSMappingAxiom
+{
 
 	private static final long serialVersionUID = 5793656631843898419L;
 	
 	private OBDASQLQuery sourceQuery;
 	private List<Function> targetQuery;
 
-	protected RDBMSMappingAxiomImpl(String id, OBDASQLQuery sourceQuery, List<Function> targetQuery) {
+	@AssistedInject
+	protected RDBMSMappingAxiomImpl(@Assisted String id, @Assisted("sourceQuery") SourceQuery sourceQuery,
+									@Assisted("targetQuery") List<Function> targetQuery) {
 		super(id);
 		setSourceQuery(sourceQuery);
 		setTargetQuery(targetQuery);
 	}
 
+	@AssistedInject
+	private RDBMSMappingAxiomImpl(@Assisted("sourceQuery") SourceQuery sourceQuery,
+								  @Assisted("targetQuery") List<Function> targetQuery) {
+		this(IDGenerator.getNextUniqueID("MAPID-"), sourceQuery, targetQuery);
+	}
+
 	@Override
-	public void setSourceQuery(OBDASQLQuery query) {
-		this.sourceQuery = query;
+	public void setSourceQuery(SourceQuery query) {
+		if (!(query instanceof OBDASQLQuery)) {
+			throw new InvalidParameterException("RDBMSDataSourceMapping must receive a RDBMSSQLQuery as source query");
+		}
+		this.sourceQuery = (OBDASQLQuery) query;
 	}
 
 	@Override
@@ -61,12 +78,12 @@ public class RDBMSMappingAxiomImpl extends AbstractOBDAMappingAxiom implements O
 	}
 
 	@Override
-	public OBDAMappingAxiom clone() {
+	public RDBMSMappingAxiom clone() {
 		List<Function> newbody = new ArrayList<>(targetQuery.size());
 		for (Function f : targetQuery)
 			newbody.add((Function)f.clone());
-		
-		OBDAMappingAxiom clone = new RDBMSMappingAxiomImpl(this.getId(), sourceQuery.clone(), newbody);
+
+		RDBMSMappingAxiom clone = new RDBMSMappingAxiomImpl(this.getId(), sourceQuery.clone(), newbody);
 		return clone;
 	}
 	

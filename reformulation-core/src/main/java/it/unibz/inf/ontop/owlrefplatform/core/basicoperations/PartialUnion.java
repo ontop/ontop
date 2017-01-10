@@ -5,7 +5,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.*;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
+
 import it.unibz.inf.ontop.pivotalrepr.IntermediateQuery;
 
 import java.util.HashMap;
@@ -14,6 +14,7 @@ import java.util.Map;
 import java.util.Set;
 
 import static it.unibz.inf.ontop.model.impl.GroundTermTools.isGroundTerm;
+import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
 import static it.unibz.inf.ontop.owlrefplatform.core.basicoperations.ImmutableUnificationTools.computeMGU;
 
 /**
@@ -23,8 +24,6 @@ import static it.unibz.inf.ontop.owlrefplatform.core.basicoperations.ImmutableUn
  *
  */
 public class PartialUnion<T extends ImmutableTerm> {
-
-    private static final OBDADataFactory DATA_FACTORY = OBDADataFactoryImpl.getInstance();
 
     /**
      * Possibly mutable attributes that can only be modified

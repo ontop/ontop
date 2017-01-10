@@ -20,6 +20,7 @@ package it.unibz.inf.ontop.protege.core;
  * #L%
  */
 
+import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.io.AbstractPrefixManager;
 
 import java.util.ArrayList;
@@ -58,8 +59,8 @@ public class PrefixManagerWrapper extends AbstractPrefixManager {
 	}
 
 	@Override
-	public Map<String, String> getPrefixMap() {
-		return owlmapper.getPrefixName2PrefixMap();
+	public ImmutableMap<String, String> getPrefixMap() {
+		return ImmutableMap.copyOf(owlmapper.getPrefixName2PrefixMap());
 	}
 
 	@Override
@@ -72,12 +73,10 @@ public class PrefixManagerWrapper extends AbstractPrefixManager {
 		return owlmapper.containsPrefixMapping(prefix);
 	}
 
-	@Override
 	public void addPrefix(String name, String uri) {
 		owlmapper.setPrefix(name, uri);
 	}
 
-	@Override
 	public void clear() {
 		owlmapper.clear();
 	}

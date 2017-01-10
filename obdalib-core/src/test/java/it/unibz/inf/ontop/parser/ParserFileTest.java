@@ -20,24 +20,28 @@ package it.unibz.inf.ontop.parser;
  * #L%
  */
 
-import it.unibz.inf.ontop.io.ModelIOManager;
-import it.unibz.inf.ontop.model.OBDADataFactory;
-import it.unibz.inf.ontop.model.OBDAMappingAxiom;
-import it.unibz.inf.ontop.model.OBDAModel;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
-import it.unibz.inf.ontop.sql.DBMetadata;
-import it.unibz.inf.ontop.sql.DBMetadataExtractor;
-import it.unibz.inf.ontop.sql.QuotedIDFactory;
-import it.unibz.inf.ontop.sql.api.ParsedSQLQuery;
 
+import java.io.File;
+import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.Hashtable;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.google.inject.Injector;
+import it.unibz.inf.ontop.injection.OBDACoreConfiguration;
+import it.unibz.inf.ontop.sql.RDBMetadata;
+import it.unibz.inf.ontop.sql.QuotedIDFactory;
+import it.unibz.inf.ontop.sql.RDBMetadataExtractionTools;
 import junit.framework.TestCase;
 import net.sf.jsqlparser.JSQLParserException;
 
+import it.unibz.inf.ontop.exception.InvalidMappingException;
+import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
+import it.unibz.inf.ontop.mapping.MappingParser;
+import it.unibz.inf.ontop.model.OBDAMappingAxiom;
+import it.unibz.inf.ontop.model.OBDAModel;
+import it.unibz.inf.ontop.sql.api.ParsedSQLQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,68 +51,76 @@ public class ParserFileTest extends TestCase {
 	final static Logger log = LoggerFactory
 			.getLogger(ParserFileTest.class);
 
+    private final NativeQueryLanguageComponentFactory factory;
+
+    public ParserFileTest() {
+		OBDACoreConfiguration configuration = OBDACoreConfiguration.defaultBuilder().build();
+		Injector injector = configuration.getInjector();
+        factory = injector.getInstance(NativeQueryLanguageComponentFactory.class);
+    }
+
 	// @Test
-	public void testStockExchange_Pgsql() throws URISyntaxException {
+	public void testStockExchange_Pgsql() throws URISyntaxException, InvalidMappingException, IOException {
 		OBDAModel model = load(ROOT + "virtual/stockexchange-pgsql.owl");
 		execute(model, new URI("RandBStockExchange"));
 	}
 
 	// @Test
-	public void testImdbGroup4_Pgsql() throws URISyntaxException {
+	public void testImdbGroup4_Pgsql() throws URISyntaxException, InvalidMappingException, IOException {
 		OBDAModel model = load(ROOT + "virtual/imdb-group4-pgsql.owl");
 		execute(model, new URI("kbdb_imdb"));
 	}
 
 	// @Test
-	public void testImdbGroup4_Oracle() throws URISyntaxException {
+	public void testImdbGroup4_Oracle() throws URISyntaxException, InvalidMappingException, IOException {
 		OBDAModel model = load(ROOT + "virtual/imdb-group4-oracle.owl");
 		execute(model, new URI("kbdb_imdb"));
 	}
 
 	// @Test
-	public void testAdolenaSlim_Pgsql() throws URISyntaxException {
+	public void testAdolenaSlim_Pgsql() throws URISyntaxException, InvalidMappingException, IOException {
 		OBDAModel model = load(ROOT + "virtual/adolena-slim-pgsql.owl");
 		execute(model, new URI("nap"));
 	}
 
 	// @Test
-	public void testBooksApril20_Pgsql() throws URISyntaxException {
+	public void testBooksApril20_Pgsql() throws URISyntaxException, InvalidMappingException, IOException {
 		OBDAModel model = load(ROOT + "virtual/books-april20-pgsql.owl");
 		execute(model, new URI("datasource"));
 	}
 
 	// @Test
-	public void testHgt090303_Mysql() throws URISyntaxException {
+	public void testHgt090303_Mysql() throws URISyntaxException, InvalidMappingException, IOException {
 		OBDAModel model = load(ROOT + "virtual/hgt-090303-mysql.owl");
 		execute(model, new URI("HGT"));
 	}
 
 	// @Test
-	public void testHgt090324_Pgsql() throws URISyntaxException {
+	public void testHgt090324_Pgsql() throws URISyntaxException, InvalidMappingException, IOException {
 		OBDAModel model = load(ROOT + "virtual/hgt-090324-pgsql.owl");
 		execute(model, new URI("HGT"));
 	}
 
 	// @Test
-	public void testHgt091007_Oracle() throws URISyntaxException {
+	public void testHgt091007_Oracle() throws URISyntaxException, InvalidMappingException, IOException {
 		OBDAModel model = load(ROOT + "virtual/hgt-091007-oracle.owl");
 		execute(model, new URI("HGT"));
 	}
 
 	// @Test
-	public void testMpsOntologiaGcc_DB2() throws URISyntaxException {
+	public void testMpsOntologiaGcc_DB2() throws URISyntaxException, InvalidMappingException, IOException {
 		OBDAModel model = load(ROOT + "virtual/mps-ontologiagcc-db2.owl");
 		execute(model, new URI("sourceGCC"));
 	}
 
 	// @Test
-	public void testOperationNoyauV5_Oracle() throws URISyntaxException {
+	public void testOperationNoyauV5_Oracle() throws URISyntaxException, InvalidMappingException, IOException {
 		OBDAModel model = load(ROOT + "virtual/operation-noyau-v5-oracle.owl");
 		execute(model, new URI("PgmOpe"));
 	}
 
 	// @Test
-	public void testOperationNoyauV6_Oracle() throws URISyntaxException {
+	public void testOperationNoyauV6_Oracle() throws URISyntaxException, InvalidMappingException, IOException {
 		OBDAModel model = load(ROOT + "virtual/operation-noyau-v6-oracle.owl");
 		execute(model, new URI("CORIOLIS-CRAQ"));
 		execute(model, new URI("PROGOS-CRAQ"));
@@ -117,13 +129,25 @@ public class ParserFileTest extends TestCase {
 	// ------- Utility methods
 
 	private void execute(OBDAModel model, URI identifier) {
-		
-		DBMetadata dbMetadata = DBMetadataExtractor.createDummyMetadata();
+
+		RDBMetadata dbMetadata = RDBMetadataExtractionTools.createDummyMetadata();
 		QuotedIDFactory idfac = dbMetadata.getQuotedIDFactory();
-		
+
+        /**
+         * Problems found in the mapping file.
+         * --> Do nothing.
+         *
+         * Before, tests were analyzing the incomplete OBDA model.
+         * TODO: discuss this difference due to the new interface.
+         *
+         */
+        if (model == null) {
+            return;
+        }
+
 		OBDAModel controller = model;
-		Hashtable<URI, ArrayList<OBDAMappingAxiom>> mappingList = controller.getMappings();
-		ArrayList<OBDAMappingAxiom> mappings = mappingList.get(identifier);
+		ImmutableMap<URI, ImmutableList<OBDAMappingAxiom>> mappingList = controller.getMappings();
+		ImmutableList<OBDAMappingAxiom> mappings = mappingList.get(identifier);
 
 		log.debug("=========== " + identifier + " ===========");
 		for (OBDAMappingAxiom axiom : mappings) {
@@ -139,24 +163,23 @@ public class ParserFileTest extends TestCase {
 		}
 	}
 
-	private OBDAModel load(String file) {
+	private OBDAModel load(String file) throws InvalidMappingException, IOException {
 		final String obdafile = file.substring(0, file.length() - 3) + "obda";
-		OBDADataFactory factory = OBDADataFactoryImpl.getInstance();
-		OBDAModel model = factory.getOBDAModel();
-		ModelIOManager ioManager = new ModelIOManager(model);
-		try {
-			ioManager.load(obdafile);
-		} catch (Exception e) {
-			log.debug(e.toString());
-		}
-		return model;
+        try {
+            MappingParser mappingParser = factory.create(new File(obdafile));
+            return mappingParser.getOBDAModel();
+        }
+        catch (Exception e) {
+            log.debug(e.toString());
+        }
+        return null;
 	}
 
 	private static boolean parse(String input, QuotedIDFactory idfac) {
 		ParsedSQLQuery queryP;
 		
 		try {
-			queryP = new ParsedSQLQuery(input, true, idfac);
+			queryP = new ParsedSQLQuery(input,true, idfac);
 		} catch (JSQLParserException e) {
 			log.debug(e.getMessage());
 			return false;

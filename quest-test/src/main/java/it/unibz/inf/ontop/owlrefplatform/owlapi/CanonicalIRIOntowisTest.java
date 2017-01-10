@@ -2,13 +2,12 @@ package it.unibz.inf.ontop.owlrefplatform.owlapi;
 
 import it.unibz.inf.ontop.exception.InvalidMappingException;
 import it.unibz.inf.ontop.exception.InvalidPredicateDeclarationException;
-import it.unibz.inf.ontop.io.ModelIOManager;
+import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.model.OBDADataFactory;
 import it.unibz.inf.ontop.model.OBDAException;
 import it.unibz.inf.ontop.model.OBDAModel;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.*;
 
@@ -501,43 +500,19 @@ public class CanonicalIRIOntowisTest {
      */
     private QuestOWLConnection createStuff() throws OBDAException, OWLOntologyCreationException, IOException, InvalidPredicateDeclarationException, InvalidMappingException{
 
-		/*
-		 * Load the ontology from an external .owl file.
-		 */
-        OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-        OWLOntology ontology = manager.loadOntologyFromOntologyDocument(new File(owlfile));
-
-		/*
-		 * Load the OBDA model from an externa
-		 * l .obda file
-		 */
-        OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
-        OBDAModel obdaModel = fac.getOBDAModel();
-        ModelIOManager ioManager = new ModelIOManager(obdaModel);
-        ioManager.load(obdaFile);
-
-		/*
-		 * Prepare the configuration for the Quest instance. The example below shows the setup for
-		 * "Virtual ABox" mode
-		 */
-        QuestPreferences preference = new QuestPreferences();
-        preference.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-        preference.setCurrentValueOf(QuestPreferences.SQL_GENERATE_REPLACE, QuestConstants.FALSE);
+        QuestConfiguration config = QuestConfiguration.defaultBuilder()
+                .ontologyFile(owlfile)
+                .nativeOntopMappingFile(obdaFile)
+                .sameAsMappings(true)
+                .build();
 
 		/*
 		 * Create the instance of Quest OWL reasoner.
 		 */
         QuestOWLFactory factory = new QuestOWLFactory();
-//        factory.setOBDAController(obdaModel);
-//        factory.setPreferenceHolder(preference);
-
-        QuestOWLConfiguration config;
-
-        config = QuestOWLConfiguration.builder().obdaModel(obdaModel).sameAsMappings(true).build();
 
 
-
-        QuestOWL reasoner = factory.createReasoner(ontology,config);
+        QuestOWL reasoner = factory.createReasoner(config);
 
         this.reasoner = reasoner;
 		/*

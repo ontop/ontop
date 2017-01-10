@@ -35,6 +35,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -136,9 +137,9 @@ public class VirtualABoxStatistics {
 	}
 
 	public void refresh() {
-		final List<OBDADataSource> sourceList = model.getSources();
+		final Set<OBDADataSource> sources = model.getSources();
 
-		for (OBDADataSource database : sourceList) {
+		for (OBDADataSource database : sources) {
 			URI sourceUri = database.getSourceID();
 			List<OBDAMappingAxiom> mappingList = model.getMappings(sourceUri);
 
@@ -147,7 +148,7 @@ public class VirtualABoxStatistics {
 				String mappingId = mapping.getId();
 				int triplesCount = 0;
 				try {
-					OBDASQLQuery sourceQuery = mapping.getSourceQuery();
+					OBDASQLQuery sourceQuery = (OBDASQLQuery) mapping.getSourceQuery();
 					int tuples = getTuplesCount(database, sourceQuery);
 
 					List<Function> targetQuery = mapping.getTargetQuery();

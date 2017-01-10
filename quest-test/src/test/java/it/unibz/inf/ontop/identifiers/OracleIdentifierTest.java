@@ -20,124 +20,20 @@ package it.unibz.inf.ontop.identifiers;
  * #L%
  */
 
-import it.unibz.inf.ontop.io.ModelIOManager;
-import it.unibz.inf.ontop.model.OBDADataFactory;
-import it.unibz.inf.ontop.model.OBDAModel;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
-import junit.framework.TestCase;
-import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.OWLIndividual;
-import org.semanticweb.owlapi.model.OWLLiteral;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.io.File;
+import it.unibz.inf.ontop.quest.AbstractVirtualModeTest;
 
 /***
  * Tests that oracle identifiers for tables and columns are treated
  * correctly. Especially, that the unquoted identifiers are treated as uppercase, and
  * that the case of quoted identifiers is not changed
  */
-public class OracleIdentifierTest extends TestCase {
+public class OracleIdentifierTest extends AbstractVirtualModeTest {
 
-	private OBDADataFactory fac;
-	private QuestOWLConnection conn;
+	static final String owlfile = "resources/identifiers/identifiers.owl";
+	static final String obdafile = "resources/identifiers/identifiers-oracle.obda";
 
-	Logger log = LoggerFactory.getLogger(this.getClass());
-	private OBDAModel obdaModel;
-	private OWLOntology ontology;
-
-	final String owlfile = "resources/identifiers/identifiers.owl";
-	final String obdafile = "resources/identifiers/identifiers-oracle.obda";
-	private QuestOWL reasoner;
-
-	@Override
-	public void setUp() throws Exception {
-		
-		
-		// Loading the OWL file
-		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-		ontology = manager.loadOntologyFromOntologyDocument((new File(owlfile)));
-
-		// Loading the OBDA data
-		fac = OBDADataFactoryImpl.getInstance();
-		obdaModel = fac.getOBDAModel();
-		
-		ModelIOManager ioManager = new ModelIOManager(obdaModel);
-		ioManager.load(obdafile);
-	
-		QuestPreferences p = new QuestPreferences();
-		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-		p.setCurrentValueOf(QuestPreferences.OBTAIN_FULL_METADATA, QuestConstants.FALSE);
-		// Creating a new instance of the reasoner
-        QuestOWLFactory factory = new QuestOWLFactory();
-        QuestOWLConfiguration config = QuestOWLConfiguration.builder().obdaModel(obdaModel).preferences(p).build();
-        reasoner = factory.createReasoner(ontology, config);
-
-		// Now we are ready for querying
-		conn = reasoner.getConnection();
-
-		
-	}
-
-
-	public void tearDown() throws Exception{
-		conn.close();
-		reasoner.dispose();
-	}
-	
-
-	
-	private String runTests(String query) throws Exception {
-		QuestOWLStatement st = conn.createStatement();
-		String retval;
-		try {
-			QuestOWLResultSet rs = st.executeTuple(query);
-			assertTrue(rs.nextRow());
-			OWLIndividual ind1 =	rs.getOWLIndividual("x")	 ;
-			retval = ind1.toString();
-		} catch (Exception e) {
-			throw e;
-		} finally {
-			try {
-
-			} catch (Exception e) {
-				st.close();
-				assertTrue(false);
-			}
-			conn.close();
-			reasoner.dispose();
-		}
-		return retval;
-	}
-
-
-	private Boolean runASKTests(String query) throws Exception {
-		QuestOWLStatement st = conn.createStatement();
-		boolean retval;
-		try {
-			QuestOWLResultSet rs = st.executeTuple(query);
-			assertTrue(rs.nextRow());
-			OWLLiteral ind1 = rs.getOWLLiteral(1);
-			retval = ind1.parseBoolean();
-		} catch (Exception e) {
-			throw e;
-		} finally {
-			try {
-
-			} catch (Exception e) {
-				st.close();
-				assertTrue(false);
-			}
-			conn.close();
-			reasoner.dispose();
-		}
-		return retval;
+	protected OracleIdentifierTest() {
+		super(owlfile, obdafile);
 	}
 
 
@@ -147,7 +43,7 @@ public class OracleIdentifierTest extends TestCase {
 	 */
 	public void testLowercaseUnquoted() throws Exception {
 		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT ?x WHERE {?x a :Country} ORDER BY ?x";
-		String val = runTests(query);
+		String val = runQueryAndReturnStringX(query);
 		assertEquals("<http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country-Argentina>", val);
 	}
 
@@ -158,7 +54,7 @@ public class OracleIdentifierTest extends TestCase {
 	 */
 	public void testUpperCaseTableUnquoted() throws Exception {
 		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT ?x WHERE {?x a :Country2} ORDER BY ?x";
-		String val =  runTests(query);
+		String val =  runQueryAndReturnStringX(query);
 		assertEquals("<http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country2-Argentina>", val);
 	}
 	
@@ -168,7 +64,7 @@ public class OracleIdentifierTest extends TestCase {
 	 */
 	public void testLowerCaseColumnViewDefQuoted() throws Exception {
 		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT ?x WHERE {?x a :Country4} ORDER BY ?x";
-		String val =  runTests(query);
+		String val =  runQueryAndReturnStringX(query);
 		assertEquals("<http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country4-Argentina>", val);
 	}
 
@@ -178,7 +74,7 @@ public class OracleIdentifierTest extends TestCase {
 	 */
 	public void testLowerCaseColumnViewDefUnquoted() throws Exception {
 		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT ?x WHERE {?x a :Country5} ORDER BY ?x";
-		String val =  runTests(query);
+		String val =  runQueryAndReturnStringX(query);
 		assertEquals("<http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country5-Argentina>", val);
 	}
 

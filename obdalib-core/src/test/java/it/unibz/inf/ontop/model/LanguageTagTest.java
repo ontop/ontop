@@ -1,21 +1,18 @@
 package it.unibz.inf.ontop.model;
 
 
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
-import junit.framework.Assert;
 import org.junit.Test;
 
 import java.util.Optional;
 
 import static it.unibz.inf.ontop.model.Predicate.COL_TYPE.*;
+import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
 import static junit.framework.TestCase.assertFalse;
 import static junit.framework.TestCase.assertTrue;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 
 public class LanguageTagTest {
-
-    private static final OBDADataFactory DATA_FACTORY = OBDADataFactoryImpl.getInstance();
 
     @Test
     public void testDifferentLanguageRegions() {

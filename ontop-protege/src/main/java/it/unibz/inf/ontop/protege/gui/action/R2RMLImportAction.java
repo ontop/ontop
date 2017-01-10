@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.protege.gui.action;
 
 /*
  * #%L
- * ontop-protege4
+ * ontop-protege
  * %%
  * Copyright (C) 2009 - 2013 KRDB Research Centre. Free University of Bozen Bolzano.
  * %%
@@ -21,11 +21,16 @@ package it.unibz.inf.ontop.protege.gui.action;
  */
 
 import it.unibz.inf.ontop.exception.DuplicateMappingException;
+import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
+import it.unibz.inf.ontop.injection.OBDACoreConfiguration;
+import it.unibz.inf.ontop.io.DataSource2PropertiesConvertor;
+import it.unibz.inf.ontop.model.OBDADataSource;
 import it.unibz.inf.ontop.model.OBDAMappingAxiom;
 import it.unibz.inf.ontop.model.OBDAModel;
 import it.unibz.inf.ontop.model.impl.OBDAModelImpl;
 import it.unibz.inf.ontop.protege.core.OBDAModelManager;
-import it.unibz.inf.ontop.r2rml.R2RMLReader;
+import it.unibz.inf.ontop.protege.core.OBDAModelWrapper;
+import org.protege.editor.core.Disposable;
 import org.protege.editor.core.ui.action.ProtegeAction;
 import org.protege.editor.owl.OWLEditorKit;
 import org.protege.editor.owl.model.OWLWorkspace;
@@ -45,17 +50,17 @@ public class R2RMLImportAction extends ProtegeAction {
 	private static final long serialVersionUID = -1211395039869926309L;
 
 	private OWLEditorKit editorKit = null;
-	private OBDAModel obdaModel = null;
-    	private OWLModelManager modelManager= null;
+	private OBDAModelWrapper obdaModelController = null;
+	private OWLModelManager modelManager;
 
 	private Logger log = LoggerFactory.getLogger(R2RMLImportAction.class);
 
 	@Override
 	public void initialise() throws Exception {
 		editorKit = (OWLEditorKit) getEditorKit();
-		obdaModel = ((OBDAModelManager) editorKit.get(OBDAModelImpl.class
-				.getName())).getActiveOBDAModel();
-		modelManager = editorKit.getOWLModelManager();
+		obdaModelController = ((OBDAModelManager) editorKit.get(OBDAModelImpl.class
+				.getName())).getActiveOBDAModelWrapper();
+		modelManager = editorKit.getOWLWorkspace().getOWLModelManager();
 	}
 
 	@Override
@@ -68,11 +73,9 @@ public class R2RMLImportAction extends ProtegeAction {
 
 		final OWLWorkspace workspace = editorKit.getWorkspace();
 
-		if (obdaModel.getSources().isEmpty()) 
-		{
+		if (obdaModelController.getSources().isEmpty()) {
 			JOptionPane.showMessageDialog(workspace, "The data source is missing. Create one in ontop Mappings. ");
-		}
-		else {
+		} else {
 			String message = "The imported mappings will be appended to the existing data source. Continue?";
 			int response = JOptionPane.showConfirmDialog(workspace, message,
 					"Confirmation", JOptionPane.YES_NO_OPTION);
@@ -81,9 +84,9 @@ public class R2RMLImportAction extends ProtegeAction {
 				// Get the path of the file of the active OWL model
 				OWLOntology activeOntology = modelManager.getActiveOntology();
 				IRI documentIRI = modelManager.getOWLOntologyManager().getOntologyDocumentIRI(activeOntology);
-				File ontologyDir = new File(documentIRI.toURI().getPath());		
+				File ontologyDir = new File(documentIRI.toURI().getPath());
 				final JFileChooser fc = new JFileChooser(ontologyDir);
-		       
+
 				fc.showOpenDialog(workspace);
 				File file = null;
 				try {
@@ -93,28 +96,37 @@ public class R2RMLImportAction extends ProtegeAction {
 					e.printStackTrace();
 				}
 				if (file != null) {
-					R2RMLReader reader = null;
+					Disposable d = editorKit.get(NativeQueryLanguageComponentFactory.class.getName());
+
+					/**
+					 * Uses the predefined data source for creating the OBDAModel.
+					 */
+					OBDADataSource dataSource = obdaModelController.getSources().get(0);
+
+					OBDACoreConfiguration configuration = OBDACoreConfiguration.defaultBuilder()
+							.properties(DataSource2PropertiesConvertor.convert(dataSource))
+							.r2rmlMappingFile(file)
+							.build();
+
+					URI sourceID = dataSource.getSourceID();
+
 					try {
-						reader = new R2RMLReader(file);
+						OBDAModel parsedModel = configuration.loadProvidedMapping();
 
-
-					URI sourceID = obdaModel.getSources().get(0).getSourceID();
-
-					try {
-						for (OBDAMappingAxiom mapping : reader.readMappings()) {
+						/**
+						 * TODO: improve this inefficient method (batch processing, not one by one)
+						 */
+						for (OBDAMappingAxiom mapping : parsedModel.getMappings(sourceID)) {
 							if (mapping.getTargetQuery().toString().contains("BNODE")) {
 								JOptionPane.showMessageDialog(workspace, "The mapping " + mapping.getId() + " contains BNode. -ontoPro- does not support it yet.");
 							} else {
-								obdaModel.addMapping(sourceID, mapping, false);
-
+								obdaModelController.addMapping(sourceID, mapping, false);
 							}
 						}
 						JOptionPane.showMessageDialog(workspace, "R2RML Import completed. " );
 					} catch (DuplicateMappingException dm) {
 						JOptionPane.showMessageDialog(workspace, "Duplicate mapping id found. Please correct the Resource node name: " + dm.getLocalizedMessage());
 						throw new RuntimeException("Duplicate mapping found: " + dm.getMessage());
-					}
-
 					} catch (Exception e) {
 						JOptionPane.showMessageDialog(null, "An error occurred. For more info, see the logs.");
 						log.error("Error during R2RML import. \n");
@@ -122,8 +134,8 @@ public class R2RMLImportAction extends ProtegeAction {
 					}
 
 				}
-			}
 
+			}
 		}
 	}
 }

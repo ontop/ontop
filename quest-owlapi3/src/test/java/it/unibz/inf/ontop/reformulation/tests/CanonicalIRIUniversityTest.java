@@ -1,11 +1,11 @@
 package it.unibz.inf.ontop.reformulation.tests;
 
 
+import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.io.QueryIOManager;
 import it.unibz.inf.ontop.model.OBDAModel;
 
 import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import it.unibz.inf.ontop.querymanager.QueryController;
 import it.unibz.inf.ontop.querymanager.QueryControllerGroup;
@@ -50,21 +50,19 @@ public class CanonicalIRIUniversityTest {
         String text = new Scanner( new File("src/test/resources/canonicalIRI/university/dataset_dump.sql") ).useDelimiter("\\A").next();
         s.execute(text);
         s.close();
-        OWLOntology ontology = OWLManager.createOWLOntologyManager()
-                .loadOntologyFromOntologyDocument(new File(owlFile));
 
-        OBDAModel obdaModel = new MappingLoader().loadFromOBDAFile(obdaFile);
+        QuestConfiguration config = QuestConfiguration.defaultBuilder()
+                .ontologyFile(owlFile)
+                .nativeOntopMappingFile(obdaFile)
+                .enableExistentialReasoning(true)
+                .build();
 
-        QuestPreferences preference = new QuestPreferences() ;
-        preference.setCurrentValueOf(QuestPreferences.REWRITE, QuestConstants.TRUE);
 		/*
 		 * Create the instance of Quest OWL reasoner.
 		 */
         QuestOWLFactory factory = new QuestOWLFactory();
 
-        QuestOWLConfiguration config = QuestOWLConfiguration.builder().obdaModel(obdaModel).preferences(preference).build();
-
-        reasoner = factory.createReasoner(ontology, config);
+        reasoner = factory.createReasoner(config);
         conn = reasoner.getConnection();
 
 

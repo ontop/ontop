@@ -5,12 +5,8 @@ package it.unibz.inf.ontop.reformulation.tests;
  * Problem with OPTIONAL when the left join is having on the right multiple mappings
  */
 
-import it.unibz.inf.ontop.io.ModelIOManager;
+import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.io.QueryIOManager;
-import it.unibz.inf.ontop.model.OBDADataFactory;
-import it.unibz.inf.ontop.model.OBDAModel;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import it.unibz.inf.ontop.querymanager.QueryController;
 import it.unibz.inf.ontop.querymanager.QueryControllerGroup;
@@ -18,9 +14,6 @@ import it.unibz.inf.ontop.querymanager.QueryControllerQuery;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,11 +31,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 
 public class LeftJoinMultipleMatchingTest {
-    private OBDADataFactory fac;
-
     private final Logger log = LoggerFactory.getLogger(this.getClass());
-    private OBDAModel obdaModel;
-    private OWLOntology ontology;
 
     private final String owlFile = "src/test/resources/ljoptional/rais-ontology.owl";
 
@@ -66,17 +55,6 @@ public class LeftJoinMultipleMatchingTest {
         }
 
         s.close();
-
-
-        fac = OBDADataFactoryImpl.getInstance();
-
-        // Loading the OWL file
-        OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-        ontology = manager.loadOntologyFromOntologyDocument((new File(owlFile)));
-
-
-
-
     }
 
 
@@ -117,12 +95,15 @@ public class LeftJoinMultipleMatchingTest {
     }
 
 
-    private void runTests(QuestPreferences p) throws Exception {
+    private void runTests(String obdaFile) throws Exception {
 
         // Creating a new instance of the reasoner
         QuestOWLFactory factory = new QuestOWLFactory();
-        QuestOWLConfiguration config = QuestOWLConfiguration.builder().obdaModel(obdaModel).preferences(p).build();
-        reasoner = factory.createReasoner(ontology, config);
+        QuestConfiguration config = QuestConfiguration.defaultBuilder()
+                .ontologyFile(owlFile)
+                .nativeOntopMappingFile(obdaFile)
+                .build();
+        reasoner = factory.createReasoner(config);
 
         // Now we are ready for querying
         conn = reasoner.getConnection();
@@ -154,45 +135,17 @@ public class LeftJoinMultipleMatchingTest {
                 log.debug("Elapsed time: {} ms", time);
             }
         }
-
-
     }
-
-
-
 
 
     @Test
     public void testRaisQueries() throws Exception {
-
-        String obdaFile = "src/test/resources/ljoptional/rais-ontology-small.obda";
-
-        // Loading the OBDA data
-        obdaModel = fac.getOBDAModel();
-
-        ModelIOManager ioManager = new ModelIOManager(obdaModel);
-        ioManager.load(obdaFile);
-
-
-        QuestPreferences p = new QuestPreferences();
-
-        runTests(p);
+        runTests("src/test/resources/ljoptional/rais-ontology-small.obda");
     }
 
 
     @Test
     public void testOptionalQuery() throws Exception {
-        // Loading the OBDA data
-        obdaModel = fac.getOBDAModel();
-
-        ModelIOManager ioManager = new ModelIOManager(obdaModel);
-
-        ioManager.load("src/test/resources/ljoptional/rais-ontology-small.obda");
-
-
-        QuestPreferences p = new QuestPreferences();
-
-
         String optional = "PREFIX owl: <http://www.w3.org/2002/07/owl#>\n" +
                 "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
                 "PREFIX rais: <http://www.ontorais.de/>\n" +
@@ -204,16 +157,19 @@ public class LeftJoinMultipleMatchingTest {
                 " OPTIONAL{ ?ao rais:archivalDate ?date.}\n" +
                 "}\n";
 
-        assertEquals(2, runTestQuery(p, optional));
+        assertEquals(2, runTestQuery("src/test/resources/ljoptional/rais-ontology-small.obda", optional));
     }
 
 
-    private int runTestQuery(QuestPreferences p, String query) throws Exception {
+    private int runTestQuery(String obdaFile, String query) throws Exception {
 
         // Creating a new instance of the reasoner
     	QuestOWLFactory factory = new QuestOWLFactory();
-        QuestOWLConfiguration config = QuestOWLConfiguration.builder().obdaModel(obdaModel).preferences(p).build();
-        reasoner = factory.createReasoner(ontology, config);
+        QuestConfiguration config = QuestConfiguration.defaultBuilder()
+                .ontologyFile(owlFile)
+                .nativeOntopMappingFile(obdaFile)
+                .build();
+        reasoner = factory.createReasoner(config);
 
         // Now we are ready for querying
         conn = reasoner.getConnection();
@@ -239,11 +195,6 @@ public class LeftJoinMultipleMatchingTest {
         log.debug("Elapsed time: {} ms", time);
 
         return count;
-
-
-
     }
-
-
 }
 

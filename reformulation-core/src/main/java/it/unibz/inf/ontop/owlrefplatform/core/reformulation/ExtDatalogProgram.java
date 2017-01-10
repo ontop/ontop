@@ -32,11 +32,11 @@
 //import Predicate;
 //import Term;
 //import OBDADataFactoryImpl;
-//import org.semanticweb.ontop.ontology.BasicClassDescription;
+//import it.unibz.inf.ontop.ontology.BasicClassDescription;
 //import OClass;
 //import Ontology;
-//import org.semanticweb.ontop.ontology.Property;
-//import org.semanticweb.ontop.ontology.PropertySomeRestriction;
+//import it.unibz.inf.ontop.ontology.Property;
+//import it.unibz.inf.ontop.ontology.PropertySomeRestriction;
 //import CQCUtilities;
 //import org.slf4j.Logger;
 //import org.slf4j.LoggerFactory;

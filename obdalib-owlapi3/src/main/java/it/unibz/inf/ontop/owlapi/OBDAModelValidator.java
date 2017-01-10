@@ -20,20 +20,20 @@ package it.unibz.inf.ontop.owlapi;
  * #L%
  */
 
+import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.io.TargetQueryVocabularyValidator;
 import it.unibz.inf.ontop.model.Function;
 import it.unibz.inf.ontop.model.OBDAMappingAxiom;
 import it.unibz.inf.ontop.model.OBDAModel;
 
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.Hashtable;
 import java.util.List;
+import java.util.Map;
 
 /***
- * Validates an OBDAModel (mappings) against the vocabulary of an ontology 
+ * Validates an OBDAModel (mappings) against the vocabulary of an ontology
  * and adds type information to the mapping predicates
- * 
+ *
  * Used by the Protege plugin in
  * OBDAModelManager.OBDAPluginOWLModelManagerListener.handleChange
  * 
@@ -48,10 +48,10 @@ import java.util.List;
 public class OBDAModelValidator {
 
 	public static void validate(OBDAModel obdaModel) throws Exception {
-		
+
 		 TargetQueryVocabularyValidator validator = new TargetQueryValidator(obdaModel.getOntologyVocabulary());
-		
-		 Hashtable<URI, ArrayList<OBDAMappingAxiom>> mappingTable = obdaModel.getMappings();
+
+		Map<URI, ImmutableList<OBDAMappingAxiom>> mappingTable = obdaModel.getMappings();
 		 for (URI datasourceUri : mappingTable.keySet()) {
 			 for (OBDAMappingAxiom mapping : mappingTable.get(datasourceUri)) {
 				 List<Function> tq = mapping.getTargetQuery();

@@ -9,18 +9,17 @@ import com.github.rvesse.airline.help.cli.bash.CompletionBehaviour;
 import com.google.common.base.Strings;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
+import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.exception.InvalidMappingException;
-import it.unibz.inf.ontop.io.ModelIOManager;
+import it.unibz.inf.ontop.injection.QuestConfiguration;
+import it.unibz.inf.ontop.io.InvalidDataSourceException;
 import it.unibz.inf.ontop.model.OBDAModel;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.r2rml.R2RMLWriter;
 import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.RDFFormat;
-import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
 
 import java.io.*;
 import java.net.URI;
@@ -55,41 +54,43 @@ public class OntopOBDAToR2RML implements OntopCommand {
         }
 
         File out = new File(outputMappingFile);
-        URI obdaURI = new File(inputMappingFile).toURI();
-        // create model
-        OBDAModel model = OBDADataFactoryImpl.getInstance().getOBDAModel();
 
+        QuestConfiguration.Builder configBuilder = QuestConfiguration.defaultBuilder()
+                .nativeOntopMappingFile(inputMappingFile);
 
-        // obda mapping
-        ModelIOManager modelIO = new ModelIOManager(model);
+        if (owlFile != null)
+            configBuilder.ontologyFile(owlFile);
 
+        QuestConfiguration config = configBuilder.build();
+
+        OBDAModel model;
         /**
          * load the mapping in native Ontop syntax
          */
         try {
-            modelIO.load(new File(obdaURI));
-        } catch (IOException | InvalidMappingException e) {
+            model = config.loadProvidedMapping();
+        } catch (IOException | InvalidMappingException | DuplicateMappingException | InvalidDataSourceException e) {
             e.printStackTrace();
+            System.exit(1);
+            return;
         }
 
-        URI srcURI = model.getSources().get(0).getSourceID();
-
-        OWLOntology ontology = null;
-        if (owlFile != null) {
-
-            // Loading the OWL file
-            OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-            try {
-                ontology = manager.loadOntologyFromOntologyDocument((new File(owlFile)));
-            } catch (OWLOntologyCreationException e) {
-                e.printStackTrace();
-            }
+        OWLOntology ontology;
+        try {
+            ontology = config.loadInputOntology()
+                    .orElse(null);
+        } catch (OWLOntologyCreationException e) {
+            e.printStackTrace();
+            System.exit(1);
+            return;
         }
+
+        URI srcURI = model.getSources().iterator().next().getSourceID();
 
         /**
          * render the mapping in the (ugly) Turtle syntax and save it to a string
          */
-        R2RMLWriter writer = new R2RMLWriter(model, srcURI, ontology);
+        R2RMLWriter writer = new R2RMLWriter(model, srcURI, ontology, config.getInjector());
 
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 

@@ -22,7 +22,6 @@ package it.unibz.inf.ontop.owlrefplatform.core.unfolding;
 
 import com.google.common.collect.*;
 import it.unibz.inf.ontop.model.*;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
 import it.unibz.inf.ontop.model.impl.TermUtils;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
@@ -39,6 +38,7 @@ import java.util.AbstractMap.SimpleEntry;
 import java.util.*;
 
 import static it.unibz.inf.ontop.model.impl.DatalogTools.isLeftJoinOrJoinAtom;
+import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
 
 /**
  * Generates partial evaluations of rules (the queries), with respect to a set
@@ -61,9 +61,8 @@ public class DatalogUnfolder {
 
     private static final long serialVersionUID = 6088558456135748487L;
     private static final Logger log = LoggerFactory.getLogger(DatalogUnfolder.class);
-    private static final OBDADataFactory termFactory = OBDADataFactoryImpl.getInstance();
 
-    private final ImmutableMultimap<Predicate, List<Integer>> primaryKeys;
+    private final ImmutableMultimap<Predicate, ImmutableList<Integer>> primaryKeys;
 
     private final Map<Predicate, List<CQIE>> mappings;
     private final Multimap<Predicate,Integer> multiTypedFunctionSymbolIndex;
@@ -80,13 +79,13 @@ public class DatalogUnfolder {
     private final List<Predicate> extensionalPredicates;
 
     public DatalogUnfolder(List<CQIE> rules) {
-        this(rules, ArrayListMultimap.<Predicate, List<Integer>>create());
+        this(rules, ArrayListMultimap.<Predicate, ImmutableList<Integer>>create());
     }
 
-    public DatalogUnfolder(DatalogProgram unfoldingProgram, Multimap<Predicate, List<Integer>> primaryKeys) {
+    public DatalogUnfolder(DatalogProgram unfoldingProgram, Multimap<? extends Predicate, ImmutableList<Integer>> primaryKeys) {
         this(unfoldingProgram.getRules(), primaryKeys);
     }
-    public DatalogUnfolder(List<CQIE> unfoldingProgram, Multimap<Predicate, List<Integer>> primaryKeys) {
+    public DatalogUnfolder(List<CQIE> unfoldingProgram, Multimap<? extends Predicate, ImmutableList<Integer>> primaryKeys) {
         /**
          * Creating a local index for the rules according to their predicate
          */
@@ -248,7 +247,7 @@ public class DatalogUnfolder {
         for (CQIE query : workingSet)
             EQNormalizer.enforceEqualities(query);
 
-        return termFactory.getDatalogProgram(inputquery.getQueryModifiers().clone(), workingSet);
+        return DATA_FACTORY.getDatalogProgram(inputquery.getQueryModifiers().clone(), workingSet);
     }
 
 
@@ -729,7 +728,7 @@ public class DatalogUnfolder {
 
         List<Predicate> touchedPredicates = new LinkedList<Predicate>();
         boolean noRewriting = false ;
-        Predicate ans1 = termFactory.getClassPredicate("ans1");
+        Predicate ans1 = DATA_FACTORY.getClassPredicate("ans1");
 
         while (!predicatesMightGotEmpty.isEmpty()){
             predicatesMightGotEmpty=updateRulesWithEmptyAnsPredicates(workingList, predicatesMightGotEmpty, touchedPredicates,
@@ -1447,7 +1446,7 @@ public class DatalogUnfolder {
 //		LinkedList<CQIE> result = new LinkedList<CQIE>();
 //		result.addAll(inputquery.getRules());
 //		result.addAll(relevantrules);
-//		return termFactory.getDatalogProgram(result);
+//		return DATA_FACTORY.getDatalogProgram(result);
 //	}
 
 
@@ -1506,7 +1505,7 @@ public class DatalogUnfolder {
         Term newTerm = null;
         if (term instanceof Variable) {
             Variable variable = (Variable) term;
-            newTerm = termFactory.getVariable(variable.getName() + "_" + suffix);
+            newTerm = DATA_FACTORY.getVariable(variable.getName() + "_" + suffix);
         } else if (term instanceof Function) {
             Function functionalTerm = (Function) term;
             List<Term> innerTerms = functionalTerm.getTerms();
@@ -1516,7 +1515,7 @@ public class DatalogUnfolder {
                 newInnerTerms.add(getFreshTerm(innerTerm, suffix));
             }
             Predicate newFunctionSymbol = functionalTerm.getFunctionSymbol();
-            Function newFunctionalTerm = termFactory.getFunction(newFunctionSymbol, newInnerTerms);
+            Function newFunctionalTerm = DATA_FACTORY.getFunction(newFunctionSymbol, newInnerTerms);
             newTerm = newFunctionalTerm;
         } else if (term instanceof Constant) {
             newTerm = term.clone();
@@ -1714,9 +1713,9 @@ public class DatalogUnfolder {
          */
         for (int i=(lastIndex - 1); i > 0; i--) {
             //TODO: find a more elegant solution (in order to have a functional term)
-            Function defaultBooleanExpression = termFactory.getFunctionAND(OBDAVocabulary.TRUE, OBDAVocabulary.TRUE);
+            Function defaultBooleanExpression = DATA_FACTORY.getFunctionAND(OBDAVocabulary.TRUE, OBDAVocabulary.TRUE);
 
-            foldedJoinAtom = termFactory.getSPARQLJoin(dataAtoms.get(i), foldedJoinAtom, defaultBooleanExpression);
+            foldedJoinAtom = DATA_FACTORY.getSPARQLJoin(dataAtoms.get(i), foldedJoinAtom, defaultBooleanExpression);
         }
         /**
          * Basic "naive" approach: we introduce the filter terms as a boolean expression
@@ -1724,13 +1723,13 @@ public class DatalogUnfolder {
          *
          */
         Function booleanExpression = buildBooleanExpression(filterConditionAtoms);
-        foldedJoinAtom = termFactory.getSPARQLJoin(dataAtoms.get(0), foldedJoinAtom, booleanExpression);
+        foldedJoinAtom = DATA_FACTORY.getSPARQLJoin(dataAtoms.get(0), foldedJoinAtom, booleanExpression);
 
         List<Function> newBodyMapping = new ArrayList<>();
         newBodyMapping.add(foldedJoinAtom);
         //newBodyMapping.addAll(otherAtomsList);
 
-        CQIE newRule = termFactory.getCQIE(initialRule.getHead(), newBodyMapping);
+        CQIE newRule = DATA_FACTORY.getCQIE(initialRule.getHead(), newBodyMapping);
 
         return newRule;
 
@@ -1742,7 +1741,7 @@ public class DatalogUnfolder {
          */
         if (booleanAtoms.size() == 0) {
             //TODO: find a more elegant solution
-            return termFactory.getFunctionAND(OBDAVocabulary.TRUE, OBDAVocabulary.TRUE);
+            return DATA_FACTORY.getFunctionAND(OBDAVocabulary.TRUE, OBDAVocabulary.TRUE);
         }
 
         int lastIndex = booleanAtoms.size() - 1;
@@ -1752,7 +1751,7 @@ public class DatalogUnfolder {
          * Recursive
          */
         for (int i=(lastIndex - 1); i >= 0 ; i--) {
-            foldedBooleanExpression = termFactory.getFunctionAND(booleanAtoms.get(i), foldedBooleanExpression);
+            foldedBooleanExpression = DATA_FACTORY.getFunctionAND(booleanAtoms.get(i), foldedBooleanExpression);
         }
         return foldedBooleanExpression;
     }
@@ -2168,7 +2167,7 @@ public class DatalogUnfolder {
             if (!newatom.isDataFunction())
                 continue;
 
-            Collection<List<Integer>> pKeys = primaryKeys.get(newatom.getFunctionSymbol());
+            Collection<ImmutableList<Integer>> pKeys = primaryKeys.get(newatom.getFunctionSymbol());
 
             for(List<Integer> pKey : pKeys){
 
@@ -2346,7 +2345,7 @@ public class DatalogUnfolder {
 
 
 
-        Predicate triple = termFactory.getPredicate("triple", 3);
+        Predicate triple = DATA_FACTORY.getPredicate("triple", 3);
 
         Set<Predicate> keySet = ruleIndex.keySet();
         //Not interested in triple predicates

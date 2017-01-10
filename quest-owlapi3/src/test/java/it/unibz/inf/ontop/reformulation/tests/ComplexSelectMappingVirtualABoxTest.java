@@ -20,33 +20,28 @@ package it.unibz.inf.ontop.reformulation.tests;
  * #L%
  */
 
-import it.unibz.inf.ontop.io.ModelIOManager;
-import it.unibz.inf.ontop.model.OBDADataFactory;
-import it.unibz.inf.ontop.model.OBDAModel;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
+import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
+import it.unibz.inf.ontop.injection.QuestCoreSettings;
+import it.unibz.inf.ontop.owlrefplatform.core.SQLExecutableQuery;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.io.ToStringRenderer;
 import org.semanticweb.owlapi.model.OWLIndividual;
 import org.semanticweb.owlapi.model.OWLLiteral;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -58,15 +53,11 @@ import static org.junit.Assert.assertTrue;
  */
 
 public class ComplexSelectMappingVirtualABoxTest  {
-
-	private OBDADataFactory fac;
 	private Connection conn;
 
 	String query = null;
 	
 	Logger log = LoggerFactory.getLogger(this.getClass());
-	private OBDAModel obdaModel;
-	private OWLOntology ontology;
 
 	final String owlfile = "src/test/resources/test/complexmapping.owl";
 	final String obdafile = "src/test/resources/test/complexmapping.obda";
@@ -83,8 +74,6 @@ public class ComplexSelectMappingVirtualABoxTest  {
 		String username = "sa";
 		String password = "";
 
-		fac = OBDADataFactoryImpl.getInstance();
-
 		conn = DriverManager.getConnection(url, username, password);
 		Statement st = conn.createStatement();
 
@@ -99,17 +88,6 @@ public class ComplexSelectMappingVirtualABoxTest  {
 
 		st.executeUpdate(bf.toString());
 		conn.commit();
-
-		// Loading the OWL file
-		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-		ontology = manager.loadOntologyFromOntologyDocument((new File(owlfile)));
-
-		// Loading the OBDA data
-		obdaModel = fac.getOBDAModel();
-		
-		ModelIOManager ioManager = new ModelIOManager(obdaModel);
-		ioManager.load(obdafile);
-		
 	}
 
 	@After
@@ -139,11 +117,15 @@ public class ComplexSelectMappingVirtualABoxTest  {
 	}
 
 //   test for self join count the number of occurrences
-	private String runTests(QuestPreferences p) throws Exception {
+	private String runTests(Properties p) throws Exception {
 
         QuestOWLFactory factory = new QuestOWLFactory();
-        QuestOWLConfiguration config = QuestOWLConfiguration.builder().obdaModel(obdaModel).preferences(p).build();
-        QuestOWL reasoner = factory.createReasoner(ontology, config);
+        QuestConfiguration config = QuestConfiguration.defaultBuilder()
+				.nativeOntopMappingFile(obdafile)
+				.ontologyFile(owlfile)
+				.properties(p)
+				.build();
+        QuestOWL reasoner = factory.createReasoner(config);
 
 
 		// Now we are ready for querying
@@ -152,8 +134,8 @@ public class ComplexSelectMappingVirtualABoxTest  {
 
         OWLLiteral val;
 		try {
-			String sql = st.getUnfolding(this.query);
-			Pattern pat = Pattern.compile("TABLE1");
+			String sql = ((SQLExecutableQuery)st.getExecutableQuery(this.query)).getSQL();
+			Pattern pat = Pattern.compile("TABLE1 ");
 		    Matcher m = pat.matcher(sql);
 		    int num_joins = -1;
 		    while (m.find()){
@@ -188,9 +170,9 @@ public class ComplexSelectMappingVirtualABoxTest  {
     @Test
 	public void testReplace() throws Exception {
 
-		QuestPreferences p = new QuestPreferences();
-		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-        p.setCurrentValueOf(QuestPreferences.SQL_GENERATE_REPLACE, QuestConstants.FALSE);
+		Properties p = new Properties();
+		p.put(QuestCoreSettings.ABOX_MODE, QuestConstants.VIRTUAL);
+        p.put(QuestCoreSettings.SQL_GENERATE_REPLACE, QuestConstants.FALSE);
 
 		this.query = "PREFIX : <http://it.unibz.inf/obda/test/simple#> SELECT * WHERE { ?x :U ?z. }";
 
@@ -202,9 +184,9 @@ public class ComplexSelectMappingVirtualABoxTest  {
     @Test
     public void testReplaceValue() throws Exception {
 
-        QuestPreferences p = new QuestPreferences();
-        p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-        this.query = "PREFIX : <http://it.unibz.inf/obda/test/simple#> SELECT * WHERE { ?x :U4 ?z . }";
+        Properties p = new Properties();
+        p.put(QuestCoreSettings.ABOX_MODE, QuestConstants.VIRTUAL);
+		this.query = "PREFIX : <http://it.unibz.inf/obda/test/simple#> SELECT * WHERE { ?x :U4 ?z . }";
 
         String val = runTests(p);
         assertEquals("\"ualue1\"", val);
@@ -213,8 +195,8 @@ public class ComplexSelectMappingVirtualABoxTest  {
     @Test
 	public void testConcat() throws Exception {
 
-		QuestPreferences p = new QuestPreferences();
-		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+		Properties p = new Properties();
+		p.put(QuestCoreSettings.ABOX_MODE, QuestConstants.VIRTUAL);
 		this.query = "PREFIX : <http://it.unibz.inf/obda/test/simple#> SELECT * WHERE { ?x :U2 ?z. }";
 
         String val = runTests(p);
@@ -224,8 +206,8 @@ public class ComplexSelectMappingVirtualABoxTest  {
     @Test
 	public void testDoubleConcat() throws Exception {
 
-		QuestPreferences p = new QuestPreferences();
-		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+		Properties p = new Properties();
+		p.put(QuestCoreSettings.ABOX_MODE, QuestConstants.VIRTUAL);
 
 		this.query = "PREFIX : <http://it.unibz.inf/obda/test/simple#> SELECT * WHERE { ?x :U2 ?z; :U3 ?w. }";
 
@@ -236,8 +218,8 @@ public class ComplexSelectMappingVirtualABoxTest  {
     @Test
     public void testConcat2() throws Exception {
 
-        QuestPreferences p = new QuestPreferences();
-        p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+		Properties p = new Properties();
+		p.put(QuestCoreSettings.ABOX_MODE, QuestConstants.VIRTUAL);
 
         this.query = "PREFIX : <http://it.unibz.inf/obda/test/simple#> SELECT * WHERE { ?x :U5 ?z. }";
 
@@ -248,8 +230,8 @@ public class ComplexSelectMappingVirtualABoxTest  {
     @Test
     public void testConcat3() throws Exception {
 
-        QuestPreferences p = new QuestPreferences();
-        p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+		Properties p = new Properties();
+		p.put(QuestCoreSettings.ABOX_MODE, QuestConstants.VIRTUAL);
 
         this.query = "PREFIX : <http://it.unibz.inf/obda/test/simple#> SELECT * WHERE { ?x :U6 ?z. }";
 
@@ -260,8 +242,8 @@ public class ComplexSelectMappingVirtualABoxTest  {
     @Test
     public void testConcat4() throws Exception {
 
-        QuestPreferences p = new QuestPreferences();
-        p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+		Properties p = new Properties();
+		p.put(QuestCoreSettings.ABOX_MODE, QuestConstants.VIRTUAL);
 
         this.query = "PREFIX : <http://it.unibz.inf/obda/test/simple#> SELECT * WHERE { ?x :U7 ?z. }";
 
@@ -272,8 +254,8 @@ public class ComplexSelectMappingVirtualABoxTest  {
     @Test
     public void testConcat5() throws Exception {
 
-        QuestPreferences p = new QuestPreferences();
-        p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+		Properties p = new Properties();
+		p.put(QuestCoreSettings.ABOX_MODE, QuestConstants.VIRTUAL);
 
         this.query = "PREFIX : <http://it.unibz.inf/obda/test/simple#> SELECT * WHERE { ?x :U8 ?z. }";
 
@@ -284,8 +266,8 @@ public class ComplexSelectMappingVirtualABoxTest  {
     @Test
     public void testConcatAndReplaceUri() throws Exception {
 
-        QuestPreferences p = new QuestPreferences();
-        p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+        Properties p = new Properties();
+        p.put(QuestCoreSettings.ABOX_MODE, QuestConstants.VIRTUAL);
 
         this.query = "PREFIX : <http://it.unibz.inf/obda/test/simple#> SELECT * WHERE { ?x :U9 ?z. }";
 

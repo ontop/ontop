@@ -20,6 +20,7 @@ package it.unibz.inf.ontop.sesame;
  * #L%
  */
 
+import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
 import it.unibz.inf.ontop.ontology.ImmutableOntologyVocabulary;
 import it.unibz.inf.ontop.ontology.Ontology;
 import it.unibz.inf.ontop.owlapi.OWLAPIABoxIterator;
@@ -59,14 +60,15 @@ public class SemanticIndexManager {
 
 	private final Logger log = LoggerFactory.getLogger(this.getClass());
 
-	public SemanticIndexManager(OWLOntology tbox, Connection connection) throws Exception {
+	public SemanticIndexManager(OWLOntology tbox, Connection connection,
+								NativeQueryLanguageComponentFactory nativeQLFactory) throws Exception {
 		conn = connection;
 		Ontology ontologyClosure = QuestOWL.loadOntologies(tbox);
 		voc = ontologyClosure.getVocabulary();
 
 		reasoner = TBoxReasonerImpl.create(ontologyClosure, true);
 			
-		dataRepository = new RDBMSSIRepositoryManager(reasoner, ontologyClosure.getVocabulary());
+		dataRepository = new RDBMSSIRepositoryManager(reasoner, ontologyClosure.getVocabulary(), nativeQLFactory);
 		dataRepository.generateMetadata(); // generate just in case
 
 		log.debug("TBox has been processed. Ready to ");
@@ -89,7 +91,7 @@ public class SemanticIndexManager {
 				log.debug(e.getMessage(), e);
 			}
 		}
-		
+
 		dataRepository.createDBSchemaAndInsertMetadata(conn);
 
 		log.debug("Semantic Index repository has been setup.");
@@ -123,7 +125,7 @@ public class SemanticIndexManager {
 		final SesameRDFIterator aBoxIter = new SesameRDFIterator();
 		
 		parser.setRDFHandler(aBoxIter);
-		
+
 
 		Thread t = new Thread() {
 			@Override
