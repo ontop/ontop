@@ -327,21 +327,21 @@ public class ExpressionEvaluator {
 			if (function.isDataTypeFunction()) {
 				if (DATATYPE_FACTORY.isLiteral(predicate)) { // R: was datatype.equals(OBDAVocabulary.RDFS_LITERAL_URI)
 					return DATA_FACTORY.getTypedTerm(
-							DATA_FACTORY.getVariable(parameter.toString()), COL_TYPE.LITERAL);
+							DATA_FACTORY.getVariable(parameter.toString()), COL_TYPE.STRING);
 				} 
 				else if (DATATYPE_FACTORY.isString(predicate)) { // R: was datatype.equals(OBDAVocabulary.XSD_STRING_URI)) {
 					return DATA_FACTORY.getTypedTerm(
-							DATA_FACTORY.getVariable(parameter.toString()), COL_TYPE.LITERAL);
+							DATA_FACTORY.getVariable(parameter.toString()), COL_TYPE.STRING);
 				} 
 				else {
 					return DATA_FACTORY.getTypedTerm(
 							DATA_FACTORY.getFunctionCast(DATA_FACTORY.getVariable(parameter.toString()),
-									DATA_FACTORY.getConstantLiteral(DATATYPE_FACTORY.getDatatypeURI(COL_TYPE.LITERAL).stringValue())),
-										COL_TYPE.LITERAL);
+									DATA_FACTORY.getConstantLiteral(DATATYPE_FACTORY.getDatatypeURI(COL_TYPE.STRING).stringValue())),
+										COL_TYPE.STRING);
 				}
 			} 
 			else if (predicate instanceof URITemplatePredicate) {
-				return DATA_FACTORY.getTypedTerm(function.clone(), COL_TYPE.LITERAL);
+				return DATA_FACTORY.getTypedTerm(function.clone(), COL_TYPE.STRING);
 			} 
 			else if (predicate instanceof BNodePredicate) {
 				return OBDAVocabulary.NULL;
