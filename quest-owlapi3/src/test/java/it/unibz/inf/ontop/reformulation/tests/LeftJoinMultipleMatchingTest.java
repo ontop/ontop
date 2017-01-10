@@ -207,6 +207,7 @@ public class LeftJoinMultipleMatchingTest {
         assertEquals(2, runTestQuery(p, optional));
     }
 
+
     private int runTestQuery(QuestPreferences p, String query) throws Exception {
 
         // Creating a new instance of the reasoner
@@ -233,7 +234,7 @@ public class LeftJoinMultipleMatchingTest {
         }
         log.debug("Total result: {}", count);
 
-        assertFalse(count == 0);
+        assertFalse(count != 2);
 
         log.debug("Elapsed time: {} ms", time);
 
