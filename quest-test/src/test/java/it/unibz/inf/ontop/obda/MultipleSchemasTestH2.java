@@ -1,9 +1,7 @@
 package it.unibz.inf.ontop.obda;
 
 import it.unibz.inf.ontop.injection.QuestConfiguration;
-import it.unibz.inf.ontop.model.OBDADataFactory;
 
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import it.unibz.inf.ontop.utils.SQLScriptRunner;
 import org.junit.*;
@@ -21,7 +19,6 @@ import java.sql.SQLException;
 
 public class MultipleSchemasTestH2 {
 
-    private static OBDADataFactory fac;
     private static QuestOWLConnection conn;
 
     static Logger log = LoggerFactory.getLogger(MultipleSchemasTestH2.class);
@@ -51,7 +48,6 @@ public class MultipleSchemasTestH2 {
         String password = "";
 
         System.out.println("Test");
-        fac = OBDADataFactoryImpl.getInstance();
 
         try {
 

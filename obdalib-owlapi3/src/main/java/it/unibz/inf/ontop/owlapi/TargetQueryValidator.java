@@ -22,10 +22,8 @@ package it.unibz.inf.ontop.owlapi;
 
 import it.unibz.inf.ontop.io.TargetQueryVocabularyValidator;
 import it.unibz.inf.ontop.model.Function;
-import it.unibz.inf.ontop.model.OBDADataFactory;
 import it.unibz.inf.ontop.model.Predicate;
 import it.unibz.inf.ontop.model.Predicate.COL_TYPE;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
 import it.unibz.inf.ontop.ontology.ImmutableOntologyVocabulary;
 import org.slf4j.Logger;
@@ -34,15 +32,14 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.List;
 
+import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
+
 // TODO: move to a more appropriate package
 
 public class TargetQueryValidator implements TargetQueryVocabularyValidator {
 	
 	// the ontology vocabulary of the OBDA model
 	private final ImmutableOntologyVocabulary voc;
-
-	/** Data factory **/
-	private final OBDADataFactory dataFactory = OBDADataFactoryImpl.getInstance();
 
 	/** List of invalid predicates */
 	private List<String> invalidPredicates = new ArrayList<>();
@@ -79,28 +76,28 @@ public class TargetQueryValidator implements TargetQueryVocabularyValidator {
 			if (isPredicateValid) {
 				Predicate predicate;
 				if (isClass) {
-					predicate = dataFactory.getClassPredicate(p.getName());
+					predicate = DATA_FACTORY.getClassPredicate(p.getName());
 					debugMsg += " is a Class.";
 				} else if (isObjectProp) {
-					predicate = dataFactory.getObjectPropertyPredicate(p.getName());
+					predicate = DATA_FACTORY.getObjectPropertyPredicate(p.getName());
 					debugMsg += " is an Object property.";
 				} else if (isDataProp) {
-					predicate = dataFactory.getDataPropertyPredicate(p.getName(), COL_TYPE.LITERAL);
+					predicate = DATA_FACTORY.getDataPropertyPredicate(p.getName(), COL_TYPE.LITERAL);
 					debugMsg += " is a Data property.";
 				}
                 else if (isAnnotProp){
-                    predicate =  dataFactory.getAnnotationPropertyPredicate(p.getName());
+                    predicate =  DATA_FACTORY.getAnnotationPropertyPredicate(p.getName());
                     debugMsg += " is an Annotation property.";
                 }
 				else if (isSameAs){
-					predicate =  dataFactory.getOWLSameAsPredicate();
+					predicate =  DATA_FACTORY.getOWLSameAsPredicate();
 					debugMsg += " is the owl:sameAs property.";
 				}
 				else if (isCanonicalIRI){
-                    predicate =  dataFactory.getOBDACanonicalIRI();
+                    predicate =  DATA_FACTORY.getOBDACanonicalIRI();
                     debugMsg += " is the obda:isCanonicalIRIOf property.";
                 } else {
-                    predicate = dataFactory.getPredicate(p.getName(), atom.getArity());
+                    predicate = DATA_FACTORY.getPredicate(p.getName(), atom.getArity());
                 }
 				atom.setPredicate(predicate); // TODO Fix the API!
 			} else {

@@ -27,14 +27,11 @@ import it.unibz.inf.ontop.model.*;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.model.Predicate.COL_TYPE;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
-import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
-import it.unibz.inf.ontop.model.impl.RDBMSourceParameterConstants;
-import it.unibz.inf.ontop.model.impl.TermUtils;
+import it.unibz.inf.ontop.model.impl.*;
 import it.unibz.inf.ontop.owlrefplatform.core.ExecutableQuery;
 import it.unibz.inf.ontop.owlrefplatform.core.optimization.GroundTermRemovalFromDataNodeReshaper;
 import it.unibz.inf.ontop.owlrefplatform.core.optimization.PullOutVariableOptimizer;
-import it.unibz.inf.ontop.owlrefplatform.injection.QuestCorePreferences;
+import it.unibz.inf.ontop.injection.QuestCoreSettings;
 import it.unibz.inf.ontop.owlrefplatform.core.SQLExecutableQuery;
 import it.unibz.inf.ontop.owlrefplatform.core.abox.SemanticIndexURIMap;
 import it.unibz.inf.ontop.owlrefplatform.core.abox.XsdDatatypeConverter;
@@ -62,6 +59,8 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static it.unibz.inf.ontop.model.Predicate.COL_TYPE.*;
+import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATATYPE_FACTORY;
+import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
 
 /**
  * This class generates an SQLExecutableQuery from the datalog program coming from the
@@ -116,9 +115,7 @@ public class SQLGenerator implements NativeQueryGenerator {
 
 	private Map<Predicate, String> sqlAnsViewMap;
 
-	private static final OBDADataFactory obdaDataFactory = OBDADataFactoryImpl.getInstance();
-
-	private final DatatypeFactory dtfac = OBDADataFactoryImpl.getInstance().getDatatypeFactory();
+	private static final MappingFactory MAPPING_FACTORY = MappingFactoryImpl.getInstance();
 
 	private final ImmutableMap<ExpressionOperation, String> operations;
 
@@ -126,7 +123,7 @@ public class SQLGenerator implements NativeQueryGenerator {
 			.getLogger(SQLGenerator.class);
 
     @AssistedInject
-	private SQLGenerator(@Assisted DBMetadata metadata, @Assisted OBDADataSource dataSource, QuestCorePreferences preferences) {
+	private SQLGenerator(@Assisted DBMetadata metadata, @Assisted OBDADataSource dataSource, QuestCoreSettings preferences) {
         // TODO: make these attributes immutable.
         //TODO: avoid the null value
         this(metadata, dataSource, null, preferences);
@@ -134,7 +131,7 @@ public class SQLGenerator implements NativeQueryGenerator {
 
 	@AssistedInject
 	private SQLGenerator(@Assisted DBMetadata metadata, @Assisted OBDADataSource dataSource,
-						 @Assisted SemanticIndexURIMap uriRefIds, QuestCorePreferences preferences) {
+						 @Assisted SemanticIndexURIMap uriRefIds, QuestCoreSettings preferences) {
 		String driverURI = dataSource.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER);
 
 		if (!(metadata instanceof RDBMetadata)) {
@@ -356,7 +353,7 @@ public class SQLGenerator implements NativeQueryGenerator {
 		}
 
 		OBDAQueryModifiers queryModifiers = datalogProgram.getQueryModifiers();
-		datalogProgram = obdaDataFactory.getDatalogProgram(queryModifiers, normalizedRules);
+		datalogProgram = DATA_FACTORY.getDatalogProgram(queryModifiers, normalizedRules);
 		log.debug("Normalized Datalog query: \n" + datalogProgram.toString());
 
 		return datalogProgram;
@@ -1229,8 +1226,8 @@ public class SQLGenerator implements NativeQueryGenerator {
 			Function f = (Function) term;
 			if (f.isDataTypeFunction()) {
 				Predicate p = f.getFunctionSymbol();
-				COL_TYPE type = dtfac.getDatatype(p.toString());
-				return OBDADataFactoryImpl.getInstance().getJdbcTypeMapper().getSQLType(type);
+				COL_TYPE type = DATATYPE_FACTORY.getDatatype(p.toString());
+				return MAPPING_FACTORY.getJdbcTypeMapper().getSQLType(type);
 			}
 			// Return varchar for unknown
 			return Types.VARCHAR;
@@ -1428,7 +1425,7 @@ public class SQLGenerator implements NativeQueryGenerator {
 
 			if (castDataType != null){
 
-				mainColumn = sqladapter.sqlCast(mainColumn, obdaDataFactory.getJdbcTypeMapper().getSQLType(castDataType));
+				mainColumn = sqladapter.sqlCast(mainColumn, MAPPING_FACTORY.getJdbcTypeMapper().getSQLType(castDataType));
 			}
 
 			//int sqlType = getSQLTypeForTerm(ht,index );
@@ -1621,7 +1618,7 @@ public class SQLGenerator implements NativeQueryGenerator {
 			 */
 			if (ov.getTerms().size() > 1) {
 				int size = ov.getTerms().size();
-				if (dtfac.isLiteral(pred)) {
+				if (DATATYPE_FACTORY.isLiteral(pred)) {
 					size--;
 				}
 				for (int termIndex = 1; termIndex < size; termIndex++) {

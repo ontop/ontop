@@ -21,7 +21,6 @@ package it.unibz.inf.ontop.protege.gui.preferences;
  */
 
 
-import it.unibz.inf.ontop.owlrefplatform.injection.QuestCorePreferences;
 import it.unibz.inf.ontop.protege.core.DisposableProperties;
 import org.protege.editor.owl.ui.preferences.OWLPreferencesPanel;
 import it.unibz.inf.ontop.protege.panels.QuestConfigPanel;

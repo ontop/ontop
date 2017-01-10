@@ -20,7 +20,7 @@ package it.unibz.inf.ontop.obda;
  * #L%
  */
 
-import it.unibz.inf.ontop.injection.OBDAProperties;
+import it.unibz.inf.ontop.injection.OBDASettings;
 import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.ontology.DataPropertyExpression;
@@ -83,11 +83,11 @@ public class R2rmlCheckerTest {
 		onto = OWLAPITranslatorUtility.translate(owlOntology);
 
 		Properties p = new Properties();
-        p.setProperty(OBDAProperties.DB_NAME, "npd");
-        p.setProperty(OBDAProperties.JDBC_URL, "jdbc:mysql://10.7.20.39/npd");
-        p.setProperty(OBDAProperties.DB_USER, "fish");
-        p.setProperty(OBDAProperties.DB_PASSWORD, "fish");
-        p.setProperty(OBDAProperties.JDBC_DRIVER, "com.mysql.jdbc.Driver");
+        p.setProperty(OBDASettings.DB_NAME, "npd");
+        p.setProperty(OBDASettings.JDBC_URL, "jdbc:mysql://10.7.20.39/npd");
+        p.setProperty(OBDASettings.DB_USER, "fish");
+        p.setProperty(OBDASettings.DB_PASSWORD, "fish");
+        p.setProperty(OBDASettings.JDBC_DRIVER, "com.mysql.jdbc.Driver");
 
 		loadOBDA(p);
 		loadR2rml(p);

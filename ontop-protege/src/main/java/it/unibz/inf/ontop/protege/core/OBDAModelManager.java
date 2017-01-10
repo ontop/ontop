@@ -31,7 +31,7 @@ import it.unibz.inf.ontop.io.QueryIOManager;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.owlapi.OBDAModelValidator;
-import it.unibz.inf.ontop.owlrefplatform.injection.QuestCorePreferences;
+import it.unibz.inf.ontop.injection.QuestCoreSettings;
 import it.unibz.inf.ontop.protege.utils.DialogUtils;
 import it.unibz.inf.ontop.querymanager.*;
 import it.unibz.inf.ontop.sql.ImplicitDBConstraintsReader;
@@ -59,6 +59,8 @@ import java.io.File;
 import java.net.URI;
 import java.util.*;
 
+import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
+
 public class OBDAModelManager implements Disposable {
 
 	private static final String OBDA_EXT = ".obda"; // The default OBDA file extension.
@@ -76,8 +78,6 @@ public class OBDAModelManager implements Disposable {
 	private final List<OBDAModelManagerListener> obdaManagerListeners;
 
 	private final JDBCConnectionManager connectionManager = JDBCConnectionManager.getJDBCConnectionManager();
-
-	private static final OBDADataFactory dfac = OBDADataFactoryImpl.getInstance();
 
     private boolean applyUserConstraints = false;
 	private ImplicitDBConstraintsReader userConstraints;
@@ -361,20 +361,20 @@ public class OBDAModelManager implements Disposable {
 			}
 			String uri = entity.getIRI().toString();
 
-			p = dfac.getClassPredicate(uri);
+			p = DATA_FACTORY.getClassPredicate(uri);
 		} else if (entity instanceof OWLObjectProperty) {
 			String uri = entity.getIRI().toString();
 
-			p = dfac.getObjectPropertyPredicate(uri);
+			p = DATA_FACTORY.getObjectPropertyPredicate(uri);
 		} else if (entity instanceof OWLDataProperty) {
 			String uri = entity.getIRI().toString();
 
-			p = dfac.getDataPropertyPredicate(uri);
+			p = DATA_FACTORY.getDataPropertyPredicate(uri);
 
 		} else if (entity instanceof OWLAnnotationProperty) {
 			String uri = entity.getIRI().toString();
 
-			p = dfac.getAnnotationPropertyPredicate(uri);
+			p = DATA_FACTORY.getAnnotationPropertyPredicate(uri);
         }
 		return p;
 	}
@@ -576,7 +576,7 @@ public class OBDAModelManager implements Disposable {
                 if (fac instanceof OntopReasonerInfo) {
                     OntopReasonerInfo questfactory = (OntopReasonerInfo) fac;
                     DisposableProperties reasonerPreference = (DisposableProperties) owlEditorKit
-                            .get(QuestCorePreferences.class.getName());
+                            .get(QuestCoreSettings.class.getName());
                     questfactory.setPreferences(reasonerPreference.clone());
                     questfactory.setOBDAModelWrapper(activeOBDAModel);
                 }
@@ -628,7 +628,7 @@ public class OBDAModelManager implements Disposable {
 			ProtegeOWLReasonerInfo factory = owlEditorKit.getOWLModelManager().getOWLReasonerManager().getCurrentReasonerFactory();
 			if (factory instanceof OntopReasonerInfo) {
                 OntopReasonerInfo questfactory = (OntopReasonerInfo) factory;
-                DisposableProperties reasonerPreference = (DisposableProperties) owlEditorKit.get(QuestCorePreferences.class.getName());
+                DisposableProperties reasonerPreference = (DisposableProperties) owlEditorKit.get(QuestCoreSettings.class.getName());
                 questfactory.setPreferences(reasonerPreference.clone());
                 questfactory.setOBDAModelWrapper(getActiveOBDAModelWrapper());
                 if(applyUserConstraints)

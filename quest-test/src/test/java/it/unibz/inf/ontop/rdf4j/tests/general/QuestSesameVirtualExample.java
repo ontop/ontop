@@ -21,7 +21,7 @@ package it.unibz.inf.ontop.rdf4j.tests.general;
  */
 
 import it.unibz.inf.ontop.injection.QuestConfiguration;
-import it.unibz.inf.ontop.owlrefplatform.injection.QuestCorePreferences;
+import it.unibz.inf.ontop.injection.QuestCoreSettings;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -158,11 +158,11 @@ public class QuestSesameVirtualExample {
 		
 		Properties p = new Properties();
 		//set jdbc params in config
-		p.setProperty(QuestCorePreferences.DB_NAME, "books");
-		p.setProperty(QuestCorePreferences.JDBC_URL, "jdbc:mysql://10.7.20.39/books?sessionVariables=sql_mode='ANSI'");
-		p.setProperty(QuestCorePreferences.DB_USER, "fish");
-		p.setProperty(QuestCorePreferences.DB_PASSWORD, "fish");
-		p.setProperty(QuestCorePreferences.JDBC_DRIVER, "com.mysql.jdbc.Driver");
+		p.setProperty(QuestCoreSettings.DB_NAME, "books");
+		p.setProperty(QuestCoreSettings.JDBC_URL, "jdbc:mysql://10.7.20.39/books?sessionVariables=sql_mode='ANSI'");
+		p.setProperty(QuestCoreSettings.DB_USER, "fish");
+		p.setProperty(QuestCoreSettings.DB_PASSWORD, "fish");
+		p.setProperty(QuestCoreSettings.JDBC_DRIVER, "com.mysql.jdbc.Driver");
 
 		QuestConfiguration configuration = QuestConfiguration.defaultBuilder()
 				.ontologyFile(owlFile)

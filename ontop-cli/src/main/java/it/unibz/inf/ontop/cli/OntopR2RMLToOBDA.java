@@ -5,7 +5,7 @@ import com.github.rvesse.airline.annotations.Option;
 import com.github.rvesse.airline.annotations.OptionType;
 import com.github.rvesse.airline.annotations.restrictions.Required;
 import com.google.common.base.Strings;
-import it.unibz.inf.ontop.injection.OBDAProperties;
+import it.unibz.inf.ontop.injection.OBDASettings;
 import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.io.OntopNativeMappingSerializer;
 import it.unibz.inf.ontop.model.OBDAModel;
@@ -36,10 +36,10 @@ public class OntopR2RMLToOBDA implements OntopCommand {
         File out = new File(outputMappingFile);
         try {
             Properties p = new Properties();
-            p.put(OBDAProperties.JDBC_URL, "jdbc:h2:tcp://localhost/DBName");
-            p.put(OBDAProperties.DB_USER, "username");
-            p.put(OBDAProperties.DB_PASSWORD, "password");
-            p.put(OBDAProperties.JDBC_DRIVER, "com.mysql.jdbc.Driver");
+            p.put(OBDASettings.JDBC_URL, "jdbc:h2:tcp://localhost/DBName");
+            p.put(OBDASettings.DB_USER, "username");
+            p.put(OBDASettings.DB_PASSWORD, "password");
+            p.put(OBDASettings.JDBC_DRIVER, "com.mysql.jdbc.Driver");
 
             QuestConfiguration configuration = QuestConfiguration.defaultBuilder()
                     .r2rmlMappingFile(inputMappingFile)

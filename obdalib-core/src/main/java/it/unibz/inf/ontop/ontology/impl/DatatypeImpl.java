@@ -20,11 +20,11 @@ package it.unibz.inf.ontop.ontology.impl;
  * #L%
  */
 
-import it.unibz.inf.ontop.model.OBDADataFactory;
 import it.unibz.inf.ontop.model.Predicate;
 import it.unibz.inf.ontop.model.Predicate.COL_TYPE;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.ontology.Datatype;
+
+import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATATYPE_FACTORY;
 
 public class DatatypeImpl implements Datatype {
 	
@@ -35,8 +35,7 @@ public class DatatypeImpl implements Datatype {
 	public static final  Datatype rdfsLiteral; 
 	
 	static {
-		OBDADataFactory ofac = OBDADataFactoryImpl.getInstance();
-	    rdfsLiteral = new DatatypeImpl(ofac.getDatatypeFactory().getTypePredicate(COL_TYPE.LITERAL));   	
+	    rdfsLiteral = new DatatypeImpl(DATATYPE_FACTORY.getTypePredicate(COL_TYPE.LITERAL));
 	}
 	
 	DatatypeImpl(Predicate p) {

@@ -15,10 +15,9 @@ import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing.*;
 import it.unibz.inf.ontop.owlrefplatform.core.unfolding.DatalogUnfolder;
 
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
 import it.unibz.inf.ontop.model.impl.TermUtils;
-import it.unibz.inf.ontop.owlrefplatform.injection.QuestCorePreferences;
+import it.unibz.inf.ontop.injection.QuestCoreSettings;
 import it.unibz.inf.ontop.pivotalrepr.MetadataForQueryOptimization;
 import it.unibz.inf.ontop.pivotalrepr.impl.MetadataForQueryOptimizationImpl;
 import it.unibz.inf.ontop.sql.RDBMetadata;
@@ -35,10 +34,12 @@ import java.sql.SQLException;
 import java.util.*;
 import java.util.stream.IntStream;
 
+import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
+
 public class QuestUnfolder {
 
 	private final NativeQueryLanguageComponentFactory nativeQLFactory;
-	private final QuestCorePreferences preferences;
+	private final QuestCoreSettings preferences;
 	/* The active unfolding engine */
 	private DatalogUnfolder unfolder;
 
@@ -51,8 +52,6 @@ public class QuestUnfolder {
 	protected List<CQIE> ufp; // for TESTS ONLY
 
 	private static final Logger log = LoggerFactory.getLogger(QuestUnfolder.class);
-	
-	private static final OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 
 	private ImmutableMultimap<AtomPredicate, ImmutableList<Integer>> uniqueConstraints;
 	private final IMapping2DatalogConverter mapping2DatalogConvertor;
@@ -69,7 +68,7 @@ public class QuestUnfolder {
 	//private boolean applyExcludeFromTMappings = false;
 	public QuestUnfolder(NativeQueryLanguageComponentFactory nativeQLFactory,
 						 IMapping2DatalogConverter mapping2DatalogConvertor,
-						 QuestCorePreferences preferences) throws Exception{
+						 QuestCoreSettings preferences) throws Exception{
 		this.nativeQLFactory = nativeQLFactory;
 		this.mapping2DatalogConvertor = mapping2DatalogConvertor;
 		this.preferences = preferences;
@@ -226,7 +225,7 @@ public class QuestUnfolder {
 					Term originalLangTag = typedTerm.getTerm(1);
 					if (originalLangTag instanceof ValueConstant) {
 						ValueConstant originalLangConstant = (ValueConstant) originalLangTag;
-						Term normalizedLangTag = fac.getConstantLiteral(originalLangConstant.getValue().toLowerCase(),
+						Term normalizedLangTag = DATA_FACTORY.getConstantLiteral(originalLangConstant.getValue().toLowerCase(),
 								originalLangConstant.getType());
 						typedTerm.setTerm(1, normalizedLangTag);
 					}
@@ -251,9 +250,9 @@ public class QuestUnfolder {
 			// no blank nodes are supported here
 			URIConstant c = (URIConstant) ca.getIndividual();
 			Predicate p = ca.getConcept().getPredicate();
-			Function head = fac.getFunction(p,
+			Function head = DATA_FACTORY.getFunction(p,
 					uriTemplateMatcher.generateURIFunction(c.getURI()));
-			CQIE rule = fac.getCQIE(head, Collections.<Function> emptyList());
+			CQIE rule = DATA_FACTORY.getCQIE(head, Collections.<Function> emptyList());
 
 			unfoldingProgram.add(rule);
 			count++;
@@ -266,10 +265,10 @@ public class QuestUnfolder {
 			URIConstant s = (URIConstant)pa.getSubject();
 			URIConstant o = (URIConstant)pa.getObject();
 			Predicate p = pa.getProperty().getPredicate();
-			Function head = fac.getFunction(p,
+			Function head = DATA_FACTORY.getFunction(p,
 					uriTemplateMatcher.generateURIFunction(s.getURI()),
 					uriTemplateMatcher.generateURIFunction(o.getURI()));
-			CQIE rule = fac.getCQIE(head, Collections.<Function> emptyList());
+			CQIE rule = DATA_FACTORY.getCQIE(head, Collections.<Function> emptyList());
 
 			unfoldingProgram.add(rule);
 			count++;
@@ -286,13 +285,13 @@ public class QuestUnfolder {
 
 			Function head;
 			if(o.getLanguage()!=null){
-				head = fac.getFunction(p, fac.getUriTemplate(fac.getConstantLiteral(s.getURI())), fac.getTypedTerm(fac.getConstantLiteral(o.getValue()),o.getLanguage()));
+				head = DATA_FACTORY.getFunction(p, DATA_FACTORY.getUriTemplate(DATA_FACTORY.getConstantLiteral(s.getURI())), DATA_FACTORY.getTypedTerm(DATA_FACTORY.getConstantLiteral(o.getValue()),o.getLanguage()));
 			}
 			else {
 
-				head = fac.getFunction(p, fac.getUriTemplate(fac.getConstantLiteral(s.getURI())), fac.getTypedTerm(o, o.getType()));
+				head = DATA_FACTORY.getFunction(p, DATA_FACTORY.getUriTemplate(DATA_FACTORY.getConstantLiteral(s.getURI())), DATA_FACTORY.getTypedTerm(o, o.getType()));
 			}
-			CQIE rule = fac.getCQIE(head, Collections.<Function> emptyList());
+			CQIE rule = DATA_FACTORY.getCQIE(head, Collections.<Function> emptyList());
 
 			unfoldingProgram.add(rule);
 			count ++;
@@ -314,21 +313,21 @@ public class QuestUnfolder {
 				ValueConstant o = (ValueConstant) v;
 
 				if (o.getLanguage() != null) {
-					head = fac.getFunction(p, fac.getUriTemplate(fac.getConstantLiteral(s.getURI())), fac.getTypedTerm(fac.getConstantLiteral(o.getValue()), o.getLanguage()));
+					head = DATA_FACTORY.getFunction(p, DATA_FACTORY.getUriTemplate(DATA_FACTORY.getConstantLiteral(s.getURI())), DATA_FACTORY.getTypedTerm(DATA_FACTORY.getConstantLiteral(o.getValue()), o.getLanguage()));
 				} else {
 
-					head = fac.getFunction(p, fac.getUriTemplate(fac.getConstantLiteral(s.getURI())), fac.getTypedTerm(o, o.getType()));
+					head = DATA_FACTORY.getFunction(p, DATA_FACTORY.getUriTemplate(DATA_FACTORY.getConstantLiteral(s.getURI())), DATA_FACTORY.getTypedTerm(o, o.getType()));
 				}
 			} else {
 
 				URIConstant o = (URIConstant) v;
-				head = fac.getFunction(p,
-						fac.getUriTemplate(fac.getConstantLiteral(s.getURI())),
-						fac.getUriTemplate(fac.getConstantLiteral(o.getURI())));
+				head = DATA_FACTORY.getFunction(p,
+						DATA_FACTORY.getUriTemplate(DATA_FACTORY.getConstantLiteral(s.getURI())),
+						DATA_FACTORY.getUriTemplate(DATA_FACTORY.getConstantLiteral(o.getURI())));
 
 
 			}
-			CQIE rule = fac.getCQIE(head, Collections.<Function>emptyList());
+			CQIE rule = DATA_FACTORY.getCQIE(head, Collections.<Function>emptyList());
 
 			unfoldingProgram.add(rule);
 			count++;
@@ -374,7 +373,7 @@ public class QuestUnfolder {
 			for (Variable var : headvars) {
 				List<Function> body = mapping.getBody();
 				if (isNullable(var, body, metadata)) {
-					Function notnull = fac.getFunctionIsNotNull(var);
+					Function notnull = DATA_FACTORY.getFunctionIsNotNull(var);
 					if (!body.contains(notnull))
 						body.add(notnull);
 				}
@@ -510,12 +509,12 @@ public class QuestUnfolder {
 				 * head is Class(x) Forming head as triple(x,uri(rdf:type),
 				 * uri(Class))
 				 */
-				Function rdfTypeConstant = fac.getUriTemplate(fac.getConstantLiteral(OBDAVocabulary.RDF_TYPE));
+				Function rdfTypeConstant = DATA_FACTORY.getUriTemplate(DATA_FACTORY.getConstantLiteral(OBDAVocabulary.RDF_TYPE));
 
 				String classname = currenthead.getFunctionSymbol().getName();
-				Term classConstant = fac.getUriTemplate(fac.getConstantLiteral(classname));
+				Term classConstant = DATA_FACTORY.getUriTemplate(DATA_FACTORY.getConstantLiteral(classname));
 
-				newhead = fac.getTripleAtom(currenthead.getTerm(0), rdfTypeConstant, classConstant);
+				newhead = DATA_FACTORY.getTripleAtom(currenthead.getTerm(0), rdfTypeConstant, classConstant);
 			} 
 			else if (currenthead.getArity() == 2) {
 				/*
@@ -523,9 +522,9 @@ public class QuestUnfolder {
 				 * y)
 				 */
 				String propname = currenthead.getFunctionSymbol().getName();
-				Function propConstant = fac.getUriTemplate(fac.getConstantLiteral(propname));
+				Function propConstant = DATA_FACTORY.getUriTemplate(DATA_FACTORY.getConstantLiteral(propname));
 
-				newhead = fac.getTripleAtom(currenthead.getTerm(0), propConstant, currenthead.getTerm(1));
+				newhead = DATA_FACTORY.getTripleAtom(currenthead.getTerm(0), propConstant, currenthead.getTerm(1));
 			}
 			else {
 				/*
@@ -533,7 +532,7 @@ public class QuestUnfolder {
 				 */
 				newhead = (Function) currenthead.clone();
 			}
-			CQIE newmapping = fac.getCQIE(newhead, mapping.getBody());
+			CQIE newmapping = DATA_FACTORY.getCQIE(newhead, mapping.getBody());
 			newmappings.add(newmapping);
 		}
 		return newmappings;

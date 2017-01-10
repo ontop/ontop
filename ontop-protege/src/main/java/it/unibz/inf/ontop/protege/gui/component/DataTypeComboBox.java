@@ -20,9 +20,7 @@ package it.unibz.inf.ontop.protege.gui.component;
  * #L%
  */
 
-import it.unibz.inf.ontop.model.DatatypeFactory;
 import it.unibz.inf.ontop.model.Predicate;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
 import it.unibz.inf.ontop.protege.gui.IconLoader;
 
@@ -30,6 +28,8 @@ import javax.swing.*;
 import javax.swing.plaf.basic.BasicComboBoxRenderer;
 import java.awt.*;
 import java.util.List;
+
+import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATATYPE_FACTORY;
 
 public class DataTypeComboBox extends JComboBox {
 
@@ -45,9 +45,8 @@ public class DataTypeComboBox extends JComboBox {
 	}
 	
 	private static Predicate[] getQuestDataTypePredicates() {
-		DatatypeFactory dtfac = OBDADataFactoryImpl.getInstance().getDatatypeFactory();
 		
-		List<Predicate> prediacteList = dtfac.getDatatypePredicates();
+		List<Predicate> prediacteList = DATATYPE_FACTORY.getDatatypePredicates();
 		
 		int length = prediacteList.size() + 1;
 		Predicate[] dataTypes = new Predicate[length];

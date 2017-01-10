@@ -2,12 +2,10 @@ package it.unibz.inf.ontop.rdf4j;
 
 import it.unibz.inf.ontop.model.BNode;
 import it.unibz.inf.ontop.model.Constant;
-import it.unibz.inf.ontop.model.DatatypeFactory;
 import it.unibz.inf.ontop.model.ObjectConstant;
 import it.unibz.inf.ontop.model.Predicate.COL_TYPE;
 import it.unibz.inf.ontop.model.URIConstant;
 import it.unibz.inf.ontop.model.ValueConstant;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
 import it.unibz.inf.ontop.ontology.AnnotationAssertion;
 import it.unibz.inf.ontop.ontology.Assertion;
@@ -20,13 +18,14 @@ import org.eclipse.rdf4j.model.Resource;
 import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.model.ValueFactory;
-import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
+import org.eclipse.rdf4j.model.impl.ValueFactoryImpl;
+
+import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATATYPE_FACTORY;
 
 public class RDF4JHelper {
 
-	private static final ValueFactory fact = SimpleValueFactory.getInstance();
-	private static final DatatypeFactory dtfac = OBDADataFactoryImpl.getInstance().getDatatypeFactory();
-	
+	private static final ValueFactory fact = new ValueFactoryImpl();
+
 	public static Resource getResource(ObjectConstant obj) {
 		if (obj instanceof BNode)
 			return fact.createBNode(((BNode)obj).getName());
@@ -43,10 +42,10 @@ public class RDF4JHelper {
             return fact.createLiteral(literal.getValue(), literal.getLanguage());
 		}
 		else if (literal.getType() == COL_TYPE.OBJECT) {
-            return fact.createLiteral(literal.getValue(), dtfac.getDatatypeURI(COL_TYPE.STRING));
+            return fact.createLiteral(literal.getValue(), DATATYPE_FACTORY.getDatatypeURI(COL_TYPE.STRING));
 		}	
 		else {
-			IRI datatype = dtfac.getDatatypeURI(literal.getType());
+			IRI datatype = DATATYPE_FACTORY.getDatatypeURI(literal.getType());
 			if (datatype == null)
 				throw new RuntimeException("Found unknown TYPE for constant: " + literal + " with COL_TYPE="+ literal.getType());
 

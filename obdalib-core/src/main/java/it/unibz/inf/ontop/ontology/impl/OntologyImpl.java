@@ -22,20 +22,17 @@ package it.unibz.inf.ontop.ontology.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import it.unibz.inf.ontop.model.DatatypeFactory;
-import it.unibz.inf.ontop.model.OBDADataFactory;
 import it.unibz.inf.ontop.model.Predicate;
 import it.unibz.inf.ontop.model.Predicate.COL_TYPE;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.ontology.*;
 
 import java.util.*;
 
+import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATATYPE_FACTORY;
+
 public class OntologyImpl implements Ontology {
 
 	private static final long serialVersionUID = 758424053258299151L;
-	
-	private static final OBDADataFactory obdafac = OBDADataFactoryImpl.getInstance();
 	
 	private final ImmutableOntologyVocabularyImpl vocabulary;
 	
@@ -158,30 +155,29 @@ public class OntologyImpl implements Ontology {
 	private static final String xsd = "http://www.w3.org/2001/XMLSchema#";
 	
 	static {
-		DatatypeFactory ofac = obdafac.getDatatypeFactory();
 		
 		OWL2QLDatatypes = ImmutableMap.<String, Datatype>builder()
-				.put(xml + "PlainLiteral", new DatatypeImpl(ofac.getTypePredicate(COL_TYPE.LITERAL))) // 	rdf:PlainLiteral
-				.put(xml + "XMLLiteral", new DatatypeImpl(ofac.getTypePredicate(COL_TYPE.STRING))) //	rdf:XMLLiteral
-				.put(rdfs + "Literal", new DatatypeImpl(ofac.getTypePredicate(COL_TYPE.LITERAL))) //		rdfs:Literal
-				.put(owl + "real", new DatatypeImpl(ofac.getTypePredicate(COL_TYPE.DECIMAL))) // 			owl:real
-				.put(owl + "rational", new DatatypeImpl(ofac.getTypePredicate(COL_TYPE.DECIMAL))) // 		owl:rational		
-				.put(xsd + "decimal", new DatatypeImpl(ofac.getTypePredicate(COL_TYPE.DECIMAL))) // 	xsd:decimal
-				.put(xsd + "integer", new DatatypeImpl(ofac.getTypePredicate(COL_TYPE.INTEGER))) // 	xsd:integer
-				.put(xsd + "nonNegativeInteger", new DatatypeImpl(ofac.getTypePredicate(COL_TYPE.NON_NEGATIVE_INTEGER))) // 	xsd:nonNegativeInteger
-				.put(xsd + "string", new DatatypeImpl(ofac.getTypePredicate(COL_TYPE.STRING))) // 	xsd:string
-				.put(xsd + "normalizedString", new DatatypeImpl(ofac.getTypePredicate(COL_TYPE.STRING))) // 	xsd:normalizedString
-				.put(xsd + "token", new DatatypeImpl(ofac.getTypePredicate(COL_TYPE.STRING))) // 	xsd:token
-				.put(xsd + "Name", new DatatypeImpl(ofac.getTypePredicate(COL_TYPE.STRING))) // 	xsd:Name
-				.put(xsd + "NCName", new DatatypeImpl(ofac.getTypePredicate(COL_TYPE.STRING))) //	xsd:NCName
-				.put(xsd + "NMTOKEN", new DatatypeImpl(ofac.getTypePredicate(COL_TYPE.STRING))) // 	xsd:NMTOKEN
-				.put(xsd + "hexBinary", new DatatypeImpl(ofac.getTypePredicate(COL_TYPE.STRING))) // 	xsd:hexBinary
-				.put(xsd + "base64Binary", new DatatypeImpl(ofac.getTypePredicate(COL_TYPE.STRING))) // 	xsd:base64Binary
-				.put(xsd + "anyURI", new DatatypeImpl(ofac.getTypePredicate(COL_TYPE.STRING))) // 	xsd:anyURI
-				.put(xsd + "dateTime", new DatatypeImpl(ofac.getTypePredicate(COL_TYPE.DATETIME))) // 	xsd:dateTime
-				.put(xsd + "dateTimeStamp", new DatatypeImpl(ofac.getTypePredicate(COL_TYPE.DATETIME_STAMP))) // 	xsd:dateTimeStamp
-				.put(xsd + "int", new DatatypeImpl(ofac.getTypePredicate(COL_TYPE.INT))) // 	TEMPORARY FOR Q9 / FISHMARK
-				.put(xsd + "long", new DatatypeImpl(ofac.getTypePredicate(COL_TYPE.LONG))) // 	TEMPORARY FOR OntologyTypesTest
+				.put(xml + "PlainLiteral", new DatatypeImpl(DATATYPE_FACTORY.getTypePredicate(COL_TYPE.LITERAL))) // 	rdf:PlainLiteral
+				.put(xml + "XMLLiteral", new DatatypeImpl(DATATYPE_FACTORY.getTypePredicate(COL_TYPE.STRING))) //	rdf:XMLLiteral
+				.put(rdfs + "Literal", new DatatypeImpl(DATATYPE_FACTORY.getTypePredicate(COL_TYPE.LITERAL))) //		rdfs:Literal
+				.put(owl + "real", new DatatypeImpl(DATATYPE_FACTORY.getTypePredicate(COL_TYPE.DECIMAL))) // 			owl:real
+				.put(owl + "rational", new DatatypeImpl(DATATYPE_FACTORY.getTypePredicate(COL_TYPE.DECIMAL))) // 		owl:rational
+				.put(xsd + "decimal", new DatatypeImpl(DATATYPE_FACTORY.getTypePredicate(COL_TYPE.DECIMAL))) // 	xsd:decimal
+				.put(xsd + "integer", new DatatypeImpl(DATATYPE_FACTORY.getTypePredicate(COL_TYPE.INTEGER))) // 	xsd:integer
+				.put(xsd + "nonNegativeInteger", new DatatypeImpl(DATATYPE_FACTORY.getTypePredicate(COL_TYPE.NON_NEGATIVE_INTEGER))) // 	xsd:nonNegativeInteger
+				.put(xsd + "string", new DatatypeImpl(DATATYPE_FACTORY.getTypePredicate(COL_TYPE.STRING))) // 	xsd:string
+				.put(xsd + "normalizedString", new DatatypeImpl(DATATYPE_FACTORY.getTypePredicate(COL_TYPE.STRING))) // 	xsd:normalizedString
+				.put(xsd + "token", new DatatypeImpl(DATATYPE_FACTORY.getTypePredicate(COL_TYPE.STRING))) // 	xsd:token
+				.put(xsd + "Name", new DatatypeImpl(DATATYPE_FACTORY.getTypePredicate(COL_TYPE.STRING))) // 	xsd:Name
+				.put(xsd + "NCName", new DatatypeImpl(DATATYPE_FACTORY.getTypePredicate(COL_TYPE.STRING))) //	xsd:NCName
+				.put(xsd + "NMTOKEN", new DatatypeImpl(DATATYPE_FACTORY.getTypePredicate(COL_TYPE.STRING))) // 	xsd:NMTOKEN
+				.put(xsd + "hexBinary", new DatatypeImpl(DATATYPE_FACTORY.getTypePredicate(COL_TYPE.STRING))) // 	xsd:hexBinary
+				.put(xsd + "base64Binary", new DatatypeImpl(DATATYPE_FACTORY.getTypePredicate(COL_TYPE.STRING))) // 	xsd:base64Binary
+				.put(xsd + "anyURI", new DatatypeImpl(DATATYPE_FACTORY.getTypePredicate(COL_TYPE.STRING))) // 	xsd:anyURI
+				.put(xsd + "dateTime", new DatatypeImpl(DATATYPE_FACTORY.getTypePredicate(COL_TYPE.DATETIME))) // 	xsd:dateTime
+				.put(xsd + "dateTimeStamp", new DatatypeImpl(DATATYPE_FACTORY.getTypePredicate(COL_TYPE.DATETIME_STAMP))) // 	xsd:dateTimeStamp
+				.put(xsd + "int", new DatatypeImpl(DATATYPE_FACTORY.getTypePredicate(COL_TYPE.INT))) // 	TEMPORARY FOR Q9 / FISHMARK
+				.put(xsd + "long", new DatatypeImpl(DATATYPE_FACTORY.getTypePredicate(COL_TYPE.LONG))) // 	TEMPORARY FOR OntologyTypesTest
 				.build();
 	}
 	

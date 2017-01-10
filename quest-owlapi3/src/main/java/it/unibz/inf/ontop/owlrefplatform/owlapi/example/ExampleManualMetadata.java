@@ -6,8 +6,8 @@ import it.unibz.inf.ontop.mapping.MappingParser;
 import it.unibz.inf.ontop.model.OBDAModel;
 import it.unibz.inf.ontop.owlapi.OWLAPITranslatorUtility;
 import it.unibz.inf.ontop.owlrefplatform.core.*;
-import it.unibz.inf.ontop.owlrefplatform.injection.QuestComponentFactory;
-import it.unibz.inf.ontop.owlrefplatform.injection.QuestCoreConfiguration;
+import it.unibz.inf.ontop.injection.QuestComponentFactory;
+import it.unibz.inf.ontop.injection.QuestCoreConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLConnection;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLStatement;
 import it.unibz.inf.ontop.sql.RDBMetadata;
@@ -60,8 +60,9 @@ private void setup()  throws Exception {
 	IQuest quest = componentFactory.create(
 			OWLAPITranslatorUtility.translateImportsClosure(ontology),
 			Optional.of(obdaModel),
-			Optional.empty());
-	quest.setupRepository(injector);
+			Optional.empty(),
+			configuration.getExecutorRegistry());
+	quest.setupRepository();
 	
 	/*
 	 * Prepare the data connection for querying.

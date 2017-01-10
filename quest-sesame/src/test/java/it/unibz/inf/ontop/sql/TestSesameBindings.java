@@ -22,6 +22,7 @@ import java.sql.SQLException;
 import java.util.Properties;
 import java.util.Scanner;
 
+import it.unibz.inf.ontop.injection.OBDASettings;
 import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.rdf4j.repository.OntopVirtualRepository;
 import org.junit.After;
@@ -37,9 +38,8 @@ import org.eclipse.rdf4j.query.GraphQueryResult;
 import org.eclipse.rdf4j.query.QueryLanguage;
 import org.eclipse.rdf4j.query.TupleQuery;
 import org.eclipse.rdf4j.query.TupleQueryResult;
-import it.unibz.inf.ontop.injection.OBDAProperties;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.inf.ontop.owlrefplatform.injection.QuestCorePreferences;
+import it.unibz.inf.ontop.injection.QuestCoreSettings;
 import it.unibz.inf.ontop.rdf4j.repository.OntopRepositoryConnection;
 
 public class TestSesameBindings {
@@ -77,12 +77,12 @@ public class TestSesameBindings {
         s.close();
 
         Properties p = new Properties();
-        p.setProperty(QuestCorePreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-        p.setProperty(OBDAProperties.DB_NAME, "countries");
-        p.setProperty(OBDAProperties.JDBC_URL, "jdbc:h2:mem:countries");
-        p.setProperty(OBDAProperties.DB_USER, "sa");
-        p.setProperty(OBDAProperties.DB_PASSWORD, "");
-        p.setProperty(OBDAProperties.JDBC_DRIVER, "org.h2.Driver");
+        p.setProperty(QuestCoreSettings.ABOX_MODE, QuestConstants.VIRTUAL);
+        p.setProperty(OBDASettings.DB_NAME, "countries");
+        p.setProperty(OBDASettings.JDBC_URL, "jdbc:h2:mem:countries");
+        p.setProperty(OBDASettings.DB_USER, "sa");
+        p.setProperty(OBDASettings.DB_PASSWORD, "");
+        p.setProperty(OBDASettings.JDBC_DRIVER, "org.h2.Driver");
 
         QuestConfiguration config = QuestConfiguration.defaultBuilder()
                 .ontologyFile(owlfile)

@@ -1,9 +1,8 @@
 package it.unibz.inf.ontop.owlrefplatform.core;
 
 import com.google.common.collect.ImmutableList;
-import com.google.inject.Injector;
+import it.unibz.inf.ontop.injection.OntopModelFactory;
 import it.unibz.inf.ontop.model.*;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
 import it.unibz.inf.ontop.owlrefplatform.core.abox.SemanticIndexURIMap;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.*;
@@ -18,6 +17,7 @@ import it.unibz.inf.ontop.owlrefplatform.core.translator.*;
 import it.unibz.inf.ontop.pivotalrepr.EmptyQueryException;
 import it.unibz.inf.ontop.pivotalrepr.IntermediateQuery;
 import it.unibz.inf.ontop.pivotalrepr.datalog.DatalogProgram2QueryConverter;
+import it.unibz.inf.ontop.pivotalrepr.utils.ExecutorRegistry;
 import it.unibz.inf.ontop.renderer.DatalogProgramRenderer;
 
 import java.util.*;
@@ -32,6 +32,7 @@ import org.eclipse.rdf4j.query.parser.QueryParserUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
 import static it.unibz.inf.ontop.pivotalrepr.datalog.Mapping2QueryConverter.convertMappings;
 
 /**
@@ -56,20 +57,21 @@ public class QuestQueryProcessor {
 	
 	private static final Logger log = LoggerFactory.getLogger(QuestQueryProcessor.class);
 	private final boolean hasDistinctResultSet;
-	private final Injector injector;
+	private final OntopModelFactory modelFactory;
+	private final ExecutorRegistry executorRegistry;
 
 	public QuestQueryProcessor(QueryRewriter rewriter, LinearInclusionDependencies sigma, QuestUnfolder unfolder,
 							   VocabularyValidator vocabularyValidator, SemanticIndexURIMap uriMap,
 							   NativeQueryGenerator datasourceQueryGenerator,
 							   QueryCache queryCache, boolean hasDistinctResultSet,
-							   Injector injector) {
+							   OntopModelFactory modelFactory, ExecutorRegistry executorRegistry) {
 		this.rewriter = rewriter;
 		this.sigma = sigma;
 		this.unfolder = unfolder;
 
 		Stream<IntermediateQuery> intermediateQueryStream =
 				convertMappings(unfolder.getMappings(), unfolder.getExtensionalPredicates(),
-						unfolder.getMetadataForQueryOptimization(), injector);
+						unfolder.getMetadataForQueryOptimization(), modelFactory, executorRegistry);
 
 		this.queryUnfolder = new QueryUnfolderImpl(intermediateQueryStream);
 
@@ -78,7 +80,8 @@ public class QuestQueryProcessor {
 		this.datasourceQueryGenerator = datasourceQueryGenerator;
 		this.queryCache = queryCache;
 		this.hasDistinctResultSet = hasDistinctResultSet;
-		this.injector = injector;
+		this.modelFactory = modelFactory;
+		this.executorRegistry = executorRegistry;
 	}
 
 	/**
@@ -92,7 +95,7 @@ public class QuestQueryProcessor {
 		unfolder.changeMappings(mappings, reformulationReasoner);
 		queryCache.clear();
 		return new QuestQueryProcessor(rewriter, sigma, unfolder, vocabularyValidator, uriMap, datasourceQueryGenerator,
-				queryCache, hasDistinctResultSet, injector);
+				queryCache, hasDistinctResultSet, modelFactory, executorRegistry);
 	}
 
 	/**
@@ -124,7 +127,7 @@ public class QuestQueryProcessor {
 		//System.out.println("SAMEAS" + program);
 
 		log.debug("Replacing equivalences...");
-		DatalogProgram newprogramEq = OBDADataFactoryImpl.getInstance().getDatalogProgram(program.getQueryModifiers());
+		DatalogProgram newprogramEq = DATA_FACTORY.getDatalogProgram(program.getQueryModifiers());
 		Predicate topLevelPredicate = null;
 		for (CQIE query : program.getRules()) {
 			// TODO: fix cloning
@@ -140,7 +143,7 @@ public class QuestQueryProcessor {
 
 		SPARQLQueryFlattener fl = new SPARQLQueryFlattener(newprogramEq);
 		List<CQIE> p = fl.flatten(newprogramEq.getRules(topLevelPredicate).get(0));
-		DatalogProgram newprogram = OBDADataFactoryImpl.getInstance().getDatalogProgram(program.getQueryModifiers(), p);
+		DatalogProgram newprogram = DATA_FACTORY.getDatalogProgram(program.getQueryModifiers(), p);
 
 		return newprogram;
 	}
@@ -186,7 +189,7 @@ public class QuestQueryProcessor {
 			try {
 				IntermediateQuery intermediateQuery = DatalogProgram2QueryConverter.convertDatalogProgram(
 						unfolder.getMetadataForQueryOptimization(), programAfterRewriting,
-						unfolder.getExtensionalPredicates(), injector);
+						unfolder.getExtensionalPredicates(), modelFactory, executorRegistry);
 				log.debug("Directly translated (SPARQL) intermediate query: \n" + intermediateQuery.toString());
 
 				log.debug("Start the unfolding...");

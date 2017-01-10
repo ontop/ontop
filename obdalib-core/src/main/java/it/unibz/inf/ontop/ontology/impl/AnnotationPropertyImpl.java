@@ -20,10 +20,10 @@ package it.unibz.inf.ontop.ontology.impl;
  * #L%
  */
 
-import it.unibz.inf.ontop.model.OBDADataFactory;
 import it.unibz.inf.ontop.model.Predicate;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.ontology.AnnotationProperty;
+
+import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
 
 /**
  * Represents AnnotationPropertyExpression from the OWL 2 QL Specification
@@ -45,12 +45,10 @@ public class AnnotationPropertyImpl implements AnnotationProperty {
 //	private final AnnotationPropertyDomainImpl domain;
 //	private final AnnotationPropertyRangeImpl range;
 
-	private static final OBDADataFactory ofac = OBDADataFactoryImpl.getInstance();
-
 
 	AnnotationPropertyImpl(String name) {
 
-		this.predicate = ofac.getAnnotationPropertyPredicate(name);
+		this.predicate = DATA_FACTORY.getAnnotationPropertyPredicate(name);
 		this.name = name;
 //		this.domain =  new AnnotationPropertyDomainImpl(this);
 //		this.range = new AnnotationPropertyRangeImpl(this);

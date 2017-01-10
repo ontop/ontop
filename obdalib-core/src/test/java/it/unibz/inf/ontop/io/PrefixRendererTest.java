@@ -28,12 +28,12 @@ import it.unibz.inf.ontop.injection.OBDACoreConfiguration;
 import it.unibz.inf.ontop.model.CQIE;
 import it.unibz.inf.ontop.model.DatalogProgram;
 import it.unibz.inf.ontop.model.Function;
-import it.unibz.inf.ontop.model.OBDADataFactory;
 import it.unibz.inf.ontop.model.Term;
 import it.unibz.inf.ontop.model.impl.FunctionalTermImpl;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 
 import junit.framework.TestCase;
+
+import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
 
 
 public class PrefixRendererTest extends TestCase {
@@ -49,25 +49,23 @@ public class PrefixRendererTest extends TestCase {
     }
 
 	public void setUp() throws Exception {
-		OBDADataFactory pfac = OBDADataFactoryImpl.getInstance();
-		OBDADataFactory tfac = OBDADataFactoryImpl.getInstance();
-		query = tfac.getDatalogProgram();
+		query = DATA_FACTORY.getDatalogProgram();
 
 		LinkedList<Term> innerterms = new LinkedList<Term>();
-		innerterms.add(tfac.getVariable("id"));
+		innerterms.add(DATA_FACTORY.getVariable("id"));
 		
 //		IRIFactory fact = new IRIFactory();
 
 		List<Term> terms = new LinkedList<Term>();
-		terms.add(tfac.getFunction(pfac.getPredicate("http://obda.org/onto.owl#person-individual", 1), innerterms));
+		terms.add(DATA_FACTORY.getFunction(DATA_FACTORY.getPredicate("http://obda.org/onto.owl#person-individual", 1), innerterms));
 
-		Function body = tfac.getFunction(pfac.getClassPredicate("http://obda.org/onto.owl#Person"), terms);
+		Function body = DATA_FACTORY.getFunction(DATA_FACTORY.getClassPredicate("http://obda.org/onto.owl#Person"), terms);
 
 		terms = new LinkedList<Term>();
-		terms.add(tfac.getVariable("id"));
-		Function head = tfac.getFunction(pfac.getPredicate("http://obda.org/predicates#q", 1), terms);
+		terms.add(DATA_FACTORY.getVariable("id"));
+		Function head = DATA_FACTORY.getFunction(DATA_FACTORY.getPredicate("http://obda.org/predicates#q", 1), terms);
 
-		rule1 = tfac.getCQIE(head, Collections.singletonList(body));
+		rule1 = DATA_FACTORY.getCQIE(head, Collections.singletonList(body));
 		query.appendRule(rule1);
 	}
 

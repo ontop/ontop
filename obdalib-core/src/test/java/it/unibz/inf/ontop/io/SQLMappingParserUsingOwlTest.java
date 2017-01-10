@@ -33,10 +33,8 @@ import com.google.common.collect.ImmutableSet;
 import com.google.inject.Injector;
 
 import it.unibz.inf.ontop.injection.OBDACoreConfiguration;
-import it.unibz.inf.ontop.model.OBDADataFactory;
-import it.unibz.inf.ontop.model.OBDADataSource;
-import it.unibz.inf.ontop.model.OBDAMappingAxiom;
-import it.unibz.inf.ontop.model.OBDAModel;
+import it.unibz.inf.ontop.model.*;
+import it.unibz.inf.ontop.model.impl.MappingFactoryImpl;
 import it.unibz.inf.ontop.ontology.impl.OntologyVocabularyImpl;
 import org.junit.Before;
 import org.junit.Test;
@@ -48,7 +46,6 @@ import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
 import it.unibz.inf.ontop.injection.OBDAFactoryWithException;
 import it.unibz.inf.ontop.mapping.MappingParser;
 
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.model.impl.RDBMSourceParameterConstants;
 import it.unibz.inf.ontop.parser.TurtleOBDASyntaxParser;
 
@@ -56,7 +53,7 @@ import static org.junit.Assert.assertEquals;
 
 public class SQLMappingParserUsingOwlTest {
 
-    private static final OBDADataFactory dfac = OBDADataFactoryImpl.getInstance();
+    private static final MappingFactory MAPPING_FACTORY = MappingFactoryImpl.getInstance();
     private final NativeQueryLanguageComponentFactory nativeQLFactory;
     private final OBDAFactoryWithException modelFactory;
 
@@ -212,7 +209,7 @@ public class SQLMappingParserUsingOwlTest {
     private OBDADataSource setupSampleDataSource() {
         // Setting up the data source
         URI sourceId = URI.create("http://www.example.org/db/dummy/");
-        OBDADataSource datasource = dfac.getDataSource(sourceId);
+        OBDADataSource datasource = MAPPING_FACTORY.getDataSource(sourceId);
         datasource.setParameter(RDBMSourceParameterConstants.DATABASE_URL, "jdbc:postgresql://www.example.org/dummy");
         datasource.setParameter(RDBMSourceParameterConstants.DATABASE_USERNAME, "dummy");
         datasource.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, "dummy");
@@ -223,7 +220,7 @@ public class SQLMappingParserUsingOwlTest {
     private OBDADataSource setupAnotherSampleDataSource() {
         // Setting up the data source
         URI sourceId2 = URI.create("http://www.example.org/db/dummy2/");
-        OBDADataSource datasource2 = dfac.getDataSource(sourceId2);
+        OBDADataSource datasource2 = MAPPING_FACTORY.getDataSource(sourceId2);
         datasource2.setParameter(RDBMSourceParameterConstants.DATABASE_URL, "jdbc:postgresql://www.example.org/dummy2");
         datasource2.setParameter(RDBMSourceParameterConstants.DATABASE_USERNAME, "dummy2");
         datasource2.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, "dummy2");
@@ -236,11 +233,11 @@ public class SQLMappingParserUsingOwlTest {
         // Add some mappings
         try {
             mappingIndex.put(sourceId, ImmutableList.of(nativeQLFactory.create(mappings[0][0],
-                    dfac.getSQLQuery(mappings[0][1]), parser.parse(mappings[0][2]))));
+                    MAPPING_FACTORY.getSQLQuery(mappings[0][1]), parser.parse(mappings[0][2]))));
             mappingIndex.put(sourceId, ImmutableList.of(nativeQLFactory.create(mappings[1][0],
-                    dfac.getSQLQuery(mappings[1][1]), parser.parse(mappings[1][2]))));
+                    MAPPING_FACTORY.getSQLQuery(mappings[1][1]), parser.parse(mappings[1][2]))));
             mappingIndex.put(sourceId, ImmutableList.of(nativeQLFactory.create(mappings[2][0],
-                    dfac.getSQLQuery(mappings[2][1]), parser.parse(mappings[2][2]))));
+                    MAPPING_FACTORY.getSQLQuery(mappings[2][1]), parser.parse(mappings[2][2]))));
         } catch (Exception e) {
             // NO-OP
         }
@@ -252,11 +249,11 @@ public class SQLMappingParserUsingOwlTest {
         // Add some mappings
         try {
             mappingIndex.put(sourceId, ImmutableList.of(nativeQLFactory.create(mappings[3][0],
-                    dfac.getSQLQuery(mappings[3][1]), parser.parse(mappings[3][2]))));
+                    MAPPING_FACTORY.getSQLQuery(mappings[3][1]), parser.parse(mappings[3][2]))));
             mappingIndex.put(sourceId, ImmutableList.of(nativeQLFactory.create(mappings[4][0],
-                    dfac.getSQLQuery(mappings[4][1]), parser.parse(mappings[4][2]))));
+                    MAPPING_FACTORY.getSQLQuery(mappings[4][1]), parser.parse(mappings[4][2]))));
             mappingIndex.put(sourceId, ImmutableList.of(nativeQLFactory.create(mappings[5][0],
-                    dfac.getSQLQuery(mappings[5][1]), parser.parse(mappings[5][2]))));
+                    MAPPING_FACTORY.getSQLQuery(mappings[5][1]), parser.parse(mappings[5][2]))));
         } catch (Exception e) {
             // NO-OP
         }

@@ -26,11 +26,8 @@ import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
 import it.unibz.inf.ontop.injection.OBDAFactoryWithException;
 import it.unibz.inf.ontop.io.PrefixManager;
-import it.unibz.inf.ontop.model.OBDADataFactory;
-import it.unibz.inf.ontop.model.OBDADataSource;
-import it.unibz.inf.ontop.model.OBDAMappingAxiom;
-import it.unibz.inf.ontop.model.OBDAModel;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
+import it.unibz.inf.ontop.model.*;
+import it.unibz.inf.ontop.model.impl.MappingFactoryImpl;
 import it.unibz.inf.ontop.ontology.impl.OntologyVocabularyImpl;
 import it.unibz.inf.ontop.owlapi.directmapping.DirectMappingEngine;
 import org.semanticweb.owlapi.apibinding.OWLManager;
@@ -47,12 +44,13 @@ public class DirectMappingBootstrapper {
     private OBDAModel model;
     private OBDADataSource source;
 
+	private static final MappingFactory MAPPING_FACTORY = MappingFactoryImpl.getInstance();
+
 
     public DirectMappingBootstrapper(String baseuri, String url, String user, String password, String driver,
 									 NativeQueryLanguageComponentFactory nativeQLFactory,
 									 OBDAFactoryWithException obdaFactory) throws Exception{
-		OBDADataFactory fact = OBDADataFactoryImpl.getInstance();
-		OBDADataSource source = fact.getJDBCDataSource(url, user, password, driver);
+		OBDADataSource source = MAPPING_FACTORY.getJDBCDataSource(url, user, password, driver);
 		//create empty ontology and model, add source to model
 		OWLOntologyManager mng = OWLManager.createOWLOntologyManager();
 		OWLOntology onto = mng.createOntology(IRI.create(baseuri));

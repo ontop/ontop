@@ -1,7 +1,7 @@
 package it.unibz.inf.ontop.rdf4j.tests.general;
 
 import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.inf.ontop.owlrefplatform.injection.QuestCorePreferences;
+import it.unibz.inf.ontop.injection.QuestCoreSettings;
 
 import java.util.Properties;
 
@@ -18,17 +18,17 @@ public class OptiqueIntegrationTest extends AbstractVirtualSesameTest {
 
 	private static Properties buildProperties() {
 		Properties p = new Properties();
-		p.setProperty(QuestCorePreferences.ABOX_MODE,
+		p.setProperty(QuestCoreSettings.ABOX_MODE,
 				QuestConstants.VIRTUAL);
-		p.setProperty(QuestCorePreferences.REWRITE, "true");
-		p.setProperty(QuestCorePreferences.REFORMULATION_TECHNIQUE, QuestConstants.TW);
+		p.setProperty(QuestCoreSettings.REWRITE, "true");
+		p.setProperty(QuestCoreSettings.REFORMULATION_TECHNIQUE, QuestConstants.TW);
 		// set jdbc params in config
-		p.setProperty(QuestCorePreferences.DB_NAME, "npd");
-		p.setProperty(QuestCorePreferences.JDBC_URL,
+		p.setProperty(QuestCoreSettings.DB_NAME, "npd");
+		p.setProperty(QuestCoreSettings.JDBC_URL,
 				"jdbc:mysql://10.7.20.39/npd?sessionVariables=sql_mode='ANSI'");
-		p.setProperty(QuestCorePreferences.DB_USER, "fish");
-		p.setProperty(QuestCorePreferences.DB_PASSWORD, "fish");
-		p.setProperty(QuestCorePreferences.JDBC_DRIVER, "com.mysql.jdbc.Driver");
+		p.setProperty(QuestCoreSettings.DB_USER, "fish");
+		p.setProperty(QuestCoreSettings.DB_PASSWORD, "fish");
+		p.setProperty(QuestCoreSettings.JDBC_DRIVER, "com.mysql.jdbc.Driver");
 
 		return p;
 	}

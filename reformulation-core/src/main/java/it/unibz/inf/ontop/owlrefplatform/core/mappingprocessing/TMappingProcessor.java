@@ -21,7 +21,6 @@ package it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing;
  */
 
 import it.unibz.inf.ontop.model.*;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.ontology.ClassExpression;
 import it.unibz.inf.ontop.ontology.DataPropertyExpression;
 import it.unibz.inf.ontop.ontology.DataSomeValuesFrom;
@@ -44,9 +43,9 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-public class TMappingProcessor {
+import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
 
-	private static final OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
+public class TMappingProcessor {
 
 	private static final boolean noCQC = false;		
 
@@ -281,10 +280,10 @@ public class TMappingProcessor {
 						if (!requiresInverse) {
 							if (!full)
 								continue;
-							newMappingHead = fac.getFunction(currentPredicate, terms);
+							newMappingHead = DATA_FACTORY.getFunction(currentPredicate, terms);
 						} 
 						else {
-							newMappingHead = fac.getFunction(currentPredicate, terms.get(1), terms.get(0));
+							newMappingHead = DATA_FACTORY.getFunction(currentPredicate, terms.get(1), terms.get(0));
 						}
 						TMappingRule newmapping = new TMappingRule(newMappingHead, childmapping);				
 						currentNodeMappings.mergeMappingsWithCQC(newmapping);
@@ -308,9 +307,9 @@ public class TMappingProcessor {
 					
 					Function newhead;
 					if (!equivProperty.isInverse()) 
-						newhead = fac.getFunction(p, terms);
+						newhead = DATA_FACTORY.getFunction(p, terms);
 					else 
-						newhead = fac.getFunction(p, terms.get(1), terms.get(0));
+						newhead = DATA_FACTORY.getFunction(p, terms.get(1), terms.get(0));
 					
 					TMappingRule newrule = new TMappingRule(newhead, currentNodeMapping);				
 					equivalentPropertyMappings.mergeMappingsWithCQC(newrule);
@@ -362,7 +361,7 @@ public class TMappingProcessor {
 							
 							List<Term> terms = childmapping.getHeadTerms();
 
-							Function newMappingHead = fac.getFunction(currentPredicate, terms);
+							Function newMappingHead = DATA_FACTORY.getFunction(currentPredicate, terms);
 							TMappingRule newmapping = new TMappingRule(newMappingHead, childmapping);				
 							currentNodeMappings.mergeMappingsWithCQC(newmapping);
 						}
@@ -383,7 +382,7 @@ public class TMappingProcessor {
 				TMappingIndexEntry equivalentPropertyMappings = getMappings(mappingIndex, p);
 					
 				for (TMappingRule currentNodeMapping : currentNodeMappings) {
-					Function newhead = fac.getFunction(p, currentNodeMapping.getHeadTerms());
+					Function newhead = DATA_FACTORY.getFunction(p, currentNodeMapping.getHeadTerms());
 					
 					TMappingRule newrule = new TMappingRule(newhead, currentNodeMapping);				
 					equivalentPropertyMappings.mergeMappingsWithCQC(newrule);
@@ -543,13 +542,13 @@ public class TMappingProcessor {
 
 						Function newMappingHead;
 						if (isClass) {
-							newMappingHead = fac.getFunction(currentPredicate, terms);
+							newMappingHead = DATA_FACTORY.getFunction(currentPredicate, terms);
 						} 
 						else {
 							if (!isInverse) 
-								newMappingHead = fac.getFunction(currentPredicate, terms.get(0));
+								newMappingHead = DATA_FACTORY.getFunction(currentPredicate, terms.get(0));
 							else 
-								newMappingHead = fac.getFunction(currentPredicate, terms.get(1));
+								newMappingHead = DATA_FACTORY.getFunction(currentPredicate, terms.get(1));
 						}
 						TMappingRule newmapping = new TMappingRule(newMappingHead, childmapping);				
 						currentNodeMappings.mergeMappingsWithCQC(newmapping);
@@ -567,7 +566,7 @@ public class TMappingProcessor {
 				TMappingIndexEntry equivalentClassMappings = getMappings(mappingIndex, p);	
 				
 				for (TMappingRule currentNodeMapping : currentNodeMappings) {
-					Function newhead = fac.getFunction(p, currentNodeMapping.getHeadTerms());
+					Function newhead = DATA_FACTORY.getFunction(p, currentNodeMapping.getHeadTerms());
 
 					TMappingRule newrule = new TMappingRule(newhead, currentNodeMapping);				
 					equivalentClassMappings.mergeMappingsWithCQC(newrule);

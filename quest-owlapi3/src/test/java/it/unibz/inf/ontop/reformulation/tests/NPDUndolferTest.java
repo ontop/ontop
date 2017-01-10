@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.reformulation.tests;
 
 import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.inf.ontop.owlrefplatform.injection.QuestCorePreferences;
+import it.unibz.inf.ontop.injection.QuestCoreSettings;
 import it.unibz.inf.ontop.owlrefplatform.core.SQLExecutableQuery;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import junit.framework.TestCase;
@@ -216,10 +216,10 @@ public class NPDUndolferTest extends TestCase {
     private String getNPDUnfoldingThroughRewriting(String query) throws Exception {
 
 		Properties pref = new Properties();
-		pref.put(QuestCorePreferences.DBTYPE, QuestConstants.SEMANTIC_INDEX);
-		pref.put(QuestCorePreferences.ABOX_MODE, QuestConstants.CLASSIC);
-		pref.put(QuestCorePreferences.REFORMULATION_TECHNIQUE, QuestConstants.TW);
-		pref.put(QuestCorePreferences.REWRITE, QuestConstants.TRUE);
+		pref.put(QuestCoreSettings.DBTYPE, QuestConstants.SEMANTIC_INDEX);
+		pref.put(QuestCoreSettings.ABOX_MODE, QuestConstants.CLASSIC);
+		pref.put(QuestCoreSettings.REFORMULATION_TECHNIQUE, QuestConstants.TW);
+		pref.put(QuestCoreSettings.REWRITE, QuestConstants.TRUE);
 
         QuestOWLFactory factory = new QuestOWLFactory();
         QuestConfiguration config = QuestConfiguration.defaultBuilder()
@@ -251,8 +251,8 @@ public class NPDUndolferTest extends TestCase {
 	private String getNPDUnfolding(String query) throws Exception {
 
         Properties pref = new Properties();
-        pref.put(QuestCorePreferences.DBTYPE, QuestConstants.SEMANTIC_INDEX);
-        pref.put(QuestCorePreferences.ABOX_MODE, QuestConstants.CLASSIC);
+        pref.put(QuestCoreSettings.DBTYPE, QuestConstants.SEMANTIC_INDEX);
+        pref.put(QuestCoreSettings.ABOX_MODE, QuestConstants.CLASSIC);
         //pref.put(QuestPreferences.REFORMULATION_TECHNIQUE, QuestConstants.TW);
         //pref.put(QuestPreferences.REWRITE, QuestConstants.TRUE);
 
@@ -288,10 +288,10 @@ public class NPDUndolferTest extends TestCase {
 		QuestOWLFactory fac = new QuestOWLFactory();
 
         Properties pref = new Properties();
-        pref.put(QuestCorePreferences.DBTYPE, QuestConstants.SEMANTIC_INDEX);
-        pref.put(QuestCorePreferences.ABOX_MODE, QuestConstants.CLASSIC);
-        pref.put(QuestCorePreferences.REFORMULATION_TECHNIQUE, QuestConstants.TW);
-        pref.put(QuestCorePreferences.REWRITE, QuestConstants.TRUE);
+        pref.put(QuestCoreSettings.DBTYPE, QuestConstants.SEMANTIC_INDEX);
+        pref.put(QuestCoreSettings.ABOX_MODE, QuestConstants.CLASSIC);
+        pref.put(QuestCoreSettings.REFORMULATION_TECHNIQUE, QuestConstants.TW);
+        pref.put(QuestCoreSettings.REWRITE, QuestConstants.TRUE);
 
         QuestConfiguration config = QuestConfiguration.defaultBuilder()
                 .ontologyFile(owlfile)

@@ -4,7 +4,7 @@ package it.unibz.inf.ontop.rdf4j.tests.general;
 import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.rdf4j.repository.OntopVirtualRepository;
 import junit.framework.TestCase;
-import it.unibz.inf.ontop.owlrefplatform.injection.QuestCorePreferences;
+import it.unibz.inf.ontop.injection.QuestCoreSettings;
 import org.junit.Test;
 
 import org.eclipse.rdf4j.query.BindingSet;
@@ -34,12 +34,12 @@ public class DatetimeStampSesameTest extends TestCase {
 
 		Properties connectionProperties = new Properties();
 		// set jdbc params in config
-		connectionProperties.setProperty(QuestCorePreferences.DB_NAME, "northwind");
-		connectionProperties.setProperty(QuestCorePreferences.JDBC_URL,
+		connectionProperties.setProperty(QuestCoreSettings.DB_NAME, "northwind");
+		connectionProperties.setProperty(QuestCoreSettings.JDBC_URL,
 				"jdbc:mysql://10.7.20.39/northwind?sessionVariables=sql_mode='ANSI'");
-		connectionProperties.setProperty(QuestCorePreferences.DB_USER, "fish");
-		connectionProperties.setProperty(QuestCorePreferences.DB_PASSWORD, "fish");
-		connectionProperties.setProperty(QuestCorePreferences.JDBC_DRIVER, "com.mysql.jdbc.Driver");
+		connectionProperties.setProperty(QuestCoreSettings.DB_USER, "fish");
+		connectionProperties.setProperty(QuestCoreSettings.DB_PASSWORD, "fish");
+		connectionProperties.setProperty(QuestCoreSettings.JDBC_DRIVER, "com.mysql.jdbc.Driver");
 
 		QuestConfiguration configuration = QuestConfiguration.defaultBuilder()
 				.ontologyFile(owlfile)

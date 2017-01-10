@@ -4,7 +4,7 @@ package it.unibz.inf.ontop.rdf4j.tests.general;
 import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.rdf4j.repository.OntopVirtualRepository;
 import junit.framework.TestCase;
-import it.unibz.inf.ontop.owlrefplatform.injection.QuestCorePreferences;
+import it.unibz.inf.ontop.injection.QuestCoreSettings;
 import org.junit.Test;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
@@ -70,12 +70,12 @@ public class SesameTableWithSpaceTest extends TestCase {
 
 		connectionProperties = new Properties();
 		// set jdbc params in config
-		connectionProperties.put(QuestCorePreferences.DB_NAME, "northwindSpaced");
-		connectionProperties.put(QuestCorePreferences.JDBC_URL,
+		connectionProperties.put(QuestCoreSettings.DB_NAME, "northwindSpaced");
+		connectionProperties.put(QuestCoreSettings.JDBC_URL,
 				"jdbc:mysql://10.7.20.39/northwindSpaced?sessionVariables=sql_mode='ANSI'");
-		connectionProperties.put(QuestCorePreferences.DB_USER, "fish");
-		connectionProperties.put(QuestCorePreferences.DB_PASSWORD, "fish");
-		connectionProperties.put(QuestCorePreferences.JDBC_DRIVER,"com.mysql.jdbc.Driver");
+		connectionProperties.put(QuestCoreSettings.DB_USER, "fish");
+		connectionProperties.put(QuestCoreSettings.DB_PASSWORD, "fish");
+		connectionProperties.put(QuestCoreSettings.JDBC_DRIVER,"com.mysql.jdbc.Driver");
 	}
 
 	public void setUp() {
