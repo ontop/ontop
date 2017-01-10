@@ -2,7 +2,6 @@ package it.unibz.inf.ontop.pivotalrepr;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import com.google.inject.Injector;
 import it.unibz.inf.ontop.model.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.Variable;
 import it.unibz.inf.ontop.pivotalrepr.proposal.InvalidQueryOptimizationProposalException;
@@ -68,9 +67,7 @@ public interface IntermediateQuery {
      * Central method for submitting a proposal.
      * Throws a InvalidQueryOptimizationProposalException if the proposal is rejected.
      *
-     * Returns an IntermediateQuery that MIGHT (i) be the current intermediate query that would have been optimized
-     * or (ii) a new IntermediateQuery.
-     *
+     * The current intermediate query will most likely be modified (SIDE-EFFECT).
      *
      * The proposal is expected TO optimize the query WITHOUT CHANGING ITS SEMANTICS.
      * In principle, the proposal could be carefully checked, beware!
@@ -80,17 +77,9 @@ public interface IntermediateQuery {
             throws InvalidQueryOptimizationProposalException, EmptyQueryException;
 
     /**
-     * May forbid the use of a StandardProposalExecutor.
+     * May disable the (possible) validation tests
      */
     <R extends ProposalResults, P extends QueryOptimizationProposal<R>> R applyProposal(P propagationProposal,
-                                                                                        boolean requireUsingInternalExecutor)
-            throws InvalidQueryOptimizationProposalException, EmptyQueryException;
-
-    /**
-     * May forbid the use of a StandardProposalExecutor and disable the (possible) validation tests
-     */
-    <R extends ProposalResults, P extends QueryOptimizationProposal<R>> R applyProposal(P propagationProposal,
-                                                                                        boolean requireUsingInternalExecutor,
                                                                                         boolean disableValidation)
             throws InvalidQueryOptimizationProposalException, EmptyQueryException;
 

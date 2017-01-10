@@ -499,7 +499,7 @@ public class SelfJoinLikeExecutor {
                     topNode, optionalSubstitution.get(), false);
 
             // Forces the use of an internal executor (the treeComponent must remain the same).
-            return query.applyProposal(propagationProposal, true);
+            return query.applyProposal(propagationProposal);
         }
         /**
          * No substitution to propagate

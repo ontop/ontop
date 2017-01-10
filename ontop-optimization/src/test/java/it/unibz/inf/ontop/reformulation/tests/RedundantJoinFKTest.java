@@ -124,10 +124,9 @@ public class RedundantJoinFKTest {
         IntermediateQuery query = queryBuilder.build();
         System.out.println("\nBefore optimization: \n" +  query);
 
-        IntermediateQuery optimizedQuery = query.applyProposal(new InnerJoinOptimizationProposalImpl(joinNode))
-                .getResultingQuery();
+        query.applyProposal(new InnerJoinOptimizationProposalImpl(joinNode));
 
-        System.out.println("\n After optimization: \n" +  optimizedQuery);
+        System.out.println("\n After optimization: \n" +  query);
 
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(metadata);
         DistinctVariableOnlyDataAtom projectionAtom1 = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE, A);
@@ -140,7 +139,7 @@ public class RedundantJoinFKTest {
 
         System.out.println("\n Expected query: \n" +  expectedQuery);
 
-        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, expectedQuery));
+        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(query, expectedQuery));
     }
 
 
@@ -170,12 +169,11 @@ public class RedundantJoinFKTest {
         IntermediateQuery expectedQuery = query.createSnapshot();
         System.out.println("\n Expected query: \n" +  expectedQuery);
 
-        IntermediateQuery optimizedQuery = query.applyProposal(new InnerJoinOptimizationProposalImpl(joinNode))
-                .getResultingQuery();
+        query.applyProposal(new InnerJoinOptimizationProposalImpl(joinNode));
 
-        System.out.println("\n After optimization: \n" +  optimizedQuery);
+        System.out.println("\n After optimization: \n" +  query);
 
-        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, expectedQuery));
+        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(query, expectedQuery));
     }
 
 
@@ -203,12 +201,11 @@ public class RedundantJoinFKTest {
         IntermediateQuery expectedQuery = query.createSnapshot();
         System.out.println("\n Expected query: \n" +  expectedQuery);
 
-        IntermediateQuery optimizedQuery = query.applyProposal(new InnerJoinOptimizationProposalImpl(joinNode))
-                .getResultingQuery();
+        query.applyProposal(new InnerJoinOptimizationProposalImpl(joinNode));
 
-        System.out.println("\n After optimization: \n" +  optimizedQuery);
+        System.out.println("\n After optimization: \n" +  query);
 
-        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, expectedQuery));
+        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(query, expectedQuery));
     }
 
     @Test
@@ -239,12 +236,11 @@ public class RedundantJoinFKTest {
         IntermediateQuery expectedQuery = query.createSnapshot();
         System.out.println("\n Expected query: \n" +  expectedQuery);
 
-        IntermediateQuery optimizedQuery = query.applyProposal(new InnerJoinOptimizationProposalImpl(joinNode))
-                .getResultingQuery();
+        query.applyProposal(new InnerJoinOptimizationProposalImpl(joinNode));
 
-        System.out.println("\n After optimization: \n" +  optimizedQuery);
+        System.out.println("\n After optimization: \n" +  query);
 
-        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, expectedQuery));
+        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(query, expectedQuery));
     }
 
     @Test
@@ -271,12 +267,11 @@ public class RedundantJoinFKTest {
         IntermediateQuery expectedQuery = query.createSnapshot();
         System.out.println("\n Expected query: \n" +  expectedQuery);
 
-        IntermediateQuery optimizedQuery = query.applyProposal(new InnerJoinOptimizationProposalImpl(joinNode))
-                .getResultingQuery();
+        query.applyProposal(new InnerJoinOptimizationProposalImpl(joinNode));
 
-        System.out.println("\n After optimization: \n" +  optimizedQuery);
+        System.out.println("\n After optimization: \n" +  query);
 
-        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, expectedQuery));
+        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(query, expectedQuery));
     }
 
     @Test
@@ -311,10 +306,9 @@ public class RedundantJoinFKTest {
         IntermediateQuery query = queryBuilder.build();
         System.out.println("\nBefore optimization: \n" +  query);
 
-        IntermediateQuery optimizedQuery = query.applyProposal(new InnerJoinOptimizationProposalImpl(joinNode))
-                .getResultingQuery();
+        query.applyProposal(new InnerJoinOptimizationProposalImpl(joinNode));
 
-        System.out.println("\n After optimization: \n" +  optimizedQuery);
+        System.out.println("\n After optimization: \n" +  query);
 
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(metadata);
         DistinctVariableOnlyDataAtom projectionAtom1 = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE, A);
@@ -334,7 +328,7 @@ public class RedundantJoinFKTest {
 
         System.out.println("\n Expected query: \n" +  expectedQuery);
 
-        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, expectedQuery));
+        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(query, expectedQuery));
     }
 
     @Test
@@ -357,10 +351,9 @@ public class RedundantJoinFKTest {
         IntermediateQuery query = queryBuilder.build();
         System.out.println("\nBefore optimization: \n" +  query);
 
-        IntermediateQuery optimizedQuery = query.applyProposal(new InnerJoinOptimizationProposalImpl(joinNode))
-                .getResultingQuery();
+        query.applyProposal(new InnerJoinOptimizationProposalImpl(joinNode));
 
-        System.out.println("\n After optimization: \n" +  optimizedQuery);
+        System.out.println("\n After optimization: \n" +  query);
 
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(metadata);
         DistinctVariableOnlyDataAtom projectionAtom1 = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE, A);
@@ -373,7 +366,7 @@ public class RedundantJoinFKTest {
 
         System.out.println("\n Expected query: \n" +  expectedQuery);
 
-        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, expectedQuery));
+        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(query, expectedQuery));
     }
 
     @Test
@@ -400,12 +393,11 @@ public class RedundantJoinFKTest {
         IntermediateQuery expectedQuery = query.createSnapshot();
         System.out.println("\n Expected query: \n" +  expectedQuery);
 
-        IntermediateQuery optimizedQuery = query.applyProposal(new InnerJoinOptimizationProposalImpl(joinNode))
-                .getResultingQuery();
+        query.applyProposal(new InnerJoinOptimizationProposalImpl(joinNode));
 
-        System.out.println("\n After optimization: \n" +  optimizedQuery);
+        System.out.println("\n After optimization: \n" +  query);
 
-        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, expectedQuery));
+        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(query, expectedQuery));
     }
 
     @Test
@@ -432,12 +424,11 @@ public class RedundantJoinFKTest {
         IntermediateQuery expectedQuery = query.createSnapshot();
         System.out.println("\n Expected query: \n" +  expectedQuery);
 
-        IntermediateQuery optimizedQuery = query.applyProposal(new InnerJoinOptimizationProposalImpl(joinNode))
-                .getResultingQuery();
+        query.applyProposal(new InnerJoinOptimizationProposalImpl(joinNode));
 
-        System.out.println("\n After optimization: \n" +  optimizedQuery);
+        System.out.println("\n After optimization: \n" +  query);
 
-        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, expectedQuery));
+        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(query, expectedQuery));
     }
 
     private static ImmutableFunctionalTerm generateURI1(VariableOrGroundTerm argument) {

@@ -61,7 +61,7 @@ public class GroundTermRemovalFromDataNodeExecutorImpl implements
 
         processJoinOrFilterNodes(receivingNodes, treeComponent);
 
-        return new ProposalResultsImpl(query);
+        return new ProposalResultsImpl();
     }
 
     /**

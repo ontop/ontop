@@ -46,7 +46,7 @@ public class ProjectionShrinkingOptimizer implements IntermediateQueryOptimizer 
         }
         if (optionalProposal.isPresent()) {
             NodeCentricOptimizationResults<ExplicitVariableProjectionNode> optimizationResults = query.applyProposal(optionalProposal.get());
-            QueryNodeNavigationTools.NextNodeAndQuery nextNodeAndQuery = QueryNodeNavigationTools.getNextNodeAndQuery(optimizationResults);
+            QueryNodeNavigationTools.NextNodeAndQuery nextNodeAndQuery = QueryNodeNavigationTools.getNextNodeAndQuery(query, optimizationResults);
             query = nextNodeAndQuery.getNextQuery();
             optionalNextNode = nextNodeAndQuery.getOptionalNextNode();
         } else {

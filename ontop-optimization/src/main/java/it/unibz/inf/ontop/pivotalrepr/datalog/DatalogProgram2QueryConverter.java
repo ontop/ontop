@@ -96,7 +96,7 @@ public class DatalogProgram2QueryConverter {
                     if (intermediateQuery.contains(intensionalNode)) {
                         QueryMergingProposal mergingProposal = new QueryMergingProposalImpl(intensionalNode,
                                 optionalSubQuery);
-                        intermediateQuery.applyProposal(mergingProposal, true);
+                        intermediateQuery.applyProposal(mergingProposal);
                     }
                 }
             }

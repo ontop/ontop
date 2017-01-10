@@ -82,7 +82,7 @@ public class SubstitutionPropagationExecutorImpl<N extends QueryNode>
                         "by its child while propagating the substitution up");
             }
 
-            return new NodeCentricOptimizationResultsImpl<>(ascendingPropagationResults.getResultingQuery(),
+            return new NodeCentricOptimizationResultsImpl<>(query,
                     ascendingPropagationResults.getOptionalNextSibling(),
                     ascendingPropagationResults.getOptionalClosestAncestor());
         }
@@ -135,7 +135,7 @@ public class SubstitutionPropagationExecutorImpl<N extends QueryNode>
                  * No replacing child after applying the substitution (--> is empty)
                  */
                 else {
-                    return new SubstitutionApplicationResults<N>(replacingChildResults);
+                    return new SubstitutionApplicationResults<>(query, replacingChildResults);
                 }
             }
         }

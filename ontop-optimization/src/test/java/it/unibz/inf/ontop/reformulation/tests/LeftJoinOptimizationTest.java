@@ -156,10 +156,10 @@ public class LeftJoinOptimizationTest {
         IntermediateQuery query = queryBuilder.build();
         System.out.println("\nBefore optimization: \n" +  query);
 
-        IntermediateQuery optimizedQuery = query.applyProposal(new LeftJoinOptimizationProposalImpl(leftJoinNode))
-                .getResultingQuery();
+        query.applyProposal(new LeftJoinOptimizationProposalImpl(leftJoinNode));
+                
 
-        System.out.println("\n After optimization: \n" +  optimizedQuery);
+        System.out.println("\n After optimization: \n" +  query);
 
 
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(metadata);
@@ -172,7 +172,7 @@ public class LeftJoinOptimizationTest {
 
         IntermediateQuery query1 = expectedQueryBuilder.build();
 
-        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, query1));
+        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(query, query1));
     }
 
     @Test
@@ -196,10 +196,9 @@ public class LeftJoinOptimizationTest {
         IntermediateQuery query = queryBuilder.build();
         System.out.println("\nBefore optimization: \n" +  query);
 
-        IntermediateQuery optimizedQuery = query.applyProposal(new LeftJoinOptimizationProposalImpl(leftJoinNode))
-                .getResultingQuery();
+        query.applyProposal(new LeftJoinOptimizationProposalImpl(leftJoinNode));
 
-        System.out.println("\n After optimization: \n" +  optimizedQuery);
+        System.out.println("\n After optimization: \n" +  query);
 
 
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(metadata);
@@ -214,7 +213,7 @@ public class LeftJoinOptimizationTest {
 
         IntermediateQuery query1 = expectedQueryBuilder.build();
 
-        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, query1));
+        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(query, query1));
     }
 
     @Test
@@ -240,13 +239,12 @@ public class LeftJoinOptimizationTest {
 
         IntermediateQuery expectedQuery = query.createSnapshot();
 
-        IntermediateQuery optimizedQuery = query.applyProposal(new LeftJoinOptimizationProposalImpl(leftJoinNode))
-                .getResultingQuery();
+        query.applyProposal(new LeftJoinOptimizationProposalImpl(leftJoinNode));
 
-        System.out.println("\n After optimization: \n" +  optimizedQuery);
+        System.out.println("\n After optimization: \n" +  query);
 
         System.out.println("\n Expected query: \n" +  expectedQuery);
-        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, expectedQuery));
+        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(query, expectedQuery));
     }
 
     @Test
@@ -267,10 +265,9 @@ public class LeftJoinOptimizationTest {
         IntermediateQuery query = queryBuilder.build();
         System.out.println("\nBefore optimization: \n" +  query);
 
-        IntermediateQuery optimizedQuery = query.applyProposal(new LeftJoinOptimizationProposalImpl(leftJoinNode))
-                .getResultingQuery();
+        query.applyProposal(new LeftJoinOptimizationProposalImpl(leftJoinNode));
 
-        System.out.println("\n After optimization: \n" +  optimizedQuery);
+        System.out.println("\n After optimization: \n" +  query);
 
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(metadata);
         ConstructionNode constructionNode1 = new ConstructionNodeImpl(projectionAtom.getVariables(),
@@ -283,7 +280,7 @@ public class LeftJoinOptimizationTest {
 
         System.out.println("\n Expected query: \n" +  expectedQuery);
 
-        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, expectedQuery));
+        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(query, expectedQuery));
     }
 
     @Test
@@ -308,8 +305,8 @@ public class LeftJoinOptimizationTest {
         System.out.println("\nBefore optimization: \n" +  query);
 
         try {
-            IntermediateQuery optimizedQuery = query.applyProposal(new LeftJoinOptimizationProposalImpl(leftJoinNode)).getResultingQuery();
-            System.out.println("\n After optimization: \n" +  optimizedQuery);
+            query.applyProposal(new LeftJoinOptimizationProposalImpl(leftJoinNode));
+            System.out.println("\n After optimization: \n" +  query);
             System.out.println("\n Expected query: \n" +  "empty query");
             assertTrue(false);
         } catch (EmptyQueryException e) {
@@ -341,12 +338,11 @@ public class LeftJoinOptimizationTest {
         IntermediateQuery expectedQuery = query.createSnapshot();
         System.out.println("\n Expected query: \n" +  expectedQuery);
 
-        IntermediateQuery optimizedQuery = query.applyProposal(new LeftJoinOptimizationProposalImpl(leftJoinNode))
-                .getResultingQuery();
+        query.applyProposal(new LeftJoinOptimizationProposalImpl(leftJoinNode));
 
-        System.out.println("\n After optimization: \n" +  optimizedQuery);
+        System.out.println("\n After optimization: \n" +  query);
 
-        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, expectedQuery));
+        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(query, expectedQuery));
     }
 
     @Test
@@ -370,12 +366,11 @@ public class LeftJoinOptimizationTest {
         IntermediateQuery expectedQuery = query.createSnapshot();
         System.out.println("\n Expected query: \n" +  expectedQuery);
 
-        IntermediateQuery optimizedQuery = query.applyProposal(new LeftJoinOptimizationProposalImpl(leftJoinNode))
-                .getResultingQuery();
+        query.applyProposal(new LeftJoinOptimizationProposalImpl(leftJoinNode));
 
-        System.out.println("\n After optimization: \n" +  optimizedQuery);
+        System.out.println("\n After optimization: \n" +  query);
 
-        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, expectedQuery));
+        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(query, expectedQuery));
     }
 
     @Test
@@ -398,14 +393,13 @@ public class LeftJoinOptimizationTest {
 
         IntermediateQuery expectedQuery = query.createSnapshot();
 
-        IntermediateQuery optimizedQuery = query.applyProposal(new LeftJoinOptimizationProposalImpl(leftJoinNode))
-                .getResultingQuery();
+        query.applyProposal(new LeftJoinOptimizationProposalImpl(leftJoinNode));
 
-        System.out.println("\n After optimization: \n" +  optimizedQuery);
+        System.out.println("\n After optimization: \n" +  query);
 
         System.out.println("\n Expected query: \n" +  expectedQuery);
 
-        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, expectedQuery));
+        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(query, expectedQuery));
     }
 
     @Test
@@ -428,14 +422,13 @@ public class LeftJoinOptimizationTest {
 
         IntermediateQuery expectedQuery = query.createSnapshot();
 
-        IntermediateQuery optimizedQuery = query.applyProposal(new LeftJoinOptimizationProposalImpl(leftJoinNode))
-                .getResultingQuery();
+        query.applyProposal(new LeftJoinOptimizationProposalImpl(leftJoinNode));
 
-        System.out.println("\n After optimization: \n" +  optimizedQuery);
+        System.out.println("\n After optimization: \n" +  query);
 
         System.out.println("\n Expected query: \n" +  expectedQuery);
 
-        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, expectedQuery));
+        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(query, expectedQuery));
     }
 
     @Test
@@ -456,10 +449,9 @@ public class LeftJoinOptimizationTest {
         IntermediateQuery query = queryBuilder.build();
         System.out.println("\nBefore optimization: \n" +  query);
 
-        IntermediateQuery optimizedQuery = query.applyProposal(new LeftJoinOptimizationProposalImpl(leftJoinNode))
-                .getResultingQuery();
+        query.applyProposal(new LeftJoinOptimizationProposalImpl(leftJoinNode));
 
-        System.out.println("\n After optimization: \n" +  optimizedQuery);
+        System.out.println("\n After optimization: \n" +  query);
 
 
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(metadata);
@@ -474,7 +466,7 @@ public class LeftJoinOptimizationTest {
 
         IntermediateQuery query1 = expectedQueryBuilder.build();
 
-        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, query1));
+        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(query, query1));
     }
 
 
@@ -496,10 +488,9 @@ public class LeftJoinOptimizationTest {
         IntermediateQuery query = queryBuilder.build();
         System.out.println("\nBefore optimization: \n" +  query);
 
-        IntermediateQuery optimizedQuery = query.applyProposal(new LeftJoinOptimizationProposalImpl(leftJoinNode))
-                .getResultingQuery();
+        query.applyProposal(new LeftJoinOptimizationProposalImpl(leftJoinNode));
 
-        System.out.println("\n After optimization: \n" +  optimizedQuery);
+        System.out.println("\n After optimization: \n" +  query);
 
 
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(metadata);
@@ -512,7 +503,7 @@ public class LeftJoinOptimizationTest {
 
         IntermediateQuery query1 = expectedQueryBuilder.build();
 
-        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, query1));
+        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(query, query1));
     }
 
     @Test
@@ -533,10 +524,9 @@ public class LeftJoinOptimizationTest {
         IntermediateQuery query = queryBuilder.build();
         System.out.println("\nBefore optimization: \n" +  query);
 
-        IntermediateQuery optimizedQuery = query.applyProposal(new LeftJoinOptimizationProposalImpl(leftJoinNode))
-                .getResultingQuery();
+        query.applyProposal(new LeftJoinOptimizationProposalImpl(leftJoinNode));
 
-        System.out.println("\n After optimization: \n" +  optimizedQuery);
+        System.out.println("\n After optimization: \n" +  query);
 
 
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(metadata);
@@ -547,7 +537,7 @@ public class LeftJoinOptimizationTest {
 
         IntermediateQuery query1 = expectedQueryBuilder.build();
 
-        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, query1));
+        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(query, query1));
     }
 
     @Test
@@ -568,10 +558,9 @@ public class LeftJoinOptimizationTest {
         IntermediateQuery query = queryBuilder.build();
         System.out.println("\nBefore optimization: \n" +  query);
 
-        IntermediateQuery optimizedQuery = query.applyProposal(new LeftJoinOptimizationProposalImpl(leftJoinNode))
-                .getResultingQuery();
+        query.applyProposal(new LeftJoinOptimizationProposalImpl(leftJoinNode));
 
-        System.out.println("\n After optimization: \n" +  optimizedQuery);
+        System.out.println("\n After optimization: \n" +  query);
 
 
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(metadata);
@@ -587,7 +576,7 @@ public class LeftJoinOptimizationTest {
         IntermediateQuery query1 = expectedQueryBuilder.build();
 
         System.out.println("\n Expected query: \n" +  query1);
-        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, query1));
+        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(query, query1));
     }
 
     @Test
@@ -608,10 +597,9 @@ public class LeftJoinOptimizationTest {
         IntermediateQuery query = queryBuilder.build();
         System.out.println("\nBefore optimization: \n" +  query);
 
-        IntermediateQuery optimizedQuery = query.applyProposal(new LeftJoinOptimizationProposalImpl(leftJoinNode))
-                .getResultingQuery();
+        query.applyProposal(new LeftJoinOptimizationProposalImpl(leftJoinNode));
 
-        System.out.println("\n After optimization: \n" +  optimizedQuery);
+        System.out.println("\n After optimization: \n" +  query);
 
 
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(metadata);
@@ -622,7 +610,7 @@ public class LeftJoinOptimizationTest {
 
         IntermediateQuery query1 = expectedQueryBuilder.build();
 
-        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, query1));
+        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(query, query1));
     }
 
     @Test
@@ -644,10 +632,9 @@ public class LeftJoinOptimizationTest {
         IntermediateQuery query = queryBuilder.build();
         System.out.println("\nBefore optimization: \n" +  query);
 
-        IntermediateQuery optimizedQuery = query.applyProposal(new LeftJoinOptimizationProposalImpl(leftJoinNode))
-                .getResultingQuery();
+        query.applyProposal(new LeftJoinOptimizationProposalImpl(leftJoinNode));
 
-        System.out.println("\n After optimization: \n" +  optimizedQuery);
+        System.out.println("\n After optimization: \n" +  query);
 
 
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(metadata);
@@ -658,7 +645,7 @@ public class LeftJoinOptimizationTest {
 
         IntermediateQuery query1 = expectedQueryBuilder.build();
 
-        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, query1));
+        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(query, query1));
     }
 
 

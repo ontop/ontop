@@ -165,7 +165,7 @@ public class PushDownBooleanExpressionOptimizerImpl implements PushDownBooleanEx
                 throw new IllegalStateException("Unexpected empty query exception while pushing down boolean expressions");
             }
 
-            return getNextNodeAndQuery(results);
+            return getNextNodeAndQuery(currentQuery, results);
         }
         else {
             return new NextNodeAndQuery(getDepthFirstNextNode(currentQuery, currentNode), currentQuery);

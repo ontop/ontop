@@ -72,8 +72,6 @@ public class SubstitutionPropagationTest {
     private static final ExtensionalDataNode DATA_NODE_6 = buildExtensionalDataNode(TABLE3_PREDICATE, E, F);
     private static final ExtensionalDataNode DATA_NODE_7 = buildExtensionalDataNode(TABLE4_PREDICATE, G, H);
 
-    private static final boolean REQUIRE_USING_IN_PLACE_EXECUTOR = true;
-
     @Test
     public void testURI1PropOtherBranch() throws EmptyQueryException {
         IntermediateQueryBuilder initialQueryBuilder = createQueryBuilder(EMPTY_METADATA);
@@ -164,7 +162,7 @@ public class SubstitutionPropagationTest {
         System.out.println(propagationProposal);
 
         // Updates the query (in-place optimization)
-        initialQuery.applyProposal(propagationProposal, REQUIRE_USING_IN_PLACE_EXECUTOR);
+        initialQuery.applyProposal(propagationProposal);
 
 //        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(EMPTY_METADATA);
 //        ConstructionNode newRootNode = leftConstructionNode;
@@ -216,7 +214,7 @@ public class SubstitutionPropagationTest {
         System.out.println(propagationProposal);
 
         // Updates the query (in-place optimization)
-        initialQuery.applyProposal(propagationProposal, REQUIRE_USING_IN_PLACE_EXECUTOR);
+        initialQuery.applyProposal(propagationProposal);
     }
 
     @Test
@@ -456,7 +454,7 @@ public class SubstitutionPropagationTest {
         System.out.println(propagationProposal);
 
         // Updates the query (in-place optimization)
-        initialQuery.applyProposal(propagationProposal, REQUIRE_USING_IN_PLACE_EXECUTOR);
+        initialQuery.applyProposal(propagationProposal);
     }
 
     @Test
@@ -1036,8 +1034,7 @@ public class SubstitutionPropagationTest {
         System.out.println("\n Expected query: \n" +  expectedQuery);
 
         // Updates the query (in-place optimization)
-        NodeCentricOptimizationResults<? extends QueryNode> results = query.applyProposal(propagationProposal,
-                REQUIRE_USING_IN_PLACE_EXECUTOR);
+        NodeCentricOptimizationResults<? extends QueryNode> results = query.applyProposal(propagationProposal);
 
         System.out.println("\n Optimized query: \n" +  query);
 

@@ -25,8 +25,7 @@ import static junit.framework.TestCase.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 public class EmptyNodeRemovalTest {
-    
-    private static boolean REQUIRE_USING_IN_PLACE_EXECUTOR = true;
+
     private static AtomPredicate ANS1_PREDICATE = new AtomPredicateImpl("ans1", 2);
     private static Variable X = DATA_FACTORY.getVariable("x");
     private static Variable Y = DATA_FACTORY.getVariable("y");
@@ -251,7 +250,7 @@ public class EmptyNodeRemovalTest {
 
         System.out.println("\n Unsatisfiable query: \n" +  query);
 
-        query.applyProposal(new RemoveEmptyNodeProposalImpl(emptyNode, false), REQUIRE_USING_IN_PLACE_EXECUTOR);
+        query.applyProposal(new RemoveEmptyNodeProposalImpl(emptyNode, false));
     }
 
     @Test
@@ -365,7 +364,7 @@ public class EmptyNodeRemovalTest {
         System.out.println("\n Unsatisfiable query: \n" +  query);
 
         // Should throw an exception
-        query.applyProposal(new RemoveEmptyNodeProposalImpl(emptyNode, true), REQUIRE_USING_IN_PLACE_EXECUTOR);
+        query.applyProposal(new RemoveEmptyNodeProposalImpl(emptyNode, true));
         System.err.println("\n Failure: this query should have been declared as unsatisfiable: \n" +  query);
     }
 
@@ -393,7 +392,7 @@ public class EmptyNodeRemovalTest {
         System.out.println("\n Unsatisfiable query: \n" +  query);
 
         // Should throw an exception
-        query.applyProposal(new RemoveEmptyNodeProposalImpl(emptyNode, true), REQUIRE_USING_IN_PLACE_EXECUTOR);
+        query.applyProposal(new RemoveEmptyNodeProposalImpl(emptyNode, true));
         System.err.println("\n Failure: this query should have been declared as unsatisfiable: \n" +  query);
     }
 
@@ -419,7 +418,7 @@ public class EmptyNodeRemovalTest {
         System.out.println("\n Unsatisfiable query: \n" +  query);
 
         // Should throw an exception
-        query.applyProposal(new RemoveEmptyNodeProposalImpl(emptyNode, true), REQUIRE_USING_IN_PLACE_EXECUTOR);
+        query.applyProposal(new RemoveEmptyNodeProposalImpl(emptyNode, true));
         System.err.println("\n Failure: this query should have been declared as unsatisfiable: \n" +  query);
     }
 
@@ -431,8 +430,7 @@ public class EmptyNodeRemovalTest {
         System.out.println("\n Unsatisfiable query: \n" +  query);
 
         // Should throw an exception
-        query.applyProposal(new RemoveEmptyNodeProposalImpl(EMPTY_NODE_1, true),
-                REQUIRE_USING_IN_PLACE_EXECUTOR);
+        query.applyProposal(new RemoveEmptyNodeProposalImpl(EMPTY_NODE_1, true));
         System.err.println("\n Failure: this query should have been declared as unsatisfiable: \n" +  query);
     }
 
@@ -445,8 +443,7 @@ public class EmptyNodeRemovalTest {
         System.out.println("\n Unsatisfiable query: \n" +  query);
 
         // Should throw an exception
-        query.applyProposal(new RemoveEmptyNodeProposalImpl(EMPTY_NODE_1, true),
-                REQUIRE_USING_IN_PLACE_EXECUTOR);
+        query.applyProposal(new RemoveEmptyNodeProposalImpl(EMPTY_NODE_1, true));
         System.err.println("\n Failure: this query should have been declared as unsatisfiable: \n" +  query);
     }
 
@@ -553,7 +550,7 @@ public class EmptyNodeRemovalTest {
         System.out.println("\n Unsatisfiable query: \n" +  query);
 
         // Should throw an exception
-        query.applyProposal(new RemoveEmptyNodeProposalImpl(emptyNode, true), REQUIRE_USING_IN_PLACE_EXECUTOR);
+        query.applyProposal(new RemoveEmptyNodeProposalImpl(emptyNode, true));
         System.err.println("\n Failure: this query should have been declared as unsatisfiable: \n" +  query);
     }
 
@@ -867,8 +864,7 @@ public class EmptyNodeRemovalTest {
         System.out.println("\n Expected query: \n" +  expectedQuery);
 
         // Updates the query (in-place optimization)
-        NodeTrackingResults<EmptyNode> results = query.applyProposal(new RemoveEmptyNodeProposalImpl(emptyNode, true),
-                REQUIRE_USING_IN_PLACE_EXECUTOR);
+        NodeTrackingResults<EmptyNode> results = query.applyProposal(new RemoveEmptyNodeProposalImpl(emptyNode, true));
 
         System.out.println("\n Optimized query: \n" +  query);
 

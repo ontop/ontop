@@ -55,7 +55,7 @@ public class QueryUnfolderImpl implements QueryUnfolder {
                     mappingIndex.get(intensionalNode.getProjectionAtom().getPredicate()));
 
             QueryMergingProposal queryMerging = new QueryMergingProposalImpl(intensionalNode, optionalMapping);
-            query.applyProposal(queryMerging, true);
+            query.applyProposal(queryMerging);
 
             /**
              * Next intensional node

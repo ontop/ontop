@@ -65,7 +65,7 @@ public class RedundantSelfJoinExecutor extends SelfJoinLikeExecutor implements I
                      */
                     if (result.getOptionalNewNode().isPresent()) {
                         int oldSize = initialMap.size();
-                        initialMap = extractDataNodes(result.getResultingQuery().getChildren(
+                        initialMap = extractDataNodes(query.getChildren(
                                 result.getOptionalNewNode().get()));
                         int newSize = initialMap.size();
 
@@ -194,7 +194,7 @@ public class RedundantSelfJoinExecutor extends SelfJoinLikeExecutor implements I
          * (may throw an EmptyQuery)
          */
         RemoveEmptyNodeProposal removalProposal = new RemoveEmptyNodeProposalImpl(emptyNode, false);
-        NodeTrackingResults<EmptyNode> removalResults = query.applyProposal(removalProposal, true);
+        NodeTrackingResults<EmptyNode> removalResults = query.applyProposal(removalProposal);
 
         /**
          * If the query is not empty, changes the type of the results

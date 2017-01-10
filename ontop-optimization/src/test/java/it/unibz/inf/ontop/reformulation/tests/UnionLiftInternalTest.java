@@ -123,12 +123,11 @@ public class UnionLiftInternalTest {
         originalBuilder.addChild(table2Construction, table2DataNode);
         originalBuilder.addChild(table1Construction, table1DataNode);
 
-        IntermediateQuery originalQuery = originalBuilder.build();
+        IntermediateQuery query = originalBuilder.build();
 
-        System.out.println("\n Original query: \n" +  originalQuery);
+        System.out.println("\n Original query: \n" +  query);
 
-        IntermediateQuery optimizedQuery = originalQuery.applyProposal(new UnionLiftProposalImpl(unionNode, leftJoinNode))
-                .getResultingQuery();
+        query.applyProposal(new UnionLiftProposalImpl(unionNode, leftJoinNode));
 
         /**
          * Expected Query
@@ -163,10 +162,10 @@ public class UnionLiftInternalTest {
 
         IntermediateQuery expectedQuery = expectedBuilder.build();
 
-        System.out.println("\n Optimized query: \n" +  optimizedQuery);
+        System.out.println("\n Optimized query: \n" +  query);
         System.out.println("\n Expected query: \n" +  expectedQuery);
 
-        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, expectedQuery));
+        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(query, expectedQuery));
 
     }
 
@@ -213,14 +212,13 @@ public class UnionLiftInternalTest {
         originalBuilder.addChild(unionNode2, table3DataNode);
 
 
-        IntermediateQuery originalQuery = originalBuilder.build();
+        IntermediateQuery query = originalBuilder.build();
 
-        System.out.println("\n Original query: \n" +  originalQuery);
+        System.out.println("\n Original query: \n" +  query);
 
-        IntermediateQuery optimizedQuery = originalQuery.applyProposal(new UnionLiftProposalImpl(unionNode2, joinNode))
-                .getResultingQuery();
+        query.applyProposal(new UnionLiftProposalImpl(unionNode2, joinNode));
 
-        System.out.println("\n Optimized query: \n" +  optimizedQuery);
+        System.out.println("\n Optimized query: \n" +  query);
 
         /**
          * Expected Query
@@ -251,7 +249,7 @@ public class UnionLiftInternalTest {
 
         System.out.println("\n Expected query: \n" +  expectedQuery);
 
-        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, expectedQuery));
+        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(query, expectedQuery));
     }
 
     @Test
@@ -301,15 +299,13 @@ public class UnionLiftInternalTest {
         originalBuilder.addChild(unionNode22, table5DataNode.clone());
 
 
-        IntermediateQuery originalQuery = originalBuilder.build();
+        IntermediateQuery query = originalBuilder.build();
 
-        System.out.println("\n Original query: \n" +  originalQuery);
+        System.out.println("\n Original query: \n" +  query);
 
-        NodeCentricOptimizationResults<UnionNode> unionNodeNodeCentricOptimizationResults = originalQuery.applyProposal(new UnionLiftProposalImpl(unionNode21, joinNode));
-        IntermediateQuery optimizedQuery = unionNodeNodeCentricOptimizationResults
-                .getResultingQuery();
+        NodeCentricOptimizationResults<UnionNode> unionNodeNodeCentricOptimizationResults = query.applyProposal(new UnionLiftProposalImpl(unionNode21, joinNode));
 
-        System.out.println("\n Optimized query: \n" +  optimizedQuery);
+        System.out.println("\n Optimized query: \n" +  query);
 
         /**
          * Expected Query
@@ -352,7 +348,7 @@ public class UnionLiftInternalTest {
 
         System.out.println("\n Expected query: \n" +  expectedQuery);
 
-        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, expectedQuery));
+        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(query, expectedQuery));
     }
 
     @Test
@@ -402,15 +398,13 @@ public class UnionLiftInternalTest {
         originalBuilder.addChild(unionNode22, table5DataNode.clone());
 
 
-        IntermediateQuery originalQuery = originalBuilder.build();
+        IntermediateQuery query = originalBuilder.build();
 
-        System.out.println("\n Original query: \n" +  originalQuery);
+        System.out.println("\n Original query: \n" +  query);
 
-        NodeCentricOptimizationResults<UnionNode> unionNodeNodeCentricOptimizationResults = originalQuery.applyProposal(new UnionLiftProposalImpl(unionNode22, joinNode));
-        IntermediateQuery optimizedQuery = unionNodeNodeCentricOptimizationResults
-                .getResultingQuery();
+        NodeCentricOptimizationResults<UnionNode> unionNodeNodeCentricOptimizationResults = query.applyProposal(new UnionLiftProposalImpl(unionNode22, joinNode));
 
-        System.out.println("\n Optimized query: \n" +  optimizedQuery);
+        System.out.println("\n Optimized query: \n" +  query);
 
         /**
          * Expected Query
@@ -448,7 +442,7 @@ public class UnionLiftInternalTest {
 
         System.out.println("\n Expected query: \n" +  expectedQuery);
 
-        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, expectedQuery));
+        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(query, expectedQuery));
     }
 
     @Test
@@ -504,15 +498,14 @@ public class UnionLiftInternalTest {
 
 
 
-        IntermediateQuery originalQuery = originalBuilder.build();
+        IntermediateQuery query = originalBuilder.build();
 
-        System.out.println("\n Original query: \n" +  originalQuery);
+        System.out.println("\n Original query: \n" +  query);
 
-        NodeCentricOptimizationResults<UnionNode> unionNodeNodeCentricOptimizationResults = originalQuery.applyProposal(new UnionLiftProposalImpl(unionNode21, joinNode));
-        IntermediateQuery optimizedQuery = unionNodeNodeCentricOptimizationResults
-                .getResultingQuery();
+        NodeCentricOptimizationResults<UnionNode> unionNodeNodeCentricOptimizationResults = query.applyProposal(
+                new UnionLiftProposalImpl(unionNode21, joinNode));
 
-        System.out.println("\n Optimized query: \n" +  optimizedQuery);
+        System.out.println("\n Optimized query: \n" +  query);
 
         /**
          * Expected Query
@@ -568,16 +561,15 @@ public class UnionLiftInternalTest {
 
         System.out.println("\n Expected query: \n" +  expectedQuery);
 
-        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, expectedQuery));
+        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(query, expectedQuery));
 
 
         System.out.println("\n Continue from the expected query: \n" +  expectedQuery);
 
         NodeCentricOptimizationResults<UnionNode> unionNodeNodeCentricOptimizationResults2 = expectedQuery.applyProposal(new UnionLiftProposalImpl(unionNode5, joinNode2));
-        IntermediateQuery optimizedQuery2 = unionNodeNodeCentricOptimizationResults2
-                .getResultingQuery();
+        IntermediateQuery query2 = expectedQuery;
 
-        System.out.println("\n Optimized query: \n" +  optimizedQuery2);
+        System.out.println("\n Optimized query: \n" +  query2);
 
         /**
          * Second Expected Query
@@ -644,7 +636,7 @@ public class UnionLiftInternalTest {
 
         System.out.println("\n Expected query: \n" +  expectedQuery2);
 
-        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery2, expectedQuery2));
+        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(query2, expectedQuery2));
     }
 
     @Test(expected = InvalidQueryOptimizationProposalException.class)
@@ -689,12 +681,12 @@ public class UnionLiftInternalTest {
         originalBuilder.addChild(unionNode2, table3DataNode);
 
 
-        IntermediateQuery originalQuery = originalBuilder.build();
+        IntermediateQuery query = originalBuilder.build();
 
-        System.out.println("\n Original query: \n" +  originalQuery);
+        System.out.println("\n Original query: \n" +  query);
 
-        IntermediateQuery optimizedQuery = originalQuery.applyProposal(new UnionLiftProposalImpl(unionNode2, unionNode1))
-                .getResultingQuery();
+        query.applyProposal(new UnionLiftProposalImpl(unionNode2, unionNode1))
+                ;
     }
 
     @Test(expected = InvalidQueryOptimizationProposalException.class)
@@ -740,14 +732,14 @@ public class UnionLiftInternalTest {
         originalBuilder.addChild(unionNode, table1DataNode);
         originalBuilder.addChild(unionNode, table2DataNode);
 
-        IntermediateQuery originalQuery = originalBuilder.build();
+        IntermediateQuery query = originalBuilder.build();
 
-        System.out.println("\n Original query: \n" +  originalQuery);
+        System.out.println("\n Original query: \n" +  query);
 
-        IntermediateQuery optimizedQuery = originalQuery.applyProposal(new UnionLiftProposalImpl(unionNode, joinNode1))
-                .getResultingQuery();
+        query.applyProposal(new UnionLiftProposalImpl(unionNode, joinNode1))
+                ;
 
-        System.out.println("\n Optimized query: \n" +  optimizedQuery);
+        System.out.println("\n Optimized query: \n" +  query);
 
     }
 
@@ -794,14 +786,14 @@ public class UnionLiftInternalTest {
         originalBuilder.addChild(unionNode, table1DataNode);
         originalBuilder.addChild(unionNode, table2DataNode);
 
-        IntermediateQuery originalQuery = originalBuilder.build();
+        IntermediateQuery query = originalBuilder.build();
 
-        System.out.println("\n Original query: \n" +  originalQuery);
+        System.out.println("\n Original query: \n" +  query);
 
-        IntermediateQuery optimizedQuery = originalQuery.applyProposal(new UnionLiftProposalImpl(unionNode, joinNode1))
-                .getResultingQuery();
+        query.applyProposal(new UnionLiftProposalImpl(unionNode, joinNode1))
+                ;
 
-        System.out.println("\n Optimized query: \n" +  optimizedQuery);
+        System.out.println("\n Optimized query: \n" +  query);
 
 
     }
@@ -844,14 +836,13 @@ public class UnionLiftInternalTest {
         originalBuilder.addChild(unionNode, table1DataNode);
         originalBuilder.addChild(unionNode, table2DataNode);
 
-        IntermediateQuery originalQuery = originalBuilder.build();
+        IntermediateQuery query = originalBuilder.build();
 
-        System.out.println("\n Original query: \n" +  originalQuery);
+        System.out.println("\n Original query: \n" +  query);
 
-        IntermediateQuery optimizedQuery = originalQuery.applyProposal(new UnionLiftProposalImpl(unionNode, joinNode))
-                .getResultingQuery();
+        query.applyProposal(new UnionLiftProposalImpl(unionNode, joinNode));
 
-        System.out.println("\n Optimized query: \n" +  optimizedQuery);
+        System.out.println("\n Optimized query: \n" +  query);
 
         /**
          * Expected Query
@@ -881,7 +872,7 @@ public class UnionLiftInternalTest {
 
         System.out.println("\n Expected query: \n" +  expectedQuery);
 
-        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, expectedQuery));
+        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(query, expectedQuery));
 
     }
 

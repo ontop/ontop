@@ -173,12 +173,12 @@ public class QueryMergingExecutorImpl implements QueryMergingExecutor {
         while (nextEmptyNode.isPresent()) {
             // Removes the empty nodes (in-place operation)
             RemoveEmptyNodeProposal cleaningProposal = new RemoveEmptyNodeProposalImpl(nextEmptyNode.get(), false);
-            mainQuery.applyProposal(cleaningProposal, true);
+            mainQuery.applyProposal(cleaningProposal);
 
             nextEmptyNode = treeComponent.getEmptyNodes().stream().findFirst();
         }
 
-        return new ProposalResultsImpl(mainQuery);
+        return new ProposalResultsImpl();
     }
 
     private void removeUnsatisfiedNode(QueryTreeComponent treeComponent, IntensionalDataNode intensionalNode) {

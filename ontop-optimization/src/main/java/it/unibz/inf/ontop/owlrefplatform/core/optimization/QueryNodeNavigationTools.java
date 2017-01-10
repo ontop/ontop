@@ -41,8 +41,8 @@ public class QueryNodeNavigationTools {
     /**
      * Finds the next node to visit in a new intermediate query
      */
-    public static NextNodeAndQuery getNextNodeAndQuery(NodeCentricOptimizationResults<? extends QueryNode> results) {
-        IntermediateQuery query = results.getResultingQuery();
+    public static NextNodeAndQuery getNextNodeAndQuery(IntermediateQuery query,
+                                                       NodeCentricOptimizationResults<? extends QueryNode> results) {
 
         /**
          * If there is still a node at center: gets the next one of it

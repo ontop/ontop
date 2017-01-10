@@ -194,22 +194,8 @@ public class IntermediateQueryImpl implements IntermediateQuery {
         return treeComponent.contains(node);
     }
 
-    /**
-     * TODO: remove this method
-     */
     @Override
     public <R extends ProposalResults, P extends QueryOptimizationProposal<R>> R applyProposal(P proposal,
-                                                       boolean requireUsingInternalExecutor)
-            throws InvalidQueryOptimizationProposalException, EmptyQueryException {
-        return applyProposal(proposal, requireUsingInternalExecutor, false);
-    }
-
-    /**
-     * TODO: remove requireUsingInternalExecutor
-     */
-    @Override
-    public <R extends ProposalResults, P extends QueryOptimizationProposal<R>> R applyProposal(P proposal,
-                                                                                               boolean requireUsingInternalExecutor,
                                                                                                boolean disableValidationTests)
             throws InvalidQueryOptimizationProposalException, EmptyQueryException {
 
@@ -233,7 +219,7 @@ public class IntermediateQueryImpl implements IntermediateQuery {
     @Override
     public <R extends ProposalResults, P extends QueryOptimizationProposal<R>> R applyProposal(P propagationProposal)
             throws InvalidQueryOptimizationProposalException, EmptyQueryException {
-        return applyProposal(propagationProposal, false, false);
+        return applyProposal(propagationProposal, false);
     }
 
     @Override

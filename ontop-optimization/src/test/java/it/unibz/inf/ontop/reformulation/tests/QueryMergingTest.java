@@ -26,7 +26,6 @@ import static it.unibz.inf.ontop.OptimizationTestingTools.*;
 
 public class QueryMergingTest {
 
-    private static boolean REQUIRE_USING_IN_PLACE_EXECUTOR = true;
     private static AtomPredicate ANS0_PREDICATE = new AtomPredicateImpl("ans1", 0);
     private static AtomPredicate ANS1_PREDICATE = new AtomPredicateImpl("ans1", 2);
     private static AtomPredicate ANS2_PREDICATE = new AtomPredicateImpl("ans1", 1);
@@ -1072,12 +1071,10 @@ public class QueryMergingTest {
         IntermediateQuery lastMapping = lastMappingBuilder.build();
         System.out.println("Last name mapping: \n" + lastMapping);
 
-        query.applyProposal(new QueryMergingProposalImpl(firstIntentional, Optional.of(firstMapping)),
-                REQUIRE_USING_IN_PLACE_EXECUTOR);
+        query.applyProposal(new QueryMergingProposalImpl(firstIntentional, Optional.of(firstMapping)));
         System.out.println("\n After merging the first mapping: \n" + query);
 
-        query.applyProposal(new QueryMergingProposalImpl(lastIntentional, Optional.of(lastMapping)),
-                REQUIRE_USING_IN_PLACE_EXECUTOR);
+        query.applyProposal(new QueryMergingProposalImpl(lastIntentional, Optional.of(lastMapping)));
         System.out.println("\n After merging the last mapping: \n" + query);
 
         /**
@@ -1155,7 +1152,7 @@ public class QueryMergingTest {
 
         QueryMergingProposal queryMerging = new QueryMergingProposalImpl(intensionalDataNode, Optional.ofNullable(mapping));
         try {
-            mainQuery.applyProposal(queryMerging, true);
+            mainQuery.applyProposal(queryMerging);
         } catch (EmptyQueryException e) {
             e.printStackTrace();
         }
@@ -1230,7 +1227,7 @@ public class QueryMergingTest {
          */
         QueryMergingProposal queryMerging = new QueryMergingProposalImpl(intensionalDataNode, Optional.ofNullable(mapping));
         try {
-            mainQuery.applyProposal(queryMerging, true);
+            mainQuery.applyProposal(queryMerging);
         }catch (IllegalArgumentException|EmptyQueryException e){
             e.printStackTrace();
             fail();
@@ -1336,7 +1333,7 @@ public class QueryMergingTest {
          */
         QueryMergingProposal queryMerging = new QueryMergingProposalImpl(intensionalDataNode, Optional.ofNullable(mapping));
         try {
-            mainQuery.applyProposal(queryMerging, true);
+            mainQuery.applyProposal(queryMerging);
         }catch (IllegalArgumentException|EmptyQueryException e){
             e.printStackTrace();
             fail();
@@ -1376,7 +1373,7 @@ public class QueryMergingTest {
         System.out.println("\n Expected query: \n" + expectedQuery);
 
         // Updates the query (in-place optimization)
-        mainQuery.applyProposal(new QueryMergingProposalImpl(intensionalNode, Optional.of(subQuery)), REQUIRE_USING_IN_PLACE_EXECUTOR);
+        mainQuery.applyProposal(new QueryMergingProposalImpl(intensionalNode, Optional.of(subQuery)));
 
         System.out.println("\n Optimized query: \n" + mainQuery);
 

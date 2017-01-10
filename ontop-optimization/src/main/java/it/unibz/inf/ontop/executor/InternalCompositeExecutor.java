@@ -33,7 +33,6 @@ public abstract class InternalCompositeExecutor<P extends QueryOptimizationPropo
 
             results = executor.apply(optionalProposal.get(), query, treeComponent);
             optionalProposal = createNewProposal(results);
-            query = results.getResultingQuery();
 
         } while(optionalProposal.isPresent() && executorIterator.hasNext());
 

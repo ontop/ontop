@@ -136,10 +136,9 @@ public class RedundantSelfJoinTest {
         IntermediateQuery query = queryBuilder.build();
         System.out.println("\nBefore optimization: \n" +  query);
 
-        IntermediateQuery optimizedQuery = query.applyProposal(new InnerJoinOptimizationProposalImpl(joinNode))
-                .getResultingQuery();
+        query.applyProposal(new InnerJoinOptimizationProposalImpl(joinNode));
 
-        System.out.println("\n After optimization: \n" +  optimizedQuery);
+        System.out.println("\n After optimization: \n" +  query);
 
         IntermediateQueryBuilder queryBuilder1 = createQueryBuilder(METADATA);
         DistinctVariableOnlyDataAtom projectionAtom1 = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE, M, N, O);
@@ -155,7 +154,7 @@ public class RedundantSelfJoinTest {
 
         System.out.println("\n Expected query: \n" +  query1);
 
-        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, query1));
+        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(query, query1));
     }
 
     /**
@@ -183,10 +182,9 @@ public class RedundantSelfJoinTest {
         IntermediateQuery query = queryBuilder.build();
         System.out.println("\nBefore optimization: \n" +  query);
 
-        IntermediateQuery optimizedQuery = query.applyProposal(new InnerJoinOptimizationProposalImpl(joinNode))
-                .getResultingQuery();
+        query.applyProposal(new InnerJoinOptimizationProposalImpl(joinNode));
 
-        System.out.println("\n After optimization: \n" +  optimizedQuery);
+        System.out.println("\n After optimization: \n" +  query);
 
 
         IntermediateQueryBuilder queryBuilder1 = createQueryBuilder(METADATA);
@@ -204,7 +202,7 @@ public class RedundantSelfJoinTest {
 
         IntermediateQuery query1 = queryBuilder1.build();
 
-        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, query1));
+        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(query, query1));
     }
 
     /**
@@ -226,9 +224,8 @@ public class RedundantSelfJoinTest {
         IntermediateQuery query = queryBuilder.build();
         System.out.println("\nBefore optimization: \n" +  query);
 
-        IntermediateQuery optimizedQuery = query.applyProposal(new InnerJoinOptimizationProposalImpl(joinNode))
-                .getResultingQuery();
-        System.out.println("\n After optimization: \n" +  optimizedQuery);
+        query.applyProposal(new InnerJoinOptimizationProposalImpl(joinNode));
+        System.out.println("\n After optimization: \n" +  query);
 
         DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_1, Y);
         ConstructionNode constructionNode = new ConstructionNodeImpl(projectionAtom.getVariables());
@@ -238,7 +235,7 @@ public class RedundantSelfJoinTest {
         queryBuilder1.addChild(constructionNode, extensionalDataNode);
         IntermediateQuery query1 = queryBuilder.build();
 
-        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, query1));
+        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(query, query1));
     }
 
     @Test
@@ -257,9 +254,8 @@ public class RedundantSelfJoinTest {
         IntermediateQuery query = queryBuilder.build();
         System.out.println("\nBefore optimization: \n" +  query);
 
-        IntermediateQuery optimizedQuery = query.applyProposal(new InnerJoinOptimizationProposalImpl(joinNode))
-                .getResultingQuery();
-        System.out.println("\n After optimization: \n" +  optimizedQuery);
+        query.applyProposal(new InnerJoinOptimizationProposalImpl(joinNode));
+        System.out.println("\n After optimization: \n" +  query);
 
         DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_1, Y);
         ConstructionNode constructionNode = new ConstructionNodeImpl(projectionAtom.getVariables());
@@ -270,7 +266,7 @@ public class RedundantSelfJoinTest {
         queryBuilder1.addChild(joinNode, dataNode2);
         IntermediateQuery query1 = queryBuilder.build();
 
-        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, query1));
+        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(query, query1));
     }
 
     @Test
@@ -289,9 +285,9 @@ public class RedundantSelfJoinTest {
         IntermediateQuery query = queryBuilder.build();
         System.out.println("\nBefore optimization: \n" +  query);
 
-        IntermediateQuery optimizedQuery = query.applyProposal(new InnerJoinOptimizationProposalImpl(joinNode))
-                .getResultingQuery();
-        System.out.println("\n After optimization: \n" +  optimizedQuery);
+        query.applyProposal(new InnerJoinOptimizationProposalImpl(joinNode))
+                ;
+        System.out.println("\n After optimization: \n" +  query);
 
         DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_1, Y);
         ConstructionNode constructionNode = new ConstructionNodeImpl(projectionAtom.getVariables());
@@ -301,7 +297,7 @@ public class RedundantSelfJoinTest {
         queryBuilder1.addChild(constructionNode, extensionalDataNode);
         IntermediateQuery query1 = queryBuilder.build();
 
-        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, query1));
+        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(query, query1));
     }
 
     @Test
@@ -320,9 +316,9 @@ public class RedundantSelfJoinTest {
         IntermediateQuery query = queryBuilder.build();
         System.out.println("\nBefore optimization: \n" +  query);
 
-        IntermediateQuery optimizedQuery = query.applyProposal(new InnerJoinOptimizationProposalImpl(joinNode))
-                .getResultingQuery();
-        System.out.println("\n After optimization: \n" +  optimizedQuery);
+        query.applyProposal(new InnerJoinOptimizationProposalImpl(joinNode))
+                ;
+        System.out.println("\n After optimization: \n" +  query);
 
         DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_1, Y);
         ConstructionNode constructionNode = new ConstructionNodeImpl(projectionAtom.getVariables());
@@ -333,7 +329,7 @@ public class RedundantSelfJoinTest {
         queryBuilder1.addChild(joinNode, dataNode2);
         IntermediateQuery query1 = queryBuilder.build();
 
-        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, query1));
+        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(query, query1));
     }
 
     @Test
@@ -358,10 +354,10 @@ public class RedundantSelfJoinTest {
         IntermediateQuery query = queryBuilder.build();
         System.out.println("\nBefore optimization: \n" +  query);
 
-        IntermediateQuery optimizedQuery = query.applyProposal(new InnerJoinOptimizationProposalImpl(joinNode))
-                .getResultingQuery();
+        query.applyProposal(new InnerJoinOptimizationProposalImpl(joinNode))
+                ;
 
-        System.out.println("\n After optimization: \n" +  optimizedQuery);
+        System.out.println("\n After optimization: \n" +  query);
 
 
         IntermediateQueryBuilder queryBuilder1 = createQueryBuilder(METADATA);
@@ -379,7 +375,7 @@ public class RedundantSelfJoinTest {
 
         IntermediateQuery query1 = queryBuilder1.build();
 
-        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, query1));
+        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(query, query1));
     }
 
     @Test
@@ -404,10 +400,10 @@ public class RedundantSelfJoinTest {
         IntermediateQuery query = queryBuilder.build();
         System.out.println("\nBefore optimization: \n" +  query);
 
-        IntermediateQuery optimizedQuery = query.applyProposal(new InnerJoinOptimizationProposalImpl(joinNode))
-                .getResultingQuery();
+        query.applyProposal(new InnerJoinOptimizationProposalImpl(joinNode))
+                ;
 
-        System.out.println("\n After optimization: \n" +  optimizedQuery);
+        System.out.println("\n After optimization: \n" +  query);
 
 
         IntermediateQueryBuilder queryBuilder1 = createQueryBuilder(METADATA);
@@ -423,7 +419,7 @@ public class RedundantSelfJoinTest {
 
         IntermediateQuery query1 = queryBuilder1.build();
 
-        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, query1));
+        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(query, query1));
     }
 
     @Test
@@ -446,10 +442,10 @@ public class RedundantSelfJoinTest {
         IntermediateQuery query = queryBuilder.build();
         System.out.println("\nBefore optimization: \n" +  query);
 
-        IntermediateQuery optimizedQuery = query.applyProposal(new InnerJoinOptimizationProposalImpl(joinNode))
-                .getResultingQuery();
+        query.applyProposal(new InnerJoinOptimizationProposalImpl(joinNode))
+                ;
 
-        System.out.println("\n After optimization: \n" +  optimizedQuery);
+        System.out.println("\n After optimization: \n" +  query);
 
 
         IntermediateQueryBuilder queryBuilder1 = createQueryBuilder(METADATA);
@@ -467,7 +463,7 @@ public class RedundantSelfJoinTest {
 
         IntermediateQuery query1 = queryBuilder1.build();
 
-        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, query1));
+        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(query, query1));
     }
 
     @Test
@@ -493,10 +489,10 @@ public class RedundantSelfJoinTest {
         IntermediateQuery query = queryBuilder.build();
         System.out.println("\nBefore optimization: \n" +  query);
 
-        IntermediateQuery optimizedQuery = query.applyProposal(new InnerJoinOptimizationProposalImpl(joinNode))
-                .getResultingQuery();
+        query.applyProposal(new InnerJoinOptimizationProposalImpl(joinNode))
+                ;
 
-        System.out.println("\n After optimization: \n" +  optimizedQuery);
+        System.out.println("\n After optimization: \n" +  query);
 
 
         IntermediateQueryBuilder queryBuilder1 = createQueryBuilder(METADATA);
@@ -515,7 +511,7 @@ public class RedundantSelfJoinTest {
 
         System.out.println("\n Expected query: \n" +  query1);
 
-        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, query1));
+        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(query, query1));
     }
 
     /**
@@ -543,10 +539,10 @@ public class RedundantSelfJoinTest {
         IntermediateQuery query = queryBuilder.build();
         System.out.println("\nBefore optimization: \n" +  query);
 
-        IntermediateQuery optimizedQuery = query.applyProposal(new InnerJoinOptimizationProposalImpl(joinNode))
-                .getResultingQuery();
+        query.applyProposal(new InnerJoinOptimizationProposalImpl(joinNode))
+                ;
 
-        System.out.println("\n After optimization: \n" +  optimizedQuery);
+        System.out.println("\n After optimization: \n" +  query);
 
 
         IntermediateQueryBuilder queryBuilder1 = createQueryBuilder(METADATA);
@@ -564,7 +560,7 @@ public class RedundantSelfJoinTest {
 
         IntermediateQuery query1 = queryBuilder1.build();
 
-        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, query1));
+        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(query, query1));
     }
 
 
@@ -589,10 +585,10 @@ public class RedundantSelfJoinTest {
         IntermediateQuery query = queryBuilder.build();
         System.out.println("\nBefore optimization: \n" +  query);
 
-        IntermediateQuery optimizedQuery = query.applyProposal(new InnerJoinOptimizationProposalImpl(joinNode))
-                .getResultingQuery();
+        query.applyProposal(new InnerJoinOptimizationProposalImpl(joinNode))
+                ;
 
-        System.out.println("\n After optimization: \n" +  optimizedQuery);
+        System.out.println("\n After optimization: \n" +  query);
 
 
         IntermediateQueryBuilder queryBuilder1 = createQueryBuilder(METADATA);
@@ -610,7 +606,7 @@ public class RedundantSelfJoinTest {
 
         IntermediateQuery query1 = queryBuilder1.build();
 
-        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, query1));
+        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(query, query1));
     }
 
     @Test
@@ -642,11 +638,11 @@ public class RedundantSelfJoinTest {
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
         System.out.println("\n Expected query : \n" +  expectedQuery);
 
-        IntermediateQuery optimizedQuery = query.applyProposal(new InnerJoinOptimizationProposalImpl(joinNode))
-                .getResultingQuery();
-        System.out.println("\n After optimization: \n" +  optimizedQuery);
+        query.applyProposal(new InnerJoinOptimizationProposalImpl(joinNode))
+                ;
+        System.out.println("\n After optimization: \n" +  query);
 
-        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, expectedQuery));
+        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(query, expectedQuery));
     }
 
     @Test
@@ -680,11 +676,11 @@ public class RedundantSelfJoinTest {
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
         System.out.println("\n Expected query : \n" +  expectedQuery);
 
-        IntermediateQuery optimizedQuery = query.applyProposal(new InnerJoinOptimizationProposalImpl(joinNode))
-                .getResultingQuery();
-        System.out.println("\n After optimization: \n" +  optimizedQuery);
+        query.applyProposal(new InnerJoinOptimizationProposalImpl(joinNode))
+                ;
+        System.out.println("\n After optimization: \n" +  query);
 
-        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, expectedQuery));
+        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(query, expectedQuery));
     }
 
     @Test
@@ -719,11 +715,10 @@ public class RedundantSelfJoinTest {
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
         System.out.println("\n Expected query : \n" +  expectedQuery);
 
-        IntermediateQuery optimizedQuery = query.applyProposal(new InnerJoinOptimizationProposalImpl(joinNode))
-                .getResultingQuery();
-        System.out.println("\n After optimization: \n" +  optimizedQuery);
+        query.applyProposal(new InnerJoinOptimizationProposalImpl(joinNode));
+        System.out.println("\n After optimization: \n" +  query);
 
-        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, expectedQuery));
+        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(query, expectedQuery));
     }
 
     @Test(expected = EmptyQueryException.class)
@@ -746,9 +741,8 @@ public class RedundantSelfJoinTest {
         IntermediateQuery query = queryBuilder.build();
         System.out.println("\nBefore optimization: \n" +  query);
 
-        IntermediateQuery optimizedQuery = query.applyProposal(new InnerJoinOptimizationProposalImpl(joinNode))
-                .getResultingQuery();
-        System.out.println("\n Optimized query (should not be produced): \n" +  optimizedQuery);
+        query.applyProposal(new InnerJoinOptimizationProposalImpl(joinNode));
+        System.out.println("\n Optimized query (should not be produced): \n" +  query);
     }
 
     @Test
@@ -792,11 +786,10 @@ public class RedundantSelfJoinTest {
         System.out.println("\n Expected query : \n" +  expectedQuery);
 
         NodeCentricOptimizationResults<InnerJoinNode> results = query.applyProposal(new InnerJoinOptimizationProposalImpl(joinNode));
-        IntermediateQuery optimizedQuery = results.getResultingQuery();
 
-        System.out.println("\n Optimized query: \n" +  optimizedQuery);
+        System.out.println("\n Optimized query: \n" +  query);
 
-        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, expectedQuery));
+        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(query, expectedQuery));
 
         Optional<QueryNode> optionalClosestAncestor = results.getOptionalClosestAncestor();
         assertTrue(optionalClosestAncestor.isPresent());
@@ -841,11 +834,10 @@ public class RedundantSelfJoinTest {
         System.out.println("\n Expected query : \n" +  expectedQuery);
 
         NodeCentricOptimizationResults<InnerJoinNode> results = query.applyProposal(new InnerJoinOptimizationProposalImpl(joinNode));
-        IntermediateQuery optimizedQuery = results.getResultingQuery();
 
-        System.out.println("\n After optimization: \n" +  optimizedQuery);
+        System.out.println("\n After optimization: \n" +  query);
 
-        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, expectedQuery));
+        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(query, expectedQuery));
 
         assertFalse(results.getOptionalNewNode().isPresent());
         assertTrue(results.getOptionalReplacingChild().isPresent());
@@ -905,7 +897,7 @@ public class RedundantSelfJoinTest {
 
         System.out.println("\nBefore optimization: \n" +  query);
 
-        query.applyProposal(new InnerJoinOptimizationProposalImpl(joinNode), true);
+        query.applyProposal(new InnerJoinOptimizationProposalImpl(joinNode));
         System.out.println("\nAfter optimization: \n" +  query);
 
 
@@ -936,7 +928,7 @@ public class RedundantSelfJoinTest {
 
         System.out.println("\nBefore optimization: \n" +  query);
 
-        query.applyProposal(new InnerJoinOptimizationProposalImpl(joinNode), true);
+        query.applyProposal(new InnerJoinOptimizationProposalImpl(joinNode));
 
         System.out.println("\nAfter optimization: \n" +  query);
 
@@ -989,7 +981,7 @@ public class RedundantSelfJoinTest {
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
         System.out.println("\nExpected query: \n" +  expectedQuery);
 
-        query.applyProposal(new InnerJoinOptimizationProposalImpl(joinNode), true);
+        query.applyProposal(new InnerJoinOptimizationProposalImpl(joinNode));
         System.out.println("\nAfter optimization: \n" +  query);
 
         assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(query, expectedQuery));
@@ -1044,7 +1036,7 @@ public class RedundantSelfJoinTest {
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
         System.out.println("\nExpected query: \n" +  expectedQuery);
 
-        query.applyProposal(new InnerJoinOptimizationProposalImpl(joinNode), true);
+        query.applyProposal(new InnerJoinOptimizationProposalImpl(joinNode));
         System.out.println("\nAfter optimization: \n" +  query);
 
         assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(query, expectedQuery));
@@ -1095,7 +1087,7 @@ public class RedundantSelfJoinTest {
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
         System.out.println("\nExpected query: \n" +  expectedQuery);
 
-        query.applyProposal(new InnerJoinOptimizationProposalImpl(joinNode), true);
+        query.applyProposal(new InnerJoinOptimizationProposalImpl(joinNode));
         System.out.println("\nAfter optimization: \n" +  query);
 
         assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(query, expectedQuery));
@@ -1144,7 +1136,7 @@ public class RedundantSelfJoinTest {
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
         System.out.println("\nExpected query: \n" +  expectedQuery);
 
-        query.applyProposal(new InnerJoinOptimizationProposalImpl(joinNode), true);
+        query.applyProposal(new InnerJoinOptimizationProposalImpl(joinNode));
         System.out.println("\nAfter optimization: \n" +  query);
 
         assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(query, expectedQuery));
@@ -1196,7 +1188,7 @@ public class RedundantSelfJoinTest {
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
         System.out.println("\nExpected query: \n" +  expectedQuery);
 
-        query.applyProposal(new InnerJoinOptimizationProposalImpl(joinNode), true);
+        query.applyProposal(new InnerJoinOptimizationProposalImpl(joinNode));
         System.out.println("\nAfter optimization: \n" +  query);
 
         assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(query, expectedQuery));
@@ -1251,7 +1243,7 @@ public class RedundantSelfJoinTest {
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
         System.out.println("\nExpected query: \n" +  expectedQuery);
 
-        query.applyProposal(new InnerJoinOptimizationProposalImpl(joinNode), true);
+        query.applyProposal(new InnerJoinOptimizationProposalImpl(joinNode));
         System.out.println("\nAfter optimization: \n" +  query);
 
         assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(query, expectedQuery));
@@ -1305,7 +1297,7 @@ public class RedundantSelfJoinTest {
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
         System.out.println("\nExpected query: \n" +  expectedQuery);
 
-        query.applyProposal(new InnerJoinOptimizationProposalImpl(joinNode), true);
+        query.applyProposal(new InnerJoinOptimizationProposalImpl(joinNode));
         System.out.println("\nAfter optimization: \n" +  query);
 
         assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(query, expectedQuery));

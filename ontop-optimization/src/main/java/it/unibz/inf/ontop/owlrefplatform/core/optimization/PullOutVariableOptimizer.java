@@ -161,7 +161,7 @@ public class PullOutVariableOptimizer implements IntermediateQueryOptimizer {
                 PullVariableOutOfSubTreeProposal<JoinLikeNode> proposal = new PullVariableOutOfSubTreeProposalImpl<>(
                         currentJoinLikeNode, renamingSubstitution, childNode);
 
-                PullVariableOutOfSubTreeResults<JoinLikeNode> results = query.applyProposal(proposal, true);
+                PullVariableOutOfSubTreeResults<JoinLikeNode> results = query.applyProposal(proposal);
 
                 /**
                  * Updates the "iterated" variables
@@ -227,7 +227,7 @@ public class PullOutVariableOptimizer implements IntermediateQueryOptimizer {
             PullVariableOutOfDataNodeProposal proposal = optionalProposal.get();
             NodeCentricOptimizationResults<DataNode> results = currentQuery.applyProposal(proposal);
 
-            return getNextNodeAndQuery(results);
+            return getNextNodeAndQuery(currentQuery, results);
         }
         else {
             // NB: a DataNode is not expected to have a child

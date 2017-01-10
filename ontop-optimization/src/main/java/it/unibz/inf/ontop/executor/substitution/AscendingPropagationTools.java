@@ -319,6 +319,6 @@ public class AscendingPropagationTools {
                 optionalAncestryTracker.isPresent()
                 ? new RemoveEmptyNodeProposalImpl(replacingEmptyNode, optionalAncestryTracker.get())
                 : new RemoveEmptyNodeProposalImpl(replacingEmptyNode, false);
-        return query.applyProposal(proposal, true, true);
+        return query.applyProposal(proposal, true);
     }
 }

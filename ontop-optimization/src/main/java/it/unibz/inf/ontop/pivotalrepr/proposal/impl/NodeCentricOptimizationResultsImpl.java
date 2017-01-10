@@ -16,7 +16,7 @@ public class NodeCentricOptimizationResultsImpl<N extends QueryNode> extends Pro
 
     public NodeCentricOptimizationResultsImpl(IntermediateQuery query,
                                               N newNode) {
-        super(query);
+        super();
         this.optionalNextSibling = query.getNextSibling(newNode);
         this.optionalNewNode = Optional.of(newNode);
         this.optionalClosestAncestor = query.getParent(newNode);
@@ -30,7 +30,7 @@ public class NodeCentricOptimizationResultsImpl<N extends QueryNode> extends Pro
     public NodeCentricOptimizationResultsImpl(IntermediateQuery query,
                                               Optional<QueryNode> optionalNextSibling,
                                               Optional<QueryNode> optionalClosestAncestor) {
-        super(query);
+        super();
         this.optionalNextSibling = optionalNextSibling;
         this.optionalNewNode = Optional.empty();
         this.optionalClosestAncestor = optionalClosestAncestor;
@@ -54,7 +54,7 @@ public class NodeCentricOptimizationResultsImpl<N extends QueryNode> extends Pro
      * TODO: should we refactor it?
      */
     public NodeCentricOptimizationResultsImpl(IntermediateQuery query, Optional<QueryNode> optionalReplacingChild) {
-        super(query);
+        super();
         if (!optionalReplacingChild.isPresent()) {
             throw new IllegalArgumentException("A replacing child must be given (not optional in practice)");
         }

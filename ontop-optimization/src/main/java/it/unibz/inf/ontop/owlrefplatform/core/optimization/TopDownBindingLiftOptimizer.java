@@ -98,7 +98,6 @@ public class TopDownBindingLiftOptimizer implements BindingLiftOptimizer {
                     new SubstitutionPropagationProposalImpl<>(initialUnionNode, optionalSubstitution.get());
 
             NodeCentricOptimizationResults<UnionNode> results = currentQuery.applyProposal(proposal);
-            currentQuery = results.getResultingQuery();
             unionNode = results.getOptionalNewNode();
             currentNode = results.getNewNodeOrReplacingChild()
                     .orElseThrow(() -> new IllegalStateException(
@@ -138,7 +137,6 @@ public class TopDownBindingLiftOptimizer implements BindingLiftOptimizer {
 
             UnionLiftProposal proposal = new UnionLiftProposalImpl(currentUnionNode, parentNode.get());
             NodeCentricOptimizationResults<UnionNode> results = currentQuery.applyProposal(proposal);
-            currentQuery = results.getResultingQuery();
             currentUnionNode = results.getOptionalNewNode().orElseThrow(() -> new IllegalStateException(
                     "The focus node has to be a union node and be present"));
 
@@ -177,7 +175,7 @@ public class TopDownBindingLiftOptimizer implements BindingLiftOptimizer {
                     new SubstitutionPropagationProposalImpl<>(currentNode, optionalSubstitution.get());
 
             NodeCentricOptimizationResults<QueryNode> results = currentQuery.applyProposal(proposal);
-            return getNextNodeAndQuery(results);
+            return getNextNodeAndQuery(currentQuery, results);
 
 
         }
@@ -217,7 +215,6 @@ public class TopDownBindingLiftOptimizer implements BindingLiftOptimizer {
                         new SubstitutionPropagationProposalImpl<>(currentChild, optionalSubstitution.get());
 
                 NodeCentricOptimizationResults<QueryNode> results = currentQuery.applyProposal(proposal);
-                currentQuery = results.getResultingQuery();
                 optionalCurrentChild = results.getOptionalNextSibling();
                 Optional<QueryNode> currentNode = results.getNewNodeOrReplacingChild();
 
@@ -232,7 +229,7 @@ public class TopDownBindingLiftOptimizer implements BindingLiftOptimizer {
                 }
                 else {
 
-                    return getNextNodeAndQuery(results);
+                    return getNextNodeAndQuery(currentQuery, results);
 
                 }
 
@@ -278,14 +275,13 @@ public class TopDownBindingLiftOptimizer implements BindingLiftOptimizer {
                         new SubstitutionPropagationProposalImpl<>(initialLeftJoinNode, optionalSubstitution.get());
 
                 NodeCentricOptimizationResults<LeftJoinNode> results = currentQuery.applyProposal(proposal);
-                currentQuery = results.getResultingQuery();
                 currentJoinNode = results.getOptionalNewNode();
 
                 if(currentJoinNode.isPresent()){
                     currentNode = currentJoinNode.get();
                 }
                 else{
-                    return getNextNodeAndQuery(results);
+                    return getNextNodeAndQuery(currentQuery, results);
                 }
 
 
@@ -324,7 +320,7 @@ public class TopDownBindingLiftOptimizer implements BindingLiftOptimizer {
 
                     NodeCentricOptimizationResults<QueryNode> results = currentQuery.applyProposal(proposal);
 
-                    return getNextNodeAndQuery(results);
+                    return getNextNodeAndQuery(currentQuery, results);
 
                 }
                 }

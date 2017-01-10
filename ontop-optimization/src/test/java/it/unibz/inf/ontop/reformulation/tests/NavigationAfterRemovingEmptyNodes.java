@@ -63,9 +63,6 @@ public class NavigationAfterRemovingEmptyNodes {
     private static final ExtensionalDataNode DATA_NODE_6 = buildExtensionalDataNode(TABLE3_PREDICATE, E, F);
     private static final ExtensionalDataNode DATA_NODE_7 = buildExtensionalDataNode(TABLE4_PREDICATE, G, H);
 
-    private static final boolean REQUIRE_USING_IN_PLACE_EXECUTOR = true;
-
-
     @Test
     public void testNextSiblingInitiallyFar() throws EmptyQueryException {
         IntermediateQueryBuilder initialQueryBuilder = createQueryBuilder(EMPTY_METADATA);
@@ -97,7 +94,7 @@ public class NavigationAfterRemovingEmptyNodes {
 
         System.out.println("Initial query: \n" + initialQuery);
 
-        NodeCentricOptimizationResults<EmptyNode> results = initialQuery.applyProposal(proposal, REQUIRE_USING_IN_PLACE_EXECUTOR);
+        NodeCentricOptimizationResults<EmptyNode> results = initialQuery.applyProposal(proposal);
 
         System.out.println("Optimized query: \n" + initialQuery);
 
@@ -127,14 +124,14 @@ public class NavigationAfterRemovingEmptyNodes {
 
         initialQueryBuilder.addChild(unionNode, DATA_NODE_4);
 
-        IntermediateQuery initialQuery = initialQueryBuilder.build();
+        IntermediateQuery query = initialQueryBuilder.build();
 
-        System.out.println("Initial query: \n" + initialQuery);
+        System.out.println("Initial query: \n" + query);
 
         InnerJoinOptimizationProposal proposal = new InnerJoinOptimizationProposalImpl(unsatisfiedJoinNode);
-        NodeCentricOptimizationResults<InnerJoinNode> results = initialQuery.applyProposal(proposal);
+        NodeCentricOptimizationResults<InnerJoinNode> results = query.applyProposal(proposal);
 
-        System.out.println("Optimized query: \n" + results.getResultingQuery());
+        System.out.println("Optimized query: \n" + query);
 
         assertFalse(results.getNewNodeOrReplacingChild().isPresent());
         assertTrue(results.getOptionalNextSibling().isPresent());

@@ -55,11 +55,11 @@ public class JoinBooleanExpressionExecutor implements InnerJoinExecutor {
 
             RemoveEmptyNodeProposal cleaningProposal = new RemoveEmptyNodeProposalImpl(replacingEmptyNode, false);
 
-            NodeCentricOptimizationResults<EmptyNode> cleaningResults = query.applyProposal(cleaningProposal, true);
+            NodeCentricOptimizationResults<EmptyNode> cleaningResults = query.applyProposal(cleaningProposal);
 
             // Converts it into a NodeCentricOptimizationResults<InnerJoinNode>
-            return new NodeCentricOptimizationResultsImpl<>(cleaningResults.getResultingQuery(),
-                    cleaningResults.getOptionalNextSibling(), cleaningResults.getOptionalClosestAncestor());
+            return new NodeCentricOptimizationResultsImpl<>(query, cleaningResults.getOptionalNextSibling(),
+                    cleaningResults.getOptionalClosestAncestor());
         }
 
         /**

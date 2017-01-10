@@ -221,7 +221,7 @@ public class RedundantSelfLeftJoinExecutor
 
         RemoveEmptyNodeProposal emptyNodeProposal = new RemoveEmptyNodeProposalImpl(emptyChild, true);
 
-        NodeTrackingResults<EmptyNode> removalResults = query.applyProposal(emptyNodeProposal, true);
+        NodeTrackingResults<EmptyNode> removalResults = query.applyProposal(emptyNodeProposal);
 
         /**
          * Retrieves the status of the parent of the empty node (the LJ node)

@@ -56,7 +56,7 @@ public abstract class NodeCentricDepthFirstOptimizer<P extends SimpleNodeCentric
                 NodeCentricOptimizationResults<? extends QueryNode> optimizationResults = currentQuery.applyProposal(
                         optionalProposal.get());
 
-                NextNodeAndQuery nextNodeAndQuery = getNextNodeAndQuery(optimizationResults);
+                NextNodeAndQuery nextNodeAndQuery = getNextNodeAndQuery(currentQuery, optimizationResults);
                 currentQuery = nextNodeAndQuery.getNextQuery();
                 optionalNextNode = nextNodeAndQuery.getOptionalNextNode();
             }

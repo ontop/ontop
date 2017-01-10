@@ -26,8 +26,8 @@ public class GroundTermRemovalFromDataNodeReshaper implements IntermediateQueryO
         if (optionalProposal.isPresent()) {
             GroundTermRemovalFromDataNodeProposal proposal = optionalProposal.get();
             try {
-                ProposalResults results = query.applyProposal(proposal);
-                return results.getResultingQuery();
+                query.applyProposal(proposal);
+                return query;
 
             } catch (EmptyQueryException e) {
                 throw new IllegalStateException("Inconsistency: GroundTermRemovalFromDataNodeReshaper should empty the query ");
