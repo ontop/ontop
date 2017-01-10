@@ -39,23 +39,25 @@ public class RDF4JHelper {
 	
 	public static Literal getLiteral(ValueConstant literal)
 	{
-		if ((literal.getType() == COL_TYPE.LITERAL) ||  (literal.getType() == COL_TYPE.LITERAL_LANG)) {
-            return fact.createLiteral(literal.getValue(), literal.getLanguage());
-		}
-		else if (literal.getType() == COL_TYPE.OBJECT) {
-            return fact.createLiteral(literal.getValue(), dtfac.getDatatypeURI(COL_TYPE.STRING));
-		}	
-		else {
-			IRI datatype = dtfac.getDatatypeURI(literal.getType());
-			if (datatype == null)
-				throw new RuntimeException("Found unknown TYPE for constant: " + literal + " with COL_TYPE="+ literal.getType());
-
-            return fact.createLiteral(literal.getValue(), datatype);
-		}
+	    switch (literal.getType()) {
+            case OBJECT:
+            case LITERAL:
+            case STRING:
+                // creates xsd:string
+                return fact.createLiteral(literal.getValue());
+            case LITERAL_LANG:
+                // creates xsd:langString
+                return fact.createLiteral(literal.getValue(), literal.getLanguage());
+            default:
+                IRI datatype = dtfac.getDatatypeURI(literal.getType());
+                if (datatype == null)
+                    throw new RuntimeException(
+                            "Found unknown TYPE for constant: " + literal + " with COL_TYPE=" + literal.getType());
+                return fact.createLiteral(literal.getValue(), datatype);
+        }
 	}
 
     public static Value getValue(Constant c) {
-
         if(c == null)
             return null;
 

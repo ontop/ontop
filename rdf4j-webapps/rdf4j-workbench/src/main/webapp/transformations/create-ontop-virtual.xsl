@@ -93,7 +93,7 @@
 						</td>
 						<td>
 							<xsl:value-of select="$ontop-exist.label" />
-							<a href="https://babbage.inf.unibz.it/trac/obdapublic/wiki/ObdalibQuestReasoning#QuestReasoning">OntopReasoning</a>.
+							OntopReasoning
 						</td>
 					</tr>
 					<tr>

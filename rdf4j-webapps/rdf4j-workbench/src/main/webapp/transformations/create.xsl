@@ -28,9 +28,6 @@
                                 <option value="ontop-virtual">
                                     Ontop Virtual RDF Store
                                 </option>
-                                <option value="ontop-inmemory">
-                                    Ontop In-Memory RDF Store
-                                </option>
 								<option value="memory">
 									In Memory Store
 								</option>
