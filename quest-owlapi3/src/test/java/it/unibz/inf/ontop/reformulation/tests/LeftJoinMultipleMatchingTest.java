@@ -24,10 +24,14 @@ import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.Scanner;
 
 import static org.junit.Assert.assertEquals;
@@ -40,7 +44,7 @@ public class LeftJoinMultipleMatchingTest {
     private OBDAModel obdaModel;
     private OWLOntology ontology;
 
-    private final String owlFile = "src/test/resources/optional/rais-ontology.owl";
+    private final String owlFile = "src/test/resources/ljoptional/rais-ontology.owl";
 
 
     private Connection sqlConnection;
@@ -54,11 +58,11 @@ public class LeftJoinMultipleMatchingTest {
         java.sql.Statement s = sqlConnection.createStatement();
 
         try {
-            String text = new Scanner( new File("src/test/resources/optional/rais-create-h2.sql") ).useDelimiter("\\A").next();
+            String text = new Scanner( new File("src/test/resources/ljoptional/rais-create-h2.sql") ).useDelimiter("\\A").next();
             s.execute(text);
 
         } catch(SQLException sqle) {
-            System.out.println("Exception in creating db from script");
+            System.out.println("Exception in creating db from script "+sqle);
         }
 
         s.close();
@@ -83,7 +87,7 @@ public class LeftJoinMultipleMatchingTest {
         if (!sqlConnection.isClosed()) {
             java.sql.Statement s = sqlConnection.createStatement();
             try {
-                s.execute("DROP ALL OBJECTS DELETE FILES");
+                dropTables();
             } catch (SQLException sqle) {
                 System.out.println("Table not found, not dropping");
             } finally {
@@ -92,6 +96,26 @@ public class LeftJoinMultipleMatchingTest {
             }
         }
     }
+
+    private void dropTables() throws SQLException, IOException {
+
+        Statement st = sqlConnection.createStatement();
+
+        FileReader reader = new FileReader("src/test/resources/ljoptional/rais-drop-h2.sql");
+        BufferedReader in = new BufferedReader(reader);
+        StringBuilder bf = new StringBuilder();
+        String line = in.readLine();
+        while (line != null) {
+            bf.append(line);
+            line = in.readLine();
+        }
+        in.close();
+
+        st.executeUpdate(bf.toString());
+        st.close();
+        sqlConnection.commit();
+    }
+
 
     private void runTests(QuestPreferences p) throws Exception {
 
@@ -107,7 +131,7 @@ public class LeftJoinMultipleMatchingTest {
 
         QueryController qc = new QueryController();
         QueryIOManager qman = new QueryIOManager(qc);
-        qman.load("src/test/resources/optional/rais-ontology.q");
+        qman.load("src/test/resources/ljoptional/rais-ontology.q");
 
         for (QueryControllerGroup group : qc.getGroups()) {
             for (QueryControllerQuery query : group.getQueries()) {
@@ -141,7 +165,7 @@ public class LeftJoinMultipleMatchingTest {
     @Test
     public void testRaisQueries() throws Exception {
 
-        String obdaFile = "src/test/resources/optional/rais-ontology-unmodified.obda";
+        String obdaFile = "src/test/resources/ljoptional/rais-ontology-small.obda";
 
         // Loading the OBDA data
         obdaModel = fac.getOBDAModel();
@@ -163,7 +187,7 @@ public class LeftJoinMultipleMatchingTest {
 
         ModelIOManager ioManager = new ModelIOManager(obdaModel);
 
-        ioManager.load("src/test/resources/optional/rais-ontology-small.obda");
+        ioManager.load("src/test/resources/ljoptional/rais-ontology-small.obda");
 
 
         QuestPreferences p = new QuestPreferences();
@@ -180,7 +204,7 @@ public class LeftJoinMultipleMatchingTest {
                 " OPTIONAL{ ?ao rais:archivalDate ?date.}\n" +
                 "}\n";
 
-        assertEquals(0, runTestQuery(p, optional));
+        assertEquals(2, runTestQuery(p, optional));
     }
 
     private int runTestQuery(QuestPreferences p, String query) throws Exception {
