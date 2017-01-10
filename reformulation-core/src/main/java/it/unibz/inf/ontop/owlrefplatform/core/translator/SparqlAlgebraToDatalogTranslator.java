@@ -481,34 +481,38 @@ public class SparqlAlgebraToDatalogTranslator {
     private static Term getTermForLiteral(Literal literal) {
         IRI typeURI = literal.getDatatype();
         String value = literal.getLabel();
+        Optional<String> lang = literal.getLanguage();
 
-        COL_TYPE type;
-        if (typeURI == null)
-            type = COL_TYPE.LITERAL;
-        else {
-            type = DATATYPE_FACTORY.getDatatype(typeURI);
+        if (lang.isPresent()) {
+            return DATA_FACTORY.getTypedTerm(DATA_FACTORY.getConstantLiteral(value, COL_TYPE.STRING), lang.get());
+
+        } else {
+            COL_TYPE type;
+             /*
+              * default data type is xsd:string
+              */
+            if (typeURI == null) {
+                type = COL_TYPE.STRING;
+            } else {
+                type = DATATYPE_FACTORY.getDatatype(typeURI);
+            }
+
             if (type == null)
                 // ROMAN (27 June 2016): type1 in open-eq-05 test would not be supported in OWL
                 // the actual value is LOST here
                 return DATA_FACTORY.getUriTemplateForDatatype(typeURI.stringValue());
-                // old strict version:
-                // throw new RuntimeException("Unsupported datatype: " + typeURI);
+            // old strict version:
+            // throw new RuntimeException("Unsupported datatype: " + typeURI);
 
             // check if the value is (lexically) correct for the specified datatype
             if (!XMLDatatypeUtil.isValidValue(value, typeURI))
                 throw new RuntimeException("Invalid lexical form for datatype. Found: " + value);
-        }
 
-        Term constant = DATA_FACTORY.getConstantLiteral(value, type);
+            Term constant = DATA_FACTORY.getConstantLiteral(value, type);
 
-        // wrap the constant in its datatype function
-        if (type == COL_TYPE.LITERAL) {
-            // if the object has type LITERAL, check the language tag
-            Optional<String> lang = literal.getLanguage();
-            if (lang.isPresent() && !lang.get().equals(""))
-                return DATA_FACTORY.getTypedTerm(constant, lang.get());
+            return DATA_FACTORY.getTypedTerm(constant, type);
+
         }
-        return DATA_FACTORY.getTypedTerm(constant, type);
     }
 
     /**

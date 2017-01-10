@@ -142,7 +142,7 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 
 	@Override
 	public Function getTypedTerm(Term value, String language) {
-		Term lang = getConstantLiteral(language.toLowerCase(), COL_TYPE.LITERAL);		
+		Term lang = getConstantLiteral(language.toLowerCase(), COL_TYPE.STRING);
 		Predicate pred = datatypeFactory.getTypePredicate(COL_TYPE.LITERAL_LANG);
 		return getFunction(pred, value, lang);
 	}

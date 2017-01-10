@@ -24,8 +24,8 @@ public class DatatypeFactoryImpl implements DatatypeFactory {
 
 	
 	// special case of literals with the specified language
-	private final DatatypePredicate RDFS_LITERAL_LANG = new DatatypePredicateImpl(RDF.LANGSTRING.toString(),
-									new COL_TYPE[] { COL_TYPE.LITERAL, COL_TYPE.LITERAL });
+	private final DatatypePredicate RDF_LANG_STRING = new DatatypePredicateImpl(RDF.LANGSTRING.toString(),
+									new COL_TYPE[] { COL_TYPE.STRING, COL_TYPE.STRING });
 	
 	private final DatatypePredicate RDFS_LITERAL, XSD_STRING;
 	private final DatatypePredicate XSD_INTEGER, XSD_NEGATIVE_INTEGER, XSD_NON_NEGATIVE_INTEGER;
@@ -67,13 +67,13 @@ public class DatatypeFactoryImpl implements DatatypeFactory {
 
 		// special case
 		// used in ExpressionEvaluator only(?) use proper method there? 
-		mapCOLTYPEtoPredicate.put(COL_TYPE.LITERAL_LANG, RDFS_LITERAL_LANG);
+		mapCOLTYPEtoPredicate.put(COL_TYPE.LITERAL_LANG, RDF_LANG_STRING);
 	}
-	
+
 	private DatatypePredicate registerType(org.eclipse.rdf4j.model.IRI uri, COL_TYPE type) {
 		String sURI = uri.toString();
-		mapURItoCOLTYPE.put(sURI, type);  
-		mapCOLTYPEtoURI.put(type, uri); 
+		mapURItoCOLTYPE.put(sURI, type);
+		mapCOLTYPEtoURI.put(type, uri);
 		DatatypePredicate predicate = new DatatypePredicateImpl(sURI, type);
 		mapCOLTYPEtoPredicate.put(type, predicate);
 		predicateList.add(predicate);
@@ -113,7 +113,7 @@ public class DatatypeFactoryImpl implements DatatypeFactory {
 	
 	@Override 
 	public boolean isLiteral(Predicate p) {
-		return p == RDFS_LITERAL || p == RDFS_LITERAL_LANG;
+		return p == RDFS_LITERAL || p == RDF_LANG_STRING;
 	}
 	
 	@Override 
