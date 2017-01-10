@@ -15,21 +15,21 @@ import java.util.Iterator;
  * TODO: explain
  */
 public abstract class InternalCompositeExecutor<P extends QueryOptimizationProposal<R>, R extends ProposalResults>
-        implements InternalProposalExecutor<P, R> {
+        implements ProposalExecutor<P, R> {
 
     @Override
     public R apply(final P initialProposal, IntermediateQuery query, final QueryTreeComponent treeComponent)
             throws InvalidQueryOptimizationProposalException, EmptyQueryException {
 
-        ImmutableList<? extends InternalProposalExecutor<P, R>> executors = getExecutors();
-        Iterator<? extends InternalProposalExecutor<P, R>> executorIterator = executors.iterator();
+        ImmutableList<? extends ProposalExecutor<P, R>> executors = getExecutors();
+        Iterator<? extends ProposalExecutor<P, R>> executorIterator = executors.iterator();
 
         // Non-final
         Optional<P> optionalProposal = Optional.of(initialProposal);
 
         R results;
         do {
-            InternalProposalExecutor<P, R> executor = executorIterator.next();
+            ProposalExecutor<P, R> executor = executorIterator.next();
 
             results = executor.apply(optionalProposal.get(), query, treeComponent);
             optionalProposal = createNewProposal(results);
@@ -41,7 +41,7 @@ public abstract class InternalCompositeExecutor<P extends QueryOptimizationPropo
 
     protected abstract Optional<P> createNewProposal(R results);
 
-    protected abstract ImmutableList<? extends InternalProposalExecutor<P, R>> getExecutors();
+    protected abstract ImmutableList<? extends ProposalExecutor<P, R>> getExecutors();
 
 
 }

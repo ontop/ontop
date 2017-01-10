@@ -19,7 +19,7 @@ import static it.unibz.inf.ontop.pivotalrepr.NonCommutativeOperatorNode.Argument
 /**
  * TODO: explain
  */
-public class UnionLiftInternalExecutorImpl implements UnionLiftInternalExecutor {
+public class UnionLiftExecutorImpl implements UnionLiftExecutor {
 
     @Override
     public NodeCentricOptimizationResults<UnionNode> apply(UnionLiftProposal proposal, IntermediateQuery query,

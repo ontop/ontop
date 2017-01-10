@@ -10,12 +10,12 @@ import java.util.Optional;
 /**
  * TODO: explain
  */
-public abstract class NodeCentricInternalCompositeExecutor<
+public abstract class NodeCentricCompositeExecutor<
         N extends QueryNode,
         R extends NodeCentricOptimizationResults<N>,
         P extends NodeCentricOptimizationProposal<N, R>>
         extends InternalCompositeExecutor<P, R>
-        implements NodeCentricInternalExecutor<N, R, P> {
+        implements NodeCentricExecutor<N, R, P> {
 
     @Override
     protected Optional<P> createNewProposal(R results) {
@@ -35,5 +35,5 @@ public abstract class NodeCentricInternalCompositeExecutor<
     protected abstract Optional<P> createNewProposalFromFocusNode(N focusNode);
 
     @Override
-    protected abstract ImmutableList<? extends NodeCentricInternalExecutor<N, R, P>> getExecutors();
+    protected abstract ImmutableList<? extends NodeCentricExecutor<N, R, P>> getExecutors();
 }

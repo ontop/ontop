@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.injection.impl;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Module;
-import it.unibz.inf.ontop.executor.InternalProposalExecutor;
+import it.unibz.inf.ontop.executor.ProposalExecutor;
 import it.unibz.inf.ontop.executor.expression.PushDownExpressionExecutor;
 import it.unibz.inf.ontop.executor.groundterm.GroundTermRemovalFromDataNodeExecutor;
 import it.unibz.inf.ontop.executor.join.InnerJoinExecutor;
@@ -13,7 +13,7 @@ import it.unibz.inf.ontop.executor.pullout.PullVariableOutOfDataNodeExecutor;
 import it.unibz.inf.ontop.executor.pullout.PullVariableOutOfSubTreeExecutor;
 import it.unibz.inf.ontop.executor.substitution.SubstitutionPropagationExecutor;
 import it.unibz.inf.ontop.executor.truenode.TrueNodeRemovalExecutor;
-import it.unibz.inf.ontop.executor.union.UnionLiftInternalExecutor;
+import it.unibz.inf.ontop.executor.union.UnionLiftExecutor;
 import it.unibz.inf.ontop.executor.unsatisfiable.RemoveEmptyNodesExecutor;
 import it.unibz.inf.ontop.injection.OntopOptimizationConfiguration;
 import it.unibz.inf.ontop.injection.OntopOptimizationSettings;
@@ -61,9 +61,9 @@ public class OntopOptimizationConfigurationImpl extends OntopModelConfigurationI
      * Can be overloaded by sub-classes
      */
     @Override
-    protected ImmutableMap<Class<? extends QueryOptimizationProposal>, Class<? extends InternalProposalExecutor>>
+    protected ImmutableMap<Class<? extends QueryOptimizationProposal>, Class<? extends ProposalExecutor>>
     generateOptimizationConfigurationMap() {
-        ImmutableMap.Builder<Class<? extends QueryOptimizationProposal>, Class<? extends InternalProposalExecutor>>
+        ImmutableMap.Builder<Class<? extends QueryOptimizationProposal>, Class<? extends ProposalExecutor>>
                 internalExecutorMapBuilder = ImmutableMap.builder();
         internalExecutorMapBuilder.putAll(super.generateOptimizationConfigurationMap());
 
@@ -75,7 +75,7 @@ public class OntopOptimizationConfigurationImpl extends OntopModelConfigurationI
         internalExecutorMapBuilder.put(PullVariableOutOfSubTreeProposal.class, PullVariableOutOfSubTreeExecutor.class);
         internalExecutorMapBuilder.put(RemoveEmptyNodeProposal.class, RemoveEmptyNodesExecutor.class);
         internalExecutorMapBuilder.put(QueryMergingProposal.class, QueryMergingExecutor.class);
-        internalExecutorMapBuilder.put(UnionLiftProposal.class, UnionLiftInternalExecutor.class);
+        internalExecutorMapBuilder.put(UnionLiftProposal.class, UnionLiftExecutor.class);
         internalExecutorMapBuilder.put(LeftJoinOptimizationProposal.class, LeftJoinExecutor.class);
         internalExecutorMapBuilder.put(ProjectionShrinkingProposal.class, ProjectionShrinkingExecutor.class);
         internalExecutorMapBuilder.put(TrueNodeRemovalProposal.class, TrueNodeRemovalExecutor.class);

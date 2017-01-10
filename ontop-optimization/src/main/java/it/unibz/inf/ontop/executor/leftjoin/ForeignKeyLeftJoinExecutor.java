@@ -1,7 +1,7 @@
 package it.unibz.inf.ontop.executor.leftjoin;
 
 import com.google.inject.Singleton;
-import it.unibz.inf.ontop.executor.SimpleNodeCentricInternalExecutor;
+import it.unibz.inf.ontop.executor.SimpleNodeCentricExecutor;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.pivotalrepr.*;
 import it.unibz.inf.ontop.pivotalrepr.impl.InnerJoinNodeImpl;
@@ -21,7 +21,7 @@ import static it.unibz.inf.ontop.pivotalrepr.NonCommutativeOperatorNode.Argument
  *
  */
 @Singleton
-public class ForeignKeyLeftJoinExecutor implements SimpleNodeCentricInternalExecutor<LeftJoinNode, LeftJoinOptimizationProposal> {
+public class ForeignKeyLeftJoinExecutor implements SimpleNodeCentricExecutor<LeftJoinNode, LeftJoinOptimizationProposal> {
 
     /**
      * This method assumes that all redundant IS_NOT_NULL predicates

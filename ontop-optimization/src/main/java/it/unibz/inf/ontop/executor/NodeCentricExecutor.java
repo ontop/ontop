@@ -7,10 +7,10 @@ import it.unibz.inf.ontop.pivotalrepr.proposal.NodeCentricOptimizationResults;
 /**
  * TODO: explain
  */
-public interface NodeCentricInternalExecutor<
+public interface NodeCentricExecutor<
         N extends QueryNode,
         R extends NodeCentricOptimizationResults<N>,
         P extends NodeCentricOptimizationProposal<N, R>>
-        extends InternalProposalExecutor<P, R> {
+        extends ProposalExecutor<P, R> {
 
 }

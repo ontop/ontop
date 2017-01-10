@@ -4,7 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Module;
-import it.unibz.inf.ontop.executor.InternalProposalExecutor;
+import it.unibz.inf.ontop.executor.ProposalExecutor;
 import it.unibz.inf.ontop.injection.InvalidOntopConfigurationException;
 import it.unibz.inf.ontop.injection.OntopModelConfiguration;
 import it.unibz.inf.ontop.injection.OntopModelSettings;
@@ -65,7 +65,7 @@ public class OntopModelConfigurationImpl implements OntopModelConfiguration {
     /**
      * Can be overloaded by sub-classes
      */
-    protected ImmutableMap<Class<? extends QueryOptimizationProposal>, Class<? extends InternalProposalExecutor>>
+    protected ImmutableMap<Class<? extends QueryOptimizationProposal>, Class<? extends ProposalExecutor>>
         generateOptimizationConfigurationMap() {
         return ImmutableMap.of();
     }

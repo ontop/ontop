@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.pivotalrepr.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import it.unibz.inf.ontop.executor.InternalProposalExecutor;
+import it.unibz.inf.ontop.executor.ProposalExecutor;
 import it.unibz.inf.ontop.injection.OntopModelFactory;
 import it.unibz.inf.ontop.injection.OntopModelSettings;
 import it.unibz.inf.ontop.model.DistinctVariableOnlyDataAtom;
@@ -203,7 +203,7 @@ public class IntermediateQueryImpl implements IntermediateQuery {
             validate();
         }
 
-        InternalProposalExecutor<P, R> executor = executorRegistry.getExecutor(proposal);
+        ProposalExecutor<P, R> executor = executorRegistry.getExecutor(proposal);
 
         /**
          * Has a SIDE-EFFECT on the tree component.

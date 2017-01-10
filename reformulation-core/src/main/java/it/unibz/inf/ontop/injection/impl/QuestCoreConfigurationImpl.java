@@ -3,7 +3,7 @@ package it.unibz.inf.ontop.injection.impl;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Module;
-import it.unibz.inf.ontop.executor.InternalProposalExecutor;
+import it.unibz.inf.ontop.executor.ProposalExecutor;
 import it.unibz.inf.ontop.injection.InvalidOntopConfigurationException;
 import it.unibz.inf.ontop.injection.impl.OntopOptimizationConfigurationImpl.DefaultOntopOptimizationBuilderFragment;
 import it.unibz.inf.ontop.injection.impl.OntopOptimizationConfigurationImpl.OntopOptimizationConfigurationOptions;
@@ -37,9 +37,9 @@ public class QuestCoreConfigurationImpl extends OBDACoreConfigurationImpl implem
      * Can be overloaded by sub-classes
      */
     @Override
-    protected ImmutableMap<Class<? extends QueryOptimizationProposal>, Class<? extends InternalProposalExecutor>>
+    protected ImmutableMap<Class<? extends QueryOptimizationProposal>, Class<? extends ProposalExecutor>>
     generateOptimizationConfigurationMap() {
-        ImmutableMap.Builder<Class<? extends QueryOptimizationProposal>, Class<? extends InternalProposalExecutor>>
+        ImmutableMap.Builder<Class<? extends QueryOptimizationProposal>, Class<? extends ProposalExecutor>>
                 internalExecutorMapBuilder = ImmutableMap.builder();
         internalExecutorMapBuilder.putAll(super.generateOptimizationConfigurationMap());
         internalExecutorMapBuilder.putAll(optimizationConfiguration.generateOptimizationConfigurationMap());

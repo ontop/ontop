@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.executor.leftjoin;
 
 import com.google.common.collect.*;
 import com.google.inject.Singleton;
-import it.unibz.inf.ontop.executor.SimpleNodeCentricInternalExecutor;
+import it.unibz.inf.ontop.executor.SimpleNodeCentricExecutor;
 import it.unibz.inf.ontop.executor.join.SelfJoinLikeExecutor;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.pivotalrepr.*;
@@ -31,7 +31,7 @@ import static it.unibz.inf.ontop.pivotalrepr.NonCommutativeOperatorNode.Argument
 @Singleton
 public class RedundantSelfLeftJoinExecutor
         extends SelfJoinLikeExecutor
-        implements SimpleNodeCentricInternalExecutor<LeftJoinNode, LeftJoinOptimizationProposal> {
+        implements SimpleNodeCentricExecutor<LeftJoinNode, LeftJoinOptimizationProposal> {
 
     enum Action {
         UNIFY, DO_NOTHING, DROP_RIGHT
