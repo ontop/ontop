@@ -23,9 +23,10 @@ package it.unibz.inf.ontop.protege.panels;
 import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
 import it.unibz.inf.ontop.injection.QuestConfiguration;
-import it.unibz.inf.ontop.injection.QuestPreferences;
+import it.unibz.inf.ontop.injection.QuestSettings;
 import it.unibz.inf.ontop.io.PrefixManager;
 import it.unibz.inf.ontop.model.*;
+import it.unibz.inf.ontop.model.impl.MappingFactoryImpl;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.model.impl.RDBMSourceParameterConstants;
 import it.unibz.inf.ontop.ontology.OClass;
@@ -65,6 +66,8 @@ import java.util.concurrent.CountDownLatch;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
+
 public class MappingAssistantPanel extends javax.swing.JPanel implements DatasourceSelectorListener {
 
 	private static final long serialVersionUID = 1L;
@@ -78,8 +81,8 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 	private MapItem predicateSubjectMap;
 
     private boolean isSubjectClassValid = true;
-	
-	private static final OBDADataFactory dfac = OBDADataFactoryImpl.getInstance();
+
+	private static final MappingFactory MAPPING_FACTORY = MappingFactoryImpl.getInstance();
 
 	private static final String EMPTY_TEXT = "";
 
@@ -528,7 +531,7 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 				return;
 			}
 			// Create the mapping axiom
-            OBDAMappingAxiom mappingAxiom = nativeQLFactory.create(dfac.getSQLQuery(source), target);
+            OBDAMappingAxiom mappingAxiom = nativeQLFactory.create(MAPPING_FACTORY.getSQLQuery(source), target);
 			obdaModel.addMapping(selectedSource.getSourceID(), mappingAxiom, false);
 			
 			// Clear the form afterwards
@@ -552,7 +555,7 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 		// Store concept in the body, if any
 		Function subjectTerm = createSubjectTerm(predicateSubjectMap);
 		if (!predicateSubjectMap.getName().equals("owl:Thing")) {
-			Function concept = dfac.getFunction(predicateSubjectMap.getSourcePredicate(), subjectTerm);
+			Function concept = DATA_FACTORY.getFunction(predicateSubjectMap.getSourcePredicate(), subjectTerm);
 			body.add(concept);
 		}
 		
@@ -561,18 +564,18 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 		for (MapItem predicateObjectMap : predicateObjectMapsList) {
 			if (predicateObjectMap.isObjectMap()) { // if an attribute
 				Term objectTerm = createObjectTerm(getColumnName(predicateObjectMap), predicateObjectMap.getDataType());
-				Function attribute = dfac.getFunction(predicateObjectMap.getSourcePredicate(), subjectTerm, objectTerm);
+				Function attribute = DATA_FACTORY.getFunction(predicateObjectMap.getSourcePredicate(), subjectTerm, objectTerm);
 				body.add(attribute);
 				//distinguishVariables.add(objectTerm);
 			} else if (predicateObjectMap.isRefObjectMap()) { // if a role
 				Function objectRefTerm = createRefObjectTerm(predicateObjectMap);
-				Function role = dfac.getFunction(predicateObjectMap.getSourcePredicate(), subjectTerm, objectRefTerm);
+				Function role = DATA_FACTORY.getFunction(predicateObjectMap.getSourcePredicate(), subjectTerm, objectRefTerm);
 				body.add(role);
 			}
 		}
 		// Create the head
 		//int arity = distinguishVariables.size();
-		//Function head = dfac.getFunction(dfac.getPredicate(OBDALibConstants.QUERY_HEAD, arity), distinguishVariables);
+		//Function head = DATA_FACTORY.getFunction(DATA_FACTORY.getPredicate(OBDALibConstants.QUERY_HEAD, arity), distinguishVariables);
 		
 		// Create and return the conjunctive query
 		return body;
@@ -595,11 +598,11 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 			throw new RuntimeException("Invalid column mapping: " + column);
 		}
 		String columnName = columnStrings.get(0).toString();
-		Variable var = dfac.getVariable(columnName);
+		Variable var = DATA_FACTORY.getVariable(columnName);
 		if (datatype == null) {
 			return var;
 		} else {
-			return dfac.getFunction(datatype, var);
+			return DATA_FACTORY.getFunction(datatype, var);
 		}
 	}
 	
@@ -640,7 +643,7 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 
 	private MapItem createPredicateSubjectMap() {
 		// Create a default subject map using owl:Thing as the subject
-		return new MapItem(new PredicateItem(dfac.getClassPredicate("owl:Thing"), prefixManager));
+		return new MapItem(new PredicateItem(DATA_FACTORY.getClassPredicate("owl:Thing"), prefixManager));
 	}
 
 	private Function getUriFunctionTerm(String text) {
@@ -653,13 +656,13 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 				sb.append(token.toString());
 			} else if (token instanceof ColumnString) {
 				sb.append(PLACEHOLDER);
-				Variable column = dfac.getVariable(token.toString());
+				Variable column = DATA_FACTORY.getVariable(token.toString());
 				terms.add(column);
 			}
 		}
-		ValueConstant uriTemplate = dfac.getConstantLiteral(sb.toString()); // complete URI template
+		ValueConstant uriTemplate = DATA_FACTORY.getConstantLiteral(sb.toString()); // complete URI template
 		terms.add(0, uriTemplate);
-		return dfac.getUriTemplate(terms);
+		return DATA_FACTORY.getUriTemplate(terms);
 	}
 
 	// Column placeholder pattern
@@ -988,7 +991,7 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 						final String dbType = selectedSource.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER);
 
                         //TODO: find a way to get the current preferences. Necessary if an third-party adapter should be used.
-						QuestPreferences defaultPreferences = QuestConfiguration.defaultBuilder().build().getPreferences();
+						QuestSettings defaultPreferences = QuestConfiguration.defaultBuilder().build().getSettings();
 						SQLDialectAdapter sqlDialect = SQLAdapterFactory.getSQLDialectAdapter(dbType, "", defaultPreferences);
 						String sqlString = txtQueryEditor.getText();
 

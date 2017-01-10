@@ -22,7 +22,7 @@ package it.unibz.inf.ontop.reformulation.tests;
 
 import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.inf.ontop.owlrefplatform.injection.QuestCorePreferences;
+import it.unibz.inf.ontop.injection.QuestCoreSettings;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import junit.framework.TestCase;
 import org.semanticweb.owlapi.io.ToStringRenderer;
@@ -169,8 +169,8 @@ public class SimpleMappingVirtualABoxTest extends TestCase {
 	public void testViEqSig() throws Exception {
 
 		Properties p = new Properties();
-		p.setProperty(QuestCorePreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-		p.setProperty(QuestCorePreferences.OPTIMIZE_EQUIVALENCES, "true");
+		p.setProperty(QuestCoreSettings.ABOX_MODE, QuestConstants.VIRTUAL);
+		p.setProperty(QuestCoreSettings.OPTIMIZE_EQUIVALENCES, "true");
 
 		runTests(p);
 	}
@@ -178,9 +178,9 @@ public class SimpleMappingVirtualABoxTest extends TestCase {
 	public void testClassicEqSig() throws Exception {
 
 		Properties p = new Properties();
-		p.setProperty(QuestCorePreferences.ABOX_MODE, QuestConstants.CLASSIC);
-		p.setProperty(QuestCorePreferences.OPTIMIZE_EQUIVALENCES, "true");
-		p.setProperty(QuestCorePreferences.OBTAIN_FROM_MAPPINGS, "true");
+		p.setProperty(QuestCoreSettings.ABOX_MODE, QuestConstants.CLASSIC);
+		p.setProperty(QuestCoreSettings.OPTIMIZE_EQUIVALENCES, "true");
+		p.setProperty(QuestCoreSettings.OBTAIN_FROM_MAPPINGS, "true");
 
 		try {
 			runTests(p);

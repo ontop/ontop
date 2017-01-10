@@ -24,7 +24,6 @@ import eu.optique.api.mapping.TermMap.TermMapType;
 import eu.optique.api.mapping.impl.rdf4j.RDF4JR2RMLMappingManagerFactory;
 import it.unibz.inf.ontop.io.PrefixManager;
 import it.unibz.inf.ontop.model.*;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
 import it.unibz.inf.ontop.model.impl.SQLQueryImpl;
 import it.unibz.inf.ontop.renderer.TargetQueryRenderer;
@@ -62,6 +61,8 @@ import org.semanticweb.owlapi.model.OWLDataRange;
 import org.semanticweb.owlapi.model.OWLObjectProperty;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.search.EntitySearcher;
+
+import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
 
 /**
  * Transform OBDA mappings in R2rml mappings
@@ -136,7 +137,7 @@ public class OBDAMappingTransformer {
 		
 		//add subject Map to triples Map node
 		statements.add(vf.createStatement(mainNode, R2RMLVocabulary.subjectMap, subjectNode));
-		statements.add(vf.createStatement(subjectNode, vf.createIRI(OBDAVocabulary.RDF_TYPE),   R2RMLVocabulary.termMap));		
+		statements.add(vf.createStatement(subjectNode, vf.createIRI(OBDAVocabulary.RDF_TYPE),   R2RMLVocabulary.termMap));
 
 		//Now we add the template!!
 		Function uriTemplate = (Function) tquery.get(0).getTerm(0); //URI("..{}..", , )
@@ -163,8 +164,8 @@ public class OBDAMappingTransformer {
 				if (predf.getFunctionSymbol() instanceof URITemplatePredicate) {
 					if (predf.getTerms().size() == 1) //fixed string
 					{
-						pred = OBDADataFactoryImpl.getInstance().getPredicate(((ValueConstant)(predf.getTerm(0))).getValue(), 1);
-						predUri = vf.createIRI(pred.getName());
+                        pred = DATA_FACTORY.getPredicate(((ValueConstant)(predf.getTerm(0))).getValue(), 1);
+                        predUri = vf.createIRI(pred.getName());
 					}
 				    else {
 						//custom predicate
@@ -185,7 +186,7 @@ public class OBDAMappingTransformer {
 		
 			if (  !predURIString.equals(OBDAVocabulary.RDF_TYPE) && pred.isClass() ){
 				// The term is actually a SubjectMap (class)
-			//	statements.add(vf.createStatement(nod_subject, vf.createIRI(OBDAVocabulary.RDF_TYPE),   R2RMLVocabulary.subjectMapClass));		
+			//	statements.add(vf.createStatement(nod_subject, vf.createIRI(OBDAVocabulary.RDF_TYPE),   R2RMLVocabulary.subjectMapClass));
 				
 				//add class declaration to subject Map node
 				statements.add(vf.createStatement(subjectNode, R2RMLVocabulary.classUri, predUri));
@@ -309,7 +310,7 @@ public class OBDAMappingTransformer {
 				Function predf = (Function)func.getTerm(1);
 				if (predf.getFunctionSymbol() instanceof URITemplatePredicate) {
 					if (predf.getTerms().size() == 1) { //fixed string 
-						pred = OBDADataFactoryImpl.getInstance().getPredicate(((ValueConstant)(predf.getTerm(0))).getValue(), 1);
+						pred = DATA_FACTORY.getPredicate(((ValueConstant)(predf.getTerm(0))).getValue(), 1);
 						predUri = vf.createIRI(pred.getName());
 					}
 					else {

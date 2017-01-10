@@ -25,7 +25,7 @@ import static org.junit.Assert.assertTrue;
 import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestDBConnection;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestDBStatement;
-import it.unibz.inf.ontop.owlrefplatform.injection.QuestCorePreferences;
+import it.unibz.inf.ontop.injection.QuestCoreSettings;
 import it.unibz.inf.ontop.rdf4j.repository.OntopVirtualRepository;
 
 import java.util.Properties;
@@ -54,11 +54,11 @@ public class OracleSesameLIMITTest  {
 		 * "Virtual ABox" mode
 		 */
 		Properties p = new Properties();
-		p.setProperty(QuestCorePreferences.DB_NAME, "db");
-		p.setProperty(QuestCorePreferences.JDBC_URL, "jdbc:oracle:thin:@//10.7.20.91:1521/xe");
-		p.setProperty(QuestCorePreferences.DB_USER, "system");
-		p.setProperty(QuestCorePreferences.DB_PASSWORD, "obdaps83");
-		p.setProperty(QuestCorePreferences.JDBC_DRIVER, jdbc_driver_class);
+		p.setProperty(QuestCoreSettings.DB_NAME, "db");
+		p.setProperty(QuestCoreSettings.JDBC_URL, "jdbc:oracle:thin:@//10.7.20.91:1521/xe");
+		p.setProperty(QuestCoreSettings.DB_USER, "system");
+		p.setProperty(QuestCoreSettings.DB_PASSWORD, "obdaps83");
+		p.setProperty(QuestCoreSettings.JDBC_DRIVER, jdbc_driver_class);
 
 		QuestConfiguration configuration = QuestConfiguration.defaultBuilder()
 				.enableEquivalenceOptimization(false)

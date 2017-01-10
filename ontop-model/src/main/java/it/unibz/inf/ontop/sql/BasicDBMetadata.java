@@ -1,0 +1,215 @@
+package it.unibz.inf.ontop.sql;
+
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMultimap;
+import it.unibz.inf.ontop.model.AtomPredicate;
+import it.unibz.inf.ontop.model.DBMetadata;
+import it.unibz.inf.ontop.model.Predicate;
+import it.unibz.inf.ontop.model.impl.AtomPredicateImpl;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
+
+import java.util.*;
+import java.util.stream.Stream;
+
+public class BasicDBMetadata extends AbstractDBMetadata implements DBMetadata {
+
+    private final Map<RelationID, DatabaseRelationDefinition> tables;
+
+    // relations include tables and views (views are only created for complex queries in mappings)
+    protected final Map<RelationID, RelationDefinition> relations;
+    private final List<DatabaseRelationDefinition> listOfTables;
+
+    private final String driverName;
+    private final String driverVersion;
+    private final String databaseProductName;
+    private final String databaseVersion;
+    private final QuotedIDFactory idfac;
+
+    protected BasicDBMetadata(String driverName, String driverVersion, String databaseProductName, String databaseVersion, QuotedIDFactory idfac) {
+        this(driverName, driverVersion, databaseProductName, databaseVersion, idfac, new HashMap<>(), new HashMap<>(),
+                new LinkedList<>());
+    }
+
+    protected BasicDBMetadata(String driverName, String driverVersion, String databaseProductName, String databaseVersion,
+                            QuotedIDFactory idfac, Map<RelationID, DatabaseRelationDefinition> tables,
+                            Map<RelationID, RelationDefinition> relations, List<DatabaseRelationDefinition> listOfTables) {
+        this.driverName = driverName;
+        this.driverVersion = driverVersion;
+        this.databaseProductName = databaseProductName;
+        this.databaseVersion = databaseVersion;
+        this.idfac = idfac;
+        this.tables = tables;
+        this.relations = relations;
+        this.listOfTables = listOfTables;
+    }
+
+    /**
+     * creates a database table (which can also be a database view)
+     * if the <name>id</name> contains schema than the relation is added
+     * to the lookup table (see getDatabaseRelation and getRelation) with
+     * both the fully qualified id and the table name only id
+     *
+     * @param id
+     * @return
+     */
+
+    public DatabaseRelationDefinition createDatabaseRelation(RelationID id) {
+        DatabaseRelationDefinition table = new DatabaseRelationDefinition(id);
+        add(table, tables);
+        add(table, relations);
+        listOfTables.add(table);
+        return table;
+    }
+
+    /**
+     * Inserts a new data definition to this metadata object.
+     *
+     * @param td
+     *            The data definition. It can be a {@link DatabaseRelationDefinition} or a
+     *            {@link ParserViewDefinition} object.
+     */
+    protected <T extends RelationDefinition> void add(T td, Map<RelationID, T> schema) {
+        schema.put(td.getID(), td);
+        if (td.getID().hasSchema()) {
+            RelationID noSchemaID = td.getID().getSchemalessID();
+            if (!schema.containsKey(noSchemaID)) {
+                schema.put(noSchemaID, td);
+            }
+            else {
+                System.err.println("DUPLICATE TABLE NAMES, USE QUALIFIED NAMES:\n" + td + "\nAND\n" + schema.get(noSchemaID));
+                //schema.remove(noSchemaID);
+                // TODO (ROMAN 8 Oct 2015): think of a better way of resolving ambiguities
+            }
+        }
+    }
+
+    @Override
+    public DatabaseRelationDefinition getDatabaseRelation(RelationID id) {
+        DatabaseRelationDefinition def = tables.get(id);
+        if (def == null && id.hasSchema()) {
+            def = tables.get(id.getSchemalessID());
+        }
+        return def;
+    }
+
+    @Override
+    public RelationDefinition getRelation(RelationID name) {
+        RelationDefinition def = relations.get(name);
+        if (def == null && name.hasSchema()) {
+            def = relations.get(name.getSchemalessID());
+        }
+        return def;
+    }
+
+    @Override
+    public Collection<DatabaseRelationDefinition> getDatabaseRelations() {
+        return Collections.unmodifiableCollection(listOfTables);
+    }
+
+    @Override
+    public String getDriverName() {
+        return driverName;
+    }
+
+    @Override
+    public String getDriverVersion() {
+        return driverVersion;
+    }
+
+    @Override
+    public String printKeys() {
+        StringBuilder builder = new StringBuilder();
+        Collection<DatabaseRelationDefinition> table_list = getDatabaseRelations();
+        // Prints all primary keys
+        builder.append("\n====== Unique constraints ==========\n");
+        for (DatabaseRelationDefinition dd : table_list) {
+            builder.append(dd + ";\n");
+            for (UniqueConstraint uc : dd.getUniqueConstraints())
+                builder.append(uc + ";\n");
+            builder.append("\n");
+        }
+        // Prints all foreign keys
+        builder.append("====== Foreign key constraints ==========\n");
+        for(DatabaseRelationDefinition dd : table_list) {
+            for (ForeignKeyConstraint fk : dd.getForeignKeys())
+                builder.append(fk + ";\n");
+        }
+        return builder.toString();
+    }
+
+    @Override
+    public ImmutableMultimap<AtomPredicate, ImmutableList<Integer>> extractUniqueConstraints() {
+        Map<Predicate, AtomPredicate> predicateCache = new HashMap<>();
+
+        return getDatabaseRelations().stream()
+                .flatMap(relation -> extractUniqueConstraintsFromRelation(relation, predicateCache))
+                .collect(ImmutableCollectors.toMultimap());
+    }
+
+    private Stream<Map.Entry<AtomPredicate, ImmutableList<Integer>>> extractUniqueConstraintsFromRelation(
+            DatabaseRelationDefinition relation, Map<Predicate, AtomPredicate> predicateCache) {
+
+        Predicate originalPredicate = Relation2DatalogPredicate.createPredicateFromRelation(relation);
+        AtomPredicate atomPredicate = convertToAtomPredicate(originalPredicate, predicateCache);
+
+        return relation.getUniqueConstraints().stream()
+                .map(uc -> uc.getAttributes().stream()
+                        .map(Attribute::getIndex)
+                        .collect(ImmutableCollectors.toList()))
+                .map(positions -> new AbstractMap.SimpleEntry<>(atomPredicate, positions));
+    }
+
+
+    @Override
+    protected AtomPredicate convertToAtomPredicate(Predicate originalPredicate,
+                                                   Map<Predicate, AtomPredicate> predicateCache) {
+        if (originalPredicate instanceof AtomPredicate) {
+            return (AtomPredicate) originalPredicate;
+        }
+        else if (predicateCache.containsKey(originalPredicate)) {
+            return predicateCache.get(originalPredicate);
+        }
+        else {
+            AtomPredicate atomPredicate = new AtomPredicateImpl(originalPredicate);
+            // Cache it
+            predicateCache.put(originalPredicate, atomPredicate);
+            return atomPredicate;
+        }
+    }
+
+    @Override
+    public String getDbmsProductName() {
+        return databaseProductName;
+    }
+
+    public String getDbmsVersion() {
+        return databaseVersion;
+    }
+
+
+    public QuotedIDFactory getQuotedIDFactory() {
+        return idfac;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder bf = new StringBuilder();
+        for (RelationID key : relations.keySet()) {
+            bf.append(key);
+            bf.append("=");
+            bf.append(relations.get(key).toString());
+            bf.append("\n");
+        }
+        return bf.toString();
+    }
+
+    protected Map<RelationID, DatabaseRelationDefinition> getTables() {
+        return tables;
+    }
+
+    @Override
+    public BasicDBMetadata clone() {
+        return new BasicDBMetadata(driverName, driverVersion, databaseProductName, databaseVersion, idfac,
+                new HashMap<>(tables), new HashMap<>(relations), new LinkedList<>(listOfTables));
+    }
+}

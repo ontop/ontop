@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.injection.impl;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.exception.DuplicateMappingException;
-import it.unibz.inf.ontop.injection.OBDAProperties;
+import it.unibz.inf.ontop.injection.OBDASettings;
 import it.unibz.inf.ontop.injection.OBDAFactoryWithException;
 import it.unibz.inf.ontop.io.PrefixManager;
 import it.unibz.inf.ontop.model.OBDADataSource;
@@ -23,10 +23,10 @@ import java.util.Set;
 public class OBDAFactoryWithExceptionImpl
         implements OBDAFactoryWithException {
 
-    private final OBDAProperties preferences;
+    private final OBDASettings preferences;
 
     @Inject
-    private OBDAFactoryWithExceptionImpl(OBDAProperties preferences) {
+    private OBDAFactoryWithExceptionImpl(OBDASettings preferences) {
         // TODO: use them
         this.preferences = preferences;
     }

@@ -25,7 +25,7 @@ import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
 import it.unibz.inf.ontop.io.PrefixManager;
 import it.unibz.inf.ontop.io.TargetQueryVocabularyValidator;
 import it.unibz.inf.ontop.model.*;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
+import it.unibz.inf.ontop.model.impl.MappingFactoryImpl;
 import it.unibz.inf.ontop.parser.TargetQueryParserException;
 import it.unibz.inf.ontop.parser.TurtleOBDASyntaxParser;
 import it.unibz.inf.ontop.protege.core.OBDAModelWrapper;
@@ -65,7 +65,7 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 	private OBDADataSource dataSource;
 	private JDialog parent;
 	private TargetQueryVocabularyValidator validator;
-	private OBDADataFactory dataFactory = OBDADataFactoryImpl.getInstance();
+	private static final MappingFactory MAPPING_FACTORY = MappingFactoryImpl.getInstance();
 
 	private PrefixManager prefixManager;
 
@@ -189,7 +189,7 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 					URI sourceID = dataSource.getSourceID();
 					System.out.println(sourceID.toString()+" \n");
 
-					OBDASQLQuery body = dataFactory.getSQLQuery(source);
+					OBDASQLQuery body = MAPPING_FACTORY.getSQLQuery(source);
 					System.out.println(body.toString()+" \n");
 
 					OBDAMappingAxiom newmapping = nativeQLFactory.create(txtMappingID.getText().trim(), body, targetQuery);

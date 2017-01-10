@@ -26,10 +26,8 @@ import com.github.rvesse.airline.annotations.Option;
 import com.github.rvesse.airline.annotations.OptionType;
 import com.github.rvesse.airline.annotations.restrictions.AllowedValues;
 import it.unibz.inf.ontop.injection.QuestConfiguration;
-import it.unibz.inf.ontop.model.OBDADataFactory;
 import it.unibz.inf.ontop.model.OBDAModel;
 import it.unibz.inf.ontop.model.Predicate;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.ontology.Ontology;
 import it.unibz.inf.ontop.owlapi.OWLAPITranslatorUtility;
 import it.unibz.inf.ontop.owlapi.QuestOWLIndividualAxiomIterator;
@@ -42,6 +40,8 @@ import java.io.*;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
+
+import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
 
 @Command(name = "materialize",
         description = "Materialize the RDF graph exposed by the mapping and the OWL ontology")
@@ -98,8 +98,6 @@ public class OntopMaterialize extends OntopReasoningCommandBase {
         if (owlFile == null) {
             throw new NullPointerException("You have to specify an ontology file!");
         }
-
-        OBDADataFactory obdaDataFactory =  OBDADataFactoryImpl.getInstance();
         try {
             QuestConfiguration.Builder configurationBuilder = QuestConfiguration.defaultBuilder()
                     .ontologyFile(owlFile);
@@ -124,19 +122,19 @@ public class OntopMaterialize extends OntopReasoningCommandBase {
             Collection<Predicate> predicates = new ArrayList<>();
 
             for (OWLClass owlClass : ontology.getClassesInSignature()) {
-                Predicate predicate = obdaDataFactory.getClassPredicate(owlClass.getIRI().toString());
+                Predicate predicate = DATA_FACTORY.getClassPredicate(owlClass.getIRI().toString());
                 predicates.add(predicate);
             }
             for (OWLDataProperty owlDataProperty : ontology.getDataPropertiesInSignature()) {
-                Predicate predicate = obdaDataFactory.getDataPropertyPredicate(owlDataProperty.getIRI().toString());
+                Predicate predicate = DATA_FACTORY.getDataPropertyPredicate(owlDataProperty.getIRI().toString());
                 predicates.add(predicate);
             }
             for(OWLObjectProperty owlObjectProperty: ontology.getObjectPropertiesInSignature()){
-                Predicate predicate = obdaDataFactory.getObjectPropertyPredicate(owlObjectProperty.getIRI().toString());
+                Predicate predicate = DATA_FACTORY.getObjectPropertyPredicate(owlObjectProperty.getIRI().toString());
                 predicates.add(predicate);
             }
             for (OWLAnnotationProperty owlAnnotationProperty : ontology.getAnnotationPropertiesInSignature()) {
-                Predicate predicate = obdaDataFactory.getAnnotationPropertyPredicate(owlAnnotationProperty.getIRI().toString());
+                Predicate predicate = DATA_FACTORY.getAnnotationPropertyPredicate(owlAnnotationProperty.getIRI().toString());
                 predicates.add(predicate);
             }
 

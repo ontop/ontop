@@ -20,12 +20,9 @@ package it.unibz.inf.ontop.rdf4j;
  * #L%
  */
 
-import it.unibz.inf.ontop.model.DatatypeFactory;
-import it.unibz.inf.ontop.model.OBDADataFactory;
 import it.unibz.inf.ontop.model.ObjectConstant;
 import it.unibz.inf.ontop.model.Predicate;
 import it.unibz.inf.ontop.model.ValueConstant;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
 import it.unibz.inf.ontop.ontology.Assertion;
 import it.unibz.inf.ontop.ontology.AssertionFactory;
@@ -47,12 +44,13 @@ import java.util.Optional;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
+import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATATYPE_FACTORY;
+import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
+
 // TODO(xiao): find a proper name (the original name was SesameRDFIterator)
 public class RDF4JRDFIterator extends AbstractRDFHandler implements Iterator<Assertion> {
-	
-	private final OBDADataFactory obdafac = OBDADataFactoryImpl.getInstance();
+
 	private final AssertionFactory ofac = AssertionFactoryImpl.getInstance();
-	private final DatatypeFactory dtfac = OBDADataFactoryImpl.getInstance().getDatatypeFactory();
 
 	private BlockingQueue<Statement> buffer;
 	private Iterator<Statement> iterator;
@@ -137,9 +135,9 @@ public class RDF4JRDFIterator extends AbstractRDFHandler implements Iterator<Ass
 		
 		ObjectConstant c = null;
 		if (currSubject instanceof IRI) {
-			c = obdafac.getConstantURI(currSubject.stringValue());
+			c = DATA_FACTORY.getConstantURI(currSubject.stringValue());
 		} else if (currSubject instanceof BNode) {
-			c = obdafac.getConstantBNode(currSubject.stringValue());
+			c = DATA_FACTORY.getConstantBNode(currSubject.stringValue());
 		} else {
 			throw new RuntimeException("Unsupported subject found in triple: "	+ st.toString() + " (Required URI or BNode)");
 		}
@@ -149,19 +147,19 @@ public class RDF4JRDFIterator extends AbstractRDFHandler implements Iterator<Ass
 
 		Predicate currentPredicate = null;
 		if (currObject instanceof Literal) {
-			currentPredicate = obdafac.getDataPropertyPredicate(currPredicate.stringValue());
+			currentPredicate = DATA_FACTORY.getDataPropertyPredicate(currPredicate.stringValue());
 		} else {
 			String predStringValue = currPredicate.stringValue();
 			if (predStringValue.equals(OBDAVocabulary.RDF_TYPE)) {
 //				if (!(predStringValue.endsWith("/owl#Thing"))
 //						|| predStringValue.endsWith("/owl#Nothing")
 //						|| predStringValue.endsWith("/owl#Ontology")) {
-					currentPredicate = obdafac.getClassPredicate(currObject.stringValue());
+					currentPredicate = DATA_FACTORY.getClassPredicate(currObject.stringValue());
 //				} else {
 //					return null;
 //				}
 			} else {
-				currentPredicate = obdafac.getObjectPropertyPredicate(currPredicate.stringValue());
+				currentPredicate = DATA_FACTORY.getObjectPropertyPredicate(currPredicate.stringValue());
 			}
 		}
 		
@@ -173,11 +171,11 @@ public class RDF4JRDFIterator extends AbstractRDFHandler implements Iterator<Ass
 			} 
 			else if (currentPredicate.getArity() == 2) {
 				if (currObject instanceof IRI) {
-					ObjectConstant c2 = obdafac.getConstantURI(currObject.stringValue());
+					ObjectConstant c2 = DATA_FACTORY.getConstantURI(currObject.stringValue());
 					assertion = ofac.createObjectPropertyAssertion(currentPredicate.getName(), c, c2);
 				} 
 				else if (currObject instanceof BNode) {
-					ObjectConstant c2 = obdafac.getConstantBNode(currObject.stringValue());
+					ObjectConstant c2 = DATA_FACTORY.getConstantBNode(currObject.stringValue());
 					assertion = ofac.createObjectPropertyAssertion(currentPredicate.getName(), c, c2);
 				} 
 				else if (currObject instanceof Literal) {
@@ -192,15 +190,15 @@ public class RDF4JRDFIterator extends AbstractRDFHandler implements Iterator<Ass
 							type = Predicate.COL_TYPE.LITERAL;
 						} 
 						else {
-							type = dtfac.getDatatype(datatype);
+							type = DATATYPE_FACTORY.getDatatype(datatype);
 							if (type == null)
 								type = Predicate.COL_TYPE.UNSUPPORTED;
 						}			
 						
-						c2 = obdafac.getConstantLiteral(l.getLabel(), type);
+						c2 = DATA_FACTORY.getConstantLiteral(l.getLabel(), type);
 					} 
 					else {
-						c2 = obdafac.getConstantLiteral(l.getLabel(), lang.get());
+						c2 = DATA_FACTORY.getConstantLiteral(l.getLabel(), lang.get());
 					}
 					assertion = ofac.createDataPropertyAssertion(currentPredicate.getName(), c, c2);			
 				} 

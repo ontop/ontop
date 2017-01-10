@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.reformulation.tests;
 
 import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.inf.ontop.owlrefplatform.injection.QuestCorePreferences;
+import it.unibz.inf.ontop.injection.QuestCoreSettings;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWL;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLFactory;
 import org.junit.Test;
@@ -31,10 +31,10 @@ public class TMappingUOBMShortTest {
 
 		Properties pref = new Properties();
 		//pref.put(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC_INDEX);
-		pref.put(QuestCorePreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-		pref.put(QuestCorePreferences.REFORMULATION_TECHNIQUE, QuestConstants.TW);
-		pref.put(QuestCorePreferences.REWRITE, QuestConstants.TRUE);
-		pref.put(QuestCorePreferences.PRINT_KEYS, QuestConstants.TRUE);
+		pref.put(QuestCoreSettings.ABOX_MODE, QuestConstants.VIRTUAL);
+		pref.put(QuestCoreSettings.REFORMULATION_TECHNIQUE, QuestConstants.TW);
+		pref.put(QuestCoreSettings.REWRITE, QuestConstants.TRUE);
+		pref.put(QuestCoreSettings.PRINT_KEYS, QuestConstants.TRUE);
 
 		QuestOWLFactory factory = new QuestOWLFactory();
         QuestConfiguration config = QuestConfiguration.defaultBuilder()

@@ -22,7 +22,7 @@ package it.unibz.inf.ontop.rdf4j.repository;
 
 import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.inf.ontop.owlrefplatform.injection.QuestCorePreferences;
+import it.unibz.inf.ontop.injection.QuestCoreSettings;
 
 import java.util.Properties;
 
@@ -36,21 +36,21 @@ public class OntopClassicInMemoryRepository extends OntopClassicRepository {
 
 	private static QuestConfiguration buildConfiguration(String tboxFile, boolean existential, String rewriting) {
 		Properties props = new Properties();
-		props.setProperty(QuestCorePreferences.ABOX_MODE, QuestConstants.CLASSIC);
-		props.setProperty(QuestCorePreferences.OPTIMIZE_EQUIVALENCES, "true");
-		props.setProperty(QuestCorePreferences.OBTAIN_FROM_MAPPINGS, "false");
-		props.setProperty(QuestCorePreferences.OBTAIN_FROM_ONTOLOGY, "false");
-		props.setProperty(QuestCorePreferences.DBTYPE, QuestConstants.SEMANTIC_INDEX);
-		props.setProperty(QuestCorePreferences.STORAGE_LOCATION, QuestConstants.INMEMORY);
+		props.setProperty(QuestCoreSettings.ABOX_MODE, QuestConstants.CLASSIC);
+		props.setProperty(QuestCoreSettings.OPTIMIZE_EQUIVALENCES, "true");
+		props.setProperty(QuestCoreSettings.OBTAIN_FROM_MAPPINGS, "false");
+		props.setProperty(QuestCoreSettings.OBTAIN_FROM_ONTOLOGY, "false");
+		props.setProperty(QuestCoreSettings.DBTYPE, QuestConstants.SEMANTIC_INDEX);
+		props.setProperty(QuestCoreSettings.STORAGE_LOCATION, QuestConstants.INMEMORY);
 		if (existential) {
-			props.setProperty(QuestCorePreferences.REWRITE, "true");
+			props.setProperty(QuestCoreSettings.REWRITE, "true");
 		} else {
-			props.setProperty(QuestCorePreferences.REWRITE, "false");
+			props.setProperty(QuestCoreSettings.REWRITE, "false");
 		}
 		if (rewriting.equals("TreeWitness")) {
-			props.setProperty(QuestCorePreferences.REFORMULATION_TECHNIQUE, QuestConstants.TW);
+			props.setProperty(QuestCoreSettings.REFORMULATION_TECHNIQUE, QuestConstants.TW);
 		} else if (rewriting.equals("Default")) {
-			props.setProperty(QuestCorePreferences.REFORMULATION_TECHNIQUE, QuestConstants.UCQBASED);
+			props.setProperty(QuestCoreSettings.REFORMULATION_TECHNIQUE, QuestConstants.UCQBASED);
 		}
 
 		return QuestConfiguration.defaultBuilder()
@@ -65,12 +65,12 @@ public class OntopClassicInMemoryRepository extends OntopClassicRepository {
 
 	private static QuestConfiguration buildConfiguration() {
 		Properties props = new Properties();
-		props.setProperty(QuestCorePreferences.ABOX_MODE, QuestConstants.CLASSIC);
-		props.setProperty(QuestCorePreferences.OPTIMIZE_EQUIVALENCES, "true");
-		props.setProperty(QuestCorePreferences.OBTAIN_FROM_MAPPINGS, "false");
-		props.setProperty(QuestCorePreferences.OBTAIN_FROM_ONTOLOGY, "false");
-		props.setProperty(QuestCorePreferences.DBTYPE, QuestConstants.SEMANTIC_INDEX);
-		props.setProperty(QuestCorePreferences.STORAGE_LOCATION, QuestConstants.INMEMORY);
+		props.setProperty(QuestCoreSettings.ABOX_MODE, QuestConstants.CLASSIC);
+		props.setProperty(QuestCoreSettings.OPTIMIZE_EQUIVALENCES, "true");
+		props.setProperty(QuestCoreSettings.OBTAIN_FROM_MAPPINGS, "false");
+		props.setProperty(QuestCoreSettings.OBTAIN_FROM_ONTOLOGY, "false");
+		props.setProperty(QuestCoreSettings.DBTYPE, QuestConstants.SEMANTIC_INDEX);
+		props.setProperty(QuestCoreSettings.STORAGE_LOCATION, QuestConstants.INMEMORY);
 
 		return QuestConfiguration.defaultBuilder()
 				.properties(props)

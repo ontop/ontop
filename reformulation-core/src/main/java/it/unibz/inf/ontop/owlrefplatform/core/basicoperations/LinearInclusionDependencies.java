@@ -5,7 +5,6 @@ import java.util.stream.Collectors;
 
 import com.google.common.collect.ImmutableMultimap;
 import it.unibz.inf.ontop.model.*;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.ontology.ClassExpression;
 import it.unibz.inf.ontop.ontology.DataPropertyExpression;
 import it.unibz.inf.ontop.ontology.DataSomeValuesFrom;
@@ -15,9 +14,9 @@ import it.unibz.inf.ontop.ontology.ObjectSomeValuesFrom;
 import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.Equivalences;
 import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 
-public class LinearInclusionDependencies {
+import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
 
-    private static final OBDADataFactory ofac = OBDADataFactoryImpl.getInstance();
+public class LinearInclusionDependencies {
     
 	private final Map<Predicate, List<CQIE>> rules;
 
@@ -48,7 +47,7 @@ public class LinearInclusionDependencies {
 	 * @param body: atom
 	 */
 	public void addRule(Function head, Function body) {
-        CQIE rule = ofac.getCQIE(head, body);
+        CQIE rule = DATA_FACTORY.getCQIE(head, body);
 		
         List<CQIE> list = rules.get(body.getFunctionSymbol());
         if (list == null) {
@@ -131,41 +130,41 @@ public class LinearInclusionDependencies {
 	private static final String variableZname = "z";
 	
     private static Function translate(ObjectPropertyExpression property) {
-		final Variable varX = ofac.getVariable(variableXname);
-		final Variable varY = ofac.getVariable(variableYname);
+		final Variable varX = DATA_FACTORY.getVariable(variableXname);
+		final Variable varY = DATA_FACTORY.getVariable(variableYname);
 
 		if (property.isInverse()) 
-			return ofac.getFunction(property.getPredicate(), varY, varX);
+			return DATA_FACTORY.getFunction(property.getPredicate(), varY, varX);
 		else 
-			return ofac.getFunction(property.getPredicate(), varX, varY);
+			return DATA_FACTORY.getFunction(property.getPredicate(), varX, varY);
 	}
     
     private static Function translate(DataPropertyExpression property) {
-		final Variable varX = ofac.getVariable(variableXname);
-		final Variable varY = ofac.getVariable(variableYname);
+		final Variable varX = DATA_FACTORY.getVariable(variableXname);
+		final Variable varY = DATA_FACTORY.getVariable(variableYname);
 
-		return ofac.getFunction(property.getPredicate(), varX, varY);
+		return DATA_FACTORY.getFunction(property.getPredicate(), varX, varY);
 	}
 	
     private static Function translate(ClassExpression description, String existentialVariableName) {
-		final Variable varX = ofac.getVariable(variableXname);
+		final Variable varX = DATA_FACTORY.getVariable(variableXname);
 		if (description instanceof OClass) {
 			OClass klass = (OClass) description;
-			return ofac.getFunction(klass.getPredicate(), varX);
+			return DATA_FACTORY.getFunction(klass.getPredicate(), varX);
 		} 
 		else if (description instanceof ObjectSomeValuesFrom) {
-			final Variable varY = ofac.getVariable(existentialVariableName);
+			final Variable varY = DATA_FACTORY.getVariable(existentialVariableName);
 			ObjectPropertyExpression property = ((ObjectSomeValuesFrom) description).getProperty();
 			if (property.isInverse()) 
-				return ofac.getFunction(property.getPredicate(), varY, varX);
+				return DATA_FACTORY.getFunction(property.getPredicate(), varY, varX);
 			else 
-				return ofac.getFunction(property.getPredicate(), varX, varY);
+				return DATA_FACTORY.getFunction(property.getPredicate(), varX, varY);
 		} 
 		else {
 			assert (description instanceof DataSomeValuesFrom);
-			final Variable varY = ofac.getVariable(existentialVariableName);
+			final Variable varY = DATA_FACTORY.getVariable(existentialVariableName);
 			DataPropertyExpression property = ((DataSomeValuesFrom) description).getProperty();
-			return ofac.getFunction(property.getPredicate(), varX, varY);
+			return DATA_FACTORY.getFunction(property.getPredicate(), varX, varY);
 		} 
 	}
 

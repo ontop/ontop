@@ -40,7 +40,7 @@ import java.util.List;
 
 
 import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.inf.ontop.owlrefplatform.injection.QuestCorePreferences;
+import it.unibz.inf.ontop.injection.QuestCoreSettings;
 import org.semanticweb.owlapi.model.OWLObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -165,8 +165,8 @@ public class BindTest {
     public void testSelect() throws Exception {
 
 		Properties p = new Properties();
-		p.setProperty(QuestCorePreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-		p.setProperty(QuestCorePreferences.OPTIMIZE_EQUIVALENCES, "true");
+		p.setProperty(QuestCoreSettings.ABOX_MODE, QuestConstants.VIRTUAL);
+		p.setProperty(QuestCoreSettings.OPTIMIZE_EQUIVALENCES, "true");
 
         //simple case
         String querySelect = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n" +
@@ -202,8 +202,8 @@ public class BindTest {
     public void testBind() throws Exception {
 
         Properties p = new Properties();
-        p.setProperty(QuestCorePreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-        p.setProperty(QuestCorePreferences.OPTIMIZE_EQUIVALENCES, "true");
+        p.setProperty(QuestCoreSettings.ABOX_MODE, QuestConstants.VIRTUAL);
+        p.setProperty(QuestCoreSettings.OPTIMIZE_EQUIVALENCES, "true");
 
         String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
                 + "PREFIX  ns:  <http://example.org/ns#>\n"
@@ -232,8 +232,8 @@ public class BindTest {
     public void testBindWithStrlen() throws Exception {
 
         Properties p = new Properties();
-        p.setProperty(QuestCorePreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-        p.setProperty(QuestCorePreferences.OPTIMIZE_EQUIVALENCES, "true");
+        p.setProperty(QuestCoreSettings.ABOX_MODE, QuestConstants.VIRTUAL);
+        p.setProperty(QuestCoreSettings.OPTIMIZE_EQUIVALENCES, "true");
 
         String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
                 + "PREFIX  ns:  <http://example.org/ns#>\n"
@@ -261,8 +261,8 @@ public class BindTest {
     public void testDoubleBind() throws Exception{
 
 		Properties p = new Properties();
-        p.setProperty(QuestCorePreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-        p.setProperty(QuestCorePreferences.OPTIMIZE_EQUIVALENCES, "true");
+        p.setProperty(QuestCoreSettings.ABOX_MODE, QuestConstants.VIRTUAL);
+        p.setProperty(QuestCoreSettings.OPTIMIZE_EQUIVALENCES, "true");
 
 		// double bind
         String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
@@ -290,8 +290,8 @@ public class BindTest {
     public void testBindWithSelect() throws Exception {
 
 		Properties p = new Properties();
-        p.setProperty(QuestCorePreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-        p.setProperty(QuestCorePreferences.OPTIMIZE_EQUIVALENCES, "true");
+        p.setProperty(QuestCoreSettings.ABOX_MODE, QuestConstants.VIRTUAL);
+        p.setProperty(QuestCoreSettings.OPTIMIZE_EQUIVALENCES, "true");
 
 
         //error in DataFactoryImpl to handle  nested functional terms getFreshCQIECopy
@@ -318,8 +318,8 @@ public class BindTest {
     public void testFailingSelect()  throws Exception {
 
 		Properties p = new Properties();
-        p.setProperty(QuestCorePreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-        p.setProperty(QuestCorePreferences.OPTIMIZE_EQUIVALENCES, "true");
+        p.setProperty(QuestCoreSettings.ABOX_MODE, QuestConstants.VIRTUAL);
+        p.setProperty(QuestCoreSettings.OPTIMIZE_EQUIVALENCES, "true");
 
         //complex case
         //variable should be assigned again in the same SELECT clause. SELECT Expressions, reuse the same variable
@@ -369,8 +369,8 @@ public class BindTest {
     public void testFailingBind() throws Exception {
 
 		Properties p = new Properties();
-        p.setProperty(QuestCorePreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-        p.setProperty(QuestCorePreferences.OPTIMIZE_EQUIVALENCES, "true");
+        p.setProperty(QuestCoreSettings.ABOX_MODE, QuestConstants.VIRTUAL);
+        p.setProperty(QuestCoreSettings.OPTIMIZE_EQUIVALENCES, "true");
 
 /*      ROMAN (26 June 2016): commented out - the query has little sense because the expressions
                               used in BIND can never have any values
@@ -424,8 +424,8 @@ public class BindTest {
     public void testBindWithConcat() throws Exception {
 
 		Properties p = new Properties();
-        p.setProperty(QuestCorePreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-        p.setProperty(QuestCorePreferences.OPTIMIZE_EQUIVALENCES, "true");
+        p.setProperty(QuestCoreSettings.ABOX_MODE, QuestConstants.VIRTUAL);
+        p.setProperty(QuestCoreSettings.OPTIMIZE_EQUIVALENCES, "true");
 
 
         String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
@@ -451,8 +451,8 @@ public class BindTest {
     public void testBindWithConcatStrLen() throws Exception {
 
         Properties p = new Properties();
-        p.setProperty(QuestCorePreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-        p.setProperty(QuestCorePreferences.OPTIMIZE_EQUIVALENCES, "true");
+        p.setProperty(QuestCoreSettings.ABOX_MODE, QuestConstants.VIRTUAL);
+        p.setProperty(QuestCoreSettings.OPTIMIZE_EQUIVALENCES, "true");
 
         String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
                 + "PREFIX  ns:  <http://example.org/ns#>\n"
@@ -477,8 +477,8 @@ public class BindTest {
     public void testBindWithConcatLanguage() throws Exception {
 
 		Properties p = new Properties();
-        p.setProperty(QuestCorePreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-        p.setProperty(QuestCorePreferences.OPTIMIZE_EQUIVALENCES, "true");
+        p.setProperty(QuestCoreSettings.ABOX_MODE, QuestConstants.VIRTUAL);
+        p.setProperty(QuestCoreSettings.OPTIMIZE_EQUIVALENCES, "true");
 
 
 		String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
@@ -507,8 +507,8 @@ public class BindTest {
     public void testBindWithConcatLanguageinDatabase() throws Exception {
 
 		Properties p = new Properties();
-        p.setProperty(QuestCorePreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-		p.setProperty(QuestCorePreferences.OPTIMIZE_EQUIVALENCES, "true");
+        p.setProperty(QuestCoreSettings.ABOX_MODE, QuestConstants.VIRTUAL);
+		p.setProperty(QuestCoreSettings.OPTIMIZE_EQUIVALENCES, "true");
 
 
 		String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
@@ -538,8 +538,8 @@ public class BindTest {
     public void testBindWithCast() throws Exception {
 
 		Properties p = new Properties();
-        p.setProperty(QuestCorePreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-		p.setProperty(QuestCorePreferences.OPTIMIZE_EQUIVALENCES, "true");
+        p.setProperty(QuestCoreSettings.ABOX_MODE, QuestConstants.VIRTUAL);
+		p.setProperty(QuestCoreSettings.OPTIMIZE_EQUIVALENCES, "true");
 
 
 		String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"

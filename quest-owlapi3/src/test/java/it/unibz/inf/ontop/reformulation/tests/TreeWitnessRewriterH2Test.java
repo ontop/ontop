@@ -26,7 +26,7 @@ import it.unibz.inf.ontop.model.OBDADataFactory;
 import it.unibz.inf.ontop.model.OBDAModel;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.inf.ontop.owlrefplatform.injection.QuestCorePreferences;
+import it.unibz.inf.ontop.injection.QuestCoreSettings;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import it.unibz.inf.ontop.querymanager.QueryController;
 import it.unibz.inf.ontop.querymanager.QueryControllerEntity;
@@ -73,7 +73,6 @@ public class TreeWitnessRewriterH2Test{
 	// TODO We need to extend this test to import the contents of the mappings
 	// into OWL and repeat everything taking form OWL
 
-	private OBDADataFactory fac;
 	private Connection conn;
 
 	Logger log = LoggerFactory.getLogger(this.getClass());
@@ -145,8 +144,6 @@ public class TreeWitnessRewriterH2Test{
 		String url = "jdbc:h2:mem:questjunitdb";
 		String username = "sa";
 		String password = "";
-
-		fac = OBDADataFactoryImpl.getInstance();
 
 		conn = DriverManager.getConnection(url, username, password);
 		Statement st = conn.createStatement();
@@ -310,11 +307,11 @@ public class TreeWitnessRewriterH2Test{
 		 * p.setProperty("rewrite", "true");
 		 */
 		Properties p  = new Properties();
-		p.setProperty(QuestCorePreferences.REFORMULATION_TECHNIQUE, QuestConstants.TW);
-		p.setProperty(QuestCorePreferences.DBTYPE, QuestConstants.SEMANTIC_INDEX);
-		p.setProperty(QuestCorePreferences.ABOX_MODE, QuestConstants.CLASSIC);
-		p.setProperty(QuestCorePreferences.OPTIMIZE_EQUIVALENCES, "true");
-		p.setProperty(QuestCorePreferences.OBTAIN_FROM_ONTOLOGY, "true");
+		p.setProperty(QuestCoreSettings.REFORMULATION_TECHNIQUE, QuestConstants.TW);
+		p.setProperty(QuestCoreSettings.DBTYPE, QuestConstants.SEMANTIC_INDEX);
+		p.setProperty(QuestCoreSettings.ABOX_MODE, QuestConstants.CLASSIC);
+		p.setProperty(QuestCoreSettings.OPTIMIZE_EQUIVALENCES, "true");
+		p.setProperty(QuestCoreSettings.OBTAIN_FROM_ONTOLOGY, "true");
 		p.setProperty("rewrite", "true");
 
 		runTests(p);

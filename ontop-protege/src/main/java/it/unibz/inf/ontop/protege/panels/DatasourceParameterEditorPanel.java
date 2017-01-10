@@ -21,10 +21,10 @@ package it.unibz.inf.ontop.protege.panels;
  */
 
 
+import it.unibz.inf.ontop.model.MappingFactory;
 import it.unibz.inf.ontop.model.OBDADataSource;
 import it.unibz.inf.ontop.model.OBDAException;
-import it.unibz.inf.ontop.model.OBDAModel;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
+import it.unibz.inf.ontop.model.impl.MappingFactoryImpl;
 import it.unibz.inf.ontop.model.impl.OBDAModelImpl;
 import it.unibz.inf.ontop.model.impl.RDBMSourceParameterConstants;
 import it.unibz.inf.ontop.protege.core.OBDAModelManager;
@@ -49,6 +49,7 @@ import java.util.List;
 
 public class DatasourceParameterEditorPanel extends javax.swing.JPanel implements DatasourceSelectorListener {
 
+    private static final MappingFactory MAPPING_FACTORY = MappingFactoryImpl.getInstance();
     private static final long serialVersionUID = 3506358479342412849L;
     private final OWLEditorKit owlEditorKit;
 
@@ -439,7 +440,7 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
         URI uri = URI.create("datasource1");
 
         //create new datasource
-        OBDADataSource newDatasource = OBDADataFactoryImpl.getInstance().getDataSource(uri);
+        OBDADataSource newDatasource = MAPPING_FACTORY.getDataSource(uri);
         String username = txtDatabaseUsername.getText();
         newDatasource.setParameter(RDBMSourceParameterConstants.DATABASE_USERNAME, username);
         String password = new String(txtDatabasePassword.getPassword());

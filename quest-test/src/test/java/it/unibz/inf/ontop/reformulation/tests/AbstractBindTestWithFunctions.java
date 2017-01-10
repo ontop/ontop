@@ -27,11 +27,8 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Locale;
 
-import com.ibm.db2.jcc.am.re;
 import it.unibz.inf.ontop.injection.QuestConfiguration;
-import it.unibz.inf.ontop.model.OBDADataFactory;
 import it.unibz.inf.ontop.model.Predicate;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import org.junit.Test;
 import java.util.ArrayList;
@@ -41,6 +38,7 @@ import org.semanticweb.owlapi.model.OWLObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
 import static org.junit.Assert.assertTrue;
 
 /***
@@ -54,7 +52,6 @@ public abstract class AbstractBindTestWithFunctions {
     private final String obdafile;
 
     protected static Logger log = LoggerFactory.getLogger(AbstractBindTestWithFunctions.class);
-    private static final OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 
 
     protected AbstractBindTestWithFunctions(String owlfile, String obdafile) {
@@ -765,7 +762,7 @@ public abstract class AbstractBindTestWithFunctions {
         try {
             date = df.parse(value);
             Timestamp ts = new Timestamp(date.getTime());
-            System.out.println(fac.getConstantLiteral(ts.toString().replace(' ', 'T'), Predicate.COL_TYPE.DATETIME));
+            System.out.println(DATA_FACTORY.getConstantLiteral(ts.toString().replace(' ', 'T'), Predicate.COL_TYPE.DATETIME));
 
         } catch (ParseException pe) {
 

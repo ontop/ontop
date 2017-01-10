@@ -21,7 +21,7 @@ package it.unibz.inf.ontop.obda;
  */
 
 import it.unibz.inf.ontop.injection.QuestConfiguration;
-import it.unibz.inf.ontop.injection.QuestPreferences;
+import it.unibz.inf.ontop.injection.QuestSettings;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import org.junit.After;
@@ -69,7 +69,7 @@ public class H2NoDuplicatesCanonicalIRITest {
 
 		Properties properties = new Properties();
 		// TODO: better integrate
-		properties.setProperty(QuestPreferences.SQL_GENERATE_REPLACE, QuestConstants.FALSE);
+		properties.setProperty(QuestSettings.SQL_GENERATE_REPLACE, QuestConstants.FALSE);
 
 		QuestConfiguration config = QuestConfiguration.defaultBuilder()
 				.ontologyFile(owlfile)

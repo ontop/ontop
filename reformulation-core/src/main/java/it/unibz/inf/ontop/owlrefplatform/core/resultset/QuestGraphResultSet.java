@@ -22,7 +22,6 @@ package it.unibz.inf.ontop.owlrefplatform.core.resultset;
 
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.ValueConstant;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
 import it.unibz.inf.ontop.ontology.Assertion;
 import it.unibz.inf.ontop.ontology.AssertionFactory;
@@ -40,6 +39,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
+
 public class QuestGraphResultSet implements GraphResultSet {
 
 	private List<List<Assertion>> results = new ArrayList<>();
@@ -56,7 +57,6 @@ public class QuestGraphResultSet implements GraphResultSet {
 	//store results in case of describe queries
 	private boolean storeResults = false;
 
-	private OBDADataFactory dfac = OBDADataFactoryImpl.getInstance();
 	private AssertionFactory ofac = AssertionFactoryImpl.getInstance();
 
 	public QuestGraphResultSet(TupleResultSet results, SesameConstructTemplate template,
@@ -181,11 +181,11 @@ public class QuestGraphResultSet implements GraphResultSet {
         if (ve instanceof org.eclipse.rdf4j.query.algebra.ValueConstant) {
             org.eclipse.rdf4j.query.algebra.ValueConstant vc = (org.eclipse.rdf4j.query.algebra.ValueConstant) ve;
             if (vc.getValue() instanceof IRI) {
-                constant = dfac.getConstantURI(vc.getValue().stringValue());
+                constant = DATA_FACTORY.getConstantURI(vc.getValue().stringValue());
             } else if (vc.getValue() instanceof Literal) {
-                constant = dfac.getConstantLiteral(vc.getValue().stringValue());
+                constant = DATA_FACTORY.getConstantLiteral(vc.getValue().stringValue());
             } else {
-                constant = dfac.getConstantBNode(vc.getValue().stringValue());
+                constant = DATA_FACTORY.getConstantBNode(vc.getValue().stringValue());
             }
         } else {
             constant = resSet.getConstant(node_name);

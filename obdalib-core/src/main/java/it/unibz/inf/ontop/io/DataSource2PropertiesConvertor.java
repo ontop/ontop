@@ -1,6 +1,6 @@
 package it.unibz.inf.ontop.io;
 
-import it.unibz.inf.ontop.injection.OBDAProperties;
+import it.unibz.inf.ontop.injection.OBDASettings;
 import it.unibz.inf.ontop.model.OBDADataSource;
 import it.unibz.inf.ontop.model.impl.RDBMSourceParameterConstants;
 
@@ -23,11 +23,11 @@ public class DataSource2PropertiesConvertor {
         String driver =  source.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER);
 
         Properties p = new Properties();
-        p.put(OBDAProperties.DB_NAME, id);
-        p.put(OBDAProperties.JDBC_URL, url);
-        p.put(OBDAProperties.DB_USER, username);
-        p.put(OBDAProperties.DB_PASSWORD, password);
-        p.put(OBDAProperties.JDBC_DRIVER, driver);
+        p.put(OBDASettings.DB_NAME, id);
+        p.put(OBDASettings.JDBC_URL, url);
+        p.put(OBDASettings.DB_USER, username);
+        p.put(OBDASettings.DB_PASSWORD, password);
+        p.put(OBDASettings.JDBC_DRIVER, driver);
 
         return p;
     }

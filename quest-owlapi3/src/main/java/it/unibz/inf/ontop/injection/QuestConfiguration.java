@@ -2,7 +2,6 @@ package it.unibz.inf.ontop.injection;
 
 import it.unibz.inf.ontop.injection.impl.QuestConfigurationImpl;
 import it.unibz.inf.ontop.model.OBDADataSource;
-import it.unibz.inf.ontop.owlrefplatform.injection.QuestCoreConfiguration;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
@@ -19,7 +18,7 @@ import java.util.Optional;
 public interface QuestConfiguration extends QuestCoreConfiguration {
 
     @Override
-    QuestPreferences getPreferences();
+    QuestSettings getSettings();
 
     Optional<OWLOntology> loadInputOntology() throws OWLOntologyCreationException;
 
@@ -36,7 +35,7 @@ public interface QuestConfiguration extends QuestCoreConfiguration {
         return new QuestConfigurationImpl.BuilderImpl<>();
     }
 
-    interface Builder<B extends Builder> extends QuestCoreConfiguration.Builder<B> {
+    interface QuestConfigurationBuilderFragment<B extends Builder> {
 
         B ontologyFile(@Nonnull String urlOrPath);
 
@@ -50,7 +49,12 @@ public interface QuestConfiguration extends QuestCoreConfiguration {
          * Cannot be used together with a pre-defined mapping
          */
         B bootstrapMapping(OBDADataSource source, String baseIRI);
+    }
 
+    interface Builder<B extends Builder> extends QuestConfigurationBuilderFragment<B>,
+            QuestCoreConfiguration.Builder<B> {
+
+        @Override
         QuestConfiguration build();
     }
 }

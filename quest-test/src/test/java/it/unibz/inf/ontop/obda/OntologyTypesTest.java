@@ -20,7 +20,7 @@ package it.unibz.inf.ontop.obda;
  * #L%
  */
 
-import it.unibz.inf.ontop.injection.OBDAProperties;
+import it.unibz.inf.ontop.injection.OBDASettings;
 import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import org.junit.Test;
@@ -171,10 +171,10 @@ public class OntologyTypesTest {
         String driverclass = "oracle.jdbc.driver.OracleDriver";
 
         Properties p = new Properties();
-		p.setProperty(OBDAProperties.DB_NAME, jdbcurl);
-		p.setProperty(OBDAProperties.DB_USER, username);
-		p.setProperty(OBDAProperties.DB_PASSWORD, password);
-		p.setProperty(OBDAProperties.JDBC_DRIVER, driverclass);
+		p.setProperty(OBDASettings.DB_NAME, jdbcurl);
+		p.setProperty(OBDASettings.DB_USER, username);
+		p.setProperty(OBDASettings.DB_PASSWORD, password);
+		p.setProperty(OBDASettings.JDBC_DRIVER, driverclass);
 
         //no value in the mapping
         //xsd:long in the ontology, asking for the general case we will not have any result

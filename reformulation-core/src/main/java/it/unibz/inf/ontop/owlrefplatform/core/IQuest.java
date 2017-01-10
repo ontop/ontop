@@ -3,13 +3,12 @@ package it.unibz.inf.ontop.owlrefplatform.core;
 import java.util.List;
 import java.util.Optional;
 
-import com.google.inject.Injector;
 import it.unibz.inf.ontop.model.*;
 
 import it.unibz.inf.ontop.ontology.ImmutableOntologyVocabulary;
 import it.unibz.inf.ontop.owlrefplatform.core.abox.RDBMSSIRepositoryManager;
 import it.unibz.inf.ontop.owlrefplatform.core.abox.SemanticIndexURIMap;
-import it.unibz.inf.ontop.owlrefplatform.injection.QuestCorePreferences;
+import it.unibz.inf.ontop.injection.QuestCoreSettings;
 
 /**
  * Automatically extracted.
@@ -22,9 +21,9 @@ public interface IQuest {
 
     void dispose();
 
-    QuestCorePreferences getPreferences();
+    QuestCoreSettings getPreferences();
 
-    void setupRepository(Injector injector) throws Exception;
+    void setupRepository() throws Exception;
 
     void close();
 

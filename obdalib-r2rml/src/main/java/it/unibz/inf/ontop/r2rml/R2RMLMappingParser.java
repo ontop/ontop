@@ -13,7 +13,7 @@ import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.exception.InvalidMappingException;
 import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
 import it.unibz.inf.ontop.injection.OBDAFactoryWithException;
-import it.unibz.inf.ontop.injection.OBDAProperties;
+import it.unibz.inf.ontop.injection.OBDASettings;
 import it.unibz.inf.ontop.io.InvalidDataSourceException;
 import it.unibz.inf.ontop.io.OBDADataSourceFromConfigExtractor;
 import it.unibz.inf.ontop.io.PrefixManager;
@@ -34,7 +34,7 @@ import java.util.HashMap;
  */
 public class R2RMLMappingParser implements MappingParser {
 
-    private final OBDAProperties configuration;
+    private final OBDASettings configuration;
     private final NativeQueryLanguageComponentFactory nativeQLFactory;
     private final OBDAFactoryWithException obdaFactory;
     /**
@@ -51,7 +51,7 @@ public class R2RMLMappingParser implements MappingParser {
 
     @AssistedInject
     private R2RMLMappingParser(@Assisted File mappingFile, NativeQueryLanguageComponentFactory nativeQLFactory,
-                               OBDAFactoryWithException obdaFactory, OBDAProperties configuration) {
+                               OBDAFactoryWithException obdaFactory, OBDASettings configuration) {
         this.nativeQLFactory = nativeQLFactory;
         this.obdaFactory = obdaFactory;
         this.configuration = configuration;
@@ -68,7 +68,7 @@ public class R2RMLMappingParser implements MappingParser {
     @AssistedInject
     private R2RMLMappingParser(@Assisted Model mappingGraph,
                                NativeQueryLanguageComponentFactory nativeQLFactory,
-                               OBDAFactoryWithException obdaFactory, OBDAProperties configuration) {
+                               OBDAFactoryWithException obdaFactory, OBDASettings configuration) {
         this.nativeQLFactory = nativeQLFactory;
         this.obdaFactory = obdaFactory;
         this.configuration = configuration;
@@ -84,7 +84,7 @@ public class R2RMLMappingParser implements MappingParser {
     @AssistedInject
     private R2RMLMappingParser(@Assisted File mappingFile, @Assisted OBDADataSource dataSource,
                                NativeQueryLanguageComponentFactory nativeQLFactory,
-                               OBDAFactoryWithException obdaFactory, OBDAProperties configuration) {
+                               OBDAFactoryWithException obdaFactory, OBDASettings configuration) {
         this.nativeQLFactory = nativeQLFactory;
         this.obdaFactory = obdaFactory;
         this.configuration = configuration;
@@ -96,7 +96,7 @@ public class R2RMLMappingParser implements MappingParser {
     @AssistedInject
     private R2RMLMappingParser(@Assisted Reader reader,
                                NativeQueryLanguageComponentFactory nativeQLFactory,
-                               OBDAProperties configuration) {
+                               OBDASettings configuration) {
         // TODO: support this
         throw new IllegalArgumentException("The R2RMLMappingParser does not support" +
                 "yet the Reader interface.");

@@ -22,14 +22,14 @@ package it.unibz.inf.ontop.reformulation.tests;
 
 import it.unibz.inf.ontop.model.Function;
 import it.unibz.inf.ontop.model.Term;
-import it.unibz.inf.ontop.model.OBDADataFactory;
 import it.unibz.inf.ontop.model.Predicate;
 import it.unibz.inf.ontop.model.Variable;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.SingletonSubstitution;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
 
 
 /***
@@ -45,9 +45,6 @@ import java.util.List;
  *
  */
 public class AutomaticMGUTestDataGenerator {
-
-	OBDADataFactory	predFac	= OBDADataFactoryImpl.getInstance();
-	OBDADataFactory					termFac	= OBDADataFactoryImpl.getInstance();
 
 	/***
 	 * Checks if all substitutions in unifier1 are also in unifier2.
@@ -148,7 +145,7 @@ public class AutomaticMGUTestDataGenerator {
 		for (int i = 0; i < termstra.length; i++) {
 			terms.add(getTerm(termstra[i].trim()));
 		}
-		Function atom = this.predFac.getFunction(predFac.getPredicate(atomstr.substring(0, 1), terms.size()), terms);
+		Function atom = DATA_FACTORY.getFunction(DATA_FACTORY.getPredicate(atomstr.substring(0, 1), terms.size()), terms);
 		return atom;
 	}
 
@@ -165,16 +162,16 @@ public class AutomaticMGUTestDataGenerator {
 			for (int i = 0; i < subtermstr.length; i++) {
 				fuctTerms.add(getTerm(subtermstr[i]));
 			}
-			Predicate fs = predFac.getPredicate(termstr.substring(0, 1), fuctTerms.size());
-			return termFac.getFunction(fs, fuctTerms);
+			Predicate fs = DATA_FACTORY.getPredicate(termstr.substring(0, 1), fuctTerms.size());
+			return DATA_FACTORY.getFunction(fs, fuctTerms);
 		} else if (termstr.charAt(0) == '"') {
-			return termFac.getConstantLiteral(termstr.substring(1, termstr.length() - 1));
+			return DATA_FACTORY.getConstantLiteral(termstr.substring(1, termstr.length() - 1));
 		} else if (termstr.charAt(0) == '<') {
-			return termFac.getConstantURI(termstr.substring(1, termstr.length() - 1));
+			return DATA_FACTORY.getConstantURI(termstr.substring(1, termstr.length() - 1));
 //		} else if (termstr.equals("#")) {
-//			return termFac.getVariableNondistinguished();
+//			return DATA_FACTORY.getVariableNondistinguished();
 		} else {
-			return termFac.getVariable(termstr);
+			return DATA_FACTORY.getVariable(termstr);
 			/* variable */
 		}
 		// }

@@ -33,14 +33,14 @@ public class OntopClassicRepository extends AbstractOntopRepository {
 	private final QuestDBClassicStore classicStore;
 	
 	public OntopClassicRepository(String name, QuestConfiguration config) throws Exception {
-		if (config.getPreferences().isInVirtualMode()) {
+		if (config.getSettings().isInVirtualMode()) {
 			throw new RepositoryException("Must be in classic A-box mode!");
 		}
 		this.classicStore = new QuestDBClassicStore(name, config);
 	}
 	
 	public OntopClassicRepository(String name, Dataset data, QuestConfiguration config) throws Exception {
-		if (config.getPreferences().isInVirtualMode()) {
+		if (config.getSettings().isInVirtualMode()) {
 			throw new RepositoryException("Must be in classic A-box mode!");
 		}
 		this.classicStore = new QuestDBClassicStore(name, data, config);

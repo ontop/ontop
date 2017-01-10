@@ -2,8 +2,9 @@ package it.unibz.inf.ontop.reformulation.tests;
 
 import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.inf.ontop.owlrefplatform.injection.QuestCorePreferences;
+import it.unibz.inf.ontop.injection.QuestCoreSettings;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.IRI;
@@ -28,6 +29,7 @@ public class NPDTest {
 	
 	Logger log = LoggerFactory.getLogger(this.getClass());
 
+	@Ignore("Ontology URIs are now broken: impossible to download them")
 	@Test
 	public void test_load_NPD() throws Exception {
 		
@@ -85,10 +87,10 @@ public class NPDTest {
 
 		Properties pref = new Properties();
 		//pref.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC_INDEX);
-		pref.put(QuestCorePreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-		pref.put(QuestCorePreferences.REFORMULATION_TECHNIQUE, QuestConstants.TW);
-		pref.put(QuestCorePreferences.REWRITE, QuestConstants.TRUE);
-		pref.put(QuestCorePreferences.PRINT_KEYS, QuestConstants.FALSE);
+		pref.put(QuestCoreSettings.ABOX_MODE, QuestConstants.VIRTUAL);
+		pref.put(QuestCoreSettings.REFORMULATION_TECHNIQUE, QuestConstants.TW);
+		pref.put(QuestCoreSettings.REWRITE, QuestConstants.TRUE);
+		pref.put(QuestCoreSettings.PRINT_KEYS, QuestConstants.FALSE);
 
 		setupDatabase();
 		QuestOWLFactory factory = new QuestOWLFactory();
