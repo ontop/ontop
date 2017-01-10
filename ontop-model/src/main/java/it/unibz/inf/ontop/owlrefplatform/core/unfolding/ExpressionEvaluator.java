@@ -449,7 +449,7 @@ public class ExpressionEvaluator {
 		Term innerTerm = term.getTerm(0);
 
 		// Create a default return constant: blank language with literal type.
-		Term emptyconstant = DATA_FACTORY.getTypedTerm(DATA_FACTORY.getConstantLiteral("", COL_TYPE.LITERAL), COL_TYPE.LITERAL);
+		Term emptyconstant = DATA_FACTORY.getTypedTerm(DATA_FACTORY.getConstantLiteral("", COL_TYPE.STRING), COL_TYPE.STRING);
 
         if (innerTerm instanceof Variable) {
             return term;
@@ -476,11 +476,11 @@ public class ExpressionEvaluator {
 		else { // rdfs:Literal(text, lang)
 			Term parameter = function.getTerm(1);
 			if (parameter instanceof Variable) {
-				return DATA_FACTORY.getTypedTerm(parameter.clone(), COL_TYPE.LITERAL);
+				return DATA_FACTORY.getTypedTerm(parameter.clone(), COL_TYPE.STRING);
 			} 
 			else if (parameter instanceof Constant) {
 				return DATA_FACTORY.getTypedTerm(
-						DATA_FACTORY.getConstantLiteral(((Constant) parameter).getValue(),COL_TYPE.LITERAL), COL_TYPE.LITERAL);
+						DATA_FACTORY.getConstantLiteral(((Constant) parameter).getValue(),COL_TYPE.STRING), COL_TYPE.STRING);
 			}
 		}
 		return term;
