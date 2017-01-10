@@ -26,7 +26,7 @@ import java.sql.SQLException;
 import it.unibz.inf.ontop.model.OBDAException;
 import it.unibz.inf.ontop.owlrefplatform.core.execution.SIQuestStatement;
 import it.unibz.inf.ontop.owlrefplatform.core.execution.SISQLQuestStatementImpl;
-import it.unibz.inf.ontop.owlrefplatform.injection.QuestCorePreferences;
+import it.unibz.inf.ontop.injection.QuestCoreSettings;
 
 /***
  * Quest connection is responsible for wrapping a JDBC connection to the data
@@ -42,7 +42,7 @@ import it.unibz.inf.ontop.owlrefplatform.injection.QuestCorePreferences;
  */
 public class QuestConnection implements IQuestConnection {
 
-	private final QuestCorePreferences questCorePreferences;
+	private final QuestCoreSettings questCoreSettings;
 	private Connection conn;
 
 	private IQuest questinstance;
@@ -50,12 +50,12 @@ public class QuestConnection implements IQuestConnection {
 	private boolean isClosed;
 
 
-	public QuestConnection(JDBCConnector jdbcConnector, IQuest questInstance, Connection connection, QuestCorePreferences questCorePreferences) {
+	public QuestConnection(JDBCConnector jdbcConnector, IQuest questInstance, Connection connection, QuestCoreSettings questCoreSettings) {
 		this.jdbcConnector = jdbcConnector;
 		this.questinstance = questInstance;
 		this.conn = connection;
 		this.isClosed = false;
-		this.questCorePreferences = questCorePreferences;
+		this.questCoreSettings = questCoreSettings;
 	}
 
 	public Connection getSQLConnection() {
@@ -82,7 +82,7 @@ public class QuestConnection implements IQuestConnection {
 		 * Why? Because the insertData method is not implemented by SQLQuestStatement while
 		 * it is by SISQLQuestStatementImpl.
 		 */
-		if (questCorePreferences.getProperty(QuestCorePreferences.ABOX_MODE).equals(QuestConstants.CLASSIC)) {
+		if (questCoreSettings.getProperty(QuestCoreSettings.ABOX_MODE).equals(QuestConstants.CLASSIC)) {
 			return createSIStatement();
 		}
 

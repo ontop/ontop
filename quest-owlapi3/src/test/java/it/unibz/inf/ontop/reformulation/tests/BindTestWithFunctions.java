@@ -21,9 +21,7 @@ package it.unibz.inf.ontop.reformulation.tests;
  */
 
 import it.unibz.inf.ontop.injection.QuestConfiguration;
-import it.unibz.inf.ontop.model.OBDADataFactory;
 import it.unibz.inf.ontop.model.Predicate;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import org.junit.After;
 import org.junit.Before;
@@ -42,6 +40,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
+import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -52,8 +51,7 @@ import static org.junit.Assert.assertTrue;
  */
 
 public class BindTestWithFunctions {
-	
-	private OBDADataFactory fac;
+
 	private Connection conn;
 
 	final String owlfile = "src/test/resources/test/bind/sparqlBind.owl";
@@ -65,8 +63,6 @@ public class BindTestWithFunctions {
     	String url = "jdbc:h2:mem:questjunitdb";
 		String username = "sa";
 		String password = "";
-
-		fac = OBDADataFactoryImpl.getInstance();
 
 		conn = DriverManager.getConnection(url, username, password);
 		
@@ -774,7 +770,7 @@ public class BindTestWithFunctions {
         try {
             date = df.parse(value);
             Timestamp ts = new Timestamp(date.getTime());
-            System.out.println(fac.getConstantLiteral(ts.toString().replace(' ', 'T'), Predicate.COL_TYPE.DATETIME));
+            System.out.println(DATA_FACTORY.getConstantLiteral(ts.toString().replace(' ', 'T'), Predicate.COL_TYPE.DATETIME));
 
         } catch (ParseException pe) {
 

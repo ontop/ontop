@@ -28,15 +28,16 @@ import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.injection.OBDAFactoryWithException;
 import it.unibz.inf.ontop.owlrefplatform.core.IQuestConnection;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestDBConnection;
-import it.unibz.inf.ontop.owlrefplatform.injection.QuestCorePreferences;
-import it.unibz.inf.ontop.owlrefplatform.injection.QuestComponentFactory;
+import it.unibz.inf.ontop.injection.QuestCoreSettings;
+import it.unibz.inf.ontop.injection.QuestComponentFactory;
 import it.unibz.inf.ontop.model.OBDAException;
+import it.unibz.inf.ontop.pivotalrepr.utils.ExecutorRegistry;
 
 public abstract class QuestDBAbstractStore implements Serializable {
 
 	private static final long serialVersionUID = -8088123404566560283L;
 
-	private final Injector injector;
+	private final ExecutorRegistry executorRegistry;
 	private final QuestComponentFactory componentFactory;
 	private final NativeQueryLanguageComponentFactory nativeQLFactory;
 	private final OBDAFactoryWithException obdaFactory;
@@ -46,10 +47,12 @@ public abstract class QuestDBAbstractStore implements Serializable {
 	public QuestDBAbstractStore(String name, QuestConfiguration configuration) {
 		this.name = name;
 
+		this.executorRegistry = configuration.getExecutorRegistry();
+
         /**
          * Setup the dependency injection for the QuestComponentFactory
          */
-        injector = configuration.getInjector();
+		Injector injector = configuration.getInjector();
         nativeQLFactory = injector.getInstance(NativeQueryLanguageComponentFactory.class);
         componentFactory = injector.getInstance(QuestComponentFactory.class);
         obdaFactory = injector.getInstance(OBDAFactoryWithException.class);
@@ -60,7 +63,7 @@ public abstract class QuestDBAbstractStore implements Serializable {
 	}
 	
 	/* Move to query time ? */
-	public abstract QuestCorePreferences getPreferences();
+	public abstract QuestCoreSettings getPreferences();
 
 	public QuestDBConnection getConnection() throws OBDAException {
 	//	System.out.println("getquestdbconn..");
@@ -81,8 +84,8 @@ public abstract class QuestDBAbstractStore implements Serializable {
         return obdaFactory;
     }
 
-	protected Injector getInjector() {
-		return injector;
+	protected ExecutorRegistry getExecutorRegistry() {
+    	return executorRegistry;
 	}
 
 }

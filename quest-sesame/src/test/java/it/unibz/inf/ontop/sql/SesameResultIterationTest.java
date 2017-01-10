@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.sql;
 
 import static org.junit.Assert.assertTrue;
 
-import it.unibz.inf.ontop.injection.OBDAProperties;
+import it.unibz.inf.ontop.injection.OBDASettings;
 import it.unibz.inf.ontop.injection.QuestConfiguration;
 
 import java.io.File;
@@ -83,11 +83,11 @@ public class SesameResultIterationTest {
         s.close();
 
         Properties p = new Properties();
-        p.put(OBDAProperties.DB_NAME, "countries_iteration_test");
-        p.put(OBDAProperties.JDBC_URL, jdbcUrl);
-        p.put(OBDAProperties.DB_USER, "sa");
-        p.put(OBDAProperties.DB_PASSWORD, "");
-        p.put(OBDAProperties.JDBC_DRIVER, "org.h2.Driver");
+        p.put(OBDASettings.DB_NAME, "countries_iteration_test");
+        p.put(OBDASettings.JDBC_URL, jdbcUrl);
+        p.put(OBDASettings.DB_USER, "sa");
+        p.put(OBDASettings.DB_PASSWORD, "");
+        p.put(OBDASettings.JDBC_DRIVER, "org.h2.Driver");
 
         QuestConfiguration configuration = QuestConfiguration.defaultBuilder()
                 .ontologyFile(owlfile)

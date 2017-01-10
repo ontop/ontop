@@ -32,13 +32,13 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.common.io.Resources;
-import it.unibz.inf.ontop.injection.OBDAProperties;
+import it.unibz.inf.ontop.injection.OBDASettings;
 import it.unibz.inf.ontop.injection.QuestConfiguration;
-import it.unibz.inf.ontop.model.OBDADataFactory;
+import it.unibz.inf.ontop.model.MappingFactory;
 import it.unibz.inf.ontop.model.OBDADataSource;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
+import it.unibz.inf.ontop.model.impl.MappingFactoryImpl;
 import it.unibz.inf.ontop.model.impl.RDBMSourceParameterConstants;
-import it.unibz.inf.ontop.owlrefplatform.injection.QuestCorePreferences;
+import it.unibz.inf.ontop.injection.QuestCoreSettings;
 import it.unibz.inf.ontop.sesame.SesameVirtualRepo;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -100,7 +100,7 @@ public class RDB2RDFTest {
 
 	private static OWLOntology EMPTY_ONT;
 	private static Properties PROPERTIES;
-	private static OBDADataFactory DATA_FACTORY = OBDADataFactoryImpl.getInstance();
+	private static final MappingFactory MAPPING_FACTORY = MappingFactoryImpl.getInstance();
 
 	private static final String JDBC_URL = "jdbc:h2:mem:questrepository";
 	private static final String DB_USER = "sa";
@@ -227,12 +227,12 @@ public class RDB2RDFTest {
 
 		PROPERTIES = new Properties();
 
-		PROPERTIES.setProperty(OBDAProperties.DB_NAME, "h2");
-		PROPERTIES.setProperty(OBDAProperties.DB_USER, DB_USER);
-		PROPERTIES.setProperty(OBDAProperties.DB_PASSWORD, DB_PASSWORD);
-		PROPERTIES.setProperty(OBDAProperties.JDBC_URL, JDBC_URL);
-		PROPERTIES.setProperty(OBDAProperties.JDBC_DRIVER, JDBC_DRIVER);
-		PROPERTIES.setProperty(QuestCorePreferences.BASE_IRI, BASE_IRI);
+		PROPERTIES.setProperty(OBDASettings.DB_NAME, "h2");
+		PROPERTIES.setProperty(OBDASettings.DB_USER, DB_USER);
+		PROPERTIES.setProperty(OBDASettings.DB_PASSWORD, DB_PASSWORD);
+		PROPERTIES.setProperty(OBDASettings.JDBC_URL, JDBC_URL);
+		PROPERTIES.setProperty(OBDASettings.JDBC_DRIVER, JDBC_DRIVER);
+		PROPERTIES.setProperty(QuestCoreSettings.BASE_IRI, BASE_IRI);
 	}
 
 	@Before
@@ -280,7 +280,7 @@ public class RDB2RDFTest {
 
 	private static OBDADataSource getMemOBDADataSource() {
 
-		OBDADataSource obdaSource = DATA_FACTORY.getDataSource(java.net.URI.create("http://www.obda.org/ABOXDUMP" + System.currentTimeMillis()));
+		OBDADataSource obdaSource = MAPPING_FACTORY.getDataSource(java.net.URI.create("http://www.obda.org/ABOXDUMP" + System.currentTimeMillis()));
 		obdaSource.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, JDBC_DRIVER);
 		obdaSource.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, DB_PASSWORD);
 		obdaSource.setParameter(RDBMSourceParameterConstants.DATABASE_URL, JDBC_URL);

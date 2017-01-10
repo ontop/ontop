@@ -22,14 +22,14 @@ package it.unibz.inf.ontop.sesame;
 
 import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
 import it.unibz.inf.ontop.injection.QuestConfiguration;
-import it.unibz.inf.ontop.injection.OBDAProperties;
+import it.unibz.inf.ontop.injection.OBDASettings;
 import it.unibz.inf.ontop.io.QueryIOManager;
-import it.unibz.inf.ontop.model.OBDADataFactory;
+import it.unibz.inf.ontop.model.MappingFactory;
 import it.unibz.inf.ontop.model.OBDADataSource;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
+import it.unibz.inf.ontop.model.impl.MappingFactoryImpl;
 import it.unibz.inf.ontop.model.impl.RDBMSourceParameterConstants;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.inf.ontop.owlrefplatform.injection.QuestCorePreferences;
+import it.unibz.inf.ontop.injection.QuestCoreSettings;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import it.unibz.inf.ontop.querymanager.QueryController;
 import it.unibz.inf.ontop.querymanager.QueryControllerEntity;
@@ -64,7 +64,7 @@ public class LUBM50Tests {
 
 	String owlfile = "../quest-owlapi3/src/test/resources/test/lubm-ex-20-uni1/LUBM-ex-20.owl";
 
-	OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
+	private static final MappingFactory MAPPING_FACTORY = MappingFactoryImpl.getInstance();
 	private final OWLOntology ontology;
 	private OBDADataSource source;
 	private final NativeQueryLanguageComponentFactory nativeQLFactory;
@@ -88,15 +88,15 @@ public class LUBM50Tests {
 	public LUBM50Tests() throws Exception {
 
 		Properties p = new Properties();
-		p.setProperty(QuestCorePreferences.DBTYPE, QuestConstants.SEMANTIC_INDEX);
-		p.setProperty(QuestCorePreferences.ABOX_MODE, QuestConstants.CLASSIC);
-		p.setProperty(QuestCorePreferences.STORAGE_LOCATION, QuestConstants.JDBC);
-		p.setProperty(QuestCorePreferences.OBTAIN_FROM_ONTOLOGY, "false");
-		p.setProperty(OBDAProperties.JDBC_DRIVER, driver);
-		p.setProperty(OBDAProperties.JDBC_URL, url);
-		p.setProperty(OBDAProperties.DB_USER, username);
-		p.setProperty(OBDAProperties.DB_PASSWORD, password);
-		p.setProperty(QuestCorePreferences.REWRITE, "true");
+		p.setProperty(QuestCoreSettings.DBTYPE, QuestConstants.SEMANTIC_INDEX);
+		p.setProperty(QuestCoreSettings.ABOX_MODE, QuestConstants.CLASSIC);
+		p.setProperty(QuestCoreSettings.STORAGE_LOCATION, QuestConstants.JDBC);
+		p.setProperty(QuestCoreSettings.OBTAIN_FROM_ONTOLOGY, "false");
+		p.setProperty(OBDASettings.JDBC_DRIVER, driver);
+		p.setProperty(OBDASettings.JDBC_URL, url);
+		p.setProperty(OBDASettings.DB_USER, username);
+		p.setProperty(OBDASettings.DB_PASSWORD, password);
+		p.setProperty(QuestCoreSettings.REWRITE, "true");
 
 		config = QuestConfiguration.defaultBuilder()
 				.ontologyFile(owlfile)
@@ -105,7 +105,7 @@ public class LUBM50Tests {
 
 		ontology = config.loadProvidedInputOntology();
 
-		source = fac.getDataSource(URI.create("http://www.obda.org/ABOXDUMP1testx1"));
+		source = MAPPING_FACTORY.getDataSource(URI.create("http://www.obda.org/ABOXDUMP1testx1"));
 		source.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, driver);
 		source.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, password);
 		source.setParameter(RDBMSourceParameterConstants.DATABASE_URL, url);

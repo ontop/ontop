@@ -21,7 +21,6 @@ package it.unibz.inf.ontop.owlrefplatform.core.reformulation;
  */
 
 import it.unibz.inf.ontop.model.*;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.*;
 
 import java.util.ArrayList;
@@ -35,9 +34,9 @@ import java.util.PriorityQueue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
+
 public class DatalogQueryServices {
-	
-	private static OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 	
 	private static final Logger log = LoggerFactory.getLogger(DatalogQueryServices.class);
 
@@ -49,12 +48,12 @@ public class DatalogQueryServices {
 		for (Term t : a.getTerms()) {
 			if (t instanceof Variable) {
 				Variable v = (Variable)t;
-				termscopy.add(fac.getVariable(v.getName() + suffix));
+				termscopy.add(DATA_FACTORY.getVariable(v.getName() + suffix));
 			}
 			else
 				termscopy.add(t.clone());
 		}
-		return fac.getFunction(a.getFunctionSymbol(), termscopy);
+		return DATA_FACTORY.getFunction(a.getFunctionSymbol(), termscopy);
 		
 	}
 	

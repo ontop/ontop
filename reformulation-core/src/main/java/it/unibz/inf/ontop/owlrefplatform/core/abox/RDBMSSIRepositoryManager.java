@@ -22,18 +22,9 @@ package it.unibz.inf.ontop.owlrefplatform.core.abox;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
-import it.unibz.inf.ontop.model.BNode;
-import it.unibz.inf.ontop.model.Function;
-import it.unibz.inf.ontop.model.OBDADataFactory;
-import it.unibz.inf.ontop.model.OBDAException;
-import it.unibz.inf.ontop.model.OBDAMappingAxiom;
-import it.unibz.inf.ontop.model.ObjectConstant;
-import it.unibz.inf.ontop.model.Predicate;
+import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.Predicate.COL_TYPE;
-import it.unibz.inf.ontop.model.URIConstant;
-import it.unibz.inf.ontop.model.ValueConstant;
-import it.unibz.inf.ontop.model.Variable;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
+import it.unibz.inf.ontop.model.impl.MappingFactoryImpl;
 import it.unibz.inf.ontop.ontology.Assertion;
 import it.unibz.inf.ontop.ontology.ClassExpression;
 import it.unibz.inf.ontop.ontology.DataPropertyAssertion;
@@ -63,6 +54,8 @@ import org.slf4j.LoggerFactory;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableMap;
 
+import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
+
 /**
  * Store ABox assertions in the DB
  * 
@@ -74,6 +67,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 	private static final long serialVersionUID = -6494667662327970606L;
 
 	private final static Logger log = LoggerFactory.getLogger(RDBMSSIRepositoryManager.class);
+	private static final MappingFactory MAPPING_FACTORY = MappingFactoryImpl.getInstance();
 	private final NativeQueryLanguageComponentFactory nativeQLFactory;
 
 	static final class TableDescription {
@@ -248,9 +242,6 @@ public class RDBMSSIRepositoryManager implements Serializable {
 			table.indexOn(descrtiption.indexName + "3", "VAL");
 		}
 	}
-	
-
-	private static final OBDADataFactory dfac = OBDADataFactoryImpl.getInstance();
 	
 	private final SemanticIndexURIMap uriMap = new SemanticIndexURIMap();
 	
@@ -916,7 +907,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 				
 				String sourceQuery = view.getSELECT(intervalsSqlFilter);
 				List<Function> targetQuery = constructTargetQuery(ope.getPredicate(), view.getId().getType1(), view.getId().getType2());
-				OBDAMappingAxiom basicmapping = nativeQLFactory.create(dfac.getSQLQuery(sourceQuery), targetQuery);
+				OBDAMappingAxiom basicmapping = nativeQLFactory.create(MAPPING_FACTORY.getSQLQuery(sourceQuery), targetQuery);
 				result.add(basicmapping);		
 			}
 		}
@@ -954,7 +945,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 				
 				String sourceQuery = view.getSELECT(intervalsSqlFilter);
 				List<Function> targetQuery = constructTargetQuery(dpe.getPredicate(), view.getId().getType1(), view.getId().getType2());
-				OBDAMappingAxiom basicmapping = nativeQLFactory.create(dfac.getSQLQuery(sourceQuery), targetQuery);
+				OBDAMappingAxiom basicmapping = nativeQLFactory.create(MAPPING_FACTORY.getSQLQuery(sourceQuery), targetQuery);
 				result.add(basicmapping);			
 			}
 		}
@@ -986,7 +977,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 				
 				String sourceQuery = view.getSELECT(intervalsSqlFilter);
 				List<Function> targetQuery = constructTargetQuery(classNode.getPredicate(), view.getId().getType1());
-				OBDAMappingAxiom basicmapping = nativeQLFactory.create(dfac.getSQLQuery(sourceQuery), targetQuery);
+				OBDAMappingAxiom basicmapping = nativeQLFactory.create(MAPPING_FACTORY.getSQLQuery(sourceQuery), targetQuery);
 				result.add(basicmapping);
 			}
 		}
@@ -1028,50 +1019,50 @@ public class RDBMSSIRepositoryManager implements Serializable {
 	
 	private List<Function> constructTargetQuery(Predicate predicate, COL_TYPE type) {
 
-		Variable X = dfac.getVariable("X");
+		Variable X = DATA_FACTORY.getVariable("X");
 
-		//Predicate headPredicate = dfac.getPredicate("m", new COL_TYPE[] { COL_TYPE.OBJECT });
-		//Function head = dfac.getFunction(headPredicate, X);
+		//Predicate headPredicate = DATA_FACTORY.getPredicate("m", new COL_TYPE[] { COL_TYPE.OBJECT });
+		//Function head = DATA_FACTORY.getFunction(headPredicate, X);
 
 		Function subjectTerm;
 		if (type == COL_TYPE.OBJECT) 
-			subjectTerm = dfac.getUriTemplate(X);
+			subjectTerm = DATA_FACTORY.getUriTemplate(X);
 		else {
 			assert (type == COL_TYPE.BNODE); 
-			subjectTerm = dfac.getBNodeTemplate(X);
+			subjectTerm = DATA_FACTORY.getBNodeTemplate(X);
 		}
 		
-		Function body = dfac.getFunction(predicate, subjectTerm);
+		Function body = DATA_FACTORY.getFunction(predicate, subjectTerm);
 		return Collections.singletonList(body);
 	}
 	
 	
 	private List<Function> constructTargetQuery(Predicate predicate, COL_TYPE type1, COL_TYPE type2) {
 
-		Variable X = dfac.getVariable("X");
-		Variable Y = dfac.getVariable("Y");
+		Variable X = DATA_FACTORY.getVariable("X");
+		Variable Y = DATA_FACTORY.getVariable("Y");
 
-		//Predicate headPredicate = dfac.getPredicate("m", new COL_TYPE[] { COL_TYPE.STRING, COL_TYPE.OBJECT });
-		//Function head = dfac.getFunction(headPredicate, X, Y);
+		//Predicate headPredicate = DATA_FACTORY.getPredicate("m", new COL_TYPE[] { COL_TYPE.STRING, COL_TYPE.OBJECT });
+		//Function head = DATA_FACTORY.getFunction(headPredicate, X, Y);
 
 		Function subjectTerm;
 		if (type1 == COL_TYPE.OBJECT) 
-			subjectTerm = dfac.getUriTemplate(X);
+			subjectTerm = DATA_FACTORY.getUriTemplate(X);
 		else {
 			assert (type1 == COL_TYPE.BNODE); 
-			subjectTerm = dfac.getBNodeTemplate(X);
+			subjectTerm = DATA_FACTORY.getBNodeTemplate(X);
 		}
 		
 		Function objectTerm;
 		switch (type2) {
 			case BNODE:
-				objectTerm = dfac.getBNodeTemplate(Y); 
+				objectTerm = DATA_FACTORY.getBNodeTemplate(Y);
 				break;
 			case OBJECT:
-				objectTerm = dfac.getUriTemplate(Y);
+				objectTerm = DATA_FACTORY.getUriTemplate(Y);
 				break;
 			case LITERAL_LANG:	
-				objectTerm = dfac.getTypedTerm(Y, dfac.getVariable("Z"));
+				objectTerm = DATA_FACTORY.getTypedTerm(Y, DATA_FACTORY.getVariable("Z"));
 				break;
 			case DATE:
 			case TIME:
@@ -1079,10 +1070,10 @@ public class RDBMSSIRepositoryManager implements Serializable {
 				// R: these three types were not covered by the old switch
 				throw new RuntimeException("Unsuported type: " + type2);
 			default:
-				objectTerm = dfac.getTypedTerm(Y, type2);
+				objectTerm = DATA_FACTORY.getTypedTerm(Y, type2);
 		}
 
-		Function body = dfac.getFunction(predicate, subjectTerm, objectTerm);
+		Function body = DATA_FACTORY.getFunction(predicate, subjectTerm, objectTerm);
 		return Collections.singletonList(body);
 	}
 

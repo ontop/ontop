@@ -22,7 +22,6 @@ package it.unibz.inf.ontop.partialEvaluation.test;
 
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.FunctionalTermImpl;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.*;
 
 import java.util.HashMap;
@@ -32,11 +31,10 @@ import java.util.Vector;
 
 import junit.framework.TestCase;
 
+import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
+
 
 public class ThetaApplicationTest extends TestCase {
-
-	OBDADataFactory	termFactory	= OBDADataFactoryImpl.getInstance();
-	OBDADataFactory	predFactory	= OBDADataFactoryImpl.getInstance();
 
 	/*
 	 * tests the application of given thteas to a given CQIE scenario settings
@@ -46,53 +44,53 @@ public class ThetaApplicationTest extends TestCase {
 	 */
 	public void test_1() {
 
-		Term t1 = termFactory.getVariable("x");
-		Term t2 = termFactory.getVariable("y");
-		Term t3 = termFactory.getVariable("z");
+		Term t1 = DATA_FACTORY.getVariable("x");
+		Term t2 = DATA_FACTORY.getVariable("y");
+		Term t3 = DATA_FACTORY.getVariable("z");
 
-		Term t4 = termFactory.getVariable("x");
+		Term t4 = DATA_FACTORY.getVariable("x");
 		List<Term> vars = new Vector<Term>();
 		vars.add(t4);
-		Predicate fs = predFactory.getPredicate("p", vars.size());
-		FunctionalTermImpl ot = (FunctionalTermImpl) termFactory.getFunction(fs, vars);
+		Predicate fs = DATA_FACTORY.getPredicate("p", vars.size());
+		FunctionalTermImpl ot = (FunctionalTermImpl) DATA_FACTORY.getFunction(fs, vars);
 
-		Term t5 = termFactory.getConstantLiteral("con");
-		Term t51 = termFactory.getConstantLiteral("st");
+		Term t5 = DATA_FACTORY.getConstantLiteral("con");
+		Term t51 = DATA_FACTORY.getConstantLiteral("st");
 		List<Term> vars5 = new Vector<Term>();
 		vars5.add(t5);
 		vars5.add(t51);
-		Predicate fs2 = predFactory.getPredicate("p", vars5.size());
-		FunctionalTermImpl ot2 = (FunctionalTermImpl) termFactory.getFunction(fs2, vars5);
+		Predicate fs2 = DATA_FACTORY.getPredicate("p", vars5.size());
+		FunctionalTermImpl ot2 = (FunctionalTermImpl) DATA_FACTORY.getFunction(fs2, vars5);
 
-		Predicate pred1 = predFactory.getPredicate("A", 5);
+		Predicate pred1 = DATA_FACTORY.getPredicate("A", 5);
 		List<Term> terms1 = new Vector<Term>();
 		terms1.add(t1);
 		terms1.add(t2);
 		terms1.add(t3);
 		terms1.add(ot);
 		terms1.add(ot2);
-		Function atom1 = predFactory.getFunction(pred1, terms1);
+		Function atom1 = DATA_FACTORY.getFunction(pred1, terms1);
 		List<Function> body = new Vector<Function>();
 		body.add(atom1);
 
-		Variable t7 = termFactory.getVariable("x");
-		Term t6 = termFactory.getVariable("t");
-		Variable t8 = termFactory.getVariable("z");
-		Term t9 = termFactory.getConstantLiteral("elf");
-		Term t10 = termFactory.getVariable("x");
-		Variable t11 = termFactory.getVariable("y");
-		Term t12 = termFactory.getVariable("p");
+		Variable t7 = DATA_FACTORY.getVariable("x");
+		Term t6 = DATA_FACTORY.getVariable("t");
+		Variable t8 = DATA_FACTORY.getVariable("z");
+		Term t9 = DATA_FACTORY.getConstantLiteral("elf");
+		Term t10 = DATA_FACTORY.getVariable("x");
+		Variable t11 = DATA_FACTORY.getVariable("y");
+		Term t12 = DATA_FACTORY.getVariable("p");
 		List<Term> vars3 = new Vector<Term>();
 		vars3.add(t12);
-		Predicate fs3 = predFactory.getPredicate("uri", vars3.size());
-		FunctionalTermImpl otx = (FunctionalTermImpl) termFactory.getFunction(fs3, vars3);
+		Predicate fs3 = DATA_FACTORY.getPredicate("uri", vars3.size());
+		FunctionalTermImpl otx = (FunctionalTermImpl) DATA_FACTORY.getFunction(fs3, vars3);
 
-		Predicate head = predFactory.getPredicate("q", 1);
+		Predicate head = DATA_FACTORY.getPredicate("q", 1);
 		List<Term> terms2 = new Vector<Term>();
 		terms2.add(t10);
-		Function h = predFactory.getFunction(head, terms2);
+		Function h = DATA_FACTORY.getFunction(head, terms2);
 
-		CQIE query = predFactory.getCQIE(h, body);
+		CQIE query = DATA_FACTORY.getCQIE(h, body);
 
         SingletonSubstitution s1 = new SingletonSubstitution(t7, t6);
         SingletonSubstitution s2 = new SingletonSubstitution(t8, t9);
@@ -139,29 +137,29 @@ public class ThetaApplicationTest extends TestCase {
 
 	public void test_2() throws Exception {
 
-		// Term qt1 = termFactory.createVariable("a");
-		// Term qt2 = termFactory.createVariable("b");
-		// Term qt3 = termFactory.createVariable("c");
+		// Term qt1 = DATA_FACTORY.createVariable("a");
+		// Term qt2 = DATA_FACTORY.createVariable("b");
+		// Term qt3 = DATA_FACTORY.createVariable("c");
 		//
 		//
-		// Predicate pred1 = predFactory.createPredicate("A", 1);
+		// Predicate pred1 = DATA_FACTORY.createPredicate("A", 1);
 		// List<Term> terms1 = new Vector<Term>();
 		// terms1.add(qt1);
 		// AtomImpl a1 = new AtomImpl(pred1, terms1);
 		//
-		// Predicate pred2 = predFactory.createPredicate("B", 1);
+		// Predicate pred2 = DATA_FACTORY.createPredicate("B", 1);
 		// List<Term> terms2 = new Vector<Term>();
 		// terms1.add(qt2);
 		// AtomImpl a2 = new AtomImpl(pred2, terms2);
 		//
-		// Predicate pred3 = predFactory.createPredicate("C", 1);
+		// Predicate pred3 = DATA_FACTORY.createPredicate("C", 1);
 		// List<Term> terms3 = new Vector<Term>();
 		// terms3.add(qt3);
 		// AtomImpl a3 = new AtomImpl(pred3, terms3);
 		//
 		// LinkedList<Function> body = new LinkedList<Function>();
 		//
-		// Predicate predh = predFactory.createPredicate("q", 1);
+		// Predicate predh = DATA_FACTORY.createPredicate("q", 1);
 		// List<Term> termsh = new Vector<Term>();
 		// termsh.add(qt1);
 		// termsh.add(qt2);
@@ -178,18 +176,18 @@ public class ThetaApplicationTest extends TestCase {
 		// ComplexMappingUnfolder cmu = new ComplexMappingUnfolder(vex,
 		// viewMan);
 		//
-		// Term t1 = termFactory.createVariable("x");
-		// Predicate pred1 = predFactory.createPredicate("A", 1);
+		// Term t1 = DATA_FACTORY.createVariable("x");
+		// Predicate pred1 = DATA_FACTORY.createPredicate("A", 1);
 		// List<Term> terms1 = new Vector<Term>();
 		// terms1.add(t1);
 		// AtomImpl atom1 = new AtomImpl(pred1, terms1);
-		// Term t2 = termFactory.createVariable("x");
-		// Predicate pred2 = predFactory.createPredicate("A", 1);
+		// Term t2 = DATA_FACTORY.createVariable("x");
+		// Predicate pred2 = DATA_FACTORY.createPredicate("A", 1);
 		// List<Term> terms2 = new Vector<Term>();
 		// terms2.add(t2);
 		// AtomImpl atom2 = new AtomImpl(pred2, terms2);
-		// Term ht = termFactory.createVariable("x");
-		// Predicate pred3 = predFactory.createPredicate("q", 1);
+		// Term ht = DATA_FACTORY.createVariable("x");
+		// Predicate pred3 = DATA_FACTORY.createPredicate("q", 1);
 		// List<Term> terms3 = new Vector<Term>();
 		// terms3.add(ht);
 		// AtomImpl head = new AtomImpl(pred3, terms3);

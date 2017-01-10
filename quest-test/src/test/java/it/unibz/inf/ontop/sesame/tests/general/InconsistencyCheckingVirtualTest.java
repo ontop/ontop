@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.sesame.tests.general;
 
 import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.inf.ontop.owlrefplatform.injection.QuestCorePreferences;
+import it.unibz.inf.ontop.injection.QuestCoreSettings;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWL;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLFactory;
 import org.junit.Before;
@@ -48,7 +48,7 @@ public class InconsistencyCheckingVirtualTest {
 
 		p = new Properties();
 		// ???
-		p.setProperty(QuestCorePreferences.OBTAIN_FROM_ONTOLOGY, QuestConstants.TRUE);
+		p.setProperty(QuestCoreSettings.OBTAIN_FROM_ONTOLOGY, QuestConstants.TRUE);
 
 		manager = OWLManager.createOWLOntologyManager();
 		try {

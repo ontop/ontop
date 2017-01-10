@@ -22,7 +22,7 @@ package it.unibz.inf.ontop.r2rml;
 
 import it.unibz.inf.ontop.exception.InvalidMappingExceptionWithIndicator;
 import it.unibz.inf.ontop.injection.OBDACoreConfiguration;
-import it.unibz.inf.ontop.injection.OBDAProperties;
+import it.unibz.inf.ontop.injection.OBDASettings;
 import it.unibz.inf.ontop.io.OntopNativeMappingSerializer;
 import it.unibz.inf.ontop.model.OBDAModel;
 
@@ -92,11 +92,11 @@ class MappingConverterCMD {
 			} else if (mapFile.endsWith(".ttl")) {
 
                 Properties p = new Properties();
-                p.setProperty(OBDAProperties.DB_NAME, "DBName");
-                p.setProperty(OBDAProperties.JDBC_URL, "jdbc:h2:tcp://localhost/DBName");
-                p.setProperty(OBDAProperties.DB_USER, "sa");
-                p.setProperty(OBDAProperties.DB_PASSWORD, "");
-                p.setProperty(OBDAProperties.JDBC_DRIVER, "com.mysql.jdbc.Driver");
+                p.setProperty(OBDASettings.DB_NAME, "DBName");
+                p.setProperty(OBDASettings.JDBC_URL, "jdbc:h2:tcp://localhost/DBName");
+                p.setProperty(OBDASettings.DB_USER, "sa");
+                p.setProperty(OBDASettings.DB_PASSWORD, "");
+                p.setProperty(OBDASettings.JDBC_DRIVER, "com.mysql.jdbc.Driver");
 				OBDACoreConfiguration configuration = OBDACoreConfiguration.defaultBuilder()
 						.properties(p)
 						.r2rmlMappingFile(mapFile)

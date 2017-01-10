@@ -3,7 +3,7 @@ package it.unibz.inf.ontop.obda;
 
 import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.inf.ontop.owlrefplatform.injection.QuestCorePreferences;
+import it.unibz.inf.ontop.injection.QuestCoreSettings;
 import it.unibz.inf.ontop.owlrefplatform.core.resultset.QuestDistinctTupleResultSet;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import it.unibz.inf.ontop.sesame.SesameVirtualRepo;
@@ -15,9 +15,6 @@ import org.openrdf.query.TupleQuery;
 import org.openrdf.query.TupleQueryResult;
 import org.openrdf.repository.Repository;
 import org.openrdf.repository.RepositoryConnection;
-import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -150,7 +147,7 @@ public class DistinctResultSetTest { //
 
 
         Properties p = new Properties();
-        p.setProperty(QuestCorePreferences.DISTINCT_RESULTSET, QuestConstants.TRUE);
+        p.setProperty(QuestCoreSettings.DISTINCT_RESULTSET, QuestConstants.TRUE);
         String query = "PREFIX : <http://meraka/moss/exampleBooks.owl#>" +
                 " select distinct * {?x a :Author}";
         int nResults = runTestsQuestOWL(p, query);

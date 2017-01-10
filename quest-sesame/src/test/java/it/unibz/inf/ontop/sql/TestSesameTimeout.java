@@ -18,7 +18,7 @@ import org.openrdf.query.QueryEvaluationException;
 import org.openrdf.query.QueryLanguage;
 import org.openrdf.query.TupleQuery;
 import org.openrdf.query.TupleQueryResult;
-import it.unibz.inf.ontop.injection.OBDAProperties;
+import it.unibz.inf.ontop.injection.OBDASettings;
 import it.unibz.inf.ontop.sesame.RepositoryConnection;
 import it.unibz.inf.ontop.sesame.SesameVirtualRepo;
 
@@ -50,11 +50,11 @@ public class TestSesameTimeout {
 	public void init()  throws Exception {
 
 		Properties p = new Properties();
-		p.setProperty(OBDAProperties.DB_NAME, "countries");
-		p.setProperty(OBDAProperties.JDBC_URL, "jdbc:h2:mem:countries");
-		p.setProperty(OBDAProperties.DB_USER, "sa");
-		p.setProperty(OBDAProperties.DB_PASSWORD, "");
-		p.setProperty(OBDAProperties.JDBC_DRIVER, "org.h2.Driver");
+		p.setProperty(OBDASettings.DB_NAME, "countries");
+		p.setProperty(OBDASettings.JDBC_URL, "jdbc:h2:mem:countries");
+		p.setProperty(OBDASettings.DB_USER, "sa");
+		p.setProperty(OBDASettings.DB_PASSWORD, "");
+		p.setProperty(OBDASettings.JDBC_DRIVER, "org.h2.Driver");
 
 		sqlConnection= DriverManager.getConnection("jdbc:h2:mem:countries","sa", "");
 		java.sql.Statement s = sqlConnection.createStatement();

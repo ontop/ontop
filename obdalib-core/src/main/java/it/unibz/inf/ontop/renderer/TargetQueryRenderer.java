@@ -22,7 +22,6 @@ package it.unibz.inf.ontop.renderer;
 
 import it.unibz.inf.ontop.io.PrefixManager;
 import it.unibz.inf.ontop.model.Constant;
-import it.unibz.inf.ontop.model.DatatypeFactory;
 import it.unibz.inf.ontop.model.ExpressionOperation;
 import it.unibz.inf.ontop.model.Function;
 import it.unibz.inf.ontop.model.Predicate;
@@ -31,19 +30,18 @@ import it.unibz.inf.ontop.model.URIConstant;
 import it.unibz.inf.ontop.model.URITemplatePredicate;
 import it.unibz.inf.ontop.model.ValueConstant;
 import it.unibz.inf.ontop.model.Variable;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATATYPE_FACTORY;
 
 /**
  * A utility class to render a Target Query object into its representational
  * string.
  */
 public class TargetQueryRenderer {
-
-	private static final DatatypeFactory dtfac = OBDADataFactoryImpl.getInstance().getDatatypeFactory();
 	
 	/**
 	 * Transforms the given <code>OBDAQuery</code> into a string. The method requires
@@ -144,7 +142,7 @@ public class TargetQueryRenderer {
 			String fname = getAbbreviatedName(functionSymbol.toString(), prefixManager, false);
 			if (function.isDataTypeFunction()) {
 				// if the function symbol is a data type predicate
-				if (dtfac.isLiteral(functionSymbol)) {
+				if (DATATYPE_FACTORY.isLiteral(functionSymbol)) {
 					// if it is rdfs:Literal
 					int arity = function.getArity();
 					if (arity == 1) {

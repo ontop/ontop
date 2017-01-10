@@ -26,7 +26,7 @@ import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.model.OBDAException;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
 import it.unibz.inf.ontop.owlrefplatform.core.SQLExecutableQuery;
-import it.unibz.inf.ontop.owlrefplatform.injection.QuestCorePreferences;
+import it.unibz.inf.ontop.injection.QuestCoreSettings;
 import it.unibz.inf.ontop.sql.ImplicitDBConstraintsReader;
 import org.semanticweb.owlapi.model.*;
 
@@ -224,7 +224,7 @@ public class QuestOWLExample_OntowisTests {
 		 * "Virtual ABox" mode
 		 */
 		Properties p = new Properties();
-		p.setProperty(QuestCorePreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+		p.setProperty(QuestCoreSettings.ABOX_MODE, QuestConstants.VIRTUAL);
 		//		TEST preference.setProperty(QuestPreferences.T_MAPPINGS, QuestConstants.FALSE); // Disable T_Mappings
 
 		/*

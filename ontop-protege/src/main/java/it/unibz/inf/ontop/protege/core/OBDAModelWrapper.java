@@ -13,9 +13,6 @@ import it.unibz.inf.ontop.io.SimplePrefixManager;
 import it.unibz.inf.ontop.mapping.MappingParser;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
-import it.unibz.inf.ontop.ontology.DataPropertyExpression;
-import it.unibz.inf.ontop.ontology.OClass;
-import it.unibz.inf.ontop.ontology.ObjectPropertyExpression;
 import it.unibz.inf.ontop.ontology.OntologyVocabulary;
 import it.unibz.inf.ontop.ontology.impl.OntologyVocabularyImpl;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -25,6 +22,8 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.*;
 import java.util.stream.Stream;
+
+import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
 
 /**
  * Mutable wrapper that follows the previous implementation of OBDAModel.
@@ -50,8 +49,6 @@ public class OBDAModelWrapper {
 
     private final List<OBDAModelListener> sourceListeners;
     private final List<OBDAMappingListener> mappingListeners;
-
-    private static OBDADataFactory dataFactory = OBDADataFactoryImpl.getInstance();
 
 
     public OBDAModelWrapper(NativeQueryLanguageComponentFactory nativeQLFactory,
@@ -129,7 +126,7 @@ public class OBDAModelWrapper {
                         continue;
                     }
                     modifiedCount += 1;
-                    Function newAtom = dataFactory.getFunction(newPredicate, oldAtom.getTerms());
+                    Function newAtom = DATA_FACTORY.getFunction(newPredicate, oldAtom.getTerms());
                     body.set(idx, newAtom);
                 }
                 fireMappingUpdated(sourceURI, mapping.getId(), mapping);

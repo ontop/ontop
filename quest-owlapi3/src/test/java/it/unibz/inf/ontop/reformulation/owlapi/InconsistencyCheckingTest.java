@@ -37,7 +37,7 @@ import static org.semanticweb.owlapi.apibinding.OWLFunctionalSyntaxFactory.Liter
 import static org.semanticweb.owlapi.apibinding.OWLFunctionalSyntaxFactory.Ontology;
 
 import it.unibz.inf.ontop.injection.QuestConfiguration;
-import it.unibz.inf.ontop.owlrefplatform.injection.QuestCorePreferences;
+import it.unibz.inf.ontop.injection.QuestCoreSettings;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWL;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLFactory;
 import junit.framework.TestCase;
@@ -90,8 +90,8 @@ public class InconsistencyCheckingTest extends TestCase{
 	
 	private void startReasoner() throws Exception {
 		Properties p = new Properties();
-		p.setProperty(QuestCorePreferences.ABOX_MODE, QuestConstants.CLASSIC);
-		p.setProperty(QuestCorePreferences.OPTIMIZE_EQUIVALENCES, "true");
+		p.setProperty(QuestCoreSettings.ABOX_MODE, QuestConstants.CLASSIC);
+		p.setProperty(QuestCoreSettings.OPTIMIZE_EQUIVALENCES, "true");
 		QuestConfiguration configuration = QuestConfiguration.defaultBuilder()
 				.properties(p)
 				.ontology(ontology)

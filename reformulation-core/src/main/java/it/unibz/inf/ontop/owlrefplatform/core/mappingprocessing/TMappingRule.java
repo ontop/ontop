@@ -1,7 +1,6 @@
 package it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing;
 
 import it.unibz.inf.ontop.model.*;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.CQContainmentCheck;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.EQNormalizer;
 
@@ -12,6 +11,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
+
 /***
  * Splits a given {@link mapping} into builtin predicates ({@link conditions})
  * and all other atoms ({@link stripped}), which are checked for containment 
@@ -19,8 +20,6 @@ import java.util.Map;
  */
 
 public class TMappingRule {
-	
-	private static final OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 	
 	private final Function head;
 	private final List<Function> databaseAtoms;	
@@ -70,7 +69,7 @@ public class TMappingRule {
 			this.filterAtoms = Collections.singletonList(filters);
 		
 		this.head = replaceConstants(head, filters);
-		this.stripped = fac.getCQIE(this.head, databaseAtoms);
+		this.stripped = DATA_FACTORY.getCQIE(this.head, databaseAtoms);
 		this.cqc = cqc;
 	}
 
@@ -90,9 +89,9 @@ public class TMappingRule {
 				Variable var = valueMap.get(c);
 				if (var == null) {
 					freshVarCount++;
-					var = fac.getVariable("?FreshVar" + freshVarCount);
+					var = DATA_FACTORY.getVariable("?FreshVar" + freshVarCount);
 					valueMap.put(c, var);
-					filters.add(fac.getFunctionEQ(var, c));
+					filters.add(DATA_FACTORY.getFunctionEQ(var, c));
 				}
 				atom.setTerm(i, var);
 			}
@@ -107,7 +106,7 @@ public class TMappingRule {
 
 		this.filterAtoms = filterAtoms;
 		
-		this.stripped = fac.getCQIE(head, databaseAtoms);
+		this.stripped = DATA_FACTORY.getCQIE(head, databaseAtoms);
 		this.cqc = baseRule.cqc;
 	}
 	
@@ -120,7 +119,7 @@ public class TMappingRule {
 		this.databaseAtoms = cloneList(baseRule.databaseAtoms);
 		this.head = (Function)head.clone();
 		
-		this.stripped = fac.getCQIE(head, databaseAtoms);
+		this.stripped = DATA_FACTORY.getCQIE(head, databaseAtoms);
 		this.cqc = baseRule.cqc;
 	}
 	
@@ -159,7 +158,7 @@ public class TMappingRule {
 			while (iterOR.hasNext()) {
 				list = iterOR.next();
 				Function e = getMergedByAND(list);
-				mergedConditions = fac.getFunctionOR(e, mergedConditions);				
+				mergedConditions = DATA_FACTORY.getFunctionOR(e, mergedConditions);
 			}
 			
 			combinedBody.add(mergedConditions);
@@ -167,7 +166,7 @@ public class TMappingRule {
 		else
 			combinedBody = databaseAtoms;
 		
-		CQIE cq = fac.getCQIE(head, combinedBody);
+		CQIE cq = DATA_FACTORY.getCQIE(head, combinedBody);
 		EQNormalizer.enforceEqualities(cq);
 		return cq;
 	}
@@ -189,7 +188,7 @@ public class TMappingRule {
 		Function mergedConditions = iterAND.next();
 		while (iterAND.hasNext()) {
 			Function e = iterAND.next();
-			mergedConditions = fac.getFunctionAND(e, mergedConditions);				
+			mergedConditions = DATA_FACTORY.getFunctionAND(e, mergedConditions);
 		}		
 		return mergedConditions;
 	}

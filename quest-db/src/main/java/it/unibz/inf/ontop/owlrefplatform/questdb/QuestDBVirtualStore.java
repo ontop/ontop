@@ -24,13 +24,13 @@ package it.unibz.inf.ontop.owlrefplatform.questdb;
 import java.util.Optional;
 
 import it.unibz.inf.ontop.injection.QuestConfiguration;
-import it.unibz.inf.ontop.injection.QuestPreferences;
+import it.unibz.inf.ontop.injection.QuestSettings;
 import it.unibz.inf.ontop.model.OBDAException;
 import it.unibz.inf.ontop.model.OBDAModel;
 import it.unibz.inf.ontop.ontology.OntologyFactory;
 import it.unibz.inf.ontop.owlrefplatform.core.IQuest;
 import it.unibz.inf.ontop.owlrefplatform.core.IQuestConnection;
-import it.unibz.inf.ontop.owlrefplatform.injection.QuestCorePreferences;
+import it.unibz.inf.ontop.injection.QuestCoreSettings;
 
 import it.unibz.inf.ontop.ontology.Ontology;
 import it.unibz.inf.ontop.ontology.impl.OntologyFactoryImpl;
@@ -58,7 +58,7 @@ public class QuestDBVirtualStore extends QuestDBAbstractStore {
 	private boolean isinitalized = false;
 
 	@Override
-	public QuestCorePreferences getPreferences() {
+	public QuestCoreSettings getPreferences() {
 		return questInstance.getPreferences();
 	}
 
@@ -70,7 +70,7 @@ public class QuestDBVirtualStore extends QuestDBAbstractStore {
 		// TODO: re-cast the exception to a Sesame-specific one
 		config.validate();
 
-		QuestPreferences preferences = config.getPreferences();
+		QuestSettings preferences = config.getSettings();
 
 		//we are working in virtual mode
 		if (!preferences.isInVirtualMode())
@@ -90,7 +90,8 @@ public class QuestDBVirtualStore extends QuestDBAbstractStore {
 		obdaModel.getOntologyVocabulary().merge(tbox.getVocabulary());
 
 		//set up Quest
-		questInstance = getComponentFactory().create(tbox, Optional.of(obdaModel), config.getDatasourceMetadata());
+		questInstance = getComponentFactory().create(tbox, Optional.of(obdaModel), config.getDatasourceMetadata(),
+				config.getExecutorRegistry());
 	}
 
 	/**
@@ -105,7 +106,7 @@ public class QuestDBVirtualStore extends QuestDBAbstractStore {
 			log.warn("Double initialization of QuestDBVirtualStore");
 		} else {
 			this.isinitalized = true;
-			questInstance.setupRepository(getInjector());
+			questInstance.setupRepository();
 		}
 	}
 	

@@ -3,7 +3,6 @@ package it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.Function;
 import it.unibz.inf.ontop.model.Predicate;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.SubstitutionImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.SubstitutionUtilities;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.UnifierUtilities;
@@ -12,6 +11,8 @@ import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
 
 /**
  * Rewrite the mappings to use the canonical iri
@@ -47,8 +48,6 @@ public class CanonicalIRIRewriter {
     private Map<ValueConstant, CQIE> uriMappingMap;
 
     private static final Logger log = LoggerFactory.getLogger(CanonicalIRIRewriter.class);
-
-    private static final OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 
 
     //rewrite all the URI of the mappings with canonical iri if defined
@@ -157,7 +156,7 @@ public class CanonicalIRIRewriter {
                 Map<Variable, Term> map = variables.stream()
                         .collect(Collectors.toMap(
                                 var -> var,
-                                var -> fac.getVariable(var.getName() + finalRename)));
+                                var -> DATA_FACTORY.getVariable(var.getName() + finalRename)));
 
                 //apply substitution for variables renaming
                 Substitution substitution = new SubstitutionImpl(map);

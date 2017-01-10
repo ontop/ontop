@@ -5,7 +5,7 @@ import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import org.junit.Test;
 import it.unibz.inf.ontop.io.QueryIOManager;
-import it.unibz.inf.ontop.owlrefplatform.injection.QuestCorePreferences;
+import it.unibz.inf.ontop.injection.QuestCoreSettings;
 import it.unibz.inf.ontop.querymanager.QueryController;
 import it.unibz.inf.ontop.querymanager.QueryControllerGroup;
 import it.unibz.inf.ontop.querymanager.QueryControllerQuery;
@@ -88,10 +88,10 @@ public class DatetimeStampTest {
     @Test
     public void testR2rml() throws Exception {
         Properties p = new Properties();
-        p.setProperty(QuestCorePreferences.JDBC_URL, "jdbc:mysql://10.7.20.39/northwind");
-        p.setProperty(QuestCorePreferences.DB_USER, "fish");
-        p.setProperty(QuestCorePreferences.DB_PASSWORD, "fish");
-        p.setProperty(QuestCorePreferences.JDBC_DRIVER, "com.mysql.jdbc.Driver");
+        p.setProperty(QuestCoreSettings.JDBC_URL, "jdbc:mysql://10.7.20.39/northwind");
+        p.setProperty(QuestCoreSettings.DB_USER, "fish");
+        p.setProperty(QuestCoreSettings.DB_PASSWORD, "fish");
+        p.setProperty(QuestCoreSettings.JDBC_DRIVER, "com.mysql.jdbc.Driver");
 
         log.info("Loading r2rml file");
         runTests(r2rmlFile, true);

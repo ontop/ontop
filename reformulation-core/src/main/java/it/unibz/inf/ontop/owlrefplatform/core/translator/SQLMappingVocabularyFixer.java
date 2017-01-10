@@ -34,11 +34,12 @@ import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
 import it.unibz.inf.ontop.model.*;
 
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
 import it.unibz.inf.ontop.ontology.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
 
 /***
  * This is a hack class that helps fix and OBDA model in which the mappings
@@ -47,8 +48,6 @@ import org.slf4j.LoggerFactory;
  * @author mariano
  */
 public class SQLMappingVocabularyFixer implements MappingVocabularyFixer {
-
-    private static final OBDADataFactory dfac = OBDADataFactoryImpl.getInstance();
 
     private static final Logger log = LoggerFactory.getLogger(SQLMappingVocabularyFixer.class);
 
@@ -178,8 +177,8 @@ public class SQLMappingVocabularyFixer implements MappingVocabularyFixer {
                     boolean t1uri = (ft1.getFunctionSymbol() instanceof URITemplatePredicate);
 
                     if (t0uri && t1uri) {
-                        Predicate pred = dfac.getObjectPropertyPredicate(sameAsPredName);
-                        fixedTarget = dfac.getFunction(pred, t0, t1);
+                        Predicate pred = DATA_FACTORY.getObjectPropertyPredicate(sameAsPredName);
+                        fixedTarget = DATA_FACTORY.getFunction(pred, t0, t1);
 
                     } else {
                         String message = String.format("" +
@@ -212,7 +211,7 @@ public class SQLMappingVocabularyFixer implements MappingVocabularyFixer {
         Term t0 = arguments.get(0);
         if ((t0 instanceof Function) && ((Function) t0).getFunctionSymbol() instanceof URITemplatePredicate) {
 
-                newatom = dfac.getTripleAtom(arguments.get(0), arguments.get(1), arguments.get(2));
+                newatom = DATA_FACTORY.getTripleAtom(arguments.get(0), arguments.get(1), arguments.get(2));
 
         } else {
             String message = String.format("" +
@@ -231,7 +230,7 @@ public class SQLMappingVocabularyFixer implements MappingVocabularyFixer {
         if (arguments.size() == 1) {
             Term t0 = arguments.get(0);
             if ((t0 instanceof Function) && ((Function)t0).getFunctionSymbol() instanceof URITemplatePredicate) {
-                newatom = dfac.getFunction(predicate, arguments.get(0));
+                newatom = DATA_FACTORY.getFunction(predicate, arguments.get(0));
             } else {
                 String message = String.format("" +
                         "Error with class <%s> used in the mapping\n" +
@@ -251,7 +250,7 @@ public class SQLMappingVocabularyFixer implements MappingVocabularyFixer {
 
                     Term t1 = arguments.get(1);
                     if ((t1 instanceof Function) && ((Function) t1).getFunctionSymbol() instanceof URITemplatePredicate) {
-                        newatom = dfac.getFunction(predicate, arguments.get(0), arguments.get(1));
+                        newatom = DATA_FACTORY.getFunction(predicate, arguments.get(0), arguments.get(1));
 
                     } else {
 
@@ -269,7 +268,7 @@ public class SQLMappingVocabularyFixer implements MappingVocabularyFixer {
                     if (predicate.isDataProperty()) {
 
 
-                        newatom = dfac.getFunction(predicate, arguments.get(0), arguments.get(1));
+                        newatom = DATA_FACTORY.getFunction(predicate, arguments.get(0), arguments.get(1));
 
                     } else { //case of annotation property
 
@@ -278,7 +277,7 @@ public class SQLMappingVocabularyFixer implements MappingVocabularyFixer {
 
                             Term t1 = arguments.get(1);
                             if ((t1 instanceof Function) && ((Function) t1).getFunctionSymbol() instanceof URITemplatePredicate) {
-                                newatom = dfac.getFunction(predTarget, arguments.get(0), arguments.get(1));
+                                newatom = DATA_FACTORY.getFunction(predTarget, arguments.get(0), arguments.get(1));
 
                             } else {
 
@@ -294,12 +293,12 @@ public class SQLMappingVocabularyFixer implements MappingVocabularyFixer {
                             //we understood from the mappings that the annotation property can be treated as data property
                         } else if (predTarget.isDataProperty()) {
 
-                            newatom = dfac.getFunction(predTarget, arguments.get(0), arguments.get(1));
+                            newatom = DATA_FACTORY.getFunction(predTarget, arguments.get(0), arguments.get(1));
 
                         } else { //annotation property not clear, is treated as a data property
 
-                            Predicate pred = dfac.getDataPropertyPredicate(predTarget.getName());
-                            newatom = dfac.getFunction(pred, arguments.get(0), arguments.get(1));
+                            Predicate pred = DATA_FACTORY.getDataPropertyPredicate(predTarget.getName());
+                            newatom = DATA_FACTORY.getFunction(pred, arguments.get(0), arguments.get(1));
 
                         }
                     }
@@ -325,8 +324,8 @@ public class SQLMappingVocabularyFixer implements MappingVocabularyFixer {
         if (arguments.size() == 1) {
             Term t0 = arguments.get(0);
             if ((t0 instanceof Function) && ((Function)t0).getFunctionSymbol() instanceof URITemplatePredicate) {
-                Predicate pred = dfac.getClassPredicate(undeclaredPredName);
-                fixedTarget = dfac.getFunction(pred, arguments.get(0));
+                Predicate pred = DATA_FACTORY.getClassPredicate(undeclaredPredName);
+                fixedTarget = DATA_FACTORY.getFunction(pred, arguments.get(0));
             } else {
                 String message = String.format("" +
                         "Error with class <%s> used in the mapping\n" +
@@ -349,11 +348,11 @@ public class SQLMappingVocabularyFixer implements MappingVocabularyFixer {
                     boolean t1uri = (ft1.getFunctionSymbol() instanceof URITemplatePredicate);
 
                     if (t0uri && t1uri) {
-                        Predicate pred = dfac.getObjectPropertyPredicate(undeclaredPredName);
-                        fixedTarget = dfac.getFunction(pred, t0, t1);
+                        Predicate pred = DATA_FACTORY.getObjectPropertyPredicate(undeclaredPredName);
+                        fixedTarget = DATA_FACTORY.getFunction(pred, t0, t1);
                     } else {
-                        Predicate pred = dfac.getDataPropertyPredicate(undeclaredPredName);
-                        fixedTarget = dfac.getFunction(pred, t0, t1);
+                        Predicate pred = DATA_FACTORY.getDataPropertyPredicate(undeclaredPredName);
+                        fixedTarget = DATA_FACTORY.getFunction(pred, t0, t1);
                     }
                 } else {
                     //cases we cannot recognize
@@ -414,10 +413,10 @@ public class SQLMappingVocabularyFixer implements MappingVocabularyFixer {
             }
 
             LinkedList<Term> newTerms = new LinkedList<>();
-            newTerms.add(dfac.getConstantLiteral(newTemplate.toString()));
+            newTerms.add(DATA_FACTORY.getConstantLiteral(newTemplate.toString()));
             newTerms.addAll(fterm.getTerms());
 
-            return dfac.getUriTemplate(newTerms);
+            return DATA_FACTORY.getUriTemplate(newTerms);
         }
         return term;
     }

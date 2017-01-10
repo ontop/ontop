@@ -4,12 +4,9 @@ package it.unibz.inf.ontop.injection.impl;
 import com.google.inject.Injector;
 import it.unibz.inf.ontop.injection.*;
 import it.unibz.inf.ontop.io.InvalidDataSourceException;
-import it.unibz.inf.ontop.model.OBDADataFactory;
 import it.unibz.inf.ontop.model.OBDADataSource;
 import it.unibz.inf.ontop.model.OBDAModel;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.owlapi.directmapping.DirectMappingEngine;
-import it.unibz.inf.ontop.owlrefplatform.injection.impl.QuestCoreConfigurationImpl;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
@@ -23,22 +20,22 @@ import java.net.URL;
 import java.sql.SQLException;
 import java.util.Optional;
 import java.util.Properties;
+import java.util.function.Supplier;
 
 public class QuestConfigurationImpl extends QuestCoreConfigurationImpl implements QuestConfiguration {
 
     private final QuestOptions options;
-    private final QuestPreferences preferences;
+    private final QuestSettings settings;
 
-    protected QuestConfigurationImpl(QuestPreferences preferences, OBDAConfigurationOptions obdaOptions,
-                                     QuestCoreOptions coreOptions, QuestOptions options) {
-        super(preferences, obdaOptions, coreOptions);
-        this.preferences = preferences;
+    protected QuestConfigurationImpl(QuestSettings settings, QuestOptions options) {
+        super(settings, options.coreOptions);
+        this.settings = settings;
         this.options = options;
     }
 
     @Override
-    public QuestPreferences getPreferences() {
-        return preferences;
+    public QuestSettings getSettings() {
+        return settings;
     }
 
     @Override
@@ -80,7 +77,7 @@ public class QuestConfigurationImpl extends QuestCoreConfigurationImpl implement
         if (options.ontologyURL.isPresent()) {
             return options.ontologyURL;
         }
-        Optional<String> optionalString = preferences.getOntologyURL();
+        Optional<String> optionalString = settings.getOntologyURL();
         if (optionalString.isPresent()) {
             return Optional.of(new URL(optionalString.get()));
         }
@@ -127,24 +124,27 @@ public class QuestConfigurationImpl extends QuestCoreConfigurationImpl implement
         private final Optional<URL> ontologyURL;
         private final Optional<OBDADataSource> sourceToBootstrap;
         private final Optional<String> bootstrappingBaseIRI;
+        public final QuestCoreOptions coreOptions;
 
         public QuestOptions(Optional<OWLOntology> ontology, Optional<File> ontologyFile, Optional<URL> ontologyURL,
                             Optional<OBDADataSource> sourceToBootstrap,
-                            Optional<String> bootstrappingBaseIRI) {
+                            Optional<String> bootstrappingBaseIRI,
+                            QuestCoreOptions coreOptions) {
             this.ontology = ontology;
             this.ontologyFile = ontologyFile;
             this.ontologyURL = ontologyURL;
             this.sourceToBootstrap = sourceToBootstrap;
             this.bootstrappingBaseIRI = bootstrappingBaseIRI;
+            this.coreOptions = coreOptions;
         }
     }
 
-    public static class BuilderImpl<B extends QuestConfiguration.Builder,
-                                    P extends QuestPreferences,
-                                    C extends QuestConfiguration>
-            extends QuestCoreConfigurationImpl.BuilderImpl<B,P,C>
-            implements QuestConfiguration.Builder<B> {
+    protected static class DefaultQuestConfigurationBuilderFragment<B extends QuestConfiguration.Builder>
+        implements QuestConfigurationBuilderFragment<B> {
 
+        private final B builder;
+        private final Runnable mappingDefinitionCB;
+        private final Supplier<Boolean> isMappingDefinedCB;
 
         private Optional<File> ontologyFile = Optional.empty();
         private Optional<OWLOntology> ontology = Optional.empty();
@@ -152,6 +152,23 @@ public class QuestConfigurationImpl extends QuestCoreConfigurationImpl implement
         private Optional<URL> ontologyURL = Optional.empty() ;
         private Optional<OBDADataSource> sourceToBootstrap = Optional.empty();
         private Optional<String> boostrappingBaseIri = Optional.empty();
+
+        protected DefaultQuestConfigurationBuilderFragment(B builder, Runnable mappingDefinitionCB,
+                                                           Supplier<Boolean> isMappingDefinedCB) {
+            this.builder = builder;
+            this.mappingDefinitionCB = mappingDefinitionCB;
+            this.isMappingDefinedCB = isMappingDefinedCB;
+        }
+
+        /**
+         * For sub-classes ONLY!
+         */
+        protected DefaultQuestConfigurationBuilderFragment(Runnable mappingDefinitionCB,
+                                                           Supplier<Boolean> isMappingDefinedCB) {
+            this.builder = (B) this;
+            this.mappingDefinitionCB = mappingDefinitionCB;
+            this.isMappingDefinedCB = isMappingDefinedCB;
+        }
 
         @Override
         public B ontologyFile(@Nonnull String urlOrPath) {
@@ -177,81 +194,115 @@ public class QuestConfigurationImpl extends QuestCoreConfigurationImpl implement
 
         @Override
         public B ontologyFile(@Nonnull URL url) {
-                if (isOntologyDefined) {
-                    throw new InvalidOBDAConfigurationException("Ontology already defined!");
-                }
-                isOntologyDefined = true;
-                this.ontologyURL = Optional.of(url);
-                return (B) this;
+            if (isOntologyDefined) {
+                throw new InvalidOntopConfigurationException("Ontology already defined!");
+            }
+            isOntologyDefined = true;
+            this.ontologyURL = Optional.of(url);
+            return builder;
         }
 
 
         @Override
         public B ontologyFile(@Nonnull File owlFile) {
             if (isOntologyDefined) {
-                throw new InvalidOBDAConfigurationException("Ontology already defined!");
+                throw new InvalidOntopConfigurationException("Ontology already defined!");
             }
             isOntologyDefined = true;
             this.ontologyFile = Optional.of(owlFile);
-            return (B) this;
+            return builder;
         }
 
         @Override
         public B ontology(@Nonnull OWLOntology ontology) {
             if (isOntologyDefined) {
-                throw new InvalidOBDAConfigurationException("Ontology already defined!");
+                throw new InvalidOntopConfigurationException("Ontology already defined!");
             }
             isOntologyDefined = true;
             this.ontology = Optional.of(ontology);
-            return (B) this;
+            return builder;
         }
 
         @Override
         public B bootstrapMapping(OBDADataSource source, String baseIRI) {
-            if (isMappingDefined()) {
-                throw new InvalidOBDAConfigurationException("OBDA model or mappings already defined!");
+            if (isMappingDefinedCB.get()) {
+                throw new InvalidOntopConfigurationException("OBDA model or mappings already defined!");
             }
-            declareMappingDefined();
+            mappingDefinitionCB.run();
             sourceToBootstrap = Optional.of(source);
             boostrappingBaseIri = Optional.of(baseIRI);
-            return (B) this;
+            return builder;
         }
 
-        /**
-         * TODO: explain
-         * TODO: find a better term
-         *
-         * Can be overloaded (for extensions)
-         */
-        @Override
+        protected final QuestOptions generateQuestOptions(QuestCoreOptions coreOptions) {
+            return new QuestOptions(ontology, ontologyFile, ontologyURL, sourceToBootstrap, boostrappingBaseIri, coreOptions);
+        }
+
         protected Properties generateProperties() {
-            Properties p = super.generateProperties();
-
+            Properties p = new Properties();
             // Does not create new property entries
-
             return p;
         }
+    }
 
-        /**
-         * Default implementation for P == QuestPreferences
-         */
+    protected abstract static class QuestConfigurationBuilderMixin<B extends QuestConfiguration.Builder>
+        extends QuestCoreConfigurationBuilderMixin<B>
+        implements QuestConfiguration.Builder<B> {
+
+        private final DefaultQuestConfigurationBuilderFragment<B> questBuilderFragment;
+
+        protected QuestConfigurationBuilderMixin() {
+            questBuilderFragment = new DefaultQuestConfigurationBuilderFragment<>((B) this,
+                    this::declareMappingDefined,
+                    this::isMappingDefined);
+        }
+
         @Override
-        protected P createOBDAProperties(Properties p) {
-            return (P) new QuestPreferencesImpl(p, isR2rml());
+        public B ontologyFile(@Nonnull String urlOrPath) {
+            return questBuilderFragment.ontologyFile(urlOrPath);
         }
 
-        /**
-         * Default implementation for P == QuestPreferences
-         */
         @Override
-        protected C createConfiguration(P questPreferences) {
-            return (C) new QuestConfigurationImpl(questPreferences, createOBDAConfigurationArguments(),
-                    createQuestCoreArguments(), createQuestArguments());
+        public B ontologyFile(@Nonnull URL url) {
+            return questBuilderFragment.ontologyFile(url);
         }
 
-        protected final QuestOptions createQuestArguments() {
-            return new QuestOptions(ontology, ontologyFile, ontologyURL, sourceToBootstrap, boostrappingBaseIri);
+        @Override
+        public B ontologyFile(@Nonnull File owlFile) {
+            return questBuilderFragment.ontologyFile(owlFile);
         }
 
+        @Override
+        public B ontology(@Nonnull OWLOntology ontology) {
+            return questBuilderFragment.ontology(ontology);
+        }
+
+        @Override
+        public B bootstrapMapping(OBDADataSource source, String baseIRI) {
+            return questBuilderFragment.bootstrapMapping(source, baseIRI);
+        }
+
+        @Override
+        protected Properties generateProperties() {
+            Properties properties = super.generateProperties();
+            properties.putAll(questBuilderFragment.generateProperties());
+            return properties;
+        }
+
+        protected final QuestOptions generateQuestOptions() {
+            return questBuilderFragment.generateQuestOptions(generateQuestCoreOptions());
+        }
+    }
+
+    public static final class BuilderImpl<B extends QuestConfiguration.Builder>
+            extends QuestConfigurationBuilderMixin<B> {
+
+        @Override
+        public QuestConfiguration build() {
+            Properties properties = generateProperties();
+            QuestSettings settings = new QuestSettingsImpl(properties, isR2rml());
+
+            return new QuestConfigurationImpl(settings, generateQuestOptions());
+        }
     }
 }

@@ -25,15 +25,13 @@ import java.util.Optional;
 import com.google.common.collect.ImmutableList;
 
 import com.google.inject.Inject;
-import com.google.inject.Injector;
 import com.google.inject.assistedinject.Assisted;
 
 import it.unibz.inf.ontop.exception.DuplicateMappingException;
-import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
-import it.unibz.inf.ontop.injection.OBDAFactoryWithException;
-import it.unibz.inf.ontop.injection.OBDAProperties;
+import it.unibz.inf.ontop.injection.*;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.io.PrefixManager;
+import it.unibz.inf.ontop.model.impl.MappingFactoryImpl;
 import it.unibz.inf.ontop.ontology.ImmutableOntologyVocabulary;
 import it.unibz.inf.ontop.owlrefplatform.core.abox.RDBMSSIRepositoryManager;
 import it.unibz.inf.ontop.owlrefplatform.core.abox.RepositoryChangedListener;
@@ -47,13 +45,11 @@ import it.unibz.inf.ontop.owlrefplatform.core.reformulation.TreeWitnessRewriter;
 import it.unibz.inf.ontop.owlrefplatform.core.srcquerygeneration.NativeQueryGenerator;
 import it.unibz.inf.ontop.owlrefplatform.core.translator.MappingVocabularyFixer;
 
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.model.impl.RDBMSourceParameterConstants;
 import it.unibz.inf.ontop.ontology.Ontology;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.VocabularyValidator;
 import it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing.TMappingExclusionConfig;
-import it.unibz.inf.ontop.owlrefplatform.injection.QuestComponentFactory;
-import it.unibz.inf.ontop.owlrefplatform.injection.QuestCorePreferences;
+import it.unibz.inf.ontop.pivotalrepr.utils.ExecutorRegistry;
 import it.unibz.inf.ontop.sql.ImplicitDBConstraintsReader;
 import it.unibz.inf.ontop.utils.IMapping2DatalogConverter;
 import org.slf4j.Logger;
@@ -68,6 +64,8 @@ import java.util.*;
 public class Quest implements Serializable, IQuest {
 
 	private static final long serialVersionUID = -6074403119825754295L;
+	private static final MappingFactory MAPPING_FACTORY = MappingFactoryImpl.getInstance();
+
 	// Whether to print primary and foreign keys to stdout.
 	private boolean printKeys;
 
@@ -140,7 +138,7 @@ public class Quest implements Serializable, IQuest {
 
 	private OBDADataSource obdaSource;
 
-	private QuestCorePreferences preferences;
+	private QuestCoreSettings preferences;
 
 	private boolean inmemory;
 
@@ -170,6 +168,9 @@ public class Quest implements Serializable, IQuest {
 	private DBConnector dbConnector;
 	private final QueryCache queryCache;
 
+	private final OntopModelFactory modelFactory;
+	private final ExecutorRegistry executorRegistry;
+
 	/***
 	 * Will prepare an instance of quest in classic or virtual ABox mode. If the
 	 * mappings are not null, then org.obda.owlreformulationplatform.aboxmode
@@ -195,10 +196,12 @@ public class Quest implements Serializable, IQuest {
 	@Inject
 	private Quest(@Assisted Ontology tbox, @Assisted Optional<OBDAModel> obdaModel,
 				  @Assisted Optional<DBMetadata> inputMetadata,
-				  QuestCorePreferences config, NativeQueryLanguageComponentFactory nativeQLFactory,
+				  @Assisted ExecutorRegistry executorRegistry,
+				  QuestCoreSettings config, NativeQueryLanguageComponentFactory nativeQLFactory,
 				  OBDAFactoryWithException obdaFactory, QuestComponentFactory questComponentFactory,
 				  MappingVocabularyFixer mappingVocabularyFixer, TMappingExclusionConfig excludeFromTMappings,
-				  IMapping2DatalogConverter mapping2DatalogConverter, QueryCache queryCache) throws DuplicateMappingException {
+				  IMapping2DatalogConverter mapping2DatalogConverter, QueryCache queryCache,
+				  OntopModelFactory modelFactory) throws DuplicateMappingException {
 		if (tbox == null)
 			throw new InvalidParameterException("TBox cannot be null");
 
@@ -208,6 +211,8 @@ public class Quest implements Serializable, IQuest {
 		this.mappingVocabularyFixer = mappingVocabularyFixer;
 		this.mapping2DatalogConverter = mapping2DatalogConverter;
 		this.queryCache = queryCache;
+		this.modelFactory = modelFactory;
+		this.executorRegistry = executorRegistry;
 
 		inputOntology = tbox;
 
@@ -265,39 +270,39 @@ public class Quest implements Serializable, IQuest {
 	}
 
 	@Override
-	public QuestCorePreferences getPreferences() {
+	public QuestCoreSettings getPreferences() {
 		return preferences;
 	}
 
 
-	private void setPreferences(QuestCorePreferences preferences) {
+	private void setPreferences(QuestCoreSettings preferences) {
 		this.preferences = preferences;
 
 		reformulate = preferences.isRewritingEnabled();
-		reformulationTechnique = preferences.getProperty(QuestCorePreferences.REFORMULATION_TECHNIQUE);
+		reformulationTechnique = preferences.getProperty(QuestCoreSettings.REFORMULATION_TECHNIQUE);
 		bOptimizeEquivalences = preferences.isEquivalenceOptimizationEnabled();
 
 		/**
 		 * Classic A-box specific configuration
 		 */
-		bObtainFromOntology = preferences.getRequiredBoolean(QuestCorePreferences.OBTAIN_FROM_ONTOLOGY);
-		bObtainFromMappings = preferences.getRequiredBoolean(QuestCorePreferences.OBTAIN_FROM_MAPPINGS);
+		bObtainFromOntology = preferences.getRequiredBoolean(QuestCoreSettings.OBTAIN_FROM_ONTOLOGY);
+		bObtainFromMappings = preferences.getRequiredBoolean(QuestCoreSettings.OBTAIN_FROM_MAPPINGS);
 		isVirtualMode = preferences.isInVirtualMode();
-		aboxSchemaType = preferences.getProperty(QuestCorePreferences.DBTYPE);
-		inmemory = preferences.getRequiredProperty(QuestCorePreferences.STORAGE_LOCATION)
+		aboxSchemaType = preferences.getProperty(QuestCoreSettings.DBTYPE);
+		inmemory = preferences.getRequiredProperty(QuestCoreSettings.STORAGE_LOCATION)
 				.equals(QuestConstants.INMEMORY);
 
 		printKeys = preferences.isKeyPrintingEnabled();
 
 		if (!inmemory) {
-			aboxJdbcURL = preferences.getProperty(QuestCorePreferences.JDBC_URL)
+			aboxJdbcURL = preferences.getProperty(QuestCoreSettings.JDBC_URL)
 					.orElseThrow(() -> new IllegalStateException("JDBC_URL must have a default value"));
 
-			aboxJdbcUser = preferences.getProperty(OBDAProperties.DB_USER)
+			aboxJdbcUser = preferences.getProperty(OBDASettings.DB_USER)
 					.orElseThrow(() -> new IllegalStateException("DB_USER must have a default value"));
-			aboxJdbcPassword = preferences.getProperty(OBDAProperties.DB_PASSWORD)
+			aboxJdbcPassword = preferences.getProperty(OBDASettings.DB_PASSWORD)
 					.orElseThrow(() -> new IllegalStateException("DB_PASSWORD must have a default value"));
-			aboxJdbcDriver = preferences.getProperty(OBDAProperties.JDBC_DRIVER)
+			aboxJdbcDriver = preferences.getProperty(OBDASettings.JDBC_DRIVER)
 					.orElseThrow(() -> new IllegalStateException("JDBC_DRIVER must have a default value"));
 		}
 
@@ -324,11 +329,8 @@ public class Quest implements Serializable, IQuest {
 	 * creating the instance.
 	 * 
 	 * @throws Exception
-	 * @param injector
 	 */
-	public void setupRepository(Injector injector) throws Exception {
-
-		OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
+	public void setupRepository() throws Exception {
 
 		log.debug("Initializing Quest...");
 
@@ -375,7 +377,7 @@ public class Quest implements Serializable, IQuest {
 					String url = "jdbc:h2:mem:questrepository:" + System.currentTimeMillis()
 							+ ";LOG=0;CACHE_SIZE=65536;LOCK_MODE=0;UNDO_LOG=0";
 
-					obdaSource = fac.getDataSource(URI.create("http://www.obda.org/ABOXDUMP" + System.currentTimeMillis()));
+					obdaSource = MAPPING_FACTORY.getDataSource(URI.create("http://www.obda.org/ABOXDUMP" + System.currentTimeMillis()));
 					obdaSource.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, "org.h2.Driver");
 					obdaSource.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, "");
 					obdaSource.setParameter(RDBMSourceParameterConstants.DATABASE_URL, url);
@@ -391,7 +393,7 @@ public class Quest implements Serializable, IQuest {
 						throw new OBDAException(
 								"Found empty JDBC_DRIVER parametery. Quest in CLASSIC/JDBC mode requires a JDBC_DRIVER value.");
 
-					obdaSource = fac.getDataSource(URI.create("http://www.obda.org/ABOXDUMP" + System.currentTimeMillis()));
+					obdaSource = MAPPING_FACTORY.getDataSource(URI.create("http://www.obda.org/ABOXDUMP" + System.currentTimeMillis()));
 					obdaSource.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, aboxJdbcDriver.trim());
 					obdaSource.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, aboxJdbcPassword);
 					obdaSource.setParameter(RDBMSourceParameterConstants.DATABASE_URL, aboxJdbcURL.trim());
@@ -511,7 +513,7 @@ public class Quest implements Serializable, IQuest {
 			else if (QuestConstants.TW.equals(reformulationTechnique.get()))
 				rewriter = new TreeWitnessRewriter();
 			else
-				throw new IllegalArgumentException("Invalid value for argument: " + QuestCorePreferences.REFORMULATION_TECHNIQUE);
+				throw new IllegalArgumentException("Invalid value for argument: " + QuestCoreSettings.REFORMULATION_TECHNIQUE);
 
 			rewriter.setTBox(reformulationReasoner, inputOntology.getVocabulary(), sigma);
 
@@ -524,7 +526,7 @@ public class Quest implements Serializable, IQuest {
 			 * Done, sending a new reasoner with the modules we just configured
 			 */
 			engine = new QuestQueryProcessor(rewriter, sigma, unfolder, vocabularyValidator, getUriMap(),
-					dataSourceQueryGenerator, queryCache, distinctResultSet, injector);
+					dataSourceQueryGenerator, queryCache, distinctResultSet, modelFactory, executorRegistry);
 
 			if (dataRepository != null)
 				dataRepository.addRepositoryChangedListener(new RepositoryChangedListener() {

@@ -1,7 +1,7 @@
 package it.unibz.inf.ontop.sql;
 
 
-import it.unibz.inf.ontop.injection.OBDAProperties;
+import it.unibz.inf.ontop.injection.OBDASettings;
 import it.unibz.inf.ontop.model.DBMetadata;
 import it.unibz.inf.ontop.model.OBDADataSource;
 import it.unibz.inf.ontop.model.OBDAModel;
@@ -38,7 +38,7 @@ public class SQLDBMetadataExtractor implements DBMetadataExtractor {
     private final Optional<ImplicitDBConstraintsReader> userConstraints;
 
     @Inject
-    private SQLDBMetadataExtractor(OBDAProperties preferences, @Nullable ImplicitDBConstraintsReader userConstraints) {
+    private SQLDBMetadataExtractor(OBDASettings preferences, @Nullable ImplicitDBConstraintsReader userConstraints) {
         this.obtainFullMetadata = preferences.isFullMetadataExtractionEnabled();
         this.userConstraints = Optional.ofNullable(userConstraints);
     }
