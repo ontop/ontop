@@ -105,10 +105,17 @@
             <version>${project.version}</version>
         </dependency>
 
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>ontop-model</artifactId>
+            <version>${project.version}</version>
+        </dependency>
 
-        <!--Dependencies from the OBDA projects to include in the jar -->
-
-        <!-- Reasoner libraries -->
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>ontop-optimization</artifactId>
+            <version>${project.version}</version>
+        </dependency>
 
         <dependency>
             <groupId>${project.groupId}</groupId>
@@ -331,10 +338,10 @@
 			<groupId>aopalliance</groupId>
 			<artifactId>aopalliance</artifactId>
 		</dependency>
-        <dependency>
-            <groupId>org.osgi</groupId>
-            <artifactId>org.osgi.core</artifactId>
-        </dependency>
+        <!--<dependency>-->
+            <!--<groupId>org.osgi</groupId>-->
+            <!--<artifactId>org.osgi.core</artifactId>-->
+        <!--</dependency>-->
     </dependencies>
 
     <build>
