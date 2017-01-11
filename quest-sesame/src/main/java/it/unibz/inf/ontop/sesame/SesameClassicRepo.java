@@ -20,32 +20,28 @@ package it.unibz.inf.ontop.sesame;
  * #L%
  */
 
+import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.model.OBDAException;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestDBConnection;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
 import it.unibz.inf.ontop.owlrefplatform.questdb.QuestDBClassicStore;
 import org.openrdf.query.Dataset;
 import org.openrdf.repository.RepositoryException;
 
-public abstract class SesameClassicRepo extends SesameAbstractRepo {
+public class SesameClassicRepo extends SesameAbstractRepo {
 
-	protected QuestDBClassicStore classicStore;
-
-	public SesameClassicRepo() {
-		super();
-	}
+	private final QuestDBClassicStore classicStore;
 	
-	protected void createStore(String name, String tboxFile, QuestPreferences config) throws Exception {
-		if (!config.getProperty(QuestPreferences.ABOX_MODE).equals(QuestConstants.CLASSIC)) {
-			throw new RepositoryException("Must be in classic mode!");
+	public SesameClassicRepo(String name, QuestConfiguration config) throws Exception {
+		if (config.getSettings().isInVirtualMode()) {
+			throw new RepositoryException("Must be in classic A-box mode!");
 		}
-		this.classicStore = new QuestDBClassicStore(name, tboxFile, config);
+		this.classicStore = new QuestDBClassicStore(name, config);
 	}
 	
-	protected void createStore(String name, Dataset data, QuestPreferences config) throws Exception {
-		if (!config.getProperty(QuestPreferences.ABOX_MODE).equals(QuestConstants.CLASSIC)) {
-			throw new RepositoryException("Must be in classic mode!");
+	public SesameClassicRepo(String name, Dataset data, QuestConfiguration config) throws Exception {
+		if (config.getSettings().isInVirtualMode()) {
+			throw new RepositoryException("Must be in classic A-box mode!");
 		}
 		this.classicStore = new QuestDBClassicStore(name, data, config);
 	}

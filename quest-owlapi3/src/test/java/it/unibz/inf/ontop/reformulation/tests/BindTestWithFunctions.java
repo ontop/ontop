@@ -20,24 +20,15 @@ package it.unibz.inf.ontop.reformulation.tests;
  * #L%
  */
 
-import it.unibz.inf.ontop.io.ModelIOManager;
-import it.unibz.inf.ontop.model.OBDADataFactory;
-import it.unibz.inf.ontop.model.OBDAModel;
+import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.model.Predicate;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLObject;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.security.MessageDigest;
@@ -49,6 +40,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
+import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -59,12 +51,8 @@ import static org.junit.Assert.assertTrue;
  */
 
 public class BindTestWithFunctions {
-	
-	private OBDADataFactory fac;
-	private Connection conn;
 
-	private OBDAModel obdaModel;
-	private OWLOntology ontology;
+	private Connection conn;
 
 	final String owlfile = "src/test/resources/test/bind/sparqlBind.owl";
 	final String obdafile = "src/test/resources/test/bind/sparqlBindWithFunctions.obda";
@@ -75,8 +63,6 @@ public class BindTestWithFunctions {
     	String url = "jdbc:h2:mem:questjunitdb";
 		String username = "sa";
 		String password = "";
-
-		fac = OBDADataFactoryImpl.getInstance();
 
 		conn = DriverManager.getConnection(url, username, password);
 		
@@ -95,15 +81,6 @@ public class BindTestWithFunctions {
 		
 		st.executeUpdate(bf.toString()); 
 		conn.commit();
-
-		// Loading the OWL file
-		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-		ontology = manager.loadOntologyFromOntologyDocument((new File(owlfile)));
-
-		// Loading the OBDA data
-		obdaModel = fac.getOBDAModel();
-		ModelIOManager ioManager = new ModelIOManager(obdaModel);
-		ioManager.load(obdafile);
 	}
 
 	@After
@@ -135,13 +112,16 @@ public class BindTestWithFunctions {
 
 
 
-	private void runTests(QuestPreferences p, String query) throws Exception {
+	private void runTests(String query) throws Exception {
 
         // Creating a new instance of the reasoner
 
         QuestOWLFactory factory = new QuestOWLFactory();
-        QuestOWLConfiguration config = QuestOWLConfiguration.builder().obdaModel(obdaModel).preferences(p).build();
-        QuestOWL reasoner = factory.createReasoner(ontology, config);
+        QuestConfiguration config = QuestConfiguration.defaultBuilder()
+                .nativeOntopMappingFile(obdafile)
+                .ontologyFile(owlfile)
+                .build();
+        QuestOWL reasoner = factory.createReasoner(config);
 
         // Now we are ready for querying
         QuestOWLConnection conn = reasoner.getConnection();
@@ -178,11 +158,6 @@ public class BindTestWithFunctions {
 	@Test
     public void testCeil() throws Exception {
 
-        QuestPreferences p = new QuestPreferences();
-        p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-
-
         String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
                 + "PREFIX  ns:  <http://example.org/ns#>\n"
                 + "SELECT  ?title ?w WHERE \n"
@@ -198,16 +173,12 @@ public class BindTestWithFunctions {
         expectedValues.add("\"1.0\"^^xsd:decimal");
         expectedValues.add("\"1.0\"^^xsd:decimal");
         expectedValues.add("\"1.0\"^^xsd:decimal");
-        checkReturnedValues(p, queryBind, expectedValues);
+        checkReturnedValues(queryBind, expectedValues);
     }
 	
 	
 	@Test
     public void testFloor() throws Exception {
-
-        QuestPreferences p = new QuestPreferences();
-        p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
 
         String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
                 + "PREFIX  ns:  <http://example.org/ns#>\n"
@@ -223,16 +194,12 @@ public class BindTestWithFunctions {
         expectedValues.add("\"0.0\"^^xsd:decimal");
         expectedValues.add("\"0.0\"^^xsd:decimal");
         expectedValues.add("\"0.0\"^^xsd:decimal");
-        checkReturnedValues(p, queryBind, expectedValues);
+        checkReturnedValues(queryBind, expectedValues);
     }
 	
 	
 	@Test
     public void testRound() throws Exception {
-
-        QuestPreferences p = new QuestPreferences();
-        p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
 
         String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
                 + "PREFIX  ns:  <http://example.org/ns#>\n"
@@ -248,15 +215,11 @@ public class BindTestWithFunctions {
         expectedValues.add("\"0.0, 23.0\"");
         expectedValues.add("\"0.0, 34.0\"");
         expectedValues.add("\"0.0, 10.0\"");
-        checkReturnedValues(p, queryBind, expectedValues);
+        checkReturnedValues(queryBind, expectedValues);
     }
 	
 	@Test
     public void testAbs() throws Exception {
-
-        QuestPreferences p = new QuestPreferences();
-        p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
 
         String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
                 + "PREFIX  ns:  <http://example.org/ns#>\n"
@@ -272,7 +235,7 @@ public class BindTestWithFunctions {
         expectedValues.add("\"5.75\"^^xsd:decimal");
         expectedValues.add("\"6.8\"^^xsd:decimal");
         expectedValues.add("\"1.50\"^^xsd:decimal");
-        checkReturnedValues(p, queryBind, expectedValues);
+        checkReturnedValues(queryBind, expectedValues);
 	}	
 	
 	/*
@@ -281,11 +244,7 @@ public class BindTestWithFunctions {
 	
 	@Test
     public void testHash() throws Exception {
-
-        QuestPreferences p = new QuestPreferences();
-        p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-
+        
         String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
                 + "PREFIX  ns:  <http://example.org/ns#>\n"
                 + "SELECT  ?title ?w WHERE \n"
@@ -312,7 +271,7 @@ public class BindTestWithFunctions {
 	  } catch(Exception ex){
 	     throw new RuntimeException(ex);
 	  }
-        checkReturnedValues(p, queryBind, expectedValues);
+        checkReturnedValues(queryBind, expectedValues);
 
     }
 
@@ -323,10 +282,6 @@ public class BindTestWithFunctions {
 
     @Test
     public void testStrLen() throws Exception {
-
-        QuestPreferences p = new QuestPreferences();
-        p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
 
         String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
                 + "PREFIX  ns:  <http://example.org/ns#>\n"
@@ -343,16 +298,12 @@ public class BindTestWithFunctions {
         expectedValues.add("\"16\"^^xsd:integer");
         expectedValues.add("\"20\"^^xsd:integer");
         expectedValues.add("\"44\"^^xsd:integer");
-        checkReturnedValues(p, queryBind, expectedValues);
+        checkReturnedValues(queryBind, expectedValues);
     }
 
     //test substring with 2 parameters
     @Test
     public void testSubstr2() throws Exception {
-
-        QuestPreferences p = new QuestPreferences();
-        p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
 
         String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
                 + "PREFIX  ns:  <http://example.org/ns#>\n"
@@ -369,16 +320,12 @@ public class BindTestWithFunctions {
         expectedValues.add("\"e Semantic Web\"@en");
         expectedValues.add("\"ime and Punishment\"@en");
         expectedValues.add("\"e Logic Book: Introduction, Second Edition\"@en");
-        checkReturnedValues(p, queryBind, expectedValues);
+        checkReturnedValues(queryBind, expectedValues);
     }
 
     //test substring with 3 parameters
     @Test
     public void testSubstr3() throws Exception {
-
-        QuestPreferences p = new QuestPreferences();
-        p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
 
         String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
                 + "PREFIX  ns:  <http://example.org/ns#>\n"
@@ -395,15 +342,10 @@ public class BindTestWithFunctions {
         expectedValues.add("\"e Sema\"@en");
         expectedValues.add("\"ime an\"@en");
         expectedValues.add("\"e Logi\"@en");
-        checkReturnedValues(p, queryBind, expectedValues);
+        checkReturnedValues(queryBind, expectedValues);
     }
     @Test
     public void testURIEncoding() throws Exception {
-
-        QuestPreferences p = new QuestPreferences();
-        p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-
 
         String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
                 + "PREFIX  ns:  <http://example.org/ns#>\n"
@@ -420,17 +362,13 @@ public class BindTestWithFunctions {
         List<String> expectedValues = new ArrayList<>();
         expectedValues.add("\"The%20Semantic%20Web\"");
         expectedValues.add("\"The%20Logic%20Book%3A%20Introduction%2C%20Second%20Edition\"");
-        checkReturnedValues(p, queryBind, expectedValues);
+        checkReturnedValues(queryBind, expectedValues);
     } 
 	
 
     
     @Test
     public void testStrEnds() throws Exception {
-
-        QuestPreferences p = new QuestPreferences();
-        p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
 
         String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
                 + "PREFIX  ns:  <http://example.org/ns#>\n"
@@ -444,16 +382,11 @@ public class BindTestWithFunctions {
 
         List<String> expectedValues = new ArrayList<>();
         expectedValues.add("\"The Semantic Web\"@en");        
-        checkReturnedValues(p, queryBind, expectedValues);
+        checkReturnedValues(queryBind, expectedValues);
     } 
     
     @Test
     public void testStrStarts() throws Exception {
-
-        QuestPreferences p = new QuestPreferences();
-        p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-
 
         String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
                 + "PREFIX  ns:  <http://example.org/ns#>\n"
@@ -469,16 +402,11 @@ public class BindTestWithFunctions {
         expectedValues.add("\"The Semantic Web\"@en"); 
         expectedValues.add("\"The Logic Book: Introduction, Second Edition\"@en");        
 
-        checkReturnedValues(p, queryBind, expectedValues);
+        checkReturnedValues(queryBind, expectedValues);
     }
 
     @Test
     public void testStrSubstring() throws Exception {
-
-        QuestPreferences p = new QuestPreferences();
-        p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-
 
         String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
                 + "PREFIX  ns:  <http://example.org/ns#>\n"
@@ -494,15 +422,11 @@ public class BindTestWithFunctions {
         expectedValues.add("\"The Semantic Web\"@en"); // ROMAN (23 Dec 2015): now the language tag is handled correctly
         expectedValues.add("\"The Logic Book: Introduction, Second Edition\"@en");  // ROMAN (23 Dec 2015): now the language tag is handled correctly
 
-        checkReturnedValues(p, queryBind, expectedValues);
+        checkReturnedValues(queryBind, expectedValues);
     }
     @Test
     public void testContains() throws Exception {
-
-        QuestPreferences p = new QuestPreferences();
-        p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-
+        
         String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
                 + "PREFIX  ns:  <http://example.org/ns#>\n"
                 + "SELECT  ?title ?w WHERE \n"
@@ -515,18 +439,13 @@ public class BindTestWithFunctions {
 
         List<String> expectedValues = new ArrayList<>();
         expectedValues.add("\"The Semantic Web\"@en");
-        checkReturnedValues(p, queryBind, expectedValues);
+        checkReturnedValues(queryBind, expectedValues);
 
     }    
     
   
     @Test
     public void testBindWithUcase() throws Exception {
-
-        QuestPreferences p = new QuestPreferences();
-        p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-
 
         String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
                 + "PREFIX  ns:  <http://example.org/ns#>\n"
@@ -545,17 +464,12 @@ public class BindTestWithFunctions {
         expectedValues.add("\"Crime and Punishment CRIME AND PUNISHMENT\"");
         expectedValues.add("\"The Logic Book: Introduction, Second Edition " + 
         "The Logic Book: Introduction, Second Edition\"".toUpperCase());
-        checkReturnedValues(p, queryBind, expectedValues);
+        checkReturnedValues(queryBind, expectedValues);
 
     }
     
     @Test
     public void testBindWithLcase() throws Exception {
-
-        QuestPreferences p = new QuestPreferences();
-        p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-
 
         String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
                 + "PREFIX  ns:  <http://example.org/ns#>\n"
@@ -574,19 +488,14 @@ public class BindTestWithFunctions {
         expectedValues.add("\"Crime and Punishment crime and punishment\"");
         expectedValues.add("\"The Logic Book: Introduction, Second Edition " + 
         "The Logic Book: Introduction, Second Edition\"".toLowerCase());
-        checkReturnedValues(p, queryBind, expectedValues);
+        checkReturnedValues(queryBind, expectedValues);
 
     }
     
     
     @Test
     public void testBindWithBefore() throws Exception {
-
-        QuestPreferences p = new QuestPreferences();
-        p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-
-
+        
         String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
                 + "PREFIX  ns:  <http://example.org/ns#>\n"
                 + "SELECT  ?title ?w WHERE \n"
@@ -602,18 +511,13 @@ public class BindTestWithFunctions {
         expectedValues.add("\"The Seman\"@en");
         expectedValues.add("\"\"@en");
         expectedValues.add("\"The Logic Book: Introduc\"@en");
-        checkReturnedValues(p, queryBind, expectedValues);
+        checkReturnedValues(queryBind, expectedValues);
 
     }
     
     
     @Test
     public void testBindWithAfter() throws Exception {
-
-        QuestPreferences p = new QuestPreferences();
-        p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-
 
         String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
                 + "PREFIX  ns:  <http://example.org/ns#>\n"
@@ -630,7 +534,7 @@ public class BindTestWithFunctions {
         expectedValues.add("\" Semantic Web\"@en");
         expectedValues.add("\"\"@en");
         expectedValues.add("\" Logic Book: Introduction, Second Edition\"@en");
-        checkReturnedValues(p, queryBind, expectedValues);
+        checkReturnedValues(queryBind, expectedValues);
 
     }
     
@@ -642,10 +546,6 @@ public class BindTestWithFunctions {
     
     @Test
     public void testMonth() throws Exception {
-
-        QuestPreferences p = new QuestPreferences();
-        p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
 
 
         String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
@@ -664,15 +564,11 @@ public class BindTestWithFunctions {
         expectedValues.add("\"12\"^^xsd:integer");
         expectedValues.add("\"7\"^^xsd:integer");
         expectedValues.add("\"11\"^^xsd:integer");
-        checkReturnedValues(p, queryBind, expectedValues);
+        checkReturnedValues(queryBind, expectedValues);
     } 
     
     @Test
     public void testYear() throws Exception {
-
-        QuestPreferences p = new QuestPreferences();
-        p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
 
 
         String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
@@ -691,17 +587,12 @@ public class BindTestWithFunctions {
         expectedValues.add("\"2011\"^^xsd:integer");
         expectedValues.add("\"1866\"^^xsd:integer");
         expectedValues.add("\"1967\"^^xsd:integer");
-        checkReturnedValues(p, queryBind, expectedValues);
+        checkReturnedValues(queryBind, expectedValues);
     }
 
     @Test
     public void testDay() throws Exception {
-
-        QuestPreferences p = new QuestPreferences();
-        p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-
-
+        
         String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
                 + "PREFIX  ns:  <http://example.org/ns#>\n"
                 + "SELECT  ?title ?w WHERE \n"
@@ -718,16 +609,11 @@ public class BindTestWithFunctions {
         expectedValues.add("\"8\"^^xsd:integer");
         expectedValues.add("\"1\"^^xsd:integer");
         expectedValues.add("\"5\"^^xsd:integer");
-        checkReturnedValues(p, queryBind, expectedValues);
+        checkReturnedValues(queryBind, expectedValues);
     }
 
     @Test
     public void testMinutes() throws Exception {
-
-        QuestPreferences p = new QuestPreferences();
-        p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-
 
         String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
                 + "PREFIX  ns:  <http://example.org/ns#>\n"
@@ -745,15 +631,11 @@ public class BindTestWithFunctions {
         expectedValues.add("\"0\"^^xsd:integer");
         expectedValues.add("\"0\"^^xsd:integer");
         expectedValues.add("\"0\"^^xsd:integer");
-        checkReturnedValues(p, queryBind, expectedValues);
+        checkReturnedValues(queryBind, expectedValues);
     }
 
     @Test
     public void testHours() throws Exception {
-
-        QuestPreferences p = new QuestPreferences();
-        p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
 
 
         String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
@@ -772,15 +654,11 @@ public class BindTestWithFunctions {
         expectedValues.add("\"0\"^^xsd:integer");
         expectedValues.add("\"0\"^^xsd:integer");
         expectedValues.add("\"0\"^^xsd:integer");
-        checkReturnedValues(p, queryBind, expectedValues);
+        checkReturnedValues(queryBind, expectedValues);
     }
 
     @Test
     public void testSeconds() throws Exception {
-
-        QuestPreferences p = new QuestPreferences();
-        p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
 
 
         String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
@@ -799,16 +677,11 @@ public class BindTestWithFunctions {
         expectedValues.add("\"0\"^^xsd:decimal");
         expectedValues.add("\"0\"^^xsd:decimal");
         expectedValues.add("\"0\"^^xsd:decimal");
-        checkReturnedValues(p, queryBind, expectedValues);
+        checkReturnedValues(queryBind, expectedValues);
     }
 
     @Test
     public void testNow() throws Exception {
-
-        QuestPreferences p = new QuestPreferences();
-        p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-
 
         String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
                 + "PREFIX  ns:  <http://example.org/ns#>\n"
@@ -820,16 +693,11 @@ public class BindTestWithFunctions {
                 + "   BIND (NOW() AS ?w)\n"
                 + "}";
 
-        runTests(p, queryBind);
+        runTests(queryBind);
     }
 
     @Test
     public void testUuid() throws Exception {
-
-        QuestPreferences p = new QuestPreferences();
-        p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-
 
         String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
                 + "PREFIX  ns:  <http://example.org/ns#>\n"
@@ -840,17 +708,11 @@ public class BindTestWithFunctions {
                 + "}";
 
 
-        runTests(p, queryBind);
+        runTests(queryBind);
     }
 
     @Test
     public void testStrUuid() throws Exception {
-
-        QuestPreferences p = new QuestPreferences();
-        p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-
-
         String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
                 + "PREFIX  ns:  <http://example.org/ns#>\n"
                 + "SELECT  ?title (STRUUID() AS ?w) WHERE \n"
@@ -860,17 +722,11 @@ public class BindTestWithFunctions {
                 + "}";
 
 
-        runTests(p, queryBind);
+        runTests(queryBind);
     }
 
     @Test
     public void testRand() throws Exception {
-
-        QuestPreferences p = new QuestPreferences();
-        p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-
-
         String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
                 + "PREFIX  ns:  <http://example.org/ns#>\n"
                 + "SELECT  ?title (RAND() AS ?w) WHERE \n"
@@ -880,15 +736,11 @@ public class BindTestWithFunctions {
                 + "}";
 
 
-        runTests(p, queryBind);
+        runTests(queryBind);
     }
 
 //    @Test timezone is not supported in h2
     public void testTZ() throws Exception {
-
-        QuestPreferences p = new QuestPreferences();
-        p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
 
         String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
                 + "PREFIX  ns:  <http://example.org/ns#>\n"
@@ -904,7 +756,7 @@ public class BindTestWithFunctions {
         expectedValues.add("\"0.0\"");
         expectedValues.add("\"0.0\"");
         expectedValues.add("\"0.0\"");
-        checkReturnedValues(p, queryBind, expectedValues);
+        checkReturnedValues(queryBind, expectedValues);
     }
 
     //    @Test see results of datetime with locale
@@ -918,7 +770,7 @@ public class BindTestWithFunctions {
         try {
             date = df.parse(value);
             Timestamp ts = new Timestamp(date.getTime());
-            System.out.println(fac.getConstantLiteral(ts.toString().replace(' ', 'T'), Predicate.COL_TYPE.DATETIME));
+            System.out.println(DATA_FACTORY.getConstantLiteral(ts.toString().replace(' ', 'T'), Predicate.COL_TYPE.DATETIME));
 
         } catch (ParseException pe) {
 
@@ -926,11 +778,14 @@ public class BindTestWithFunctions {
         }
     }
 
-    private void checkReturnedValues(QuestPreferences p, String query, List<String> expectedValues) throws Exception {
+    private void checkReturnedValues(String query, List<String> expectedValues) throws Exception {
 
         QuestOWLFactory factory = new QuestOWLFactory();
-        QuestOWLConfiguration config = QuestOWLConfiguration.builder().obdaModel(obdaModel).preferences(p).build();
-        QuestOWL reasoner = factory.createReasoner(ontology, config);
+        QuestConfiguration config = QuestConfiguration.defaultBuilder()
+                .nativeOntopMappingFile(obdafile)
+                .ontologyFile(owlfile)
+                .build();
+        QuestOWL reasoner = factory.createReasoner(config);
 
 
         // Now we are ready for querying

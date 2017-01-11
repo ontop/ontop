@@ -22,22 +22,18 @@ package it.unibz.inf.ontop.owlrefplatform.owlapi;
 
 import it.unibz.inf.ontop.exception.InvalidMappingException;
 import it.unibz.inf.ontop.exception.InvalidPredicateDeclarationException;
-import it.unibz.inf.ontop.io.ModelIOManager;
-import it.unibz.inf.ontop.model.OBDADataFactory;
+import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.model.OBDAException;
-import it.unibz.inf.ontop.model.OBDAModel;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
+import it.unibz.inf.ontop.owlrefplatform.core.SQLExecutableQuery;
+import it.unibz.inf.ontop.injection.QuestCoreSettings;
 import it.unibz.inf.ontop.sql.ImplicitDBConstraintsReader;
-import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.*;
 
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
-
-
+import java.util.Properties;
 
 
 public class QuestOWLExample_OntowisTests {
@@ -165,7 +161,6 @@ public class QuestOWLExample_OntowisTests {
 
 	/**
 	 * @param resultsOne
-	 * @param obdaFile 
 	 * @throws UnsupportedEncodingException 
 	 * @throws FileNotFoundException 
 	 */
@@ -217,7 +212,7 @@ public class QuestOWLExample_OntowisTests {
 	/**
 	 * @throws OBDAException 
 	 * @throws OWLOntologyCreationException 
-	 * @throws InvalidMappingException 
+	 * @throws InvalidMappingException
 	 * @throws InvalidPredicateDeclarationException 
 	 * @throws IOException 
 	 * @throws OWLException
@@ -225,27 +220,12 @@ public class QuestOWLExample_OntowisTests {
 	private QuestOWLConnection createStuff(boolean manualKeys) throws OBDAException, OWLOntologyCreationException, IOException, InvalidPredicateDeclarationException, InvalidMappingException{
 
 		/*
-		 * Load the ontology from an external .owl file.
-		 */
-		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-		OWLOntology ontology = manager.loadOntologyFromOntologyDocument(new File(owlfile));
-
-		/*
-		 * Load the OBDA model from an externa
-		 * l .obda file
-		 */
-		OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
-		OBDAModel obdaModel = fac.getOBDAModel();
-		ModelIOManager ioManager = new ModelIOManager(obdaModel);
-		ioManager.load(obdaFile);
-		
-		/*
 		 * Prepare the configuration for the Quest instance. The example below shows the setup for
 		 * "Virtual ABox" mode
 		 */
-		QuestPreferences preference = new QuestPreferences();
-		preference.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-		//		TEST preference.setCurrentValueOf(QuestPreferences.T_MAPPINGS, QuestConstants.FALSE); // Disable T_Mappings
+		Properties p = new Properties();
+		p.setProperty(QuestCoreSettings.ABOX_MODE, QuestConstants.VIRTUAL);
+		//		TEST preference.setProperty(QuestPreferences.T_MAPPINGS, QuestConstants.FALSE); // Disable T_Mappings
 
 		/*
 		 * Create the instance of Quest OWL reasoner.
@@ -257,14 +237,19 @@ public class QuestOWLExample_OntowisTests {
 		/*
 		 * USR CONSTRAINTS !!!!
 		 */
-		QuestOWLConfiguration config;
+		QuestConfiguration config;
 		if (manualKeys){
 			System.out.println();
 			ImplicitDBConstraintsReader constr = new ImplicitDBConstraintsReader(new File(usrConstrinFile));
 			//factory.setImplicitDBConstraints(constr);
-			config = QuestOWLConfiguration.builder().obdaModel(obdaModel).dbConstraintsReader(constr).build();
+			config = QuestConfiguration.defaultBuilder()
+					.ontologyFile(owlfile)
+					.nativeOntopMappingFile(new File(obdaFile)).dbConstraintsReader(constr).build();
 		} else {
-			config = QuestOWLConfiguration.builder().obdaModel(obdaModel).build();
+			config = QuestConfiguration.defaultBuilder()
+					.ontologyFile(owlfile)
+					.nativeOntopMappingFile(new File(obdaFile))
+					.build();
 		}
 		/*
 		 * T-Mappings Handling!!
@@ -272,7 +257,7 @@ public class QuestOWLExample_OntowisTests {
 		//TMappingsConfParser tMapParser = new TMappingsConfParser(tMappingsConfFile);
 		//factory.setExcludeFromTMappingsPredicates(tMapParser.parsePredicates());
 
-		QuestOWL reasoner = factory.createReasoner(ontology, config);
+		QuestOWL reasoner = factory.createReasoner(config);
 
 		this.reasoner = reasoner;
 		/*
@@ -326,7 +311,7 @@ public class QuestOWLExample_OntowisTests {
 				 * Print the query summary
 				 */
 				QuestOWLStatement qst = (QuestOWLStatement) st;
-				String sqlQuery = qst.getUnfolding(sparqlQuery);
+				String sqlQuery = ((SQLExecutableQuery)qst.getExecutableQuery(sparqlQuery)).getSQL();
 
 				System.out.println();
 				System.out.println("The input SPARQL query:");

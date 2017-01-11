@@ -20,15 +20,12 @@ package it.unibz.inf.ontop.reformulation.tests;
  * #L%
  */
 
-import it.unibz.inf.ontop.io.ModelIOManager;
-import it.unibz.inf.ontop.model.OBDADataFactory;
-import it.unibz.inf.ontop.model.OBDAModel;
+import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.model.Predicate;
 import it.unibz.inf.ontop.ontology.Ontology;
 import it.unibz.inf.ontop.owlapi.OWLAPITranslatorUtility;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
+import it.unibz.inf.ontop.injection.QuestCoreSettings;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import org.junit.After;
 import org.junit.Before;
@@ -50,6 +47,7 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Properties;
 
 import static org.junit.Assert.assertEquals;
 
@@ -61,21 +59,18 @@ import static org.junit.Assert.assertEquals;
  */
 public class QuestOWLEmptyEntitiesCheckerTest {
 
-	private OBDADataFactory fac;
 	private QuestOWLConnection conn;
 	private Connection connection;
 
 	Logger log = LoggerFactory.getLogger(this.getClass());
-	private OBDAModel obdaModel;
-
 	private Ontology onto;
 
 	final String owlfile = "src/test/resources/test/emptiesDatabase.owl";
 	final String obdafile = "src/test/resources/test/emptiesDatabase.obda";
 
-	// final String owlfile =
+	// final String owlFileName =
 	// "src/main/resources/testcases-scenarios/virtual-mode/stockexchange/simplecq/stockexchange.owl";
-	// final String obdafile =
+	// final String obdaFileName =
 	// "src/main/resources/testcases-scenarios/virtual-mode/stockexchange/simplecq/stockexchange-mysql.obda";
 
 	private List<Predicate> emptyConcepts = new ArrayList<Predicate>();
@@ -90,8 +85,6 @@ public class QuestOWLEmptyEntitiesCheckerTest {
 		String url = "jdbc:h2:mem:questjunitdb;";
 		String username = "sa";
 		String password = "";
-
-		fac = OBDADataFactoryImpl.getInstance();
 
 		connection = DriverManager.getConnection(url, username, password);
 		Statement st = connection.createStatement();
@@ -114,20 +107,17 @@ public class QuestOWLEmptyEntitiesCheckerTest {
 		OWLOntology ontology = manager.loadOntologyFromOntologyDocument((new File(owlfile)));
 		onto =  OWLAPITranslatorUtility.translate(ontology);
 
-		// Loading the OBDA data
-		fac = OBDADataFactoryImpl.getInstance();
-		obdaModel = fac.getOBDAModel();
-
-		ModelIOManager ioManager = new ModelIOManager(obdaModel);
-		ioManager.load(obdafile);
-
-		QuestPreferences p = new QuestPreferences();
-		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-		p.setCurrentValueOf(QuestPreferences.OBTAIN_FULL_METADATA, QuestConstants.FALSE);
+		Properties p = new Properties();
+		p.setProperty(QuestCoreSettings.ABOX_MODE, QuestConstants.VIRTUAL);
+		p.setProperty(QuestCoreSettings.OBTAIN_FULL_METADATA, QuestConstants.FALSE);
 		// Creating a new instance of the reasoner
 		QuestOWLFactory factory = new QuestOWLFactory();
-        QuestOWLConfiguration config = QuestOWLConfiguration.builder().obdaModel(obdaModel).build();
-        reasoner = factory.createReasoner(ontology, config);
+        QuestConfiguration config = QuestConfiguration.defaultBuilder()
+				.nativeOntopMappingFile(obdafile)
+				.ontology(ontology)
+				.properties(p)
+				.build();
+        reasoner = factory.createReasoner(config);
 		// Now we are ready for querying
 		conn = reasoner.getConnection();
 
@@ -135,12 +125,9 @@ public class QuestOWLEmptyEntitiesCheckerTest {
 
 	@After
 	public void tearDown() throws Exception {
-		
 			dropTables();
 			reasoner.dispose();
 			connection.close();
-		
-
 	}
 
 	private void dropTables() throws SQLException, IOException {

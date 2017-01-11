@@ -1,23 +1,16 @@
 package it.unibz.inf.ontop.obda;
 
-import it.unibz.inf.ontop.io.ModelIOManager;
-import it.unibz.inf.ontop.model.OBDADataFactory;
-import it.unibz.inf.ontop.model.OBDAModel;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
+import it.unibz.inf.ontop.injection.QuestConfiguration;
+
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import it.unibz.inf.ontop.utils.SQLScriptRunner;
 import org.junit.*;
-import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLObject;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileReader;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -26,12 +19,9 @@ import java.sql.SQLException;
 
 public class MultipleSchemasTestH2 {
 
-    private static OBDADataFactory fac;
     private static QuestOWLConnection conn;
 
     static Logger log = LoggerFactory.getLogger(MultipleSchemasTestH2.class);
-    private static OBDAModel obdaModel;
-    private static OWLOntology ontology;
 
     final static String owlfile = "src/test/resources/multiple-schema-test.owl";
     final static String obdafile = "src/test/resources/multiple-schema-test.obda";
@@ -58,7 +48,6 @@ public class MultipleSchemasTestH2 {
         String password = "";
 
         System.out.println("Test");
-        fac = OBDADataFactoryImpl.getInstance();
 
         try {
 
@@ -69,24 +58,14 @@ public class MultipleSchemasTestH2 {
             SQLScriptRunner runner = new SQLScriptRunner(sqlConnection, true, false);
             runner.runScript(in);
 
-            // Loading the OWL file
-            OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-            ontology = manager.loadOntologyFromOntologyDocument((new File(owlfile)));
-
-            // Loading the OBDA data
-            fac = OBDADataFactoryImpl.getInstance();
-            obdaModel = fac.getOBDAModel();
-
-            ModelIOManager ioManager = new ModelIOManager(obdaModel);
-            ioManager.load(obdafile);
-
-            QuestPreferences p = new QuestPreferences();
-            p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-            p.setCurrentValueOf(QuestPreferences.OBTAIN_FULL_METADATA, QuestConstants.FALSE);
             // Creating a new instance of the reasoner
             QuestOWLFactory factory = new QuestOWLFactory();
-            QuestOWLConfiguration config = QuestOWLConfiguration.builder().obdaModel(obdaModel).preferences(p).build();
-            reasoner = factory.createReasoner(ontology, config);
+            QuestConfiguration config = QuestConfiguration.defaultBuilder()
+                    .nativeOntopMappingFile(obdafile)
+                    .ontologyFile(owlfile)
+                    .enableFullMetadataExtraction(false)
+                    .build();
+            reasoner = factory.createReasoner(config);
 
             // Now we are ready for querying
             conn = reasoner.getConnection();

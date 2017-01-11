@@ -12,12 +12,12 @@ import static org.junit.Assert.assertTrue;
 
 public class TestImplicitDBConstraints {
 
-	DBMetadata md;
+	RDBMetadata md;
 	QuotedIDFactory idfac;
 	
 	@Before
 	public void setupMetadata(){
-		this.md = DBMetadataExtractor.createDummyMetadata();
+		this.md = RDBMetadataExtractionTools.createDummyMetadata();
 		this.idfac = md.getQuotedIDFactory();
 
 		DatabaseRelationDefinition td = md.createDatabaseRelation(idfac.createRelationID(null, "TABLENAME"));

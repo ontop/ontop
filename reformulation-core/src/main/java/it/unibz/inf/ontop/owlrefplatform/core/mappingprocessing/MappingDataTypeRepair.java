@@ -22,7 +22,7 @@ package it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing;
 
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.FunctionalTermImpl;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
+import it.unibz.inf.ontop.model.impl.MappingFactoryImpl;
 import it.unibz.inf.ontop.ontology.DataPropertyRangeExpression;
 import it.unibz.inf.ontop.ontology.DataRangeExpression;
 import it.unibz.inf.ontop.ontology.Datatype;
@@ -38,6 +38,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
+
 public class MappingDataTypeRepair {
 
 	private final DBMetadata metadata;
@@ -45,7 +47,7 @@ public class MappingDataTypeRepair {
 	private final Map<Predicate, Datatype> dataTypesMap;
 	private final VocabularyValidator qvv;
 
-  	private static final OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
+    private static final MappingFactory MAPPING_FACTORY = MappingFactoryImpl.getInstance();
     private static final Logger log = LoggerFactory.getLogger(MappingDataTypeRepair.class);
 
     /**
@@ -65,11 +67,11 @@ public class MappingDataTypeRepair {
         String databaseDriver = metadata.getDriverName();
         this.isDB2 = (databaseName!= null && databaseName.contains("DB2"))
         			|| (databaseDriver != null && databaseDriver.contains("IBM"));
-        
+
         this.qvv = qvv;
         try {
             dataTypesMap = getDataTypeFromOntology(reasoner);
-        } 
+        }
         catch (PredicateRedefinitionException pe) {
             throw new OBDAException(pe);
         }
@@ -82,15 +84,15 @@ public class MappingDataTypeRepair {
     private static Map<Predicate, Datatype> getDataTypeFromOntology(TBoxReasoner reasoner) {
 
     	final Map<Predicate, Datatype> dataTypesMap = new HashMap<>();
-        
+
         // Traverse the graph searching for dataProperty
 		for (Equivalences<DataRangeExpression> nodes : reasoner.getDataRangeDAG()) {
 			DataRangeExpression node = nodes.getRepresentative();
-			
+
 			for (Equivalences<DataRangeExpression> descendants : reasoner.getDataRangeDAG().getSub(nodes)) {
 				DataRangeExpression descendant = descendants.getRepresentative();
 				if (descendant != node)
-					onDataRangeInclusion(dataTypesMap, descendant, node);				
+					onDataRangeInclusion(dataTypesMap, descendant, node);
 			}
 			for (DataRangeExpression equivalent : nodes) {
 				if (equivalent != node) {
@@ -98,8 +100,8 @@ public class MappingDataTypeRepair {
 					onDataRangeInclusion(dataTypesMap, equivalent, node);
 				}
 			}
-		}	
-    	
+		}
+
 		return dataTypesMap;
     }
 
@@ -114,18 +116,18 @@ public class MappingDataTypeRepair {
     			key = ((Datatype)sub).getPredicate();
     		}
     		else if (sub instanceof DataPropertyRangeExpression) {
-    			// range 
+    			// range
     			key = ((DataPropertyRangeExpression)sub).getProperty().getPredicate();
     		}
     		else
     			return;
-    		
+
 			if (dataTypesMap.containsKey(key))
                 throw new PredicateRedefinitionException("Predicate " + key + " with " + dataTypesMap.get(key) + " is redefined as " + supDataType + " in the ontology");
 			dataTypesMap.put(key, supDataType);
     	}
     }
-   
+
     /**
      * This method wraps the variable that holds data property values with a
      * data type predicate. It will replace the variable with a new function
@@ -143,7 +145,7 @@ public class MappingDataTypeRepair {
         Predicate predicate = atom.getFunctionSymbol();
         if (predicate.getArity() == 2) { // we check both for data and object property
             Term term = atom.getTerm(1); // the second argument only
-            
+
     		Map<String, List<IndexedPosititon>> termOccurenceIndex = createIndex(rule.getBody());
             insertDataTyping(term, atom, 1, termOccurenceIndex);
         }
@@ -175,15 +177,15 @@ public class MappingDataTypeRepair {
                     //assign the datatype of the ontology
                     if (!isBooleanDB2(dataType.getPredicate())) {
                         Predicate replacement = dataType.getPredicate();
-                        Term newTerm = fac.getFunction(replacement, function);
+                        Term newTerm = DATA_FACTORY.getFunction(replacement, function);
                         atom.setTerm(position, newTerm);
                     }
-                } 
+                }
                 else {
-                    for (int i = 0; i < function.getArity(); i++) 
+                    for (int i = 0; i < function.getArity(); i++)
                         insertDataTyping(function.getTerm(i), function, i, termOccurenceIndex);
                 }
-            } 
+            }
             else if (function.isDataTypeFunction()) {
 
                 Function normal = qvv.getNormal(atom);
@@ -204,15 +206,15 @@ public class MappingDataTypeRepair {
 
                         //No Boolean datatype in DB2 database, the value in the database is used
                         Predicate.COL_TYPE type = getDataType(termOccurenceIndex, variable);
-                        Term newTerm = fac.getTypedTerm(variable, type);
+                        Term newTerm = DATA_FACTORY.getTypedTerm(variable, type);
                         log.warn("Datatype for the value " +variable + "of the property "+ predicate+ " has been inferred from the database");
                         atom.setTerm(position, newTerm);
                     }
                 }
-            } 
-           else 
+            }
+           else
                throw new OBDAException("Unknown data type predicate: " + functionSymbol.getName());
-        } 
+        }
         else if (term instanceof Variable) {
 
             //check in the ontology if we have already information about the datatype
@@ -228,18 +230,18 @@ public class MappingDataTypeRepair {
             Term newTerm;
             if (dataType == null || isBooleanDB2(dataType.getPredicate())) {
                 Predicate.COL_TYPE type = getDataType(termOccurenceIndex, variable);
-                newTerm = fac.getTypedTerm(variable, type);
+                newTerm = DATA_FACTORY.getTypedTerm(variable, type);
                 log.warn("Datatype for the value " +variable + "of the property "+ predicate+ " has been inferred from the database");
-            } 
+            }
             else {
                 Predicate replacement = dataType.getPredicate();
-                newTerm = fac.getFunction(replacement, variable);
+                newTerm = DATA_FACTORY.getFunction(replacement, variable);
             }
 
             atom.setTerm(position, newTerm);
-        } 
+        }
         else if (term instanceof ValueConstant) {
-            Term newTerm = fac.getTypedTerm(term, Predicate.COL_TYPE.LITERAL);
+            Term newTerm = DATA_FACTORY.getTypedTerm(term, Predicate.COL_TYPE.LITERAL);
             atom.setTerm(position, newTerm);
         }
     }
@@ -252,7 +254,7 @@ public class MappingDataTypeRepair {
     private boolean isBooleanDB2(Predicate dataType){
 
         if (isDB2){
-            if (fac.getDatatypeFactory().isBoolean(dataType)) {
+            if (DATA_FACTORY.getDatatypeFactory().isBoolean(dataType)) {
                 log.warn("Boolean dataType do not exist in DB2 database, the value in the database metadata is used instead.");
                 return true;
             }
@@ -271,14 +273,14 @@ public class MappingDataTypeRepair {
      * @return
      * @throws OBDAException
      */
-    
+
 	private Predicate.COL_TYPE getDataType(Map<String, List<IndexedPosititon>> termOccurenceIndex, Variable variable) throws OBDAException {
 
 
 		List<IndexedPosititon> list = termOccurenceIndex.get(variable.getName());
-		if (list == null) 
+		if (list == null)
 			throw new OBDAException("Unknown term in head");
-		
+
 		// ROMAN (10 Oct 2015): this assumes the first occurrence is a database relation!
 		//                      AND THAT THERE ARE NO CONSTANTS IN ARGUMENTS!
 		IndexedPosititon ip = list.get(0);
@@ -287,14 +289,14 @@ public class MappingDataTypeRepair {
 		RelationDefinition td = metadata.getRelation(tableId);
 		Attribute attribute = td.getAttribute(ip.pos);
 
-		Predicate.COL_TYPE type =  fac.getJdbcTypeMapper().getPredicate(attribute.getType());
+		Predicate.COL_TYPE type =  MAPPING_FACTORY.getJdbcTypeMapper().getPredicate(attribute.getType());
 		return type;
 	}
-	
+
 	private static class IndexedPosititon {
 		final Function atom;
 		final int pos;
-		
+
 		IndexedPosititon(Function atom, int pos) {
 			this.atom = atom;
 			this.pos = pos;
@@ -310,18 +312,18 @@ public class MappingDataTypeRepair {
 				if (t instanceof Variable) {
 					Variable var = (Variable) t;
 					List<IndexedPosititon> aux = termOccurenceIndex.get(var.getName());
-					if (aux == null) 
+					if (aux == null)
 						aux = new LinkedList<>();
 					aux.add(new IndexedPosititon(a, i));
 					termOccurenceIndex.put(var.getName(), aux);
 					i++; // increase the position index for the next variable
-				} 
+				}
 				else if (t instanceof FunctionalTermImpl) {
 					// NO-OP
-				} 
+				}
 				else if (t instanceof ValueConstant) {
 					// NO-OP
-				} 
+				}
 				else if (t instanceof URIConstant) {
 					// NO-OP
 				}

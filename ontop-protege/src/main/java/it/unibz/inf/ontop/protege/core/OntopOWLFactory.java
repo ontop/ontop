@@ -37,16 +37,6 @@ public class OntopOWLFactory extends QuestOWLFactory {
 			throw e;
 		}
 	}
-	@Nonnull
-    @Override
-	public QuestOWL createReasoner(OWLOntology ontology) throws IllegalConfigurationException {
-		try { 
-			return super.createReasoner(ontology);
-		} catch (Exception e){
-			handleError(e);
-			throw e;
-		}
-	}
 	
 	@Nonnull
     @Override

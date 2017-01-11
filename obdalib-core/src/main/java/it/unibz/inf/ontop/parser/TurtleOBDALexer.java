@@ -1,15 +1,8 @@
-// $ANTLR 3.5.2 TurtleOBDA.g 2016-05-19 10:55:54
+// $ANTLR 3.5.2 TurtleOBDA.g 2015-12-18 18:50:45
 
 package it.unibz.inf.ontop.parser;
 
-import java.util.List;
-import java.util.Vector;
-
-
 import org.antlr.runtime.*;
-import java.util.Stack;
-import java.util.List;
-import java.util.ArrayList;
 
 @SuppressWarnings("all")
 public class TurtleOBDALexer extends Lexer {
@@ -90,37 +83,37 @@ public class TurtleOBDALexer extends Lexer {
 	public static final int WS=76;
 
 	private String error = "";
-	    
+
 	public String getError() {
-	   return error;
+		return error;
 	}
 
 	@Override
 	public Object recoverFromMismatchedSet(IntStream input, RecognitionException e, BitSet follow) throws RecognitionException {
-	   throw e;
+		throw e;
 	}
 
 	@Override
 	public void recover(IntStream input, RecognitionException re) {
-	   throw new RuntimeException(error);
+		throw new RuntimeException(error);
 	}
-	    
+
 	@Override
 	public void displayRecognitionError(String[] tokenNames, RecognitionException e) {
-	   String hdr = getErrorHeader(e);
-	   String msg = getErrorMessage(e, tokenNames);
-	   emitErrorMessage("Syntax error: " + msg + " Location: " + hdr);
+		String hdr = getErrorHeader(e);
+		String msg = getErrorMessage(e, tokenNames);
+		emitErrorMessage("Syntax error: " + msg + " Location: " + hdr);
 	}
 
 	@Override
 	public void emitErrorMessage(String msg) {
-	   error = msg;
-	   throw new RuntimeException(error);
+		error = msg;
+		throw new RuntimeException(error);
 	}
-	    
+
 	@Override
 	public Object recoverFromMismatchedToken(IntStream input, int ttype, BitSet follow) throws RecognitionException {
-	   throw new RecognitionException(input);
+		throw new RecognitionException(input);
 	}
 
 
@@ -130,7 +123,7 @@ public class TurtleOBDALexer extends Lexer {
 		return new Lexer[] {};
 	}
 
-	public TurtleOBDALexer() {} 
+	public TurtleOBDALexer() {}
 	public TurtleOBDALexer(CharStream input) {
 		this(input, new RecognizerSharedState());
 	}
@@ -147,7 +140,7 @@ public class TurtleOBDALexer extends Lexer {
 			// TurtleOBDA.g:44:7: ( 'a' )
 			// TurtleOBDA.g:44:9: 'a'
 			{
-			match('a'); 
+				match('a');
 			}
 
 			state.type = _type;
@@ -164,41 +157,41 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = BASE;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// TurtleOBDA.g:752:5: ( ( 'B' | 'b' ) ( 'A' | 'a' ) ( 'S' | 's' ) ( 'E' | 'e' ) )
-			// TurtleOBDA.g:752:7: ( 'B' | 'b' ) ( 'A' | 'a' ) ( 'S' | 's' ) ( 'E' | 'e' )
+			// TurtleOBDA.g:745:5: ( ( 'B' | 'b' ) ( 'A' | 'a' ) ( 'S' | 's' ) ( 'E' | 'e' ) )
+			// TurtleOBDA.g:745:7: ( 'B' | 'b' ) ( 'A' | 'a' ) ( 'S' | 's' ) ( 'E' | 'e' )
 			{
-			if ( input.LA(1)=='B'||input.LA(1)=='b' ) {
-				input.consume();
-			}
-			else {
-				MismatchedSetException mse = new MismatchedSetException(null,input);
-				recover(mse);
-				throw mse;
-			}
-			if ( input.LA(1)=='A'||input.LA(1)=='a' ) {
-				input.consume();
-			}
-			else {
-				MismatchedSetException mse = new MismatchedSetException(null,input);
-				recover(mse);
-				throw mse;
-			}
-			if ( input.LA(1)=='S'||input.LA(1)=='s' ) {
-				input.consume();
-			}
-			else {
-				MismatchedSetException mse = new MismatchedSetException(null,input);
-				recover(mse);
-				throw mse;
-			}
-			if ( input.LA(1)=='E'||input.LA(1)=='e' ) {
-				input.consume();
-			}
-			else {
-				MismatchedSetException mse = new MismatchedSetException(null,input);
-				recover(mse);
-				throw mse;
-			}
+				if ( input.LA(1)=='B'||input.LA(1)=='b' ) {
+					input.consume();
+				}
+				else {
+					MismatchedSetException mse = new MismatchedSetException(null,input);
+					recover(mse);
+					throw mse;
+				}
+				if ( input.LA(1)=='A'||input.LA(1)=='a' ) {
+					input.consume();
+				}
+				else {
+					MismatchedSetException mse = new MismatchedSetException(null,input);
+					recover(mse);
+					throw mse;
+				}
+				if ( input.LA(1)=='S'||input.LA(1)=='s' ) {
+					input.consume();
+				}
+				else {
+					MismatchedSetException mse = new MismatchedSetException(null,input);
+					recover(mse);
+					throw mse;
+				}
+				if ( input.LA(1)=='E'||input.LA(1)=='e' ) {
+					input.consume();
+				}
+				else {
+					MismatchedSetException mse = new MismatchedSetException(null,input);
+					recover(mse);
+					throw mse;
+				}
 			}
 
 			state.type = _type;
@@ -215,57 +208,57 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = PREFIX;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// TurtleOBDA.g:754:7: ( ( 'P' | 'p' ) ( 'R' | 'r' ) ( 'E' | 'e' ) ( 'F' | 'f' ) ( 'I' | 'i' ) ( 'X' | 'x' ) )
-			// TurtleOBDA.g:754:9: ( 'P' | 'p' ) ( 'R' | 'r' ) ( 'E' | 'e' ) ( 'F' | 'f' ) ( 'I' | 'i' ) ( 'X' | 'x' )
+			// TurtleOBDA.g:747:7: ( ( 'P' | 'p' ) ( 'R' | 'r' ) ( 'E' | 'e' ) ( 'F' | 'f' ) ( 'I' | 'i' ) ( 'X' | 'x' ) )
+			// TurtleOBDA.g:747:9: ( 'P' | 'p' ) ( 'R' | 'r' ) ( 'E' | 'e' ) ( 'F' | 'f' ) ( 'I' | 'i' ) ( 'X' | 'x' )
 			{
-			if ( input.LA(1)=='P'||input.LA(1)=='p' ) {
-				input.consume();
-			}
-			else {
-				MismatchedSetException mse = new MismatchedSetException(null,input);
-				recover(mse);
-				throw mse;
-			}
-			if ( input.LA(1)=='R'||input.LA(1)=='r' ) {
-				input.consume();
-			}
-			else {
-				MismatchedSetException mse = new MismatchedSetException(null,input);
-				recover(mse);
-				throw mse;
-			}
-			if ( input.LA(1)=='E'||input.LA(1)=='e' ) {
-				input.consume();
-			}
-			else {
-				MismatchedSetException mse = new MismatchedSetException(null,input);
-				recover(mse);
-				throw mse;
-			}
-			if ( input.LA(1)=='F'||input.LA(1)=='f' ) {
-				input.consume();
-			}
-			else {
-				MismatchedSetException mse = new MismatchedSetException(null,input);
-				recover(mse);
-				throw mse;
-			}
-			if ( input.LA(1)=='I'||input.LA(1)=='i' ) {
-				input.consume();
-			}
-			else {
-				MismatchedSetException mse = new MismatchedSetException(null,input);
-				recover(mse);
-				throw mse;
-			}
-			if ( input.LA(1)=='X'||input.LA(1)=='x' ) {
-				input.consume();
-			}
-			else {
-				MismatchedSetException mse = new MismatchedSetException(null,input);
-				recover(mse);
-				throw mse;
-			}
+				if ( input.LA(1)=='P'||input.LA(1)=='p' ) {
+					input.consume();
+				}
+				else {
+					MismatchedSetException mse = new MismatchedSetException(null,input);
+					recover(mse);
+					throw mse;
+				}
+				if ( input.LA(1)=='R'||input.LA(1)=='r' ) {
+					input.consume();
+				}
+				else {
+					MismatchedSetException mse = new MismatchedSetException(null,input);
+					recover(mse);
+					throw mse;
+				}
+				if ( input.LA(1)=='E'||input.LA(1)=='e' ) {
+					input.consume();
+				}
+				else {
+					MismatchedSetException mse = new MismatchedSetException(null,input);
+					recover(mse);
+					throw mse;
+				}
+				if ( input.LA(1)=='F'||input.LA(1)=='f' ) {
+					input.consume();
+				}
+				else {
+					MismatchedSetException mse = new MismatchedSetException(null,input);
+					recover(mse);
+					throw mse;
+				}
+				if ( input.LA(1)=='I'||input.LA(1)=='i' ) {
+					input.consume();
+				}
+				else {
+					MismatchedSetException mse = new MismatchedSetException(null,input);
+					recover(mse);
+					throw mse;
+				}
+				if ( input.LA(1)=='X'||input.LA(1)=='x' ) {
+					input.consume();
+				}
+				else {
+					MismatchedSetException mse = new MismatchedSetException(null,input);
+					recover(mse);
+					throw mse;
+				}
 			}
 
 			state.type = _type;
@@ -282,49 +275,49 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = FALSE;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// TurtleOBDA.g:756:6: ( ( 'F' | 'f' ) ( 'A' | 'a' ) ( 'L' | 'l' ) ( 'S' | 's' ) ( 'E' | 'e' ) )
-			// TurtleOBDA.g:756:8: ( 'F' | 'f' ) ( 'A' | 'a' ) ( 'L' | 'l' ) ( 'S' | 's' ) ( 'E' | 'e' )
+			// TurtleOBDA.g:749:6: ( ( 'F' | 'f' ) ( 'A' | 'a' ) ( 'L' | 'l' ) ( 'S' | 's' ) ( 'E' | 'e' ) )
+			// TurtleOBDA.g:749:8: ( 'F' | 'f' ) ( 'A' | 'a' ) ( 'L' | 'l' ) ( 'S' | 's' ) ( 'E' | 'e' )
 			{
-			if ( input.LA(1)=='F'||input.LA(1)=='f' ) {
-				input.consume();
-			}
-			else {
-				MismatchedSetException mse = new MismatchedSetException(null,input);
-				recover(mse);
-				throw mse;
-			}
-			if ( input.LA(1)=='A'||input.LA(1)=='a' ) {
-				input.consume();
-			}
-			else {
-				MismatchedSetException mse = new MismatchedSetException(null,input);
-				recover(mse);
-				throw mse;
-			}
-			if ( input.LA(1)=='L'||input.LA(1)=='l' ) {
-				input.consume();
-			}
-			else {
-				MismatchedSetException mse = new MismatchedSetException(null,input);
-				recover(mse);
-				throw mse;
-			}
-			if ( input.LA(1)=='S'||input.LA(1)=='s' ) {
-				input.consume();
-			}
-			else {
-				MismatchedSetException mse = new MismatchedSetException(null,input);
-				recover(mse);
-				throw mse;
-			}
-			if ( input.LA(1)=='E'||input.LA(1)=='e' ) {
-				input.consume();
-			}
-			else {
-				MismatchedSetException mse = new MismatchedSetException(null,input);
-				recover(mse);
-				throw mse;
-			}
+				if ( input.LA(1)=='F'||input.LA(1)=='f' ) {
+					input.consume();
+				}
+				else {
+					MismatchedSetException mse = new MismatchedSetException(null,input);
+					recover(mse);
+					throw mse;
+				}
+				if ( input.LA(1)=='A'||input.LA(1)=='a' ) {
+					input.consume();
+				}
+				else {
+					MismatchedSetException mse = new MismatchedSetException(null,input);
+					recover(mse);
+					throw mse;
+				}
+				if ( input.LA(1)=='L'||input.LA(1)=='l' ) {
+					input.consume();
+				}
+				else {
+					MismatchedSetException mse = new MismatchedSetException(null,input);
+					recover(mse);
+					throw mse;
+				}
+				if ( input.LA(1)=='S'||input.LA(1)=='s' ) {
+					input.consume();
+				}
+				else {
+					MismatchedSetException mse = new MismatchedSetException(null,input);
+					recover(mse);
+					throw mse;
+				}
+				if ( input.LA(1)=='E'||input.LA(1)=='e' ) {
+					input.consume();
+				}
+				else {
+					MismatchedSetException mse = new MismatchedSetException(null,input);
+					recover(mse);
+					throw mse;
+				}
 			}
 
 			state.type = _type;
@@ -341,41 +334,41 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = TRUE;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// TurtleOBDA.g:758:5: ( ( 'T' | 't' ) ( 'R' | 'r' ) ( 'U' | 'u' ) ( 'E' | 'e' ) )
-			// TurtleOBDA.g:758:7: ( 'T' | 't' ) ( 'R' | 'r' ) ( 'U' | 'u' ) ( 'E' | 'e' )
+			// TurtleOBDA.g:751:5: ( ( 'T' | 't' ) ( 'R' | 'r' ) ( 'U' | 'u' ) ( 'E' | 'e' ) )
+			// TurtleOBDA.g:751:7: ( 'T' | 't' ) ( 'R' | 'r' ) ( 'U' | 'u' ) ( 'E' | 'e' )
 			{
-			if ( input.LA(1)=='T'||input.LA(1)=='t' ) {
-				input.consume();
-			}
-			else {
-				MismatchedSetException mse = new MismatchedSetException(null,input);
-				recover(mse);
-				throw mse;
-			}
-			if ( input.LA(1)=='R'||input.LA(1)=='r' ) {
-				input.consume();
-			}
-			else {
-				MismatchedSetException mse = new MismatchedSetException(null,input);
-				recover(mse);
-				throw mse;
-			}
-			if ( input.LA(1)=='U'||input.LA(1)=='u' ) {
-				input.consume();
-			}
-			else {
-				MismatchedSetException mse = new MismatchedSetException(null,input);
-				recover(mse);
-				throw mse;
-			}
-			if ( input.LA(1)=='E'||input.LA(1)=='e' ) {
-				input.consume();
-			}
-			else {
-				MismatchedSetException mse = new MismatchedSetException(null,input);
-				recover(mse);
-				throw mse;
-			}
+				if ( input.LA(1)=='T'||input.LA(1)=='t' ) {
+					input.consume();
+				}
+				else {
+					MismatchedSetException mse = new MismatchedSetException(null,input);
+					recover(mse);
+					throw mse;
+				}
+				if ( input.LA(1)=='R'||input.LA(1)=='r' ) {
+					input.consume();
+				}
+				else {
+					MismatchedSetException mse = new MismatchedSetException(null,input);
+					recover(mse);
+					throw mse;
+				}
+				if ( input.LA(1)=='U'||input.LA(1)=='u' ) {
+					input.consume();
+				}
+				else {
+					MismatchedSetException mse = new MismatchedSetException(null,input);
+					recover(mse);
+					throw mse;
+				}
+				if ( input.LA(1)=='E'||input.LA(1)=='e' ) {
+					input.consume();
+				}
+				else {
+					MismatchedSetException mse = new MismatchedSetException(null,input);
+					recover(mse);
+					throw mse;
+				}
 			}
 
 			state.type = _type;
@@ -392,10 +385,10 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = REFERENCE;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// TurtleOBDA.g:760:10: ( '^^' )
-			// TurtleOBDA.g:760:16: '^^'
+			// TurtleOBDA.g:753:10: ( '^^' )
+			// TurtleOBDA.g:753:16: '^^'
 			{
-			match("^^"); 
+				match("^^");
 
 			}
 
@@ -413,10 +406,10 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = LTSIGN;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// TurtleOBDA.g:761:7: ( '<\"' )
-			// TurtleOBDA.g:761:16: '<\"'
+			// TurtleOBDA.g:754:7: ( '<\"' )
+			// TurtleOBDA.g:754:16: '<\"'
 			{
-			match("<\""); 
+				match("<\"");
 
 			}
 
@@ -434,10 +427,10 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = RTSIGN;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// TurtleOBDA.g:762:7: ( '\">' )
-			// TurtleOBDA.g:762:16: '\">'
+			// TurtleOBDA.g:755:7: ( '\">' )
+			// TurtleOBDA.g:755:16: '\">'
 			{
-			match("\">"); 
+				match("\">");
 
 			}
 
@@ -455,10 +448,10 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = SEMI;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// TurtleOBDA.g:763:5: ( ';' )
-			// TurtleOBDA.g:763:16: ';'
+			// TurtleOBDA.g:756:5: ( ';' )
+			// TurtleOBDA.g:756:16: ';'
 			{
-			match(';'); 
+				match(';');
 			}
 
 			state.type = _type;
@@ -475,10 +468,10 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = PERIOD;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// TurtleOBDA.g:764:7: ( '.' )
-			// TurtleOBDA.g:764:16: '.'
+			// TurtleOBDA.g:757:7: ( '.' )
+			// TurtleOBDA.g:757:16: '.'
 			{
-			match('.'); 
+				match('.');
 			}
 
 			state.type = _type;
@@ -495,10 +488,10 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = COMMA;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// TurtleOBDA.g:765:6: ( ',' )
-			// TurtleOBDA.g:765:16: ','
+			// TurtleOBDA.g:758:6: ( ',' )
+			// TurtleOBDA.g:758:16: ','
 			{
-			match(','); 
+				match(',');
 			}
 
 			state.type = _type;
@@ -515,10 +508,10 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = LSQ_BRACKET;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// TurtleOBDA.g:766:12: ( '[' )
-			// TurtleOBDA.g:766:16: '['
+			// TurtleOBDA.g:759:12: ( '[' )
+			// TurtleOBDA.g:759:16: '['
 			{
-			match('['); 
+				match('[');
 			}
 
 			state.type = _type;
@@ -535,10 +528,10 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = RSQ_BRACKET;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// TurtleOBDA.g:767:12: ( ']' )
-			// TurtleOBDA.g:767:16: ']'
+			// TurtleOBDA.g:760:12: ( ']' )
+			// TurtleOBDA.g:760:16: ']'
 			{
-			match(']'); 
+				match(']');
 			}
 
 			state.type = _type;
@@ -555,10 +548,10 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = LCR_BRACKET;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// TurtleOBDA.g:768:12: ( '{' )
-			// TurtleOBDA.g:768:16: '{'
+			// TurtleOBDA.g:761:12: ( '{' )
+			// TurtleOBDA.g:761:16: '{'
 			{
-			match('{'); 
+				match('{');
 			}
 
 			state.type = _type;
@@ -575,10 +568,10 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = RCR_BRACKET;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// TurtleOBDA.g:769:12: ( '}' )
-			// TurtleOBDA.g:769:16: '}'
+			// TurtleOBDA.g:762:12: ( '}' )
+			// TurtleOBDA.g:762:16: '}'
 			{
-			match('}'); 
+				match('}');
 			}
 
 			state.type = _type;
@@ -595,10 +588,10 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = LPAREN;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// TurtleOBDA.g:770:7: ( '(' )
-			// TurtleOBDA.g:770:16: '('
+			// TurtleOBDA.g:763:7: ( '(' )
+			// TurtleOBDA.g:763:16: '('
 			{
-			match('('); 
+				match('(');
 			}
 
 			state.type = _type;
@@ -615,10 +608,10 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = RPAREN;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// TurtleOBDA.g:771:7: ( ')' )
-			// TurtleOBDA.g:771:16: ')'
+			// TurtleOBDA.g:764:7: ( ')' )
+			// TurtleOBDA.g:764:16: ')'
 			{
-			match(')'); 
+				match(')');
 			}
 
 			state.type = _type;
@@ -635,10 +628,10 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = QUESTION;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// TurtleOBDA.g:772:9: ( '?' )
-			// TurtleOBDA.g:772:16: '?'
+			// TurtleOBDA.g:765:9: ( '?' )
+			// TurtleOBDA.g:765:16: '?'
 			{
-			match('?'); 
+				match('?');
 			}
 
 			state.type = _type;
@@ -655,10 +648,10 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = DOLLAR;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// TurtleOBDA.g:773:7: ( '$' )
-			// TurtleOBDA.g:773:16: '$'
+			// TurtleOBDA.g:766:7: ( '$' )
+			// TurtleOBDA.g:766:16: '$'
 			{
-			match('$'); 
+				match('$');
 			}
 
 			state.type = _type;
@@ -675,10 +668,10 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = QUOTE_DOUBLE;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// TurtleOBDA.g:774:13: ( '\"' )
-			// TurtleOBDA.g:774:16: '\"'
+			// TurtleOBDA.g:767:13: ( '\"' )
+			// TurtleOBDA.g:767:16: '\"'
 			{
-			match('\"'); 
+				match('\"');
 			}
 
 			state.type = _type;
@@ -695,10 +688,10 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = QUOTE_SINGLE;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// TurtleOBDA.g:775:13: ( '\\'' )
-			// TurtleOBDA.g:775:16: '\\''
+			// TurtleOBDA.g:768:13: ( '\\'' )
+			// TurtleOBDA.g:768:16: '\\''
 			{
-			match('\''); 
+				match('\'');
 			}
 
 			state.type = _type;
@@ -715,10 +708,10 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = APOSTROPHE;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// TurtleOBDA.g:776:11: ( '`' )
-			// TurtleOBDA.g:776:16: '`'
+			// TurtleOBDA.g:769:11: ( '`' )
+			// TurtleOBDA.g:769:16: '`'
 			{
-			match('`'); 
+				match('`');
 			}
 
 			state.type = _type;
@@ -735,10 +728,10 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = UNDERSCORE;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// TurtleOBDA.g:777:11: ( '_' )
-			// TurtleOBDA.g:777:16: '_'
+			// TurtleOBDA.g:770:11: ( '_' )
+			// TurtleOBDA.g:770:16: '_'
 			{
-			match('_'); 
+				match('_');
 			}
 
 			state.type = _type;
@@ -755,10 +748,10 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = MINUS;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// TurtleOBDA.g:778:6: ( '-' )
-			// TurtleOBDA.g:778:16: '-'
+			// TurtleOBDA.g:771:6: ( '-' )
+			// TurtleOBDA.g:771:16: '-'
 			{
-			match('-'); 
+				match('-');
 			}
 
 			state.type = _type;
@@ -775,10 +768,10 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = ASTERISK;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// TurtleOBDA.g:779:9: ( '*' )
-			// TurtleOBDA.g:779:16: '*'
+			// TurtleOBDA.g:772:9: ( '*' )
+			// TurtleOBDA.g:772:16: '*'
 			{
-			match('*'); 
+				match('*');
 			}
 
 			state.type = _type;
@@ -795,10 +788,10 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = AMPERSAND;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// TurtleOBDA.g:780:10: ( '&' )
-			// TurtleOBDA.g:780:16: '&'
+			// TurtleOBDA.g:773:10: ( '&' )
+			// TurtleOBDA.g:773:16: '&'
 			{
-			match('&'); 
+				match('&');
 			}
 
 			state.type = _type;
@@ -815,10 +808,10 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = AT;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// TurtleOBDA.g:781:3: ( '@' )
-			// TurtleOBDA.g:781:16: '@'
+			// TurtleOBDA.g:774:3: ( '@' )
+			// TurtleOBDA.g:774:16: '@'
 			{
-			match('@'); 
+				match('@');
 			}
 
 			state.type = _type;
@@ -835,10 +828,10 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = EXCLAMATION;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// TurtleOBDA.g:782:12: ( '!' )
-			// TurtleOBDA.g:782:16: '!'
+			// TurtleOBDA.g:775:12: ( '!' )
+			// TurtleOBDA.g:775:16: '!'
 			{
-			match('!'); 
+				match('!');
 			}
 
 			state.type = _type;
@@ -855,10 +848,10 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = HASH;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// TurtleOBDA.g:783:5: ( '#' )
-			// TurtleOBDA.g:783:16: '#'
+			// TurtleOBDA.g:776:5: ( '#' )
+			// TurtleOBDA.g:776:16: '#'
 			{
-			match('#'); 
+				match('#');
 			}
 
 			state.type = _type;
@@ -875,10 +868,10 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = PERCENT;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// TurtleOBDA.g:784:8: ( '%' )
-			// TurtleOBDA.g:784:16: '%'
+			// TurtleOBDA.g:777:8: ( '%' )
+			// TurtleOBDA.g:777:16: '%'
 			{
-			match('%'); 
+				match('%');
 			}
 
 			state.type = _type;
@@ -895,10 +888,10 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = PLUS;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// TurtleOBDA.g:785:5: ( '+' )
-			// TurtleOBDA.g:785:16: '+'
+			// TurtleOBDA.g:778:5: ( '+' )
+			// TurtleOBDA.g:778:16: '+'
 			{
-			match('+'); 
+				match('+');
 			}
 
 			state.type = _type;
@@ -915,10 +908,10 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = EQUALS;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// TurtleOBDA.g:786:7: ( '=' )
-			// TurtleOBDA.g:786:16: '='
+			// TurtleOBDA.g:779:7: ( '=' )
+			// TurtleOBDA.g:779:16: '='
 			{
-			match('='); 
+				match('=');
 			}
 
 			state.type = _type;
@@ -935,10 +928,10 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = COLON;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// TurtleOBDA.g:787:6: ( ':' )
-			// TurtleOBDA.g:787:16: ':'
+			// TurtleOBDA.g:780:6: ( ':' )
+			// TurtleOBDA.g:780:16: ':'
 			{
-			match(':'); 
+				match(':');
 			}
 
 			state.type = _type;
@@ -955,10 +948,10 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = LESS;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// TurtleOBDA.g:788:5: ( '<' )
-			// TurtleOBDA.g:788:16: '<'
+			// TurtleOBDA.g:781:5: ( '<' )
+			// TurtleOBDA.g:781:16: '<'
 			{
-			match('<'); 
+				match('<');
 			}
 
 			state.type = _type;
@@ -975,10 +968,10 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = GREATER;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// TurtleOBDA.g:789:8: ( '>' )
-			// TurtleOBDA.g:789:16: '>'
+			// TurtleOBDA.g:782:8: ( '>' )
+			// TurtleOBDA.g:782:16: '>'
 			{
-			match('>'); 
+				match('>');
 			}
 
 			state.type = _type;
@@ -995,10 +988,10 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = SLASH;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// TurtleOBDA.g:790:6: ( '/' )
-			// TurtleOBDA.g:790:16: '/'
+			// TurtleOBDA.g:783:6: ( '/' )
+			// TurtleOBDA.g:783:16: '/'
 			{
-			match('/'); 
+				match('/');
 			}
 
 			state.type = _type;
@@ -1015,10 +1008,10 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = DOUBLE_SLASH;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// TurtleOBDA.g:791:13: ( '//' )
-			// TurtleOBDA.g:791:16: '//'
+			// TurtleOBDA.g:784:13: ( '//' )
+			// TurtleOBDA.g:784:16: '//'
 			{
-			match("//"); 
+				match("//");
 
 			}
 
@@ -1036,10 +1029,10 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = BACKSLASH;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// TurtleOBDA.g:792:10: ( '\\\\' )
-			// TurtleOBDA.g:792:16: '\\\\'
+			// TurtleOBDA.g:785:10: ( '\\\\' )
+			// TurtleOBDA.g:785:16: '\\\\'
 			{
-			match('\\'); 
+				match('\\');
 			}
 
 			state.type = _type;
@@ -1056,10 +1049,10 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = BLANK;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// TurtleOBDA.g:793:6: ( '[]' )
-			// TurtleOBDA.g:793:15: '[]'
+			// TurtleOBDA.g:786:6: ( '[]' )
+			// TurtleOBDA.g:786:15: '[]'
 			{
-			match("[]"); 
+				match("[]");
 
 			}
 
@@ -1077,10 +1070,10 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = BLANK_PREFIX;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// TurtleOBDA.g:794:13: ( '_:' )
-			// TurtleOBDA.g:794:16: '_:'
+			// TurtleOBDA.g:787:13: ( '_:' )
+			// TurtleOBDA.g:787:16: '_:'
 			{
-			match("_:"); 
+				match("_:");
 
 			}
 
@@ -1098,10 +1091,10 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = TILDE;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// TurtleOBDA.g:795:6: ( '~' )
-			// TurtleOBDA.g:795:16: '~'
+			// TurtleOBDA.g:788:6: ( '~' )
+			// TurtleOBDA.g:788:16: '~'
 			{
-			match('~'); 
+				match('~');
 			}
 
 			state.type = _type;
@@ -1118,10 +1111,10 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = CARET;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// TurtleOBDA.g:796:6: ( '^' )
-			// TurtleOBDA.g:796:16: '^'
+			// TurtleOBDA.g:789:6: ( '^' )
+			// TurtleOBDA.g:789:16: '^'
 			{
-			match('^'); 
+				match('^');
 			}
 
 			state.type = _type;
@@ -1136,17 +1129,17 @@ public class TurtleOBDALexer extends Lexer {
 	// $ANTLR start "ALPHA"
 	public final void mALPHA() throws RecognitionException {
 		try {
-			// TurtleOBDA.g:799:3: ( 'a' .. 'z' | 'A' .. 'Z' | '\\u00C0' .. '\\u00D6' | '\\u00D8' .. '\\u00F6' | '\\u00F8' .. '\\u02FF' | '\\u0370' .. '\\u037D' | '\\u037F' .. '\\u1FFF' | '\\u200C' .. '\\u200D' | '\\u2070' .. '\\u218F' | '\\u2C00' .. '\\u2FEF' | '\\u3001' .. '\\uD7FF' | '\\uF900' .. '\\uFDCF' | '\\uFDF0' .. '\\uFFFD' )
+			// TurtleOBDA.g:792:3: ( 'a' .. 'z' | 'A' .. 'Z' | '\\u00C0' .. '\\u00D6' | '\\u00D8' .. '\\u00F6' | '\\u00F8' .. '\\u02FF' | '\\u0370' .. '\\u037D' | '\\u037F' .. '\\u1FFF' | '\\u200C' .. '\\u200D' | '\\u2070' .. '\\u218F' | '\\u2C00' .. '\\u2FEF' | '\\u3001' .. '\\uD7FF' | '\\uF900' .. '\\uFDCF' | '\\uFDF0' .. '\\uFFFD' )
 			// TurtleOBDA.g:
 			{
-			if ( (input.LA(1) >= 'A' && input.LA(1) <= 'Z')||(input.LA(1) >= 'a' && input.LA(1) <= 'z')||(input.LA(1) >= '\u00C0' && input.LA(1) <= '\u00D6')||(input.LA(1) >= '\u00D8' && input.LA(1) <= '\u00F6')||(input.LA(1) >= '\u00F8' && input.LA(1) <= '\u02FF')||(input.LA(1) >= '\u0370' && input.LA(1) <= '\u037D')||(input.LA(1) >= '\u037F' && input.LA(1) <= '\u1FFF')||(input.LA(1) >= '\u200C' && input.LA(1) <= '\u200D')||(input.LA(1) >= '\u2070' && input.LA(1) <= '\u218F')||(input.LA(1) >= '\u2C00' && input.LA(1) <= '\u2FEF')||(input.LA(1) >= '\u3001' && input.LA(1) <= '\uD7FF')||(input.LA(1) >= '\uF900' && input.LA(1) <= '\uFDCF')||(input.LA(1) >= '\uFDF0' && input.LA(1) <= '\uFFFD') ) {
-				input.consume();
-			}
-			else {
-				MismatchedSetException mse = new MismatchedSetException(null,input);
-				recover(mse);
-				throw mse;
-			}
+				if ( (input.LA(1) >= 'A' && input.LA(1) <= 'Z')||(input.LA(1) >= 'a' && input.LA(1) <= 'z')||(input.LA(1) >= '\u00C0' && input.LA(1) <= '\u00D6')||(input.LA(1) >= '\u00D8' && input.LA(1) <= '\u00F6')||(input.LA(1) >= '\u00F8' && input.LA(1) <= '\u02FF')||(input.LA(1) >= '\u0370' && input.LA(1) <= '\u037D')||(input.LA(1) >= '\u037F' && input.LA(1) <= '\u1FFF')||(input.LA(1) >= '\u200C' && input.LA(1) <= '\u200D')||(input.LA(1) >= '\u2070' && input.LA(1) <= '\u218F')||(input.LA(1) >= '\u2C00' && input.LA(1) <= '\u2FEF')||(input.LA(1) >= '\u3001' && input.LA(1) <= '\uD7FF')||(input.LA(1) >= '\uF900' && input.LA(1) <= '\uFDCF')||(input.LA(1) >= '\uFDF0' && input.LA(1) <= '\uFFFD') ) {
+					input.consume();
+				}
+				else {
+					MismatchedSetException mse = new MismatchedSetException(null,input);
+					recover(mse);
+					throw mse;
+				}
 			}
 
 		}
@@ -1159,17 +1152,17 @@ public class TurtleOBDALexer extends Lexer {
 	// $ANTLR start "DIGIT"
 	public final void mDIGIT() throws RecognitionException {
 		try {
-			// TurtleOBDA.g:815:3: ( '0' .. '9' )
+			// TurtleOBDA.g:808:3: ( '0' .. '9' )
 			// TurtleOBDA.g:
 			{
-			if ( (input.LA(1) >= '0' && input.LA(1) <= '9') ) {
-				input.consume();
-			}
-			else {
-				MismatchedSetException mse = new MismatchedSetException(null,input);
-				recover(mse);
-				throw mse;
-			}
+				if ( (input.LA(1) >= '0' && input.LA(1) <= '9') ) {
+					input.consume();
+				}
+				else {
+					MismatchedSetException mse = new MismatchedSetException(null,input);
+					recover(mse);
+					throw mse;
+				}
 			}
 
 		}
@@ -1182,17 +1175,17 @@ public class TurtleOBDALexer extends Lexer {
 	// $ANTLR start "ALPHANUM"
 	public final void mALPHANUM() throws RecognitionException {
 		try {
-			// TurtleOBDA.g:819:3: ( ALPHA | DIGIT )
+			// TurtleOBDA.g:812:3: ( ALPHA | DIGIT )
 			// TurtleOBDA.g:
 			{
-			if ( (input.LA(1) >= '0' && input.LA(1) <= '9')||(input.LA(1) >= 'A' && input.LA(1) <= 'Z')||(input.LA(1) >= 'a' && input.LA(1) <= 'z')||(input.LA(1) >= '\u00C0' && input.LA(1) <= '\u00D6')||(input.LA(1) >= '\u00D8' && input.LA(1) <= '\u00F6')||(input.LA(1) >= '\u00F8' && input.LA(1) <= '\u02FF')||(input.LA(1) >= '\u0370' && input.LA(1) <= '\u037D')||(input.LA(1) >= '\u037F' && input.LA(1) <= '\u1FFF')||(input.LA(1) >= '\u200C' && input.LA(1) <= '\u200D')||(input.LA(1) >= '\u2070' && input.LA(1) <= '\u218F')||(input.LA(1) >= '\u2C00' && input.LA(1) <= '\u2FEF')||(input.LA(1) >= '\u3001' && input.LA(1) <= '\uD7FF')||(input.LA(1) >= '\uF900' && input.LA(1) <= '\uFDCF')||(input.LA(1) >= '\uFDF0' && input.LA(1) <= '\uFFFD') ) {
-				input.consume();
-			}
-			else {
-				MismatchedSetException mse = new MismatchedSetException(null,input);
-				recover(mse);
-				throw mse;
-			}
+				if ( (input.LA(1) >= '0' && input.LA(1) <= '9')||(input.LA(1) >= 'A' && input.LA(1) <= 'Z')||(input.LA(1) >= 'a' && input.LA(1) <= 'z')||(input.LA(1) >= '\u00C0' && input.LA(1) <= '\u00D6')||(input.LA(1) >= '\u00D8' && input.LA(1) <= '\u00F6')||(input.LA(1) >= '\u00F8' && input.LA(1) <= '\u02FF')||(input.LA(1) >= '\u0370' && input.LA(1) <= '\u037D')||(input.LA(1) >= '\u037F' && input.LA(1) <= '\u1FFF')||(input.LA(1) >= '\u200C' && input.LA(1) <= '\u200D')||(input.LA(1) >= '\u2070' && input.LA(1) <= '\u218F')||(input.LA(1) >= '\u2C00' && input.LA(1) <= '\u2FEF')||(input.LA(1) >= '\u3001' && input.LA(1) <= '\uD7FF')||(input.LA(1) >= '\uF900' && input.LA(1) <= '\uFDCF')||(input.LA(1) >= '\uFDF0' && input.LA(1) <= '\uFFFD') ) {
+					input.consume();
+				}
+				else {
+					MismatchedSetException mse = new MismatchedSetException(null,input);
+					recover(mse);
+					throw mse;
+				}
 			}
 
 		}
@@ -1205,17 +1198,17 @@ public class TurtleOBDALexer extends Lexer {
 	// $ANTLR start "CHAR"
 	public final void mCHAR() throws RecognitionException {
 		try {
-			// TurtleOBDA.g:824:3: ( ALPHANUM | UNDERSCORE | MINUS | PERIOD )
+			// TurtleOBDA.g:817:3: ( ALPHANUM | UNDERSCORE | MINUS | PERIOD )
 			// TurtleOBDA.g:
 			{
-			if ( (input.LA(1) >= '-' && input.LA(1) <= '.')||(input.LA(1) >= '0' && input.LA(1) <= '9')||(input.LA(1) >= 'A' && input.LA(1) <= 'Z')||input.LA(1)=='_'||(input.LA(1) >= 'a' && input.LA(1) <= 'z')||(input.LA(1) >= '\u00C0' && input.LA(1) <= '\u00D6')||(input.LA(1) >= '\u00D8' && input.LA(1) <= '\u00F6')||(input.LA(1) >= '\u00F8' && input.LA(1) <= '\u02FF')||(input.LA(1) >= '\u0370' && input.LA(1) <= '\u037D')||(input.LA(1) >= '\u037F' && input.LA(1) <= '\u1FFF')||(input.LA(1) >= '\u200C' && input.LA(1) <= '\u200D')||(input.LA(1) >= '\u2070' && input.LA(1) <= '\u218F')||(input.LA(1) >= '\u2C00' && input.LA(1) <= '\u2FEF')||(input.LA(1) >= '\u3001' && input.LA(1) <= '\uD7FF')||(input.LA(1) >= '\uF900' && input.LA(1) <= '\uFDCF')||(input.LA(1) >= '\uFDF0' && input.LA(1) <= '\uFFFD') ) {
-				input.consume();
-			}
-			else {
-				MismatchedSetException mse = new MismatchedSetException(null,input);
-				recover(mse);
-				throw mse;
-			}
+				if ( (input.LA(1) >= '-' && input.LA(1) <= '.')||(input.LA(1) >= '0' && input.LA(1) <= '9')||(input.LA(1) >= 'A' && input.LA(1) <= 'Z')||input.LA(1)=='_'||(input.LA(1) >= 'a' && input.LA(1) <= 'z')||(input.LA(1) >= '\u00C0' && input.LA(1) <= '\u00D6')||(input.LA(1) >= '\u00D8' && input.LA(1) <= '\u00F6')||(input.LA(1) >= '\u00F8' && input.LA(1) <= '\u02FF')||(input.LA(1) >= '\u0370' && input.LA(1) <= '\u037D')||(input.LA(1) >= '\u037F' && input.LA(1) <= '\u1FFF')||(input.LA(1) >= '\u200C' && input.LA(1) <= '\u200D')||(input.LA(1) >= '\u2070' && input.LA(1) <= '\u218F')||(input.LA(1) >= '\u2C00' && input.LA(1) <= '\u2FEF')||(input.LA(1) >= '\u3001' && input.LA(1) <= '\uD7FF')||(input.LA(1) >= '\uF900' && input.LA(1) <= '\uFDCF')||(input.LA(1) >= '\uFDF0' && input.LA(1) <= '\uFFFD') ) {
+					input.consume();
+				}
+				else {
+					MismatchedSetException mse = new MismatchedSetException(null,input);
+					recover(mse);
+					throw mse;
+				}
 			}
 
 		}
@@ -1230,41 +1223,41 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = INTEGER;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// TurtleOBDA.g:831:3: ( ( DIGIT )+ )
-			// TurtleOBDA.g:831:5: ( DIGIT )+
+			// TurtleOBDA.g:824:3: ( ( DIGIT )+ )
+			// TurtleOBDA.g:824:5: ( DIGIT )+
 			{
-			// TurtleOBDA.g:831:5: ( DIGIT )+
-			int cnt1=0;
-			loop1:
-			while (true) {
-				int alt1=2;
-				int LA1_0 = input.LA(1);
-				if ( ((LA1_0 >= '0' && LA1_0 <= '9')) ) {
-					alt1=1;
-				}
+				// TurtleOBDA.g:824:5: ( DIGIT )+
+				int cnt1=0;
+				loop1:
+				while (true) {
+					int alt1=2;
+					int LA1_0 = input.LA(1);
+					if ( ((LA1_0 >= '0' && LA1_0 <= '9')) ) {
+						alt1=1;
+					}
 
-				switch (alt1) {
-				case 1 :
-					// TurtleOBDA.g:
-					{
-					if ( (input.LA(1) >= '0' && input.LA(1) <= '9') ) {
-						input.consume();
-					}
-					else {
-						MismatchedSetException mse = new MismatchedSetException(null,input);
-						recover(mse);
-						throw mse;
-					}
-					}
-					break;
+					switch (alt1) {
+						case 1 :
+							// TurtleOBDA.g:
+						{
+							if ( (input.LA(1) >= '0' && input.LA(1) <= '9') ) {
+								input.consume();
+							}
+							else {
+								MismatchedSetException mse = new MismatchedSetException(null,input);
+								recover(mse);
+								throw mse;
+							}
+						}
+						break;
 
-				default :
-					if ( cnt1 >= 1 ) break loop1;
-					EarlyExitException eee = new EarlyExitException(1, input);
-					throw eee;
+						default :
+							if ( cnt1 >= 1 ) break loop1;
+							EarlyExitException eee = new EarlyExitException(1, input);
+							throw eee;
+					}
+					cnt1++;
 				}
-				cnt1++;
-			}
 
 			}
 
@@ -1282,14 +1275,14 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = DOUBLE;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// TurtleOBDA.g:835:3: ( ( DIGIT )+ PERIOD ( DIGIT )* ( 'e' | 'E' ) ( '-' | '+' )? ( DIGIT )* | PERIOD ( DIGIT )+ ( 'e' | 'E' ) ( '-' | '+' )? ( DIGIT )* | ( DIGIT )+ ( 'e' | 'E' ) ( '-' | '+' )? ( DIGIT )* )
+			// TurtleOBDA.g:828:3: ( ( DIGIT )+ PERIOD ( DIGIT )* ( 'e' | 'E' ) ( '-' | '+' )? ( DIGIT )* | PERIOD ( DIGIT )+ ( 'e' | 'E' ) ( '-' | '+' )? ( DIGIT )* | ( DIGIT )+ ( 'e' | 'E' ) ( '-' | '+' )? ( DIGIT )* )
 			int alt12=3;
 			alt12 = dfa12.predict(input);
 			switch (alt12) {
 				case 1 :
-					// TurtleOBDA.g:835:5: ( DIGIT )+ PERIOD ( DIGIT )* ( 'e' | 'E' ) ( '-' | '+' )? ( DIGIT )*
-					{
-					// TurtleOBDA.g:835:5: ( DIGIT )+
+					// TurtleOBDA.g:828:5: ( DIGIT )+ PERIOD ( DIGIT )* ( 'e' | 'E' ) ( '-' | '+' )? ( DIGIT )*
+				{
+					// TurtleOBDA.g:828:5: ( DIGIT )+
 					int cnt2=0;
 					loop2:
 					while (true) {
@@ -1300,31 +1293,31 @@ public class TurtleOBDALexer extends Lexer {
 						}
 
 						switch (alt2) {
-						case 1 :
-							// TurtleOBDA.g:
+							case 1 :
+								// TurtleOBDA.g:
 							{
-							if ( (input.LA(1) >= '0' && input.LA(1) <= '9') ) {
-								input.consume();
-							}
-							else {
-								MismatchedSetException mse = new MismatchedSetException(null,input);
-								recover(mse);
-								throw mse;
-							}
+								if ( (input.LA(1) >= '0' && input.LA(1) <= '9') ) {
+									input.consume();
+								}
+								else {
+									MismatchedSetException mse = new MismatchedSetException(null,input);
+									recover(mse);
+									throw mse;
+								}
 							}
 							break;
 
-						default :
-							if ( cnt2 >= 1 ) break loop2;
-							EarlyExitException eee = new EarlyExitException(2, input);
-							throw eee;
+							default :
+								if ( cnt2 >= 1 ) break loop2;
+								EarlyExitException eee = new EarlyExitException(2, input);
+								throw eee;
 						}
 						cnt2++;
 					}
 
-					mPERIOD(); 
+					mPERIOD();
 
-					// TurtleOBDA.g:835:19: ( DIGIT )*
+					// TurtleOBDA.g:828:19: ( DIGIT )*
 					loop3:
 					while (true) {
 						int alt3=2;
@@ -1334,22 +1327,22 @@ public class TurtleOBDALexer extends Lexer {
 						}
 
 						switch (alt3) {
-						case 1 :
-							// TurtleOBDA.g:
+							case 1 :
+								// TurtleOBDA.g:
 							{
-							if ( (input.LA(1) >= '0' && input.LA(1) <= '9') ) {
-								input.consume();
-							}
-							else {
-								MismatchedSetException mse = new MismatchedSetException(null,input);
-								recover(mse);
-								throw mse;
-							}
+								if ( (input.LA(1) >= '0' && input.LA(1) <= '9') ) {
+									input.consume();
+								}
+								else {
+									MismatchedSetException mse = new MismatchedSetException(null,input);
+									recover(mse);
+									throw mse;
+								}
 							}
 							break;
 
-						default :
-							break loop3;
+							default :
+								break loop3;
 						}
 					}
 
@@ -1361,7 +1354,7 @@ public class TurtleOBDALexer extends Lexer {
 						recover(mse);
 						throw mse;
 					}
-					// TurtleOBDA.g:835:36: ( '-' | '+' )?
+					// TurtleOBDA.g:828:36: ( '-' | '+' )?
 					int alt4=2;
 					int LA4_0 = input.LA(1);
 					if ( (LA4_0=='+'||LA4_0=='-') ) {
@@ -1370,7 +1363,7 @@ public class TurtleOBDALexer extends Lexer {
 					switch (alt4) {
 						case 1 :
 							// TurtleOBDA.g:
-							{
+						{
 							if ( input.LA(1)=='+'||input.LA(1)=='-' ) {
 								input.consume();
 							}
@@ -1379,12 +1372,12 @@ public class TurtleOBDALexer extends Lexer {
 								recover(mse);
 								throw mse;
 							}
-							}
-							break;
+						}
+						break;
 
 					}
 
-					// TurtleOBDA.g:835:47: ( DIGIT )*
+					// TurtleOBDA.g:828:47: ( DIGIT )*
 					loop5:
 					while (true) {
 						int alt5=2;
@@ -1394,33 +1387,33 @@ public class TurtleOBDALexer extends Lexer {
 						}
 
 						switch (alt5) {
-						case 1 :
-							// TurtleOBDA.g:
+							case 1 :
+								// TurtleOBDA.g:
 							{
-							if ( (input.LA(1) >= '0' && input.LA(1) <= '9') ) {
-								input.consume();
-							}
-							else {
-								MismatchedSetException mse = new MismatchedSetException(null,input);
-								recover(mse);
-								throw mse;
-							}
+								if ( (input.LA(1) >= '0' && input.LA(1) <= '9') ) {
+									input.consume();
+								}
+								else {
+									MismatchedSetException mse = new MismatchedSetException(null,input);
+									recover(mse);
+									throw mse;
+								}
 							}
 							break;
 
-						default :
-							break loop5;
+							default :
+								break loop5;
 						}
 					}
 
-					}
-					break;
+				}
+				break;
 				case 2 :
-					// TurtleOBDA.g:836:5: PERIOD ( DIGIT )+ ( 'e' | 'E' ) ( '-' | '+' )? ( DIGIT )*
-					{
-					mPERIOD(); 
+					// TurtleOBDA.g:829:5: PERIOD ( DIGIT )+ ( 'e' | 'E' ) ( '-' | '+' )? ( DIGIT )*
+				{
+					mPERIOD();
 
-					// TurtleOBDA.g:836:12: ( DIGIT )+
+					// TurtleOBDA.g:829:12: ( DIGIT )+
 					int cnt6=0;
 					loop6:
 					while (true) {
@@ -1431,24 +1424,24 @@ public class TurtleOBDALexer extends Lexer {
 						}
 
 						switch (alt6) {
-						case 1 :
-							// TurtleOBDA.g:
+							case 1 :
+								// TurtleOBDA.g:
 							{
-							if ( (input.LA(1) >= '0' && input.LA(1) <= '9') ) {
-								input.consume();
-							}
-							else {
-								MismatchedSetException mse = new MismatchedSetException(null,input);
-								recover(mse);
-								throw mse;
-							}
+								if ( (input.LA(1) >= '0' && input.LA(1) <= '9') ) {
+									input.consume();
+								}
+								else {
+									MismatchedSetException mse = new MismatchedSetException(null,input);
+									recover(mse);
+									throw mse;
+								}
 							}
 							break;
 
-						default :
-							if ( cnt6 >= 1 ) break loop6;
-							EarlyExitException eee = new EarlyExitException(6, input);
-							throw eee;
+							default :
+								if ( cnt6 >= 1 ) break loop6;
+								EarlyExitException eee = new EarlyExitException(6, input);
+								throw eee;
 						}
 						cnt6++;
 					}
@@ -1461,7 +1454,7 @@ public class TurtleOBDALexer extends Lexer {
 						recover(mse);
 						throw mse;
 					}
-					// TurtleOBDA.g:836:29: ( '-' | '+' )?
+					// TurtleOBDA.g:829:29: ( '-' | '+' )?
 					int alt7=2;
 					int LA7_0 = input.LA(1);
 					if ( (LA7_0=='+'||LA7_0=='-') ) {
@@ -1470,7 +1463,7 @@ public class TurtleOBDALexer extends Lexer {
 					switch (alt7) {
 						case 1 :
 							// TurtleOBDA.g:
-							{
+						{
 							if ( input.LA(1)=='+'||input.LA(1)=='-' ) {
 								input.consume();
 							}
@@ -1479,12 +1472,12 @@ public class TurtleOBDALexer extends Lexer {
 								recover(mse);
 								throw mse;
 							}
-							}
-							break;
+						}
+						break;
 
 					}
 
-					// TurtleOBDA.g:836:40: ( DIGIT )*
+					// TurtleOBDA.g:829:40: ( DIGIT )*
 					loop8:
 					while (true) {
 						int alt8=2;
@@ -1494,31 +1487,31 @@ public class TurtleOBDALexer extends Lexer {
 						}
 
 						switch (alt8) {
-						case 1 :
-							// TurtleOBDA.g:
+							case 1 :
+								// TurtleOBDA.g:
 							{
-							if ( (input.LA(1) >= '0' && input.LA(1) <= '9') ) {
-								input.consume();
-							}
-							else {
-								MismatchedSetException mse = new MismatchedSetException(null,input);
-								recover(mse);
-								throw mse;
-							}
+								if ( (input.LA(1) >= '0' && input.LA(1) <= '9') ) {
+									input.consume();
+								}
+								else {
+									MismatchedSetException mse = new MismatchedSetException(null,input);
+									recover(mse);
+									throw mse;
+								}
 							}
 							break;
 
-						default :
-							break loop8;
+							default :
+								break loop8;
 						}
 					}
 
-					}
-					break;
+				}
+				break;
 				case 3 :
-					// TurtleOBDA.g:837:5: ( DIGIT )+ ( 'e' | 'E' ) ( '-' | '+' )? ( DIGIT )*
-					{
-					// TurtleOBDA.g:837:5: ( DIGIT )+
+					// TurtleOBDA.g:830:5: ( DIGIT )+ ( 'e' | 'E' ) ( '-' | '+' )? ( DIGIT )*
+				{
+					// TurtleOBDA.g:830:5: ( DIGIT )+
 					int cnt9=0;
 					loop9:
 					while (true) {
@@ -1529,24 +1522,24 @@ public class TurtleOBDALexer extends Lexer {
 						}
 
 						switch (alt9) {
-						case 1 :
-							// TurtleOBDA.g:
+							case 1 :
+								// TurtleOBDA.g:
 							{
-							if ( (input.LA(1) >= '0' && input.LA(1) <= '9') ) {
-								input.consume();
-							}
-							else {
-								MismatchedSetException mse = new MismatchedSetException(null,input);
-								recover(mse);
-								throw mse;
-							}
+								if ( (input.LA(1) >= '0' && input.LA(1) <= '9') ) {
+									input.consume();
+								}
+								else {
+									MismatchedSetException mse = new MismatchedSetException(null,input);
+									recover(mse);
+									throw mse;
+								}
 							}
 							break;
 
-						default :
-							if ( cnt9 >= 1 ) break loop9;
-							EarlyExitException eee = new EarlyExitException(9, input);
-							throw eee;
+							default :
+								if ( cnt9 >= 1 ) break loop9;
+								EarlyExitException eee = new EarlyExitException(9, input);
+								throw eee;
 						}
 						cnt9++;
 					}
@@ -1559,7 +1552,7 @@ public class TurtleOBDALexer extends Lexer {
 						recover(mse);
 						throw mse;
 					}
-					// TurtleOBDA.g:837:22: ( '-' | '+' )?
+					// TurtleOBDA.g:830:22: ( '-' | '+' )?
 					int alt10=2;
 					int LA10_0 = input.LA(1);
 					if ( (LA10_0=='+'||LA10_0=='-') ) {
@@ -1568,7 +1561,7 @@ public class TurtleOBDALexer extends Lexer {
 					switch (alt10) {
 						case 1 :
 							// TurtleOBDA.g:
-							{
+						{
 							if ( input.LA(1)=='+'||input.LA(1)=='-' ) {
 								input.consume();
 							}
@@ -1577,12 +1570,12 @@ public class TurtleOBDALexer extends Lexer {
 								recover(mse);
 								throw mse;
 							}
-							}
-							break;
+						}
+						break;
 
 					}
 
-					// TurtleOBDA.g:837:33: ( DIGIT )*
+					// TurtleOBDA.g:830:33: ( DIGIT )*
 					loop11:
 					while (true) {
 						int alt11=2;
@@ -1592,27 +1585,27 @@ public class TurtleOBDALexer extends Lexer {
 						}
 
 						switch (alt11) {
-						case 1 :
-							// TurtleOBDA.g:
+							case 1 :
+								// TurtleOBDA.g:
 							{
-							if ( (input.LA(1) >= '0' && input.LA(1) <= '9') ) {
-								input.consume();
-							}
-							else {
-								MismatchedSetException mse = new MismatchedSetException(null,input);
-								recover(mse);
-								throw mse;
-							}
+								if ( (input.LA(1) >= '0' && input.LA(1) <= '9') ) {
+									input.consume();
+								}
+								else {
+									MismatchedSetException mse = new MismatchedSetException(null,input);
+									recover(mse);
+									throw mse;
+								}
 							}
 							break;
 
-						default :
-							break loop11;
+							default :
+								break loop11;
 						}
 					}
 
-					}
-					break;
+				}
+				break;
 
 			}
 			state.type = _type;
@@ -1629,7 +1622,7 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = DECIMAL;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// TurtleOBDA.g:841:3: ( ( DIGIT )+ PERIOD ( DIGIT )+ | PERIOD ( DIGIT )+ )
+			// TurtleOBDA.g:834:3: ( ( DIGIT )+ PERIOD ( DIGIT )+ | PERIOD ( DIGIT )+ )
 			int alt16=2;
 			int LA16_0 = input.LA(1);
 			if ( ((LA16_0 >= '0' && LA16_0 <= '9')) ) {
@@ -1641,15 +1634,15 @@ public class TurtleOBDALexer extends Lexer {
 
 			else {
 				NoViableAltException nvae =
-					new NoViableAltException("", 16, 0, input);
+						new NoViableAltException("", 16, 0, input);
 				throw nvae;
 			}
 
 			switch (alt16) {
 				case 1 :
-					// TurtleOBDA.g:841:5: ( DIGIT )+ PERIOD ( DIGIT )+
-					{
-					// TurtleOBDA.g:841:5: ( DIGIT )+
+					// TurtleOBDA.g:834:5: ( DIGIT )+ PERIOD ( DIGIT )+
+				{
+					// TurtleOBDA.g:834:5: ( DIGIT )+
 					int cnt13=0;
 					loop13:
 					while (true) {
@@ -1660,31 +1653,31 @@ public class TurtleOBDALexer extends Lexer {
 						}
 
 						switch (alt13) {
-						case 1 :
-							// TurtleOBDA.g:
+							case 1 :
+								// TurtleOBDA.g:
 							{
-							if ( (input.LA(1) >= '0' && input.LA(1) <= '9') ) {
-								input.consume();
-							}
-							else {
-								MismatchedSetException mse = new MismatchedSetException(null,input);
-								recover(mse);
-								throw mse;
-							}
+								if ( (input.LA(1) >= '0' && input.LA(1) <= '9') ) {
+									input.consume();
+								}
+								else {
+									MismatchedSetException mse = new MismatchedSetException(null,input);
+									recover(mse);
+									throw mse;
+								}
 							}
 							break;
 
-						default :
-							if ( cnt13 >= 1 ) break loop13;
-							EarlyExitException eee = new EarlyExitException(13, input);
-							throw eee;
+							default :
+								if ( cnt13 >= 1 ) break loop13;
+								EarlyExitException eee = new EarlyExitException(13, input);
+								throw eee;
 						}
 						cnt13++;
 					}
 
-					mPERIOD(); 
+					mPERIOD();
 
-					// TurtleOBDA.g:841:19: ( DIGIT )+
+					// TurtleOBDA.g:834:19: ( DIGIT )+
 					int cnt14=0;
 					loop14:
 					while (true) {
@@ -1695,36 +1688,36 @@ public class TurtleOBDALexer extends Lexer {
 						}
 
 						switch (alt14) {
-						case 1 :
-							// TurtleOBDA.g:
+							case 1 :
+								// TurtleOBDA.g:
 							{
-							if ( (input.LA(1) >= '0' && input.LA(1) <= '9') ) {
-								input.consume();
-							}
-							else {
-								MismatchedSetException mse = new MismatchedSetException(null,input);
-								recover(mse);
-								throw mse;
-							}
+								if ( (input.LA(1) >= '0' && input.LA(1) <= '9') ) {
+									input.consume();
+								}
+								else {
+									MismatchedSetException mse = new MismatchedSetException(null,input);
+									recover(mse);
+									throw mse;
+								}
 							}
 							break;
 
-						default :
-							if ( cnt14 >= 1 ) break loop14;
-							EarlyExitException eee = new EarlyExitException(14, input);
-							throw eee;
+							default :
+								if ( cnt14 >= 1 ) break loop14;
+								EarlyExitException eee = new EarlyExitException(14, input);
+								throw eee;
 						}
 						cnt14++;
 					}
 
-					}
-					break;
+				}
+				break;
 				case 2 :
-					// TurtleOBDA.g:842:5: PERIOD ( DIGIT )+
-					{
-					mPERIOD(); 
+					// TurtleOBDA.g:835:5: PERIOD ( DIGIT )+
+				{
+					mPERIOD();
 
-					// TurtleOBDA.g:842:12: ( DIGIT )+
+					// TurtleOBDA.g:835:12: ( DIGIT )+
 					int cnt15=0;
 					loop15:
 					while (true) {
@@ -1735,30 +1728,30 @@ public class TurtleOBDALexer extends Lexer {
 						}
 
 						switch (alt15) {
-						case 1 :
-							// TurtleOBDA.g:
+							case 1 :
+								// TurtleOBDA.g:
 							{
-							if ( (input.LA(1) >= '0' && input.LA(1) <= '9') ) {
-								input.consume();
-							}
-							else {
-								MismatchedSetException mse = new MismatchedSetException(null,input);
-								recover(mse);
-								throw mse;
-							}
+								if ( (input.LA(1) >= '0' && input.LA(1) <= '9') ) {
+									input.consume();
+								}
+								else {
+									MismatchedSetException mse = new MismatchedSetException(null,input);
+									recover(mse);
+									throw mse;
+								}
 							}
 							break;
 
-						default :
-							if ( cnt15 >= 1 ) break loop15;
-							EarlyExitException eee = new EarlyExitException(15, input);
-							throw eee;
+							default :
+								if ( cnt15 >= 1 ) break loop15;
+								EarlyExitException eee = new EarlyExitException(15, input);
+								throw eee;
 						}
 						cnt15++;
 					}
 
-					}
-					break;
+				}
+				break;
 
 			}
 			state.type = _type;
@@ -1775,12 +1768,12 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = INTEGER_POSITIVE;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// TurtleOBDA.g:846:3: ( PLUS INTEGER )
-			// TurtleOBDA.g:846:5: PLUS INTEGER
+			// TurtleOBDA.g:839:3: ( PLUS INTEGER )
+			// TurtleOBDA.g:839:5: PLUS INTEGER
 			{
-			mPLUS(); 
+				mPLUS();
 
-			mINTEGER(); 
+				mINTEGER();
 
 			}
 
@@ -1798,12 +1791,12 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = INTEGER_NEGATIVE;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// TurtleOBDA.g:850:3: ( MINUS INTEGER )
-			// TurtleOBDA.g:850:5: MINUS INTEGER
+			// TurtleOBDA.g:843:3: ( MINUS INTEGER )
+			// TurtleOBDA.g:843:5: MINUS INTEGER
 			{
-			mMINUS(); 
+				mMINUS();
 
-			mINTEGER(); 
+				mINTEGER();
 
 			}
 
@@ -1821,12 +1814,12 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = DOUBLE_POSITIVE;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// TurtleOBDA.g:854:3: ( PLUS DOUBLE )
-			// TurtleOBDA.g:854:5: PLUS DOUBLE
+			// TurtleOBDA.g:847:3: ( PLUS DOUBLE )
+			// TurtleOBDA.g:847:5: PLUS DOUBLE
 			{
-			mPLUS(); 
+				mPLUS();
 
-			mDOUBLE(); 
+				mDOUBLE();
 
 			}
 
@@ -1844,12 +1837,12 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = DOUBLE_NEGATIVE;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// TurtleOBDA.g:858:3: ( MINUS DOUBLE )
-			// TurtleOBDA.g:858:5: MINUS DOUBLE
+			// TurtleOBDA.g:851:3: ( MINUS DOUBLE )
+			// TurtleOBDA.g:851:5: MINUS DOUBLE
 			{
-			mMINUS(); 
+				mMINUS();
 
-			mDOUBLE(); 
+				mDOUBLE();
 
 			}
 
@@ -1867,12 +1860,12 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = DECIMAL_POSITIVE;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// TurtleOBDA.g:862:3: ( PLUS DECIMAL )
-			// TurtleOBDA.g:862:5: PLUS DECIMAL
+			// TurtleOBDA.g:855:3: ( PLUS DECIMAL )
+			// TurtleOBDA.g:855:5: PLUS DECIMAL
 			{
-			mPLUS(); 
+				mPLUS();
 
-			mDECIMAL(); 
+				mDECIMAL();
 
 			}
 
@@ -1890,12 +1883,12 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = DECIMAL_NEGATIVE;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// TurtleOBDA.g:866:3: ( MINUS DECIMAL )
-			// TurtleOBDA.g:866:5: MINUS DECIMAL
+			// TurtleOBDA.g:859:3: ( MINUS DECIMAL )
+			// TurtleOBDA.g:859:5: MINUS DECIMAL
 			{
-			mMINUS(); 
+				mMINUS();
 
-			mDECIMAL(); 
+				mDECIMAL();
 
 			}
 
@@ -1913,39 +1906,39 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = VARNAME;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// TurtleOBDA.g:870:3: ( ALPHA ( CHAR )* )
-			// TurtleOBDA.g:870:5: ALPHA ( CHAR )*
+			// TurtleOBDA.g:863:3: ( ALPHA ( CHAR )* )
+			// TurtleOBDA.g:863:5: ALPHA ( CHAR )*
 			{
-			mALPHA(); 
+				mALPHA();
 
-			// TurtleOBDA.g:870:11: ( CHAR )*
-			loop17:
-			while (true) {
-				int alt17=2;
-				int LA17_0 = input.LA(1);
-				if ( ((LA17_0 >= '-' && LA17_0 <= '.')||(LA17_0 >= '0' && LA17_0 <= '9')||(LA17_0 >= 'A' && LA17_0 <= 'Z')||LA17_0=='_'||(LA17_0 >= 'a' && LA17_0 <= 'z')||(LA17_0 >= '\u00C0' && LA17_0 <= '\u00D6')||(LA17_0 >= '\u00D8' && LA17_0 <= '\u00F6')||(LA17_0 >= '\u00F8' && LA17_0 <= '\u02FF')||(LA17_0 >= '\u0370' && LA17_0 <= '\u037D')||(LA17_0 >= '\u037F' && LA17_0 <= '\u1FFF')||(LA17_0 >= '\u200C' && LA17_0 <= '\u200D')||(LA17_0 >= '\u2070' && LA17_0 <= '\u218F')||(LA17_0 >= '\u2C00' && LA17_0 <= '\u2FEF')||(LA17_0 >= '\u3001' && LA17_0 <= '\uD7FF')||(LA17_0 >= '\uF900' && LA17_0 <= '\uFDCF')||(LA17_0 >= '\uFDF0' && LA17_0 <= '\uFFFD')) ) {
-					alt17=1;
+				// TurtleOBDA.g:863:11: ( CHAR )*
+				loop17:
+				while (true) {
+					int alt17=2;
+					int LA17_0 = input.LA(1);
+					if ( ((LA17_0 >= '-' && LA17_0 <= '.')||(LA17_0 >= '0' && LA17_0 <= '9')||(LA17_0 >= 'A' && LA17_0 <= 'Z')||LA17_0=='_'||(LA17_0 >= 'a' && LA17_0 <= 'z')||(LA17_0 >= '\u00C0' && LA17_0 <= '\u00D6')||(LA17_0 >= '\u00D8' && LA17_0 <= '\u00F6')||(LA17_0 >= '\u00F8' && LA17_0 <= '\u02FF')||(LA17_0 >= '\u0370' && LA17_0 <= '\u037D')||(LA17_0 >= '\u037F' && LA17_0 <= '\u1FFF')||(LA17_0 >= '\u200C' && LA17_0 <= '\u200D')||(LA17_0 >= '\u2070' && LA17_0 <= '\u218F')||(LA17_0 >= '\u2C00' && LA17_0 <= '\u2FEF')||(LA17_0 >= '\u3001' && LA17_0 <= '\uD7FF')||(LA17_0 >= '\uF900' && LA17_0 <= '\uFDCF')||(LA17_0 >= '\uFDF0' && LA17_0 <= '\uFFFD')) ) {
+						alt17=1;
+					}
+
+					switch (alt17) {
+						case 1 :
+							// TurtleOBDA.g:
+						{
+							if ( (input.LA(1) >= '-' && input.LA(1) <= '.')||(input.LA(1) >= '0' && input.LA(1) <= '9')||(input.LA(1) >= 'A' && input.LA(1) <= 'Z')||input.LA(1)=='_'||(input.LA(1) >= 'a' && input.LA(1) <= 'z')||(input.LA(1) >= '\u00C0' && input.LA(1) <= '\u00D6')||(input.LA(1) >= '\u00D8' && input.LA(1) <= '\u00F6')||(input.LA(1) >= '\u00F8' && input.LA(1) <= '\u02FF')||(input.LA(1) >= '\u0370' && input.LA(1) <= '\u037D')||(input.LA(1) >= '\u037F' && input.LA(1) <= '\u1FFF')||(input.LA(1) >= '\u200C' && input.LA(1) <= '\u200D')||(input.LA(1) >= '\u2070' && input.LA(1) <= '\u218F')||(input.LA(1) >= '\u2C00' && input.LA(1) <= '\u2FEF')||(input.LA(1) >= '\u3001' && input.LA(1) <= '\uD7FF')||(input.LA(1) >= '\uF900' && input.LA(1) <= '\uFDCF')||(input.LA(1) >= '\uFDF0' && input.LA(1) <= '\uFFFD') ) {
+								input.consume();
+							}
+							else {
+								MismatchedSetException mse = new MismatchedSetException(null,input);
+								recover(mse);
+								throw mse;
+							}
+						}
+						break;
+
+						default :
+							break loop17;
+					}
 				}
-
-				switch (alt17) {
-				case 1 :
-					// TurtleOBDA.g:
-					{
-					if ( (input.LA(1) >= '-' && input.LA(1) <= '.')||(input.LA(1) >= '0' && input.LA(1) <= '9')||(input.LA(1) >= 'A' && input.LA(1) <= 'Z')||input.LA(1)=='_'||(input.LA(1) >= 'a' && input.LA(1) <= 'z')||(input.LA(1) >= '\u00C0' && input.LA(1) <= '\u00D6')||(input.LA(1) >= '\u00D8' && input.LA(1) <= '\u00F6')||(input.LA(1) >= '\u00F8' && input.LA(1) <= '\u02FF')||(input.LA(1) >= '\u0370' && input.LA(1) <= '\u037D')||(input.LA(1) >= '\u037F' && input.LA(1) <= '\u1FFF')||(input.LA(1) >= '\u200C' && input.LA(1) <= '\u200D')||(input.LA(1) >= '\u2070' && input.LA(1) <= '\u218F')||(input.LA(1) >= '\u2C00' && input.LA(1) <= '\u2FEF')||(input.LA(1) >= '\u3001' && input.LA(1) <= '\uD7FF')||(input.LA(1) >= '\uF900' && input.LA(1) <= '\uFDCF')||(input.LA(1) >= '\uFDF0' && input.LA(1) <= '\uFFFD') ) {
-						input.consume();
-					}
-					else {
-						MismatchedSetException mse = new MismatchedSetException(null,input);
-						recover(mse);
-						throw mse;
-					}
-					}
-					break;
-
-				default :
-					break loop17;
-				}
-			}
 
 			}
 
@@ -1961,18 +1954,18 @@ public class TurtleOBDALexer extends Lexer {
 	// $ANTLR start "ECHAR"
 	public final void mECHAR() throws RecognitionException {
 		try {
-			// TurtleOBDA.g:874:3: ( '\\\\' ( 't' | 'b' | 'n' | 'r' | 'f' | '\\\\' | '\"' | '\\'' ) )
-			// TurtleOBDA.g:874:5: '\\\\' ( 't' | 'b' | 'n' | 'r' | 'f' | '\\\\' | '\"' | '\\'' )
+			// TurtleOBDA.g:867:3: ( '\\\\' ( 't' | 'b' | 'n' | 'r' | 'f' | '\\\\' | '\"' | '\\'' ) )
+			// TurtleOBDA.g:867:5: '\\\\' ( 't' | 'b' | 'n' | 'r' | 'f' | '\\\\' | '\"' | '\\'' )
 			{
-			match('\\'); 
-			if ( input.LA(1)=='\"'||input.LA(1)=='\''||input.LA(1)=='\\'||input.LA(1)=='b'||input.LA(1)=='f'||input.LA(1)=='n'||input.LA(1)=='r'||input.LA(1)=='t' ) {
-				input.consume();
-			}
-			else {
-				MismatchedSetException mse = new MismatchedSetException(null,input);
-				recover(mse);
-				throw mse;
-			}
+				match('\\');
+				if ( input.LA(1)=='\"'||input.LA(1)=='\''||input.LA(1)=='\\'||input.LA(1)=='b'||input.LA(1)=='f'||input.LA(1)=='n'||input.LA(1)=='r'||input.LA(1)=='t' ) {
+					input.consume();
+				}
+				else {
+					MismatchedSetException mse = new MismatchedSetException(null,input);
+					recover(mse);
+					throw mse;
+				}
 			}
 
 		}
@@ -1985,39 +1978,39 @@ public class TurtleOBDALexer extends Lexer {
 	// $ANTLR start "SCHEMA"
 	public final void mSCHEMA() throws RecognitionException {
 		try {
-			// TurtleOBDA.g:877:16: ( ALPHA ( ALPHANUM | PLUS | MINUS | PERIOD )* )
-			// TurtleOBDA.g:877:18: ALPHA ( ALPHANUM | PLUS | MINUS | PERIOD )*
+			// TurtleOBDA.g:870:16: ( ALPHA ( ALPHANUM | PLUS | MINUS | PERIOD )* )
+			// TurtleOBDA.g:870:18: ALPHA ( ALPHANUM | PLUS | MINUS | PERIOD )*
 			{
-			mALPHA(); 
+				mALPHA();
 
-			// TurtleOBDA.g:877:24: ( ALPHANUM | PLUS | MINUS | PERIOD )*
-			loop18:
-			while (true) {
-				int alt18=2;
-				int LA18_0 = input.LA(1);
-				if ( (LA18_0=='+'||(LA18_0 >= '-' && LA18_0 <= '.')||(LA18_0 >= '0' && LA18_0 <= '9')||(LA18_0 >= 'A' && LA18_0 <= 'Z')||(LA18_0 >= 'a' && LA18_0 <= 'z')||(LA18_0 >= '\u00C0' && LA18_0 <= '\u00D6')||(LA18_0 >= '\u00D8' && LA18_0 <= '\u00F6')||(LA18_0 >= '\u00F8' && LA18_0 <= '\u02FF')||(LA18_0 >= '\u0370' && LA18_0 <= '\u037D')||(LA18_0 >= '\u037F' && LA18_0 <= '\u1FFF')||(LA18_0 >= '\u200C' && LA18_0 <= '\u200D')||(LA18_0 >= '\u2070' && LA18_0 <= '\u218F')||(LA18_0 >= '\u2C00' && LA18_0 <= '\u2FEF')||(LA18_0 >= '\u3001' && LA18_0 <= '\uD7FF')||(LA18_0 >= '\uF900' && LA18_0 <= '\uFDCF')||(LA18_0 >= '\uFDF0' && LA18_0 <= '\uFFFD')) ) {
-					alt18=1;
+				// TurtleOBDA.g:870:24: ( ALPHANUM | PLUS | MINUS | PERIOD )*
+				loop18:
+				while (true) {
+					int alt18=2;
+					int LA18_0 = input.LA(1);
+					if ( (LA18_0=='+'||(LA18_0 >= '-' && LA18_0 <= '.')||(LA18_0 >= '0' && LA18_0 <= '9')||(LA18_0 >= 'A' && LA18_0 <= 'Z')||(LA18_0 >= 'a' && LA18_0 <= 'z')||(LA18_0 >= '\u00C0' && LA18_0 <= '\u00D6')||(LA18_0 >= '\u00D8' && LA18_0 <= '\u00F6')||(LA18_0 >= '\u00F8' && LA18_0 <= '\u02FF')||(LA18_0 >= '\u0370' && LA18_0 <= '\u037D')||(LA18_0 >= '\u037F' && LA18_0 <= '\u1FFF')||(LA18_0 >= '\u200C' && LA18_0 <= '\u200D')||(LA18_0 >= '\u2070' && LA18_0 <= '\u218F')||(LA18_0 >= '\u2C00' && LA18_0 <= '\u2FEF')||(LA18_0 >= '\u3001' && LA18_0 <= '\uD7FF')||(LA18_0 >= '\uF900' && LA18_0 <= '\uFDCF')||(LA18_0 >= '\uFDF0' && LA18_0 <= '\uFFFD')) ) {
+						alt18=1;
+					}
+
+					switch (alt18) {
+						case 1 :
+							// TurtleOBDA.g:
+						{
+							if ( input.LA(1)=='+'||(input.LA(1) >= '-' && input.LA(1) <= '.')||(input.LA(1) >= '0' && input.LA(1) <= '9')||(input.LA(1) >= 'A' && input.LA(1) <= 'Z')||(input.LA(1) >= 'a' && input.LA(1) <= 'z')||(input.LA(1) >= '\u00C0' && input.LA(1) <= '\u00D6')||(input.LA(1) >= '\u00D8' && input.LA(1) <= '\u00F6')||(input.LA(1) >= '\u00F8' && input.LA(1) <= '\u02FF')||(input.LA(1) >= '\u0370' && input.LA(1) <= '\u037D')||(input.LA(1) >= '\u037F' && input.LA(1) <= '\u1FFF')||(input.LA(1) >= '\u200C' && input.LA(1) <= '\u200D')||(input.LA(1) >= '\u2070' && input.LA(1) <= '\u218F')||(input.LA(1) >= '\u2C00' && input.LA(1) <= '\u2FEF')||(input.LA(1) >= '\u3001' && input.LA(1) <= '\uD7FF')||(input.LA(1) >= '\uF900' && input.LA(1) <= '\uFDCF')||(input.LA(1) >= '\uFDF0' && input.LA(1) <= '\uFFFD') ) {
+								input.consume();
+							}
+							else {
+								MismatchedSetException mse = new MismatchedSetException(null,input);
+								recover(mse);
+								throw mse;
+							}
+						}
+						break;
+
+						default :
+							break loop18;
+					}
 				}
-
-				switch (alt18) {
-				case 1 :
-					// TurtleOBDA.g:
-					{
-					if ( input.LA(1)=='+'||(input.LA(1) >= '-' && input.LA(1) <= '.')||(input.LA(1) >= '0' && input.LA(1) <= '9')||(input.LA(1) >= 'A' && input.LA(1) <= 'Z')||(input.LA(1) >= 'a' && input.LA(1) <= 'z')||(input.LA(1) >= '\u00C0' && input.LA(1) <= '\u00D6')||(input.LA(1) >= '\u00D8' && input.LA(1) <= '\u00F6')||(input.LA(1) >= '\u00F8' && input.LA(1) <= '\u02FF')||(input.LA(1) >= '\u0370' && input.LA(1) <= '\u037D')||(input.LA(1) >= '\u037F' && input.LA(1) <= '\u1FFF')||(input.LA(1) >= '\u200C' && input.LA(1) <= '\u200D')||(input.LA(1) >= '\u2070' && input.LA(1) <= '\u218F')||(input.LA(1) >= '\u2C00' && input.LA(1) <= '\u2FEF')||(input.LA(1) >= '\u3001' && input.LA(1) <= '\uD7FF')||(input.LA(1) >= '\uF900' && input.LA(1) <= '\uFDCF')||(input.LA(1) >= '\uFDF0' && input.LA(1) <= '\uFFFD') ) {
-						input.consume();
-					}
-					else {
-						MismatchedSetException mse = new MismatchedSetException(null,input);
-						recover(mse);
-						throw mse;
-					}
-					}
-					break;
-
-				default :
-					break loop18;
-				}
-			}
 
 			}
 
@@ -2031,17 +2024,17 @@ public class TurtleOBDALexer extends Lexer {
 	// $ANTLR start "URI_PATH"
 	public final void mURI_PATH() throws RecognitionException {
 		try {
-			// TurtleOBDA.g:879:18: ( ( ALPHANUM | UNDERSCORE | MINUS | COLON | PERIOD | HASH | QUESTION | SLASH ) )
+			// TurtleOBDA.g:872:18: ( ( ALPHANUM | UNDERSCORE | MINUS | COLON | PERIOD | HASH | QUESTION | SLASH ) )
 			// TurtleOBDA.g:
 			{
-			if ( input.LA(1)=='#'||(input.LA(1) >= '-' && input.LA(1) <= ':')||input.LA(1)=='?'||(input.LA(1) >= 'A' && input.LA(1) <= 'Z')||input.LA(1)=='_'||(input.LA(1) >= 'a' && input.LA(1) <= 'z')||(input.LA(1) >= '\u00C0' && input.LA(1) <= '\u00D6')||(input.LA(1) >= '\u00D8' && input.LA(1) <= '\u00F6')||(input.LA(1) >= '\u00F8' && input.LA(1) <= '\u02FF')||(input.LA(1) >= '\u0370' && input.LA(1) <= '\u037D')||(input.LA(1) >= '\u037F' && input.LA(1) <= '\u1FFF')||(input.LA(1) >= '\u200C' && input.LA(1) <= '\u200D')||(input.LA(1) >= '\u2070' && input.LA(1) <= '\u218F')||(input.LA(1) >= '\u2C00' && input.LA(1) <= '\u2FEF')||(input.LA(1) >= '\u3001' && input.LA(1) <= '\uD7FF')||(input.LA(1) >= '\uF900' && input.LA(1) <= '\uFDCF')||(input.LA(1) >= '\uFDF0' && input.LA(1) <= '\uFFFD') ) {
-				input.consume();
-			}
-			else {
-				MismatchedSetException mse = new MismatchedSetException(null,input);
-				recover(mse);
-				throw mse;
-			}
+				if ( input.LA(1)=='#'||(input.LA(1) >= '-' && input.LA(1) <= ':')||input.LA(1)=='?'||(input.LA(1) >= 'A' && input.LA(1) <= 'Z')||input.LA(1)=='_'||(input.LA(1) >= 'a' && input.LA(1) <= 'z')||(input.LA(1) >= '\u00C0' && input.LA(1) <= '\u00D6')||(input.LA(1) >= '\u00D8' && input.LA(1) <= '\u00F6')||(input.LA(1) >= '\u00F8' && input.LA(1) <= '\u02FF')||(input.LA(1) >= '\u0370' && input.LA(1) <= '\u037D')||(input.LA(1) >= '\u037F' && input.LA(1) <= '\u1FFF')||(input.LA(1) >= '\u200C' && input.LA(1) <= '\u200D')||(input.LA(1) >= '\u2070' && input.LA(1) <= '\u218F')||(input.LA(1) >= '\u2C00' && input.LA(1) <= '\u2FEF')||(input.LA(1) >= '\u3001' && input.LA(1) <= '\uD7FF')||(input.LA(1) >= '\uF900' && input.LA(1) <= '\uFDCF')||(input.LA(1) >= '\uFDF0' && input.LA(1) <= '\uFFFD') ) {
+					input.consume();
+				}
+				else {
+					MismatchedSetException mse = new MismatchedSetException(null,input);
+					recover(mse);
+					throw mse;
+				}
 			}
 
 		}
@@ -2054,17 +2047,17 @@ public class TurtleOBDALexer extends Lexer {
 	// $ANTLR start "ID_START"
 	public final void mID_START() throws RecognitionException {
 		try {
-			// TurtleOBDA.g:881:18: ( ( ALPHA | UNDERSCORE ) )
+			// TurtleOBDA.g:874:18: ( ( ALPHA | UNDERSCORE ) )
 			// TurtleOBDA.g:
 			{
-			if ( (input.LA(1) >= 'A' && input.LA(1) <= 'Z')||input.LA(1)=='_'||(input.LA(1) >= 'a' && input.LA(1) <= 'z')||(input.LA(1) >= '\u00C0' && input.LA(1) <= '\u00D6')||(input.LA(1) >= '\u00D8' && input.LA(1) <= '\u00F6')||(input.LA(1) >= '\u00F8' && input.LA(1) <= '\u02FF')||(input.LA(1) >= '\u0370' && input.LA(1) <= '\u037D')||(input.LA(1) >= '\u037F' && input.LA(1) <= '\u1FFF')||(input.LA(1) >= '\u200C' && input.LA(1) <= '\u200D')||(input.LA(1) >= '\u2070' && input.LA(1) <= '\u218F')||(input.LA(1) >= '\u2C00' && input.LA(1) <= '\u2FEF')||(input.LA(1) >= '\u3001' && input.LA(1) <= '\uD7FF')||(input.LA(1) >= '\uF900' && input.LA(1) <= '\uFDCF')||(input.LA(1) >= '\uFDF0' && input.LA(1) <= '\uFFFD') ) {
-				input.consume();
-			}
-			else {
-				MismatchedSetException mse = new MismatchedSetException(null,input);
-				recover(mse);
-				throw mse;
-			}
+				if ( (input.LA(1) >= 'A' && input.LA(1) <= 'Z')||input.LA(1)=='_'||(input.LA(1) >= 'a' && input.LA(1) <= 'z')||(input.LA(1) >= '\u00C0' && input.LA(1) <= '\u00D6')||(input.LA(1) >= '\u00D8' && input.LA(1) <= '\u00F6')||(input.LA(1) >= '\u00F8' && input.LA(1) <= '\u02FF')||(input.LA(1) >= '\u0370' && input.LA(1) <= '\u037D')||(input.LA(1) >= '\u037F' && input.LA(1) <= '\u1FFF')||(input.LA(1) >= '\u200C' && input.LA(1) <= '\u200D')||(input.LA(1) >= '\u2070' && input.LA(1) <= '\u218F')||(input.LA(1) >= '\u2C00' && input.LA(1) <= '\u2FEF')||(input.LA(1) >= '\u3001' && input.LA(1) <= '\uD7FF')||(input.LA(1) >= '\uF900' && input.LA(1) <= '\uFDCF')||(input.LA(1) >= '\uFDF0' && input.LA(1) <= '\uFFFD') ) {
+					input.consume();
+				}
+				else {
+					MismatchedSetException mse = new MismatchedSetException(null,input);
+					recover(mse);
+					throw mse;
+				}
 			}
 
 		}
@@ -2077,17 +2070,17 @@ public class TurtleOBDALexer extends Lexer {
 	// $ANTLR start "ID_CORE"
 	public final void mID_CORE() throws RecognitionException {
 		try {
-			// TurtleOBDA.g:883:17: ( ( ID_START | DIGIT ) )
+			// TurtleOBDA.g:876:17: ( ( ID_START | DIGIT ) )
 			// TurtleOBDA.g:
 			{
-			if ( (input.LA(1) >= '0' && input.LA(1) <= '9')||(input.LA(1) >= 'A' && input.LA(1) <= 'Z')||input.LA(1)=='_'||(input.LA(1) >= 'a' && input.LA(1) <= 'z')||(input.LA(1) >= '\u00C0' && input.LA(1) <= '\u00D6')||(input.LA(1) >= '\u00D8' && input.LA(1) <= '\u00F6')||(input.LA(1) >= '\u00F8' && input.LA(1) <= '\u02FF')||(input.LA(1) >= '\u0370' && input.LA(1) <= '\u037D')||(input.LA(1) >= '\u037F' && input.LA(1) <= '\u1FFF')||(input.LA(1) >= '\u200C' && input.LA(1) <= '\u200D')||(input.LA(1) >= '\u2070' && input.LA(1) <= '\u218F')||(input.LA(1) >= '\u2C00' && input.LA(1) <= '\u2FEF')||(input.LA(1) >= '\u3001' && input.LA(1) <= '\uD7FF')||(input.LA(1) >= '\uF900' && input.LA(1) <= '\uFDCF')||(input.LA(1) >= '\uFDF0' && input.LA(1) <= '\uFFFD') ) {
-				input.consume();
-			}
-			else {
-				MismatchedSetException mse = new MismatchedSetException(null,input);
-				recover(mse);
-				throw mse;
-			}
+				if ( (input.LA(1) >= '0' && input.LA(1) <= '9')||(input.LA(1) >= 'A' && input.LA(1) <= 'Z')||input.LA(1)=='_'||(input.LA(1) >= 'a' && input.LA(1) <= 'z')||(input.LA(1) >= '\u00C0' && input.LA(1) <= '\u00D6')||(input.LA(1) >= '\u00D8' && input.LA(1) <= '\u00F6')||(input.LA(1) >= '\u00F8' && input.LA(1) <= '\u02FF')||(input.LA(1) >= '\u0370' && input.LA(1) <= '\u037D')||(input.LA(1) >= '\u037F' && input.LA(1) <= '\u1FFF')||(input.LA(1) >= '\u200C' && input.LA(1) <= '\u200D')||(input.LA(1) >= '\u2070' && input.LA(1) <= '\u218F')||(input.LA(1) >= '\u2C00' && input.LA(1) <= '\u2FEF')||(input.LA(1) >= '\u3001' && input.LA(1) <= '\uD7FF')||(input.LA(1) >= '\uF900' && input.LA(1) <= '\uFDCF')||(input.LA(1) >= '\uFDF0' && input.LA(1) <= '\uFFFD') ) {
+					input.consume();
+				}
+				else {
+					MismatchedSetException mse = new MismatchedSetException(null,input);
+					recover(mse);
+					throw mse;
+				}
 			}
 
 		}
@@ -2100,39 +2093,39 @@ public class TurtleOBDALexer extends Lexer {
 	// $ANTLR start "ID"
 	public final void mID() throws RecognitionException {
 		try {
-			// TurtleOBDA.g:885:12: ( ID_START ( ID_CORE )* )
-			// TurtleOBDA.g:885:14: ID_START ( ID_CORE )*
+			// TurtleOBDA.g:878:12: ( ID_START ( ID_CORE )* )
+			// TurtleOBDA.g:878:14: ID_START ( ID_CORE )*
 			{
-			mID_START(); 
+				mID_START();
 
-			// TurtleOBDA.g:885:23: ( ID_CORE )*
-			loop19:
-			while (true) {
-				int alt19=2;
-				int LA19_0 = input.LA(1);
-				if ( ((LA19_0 >= '0' && LA19_0 <= '9')||(LA19_0 >= 'A' && LA19_0 <= 'Z')||LA19_0=='_'||(LA19_0 >= 'a' && LA19_0 <= 'z')||(LA19_0 >= '\u00C0' && LA19_0 <= '\u00D6')||(LA19_0 >= '\u00D8' && LA19_0 <= '\u00F6')||(LA19_0 >= '\u00F8' && LA19_0 <= '\u02FF')||(LA19_0 >= '\u0370' && LA19_0 <= '\u037D')||(LA19_0 >= '\u037F' && LA19_0 <= '\u1FFF')||(LA19_0 >= '\u200C' && LA19_0 <= '\u200D')||(LA19_0 >= '\u2070' && LA19_0 <= '\u218F')||(LA19_0 >= '\u2C00' && LA19_0 <= '\u2FEF')||(LA19_0 >= '\u3001' && LA19_0 <= '\uD7FF')||(LA19_0 >= '\uF900' && LA19_0 <= '\uFDCF')||(LA19_0 >= '\uFDF0' && LA19_0 <= '\uFFFD')) ) {
-					alt19=1;
+				// TurtleOBDA.g:878:23: ( ID_CORE )*
+				loop19:
+				while (true) {
+					int alt19=2;
+					int LA19_0 = input.LA(1);
+					if ( ((LA19_0 >= '0' && LA19_0 <= '9')||(LA19_0 >= 'A' && LA19_0 <= 'Z')||LA19_0=='_'||(LA19_0 >= 'a' && LA19_0 <= 'z')||(LA19_0 >= '\u00C0' && LA19_0 <= '\u00D6')||(LA19_0 >= '\u00D8' && LA19_0 <= '\u00F6')||(LA19_0 >= '\u00F8' && LA19_0 <= '\u02FF')||(LA19_0 >= '\u0370' && LA19_0 <= '\u037D')||(LA19_0 >= '\u037F' && LA19_0 <= '\u1FFF')||(LA19_0 >= '\u200C' && LA19_0 <= '\u200D')||(LA19_0 >= '\u2070' && LA19_0 <= '\u218F')||(LA19_0 >= '\u2C00' && LA19_0 <= '\u2FEF')||(LA19_0 >= '\u3001' && LA19_0 <= '\uD7FF')||(LA19_0 >= '\uF900' && LA19_0 <= '\uFDCF')||(LA19_0 >= '\uFDF0' && LA19_0 <= '\uFFFD')) ) {
+						alt19=1;
+					}
+
+					switch (alt19) {
+						case 1 :
+							// TurtleOBDA.g:
+						{
+							if ( (input.LA(1) >= '0' && input.LA(1) <= '9')||(input.LA(1) >= 'A' && input.LA(1) <= 'Z')||input.LA(1)=='_'||(input.LA(1) >= 'a' && input.LA(1) <= 'z')||(input.LA(1) >= '\u00C0' && input.LA(1) <= '\u00D6')||(input.LA(1) >= '\u00D8' && input.LA(1) <= '\u00F6')||(input.LA(1) >= '\u00F8' && input.LA(1) <= '\u02FF')||(input.LA(1) >= '\u0370' && input.LA(1) <= '\u037D')||(input.LA(1) >= '\u037F' && input.LA(1) <= '\u1FFF')||(input.LA(1) >= '\u200C' && input.LA(1) <= '\u200D')||(input.LA(1) >= '\u2070' && input.LA(1) <= '\u218F')||(input.LA(1) >= '\u2C00' && input.LA(1) <= '\u2FEF')||(input.LA(1) >= '\u3001' && input.LA(1) <= '\uD7FF')||(input.LA(1) >= '\uF900' && input.LA(1) <= '\uFDCF')||(input.LA(1) >= '\uFDF0' && input.LA(1) <= '\uFFFD') ) {
+								input.consume();
+							}
+							else {
+								MismatchedSetException mse = new MismatchedSetException(null,input);
+								recover(mse);
+								throw mse;
+							}
+						}
+						break;
+
+						default :
+							break loop19;
+					}
 				}
-
-				switch (alt19) {
-				case 1 :
-					// TurtleOBDA.g:
-					{
-					if ( (input.LA(1) >= '0' && input.LA(1) <= '9')||(input.LA(1) >= 'A' && input.LA(1) <= 'Z')||input.LA(1)=='_'||(input.LA(1) >= 'a' && input.LA(1) <= 'z')||(input.LA(1) >= '\u00C0' && input.LA(1) <= '\u00D6')||(input.LA(1) >= '\u00D8' && input.LA(1) <= '\u00F6')||(input.LA(1) >= '\u00F8' && input.LA(1) <= '\u02FF')||(input.LA(1) >= '\u0370' && input.LA(1) <= '\u037D')||(input.LA(1) >= '\u037F' && input.LA(1) <= '\u1FFF')||(input.LA(1) >= '\u200C' && input.LA(1) <= '\u200D')||(input.LA(1) >= '\u2070' && input.LA(1) <= '\u218F')||(input.LA(1) >= '\u2C00' && input.LA(1) <= '\u2FEF')||(input.LA(1) >= '\u3001' && input.LA(1) <= '\uD7FF')||(input.LA(1) >= '\uF900' && input.LA(1) <= '\uFDCF')||(input.LA(1) >= '\uFDF0' && input.LA(1) <= '\uFFFD') ) {
-						input.consume();
-					}
-					else {
-						MismatchedSetException mse = new MismatchedSetException(null,input);
-						recover(mse);
-						throw mse;
-					}
-					}
-					break;
-
-				default :
-					break loop19;
-				}
-			}
 
 			}
 
@@ -2146,17 +2139,17 @@ public class TurtleOBDALexer extends Lexer {
 	// $ANTLR start "NAME_START_CHAR"
 	public final void mNAME_START_CHAR() throws RecognitionException {
 		try {
-			// TurtleOBDA.g:887:25: ( ( ALPHA | UNDERSCORE ) )
+			// TurtleOBDA.g:880:25: ( ( ALPHA | UNDERSCORE ) )
 			// TurtleOBDA.g:
 			{
-			if ( (input.LA(1) >= 'A' && input.LA(1) <= 'Z')||input.LA(1)=='_'||(input.LA(1) >= 'a' && input.LA(1) <= 'z')||(input.LA(1) >= '\u00C0' && input.LA(1) <= '\u00D6')||(input.LA(1) >= '\u00D8' && input.LA(1) <= '\u00F6')||(input.LA(1) >= '\u00F8' && input.LA(1) <= '\u02FF')||(input.LA(1) >= '\u0370' && input.LA(1) <= '\u037D')||(input.LA(1) >= '\u037F' && input.LA(1) <= '\u1FFF')||(input.LA(1) >= '\u200C' && input.LA(1) <= '\u200D')||(input.LA(1) >= '\u2070' && input.LA(1) <= '\u218F')||(input.LA(1) >= '\u2C00' && input.LA(1) <= '\u2FEF')||(input.LA(1) >= '\u3001' && input.LA(1) <= '\uD7FF')||(input.LA(1) >= '\uF900' && input.LA(1) <= '\uFDCF')||(input.LA(1) >= '\uFDF0' && input.LA(1) <= '\uFFFD') ) {
-				input.consume();
-			}
-			else {
-				MismatchedSetException mse = new MismatchedSetException(null,input);
-				recover(mse);
-				throw mse;
-			}
+				if ( (input.LA(1) >= 'A' && input.LA(1) <= 'Z')||input.LA(1)=='_'||(input.LA(1) >= 'a' && input.LA(1) <= 'z')||(input.LA(1) >= '\u00C0' && input.LA(1) <= '\u00D6')||(input.LA(1) >= '\u00D8' && input.LA(1) <= '\u00F6')||(input.LA(1) >= '\u00F8' && input.LA(1) <= '\u02FF')||(input.LA(1) >= '\u0370' && input.LA(1) <= '\u037D')||(input.LA(1) >= '\u037F' && input.LA(1) <= '\u1FFF')||(input.LA(1) >= '\u200C' && input.LA(1) <= '\u200D')||(input.LA(1) >= '\u2070' && input.LA(1) <= '\u218F')||(input.LA(1) >= '\u2C00' && input.LA(1) <= '\u2FEF')||(input.LA(1) >= '\u3001' && input.LA(1) <= '\uD7FF')||(input.LA(1) >= '\uF900' && input.LA(1) <= '\uFDCF')||(input.LA(1) >= '\uFDF0' && input.LA(1) <= '\uFFFD') ) {
+					input.consume();
+				}
+				else {
+					MismatchedSetException mse = new MismatchedSetException(null,input);
+					recover(mse);
+					throw mse;
+				}
 			}
 
 		}
@@ -2169,17 +2162,17 @@ public class TurtleOBDALexer extends Lexer {
 	// $ANTLR start "NAME_CHAR"
 	public final void mNAME_CHAR() throws RecognitionException {
 		try {
-			// TurtleOBDA.g:889:19: ( ( NAME_START_CHAR | DIGIT | UNDERSCORE | MINUS | PERIOD | HASH | QUESTION | SLASH | PERCENT | EQUALS | SEMI ) )
+			// TurtleOBDA.g:882:19: ( ( NAME_START_CHAR | DIGIT | UNDERSCORE | MINUS | PERIOD | HASH | QUESTION | SLASH | PERCENT | EQUALS | SEMI ) )
 			// TurtleOBDA.g:
 			{
-			if ( input.LA(1)=='#'||input.LA(1)=='%'||(input.LA(1) >= '-' && input.LA(1) <= '9')||input.LA(1)==';'||input.LA(1)=='='||input.LA(1)=='?'||(input.LA(1) >= 'A' && input.LA(1) <= 'Z')||input.LA(1)=='_'||(input.LA(1) >= 'a' && input.LA(1) <= 'z')||(input.LA(1) >= '\u00C0' && input.LA(1) <= '\u00D6')||(input.LA(1) >= '\u00D8' && input.LA(1) <= '\u00F6')||(input.LA(1) >= '\u00F8' && input.LA(1) <= '\u02FF')||(input.LA(1) >= '\u0370' && input.LA(1) <= '\u037D')||(input.LA(1) >= '\u037F' && input.LA(1) <= '\u1FFF')||(input.LA(1) >= '\u200C' && input.LA(1) <= '\u200D')||(input.LA(1) >= '\u2070' && input.LA(1) <= '\u218F')||(input.LA(1) >= '\u2C00' && input.LA(1) <= '\u2FEF')||(input.LA(1) >= '\u3001' && input.LA(1) <= '\uD7FF')||(input.LA(1) >= '\uF900' && input.LA(1) <= '\uFDCF')||(input.LA(1) >= '\uFDF0' && input.LA(1) <= '\uFFFD') ) {
-				input.consume();
-			}
-			else {
-				MismatchedSetException mse = new MismatchedSetException(null,input);
-				recover(mse);
-				throw mse;
-			}
+				if ( input.LA(1)=='#'||input.LA(1)=='%'||(input.LA(1) >= '-' && input.LA(1) <= '9')||input.LA(1)==';'||input.LA(1)=='='||input.LA(1)=='?'||(input.LA(1) >= 'A' && input.LA(1) <= 'Z')||input.LA(1)=='_'||(input.LA(1) >= 'a' && input.LA(1) <= 'z')||(input.LA(1) >= '\u00C0' && input.LA(1) <= '\u00D6')||(input.LA(1) >= '\u00D8' && input.LA(1) <= '\u00F6')||(input.LA(1) >= '\u00F8' && input.LA(1) <= '\u02FF')||(input.LA(1) >= '\u0370' && input.LA(1) <= '\u037D')||(input.LA(1) >= '\u037F' && input.LA(1) <= '\u1FFF')||(input.LA(1) >= '\u200C' && input.LA(1) <= '\u200D')||(input.LA(1) >= '\u2070' && input.LA(1) <= '\u218F')||(input.LA(1) >= '\u2C00' && input.LA(1) <= '\u2FEF')||(input.LA(1) >= '\u3001' && input.LA(1) <= '\uD7FF')||(input.LA(1) >= '\uF900' && input.LA(1) <= '\uFDCF')||(input.LA(1) >= '\uFDF0' && input.LA(1) <= '\uFFFD') ) {
+					input.consume();
+				}
+				else {
+					MismatchedSetException mse = new MismatchedSetException(null,input);
+					recover(mse);
+					throw mse;
+				}
 			}
 
 		}
@@ -2194,39 +2187,39 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = NCNAME;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// TurtleOBDA.g:892:3: ( NAME_START_CHAR ( NAME_CHAR )* )
-			// TurtleOBDA.g:892:5: NAME_START_CHAR ( NAME_CHAR )*
+			// TurtleOBDA.g:885:3: ( NAME_START_CHAR ( NAME_CHAR )* )
+			// TurtleOBDA.g:885:5: NAME_START_CHAR ( NAME_CHAR )*
 			{
-			mNAME_START_CHAR(); 
+				mNAME_START_CHAR();
 
-			// TurtleOBDA.g:892:21: ( NAME_CHAR )*
-			loop20:
-			while (true) {
-				int alt20=2;
-				int LA20_0 = input.LA(1);
-				if ( (LA20_0=='#'||LA20_0=='%'||(LA20_0 >= '-' && LA20_0 <= '9')||LA20_0==';'||LA20_0=='='||LA20_0=='?'||(LA20_0 >= 'A' && LA20_0 <= 'Z')||LA20_0=='_'||(LA20_0 >= 'a' && LA20_0 <= 'z')||(LA20_0 >= '\u00C0' && LA20_0 <= '\u00D6')||(LA20_0 >= '\u00D8' && LA20_0 <= '\u00F6')||(LA20_0 >= '\u00F8' && LA20_0 <= '\u02FF')||(LA20_0 >= '\u0370' && LA20_0 <= '\u037D')||(LA20_0 >= '\u037F' && LA20_0 <= '\u1FFF')||(LA20_0 >= '\u200C' && LA20_0 <= '\u200D')||(LA20_0 >= '\u2070' && LA20_0 <= '\u218F')||(LA20_0 >= '\u2C00' && LA20_0 <= '\u2FEF')||(LA20_0 >= '\u3001' && LA20_0 <= '\uD7FF')||(LA20_0 >= '\uF900' && LA20_0 <= '\uFDCF')||(LA20_0 >= '\uFDF0' && LA20_0 <= '\uFFFD')) ) {
-					alt20=1;
+				// TurtleOBDA.g:885:21: ( NAME_CHAR )*
+				loop20:
+				while (true) {
+					int alt20=2;
+					int LA20_0 = input.LA(1);
+					if ( (LA20_0=='#'||LA20_0=='%'||(LA20_0 >= '-' && LA20_0 <= '9')||LA20_0==';'||LA20_0=='='||LA20_0=='?'||(LA20_0 >= 'A' && LA20_0 <= 'Z')||LA20_0=='_'||(LA20_0 >= 'a' && LA20_0 <= 'z')||(LA20_0 >= '\u00C0' && LA20_0 <= '\u00D6')||(LA20_0 >= '\u00D8' && LA20_0 <= '\u00F6')||(LA20_0 >= '\u00F8' && LA20_0 <= '\u02FF')||(LA20_0 >= '\u0370' && LA20_0 <= '\u037D')||(LA20_0 >= '\u037F' && LA20_0 <= '\u1FFF')||(LA20_0 >= '\u200C' && LA20_0 <= '\u200D')||(LA20_0 >= '\u2070' && LA20_0 <= '\u218F')||(LA20_0 >= '\u2C00' && LA20_0 <= '\u2FEF')||(LA20_0 >= '\u3001' && LA20_0 <= '\uD7FF')||(LA20_0 >= '\uF900' && LA20_0 <= '\uFDCF')||(LA20_0 >= '\uFDF0' && LA20_0 <= '\uFFFD')) ) {
+						alt20=1;
+					}
+
+					switch (alt20) {
+						case 1 :
+							// TurtleOBDA.g:
+						{
+							if ( input.LA(1)=='#'||input.LA(1)=='%'||(input.LA(1) >= '-' && input.LA(1) <= '9')||input.LA(1)==';'||input.LA(1)=='='||input.LA(1)=='?'||(input.LA(1) >= 'A' && input.LA(1) <= 'Z')||input.LA(1)=='_'||(input.LA(1) >= 'a' && input.LA(1) <= 'z')||(input.LA(1) >= '\u00C0' && input.LA(1) <= '\u00D6')||(input.LA(1) >= '\u00D8' && input.LA(1) <= '\u00F6')||(input.LA(1) >= '\u00F8' && input.LA(1) <= '\u02FF')||(input.LA(1) >= '\u0370' && input.LA(1) <= '\u037D')||(input.LA(1) >= '\u037F' && input.LA(1) <= '\u1FFF')||(input.LA(1) >= '\u200C' && input.LA(1) <= '\u200D')||(input.LA(1) >= '\u2070' && input.LA(1) <= '\u218F')||(input.LA(1) >= '\u2C00' && input.LA(1) <= '\u2FEF')||(input.LA(1) >= '\u3001' && input.LA(1) <= '\uD7FF')||(input.LA(1) >= '\uF900' && input.LA(1) <= '\uFDCF')||(input.LA(1) >= '\uFDF0' && input.LA(1) <= '\uFFFD') ) {
+								input.consume();
+							}
+							else {
+								MismatchedSetException mse = new MismatchedSetException(null,input);
+								recover(mse);
+								throw mse;
+							}
+						}
+						break;
+
+						default :
+							break loop20;
+					}
 				}
-
-				switch (alt20) {
-				case 1 :
-					// TurtleOBDA.g:
-					{
-					if ( input.LA(1)=='#'||input.LA(1)=='%'||(input.LA(1) >= '-' && input.LA(1) <= '9')||input.LA(1)==';'||input.LA(1)=='='||input.LA(1)=='?'||(input.LA(1) >= 'A' && input.LA(1) <= 'Z')||input.LA(1)=='_'||(input.LA(1) >= 'a' && input.LA(1) <= 'z')||(input.LA(1) >= '\u00C0' && input.LA(1) <= '\u00D6')||(input.LA(1) >= '\u00D8' && input.LA(1) <= '\u00F6')||(input.LA(1) >= '\u00F8' && input.LA(1) <= '\u02FF')||(input.LA(1) >= '\u0370' && input.LA(1) <= '\u037D')||(input.LA(1) >= '\u037F' && input.LA(1) <= '\u1FFF')||(input.LA(1) >= '\u200C' && input.LA(1) <= '\u200D')||(input.LA(1) >= '\u2070' && input.LA(1) <= '\u218F')||(input.LA(1) >= '\u2C00' && input.LA(1) <= '\u2FEF')||(input.LA(1) >= '\u3001' && input.LA(1) <= '\uD7FF')||(input.LA(1) >= '\uF900' && input.LA(1) <= '\uFDCF')||(input.LA(1) >= '\uFDF0' && input.LA(1) <= '\uFFFD') ) {
-						input.consume();
-					}
-					else {
-						MismatchedSetException mse = new MismatchedSetException(null,input);
-						recover(mse);
-						throw mse;
-					}
-					}
-					break;
-
-				default :
-					break loop20;
-				}
-			}
 
 			}
 
@@ -2244,37 +2237,37 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = NCNAME_EXT;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// TurtleOBDA.g:896:3: ( ( NAME_CHAR | LCR_BRACKET | RCR_BRACKET | HASH | SLASH )* )
-			// TurtleOBDA.g:896:5: ( NAME_CHAR | LCR_BRACKET | RCR_BRACKET | HASH | SLASH )*
+			// TurtleOBDA.g:889:3: ( ( NAME_CHAR | LCR_BRACKET | RCR_BRACKET | HASH | SLASH )* )
+			// TurtleOBDA.g:889:5: ( NAME_CHAR | LCR_BRACKET | RCR_BRACKET | HASH | SLASH )*
 			{
-			// TurtleOBDA.g:896:5: ( NAME_CHAR | LCR_BRACKET | RCR_BRACKET | HASH | SLASH )*
-			loop21:
-			while (true) {
-				int alt21=2;
-				int LA21_0 = input.LA(1);
-				if ( (LA21_0=='#'||LA21_0=='%'||(LA21_0 >= '-' && LA21_0 <= '9')||LA21_0==';'||LA21_0=='='||LA21_0=='?'||(LA21_0 >= 'A' && LA21_0 <= 'Z')||LA21_0=='_'||(LA21_0 >= 'a' && LA21_0 <= '{')||LA21_0=='}'||(LA21_0 >= '\u00C0' && LA21_0 <= '\u00D6')||(LA21_0 >= '\u00D8' && LA21_0 <= '\u00F6')||(LA21_0 >= '\u00F8' && LA21_0 <= '\u02FF')||(LA21_0 >= '\u0370' && LA21_0 <= '\u037D')||(LA21_0 >= '\u037F' && LA21_0 <= '\u1FFF')||(LA21_0 >= '\u200C' && LA21_0 <= '\u200D')||(LA21_0 >= '\u2070' && LA21_0 <= '\u218F')||(LA21_0 >= '\u2C00' && LA21_0 <= '\u2FEF')||(LA21_0 >= '\u3001' && LA21_0 <= '\uD7FF')||(LA21_0 >= '\uF900' && LA21_0 <= '\uFDCF')||(LA21_0 >= '\uFDF0' && LA21_0 <= '\uFFFD')) ) {
-					alt21=1;
-				}
+				// TurtleOBDA.g:889:5: ( NAME_CHAR | LCR_BRACKET | RCR_BRACKET | HASH | SLASH )*
+				loop21:
+				while (true) {
+					int alt21=2;
+					int LA21_0 = input.LA(1);
+					if ( (LA21_0=='#'||LA21_0=='%'||(LA21_0 >= '-' && LA21_0 <= '9')||LA21_0==';'||LA21_0=='='||LA21_0=='?'||(LA21_0 >= 'A' && LA21_0 <= 'Z')||LA21_0=='_'||(LA21_0 >= 'a' && LA21_0 <= '{')||LA21_0=='}'||(LA21_0 >= '\u00C0' && LA21_0 <= '\u00D6')||(LA21_0 >= '\u00D8' && LA21_0 <= '\u00F6')||(LA21_0 >= '\u00F8' && LA21_0 <= '\u02FF')||(LA21_0 >= '\u0370' && LA21_0 <= '\u037D')||(LA21_0 >= '\u037F' && LA21_0 <= '\u1FFF')||(LA21_0 >= '\u200C' && LA21_0 <= '\u200D')||(LA21_0 >= '\u2070' && LA21_0 <= '\u218F')||(LA21_0 >= '\u2C00' && LA21_0 <= '\u2FEF')||(LA21_0 >= '\u3001' && LA21_0 <= '\uD7FF')||(LA21_0 >= '\uF900' && LA21_0 <= '\uFDCF')||(LA21_0 >= '\uFDF0' && LA21_0 <= '\uFFFD')) ) {
+						alt21=1;
+					}
 
-				switch (alt21) {
-				case 1 :
-					// TurtleOBDA.g:
-					{
-					if ( input.LA(1)=='#'||input.LA(1)=='%'||(input.LA(1) >= '-' && input.LA(1) <= '9')||input.LA(1)==';'||input.LA(1)=='='||input.LA(1)=='?'||(input.LA(1) >= 'A' && input.LA(1) <= 'Z')||input.LA(1)=='_'||(input.LA(1) >= 'a' && input.LA(1) <= '{')||input.LA(1)=='}'||(input.LA(1) >= '\u00C0' && input.LA(1) <= '\u00D6')||(input.LA(1) >= '\u00D8' && input.LA(1) <= '\u00F6')||(input.LA(1) >= '\u00F8' && input.LA(1) <= '\u02FF')||(input.LA(1) >= '\u0370' && input.LA(1) <= '\u037D')||(input.LA(1) >= '\u037F' && input.LA(1) <= '\u1FFF')||(input.LA(1) >= '\u200C' && input.LA(1) <= '\u200D')||(input.LA(1) >= '\u2070' && input.LA(1) <= '\u218F')||(input.LA(1) >= '\u2C00' && input.LA(1) <= '\u2FEF')||(input.LA(1) >= '\u3001' && input.LA(1) <= '\uD7FF')||(input.LA(1) >= '\uF900' && input.LA(1) <= '\uFDCF')||(input.LA(1) >= '\uFDF0' && input.LA(1) <= '\uFFFD') ) {
-						input.consume();
-					}
-					else {
-						MismatchedSetException mse = new MismatchedSetException(null,input);
-						recover(mse);
-						throw mse;
-					}
-					}
-					break;
+					switch (alt21) {
+						case 1 :
+							// TurtleOBDA.g:
+						{
+							if ( input.LA(1)=='#'||input.LA(1)=='%'||(input.LA(1) >= '-' && input.LA(1) <= '9')||input.LA(1)==';'||input.LA(1)=='='||input.LA(1)=='?'||(input.LA(1) >= 'A' && input.LA(1) <= 'Z')||input.LA(1)=='_'||(input.LA(1) >= 'a' && input.LA(1) <= '{')||input.LA(1)=='}'||(input.LA(1) >= '\u00C0' && input.LA(1) <= '\u00D6')||(input.LA(1) >= '\u00D8' && input.LA(1) <= '\u00F6')||(input.LA(1) >= '\u00F8' && input.LA(1) <= '\u02FF')||(input.LA(1) >= '\u0370' && input.LA(1) <= '\u037D')||(input.LA(1) >= '\u037F' && input.LA(1) <= '\u1FFF')||(input.LA(1) >= '\u200C' && input.LA(1) <= '\u200D')||(input.LA(1) >= '\u2070' && input.LA(1) <= '\u218F')||(input.LA(1) >= '\u2C00' && input.LA(1) <= '\u2FEF')||(input.LA(1) >= '\u3001' && input.LA(1) <= '\uD7FF')||(input.LA(1) >= '\uF900' && input.LA(1) <= '\uFDCF')||(input.LA(1) >= '\uFDF0' && input.LA(1) <= '\uFFFD') ) {
+								input.consume();
+							}
+							else {
+								MismatchedSetException mse = new MismatchedSetException(null,input);
+								recover(mse);
+								throw mse;
+							}
+						}
+						break;
 
-				default :
-					break loop21;
+						default :
+							break loop21;
+					}
 				}
-			}
 
 			}
 
@@ -2292,41 +2285,41 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = NAMESPACE;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// TurtleOBDA.g:900:3: ( NAME_START_CHAR ( NAME_CHAR )* COLON )
-			// TurtleOBDA.g:900:5: NAME_START_CHAR ( NAME_CHAR )* COLON
+			// TurtleOBDA.g:893:3: ( NAME_START_CHAR ( NAME_CHAR )* COLON )
+			// TurtleOBDA.g:893:5: NAME_START_CHAR ( NAME_CHAR )* COLON
 			{
-			mNAME_START_CHAR(); 
+				mNAME_START_CHAR();
 
-			// TurtleOBDA.g:900:21: ( NAME_CHAR )*
-			loop22:
-			while (true) {
-				int alt22=2;
-				int LA22_0 = input.LA(1);
-				if ( (LA22_0=='#'||LA22_0=='%'||(LA22_0 >= '-' && LA22_0 <= '9')||LA22_0==';'||LA22_0=='='||LA22_0=='?'||(LA22_0 >= 'A' && LA22_0 <= 'Z')||LA22_0=='_'||(LA22_0 >= 'a' && LA22_0 <= 'z')||(LA22_0 >= '\u00C0' && LA22_0 <= '\u00D6')||(LA22_0 >= '\u00D8' && LA22_0 <= '\u00F6')||(LA22_0 >= '\u00F8' && LA22_0 <= '\u02FF')||(LA22_0 >= '\u0370' && LA22_0 <= '\u037D')||(LA22_0 >= '\u037F' && LA22_0 <= '\u1FFF')||(LA22_0 >= '\u200C' && LA22_0 <= '\u200D')||(LA22_0 >= '\u2070' && LA22_0 <= '\u218F')||(LA22_0 >= '\u2C00' && LA22_0 <= '\u2FEF')||(LA22_0 >= '\u3001' && LA22_0 <= '\uD7FF')||(LA22_0 >= '\uF900' && LA22_0 <= '\uFDCF')||(LA22_0 >= '\uFDF0' && LA22_0 <= '\uFFFD')) ) {
-					alt22=1;
+				// TurtleOBDA.g:893:21: ( NAME_CHAR )*
+				loop22:
+				while (true) {
+					int alt22=2;
+					int LA22_0 = input.LA(1);
+					if ( (LA22_0=='#'||LA22_0=='%'||(LA22_0 >= '-' && LA22_0 <= '9')||LA22_0==';'||LA22_0=='='||LA22_0=='?'||(LA22_0 >= 'A' && LA22_0 <= 'Z')||LA22_0=='_'||(LA22_0 >= 'a' && LA22_0 <= 'z')||(LA22_0 >= '\u00C0' && LA22_0 <= '\u00D6')||(LA22_0 >= '\u00D8' && LA22_0 <= '\u00F6')||(LA22_0 >= '\u00F8' && LA22_0 <= '\u02FF')||(LA22_0 >= '\u0370' && LA22_0 <= '\u037D')||(LA22_0 >= '\u037F' && LA22_0 <= '\u1FFF')||(LA22_0 >= '\u200C' && LA22_0 <= '\u200D')||(LA22_0 >= '\u2070' && LA22_0 <= '\u218F')||(LA22_0 >= '\u2C00' && LA22_0 <= '\u2FEF')||(LA22_0 >= '\u3001' && LA22_0 <= '\uD7FF')||(LA22_0 >= '\uF900' && LA22_0 <= '\uFDCF')||(LA22_0 >= '\uFDF0' && LA22_0 <= '\uFFFD')) ) {
+						alt22=1;
+					}
+
+					switch (alt22) {
+						case 1 :
+							// TurtleOBDA.g:
+						{
+							if ( input.LA(1)=='#'||input.LA(1)=='%'||(input.LA(1) >= '-' && input.LA(1) <= '9')||input.LA(1)==';'||input.LA(1)=='='||input.LA(1)=='?'||(input.LA(1) >= 'A' && input.LA(1) <= 'Z')||input.LA(1)=='_'||(input.LA(1) >= 'a' && input.LA(1) <= 'z')||(input.LA(1) >= '\u00C0' && input.LA(1) <= '\u00D6')||(input.LA(1) >= '\u00D8' && input.LA(1) <= '\u00F6')||(input.LA(1) >= '\u00F8' && input.LA(1) <= '\u02FF')||(input.LA(1) >= '\u0370' && input.LA(1) <= '\u037D')||(input.LA(1) >= '\u037F' && input.LA(1) <= '\u1FFF')||(input.LA(1) >= '\u200C' && input.LA(1) <= '\u200D')||(input.LA(1) >= '\u2070' && input.LA(1) <= '\u218F')||(input.LA(1) >= '\u2C00' && input.LA(1) <= '\u2FEF')||(input.LA(1) >= '\u3001' && input.LA(1) <= '\uD7FF')||(input.LA(1) >= '\uF900' && input.LA(1) <= '\uFDCF')||(input.LA(1) >= '\uFDF0' && input.LA(1) <= '\uFFFD') ) {
+								input.consume();
+							}
+							else {
+								MismatchedSetException mse = new MismatchedSetException(null,input);
+								recover(mse);
+								throw mse;
+							}
+						}
+						break;
+
+						default :
+							break loop22;
+					}
 				}
 
-				switch (alt22) {
-				case 1 :
-					// TurtleOBDA.g:
-					{
-					if ( input.LA(1)=='#'||input.LA(1)=='%'||(input.LA(1) >= '-' && input.LA(1) <= '9')||input.LA(1)==';'||input.LA(1)=='='||input.LA(1)=='?'||(input.LA(1) >= 'A' && input.LA(1) <= 'Z')||input.LA(1)=='_'||(input.LA(1) >= 'a' && input.LA(1) <= 'z')||(input.LA(1) >= '\u00C0' && input.LA(1) <= '\u00D6')||(input.LA(1) >= '\u00D8' && input.LA(1) <= '\u00F6')||(input.LA(1) >= '\u00F8' && input.LA(1) <= '\u02FF')||(input.LA(1) >= '\u0370' && input.LA(1) <= '\u037D')||(input.LA(1) >= '\u037F' && input.LA(1) <= '\u1FFF')||(input.LA(1) >= '\u200C' && input.LA(1) <= '\u200D')||(input.LA(1) >= '\u2070' && input.LA(1) <= '\u218F')||(input.LA(1) >= '\u2C00' && input.LA(1) <= '\u2FEF')||(input.LA(1) >= '\u3001' && input.LA(1) <= '\uD7FF')||(input.LA(1) >= '\uF900' && input.LA(1) <= '\uFDCF')||(input.LA(1) >= '\uFDF0' && input.LA(1) <= '\uFFFD') ) {
-						input.consume();
-					}
-					else {
-						MismatchedSetException mse = new MismatchedSetException(null,input);
-						recover(mse);
-						throw mse;
-					}
-					}
-					break;
-
-				default :
-					break loop22;
-				}
-			}
-
-			mCOLON(); 
+				mCOLON();
 
 			}
 
@@ -2344,29 +2337,29 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = PREFIXED_NAME;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// TurtleOBDA.g:904:3: ( ( NCNAME )? COLON NCNAME_EXT )
-			// TurtleOBDA.g:904:5: ( NCNAME )? COLON NCNAME_EXT
+			// TurtleOBDA.g:897:3: ( ( NCNAME )? COLON NCNAME_EXT )
+			// TurtleOBDA.g:897:5: ( NCNAME )? COLON NCNAME_EXT
 			{
-			// TurtleOBDA.g:904:5: ( NCNAME )?
-			int alt23=2;
-			int LA23_0 = input.LA(1);
-			if ( ((LA23_0 >= 'A' && LA23_0 <= 'Z')||LA23_0=='_'||(LA23_0 >= 'a' && LA23_0 <= 'z')||(LA23_0 >= '\u00C0' && LA23_0 <= '\u00D6')||(LA23_0 >= '\u00D8' && LA23_0 <= '\u00F6')||(LA23_0 >= '\u00F8' && LA23_0 <= '\u02FF')||(LA23_0 >= '\u0370' && LA23_0 <= '\u037D')||(LA23_0 >= '\u037F' && LA23_0 <= '\u1FFF')||(LA23_0 >= '\u200C' && LA23_0 <= '\u200D')||(LA23_0 >= '\u2070' && LA23_0 <= '\u218F')||(LA23_0 >= '\u2C00' && LA23_0 <= '\u2FEF')||(LA23_0 >= '\u3001' && LA23_0 <= '\uD7FF')||(LA23_0 >= '\uF900' && LA23_0 <= '\uFDCF')||(LA23_0 >= '\uFDF0' && LA23_0 <= '\uFFFD')) ) {
-				alt23=1;
-			}
-			switch (alt23) {
-				case 1 :
-					// TurtleOBDA.g:904:5: NCNAME
+				// TurtleOBDA.g:897:5: ( NCNAME )?
+				int alt23=2;
+				int LA23_0 = input.LA(1);
+				if ( ((LA23_0 >= 'A' && LA23_0 <= 'Z')||LA23_0=='_'||(LA23_0 >= 'a' && LA23_0 <= 'z')||(LA23_0 >= '\u00C0' && LA23_0 <= '\u00D6')||(LA23_0 >= '\u00D8' && LA23_0 <= '\u00F6')||(LA23_0 >= '\u00F8' && LA23_0 <= '\u02FF')||(LA23_0 >= '\u0370' && LA23_0 <= '\u037D')||(LA23_0 >= '\u037F' && LA23_0 <= '\u1FFF')||(LA23_0 >= '\u200C' && LA23_0 <= '\u200D')||(LA23_0 >= '\u2070' && LA23_0 <= '\u218F')||(LA23_0 >= '\u2C00' && LA23_0 <= '\u2FEF')||(LA23_0 >= '\u3001' && LA23_0 <= '\uD7FF')||(LA23_0 >= '\uF900' && LA23_0 <= '\uFDCF')||(LA23_0 >= '\uFDF0' && LA23_0 <= '\uFFFD')) ) {
+					alt23=1;
+				}
+				switch (alt23) {
+					case 1 :
+						// TurtleOBDA.g:897:5: NCNAME
 					{
-					mNCNAME(); 
+						mNCNAME();
 
 					}
 					break;
 
-			}
+				}
 
-			mCOLON(); 
+				mCOLON();
 
-			mNCNAME_EXT(); 
+				mNCNAME_EXT();
 
 			}
 
@@ -2384,53 +2377,53 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = STRING_WITH_QUOTE;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// TurtleOBDA.g:908:3: ( '\\'' ( options {greedy=false; } :~ ( '\\u0027' | '\\u005C' | '\\u000A' | '\\u000D' ) | ECHAR )* '\\'' )
-			// TurtleOBDA.g:908:5: '\\'' ( options {greedy=false; } :~ ( '\\u0027' | '\\u005C' | '\\u000A' | '\\u000D' ) | ECHAR )* '\\''
+			// TurtleOBDA.g:901:3: ( '\\'' ( options {greedy=false; } :~ ( '\\u0027' | '\\u005C' | '\\u000A' | '\\u000D' ) | ECHAR )* '\\'' )
+			// TurtleOBDA.g:901:5: '\\'' ( options {greedy=false; } :~ ( '\\u0027' | '\\u005C' | '\\u000A' | '\\u000D' ) | ECHAR )* '\\''
 			{
-			match('\''); 
-			// TurtleOBDA.g:908:10: ( options {greedy=false; } :~ ( '\\u0027' | '\\u005C' | '\\u000A' | '\\u000D' ) | ECHAR )*
-			loop24:
-			while (true) {
-				int alt24=3;
-				int LA24_0 = input.LA(1);
-				if ( ((LA24_0 >= '\u0000' && LA24_0 <= '\t')||(LA24_0 >= '\u000B' && LA24_0 <= '\f')||(LA24_0 >= '\u000E' && LA24_0 <= '&')||(LA24_0 >= '(' && LA24_0 <= '[')||(LA24_0 >= ']' && LA24_0 <= '\uFFFF')) ) {
-					alt24=1;
-				}
-				else if ( (LA24_0=='\\') ) {
-					alt24=2;
-				}
-				else if ( (LA24_0=='\'') ) {
-					alt24=3;
+				match('\'');
+				// TurtleOBDA.g:901:10: ( options {greedy=false; } :~ ( '\\u0027' | '\\u005C' | '\\u000A' | '\\u000D' ) | ECHAR )*
+				loop24:
+				while (true) {
+					int alt24=3;
+					int LA24_0 = input.LA(1);
+					if ( ((LA24_0 >= '\u0000' && LA24_0 <= '\t')||(LA24_0 >= '\u000B' && LA24_0 <= '\f')||(LA24_0 >= '\u000E' && LA24_0 <= '&')||(LA24_0 >= '(' && LA24_0 <= '[')||(LA24_0 >= ']' && LA24_0 <= '\uFFFF')) ) {
+						alt24=1;
+					}
+					else if ( (LA24_0=='\\') ) {
+						alt24=2;
+					}
+					else if ( (LA24_0=='\'') ) {
+						alt24=3;
+					}
+
+					switch (alt24) {
+						case 1 :
+							// TurtleOBDA.g:901:40: ~ ( '\\u0027' | '\\u005C' | '\\u000A' | '\\u000D' )
+						{
+							if ( (input.LA(1) >= '\u0000' && input.LA(1) <= '\t')||(input.LA(1) >= '\u000B' && input.LA(1) <= '\f')||(input.LA(1) >= '\u000E' && input.LA(1) <= '&')||(input.LA(1) >= '(' && input.LA(1) <= '[')||(input.LA(1) >= ']' && input.LA(1) <= '\uFFFF') ) {
+								input.consume();
+							}
+							else {
+								MismatchedSetException mse = new MismatchedSetException(null,input);
+								recover(mse);
+								throw mse;
+							}
+						}
+						break;
+						case 2 :
+							// TurtleOBDA.g:901:87: ECHAR
+						{
+							mECHAR();
+
+						}
+						break;
+
+						default :
+							break loop24;
+					}
 				}
 
-				switch (alt24) {
-				case 1 :
-					// TurtleOBDA.g:908:40: ~ ( '\\u0027' | '\\u005C' | '\\u000A' | '\\u000D' )
-					{
-					if ( (input.LA(1) >= '\u0000' && input.LA(1) <= '\t')||(input.LA(1) >= '\u000B' && input.LA(1) <= '\f')||(input.LA(1) >= '\u000E' && input.LA(1) <= '&')||(input.LA(1) >= '(' && input.LA(1) <= '[')||(input.LA(1) >= ']' && input.LA(1) <= '\uFFFF') ) {
-						input.consume();
-					}
-					else {
-						MismatchedSetException mse = new MismatchedSetException(null,input);
-						recover(mse);
-						throw mse;
-					}
-					}
-					break;
-				case 2 :
-					// TurtleOBDA.g:908:87: ECHAR
-					{
-					mECHAR(); 
-
-					}
-					break;
-
-				default :
-					break loop24;
-				}
-			}
-
-			match('\''); 
+				match('\'');
 			}
 
 			state.type = _type;
@@ -2447,53 +2440,53 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = STRING_WITH_QUOTE_DOUBLE;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// TurtleOBDA.g:920:3: ( '\"' ( options {greedy=false; } :~ ( '\\u0022' | '\\u005C' | '\\u000A' | '\\u000D' ) | ECHAR )* '\"' )
-			// TurtleOBDA.g:920:5: '\"' ( options {greedy=false; } :~ ( '\\u0022' | '\\u005C' | '\\u000A' | '\\u000D' ) | ECHAR )* '\"'
+			// TurtleOBDA.g:913:3: ( '\"' ( options {greedy=false; } :~ ( '\\u0022' | '\\u005C' | '\\u000A' | '\\u000D' ) | ECHAR )* '\"' )
+			// TurtleOBDA.g:913:5: '\"' ( options {greedy=false; } :~ ( '\\u0022' | '\\u005C' | '\\u000A' | '\\u000D' ) | ECHAR )* '\"'
 			{
-			match('\"'); 
-			// TurtleOBDA.g:920:10: ( options {greedy=false; } :~ ( '\\u0022' | '\\u005C' | '\\u000A' | '\\u000D' ) | ECHAR )*
-			loop25:
-			while (true) {
-				int alt25=3;
-				int LA25_0 = input.LA(1);
-				if ( ((LA25_0 >= '\u0000' && LA25_0 <= '\t')||(LA25_0 >= '\u000B' && LA25_0 <= '\f')||(LA25_0 >= '\u000E' && LA25_0 <= '!')||(LA25_0 >= '#' && LA25_0 <= '[')||(LA25_0 >= ']' && LA25_0 <= '\uFFFF')) ) {
-					alt25=1;
-				}
-				else if ( (LA25_0=='\\') ) {
-					alt25=2;
-				}
-				else if ( (LA25_0=='\"') ) {
-					alt25=3;
+				match('\"');
+				// TurtleOBDA.g:913:10: ( options {greedy=false; } :~ ( '\\u0022' | '\\u005C' | '\\u000A' | '\\u000D' ) | ECHAR )*
+				loop25:
+				while (true) {
+					int alt25=3;
+					int LA25_0 = input.LA(1);
+					if ( ((LA25_0 >= '\u0000' && LA25_0 <= '\t')||(LA25_0 >= '\u000B' && LA25_0 <= '\f')||(LA25_0 >= '\u000E' && LA25_0 <= '!')||(LA25_0 >= '#' && LA25_0 <= '[')||(LA25_0 >= ']' && LA25_0 <= '\uFFFF')) ) {
+						alt25=1;
+					}
+					else if ( (LA25_0=='\\') ) {
+						alt25=2;
+					}
+					else if ( (LA25_0=='\"') ) {
+						alt25=3;
+					}
+
+					switch (alt25) {
+						case 1 :
+							// TurtleOBDA.g:913:40: ~ ( '\\u0022' | '\\u005C' | '\\u000A' | '\\u000D' )
+						{
+							if ( (input.LA(1) >= '\u0000' && input.LA(1) <= '\t')||(input.LA(1) >= '\u000B' && input.LA(1) <= '\f')||(input.LA(1) >= '\u000E' && input.LA(1) <= '!')||(input.LA(1) >= '#' && input.LA(1) <= '[')||(input.LA(1) >= ']' && input.LA(1) <= '\uFFFF') ) {
+								input.consume();
+							}
+							else {
+								MismatchedSetException mse = new MismatchedSetException(null,input);
+								recover(mse);
+								throw mse;
+							}
+						}
+						break;
+						case 2 :
+							// TurtleOBDA.g:913:87: ECHAR
+						{
+							mECHAR();
+
+						}
+						break;
+
+						default :
+							break loop25;
+					}
 				}
 
-				switch (alt25) {
-				case 1 :
-					// TurtleOBDA.g:920:40: ~ ( '\\u0022' | '\\u005C' | '\\u000A' | '\\u000D' )
-					{
-					if ( (input.LA(1) >= '\u0000' && input.LA(1) <= '\t')||(input.LA(1) >= '\u000B' && input.LA(1) <= '\f')||(input.LA(1) >= '\u000E' && input.LA(1) <= '!')||(input.LA(1) >= '#' && input.LA(1) <= '[')||(input.LA(1) >= ']' && input.LA(1) <= '\uFFFF') ) {
-						input.consume();
-					}
-					else {
-						MismatchedSetException mse = new MismatchedSetException(null,input);
-						recover(mse);
-						throw mse;
-					}
-					}
-					break;
-				case 2 :
-					// TurtleOBDA.g:920:87: ECHAR
-					{
-					mECHAR(); 
-
-					}
-					break;
-
-				default :
-					break loop25;
-				}
-			}
-
-			match('\"'); 
+				match('\"');
 			}
 
 			state.type = _type;
@@ -2510,53 +2503,53 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = STRING_WITH_BRACKET;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// TurtleOBDA.g:924:3: ( '<' ( options {greedy=false; } :~ ( '\\u0022' | '\\u005C' | '\\u000A' | '\\u000D' ) | ECHAR )* '>' )
-			// TurtleOBDA.g:924:5: '<' ( options {greedy=false; } :~ ( '\\u0022' | '\\u005C' | '\\u000A' | '\\u000D' ) | ECHAR )* '>'
+			// TurtleOBDA.g:917:3: ( '<' ( options {greedy=false; } :~ ( '\\u0022' | '\\u005C' | '\\u000A' | '\\u000D' ) | ECHAR )* '>' )
+			// TurtleOBDA.g:917:5: '<' ( options {greedy=false; } :~ ( '\\u0022' | '\\u005C' | '\\u000A' | '\\u000D' ) | ECHAR )* '>'
 			{
-			match('<'); 
-			// TurtleOBDA.g:924:9: ( options {greedy=false; } :~ ( '\\u0022' | '\\u005C' | '\\u000A' | '\\u000D' ) | ECHAR )*
-			loop26:
-			while (true) {
-				int alt26=3;
-				int LA26_0 = input.LA(1);
-				if ( (LA26_0=='>') ) {
-					alt26=3;
-				}
-				else if ( ((LA26_0 >= '\u0000' && LA26_0 <= '\t')||(LA26_0 >= '\u000B' && LA26_0 <= '\f')||(LA26_0 >= '\u000E' && LA26_0 <= '!')||(LA26_0 >= '#' && LA26_0 <= '=')||(LA26_0 >= '?' && LA26_0 <= '[')||(LA26_0 >= ']' && LA26_0 <= '\uFFFF')) ) {
-					alt26=1;
-				}
-				else if ( (LA26_0=='\\') ) {
-					alt26=2;
+				match('<');
+				// TurtleOBDA.g:917:9: ( options {greedy=false; } :~ ( '\\u0022' | '\\u005C' | '\\u000A' | '\\u000D' ) | ECHAR )*
+				loop26:
+				while (true) {
+					int alt26=3;
+					int LA26_0 = input.LA(1);
+					if ( (LA26_0=='>') ) {
+						alt26=3;
+					}
+					else if ( ((LA26_0 >= '\u0000' && LA26_0 <= '\t')||(LA26_0 >= '\u000B' && LA26_0 <= '\f')||(LA26_0 >= '\u000E' && LA26_0 <= '!')||(LA26_0 >= '#' && LA26_0 <= '=')||(LA26_0 >= '?' && LA26_0 <= '[')||(LA26_0 >= ']' && LA26_0 <= '\uFFFF')) ) {
+						alt26=1;
+					}
+					else if ( (LA26_0=='\\') ) {
+						alt26=2;
+					}
+
+					switch (alt26) {
+						case 1 :
+							// TurtleOBDA.g:917:39: ~ ( '\\u0022' | '\\u005C' | '\\u000A' | '\\u000D' )
+						{
+							if ( (input.LA(1) >= '\u0000' && input.LA(1) <= '\t')||(input.LA(1) >= '\u000B' && input.LA(1) <= '\f')||(input.LA(1) >= '\u000E' && input.LA(1) <= '!')||(input.LA(1) >= '#' && input.LA(1) <= '[')||(input.LA(1) >= ']' && input.LA(1) <= '\uFFFF') ) {
+								input.consume();
+							}
+							else {
+								MismatchedSetException mse = new MismatchedSetException(null,input);
+								recover(mse);
+								throw mse;
+							}
+						}
+						break;
+						case 2 :
+							// TurtleOBDA.g:917:86: ECHAR
+						{
+							mECHAR();
+
+						}
+						break;
+
+						default :
+							break loop26;
+					}
 				}
 
-				switch (alt26) {
-				case 1 :
-					// TurtleOBDA.g:924:39: ~ ( '\\u0022' | '\\u005C' | '\\u000A' | '\\u000D' )
-					{
-					if ( (input.LA(1) >= '\u0000' && input.LA(1) <= '\t')||(input.LA(1) >= '\u000B' && input.LA(1) <= '\f')||(input.LA(1) >= '\u000E' && input.LA(1) <= '!')||(input.LA(1) >= '#' && input.LA(1) <= '[')||(input.LA(1) >= ']' && input.LA(1) <= '\uFFFF') ) {
-						input.consume();
-					}
-					else {
-						MismatchedSetException mse = new MismatchedSetException(null,input);
-						recover(mse);
-						throw mse;
-					}
-					}
-					break;
-				case 2 :
-					// TurtleOBDA.g:924:86: ECHAR
-					{
-					mECHAR(); 
-
-					}
-					break;
-
-				default :
-					break loop26;
-				}
-			}
-
-			match('>'); 
+				match('>');
 			}
 
 			state.type = _type;
@@ -2573,53 +2566,53 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = STRING_WITH_CURLY_BRACKET;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// TurtleOBDA.g:928:3: ( '{' ( options {greedy=false; } :~ ( '\\u0022' | '\\u005C' | '\\u000A' | '\\u000D' ) | ECHAR )* '}' )
-			// TurtleOBDA.g:928:5: '{' ( options {greedy=false; } :~ ( '\\u0022' | '\\u005C' | '\\u000A' | '\\u000D' ) | ECHAR )* '}'
+			// TurtleOBDA.g:921:3: ( '{' ( options {greedy=false; } :~ ( '\\u0022' | '\\u005C' | '\\u000A' | '\\u000D' ) | ECHAR )* '}' )
+			// TurtleOBDA.g:921:5: '{' ( options {greedy=false; } :~ ( '\\u0022' | '\\u005C' | '\\u000A' | '\\u000D' ) | ECHAR )* '}'
 			{
-			match('{'); 
-			// TurtleOBDA.g:928:9: ( options {greedy=false; } :~ ( '\\u0022' | '\\u005C' | '\\u000A' | '\\u000D' ) | ECHAR )*
-			loop27:
-			while (true) {
-				int alt27=3;
-				int LA27_0 = input.LA(1);
-				if ( (LA27_0=='}') ) {
-					alt27=3;
-				}
-				else if ( ((LA27_0 >= '\u0000' && LA27_0 <= '\t')||(LA27_0 >= '\u000B' && LA27_0 <= '\f')||(LA27_0 >= '\u000E' && LA27_0 <= '!')||(LA27_0 >= '#' && LA27_0 <= '[')||(LA27_0 >= ']' && LA27_0 <= '|')||(LA27_0 >= '~' && LA27_0 <= '\uFFFF')) ) {
-					alt27=1;
-				}
-				else if ( (LA27_0=='\\') ) {
-					alt27=2;
+				match('{');
+				// TurtleOBDA.g:921:9: ( options {greedy=false; } :~ ( '\\u0022' | '\\u005C' | '\\u000A' | '\\u000D' ) | ECHAR )*
+				loop27:
+				while (true) {
+					int alt27=3;
+					int LA27_0 = input.LA(1);
+					if ( (LA27_0=='}') ) {
+						alt27=3;
+					}
+					else if ( ((LA27_0 >= '\u0000' && LA27_0 <= '\t')||(LA27_0 >= '\u000B' && LA27_0 <= '\f')||(LA27_0 >= '\u000E' && LA27_0 <= '!')||(LA27_0 >= '#' && LA27_0 <= '[')||(LA27_0 >= ']' && LA27_0 <= '|')||(LA27_0 >= '~' && LA27_0 <= '\uFFFF')) ) {
+						alt27=1;
+					}
+					else if ( (LA27_0=='\\') ) {
+						alt27=2;
+					}
+
+					switch (alt27) {
+						case 1 :
+							// TurtleOBDA.g:921:39: ~ ( '\\u0022' | '\\u005C' | '\\u000A' | '\\u000D' )
+						{
+							if ( (input.LA(1) >= '\u0000' && input.LA(1) <= '\t')||(input.LA(1) >= '\u000B' && input.LA(1) <= '\f')||(input.LA(1) >= '\u000E' && input.LA(1) <= '!')||(input.LA(1) >= '#' && input.LA(1) <= '[')||(input.LA(1) >= ']' && input.LA(1) <= '\uFFFF') ) {
+								input.consume();
+							}
+							else {
+								MismatchedSetException mse = new MismatchedSetException(null,input);
+								recover(mse);
+								throw mse;
+							}
+						}
+						break;
+						case 2 :
+							// TurtleOBDA.g:921:86: ECHAR
+						{
+							mECHAR();
+
+						}
+						break;
+
+						default :
+							break loop27;
+					}
 				}
 
-				switch (alt27) {
-				case 1 :
-					// TurtleOBDA.g:928:39: ~ ( '\\u0022' | '\\u005C' | '\\u000A' | '\\u000D' )
-					{
-					if ( (input.LA(1) >= '\u0000' && input.LA(1) <= '\t')||(input.LA(1) >= '\u000B' && input.LA(1) <= '\f')||(input.LA(1) >= '\u000E' && input.LA(1) <= '!')||(input.LA(1) >= '#' && input.LA(1) <= '[')||(input.LA(1) >= ']' && input.LA(1) <= '\uFFFF') ) {
-						input.consume();
-					}
-					else {
-						MismatchedSetException mse = new MismatchedSetException(null,input);
-						recover(mse);
-						throw mse;
-					}
-					}
-					break;
-				case 2 :
-					// TurtleOBDA.g:928:86: ECHAR
-					{
-					mECHAR(); 
-
-					}
-					break;
-
-				default :
-					break loop27;
-				}
-			}
-
-			match('}'); 
+				match('}');
 			}
 
 			state.type = _type;
@@ -2636,43 +2629,43 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = STRING_URI;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// TurtleOBDA.g:932:3: ( SCHEMA COLON DOUBLE_SLASH ( URI_PATH )* )
-			// TurtleOBDA.g:932:5: SCHEMA COLON DOUBLE_SLASH ( URI_PATH )*
+			// TurtleOBDA.g:925:3: ( SCHEMA COLON DOUBLE_SLASH ( URI_PATH )* )
+			// TurtleOBDA.g:925:5: SCHEMA COLON DOUBLE_SLASH ( URI_PATH )*
 			{
-			mSCHEMA(); 
+				mSCHEMA();
 
-			mCOLON(); 
+				mCOLON();
 
-			mDOUBLE_SLASH(); 
+				mDOUBLE_SLASH();
 
-			// TurtleOBDA.g:932:31: ( URI_PATH )*
-			loop28:
-			while (true) {
-				int alt28=2;
-				int LA28_0 = input.LA(1);
-				if ( (LA28_0=='#'||(LA28_0 >= '-' && LA28_0 <= ':')||LA28_0=='?'||(LA28_0 >= 'A' && LA28_0 <= 'Z')||LA28_0=='_'||(LA28_0 >= 'a' && LA28_0 <= 'z')||(LA28_0 >= '\u00C0' && LA28_0 <= '\u00D6')||(LA28_0 >= '\u00D8' && LA28_0 <= '\u00F6')||(LA28_0 >= '\u00F8' && LA28_0 <= '\u02FF')||(LA28_0 >= '\u0370' && LA28_0 <= '\u037D')||(LA28_0 >= '\u037F' && LA28_0 <= '\u1FFF')||(LA28_0 >= '\u200C' && LA28_0 <= '\u200D')||(LA28_0 >= '\u2070' && LA28_0 <= '\u218F')||(LA28_0 >= '\u2C00' && LA28_0 <= '\u2FEF')||(LA28_0 >= '\u3001' && LA28_0 <= '\uD7FF')||(LA28_0 >= '\uF900' && LA28_0 <= '\uFDCF')||(LA28_0 >= '\uFDF0' && LA28_0 <= '\uFFFD')) ) {
-					alt28=1;
+				// TurtleOBDA.g:925:31: ( URI_PATH )*
+				loop28:
+				while (true) {
+					int alt28=2;
+					int LA28_0 = input.LA(1);
+					if ( (LA28_0=='#'||(LA28_0 >= '-' && LA28_0 <= ':')||LA28_0=='?'||(LA28_0 >= 'A' && LA28_0 <= 'Z')||LA28_0=='_'||(LA28_0 >= 'a' && LA28_0 <= 'z')||(LA28_0 >= '\u00C0' && LA28_0 <= '\u00D6')||(LA28_0 >= '\u00D8' && LA28_0 <= '\u00F6')||(LA28_0 >= '\u00F8' && LA28_0 <= '\u02FF')||(LA28_0 >= '\u0370' && LA28_0 <= '\u037D')||(LA28_0 >= '\u037F' && LA28_0 <= '\u1FFF')||(LA28_0 >= '\u200C' && LA28_0 <= '\u200D')||(LA28_0 >= '\u2070' && LA28_0 <= '\u218F')||(LA28_0 >= '\u2C00' && LA28_0 <= '\u2FEF')||(LA28_0 >= '\u3001' && LA28_0 <= '\uD7FF')||(LA28_0 >= '\uF900' && LA28_0 <= '\uFDCF')||(LA28_0 >= '\uFDF0' && LA28_0 <= '\uFFFD')) ) {
+						alt28=1;
+					}
+
+					switch (alt28) {
+						case 1 :
+							// TurtleOBDA.g:
+						{
+							if ( input.LA(1)=='#'||(input.LA(1) >= '-' && input.LA(1) <= ':')||input.LA(1)=='?'||(input.LA(1) >= 'A' && input.LA(1) <= 'Z')||input.LA(1)=='_'||(input.LA(1) >= 'a' && input.LA(1) <= 'z')||(input.LA(1) >= '\u00C0' && input.LA(1) <= '\u00D6')||(input.LA(1) >= '\u00D8' && input.LA(1) <= '\u00F6')||(input.LA(1) >= '\u00F8' && input.LA(1) <= '\u02FF')||(input.LA(1) >= '\u0370' && input.LA(1) <= '\u037D')||(input.LA(1) >= '\u037F' && input.LA(1) <= '\u1FFF')||(input.LA(1) >= '\u200C' && input.LA(1) <= '\u200D')||(input.LA(1) >= '\u2070' && input.LA(1) <= '\u218F')||(input.LA(1) >= '\u2C00' && input.LA(1) <= '\u2FEF')||(input.LA(1) >= '\u3001' && input.LA(1) <= '\uD7FF')||(input.LA(1) >= '\uF900' && input.LA(1) <= '\uFDCF')||(input.LA(1) >= '\uFDF0' && input.LA(1) <= '\uFFFD') ) {
+								input.consume();
+							}
+							else {
+								MismatchedSetException mse = new MismatchedSetException(null,input);
+								recover(mse);
+								throw mse;
+							}
+						}
+						break;
+
+						default :
+							break loop28;
+					}
 				}
-
-				switch (alt28) {
-				case 1 :
-					// TurtleOBDA.g:
-					{
-					if ( input.LA(1)=='#'||(input.LA(1) >= '-' && input.LA(1) <= ':')||input.LA(1)=='?'||(input.LA(1) >= 'A' && input.LA(1) <= 'Z')||input.LA(1)=='_'||(input.LA(1) >= 'a' && input.LA(1) <= 'z')||(input.LA(1) >= '\u00C0' && input.LA(1) <= '\u00D6')||(input.LA(1) >= '\u00D8' && input.LA(1) <= '\u00F6')||(input.LA(1) >= '\u00F8' && input.LA(1) <= '\u02FF')||(input.LA(1) >= '\u0370' && input.LA(1) <= '\u037D')||(input.LA(1) >= '\u037F' && input.LA(1) <= '\u1FFF')||(input.LA(1) >= '\u200C' && input.LA(1) <= '\u200D')||(input.LA(1) >= '\u2070' && input.LA(1) <= '\u218F')||(input.LA(1) >= '\u2C00' && input.LA(1) <= '\u2FEF')||(input.LA(1) >= '\u3001' && input.LA(1) <= '\uD7FF')||(input.LA(1) >= '\uF900' && input.LA(1) <= '\uFDCF')||(input.LA(1) >= '\uFDF0' && input.LA(1) <= '\uFFFD') ) {
-						input.consume();
-					}
-					else {
-						MismatchedSetException mse = new MismatchedSetException(null,input);
-						recover(mse);
-						throw mse;
-					}
-					}
-					break;
-
-				default :
-					break loop28;
-				}
-			}
 
 			}
 
@@ -2690,98 +2683,98 @@ public class TurtleOBDALexer extends Lexer {
 		try {
 			int _type = WS;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// TurtleOBDA.g:935:3: ( ( ' ' | '\\t' | ( '\\n' | '\\r' ( '\\n' ) ) )+ )
-			// TurtleOBDA.g:935:5: ( ' ' | '\\t' | ( '\\n' | '\\r' ( '\\n' ) ) )+
+			// TurtleOBDA.g:928:3: ( ( ' ' | '\\t' | ( '\\n' | '\\r' ( '\\n' ) ) )+ )
+			// TurtleOBDA.g:928:5: ( ' ' | '\\t' | ( '\\n' | '\\r' ( '\\n' ) ) )+
 			{
-			// TurtleOBDA.g:935:5: ( ' ' | '\\t' | ( '\\n' | '\\r' ( '\\n' ) ) )+
-			int cnt30=0;
-			loop30:
-			while (true) {
-				int alt30=4;
-				switch ( input.LA(1) ) {
-				case ' ':
-					{
-					alt30=1;
+				// TurtleOBDA.g:928:5: ( ' ' | '\\t' | ( '\\n' | '\\r' ( '\\n' ) ) )+
+				int cnt30=0;
+				loop30:
+				while (true) {
+					int alt30=4;
+					switch ( input.LA(1) ) {
+						case ' ':
+						{
+							alt30=1;
+						}
+						break;
+						case '\t':
+						{
+							alt30=2;
+						}
+						break;
+						case '\n':
+						case '\r':
+						{
+							alt30=3;
+						}
+						break;
 					}
-					break;
-				case '\t':
-					{
-					alt30=2;
-					}
-					break;
-				case '\n':
-				case '\r':
-					{
-					alt30=3;
-					}
-					break;
-				}
-				switch (alt30) {
-				case 1 :
-					// TurtleOBDA.g:935:6: ' '
-					{
-					match(' '); 
-					}
-					break;
-				case 2 :
-					// TurtleOBDA.g:935:10: '\\t'
-					{
-					match('\t'); 
-					}
-					break;
-				case 3 :
-					// TurtleOBDA.g:935:15: ( '\\n' | '\\r' ( '\\n' ) )
-					{
-					// TurtleOBDA.g:935:15: ( '\\n' | '\\r' ( '\\n' ) )
-					int alt29=2;
-					int LA29_0 = input.LA(1);
-					if ( (LA29_0=='\n') ) {
-						alt29=1;
-					}
-					else if ( (LA29_0=='\r') ) {
-						alt29=2;
-					}
-
-					else {
-						NoViableAltException nvae =
-							new NoViableAltException("", 29, 0, input);
-						throw nvae;
-					}
-
-					switch (alt29) {
+					switch (alt30) {
 						case 1 :
-							// TurtleOBDA.g:935:16: '\\n'
-							{
-							match('\n'); 
-							}
-							break;
+							// TurtleOBDA.g:928:6: ' '
+						{
+							match(' ');
+						}
+						break;
 						case 2 :
-							// TurtleOBDA.g:935:21: '\\r' ( '\\n' )
-							{
-							match('\r'); 
-							// TurtleOBDA.g:935:25: ( '\\n' )
-							// TurtleOBDA.g:935:26: '\\n'
-							{
-							match('\n'); 
+							// TurtleOBDA.g:928:10: '\\t'
+						{
+							match('\t');
+						}
+						break;
+						case 3 :
+							// TurtleOBDA.g:928:15: ( '\\n' | '\\r' ( '\\n' ) )
+						{
+							// TurtleOBDA.g:928:15: ( '\\n' | '\\r' ( '\\n' ) )
+							int alt29=2;
+							int LA29_0 = input.LA(1);
+							if ( (LA29_0=='\n') ) {
+								alt29=1;
+							}
+							else if ( (LA29_0=='\r') ) {
+								alt29=2;
 							}
 
+							else {
+								NoViableAltException nvae =
+										new NoViableAltException("", 29, 0, input);
+								throw nvae;
 							}
-							break;
 
+							switch (alt29) {
+								case 1 :
+									// TurtleOBDA.g:928:16: '\\n'
+								{
+									match('\n');
+								}
+								break;
+								case 2 :
+									// TurtleOBDA.g:928:21: '\\r' ( '\\n' )
+								{
+									match('\r');
+									// TurtleOBDA.g:928:25: ( '\\n' )
+									// TurtleOBDA.g:928:26: '\\n'
+									{
+										match('\n');
+									}
+
+								}
+								break;
+
+							}
+
+						}
+						break;
+
+						default :
+							if ( cnt30 >= 1 ) break loop30;
+							EarlyExitException eee = new EarlyExitException(30, input);
+							throw eee;
 					}
-
-					}
-					break;
-
-				default :
-					if ( cnt30 >= 1 ) break loop30;
-					EarlyExitException eee = new EarlyExitException(30, input);
-					throw eee;
+					cnt30++;
 				}
-				cnt30++;
-			}
 
-			_channel=HIDDEN;
+				_channel=HIDDEN;
 			}
 
 			state.type = _type;
@@ -2801,438 +2794,438 @@ public class TurtleOBDALexer extends Lexer {
 		switch (alt31) {
 			case 1 :
 				// TurtleOBDA.g:1:10: T__77
-				{
-				mT__77(); 
+			{
+				mT__77();
 
-				}
-				break;
+			}
+			break;
 			case 2 :
 				// TurtleOBDA.g:1:16: BASE
-				{
-				mBASE(); 
+			{
+				mBASE();
 
-				}
-				break;
+			}
+			break;
 			case 3 :
 				// TurtleOBDA.g:1:21: PREFIX
-				{
-				mPREFIX(); 
+			{
+				mPREFIX();
 
-				}
-				break;
+			}
+			break;
 			case 4 :
 				// TurtleOBDA.g:1:28: FALSE
-				{
-				mFALSE(); 
+			{
+				mFALSE();
 
-				}
-				break;
+			}
+			break;
 			case 5 :
 				// TurtleOBDA.g:1:34: TRUE
-				{
-				mTRUE(); 
+			{
+				mTRUE();
 
-				}
-				break;
+			}
+			break;
 			case 6 :
 				// TurtleOBDA.g:1:39: REFERENCE
-				{
-				mREFERENCE(); 
+			{
+				mREFERENCE();
 
-				}
-				break;
+			}
+			break;
 			case 7 :
 				// TurtleOBDA.g:1:49: LTSIGN
-				{
-				mLTSIGN(); 
+			{
+				mLTSIGN();
 
-				}
-				break;
+			}
+			break;
 			case 8 :
 				// TurtleOBDA.g:1:56: RTSIGN
-				{
-				mRTSIGN(); 
+			{
+				mRTSIGN();
 
-				}
-				break;
+			}
+			break;
 			case 9 :
 				// TurtleOBDA.g:1:63: SEMI
-				{
-				mSEMI(); 
+			{
+				mSEMI();
 
-				}
-				break;
+			}
+			break;
 			case 10 :
 				// TurtleOBDA.g:1:68: PERIOD
-				{
-				mPERIOD(); 
+			{
+				mPERIOD();
 
-				}
-				break;
+			}
+			break;
 			case 11 :
 				// TurtleOBDA.g:1:75: COMMA
-				{
-				mCOMMA(); 
+			{
+				mCOMMA();
 
-				}
-				break;
+			}
+			break;
 			case 12 :
 				// TurtleOBDA.g:1:81: LSQ_BRACKET
-				{
-				mLSQ_BRACKET(); 
+			{
+				mLSQ_BRACKET();
 
-				}
-				break;
+			}
+			break;
 			case 13 :
 				// TurtleOBDA.g:1:93: RSQ_BRACKET
-				{
-				mRSQ_BRACKET(); 
+			{
+				mRSQ_BRACKET();
 
-				}
-				break;
+			}
+			break;
 			case 14 :
 				// TurtleOBDA.g:1:105: LCR_BRACKET
-				{
-				mLCR_BRACKET(); 
+			{
+				mLCR_BRACKET();
 
-				}
-				break;
+			}
+			break;
 			case 15 :
 				// TurtleOBDA.g:1:117: RCR_BRACKET
-				{
-				mRCR_BRACKET(); 
+			{
+				mRCR_BRACKET();
 
-				}
-				break;
+			}
+			break;
 			case 16 :
 				// TurtleOBDA.g:1:129: LPAREN
-				{
-				mLPAREN(); 
+			{
+				mLPAREN();
 
-				}
-				break;
+			}
+			break;
 			case 17 :
 				// TurtleOBDA.g:1:136: RPAREN
-				{
-				mRPAREN(); 
+			{
+				mRPAREN();
 
-				}
-				break;
+			}
+			break;
 			case 18 :
 				// TurtleOBDA.g:1:143: QUESTION
-				{
-				mQUESTION(); 
+			{
+				mQUESTION();
 
-				}
-				break;
+			}
+			break;
 			case 19 :
 				// TurtleOBDA.g:1:152: DOLLAR
-				{
-				mDOLLAR(); 
+			{
+				mDOLLAR();
 
-				}
-				break;
+			}
+			break;
 			case 20 :
 				// TurtleOBDA.g:1:159: QUOTE_DOUBLE
-				{
-				mQUOTE_DOUBLE(); 
+			{
+				mQUOTE_DOUBLE();
 
-				}
-				break;
+			}
+			break;
 			case 21 :
 				// TurtleOBDA.g:1:172: QUOTE_SINGLE
-				{
-				mQUOTE_SINGLE(); 
+			{
+				mQUOTE_SINGLE();
 
-				}
-				break;
+			}
+			break;
 			case 22 :
 				// TurtleOBDA.g:1:185: APOSTROPHE
-				{
-				mAPOSTROPHE(); 
+			{
+				mAPOSTROPHE();
 
-				}
-				break;
+			}
+			break;
 			case 23 :
 				// TurtleOBDA.g:1:196: UNDERSCORE
-				{
-				mUNDERSCORE(); 
+			{
+				mUNDERSCORE();
 
-				}
-				break;
+			}
+			break;
 			case 24 :
 				// TurtleOBDA.g:1:207: MINUS
-				{
-				mMINUS(); 
+			{
+				mMINUS();
 
-				}
-				break;
+			}
+			break;
 			case 25 :
 				// TurtleOBDA.g:1:213: ASTERISK
-				{
-				mASTERISK(); 
+			{
+				mASTERISK();
 
-				}
-				break;
+			}
+			break;
 			case 26 :
 				// TurtleOBDA.g:1:222: AMPERSAND
-				{
-				mAMPERSAND(); 
+			{
+				mAMPERSAND();
 
-				}
-				break;
+			}
+			break;
 			case 27 :
 				// TurtleOBDA.g:1:232: AT
-				{
-				mAT(); 
+			{
+				mAT();
 
-				}
-				break;
+			}
+			break;
 			case 28 :
 				// TurtleOBDA.g:1:235: EXCLAMATION
-				{
-				mEXCLAMATION(); 
+			{
+				mEXCLAMATION();
 
-				}
-				break;
+			}
+			break;
 			case 29 :
 				// TurtleOBDA.g:1:247: HASH
-				{
-				mHASH(); 
+			{
+				mHASH();
 
-				}
-				break;
+			}
+			break;
 			case 30 :
 				// TurtleOBDA.g:1:252: PERCENT
-				{
-				mPERCENT(); 
+			{
+				mPERCENT();
 
-				}
-				break;
+			}
+			break;
 			case 31 :
 				// TurtleOBDA.g:1:260: PLUS
-				{
-				mPLUS(); 
+			{
+				mPLUS();
 
-				}
-				break;
+			}
+			break;
 			case 32 :
 				// TurtleOBDA.g:1:265: EQUALS
-				{
-				mEQUALS(); 
+			{
+				mEQUALS();
 
-				}
-				break;
+			}
+			break;
 			case 33 :
 				// TurtleOBDA.g:1:272: COLON
-				{
-				mCOLON(); 
+			{
+				mCOLON();
 
-				}
-				break;
+			}
+			break;
 			case 34 :
 				// TurtleOBDA.g:1:278: LESS
-				{
-				mLESS(); 
+			{
+				mLESS();
 
-				}
-				break;
+			}
+			break;
 			case 35 :
 				// TurtleOBDA.g:1:283: GREATER
-				{
-				mGREATER(); 
+			{
+				mGREATER();
 
-				}
-				break;
+			}
+			break;
 			case 36 :
 				// TurtleOBDA.g:1:291: SLASH
-				{
-				mSLASH(); 
+			{
+				mSLASH();
 
-				}
-				break;
+			}
+			break;
 			case 37 :
 				// TurtleOBDA.g:1:297: DOUBLE_SLASH
-				{
-				mDOUBLE_SLASH(); 
+			{
+				mDOUBLE_SLASH();
 
-				}
-				break;
+			}
+			break;
 			case 38 :
 				// TurtleOBDA.g:1:310: BACKSLASH
-				{
-				mBACKSLASH(); 
+			{
+				mBACKSLASH();
 
-				}
-				break;
+			}
+			break;
 			case 39 :
 				// TurtleOBDA.g:1:320: BLANK
-				{
-				mBLANK(); 
+			{
+				mBLANK();
 
-				}
-				break;
+			}
+			break;
 			case 40 :
 				// TurtleOBDA.g:1:326: BLANK_PREFIX
-				{
-				mBLANK_PREFIX(); 
+			{
+				mBLANK_PREFIX();
 
-				}
-				break;
+			}
+			break;
 			case 41 :
 				// TurtleOBDA.g:1:339: TILDE
-				{
-				mTILDE(); 
+			{
+				mTILDE();
 
-				}
-				break;
+			}
+			break;
 			case 42 :
 				// TurtleOBDA.g:1:345: CARET
-				{
-				mCARET(); 
+			{
+				mCARET();
 
-				}
-				break;
+			}
+			break;
 			case 43 :
 				// TurtleOBDA.g:1:351: INTEGER
-				{
-				mINTEGER(); 
+			{
+				mINTEGER();
 
-				}
-				break;
+			}
+			break;
 			case 44 :
 				// TurtleOBDA.g:1:359: DOUBLE
-				{
-				mDOUBLE(); 
+			{
+				mDOUBLE();
 
-				}
-				break;
+			}
+			break;
 			case 45 :
 				// TurtleOBDA.g:1:366: DECIMAL
-				{
-				mDECIMAL(); 
+			{
+				mDECIMAL();
 
-				}
-				break;
+			}
+			break;
 			case 46 :
 				// TurtleOBDA.g:1:374: INTEGER_POSITIVE
-				{
-				mINTEGER_POSITIVE(); 
+			{
+				mINTEGER_POSITIVE();
 
-				}
-				break;
+			}
+			break;
 			case 47 :
 				// TurtleOBDA.g:1:391: INTEGER_NEGATIVE
-				{
-				mINTEGER_NEGATIVE(); 
+			{
+				mINTEGER_NEGATIVE();
 
-				}
-				break;
+			}
+			break;
 			case 48 :
 				// TurtleOBDA.g:1:408: DOUBLE_POSITIVE
-				{
-				mDOUBLE_POSITIVE(); 
+			{
+				mDOUBLE_POSITIVE();
 
-				}
-				break;
+			}
+			break;
 			case 49 :
 				// TurtleOBDA.g:1:424: DOUBLE_NEGATIVE
-				{
-				mDOUBLE_NEGATIVE(); 
+			{
+				mDOUBLE_NEGATIVE();
 
-				}
-				break;
+			}
+			break;
 			case 50 :
 				// TurtleOBDA.g:1:440: DECIMAL_POSITIVE
-				{
-				mDECIMAL_POSITIVE(); 
+			{
+				mDECIMAL_POSITIVE();
 
-				}
-				break;
+			}
+			break;
 			case 51 :
 				// TurtleOBDA.g:1:457: DECIMAL_NEGATIVE
-				{
-				mDECIMAL_NEGATIVE(); 
+			{
+				mDECIMAL_NEGATIVE();
 
-				}
-				break;
+			}
+			break;
 			case 52 :
 				// TurtleOBDA.g:1:474: VARNAME
-				{
-				mVARNAME(); 
+			{
+				mVARNAME();
 
-				}
-				break;
+			}
+			break;
 			case 53 :
 				// TurtleOBDA.g:1:482: NCNAME
-				{
-				mNCNAME(); 
+			{
+				mNCNAME();
 
-				}
-				break;
+			}
+			break;
 			case 54 :
 				// TurtleOBDA.g:1:489: NCNAME_EXT
-				{
-				mNCNAME_EXT(); 
+			{
+				mNCNAME_EXT();
 
-				}
-				break;
+			}
+			break;
 			case 55 :
 				// TurtleOBDA.g:1:500: NAMESPACE
-				{
-				mNAMESPACE(); 
+			{
+				mNAMESPACE();
 
-				}
-				break;
+			}
+			break;
 			case 56 :
 				// TurtleOBDA.g:1:510: PREFIXED_NAME
-				{
-				mPREFIXED_NAME(); 
+			{
+				mPREFIXED_NAME();
 
-				}
-				break;
+			}
+			break;
 			case 57 :
 				// TurtleOBDA.g:1:524: STRING_WITH_QUOTE
-				{
-				mSTRING_WITH_QUOTE(); 
+			{
+				mSTRING_WITH_QUOTE();
 
-				}
-				break;
+			}
+			break;
 			case 58 :
 				// TurtleOBDA.g:1:542: STRING_WITH_QUOTE_DOUBLE
-				{
-				mSTRING_WITH_QUOTE_DOUBLE(); 
+			{
+				mSTRING_WITH_QUOTE_DOUBLE();
 
-				}
-				break;
+			}
+			break;
 			case 59 :
 				// TurtleOBDA.g:1:567: STRING_WITH_BRACKET
-				{
-				mSTRING_WITH_BRACKET(); 
+			{
+				mSTRING_WITH_BRACKET();
 
-				}
-				break;
+			}
+			break;
 			case 60 :
 				// TurtleOBDA.g:1:587: STRING_WITH_CURLY_BRACKET
-				{
-				mSTRING_WITH_CURLY_BRACKET(); 
+			{
+				mSTRING_WITH_CURLY_BRACKET();
 
-				}
-				break;
+			}
+			break;
 			case 61 :
 				// TurtleOBDA.g:1:613: STRING_URI
-				{
-				mSTRING_URI(); 
+			{
+				mSTRING_URI();
 
-				}
-				break;
+			}
+			break;
 			case 62 :
 				// TurtleOBDA.g:1:624: WS
-				{
-				mWS(); 
+			{
+				mWS();
 
-				}
-				break;
+			}
+			break;
 
 		}
 	}
@@ -3241,17 +3234,17 @@ public class TurtleOBDALexer extends Lexer {
 	protected DFA12 dfa12 = new DFA12(this);
 	protected DFA31 dfa31 = new DFA31(this);
 	static final String DFA12_eotS =
-		"\5\uffff";
+			"\5\uffff";
 	static final String DFA12_eofS =
-		"\5\uffff";
+			"\5\uffff";
 	static final String DFA12_minS =
-		"\2\56\3\uffff";
+			"\2\56\3\uffff";
 	static final String DFA12_maxS =
-		"\1\71\1\145\3\uffff";
+			"\1\71\1\145\3\uffff";
 	static final String DFA12_acceptS =
-		"\2\uffff\1\2\1\1\1\3";
+			"\2\uffff\1\2\1\1\1\3";
 	static final String DFA12_specialS =
-		"\5\uffff}>";
+			"\5\uffff}>";
 	static final String[] DFA12_transitionS = {
 			"\1\2\1\uffff\12\1",
 			"\1\3\1\uffff\12\1\13\uffff\1\4\37\uffff\1\4",
@@ -3291,232 +3284,232 @@ public class TurtleOBDALexer extends Lexer {
 		}
 		@Override
 		public String getDescription() {
-			return "834:1: DOUBLE : ( ( DIGIT )+ PERIOD ( DIGIT )* ( 'e' | 'E' ) ( '-' | '+' )? ( DIGIT )* | PERIOD ( DIGIT )+ ( 'e' | 'E' ) ( '-' | '+' )? ( DIGIT )* | ( DIGIT )+ ( 'e' | 'E' ) ( '-' | '+' )? ( DIGIT )* );";
+			return "827:1: DOUBLE : ( ( DIGIT )+ PERIOD ( DIGIT )* ( 'e' | 'E' ) ( '-' | '+' )? ( DIGIT )* | PERIOD ( DIGIT )+ ( 'e' | 'E' ) ( '-' | '+' )? ( DIGIT )* | ( DIGIT )+ ( 'e' | 'E' ) ( '-' | '+' )? ( DIGIT )* );";
 		}
 	}
 
 	static final String DFA31_eotS =
-		"\1\47\1\51\4\60\1\65\1\67\1\72\1\74\1\75\1\uffff\1\100\1\uffff\1\101\1"+
-		"\105\2\uffff\1\106\1\uffff\1\107\1\uffff\1\112\1\113\4\uffff\1\116\1\117"+
-		"\1\120\1\123\1\124\1\uffff\1\127\2\uffff\1\130\1\60\3\uffff\1\60\1\133"+
-		"\1\135\1\60\1\uffff\1\60\1\uffff\3\60\5\uffff\1\143\4\uffff\1\145\3\uffff"+
-		"\1\47\1\uffff\1\47\4\uffff\1\146\2\uffff\1\147\1\47\3\uffff\1\153\4\uffff"+
-		"\1\157\2\uffff\1\47\1\164\1\uffff\1\135\1\uffff\1\125\4\60\1\uffff\1\164"+
-		"\3\uffff\1\47\1\u0080\1\u0082\3\uffff\1\u0084\1\uffff\1\145\3\164\1\uffff"+
-		"\1\125\1\u0088\2\60\1\u008b\2\164\1\u0082\3\u0080\1\uffff\1\u0080\1\uffff"+
-		"\1\u0084\1\uffff\2\164\1\125\1\uffff\1\60\1\u0091\1\uffff\4\u0080\1\u0092"+
-		"\2\uffff";
+			"\1\47\1\51\4\60\1\65\1\67\1\72\1\74\1\75\1\uffff\1\100\1\uffff\1\101\1"+
+					"\105\2\uffff\1\106\1\uffff\1\107\1\uffff\1\112\1\113\4\uffff\1\116\1\117"+
+					"\1\120\1\123\1\124\1\uffff\1\127\2\uffff\1\130\1\60\3\uffff\1\60\1\133"+
+					"\1\135\1\60\1\uffff\1\60\1\uffff\3\60\5\uffff\1\143\4\uffff\1\145\3\uffff"+
+					"\1\47\1\uffff\1\47\4\uffff\1\146\2\uffff\1\147\1\47\3\uffff\1\153\4\uffff"+
+					"\1\157\2\uffff\1\47\1\164\1\uffff\1\135\1\uffff\1\125\4\60\1\uffff\1\164"+
+					"\3\uffff\1\47\1\u0080\1\u0082\3\uffff\1\u0084\1\uffff\1\145\3\164\1\uffff"+
+					"\1\125\1\u0088\2\60\1\u008b\2\164\1\u0082\3\u0080\1\uffff\1\u0080\1\uffff"+
+					"\1\u0084\1\uffff\2\164\1\125\1\uffff\1\60\1\u0091\1\uffff\4\u0080\1\u0092"+
+					"\2\uffff";
 	static final String DFA31_eofS =
-		"\u0093\uffff";
+			"\u0093\uffff";
 	static final String DFA31_minS =
-		"\1\11\5\43\1\136\2\0\2\43\1\uffff\1\135\1\uffff\1\0\1\43\2\uffff\1\43"+
-		"\1\uffff\1\0\1\uffff\2\43\4\uffff\2\43\1\56\2\43\1\uffff\1\43\2\uffff"+
-		"\2\43\3\uffff\4\43\1\uffff\1\43\1\uffff\3\43\5\uffff\1\0\4\uffff\1\43"+
-		"\3\uffff\1\0\1\uffff\1\0\4\uffff\1\43\2\uffff\1\43\1\60\3\uffff\1\56\1"+
-		"\60\3\uffff\1\43\2\uffff\1\60\1\43\1\uffff\1\43\1\uffff\1\57\4\43\1\uffff"+
-		"\1\43\3\uffff\1\60\2\43\1\uffff\1\60\1\uffff\1\60\1\uffff\4\43\1\uffff"+
-		"\13\43\1\uffff\1\43\1\uffff\1\60\1\uffff\3\43\1\uffff\2\43\1\uffff\5\43"+
-		"\2\uffff";
+			"\1\11\5\43\1\136\2\0\2\43\1\uffff\1\135\1\uffff\1\0\1\43\2\uffff\1\43"+
+					"\1\uffff\1\0\1\uffff\2\43\4\uffff\2\43\1\56\2\43\1\uffff\1\43\2\uffff"+
+					"\2\43\3\uffff\4\43\1\uffff\1\43\1\uffff\3\43\5\uffff\1\0\4\uffff\1\43"+
+					"\3\uffff\1\0\1\uffff\1\0\4\uffff\1\43\2\uffff\1\43\1\60\3\uffff\1\56\1"+
+					"\60\3\uffff\1\43\2\uffff\1\60\1\43\1\uffff\1\43\1\uffff\1\57\4\43\1\uffff"+
+					"\1\43\3\uffff\1\60\2\43\1\uffff\1\60\1\uffff\1\60\1\uffff\4\43\1\uffff"+
+					"\13\43\1\uffff\1\43\1\uffff\1\60\1\uffff\3\43\1\uffff\2\43\1\uffff\5\43"+
+					"\2\uffff";
 	static final String DFA31_maxS =
-		"\6\ufffd\1\136\2\uffff\2\ufffd\1\uffff\1\135\1\uffff\1\uffff\1\ufffd\2"+
-		"\uffff\1\ufffd\1\uffff\1\uffff\1\uffff\2\ufffd\4\uffff\2\ufffd\1\71\2"+
-		"\ufffd\1\uffff\1\ufffd\2\uffff\2\ufffd\3\uffff\4\ufffd\1\uffff\1\ufffd"+
-		"\1\uffff\3\ufffd\5\uffff\1\uffff\4\uffff\1\ufffd\3\uffff\1\uffff\1\uffff"+
-		"\1\uffff\4\uffff\1\ufffd\2\uffff\1\ufffd\1\71\3\uffff\1\145\1\71\3\uffff"+
-		"\1\ufffd\2\uffff\1\145\1\ufffd\1\uffff\1\ufffd\1\uffff\1\57\4\ufffd\1"+
-		"\uffff\1\ufffd\3\uffff\1\145\2\ufffd\1\uffff\1\145\1\uffff\1\145\1\uffff"+
-		"\4\ufffd\1\uffff\13\ufffd\1\uffff\1\ufffd\1\uffff\1\145\1\uffff\3\ufffd"+
-		"\1\uffff\2\ufffd\1\uffff\5\ufffd\2\uffff";
+			"\6\ufffd\1\136\2\uffff\2\ufffd\1\uffff\1\135\1\uffff\1\uffff\1\ufffd\2"+
+					"\uffff\1\ufffd\1\uffff\1\uffff\1\uffff\2\ufffd\4\uffff\2\ufffd\1\71\2"+
+					"\ufffd\1\uffff\1\ufffd\2\uffff\2\ufffd\3\uffff\4\ufffd\1\uffff\1\ufffd"+
+					"\1\uffff\3\ufffd\5\uffff\1\uffff\4\uffff\1\ufffd\3\uffff\1\uffff\1\uffff"+
+					"\1\uffff\4\uffff\1\ufffd\2\uffff\1\ufffd\1\71\3\uffff\1\145\1\71\3\uffff"+
+					"\1\ufffd\2\uffff\1\145\1\ufffd\1\uffff\1\ufffd\1\uffff\1\57\4\ufffd\1"+
+					"\uffff\1\ufffd\3\uffff\1\145\2\ufffd\1\uffff\1\145\1\uffff\1\145\1\uffff"+
+					"\4\ufffd\1\uffff\13\ufffd\1\uffff\1\ufffd\1\uffff\1\145\1\uffff\3\ufffd"+
+					"\1\uffff\2\ufffd\1\uffff\5\ufffd\2\uffff";
 	static final String DFA31_acceptS =
-		"\13\uffff\1\13\1\uffff\1\15\2\uffff\1\20\1\21\1\uffff\1\23\1\uffff\1\26"+
-		"\2\uffff\1\31\1\32\1\33\1\34\5\uffff\1\43\1\uffff\1\46\1\51\2\uffff\1"+
-		"\66\1\76\1\1\4\uffff\1\75\1\uffff\1\64\3\uffff\1\6\1\52\1\7\1\42\1\73"+
-		"\1\uffff\1\24\1\72\1\11\1\12\1\uffff\1\47\1\14\1\16\1\uffff\1\74\1\uffff"+
-		"\1\17\1\22\1\25\1\71\1\uffff\1\27\1\30\2\uffff\1\35\1\36\1\37\2\uffff"+
-		"\1\40\1\41\1\70\1\uffff\1\44\1\53\2\uffff\1\65\1\uffff\1\67\5\uffff\1"+
-		"\10\1\uffff\1\55\1\50\1\57\3\uffff\1\56\1\uffff\1\60\1\uffff\1\45\4\uffff"+
-		"\1\54\13\uffff\1\61\1\uffff\1\63\1\uffff\1\62\3\uffff\1\2\2\uffff\1\5"+
-		"\5\uffff\1\4\1\3";
+			"\13\uffff\1\13\1\uffff\1\15\2\uffff\1\20\1\21\1\uffff\1\23\1\uffff\1\26"+
+					"\2\uffff\1\31\1\32\1\33\1\34\5\uffff\1\43\1\uffff\1\46\1\51\2\uffff\1"+
+					"\66\1\76\1\1\4\uffff\1\75\1\uffff\1\64\3\uffff\1\6\1\52\1\7\1\42\1\73"+
+					"\1\uffff\1\24\1\72\1\11\1\12\1\uffff\1\47\1\14\1\16\1\uffff\1\74\1\uffff"+
+					"\1\17\1\22\1\25\1\71\1\uffff\1\27\1\30\2\uffff\1\35\1\36\1\37\2\uffff"+
+					"\1\40\1\41\1\70\1\uffff\1\44\1\53\2\uffff\1\65\1\uffff\1\67\5\uffff\1"+
+					"\10\1\uffff\1\55\1\50\1\57\3\uffff\1\56\1\uffff\1\60\1\uffff\1\45\4\uffff"+
+					"\1\54\13\uffff\1\61\1\uffff\1\63\1\uffff\1\62\3\uffff\1\2\2\uffff\1\5"+
+					"\5\uffff\1\4\1\3";
 	static final String DFA31_specialS =
-		"\7\uffff\1\6\1\4\5\uffff\1\0\5\uffff\1\1\44\uffff\1\5\10\uffff\1\2\1\uffff"+
-		"\1\3\116\uffff}>";
+			"\7\uffff\1\4\1\5\5\uffff\1\2\5\uffff\1\0\44\uffff\1\1\10\uffff\1\6\1\uffff"+
+					"\1\3\116\uffff}>";
 	static final String[] DFA31_transitionS = {
 			"\2\50\2\uffff\1\50\22\uffff\1\50\1\33\1\10\1\34\1\23\1\35\1\31\1\24\1"+
-			"\20\1\21\1\30\1\36\1\13\1\27\1\12\1\42\12\45\1\40\1\11\1\7\1\37\1\41"+
-			"\1\22\1\32\1\46\1\2\3\46\1\4\11\46\1\3\3\46\1\5\6\46\1\14\1\43\1\15\1"+
-			"\6\1\26\1\25\1\1\1\2\3\46\1\4\11\46\1\3\3\46\1\5\6\46\1\16\1\uffff\1"+
-			"\17\1\44\101\uffff\27\46\1\uffff\37\46\1\uffff\u0208\46\160\uffff\16"+
-			"\46\1\uffff\u1c81\46\14\uffff\2\46\142\uffff\u0120\46\u0a70\uffff\u03f0"+
-			"\46\21\uffff\ua7ff\46\u2100\uffff\u04d0\46\40\uffff\u020e\46",
+					"\20\1\21\1\30\1\36\1\13\1\27\1\12\1\42\12\45\1\40\1\11\1\7\1\37\1\41"+
+					"\1\22\1\32\1\46\1\2\3\46\1\4\11\46\1\3\3\46\1\5\6\46\1\14\1\43\1\15\1"+
+					"\6\1\26\1\25\1\1\1\2\3\46\1\4\11\46\1\3\3\46\1\5\6\46\1\16\1\uffff\1"+
+					"\17\1\44\101\uffff\27\46\1\uffff\37\46\1\uffff\u0208\46\160\uffff\16"+
+					"\46\1\uffff\u1c81\46\14\uffff\2\46\142\uffff\u0120\46\u0a70\uffff\u03f0"+
+					"\46\21\uffff\ua7ff\46\u2100\uffff\u04d0\46\40\uffff\u020e\46",
 			"\1\53\1\uffff\1\53\5\uffff\1\56\1\uffff\2\52\1\53\12\52\1\54\1\53\1"+
-			"\uffff\1\53\1\uffff\1\53\1\uffff\32\52\4\uffff\1\55\1\uffff\32\52\1\47"+
-			"\1\uffff\1\47\102\uffff\27\52\1\uffff\37\52\1\uffff\u0208\52\160\uffff"+
-			"\16\52\1\uffff\u1c81\52\14\uffff\2\52\142\uffff\u0120\52\u0a70\uffff"+
-			"\u03f0\52\21\uffff\ua7ff\52\u2100\uffff\u04d0\52\40\uffff\u020e\52",
+					"\uffff\1\53\1\uffff\1\53\1\uffff\32\52\4\uffff\1\55\1\uffff\32\52\1\47"+
+					"\1\uffff\1\47\102\uffff\27\52\1\uffff\37\52\1\uffff\u0208\52\160\uffff"+
+					"\16\52\1\uffff\u1c81\52\14\uffff\2\52\142\uffff\u0120\52\u0a70\uffff"+
+					"\u03f0\52\21\uffff\ua7ff\52\u2100\uffff\u04d0\52\40\uffff\u020e\52",
 			"\1\53\1\uffff\1\53\5\uffff\1\56\1\uffff\2\52\1\53\12\52\1\54\1\53\1"+
-			"\uffff\1\53\1\uffff\1\53\1\uffff\1\57\31\52\4\uffff\1\55\1\uffff\1\57"+
-			"\31\52\1\47\1\uffff\1\47\102\uffff\27\52\1\uffff\37\52\1\uffff\u0208"+
-			"\52\160\uffff\16\52\1\uffff\u1c81\52\14\uffff\2\52\142\uffff\u0120\52"+
-			"\u0a70\uffff\u03f0\52\21\uffff\ua7ff\52\u2100\uffff\u04d0\52\40\uffff"+
-			"\u020e\52",
+					"\uffff\1\53\1\uffff\1\53\1\uffff\1\57\31\52\4\uffff\1\55\1\uffff\1\57"+
+					"\31\52\1\47\1\uffff\1\47\102\uffff\27\52\1\uffff\37\52\1\uffff\u0208"+
+					"\52\160\uffff\16\52\1\uffff\u1c81\52\14\uffff\2\52\142\uffff\u0120\52"+
+					"\u0a70\uffff\u03f0\52\21\uffff\ua7ff\52\u2100\uffff\u04d0\52\40\uffff"+
+					"\u020e\52",
 			"\1\53\1\uffff\1\53\5\uffff\1\56\1\uffff\2\52\1\53\12\52\1\54\1\53\1"+
-			"\uffff\1\53\1\uffff\1\53\1\uffff\21\52\1\61\10\52\4\uffff\1\55\1\uffff"+
-			"\21\52\1\61\10\52\1\47\1\uffff\1\47\102\uffff\27\52\1\uffff\37\52\1\uffff"+
-			"\u0208\52\160\uffff\16\52\1\uffff\u1c81\52\14\uffff\2\52\142\uffff\u0120"+
-			"\52\u0a70\uffff\u03f0\52\21\uffff\ua7ff\52\u2100\uffff\u04d0\52\40\uffff"+
-			"\u020e\52",
+					"\uffff\1\53\1\uffff\1\53\1\uffff\21\52\1\61\10\52\4\uffff\1\55\1\uffff"+
+					"\21\52\1\61\10\52\1\47\1\uffff\1\47\102\uffff\27\52\1\uffff\37\52\1\uffff"+
+					"\u0208\52\160\uffff\16\52\1\uffff\u1c81\52\14\uffff\2\52\142\uffff\u0120"+
+					"\52\u0a70\uffff\u03f0\52\21\uffff\ua7ff\52\u2100\uffff\u04d0\52\40\uffff"+
+					"\u020e\52",
 			"\1\53\1\uffff\1\53\5\uffff\1\56\1\uffff\2\52\1\53\12\52\1\54\1\53\1"+
-			"\uffff\1\53\1\uffff\1\53\1\uffff\1\62\31\52\4\uffff\1\55\1\uffff\1\62"+
-			"\31\52\1\47\1\uffff\1\47\102\uffff\27\52\1\uffff\37\52\1\uffff\u0208"+
-			"\52\160\uffff\16\52\1\uffff\u1c81\52\14\uffff\2\52\142\uffff\u0120\52"+
-			"\u0a70\uffff\u03f0\52\21\uffff\ua7ff\52\u2100\uffff\u04d0\52\40\uffff"+
-			"\u020e\52",
+					"\uffff\1\53\1\uffff\1\53\1\uffff\1\62\31\52\4\uffff\1\55\1\uffff\1\62"+
+					"\31\52\1\47\1\uffff\1\47\102\uffff\27\52\1\uffff\37\52\1\uffff\u0208"+
+					"\52\160\uffff\16\52\1\uffff\u1c81\52\14\uffff\2\52\142\uffff\u0120\52"+
+					"\u0a70\uffff\u03f0\52\21\uffff\ua7ff\52\u2100\uffff\u04d0\52\40\uffff"+
+					"\u020e\52",
 			"\1\53\1\uffff\1\53\5\uffff\1\56\1\uffff\2\52\1\53\12\52\1\54\1\53\1"+
-			"\uffff\1\53\1\uffff\1\53\1\uffff\21\52\1\63\10\52\4\uffff\1\55\1\uffff"+
-			"\21\52\1\63\10\52\1\47\1\uffff\1\47\102\uffff\27\52\1\uffff\37\52\1\uffff"+
-			"\u0208\52\160\uffff\16\52\1\uffff\u1c81\52\14\uffff\2\52\142\uffff\u0120"+
-			"\52\u0a70\uffff\u03f0\52\21\uffff\ua7ff\52\u2100\uffff\u04d0\52\40\uffff"+
-			"\u020e\52",
+					"\uffff\1\53\1\uffff\1\53\1\uffff\21\52\1\63\10\52\4\uffff\1\55\1\uffff"+
+					"\21\52\1\63\10\52\1\47\1\uffff\1\47\102\uffff\27\52\1\uffff\37\52\1\uffff"+
+					"\u0208\52\160\uffff\16\52\1\uffff\u1c81\52\14\uffff\2\52\142\uffff\u0120"+
+					"\52\u0a70\uffff\u03f0\52\21\uffff\ua7ff\52\u2100\uffff\u04d0\52\40\uffff"+
+					"\u020e\52",
 			"\1\64",
 			"\12\70\1\uffff\2\70\1\uffff\24\70\1\66\uffdd\70",
 			"\12\73\1\uffff\2\73\1\uffff\60\73\1\71\uffc1\73",
 			"\1\47\1\uffff\1\47\7\uffff\15\47\1\uffff\1\47\1\uffff\1\47\1\uffff\1"+
-			"\47\1\uffff\32\47\4\uffff\1\47\1\uffff\33\47\1\uffff\1\47\102\uffff\27"+
-			"\47\1\uffff\37\47\1\uffff\u0208\47\160\uffff\16\47\1\uffff\u1c81\47\14"+
-			"\uffff\2\47\142\uffff\u0120\47\u0a70\uffff\u03f0\47\21\uffff\ua7ff\47"+
-			"\u2100\uffff\u04d0\47\40\uffff\u020e\47",
+					"\47\1\uffff\32\47\4\uffff\1\47\1\uffff\33\47\1\uffff\1\47\102\uffff\27"+
+					"\47\1\uffff\37\47\1\uffff\u0208\47\160\uffff\16\47\1\uffff\u1c81\47\14"+
+					"\uffff\2\47\142\uffff\u0120\47\u0a70\uffff\u03f0\47\21\uffff\ua7ff\47"+
+					"\u2100\uffff\u04d0\47\40\uffff\u020e\47",
 			"\1\47\1\uffff\1\47\7\uffff\3\47\12\76\1\uffff\1\47\1\uffff\1\47\1\uffff"+
-			"\1\47\1\uffff\32\47\4\uffff\1\47\1\uffff\33\47\1\uffff\1\47\102\uffff"+
-			"\27\47\1\uffff\37\47\1\uffff\u0208\47\160\uffff\16\47\1\uffff\u1c81\47"+
-			"\14\uffff\2\47\142\uffff\u0120\47\u0a70\uffff\u03f0\47\21\uffff\ua7ff"+
-			"\47\u2100\uffff\u04d0\47\40\uffff\u020e\47",
+					"\1\47\1\uffff\32\47\4\uffff\1\47\1\uffff\33\47\1\uffff\1\47\102\uffff"+
+					"\27\47\1\uffff\37\47\1\uffff\u0208\47\160\uffff\16\47\1\uffff\u1c81\47"+
+					"\14\uffff\2\47\142\uffff\u0120\47\u0a70\uffff\u03f0\47\21\uffff\ua7ff"+
+					"\47\u2100\uffff\u04d0\47\40\uffff\u020e\47",
 			"",
 			"\1\77",
 			"",
 			"\12\103\1\uffff\2\103\1\uffff\24\103\1\uffff\1\104\1\103\1\104\7\103"+
-			"\15\104\1\103\1\104\1\103\1\104\1\103\1\104\1\103\32\104\4\103\1\104"+
-			"\1\103\33\104\1\103\1\102\102\103\27\104\1\103\37\104\1\103\u0208\104"+
-			"\160\103\16\104\1\103\u1c81\104\14\103\2\104\142\103\u0120\104\u0a70"+
-			"\103\u03f0\104\21\103\ua7ff\104\u2100\103\u04d0\104\40\103\u020e\104"+
-			"\2\103",
+					"\15\104\1\103\1\104\1\103\1\104\1\103\1\104\1\103\32\104\4\103\1\104"+
+					"\1\103\33\104\1\103\1\102\102\103\27\104\1\103\37\104\1\103\u0208\104"+
+					"\160\103\16\104\1\103\u1c81\104\14\103\2\104\142\103\u0120\104\u0a70"+
+					"\103\u03f0\104\21\103\ua7ff\104\u2100\103\u04d0\104\40\103\u020e\104"+
+					"\2\103",
 			"\1\47\1\uffff\1\47\7\uffff\15\47\1\uffff\1\47\1\uffff\1\47\1\uffff\1"+
-			"\47\1\uffff\32\47\4\uffff\1\47\1\uffff\33\47\1\uffff\1\47\102\uffff\27"+
-			"\47\1\uffff\37\47\1\uffff\u0208\47\160\uffff\16\47\1\uffff\u1c81\47\14"+
-			"\uffff\2\47\142\uffff\u0120\47\u0a70\uffff\u03f0\47\21\uffff\ua7ff\47"+
-			"\u2100\uffff\u04d0\47\40\uffff\u020e\47",
+					"\47\1\uffff\32\47\4\uffff\1\47\1\uffff\33\47\1\uffff\1\47\102\uffff\27"+
+					"\47\1\uffff\37\47\1\uffff\u0208\47\160\uffff\16\47\1\uffff\u1c81\47\14"+
+					"\uffff\2\47\142\uffff\u0120\47\u0a70\uffff\u03f0\47\21\uffff\ua7ff\47"+
+					"\u2100\uffff\u04d0\47\40\uffff\u020e\47",
 			"",
 			"",
 			"\1\47\1\uffff\1\47\7\uffff\15\47\1\uffff\1\47\1\uffff\1\47\1\uffff\1"+
-			"\47\1\uffff\32\47\4\uffff\1\47\1\uffff\33\47\1\uffff\1\47\102\uffff\27"+
-			"\47\1\uffff\37\47\1\uffff\u0208\47\160\uffff\16\47\1\uffff\u1c81\47\14"+
-			"\uffff\2\47\142\uffff\u0120\47\u0a70\uffff\u03f0\47\21\uffff\ua7ff\47"+
-			"\u2100\uffff\u04d0\47\40\uffff\u020e\47",
+					"\47\1\uffff\32\47\4\uffff\1\47\1\uffff\33\47\1\uffff\1\47\102\uffff\27"+
+					"\47\1\uffff\37\47\1\uffff\u0208\47\160\uffff\16\47\1\uffff\u1c81\47\14"+
+					"\uffff\2\47\142\uffff\u0120\47\u0a70\uffff\u03f0\47\21\uffff\ua7ff\47"+
+					"\u2100\uffff\u04d0\47\40\uffff\u020e\47",
 			"",
 			"\12\110\1\uffff\2\110\1\uffff\ufff2\110",
 			"",
 			"\1\53\1\uffff\1\53\7\uffff\15\53\1\111\1\53\1\uffff\1\53\1\uffff\1\53"+
-			"\1\uffff\32\53\4\uffff\1\53\1\uffff\32\53\1\47\1\uffff\1\47\102\uffff"+
-			"\27\53\1\uffff\37\53\1\uffff\u0208\53\160\uffff\16\53\1\uffff\u1c81\53"+
-			"\14\uffff\2\53\142\uffff\u0120\53\u0a70\uffff\u03f0\53\21\uffff\ua7ff"+
-			"\53\u2100\uffff\u04d0\53\40\uffff\u020e\53",
+					"\1\uffff\32\53\4\uffff\1\53\1\uffff\32\53\1\47\1\uffff\1\47\102\uffff"+
+					"\27\53\1\uffff\37\53\1\uffff\u0208\53\160\uffff\16\53\1\uffff\u1c81\53"+
+					"\14\uffff\2\53\142\uffff\u0120\53\u0a70\uffff\u03f0\53\21\uffff\ua7ff"+
+					"\53\u2100\uffff\u04d0\53\40\uffff\u020e\53",
 			"\1\47\1\uffff\1\47\7\uffff\1\47\1\115\1\47\12\114\1\uffff\1\47\1\uffff"+
-			"\1\47\1\uffff\1\47\1\uffff\32\47\4\uffff\1\47\1\uffff\33\47\1\uffff\1"+
-			"\47\102\uffff\27\47\1\uffff\37\47\1\uffff\u0208\47\160\uffff\16\47\1"+
-			"\uffff\u1c81\47\14\uffff\2\47\142\uffff\u0120\47\u0a70\uffff\u03f0\47"+
-			"\21\uffff\ua7ff\47\u2100\uffff\u04d0\47\40\uffff\u020e\47",
+					"\1\47\1\uffff\1\47\1\uffff\32\47\4\uffff\1\47\1\uffff\33\47\1\uffff\1"+
+					"\47\102\uffff\27\47\1\uffff\37\47\1\uffff\u0208\47\160\uffff\16\47\1"+
+					"\uffff\u1c81\47\14\uffff\2\47\142\uffff\u0120\47\u0a70\uffff\u03f0\47"+
+					"\21\uffff\ua7ff\47\u2100\uffff\u04d0\47\40\uffff\u020e\47",
 			"",
 			"",
 			"",
 			"",
 			"\1\47\1\uffff\1\47\7\uffff\15\47\1\uffff\1\47\1\uffff\1\47\1\uffff\1"+
-			"\47\1\uffff\32\47\4\uffff\1\47\1\uffff\33\47\1\uffff\1\47\102\uffff\27"+
-			"\47\1\uffff\37\47\1\uffff\u0208\47\160\uffff\16\47\1\uffff\u1c81\47\14"+
-			"\uffff\2\47\142\uffff\u0120\47\u0a70\uffff\u03f0\47\21\uffff\ua7ff\47"+
-			"\u2100\uffff\u04d0\47\40\uffff\u020e\47",
+					"\47\1\uffff\32\47\4\uffff\1\47\1\uffff\33\47\1\uffff\1\47\102\uffff\27"+
+					"\47\1\uffff\37\47\1\uffff\u0208\47\160\uffff\16\47\1\uffff\u1c81\47\14"+
+					"\uffff\2\47\142\uffff\u0120\47\u0a70\uffff\u03f0\47\21\uffff\ua7ff\47"+
+					"\u2100\uffff\u04d0\47\40\uffff\u020e\47",
 			"\1\47\1\uffff\1\47\7\uffff\15\47\1\uffff\1\47\1\uffff\1\47\1\uffff\1"+
-			"\47\1\uffff\32\47\4\uffff\1\47\1\uffff\33\47\1\uffff\1\47\102\uffff\27"+
-			"\47\1\uffff\37\47\1\uffff\u0208\47\160\uffff\16\47\1\uffff\u1c81\47\14"+
-			"\uffff\2\47\142\uffff\u0120\47\u0a70\uffff\u03f0\47\21\uffff\ua7ff\47"+
-			"\u2100\uffff\u04d0\47\40\uffff\u020e\47",
+					"\47\1\uffff\32\47\4\uffff\1\47\1\uffff\33\47\1\uffff\1\47\102\uffff\27"+
+					"\47\1\uffff\37\47\1\uffff\u0208\47\160\uffff\16\47\1\uffff\u1c81\47\14"+
+					"\uffff\2\47\142\uffff\u0120\47\u0a70\uffff\u03f0\47\21\uffff\ua7ff\47"+
+					"\u2100\uffff\u04d0\47\40\uffff\u020e\47",
 			"\1\122\1\uffff\12\121",
 			"\1\47\1\uffff\1\47\7\uffff\15\47\1\uffff\1\47\1\uffff\1\47\1\uffff\1"+
-			"\47\1\uffff\32\47\4\uffff\1\47\1\uffff\33\47\1\uffff\1\47\102\uffff\27"+
-			"\47\1\uffff\37\47\1\uffff\u0208\47\160\uffff\16\47\1\uffff\u1c81\47\14"+
-			"\uffff\2\47\142\uffff\u0120\47\u0a70\uffff\u03f0\47\21\uffff\ua7ff\47"+
-			"\u2100\uffff\u04d0\47\40\uffff\u020e\47",
+					"\47\1\uffff\32\47\4\uffff\1\47\1\uffff\33\47\1\uffff\1\47\102\uffff\27"+
+					"\47\1\uffff\37\47\1\uffff\u0208\47\160\uffff\16\47\1\uffff\u1c81\47\14"+
+					"\uffff\2\47\142\uffff\u0120\47\u0a70\uffff\u03f0\47\21\uffff\ua7ff\47"+
+					"\u2100\uffff\u04d0\47\40\uffff\u020e\47",
 			"\1\125\1\uffff\1\125\7\uffff\15\125\1\uffff\1\125\1\uffff\1\125\1\uffff"+
-			"\1\125\1\uffff\32\125\4\uffff\1\125\1\uffff\33\125\1\uffff\1\125\102"+
-			"\uffff\27\125\1\uffff\37\125\1\uffff\u0208\125\160\uffff\16\125\1\uffff"+
-			"\u1c81\125\14\uffff\2\125\142\uffff\u0120\125\u0a70\uffff\u03f0\125\21"+
-			"\uffff\ua7ff\125\u2100\uffff\u04d0\125\40\uffff\u020e\125",
+					"\1\125\1\uffff\32\125\4\uffff\1\125\1\uffff\33\125\1\uffff\1\125\102"+
+					"\uffff\27\125\1\uffff\37\125\1\uffff\u0208\125\160\uffff\16\125\1\uffff"+
+					"\u1c81\125\14\uffff\2\125\142\uffff\u0120\125\u0a70\uffff\u03f0\125\21"+
+					"\uffff\ua7ff\125\u2100\uffff\u04d0\125\40\uffff\u020e\125",
 			"",
 			"\1\47\1\uffff\1\47\7\uffff\2\47\1\126\12\47\1\uffff\1\47\1\uffff\1\47"+
-			"\1\uffff\1\47\1\uffff\32\47\4\uffff\1\47\1\uffff\33\47\1\uffff\1\47\102"+
-			"\uffff\27\47\1\uffff\37\47\1\uffff\u0208\47\160\uffff\16\47\1\uffff\u1c81"+
-			"\47\14\uffff\2\47\142\uffff\u0120\47\u0a70\uffff\u03f0\47\21\uffff\ua7ff"+
-			"\47\u2100\uffff\u04d0\47\40\uffff\u020e\47",
+					"\1\uffff\1\47\1\uffff\32\47\4\uffff\1\47\1\uffff\33\47\1\uffff\1\47\102"+
+					"\uffff\27\47\1\uffff\37\47\1\uffff\u0208\47\160\uffff\16\47\1\uffff\u1c81"+
+					"\47\14\uffff\2\47\142\uffff\u0120\47\u0a70\uffff\u03f0\47\21\uffff\ua7ff"+
+					"\47\u2100\uffff\u04d0\47\40\uffff\u020e\47",
 			"",
 			"",
 			"\1\47\1\uffff\1\47\7\uffff\1\47\1\131\1\47\12\45\1\uffff\1\47\1\uffff"+
-			"\1\47\1\uffff\1\47\1\uffff\4\47\1\132\25\47\4\uffff\1\47\1\uffff\4\47"+
-			"\1\132\26\47\1\uffff\1\47\102\uffff\27\47\1\uffff\37\47\1\uffff\u0208"+
-			"\47\160\uffff\16\47\1\uffff\u1c81\47\14\uffff\2\47\142\uffff\u0120\47"+
-			"\u0a70\uffff\u03f0\47\21\uffff\ua7ff\47\u2100\uffff\u04d0\47\40\uffff"+
-			"\u020e\47",
+					"\1\47\1\uffff\1\47\1\uffff\4\47\1\132\25\47\4\uffff\1\47\1\uffff\4\47"+
+					"\1\132\26\47\1\uffff\1\47\102\uffff\27\47\1\uffff\37\47\1\uffff\u0208"+
+					"\47\160\uffff\16\47\1\uffff\u1c81\47\14\uffff\2\47\142\uffff\u0120\47"+
+					"\u0a70\uffff\u03f0\47\21\uffff\ua7ff\47\u2100\uffff\u04d0\47\40\uffff"+
+					"\u020e\47",
 			"\1\53\1\uffff\1\53\5\uffff\1\56\1\uffff\2\52\1\53\12\52\1\54\1\53\1"+
-			"\uffff\1\53\1\uffff\1\53\1\uffff\32\52\4\uffff\1\55\1\uffff\32\52\1\47"+
-			"\1\uffff\1\47\102\uffff\27\52\1\uffff\37\52\1\uffff\u0208\52\160\uffff"+
-			"\16\52\1\uffff\u1c81\52\14\uffff\2\52\142\uffff\u0120\52\u0a70\uffff"+
-			"\u03f0\52\21\uffff\ua7ff\52\u2100\uffff\u04d0\52\40\uffff\u020e\52",
+					"\uffff\1\53\1\uffff\1\53\1\uffff\32\52\4\uffff\1\55\1\uffff\32\52\1\47"+
+					"\1\uffff\1\47\102\uffff\27\52\1\uffff\37\52\1\uffff\u0208\52\160\uffff"+
+					"\16\52\1\uffff\u1c81\52\14\uffff\2\52\142\uffff\u0120\52\u0a70\uffff"+
+					"\u03f0\52\21\uffff\ua7ff\52\u2100\uffff\u04d0\52\40\uffff\u020e\52",
 			"",
 			"",
 			"",
 			"\1\53\1\uffff\1\53\5\uffff\1\56\1\uffff\2\52\1\53\12\52\1\54\1\53\1"+
-			"\uffff\1\53\1\uffff\1\53\1\uffff\32\52\4\uffff\1\55\1\uffff\32\52\1\47"+
-			"\1\uffff\1\47\102\uffff\27\52\1\uffff\37\52\1\uffff\u0208\52\160\uffff"+
-			"\16\52\1\uffff\u1c81\52\14\uffff\2\52\142\uffff\u0120\52\u0a70\uffff"+
-			"\u03f0\52\21\uffff\ua7ff\52\u2100\uffff\u04d0\52\40\uffff\u020e\52",
+					"\uffff\1\53\1\uffff\1\53\1\uffff\32\52\4\uffff\1\55\1\uffff\32\52\1\47"+
+					"\1\uffff\1\47\102\uffff\27\52\1\uffff\37\52\1\uffff\u0208\52\160\uffff"+
+					"\16\52\1\uffff\u1c81\52\14\uffff\2\52\142\uffff\u0120\52\u0a70\uffff"+
+					"\u03f0\52\21\uffff\ua7ff\52\u2100\uffff\u04d0\52\40\uffff\u020e\52",
 			"\1\53\1\uffff\1\53\7\uffff\15\53\1\134\1\53\1\uffff\1\53\1\uffff\1\53"+
-			"\1\uffff\32\53\4\uffff\1\53\1\uffff\32\53\1\47\1\uffff\1\47\102\uffff"+
-			"\27\53\1\uffff\37\53\1\uffff\u0208\53\160\uffff\16\53\1\uffff\u1c81\53"+
-			"\14\uffff\2\53\142\uffff\u0120\53\u0a70\uffff\u03f0\53\21\uffff\ua7ff"+
-			"\53\u2100\uffff\u04d0\53\40\uffff\u020e\53",
+					"\1\uffff\32\53\4\uffff\1\53\1\uffff\32\53\1\47\1\uffff\1\47\102\uffff"+
+					"\27\53\1\uffff\37\53\1\uffff\u0208\53\160\uffff\16\53\1\uffff\u1c81\53"+
+					"\14\uffff\2\53\142\uffff\u0120\53\u0a70\uffff\u03f0\53\21\uffff\ua7ff"+
+					"\53\u2100\uffff\u04d0\53\40\uffff\u020e\53",
 			"\1\125\1\uffff\1\125\7\uffff\2\125\1\136\12\125\1\uffff\1\125\1\uffff"+
-			"\1\125\1\uffff\1\125\1\uffff\32\125\4\uffff\1\125\1\uffff\33\125\1\uffff"+
-			"\1\125\102\uffff\27\125\1\uffff\37\125\1\uffff\u0208\125\160\uffff\16"+
-			"\125\1\uffff\u1c81\125\14\uffff\2\125\142\uffff\u0120\125\u0a70\uffff"+
-			"\u03f0\125\21\uffff\ua7ff\125\u2100\uffff\u04d0\125\40\uffff\u020e\125",
+					"\1\125\1\uffff\1\125\1\uffff\32\125\4\uffff\1\125\1\uffff\33\125\1\uffff"+
+					"\1\125\102\uffff\27\125\1\uffff\37\125\1\uffff\u0208\125\160\uffff\16"+
+					"\125\1\uffff\u1c81\125\14\uffff\2\125\142\uffff\u0120\125\u0a70\uffff"+
+					"\u03f0\125\21\uffff\ua7ff\125\u2100\uffff\u04d0\125\40\uffff\u020e\125",
 			"\1\53\1\uffff\1\53\7\uffff\2\55\1\53\12\55\1\134\1\53\1\uffff\1\53\1"+
-			"\uffff\1\53\1\uffff\32\55\4\uffff\1\55\1\uffff\32\55\1\47\1\uffff\1\47"+
-			"\102\uffff\27\55\1\uffff\37\55\1\uffff\u0208\55\160\uffff\16\55\1\uffff"+
-			"\u1c81\55\14\uffff\2\55\142\uffff\u0120\55\u0a70\uffff\u03f0\55\21\uffff"+
-			"\ua7ff\55\u2100\uffff\u04d0\55\40\uffff\u020e\55",
+					"\uffff\1\53\1\uffff\32\55\4\uffff\1\55\1\uffff\32\55\1\47\1\uffff\1\47"+
+					"\102\uffff\27\55\1\uffff\37\55\1\uffff\u0208\55\160\uffff\16\55\1\uffff"+
+					"\u1c81\55\14\uffff\2\55\142\uffff\u0120\55\u0a70\uffff\u03f0\55\21\uffff"+
+					"\ua7ff\55\u2100\uffff\u04d0\55\40\uffff\u020e\55",
 			"",
 			"\1\53\1\uffff\1\53\5\uffff\1\56\1\uffff\2\52\1\53\12\52\1\54\1\53\1"+
-			"\uffff\1\53\1\uffff\1\53\1\uffff\22\52\1\137\7\52\4\uffff\1\55\1\uffff"+
-			"\22\52\1\137\7\52\1\47\1\uffff\1\47\102\uffff\27\52\1\uffff\37\52\1\uffff"+
-			"\u0208\52\160\uffff\16\52\1\uffff\u1c81\52\14\uffff\2\52\142\uffff\u0120"+
-			"\52\u0a70\uffff\u03f0\52\21\uffff\ua7ff\52\u2100\uffff\u04d0\52\40\uffff"+
-			"\u020e\52",
+					"\uffff\1\53\1\uffff\1\53\1\uffff\22\52\1\137\7\52\4\uffff\1\55\1\uffff"+
+					"\22\52\1\137\7\52\1\47\1\uffff\1\47\102\uffff\27\52\1\uffff\37\52\1\uffff"+
+					"\u0208\52\160\uffff\16\52\1\uffff\u1c81\52\14\uffff\2\52\142\uffff\u0120"+
+					"\52\u0a70\uffff\u03f0\52\21\uffff\ua7ff\52\u2100\uffff\u04d0\52\40\uffff"+
+					"\u020e\52",
 			"",
 			"\1\53\1\uffff\1\53\5\uffff\1\56\1\uffff\2\52\1\53\12\52\1\54\1\53\1"+
-			"\uffff\1\53\1\uffff\1\53\1\uffff\4\52\1\140\25\52\4\uffff\1\55\1\uffff"+
-			"\4\52\1\140\25\52\1\47\1\uffff\1\47\102\uffff\27\52\1\uffff\37\52\1\uffff"+
-			"\u0208\52\160\uffff\16\52\1\uffff\u1c81\52\14\uffff\2\52\142\uffff\u0120"+
-			"\52\u0a70\uffff\u03f0\52\21\uffff\ua7ff\52\u2100\uffff\u04d0\52\40\uffff"+
-			"\u020e\52",
+					"\uffff\1\53\1\uffff\1\53\1\uffff\4\52\1\140\25\52\4\uffff\1\55\1\uffff"+
+					"\4\52\1\140\25\52\1\47\1\uffff\1\47\102\uffff\27\52\1\uffff\37\52\1\uffff"+
+					"\u0208\52\160\uffff\16\52\1\uffff\u1c81\52\14\uffff\2\52\142\uffff\u0120"+
+					"\52\u0a70\uffff\u03f0\52\21\uffff\ua7ff\52\u2100\uffff\u04d0\52\40\uffff"+
+					"\u020e\52",
 			"\1\53\1\uffff\1\53\5\uffff\1\56\1\uffff\2\52\1\53\12\52\1\54\1\53\1"+
-			"\uffff\1\53\1\uffff\1\53\1\uffff\13\52\1\141\16\52\4\uffff\1\55\1\uffff"+
-			"\13\52\1\141\16\52\1\47\1\uffff\1\47\102\uffff\27\52\1\uffff\37\52\1"+
-			"\uffff\u0208\52\160\uffff\16\52\1\uffff\u1c81\52\14\uffff\2\52\142\uffff"+
-			"\u0120\52\u0a70\uffff\u03f0\52\21\uffff\ua7ff\52\u2100\uffff\u04d0\52"+
-			"\40\uffff\u020e\52",
+					"\uffff\1\53\1\uffff\1\53\1\uffff\13\52\1\141\16\52\4\uffff\1\55\1\uffff"+
+					"\13\52\1\141\16\52\1\47\1\uffff\1\47\102\uffff\27\52\1\uffff\37\52\1"+
+					"\uffff\u0208\52\160\uffff\16\52\1\uffff\u1c81\52\14\uffff\2\52\142\uffff"+
+					"\u0120\52\u0a70\uffff\u03f0\52\21\uffff\ua7ff\52\u2100\uffff\u04d0\52"+
+					"\40\uffff\u020e\52",
 			"\1\53\1\uffff\1\53\5\uffff\1\56\1\uffff\2\52\1\53\12\52\1\54\1\53\1"+
-			"\uffff\1\53\1\uffff\1\53\1\uffff\24\52\1\142\5\52\4\uffff\1\55\1\uffff"+
-			"\24\52\1\142\5\52\1\47\1\uffff\1\47\102\uffff\27\52\1\uffff\37\52\1\uffff"+
-			"\u0208\52\160\uffff\16\52\1\uffff\u1c81\52\14\uffff\2\52\142\uffff\u0120"+
-			"\52\u0a70\uffff\u03f0\52\21\uffff\ua7ff\52\u2100\uffff\u04d0\52\40\uffff"+
-			"\u020e\52",
+					"\uffff\1\53\1\uffff\1\53\1\uffff\24\52\1\142\5\52\4\uffff\1\55\1\uffff"+
+					"\24\52\1\142\5\52\1\47\1\uffff\1\47\102\uffff\27\52\1\uffff\37\52\1\uffff"+
+					"\u0208\52\160\uffff\16\52\1\uffff\u1c81\52\14\uffff\2\52\142\uffff\u0120"+
+					"\52\u0a70\uffff\u03f0\52\21\uffff\ua7ff\52\u2100\uffff\u04d0\52\40\uffff"+
+					"\u020e\52",
 			"",
 			"",
 			"",
@@ -3528,43 +3521,43 @@ public class TurtleOBDALexer extends Lexer {
 			"",
 			"",
 			"\1\47\1\uffff\1\47\7\uffff\3\47\12\76\1\uffff\1\47\1\uffff\1\47\1\uffff"+
-			"\1\47\1\uffff\4\47\1\144\25\47\4\uffff\1\47\1\uffff\4\47\1\144\26\47"+
-			"\1\uffff\1\47\102\uffff\27\47\1\uffff\37\47\1\uffff\u0208\47\160\uffff"+
-			"\16\47\1\uffff\u1c81\47\14\uffff\2\47\142\uffff\u0120\47\u0a70\uffff"+
-			"\u03f0\47\21\uffff\ua7ff\47\u2100\uffff\u04d0\47\40\uffff\u020e\47",
+					"\1\47\1\uffff\4\47\1\144\25\47\4\uffff\1\47\1\uffff\4\47\1\144\26\47"+
+					"\1\uffff\1\47\102\uffff\27\47\1\uffff\37\47\1\uffff\u0208\47\160\uffff"+
+					"\16\47\1\uffff\u1c81\47\14\uffff\2\47\142\uffff\u0120\47\u0a70\uffff"+
+					"\u03f0\47\21\uffff\ua7ff\47\u2100\uffff\u04d0\47\40\uffff\u020e\47",
 			"",
 			"",
 			"",
 			"\12\103\1\uffff\2\103\1\uffff\24\103\1\uffff\1\104\1\103\1\104\7\103"+
-			"\15\104\1\103\1\104\1\103\1\104\1\103\1\104\1\103\32\104\4\103\1\104"+
-			"\1\103\33\104\1\103\1\102\102\103\27\104\1\103\37\104\1\103\u0208\104"+
-			"\160\103\16\104\1\103\u1c81\104\14\103\2\104\142\103\u0120\104\u0a70"+
-			"\103\u03f0\104\21\103\ua7ff\104\u2100\103\u04d0\104\40\103\u020e\104"+
-			"\2\103",
+					"\15\104\1\103\1\104\1\103\1\104\1\103\1\104\1\103\32\104\4\103\1\104"+
+					"\1\103\33\104\1\103\1\102\102\103\27\104\1\103\37\104\1\103\u0208\104"+
+					"\160\103\16\104\1\103\u1c81\104\14\103\2\104\142\103\u0120\104\u0a70"+
+					"\103\u03f0\104\21\103\ua7ff\104\u2100\103\u04d0\104\40\103\u020e\104"+
+					"\2\103",
 			"",
 			"\12\103\1\uffff\2\103\1\uffff\24\103\1\uffff\1\104\1\103\1\104\7\103"+
-			"\15\104\1\103\1\104\1\103\1\104\1\103\1\104\1\103\32\104\4\103\1\104"+
-			"\1\103\33\104\1\103\1\102\102\103\27\104\1\103\37\104\1\103\u0208\104"+
-			"\160\103\16\104\1\103\u1c81\104\14\103\2\104\142\103\u0120\104\u0a70"+
-			"\103\u03f0\104\21\103\ua7ff\104\u2100\103\u04d0\104\40\103\u020e\104"+
-			"\2\103",
+					"\15\104\1\103\1\104\1\103\1\104\1\103\1\104\1\103\32\104\4\103\1\104"+
+					"\1\103\33\104\1\103\1\102\102\103\27\104\1\103\37\104\1\103\u0208\104"+
+					"\160\103\16\104\1\103\u1c81\104\14\103\2\104\142\103\u0120\104\u0a70"+
+					"\103\u03f0\104\21\103\ua7ff\104\u2100\103\u04d0\104\40\103\u020e\104"+
+					"\2\103",
 			"",
 			"",
 			"",
 			"",
 			"\1\125\1\uffff\1\125\7\uffff\15\125\1\uffff\1\125\1\uffff\1\125\1\uffff"+
-			"\1\125\1\uffff\32\125\4\uffff\1\125\1\uffff\33\125\1\uffff\1\125\102"+
-			"\uffff\27\125\1\uffff\37\125\1\uffff\u0208\125\160\uffff\16\125\1\uffff"+
-			"\u1c81\125\14\uffff\2\125\142\uffff\u0120\125\u0a70\uffff\u03f0\125\21"+
-			"\uffff\ua7ff\125\u2100\uffff\u04d0\125\40\uffff\u020e\125",
+					"\1\125\1\uffff\32\125\4\uffff\1\125\1\uffff\33\125\1\uffff\1\125\102"+
+					"\uffff\27\125\1\uffff\37\125\1\uffff\u0208\125\160\uffff\16\125\1\uffff"+
+					"\u1c81\125\14\uffff\2\125\142\uffff\u0120\125\u0a70\uffff\u03f0\125\21"+
+					"\uffff\ua7ff\125\u2100\uffff\u04d0\125\40\uffff\u020e\125",
 			"",
 			"",
 			"\1\47\1\uffff\1\47\7\uffff\1\47\1\150\1\47\12\114\1\uffff\1\47\1\uffff"+
-			"\1\47\1\uffff\1\47\1\uffff\4\47\1\151\25\47\4\uffff\1\47\1\uffff\4\47"+
-			"\1\151\26\47\1\uffff\1\47\102\uffff\27\47\1\uffff\37\47\1\uffff\u0208"+
-			"\47\160\uffff\16\47\1\uffff\u1c81\47\14\uffff\2\47\142\uffff\u0120\47"+
-			"\u0a70\uffff\u03f0\47\21\uffff\ua7ff\47\u2100\uffff\u04d0\47\40\uffff"+
-			"\u020e\47",
+					"\1\47\1\uffff\1\47\1\uffff\4\47\1\151\25\47\4\uffff\1\47\1\uffff\4\47"+
+					"\1\151\26\47\1\uffff\1\47\102\uffff\27\47\1\uffff\37\47\1\uffff\u0208"+
+					"\47\160\uffff\16\47\1\uffff\u1c81\47\14\uffff\2\47\142\uffff\u0120\47"+
+					"\u0a70\uffff\u03f0\47\21\uffff\ua7ff\47\u2100\uffff\u04d0\47\40\uffff"+
+					"\u020e\47",
 			"\12\152",
 			"",
 			"",
@@ -3575,215 +3568,215 @@ public class TurtleOBDALexer extends Lexer {
 			"",
 			"",
 			"\1\47\1\uffff\1\47\7\uffff\15\47\1\uffff\1\47\1\uffff\1\47\1\uffff\1"+
-			"\47\1\uffff\32\47\4\uffff\1\47\1\uffff\33\47\1\uffff\1\47\102\uffff\27"+
-			"\47\1\uffff\37\47\1\uffff\u0208\47\160\uffff\16\47\1\uffff\u1c81\47\14"+
-			"\uffff\2\47\142\uffff\u0120\47\u0a70\uffff\u03f0\47\21\uffff\ua7ff\47"+
-			"\u2100\uffff\u04d0\47\40\uffff\u020e\47",
+					"\47\1\uffff\32\47\4\uffff\1\47\1\uffff\33\47\1\uffff\1\47\102\uffff\27"+
+					"\47\1\uffff\37\47\1\uffff\u0208\47\160\uffff\16\47\1\uffff\u1c81\47\14"+
+					"\uffff\2\47\142\uffff\u0120\47\u0a70\uffff\u03f0\47\21\uffff\ua7ff\47"+
+					"\u2100\uffff\u04d0\47\40\uffff\u020e\47",
 			"",
 			"",
 			"\12\160\13\uffff\1\161\37\uffff\1\161",
 			"\1\47\1\uffff\1\47\7\uffff\1\162\2\47\12\163\1\uffff\1\47\1\uffff\1"+
-			"\47\1\uffff\1\47\1\uffff\32\47\4\uffff\1\47\1\uffff\33\47\1\uffff\1\47"+
-			"\102\uffff\27\47\1\uffff\37\47\1\uffff\u0208\47\160\uffff\16\47\1\uffff"+
-			"\u1c81\47\14\uffff\2\47\142\uffff\u0120\47\u0a70\uffff\u03f0\47\21\uffff"+
-			"\ua7ff\47\u2100\uffff\u04d0\47\40\uffff\u020e\47",
+					"\47\1\uffff\1\47\1\uffff\32\47\4\uffff\1\47\1\uffff\33\47\1\uffff\1\47"+
+					"\102\uffff\27\47\1\uffff\37\47\1\uffff\u0208\47\160\uffff\16\47\1\uffff"+
+					"\u1c81\47\14\uffff\2\47\142\uffff\u0120\47\u0a70\uffff\u03f0\47\21\uffff"+
+					"\ua7ff\47\u2100\uffff\u04d0\47\40\uffff\u020e\47",
 			"",
 			"\1\125\1\uffff\1\125\7\uffff\15\125\1\uffff\1\125\1\uffff\1\125\1\uffff"+
-			"\1\125\1\uffff\32\125\4\uffff\1\125\1\uffff\33\125\1\uffff\1\125\102"+
-			"\uffff\27\125\1\uffff\37\125\1\uffff\u0208\125\160\uffff\16\125\1\uffff"+
-			"\u1c81\125\14\uffff\2\125\142\uffff\u0120\125\u0a70\uffff\u03f0\125\21"+
-			"\uffff\ua7ff\125\u2100\uffff\u04d0\125\40\uffff\u020e\125",
+					"\1\125\1\uffff\32\125\4\uffff\1\125\1\uffff\33\125\1\uffff\1\125\102"+
+					"\uffff\27\125\1\uffff\37\125\1\uffff\u0208\125\160\uffff\16\125\1\uffff"+
+					"\u1c81\125\14\uffff\2\125\142\uffff\u0120\125\u0a70\uffff\u03f0\125\21"+
+					"\uffff\ua7ff\125\u2100\uffff\u04d0\125\40\uffff\u020e\125",
 			"",
 			"\1\165",
 			"\1\53\1\uffff\1\53\5\uffff\1\56\1\uffff\2\52\1\53\12\52\1\54\1\53\1"+
-			"\uffff\1\53\1\uffff\1\53\1\uffff\4\52\1\166\25\52\4\uffff\1\55\1\uffff"+
-			"\4\52\1\166\25\52\1\47\1\uffff\1\47\102\uffff\27\52\1\uffff\37\52\1\uffff"+
-			"\u0208\52\160\uffff\16\52\1\uffff\u1c81\52\14\uffff\2\52\142\uffff\u0120"+
-			"\52\u0a70\uffff\u03f0\52\21\uffff\ua7ff\52\u2100\uffff\u04d0\52\40\uffff"+
-			"\u020e\52",
+					"\uffff\1\53\1\uffff\1\53\1\uffff\4\52\1\166\25\52\4\uffff\1\55\1\uffff"+
+					"\4\52\1\166\25\52\1\47\1\uffff\1\47\102\uffff\27\52\1\uffff\37\52\1\uffff"+
+					"\u0208\52\160\uffff\16\52\1\uffff\u1c81\52\14\uffff\2\52\142\uffff\u0120"+
+					"\52\u0a70\uffff\u03f0\52\21\uffff\ua7ff\52\u2100\uffff\u04d0\52\40\uffff"+
+					"\u020e\52",
 			"\1\53\1\uffff\1\53\5\uffff\1\56\1\uffff\2\52\1\53\12\52\1\54\1\53\1"+
-			"\uffff\1\53\1\uffff\1\53\1\uffff\5\52\1\167\24\52\4\uffff\1\55\1\uffff"+
-			"\5\52\1\167\24\52\1\47\1\uffff\1\47\102\uffff\27\52\1\uffff\37\52\1\uffff"+
-			"\u0208\52\160\uffff\16\52\1\uffff\u1c81\52\14\uffff\2\52\142\uffff\u0120"+
-			"\52\u0a70\uffff\u03f0\52\21\uffff\ua7ff\52\u2100\uffff\u04d0\52\40\uffff"+
-			"\u020e\52",
+					"\uffff\1\53\1\uffff\1\53\1\uffff\5\52\1\167\24\52\4\uffff\1\55\1\uffff"+
+					"\5\52\1\167\24\52\1\47\1\uffff\1\47\102\uffff\27\52\1\uffff\37\52\1\uffff"+
+					"\u0208\52\160\uffff\16\52\1\uffff\u1c81\52\14\uffff\2\52\142\uffff\u0120"+
+					"\52\u0a70\uffff\u03f0\52\21\uffff\ua7ff\52\u2100\uffff\u04d0\52\40\uffff"+
+					"\u020e\52",
 			"\1\53\1\uffff\1\53\5\uffff\1\56\1\uffff\2\52\1\53\12\52\1\54\1\53\1"+
-			"\uffff\1\53\1\uffff\1\53\1\uffff\22\52\1\170\7\52\4\uffff\1\55\1\uffff"+
-			"\22\52\1\170\7\52\1\47\1\uffff\1\47\102\uffff\27\52\1\uffff\37\52\1\uffff"+
-			"\u0208\52\160\uffff\16\52\1\uffff\u1c81\52\14\uffff\2\52\142\uffff\u0120"+
-			"\52\u0a70\uffff\u03f0\52\21\uffff\ua7ff\52\u2100\uffff\u04d0\52\40\uffff"+
-			"\u020e\52",
+					"\uffff\1\53\1\uffff\1\53\1\uffff\22\52\1\170\7\52\4\uffff\1\55\1\uffff"+
+					"\22\52\1\170\7\52\1\47\1\uffff\1\47\102\uffff\27\52\1\uffff\37\52\1\uffff"+
+					"\u0208\52\160\uffff\16\52\1\uffff\u1c81\52\14\uffff\2\52\142\uffff\u0120"+
+					"\52\u0a70\uffff\u03f0\52\21\uffff\ua7ff\52\u2100\uffff\u04d0\52\40\uffff"+
+					"\u020e\52",
 			"\1\53\1\uffff\1\53\5\uffff\1\56\1\uffff\2\52\1\53\12\52\1\54\1\53\1"+
-			"\uffff\1\53\1\uffff\1\53\1\uffff\4\52\1\171\25\52\4\uffff\1\55\1\uffff"+
-			"\4\52\1\171\25\52\1\47\1\uffff\1\47\102\uffff\27\52\1\uffff\37\52\1\uffff"+
-			"\u0208\52\160\uffff\16\52\1\uffff\u1c81\52\14\uffff\2\52\142\uffff\u0120"+
-			"\52\u0a70\uffff\u03f0\52\21\uffff\ua7ff\52\u2100\uffff\u04d0\52\40\uffff"+
-			"\u020e\52",
+					"\uffff\1\53\1\uffff\1\53\1\uffff\4\52\1\171\25\52\4\uffff\1\55\1\uffff"+
+					"\4\52\1\171\25\52\1\47\1\uffff\1\47\102\uffff\27\52\1\uffff\37\52\1\uffff"+
+					"\u0208\52\160\uffff\16\52\1\uffff\u1c81\52\14\uffff\2\52\142\uffff\u0120"+
+					"\52\u0a70\uffff\u03f0\52\21\uffff\ua7ff\52\u2100\uffff\u04d0\52\40\uffff"+
+					"\u020e\52",
 			"",
 			"\1\47\1\uffff\1\47\7\uffff\1\172\2\47\12\173\1\uffff\1\47\1\uffff\1"+
-			"\47\1\uffff\1\47\1\uffff\32\47\4\uffff\1\47\1\uffff\33\47\1\uffff\1\47"+
-			"\102\uffff\27\47\1\uffff\37\47\1\uffff\u0208\47\160\uffff\16\47\1\uffff"+
-			"\u1c81\47\14\uffff\2\47\142\uffff\u0120\47\u0a70\uffff\u03f0\47\21\uffff"+
-			"\ua7ff\47\u2100\uffff\u04d0\47\40\uffff\u020e\47",
+					"\47\1\uffff\1\47\1\uffff\32\47\4\uffff\1\47\1\uffff\33\47\1\uffff\1\47"+
+					"\102\uffff\27\47\1\uffff\37\47\1\uffff\u0208\47\160\uffff\16\47\1\uffff"+
+					"\u1c81\47\14\uffff\2\47\142\uffff\u0120\47\u0a70\uffff\u03f0\47\21\uffff"+
+					"\ua7ff\47\u2100\uffff\u04d0\47\40\uffff\u020e\47",
 			"",
 			"",
 			"",
 			"\12\174\13\uffff\1\175\37\uffff\1\175",
 			"\1\47\1\uffff\1\47\7\uffff\1\176\2\47\12\177\1\uffff\1\47\1\uffff\1"+
-			"\47\1\uffff\1\47\1\uffff\32\47\4\uffff\1\47\1\uffff\33\47\1\uffff\1\47"+
-			"\102\uffff\27\47\1\uffff\37\47\1\uffff\u0208\47\160\uffff\16\47\1\uffff"+
-			"\u1c81\47\14\uffff\2\47\142\uffff\u0120\47\u0a70\uffff\u03f0\47\21\uffff"+
-			"\ua7ff\47\u2100\uffff\u04d0\47\40\uffff\u020e\47",
+					"\47\1\uffff\1\47\1\uffff\32\47\4\uffff\1\47\1\uffff\33\47\1\uffff\1\47"+
+					"\102\uffff\27\47\1\uffff\37\47\1\uffff\u0208\47\160\uffff\16\47\1\uffff"+
+					"\u1c81\47\14\uffff\2\47\142\uffff\u0120\47\u0a70\uffff\u03f0\47\21\uffff"+
+					"\ua7ff\47\u2100\uffff\u04d0\47\40\uffff\u020e\47",
 			"\1\47\1\uffff\1\47\7\uffff\3\47\12\152\1\uffff\1\47\1\uffff\1\47\1\uffff"+
-			"\1\47\1\uffff\4\47\1\u0081\25\47\4\uffff\1\47\1\uffff\4\47\1\u0081\26"+
-			"\47\1\uffff\1\47\102\uffff\27\47\1\uffff\37\47\1\uffff\u0208\47\160\uffff"+
-			"\16\47\1\uffff\u1c81\47\14\uffff\2\47\142\uffff\u0120\47\u0a70\uffff"+
-			"\u03f0\47\21\uffff\ua7ff\47\u2100\uffff\u04d0\47\40\uffff\u020e\47",
+					"\1\47\1\uffff\4\47\1\u0081\25\47\4\uffff\1\47\1\uffff\4\47\1\u0081\26"+
+					"\47\1\uffff\1\47\102\uffff\27\47\1\uffff\37\47\1\uffff\u0208\47\160\uffff"+
+					"\16\47\1\uffff\u1c81\47\14\uffff\2\47\142\uffff\u0120\47\u0a70\uffff"+
+					"\u03f0\47\21\uffff\ua7ff\47\u2100\uffff\u04d0\47\40\uffff\u020e\47",
 			"",
 			"\12\u0083\13\uffff\1\155\37\uffff\1\155",
 			"",
 			"\12\156\13\uffff\1\155\37\uffff\1\155",
 			"",
 			"\1\47\1\uffff\1\47\7\uffff\3\47\12\160\1\uffff\1\47\1\uffff\1\47\1\uffff"+
-			"\1\47\1\uffff\4\47\1\161\25\47\4\uffff\1\47\1\uffff\4\47\1\161\26\47"+
-			"\1\uffff\1\47\102\uffff\27\47\1\uffff\37\47\1\uffff\u0208\47\160\uffff"+
-			"\16\47\1\uffff\u1c81\47\14\uffff\2\47\142\uffff\u0120\47\u0a70\uffff"+
-			"\u03f0\47\21\uffff\ua7ff\47\u2100\uffff\u04d0\47\40\uffff\u020e\47",
+					"\1\47\1\uffff\4\47\1\161\25\47\4\uffff\1\47\1\uffff\4\47\1\161\26\47"+
+					"\1\uffff\1\47\102\uffff\27\47\1\uffff\37\47\1\uffff\u0208\47\160\uffff"+
+					"\16\47\1\uffff\u1c81\47\14\uffff\2\47\142\uffff\u0120\47\u0a70\uffff"+
+					"\u03f0\47\21\uffff\ua7ff\47\u2100\uffff\u04d0\47\40\uffff\u020e\47",
 			"\1\47\1\uffff\1\47\7\uffff\1\u0085\2\47\12\u0086\1\uffff\1\47\1\uffff"+
-			"\1\47\1\uffff\1\47\1\uffff\32\47\4\uffff\1\47\1\uffff\33\47\1\uffff\1"+
-			"\47\102\uffff\27\47\1\uffff\37\47\1\uffff\u0208\47\160\uffff\16\47\1"+
-			"\uffff\u1c81\47\14\uffff\2\47\142\uffff\u0120\47\u0a70\uffff\u03f0\47"+
-			"\21\uffff\ua7ff\47\u2100\uffff\u04d0\47\40\uffff\u020e\47",
+					"\1\47\1\uffff\1\47\1\uffff\32\47\4\uffff\1\47\1\uffff\33\47\1\uffff\1"+
+					"\47\102\uffff\27\47\1\uffff\37\47\1\uffff\u0208\47\160\uffff\16\47\1"+
+					"\uffff\u1c81\47\14\uffff\2\47\142\uffff\u0120\47\u0a70\uffff\u03f0\47"+
+					"\21\uffff\ua7ff\47\u2100\uffff\u04d0\47\40\uffff\u020e\47",
 			"\1\47\1\uffff\1\47\7\uffff\3\47\12\163\1\uffff\1\47\1\uffff\1\47\1\uffff"+
-			"\1\47\1\uffff\32\47\4\uffff\1\47\1\uffff\33\47\1\uffff\1\47\102\uffff"+
-			"\27\47\1\uffff\37\47\1\uffff\u0208\47\160\uffff\16\47\1\uffff\u1c81\47"+
-			"\14\uffff\2\47\142\uffff\u0120\47\u0a70\uffff\u03f0\47\21\uffff\ua7ff"+
-			"\47\u2100\uffff\u04d0\47\40\uffff\u020e\47",
+					"\1\47\1\uffff\32\47\4\uffff\1\47\1\uffff\33\47\1\uffff\1\47\102\uffff"+
+					"\27\47\1\uffff\37\47\1\uffff\u0208\47\160\uffff\16\47\1\uffff\u1c81\47"+
+					"\14\uffff\2\47\142\uffff\u0120\47\u0a70\uffff\u03f0\47\21\uffff\ua7ff"+
+					"\47\u2100\uffff\u04d0\47\40\uffff\u020e\47",
 			"\1\47\1\uffff\1\47\7\uffff\3\47\12\163\1\uffff\1\47\1\uffff\1\47\1\uffff"+
-			"\1\47\1\uffff\32\47\4\uffff\1\47\1\uffff\33\47\1\uffff\1\47\102\uffff"+
-			"\27\47\1\uffff\37\47\1\uffff\u0208\47\160\uffff\16\47\1\uffff\u1c81\47"+
-			"\14\uffff\2\47\142\uffff\u0120\47\u0a70\uffff\u03f0\47\21\uffff\ua7ff"+
-			"\47\u2100\uffff\u04d0\47\40\uffff\u020e\47",
+					"\1\47\1\uffff\32\47\4\uffff\1\47\1\uffff\33\47\1\uffff\1\47\102\uffff"+
+					"\27\47\1\uffff\37\47\1\uffff\u0208\47\160\uffff\16\47\1\uffff\u1c81\47"+
+					"\14\uffff\2\47\142\uffff\u0120\47\u0a70\uffff\u03f0\47\21\uffff\ua7ff"+
+					"\47\u2100\uffff\u04d0\47\40\uffff\u020e\47",
 			"",
 			"\1\u0087\11\uffff\15\u0087\1\56\4\uffff\1\u0087\1\uffff\32\u0087\4\uffff"+
-			"\1\u0087\1\uffff\32\u0087\105\uffff\27\u0087\1\uffff\37\u0087\1\uffff"+
-			"\u0208\u0087\160\uffff\16\u0087\1\uffff\u1c81\u0087\14\uffff\2\u0087"+
-			"\142\uffff\u0120\u0087\u0a70\uffff\u03f0\u0087\21\uffff\ua7ff\u0087\u2100"+
-			"\uffff\u04d0\u0087\40\uffff\u020e\u0087",
+					"\1\u0087\1\uffff\32\u0087\105\uffff\27\u0087\1\uffff\37\u0087\1\uffff"+
+					"\u0208\u0087\160\uffff\16\u0087\1\uffff\u1c81\u0087\14\uffff\2\u0087"+
+					"\142\uffff\u0120\u0087\u0a70\uffff\u03f0\u0087\21\uffff\ua7ff\u0087\u2100"+
+					"\uffff\u04d0\u0087\40\uffff\u020e\u0087",
 			"\1\53\1\uffff\1\53\5\uffff\1\56\1\uffff\2\52\1\53\12\52\1\54\1\53\1"+
-			"\uffff\1\53\1\uffff\1\53\1\uffff\32\52\4\uffff\1\55\1\uffff\32\52\1\47"+
-			"\1\uffff\1\47\102\uffff\27\52\1\uffff\37\52\1\uffff\u0208\52\160\uffff"+
-			"\16\52\1\uffff\u1c81\52\14\uffff\2\52\142\uffff\u0120\52\u0a70\uffff"+
-			"\u03f0\52\21\uffff\ua7ff\52\u2100\uffff\u04d0\52\40\uffff\u020e\52",
+					"\uffff\1\53\1\uffff\1\53\1\uffff\32\52\4\uffff\1\55\1\uffff\32\52\1\47"+
+					"\1\uffff\1\47\102\uffff\27\52\1\uffff\37\52\1\uffff\u0208\52\160\uffff"+
+					"\16\52\1\uffff\u1c81\52\14\uffff\2\52\142\uffff\u0120\52\u0a70\uffff"+
+					"\u03f0\52\21\uffff\ua7ff\52\u2100\uffff\u04d0\52\40\uffff\u020e\52",
 			"\1\53\1\uffff\1\53\5\uffff\1\56\1\uffff\2\52\1\53\12\52\1\54\1\53\1"+
-			"\uffff\1\53\1\uffff\1\53\1\uffff\10\52\1\u0089\21\52\4\uffff\1\55\1\uffff"+
-			"\10\52\1\u0089\21\52\1\47\1\uffff\1\47\102\uffff\27\52\1\uffff\37\52"+
-			"\1\uffff\u0208\52\160\uffff\16\52\1\uffff\u1c81\52\14\uffff\2\52\142"+
-			"\uffff\u0120\52\u0a70\uffff\u03f0\52\21\uffff\ua7ff\52\u2100\uffff\u04d0"+
-			"\52\40\uffff\u020e\52",
+					"\uffff\1\53\1\uffff\1\53\1\uffff\10\52\1\u0089\21\52\4\uffff\1\55\1\uffff"+
+					"\10\52\1\u0089\21\52\1\47\1\uffff\1\47\102\uffff\27\52\1\uffff\37\52"+
+					"\1\uffff\u0208\52\160\uffff\16\52\1\uffff\u1c81\52\14\uffff\2\52\142"+
+					"\uffff\u0120\52\u0a70\uffff\u03f0\52\21\uffff\ua7ff\52\u2100\uffff\u04d0"+
+					"\52\40\uffff\u020e\52",
 			"\1\53\1\uffff\1\53\5\uffff\1\56\1\uffff\2\52\1\53\12\52\1\54\1\53\1"+
-			"\uffff\1\53\1\uffff\1\53\1\uffff\4\52\1\u008a\25\52\4\uffff\1\55\1\uffff"+
-			"\4\52\1\u008a\25\52\1\47\1\uffff\1\47\102\uffff\27\52\1\uffff\37\52\1"+
-			"\uffff\u0208\52\160\uffff\16\52\1\uffff\u1c81\52\14\uffff\2\52\142\uffff"+
-			"\u0120\52\u0a70\uffff\u03f0\52\21\uffff\ua7ff\52\u2100\uffff\u04d0\52"+
-			"\40\uffff\u020e\52",
+					"\uffff\1\53\1\uffff\1\53\1\uffff\4\52\1\u008a\25\52\4\uffff\1\55\1\uffff"+
+					"\4\52\1\u008a\25\52\1\47\1\uffff\1\47\102\uffff\27\52\1\uffff\37\52\1"+
+					"\uffff\u0208\52\160\uffff\16\52\1\uffff\u1c81\52\14\uffff\2\52\142\uffff"+
+					"\u0120\52\u0a70\uffff\u03f0\52\21\uffff\ua7ff\52\u2100\uffff\u04d0\52"+
+					"\40\uffff\u020e\52",
 			"\1\53\1\uffff\1\53\5\uffff\1\56\1\uffff\2\52\1\53\12\52\1\54\1\53\1"+
-			"\uffff\1\53\1\uffff\1\53\1\uffff\32\52\4\uffff\1\55\1\uffff\32\52\1\47"+
-			"\1\uffff\1\47\102\uffff\27\52\1\uffff\37\52\1\uffff\u0208\52\160\uffff"+
-			"\16\52\1\uffff\u1c81\52\14\uffff\2\52\142\uffff\u0120\52\u0a70\uffff"+
-			"\u03f0\52\21\uffff\ua7ff\52\u2100\uffff\u04d0\52\40\uffff\u020e\52",
+					"\uffff\1\53\1\uffff\1\53\1\uffff\32\52\4\uffff\1\55\1\uffff\32\52\1\47"+
+					"\1\uffff\1\47\102\uffff\27\52\1\uffff\37\52\1\uffff\u0208\52\160\uffff"+
+					"\16\52\1\uffff\u1c81\52\14\uffff\2\52\142\uffff\u0120\52\u0a70\uffff"+
+					"\u03f0\52\21\uffff\ua7ff\52\u2100\uffff\u04d0\52\40\uffff\u020e\52",
 			"\1\47\1\uffff\1\47\7\uffff\3\47\12\173\1\uffff\1\47\1\uffff\1\47\1\uffff"+
-			"\1\47\1\uffff\32\47\4\uffff\1\47\1\uffff\33\47\1\uffff\1\47\102\uffff"+
-			"\27\47\1\uffff\37\47\1\uffff\u0208\47\160\uffff\16\47\1\uffff\u1c81\47"+
-			"\14\uffff\2\47\142\uffff\u0120\47\u0a70\uffff\u03f0\47\21\uffff\ua7ff"+
-			"\47\u2100\uffff\u04d0\47\40\uffff\u020e\47",
+					"\1\47\1\uffff\32\47\4\uffff\1\47\1\uffff\33\47\1\uffff\1\47\102\uffff"+
+					"\27\47\1\uffff\37\47\1\uffff\u0208\47\160\uffff\16\47\1\uffff\u1c81\47"+
+					"\14\uffff\2\47\142\uffff\u0120\47\u0a70\uffff\u03f0\47\21\uffff\ua7ff"+
+					"\47\u2100\uffff\u04d0\47\40\uffff\u020e\47",
 			"\1\47\1\uffff\1\47\7\uffff\3\47\12\173\1\uffff\1\47\1\uffff\1\47\1\uffff"+
-			"\1\47\1\uffff\32\47\4\uffff\1\47\1\uffff\33\47\1\uffff\1\47\102\uffff"+
-			"\27\47\1\uffff\37\47\1\uffff\u0208\47\160\uffff\16\47\1\uffff\u1c81\47"+
-			"\14\uffff\2\47\142\uffff\u0120\47\u0a70\uffff\u03f0\47\21\uffff\ua7ff"+
-			"\47\u2100\uffff\u04d0\47\40\uffff\u020e\47",
+					"\1\47\1\uffff\32\47\4\uffff\1\47\1\uffff\33\47\1\uffff\1\47\102\uffff"+
+					"\27\47\1\uffff\37\47\1\uffff\u0208\47\160\uffff\16\47\1\uffff\u1c81\47"+
+					"\14\uffff\2\47\142\uffff\u0120\47\u0a70\uffff\u03f0\47\21\uffff\ua7ff"+
+					"\47\u2100\uffff\u04d0\47\40\uffff\u020e\47",
 			"\1\47\1\uffff\1\47\7\uffff\3\47\12\174\1\uffff\1\47\1\uffff\1\47\1\uffff"+
-			"\1\47\1\uffff\4\47\1\175\25\47\4\uffff\1\47\1\uffff\4\47\1\175\26\47"+
-			"\1\uffff\1\47\102\uffff\27\47\1\uffff\37\47\1\uffff\u0208\47\160\uffff"+
-			"\16\47\1\uffff\u1c81\47\14\uffff\2\47\142\uffff\u0120\47\u0a70\uffff"+
-			"\u03f0\47\21\uffff\ua7ff\47\u2100\uffff\u04d0\47\40\uffff\u020e\47",
+					"\1\47\1\uffff\4\47\1\175\25\47\4\uffff\1\47\1\uffff\4\47\1\175\26\47"+
+					"\1\uffff\1\47\102\uffff\27\47\1\uffff\37\47\1\uffff\u0208\47\160\uffff"+
+					"\16\47\1\uffff\u1c81\47\14\uffff\2\47\142\uffff\u0120\47\u0a70\uffff"+
+					"\u03f0\47\21\uffff\ua7ff\47\u2100\uffff\u04d0\47\40\uffff\u020e\47",
 			"\1\47\1\uffff\1\47\7\uffff\1\u008c\2\47\12\u008d\1\uffff\1\47\1\uffff"+
-			"\1\47\1\uffff\1\47\1\uffff\32\47\4\uffff\1\47\1\uffff\33\47\1\uffff\1"+
-			"\47\102\uffff\27\47\1\uffff\37\47\1\uffff\u0208\47\160\uffff\16\47\1"+
-			"\uffff\u1c81\47\14\uffff\2\47\142\uffff\u0120\47\u0a70\uffff\u03f0\47"+
-			"\21\uffff\ua7ff\47\u2100\uffff\u04d0\47\40\uffff\u020e\47",
+					"\1\47\1\uffff\1\47\1\uffff\32\47\4\uffff\1\47\1\uffff\33\47\1\uffff\1"+
+					"\47\102\uffff\27\47\1\uffff\37\47\1\uffff\u0208\47\160\uffff\16\47\1"+
+					"\uffff\u1c81\47\14\uffff\2\47\142\uffff\u0120\47\u0a70\uffff\u03f0\47"+
+					"\21\uffff\ua7ff\47\u2100\uffff\u04d0\47\40\uffff\u020e\47",
 			"\1\47\1\uffff\1\47\7\uffff\3\47\12\177\1\uffff\1\47\1\uffff\1\47\1\uffff"+
-			"\1\47\1\uffff\32\47\4\uffff\1\47\1\uffff\33\47\1\uffff\1\47\102\uffff"+
-			"\27\47\1\uffff\37\47\1\uffff\u0208\47\160\uffff\16\47\1\uffff\u1c81\47"+
-			"\14\uffff\2\47\142\uffff\u0120\47\u0a70\uffff\u03f0\47\21\uffff\ua7ff"+
-			"\47\u2100\uffff\u04d0\47\40\uffff\u020e\47",
+					"\1\47\1\uffff\32\47\4\uffff\1\47\1\uffff\33\47\1\uffff\1\47\102\uffff"+
+					"\27\47\1\uffff\37\47\1\uffff\u0208\47\160\uffff\16\47\1\uffff\u1c81\47"+
+					"\14\uffff\2\47\142\uffff\u0120\47\u0a70\uffff\u03f0\47\21\uffff\ua7ff"+
+					"\47\u2100\uffff\u04d0\47\40\uffff\u020e\47",
 			"\1\47\1\uffff\1\47\7\uffff\3\47\12\177\1\uffff\1\47\1\uffff\1\47\1\uffff"+
-			"\1\47\1\uffff\32\47\4\uffff\1\47\1\uffff\33\47\1\uffff\1\47\102\uffff"+
-			"\27\47\1\uffff\37\47\1\uffff\u0208\47\160\uffff\16\47\1\uffff\u1c81\47"+
-			"\14\uffff\2\47\142\uffff\u0120\47\u0a70\uffff\u03f0\47\21\uffff\ua7ff"+
-			"\47\u2100\uffff\u04d0\47\40\uffff\u020e\47",
+					"\1\47\1\uffff\32\47\4\uffff\1\47\1\uffff\33\47\1\uffff\1\47\102\uffff"+
+					"\27\47\1\uffff\37\47\1\uffff\u0208\47\160\uffff\16\47\1\uffff\u1c81\47"+
+					"\14\uffff\2\47\142\uffff\u0120\47\u0a70\uffff\u03f0\47\21\uffff\ua7ff"+
+					"\47\u2100\uffff\u04d0\47\40\uffff\u020e\47",
 			"",
 			"\1\47\1\uffff\1\47\7\uffff\1\u008e\2\47\12\u008f\1\uffff\1\47\1\uffff"+
-			"\1\47\1\uffff\1\47\1\uffff\32\47\4\uffff\1\47\1\uffff\33\47\1\uffff\1"+
-			"\47\102\uffff\27\47\1\uffff\37\47\1\uffff\u0208\47\160\uffff\16\47\1"+
-			"\uffff\u1c81\47\14\uffff\2\47\142\uffff\u0120\47\u0a70\uffff\u03f0\47"+
-			"\21\uffff\ua7ff\47\u2100\uffff\u04d0\47\40\uffff\u020e\47",
+					"\1\47\1\uffff\1\47\1\uffff\32\47\4\uffff\1\47\1\uffff\33\47\1\uffff\1"+
+					"\47\102\uffff\27\47\1\uffff\37\47\1\uffff\u0208\47\160\uffff\16\47\1"+
+					"\uffff\u1c81\47\14\uffff\2\47\142\uffff\u0120\47\u0a70\uffff\u03f0\47"+
+					"\21\uffff\ua7ff\47\u2100\uffff\u04d0\47\40\uffff\u020e\47",
 			"",
 			"\12\u0083\13\uffff\1\155\37\uffff\1\155",
 			"",
 			"\1\47\1\uffff\1\47\7\uffff\3\47\12\u0086\1\uffff\1\47\1\uffff\1\47\1"+
-			"\uffff\1\47\1\uffff\32\47\4\uffff\1\47\1\uffff\33\47\1\uffff\1\47\102"+
-			"\uffff\27\47\1\uffff\37\47\1\uffff\u0208\47\160\uffff\16\47\1\uffff\u1c81"+
-			"\47\14\uffff\2\47\142\uffff\u0120\47\u0a70\uffff\u03f0\47\21\uffff\ua7ff"+
-			"\47\u2100\uffff\u04d0\47\40\uffff\u020e\47",
+					"\uffff\1\47\1\uffff\32\47\4\uffff\1\47\1\uffff\33\47\1\uffff\1\47\102"+
+					"\uffff\27\47\1\uffff\37\47\1\uffff\u0208\47\160\uffff\16\47\1\uffff\u1c81"+
+					"\47\14\uffff\2\47\142\uffff\u0120\47\u0a70\uffff\u03f0\47\21\uffff\ua7ff"+
+					"\47\u2100\uffff\u04d0\47\40\uffff\u020e\47",
 			"\1\47\1\uffff\1\47\7\uffff\3\47\12\u0086\1\uffff\1\47\1\uffff\1\47\1"+
-			"\uffff\1\47\1\uffff\32\47\4\uffff\1\47\1\uffff\33\47\1\uffff\1\47\102"+
-			"\uffff\27\47\1\uffff\37\47\1\uffff\u0208\47\160\uffff\16\47\1\uffff\u1c81"+
-			"\47\14\uffff\2\47\142\uffff\u0120\47\u0a70\uffff\u03f0\47\21\uffff\ua7ff"+
-			"\47\u2100\uffff\u04d0\47\40\uffff\u020e\47",
+					"\uffff\1\47\1\uffff\32\47\4\uffff\1\47\1\uffff\33\47\1\uffff\1\47\102"+
+					"\uffff\27\47\1\uffff\37\47\1\uffff\u0208\47\160\uffff\16\47\1\uffff\u1c81"+
+					"\47\14\uffff\2\47\142\uffff\u0120\47\u0a70\uffff\u03f0\47\21\uffff\ua7ff"+
+					"\47\u2100\uffff\u04d0\47\40\uffff\u020e\47",
 			"\1\u0087\11\uffff\15\u0087\1\56\4\uffff\1\u0087\1\uffff\32\u0087\4\uffff"+
-			"\1\u0087\1\uffff\32\u0087\105\uffff\27\u0087\1\uffff\37\u0087\1\uffff"+
-			"\u0208\u0087\160\uffff\16\u0087\1\uffff\u1c81\u0087\14\uffff\2\u0087"+
-			"\142\uffff\u0120\u0087\u0a70\uffff\u03f0\u0087\21\uffff\ua7ff\u0087\u2100"+
-			"\uffff\u04d0\u0087\40\uffff\u020e\u0087",
+					"\1\u0087\1\uffff\32\u0087\105\uffff\27\u0087\1\uffff\37\u0087\1\uffff"+
+					"\u0208\u0087\160\uffff\16\u0087\1\uffff\u1c81\u0087\14\uffff\2\u0087"+
+					"\142\uffff\u0120\u0087\u0a70\uffff\u03f0\u0087\21\uffff\ua7ff\u0087\u2100"+
+					"\uffff\u04d0\u0087\40\uffff\u020e\u0087",
 			"",
 			"\1\53\1\uffff\1\53\5\uffff\1\56\1\uffff\2\52\1\53\12\52\1\54\1\53\1"+
-			"\uffff\1\53\1\uffff\1\53\1\uffff\27\52\1\u0090\2\52\4\uffff\1\55\1\uffff"+
-			"\27\52\1\u0090\2\52\1\47\1\uffff\1\47\102\uffff\27\52\1\uffff\37\52\1"+
-			"\uffff\u0208\52\160\uffff\16\52\1\uffff\u1c81\52\14\uffff\2\52\142\uffff"+
-			"\u0120\52\u0a70\uffff\u03f0\52\21\uffff\ua7ff\52\u2100\uffff\u04d0\52"+
-			"\40\uffff\u020e\52",
+					"\uffff\1\53\1\uffff\1\53\1\uffff\27\52\1\u0090\2\52\4\uffff\1\55\1\uffff"+
+					"\27\52\1\u0090\2\52\1\47\1\uffff\1\47\102\uffff\27\52\1\uffff\37\52\1"+
+					"\uffff\u0208\52\160\uffff\16\52\1\uffff\u1c81\52\14\uffff\2\52\142\uffff"+
+					"\u0120\52\u0a70\uffff\u03f0\52\21\uffff\ua7ff\52\u2100\uffff\u04d0\52"+
+					"\40\uffff\u020e\52",
 			"\1\53\1\uffff\1\53\5\uffff\1\56\1\uffff\2\52\1\53\12\52\1\54\1\53\1"+
-			"\uffff\1\53\1\uffff\1\53\1\uffff\32\52\4\uffff\1\55\1\uffff\32\52\1\47"+
-			"\1\uffff\1\47\102\uffff\27\52\1\uffff\37\52\1\uffff\u0208\52\160\uffff"+
-			"\16\52\1\uffff\u1c81\52\14\uffff\2\52\142\uffff\u0120\52\u0a70\uffff"+
-			"\u03f0\52\21\uffff\ua7ff\52\u2100\uffff\u04d0\52\40\uffff\u020e\52",
+					"\uffff\1\53\1\uffff\1\53\1\uffff\32\52\4\uffff\1\55\1\uffff\32\52\1\47"+
+					"\1\uffff\1\47\102\uffff\27\52\1\uffff\37\52\1\uffff\u0208\52\160\uffff"+
+					"\16\52\1\uffff\u1c81\52\14\uffff\2\52\142\uffff\u0120\52\u0a70\uffff"+
+					"\u03f0\52\21\uffff\ua7ff\52\u2100\uffff\u04d0\52\40\uffff\u020e\52",
 			"",
 			"\1\47\1\uffff\1\47\7\uffff\3\47\12\u008d\1\uffff\1\47\1\uffff\1\47\1"+
-			"\uffff\1\47\1\uffff\32\47\4\uffff\1\47\1\uffff\33\47\1\uffff\1\47\102"+
-			"\uffff\27\47\1\uffff\37\47\1\uffff\u0208\47\160\uffff\16\47\1\uffff\u1c81"+
-			"\47\14\uffff\2\47\142\uffff\u0120\47\u0a70\uffff\u03f0\47\21\uffff\ua7ff"+
-			"\47\u2100\uffff\u04d0\47\40\uffff\u020e\47",
+					"\uffff\1\47\1\uffff\32\47\4\uffff\1\47\1\uffff\33\47\1\uffff\1\47\102"+
+					"\uffff\27\47\1\uffff\37\47\1\uffff\u0208\47\160\uffff\16\47\1\uffff\u1c81"+
+					"\47\14\uffff\2\47\142\uffff\u0120\47\u0a70\uffff\u03f0\47\21\uffff\ua7ff"+
+					"\47\u2100\uffff\u04d0\47\40\uffff\u020e\47",
 			"\1\47\1\uffff\1\47\7\uffff\3\47\12\u008d\1\uffff\1\47\1\uffff\1\47\1"+
-			"\uffff\1\47\1\uffff\32\47\4\uffff\1\47\1\uffff\33\47\1\uffff\1\47\102"+
-			"\uffff\27\47\1\uffff\37\47\1\uffff\u0208\47\160\uffff\16\47\1\uffff\u1c81"+
-			"\47\14\uffff\2\47\142\uffff\u0120\47\u0a70\uffff\u03f0\47\21\uffff\ua7ff"+
-			"\47\u2100\uffff\u04d0\47\40\uffff\u020e\47",
+					"\uffff\1\47\1\uffff\32\47\4\uffff\1\47\1\uffff\33\47\1\uffff\1\47\102"+
+					"\uffff\27\47\1\uffff\37\47\1\uffff\u0208\47\160\uffff\16\47\1\uffff\u1c81"+
+					"\47\14\uffff\2\47\142\uffff\u0120\47\u0a70\uffff\u03f0\47\21\uffff\ua7ff"+
+					"\47\u2100\uffff\u04d0\47\40\uffff\u020e\47",
 			"\1\47\1\uffff\1\47\7\uffff\3\47\12\u008f\1\uffff\1\47\1\uffff\1\47\1"+
-			"\uffff\1\47\1\uffff\32\47\4\uffff\1\47\1\uffff\33\47\1\uffff\1\47\102"+
-			"\uffff\27\47\1\uffff\37\47\1\uffff\u0208\47\160\uffff\16\47\1\uffff\u1c81"+
-			"\47\14\uffff\2\47\142\uffff\u0120\47\u0a70\uffff\u03f0\47\21\uffff\ua7ff"+
-			"\47\u2100\uffff\u04d0\47\40\uffff\u020e\47",
+					"\uffff\1\47\1\uffff\32\47\4\uffff\1\47\1\uffff\33\47\1\uffff\1\47\102"+
+					"\uffff\27\47\1\uffff\37\47\1\uffff\u0208\47\160\uffff\16\47\1\uffff\u1c81"+
+					"\47\14\uffff\2\47\142\uffff\u0120\47\u0a70\uffff\u03f0\47\21\uffff\ua7ff"+
+					"\47\u2100\uffff\u04d0\47\40\uffff\u020e\47",
 			"\1\47\1\uffff\1\47\7\uffff\3\47\12\u008f\1\uffff\1\47\1\uffff\1\47\1"+
-			"\uffff\1\47\1\uffff\32\47\4\uffff\1\47\1\uffff\33\47\1\uffff\1\47\102"+
-			"\uffff\27\47\1\uffff\37\47\1\uffff\u0208\47\160\uffff\16\47\1\uffff\u1c81"+
-			"\47\14\uffff\2\47\142\uffff\u0120\47\u0a70\uffff\u03f0\47\21\uffff\ua7ff"+
-			"\47\u2100\uffff\u04d0\47\40\uffff\u020e\47",
+					"\uffff\1\47\1\uffff\32\47\4\uffff\1\47\1\uffff\33\47\1\uffff\1\47\102"+
+					"\uffff\27\47\1\uffff\37\47\1\uffff\u0208\47\160\uffff\16\47\1\uffff\u1c81"+
+					"\47\14\uffff\2\47\142\uffff\u0120\47\u0a70\uffff\u03f0\47\21\uffff\ua7ff"+
+					"\47\u2100\uffff\u04d0\47\40\uffff\u020e\47",
 			"\1\53\1\uffff\1\53\5\uffff\1\56\1\uffff\2\52\1\53\12\52\1\54\1\53\1"+
-			"\uffff\1\53\1\uffff\1\53\1\uffff\32\52\4\uffff\1\55\1\uffff\32\52\1\47"+
-			"\1\uffff\1\47\102\uffff\27\52\1\uffff\37\52\1\uffff\u0208\52\160\uffff"+
-			"\16\52\1\uffff\u1c81\52\14\uffff\2\52\142\uffff\u0120\52\u0a70\uffff"+
-			"\u03f0\52\21\uffff\ua7ff\52\u2100\uffff\u04d0\52\40\uffff\u020e\52",
+					"\uffff\1\53\1\uffff\1\53\1\uffff\32\52\4\uffff\1\55\1\uffff\32\52\1\47"+
+					"\1\uffff\1\47\102\uffff\27\52\1\uffff\37\52\1\uffff\u0208\52\160\uffff"+
+					"\16\52\1\uffff\u1c81\52\14\uffff\2\52\142\uffff\u0120\52\u0a70\uffff"+
+					"\u03f0\52\21\uffff\ua7ff\52\u2100\uffff\u04d0\52\40\uffff\u020e\52",
 			"",
 			""
 	};
@@ -3826,72 +3819,72 @@ public class TurtleOBDALexer extends Lexer {
 			IntStream input = _input;
 			int _s = s;
 			switch ( s ) {
-					case 0 : 
-						int LA31_14 = input.LA(1);
-						s = -1;
-						if ( (LA31_14=='}') ) {s = 66;}
-						else if ( ((LA31_14 >= '\u0000' && LA31_14 <= '\t')||(LA31_14 >= '\u000B' && LA31_14 <= '\f')||(LA31_14 >= '\u000E' && LA31_14 <= '!')||LA31_14=='$'||(LA31_14 >= '&' && LA31_14 <= ',')||LA31_14==':'||LA31_14=='<'||LA31_14=='>'||LA31_14=='@'||(LA31_14 >= '[' && LA31_14 <= '^')||LA31_14=='`'||LA31_14=='|'||(LA31_14 >= '~' && LA31_14 <= '\u00BF')||LA31_14=='\u00D7'||LA31_14=='\u00F7'||(LA31_14 >= '\u0300' && LA31_14 <= '\u036F')||LA31_14=='\u037E'||(LA31_14 >= '\u2000' && LA31_14 <= '\u200B')||(LA31_14 >= '\u200E' && LA31_14 <= '\u206F')||(LA31_14 >= '\u2190' && LA31_14 <= '\u2BFF')||(LA31_14 >= '\u2FF0' && LA31_14 <= '\u3000')||(LA31_14 >= '\uD800' && LA31_14 <= '\uF8FF')||(LA31_14 >= '\uFDD0' && LA31_14 <= '\uFDEF')||(LA31_14 >= '\uFFFE' && LA31_14 <= '\uFFFF')) ) {s = 67;}
-						else if ( (LA31_14=='#'||LA31_14=='%'||(LA31_14 >= '-' && LA31_14 <= '9')||LA31_14==';'||LA31_14=='='||LA31_14=='?'||(LA31_14 >= 'A' && LA31_14 <= 'Z')||LA31_14=='_'||(LA31_14 >= 'a' && LA31_14 <= '{')||(LA31_14 >= '\u00C0' && LA31_14 <= '\u00D6')||(LA31_14 >= '\u00D8' && LA31_14 <= '\u00F6')||(LA31_14 >= '\u00F8' && LA31_14 <= '\u02FF')||(LA31_14 >= '\u0370' && LA31_14 <= '\u037D')||(LA31_14 >= '\u037F' && LA31_14 <= '\u1FFF')||(LA31_14 >= '\u200C' && LA31_14 <= '\u200D')||(LA31_14 >= '\u2070' && LA31_14 <= '\u218F')||(LA31_14 >= '\u2C00' && LA31_14 <= '\u2FEF')||(LA31_14 >= '\u3001' && LA31_14 <= '\uD7FF')||(LA31_14 >= '\uF900' && LA31_14 <= '\uFDCF')||(LA31_14 >= '\uFDF0' && LA31_14 <= '\uFFFD')) ) {s = 68;}
-						else s = 65;
-						if ( s>=0 ) return s;
-						break;
+				case 0 :
+					int LA31_20 = input.LA(1);
+					s = -1;
+					if ( ((LA31_20 >= '\u0000' && LA31_20 <= '\t')||(LA31_20 >= '\u000B' && LA31_20 <= '\f')||(LA31_20 >= '\u000E' && LA31_20 <= '\uFFFF')) ) {s = 72;}
+					else s = 71;
+					if ( s>=0 ) return s;
+					break;
 
-					case 1 : 
-						int LA31_20 = input.LA(1);
-						s = -1;
-						if ( ((LA31_20 >= '\u0000' && LA31_20 <= '\t')||(LA31_20 >= '\u000B' && LA31_20 <= '\f')||(LA31_20 >= '\u000E' && LA31_20 <= '\uFFFF')) ) {s = 72;}
-						else s = 71;
-						if ( s>=0 ) return s;
-						break;
+				case 1 :
+					int LA31_57 = input.LA(1);
+					s = -1;
+					if ( ((LA31_57 >= '\u0000' && LA31_57 <= '\t')||(LA31_57 >= '\u000B' && LA31_57 <= '\f')||(LA31_57 >= '\u000E' && LA31_57 <= '\uFFFF')) ) {s = 59;}
+					else s = 99;
+					if ( s>=0 ) return s;
+					break;
 
-					case 2 : 
-						int LA31_66 = input.LA(1);
-						s = -1;
-						if ( (LA31_66=='}') ) {s = 66;}
-						else if ( (LA31_66=='#'||LA31_66=='%'||(LA31_66 >= '-' && LA31_66 <= '9')||LA31_66==';'||LA31_66=='='||LA31_66=='?'||(LA31_66 >= 'A' && LA31_66 <= 'Z')||LA31_66=='_'||(LA31_66 >= 'a' && LA31_66 <= '{')||(LA31_66 >= '\u00C0' && LA31_66 <= '\u00D6')||(LA31_66 >= '\u00D8' && LA31_66 <= '\u00F6')||(LA31_66 >= '\u00F8' && LA31_66 <= '\u02FF')||(LA31_66 >= '\u0370' && LA31_66 <= '\u037D')||(LA31_66 >= '\u037F' && LA31_66 <= '\u1FFF')||(LA31_66 >= '\u200C' && LA31_66 <= '\u200D')||(LA31_66 >= '\u2070' && LA31_66 <= '\u218F')||(LA31_66 >= '\u2C00' && LA31_66 <= '\u2FEF')||(LA31_66 >= '\u3001' && LA31_66 <= '\uD7FF')||(LA31_66 >= '\uF900' && LA31_66 <= '\uFDCF')||(LA31_66 >= '\uFDF0' && LA31_66 <= '\uFFFD')) ) {s = 68;}
-						else if ( ((LA31_66 >= '\u0000' && LA31_66 <= '\t')||(LA31_66 >= '\u000B' && LA31_66 <= '\f')||(LA31_66 >= '\u000E' && LA31_66 <= '!')||LA31_66=='$'||(LA31_66 >= '&' && LA31_66 <= ',')||LA31_66==':'||LA31_66=='<'||LA31_66=='>'||LA31_66=='@'||(LA31_66 >= '[' && LA31_66 <= '^')||LA31_66=='`'||LA31_66=='|'||(LA31_66 >= '~' && LA31_66 <= '\u00BF')||LA31_66=='\u00D7'||LA31_66=='\u00F7'||(LA31_66 >= '\u0300' && LA31_66 <= '\u036F')||LA31_66=='\u037E'||(LA31_66 >= '\u2000' && LA31_66 <= '\u200B')||(LA31_66 >= '\u200E' && LA31_66 <= '\u206F')||(LA31_66 >= '\u2190' && LA31_66 <= '\u2BFF')||(LA31_66 >= '\u2FF0' && LA31_66 <= '\u3000')||(LA31_66 >= '\uD800' && LA31_66 <= '\uF8FF')||(LA31_66 >= '\uFDD0' && LA31_66 <= '\uFDEF')||(LA31_66 >= '\uFFFE' && LA31_66 <= '\uFFFF')) ) {s = 67;}
-						else s = 39;
-						if ( s>=0 ) return s;
-						break;
+				case 2 :
+					int LA31_14 = input.LA(1);
+					s = -1;
+					if ( (LA31_14=='}') ) {s = 66;}
+					else if ( ((LA31_14 >= '\u0000' && LA31_14 <= '\t')||(LA31_14 >= '\u000B' && LA31_14 <= '\f')||(LA31_14 >= '\u000E' && LA31_14 <= '!')||LA31_14=='$'||(LA31_14 >= '&' && LA31_14 <= ',')||LA31_14==':'||LA31_14=='<'||LA31_14=='>'||LA31_14=='@'||(LA31_14 >= '[' && LA31_14 <= '^')||LA31_14=='`'||LA31_14=='|'||(LA31_14 >= '~' && LA31_14 <= '\u00BF')||LA31_14=='\u00D7'||LA31_14=='\u00F7'||(LA31_14 >= '\u0300' && LA31_14 <= '\u036F')||LA31_14=='\u037E'||(LA31_14 >= '\u2000' && LA31_14 <= '\u200B')||(LA31_14 >= '\u200E' && LA31_14 <= '\u206F')||(LA31_14 >= '\u2190' && LA31_14 <= '\u2BFF')||(LA31_14 >= '\u2FF0' && LA31_14 <= '\u3000')||(LA31_14 >= '\uD800' && LA31_14 <= '\uF8FF')||(LA31_14 >= '\uFDD0' && LA31_14 <= '\uFDEF')||(LA31_14 >= '\uFFFE' && LA31_14 <= '\uFFFF')) ) {s = 67;}
+					else if ( (LA31_14=='#'||LA31_14=='%'||(LA31_14 >= '-' && LA31_14 <= '9')||LA31_14==';'||LA31_14=='='||LA31_14=='?'||(LA31_14 >= 'A' && LA31_14 <= 'Z')||LA31_14=='_'||(LA31_14 >= 'a' && LA31_14 <= '{')||(LA31_14 >= '\u00C0' && LA31_14 <= '\u00D6')||(LA31_14 >= '\u00D8' && LA31_14 <= '\u00F6')||(LA31_14 >= '\u00F8' && LA31_14 <= '\u02FF')||(LA31_14 >= '\u0370' && LA31_14 <= '\u037D')||(LA31_14 >= '\u037F' && LA31_14 <= '\u1FFF')||(LA31_14 >= '\u200C' && LA31_14 <= '\u200D')||(LA31_14 >= '\u2070' && LA31_14 <= '\u218F')||(LA31_14 >= '\u2C00' && LA31_14 <= '\u2FEF')||(LA31_14 >= '\u3001' && LA31_14 <= '\uD7FF')||(LA31_14 >= '\uF900' && LA31_14 <= '\uFDCF')||(LA31_14 >= '\uFDF0' && LA31_14 <= '\uFFFD')) ) {s = 68;}
+					else s = 65;
+					if ( s>=0 ) return s;
+					break;
 
-					case 3 : 
-						int LA31_68 = input.LA(1);
-						s = -1;
-						if ( (LA31_68=='}') ) {s = 66;}
-						else if ( (LA31_68=='#'||LA31_68=='%'||(LA31_68 >= '-' && LA31_68 <= '9')||LA31_68==';'||LA31_68=='='||LA31_68=='?'||(LA31_68 >= 'A' && LA31_68 <= 'Z')||LA31_68=='_'||(LA31_68 >= 'a' && LA31_68 <= '{')||(LA31_68 >= '\u00C0' && LA31_68 <= '\u00D6')||(LA31_68 >= '\u00D8' && LA31_68 <= '\u00F6')||(LA31_68 >= '\u00F8' && LA31_68 <= '\u02FF')||(LA31_68 >= '\u0370' && LA31_68 <= '\u037D')||(LA31_68 >= '\u037F' && LA31_68 <= '\u1FFF')||(LA31_68 >= '\u200C' && LA31_68 <= '\u200D')||(LA31_68 >= '\u2070' && LA31_68 <= '\u218F')||(LA31_68 >= '\u2C00' && LA31_68 <= '\u2FEF')||(LA31_68 >= '\u3001' && LA31_68 <= '\uD7FF')||(LA31_68 >= '\uF900' && LA31_68 <= '\uFDCF')||(LA31_68 >= '\uFDF0' && LA31_68 <= '\uFFFD')) ) {s = 68;}
-						else if ( ((LA31_68 >= '\u0000' && LA31_68 <= '\t')||(LA31_68 >= '\u000B' && LA31_68 <= '\f')||(LA31_68 >= '\u000E' && LA31_68 <= '!')||LA31_68=='$'||(LA31_68 >= '&' && LA31_68 <= ',')||LA31_68==':'||LA31_68=='<'||LA31_68=='>'||LA31_68=='@'||(LA31_68 >= '[' && LA31_68 <= '^')||LA31_68=='`'||LA31_68=='|'||(LA31_68 >= '~' && LA31_68 <= '\u00BF')||LA31_68=='\u00D7'||LA31_68=='\u00F7'||(LA31_68 >= '\u0300' && LA31_68 <= '\u036F')||LA31_68=='\u037E'||(LA31_68 >= '\u2000' && LA31_68 <= '\u200B')||(LA31_68 >= '\u200E' && LA31_68 <= '\u206F')||(LA31_68 >= '\u2190' && LA31_68 <= '\u2BFF')||(LA31_68 >= '\u2FF0' && LA31_68 <= '\u3000')||(LA31_68 >= '\uD800' && LA31_68 <= '\uF8FF')||(LA31_68 >= '\uFDD0' && LA31_68 <= '\uFDEF')||(LA31_68 >= '\uFFFE' && LA31_68 <= '\uFFFF')) ) {s = 67;}
-						else s = 39;
-						if ( s>=0 ) return s;
-						break;
+				case 3 :
+					int LA31_68 = input.LA(1);
+					s = -1;
+					if ( (LA31_68=='}') ) {s = 66;}
+					else if ( (LA31_68=='#'||LA31_68=='%'||(LA31_68 >= '-' && LA31_68 <= '9')||LA31_68==';'||LA31_68=='='||LA31_68=='?'||(LA31_68 >= 'A' && LA31_68 <= 'Z')||LA31_68=='_'||(LA31_68 >= 'a' && LA31_68 <= '{')||(LA31_68 >= '\u00C0' && LA31_68 <= '\u00D6')||(LA31_68 >= '\u00D8' && LA31_68 <= '\u00F6')||(LA31_68 >= '\u00F8' && LA31_68 <= '\u02FF')||(LA31_68 >= '\u0370' && LA31_68 <= '\u037D')||(LA31_68 >= '\u037F' && LA31_68 <= '\u1FFF')||(LA31_68 >= '\u200C' && LA31_68 <= '\u200D')||(LA31_68 >= '\u2070' && LA31_68 <= '\u218F')||(LA31_68 >= '\u2C00' && LA31_68 <= '\u2FEF')||(LA31_68 >= '\u3001' && LA31_68 <= '\uD7FF')||(LA31_68 >= '\uF900' && LA31_68 <= '\uFDCF')||(LA31_68 >= '\uFDF0' && LA31_68 <= '\uFFFD')) ) {s = 68;}
+					else if ( ((LA31_68 >= '\u0000' && LA31_68 <= '\t')||(LA31_68 >= '\u000B' && LA31_68 <= '\f')||(LA31_68 >= '\u000E' && LA31_68 <= '!')||LA31_68=='$'||(LA31_68 >= '&' && LA31_68 <= ',')||LA31_68==':'||LA31_68=='<'||LA31_68=='>'||LA31_68=='@'||(LA31_68 >= '[' && LA31_68 <= '^')||LA31_68=='`'||LA31_68=='|'||(LA31_68 >= '~' && LA31_68 <= '\u00BF')||LA31_68=='\u00D7'||LA31_68=='\u00F7'||(LA31_68 >= '\u0300' && LA31_68 <= '\u036F')||LA31_68=='\u037E'||(LA31_68 >= '\u2000' && LA31_68 <= '\u200B')||(LA31_68 >= '\u200E' && LA31_68 <= '\u206F')||(LA31_68 >= '\u2190' && LA31_68 <= '\u2BFF')||(LA31_68 >= '\u2FF0' && LA31_68 <= '\u3000')||(LA31_68 >= '\uD800' && LA31_68 <= '\uF8FF')||(LA31_68 >= '\uFDD0' && LA31_68 <= '\uFDEF')||(LA31_68 >= '\uFFFE' && LA31_68 <= '\uFFFF')) ) {s = 67;}
+					else s = 39;
+					if ( s>=0 ) return s;
+					break;
 
-					case 4 : 
-						int LA31_8 = input.LA(1);
-						s = -1;
-						if ( (LA31_8=='>') ) {s = 57;}
-						else if ( ((LA31_8 >= '\u0000' && LA31_8 <= '\t')||(LA31_8 >= '\u000B' && LA31_8 <= '\f')||(LA31_8 >= '\u000E' && LA31_8 <= '=')||(LA31_8 >= '?' && LA31_8 <= '\uFFFF')) ) {s = 59;}
-						else s = 58;
-						if ( s>=0 ) return s;
-						break;
+				case 4 :
+					int LA31_7 = input.LA(1);
+					s = -1;
+					if ( (LA31_7=='\"') ) {s = 54;}
+					else if ( ((LA31_7 >= '\u0000' && LA31_7 <= '\t')||(LA31_7 >= '\u000B' && LA31_7 <= '\f')||(LA31_7 >= '\u000E' && LA31_7 <= '!')||(LA31_7 >= '#' && LA31_7 <= '\uFFFF')) ) {s = 56;}
+					else s = 55;
+					if ( s>=0 ) return s;
+					break;
 
-					case 5 : 
-						int LA31_57 = input.LA(1);
-						s = -1;
-						if ( ((LA31_57 >= '\u0000' && LA31_57 <= '\t')||(LA31_57 >= '\u000B' && LA31_57 <= '\f')||(LA31_57 >= '\u000E' && LA31_57 <= '\uFFFF')) ) {s = 59;}
-						else s = 99;
-						if ( s>=0 ) return s;
-						break;
+				case 5 :
+					int LA31_8 = input.LA(1);
+					s = -1;
+					if ( (LA31_8=='>') ) {s = 57;}
+					else if ( ((LA31_8 >= '\u0000' && LA31_8 <= '\t')||(LA31_8 >= '\u000B' && LA31_8 <= '\f')||(LA31_8 >= '\u000E' && LA31_8 <= '=')||(LA31_8 >= '?' && LA31_8 <= '\uFFFF')) ) {s = 59;}
+					else s = 58;
+					if ( s>=0 ) return s;
+					break;
 
-					case 6 : 
-						int LA31_7 = input.LA(1);
-						s = -1;
-						if ( (LA31_7=='\"') ) {s = 54;}
-						else if ( ((LA31_7 >= '\u0000' && LA31_7 <= '\t')||(LA31_7 >= '\u000B' && LA31_7 <= '\f')||(LA31_7 >= '\u000E' && LA31_7 <= '!')||(LA31_7 >= '#' && LA31_7 <= '\uFFFF')) ) {s = 56;}
-						else s = 55;
-						if ( s>=0 ) return s;
-						break;
+				case 6 :
+					int LA31_66 = input.LA(1);
+					s = -1;
+					if ( (LA31_66=='}') ) {s = 66;}
+					else if ( (LA31_66=='#'||LA31_66=='%'||(LA31_66 >= '-' && LA31_66 <= '9')||LA31_66==';'||LA31_66=='='||LA31_66=='?'||(LA31_66 >= 'A' && LA31_66 <= 'Z')||LA31_66=='_'||(LA31_66 >= 'a' && LA31_66 <= '{')||(LA31_66 >= '\u00C0' && LA31_66 <= '\u00D6')||(LA31_66 >= '\u00D8' && LA31_66 <= '\u00F6')||(LA31_66 >= '\u00F8' && LA31_66 <= '\u02FF')||(LA31_66 >= '\u0370' && LA31_66 <= '\u037D')||(LA31_66 >= '\u037F' && LA31_66 <= '\u1FFF')||(LA31_66 >= '\u200C' && LA31_66 <= '\u200D')||(LA31_66 >= '\u2070' && LA31_66 <= '\u218F')||(LA31_66 >= '\u2C00' && LA31_66 <= '\u2FEF')||(LA31_66 >= '\u3001' && LA31_66 <= '\uD7FF')||(LA31_66 >= '\uF900' && LA31_66 <= '\uFDCF')||(LA31_66 >= '\uFDF0' && LA31_66 <= '\uFFFD')) ) {s = 68;}
+					else if ( ((LA31_66 >= '\u0000' && LA31_66 <= '\t')||(LA31_66 >= '\u000B' && LA31_66 <= '\f')||(LA31_66 >= '\u000E' && LA31_66 <= '!')||LA31_66=='$'||(LA31_66 >= '&' && LA31_66 <= ',')||LA31_66==':'||LA31_66=='<'||LA31_66=='>'||LA31_66=='@'||(LA31_66 >= '[' && LA31_66 <= '^')||LA31_66=='`'||LA31_66=='|'||(LA31_66 >= '~' && LA31_66 <= '\u00BF')||LA31_66=='\u00D7'||LA31_66=='\u00F7'||(LA31_66 >= '\u0300' && LA31_66 <= '\u036F')||LA31_66=='\u037E'||(LA31_66 >= '\u2000' && LA31_66 <= '\u200B')||(LA31_66 >= '\u200E' && LA31_66 <= '\u206F')||(LA31_66 >= '\u2190' && LA31_66 <= '\u2BFF')||(LA31_66 >= '\u2FF0' && LA31_66 <= '\u3000')||(LA31_66 >= '\uD800' && LA31_66 <= '\uF8FF')||(LA31_66 >= '\uFDD0' && LA31_66 <= '\uFDEF')||(LA31_66 >= '\uFFFE' && LA31_66 <= '\uFFFF')) ) {s = 67;}
+					else s = 39;
+					if ( s>=0 ) return s;
+					break;
 			}
 			NoViableAltException nvae =
-				new NoViableAltException(getDescription(), 31, _s, input);
+					new NoViableAltException(getDescription(), 31, _s, input);
 			error(nvae);
 			throw nvae;
 		}

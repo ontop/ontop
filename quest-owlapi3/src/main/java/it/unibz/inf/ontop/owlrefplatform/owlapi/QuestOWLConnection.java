@@ -21,17 +21,15 @@ package it.unibz.inf.ontop.owlrefplatform.owlapi;
  */
 
 import it.unibz.inf.ontop.model.OBDAException;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestConnection;
+import it.unibz.inf.ontop.owlrefplatform.core.IQuestConnection;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestStatement;
 import org.semanticweb.owlapi.model.OWLException;
-
-import java.sql.Connection;
 
 /***
  * Handler for a connection. Note that as with JDBC, executing queries in
  * parallels over a single connection is inefficient, since JDBC drivers will
  * serialize each query execution and you get a bottle neck (even if using
- * multiple {@link QuestOWLStatment}) . Having explicit QuestOWLConnections
+ * multiple {@link QuestOWLStatement}) . Having explicit QuestOWLConnections
  * allows to initialize a single QuestOWLReasoner and make multiple queries in
  * parallel with good performance (as with JDBC).
  * 
@@ -52,15 +50,10 @@ import java.sql.Connection;
  */
 public class QuestOWLConnection implements AutoCloseable {
 
-	private final QuestConnection conn;
+	private final IQuestConnection conn;
 
-	public QuestOWLConnection(QuestConnection conn) {
+	public QuestOWLConnection(IQuestConnection conn) {
 		this.conn = conn;
-	}
-
-	@Deprecated // used in one test only
-	public Connection getConnection() {
-		return conn.getConnection();
 	}
 	
 	/***
@@ -77,11 +70,25 @@ public class QuestOWLConnection implements AutoCloseable {
 
 	}
 
+	/**
+	 * For the virtual A-box mode.
+	 */
 	public QuestOWLStatement createStatement() throws OWLException {
 		try {
 			return new QuestOWLStatement(conn.createStatement(), this);
 		} catch (OBDAException e) {
 			throw new OWLException(e); 
+		}
+	}
+
+	/**
+	 * For the classic A-box mode
+     */
+	public SIQuestOWLStatement createSIStatement() throws OWLException {
+		try {
+			return new SIQuestOWLStatementImpl(conn.createSIStatement(), this);
+		} catch (OBDAException e) {
+			throw new OWLException(e);
 		}
 	}
 

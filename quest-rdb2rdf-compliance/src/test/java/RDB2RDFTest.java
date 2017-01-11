@@ -18,18 +18,12 @@
  * #L%
  */
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.PrintWriter;
-import java.io.StringWriter;
+import java.io.*;
 import java.net.URL;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import com.google.common.base.Charsets;
 import com.google.common.base.Objects;
@@ -38,7 +32,13 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.common.io.Resources;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
+import it.unibz.inf.ontop.injection.OBDASettings;
+import it.unibz.inf.ontop.injection.QuestConfiguration;
+import it.unibz.inf.ontop.model.MappingFactory;
+import it.unibz.inf.ontop.model.OBDADataSource;
+import it.unibz.inf.ontop.model.impl.MappingFactoryImpl;
+import it.unibz.inf.ontop.model.impl.RDBMSourceParameterConstants;
+import it.unibz.inf.ontop.injection.QuestCoreSettings;
 import it.unibz.inf.ontop.sesame.SesameVirtualRepo;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -46,7 +46,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
-import org.openrdf.model.Model;
 import org.openrdf.model.Statement;
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
@@ -100,9 +99,13 @@ public class RDB2RDFTest {
 	private static ValueFactory FACTORY = ValueFactoryImpl.getInstance();
 
 	private static OWLOntology EMPTY_ONT;
+	private static Properties PROPERTIES;
+	private static final MappingFactory MAPPING_FACTORY = MappingFactoryImpl.getInstance();
 
-
-	private static QuestPreferences QUEST_PREFS = new QuestPreferences();
+	private static final String JDBC_URL = "jdbc:h2:mem:questrepository";
+	private static final String DB_USER = "sa";
+	private static final String DB_PASSWORD = "";
+	private static final String JDBC_DRIVER = "org.h2.Driver";
 
 	/**
 	 * Terms used in the manifest files of RDB2RDF test suite
@@ -222,12 +225,14 @@ public class RDB2RDFTest {
 
 		EMPTY_ONT = OWLManager.createOWLOntologyManager().createOntology();
 
-		QUEST_PREFS.setProperty(QuestPreferences.DBNAME, "h2");
-		QUEST_PREFS.setProperty(QuestPreferences.DBUSER, "sa");
-		QUEST_PREFS.setProperty(QuestPreferences.DBPASSWORD, "");
-		QUEST_PREFS.setProperty(QuestPreferences.JDBC_URL, "jdbc:h2:mem:questrepository");
-		QUEST_PREFS.setProperty(QuestPreferences.JDBC_DRIVER, "org.h2.Driver");
-		QUEST_PREFS.setProperty(QuestPreferences.BASE_IRI, BASE_IRI);
+		PROPERTIES = new Properties();
+
+		PROPERTIES.setProperty(OBDASettings.DB_NAME, "h2");
+		PROPERTIES.setProperty(OBDASettings.DB_USER, DB_USER);
+		PROPERTIES.setProperty(OBDASettings.DB_PASSWORD, DB_PASSWORD);
+		PROPERTIES.setProperty(OBDASettings.JDBC_URL, JDBC_URL);
+		PROPERTIES.setProperty(OBDASettings.JDBC_DRIVER, JDBC_DRIVER);
+		PROPERTIES.setProperty(QuestCoreSettings.BASE_IRI, BASE_IRI);
 	}
 
 	@Before
@@ -255,10 +260,35 @@ public class RDB2RDFTest {
 	protected Repository createRepository() throws Exception {
 		logger.info("RDB2RDFTest " + name + " " + mappingFile);
 
-		Model mappings = mappingFile == null ? null : Rio.parse(stream(mappingFile), BASE_IRI, Rio.getParserFormatForFileName(mappingFile));
-		SesameVirtualRepo repo = new SesameVirtualRepo(name, EMPTY_ONT, mappings, null, QUEST_PREFS);
+		QuestConfiguration.Builder configBuilder = QuestConfiguration.defaultBuilder()
+				.properties(PROPERTIES)
+				.ontology(EMPTY_ONT);
+		if (mappingFile != null) {
+			String absoluteFilePath = Optional.ofNullable(getClass().getResource(mappingFile))
+					.map(URL::getFile)
+					.orElseThrow(() -> new IllegalArgumentException("The mappingFile " + mappingFile
+							+ " has not been found"));
+			configBuilder.r2rmlMappingFile(absoluteFilePath);
+		}
+		else {
+			configBuilder.bootstrapMapping(getMemOBDADataSource(), BASE_IRI);
+		}
+		SesameVirtualRepo repo = new SesameVirtualRepo(name, configBuilder.build());
 		repo.initialize();
 		return repo;
+	}
+
+	private static OBDADataSource getMemOBDADataSource() {
+
+		OBDADataSource obdaSource = MAPPING_FACTORY.getDataSource(java.net.URI.create("http://www.obda.org/ABOXDUMP" + System.currentTimeMillis()));
+		obdaSource.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, JDBC_DRIVER);
+		obdaSource.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, DB_PASSWORD);
+		obdaSource.setParameter(RDBMSourceParameterConstants.DATABASE_URL, JDBC_URL);
+		obdaSource.setParameter(RDBMSourceParameterConstants.DATABASE_USERNAME, DB_USER);
+		obdaSource.setParameter(RDBMSourceParameterConstants.IS_IN_MEMORY, "true");
+		obdaSource.setParameter(RDBMSourceParameterConstants.USE_DATASOURCE_FOR_ABOXDUMP, "true");
+
+		return obdaSource;
 	}
 
 	protected static void clearDB() throws Exception {

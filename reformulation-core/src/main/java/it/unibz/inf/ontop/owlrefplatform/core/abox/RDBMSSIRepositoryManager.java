@@ -20,15 +20,26 @@ package it.unibz.inf.ontop.owlrefplatform.core.abox;
  * #L%
  */
 
-import com.google.common.base.Joiner;
-import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableList;
+import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.Predicate.COL_TYPE;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
-import it.unibz.inf.ontop.ontology.*;
-import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import it.unibz.inf.ontop.model.impl.MappingFactoryImpl;
+import it.unibz.inf.ontop.ontology.Assertion;
+import it.unibz.inf.ontop.ontology.ClassExpression;
+import it.unibz.inf.ontop.ontology.DataPropertyAssertion;
+import it.unibz.inf.ontop.ontology.DataPropertyExpression;
+import it.unibz.inf.ontop.ontology.ImmutableOntologyVocabulary;
+import it.unibz.inf.ontop.ontology.ObjectPropertyAssertion;
+import it.unibz.inf.ontop.ontology.ObjectPropertyExpression;
+import it.unibz.inf.ontop.ontology.ClassAssertion;
+import it.unibz.inf.ontop.ontology.OClass;
+import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.Equivalences;
+import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.EquivalencesDAG;
+import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.Interval;
+import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.SemanticIndexCache;
+import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.SemanticIndexRange;
+import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -37,6 +48,13 @@ import java.sql.ResultSet;
 import java.util.*;
 import java.util.Map.Entry;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.google.common.base.Joiner;
+import com.google.common.collect.ImmutableMap;
+
+import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
 
 /**
  * Store ABox assertions in the DB
@@ -49,7 +67,9 @@ public class RDBMSSIRepositoryManager implements Serializable {
 	private static final long serialVersionUID = -6494667662327970606L;
 
 	private final static Logger log = LoggerFactory.getLogger(RDBMSSIRepositoryManager.class);
-	
+	private static final MappingFactory MAPPING_FACTORY = MappingFactoryImpl.getInstance();
+	private final NativeQueryLanguageComponentFactory nativeQLFactory;
+
 	static final class TableDescription {
 		final String tableName;
 		final String createCommand;
@@ -223,14 +243,11 @@ public class RDBMSSIRepositoryManager implements Serializable {
 		}
 	}
 	
-
-	private static final OBDADataFactory dfac = OBDADataFactoryImpl.getInstance();
-	
 	private final SemanticIndexURIMap uriMap = new SemanticIndexURIMap();
 	
 	private final TBoxReasoner reasonerDag;
 	private final ImmutableOntologyVocabulary voc;
-	
+
 	private SemanticIndexCache cacheSI;
 	
 	private boolean isIndexed;  // database index created
@@ -239,9 +256,11 @@ public class RDBMSSIRepositoryManager implements Serializable {
 	
 	private final List<RepositoryChangedListener> changeList = new LinkedList<>();
 
-	public RDBMSSIRepositoryManager(TBoxReasoner reasonerDag, ImmutableOntologyVocabulary voc) {
+	public RDBMSSIRepositoryManager(TBoxReasoner reasonerDag, ImmutableOntologyVocabulary voc,
+									NativeQueryLanguageComponentFactory nativeQLFactory) {
 		this.reasonerDag = reasonerDag;
 		this.voc = voc;
+		this.nativeQLFactory = nativeQLFactory;
 	}
 
 	public void generateMetadata() {
@@ -515,7 +534,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 
 		// replace the property by its canonical representative
 		DataPropertyExpression dpe0 = ax.getProperty();
-		DataPropertyExpression dpe = reasonerDag.getDataPropertyDAG().getCanonicalForm(dpe0);		
+		DataPropertyExpression dpe = reasonerDag.getDataPropertyDAG().getCanonicalForm(dpe0);
 		int idx = cacheSI.getEntry(dpe).getIndex();
 		
 		ObjectConstant subject = ax.getSubject();
@@ -600,7 +619,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 		
 		// replace concept by the canonical representative (which must be a concept name)
 		OClass concept0 = ax.getConcept();
-		OClass concept = (OClass)reasonerDag.getClassDAG().getCanonicalForm(concept0);	
+		OClass concept = (OClass)reasonerDag.getClassDAG().getCanonicalForm(concept0);
 		int conceptIndex = cacheSI.getEntry(concept).getIndex();	
 
 		ObjectConstant c1 = ax.getIndividual();
@@ -840,7 +859,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 	}
 
 	
-	public Collection<OBDAMappingAxiom> getMappings() throws OBDAException {
+	public ImmutableList<OBDAMappingAxiom> getMappings() throws OBDAException {
 
 		List<OBDAMappingAxiom> result = new LinkedList<>();
 
@@ -860,7 +879,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 				continue;
 			
 			// no mappings for auxiliary roles, which are introduced by the ontology translation process
-			if (!voc.containsObjectProperty(ope.getName())) 
+			if (!voc.containsObjectProperty(ope.getName()))
 				continue;
 
 			SemanticIndexRange range = cacheSI.getEntry(ope);
@@ -888,7 +907,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 				
 				String sourceQuery = view.getSELECT(intervalsSqlFilter);
 				List<Function> targetQuery = constructTargetQuery(ope.getPredicate(), view.getId().getType1(), view.getId().getType2());
-				OBDAMappingAxiom basicmapping = dfac.getRDBMSMappingAxiom(dfac.getSQLQuery(sourceQuery), targetQuery);
+				OBDAMappingAxiom basicmapping = nativeQLFactory.create(MAPPING_FACTORY.getSQLQuery(sourceQuery), targetQuery);
 				result.add(basicmapping);		
 			}
 		}
@@ -898,7 +917,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 			DataPropertyExpression dpe = set.getRepresentative();
 			
 			// no mappings for auxiliary roles, which are introduced by the ontology translation process
-			if (!voc.containsDataProperty(dpe.getName())) 
+			if (!voc.containsDataProperty(dpe.getName()))
 				continue;
 			
 			SemanticIndexRange range = cacheSI.getEntry(dpe);
@@ -926,7 +945,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 				
 				String sourceQuery = view.getSELECT(intervalsSqlFilter);
 				List<Function> targetQuery = constructTargetQuery(dpe.getPredicate(), view.getId().getType1(), view.getId().getType2());
-				OBDAMappingAxiom basicmapping = dfac.getRDBMSMappingAxiom(dfac.getSQLQuery(sourceQuery), targetQuery);
+				OBDAMappingAxiom basicmapping = nativeQLFactory.create(MAPPING_FACTORY.getSQLQuery(sourceQuery), targetQuery);
 				result.add(basicmapping);			
 			}
 		}
@@ -935,7 +954,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 		 * Creating mappings for each concept
 		 */
 
-		EquivalencesDAG<ClassExpression> classes = reasonerDag.getClassDAG();		
+		EquivalencesDAG<ClassExpression> classes = reasonerDag.getClassDAG();
 		for (Equivalences<ClassExpression> set : classes) {
 			
 			ClassExpression node = set.getRepresentative();
@@ -958,7 +977,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 				
 				String sourceQuery = view.getSELECT(intervalsSqlFilter);
 				List<Function> targetQuery = constructTargetQuery(classNode.getPredicate(), view.getId().getType1());
-				OBDAMappingAxiom basicmapping = dfac.getRDBMSMappingAxiom(dfac.getSQLQuery(sourceQuery), targetQuery);
+				OBDAMappingAxiom basicmapping = nativeQLFactory.create(MAPPING_FACTORY.getSQLQuery(sourceQuery), targetQuery);
 				result.add(basicmapping);
 			}
 		}
@@ -987,63 +1006,63 @@ public class RDBMSSIRepositoryManager implements Serializable {
 				}
 
 				// Replacing the old mappings 
-				OBDAMappingAxiom mergedMapping = dfac.getRDBMSMappingAxiom(newSQL.toString(), targetQuery);
+				OBDAMappingAxiom mergedMapping = nativeQLFactory.create(newSQL.toString(), targetQuery);
 				currentMappings.clear();
 				currentMappings.add(mergedMapping);
 			}
 		}
 		*/
 		log.debug("Total: {} mappings", result.size());
-		return result;
+		return ImmutableList.copyOf(result);
 	}
 
 	
 	private List<Function> constructTargetQuery(Predicate predicate, COL_TYPE type) {
 
-		Variable X = dfac.getVariable("X");
+		Variable X = DATA_FACTORY.getVariable("X");
 
-		//Predicate headPredicate = dfac.getPredicate("m", new COL_TYPE[] { COL_TYPE.OBJECT });
-		//Function head = dfac.getFunction(headPredicate, X);
+		//Predicate headPredicate = DATA_FACTORY.getPredicate("m", new COL_TYPE[] { COL_TYPE.OBJECT });
+		//Function head = DATA_FACTORY.getFunction(headPredicate, X);
 
 		Function subjectTerm;
 		if (type == COL_TYPE.OBJECT) 
-			subjectTerm = dfac.getUriTemplate(X);
+			subjectTerm = DATA_FACTORY.getUriTemplate(X);
 		else {
 			assert (type == COL_TYPE.BNODE); 
-			subjectTerm = dfac.getBNodeTemplate(X);
+			subjectTerm = DATA_FACTORY.getBNodeTemplate(X);
 		}
 		
-		Function body = dfac.getFunction(predicate, subjectTerm);
+		Function body = DATA_FACTORY.getFunction(predicate, subjectTerm);
 		return Collections.singletonList(body);
 	}
 	
 	
 	private List<Function> constructTargetQuery(Predicate predicate, COL_TYPE type1, COL_TYPE type2) {
 
-		Variable X = dfac.getVariable("X");
-		Variable Y = dfac.getVariable("Y");
+		Variable X = DATA_FACTORY.getVariable("X");
+		Variable Y = DATA_FACTORY.getVariable("Y");
 
-		//Predicate headPredicate = dfac.getPredicate("m", new COL_TYPE[] { COL_TYPE.STRING, COL_TYPE.OBJECT });
-		//Function head = dfac.getFunction(headPredicate, X, Y);
+		//Predicate headPredicate = DATA_FACTORY.getPredicate("m", new COL_TYPE[] { COL_TYPE.STRING, COL_TYPE.OBJECT });
+		//Function head = DATA_FACTORY.getFunction(headPredicate, X, Y);
 
 		Function subjectTerm;
 		if (type1 == COL_TYPE.OBJECT) 
-			subjectTerm = dfac.getUriTemplate(X);
+			subjectTerm = DATA_FACTORY.getUriTemplate(X);
 		else {
 			assert (type1 == COL_TYPE.BNODE); 
-			subjectTerm = dfac.getBNodeTemplate(X);
+			subjectTerm = DATA_FACTORY.getBNodeTemplate(X);
 		}
 		
 		Function objectTerm;
 		switch (type2) {
 			case BNODE:
-				objectTerm = dfac.getBNodeTemplate(Y); 
+				objectTerm = DATA_FACTORY.getBNodeTemplate(Y);
 				break;
 			case OBJECT:
-				objectTerm = dfac.getUriTemplate(Y);
+				objectTerm = DATA_FACTORY.getUriTemplate(Y);
 				break;
 			case LITERAL_LANG:	
-				objectTerm = dfac.getTypedTerm(Y, dfac.getVariable("Z"));
+				objectTerm = DATA_FACTORY.getTypedTerm(Y, DATA_FACTORY.getVariable("Z"));
 				break;
 			case DATE:
 			case TIME:
@@ -1051,10 +1070,10 @@ public class RDBMSSIRepositoryManager implements Serializable {
 				// R: these three types were not covered by the old switch
 				throw new RuntimeException("Unsuported type: " + type2);
 			default:
-				objectTerm = dfac.getTypedTerm(Y, type2);
+				objectTerm = DATA_FACTORY.getTypedTerm(Y, type2);
 		}
 
-		Function body = dfac.getFunction(predicate, subjectTerm, objectTerm);
+		Function body = DATA_FACTORY.getFunction(predicate, subjectTerm, objectTerm);
 		return Collections.singletonList(body);
 	}
 

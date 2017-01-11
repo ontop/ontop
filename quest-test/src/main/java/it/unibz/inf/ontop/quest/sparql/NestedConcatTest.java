@@ -20,22 +20,14 @@ package it.unibz.inf.ontop.quest.sparql;
  * #L%
  */
 
-import it.unibz.inf.ontop.io.ModelIOManager;
-import it.unibz.inf.ontop.model.OBDADataFactory;
-import it.unibz.inf.ontop.model.OBDAModel;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
-import org.junit.Test;
-import org.semanticweb.owlapi.apibinding.OWLManager;
+import it.unibz.inf.ontop.owlrefplatform.core.SQLExecutableQuery;
+import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLResultSet;
+import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLStatement;
+import it.unibz.inf.ontop.quest.AbstractVirtualModeTest;
 import org.semanticweb.owlapi.model.OWLObject;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
 
-import java.io.File;
 
-public class NestedConcatTest {
+public class NestedConcatTest extends AbstractVirtualModeTest {
 
     /*
      * Use the sample database using H2 from
@@ -46,44 +38,15 @@ public class NestedConcatTest {
      * Test with not latin Character
      *
      */
-    final String owlfile = "src/test/resources/nestedConcat/test.owl";
-    final String obdafile = "src/test/resources/nestedConcat/test.obda";
+    static final String owlfile = "src/test/resources/nestedConcat/test.owl";
+    static final String obdafile = "src/test/resources/nestedConcat/test.obda";
 
-    @Test
+    protected NestedConcatTest() {
+        super(owlfile, obdafile);
+    }
+
     public void runQuery() throws Exception {
 
-		/*
-		 * Load the ontology from an external .owl file.
-		 */
-        OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-        OWLOntology ontology = manager.loadOntologyFromOntologyDocument(new File(owlfile));
-
-		/*
-		 * Load the OBDA model from an external .obda file
-		 */
-        OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
-        OBDAModel obdaModel = fac.getOBDAModel();
-        ModelIOManager ioManager = new ModelIOManager(obdaModel);
-        ioManager.load(obdafile);
-
-		/*
-		 * Prepare the configuration for the Quest instance. The example below shows the setup for
-		 * "Virtual ABox" mode
-		 */
-        QuestPreferences preference = new QuestPreferences();
-        preference.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-
-		/*
-		 * Create the instance of Quest OWL reasoner.
-		 */
-        QuestOWLFactory factory = new QuestOWLFactory();
-        QuestOWLConfiguration config = QuestOWLConfiguration.builder().obdaModel(obdaModel).preferences(preference).build();
-        QuestOWL reasoner = factory.createReasoner(ontology, config);
-
-		/*
-		 * Prepare the data connection for querying.
-		 */
-        QuestOWLConnection conn = reasoner.getConnection();
         QuestOWLStatement st = conn.createStatement();
 
 		/*
@@ -120,8 +83,7 @@ public class NestedConcatTest {
 			/*
 			 * Print the query summary
 			 */
-            QuestOWLStatement qst = (QuestOWLStatement) st;
-            String sqlQuery = qst.getUnfolding(sparqlQuery);
+            String sqlQuery = ((SQLExecutableQuery)st.getExecutableQuery(sparqlQuery)).getSQL();
 
             System.out.println();
             System.out.println("The input SPARQL query:");
@@ -149,18 +111,6 @@ public class NestedConcatTest {
                 conn.close();
             }
             reasoner.dispose();
-        }
-    }
-
-    /**
-     * Main client program
-     */
-    public static void main(String[] args) {
-        try {
-            NestedConcatTest example = new NestedConcatTest();
-            example.runQuery();
-        } catch (Exception e) {
-            e.printStackTrace();
         }
     }
 }

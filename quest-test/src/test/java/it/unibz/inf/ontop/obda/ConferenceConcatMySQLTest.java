@@ -20,29 +20,12 @@ package it.unibz.inf.ontop.obda;
  * #L%
  */
 
-import it.unibz.inf.ontop.io.ModelIOManager;
-import it.unibz.inf.ontop.model.OBDADataFactory;
-import it.unibz.inf.ontop.model.OBDAModel;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
-import it.unibz.inf.ontop.parser.ProjectionVisitor;
-import it.unibz.inf.ontop.utils.Mapping2DatalogConverter;
-import org.junit.Before;
-import org.junit.Test;
-import org.semanticweb.owlapi.apibinding.OWLManager;
+
+import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLResultSet;
+import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLStatement;
+import it.unibz.inf.ontop.quest.AbstractVirtualModeTest;
+
 import org.semanticweb.owlapi.model.OWLObject;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.io.File;
-import java.sql.Connection;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 /**
  * Test
@@ -51,44 +34,17 @@ import static org.junit.Assert.assertTrue;
  * Refer to {@link Mapping2DatalogConverter} {@link ProjectionVisitor}
  */
 
-public class ConferenceConcatMySQLTest {
+public class ConferenceConcatMySQLTest extends AbstractVirtualModeTest {
 
-	private OBDADataFactory fac;
-	private Connection conn;
+    static final String owlFile = "src/test/resources/conference/ontology3.owl";
+    static final String obdaFile = "src/test/resources/conference/secondmapping-test.obda";
 
-	Logger log = LoggerFactory.getLogger(this.getClass());
-	private OBDAModel obdaModel;
-	private OWLOntology ontology;
-
-    final String owlFile = "src/test/resources/conference/ontology3.owl";
-    final String obdaFile = "src/test/resources/conference/secondmapping-test.obda";
-
-	@Before
-	public void setUp() throws Exception {
-
-		fac = OBDADataFactoryImpl.getInstance();
-		
-		// Loading the OWL file
-		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-		ontology = manager.loadOntologyFromOntologyDocument((new File(owlFile)));
-
-		// Loading the OBDA data
-		obdaModel = fac.getOBDAModel();
-		
-		ModelIOManager ioManager = new ModelIOManager(obdaModel);
-		ioManager.load(obdaFile);
-		
+	protected ConferenceConcatMySQLTest() {
+		super(owlFile, obdaFile);
 	}
 
-	private void runTests(QuestPreferences p, String query1) throws Exception {
+	private void runTests(String query1) throws Exception {
 
-        // Creating a new instance of the reasoner
-        QuestOWLFactory factory = new QuestOWLFactory();
-        QuestOWLConfiguration config = QuestOWLConfiguration.builder().obdaModel(obdaModel).preferences(p).build();
-        QuestOWL reasoner = factory.createReasoner(ontology, config);
-
-		// Now we are ready for querying
-		QuestOWLConnection conn = reasoner.getConnection();
 		QuestOWLStatement st = conn.createStatement();
 
 
@@ -111,7 +67,7 @@ public class ConferenceConcatMySQLTest {
 	private void executeQueryAssertResults(String query, QuestOWLStatement st) throws Exception {
 		QuestOWLResultSet rs = st.executeTuple(query);
 
-		OWLObject answer, answer2=null;
+		OWLObject answer, answer2;
 		rs.nextRow();
 
 
@@ -130,20 +86,14 @@ public class ConferenceConcatMySQLTest {
 		assertEquals("<http://myproject.org/odbs#eventpaper1>", answer2.toString());
 	}
 
-
-	@Test
 	public void testConcat() throws Exception {
-
-		QuestPreferences p = new QuestPreferences();
-		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
 
         String query1 = "PREFIX : <http://myproject.org/odbs#> SELECT ?x ?y\n" +
                 "WHERE {\n" +
                 "   ?x :TcontainsE ?y\n" +
 				"}";
 
-		runTests(p, query1);
+		runTests(query1);
 	}
 
 

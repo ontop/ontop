@@ -20,6 +20,8 @@ package it.unibz.inf.ontop.owlapi;
  * #L%
  */
 
+import it.unibz.inf.ontop.ontology.ClassAssertion;
+import it.unibz.inf.ontop.ontology.DataPropertyAssertion;
 import it.unibz.inf.ontop.model.BNode;
 import it.unibz.inf.ontop.model.ObjectConstant;
 import it.unibz.inf.ontop.model.Predicate.COL_TYPE;
@@ -31,6 +33,7 @@ import it.unibz.inf.ontop.ontology.ObjectPropertyAssertion;
 import org.semanticweb.owlapi.model.*;
 import org.semanticweb.owlapi.vocab.OWL2Datatype;
 import uk.ac.manchester.cs.owl.owlapi.OWLDataFactoryImpl;
+import it.unibz.inf.ontop.model.*;
 
 /***
  * Translates a ontop ABox assertion into an OWLIndividualAxiom. Used in the

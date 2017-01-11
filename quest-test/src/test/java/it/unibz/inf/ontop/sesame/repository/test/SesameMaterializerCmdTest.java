@@ -20,10 +20,11 @@ package it.unibz.inf.ontop.sesame.repository.test;
  * #L%
  */
 
+import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.exception.InvalidMappingException;
-import it.unibz.inf.ontop.io.ModelIOManager;
+import it.unibz.inf.ontop.injection.OBDACoreConfiguration;
+import it.unibz.inf.ontop.io.InvalidDataSourceException;
 import it.unibz.inf.ontop.model.OBDAModel;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.ontology.Ontology;
 import it.unibz.inf.ontop.owlapi.OWLAPITranslatorUtility;
 import it.unibz.inf.ontop.owlapi.QuestOWLIndividualAxiomIterator;
@@ -46,8 +47,8 @@ import org.semanticweb.owlapi.model.OWLOntologyManager;
 import java.io.*;
 
 public class SesameMaterializerCmdTest extends TestCase {
-	
-	private OBDAModel model;
+
+	private final OBDAModel model;
 	private Ontology onto;
 	private OWLOntology ontology = null;
 
@@ -56,16 +57,14 @@ public class SesameMaterializerCmdTest extends TestCase {
 	 * storing all the SQL results of one big query in memory.
 	 */
 	private static boolean DO_STREAM_RESULTS = true;
-	
-	@Override
-	public void setUp() throws IOException, InvalidMappingException {
-		// obda file
-		File f = new File("src/test/resources/materializer/MaterializeTest.obda");
-		//create model
-		model = OBDADataFactoryImpl.getInstance().getOBDAModel();
-		ModelIOManager modelIO = new ModelIOManager(model);
-		modelIO.load(f);
-	}
+
+    public SesameMaterializerCmdTest() throws IOException, InvalidMappingException, DuplicateMappingException, InvalidDataSourceException {
+
+		OBDACoreConfiguration configuration = OBDACoreConfiguration.defaultBuilder()
+				.nativeOntopMappingFile("src/test/resources/materializer/MaterializeTest.obda")
+				.build();
+        model = configuration.loadProvidedMapping();
+    }
 	
 	public void setUpOnto() throws OWLOntologyCreationException {
 		//create onto
@@ -290,7 +289,7 @@ public class SesameMaterializerCmdTest extends TestCase {
 
 		while(iterator.hasNext()) 
 			manager.addAxiom(ontology, iterator.next());
-		manager.saveOntology(ontology, new OWLXMLDocumentFormat(), new WriterDocumentTarget(writer));	
+		manager.saveOntology(ontology, new OWLXMLDocumentFormat(), new WriterDocumentTarget(writer));
 		
 		assertEquals(51, materializer.getTriplesCount());
 		assertEquals(5, materializer.getVocabularySize());

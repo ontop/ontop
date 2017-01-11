@@ -20,57 +20,104 @@ package it.unibz.inf.ontop.owlrefplatform.core;
  * #L%
  */
 
-import it.unibz.inf.ontop.model.OBDAConnection;
-import it.unibz.inf.ontop.model.OBDAException;
-
 import java.sql.Connection;
 import java.sql.SQLException;
+
+import it.unibz.inf.ontop.model.OBDAException;
+import it.unibz.inf.ontop.owlrefplatform.core.execution.SIQuestStatement;
+import it.unibz.inf.ontop.owlrefplatform.core.execution.SISQLQuestStatementImpl;
+import it.unibz.inf.ontop.injection.QuestCoreSettings;
 
 /***
  * Quest connection is responsible for wrapping a JDBC connection to the data
  * source. It will translate calls to OBDAConnection into JDBC Connection calls
  * (in most cases directly).
- * 
+ *
+ * SQL-specific implementation (specific to the JDBCConnector)!
+ *
+ * TODO: rename it SQLQuestConnection
+ *
  * @author mariano
  * 
  */
-public class QuestConnection implements OBDAConnection {
-	
+public class QuestConnection implements IQuestConnection {
+
+	private final QuestCoreSettings questCoreSettings;
 	private Connection conn;
 
-	private final Quest questInstance;
-	
+	private IQuest questinstance;
+	private final JDBCConnector jdbcConnector;
 	private boolean isClosed;
 
-	public QuestConnection(Quest questInstance, Connection connection) {
-		this.questInstance = questInstance;
+
+	public QuestConnection(JDBCConnector jdbcConnector, IQuest questInstance, Connection connection, QuestCoreSettings questCoreSettings) {
+		this.jdbcConnector = jdbcConnector;
+		this.questinstance = questInstance;
 		this.conn = connection;
-		isClosed = false;
+		this.isClosed = false;
+		this.questCoreSettings = questCoreSettings;
 	}
-	
-	@Deprecated // used only in QuestSemanticSIRepository
-	public Connection getConnection() {
+
+	public Connection getSQLConnection() {
 		return conn;
 	}
 	
 	@Override
 	public void close() throws OBDAException {
 		try {
-			questInstance.releaseSQLPoolConnection(conn);
-		} catch (Exception e) {
-			throw new OBDAException(e);
+			conn.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+			//throw new OBDAException(e);
 		}
-
 	}
 
+	/**
+	 * For both the virtual and classic modes.
+	 */
 	@Override
-	public QuestStatement createStatement() throws OBDAException {
+	public IQuestStatement createStatement() throws OBDAException {
+		/**
+		 * If in the classic mode, creates a SIQuestStatement.
+		 * Why? Because the insertData method is not implemented by SQLQuestStatement while
+		 * it is by SISQLQuestStatementImpl.
+		 */
+		if (questCoreSettings.getProperty(QuestCoreSettings.ABOX_MODE).equals(QuestConstants.CLASSIC)) {
+			return createSIStatement();
+		}
+
+		/**
+		 * Virtual mode.
+		 */
 		try {
 			if (conn.isClosed()) {
 				// Sometimes it gets dropped, reconnect
-				conn = questInstance.getSQLPoolConnection();
+				conn = jdbcConnector.getSQLPoolConnection();
 			}
-			QuestStatement st = new QuestStatement(this.questInstance, this,
+			IQuestStatement st = new SQLQuestStatement(this.questinstance, this,
+					conn.createStatement(java.sql.ResultSet.TYPE_FORWARD_ONLY,
+							java.sql.ResultSet.CONCUR_READ_ONLY));
+			//st.setFetchSize(400);
+			return st;
+
+		} catch (SQLException e1) {
+			OBDAException obdaException = new OBDAException(e1);
+			throw obdaException;
+		}
+	}
+
+
+	/**
+	 * Only for the classic mode!
+	 */
+	@Override
+	public SIQuestStatement createSIStatement() throws OBDAException {
+		try {
+			if (conn.isClosed()) {
+				// Sometimes it gets dropped, reconnect
+				conn = jdbcConnector.getSQLPoolConnection();
+			}
+			SIQuestStatement st = new SISQLQuestStatementImpl(this.questinstance, this,
 					conn.createStatement(java.sql.ResultSet.TYPE_FORWARD_ONLY,
 							java.sql.ResultSet.CONCUR_READ_ONLY));
 			//st.setFetchSize(400);
@@ -130,7 +177,10 @@ public class QuestConnection implements OBDAConnection {
 
 	@Override
 	public boolean isReadOnly() throws OBDAException {
-		if (this.questInstance.getSemanticIndexRepository() == null)
+		/**
+		 * Write is currently supported by the classic mode.
+		 */
+		if (!this.questinstance.getOptionalSemanticIndexRepository().isPresent())
 			return true;
 		try {
 			return conn.isReadOnly();

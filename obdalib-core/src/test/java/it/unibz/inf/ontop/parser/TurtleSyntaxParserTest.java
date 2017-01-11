@@ -20,14 +20,19 @@ package it.unibz.inf.ontop.parser;
  * #L%
  */
 
+import com.google.inject.Injector;
+
+import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
+import it.unibz.inf.ontop.injection.OBDACoreConfiguration;
 import it.unibz.inf.ontop.io.PrefixManager;
-import it.unibz.inf.ontop.io.SimplePrefixManager;
 import it.unibz.inf.ontop.model.Function;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static junit.framework.TestCase.assertFalse;
 import static junit.framework.TestCase.assertTrue;
@@ -42,9 +47,15 @@ import static junit.framework.TestCase.assertTrue;
 
 public class TurtleSyntaxParserTest {
 
-	final static Logger log = LoggerFactory.getLogger(TurtleSyntaxParserTest.class);
+	private final static Logger log = LoggerFactory.getLogger(TurtleSyntaxParserTest.class);
+    private final NativeQueryLanguageComponentFactory factory;
 
-	@Test
+    public TurtleSyntaxParserTest() {
+		OBDACoreConfiguration configuration = OBDACoreConfiguration.defaultBuilder().build();
+		Injector injector = configuration.getInjector();
+        factory = injector.getInstance(NativeQueryLanguageComponentFactory.class);
+    }
+	
 	public void test_1_1() {
 		final boolean result = parse(":Person-{id} a :Person .");
 		assertTrue(result);
@@ -126,7 +137,7 @@ public class TurtleSyntaxParserTest {
 		final boolean result = parse(":Person-{id} :firstName \"hello {fname}\"^^xsd:double .");
 		assertTrue(result);
 	}
-	
+
 	public void test_3_3() {
 		final boolean result = parse(":Person-{id} :firstName {fname}@en-US .");
 		assertTrue(result);
@@ -265,7 +276,7 @@ public class TurtleSyntaxParserTest {
 				":C_{course_id} a :Course ; :hasProfessor :P_{id} . \n" +
 				":P_{id} a :Professor ; :teaches :C_{course_id} .\n" +
 				"{first_name} a :Name . ", 8);
-				assertTrue(result);
+		assertTrue(result);
 
 	}
 
@@ -286,8 +297,7 @@ public class TurtleSyntaxParserTest {
 	}
 
 	private boolean compareCQIE(String input, int countBody) {
-		TurtleOBDASyntaxParser parser = new TurtleOBDASyntaxParser();
-		parser.setPrefixManager(getPrefixManager());
+		TurtleOBDASyntaxParser parser = new TurtleOBDASyntaxParser(getPrefixManager().getPrefixMap());
 		List<Function> mapping;
 		try {
 			mapping = parser.parse(input);
@@ -300,9 +310,11 @@ public class TurtleSyntaxParserTest {
 		}
 		return mapping.size()==countBody;
 	}
+
+
 	private boolean parse(String input) {
-		TurtleOBDASyntaxParser parser = new TurtleOBDASyntaxParser();
-		parser.setPrefixManager(getPrefixManager());
+		TurtleOBDASyntaxParser parser = new TurtleOBDASyntaxParser(getPrefixManager().getPrefixMap());
+
 		List<Function> mapping;
 		try {
 			mapping = parser.parse(input);
@@ -318,9 +330,10 @@ public class TurtleSyntaxParserTest {
 	}
 	
 	private PrefixManager getPrefixManager() {
-		PrefixManager pm = new SimplePrefixManager();
-		pm.addPrefix(PrefixManager.DEFAULT_PREFIX, "http://obda.inf.unibz.it/testcase#");
-		pm.addPrefix("ex:", "http://www.example.org/");
+		Map<String, String> prefixes = new HashMap<>();
+		prefixes.put(PrefixManager.DEFAULT_PREFIX, "http://obda.inf.unibz.it/testcase#");
+		prefixes.put("ex:", "http://www.example.org/");
+        PrefixManager pm = factory.create(prefixes);
 		return pm;
 	}
 }

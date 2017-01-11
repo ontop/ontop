@@ -1,6 +1,5 @@
 package it.unibz.inf.ontop.cli;
 
-import it.unibz.inf.ontop.io.ModelIOManager;
 import it.unibz.inf.ontop.model.OBDADataFactory;
 import it.unibz.inf.ontop.model.OBDAModel;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
@@ -31,15 +30,13 @@ public class SimpleMaterializerTest {
     // TODO We need to extend this test to import the contents of the mappings
     // into OWL and repeat everything taking form OWL
 
-    private OBDADataFactory fac;
     private Connection conn;
 
-    Logger log = LoggerFactory.getLogger(this.getClass());
-    private OBDAModel obdaModel;
+    private Logger log = LoggerFactory.getLogger(this.getClass());
     private OWLOntology ontology;
 
     final String owlfile = "src/test/resources/test/simplemapping.owl";
-    final String obdafile = "src/test/resources/test/simplemapping.obda";
+    // final String obdafile = "src/test/resources/test/simplemapping.obda";
 
     @Before
     public void setUp() throws Exception {
@@ -50,8 +47,6 @@ public class SimpleMaterializerTest {
         String url = "jdbc:h2:mem:materialization_test";
         String username = "sa";
         String password = "";
-
-        fac = OBDADataFactoryImpl.getInstance();
 
         conn = DriverManager.getConnection(url, username, password);
         Statement st = conn.createStatement();
@@ -71,13 +66,6 @@ public class SimpleMaterializerTest {
         // Loading the OWL file
         OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
         ontology = manager.loadOntologyFromOntologyDocument((new File(owlfile)));
-
-        // Loading the OBDA data
-        obdaModel = fac.getOBDAModel();
-
-        ModelIOManager ioManager = new ModelIOManager(obdaModel);
-        ioManager.load(obdafile);
-
     }
 
     @After

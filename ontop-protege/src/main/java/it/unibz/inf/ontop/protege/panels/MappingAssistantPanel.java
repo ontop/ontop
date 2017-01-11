@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.protege.panels;
 
 /*
  * #%L
- * ontop-protege4
+ * ontop-protege
  * %%
  * Copyright (C) 2009 - 2013 KRDB Research Centre. Free University of Bozen Bolzano.
  * %%
@@ -21,14 +21,19 @@ package it.unibz.inf.ontop.protege.panels;
  */
 
 import it.unibz.inf.ontop.exception.DuplicateMappingException;
+import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
+import it.unibz.inf.ontop.injection.QuestConfiguration;
+import it.unibz.inf.ontop.injection.QuestSettings;
 import it.unibz.inf.ontop.io.PrefixManager;
 import it.unibz.inf.ontop.model.*;
+import it.unibz.inf.ontop.model.impl.MappingFactoryImpl;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.model.impl.RDBMSourceParameterConstants;
 import it.unibz.inf.ontop.ontology.OClass;
 import it.unibz.inf.ontop.owlrefplatform.core.queryevaluation.SQLAdapterFactory;
 import it.unibz.inf.ontop.owlrefplatform.core.queryevaluation.SQLDialectAdapter;
 import it.unibz.inf.ontop.owlrefplatform.core.queryevaluation.SQLServerSQLDialectAdapter;
+import it.unibz.inf.ontop.protege.core.OBDAModelWrapper;
 import it.unibz.inf.ontop.protege.gui.IconLoader;
 import it.unibz.inf.ontop.protege.gui.MapItem;
 import it.unibz.inf.ontop.protege.gui.PredicateItem;
@@ -61,11 +66,13 @@ import java.util.concurrent.CountDownLatch;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
+
 public class MappingAssistantPanel extends javax.swing.JPanel implements DatasourceSelectorListener {
 
 	private static final long serialVersionUID = 1L;
 
-	private final OBDAModel obdaModel;
+	private final OBDAModelWrapper obdaModel;
 	
 	private final PrefixManager prefixManager;
 	
@@ -74,21 +81,24 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 	private MapItem predicateSubjectMap;
 
     private boolean isSubjectClassValid = true;
-	
-	private static final OBDADataFactory dfac = OBDADataFactoryImpl.getInstance();
+
+	private static final MappingFactory MAPPING_FACTORY = MappingFactoryImpl.getInstance();
 
 	private static final String EMPTY_TEXT = "";
-	
-	private static final Color DEFAULT_TEXTFIELD_BACKGROUND = UIManager.getDefaults().getColor("TextField.background");
-	private static final Color ERROR_TEXTFIELD_BACKGROUND = new Color(255, 143, 143);
-	
-	public MappingAssistantPanel(OBDAModel model) {
+
+    private static final Color DEFAULT_TEXTFIELD_BACKGROUND = UIManager.getDefaults().getColor("TextField.background");
+    private static final Color ERROR_TEXTFIELD_BACKGROUND = new Color(255, 143, 143);
+
+    private final NativeQueryLanguageComponentFactory nativeQLFactory;
+
+    public MappingAssistantPanel(OBDAModelWrapper model, NativeQueryLanguageComponentFactory nativeQLFactory) {
 		obdaModel = model;
 		prefixManager = obdaModel.getPrefixManager();
+        this.nativeQLFactory = nativeQLFactory;
 		initComponents();
-                
+
                 if (obdaModel.getSources().size() > 0) {
-            
+
                     datasourceChanged(selectedSource, obdaModel.getSources().get(0));
                 }
 	}
@@ -285,8 +295,9 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 
         pnlClassSeachComboBox.setLayout(new java.awt.BorderLayout());
         Vector<Object> v = new Vector<Object>();
-        for (OClass c : obdaModel.getOntologyVocabulary().getClasses()) {
-        	Predicate pred = c.getPredicate(); 
+		OBDAModel model = obdaModel.getCurrentImmutableOBDAModel();
+        for (OClass c : model.getOntologyVocabulary().getClasses()) {
+        	Predicate pred = c.getPredicate();
             v.addElement(new PredicateItem(pred, prefixManager));
         }
         cboClassAutoSuggest = new AutoSuggestComboBox(v);
@@ -520,7 +531,7 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 				return;
 			}
 			// Create the mapping axiom
-			OBDAMappingAxiom mappingAxiom = dfac.getRDBMSMappingAxiom(dfac.getSQLQuery(source), target);
+            OBDAMappingAxiom mappingAxiom = nativeQLFactory.create(MAPPING_FACTORY.getSQLQuery(source), target);
 			obdaModel.addMapping(selectedSource.getSourceID(), mappingAxiom, false);
 			
 			// Clear the form afterwards
@@ -544,7 +555,7 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 		// Store concept in the body, if any
 		Function subjectTerm = createSubjectTerm(predicateSubjectMap);
 		if (!predicateSubjectMap.getName().equals("owl:Thing")) {
-			Function concept = dfac.getFunction(predicateSubjectMap.getSourcePredicate(), subjectTerm);
+			Function concept = DATA_FACTORY.getFunction(predicateSubjectMap.getSourcePredicate(), subjectTerm);
 			body.add(concept);
 		}
 		
@@ -553,18 +564,18 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 		for (MapItem predicateObjectMap : predicateObjectMapsList) {
 			if (predicateObjectMap.isObjectMap()) { // if an attribute
 				Term objectTerm = createObjectTerm(getColumnName(predicateObjectMap), predicateObjectMap.getDataType());
-				Function attribute = dfac.getFunction(predicateObjectMap.getSourcePredicate(), subjectTerm, objectTerm);
+				Function attribute = DATA_FACTORY.getFunction(predicateObjectMap.getSourcePredicate(), subjectTerm, objectTerm);
 				body.add(attribute);
 				//distinguishVariables.add(objectTerm);
 			} else if (predicateObjectMap.isRefObjectMap()) { // if a role
 				Function objectRefTerm = createRefObjectTerm(predicateObjectMap);
-				Function role = dfac.getFunction(predicateObjectMap.getSourcePredicate(), subjectTerm, objectRefTerm);
+				Function role = DATA_FACTORY.getFunction(predicateObjectMap.getSourcePredicate(), subjectTerm, objectRefTerm);
 				body.add(role);
 			}
 		}
 		// Create the head
 		//int arity = distinguishVariables.size();
-		//Function head = dfac.getFunction(dfac.getPredicate(OBDALibConstants.QUERY_HEAD, arity), distinguishVariables);
+		//Function head = DATA_FACTORY.getFunction(DATA_FACTORY.getPredicate(OBDALibConstants.QUERY_HEAD, arity), distinguishVariables);
 		
 		// Create and return the conjunctive query
 		return body;
@@ -587,11 +598,11 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 			throw new RuntimeException("Invalid column mapping: " + column);
 		}
 		String columnName = columnStrings.get(0).toString();
-		Variable var = dfac.getVariable(columnName);
+		Variable var = DATA_FACTORY.getVariable(columnName);
 		if (datatype == null) {
 			return var;
 		} else {
-			return dfac.getFunction(datatype, var);
+			return DATA_FACTORY.getFunction(datatype, var);
 		}
 	}
 	
@@ -632,7 +643,7 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 
 	private MapItem createPredicateSubjectMap() {
 		// Create a default subject map using owl:Thing as the subject
-		return new MapItem(new PredicateItem(dfac.getClassPredicate("owl:Thing"), prefixManager));
+		return new MapItem(new PredicateItem(DATA_FACTORY.getClassPredicate("owl:Thing"), prefixManager));
 	}
 
 	private Function getUriFunctionTerm(String text) {
@@ -645,13 +656,13 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 				sb.append(token.toString());
 			} else if (token instanceof ColumnString) {
 				sb.append(PLACEHOLDER);
-				Variable column = dfac.getVariable(token.toString());
+				Variable column = DATA_FACTORY.getVariable(token.toString());
 				terms.add(column);
 			}
 		}
-		ValueConstant uriTemplate = dfac.getConstantLiteral(sb.toString()); // complete URI template
+		ValueConstant uriTemplate = DATA_FACTORY.getConstantLiteral(sb.toString()); // complete URI template
 		terms.add(0, uriTemplate);
-		return dfac.getUriTemplate(terms);
+		return DATA_FACTORY.getUriTemplate(terms);
 	}
 
 	// Column placeholder pattern
@@ -779,13 +790,13 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 		try {
 			JDBCConnectionManager man = JDBCConnectionManager.getJDBCConnectionManager();
 			Connection conn = man.getConnection(selectedSource);
-			DBMetadata md = DBMetadataExtractor.createMetadata(conn);
+			RDBMetadata md = RDBMetadataExtractionTools.createMetadata(conn);
 			// this operation is EXPENSIVE -- only names are needed + a flag for table/view
-			DBMetadataExtractor.loadMetadata(md, conn, null);
+			RDBMetadataExtractionTools.loadMetadata(md, conn, null);
 			for (DatabaseRelationDefinition relation : md.getDatabaseRelations()) {
 				relationList.addElement(relation);
 			}
-		} 
+		}
 		catch (SQLException e) {
 			// NO-OP
 		}
@@ -906,7 +917,7 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 						label.setIcon(icon);
 						label.setText(td.getID().getSQLRendering());
 					} else if (value instanceof ParserViewDefinition) {
-						// ROMAN (7 Oct 2015): I'm not sure we need "views" -- they are 
+						// ROMAN (7 Oct 2015): I'm not sure we need "views" -- they are
 						// created by SQLQueryParser for complex queries that cannot be parsed
 						ParserViewDefinition vd = (ParserViewDefinition) value;
 						ImageIcon icon = IconLoader.getImageIcon("images/db_view.png");
@@ -978,8 +989,10 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 					try {
 						// Construct the sql query
 						final String dbType = selectedSource.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER);
-                        //second parameter is database version, not relevant in this step
-                        SQLDialectAdapter sqlDialect = SQLAdapterFactory.getSQLDialectAdapter(dbType, "");
+
+                        //TODO: find a way to get the current preferences. Necessary if an third-party adapter should be used.
+						QuestSettings defaultPreferences = QuestConfiguration.defaultBuilder().build().getSettings();
+						SQLDialectAdapter sqlDialect = SQLAdapterFactory.getSQLDialectAdapter(dbType, "", defaultPreferences);
 						String sqlString = txtQueryEditor.getText();
 
 						int rowCount = fetchSize();

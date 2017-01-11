@@ -24,14 +24,14 @@ import it.unibz.inf.ontop.model.CQIE;
 import it.unibz.inf.ontop.model.DatalogProgram;
 import it.unibz.inf.ontop.model.Function;
 import it.unibz.inf.ontop.model.Term;
-import it.unibz.inf.ontop.model.OBDADataFactory;
 import it.unibz.inf.ontop.model.Predicate;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 
 import java.util.List;
 import java.util.Vector;
 
 import junit.framework.TestCase;
+
+import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
 
 public class UnificationTest2 extends TestCase {
 
@@ -50,43 +50,39 @@ public class UnificationTest2 extends TestCase {
 
 	public void test_1() throws Exception {
 
-		OBDADataFactory factory = OBDADataFactoryImpl.getInstance();
-		OBDADataFactory predFac = OBDADataFactoryImpl.getInstance();
-		OBDADataFactory tfac = OBDADataFactoryImpl.getInstance();
+		Term t1 = DATA_FACTORY.getVariable("x");
+		Term t2 = DATA_FACTORY.getVariable("y");
+		Term t3 = DATA_FACTORY.getVariable("x");
 
-		Term t1 = factory.getVariable("x");
-		Term t2 = factory.getVariable("y");
-		Term t3 = factory.getVariable("x");
-
-		Predicate r1 = predFac.getObjectPropertyPredicate("R");
-		Predicate r2 = predFac.getObjectPropertyPredicate("R");
-		Predicate s = predFac.getObjectPropertyPredicate("S");
-		Predicate p = predFac.getPredicate("p", 2);
+		Predicate r1 = DATA_FACTORY.getObjectPropertyPredicate("R");
+		Predicate r2 = DATA_FACTORY.getObjectPropertyPredicate("R");
+		Predicate s = DATA_FACTORY.getObjectPropertyPredicate("S");
+		Predicate p = DATA_FACTORY.getPredicate("p", 2);
 
 		List<Term> terms1 = new Vector<Term>();
 		terms1.add(t1);
-		terms1.add(factory.getVariable("w1"));
+		terms1.add(DATA_FACTORY.getVariable("w1"));
 		List<Term> terms2 = new Vector<Term>();
-		terms2.add(factory.getVariable("w2"));
+		terms2.add(DATA_FACTORY.getVariable("w2"));
 		terms2.add(t2);
 		List<Term> terms3 = new Vector<Term>();
 		terms3.add(t3);
-		terms3.add(factory.getVariable("w3"));
+		terms3.add(DATA_FACTORY.getVariable("w3"));
 		List<Term> terms4 = new Vector<Term>();
 		terms4.add(t3.clone());
 		terms4.add(t2.clone());
 
-		Function a1 = tfac.getFunction(r1, terms1);
-		Function a2 = tfac.getFunction(r2, terms2);
-		Function a3 = tfac.getFunction(s, terms3);
-		Function head = tfac.getFunction(p, terms4);
+		Function a1 = DATA_FACTORY.getFunction(r1, terms1);
+		Function a2 = DATA_FACTORY.getFunction(r2, terms2);
+		Function a3 = DATA_FACTORY.getFunction(s, terms3);
+		Function head = DATA_FACTORY.getFunction(p, terms4);
 
 		List<Function> body = new Vector<Function>();
 		body.add(a1);
 		body.add(a2);
 		body.add(a3);
-		CQIE query = tfac.getCQIE(head, body);
-		DatalogProgram prog = tfac.getDatalogProgram();
+		CQIE query = DATA_FACTORY.getCQIE(head, body);
+		DatalogProgram prog = DATA_FACTORY.getDatalogProgram();
 		prog.appendRule(query);
 /* ROMAN commented out (might be able to restore)
 		// List<Assertion> list = new Vector<Assertion>();

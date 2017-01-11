@@ -1,7 +1,7 @@
 package it.unibz.inf.ontop.reformulation.tests;
 
 import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.io.ModelIOManager;
+import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.model.OBDADataFactory;
 import it.unibz.inf.ontop.model.OBDAModel;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
@@ -33,11 +33,7 @@ import static org.junit.Assert.assertTrue;
  */
 public class TypeInferenceTest {
 
-    private OBDADataFactory fac;
     private Connection conn;
-
-    private OBDAModel obdaModel;
-    private OWLOntology ontology;
 
     private static final String ONTOLOGY_FILE = "src/test/resources/test/typeinference/types.owl";
     private static final String OBDA_FILE = "src/test/resources/test/typeinference/types.obda";
@@ -50,8 +46,6 @@ public class TypeInferenceTest {
         String url = "jdbc:h2:mem:types";
         String username = "sa";
         String password = "";
-
-        fac = OBDADataFactoryImpl.getInstance();
 
         conn = DriverManager.getConnection(url, username, password);
 
@@ -70,15 +64,6 @@ public class TypeInferenceTest {
 
         st.executeUpdate(bf.toString());
         conn.commit();
-
-        // Loading the OWL file
-        OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-        ontology = manager.loadOntologyFromOntologyDocument((new File(ONTOLOGY_FILE)));
-
-        // Loading the OBDA data
-        obdaModel = fac.getOBDAModel();
-        ModelIOManager ioManager = new ModelIOManager(obdaModel);
-        ioManager.load(OBDA_FILE);
     }
 
     @After
@@ -128,9 +113,11 @@ public class TypeInferenceTest {
     private void checkReturnedValues(String query, List<String> expectedValues) throws Exception {
 
         QuestOWLFactory factory = new QuestOWLFactory();
-        QuestOWLConfiguration config = QuestOWLConfiguration.builder().obdaModel(obdaModel).build();
-        QuestOWL reasoner = factory.createReasoner(ontology, config);
-
+        QuestConfiguration config = QuestConfiguration.defaultBuilder()
+                .nativeOntopMappingFile(OBDA_FILE)
+                .ontologyFile(ONTOLOGY_FILE)
+                .build();
+        QuestOWL reasoner = factory.createReasoner(config);
 
         // Now we are ready for querying
         QuestOWLConnection conn = reasoner.getConnection();

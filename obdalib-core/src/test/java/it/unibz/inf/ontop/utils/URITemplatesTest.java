@@ -28,6 +28,7 @@ import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 
 import org.junit.Test;
 
+import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
 import static org.junit.Assert.assertEquals;
 
 public class URITemplatesTest {
@@ -48,46 +49,39 @@ public class URITemplatesTest {
 
     @Test
     public void testGetUriTemplateString1(){
-        final OBDADataFactory FACTORY = OBDADataFactoryImpl.getInstance();
-
-        Function f1 = FACTORY.getUriTemplate(FACTORY.getConstantLiteral("http://example.org/{}/{}"), //
-                FACTORY.getVariable("X"), FACTORY.getVariable("Y"));
+        Function f1 = DATA_FACTORY.getUriTemplate(DATA_FACTORY.getConstantLiteral("http://example.org/{}/{}"), //
+                DATA_FACTORY.getVariable("X"), DATA_FACTORY.getVariable("Y"));
         assertEquals("http://example.org/{X}/{Y}", URITemplates.getUriTemplateString(f1));
     }
 
     @Test
     public void testGetUriTemplateString2(){
-        final OBDADataFactory FACTORY = OBDADataFactoryImpl.getInstance();
-
-        Function f1 = FACTORY.getUriTemplate(FACTORY.getConstantLiteral("{}"), //
-                FACTORY.getVariable("X"));
+        Function f1 = DATA_FACTORY.getUriTemplate(DATA_FACTORY.getConstantLiteral("{}"), //
+                DATA_FACTORY.getVariable("X"));
         assertEquals("{X}", URITemplates.getUriTemplateString(f1));
     }
 
     @Test
     public void testGetUriTemplateString3(){
-        final OBDADataFactory FACTORY = OBDADataFactoryImpl.getInstance();
 
-        Function f1 = FACTORY.getUriTemplate(FACTORY.getConstantLiteral("{}/"), //
-                FACTORY.getVariable("X"));
+        Function f1 = DATA_FACTORY.getUriTemplate(DATA_FACTORY.getConstantLiteral("{}/"), //
+                DATA_FACTORY.getVariable("X"));
         assertEquals("{X}/", URITemplates.getUriTemplateString(f1));
     }
 
     @Test
     public void testGetUriTemplateString4(){
-        final OBDADataFactory FACTORY = OBDADataFactoryImpl.getInstance();
 
-        Function f1 = FACTORY.getUriTemplate(FACTORY.getConstantLiteral("http://example.org/{}/{}/"), //
-                FACTORY.getVariable("X"), FACTORY.getVariable("Y"));
+        Function f1 = DATA_FACTORY.getUriTemplate(DATA_FACTORY.getConstantLiteral("http://example.org/{}/{}/"), //
+                DATA_FACTORY.getVariable("X"), DATA_FACTORY.getVariable("Y"));
         assertEquals("http://example.org/{X}/{Y}/", URITemplates.getUriTemplateString(f1));
     }
 
     @Test
     public void testGetUriTemplateString5(){
-        final OBDADataFactory FACTORY = OBDADataFactoryImpl.getInstance();
 
-        Function f1 = FACTORY.getUriTemplate(FACTORY.getConstantLiteral("http://example.org/{}/{}/{}"), //
-                FACTORY.getVariable("X"), FACTORY.getVariable("Y"),FACTORY.getVariable("X"));
+        Function f1 = DATA_FACTORY.getUriTemplate(DATA_FACTORY.getConstantLiteral("http://example.org/{}/{}/{}"), //
+                DATA_FACTORY.getVariable("X"), DATA_FACTORY.getVariable("Y"),DATA_FACTORY.getVariable("X"));
         assertEquals("http://example.org/{X}/{Y}/{X}", URITemplates.getUriTemplateString(f1));
     }
 }

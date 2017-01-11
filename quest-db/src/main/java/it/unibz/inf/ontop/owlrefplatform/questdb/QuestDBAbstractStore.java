@@ -20,49 +20,72 @@ package it.unibz.inf.ontop.owlrefplatform.questdb;
  * #L%
  */
 
-import it.unibz.inf.ontop.model.OBDAException;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestConnection;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestDBConnection;
-import it.unibz.inf.ontop.owlrefplatform.core.abox.RDBMSSIRepositoryManager;
-
 import java.io.Serializable;
-import java.util.Properties;
+
+import com.google.inject.Injector;
+import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
+import it.unibz.inf.ontop.injection.QuestConfiguration;
+import it.unibz.inf.ontop.injection.OBDAFactoryWithException;
+import it.unibz.inf.ontop.owlrefplatform.core.IQuestConnection;
+import it.unibz.inf.ontop.owlrefplatform.core.QuestDBConnection;
+import it.unibz.inf.ontop.injection.QuestCoreSettings;
+import it.unibz.inf.ontop.injection.QuestComponentFactory;
+import it.unibz.inf.ontop.model.OBDAException;
+import it.unibz.inf.ontop.pivotalrepr.utils.ExecutorRegistry;
 
 public abstract class QuestDBAbstractStore implements Serializable {
 
 	private static final long serialVersionUID = -8088123404566560283L;
 
+	private final ExecutorRegistry executorRegistry;
+	private final QuestComponentFactory componentFactory;
+	private final NativeQueryLanguageComponentFactory nativeQLFactory;
+	private final OBDAFactoryWithException obdaFactory;
 
 	protected String name;
 
-	
-	public QuestDBAbstractStore(String name) {
+	public QuestDBAbstractStore(String name, QuestConfiguration configuration) {
 		this.name = name;
-	}
 
+		this.executorRegistry = configuration.getExecutorRegistry();
+
+        /**
+         * Setup the dependency injection for the QuestComponentFactory
+         */
+		Injector injector = configuration.getInjector();
+        nativeQLFactory = injector.getInstance(NativeQueryLanguageComponentFactory.class);
+        componentFactory = injector.getInstance(QuestComponentFactory.class);
+        obdaFactory = injector.getInstance(OBDAFactoryWithException.class);
+    }
 
 	public String getName() {
 		return name;
 	}
-
-	public void setName(String name) {
-		this.name = name;
-	}
 	
 	/* Move to query time ? */
-	public abstract Properties getPreferences(); 
-
-	/* Move to query time ? */
-	public boolean setProperty(String key, String value) {
-		return false;
-	}
+	public abstract QuestCoreSettings getPreferences();
 
 	public QuestDBConnection getConnection() throws OBDAException {
 	//	System.out.println("getquestdbconn..");
-		return new QuestDBConnection(getQuestConnection());
+		return new QuestDBConnection(getQuestConnection(), nativeQLFactory);
 	}
 	
-	public abstract QuestConnection getQuestConnection();
+	public abstract IQuestConnection getQuestConnection();
 
-	public abstract RDBMSSIRepositoryManager getSemanticIndexRepository();
+    protected QuestComponentFactory getComponentFactory() {
+        return componentFactory;
+    }
+
+    protected NativeQueryLanguageComponentFactory getNativeQLFactory() {
+        return nativeQLFactory;
+    }
+
+    protected OBDAFactoryWithException getOBDAFactory() {
+        return obdaFactory;
+    }
+
+	protected ExecutorRegistry getExecutorRegistry() {
+    	return executorRegistry;
+	}
+
 }

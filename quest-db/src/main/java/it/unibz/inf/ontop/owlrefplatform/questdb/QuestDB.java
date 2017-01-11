@@ -20,18 +20,21 @@ package it.unibz.inf.ontop.owlrefplatform.questdb;
  * #L%
  */
 
-import it.unibz.inf.ontop.model.OBDAException;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestDBConnection;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestDBStatement;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
-import it.unibz.inf.ontop.owlrefplatform.core.abox.RDBMSSIRepositoryManager;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.File;
 import java.net.URI;
-import java.util.*;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import it.unibz.inf.ontop.injection.QuestConfiguration;
+import it.unibz.inf.ontop.model.OBDAException;
+import it.unibz.inf.ontop.owlrefplatform.core.*;
+
+import it.unibz.inf.ontop.injection.QuestCoreSettings;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class QuestDB {
 
@@ -139,27 +142,24 @@ public class QuestDB {
 		}
 	}
 
-	public void createClassicStore(String name, URI tboxUri, Properties params) throws Exception {
+	public void createClassicStore(String name, QuestConfiguration configuration) throws Exception {
 
 		if (stores.containsKey(name))
 			throw new Exception("A store already exists with the name" + name);
 
-		QuestPreferences config = new QuestPreferences();
-		config.putAll(params);
-
-		QuestDBClassicStore store = new QuestDBClassicStore(name, tboxUri, config);
+		QuestDBClassicStore store = new QuestDBClassicStore(name, configuration);
 
 		stores.put(name, store);
 
 		saveStore(name);
 	}
 
-	public void createVirtualStore(String name, URI tboxUri, URI obdaUri) throws Exception {
+	public void createVirtualStore(String name, QuestConfiguration configuration) throws Exception {
 
 		if (stores.containsKey(name))
 			throw new Exception("A store already exists with the name" + name);
 
-		QuestDBVirtualStore store = new QuestDBVirtualStore(name, tboxUri, obdaUri);
+		QuestDBVirtualStore store = new QuestDBVirtualStore(name, configuration);
 
 		stores.put(name, store);
 
@@ -190,9 +190,14 @@ public class QuestDB {
 		QuestDBAbstractStore dbstore = stores.get(storename);
 		try {
 			QuestDBConnection conn = connections.get(storename);
-			RDBMSSIRepositoryManager si = dbstore.getSemanticIndexRepository();
-			if (si != null)
-				si.dropDBSchema(conn.getConnection());
+			// V1
+			// RDBMSSIRepositoryManager si = dbstore.getOptionalSemanticIndexRepository();
+			// if (si != null)
+			//	si.dropDBSchema(conn.getConnection());
+			// END V1
+			SIQuestDBStatement st = conn.createSIStatement();
+			st.dropRepository();
+			st.close();
 			conn.commit();
 			conn.close();
 		} 
@@ -217,10 +222,16 @@ public class QuestDB {
 		QuestDBAbstractStore dbstore = stores.get(storename);
 		try {
 			QuestDBConnection conn = dbstore.getConnection();
-			boolean classic = dbstore.getPreferences().get(QuestPreferences.ABOX_MODE).equals(QuestConstants.CLASSIC);
-			boolean inmemory = dbstore.getPreferences().get(QuestPreferences.STORAGE_LOCATION).equals(QuestConstants.INMEMORY);
+			boolean classic = ! dbstore.getPreferences().isInVirtualMode();
+			boolean inmemory = dbstore.getPreferences().getRequiredProperty(QuestCoreSettings.STORAGE_LOCATION)
+					.equals(QuestConstants.INMEMORY);
 			if (classic && inmemory) {
-				dbstore.getSemanticIndexRepository().createDBSchemaAndInsertMetadata(conn.getConnection());
+				// V1
+				// dbstore.getOptionalSemanticIndexRepository().createDBSchemaAndInsertMetadata(conn.getConnection());
+				// END V1
+				SIQuestDBStatement st = conn.createSIStatement();
+				st.createDB();
+				st.close();
 				conn.commit();
 			}
 			connections.put(storename, conn);
@@ -312,12 +323,14 @@ public class QuestDB {
 			throw new Exception("Unsupported request");
 		//QuestDBClassicStore cstore = (QuestDBClassicStore) dbstore;
 		QuestDBConnection conn = connections.get(storename);
-		RDBMSSIRepositoryManager si = dbstore.getSemanticIndexRepository();
-		si.createIndexes(conn.getConnection());
-		conn.commit();
-		//QuestDBStatement st = conn.createStatement();
-		//st.getSIRepository().createIndexes();
-		//st.close();
+		// V1
+		// RDBMSSIRepositoryManager si = dbstore.getOptionalSemanticIndexRepository();
+		// si.createIndexes(conn.getConnection());
+		// conn.commit();
+		// END V1
+		SIQuestDBStatement st = conn.createSIStatement();
+		st.createIndexes();
+		st.close();
 	}
 
 	public void dropIndexes(String storename) throws Exception {
@@ -328,12 +341,13 @@ public class QuestDB {
 			throw new Exception("Unsupported request");
 		//QuestDBClassicStore cstore = (QuestDBClassicStore) dbstore;
 		QuestDBConnection conn = connections.get(storename);
-		//QuestDBStatement st = conn.createStatement();
-		//st.getSIRepository().dropIndexes();
-		RDBMSSIRepositoryManager si = dbstore.getSemanticIndexRepository();
-		si.dropIndexes(conn.getConnection());
-		//st.close();
-		conn.commit();
+		// V1
+		// RDBMSSIRepositoryManager si = dbstore.getOptionalSemanticIndexRepository();
+		// si.dropIndexes(conn.getConnection());
+		// END V1
+		SIQuestDBStatement st = conn.createSIStatement();
+		st.dropIndexes();
+		st.close();
 	}
 
 	public boolean isIndexed(String storename) throws Exception {
@@ -344,14 +358,15 @@ public class QuestDB {
 			throw new Exception("Unsupported request");
 		
 		QuestDBConnection conn = connections.get(storename);
-		//QuestDBStatement st = conn.createStatement();
-		
-		RDBMSSIRepositoryManager si = dbstore.getSemanticIndexRepository();
-		boolean response = false;
-		if (si != null)
-			response = si.isIndexed(conn.getConnection());
-		
-		//st.close();
+		// V1
+		// RDBMSSIRepositoryManager si = dbstore.getOptionalSemanticIndexRepository();
+		// boolean response = false;
+		// if (si != null)
+		//	response = si.isIndexed(conn.getConnection());
+		// END V1
+		SIQuestDBStatement st = conn.createSIStatement();
+		boolean response = st.isIndexed();
+		st.close();
 		return response;
 	}
 
@@ -362,7 +377,7 @@ public class QuestDB {
 		if (!(dbstore instanceof QuestDBClassicStore))
 			throw new Exception("Unsupported request");
 		QuestDBConnection conn = connections.get(storename);
-		QuestDBStatement st = conn.createStatement();
+		SIQuestDBStatement st = conn.createSIStatement();
 		int result = st.addFromOBDA(obdamodelURI);
 		st.close();
 		return result;
@@ -375,7 +390,7 @@ public class QuestDB {
 		if (!(dbstore instanceof QuestDBClassicStore))
 			throw new Exception("Unsupported request");
 		QuestDBConnection conn = connections.get(storename);
-		QuestDBStatement st = conn.createStatement();
+		SIQuestDBStatement st = conn.createSIStatement();
 		if (useFile) {
 			int result = st.addWithTempFile(dataURI);
 			st.close();
@@ -397,9 +412,10 @@ public class QuestDB {
 		return stores.containsKey(storename);
 	}
 
-	public QuestDBStatement getStatement(String storename) throws Exception {
+	public QuestDBStatement getStatement(String storename) throws OBDAException {
 		if (!stores.containsKey(storename))
-			throw new Exception(String.format("The store \"%s\" does not exists.", storename));
+			throw new OBDAException(String.format("The store \"%s\" does not exists.", storename));
+		QuestDBAbstractStore dbstore = stores.get(storename);
 		QuestDBConnection conn = connections.get(storename);
 		return conn.createStatement();
 	}

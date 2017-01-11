@@ -21,13 +21,14 @@ package it.unibz.inf.ontop.protege.panels;
  */
 
 
+import it.unibz.inf.ontop.model.MappingFactory;
 import it.unibz.inf.ontop.model.OBDADataSource;
 import it.unibz.inf.ontop.model.OBDAException;
-import it.unibz.inf.ontop.model.OBDAModel;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
+import it.unibz.inf.ontop.model.impl.MappingFactoryImpl;
 import it.unibz.inf.ontop.model.impl.OBDAModelImpl;
 import it.unibz.inf.ontop.model.impl.RDBMSourceParameterConstants;
 import it.unibz.inf.ontop.protege.core.OBDAModelManager;
+import it.unibz.inf.ontop.protege.core.OBDAModelWrapper;
 import it.unibz.inf.ontop.protege.gui.IconLoader;
 import it.unibz.inf.ontop.protege.utils.CustomTraversalPolicy;
 import it.unibz.inf.ontop.protege.utils.DatasourceSelectorListener;
@@ -48,12 +49,13 @@ import java.util.List;
 
 public class DatasourceParameterEditorPanel extends javax.swing.JPanel implements DatasourceSelectorListener {
 
+    private static final MappingFactory MAPPING_FACTORY = MappingFactoryImpl.getInstance();
     private static final long serialVersionUID = 3506358479342412849L;
     private final OWLEditorKit owlEditorKit;
 
     private OBDADataSource currentDataSource;
 
-    private OBDAModel obdaModel;
+	private OBDAModelWrapper obdaModel;
 
     private ComboBoxItemListener comboListener;
 
@@ -66,7 +68,7 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
 
         this.owlEditorKit = owlEditorKit;
         OBDAModelManager obdaModelManager = (OBDAModelManager) owlEditorKit.get(OBDAModelImpl.class.getName());
-        OBDAModel model = obdaModelManager.getActiveOBDAModel();
+        OBDAModelWrapper model = obdaModelManager.getActiveOBDAModelWrapper();
 
         timer = new Timer(200, e -> handleTimer());
 
@@ -109,7 +111,7 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
         }
     }
 
-    public void setNewDatasource(OBDAModel model) {
+    public void setNewDatasource(OBDAModelWrapper model) {
         obdaModel = model;
         resetTextFields();
         /**
@@ -117,7 +119,7 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
          */
         if (obdaModel.getSources().size() > 0) {
 
-            currentDatasourceChange(obdaModel.getSources().get(0));
+            currentDatasourceChange(obdaModel.getCurrentImmutableOBDAModel().getSources().iterator().next());
         }
     }
 
@@ -438,7 +440,7 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
         URI uri = URI.create("datasource1");
 
         //create new datasource
-        OBDADataSource newDatasource = OBDADataFactoryImpl.getInstance().getDataSource(uri);
+        OBDADataSource newDatasource = MAPPING_FACTORY.getDataSource(uri);
         String username = txtDatabaseUsername.getText();
         newDatasource.setParameter(RDBMSourceParameterConstants.DATABASE_USERNAME, username);
         String password = new String(txtDatabasePassword.getPassword());

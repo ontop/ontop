@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.owlrefplatform.core.srcquerygeneration;
 
 import com.google.common.collect.*;
 import it.unibz.inf.ontop.model.*;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
+import it.unibz.inf.ontop.model.impl.MappingFactoryImpl;
 import it.unibz.inf.ontop.model.type.impl.TermTypeInferenceTools;
 import it.unibz.inf.ontop.sql.*;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -16,15 +16,17 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static it.unibz.inf.ontop.model.Predicate.COL_TYPE.LITERAL;
+import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
+
+
 
 /**
  * Extracts the TermTypes and the cast types from a set of Datalog rules.
  */
 public class TypeExtractor {
 
-    private static final TermType LITERAL_TYPE = OBDADataFactoryImpl.getInstance()
-            .getTermType(LITERAL);
-    private static final OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
+    private static final TermType LITERAL_TYPE = DATA_FACTORY.getTermType(LITERAL);
+    private static final MappingFactory MAPPING_FACTORY = MappingFactoryImpl.getInstance();
 
     public static class TypeResults {
         private final ImmutableMap<CQIE, ImmutableList<Optional<TermType>>> termTypeMap;
@@ -114,12 +116,14 @@ public class TypeExtractor {
             ImmutableList.Builder<TermType> defaultTypeBuilder = ImmutableList.builder();
 
             IntStream.range(0, predicate.getArity())
-                    .forEach(i -> {RelationID tableId = Relation2DatalogPredicate.createRelationFromPredicateName(metadata.getQuotedIDFactory(), predicate);
+                    .forEach(i -> {
+                        RelationID tableId = Relation2DatalogPredicate.createRelationFromPredicateName(metadata.getQuotedIDFactory(), predicate);
                         Optional<RelationDefinition> td = Optional.ofNullable(metadata.getRelation(tableId));
                         if(td.isPresent()) {
                             Attribute attribute = td.get().getAttribute(i+1);
-                            Predicate.COL_TYPE type = fac.getJdbcTypeMapper().getPredicate(attribute.getType());
-                            defaultTypeBuilder.add(fac.getTermType(type));
+                            //add mapping factory
+                            Predicate.COL_TYPE type = MAPPING_FACTORY.getJdbcTypeMapper().getPredicate(attribute.getType());
+                            defaultTypeBuilder.add(DATA_FACTORY.getTermType(type));
                         }
                         else{
                             defaultTypeBuilder.add(LITERAL_TYPE);

@@ -25,6 +25,8 @@ import it.unibz.inf.ontop.owlrefplatform.core.QuestDBConnection;
 import org.openrdf.model.ValueFactory;
 import org.openrdf.model.impl.ValueFactoryImpl;
 import org.openrdf.repository.RepositoryException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.util.HashMap;
@@ -33,26 +35,29 @@ import java.util.Map;
 public abstract class SesameAbstractRepo implements
 		org.openrdf.repository.Repository, AutoCloseable {
 
-	private RepositoryConnection repoConnection;
 	private Map<String, String> namespaces;
+	private static final Logger logger = LoggerFactory.getLogger(SesameAbstractRepo.class);
 	boolean initialized = false;
 	
 	public SesameAbstractRepo() {
 		namespaces = new HashMap<>();
 	}
 
-	@Override
-    public RepositoryConnection getConnection() throws RepositoryException {
+	/**
+	 * Returns a new RepositoryConnection.
+	 *
+	 * (No repository connection sharing for the sake
+	 *  of thread-safeness)
+	 *
+	 */
+	public RepositoryConnection getConnection() throws RepositoryException {
 		try {
-			this.repoConnection = new RepositoryConnection(this,
+			return new RepositoryConnection(this,
 					getQuestConnection());
 		} catch (OBDAException e) {
-			System.err.println("Error creating repo connection!");
-			e.printStackTrace();
-            throw new RepositoryException(e.getMessage());
+			logger.error("Error creating repo connection: " + e.getMessage());
+			throw new RepositoryException(e.getMessage());
 		}
-		return repoConnection;
-
 	}
 
 	@Override
@@ -100,9 +105,9 @@ public abstract class SesameAbstractRepo implements
 		// of.
 		// Once shut down, the repository can no longer be used until it is
 		// re-initialized.
-		initialized =false;
-		if(repoConnection!=null && repoConnection.isOpen())
-			repoConnection.close();
+		initialized=false;
+//		if(repoConnection!=null && repoConnection.isOpen())
+//			repoConnection.close();
 		
 	}
 

@@ -32,7 +32,7 @@ import java.util.List;
 
 public abstract class AbstractConstraintTest extends TestCase {
 	
-	private DBMetadata metadata;
+	private RDBMetadata metadata;
 	
 	private static final String TB_BOOK = "Book";
 	private static final String TB_WRITER = "Writer";
@@ -50,8 +50,8 @@ public abstract class AbstractConstraintTest extends TestCase {
 		try {
 			log.info(getConnectionString() + "\n");
 			Connection conn = DriverManager.getConnection(getConnectionString(), getConnectionUsername(), getConnectionPassword());
-			metadata = DBMetadataExtractor.createMetadata(conn);
-			DBMetadataExtractor.loadMetadata(metadata, conn, null);
+			metadata = RDBMetadataExtractionTools.createMetadata(conn);
+			RDBMetadataExtractionTools.loadMetadata(metadata, conn, null);
 		} 
 		catch (SQLException e) { 
 			e.printStackTrace();

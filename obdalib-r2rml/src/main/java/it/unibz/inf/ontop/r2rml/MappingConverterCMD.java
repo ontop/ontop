@@ -20,19 +20,19 @@ package it.unibz.inf.ontop.r2rml;
  * #L%
  */
 
-import it.unibz.inf.ontop.exception.InvalidMappingException;
-import it.unibz.inf.ontop.io.ModelIOManager;
-import it.unibz.inf.ontop.model.OBDADataFactory;
-import it.unibz.inf.ontop.model.OBDADataSource;
+import it.unibz.inf.ontop.exception.InvalidMappingExceptionWithIndicator;
+import it.unibz.inf.ontop.injection.OBDACoreConfiguration;
+import it.unibz.inf.ontop.injection.OBDASettings;
+import it.unibz.inf.ontop.io.OntopNativeMappingSerializer;
 import it.unibz.inf.ontop.model.OBDAModel;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
+
+import java.io.File;
+import java.net.URI;
+import java.util.Properties;
+
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
-
-import java.io.File;
-import java.io.IOException;
-import java.net.URI;
 
 class MappingConverterCMD {
 
@@ -56,23 +56,23 @@ class MappingConverterCMD {
 
 		try {
 			if (mapFile.endsWith(".obda")) {
+				OBDACoreConfiguration configuration = OBDACoreConfiguration.defaultBuilder()
+						.nativeOntopMappingFile(mapFile)
+						.build();
+
 				String outfile = mapFile.substring(0, mapFile.length() - 5)
 						.concat(".ttl");
 				File out = new File(outfile);
-				URI obdaURI = new File(mapFile).toURI();
 				// create model
-				OBDAModel model = OBDADataFactoryImpl.getInstance()
-						.getOBDAModel();
 
-				// obda mapping
-				ModelIOManager modelIO = new ModelIOManager(model);
-
-				try {
-					modelIO.load(new File(obdaURI));
-				} catch (IOException | InvalidMappingException e) {
+                OBDAModel model;
+                try {
+                    model = configuration.loadProvidedMapping();
+				} catch (InvalidMappingExceptionWithIndicator e) {
 					e.printStackTrace();
+                    return;
 				}
-				URI srcURI = model.getSources().get(0).getSourceID();
+				URI srcURI = model.getSources().iterator().next().getSourceID();
 
 				OWLOntology ontology = null;
 				if (args.length > 1) {
@@ -84,34 +84,35 @@ class MappingConverterCMD {
 							.loadOntologyFromOntologyDocument((new File(owlfile)));
 				}
 
-				R2RMLWriter writer = new R2RMLWriter(model, srcURI, ontology);
+				R2RMLWriter writer = new R2RMLWriter(model, srcURI, ontology, configuration.getInjector());
 				// writer.writePretty(out);
 				writer.write(out);
 				System.out.println("R2RML mapping file " + outfile
 						+ " written!");
 			} else if (mapFile.endsWith(".ttl")) {
+
+                Properties p = new Properties();
+                p.setProperty(OBDASettings.DB_NAME, "DBName");
+                p.setProperty(OBDASettings.JDBC_URL, "jdbc:h2:tcp://localhost/DBName");
+                p.setProperty(OBDASettings.DB_USER, "sa");
+                p.setProperty(OBDASettings.DB_PASSWORD, "");
+                p.setProperty(OBDASettings.JDBC_DRIVER, "com.mysql.jdbc.Driver");
+				OBDACoreConfiguration configuration = OBDACoreConfiguration.defaultBuilder()
+						.properties(p)
+						.r2rmlMappingFile(mapFile)
+						.build();
+
 				String outfile = mapFile.substring(0, mapFile.length() - 4)
 						.concat(".obda");
 				File out = new File(outfile);
 
-				URI obdaURI = new File(mapFile).toURI();
-				R2RMLReader reader = new R2RMLReader(mapFile);
+                OBDAModel model = configuration.loadProvidedMapping();
+
+                OntopNativeMappingSerializer mappingWriter = new OntopNativeMappingSerializer(model);
+				mappingWriter.save(out);
 				
-				String jdbcurl = "jdbc:h2:tcp://localhost/DBName";
-				String username = "sa";
-				String password = "";
-				String driverclass = "com.mysql.jdbc.Driver";
-
-				OBDADataFactory f = OBDADataFactoryImpl.getInstance();
-				String sourceUrl =obdaURI.toString();
-				OBDADataSource dataSource = f.getJDBCDataSource(sourceUrl, jdbcurl,
-						username, password, driverclass);
-				OBDAModel model = reader.readModel(dataSource);
-
-				ModelIOManager modelIO = new ModelIOManager(model);
-				modelIO.save(out);
-
-				System.out.println("OBDA mapping file " + outfile + " written!");
+				System.out
+						.println("OBDA mapping file " + outfile + " written!");
 			}
 
 		} catch (Exception e) {

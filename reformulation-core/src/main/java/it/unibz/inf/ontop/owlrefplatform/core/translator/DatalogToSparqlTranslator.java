@@ -23,10 +23,12 @@ package it.unibz.inf.ontop.owlrefplatform.core.translator;
 import it.unibz.inf.ontop.io.PrefixManager;
 import it.unibz.inf.ontop.io.SimplePrefixManager;
 import it.unibz.inf.ontop.model.*;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
 
+import java.util.HashMap;
 import java.util.List;
+
+import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
 
 /**
  * This class provides the translation service from Datalog Program to SPARQL string.
@@ -34,10 +36,8 @@ import java.util.List;
  * in the program followed by the rules.
  */
 public class DatalogToSparqlTranslator {
-
-	private static OBDADataFactory dataFactory = OBDADataFactoryImpl.getInstance();
 	
-	private static final URIConstant RDF_TYPE = dataFactory.getConstantURI(OBDAVocabulary.RDF_TYPE);
+	private static final URIConstant RDF_TYPE = DATA_FACTORY.getConstantURI(OBDAVocabulary.RDF_TYPE);
 
 	private PrefixManager prefixManager;
 
@@ -46,9 +46,11 @@ public class DatalogToSparqlTranslator {
 	/**
 	 * Creates the translator with a default prefix manager. The default prefix
 	 * manager contains the common prefixes (e.g., RDF, RDFS, OWL)
+     *
+     * TODO: use the factory to construct this translator
 	 */
 	public DatalogToSparqlTranslator() {
-		this(new SimplePrefixManager());
+		this(new SimplePrefixManager(new HashMap<>()));
 	}
 
 	/**
@@ -61,7 +63,7 @@ public class DatalogToSparqlTranslator {
 		this.prefixManager = prefixManager;
 	}
 
-	
+
 	private static final String PREFIX = "PREFIX";
 	private static final String SELECT = "SELECT";
 	private static final String DISTINCT = "DISTINCT";
@@ -75,7 +77,7 @@ public class DatalogToSparqlTranslator {
 	private static final String ORDER_BY = "ORDER BY";
 	private static final String ASCENDING = "ASC";
 	private static final String DESCENDING = "DESC";
-	
+
 	// Operator
 	private static final String AND = "&&";
 	private static final String OR = "||";
@@ -89,8 +91,8 @@ public class DatalogToSparqlTranslator {
 	private static final String SUBTRACT = "-";
 	private static final String MULTIPLY = "*";
 
-	
-	
+
+
 	/**
 	 * Produces SPARQL string given a valid datalog program.
 	 */
@@ -248,7 +250,7 @@ public class DatalogToSparqlTranslator {
 
 	private Term getPredicate(Function function) {
 		Predicate predicate = function.getFunctionSymbol();
-		return dataFactory.getConstantURI(predicate.getName());
+		return DATA_FACTORY.getConstantURI(predicate.getName());
 	}
 
 	private Term getObject(Function function) {

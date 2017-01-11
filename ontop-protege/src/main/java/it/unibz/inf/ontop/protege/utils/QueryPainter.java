@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.protege.utils;
 
 /*
  * #%L
- * ontop-protege4
+ * ontop-protege
  * %%
  * Copyright (C) 2009 - 2013 KRDB Research Centre. Free University of Bozen Bolzano.
  * %%
@@ -25,6 +25,7 @@ import it.unibz.inf.ontop.io.TargetQueryVocabularyValidator;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.parser.TargetQueryParserException;
 import it.unibz.inf.ontop.parser.TurtleOBDASyntaxParser;
+import it.unibz.inf.ontop.protege.core.OBDAModelWrapper;
 
 import javax.swing.*;
 import javax.swing.border.Border;
@@ -42,7 +43,7 @@ import java.util.List;
 import java.util.Vector;
 
 public class QueryPainter {
-	private final OBDAModel apic;
+	private final OBDAModelWrapper apic;
 
 	private SimpleAttributeSet black;
 	private SimpleAttributeSet brackets;
@@ -83,13 +84,13 @@ public class QueryPainter {
 	private List<ValidatorListener> validatorListeners = new LinkedList<QueryPainter.ValidatorListener>();
 	private TurtleOBDASyntaxParser textParser;
 
-	public QueryPainter(OBDAModel apic, JTextPane parent, TargetQueryVocabularyValidator validator) {
+	public QueryPainter(OBDAModelWrapper apic, JTextPane parent, TargetQueryVocabularyValidator validator) {
 		this.apic = apic;
 		this.parent = parent;
 		this.validator = validator;
 		this.doc = parent.getStyledDocument();
 		this.parent = parent;
-		this.textParser = new TurtleOBDASyntaxParser(apic.getPrefixManager());
+		this.textParser = new TurtleOBDASyntaxParser(apic.getPrefixManager().getPrefixMap());
 
 		prepareStyles();
 		prepareTextPane();

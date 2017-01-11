@@ -3,21 +3,13 @@ package it.unibz.inf.ontop.unfold;
 
 import com.google.common.base.Joiner;
 import com.google.common.io.CharStreams;
-import it.unibz.inf.ontop.io.ModelIOManager;
-import it.unibz.inf.ontop.model.OBDADataFactory;
-import it.unibz.inf.ontop.model.OBDAModel;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
+import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
-import org.junit.Before;
 import org.junit.Test;
-import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
 import java.io.FileReader;
 
 import static org.junit.Assert.assertEquals;
@@ -30,38 +22,21 @@ import static org.junit.Assert.assertFalse;
  */
 public class AnnotationTest {
 
-    private OBDADataFactory fac;
-
     Logger log = LoggerFactory.getLogger(this.getClass());
-    private OBDAModel obdaModel;
-    private OWLOntology ontology;
 
     final String owlFile = "src/test/resources/annotation/doid.owl";
     final String obdaFile = "src/test/resources/annotation/doid.obda";
 
-    @Before
-    public void setUp() throws Exception {
-
-        fac = OBDADataFactoryImpl.getInstance();
-
-        // Loading the OWL file
-        OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-        ontology = manager.loadOntologyFromOntologyDocument((new File(owlFile)));
-
-        // Loading the OBDA data
-        obdaModel = fac.getOBDAModel();
-
-        ModelIOManager ioManager = new ModelIOManager(obdaModel);
-        ioManager.load(obdaFile);
-
-    }
-
-    private int runTestQuery1(QuestPreferences p) throws Exception {
+    private int runTestQuery1() throws Exception {
 
         // Creating a new instance of the reasoner
         QuestOWLFactory factory = new QuestOWLFactory();
-        QuestOWLConfiguration config = QuestOWLConfiguration.builder().obdaModel(obdaModel).preferences(p).queryingAnnotationsInOntology(true).build();
-        QuestOWL reasoner = factory.createReasoner(ontology, config);
+        QuestConfiguration config = QuestConfiguration.defaultBuilder()
+                .nativeOntopMappingFile(obdaFile)
+                .ontologyFile(owlFile)
+                .enableOntologyAnnotationQuerying(true)
+                .build();
+        QuestOWL reasoner = factory.createReasoner(config);
         // Now we are ready for querying
         QuestOWLConnection conn = reasoner.getConnection();
         QuestOWLStatement st = conn.createStatement();
@@ -107,10 +82,8 @@ public class AnnotationTest {
     @Test
     public void testAnnotationInOntology() throws Exception {
 
-        QuestPreferences p = new QuestPreferences();
-
-        int results = runTestQuery1(p);
-        assertEquals(76 , results);
+        int results = runTestQuery1();
+        assertEquals(76, results);
     }
 
 

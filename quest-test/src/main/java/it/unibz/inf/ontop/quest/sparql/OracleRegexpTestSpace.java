@@ -20,84 +20,26 @@ package it.unibz.inf.ontop.quest.sparql;
  * #L%
  */
 
-import it.unibz.inf.ontop.io.ModelIOManager;
-import it.unibz.inf.ontop.model.OBDADataFactory;
-import it.unibz.inf.ontop.model.OBDAModel;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
-import junit.framework.TestCase;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.semanticweb.owlapi.apibinding.OWLManager;
+import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLResultSet;
+import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLStatement;
+import it.unibz.inf.ontop.quest.AbstractVirtualModeTest;
 import org.semanticweb.owlapi.model.OWLIndividual;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import java.io.File;
 
 /***
  * Tests that the system can handle the SPARQL "LIKE" keyword in the oracle setting
  * (i.e. that it is translated to REGEXP_LIKE and not LIKE in oracle sql)
  */
-public class OracleRegexpTestSpace extends TestCase {
+public class OracleRegexpTestSpace extends AbstractVirtualModeTest {
 
-	// TODO We need to extend this test to import the contents of the mappings
-	// into OWL and repeat everything taking form OWL
+	static final String owlfile = "resources/regexp/oracle-regexp.owl";
+	static final String obdafile = "resources/regexp/oracle-regexp.obda";
 
-	private OBDADataFactory fac;
-	private QuestOWLConnection conn;
-
-	Logger log = LoggerFactory.getLogger(this.getClass());
-	private OBDAModel obdaModel;
-	private OWLOntology ontology;
-
-	final String owlfile = "resources/regexp/oracle-regexp.owl";
-	final String obdafile = "resources/regexp/oracle-regexp.obda";
-	private QuestOWL reasoner;
-
-	@Override
-	@Before
-	public void setUp() throws Exception {
-		
-		
-		// Loading the OWL file
-		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-		ontology = manager.loadOntologyFromOntologyDocument((new File(owlfile)));
-
-		// Loading the OBDA data
-		fac = OBDADataFactoryImpl.getInstance();
-		obdaModel = fac.getOBDAModel();
-		
-		ModelIOManager ioManager = new ModelIOManager(obdaModel);
-		ioManager.load(obdafile);
-	
-		QuestPreferences p = new QuestPreferences();
-		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-		p.setCurrentValueOf(QuestPreferences.OBTAIN_FULL_METADATA, QuestConstants.FALSE);
-		
-		QuestOWLFactory factory = new QuestOWLFactory();
-        QuestOWLConfiguration config = QuestOWLConfiguration.builder().obdaModel(obdaModel).preferences(p).build();
-        reasoner = factory.createReasoner(ontology, config);
-        
-		// Now we are ready for querying
-		conn = reasoner.getConnection();
-
-		
+	protected OracleRegexpTestSpace() {
+		super(owlfile, obdafile);
 	}
 
-	@After
-	public void tearDown() throws Exception{
-		conn.close();
-		reasoner.dispose();
-	}
-	
 
-	
 	private String runTest(QuestOWLStatement st, String query, boolean hasResult) throws Exception {
 		String retval;
 		QuestOWLResultSet rs = st.executeTuple(query);
@@ -117,7 +59,6 @@ public class OracleRegexpTestSpace extends TestCase {
 	 * Tests the use of mapings with regex in subqueries and where with SQL subquery
 	 * @throws Exception
 	 */
-	@Test
 	public void testSparql2OracleRegexWhere() throws Exception {
 		QuestOWLStatement st = null;
 		try {
@@ -145,7 +86,6 @@ public class OracleRegexpTestSpace extends TestCase {
 	 * Tests the use of mapings with regex in subqueries without where with SQL subquery
 	 * @throws Exception
 	 */
-	@Test
 	public void testSparql2OracleRegexNoWhere() throws Exception {
 		QuestOWLStatement st = null;
 		try {
@@ -172,21 +112,16 @@ public class OracleRegexpTestSpace extends TestCase {
 	 * Tests the use of mapings with regex in subqueries without where without subquery
 	 * @throws Exception
 	 */
-	@Test
 	public void testSparql2OracleRegexNoWhereNoSubquery() throws Exception {
 		QuestOWLStatement st = null;
 		try {
 			st = conn.createStatement();
-
-			
 			
 			String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT ?country ?pos WHERE {?country a :CountriesWithSpaceNoWhereNoSubquery . ?country :position ?pos . FILTER (?pos >0)}";
 			String countryName = runTest(st, query, true);
 			System.out.println(countryName);
 			assertEquals(countryName, "<http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country-United%20Kingdom>");
-		
-		
-			
+
 		} catch (Exception e) {
 			throw e;
 		} finally {

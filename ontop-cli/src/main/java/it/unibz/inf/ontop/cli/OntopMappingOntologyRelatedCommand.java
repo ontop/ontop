@@ -14,7 +14,7 @@ public abstract class OntopMappingOntologyRelatedCommand implements OntopCommand
     @BashCompletion(behaviour = CompletionBehaviour.FILENAMES)
     protected String owlFile;
 
-    @Option(type = OptionType.COMMAND, name = {"-m", "--mapping"}, title = "mappingFile",
+    @Option(type = OptionType.COMMAND, name = {"-m", "--mapping"}, title = "nativeOntopMappingFile",
             description = "Mapping file in R2RML (.ttl) or in Ontop native format (.obda)")
     @Required
     @BashCompletion(behaviour = CompletionBehaviour.FILENAMES)

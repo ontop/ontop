@@ -32,6 +32,8 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
+
 /**
  * Represents DataPropertyExpression from the OWL 2 QL Specification
  * 
@@ -58,14 +60,12 @@ public class DataPropertyExpressionImpl implements DataPropertyExpression {
 	public static final String owlTopDataPropertyIRI = "http://www.w3.org/2002/07/owl#topDataProperty";
 	public static final String owlBottomDataPropertyIRI  = "http://www.w3.org/2002/07/owl#bottomDataProperty";
 	
-	private static final OBDADataFactory ofac = OBDADataFactoryImpl.getInstance();
-	
     public static final DataPropertyExpression owlTopDataProperty = new DataPropertyExpressionImpl(owlTopDataPropertyIRI);
     public static final DataPropertyExpression owlBottomDataProperty = new DataPropertyExpressionImpl(owlBottomDataPropertyIRI);
 	
 
 	DataPropertyExpressionImpl(String name) {
-		this.predicate = ofac.getDataPropertyPredicate(name);
+		this.predicate = DATA_FACTORY.getDataPropertyPredicate(name);
 		this.name = name;		
 		this.isTop = name.equals(owlTopDataPropertyIRI);
 		this.isBottom = name.equals(owlBottomDataPropertyIRI);

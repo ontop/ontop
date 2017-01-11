@@ -1,12 +1,10 @@
 package it.unibz.inf.ontop.reformulation.tests;
 
-import it.unibz.inf.ontop.io.ModelIOManager;
-import it.unibz.inf.ontop.model.OBDADataFactory;
-import it.unibz.inf.ontop.model.OBDAModel;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
+import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
+import it.unibz.inf.ontop.injection.QuestCoreSettings;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.IRI;
@@ -23,6 +21,7 @@ import java.io.IOException;
 import java.sql.*;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Properties;
 
 import static org.junit.Assert.assertEquals;
 
@@ -30,6 +29,7 @@ public class NPDTest {
 	
 	Logger log = LoggerFactory.getLogger(this.getClass());
 
+	@Ignore("Ontology URIs are now broken: impossible to download them")
 	@Test
 	public void test_load_NPD() throws Exception {
 		
@@ -83,23 +83,22 @@ public class NPDTest {
 		System.out.println("Class names: " + (onto.getVocabulary().getClasses().size() - 2));
 		System.out.println("Object Property names: " + (onto.getVocabulary().getObjectProperties().size() - 2));
 		System.out.println("Data Property names: " + (onto.getVocabulary().getDataProperties().size() - 2));
-*/		
-		OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
-		OBDAModel obdaModel = fac.getOBDAModel();
-		ModelIOManager ioManager = new ModelIOManager(obdaModel);
-		ioManager.load(path + "npd.obda");
+*/
 
-		QuestPreferences pref = new QuestPreferences();
+		Properties pref = new Properties();
 		//pref.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC_INDEX);
-		pref.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-		pref.setCurrentValueOf(QuestPreferences.REFORMULATION_TECHNIQUE, QuestConstants.TW);
-		pref.setCurrentValueOf(QuestPreferences.REWRITE, QuestConstants.TRUE);
-		pref.setCurrentValueOf(QuestPreferences.PRINT_KEYS, QuestConstants.FALSE);
+		pref.put(QuestCoreSettings.ABOX_MODE, QuestConstants.VIRTUAL);
+		pref.put(QuestCoreSettings.REFORMULATION_TECHNIQUE, QuestConstants.TW);
+		pref.put(QuestCoreSettings.REWRITE, QuestConstants.TRUE);
+		pref.put(QuestCoreSettings.PRINT_KEYS, QuestConstants.FALSE);
 
 		setupDatabase();
 		QuestOWLFactory factory = new QuestOWLFactory();
-        QuestOWLConfiguration config = QuestOWLConfiguration.builder().obdaModel(obdaModel).preferences(pref).build();
-        QuestOWL reasoner = factory.createReasoner(owlOnto, config);
+        QuestConfiguration config = QuestConfiguration.defaultBuilder()
+				.nativeOntopMappingFile(path + "npd.obda")
+				.ontologyFile(path + "npd-v2.owl")
+				.properties(pref).build();
+        QuestOWL reasoner = factory.createReasoner(config);
 		
 		//QuestOWL reasoner = factory.createReasoner(owlOnto, new SimpleConfiguration());
 	

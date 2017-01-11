@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.protege.views;
 
 /*
  * #%L
- * ontop-protege4
+ * ontop-protege
  * %%
  * Copyright (C) 2009 - 2013 KRDB Research Centre. Free University of Bozen Bolzano.
  * %%
@@ -20,10 +20,13 @@ package it.unibz.inf.ontop.protege.views;
  * #L%
  */
 
-import it.unibz.inf.ontop.model.OBDAModel;
+import com.google.inject.Injector;
+import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
+import it.unibz.inf.ontop.injection.OBDACoreConfiguration;
 import it.unibz.inf.ontop.model.impl.OBDAModelImpl;
 import it.unibz.inf.ontop.protege.core.OBDAModelManager;
 import it.unibz.inf.ontop.protege.core.OBDAModelManagerListener;
+import it.unibz.inf.ontop.protege.core.OBDAModelWrapper;
 import it.unibz.inf.ontop.protege.panels.MappingAssistantPanel;
 import org.protege.editor.owl.ui.view.AbstractOWLViewComponent;
 import org.slf4j.Logger;
@@ -37,8 +40,8 @@ public class MappingAssistantView extends AbstractOWLViewComponent implements OB
     private static final long serialVersionUID = 1L;
 
     private OBDAModelManager obdaModelManager;
- 
-    private OBDAModel activeOBDAModel;
+
+    private OBDAModelWrapper activeOBDAModel;
 
     private static final Logger log = LoggerFactory.getLogger(SQLQueryInterfaceView.class);
 
@@ -50,27 +53,30 @@ public class MappingAssistantView extends AbstractOWLViewComponent implements OB
     @Override
     protected void initialiseOWLView() throws Exception {
 
+        Injector defaultInjector = OBDACoreConfiguration.defaultBuilder().build().getInjector();
+        NativeQueryLanguageComponentFactory nativeQLFactory = defaultInjector.getInstance(
+                NativeQueryLanguageComponentFactory.class);
+
         obdaModelManager = (OBDAModelManager) getOWLEditorKit().get(OBDAModelImpl.class.getName());
         obdaModelManager.addListener(this);
 
-        activeOBDAModel = obdaModelManager.getActiveOBDAModel();
+        activeOBDAModel = obdaModelManager.getActiveOBDAModelWrapper();
 
-        MappingAssistantPanel queryPanel = new MappingAssistantPanel(activeOBDAModel);
-
+        MappingAssistantPanel queryPanel = new MappingAssistantPanel(activeOBDAModel, nativeQLFactory);
 
         queryPanel.setBorder(new TitledBorder("SQL Query Editor"));
 
         setLayout(new BorderLayout());
         add(queryPanel, BorderLayout.NORTH);
-       
+
 
         log.debug("SQL Query view initialized");
     }
 
     @Override
     public void activeOntologyChanged() {
-        
-       activeOBDAModel = obdaModelManager.getActiveOBDAModel();
- 
+
+       activeOBDAModel = obdaModelManager.getActiveOBDAModelWrapper();
+
     }
 }

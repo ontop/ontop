@@ -15,7 +15,7 @@ We have a Google group for anything related to support, discussion and announcem
 
 ## Contributing Code
 
-Know how to fix something or provide new features? 
+Do you know how to fix something or provide new features? 
 
 For trivial contribution (e.g. fixing typos in the docs), please use the Pull Request of GitHub.
 

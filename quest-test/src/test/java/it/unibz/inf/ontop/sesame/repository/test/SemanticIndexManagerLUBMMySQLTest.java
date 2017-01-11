@@ -20,29 +20,35 @@ package it.unibz.inf.ontop.sesame.repository.test;
  * #L%
  */
 
+import java.io.File;
+import java.net.URI;
+import java.sql.Connection;
+import java.util.Properties;
+
+import com.google.inject.Injector;
+import it.unibz.inf.ontop.injection.OBDACoreConfiguration;
+import it.unibz.inf.ontop.injection.QuestConfiguration;
+import it.unibz.inf.ontop.model.MappingFactory;
+import it.unibz.inf.ontop.model.impl.MappingFactoryImpl;
+import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
+import junit.framework.TestCase;
+
+import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
 import it.unibz.inf.ontop.io.QueryIOManager;
-import it.unibz.inf.ontop.model.OBDADataFactory;
 import it.unibz.inf.ontop.model.OBDADataSource;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.model.impl.RDBMSourceParameterConstants;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
+import it.unibz.inf.ontop.injection.QuestCoreSettings;
 import it.unibz.inf.ontop.querymanager.QueryController;
 import it.unibz.inf.ontop.querymanager.QueryControllerEntity;
 import it.unibz.inf.ontop.querymanager.QueryControllerQuery;
 import it.unibz.inf.ontop.sesame.SemanticIndexManager;
 import it.unibz.inf.ontop.sql.JDBCConnectionManager;
-import junit.framework.TestCase;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.File;
-import java.net.URI;
-import java.sql.Connection;
 
 /**
  * Tests if QuestOWL can be initialized on top of an existing semantic index
@@ -50,6 +56,7 @@ import java.sql.Connection;
  */
 public class SemanticIndexManagerLUBMMySQLTest extends TestCase {
 
+	private final NativeQueryLanguageComponentFactory nativeQLFactory;
 	String driver = "com.mysql.jdbc.Driver";
 	String url = "jdbc:mysql://10.7.20.39/si_test?sessionVariables=sql_mode='ANSI'";
 	String username = "fish";
@@ -57,7 +64,7 @@ public class SemanticIndexManagerLUBMMySQLTest extends TestCase {
 	
 	String owlfile = "../quest-owlapi3/src/test/resources/test/lubm-ex-20-uni1/University0_0.owl";
 
-	OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
+	private static final MappingFactory MAPPING_FACTORY = MappingFactoryImpl.getInstance();
 	private OWLOntology ontology;
 	private OWLOntologyManager manager;
 	private OBDADataSource source;
@@ -68,13 +75,16 @@ public class SemanticIndexManagerLUBMMySQLTest extends TestCase {
 		manager = OWLManager.createOWLOntologyManager();
 		ontology = manager.loadOntologyFromOntologyDocument(new File(owlfile));
 
-		source = fac.getDataSource(URI.create("http://www.obda.org/ABOXDUMP1testx1"));
+		source = MAPPING_FACTORY.getDataSource(URI.create("http://www.obda.org/ABOXDUMP1testx1"));
 		source.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, driver);
 		source.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, password);
 		source.setParameter(RDBMSourceParameterConstants.DATABASE_URL, url);
 		source.setParameter(RDBMSourceParameterConstants.DATABASE_USERNAME, username);
 		source.setParameter(RDBMSourceParameterConstants.IS_IN_MEMORY, "false");
 		source.setParameter(RDBMSourceParameterConstants.USE_DATASOURCE_FOR_ABOXDUMP, "true");
+
+		Injector injector = OBDACoreConfiguration.defaultBuilder().build().getInjector();
+		nativeQLFactory = injector.getInstance(NativeQueryLanguageComponentFactory.class);
 	}
 
 	@Override
@@ -82,7 +92,7 @@ public class SemanticIndexManagerLUBMMySQLTest extends TestCase {
 		Connection conn = null;
 		try {
 			conn = JDBCConnectionManager.getJDBCConnectionManager().createConnection(source);
-			SemanticIndexManager simanager = new SemanticIndexManager(ontology, conn);
+			SemanticIndexManager simanager = new SemanticIndexManager(ontology, conn, nativeQLFactory);
 			simanager.setupRepository(true);
 		} catch (Exception e) {
 			throw e;
@@ -99,7 +109,7 @@ public class SemanticIndexManagerLUBMMySQLTest extends TestCase {
 		try {
 			conn = JDBCConnectionManager.getJDBCConnectionManager().createConnection(source);
 
-			SemanticIndexManager simanager = new SemanticIndexManager(ontology, conn);
+			SemanticIndexManager simanager = new SemanticIndexManager(ontology, conn, nativeQLFactory);
 			simanager.dropRepository();
 		} catch (Exception e) {
 			
@@ -119,7 +129,7 @@ public class SemanticIndexManagerLUBMMySQLTest extends TestCase {
 		Connection conn = null;
 		try {
 			conn = JDBCConnectionManager.getJDBCConnectionManager().createConnection(source);
-			SemanticIndexManager simanager = new SemanticIndexManager(ontology, conn);
+			SemanticIndexManager simanager = new SemanticIndexManager(ontology, conn, nativeQLFactory);
 			//simanager.restoreRepository();
 			int inserts = simanager.insertData(ontology, 20000, 5000);
 			simanager.updateMetadata();
@@ -135,27 +145,25 @@ public class SemanticIndexManagerLUBMMySQLTest extends TestCase {
 	}
 
 	public void test3InitializingQuest() throws Exception {
-		QuestOWLFactory fac = new QuestOWLFactory();
+		Properties p = new Properties();
+		p.setProperty(QuestCoreSettings.DBTYPE, QuestConstants.SEMANTIC_INDEX);
+		p.setProperty(QuestCoreSettings.ABOX_MODE, QuestConstants.CLASSIC);
+		p.setProperty(QuestCoreSettings.STORAGE_LOCATION, QuestConstants.JDBC);
+		p.setProperty(QuestCoreSettings.OBTAIN_FROM_ONTOLOGY, "false");
+		p.setProperty(QuestCoreSettings.JDBC_DRIVER, driver);
+		p.setProperty(QuestCoreSettings.JDBC_URL, url);
+		p.setProperty(QuestCoreSettings.DB_USER, username);
+		p.setProperty(QuestCoreSettings.DB_PASSWORD, password);
 
-		QuestPreferences pref = new QuestPreferences();
-		pref.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC_INDEX);
-		pref.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
-		pref.setCurrentValueOf(QuestPreferences.STORAGE_LOCATION, QuestConstants.JDBC);
-		pref.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_ONTOLOGY, "false");
-		pref.setCurrentValueOf(QuestPreferences.JDBC_DRIVER, driver);
-		pref.setCurrentValueOf(QuestPreferences.JDBC_URL, url);
-		pref.setCurrentValueOf(QuestPreferences.DBUSER, username);
-		pref.setCurrentValueOf(QuestPreferences.DBPASSWORD, password);
-
-//		fac.setPreferenceHolder(pref);
-//
-//		QuestOWL quest = (QuestOWL) fac.createReasoner(ontology);
 
 		QuestOWLFactory factory = new QuestOWLFactory();
-        QuestOWLConfiguration config = QuestOWLConfiguration.builder().preferences(pref).build();
-        QuestOWL quest = factory.createReasoner(ontology, config);
-        
-		
+        QuestConfiguration config = QuestConfiguration.defaultBuilder()
+				.ontology(ontology)
+				.properties(p)
+				.build();
+        QuestOWL quest = factory.createReasoner(config);
+
+
 		QuestOWLConnection qconn = (QuestOWLConnection) quest.getConnection();
 		QuestOWLStatement st = (QuestOWLStatement) qconn.createStatement();
 

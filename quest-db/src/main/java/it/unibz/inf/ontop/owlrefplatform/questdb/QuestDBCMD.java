@@ -20,11 +20,6 @@ package it.unibz.inf.ontop.owlrefplatform.questdb;
  * #L%
  */
 
-import it.unibz.inf.ontop.model.OBDAException;
-import it.unibz.inf.ontop.model.TupleResultSet;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestDBStatement;
-import it.unibz.inf.ontop.owlrefplatform.questdb.QuestDB.StoreStatus;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -38,6 +33,12 @@ import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import it.unibz.inf.ontop.injection.QuestConfiguration;
+import it.unibz.inf.ontop.model.OBDAException;
+import it.unibz.inf.ontop.model.TupleResultSet;
+import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
+import it.unibz.inf.ontop.owlrefplatform.core.QuestDBStatement;
+import it.unibz.inf.ontop.injection.QuestCoreSettings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -393,11 +394,11 @@ public class QuestDBCMD {
 
 	private void processListStores() {
 
-		List<StoreStatus> stores = dbInstance.listStores();
+		List<QuestDB.StoreStatus> stores = dbInstance.listStores();
 		String format = "%s | %s";
 		System.out.println(String.format(format, "name", "online"));
 		System.out.println("-------------------");
-		for (StoreStatus status : stores) {
+		for (QuestDB.StoreStatus status : stores) {
 			System.out.println(String.format(format, status.name, status.isOnline));
 		}
 
@@ -453,12 +454,19 @@ public class QuestDBCMD {
 		String name = m.group(1);
 		String tboxfile = m.group(2);
 		String paramfile = m.group(3);
-		URI tboxURI = getFileURI(tboxfile);
+		//URI tboxURI = getFileURI(tboxfile);
 		Properties prop = new Properties();
 		try {
+			// By default
+			prop.put(QuestCoreSettings.ABOX_MODE, QuestConstants.CLASSIC);
 			prop.load(new FileReader(new File(getFileURI(paramfile))));
 
-			dbInstance.createClassicStore(name, tboxURI, prop);
+			QuestConfiguration configuration = QuestConfiguration.defaultBuilder()
+					.ontologyFile(tboxfile)
+					.properties(prop)
+					.build();
+
+			dbInstance.createClassicStore(name, configuration);
 			System.out.println("\nStore has been created.");
 
 		} catch (Exception e) {
@@ -473,12 +481,17 @@ public class QuestDBCMD {
 		m.find();
 		String name = m.group(1);
 		String tboxfile = m.group(2);
-		String obdaModel = m.group(3);
-		URI tboxURI = getFileURI(tboxfile);
-		URI obdaModelURI = getFileURI(obdaModel);
+		String obdaModelPath = m.group(3);
+		//URI tboxURI = getFileURI(tboxfile);
+		//URI obdaModelURI = getFileURI(obdaModel);
 		try {
 
-			dbInstance.createVirtualStore(name, tboxURI, obdaModelURI);
+			QuestConfiguration configuration = QuestConfiguration.defaultBuilder()
+					.ontologyFile(tboxfile)
+					.nativeOntopMappingFile(obdaModelPath)
+					.build();
+
+			dbInstance.createVirtualStore(name, configuration);
 			System.out.println("\nStore has been created.");
 
 		} catch (Exception e) {

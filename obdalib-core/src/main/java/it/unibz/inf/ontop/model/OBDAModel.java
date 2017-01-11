@@ -1,202 +1,120 @@
 package it.unibz.inf.ontop.model;
 
-/*
- * #%L
- * ontop-obdalib-core
- * %%
- * Copyright (C) 2009 - 2014 Free University of Bozen-Bolzano
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.exception.DuplicateMappingException;
-import it.unibz.inf.ontop.io.ModelIOManager;
 import it.unibz.inf.ontop.io.PrefixManager;
-import it.unibz.inf.ontop.ontology.OntologyVocabulary;
-import it.unibz.inf.ontop.querymanager.QueryController;
+import it.unibz.inf.ontop.mapping.MappingParser;
+import it.unibz.inf.ontop.ontology.*;
 
-import java.io.Serializable;
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Hashtable;
-import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
-/***
- * A container for the database and mapping declarations needed to define a
+/**
+ * An OBDA model contains mapping information.
+ * This interface is generic regarding the targeted native query language.
+ *
+ * An OBDA model is a container for the database and mapping declarations needed to define a
  * Virtual ABox or Virtual RDF graph. That is, this is a manager for a
- * collection of JDBC databases and their corresponding mappings. It is used as
- * input to any Quest instance (either OWLAPI or Sesame).
- * 
+ * collection of JDBC databases (when SQL is the native query language) and their corresponding mappings.
+ * It is used as input to any Quest instance (either OWLAPI or Sesame).
+ *
+ * An OBDA model also contains lists of the declared properties and classes.
+ * TODO: move this concern into a separated class.
+ *
  * <p>
- * OBDAModels are also used internally by the Protege plugin and many other
- * utilities including the mapping materializer (to generate ABox assertions or
+ * OBDAModels are also used indirectly by the Protege plugin and many other
+ * utilities including the mapping materializer (e.g. to generate ABox assertions or
  * RDF triples from a .obda file and a database).
- * 
+ *
  * <p>
- * OBModels can be serialized and read to/from .obda files using
- * {@link ModelIOManager}.
- * 
- * 
- * @see ModelIOManager
+ * OBDAModels can be serialized and parsed to/from mapping files using
+ * a serializer and a {@link MappingParser}.
+ *
+ *
+ * @see MappingParser
+ *
+ * Initial author (before refactoring):
  * @author Mariano Rodriguez Muro <mariano.muro@gmail.com>
- * 
+ *
+ * TODO: make the ontology vocabulary immutable
+ *
  */
-public interface OBDAModel extends Cloneable, Serializable {
+public interface OBDAModel {
 
-	public QueryController getQueryController();
+    /**
+     * Prefix manager. Normally immutable.
+     */
+    public PrefixManager getPrefixManager();
 
-	public String getVersion();
+    /**
+     * Retrieves the mapping axiom given its id.
+     */
+    public OBDAMappingAxiom getMapping(String mappingId);
 
-	public String getBuiltDate();
+    /**
+     * Returns the mappings of a given data source.
+     * This set is immutable.
+     */
+    public ImmutableList<OBDAMappingAxiom> getMappings(URI sourceUri);
 
-	public String getBuiltBy();
+    /**
+     * Returns all the mappings in this model indexed by
+     * their datasource.
+     */
+    public ImmutableMap<URI, ImmutableList<OBDAMappingAxiom>> getMappings();
 
-	
-	
-	public void setPrefixManager(PrefixManager prefman);
+    /**
+     * Constructs a new OBDA model with new mappings.
+     *
+     * Note that normal ODBA models are immutable so you
+     * should use this method to "update" them.
+     * 
+     */
+    public OBDAModel newModel(Set<OBDADataSource> dataSources,
+                              Map<URI, ImmutableList<OBDAMappingAxiom>> newMappings)
+        throws DuplicateMappingException;
+    /**
+     * Constructs a new OBDA model with new mappings and a prefix manager.
+     *
+     * Note that normal ODBA models are immutable so you
+     * should use this method to "update" them.
+     *
+     */
+    public OBDAModel newModel(Set<OBDADataSource> dataSources,
+                              Map<URI, ImmutableList<OBDAMappingAxiom>> newMappings,
+                              PrefixManager prefixManager) throws DuplicateMappingException;
 
-	public PrefixManager getPrefixManager();
-	
-	
+    /**
+     * Constructs a new OBDA model with new mappings, a prefix manager, class and properties
+     * declarations.
+     *
+     * Note that normal ODBA models are immutable so you
+     * should use this method to "update" them.
+     *
+     */
+    public OBDAModel newModel(Set<OBDADataSource> dataSources,
+                              Map<URI, ImmutableList<OBDAMappingAxiom>> newMappings,
+                              PrefixManager prefixManager, OntologyVocabulary ontologyVocabulary)
+            throws DuplicateMappingException;
 
-	public OBDADataFactory getDataFactory();
+    /**
+     * TODO: remove it when OBDA models will be FULLY immutable.
+     */
+    public OBDAModel clone();
 
-	/*
-	 * Methods related to data sources
-	 */
+    /**
+     * Returns the set of all sources defined in this OBDA model. This set
+     * is immutable.
+     */
+    public Set<OBDADataSource> getSources();
 
-	public void addSourcesListener(OBDAModelListener listener);
+    public OBDADataSource getSource(URI sourceURI);
 
-	public void removeSourcesListener(OBDAModelListener listener);
+    public boolean containsSource(URI sourceURI);
 
-	public void fireSourceParametersUpdated();
-
-
-	/**
-	 * Returns the list of all sources defined in this OBDA model. This list is
-	 * a non-modifiable copy of the internal list.
-	 */
-	public List<OBDADataSource> getSources();
-
-	public OBDADataSource getSource(URI name);
-
-	public void addSource(OBDADataSource source);
-
-	public void removeSource(URI id);
-
-	public void updateSource(URI id, OBDADataSource dsd);
-
-	public boolean containsSource(URI name);
-
-	/*
-	 * Methods related to mappings
-	 */
-
-	public void addMappingsListener(OBDAMappingListener listener);
-
-	public void removeMappingsListener(OBDAMappingListener listener);
-
-	/**
-	 * Deletes the mapping given its id and data source.
-	 */
-	public void removeMapping(URI sourceuri, String mappingid);
-
-	/**
-	 * Deletes all the mappings given the data source id
-	 */
-	public void removeAllMappings(URI sourceuri);
-
-	/**
-	 * Retrieves the mapping axiom given its id and data source.
-	 */
-	public OBDAMappingAxiom getMapping(URI sourceuri, String mappinid);
-
-	/**
-	 * Returns all the mappings the given data source id.
-	 */
-	public List<OBDAMappingAxiom> getMappings(URI sourceuri);
-
-	/**
-	 * Returns all the mappings in this model.
-	 */
-	public Hashtable<URI, ArrayList<OBDAMappingAxiom>> getMappings();
-
-	/**
-	 * Retrieves the position of the mapping given its id and data source.
-	 */
-	@Deprecated
-	public int indexOf(URI sourceuri, String mappingid);
-
-	/**
-	 * Inserts a mappings into this model. If the mapping id already exits it
-	 * throws an exception. Can be used inside method addMappings
-	 */
-	public void addMapping(URI sourceuri, OBDAMappingAxiom mapping , boolean disableFiringMappingInsertedEvent) throws DuplicateMappingException;
-
-	/**
-	 * Inserts a collection of mappings into this model. Any duplicates will be
-	 * failed and the system will report such duplication failures.
-	 */
-	public void addMappings(URI sourceuri, Collection<OBDAMappingAxiom> mappings) throws DuplicateMappingException;
-
-
-	/***
-	 * Removes all mappings in the model.
-	 */
-	public void removeAllMappings();
-
-	/**
-	 * Updates the mapping id.
-	 * @throws DuplicateMappingException 
-	 */
-	public int updateMapping(URI datasource_uri, String mapping_id, String new_mappingid) throws DuplicateMappingException;
-
-	/**
-	 * Replaces the old target query with the new one given its id.
-	 */
-	public void updateTargetQueryMapping(URI datasource_uri, String mapping_id, List<Function> targetQuery);
-
-	/**
-	 * Replaces the old source query with the new one given its id.
-	 */
-	public void updateMappingsSourceQuery(URI datasource_uri, String mapping_id, OBDASQLQuery sourceQuery);
-
-	/**
-	 * Refactors every mapping in this OBDA model by modifying each mapping of
-	 * the model by replacing each atom that use the predicate old name, with a
-	 * new atom that uses newName and has the same terms as the old atom.
-	 */
-	public int renamePredicate(Predicate oldname, Predicate newName);
-
-	/**
-	 * Removes all atoms that contain the given predicate in all mappings.
-	 */
-	public int deletePredicate(Predicate predicate);
-
-	public boolean containsMapping(URI datasourceUri, String mappingId);
-
-	public Object clone();
-
-	public void reset();
-
-	
-	/**
-	 * 
-	 * @return
-	 */
-	
 	public OntologyVocabulary getOntologyVocabulary();
-		
+
 }

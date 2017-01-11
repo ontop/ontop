@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.protege.core;
 
 /*
  * #%L
- * ontop-protege4
+ * ontop-protege
  * %%
  * Copyright (C) 2009 - 2013 KRDB Research Centre. Free University of Bozen Bolzano.
  * %%
@@ -20,8 +20,8 @@ package it.unibz.inf.ontop.protege.core;
  * #L%
  */
 
+import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.model.OBDAModel;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLConfiguration;
 import it.unibz.inf.ontop.sql.ImplicitDBConstraintsReader;
 import org.protege.editor.owl.model.inference.AbstractProtegeOWLReasonerInfo;
@@ -30,11 +30,47 @@ import org.semanticweb.owlapi.reasoner.OWLReasonerConfiguration;
 import org.semanticweb.owlapi.reasoner.OWLReasonerFactory;
 import org.semanticweb.owlapi.reasoner.ReasonerProgressMonitor;
 
+import java.util.Optional;
+import java.util.Properties;
+
 public class OntopReasonerInfo extends AbstractProtegeOWLReasonerInfo {
 
-	OntopOWLFactory factory = new OntopOWLFactory();
+	/**
+	 * Mutable
+	 */
+	private static class FlexibleConfigurationBuilder {
+		private Optional<Properties> optionalProperties = Optional.empty();
+		private Optional<OBDAModelWrapper> optionalObdaModelWrapper = Optional.empty();
+		private Optional<ImplicitDBConstraintsReader> optionalDBConstraintReader = Optional.empty();
 
-    private final QuestOWLConfiguration.Builder configBuilder = QuestOWLConfiguration.builder();
+		public QuestConfiguration buildQuestConfiguration() {
+			QuestConfiguration.Builder builder = QuestConfiguration.defaultBuilder();
+			optionalProperties
+					.ifPresent(p -> builder.properties(p));
+			optionalObdaModelWrapper
+					.ifPresent(w -> builder.obdaModel(w.getCurrentImmutableOBDAModel()));
+			optionalDBConstraintReader
+					.ifPresent(r -> builder.dbConstraintsReader(r));
+
+			return builder.build();
+		}
+
+		public void setProperties(Properties properties) {
+			this.optionalProperties = Optional.of(properties);
+		}
+
+		public void setOBDAModelWrapper(OBDAModelWrapper modelWrapper) {
+			this.optionalObdaModelWrapper = Optional.of(modelWrapper);
+		}
+
+		public void setDBConstraintReader(ImplicitDBConstraintsReader dBConstraintReader) {
+			this.optionalDBConstraintReader = Optional.ofNullable(dBConstraintReader);
+		}
+	}
+
+    private OntopOWLFactory factory = new OntopOWLFactory();
+
+    private final FlexibleConfigurationBuilder configBuilder = new FlexibleConfigurationBuilder();
 
     @Override
 	public BufferingMode getRecommendedBuffering() {
@@ -46,27 +82,25 @@ public class OntopReasonerInfo extends AbstractProtegeOWLReasonerInfo {
 		return factory;
 	}
 
-	public void setPreferences(QuestPreferences preferences) {
-        configBuilder.preferences(preferences);
+	public void setPreferences(Properties preferences) {
+        configBuilder.setProperties(preferences);
 	}
 
-	public void setOBDAModel(OBDAModel model) {
-        configBuilder.obdaModel(model);
+	public void setOBDAModelWrapper(OBDAModelWrapper modelWrapper) {
+        configBuilder.setOBDAModelWrapper(modelWrapper);
 	}
 
 	/**
 	 * Allows the user to supply database keys that are not in the database metadata
-	 * 
+	 *
 	 * @param uc The user-supplied database constraints
 	 */
 	public void setImplicitDBConstraints(ImplicitDBConstraintsReader uc) {
-		if(uc == null)
-			throw new NullPointerException();
-        configBuilder.dbConstraintsReader(uc);
+		configBuilder.setDBConstraintReader(uc);
 	}
 
     @Override
     public OWLReasonerConfiguration getConfiguration(ReasonerProgressMonitor monitor) {
-        return configBuilder.progressMonitor(monitor).build();
+		return new QuestOWLConfiguration(configBuilder.buildQuestConfiguration(), monitor);
     }
 }

@@ -21,7 +21,6 @@ package it.unibz.inf.ontop.owlrefplatform.core.unfolding;
  */
 
 import it.unibz.inf.ontop.model.*;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 
 import java.util.ArrayList;
 
@@ -29,43 +28,44 @@ import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
 import junit.framework.TestCase;
 import org.junit.Ignore;
 
+import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
+
 /**
  * TODO: port it to the new IntermediateQuery data structure
  */
 @Ignore
 public class LeftJoinUnfoldingTest extends TestCase {
-	OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 
 	@Ignore
 	public void testUnfoldingWithMultipleSuccessfulResolutions() {
 
 		// query rule
-		DatalogProgram queryProgram = fac.getDatalogProgram();
-		Function a = fac.getFunction(fac.getClassPredicate("A"), fac.getVariable("x"));
-		Function R = fac.getFunction(fac.getObjectPropertyPredicate("R"), fac.getVariable("x"), fac.getVariable("y"));
-		Function lj = fac.getSPARQLLeftJoin(a, R);
-		Function head = fac.getFunction(fac.getPredicate("q", 2), fac.getVariable("x"), fac.getVariable("y"));
-		CQIE query = fac.getCQIE(head, lj);
+		DatalogProgram queryProgram = DATA_FACTORY.getDatalogProgram();
+		Function a = DATA_FACTORY.getFunction(DATA_FACTORY.getClassPredicate("A"), DATA_FACTORY.getVariable("x"));
+		Function R = DATA_FACTORY.getFunction(DATA_FACTORY.getObjectPropertyPredicate("R"), DATA_FACTORY.getVariable("x"), DATA_FACTORY.getVariable("y"));
+		Function lj = DATA_FACTORY.getSPARQLLeftJoin(a, R);
+		Function head = DATA_FACTORY.getFunction(DATA_FACTORY.getPredicate("q", 2), DATA_FACTORY.getVariable("x"), DATA_FACTORY.getVariable("y"));
+		CQIE query = DATA_FACTORY.getCQIE(head, lj);
 		queryProgram.appendRule(query);
 
 		// Mapping program
-		DatalogProgram p = fac.getDatalogProgram();
+		DatalogProgram p = DATA_FACTORY.getDatalogProgram();
 		// A rule 1
-		Function body = fac.getFunction(fac.getPredicate("T1", 2), fac.getVariable("x"), fac.getVariable("y"));
-		head = fac.getFunction(fac.getPredicate("A", 1), fac.getVariable("x"));
-		CQIE rule1 = fac.getCQIE(head, body);
+		Function body = DATA_FACTORY.getFunction(DATA_FACTORY.getPredicate("T1", 2), DATA_FACTORY.getVariable("x"), DATA_FACTORY.getVariable("y"));
+		head = DATA_FACTORY.getFunction(DATA_FACTORY.getPredicate("A", 1), DATA_FACTORY.getVariable("x"));
+		CQIE rule1 = DATA_FACTORY.getCQIE(head, body);
 		p.appendRule(rule1);
 
 		// A rule 2
-		body = fac.getFunction(fac.getPredicate("T2", 2), fac.getVariable("x"), fac.getVariable("y"));
-		head = fac.getFunction(fac.getPredicate("R", 2), fac.getVariable("x"), fac.getVariable("y"));
-		CQIE rule2 = fac.getCQIE(head, body);
+		body = DATA_FACTORY.getFunction(DATA_FACTORY.getPredicate("T2", 2), DATA_FACTORY.getVariable("x"), DATA_FACTORY.getVariable("y"));
+		head = DATA_FACTORY.getFunction(DATA_FACTORY.getPredicate("R", 2), DATA_FACTORY.getVariable("x"), DATA_FACTORY.getVariable("y"));
+		CQIE rule2 = DATA_FACTORY.getCQIE(head, body);
 		p.appendRule(rule2);
 
 		// A rule 3
-		body = fac.getFunction(fac.getPredicate("T3", 2), fac.getVariable("x"), fac.getVariable("y"));
-		head = fac.getFunction(fac.getPredicate("R", 2), fac.getVariable("x"), fac.getVariable("y"));
-		CQIE rule3 = fac.getCQIE(head, body);
+		body = DATA_FACTORY.getFunction(DATA_FACTORY.getPredicate("T3", 2), DATA_FACTORY.getVariable("x"), DATA_FACTORY.getVariable("y"));
+		head = DATA_FACTORY.getFunction(DATA_FACTORY.getPredicate("R", 2), DATA_FACTORY.getVariable("x"), DATA_FACTORY.getVariable("y"));
+		CQIE rule3 = DATA_FACTORY.getCQIE(head, body);
 		p.appendRule(rule3);
 
 		DatalogUnfolder unfolder = new DatalogUnfolder(p.getRules());
@@ -87,37 +87,37 @@ public class LeftJoinUnfoldingTest extends TestCase {
 	public void testUnfoldingWithMultipleSuccessfulResolutionsAndMultipleUnfoldableAtomsBeforeAndAfterLeftJoin() {
 
 		// query rule
-		DatalogProgram queryProgram = fac.getDatalogProgram();
-		Function a = fac.getFunction(fac.getClassPredicate("A"), fac.getVariable("x"));
-		Function R = fac.getFunction(fac.getObjectPropertyPredicate("R"), fac.getVariable("x"), fac.getVariable("y"));
-		Function lj = fac.getSPARQLLeftJoin(a, R);
-		Function head = fac.getFunction(fac.getPredicate("q", 2), fac.getVariable("x"), fac.getVariable("y"));
+		DatalogProgram queryProgram = DATA_FACTORY.getDatalogProgram();
+		Function a = DATA_FACTORY.getFunction(DATA_FACTORY.getClassPredicate("A"), DATA_FACTORY.getVariable("x"));
+		Function R = DATA_FACTORY.getFunction(DATA_FACTORY.getObjectPropertyPredicate("R"), DATA_FACTORY.getVariable("x"), DATA_FACTORY.getVariable("y"));
+		Function lj = DATA_FACTORY.getSPARQLLeftJoin(a, R);
+		Function head = DATA_FACTORY.getFunction(DATA_FACTORY.getPredicate("q", 2), DATA_FACTORY.getVariable("x"), DATA_FACTORY.getVariable("y"));
 		ArrayList<Function> bodyl = new ArrayList<Function>();
 		bodyl.add(a);
 		bodyl.add(lj);
 		bodyl.add(a);
 		bodyl.add(R);
-		CQIE query = fac.getCQIE(head, bodyl);
+		CQIE query = DATA_FACTORY.getCQIE(head, bodyl);
 		queryProgram.appendRule(query);
 
 		// Mapping program
-		DatalogProgram p = fac.getDatalogProgram();
+		DatalogProgram p = DATA_FACTORY.getDatalogProgram();
 		// A rule 1
-		Function body = fac.getFunction(fac.getPredicate("T1", 2), fac.getVariable("x"), fac.getVariable("y"));
-		head = fac.getFunction(fac.getPredicate("A", 1), fac.getVariable("x"));
-		CQIE rule1 = fac.getCQIE(head, body);
+		Function body = DATA_FACTORY.getFunction(DATA_FACTORY.getPredicate("T1", 2), DATA_FACTORY.getVariable("x"), DATA_FACTORY.getVariable("y"));
+		head = DATA_FACTORY.getFunction(DATA_FACTORY.getPredicate("A", 1), DATA_FACTORY.getVariable("x"));
+		CQIE rule1 = DATA_FACTORY.getCQIE(head, body);
 		p.appendRule(rule1);
 
 		// A rule 2
-		body = fac.getFunction(fac.getPredicate("T2", 2), fac.getVariable("x"), fac.getVariable("y"));
-		head = fac.getFunction(fac.getPredicate("R", 2), fac.getVariable("x"), fac.getVariable("y"));
-		CQIE rule2 = fac.getCQIE(head, body);
+		body = DATA_FACTORY.getFunction(DATA_FACTORY.getPredicate("T2", 2), DATA_FACTORY.getVariable("x"), DATA_FACTORY.getVariable("y"));
+		head = DATA_FACTORY.getFunction(DATA_FACTORY.getPredicate("R", 2), DATA_FACTORY.getVariable("x"), DATA_FACTORY.getVariable("y"));
+		CQIE rule2 = DATA_FACTORY.getCQIE(head, body);
 		p.appendRule(rule2);
 
 		// A rule 3
-		body = fac.getFunction(fac.getPredicate("T3", 2), fac.getVariable("x"), fac.getVariable("y"));
-		head = fac.getFunction(fac.getPredicate("R", 2), fac.getVariable("x"), fac.getVariable("y"));
-		CQIE rule3 = fac.getCQIE(head, body);
+		body = DATA_FACTORY.getFunction(DATA_FACTORY.getPredicate("T3", 2), DATA_FACTORY.getVariable("x"), DATA_FACTORY.getVariable("y"));
+		head = DATA_FACTORY.getFunction(DATA_FACTORY.getPredicate("R", 2), DATA_FACTORY.getVariable("x"), DATA_FACTORY.getVariable("y"));
+		CQIE rule3 = DATA_FACTORY.getCQIE(head, body);
 		p.appendRule(rule3);
 
 		DatalogUnfolder unfolder = new DatalogUnfolder(p.getRules());
@@ -142,33 +142,33 @@ public class LeftJoinUnfoldingTest extends TestCase {
 	public void testUnfoldingWithNoSuccessfulResolutions() {
 		// query rule q(x,y) :- LF(A(x), R(x,y)
 		
-		DatalogProgram queryProgram = fac.getDatalogProgram();
-		Function a = fac.getFunction(fac.getClassPredicate("A"), fac.getVariable("x"));
-		Function R = fac.getFunction(fac.getObjectPropertyPredicate("R"), fac.getVariable("x"), fac.getVariable("y"));
-		Function lj = fac.getSPARQLLeftJoin(a, R);
-		Function head = fac.getFunction(fac.getPredicate("q", 2), fac.getVariable("x"), fac.getVariable("y"));
-		CQIE query = fac.getCQIE(head, lj);
+		DatalogProgram queryProgram = DATA_FACTORY.getDatalogProgram();
+		Function a = DATA_FACTORY.getFunction(DATA_FACTORY.getClassPredicate("A"), DATA_FACTORY.getVariable("x"));
+		Function R = DATA_FACTORY.getFunction(DATA_FACTORY.getObjectPropertyPredicate("R"), DATA_FACTORY.getVariable("x"), DATA_FACTORY.getVariable("y"));
+		Function lj = DATA_FACTORY.getSPARQLLeftJoin(a, R);
+		Function head = DATA_FACTORY.getFunction(DATA_FACTORY.getPredicate("q", 2), DATA_FACTORY.getVariable("x"), DATA_FACTORY.getVariable("y"));
+		CQIE query = DATA_FACTORY.getCQIE(head, lj);
 		queryProgram.appendRule(query);
 
 		// Mapping program
-		DatalogProgram p = fac.getDatalogProgram();
+		DatalogProgram p = DATA_FACTORY.getDatalogProgram();
 		// A rule 1 A(uri(x)) :- T1(x,y)
-		Function body = fac.getFunction(fac.getPredicate("T1", 2), fac.getVariable("x"), fac.getVariable("y"));
-		head = fac.getFunction(fac.getPredicate("A", 1), fac.getFunction(fac.getPredicate("uri", 1), fac.getVariable("x")));
-		CQIE rule1 = fac.getCQIE(head, body);
+		Function body = DATA_FACTORY.getFunction(DATA_FACTORY.getPredicate("T1", 2), DATA_FACTORY.getVariable("x"), DATA_FACTORY.getVariable("y"));
+		head = DATA_FACTORY.getFunction(DATA_FACTORY.getPredicate("A", 1), DATA_FACTORY.getFunction(DATA_FACTORY.getPredicate("uri", 1), DATA_FACTORY.getVariable("x")));
+		CQIE rule1 = DATA_FACTORY.getCQIE(head, body);
 		p.appendRule(rule1);
 
 		// A rule 2 R(f(x),y) :- T2(x,y)
-		body = fac.getFunction(fac.getPredicate("T2", 2), fac.getVariable("x"), fac.getVariable("y"));
-		head = fac.getFunction(fac.getPredicate("R", 2), fac.getFunction(fac.getPredicate("f", 1), fac.getVariable("x")), fac.getVariable("y"));
-		CQIE rule2 = fac.getCQIE(head, body);
+		body = DATA_FACTORY.getFunction(DATA_FACTORY.getPredicate("T2", 2), DATA_FACTORY.getVariable("x"), DATA_FACTORY.getVariable("y"));
+		head = DATA_FACTORY.getFunction(DATA_FACTORY.getPredicate("R", 2), DATA_FACTORY.getFunction(DATA_FACTORY.getPredicate("f", 1), DATA_FACTORY.getVariable("x")), DATA_FACTORY.getVariable("y"));
+		CQIE rule2 = DATA_FACTORY.getCQIE(head, body);
 		p.appendRule(rule2);
 
 		// A rule 3 R(g(x),y) :- T3(x,y)
 		
-		body = fac.getFunction(fac.getPredicate("T3", 2), fac.getVariable("x"), fac.getVariable("y"));
-		head = fac.getFunction(fac.getPredicate("R", 2), fac.getFunction(fac.getPredicate("g", 1), fac.getVariable("x")), fac.getVariable("y"));
-		CQIE rule3 = fac.getCQIE(head, body);
+		body = DATA_FACTORY.getFunction(DATA_FACTORY.getPredicate("T3", 2), DATA_FACTORY.getVariable("x"), DATA_FACTORY.getVariable("y"));
+		head = DATA_FACTORY.getFunction(DATA_FACTORY.getPredicate("R", 2), DATA_FACTORY.getFunction(DATA_FACTORY.getPredicate("g", 1), DATA_FACTORY.getVariable("x")), DATA_FACTORY.getVariable("y"));
+		CQIE rule3 = DATA_FACTORY.getCQIE(head, body);
 		p.appendRule(rule3);
 
 		DatalogUnfolder unfolder = new DatalogUnfolder(p.getRules());
@@ -189,33 +189,33 @@ public class LeftJoinUnfoldingTest extends TestCase {
 	public void testUnfoldingWithOneSuccessfulResolutions() {
 			// query rule q(x,y) :- LF(A(x), R(x,y)
 			
-			DatalogProgram queryProgram = fac.getDatalogProgram();
-			Function a = fac.getFunction(fac.getClassPredicate("A"), fac.getVariable("x"));
-			Function R = fac.getFunction(fac.getObjectPropertyPredicate("R"), fac.getVariable("x"), fac.getVariable("y"));
-			Function lj = fac.getSPARQLLeftJoin(a, R);
-			Function head = fac.getFunction(fac.getPredicate("q", 2), fac.getVariable("x"), fac.getVariable("y"));
-			CQIE query = fac.getCQIE(head, lj);
+			DatalogProgram queryProgram = DATA_FACTORY.getDatalogProgram();
+			Function a = DATA_FACTORY.getFunction(DATA_FACTORY.getClassPredicate("A"), DATA_FACTORY.getVariable("x"));
+			Function R = DATA_FACTORY.getFunction(DATA_FACTORY.getObjectPropertyPredicate("R"), DATA_FACTORY.getVariable("x"), DATA_FACTORY.getVariable("y"));
+			Function lj = DATA_FACTORY.getSPARQLLeftJoin(a, R);
+			Function head = DATA_FACTORY.getFunction(DATA_FACTORY.getPredicate("q", 2), DATA_FACTORY.getVariable("x"), DATA_FACTORY.getVariable("y"));
+			CQIE query = DATA_FACTORY.getCQIE(head, lj);
 			queryProgram.appendRule(query);
 
 			// Mapping program
-			DatalogProgram p = fac.getDatalogProgram();
+			DatalogProgram p = DATA_FACTORY.getDatalogProgram();
 			// A rule 1 A(uri(x)) :- T1(x,y)
-			Function body = fac.getFunction(fac.getPredicate("T1", 2), fac.getVariable("x"), fac.getVariable("y"));
-			head = fac.getFunction(fac.getPredicate("A", 1), fac.getFunction(fac.getPredicate("uri", 1), fac.getVariable("x")));
-			CQIE rule1 = fac.getCQIE(head, body);
+			Function body = DATA_FACTORY.getFunction(DATA_FACTORY.getPredicate("T1", 2), DATA_FACTORY.getVariable("x"), DATA_FACTORY.getVariable("y"));
+			head = DATA_FACTORY.getFunction(DATA_FACTORY.getPredicate("A", 1), DATA_FACTORY.getFunction(DATA_FACTORY.getPredicate("uri", 1), DATA_FACTORY.getVariable("x")));
+			CQIE rule1 = DATA_FACTORY.getCQIE(head, body);
 			p.appendRule(rule1);
 
 			// A rule 2 R(f(x),y) :- T2(x,y)
-			body = fac.getFunction(fac.getPredicate("T2", 2), fac.getVariable("x"), fac.getVariable("y"));
-			head = fac.getFunction(fac.getPredicate("R", 2), fac.getFunction(fac.getPredicate("f", 1), fac.getVariable("x")), fac.getVariable("y"));
-			CQIE rule2 = fac.getCQIE(head, body);
+			body = DATA_FACTORY.getFunction(DATA_FACTORY.getPredicate("T2", 2), DATA_FACTORY.getVariable("x"), DATA_FACTORY.getVariable("y"));
+			head = DATA_FACTORY.getFunction(DATA_FACTORY.getPredicate("R", 2), DATA_FACTORY.getFunction(DATA_FACTORY.getPredicate("f", 1), DATA_FACTORY.getVariable("x")), DATA_FACTORY.getVariable("y"));
+			CQIE rule2 = DATA_FACTORY.getCQIE(head, body);
 			p.appendRule(rule2);
 
 			// A rule 3 R(uri(x),y) :- T3(x,y)
 			
-			body = fac.getFunction(fac.getPredicate("T3", 2), fac.getVariable("x"), fac.getVariable("y"));
-			head = fac.getFunction(fac.getPredicate("R", 2), fac.getFunction(fac.getPredicate("uri", 1), fac.getVariable("x")), fac.getVariable("y"));
-			CQIE rule3 = fac.getCQIE(head, body);
+			body = DATA_FACTORY.getFunction(DATA_FACTORY.getPredicate("T3", 2), DATA_FACTORY.getVariable("x"), DATA_FACTORY.getVariable("y"));
+			head = DATA_FACTORY.getFunction(DATA_FACTORY.getPredicate("R", 2), DATA_FACTORY.getFunction(DATA_FACTORY.getPredicate("uri", 1), DATA_FACTORY.getVariable("x")), DATA_FACTORY.getVariable("y"));
+			CQIE rule3 = DATA_FACTORY.getCQIE(head, body);
 			p.appendRule(rule3);
 
 			DatalogUnfolder unfolder = new DatalogUnfolder(p.getRules());
@@ -243,19 +243,19 @@ public class LeftJoinUnfoldingTest extends TestCase {
 	public void testUnfoldingWithNoRulesForResolutions() {
 
 		// A program that unifies with A, but not R, y should become null
-		DatalogProgram p = fac.getDatalogProgram();
-		Function body = fac.getFunction(fac.getPredicate("T1", 2), fac.getVariable("x"), fac.getVariable("y"));
-		Function head = fac.getFunction(fac.getPredicate("A", 1), fac.getVariable("x"));
-		CQIE rule2 = fac.getCQIE(head, body);
+		DatalogProgram p = DATA_FACTORY.getDatalogProgram();
+		Function body = DATA_FACTORY.getFunction(DATA_FACTORY.getPredicate("T1", 2), DATA_FACTORY.getVariable("x"), DATA_FACTORY.getVariable("y"));
+		Function head = DATA_FACTORY.getFunction(DATA_FACTORY.getPredicate("A", 1), DATA_FACTORY.getVariable("x"));
+		CQIE rule2 = DATA_FACTORY.getCQIE(head, body);
 		p.appendRule(rule2);
 
-		DatalogProgram query = fac.getDatalogProgram();
+		DatalogProgram query = DATA_FACTORY.getDatalogProgram();
 		// main rule q(x,y) :- LJ(A(x), R(x,y))
-		Function a = fac.getFunction(fac.getClassPredicate("A"), fac.getVariable("x"));
-		Function R = fac.getFunction(fac.getObjectPropertyPredicate("R"), fac.getVariable("x"), fac.getVariable("y"));
-		Function lj = fac.getSPARQLLeftJoin(a, R);
-		head = fac.getFunction(fac.getPredicate("q", 2), fac.getVariable("x"), fac.getVariable("y"));
-		CQIE rule1 = fac.getCQIE(head, lj);
+		Function a = DATA_FACTORY.getFunction(DATA_FACTORY.getClassPredicate("A"), DATA_FACTORY.getVariable("x"));
+		Function R = DATA_FACTORY.getFunction(DATA_FACTORY.getObjectPropertyPredicate("R"), DATA_FACTORY.getVariable("x"), DATA_FACTORY.getVariable("y"));
+		Function lj = DATA_FACTORY.getSPARQLLeftJoin(a, R);
+		head = DATA_FACTORY.getFunction(DATA_FACTORY.getPredicate("q", 2), DATA_FACTORY.getVariable("x"), DATA_FACTORY.getVariable("y"));
+		CQIE rule1 = DATA_FACTORY.getCQIE(head, lj);
 		query.appendRule(rule1);
 
 		DatalogUnfolder unfolder = new DatalogUnfolder(p.getRules());

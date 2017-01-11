@@ -20,6 +20,7 @@ package it.unibz.inf.ontop.owlrefplatform.core.abox;
  * #L%
  */
 
+import com.google.inject.Injector;
 import it.unibz.inf.ontop.model.Function;
 import it.unibz.inf.ontop.model.GraphResultSet;
 import it.unibz.inf.ontop.model.OBDAException;
@@ -36,16 +37,14 @@ import it.unibz.inf.ontop.ontology.Ontology;
 import it.unibz.inf.ontop.ontology.OntologyFactory;
 import it.unibz.inf.ontop.ontology.OntologyVocabulary;
 import it.unibz.inf.ontop.ontology.impl.OntologyFactoryImpl;
-import it.unibz.inf.ontop.owlrefplatform.core.Quest;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestConnection;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestStatement;
+import it.unibz.inf.ontop.owlrefplatform.core.*;
 
 import java.net.URI;
 import java.sql.SQLException;
 import java.util.*;
 
+import it.unibz.inf.ontop.injection.QuestComponentFactory;
+import it.unibz.inf.ontop.injection.QuestCoreConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -69,8 +68,9 @@ import org.slf4j.LoggerFactory;
  */
 public class QuestMaterializer {
 
-	private final OBDAModel model;
-	private final Quest questInstance;
+    private final QuestComponentFactory questComponentFactory;
+    private OBDAModel model;
+	private IQuest questInstance;
 	private Ontology ontology;
 
 	/**
@@ -93,25 +93,16 @@ public class QuestMaterializer {
 	 * @throws Exception
 	 */
 	public QuestMaterializer(OBDAModel model, boolean doStreamResults) throws Exception {
-		this(model, null, null, getDefaultPreferences(), doStreamResults);
-	}
-	
-	public QuestMaterializer(OBDAModel model, QuestPreferences pref, boolean doStreamResults) throws Exception {
-		this(model, null, null, pref, doStreamResults);
-		
+		this(model, null, null, new Properties(), doStreamResults);
 	}
 	
 	public QuestMaterializer(OBDAModel model, Ontology onto, boolean doStreamResults) throws Exception {
-		this(model, onto, null, getDefaultPreferences(), doStreamResults);
+		this(model, onto, null, new Properties(), doStreamResults);
 	}
 
     public QuestMaterializer(OBDAModel model, Ontology onto, Collection<Predicate> predicates, boolean doStreamResults) throws Exception {
-        this(model, onto, predicates, getDefaultPreferences(), doStreamResults);
+        this(model, onto, predicates, new Properties(), doStreamResults);
     }
-
-	public QuestMaterializer(OBDAModel model, Ontology onto, QuestPreferences prefs, boolean doStreamResults) throws Exception {
-		this(model, onto, null, prefs, doStreamResults);
-	}
 
 	/***
 	 * 
@@ -119,7 +110,7 @@ public class QuestMaterializer {
 	 * @param model
 	 * @throws Exception
 	 */
-	public QuestMaterializer(OBDAModel model, Ontology onto, Collection<Predicate> predicates, QuestPreferences preferences,
+	public QuestMaterializer(OBDAModel model, Ontology onto, Collection<Predicate> predicates, Properties properties,
 							 boolean doStreamResults) throws Exception {
 		this.doStreamResults = doStreamResults;
 		this.model = model;
@@ -130,6 +121,13 @@ public class QuestMaterializer {
         } else {
            this.vocabulary = extractVocabulary(model, onto);
         }
+
+		QuestCoreConfiguration configuration = QuestCoreConfiguration.defaultBuilder()
+				.enableOntologyAnnotationQuerying(true)
+				.properties(properties).build();
+
+		Injector injector = configuration.getInjector();
+		questComponentFactory = injector.getInstance(QuestComponentFactory.class);
 
 		if (this.model.getSources()!= null && this.model.getSources().size() > 1)
 			throw new Exception("Cannot materialize with multiple data sources!");
@@ -157,10 +155,11 @@ public class QuestMaterializer {
 		}
 		
 		
-		preferences.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+		//preferences.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
 
-		questInstance = new Quest(ontology, this.model, preferences);
-		questInstance.setQueryingAnnotationsInOntology(true);
+		questInstance = questComponentFactory.create(ontology, Optional.of(this.model), Optional.empty(),
+				configuration.getExecutorRegistry());
+		// Was an ugly way to ask for also querying the annotations
 
 		questInstance.setupRepository();
 	}
@@ -237,14 +236,6 @@ public class QuestMaterializer {
     }
 */
 
-    private static QuestPreferences getDefaultPreferences() {
-		QuestPreferences p = new QuestPreferences();
-		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-		p.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_MAPPINGS, "true");
-		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-		return p;
-	}
-
 
 	public Iterator<Assertion> getAssertionIterator() throws Exception {
 		//return the inner class  iterator
@@ -298,8 +289,8 @@ public class QuestMaterializer {
 		private String query1 = "CONSTRUCT {?s <%s> ?o} WHERE {?s <%s> ?o}";
 		private String query2 = "CONSTRUCT {?s a <%s>} WHERE {?s a <%s>}";
 
-		private QuestConnection questConn;
-		private QuestStatement stm;
+		private IQuestConnection questConn;
+		private IQuestStatement stm;
 		
 		private boolean read = false, hasNext = false;
 
@@ -309,7 +300,7 @@ public class QuestMaterializer {
 		
 		private Logger log = LoggerFactory.getLogger(VirtualTripleIterator.class);
 
-		public VirtualTripleIterator(Quest questInstance, Iterator<Predicate> vocabIter)
+		public VirtualTripleIterator(IQuest questInstance, Iterator<Predicate> vocabIter)
 				throws SQLException {
 			try{
 				questConn = questInstance.getNonPoolConnection();

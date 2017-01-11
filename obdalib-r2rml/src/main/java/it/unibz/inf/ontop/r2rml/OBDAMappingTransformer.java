@@ -20,12 +20,10 @@ package it.unibz.inf.ontop.r2rml;
  * #L%
  */
 
-import eu.optique.api.mapping.*;
 import eu.optique.api.mapping.TermMap.TermMapType;
 import eu.optique.api.mapping.impl.sesame.SesameR2RMLMappingManagerFactory;
 import it.unibz.inf.ontop.io.PrefixManager;
 import it.unibz.inf.ontop.model.*;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
 import it.unibz.inf.ontop.model.impl.SQLQueryImpl;
 import it.unibz.inf.ontop.renderer.TargetQueryRenderer;
@@ -33,20 +31,15 @@ import it.unibz.inf.ontop.utils.IDGenerator;
 import it.unibz.inf.ontop.utils.URITemplates;
 
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import org.openrdf.model.Resource;
 import org.openrdf.model.Statement;
 import org.openrdf.model.URI;
 import org.openrdf.model.ValueFactory;
 import org.openrdf.model.impl.ValueFactoryImpl;
-import it.unibz.inf.ontop.io.PrefixManager;
-import it.unibz.inf.ontop.utils.IDGenerator;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import eu.optique.api.mapping.LogicalTable;
@@ -55,15 +48,14 @@ import eu.optique.api.mapping.ObjectMap;
 import eu.optique.api.mapping.PredicateMap;
 import eu.optique.api.mapping.PredicateObjectMap;
 import eu.optique.api.mapping.R2RMLMappingManager;
-import eu.optique.api.mapping.R2RMLMappingManagerFactory;
 import eu.optique.api.mapping.SubjectMap;
 import eu.optique.api.mapping.Template;
-import eu.optique.api.mapping.TermMap.TermMapType;
 import eu.optique.api.mapping.TriplesMap;
-import it.unibz.inf.ontop.model.*;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.*;
 import org.semanticweb.owlapi.search.EntitySearcher;
+
+import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
 
 /**
  * Transform OBDA mappings in R2rml mappings
@@ -167,7 +159,7 @@ public class OBDAMappingTransformer {
 				if (predf.getFunctionSymbol() instanceof URITemplatePredicate) {
 					if (predf.getTerms().size() == 1) //fixed string
 					{
-						pred = OBDADataFactoryImpl.getInstance().getPredicate(((ValueConstant)(predf.getTerm(0))).getValue(), 1);
+						pred = DATA_FACTORY.getPredicate(((ValueConstant)(predf.getTerm(0))).getValue(), 1);
 						predUri = vf.createURI(pred.getName());
 					}
 				    else {
@@ -269,19 +261,19 @@ public class OBDAMappingTransformer {
 	}
 
 	/**
-	 * Get R2RML TriplesMap from OBDA mapping axiom
+	 * Get R2RML TriplesMaps from OBDA mapping axiom
 	 * @param axiom
 	 * @param prefixmng
 	 * @return
 	 */
-	public TriplesMap getTriplesMap(OBDAMappingAxiom axiom,
-			PrefixManager prefixmng) {
-		
+	public TriplesMap getTripleMap(OBDAMappingAxiom axiom,
+									PrefixManager prefixmng) {
+
 		SQLQueryImpl squery = (SQLQueryImpl) axiom.getSourceQuery();
 		List<Function> tquery = axiom.getTargetQuery();
-		
+
 		String random_number = IDGenerator.getNextUniqueID("");
-		
+
 		//triplesMap node
 		String mapping_id = axiom.getId();
 		if (!mapping_id.startsWith("http://"))
@@ -300,7 +292,7 @@ public class OBDAMappingTransformer {
 		Template templs = mfact.createTemplate(subjectTemplate);
 		SubjectMap sm = mfact.createSubjectMap(templs);
 		
-		TriplesMap tm = mfact.createTriplesMap(lt, sm);
+		TriplesMap tm = mfact.createTriplesMap(lt, sm, axiom.getId());
 		
 		//process target query
 		for (Function func : tquery) {
@@ -308,19 +300,21 @@ public class OBDAMappingTransformer {
 			Predicate pred = func.getFunctionSymbol();
 			String predName = pred.getName();
 			URI predUri = null; String predURIString ="";
-			
+			Optional<Template> templp = Optional.empty();
+
 			if (pred.isTriplePredicate()) {
 				//triple
 				Function predf = (Function)func.getTerm(1);
 				if (predf.getFunctionSymbol() instanceof URITemplatePredicate) {
 					if (predf.getTerms().size() == 1) { //fixed string 
-						pred = OBDADataFactoryImpl.getInstance().getPredicate(((ValueConstant)(predf.getTerm(0))).getValue(), 1);
+						pred = DATA_FACTORY.getPredicate(((ValueConstant)(predf.getTerm(0))).getValue(), 1);
 						predUri = vf.createURI(pred.getName());
 					}
 					else {
-						//custom predicate
+						//template
 						predURIString = URITemplates.getUriTemplateString(predf, prefixmng);
 						predUri = vf.createURI(predURIString);
+                        templp = Optional.of(mfact.createTemplate(subjectTemplate));
 					}
 				}	
 			} 
@@ -340,8 +334,9 @@ public class OBDAMappingTransformer {
 				sm.addClass(predUri);
 				
 			} else {
-//                PredicateMap predM = null;
-				PredicateMap predM = mfact.createPredicateMap(TermMapType.CONSTANT_VALUED, predURIString);
+				PredicateMap predM = templp.isPresent()?
+				mfact.createPredicateMap(templp.get()):
+				mfact.createPredicateMap(TermMapType.CONSTANT_VALUED, predURIString);
 				ObjectMap obm = null; PredicateObjectMap pom = null;
                 Term object = null;
 				if (!pred.isTriplePredicate()) {

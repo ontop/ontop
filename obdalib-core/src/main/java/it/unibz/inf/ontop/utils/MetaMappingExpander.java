@@ -20,8 +20,9 @@ package it.unibz.inf.ontop.utils;
  * #L%
  */
 
+import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
 import it.unibz.inf.ontop.model.*;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
+import it.unibz.inf.ontop.model.impl.MappingFactoryImpl;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
 import it.unibz.inf.ontop.parser.SQLQueryShallowParser;
 import it.unibz.inf.ontop.sql.QualifiedAttributeID;
@@ -47,6 +48,8 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.*;
 
+import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
+
 
 /**
  * 
@@ -59,16 +62,19 @@ public class MetaMappingExpander {
 	
 	private final Connection connection;
 	private final QuotedIDFactory idfac;
-	private final OBDADataFactory dfac = OBDADataFactoryImpl.getInstance();
+	private final NativeQueryLanguageComponentFactory nativeQLFactory;
+	private static final MappingFactory MAPPING_FACTORY = MappingFactoryImpl.getInstance();
 
     /**
 	 *
 	 * 
 	 * @param connection a JDBC connection
 	 */
-	public MetaMappingExpander(Connection connection, QuotedIDFactory idfac) {
+	public MetaMappingExpander(Connection connection, QuotedIDFactory idfac,
+							   NativeQueryLanguageComponentFactory nativeQLFactory) {
 		this.connection = connection;
 		this.idfac = idfac;
+		this.nativeQLFactory = nativeQLFactory;
 	}
 
 	/**
@@ -113,7 +119,7 @@ public class MetaMappingExpander {
 				}
 				
 				// Construct the SQL query tree from the source query we do not work with views 
-				OBDASQLQuery sourceQuery = mapping.getSourceQuery();
+				OBDASQLQuery sourceQuery = (OBDASQLQuery) mapping.getSourceQuery();
 				ParsedSQLQuery sourceQueryParsed = SQLQueryShallowParser.parse(idfac, sourceQuery.toString());
 				
 				List<SelectExpressionItem> columnList = null;
@@ -283,9 +289,9 @@ public class MetaMappingExpander {
 		newSourceParsedQuery.setWhereClause(selection);
 		
 		String newSourceQuerySQL = newSourceParsedQuery.toString();
-		OBDASQLQuery newSourceQuery =  dfac.getSQLQuery(newSourceQuerySQL);
+		OBDASQLQuery newSourceQuery =  MAPPING_FACTORY.getSQLQuery(newSourceQuerySQL);
 
-		OBDAMappingAxiom newMapping = dfac.getRDBMSMappingAxiom(id, newSourceQuery,
+		OBDAMappingAxiom newMapping = nativeQLFactory.create(id, newSourceQuery,
 										Collections.singletonList(newTargetBody));
 		return newMapping;
 	}
@@ -443,12 +449,12 @@ public class MetaMappingExpander {
 		
 		Function result = null;
 		if (arity == 1) {
-			Predicate p = dfac.getClassPredicate(predName);
-			result = dfac.getFunction(p, atom.getTerm(0));
+			Predicate p = DATA_FACTORY.getClassPredicate(predName);
+			result = DATA_FACTORY.getFunction(p, atom.getTerm(0));
 		} 
 		else if (arity == 2) {
-			Predicate p = dfac.getObjectPropertyPredicate(predName);
-			result = dfac.getFunction(p, atom.getTerm(0), atom.getTerm(2));
+			Predicate p = DATA_FACTORY.getObjectPropertyPredicate(predName);
+			result = DATA_FACTORY.getFunction(p, atom.getTerm(0), atom.getTerm(2));
 		}
 		return result;
 	}

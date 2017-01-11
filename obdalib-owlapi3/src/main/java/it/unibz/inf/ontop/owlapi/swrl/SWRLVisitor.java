@@ -1,12 +1,13 @@
 package it.unibz.inf.ontop.owlapi.swrl;
 
 import it.unibz.inf.ontop.model.*;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.owlapi.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
+
+import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
 
 
 /**
@@ -23,7 +24,6 @@ public class SWRLVisitor implements SWRLObjectVisitor {
 
 	
 	//Datalog elements
-	OBDADataFactory fac;
 	Function head;
 	List<Function> body;
 	Function function;
@@ -37,8 +37,7 @@ public class SWRLVisitor implements SWRLObjectVisitor {
 	private static Logger log = LoggerFactory.getLogger(SWRLVisitor.class); 
 	
 	public SWRLVisitor(){
-		
-		fac=  OBDADataFactoryImpl.getInstance();
+
 		facts = new HashSet<CQIE>();
 		
 	}
@@ -68,7 +67,7 @@ public class SWRLVisitor implements SWRLObjectVisitor {
 		}
 		
 		
-		DatalogProgram dp = fac.getDatalogProgram();
+		DatalogProgram dp = DATA_FACTORY.getDatalogProgram();
 		dp.appendRule(facts);
 		return dp;
 	}
@@ -89,7 +88,7 @@ public class SWRLVisitor implements SWRLObjectVisitor {
 			errors.clear();
 		}
 
-		DatalogProgram dp = fac.getDatalogProgram();
+		DatalogProgram dp = DATA_FACTORY.getDatalogProgram();
 		dp.appendRule(facts);
 		return dp;
 	}
@@ -135,7 +134,7 @@ public class SWRLVisitor implements SWRLObjectVisitor {
 			getBody(node.getBody());
 			
 			
-			facts.add(fac.getCQIE(head, body));
+			facts.add(DATA_FACTORY.getCQIE(head, body));
 			}
 		
 	}
@@ -147,7 +146,7 @@ public class SWRLVisitor implements SWRLObjectVisitor {
 		if(!node.getPredicate().isAnonymous()){
 			
 		//get predicate for datalog
-		Predicate predicate=fac.getClassPredicate(node.getPredicate().asOWLClass().toStringID());
+		Predicate predicate= DATA_FACTORY.getClassPredicate(node.getPredicate().asOWLClass().toStringID());
 		
 		terms = new ArrayList<Term>();
 		//get terms for datalog
@@ -156,7 +155,7 @@ public class SWRLVisitor implements SWRLObjectVisitor {
 			
 		}
 		
-		function = fac.getFunction(predicate, terms);
+		function = DATA_FACTORY.getFunction(predicate, terms);
 		}
 		else{
 			notSupported=false;
@@ -181,7 +180,7 @@ public class SWRLVisitor implements SWRLObjectVisitor {
 		//we consider only namedOwlObjectProperty example not an object property expression such as inv(p)
 		if(!node.getPredicate().isAnonymous()){
 			
-			predicate=fac.getObjectPropertyPredicate(node.getPredicate().asOWLObjectProperty().toStringID());
+			predicate= DATA_FACTORY.getObjectPropertyPredicate(node.getPredicate().asOWLObjectProperty().toStringID());
 			
 			terms = new ArrayList<Term>();
 			//get terms for datalog
@@ -189,7 +188,7 @@ public class SWRLVisitor implements SWRLObjectVisitor {
 				argument.accept(this);
 	
 			}
-			function = fac.getFunction(predicate, terms);
+			function = DATA_FACTORY.getFunction(predicate, terms);
 		}
 		else{
 			notSupported=false;
@@ -205,7 +204,7 @@ public class SWRLVisitor implements SWRLObjectVisitor {
 		if(!node.getPredicate().isAnonymous()){
 		
 			//get predicate for datalog
-			 predicate=fac.getDataPropertyPredicate(node.getPredicate().asOWLDataProperty().toStringID());
+			 predicate= DATA_FACTORY.getDataPropertyPredicate(node.getPredicate().asOWLDataProperty().toStringID());
 					
 			terms = new ArrayList<Term>();
 					//get terms for datalog
@@ -213,7 +212,7 @@ public class SWRLVisitor implements SWRLObjectVisitor {
 						argument.accept(this);
 			
 					}
-			function = fac.getFunction(predicate, terms);
+			function = DATA_FACTORY.getFunction(predicate, terms);
 		}
 		else{
 			notSupported=false;
@@ -235,7 +234,7 @@ public class SWRLVisitor implements SWRLObjectVisitor {
 	@Override
 	public void visit(SWRLVariable node) {
 		
-		terms.add(fac.getVariable(node.getIRI().getFragment()));
+		terms.add(DATA_FACTORY.getVariable(node.getIRI().getFragment()));
 		
 	}
 
@@ -243,7 +242,7 @@ public class SWRLVisitor implements SWRLObjectVisitor {
 	public void visit(SWRLIndividualArgument node) {
 	
 		//get the id without the quotes <>
-		terms.add(fac.getConstantLiteral(node.getIndividual().toStringID(), Predicate.COL_TYPE.STRING));
+		terms.add(DATA_FACTORY.getConstantLiteral(node.getIndividual().toStringID(), Predicate.COL_TYPE.STRING));
 	}
 
 	@Override
@@ -252,17 +251,17 @@ public class SWRLVisitor implements SWRLObjectVisitor {
 		OWLLiteral literal=node.getLiteral();
 		
 		if (literal.isBoolean()) 
-			terms.add(fac.getBooleanConstant(literal.parseBoolean())); 
+			terms.add(DATA_FACTORY.getBooleanConstant(literal.parseBoolean()));
 		else if(literal.hasLang())
-			terms.add(fac.getConstantLiteral(literal.getLiteral(), literal.getLang()));
+			terms.add(DATA_FACTORY.getConstantLiteral(literal.getLiteral(), literal.getLang()));
 		else if (literal.isDouble())
-			terms.add(fac.getConstantLiteral(literal.getLiteral(), Predicate.COL_TYPE.DOUBLE));
+			terms.add(DATA_FACTORY.getConstantLiteral(literal.getLiteral(), Predicate.COL_TYPE.DOUBLE));
 		else if (literal.isFloat())
-			terms.add(fac.getConstantLiteral(literal.getLiteral(), Predicate.COL_TYPE.DECIMAL));
+			terms.add(DATA_FACTORY.getConstantLiteral(literal.getLiteral(), Predicate.COL_TYPE.DECIMAL));
 		else if (literal.isInteger())
-			terms.add(fac.getConstantLiteral(literal.getLiteral(), Predicate.COL_TYPE.INTEGER));
+			terms.add(DATA_FACTORY.getConstantLiteral(literal.getLiteral(), Predicate.COL_TYPE.INTEGER));
 		else 
-			fac.getConstantLiteral(literal.getLiteral());
+			DATA_FACTORY.getConstantLiteral(literal.getLiteral());
 	}
 
 //	we do not support swrl same as

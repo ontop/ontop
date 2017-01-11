@@ -30,7 +30,9 @@ import it.unibz.inf.ontop.ontology.ObjectPropertyAssertion;
 import it.unibz.inf.ontop.owlapi.OWLAPIABoxIterator;
 import it.unibz.inf.ontop.owlapi.OWLAPIIndividualTranslator;
 import it.unibz.inf.ontop.owlapi.OntopOWLException;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestStatement;
+import it.unibz.inf.ontop.owlrefplatform.core.ExecutableQuery;
+import it.unibz.inf.ontop.owlrefplatform.core.IQuestStatement;
+import it.unibz.inf.ontop.owlrefplatform.core.SQLExecutableQuery;
 import it.unibz.inf.ontop.owlrefplatform.core.queryevaluation.SPARQLQueryUtility;
 import it.unibz.inf.ontop.sesame.SesameRDFIterator;
 import org.openrdf.query.parser.ParsedQuery;
@@ -46,11 +48,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.Reader;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /***
  * A Statement to execute queries over a QuestOWLConnection. The logic of this
@@ -64,22 +62,23 @@ import java.util.Set;
  * allow to implement transactions in the same way as JDBC Statements).
  * 
  * @author Mariano Rodriguez Muro <mariano.muro@gmail.com>
- * 
+ *
+ * Used by the OWLAPI.
+ *
+ * TODO: rename it (not now) QuestOWLStatementImpl.
+ *
  */
-public class QuestOWLStatement implements AutoCloseable {
+// DISABLED TEMPORARILY FOR MERGING PURPOSES (NOT BREAKING CLIENTS WITH this ugly name IQquestOWLStatement)
+//public class QuestOWLStatement implements IQuestOWLStatement {
+public class QuestOWLStatement implements IQuestOWLStatement {
+	private IQuestStatement st;
+	private QuestOWLConnection conn;
 
-	private final QuestStatement st;
-	private final QuestOWLConnection conn;
-	
-	protected  QuestOWLStatement(QuestStatement st, QuestOWLConnection conn) {
+	public QuestOWLStatement(IQuestStatement st, QuestOWLConnection conn) {
 		this.conn = conn;
 		this.st = st;
 	}
 
-	public boolean isCanceled(){
-		return st.isCanceled();
-	}
-	
 	public void cancel() throws OWLException {
 		try {
 			st.cancel();
@@ -143,7 +142,7 @@ public class QuestOWLStatement implements AutoCloseable {
 
 			// Retrieves the ABox from the ontology file.
 
-			aBoxIter = new OWLAPIABoxIterator(set, st.questInstance.getVocabulary());
+			aBoxIter = new OWLAPIABoxIterator(set, st.getQuestInstance().getVocabulary());
 			return st.insertData(aBoxIter, commitSize, batchsize);
 		} 
 		else if (owlFile.getName().toLowerCase().endsWith(".ttl") || owlFile.getName().toLowerCase().endsWith(".nt")) {
@@ -229,13 +228,13 @@ public class QuestOWLStatement implements AutoCloseable {
 
 	private class Process implements Runnable {
 		private SesameRDFIterator iterator;
-		private QuestStatement questStmt;
+		private IQuestStatement questStmt;
 
 		int insertCount = -1;
 		private int commitsize;
 		private int batchsize;
 
-		public Process(SesameRDFIterator iterator, QuestStatement qstm, int commitsize, int batchsize) throws OBDAException {
+		public Process(SesameRDFIterator iterator, IQuestStatement qstm, int commitsize, int batchsize) throws OBDAException {
 			this.iterator = iterator;
 			this.questStmt = qstm;
 			this.commitsize = commitsize;
@@ -246,7 +245,7 @@ public class QuestOWLStatement implements AutoCloseable {
 		public void run() {
 			try {
 				insertCount = questStmt.insertData(iterator, commitsize, batchsize);
-			} catch (SQLException e) {
+			} catch (OBDAException e) {
 				throw new RuntimeException(e);
 			}
 		}
@@ -342,20 +341,34 @@ public class QuestOWLStatement implements AutoCloseable {
 
 	public String getRewriting(String query) throws OWLException {
 		try {
-			ParsedQuery pq = st.questInstance.getEngine().getParsedQuery(query); 			
-			return st.questInstance.getEngine().getRewriting(pq);
+			ParsedQuery pq = st.getQuestInstance().getEngine().getParsedQuery(query);
+			return st.getQuestInstance().getEngine().getRewriting(pq);
 		} 
 		catch (Exception e) {
 			throw new OntopOWLException(e);
 		}
 	}
 
+	/**
+	 * SQL-specific! Please use getExecutableQuery() instead!
+	 */
+	@Deprecated
 	public String getUnfolding(String query) throws OWLException {
+		ExecutableQuery executableQuery = getExecutableQuery(query);
+		if (executableQuery instanceof SQLExecutableQuery) {
+			return ((SQLExecutableQuery) executableQuery).getSQL();
+		}
+		else {
+			throw new RuntimeException("This deprecated method (getUnfolding) presumes the use of SQL as a native query language. " +
+					"Please use getExecutableQuery() instead.");
+		}
+	}
+
+	public ExecutableQuery getExecutableQuery(String query) throws OWLException {
 		try {
-			ParsedQuery pq = st.questInstance.getEngine().getParsedQuery(query); 			
-			return st.questInstance.getEngine().getSQL(pq);
-		} 
-		catch (Exception e) {
+			ParsedQuery pq = st.getQuestInstance().getEngine().getParsedQuery(query);
+			return st.getQuestInstance().getEngine().translateIntoNativeQuery(pq, Optional.empty());
+		} catch (Exception e) {
 			throw new OntopOWLException(e);
 		}
 	}
@@ -369,15 +382,15 @@ public class QuestOWLStatement implements AutoCloseable {
 			while (resultSet.hasNext()) {
 				for (Assertion assertion : resultSet.next()) {
 					if (assertion instanceof ClassAssertion) {
-						OWLAxiom classAxiom = translator.translate((ClassAssertion)assertion);
+						OWLAxiom classAxiom = translator.translate((ClassAssertion) assertion);
 						axiomList.add(classAxiom);
 					} 
 					else if (assertion instanceof ObjectPropertyAssertion) {
-						OWLAxiom objectPropertyAxiom = translator.translate((ObjectPropertyAssertion)assertion);
+						OWLAxiom objectPropertyAxiom = translator.translate((ObjectPropertyAssertion) assertion);
 						axiomList.add(objectPropertyAxiom);
 					}
 					else if (assertion instanceof DataPropertyAssertion) {
-						OWLAxiom objectPropertyAxiom = translator.translate((DataPropertyAssertion)assertion);
+						OWLAxiom objectPropertyAxiom = translator.translate((DataPropertyAssertion) assertion);
 						axiomList.add(objectPropertyAxiom);							
 					} 
 				}
@@ -385,5 +398,4 @@ public class QuestOWLStatement implements AutoCloseable {
 		}
 		return axiomList;
 	}
-
 }

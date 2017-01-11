@@ -20,32 +20,30 @@ package it.unibz.inf.ontop.reformulation.tests;
  * #L%
  */
 
-import it.unibz.inf.ontop.io.ModelIOManager;
-import it.unibz.inf.ontop.model.OBDADataFactory;
-import it.unibz.inf.ontop.model.OBDAModel;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
-import it.unibz.inf.ontop.owlapi.OntopOWLException;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.OWLObject;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
-
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Properties;
+
+import it.unibz.inf.ontop.injection.QuestConfiguration;
+import it.unibz.inf.ontop.owlapi.OntopOWLException;
+import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
+import org.junit.*;
+import org.junit.Before;
+import org.junit.Test;
 import java.util.ArrayList;
 import java.util.List;
+
+
+import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
+import it.unibz.inf.ontop.injection.QuestCoreSettings;
+import org.semanticweb.owlapi.model.OWLObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -66,13 +64,9 @@ import static org.junit.Assert.assertTrue;
 
 public class BindTest {
 
+	private Connection conn;
 
-
-    private OBDADataFactory fac;
-    private Connection conn;
-
-    private OBDAModel obdaModel;
-    private OWLOntology ontology;
+	Logger log = LoggerFactory.getLogger(this.getClass());
 
     final String owlfile = "src/test/resources/test/bind/sparqlBind.owl";
     final String obdafile = "src/test/resources/test/bind/sparqlBind.obda";
@@ -87,10 +81,8 @@ public class BindTest {
         String username = "sa";
         String password = "";
 
-        fac = OBDADataFactoryImpl.getInstance();
-
-        conn = DriverManager.getConnection(url, username, password);
-        Statement st = conn.createStatement();
+		conn = DriverManager.getConnection(url, username, password);
+		Statement st = conn.createStatement();
 
         FileReader reader = new FileReader("src/test/resources/test/bind/sparqlBind-create-h2.sql");
         BufferedReader in = new BufferedReader(reader);
@@ -104,16 +96,7 @@ public class BindTest {
 
         st.executeUpdate(bf.toString());
         conn.commit();
-
-        // Loading the OWL file
-        OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-        ontology = manager.loadOntologyFromOntologyDocument((new File(owlfile)));
-
-        // Loading the OBDA data
-        obdaModel = fac.getOBDAModel();
-        ModelIOManager ioManager = new ModelIOManager(obdaModel);
-        ioManager.load(obdafile);
-    }
+	}
 
     @After
     public void tearDown() throws Exception {
@@ -142,14 +125,17 @@ public class BindTest {
         conn.commit();
     }
 
-    private OWLObject runTests(QuestPreferences p, String query) throws Exception {
+    private OWLObject runTests(Properties p, String query) throws Exception {
 
-        // Creating a new instance of the reasoner
+		// Creating a new instance of the reasoner
+		QuestOWLFactory factory = new QuestOWLFactory();
+        QuestConfiguration configuration = QuestConfiguration.defaultBuilder()
+                .nativeOntopMappingFile(obdafile)
+                .ontologyFile(owlfile)
+                .properties(p)
+                .build();
 
-        QuestOWLFactory factory = new QuestOWLFactory();
-        QuestOWLConfiguration config = QuestOWLConfiguration.builder().obdaModel(obdaModel).preferences(p).build();
-        QuestOWL reasoner = factory.createReasoner(ontology, config);
-
+		QuestOWL reasoner = factory.createReasoner(configuration);
 
         // Now we are ready for querying
         QuestOWLConnection conn = reasoner.getConnection();
@@ -178,9 +164,9 @@ public class BindTest {
     @Test
     public void testSelect() throws Exception {
 
-        QuestPreferences p = new QuestPreferences();
-        p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
+		Properties p = new Properties();
+		p.setProperty(QuestCoreSettings.ABOX_MODE, QuestConstants.VIRTUAL);
+		p.setProperty(QuestCoreSettings.OPTIMIZE_EQUIVALENCES, "true");
 
         //simple case
         String querySelect = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n" +
@@ -215,9 +201,9 @@ public class BindTest {
     @Test
     public void testBind() throws Exception {
 
-        QuestPreferences p = new QuestPreferences();
-        p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
+        Properties p = new Properties();
+        p.setProperty(QuestCoreSettings.ABOX_MODE, QuestConstants.VIRTUAL);
+        p.setProperty(QuestCoreSettings.OPTIMIZE_EQUIVALENCES, "true");
 
         String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
                 + "PREFIX  ns:  <http://example.org/ns#>\n"
@@ -245,10 +231,9 @@ public class BindTest {
     @Test
     public void testBindWithStrlen() throws Exception {
 
-        QuestPreferences p = new QuestPreferences();
-        p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-
+        Properties p = new Properties();
+        p.setProperty(QuestCoreSettings.ABOX_MODE, QuestConstants.VIRTUAL);
+        p.setProperty(QuestCoreSettings.OPTIMIZE_EQUIVALENCES, "true");
 
         String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
                 + "PREFIX  ns:  <http://example.org/ns#>\n"
@@ -275,11 +260,11 @@ public class BindTest {
     @Test
     public void testDoubleBind() throws Exception{
 
-        QuestPreferences p = new QuestPreferences();
-        p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
+		Properties p = new Properties();
+        p.setProperty(QuestCoreSettings.ABOX_MODE, QuestConstants.VIRTUAL);
+        p.setProperty(QuestCoreSettings.OPTIMIZE_EQUIVALENCES, "true");
 
-        // double bind
+		// double bind
         String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
                 + "PREFIX  ns:  <http://example.org/ns#>\n" +
                 "SELECT  ?title  ?w WHERE \n" +
@@ -304,9 +289,9 @@ public class BindTest {
     @Test
     public void testBindWithSelect() throws Exception {
 
-        QuestPreferences p = new QuestPreferences();
-        p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
+		Properties p = new Properties();
+        p.setProperty(QuestCoreSettings.ABOX_MODE, QuestConstants.VIRTUAL);
+        p.setProperty(QuestCoreSettings.OPTIMIZE_EQUIVALENCES, "true");
 
 
         //error in DataFactoryImpl to handle  nested functional terms getFreshCQIECopy
@@ -332,9 +317,9 @@ public class BindTest {
     @Test
     public void testFailingSelect()  throws Exception {
 
-        QuestPreferences p = new QuestPreferences();
-        p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
+		Properties p = new Properties();
+        p.setProperty(QuestCoreSettings.ABOX_MODE, QuestConstants.VIRTUAL);
+        p.setProperty(QuestCoreSettings.OPTIMIZE_EQUIVALENCES, "true");
 
         //complex case
         //variable should be assigned again in the same SELECT clause. SELECT Expressions, reuse the same variable
@@ -383,9 +368,9 @@ public class BindTest {
     @Test
     public void testFailingBind() throws Exception {
 
-        QuestPreferences p = new QuestPreferences();
-        p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
+		Properties p = new Properties();
+        p.setProperty(QuestCoreSettings.ABOX_MODE, QuestConstants.VIRTUAL);
+        p.setProperty(QuestCoreSettings.OPTIMIZE_EQUIVALENCES, "true");
 
 /*      ROMAN (26 June 2016): commented out - the query has little sense because the expressions
                               used in BIND can never have any values
@@ -438,9 +423,9 @@ public class BindTest {
     @Test
     public void testBindWithConcat() throws Exception {
 
-        QuestPreferences p = new QuestPreferences();
-        p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
+		Properties p = new Properties();
+        p.setProperty(QuestCoreSettings.ABOX_MODE, QuestConstants.VIRTUAL);
+        p.setProperty(QuestCoreSettings.OPTIMIZE_EQUIVALENCES, "true");
 
 
         String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
@@ -465,10 +450,9 @@ public class BindTest {
     @Test
     public void testBindWithConcatStrLen() throws Exception {
 
-        QuestPreferences p = new QuestPreferences();
-        p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-
+        Properties p = new Properties();
+        p.setProperty(QuestCoreSettings.ABOX_MODE, QuestConstants.VIRTUAL);
+        p.setProperty(QuestCoreSettings.OPTIMIZE_EQUIVALENCES, "true");
 
         String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
                 + "PREFIX  ns:  <http://example.org/ns#>\n"
@@ -492,12 +476,12 @@ public class BindTest {
     @Test
     public void testBindWithConcatLanguage() throws Exception {
 
-        QuestPreferences p = new QuestPreferences();
-        p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
+		Properties p = new Properties();
+        p.setProperty(QuestCoreSettings.ABOX_MODE, QuestConstants.VIRTUAL);
+        p.setProperty(QuestCoreSettings.OPTIMIZE_EQUIVALENCES, "true");
 
 
-        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+		String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
                 + "PREFIX  ns:  <http://example.org/ns#>\n"
                 + "SELECT  ?title ?w WHERE \n"
                 + "{  ?x ns:price ?p .\n"
@@ -522,12 +506,12 @@ public class BindTest {
     @Test
     public void testBindWithConcatLanguageinDatabase() throws Exception {
 
-        QuestPreferences p = new QuestPreferences();
-        p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
+		Properties p = new Properties();
+        p.setProperty(QuestCoreSettings.ABOX_MODE, QuestConstants.VIRTUAL);
+		p.setProperty(QuestCoreSettings.OPTIMIZE_EQUIVALENCES, "true");
 
 
-        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+		String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
                 + "PREFIX  ns:  <http://example.org/ns#>\n"
                 + "SELECT  ?title ?w WHERE \n"
                 + "{  ?x ns:price ?p .\n"
@@ -553,12 +537,12 @@ public class BindTest {
     @Test
     public void testBindWithCast() throws Exception {
 
-        QuestPreferences p = new QuestPreferences();
-        p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
+		Properties p = new Properties();
+        p.setProperty(QuestCoreSettings.ABOX_MODE, QuestConstants.VIRTUAL);
+		p.setProperty(QuestCoreSettings.OPTIMIZE_EQUIVALENCES, "true");
 
 
-        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+		String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
                 + "PREFIX  ns:  <http://example.org/ns#>\n"
                 + "PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> \n"
                 + "SELECT  ?title ?price WHERE \n"
@@ -580,16 +564,21 @@ public class BindTest {
     }
 
 
-    private void checkReturnedValues(QuestPreferences p, String query, List<String> expectedValues) throws Exception {
+        private void checkReturnedValues(Properties p, String query, List<String> expectedValues) throws Exception {
 
-        // Creating a new instance of the reasoner
-        QuestOWLFactory factory = new QuestOWLFactory();
-        QuestOWLConfiguration config = QuestOWLConfiguration.builder().obdaModel(obdaModel).preferences(p).build();
-        QuestOWL reasoner = factory.createReasoner(ontology, config);
+			// Creating a new instance of the reasoner
+			QuestOWLFactory factory = new QuestOWLFactory();
+            QuestConfiguration configuration = QuestConfiguration.defaultBuilder()
+                    .nativeOntopMappingFile(obdafile)
+                    .ontologyFile(owlfile)
+                    .properties(p)
+                    .build();
 
-        // Now we are ready for querying
-        QuestOWLConnection conn = reasoner.getConnection();
-        QuestOWLStatement st = conn.createStatement();
+			QuestOWL reasoner = factory.createReasoner(configuration);
+
+			// Now we are ready for querying
+			QuestOWLConnection conn = reasoner.getConnection();
+			QuestOWLStatement st = conn.createStatement();
 
 
 

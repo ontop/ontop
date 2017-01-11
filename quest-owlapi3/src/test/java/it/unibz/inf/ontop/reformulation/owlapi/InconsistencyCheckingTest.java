@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.reformulation.owlapi;
 
 /*
  * #%L
- * ontop-quest-owlapi
+ * ontop-quest-owlapi3
  * %%
  * Copyright (C) 2009 - 2014 Free University of Bozen-Bolzano
  * %%
@@ -20,18 +20,40 @@ package it.unibz.inf.ontop.reformulation.owlapi;
  * #L%
  */
 
-import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
+import static org.semanticweb.owlapi.apibinding.OWLFunctionalSyntaxFactory.Class;
+import static org.semanticweb.owlapi.apibinding.OWLFunctionalSyntaxFactory.ClassAssertion;
+import static org.semanticweb.owlapi.apibinding.OWLFunctionalSyntaxFactory.DataProperty;
+import static org.semanticweb.owlapi.apibinding.OWLFunctionalSyntaxFactory.Declaration;
+import static org.semanticweb.owlapi.apibinding.OWLFunctionalSyntaxFactory.DisjointClasses;
+import static org.semanticweb.owlapi.apibinding.OWLFunctionalSyntaxFactory.DisjointObjectProperties;
+import static org.semanticweb.owlapi.apibinding.OWLFunctionalSyntaxFactory.DisjointDataProperties;
+import static org.semanticweb.owlapi.apibinding.OWLFunctionalSyntaxFactory.ObjectProperty;
+import static org.semanticweb.owlapi.apibinding.OWLFunctionalSyntaxFactory.NamedIndividual;
+import static org.semanticweb.owlapi.apibinding.OWLFunctionalSyntaxFactory.ObjectPropertyAssertion;
+import static org.semanticweb.owlapi.apibinding.OWLFunctionalSyntaxFactory.DataPropertyAssertion;
+import static org.semanticweb.owlapi.apibinding.OWLFunctionalSyntaxFactory.FunctionalDataProperty;
+import static org.semanticweb.owlapi.apibinding.OWLFunctionalSyntaxFactory.FunctionalObjectProperty;
+import static org.semanticweb.owlapi.apibinding.OWLFunctionalSyntaxFactory.Literal;
+import static org.semanticweb.owlapi.apibinding.OWLFunctionalSyntaxFactory.Ontology;
+
+import it.unibz.inf.ontop.injection.QuestConfiguration;
+import it.unibz.inf.ontop.injection.QuestCoreSettings;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWL;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLFactory;
 import junit.framework.TestCase;
-import org.junit.Test;
-import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.*;
 
-import static org.semanticweb.owlapi.apibinding.OWLFunctionalSyntaxFactory.Class;
-import static org.semanticweb.owlapi.apibinding.OWLFunctionalSyntaxFactory.*;
+import org.junit.Test;
+import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
+import org.semanticweb.owlapi.apibinding.OWLManager;
+import org.semanticweb.owlapi.model.IRI;
+import org.semanticweb.owlapi.model.OWLClass;
+import org.semanticweb.owlapi.model.OWLDataProperty;
+import org.semanticweb.owlapi.model.OWLNamedIndividual;
+import org.semanticweb.owlapi.model.OWLObjectProperty;
+import org.semanticweb.owlapi.model.OWLOntology;
+import org.semanticweb.owlapi.model.OWLOntologyManager;
+
+import java.util.Properties;
 
 public class InconsistencyCheckingTest extends TestCase{
 
@@ -66,25 +88,28 @@ public class InconsistencyCheckingTest extends TestCase{
 		);
 	}
 	
-	private void startReasoner() {
-		QuestPreferences p = new QuestPreferences();
-		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
-		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
+	private void startReasoner() throws Exception {
+		Properties p = new Properties();
+		p.setProperty(QuestCoreSettings.ABOX_MODE, QuestConstants.CLASSIC);
+		p.setProperty(QuestCoreSettings.OPTIMIZE_EQUIVALENCES, "true");
+		QuestConfiguration configuration = QuestConfiguration.defaultBuilder()
+				.properties(p)
+				.ontology(ontology)
+				.build();
 
-		QuestOWLFactory factory = new QuestOWLFactory();
-        QuestOWLConfiguration config = QuestOWLConfiguration.builder().preferences(p).build();
-        reasoner = factory.createReasoner(ontology, config);
+		QuestOWLFactory questOWLFactory = new QuestOWLFactory();
+		reasoner = questOWLFactory.createReasoner(configuration);
 	}
 	
 	@Test
-	public void testInitialConsistency() {
+	public void testInitialConsistency() throws Exception {
 		//initially the ontology is consistent
 		startReasoner();
 		assertTrue(reasoner.isQuestConsistent());
 	}
 	
 	@Test
-	public void testDisjointClassInconsistency() throws OWLOntologyCreationException {
+	public void testDisjointClassInconsistency() throws Exception {
 
 		//Male(a), Female(a), disjoint(Male, Female)
 		manager.addAxiom(ontology, ClassAssertion(c1, a));
@@ -99,7 +124,7 @@ public class InconsistencyCheckingTest extends TestCase{
 	} 
 	
 	@Test
-	public void testDisjointObjectPropInconsistency() throws OWLOntologyCreationException {
+	public void testDisjointObjectPropInconsistency() throws Exception {
 
 		//hasMother(a, b), hasFather(a,b), disjoint(hasMother, hasFather)
 		manager.addAxiom(ontology,ObjectPropertyAssertion(r1, a, b)); //
@@ -114,7 +139,7 @@ public class InconsistencyCheckingTest extends TestCase{
 	} 
 	
 	@Test
-	public void testDisjointDataPropInconsistency() throws OWLOntologyCreationException {
+	public void testDisjointDataPropInconsistency() throws Exception {
 
 		//hasAgeFirst(a, 21), hasAge(a, 21), disjoint(hasAgeFirst, hasAge)
 		manager.addAxiom(ontology, DataPropertyAssertion(d1, a, Literal(21)));
@@ -129,7 +154,7 @@ public class InconsistencyCheckingTest extends TestCase{
 	} 
 	
 	@Test
-	public void testFunctionalObjPropInconsistency() throws OWLOntologyCreationException {
+	public void testFunctionalObjPropInconsistency() throws Exception {
 
 		//hasMother(a,b), hasMother(a,c), func(hasMother)
 		manager.addAxiom(ontology,ObjectPropertyAssertion(r1, a, b)); //
@@ -144,7 +169,7 @@ public class InconsistencyCheckingTest extends TestCase{
 	} 
 	
 	@Test
-	public void testFunctionalDataPropInconsistency() throws OWLOntologyCreationException {
+	public void testFunctionalDataPropInconsistency() throws Exception {
 
 		//hasAge(a, 18), hasAge(a, 21), func(hasAge)
 		manager.addAxiom(ontology, DataPropertyAssertion(d1, a, Literal(18)));

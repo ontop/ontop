@@ -25,9 +25,9 @@ import java.util.List;
 
 public interface OBDAMappingAxiom extends Cloneable, Serializable {
 
-	public void setSourceQuery(OBDASQLQuery query);
+	void setSourceQuery(SourceQuery query);
 
-	public OBDASQLQuery getSourceQuery();
+	SourceQuery getSourceQuery();
 
 	public void setTargetQuery(List<Function> query);
 

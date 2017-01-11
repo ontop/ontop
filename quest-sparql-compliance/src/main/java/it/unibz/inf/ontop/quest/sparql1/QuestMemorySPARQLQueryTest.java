@@ -20,11 +20,12 @@ package it.unibz.inf.ontop.quest.sparql1;
  * #L%
  */
 
-import it.unibz.inf.ontop.sesame.SesameClassicInMemoryRepo;
 import junit.framework.Test;
 
 import org.openrdf.query.Dataset;
 import org.openrdf.repository.Repository;
+import it.unibz.inf.ontop.sesame.SesameClassicInMemoryRepo;
+
 
 
 public class QuestMemorySPARQLQueryTest extends SPARQLQueryParent {
