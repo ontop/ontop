@@ -3,11 +3,11 @@
 	xmlns="http://www.w3.org/1999/XSL/Transform">
 
 <!-- Quest labels -->
-	<variable name="ontop-owlfile.label">OWL file</variable>
-	<variable name="ontop-owlfilecommentinmem.label"> OWL Ontology. For more information: </variable>
-	<variable name="ontop-owlfilecommentvirt.label"> OWL Ontology. For more information: </variable>
-	<variable name="ontop-obdafile.label">Mapping file</variable>
-	<variable name="ontop-obdafilecomment.label"> Mapping file in native Ontop mapping format. For more information: </variable>
+	<variable name="ontop-owlfile.label">OWL ontology file</variable>
+	<variable name="ontop-owlfilecommentinmem.label">  </variable>
+	<variable name="ontop-owlfilecommentvirt.label">  </variable>
+	<variable name="ontop-obdafile.label">Ontop Mapping file</variable>
+	<variable name="ontop-obdafilecomment.label"> </variable>
 	<variable name="ontop-existential.label">Existential reasoning (tree-witness rewriting)</variable>
 	<variable name="ontop-rewriting.label">Rewriting technique</variable>
 	<variable name="ontop-reasoning.label">Reasoning configurations</variable>
