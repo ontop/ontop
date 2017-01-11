@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.model;
 
 import java.util.List;
 
-import org.openrdf.model.URI;
+import org.eclipse.rdf4j.model.IRI;
 
 import it.unibz.inf.ontop.model.Predicate.COL_TYPE;
 
@@ -11,13 +11,11 @@ public interface DatatypeFactory {
 	@Deprecated
 	public COL_TYPE getDatatype(String uri);
 	
-	public COL_TYPE getDatatype(URI uri);
+	public COL_TYPE getDatatype(IRI uri);
 	
-	public URI getDatatypeURI(COL_TYPE type);
+	public IRI getDatatypeURI(COL_TYPE type);
 
-	
 	public DatatypePredicate getTypePredicate(COL_TYPE type);
-	
 		
 	public boolean isBoolean(Predicate p);
 	

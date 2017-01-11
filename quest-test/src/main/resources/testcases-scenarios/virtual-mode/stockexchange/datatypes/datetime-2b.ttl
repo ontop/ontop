@@ -4,4 +4,4 @@
 
 []    rdf:type      rsi:ResultSetInfo ;
       rsi:size      "-1" ;
-      rsi:thrownException        "org.openrdf.query.MalformedQueryException" .
+      rsi:thrownException        "org.eclipse.rdf4j.query.MalformedQueryException" .

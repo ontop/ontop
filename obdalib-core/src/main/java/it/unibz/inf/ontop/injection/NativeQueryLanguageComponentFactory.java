@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.injection;
 
 import com.google.inject.assistedinject.Assisted;
 import it.unibz.inf.ontop.model.*;
-import org.openrdf.model.Model;
+import org.eclipse.rdf4j.model.Model;
 import it.unibz.inf.ontop.io.PrefixManager;
 import it.unibz.inf.ontop.mapping.MappingParser;
 import it.unibz.inf.ontop.nativeql.DBMetadataExtractor;

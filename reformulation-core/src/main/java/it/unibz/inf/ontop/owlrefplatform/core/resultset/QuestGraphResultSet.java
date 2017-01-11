@@ -28,9 +28,11 @@ import it.unibz.inf.ontop.ontology.AssertionFactory;
 import it.unibz.inf.ontop.ontology.InconsistentOntologyException;
 import it.unibz.inf.ontop.ontology.impl.AssertionFactoryImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.translator.SesameConstructTemplate;
-import org.openrdf.model.impl.LiteralImpl;
-import org.openrdf.model.impl.URIImpl;
-import org.openrdf.query.algebra.*;
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.Literal;
+import org.eclipse.rdf4j.model.impl.LiteralImpl;
+import org.eclipse.rdf4j.model.impl.URIImpl;
+import org.eclipse.rdf4j.query.algebra.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -163,34 +165,35 @@ public class QuestGraphResultSet implements GraphResultSet {
 		}
 	}
 
-	private Constant getConstant(ProjectionElem node, TupleResultSet resSet)
-			throws OBDAException {
-		Constant constant = null;
-		String node_name = node.getSourceName();
-		ValueExpr ve = null;
-		
-		if (extMap!= null) {
-			ve = extMap.get(node_name);
-			if (ve!=null && ve instanceof Var)
-				throw new RuntimeException ("Invalid query. Found unbound variable: "+ve);
-		}
-		
-		if (node_name.charAt(0) == '-') {
-			org.openrdf.query.algebra.ValueConstant vc = (org.openrdf.query.algebra.ValueConstant) ve;
-			 if (vc.getValue() instanceof URIImpl) {
-				 constant = DATA_FACTORY.getConstantURI(vc.getValue().stringValue());
-			 } else if (vc.getValue() instanceof LiteralImpl) {
-				 constant = DATA_FACTORY.getConstantLiteral(vc.getValue().stringValue());
-			 } else {
-				 constant = DATA_FACTORY.getConstantBNode(vc.getValue().stringValue());
-			 }
-		} else {
-			constant = resSet.getConstant(node_name);
-		}
-		return constant;
-	}
-	
-	@Override
+    private Constant getConstant(ProjectionElem node, TupleResultSet resSet)
+            throws OBDAException {
+        Constant constant = null;
+        String node_name = node.getSourceName();
+        ValueExpr ve = null;
+
+        if (extMap != null) {
+            ve = extMap.get(node_name);
+            if (ve != null && ve instanceof Var)
+                throw new RuntimeException("Invalid query. Found unbound variable: " + ve);
+        }
+
+//		if (node_name.charAt(0) == '-') {
+        if (ve instanceof org.eclipse.rdf4j.query.algebra.ValueConstant) {
+            org.eclipse.rdf4j.query.algebra.ValueConstant vc = (org.eclipse.rdf4j.query.algebra.ValueConstant) ve;
+            if (vc.getValue() instanceof IRI) {
+                constant = DATA_FACTORY.getConstantURI(vc.getValue().stringValue());
+            } else if (vc.getValue() instanceof Literal) {
+                constant = DATA_FACTORY.getConstantLiteral(vc.getValue().stringValue());
+            } else {
+                constant = DATA_FACTORY.getConstantBNode(vc.getValue().stringValue());
+            }
+        } else {
+            constant = resSet.getConstant(node_name);
+        }
+        return constant;
+    }
+
+    @Override
 	public void close() throws OBDAException {
 		tupleResultSet.close();
 	}

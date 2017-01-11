@@ -31,13 +31,13 @@ import eu.optique.api.mapping.*;
 import eu.optique.api.mapping.TermMap.TermMapType;
 import eu.optique.api.mapping.impl.InvalidR2RMLMappingException;
 import eu.optique.api.mapping.impl.SubjectMapImpl;
-import eu.optique.api.mapping.impl.sesame.SesameR2RMLMappingManagerFactory;
+import eu.optique.api.mapping.impl.rdf4j.RDF4JR2RMLMappingManagerFactory;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.Predicate.COL_TYPE;
 import it.unibz.inf.ontop.model.impl.DatatypePredicateImpl;
 import it.unibz.inf.ontop.model.Term;
-import org.openrdf.model.Model;
-import org.openrdf.model.Resource;
+import org.eclipse.rdf4j.model.Model;
+import org.eclipse.rdf4j.model.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -61,7 +61,7 @@ public class R2RMLParser {
 	 * empty constructor
 	 */
 	public R2RMLParser() {
-        mapManager = new SesameR2RMLMappingManagerFactory().getR2RMLMappingManager();
+        mapManager = new RDF4JR2RMLMappingManagerFactory().getR2RMLMappingManager();
 		classPredicates = new ArrayList<Predicate>();
 		joinPredObjNodes = new ArrayList<Resource>();
 	}
@@ -655,12 +655,12 @@ public class R2RMLParser {
 		// process OBJECTMAP
 		Model m = myModel.filter(predobjNode, R2RMLVocabulary.objectMap, null);
 		if (!m.isEmpty()) {
-			Resource object = m.objectResource();
+			Resource object = m.objectResource().get();
 
 			// look for parentTriplesMap declaration
 			m = myModel.filter(object, R2RMLVocabulary.parentTriplesMap, null);
 			if (!m.isEmpty()) {
-				return m.objectResource();
+				return m.objectResource().get();
 			}
 		}
 		return null;
@@ -680,17 +680,17 @@ public class R2RMLParser {
 		// process OBJECTMAP
 		Model m = myModel.filter(predobjNode, R2RMLVocabulary.objectMap, null);
 		if (!m.isEmpty()) {
-			Resource object = m.objectResource();
+			Resource object = m.objectResource().get();
 
 			// look for joincondition declaration
 			m = myModel.filter(object, R2RMLVocabulary.joinCondition, null);
 			if (!m.isEmpty()) {
-				Resource objectt = m.objectResource();
+				Resource objectt = m.objectResource().get();
 
 				// look for child declaration
 				m = myModel.filter(objectt, R2RMLVocabulary.child, null);
 				if (!m.isEmpty()) {
-					return trimTo1(m.objectString());
+					return trimTo1(m.objectString().get());
 				}
 			}
 		}
@@ -710,17 +710,17 @@ public class R2RMLParser {
 		// process OBJECTMAP
 		Model m = myModel.filter(predobjNode, R2RMLVocabulary.objectMap, null);
 		if (!m.isEmpty()) {
-			Resource object = m.objectResource();
+			Resource object = m.objectResource().get();
 
 			// look for joincondition declaration
 			m = myModel.filter(object, R2RMLVocabulary.joinCondition, null);
 			if (!m.isEmpty()) {
-				Resource objectt = m.objectResource();
+				Resource objectt = m.objectResource().get();
 
 				// look for parent declaration
 				m = myModel.filter(objectt, R2RMLVocabulary.parent, null);
 				if (!m.isEmpty()) {
-					return trimTo1(m.objectString());
+					return trimTo1(m.objectString().get());
 				}
 			}
 		}

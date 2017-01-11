@@ -5,4 +5,4 @@
 # Parsing error on Jena-ARQ API
 []    rdf:type      rsi:ResultSetInfo ;
       rsi:size      "-1" ;
-      rsi:thrownException      "org.openrdf.query.QueryEvaluationException" .
+      rsi:thrownException      "org.eclipse.rdf4j.query.QueryEvaluationException" .

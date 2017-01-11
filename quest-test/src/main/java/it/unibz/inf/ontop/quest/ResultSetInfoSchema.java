@@ -20,9 +20,9 @@ package it.unibz.inf.ontop.quest;
  * #L%
  */
 
-import org.openrdf.model.URI;
-import org.openrdf.model.ValueFactory;
-import org.openrdf.model.impl.ValueFactoryImpl;
+import org.eclipse.rdf4j.model.URI;
+import org.eclipse.rdf4j.model.ValueFactory;
+import org.eclipse.rdf4j.model.impl.ValueFactoryImpl;
 
 /**
  * Below is an example of using ResultSetInfo in the test framework.

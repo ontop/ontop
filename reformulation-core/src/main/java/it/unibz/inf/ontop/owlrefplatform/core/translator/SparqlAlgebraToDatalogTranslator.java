@@ -30,16 +30,17 @@ import it.unibz.inf.ontop.owlrefplatform.core.abox.SemanticIndexURIMap;
 import it.unibz.inf.ontop.model.UriTemplateMatcher;
 import it.unibz.inf.ontop.parser.EncodeForURI;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
-import org.openrdf.model.Literal;
-import org.openrdf.model.URI;
-import org.openrdf.model.Value;
-import org.openrdf.model.datatypes.XMLDatatypeUtil;
-import org.openrdf.model.vocabulary.RDF;
-import org.openrdf.query.algebra.*;
-import org.openrdf.query.algebra.ValueConstant;
-import org.openrdf.query.parser.ParsedGraphQuery;
-import org.openrdf.query.parser.ParsedQuery;
-import org.openrdf.query.parser.ParsedTupleQuery;
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.Literal;
+import org.eclipse.rdf4j.model.URI;
+import org.eclipse.rdf4j.model.Value;
+import org.eclipse.rdf4j.model.datatypes.XMLDatatypeUtil;
+import org.eclipse.rdf4j.model.vocabulary.RDF;
+import org.eclipse.rdf4j.query.algebra.*;
+import org.eclipse.rdf4j.query.algebra.ValueConstant;
+import org.eclipse.rdf4j.query.parser.ParsedGraphQuery;
+import org.eclipse.rdf4j.query.parser.ParsedQuery;
+import org.eclipse.rdf4j.query.parser.ParsedTupleQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -139,7 +140,7 @@ public class SparqlAlgebraToDatalogTranslator {
          * @param bindings   a stream of bindings. A binding is a pair of a variable, and a value/expression
          * @param varMapper  a function from bindings to {@link Variable}s
          * @param exprMapper a function maps a pair of a binding and a set variables to a {@link Term}
-         * @param <T>        A class for binding. E.g. {@link org.openrdf.query.Binding} or {@link org.openrdf.query.algebra.ExtensionElem}
+         * @param <T>        A class for binding. E.g. {@link org.eclipse.rdf4j.query.Binding} or {@link org.eclipse.rdf4j.query.algebra.ExtensionElem}
          * @return extended translation result
          */
         <T> TranslationResult extendWithBindings(Stream<T> bindings,
@@ -428,7 +429,7 @@ public class SparqlAlgebraToDatalogTranslator {
             Term oTerm = (o == null) ? getTermForVariable(triple.getObjectVar(), variables) : getTermForLiteralOrIri(o);
 			atom = DATA_FACTORY.getTripleAtom(sTerm, pTerm, oTerm);
 		}
-		else if (p instanceof URI) {
+		else if (p instanceof IRI) {
 			if (p.equals(RDF.TYPE)) {
 				if (o == null) {
 					// term rdf:type variable .
@@ -438,7 +439,7 @@ public class SparqlAlgebraToDatalogTranslator {
 				}
 				else if (o instanceof URI) {
 					// term rdf:type uri .
-					Predicate.COL_TYPE type = DATATYPE_FACTORY.getDatatype((URI)o);
+					Predicate.COL_TYPE type = DATATYPE_FACTORY.getDatatype((IRI)o);
 					if (type != null) // datatype
 						atom = DATA_FACTORY.getFunction(DATATYPE_FACTORY.getTypePredicate(type), sTerm);
 					else // class
@@ -478,36 +479,40 @@ public class SparqlAlgebraToDatalogTranslator {
     }
 
     private static Term getTermForLiteral(Literal literal) {
-        URI typeURI = literal.getDatatype();
+        IRI typeURI = literal.getDatatype();
         String value = literal.getLabel();
+        Optional<String> lang = literal.getLanguage();
 
-        COL_TYPE type;
-        if (typeURI == null)
-            type = COL_TYPE.LITERAL;
-        else {
-            type = DATATYPE_FACTORY.getDatatype(typeURI);
+        if (lang.isPresent()) {
+            return DATA_FACTORY.getTypedTerm(DATA_FACTORY.getConstantLiteral(value, COL_TYPE.STRING), lang.get());
+
+        } else {
+            COL_TYPE type;
+             /*
+              * default data type is xsd:string
+              */
+            if (typeURI == null) {
+                type = COL_TYPE.STRING;
+            } else {
+                type = DATATYPE_FACTORY.getDatatype(typeURI);
+            }
+
             if (type == null)
                 // ROMAN (27 June 2016): type1 in open-eq-05 test would not be supported in OWL
                 // the actual value is LOST here
                 return DATA_FACTORY.getUriTemplateForDatatype(typeURI.stringValue());
-                // old strict version:
-                // throw new RuntimeException("Unsupported datatype: " + typeURI);
+            // old strict version:
+            // throw new RuntimeException("Unsupported datatype: " + typeURI);
 
             // check if the value is (lexically) correct for the specified datatype
             if (!XMLDatatypeUtil.isValidValue(value, typeURI))
                 throw new RuntimeException("Invalid lexical form for datatype. Found: " + value);
-        }
 
-        Term constant = DATA_FACTORY.getConstantLiteral(value, type);
+            Term constant = DATA_FACTORY.getConstantLiteral(value, type);
 
-        // wrap the constant in its datatype function
-        if (type == COL_TYPE.LITERAL) {
-            // if the object has type LITERAL, check the language tag
-            String lang = literal.getLanguage();
-            if (lang != null && !lang.equals(""))
-                return DATA_FACTORY.getTypedTerm(constant, lang);
+            return DATA_FACTORY.getTypedTerm(constant, type);
+
         }
-        return DATA_FACTORY.getTypedTerm(constant, type);
     }
 
     /**

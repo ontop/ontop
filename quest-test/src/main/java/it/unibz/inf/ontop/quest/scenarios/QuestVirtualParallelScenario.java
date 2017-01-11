@@ -21,8 +21,8 @@ package it.unibz.inf.ontop.quest.scenarios;
  */
 
 import it.unibz.inf.ontop.injection.QuestConfiguration;
-import org.openrdf.repository.Repository;
-import it.unibz.inf.ontop.sesame.SesameVirtualRepo;
+import org.eclipse.rdf4j.repository.Repository;
+import it.unibz.inf.ontop.rdf4j.repository.OntopVirtualRepository;
 
 import java.util.List;
 
@@ -42,7 +42,7 @@ public abstract class QuestVirtualParallelScenario extends QuestParallelScenario
 				.propertyFile(parameterFileURL)
 				.build();
 
-        SesameVirtualRepo repo = new SesameVirtualRepo(getClass().getName(), configuration);
+        OntopVirtualRepository repo = new OntopVirtualRepository(getClass().getName(), configuration);
         repo.initialize();
         return repo;
 	}

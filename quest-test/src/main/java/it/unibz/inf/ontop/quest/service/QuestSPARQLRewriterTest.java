@@ -20,11 +20,12 @@ package it.unibz.inf.ontop.quest.service;
  * #L%
  */
 
-import info.aduna.io.IOUtil;
+import it.unibz.inf.ontop.rdf4j.repository.OntopVirtualRepository;
+import org.eclipse.rdf4j.common.io.IOUtil;
 import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.model.OBDAException;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestDBStatement;
-import it.unibz.inf.ontop.sesame.SesameVirtualRepo;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -41,7 +42,7 @@ public class QuestSPARQLRewriterTest extends TestCase {
 	private static final String OWL_FILE_LOCATION = ROOT_LOCATION + "stockexchange.owl";
 	private static final String OBDA_FILE_LOCATION = ROOT_LOCATION + "stockexchange-mysql.obda";
 	
-	protected SesameVirtualRepo repository;
+	protected OntopVirtualRepository repository;
 	
 	@Override
 	protected void setUp() throws Exception {
@@ -52,7 +53,7 @@ public class QuestSPARQLRewriterTest extends TestCase {
 					.ontologyFile(owlFileUrl)
 					.nativeOntopMappingFile(obdaFileUrl.toString())
 					.build();
-			repository = new SesameVirtualRepo(getName(), configuration);
+			repository = new OntopVirtualRepository(getName(), configuration);
 			repository.initialize();
 		} catch (Exception exc) {
 			repository.shutDown();

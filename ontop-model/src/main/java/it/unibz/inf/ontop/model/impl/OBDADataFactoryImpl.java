@@ -24,8 +24,7 @@ import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.Predicate.COL_TYPE;
 import it.unibz.inf.ontop.model.LanguageTag;
 import it.unibz.inf.ontop.model.TermType;
-import org.openrdf.model.ValueFactory;
-import org.openrdf.model.impl.ValueFactoryImpl;
+import org.eclipse.rdf4j.model.ValueFactory;
 
 
 import java.util.*;
@@ -143,7 +142,7 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 
 	@Override
 	public Function getTypedTerm(Term value, String language) {
-		Term lang = getConstantLiteral(language.toLowerCase(), COL_TYPE.LITERAL);		
+		Term lang = getConstantLiteral(language.toLowerCase(), COL_TYPE.STRING);
 		Predicate pred = datatypeFactory.getTypePredicate(COL_TYPE.LITERAL_LANG);
 		return getFunction(pred, value, lang);
 	}

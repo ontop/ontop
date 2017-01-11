@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.model.impl;
 
 
 import it.unibz.inf.ontop.model.LanguageTag;
-import org.openrdf.model.util.language.LanguageTagSyntaxException;
+import org.eclipse.rdf4j.model.util.language.LanguageTagSyntaxException;
 
 import java.util.Optional;
 
@@ -15,7 +15,7 @@ public class LanguageTagImpl implements LanguageTag {
         this.fullString = fullString;
 
         try {
-            org.openrdf.model.util.language.LanguageTag tag = new org.openrdf.model.util.language.LanguageTag(fullString);
+            org.eclipse.rdf4j.model.util.language.LanguageTag tag = new org.eclipse.rdf4j.model.util.language.LanguageTag(fullString);
             prefix = tag.getLanguage().twoCharCode;
             optionalSuffix = Optional.ofNullable(tag.getVariant());
         }
