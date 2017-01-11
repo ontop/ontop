@@ -1,9 +1,5 @@
 package it.unibz.inf.ontop.model;
 
-import it.unibz.inf.ontop.model.OBDADataSource;
-import it.unibz.inf.ontop.model.OBDASQLQuery;
-import it.unibz.inf.ontop.utils.JdbcTypeMapper;
-
 import java.net.URI;
 
 /**
@@ -19,8 +15,6 @@ public interface MappingFactory {
                                      String username, String password, String driverclass);
 
     OBDADataSource getDataSource(URI id);
-
-    JdbcTypeMapper getJdbcTypeMapper();
 
 
     OBDASQLQuery getSQLQuery(String query);

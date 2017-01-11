@@ -3,18 +3,15 @@ package it.unibz.inf.ontop.model.impl;
 import com.google.common.base.Preconditions;
 import it.unibz.inf.ontop.model.MappingFactory;
 import it.unibz.inf.ontop.model.OBDADataSource;
-import it.unibz.inf.ontop.utils.JdbcTypeMapper;
 
 import java.net.URI;
 import java.util.UUID;
 
 public class MappingFactoryImpl implements MappingFactory {
 
-    private final JdbcTypeMapper jdbcTypeMapper;
     private static MappingFactory INSTANCE = null;
 
     private MappingFactoryImpl() {
-        jdbcTypeMapper =  new JdbcTypeMapper();
     }
 
     public static MappingFactory getInstance() {
@@ -50,12 +47,6 @@ public class MappingFactoryImpl implements MappingFactory {
         source.setParameter(RDBMSourceParameterConstants.DATABASE_USERNAME, username);
         source.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, driverclass);
         return source;
-    }
-
-
-    @Override
-    public JdbcTypeMapper getJdbcTypeMapper() {
-        return jdbcTypeMapper;
     }
 
     @Override

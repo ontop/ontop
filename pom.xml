@@ -59,6 +59,10 @@
 	<modules>
 		<module>ontop-model</module>
 		<module>ontop-optimization</module>
+		<module>ontop-mapping-core</module>
+		<module>ontop-sql-common</module>
+		<module>ontop-mapping-sql-core</module>
+		<module>ontop-mapping-native</module>
 		<module>obdalib-core</module>
 		<module>reformulation-core</module>
 		<module>obdalib-owlapi3</module>

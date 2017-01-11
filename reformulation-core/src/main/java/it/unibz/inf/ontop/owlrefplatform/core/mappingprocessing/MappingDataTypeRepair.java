@@ -22,7 +22,6 @@ package it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing;
 
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.FunctionalTermImpl;
-import it.unibz.inf.ontop.model.impl.MappingFactoryImpl;
 import it.unibz.inf.ontop.ontology.DataPropertyRangeExpression;
 import it.unibz.inf.ontop.ontology.DataRangeExpression;
 import it.unibz.inf.ontop.ontology.Datatype;
@@ -30,6 +29,7 @@ import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.VocabularyValidato
 import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.Equivalences;
 import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import it.unibz.inf.ontop.sql.*;
+import it.unibz.inf.ontop.utils.JdbcTypeMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,8 +47,8 @@ public class MappingDataTypeRepair {
 	private final Map<Predicate, Datatype> dataTypesMap;
 	private final VocabularyValidator qvv;
 
-    private static final MappingFactory MAPPING_FACTORY = MappingFactoryImpl.getInstance();
     private static final Logger log = LoggerFactory.getLogger(MappingDataTypeRepair.class);
+    private final JdbcTypeMapper jdbcTypeMapper;
 
     /**
      * Constructs a new mapping data type resolution. The object requires an
@@ -69,6 +69,10 @@ public class MappingDataTypeRepair {
         			|| (databaseDriver != null && databaseDriver.contains("IBM"));
 
         this.qvv = qvv;
+        /**
+         * TODO: retrieve from Guice
+         */
+        this.jdbcTypeMapper =  JdbcTypeMapper.getInstance();
         try {
             dataTypesMap = getDataTypeFromOntology(reasoner);
         }
@@ -289,7 +293,7 @@ public class MappingDataTypeRepair {
 		RelationDefinition td = metadata.getRelation(tableId);
 		Attribute attribute = td.getAttribute(ip.pos);
 
-		Predicate.COL_TYPE type =  MAPPING_FACTORY.getJdbcTypeMapper().getPredicate(attribute.getType());
+		Predicate.COL_TYPE type =  jdbcTypeMapper.getPredicate(attribute.getType());
 		return type;
 	}
 

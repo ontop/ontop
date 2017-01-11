@@ -48,6 +48,7 @@ import it.unibz.inf.ontop.parser.EncodeForURI;
 import it.unibz.inf.ontop.pivotalrepr.IntermediateQuery;
 import it.unibz.inf.ontop.sql.*;
 import it.unibz.inf.ontop.utils.DatalogDependencyGraphGenerator;
+import it.unibz.inf.ontop.utils.JdbcTypeMapper;
 import org.eclipse.rdf4j.model.Literal;
 import org.eclipse.rdf4j.model.vocabulary.XMLSchema;
 import org.slf4j.LoggerFactory;
@@ -121,17 +122,20 @@ public class SQLGenerator implements NativeQueryGenerator {
 
 	private static final org.slf4j.Logger log = LoggerFactory
 			.getLogger(SQLGenerator.class);
+	private final JdbcTypeMapper jdbcTypeMapper;
 
-    @AssistedInject
-	private SQLGenerator(@Assisted DBMetadata metadata, @Assisted OBDADataSource dataSource, QuestCoreSettings preferences) {
+	@AssistedInject
+	private SQLGenerator(@Assisted DBMetadata metadata, @Assisted OBDADataSource dataSource,
+						 QuestCoreSettings preferences, JdbcTypeMapper jdbcTypeMapper) {
         // TODO: make these attributes immutable.
         //TODO: avoid the null value
-        this(metadata, dataSource, null, preferences);
+        this(metadata, dataSource, null, preferences, jdbcTypeMapper);
     }
 
 	@AssistedInject
 	private SQLGenerator(@Assisted DBMetadata metadata, @Assisted OBDADataSource dataSource,
-						 @Assisted SemanticIndexURIMap uriRefIds, QuestCoreSettings preferences) {
+						 @Assisted SemanticIndexURIMap uriRefIds, QuestCoreSettings preferences,
+						 JdbcTypeMapper jdbcTypeMapper) {
 		String driverURI = dataSource.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER);
 
 		if (!(metadata instanceof RDBMetadata)) {
@@ -162,6 +166,7 @@ public class SQLGenerator implements NativeQueryGenerator {
 
 		this.isSI = !preferences.isInVirtualMode();
 		this.uriRefIds = uriRefIds;
+		this.jdbcTypeMapper = jdbcTypeMapper;
  	}
 
 	/**
@@ -169,7 +174,7 @@ public class SQLGenerator implements NativeQueryGenerator {
 	 */
 	private SQLGenerator(RDBMetadata metadata, SQLDialectAdapter sqlAdapter, boolean generatingReplace,
 						 boolean isSI, String replace1, String replace2, boolean distinctResultSet,
-						 SemanticIndexURIMap uriRefIds) {
+						 SemanticIndexURIMap uriRefIds, JdbcTypeMapper jdbcTypeMapper) {
 		if (isSI && uriRefIds == null) {
 			throw new IllegalArgumentException("A SemanticIndexURIMap must be given in the classic mode.");
 		}
@@ -182,6 +187,7 @@ public class SQLGenerator implements NativeQueryGenerator {
 		this.isSI = isSI;
 		this.distinctResultSet = distinctResultSet;
 		this.uriRefIds = uriRefIds;
+		this.jdbcTypeMapper = jdbcTypeMapper;
 	}
 
 	private static ImmutableMap<ExpressionOperation, String> buildOperations(SQLDialectAdapter sqladapter) {
@@ -237,7 +243,7 @@ public class SQLGenerator implements NativeQueryGenerator {
 	 */
 	public NativeQueryGenerator cloneIfNecessary() {
 		return new SQLGenerator(metadata.clone(), sqladapter, generatingREPLACE,
-				isSI, replace1, replace2, distinctResultSet, uriRefIds);
+				isSI, replace1, replace2, distinctResultSet, uriRefIds, jdbcTypeMapper);
 	}
 
 	@Override
@@ -1227,7 +1233,7 @@ public class SQLGenerator implements NativeQueryGenerator {
 			if (f.isDataTypeFunction()) {
 				Predicate p = f.getFunctionSymbol();
 				COL_TYPE type = DATATYPE_FACTORY.getDatatype(p.toString());
-				return MAPPING_FACTORY.getJdbcTypeMapper().getSQLType(type);
+				return jdbcTypeMapper.getSQLType(type);
 			}
 			// Return varchar for unknown
 			return Types.VARCHAR;
@@ -1425,7 +1431,7 @@ public class SQLGenerator implements NativeQueryGenerator {
 
 			if (castDataType != null){
 
-				mainColumn = sqladapter.sqlCast(mainColumn, MAPPING_FACTORY.getJdbcTypeMapper().getSQLType(castDataType));
+				mainColumn = sqladapter.sqlCast(mainColumn, jdbcTypeMapper.getSQLType(castDataType));
 			}
 
 			//int sqlType = getSQLTypeForTerm(ht,index );
