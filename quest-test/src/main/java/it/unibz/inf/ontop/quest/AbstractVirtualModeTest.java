@@ -117,9 +117,9 @@ public abstract class AbstractVirtualModeTest extends TestCase {
             QuestOWLResultSet rs = st.executeTuple(query);
             while (rs.nextRow()) {
                 OWLNamedIndividual ind1 = (OWLNamedIndividual) rs.getOWLIndividual("x");
-                // log.debug(ind1.toString());
+
                 returnedUris.add(ind1.getIRI().toString());
-                java.lang.System.out.println(ind1.getIRI());
+                log.debug(ind1.getIRI().toString());
                 i++;
             }
         } catch (Exception e) {
