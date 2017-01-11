@@ -20,6 +20,7 @@ package it.unibz.inf.ontop.utils;
  * #L%
  */
 
+import com.google.inject.Inject;
 import it.unibz.inf.ontop.model.Predicate;
 import it.unibz.inf.ontop.model.Predicate.COL_TYPE;
 
@@ -33,10 +34,12 @@ import java.util.Map;
  */
 public class JdbcTypeMapper {
 
+	private static JdbcTypeMapper INSTANCE;
 	private final Map<Integer, COL_TYPE> sqlToQuest = new HashMap<Integer, COL_TYPE>();
 	private final Map<COL_TYPE, Integer> datatypeMap = new HashMap<COL_TYPE, Integer>();
 
-	public JdbcTypeMapper() {
+	@Inject
+	private JdbcTypeMapper() {
 		sqlToQuest.put(Types.VARCHAR, COL_TYPE.LITERAL);
 		sqlToQuest.put(Types.CHAR, COL_TYPE.LITERAL);
 		sqlToQuest.put(Types.LONGNVARCHAR, COL_TYPE.LITERAL);
@@ -79,6 +82,13 @@ public class JdbcTypeMapper {
 		datatypeMap.put(COL_TYPE.LITERAL, Types.VARCHAR);
 		datatypeMap.put(COL_TYPE.DATETIME_STAMP, Types.TIMESTAMP);
 		// all other COL_TYPEs are mapped to Types.VARCHAR by default
+	}
+
+	@Deprecated
+	public static JdbcTypeMapper getInstance() {
+		if (INSTANCE == null)
+			INSTANCE = new JdbcTypeMapper();
+		return INSTANCE;
 	}
 
 	public Predicate.COL_TYPE getPredicate(int sqlType) {
