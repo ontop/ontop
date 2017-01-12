@@ -44,7 +44,7 @@ public class H2DatatypeTest extends AbstractVirtualModeTest {
                 "   ?s a :Row; :hasDate ?x\n" +
                 "   FILTER ( ?x = \"2013-03-18\"^^xsd:date ) .\n" +
                 "}";
-		String val = runQueryAndReturnStringX(query);
+		String val = runQueryAndReturnStringOfIndividualX(query);
 		assertEquals("\"2013-03-18\"", val);
 	}
 
@@ -53,7 +53,7 @@ public class H2DatatypeTest extends AbstractVirtualModeTest {
                 "WHERE {\n" +
                 "   ?x a :Row; :hasDate \"2013-03-18\"^^xsd:date\n" +
                 "}";
-        String val = runQueryAndReturnStringX(query);
+        String val = runQueryAndReturnStringOfIndividualX(query);
         assertEquals("<http://ontop.inf.unibz.it/test/datatypes#datetime-1>", val);
     }
 

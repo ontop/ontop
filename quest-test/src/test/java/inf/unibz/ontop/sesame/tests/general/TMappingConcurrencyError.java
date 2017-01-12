@@ -49,7 +49,7 @@ public class TMappingConcurrencyError extends AbstractVirtualModeTest {
 	 */
 	public void test() throws Exception {
 		String query = "PREFIX  : <http://www.semanticweb.org/sarah/ontologies/2014/4/untitled-ontology-73#> SELECT ?x WHERE { ?x a :Man }";
-		String val = runQueryAndReturnStringX(query);
+		String val = runQueryAndReturnStringOfIndividualX(query);
 
 	}
 

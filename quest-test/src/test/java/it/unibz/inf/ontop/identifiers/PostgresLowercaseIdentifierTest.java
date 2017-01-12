@@ -43,7 +43,7 @@ public class PostgresLowercaseIdentifierTest extends AbstractVirtualModeTest {
 	 */
 	public void testLowercaseUnquoted() throws Exception {
 		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT ?x WHERE {?x a :Country} ORDER BY ?x";
-		String val = runQueryAndReturnStringX(query);
+		String val = runQueryAndReturnStringOfIndividualX(query);
 	}
 
 			

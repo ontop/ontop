@@ -43,7 +43,7 @@ public class H2IdentifierTest extends AbstractVirtualModeTest {
 	 */
 	public void testLowercaseUnquoted() throws Exception {
 		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT ?x WHERE {?x a :Country} ORDER BY ?x";
-		String val = runQueryAndReturnStringX(query);
+		String val = runQueryAndReturnStringOfIndividualX(query);
 		assertEquals("<http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country-Argentina>", val);
 	}
 
@@ -54,7 +54,7 @@ public class H2IdentifierTest extends AbstractVirtualModeTest {
 	 */
 	public void testUpperCaseTableUnquoted() throws Exception {
 		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT ?x WHERE {?x a :Country2} ORDER BY ?x";
-		String val =  runQueryAndReturnStringX(query);
+		String val =  runQueryAndReturnStringOfIndividualX(query);
 		assertEquals("<http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country2-Argentina>", val);
 	}
 	
@@ -64,7 +64,7 @@ public class H2IdentifierTest extends AbstractVirtualModeTest {
 	 */
 	public void testLowerCaseColumnViewDefQuoted() throws Exception {
 		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT ?x WHERE {?x a :Country4} ORDER BY ?x";
-		String val =  runQueryAndReturnStringX(query);
+		String val =  runQueryAndReturnStringOfIndividualX(query);
 		assertEquals("<http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country4-1010>", val);
 	}
 
@@ -74,7 +74,7 @@ public class H2IdentifierTest extends AbstractVirtualModeTest {
 	 */
 	public void testLowerCaseColumnViewDefUnquoted() throws Exception {
 		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT ?x WHERE {?x a :Country5} ORDER BY ?x";
-		String val =  runQueryAndReturnStringX(query);
+		String val =  runQueryAndReturnStringOfIndividualX(query);
 		assertEquals("<http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country5-1010>", val);
 	}
 	
@@ -84,7 +84,7 @@ public class H2IdentifierTest extends AbstractVirtualModeTest {
 	 */
 	public void testLowerCaseTable() throws Exception {
 		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT ?x WHERE {?x a :Country3} ORDER BY ?x";
-		String val =  runQueryAndReturnStringX(query);
+		String val =  runQueryAndReturnStringOfIndividualX(query);
 		assertEquals("<http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country3-BladeRunner-2020-Constant>", val);
 	}
 	

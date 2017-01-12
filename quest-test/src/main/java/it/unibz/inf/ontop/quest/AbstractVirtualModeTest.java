@@ -54,7 +54,7 @@ public abstract class AbstractVirtualModeTest extends TestCase {
         reasoner.dispose();
     }
 
-    protected String runQueryAndReturnStringX(String query) throws Exception {
+    protected String runQueryAndReturnStringOfIndividualX(String query) throws Exception {
         QuestOWLStatement st = conn.createStatement();
         String retval;
         try {
@@ -62,6 +62,25 @@ public abstract class AbstractVirtualModeTest extends TestCase {
 
             assertTrue(rs.nextRow());
             OWLIndividual ind1 = rs.getOWLIndividual("x");
+            retval = ind1.toString();
+
+        } catch (Exception e) {
+            throw e;
+        } finally {
+            conn.close();
+            reasoner.dispose();
+        }
+        return retval;
+    }
+
+    protected String runQueryAndReturnStringOfLiteralX(String query) throws Exception {
+        QuestOWLStatement st = conn.createStatement();
+        String retval;
+        try {
+            QuestOWLResultSet rs = st.executeTuple(query);
+
+            assertTrue(rs.nextRow());
+            OWLLiteral ind1 = rs.getOWLLiteral("x");
             retval = ind1.toString();
 
         } catch (Exception e) {

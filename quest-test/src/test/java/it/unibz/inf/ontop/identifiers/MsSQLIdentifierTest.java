@@ -42,25 +42,25 @@ public class MsSQLIdentifierTest extends AbstractVirtualModeTest {
 	 */
 	public void testLowercaseUnquoted() throws Exception {
 		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT ?x WHERE {?x a :Country} ORDER BY ?x";
-		String val = runQueryAndReturnStringX(query);
+		String val = runQueryAndReturnStringOfIndividualX(query);
 		assertEquals("<http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country-991>", val);
 	}
 
 	public void testUppercaseUnquoted() throws Exception {
 		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT ?x WHERE {?x a :Country2} ORDER BY ?x";
-		String val = runQueryAndReturnStringX(query);
+		String val = runQueryAndReturnStringOfIndividualX(query);
 		assertEquals("<http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country2-211>", val);	
 	}
 		
 	public void testLowercaseQuoted() throws Exception {
 		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT ?x WHERE {?x a :Country3} ORDER BY ?x";
-		String val = runQueryAndReturnStringX(query);
+		String val = runQueryAndReturnStringOfIndividualX(query);
 		assertEquals("<http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country3-112>", val);
 	}
 	
 	public void testAliasQuoted() throws Exception {
 		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT ?x WHERE {?x a :Country4} ORDER BY ?x";
-		String val = runQueryAndReturnStringX(query);
+		String val = runQueryAndReturnStringOfIndividualX(query);
 		assertEquals("<http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country4-111>", val);
 	}
 }
