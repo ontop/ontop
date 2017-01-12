@@ -40,12 +40,12 @@ public class JdbcTypeMapper {
 
 	@Inject
 	private JdbcTypeMapper() {
-		sqlToQuest.put(Types.VARCHAR, COL_TYPE.LITERAL);
-		sqlToQuest.put(Types.CHAR, COL_TYPE.LITERAL);
-		sqlToQuest.put(Types.LONGNVARCHAR, COL_TYPE.LITERAL);
-		sqlToQuest.put(Types.LONGVARCHAR, COL_TYPE.LITERAL);
-		sqlToQuest.put(Types.NVARCHAR, COL_TYPE.LITERAL);
-		sqlToQuest.put(Types.NCHAR, COL_TYPE.LITERAL);
+		sqlToQuest.put(Types.VARCHAR, COL_TYPE.STRING);
+		sqlToQuest.put(Types.CHAR, COL_TYPE.STRING);
+		sqlToQuest.put(Types.LONGNVARCHAR, COL_TYPE.STRING);
+		sqlToQuest.put(Types.LONGVARCHAR, COL_TYPE.STRING);
+		sqlToQuest.put(Types.NVARCHAR, COL_TYPE.STRING);
+		sqlToQuest.put(Types.NCHAR, COL_TYPE.STRING);
 		sqlToQuest.put(Types.INTEGER, COL_TYPE.INTEGER);
 		sqlToQuest.put(Types.BIGINT, COL_TYPE.INTEGER);
 		sqlToQuest.put(Types.SMALLINT, COL_TYPE.INTEGER);

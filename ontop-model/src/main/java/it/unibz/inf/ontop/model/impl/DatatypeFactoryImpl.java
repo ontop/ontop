@@ -1,13 +1,10 @@
 package it.unibz.inf.ontop.model.impl;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-
 import com.google.inject.Singleton;
+import it.unibz.inf.ontop.model.DatatypeFactory;
 import it.unibz.inf.ontop.model.DatatypePredicate;
+import it.unibz.inf.ontop.model.Predicate;
+import it.unibz.inf.ontop.model.Predicate.COL_TYPE;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.ValueFactory;
 import org.eclipse.rdf4j.model.impl.ValueFactoryImpl;
@@ -15,9 +12,7 @@ import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.model.vocabulary.RDFS;
 import org.eclipse.rdf4j.model.vocabulary.XMLSchema;
 
-import it.unibz.inf.ontop.model.DatatypeFactory;
-import it.unibz.inf.ontop.model.Predicate;
-import it.unibz.inf.ontop.model.Predicate.COL_TYPE;
+import java.util.*;
 
 @Singleton
 public class DatatypeFactoryImpl implements DatatypeFactory {
@@ -113,12 +108,12 @@ public class DatatypeFactoryImpl implements DatatypeFactory {
 	
 	@Override 
 	public boolean isLiteral(Predicate p) {
-		return p == RDFS_LITERAL || p == RDF_LANG_STRING;
+		return p == RDFS_LITERAL ;
 	}
 	
 	@Override 
 	public boolean isString(Predicate p) {
-		return p == XSD_STRING;
+		return p == XSD_STRING || p == RDF_LANG_STRING;
 	}
 
 	@Override
