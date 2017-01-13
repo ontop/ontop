@@ -3,14 +3,9 @@ package it.unibz.inf.ontop.injection;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.io.PrefixManager;
-import it.unibz.inf.ontop.model.OBDADataSource;
 import it.unibz.inf.ontop.model.OBDAMappingAxiom;
 import it.unibz.inf.ontop.model.OBDAModel;
 import it.unibz.inf.ontop.ontology.ImmutableOntologyVocabulary;
-
-import java.net.URI;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * Some object instantiations may throw exceptions that
@@ -24,8 +19,7 @@ import java.util.Set;
  */
 public interface OBDAFactoryWithException {
 
-    OBDAModel createOBDAModel(Set<OBDADataSource> dataSources,
-                                     Map<URI, ImmutableList<OBDAMappingAxiom>> newMappings,
+    OBDAModel createOBDAModel(ImmutableList<OBDAMappingAxiom> newMappings,
                                      PrefixManager prefixManager,
                                      ImmutableOntologyVocabulary ontologyVocabulary) throws DuplicateMappingException;
 }

@@ -20,15 +20,12 @@ package it.unibz.inf.ontop.owlapi;
  * #L%
  */
 
-import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.io.TargetQueryVocabularyValidator;
 import it.unibz.inf.ontop.model.Function;
 import it.unibz.inf.ontop.model.OBDAMappingAxiom;
 import it.unibz.inf.ontop.model.OBDAModel;
 
-import java.net.URI;
 import java.util.List;
-import java.util.Map;
 
 /***
  * Validates an OBDAModel (mappings) against the vocabulary of an ontology
@@ -51,14 +48,11 @@ public class OBDAModelValidator {
 
 		 TargetQueryVocabularyValidator validator = new TargetQueryValidator(obdaModel.getOntologyVocabulary());
 
-		Map<URI, ImmutableList<OBDAMappingAxiom>> mappingTable = obdaModel.getMappings();
-		 for (URI datasourceUri : mappingTable.keySet()) {
-			 for (OBDAMappingAxiom mapping : mappingTable.get(datasourceUri)) {
-				 List<Function> tq = mapping.getTargetQuery();
-				 boolean bSuccess = validator.validate(tq);
-				 if (!bSuccess) {
-					 throw new Exception("Found an invalid target query: " + tq.toString());
-				 }
+		 for (OBDAMappingAxiom mapping : obdaModel.getMappings()) {
+			 List<Function> tq = mapping.getTargetQuery();
+			 boolean bSuccess = validator.validate(tq);
+			 if (!bSuccess) {
+				 throw new Exception("Found an invalid target query: " + tq.toString());
 			 }
 		 }
 		}

@@ -1,7 +1,6 @@
 package it.unibz.inf.ontop.injection;
 
 import com.google.inject.assistedinject.Assisted;
-import it.unibz.inf.ontop.model.OBDADataSource;
 import it.unibz.inf.ontop.model.OBDAModel;
 import it.unibz.inf.ontop.ontology.Ontology;
 import it.unibz.inf.ontop.owlrefplatform.core.DBConnector;
@@ -18,9 +17,8 @@ public interface QuestComponentFactory {
     IQuest create(Ontology inputTBox, @Assisted Optional<OBDAModel> inputMappings,
                   @Assisted Optional<DBMetadata> inputMetadata, ExecutorRegistry executorRegistry);
 
-    NativeQueryGenerator create(DBMetadata metadata, OBDADataSource dataSource);
-    NativeQueryGenerator create(DBMetadata metadata, OBDADataSource dataSource,
-                                SemanticIndexURIMap uriRefIds);
+    NativeQueryGenerator create(DBMetadata metadata);
+    NativeQueryGenerator create(DBMetadata metadata, SemanticIndexURIMap uriRefIds);
 
-    DBConnector create(OBDADataSource obdaDataSource, IQuest questInstance);
+    DBConnector create(IQuest questInstance);
 }

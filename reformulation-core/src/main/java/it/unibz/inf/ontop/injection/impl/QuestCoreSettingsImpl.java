@@ -4,6 +4,7 @@ package it.unibz.inf.ontop.injection.impl;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
 import it.unibz.inf.ontop.injection.QuestCoreSettings;
 
+import java.util.Optional;
 import java.util.Properties;
 
 public class QuestCoreSettingsImpl extends OBDASettingsImpl implements QuestCoreSettings {
@@ -99,5 +100,25 @@ public class QuestCoreSettingsImpl extends OBDASettingsImpl implements QuestCore
     @Override
     public int getConnectionPoolMaxSize() {
         return getRequiredInteger(MAX_POOL_SIZE);
+    }
+
+    @Override
+    public Optional<Boolean> getBoolean(String key) {
+        return super.getBoolean(key);
+    }
+
+    @Override
+    public boolean getRequiredBoolean(String key) {
+        return super.getRequiredBoolean(key);
+    }
+
+    @Override
+    public Optional<String> getProperty(String key) {
+        return super.getProperty(key);
+    }
+
+    @Override
+    public String getRequiredProperty(String key) {
+        return super.getRequiredProperty(key);
     }
 }

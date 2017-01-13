@@ -2,7 +2,6 @@ package it.unibz.inf.ontop.protege.core;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.exception.InvalidMappingException;
 import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
@@ -12,7 +11,6 @@ import it.unibz.inf.ontop.io.PrefixManager;
 import it.unibz.inf.ontop.io.SimplePrefixManager;
 import it.unibz.inf.ontop.mapping.MappingParser;
 import it.unibz.inf.ontop.model.*;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.ontology.OntologyVocabulary;
 import it.unibz.inf.ontop.ontology.impl.OntologyVocabularyImpl;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -43,6 +41,7 @@ public class OBDAModelWrapper {
      */
     private final NativeQueryLanguageComponentFactory nativeQLFactory;
     private final OBDAFactoryWithException obdaFactory;
+    private Optional<OBDADataSource> source;
 
     private OBDAModel obdaModel;
     private PrefixManagerWrapper prefixManager;
@@ -59,6 +58,7 @@ public class OBDAModelWrapper {
         this.obdaModel = createNewOBDAModel(obdaFactory, prefixManager);
         this.sourceListeners = new ArrayList<>();
         this.mappingListeners = new ArrayList<>();
+        source = Optional.empty();
     }
 
     public OBDAModel getCurrentImmutableOBDAModel() {
@@ -81,7 +81,7 @@ public class OBDAModelWrapper {
                 .distinct()
                 .collect(ImmutableCollectors.toMap());
 
-        obdaModel = obdaModel.newModel(newObdaModel.getSources(), newObdaModel.getMappings(),
+        obdaModel = obdaModel.newModel(newObdaModel.getMappings(),
                 new SimplePrefixManager(mergedPrefixes));
     }
 
@@ -90,15 +90,20 @@ public class OBDAModelWrapper {
     }
 
     public ImmutableList<OBDAMappingAxiom> getMappings(URI sourceUri) {
-        return obdaModel.getMappings(sourceUri);
+        if (sourceUri.equals(getSourceId()))
+            return obdaModel.getMappings();
+        else
+            return ImmutableList.of();
     }
 
     public ImmutableMap<URI, ImmutableList<OBDAMappingAxiom>> getMappings() {
-        return obdaModel.getMappings();
+        return ImmutableMap.of(getSourceId(), obdaModel.getMappings());
     }
 
     public ImmutableList<OBDADataSource> getSources() {
-        return ImmutableList.copyOf(obdaModel.getSources());
+        return source.isPresent()
+                ? ImmutableList.of(source.get())
+                : ImmutableList.of();
     }
 
     public OBDAMappingAxiom getMapping(String mappingId) {
@@ -115,22 +120,19 @@ public class OBDAModelWrapper {
 
     public int renamePredicate(Predicate removedPredicate, Predicate newPredicate) {
         int modifiedCount = 0;
-        for (Map.Entry<URI, ImmutableList<OBDAMappingAxiom>> mappingEntry : obdaModel.getMappings().entrySet()) {
-            URI sourceURI = mappingEntry.getKey();
-            for (OBDAMappingAxiom mapping : mappingEntry.getValue()) {
-                CQIE cq = (CQIE) mapping.getTargetQuery();
-                List<Function> body = cq.getBody();
-                for (int idx = 0; idx < body.size(); idx++) {
-                    Function oldAtom = body.get(idx);
-                    if (!oldAtom.getFunctionSymbol().equals(removedPredicate)) {
-                        continue;
-                    }
-                    modifiedCount += 1;
-                    Function newAtom = DATA_FACTORY.getFunction(newPredicate, oldAtom.getTerms());
-                    body.set(idx, newAtom);
+        for (OBDAMappingAxiom mapping : obdaModel.getMappings()) {
+            CQIE cq = (CQIE) mapping.getTargetQuery();
+            List<Function> body = cq.getBody();
+            for (int idx = 0; idx < body.size(); idx++) {
+                Function oldAtom = body.get(idx);
+                if (!oldAtom.getFunctionSymbol().equals(removedPredicate)) {
+                    continue;
                 }
-                fireMappingUpdated(sourceURI, mapping.getId(), mapping);
+                modifiedCount += 1;
+                Function newAtom = DATA_FACTORY.getFunction(newPredicate, oldAtom.getTerms());
+                body.set(idx, newAtom);
             }
+            fireMappingUpdated(getSourceId(), mapping.getId(), mapping);
         }
         return modifiedCount;
     }
@@ -143,27 +145,30 @@ public class OBDAModelWrapper {
 
     public int deletePredicate(Predicate removedPredicate) {
         int modifiedCount = 0;
-        for (Map.Entry<URI, ImmutableList<OBDAMappingAxiom>> mappingEntry : obdaModel.getMappings().entrySet()) {
-            URI sourceURI = mappingEntry.getKey();
-            for (OBDAMappingAxiom mapping : mappingEntry.getValue()) {
-                CQIE cq = (CQIE) mapping.getTargetQuery();
-                List<Function> body = cq.getBody();
-                for (int idx = 0; idx < body.size(); idx++) {
-                    Function oldatom = body.get(idx);
-                    if (!oldatom.getFunctionSymbol().equals(removedPredicate)) {
-                        continue;
-                    }
-                    modifiedCount += 1;
-                    body.remove(idx);
+        for (OBDAMappingAxiom mapping : obdaModel.getMappings()) {
+            CQIE cq = (CQIE) mapping.getTargetQuery();
+            List<Function> body = cq.getBody();
+            for (int idx = 0; idx < body.size(); idx++) {
+                Function oldatom = body.get(idx);
+                if (!oldatom.getFunctionSymbol().equals(removedPredicate)) {
+                    continue;
                 }
-                if (body.size() != 0) {
-                    fireMappingUpdated(sourceURI, mapping.getId(), mapping);
-                } else {
-                    removeMapping(sourceURI, mapping.getId());
-                }
+                modifiedCount += 1;
+                body.remove(idx);
+            }
+            if (body.size() != 0) {
+                fireMappingUpdated(getSourceId(), mapping.getId(), mapping);
+            } else {
+                removeMapping(getSourceId(), mapping.getId());
             }
         }
         return modifiedCount;
+    }
+
+    private URI getSourceId() {
+        return source
+                .map(OBDADataSource::getSourceID)
+                .orElseGet(() -> URI.create("ontop-data-source"));
     }
 
     public void addSourceListener(OBDAModelListener listener) {
@@ -210,90 +215,10 @@ public class OBDAModelWrapper {
         obdaModel = createNewOBDAModel(obdaFactory, prefixManager);
     }
 
-    /**
-     * Updates the source. If its URI has changed, updates the mapping index.
-     */
-    public void updateSource(URI formerSourceId, OBDADataSource newSource) {
-        OBDADataSource formerDataSource = obdaModel.getSource(formerSourceId);
-
-        Set<OBDADataSource> newDataSources = new HashSet<>(obdaModel.getSources());
-
-        if (formerDataSource != null) {
-            newDataSources.remove(formerDataSource);
-        }
-        newDataSources.add(newSource);
-
-        Map<URI, ImmutableList<OBDAMappingAxiom>> mappingIndex;
-
-        /**
-         * Source URI has been updated: update the mapping index
-         */
-        if (!formerSourceId.equals(newSource.getSourceID())) {
-            mappingIndex = new HashMap<>(obdaModel.getMappings());
-            ImmutableList<OBDAMappingAxiom> sourceMappings = mappingIndex.get(formerSourceId);
-            if (sourceMappings != null) {
-                mappingIndex.put(newSource.getSourceID(), sourceMappings);
-                mappingIndex.remove(formerSourceId);
-            }
-        }
-        else {
-            mappingIndex = obdaModel.getMappings();
-        }
-
-        try {
-            obdaModel = obdaModel.newModel(newDataSources, mappingIndex);
-        } catch (DuplicateMappingException e) {
-            throw new RuntimeException("Duplicated mappings should have been detected earlier.");
-        }
-
-        fireSourceNameUpdated(formerSourceId, newSource);
-    }
-
-    /**
-     * Removes the source and the corresponding mappings.
-     */
-    public void removeSource(URI sourceID){
-        OBDADataSource dataSource = obdaModel.getSource(sourceID);
-        Set<OBDADataSource> newDataSources = new HashSet<>(obdaModel.getSources());
-
-        if (dataSource != null) {
-            newDataSources.remove(dataSource);
-        }
-
-        Map<URI, ImmutableList<OBDAMappingAxiom>> newMappingIndex = new HashMap<>(obdaModel.getMappings());
-        newMappingIndex.remove(sourceID);
-
-        try {
-            obdaModel = obdaModel.newModel(newDataSources, newMappingIndex);
-        } catch (DuplicateMappingException e) {
-            throw new RuntimeException("Duplicated mappings should have been detected earlier.");
-        }
-        fireSourceRemoved(dataSource);
-    }
-
-    public void addSource(OBDADataSource ds) {
-        Set<OBDADataSource> existingSources = obdaModel.getSources();
-
-        if (existingSources.contains(ds))
-            return;
-
-        Set<OBDADataSource> newDataSources = new HashSet<>(existingSources);
-        newDataSources.add(ds);
-
-        try {
-            obdaModel = obdaModel.newModel(newDataSources, obdaModel.getMappings());
-        } catch (DuplicateMappingException e) {
-            throw new RuntimeException("Duplicated mappings should have been detected earlier.");
-        }
-        fireSourceAdded(ds);
-    }
-
 
     public void addMapping(URI sourceID, OBDAMappingAxiom mappingAxiom, boolean disableFiringMappingInsertedEvent)
             throws DuplicateMappingException {
-        ImmutableMap<URI, ImmutableList<OBDAMappingAxiom>> formerMappingIndex = obdaModel.getMappings();
-
-        ImmutableList<OBDAMappingAxiom> sourceMappings = formerMappingIndex.get(sourceID);
+        ImmutableList<OBDAMappingAxiom> sourceMappings = obdaModel.getMappings();
         List<OBDAMappingAxiom> newSourceMappings;
         if (sourceMappings == null) {
             newSourceMappings = Arrays.asList(mappingAxiom);
@@ -305,12 +230,8 @@ public class OBDAModelWrapper {
             newSourceMappings = new ArrayList<>(sourceMappings);
             newSourceMappings.add(mappingAxiom);
         }
-
-        Map<URI, ImmutableList<OBDAMappingAxiom>> newMappingIndex = new HashMap<>(formerMappingIndex);
-        newMappingIndex.put(sourceID, ImmutableList.copyOf(newSourceMappings));
-
         try {
-            obdaModel = obdaModel.newModel(obdaModel.getSources(), newMappingIndex);
+            obdaModel = obdaModel.newModel(ImmutableList.copyOf(newSourceMappings));
         } catch (DuplicateMappingException e) {
             throw new RuntimeException("Duplicated mappings should have been detected earlier.");
         }
@@ -323,14 +244,12 @@ public class OBDAModelWrapper {
         if (mapping == null)
             return;
 
-        List<OBDAMappingAxiom> newSourceMappings = new LinkedList<>(obdaModel.getMappings(dataSourceURI));
-        newSourceMappings.remove(mapping);
-
-        Map<URI, ImmutableList<OBDAMappingAxiom>> newMappingIndex = new HashMap<>(obdaModel.getMappings());
-        newMappingIndex.put(dataSourceURI, ImmutableList.copyOf(newSourceMappings));
+        ImmutableList<OBDAMappingAxiom> newMappingAssertions = obdaModel.getMappings().stream()
+                .filter(a -> ! a.getId().equals(mappingId))
+                .collect(ImmutableCollectors.toList());
 
         try {
-            obdaModel = obdaModel.newModel(obdaModel.getSources(), ImmutableMap.copyOf(newMappingIndex));
+            obdaModel = obdaModel.newModel(newMappingAssertions);
         } catch (DuplicateMappingException e) {
             throw new RuntimeException("Duplicated mappings should have been detected earlier.");
         }
@@ -364,7 +283,7 @@ public class OBDAModelWrapper {
     }
 
     public int indexOf(URI currentSource, String mappingId) {
-        ImmutableList<OBDAMappingAxiom> sourceMappings = obdaModel.getMappings(currentSource);
+        ImmutableList<OBDAMappingAxiom> sourceMappings = obdaModel.getMappings();
         if (sourceMappings == null) {
             return -1;
         }
@@ -396,8 +315,7 @@ public class OBDAModelWrapper {
     private static OBDAModel createNewOBDAModel(OBDAFactoryWithException obdaFactory, PrefixManagerWrapper prefixManager) {
         try {
             OntologyVocabulary vocabulary = new OntologyVocabularyImpl();
-            return obdaFactory.createOBDAModel(ImmutableSet.<OBDADataSource>of(), ImmutableMap.<URI, ImmutableList<OBDAMappingAxiom>>of(),
-                    prefixManager, vocabulary);
+            return obdaFactory.createOBDAModel(ImmutableList.of(), prefixManager, vocabulary);
             /**
              * No mapping so should never happen
              */
@@ -405,5 +323,13 @@ public class OBDAModelWrapper {
             throw new RuntimeException("A DuplicateMappingException has been thrown while no mapping has been given." +
                     "What is going on? Message: " + e.getMessage());
         }
+    }
+
+    public Optional<OBDADataSource> getDatasource() {
+        return source;
+    }
+
+    public void addSource(OBDADataSource currentDataSource) {
+        source = Optional.of(currentDataSource);
     }
 }

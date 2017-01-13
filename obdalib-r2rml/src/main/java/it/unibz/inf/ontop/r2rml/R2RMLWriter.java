@@ -45,7 +45,6 @@ import com.google.common.collect.Multimap;
 import com.google.inject.Injector;
 
 import java.io.*;
-import java.net.URI;
 import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -54,18 +53,16 @@ import java.util.stream.Collectors;
 public class R2RMLWriter {
 
 	private List<OBDAMappingAxiom> mappings;
-	private URI sourceUri;
 	private PrefixManager prefixmng;
 	private OWLOntology ontology;
 	private final NativeQueryLanguageComponentFactory nativeQLFactory;
 
-    public R2RMLWriter(OBDAModel obdamodel, URI sourceURI, OWLOntology ontology, Injector injector)
+    public R2RMLWriter(OBDAModel obdamodel, OWLOntology ontology, NativeQueryLanguageComponentFactory nativeQLFactory)
 	{
-		this.sourceUri = sourceURI;
-		this.mappings = obdamodel.getMappings(sourceUri);
+		this.mappings = obdamodel.getMappings();
 		this.prefixmng = obdamodel.getPrefixManager();
 		this.ontology = ontology;
-		this.nativeQLFactory = injector.getInstance(NativeQueryLanguageComponentFactory.class);
+		this.nativeQLFactory = nativeQLFactory;
 	}
 
 

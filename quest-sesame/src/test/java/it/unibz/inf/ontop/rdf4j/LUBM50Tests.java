@@ -24,10 +24,8 @@ import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
 import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.injection.OBDASettings;
 import it.unibz.inf.ontop.io.QueryIOManager;
-import it.unibz.inf.ontop.model.MappingFactory;
-import it.unibz.inf.ontop.model.OBDADataSource;
-import it.unibz.inf.ontop.model.impl.MappingFactoryImpl;
-import it.unibz.inf.ontop.model.impl.RDBMSourceParameterConstants;
+import it.unibz.inf.ontop.model.SQLMappingFactory;
+import it.unibz.inf.ontop.model.impl.SQLMappingFactoryImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
 import it.unibz.inf.ontop.injection.QuestCoreSettings;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
@@ -42,7 +40,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
-import java.net.URI;
 import java.sql.Connection;
 import java.util.Properties;
 
@@ -67,9 +64,8 @@ public class LUBM50Tests {
 
 	String owlfile = "../quest-owlapi3/src/test/resources/test/lubm-ex-20-uni1/LUBM-ex-20.owl";
 
-	private static final MappingFactory MAPPING_FACTORY = MappingFactoryImpl.getInstance();
+	private static final SQLMappingFactory MAPPING_FACTORY = SQLMappingFactoryImpl.getInstance();
 	private final OWLOntology ontology;
-	private OBDADataSource source;
 	private final NativeQueryLanguageComponentFactory nativeQLFactory;
 
 	Logger log = LoggerFactory.getLogger(this.getClass());
@@ -108,13 +104,8 @@ public class LUBM50Tests {
 
 		ontology = config.loadProvidedInputOntology();
 
-		source = MAPPING_FACTORY.getDataSource(URI.create("http://www.obda.org/ABOXDUMP1testx1"));
-		source.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, driver);
-		source.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, password);
-		source.setParameter(RDBMSourceParameterConstants.DATABASE_URL, url);
-		source.setParameter(RDBMSourceParameterConstants.DATABASE_USERNAME, username);
-		source.setParameter(RDBMSourceParameterConstants.IS_IN_MEMORY, "false");
-		source.setParameter(RDBMSourceParameterConstants.USE_DATASOURCE_FOR_ABOXDUMP, "true");
+		// source.setParameter(RDBMSourceParameterConstants.IS_IN_MEMORY, "false");
+		// source.setParameter(RDBMSourceParameterConstants.USE_DATASOURCE_FOR_ABOXDUMP, "true");
 
 		nativeQLFactory = config.getInjector().getInstance(NativeQueryLanguageComponentFactory.class);
 
@@ -124,7 +115,7 @@ public class LUBM50Tests {
 
 		Connection conn = null;
 		try {
-			conn = JDBCConnectionManager.getJDBCConnectionManager().createConnection(source);
+			conn = JDBCConnectionManager.getJDBCConnectionManager().getConnection(config.getSettings());
 
 			SemanticIndexManager simanager = new SemanticIndexManager(ontology, conn, nativeQLFactory);
 
@@ -142,7 +133,7 @@ public class LUBM50Tests {
 
 		Connection conn = null;
 		try {
-			conn = JDBCConnectionManager.getJDBCConnectionManager().createConnection(source);
+			conn = JDBCConnectionManager.getJDBCConnectionManager().getConnection(config.getSettings());
 
 			SemanticIndexManager simanager = new SemanticIndexManager(ontology, conn, nativeQLFactory);
 

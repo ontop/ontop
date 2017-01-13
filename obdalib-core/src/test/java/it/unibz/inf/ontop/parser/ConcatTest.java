@@ -17,7 +17,9 @@ public class ConcatTest {
 
 	@Test
 	public void testConcat() throws DuplicateMappingException, InvalidMappingException, InvalidDataSourceException, IOException {
-		OBDACoreConfiguration configuration = OBDACoreConfiguration.defaultBuilder().build();
+		OBDACoreConfiguration configuration = OBDACoreConfiguration.defaultBuilder()
+				.propertyFile("src/test/resources/format/obda/mapping-northwind.properties")
+				.build();
 		Injector injector = configuration.getInjector();
 
 		NativeQueryLanguageComponentFactory nativeQLFactory = injector.getInstance(

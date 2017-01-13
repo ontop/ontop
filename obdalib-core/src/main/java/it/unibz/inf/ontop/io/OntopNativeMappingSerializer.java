@@ -6,10 +6,7 @@ import it.unibz.inf.ontop.renderer.SourceQueryRenderer;
 import it.unibz.inf.ontop.renderer.TargetQueryRenderer;
 import it.unibz.inf.ontop.sql.RDBMSMappingAxiom;
 
-import static it.unibz.inf.ontop.model.impl.RDBMSourceParameterConstants.*;
-
 import java.io.*;
-import java.net.URI;
 import java.util.List;
 import java.util.Map;
 
@@ -42,10 +39,7 @@ public class OntopNativeMappingSerializer {
     public void save(Writer writer) throws IOException {
         BufferedWriter bufferWriter = new BufferedWriter(writer);
         writePrefixDeclaration(bufferWriter);
-        for (OBDADataSource source : model.getSources()) {
-            writeSourceDeclaration(source, bufferWriter);
-            writeMappingDeclaration(source, bufferWriter);
-        }
+        writeMappingDeclaration(bufferWriter);
         bufferWriter.flush();
         bufferWriter.close();
     }
@@ -79,25 +73,13 @@ public class OntopNativeMappingSerializer {
         writer.write("\n");
     }
 
-    private void writeSourceDeclaration(OBDADataSource source, BufferedWriter writer) throws IOException {
-        writer.write(OntopNativeMappingParser.SOURCE_DECLARATION_TAG);
-        writer.write("\n");
-        writer.write(OntopNativeMappingParser.Label.sourceUri.name() + "\t" + source.getSourceID() + "\n");
-        writer.write(OntopNativeMappingParser.Label.connectionUrl.name() + "\t" + source.getParameter(DATABASE_URL) + "\n");
-        writer.write(OntopNativeMappingParser.Label.username.name() + "\t" + source.getParameter(DATABASE_USERNAME) + "\n");
-        writer.write(OntopNativeMappingParser.Label.password.name() + "\t" + source.getParameter(DATABASE_PASSWORD) + "\n");
-        writer.write(OntopNativeMappingParser.Label.driverClass.name() + "\t" + source.getParameter(DATABASE_DRIVER) + "\n");
-        writer.write("\n");
-    }
-
-    private void writeMappingDeclaration(OBDADataSource source, BufferedWriter writer) throws IOException {
-        final URI sourceUri = source.getSourceID();
+    private void writeMappingDeclaration(BufferedWriter writer) throws IOException {
 
         writer.write(OntopNativeMappingParser.MAPPING_DECLARATION_TAG + " " + OntopNativeMappingParser.START_COLLECTION_SYMBOL);
         writer.write("\n");
 
         boolean needLineBreak = false;
-        for (OBDAMappingAxiom axiom : model.getMappings(sourceUri)) {
+        for (OBDAMappingAxiom axiom : model.getMappings()) {
             if (!(axiom instanceof RDBMSMappingAxiom)) {
                 throw new IllegalArgumentException("The ontop native mapping serializer only supports RDBMSMappingAxioms");
             }

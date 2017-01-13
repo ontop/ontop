@@ -3,7 +3,7 @@ package it.unibz.inf.ontop.owlrefplatform.core;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 import it.unibz.inf.ontop.model.*;
-import it.unibz.inf.ontop.model.impl.MappingFactoryImpl;
+import it.unibz.inf.ontop.model.impl.SQLMappingFactoryImpl;
 import it.unibz.inf.ontop.injection.QuestCoreSettings;
 import it.unibz.inf.ontop.sql.ImplicitDBConstraintsReader;
 import net.sf.jsqlparser.JSQLParserException;
@@ -14,7 +14,6 @@ import org.apache.tomcat.jdbc.pool.PoolProperties;
 import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
 import it.unibz.inf.ontop.mapping.MappingSplitter;
 
-import it.unibz.inf.ontop.model.impl.RDBMSourceParameterConstants;
 import it.unibz.inf.ontop.nativeql.DBMetadataException;
 import it.unibz.inf.ontop.nativeql.DBMetadataExtractor;
 import it.unibz.inf.ontop.nativeql.JDBCConnectionWrapper;
@@ -36,7 +35,7 @@ import java.util.stream.Collectors;
  */
 public class JDBCConnector implements DBConnector {
 
-    private static final MappingFactory MAPPING_FACTORY = MappingFactoryImpl.getInstance();
+    private static final SQLMappingFactory MAPPING_FACTORY = SQLMappingFactoryImpl.getInstance();
 
     private final IQuest questInstance;
     private final QuestCoreSettings questCoreSettings;
@@ -52,10 +51,10 @@ public class JDBCConnector implements DBConnector {
      * Also injected in the DBMetadataExtractor. Only useful here if the DBMetadata is pre-defined.
      */
     private final ImplicitDBConstraintsReader userConstraints;
+    private final QuestCoreSettings settings;
 
     /* The active connection used to get metadata from the DBMS */
     private transient Connection localConnection;
-    private final OBDADataSource obdaSource;
 
     private final Logger log = LoggerFactory.getLogger(JDBCConnector.class);
     private PoolProperties poolProperties;
@@ -76,20 +75,20 @@ public class JDBCConnector implements DBConnector {
      * TODO: see if we can ignore the questInstance
      */
     @Inject
-    private JDBCConnector(@Assisted OBDADataSource obdaDataSource, @Assisted IQuest questInstance,
+    private JDBCConnector(@Assisted IQuest questInstance,
                           NativeQueryLanguageComponentFactory nativeQLFactory,
-                          QuestCoreSettings preferences,
+                          QuestCoreSettings settings,
                           @Nullable ImplicitDBConstraintsReader userConstraints) {
-        this.questCoreSettings = preferences;
-        this.obdaSource = obdaDataSource;
+        this.questCoreSettings = settings;
         this.questInstance = questInstance;
         this.nativeQLFactory = nativeQLFactory;
-        keepAlive = preferences.isKeepAliveEnabled();
-        removeAbandoned = preferences.isRemoveAbandonedEnabled();
-        abandonedTimeout = preferences.getAbandonedTimeout();
-        startPoolSize = preferences.getConnectionPoolInitialSize();
-        maxPoolSize = preferences.getConnectionPoolMaxSize();
+        keepAlive = settings.isKeepAliveEnabled();
+        removeAbandoned = settings.isRemoveAbandonedEnabled();
+        abandonedTimeout = settings.getAbandonedTimeout();
+        startPoolSize = settings.getConnectionPoolInitialSize();
+        maxPoolSize = settings.getConnectionPoolMaxSize();
         this.userConstraints = userConstraints;
+        this.settings = settings;
 
         setupConnectionPool();
     }
@@ -108,17 +107,14 @@ public class JDBCConnector implements DBConnector {
             if (localConnection != null && !localConnection.isClosed()) {
                 return true;
             }
-            String url = obdaSource.getParameter(RDBMSourceParameterConstants.DATABASE_URL);
-            String username = obdaSource.getParameter(RDBMSourceParameterConstants.DATABASE_USERNAME);
-            String password = obdaSource.getParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD);
-            String driver = obdaSource.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER);
 
             try {
-                Class.forName(driver);
+                Class.forName(settings.getJdbcDriver());
             } catch (ClassNotFoundException e1) {
                 // Does nothing because the SQLException handles this problem also.
             }
-            localConnection = DriverManager.getConnection(url, username, password);
+            localConnection = DriverManager.getConnection(settings.getJdbcUrl(),
+                    settings.getDBUser(), settings.getDbPassword());
 
             if (localConnection != null) {
                 return true;
@@ -158,14 +154,14 @@ public class JDBCConnector implements DBConnector {
     @Override
     public DBMetadata extractDBMetadata(OBDAModel obdaModel) throws DBMetadataException {
         DBMetadataExtractor dataSourceMetadataExtractor = nativeQLFactory.create();
-        return dataSourceMetadataExtractor.extract(obdaSource, obdaModel, new JDBCConnectionWrapper(localConnection));
+        return dataSourceMetadataExtractor.extract(obdaModel, new JDBCConnectionWrapper(localConnection));
     }
 
     @Override
     public DBMetadata extractDBMetadata(OBDAModel obdaModel, DBMetadata partiallyDefinedMetadata)
             throws DBMetadataException {
         DBMetadataExtractor dataSourceMetadataExtractor = nativeQLFactory.create();
-        return dataSourceMetadataExtractor.extract(obdaSource, obdaModel, new JDBCConnectionWrapper(localConnection),
+        return dataSourceMetadataExtractor.extract(obdaModel, new JDBCConnectionWrapper(localConnection),
                 partiallyDefinedMetadata);
     }
 
@@ -183,16 +179,12 @@ public class JDBCConnector implements DBConnector {
     }
 
     private void setupConnectionPool() {
-        String url = obdaSource.getParameter(RDBMSourceParameterConstants.DATABASE_URL);
-        String username = obdaSource.getParameter(RDBMSourceParameterConstants.DATABASE_USERNAME);
-        String password = obdaSource.getParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD);
-        String driver = obdaSource.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER);
-
+        String driver = settings.getJdbcDriver();
         poolProperties = new PoolProperties();
-        poolProperties.setUrl(url);
+        poolProperties.setUrl(settings.getJdbcUrl());
         poolProperties.setDriverClassName(driver);
-        poolProperties.setUsername(username);
-        poolProperties.setPassword(password);
+        poolProperties.setUsername(settings.getDBUser());
+        poolProperties.setPassword(settings.getDbPassword());
         poolProperties.setJmxEnabled(true);
 
         // TEST connection before using it
@@ -253,21 +245,17 @@ public class JDBCConnector implements DBConnector {
     protected Connection getSQLConnection() throws OBDAException {
         Connection conn;
 
-        String url = obdaSource.getParameter(RDBMSourceParameterConstants.DATABASE_URL);
-        String username = obdaSource.getParameter(RDBMSourceParameterConstants.DATABASE_USERNAME);
-        String password = obdaSource.getParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD);
-        String driver = obdaSource.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER);
-
         // if (driver.contains("mysql")) {
         // url = url + "?relaxAutoCommit=true";
         // }
         try {
-            Class.forName(driver);
+            Class.forName(settings.getJdbcDriver());
         } catch (ClassNotFoundException e1) {
             log.debug(e1.getMessage());
         }
         try {
-            conn = DriverManager.getConnection(url, username, password);
+            conn = DriverManager.getConnection(settings.getJdbcUrl(),
+                    settings.getDBUser(), settings.getDbPassword());
         } catch (SQLException e) {
             throw new OBDAException(e);
         } catch (Exception e) {

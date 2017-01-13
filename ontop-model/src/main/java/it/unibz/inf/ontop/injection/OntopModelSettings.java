@@ -12,19 +12,12 @@ public interface OntopModelSettings {
 
     boolean isTestModeEnabled();
 
-
-    //-------------------
-    // Low-level methods
-    //-------------------
-
-    Optional<Boolean> getBoolean(String key);
-    boolean getRequiredBoolean(String key);
-
-    Optional<Integer> getInteger(String key);
-    int getRequiredInteger(String key);
-
+    /**
+     * Not for end-users!
+     *
+     * Please avoid using that class.
+     */
     Optional<String> getProperty(String key);
-    String getRequiredProperty(String key);
 
     boolean contains(Object key);
 

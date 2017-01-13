@@ -258,7 +258,8 @@ public class QuestCoreConfigurationImpl extends OBDACoreConfigurationImpl implem
             OBDAConfigurationOptions obdaOptions = generateOBDACoreOptions();
 
             return questCoreBuilderFragment.generateQuestCoreOptions(obdaOptions,
-                    optimizationBuilderFragment.generateOntopOptimizationConfigurationOptions(obdaOptions.modelOptions));
+                    optimizationBuilderFragment.generateOntopOptimizationConfigurationOptions(
+                            obdaOptions.sqlOptions.modelOptions));
         }
     }
 

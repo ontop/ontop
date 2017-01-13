@@ -54,8 +54,9 @@ public class BindTestWithFunctions {
 
 	private Connection conn;
 
-	final String owlfile = "src/test/resources/test/bind/sparqlBind.owl";
-	final String obdafile = "src/test/resources/test/bind/sparqlBindWithFunctions.obda";
+	private static final String owlfile = "src/test/resources/test/bind/sparqlBind.owl";
+	private static final String obdafile = "src/test/resources/test/bind/sparqlBindWithFunctions.obda";
+	private static final String propertyFile = "src/test/resources/test/bind/sparqlBindWithFunctions.properties";
 
     @Before
 	public void setUp() throws Exception {
@@ -120,6 +121,7 @@ public class BindTestWithFunctions {
         QuestConfiguration config = QuestConfiguration.defaultBuilder()
                 .nativeOntopMappingFile(obdafile)
                 .ontologyFile(owlfile)
+                .propertyFile(propertyFile)
                 .build();
         QuestOWL reasoner = factory.createReasoner(config);
 
@@ -784,6 +786,7 @@ public class BindTestWithFunctions {
         QuestConfiguration config = QuestConfiguration.defaultBuilder()
                 .nativeOntopMappingFile(obdafile)
                 .ontologyFile(owlfile)
+                .propertyFile(propertyFile)
                 .build();
         QuestOWL reasoner = factory.createReasoner(config);
 

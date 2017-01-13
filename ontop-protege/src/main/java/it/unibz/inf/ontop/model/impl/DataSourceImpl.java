@@ -39,7 +39,7 @@ public class DataSourceImpl implements OBDADataSource {
 
 	/**
 	 * Creates a new DataSource object
-	 * 
+	 *
 	 * @param uri
 	 *            The URI of the data source
 	 * @param name
@@ -49,7 +49,7 @@ public class DataSourceImpl implements OBDADataSource {
 		this.id = id;
 		parameters = new Properties();
 	}
-	
+
 	@Override
 	public void setParameter(String parameter_uri, String value) {
 		this.parameters.setProperty(parameter_uri, value);
@@ -101,7 +101,7 @@ public class DataSourceImpl implements OBDADataSource {
 		return d2.id.equals(this.id);
 
 	}
-	
+
 	@Override
 	public void setEnabled(boolean enabled) {
 		this.enabled = enabled;

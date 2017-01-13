@@ -32,13 +32,16 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.common.io.Resources;
+import it.unibz.inf.ontop.exception.InvalidMappingException;
 import it.unibz.inf.ontop.injection.OBDASettings;
 import it.unibz.inf.ontop.injection.QuestConfiguration;
-import it.unibz.inf.ontop.model.MappingFactory;
-import it.unibz.inf.ontop.model.OBDADataSource;
-import it.unibz.inf.ontop.model.impl.MappingFactoryImpl;
-import it.unibz.inf.ontop.model.impl.RDBMSourceParameterConstants;
+import it.unibz.inf.ontop.injection.QuestConfiguration.Builder;
+import it.unibz.inf.ontop.io.InvalidDataSourceException;
+import it.unibz.inf.ontop.model.OBDAModel;
+import it.unibz.inf.ontop.model.SQLMappingFactory;
+import it.unibz.inf.ontop.model.impl.SQLMappingFactoryImpl;
 import it.unibz.inf.ontop.injection.QuestCoreSettings;
+import it.unibz.inf.ontop.owlapi.directmapping.DirectMappingEngine;
 import it.unibz.inf.ontop.rdf4j.repository.OntopVirtualRepository;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -65,6 +68,8 @@ import org.eclipse.rdf4j.rio.Rio;
 import org.eclipse.rdf4j.rio.helpers.RDFHandlerBase;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLOntology;
+import org.semanticweb.owlapi.model.OWLOntologyCreationException;
+import org.semanticweb.owlapi.model.OWLOntologyStorageException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -100,7 +105,7 @@ public class RDB2RDFTest {
 
 	private static OWLOntology EMPTY_ONT;
 	private static Properties PROPERTIES;
-	private static final MappingFactory MAPPING_FACTORY = MappingFactoryImpl.getInstance();
+	private static final SQLMappingFactory MAPPING_FACTORY = SQLMappingFactoryImpl.getInstance();
 
 	private static final String JDBC_URL = "jdbc:h2:mem:questrepository";
 	private static final String DB_USER = "sa";
@@ -260,35 +265,57 @@ public class RDB2RDFTest {
 	protected Repository createRepository() throws Exception {
 		logger.info("RDB2RDFTest " + name + " " + mappingFile);
 
-		QuestConfiguration.Builder configBuilder = QuestConfiguration.defaultBuilder()
-				.properties(PROPERTIES)
-				.ontology(EMPTY_ONT);
+		QuestConfiguration configuration;
 		if (mappingFile != null) {
 			String absoluteFilePath = Optional.ofNullable(getClass().getResource(mappingFile))
 					.map(URL::getFile)
 					.orElseThrow(() -> new IllegalArgumentException("The mappingFile " + mappingFile
 							+ " has not been found"));
-			configBuilder.r2rmlMappingFile(absoluteFilePath);
+			configuration = createStandardConfigurationBuilder()
+					.r2rmlMappingFile(absoluteFilePath)
+					.build();
 		}
 		else {
-			configBuilder.bootstrapMapping(getMemOBDADataSource(), BASE_IRI);
+			configuration = bootstrapDMConfiguration();
 		}
-		OntopVirtualRepository repo = new OntopVirtualRepository(name, configBuilder.build());
+		OntopVirtualRepository repo = new OntopVirtualRepository(name, configuration);
 		repo.initialize();
 		return repo;
 	}
 
-	private static OBDADataSource getMemOBDADataSource() {
+	Builder<Builder<Builder<Builder<Builder<Builder<Builder<Builder<Builder<Builder<Builder>>>>>>>>>> createStandardConfigurationBuilder() {
+		  return QuestConfiguration.defaultBuilder()
+				 .properties(PROPERTIES)
+				 .ontology(EMPTY_ONT);
+	}
 
-		OBDADataSource obdaSource = MAPPING_FACTORY.getDataSource(java.net.URI.create("http://www.obda.org/ABOXDUMP" + System.currentTimeMillis()));
-		obdaSource.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, JDBC_DRIVER);
-		obdaSource.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, DB_PASSWORD);
-		obdaSource.setParameter(RDBMSourceParameterConstants.DATABASE_URL, JDBC_URL);
-		obdaSource.setParameter(RDBMSourceParameterConstants.DATABASE_USERNAME, DB_USER);
-		obdaSource.setParameter(RDBMSourceParameterConstants.IS_IN_MEMORY, "true");
-		obdaSource.setParameter(RDBMSourceParameterConstants.USE_DATASOURCE_FOR_ABOXDUMP, "true");
+	Builder<? extends Builder> createInMemoryBuilder() {
+		return createStandardConfigurationBuilder()
+				.dbName("http://www.obda.org/ABOXDUMP" + System.currentTimeMillis())
+				.jdbcUrl(JDBC_URL)
+				.jdbcDriver(JDBC_DRIVER)
+				.dbUser(DB_USER)
+				.dbPassword(DB_PASSWORD);
+		// TODO: re-enable these options
+		//obdaSource.setParameter(RDBMSourceParameterConstants.IS_IN_MEMORY, "true");
+		//obdaSource.setParameter(RDBMSourceParameterConstants.USE_DATASOURCE_FOR_ABOXDUMP, "true");
+	}
 
-		return obdaSource;
+	/**
+	 * Bootstraps the mapping and returns a new configuration
+	 */
+	QuestConfiguration bootstrapDMConfiguration()
+			throws SQLException, IOException, InvalidMappingException, OWLOntologyStorageException,
+			InvalidDataSourceException, OWLOntologyCreationException {
+
+		QuestConfiguration initialConfiguration = createInMemoryBuilder().build();
+		DirectMappingEngine.BootstrappingResults results = DirectMappingEngine.bootstrap(initialConfiguration, BASE_IRI);
+
+		OBDAModel bootstrappedMapping = results.getMapping();
+
+		return createInMemoryBuilder()
+				.obdaModel(bootstrappedMapping)
+				.build();
 	}
 
 	protected static void clearDB() throws Exception {

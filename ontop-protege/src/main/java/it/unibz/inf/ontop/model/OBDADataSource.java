@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.model.impl;
+package it.unibz.inf.ontop.model;
 
 /*
  * #%L
@@ -20,19 +20,30 @@ package it.unibz.inf.ontop.model.impl;
  * #L%
  */
 
-public class RDBMSourceParameterConstants {
+import java.net.URI;
+import java.util.Set;
 
-	public static final String	DATABASE_USERNAME			= "databaseUsername";
-	
-	public static final String	DATABASE_PASSWORD			= "databasePassword";
-	
-	public static final String	DATABASE_DRIVER				= "databaseDriver";
-	
-	public static final String	DATABASE_URL				= "databaseURL";
-	
-	public static final String	ONTOLOGY_URI				= "ontouri";
-	
-	public static final String	USE_DATASOURCE_FOR_ABOXDUMP	= "use_datasource_for_aboxdump";
-	
-	public static final String	IS_IN_MEMORY				= "is_in_memory";
+public interface OBDADataSource {
+
+    @Deprecated
+	public abstract void setParameter(String parameter_uri, String value);
+
+	public abstract URI getSourceID();
+
+    @Deprecated
+	public abstract void setNewID(URI newid);
+
+	public abstract String getParameter(String parameter_uri);
+
+	public abstract Set<Object> getParameters();
+
+	public abstract void setEnabled(boolean enabled);
+
+	public abstract boolean isEnabled();
+
+	public abstract void setRegistered(boolean registered);
+
+	public abstract boolean isRegistered();
+
+	public Object clone();
 }

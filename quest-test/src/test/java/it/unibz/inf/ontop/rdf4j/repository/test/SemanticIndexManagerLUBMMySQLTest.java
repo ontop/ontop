@@ -21,24 +21,16 @@ package it.unibz.inf.ontop.rdf4j.repository.test;
  */
 
 import java.io.File;
-import java.net.URI;
 import java.sql.Connection;
 import java.util.Properties;
 
 import com.google.inject.Injector;
-import it.unibz.inf.ontop.injection.OBDACoreConfiguration;
-import it.unibz.inf.ontop.injection.QuestConfiguration;
-import it.unibz.inf.ontop.model.MappingFactory;
-import it.unibz.inf.ontop.model.impl.MappingFactoryImpl;
+import it.unibz.inf.ontop.injection.*;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import junit.framework.TestCase;
 
-import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
 import it.unibz.inf.ontop.io.QueryIOManager;
-import it.unibz.inf.ontop.model.OBDADataSource;
-import it.unibz.inf.ontop.model.impl.RDBMSourceParameterConstants;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.inf.ontop.injection.QuestCoreSettings;
 import it.unibz.inf.ontop.querymanager.QueryController;
 import it.unibz.inf.ontop.querymanager.QueryControllerEntity;
 import it.unibz.inf.ontop.querymanager.QueryControllerQuery;
@@ -64,10 +56,9 @@ public class SemanticIndexManagerLUBMMySQLTest extends TestCase {
 	
 	String owlfile = "../quest-owlapi3/src/test/resources/test/lubm-ex-20-uni1/University0_0.owl";
 
-	private static final MappingFactory MAPPING_FACTORY = MappingFactoryImpl.getInstance();
 	private OWLOntology ontology;
 	private OWLOntologyManager manager;
-	private OBDADataSource source;
+	private final OntopSQLSettings settings;
 	
 	Logger log = LoggerFactory.getLogger(this.getClass());
 
@@ -75,15 +66,19 @@ public class SemanticIndexManagerLUBMMySQLTest extends TestCase {
 		manager = OWLManager.createOWLOntologyManager();
 		ontology = manager.loadOntologyFromOntologyDocument(new File(owlfile));
 
-		source = MAPPING_FACTORY.getDataSource(URI.create("http://www.obda.org/ABOXDUMP1testx1"));
-		source.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, driver);
-		source.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, password);
-		source.setParameter(RDBMSourceParameterConstants.DATABASE_URL, url);
-		source.setParameter(RDBMSourceParameterConstants.DATABASE_USERNAME, username);
-		source.setParameter(RDBMSourceParameterConstants.IS_IN_MEMORY, "false");
-		source.setParameter(RDBMSourceParameterConstants.USE_DATASOURCE_FOR_ABOXDUMP, "true");
+		OBDACoreConfiguration configuration = OBDACoreConfiguration.defaultBuilder()
+				.jdbcUrl(url)
+				.dbUser(username)
+				.dbPassword(password)
+				.jdbcDriver(driver)
+				.build();
 
-		Injector injector = OBDACoreConfiguration.defaultBuilder().build().getInjector();
+		// TODO: re-enable them
+		// source.setParameter(RDBMSourceParameterConstants.IS_IN_MEMORY, "false");
+		// source.setParameter(RDBMSourceParameterConstants.USE_DATASOURCE_FOR_ABOXDUMP, "true");
+
+		settings = configuration.getSettings();
+		Injector injector = configuration.getInjector();
 		nativeQLFactory = injector.getInstance(NativeQueryLanguageComponentFactory.class);
 	}
 
@@ -91,7 +86,7 @@ public class SemanticIndexManagerLUBMMySQLTest extends TestCase {
 	public void setUp() throws Exception {
 		Connection conn = null;
 		try {
-			conn = JDBCConnectionManager.getJDBCConnectionManager().createConnection(source);
+			conn = JDBCConnectionManager.getJDBCConnectionManager().createConnection(settings);
 			SemanticIndexManager simanager = new SemanticIndexManager(ontology, conn, nativeQLFactory);
 			simanager.setupRepository(true);
 		} catch (Exception e) {
@@ -107,7 +102,7 @@ public class SemanticIndexManagerLUBMMySQLTest extends TestCase {
 	public void tearDown() {
 		Connection conn = null;
 		try {
-			conn = JDBCConnectionManager.getJDBCConnectionManager().createConnection(source);
+			conn = JDBCConnectionManager.getJDBCConnectionManager().createConnection(settings);
 
 			SemanticIndexManager simanager = new SemanticIndexManager(ontology, conn, nativeQLFactory);
 			simanager.dropRepository();
@@ -128,7 +123,7 @@ public class SemanticIndexManagerLUBMMySQLTest extends TestCase {
 		
 		Connection conn = null;
 		try {
-			conn = JDBCConnectionManager.getJDBCConnectionManager().createConnection(source);
+			conn = JDBCConnectionManager.getJDBCConnectionManager().createConnection(settings);
 			SemanticIndexManager simanager = new SemanticIndexManager(ontology, conn, nativeQLFactory);
 			//simanager.restoreRepository();
 			int inserts = simanager.insertData(ontology, 20000, 5000);

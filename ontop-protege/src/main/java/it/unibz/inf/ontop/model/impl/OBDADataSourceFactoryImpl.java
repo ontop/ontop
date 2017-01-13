@@ -1,22 +1,23 @@
 package it.unibz.inf.ontop.model.impl;
 
+
 import com.google.common.base.Preconditions;
-import it.unibz.inf.ontop.model.MappingFactory;
 import it.unibz.inf.ontop.model.OBDADataSource;
+import it.unibz.inf.ontop.model.OBDADataSourceFactory;
 
 import java.net.URI;
 import java.util.UUID;
 
-public class MappingFactoryImpl implements MappingFactory {
+public class OBDADataSourceFactoryImpl implements OBDADataSourceFactory {
 
-    private static MappingFactory INSTANCE = null;
+    private static OBDADataSourceFactory INSTANCE = null;
 
-    private MappingFactoryImpl() {
+    private OBDADataSourceFactoryImpl() {
     }
 
-    public static MappingFactory getInstance() {
+    public static OBDADataSourceFactory getInstance() {
         if (INSTANCE == null)
-            INSTANCE = new MappingFactoryImpl();
+            INSTANCE = new OBDADataSourceFactoryImpl();
         return INSTANCE;
     }
 
@@ -49,8 +50,4 @@ public class MappingFactoryImpl implements MappingFactory {
         return source;
     }
 
-    @Override
-    public SQLQueryImpl getSQLQuery(String query) {
-        return new SQLQueryImpl(query);
-    }
 }

@@ -20,14 +20,14 @@ import java.util.Optional;
 import java.util.Properties;
 import java.util.stream.Stream;
 
-public class OBDACoreConfigurationImpl extends OntopModelConfigurationImpl implements OBDACoreConfiguration {
+public class OBDACoreConfigurationImpl extends OntopSQLConfigurationImpl implements OBDACoreConfiguration {
 
     private final OBDASettings settings;
     private final OBDAConfigurationOptions options;
 
     protected OBDACoreConfigurationImpl(OBDASettings settings,
                                         OBDAConfigurationOptions options) {
-        super(settings, options.modelOptions);
+        super(settings, options.sqlOptions);
         this.settings = settings;
         this.options = options;
     }
@@ -134,18 +134,18 @@ public class OBDACoreConfigurationImpl extends OntopModelConfigurationImpl imple
         public final Optional<Model> mappingGraph;
         public final Optional<OBDAModel> predefinedMappingModel;
         public final Optional<ImplicitDBConstraintsReader> implicitDBConstraintsReader;
-        public final OntopModelConfigurationOptions modelOptions;
+        public final OntopSQLOptions sqlOptions;
 
         public OBDAConfigurationOptions(Optional<File> mappingFile, Optional<Reader> mappingReader, Optional<Model> mappingGraph,
                                         Optional<OBDAModel> predefinedMappingModel,
                                         Optional<ImplicitDBConstraintsReader> implicitDBConstraintsReader,
-                                        OntopModelConfigurationOptions modelOptions) {
+                                        OntopSQLOptions sqlOptions) {
             this.mappingFile = mappingFile;
             this.mappingReader = mappingReader;
             this.mappingGraph = mappingGraph;
             this.predefinedMappingModel = predefinedMappingModel;
             this.implicitDBConstraintsReader = implicitDBConstraintsReader;
-            this.modelOptions = modelOptions;
+            this.sqlOptions = sqlOptions;
         }
     }
 
@@ -345,52 +345,99 @@ public class OBDACoreConfigurationImpl extends OntopModelConfigurationImpl imple
             }
         }
 
-        protected final OBDAConfigurationOptions generateOBDACoreOptions(OntopModelConfigurationOptions modelOptions) {
+        protected final OBDAConfigurationOptions generateOBDACoreOptions(OntopSQLOptions sqlOptions) {
             return new OBDAConfigurationOptions(mappingFile, mappingReader, mappingGraph, obdaModel, userConstraints,
-                    modelOptions);
+                    sqlOptions);
         }
     }
 
-    protected static abstract class OBDACoreConfigurationBuilderMixin<B extends OBDACoreConfiguration.Builder>
-            extends DefaultOBDACoreBuilderFragment<B>
+    protected abstract static class OBDACoreConfigurationBuilderMixin<B extends OBDACoreConfiguration.Builder>
+            extends OntopSQLBuilderMixin<B>
             implements OBDACoreConfiguration.Builder<B> {
 
-        private final DefaultOntopModelBuilderFragment<B> modelBuilderFragment;
+        private final DefaultOBDACoreBuilderFragment<B> obdaBuilderFragment;
 
         protected OBDACoreConfigurationBuilderMixin() {
-            modelBuilderFragment = new DefaultOntopModelBuilderFragment<>((B) this);
-        }
-
-        @Override
-        public B properties(@Nonnull Properties properties) {
-            return modelBuilderFragment.properties(properties);
-        }
-
-        @Override
-        public B propertyFile(String propertyFilePath) {
-            return modelBuilderFragment.propertyFile(propertyFilePath);
-        }
-
-        @Override
-        public B propertyFile(File propertyFile) {
-            return modelBuilderFragment.propertyFile(propertyFile);
-        }
-
-        @Override
-        public B enableTestMode() {
-            return modelBuilderFragment.enableTestMode();
+            obdaBuilderFragment = new DefaultOBDACoreBuilderFragment<B>((B) this) {
+            };
         }
 
         @Override
         protected Properties generateProperties() {
             Properties properties = super.generateProperties();
-            properties.putAll(modelBuilderFragment.generateProperties());
+            properties.putAll(obdaBuilderFragment.generateProperties());
 
             return properties;
         }
 
-        protected final OBDAConfigurationOptions generateOBDACoreOptions() {
-            return generateOBDACoreOptions(modelBuilderFragment.generateModelOptions());
+        protected boolean isR2rml() {
+            return obdaBuilderFragment.isR2rml();
+        }
+
+        protected final void setMappingFile(String mappingFilename) {
+            obdaBuilderFragment.setMappingFile(mappingFilename);
+        }
+
+        protected final void declareMappingDefined() {
+            obdaBuilderFragment.declareMappingDefined();
+        }
+
+        protected final boolean isMappingDefined() {
+            return obdaBuilderFragment.isMappingDefined();
+        }
+
+        final OBDAConfigurationOptions generateOBDACoreOptions() {
+            return obdaBuilderFragment.generateOBDACoreOptions(generateSQLOptions());
+        }
+
+        @Override
+        public B obdaModel(@Nonnull OBDAModel obdaModel) {
+            return obdaBuilderFragment.obdaModel(obdaModel);
+        }
+
+        @Override
+        public B nativeOntopMappingFile(@Nonnull File mappingFile) {
+            return obdaBuilderFragment.nativeOntopMappingFile(mappingFile);
+        }
+
+        @Override
+        public B nativeOntopMappingFile(@Nonnull String mappingFilename) {
+            return obdaBuilderFragment.nativeOntopMappingFile(mappingFilename);
+        }
+
+        @Override
+        public B nativeOntopMappingReader(@Nonnull Reader mappingReader) {
+            return obdaBuilderFragment.nativeOntopMappingReader(mappingReader);
+        }
+
+        @Override
+        public B r2rmlMappingFile(@Nonnull File mappingFile) {
+            return obdaBuilderFragment.r2rmlMappingFile(mappingFile);
+        }
+
+        @Override
+        public B r2rmlMappingFile(@Nonnull String mappingFilename) {
+            return obdaBuilderFragment.r2rmlMappingFile(mappingFilename);
+        }
+
+        @Override
+        public B r2rmlMappingReader(@Nonnull Reader mappingReader) {
+            return obdaBuilderFragment.r2rmlMappingReader(mappingReader);
+        }
+
+        @Override
+        public B r2rmlMappingGraph(@Nonnull Model rdfGraph) {
+            return obdaBuilderFragment.r2rmlMappingGraph(rdfGraph);
+        }
+
+        @Override
+        public B dbConstraintsReader(@Nonnull ImplicitDBConstraintsReader constraints) {
+            return obdaBuilderFragment.dbConstraintsReader(constraints);
+        }
+
+        @Override
+        public B enableFullMetadataExtraction(boolean obtainFullMetadata) {
+            return obdaBuilderFragment.enableFullMetadataExtraction(obtainFullMetadata);
         }
     }
 

@@ -25,7 +25,7 @@ import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
 import it.unibz.inf.ontop.injection.OBDACoreConfiguration;
 import it.unibz.inf.ontop.io.PrefixManager;
 import it.unibz.inf.ontop.model.*;
-import it.unibz.inf.ontop.model.impl.MappingFactoryImpl;
+import it.unibz.inf.ontop.model.impl.SQLMappingFactoryImpl;
 import it.unibz.inf.ontop.parser.TurtleOBDASyntaxParser;
 import it.unibz.inf.ontop.sql.RDBMetadata;
 import it.unibz.inf.ontop.sql.RDBMetadataExtractionTools;
@@ -42,7 +42,7 @@ import java.util.List;
 
 public class Mapping2DatalogConverterTest extends TestCase {
 
-	private static final MappingFactory MAPPING_FACTORY = MappingFactoryImpl.getInstance();
+	private static final SQLMappingFactory MAPPING_FACTORY = SQLMappingFactoryImpl.getInstance();
     private final NativeQueryLanguageComponentFactory factory;
 	private final Injector injector;
 

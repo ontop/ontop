@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.model;
+package it.unibz.inf.ontop.model.impl;
 
 /*
  * #%L
@@ -20,30 +20,19 @@ package it.unibz.inf.ontop.model;
  * #L%
  */
 
-import java.net.URI;
-import java.util.Set;
+import it.unibz.inf.ontop.injection.OntopSQLSettings;
 
-public interface OBDADataSource {
+public class RDBMSourceParameterConstants {
 
-    @Deprecated
-	public abstract void setParameter(String parameter_uri, String value);
-
-	public abstract URI getSourceID();
-
-    @Deprecated
-	public abstract void setNewID(URI newid);
-
-	public abstract String getParameter(String parameter_uri);
-
-	public abstract Set<Object> getParameters();
-
-	public abstract void setEnabled(boolean enabled);
-
-	public abstract boolean isEnabled();
-
-	public abstract void setRegistered(boolean registered);
-
-	public abstract boolean isRegistered();
+	public static final String	DATABASE_USERNAME			= OntopSQLSettings.DB_USER;
 	
-	public Object clone();
+	public static final String	DATABASE_PASSWORD			= OntopSQLSettings.DB_PASSWORD;
+	
+	public static final String	DATABASE_DRIVER				= OntopSQLSettings.JDBC_DRIVER;
+	
+	public static final String	DATABASE_URL				= OntopSQLSettings.JDBC_URL;
+	
+	public static final String	USE_DATASOURCE_FOR_ABOXDUMP	= "use_datasource_for_aboxdump";
+	
+	public static final String	IS_IN_MEMORY				= "is_in_memory";
 }

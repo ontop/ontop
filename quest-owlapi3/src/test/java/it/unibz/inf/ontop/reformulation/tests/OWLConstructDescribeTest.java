@@ -54,7 +54,7 @@ public class OWLConstructDescribeTest{
 //			String username = "sa";
 //			String password = "";
 //
-//			OBDADataSource source = fac.getDataSource(URI.create("http://www.obda.org/ABOXDUMP1testx1"));
+//			OBDADataSource source = fac.getJDBCDataSource(URI.create("http://www.obda.org/ABOXDUMP1testx1"));
 //			source.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, driver);
 //			source.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, password);
 //			source.setParameter(RDBMSourceParameterConstants.DATABASE_URL, url);

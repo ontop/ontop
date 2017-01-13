@@ -39,7 +39,6 @@ import it.unibz.inf.ontop.ontology.OntologyVocabulary;
 import it.unibz.inf.ontop.ontology.impl.OntologyFactoryImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.*;
 
-import java.net.URI;
 import java.sql.SQLException;
 import java.util.*;
 
@@ -129,10 +128,6 @@ public class QuestMaterializer {
 		Injector injector = configuration.getInjector();
 		questComponentFactory = injector.getInstance(QuestComponentFactory.class);
 
-		if (this.model.getSources()!= null && this.model.getSources().size() > 1)
-			throw new Exception("Cannot materialize with multiple data sources!");
-
-
         //start a quest instance
 		if (ontology == null) {
 			OntologyVocabulary vb = ofac.createVocabulary();
@@ -219,14 +214,11 @@ public class QuestMaterializer {
         }
         else {
             //from mapping undeclared predicates (can happen)
-            for (URI uri : this.model.getMappings().keySet()){
-                for (OBDAMappingAxiom axiom : this.model.getMappings(uri))
-                {
-                    List<Function> rule = axiom.getTargetQuery();
-                    for (Function f: rule)
-                        vocabulary.add(f.getFunctionSymbol());
-                }
-            }
+			for (OBDAMappingAxiom axiom : this.model.getMappings()) {
+				List<Function> rule = axiom.getTargetQuery();
+				for (Function f : rule)
+					vocabulary.add(f.getFunctionSymbol());
+			}
         }
 
         return vocabulary;

@@ -31,7 +31,6 @@ import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.injection.*;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.io.PrefixManager;
-import it.unibz.inf.ontop.model.impl.MappingFactoryImpl;
 import it.unibz.inf.ontop.ontology.ImmutableOntologyVocabulary;
 import it.unibz.inf.ontop.owlrefplatform.core.abox.RDBMSSIRepositoryManager;
 import it.unibz.inf.ontop.owlrefplatform.core.abox.RepositoryChangedListener;
@@ -45,7 +44,6 @@ import it.unibz.inf.ontop.owlrefplatform.core.reformulation.TreeWitnessRewriter;
 import it.unibz.inf.ontop.owlrefplatform.core.srcquerygeneration.NativeQueryGenerator;
 import it.unibz.inf.ontop.owlrefplatform.core.translator.MappingVocabularyFixer;
 
-import it.unibz.inf.ontop.model.impl.RDBMSourceParameterConstants;
 import it.unibz.inf.ontop.ontology.Ontology;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.VocabularyValidator;
 import it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing.TMappingExclusionConfig;
@@ -56,7 +54,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.Serializable;
-import java.net.URI;
 import java.security.InvalidParameterException;
 import java.sql.*;
 import java.util.*;
@@ -64,7 +61,6 @@ import java.util.*;
 public class Quest implements Serializable, IQuest {
 
 	private static final long serialVersionUID = -6074403119825754295L;
-	private static final MappingFactory MAPPING_FACTORY = MappingFactoryImpl.getInstance();
 
 	// Whether to print primary and foreign keys to stdout.
 	private boolean printKeys;
@@ -135,8 +131,6 @@ public class Quest implements Serializable, IQuest {
 	private boolean isVirtualMode = true;
 
 	private Optional<String> aboxSchemaType = Optional.empty();
-
-	private OBDADataSource obdaSource;
 
 	private QuestCoreSettings preferences;
 
@@ -253,8 +247,7 @@ public class Quest implements Serializable, IQuest {
 			//TODO: add the prefix.
 			PrefixManager defaultPrefixManager = nativeQLFactory.create(new HashMap<String, String>());
 
-			model = obdaFactory.createOBDAModel(new HashSet<OBDADataSource>(),
-					new HashMap<URI, ImmutableList<OBDAMappingAxiom>>(), defaultPrefixManager, vocabulary);
+			model = obdaFactory.createOBDAModel(ImmutableList.of(), defaultPrefixManager, vocabulary);
 		}
 		inputOBDAModel = model;
 	}
@@ -373,92 +366,84 @@ public class Quest implements Serializable, IQuest {
 							+ " is unknown or not yet supported Data Base type. Currently only the direct db type is supported");
 				}
 
-				if (inmemory) {
-					String url = "jdbc:h2:mem:questrepository:" + System.currentTimeMillis()
-							+ ";LOG=0;CACHE_SIZE=65536;LOCK_MODE=0;UNDO_LOG=0";
+				throw new RuntimeException("TODO: fix quickly the configuration of the SI mode");
 
-					obdaSource = MAPPING_FACTORY.getDataSource(URI.create("http://www.obda.org/ABOXDUMP" + System.currentTimeMillis()));
-					obdaSource.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, "org.h2.Driver");
-					obdaSource.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, "");
-					obdaSource.setParameter(RDBMSourceParameterConstants.DATABASE_URL, url);
-					obdaSource.setParameter(RDBMSourceParameterConstants.DATABASE_USERNAME, "sa");
-					obdaSource.setParameter(RDBMSourceParameterConstants.IS_IN_MEMORY, "true");
-					obdaSource.setParameter(RDBMSourceParameterConstants.USE_DATASOURCE_FOR_ABOXDUMP, "true");
-				}
-				else {
-					if (aboxJdbcURL.trim().equals(""))
-						throw new OBDAException("Found empty JDBC_URL parametery. Quest in CLASSIC/JDBC mode requires a JDBC_URL value.");
-
-					if (aboxJdbcDriver.trim().equals(""))
-						throw new OBDAException(
-								"Found empty JDBC_DRIVER parametery. Quest in CLASSIC/JDBC mode requires a JDBC_DRIVER value.");
-
-					obdaSource = MAPPING_FACTORY.getDataSource(URI.create("http://www.obda.org/ABOXDUMP" + System.currentTimeMillis()));
-					obdaSource.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, aboxJdbcDriver.trim());
-					obdaSource.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, aboxJdbcPassword);
-					obdaSource.setParameter(RDBMSourceParameterConstants.DATABASE_URL, aboxJdbcURL.trim());
-					obdaSource.setParameter(RDBMSourceParameterConstants.DATABASE_USERNAME, aboxJdbcUser.trim());
-					obdaSource.setParameter(RDBMSourceParameterConstants.IS_IN_MEMORY, "false");
-					obdaSource.setParameter(RDBMSourceParameterConstants.USE_DATASOURCE_FOR_ABOXDUMP, "true");
-				}
-
-				// TODO one of these is redundant??? check
-				dbConnector = questComponentFactory.create(obdaSource, this);
-				dbConnector.connect();
-
-				// Classic mode only works with a JDBCConnector
-				if (!(dbConnector instanceof JDBCConnector)) {
-					throw new OBDAException("Classic mode requires using a JDBC connector");
-				}
-				JDBCConnector jdbcConnector = (JDBCConnector) dbConnector;
-				Connection localConnection = jdbcConnector.getSQLConnection();
-
-				dataRepository = new RDBMSSIRepositoryManager(reformulationReasoner, inputOntology.getVocabulary(),
-						nativeQLFactory);
-
-				if (inmemory) {
-
-					log.warn("Semantic index mode initializing: \nString operation over URI are not supported in this mode ");
-					// we work in memory (with H2), the database is clean and
-					// Quest will insert new Abox assertions into the database.
-					dataRepository.generateMetadata();
-					
-					// Creating the ABox repository
-					dataRepository.createDBSchemaAndInsertMetadata(localConnection);
-				} 
-				else {
-					// the repository has already been created in the database,
-					// restore the repository and do NOT insert any data in the repo,
-					// it should have been inserted already.
-					dataRepository.loadMetadata(localConnection);
-
-					// TODO add code to verify that the existing semantic index
-					// repository can be used with the current ontology, e.g.,
-					// checking the vocabulary of URIs, ranges wrt the ontology entailments
-				}
-
-				mappings = dataRepository.getMappings();
+//				if (inmemory) {
+//					String url = "jdbc:h2:mem:questrepository:" + System.currentTimeMillis()
+//							+ ";LOG=0;CACHE_SIZE=65536;LOCK_MODE=0;UNDO_LOG=0";
+//
+//					throw new RuntimeException("TODO: load the configuration somewhere else");
+////					obdaSource = MAPPING_FACTORY.getDataSource(URI.create("http://www.obda.org/ABOXDUMP" + System.currentTimeMillis()));
+////					obdaSource.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, "org.h2.Driver");
+////					obdaSource.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, "");
+////					obdaSource.setParameter(RDBMSourceParameterConstants.DATABASE_URL, url);
+////					obdaSource.setParameter(RDBMSourceParameterConstants.DATABASE_USERNAME, "sa");
+////					obdaSource.setParameter(RDBMSourceParameterConstants.IS_IN_MEMORY, "true");
+////					obdaSource.setParameter(RDBMSourceParameterConstants.USE_DATASOURCE_FOR_ABOXDUMP, "true");
+//				}
+//				else {
+//					if (aboxJdbcURL.trim().equals(""))
+//						throw new OBDAException("Found empty JDBC_URL parametery. Quest in CLASSIC/JDBC mode requires a JDBC_URL value.");
+//
+//					if (aboxJdbcDriver.trim().equals(""))
+//						throw new OBDAException(
+//								"Found empty JDBC_DRIVER parametery. Quest in CLASSIC/JDBC mode requires a JDBC_DRIVER value.");
+//
+//					throw new RuntimeException("TODO: load the configuration somewhere else");
+////					obdaSource = MAPPING_FACTORY.getDataSource(URI.create("http://www.obda.org/ABOXDUMP" + System.currentTimeMillis()));
+////					obdaSource.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, aboxJdbcDriver.trim());
+////					obdaSource.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, aboxJdbcPassword);
+////					obdaSource.setParameter(RDBMSourceParameterConstants.DATABASE_URL, aboxJdbcURL.trim());
+////					obdaSource.setParameter(RDBMSourceParameterConstants.DATABASE_USERNAME, aboxJdbcUser.trim());
+////					obdaSource.setParameter(RDBMSourceParameterConstants.IS_IN_MEMORY, "false");
+////					obdaSource.setParameter(RDBMSourceParameterConstants.USE_DATASOURCE_FOR_ABOXDUMP, "true");
+//				}
+//
+//				// TODO one of these is redundant??? check
+//				dbConnector = questComponentFactory.create(this);
+//				dbConnector.connect();
+//
+//				// Classic mode only works with a JDBCConnector
+//				if (!(dbConnector instanceof JDBCConnector)) {
+//					throw new OBDAException("Classic mode requires using a JDBC connector");
+//				}
+//				JDBCConnector jdbcConnector = (JDBCConnector) dbConnector;
+//				Connection localConnection = jdbcConnector.getSQLConnection();
+//
+//				dataRepository = new RDBMSSIRepositoryManager(reformulationReasoner, inputOntology.getVocabulary(),
+//						nativeQLFactory);
+//
+//				if (inmemory) {
+//
+//					log.warn("Semantic index mode initializing: \nString operation over URI are not supported in this mode ");
+//					// we work in memory (with H2), the database is clean and
+//					// Quest will insert new Abox assertions into the database.
+//					dataRepository.generateMetadata();
+//
+//					// Creating the ABox repository
+//					dataRepository.createDBSchemaAndInsertMetadata(localConnection);
+//				}
+//				else {
+//					// the repository has already been created in the database,
+//					// restore the repository and do NOT insert any data in the repo,
+//					// it should have been inserted already.
+//					dataRepository.loadMetadata(localConnection);
+//
+//					// TODO add code to verify that the existing semantic index
+//					// repository can be used with the current ontology, e.g.,
+//					// checking the vocabulary of URIs, ranges wrt the ontology entailments
+//				}
+//
+//				mappings = dataRepository.getMappings();
 			}
 			else if (isVirtualMode) {
 				// log.debug("Working in virtual mode");
 
-				Set<OBDADataSource> sources = this.inputOBDAModel.getSources();
-				if (sources == null || sources.size() == 0)
-					throw new Exception(
-							"No datasource has been defined. Virtual ABox mode requires exactly 1 data source in your OBDA model.");
-				if (sources.size() > 1)
-					throw new Exception(
-							"Quest in virtual ABox mode only supports OBDA models with 1 single data source. Your OBDA model contains "
-									+ sources.size() + " data sources. Please remove the aditional sources.");
-
-				// Setting up the OBDA model
-
-				obdaSource = sources.iterator().next();
-				dbConnector = questComponentFactory.create(obdaSource, this);
+				dbConnector = questComponentFactory.create(this);
 				dbConnector.connect();
 
 				log.debug("Testing DB connection...");
-				mappings = inputOBDAModel.getMappings(obdaSource.getSourceID());
+				mappings = inputOBDAModel.getMappings();
 			}
 
 
@@ -519,8 +504,8 @@ public class Quest implements Serializable, IQuest {
 
 
 			NativeQueryGenerator dataSourceQueryGenerator = isVirtualMode
-					? questComponentFactory.create(metadata, obdaSource)
-					: questComponentFactory.create(metadata, obdaSource, dataRepository.getUriMap());
+					? questComponentFactory.create(metadata)
+					: questComponentFactory.create(metadata, dataRepository.getUriMap());
 
 			/*
 			 * Done, sending a new reasoner with the modules we just configured

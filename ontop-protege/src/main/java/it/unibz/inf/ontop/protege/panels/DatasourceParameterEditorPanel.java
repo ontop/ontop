@@ -21,15 +21,15 @@ package it.unibz.inf.ontop.protege.panels;
  */
 
 
-import it.unibz.inf.ontop.model.MappingFactory;
+import it.unibz.inf.ontop.model.OBDADataSourceFactory;
+import it.unibz.inf.ontop.model.SQLMappingFactory;
 import it.unibz.inf.ontop.model.OBDADataSource;
 import it.unibz.inf.ontop.model.OBDAException;
-import it.unibz.inf.ontop.model.impl.MappingFactoryImpl;
-import it.unibz.inf.ontop.model.impl.OBDAModelImpl;
-import it.unibz.inf.ontop.model.impl.RDBMSourceParameterConstants;
+import it.unibz.inf.ontop.model.impl.*;
 import it.unibz.inf.ontop.protege.core.OBDAModelManager;
 import it.unibz.inf.ontop.protege.core.OBDAModelWrapper;
 import it.unibz.inf.ontop.protege.gui.IconLoader;
+import it.unibz.inf.ontop.protege.utils.ConnectionTools;
 import it.unibz.inf.ontop.protege.utils.CustomTraversalPolicy;
 import it.unibz.inf.ontop.protege.utils.DatasourceSelectorListener;
 import it.unibz.inf.ontop.protege.utils.DialogUtils;
@@ -49,7 +49,7 @@ import java.util.List;
 
 public class DatasourceParameterEditorPanel extends javax.swing.JPanel implements DatasourceSelectorListener {
 
-    private static final MappingFactory MAPPING_FACTORY = MappingFactoryImpl.getInstance();
+    private static final OBDADataSourceFactory DATASOURCE_FACTORY = OBDADataSourceFactoryImpl.getInstance();
     private static final long serialVersionUID = 3506358479342412849L;
     private final OWLEditorKit owlEditorKit;
 
@@ -114,13 +114,12 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
     public void setNewDatasource(OBDAModelWrapper model) {
         obdaModel = model;
         resetTextFields();
+
         /**
          * Selects the first data source if it exists
          */
-        if (obdaModel.getSources().size() > 0) {
-
-            currentDatasourceChange(obdaModel.getCurrentImmutableOBDAModel().getSources().iterator().next());
-        }
+        obdaModel.getDatasource()
+                .ifPresent(this::currentDatasourceChange);
     }
 
 
@@ -440,7 +439,7 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
         URI uri = URI.create("datasource1");
 
         //create new datasource
-        OBDADataSource newDatasource = MAPPING_FACTORY.getDataSource(uri);
+        OBDADataSource newDatasource = DATASOURCE_FACTORY.getDataSource(uri);
         String username = txtDatabaseUsername.getText();
         newDatasource.setParameter(RDBMSourceParameterConstants.DATABASE_USERNAME, username);
         String password = new String(txtDatabasePassword.getPassword());
@@ -471,11 +470,11 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
             JDBCConnectionManager connm = JDBCConnectionManager.getJDBCConnectionManager();
             try {
                 try {
-                    connm.closeConnection(currentDataSource);
+                    connm.closeConnection();
                 } catch (Exception e) {
                     // NO-OP
                 }
-                Connection conn = connm.getConnection(currentDataSource);
+                Connection conn = ConnectionTools.getConnection(currentDataSource);
                 if (conn == null)
                     throw new SQLException("Error connecting to the database");
                 lblConnectionStatus.setForeground(Color.GREEN.darker());
@@ -510,7 +509,7 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
 
         JDBCConnectionManager man = JDBCConnectionManager.getJDBCConnectionManager();
         try {
-            man.closeConnection(currentDataSource);
+            man.closeConnection();
         } catch (OBDAException | SQLException e) {
             // do nothing
         }

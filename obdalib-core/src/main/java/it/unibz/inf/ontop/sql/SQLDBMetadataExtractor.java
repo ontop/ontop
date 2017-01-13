@@ -3,7 +3,6 @@ package it.unibz.inf.ontop.sql;
 
 import it.unibz.inf.ontop.injection.OBDASettings;
 import it.unibz.inf.ontop.model.DBMetadata;
-import it.unibz.inf.ontop.model.OBDADataSource;
 import it.unibz.inf.ontop.model.OBDAModel;
 import it.unibz.inf.ontop.nativeql.DBConnectionWrapper;
 import it.unibz.inf.ontop.nativeql.DBMetadataException;
@@ -47,20 +46,20 @@ public class SQLDBMetadataExtractor implements DBMetadataExtractor {
      * Expects the DBConnectionWrapper to wrap a JDBC connection.
      */
     @Override
-    public RDBMetadata extract(OBDADataSource dataSource, OBDAModel obdaModel, DBConnectionWrapper dbConnection)
+    public RDBMetadata extract(OBDAModel obdaModel, DBConnectionWrapper dbConnection)
             throws DBMetadataException {
 
         Connection connection = (Connection) dbConnection.getConnection();
         try {
             RDBMetadata metadata = RDBMetadataExtractionTools.createMetadata(connection);
-            return extract(dataSource, obdaModel, dbConnection, metadata);
+            return extract(obdaModel, dbConnection, metadata);
         } catch (SQLException e) {
             throw new DBMetadataException(e.getMessage());
         }
     }
 
     @Override
-    public RDBMetadata extract(OBDADataSource dataSource, OBDAModel model, @Nullable DBConnectionWrapper dbConnection,
+    public RDBMetadata extract(OBDAModel model, @Nullable DBConnectionWrapper dbConnection,
                                DBMetadata partiallyDefinedMetadata) throws DBMetadataException {
 
         if (!(partiallyDefinedMetadata instanceof RDBMetadata)) {
@@ -82,8 +81,7 @@ public class SQLDBMetadataExtractor implements DBMetadataExtractor {
 
                     // Parse mappings. Just to get the table names in use
 
-                    Set<RelationID> realTables = getRealTables(metadata.getQuotedIDFactory(), model.getMappings(
-                            dataSource.getSourceID()));
+                    Set<RelationID> realTables = getRealTables(metadata.getQuotedIDFactory(), model.getMappings());
                     userConstraints.ifPresent(c -> {
                         // Add the tables referred to by user-supplied foreign keys
                         Set<RelationID> referredTables = c.getReferredTables(metadata.getQuotedIDFactory());

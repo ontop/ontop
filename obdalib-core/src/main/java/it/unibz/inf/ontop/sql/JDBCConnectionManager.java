@@ -20,9 +20,8 @@ package it.unibz.inf.ontop.sql;
  * #L%
  */
 
-import it.unibz.inf.ontop.model.OBDADataSource;
+import it.unibz.inf.ontop.injection.OntopSQLSettings;
 import it.unibz.inf.ontop.model.OBDAException;
-import it.unibz.inf.ontop.model.impl.RDBMSourceParameterConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,7 +31,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
 public class JDBCConnectionManager {
 
@@ -44,7 +42,7 @@ public class JDBCConnectionManager {
 	private static JDBCConnectionManager instance = null;
 
 	private Map<String, Object> properties = new HashMap<>();
-	private Map<OBDADataSource, Connection> connectionPool = new HashMap<>();
+	private Connection connection = null;
 
 	private static Logger log = LoggerFactory.getLogger(JDBCConnectionManager.class);
 
@@ -68,70 +66,58 @@ public class JDBCConnectionManager {
 		return instance;
 	}
 
+	public Connection createConnection(OntopSQLSettings settings) throws SQLException {
+		return createConnection(settings.getJdbcUrl(), settings.getDBUser(),
+				settings.getDbPassword(), settings.getJdbcDriver());
+	}
+
 	/**
-	 * Constructs a new database connection object from a data source and
-	 * retrieves the object.
-	 * 
-	 * @param dataSource
-	 *            The data source object.
+	 * Constructs a new database connection object and retrieves it.
+	 *
 	 * @return The connection object.
 	 * @throws SQLException
 	 */
-	public Connection createConnection(OBDADataSource dataSource) throws SQLException {
+	public Connection createConnection(String url, String username, String password, String driver) throws SQLException {
 
-		if (connectionPool.get(dataSource) != null && !connectionPool.get(dataSource).isClosed())
-			return connectionPool.get(dataSource);
-
-		String url = dataSource.getParameter(RDBMSourceParameterConstants.DATABASE_URL);
-		String username = dataSource.getParameter(RDBMSourceParameterConstants.DATABASE_USERNAME);
-		String password = dataSource.getParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD);
-		String driver = dataSource.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER);
+		if (connection != null && !connection.isClosed())
+			return connection;
 
 		if (driver == null || driver.trim().equals(""))
 			throw new SQLException("Invalid driver");
 
-		Connection conn = DriverManager.getConnection(url, username, password);
-		connectionPool.put(dataSource, conn);
-		return conn;
+		connection = DriverManager.getConnection(url, username, password);
+		return connection;
 	}
 	
 	/**
-	 * Retrieves the connection object from the connection pool. If the
+	 * Retrieves the connection object. If the
 	 * connection doesnt exist or is dead, it will attempt to create a new
 	 * connection.
-	 * 
-	 * @param sourceId
-	 *            The connection ID (usually the same as the data source URI).
+	 *
 	 */
-	public Connection getConnection(OBDADataSource source) throws SQLException {
-		boolean alive = isConnectionAlive(source);
+	public Connection getConnection(String url, String username, String password, String driver) throws SQLException {
+		boolean alive = isConnectionAlive();
 		if (!alive) {
-			createConnection(source);
+			createConnection(url, username, password, driver);
 		}
-		Connection conn = connectionPool.get(source);
-		return conn;
+		return connection;
 	}
 
 	/**
 	 * Removes a connection object form the pool. The system will put the
 	 * connection back to the pool if an exception occurs.
-	 * 
-	 * @param sourceId
-	 *            The connection ID that wants to be removed.
+	 *
 	 * @return Returns true if the removal is successful, or false otherwise.
 	 */
-	public boolean closeConnection(OBDADataSource source) throws OBDAException, SQLException {
+	public boolean closeConnection() throws OBDAException, SQLException {
 		boolean bStatus = true; // the status flag.
-		Connection existing = connectionPool.get(source);
-		if (existing == null)
+		if (connection == null)
 			throw new OBDAException("There is connection for such source");
-		if (existing.isClosed()) {
-			connectionPool.remove(source);
+		if (connection.isClosed()) {
 			throw new OBDAException("Connection is already close");
 		}
 		try {
-			connectionPool.remove(source);
-			existing.close();
+			connection.close();
 		} 
 		catch (SQLException e) {
 			log.error(e.getMessage());
@@ -141,19 +127,16 @@ public class JDBCConnectionManager {
 
 	/**
 	 * Checks whether the connection is still alive.
-	 * 
-	 * @param sourceId
-	 *            The connection ID (usually the same as the data source URI).
+	 *
 	 * @return Returns true if the connection exists and is still open.
 	 * 
 	 * @throws SQLException
 	 */
-	public boolean isConnectionAlive(OBDADataSource sourceId) throws SQLException {
-		Connection conn = connectionPool.get(sourceId);
-		if (conn == null || conn.isClosed()) {
+	public boolean isConnectionAlive() throws SQLException {
+		if (connection == null || connection.isClosed()) {
 			return false;
 		}
-		return !conn.isClosed();
+		return !connection.isClosed();
 	}
 
 	
@@ -163,14 +146,16 @@ public class JDBCConnectionManager {
 	 * @throws SQLException
 	 */
 	public void dispose() throws SQLException {
-		Set<OBDADataSource> keys = connectionPool.keySet();
-		for (OBDADataSource sourceId : keys) {
-			try {
-				closeConnection(sourceId);
-			} 
-			catch (Exception e) {
-				log.error(e.getMessage());
-			}
+		try {
+			closeConnection();
 		}
+		catch (Exception e) {
+			log.error(e.getMessage());
+		}
+	}
+
+	public Connection getConnection(OntopSQLSettings settings) throws SQLException {
+		return getConnection(settings.getJdbcUrl(), settings.getDBUser(),
+				settings.getDbPassword(), settings.getJdbcDriver());
 	}
 }

@@ -116,7 +116,7 @@ public class SQLGenerator implements NativeQueryGenerator {
 
 	private Map<Predicate, String> sqlAnsViewMap;
 
-	private static final MappingFactory MAPPING_FACTORY = MappingFactoryImpl.getInstance();
+	private static final SQLMappingFactory MAPPING_FACTORY = SQLMappingFactoryImpl.getInstance();
 
 	private final ImmutableMap<ExpressionOperation, String> operations;
 
@@ -125,18 +125,18 @@ public class SQLGenerator implements NativeQueryGenerator {
 	private final JdbcTypeMapper jdbcTypeMapper;
 
 	@AssistedInject
-	private SQLGenerator(@Assisted DBMetadata metadata, @Assisted OBDADataSource dataSource,
+	private SQLGenerator(@Assisted DBMetadata metadata,
 						 QuestCoreSettings preferences, JdbcTypeMapper jdbcTypeMapper) {
         // TODO: make these attributes immutable.
         //TODO: avoid the null value
-        this(metadata, dataSource, null, preferences, jdbcTypeMapper);
+        this(metadata, null, preferences, jdbcTypeMapper);
     }
 
 	@AssistedInject
-	private SQLGenerator(@Assisted DBMetadata metadata, @Assisted OBDADataSource dataSource,
+	private SQLGenerator(@Assisted DBMetadata metadata,
 						 @Assisted SemanticIndexURIMap uriRefIds, QuestCoreSettings preferences,
 						 JdbcTypeMapper jdbcTypeMapper) {
-		String driverURI = dataSource.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER);
+		String driverURI = preferences.getJdbcDriver();
 
 		if (!(metadata instanceof RDBMetadata)) {
 			throw new IllegalArgumentException("Not a DBMetadata!");

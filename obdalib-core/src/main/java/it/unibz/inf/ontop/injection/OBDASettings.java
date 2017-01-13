@@ -15,7 +15,7 @@ import java.util.Optional;
  * TODO: update this description
  *
  */
-public interface OBDASettings extends OntopModelSettings {
+public interface OBDASettings extends OntopSQLSettings {
 
     //-------------------
     // High-level methods
@@ -25,19 +25,6 @@ public interface OBDASettings extends OntopModelSettings {
 
     boolean isFullMetadataExtractionEnabled();
 
-    Optional<String> getJdbcUrl();
-    // TODO: continue
-
-
-    //-------
-    // Keys
-    //-------
-
-    String JDBC_URL = "JDBC_URL";
-    String DB_NAME = "DB_NAME";
-    String DB_USER = "DBUSER";
-    String DB_PASSWORD = "DBPASSWORD";
-    String JDBC_DRIVER = "JDBC_DRIVER";
 
     String OBTAIN_FULL_METADATA = "OBTAIN_FULL_METADATA";
 

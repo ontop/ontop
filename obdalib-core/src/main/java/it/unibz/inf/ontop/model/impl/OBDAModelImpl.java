@@ -25,9 +25,7 @@ import java.util.*;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.exception.DuplicateMappingException;
-import it.unibz.inf.ontop.model.OBDADataSource;
 import it.unibz.inf.ontop.model.OBDAMappingAxiom;
 import it.unibz.inf.ontop.model.OBDAModel;
 import it.unibz.inf.ontop.io.PrefixManager;
@@ -38,10 +36,7 @@ import it.unibz.inf.ontop.ontology.impl.OntologyVocabularyImpl;
 public class OBDAModelImpl implements OBDAModel {
 	private final PrefixManager prefixManager;
 
-    private final ImmutableSet<OBDADataSource> dataSources;
-	private final ImmutableMap<URI, OBDADataSource> dataSourceIndex;
-
-	private final ImmutableMap<URI, ImmutableList<OBDAMappingAxiom>> mappingIndexByDataSource;
+	private final ImmutableList<OBDAMappingAxiom> mappings;
     private final ImmutableMap<String, OBDAMappingAxiom> mappingIndexById;
 
     private final OntologyVocabulary mutableOntologyVocabulary;
@@ -49,17 +44,14 @@ public class OBDAModelImpl implements OBDAModel {
     /**
      * Normal constructor. Used by the QuestComponentFactory.
      */
-    public OBDAModelImpl(Set<OBDADataSource> dataSources,
-                         Map<URI, ImmutableList<OBDAMappingAxiom>> newMappings,
+    public OBDAModelImpl(ImmutableList<OBDAMappingAxiom> newMappings,
                          PrefixManager prefixManager,
                          ImmutableOntologyVocabulary ontologyVocabulary) throws DuplicateMappingException {
 
         checkDuplicates(newMappings);
-        this.mappingIndexByDataSource = ImmutableMap.copyOf(newMappings);
-        this.mappingIndexById = indexMappingsById(newMappings);
+        this.mappings = newMappings;
         this.prefixManager = prefixManager;
-        this.dataSources = ImmutableSet.copyOf(dataSources);
-        this.dataSourceIndex = indexDataSources(this.dataSources);
+        this.mappingIndexById = indexMappingsById(mappings);
         // Mutable
         this.mutableOntologyVocabulary = new OntologyVocabularyImpl();
         this.mutableOntologyVocabulary.merge(ontologyVocabulary);
@@ -68,95 +60,74 @@ public class OBDAModelImpl implements OBDAModel {
     /**
      * No mapping should be duplicate among all the data sources.
      */
-    private static void checkDuplicates(Map<URI, ImmutableList<OBDAMappingAxiom>> mappings)
+    private static void checkDuplicates(ImmutableList<OBDAMappingAxiom> mappings)
             throws DuplicateMappingException {
 
-        Set<OBDAMappingAxiom> sourceMappingSet = new HashSet<>();
+        Set<OBDAMappingAxiom> mappingSet = new HashSet<>(mappings);
 
-        for (URI sourceURI : mappings.keySet()) {
-            List<OBDAMappingAxiom> currentSourceMappings = mappings.get(sourceURI);
+        int duplicateCount = mappings.size() - mappingSet.size();
 
-            // Mutable (may be reused)
-            int previousMappingCount = sourceMappingSet.size();
-            sourceMappingSet.addAll(currentSourceMappings);
-
-            int duplicateCount = currentSourceMappings.size() + previousMappingCount - sourceMappingSet.size();
-
-            /**
-             * If there are some mappings, finds them
-             */
-            if (duplicateCount > 0) {
-                Set<String> duplicateIds = new HashSet<>();
-                int remaining = duplicateCount;
-                for (OBDAMappingAxiom mapping : currentSourceMappings) {
-                    if (sourceMappingSet.contains(mapping)) {
-                        sourceMappingSet.remove(mapping);
-                    }
-                    /**
-                     * Duplicate
-                     */
-                    else {
-                        duplicateIds.add(mapping.getId());
-                        if (--remaining == 0)
-                            break;
-                    }
+        /**
+         * If there are some mappings, finds them
+         */
+        if (duplicateCount > 0) {
+            Set<String> duplicateIds = new HashSet<>();
+            int remaining = duplicateCount;
+            for (OBDAMappingAxiom mapping : mappings) {
+                if (mappingSet.contains(mapping)) {
+                    mappingSet.remove(mapping);
                 }
-                //TODO: indicate the source
-                throw new DuplicateMappingException(String.format("Found %d duplicates in the following ids: %s",
-                        duplicateCount, duplicateIds.toString()));
+                /**
+                 * Duplicate
+                 */
+                else {
+                    duplicateIds.add(mapping.getId());
+                    if (--remaining == 0)
+                        break;
+                }
             }
+            //TODO: indicate the source
+            throw new DuplicateMappingException(String.format("Found %d duplicates in the following ids: %s",
+                    duplicateCount, duplicateIds.toString()));
         }
     }
 
-    private static ImmutableMap<String, OBDAMappingAxiom> indexMappingsById(Map<URI, ImmutableList<OBDAMappingAxiom>> mappings)
+    private static ImmutableMap<String, OBDAMappingAxiom> indexMappingsById(ImmutableList<OBDAMappingAxiom> mappings)
             throws IllegalArgumentException {
         Map<String, OBDAMappingAxiom> mappingIndexById = new HashMap<>();
-        for (List<OBDAMappingAxiom> axioms : mappings.values()) {
-            for (OBDAMappingAxiom axiom : axioms) {
-                String id = axiom.getId();
-                if (mappingIndexById.containsKey(id)) {
-                    // Should have already been detected by checkDuplicates.
-                    throw new IllegalArgumentException(String.format("Not unique mapping ID found : %s", id));
-                }
-                mappingIndexById.put(id, axiom);
+        for (OBDAMappingAxiom axiom : mappings) {
+            String id = axiom.getId();
+            if (mappingIndexById.containsKey(id)) {
+                // Should have already been detected by checkDuplicates.
+                throw new IllegalArgumentException(String.format("Not unique mapping ID found : %s", id));
             }
+            mappingIndexById.put(id, axiom);
         }
         return ImmutableMap.copyOf(mappingIndexById);
     }
 
-    private static ImmutableMap<URI, OBDADataSource> indexDataSources(Set<OBDADataSource> dataSources) {
-        Map<URI, OBDADataSource> dataSourceIndex = new HashMap<>();
-        for (OBDADataSource source : dataSources) {
-            dataSourceIndex.put(source.getSourceID(), source);
-        }
-        return ImmutableMap.copyOf(dataSourceIndex);
-    }
-
 
     @Override
-    public OBDAModel newModel(Set<OBDADataSource> dataSources,
-                              Map<URI, ImmutableList<OBDAMappingAxiom>> newMappings) throws DuplicateMappingException {
-        return newModel(dataSources, newMappings, prefixManager);
+    public OBDAModel newModel(ImmutableList<OBDAMappingAxiom> newMappings) throws DuplicateMappingException {
+        return newModel(newMappings, prefixManager);
     }
 
     @Override
-    public OBDAModel newModel(Set<OBDADataSource> dataSources,
-                              Map<URI, ImmutableList<OBDAMappingAxiom>> newMappings,
+    public OBDAModel newModel(ImmutableList<OBDAMappingAxiom> newMappings,
                               PrefixManager prefixManager) throws DuplicateMappingException {
-        return newModel(dataSources, newMappings, prefixManager, mutableOntologyVocabulary);
+        return newModel(newMappings, prefixManager, mutableOntologyVocabulary);
     }
 
     @Override
-    public OBDAModel newModel(Set<OBDADataSource> dataSources,
-                              Map<URI, ImmutableList<OBDAMappingAxiom>> newMappings,
+    public OBDAModel newModel(ImmutableList<OBDAMappingAxiom> newMappings,
                               PrefixManager prefixManager, OntologyVocabulary ontologyVocabulary) throws DuplicateMappingException {
-        return new OBDAModelImpl(dataSources, newMappings, prefixManager, ontologyVocabulary);
+        return new OBDAModelImpl(newMappings, prefixManager, ontologyVocabulary);
     }
 
     @Override
     public OBDAModel clone() {
         try {
-            return new OBDAModelImpl(dataSources, mappingIndexByDataSource, prefixManager, mutableOntologyVocabulary);
+            return new OBDAModelImpl(mappings, prefixManager, mutableOntologyVocabulary);
         } catch (DuplicateMappingException e) {
             throw new RuntimeException("Unexpected error (inconsistent cloning): " + e.getMessage());
         }
@@ -165,21 +136,6 @@ public class OBDAModelImpl implements OBDAModel {
     @Override
 	public PrefixManager getPrefixManager() {
 		return prefixManager;
-	}
-
-	@Override
-	public Set<OBDADataSource> getSources() {
-		return dataSources;
-	}
-
-	@Override
-	public OBDADataSource getSource(URI name) {
-		return dataSourceIndex.get(name);
-	}
-
-	@Override
-	public boolean containsSource(URI name) {
-		return (getSource(name) != null);
 	}
 
     @Override
@@ -193,20 +149,7 @@ public class OBDAModelImpl implements OBDAModel {
     }
 
 	@Override
-	public ImmutableMap<URI, ImmutableList<OBDAMappingAxiom>> getMappings() {
-        return mappingIndexByDataSource;
-	}
-
-	@Override
-	public ImmutableList<OBDAMappingAxiom> getMappings(URI dataSourceUri) {
-        ImmutableList<OBDAMappingAxiom> mappings = mappingIndexByDataSource.get(dataSourceUri);
-        if (mappings != null) {
-            return mappings;
-        }
-        /**
-         * Sometimes, no mappings are defined.
-         * Happens for instance with Protege if we save the OBDAModel without adding any mapping.
-         */
-        return ImmutableList.of();
+	public ImmutableList<OBDAMappingAxiom> getMappings() {
+        return mappings;
 	}
 }

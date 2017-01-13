@@ -16,7 +16,7 @@ import java.util.Optional;
 /**
  * TODO: explain
  */
-public interface OBDACoreConfiguration extends OntopModelConfiguration {
+public interface OBDACoreConfiguration extends OntopSQLConfiguration {
 
     @Override
     OBDASettings getSettings();
@@ -40,7 +40,7 @@ public interface OBDACoreConfiguration extends OntopModelConfiguration {
     /**
      * Default builder
      */
-    static Builder<Builder> defaultBuilder() {
+    static Builder<Builder<Builder<Builder<Builder<Builder<Builder>>>>>> defaultBuilder() {
         return new OBDACoreConfigurationImpl.BuilderImpl<>();
     }
 
@@ -72,7 +72,7 @@ public interface OBDACoreConfiguration extends OntopModelConfiguration {
         B jdbcUrl(String jdbcUrl);
     }
 
-    interface Builder<B extends Builder> extends OBDACoreBuilderFragment<B>, OntopModelConfiguration.Builder<B> {
+    interface Builder<B extends Builder> extends OBDACoreBuilderFragment<B>, OntopSQLConfiguration.Builder<B> {
 
         @Override
         OBDACoreConfiguration build();

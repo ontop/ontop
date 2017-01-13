@@ -1,6 +1,6 @@
 package it.unibz.inf.ontop.nativeql;
 
-import it.unibz.inf.ontop.model.OBDADataSource;
+import it.unibz.inf.ontop.injection.OntopSQLSettings;
 import it.unibz.inf.ontop.model.OBDAModel;
 import it.unibz.inf.ontop.model.DBMetadata;
 
@@ -17,8 +17,8 @@ import javax.annotation.Nullable;
  */
 public interface DBMetadataExtractor {
 
-    DBMetadata extract(OBDADataSource dataSource, OBDAModel model, @Nullable DBConnectionWrapper dbConnection) throws DBMetadataException;
+    DBMetadata extract(OBDAModel model, @Nullable DBConnectionWrapper dbConnection) throws DBMetadataException;
 
-    DBMetadata extract(OBDADataSource dataSource, OBDAModel model, @Nullable DBConnectionWrapper dbConnection,
+    DBMetadata extract(OBDAModel model, @Nullable DBConnectionWrapper dbConnection,
                        DBMetadata partiallyDefinedMetadata) throws DBMetadataException;
 }

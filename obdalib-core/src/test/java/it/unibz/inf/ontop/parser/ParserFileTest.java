@@ -146,8 +146,7 @@ public class ParserFileTest extends TestCase {
         }
 
 		OBDAModel controller = model;
-		ImmutableMap<URI, ImmutableList<OBDAMappingAxiom>> mappingList = controller.getMappings();
-		ImmutableList<OBDAMappingAxiom> mappings = mappingList.get(identifier);
+		ImmutableList<OBDAMappingAxiom> mappings = controller.getMappings();
 
 		log.debug("=========== " + identifier + " ===========");
 		for (OBDAMappingAxiom axiom : mappings) {

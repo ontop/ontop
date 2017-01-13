@@ -21,7 +21,6 @@ package it.unibz.inf.ontop.io;
  */
 
 import java.io.*;
-import java.net.URI;
 import java.util.*;
 
 import com.google.common.collect.ImmutableList;
@@ -31,8 +30,7 @@ import com.google.inject.assistedinject.AssistedInject;
 
 import it.unibz.inf.ontop.exception.*;
 import it.unibz.inf.ontop.model.*;
-import it.unibz.inf.ontop.model.impl.MappingFactoryImpl;
-import it.unibz.inf.ontop.ontology.ImmutableOntologyVocabulary;
+import it.unibz.inf.ontop.model.impl.SQLMappingFactoryImpl;
 import it.unibz.inf.ontop.ontology.OntologyVocabulary;
 import it.unibz.inf.ontop.ontology.impl.OntologyVocabularyImpl;
 import org.eclipse.rdf4j.model.Model;
@@ -40,7 +38,6 @@ import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
 import it.unibz.inf.ontop.injection.OBDAFactoryWithException;
 import it.unibz.inf.ontop.mapping.MappingParser;
 
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.parser.TargetQueryParser;
 import it.unibz.inf.ontop.parser.TargetQueryParserException;
 import it.unibz.inf.ontop.parser.TurtleOBDASyntaxParser;
@@ -49,7 +46,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static it.unibz.inf.ontop.exception.InvalidMappingExceptionWithIndicator.*;
-import static it.unibz.inf.ontop.model.impl.RDBMSourceParameterConstants.*;
 
 /**
  * Mapping parser specific to the Ontop Native Mapping Language for SQL.
@@ -75,7 +71,7 @@ public class OntopNativeMappingParser implements MappingParser {
     protected static final String END_COLLECTION_SYMBOL = "]]";
     protected static final String COMMENT_SYMBOL = ";";
 
-    private static final MappingFactory MAPPING_FACTORY = MappingFactoryImpl.getInstance();
+    private static final SQLMappingFactory MAPPING_FACTORY = SQLMappingFactoryImpl.getInstance();
     private static final Logger LOG = LoggerFactory.getLogger(OntopNativeMappingParser.class);
 
     private final NativeQueryLanguageComponentFactory nativeQLFactory;
@@ -110,15 +106,6 @@ public class OntopNativeMappingParser implements MappingParser {
         this.model = null;
         this.file = file;
         this.reader = null;
-    }
-
-    /**
-     * Not supported.
-     */
-    @AssistedInject
-    private OntopNativeMappingParser(@Assisted File file, @Assisted OBDADataSource dataSource) {
-        throw new IllegalArgumentException("Data sources must be configured instead the mapping file of" +
-                "the Ontop native mapping language, not outside.");
     }
 
     /**
@@ -175,15 +162,12 @@ public class OntopNativeMappingParser implements MappingParser {
         LineNumberReader lineNumberReader = new LineNumberReader(reader);
 
         final Map<String, String> prefixes = new HashMap<>();
-        final Map<URI, ImmutableList<OBDAMappingAxiom>> mappingIndex = new HashMap<>();
-        final Set<OBDADataSource> sources = new HashSet<>();
+        final List<OBDAMappingAxiom> mappings = new ArrayList<>();
         final List<Indicator> invalidMappingIndicators = new ArrayList<>();
 
         List<TargetQueryParser> parsers = null;
 		
 		String line;
-        OBDADataSource currentDataSource = null;
-        List<OBDAMappingAxiom> currentSourceMappings = new ArrayList<>();
 
         while ((line = lineNumberReader.readLine()) != null) {
         	try {
@@ -210,25 +194,15 @@ public class OntopNativeMappingParser implements MappingParser {
 	            	// deprecated tag
 	            	throw new UnsupportedTagException(DATA_PROPERTY_DECLARATION_TAG);
 	            } else if (line.contains(SOURCE_DECLARATION_TAG)) {
-                    if (currentDataSource != null) {
-                        if (!currentSourceMappings.isEmpty()) {
-                            mappingIndex.put(currentDataSource.getSourceID(), ImmutableList.copyOf(currentSourceMappings));
-                            currentSourceMappings = new ArrayList<>();
-                        }
-                    }
-	                currentDataSource = readSourceDeclaration(lineNumberReader);
-                    if (!sources.contains(currentDataSource)) {
-                        sources.add(currentDataSource);
-                    }
-                    else {
-                        LOG.warn("Duplicated data source %s", currentDataSource.getSourceID());
-                    }
+	                // This exception wil be rethrown
+                    throw new RuntimeException("Source declaration is not supported anymore (since 3.0). " +
+                            "Please give this information with the Ontop configuration.");
 	            } else if (line.contains(MAPPING_DECLARATION_TAG)) {
                     if (parsers == null) {
                         parsers = createParsers(ImmutableMap.copyOf(prefixes));
                     }
-	                currentSourceMappings = readMappingDeclaration(lineNumberReader, currentSourceMappings, parsers,
-                            invalidMappingIndicators, nativeQLFactory);
+	                mappings.addAll(readMappingDeclaration(lineNumberReader, parsers, invalidMappingIndicators,
+                            nativeQLFactory));
 	            } else {
 	                throw new IOException("Unknown syntax: " + line);
 	            }
@@ -247,13 +221,9 @@ public class OntopNativeMappingParser implements MappingParser {
             throw new InvalidMappingExceptionWithIndicator(invalidMappingIndicators);
         }
 
-        if (!currentSourceMappings.isEmpty()) {
-            mappingIndex.put(currentDataSource.getSourceID(), ImmutableList.copyOf(currentSourceMappings));
-        }
-
         PrefixManager prefixManager = nativeQLFactory.create(prefixes);
         OntologyVocabulary vocabulary = new OntologyVocabularyImpl();
-        OBDAModel model = obdaFactory.createOBDAModel(sources, mappingIndex, prefixManager, vocabulary);
+        OBDAModel model = obdaFactory.createOBDAModel(ImmutableList.copyOf(mappings), prefixManager, vocabulary);
         return model;
 	}
     
@@ -272,52 +242,20 @@ public class OntopNativeMappingParser implements MappingParser {
     }
 
     /**
-     * TODO: modernize this method (stop using the DataSource in a mutable way).
-     */
-    private static OBDADataSource readSourceDeclaration(LineNumberReader reader) throws IOException {
-        String line;
-        OBDADataSource dataSource = null;
-        while (!(line = reader.readLine()).isEmpty()) {
-            int lineNumber = reader.getLineNumber();
-            String[] tokens = line.split("[\t| ]+", 2);
-            
-            final String parameter = tokens[0].trim();
-            final String inputParameter = tokens[1].trim();
-            if (parameter.equals(Label.sourceUri.name())) {
-                URI sourceUri = URI.create(inputParameter);
-                // TODO: use a modern factory instead
-                dataSource = MAPPING_FACTORY.getDataSource(sourceUri);
-            } else if (parameter.equals(Label.connectionUrl.name())) {
-                dataSource.setParameter(DATABASE_URL, inputParameter);
-            } else if (parameter.equals(Label.username.name())) {
-                dataSource.setParameter(DATABASE_USERNAME, inputParameter);
-            } else if (parameter.equals(Label.password.name())) {
-                dataSource.setParameter(DATABASE_PASSWORD, inputParameter);
-            } else if (parameter.equals(Label.driverClass.name())) {
-                dataSource.setParameter(DATABASE_DRIVER, inputParameter);
-            } else {
-                String msg = String.format("Unknown parameter name \"%s\" at line: %d.", parameter, lineNumber);
-                throw new IOException(msg);
-            }
-        }
-        return dataSource;
-    }
-
-    /**
      * TODO: describe
      * TODO: follow the advice of IntelliJ: split this method to make its workflow tractable.
      * @param reader
-     * @param currentSourceMappings
      * @param invalidMappingIndicators Read-write list of error indicators.
      * @return The updated mapping set of the current source
      * @throws IOException
      */
     private static List<OBDAMappingAxiom> readMappingDeclaration(LineNumberReader reader,
-                                                                 List<OBDAMappingAxiom> currentSourceMappings,
                                                                  List<TargetQueryParser> parsers,
                                                                  List<Indicator> invalidMappingIndicators,
                                                                  NativeQueryLanguageComponentFactory nativeQLFactory)
             throws IOException {
+        List<OBDAMappingAxiom> currentSourceMappings = new ArrayList<>();
+
         String mappingId = "";
         String currentLabel = ""; // the reader is working on which label
         StringBuffer sourceQuery = null;

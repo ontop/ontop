@@ -24,17 +24,15 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
 import com.google.inject.Injector;
 
 import it.unibz.inf.ontop.injection.OBDACoreConfiguration;
 import it.unibz.inf.ontop.model.*;
-import it.unibz.inf.ontop.model.impl.MappingFactoryImpl;
+import it.unibz.inf.ontop.model.impl.SQLMappingFactoryImpl;
 import it.unibz.inf.ontop.ontology.impl.OntologyVocabularyImpl;
 import org.junit.Before;
 import org.junit.Test;
@@ -46,14 +44,13 @@ import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
 import it.unibz.inf.ontop.injection.OBDAFactoryWithException;
 import it.unibz.inf.ontop.mapping.MappingParser;
 
-import it.unibz.inf.ontop.model.impl.RDBMSourceParameterConstants;
 import it.unibz.inf.ontop.parser.TurtleOBDASyntaxParser;
 
 import static org.junit.Assert.assertEquals;
 
 public class SQLMappingParserUsingOwlTest {
 
-    private static final MappingFactory MAPPING_FACTORY = MappingFactoryImpl.getInstance();
+    private static final SQLMappingFactory MAPPING_FACTORY = SQLMappingFactoryImpl.getInstance();
     private final NativeQueryLanguageComponentFactory nativeQLFactory;
     private final OBDAFactoryWithException modelFactory;
 
@@ -74,11 +71,17 @@ public class SQLMappingParserUsingOwlTest {
             { "M6", "select sid, cid from registrare", 
                     ":P{sid} :hasEnrollment :C{cid} ." }
     };
-    private OBDADataSource dataSource;
     private ImmutableMap<String, String> prefixes;
 
     public SQLMappingParserUsingOwlTest() {
-        OBDACoreConfiguration configuration = OBDACoreConfiguration.defaultBuilder().build();
+        OBDACoreConfiguration configuration = OBDACoreConfiguration.defaultBuilder()
+                .dbName("http://www.example.org/db/dummy/")
+                .jdbcUrl("jdbc:postgresql://www.example.org/dummy")
+                .dbUser("dummy")
+                .dbPassword("dummy")
+                .jdbcDriver("org.postgresql.Driver")
+                .build();
+
         Injector injector = configuration.getInjector();
         nativeQLFactory = injector.getInstance(NativeQueryLanguageComponentFactory.class);
         modelFactory = injector.getInstance(OBDAFactoryWithException.class);
@@ -87,7 +90,6 @@ public class SQLMappingParserUsingOwlTest {
     @Before
     public void setUp() throws Exception {
         PrefixManager prefixManager = setupPrefixManager();
-        dataSource = setupSampleDataSource();
 
         // Setting up the CQ parser
         prefixes = prefixManager.getPrefixMap();
@@ -98,12 +100,6 @@ public class SQLMappingParserUsingOwlTest {
     public void testRegularFile() throws Exception {
         saveRegularFile();
         loadRegularFile();
-    }
-
-    @Test
-    public void testFileWithMultipleDataSources() throws Exception {
-        saveFileWithMultipleDataSources();
-        loadFileWithMultipleDataSources();
     }
 
     @Test(expected=InvalidMappingExceptionWithIndicator.class)
@@ -144,29 +140,11 @@ public class SQLMappingParserUsingOwlTest {
      */
 
     private void saveRegularFile() throws Exception {
-        OBDAModel model = modelFactory.createOBDAModel(ImmutableSet.<OBDADataSource>of(),
-                ImmutableMap.<URI, ImmutableList<OBDAMappingAxiom>>of(),
-                nativeQLFactory.create(ImmutableMap.<String, String>of()),
+        OBDAModel model = modelFactory.createOBDAModel(ImmutableList.of(),
+                nativeQLFactory.create(ImmutableMap.of()),
                 new OntologyVocabularyImpl());
         OntopNativeMappingSerializer writer = new OntopNativeMappingSerializer(model);
         writer.save(new File("src/test/java/it/unibz/inf/ontop/io/SchoolRegularFile.obda"));
-    }
-
-    private void saveFileWithMultipleDataSources() throws Exception {
-
-        // Setup another data source
-        OBDADataSource datasource2 = setupAnotherSampleDataSource();
-
-        // Add some more mappings
-        Map<URI, ImmutableList<OBDAMappingAxiom>> mappingIndex = addSampleMappings(dataSource.getSourceID());
-        mappingIndex = addMoreSampleMappings(mappingIndex, datasource2.getSourceID());
-
-        OBDAModel model = modelFactory.createOBDAModel(ImmutableSet.of(dataSource, datasource2),
-                ImmutableMap.copyOf(mappingIndex), nativeQLFactory.create(prefixes), new OntologyVocabularyImpl());
-        OntopNativeMappingSerializer writer = new OntopNativeMappingSerializer(model);
-
-        // Save the model
-        writer.save(new File("src/test/java/it/unibz/inf/ontop/io/SchoolMultipleDataSources.obda"));
     }
 
     /*
@@ -178,8 +156,7 @@ public class SQLMappingParserUsingOwlTest {
 
         // Check the content
         assertEquals(model.getPrefixManager().getPrefixMap().size(), 5);
-        assertEquals(model.getSources().size(), 0);
-        assertEquals(countElement(model.getMappings()), 0);
+        assertEquals(model.getMappings().size(), 0);
     }
 
     private void loadFileWithMultipleDataSources() throws Exception {
@@ -187,8 +164,7 @@ public class SQLMappingParserUsingOwlTest {
 
         // Check the content
         assertEquals(model.getPrefixManager().getPrefixMap().size(), 6);
-        assertEquals(model.getSources().size(), 2);
-        assertEquals(countElement(model.getMappings()), 2);
+        assertEquals(model.getMappings().size(), 2);
     }
 
     private OBDAModel loadObdaFile(String fileLocation) throws IOException,
@@ -204,28 +180,6 @@ public class SQLMappingParserUsingOwlTest {
         PrefixManager prefixManager = new SimplePrefixManager(ImmutableMap.of(PrefixManager.DEFAULT_PREFIX,
                 "http://www.semanticweb.org/ontologies/2012/5/Ontology1340973114537.owl#"));
         return prefixManager;
-    }
-    
-    private OBDADataSource setupSampleDataSource() {
-        // Setting up the data source
-        URI sourceId = URI.create("http://www.example.org/db/dummy/");
-        OBDADataSource datasource = MAPPING_FACTORY.getDataSource(sourceId);
-        datasource.setParameter(RDBMSourceParameterConstants.DATABASE_URL, "jdbc:postgresql://www.example.org/dummy");
-        datasource.setParameter(RDBMSourceParameterConstants.DATABASE_USERNAME, "dummy");
-        datasource.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, "dummy");
-        datasource.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, "org.postgresl.Driver");
-        return datasource;
-    }
-    
-    private OBDADataSource setupAnotherSampleDataSource() {
-        // Setting up the data source
-        URI sourceId2 = URI.create("http://www.example.org/db/dummy2/");
-        OBDADataSource datasource2 = MAPPING_FACTORY.getDataSource(sourceId2);
-        datasource2.setParameter(RDBMSourceParameterConstants.DATABASE_URL, "jdbc:postgresql://www.example.org/dummy2");
-        datasource2.setParameter(RDBMSourceParameterConstants.DATABASE_USERNAME, "dummy2");
-        datasource2.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, "dummy2");
-        datasource2.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, "org.postgresl.Driver");
-        return datasource2;
     }
     
     private Map<URI, ImmutableList<OBDAMappingAxiom>> addSampleMappings(URI sourceId) {
@@ -258,13 +212,5 @@ public class SQLMappingParserUsingOwlTest {
             // NO-OP
         }
         return mappingIndex;
-    }
-    
-    private int countElement(Map<URI, ImmutableList<OBDAMappingAxiom>> mappings) {
-        int total = 0;
-        for (List<OBDAMappingAxiom> list : mappings.values()) {
-            total += list.size();
-        }
-        return total;
     }
 }

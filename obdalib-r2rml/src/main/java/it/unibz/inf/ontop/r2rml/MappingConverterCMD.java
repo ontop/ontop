@@ -21,13 +21,13 @@ package it.unibz.inf.ontop.r2rml;
  */
 
 import it.unibz.inf.ontop.exception.InvalidMappingExceptionWithIndicator;
+import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
 import it.unibz.inf.ontop.injection.OBDACoreConfiguration;
 import it.unibz.inf.ontop.injection.OBDASettings;
 import it.unibz.inf.ontop.io.OntopNativeMappingSerializer;
 import it.unibz.inf.ontop.model.OBDAModel;
 
 import java.io.File;
-import java.net.URI;
 import java.util.Properties;
 
 import org.semanticweb.owlapi.apibinding.OWLManager;
@@ -57,6 +57,7 @@ class MappingConverterCMD {
 		try {
 			if (mapFile.endsWith(".obda")) {
 				OBDACoreConfiguration configuration = OBDACoreConfiguration.defaultBuilder()
+						.properties(generateProperties())
 						.nativeOntopMappingFile(mapFile)
 						.build();
 
@@ -72,7 +73,6 @@ class MappingConverterCMD {
 					e.printStackTrace();
                     return;
 				}
-				URI srcURI = model.getSources().iterator().next().getSourceID();
 
 				OWLOntology ontology = null;
 				if (args.length > 1) {
@@ -84,21 +84,16 @@ class MappingConverterCMD {
 							.loadOntologyFromOntologyDocument((new File(owlfile)));
 				}
 
-				R2RMLWriter writer = new R2RMLWriter(model, srcURI, ontology, configuration.getInjector());
+				R2RMLWriter writer = new R2RMLWriter(model, ontology, configuration.getInjector().getInstance(
+						NativeQueryLanguageComponentFactory.class));
 				// writer.writePretty(out);
 				writer.write(out);
 				System.out.println("R2RML mapping file " + outfile
 						+ " written!");
 			} else if (mapFile.endsWith(".ttl")) {
 
-                Properties p = new Properties();
-                p.setProperty(OBDASettings.DB_NAME, "DBName");
-                p.setProperty(OBDASettings.JDBC_URL, "jdbc:h2:tcp://localhost/DBName");
-                p.setProperty(OBDASettings.DB_USER, "sa");
-                p.setProperty(OBDASettings.DB_PASSWORD, "");
-                p.setProperty(OBDASettings.JDBC_DRIVER, "com.mysql.jdbc.Driver");
 				OBDACoreConfiguration configuration = OBDACoreConfiguration.defaultBuilder()
-						.properties(p)
+						.properties(generateProperties())
 						.r2rmlMappingFile(mapFile)
 						.build();
 
@@ -120,6 +115,16 @@ class MappingConverterCMD {
 			e.printStackTrace();
 		}
 
+	}
+
+	private static Properties generateProperties() {
+		Properties p = new Properties();
+		p.setProperty(OBDASettings.DB_NAME, "DBName");
+		p.setProperty(OBDASettings.JDBC_URL, "jdbc:h2:tcp://localhost/DBName");
+		p.setProperty(OBDASettings.DB_USER, "sa");
+		p.setProperty(OBDASettings.DB_PASSWORD, "");
+		p.setProperty(OBDASettings.JDBC_DRIVER, "com.mysql.jdbc.Driver");
+		return p;
 	}
 
 }

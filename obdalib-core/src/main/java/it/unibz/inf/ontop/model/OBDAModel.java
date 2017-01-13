@@ -2,15 +2,10 @@ package it.unibz.inf.ontop.model;
 
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.io.PrefixManager;
 import it.unibz.inf.ontop.mapping.MappingParser;
 import it.unibz.inf.ontop.ontology.*;
-
-import java.net.URI;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * An OBDA model contains mapping information.
@@ -55,16 +50,10 @@ public interface OBDAModel {
     public OBDAMappingAxiom getMapping(String mappingId);
 
     /**
-     * Returns the mappings of a given data source.
-     * This set is immutable.
-     */
-    public ImmutableList<OBDAMappingAxiom> getMappings(URI sourceUri);
-
-    /**
      * Returns all the mappings in this model indexed by
      * their datasource.
      */
-    public ImmutableMap<URI, ImmutableList<OBDAMappingAxiom>> getMappings();
+    public ImmutableList<OBDAMappingAxiom> getMappings();
 
     /**
      * Constructs a new OBDA model with new mappings.
@@ -73,8 +62,7 @@ public interface OBDAModel {
      * should use this method to "update" them.
      * 
      */
-    public OBDAModel newModel(Set<OBDADataSource> dataSources,
-                              Map<URI, ImmutableList<OBDAMappingAxiom>> newMappings)
+    public OBDAModel newModel(ImmutableList<OBDAMappingAxiom> newMappings)
         throws DuplicateMappingException;
     /**
      * Constructs a new OBDA model with new mappings and a prefix manager.
@@ -83,8 +71,7 @@ public interface OBDAModel {
      * should use this method to "update" them.
      *
      */
-    public OBDAModel newModel(Set<OBDADataSource> dataSources,
-                              Map<URI, ImmutableList<OBDAMappingAxiom>> newMappings,
+    public OBDAModel newModel(ImmutableList<OBDAMappingAxiom> newMappings,
                               PrefixManager prefixManager) throws DuplicateMappingException;
 
     /**
@@ -95,8 +82,7 @@ public interface OBDAModel {
      * should use this method to "update" them.
      *
      */
-    public OBDAModel newModel(Set<OBDADataSource> dataSources,
-                              Map<URI, ImmutableList<OBDAMappingAxiom>> newMappings,
+    public OBDAModel newModel(ImmutableList<OBDAMappingAxiom> newMappings,
                               PrefixManager prefixManager, OntologyVocabulary ontologyVocabulary)
             throws DuplicateMappingException;
 
@@ -104,16 +90,6 @@ public interface OBDAModel {
      * TODO: remove it when OBDA models will be FULLY immutable.
      */
     public OBDAModel clone();
-
-    /**
-     * Returns the set of all sources defined in this OBDA model. This set
-     * is immutable.
-     */
-    public Set<OBDADataSource> getSources();
-
-    public OBDADataSource getSource(URI sourceURI);
-
-    public boolean containsSource(URI sourceURI);
 
 	public OntologyVocabulary getOntologyVocabulary();
 

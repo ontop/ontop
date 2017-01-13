@@ -116,7 +116,7 @@ public class R2RMLImportAction extends ProtegeAction {
 						/**
 						 * TODO: improve this inefficient method (batch processing, not one by one)
 						 */
-						for (OBDAMappingAxiom mapping : parsedModel.getMappings(sourceID)) {
+						for (OBDAMappingAxiom mapping : parsedModel.getMappings()) {
 							if (mapping.getTargetQuery().toString().contains("BNODE")) {
 								JOptionPane.showMessageDialog(workspace, "The mapping " + mapping.getId() + " contains BNode. -ontoPro- does not support it yet.");
 							} else {

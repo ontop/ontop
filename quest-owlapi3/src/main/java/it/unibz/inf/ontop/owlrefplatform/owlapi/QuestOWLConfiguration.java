@@ -21,7 +21,7 @@ public class QuestOWLConfiguration extends SimpleConfiguration {
         return questConfiguration;
     }
 
-    public QuestOWLConfiguration(@Nonnull QuestConfiguration questConfiguration) {
+    QuestOWLConfiguration(@Nonnull QuestConfiguration questConfiguration) {
         super(new NullReasonerProgressMonitor());
         this.questConfiguration = questConfiguration;
     }

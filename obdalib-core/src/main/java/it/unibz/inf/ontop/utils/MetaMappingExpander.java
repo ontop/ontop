@@ -22,7 +22,7 @@ package it.unibz.inf.ontop.utils;
 
 import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
 import it.unibz.inf.ontop.model.*;
-import it.unibz.inf.ontop.model.impl.MappingFactoryImpl;
+import it.unibz.inf.ontop.model.impl.SQLMappingFactoryImpl;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
 import it.unibz.inf.ontop.parser.SQLQueryShallowParser;
 import it.unibz.inf.ontop.sql.QualifiedAttributeID;
@@ -63,7 +63,7 @@ public class MetaMappingExpander {
 	private final Connection connection;
 	private final QuotedIDFactory idfac;
 	private final NativeQueryLanguageComponentFactory nativeQLFactory;
-	private static final MappingFactory MAPPING_FACTORY = MappingFactoryImpl.getInstance();
+	private static final SQLMappingFactory MAPPING_FACTORY = SQLMappingFactoryImpl.getInstance();
 
     /**
 	 *

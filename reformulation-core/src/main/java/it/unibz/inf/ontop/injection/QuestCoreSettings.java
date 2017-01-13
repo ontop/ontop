@@ -21,6 +21,8 @@ package it.unibz.inf.ontop.injection;
  */
 
 
+import java.util.Optional;
+
 /**
  * A class that represents the preferences overwritten by the user.
  *
@@ -61,6 +63,19 @@ public interface QuestCoreSettings extends OBDASettings, OntopOptimizationSettin
 	int getConnectionPoolInitialSize();
 	int getConnectionPoolMaxSize();
 
+	//-------------------
+	// Low-level methods
+	// TODO: hide them
+	//-------------------
+
+	@Deprecated
+	Optional<Boolean> getBoolean(String key);
+	@Deprecated
+	boolean getRequiredBoolean(String key);
+
+	@Deprecated
+	String getRequiredProperty(String key);
+
 
 	//--------------------------
 	// Keys
@@ -89,15 +104,6 @@ public interface QuestCoreSettings extends OBDASettings, OntopOptimizationSettin
 //	String  OPTIMIZE_TBOX_SIGMA 	= "org.obda.owlreformulationplatform.optimizeTboxSigma";
 //	String 	CREATE_TEST_MAPPINGS 	= "org.obda.owlreformulationplatform.createTestMappings";
 
-
-    //@Deprecated
-	//public static final String JDBC_URL = OBDAProperties.JDBC_URL;
-    @Deprecated
-	String DBNAME = OBDASettings.DB_NAME;
-    @Deprecated
-	String DBUSER = OBDASettings.DB_USER;
-    @Deprecated
-	String DBPASSWORD = OBDASettings.DB_PASSWORD;
 
 	String PRINT_KEYS = "PRINT_KEYS";
 
