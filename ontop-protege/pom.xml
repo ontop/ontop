@@ -22,6 +22,8 @@
     </properties>
 
     <dependencies>
+
+        <!-- dependencies available from Protege: begin -->
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
@@ -46,6 +48,14 @@
             <scope>provided</scope>
         </dependency>
 
+        <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.main</artifactId>
+            <version>4.4.1</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- dependencies available from Protege: end -->
 
         <!-- not sure if this is really needed -->
         <dependency>
@@ -105,10 +115,17 @@
             <version>${project.version}</version>
         </dependency>
 
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>ontop-model</artifactId>
+            <version>${project.version}</version>
+        </dependency>
 
-        <!--Dependencies from the OBDA projects to include in the jar -->
-
-        <!-- Reasoner libraries -->
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>ontop-optimization</artifactId>
+            <version>${project.version}</version>
+        </dependency>
 
         <dependency>
             <groupId>${project.groupId}</groupId>
@@ -331,10 +348,7 @@
 			<groupId>aopalliance</groupId>
 			<artifactId>aopalliance</artifactId>
 		</dependency>
-        <dependency>
-            <groupId>org.osgi</groupId>
-            <artifactId>org.osgi.core</artifactId>
-        </dependency>
+
     </dependencies>
 
     <build>
