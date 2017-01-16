@@ -11,8 +11,9 @@ import it.unibz.inf.ontop.io.PrefixManager;
 import it.unibz.inf.ontop.io.SimplePrefixManager;
 import it.unibz.inf.ontop.mapping.MappingParser;
 import it.unibz.inf.ontop.model.*;
+import it.unibz.inf.ontop.ontology.OntologyFactory;
 import it.unibz.inf.ontop.ontology.OntologyVocabulary;
-import it.unibz.inf.ontop.ontology.impl.OntologyVocabularyImpl;
+import it.unibz.inf.ontop.ontology.impl.OntologyFactoryImpl;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.io.File;
@@ -39,6 +40,7 @@ public class OBDAModelWrapper {
      *  Immutable OBDA model.
      *  This variable is frequently re-affected.
      */
+    private final static OntologyFactory ONTOLOGY_FACTORY = OntologyFactoryImpl.getInstance();
     private final NativeQueryLanguageComponentFactory nativeQLFactory;
     private final OBDAFactoryWithException obdaFactory;
     private Optional<OBDADataSource> source;
@@ -48,7 +50,7 @@ public class OBDAModelWrapper {
 
     private final List<OBDAModelListener> sourceListeners;
     private final List<OBDAMappingListener> mappingListeners;
-
+    private final OntologyVocabulary ontologyVocabulary;
 
     public OBDAModelWrapper(NativeQueryLanguageComponentFactory nativeQLFactory,
                             OBDAFactoryWithException obdaFactory, PrefixManagerWrapper prefixManager) {
@@ -59,6 +61,7 @@ public class OBDAModelWrapper {
         this.sourceListeners = new ArrayList<>();
         this.mappingListeners = new ArrayList<>();
         source = Optional.empty();
+        ontologyVocabulary = ONTOLOGY_FACTORY.createVocabulary();
     }
 
     public OBDAModel getCurrentImmutableOBDAModel() {
@@ -314,8 +317,7 @@ public class OBDAModelWrapper {
 
     private static OBDAModel createNewOBDAModel(OBDAFactoryWithException obdaFactory, PrefixManagerWrapper prefixManager) {
         try {
-            OntologyVocabulary vocabulary = new OntologyVocabularyImpl();
-            return obdaFactory.createOBDAModel(ImmutableList.of(), prefixManager, vocabulary);
+            return obdaFactory.createOBDAModel(ImmutableList.of(), prefixManager);
             /**
              * No mapping so should never happen
              */
@@ -331,5 +333,10 @@ public class OBDAModelWrapper {
 
     public void addSource(OBDADataSource currentDataSource) {
         source = Optional.of(currentDataSource);
+    }
+
+    public OntologyVocabulary getOntologyVocabulary() {
+        return ontologyVocabulary;
+
     }
 }

@@ -20,7 +20,9 @@ package it.unibz.inf.ontop.owlrefplatform.core.abox;
  * #L%
  */
 
+import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.injection.InvalidOntopConfigurationException;
+import it.unibz.inf.ontop.injection.QuestCoreConfiguration.Builder;
 import it.unibz.inf.ontop.model.*;
 
 import java.io.BufferedReader;
@@ -37,14 +39,17 @@ import it.unibz.inf.ontop.io.PrefixManager;
 import it.unibz.inf.ontop.model.Predicate.COL_TYPE;
 import it.unibz.inf.ontop.model.impl.SQLMappingFactoryImpl;
 import it.unibz.inf.ontop.ontology.Assertion;
-import it.unibz.inf.ontop.ontology.impl.OntologyVocabularyImpl;
 import it.unibz.inf.ontop.injection.QuestCoreConfiguration;
+import it.unibz.inf.ontop.ontology.Ontology;
+import it.unibz.inf.ontop.ontology.utils.MappingVocabularyExtractor;
 import it.unibz.inf.ontop.sql.JDBCConnectionManager;
 
 import java.util.LinkedList;
 import java.util.List;
 
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
 import static org.junit.Assert.assertEquals;
@@ -53,8 +58,33 @@ public class VirtualABoxMaterializerTest {
 
 	private static final SQLMappingFactory MAPPING_FACTORY = SQLMappingFactoryImpl.getInstance();
 
+	private static final String PREFIX = "http://example.com/vocab#";
+
+	private static final Predicate person = DATA_FACTORY.getClassPredicate(PREFIX + "Person");
+	private static final Predicate fn = DATA_FACTORY.getDataPropertyPredicate(PREFIX + "fn", COL_TYPE.STRING);
+	private static final Predicate ln = DATA_FACTORY.getDataPropertyPredicate(PREFIX + "ln", COL_TYPE.STRING);
+	private static final Predicate age = DATA_FACTORY.getDataPropertyPredicate(PREFIX + "age", COL_TYPE.STRING);
+	private static final Predicate hasschool = DATA_FACTORY.getObjectPropertyPredicate(PREFIX + "hasschool");
+	private static final Predicate school = DATA_FACTORY.getClassPredicate(PREFIX + "School");
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(VirtualABoxMaterializerTest.class);
+
     public VirtualABoxMaterializerTest() {
     }
+
+	private static Builder<? extends Builder> createAndInitConfiguration() {
+		/* Setting the database */
+		String driver = "org.h2.Driver";
+		String url = "jdbc:h2:mem:aboxdump";
+		String username = "sa";
+		String password = "";
+
+		return QuestCoreConfiguration.defaultBuilder()
+				.jdbcUrl(url)
+				.dbUser(username)
+				.dbPassword(password)
+				.jdbcDriver(driver);
+	}
 
 	@Test(expected = InvalidOntopConfigurationException.class)
 	public void testNoSource() throws Exception {
@@ -64,22 +94,11 @@ public class VirtualABoxMaterializerTest {
 	@Test
 	public void testOneSource() throws Exception {
 
-		/* Setting the database */
-		String driver = "org.h2.Driver";
-		String url = "jdbc:h2:mem:aboxdump";
-		String username = "sa";
-		String password = "";
+    	OBDAModel mapping = createMapping();
 
-		QuestCoreConfiguration configuration = QuestCoreConfiguration.defaultBuilder()
-				.jdbcUrl(url)
-				.dbUser(username)
-				.dbPassword(password)
-				.jdbcDriver(driver)
+		QuestCoreConfiguration configuration = createAndInitConfiguration()
+				.obdaModel(mapping)
 				.build();
-		Injector injector = configuration.getInjector();
-		NativeQueryLanguageComponentFactory nativeQLFactory = injector.getInstance(NativeQueryLanguageComponentFactory.class);
-		OBDAFactoryWithException obdaFactory = injector.getInstance(OBDAFactoryWithException.class);
-
 		// source.setParameter(RDBMSourceParameterConstants.IS_IN_MEMORY, "true");
 		// source.setParameter(RDBMSourceParameterConstants.USE_DATASOURCE_FOR_ABOXDUMP, "true");
 
@@ -99,53 +118,62 @@ public class VirtualABoxMaterializerTest {
 		st.executeUpdate(bf.toString());
 		conn.commit();
 
-		/*
-		 * Setting up the OBDA model and the mappings
-		 */
+		ImmutableSet<Predicate> vocabulary = ImmutableSet.of(fn, ln, age, hasschool, school);
 
-		String sql = "SELECT \"fn\", \"ln\", \"age\", \"schooluri\" FROM \"data\"";
-
-		Predicate q = DATA_FACTORY.getPredicate(OBDALibConstants.QUERY_HEAD, 4);
-		List<Term> headTerms = new LinkedList<Term>();
-		headTerms.add(DATA_FACTORY.getVariable("fn"));
-		headTerms.add(DATA_FACTORY.getVariable("ln"));
-		headTerms.add(DATA_FACTORY.getVariable("age"));
-		headTerms.add(DATA_FACTORY.getVariable("schooluri"));
-
-		Function head = DATA_FACTORY.getFunction(q, headTerms);
-
-		Term objectTerm = DATA_FACTORY.getFunction(DATA_FACTORY.getPredicate("http://schools.com/persons", 2), DATA_FACTORY.getVariable("fn"),
-				DATA_FACTORY.getVariable("ln"));
-
-		List<Function> body = new LinkedList<Function>();
-		Predicate person = DATA_FACTORY.getClassPredicate("Person");
-		Predicate fn = DATA_FACTORY.getDataPropertyPredicate("fn", COL_TYPE.STRING);
-		Predicate ln = DATA_FACTORY.getDataPropertyPredicate("ln", COL_TYPE.STRING);
-		Predicate age = DATA_FACTORY.getDataPropertyPredicate("age", COL_TYPE.STRING);
-		Predicate hasschool = DATA_FACTORY.getObjectPropertyPredicate("hasschool");
-		Predicate school = DATA_FACTORY.getClassPredicate("School");
-		body.add(DATA_FACTORY.getFunction(person, objectTerm));
-		body.add(DATA_FACTORY.getFunction(fn, objectTerm, DATA_FACTORY.getVariable("fn")));
-		body.add(DATA_FACTORY.getFunction(ln, objectTerm, DATA_FACTORY.getVariable("ln")));
-		body.add(DATA_FACTORY.getFunction(age, objectTerm, DATA_FACTORY.getVariable("age")));
-		body.add(DATA_FACTORY.getFunction(hasschool, objectTerm, DATA_FACTORY.getVariable("schooluri")));
-		body.add(DATA_FACTORY.getFunction(school, DATA_FACTORY.getVariable("schooluri")));
-
-		OBDAMappingAxiom map1 = nativeQLFactory.create(MAPPING_FACTORY.getSQLQuery(sql), body);
-
-        PrefixManager prefixManager = nativeQLFactory.create(new HashMap<String, String>());
-		OBDAModel model = obdaFactory.createOBDAModel(ImmutableList.of(map1), prefixManager, new OntologyVocabularyImpl());
-
-		QuestMaterializer materializer = new QuestMaterializer(model, false);
+		Ontology tbox = MappingVocabularyExtractor.extractOntology(mapping);
+		QuestMaterializer materializer = new QuestMaterializer(configuration, tbox, vocabulary, false);
 
 		List<Assertion> assertions = materializer.getAssertionList();
-		assertEquals(0, assertions.size());
 
+		LOGGER.debug("Assertions: \n");
+		assertions.forEach(a -> LOGGER.debug(a + "\n"));
+
+		assertEquals(15, assertions.size());
+
+		// Too late!
 		int count = materializer.getTripleCount();
 		assertEquals(0, count);
 
 		conn.close();
 
+	}
+
+	private static OBDAModel createMapping() {
+
+    	// TODO: we should not have to create an high-level configuration just for constructing these objects...
+		QuestCoreConfiguration configuration = createAndInitConfiguration()
+				.build();
+		Injector injector = configuration.getInjector();
+		NativeQueryLanguageComponentFactory nativeQLFactory = injector.getInstance(NativeQueryLanguageComponentFactory.class);
+		OBDAFactoryWithException obdaFactory = injector.getInstance(OBDAFactoryWithException.class);
+
+    			/*
+		 * Setting up the OBDA model and the mappings
+		 */
+
+		String sql = "SELECT \"fn\", \"ln\", \"age\", \"schooluri\" FROM \"data\"";
+
+		Function personTemplate = DATA_FACTORY.getUriTemplate(
+				DATA_FACTORY.getConstantLiteral("http://schools.com/person/{}-{}"),
+				DATA_FACTORY.getVariable("fn"),
+				DATA_FACTORY.getVariable("ln"));
+
+		Function schoolTemplate = DATA_FACTORY.getUriTemplate(
+				DATA_FACTORY.getConstantLiteral("{}"),
+				DATA_FACTORY.getVariable("schooluri"));
+
+		List<Function> body = new LinkedList<Function>();
+		body.add(DATA_FACTORY.getFunction(person, personTemplate));
+		body.add(DATA_FACTORY.getFunction(fn, personTemplate, DATA_FACTORY.getVariable("fn")));
+		body.add(DATA_FACTORY.getFunction(ln, personTemplate, DATA_FACTORY.getVariable("ln")));
+		body.add(DATA_FACTORY.getFunction(age, personTemplate, DATA_FACTORY.getVariable("age")));
+		body.add(DATA_FACTORY.getFunction(hasschool, personTemplate, schoolTemplate));
+		body.add(DATA_FACTORY.getFunction(school, schoolTemplate));
+
+		OBDAMappingAxiom map1 = nativeQLFactory.create(MAPPING_FACTORY.getSQLQuery(sql), body);
+
+		PrefixManager prefixManager = nativeQLFactory.create(new HashMap<>());
+		return obdaFactory.createOBDAModel(ImmutableList.of(map1), prefixManager);
 	}
 
 //	public void testTwoSources() throws Exception {
@@ -232,7 +260,7 @@ public class VirtualABoxMaterializerTest {
 //            mappingIndex.put(source2.getSourceID(), ImmutableList.of(map1));
 //
 //            PrefixManager prefixManager = nativeQLFactory.create(new HashMap<String, String>());
-//            OBDAModel model = obdaFactory.createOBDAModel(dataSources, mappingIndex, prefixManager,
+//            OBDAModel model = obdaFactory.createMapping(dataSources, mappingIndex, prefixManager,
 //					new OntologyVocabularyImpl());
 //
 //            QuestMaterializer materializer = new QuestMaterializer(model, false);
@@ -342,7 +370,7 @@ public class VirtualABoxMaterializerTest {
 //		OBDAMappingAxiom map1 = nativeQLFactory.create(MAPPING_FACTORY.getSQLQuery(sql), body);
 //
 //        PrefixManager prefixManager = nativeQLFactory.create(new HashMap<String, String>());
-//        OBDAModel model = obdaFactory.createOBDAModel(dataSources, mappingIndex, prefixManager, new OntologyVocabularyImpl());
+//        OBDAModel model = obdaFactory.createMapping(dataSources, mappingIndex, prefixManager, new OntologyVocabularyImpl());
 //
 //		QuestMaterializer materializer = new QuestMaterializer(model, false);
 //
@@ -414,7 +442,7 @@ public class VirtualABoxMaterializerTest {
 //        dataSources.add(source3);
 //
 //        PrefixManager prefixManager = nativeQLFactory.create(new HashMap<String, String>());
-//        OBDAModel model = obdaFactory.createOBDAModel(dataSources, mappingIndex, prefixManager, new OntologyVocabularyImpl());
+//        OBDAModel model = obdaFactory.createMapping(dataSources, mappingIndex, prefixManager, new OntologyVocabularyImpl());
 //		QuestMaterializer materializer = new QuestMaterializer(model, false);
 //
 //		List<Assertion> assertions = materializer.getAssertionList();
@@ -521,7 +549,7 @@ public class VirtualABoxMaterializerTest {
 //        mappingIndex.put(source2.getSourceID(), ImmutableList.of(map1));
 //
 //        PrefixManager prefixManager = nativeQLFactory.create(new HashMap<String, String>());
-//        OBDAModel model = obdaFactory.createOBDAModel(dataSources, mappingIndex, prefixManager,
+//        OBDAModel model = obdaFactory.createMapping(dataSources, mappingIndex, prefixManager,
 //				new OntologyVocabularyImpl());
 //
 //		QuestMaterializer materializer = new QuestMaterializer(model, false);
@@ -629,7 +657,7 @@ public class VirtualABoxMaterializerTest {
 //        mappingIndex.put(source.getSourceID(), ImmutableList.of(map1, map2, map3, map4, map5, map6));
 //
 //        PrefixManager prefixManager = nativeQLFactory.create(new HashMap<String, String>());
-//        OBDAModel model = obdaFactory.createOBDAModel(dataSources, mappingIndex, prefixManager, new OntologyVocabularyImpl());
+//        OBDAModel model = obdaFactory.createMapping(dataSources, mappingIndex, prefixManager, new OntologyVocabularyImpl());
 //
 //		QuestMaterializer materializer = new QuestMaterializer(model, false);
 //
@@ -641,4 +669,5 @@ public class VirtualABoxMaterializerTest {
 //		conn.close();
 //
 //	}
+
 }

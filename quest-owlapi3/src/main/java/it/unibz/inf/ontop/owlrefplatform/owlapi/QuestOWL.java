@@ -22,9 +22,7 @@ package it.unibz.inf.ontop.owlrefplatform.owlapi;
 
 import com.google.inject.Injector;
 import it.unibz.inf.ontop.exception.InvalidMappingException;
-import it.unibz.inf.ontop.injection.InvalidOntopConfigurationException;
-import it.unibz.inf.ontop.injection.QuestConfiguration;
-import it.unibz.inf.ontop.injection.QuestSettings;
+import it.unibz.inf.ontop.injection.*;
 import it.unibz.inf.ontop.io.InvalidDataSourceException;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.ontology.*;
@@ -32,8 +30,6 @@ import it.unibz.inf.ontop.owlapi.OWLAPIABoxIterator;
 import it.unibz.inf.ontop.owlapi.OWLAPITranslatorUtility;
 import it.unibz.inf.ontop.owlrefplatform.core.*;
 import it.unibz.inf.ontop.owlrefplatform.core.abox.QuestMaterializer;
-import it.unibz.inf.ontop.injection.QuestComponentFactory;
-import it.unibz.inf.ontop.injection.QuestCoreSettings;
 import it.unibz.inf.ontop.pivotalrepr.utils.ExecutorRegistry;
 import it.unibz.inf.ontop.utils.VersionInfo;
 import org.semanticweb.owlapi.model.*;
@@ -46,6 +42,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Iterator;
@@ -60,6 +57,7 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 
 	private final QuestSettings preferences;
 	private final Optional<DBMetadata> inputDBMetadata;
+
 	StructuralReasoner structuralReasoner;
 
     private final Version version;
@@ -101,6 +99,13 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 	private QuestOWLConnection owlconn = null;
 
 	private final OWLOntologyManager man;
+
+
+	/*
+	 * This configuration will be dropped after initialization
+	 */
+	@Nullable
+	private QuestConfiguration questConfiguration;
 	
 	
 	// //////////////////////////////////////////////////////////////////////////////////////
@@ -134,7 +139,7 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 			throws IllegalConfigurationException {
         super(rootOntology, owlConfiguration, BufferingMode.BUFFERING);
 
-		QuestConfiguration questConfiguration = owlConfiguration.getQuestConfiguration();
+		questConfiguration = owlConfiguration.getQuestConfiguration();
 		preferences = questConfiguration.getSettings();
 		inputDBMetadata = questConfiguration.getDatasourceMetadata();
 
@@ -272,11 +277,15 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 				if (bObtainFromMappings) { // TODO: GUOHUI 2016-01-16: This mode will be removed
 					// Retrieves the ABox from the target database via mapping.
 					log.debug("Loading data from Mappings into the database");
-
-					OBDAModel obdaModelForMaterialization = questInstance.getOBDAModel();
-					obdaModelForMaterialization.getOntologyVocabulary().merge(translatedOntologyMerge.getVocabulary());
 					
-					QuestMaterializer materializer = new QuestMaterializer(obdaModelForMaterialization, false);
+					QuestMaterializer materializer = new QuestMaterializer(questConfiguration,
+							translatedOntologyMerge, false);
+
+					/*
+					 * Now we can forget the configuration (not needed anymore)
+					 */
+					questConfiguration = null;
+
 					Iterator<Assertion> assertionIter = materializer.getAssertionIterator();
 					int count = st.insertData(assertionIter, 5000, 500);
 					materializer.disconnect();

@@ -31,6 +31,8 @@ import java.sql.Statement;
 import it.unibz.inf.ontop.exception.InvalidMappingException;
 import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.io.InvalidDataSourceException;
+import it.unibz.inf.ontop.ontology.OntologyVocabulary;
+import it.unibz.inf.ontop.ontology.impl.OntologyFactoryImpl;
 import junit.framework.TestCase;
 
 import it.unibz.inf.ontop.model.OBDAModel;
@@ -121,9 +123,14 @@ public class MetaMappingTargetQueryValidatorTest extends TestCase {
 
 		OBDAModel obdaModel = configuration.loadProvidedMapping();
 
+		/**
+		 * TODO: do we want to consider a non-empty vocabulary?
+		 */
+		OntologyVocabulary vocabulary = OntologyFactoryImpl.getInstance().createVocabulary();
+
 		// run validator
 		try {
-			OBDAModelValidator.validate(obdaModel);
+			OBDAModelValidator.validate(obdaModel, vocabulary);
 		}
 		catch (Exception e) {
 			fail("The target query has problem:" + e.getMessage());

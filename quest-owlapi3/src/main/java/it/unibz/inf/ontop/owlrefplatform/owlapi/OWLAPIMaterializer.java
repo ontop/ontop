@@ -21,44 +21,49 @@ package it.unibz.inf.ontop.owlrefplatform.owlapi;
  */
 
 import com.google.common.collect.ImmutableSet;
-import it.unibz.inf.ontop.model.OBDAModel;
+import it.unibz.inf.ontop.exception.InvalidMappingException;
+import it.unibz.inf.ontop.injection.QuestConfiguration;
+import it.unibz.inf.ontop.io.InvalidDataSourceException;
 import it.unibz.inf.ontop.model.Predicate;
 import it.unibz.inf.ontop.ontology.Assertion;
 import it.unibz.inf.ontop.ontology.Ontology;
+import it.unibz.inf.ontop.ontology.utils.MappingVocabularyExtractor;
+import it.unibz.inf.ontop.owlapi.OWLAPITranslatorUtility;
 import it.unibz.inf.ontop.owlapi.QuestOWLIndividualAxiomIterator;
 import it.unibz.inf.ontop.owlrefplatform.core.abox.QuestMaterializer;
+import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
-import java.util.Collection;
+import java.io.IOException;
 import java.util.Iterator;
+import java.util.Optional;
 
+/**
+ * TODO: refactor (remove the exceptions from the constructors and create a Result object)
+ */
 public class OWLAPIMaterializer implements AutoCloseable {
 
 	private final Iterator<Assertion> assertions;
 	private final QuestMaterializer materializer;
-	
-	public OWLAPIMaterializer(OBDAModel model, boolean doStreamResults) throws Exception {
-		 this(model, null, doStreamResults);
+
+	public OWLAPIMaterializer(QuestConfiguration configuration, boolean doStreamResults) throws Exception {
+		Ontology tbox = extractTBox(configuration);
+		materializer = new QuestMaterializer(configuration, tbox, doStreamResults);
+		assertions = materializer.getAssertionIterator();
 	}
 
-	
-	public OWLAPIMaterializer(OBDAModel model, Ontology onto, boolean doStreamResults) throws Exception {
-		 materializer = new QuestMaterializer(model, onto, doStreamResults);
-		 assertions = materializer.getAssertionIterator();
+	/**
+ 	 * Only materializes the predicates in `predicates`
+  	 */
+	public OWLAPIMaterializer(QuestConfiguration configuration, ImmutableSet<Predicate> selectedVocabulary, boolean doStreamResults) throws Exception {
+		materializer = new QuestMaterializer(configuration, extractTBox(configuration), selectedVocabulary, doStreamResults);
+		assertions = materializer.getAssertionIterator();
 	}
 
-    /*
-     * only materialize the predicates in  `predicates`
-     */
-    public OWLAPIMaterializer(OBDAModel model, Ontology onto, Collection<Predicate> predicates, boolean doStreamResults) throws Exception {
-        materializer = new QuestMaterializer(model, onto, predicates, doStreamResults);
-        assertions = materializer.getAssertionIterator();
-    }
+	public OWLAPIMaterializer(QuestConfiguration configuration, Predicate selectedPredicate, boolean doStreamResults) throws Exception {
+		this(configuration, ImmutableSet.of(selectedPredicate), doStreamResults);
+	}
 
-    public OWLAPIMaterializer(OBDAModel obdaModel, Ontology onto, Predicate predicate, boolean doStreamResults)  throws Exception {
-        this(obdaModel, onto, ImmutableSet.of(predicate), doStreamResults);
-    }
-
-    public QuestOWLIndividualAxiomIterator getIterator() {
+	public QuestOWLIndividualAxiomIterator getIterator() {
 		return new QuestOWLIndividualAxiomIterator(assertions);
 	}
 	
@@ -84,4 +89,16 @@ public class OWLAPIMaterializer implements AutoCloseable {
     public void close() throws Exception {
         disconnect();
     }
+
+	private static Ontology extractTBox(QuestConfiguration configuration) throws OWLOntologyCreationException,
+			InvalidDataSourceException, IOException, InvalidMappingException {
+
+		Optional<Ontology> inputOntology =  configuration.loadInputOntology()
+				.map(OWLAPITranslatorUtility::translate);
+
+		if (inputOntology.isPresent())
+			return inputOntology.get();
+
+		return MappingVocabularyExtractor.extractOntology(configuration.loadProvidedMapping());
+	}
 }

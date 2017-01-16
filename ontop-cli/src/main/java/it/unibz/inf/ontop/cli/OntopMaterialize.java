@@ -25,11 +25,12 @@ import com.github.rvesse.airline.annotations.Command;
 import com.github.rvesse.airline.annotations.Option;
 import com.github.rvesse.airline.annotations.OptionType;
 import com.github.rvesse.airline.annotations.restrictions.AllowedValues;
+import com.google.common.collect.ImmutableCollection;
+import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.injection.QuestConfiguration;
+import it.unibz.inf.ontop.injection.QuestConfiguration.Builder;
 import it.unibz.inf.ontop.model.OBDAModel;
 import it.unibz.inf.ontop.model.Predicate;
-import it.unibz.inf.ontop.ontology.Ontology;
-import it.unibz.inf.ontop.owlapi.OWLAPITranslatorUtility;
 import it.unibz.inf.ontop.owlapi.QuestOWLIndividualAxiomIterator;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.OWLAPIMaterializer;
 import org.semanticweb.owlapi.apibinding.OWLManager;
@@ -99,16 +100,10 @@ public class OntopMaterialize extends OntopReasoningCommandBase {
             throw new NullPointerException("You have to specify an ontology file!");
         }
         try {
-            QuestConfiguration.Builder configurationBuilder = QuestConfiguration.defaultBuilder()
-                    .ontologyFile(owlFile);
 
-            if (isR2rmlFile(mappingFile)) {
-                configurationBuilder.r2rmlMappingFile(mappingFile);
-            } else {
-                configurationBuilder.nativeOntopMappingFile(mappingFile);
-            }
-
-            QuestConfiguration configuration = configurationBuilder.build();
+            QuestConfiguration configuration = createAndInitConfigurationBuilder()
+                    .ontologyFile(owlFile)
+                    .build();
 
             OWLOntology ontology = configuration.loadProvidedInputOntology();
 
@@ -119,39 +114,20 @@ public class OntopMaterialize extends OntopReasoningCommandBase {
                 ontology = extractDeclarations(ontology.getOWLOntologyManager(), ontology);
             }
 
-            Collection<Predicate> predicates = new ArrayList<>();
+            ImmutableCollection<Predicate> predicates = extractPredicates(ontology);
 
-            for (OWLClass owlClass : ontology.getClassesInSignature()) {
-                Predicate predicate = DATA_FACTORY.getClassPredicate(owlClass.getIRI().toString());
-                predicates.add(predicate);
-            }
-            for (OWLDataProperty owlDataProperty : ontology.getDataPropertiesInSignature()) {
-                Predicate predicate = DATA_FACTORY.getDataPropertyPredicate(owlDataProperty.getIRI().toString());
-                predicates.add(predicate);
-            }
-            for(OWLObjectProperty owlObjectProperty: ontology.getObjectPropertiesInSignature()){
-                Predicate predicate = DATA_FACTORY.getObjectPropertyPredicate(owlObjectProperty.getIRI().toString());
-                predicates.add(predicate);
-            }
-            for (OWLAnnotationProperty owlAnnotationProperty : ontology.getAnnotationPropertiesInSignature()) {
-                Predicate predicate = DATA_FACTORY.getAnnotationPropertyPredicate(owlAnnotationProperty.getIRI().toString());
-                predicates.add(predicate);
-            }
-
-
+            // Loads it only once
             OBDAModel obdaModel = configuration.loadProvidedMapping();
-
-            Ontology inputOntology = OWLAPITranslatorUtility.translate(ontology);
-
-            obdaModel.getOntologyVocabulary().merge(inputOntology.getVocabulary());
-
-
-            int numPredicates = predicates.size();
+            QuestConfiguration materializationConfig = createAndInitConfigurationBuilder()
+                    // To avoid parsing it again and again
+                    .obdaModel(obdaModel)
+                    .build();
 
             int i = 1;
+            int numPredicates = predicates.size();
             for (Predicate predicate : predicates) {
                 System.err.println(String.format("Materializing %s (%d/%d)", predicate, i, numPredicates));
-                serializePredicate(ontology, inputOntology, obdaModel, predicate, outputFile, format);
+                serializePredicate(materializationConfig, predicate, outputFile, format, ontology);
                 i++;
             }
 
@@ -162,14 +138,38 @@ public class OntopMaterialize extends OntopReasoningCommandBase {
         }
     }
 
+    private ImmutableCollection<Predicate> extractPredicates(OWLOntology ontology) {
+        Collection<Predicate> predicates = new ArrayList<>();
+
+        for (OWLClass owlClass : ontology.getClassesInSignature()) {
+            Predicate predicate = DATA_FACTORY.getClassPredicate(owlClass.getIRI().toString());
+            predicates.add(predicate);
+        }
+        for (OWLDataProperty owlDataProperty : ontology.getDataPropertiesInSignature()) {
+            Predicate predicate = DATA_FACTORY.getDataPropertyPredicate(owlDataProperty.getIRI().toString());
+            predicates.add(predicate);
+        }
+        for(OWLObjectProperty owlObjectProperty: ontology.getObjectPropertiesInSignature()){
+            Predicate predicate = DATA_FACTORY.getObjectPropertyPredicate(owlObjectProperty.getIRI().toString());
+            predicates.add(predicate);
+        }
+        for (OWLAnnotationProperty owlAnnotationProperty : ontology.getAnnotationPropertiesInSignature()) {
+            Predicate predicate = DATA_FACTORY.getAnnotationPropertyPredicate(owlAnnotationProperty.getIRI().toString());
+            predicates.add(predicate);
+        }
+        return ImmutableList.copyOf(predicates);
+    }
+
     /**
      * Serializes the A-box corresponding to a predicate into one or multiple file.
      */
-    private void serializePredicate(OWLOntology ontology, Ontology inputOntology, OBDAModel obdaModel,
-                                           Predicate predicate, String outputFile, String format) throws Exception {
+    private void serializePredicate(QuestConfiguration materializationConfig, Predicate predicate,
+                                    String outputFile, String format, OWLOntology ontology) throws Exception {
         final long startTime = System.currentTimeMillis();
 
-        OWLAPIMaterializer materializer = new OWLAPIMaterializer(obdaModel, inputOntology, predicate, doStreamResults);
+
+
+        OWLAPIMaterializer materializer = new OWLAPIMaterializer(materializationConfig, predicate, doStreamResults);
         QuestOWLIndividualAxiomIterator iterator = materializer.getIterator();
 
         System.err.println("Starts writing triples into files.");
@@ -273,43 +273,40 @@ public class OntopMaterialize extends OntopReasoningCommandBase {
             }
             writer = new BufferedWriter(new OutputStreamWriter(output, "UTF-8"));
 
-            QuestConfiguration.Builder configBuilder = QuestConfiguration.defaultBuilder();
-            if (isR2rmlFile(mappingFile)) {
-                configBuilder.r2rmlMappingFile(mappingFile);
-            }
-            else {
-                configBuilder.nativeOntopMappingFile(mappingFile);
-            }
+            Builder configBuilder = createAndInitConfigurationBuilder();
 
             if (owlFile != null) {
                 configBuilder.ontologyFile(owlFile);
             }
 
-            QuestConfiguration configuration = configBuilder.build();
-
-            OBDAModel obdaModel = configuration.loadProvidedMapping();
+            QuestConfiguration initialConfiguration = configBuilder.build();
+            //OBDAModel obdaModel = initialConfiguration.loadProvidedMapping();
 
             OWLOntology ontology;
-            OWLAPIMaterializer materializer;
+            QuestConfiguration materializerConfiguration;
 
             if (owlFile != null) {
             // Loading the OWL ontology from the file as with normal OWLReasoners
-                ontology = configuration.loadProvidedInputOntology();
+                OWLOntology initialOntology = initialConfiguration.loadProvidedInputOntology();
 
                 if (disableReasoning) {
-                /*
-                 * when reasoning is disabled, we extract only the declaration assertions for the vocabulary
-                 */
-                    ontology = extractDeclarations(ontology.getOWLOntologyManager(), ontology);
+                    ontology = extractDeclarations(initialOntology.getOWLOntologyManager(), initialOntology);
                 }
+                else {
+                    ontology = initialOntology;
+                }
+                materializerConfiguration = createAndInitConfigurationBuilder()
+                        .ontology(ontology)
+                        .build();
 
-                Ontology onto =  OWLAPITranslatorUtility.translate(ontology);
-                obdaModel.getOntologyVocabulary().merge(onto.getVocabulary());
-                materializer = new OWLAPIMaterializer(obdaModel, onto, doStreamResults);
             } else {
                 ontology = OWLManager.createOWLOntologyManager().createOntology();
-                materializer = new OWLAPIMaterializer(obdaModel, doStreamResults);
+                materializerConfiguration = createAndInitConfigurationBuilder()
+                        .ontology(ontology)
+                        .build();
             }
+
+            OWLAPIMaterializer materializer = new OWLAPIMaterializer(materializerConfiguration, doStreamResults);
 
 
             // OBDAModelSynchronizer.declarePredicates(ontology, obdaModel);
@@ -343,4 +340,22 @@ public class OntopMaterialize extends OntopReasoningCommandBase {
         }
     }
 
+
+    /**
+     * Mapping file + connection info
+     */
+    private Builder<Builder<? extends Builder>> createAndInitConfigurationBuilder() {
+        Builder configBuilder = QuestConfiguration.defaultBuilder()
+                .enableOntologyAnnotationQuerying(true)
+                .properties(createConnectionProperties());
+
+        if (isR2rmlFile(mappingFile)) {
+            configBuilder.r2rmlMappingFile(mappingFile);
+        }
+        else {
+            configBuilder.nativeOntopMappingFile(mappingFile);
+        }
+
+        return configBuilder;
+    }
 }

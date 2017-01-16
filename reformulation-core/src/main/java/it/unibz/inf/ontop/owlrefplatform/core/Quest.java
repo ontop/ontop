@@ -228,7 +228,7 @@ public class Quest implements Serializable, IQuest {
 							+ "\". If you want to work in \"classic abox\" mode, that is, as a triple store, you may not provide mappings (quest will take care of setting up the mappings and the database), set them to null.");
 		}
 
-		loadOBDAModel(obdaModel.orElse(null), inputOntology.getVocabulary());
+		loadOBDAModel(obdaModel.orElse(null));
 		// TODO: use the Optional instead
 		this.metadata = inputMetadata.orElse(null);
 	}
@@ -239,7 +239,7 @@ public class Quest implements Serializable, IQuest {
 		return engine.unfolder.ufp;
 	}
 
-	private void loadOBDAModel(OBDAModel model, ImmutableOntologyVocabulary vocabulary) {
+	private void loadOBDAModel(OBDAModel model) {
 
 		if (model == null) {
 			//model = OBDADataFactoryImpl.getInstance().getOBDAModel();
@@ -247,7 +247,7 @@ public class Quest implements Serializable, IQuest {
 			//TODO: add the prefix.
 			PrefixManager defaultPrefixManager = nativeQLFactory.create(new HashMap<String, String>());
 
-			model = obdaFactory.createOBDAModel(ImmutableList.of(), defaultPrefixManager, vocabulary);
+			model = obdaFactory.createOBDAModel(ImmutableList.of(), defaultPrefixManager);
 		}
 		inputOBDAModel = model;
 	}

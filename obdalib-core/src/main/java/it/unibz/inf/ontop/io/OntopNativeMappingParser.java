@@ -31,8 +31,6 @@ import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.exception.*;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.SQLMappingFactoryImpl;
-import it.unibz.inf.ontop.ontology.OntologyVocabulary;
-import it.unibz.inf.ontop.ontology.impl.OntologyVocabularyImpl;
 import org.eclipse.rdf4j.model.Model;
 import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
 import it.unibz.inf.ontop.injection.OBDAFactoryWithException;
@@ -222,9 +220,7 @@ public class OntopNativeMappingParser implements MappingParser {
         }
 
         PrefixManager prefixManager = nativeQLFactory.create(prefixes);
-        OntologyVocabulary vocabulary = new OntologyVocabularyImpl();
-        OBDAModel model = obdaFactory.createOBDAModel(ImmutableList.copyOf(mappings), prefixManager, vocabulary);
-        return model;
+        return obdaFactory.createOBDAModel(ImmutableList.copyOf(mappings), prefixManager);
 	}
     
     /*

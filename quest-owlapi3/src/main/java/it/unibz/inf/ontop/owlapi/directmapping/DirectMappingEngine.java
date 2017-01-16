@@ -32,11 +32,9 @@ import it.unibz.inf.ontop.io.*;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.Predicate.COL_TYPE;
 import it.unibz.inf.ontop.model.impl.SQLMappingFactoryImpl;
-import it.unibz.inf.ontop.ontology.DataPropertyExpression;
-import it.unibz.inf.ontop.ontology.OClass;
-import it.unibz.inf.ontop.ontology.ObjectPropertyExpression;
-import it.unibz.inf.ontop.ontology.OntologyVocabulary;
-import it.unibz.inf.ontop.ontology.impl.OntologyVocabularyImpl;
+import it.unibz.inf.ontop.ontology.*;
+import it.unibz.inf.ontop.ontology.impl.OntologyFactoryImpl;
+import it.unibz.inf.ontop.ontology.utils.MappingVocabularyExtractor;
 import it.unibz.inf.ontop.sql.RDBMetadata;
 import it.unibz.inf.ontop.sql.RDBMetadataExtractionTools;
 import it.unibz.inf.ontop.sql.DatabaseRelationDefinition;
@@ -80,6 +78,7 @@ public class DirectMappingEngine {
 	}
 
 	private static final SQLMappingFactory MAPPING_FACTORY = SQLMappingFactoryImpl.getInstance();
+	private static final OntologyFactory ONTOLOGY_FACTORY = OntologyFactoryImpl.getInstance();
 	private final NativeQueryLanguageComponentFactory nativeQLFactory;
 	private final OBDAFactoryWithException obdaFactory;
 	private final OntopSQLSettings settings;
@@ -122,9 +121,11 @@ public class DirectMappingEngine {
 				? extractMappings(inputObdaModel.get())
 				: extractMappings();
 
+		ImmutableOntologyVocabulary newVocabulary = MappingVocabularyExtractor.extractVocabulary(newMapping);
+
 		OWLOntology newOntology = inputOntology.isPresent()
-				? updateOntology(inputOntology.get(), newMapping)
-				: updateOntology(createEmptyOntology(baseIRI), newMapping);
+				? updateOntology(inputOntology.get(), newVocabulary)
+				: updateOntology(createEmptyOntology(baseIRI), newVocabulary);
 
 		return new BootstrappingResults(newMapping, newOntology);
 	}
@@ -153,7 +154,7 @@ public class DirectMappingEngine {
 	 * @return a new ontology storing all classes and properties used in the mappings
 	 *
 	 */
-	private OWLOntology updateOntology(OWLOntology ontology, OBDAModel model)
+	private OWLOntology updateOntology(OWLOntology ontology, ImmutableOntologyVocabulary vocabulary)
 			throws OWLOntologyCreationException, OWLOntologyStorageException, SQLException {
 		OWLOntologyManager manager = ontology.getOWLOntologyManager();
 
@@ -161,19 +162,19 @@ public class DirectMappingEngine {
 		Set<OWLDeclarationAxiom> declarationAxioms = new HashSet<>();
 
 		//Add all the classes
-		for (OClass c :  model.getOntologyVocabulary().getClasses()) {
+		for (OClass c :  vocabulary.getClasses()) {
 			OWLClass owlClass = dataFactory.getOWLClass(IRI.create(c.getName()));
 			declarationAxioms.add(dataFactory.getOWLDeclarationAxiom(owlClass));
 		}
 		
 		//Add all the object properties
-		for (ObjectPropertyExpression p : model.getOntologyVocabulary().getObjectProperties()){
+		for (ObjectPropertyExpression p : vocabulary.getObjectProperties()){
 			OWLObjectProperty property = dataFactory.getOWLObjectProperty(IRI.create(p.getName()));
 			declarationAxioms.add(dataFactory.getOWLDeclarationAxiom(property));
 		}
 		
 		//Add all the data properties
-		for (DataPropertyExpression p : model.getOntologyVocabulary().getDataProperties()){
+		for (DataPropertyExpression p : vocabulary.getDataProperties()){
 			OWLDataProperty property = dataFactory.getOWLDataProperty(IRI.create(p.getName()));
 			declarationAxioms.add(dataFactory.getOWLDeclarationAxiom(property));
 		}
@@ -191,8 +192,7 @@ public class DirectMappingEngine {
 	 */
 	private OBDAModel extractMappings() throws DuplicateMappingException, SQLException {
 		it.unibz.inf.ontop.io.PrefixManager prefixManager = nativeQLFactory.create(new HashMap<>());
-		OBDAModel emptyModel = obdaFactory.createOBDAModel(ImmutableList.of(), prefixManager,
-				new OntologyVocabularyImpl());
+		OBDAModel emptyModel = obdaFactory.createOBDAModel(ImmutableList.of(), prefixManager);
 		return extractMappings(emptyModel);
 	}
 
@@ -235,20 +235,7 @@ public class DirectMappingEngine {
 		mappings.addAll(model.getMappings());
 		mappings.addAll(mappingAxioms);
 
-		OntologyVocabulary ontologyVocabulary = model.getOntologyVocabulary();
-
-		for (OBDAMappingAxiom mapping : model.getMappings()) {
-			List<Function> rule = mapping.getTargetQuery();
-			for (Function f : rule) {
-				if (f.getArity() == 1)
-					ontologyVocabulary.createClass(f.getFunctionSymbol().getName());
-				else if (f.getFunctionSymbol().getType(1).equals(COL_TYPE.OBJECT))
-					ontologyVocabulary.createObjectProperty(f.getFunctionSymbol().getName());
-				else
-					ontologyVocabulary.createDataProperty(f.getFunctionSymbol().getName());
-			}
-		}
-		return model.newModel(ImmutableList.copyOf(mappings), model.getPrefixManager(), ontologyVocabulary);
+		return model.newModel(ImmutableList.copyOf(mappings), model.getPrefixManager());
 	}
 
 

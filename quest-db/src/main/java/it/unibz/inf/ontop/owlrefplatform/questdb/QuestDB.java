@@ -370,19 +370,6 @@ public class QuestDB {
 		return response;
 	}
 
-	public int loadOBDAModel(String storename, URI obdamodelURI) throws Exception {
-		if (!stores.containsKey(storename))
-			throw new Exception(String.format("The store \"%s\" does not exists.", storename));
-		QuestDBAbstractStore dbstore = stores.get(storename);
-		if (!(dbstore instanceof QuestDBClassicStore))
-			throw new Exception("Unsupported request");
-		QuestDBConnection conn = connections.get(storename);
-		SIQuestDBStatement st = conn.createSIStatement();
-		int result = st.addFromOBDA(obdamodelURI);
-		st.close();
-		return result;
-	}
-
 	public int load(String storename, URI dataURI, boolean useFile) throws Exception {
 		if (!stores.containsKey(storename))
 			throw new Exception(String.format("The store \"%s\" does not exists.", storename));

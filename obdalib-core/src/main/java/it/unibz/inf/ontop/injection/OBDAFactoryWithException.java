@@ -5,7 +5,6 @@ import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.io.PrefixManager;
 import it.unibz.inf.ontop.model.OBDAMappingAxiom;
 import it.unibz.inf.ontop.model.OBDAModel;
-import it.unibz.inf.ontop.ontology.ImmutableOntologyVocabulary;
 
 /**
  * Some object instantiations may throw exceptions that
@@ -20,6 +19,5 @@ import it.unibz.inf.ontop.ontology.ImmutableOntologyVocabulary;
 public interface OBDAFactoryWithException {
 
     OBDAModel createOBDAModel(ImmutableList<OBDAMappingAxiom> newMappings,
-                                     PrefixManager prefixManager,
-                                     ImmutableOntologyVocabulary ontologyVocabulary) throws DuplicateMappingException;
+                                     PrefixManager prefixManager) throws DuplicateMappingException;
 }

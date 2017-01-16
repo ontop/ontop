@@ -48,9 +48,10 @@ public class QuestOWLMaterializerTest extends TestCase {
 
 	private Connection jdbcconn = null;
 
-	private Logger log =  LoggerFactory.getLogger(this.getClass());
+	private static final Logger LOGGER =  LoggerFactory.getLogger(QuestOWLMaterializerTest.class);
+	private static final String PROPERTY_FILE = "src/test/resources/test/materializer/MaterializeTest.properties";
 
-    public QuestOWLMaterializerTest() {
+	public QuestOWLMaterializerTest() {
     }
 
 	@Override
@@ -107,21 +108,24 @@ public class QuestOWLMaterializerTest extends TestCase {
 
 		QuestConfiguration configuration = QuestConfiguration.defaultBuilder()
 				.ontologyFile("src/test/resources/test/materializer/MaterializeTest.owl")
+				.propertyFile(PROPERTY_FILE)
 				.nativeOntopMappingFile(f)
 				.build();
 
-        /*
-         * Load the OBDA model from an external .obda file
-         */
-        OBDAModel model = configuration.loadProvidedMapping();
+		Ontology ontology = OWLAPITranslatorUtility.translate(configuration.loadProvidedInputOntology());
 
-			QuestMaterializer mat = new QuestMaterializer(model, false);
+		// TODO: why not using OWLAPIMaterializer instead?
+			QuestMaterializer mat = new QuestMaterializer(configuration, ontology, false);
 			Iterator<Assertion> iterator = mat.getAssertionIterator();
 			int classAss = 0;
 			int propAss = 0;
 			int objAss = 0;
+
+			LOGGER.debug("Assertions:");
 			while (iterator.hasNext()) {
 				Assertion assertion = iterator.next();
+				LOGGER.debug(assertion.toString());
+
 				if (assertion instanceof ClassAssertion)
 					classAss++;
 				
@@ -131,8 +135,8 @@ public class QuestOWLMaterializerTest extends TestCase {
 				else // DataPropertyAssertion
 					propAss++;
 			}
-			Assert.assertEquals(3, classAss); //3 data rows for T1
-			Assert.assertEquals(21, propAss); //7 tables * 3 data rows each T2-T8
+			Assert.assertEquals(6, classAss); //2 classes * 3 data rows for T1
+			Assert.assertEquals(42, propAss); //2 properties * 7 tables * 3 data rows each T2-T8
 			Assert.assertEquals(3, objAss); //3 data rows for T9
 
 	}
@@ -144,10 +148,9 @@ public class QuestOWLMaterializerTest extends TestCase {
 
 		QuestConfiguration configuration = QuestConfiguration.defaultBuilder()
 				.ontologyFile("src/test/resources/test/materializer/MaterializeTest.owl")
+				.propertyFile(PROPERTY_FILE)
 				.nativeOntopMappingFile(f)
 				.build();
-
-            OBDAModel model = configuration.loadProvidedMapping();
 
 			// read onto
 			Ontology onto =  OWLAPITranslatorUtility.translateImportsClosure(
@@ -155,14 +158,16 @@ public class QuestOWLMaterializerTest extends TestCase {
 			System.out.println(onto.getSubClassAxioms());
 			System.out.println(onto.getSubObjectPropertyAxioms());
 			System.out.println(onto.getSubDataPropertyAxioms());
-			
-			QuestMaterializer mat = new QuestMaterializer(model, onto, false);
+
+			// TODO: why not using OWLAPIMaterializer instead?
+			QuestMaterializer mat = new QuestMaterializer(configuration, onto, false);
 			Iterator<Assertion> iterator = mat.getAssertionIterator();
 			int classAss = 0;
 			int propAss = 0;
 			int objAss = 0;
 			while (iterator.hasNext()) {
 				Assertion assertion = iterator.next();
+				LOGGER.debug(assertion + "\n");
 				if (assertion instanceof ClassAssertion) 
 					classAss++;
 	

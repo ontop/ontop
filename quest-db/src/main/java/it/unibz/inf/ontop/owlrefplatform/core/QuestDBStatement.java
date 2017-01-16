@@ -20,7 +20,6 @@ package it.unibz.inf.ontop.owlrefplatform.core;
  * #L%
  */
 
-import java.io.File;
 import java.net.URI;
 import java.util.Iterator;
 import java.util.Optional;
@@ -29,11 +28,9 @@ import java.util.Set;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.owlapi.OWLAPIABoxIterator;
 import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
-import it.unibz.inf.ontop.mapping.MappingParser;
 
 import it.unibz.inf.ontop.ontology.Assertion;
 import it.unibz.inf.ontop.owlrefplatform.core.abox.NTripleAssertionIterator;
-import it.unibz.inf.ontop.owlrefplatform.core.abox.QuestMaterializer;
 import org.eclipse.rdf4j.query.MalformedQueryException;
 import org.eclipse.rdf4j.query.parser.ParsedQuery;
 import org.semanticweb.owlapi.apibinding.OWLManager;
@@ -79,10 +76,6 @@ public class QuestDBStatement implements IQuestDBStatement {
 		return load(rdffile, true, -1, -1);
 	}
 
-	public int addFromOBDA(URI obdaFile) throws OBDAException {
-		return loadOBDAModel(obdaFile, false, -1, -1);
-	}
-
 	/* Move to query time ? */
 	private int load(URI rdffile, boolean useFile, int commit, int batch) throws OBDAException {
 		String pathstr = rdffile.toString();
@@ -106,34 +99,6 @@ public class QuestDBStatement implements IQuestDBStatement {
 			throw new OBDAException(e);
 		} finally {
 			st.close();
-		}
-	}
-
-	/* Move to query time ? */
-	private int loadOBDAModel(URI uri, boolean useFile, int commit, int batch)
-			throws OBDAException {
-		Iterator<Assertion> assertionIter = null;
-		QuestMaterializer materializer = null;
-		try {
-            MappingParser parser = nativeQLFactory.create(new File(uri));
-            OBDAModel obdaModel = parser.getOBDAModel();
-
-			materializer = new QuestMaterializer(obdaModel, false);
-			assertionIter =  materializer.getAssertionIterator();
-			int result = st.insertData(assertionIter, /*useFile,*/ commit, batch);
-			return result;
-
-		} catch (Exception e) {
-			throw new OBDAException(e);
-		} finally {
-			st.close();
-			try {
-				if (assertionIter != null)
-					materializer.disconnect();
-			} catch (Exception e) {
-				log.error(e.getMessage());
-				throw new OBDAException(e.getMessage());
-			}
 		}
 	}
 

@@ -11,6 +11,7 @@ import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.exception.InvalidMappingException;
+import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
 import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.io.InvalidDataSourceException;
 import it.unibz.inf.ontop.model.OBDAModel;
@@ -22,7 +23,6 @@ import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
 import java.io.*;
-import java.net.URI;
 
 @Command(name = "to-r2rml",
         description = "Convert ontop native mapping format (.obda) to R2RML format")
@@ -56,7 +56,11 @@ public class OntopOBDAToR2RML implements OntopCommand {
         File out = new File(outputMappingFile);
 
         QuestConfiguration.Builder configBuilder = QuestConfiguration.defaultBuilder()
-                .nativeOntopMappingFile(inputMappingFile);
+                .nativeOntopMappingFile(inputMappingFile)
+                .jdbcDriver("dummy")
+                .jdbcUrl("dummy")
+                .dbUser("")
+                .dbPassword("");
 
         if (owlFile != null)
             configBuilder.ontologyFile(owlFile);
@@ -85,12 +89,11 @@ public class OntopOBDAToR2RML implements OntopCommand {
             return;
         }
 
-        URI srcURI = model.getSources().iterator().next().getSourceID();
-
         /**
          * render the mapping in the (ugly) Turtle syntax and save it to a string
          */
-        R2RMLWriter writer = new R2RMLWriter(model, srcURI, ontology, config.getInjector());
+        R2RMLWriter writer = new R2RMLWriter(model, ontology,
+                config.getInjector().getInstance(NativeQueryLanguageComponentFactory.class));
 
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 

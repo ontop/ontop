@@ -87,8 +87,6 @@ public class QuestDBVirtualStore extends QuestDBAbstractStore {
 				.map(OWLAPITranslatorUtility::translateImportsClosure)
 				.orElseGet(() -> ofac.createOntology(ofac.createVocabulary()));
 
-		obdaModel.getOntologyVocabulary().merge(tbox.getVocabulary());
-
 		//set up Quest
 		questInstance = getComponentFactory().create(tbox, Optional.of(obdaModel), config.getDatasourceMetadata(),
 				config.getExecutorRegistry());

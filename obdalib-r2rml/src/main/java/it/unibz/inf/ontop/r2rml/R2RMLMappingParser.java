@@ -3,7 +3,6 @@ package it.unibz.inf.ontop.r2rml;
 import com.google.common.collect.ImmutableList;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
-import it.unibz.inf.ontop.ontology.impl.OntologyVocabularyImpl;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.rio.RDFHandlerException;
 import org.eclipse.rdf4j.rio.RDFParseException;
@@ -106,7 +105,7 @@ public class R2RMLMappingParser implements MappingParser {
         //TODO: try to extract prefixes from the R2RML mappings
         PrefixManager prefixManager = nativeQLFactory.create(new HashMap<>());
 
-        obdaModel = obdaFactory.createOBDAModel(sourceMappings, prefixManager, new OntologyVocabularyImpl());
+        obdaModel = obdaFactory.createOBDAModel(sourceMappings, prefixManager);
 
     return obdaModel;
     }

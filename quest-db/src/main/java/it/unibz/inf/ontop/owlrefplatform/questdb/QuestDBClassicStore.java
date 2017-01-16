@@ -98,7 +98,7 @@ public class QuestDBClassicStore extends QuestDBAbstractStore {
 				// Default empty Ontology
 				.orElseGet(() -> ofac.createOntology(ofac.createVocabulary()));
 
-		createInstance(tbox, config.getSettings());
+		createInstance(tbox, config);
 	}
 
 	/**
@@ -107,10 +107,11 @@ public class QuestDBClassicStore extends QuestDBAbstractStore {
 	public QuestDBClassicStore(String name, Dataset data, QuestConfiguration config) throws Exception {
 		super(name, config);
 		Ontology tbox = loadTBoxFromDataset(data);
-		createInstance(tbox, config.getSettings());
+		createInstance(tbox, config);
 	}
 
-	private void createInstance(Ontology tbox, QuestSettings preferences) throws Exception {
+	private void createInstance(Ontology tbox, QuestConfiguration configuration) throws Exception {
+		QuestSettings preferences = configuration.getSettings();
         questInstance = getComponentFactory().create(tbox, Optional.empty(), Optional.empty(), getExecutorRegistry());
 		questInstance.setupRepository();
 		
@@ -130,9 +131,13 @@ public class QuestDBClassicStore extends QuestDBAbstractStore {
 			// Retrieves the ABox from the target database via mapping.
 			log.debug("Loading data from Mappings into the database");
 			OBDAModel obdaModelForMaterialization = questInstance.getOBDAModel();
-			obdaModelForMaterialization.getOntologyVocabulary().merge(tbox.getVocabulary());
-			
-			QuestMaterializer materializer = new QuestMaterializer(obdaModelForMaterialization, false);
+			//obdaModelForMaterialization.getOntologyVocabulary().merge(tbox.getVocabulary());
+
+			/**
+			 * TODO: check if tbox is the expected vocabulary
+			 * TODO: why is it using the QuestMaterializer, not the OWLAPIMaterializer
+			 */
+			QuestMaterializer materializer = new QuestMaterializer(configuration, tbox, false);
 			Iterator<Assertion> assertionIter = materializer.getAssertionIterator();
 			int count = st.insertData(assertionIter, 5000, 500);
 			materializer.disconnect();

@@ -39,8 +39,9 @@ public class ABoxSesameMaterializerExample {
 	 * Use the sample database using H2 from
 	 * https://babbage.inf.unibz.it/trac/obdapublic/wiki/InstallingTutorialDatabases
 	 */
-	final String inputFile = "src/main/resources/example/exampleBooks.obda";
-	final String outputFile = "src/main/resources/example/exampleBooks.n3";
+	private static final String inputFile = "src/test/resources/example/exampleBooks.obda";
+	private static final String PROPERTY_FILE = "src/test/resources/example/exampleBooks.properties";
+	private static final String outputFile = "src/test/resources/example/exampleBooks.n3";
 
 	/**
 	 * TODO: try with result streaming
@@ -51,11 +52,10 @@ public class ABoxSesameMaterializerExample {
 
 		QuestConfiguration configuration = QuestConfiguration.defaultBuilder()
 				.nativeOntopMappingFile(inputFile)
+				.propertyFile(PROPERTY_FILE)
 				.build();
 
-		OBDAModel obdaModel = configuration.loadProvidedMapping();
-
-		SesameMaterializer materializer = new SesameMaterializer(obdaModel, DO_STREAM_RESULTS);
+		SesameMaterializer materializer = new SesameMaterializer(configuration, DO_STREAM_RESULTS);
 		
 		long numberOfTriples = materializer.getTriplesCount();
 		System.out.println("Generated triples: " + numberOfTriples);

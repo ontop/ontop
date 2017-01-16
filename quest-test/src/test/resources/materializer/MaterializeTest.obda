@@ -1,13 +1,6 @@
 [PrefixDeclaration]
 :		http://www.semanticweb.org/ontologies/MaterializeTest.owl#
 
-[SourceDeclaration]
-sourceUri	RandBStockExchange
-connectionUrl	jdbc:mysql://10.7.20.39/materializeTest
-username	fish
-password	fish
-driverClass	com.mysql.jdbc.Driver
-
 [MappingDeclaration] @collection [[
 mappingId	MAPID-T1
 target		:id/{id} a :B . 

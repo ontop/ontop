@@ -24,6 +24,7 @@ import it.unibz.inf.ontop.io.TargetQueryVocabularyValidator;
 import it.unibz.inf.ontop.model.Function;
 import it.unibz.inf.ontop.model.OBDAMappingAxiom;
 import it.unibz.inf.ontop.model.OBDAModel;
+import it.unibz.inf.ontop.ontology.ImmutableOntologyVocabulary;
 
 import java.util.List;
 
@@ -44,9 +45,9 @@ import java.util.List;
 
 public class OBDAModelValidator {
 
-	public static void validate(OBDAModel obdaModel) throws Exception {
+	public static void validate(OBDAModel obdaModel, ImmutableOntologyVocabulary vocabulary) throws Exception {
 
-		 TargetQueryVocabularyValidator validator = new TargetQueryValidator(obdaModel.getOntologyVocabulary());
+		 TargetQueryVocabularyValidator validator = new TargetQueryValidator(vocabulary);
 
 		 for (OBDAMappingAxiom mapping : obdaModel.getMappings()) {
 			 List<Function> tq = mapping.getTargetQuery();

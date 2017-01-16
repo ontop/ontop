@@ -33,7 +33,6 @@ import com.google.inject.Injector;
 import it.unibz.inf.ontop.injection.OBDACoreConfiguration;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.SQLMappingFactoryImpl;
-import it.unibz.inf.ontop.ontology.impl.OntologyVocabularyImpl;
 import org.junit.Before;
 import org.junit.Test;
 import it.unibz.inf.ontop.exception.DuplicateMappingException;
@@ -141,8 +140,7 @@ public class SQLMappingParserUsingOwlTest {
 
     private void saveRegularFile() throws Exception {
         OBDAModel model = modelFactory.createOBDAModel(ImmutableList.of(),
-                nativeQLFactory.create(ImmutableMap.of()),
-                new OntologyVocabularyImpl());
+                nativeQLFactory.create(ImmutableMap.of()));
         OntopNativeMappingSerializer writer = new OntopNativeMappingSerializer(model);
         writer.save(new File("src/test/java/it/unibz/inf/ontop/io/SchoolRegularFile.obda"));
     }

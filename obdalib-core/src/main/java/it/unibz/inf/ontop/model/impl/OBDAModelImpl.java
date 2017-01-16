@@ -20,7 +20,6 @@ package it.unibz.inf.ontop.model.impl;
  * #L%
  */
 
-import java.net.URI;
 import java.util.*;
 
 import com.google.common.collect.ImmutableList;
@@ -30,8 +29,6 @@ import it.unibz.inf.ontop.model.OBDAMappingAxiom;
 import it.unibz.inf.ontop.model.OBDAModel;
 import it.unibz.inf.ontop.io.PrefixManager;
 
-import it.unibz.inf.ontop.ontology.*;
-import it.unibz.inf.ontop.ontology.impl.OntologyVocabularyImpl;
 
 public class OBDAModelImpl implements OBDAModel {
 	private final PrefixManager prefixManager;
@@ -39,22 +36,16 @@ public class OBDAModelImpl implements OBDAModel {
 	private final ImmutableList<OBDAMappingAxiom> mappings;
     private final ImmutableMap<String, OBDAMappingAxiom> mappingIndexById;
 
-    private final OntologyVocabulary mutableOntologyVocabulary;
-
     /**
      * Normal constructor. Used by the QuestComponentFactory.
      */
     public OBDAModelImpl(ImmutableList<OBDAMappingAxiom> newMappings,
-                         PrefixManager prefixManager,
-                         ImmutableOntologyVocabulary ontologyVocabulary) throws DuplicateMappingException {
+                         PrefixManager prefixManager) throws DuplicateMappingException {
 
         checkDuplicates(newMappings);
         this.mappings = newMappings;
         this.prefixManager = prefixManager;
         this.mappingIndexById = indexMappingsById(mappings);
-        // Mutable
-        this.mutableOntologyVocabulary = new OntologyVocabularyImpl();
-        this.mutableOntologyVocabulary.merge(ontologyVocabulary);
     }
 
     /**
@@ -115,19 +106,13 @@ public class OBDAModelImpl implements OBDAModel {
     @Override
     public OBDAModel newModel(ImmutableList<OBDAMappingAxiom> newMappings,
                               PrefixManager prefixManager) throws DuplicateMappingException {
-        return newModel(newMappings, prefixManager, mutableOntologyVocabulary);
-    }
-
-    @Override
-    public OBDAModel newModel(ImmutableList<OBDAMappingAxiom> newMappings,
-                              PrefixManager prefixManager, OntologyVocabulary ontologyVocabulary) throws DuplicateMappingException {
-        return new OBDAModelImpl(newMappings, prefixManager, ontologyVocabulary);
+        return new OBDAModelImpl(newMappings, prefixManager);
     }
 
     @Override
     public OBDAModel clone() {
         try {
-            return new OBDAModelImpl(mappings, prefixManager, mutableOntologyVocabulary);
+            return new OBDAModelImpl(mappings, prefixManager);
         } catch (DuplicateMappingException e) {
             throw new RuntimeException("Unexpected error (inconsistent cloning): " + e.getMessage());
         }
@@ -137,11 +122,6 @@ public class OBDAModelImpl implements OBDAModel {
 	public PrefixManager getPrefixManager() {
 		return prefixManager;
 	}
-
-    @Override
-    public OntologyVocabulary getOntologyVocabulary() {
-        return mutableOntologyVocabulary;
-    }
 
     @Override
     public OBDAMappingAxiom getMapping(String mappingId) {

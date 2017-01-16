@@ -16,9 +16,6 @@ import it.unibz.inf.ontop.ontology.*;
  * collection of JDBC databases (when SQL is the native query language) and their corresponding mappings.
  * It is used as input to any Quest instance (either OWLAPI or Sesame).
  *
- * An OBDA model also contains lists of the declared properties and classes.
- * TODO: move this concern into a separated class.
- *
  * <p>
  * OBDAModels are also used indirectly by the Protege plugin and many other
  * utilities including the mapping materializer (e.g. to generate ABox assertions or
@@ -34,7 +31,6 @@ import it.unibz.inf.ontop.ontology.*;
  * Initial author (before refactoring):
  * @author Mariano Rodriguez Muro <mariano.muro@gmail.com>
  *
- * TODO: make the ontology vocabulary immutable
  *
  */
 public interface OBDAModel {
@@ -73,24 +69,5 @@ public interface OBDAModel {
      */
     public OBDAModel newModel(ImmutableList<OBDAMappingAxiom> newMappings,
                               PrefixManager prefixManager) throws DuplicateMappingException;
-
-    /**
-     * Constructs a new OBDA model with new mappings, a prefix manager, class and properties
-     * declarations.
-     *
-     * Note that normal ODBA models are immutable so you
-     * should use this method to "update" them.
-     *
-     */
-    public OBDAModel newModel(ImmutableList<OBDAMappingAxiom> newMappings,
-                              PrefixManager prefixManager, OntologyVocabulary ontologyVocabulary)
-            throws DuplicateMappingException;
-
-    /**
-     * TODO: remove it when OBDA models will be FULLY immutable.
-     */
-    public OBDAModel clone();
-
-	public OntologyVocabulary getOntologyVocabulary();
 
 }

@@ -51,14 +51,14 @@ public class OBDAFactoryWithExceptionImpl
      */
     @Override
     public OBDAModel createOBDAModel(ImmutableList<OBDAMappingAxiom> newMappings,
-                                     PrefixManager prefixManager, ImmutableOntologyVocabulary ontologyVocabulary)
+                                     PrefixManager prefixManager)
             throws DuplicateMappingException {
         try {
             /**
              * Instantiation
              */
             Constructor constructor = findFirstConstructor(OBDAModel.class);
-            return (OBDAModel) constructor.newInstance(newMappings, prefixManager, ontologyVocabulary);
+            return (OBDAModel) constructor.newInstance(newMappings, prefixManager);
             /**
              * Exception management
              */

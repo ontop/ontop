@@ -49,9 +49,4 @@ public interface IQuestDBStatement extends OBDAStatement {
      * May not be supported (if read-only)
      */
     int addWithTempFile(URI rdffile) throws OBDAException;
-
-    /**
-     * May not be supported (if read-only)
-     */
-    int addFromOBDA(URI obdaFile) throws OBDAException;
 }

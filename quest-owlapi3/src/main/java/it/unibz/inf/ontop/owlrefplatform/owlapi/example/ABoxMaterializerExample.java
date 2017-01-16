@@ -23,7 +23,6 @@ package it.unibz.inf.ontop.owlrefplatform.owlapi.example;
 import java.io.*;
 
 import it.unibz.inf.ontop.injection.QuestConfiguration;
-import it.unibz.inf.ontop.model.OBDAModel;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.OWLAPIMaterializer;
 import it.unibz.inf.ontop.owlapi.QuestOWLIndividualAxiomIterator;
 import org.semanticweb.owlapi.model.OWLIndividualAxiom;
@@ -41,23 +40,24 @@ public class ABoxMaterializerExample {
 	 * Use the sample database using H2 from
 	 * https://babbage.inf.unibz.it/trac/obdapublic/wiki/InstallingTutorialDatabases
 	 */
-	final String inputFile = "src/main/resources/example/exampleBooks.obda";
-	final String outputFile = "src/main/resources/example/exampleBooks.txt";
+	private static final String OBDA_FILE = "src/main/resources/example/exampleBooks.obda";
+	private static final String PROPERTY_FILE = "src/main/resources/example/exampleBooks.properties";
+	private static final String OUTPUT_FILE = "src/main/resources/example/exampleBooks.txt";
+
 	
 	public void generateTriples() throws Exception {
 
 		QuestConfiguration configuration = QuestConfiguration.defaultBuilder()
-				.nativeOntopMappingFile(inputFile)
+				.nativeOntopMappingFile(OBDA_FILE)
+				.propertyFile(PROPERTY_FILE)
 				.build();
-
-        OBDAModel obdaModel = configuration.loadProvidedMapping();
 
 		/*
 		 * Start materializing data from database to triples.
 		 */
 
 		// TODO: try the streaming mode.
-		try (OWLAPIMaterializer materializer = new OWLAPIMaterializer(obdaModel, false)) {
+		try (OWLAPIMaterializer materializer = new OWLAPIMaterializer(configuration, false)) {
 		
 		long numberOfTriples = materializer.getTriplesCount();
 		System.out.println("Generated triples: " + numberOfTriples);
@@ -70,7 +70,7 @@ public class ABoxMaterializerExample {
 		/*
 		 * Print the triples into an external file.
 		 */
-		File fout = new File(outputFile);
+		File fout = new File(OUTPUT_FILE);
 		if (fout.exists()) {
 			fout.delete(); // clean any existing output file.
 		}
