@@ -21,8 +21,8 @@ package it.unibz.inf.ontop.quest.scenarios;
  */
 
 import it.unibz.inf.ontop.injection.QuestConfiguration;
-import org.eclipse.rdf4j.repository.Repository;
 import it.unibz.inf.ontop.rdf4j.repository.OntopVirtualRepository;
+import org.eclipse.rdf4j.repository.Repository;
 
 import java.util.List;
 
@@ -36,13 +36,16 @@ public abstract class QuestVirtualParallelScenario extends QuestParallelScenario
 	
 	@Override
 	protected Repository createRepository() throws Exception {
-		QuestConfiguration configuration = QuestConfiguration.defaultBuilder()
-				.ontologyFile(owlFileURL)
-				.nativeOntopMappingFile(obdaFileURL)
-				.propertyFile(parameterFileURL)
-				.build();
 
-        OntopVirtualRepository repo = new OntopVirtualRepository(getClass().getName(), configuration);
+		QuestConfiguration.Builder configBuilder = QuestConfiguration.defaultBuilder()
+				.ontologyFile(owlFileURL)
+				.nativeOntopMappingFile(obdaFileURL);
+
+		if (parameterFileURL != null && (!parameterFileURL.isEmpty())) {
+			configBuilder.propertyFile(parameterFileURL);
+		}
+
+        OntopVirtualRepository repo = new OntopVirtualRepository(getClass().getName(), configBuilder.build());
         repo.initialize();
         return repo;
 	}
