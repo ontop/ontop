@@ -20,35 +20,30 @@ package it.unibz.inf.ontop.owlrefplatform.core;
  * #L%
  */
 
-import java.util.Optional;
-
 import com.google.common.collect.ImmutableList;
-
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
-
 import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.injection.*;
-import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.io.PrefixManager;
+import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.MappingFactoryImpl;
+import it.unibz.inf.ontop.model.impl.RDBMSourceParameterConstants;
 import it.unibz.inf.ontop.ontology.ImmutableOntologyVocabulary;
+import it.unibz.inf.ontop.ontology.Ontology;
 import it.unibz.inf.ontop.owlrefplatform.core.abox.RDBMSSIRepositoryManager;
 import it.unibz.inf.ontop.owlrefplatform.core.abox.RepositoryChangedListener;
 import it.unibz.inf.ontop.owlrefplatform.core.abox.SemanticIndexURIMap;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.LinearInclusionDependencies;
+import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.VocabularyValidator;
 import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
+import it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing.TMappingExclusionConfig;
 import it.unibz.inf.ontop.owlrefplatform.core.reformulation.DummyReformulator;
 import it.unibz.inf.ontop.owlrefplatform.core.reformulation.QueryRewriter;
 import it.unibz.inf.ontop.owlrefplatform.core.reformulation.TreeWitnessRewriter;
 import it.unibz.inf.ontop.owlrefplatform.core.srcquerygeneration.NativeQueryGenerator;
 import it.unibz.inf.ontop.owlrefplatform.core.translator.MappingVocabularyFixer;
-
-import it.unibz.inf.ontop.model.impl.RDBMSourceParameterConstants;
-import it.unibz.inf.ontop.ontology.Ontology;
-import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.VocabularyValidator;
-import it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing.TMappingExclusionConfig;
 import it.unibz.inf.ontop.pivotalrepr.utils.ExecutorRegistry;
 import it.unibz.inf.ontop.sql.ImplicitDBConstraintsReader;
 import it.unibz.inf.ontop.utils.IMapping2DatalogConverter;
@@ -58,7 +53,8 @@ import org.slf4j.LoggerFactory;
 import java.io.Serializable;
 import java.net.URI;
 import java.security.InvalidParameterException;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.*;
 
 public class Quest implements Serializable, IQuest {
@@ -281,6 +277,7 @@ public class Quest implements Serializable, IQuest {
 		reformulate = preferences.isRewritingEnabled();
 		reformulationTechnique = preferences.getProperty(QuestCoreSettings.REFORMULATION_TECHNIQUE);
 		bOptimizeEquivalences = preferences.isEquivalenceOptimizationEnabled();
+		distinctResultSet = preferences.isDistinctPostProcessingEnabled();
 
 		/**
 		 * Classic A-box specific configuration
