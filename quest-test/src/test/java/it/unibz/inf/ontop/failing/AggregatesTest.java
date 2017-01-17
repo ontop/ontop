@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.quest;
+package it.unibz.inf.ontop.failing;
 
 /*
  * #%L
@@ -19,6 +19,8 @@ package it.unibz.inf.ontop.quest;
  * limitations under the License.
  * #L%
  */
+
+import it.unibz.inf.ontop.quest.AbstractVirtualModeTest;
 
 public class AggregatesTest extends AbstractVirtualModeTest {
 

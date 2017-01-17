@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.parser;
+package it.unibz.inf.ontop.failing;
 
 
 import it.unibz.inf.ontop.quest.AbstractVirtualModeTest;
