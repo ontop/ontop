@@ -20,56 +20,23 @@ package it.unibz.inf.ontop.quest.sparql;
  * #L%
  */
 
+import junit.framework.TestCase;
+import junit.framework.TestSuite;
 import org.eclipse.rdf4j.common.io.IOUtil;
 import org.eclipse.rdf4j.common.iteration.Iterations;
 import org.eclipse.rdf4j.common.text.StringUtil;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import javax.xml.datatype.XMLGregorianCalendar;
-
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
-
-import org.eclipse.rdf4j.model.BNode;
-import org.eclipse.rdf4j.model.Literal;
-import org.eclipse.rdf4j.model.Resource;
-import org.eclipse.rdf4j.model.Statement;
-import org.eclipse.rdf4j.model.IRI;
-import org.eclipse.rdf4j.model.Value;
+import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.datatypes.XMLDatatypeUtil;
 import org.eclipse.rdf4j.model.util.ModelUtil;
 import org.eclipse.rdf4j.model.vocabulary.XMLSchema;
-import org.eclipse.rdf4j.query.Binding;
-import org.eclipse.rdf4j.query.BindingSet;
-import org.eclipse.rdf4j.query.BooleanQuery;
-import org.eclipse.rdf4j.query.Dataset;
-import org.eclipse.rdf4j.query.GraphQuery;
-import org.eclipse.rdf4j.query.GraphQueryResult;
-import org.eclipse.rdf4j.query.MalformedQueryException;
-import org.eclipse.rdf4j.query.Query;
-import org.eclipse.rdf4j.query.QueryEvaluationException;
-import org.eclipse.rdf4j.query.QueryLanguage;
-import org.eclipse.rdf4j.query.TupleQuery;
-import org.eclipse.rdf4j.query.TupleQueryResult;
+import org.eclipse.rdf4j.query.*;
 import org.eclipse.rdf4j.query.dawg.DAWGTestResultSetUtil;
 import org.eclipse.rdf4j.query.impl.DatasetImpl;
 import org.eclipse.rdf4j.query.impl.MutableTupleQueryResult;
 import org.eclipse.rdf4j.query.impl.TupleQueryResultBuilder;
-import org.eclipse.rdf4j.query.resultio.BooleanQueryResultFormat;
 import org.eclipse.rdf4j.query.resultio.BooleanQueryResultParserRegistry;
+import org.eclipse.rdf4j.query.resultio.QueryResultFormat;
 import org.eclipse.rdf4j.query.resultio.QueryResultIO;
-import org.eclipse.rdf4j.query.resultio.TupleQueryResultFormat;
 import org.eclipse.rdf4j.query.resultio.TupleQueryResultParser;
 import org.eclipse.rdf4j.repository.Repository;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
@@ -85,6 +52,13 @@ import org.eclipse.rdf4j.rio.helpers.StatementCollector;
 import org.eclipse.rdf4j.sail.memory.MemoryStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.xml.datatype.XMLGregorianCalendar;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.URL;
+import java.util.*;
 
 public abstract class SPARQLQueryParent extends TestCase {
 
@@ -683,12 +657,12 @@ public abstract class SPARQLQueryParent extends TestCase {
 	private TupleQueryResult readExpectedTupleQueryResult()
 		throws Exception
 	{
-		TupleQueryResultFormat tqrFormat = (TupleQueryResultFormat) QueryResultIO.getParserFormatForFileName(resultFileURL).get();
+		Optional<QueryResultFormat> tqrFormat = QueryResultIO.getParserFormatForFileName(resultFileURL);
 
-		if (tqrFormat != null) {
+		if (tqrFormat.isPresent()) {
 			InputStream in = new URL(resultFileURL).openStream();
 			try {
-				TupleQueryResultParser parser = QueryResultIO.createTupleParser(tqrFormat);
+				TupleQueryResultParser parser = QueryResultIO.createTupleParser(tqrFormat.get());
 				parser.setValueFactory(dataRep.getValueFactory());
 
 				TupleQueryResultBuilder qrBuilder = new TupleQueryResultBuilder();
@@ -710,13 +684,13 @@ public abstract class SPARQLQueryParent extends TestCase {
 	private boolean readExpectedBooleanQueryResult()
 		throws Exception
 	{
-		BooleanQueryResultFormat bqrFormat = (BooleanQueryResultFormat) BooleanQueryResultParserRegistry.getInstance().getFileFormatForFileName(
-				resultFileURL).get();
+		Optional<QueryResultFormat> bqrFormat = BooleanQueryResultParserRegistry.getInstance().getFileFormatForFileName(
+				resultFileURL);
 
-		if (bqrFormat != null) {
+		if (bqrFormat.isPresent()) {
 			InputStream in = new URL(resultFileURL).openStream();
 			try {
-				return QueryResultIO.parseBoolean(in, bqrFormat);
+				return QueryResultIO.parseBoolean(in, bqrFormat.get());
 			}
 			finally {
 				in.close();
@@ -731,10 +705,10 @@ public abstract class SPARQLQueryParent extends TestCase {
 	private Set<Statement> readExpectedGraphQueryResult()
 		throws Exception
 	{
-		RDFFormat rdfFormat = Rio.getParserFormatForFileName(resultFileURL).get();
+		Optional<RDFFormat> rdfFormat = Rio.getParserFormatForFileName(resultFileURL);
 
-		if (rdfFormat != null) {
-			RDFParser parser = Rio.createParser(rdfFormat, dataRep.getValueFactory());
+		if (rdfFormat.isPresent()) {
+			RDFParser parser = Rio.createParser(rdfFormat.get(), dataRep.getValueFactory());
 			ParserConfig config = parser.getParserConfig();
 			// To emulate DatatypeHandling.IGNORE 
 			config.addNonFatalError(BasicParserSettings.FAIL_ON_UNKNOWN_DATATYPES);
