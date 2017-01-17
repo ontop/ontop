@@ -5,13 +5,11 @@ import it.unibz.inf.ontop.exception.InvalidMappingException;
 import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
 import it.unibz.inf.ontop.injection.OBDACoreConfiguration;
 import it.unibz.inf.ontop.injection.OBDASettings;
-import it.unibz.inf.ontop.io.InvalidDataSourceException;
 import it.unibz.inf.ontop.model.OBDAModel;
 import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URI;
 import java.util.Collection;
 import java.util.Properties;
 
@@ -20,7 +18,7 @@ import static junit.framework.TestCase.assertTrue;
 public class OBDAMappingTransformerDebugTest {
 
     @Test
-    public void testMultipleSubjectsInMappingTarget() throws InvalidDataSourceException, IOException, InvalidMappingException {
+    public void testMultipleSubjectsInMappingTarget() throws IOException, InvalidMappingException {
         File mapFile = new File("src/test/resources/obdaMappingTransformerTests/splitMappingAxiomBySubject.obda");
 
         OBDACoreConfiguration config = OBDACoreConfiguration.defaultBuilder()
@@ -41,7 +39,7 @@ public class OBDAMappingTransformerDebugTest {
     }
 
     @Test
-    public void testPredicateMapTranslation() throws InvalidDataSourceException, IOException, InvalidMappingException {
+    public void testPredicateMapTranslation() throws IOException, InvalidMappingException {
         File mapFile = new File("src/test/resources/obdaMappingTransformerTests/predicateMap.obda");
         OBDACoreConfiguration config = OBDACoreConfiguration.defaultBuilder()
                 .properties(generateProperties())

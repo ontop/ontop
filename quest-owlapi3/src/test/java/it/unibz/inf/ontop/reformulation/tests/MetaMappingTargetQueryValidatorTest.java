@@ -30,7 +30,6 @@ import java.sql.Statement;
 
 import it.unibz.inf.ontop.exception.InvalidMappingException;
 import it.unibz.inf.ontop.injection.QuestConfiguration;
-import it.unibz.inf.ontop.io.InvalidDataSourceException;
 import it.unibz.inf.ontop.ontology.OntologyVocabulary;
 import it.unibz.inf.ontop.ontology.impl.OntologyFactoryImpl;
 import junit.framework.TestCase;
@@ -115,7 +114,7 @@ public class MetaMappingTargetQueryValidatorTest extends TestCase {
 		conn.commit();
 	}
 
-	public void testValidate() throws InvalidDataSourceException, IOException, InvalidMappingException {
+	public void testValidate() throws IOException, InvalidMappingException {
 
 		QuestConfiguration configuration = QuestConfiguration.defaultBuilder()
 				.nativeOntopMappingFile(obdafile)

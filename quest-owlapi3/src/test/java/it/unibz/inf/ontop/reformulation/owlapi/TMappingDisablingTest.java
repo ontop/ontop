@@ -3,7 +3,6 @@ package it.unibz.inf.ontop.reformulation.owlapi;
 
 import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.injection.QuestConfiguration;
-import it.unibz.inf.ontop.io.InvalidDataSourceException;
 import it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing.TMappingExclusionConfig;
 import it.unibz.inf.ontop.exception.InvalidMappingException;
 import it.unibz.inf.ontop.model.OBDAException;
@@ -95,7 +94,7 @@ public class TMappingDisablingTest extends TestCase {
 	}
 		
 	public void testDisableTMappings() throws DuplicateMappingException, InvalidMappingException,
-			InvalidDataSourceException, IOException, OWLOntologyCreationException {
+			IOException, OWLOntologyCreationException {
 		
 		/*
 		 * Create the instance of Quest OWL reasoner.
@@ -142,7 +141,7 @@ public class TMappingDisablingTest extends TestCase {
 	}
 	
 	public void testDisableSelectedTMappings() throws DuplicateMappingException, InvalidMappingException,
-			InvalidDataSourceException, IOException, OWLOntologyCreationException {
+			IOException, OWLOntologyCreationException {
 		/*
 		 * Create the instance of Quest OWL reasoner.
 		 */

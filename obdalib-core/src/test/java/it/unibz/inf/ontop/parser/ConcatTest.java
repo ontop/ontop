@@ -5,7 +5,6 @@ import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.exception.InvalidMappingException;
 import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
 import it.unibz.inf.ontop.injection.OBDACoreConfiguration;
-import it.unibz.inf.ontop.io.InvalidDataSourceException;
 import it.unibz.inf.ontop.mapping.MappingParser;
 
 import java.io.File;
@@ -16,7 +15,7 @@ import org.junit.Test;
 public class ConcatTest {
 
 	@Test
-	public void testConcat() throws DuplicateMappingException, InvalidMappingException, InvalidDataSourceException, IOException {
+	public void testConcat() throws DuplicateMappingException, InvalidMappingException, IOException {
 		OBDACoreConfiguration configuration = OBDACoreConfiguration.defaultBuilder()
 				.propertyFile("src/test/resources/format/obda/mapping-northwind.properties")
 				.build();

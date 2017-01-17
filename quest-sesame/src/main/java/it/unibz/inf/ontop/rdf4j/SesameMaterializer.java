@@ -23,7 +23,6 @@ package it.unibz.inf.ontop.rdf4j;
 import com.google.common.collect.Iterators;
 import it.unibz.inf.ontop.exception.InvalidMappingException;
 import it.unibz.inf.ontop.injection.QuestConfiguration;
-import it.unibz.inf.ontop.io.InvalidDataSourceException;
 import it.unibz.inf.ontop.ontology.Assertion;
 import it.unibz.inf.ontop.ontology.Ontology;
 import it.unibz.inf.ontop.ontology.utils.MappingVocabularyExtractor;
@@ -71,7 +70,7 @@ public class SesameMaterializer {
 		}
 
 	private static Ontology extractOntology(QuestConfiguration configuration) throws OWLOntologyCreationException,
-			InvalidDataSourceException, IOException, InvalidMappingException {
+			IOException, InvalidMappingException {
 
 		Optional<Ontology> inputOntology =  configuration.loadInputOntology()
 				.map(OWLAPITranslatorUtility::translate);

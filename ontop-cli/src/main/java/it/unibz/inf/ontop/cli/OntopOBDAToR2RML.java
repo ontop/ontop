@@ -13,7 +13,6 @@ import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.exception.InvalidMappingException;
 import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
 import it.unibz.inf.ontop.injection.QuestConfiguration;
-import it.unibz.inf.ontop.io.InvalidDataSourceException;
 import it.unibz.inf.ontop.model.OBDAModel;
 import it.unibz.inf.ontop.r2rml.R2RMLWriter;
 import org.apache.jena.riot.Lang;
@@ -73,7 +72,7 @@ public class OntopOBDAToR2RML implements OntopCommand {
          */
         try {
             model = config.loadProvidedMapping();
-        } catch (IOException | InvalidMappingException | DuplicateMappingException | InvalidDataSourceException e) {
+        } catch (IOException | InvalidMappingException | DuplicateMappingException e) {
             e.printStackTrace();
             System.exit(1);
             return;

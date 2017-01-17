@@ -107,23 +107,23 @@ public class SQLMappingParserUsingOwlTest {
 
     @Test(expected=InvalidMappingExceptionWithIndicator.class)
     public void testLoadWithBlankMappingId()
-            throws DuplicateMappingException, InvalidDataSourceException, InvalidMappingException, IOException, InvalidPredicateDeclarationException {
+            throws DuplicateMappingException, InvalidMappingException, IOException, InvalidPredicateDeclarationException {
         loadObdaFile("src/test/resources/it/unibz/inf/ontop/io/SchoolBadFile5.obda");
     }
 
     @Test(expected=InvalidMappingExceptionWithIndicator.class)
-    public void testLoadWithBlankTargetQuery() throws DuplicateMappingException, InvalidMappingException, InvalidPredicateDeclarationException, InvalidDataSourceException, IOException {
+    public void testLoadWithBlankTargetQuery() throws DuplicateMappingException, InvalidMappingException, InvalidPredicateDeclarationException, IOException {
         loadObdaFile("src/test/resources/it/unibz/inf/ontop/io/SchoolBadFile6.obda");
     }
 
     @Test(expected=InvalidMappingExceptionWithIndicator.class)
-    public void testLoadWithBlankSourceQuery() throws DuplicateMappingException, InvalidMappingException, InvalidPredicateDeclarationException, InvalidDataSourceException, IOException {
+    public void testLoadWithBlankSourceQuery() throws DuplicateMappingException, InvalidMappingException, InvalidPredicateDeclarationException, IOException {
         loadObdaFile("src/test/resources/it/unibz/inf/ontop/io/SchoolBadFile7.obda");
     }
 
     @Test(expected=IOException.class)
     public void testLoadWithBadTargetQuery() throws DuplicateMappingException, InvalidMappingException,
-            InvalidPredicateDeclarationException, InvalidDataSourceException, IOException {
+            InvalidPredicateDeclarationException, IOException {
         loadObdaFile("src/test/resources/it/unibz/inf/ontop/io/SchoolBadFile8.obda");
     }
 
@@ -134,7 +134,7 @@ public class SQLMappingParserUsingOwlTest {
 
     @Test(expected=InvalidMappingExceptionWithIndicator.class)
     public void testLoadWithAllMistakes() throws DuplicateMappingException, InvalidMappingException,
-            InvalidPredicateDeclarationException, InvalidDataSourceException, IOException {
+            InvalidPredicateDeclarationException, IOException {
             loadObdaFile("src/test/resources/it/unibz/inf/ontop/io/SchoolBadFile10.obda");
     }
     
@@ -170,8 +170,7 @@ public class SQLMappingParserUsingOwlTest {
     }
 
     private OBDAModel loadObdaFile(String fileLocation) throws IOException,
-            InvalidPredicateDeclarationException, InvalidMappingException, DuplicateMappingException,
-            InvalidDataSourceException {
+            InvalidPredicateDeclarationException, InvalidMappingException, DuplicateMappingException {
         // Load the OBDA model
         MappingParser mappingParser = nativeQLFactory.create(new File(fileLocation));
         return mappingParser.getOBDAModel();

@@ -23,7 +23,6 @@ package it.unibz.inf.ontop.owlrefplatform.owlapi;
 import com.google.inject.Injector;
 import it.unibz.inf.ontop.exception.InvalidMappingException;
 import it.unibz.inf.ontop.injection.*;
-import it.unibz.inf.ontop.io.InvalidDataSourceException;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.ontology.*;
 import it.unibz.inf.ontop.owlapi.OWLAPIABoxIterator;
@@ -165,7 +164,7 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 			/**
 			 * Mapping parsing exceptions are re-thrown as configuration exceptions.
 			 */
-		} catch (InvalidDataSourceException | IOException | InvalidMappingException e) {
+		} catch (IOException | InvalidMappingException e) {
 			throw new IllegalConfigurationException(e.getMessage(), owlConfiguration);
 		}
 

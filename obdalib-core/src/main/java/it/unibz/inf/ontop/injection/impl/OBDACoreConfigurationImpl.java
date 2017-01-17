@@ -4,7 +4,6 @@ package it.unibz.inf.ontop.injection.impl;
 import com.google.inject.Module;
 import it.unibz.inf.ontop.exception.InvalidMappingException;
 import it.unibz.inf.ontop.injection.*;
-import it.unibz.inf.ontop.io.InvalidDataSourceException;
 import it.unibz.inf.ontop.mapping.MappingParser;
 import it.unibz.inf.ontop.model.OBDAModel;
 import it.unibz.inf.ontop.sql.ImplicitDBConstraintsReader;
@@ -49,7 +48,7 @@ public class OBDACoreConfigurationImpl extends OntopMappingSQLConfigurationImpl 
     }
 
     @Override
-    public Optional<OBDAModel> loadMapping() throws InvalidDataSourceException, IOException, InvalidMappingException {
+    public Optional<OBDAModel> loadMapping() throws IOException, InvalidMappingException {
         if (options.predefinedMappingModel.isPresent()) {
             return options.predefinedMappingModel;
         }
@@ -118,7 +117,7 @@ public class OBDACoreConfigurationImpl extends OntopMappingSQLConfigurationImpl 
      *
      * By default, returns nothing.
      */
-    protected Optional<OBDAModel> loadAlternativeMapping() throws InvalidDataSourceException {
+    protected Optional<OBDAModel> loadAlternativeMapping() {
         return Optional.empty();
     }
 

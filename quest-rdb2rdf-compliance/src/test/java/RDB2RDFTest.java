@@ -36,7 +36,6 @@ import it.unibz.inf.ontop.exception.InvalidMappingException;
 import it.unibz.inf.ontop.injection.OBDASettings;
 import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.injection.QuestConfiguration.Builder;
-import it.unibz.inf.ontop.io.InvalidDataSourceException;
 import it.unibz.inf.ontop.model.OBDAModel;
 import it.unibz.inf.ontop.model.SQLMappingFactory;
 import it.unibz.inf.ontop.model.impl.SQLMappingFactoryImpl;
@@ -306,7 +305,7 @@ public class RDB2RDFTest {
 	 */
 	QuestConfiguration bootstrapDMConfiguration()
 			throws SQLException, IOException, InvalidMappingException, OWLOntologyStorageException,
-			InvalidDataSourceException, OWLOntologyCreationException {
+			OWLOntologyCreationException {
 
 		QuestConfiguration initialConfiguration = createInMemoryBuilder().build();
 		DirectMappingEngine.BootstrappingResults results = DirectMappingEngine.bootstrap(initialConfiguration, BASE_IRI);

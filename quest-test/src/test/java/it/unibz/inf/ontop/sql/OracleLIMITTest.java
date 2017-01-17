@@ -35,7 +35,6 @@ import org.junit.Before;
 import org.junit.Test;
 import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.exception.InvalidMappingException;
-import it.unibz.inf.ontop.io.InvalidDataSourceException;
 import it.unibz.inf.ontop.model.OBDAException;
 import it.unibz.inf.ontop.owlrefplatform.core.SQLExecutableQuery;
 import org.semanticweb.owlapi.apibinding.OWLManager;
@@ -79,7 +78,7 @@ public class OracleLIMITTest  {
 	
 
 	private void runQuery(String obdaFileName) throws OBDAException, OWLException, IOException,
-            InvalidMappingException, DuplicateMappingException, InvalidDataSourceException {
+            InvalidMappingException, DuplicateMappingException {
 
 		QuestOWLFactory factory = new QuestOWLFactory();
 

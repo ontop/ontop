@@ -7,9 +7,7 @@ import it.unibz.inf.ontop.exception.InvalidMappingException;
 import it.unibz.inf.ontop.injection.MappingFactory;
 import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
 import it.unibz.inf.ontop.injection.OBDAFactoryWithException;
-import it.unibz.inf.ontop.io.InvalidDataSourceException;
 import it.unibz.inf.ontop.io.PrefixManager;
-import it.unibz.inf.ontop.io.impl.SimplePrefixManager;
 import it.unibz.inf.ontop.mapping.MappingParser;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.ontology.OntologyFactory;
@@ -95,7 +93,7 @@ public class OBDAModelWrapper {
      *
      * UGLY!
      */
-    public void parseMappings(File mappingFile) throws DuplicateMappingException, InvalidMappingException, InvalidDataSourceException, IOException {
+    public void parseMappings(File mappingFile) throws DuplicateMappingException, InvalidMappingException, IOException {
         MappingParser mappingParser = nativeQLFactory.create(mappingFile);
         OBDAModel newObdaModel = mappingParser.getOBDAModel();
 

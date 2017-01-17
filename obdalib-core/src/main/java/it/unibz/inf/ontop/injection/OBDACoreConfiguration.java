@@ -2,7 +2,6 @@ package it.unibz.inf.ontop.injection;
 
 import it.unibz.inf.ontop.exception.InvalidMappingException;
 import it.unibz.inf.ontop.injection.impl.OBDACoreConfigurationImpl;
-import it.unibz.inf.ontop.io.InvalidDataSourceException;
 import it.unibz.inf.ontop.model.OBDAModel;
 import it.unibz.inf.ontop.sql.ImplicitDBConstraintsReader;
 import org.eclipse.rdf4j.model.Model;
@@ -26,12 +25,12 @@ public interface OBDACoreConfiguration extends OntopMappingSQLConfiguration {
     /**
      * TODO: explain
      */
-    Optional<OBDAModel> loadMapping() throws InvalidDataSourceException, IOException, InvalidMappingException;
+    Optional<OBDAModel> loadMapping() throws IOException, InvalidMappingException;
 
     /**
      * Only call it if you are sure that mapping assertions have been provided
      */
-    default OBDAModel loadProvidedMapping() throws InvalidDataSourceException, IOException, InvalidMappingException {
+    default OBDAModel loadProvidedMapping() throws IOException, InvalidMappingException {
         return loadMapping()
                 .orElseThrow(() -> new IllegalStateException("No mapping has been provided. " +
                         "Do not call this method unless you are sure of the mapping provision."));

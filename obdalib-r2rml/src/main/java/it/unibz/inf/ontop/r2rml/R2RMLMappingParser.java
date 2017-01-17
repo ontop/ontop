@@ -14,7 +14,6 @@ import it.unibz.inf.ontop.exception.InvalidMappingException;
 import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
 import it.unibz.inf.ontop.injection.OBDAFactoryWithException;
 import it.unibz.inf.ontop.injection.OBDASettings;
-import it.unibz.inf.ontop.io.InvalidDataSourceException;
 import it.unibz.inf.ontop.io.PrefixManager;
 import it.unibz.inf.ontop.mapping.MappingParser;
 import it.unibz.inf.ontop.model.OBDAMappingAxiom;
@@ -23,7 +22,6 @@ import it.unibz.inf.ontop.model.OBDAModel;
 import java.io.File;
 import java.io.IOException;
 import java.io.Reader;
-import java.util.HashMap;
 
 /**
  * High-level class that implements the MappingParser interface for R2RML.
@@ -85,8 +83,7 @@ public class R2RMLMappingParser implements MappingParser {
 
 
     @Override
-    public OBDAModel getOBDAModel() throws InvalidMappingException, IOException, InvalidDataSourceException,
-            DuplicateMappingException {
+    public OBDAModel getOBDAModel() throws InvalidMappingException, IOException, DuplicateMappingException {
         /**
          * The OBDA model is only computed once.
          */
@@ -99,7 +96,7 @@ public class R2RMLMappingParser implements MappingParser {
             try {
                 r2rmlManager = new R2RMLManager(mappingFile, nativeQLFactory);
             } catch (RDFParseException | RDFHandlerException e) {
-                throw new InvalidDataSourceException(e.getMessage());
+                throw new InvalidMappingException(e.getMessage());
             }
         else if (mappingGraph != null)
             r2rmlManager = new R2RMLManager(mappingGraph, nativeQLFactory);

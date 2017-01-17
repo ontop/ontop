@@ -23,7 +23,6 @@ package it.unibz.inf.ontop.owlrefplatform.owlapi;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.exception.InvalidMappingException;
 import it.unibz.inf.ontop.injection.QuestConfiguration;
-import it.unibz.inf.ontop.io.InvalidDataSourceException;
 import it.unibz.inf.ontop.model.Predicate;
 import it.unibz.inf.ontop.ontology.Assertion;
 import it.unibz.inf.ontop.ontology.Ontology;
@@ -91,7 +90,7 @@ public class OWLAPIMaterializer implements AutoCloseable {
     }
 
 	private static Ontology extractTBox(QuestConfiguration configuration) throws OWLOntologyCreationException,
-			InvalidDataSourceException, IOException, InvalidMappingException {
+			IOException, InvalidMappingException {
 
 		Optional<Ontology> inputOntology =  configuration.loadInputOntology()
 				.map(OWLAPITranslatorUtility::translate);

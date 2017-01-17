@@ -5,7 +5,6 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import it.unibz.inf.ontop.exception.InvalidMappingException;
 import it.unibz.inf.ontop.injection.QuestConfiguration;
-import it.unibz.inf.ontop.io.InvalidDataSourceException;
 import org.semanticweb.owlapi.model.*;
 
 import java.io.IOException;
@@ -98,7 +97,7 @@ public class OntopValidate extends OntopReasoningCommandBase {
 
         try {
             config.loadMapping();
-        } catch (IOException | InvalidDataSourceException | InvalidMappingException e) {
+        } catch (IOException |  InvalidMappingException e) {
             System.out.format("ERROR: There is a problem loading the mapping file %s\n", mappingFile);
             e.printStackTrace();
             System.exit(1);
