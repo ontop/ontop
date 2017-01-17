@@ -32,7 +32,7 @@ public class PostgresLowercaseIdentifierTest extends AbstractVirtualModeTest {
 	static final String owlfile = "resources/identifiers/identifiers.owl";
 	static final String obdafile = "resources/identifiers/identifiers-lowercase-postgres.obda";
 
-	protected PostgresLowercaseIdentifierTest() {
+	public PostgresLowercaseIdentifierTest() {
 		super(owlfile, obdafile);
 	}
 
@@ -43,7 +43,7 @@ public class PostgresLowercaseIdentifierTest extends AbstractVirtualModeTest {
 	 */
 	public void testLowercaseUnquoted() throws Exception {
 		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT ?x WHERE {?x a :Country} ORDER BY ?x";
-		String val = runQueryAndReturnStringOfIndividualX(query);
+		checkThereIsAtLeastOneResult(query);
 	}
 
 			

@@ -25,15 +25,7 @@ import it.unibz.inf.ontop.quest.AbstractVirtualModeTest;
 
 public class NestedConcatTest extends AbstractVirtualModeTest {
 
-    /*
-     * Use the sample database using H2 from
-     * https://github.com/ontop/ontop/wiki/InstallingTutorialDatabases
-     *
-     * Please use the pre-bundled H2 server from the above link
-     *
-     * Test with not latin Character
-     *
-     */
+
     static final String owlfile = "src/test/resources/nestedConcat/test.owl";
     static final String obdafile = "src/test/resources/nestedConcat/test.obda";
 
