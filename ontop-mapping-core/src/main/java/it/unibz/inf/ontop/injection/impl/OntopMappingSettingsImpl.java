@@ -20,7 +20,12 @@ class OntopMappingSettingsImpl extends OntopOBDASettingsImpl implements OntopMap
         return properties;
     }
 
-    public static Properties loadDefaultMappingProperties() {
+    static Properties loadDefaultMappingProperties() {
         return loadDefaultPropertiesFromFile(OntopOBDASettings.class, DEFAULT_FILE);
+    }
+
+    @Override
+    public boolean isFullMetadataExtractionEnabled() {
+        return getRequiredBoolean(OntopMappingSettings.OBTAIN_FULL_METADATA);
     }
 }

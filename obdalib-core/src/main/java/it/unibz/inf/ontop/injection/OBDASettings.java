@@ -23,11 +23,6 @@ public interface OBDASettings extends OntopMappingSQLSettings {
 
     Optional<String> getMappingFilePath();
 
-    boolean isFullMetadataExtractionEnabled();
-
-
-    String OBTAIN_FULL_METADATA = "OBTAIN_FULL_METADATA";
-
     // String DB_CONSTRAINTS = "DB_CONSTRAINTS";
 
     String MAPPING_FILE_PATH = "MAPPING_FILE_PATH";

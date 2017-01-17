@@ -50,15 +50,6 @@ public class OBDACoreModule extends OntopAbstractModule {
         bindImplicitDBConstraints();
         bindFromPreferences(IMapping2DatalogConverter.class);
 
-        Module nativeQLFactoryModule = buildFactory(ImmutableList.<Class>of(
-                        OBDAModel.class,
-                        MappingParser.class,
-                        DBMetadataExtractor.class,
-                        OBDAMappingAxiom.class
-                        ),
-                NativeQueryLanguageComponentFactory.class);
-        install(nativeQLFactoryModule);
-
         // Forgets the configuration (useful for the GC in case of large input objects)
         this.configuration = null;
     }

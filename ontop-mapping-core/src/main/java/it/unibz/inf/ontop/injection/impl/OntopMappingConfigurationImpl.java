@@ -4,6 +4,7 @@ import com.google.inject.Module;
 import it.unibz.inf.ontop.injection.OntopMappingConfiguration;
 import it.unibz.inf.ontop.injection.OntopMappingSettings;
 
+import java.util.Optional;
 import java.util.Properties;
 import java.util.stream.Stream;
 
@@ -39,9 +40,16 @@ public class OntopMappingConfigurationImpl extends OntopOBDAConfigurationImpl im
             implements OntopMappingBuilderFragment<B> {
 
         private final B builder;
+        private Optional<Boolean> obtainFullMetadata = Optional.empty();
 
         DefaultOntopMappingBuilderFragment(B builder) {
             this.builder = builder;
+        }
+
+        @Override
+        public B enableFullMetadataExtraction(boolean obtainFullMetadata) {
+            this.obtainFullMetadata = Optional.of(obtainFullMetadata);
+            return builder;
         }
 
         protected final OntopMappingOptions generateMappingOptions(OntopOBDAOptions obdaOptions) {
@@ -49,7 +57,9 @@ public class OntopMappingConfigurationImpl extends OntopOBDAConfigurationImpl im
         }
 
         Properties generateProperties() {
-            return new Properties();
+            Properties properties = new Properties();
+            obtainFullMetadata.ifPresent(m -> properties.put(OntopMappingSettings.OBTAIN_FULL_METADATA, m));
+            return properties;
         }
 
     }
@@ -62,6 +72,11 @@ public class OntopMappingConfigurationImpl extends OntopOBDAConfigurationImpl im
 
         OntopMappingBuilderMixin() {
             this.mappingBuilderFragment = new DefaultOntopMappingBuilderFragment<>((B)this);
+        }
+
+        @Override
+        public B enableFullMetadataExtraction(boolean obtainFullMetadata) {
+            return mappingBuilderFragment.enableFullMetadataExtraction(obtainFullMetadata);
         }
 
         final OntopMappingOptions generateMappingOptions() {

@@ -29,9 +29,4 @@ public class OBDASettingsImpl extends OntopMappingSQLSettingsImpl implements OBD
         return getProperty(OBDASettings.MAPPING_FILE_PATH);
     }
 
-    @Override
-    public boolean isFullMetadataExtractionEnabled() {
-        return getRequiredBoolean(OBDASettings.OBTAIN_FULL_METADATA);
-    }
-
 }

@@ -3,15 +3,12 @@ package it.unibz.inf.ontop.injection;
 import com.google.inject.assistedinject.Assisted;
 import it.unibz.inf.ontop.model.*;
 import org.eclipse.rdf4j.model.Model;
-import it.unibz.inf.ontop.io.PrefixManager;
 import it.unibz.inf.ontop.mapping.MappingParser;
 import it.unibz.inf.ontop.nativeql.DBMetadataExtractor;
-import it.unibz.inf.ontop.utils.IMapping2DatalogConverter;
 
 import java.io.File;
 import java.io.Reader;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Factory following the Guice AssistedInject pattern.
@@ -27,15 +24,15 @@ import java.util.Map;
  */
 public interface NativeQueryLanguageComponentFactory {
 
-    public MappingParser create(Reader reader);
-    public MappingParser create(File file);
-    public MappingParser create(Model mappingGraph);
+    MappingParser create(Reader reader);
+    MappingParser create(File file);
+    MappingParser create(Model mappingGraph);
 
-    public DBMetadataExtractor create();
+    DBMetadataExtractor create();
 
-    public OBDAMappingAxiom create(String id, @Assisted("sourceQuery") SourceQuery sourceQuery,
-                                   @Assisted("targetQuery") List<Function> targetQuery);
+    OBDAMappingAxiom create(String id, @Assisted("sourceQuery") SourceQuery sourceQuery,
+                            @Assisted("targetQuery") List<Function> targetQuery);
 
-    public OBDAMappingAxiom create(@Assisted("sourceQuery") SourceQuery sourceQuery,
-                                   @Assisted("targetQuery") List<Function> targetQuery);
+    OBDAMappingAxiom create(@Assisted("sourceQuery") SourceQuery sourceQuery,
+                            @Assisted("targetQuery") List<Function> targetQuery);
 }

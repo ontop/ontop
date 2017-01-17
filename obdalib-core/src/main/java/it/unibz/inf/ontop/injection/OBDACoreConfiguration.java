@@ -66,7 +66,6 @@ public interface OBDACoreConfiguration extends OntopMappingSQLConfiguration {
 
         B dbConstraintsReader(@Nonnull ImplicitDBConstraintsReader constraints);
 
-        B enableFullMetadataExtraction(boolean obtainFullMetadata);
     }
 
     interface Builder<B extends Builder> extends OBDACoreBuilderFragment<B>, OntopMappingSQLConfiguration.Builder<B> {

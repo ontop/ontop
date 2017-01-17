@@ -158,7 +158,6 @@ public class OBDACoreConfigurationImpl extends OntopMappingSQLConfigurationImpl 
         private Optional<File> mappingFile = Optional.empty();
         private Optional<Reader> mappingReader = Optional.empty();
         private Optional<Model> mappingGraph = Optional.empty();
-        private Optional<Boolean> obtainFullMetadata = Optional.empty();
 
         private boolean useR2rml = false;
         private boolean isMappingDefined = false;
@@ -276,12 +275,6 @@ public class OBDACoreConfigurationImpl extends OntopMappingSQLConfigurationImpl 
             return builder;
         }
 
-        @Override
-        public B enableFullMetadataExtraction(boolean obtainFullMetadata) {
-            this.obtainFullMetadata = Optional.of(obtainFullMetadata);
-            return builder;
-        }
-
         /**
          * Allows to detect double mapping definition (error).
          */
@@ -297,8 +290,6 @@ public class OBDACoreConfigurationImpl extends OntopMappingSQLConfigurationImpl 
             Properties p = new Properties();
 
             // Never puts the mapping file path
-
-            obtainFullMetadata.ifPresent(m -> p.put(OBDASettings.OBTAIN_FULL_METADATA, m));
 
             return p;
         }
@@ -418,11 +409,6 @@ public class OBDACoreConfigurationImpl extends OntopMappingSQLConfigurationImpl 
         @Override
         public B dbConstraintsReader(@Nonnull ImplicitDBConstraintsReader constraints) {
             return obdaBuilderFragment.dbConstraintsReader(constraints);
-        }
-
-        @Override
-        public B enableFullMetadataExtraction(boolean obtainFullMetadata) {
-            return obdaBuilderFragment.enableFullMetadataExtraction(obtainFullMetadata);
         }
     }
 
