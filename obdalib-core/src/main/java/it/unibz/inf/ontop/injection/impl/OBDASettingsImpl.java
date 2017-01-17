@@ -2,12 +2,11 @@ package it.unibz.inf.ontop.injection.impl;
 
 import it.unibz.inf.ontop.injection.InvalidOntopConfigurationException;
 import it.unibz.inf.ontop.injection.OBDASettings;
-import it.unibz.inf.ontop.injection.OntopSQLSettings;
 
 import java.util.Optional;
 import java.util.Properties;
 
-public class OBDASettingsImpl extends OntopSQLSettingsImpl implements OBDASettings {
+public class OBDASettingsImpl extends OntopMappingSQLSettingsImpl implements OBDASettings {
 
     private static final String DEFAULT_OBDA_PROPERTIES_FILE = "default_obda.properties";
     private static final String DEFAULT_R2RML_PROPERTIES_FILE = "default_r2rml.properties";

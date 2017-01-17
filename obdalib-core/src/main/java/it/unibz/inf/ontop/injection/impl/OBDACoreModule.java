@@ -59,8 +59,6 @@ public class OBDACoreModule extends OntopAbstractModule {
                 NativeQueryLanguageComponentFactory.class);
         install(nativeQLFactoryModule);
 
-        bind(OBDAFactoryWithException.class).to(OBDAFactoryWithExceptionImpl.class);
-
         // Forgets the configuration (useful for the GC in case of large input objects)
         this.configuration = null;
     }

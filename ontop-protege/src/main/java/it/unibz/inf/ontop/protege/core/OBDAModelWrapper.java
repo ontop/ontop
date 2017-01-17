@@ -34,6 +34,24 @@ import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
  * built according to INITIAL Quest preferences.
  * Late modified preferences are not taken into account.
  *
+ *
+ *
+ *
+ * An OBDA model contains mapping information.
+ * This interface is generic regarding the targeted native query language.
+ *
+ * An OBDA model is a container for the database and mapping declarations needed to define a
+ * Virtual ABox or Virtual RDF graph. That is, this is a manager for a
+ * collection of JDBC databases (when SQL is the native query language) and their corresponding mappings.
+ * It is used as input to any Quest instance (either OWLAPI or Sesame).
+ *
+ * <p>
+ * OBDAModels are also used indirectly by the Protege plugin and many other
+ * utilities including the mapping materializer (e.g. to generate ABox assertions or
+ * RDF triples from a .obda file and a database).
+ *
+ * <p>
+ *
  */
 public class OBDAModelWrapper {
 

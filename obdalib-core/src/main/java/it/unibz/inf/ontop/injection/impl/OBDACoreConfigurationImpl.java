@@ -20,14 +20,14 @@ import java.util.Optional;
 import java.util.Properties;
 import java.util.stream.Stream;
 
-public class OBDACoreConfigurationImpl extends OntopSQLConfigurationImpl implements OBDACoreConfiguration {
+public class OBDACoreConfigurationImpl extends OntopMappingSQLConfigurationImpl implements OBDACoreConfiguration {
 
     private final OBDASettings settings;
     private final OBDAConfigurationOptions options;
 
     protected OBDACoreConfigurationImpl(OBDASettings settings,
                                         OBDAConfigurationOptions options) {
-        super(settings, options.sqlOptions);
+        super(settings, options.mappingSqlOptions);
         this.settings = settings;
         this.options = options;
     }
@@ -134,18 +134,18 @@ public class OBDACoreConfigurationImpl extends OntopSQLConfigurationImpl impleme
         public final Optional<Model> mappingGraph;
         public final Optional<OBDAModel> predefinedMappingModel;
         public final Optional<ImplicitDBConstraintsReader> implicitDBConstraintsReader;
-        public final OntopSQLOptions sqlOptions;
+        public final OntopMappingSQLOptions mappingSqlOptions;
 
         public OBDAConfigurationOptions(Optional<File> mappingFile, Optional<Reader> mappingReader, Optional<Model> mappingGraph,
                                         Optional<OBDAModel> predefinedMappingModel,
                                         Optional<ImplicitDBConstraintsReader> implicitDBConstraintsReader,
-                                        OntopSQLOptions sqlOptions) {
+                                        OntopMappingSQLOptions mappingSqlOptions) {
             this.mappingFile = mappingFile;
             this.mappingReader = mappingReader;
             this.mappingGraph = mappingGraph;
             this.predefinedMappingModel = predefinedMappingModel;
             this.implicitDBConstraintsReader = implicitDBConstraintsReader;
-            this.sqlOptions = sqlOptions;
+            this.mappingSqlOptions = mappingSqlOptions;
         }
     }
 
@@ -160,7 +160,6 @@ public class OBDACoreConfigurationImpl extends OntopSQLConfigurationImpl impleme
         private Optional<Reader> mappingReader = Optional.empty();
         private Optional<Model> mappingGraph = Optional.empty();
         private Optional<Boolean> obtainFullMetadata = Optional.empty();
-        private Optional<String> jdbcUrl = Optional.empty();
 
         private boolean useR2rml = false;
         private boolean isMappingDefined = false;
@@ -172,12 +171,6 @@ public class OBDACoreConfigurationImpl extends OntopSQLConfigurationImpl impleme
             this.builder = builder;
         }
 
-        /**
-         * Only for sub-classes!
-         */
-        protected DefaultOBDACoreBuilderFragment() {
-            this.builder = (B) this;
-        }
 
         /**
          * Not for end-users! Please consider giving a mapping file or a mapping reader.
@@ -290,12 +283,6 @@ public class OBDACoreConfigurationImpl extends OntopSQLConfigurationImpl impleme
             return builder;
         }
 
-        @Override
-        public B jdbcUrl(String jdbcUrl) {
-            this.jdbcUrl = Optional.of(jdbcUrl);
-            return builder;
-        }
-
         /**
          * Allows to detect double mapping definition (error).
          */
@@ -313,7 +300,6 @@ public class OBDACoreConfigurationImpl extends OntopSQLConfigurationImpl impleme
             // Never puts the mapping file path
 
             obtainFullMetadata.ifPresent(m -> p.put(OBDASettings.OBTAIN_FULL_METADATA, m));
-            jdbcUrl.ifPresent(u -> p.put(OBDASettings.JDBC_URL, u));
 
             return p;
         }
@@ -345,14 +331,14 @@ public class OBDACoreConfigurationImpl extends OntopSQLConfigurationImpl impleme
             }
         }
 
-        protected final OBDAConfigurationOptions generateOBDACoreOptions(OntopSQLOptions sqlOptions) {
+        final OBDAConfigurationOptions generateOBDACoreOptions(OntopMappingSQLOptions mappingSqlOptions) {
             return new OBDAConfigurationOptions(mappingFile, mappingReader, mappingGraph, obdaModel, userConstraints,
-                    sqlOptions);
+                    mappingSqlOptions);
         }
     }
 
     protected abstract static class OBDACoreConfigurationBuilderMixin<B extends OBDACoreConfiguration.Builder>
-            extends OntopSQLBuilderMixin<B>
+            extends OntopMappingSQLBuilderMixin<B>
             implements OBDACoreConfiguration.Builder<B> {
 
         private final DefaultOBDACoreBuilderFragment<B> obdaBuilderFragment;
@@ -387,7 +373,7 @@ public class OBDACoreConfigurationImpl extends OntopSQLConfigurationImpl impleme
         }
 
         final OBDAConfigurationOptions generateOBDACoreOptions() {
-            return obdaBuilderFragment.generateOBDACoreOptions(generateSQLOptions());
+            return obdaBuilderFragment.generateOBDACoreOptions(generateMappingSQLOptions());
         }
 
         @Override

@@ -5,7 +5,6 @@ import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.renderer.SourceQueryRenderer;
 import it.unibz.inf.ontop.renderer.TargetQueryRenderer;
-import it.unibz.inf.ontop.sql.RDBMSMappingAxiom;
 
 import java.io.*;
 import java.util.List;
@@ -80,21 +79,19 @@ public class OntopNativeMappingSerializer {
 
         boolean needLineBreak = false;
         for (OBDAMappingAxiom axiom : model.getMappings()) {
-            if (!(axiom instanceof RDBMSMappingAxiom)) {
-                throw new IllegalArgumentException("The ontop native mapping serializer only supports RDBMSMappingAxioms");
+            if (!(axiom.getSourceQuery() instanceof OBDASQLQuery)) {
+                throw new IllegalArgumentException("The ontop native mapping serializer only supports OBDAMappingAxioms with OBDASQLQueries");
             }
-
-            RDBMSMappingAxiom mapping = (RDBMSMappingAxiom) axiom;
 
             if (needLineBreak) {
                 writer.write("\n");
             }
-            writer.write(OntopNativeMappingParser.Label.mappingId.name() + "\t" + mapping.getId() + "\n");
+            writer.write(OntopNativeMappingParser.Label.mappingId.name() + "\t" + axiom.getId() + "\n");
 
-            List<Function> targetQuery = mapping.getTargetQuery();
+            List<Function> targetQuery = axiom.getTargetQuery();
             writer.write(OntopNativeMappingParser.Label.target.name() + "\t\t" + printTargetQuery(targetQuery) + "\n");
 
-            OBDASQLQuery sourceQuery = mapping.getSourceQuery();
+            OBDASQLQuery sourceQuery = (OBDASQLQuery) axiom.getSourceQuery();
             writer.write(OntopNativeMappingParser.Label.source.name() + "\t\t" + printSourceQuery(sourceQuery) + "\n");
             needLineBreak = true;
         }

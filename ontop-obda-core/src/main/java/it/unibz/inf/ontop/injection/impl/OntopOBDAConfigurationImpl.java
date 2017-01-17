@@ -44,6 +44,12 @@ public class OntopOBDAConfigurationImpl extends OntopModelConfigurationImpl impl
         final OntopOBDAOptions generateOBDAOptions() {
             return new OntopOBDAOptions(generateModelOptions());
         }
+
+        @Override
+        protected Properties generateProperties() {
+            return super.generateProperties();
+        }
+
     }
 
 

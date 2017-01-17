@@ -16,7 +16,7 @@ import java.util.Optional;
 /**
  * TODO: explain
  */
-public interface OBDACoreConfiguration extends OntopSQLConfiguration {
+public interface OBDACoreConfiguration extends OntopMappingSQLConfiguration {
 
     @Override
     OBDASettings getSettings();
@@ -68,11 +68,9 @@ public interface OBDACoreConfiguration extends OntopSQLConfiguration {
         B dbConstraintsReader(@Nonnull ImplicitDBConstraintsReader constraints);
 
         B enableFullMetadataExtraction(boolean obtainFullMetadata);
-
-        B jdbcUrl(String jdbcUrl);
     }
 
-    interface Builder<B extends Builder> extends OBDACoreBuilderFragment<B>, OntopSQLConfiguration.Builder<B> {
+    interface Builder<B extends Builder> extends OBDACoreBuilderFragment<B>, OntopMappingSQLConfiguration.Builder<B> {
 
         @Override
         OBDACoreConfiguration build();

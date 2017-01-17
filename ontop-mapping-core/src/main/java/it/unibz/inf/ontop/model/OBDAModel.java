@@ -3,18 +3,14 @@ package it.unibz.inf.ontop.model;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.exception.DuplicateMappingException;
-import it.unibz.inf.ontop.io.PrefixManager;
 import it.unibz.inf.ontop.mapping.MappingMetadata;
-import it.unibz.inf.ontop.mapping.MappingParser;
 
 /**
  * An OBDA model contains mapping information.
  * This interface is generic regarding the targeted native query language.
  *
- * An OBDA model is a container for the database and mapping declarations needed to define a
- * Virtual ABox or Virtual RDF graph. That is, this is a manager for a
- * collection of JDBC databases (when SQL is the native query language) and their corresponding mappings.
- * It is used as input to any Quest instance (either OWLAPI or Sesame).
+ * An OBDA model is a container for  mapping declarations needed to define a
+ * Virtual ABox or Virtual RDF graph.
  *
  * <p>
  * OBDAModels are also used indirectly by the Protege plugin and many other
@@ -23,10 +19,8 @@ import it.unibz.inf.ontop.mapping.MappingParser;
  *
  * <p>
  * OBDAModels can be serialized and parsed to/from mapping files using
- * a serializer and a {@link MappingParser}.
+ * a serializer and a MappingParser.
  *
- *
- * @see MappingParser
  *
  * Initial author (before refactoring):
  * @author Mariano Rodriguez Muro <mariano.muro@gmail.com>

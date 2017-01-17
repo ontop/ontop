@@ -2,8 +2,8 @@ package it.unibz.inf.ontop.injection.impl;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.exception.DuplicateMappingException;
-import it.unibz.inf.ontop.injection.OBDASettings;
 import it.unibz.inf.ontop.injection.OBDAFactoryWithException;
+import it.unibz.inf.ontop.injection.OntopMappingSettings;
 import it.unibz.inf.ontop.mapping.MappingMetadata;
 import it.unibz.inf.ontop.model.OBDAMappingAxiom;
 import it.unibz.inf.ontop.model.OBDAModel;
@@ -18,16 +18,15 @@ import java.lang.reflect.InvocationTargetException;
 public class OBDAFactoryWithExceptionImpl
         implements OBDAFactoryWithException {
 
-    private final OBDASettings preferences;
+    private final OntopMappingSettings settings;
 
     @Inject
-    private OBDAFactoryWithExceptionImpl(OBDASettings preferences) {
-        // TODO: use them
-        this.preferences = preferences;
+    private OBDAFactoryWithExceptionImpl(OntopMappingSettings settings) {
+        this.settings = settings;
     }
 
     private Constructor[] findConstructors(Class genericClass) {
-        String implementationName = preferences.getProperty(genericClass.getCanonicalName())
+        String implementationName = settings.getProperty(genericClass.getCanonicalName())
                 //TODO: find a better exception
                 .orElseThrow(() -> new RuntimeException("No implementation declared for " +
                         genericClass.getCanonicalName()));

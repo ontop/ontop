@@ -15,7 +15,7 @@ import java.util.Optional;
  * TODO: update this description
  *
  */
-public interface OBDASettings extends OntopSQLSettings {
+public interface OBDASettings extends OntopMappingSQLSettings {
 
     //-------------------
     // High-level methods

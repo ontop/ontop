@@ -28,7 +28,6 @@ import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.mapping.MappingMetadata;
 import it.unibz.inf.ontop.model.OBDAMappingAxiom;
 import it.unibz.inf.ontop.model.OBDAModel;
-import it.unibz.inf.ontop.io.PrefixManager;
 
 
 public class OBDAModelImpl implements OBDAModel {

@@ -19,5 +19,5 @@ import it.unibz.inf.ontop.model.OBDAModel;
 public interface OBDAFactoryWithException {
 
     OBDAModel createOBDAModel(ImmutableList<OBDAMappingAxiom> newMappings,
-                                     MappingMetadata metadata) throws DuplicateMappingException;
+                              MappingMetadata metadata) throws DuplicateMappingException;
 }
