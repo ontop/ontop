@@ -59,7 +59,7 @@ public class QuestConfigPanel extends javax.swing.JPanel {
         chkAnnotations.setSelected(bChecked);
 
         String value = preference.getProperty(QuestCoreSettings.ABOX_MODE);
-        if (value.equals(QuestConstants.VIRTUAL)) {
+        if (value == null || value.equals(QuestConstants.VIRTUAL)) {
             virtualModeSelected();
         }
         else if (value.equals(QuestConstants.CLASSIC)) {
@@ -74,17 +74,19 @@ public class QuestConfigPanel extends javax.swing.JPanel {
             radInMemoryDatabase.setSelected(true);
 //        }
 
-        value = (String) preference.getProperty(QuestCoreSettings.DBTYPE);
-        switch (value) {
-            case QuestConstants.DIRECT:
-                radDirect.setSelected(true);
-                break;
-            case QuestConstants.UNIVERSAL:
-                radUniversal.setSelected(true);
-                break;
-            case QuestConstants.SEMANTIC_INDEX:
-                radSemanticIndex.setSelected(true);
-                break;
+        value = preference.getProperty(QuestCoreSettings.DBTYPE);
+        if (value != null) {
+            switch (value) {
+                case QuestConstants.DIRECT:
+                    radDirect.setSelected(true);
+                    break;
+                case QuestConstants.UNIVERSAL:
+                    radUniversal.setSelected(true);
+                    break;
+                case QuestConstants.SEMANTIC_INDEX:
+                    radSemanticIndex.setSelected(true);
+                    break;
+            }
         }
 
         bChecked = preference.getBoolean(QuestCoreSettings.OBTAIN_FROM_ONTOLOGY);

@@ -61,7 +61,7 @@
                         </td>
 						<td>
 							<xsl:value-of select="$ontop-owlfilecommentvirt.label" />
-							<a href="https://github.com/ontop/ontop/wiki/ObdalibOwlFile">OntopOwl</a>.
+							<!--<a href="https://github.com/ontop/ontop/wiki/ObdalibOwlFile">OntopOwl</a>.-->
 						</td>
 					</tr>
 					<tr>
@@ -74,7 +74,7 @@
 						</td>
 						<td>
 							<xsl:value-of select="$ontop-obdafilecomment.label" />
-							<a href="https://github.com/ontop/ontop/wiki/ObdalibMappings">OntopObda</a>.
+							<!--<a href="https://github.com/ontop/ontop/wiki/ObdalibMappings">OntopObda</a>.-->
 						</td>
 					</tr>
 					<tr>
@@ -89,11 +89,9 @@
 						</th>
 						<td>
 							<input type="checkbox" id="existential"
-								name="Existential reasoning" size="48" value="true"/>
+								name="Existential reasoning" size="48" value="true" title="{$ontop-exist.label}"/>
 						</td>
 						<td>
-							<xsl:value-of select="$ontop-exist.label" />
-							OntopReasoning
 						</td>
 					</tr>
 					<tr>
