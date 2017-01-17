@@ -22,7 +22,9 @@ package it.unibz.inf.ontop.io;
 
 import java.util.*;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.inject.Injector;
+import it.unibz.inf.ontop.injection.MappingFactory;
 import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
 import it.unibz.inf.ontop.injection.OBDACoreConfiguration;
 import it.unibz.inf.ontop.model.CQIE;
@@ -40,12 +42,12 @@ public class PrefixRendererTest extends TestCase {
 
 	private DatalogProgram query;
 	private CQIE rule1;
-    private final NativeQueryLanguageComponentFactory factory;
+	private final MappingFactory mappingFactory;
 
-    public PrefixRendererTest() {
+	public PrefixRendererTest() {
 		OBDACoreConfiguration configuration = OBDACoreConfiguration.defaultBuilder().build();
 		Injector injector = configuration.getInjector();
-        factory = injector.getInstance(NativeQueryLanguageComponentFactory.class);
+        mappingFactory = injector.getInstance(MappingFactory.class);
     }
 
 	public void setUp() throws Exception {
@@ -77,7 +79,7 @@ public class PrefixRendererTest extends TestCase {
         PrefixManager pm;
         Map<String, String> prefixes = new HashMap<>();
 		prefixes.put(PrefixManager.DEFAULT_PREFIX, "http://obda.org/onto.owl#");
-        pm = factory.create(prefixes);
+        pm = mappingFactory.create(ImmutableMap.copyOf(prefixes));
 		String name = pm.getShortForm(query.getRules().get(0).getHead().getFunctionSymbol().toString(), true);
 		assertTrue(name, name.equals("http://obda.org/predicates#q"));
 
@@ -89,7 +91,7 @@ public class PrefixRendererTest extends TestCase {
 		assertTrue(name, name.equals("&:;person-individual"));
 
 		prefixes.put(PrefixManager.DEFAULT_PREFIX, "http://obda.org/predicates#");
-        pm = factory.create(prefixes);
+        pm = mappingFactory.create(ImmutableMap.copyOf(prefixes));
 		name = pm.getShortForm(query.getRules().get(0).getHead().getFunctionSymbol().toString(), true);
 		assertTrue(name, name.equals("&:;q"));
 
@@ -109,7 +111,7 @@ public class PrefixRendererTest extends TestCase {
         Map<String, String> prefixes = new HashMap<>();
 		prefixes.put(PrefixManager.DEFAULT_PREFIX, "http://obda.org/onto.owl#");
 		prefixes.put("obdap:", "http://obda.org/predicates#");
-        pm = factory.create(prefixes);
+        pm = mappingFactory.create(ImmutableMap.copyOf(prefixes));
 
 		String name = pm.getShortForm(query.getRules().get(0).getHead().getFunctionSymbol().toString(), false);
 		assertTrue(name, name.equals("obdap:q"));
@@ -123,7 +125,7 @@ public class PrefixRendererTest extends TestCase {
 
 		prefixes.put(PrefixManager.DEFAULT_PREFIX, "http://obda.org/predicates#");
 		prefixes.put("onto:", "http://obda.org/onto.owl#");
-        pm = factory.create(prefixes);
+        pm = mappingFactory.create(ImmutableMap.copyOf(prefixes));
 		name = pm.getShortForm(query.getRules().get(0).getHead().getFunctionSymbol().toString(), false);
 		assertTrue(name, name.equals(":q"));
 
@@ -146,7 +148,7 @@ public class PrefixRendererTest extends TestCase {
 
 		String uri = "http://obda.org/onto.owl#redirect=http://obda.org/predicates#";
 
-		PrefixManager pm = factory.create(prefixes);
+		PrefixManager pm = mappingFactory.create(ImmutableMap.copyOf(prefixes));
 
 		String shortForm = pm.getShortForm(uri, false);
 		System.out.println(shortForm);
@@ -156,7 +158,7 @@ public class PrefixRendererTest extends TestCase {
 		prefixes.put(PrefixManager.DEFAULT_PREFIX, "http://example.com/resource/");
 		prefixes.put("movie:", "http://www.movieontology.org/2009/10/01/movieontology.owl/");
 
-		pm = factory.create(prefixes);
+		pm = mappingFactory.create(ImmutableMap.copyOf(prefixes));
 
 		String uri2 = "http://example.com/resource/?repository=repo&uri=http://www.movieontology.org/2009/10/01/movieontology.owl/China-24951";
 		String shortForm2 = pm.getShortForm(uri2, false);

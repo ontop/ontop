@@ -4,8 +4,8 @@ package it.unibz.inf.ontop.model;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.io.PrefixManager;
+import it.unibz.inf.ontop.mapping.MappingMetadata;
 import it.unibz.inf.ontop.mapping.MappingParser;
-import it.unibz.inf.ontop.ontology.*;
 
 /**
  * An OBDA model contains mapping information.
@@ -35,21 +35,18 @@ import it.unibz.inf.ontop.ontology.*;
  */
 public interface OBDAModel {
 
-    /**
-     * Prefix manager. Normally immutable.
-     */
-    public PrefixManager getPrefixManager();
+    MappingMetadata getMetadata();
 
     /**
      * Retrieves the mapping axiom given its id.
      */
-    public OBDAMappingAxiom getMapping(String mappingId);
+    OBDAMappingAxiom getMapping(String mappingId);
 
     /**
      * Returns all the mappings in this model indexed by
      * their datasource.
      */
-    public ImmutableList<OBDAMappingAxiom> getMappings();
+    ImmutableList<OBDAMappingAxiom> getMappings();
 
     /**
      * Constructs a new OBDA model with new mappings.
@@ -58,7 +55,7 @@ public interface OBDAModel {
      * should use this method to "update" them.
      * 
      */
-    public OBDAModel newModel(ImmutableList<OBDAMappingAxiom> newMappings)
+    OBDAModel newModel(ImmutableList<OBDAMappingAxiom> newMappings)
         throws DuplicateMappingException;
     /**
      * Constructs a new OBDA model with new mappings and a prefix manager.
@@ -67,7 +64,7 @@ public interface OBDAModel {
      * should use this method to "update" them.
      *
      */
-    public OBDAModel newModel(ImmutableList<OBDAMappingAxiom> newMappings,
-                              PrefixManager prefixManager) throws DuplicateMappingException;
+    OBDAModel newModel(ImmutableList<OBDAMappingAxiom> newMappings,
+                              MappingMetadata metadata) throws DuplicateMappingException;
 
 }

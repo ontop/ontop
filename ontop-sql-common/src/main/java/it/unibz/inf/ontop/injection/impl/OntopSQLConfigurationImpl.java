@@ -9,13 +9,13 @@ import java.util.Properties;
 import java.util.stream.Stream;
 
 
-public class OntopSQLConfigurationImpl extends OntopModelConfigurationImpl
+public class OntopSQLConfigurationImpl extends OntopOBDAConfigurationImpl
         implements OntopSQLConfiguration {
 
     private final OntopSQLSettings settings;
 
     protected OntopSQLConfigurationImpl(OntopSQLSettings settings, OntopSQLOptions options) {
-        super(settings, options.modelOptions);
+        super(settings, options.obdaOptions);
         this.settings = settings;
     }
 
@@ -33,10 +33,10 @@ public class OntopSQLConfigurationImpl extends OntopModelConfigurationImpl
 
     protected static class OntopSQLOptions {
 
-        public final OntopModelConfigurationOptions modelOptions;
+        public final OntopOBDAOptions obdaOptions;
 
-        private OntopSQLOptions(OntopModelConfigurationOptions modelOptions) {
-            this.modelOptions = modelOptions;
+        private OntopSQLOptions(OntopOBDAOptions obdaOptions) {
+            this.obdaOptions = obdaOptions;
         }
     }
 
@@ -50,15 +50,8 @@ public class OntopSQLConfigurationImpl extends OntopModelConfigurationImpl
         private Optional<String> dbPassword = Optional.empty();
         private Optional<String> jdbcDriver = Optional.empty();
 
-        protected DefaultOntopSQLBuilderFragment(B builder) {
+        DefaultOntopSQLBuilderFragment(B builder) {
             this.builder = builder;
-        }
-
-        /**
-         * Only for sub-classes!
-         */
-        protected DefaultOntopSQLBuilderFragment() {
-            this.builder = (B) this;
         }
 
         @Override
@@ -103,14 +96,14 @@ public class OntopSQLConfigurationImpl extends OntopModelConfigurationImpl
             return properties;
         }
 
-        final OntopSQLOptions generateSQLOptions(OntopModelConfigurationOptions modelOptions) {
-            return new OntopSQLOptions(modelOptions);
+        final OntopSQLOptions generateSQLOptions(OntopOBDAOptions obdaOptions) {
+            return new OntopSQLOptions(obdaOptions);
         }
 
     }
 
     protected abstract static class OntopSQLBuilderMixin<B extends OntopSQLConfiguration.Builder>
-            extends OntopModelConfigurationImpl.DefaultOntopModelBuilderFragment<B>
+            extends OntopOBDAConfigurationImpl.OntopOBDAConfigurationBuilderMixin<B>
             implements OntopSQLConfiguration.Builder<B> {
 
         private final DefaultOntopSQLBuilderFragment<B> sqlBuilderFragment;
@@ -152,7 +145,7 @@ public class OntopSQLConfigurationImpl extends OntopModelConfigurationImpl
         }
 
         OntopSQLOptions generateSQLOptions() {
-            return sqlBuilderFragment.generateSQLOptions(generateModelOptions());
+            return sqlBuilderFragment.generateSQLOptions(generateOBDAOptions());
         }
     }
 

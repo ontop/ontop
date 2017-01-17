@@ -24,11 +24,13 @@ import java.util.Optional;
 
 import com.google.common.collect.ImmutableList;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 
 import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.injection.*;
+import it.unibz.inf.ontop.mapping.MappingMetadata;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.io.PrefixManager;
 import it.unibz.inf.ontop.ontology.ImmutableOntologyVocabulary;
@@ -156,6 +158,7 @@ public class Quest implements Serializable, IQuest {
 	private final NativeQueryLanguageComponentFactory nativeQLFactory;
 	private final QuestComponentFactory questComponentFactory;
 	private final OBDAFactoryWithException obdaFactory;
+	private final MappingFactory mappingFactory;
 	private final MappingVocabularyFixer mappingVocabularyFixer;
 	private final IMapping2DatalogConverter mapping2DatalogConverter;
 
@@ -195,7 +198,7 @@ public class Quest implements Serializable, IQuest {
 				  OBDAFactoryWithException obdaFactory, QuestComponentFactory questComponentFactory,
 				  MappingVocabularyFixer mappingVocabularyFixer, TMappingExclusionConfig excludeFromTMappings,
 				  IMapping2DatalogConverter mapping2DatalogConverter, QueryCache queryCache,
-				  OntopModelFactory modelFactory) throws DuplicateMappingException {
+				  OntopModelFactory modelFactory, MappingFactory mappingFactory) throws DuplicateMappingException {
 		if (tbox == null)
 			throw new InvalidParameterException("TBox cannot be null");
 
@@ -207,6 +210,7 @@ public class Quest implements Serializable, IQuest {
 		this.queryCache = queryCache;
 		this.modelFactory = modelFactory;
 		this.executorRegistry = executorRegistry;
+		this.mappingFactory = mappingFactory;
 
 		inputOntology = tbox;
 
@@ -245,9 +249,10 @@ public class Quest implements Serializable, IQuest {
 			//model = OBDADataFactoryImpl.getInstance().getOBDAModel();
 			// TODO: refactor this pretty bad practice.
 			//TODO: add the prefix.
-			PrefixManager defaultPrefixManager = nativeQLFactory.create(new HashMap<String, String>());
+			PrefixManager defaultPrefixManager = mappingFactory.create(ImmutableMap.of());
+			MappingMetadata mappingMetadata = mappingFactory.create(defaultPrefixManager);
 
-			model = obdaFactory.createOBDAModel(ImmutableList.of(), defaultPrefixManager);
+			model = obdaFactory.createOBDAModel(ImmutableList.of(), mappingMetadata);
 		}
 		inputOBDAModel = model;
 	}

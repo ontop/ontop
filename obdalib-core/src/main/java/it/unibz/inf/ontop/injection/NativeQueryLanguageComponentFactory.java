@@ -31,8 +31,6 @@ public interface NativeQueryLanguageComponentFactory {
     public MappingParser create(File file);
     public MappingParser create(Model mappingGraph);
 
-    public PrefixManager create(Map<String, String> prefixToURIMap);
-
     public DBMetadataExtractor create();
 
     public OBDAMappingAxiom create(String id, @Assisted("sourceQuery") SourceQuery sourceQuery,

@@ -29,6 +29,8 @@ import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 
 import it.unibz.inf.ontop.exception.*;
+import it.unibz.inf.ontop.injection.MappingFactory;
+import it.unibz.inf.ontop.mapping.MappingMetadata;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.SQLMappingFactoryImpl;
 import org.eclipse.rdf4j.model.Model;
@@ -69,11 +71,12 @@ public class OntopNativeMappingParser implements MappingParser {
     protected static final String END_COLLECTION_SYMBOL = "]]";
     protected static final String COMMENT_SYMBOL = ";";
 
-    private static final SQLMappingFactory MAPPING_FACTORY = SQLMappingFactoryImpl.getInstance();
+    private static final SQLMappingFactory SQL_MAPPING_FACTORY = SQLMappingFactoryImpl.getInstance();
     private static final Logger LOG = LoggerFactory.getLogger(OntopNativeMappingParser.class);
 
     private final NativeQueryLanguageComponentFactory nativeQLFactory;
     private final OBDAFactoryWithException obdaFactory;
+    private final MappingFactory mappingFactory;
 
     private OBDAModel model;
 
@@ -85,9 +88,11 @@ public class OntopNativeMappingParser implements MappingParser {
 
     @AssistedInject
     private OntopNativeMappingParser(@Assisted Reader reader, NativeQueryLanguageComponentFactory nativeQLFactory,
+                                     MappingFactory mappingFactory,
                                      OBDAFactoryWithException obdaFactory) {
         this.nativeQLFactory = nativeQLFactory;
         this.obdaFactory = obdaFactory;
+        this.mappingFactory = mappingFactory;
         this.model = null;
         this.reader = reader;
         this.file = null;
@@ -97,8 +102,10 @@ public class OntopNativeMappingParser implements MappingParser {
      * Create an SQL Mapping Parser for generating an OBDA model.
      */
     @AssistedInject
-    private OntopNativeMappingParser(@Assisted File file, NativeQueryLanguageComponentFactory nativeQLFactory,
+    private OntopNativeMappingParser(@Assisted File file, MappingFactory mappingFactory,
+                                     NativeQueryLanguageComponentFactory nativeQLFactory,
                                      OBDAFactoryWithException obdaFactory) {
+        this.mappingFactory = mappingFactory;
         this.nativeQLFactory = nativeQLFactory;
         this.obdaFactory = obdaFactory;
         this.model = null;
@@ -123,7 +130,7 @@ public class OntopNativeMappingParser implements MappingParser {
     @Override
     public OBDAModel getOBDAModel() throws InvalidMappingException, IOException, DuplicateMappingException {
         if (model == null) {
-            this.model = load(reader, file, nativeQLFactory, obdaFactory);
+            this.model = load(reader, file, mappingFactory, nativeQLFactory, obdaFactory);
             reader = null;
         }
         return model;
@@ -145,7 +152,8 @@ public class OntopNativeMappingParser implements MappingParser {
      *
      * TODO: refactor it. Way too complex.
      */
-	private static OBDAModel load(Reader reader, File file, NativeQueryLanguageComponentFactory nativeQLFactory,
+	private static OBDAModel load(Reader reader, File file, MappingFactory mappingFactory,
+                                  NativeQueryLanguageComponentFactory nativeQLFactory,
                                   OBDAFactoryWithException obdaFactory)
             throws IOException, InvalidMappingExceptionWithIndicator, DuplicateMappingException {
 
@@ -219,8 +227,9 @@ public class OntopNativeMappingParser implements MappingParser {
             throw new InvalidMappingExceptionWithIndicator(invalidMappingIndicators);
         }
 
-        PrefixManager prefixManager = nativeQLFactory.create(prefixes);
-        return obdaFactory.createOBDAModel(ImmutableList.copyOf(mappings), prefixManager);
+        PrefixManager prefixManager = mappingFactory.create(ImmutableMap.copyOf(prefixes));
+        MappingMetadata metadata = mappingFactory.create(prefixManager);
+        return obdaFactory.createOBDAModel(ImmutableList.copyOf(mappings), metadata);
 	}
     
     /*
@@ -377,7 +386,7 @@ public class OntopNativeMappingParser implements MappingParser {
     private static List<OBDAMappingAxiom> addNewMapping(String mappingId, String sourceQuery, List<Function> targetQuery,
                                                         List<OBDAMappingAxiom> currentSourceMappings,
                                                         NativeQueryLanguageComponentFactory nativeQLFactory) {
-        OBDAMappingAxiom mapping = nativeQLFactory.create(mappingId, MAPPING_FACTORY.getSQLQuery(sourceQuery), targetQuery);
+        OBDAMappingAxiom mapping = nativeQLFactory.create(mappingId, SQL_MAPPING_FACTORY.getSQLQuery(sourceQuery), targetQuery);
         if (!currentSourceMappings.contains(mapping)) {
             currentSourceMappings.add(mapping);
         }

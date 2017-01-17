@@ -1,8 +1,11 @@
 package it.unibz.inf.ontop.r2rml;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
+import it.unibz.inf.ontop.injection.MappingFactory;
+import it.unibz.inf.ontop.mapping.MappingMetadata;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.rio.RDFHandlerException;
 import org.eclipse.rdf4j.rio.RDFParseException;
@@ -32,6 +35,7 @@ public class R2RMLMappingParser implements MappingParser {
     private final OBDASettings configuration;
     private final NativeQueryLanguageComponentFactory nativeQLFactory;
     private final OBDAFactoryWithException obdaFactory;
+    private final MappingFactory mappingFactory;
     private OBDAModel obdaModel;
 
     /**
@@ -42,11 +46,13 @@ public class R2RMLMappingParser implements MappingParser {
 
     @AssistedInject
     private R2RMLMappingParser(@Assisted File mappingFile, NativeQueryLanguageComponentFactory nativeQLFactory,
-                               OBDAFactoryWithException obdaFactory, OBDASettings configuration) {
+                               OBDAFactoryWithException obdaFactory, MappingFactory mappingFactory,
+                               OBDASettings configuration) {
         this.nativeQLFactory = nativeQLFactory;
         this.obdaFactory = obdaFactory;
         this.configuration = configuration;
         this.mappingFile = mappingFile;
+        this.mappingFactory = mappingFactory;
         this.mappingGraph = null;
 
         /**
@@ -56,11 +62,12 @@ public class R2RMLMappingParser implements MappingParser {
     }
 
     @AssistedInject
-    private R2RMLMappingParser(@Assisted Model mappingGraph,
+    private R2RMLMappingParser(@Assisted Model mappingGraph, MappingFactory mappingFactory,
                                NativeQueryLanguageComponentFactory nativeQLFactory,
                                OBDAFactoryWithException obdaFactory, OBDASettings configuration) {
         this.nativeQLFactory = nativeQLFactory;
         this.obdaFactory = obdaFactory;
+        this.mappingFactory = mappingFactory;
         this.configuration = configuration;
         this.mappingGraph = mappingGraph;
         this.mappingFile = null;
@@ -103,9 +110,10 @@ public class R2RMLMappingParser implements MappingParser {
         ImmutableList<OBDAMappingAxiom> sourceMappings = r2rmlManager.getMappings(r2rmlManager.getModel());
 
         //TODO: try to extract prefixes from the R2RML mappings
-        PrefixManager prefixManager = nativeQLFactory.create(new HashMap<>());
+        PrefixManager prefixManager = mappingFactory.create(ImmutableMap.of());
+        MappingMetadata mappingMetadata = mappingFactory.create(prefixManager);
 
-        obdaModel = obdaFactory.createOBDAModel(sourceMappings, prefixManager);
+        obdaModel = obdaFactory.createOBDAModel(sourceMappings, mappingMetadata);
 
     return obdaModel;
     }

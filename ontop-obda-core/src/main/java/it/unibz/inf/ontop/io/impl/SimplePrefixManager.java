@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.io;
+package it.unibz.inf.ontop.io.impl;
 
 /*
  * #%L
@@ -52,7 +52,7 @@ public class SimplePrefixManager extends AbstractPrefixManager {
      * TODO: make it private (again).
 	 */
     @Inject
-	public SimplePrefixManager(@Assisted Map<String, String> prefixToURIMap) {
+	public SimplePrefixManager(@Assisted ImmutableMap<String, String> prefixToURIMap) {
         checkPrefixToURIMap(prefixToURIMap);
         Map<String, String> newPrefixToURIMap = new HashMap<>(prefixToURIMap);
 		newPrefixToURIMap.putAll(initKnownPrefixes());

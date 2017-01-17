@@ -20,9 +20,11 @@ package it.unibz.inf.ontop.owlrefplatform.core.abox;
  * #L%
  */
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import it.unibz.inf.ontop.injection.InvalidOntopConfigurationException;
+import it.unibz.inf.ontop.injection.*;
 import it.unibz.inf.ontop.injection.QuestCoreConfiguration.Builder;
+import it.unibz.inf.ontop.mapping.MappingMetadata;
 import it.unibz.inf.ontop.model.*;
 
 import java.io.BufferedReader;
@@ -33,13 +35,10 @@ import java.util.*;
 
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Injector;
-import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
-import it.unibz.inf.ontop.injection.OBDAFactoryWithException;
 import it.unibz.inf.ontop.io.PrefixManager;
 import it.unibz.inf.ontop.model.Predicate.COL_TYPE;
 import it.unibz.inf.ontop.model.impl.SQLMappingFactoryImpl;
 import it.unibz.inf.ontop.ontology.Assertion;
-import it.unibz.inf.ontop.injection.QuestCoreConfiguration;
 import it.unibz.inf.ontop.ontology.Ontology;
 import it.unibz.inf.ontop.ontology.utils.MappingVocabularyExtractor;
 import it.unibz.inf.ontop.sql.JDBCConnectionManager;
@@ -145,6 +144,7 @@ public class VirtualABoxMaterializerTest {
 				.build();
 		Injector injector = configuration.getInjector();
 		NativeQueryLanguageComponentFactory nativeQLFactory = injector.getInstance(NativeQueryLanguageComponentFactory.class);
+		MappingFactory mappingFactory = injector.getInstance(MappingFactory.class);
 		OBDAFactoryWithException obdaFactory = injector.getInstance(OBDAFactoryWithException.class);
 
     			/*
@@ -172,8 +172,9 @@ public class VirtualABoxMaterializerTest {
 
 		OBDAMappingAxiom map1 = nativeQLFactory.create(MAPPING_FACTORY.getSQLQuery(sql), body);
 
-		PrefixManager prefixManager = nativeQLFactory.create(new HashMap<>());
-		return obdaFactory.createOBDAModel(ImmutableList.of(map1), prefixManager);
+		PrefixManager prefixManager = mappingFactory.create(ImmutableMap.of());
+		MappingMetadata mappingMetadata = mappingFactory.create(prefixManager);
+		return obdaFactory.createOBDAModel(ImmutableList.of(map1), mappingMetadata);
 	}
 
 //	public void testTwoSources() throws Exception {

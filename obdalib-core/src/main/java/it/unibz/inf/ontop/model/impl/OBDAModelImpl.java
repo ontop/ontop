@@ -25,13 +25,14 @@ import java.util.*;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.exception.DuplicateMappingException;
+import it.unibz.inf.ontop.mapping.MappingMetadata;
 import it.unibz.inf.ontop.model.OBDAMappingAxiom;
 import it.unibz.inf.ontop.model.OBDAModel;
 import it.unibz.inf.ontop.io.PrefixManager;
 
 
 public class OBDAModelImpl implements OBDAModel {
-	private final PrefixManager prefixManager;
+	private final MappingMetadata mappingMetadata;
 
 	private final ImmutableList<OBDAMappingAxiom> mappings;
     private final ImmutableMap<String, OBDAMappingAxiom> mappingIndexById;
@@ -40,11 +41,11 @@ public class OBDAModelImpl implements OBDAModel {
      * Normal constructor. Used by the QuestComponentFactory.
      */
     public OBDAModelImpl(ImmutableList<OBDAMappingAxiom> newMappings,
-                         PrefixManager prefixManager) throws DuplicateMappingException {
+                         MappingMetadata mappingMetadata) throws DuplicateMappingException {
 
         checkDuplicates(newMappings);
         this.mappings = newMappings;
-        this.prefixManager = prefixManager;
+        this.mappingMetadata = mappingMetadata;
         this.mappingIndexById = indexMappingsById(mappings);
     }
 
@@ -100,27 +101,27 @@ public class OBDAModelImpl implements OBDAModel {
 
     @Override
     public OBDAModel newModel(ImmutableList<OBDAMappingAxiom> newMappings) throws DuplicateMappingException {
-        return newModel(newMappings, prefixManager);
+        return newModel(newMappings, mappingMetadata);
     }
 
     @Override
     public OBDAModel newModel(ImmutableList<OBDAMappingAxiom> newMappings,
-                              PrefixManager prefixManager) throws DuplicateMappingException {
-        return new OBDAModelImpl(newMappings, prefixManager);
+                              MappingMetadata mappingMetadata) throws DuplicateMappingException {
+        return new OBDAModelImpl(newMappings, mappingMetadata);
     }
 
     @Override
     public OBDAModel clone() {
         try {
-            return new OBDAModelImpl(mappings, prefixManager);
+            return new OBDAModelImpl(mappings, mappingMetadata);
         } catch (DuplicateMappingException e) {
             throw new RuntimeException("Unexpected error (inconsistent cloning): " + e.getMessage());
         }
     }
 
     @Override
-	public PrefixManager getPrefixManager() {
-		return prefixManager;
+    public MappingMetadata getMetadata() {
+		return mappingMetadata;
 	}
 
     @Override

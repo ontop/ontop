@@ -22,16 +22,12 @@ package it.unibz.inf.ontop.protege.core;
 
 import com.google.common.base.Optional;
 import com.google.inject.Injector;
-import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
-import it.unibz.inf.ontop.injection.OBDACoreConfiguration;
-import it.unibz.inf.ontop.injection.OBDAFactoryWithException;
+import it.unibz.inf.ontop.injection.*;
 import it.unibz.inf.ontop.io.OntopNativeMappingSerializer;
 import it.unibz.inf.ontop.io.PrefixManager;
 import it.unibz.inf.ontop.io.QueryIOManager;
 import it.unibz.inf.ontop.model.*;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.owlapi.OBDAModelValidator;
-import it.unibz.inf.ontop.injection.QuestCoreSettings;
 import it.unibz.inf.ontop.protege.utils.DialogUtils;
 import it.unibz.inf.ontop.querymanager.*;
 import it.unibz.inf.ontop.sql.ImplicitDBConstraintsReader;
@@ -103,13 +99,24 @@ public class OBDAModelManager implements Disposable {
 
     private final NativeQueryLanguageComponentFactory nativeQLFactory;
     private final OBDAFactoryWithException obdaFactory;
+	private final MappingFactory mappingFactory;
 
-    public OBDAModelManager(EditorKit editorKit) {
+	public OBDAModelManager(EditorKit editorKit) {
+
+		/**
+		 * TODO: avoid this use
+		 */
 		// Default injector
-		Injector defaultInjector = OBDACoreConfiguration.defaultBuilder().build().getInjector();
+		Injector defaultInjector = OBDACoreConfiguration.defaultBuilder()
+				.jdbcDriver("")
+				.jdbcUrl("")
+				.dbUser("")
+				.dbPassword("")
+				.build().getInjector();
 
+		this.mappingFactory = defaultInjector.getInstance(MappingFactory.class);
 		this.nativeQLFactory = defaultInjector.getInstance(NativeQueryLanguageComponentFactory.class);
-		this.obdaFactory = defaultInjector.getInstance(OBDAFactoryWithException.class);;
+		this.obdaFactory = defaultInjector.getInstance(OBDAFactoryWithException.class);
 
 		if (!(editorKit instanceof OWLEditorKit)) {
 			throw new IllegalArgumentException("The OBDA Plugin only works with OWLEditorKit instances.");
@@ -431,7 +438,7 @@ public class OBDAModelManager implements Disposable {
         PrefixDocumentFormat prefixManager = PrefixUtilities.getPrefixOWLOntologyFormat(mmgr.getActiveOntology());
         PrefixManagerWrapper prefixWrapper = new PrefixManagerWrapper(prefixManager);
 
-		activeOBDAModel = new OBDAModelWrapper(nativeQLFactory, obdaFactory, prefixWrapper);
+		activeOBDAModel = new OBDAModelWrapper(mappingFactory, nativeQLFactory, obdaFactory, prefixWrapper);
 		activeOBDAModel.addSourceListener(dlistener);
 		activeOBDAModel.addMappingsListener(mlistener);
 		queryController.addListener(qlistener);

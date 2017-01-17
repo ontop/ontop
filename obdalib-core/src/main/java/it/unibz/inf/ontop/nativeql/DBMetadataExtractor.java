@@ -1,6 +1,5 @@
 package it.unibz.inf.ontop.nativeql;
 
-import it.unibz.inf.ontop.injection.OntopSQLSettings;
 import it.unibz.inf.ontop.model.OBDAModel;
 import it.unibz.inf.ontop.model.DBMetadata;
 

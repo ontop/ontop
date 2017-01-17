@@ -4,11 +4,12 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.exception.InvalidMappingException;
+import it.unibz.inf.ontop.injection.MappingFactory;
 import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
 import it.unibz.inf.ontop.injection.OBDAFactoryWithException;
 import it.unibz.inf.ontop.io.InvalidDataSourceException;
 import it.unibz.inf.ontop.io.PrefixManager;
-import it.unibz.inf.ontop.io.SimplePrefixManager;
+import it.unibz.inf.ontop.io.impl.SimplePrefixManager;
 import it.unibz.inf.ontop.mapping.MappingParser;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.ontology.OntologyFactory;
@@ -43,6 +44,7 @@ public class OBDAModelWrapper {
     private final static OntologyFactory ONTOLOGY_FACTORY = OntologyFactoryImpl.getInstance();
     private final NativeQueryLanguageComponentFactory nativeQLFactory;
     private final OBDAFactoryWithException obdaFactory;
+    private final MappingFactory mappingFactory;
     private Optional<OBDADataSource> source;
 
     private OBDAModel obdaModel;
@@ -52,12 +54,13 @@ public class OBDAModelWrapper {
     private final List<OBDAMappingListener> mappingListeners;
     private final OntologyVocabulary ontologyVocabulary;
 
-    public OBDAModelWrapper(NativeQueryLanguageComponentFactory nativeQLFactory,
+    public OBDAModelWrapper(MappingFactory mappingFactory, NativeQueryLanguageComponentFactory nativeQLFactory,
                             OBDAFactoryWithException obdaFactory, PrefixManagerWrapper prefixManager) {
+        this.mappingFactory = mappingFactory;
         this.nativeQLFactory = nativeQLFactory;
         this.obdaFactory = obdaFactory;
         this.prefixManager = prefixManager;
-        this.obdaModel = createNewOBDAModel(obdaFactory, prefixManager);
+        this.obdaModel = createNewOBDAModel(mappingFactory, obdaFactory, prefixManager);
         this.sourceListeners = new ArrayList<>();
         this.mappingListeners = new ArrayList<>();
         source = Optional.empty();
@@ -79,17 +82,18 @@ public class OBDAModelWrapper {
         OBDAModel newObdaModel = mappingParser.getOBDAModel();
 
         ImmutableMap<String, String> mergedPrefixes = Stream.concat(
-                obdaModel.getPrefixManager().getPrefixMap().entrySet().stream(),
-                newObdaModel.getPrefixManager().getPrefixMap().entrySet().stream())
+                obdaModel.getMetadata().getPrefixManager().getPrefixMap().entrySet().stream(),
+                newObdaModel.getMetadata().getPrefixManager().getPrefixMap().entrySet().stream())
                 .distinct()
                 .collect(ImmutableCollectors.toMap());
 
+        PrefixManager mergedPrefixManager = mappingFactory.create(mergedPrefixes);
         obdaModel = obdaModel.newModel(newObdaModel.getMappings(),
-                new SimplePrefixManager(mergedPrefixes));
+                mappingFactory.create(mergedPrefixManager));
     }
 
     public PrefixManager getPrefixManager() {
-        return obdaModel.getPrefixManager();
+        return obdaModel.getMetadata().getPrefixManager();
     }
 
     public ImmutableList<OBDAMappingAxiom> getMappings(URI sourceUri) {
@@ -215,7 +219,7 @@ public class OBDAModelWrapper {
     }
 
     public void reset() {
-        obdaModel = createNewOBDAModel(obdaFactory, prefixManager);
+        obdaModel = createNewOBDAModel(mappingFactory, obdaFactory, prefixManager);
     }
 
 
@@ -315,9 +319,10 @@ public class OBDAModelWrapper {
         }
     }
 
-    private static OBDAModel createNewOBDAModel(OBDAFactoryWithException obdaFactory, PrefixManagerWrapper prefixManager) {
+    private static OBDAModel createNewOBDAModel(MappingFactory mappingFactory, OBDAFactoryWithException obdaFactory,
+                                                PrefixManagerWrapper prefixManager) {
         try {
-            return obdaFactory.createOBDAModel(ImmutableList.of(), prefixManager);
+            return obdaFactory.createOBDAModel(ImmutableList.of(), mappingFactory.create(prefixManager));
             /**
              * No mapping so should never happen
              */

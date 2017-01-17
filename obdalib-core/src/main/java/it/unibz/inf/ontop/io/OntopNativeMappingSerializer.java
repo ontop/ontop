@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.io;
 
 
+import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.renderer.SourceQueryRenderer;
 import it.unibz.inf.ontop.renderer.TargetQueryRenderer;
@@ -8,7 +9,6 @@ import it.unibz.inf.ontop.sql.RDBMSMappingAxiom;
 
 import java.io.*;
 import java.util.List;
-import java.util.Map;
 
 /**
  *
@@ -58,7 +58,7 @@ public class OntopNativeMappingSerializer {
      */
 
     private void writePrefixDeclaration(BufferedWriter writer) throws IOException {
-        final Map<String, String> prefixMap = model.getPrefixManager().getPrefixMap();
+        final ImmutableMap<String, String> prefixMap = model.getMetadata().getPrefixManager().getPrefixMap();
 
         if (prefixMap.size() == 0) {
             return; // do nothing if there is no prefixes to write
@@ -103,7 +103,7 @@ public class OntopNativeMappingSerializer {
     }
 
     private String printTargetQuery(List<Function> query) {
-        return TargetQueryRenderer.encode(query, model.getPrefixManager());
+        return TargetQueryRenderer.encode(query, model.getMetadata().getPrefixManager());
     }
 
     private String printSourceQuery(OBDASQLQuery query) {

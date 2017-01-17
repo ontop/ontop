@@ -30,7 +30,9 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Injector;
 
+import it.unibz.inf.ontop.injection.MappingFactory;
 import it.unibz.inf.ontop.injection.OBDACoreConfiguration;
+import it.unibz.inf.ontop.io.impl.SimplePrefixManager;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.SQLMappingFactoryImpl;
 import org.junit.Before;
@@ -52,6 +54,7 @@ public class SQLMappingParserUsingOwlTest {
     private static final SQLMappingFactory MAPPING_FACTORY = SQLMappingFactoryImpl.getInstance();
     private final NativeQueryLanguageComponentFactory nativeQLFactory;
     private final OBDAFactoryWithException modelFactory;
+    private final MappingFactory mappingFactory;
 
     private TurtleOBDASyntaxParser parser;
 
@@ -82,6 +85,7 @@ public class SQLMappingParserUsingOwlTest {
                 .build();
 
         Injector injector = configuration.getInjector();
+        mappingFactory = injector.getInstance(MappingFactory.class);
         nativeQLFactory = injector.getInstance(NativeQueryLanguageComponentFactory.class);
         modelFactory = injector.getInstance(OBDAFactoryWithException.class);
     }
@@ -140,7 +144,7 @@ public class SQLMappingParserUsingOwlTest {
 
     private void saveRegularFile() throws Exception {
         OBDAModel model = modelFactory.createOBDAModel(ImmutableList.of(),
-                nativeQLFactory.create(ImmutableMap.of()));
+                mappingFactory.create(mappingFactory.create(ImmutableMap.of())));
         OntopNativeMappingSerializer writer = new OntopNativeMappingSerializer(model);
         writer.save(new File("src/test/java/it/unibz/inf/ontop/io/SchoolRegularFile.obda"));
     }
@@ -153,7 +157,7 @@ public class SQLMappingParserUsingOwlTest {
         OBDAModel model = loadObdaFile("src/test/java/it/unibz/inf/ontop/io/SchoolRegularFile.obda");
 
         // Check the content
-        assertEquals(model.getPrefixManager().getPrefixMap().size(), 5);
+        assertEquals(model.getMetadata().getPrefixManager().getPrefixMap().size(), 5);
         assertEquals(model.getMappings().size(), 0);
     }
 
@@ -161,7 +165,7 @@ public class SQLMappingParserUsingOwlTest {
         OBDAModel model = loadObdaFile("src/test/java/it/unibz/inf/ontop/io/SchoolMultipleDataSources.obda");
 
         // Check the content
-        assertEquals(model.getPrefixManager().getPrefixMap().size(), 6);
+        assertEquals(model.getMetadata().getPrefixManager().getPrefixMap().size(), 6);
         assertEquals(model.getMappings().size(), 2);
     }
 

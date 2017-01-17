@@ -22,7 +22,7 @@ package it.unibz.inf.ontop.parser;
 
 import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.io.PrefixManager;
-import it.unibz.inf.ontop.io.SimplePrefixManager;
+import it.unibz.inf.ontop.io.impl.SimplePrefixManager;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

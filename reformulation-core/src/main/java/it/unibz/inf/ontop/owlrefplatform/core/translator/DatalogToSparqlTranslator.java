@@ -20,8 +20,9 @@ package it.unibz.inf.ontop.owlrefplatform.core.translator;
  * #L%
  */
 
+import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.io.PrefixManager;
-import it.unibz.inf.ontop.io.SimplePrefixManager;
+import it.unibz.inf.ontop.io.impl.SimplePrefixManager;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
 
@@ -50,7 +51,7 @@ public class DatalogToSparqlTranslator {
      * TODO: use the factory to construct this translator
 	 */
 	public DatalogToSparqlTranslator() {
-		this(new SimplePrefixManager(new HashMap<>()));
+		this(new SimplePrefixManager(ImmutableMap.of()));
 	}
 
 	/**

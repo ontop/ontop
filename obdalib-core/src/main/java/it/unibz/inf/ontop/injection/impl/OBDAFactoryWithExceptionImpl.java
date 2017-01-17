@@ -4,10 +4,9 @@ import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.injection.OBDASettings;
 import it.unibz.inf.ontop.injection.OBDAFactoryWithException;
-import it.unibz.inf.ontop.io.PrefixManager;
+import it.unibz.inf.ontop.mapping.MappingMetadata;
 import it.unibz.inf.ontop.model.OBDAMappingAxiom;
 import it.unibz.inf.ontop.model.OBDAModel;
-import it.unibz.inf.ontop.ontology.ImmutableOntologyVocabulary;
 
 import javax.inject.Inject;
 import java.lang.reflect.Constructor;
@@ -51,14 +50,14 @@ public class OBDAFactoryWithExceptionImpl
      */
     @Override
     public OBDAModel createOBDAModel(ImmutableList<OBDAMappingAxiom> newMappings,
-                                     PrefixManager prefixManager)
+                                     MappingMetadata mappingMetadata)
             throws DuplicateMappingException {
         try {
             /**
              * Instantiation
              */
             Constructor constructor = findFirstConstructor(OBDAModel.class);
-            return (OBDAModel) constructor.newInstance(newMappings, prefixManager);
+            return (OBDAModel) constructor.newInstance(newMappings, mappingMetadata);
             /**
              * Exception management
              */

@@ -6,7 +6,7 @@ import it.unibz.inf.ontop.utils.IDGenerator;
 
 import java.util.Properties;
 
-public class OntopSQLSettingsImpl extends OntopModelSettingsImpl implements OntopSQLSettings {
+public class OntopSQLSettingsImpl extends OntopOBDASettingsImpl implements OntopSQLSettings {
 
     private static final String DB_PREFIX = "DB-";
     private final String jdbcUrl;

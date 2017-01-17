@@ -53,7 +53,6 @@ public class OBDACoreModule extends OntopAbstractModule {
         Module nativeQLFactoryModule = buildFactory(ImmutableList.<Class>of(
                         OBDAModel.class,
                         MappingParser.class,
-                        PrefixManager.class,
                         DBMetadataExtractor.class,
                         OBDAMappingAxiom.class
                         ),

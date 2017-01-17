@@ -22,7 +22,7 @@ package it.unibz.inf.ontop.owlrefplatform.core.translator;
 
 import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.io.PrefixManager;
-import it.unibz.inf.ontop.io.SimplePrefixManager;
+import it.unibz.inf.ontop.io.impl.SimplePrefixManager;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.Predicate.COL_TYPE;
 import it.unibz.inf.ontop.model.impl.MutableQueryModifiersImpl;

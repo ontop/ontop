@@ -1,6 +1,6 @@
 package it.unibz.inf.ontop.injection;
 
-public interface OntopSQLSettings extends OntopModelSettings {
+public interface OntopSQLSettings extends OntopOBDASettings {
 
     String getJdbcUrl();
     String getDBName();

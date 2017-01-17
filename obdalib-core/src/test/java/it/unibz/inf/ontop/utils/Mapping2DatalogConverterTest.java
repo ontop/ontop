@@ -20,7 +20,9 @@ package it.unibz.inf.ontop.utils;
  * #L%
  */
 
+import com.google.common.collect.ImmutableMap;
 import com.google.inject.Injector;
+import it.unibz.inf.ontop.injection.MappingFactory;
 import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
 import it.unibz.inf.ontop.injection.OBDACoreConfiguration;
 import it.unibz.inf.ontop.io.PrefixManager;
@@ -45,6 +47,7 @@ public class Mapping2DatalogConverterTest extends TestCase {
 	private static final SQLMappingFactory MAPPING_FACTORY = SQLMappingFactoryImpl.getInstance();
     private final NativeQueryLanguageComponentFactory factory;
 	private final Injector injector;
+	private final MappingFactory mappingFactory;
 
 	private RDBMetadata md = RDBMetadataExtractionTools.createDummyMetadata();
 	private PrefixManager pm;
@@ -53,6 +56,7 @@ public class Mapping2DatalogConverterTest extends TestCase {
 		OBDACoreConfiguration configuration = OBDACoreConfiguration.defaultBuilder().build();
         injector = configuration.getInjector();
         factory = injector.getInstance(NativeQueryLanguageComponentFactory.class);
+        mappingFactory = injector.getInstance(MappingFactory.class);
     }
 	
 	public void setUp() {
@@ -84,7 +88,7 @@ public class Mapping2DatalogConverterTest extends TestCase {
 		// Prefix manager
         Map<String, String> prefixes = new HashMap<>();
 		prefixes.put(":", "http://www.example.org/university#");
-        pm = factory.create(prefixes);
+        pm = mappingFactory.create(ImmutableMap.copyOf(prefixes));
 	}
 	
 	private void runAnalysis(String source, String targetString) throws Exception {

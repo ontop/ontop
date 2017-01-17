@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.io;
+package it.unibz.inf.ontop.io.impl;
 
 /*
  * #%L
@@ -21,6 +21,7 @@ package it.unibz.inf.ontop.io;
  */
 
 import it.unibz.inf.ontop.exception.InvalidPrefixWritingException;
+import it.unibz.inf.ontop.io.PrefixManager;
 
 import java.util.List;
 

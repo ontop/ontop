@@ -60,7 +60,7 @@ public class R2RMLWriter {
     public R2RMLWriter(OBDAModel obdamodel, OWLOntology ontology, NativeQueryLanguageComponentFactory nativeQLFactory)
 	{
 		this.mappings = obdamodel.getMappings();
-		this.prefixmng = obdamodel.getPrefixManager();
+		this.prefixmng = obdamodel.getMetadata().getPrefixManager();
 		this.ontology = ontology;
 		this.nativeQLFactory = nativeQLFactory;
 	}
