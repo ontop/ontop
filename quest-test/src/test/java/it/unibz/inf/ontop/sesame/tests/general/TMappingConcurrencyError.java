@@ -1,4 +1,4 @@
-package inf.unibz.ontop.sesame.tests.general;
+package it.unibz.inf.ontop.sesame.tests.general;
 
 /*
  * #%L
@@ -32,7 +32,7 @@ public class TMappingConcurrencyError extends AbstractVirtualModeTest {
 	static final String owlfile = "src/test/resources/exampleTMapping.owl";
 	static final String obdafile = "src/test/resources/exampleTMapping.obda";
 
-	protected TMappingConcurrencyError() {
+	public TMappingConcurrencyError() {
 		super(owlfile, obdafile);
 	}
 
