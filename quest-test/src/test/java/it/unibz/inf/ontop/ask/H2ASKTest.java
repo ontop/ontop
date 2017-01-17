@@ -10,7 +10,7 @@ public class H2ASKTest extends AbstractVirtualModeTest {
 	 static final String obdafile =
 	 "src/main/resources/testcases-scenarios/virtual-mode/stockexchange/simplecq/stockexchange-h2.obda";
 
-	protected H2ASKTest() {
+	public H2ASKTest() {
 		super(owlfile, obdafile);
 	}
 

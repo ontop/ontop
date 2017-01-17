@@ -32,7 +32,7 @@ public class QuotedAliasTableTest extends AbstractVirtualModeTest {
 	static final String owlfile = "src/test/resources/new/extended-npd-v2-ql_a_postgres.owl";
     static final String obdafile = "src/test/resources/new/npd-v2.obda";
 
-	protected QuotedAliasTableTest() {
+	public QuotedAliasTableTest() {
 		super(owlfile, obdafile);
 	}
 

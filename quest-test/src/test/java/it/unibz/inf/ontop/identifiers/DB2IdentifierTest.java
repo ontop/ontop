@@ -32,7 +32,7 @@ public class DB2IdentifierTest extends AbstractVirtualModeTest {
 	static final String owlfile = "resources/identifiers/identifiers.owl";
 	static final String obdafile = "resources/identifiers/identifiers-db2.obda";
 
-	protected DB2IdentifierTest() {
+	public DB2IdentifierTest() {
 		super(owlfile, obdafile);
 	}
 

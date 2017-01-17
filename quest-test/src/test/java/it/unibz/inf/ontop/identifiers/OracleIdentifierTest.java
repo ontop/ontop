@@ -32,7 +32,7 @@ public class OracleIdentifierTest extends AbstractVirtualModeTest {
 	static final String owlfile = "resources/identifiers/identifiers.owl";
 	static final String obdafile = "resources/identifiers/identifiers-oracle.obda";
 
-	protected OracleIdentifierTest() {
+	public OracleIdentifierTest() {
 		super(owlfile, obdafile);
 	}
 

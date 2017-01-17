@@ -116,8 +116,6 @@ public abstract class AbstractVirtualModeTest extends TestCase {
     }
 
     protected void countResults(String query, int expectedCount) throws OBDAException, OWLException {
-        // Now we are ready for querying
-        conn = reasoner.getConnection();
 
         QuestOWLStatement st = conn.createStatement();
         QuestOWLResultSet results = st.executeTuple(query);
@@ -236,9 +234,9 @@ public abstract class AbstractVirtualModeTest extends TestCase {
         while (rs.nextRow()) {
             for (int idx = 1; idx <= columnSize; idx++) {
                 OWLObject binding = rs.getOWLObject(idx);
-                System.out.print(binding.toString() + ", ");
+                log.debug(binding.toString() + ", ");
             }
-            System.out.print("\n");
+
         }
         rs.close();
         long t2 = System.currentTimeMillis();

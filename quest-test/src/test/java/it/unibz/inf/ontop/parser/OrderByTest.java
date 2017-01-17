@@ -33,7 +33,7 @@ public class OrderByTest extends AbstractVirtualModeTest {
     static final String owlFile = "src/test/resources/orderBy/stockBolzanoAddress.owl";
     static final String obdaFile = "src/test/resources/orderBy/stockBolzanoAddress.obda";
 
-    protected OrderByTest() {
+    public OrderByTest() {
         super(owlFile, obdaFile);
     }
 
