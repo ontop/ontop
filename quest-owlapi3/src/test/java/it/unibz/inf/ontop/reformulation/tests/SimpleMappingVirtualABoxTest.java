@@ -21,8 +21,8 @@ package it.unibz.inf.ontop.reformulation.tests;
  */
 
 import it.unibz.inf.ontop.injection.QuestConfiguration;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
 import it.unibz.inf.ontop.injection.QuestCoreSettings;
+import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import junit.framework.TestCase;
 import org.semanticweb.owlapi.io.ToStringRenderer;
@@ -149,7 +149,7 @@ public class SimpleMappingVirtualABoxTest extends TestCase {
 			OWLObject val = rs.getOWLObject("z");
 			assertEquals("<uri1>", ToStringRenderer.getInstance().getRendering(ind1));
 			assertEquals("<uri1>", ToStringRenderer.getInstance().getRendering(ind2));
-			assertEquals("\"value1\"", ToStringRenderer.getInstance().getRendering(val));
+			assertEquals("\"value1\"^^xsd:string", ToStringRenderer.getInstance().getRendering(val));
 			
 
 		} catch (Exception e) {
