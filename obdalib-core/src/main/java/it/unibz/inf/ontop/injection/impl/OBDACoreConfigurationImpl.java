@@ -107,11 +107,6 @@ public class OBDACoreConfigurationImpl extends OntopMappingSQLConfigurationImpl 
         return isInputMappingDefined();
     }
 
-    @Override
-    public Optional<ImplicitDBConstraintsReader> getImplicitDBConstraintsReader() {
-        return options.implicitDBConstraintsReader;
-    }
-
     /**
      * To be overloaded.
      *
@@ -132,18 +127,15 @@ public class OBDACoreConfigurationImpl extends OntopMappingSQLConfigurationImpl 
         public final Optional<Reader> mappingReader;
         public final Optional<Model> mappingGraph;
         public final Optional<OBDAModel> predefinedMappingModel;
-        public final Optional<ImplicitDBConstraintsReader> implicitDBConstraintsReader;
         public final OntopMappingSQLOptions mappingSqlOptions;
 
         public OBDAConfigurationOptions(Optional<File> mappingFile, Optional<Reader> mappingReader, Optional<Model> mappingGraph,
                                         Optional<OBDAModel> predefinedMappingModel,
-                                        Optional<ImplicitDBConstraintsReader> implicitDBConstraintsReader,
                                         OntopMappingSQLOptions mappingSqlOptions) {
             this.mappingFile = mappingFile;
             this.mappingReader = mappingReader;
             this.mappingGraph = mappingGraph;
             this.predefinedMappingModel = predefinedMappingModel;
-            this.implicitDBConstraintsReader = implicitDBConstraintsReader;
             this.mappingSqlOptions = mappingSqlOptions;
         }
     }
@@ -153,7 +145,6 @@ public class OBDACoreConfigurationImpl extends OntopMappingSQLConfigurationImpl 
 
         private final B builder;
 
-        private Optional<ImplicitDBConstraintsReader> userConstraints = Optional.empty();
         private Optional<OBDAModel> obdaModel = Optional.empty();
         private Optional<File> mappingFile = Optional.empty();
         private Optional<Reader> mappingReader = Optional.empty();
@@ -269,12 +260,6 @@ public class OBDACoreConfigurationImpl extends OntopMappingSQLConfigurationImpl 
             return builder;
         }
 
-        @Override
-        public B dbConstraintsReader(@Nonnull ImplicitDBConstraintsReader constraints) {
-            this.userConstraints = Optional.of(constraints);
-            return builder;
-        }
-
         /**
          * Allows to detect double mapping definition (error).
          */
@@ -322,8 +307,7 @@ public class OBDACoreConfigurationImpl extends OntopMappingSQLConfigurationImpl 
         }
 
         final OBDAConfigurationOptions generateOBDACoreOptions(OntopMappingSQLOptions mappingSqlOptions) {
-            return new OBDAConfigurationOptions(mappingFile, mappingReader, mappingGraph, obdaModel, userConstraints,
-                    mappingSqlOptions);
+            return new OBDAConfigurationOptions(mappingFile, mappingReader, mappingGraph, obdaModel, mappingSqlOptions);
         }
     }
 
@@ -404,11 +388,6 @@ public class OBDACoreConfigurationImpl extends OntopMappingSQLConfigurationImpl 
         @Override
         public B r2rmlMappingGraph(@Nonnull Model rdfGraph) {
             return obdaBuilderFragment.r2rmlMappingGraph(rdfGraph);
-        }
-
-        @Override
-        public B dbConstraintsReader(@Nonnull ImplicitDBConstraintsReader constraints) {
-            return obdaBuilderFragment.dbConstraintsReader(constraints);
         }
     }
 

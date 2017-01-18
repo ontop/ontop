@@ -5,7 +5,9 @@ import com.google.inject.Module;
 import it.unibz.inf.ontop.injection.OntopMappingSQLConfiguration;
 import it.unibz.inf.ontop.injection.OntopMappingSQLSettings;
 import it.unibz.inf.ontop.injection.impl.OntopMappingConfigurationImpl.OntopMappingOptions;
+import it.unibz.inf.ontop.sql.ImplicitDBConstraintsReader;
 
+import java.util.Optional;
 import java.util.Properties;
 import java.util.stream.Stream;
 
@@ -33,6 +35,11 @@ public class OntopMappingSQLConfigurationImpl extends OntopSQLConfigurationImpl 
                     super.buildGuiceModules(),
                     mappingConfiguration.buildGuiceModules()),
                 Stream.of(new OntopMappingSQLModule(this)));
+    }
+
+    @Override
+    public Optional<ImplicitDBConstraintsReader> getImplicitDBConstraintsReader() {
+        return mappingConfiguration.getImplicitDBConstraintsReader();
     }
 
     @Override

@@ -3,7 +3,9 @@ package it.unibz.inf.ontop.injection.impl;
 import com.google.inject.Module;
 import it.unibz.inf.ontop.injection.OntopMappingConfiguration;
 import it.unibz.inf.ontop.injection.OntopMappingSettings;
+import it.unibz.inf.ontop.sql.ImplicitDBConstraintsReader;
 
+import javax.annotation.Nonnull;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.stream.Stream;
@@ -12,10 +14,17 @@ import java.util.stream.Stream;
 public class OntopMappingConfigurationImpl extends OntopOBDAConfigurationImpl implements OntopMappingConfiguration {
 
     private final OntopMappingSettings settings;
+    private final OntopMappingOptions options;
 
     OntopMappingConfigurationImpl(OntopMappingSettings settings, OntopMappingOptions options) {
         super(settings, options.obdaOptions);
         this.settings = settings;
+        this.options = options;
+    }
+
+    @Override
+    public Optional<ImplicitDBConstraintsReader> getImplicitDBConstraintsReader() {
+        return options.implicitDBConstraintsReader;
     }
 
     @Override
@@ -30,8 +39,11 @@ public class OntopMappingConfigurationImpl extends OntopOBDAConfigurationImpl im
     static class OntopMappingOptions {
 
         final OntopOBDAOptions obdaOptions;
+        final Optional<ImplicitDBConstraintsReader> implicitDBConstraintsReader;
 
-        private OntopMappingOptions(OntopOBDAOptions obdaOptions) {
+        private OntopMappingOptions(Optional<ImplicitDBConstraintsReader> implicitDBConstraintsReader,
+                                    OntopOBDAOptions obdaOptions) {
+            this.implicitDBConstraintsReader = implicitDBConstraintsReader;
             this.obdaOptions = obdaOptions;
         }
     }
@@ -40,10 +52,18 @@ public class OntopMappingConfigurationImpl extends OntopOBDAConfigurationImpl im
             implements OntopMappingBuilderFragment<B> {
 
         private final B builder;
+        private Optional<ImplicitDBConstraintsReader> userConstraints = Optional.empty();
         private Optional<Boolean> obtainFullMetadata = Optional.empty();
 
         DefaultOntopMappingBuilderFragment(B builder) {
             this.builder = builder;
+        }
+
+
+        @Override
+        public B dbConstraintsReader(@Nonnull ImplicitDBConstraintsReader constraints) {
+            this.userConstraints = Optional.of(constraints);
+            return builder;
         }
 
         @Override
@@ -53,7 +73,7 @@ public class OntopMappingConfigurationImpl extends OntopOBDAConfigurationImpl im
         }
 
         protected final OntopMappingOptions generateMappingOptions(OntopOBDAOptions obdaOptions) {
-            return new OntopMappingOptions(obdaOptions);
+            return new OntopMappingOptions(userConstraints, obdaOptions);
         }
 
         Properties generateProperties() {
@@ -75,6 +95,11 @@ public class OntopMappingConfigurationImpl extends OntopOBDAConfigurationImpl im
         }
 
         @Override
+        public B dbConstraintsReader(@Nonnull ImplicitDBConstraintsReader constraints) {
+            return mappingBuilderFragment.dbConstraintsReader(constraints);
+        }
+
+        @Override
         public B enableFullMetadataExtraction(boolean obtainFullMetadata) {
             return mappingBuilderFragment.enableFullMetadataExtraction(obtainFullMetadata);
         }
@@ -84,7 +109,7 @@ public class OntopMappingConfigurationImpl extends OntopOBDAConfigurationImpl im
         }
 
         final OntopMappingOptions generateMappingOptions(OntopOBDAOptions obdaOptions) {
-            return new OntopMappingOptions(obdaOptions);
+            return mappingBuilderFragment.generateMappingOptions(obdaOptions);
         }
 
         @Override

@@ -20,8 +20,6 @@ public interface OBDACoreConfiguration extends OntopMappingSQLConfiguration {
     @Override
     OBDASettings getSettings();
 
-    Optional<ImplicitDBConstraintsReader> getImplicitDBConstraintsReader();
-
     /**
      * TODO: explain
      */
@@ -63,8 +61,6 @@ public interface OBDACoreConfiguration extends OntopMappingSQLConfiguration {
         B r2rmlMappingReader(@Nonnull Reader mappingReader);
 
         B r2rmlMappingGraph(@Nonnull Model rdfGraph);
-
-        B dbConstraintsReader(@Nonnull ImplicitDBConstraintsReader constraints);
 
     }
 
