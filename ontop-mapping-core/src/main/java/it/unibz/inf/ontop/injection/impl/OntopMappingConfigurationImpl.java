@@ -33,7 +33,9 @@ public class OntopMappingConfigurationImpl extends OntopOBDAConfigurationImpl im
     }
 
     protected Stream<Module> buildGuiceModules() {
-        return Stream.of(new OntopMappingModule(this));
+        return Stream.concat(
+                super.buildGuiceModules(),
+                Stream.of(new OntopMappingModule(this)));
     }
 
     static class OntopMappingOptions {
@@ -123,7 +125,7 @@ public class OntopMappingConfigurationImpl extends OntopOBDAConfigurationImpl im
 
     }
 
-    public static class BuilderImpl<B extends OntopMappingConfiguration.Builder<B>>
+    public static class BuilderImpl<B extends OntopMappingConfiguration.Builder>
             extends OntopMappingBuilderMixin<B> {
 
         @Override
