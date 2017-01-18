@@ -7,7 +7,7 @@ import it.unibz.inf.ontop.model.DBMetadata;
 /**
  * TODO: find a better name
  */
-public interface MappingAndDBMetadata {
+public interface DataSourceModel {
 
     Mapping getMapping();
 

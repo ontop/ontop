@@ -1,16 +1,16 @@
 package it.unibz.inf.ontop.mapping.extraction.impl;
 
 import it.unibz.inf.ontop.mapping.Mapping;
-import it.unibz.inf.ontop.mapping.extraction.MappingAndDBMetadata;
+import it.unibz.inf.ontop.mapping.extraction.DataSourceModel;
 import it.unibz.inf.ontop.model.DBMetadata;
 
 
-public class MappingAndDBMetadataImpl implements MappingAndDBMetadata {
+public class DataSourceModelImpl implements DataSourceModel {
 
     private final Mapping mapping;
     private final DBMetadata dbMetadata;
 
-    public MappingAndDBMetadataImpl(Mapping mapping, DBMetadata dbMetadata) {
+    public DataSourceModelImpl(Mapping mapping, DBMetadata dbMetadata) {
         this.mapping = mapping;
         this.dbMetadata = dbMetadata;
     }

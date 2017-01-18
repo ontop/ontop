@@ -7,12 +7,12 @@ import it.unibz.inf.ontop.model.DBMetadata;
 
 import java.io.IOException;
 
-public interface MappingAndDBMetadataExtractor {
+public interface DataSourceModelExtractor {
 
-    MappingAndDBMetadata extract()
+    DataSourceModel extract()
             throws InvalidMappingException, IOException, DuplicateMappingException;
 
-    MappingAndDBMetadata extract(DBMetadata dbMetadata)
+    DataSourceModel extract(DBMetadata dbMetadata)
             throws InvalidMappingException, IOException, DuplicateMappingException;
 
 }
