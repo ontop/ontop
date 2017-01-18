@@ -43,7 +43,7 @@ public class OntologyTypesStockexchangeTest extends AbstractVirtualModeTest {
 	public void testQuotedLiteral() throws Exception {
         String query1 = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#>\n SELECT DISTINCT ?x ?street WHERE {?x a :Address; :inStreet ?street; :inCity \"Bolzano\".}";
 
-		countResults(query1, 0 );
+		countResults(query1, 2 );
 	}
 
     
@@ -69,7 +69,7 @@ public class OntologyTypesStockexchangeTest extends AbstractVirtualModeTest {
                 "\t\t$x :hasNumber $number.\n" +
                 "}";
 
-        countResults(query1, 0 );
+        countResults(query1, 1 );
     }
 
     //in db2 there is no boolean type we refer to it in the database with a smallint 1 for true and a smallint 0 for false

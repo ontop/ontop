@@ -20,71 +20,45 @@ package it.unibz.inf.ontop.quest.sparql;
  * #L%
  */
 
-import info.aduna.io.IOUtil;
-import info.aduna.iteration.Iterations;
-import info.aduna.text.StringUtil;
+import junit.framework.TestCase;
+import junit.framework.TestSuite;
+import org.eclipse.rdf4j.common.io.IOUtil;
+import org.eclipse.rdf4j.common.iteration.Iterations;
+import org.eclipse.rdf4j.common.text.StringUtil;
+import org.eclipse.rdf4j.model.*;
+import org.eclipse.rdf4j.model.datatypes.XMLDatatypeUtil;
+import org.eclipse.rdf4j.model.util.ModelUtil;
+import org.eclipse.rdf4j.model.vocabulary.XMLSchema;
+import org.eclipse.rdf4j.query.*;
+import org.eclipse.rdf4j.query.dawg.DAWGTestResultSetUtil;
+import org.eclipse.rdf4j.query.impl.DatasetImpl;
+import org.eclipse.rdf4j.query.impl.MutableTupleQueryResult;
+import org.eclipse.rdf4j.query.impl.TupleQueryResultBuilder;
+import org.eclipse.rdf4j.query.resultio.BooleanQueryResultParserRegistry;
+import org.eclipse.rdf4j.query.resultio.QueryResultFormat;
+import org.eclipse.rdf4j.query.resultio.QueryResultIO;
+import org.eclipse.rdf4j.query.resultio.TupleQueryResultParser;
+import org.eclipse.rdf4j.repository.Repository;
+import org.eclipse.rdf4j.repository.RepositoryConnection;
+import org.eclipse.rdf4j.repository.RepositoryException;
+import org.eclipse.rdf4j.repository.sail.SailRepository;
+import org.eclipse.rdf4j.repository.util.RDFInserter;
+import org.eclipse.rdf4j.rio.ParserConfig;
+import org.eclipse.rdf4j.rio.RDFFormat;
+import org.eclipse.rdf4j.rio.RDFParser;
+import org.eclipse.rdf4j.rio.Rio;
+import org.eclipse.rdf4j.rio.helpers.BasicParserSettings;
+import org.eclipse.rdf4j.rio.helpers.StatementCollector;
+import org.eclipse.rdf4j.sail.memory.MemoryStore;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import javax.xml.datatype.XMLGregorianCalendar;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import javax.xml.datatype.XMLGregorianCalendar;
-
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
-
-import org.openrdf.model.BNode;
-import org.openrdf.model.Literal;
-import org.openrdf.model.Resource;
-import org.openrdf.model.Statement;
-import org.openrdf.model.URI;
-import org.openrdf.model.Value;
-import org.openrdf.model.datatypes.XMLDatatypeUtil;
-import org.openrdf.model.util.ModelUtil;
-import org.openrdf.model.vocabulary.XMLSchema;
-import org.openrdf.query.Binding;
-import org.openrdf.query.BindingSet;
-import org.openrdf.query.BooleanQuery;
-import org.openrdf.query.Dataset;
-import org.openrdf.query.GraphQuery;
-import org.openrdf.query.GraphQueryResult;
-import org.openrdf.query.MalformedQueryException;
-import org.openrdf.query.Query;
-import org.openrdf.query.QueryEvaluationException;
-import org.openrdf.query.QueryLanguage;
-import org.openrdf.query.TupleQuery;
-import org.openrdf.query.TupleQueryResult;
-import org.openrdf.query.dawg.DAWGTestResultSetUtil;
-import org.openrdf.query.impl.DatasetImpl;
-import org.openrdf.query.impl.MutableTupleQueryResult;
-import org.openrdf.query.impl.TupleQueryResultBuilder;
-import org.openrdf.query.resultio.BooleanQueryResultFormat;
-import org.openrdf.query.resultio.BooleanQueryResultParserRegistry;
-import org.openrdf.query.resultio.QueryResultIO;
-import org.openrdf.query.resultio.TupleQueryResultFormat;
-import org.openrdf.query.resultio.TupleQueryResultParser;
-import org.openrdf.repository.Repository;
-import org.openrdf.repository.RepositoryConnection;
-import org.openrdf.repository.RepositoryException;
-import org.openrdf.repository.sail.SailRepository;
-import org.openrdf.repository.util.RDFInserter;
-import org.openrdf.rio.ParserConfig;
-import org.openrdf.rio.RDFFormat;
-import org.openrdf.rio.RDFParser;
-import org.openrdf.rio.Rio;
-import org.openrdf.rio.helpers.BasicParserSettings;
-import org.openrdf.rio.helpers.StatementCollector;
-import org.openrdf.sail.memory.MemoryStore;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.*;
 
 public abstract class SPARQLQueryParent extends TestCase {
 
@@ -94,7 +68,7 @@ public abstract class SPARQLQueryParent extends TestCase {
 
 	static final Logger logger = LoggerFactory.getLogger(SPARQLQueryParent.class);
 
-	protected final String testURI;
+	protected final String testIRI;
 
 	protected final String queryFileURL;
 
@@ -116,18 +90,18 @@ public abstract class SPARQLQueryParent extends TestCase {
 	 * Constructors *
 	 *--------------*/
 
-	public SPARQLQueryParent(String testURI, String name, String queryFileURL, String resultFileURL,
+	public SPARQLQueryParent(String testIRI, String name, String queryFileURL, String resultFileURL,
 			Dataset dataSet, boolean laxCardinality)
 	{
-		this(testURI, name, queryFileURL, resultFileURL, dataSet, laxCardinality, false);
+		this(testIRI, name, queryFileURL, resultFileURL, dataSet, laxCardinality, false);
 	}
 
-	public SPARQLQueryParent(String testURI, String name, String queryFileURL, String resultFileURL,
+	public SPARQLQueryParent(String testIRI, String name, String queryFileURL, String resultFileURL,
 			Dataset dataSet, boolean laxCardinality, boolean checkOrder)
 	{
 		super(name);
 
-		this.testURI = testURI;
+		this.testIRI = testIRI;
 		this.queryFileURL = queryFileURL;
 		this.resultFileURL = resultFileURL;
 		this.dataset = dataSet;
@@ -166,7 +140,7 @@ public abstract class SPARQLQueryParent extends TestCase {
 		throws Exception
 	{
 		Repository repo = newRepository();
-//		RepositoryConnection con = repo.getConnection();
+//		OntopRepositoryConnection con = repo.getConnection();
 //		try {
 //			con.clear();
 //			con.clearNamespaces();
@@ -378,7 +352,7 @@ public abstract class SPARQLQueryParent extends TestCase {
 	 * using the attached properties. Note that the method consumes both query
 	 * results fully.
 	 * 
-	 * @throws QueryEvaluationException
+	 * @throws org.eclipse.rdf4j.query.QueryEvaluationException
 	 */
 	public static boolean equals(TupleQueryResult tqr1, TupleQueryResult tqr2)
 		throws QueryEvaluationException
@@ -503,8 +477,8 @@ public abstract class SPARQLQueryParent extends TestCase {
 					Literal leftLit = (Literal)value1;
 					Literal rightLit = (Literal)value2;
 
-					URI dt1 = leftLit.getDatatype();
-					URI dt2 = rightLit.getDatatype();
+					IRI dt1 = leftLit.getDatatype();
+					IRI dt2 = rightLit.getDatatype();
 
 					if (dt1 != null && dt2 != null && dt1.equals(dt2)
 							&& XMLDatatypeUtil.isValidValue(leftLit.getLabel(), dt1)
@@ -616,12 +590,12 @@ public abstract class SPARQLQueryParent extends TestCase {
 		RepositoryConnection con = dataRep.getConnection();
 		try {
 			// Merge default and named graphs to filter duplicates
-			Set<URI> graphURIs = new HashSet<URI>();
-			graphURIs.addAll(dataset.getDefaultGraphs());
-			graphURIs.addAll(dataset.getNamedGraphs());
+			Set<IRI> graphIRIs = new HashSet<IRI>();
+			graphIRIs.addAll(dataset.getDefaultGraphs());
+			graphIRIs.addAll(dataset.getNamedGraphs());
 
-			for (Resource graphURI : graphURIs) {
-				upload(((URI)graphURI), graphURI);
+			for (Resource graphIRI : graphIRIs) {
+				upload(((IRI)graphIRI), graphIRI);
 			}
 		}
 		finally {
@@ -629,13 +603,13 @@ public abstract class SPARQLQueryParent extends TestCase {
 		}
 	}
 
-	private void upload(URI graphURI, Resource context)
+	private void upload(IRI graphIRI, Resource context)
 		throws Exception
 	{
 		RepositoryConnection con = dataRep.getConnection();
 		con.begin();
 		try {
-			RDFFormat rdfFormat = Rio.getParserFormatForFileName(graphURI.toString(), RDFFormat.TURTLE);
+			RDFFormat rdfFormat = Rio.getParserFormatForFileName(graphIRI.toString()).get();
 			RDFParser rdfParser = Rio.createParser(rdfFormat, dataRep.getValueFactory());
 			ParserConfig config = rdfParser.getParserConfig();
 			// To emulate DatatypeHandling.IGNORE 
@@ -652,10 +626,10 @@ public abstract class SPARQLQueryParent extends TestCase {
 			rdfInserter.enforceContext(context);
 			rdfParser.setRDFHandler(rdfInserter);
 
-			URL graphURL = new URL(graphURI.toString());
+			URL graphURL = new URL(graphIRI.toString());
 			InputStream in = graphURL.openStream();
 			try {
-				rdfParser.parse(in, graphURI.toString());
+				rdfParser.parse(in, graphIRI.toString());
 			}
 			finally {
 				in.close();
@@ -683,12 +657,12 @@ public abstract class SPARQLQueryParent extends TestCase {
 	private TupleQueryResult readExpectedTupleQueryResult()
 		throws Exception
 	{
-		TupleQueryResultFormat tqrFormat = QueryResultIO.getParserFormatForFileName(resultFileURL);
+		Optional<QueryResultFormat> tqrFormat = QueryResultIO.getParserFormatForFileName(resultFileURL);
 
-		if (tqrFormat != null) {
+		if (tqrFormat.isPresent()) {
 			InputStream in = new URL(resultFileURL).openStream();
 			try {
-				TupleQueryResultParser parser = QueryResultIO.createParser(tqrFormat);
+				TupleQueryResultParser parser = QueryResultIO.createTupleParser(tqrFormat.get());
 				parser.setValueFactory(dataRep.getValueFactory());
 
 				TupleQueryResultBuilder qrBuilder = new TupleQueryResultBuilder();
@@ -710,13 +684,12 @@ public abstract class SPARQLQueryParent extends TestCase {
 	private boolean readExpectedBooleanQueryResult()
 		throws Exception
 	{
-		BooleanQueryResultFormat bqrFormat = BooleanQueryResultParserRegistry.getInstance().getFileFormatForFileName(
-				resultFileURL);
+		Optional<QueryResultFormat> bqrFormat = BooleanQueryResultParserRegistry.getInstance().getFileFormatForFileName(resultFileURL);
 
-		if (bqrFormat != null) {
+		if (bqrFormat.isPresent()) {
 			InputStream in = new URL(resultFileURL).openStream();
 			try {
-				return QueryResultIO.parse(in, bqrFormat);
+				return QueryResultIO.parseBoolean(in, bqrFormat.get());
 			}
 			finally {
 				in.close();
@@ -731,10 +704,10 @@ public abstract class SPARQLQueryParent extends TestCase {
 	private Set<Statement> readExpectedGraphQueryResult()
 		throws Exception
 	{
-		RDFFormat rdfFormat = Rio.getParserFormatForFileName(resultFileURL);
+		Optional<RDFFormat> rdfFormat = Rio.getParserFormatForFileName(resultFileURL);
 
-		if (rdfFormat != null) {
-			RDFParser parser = Rio.createParser(rdfFormat, dataRep.getValueFactory());
+		if (rdfFormat.isPresent()) {
+			RDFParser parser = Rio.createParser(rdfFormat.get(), dataRep.getValueFactory());
 			ParserConfig config = parser.getParserConfig();
 			// To emulate DatatypeHandling.IGNORE 
 			config.addNonFatalError(BasicParserSettings.FAIL_ON_UNKNOWN_DATATYPES);
@@ -764,10 +737,10 @@ public abstract class SPARQLQueryParent extends TestCase {
 
 	public interface Factory {
 
-		SPARQLQueryParent createSPARQLQueryTest(String testURI, String name, String queryFileURL,
+		SPARQLQueryParent createSPARQLQueryTest(String testIRI, String name, String queryFileURL,
 				String resultFileURL, Dataset dataSet, boolean laxCardinality);
 
-		SPARQLQueryParent createSPARQLQueryTest(String testURI, String name, String queryFileURL,
+		SPARQLQueryParent createSPARQLQueryTest(String testIRI, String name, String queryFileURL,
 				String resultFileURL, Dataset dataSet, boolean laxCardinality, boolean checkOrder);
 	}
 
@@ -796,8 +769,8 @@ public abstract class SPARQLQueryParent extends TestCase {
 		// Extract test case information from the manifest file. Note that we only
 		// select those test cases that are mentioned in the list.
 		StringBuilder query = new StringBuilder(512);
-		query.append(" SELECT DISTINCT testURI, testName, resultFile, action, queryFile, defaultGraph, ordered ");
-		query.append(" FROM {} rdf:first {testURI} ");
+		query.append(" SELECT DISTINCT testIRI, testName, resultFile, action, queryFile, defaultGraph, ordered ");
+		query.append(" FROM {} rdf:first {testIRI} ");
 		if (approvedOnly) {
 			query.append("                          dawgt:approval {dawgt:Approved}; ");
 		}
@@ -835,7 +808,7 @@ public abstract class SPARQLQueryParent extends TestCase {
 
 		query.setLength(0);
 		query.append("SELECT 1 ");
-		query.append(" FROM {testURI} mf:resultCardinality {mf:LaxCardinality}");
+		query.append(" FROM {testIRI} mf:resultCardinality {mf:LaxCardinality}");
 		query.append(" USING NAMESPACE mf = <http://www.w3.org/2001/sw/DataAccess/tests/test-manifest#>");
 		TupleQuery laxCardinalityQuery = con.prepareTupleQuery(QueryLanguage.SERQL, query.toString());
 
@@ -844,11 +817,11 @@ public abstract class SPARQLQueryParent extends TestCase {
 		while (testCases.hasNext()) {
 			BindingSet bindingSet = testCases.next();
 
-			URI testURI = (URI)bindingSet.getValue("testURI");
+			IRI testIRI = (IRI)bindingSet.getValue("testIRI");
 			String testName = bindingSet.getValue("testName").toString();
 			String resultFile = bindingSet.getValue("resultFile").toString();
 			String queryFile = bindingSet.getValue("queryFile").toString();
-			URI defaultGraphURI = (URI)bindingSet.getValue("defaultGraph");
+			IRI defaultGraphIRI = (IRI)bindingSet.getValue("defaultGraph");
 			Value action = bindingSet.getValue("action");
 			Value ordered = bindingSet.getValue("ordered");
 
@@ -860,24 +833,24 @@ public abstract class SPARQLQueryParent extends TestCase {
 
 			DatasetImpl dataset = null;
 
-			if (defaultGraphURI != null || namedGraphs.hasNext()) {
+			if (defaultGraphIRI != null || namedGraphs.hasNext()) {
 				dataset = new DatasetImpl();
 
-				if (defaultGraphURI != null) {
-					dataset.addDefaultGraph(defaultGraphURI);
+				if (defaultGraphIRI != null) {
+					dataset.addDefaultGraph(defaultGraphIRI);
 				}
 
 				while (namedGraphs.hasNext()) {
 					BindingSet graphBindings = namedGraphs.next();
-					URI namedGraphURI = (URI)graphBindings.getValue("graph");
-					logger.debug(" adding named graph : {}", namedGraphURI);
-					dataset.addNamedGraph(namedGraphURI);
+					IRI namedGraphIRI = (IRI)graphBindings.getValue("graph");
+					logger.debug(" adding named graph : {}", namedGraphIRI);
+					dataset.addNamedGraph(namedGraphIRI);
 				}
 			}
 
 			// Check for lax-cardinality conditions
 			boolean laxCardinality = false;
-			laxCardinalityQuery.setBinding("testURI", testURI);
+			laxCardinalityQuery.setBinding("testIRI", testIRI);
 			TupleQueryResult laxCardinalityResult = laxCardinalityQuery.evaluate();
 			try {
 				laxCardinality = laxCardinalityResult.hasNext();
@@ -892,7 +865,7 @@ public abstract class SPARQLQueryParent extends TestCase {
 			/*
 			if (!laxCardinality) {
 				// property-path tests always with lax cardinality because Sesame filters out duplicates by design
-				if (testURI.stringValue().contains("property-path")) {
+				if (testIRI.stringValue().contains("property-path")) {
 					laxCardinality = true;
 				}
 			}
@@ -904,7 +877,7 @@ public abstract class SPARQLQueryParent extends TestCase {
 				checkOrder = Boolean.parseBoolean(ordered.stringValue());
 			}
 
-			SPARQLQueryParent test = factory.createSPARQLQueryTest(testURI.toString(), testName, queryFile,
+			SPARQLQueryParent test = factory.createSPARQLQueryTest(testIRI.toString(), testName, queryFile,
 					resultFile, dataset, laxCardinality, checkOrder);
 			if (test != null) {
 				suite.addTest(test);
@@ -926,7 +899,7 @@ public abstract class SPARQLQueryParent extends TestCase {
 		// Try to extract suite name from manifest file
 		TupleQuery manifestNameQuery = con.prepareTupleQuery(QueryLanguage.SERQL,
 				"SELECT ManifestName FROM {ManifestURL} rdfs:label {ManifestName}");
-		manifestNameQuery.setBinding("ManifestURL", manifestRep.getValueFactory().createURI(manifestFileURL));
+		manifestNameQuery.setBinding("ManifestURL", manifestRep.getValueFactory().createIRI(manifestFileURL));
 		TupleQueryResult manifestNames = manifestNameQuery.evaluate();
 		try {
 			if (manifestNames.hasNext()) {

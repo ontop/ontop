@@ -11,7 +11,7 @@ public class DB2ASKTest extends AbstractVirtualModeTest {
 	 static final String obdafile =
 	 "src/main/resources/testcases-scenarios/virtual-mode/stockexchange/simplecq/stockexchange-db2.obda";
 
-	protected DB2ASKTest() {
+	public DB2ASKTest() {
 		super(owlfile, obdafile);
 	}
 	

@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.owlrefplatform.core.execution;
 
 import it.unibz.inf.ontop.owlrefplatform.core.ExecutableQuery;
 import it.unibz.inf.ontop.owlrefplatform.core.QueryCache;
-import org.openrdf.query.parser.ParsedQuery;
+import org.eclipse.rdf4j.query.parser.ParsedQuery;
 
 /**
  * Does not cache anything.

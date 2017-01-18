@@ -24,7 +24,6 @@ package it.unibz.inf.ontop.obda;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLResultSet;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLStatement;
 import it.unibz.inf.ontop.quest.AbstractVirtualModeTest;
-
 import org.semanticweb.owlapi.model.OWLObject;
 
 /**
@@ -39,7 +38,7 @@ public class ConferenceConcatMySQLTest extends AbstractVirtualModeTest {
     static final String owlFile = "src/test/resources/conference/ontology3.owl";
     static final String obdaFile = "src/test/resources/conference/secondmapping-test.obda";
 
-	protected ConferenceConcatMySQLTest() {
+	public ConferenceConcatMySQLTest() {
 		super(owlFile, obdaFile);
 	}
 

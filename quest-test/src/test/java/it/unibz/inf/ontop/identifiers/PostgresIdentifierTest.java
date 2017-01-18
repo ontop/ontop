@@ -32,7 +32,7 @@ public class PostgresIdentifierTest extends AbstractVirtualModeTest {
 	static final String owlfile = "resources/identifiers/identifiers.owl";
 	static final String obdafile = "resources/identifiers/identifiers-postgres.obda";
 
-	protected PostgresIdentifierTest() {
+	public PostgresIdentifierTest() {
 		super(owlfile, obdafile);
 	}
 
@@ -42,13 +42,13 @@ public class PostgresIdentifierTest extends AbstractVirtualModeTest {
 	 */
 	public void testLowercaseUnquoted() throws Exception {
 		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT ?x WHERE {?x a :Country} ORDER BY ?x";
-		String val = runQueryAndReturnStringX(query);
+		String val = runQueryAndReturnStringOfIndividualX(query);
 		assertEquals("<http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country-a>", val);
 	}
 	
 	public void testUppercaseAlias() throws Exception {
 		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT ?x WHERE {?x a :Country4} ORDER BY ?x";
-		String val = runQueryAndReturnStringX(query);
+		String val = runQueryAndReturnStringOfIndividualX(query);
 		assertEquals("<http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country4-a>", val);
 	}
 
@@ -59,7 +59,7 @@ public class PostgresIdentifierTest extends AbstractVirtualModeTest {
 	 */
 	public void testUppercaseUnquotedView() throws Exception {
 		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT ?x WHERE {?x a :Country2} ORDER BY ?x";
-		String val = runQueryAndReturnStringX(query);
+		String val = runQueryAndReturnStringOfIndividualX(query);
 		assertEquals("<http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country2-a>", val);
 	}
 
@@ -69,7 +69,7 @@ public class PostgresIdentifierTest extends AbstractVirtualModeTest {
 	 */
 	public void testUppercaseQuotedView() throws Exception {
 		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT ?x WHERE {?x a :Country3} ORDER BY ?x";
-		String val = runQueryAndReturnStringX(query);
+		String val = runQueryAndReturnStringOfIndividualX(query);
 		assertEquals("<http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country3-a>", val);
 	}
 

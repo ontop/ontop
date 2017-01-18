@@ -21,7 +21,7 @@ package it.unibz.inf.ontop.r2rml;
  */
 
 import eu.optique.api.mapping.TermMap.TermMapType;
-import eu.optique.api.mapping.impl.sesame.SesameR2RMLMappingManagerFactory;
+import eu.optique.api.mapping.impl.rdf4j.RDF4JR2RMLMappingManagerFactory;
 import it.unibz.inf.ontop.io.PrefixManager;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
@@ -31,17 +31,20 @@ import it.unibz.inf.ontop.utils.IDGenerator;
 import it.unibz.inf.ontop.utils.URITemplates;
 
 
-import java.util.*;
-
-import org.openrdf.model.Resource;
-import org.openrdf.model.Statement;
-import org.openrdf.model.URI;
-import org.openrdf.model.ValueFactory;
-import org.openrdf.model.impl.ValueFactoryImpl;
-
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
+
+import org.eclipse.rdf4j.model.Resource;
+import org.eclipse.rdf4j.model.Statement;
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.ValueFactory;
+import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
+import org.eclipse.rdf4j.model.impl.ValueFactoryImpl;
+
+import java.util.Collection;
+
 import eu.optique.api.mapping.LogicalTable;
 import eu.optique.api.mapping.MappingFactory;
 import eu.optique.api.mapping.ObjectMap;
@@ -52,7 +55,11 @@ import eu.optique.api.mapping.SubjectMap;
 import eu.optique.api.mapping.Template;
 import eu.optique.api.mapping.TriplesMap;
 import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.*;
+import org.semanticweb.owlapi.model.OWLDataFactory;
+import org.semanticweb.owlapi.model.OWLDataProperty;
+import org.semanticweb.owlapi.model.OWLDataRange;
+import org.semanticweb.owlapi.model.OWLObjectProperty;
+import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.search.EntitySearcher;
 
 import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
@@ -71,7 +78,7 @@ public class OBDAMappingTransformer {
 
 	
 	public OBDAMappingTransformer() {
-		this.vf = new ValueFactoryImpl();
+		this.vf = SimpleValueFactory.getInstance();
 		
 	}
 //	public OBDAMappingTransformer(OWLOntology onto) {
@@ -81,9 +88,6 @@ public class OBDAMappingTransformer {
 //	}
 	/**
 	 * Get Sesame statements from OBDA mapping axiom
-	 * @param axiom
-	 * @param prefixmng
-	 * @return
 	 */
 	public List<Statement> getStatements(OBDAMappingAxiom axiom, PrefixManager prefixmng) {
 		List<Statement> statements = new ArrayList<Statement>();
@@ -96,8 +100,8 @@ public class OBDAMappingTransformer {
 		String mapping_id = axiom.getId();
 		if (!mapping_id.startsWith("http://"))
 			mapping_id = "http://example.org/" + mapping_id;
-		Resource mainNode = vf.createURI(mapping_id);
-		statements.add(vf.createStatement(mainNode, vf.createURI(OBDAVocabulary.RDF_TYPE), R2RMLVocabulary.TriplesMap));
+		Resource mainNode = vf.createIRI(mapping_id);
+		statements.add(vf.createStatement(mainNode, vf.createIRI(OBDAVocabulary.RDF_TYPE), R2RMLVocabulary.TriplesMap));
 		
 		//creating logical table node
 		Resource logicalTableNode = vf.createBNode("logicalTable"+ random_number);
@@ -122,7 +126,7 @@ public class OBDAMappingTransformer {
 			statements.add(vf.createStatement(mainNode, R2RMLVocabulary.logicalTable, logicalTableNode));
 
 			//the node is a view
-			statements.add(vf.createStatement(logicalTableNode, vf.createURI(OBDAVocabulary.RDF_TYPE),  R2RMLVocabulary.r2rmlView));
+			statements.add(vf.createStatement(logicalTableNode, vf.createIRI(OBDAVocabulary.RDF_TYPE),  R2RMLVocabulary.r2rmlView));
 
 			//this is the SQL in the logical table
 			statements.add(vf.createStatement(logicalTableNode, R2RMLVocabulary.sqlQuery, vf.createLiteral(sqlquery)));
@@ -133,7 +137,7 @@ public class OBDAMappingTransformer {
 		
 		//add subject Map to triples Map node
 		statements.add(vf.createStatement(mainNode, R2RMLVocabulary.subjectMap, subjectNode));
-		statements.add(vf.createStatement(subjectNode, vf.createURI(OBDAVocabulary.RDF_TYPE),   R2RMLVocabulary.termMap));		
+		statements.add(vf.createStatement(subjectNode, vf.createIRI(OBDAVocabulary.RDF_TYPE),   R2RMLVocabulary.termMap));
 
 		//Now we add the template!!
 		Function uriTemplate = (Function) tquery.get(0).getTerm(0); //URI("..{}..", , )
@@ -151,7 +155,8 @@ public class OBDAMappingTransformer {
 			
 
 			String predName = pred.getName();
-			URI predUri = null; String predURIString ="";
+			IRI predUri = null;
+			String predURIString ="";
 			
 			if (pred.isTriplePredicate()) {
 				//triple
@@ -159,29 +164,29 @@ public class OBDAMappingTransformer {
 				if (predf.getFunctionSymbol() instanceof URITemplatePredicate) {
 					if (predf.getTerms().size() == 1) //fixed string
 					{
-						pred = DATA_FACTORY.getPredicate(((ValueConstant)(predf.getTerm(0))).getValue(), 1);
-						predUri = vf.createURI(pred.getName());
+                        pred = DATA_FACTORY.getPredicate(((ValueConstant)(predf.getTerm(0))).getValue(), 1);
+                        predUri = vf.createIRI(pred.getName());
 					}
 				    else {
 						//custom predicate
 						predURIString = URITemplates.getUriTemplateString(predf, prefixmng);
-						predUri = vf.createURI(predURIString);
+						predUri = vf.createIRI(predURIString);
 					}
 				}
 				
 			} 
 			else {
-				predUri = vf.createURI(predName);
+				predUri = vf.createIRI(predName);
 			}
 			predURIString = predUri.stringValue();
 			
-			IRI propname = IRI.create(predURIString);
+			org.semanticweb.owlapi.model.IRI propname = org.semanticweb.owlapi.model.IRI.create(predURIString);
 			OWLDataFactory factory =  OWLManager.getOWLDataFactory();
 			OWLObjectProperty prop = factory.getOWLObjectProperty(propname);
 		
 			if (  !predURIString.equals(OBDAVocabulary.RDF_TYPE) && pred.isClass() ){
 				// The term is actually a SubjectMap (class)
-			//	statements.add(vf.createStatement(nod_subject, vf.createURI(OBDAVocabulary.RDF_TYPE),   R2RMLVocabulary.subjectMapClass));		
+			//	statements.add(vf.createStatement(nod_subject, vf.createIRI(OBDAVocabulary.RDF_TYPE),   R2RMLVocabulary.subjectMapClass));
 				
 				//add class declaration to subject Map node
 				statements.add(vf.createStatement(subjectNode, R2RMLVocabulary.classUri, predUri));
@@ -262,12 +267,9 @@ public class OBDAMappingTransformer {
 
 	/**
 	 * Get R2RML TriplesMaps from OBDA mapping axiom
-	 * @param axiom
-	 * @param prefixmng
-	 * @return
 	 */
-	public TriplesMap getTripleMap(OBDAMappingAxiom axiom,
-									PrefixManager prefixmng) {
+	public TriplesMap getTriplesMap(OBDAMappingAxiom axiom,
+                                    PrefixManager prefixmng) {
 
 		SQLQueryImpl squery = (SQLQueryImpl) axiom.getSourceQuery();
 		List<Function> tquery = axiom.getTargetQuery();
@@ -278,9 +280,9 @@ public class OBDAMappingTransformer {
 		String mapping_id = axiom.getId();
 		if (!mapping_id.startsWith("http://"))
 			mapping_id = "http://example.org/" + mapping_id;
-		Resource mainNode = vf.createURI(mapping_id);
+		Resource mainNode = vf.createIRI(mapping_id);
 
-        R2RMLMappingManager mm = new SesameR2RMLMappingManagerFactory().getR2RMLMappingManager();
+        R2RMLMappingManager mm = new RDF4JR2RMLMappingManagerFactory().getR2RMLMappingManager();
 		MappingFactory mfact = mm.getMappingFactory();
 		
 		//Table
@@ -299,7 +301,8 @@ public class OBDAMappingTransformer {
 			random_number = IDGenerator.getNextUniqueID("");
 			Predicate pred = func.getFunctionSymbol();
 			String predName = pred.getName();
-			URI predUri = null; String predURIString ="";
+			IRI predUri = null;
+			String predURIString ="";
 			Optional<Template> templp = Optional.empty();
 
 			if (pred.isTriplePredicate()) {
@@ -308,22 +311,22 @@ public class OBDAMappingTransformer {
 				if (predf.getFunctionSymbol() instanceof URITemplatePredicate) {
 					if (predf.getTerms().size() == 1) { //fixed string 
 						pred = DATA_FACTORY.getPredicate(((ValueConstant)(predf.getTerm(0))).getValue(), 1);
-						predUri = vf.createURI(pred.getName());
+						predUri = vf.createIRI(pred.getName());
 					}
 					else {
 						//template
 						predURIString = URITemplates.getUriTemplateString(predf, prefixmng);
-						predUri = vf.createURI(predURIString);
+						predUri = vf.createIRI(predURIString);
                         templp = Optional.of(mfact.createTemplate(subjectTemplate));
 					}
 				}	
 			} 
 			else {
-				predUri = vf.createURI(predName);
+				predUri = vf.createIRI(predName);
 			}
 			predURIString = predUri.stringValue();
-			
-			IRI propname = IRI.create(predURIString);
+
+            org.semanticweb.owlapi.model.IRI propname = org.semanticweb.owlapi.model.IRI.create(predURIString);
 			OWLDataFactory factory =  OWLManager.getOWLDataFactory();
 			OWLObjectProperty objectProperty = factory.getOWLObjectProperty(propname);
             OWLDataProperty dataProperty = factory.getOWLDataProperty(propname);
@@ -367,8 +370,8 @@ public class OBDAMappingTransformer {
                             Collection<OWLDataRange> ranges = EntitySearcher.getRanges(dataProperty, ontology);
                             //assign the datatype if present
                             if (ranges.size() == 1) {
-                                IRI dataRange = ranges.iterator().next().asOWLDatatype().getIRI();
-                                obm.setDatatype(vf.createURI(dataRange.toString()));
+                                org.semanticweb.owlapi.model.IRI dataRange = ranges.iterator().next().asOWLDatatype().getIRI();
+                                obm.setDatatype(vf.createIRI(dataRange.toString()));
                             }
 
                         } else {
@@ -418,7 +421,7 @@ public class OBDAMappingTransformer {
 							if(!objectPred.getName().equals(OBDAVocabulary.RDFS_LITERAL_URI)){
 								
 								//set the datatype for the typed literal								
-								obm.setDatatype(vf.createURI(objectPred.getName()));
+								obm.setDatatype(vf.createIRI(objectPred.getName()));
 							}
 							else{
 								//check if the plain literal has a lang value

@@ -20,23 +20,29 @@ package it.unibz.inf.ontop.r2rml;
  * #L%
  */
 
-import com.google.common.collect.*;
-import com.google.inject.Injector;
 import eu.optique.api.mapping.R2RMLMappingManager;
 import eu.optique.api.mapping.TriplesMap;
-import eu.optique.api.mapping.impl.sesame.SesameR2RMLMappingManagerFactory;
+import eu.optique.api.mapping.impl.rdf4j.RDF4JR2RMLMappingManagerFactory;
 import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
 import it.unibz.inf.ontop.io.PrefixManager;
-import it.unibz.inf.ontop.model.*;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
+import it.unibz.inf.ontop.model.Function;
+import it.unibz.inf.ontop.model.OBDAMappingAxiom;
+import it.unibz.inf.ontop.model.OBDAModel;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
-import org.openrdf.model.Graph;
-import org.openrdf.model.Model;
-import org.openrdf.model.Statement;
-import org.openrdf.model.impl.GraphImpl;
-import org.openrdf.rio.RDFFormat;
-import org.openrdf.rio.Rio;
+
+import org.eclipse.rdf4j.model.Graph;
+import org.eclipse.rdf4j.model.Model;
+import org.eclipse.rdf4j.model.Statement;
+import org.eclipse.rdf4j.model.impl.GraphImpl;
+import org.eclipse.rdf4j.rio.RDFFormat;
+import org.eclipse.rdf4j.rio.Rio;
 import org.semanticweb.owlapi.model.OWLOntology;
+
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Multimap;
+import com.google.inject.Injector;
 
 import java.io.*;
 import java.net.URI;
@@ -88,7 +94,7 @@ public class R2RMLWriter {
 		OBDAMappingTransformer transformer = new OBDAMappingTransformer();
 		transformer.setOntology(ontology);
 		return  splitMappingAxioms(this.mappings).stream()
-				.map(a -> transformer.getTripleMap(a, prefixmng))
+				.map(a -> transformer.getTriplesMap(a, prefixmng))
 				.collect(Collectors.toList());
 	}
 
@@ -173,7 +179,7 @@ public class R2RMLWriter {
      */
     public void write(OutputStream os) throws Exception {
         try {
-            R2RMLMappingManager mm = new SesameR2RMLMappingManagerFactory().getR2RMLMappingManager();
+            R2RMLMappingManager mm = new RDF4JR2RMLMappingManagerFactory().getR2RMLMappingManager();
             Collection<TriplesMap> coll = getTripleMaps();
             Model out = mm.exportMappings(coll, Model.class);
             Rio.write(out, os, RDFFormat.TURTLE);

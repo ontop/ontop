@@ -78,6 +78,7 @@ public abstract class OntopReasoningCommandBase extends OntopMappingOntologyRela
 
     protected Properties createConnectionProperties() {
             Properties p = new Properties();
+            p.setProperty(OBDASettings.DB_NAME, jdbcURL);
             p.setProperty(OBDASettings.JDBC_URL, jdbcURL);
             p.setProperty(OBDASettings.DB_USER, jdbcUserName);
             p.setProperty(OBDASettings.DB_PASSWORD, jdbcPassword);

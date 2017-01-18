@@ -17,11 +17,11 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 
 import it.unibz.inf.ontop.injection.OBDASettings;
-import it.unibz.inf.ontop.sesame.SesameVirtualRepo;
+import it.unibz.inf.ontop.rdf4j.repository.OntopVirtualRepository;
 
 /**
  * Tests that user-applied constraints can be provided through 
- * sesameWrapper.SesameVirtualRepo 
+ * sesameWrapper.OntopVirtualRepository
  * with manually instantiated metadata.
  * 
  * This is quite similar to the setting in the optique platform
@@ -94,7 +94,7 @@ public class TestSesameImplicitDBConstraints {
 			configurationBuilder.dbMetadata(getMeta());
 		}
 
-		SesameVirtualRepo qest1 = new SesameVirtualRepo("", configurationBuilder.build());
+		OntopVirtualRepository qest1 = new OntopVirtualRepository("", configurationBuilder.build());
 		qest1.initialize();
 		/*
 		 * Prepare the data connection for querying.

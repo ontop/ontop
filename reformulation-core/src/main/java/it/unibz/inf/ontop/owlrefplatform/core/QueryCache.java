@@ -1,6 +1,6 @@
 package it.unibz.inf.ontop.owlrefplatform.core;
 
-import org.openrdf.query.parser.ParsedQuery;
+import org.eclipse.rdf4j.query.parser.ParsedQuery;
 
 /**
  * Cache of queries.

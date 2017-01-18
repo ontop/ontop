@@ -11,7 +11,7 @@ import it.unibz.inf.ontop.owlrefplatform.core.resultset.*;
 import it.unibz.inf.ontop.owlrefplatform.core.translator.SesameConstructTemplate;
 
 import it.unibz.inf.ontop.ontology.Assertion;
-import org.openrdf.query.parser.ParsedQuery;
+import org.eclipse.rdf4j.query.parser.ParsedQuery;
 
 import java.sql.*;
 import java.sql.ResultSet;

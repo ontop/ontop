@@ -14,7 +14,7 @@ public class ConcatMappingTest extends AbstractVirtualModeTest {
     static final String owlFile = "src/test/resources/northwind/mapping-northwind.owl";
     static final String obdaFile = "src/test/resources/northwind/mapping-northwind.obda";
 
-    protected ConcatMappingTest() {
+    public ConcatMappingTest() {
         super(owlFile, obdaFile);
     }
 

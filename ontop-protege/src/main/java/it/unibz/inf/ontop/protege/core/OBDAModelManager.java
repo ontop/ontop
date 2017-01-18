@@ -576,7 +576,7 @@ public class OBDAModelManager implements Disposable {
                 if (fac instanceof OntopReasonerInfo) {
                     OntopReasonerInfo questfactory = (OntopReasonerInfo) fac;
                     DisposableProperties reasonerPreference = (DisposableProperties) owlEditorKit
-                            .get(QuestCoreSettings.class.getName());
+                            .get(DisposableProperties.class.getName());
                     questfactory.setPreferences(reasonerPreference.clone());
                     questfactory.setOBDAModelWrapper(activeOBDAModel);
                 }
@@ -628,7 +628,7 @@ public class OBDAModelManager implements Disposable {
 			ProtegeOWLReasonerInfo factory = owlEditorKit.getOWLModelManager().getOWLReasonerManager().getCurrentReasonerFactory();
 			if (factory instanceof OntopReasonerInfo) {
                 OntopReasonerInfo questfactory = (OntopReasonerInfo) factory;
-                DisposableProperties reasonerPreference = (DisposableProperties) owlEditorKit.get(QuestCoreSettings.class.getName());
+                DisposableProperties reasonerPreference = (DisposableProperties) owlEditorKit.get(DisposableProperties.class.getName());
                 questfactory.setPreferences(reasonerPreference.clone());
                 questfactory.setOBDAModelWrapper(getActiveOBDAModelWrapper());
                 if(applyUserConstraints)

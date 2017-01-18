@@ -22,25 +22,25 @@ import java.sql.SQLException;
 import java.util.Properties;
 import java.util.Scanner;
 
+import it.unibz.inf.ontop.injection.OBDASettings;
 import it.unibz.inf.ontop.injection.QuestConfiguration;
+import it.unibz.inf.ontop.rdf4j.repository.OntopVirtualRepository;
 import org.junit.After;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import org.junit.Before;
 import org.junit.Test;
-import org.openrdf.model.impl.URIImpl;
-import org.openrdf.query.BooleanQuery;
-import org.openrdf.query.GraphQuery;
-import org.openrdf.query.GraphQueryResult;
-import org.openrdf.query.QueryLanguage;
-import org.openrdf.query.TupleQuery;
-import org.openrdf.query.TupleQueryResult;
-import it.unibz.inf.ontop.injection.OBDASettings;
+import org.eclipse.rdf4j.model.impl.URIImpl;
+import org.eclipse.rdf4j.query.BooleanQuery;
+import org.eclipse.rdf4j.query.GraphQuery;
+import org.eclipse.rdf4j.query.GraphQueryResult;
+import org.eclipse.rdf4j.query.QueryLanguage;
+import org.eclipse.rdf4j.query.TupleQuery;
+import org.eclipse.rdf4j.query.TupleQueryResult;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
 import it.unibz.inf.ontop.injection.QuestCoreSettings;
-import it.unibz.inf.ontop.sesame.RepositoryConnection;
-import it.unibz.inf.ontop.sesame.SesameVirtualRepo;
+import it.unibz.inf.ontop.rdf4j.repository.OntopRepositoryConnection;
 
 public class TestSesameBindings {
 
@@ -52,7 +52,7 @@ public class TestSesameBindings {
     static String uc_create = "src/test/resources/userconstraints/create.sql";
 
     private Connection sqlConnection;
-    private RepositoryConnection conn;
+    private OntopRepositoryConnection conn;
 
     @Before
     public void init() throws Exception {
@@ -90,7 +90,7 @@ public class TestSesameBindings {
                 .properties(p)
                 .build();
 
-        SesameVirtualRepo repo = new SesameVirtualRepo("", config);
+        OntopVirtualRepository repo = new OntopVirtualRepository("", config);
         repo.initialize();
         /*
          * Prepare the data connection for querying.

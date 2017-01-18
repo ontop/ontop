@@ -5,7 +5,7 @@ import it.unibz.inf.ontop.injection.impl.OBDACoreConfigurationImpl;
 import it.unibz.inf.ontop.io.InvalidDataSourceException;
 import it.unibz.inf.ontop.model.OBDAModel;
 import it.unibz.inf.ontop.sql.ImplicitDBConstraintsReader;
-import org.openrdf.model.Model;
+import org.eclipse.rdf4j.model.Model;
 
 import javax.annotation.Nonnull;
 import java.io.File;

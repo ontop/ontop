@@ -23,10 +23,11 @@ package it.unibz.inf.ontop.owlrefplatform.core;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.owlrefplatform.core.execution.NativeQueryExecutionException;
 import it.unibz.inf.ontop.owlrefplatform.core.queryevaluation.SPARQLQueryUtility;
-import it.unibz.inf.ontop.owlrefplatform.core.resultset.*;
+import it.unibz.inf.ontop.owlrefplatform.core.resultset.EmptyTupleResultSet;
+import it.unibz.inf.ontop.owlrefplatform.core.resultset.QuestTupleResultSet;
 import it.unibz.inf.ontop.owlrefplatform.core.translator.SesameConstructTemplate;
-import org.openrdf.query.MalformedQueryException;
-import org.openrdf.query.parser.ParsedQuery;
+import org.eclipse.rdf4j.query.MalformedQueryException;
+import org.eclipse.rdf4j.query.parser.ParsedQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -115,6 +116,12 @@ public abstract class QuestStatement implements IQuestStatement {
 
 		@Override
 		public void run() {
+			//                        FOR debugging H2 in-memory database
+//			try {
+//				org.h2.tools.Server.startWebServer(((QuestConnection)conn).getSQLConnection());
+//			} catch (SQLException e) {
+//				e.printStackTrace();
+//			}
 			try {
 				/**
 				 * Executes the target query.

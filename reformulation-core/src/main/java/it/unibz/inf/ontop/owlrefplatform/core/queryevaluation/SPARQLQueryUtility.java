@@ -20,13 +20,13 @@ package it.unibz.inf.ontop.owlrefplatform.core.queryevaluation;
  * #L%
  */
 
-import org.openrdf.query.MalformedQueryException;
-import org.openrdf.query.algebra.TupleExpr;
-import org.openrdf.query.parser.ParsedBooleanQuery;
-import org.openrdf.query.parser.ParsedGraphQuery;
-import org.openrdf.query.parser.ParsedQuery;
-import org.openrdf.query.parser.ParsedTupleQuery;
-import org.openrdf.query.parser.sparql.SPARQLParser;
+import org.eclipse.rdf4j.query.MalformedQueryException;
+import org.eclipse.rdf4j.query.algebra.TupleExpr;
+import org.eclipse.rdf4j.query.parser.ParsedBooleanQuery;
+import org.eclipse.rdf4j.query.parser.ParsedGraphQuery;
+import org.eclipse.rdf4j.query.parser.ParsedQuery;
+import org.eclipse.rdf4j.query.parser.ParsedTupleQuery;
+import org.eclipse.rdf4j.query.parser.sparql.SPARQLParser;
 
 public class SPARQLQueryUtility {
 	
@@ -118,7 +118,7 @@ public class SPARQLQueryUtility {
 		int describeIdx = strquery.toLowerCase().indexOf("describe");
 		String uri = "";
 		
-		org.openrdf.query.parser.sparql.SPARQLParser parser = new SPARQLParser();
+		org.eclipse.rdf4j.query.parser.sparql.SPARQLParser parser = new SPARQLParser();
 			ParsedQuery q = parser.parseQuery(strquery, "http://example.org");
 			TupleExpr expr = q.getTupleExpr();
 			String sign = expr.toString();

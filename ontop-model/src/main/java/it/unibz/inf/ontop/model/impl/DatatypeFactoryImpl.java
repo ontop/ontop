@@ -1,31 +1,26 @@
 package it.unibz.inf.ontop.model.impl;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-
 import com.google.inject.Singleton;
-import it.unibz.inf.ontop.model.DatatypePredicate;
-import org.openrdf.model.URI;
-import org.openrdf.model.ValueFactory;
-import org.openrdf.model.impl.ValueFactoryImpl;
-import org.openrdf.model.vocabulary.RDF;
-import org.openrdf.model.vocabulary.RDFS;
-import org.openrdf.model.vocabulary.XMLSchema;
-
 import it.unibz.inf.ontop.model.DatatypeFactory;
+import it.unibz.inf.ontop.model.DatatypePredicate;
 import it.unibz.inf.ontop.model.Predicate;
 import it.unibz.inf.ontop.model.Predicate.COL_TYPE;
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.ValueFactory;
+import org.eclipse.rdf4j.model.impl.ValueFactoryImpl;
+import org.eclipse.rdf4j.model.vocabulary.RDF;
+import org.eclipse.rdf4j.model.vocabulary.RDFS;
+import org.eclipse.rdf4j.model.vocabulary.XMLSchema;
+
+import java.util.*;
 
 @Singleton
 public class DatatypeFactoryImpl implements DatatypeFactory {
 
 	
 	// special case of literals with the specified language
-	private final DatatypePredicate RDFS_LITERAL_LANG = new DatatypePredicateImpl(RDF.LANGSTRING.toString(),
-									new COL_TYPE[] { COL_TYPE.LITERAL, COL_TYPE.LITERAL });
+	private final DatatypePredicate RDF_LANG_STRING = new DatatypePredicateImpl(RDF.LANGSTRING.toString(),
+									new COL_TYPE[] { COL_TYPE.STRING, COL_TYPE.STRING });
 	
 	private final DatatypePredicate RDFS_LITERAL, XSD_STRING;
 	private final DatatypePredicate XSD_INTEGER, XSD_NEGATIVE_INTEGER, XSD_NON_NEGATIVE_INTEGER;
@@ -38,7 +33,7 @@ public class DatatypeFactoryImpl implements DatatypeFactory {
 	private final DatatypePredicate XSD_DATE, XSD_TIME, XSD_YEAR;
 	
 	private final Map<String, COL_TYPE> mapURItoCOLTYPE = new HashMap<>();
-	private final Map<COL_TYPE, URI> mapCOLTYPEtoURI = new HashMap<>();
+	private final Map<COL_TYPE, IRI> mapCOLTYPEtoURI = new HashMap<>();
 	private final Map<COL_TYPE, DatatypePredicate> mapCOLTYPEtoPredicate = new HashMap<>();
 	private final List<Predicate> predicateList = new LinkedList<>();
 
@@ -50,7 +45,7 @@ public class DatatypeFactoryImpl implements DatatypeFactory {
 		XSD_STRING = registerType(XMLSchema.STRING, COL_TYPE.STRING);  // 7 "http://www.w3.org/2001/XMLSchema#string"
 		XSD_DATETIME = registerType(XMLSchema.DATETIME, COL_TYPE.DATETIME); // 8 "http://www.w3.org/2001/XMLSchema#dateTime"
 		ValueFactory factory = new ValueFactoryImpl();
-		URI datetimestamp = factory.createURI("http://www.w3.org/2001/XMLSchema#dateTimeStamp"); // value datetime stamp is missing in XMLSchema
+		IRI datetimestamp = factory.createIRI("http://www.w3.org/2001/XMLSchema#dateTimeStamp"); // value datetime stamp is missing in XMLSchema
 		XSD_DATETIME_STAMP = registerType(datetimestamp, COL_TYPE.DATETIME_STAMP);
 		XSD_BOOLEAN = registerType(XMLSchema.BOOLEAN, COL_TYPE.BOOLEAN);  // 9 "http://www.w3.org/2001/XMLSchema#boolean"
 		XSD_DATE = registerType(XMLSchema.DATE, COL_TYPE.DATE);  // 10 "http://www.w3.org/2001/XMLSchema#date";
@@ -67,13 +62,13 @@ public class DatatypeFactoryImpl implements DatatypeFactory {
 
 		// special case
 		// used in ExpressionEvaluator only(?) use proper method there? 
-		mapCOLTYPEtoPredicate.put(COL_TYPE.LITERAL_LANG, RDFS_LITERAL_LANG);
+		mapCOLTYPEtoPredicate.put(COL_TYPE.LITERAL_LANG, RDF_LANG_STRING);
 	}
-	
-	private DatatypePredicate registerType(org.openrdf.model.URI uri, COL_TYPE type) {
+
+	private DatatypePredicate registerType(org.eclipse.rdf4j.model.IRI uri, COL_TYPE type) {
 		String sURI = uri.toString();
-		mapURItoCOLTYPE.put(sURI, type);  
-		mapCOLTYPEtoURI.put(type, uri); 
+		mapURItoCOLTYPE.put(sURI, type);
+		mapCOLTYPEtoURI.put(type, uri);
 		DatatypePredicate predicate = new DatatypePredicateImpl(sURI, type);
 		mapCOLTYPEtoPredicate.put(type, predicate);
 		predicateList.add(predicate);
@@ -86,12 +81,12 @@ public class DatatypeFactoryImpl implements DatatypeFactory {
 	}
 	
 	@Override
-	public COL_TYPE getDatatype(URI uri) {
+	public COL_TYPE getDatatype(IRI uri) {
 		return mapURItoCOLTYPE.get(uri.stringValue());
 	}
 	
 	@Override
-	public URI getDatatypeURI(COL_TYPE type) {
+	public IRI getDatatypeURI(COL_TYPE type) {
 		return mapCOLTYPEtoURI.get(type);
 	}
 	
@@ -113,12 +108,12 @@ public class DatatypeFactoryImpl implements DatatypeFactory {
 	
 	@Override 
 	public boolean isLiteral(Predicate p) {
-		return p == RDFS_LITERAL || p == RDFS_LITERAL_LANG;
+		return p == RDFS_LITERAL ;
 	}
 	
 	@Override 
 	public boolean isString(Predicate p) {
-		return p == XSD_STRING;
+		return p == XSD_STRING || p == RDF_LANG_STRING;
 	}
 
 	@Override

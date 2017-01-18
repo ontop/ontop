@@ -20,24 +20,25 @@ package it.unibz.inf.ontop.quest.sparql11;
  * #L%
  */
 
-import info.aduna.io.FileUtil;
-import info.aduna.io.ZipUtil;
+import it.unibz.inf.ontop.quest.sparql.SPARQLQueryParent;
+import org.eclipse.rdf4j.common.io.FileUtil;
+import org.eclipse.rdf4j.common.io.ZipUtil;
 import junit.framework.TestResult;
 import junit.framework.TestSuite;
-import org.openrdf.OpenRDFUtil;
-import org.openrdf.model.Resource;
-import org.openrdf.model.ValueFactory;
-import org.openrdf.query.BindingSet;
-import org.openrdf.query.QueryLanguage;
-import org.openrdf.query.TupleQueryResult;
-import org.openrdf.repository.Repository;
-import org.openrdf.repository.RepositoryConnection;
-import org.openrdf.repository.RepositoryException;
-import org.openrdf.repository.sail.SailRepository;
-import org.openrdf.repository.util.RDFInserter;
-import org.openrdf.rio.*;
-import org.openrdf.rio.helpers.BasicParserSettings;
-import org.openrdf.sail.memory.MemoryStore;
+import org.eclipse.rdf4j.OpenRDFUtil;
+import org.eclipse.rdf4j.model.Resource;
+import org.eclipse.rdf4j.model.ValueFactory;
+import org.eclipse.rdf4j.query.BindingSet;
+import org.eclipse.rdf4j.query.QueryLanguage;
+import org.eclipse.rdf4j.query.TupleQueryResult;
+import org.eclipse.rdf4j.repository.Repository;
+import org.eclipse.rdf4j.repository.RepositoryConnection;
+import org.eclipse.rdf4j.repository.RepositoryException;
+import org.eclipse.rdf4j.repository.sail.SailRepository;
+import org.eclipse.rdf4j.repository.util.RDFInserter;
+import org.eclipse.rdf4j.rio.*;
+import org.eclipse.rdf4j.rio.helpers.BasicParserSettings;
+import org.eclipse.rdf4j.sail.memory.MemoryStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
