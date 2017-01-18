@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.sql;
+package it.unibz.inf.ontop.failing.local;
 
 import it.unibz.inf.ontop.quest.AbstractVirtualModeTest;
 

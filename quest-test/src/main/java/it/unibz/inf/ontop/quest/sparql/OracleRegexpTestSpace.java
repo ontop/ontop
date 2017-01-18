@@ -35,7 +35,7 @@ public class OracleRegexpTestSpace extends AbstractVirtualModeTest {
 	static final String owlfile = "resources/regexp/oracle-regexp.owl";
 	static final String obdafile = "resources/regexp/oracle-regexp.obda";
 
-	protected OracleRegexpTestSpace() {
+	private OracleRegexpTestSpace() {
 		super(owlfile, obdafile);
 	}
 

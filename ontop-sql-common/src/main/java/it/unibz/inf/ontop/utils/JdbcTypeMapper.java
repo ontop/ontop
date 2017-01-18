@@ -20,6 +20,7 @@ package it.unibz.inf.ontop.utils;
  * #L%
  */
 
+import com.google.inject.Inject;
 import it.unibz.inf.ontop.model.Predicate;
 import it.unibz.inf.ontop.model.Predicate.COL_TYPE;
 
@@ -33,16 +34,18 @@ import java.util.Map;
  */
 public class JdbcTypeMapper {
 
+	private static JdbcTypeMapper INSTANCE;
 	private final Map<Integer, COL_TYPE> sqlToQuest = new HashMap<Integer, COL_TYPE>();
 	private final Map<COL_TYPE, Integer> datatypeMap = new HashMap<COL_TYPE, Integer>();
 
-	public JdbcTypeMapper() {
-		sqlToQuest.put(Types.VARCHAR, COL_TYPE.LITERAL);
-		sqlToQuest.put(Types.CHAR, COL_TYPE.LITERAL);
-		sqlToQuest.put(Types.LONGNVARCHAR, COL_TYPE.LITERAL);
-		sqlToQuest.put(Types.LONGVARCHAR, COL_TYPE.LITERAL);
-		sqlToQuest.put(Types.NVARCHAR, COL_TYPE.LITERAL);
-		sqlToQuest.put(Types.NCHAR, COL_TYPE.LITERAL);
+	@Inject
+	private JdbcTypeMapper() {
+		sqlToQuest.put(Types.VARCHAR, COL_TYPE.STRING);
+		sqlToQuest.put(Types.CHAR, COL_TYPE.STRING);
+		sqlToQuest.put(Types.LONGNVARCHAR, COL_TYPE.STRING);
+		sqlToQuest.put(Types.LONGVARCHAR, COL_TYPE.STRING);
+		sqlToQuest.put(Types.NVARCHAR, COL_TYPE.STRING);
+		sqlToQuest.put(Types.NCHAR, COL_TYPE.STRING);
 		sqlToQuest.put(Types.INTEGER, COL_TYPE.INTEGER);
 		sqlToQuest.put(Types.BIGINT, COL_TYPE.INTEGER);
 		sqlToQuest.put(Types.SMALLINT, COL_TYPE.INTEGER);
@@ -61,8 +64,8 @@ public class JdbcTypeMapper {
 //		typeMapper.put(Types.BINARY, dfac.getDataTypePredicateBinary());
 //		typeMapper.put(Types.VARBINARY, dfac.getDataTypePredicateBinary());
 //		typeMapper.put(Types.BLOB, dfac.getDataTypePredicateBinary());
-		sqlToQuest.put(Types.CLOB, COL_TYPE.LITERAL);
-		sqlToQuest.put(Types.OTHER, COL_TYPE.LITERAL);
+		sqlToQuest.put(Types.CLOB, COL_TYPE.STRING);
+		sqlToQuest.put(Types.OTHER, COL_TYPE.STRING);
 
 		datatypeMap.put(COL_TYPE.BOOLEAN, Types.BOOLEAN);
 		datatypeMap.put(COL_TYPE.INT, Types.INTEGER);
@@ -81,10 +84,17 @@ public class JdbcTypeMapper {
 		// all other COL_TYPEs are mapped to Types.VARCHAR by default
 	}
 
+	@Deprecated
+	public static JdbcTypeMapper getInstance() {
+		if (INSTANCE == null)
+			INSTANCE = new JdbcTypeMapper();
+		return INSTANCE;
+	}
+
 	public Predicate.COL_TYPE getPredicate(int sqlType) {
 		Predicate.COL_TYPE type = sqlToQuest.get(sqlType);
 		if (type == null)
-			type = COL_TYPE.LITERAL;
+			type = COL_TYPE.STRING; //treat them as simple literal
 
 		return type;
 	}

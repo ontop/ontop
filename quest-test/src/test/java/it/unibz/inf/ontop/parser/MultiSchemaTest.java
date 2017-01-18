@@ -36,7 +36,7 @@ public class MultiSchemaTest extends AbstractVirtualModeTest {
 	static final String owlfile = "src/test/resources/oracle.owl";
 	static final String obdafile = "src/test/resources/oracle.obda";
 
-	protected MultiSchemaTest() {
+	public MultiSchemaTest() {
 		super(owlfile, obdafile);
 	}
 

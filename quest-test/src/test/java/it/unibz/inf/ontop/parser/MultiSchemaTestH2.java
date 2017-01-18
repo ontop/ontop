@@ -21,7 +21,19 @@ package it.unibz.inf.ontop.parser;
  */
 
 
-import it.unibz.inf.ontop.quest.AbstractVirtualModeTest;
+import it.unibz.inf.ontop.injection.QuestConfiguration;
+import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+
+import java.io.File;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+import java.util.Scanner;
+
+import static junit.framework.TestCase.assertTrue;
 
 /***
  * A simple test that check if the system is able to handle Mappings for
@@ -31,48 +43,129 @@ import it.unibz.inf.ontop.quest.AbstractVirtualModeTest;
  * We are going to create an H2 DB, the .sql file is fixed. We will map directly
  * there and then query on top.
  */
-public class MultiSchemaTestH2 extends AbstractVirtualModeTest {
+public class MultiSchemaTestH2  {
 
-	// TODO We need to extend this test to import the contents of the mappings
-	// into OWL and repeat everything taking form OWL
 
-    static final String owlfile =
+    static final String owlFile =
             "src/test/resources/multischemadb2.owl";
-    static final String obdafile =
+    static final String obdaFile =
             "src/test/resources/multischemah2.obda";
 
-	protected MultiSchemaTestH2() {
-		super(owlfile, obdafile);
+	private QuestOWL reasoner;
+	private QuestOWLConnection conn;
+	Connection sqlConnection;
+
+	@Before
+	public void setUp() throws Exception {
+
+		sqlConnection = DriverManager.getConnection("jdbc:h2:mem:questrepository","fish", "fish");
+		java.sql.Statement s = sqlConnection.createStatement();
+
+		try {
+			String text = new Scanner( new File("src/test/resources/stockexchange-h2Schema.sql") ).useDelimiter("\\A").next();
+			s.execute(text);
+			//Server.startWebServer(sqlConnection);
+
+		} catch(SQLException sqle) {
+			System.out.println("Exception in creating db from script");
+		}
+
+		s.close();
+
+		QuestConfiguration config = QuestConfiguration.defaultBuilder()
+				.ontologyFile(owlFile)
+				.nativeOntopMappingFile(obdaFile)
+				.build();
+
+		/*
+		 * Create the instance of Quest OWL reasoner.
+		 */
+		QuestOWLFactory factory = new QuestOWLFactory();
+
+		reasoner = factory.createReasoner(config);
+		conn = reasoner.getConnection();
+
+
+
+	}
+
+	@After
+	public void tearDown() throws Exception {
+		try {
+			dropTables();
+			conn.close();
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+		}
+	}
+
+	private void dropTables() throws Exception {
+
+		conn.close();
+		reasoner.dispose();
+		if (!sqlConnection.isClosed()) {
+			java.sql.Statement s = sqlConnection.createStatement();
+			try {
+				s.execute("DROP ALL OBJECTS DELETE FILES");
+			} catch (SQLException sqle) {
+				System.out.println("Table not found, not dropping");
+			} finally {
+				s.close();
+				sqlConnection.close();
+			}
+		}
 	}
 
 	/**
 	 * Test use of two aliases to same table
 	 * @throws Exception
 	 */
+	@Test
 	public void testOneSchema() throws Exception {
 		String query = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> SELECT ?x WHERE {?x a :Address}";
 		checkThereIsAtLeastOneResult(query);
 	}
-	
+	@Test
 	public void testTableOneSchema() throws Exception {
 		String query = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> SELECT ?x WHERE {?x a :Broker}";
 		checkThereIsAtLeastOneResult(query);
 	}
-	
+
+	@Test
 	public void testAliasOneSchema() throws Exception {
 		String query = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> SELECT ?x WHERE {?x a :Worker}";
 		checkThereIsAtLeastOneResult(query);
 	}
-	
+
+	@Test
 	public void testSchemaWhere() throws Exception {
 		String query = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> SELECT ?x ?r WHERE { ?x :isBroker ?r }";
 		checkThereIsAtLeastOneResult(query);
 	}
-	
+
+	@Test
 	public void testMultischema() throws Exception {
 		String query = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> SELECT ?x WHERE { ?x :hasFile ?r }";
 		checkThereIsAtLeastOneResult(query);
 	}
-	
-		
+
+	private void checkThereIsAtLeastOneResult(String query) throws Exception {
+		QuestOWLStatement st = conn.createStatement();
+		try {
+			QuestOWLResultSet rs = st.executeTuple(query);
+			assertTrue(rs.nextRow());
+
+		} catch (Exception e) {
+			throw e;
+		} finally {
+			try {
+
+			} catch (Exception e) {
+				st.close();
+				assertTrue(false);
+			}
+			conn.close();
+			reasoner.dispose();
+		}
+	}
 }

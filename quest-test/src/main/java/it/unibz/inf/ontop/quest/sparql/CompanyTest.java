@@ -20,10 +20,24 @@ package it.unibz.inf.ontop.quest.sparql;
  * #L%
  */
 
-import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLResultSet;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLStatement;
-import it.unibz.inf.ontop.quest.AbstractVirtualModeTest;
+import it.unibz.inf.ontop.injection.QuestConfiguration;
+import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import org.semanticweb.owlapi.model.OWLObject;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.Scanner;
+
+import static junit.framework.TestCase.*;
 
 
 /***
@@ -33,88 +47,75 @@ import org.semanticweb.owlapi.model.OWLObject;
  * We are going to create an H2 DB, the .sql file is fixed. We will map directly
  * there and then query on top.
  */
-public class CompanyTest extends AbstractVirtualModeTest {
+public class CompanyTest  {
 
 	// TODO We need to extend this test to import the contents of the mappings
 	// into OWL and repeat everything taking form OWL
 
-	private static final String owlfile = "resources/optional/company.owl";
-	private static final String obdafile = "resources/optional/company.obda";
+	private static final String owlFile = "resources/optional/company.owl";
+	private static final String obdaFile = "resources/optional/company.obda";
 
-	protected CompanyTest() {
-		super(owlfile, obdafile);
+	private QuestOWL reasoner;
+	private QuestOWLConnection conn;
+	Connection sqlConnection;
+
+//	public CompanyTest() {
+//		super(owlfile, obdafile);
+//	}
+
+	@Before
+	public void setUp() throws Exception {
+
+		sqlConnection = DriverManager.getConnection("jdbc:h2:mem:questjunitdb","fish", "fish");
+		java.sql.Statement s = sqlConnection.createStatement();
+		String text = new Scanner( new File("resources/optional/company-h2.sql") ).useDelimiter("\\A").next();
+		s.execute(text);
+		s.close();
+
+		QuestConfiguration config = QuestConfiguration.defaultBuilder()
+				.ontologyFile(owlFile)
+				.nativeOntopMappingFile(obdaFile)
+				.build();
+
+		/*
+		 * Create the instance of Quest OWL reasoner.
+		 */
+		QuestOWLFactory factory = new QuestOWLFactory();
+
+		reasoner = factory.createReasoner(config);
+		conn = reasoner.getConnection();
+
+
+
 	}
 
-//	@Override
-//	public void setUp() throws Exception {
-//
-//
-//		/*
-//		 * Initializing and H2 database with the stock exchange data
-//		 */
-//		// String driver = "org.h2.Driver";
-//		String url = "jdbc:h2:mem:questjunitdb";
-//		String username = "fish";
-//		String password = "fish";
-//
-//		fac = OBDADataFactoryImpl.getInstance();
-//
-//		conn = DriverManager.getConnection(url, username, password);
-//
-//		Statement st = conn.createStatement();
-//
-//		//with simple h2 test we enter in a second nested left join and it fails
-//		FileReader reader = new FileReader("resources/optional/company-h2.sql");
-//		BufferedReader in = new BufferedReader(reader);
-//		StringBuilder bf = new StringBuilder();
-//		String line = in.readLine();
-//		while (line != null) {
-//			bf.append(line);
-//			line = in.readLine();
-//		}
-//
-//		st.executeUpdate(bf.toString());
-//		conn.commit();
-//
-//		// Loading the OWL file
-//		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-//		ontology = manager.loadOntologyFromOntologyDocument((new File(owlfile)));
-//
-//		// Loading the OBDA data
-//		obdaModel = fac.getOBDAModel();
-//
-//		ModelIOManager ioManager = new ModelIOManager(obdaModel);
-//		ioManager.load(obdafile);
-//
-//	}
-//
-//	@Override
-//	public void tearDown() throws Exception {
-//		try {
-//			dropTables();
-//			conn.close();
-//		} catch (Exception e) {
-//			log.debug(e.getMessage());
-//		}
-//	}
-//
-//	private void dropTables() throws SQLException, IOException {
-//
-//		Statement st = conn.createStatement();
-//
-//		FileReader reader = new FileReader("resources/optional/drop-company.sql");
-//		BufferedReader in = new BufferedReader(reader);
-//		StringBuilder bf = new StringBuilder();
-//		String line = in.readLine();
-//		while (line != null) {
-//			bf.append(line);
-//			line = in.readLine();
-//		}
-//
-//		st.executeUpdate(bf.toString());
-//		st.close();
-//		conn.commit();
-//	}
+	@After
+	public void tearDown() throws Exception {
+		try {
+			dropTables();
+			conn.close();
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+		}
+	}
+
+	private void dropTables() throws SQLException, IOException {
+
+		Statement st = sqlConnection.createStatement();
+
+		FileReader reader = new FileReader("resources/optional/drop-company.sql");
+		BufferedReader in = new BufferedReader(reader);
+		StringBuilder bf = new StringBuilder();
+		String line = in.readLine();
+		while (line != null) {
+			bf.append(line);
+			line = in.readLine();
+		}
+
+		st.executeUpdate(bf.toString());
+		st.close();
+		sqlConnection.commit();
+	}
 
 	private void runTests() throws Exception {
 
@@ -179,6 +180,8 @@ public class CompanyTest extends AbstractVirtualModeTest {
 		}
 	}
 
+
+	@Test
 	public void testViEqSig() throws Exception {
 		runTests();
 	}

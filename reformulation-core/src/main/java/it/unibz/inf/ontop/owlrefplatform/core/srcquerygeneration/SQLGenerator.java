@@ -23,15 +23,16 @@ package it.unibz.inf.ontop.owlrefplatform.core.srcquerygeneration;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.*;
-import it.unibz.inf.ontop.model.*;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
-import it.unibz.inf.ontop.model.Predicate.COL_TYPE;
-import it.unibz.inf.ontop.model.impl.*;
-import it.unibz.inf.ontop.owlrefplatform.core.ExecutableQuery;
-import it.unibz.inf.ontop.owlrefplatform.core.optimization.GroundTermRemovalFromDataNodeReshaper;
-import it.unibz.inf.ontop.owlrefplatform.core.optimization.PullOutVariableOptimizer;
 import it.unibz.inf.ontop.injection.QuestCoreSettings;
+import it.unibz.inf.ontop.model.*;
+import it.unibz.inf.ontop.model.Predicate.COL_TYPE;
+import it.unibz.inf.ontop.model.impl.MappingFactoryImpl;
+import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
+import it.unibz.inf.ontop.model.impl.RDBMSourceParameterConstants;
+import it.unibz.inf.ontop.model.impl.TermUtils;
+import it.unibz.inf.ontop.owlrefplatform.core.ExecutableQuery;
 import it.unibz.inf.ontop.owlrefplatform.core.SQLExecutableQuery;
 import it.unibz.inf.ontop.owlrefplatform.core.abox.SemanticIndexURIMap;
 import it.unibz.inf.ontop.owlrefplatform.core.abox.XsdDatatypeConverter;
@@ -39,6 +40,8 @@ import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.DatalogNormalizer;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.FunctionFlattener;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.PullOutEqualityNormalizer;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.PullOutEqualityNormalizerImpl;
+import it.unibz.inf.ontop.owlrefplatform.core.optimization.GroundTermRemovalFromDataNodeReshaper;
+import it.unibz.inf.ontop.owlrefplatform.core.optimization.PullOutVariableOptimizer;
 import it.unibz.inf.ontop.owlrefplatform.core.queryevaluation.DB2SQLDialectAdapter;
 import it.unibz.inf.ontop.owlrefplatform.core.queryevaluation.SQLAdapterFactory;
 import it.unibz.inf.ontop.owlrefplatform.core.queryevaluation.SQLDialectAdapter;
@@ -48,6 +51,7 @@ import it.unibz.inf.ontop.parser.EncodeForURI;
 import it.unibz.inf.ontop.pivotalrepr.IntermediateQuery;
 import it.unibz.inf.ontop.sql.*;
 import it.unibz.inf.ontop.utils.DatalogDependencyGraphGenerator;
+import it.unibz.inf.ontop.utils.JdbcTypeMapper;
 import org.eclipse.rdf4j.model.Literal;
 import org.eclipse.rdf4j.model.vocabulary.XMLSchema;
 import org.slf4j.LoggerFactory;
@@ -59,6 +63,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static it.unibz.inf.ontop.model.Predicate.COL_TYPE.*;
+import static it.unibz.inf.ontop.model.impl.OBDAVocabulary.SPARQL_GROUP;
 import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATATYPE_FACTORY;
 import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
 
@@ -92,7 +97,9 @@ public class SQLGenerator implements NativeQueryGenerator {
     private static final String LANG_SUFFIX = "Lang";
     private static final String MAIN_COLUMN_SUFFIX = "";
 
+
 	private static final String INDENT = "    ";
+	private static final Function TRUE_EQ = DATA_FACTORY.getFunctionEQ(OBDAVocabulary.TRUE, OBDAVocabulary.TRUE);
 
 	private final RDBMetadata metadata;
 	private final SQLDialectAdapter sqladapter;
@@ -121,17 +128,20 @@ public class SQLGenerator implements NativeQueryGenerator {
 
 	private static final org.slf4j.Logger log = LoggerFactory
 			.getLogger(SQLGenerator.class);
+	private final JdbcTypeMapper jdbcTypeMapper;
 
-    @AssistedInject
-	private SQLGenerator(@Assisted DBMetadata metadata, @Assisted OBDADataSource dataSource, QuestCoreSettings preferences) {
+	@AssistedInject
+	private SQLGenerator(@Assisted DBMetadata metadata, @Assisted OBDADataSource dataSource,
+						 QuestCoreSettings preferences, JdbcTypeMapper jdbcTypeMapper) {
         // TODO: make these attributes immutable.
         //TODO: avoid the null value
-        this(metadata, dataSource, null, preferences);
+        this(metadata, dataSource, null, preferences, jdbcTypeMapper);
     }
 
 	@AssistedInject
 	private SQLGenerator(@Assisted DBMetadata metadata, @Assisted OBDADataSource dataSource,
-						 @Assisted SemanticIndexURIMap uriRefIds, QuestCoreSettings preferences) {
+						 @Assisted SemanticIndexURIMap uriRefIds, QuestCoreSettings preferences,
+						 JdbcTypeMapper jdbcTypeMapper) {
 		String driverURI = dataSource.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER);
 
 		if (!(metadata instanceof RDBMetadata)) {
@@ -162,6 +172,7 @@ public class SQLGenerator implements NativeQueryGenerator {
 
 		this.isSI = !preferences.isInVirtualMode();
 		this.uriRefIds = uriRefIds;
+		this.jdbcTypeMapper = jdbcTypeMapper;
  	}
 
 	/**
@@ -169,7 +180,7 @@ public class SQLGenerator implements NativeQueryGenerator {
 	 */
 	private SQLGenerator(RDBMetadata metadata, SQLDialectAdapter sqlAdapter, boolean generatingReplace,
 						 boolean isSI, String replace1, String replace2, boolean distinctResultSet,
-						 SemanticIndexURIMap uriRefIds) {
+						 SemanticIndexURIMap uriRefIds, JdbcTypeMapper jdbcTypeMapper) {
 		if (isSI && uriRefIds == null) {
 			throw new IllegalArgumentException("A SemanticIndexURIMap must be given in the classic mode.");
 		}
@@ -182,6 +193,7 @@ public class SQLGenerator implements NativeQueryGenerator {
 		this.isSI = isSI;
 		this.distinctResultSet = distinctResultSet;
 		this.uriRefIds = uriRefIds;
+		this.jdbcTypeMapper = jdbcTypeMapper;
 	}
 
 	private static ImmutableMap<ExpressionOperation, String> buildOperations(SQLDialectAdapter sqladapter) {
@@ -237,7 +249,7 @@ public class SQLGenerator implements NativeQueryGenerator {
 	 */
 	public NativeQueryGenerator cloneIfNecessary() {
 		return new SQLGenerator(metadata.clone(), sqladapter, generatingREPLACE,
-				isSI, replace1, replace2, distinctResultSet, uriRefIds);
+				isSI, replace1, replace2, distinctResultSet, uriRefIds, jdbcTypeMapper);
 	}
 
 	@Override
@@ -585,7 +597,7 @@ public class SQLGenerator implements NativeQueryGenerator {
 
 		List<Variable> varsInGroupBy = Lists.newArrayList();
 		for (Function atom : body) {
-			if (atom.getFunctionSymbol().equals(OBDAVocabulary.SPARQL_GROUP)) {
+			if (atom.getFunctionSymbol().equals(SPARQL_GROUP)) {
 				varsInGroupBy.addAll(atom.getVariables());
 			}
 		}
@@ -902,7 +914,7 @@ public class SQLGenerator implements NativeQueryGenerator {
 	 * @return
 	 */
 	private String getTableDefinitions(List<Function> atoms,
-									   QueryAliasIndex index, boolean isTopLevel, boolean isLeftJoin,
+									   QueryAliasIndex index, boolean isTopLevel, boolean isLeftJoin, boolean parenthesis,
 									   String indent) {
 		/*
 		 * We now collect the view definitions for each data atom each
@@ -953,10 +965,19 @@ public class SQLGenerator implements NativeQueryGenerator {
 			} else {
 				JOIN_KEYWORD = "JOIN";
 			}
+			String JOIN;
 
-			String JOIN = "" + indent + "" + indent + "%s\n" + indent
-					+ JOIN_KEYWORD + "\n" + indent + "%s" + indent + "";
+			//add parenthesis
+			String NESTEDJOIN = "" + indent + "" + indent + "%s\n" + indent
+					+ JOIN_KEYWORD + "\n" + indent + "(%s)" + indent + "";
 
+			if(parenthesis){
+				JOIN = NESTEDJOIN;
+			}
+			else {
+				JOIN = "" + indent + "" + indent + "%s\n" + indent
+						+ JOIN_KEYWORD + "\n" + indent + "%s" + indent + "";
+			}
 
 			if (size == 0) {
 				throw new RuntimeException(
@@ -979,7 +1000,7 @@ public class SQLGenerator implements NativeQueryGenerator {
 
 			int currentSize = tableDefinitions.size();
 			while (currentSize > 0) {
-				currentJoin = String.format(JOIN,
+				currentJoin = String.format(NESTEDJOIN,
 						tableDefinitions.get(currentSize - 1), currentJoin);
 				tableDefinitions.remove(currentSize - 1);
 				currentSize = tableDefinitions.size();
@@ -987,6 +1008,8 @@ public class SQLGenerator implements NativeQueryGenerator {
 			tableDefinitions.add(currentJoin);
 
 			tableDefinitionsString.append(currentJoin);
+
+
 			/*
 			 * If there are ON conditions we add them now. We need to remove the
 			 * last parenthesis ')' and replace it with ' ON %s)' where %s are
@@ -996,7 +1019,7 @@ public class SQLGenerator implements NativeQueryGenerator {
 					indent);
 
 //			if (conditions.length() > 0
-//					&& tableDefinitionsString.lastIndexOf(")") != -1) {
+//					&& tableDefinitionsString.lcastIndexOf(")") != -1) {
 //				int lastidx = tableDefinitionsString.lastIndexOf(")");
 //				tableDefinitionsString.delete(lastidx,
 //						tableDefinitionsString.length());
@@ -1006,8 +1029,10 @@ public class SQLGenerator implements NativeQueryGenerator {
 //			}
 			String ON_CLAUSE = String.format(" ON\n%s\n " + indent, conditions);
 			tableDefinitionsString.append(ON_CLAUSE);
+
+
 		}
-		return tableDefinitionsString.toString();
+		return  tableDefinitionsString.toString() ;
 	}
 
 	/**
@@ -1019,29 +1044,51 @@ public class SQLGenerator implements NativeQueryGenerator {
 	private String getTableDefinition(Function atom, QueryAliasIndex index,
 									  String indent) {
 		Predicate predicate = atom.getFunctionSymbol();
+
 		if (atom.isOperation()
 				|| atom.isDataTypeFunction()) {
 			// These don't participate in the FROM clause
 			return "";
 		} else if (atom.isAlgebraFunction()) {
-			if (predicate.getName().equals("Group")) {
+
+			if (predicate == OBDAVocabulary.SPARQL_GROUP) {
 				return "";
 			}
 			List<Function> innerTerms = new ArrayList<>(atom.getTerms().size());
-			for (Term innerTerm : atom.getTerms()) {
-				innerTerms.add((Function) innerTerm);
-			}
-			if (predicate == OBDAVocabulary.SPARQL_JOIN) {
-				String indent2 = indent + INDENT;
-				String tableDefinitions =  getTableDefinitions(innerTerms,
-						index, false, false, indent2) ;
-				return tableDefinitions;
-			} else if (predicate == OBDAVocabulary.SPARQL_LEFTJOIN) {
 
-				return getTableDefinitions(innerTerms, index, false, true,
-						indent + INDENT);
+			boolean parenthesis = false;
+
+
+			if (predicate == OBDAVocabulary.SPARQL_JOIN || predicate == OBDAVocabulary.SPARQL_LEFTJOIN) {
+
+				boolean isLeftJoin = false;
+
+				if (predicate == OBDAVocabulary.SPARQL_LEFTJOIN) {
+					isLeftJoin = true;
+				}
+
+				for (Term innerTerm : atom.getTerms()) {
+					Function innerTerm1 = (Function) innerTerm;
+					if(innerTerm1.isAlgebraFunction()){
+						//nested joins we need to add parenthesis later
+						parenthesis = true;
+					}
+					else if(isLeftJoin && innerTerm1.equals(TRUE_EQ)){
+						//in case of left join we  want to add the parenthesis
+						// only for the right tables
+						//we ignore nested joins from the left tables
+
+						parenthesis = false;
+					}
+					innerTerms.add(innerTerm1);
+				}
+				String tableDefinitions =  getTableDefinitions(innerTerms,
+						index, false, isLeftJoin, parenthesis, indent + INDENT );
+				return tableDefinitions;
 			}
+
 		}
+
 
 		/*
 		 * This is a data atom
@@ -1052,7 +1099,7 @@ public class SQLGenerator implements NativeQueryGenerator {
 
 	private String getFROM(List<Function> atoms, QueryAliasIndex index) {
 		String tableDefinitions = getTableDefinitions(atoms, index, true,
-				false, "");
+				false, false, "");
 		return "\n FROM \n" + tableDefinitions;
 	}
 
@@ -1227,7 +1274,7 @@ public class SQLGenerator implements NativeQueryGenerator {
 			if (f.isDataTypeFunction()) {
 				Predicate p = f.getFunctionSymbol();
 				COL_TYPE type = DATATYPE_FACTORY.getDatatype(p.toString());
-				return MAPPING_FACTORY.getJdbcTypeMapper().getSQLType(type);
+				return jdbcTypeMapper.getSQLType(type);
 			}
 			// Return varchar for unknown
 			return Types.VARCHAR;
@@ -1425,7 +1472,7 @@ public class SQLGenerator implements NativeQueryGenerator {
 
 			if (castDataType != null){
 
-				mainColumn = sqladapter.sqlCast(mainColumn, MAPPING_FACTORY.getJdbcTypeMapper().getSQLType(castDataType));
+				mainColumn = sqladapter.sqlCast(mainColumn, jdbcTypeMapper.getSQLType(castDataType));
 			}
 
 			//int sqlType = getSQLTypeForTerm(ht,index );

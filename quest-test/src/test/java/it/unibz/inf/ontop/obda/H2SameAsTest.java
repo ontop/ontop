@@ -22,7 +22,6 @@ package it.unibz.inf.ontop.obda;
 
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.injection.QuestConfiguration;
-
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import org.junit.After;
 import org.junit.Before;
@@ -168,13 +167,13 @@ public class H2SameAsTest {
 		Set<String> results = ImmutableSet.copyOf(runTests(query, true));
 		Set<String> expectedResults = new HashSet<>();
 		expectedResults.add("<http://ontop.inf.unibz.it/test/wellbore#spain-991>");
-		expectedResults.add("\"Aleksi\"");
+		expectedResults.add("\"Aleksi\"^^xsd:string");
 		expectedResults.add("<http://ontop.inf.unibz.it/test/wellbore#finland-1>");
 		expectedResults.add("\"Amerigo\"^^xsd:string");
 		expectedResults.add("<http://ontop.inf.unibz.it/test/wellbore#finland-1>");
-		expectedResults.add("\"Aleksi\"");
+		expectedResults.add("\"Aleksi\"^^xsd:string");
 		expectedResults.add("<http://ontop.inf.unibz.it/test/wellbore#finland-2>");
-		expectedResults.add("\"Eljas\"");
+		expectedResults.add("\"Eljas\"^^xsd:string");
 		expectedResults.add("<http://ontop.inf.unibz.it/test/wellbore#spain-991>");
 		expectedResults.add("\"Amerigo\"^^xsd:string");
 		expectedResults.add("<http://ontop.inf.unibz.it/test/wellbore#spain-992>");
@@ -229,7 +228,7 @@ public class H2SameAsTest {
 		ArrayList<String> results = runTests(query, true);
 		ArrayList<String> expectedResults = new ArrayList<>();
 		expectedResults.add("<http://ontop.inf.unibz.it/test/wellbore#spain-991>");
-		expectedResults.add("\"Aleksi\"");
+		expectedResults.add("\"Aleksi\"^^xsd:string");
 		expectedResults.add("\"13\"^^xsd:integer");
 		expectedResults.add("<http://ontop.inf.unibz.it/test/wellbore#finland-1>");
 		expectedResults.add("\"Amerigo\"^^xsd:string");
@@ -238,10 +237,10 @@ public class H2SameAsTest {
 		expectedResults.add("\"Amerigo\"^^xsd:string");
 		expectedResults.add("\"13\"^^xsd:integer");
 		expectedResults.add("<http://ontop.inf.unibz.it/test/wellbore#finland-1>");
-		expectedResults.add("\"Aleksi\"");
+		expectedResults.add("\"Aleksi\"^^xsd:string");
 		expectedResults.add("\"13\"^^xsd:integer");
 		expectedResults.add("<http://ontop.inf.unibz.it/test/wellbore#finland-2>");
-		expectedResults.add("\"Eljas\"");
+		expectedResults.add("\"Eljas\"^^xsd:string");
 		expectedResults.add("\"100\"^^xsd:integer");
 		assertEquals(15, results.size() );
 		assertEquals(expectedResults, results);

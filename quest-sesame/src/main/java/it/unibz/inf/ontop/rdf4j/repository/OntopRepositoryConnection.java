@@ -21,9 +21,9 @@ package it.unibz.inf.ontop.rdf4j.repository;
  */
 
 import it.unibz.inf.ontop.model.OBDAException;
+import it.unibz.inf.ontop.owlrefplatform.core.IQuestDBStatement;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestDBConnection;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestDBStatement;
 import it.unibz.inf.ontop.owlrefplatform.core.SIQuestDBStatement;
 import it.unibz.inf.ontop.rdf4j.RDF4JRDFIterator;
 import it.unibz.inf.ontop.rdf4j.query.OntopBooleanQuery;
@@ -34,56 +34,22 @@ import org.eclipse.rdf4j.IsolationLevels;
 import org.eclipse.rdf4j.OpenRDFUtil;
 import org.eclipse.rdf4j.common.iteration.CloseableIteration;
 import org.eclipse.rdf4j.common.iteration.CloseableIteratorIteration;
-import org.eclipse.rdf4j.model.IRI;
-import org.eclipse.rdf4j.model.Namespace;
-import org.eclipse.rdf4j.model.Resource;
-import org.eclipse.rdf4j.model.Statement;
-import org.eclipse.rdf4j.model.Value;
-import org.eclipse.rdf4j.model.ValueFactory;
+import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.impl.NamespaceImpl;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.model.impl.ValueFactoryImpl;
-import org.eclipse.rdf4j.query.BooleanQuery;
-import org.eclipse.rdf4j.query.GraphQuery;
-import org.eclipse.rdf4j.query.GraphQueryResult;
-import org.eclipse.rdf4j.query.MalformedQueryException;
-import org.eclipse.rdf4j.query.Query;
-import org.eclipse.rdf4j.query.QueryEvaluationException;
-import org.eclipse.rdf4j.query.QueryLanguage;
-import org.eclipse.rdf4j.query.TupleQuery;
-import org.eclipse.rdf4j.query.Update;
-import org.eclipse.rdf4j.query.parser.ParsedBooleanQuery;
-import org.eclipse.rdf4j.query.parser.ParsedGraphQuery;
-import org.eclipse.rdf4j.query.parser.ParsedQuery;
-import org.eclipse.rdf4j.query.parser.ParsedTupleQuery;
-import org.eclipse.rdf4j.query.parser.QueryParserUtil;
+import org.eclipse.rdf4j.query.*;
+import org.eclipse.rdf4j.query.parser.*;
 import org.eclipse.rdf4j.repository.Repository;
 import org.eclipse.rdf4j.repository.RepositoryException;
 import org.eclipse.rdf4j.repository.RepositoryResult;
 import org.eclipse.rdf4j.repository.UnknownTransactionStateException;
-import org.eclipse.rdf4j.rio.ParserConfig;
-import org.eclipse.rdf4j.rio.RDFFormat;
-import org.eclipse.rdf4j.rio.RDFHandler;
-import org.eclipse.rdf4j.rio.RDFHandlerException;
-import org.eclipse.rdf4j.rio.RDFParseException;
-import org.eclipse.rdf4j.rio.RDFParser;
-import org.eclipse.rdf4j.rio.Rio;
+import org.eclipse.rdf4j.rio.*;
 import org.eclipse.rdf4j.rio.helpers.BasicParserSettings;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.Reader;
+import java.io.*;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 // TODO(Xiao): separate the implementation into two subclasses for virtual and classic modes
 public class OntopRepositoryConnection implements org.eclipse.rdf4j.repository.RepositoryConnection, AutoCloseable {
@@ -284,7 +250,7 @@ public class OntopRepositoryConnection implements org.eclipse.rdf4j.repository.R
             }
             
            // System.out.println("Parsing... ");
-			QuestDBStatement questStm = questConn.createStatement();
+			SIQuestDBStatement questStm = questConn.createSIStatement();
     		
             Thread insert = new Thread(new Insert(rdfParser, (InputStream)inputStreamOrReader, baseIRI));
             Thread process = new Thread(new Process(rdfHandler, questStm));
@@ -337,8 +303,8 @@ throw new RuntimeException(e);
           
           private class Process implements Runnable{
         	  private RDF4JRDFIterator iterator;
-        	  private QuestDBStatement questStmt;
-        	  public Process(RDF4JRDFIterator iterator, QuestDBStatement qstm) throws OBDAException
+        	  private IQuestDBStatement questStmt;
+        	  public Process(RDF4JRDFIterator iterator, IQuestDBStatement qstm) throws OBDAException
         	  {
         		  this.iterator = iterator;
         		  this.questStmt = qstm;

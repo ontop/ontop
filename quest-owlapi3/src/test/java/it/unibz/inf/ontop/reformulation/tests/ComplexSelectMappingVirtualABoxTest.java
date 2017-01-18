@@ -21,8 +21,8 @@ package it.unibz.inf.ontop.reformulation.tests;
  */
 
 import it.unibz.inf.ontop.injection.QuestConfiguration;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
 import it.unibz.inf.ontop.injection.QuestCoreSettings;
+import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
 import it.unibz.inf.ontop.owlrefplatform.core.SQLExecutableQuery;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import org.junit.After;
@@ -177,7 +177,7 @@ public class ComplexSelectMappingVirtualABoxTest  {
 		this.query = "PREFIX : <http://it.unibz.inf/obda/test/simple#> SELECT * WHERE { ?x :U ?z. }";
 
         String val = runTests(p);
-        assertEquals("\"value1\"", val);
+        assertEquals("\"value1\"^^xsd:string", val);
 
 	}
 
