@@ -398,7 +398,7 @@ public class SQLGenerator implements NativeQueryGenerator {
 	 * Main method. Generates the full SQL query, taking into account
 	 * limit/offset/order by. An important part of this program is
 	 * {@link #createViewFrom}
-	 * that will create a view for every ans prodicate in the Datalog input
+	 * that will create a view for every ans predicate in the Datalog input
 	 * program.
 	 *
 	 * @param signature

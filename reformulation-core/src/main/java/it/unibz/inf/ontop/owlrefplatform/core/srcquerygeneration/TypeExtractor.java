@@ -2,10 +2,13 @@ package it.unibz.inf.ontop.owlrefplatform.core.srcquerygeneration;
 
 import com.google.common.collect.*;
 import it.unibz.inf.ontop.model.*;
-import it.unibz.inf.ontop.model.impl.MappingFactoryImpl;
 import it.unibz.inf.ontop.model.type.impl.TermTypeInferenceTools;
-import it.unibz.inf.ontop.sql.*;
+import it.unibz.inf.ontop.sql.Attribute;
+import it.unibz.inf.ontop.sql.Relation2DatalogPredicate;
+import it.unibz.inf.ontop.sql.RelationDefinition;
+import it.unibz.inf.ontop.sql.RelationID;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
+import it.unibz.inf.ontop.utils.JdbcTypeMapper;
 
 import java.util.AbstractMap.SimpleEntry;
 import java.util.Collection;
@@ -26,7 +29,7 @@ import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
 public class TypeExtractor {
 
     private static final TermType LITERAL_TYPE = DATA_FACTORY.getTermType(LITERAL);
-    private static final MappingFactory MAPPING_FACTORY = MappingFactoryImpl.getInstance();
+
 
     public static class TypeResults {
         private final ImmutableMap<CQIE, ImmutableList<Optional<TermType>>> termTypeMap;
@@ -115,14 +118,17 @@ public class TypeExtractor {
 
             ImmutableList.Builder<TermType> defaultTypeBuilder = ImmutableList.builder();
 
+            RelationID tableId = Relation2DatalogPredicate.createRelationFromPredicateName(metadata.getQuotedIDFactory(), predicate);
+            Optional<RelationDefinition> td = Optional.ofNullable(metadata.getRelation(tableId));
+
             IntStream.range(0, predicate.getArity())
                     .forEach(i -> {
-                        RelationID tableId = Relation2DatalogPredicate.createRelationFromPredicateName(metadata.getQuotedIDFactory(), predicate);
-                        Optional<RelationDefinition> td = Optional.ofNullable(metadata.getRelation(tableId));
+
                         if(td.isPresent()) {
                             Attribute attribute = td.get().getAttribute(i+1);
-                            //add mapping factory
-                            Predicate.COL_TYPE type = MAPPING_FACTORY.getJdbcTypeMapper().getPredicate(attribute.getType());
+
+                            //get type from metadata
+                            Predicate.COL_TYPE type = JdbcTypeMapper.getInstance().getPredicate(attribute.getType());
                             defaultTypeBuilder.add(DATA_FACTORY.getTermType(type));
                         }
                         else{
@@ -247,9 +253,8 @@ public class TypeExtractor {
                         final int index = i;
 
                         return Optional.ofNullable(alreadyKnownCastTypes.get(bodyDataAtom.getFunctionSymbol()))
-                                .map(types -> types.get(index))
-                                // TODO: may look for the COL_TYPE of the extensional atom in the DBMetadata
-                                .orElse(LITERAL_TYPE);
+                                .map(types -> types.get(index)).orElseThrow(() -> new IllegalStateException("No type could be inferred for " + term));
+
                     }
                 }
             }
