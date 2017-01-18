@@ -48,7 +48,7 @@ public class OntopOBDAConfigurationImpl extends OntopModelConfigurationImpl impl
         }
     }
 
-    static class DefaultOntopOBDABuilderFragment<B extends OntopOBDAConfiguration.Builder>
+    static class DefaultOntopOBDABuilderFragment<B extends OntopOBDAConfiguration.Builder<B>>
             implements OntopOBDABuilderFragment<B> {
 
         private final B builder;
@@ -74,7 +74,7 @@ public class OntopOBDAConfigurationImpl extends OntopModelConfigurationImpl impl
 
     }
 
-    static abstract class OntopOBDAConfigurationBuilderMixin<B extends OntopOBDAConfiguration.Builder>
+    static abstract class OntopOBDAConfigurationBuilderMixin<B extends OntopOBDAConfiguration.Builder<B>>
             extends DefaultOntopModelBuilderFragment<B>
             implements OntopOBDAConfiguration.Builder<B> {
 
@@ -103,7 +103,7 @@ public class OntopOBDAConfigurationImpl extends OntopModelConfigurationImpl impl
     }
 
 
-    public static class BuilderImpl<B extends OntopOBDAConfiguration.Builder>
+    public static class BuilderImpl<B extends OntopOBDAConfiguration.Builder<B>>
             extends OntopOBDAConfigurationBuilderMixin<B> {
 
         @Override

@@ -10,18 +10,18 @@ public interface OntopOptimizationConfiguration extends OntopModelConfiguration 
     /**
      * Default builder
      */
-    static OntopOptimizationConfiguration.Builder<OntopOptimizationConfiguration.Builder> defaultBuilder() {
+    static Builder<? extends Builder> defaultBuilder() {
         return new OntopOptimizationConfigurationImpl.BuilderImpl<>();
     }
 
     /**
      * TODO: add some configuration methods for end-users
      */
-    interface OntopOptimizationBuilderFragment<B extends OntopOptimizationConfiguration.Builder> {
+    interface OntopOptimizationBuilderFragment<B extends OntopOptimizationConfiguration.Builder<B>> {
     }
 
 
-    interface Builder<B extends Builder> extends OntopOptimizationBuilderFragment<B>, OntopModelConfiguration.Builder<B> {
+    interface Builder<B extends Builder<B>> extends OntopOptimizationBuilderFragment<B>, OntopModelConfiguration.Builder<B> {
 
         @Override
         OntopOptimizationConfiguration build();

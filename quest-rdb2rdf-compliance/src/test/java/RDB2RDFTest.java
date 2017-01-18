@@ -282,7 +282,7 @@ public class RDB2RDFTest {
 		return repo;
 	}
 
-	Builder<Builder<Builder<Builder<Builder<Builder<Builder<Builder<Builder<Builder<Builder>>>>>>>>>> createStandardConfigurationBuilder() {
+	Builder<? extends Builder> createStandardConfigurationBuilder() {
 		  return QuestConfiguration.defaultBuilder()
 				 .properties(PROPERTIES)
 				 .ontology(EMPTY_ONT);

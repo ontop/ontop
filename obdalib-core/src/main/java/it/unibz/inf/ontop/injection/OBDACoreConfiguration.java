@@ -37,14 +37,14 @@ public interface OBDACoreConfiguration extends OntopMappingSQLConfiguration {
     /**
      * Default builder
      */
-    static Builder<Builder<Builder<Builder<Builder<Builder<Builder>>>>>> defaultBuilder() {
+    static Builder<? extends Builder> defaultBuilder() {
         return new OBDACoreConfigurationImpl.BuilderImpl<>();
     }
 
     /**
      * TODO: explain
      */
-    interface OBDACoreBuilderFragment<B extends Builder> {
+    interface OBDACoreBuilderFragment<B extends Builder<B>> {
 
         B obdaModel(@Nonnull OBDAModel obdaModel);
 
@@ -64,7 +64,7 @@ public interface OBDACoreConfiguration extends OntopMappingSQLConfiguration {
 
     }
 
-    interface Builder<B extends Builder> extends OBDACoreBuilderFragment<B>, OntopMappingSQLConfiguration.Builder<B> {
+    interface Builder<B extends Builder<B>> extends OBDACoreBuilderFragment<B>, OntopMappingSQLConfiguration.Builder<B> {
 
         @Override
         OBDACoreConfiguration build();

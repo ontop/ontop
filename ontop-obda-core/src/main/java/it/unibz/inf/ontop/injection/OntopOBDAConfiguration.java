@@ -15,16 +15,16 @@ public interface OntopOBDAConfiguration extends OntopModelConfiguration {
     @Deprecated
     Optional<DBMetadata> getDBMetadata();
 
-    static Builder<Builder<Builder<Builder>>> defaultBuilder() {
+    static Builder<? extends Builder> defaultBuilder() {
         return new OntopOBDAConfigurationImpl.BuilderImpl<>();
     }
 
-    interface OntopOBDABuilderFragment<B extends Builder> {
+    interface OntopOBDABuilderFragment<B extends Builder<B>> {
 
         B dbMetadata(@Nonnull DBMetadata dbMetadata);
     }
 
-    interface Builder<B extends Builder> extends OntopOBDABuilderFragment<B>, OntopModelConfiguration.Builder<B> {
+    interface Builder<B extends Builder<B>> extends OntopOBDABuilderFragment<B>, OntopModelConfiguration.Builder<B> {
 
         @Override
         OntopOBDAConfiguration build();

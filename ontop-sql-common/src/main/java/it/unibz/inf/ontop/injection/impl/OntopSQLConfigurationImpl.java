@@ -40,7 +40,7 @@ public class OntopSQLConfigurationImpl extends OntopOBDAConfigurationImpl
         }
     }
 
-    protected static class DefaultOntopSQLBuilderFragment<B extends OntopSQLConfiguration.Builder> implements
+    protected static class DefaultOntopSQLBuilderFragment<B extends OntopSQLConfiguration.Builder<B>> implements
             OntopSQLBuilderFragment<B> {
 
         private final B builder;
@@ -102,7 +102,7 @@ public class OntopSQLConfigurationImpl extends OntopOBDAConfigurationImpl
 
     }
 
-    protected abstract static class OntopSQLBuilderMixin<B extends OntopSQLConfiguration.Builder>
+    protected abstract static class OntopSQLBuilderMixin<B extends OntopSQLConfiguration.Builder<B>>
             extends OntopOBDAConfigurationImpl.OntopOBDAConfigurationBuilderMixin<B>
             implements OntopSQLConfiguration.Builder<B> {
 
@@ -149,7 +149,7 @@ public class OntopSQLConfigurationImpl extends OntopOBDAConfigurationImpl
         }
     }
 
-    public static class BuilderImpl<B extends OntopSQLConfiguration.Builder> extends OntopSQLBuilderMixin<B> {
+    public static class BuilderImpl<B extends OntopSQLConfiguration.Builder<B>> extends OntopSQLBuilderMixin<B> {
 
         @Override
         public OntopSQLConfiguration build() {

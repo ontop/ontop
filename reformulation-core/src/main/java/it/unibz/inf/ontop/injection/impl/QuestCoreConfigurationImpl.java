@@ -101,7 +101,7 @@ public class QuestCoreConfigurationImpl extends OBDACoreConfigurationImpl implem
     }
 
 
-    protected static class DefaultQuestCoreBuilderFragment<B extends QuestCoreConfiguration.Builder>
+    protected static class DefaultQuestCoreBuilderFragment<B extends QuestCoreConfiguration.Builder<B>>
         implements QuestCoreBuilderFragment<B> {
 
         private final B builder;
@@ -178,7 +178,7 @@ public class QuestCoreConfigurationImpl extends OBDACoreConfigurationImpl implem
     }
 
 
-    protected abstract static class QuestCoreConfigurationBuilderMixin<B extends QuestCoreConfiguration.Builder>
+    protected abstract static class QuestCoreConfigurationBuilderMixin<B extends QuestCoreConfiguration.Builder<B>>
         extends OBDACoreConfigurationBuilderMixin<B>
         implements QuestCoreConfiguration.Builder<B> {
 
@@ -239,7 +239,7 @@ public class QuestCoreConfigurationImpl extends OBDACoreConfigurationImpl implem
     }
 
 
-    public static final class BuilderImpl<B extends QuestCoreConfiguration.Builder>
+    public static final class BuilderImpl<B extends QuestCoreConfiguration.Builder<B>>
             extends QuestCoreConfigurationBuilderMixin<B> {
 
         @Override

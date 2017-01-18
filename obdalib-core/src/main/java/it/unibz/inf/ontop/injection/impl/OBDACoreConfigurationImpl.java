@@ -135,7 +135,7 @@ public class OBDACoreConfigurationImpl extends OntopMappingSQLConfigurationImpl 
         }
     }
 
-    protected static class DefaultOBDACoreBuilderFragment<B extends OBDACoreConfiguration.Builder>
+    protected static class DefaultOBDACoreBuilderFragment<B extends OBDACoreConfiguration.Builder<B>>
             implements OBDACoreBuilderFragment<B> {
 
         private final B builder;
@@ -306,7 +306,7 @@ public class OBDACoreConfigurationImpl extends OntopMappingSQLConfigurationImpl 
         }
     }
 
-    protected abstract static class OBDACoreConfigurationBuilderMixin<B extends OBDACoreConfiguration.Builder>
+    protected abstract static class OBDACoreConfigurationBuilderMixin<B extends OBDACoreConfiguration.Builder<B>>
             extends OntopMappingSQLBuilderMixin<B>
             implements OBDACoreConfiguration.Builder<B> {
 
@@ -387,7 +387,7 @@ public class OBDACoreConfigurationImpl extends OntopMappingSQLConfigurationImpl 
     }
 
 
-    public static class BuilderImpl<B extends OBDACoreConfiguration.Builder>
+    public static class BuilderImpl<B extends OBDACoreConfiguration.Builder<B>>
             extends OBDACoreConfigurationBuilderMixin<B> {
 
         @Override

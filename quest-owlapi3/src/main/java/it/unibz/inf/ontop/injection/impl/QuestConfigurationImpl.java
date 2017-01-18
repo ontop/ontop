@@ -95,7 +95,7 @@ public class QuestConfigurationImpl extends QuestCoreConfigurationImpl implement
         }
     }
 
-    protected static class DefaultQuestConfigurationBuilderFragment<B extends QuestConfiguration.Builder>
+    protected static class DefaultQuestConfigurationBuilderFragment<B extends QuestConfiguration.Builder<B>>
         implements QuestConfigurationBuilderFragment<B> {
 
         private final B builder;
@@ -180,7 +180,7 @@ public class QuestConfigurationImpl extends QuestCoreConfigurationImpl implement
         }
     }
 
-    protected abstract static class QuestConfigurationBuilderMixin<B extends QuestConfiguration.Builder>
+    protected abstract static class QuestConfigurationBuilderMixin<B extends QuestConfiguration.Builder<B>>
         extends QuestCoreConfigurationBuilderMixin<B>
         implements QuestConfiguration.Builder<B> {
 
@@ -222,7 +222,7 @@ public class QuestConfigurationImpl extends QuestCoreConfigurationImpl implement
         }
     }
 
-    public static final class BuilderImpl<B extends QuestConfiguration.Builder>
+    public static final class BuilderImpl<B extends QuestConfiguration.Builder<B>>
             extends QuestConfigurationBuilderMixin<B> {
 
         @Override

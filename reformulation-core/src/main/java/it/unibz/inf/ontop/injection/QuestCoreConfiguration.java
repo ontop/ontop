@@ -18,7 +18,7 @@ public interface QuestCoreConfiguration extends OBDACoreConfiguration, OntopOpti
     QuestCoreSettings getSettings();
 
 
-    static Builder<Builder<Builder<Builder<Builder<Builder<Builder<Builder<Builder<Builder<Builder<Builder<Builder>>>>>>>>>>>> defaultBuilder() {
+    static Builder<? extends Builder> defaultBuilder() {
         return new QuestCoreConfigurationImpl.BuilderImpl<>();
     }
 
@@ -29,7 +29,7 @@ public interface QuestCoreConfiguration extends OBDACoreConfiguration, OntopOpti
      * Not the classic A-box mode is not intended to be used by end-users (but for test purposes).
      *
      */
-    interface QuestCoreBuilderFragment<B extends Builder> {
+    interface QuestCoreBuilderFragment<B extends Builder<B>> {
         B tMappingExclusionConfig(@Nonnull TMappingExclusionConfig config);
 
         B enableOntologyAnnotationQuerying(boolean queryingAnnotationsInOntology);
@@ -46,7 +46,7 @@ public interface QuestCoreConfiguration extends OBDACoreConfiguration, OntopOpti
         B enableExistentialReasoning(boolean enable);
     }
 
-    interface Builder<B extends Builder> extends QuestCoreBuilderFragment<B>,
+    interface Builder<B extends Builder<B>> extends QuestCoreBuilderFragment<B>,
             OBDACoreConfiguration.Builder<B>,
             OntopOptimizationConfiguration.Builder<B> {
 

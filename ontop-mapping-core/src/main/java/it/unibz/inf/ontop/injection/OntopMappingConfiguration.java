@@ -15,12 +15,12 @@ public interface OntopMappingConfiguration extends OntopOBDAConfiguration {
     OntopMappingSettings getSettings();
 
 
-    static Builder<Builder<Builder<Builder>>> defaultBuilder() {
+    static Builder<? extends Builder> defaultBuilder() {
         return new OntopMappingConfigurationImpl.BuilderImpl<>();
     }
 
 
-    interface OntopMappingBuilderFragment<B extends Builder> {
+    interface OntopMappingBuilderFragment<B extends Builder<B>> {
 
         B dbConstraintsReader(@Nonnull ImplicitDBConstraintsReader constraints);
 
@@ -28,7 +28,7 @@ public interface OntopMappingConfiguration extends OntopOBDAConfiguration {
 
     }
 
-    interface Builder<B extends Builder> extends OntopMappingBuilderFragment<B>, OntopOBDAConfiguration.Builder<B> {
+    interface Builder<B extends Builder<B>> extends OntopMappingBuilderFragment<B>, OntopOBDAConfiguration.Builder<B> {
 
         @Override
         OntopMappingConfiguration build();

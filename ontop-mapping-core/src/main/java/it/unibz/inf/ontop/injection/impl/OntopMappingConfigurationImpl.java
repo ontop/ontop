@@ -50,7 +50,7 @@ public class OntopMappingConfigurationImpl extends OntopOBDAConfigurationImpl im
         }
     }
 
-    static class DefaultOntopMappingBuilderFragment<B extends OntopMappingConfiguration.Builder>
+    static class DefaultOntopMappingBuilderFragment<B extends OntopMappingConfiguration.Builder<B>>
             implements OntopMappingBuilderFragment<B> {
 
         private final B builder;
@@ -86,7 +86,7 @@ public class OntopMappingConfigurationImpl extends OntopOBDAConfigurationImpl im
 
     }
 
-    static abstract class OntopMappingBuilderMixin<B extends OntopMappingConfiguration.Builder>
+    static abstract class OntopMappingBuilderMixin<B extends OntopMappingConfiguration.Builder<B>>
         extends OntopOBDAConfigurationBuilderMixin<B>
         implements OntopMappingConfiguration.Builder<B> {
 
@@ -125,7 +125,7 @@ public class OntopMappingConfigurationImpl extends OntopOBDAConfigurationImpl im
 
     }
 
-    public static class BuilderImpl<B extends OntopMappingConfiguration.Builder>
+    public static class BuilderImpl<B extends OntopMappingConfiguration.Builder<B>>
             extends OntopMappingBuilderMixin<B> {
 
         @Override

@@ -30,11 +30,11 @@ public interface QuestConfiguration extends QuestCoreConfiguration {
                         "Do not call this method unless you are sure of the ontology provision."));
     }
 
-    static Builder<Builder<Builder<Builder<Builder<Builder<Builder<Builder<Builder<Builder<Builder<Builder<Builder>>>>>>>>>>>> defaultBuilder() {
+    static Builder<? extends Builder> defaultBuilder() {
         return new QuestConfigurationImpl.BuilderImpl<>();
     }
 
-    interface QuestConfigurationBuilderFragment<B extends Builder> {
+    interface QuestConfigurationBuilderFragment<B extends Builder<B>> {
 
         B ontologyFile(@Nonnull String urlOrPath);
 
@@ -45,7 +45,7 @@ public interface QuestConfiguration extends QuestCoreConfiguration {
         B ontology(@Nonnull OWLOntology ontology);
     }
 
-    interface Builder<B extends Builder> extends QuestConfigurationBuilderFragment<B>,
+    interface Builder<B extends Builder<B>> extends QuestConfigurationBuilderFragment<B>,
             QuestCoreConfiguration.Builder<B> {
 
         @Override

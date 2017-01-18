@@ -344,7 +344,7 @@ public class OntopMaterialize extends OntopReasoningCommandBase {
     /**
      * Mapping file + connection info
      */
-    private Builder<Builder<? extends Builder>> createAndInitConfigurationBuilder() {
+    private Builder<? extends Builder> createAndInitConfigurationBuilder() {
         Builder configBuilder = QuestConfiguration.defaultBuilder()
                 .enableOntologyAnnotationQuerying(true)
                 .properties(createConnectionProperties());

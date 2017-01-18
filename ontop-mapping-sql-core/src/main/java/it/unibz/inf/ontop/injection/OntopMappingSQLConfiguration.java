@@ -11,17 +11,17 @@ public interface OntopMappingSQLConfiguration extends OntopSQLConfiguration, Ont
     /**
      * Default builder
      */
-    static Builder<Builder<Builder<Builder<Builder<Builder<Builder>>>>>> defaultBuilder() {
+    static Builder<? extends Builder> defaultBuilder() {
         return new OntopMappingSQLConfigurationImpl.BuilderImpl<>();
     }
 
     /**
      * TODO: explain
      */
-    interface OntopMappingSQLBuilderFragment<B extends Builder> {
+    interface OntopMappingSQLBuilderFragment<B extends Builder<B>> {
     }
 
-    interface Builder<B extends Builder> extends OntopMappingSQLBuilderFragment<B>,
+    interface Builder<B extends Builder<B>> extends OntopMappingSQLBuilderFragment<B>,
             OntopSQLConfiguration.Builder<B>, OntopMappingConfiguration.Builder<B> {
 
         @Override

@@ -8,11 +8,11 @@ public interface OntopSQLConfiguration extends OntopOBDAConfiguration {
     @Override
     OntopSQLSettings getSettings();
 
-    static Builder<Builder<Builder<Builder>>> defaultBuilder() {
+    static Builder<? extends Builder> defaultBuilder() {
         return new OntopSQLConfigurationImpl.BuilderImpl<>();
     }
 
-    interface OntopSQLBuilderFragment<B extends Builder> {
+    interface OntopSQLBuilderFragment<B extends Builder<B>> {
         B dbName(String dbName);
         B jdbcUrl(String jdbcUrl);
         B dbUser(String username);
@@ -20,7 +20,7 @@ public interface OntopSQLConfiguration extends OntopOBDAConfiguration {
         B jdbcDriver(String jdbcDriver);
     }
 
-    interface Builder<B extends Builder> extends OntopSQLBuilderFragment<B>, OntopOBDAConfiguration.Builder<B> {
+    interface Builder<B extends Builder<B>> extends OntopSQLBuilderFragment<B>, OntopOBDAConfiguration.Builder<B> {
         @Override
         OntopSQLConfiguration build();
     }

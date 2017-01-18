@@ -101,7 +101,7 @@ public class OntopModelConfigurationImpl implements OntopModelConfiguration {
         }
     }
 
-    protected static class DefaultOntopModelBuilderFragment<B extends Builder> implements OntopModelBuilderFragment<B> {
+    protected static class DefaultOntopModelBuilderFragment<B extends Builder<B>> implements OntopModelBuilderFragment<B> {
 
         private final B builder;
         private Optional<Boolean> testMode = Optional.empty();
@@ -193,7 +193,7 @@ public class OntopModelConfigurationImpl implements OntopModelConfiguration {
      * Builder
      *
      */
-    public final static class BuilderImpl<B extends Builder> extends DefaultOntopModelBuilderFragment<B>
+    public final static class BuilderImpl<B extends Builder<B>> extends DefaultOntopModelBuilderFragment<B>
             implements Builder<B> {
 
         @Override

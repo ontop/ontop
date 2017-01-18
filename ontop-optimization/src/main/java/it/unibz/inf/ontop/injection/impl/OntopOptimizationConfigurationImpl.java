@@ -82,7 +82,7 @@ public class OntopOptimizationConfigurationImpl extends OntopModelConfigurationI
         return internalExecutorMapBuilder.build();
     }
 
-    protected static class DefaultOntopOptimizationBuilderFragment<B extends OntopOptimizationConfiguration.Builder>
+    protected static class DefaultOntopOptimizationBuilderFragment<B extends OntopOptimizationConfiguration.Builder<B>>
             implements OntopOptimizationBuilderFragment<B> {
 
         private final B builder;
@@ -116,7 +116,7 @@ public class OntopOptimizationConfigurationImpl extends OntopModelConfigurationI
      * Inherits from DefaultOntopModelBuilderFragment because it has more methods
      * than DefaultOntopOptimizationBuilderFragment (more convenient).
      */
-    protected static abstract class AbstractOntopOptimizationBuilderMixin<B extends OntopOptimizationConfiguration.Builder>
+    protected static abstract class AbstractOntopOptimizationBuilderMixin<B extends OntopOptimizationConfiguration.Builder<B>>
             extends DefaultOntopModelBuilderFragment<B>
             implements OntopOptimizationConfiguration.Builder<B> {
 
@@ -143,7 +143,7 @@ public class OntopOptimizationConfigurationImpl extends OntopModelConfigurationI
     }
 
 
-    public final static class BuilderImpl<B extends OntopOptimizationConfiguration.Builder>
+    public final static class BuilderImpl<B extends OntopOptimizationConfiguration.Builder<B>>
             extends AbstractOntopOptimizationBuilderMixin<B> {
 
         @Override

@@ -64,7 +64,7 @@ public class OntopMappingSQLConfigurationImpl extends OntopSQLConfigurationImpl 
         }
     }
 
-    protected static class DefaultMappingSQLBuilderFragment<B extends OntopMappingSQLConfiguration.Builder>
+    protected static class DefaultMappingSQLBuilderFragment<B extends OntopMappingSQLConfiguration.Builder<B>>
             implements OntopMappingSQLBuilderFragment<B> {
 
         private final B builder;
@@ -87,7 +87,7 @@ public class OntopMappingSQLConfigurationImpl extends OntopSQLConfigurationImpl 
         }
     }
 
-    protected abstract static class OntopMappingSQLBuilderMixin<B extends OntopMappingSQLConfiguration.Builder>
+    protected abstract static class OntopMappingSQLBuilderMixin<B extends OntopMappingSQLConfiguration.Builder<B>>
             extends OntopMappingConfigurationImpl.OntopMappingBuilderMixin<B>
             implements OntopMappingSQLConfiguration.Builder<B> {
 
@@ -143,7 +143,7 @@ public class OntopMappingSQLConfigurationImpl extends OntopSQLConfigurationImpl 
     }
 
 
-    public static class BuilderImpl<B extends OntopMappingSQLConfiguration.Builder>
+    public static class BuilderImpl<B extends OntopMappingSQLConfiguration.Builder<B>>
             extends OntopMappingSQLBuilderMixin<B> {
 
         @Override
