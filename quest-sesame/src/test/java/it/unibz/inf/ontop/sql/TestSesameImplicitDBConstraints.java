@@ -63,7 +63,7 @@ public class TestSesameImplicitDBConstraints {
 
 		/*
 		OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
-		obdaModel = fac.getOBDAModel();
+		obdaModel = fac.parse();
 		ModelIOManager ioManager = new ModelIOManager(obdaModel);
 		ioManager.load(obdafile);
 		 */

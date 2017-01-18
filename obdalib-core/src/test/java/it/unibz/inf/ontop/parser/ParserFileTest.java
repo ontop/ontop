@@ -27,7 +27,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import com.google.inject.Injector;
 import it.unibz.inf.ontop.injection.OBDACoreConfiguration;
 import it.unibz.inf.ontop.sql.RDBMetadata;
@@ -51,12 +50,12 @@ public class ParserFileTest extends TestCase {
 	final static Logger log = LoggerFactory
 			.getLogger(ParserFileTest.class);
 
-    private final NativeQueryLanguageComponentFactory factory;
+	private final MappingParser mappingParser;
 
-    public ParserFileTest() {
+	public ParserFileTest() {
 		OBDACoreConfiguration configuration = OBDACoreConfiguration.defaultBuilder().build();
 		Injector injector = configuration.getInjector();
-        factory = injector.getInstance(NativeQueryLanguageComponentFactory.class);
+		mappingParser = injector.getInstance(MappingParser.class);
     }
 
 	// @Test
@@ -165,8 +164,7 @@ public class ParserFileTest extends TestCase {
 	private OBDAModel load(String file) throws InvalidMappingException, IOException {
 		final String obdafile = file.substring(0, file.length() - 3) + "obda";
         try {
-            MappingParser mappingParser = factory.create(new File(obdafile));
-            return mappingParser.getOBDAModel();
+            return mappingParser.parse(new File(obdafile));
         }
         catch (Exception e) {
             log.debug(e.toString());

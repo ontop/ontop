@@ -5,8 +5,9 @@ import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.exception.InvalidMappingException;
 import it.unibz.inf.ontop.injection.MappingFactory;
-import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
 import it.unibz.inf.ontop.injection.OBDAFactoryWithException;
+import it.unibz.inf.ontop.injection.QuestConfiguration;
+import it.unibz.inf.ontop.io.DataSource2PropertiesConvertor;
 import it.unibz.inf.ontop.io.PrefixManager;
 import it.unibz.inf.ontop.mapping.MappingParser;
 import it.unibz.inf.ontop.model.*;
@@ -58,7 +59,6 @@ public class OBDAModelWrapper {
      *  This variable is frequently re-affected.
      */
     private final static OntologyFactory ONTOLOGY_FACTORY = OntologyFactoryImpl.getInstance();
-    private final NativeQueryLanguageComponentFactory nativeQLFactory;
     private final OBDAFactoryWithException obdaFactory;
     private final MappingFactory mappingFactory;
     private Optional<OBDADataSource> source;
@@ -70,10 +70,9 @@ public class OBDAModelWrapper {
     private final List<OBDAMappingListener> mappingListeners;
     private final OntologyVocabulary ontologyVocabulary;
 
-    public OBDAModelWrapper(MappingFactory mappingFactory, NativeQueryLanguageComponentFactory nativeQLFactory,
+    public OBDAModelWrapper(MappingFactory mappingFactory,
                             OBDAFactoryWithException obdaFactory, PrefixManagerWrapper prefixManager) {
         this.mappingFactory = mappingFactory;
-        this.nativeQLFactory = nativeQLFactory;
         this.obdaFactory = obdaFactory;
         this.prefixManager = prefixManager;
         this.obdaModel = createNewOBDAModel(mappingFactory, obdaFactory, prefixManager);
@@ -94,8 +93,17 @@ public class OBDAModelWrapper {
      * UGLY!
      */
     public void parseMappings(File mappingFile) throws DuplicateMappingException, InvalidMappingException, IOException {
-        MappingParser mappingParser = nativeQLFactory.create(mappingFile);
-        OBDAModel newObdaModel = mappingParser.getOBDAModel();
+        Properties properties = source
+                .map(DataSource2PropertiesConvertor::convert)
+                .orElseThrow(() -> new IllegalStateException("Cannot parse the mapping without a data source"));
+
+        QuestConfiguration configuration = QuestConfiguration.defaultBuilder()
+                .properties(properties)
+                .nativeOntopMappingFile(mappingFile)
+                .build();
+        MappingParser mappingParser = configuration.getInjector().getInstance(MappingParser.class);
+
+        OBDAModel newObdaModel = mappingParser.parse(mappingFile);
 
         ImmutableMap<String, String> mergedPrefixes = Stream.concat(
                 obdaModel.getMetadata().getPrefixManager().getPrefixMap().entrySet().stream(),

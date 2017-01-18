@@ -6,7 +6,6 @@ import it.unibz.inf.ontop.exception.InvalidMappingException;
 import it.unibz.inf.ontop.injection.*;
 import it.unibz.inf.ontop.mapping.MappingParser;
 import it.unibz.inf.ontop.model.OBDAModel;
-import it.unibz.inf.ontop.sql.ImplicitDBConstraintsReader;
 import org.eclipse.rdf4j.model.Model;
 
 import javax.annotation.Nonnull;
@@ -53,8 +52,7 @@ public class OBDACoreConfigurationImpl extends OntopMappingSQLConfigurationImpl 
             return options.predefinedMappingModel;
         }
 
-        NativeQueryLanguageComponentFactory nativeQLFactory = getInjector().getInstance(
-                NativeQueryLanguageComponentFactory.class);
+        MappingParser parser = getInjector().getInstance(MappingParser.class);
 
         Optional<File> optionalMappingFile = options.mappingFile
                 .map(Optional::of)
@@ -62,16 +60,13 @@ public class OBDACoreConfigurationImpl extends OntopMappingSQLConfigurationImpl 
                         .map(File::new));
 
         if (optionalMappingFile.isPresent()) {
-            MappingParser parser = nativeQLFactory.create(optionalMappingFile.get());
-            return Optional.of(parser.getOBDAModel());
+            return Optional.of(parser.parse(optionalMappingFile.get()));
         }
         else if (options.mappingReader.isPresent()) {
-            MappingParser parser = nativeQLFactory.create(options.mappingReader.get());
-            return Optional.of(parser.getOBDAModel());
+            return Optional.of(parser.parse(options.mappingReader.get()));
         }
         else if (options.mappingGraph.isPresent()) {
-            MappingParser parser = nativeQLFactory.create(options.mappingGraph.get());
-            return Optional.of(parser.getOBDAModel());
+            return Optional.of(parser.parse(options.mappingGraph.get()));
         }
         /**
          * Hook

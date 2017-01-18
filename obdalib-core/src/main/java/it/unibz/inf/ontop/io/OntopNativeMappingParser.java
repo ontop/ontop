@@ -25,8 +25,7 @@ import java.util.*;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.inject.assistedinject.Assisted;
-import com.google.inject.assistedinject.AssistedInject;
+import com.google.inject.Inject;
 
 import it.unibz.inf.ontop.exception.*;
 import it.unibz.inf.ontop.injection.MappingFactory;
@@ -50,7 +49,7 @@ import static it.unibz.inf.ontop.exception.InvalidMappingExceptionWithIndicator.
 /**
  * Mapping parser specific to the Ontop Native Mapping Language for SQL.
  *
- * Available through a Guice-enabled factory.
+ * Available through Guice.
  *
  */
 public class OntopNativeMappingParser implements MappingParser {
@@ -78,48 +77,16 @@ public class OntopNativeMappingParser implements MappingParser {
     private final OBDAFactoryWithException obdaFactory;
     private final MappingFactory mappingFactory;
 
-    private OBDAModel model;
-
     /**
-     * Temporary (removed after parsing)
+     * Create an SQL Mapping Parser for generating an OBDA model.
      */
-    private Reader reader;
-    private final File file;
-
-    @AssistedInject
-    private OntopNativeMappingParser(@Assisted Reader reader, NativeQueryLanguageComponentFactory nativeQLFactory,
+    @Inject
+    private OntopNativeMappingParser(NativeQueryLanguageComponentFactory nativeQLFactory,
                                      MappingFactory mappingFactory,
                                      OBDAFactoryWithException obdaFactory) {
         this.nativeQLFactory = nativeQLFactory;
         this.obdaFactory = obdaFactory;
         this.mappingFactory = mappingFactory;
-        this.model = null;
-        this.reader = reader;
-        this.file = null;
-    }
-    
-    /**
-     * Create an SQL Mapping Parser for generating an OBDA model.
-     */
-    @AssistedInject
-    private OntopNativeMappingParser(@Assisted File file, MappingFactory mappingFactory,
-                                     NativeQueryLanguageComponentFactory nativeQLFactory,
-                                     OBDAFactoryWithException obdaFactory) {
-        this.mappingFactory = mappingFactory;
-        this.nativeQLFactory = nativeQLFactory;
-        this.obdaFactory = obdaFactory;
-        this.model = null;
-        this.file = file;
-        this.reader = null;
-    }
-
-    /**
-     * RDF graph argument is not supported. This constructor is required by the factory.
-     */
-    @AssistedInject
-    private OntopNativeMappingParser(@Assisted Model mappingGraph, NativeQueryLanguageComponentFactory factory) {
-        throw new IllegalArgumentException("The Ontop native mapping language has no RDF serialization. Passing a RDF graph" +
-                "to the OntopNativeMappingParser is thus invalid.");
     }
 
     /**
@@ -128,13 +95,23 @@ public class OntopNativeMappingParser implements MappingParser {
      *
      */
     @Override
-    public OBDAModel getOBDAModel() throws InvalidMappingException, IOException, DuplicateMappingException {
-        if (model == null) {
-            this.model = load(reader, file, mappingFactory, nativeQLFactory, obdaFactory);
-            reader = null;
-        }
-        return model;
+    public OBDAModel parse(File file) throws InvalidMappingException, IOException, DuplicateMappingException {
+        checkFile(file);
+        Reader reader = new FileReader(file);
+        return load(reader, mappingFactory, nativeQLFactory, obdaFactory, file.getName());
     }
+
+    @Override
+    public OBDAModel parse(Reader reader) throws InvalidMappingException, IOException, DuplicateMappingException {
+        return load(reader, mappingFactory, nativeQLFactory, obdaFactory, ".obda file");
+    }
+
+    @Override
+    public OBDAModel parse(Model mappingGraph) throws InvalidMappingException, IOException, DuplicateMappingException {
+        throw new IllegalArgumentException("The Ontop native mapping language has no RDF serialization. Passing a RDF graph" +
+                "to the OntopNativeMappingParser is thus invalid.");
+    }
+
 
     private static void checkFile(File file) throws IOException {
         if (!file.exists()) {
@@ -152,18 +129,10 @@ public class OntopNativeMappingParser implements MappingParser {
      *
      * TODO: refactor it. Way too complex.
      */
-	private static OBDAModel load(Reader reader, File file, MappingFactory mappingFactory,
+	private static OBDAModel load(Reader reader, MappingFactory mappingFactory,
                                   NativeQueryLanguageComponentFactory nativeQLFactory,
-                                  OBDAFactoryWithException obdaFactory)
+                                  OBDAFactoryWithException obdaFactory, String fileName)
             throws IOException, InvalidMappingExceptionWithIndicator, DuplicateMappingException {
-
-		/**
-		 * File and reader are not supposed to be both initially defined.
-		 */
-        if (file != null) {
-            checkFile(file);
-            reader = new FileReader(file);
-        }
 
         LineNumberReader lineNumberReader = new LineNumberReader(reader);
 
@@ -213,8 +182,6 @@ public class OntopNativeMappingParser implements MappingParser {
 	                throw new IOException("Unknown syntax: " + line);
 	            }
 	       	} catch (Exception e) {
-                String fileName =  (file != null) ? file.getName() : ".obda file";
-
 	        	throw new IOException(String.format("ERROR reading %s at line: %s", fileName,
                         lineNumberReader.getLineNumber()
                         + " \nMESSAGE: " + e.getMessage()), e);

@@ -1,7 +1,6 @@
 package it.unibz.inf.ontop.owlrefplatform.owlapi.example;
 
 import com.google.inject.Injector;
-import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
 import it.unibz.inf.ontop.mapping.MappingParser;
 import it.unibz.inf.ontop.model.OBDAModel;
 import it.unibz.inf.ontop.owlapi.OWLAPITranslatorUtility;
@@ -47,11 +46,10 @@ private void setup()  throws Exception {
 			.dbMetadata(getMeta())
 			.build();
 	Injector injector = configuration.getInjector();
-	NativeQueryLanguageComponentFactory nativeQLFactory = injector.getInstance(NativeQueryLanguageComponentFactory.class);
 	QuestComponentFactory componentFactory = injector.getInstance(QuestComponentFactory.class);
 
-	MappingParser mappingParser = nativeQLFactory.create(new File(obdafile));
-	OBDAModel obdaModel = mappingParser.getOBDAModel();
+	MappingParser mappingParser = injector.getInstance(MappingParser.class);
+	OBDAModel obdaModel = mappingParser.parse(new File(obdafile));
 	
 	/*
 	 * Prepare the configuration for the Quest instance. The example below shows the setup for

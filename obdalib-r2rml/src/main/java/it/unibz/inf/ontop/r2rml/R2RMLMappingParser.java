@@ -2,8 +2,7 @@ package it.unibz.inf.ontop.r2rml;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.inject.assistedinject.Assisted;
-import com.google.inject.assistedinject.AssistedInject;
+import com.google.inject.Inject;
 import it.unibz.inf.ontop.injection.MappingFactory;
 import it.unibz.inf.ontop.mapping.MappingMetadata;
 import org.eclipse.rdf4j.model.Model;
@@ -25,8 +24,6 @@ import java.io.Reader;
 
 /**
  * High-level class that implements the MappingParser interface for R2RML.
- *
- * Guice-enabled, available through factories.
  */
 public class R2RMLMappingParser implements MappingParser {
 
@@ -34,84 +31,54 @@ public class R2RMLMappingParser implements MappingParser {
     private final NativeQueryLanguageComponentFactory nativeQLFactory;
     private final OBDAFactoryWithException obdaFactory;
     private final MappingFactory mappingFactory;
-    private OBDAModel obdaModel;
 
-    /**
-     * Either a file or a Sesame "model"
-     */
-    private final File mappingFile;
-    private final Model mappingGraph;
 
-    @AssistedInject
-    private R2RMLMappingParser(@Assisted File mappingFile, NativeQueryLanguageComponentFactory nativeQLFactory,
+    @Inject
+    private R2RMLMappingParser(NativeQueryLanguageComponentFactory nativeQLFactory,
                                OBDAFactoryWithException obdaFactory, MappingFactory mappingFactory,
                                OBDASettings configuration) {
         this.nativeQLFactory = nativeQLFactory;
         this.obdaFactory = obdaFactory;
         this.configuration = configuration;
-        this.mappingFile = mappingFile;
         this.mappingFactory = mappingFactory;
-        this.mappingGraph = null;
-
-        /**
-         * Computed lazily  (when requested for the first time).
-         */
-        this.obdaModel = null;
-    }
-
-    @AssistedInject
-    private R2RMLMappingParser(@Assisted Model mappingGraph, MappingFactory mappingFactory,
-                               NativeQueryLanguageComponentFactory nativeQLFactory,
-                               OBDAFactoryWithException obdaFactory, OBDASettings configuration) {
-        this.nativeQLFactory = nativeQLFactory;
-        this.obdaFactory = obdaFactory;
-        this.mappingFactory = mappingFactory;
-        this.configuration = configuration;
-        this.mappingGraph = mappingGraph;
-        this.mappingFile = null;
-        this.obdaModel = null;
-    }
-
-    @AssistedInject
-    private R2RMLMappingParser(@Assisted Reader reader,
-                               NativeQueryLanguageComponentFactory nativeQLFactory,
-                               OBDASettings configuration) {
-        // TODO: support this
-        throw new IllegalArgumentException("The R2RMLMappingParser does not support" +
-                "yet the Reader interface.");
     }
 
 
     @Override
-    public OBDAModel getOBDAModel() throws InvalidMappingException, IOException, DuplicateMappingException {
-        /**
-         * The OBDA model is only computed once.
-         */
-        if (obdaModel != null) {
-            return obdaModel;
+    public OBDAModel parse(File mappingFile) throws InvalidMappingException, IOException, DuplicateMappingException {
+
+        try {
+            R2RMLManager r2rmlManager = new R2RMLManager(mappingFile, nativeQLFactory);
+            return parse(r2rmlManager);
+
+        } catch (RDFParseException | RDFHandlerException e) {
+            throw new InvalidMappingException(e.getMessage());
         }
+    }
 
-        R2RMLManager r2rmlManager;
-        if (mappingFile != null)
-            try {
-                r2rmlManager = new R2RMLManager(mappingFile, nativeQLFactory);
-            } catch (RDFParseException | RDFHandlerException e) {
-                throw new InvalidMappingException(e.getMessage());
-            }
-        else if (mappingGraph != null)
-            r2rmlManager = new R2RMLManager(mappingGraph, nativeQLFactory);
-        else
-            throw new RuntimeException("Internal inconsistency. A mappingFile or a mappingGraph should be defined.");
+    @Override
+    public OBDAModel parse(Reader reader) throws InvalidMappingException, IOException, DuplicateMappingException {
+        // TODO: support this
+        throw new UnsupportedOperationException("The R2RMLMappingParser does not support" +
+                "yet the Reader interface.");
+    }
 
+    @Override
+    public OBDAModel parse(Model mappingGraph) throws InvalidMappingException, IOException, DuplicateMappingException {
+        R2RMLManager r2rmlManager = new R2RMLManager(mappingGraph, nativeQLFactory);
+        return parse(r2rmlManager);
+    }
+
+    private OBDAModel parse(R2RMLManager manager) {
         //TODO: make the R2RMLManager simpler.
-        ImmutableList<OBDAMappingAxiom> sourceMappings = r2rmlManager.getMappings(r2rmlManager.getModel());
+        ImmutableList<OBDAMappingAxiom> sourceMappings = manager.getMappings(manager.getModel());
 
         //TODO: try to extract prefixes from the R2RML mappings
         PrefixManager prefixManager = mappingFactory.create(ImmutableMap.of());
         MappingMetadata mappingMetadata = mappingFactory.create(prefixManager);
 
-        obdaModel = obdaFactory.createOBDAModel(sourceMappings, mappingMetadata);
-
-    return obdaModel;
+        return obdaFactory.createOBDAModel(sourceMappings, mappingMetadata);
     }
+
+
 }

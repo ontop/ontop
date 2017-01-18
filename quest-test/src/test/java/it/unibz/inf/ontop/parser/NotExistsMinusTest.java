@@ -70,7 +70,7 @@
 //
 //        // Loading the OBDA data
 //        factory = OBDADataFactoryImpl.getInstance();
-//        obdaModel = factory.getOBDAModel();
+//        obdaModel = factory.parse();
 //
 //        ModelIOManager ioManager = new ModelIOManager(obdaModel);
 //        ioManager.load(obdaFile);

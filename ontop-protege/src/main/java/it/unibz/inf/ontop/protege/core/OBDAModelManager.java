@@ -438,7 +438,7 @@ public class OBDAModelManager implements Disposable {
         PrefixDocumentFormat prefixManager = PrefixUtilities.getPrefixOWLOntologyFormat(mmgr.getActiveOntology());
         PrefixManagerWrapper prefixWrapper = new PrefixManagerWrapper(prefixManager);
 
-		activeOBDAModel = new OBDAModelWrapper(mappingFactory, nativeQLFactory, obdaFactory, prefixWrapper);
+		activeOBDAModel = new OBDAModelWrapper(mappingFactory, obdaFactory, prefixWrapper);
 		activeOBDAModel.addSourceListener(dlistener);
 		activeOBDAModel.addMappingsListener(mlistener);
 		queryController.addListener(qlistener);

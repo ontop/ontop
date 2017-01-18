@@ -246,7 +246,7 @@ public class Quest implements Serializable, IQuest {
 	private void loadOBDAModel(OBDAModel model) {
 
 		if (model == null) {
-			//model = OBDADataFactoryImpl.getInstance().getOBDAModel();
+			//model = OBDADataFactoryImpl.getInstance().parse();
 			// TODO: refactor this pretty bad practice.
 			//TODO: add the prefix.
 			PrefixManager defaultPrefixManager = mappingFactory.create(ImmutableMap.of());

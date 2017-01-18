@@ -71,7 +71,7 @@ public class AggregatesTest extends AbstractVirtualModeTest {
 //		ontology = manager.loadOntologyFromOntologyDocument((new File(owlfile)));
 //
 //		// Loading the OBDA data
-//		obdaModel = fac.getOBDAModel();
+//		obdaModel = fac.parse();
 //
 //		ModelIOManager ioManager = new ModelIOManager(obdaModel);
 //		ioManager.load(obdafile);

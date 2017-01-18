@@ -62,7 +62,7 @@ public class OWLConstructDescribeTest{
 //			source.setParameter(RDBMSourceParameterConstants.IS_IN_MEMORY, "true");
 //			source.setParameter(RDBMSourceParameterConstants.USE_DATASOURCE_FOR_ABOXDUMP, "true");
 //
-//			obdaModel = fac.getOBDAModel();
+//			obdaModel = fac.parse();
 //			obdaModel.addSource(source);
 
 			Properties p = new Properties();

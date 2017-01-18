@@ -25,9 +25,9 @@ public class OntopMappingModule extends OntopAbstractModule {
         bind(OntopMappingSettings.class).toInstance(settings);
 
         bindFromPreferences(OBDAFactoryWithException.class);
+        bindFromPreferences(MappingParser.class);
 
         Module nativeQLFactoryModule = buildFactory(ImmutableList.<Class>of(
-                MappingParser.class,
                 DBMetadataExtractor.class,
                 OBDAMappingAxiom.class
                 ),

@@ -24,8 +24,8 @@ public class ConcatTest {
 		NativeQueryLanguageComponentFactory nativeQLFactory = injector.getInstance(
 				NativeQueryLanguageComponentFactory.class);
 
-		MappingParser mappingParser = nativeQLFactory.create(new File("src/test/resources/format/obda/mapping-northwind.obda"));
-		mappingParser.getOBDAModel();
+		MappingParser mappingParser = injector.getInstance(MappingParser.class);
+		mappingParser.parse(new File("src/test/resources/format/obda/mapping-northwind.obda"));
 	}
 
 }

@@ -24,10 +24,6 @@ import java.util.List;
  */
 public interface NativeQueryLanguageComponentFactory {
 
-    MappingParser create(Reader reader);
-    MappingParser create(File file);
-    MappingParser create(Model mappingGraph);
-
     DBMetadataExtractor create();
 
     OBDAMappingAxiom create(String id, @Assisted("sourceQuery") SourceQuery sourceQuery,

@@ -55,6 +55,7 @@ public class SQLMappingParserUsingOwlTest {
     private final NativeQueryLanguageComponentFactory nativeQLFactory;
     private final OBDAFactoryWithException modelFactory;
     private final MappingFactory mappingFactory;
+    private final MappingParser mappingParser;
 
     private TurtleOBDASyntaxParser parser;
 
@@ -86,6 +87,8 @@ public class SQLMappingParserUsingOwlTest {
 
         Injector injector = configuration.getInjector();
         mappingFactory = injector.getInstance(MappingFactory.class);
+
+        mappingParser = injector.getInstance(MappingParser.class);
         nativeQLFactory = injector.getInstance(NativeQueryLanguageComponentFactory.class);
         modelFactory = injector.getInstance(OBDAFactoryWithException.class);
     }
@@ -172,8 +175,7 @@ public class SQLMappingParserUsingOwlTest {
     private OBDAModel loadObdaFile(String fileLocation) throws IOException,
             InvalidPredicateDeclarationException, InvalidMappingException, DuplicateMappingException {
         // Load the OBDA model
-        MappingParser mappingParser = nativeQLFactory.create(new File(fileLocation));
-        return mappingParser.getOBDAModel();
+        return mappingParser.parse(new File(fileLocation));
     }
 
     private PrefixManager setupPrefixManager() {
