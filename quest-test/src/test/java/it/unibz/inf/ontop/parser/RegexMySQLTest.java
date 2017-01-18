@@ -32,7 +32,7 @@ public class RegexMySQLTest extends AbstractVirtualModeTest {
 	static final String owlfile = "src/test/resources/regex/stockBolzanoAddress.owl";
 	static final String obdafile = "src/test/resources/regex/stockexchangeRegexMySQL.obda";
 
-	protected RegexMySQLTest() {
+	public RegexMySQLTest() {
 		super(owlfile, obdafile);
 	}
 

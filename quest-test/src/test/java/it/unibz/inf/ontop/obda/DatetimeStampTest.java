@@ -2,13 +2,13 @@ package it.unibz.inf.ontop.obda;
 
 
 import it.unibz.inf.ontop.injection.QuestConfiguration;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
-import org.junit.Test;
-import it.unibz.inf.ontop.io.QueryIOManager;
 import it.unibz.inf.ontop.injection.QuestCoreSettings;
+import it.unibz.inf.ontop.io.QueryIOManager;
+import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import it.unibz.inf.ontop.querymanager.QueryController;
 import it.unibz.inf.ontop.querymanager.QueryControllerGroup;
 import it.unibz.inf.ontop.querymanager.QueryControllerQuery;
+import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,12 +24,12 @@ public class DatetimeStampTest {
     final String r2rmlFile = "src/test/resources/northwind/mapping-northwind-dmo.ttl";
     final String obdaFile = "src/test/resources/northwind/mapping-northwind-dmo.obda";
 
-    private void runTests(String filename, boolean isR2rml) throws Exception {
+    private void runTests(String filename, boolean isR2rml, Properties p) throws Exception {
 
         // Creating a new instance of the reasoner
         QuestOWLFactory factory = new QuestOWLFactory();
         QuestConfiguration.Builder configBuilder = QuestConfiguration.defaultBuilder()
-                .ontologyFile(owlFile);
+                .ontologyFile(owlFile).properties(p);
 
         if (isR2rml) {
             configBuilder.r2rmlMappingFile(filename);
@@ -88,21 +88,22 @@ public class DatetimeStampTest {
     @Test
     public void testR2rml() throws Exception {
         Properties p = new Properties();
+        p.setProperty(QuestCoreSettings.DB_NAME, "jdbc:mysql://10.7.20.39/northwind");
         p.setProperty(QuestCoreSettings.JDBC_URL, "jdbc:mysql://10.7.20.39/northwind");
         p.setProperty(QuestCoreSettings.DB_USER, "fish");
         p.setProperty(QuestCoreSettings.DB_PASSWORD, "fish");
         p.setProperty(QuestCoreSettings.JDBC_DRIVER, "com.mysql.jdbc.Driver");
 
         log.info("Loading r2rml file");
-        runTests(r2rmlFile, true);
+        runTests(r2rmlFile, true, p);
     }
 
 
     @Test
     public void testOBDA() throws Exception {
-
+        Properties p = new Properties();
         log.info("Loading OBDA file");
-        runTests(obdaFile, false);
+        runTests(obdaFile, false, p);
     }
 
 

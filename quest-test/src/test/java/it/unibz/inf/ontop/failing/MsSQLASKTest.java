@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.ask;
+package it.unibz.inf.ontop.failing;
 
 
 import it.unibz.inf.ontop.quest.AbstractVirtualModeTest;

@@ -33,7 +33,7 @@ public class OntologyTypesDatatypeTest extends AbstractVirtualModeTest {
     static final String owlfile = "src/main/resources/testcases-datatypes/datetime/datatypes.owl";
     static final String obdafile = "src/main/resources/testcases-datatypes/datetime/datatypes-mysql.obda";
 
-    protected OntologyTypesDatatypeTest() {
+    public OntologyTypesDatatypeTest() {
         super(owlfile, obdafile);
     }
 
@@ -47,7 +47,7 @@ public class OntologyTypesDatatypeTest extends AbstractVirtualModeTest {
                 "   FILTER ( ?x = \"2013-03-18\"^^xsd:date ) .\n" +
                 "}";
 
-        String result = runQueryAndReturnStringX(query1);
+        String result = runQueryAndReturnStringOfLiteralX(query1);
 		assertEquals(result, "\"2013-03-18\"");
 	}
 	
@@ -59,7 +59,7 @@ public class OntologyTypesDatatypeTest extends AbstractVirtualModeTest {
                 "   FILTER ( ?x = \"10:12:10\"^^xsd:time ) .\n" +
                 "}";
 
-        String result = runQueryAndReturnStringX(query1);
+        String result = runQueryAndReturnStringOfLiteralX(query1);
         assertEquals(result, "\"10:12:10\"");
     }
 	
@@ -69,7 +69,7 @@ public class OntologyTypesDatatypeTest extends AbstractVirtualModeTest {
                 "   ?s a :Row; :hasYear ?x\n" +
                 "   FILTER ( ?x = \"2013\"^^xsd:gYear ) .\n" +
                 "}";
-        String result = runQueryAndReturnStringX(query1);
+        String result = runQueryAndReturnStringOfLiteralX(query1);
         assertEquals(result, "\"2013\"");
     }
 

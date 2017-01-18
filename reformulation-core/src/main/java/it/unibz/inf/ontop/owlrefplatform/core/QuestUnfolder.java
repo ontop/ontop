@@ -5,7 +5,10 @@ import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMultimap;
 import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
+import it.unibz.inf.ontop.injection.QuestCoreSettings;
 import it.unibz.inf.ontop.model.*;
+import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
+import it.unibz.inf.ontop.model.impl.TermUtils;
 import it.unibz.inf.ontop.ontology.*;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.CQContainmentCheckUnderLIDs;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.EQNormalizer;
@@ -14,14 +17,10 @@ import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.VocabularyValidato
 import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing.*;
 import it.unibz.inf.ontop.owlrefplatform.core.unfolding.DatalogUnfolder;
-
-import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
-import it.unibz.inf.ontop.model.impl.TermUtils;
-import it.unibz.inf.ontop.injection.QuestCoreSettings;
 import it.unibz.inf.ontop.pivotalrepr.MetadataForQueryOptimization;
 import it.unibz.inf.ontop.pivotalrepr.impl.MetadataForQueryOptimizationImpl;
-import it.unibz.inf.ontop.sql.RDBMetadata;
 import it.unibz.inf.ontop.sql.DatabaseRelationDefinition;
+import it.unibz.inf.ontop.sql.RDBMetadata;
 import it.unibz.inf.ontop.sql.Relation2DatalogPredicate;
 import it.unibz.inf.ontop.sql.RelationID;
 import it.unibz.inf.ontop.utils.IMapping2DatalogConverter;
@@ -108,10 +107,6 @@ public class QuestUnfolder {
 		// Apply TMappings
 		unfoldingProgram = applyTMappings(unfoldingProgram, reformulationReasoner, true, metadata, excludeFromTMappings);
 
-		// Adding ontology assertions (ABox) as rules (facts, head with no body).
-		addAssertionsAsFacts(unfoldingProgram, inputOntology.getClassAssertions(),
-				inputOntology.getObjectPropertyAssertions(), inputOntology.getDataPropertyAssertions(),
-				inputOntology.getAnnotationAssertions());
 
 		// Adding data typing on the mapping axioms.
 		 // Adding NOT NULL conditions to the variables used in the head
@@ -131,6 +126,7 @@ public class QuestUnfolder {
 		// Temporary (needed by the assertions)
 		uriTemplateMatcher = UriTemplateMatcher.create(unfoldingProgram);
 
+		// Adding ontology assertions (ABox) as rules (facts, head with no body).
 		addAssertionsAsFacts(unfoldingProgram, inputOntology.getClassAssertions(),
 				inputOntology.getObjectPropertyAssertions(), inputOntology.getDataPropertyAssertions(), annotationAssertions);
 

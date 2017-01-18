@@ -27,7 +27,6 @@ package it.unibz.inf.ontop.quest.sparql;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLResultSet;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLStatement;
 import it.unibz.inf.ontop.quest.AbstractVirtualModeTest;
-
 import org.semanticweb.owlapi.model.OWLObject;
 
 
@@ -40,7 +39,7 @@ public class OracleDateTimeTest extends AbstractVirtualModeTest {
 	static final String owlfile = "src/test/resources/dateTimeExampleBooks.owl";
 	static final String obdafile = "src/test/resources/dateTimeExampleBooks.obda";
 
-	protected OracleDateTimeTest() {
+	public OracleDateTimeTest() {
 		super(owlfile, obdafile);
 	}
 

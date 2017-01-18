@@ -21,12 +21,13 @@ package it.unibz.inf.ontop.reformulation.tests;
  */
 
 import it.unibz.inf.ontop.injection.QuestConfiguration;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
 import it.unibz.inf.ontop.injection.QuestCoreSettings;
+import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.semanticweb.owlapi.io.ToStringRenderer;
 import org.semanticweb.owlapi.model.OWLIndividual;
 import org.semanticweb.owlapi.model.OWLLiteral;
 import org.semanticweb.owlapi.reasoner.ReasonerInternalException;
@@ -130,7 +131,7 @@ public class ComplexWhereMappingTest {
 			OWLLiteral val = rs.getOWLLiteral("z");
 			assertEquals("<http://it.unibz.inf/obda/test/simple#uri1>", ind1.toString());
 			assertEquals("<http://it.unibz.inf/obda/test/simple#uri1>", ind2.toString());
-			assertEquals("\"value1\"", val.toString());
+			assertEquals("\"value1\"^^xsd:string", ToStringRenderer.getInstance().getRendering(val));
 
 
 		} catch (Exception e) {

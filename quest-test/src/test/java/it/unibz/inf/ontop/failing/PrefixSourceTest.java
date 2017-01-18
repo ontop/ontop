@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.parser;
+package it.unibz.inf.ontop.failing;
 
 
 import it.unibz.inf.ontop.quest.AbstractVirtualModeTest;
@@ -29,7 +29,7 @@ public class PrefixSourceTest extends AbstractVirtualModeTest{
 
                 "}";
 
-        assertEquals(runQueryAndReturnStringX(queryBind),
+        assertEquals(runQueryAndReturnStringOfIndividualX(queryBind),
                 "<http://example.com/resource/?repository=repo&uri=http://www.movieontology.org/2009/10/01/movieontology.owl/China-24951>");
     }
 

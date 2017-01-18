@@ -39,7 +39,7 @@ public class ValuesTestVirtual extends AbstractVirtualModeTest {
 
 	
 	public void testQ01() throws Exception {
-		String query1 = PREFIX +
+		String query1 =
 				"SELECT * " +
 				"WHERE {" +
 				"   ?p a :Person ; :name ?name . " +
@@ -49,7 +49,7 @@ public class ValuesTestVirtual extends AbstractVirtualModeTest {
 
 	
 	public void testQ02() throws Exception {
-		String query2 = PREFIX +
+		String query2 =
 				"SELECT * " +
 				"WHERE {" +
 				"   ?p a :Person ; :name ?name . " +
@@ -60,7 +60,7 @@ public class ValuesTestVirtual extends AbstractVirtualModeTest {
 
 	
 	public void testQ03() throws Exception {
-		String query3 =  PREFIX +
+		String query3 =
 				"SELECT * " +
 				"WHERE {" +
 				"  ?p a :Person ; :name ?name ." +
@@ -71,7 +71,7 @@ public class ValuesTestVirtual extends AbstractVirtualModeTest {
 
 	
 	public void testQ04() throws Exception {
-		String query4 = PREFIX +
+		String query4 =
 				"SELECT * " +
 				"WHERE {" +
 				"   ?p a :Person ; :name ?name . " +
@@ -82,7 +82,7 @@ public class ValuesTestVirtual extends AbstractVirtualModeTest {
 
 	
 	public void testQ05() throws Exception {
-		String query5 =  PREFIX +
+		String query5 =
 				"SELECT * " +
 				"WHERE {" +
 				"  ?p a :Person ; :name ?name ." +
@@ -93,7 +93,7 @@ public class ValuesTestVirtual extends AbstractVirtualModeTest {
 
 	
 	public void testQ06() throws Exception {
-		String query6 =  PREFIX +
+		String query6 =
 				"SELECT * " +
 				"WHERE {" +
 				"  ?p a :Person ; :name ?name ; :age ?age ." +
@@ -104,7 +104,7 @@ public class ValuesTestVirtual extends AbstractVirtualModeTest {
 
 	
 	public void testQ07() throws Exception {
-		String query7 =  PREFIX +
+		String query7 =
 				"SELECT * " +
 				"WHERE {" +
 				"  ?p a :Person ; :name ?name ; :age ?age ." +
@@ -115,7 +115,7 @@ public class ValuesTestVirtual extends AbstractVirtualModeTest {
 
 	
 	public void testQ08() throws Exception {
-		String query8 =  PREFIX +
+		String query8 =
 				"SELECT * " +
 				"WHERE {" +
 				"  ?p a :Person ; :name ?name ." +
@@ -126,7 +126,7 @@ public class ValuesTestVirtual extends AbstractVirtualModeTest {
 
 	
 	public void testQ09() throws Exception {
-		String query9 =  PREFIX +
+		String query9 =
 				"SELECT * " +
 				"WHERE {" +
 				"  ?p a :Person ; :name ?name ; :age ?age ." +
@@ -137,7 +137,7 @@ public class ValuesTestVirtual extends AbstractVirtualModeTest {
 
 	
 	public void testQ10() throws Exception {
-		String query10 =  PREFIX +
+		String query10 =
 				"SELECT * " +
 				"WHERE {" +
 				"  ?p a :Person ; :name ?name ; :age ?age ." +
@@ -148,7 +148,7 @@ public class ValuesTestVirtual extends AbstractVirtualModeTest {
 
 	
 	public void testQ11() throws Exception {
-		String query11 =  PREFIX +
+		String query11 =
 				"SELECT * " +
 				"WHERE {" +
 				"  ?p a :Person ; :name ?name ; :age ?age ." +
@@ -179,7 +179,7 @@ public class ValuesTestVirtual extends AbstractVirtualModeTest {
 
 	
 	public void testQ12b() throws Exception {
-		String query12 =  PREFIX +
+		String query12 =
 				"SELECT * " +
 				"WHERE {" +
 				"  VALUES (?name ?age) { " +
@@ -193,7 +193,7 @@ public class ValuesTestVirtual extends AbstractVirtualModeTest {
 
 	
 	public void testQ13() throws Exception {
-		String query13 =  PREFIX +
+		String query13 =
 				"SELECT * " +
 				"WHERE {" +
 				"  ?p a :Person ; :name ?name ." +
@@ -204,7 +204,7 @@ public class ValuesTestVirtual extends AbstractVirtualModeTest {
 
 	
 	public void testQ14() throws Exception {
-		String query14 =  PREFIX +
+		String query14 =
 				"SELECT * " +
 				"WHERE {" +
 				"  ?p a :Person ; :name ?name ." +
@@ -215,7 +215,7 @@ public class ValuesTestVirtual extends AbstractVirtualModeTest {
 
 	
 	public void testQ15() throws Exception {
-		String query15 =  PREFIX +
+		String query15 =
 				"SELECT * " +
 				"WHERE {" +
 				"  ?p a :Person ; :name ?name ." +
@@ -226,7 +226,7 @@ public class ValuesTestVirtual extends AbstractVirtualModeTest {
 
 	
 	public void testQ16() throws Exception {
-		String query16 =  PREFIX +
+		String query16 =
 				"SELECT * " +
 				"WHERE {" +
 				"  ?p a :Person ; :name ?name ; :age ?age ; :mbox ?mbox ." +

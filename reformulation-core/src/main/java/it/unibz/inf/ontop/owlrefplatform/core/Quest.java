@@ -279,6 +279,7 @@ public class Quest implements Serializable, IQuest {
 		reformulate = preferences.isRewritingEnabled();
 		reformulationTechnique = preferences.getProperty(QuestCoreSettings.REFORMULATION_TECHNIQUE);
 		bOptimizeEquivalences = preferences.isEquivalenceOptimizationEnabled();
+		distinctResultSet = preferences.isDistinctPostProcessingEnabled();
 
 		/**
 		 * Classic A-box specific configuration

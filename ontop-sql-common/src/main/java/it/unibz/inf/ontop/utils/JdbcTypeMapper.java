@@ -40,12 +40,12 @@ public class JdbcTypeMapper {
 
 	@Inject
 	private JdbcTypeMapper() {
-		sqlToQuest.put(Types.VARCHAR, COL_TYPE.LITERAL);
-		sqlToQuest.put(Types.CHAR, COL_TYPE.LITERAL);
-		sqlToQuest.put(Types.LONGNVARCHAR, COL_TYPE.LITERAL);
-		sqlToQuest.put(Types.LONGVARCHAR, COL_TYPE.LITERAL);
-		sqlToQuest.put(Types.NVARCHAR, COL_TYPE.LITERAL);
-		sqlToQuest.put(Types.NCHAR, COL_TYPE.LITERAL);
+		sqlToQuest.put(Types.VARCHAR, COL_TYPE.STRING);
+		sqlToQuest.put(Types.CHAR, COL_TYPE.STRING);
+		sqlToQuest.put(Types.LONGNVARCHAR, COL_TYPE.STRING);
+		sqlToQuest.put(Types.LONGVARCHAR, COL_TYPE.STRING);
+		sqlToQuest.put(Types.NVARCHAR, COL_TYPE.STRING);
+		sqlToQuest.put(Types.NCHAR, COL_TYPE.STRING);
 		sqlToQuest.put(Types.INTEGER, COL_TYPE.INTEGER);
 		sqlToQuest.put(Types.BIGINT, COL_TYPE.INTEGER);
 		sqlToQuest.put(Types.SMALLINT, COL_TYPE.INTEGER);
@@ -64,8 +64,8 @@ public class JdbcTypeMapper {
 //		typeMapper.put(Types.BINARY, dfac.getDataTypePredicateBinary());
 //		typeMapper.put(Types.VARBINARY, dfac.getDataTypePredicateBinary());
 //		typeMapper.put(Types.BLOB, dfac.getDataTypePredicateBinary());
-		sqlToQuest.put(Types.CLOB, COL_TYPE.LITERAL);
-		sqlToQuest.put(Types.OTHER, COL_TYPE.LITERAL);
+		sqlToQuest.put(Types.CLOB, COL_TYPE.STRING);
+		sqlToQuest.put(Types.OTHER, COL_TYPE.STRING);
 
 		datatypeMap.put(COL_TYPE.BOOLEAN, Types.BOOLEAN);
 		datatypeMap.put(COL_TYPE.INT, Types.INTEGER);
@@ -94,7 +94,7 @@ public class JdbcTypeMapper {
 	public Predicate.COL_TYPE getPredicate(int sqlType) {
 		Predicate.COL_TYPE type = sqlToQuest.get(sqlType);
 		if (type == null)
-			type = COL_TYPE.LITERAL;
+			type = COL_TYPE.STRING; //treat them as simple literal
 
 		return type;
 	}

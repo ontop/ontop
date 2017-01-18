@@ -25,7 +25,7 @@ public class OraclePrefixSourceTest extends AbstractVirtualModeTest {
                 "WHERE {?y :hasAddress ?x .  \n" +
                 "}";
 
-        assertEquals(runQueryAndReturnStringX(queryBind),
+        assertEquals(runQueryAndReturnStringOfIndividualX(queryBind),
                 "<http://example.com/resource/?repository=repo&uri=http://www.owl-ontologies.com/Ontology1207768242.owl/Address-991>");
     }
 }

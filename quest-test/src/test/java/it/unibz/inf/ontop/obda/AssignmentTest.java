@@ -13,7 +13,7 @@ public class AssignmentTest extends AbstractVirtualModeTest {
     private static final String owlFile = "src/test/resources/bindTest/ontologyOdbs.owl";
     private static final String obdaFile = "src/test/resources/bindTest/mappingsOdbs.obda";
 
-    protected AssignmentTest() {
+    public AssignmentTest() {
         super(owlFile, obdaFile);
     }
 

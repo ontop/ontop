@@ -10,7 +10,7 @@ public class OracleASKTest extends AbstractVirtualModeTest {
 	 static final String obdafile =
 	 "src/main/resources/testcases-scenarios/virtual-mode/stockexchange/simplecq/stockexchange-oracle.obda";
 
-	protected OracleASKTest() {
+	public OracleASKTest() {
 		super(owlfile, obdafile);
 	}
 

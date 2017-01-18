@@ -177,15 +177,10 @@ public class ExpressionEvaluator {
 					double valueD = Double.parseDouble(valueString);
 					return DATA_FACTORY.getBooleanConstant(valueD > 0);
 				} 
-				else if (DATATYPE_FACTORY.isString(p)) {
+				else if (DATATYPE_FACTORY.isString(p) || DATATYPE_FACTORY.isLiteral(p)) {
 					// ROMAN (18 Dec 2015): toString() was wrong -- it contains "" and so is never empty
 					return DATA_FACTORY.getBooleanConstant(valueString.length() != 0);
-				} 
-				else if (DATATYPE_FACTORY.isLiteral(p)) { // R: a bit wider than p == DATA_FACTORY.getDataTypePredicateLiteral()
-									// by taking LANG into account
-					// ROMAN (18 Dec 2015): toString() was wrong -- it contains "" and so is never empty
-					return DATA_FACTORY.getBooleanConstant(valueString.length() != 0);
-				} 
+				}
 				// TODO (R): year, date and time are not covered?
 			} 
 			else if (t0 instanceof Variable) {
@@ -325,14 +320,11 @@ public class ExpressionEvaluator {
 			Predicate predicate = function.getFunctionSymbol();
 			Term parameter = function.getTerm(0);
 			if (function.isDataTypeFunction()) {
-				if (DATATYPE_FACTORY.isLiteral(predicate)) { // R: was datatype.equals(OBDAVocabulary.RDFS_LITERAL_URI)
+				if (DATATYPE_FACTORY.isString(predicate) || DATATYPE_FACTORY.isLiteral(predicate)) { // R: was datatype.equals(OBDAVocabulary.RDFS_LITERAL_URI)
 					return DATA_FACTORY.getTypedTerm(
 							DATA_FACTORY.getVariable(parameter.toString()), COL_TYPE.STRING);
 				} 
-				else if (DATATYPE_FACTORY.isString(predicate)) { // R: was datatype.equals(OBDAVocabulary.XSD_STRING_URI)) {
-					return DATA_FACTORY.getTypedTerm(
-							DATA_FACTORY.getVariable(parameter.toString()), COL_TYPE.STRING);
-				} 
+
 				else {
 					return DATA_FACTORY.getTypedTerm(
 							DATA_FACTORY.getFunctionCast(DATA_FACTORY.getVariable(parameter.toString()),
@@ -466,7 +458,7 @@ public class ExpressionEvaluator {
 
 		Predicate predicate = function.getFunctionSymbol();
 		//String datatype = predicate.toString();
-		if (!DATATYPE_FACTORY.isLiteral(predicate)) { // (datatype.equals(OBDAVocabulary.RDFS_LITERAL_URI))
+		if (!DATATYPE_FACTORY.isString(predicate)) { // (datatype.equals(OBDAVocabulary.RDFS_LITERAL_URI))
 			return emptyconstant;
 		}
 
@@ -750,7 +742,7 @@ public class ExpressionEvaluator {
 				/*
 				 * Evaluate both terms by comparing their datatypes
 				 */
-				if (DATATYPE_FACTORY.isLiteral(pred1) && DATATYPE_FACTORY.isLiteral(pred2)) { // R: replaced incorrect check
+				if (DATATYPE_FACTORY.isString(pred1) && DATATYPE_FACTORY.isString(pred2)) { // R: replaced incorrect check
 																		//  pred1 == DATA_FACTORY.getDataTypePredicateLiteral()
 																		// && pred2 == DATA_FACTORY.getDataTypePredicateLiteral())
 																	    // which does not work for LITERAL_LANG

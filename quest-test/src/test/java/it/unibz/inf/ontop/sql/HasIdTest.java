@@ -1,9 +1,9 @@
 package it.unibz.inf.ontop.sql;
 
 import it.unibz.inf.ontop.model.OBDAException;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
+import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLResultSet;
+import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLStatement;
 import it.unibz.inf.ontop.quest.AbstractVirtualModeTest;
-
 import org.semanticweb.owlapi.model.OWLException;
 
 
@@ -15,18 +15,12 @@ public class HasIdTest extends AbstractVirtualModeTest {
     static final String owlFileName = "resources/pullOutEq/pullOutEq.ttl";
     static final String obdaFileName = "resources/pullOutEq/pullOutEq.obda";
 
-    private QuestOWL reasoner;
-    private QuestOWLConnection conn;
-
-    protected HasIdTest() {
+    public HasIdTest() {
         super(owlFileName, obdaFileName);
     }
 
 
     private QuestOWLResultSet runLocalQuery(String query) throws OBDAException, OWLException {
-
-        // Now we are ready for querying
-        conn = reasoner.getConnection();
 
         QuestOWLStatement st = conn.createStatement();
         return st.executeTuple(query);

@@ -7,14 +7,11 @@
     <variable name="x"/>
   </head>
   <results>
-    <!-- Removed entry: Quest recognizes element inside double-quotes 
-              as rdfs:Literal instead of xsd:string.
     <result>
       <binding name="x">
         <uri>http://example/x1</uri>
       </binding>
     </result>
-    -->
     <result>
       <binding name="x">
         <uri>http://example/x2</uri>
