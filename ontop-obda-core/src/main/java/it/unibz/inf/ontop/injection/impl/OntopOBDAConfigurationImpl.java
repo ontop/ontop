@@ -23,7 +23,7 @@ public class OntopOBDAConfigurationImpl extends OntopModelConfigurationImpl impl
     }
 
     @Override
-    public Optional<DBMetadata> getDBMetadata() {
+    public Optional<DBMetadata> getPredefinedDBMetadata() {
         return options.dbMetadata;
     }
 

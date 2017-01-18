@@ -1,16 +1,11 @@
 package it.unibz.inf.ontop.injection;
 
-import it.unibz.inf.ontop.exception.InvalidMappingException;
 import it.unibz.inf.ontop.injection.impl.OBDACoreConfigurationImpl;
-import it.unibz.inf.ontop.model.OBDAModel;
-import it.unibz.inf.ontop.sql.ImplicitDBConstraintsReader;
 import org.eclipse.rdf4j.model.Model;
 
 import javax.annotation.Nonnull;
 import java.io.File;
-import java.io.IOException;
 import java.io.Reader;
-import java.util.Optional;
 
 /**
  * TODO: explain
@@ -19,20 +14,6 @@ public interface OBDACoreConfiguration extends OntopMappingSQLConfiguration {
 
     @Override
     OBDASettings getSettings();
-
-    /**
-     * TODO: explain
-     */
-    Optional<OBDAModel> loadMapping() throws IOException, InvalidMappingException;
-
-    /**
-     * Only call it if you are sure that mapping assertions have been provided
-     */
-    default OBDAModel loadProvidedMapping() throws IOException, InvalidMappingException {
-        return loadMapping()
-                .orElseThrow(() -> new IllegalStateException("No mapping has been provided. " +
-                        "Do not call this method unless you are sure of the mapping provision."));
-    }
 
     /**
      * Default builder
@@ -45,8 +26,6 @@ public interface OBDACoreConfiguration extends OntopMappingSQLConfiguration {
      * TODO: explain
      */
     interface OBDACoreBuilderFragment<B extends Builder<B>> {
-
-        B obdaModel(@Nonnull OBDAModel obdaModel);
 
         B nativeOntopMappingFile(@Nonnull File mappingFile);
 

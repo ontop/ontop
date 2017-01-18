@@ -77,7 +77,7 @@ public class QuestDBVirtualStore extends QuestDBAbstractStore {
 			throw new IllegalArgumentException("Virtual mode was expected in QuestDBVirtualStore!");
 
 		//obtain the model
-		OBDAModel obdaModel = config.loadMapping()
+		OBDAModel obdaModel = config.loadDataSourceModel()
 				.orElseThrow(() -> new IllegalStateException("Mapping are required in virtual A-box mode " +
 						"so a configuration validation error should have already been thrown"));
 
@@ -88,7 +88,7 @@ public class QuestDBVirtualStore extends QuestDBAbstractStore {
 				.orElseGet(() -> ofac.createOntology(ofac.createVocabulary()));
 
 		//set up Quest
-		questInstance = getComponentFactory().create(tbox, Optional.of(obdaModel), config.getDBMetadata(),
+		questInstance = getComponentFactory().create(tbox, Optional.of(obdaModel), config.getPredefinedDBMetadata(),
 				config.getExecutorRegistry());
 	}
 

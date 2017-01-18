@@ -78,6 +78,6 @@ public class SesameMaterializer {
 		if (inputOntology.isPresent())
 			return inputOntology.get();
 
-		return MappingVocabularyExtractor.extractOntology(configuration.loadProvidedMapping());
+		return MappingVocabularyExtractor.extractOntology(configuration.loadProvidedDataSourceModel());
 	}
 }

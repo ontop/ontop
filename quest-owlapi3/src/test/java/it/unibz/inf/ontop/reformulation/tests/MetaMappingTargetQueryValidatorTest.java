@@ -120,7 +120,7 @@ public class MetaMappingTargetQueryValidatorTest extends TestCase {
 				.nativeOntopMappingFile(obdafile)
 				.build();
 
-		OBDAModel obdaModel = configuration.loadProvidedMapping();
+		OBDAModel obdaModel = configuration.loadProvidedDataSourceModel();
 
 		/**
 		 * TODO: do we want to consider a non-empty vocabulary?

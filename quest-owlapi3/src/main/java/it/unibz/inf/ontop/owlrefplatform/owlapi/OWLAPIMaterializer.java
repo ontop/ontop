@@ -98,6 +98,6 @@ public class OWLAPIMaterializer implements AutoCloseable {
 		if (inputOntology.isPresent())
 			return inputOntology.get();
 
-		return MappingVocabularyExtractor.extractOntology(configuration.loadProvidedMapping());
+		return MappingVocabularyExtractor.extractOntology(configuration.loadProvidedDataSourceModel());
 	}
 }

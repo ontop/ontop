@@ -2,13 +2,26 @@ package it.unibz.inf.ontop.injection.impl;
 
 
 import com.google.inject.Module;
+import it.unibz.inf.ontop.exception.InvalidMappingException;
+import it.unibz.inf.ontop.injection.InvalidOntopConfigurationException;
 import it.unibz.inf.ontop.injection.OntopMappingSQLConfiguration;
 import it.unibz.inf.ontop.injection.OntopMappingSQLSettings;
 import it.unibz.inf.ontop.injection.impl.OntopMappingConfigurationImpl.OntopMappingOptions;
+import it.unibz.inf.ontop.mapping.MappingParser;
+import it.unibz.inf.ontop.mapping.extraction.DataSourceModel;
+import it.unibz.inf.ontop.mapping.extraction.PreProcessedMapping;
+import it.unibz.inf.ontop.model.OBDAModel;
+import it.unibz.inf.ontop.ontology.Ontology;
 import it.unibz.inf.ontop.sql.ImplicitDBConstraintsReader;
+import org.eclipse.rdf4j.model.Model;
 
+import javax.annotation.Nonnull;
+import java.io.File;
+import java.io.IOException;
+import java.io.Reader;
 import java.util.Optional;
 import java.util.Properties;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 public class OntopMappingSQLConfigurationImpl extends OntopSQLConfigurationImpl implements OntopMappingSQLConfiguration {
@@ -23,6 +36,10 @@ public class OntopMappingSQLConfigurationImpl extends OntopSQLConfigurationImpl 
         this.settings = settings;
         this.options = options;
         this.mappingConfiguration = new OntopMappingConfigurationImpl(settings, options.mappingOptions);
+    }
+
+    boolean isInputMappingDefined() {
+        return options.predefinedMappingModel.isPresent();
     }
 
     /**
@@ -47,6 +64,66 @@ public class OntopMappingSQLConfigurationImpl extends OntopSQLConfigurationImpl 
         return settings;
     }
 
+    /**
+     * To be overloaded
+     */
+    @Override
+    public Optional<DataSourceModel> loadDataSourceModel() throws IOException, InvalidMappingException {
+        return loadDataSourceModel(Optional::empty, Optional::empty, Optional::empty, Optional::empty);
+    }
+
+    Optional<DataSourceModel> loadDataSourceModel(Supplier<Optional<Ontology>> ontologySupplier,
+                                                  Supplier<Optional<File>> mappingFileSupplier,
+                                                  Supplier<Optional<Reader>> mappingReaderSupplier,
+                                                  Supplier<Optional<Model>> mappingGraphSupplier)
+            throws IOException, InvalidMappingException {
+        return mappingConfiguration.loadDataSourceModel(
+                ontologySupplier,
+                () -> options.predefinedMappingModel.map(m -> (PreProcessedMapping) m),
+                mappingFileSupplier,
+                mappingReaderSupplier,
+                mappingGraphSupplier
+        );
+    }
+
+
+    @Override
+    public Optional<OBDAModel> loadOBDAModel() throws IOException, InvalidMappingException {
+        return loadOBDAModel(Optional::empty, Optional::empty, Optional::empty, Optional::empty);
+    }
+
+    /**
+     * TODO: also consider the other steps
+     */
+    Optional<OBDAModel> loadOBDAModel(Supplier<Optional<Ontology>> ontologySupplier,
+                                      Supplier<Optional<File>> mappingFileSupplier,
+                                      Supplier<Optional<Reader>> mappingReaderSupplier,
+                                      Supplier<Optional<Model>> mappingGraphSupplier)
+            throws IOException, InvalidMappingException {
+
+        if (options.predefinedMappingModel.isPresent()) {
+            return options.predefinedMappingModel;
+        }
+
+        MappingParser parser = getInjector().getInstance(MappingParser.class);
+
+        Optional<File> optionalMappingFile = mappingFileSupplier.get();
+        if (optionalMappingFile.isPresent()) {
+            return Optional.of(parser.parse(optionalMappingFile.get()));
+        }
+
+        Optional<Reader> optionalMappingReader = mappingReaderSupplier.get();
+        if (optionalMappingReader.isPresent()) {
+            return Optional.of(parser.parse(optionalMappingReader.get()));
+        }
+        Optional<Model> optionalMappingGraph = mappingGraphSupplier.get();
+        if (optionalMappingGraph.isPresent()) {
+            return Optional.of(parser.parse(optionalMappingGraph.get()));
+        }
+
+        return Optional.empty();
+    }
+
 
     /**
      * Groups all the options required by the OBDAConfiguration.
@@ -57,10 +134,13 @@ public class OntopMappingSQLConfigurationImpl extends OntopSQLConfigurationImpl 
     public static class OntopMappingSQLOptions {
         final OntopSQLOptions sqlOptions;
         final OntopMappingOptions mappingOptions;
+        final Optional<OBDAModel> predefinedMappingModel;
 
-        private OntopMappingSQLOptions(OntopSQLOptions sqlOptions, OntopMappingOptions mappingOptions) {
+        private OntopMappingSQLOptions(Optional<OBDAModel> predefinedMappingModel, OntopSQLOptions sqlOptions,
+                                       OntopMappingOptions mappingOptions) {
             this.sqlOptions = sqlOptions;
             this.mappingOptions = mappingOptions;
+            this.predefinedMappingModel = predefinedMappingModel;
         }
     }
 
@@ -68,18 +148,38 @@ public class OntopMappingSQLConfigurationImpl extends OntopSQLConfigurationImpl 
             implements OntopMappingSQLBuilderFragment<B> {
 
         private final B builder;
+        private final Supplier<Boolean> isMappingDefinedSupplier;
+        private final Runnable declareMappingDefinedCB;
+        private Optional<OBDAModel> obdaModel = Optional.empty();
 
         /**
          * Default constructor
          */
-        protected DefaultMappingSQLBuilderFragment(B builder) {
+        protected DefaultMappingSQLBuilderFragment(B builder,
+                                                   Supplier<Boolean> isMappingDefinedSupplier,
+                                                   Runnable declareMappingDefinedCB) {
             this.builder = builder;
+            this.isMappingDefinedSupplier = isMappingDefinedSupplier;
+            this.declareMappingDefinedCB = declareMappingDefinedCB;
+        }
+
+        /**
+         * Not for end-users! Please consider giving a mapping file or a mapping reader.
+         */
+        @Override
+        public B obdaModel(@Nonnull OBDAModel obdaModel) {
+            if (isMappingDefinedSupplier.get()) {
+                throw new InvalidOntopConfigurationException("OBDA model or mappings already defined!");
+            }
+            declareMappingDefinedCB.run();
+            this.obdaModel = Optional.of(obdaModel);
+            return builder;
         }
 
 
         final OntopMappingSQLOptions generateMappingSQLOptions(OntopSQLOptions sqlOptions,
                                                                OntopMappingOptions mappingOptions) {
-            return new OntopMappingSQLOptions(sqlOptions, mappingOptions);
+            return new OntopMappingSQLOptions(obdaModel, sqlOptions, mappingOptions);
         }
 
         Properties generateProperties() {
@@ -96,8 +196,15 @@ public class OntopMappingSQLConfigurationImpl extends OntopSQLConfigurationImpl 
 
         protected OntopMappingSQLBuilderMixin() {
             B builder = (B) this;
-            localBuilderFragment = new DefaultMappingSQLBuilderFragment<>(builder);
+            localBuilderFragment = new DefaultMappingSQLBuilderFragment<>(builder,
+                    this::isMappingDefined,
+                    this::declareMappingDefined);
             sqlBuilderFragment = new DefaultOntopSQLBuilderFragment<>(builder);
+        }
+
+        @Override
+        public B obdaModel(@Nonnull OBDAModel obdaModel) {
+            return localBuilderFragment.obdaModel(obdaModel);
         }
 
         @Override

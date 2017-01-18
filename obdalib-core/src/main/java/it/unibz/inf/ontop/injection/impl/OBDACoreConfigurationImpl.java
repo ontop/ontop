@@ -4,8 +4,10 @@ package it.unibz.inf.ontop.injection.impl;
 import com.google.inject.Module;
 import it.unibz.inf.ontop.exception.InvalidMappingException;
 import it.unibz.inf.ontop.injection.*;
-import it.unibz.inf.ontop.mapping.MappingParser;
+
+import it.unibz.inf.ontop.mapping.extraction.DataSourceModel;
 import it.unibz.inf.ontop.model.OBDAModel;
+import it.unibz.inf.ontop.ontology.Ontology;
 import org.eclipse.rdf4j.model.Model;
 
 import javax.annotation.Nonnull;
@@ -16,6 +18,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Optional;
 import java.util.Properties;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 public class OBDACoreConfigurationImpl extends OntopMappingSQLConfigurationImpl implements OBDACoreConfiguration {
@@ -46,35 +49,6 @@ public class OBDACoreConfigurationImpl extends OntopMappingSQLConfigurationImpl 
         return settings;
     }
 
-    @Override
-    public Optional<OBDAModel> loadMapping() throws IOException, InvalidMappingException {
-        if (options.predefinedMappingModel.isPresent()) {
-            return options.predefinedMappingModel;
-        }
-
-        MappingParser parser = getInjector().getInstance(MappingParser.class);
-
-        Optional<File> optionalMappingFile = options.mappingFile
-                .map(Optional::of)
-                .orElseGet(() -> settings.getMappingFilePath()
-                        .map(File::new));
-
-        if (optionalMappingFile.isPresent()) {
-            return Optional.of(parser.parse(optionalMappingFile.get()));
-        }
-        else if (options.mappingReader.isPresent()) {
-            return Optional.of(parser.parse(options.mappingReader.get()));
-        }
-        else if (options.mappingGraph.isPresent()) {
-            return Optional.of(parser.parse(options.mappingGraph.get()));
-        }
-        /**
-         * Hook
-         */
-        else {
-            return loadAlternativeMapping();
-        }
-    }
 
     /**
      * TODO: complete
@@ -84,15 +58,49 @@ public class OBDACoreConfigurationImpl extends OntopMappingSQLConfigurationImpl 
         // TODO: complete if multiple alternatives for building the OBDAModel are provided
     }
 
+    @Override
+    public Optional<DataSourceModel> loadDataSourceModel() throws IOException, InvalidMappingException {
+        return loadDataSourceModel(Optional::empty);
+    }
+
+    Optional<DataSourceModel> loadDataSourceModel(Supplier<Optional<Ontology>> ontologySupplier)
+            throws IOException, InvalidMappingException {
+
+        return loadDataSourceModel(ontologySupplier,
+                () -> options.mappingFile
+                        .map(Optional::of)
+                        .orElseGet(() -> settings.getMappingFilePath()
+                                .map(File::new)),
+                () -> options.mappingReader,
+                () -> options.mappingGraph);
+    }
+
+    @Override
+    public Optional<OBDAModel> loadOBDAModel() throws IOException, InvalidMappingException {
+        return loadOBDAModel(Optional::empty);
+    }
+
+    Optional<OBDAModel> loadOBDAModel(Supplier<Optional<Ontology>> ontologySupplier)
+            throws IOException, InvalidMappingException {
+        return loadOBDAModel(ontologySupplier,
+                () -> options.mappingFile
+                        .map(Optional::of)
+                        .orElseGet(() -> settings.getMappingFilePath()
+                                .map(File::new)),
+                () -> options.mappingReader,
+                () -> options.mappingGraph);
+    }
+
     /**
      * Please overload isMappingDefined() instead.
      */
-    protected boolean isInputMappingDefined() {
-        return settings.contains(OBDASettings.MAPPING_FILE_PATH)
+    @Override
+    boolean isInputMappingDefined() {
+        return super.isInputMappingDefined()
+                || settings.contains(OBDASettings.MAPPING_FILE_PATH)
                 || options.mappingFile.isPresent()
                 || options.mappingGraph.isPresent()
-                || options.mappingReader.isPresent()
-                || options.predefinedMappingModel.isPresent();
+                || options.mappingReader.isPresent();
     }
 
     /**
@@ -102,14 +110,6 @@ public class OBDACoreConfigurationImpl extends OntopMappingSQLConfigurationImpl 
         return isInputMappingDefined();
     }
 
-    /**
-     * To be overloaded.
-     *
-     * By default, returns nothing.
-     */
-    protected Optional<OBDAModel> loadAlternativeMapping() {
-        return Optional.empty();
-    }
 
     /**
      * Groups all the options required by the OBDAConfiguration.
@@ -121,16 +121,13 @@ public class OBDACoreConfigurationImpl extends OntopMappingSQLConfigurationImpl 
         public final Optional<File> mappingFile;
         public final Optional<Reader> mappingReader;
         public final Optional<Model> mappingGraph;
-        public final Optional<OBDAModel> predefinedMappingModel;
         public final OntopMappingSQLOptions mappingSqlOptions;
 
         public OBDAConfigurationOptions(Optional<File> mappingFile, Optional<Reader> mappingReader, Optional<Model> mappingGraph,
-                                        Optional<OBDAModel> predefinedMappingModel,
                                         OntopMappingSQLOptions mappingSqlOptions) {
             this.mappingFile = mappingFile;
             this.mappingReader = mappingReader;
             this.mappingGraph = mappingGraph;
-            this.predefinedMappingModel = predefinedMappingModel;
             this.mappingSqlOptions = mappingSqlOptions;
         }
     }
@@ -139,42 +136,32 @@ public class OBDACoreConfigurationImpl extends OntopMappingSQLConfigurationImpl 
             implements OBDACoreBuilderFragment<B> {
 
         private final B builder;
+        private final Supplier<Boolean> isMappingDefinedSupplier;
+        private final Runnable declareMappingDefinedCB;
 
-        private Optional<OBDAModel> obdaModel = Optional.empty();
         private Optional<File> mappingFile = Optional.empty();
         private Optional<Reader> mappingReader = Optional.empty();
         private Optional<Model> mappingGraph = Optional.empty();
 
         private boolean useR2rml = false;
-        private boolean isMappingDefined = false;
 
         /**
          * Default constructor
          */
-        protected DefaultOBDACoreBuilderFragment(B builder) {
+        protected DefaultOBDACoreBuilderFragment(B builder, Supplier<Boolean> isMappingDefinedSupplier,
+                                                 Runnable declareMappingDefinedCB) {
             this.builder = builder;
+            this.isMappingDefinedSupplier = isMappingDefinedSupplier;
+            this.declareMappingDefinedCB = declareMappingDefinedCB;
         }
 
-
-        /**
-         * Not for end-users! Please consider giving a mapping file or a mapping reader.
-         */
-        @Override
-        public B obdaModel(@Nonnull OBDAModel obdaModel) {
-            if (isMappingDefined) {
-                throw new InvalidOntopConfigurationException("OBDA model or mappings already defined!");
-            }
-            declareMappingDefined();
-            this.obdaModel = Optional.of(obdaModel);
-            return builder;
-        }
 
         @Override
         public B nativeOntopMappingFile(@Nonnull File mappingFile) {
-            if (isMappingDefined) {
+            if (isMappingDefinedSupplier.get()) {
                 throw new InvalidOntopConfigurationException("OBDA model or mappings already defined!");
             }
-            declareMappingDefined();
+            declareMappingDefinedCB.run();
             this.mappingFile = Optional.of(mappingFile);
             return builder;
         }
@@ -187,20 +174,20 @@ public class OBDACoreConfigurationImpl extends OntopMappingSQLConfigurationImpl 
 
         @Override
         public B nativeOntopMappingReader(@Nonnull Reader mappingReader) {
-            if (isMappingDefined) {
+            if (isMappingDefinedSupplier.get()) {
                 throw new InvalidOntopConfigurationException("OBDA model or mappings already defined!");
             }
-            declareMappingDefined();
+            declareMappingDefinedCB.run();
             this.mappingReader = Optional.of(mappingReader);
             return builder;
         }
 
         @Override
         public B r2rmlMappingFile(@Nonnull File mappingFile) {
-            if (isMappingDefined) {
+            if (isMappingDefinedSupplier.get()) {
                 throw new InvalidOntopConfigurationException("OBDA model or mappings already defined!");
             }
-            declareMappingDefined();
+            declareMappingDefinedCB.run();
             useR2rml = true;
             this.mappingFile = Optional.of(mappingFile);
             return builder;
@@ -208,10 +195,10 @@ public class OBDACoreConfigurationImpl extends OntopMappingSQLConfigurationImpl 
 
         @Override
         public B r2rmlMappingFile(@Nonnull String mappingFilename) {
-            if (isMappingDefined) {
+            if (isMappingDefinedSupplier.get()) {
                 throw new InvalidOntopConfigurationException("OBDA model or mappings already defined!");
             }
-            declareMappingDefined();
+            declareMappingDefinedCB.run();
             useR2rml = true;
 
             try {
@@ -235,10 +222,10 @@ public class OBDACoreConfigurationImpl extends OntopMappingSQLConfigurationImpl 
 
         @Override
         public B r2rmlMappingReader(@Nonnull Reader mappingReader) {
-            if (isMappingDefined) {
+            if (isMappingDefinedSupplier.get()) {
                 throw new InvalidOntopConfigurationException("OBDA model or mappings already defined!");
             }
-            declareMappingDefined();
+            declareMappingDefinedCB.run();
             useR2rml = true;
             this.mappingReader = Optional.of(mappingReader);
             return builder;
@@ -246,24 +233,13 @@ public class OBDACoreConfigurationImpl extends OntopMappingSQLConfigurationImpl 
 
         @Override
         public B r2rmlMappingGraph(@Nonnull Model rdfGraph) {
-            if (isMappingDefined) {
+            if (isMappingDefinedSupplier.get()) {
                 throw new InvalidOntopConfigurationException("OBDA model or mappings already defined!");
             }
-            declareMappingDefined();
+            declareMappingDefinedCB.run();
             useR2rml = true;
             this.mappingGraph = Optional.of(rdfGraph);
             return builder;
-        }
-
-        /**
-         * Allows to detect double mapping definition (error).
-         */
-        protected final void declareMappingDefined() {
-            isMappingDefined = true;
-        }
-
-        protected final boolean isMappingDefined() {
-            return isMappingDefined;
         }
 
         protected Properties generateProperties() {
@@ -279,10 +255,10 @@ public class OBDACoreConfigurationImpl extends OntopMappingSQLConfigurationImpl 
         }
 
         protected final void setMappingFile(String mappingFilename) {
-            if (isMappingDefined) {
+            if (isMappingDefinedSupplier.get()) {
                 throw new InvalidOntopConfigurationException("OBDA model or mappings already defined!");
             }
-            declareMappingDefined();
+            declareMappingDefinedCB.run();
             try {
                 URI fileURI = new URI(mappingFilename);
                 String scheme = fileURI.getScheme();
@@ -302,7 +278,7 @@ public class OBDACoreConfigurationImpl extends OntopMappingSQLConfigurationImpl 
         }
 
         final OBDAConfigurationOptions generateOBDACoreOptions(OntopMappingSQLOptions mappingSqlOptions) {
-            return new OBDAConfigurationOptions(mappingFile, mappingReader, mappingGraph, obdaModel, mappingSqlOptions);
+            return new OBDAConfigurationOptions(mappingFile, mappingReader, mappingGraph, mappingSqlOptions);
         }
     }
 
@@ -313,7 +289,9 @@ public class OBDACoreConfigurationImpl extends OntopMappingSQLConfigurationImpl 
         private final DefaultOBDACoreBuilderFragment<B> obdaBuilderFragment;
 
         protected OBDACoreConfigurationBuilderMixin() {
-            obdaBuilderFragment = new DefaultOBDACoreBuilderFragment<B>((B) this) {
+            obdaBuilderFragment = new DefaultOBDACoreBuilderFragment<B>((B) this,
+                    this::isMappingDefined,
+                    this::declareMappingDefined) {
             };
         }
 
@@ -333,21 +311,8 @@ public class OBDACoreConfigurationImpl extends OntopMappingSQLConfigurationImpl 
             obdaBuilderFragment.setMappingFile(mappingFilename);
         }
 
-        protected final void declareMappingDefined() {
-            obdaBuilderFragment.declareMappingDefined();
-        }
-
-        protected final boolean isMappingDefined() {
-            return obdaBuilderFragment.isMappingDefined();
-        }
-
         final OBDAConfigurationOptions generateOBDACoreOptions() {
             return obdaBuilderFragment.generateOBDACoreOptions(generateMappingSQLOptions());
-        }
-
-        @Override
-        public B obdaModel(@Nonnull OBDAModel obdaModel) {
-            return obdaBuilderFragment.obdaModel(obdaModel);
         }
 
         @Override

@@ -1,7 +1,11 @@
 package it.unibz.inf.ontop.injection.impl;
 
 
+import it.unibz.inf.ontop.exception.InvalidMappingException;
 import it.unibz.inf.ontop.injection.*;
+import it.unibz.inf.ontop.mapping.extraction.DataSourceModel;
+import it.unibz.inf.ontop.model.OBDAModel;
+import it.unibz.inf.ontop.ontology.Ontology;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
@@ -31,6 +35,9 @@ public class QuestConfigurationImpl extends QuestCoreConfigurationImpl implement
         return settings;
     }
 
+    /**
+     * TODO: cache the ontology
+     */
     @Override
     public Optional<OWLOntology> loadInputOntology() throws OWLOntologyCreationException {
         if (options.ontology.isPresent()) {
@@ -64,6 +71,20 @@ public class QuestConfigurationImpl extends QuestCoreConfigurationImpl implement
         }
 
         return Optional.empty();
+    }
+
+    @Override
+    public Optional<DataSourceModel> loadDataSourceModel() throws IOException, InvalidMappingException {
+        return loadDataSourceModel(this::loadOntology);
+    }
+
+    @Override
+    public Optional<OBDAModel> loadOBDAModel() throws IOException, InvalidMappingException {
+        return loadOBDAModel(this::loadOntology);
+    }
+
+    private Optional<Ontology> loadOntology() {
+        throw new RuntimeException("TODO: extract the ontology");
     }
 
     private Optional<URL> extractOntologyURL() throws MalformedURLException {

@@ -1,6 +1,5 @@
 package it.unibz.inf.ontop.mapping.extraction.impl;
 
-import com.google.inject.Inject;
 import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.exception.InvalidMappingException;
 import it.unibz.inf.ontop.mapping.extraction.DataSourceModel;
@@ -16,39 +15,33 @@ import java.io.IOException;
 import java.io.Reader;
 import java.util.Optional;
 
-public class FakeDataSourceModelExtractor implements DataSourceModelExtractor {
-
-    private static final String MESSAGE = "This FakeDatasourceModelExtractor is fake and thus does not extract";
-
-    @Inject
-    private FakeDataSourceModelExtractor(){
-    }
+public class SQLDataSourceModelExtractor implements DataSourceModelExtractor {
 
     @Override
     public DataSourceModel extract(@Nonnull File mappingFile, @Nonnull Optional<DBMetadata> dbMetadata,
                                    @Nonnull Optional<Ontology> ontology)
             throws InvalidMappingException, IOException, DuplicateMappingException {
-        throw new UnsupportedOperationException(MESSAGE);
+        throw new RuntimeException("TODO: support SQLMappingAndMetadataExtractor.extract(file, ...)");
     }
 
     @Override
     public DataSourceModel extract(@Nonnull Reader mappingReader, @Nonnull Optional<DBMetadata> dbMetadata,
                                    @Nonnull Optional<Ontology> ontology)
             throws InvalidMappingException, IOException, DuplicateMappingException {
-        throw new UnsupportedOperationException(MESSAGE);
+        throw new RuntimeException("TODO: support SQLMappingAndMetadataExtractor.extract(reader, ...)");
     }
 
     @Override
     public DataSourceModel extract(@Nonnull Model mappingGraph, @Nonnull Optional<DBMetadata> dbMetadata,
                                    @Nonnull Optional<Ontology> ontology)
             throws InvalidMappingException, IOException, DuplicateMappingException {
-        throw new UnsupportedOperationException(MESSAGE);
+        throw new RuntimeException("TODO: support SQLMappingAndMetadataExtractor.extract(graph, ...)");
     }
 
     @Override
     public DataSourceModel extract(@Nonnull PreProcessedMapping mapping, @Nonnull Optional<DBMetadata> dbMetadata,
                                    @Nonnull Optional<Ontology> ontology)
             throws InvalidMappingException, IOException, DuplicateMappingException {
-        throw new UnsupportedOperationException(MESSAGE);
+        throw new RuntimeException("TODO: support SQLMappingAndMetadataExtractor.extract( mapping, ...)");
     }
 }

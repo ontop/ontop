@@ -98,7 +98,7 @@ public class QuestMaterializer {
 							 @Nonnull Ontology tbox, @Nonnull ImmutableSet<Predicate> selectedVocabulary,
 							 boolean doStreamResults)
 			throws Exception {
-		this(configuration, configuration.loadProvidedMapping(), tbox, selectedVocabulary, doStreamResults);
+		this(configuration, configuration.loadProvidedDataSourceModel(), tbox, selectedVocabulary, doStreamResults);
 	}
 
 	public QuestMaterializer(@Nonnull QuestCoreConfiguration configuration, @Nonnull Ontology tbox,
@@ -108,7 +108,7 @@ public class QuestMaterializer {
 
 	public QuestMaterializer(@Nonnull QuestCoreConfiguration configuration, @Nonnull Ontology tbox,
 							 boolean doStreamResults) throws Exception {
-		this(configuration, configuration.loadProvidedMapping(), tbox, extractVocabulary(tbox), doStreamResults);
+		this(configuration, configuration.loadProvidedDataSourceModel(), tbox, extractVocabulary(tbox), doStreamResults);
 	}
 
     private static ImmutableSet<Predicate> extractVocabulary(@Nonnull Ontology onto) {

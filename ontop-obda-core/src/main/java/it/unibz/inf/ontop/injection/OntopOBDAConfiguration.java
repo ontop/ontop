@@ -13,7 +13,7 @@ public interface OntopOBDAConfiguration extends OntopModelConfiguration {
     OntopOBDASettings getSettings();
 
     @Deprecated
-    Optional<DBMetadata> getDBMetadata();
+    Optional<DBMetadata> getPredefinedDBMetadata();
 
     static Builder<? extends Builder> defaultBuilder() {
         return new OntopOBDAConfigurationImpl.BuilderImpl<>();

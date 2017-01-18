@@ -140,7 +140,7 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 
 		questConfiguration = owlConfiguration.getQuestConfiguration();
 		preferences = questConfiguration.getSettings();
-		inputDBMetadata = questConfiguration.getDBMetadata();
+		inputDBMetadata = questConfiguration.getPredefinedDBMetadata();
 
 
 		/**
@@ -160,7 +160,7 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 		this.componentFactory = injector.getInstance(QuestComponentFactory.class);
 
 		try {
-			obdaModel = questConfiguration.loadMapping();
+			obdaModel = questConfiguration.loadDataSourceModel();
 			/**
 			 * Mapping parsing exceptions are re-thrown as configuration exceptions.
 			 */

@@ -26,7 +26,6 @@ import com.google.inject.Inject;
 import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.exception.InvalidMappingException;
 import it.unibz.inf.ontop.injection.*;
-import it.unibz.inf.ontop.io.*;
 import it.unibz.inf.ontop.mapping.MappingMetadata;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.SQLMappingFactoryImpl;
@@ -91,7 +90,7 @@ public class DirectMappingEngine {
 	public static BootstrappingResults bootstrap(QuestConfiguration configuration, String baseIRI)
 			throws IOException, InvalidMappingException, OWLOntologyCreationException, SQLException, OWLOntologyStorageException {
 		DirectMappingEngine engine = configuration.getInjector().getInstance(DirectMappingEngine.class);
-		return engine.bootstrapMappingAndOntology(baseIRI, configuration.loadMapping(),
+		return engine.bootstrapMappingAndOntology(baseIRI, configuration.loadOBDAModel(),
 				configuration.loadInputOntology());
 	}
 

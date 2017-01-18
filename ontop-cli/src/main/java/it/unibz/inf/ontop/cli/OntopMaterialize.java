@@ -117,7 +117,7 @@ public class OntopMaterialize extends OntopReasoningCommandBase {
             ImmutableCollection<Predicate> predicates = extractPredicates(ontology);
 
             // Loads it only once
-            OBDAModel obdaModel = configuration.loadProvidedMapping();
+            OBDAModel obdaModel = configuration.loadProvidedDataSourceModel();
             QuestConfiguration materializationConfig = createAndInitConfigurationBuilder()
                     // To avoid parsing it again and again
                     .obdaModel(obdaModel)
@@ -280,7 +280,7 @@ public class OntopMaterialize extends OntopReasoningCommandBase {
             }
 
             QuestConfiguration initialConfiguration = configBuilder.build();
-            //OBDAModel obdaModel = initialConfiguration.loadProvidedMapping();
+            //OBDAModel obdaModel = initialConfiguration.loadProvidedDataSourceModel();
 
             OWLOntology ontology;
             QuestConfiguration materializerConfiguration;

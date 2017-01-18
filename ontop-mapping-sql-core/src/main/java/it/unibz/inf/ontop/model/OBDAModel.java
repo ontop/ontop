@@ -4,6 +4,7 @@ package it.unibz.inf.ontop.model;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.mapping.MappingMetadata;
+import it.unibz.inf.ontop.mapping.extraction.PreProcessedMapping;
 
 /**
  * An OBDA model contains mapping information.
@@ -27,7 +28,7 @@ import it.unibz.inf.ontop.mapping.MappingMetadata;
  *
  *
  */
-public interface OBDAModel {
+public interface OBDAModel extends PreProcessedMapping {
 
     MappingMetadata getMetadata();
 

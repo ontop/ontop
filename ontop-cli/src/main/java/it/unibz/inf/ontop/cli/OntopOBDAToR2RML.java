@@ -71,7 +71,7 @@ public class OntopOBDAToR2RML implements OntopCommand {
          * load the mapping in native Ontop syntax
          */
         try {
-            model = config.loadProvidedMapping();
+            model = config.loadProvidedDataSourceModel();
         } catch (IOException | InvalidMappingException | DuplicateMappingException e) {
             e.printStackTrace();
             System.exit(1);

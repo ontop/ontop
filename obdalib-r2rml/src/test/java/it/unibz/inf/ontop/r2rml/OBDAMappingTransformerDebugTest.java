@@ -26,7 +26,7 @@ public class OBDAMappingTransformerDebugTest {
                 .nativeOntopMappingFile(mapFile)
                 .build();
 
-        OBDAModel model = config.loadProvidedMapping();
+        OBDAModel model = config.loadProvidedDataSourceModel();
 
         R2RMLWriter writer = new R2RMLWriter(model, null, config.getInjector().getInstance(
                 NativeQueryLanguageComponentFactory.class));
@@ -46,7 +46,7 @@ public class OBDAMappingTransformerDebugTest {
                 .nativeOntopMappingFile(mapFile)
                 .build();
 
-        OBDAModel model = config.loadProvidedMapping();
+        OBDAModel model = config.loadProvidedDataSourceModel();
 
         R2RMLWriter writer = new R2RMLWriter(model,null, config.getInjector().getInstance(
                 NativeQueryLanguageComponentFactory.class));
