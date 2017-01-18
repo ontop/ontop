@@ -88,7 +88,7 @@ public class QuestDBVirtualStore extends QuestDBAbstractStore {
 				.orElseGet(() -> ofac.createOntology(ofac.createVocabulary()));
 
 		//set up Quest
-		questInstance = getComponentFactory().create(tbox, Optional.of(obdaModel), config.getDatasourceMetadata(),
+		questInstance = getComponentFactory().create(tbox, Optional.of(obdaModel), config.getDBMetadata(),
 				config.getExecutorRegistry());
 	}
 

@@ -140,7 +140,7 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 
 		questConfiguration = owlConfiguration.getQuestConfiguration();
 		preferences = questConfiguration.getSettings();
-		inputDBMetadata = questConfiguration.getDatasourceMetadata();
+		inputDBMetadata = questConfiguration.getDBMetadata();
 
 
 		/**

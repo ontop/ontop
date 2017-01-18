@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.injection.impl;
 
 import it.unibz.inf.ontop.injection.OntopMappingConfiguration;
 import it.unibz.inf.ontop.injection.OntopMappingSettings;
+import it.unibz.inf.ontop.mapping.extraction.MappingAndDBMetadataExtractor;
 
 
 public class OntopMappingModule extends OntopAbstractModule {
@@ -17,9 +18,6 @@ public class OntopMappingModule extends OntopAbstractModule {
     @Override
     protected void configure() {
         bind(OntopMappingSettings.class).toInstance(settings);
-
-
-
-        // TODO: continue
+        bindFromPreferences(MappingAndDBMetadataExtractor.class);
     }
 }

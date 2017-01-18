@@ -73,11 +73,6 @@ public class QuestCoreConfigurationImpl extends OBDACoreConfigurationImpl implem
     }
 
     @Override
-    public Optional<DBMetadata> getDatasourceMetadata() {
-        return options.dbMetadata;
-    }
-
-    @Override
     public QuestCoreSettings getSettings() {
         return settings;
     }
@@ -92,16 +87,14 @@ public class QuestCoreConfigurationImpl extends OBDACoreConfigurationImpl implem
 
     public static class QuestCoreOptions {
         public final Optional<TMappingExclusionConfig> excludeFromTMappings;
-        public final Optional<DBMetadata> dbMetadata;
         private final OBDAConfigurationOptions obdaOptions;
         private final OntopOptimizationConfigurationOptions optimizationOptions;
 
 
         public QuestCoreOptions(Optional<TMappingExclusionConfig> excludeFromTMappings,
-                                Optional<DBMetadata> dbMetadata, OBDAConfigurationOptions obdaOptions,
+                                OBDAConfigurationOptions obdaOptions,
                                 OntopOptimizationConfigurationOptions optimizationOptions) {
             this.excludeFromTMappings = excludeFromTMappings;
-            this.dbMetadata = dbMetadata;
             this.obdaOptions = obdaOptions;
             this.optimizationOptions = optimizationOptions;
         }
@@ -119,29 +112,16 @@ public class QuestCoreConfigurationImpl extends OBDACoreConfigurationImpl implem
         private Optional<Boolean> encodeIRISafely = Optional.empty();
         private Optional<Boolean> sameAsMappings = Optional.empty();
         private Optional<Boolean> optimizeEquivalences = Optional.empty();
-        private Optional<DBMetadata> dbMetadata = Optional.empty();
         private Optional<Boolean> existentialReasoning = Optional.empty();
 
         protected DefaultQuestCoreBuilderFragment(B builder) {
             this.builder = builder;
         }
 
-        /**
-         * For sub-classes only!!
-         */
-        protected DefaultQuestCoreBuilderFragment() {
-            this.builder = (B) this;
-        }
 
         @Override
         public B tMappingExclusionConfig(@Nonnull TMappingExclusionConfig config) {
             this.excludeFromTMappings = Optional.of(config);
-            return builder;
-        }
-
-        @Override
-        public B dbMetadata(@Nonnull DBMetadata dbMetadata) {
-            this.dbMetadata = Optional.of(dbMetadata);
             return builder;
         }
 
@@ -193,7 +173,7 @@ public class QuestCoreConfigurationImpl extends OBDACoreConfigurationImpl implem
 
         protected final QuestCoreOptions generateQuestCoreOptions(OBDAConfigurationOptions obdaOptions,
                                                                   OntopOptimizationConfigurationOptions optimizationOptions) {
-            return new QuestCoreOptions(excludeFromTMappings, dbMetadata, obdaOptions, optimizationOptions);
+            return new QuestCoreOptions(excludeFromTMappings, obdaOptions, optimizationOptions);
         }
     }
 
@@ -214,11 +194,6 @@ public class QuestCoreConfigurationImpl extends OBDACoreConfigurationImpl implem
         @Override
         public B tMappingExclusionConfig(@Nonnull TMappingExclusionConfig config) {
             return questCoreBuilderFragment.tMappingExclusionConfig(config);
-        }
-
-        @Override
-        public B dbMetadata(@Nonnull DBMetadata dbMetadata) {
-            return questCoreBuilderFragment.dbMetadata(dbMetadata);
         }
 
         @Override

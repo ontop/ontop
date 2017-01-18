@@ -1,6 +1,5 @@
 package it.unibz.inf.ontop.injection;
 
-import it.unibz.inf.ontop.model.DBMetadata;
 import it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing.TMappingExclusionConfig;
 import it.unibz.inf.ontop.injection.impl.QuestCoreConfigurationImpl;
 
@@ -14,8 +13,6 @@ import java.util.Optional;
 public interface QuestCoreConfiguration extends OBDACoreConfiguration, OntopOptimizationConfiguration {
 
     Optional<TMappingExclusionConfig> getTmappingExclusions();
-
-    Optional<DBMetadata> getDatasourceMetadata();
 
     @Override
     QuestCoreSettings getSettings();
@@ -34,8 +31,6 @@ public interface QuestCoreConfiguration extends OBDACoreConfiguration, OntopOpti
      */
     interface QuestCoreBuilderFragment<B extends Builder> {
         B tMappingExclusionConfig(@Nonnull TMappingExclusionConfig config);
-
-        B dbMetadata(@Nonnull DBMetadata dbMetadata);
 
         B enableOntologyAnnotationQuerying(boolean queryingAnnotationsInOntology);
 
