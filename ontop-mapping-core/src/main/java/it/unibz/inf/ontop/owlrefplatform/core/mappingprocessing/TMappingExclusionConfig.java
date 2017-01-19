@@ -1,12 +1,12 @@
 package it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing;
 
 
-import it.unibz.inf.ontop.model.OBDAException;
 import it.unibz.inf.ontop.ontology.DataPropertyExpression;
 import it.unibz.inf.ontop.ontology.OClass;
 import it.unibz.inf.ontop.ontology.ObjectPropertyExpression;
 
 import java.io.BufferedReader;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.Collections;
@@ -50,11 +50,11 @@ public class TMappingExclusionConfig {
         return EMPTY;
     }
 
-    public static TMappingExclusionConfig parseFile(String fileName) {
+    public static TMappingExclusionConfig parseFile(String fileName) throws IOException {
         Set<String> classes = new HashSet<>();
         Set<String> properties = new HashSet<>();
 
-        try (BufferedReader in = new BufferedReader(new FileReader(fileName))) {
+        BufferedReader in = new BufferedReader(new FileReader(fileName));
             String s;
 
             while ((s = in.readLine()) != null) {
@@ -84,9 +84,6 @@ public class TMappingExclusionConfig {
                     throw new IllegalArgumentException("cannot parse line (wrong arity): " + s);
                 }
             }
-        } catch(IOException ex){
-        	throw new OBDAException(ex);
-        }
 
         TMappingExclusionConfig conf = new TMappingExclusionConfig(classes, properties);
 

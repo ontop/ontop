@@ -1,7 +1,7 @@
 package it.unibz.inf.ontop.owlrefplatform.core;
 
 import it.unibz.inf.ontop.model.*;
-import it.unibz.inf.ontop.nativeql.DBMetadataException;
+import it.unibz.inf.ontop.nativeql.DBException;
 
 import java.util.Collection;
 
@@ -12,6 +12,7 @@ import java.util.Collection;
  * Guice-enabled interface (see the QuestComponentFactory).
  *
  */
+@Deprecated
 public interface DBConnector {
 
     /**
@@ -20,11 +21,6 @@ public interface DBConnector {
     boolean connect() throws OBDAException;
     void disconnect() throws OBDAException;
     void dispose();
-
-    DBMetadata extractDBMetadata(OBDAModel obdaModel) throws DBMetadataException;
-
-    DBMetadata extractDBMetadata(OBDAModel obdaModel, DBMetadata partiallyDefinedMetadata)
-            throws DBMetadataException;
 
 
     void close();
@@ -38,10 +34,5 @@ public interface DBConnector {
      * Gets a QuestConnection usually coming from a connection pool.
      */
     IQuestConnection getConnection() throws OBDAException;
-
-    Collection<OBDAMappingAxiom> applyDBSpecificNormalization(Collection<OBDAMappingAxiom> mappingAxioms,
-                                                              DBMetadata metadata) throws OBDAException;
-
-    void completePredefinedMetadata(DBMetadata metadata);
 
 }

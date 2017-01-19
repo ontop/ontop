@@ -159,8 +159,6 @@ public class Quest implements Serializable, IQuest {
 	private final QuestComponentFactory questComponentFactory;
 	private final OBDAFactoryWithException obdaFactory;
 	private final MappingFactory mappingFactory;
-	private final MappingVocabularyFixer mappingVocabularyFixer;
-	private final IMapping2DatalogConverter mapping2DatalogConverter;
 
 	private DBConnector dbConnector;
 	private final QueryCache queryCache;
@@ -196,8 +194,7 @@ public class Quest implements Serializable, IQuest {
 				  @Assisted ExecutorRegistry executorRegistry,
 				  QuestCoreSettings config, NativeQueryLanguageComponentFactory nativeQLFactory,
 				  OBDAFactoryWithException obdaFactory, QuestComponentFactory questComponentFactory,
-				  MappingVocabularyFixer mappingVocabularyFixer, TMappingExclusionConfig excludeFromTMappings,
-				  IMapping2DatalogConverter mapping2DatalogConverter, QueryCache queryCache,
+				  TMappingExclusionConfig excludeFromTMappings, QueryCache queryCache,
 				  OntopModelFactory modelFactory, MappingFactory mappingFactory) throws DuplicateMappingException {
 		if (tbox == null)
 			throw new InvalidParameterException("TBox cannot be null");
@@ -205,8 +202,6 @@ public class Quest implements Serializable, IQuest {
 		this.nativeQLFactory = nativeQLFactory;
 		this.obdaFactory = obdaFactory;
 		this.questComponentFactory = questComponentFactory;
-		this.mappingVocabularyFixer = mappingVocabularyFixer;
-		this.mapping2DatalogConverter = mapping2DatalogConverter;
 		this.queryCache = queryCache;
 		this.modelFactory = modelFactory;
 		this.executorRegistry = executorRegistry;
@@ -347,16 +342,6 @@ public class Quest implements Serializable, IQuest {
 		if (inputOBDAModel == null) {
 			throw new IllegalStateException("The input OBDA model should not be null");
 		}
-		if (!inputOntology.getVocabulary().isEmpty()) {
-			inputOBDAModel = mappingVocabularyFixer.fixOBDAModel(inputOBDAModel,
-					inputOntology.getVocabulary(), nativeQLFactory);
-		}
-
-		/*
-		 * Simplifying the vocabulary of the TBox
-		 */
-
-		final TBoxReasoner reformulationReasoner = TBoxReasonerImpl.create(inputOntology, bOptimizeEquivalences);
 
 		try {
 
@@ -449,19 +434,7 @@ public class Quest implements Serializable, IQuest {
 				dbConnector.connect();
 
 				log.debug("Testing DB connection...");
-				mappings = inputOBDAModel.getMappings();
 			}
-
-
-			//if the metadata was not already set
-			if (metadata == null) {
-				metadata = dbConnector.extractDBMetadata(inputOBDAModel);
-			}
-			else {
-				metadata = dbConnector.extractDBMetadata(inputOBDAModel, metadata);
-			}
-
-			dbConnector.completePredefinedMetadata(metadata);
 
 
 			// This is true if the QuestDefaults.properties contains PRINT_KEYS=true
@@ -471,8 +444,7 @@ public class Quest implements Serializable, IQuest {
 			else
 				log.debug("DB Metadata: \n{}", metadata);
 
-    		VocabularyValidator vocabularyValidator = new VocabularyValidator(reformulationReasoner,
-					inputOntology.getVocabulary(), nativeQLFactory);
+
 
             final QuestUnfolder unfolder = new QuestUnfolder(nativeQLFactory, mapping2DatalogConverter, preferences);
 
@@ -480,10 +452,9 @@ public class Quest implements Serializable, IQuest {
 			 * T-Mappings and Fact mappings
 			 */
 			if (isVirtualMode)
-				unfolder.setupInVirtualMode(mappings, metadata, dbConnector, vocabularyValidator, reformulationReasoner,
-						inputOntology, excludeFromTMappings);
+				unfolder.setupInVirtualMode(metadata);
 			else
-				unfolder.setupInSemanticIndexMode(mappings, reformulationReasoner, metadata);
+				unfolder.setupInSemanticIndexMode(mappings, metadata);
 
 
 			/* The active ABox dependencies */

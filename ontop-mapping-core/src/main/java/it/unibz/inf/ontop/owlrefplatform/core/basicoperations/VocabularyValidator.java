@@ -20,8 +20,6 @@ package it.unibz.inf.ontop.owlrefplatform.core.basicoperations;
  * #L%
  */
 
-import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.ontology.DataPropertyExpression;
 import it.unibz.inf.ontop.ontology.ImmutableOntologyVocabulary;
@@ -30,7 +28,6 @@ import it.unibz.inf.ontop.ontology.ObjectPropertyExpression;
 import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
@@ -40,13 +37,9 @@ public class VocabularyValidator {
 	private final TBoxReasoner reasoner;
 	private final ImmutableOntologyVocabulary voc;
 
-	private final NativeQueryLanguageComponentFactory nativeQLFactory;
-
-	public VocabularyValidator(TBoxReasoner reasoner, ImmutableOntologyVocabulary voc,
-							   NativeQueryLanguageComponentFactory nativeQLFactory) {
+	public VocabularyValidator(TBoxReasoner reasoner, ImmutableOntologyVocabulary voc) {
 		this.reasoner = reasoner;
 		this.voc = voc;
-		this.nativeQLFactory = nativeQLFactory;
 	}
 
 
@@ -54,7 +47,7 @@ public class VocabularyValidator {
 		return DATA_FACTORY.getCQIE(query.getHead(), replaceEquivalences(query.getBody()));
 	}
 
-	private <T extends Term> List<T> replaceEquivalences(List<T> body) {
+	protected <T extends Term> List<T> replaceEquivalences(List<T> body) {
 		List<T> result = new ArrayList<T>(body.size());
 
 		// Get the predicates in the target query.
@@ -109,38 +102,6 @@ public class VocabularyValidator {
 				return DATA_FACTORY.getFunction(equivalent.getPredicate(), atom.getTerms());
 		}
 		return atom;
-	}
-
-	/***
-	 * Given a collection of mappings and an equivalence map for classes and
-	 * properties, it returns a new collection in which all references to
-	 * class/properties with equivalents has been removed and replaced by the
-	 * equivalents.
-	 * 
-	 * For example, given the map hasFather -> inverse(hasChild)
-	 * 
-	 * If there is a mapping:
-	 * 
-	 * q(x,y):- hasFather(x,y) <- SELECT x, y FROM t
-	 * 
-	 * This will be replaced by the mapping
-	 * 
-	 * q(x,y):- hasChild(y,x) <- SELECT x, y FROM t
-	 * 
-	 * The same is done for classes.
-	 * 
-	 * @param originalMappings
-	 * @return
-	 */
-	public ImmutableList<OBDAMappingAxiom> replaceEquivalences(Collection<OBDAMappingAxiom> originalMappings) {
-		
-		Collection<OBDAMappingAxiom> result = new ArrayList<OBDAMappingAxiom>(originalMappings.size());
-		for (OBDAMappingAxiom mapping : originalMappings) {
-			List<Function> targetQuery = mapping.getTargetQuery();
-			List<Function> newTargetQuery = replaceEquivalences(targetQuery);
-			result.add(nativeQLFactory.create(mapping.getId(), mapping.getSourceQuery(), newTargetQuery));
-		}
-		return ImmutableList.copyOf(result);
 	}
 	
 }

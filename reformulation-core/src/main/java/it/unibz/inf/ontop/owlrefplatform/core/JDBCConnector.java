@@ -14,9 +14,6 @@ import org.apache.tomcat.jdbc.pool.PoolProperties;
 import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
 import it.unibz.inf.ontop.mapping.MappingSplitter;
 
-import it.unibz.inf.ontop.nativeql.DBMetadataException;
-import it.unibz.inf.ontop.nativeql.DBMetadataExtractor;
-import it.unibz.inf.ontop.nativeql.JDBCConnectionWrapper;
 import it.unibz.inf.ontop.parser.PreprocessProjection;
 import it.unibz.inf.ontop.sql.RDBMetadata;
 import it.unibz.inf.ontop.utils.MetaMappingExpander;
@@ -40,17 +37,6 @@ public class JDBCConnector implements DBConnector {
     private final IQuest questInstance;
     private final QuestCoreSettings questCoreSettings;
 
-    /**
-     * This represents user-supplied constraints, i.e. primary
-     * and foreign keys not present in the database metadata.
-     *
-     * SQL-specific.
-     *
-     * Can be useful for eliminating self-joins
-     *
-     * Also injected in the DBMetadataExtractor. Only useful here if the DBMetadata is pre-defined.
-     */
-    private final ImplicitDBConstraintsReader userConstraints;
     private final QuestCoreSettings settings;
 
     /* The active connection used to get metadata from the DBMS */
@@ -77,8 +63,7 @@ public class JDBCConnector implements DBConnector {
     @Inject
     private JDBCConnector(@Assisted IQuest questInstance,
                           NativeQueryLanguageComponentFactory nativeQLFactory,
-                          QuestCoreSettings settings,
-                          @Nullable ImplicitDBConstraintsReader userConstraints) {
+                          QuestCoreSettings settings) {
         this.questCoreSettings = settings;
         this.questInstance = questInstance;
         this.nativeQLFactory = nativeQLFactory;
@@ -87,7 +72,6 @@ public class JDBCConnector implements DBConnector {
         abandonedTimeout = settings.getAbandonedTimeout();
         startPoolSize = settings.getConnectionPoolInitialSize();
         maxPoolSize = settings.getConnectionPoolMaxSize();
-        this.userConstraints = userConstraints;
         this.settings = settings;
 
         setupConnectionPool();
@@ -148,33 +132,6 @@ public class JDBCConnector implements DBConnector {
                 disconnect();
         } catch (Exception e) {
             log.debug("Error during disconnect: " + e.getMessage());
-        }
-    }
-
-    @Override
-    public DBMetadata extractDBMetadata(OBDAModel obdaModel) throws DBMetadataException {
-        DBMetadataExtractor dataSourceMetadataExtractor = nativeQLFactory.create();
-        return dataSourceMetadataExtractor.extract(obdaModel, new JDBCConnectionWrapper(localConnection));
-    }
-
-    @Override
-    public DBMetadata extractDBMetadata(OBDAModel obdaModel, DBMetadata partiallyDefinedMetadata)
-            throws DBMetadataException {
-        DBMetadataExtractor dataSourceMetadataExtractor = nativeQLFactory.create();
-        return dataSourceMetadataExtractor.extract(obdaModel, new JDBCConnectionWrapper(localConnection),
-                partiallyDefinedMetadata);
-    }
-
-    private Collection<OBDAMappingAxiom> expandMetaMappings(Collection<OBDAMappingAxiom> mappingAxioms,
-                                                            DBMetadata metadata) throws OBDAException {
-        MetaMappingExpander metaMappingExpander = new MetaMappingExpander(localConnection, metadata.getQuotedIDFactory(),
-                nativeQLFactory);
-        try {
-            return metaMappingExpander.expand(mappingAxioms);
-        } catch (SQLException e) {
-            throw new OBDAException(e);
-        } catch (JSQLParserException e) {
-            throw new OBDAException(e);
         }
     }
 
@@ -293,77 +250,5 @@ public class JDBCConnector implements DBConnector {
         return new QuestConnection(this, questInstance, getSQLPoolConnection(), questCoreSettings);
     }
 
-    /***
-     * Expands a SELECT * into a SELECT with all columns implicit in the *
-     *
-     *
-     * Has side-effects on the input mapping axioms
-     *
-     */
-    private Collection<OBDAMappingAxiom> preprocessProjection(Collection<OBDAMappingAxiom> mappingAxioms,
-                                                              RDBMetadata dbMetadata)
-            throws OBDAException {
-        for (OBDAMappingAxiom axiom : mappingAxioms) {
-            String sourceString = axiom.getSourceQuery().toString();
 
-            List<Function> targetQuery = axiom.getTargetQuery();
-
-            Select select;
-            try {
-                select = (Select) CCJSqlParserUtil.parse(sourceString);
-
-                Set<Variable> variables = targetQuery.stream()
-                        .flatMap(atom -> atom.getVariables().stream())
-                        .collect(Collectors.toSet());
-                PreprocessProjection ps = new PreprocessProjection(dbMetadata);
-                String query = ps.getMappingQuery(select, variables);
-                axiom.setSourceQuery(MAPPING_FACTORY.getSQLQuery(query));
-
-            } catch (JSQLParserException e) {
-                log.debug("SQL Query cannot be preprocessed by the parser");
-            } catch(SQLException e) {
-                throw new OBDAException(e.getMessage());
-            }
-        }
-
-        return mappingAxioms;
-    }
-
-    @Override
-    public Collection<OBDAMappingAxiom> applyDBSpecificNormalization(Collection<OBDAMappingAxiom> mappingAxioms,
-                                                                     final DBMetadata metadata) throws OBDAException {
-        /** Substitute select * with column names (in the SQL case) **/
-
-        if (!(metadata instanceof RDBMetadata)) {
-            throw new IllegalArgumentException("The JDBC connector expects a SQL-specific DBMetadata");
-        }
-        RDBMetadata dbMetadata = (RDBMetadata) metadata;
-
-        mappingAxioms = preprocessProjection(mappingAxioms, dbMetadata);
-
-        /**
-         * Split the mapping
-         */
-        List<OBDAMappingAxiom> splitMappingsAxioms = MappingSplitter.splitMappings(mappingAxioms, nativeQLFactory);
-
-        /**
-         * Expand the meta mapping
-         */
-        Collection<OBDAMappingAxiom> expandedMappingAxioms = expandMetaMappings(splitMappingsAxioms, metadata);
-
-        return expandedMappingAxioms;
-    }
-
-    @Override
-    public void completePredefinedMetadata(DBMetadata metadata) {
-        if (!(metadata instanceof RDBMetadata)) {
-            throw new IllegalArgumentException("DBMetadata is required");
-        }
-
-        //Adds keys from the text file
-        if (userConstraints != null) {
-            userConstraints.insertUniqueConstraints(metadata);
-            userConstraints.insertForeignKeyConstraints(metadata);
-        }
-    }
 }

@@ -1,17 +1,8 @@
 package it.unibz.inf.ontop.injection.impl;
 
-import com.google.common.collect.ImmutableList;
-import com.google.inject.Module;
 import com.google.inject.util.Providers;
-import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
 import it.unibz.inf.ontop.injection.OBDACoreConfiguration;
-import it.unibz.inf.ontop.injection.OBDAFactoryWithException;
 import it.unibz.inf.ontop.injection.OBDASettings;
-import it.unibz.inf.ontop.io.PrefixManager;
-import it.unibz.inf.ontop.mapping.MappingParser;
-import it.unibz.inf.ontop.model.OBDAMappingAxiom;
-import it.unibz.inf.ontop.model.OBDAModel;
-import it.unibz.inf.ontop.nativeql.DBMetadataExtractor;
 import it.unibz.inf.ontop.sql.ImplicitDBConstraintsReader;
 import it.unibz.inf.ontop.utils.IMapping2DatalogConverter;
 

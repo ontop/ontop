@@ -9,7 +9,7 @@ import it.unibz.inf.ontop.injection.OntopMappingSQLConfiguration;
 import it.unibz.inf.ontop.injection.OntopMappingSQLSettings;
 import it.unibz.inf.ontop.mapping.MappingParser;
 import it.unibz.inf.ontop.model.OBDAMappingAxiom;
-import it.unibz.inf.ontop.nativeql.DBMetadataExtractor;
+import it.unibz.inf.ontop.nativeql.RDBMetadataExtractor;
 
 public class OntopMappingSQLModule extends OntopAbstractModule {
 
@@ -29,7 +29,7 @@ public class OntopMappingSQLModule extends OntopAbstractModule {
         bindFromPreferences(MappingParser.class);
 
         Module nativeQLFactoryModule = buildFactory(ImmutableList.<Class>of(
-                DBMetadataExtractor.class,
+                RDBMetadataExtractor.class,
                 OBDAMappingAxiom.class
                 ),
                 NativeQueryLanguageComponentFactory.class);

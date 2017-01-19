@@ -2,12 +2,8 @@ package it.unibz.inf.ontop.injection;
 
 import com.google.inject.assistedinject.Assisted;
 import it.unibz.inf.ontop.model.*;
-import org.eclipse.rdf4j.model.Model;
-import it.unibz.inf.ontop.mapping.MappingParser;
-import it.unibz.inf.ontop.nativeql.DBMetadataExtractor;
+import it.unibz.inf.ontop.nativeql.RDBMetadataExtractor;
 
-import java.io.File;
-import java.io.Reader;
 import java.util.List;
 
 /**
@@ -24,7 +20,7 @@ import java.util.List;
  */
 public interface NativeQueryLanguageComponentFactory {
 
-    DBMetadataExtractor create();
+    RDBMetadataExtractor create();
 
     OBDAMappingAxiom create(String id, @Assisted("sourceQuery") SourceQuery sourceQuery,
                             @Assisted("targetQuery") List<Function> targetQuery);

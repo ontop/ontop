@@ -59,9 +59,8 @@ public class MappingDataTypeRepair {
      * default data-type.
      * 
      * @param metadata The database metadata.
-     * @throws OBDAException
      */
-    public MappingDataTypeRepair(DBMetadata metadata, TBoxReasoner reasoner, VocabularyValidator qvv) throws OBDAException {
+    public MappingDataTypeRepair(DBMetadata metadata, TBoxReasoner reasoner, VocabularyValidator qvv) {
         this.metadata = metadata;
         String databaseName = metadata.getDbmsProductName();
         String databaseDriver = metadata.getDriverName();

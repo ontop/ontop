@@ -2,8 +2,10 @@ package it.unibz.inf.ontop.nativeql;
 
 import it.unibz.inf.ontop.model.OBDAModel;
 import it.unibz.inf.ontop.model.DBMetadata;
+import it.unibz.inf.ontop.sql.RDBMetadata;
 
 import javax.annotation.Nullable;
+import java.sql.Connection;
 
 /**
  * Extracts the metadata of the database by:
@@ -14,10 +16,10 @@ import javax.annotation.Nullable;
  * This interface aims at being generic regarding the native query language.
  *
  */
-public interface DBMetadataExtractor {
+public interface RDBMetadataExtractor {
 
-    DBMetadata extract(OBDAModel model, @Nullable DBConnectionWrapper dbConnection) throws DBMetadataException;
+    RDBMetadata extract(OBDAModel model, @Nullable Connection dbConnection) throws DBException;
 
-    DBMetadata extract(OBDAModel model, @Nullable DBConnectionWrapper dbConnection,
-                       DBMetadata partiallyDefinedMetadata) throws DBMetadataException;
+    RDBMetadata extract(OBDAModel model, @Nullable Connection dbConnection,
+                       DBMetadata partiallyDefinedMetadata) throws DBException;
 }

@@ -4,9 +4,8 @@ package it.unibz.inf.ontop.sql;
 import it.unibz.inf.ontop.injection.OntopMappingSQLSettings;
 import it.unibz.inf.ontop.model.DBMetadata;
 import it.unibz.inf.ontop.model.OBDAModel;
-import it.unibz.inf.ontop.nativeql.DBConnectionWrapper;
-import it.unibz.inf.ontop.nativeql.DBMetadataException;
-import it.unibz.inf.ontop.nativeql.DBMetadataExtractor;
+import it.unibz.inf.ontop.nativeql.DBException;
+import it.unibz.inf.ontop.nativeql.RDBMetadataExtractor;
 import net.sf.jsqlparser.JSQLParserException;
 
 import javax.annotation.Nullable;
@@ -21,7 +20,7 @@ import static it.unibz.inf.ontop.mapping.sql.SQLTableNameExtractor.getRealTables
 /**
  * DBMetadataExtractor for JDBC-enabled DBs.
  */
-public class SQLDBMetadataExtractor implements DBMetadataExtractor {
+public class DefaultRDBMetadataExtractor implements RDBMetadataExtractor {
 
     /**
      * If we have to parse the full metadata or just the table list in the mappings.
@@ -37,36 +36,30 @@ public class SQLDBMetadataExtractor implements DBMetadataExtractor {
     private final Optional<ImplicitDBConstraintsReader> userConstraints;
 
     @Inject
-    private SQLDBMetadataExtractor(OntopMappingSQLSettings settings, @Nullable ImplicitDBConstraintsReader userConstraints) {
+    private DefaultRDBMetadataExtractor(OntopMappingSQLSettings settings, @Nullable ImplicitDBConstraintsReader userConstraints) {
         this.obtainFullMetadata = settings.isFullMetadataExtractionEnabled();
         this.userConstraints = Optional.ofNullable(userConstraints);
     }
 
-    /**
-     * Expects the DBConnectionWrapper to wrap a JDBC connection.
-     */
     @Override
-    public RDBMetadata extract(OBDAModel obdaModel, DBConnectionWrapper dbConnection)
-            throws DBMetadataException {
-
-        Connection connection = (Connection) dbConnection.getConnection();
+    public RDBMetadata extract(OBDAModel obdaModel, Connection connection)
+            throws DBException {
         try {
             RDBMetadata metadata = RDBMetadataExtractionTools.createMetadata(connection);
-            return extract(obdaModel, dbConnection, metadata);
+            return extract(obdaModel, connection, metadata);
         } catch (SQLException e) {
-            throw new DBMetadataException(e.getMessage());
+            throw new DBException(e.getMessage());
         }
     }
 
     @Override
-    public RDBMetadata extract(OBDAModel model, @Nullable DBConnectionWrapper dbConnection,
-                               DBMetadata partiallyDefinedMetadata) throws DBMetadataException {
+    public RDBMetadata extract(OBDAModel model, @Nullable Connection connection,
+                               DBMetadata partiallyDefinedMetadata) throws DBException {
 
         if (!(partiallyDefinedMetadata instanceof RDBMetadata)) {
             throw new IllegalArgumentException("Was expecting a DBMetadata");
         }
 
-        Connection connection = (Connection) dbConnection.getConnection();
         try {
             RDBMetadata metadata = (RDBMetadata) partiallyDefinedMetadata;
 
@@ -106,6 +99,6 @@ public class SQLDBMetadataExtractor implements DBMetadataExtractor {
             return metadata;
 
         } catch (SQLException e) {
-            throw new DBMetadataException(e.getMessage());
+            throw new DBException(e.getMessage());
         }    }
 }

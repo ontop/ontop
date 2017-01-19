@@ -20,7 +20,6 @@ package it.unibz.inf.ontop.owlrefplatform.core.translator;
  * #L%
  */
 
-import java.net.URI;
 import java.util.*;
 
 import java.util.Collection;
@@ -30,6 +29,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.google.common.collect.ImmutableList;
+import com.google.inject.Inject;
 import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
 import it.unibz.inf.ontop.model.*;
@@ -50,10 +50,17 @@ import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
 public class SQLMappingVocabularyFixer implements MappingVocabularyFixer {
 
     private static final Logger log = LoggerFactory.getLogger(SQLMappingVocabularyFixer.class);
+    private final NativeQueryLanguageComponentFactory nativeQLFactory;
 
-	@Override
-	public OBDAModel fixOBDAModel(OBDAModel model, ImmutableOntologyVocabulary vocabulary,
-								  NativeQueryLanguageComponentFactory nativeQLFactory) {
+
+    @Inject
+    private SQLMappingVocabularyFixer(NativeQueryLanguageComponentFactory nativeQLFactory) {
+        this.nativeQLFactory = nativeQLFactory;
+    }
+
+
+    @Override
+	public OBDAModel fixOBDAModel(OBDAModel model, ImmutableOntologyVocabulary vocabulary) {
         log.debug("Fixing OBDA Model");
 
         List<OBDAMappingAxiom> mappings = new ArrayList<>();
