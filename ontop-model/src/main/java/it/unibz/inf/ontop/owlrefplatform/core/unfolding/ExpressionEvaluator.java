@@ -893,7 +893,11 @@ public class ExpressionEvaluator {
 					
 					temp.add(result);
 					if (temp.size() == 2) {
-						result = DATA_FACTORY.getFunctionAND(temp.get(0), temp.get(1));
+						if (isEqual){
+							result = DATA_FACTORY.getFunctionAND(temp.get(0), temp.get(1));
+						}else{
+							result = DATA_FACTORY.getFunctionOR(temp.get(0), temp.get(1));
+						}
 						temp.clear();
 						temp.add(result);
 					}
