@@ -2,20 +2,15 @@ package it.unibz.inf.ontop.reformulation.tests;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.injection.QuestConfiguration;
-import it.unibz.inf.ontop.model.OBDADataFactory;
-import it.unibz.inf.ontop.model.OBDAModel;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLObject;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.sql.Connection;
@@ -34,6 +29,7 @@ import static org.junit.Assert.assertTrue;
 public class TypeInferenceTest {
 
     private Connection conn;
+    private final Logger log = LoggerFactory.getLogger(this.getClass());
 
     private static final String ONTOLOGY_FILE = "src/test/resources/test/typeinference/types.owl";
     private static final String OBDA_FILE = "src/test/resources/test/typeinference/types.obda";
@@ -129,9 +125,9 @@ public class TypeInferenceTest {
             QuestOWLResultSet rs = st.executeTuple(query);
             while (rs.nextRow()) {
                 OWLObject ind1 = rs.getOWLObject("r");
-                // log.debug(ind1.toString());
+                log.debug(ind1.toString());
                 returnedValues.add(ind1.toString());
-                System.out.println(ind1);
+
                 i++;
             }
         } catch (Exception e) {
