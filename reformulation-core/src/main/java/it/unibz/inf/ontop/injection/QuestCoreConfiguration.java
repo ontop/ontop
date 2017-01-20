@@ -32,16 +32,10 @@ public interface QuestCoreConfiguration extends OBDACoreConfiguration, OntopOpti
     interface QuestCoreBuilderFragment<B extends Builder<B>> {
         B tMappingExclusionConfig(@Nonnull TMappingExclusionConfig config);
 
-        B enableOntologyAnnotationQuerying(boolean queryingAnnotationsInOntology);
-
         /**
          * In the case of SQL, inserts REPLACE functions in the generated query
          */
         B enableIRISafeEncoding(boolean enable);
-
-        B sameAsMappings(boolean sameAsMappings);
-
-        B enableEquivalenceOptimization(boolean enable);
 
         B enableExistentialReasoning(boolean enable);
     }

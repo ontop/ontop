@@ -55,7 +55,7 @@ public class QuestConfigPanel extends javax.swing.JPanel {
         boolean bChecked = preference.getBoolean(QuestCoreSettings.REWRITE);
         chkRewrite.setSelected(bChecked);
         
-        bChecked = preference.getBoolean(QuestCoreSettings.ANNOTATIONS_IN_ONTO);
+        bChecked = preference.getBoolean(QuestCoreSettings.QUERY_ONTOLOGY_ANNOTATIONS);
         chkAnnotations.setSelected(bChecked);
 
         String value = preference.getProperty(QuestCoreSettings.ABOX_MODE);
@@ -510,7 +510,7 @@ public class QuestConfigPanel extends javax.swing.JPanel {
     }//GEN-LAST:event_chkRewriteActionPerformed
 
     private void chkAnnotationsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkAnnotationsActionPerformed
-        preference.put(QuestCoreSettings.ANNOTATIONS_IN_ONTO, String.valueOf(chkAnnotations.isSelected()));
+        preference.put(QuestCoreSettings.QUERY_ONTOLOGY_ANNOTATIONS, String.valueOf(chkAnnotations.isSelected()));
 
     }//GEN-LAST:event_chkAnnotationsActionPerformed
 

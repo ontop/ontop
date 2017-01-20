@@ -46,6 +46,8 @@ public interface OntopMappingConfiguration extends OntopOBDAConfiguration {
 
         B enableFullMetadataExtraction(boolean obtainFullMetadata);
 
+        B enableOntologyAnnotationQuerying(boolean queryingAnnotationsInOntology);
+
     }
 
     interface Builder<B extends Builder<B>> extends OntopMappingBuilderFragment<B>, OntopOBDAConfiguration.Builder<B> {

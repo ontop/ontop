@@ -1,6 +1,8 @@
 package it.unibz.inf.ontop.injection.impl;
 
 import com.google.inject.Module;
+import it.unibz.inf.ontop.injection.OntopModelConfiguration;
+import it.unibz.inf.ontop.injection.OntopModelSettings;
 import it.unibz.inf.ontop.injection.OntopOBDAConfiguration;
 import it.unibz.inf.ontop.injection.OntopOBDASettings;
 import it.unibz.inf.ontop.model.DBMetadata;
@@ -53,9 +55,23 @@ public class OntopOBDAConfigurationImpl extends OntopModelConfigurationImpl impl
 
         private final B builder;
         private Optional<DBMetadata> dbMetadata = Optional.empty();
+        private Optional<Boolean> sameAsMappings = Optional.empty();
+        private Optional<Boolean> optimizeEquivalences = Optional.empty();
 
         DefaultOntopOBDABuilderFragment(B builder) {
             this.builder = builder;
+        }
+
+        @Override
+        public B sameAsMappings(boolean sameAsMappings) {
+            this.sameAsMappings = Optional.of(sameAsMappings);
+            return builder;
+        }
+
+        @Override
+        public B enableEquivalenceOptimization(boolean enable) {
+            this.optimizeEquivalences = Optional.of(enable);
+            return builder;
         }
 
         @Override
@@ -65,7 +81,11 @@ public class OntopOBDAConfigurationImpl extends OntopModelConfigurationImpl impl
         }
 
         Properties generateProperties() {
-            return new Properties();
+            Properties p = new Properties();
+            sameAsMappings.ifPresent(b -> p.put(OntopOBDASettings.SAME_AS, b));
+            optimizeEquivalences.ifPresent(b -> p.put(OntopOBDASettings.OPTIMIZE_EQUIVALENCES, b));
+
+            return p;
         }
 
         final OntopOBDAOptions generateOBDAOptions(OntopModelConfigurationOptions modelOptions) {
@@ -89,6 +109,16 @@ public class OntopOBDAConfigurationImpl extends OntopModelConfigurationImpl impl
         }
 
         @Override
+        public B sameAsMappings(boolean enable) {
+            return localBuilderFragment.sameAsMappings(enable);
+        }
+
+        @Override
+        public B enableEquivalenceOptimization(boolean enable) {
+            return localBuilderFragment.enableEquivalenceOptimization(enable);
+        }
+
+        @Override
         public B dbMetadata(@Nonnull DBMetadata dbMetadata) {
             return localBuilderFragment.dbMetadata(dbMetadata);
         }
@@ -99,7 +129,6 @@ public class OntopOBDAConfigurationImpl extends OntopModelConfigurationImpl impl
             properties.putAll(localBuilderFragment.generateProperties());
             return properties;
         }
-
     }
 
 

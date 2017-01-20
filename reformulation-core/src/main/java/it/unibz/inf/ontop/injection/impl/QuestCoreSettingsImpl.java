@@ -34,25 +34,9 @@ public class QuestCoreSettingsImpl extends OBDASettingsImpl implements QuestCore
         return loadDefaultPropertiesFromFile(QuestCoreSettings.class, DEFAULT_QUEST_PROPERTIES_FILE);
     }
 
-
-    @Override
-    public boolean isOntologyAnnotationQueryingEnabled() {
-        return getRequiredBoolean(ANNOTATIONS_IN_ONTO);
-    }
-
-    @Override
-    public boolean isSameAsInMappingsEnabled() {
-        return getRequiredBoolean(SAME_AS);
-    }
-
     @Override
     public boolean isRewritingEnabled() {
         return getRequiredBoolean(REWRITE);
-    }
-
-    @Override
-    public boolean isEquivalenceOptimizationEnabled() {
-        return getRequiredBoolean(OPTIMIZE_EQUIVALENCES);
     }
 
     @Override

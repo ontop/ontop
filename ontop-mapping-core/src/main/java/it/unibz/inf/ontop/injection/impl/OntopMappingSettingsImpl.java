@@ -26,6 +26,11 @@ class OntopMappingSettingsImpl extends OntopOBDASettingsImpl implements OntopMap
 
     @Override
     public boolean isFullMetadataExtractionEnabled() {
-        return getRequiredBoolean(OntopMappingSettings.OBTAIN_FULL_METADATA);
+        return getRequiredBoolean(OBTAIN_FULL_METADATA);
+    }
+
+    @Override
+    public boolean isOntologyAnnotationQueryingEnabled() {
+        return getRequiredBoolean(QUERY_ONTOLOGY_ANNOTATIONS);
     }
 }

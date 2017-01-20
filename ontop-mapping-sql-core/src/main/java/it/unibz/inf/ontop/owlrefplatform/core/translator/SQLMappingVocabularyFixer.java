@@ -44,6 +44,11 @@ import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
 /***
  * This is a hack class that helps fix and OBDA model in which the mappings
  * include predicates that have not been properly typed.
+ *
+ * Makes the distinction between classes, object, data and annotation properties.
+ *
+ * For annotation properties, decides if it should be treated as an object or a data property.
+ *
  * 
  * @author mariano
  */

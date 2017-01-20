@@ -30,13 +30,7 @@ import java.util.Optional;
  */
 public interface QuestCoreSettings extends OBDASettings, OntopOptimizationSettings {
 
-	boolean isOntologyAnnotationQueryingEnabled();
-
-	boolean isSameAsInMappingsEnabled();
-
 	boolean isRewritingEnabled();
-
-	boolean isEquivalenceOptimizationEnabled();
 
 	boolean isKeyPrintingEnabled();
 
@@ -83,9 +77,6 @@ public interface QuestCoreSettings extends OBDASettings, OntopOptimizationSettin
 
 	String	REFORMULATION_TECHNIQUE	= "org.obda.owlreformulationplatform.reformulationTechnique";
 	String	ABOX_MODE				= "org.obda.owlreformulationplatform.aboxmode";
-	String  OPTIMIZE_EQUIVALENCES 	= "org.obda.owlreformulationplatform.optimizeEquivalences";
-	String  ANNOTATIONS_IN_ONTO     = "org.obda.owlreformulationplatform.queryingAnnotationsInOntology";
-	String  SAME_AS   				= "org.obda.owlreformulationplatform.sameAs";
 
 	/**
 	 * Options to specify base IRI.

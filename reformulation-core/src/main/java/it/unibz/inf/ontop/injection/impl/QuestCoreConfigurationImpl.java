@@ -7,7 +7,6 @@ import it.unibz.inf.ontop.executor.ProposalExecutor;
 import it.unibz.inf.ontop.injection.InvalidOntopConfigurationException;
 import it.unibz.inf.ontop.injection.impl.OntopOptimizationConfigurationImpl.DefaultOntopOptimizationBuilderFragment;
 import it.unibz.inf.ontop.injection.impl.OntopOptimizationConfigurationImpl.OntopOptimizationConfigurationOptions;
-import it.unibz.inf.ontop.model.DBMetadata;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
 import it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing.TMappingExclusionConfig;
 import it.unibz.inf.ontop.injection.QuestCoreConfiguration;
@@ -108,10 +107,7 @@ public class QuestCoreConfigurationImpl extends OBDACoreConfigurationImpl implem
 
         private Optional<TMappingExclusionConfig> excludeFromTMappings = Optional.empty();
 
-        private Optional<Boolean> queryingAnnotationsInOntology = Optional.empty();
         private Optional<Boolean> encodeIRISafely = Optional.empty();
-        private Optional<Boolean> sameAsMappings = Optional.empty();
-        private Optional<Boolean> optimizeEquivalences = Optional.empty();
         private Optional<Boolean> existentialReasoning = Optional.empty();
 
         protected DefaultQuestCoreBuilderFragment(B builder) {
@@ -126,26 +122,8 @@ public class QuestCoreConfigurationImpl extends OBDACoreConfigurationImpl implem
         }
 
         @Override
-        public B enableOntologyAnnotationQuerying(boolean queryingAnnotationsInOntology) {
-            this.queryingAnnotationsInOntology = Optional.of(queryingAnnotationsInOntology);
-            return builder;
-        }
-
-        @Override
         public B enableIRISafeEncoding(boolean enable) {
             this.encodeIRISafely = Optional.of(enable);
-            return builder;
-        }
-
-        @Override
-        public B sameAsMappings(boolean sameAsMappings) {
-            this.sameAsMappings = Optional.of(sameAsMappings);
-            return builder;
-        }
-
-        @Override
-        public B enableEquivalenceOptimization(boolean enable) {
-            this.optimizeEquivalences = Optional.of(enable);
             return builder;
         }
 
@@ -159,10 +137,7 @@ public class QuestCoreConfigurationImpl extends OBDACoreConfigurationImpl implem
         protected Properties generateUserProperties() {
             Properties p = new Properties();
 
-            queryingAnnotationsInOntology.ifPresent(b -> p.put(QuestCoreSettings.ANNOTATIONS_IN_ONTO, b));
             encodeIRISafely.ifPresent(e -> p.put(QuestCoreSettings.SQL_GENERATE_REPLACE, e));
-            sameAsMappings.ifPresent(b -> p.put(QuestCoreSettings.SAME_AS, b));
-            optimizeEquivalences.ifPresent(b -> p.put(QuestCoreSettings.OPTIMIZE_EQUIVALENCES, b));
             existentialReasoning.ifPresent(r -> {
                 p.put(QuestCoreSettings.REWRITE, r);
                 p.put(QuestCoreSettings.REFORMULATION_TECHNIQUE, QuestConstants.TW);
@@ -197,23 +172,8 @@ public class QuestCoreConfigurationImpl extends OBDACoreConfigurationImpl implem
         }
 
         @Override
-        public B enableOntologyAnnotationQuerying(boolean queryingAnnotationsInOntology) {
-            return questCoreBuilderFragment.enableOntologyAnnotationQuerying(queryingAnnotationsInOntology);
-        }
-
-        @Override
         public B enableIRISafeEncoding(boolean enable) {
             return questCoreBuilderFragment.enableIRISafeEncoding(enable);
-        }
-
-        @Override
-        public B sameAsMappings(boolean sameAsMappings) {
-            return questCoreBuilderFragment.sameAsMappings(sameAsMappings);
-        }
-
-        @Override
-        public B enableEquivalenceOptimization(boolean enable) {
-            return questCoreBuilderFragment.enableEquivalenceOptimization(enable);
         }
 
         @Override

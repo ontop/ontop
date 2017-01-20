@@ -56,7 +56,7 @@ public class DisposableProperties extends Properties implements Disposable {
 		keys.add(OBTAIN_FROM_ONTOLOGY);
 		keys.add(OBTAIN_FROM_MAPPINGS);
 		keys.add(OPTIMIZE_EQUIVALENCES);
-//		keys.add(ANNOTATIONS_IN_ONTO);
+//		keys.add(QUERY_ONTOLOGY_ANNOTATIONS);
 //		keys.add(OPTIMIZE_TBOX_SIGMA);
 //		keys.add(CREATE_TEST_MAPPINGS);
 

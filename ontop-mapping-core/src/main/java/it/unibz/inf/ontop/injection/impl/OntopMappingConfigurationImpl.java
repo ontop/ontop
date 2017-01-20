@@ -146,6 +146,7 @@ public class OntopMappingConfigurationImpl extends OntopOBDAConfigurationImpl im
         private Optional<ImplicitDBConstraintsReader> userConstraints = Optional.empty();
         private Optional<DataSourceModel> dataSourceModel = Optional.empty();
         private Optional<Boolean> obtainFullMetadata = Optional.empty();
+        private Optional<Boolean> queryingAnnotationsInOntology = Optional.empty();
 
         DefaultOntopMappingBuilderFragment(B builder,
                                            Supplier<Boolean> isMappingDefinedSupplier,
@@ -178,6 +179,13 @@ public class OntopMappingConfigurationImpl extends OntopOBDAConfigurationImpl im
             return builder;
         }
 
+
+        @Override
+        public B enableOntologyAnnotationQuerying(boolean queryingAnnotationsInOntology) {
+            this.queryingAnnotationsInOntology = Optional.of(queryingAnnotationsInOntology);
+            return builder;
+        }
+
         final OntopMappingOptions generateMappingOptions(OntopOBDAOptions obdaOptions) {
             return new OntopMappingOptions(dataSourceModel, userConstraints, obdaOptions);
         }
@@ -185,6 +193,7 @@ public class OntopMappingConfigurationImpl extends OntopOBDAConfigurationImpl im
         Properties generateProperties() {
             Properties properties = new Properties();
             obtainFullMetadata.ifPresent(m -> properties.put(OntopMappingSettings.OBTAIN_FULL_METADATA, m));
+            queryingAnnotationsInOntology.ifPresent(b -> properties.put(OntopMappingSettings.QUERY_ONTOLOGY_ANNOTATIONS, b));
             return properties;
         }
 
@@ -216,6 +225,11 @@ public class OntopMappingConfigurationImpl extends OntopOBDAConfigurationImpl im
         @Override
         public B enableFullMetadataExtraction(boolean obtainFullMetadata) {
             return mappingBuilderFragment.enableFullMetadataExtraction(obtainFullMetadata);
+        }
+
+        @Override
+        public B enableOntologyAnnotationQuerying(boolean queryingAnnotationsInOntology) {
+            return mappingBuilderFragment.enableOntologyAnnotationQuerying(queryingAnnotationsInOntology);
         }
 
         final OntopMappingOptions generateMappingOptions() {

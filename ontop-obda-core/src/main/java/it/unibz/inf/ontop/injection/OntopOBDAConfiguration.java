@@ -21,6 +21,10 @@ public interface OntopOBDAConfiguration extends OntopModelConfiguration {
 
     interface OntopOBDABuilderFragment<B extends Builder<B>> {
 
+        B sameAsMappings(boolean enable);
+
+        B enableEquivalenceOptimization(boolean enable);
+
         B dbMetadata(@Nonnull DBMetadata dbMetadata);
     }
 
