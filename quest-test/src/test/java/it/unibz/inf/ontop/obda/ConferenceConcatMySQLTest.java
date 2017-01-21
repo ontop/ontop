@@ -27,7 +27,6 @@ import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
-import it.unibz.inf.ontop.parser.ProjectionVisitor;
 import it.unibz.inf.ontop.utils.Mapping2DatalogConverter;
 import org.junit.Before;
 import org.junit.Test;
@@ -48,13 +47,12 @@ import static org.junit.Assert.assertTrue;
  * Test
  * CONCAT with table.columnName and string values that need to be change to literal
  * use mysql.
- * Refer to {@link Mapping2DatalogConverter} {@link ProjectionVisitor}
+ * Refer to {@link Mapping2DatalogConverter}
  */
 
 public class ConferenceConcatMySQLTest {
 
 	private OBDADataFactory fac;
-	private Connection conn;
 
 	Logger log = LoggerFactory.getLogger(this.getClass());
 	private OBDAModel obdaModel;

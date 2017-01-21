@@ -42,9 +42,6 @@ import java.util.*;
 
 public class TableNameVisitor {
 
-	// Store the table selected by the SQL query in TableJSQL
-	private final Map<RelationID, RelationID> tables = new HashMap<>();
-	
 	private final QuotedIDFactory idfac;
 	private final List<RelationID> relations = new LinkedList<>();
 
@@ -63,10 +60,9 @@ public class TableNameVisitor {
 	 * Main entry for this Tool class. A list of found tables is returned.
 	 *
 	 * @param select
-	 * @param deepParsing
 	 * @return
 	 */
-	public TableNameVisitor(Select select, boolean deepParsing, QuotedIDFactory idfac) throws JSQLParserException {
+	public TableNameVisitor(Select select, QuotedIDFactory idfac) throws JSQLParserException {
 		this.idfac = idfac;
 		
  		if (select.getWithItemsList() != null) {
@@ -74,16 +70,9 @@ public class TableNameVisitor {
 				withItem.accept(selectVisitor);
 		}
 		select.getSelectBody().accept(selectVisitor);
-		
-		if (unsupported && deepParsing) // used to throw exception for the currently unsupported methods
-			throw new JSQLParserException(SQLQueryDeepParser.QUERY_NOT_SUPPORTED);
 	}
 		
-	public Map<RelationID, RelationID> getTables() {	
-		return tables;
-	}
-	
-	public List<RelationID> getRelations() {	
+	public List<RelationID> getRelations() {
 		return relations;
 	}
 
@@ -154,17 +143,6 @@ public class TableNameVisitor {
 				
 				RelationID relationId = idfac.createRelationID(table.getSchemaName(), table.getName());
 				relations.add(relationId);
-
-				if (inSubSelect && subSelectAlias != null) {
-					// ONLY SIMPLE SUBSELECTS, WITH ONE TABLE: see WhereClauseVisitor and ProjectionVisitor
-					RelationID subSelectAliasId = idfac.createRelationID(null, subSelectAlias.getName());
-					tables.put(subSelectAliasId, relationId);
-				}
-				else {
-					Alias as = table.getAlias();
-					RelationID aliasId = (as != null) ? idfac.createRelationID(null, as.getName()) : relationId;
-					tables.put(aliasId, relationId);
-				}
 			}
 		}
 

@@ -64,7 +64,7 @@ public class MappingParser {
 					throw new JSQLParserException("The query is not a SELECT statement");
 				Select selectQuery = (Select)statement;
 
-				TableNameVisitor visitor = new TableNameVisitor(selectQuery, false, idfac);
+				TableNameVisitor visitor = new TableNameVisitor(selectQuery, idfac);
 				List<RelationID> queryTables  = visitor.getRelations();
 
 				for (RelationID table : queryTables)
