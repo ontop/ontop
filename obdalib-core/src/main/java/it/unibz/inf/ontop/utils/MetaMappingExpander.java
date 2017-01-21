@@ -31,20 +31,15 @@ import it.unibz.inf.ontop.model.ValueConstant;
 import it.unibz.inf.ontop.model.Variable;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
-import it.unibz.inf.ontop.sql.QualifiedAttributeID;
-import it.unibz.inf.ontop.sql.QuotedID;
-import it.unibz.inf.ontop.sql.QuotedIDFactory;
-import it.unibz.inf.ontop.sql.RelationID;
+import it.unibz.inf.ontop.model.impl.TermUtils;
+import it.unibz.inf.ontop.parser.PreprocessProjection;
+import it.unibz.inf.ontop.sql.*;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.BinaryExpression;
@@ -71,6 +66,7 @@ public class MetaMappingExpander {
 	private final Logger log = LoggerFactory.getLogger(this.getClass());
 	
 	private final Connection connection;
+	private final DBMetadata metadata;
 	private final QuotedIDFactory idfac;
 	private final OBDADataFactory dfac = OBDADataFactoryImpl.getInstance();
 
@@ -79,46 +75,97 @@ public class MetaMappingExpander {
 	 * 
 	 * @param connection a JDBC connection
 	 */
-	public MetaMappingExpander(Connection connection, QuotedIDFactory idfac) {
+	public MetaMappingExpander(Connection connection, DBMetadata metadata) {
 		this.connection = connection;
-		this.idfac = idfac;
+		this.metadata = metadata;
+		this.idfac = metadata.getQuotedIDFactory();
 	}
 
 	/**
 	 * this method expand the input mappings, which may include meta mappings, to the concrete mappings
 	 * 
-	 * @param splittedMappings
+	 * @param mappings
 	 * 		a list of mappings, which may include meta mappings
 	 * @return
 	 * 		expanded normal mappings
 	 * @throws SQLException 
 	 * @throws JSQLParserException 
 	 */
-	public Collection<OBDAMappingAxiom> expand(Collection<OBDAMappingAxiom> splittedMappings) throws SQLException, JSQLParserException {
+	public Collection<OBDAMappingAxiom> expand(Collection<OBDAMappingAxiom> mappings) throws SQLException, JSQLParserException {
+
+		// TODO: merge the 3 steps
+
+		// PREPROCESS *
+
+		for (OBDAMappingAxiom axiom : mappings) {
+			List<Function> targetQuery = axiom.getTargetQuery();
+			Set<Variable> variables = new HashSet<>();
+			for (Function atom : targetQuery)
+				TermUtils.addReferencedVariablesTo(variables, atom);
+
+			try {
+				String sourceString = axiom.getSourceQuery().toString();
+				Select select = (Select) CCJSqlParserUtil.parse(sourceString);
+
+				PreprocessProjection ps = new PreprocessProjection(metadata);
+				String query = ps.getMappingQuery(select, variables);
+				axiom.setSourceQuery(dfac.getSQLQuery(query));
+			}
+			catch (JSQLParserException e) {
+				log.debug("SQL Query cannot be preprocessed by the parser");
+			}
+		}
+
+		// SPLIT MAPPINGS
+
+		List<OBDAMappingAxiom> splittedMappings = new LinkedList<>();
+
+		for (OBDAMappingAxiom mapping : mappings) {
+			List<Function> targetQuery = mapping.getTargetQuery();
+
+			if (targetQuery.size() == 1) {
+				// For mappings with only one body atom, we do not need to change it
+				splittedMappings.add(mapping);
+			}
+			else {
+				String id = mapping.getId();
+				OBDASQLQuery sourceQuery = mapping.getSourceQuery();
+
+				for (Function bodyAtom : targetQuery) {
+					String newId = IDGenerator.getNextUniqueID(id + "#");
+					OBDAMappingAxiom newMapping = dfac.getRDBMSMappingAxiom(newId, sourceQuery, Collections.singletonList(bodyAtom));
+					splittedMappings.add(newMapping);
+				}
+			}
+		}
+
+		// EXPAND
 
 		List<OBDAMappingAxiom> expandedMappings = new LinkedList<>();
 
 		for (OBDAMappingAxiom mapping : splittedMappings) {
 
-			Function bodyAtom = mapping.getTargetQuery().get(0); // splitted mappings, so a singleton
+			Function atom = mapping.getTargetQuery().get(0); // splitted mappings, so a singleton
 
-			if (!bodyAtom.getFunctionSymbol().isTriplePredicate()){
+			if (!atom.getFunctionSymbol().isTriplePredicate()) {
 				// for normal mappings, we do not need to expand it.
 				expandedMappings.add(mapping);	
 			} 
 			else {
-
+				Function templateAtom;
 				int arity;
-				if (isURIRDFType(bodyAtom.getTerm(1))) {
+				if (isURIRDFType(atom.getTerm(1))) {
 					// variables are in the position of object
 					arity = 1;
-				} 
+					templateAtom = (Function) atom.getTerm(2);
+				}
 				else {
 					// variables are in the position of predicate
 					arity = 2;
+					templateAtom = (Function) atom.getTerm(1);
 				}
 				
-				List<Variable> varsInTemplate = getVariablesInTemplate(bodyAtom, arity);			
+				List<Variable> varsInTemplate = getVariablesInTemplate(templateAtom);
 				if (varsInTemplate.isEmpty())
 					throw new IllegalArgumentException("No variables could be found for this metamapping. Check that the variable in the metamapping is enclosed in a URI, for instance http://.../{var}");
 				
@@ -157,23 +204,38 @@ public class MetaMappingExpander {
 
 					List<SelectExpressionItem> columnsForTemplate = getColumnsForTemplate(varsInTemplate, columnList);
 
-					/*
-					 * The query for params is almost the same with the original source query, except that
-					 * we only need to distinct project the columns needed for the template expansion
-					 */
-
-					String distinctParamsSQL = getDistinctColumnsQuery(sql, columnsForTemplate);
-					List<List<String>> paramsForClassTemplate = getParamsForClassTemplate(distinctParamsSQL, columnsForTemplate, varsInTemplate);
+					List<List<String>> paramsForTemplate = getParamsForTemplate(sql, columnsForTemplate, varsInTemplate);
 
 					List<SelectExpressionItem>  columnsForValues = new ArrayList<>(columnList);
 					columnsForValues.removeAll(columnsForTemplate);
 
-					for(List<String> params : paramsForClassTemplate) {
-						String newId = IDGenerator.getNextUniqueID(mapping.getId() + "#");
+					for(List<String> params : paramsForTemplate) {
+						// create a new  query with the changed projection and selection
+						Expression selection = getExtendedWhereClause(plainSelect.getWhere(),
+								columnsForTemplate, params);
+						String newSourceQuerySQL = getExtendedQuery(sql, columnsForValues, selection);
+						OBDASQLQuery newSourceQuery =  dfac.getSQLQuery(newSourceQuerySQL);
 
-						OBDAMappingAxiom newMapping = instantiateMapping(newId,
-								bodyAtom, sql, plainSelect.getWhere(), columnsForTemplate,
-								columnsForValues, params, arity);
+						// construct new Target Query by expanding higher order atoms of the form
+						// <pre>triple(t1, 'rdf:type', URI("http://example.org/{}", X))</pre>
+	 					// to
+						// <pre>http://example.org/cls(t1)</pre>, if X is t1
+						// (similarly for properties)
+
+						String predName = getPredicateName(templateAtom.getTerm(0), params);
+						Function newTargetBody;
+						if (arity == 1) {
+							Predicate p = dfac.getClassPredicate(predName);
+							newTargetBody = dfac.getFunction(p, atom.getTerm(0));
+						}
+						else {
+							Predicate p = dfac.getObjectPropertyPredicate(predName);
+							newTargetBody = dfac.getFunction(p, atom.getTerm(0), atom.getTerm(2));
+						}
+
+						String newId = IDGenerator.getNextUniqueID(mapping.getId() + "#");
+						OBDAMappingAxiom newMapping = dfac.getRDBMSMappingAxiom(newId, newSourceQuery,
+								Collections.singletonList(newTargetBody));
 
 						expandedMappings.add(newMapping);
 
@@ -190,8 +252,17 @@ public class MetaMappingExpander {
 		return expandedMappings;
 	}
 
-	private List<List<String>> getParamsForClassTemplate(String distinctParamsSQL, List<SelectExpressionItem> columnsForTemplate, List<Variable> varsInTemplate) throws SQLException {
-		
+	private List<List<String>> getParamsForTemplate(String sql,
+													List<SelectExpressionItem> columnsForTemplate,
+													List<Variable> varsInTemplate) throws SQLException, JSQLParserException {
+
+		/*
+		 * The query for params is almost the same with the original source query, except that
+		 * we only need to distinct project the columns needed for the template expansion
+		 */
+
+		String distinctParamsSQL = getDistinctColumnsQuery(sql, columnsForTemplate);
+
 		List<List<String>> paramsForClassTemplate = new LinkedList<>();
 		try (Statement st = connection.createStatement()) {
 			try (ResultSet rs = st.executeQuery(distinctParamsSQL)) {
@@ -199,9 +270,9 @@ public class MetaMappingExpander {
 				int varsInTemplateSize = varsInTemplate.size();
 				while (rs.next()) {
 					ArrayList<String> params = new ArrayList<>(varsInTemplateSize);
-					for (int i = 1; i <= varsInTemplateSize; i++) {
+					for (int i = 1; i <= varsInTemplateSize; i++)
 						params.add(rs.getString(i));
-					}
+
 					paramsForClassTemplate.add(params);
 				}
 			}
@@ -215,70 +286,32 @@ public class MetaMappingExpander {
 	 * @return
 	 */
 	private static boolean isURIRDFType(Term term) {
-		boolean result = true;
-		if(term instanceof Function){
+		if (term instanceof Function) {
 			Function func = (Function) term;
-			if (func.getArity() != 1){
-				result = false;
-			} 
-			else {
-				result  = result && (func.getFunctionSymbol() instanceof URITemplatePredicate);
-				result  = result && (func.getTerm(0) instanceof ValueConstant) &&
-						((ValueConstant) func.getTerm(0)).getValue(). equals(OBDAVocabulary.RDF_TYPE);
+			if (func.getArity() == 1 && (func.getFunctionSymbol() instanceof URITemplatePredicate)) {
+				Term t0 = func.getTerm(0);
+				if (t0 instanceof ValueConstant)
+					return ((ValueConstant) t0).getValue().equals(OBDAVocabulary.RDF_TYPE);
 			}
-		} 
-		else {
-			result = false;
 		}
-		return result;
+		return false;
 	}
 
-	/**
-	 * This method instantiate a meta mapping by the concrete parameters
-	 *
-	 * @throws JSQLParserException 
-	 */
-	private OBDAMappingAxiom instantiateMapping(String id,
-			Function bodyAtom, String sql, Expression selection,
-			List<SelectExpressionItem> columnsForTemplate,
-			List<SelectExpressionItem> columnsForValues,
-			List<String> params, int arity) throws JSQLParserException {
-		
-		/*
-		 * First construct new Target Query 
-		 */
-		Function newTargetBody = expandHigherOrderAtom(bodyAtom, params, arity);
-		
+
+	private static Expression getExtendedWhereClause(Expression selection,
+											  List<SelectExpressionItem> columnsForTemplate,
+											  List<String> params) {
 		int j = 0;
 		for (SelectExpressionItem column : columnsForTemplate) {
-			
-			Expression columnRefExpression = column.getExpression();
-			StringValue clsStringValue = new StringValue("'" + params.get(j) + "'");
-			
-			//we are considering only equivalences
 			BinaryExpression condition = new EqualsTo();
-			condition.setLeftExpression(columnRefExpression);
-			condition.setRightExpression(clsStringValue);
-			
-			if (selection != null) 
-				selection = new AndExpression(selection, condition);
-			else
-				selection = condition;
-			j++;	
+			condition.setLeftExpression(column.getExpression());
+			condition.setRightExpression(new StringValue("'" + params.get(j) + "'"));
+
+			selection = (selection != null) ? new AndExpression(selection, condition) : condition;
+			j++;
 		}
-			
-		/*
-		 * we create a new  query with the changed projection and selection
-		 */
-		String newSourceQuerySQL = getQueryExtendedWhere(sql,
-				columnsForValues, selection);
-		OBDASQLQuery newSourceQuery =  dfac.getSQLQuery(newSourceQuerySQL);
-
-		OBDAMappingAxiom newMapping = dfac.getRDBMSMappingAxiom(id, newSourceQuery, 
-										Collections.singletonList(newTargetBody));
-		return newMapping;
+		return selection;
 	}
-
 	
 	/**
 	 * This method get the columns which will be used for the predicate template 
@@ -288,7 +321,7 @@ public class MetaMappingExpander {
      * @return
 	 */
 	private List<SelectExpressionItem> getColumnsForTemplate(List<Variable> varsInTemplate,
-			List<SelectExpressionItem> columnList) {
+															 List<SelectExpressionItem> columnList) {
 		
 		List<SelectExpressionItem> columnsForTemplate = new ArrayList<>(varsInTemplate.size());
 
@@ -326,8 +359,6 @@ public class MetaMappingExpander {
 						}
 					}
 				}
-
-									
 			}
 			if(!found){
                 String format = "The placeholder '%s' in the target does not occur in the body of the mapping";
@@ -344,128 +375,62 @@ public class MetaMappingExpander {
 	 * 
 	 * This method extracts the variables in the template from the atom 
 	 * <p>
-	 * Example 1: 
+	 * Example:
 	 * <p>
-	 * arity = 1. 
-	 * Input Atom:
-	 * <pre>triple(t1, 'rdf:type', URI("http://example.org/{}/{}", X, Y))</pre>
+	 * Input templateAtom:
+	 * <pre>URI("http://example.org/{}/{}", X, Y)</pre>
 	 * 
 	 * Output: [X, Y]
 	 * <p>
-	 * Example 2: 
-	 * <p>
-	 * arity = 2. 
-	 * Input Atom:
-	 * <pre>triple(t1,  URI("http://example.org/{}/{}", X, Y), t2)</pre>
-	 * 
-	 * Output: [X, Y]
-	 * 
-	 * @param atom
-	 * @param arity 
+	 *
+	 * @param templateAtom
 	 * @return
 	 */
-	private static List<Variable> getVariablesInTemplate(Function atom, int arity) {
+	private static List<Variable> getVariablesInTemplate(Function templateAtom) {
 		
-		Function uriTermForPredicate = findTemplatePredicateTerm(atom, arity);
-		
-		int len = uriTermForPredicate.getTerms().size();
-		List<Variable> vars;
+		int len = templateAtom.getTerms().size();
 
 		//consider the case of <{varUri}>
-		if(len == 1){
-			vars = new ArrayList<Variable>(1);
-			Term uri = uriTermForPredicate.getTerm(0);
-			if(uri instanceof Variable){
+		if (len == 1) {
+			Term uri = templateAtom.getTerm(0);
+			if (uri instanceof Variable) {
+				List<Variable> vars = new ArrayList<>(1);
 				vars.add((Variable) uri);
+				return vars;
 			}
-			else{
-				vars = Collections.emptyList();
+			else {
+				return Collections.emptyList();
 			}
 		}
 		else {
-			vars = new ArrayList<Variable>(len - 1);
-
+			List<Variable> vars = new ArrayList<>(len - 1);
 			// TODO: check when getTerms().size() != getArity()
-
-			// index 0 is for the URI template
-			for (int i = 1; i < len; i++) {
-				vars.add((Variable) uriTermForPredicate.getTerm(i));
-			}
+			// index 0 is for the URI template term
+			for (int i = 1; i < len; i++)
+				vars.add((Variable) templateAtom.getTerm(i));
+			return vars;
 		}
-		return vars;
 	}
 
 	
 
 	
-	/***
-	 * This method expands the higher order atom 
-	 * <pre>triple(t1, 'rdf:type', URI("http://example.org/{}", X))</pre>
-	 *  to 
-	 *  <pre>http://example.org/cls(t1)</pre>, if X is t1
-	 * 
-	 * @param atom 
-	 * 			a Function of the form triple(t1, 'rdf:type', X)
-	 * @param values
-	 * 			the concrete name of the X 
-	 * @param arity 
-	 * @return
-	 * 			expanded atom in form of <pre>http://example.org/cls(t1)</pre>
-	 */
-	private Function expandHigherOrderAtom(Function atom, List<String> values, int arity) {
 
-		Function uriTermForPredicate = findTemplatePredicateTerm(atom, arity);
-
-		Term uriTermForPredicateTerm = uriTermForPredicate.getTerm(0);
-
-		String predName;
-		if(uriTermForPredicateTerm instanceof Variable){
-
-			predName = values.get(0);
+	private static String getPredicateName(Term templateTerm, List<String> values) {
+		if (templateTerm instanceof Variable) {
+			return values.get(0);
 		}
-
 		else {
-			String uriTemplate = ((ValueConstant) uriTermForPredicateTerm).getValue();
-
-			predName = URITemplates.format(uriTemplate, values);
+			String uriTemplate = ((ValueConstant) templateTerm).getValue();
+			return URITemplates.format(uriTemplate, values);
 		}
-		
-		Function result = null;
-		if (arity == 1) {
-			Predicate p = dfac.getClassPredicate(predName);
-			result = dfac.getFunction(p, atom.getTerm(0));
-		} 
-		else if (arity == 2) {
-			Predicate p = dfac.getObjectPropertyPredicate(predName);
-			result = dfac.getFunction(p, atom.getTerm(0), atom.getTerm(2));
-		}
-		return result;
 	}
-	
-	/**
-	 * This method finds the term for the predicate template
-	 */
-	private static Function findTemplatePredicateTerm(Function atom, int arity) {
-		Function uriTermForPredicate;
-		
-		if(arity == 1) {
-			uriTermForPredicate = (Function) atom.getTerm(2);
-		} 
-		else if (arity == 2) {
-			uriTermForPredicate = (Function) atom.getTerm(1);	
-		} 
-		else {
-			throw new IllegalArgumentException("The parameter arity should be 1 or 2");
-		}
-		return uriTermForPredicate;
-	}
-
 
 	/**
 	 * Set the object construction for the SELECT clause
 	 */
 
-	private String getDistinctColumnsQuery(String originalSQL, List<SelectExpressionItem> columnList) throws JSQLParserException {
+	private static String getDistinctColumnsQuery(String originalSQL, List<SelectExpressionItem> columnList) throws JSQLParserException {
 		Select select = (Select)CCJSqlParserUtil.parse(originalSQL);
 		PlainSelect plainSelect = (PlainSelect)select.getSelectBody();
 		plainSelect.setDistinct(new Distinct());
@@ -480,7 +445,7 @@ public class MetaMappingExpander {
 	 * Set the object construction for the WHERE clause
 	 */
 
-	private String getQueryExtendedWhere(String originalSQL, List<SelectExpressionItem> columnList, Expression whereClause) throws JSQLParserException {
+	private static String getExtendedQuery(String originalSQL, List<SelectExpressionItem> columnList, Expression whereClause) throws JSQLParserException {
 		Select select = (Select)CCJSqlParserUtil.parse(originalSQL);
 		PlainSelect plainSelect = (PlainSelect)select.getSelectBody();
 
@@ -494,5 +459,4 @@ public class MetaMappingExpander {
 
 		return select.toString();
 	}
-
 }

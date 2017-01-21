@@ -48,19 +48,11 @@ public class TableNameVisitor {
 	// There are special names that are not table names but are parsed as tables. 
 	// These names are collected here and are not included in the table names
 	private final Set<String> withTCEs = new HashSet<>();
-	
-	private boolean unsupported = false;
-
-
-	private boolean inSubSelect = false;
-	private Alias subSelectAlias = null;
-	
 
 	/**
 	 * Main entry for this Tool class. A list of found tables is returned.
 	 *
 	 * @param select
-	 * @return
 	 */
 	public TableNameVisitor(Select select, QuotedIDFactory idfac) throws JSQLParserException {
 		this.idfac = idfac;
@@ -76,30 +68,18 @@ public class TableNameVisitor {
 		return relations;
 	}
 
-	private void unsupported(Object o) {
-		System.out.println(this.getClass() + " DOES NOT SUPPORT " + o);
-		unsupported = true;
-	}
-	
 	private final SelectVisitor selectVisitor = new SelectVisitor() {
 		/* Visit the FROM clause to find tables
-		 * Visit the JOIN and WHERE clauses to check if nested queries are present (non-Javadoc)
-		 * 
-		 * @see net.sf.jsqlparser.statement.select.SelectVisitor#visit(net.sf.jsqlparser.statement.select.PlainSelect)
+		 * Visit the JOIN and WHERE clauses to check if nested queries are present
 		 */
 		@Override
 		public void visit(PlainSelect plainSelect) {
 			plainSelect.getFromItem().accept(fromItemVisitor);
 
-			// When the mapping contains a DISTINCT we interpret it as a HINT to create a SUBVIEW.
-			// Thus we presume that the unusual use of DISTINCT here is done ON PURPOSE for achieving this effect.
-			if (plainSelect.getDistinct() != null) 
-	            unsupported = true;
-
-			if (plainSelect.getJoins() != null) {
+			if (plainSelect.getJoins() != null)
 				for (Join join : plainSelect.getJoins()) 
 					join.getRightItem().accept(fromItemVisitor);
-			}
+
 			if (plainSelect.getWhere() != null) 
 				plainSelect.getWhere().accept(expressionVisitor);
 			
@@ -109,14 +89,11 @@ public class TableNameVisitor {
 
 
 		/*
-		 * Visit UNION, INTERSECT, MINUM and EXCEPT to search for table names
-		 * 
-		 * @see net.sf.jsqlparser.statement.select.SelectVisitor#visit(net.sf.jsqlparser.statement.select.SetOperationList)
+		 * Visit UNION, INTERSECT, MINUS and EXCEPT to search for table names
 		 */
 		@Override
 		public void visit(SetOperationList list) {
-			unsupported(list);
-			for (PlainSelect plainSelect : list.getPlainSelects()) 
+			for (PlainSelect plainSelect : list.getPlainSelects())
 				visit(plainSelect);
 		}
 
@@ -148,45 +125,26 @@ public class TableNameVisitor {
 
 		@Override
 		public void visit(SubSelect subSelect) {
-			visitSubSelect(subSelect);
+			subSelect.getSelectBody().accept(selectVisitor);
 		}
 
 		@Override
 		public void visit(SubJoin subjoin) {
-			unsupported(subjoin);
 			subjoin.getLeft().accept(this);
 			subjoin.getJoin().getRightItem().accept(this);
 		}
 
 		@Override
 		public void visit(LateralSubSelect lateralSubSelect) {
-			unsupported(lateralSubSelect);
 			lateralSubSelect.getSubSelect().getSelectBody().accept(selectVisitor);
 		}
 
 		@Override
 		public void visit(ValuesList valuesList) {
-			unsupported(valuesList);
 		}
 	};
 	
-	
-	private void visitSubSelect(SubSelect subSelect) {
-		if (subSelect.getSelectBody() instanceof PlainSelect) {
-			PlainSelect subSelBody = (PlainSelect) (subSelect.getSelectBody());	
-			if (subSelBody.getJoins() != null || subSelBody.getWhere() != null) 
-				unsupported(subSelect);	
-		} 
-		else
-			unsupported(subSelect);
 
-		inSubSelect = true;
-		subSelectAlias = subSelect.getAlias();
-		subSelect.getSelectBody().accept(selectVisitor);
-		subSelectAlias = null;
-		inSubSelect = false;
-	}
-	
 	private final SelectItemVisitor selectItemVisitor = new SelectItemVisitor() {
 		@Override
 		public void visit(AllColumns expr) {
@@ -208,7 +166,6 @@ public class TableNameVisitor {
 	
 		/*
 		 * We do the same procedure for all Binary Expressions
-		 * @see net.sf.jsqlparser.expression.ExpressionVisitor#visit(net.sf.jsqlparser.expression.operators.arithmetic.Addition)
 		 */
 		@Override
 		public void visit(Addition addition) {
@@ -248,20 +205,9 @@ public class TableNameVisitor {
 
 		@Override
 		public void visit(Function function) {
-	        switch (function.getName().toLowerCase()) {
-	            case "regexp_like" :
-	            case "regexp_replace" :
-	            case "replace" :
-	            case "concat" :
-	            case "substr" : 
-	                for (Expression ex :function.getParameters().getExpressions()) 
-	                    ex.accept(this);
-	                break;
-
-	            default:
-	                unsupported(function);
-	                break;
-	        }
+			if (function.getParameters() != null)
+				for (Expression ex :function.getParameters().getExpressions())
+					ex.accept(this);
 		}
 
 		@Override
@@ -286,7 +232,6 @@ public class TableNameVisitor {
 
 		@Override
 		public void visit(JdbcParameter jdbcParameter) {
-			unsupported(jdbcParameter);
 		}
 
 		@Override
@@ -363,26 +308,21 @@ public class TableNameVisitor {
 		public void visit(TimeValue timeValue) {
 		}
 
-
 		@Override
 		public void visit(CaseExpression caseExpression) {
-			unsupported(caseExpression);
 		}
 
 		@Override
 		public void visit(WhenClause whenClause) {
-			unsupported(whenClause);
 		}
 
 		@Override
 		public void visit(AllComparisonExpression allComparisonExpression) {
-			unsupported(allComparisonExpression);
 			allComparisonExpression.getSubSelect().getSelectBody().accept(selectVisitor);
 		}
 
 		@Override
 		public void visit(AnyComparisonExpression anyComparisonExpression) {
-			unsupported(anyComparisonExpression);
 			anyComparisonExpression.getSubSelect().getSelectBody().accept(selectVisitor);
 		}
 
@@ -393,25 +333,21 @@ public class TableNameVisitor {
 
 		@Override
 		public void visit(Matches matches) {
-			unsupported(matches);
 			visitBinaryExpression(matches);
 		}
 
 		@Override
 		public void visit(BitwiseAnd bitwiseAnd) {
-			unsupported(bitwiseAnd);
 			visitBinaryExpression(bitwiseAnd);
 		}
 
 		@Override
 		public void visit(BitwiseOr bitwiseOr) {
-			unsupported(bitwiseOr);
 			visitBinaryExpression(bitwiseOr);
 		}
 
 		@Override
 		public void visit(BitwiseXor bitwiseXor) {
-			unsupported(bitwiseXor);
 			visitBinaryExpression(bitwiseXor);
 		}
 
@@ -422,63 +358,50 @@ public class TableNameVisitor {
 
 		@Override
 		public void visit(Modulo modulo) {
-			unsupported(modulo);
 			visitBinaryExpression(modulo);
 		}
 
 		@Override
 		public void visit(AnalyticExpression analytic) {
-			unsupported(analytic);
 		}
 
 		@Override
 		public void visit(ExtractExpression eexpr) {
-			unsupported(eexpr);
 		}
 
 		@Override
 		public void visit(IntervalExpression iexpr) {
-			unsupported(iexpr);
 		}
 
 	    @Override
 	    public void visit(JdbcNamedParameter jdbcNamedParameter) {
-			unsupported(jdbcNamedParameter);
 	    }
 
 		@Override
 		public void visit(OracleHierarchicalExpression arg0) {
-			unsupported(arg0);		
 		}
 
 		@Override
 		public void visit(RegExpMatchOperator rexpr) {
-//			unsupported = true;
 //			visitBinaryExpression(rexpr);
 		}
 
 
 		@Override
 		public void visit(SignedExpression arg0) {
-			System.out.println("WARNING: SignedExpression   not implemented ");
-			unsupported(arg0);
 		}
 
 		@Override
 		public void visit(JsonExpression arg0) {
-			// TODO Auto-generated method stub
-			
 		}
 
 		@Override
 		public void visit(RegExpMySQLOperator arg0) {
-			// TODO Auto-generated method stub
-			
 		}
 
 		@Override
 		public void visit(SubSelect subSelect) {
-			visitSubSelect(subSelect);
+			subSelect.getSelectBody().accept(selectVisitor);
 		}
 	};
 
@@ -492,14 +415,13 @@ public class TableNameVisitor {
 
 		@Override
 		public void visit(MultiExpressionList multiExprList) {
-			unsupported(multiExprList);
-			for (ExpressionList exprList : multiExprList.getExprList()) 
+			for (ExpressionList exprList : multiExprList.getExprList())
 				exprList.accept(this);
 		}
 
 		@Override
 		public void visit(SubSelect subSelect) {
-			visitSubSelect(subSelect);
+			subSelect.getSelectBody().accept(selectVisitor);
 		}
 	};
 }

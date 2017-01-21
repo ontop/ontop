@@ -16,7 +16,6 @@ import it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing.TMappingProcesso
 import it.unibz.inf.ontop.owlrefplatform.core.unfolding.DatalogUnfolder;
 import it.unibz.inf.ontop.parser.PreprocessProjection;
 import it.unibz.inf.ontop.utils.Mapping2DatalogConverter;
-import it.unibz.inf.ontop.utils.MappingSplitter;
 import it.unibz.inf.ontop.utils.MetaMappingExpander;
 import it.unibz.inf.ontop.sql.DBMetadata;
 import net.sf.jsqlparser.JSQLParserException;
@@ -77,21 +76,11 @@ public class QuestUnfolder {
 		 */
 		mappings.addAll(MappingSameAs.addSameAsInverse(mappings));
 
-		/** 
-		 * Substitute select * with column names  (performs the operation `in place')
-		 */
-		preprocessProjection(mappings, metadata);
-
-		/**
-		 * Split the mapping (creates a new set of mappings)
-		 */
-		Collection<OBDAMappingAxiom> splittedMappings = MappingSplitter.splitMappings(mappings);
-		
 		/**
 		 * Expand the meta mapping (creates a new set of mappings)
 		 */
-		MetaMappingExpander metaMappingExpander = new MetaMappingExpander(localConnection, metadata.getQuotedIDFactory());
-		Collection<OBDAMappingAxiom> expandedMappings = metaMappingExpander.expand(splittedMappings);
+		MetaMappingExpander metaMappingExpander = new MetaMappingExpander(localConnection, metadata);
+		Collection<OBDAMappingAxiom> expandedMappings = metaMappingExpander.expand(mappings);
 		
 		List<CQIE> unfoldingProgram = Mapping2DatalogConverter.constructDatalogProgram(expandedMappings, metadata);
 		
@@ -402,34 +391,6 @@ public class QuestUnfolder {
 		return unfolder.unfold(query);
 	}
 
-
-	/***
-	 * Expands a SELECT * into a SELECT with all columns implicit in the *
-	 *
-	 * @throws java.sql.SQLException
-	 */
-	private static void preprocessProjection(Collection<OBDAMappingAxiom> mappings, DBMetadata metadata) throws SQLException {
-
-		for (OBDAMappingAxiom axiom : mappings) {
-			try {
-				String sourceString = axiom.getSourceQuery().toString();
-
-				Select select = (Select) CCJSqlParserUtil.parse(sourceString);
-
-				List<Function> targetQuery = axiom.getTargetQuery();
-				Set<Variable> variables = new HashSet<>();
-				for (Function atom : targetQuery) 
-					TermUtils.addReferencedVariablesTo(variables, atom);
-				
-				PreprocessProjection ps = new PreprocessProjection(metadata);
-				String query = ps.getMappingQuery(select, variables);
-				axiom.setSourceQuery(fac.getSQLQuery(query));
-			} 
-			catch (JSQLParserException e) {
-				log.debug("SQL Query cannot be preprocessed by the parser");
-			}
-		}
-	}
 
 
     /**
