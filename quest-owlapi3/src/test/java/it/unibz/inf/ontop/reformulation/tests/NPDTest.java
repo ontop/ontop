@@ -31,7 +31,7 @@ public class NPDTest {
 	
 	Logger log = LoggerFactory.getLogger(this.getClass());
 
-	@Ignore
+	@Test
 	public void test_load_NPD() throws Exception {
 		
 		File ontDir = new File("src/test/resources/npd-v2");
@@ -88,7 +88,7 @@ public class NPDTest {
 		OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 		OBDAModel obdaModel = fac.getOBDAModel();
 		ModelIOManager ioManager = new ModelIOManager(obdaModel);
-		ioManager.load(path + "npd.obda");
+		ioManager.load(path + "npd2.obda");
 
 		QuestPreferences pref = new QuestPreferences();
 		//pref.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC_INDEX);
