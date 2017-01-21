@@ -7,6 +7,7 @@ import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestPreferences;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.IRI;
@@ -30,7 +31,7 @@ public class NPDTest {
 	
 	Logger log = LoggerFactory.getLogger(this.getClass());
 
-	@Test
+	@Ignore
 	public void test_load_NPD() throws Exception {
 		
 		File ontDir = new File("src/test/resources/npd-v2");
