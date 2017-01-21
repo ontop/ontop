@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.sql.parser;
 
+import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.exception.InvalidMappingException;
@@ -25,6 +26,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -33,8 +35,6 @@ import java.util.Map;
  *
  */
 public class SelectQueryParser {
-    private static Logger log = LoggerFactory.getLogger(SQLQueryDeepParser.class);
-
     private final DBMetadata metadata;
     private final QuotedIDFactory idfac;
 
@@ -49,44 +49,14 @@ public class SelectQueryParser {
         try {
             Statement statement = CCJSqlParserUtil.parse(sql);
             if (!(statement instanceof Select))
-                throw new InvalidSelectQueryException("The inserted query is not a SELECT statement", statement);
+                throw new InvalidSelectQueryException("The query is not a SELECT statement", statement);
 
             RelationalExpression re = select(((Select) statement).getSelectBody());
             return re;
-//            final OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
-//
-//            Function head = fac.getFunction(
-//                    fac.getPredicate("Q", new Predicate.COL_TYPE[current.getAttributes().size()]),
-//                    current.getAttributes().values().stream().collect(ImmutableCollectors.toList()));
-//
-//            ImmutableList<Function> atoms = ImmutableList.<Function>builder()
-//                    .addAll(current.getDataAtoms())
-//                    .addAll(current.getFilterAtoms())
-//                    .build();
-//
-//            parsedSql = fac.getCQIE(head, atoms);
         }
         catch (JSQLParserException e) {
-            throw new UnsupportedSelectQueryException("Cannot parse: " + sql, null);
-//            if (e.getCause() instanceof ParseException)
-//                log.warn("Parse exception, check no SQL reserved keywords have been used " + e.getCause().getMessage());
-//            parseException = true;
+            throw new UnsupportedSelectQueryException("Cannot parse SQL: " + sql, e);
         }
-//
-//
-//        if (parsedSql == null || parseException) {
-//            log.warn("The following query couldn't be parsed. " +
-//                    "This means Quest will need to use nested subqueries (views) to use this mappings. " +
-//                    "This is not good for SQL performance, specially in MySQL. " +
-//                    "Try to simplify your query to allow Quest to parse it. " +
-//                    "If you think this query is already simple and should be parsed by Quest, " +
-//                    "please contact the authors. \nQuery: '{}'", sql);
-//
-//            ParserViewDefinition viewDef = createViewDefinition(sql);
-//            // TODO: proper handling
-//            parsedSql = null;
-//        }
-//        return parsedSql;
     }
 
     private RelationalExpression select(SelectBody selectBody) {
@@ -135,16 +105,18 @@ public class SelectQueryParser {
                     .addAll(new BooleanExpressionParser(idfac, plainSelect.getWhere()).apply(current.getAttributes()))
                     .build();
 
-        ImmutableMap.Builder attributesBuilder = ImmutableMap.<QualifiedAttributeID, Variable>builder();
+        ImmutableList.Builder<Function> assignmentsBuilder = ImmutableList.builder();
+        ImmutableMap.Builder<QualifiedAttributeID, Variable> attributesBuilder = ImmutableMap.builder();
         SelectItemProcessor sip = new SelectItemProcessor(current.getAttributes());
 
         plainSelect.getSelectItems().forEach(si -> {
             ImmutableMap<QualifiedAttributeID, Variable> attrs = sip.getAttributes(si);
-            if (attrs == null)
-                throw new InvalidSelectQueryException("Column " + si + " not found in the query", selectBody);
 
             // attributesBuilder.build() below checks that the keys in attrs do not intersect
             attributesBuilder.putAll(attrs);
+
+            if (sip.assignment != null)
+                assignmentsBuilder.add(sip.assignment);
         });
 
         ImmutableMap<QualifiedAttributeID, Variable> attributes;
@@ -152,10 +124,23 @@ public class SelectQueryParser {
             attributes = attributesBuilder.build();
         }
         catch (IllegalArgumentException e) {
-            throw new InvalidSelectQueryException(e.getMessage(), selectBody);
+            SelectItemProcessor sip2 = new SelectItemProcessor(current.getAttributes());
+            Map<QualifiedAttributeID, Integer> duplicates = new HashMap<>();
+            plainSelect.getSelectItems().forEach(si -> {
+                ImmutableMap<QualifiedAttributeID, Variable> attrs = sip2.getAttributes(si);
+                for (Map.Entry<QualifiedAttributeID, Variable> a : attrs.entrySet())
+                    duplicates.put(a.getKey(), duplicates.getOrDefault(a.getKey(), 0) + 1);
+            });
+            throw new InvalidSelectQueryException("Duplicate column names " + Joiner.on(", ").join(
+                    duplicates.entrySet().stream()
+                            .filter(d -> d.getValue() > 1)
+                            .map(d -> d.getKey())
+                            .collect(ImmutableCollectors.toList())) + " in the SELECT clause: ", selectBody);
         }
 
-        return new RelationalExpression(current.getDataAtoms(), filterAtoms, attributes, null);
+        return new RelationalExpression(current.getDataAtoms(),
+                ImmutableList.<Function>builder().addAll(filterAtoms).addAll(assignmentsBuilder.build()).build(),
+                attributes, null);
     }
 
     private RelationalExpression join(RelationalExpression left, Join join) throws IllegalJoinException {
@@ -205,73 +190,6 @@ public class SelectQueryParser {
     }
 
 
-    private ParserViewDefinition createViewDefinition(String sql) {
-
-        // TODO: TRY TO GET COLUMN NAMES USING JSQLParser
-        boolean supported = false;
-
-        ParserViewDefinition viewDefinition = metadata.createParserView(sql);
-
-        if (supported) {
-            List<Column> columns = null;
-            for (Column column : columns) {
-                QuotedID columnId = idfac.createAttributeID(column.getColumnName());
-                RelationID relationId;
-                Table table = column.getTable();
-                if (table == null) // this column is an alias
-                    relationId = viewDefinition.getID();
-                else
-                    relationId = idfac.createRelationID(table.getSchemaName(), table.getName());
-
-                viewDefinition.addAttribute(new QualifiedAttributeID(relationId, columnId));
-            }
-        } else {
-            int start = "select".length();
-            int end = sql.toLowerCase().indexOf("from");
-            if (end == -1)
-                throw new RuntimeException("Error parsing SQL query: Couldn't find FROM clause");
-
-
-            String projection = sql.substring(start, end).trim();
-
-            //split where comma is present but not inside parenthesis
-            String[] columns = projection.split(",+(?!.*\\))");
-//            String[] columns = projection.split(",+(?![^\\(]*\\))");
-
-
-            for (String col : columns) {
-                String columnName = col.trim();
-
-    			/*
-                 * Take the alias name if the column name has it.
-    			 */
-                final String[] aliasSplitters = new String[]{" as ", " AS "};
-
-                for (String aliasSplitter : aliasSplitters) {
-                    if (columnName.contains(aliasSplitter)) { // has an alias
-                        columnName = columnName.split(aliasSplitter)[1].trim();
-                        break;
-                    }
-                }
-                ////split where space is present but not inside single quotes
-                if (columnName.contains(" "))
-                    columnName = columnName.split("\\s+(?![^'\"]*')")[1].trim();
-
-                // Get only the short name if the column name uses qualified name.
-                // Example: table.column -> column
-                if (columnName.contains(".")) {
-                    columnName = columnName.substring(columnName.lastIndexOf(".") + 1); // get only the name
-                }
-                // TODO (ROMAN 20 Oct 2015): extract schema and table name as well
-
-                QuotedID columnId = idfac.createAttributeID(columnName);
-
-                viewDefinition.addAttribute(new QualifiedAttributeID(null, columnId));
-            }
-        }
-        return viewDefinition;
-    }
-
     private RelationalExpression getRelationalExpression(FromItem fromItem) {
         return new FromItemProcessor(fromItem).result;
     }
@@ -295,7 +213,7 @@ public class SelectQueryParser {
                 throw new InvalidSelectQueryException("Table " + id + " not found in metadata", tableName);
             relationIndex++;
 
-            RelationID aliasId = (tableName.getAlias() != null)
+            RelationID alias = (tableName.getAlias() != null)
                     ? idfac.createRelationID(null, tableName.getAlias().getName())
                     : relation.getID();
 
@@ -312,7 +230,14 @@ public class SelectQueryParser {
             // create an atom for a particular table
             Function atom = Relation2DatalogPredicate.getAtom(relation, terms);
 
-            result = RelationalExpression.create(ImmutableList.of(atom), ImmutableList.of(), attributes.build(), aliasId);
+            // DEFAULT SCHEMA
+            // TODO: to be improved
+            if ((tableName.getAlias() == null) &&
+                    relation.getID().getSchemaName() != null &&
+                    metadata.getDatabaseRelation(relation.getID().getSchemalessID()).equals(relation))
+                result = RelationalExpression.create(ImmutableList.of(atom), ImmutableList.of(), attributes.build(), alias, relation.getID().getSchemalessID());
+            else
+                result = RelationalExpression.create(ImmutableList.of(atom), ImmutableList.of(), attributes.build(), alias);
         }
 
 
@@ -360,12 +285,14 @@ public class SelectQueryParser {
         final ImmutableMap<QualifiedAttributeID, Variable> attributes;
 
         ImmutableMap<QualifiedAttributeID, Variable> map;
+        Function assignment;
 
         SelectItemProcessor(ImmutableMap<QualifiedAttributeID, Variable> attributes) {
             this.attributes = attributes;
         }
 
         ImmutableMap<QualifiedAttributeID, Variable> getAttributes(SelectItem si) {
+            assignment = null;
             si.accept(this);
             return map;
         }
@@ -392,27 +319,43 @@ public class SelectQueryParser {
         @Override
         public void visit(SelectExpressionItem selectExpressionItem) {
             Expression expr = selectExpressionItem.getExpression();
-            if (!(expr instanceof Column))
-                throw new UnsupportedSelectQueryException("Complex expressions in SELECT are not supported", selectExpressionItem);
+            if (expr instanceof Column) {
+                Column column = (Column) expr;
+                QuotedID id = idfac.createAttributeID(column.getColumnName());
+                Table table = column.getTable();
+                QualifiedAttributeID attr = (table == null || table.getName() == null)
+                        ? new QualifiedAttributeID(null, id)
+                        : new QualifiedAttributeID(idfac.createRelationID(table.getSchemaName(), table.getName()), id);
 
-            Column column = (Column) expr;
-            QuotedID id = idfac.createAttributeID(column.getColumnName());
-            Table table = column.getTable();
-            QualifiedAttributeID attr = (table == null || table.getName() == null)
-                    ? new QualifiedAttributeID(null, id)
-                    : new QualifiedAttributeID(idfac.createRelationID(table.getSchemaName(), table.getName()), id);
+                //System.out.println("" + attr + " in " + attributes);
+                Variable var = attributes.get(attr);
+                if (var != null) {
+                    Alias columnAlias = selectExpressionItem.getAlias();
+                    QuotedID name = (columnAlias == null || columnAlias.getName() == null)
+                            ? id
+                            : idfac.createAttributeID(columnAlias.getName());
 
-            Variable var = attributes.get(attr);
-            if (var != null) {
-                Alias columnAlias = selectExpressionItem.getAlias();
-                QuotedID name = (columnAlias == null || columnAlias.getName() == null)
-                        ? id
-                        : idfac.createAttributeID(columnAlias.getName());
-
-                map = ImmutableMap.of(new QualifiedAttributeID(null, name), var);
+                    map = ImmutableMap.of(new QualifiedAttributeID(null, name), var);
+                }
+                else
+                    throw new InvalidSelectQueryException("Column not found", selectExpressionItem);
             }
-            else
-                map = null; // error: attribute not found
+            else {
+                //throw new UnsupportedSelectQueryException("Complex expressions in SELECT", selectExpressionItem);
+                Alias columnAlias = selectExpressionItem.getAlias();
+                if (columnAlias == null || columnAlias.getName() == null)
+                    throw new InvalidSelectQueryException("Complex expression in SELECT must have an alias", selectExpressionItem);
+
+                OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
+
+                QuotedID name = idfac.createAttributeID(columnAlias.getName());
+                Variable var = fac.getVariable(columnAlias.getName() + relationIndex);
+                map = ImmutableMap.of(new QualifiedAttributeID(null, name), var);
+
+                Term term = new ExpressionParser(idfac, expr).apply(attributes);
+                assignment = fac.getFunctionEQ(var, term);
+            }
+
         }
     }
 }

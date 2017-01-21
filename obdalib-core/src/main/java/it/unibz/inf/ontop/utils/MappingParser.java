@@ -22,10 +22,9 @@ package it.unibz.inf.ontop.utils;
 
 import it.unibz.inf.ontop.model.OBDAMappingAxiom;
 import it.unibz.inf.ontop.model.OBDASQLQuery;
-import it.unibz.inf.ontop.parser.SQLQueryShallowParser;
+import it.unibz.inf.ontop.parser.TableNameVisitor;
 import it.unibz.inf.ontop.sql.QuotedIDFactory;
 import it.unibz.inf.ontop.sql.RelationID;
-import it.unibz.inf.ontop.sql.api.ParsedSQLQuery;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -34,7 +33,8 @@ import java.util.List;
 import java.util.Set;
 
 import net.sf.jsqlparser.JSQLParserException;
-
+import net.sf.jsqlparser.parser.CCJSqlParserUtil;
+import net.sf.jsqlparser.statement.select.Select;
 
 
 /**
@@ -59,11 +59,17 @@ public class MappingParser {
 		for (OBDAMappingAxiom axiom : mappings) {
 			try {
 				OBDASQLQuery sourceQuery = axiom.getSourceQuery();
-				ParsedSQLQuery sourceQueryParsed = SQLQueryShallowParser.parse(idfac, sourceQuery.toString());
-				List<RelationID> queryTables = sourceQueryParsed.getRelations();
-				for (RelationID table : queryTables) 
+				net.sf.jsqlparser.statement.Statement statement = CCJSqlParserUtil.parse(sourceQuery.toString());
+				if (!(statement instanceof Select))
+					throw new JSQLParserException("The query is not a SELECT statement");
+				Select selectQuery = (Select)statement;
+
+				TableNameVisitor visitor = new TableNameVisitor(selectQuery, false, idfac);
+				List<RelationID> queryTables  = visitor.getRelations();
+
+				for (RelationID table : queryTables)
 					tables.add(table);
-			} 
+			}
 			catch (Exception e) {
 				errorMessage.add("Error in mapping with id: " + axiom.getId() + " \n Description: "
 						+ e.getMessage() + " \nMapping: [" + axiom.toString() + "]");

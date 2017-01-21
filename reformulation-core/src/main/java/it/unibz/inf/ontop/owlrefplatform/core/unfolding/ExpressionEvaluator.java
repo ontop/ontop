@@ -80,7 +80,7 @@ public class ExpressionEvaluator {
 				atomidx -= 1;
 				continue;
 			} 
-			else if (newatom == OBDAVocabulary.FALSE) {
+			else if (newatom == OBDAVocabulary.FALSE || newatom == OBDAVocabulary.NULL)  {
 				return true;
 			}
 			body.set(atomidx, (Function)newatom);
@@ -226,6 +226,8 @@ public class ExpressionEvaluator {
 		} else if (pred == ExpressionOperation.STR_ENDS) {
 			return term;
 		} else if (pred == ExpressionOperation.CONTAINS) {
+			return term;
+		} else if (pred == ExpressionOperation.REPLACE) {
 			return term;
 		} else if (pred == ExpressionOperation.SPARQL_STR) {
 			return evalStr(term);
@@ -482,14 +484,14 @@ public class ExpressionEvaluator {
 		 */
 		Term teval1 = eval(term.getTerm(0));
 		if (teval1 == null) {
-			return OBDAVocabulary.FALSE;
+			return OBDAVocabulary.NULL; // ROMAN (10 Jan 2017): not FALSE
 		}
 		/*
 		 * Evaluate the second term
 		 */
 		Term innerTerm2 = term.getTerm(1);
 		if (innerTerm2 == null) {
-			return OBDAVocabulary.FALSE;
+			return OBDAVocabulary.NULL; // ROMAN (10 Jan 2017): not FALSE
 		}
 
 		/*
@@ -604,6 +606,13 @@ public class ExpressionEvaluator {
 				return fac.getFunctionNEQ(f.getTerm(0), f.getTerm(1));
 			}
 		} else if (teval instanceof Constant) {
+			if (teval == OBDAVocabulary.FALSE)
+				return OBDAVocabulary.TRUE;
+			else if (teval == OBDAVocabulary.TRUE)
+				return OBDAVocabulary.FALSE;
+			else if (teval == OBDAVocabulary.NULL)
+				return teval;
+			// ROMAN (10 Jan 2017): this needs to be revised
 			return teval;
 		}
 		return term;

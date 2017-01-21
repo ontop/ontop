@@ -31,12 +31,10 @@ import it.unibz.inf.ontop.model.ValueConstant;
 import it.unibz.inf.ontop.model.Variable;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
-import it.unibz.inf.ontop.parser.SQLQueryShallowParser;
 import it.unibz.inf.ontop.sql.QualifiedAttributeID;
 import it.unibz.inf.ontop.sql.QuotedID;
 import it.unibz.inf.ontop.sql.QuotedIDFactory;
 import it.unibz.inf.ontop.sql.RelationID;
-import it.unibz.inf.ontop.sql.api.ParsedSQLQuery;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -54,8 +52,10 @@ import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.StringValue;
 import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
 import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
+import net.sf.jsqlparser.parser.CCJSqlParserUtil;
+import net.sf.jsqlparser.parser.ParseException;
 import net.sf.jsqlparser.schema.Column;
-import net.sf.jsqlparser.statement.select.SelectExpressionItem;
+import net.sf.jsqlparser.statement.select.*;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -100,11 +100,9 @@ public class MetaMappingExpander {
 
 		for (OBDAMappingAxiom mapping : splittedMappings) {
 
-			List<Function> targetQuery = mapping.getTargetQuery();
-			Function bodyAtom = targetQuery.get(0);
-			Predicate pred = bodyAtom.getFunctionSymbol();
+			Function bodyAtom = mapping.getTargetQuery().get(0); // splitted mappings, so a singleton
 
-			if (!pred.isTriplePredicate()){
+			if (!bodyAtom.getFunctionSymbol().isTriplePredicate()){
 				// for normal mappings, we do not need to expand it.
 				expandedMappings.add(mapping);	
 			} 
@@ -121,69 +119,80 @@ public class MetaMappingExpander {
 				}
 				
 				List<Variable> varsInTemplate = getVariablesInTemplate(bodyAtom, arity);			
-				if (varsInTemplate.isEmpty()) {
-					throw new IllegalArgumentException("No Variables could be found for this metamapping. Check that the variable in the metamapping is enclosed in a URI, for instance http://.../{var}");
-				}
-				
-				// Construct the SQL query tree from the source query we do not work with views 
-				OBDASQLQuery sourceQuery = mapping.getSourceQuery();
-				ParsedSQLQuery sourceQueryParsed = SQLQueryShallowParser.parse(idfac, sourceQuery.toString());
-				
-				List<SelectExpressionItem> columnList = null;
-				
-				// distinctParamsProjection.addAll(columnsForTemplate);
-				
-				/**
-				 * The query for params is almost the same with the original source query, except that
-				 * we only need to distinct project the columns needed for the template expansion 
-				 */
+				if (varsInTemplate.isEmpty())
+					throw new IllegalArgumentException("No variables could be found for this metamapping. Check that the variable in the metamapping is enclosed in a URI, for instance http://.../{var}");
 				
 				try {
-					columnList = sourceQueryParsed.getProjection();
-				} 
-				catch (JSQLParserException e2) {
-					continue;
-				}
-				
-				List<SelectExpressionItem> columnsForTemplate = getColumnsForTemplate(varsInTemplate, columnList, idfac);
-				
-				List<List<String>> paramsForClassTemplate = getParamsForClassTemplate(sourceQueryParsed, columnsForTemplate, varsInTemplate, idfac);
-				
-				List<SelectExpressionItem>  columnsForValues = new ArrayList<>(columnList);
-				columnsForValues.removeAll(columnsForTemplate);
-				
-				String id = mapping.getId();
-				
-				for(List<String> params : paramsForClassTemplate) {
-					String newId = IDGenerator.getNextUniqueID(id + "#");
-					OBDAMappingAxiom newMapping = instantiateMapping(newId, targetQuery,
-							bodyAtom, sourceQueryParsed, columnsForTemplate,
-							columnsForValues, params, arity);
-										
-					expandedMappings.add(newMapping);	
-					
-					log.debug("Expanded Mapping: {}", newMapping);
-				}
-				
-			}
+					// Construct the SQL query tree from the source query; we do not work with views
+					String sql = mapping.getSourceQuery().toString();
 
+					net.sf.jsqlparser.statement.Statement statement = CCJSqlParserUtil.parse(sql);
+					if (!(statement instanceof Select))
+						throw new JSQLParserException("The query is not a SELECT statement");
+					Select selectQuery = (Select)statement;
+
+					if (!(selectQuery.getSelectBody() instanceof PlainSelect))
+						continue;
+
+					PlainSelect plainSelect = (PlainSelect)selectQuery.getSelectBody();
+
+					List<SelectExpressionItem> columnList = new LinkedList<>();
+					// TODO: CHANGE TABLE SCHEMA / NAME / ALIASES AND COLUMN NAMES
+					plainSelect.getSelectItems().forEach(si -> si.accept(new SelectItemVisitor() {
+						@Override
+						public void visit(AllColumns allColumns) {
+							// do nothing
+						}
+
+						@Override
+						public void visit(AllTableColumns allTableColumns) {
+							// do nothing
+						}
+
+						@Override
+						public void visit(SelectExpressionItem selectExpressionItem) {
+							columnList.add(selectExpressionItem);
+						}
+					}));
+
+					List<SelectExpressionItem> columnsForTemplate = getColumnsForTemplate(varsInTemplate, columnList);
+
+					/*
+					 * The query for params is almost the same with the original source query, except that
+					 * we only need to distinct project the columns needed for the template expansion
+					 */
+
+					String distinctParamsSQL = getDistinctColumnsQuery(sql, columnsForTemplate);
+					List<List<String>> paramsForClassTemplate = getParamsForClassTemplate(distinctParamsSQL, columnsForTemplate, varsInTemplate);
+
+					List<SelectExpressionItem>  columnsForValues = new ArrayList<>(columnList);
+					columnsForValues.removeAll(columnsForTemplate);
+
+					for(List<String> params : paramsForClassTemplate) {
+						String newId = IDGenerator.getNextUniqueID(mapping.getId() + "#");
+
+						OBDAMappingAxiom newMapping = instantiateMapping(newId,
+								bodyAtom, sql, plainSelect.getWhere(), columnsForTemplate,
+								columnsForValues, params, arity);
+
+						expandedMappings.add(newMapping);
+
+						log.debug("Expanded Mapping: {}", newMapping);
+					}
+				}
+				catch (JSQLParserException e) {
+					if (e.getCause() instanceof ParseException)
+						log.warn("Parse exception, check no SQL reserved keywords have been used "+ e.getCause().getMessage());
+				}
+			}
 		}
 		
 		return expandedMappings;
 	}
 
-	private List<List<String>> getParamsForClassTemplate(ParsedSQLQuery sourceQueryParsed, List<SelectExpressionItem> columnsForTemplate, List<Variable> varsInTemplate, QuotedIDFactory idfac) throws SQLException {
+	private List<List<String>> getParamsForClassTemplate(String distinctParamsSQL, List<SelectExpressionItem> columnsForTemplate, List<Variable> varsInTemplate) throws SQLException {
 		
-		/**
-		 * The query for params is almost the same with the original source query, except that
-		 * we only need to distinct project the columns needed for the template expansion 
-		 */
-		
-		String distinctParamsSQL = ParsedSQLQuery.getModifiedQuery(sourceQueryParsed,
-				columnsForTemplate, true, null);
-
-	
-		List<List<String>> paramsForClassTemplate = new LinkedList<List<String>>();
+		List<List<String>> paramsForClassTemplate = new LinkedList<>();
 		try (Statement st = connection.createStatement()) {
 			try (ResultSet rs = st.executeQuery(distinctParamsSQL)) {
 				
@@ -229,8 +238,8 @@ public class MetaMappingExpander {
 	 *
 	 * @throws JSQLParserException 
 	 */
-	private OBDAMappingAxiom instantiateMapping(String id, List<Function> targetQuery,
-			Function bodyAtom, ParsedSQLQuery sourceParsedQuery,
+	private OBDAMappingAxiom instantiateMapping(String id,
+			Function bodyAtom, String sql, Expression selection,
 			List<SelectExpressionItem> columnsForTemplate,
 			List<SelectExpressionItem> columnsForValues,
 			List<String> params, int arity) throws JSQLParserException {
@@ -239,14 +248,6 @@ public class MetaMappingExpander {
 		 * First construct new Target Query 
 		 */
 		Function newTargetBody = expandHigherOrderAtom(bodyAtom, params, arity);
-		
-		Expression selection = null;
-		try {
-			selection = sourceParsedQuery.getWhereClause();
-		} 
-		catch (JSQLParserException e1) {
-			e1.printStackTrace();
-		}
 		
 		int j = 0;
 		for (SelectExpressionItem column : columnsForTemplate) {
@@ -269,8 +270,8 @@ public class MetaMappingExpander {
 		/*
 		 * we create a new  query with the changed projection and selection
 		 */
-		String newSourceQuerySQL = ParsedSQLQuery.getModifiedQuery(sourceParsedQuery,
-				columnsForValues, false, selection);
+		String newSourceQuerySQL = getQueryExtendedWhere(sql,
+				columnsForValues, selection);
 		OBDASQLQuery newSourceQuery =  dfac.getSQLQuery(newSourceQuerySQL);
 
 		OBDAMappingAxiom newMapping = dfac.getRDBMSMappingAxiom(id, newSourceQuery, 
@@ -286,8 +287,8 @@ public class MetaMappingExpander {
 	 * @param columnList
      * @return
 	 */
-	private static List<SelectExpressionItem> getColumnsForTemplate(List<Variable> varsInTemplate,
-			List<SelectExpressionItem> columnList, QuotedIDFactory idfac) {
+	private List<SelectExpressionItem> getColumnsForTemplate(List<Variable> varsInTemplate,
+			List<SelectExpressionItem> columnList) {
 		
 		List<SelectExpressionItem> columnsForTemplate = new ArrayList<>(varsInTemplate.size());
 
@@ -457,5 +458,41 @@ public class MetaMappingExpander {
 			throw new IllegalArgumentException("The parameter arity should be 1 or 2");
 		}
 		return uriTermForPredicate;
-	}	
+	}
+
+
+	/**
+	 * Set the object construction for the SELECT clause
+	 */
+
+	private String getDistinctColumnsQuery(String originalSQL, List<SelectExpressionItem> columnList) throws JSQLParserException {
+		Select select = (Select)CCJSqlParserUtil.parse(originalSQL);
+		PlainSelect plainSelect = (PlainSelect)select.getSelectBody();
+		plainSelect.setDistinct(new Distinct());
+
+		plainSelect.getSelectItems().clear();
+		plainSelect.getSelectItems().addAll(columnList);
+
+		return select.toString();
+	}
+
+	/**
+	 * Set the object construction for the WHERE clause
+	 */
+
+	private String getQueryExtendedWhere(String originalSQL, List<SelectExpressionItem> columnList, Expression whereClause) throws JSQLParserException {
+		Select select = (Select)CCJSqlParserUtil.parse(originalSQL);
+		PlainSelect plainSelect = (PlainSelect)select.getSelectBody();
+
+		plainSelect.getSelectItems().clear();
+		if (!columnList.isEmpty())
+			plainSelect.getSelectItems().addAll(columnList);
+		else
+			plainSelect.getSelectItems().add(new AllColumns());
+
+		plainSelect.setWhere(whereClause);
+
+		return select.toString();
+	}
+
 }

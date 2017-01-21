@@ -66,8 +66,8 @@ public class R2rmlCheckerTest {
 	private Ontology onto;
 
 	final String owlfile = "src/test/resources/r2rml/npd-v2-ql_a.owl";
-    final String obdafile = "src/test/resources/r2rml/npd-v2-ql_a.obda";
-	final String r2rmlfile = "src/test/resources/r2rml/npd-v2-ql_test_a.ttl";
+    final String obdafile = "src/test/resources/r2rml/npd-v2-ql_a2.obda";
+	final String r2rmlfile = "src/test/resources/r2rml/npd-v2-ql_test_a2.ttl";
 
 	private List<Predicate> emptyConceptsObda = new ArrayList<>();
 	private List<Predicate> emptyRolesObda = new ArrayList<>();

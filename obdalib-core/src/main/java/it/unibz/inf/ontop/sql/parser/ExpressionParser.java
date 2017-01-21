@@ -248,10 +248,12 @@ public class ExpressionParser implements java.util.function.Function<ImmutableMa
         @Override
         public void visit(net.sf.jsqlparser.expression.Function expression) {
             // do not use ImmutableCollectors.toList because this cannot be done concurrently
-            ImmutableList<Term> terms = ImmutableList.<Term>builder()
-                    .addAll(expression.getParameters().getExpressions().stream()
-                        .map(t -> getTerm(t)).iterator())
-                    .build();
+            ImmutableList<Term> terms = (expression.getParameters() != null)
+                    ? ImmutableList.<Term>builder()
+                        .addAll(expression.getParameters().getExpressions().stream()
+                            .map(t -> getTerm(t)).iterator())
+                        .build()
+                    : ImmutableList.of();
 
             BiFunction<ImmutableList<Term>, net.sf.jsqlparser.expression.Function, Function> function
                     = FUNCTIONS.get(expression.getName().toUpperCase());

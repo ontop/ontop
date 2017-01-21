@@ -27,7 +27,7 @@ source		select broker.name as brokerName, client.name as NameOfClient, broker.id
 
 mappingId	Mix
 target		:Broker2-{id} :hasFile :Med-{med} . 
-source		SELECT "id", med from "stockexchange".address, policy
+source		SELECT id, med from "stockexchange".address, policy
 
 
 ]]

@@ -28,6 +28,6 @@ source		select type_char from `Characters`
 
 mappingId	Countries5
 target		:Country5-{type_char} a :Country5 . 
-source		select substr(type_text, 1), `type_char` from Characters
+source		select substr(type_text, 1) as foo, `type_char` from Characters
 ]]
 

@@ -72,7 +72,7 @@ CREATE TABLE transaction (
 	stockid INT,
 	brokerid INT,
 	type VARCHAR(100),
-	"date" VARCHAR(100),
+	date VARCHAR(100)
 );
 
 

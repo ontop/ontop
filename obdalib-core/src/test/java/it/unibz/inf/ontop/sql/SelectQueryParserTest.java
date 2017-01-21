@@ -158,7 +158,7 @@ public class SelectQueryParserTest {
         parser.parse("SELECT 1");
     }
 
-    @Test(expected = UnsupportedSelectQueryException.class)
+    @Test(expected = InvalidSelectQueryException.class)
     public void select_one_complex_expression_test() {
         SelectQueryParser parser = new SelectQueryParser(createMetadata());
         parser.parse("SELECT 1 FROM Q");

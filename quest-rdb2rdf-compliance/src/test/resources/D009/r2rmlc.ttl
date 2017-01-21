@@ -7,9 +7,14 @@
 
 <TriplesMap1>
    a rr:TriplesMap;
-        
+
+   # Roman (10 Jan 2017)
+   # R2RML spec, Section 5.2:
+   # Any columns in the SELECT list derived by projecting an expression should be named,
+   # because otherwise they cannot be reliably referenced in the rest of the mapping.
+
    rr:logicalTable [ rr:sqlQuery """
-        SELECT "Name", COUNT("Sport")
+        SELECT "Name", COUNT("Sport") AS "SportCount"
         FROM "Student"
         GROUP BY "Name"
         """ ];

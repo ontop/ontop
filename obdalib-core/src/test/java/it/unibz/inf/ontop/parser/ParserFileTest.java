@@ -156,12 +156,12 @@ public class ParserFileTest extends TestCase {
 	private static boolean parse(String input, QuotedIDFactory idfac) {
 		ParsedSQLQuery queryP;
 		
-		try {
-			queryP = new ParsedSQLQuery(input, true, idfac);
-		} catch (JSQLParserException e) {
-			log.debug(e.getMessage());
-			return false;
-		}
+	//	try {
+	//		queryP = new ParsedSQLQuery(input, true, idfac);
+	//	} catch (JSQLParserException e) {
+	//		log.debug(e.getMessage());
+	//		return false;
+	//	}
 
 		
 		return true;

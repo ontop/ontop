@@ -194,7 +194,7 @@ public class PreProcessProjectionTest {
         String query = "PREFIX : <http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#>" +
                 " select * {?x a :Location}";
         int nResults = runTests(p, query);
-        assertEquals(91, nResults);
+        assertEquals(53, nResults); // ROMAN (21 Jan 2017) 4 distinct results anyway
     }
 
     @Test

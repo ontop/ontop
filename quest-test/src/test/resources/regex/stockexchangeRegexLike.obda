@@ -22,7 +22,7 @@ driverClass	oracle.jdbc.driver.OracleDriver
 [MappingDeclaration] @collection [[
 mappingId	mapping-addresses
 target		:Address-{id} a :BolzanoAddress ; :addressID {id} ; :inStreet {street} ; :hasNumber {number} ; :inCity {city} ; :inState {state} ; :inCountry {country} . 
-source		select id, street, number, city, state, country from address where  regexp_like(city, 'b.+z', 'i')
+source		select id, street, "NUMBER", city, state, country from address where  regexp_like(city, 'b.+z', 'i')
 
 
 mappingId	mapping-brokers

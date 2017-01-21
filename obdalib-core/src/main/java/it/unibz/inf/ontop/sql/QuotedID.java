@@ -46,8 +46,8 @@ public class QuotedID {
 	/**
 	 * (used only in QuotedIDFactory implementations)
 	 * 
-	 * @param name can be null
-	 * @param quotes cannot be null (the empty string stands for no quotation, as in getIdentifierQuoteString)
+	 * @param id can be null
+	 * @param quoteString cannot be null (the empty string stands for no quotation, as in getIdentifierQuoteString)
 	 */
 	QuotedID(String id, String quoteString) {
 		this(id, quoteString, true);

@@ -16,6 +16,7 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import static java.util.function.Function.identity;
 
@@ -238,7 +239,7 @@ public class RelationalExpression {
      * @param dataAtoms a {@link ImmutableList}<{@link Function}>
      * @param filterAtoms a {@link ImmutableList}<{@link Function}>
      * @param unqualifiedAttributes a {@link ImmutableMap}<{@link QuotedID}, {@link Variable}>
-     * @param alias a {@link QuotedID}
+     * @param alias a {@link RelationID}
      * @return a {@link RelationalExpression}
      */
 
@@ -254,7 +255,34 @@ public class RelationalExpression {
 
                 unqualifiedAttributes.entrySet().stream()
                         .collect(ImmutableCollectors.toMap(
-                                e -> new QualifiedAttributeID(null, e.getKey()), Map.Entry::getValue)));
+                                e -> new QualifiedAttributeID(null, e.getKey()), Map.Entry::getValue))
+        );
+
+        ImmutableMap<QuotedID, ImmutableSet<RelationID>> attributeOccurrences =
+                unqualifiedAttributes.keySet().stream()
+                        .collect(ImmutableCollectors.toMap(identity(), id -> ImmutableSet.of(alias)));
+
+        return new RelationalExpression(dataAtoms, filterAtoms, attributes, attributeOccurrences);
+    }
+
+    public static RelationalExpression create(ImmutableList<Function> dataAtoms,
+                                              ImmutableList<Function> filterAtoms,
+                                              ImmutableMap<QuotedID, Variable> unqualifiedAttributes,
+                                              RelationID alias, RelationID schemalessId) {
+
+        ImmutableMap<QualifiedAttributeID, Variable> attributes = merge(
+                unqualifiedAttributes.entrySet().stream()
+                        .collect(ImmutableCollectors.toMap(
+                                e -> new QualifiedAttributeID(alias, e.getKey()), Map.Entry::getValue)),
+
+                unqualifiedAttributes.entrySet().stream()
+                        .collect(ImmutableCollectors.toMap(
+                                e -> new QualifiedAttributeID(schemalessId, e.getKey()), Map.Entry::getValue)),
+
+                unqualifiedAttributes.entrySet().stream()
+                        .collect(ImmutableCollectors.toMap(
+                                e -> new QualifiedAttributeID(null, e.getKey()), Map.Entry::getValue))
+        );
 
         ImmutableMap<QuotedID, ImmutableSet<RelationID>> attributeOccurrences =
                 unqualifiedAttributes.keySet().stream()
@@ -291,8 +319,12 @@ public class RelationalExpression {
         return ImmutableList.<Function>builder().addAll(atoms1).addAll(atoms2).addAll(atoms3).build();
     }
 
-    private static ImmutableMap<QualifiedAttributeID, Variable> merge(ImmutableMap<QualifiedAttributeID, Variable> att1, ImmutableMap<QualifiedAttributeID, Variable> att2) {
-        return ImmutableMap.<QualifiedAttributeID, Variable>builder().putAll(att1).putAll(att2).build();
+    private static ImmutableMap<QualifiedAttributeID, Variable> merge(ImmutableMap<QualifiedAttributeID, Variable> attrs1, ImmutableMap<QualifiedAttributeID, Variable> attrs2) {
+        return ImmutableMap.<QualifiedAttributeID, Variable>builder().putAll(attrs1).putAll(attrs2).build();
+    }
+
+    private static ImmutableMap<QualifiedAttributeID, Variable> merge(ImmutableMap<QualifiedAttributeID, Variable> attrs1, ImmutableMap<QualifiedAttributeID, Variable> attrs2, ImmutableMap<QualifiedAttributeID, Variable> attrs3) {
+        return ImmutableMap.<QualifiedAttributeID, Variable>builder().putAll(attrs1).putAll(attrs2).putAll(attrs3).build();
     }
 
     /**
@@ -364,7 +396,6 @@ public class RelationalExpression {
             throw new IllegalJoinException(re1, re2 ,"Relation alias " +
                     alias1.stream().filter(alias2::contains).collect(ImmutableCollectors.toList()) +
                     " occurs in both arguments of the JOIN");
-
     }
 
 

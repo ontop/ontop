@@ -134,8 +134,12 @@ public class DBMetadataExtractor {
 				//System.out.println("getIdentifierQuoteString: " + md.getIdentifierQuoteString());		
 				idfac = new QuotedIDFactoryMySQL("`"); 
 			}
-			else
+			else if (productName.contains("SQL Server")) {
+				// TODO: use a proper QuotedID (full case-insensitive, but stored by DB in mixed case)
 				// "SQL Server" = MS SQL Server
+				idfac = new QuotedIDFactoryMySQL("\"");
+			}
+			else
 				idfac = new QuotedIDFactoryIdentity("\"");
 		}
 		else {
@@ -230,8 +234,14 @@ public class DBMetadataExtractor {
 			// catalog is ignored for now (rs.getString("TABLE_CAT"))
 			try (ResultSet rs = md.getColumns(null, seedId.getSchemaName(), seedId.getTableName(), null)) {
 				while (rs.next()) {
-					RelationID relationId = RelationID.createRelationIdFromDatabaseRecord(idfac, rs.getString("TABLE_SCHEM"), 
+					String schema = rs.getString("TABLE_SCHEM");
+					// MySQL workaround
+					if (schema == null)
+						schema = rs.getString("TABLE_CAT");
+
+					RelationID relationId = RelationID.createRelationIdFromDatabaseRecord(idfac, schema,
 										rs.getString("TABLE_NAME"));
+
 					QuotedID attributeId = QuotedID.createIdFromDatabaseRecord(idfac, rs.getString("COLUMN_NAME"));
 					if (printouts)
 						System.out.println("         " + relationId + "." + attributeId);
