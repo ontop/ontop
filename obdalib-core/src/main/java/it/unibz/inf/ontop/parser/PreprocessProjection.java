@@ -32,7 +32,7 @@ public class PreprocessProjection {
     private final DBMetadata metadata;
     private final QuotedIDFactory idfac;
     
-    public PreprocessProjection(DBMetadata metadata) throws SQLException {
+    public PreprocessProjection(DBMetadata metadata) {
         // we use the metadata to get the column names
         this.metadata = metadata;
         this.idfac = metadata.getQuotedIDFactory();
@@ -47,7 +47,7 @@ public class PreprocessProjection {
     public String getMappingQuery(Select select, Set<Variable> variables) {
 
     	VariableSet variableNames = new VariableSet(variables);
-    	
+
          if (select.getWithItemsList() != null) {
             for (WithItem withItem : select.getWithItemsList()) 
                 withItem.accept(new ReplaceStarSelectVisitor(false, null, variableNames));
@@ -118,7 +118,7 @@ public class PreprocessProjection {
                 //create a set of selectItem (columns)
                 //if * add all selectItems obtained by the metadata or the subselect clause
 
-                if (isSelectAll(expr)) {
+                if ((expr instanceof AllColumns)  || (expr instanceof AllTableColumns)) {
 
                     if (joinTable != null) {
                         joinTable.accept(new ReplaceStarFromItemVisitor(aliasSubselect, variables));
@@ -188,7 +188,7 @@ public class PreprocessProjection {
     
     	private final String aliasSubselect;
     	private final VariableSet variables;
-    	
+
     	ReplaceStarFromItemVisitor(String aliasSubselect, VariableSet variables) {
     		this.aliasSubselect = aliasSubselect;
     		this.variables = variables;
@@ -243,39 +243,4 @@ public class PreprocessProjection {
         	// NO-OP
         }   
     }
-        
-    /*
-    Flag for the presence of the * in the query
-     */
-
-    private static boolean isSelectAll(SelectItem expr) {
-    	ReplaceStarSelectItemVisitor visitor = new ReplaceStarSelectItemVisitor();
-        expr.accept(visitor);
-        return visitor.selectAll;
-    }
-
-    private static class ReplaceStarSelectItemVisitor implements SelectItemVisitor {
-
-        boolean selectAll = false;
-   	
-        @Override
-        public void visit(AllColumns allColumns) {
-            selectAll = true;
-        }
-
-        @Override
-        public void visit(AllTableColumns allTableColumns) {
-            selectAll = true;
-        }
-
-        @Override
-        public void visit(SelectExpressionItem selectExpressionItem) {
-        	// NO-OP
-        }
-    }
-    
-   
-    
-
-
 }

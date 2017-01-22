@@ -21,8 +21,7 @@ package it.unibz.inf.ontop.sql.parser;
  */
 
 import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.sql.QuotedID;
-import it.unibz.inf.ontop.sql.QuotedIDFactory;
+import it.unibz.inf.ontop.sql.*;
 import it.unibz.inf.ontop.sql.parser.exceptions.InvalidSelectQueryException;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.*;
@@ -31,6 +30,8 @@ import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.statement.Statement;
 import net.sf.jsqlparser.statement.select.*;
 
+import javax.management.relation.Relation;
+
 
 /**
  * Created by Roman Kontchakov on 09/01/2017.
@@ -38,12 +39,14 @@ import net.sf.jsqlparser.statement.select.*;
 public class SelectQueryAttributeExtractor {
 
     private final QuotedIDFactory idfac;
+    private final DBMetadata metadata;
 
     private static final  String[] aliasSplitters = new String[]{" as ", " AS "};
 
 
-    public SelectQueryAttributeExtractor(QuotedIDFactory idfac) {
-        this.idfac = idfac;
+    public SelectQueryAttributeExtractor(DBMetadata metadata) {
+        this.metadata = metadata;
+        this.idfac = metadata.getQuotedIDFactory();
     }
 
     public ImmutableList<QuotedID> extract(String sql) {
@@ -70,7 +73,13 @@ public class SelectQueryAttributeExtractor {
 
                             @Override
                             public void visit(AllTableColumns allTableColumns) {
-                                // do not add columns in the case of SELECT table.*
+                                // assumes that there are no aliases and the table = relation in the database
+                                RelationID id = idfac.createRelationID(allTableColumns.getTable().getSchemaName(), allTableColumns.getTable().getName());
+                                DatabaseRelationDefinition relation = metadata.getDatabaseRelation(id);
+                                if (relation != null) {
+                                    for (Attribute attribute : relation.getAttributes())
+                                        attributes.add(attribute.getID());
+                                }
                             }
 
                             @Override

@@ -310,7 +310,7 @@ public class SelectQueryParser {
             RelationID id = idfac.createRelationID(table.getSchemaName(), table.getName());
 
             map = attributes.entrySet().stream()
-                    .filter(e -> e.getKey().getRelation().equals(id))
+                    .filter(e -> e.getKey().getRelation() != null && e.getKey().getRelation().equals(id))
                     .collect(ImmutableCollectors.toMap(
                             e -> new QualifiedAttributeID(null, e.getKey().getAttribute()),
                             Map.Entry::getValue));

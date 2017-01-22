@@ -76,8 +76,7 @@ public class Mapping2DatalogConverter {
                     //        .reduce((s1, s2) -> ImmutableSet.<QuotedID>builder().addAll(s1).addAll(s2).build())
                     //        .get();
                     ImmutableList<QuotedID> variableNames =
-                            new SelectQueryAttributeExtractor(dbMetadata.getQuotedIDFactory())
-                                    .extract(sourceQuery.toString());
+                            new SelectQueryAttributeExtractor(dbMetadata).extract(sourceQuery.toString());
 
                     ParserViewDefinition view = dbMetadata.createParserView(sourceQuery.toString());
 

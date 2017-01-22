@@ -95,27 +95,6 @@ public class MetaMappingExpander {
 
 		// TODO: merge the 3 steps
 
-		// PREPROCESS *
-
-		for (OBDAMappingAxiom axiom : mappings) {
-			List<Function> targetQuery = axiom.getTargetQuery();
-			Set<Variable> variables = new HashSet<>();
-			for (Function atom : targetQuery)
-				TermUtils.addReferencedVariablesTo(variables, atom);
-
-			try {
-				String sourceString = axiom.getSourceQuery().toString();
-				Select select = (Select) CCJSqlParserUtil.parse(sourceString);
-
-				PreprocessProjection ps = new PreprocessProjection(metadata);
-				String query = ps.getMappingQuery(select, variables);
-				axiom.setSourceQuery(dfac.getSQLQuery(query));
-			}
-			catch (JSQLParserException e) {
-				log.debug("SQL Query cannot be preprocessed by the parser");
-			}
-		}
-
 		// SPLIT MAPPINGS
 
 		List<OBDAMappingAxiom> splittedMappings = new LinkedList<>();
@@ -170,37 +149,9 @@ public class MetaMappingExpander {
 					throw new IllegalArgumentException("No variables could be found for this metamapping. Check that the variable in the metamapping is enclosed in a URI, for instance http://.../{var}");
 				
 				try {
-					// Construct the SQL query tree from the source query; we do not work with views
-					String sql = mapping.getSourceQuery().toString();
+					String sql = preprocessProjection(mapping.getSourceQuery().toString(), atom);
 
-					net.sf.jsqlparser.statement.Statement statement = CCJSqlParserUtil.parse(sql);
-					if (!(statement instanceof Select))
-						throw new JSQLParserException("The query is not a SELECT statement");
-					Select selectQuery = (Select)statement;
-
-					if (!(selectQuery.getSelectBody() instanceof PlainSelect))
-						continue;
-
-					PlainSelect plainSelect = (PlainSelect)selectQuery.getSelectBody();
-
-					List<SelectExpressionItem> columnList = new LinkedList<>();
-					// TODO: CHANGE TABLE SCHEMA / NAME / ALIASES AND COLUMN NAMES
-					plainSelect.getSelectItems().forEach(si -> si.accept(new SelectItemVisitor() {
-						@Override
-						public void visit(AllColumns allColumns) {
-							// do nothing
-						}
-
-						@Override
-						public void visit(AllTableColumns allTableColumns) {
-							// do nothing
-						}
-
-						@Override
-						public void visit(SelectExpressionItem selectExpressionItem) {
-							columnList.add(selectExpressionItem);
-						}
-					}));
+					List<SelectExpressionItem> columnList = getColumnList(sql);
 
 					List<SelectExpressionItem> columnsForTemplate = getColumnsForTemplate(varsInTemplate, columnList);
 
@@ -211,8 +162,7 @@ public class MetaMappingExpander {
 
 					for(List<String> params : paramsForTemplate) {
 						// create a new  query with the changed projection and selection
-						Expression selection = getExtendedWhereClause(plainSelect.getWhere(),
-								columnsForTemplate, params);
+						Expression selection = getWhereClauseExtension(columnsForTemplate, params);
 						String newSourceQuerySQL = getExtendedQuery(sql, columnsForValues, selection);
 						OBDASQLQuery newSourceQuery =  dfac.getSQLQuery(newSourceQuerySQL);
 
@@ -250,6 +200,49 @@ public class MetaMappingExpander {
 		}
 		
 		return expandedMappings;
+	}
+
+	private String preprocessProjection(String sql, Function atom) throws JSQLParserException {
+		// PREPROCESS *
+		Set<Variable> variables = new HashSet<>();
+		TermUtils.addReferencedVariablesTo(variables, atom);
+
+		net.sf.jsqlparser.statement.Statement statement0 = CCJSqlParserUtil.parse(sql);
+		if (!(statement0 instanceof Select))
+			throw new JSQLParserException("The query is not a SELECT statement");
+		Select select0 = (Select) statement0;
+
+		PreprocessProjection ps = new PreprocessProjection(metadata);
+		return ps.getMappingQuery(select0, variables);
+	}
+
+	private static List<SelectExpressionItem>  getColumnList(String sql) throws JSQLParserException {
+		// Construct the SQL query tree from the source query; we do not work with views
+		Select selectQuery = (Select) CCJSqlParserUtil.parse(sql);
+		if (!(selectQuery.getSelectBody() instanceof PlainSelect))
+			throw new JSQLParserException("The query is not a plain SELECT query");
+
+		PlainSelect plainSelect = (PlainSelect)selectQuery.getSelectBody();
+
+		List<SelectExpressionItem> columnList = new LinkedList<>();
+		// TODO: CHANGE TABLE SCHEMA / NAME / ALIASES AND COLUMN NAMES
+		plainSelect.getSelectItems().forEach(si -> si.accept(new SelectItemVisitor() {
+			@Override
+			public void visit(AllColumns allColumns) {
+				// do nothing
+			}
+
+			@Override
+			public void visit(AllTableColumns allTableColumns) {
+				// do nothing
+			}
+
+			@Override
+			public void visit(SelectExpressionItem selectExpressionItem) {
+				columnList.add(selectExpressionItem);
+			}
+		}));
+		return columnList;
 	}
 
 	private List<List<String>> getParamsForTemplate(String sql,
@@ -298,9 +291,9 @@ public class MetaMappingExpander {
 	}
 
 
-	private static Expression getExtendedWhereClause(Expression selection,
-											  List<SelectExpressionItem> columnsForTemplate,
-											  List<String> params) {
+	private static Expression getWhereClauseExtension(List<SelectExpressionItem> columnsForTemplate,
+													 List<String> params) {
+		Expression selection = null;
 		int j = 0;
 		for (SelectExpressionItem column : columnsForTemplate) {
 			BinaryExpression condition = new EqualsTo();
@@ -445,7 +438,7 @@ public class MetaMappingExpander {
 	 * Set the object construction for the WHERE clause
 	 */
 
-	private static String getExtendedQuery(String originalSQL, List<SelectExpressionItem> columnList, Expression whereClause) throws JSQLParserException {
+	private static String getExtendedQuery(String originalSQL, List<SelectExpressionItem> columnList, Expression whereClauseExtension) throws JSQLParserException {
 		Select select = (Select)CCJSqlParserUtil.parse(originalSQL);
 		PlainSelect plainSelect = (PlainSelect)select.getSelectBody();
 
@@ -455,7 +448,11 @@ public class MetaMappingExpander {
 		else
 			plainSelect.getSelectItems().add(new AllColumns());
 
-		plainSelect.setWhere(whereClause);
+		if (whereClauseExtension != null)
+			if (plainSelect.getWhere() != null)
+				plainSelect.setWhere(new AndExpression(plainSelect.getWhere(), whereClauseExtension));
+			else
+				plainSelect.setWhere(whereClauseExtension);
 
 		return select.toString();
 	}
