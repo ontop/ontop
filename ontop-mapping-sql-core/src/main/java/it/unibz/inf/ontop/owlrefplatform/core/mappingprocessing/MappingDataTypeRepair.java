@@ -20,6 +20,9 @@ package it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing;
  * #L%
  */
 
+import it.unibz.inf.ontop.exception.InvalidMappingException;
+import it.unibz.inf.ontop.exception.MappingException;
+import it.unibz.inf.ontop.exception.UnknownDatatypeException;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.FunctionalTermImpl;
 import it.unibz.inf.ontop.ontology.DataPropertyRangeExpression;
@@ -60,7 +63,8 @@ public class MappingDataTypeRepair {
      * 
      * @param metadata The database metadata.
      */
-    public MappingDataTypeRepair(DBMetadata metadata, TBoxReasoner reasoner, VocabularyValidator qvv) {
+    public MappingDataTypeRepair(DBMetadata metadata, TBoxReasoner reasoner, VocabularyValidator qvv)
+            throws PredicateRedefinitionException {
         this.metadata = metadata;
         String databaseName = metadata.getDbmsProductName();
         String databaseDriver = metadata.getDriverName();
@@ -72,19 +76,15 @@ public class MappingDataTypeRepair {
          * TODO: retrieve from Guice
          */
         this.jdbcTypeMapper =  JdbcTypeMapper.getInstance();
-        try {
-            dataTypesMap = getDataTypeFromOntology(reasoner);
-        }
-        catch (PredicateRedefinitionException pe) {
-            throw new OBDAException(pe);
-        }
+        dataTypesMap = getDataTypeFromOntology(reasoner);
     }
 
     /**
      * Private method that gets the datatypes already present in the ontology and stores them in a map
      * It will be used later in insertDataTyping
      */
-    private static Map<Predicate, Datatype> getDataTypeFromOntology(TBoxReasoner reasoner) {
+    private static Map<Predicate, Datatype> getDataTypeFromOntology(TBoxReasoner reasoner)
+            throws PredicateRedefinitionException {
 
     	final Map<Predicate, Datatype> dataTypesMap = new HashMap<>();
 
@@ -108,7 +108,8 @@ public class MappingDataTypeRepair {
 		return dataTypesMap;
     }
 
-    private static void onDataRangeInclusion(Map<Predicate, Datatype> dataTypesMap, DataRangeExpression sub, DataRangeExpression sup) {
+    private static void onDataRangeInclusion(Map<Predicate, Datatype> dataTypesMap, DataRangeExpression sub, DataRangeExpression sup)
+            throws PredicateRedefinitionException {
         //if sup is a datatype property  we store it in the map
         //it means that sub is of datatype sup
     	if (sup instanceof Datatype) {
@@ -126,7 +127,8 @@ public class MappingDataTypeRepair {
     			return;
 
 			if (dataTypesMap.containsKey(key))
-                throw new PredicateRedefinitionException("Predicate " + key + " with " + dataTypesMap.get(key) + " is redefined as " + supDataType + " in the ontology");
+                throw new PredicateRedefinitionException("Predicate " + key + " with " + dataTypesMap.get(key)
+                        + " is redefined as " + supDataType + " in the ontology");
 			dataTypesMap.put(key, supDataType);
     	}
     }
@@ -140,10 +142,9 @@ public class MappingDataTypeRepair {
      *
      * @param rule
      *            The set of mapping axioms.
-     * @throws OBDAException
      */
 
-    public void insertDataTyping(CQIE rule) throws OBDAException {
+    public void insertDataTyping(CQIE rule) throws MappingException {
         Function atom = rule.getHead();
         Predicate predicate = atom.getFunctionSymbol();
         if (predicate.getArity() == 2) { // we check both for data and object property
@@ -154,7 +155,8 @@ public class MappingDataTypeRepair {
         }
 	}
 
-    private void insertDataTyping(Term term, Function atom, int position, Map<String, List<IndexedPosititon>> termOccurenceIndex) throws OBDAException {
+    private void insertDataTyping(Term term, Function atom, int position, Map<String, List<IndexedPosititon>> termOccurenceIndex)
+            throws MappingException {
         Predicate predicate = atom.getFunctionSymbol();
 
         if (term instanceof Function) {
@@ -199,7 +201,7 @@ public class MappingDataTypeRepair {
 
                     //check that no datatype mismatch is present
                     if (!functionSymbol.equals(dataType.getPredicate())) {
-                        throw new OBDAException("Ontology datatype " + dataType + " for " + predicate +
+                        throw new PredicateRedefinitionException("Ontology datatype " + dataType + " for " + predicate +
                         		"\ndoes not correspond to datatype " + functionSymbol + " in mappings");
                     }
 
@@ -216,7 +218,7 @@ public class MappingDataTypeRepair {
                 }
             }
            else
-               throw new OBDAException("Unknown data type predicate: " + functionSymbol.getName());
+               throw new UnknownDatatypeException("Unknown data type predicate: " + functionSymbol.getName());
         }
         else if (term instanceof Variable) {
 
@@ -274,15 +276,15 @@ public class MappingDataTypeRepair {
      * @param termOccurenceIndex
      * @param variable
      * @return
-     * @throws OBDAException
      */
 
-	private Predicate.COL_TYPE getDataType(Map<String, List<IndexedPosititon>> termOccurenceIndex, Variable variable) throws OBDAException {
+	private Predicate.COL_TYPE getDataType(Map<String, List<IndexedPosititon>> termOccurenceIndex, Variable variable)
+            throws InvalidMappingException {
 
 
 		List<IndexedPosititon> list = termOccurenceIndex.get(variable.getName());
 		if (list == null)
-			throw new OBDAException("Unknown term in head");
+			throw new InvalidMappingException("Unknown term in head");
 
 		// ROMAN (10 Oct 2015): this assumes the first occurrence is a database relation!
 		//                      AND THAT THERE ARE NO CONSTANTS IN ARGUMENTS!

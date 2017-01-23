@@ -18,11 +18,11 @@ import java.util.stream.Stream;
  */
 public class Mapping2QueryConverter {
 
-    public static Stream<IntermediateQuery> convertMappings(ImmutableMultimap<Predicate, CQIE> mappingsDR,
-                                                            Collection<Predicate> tablePredicates,
-                                                            MetadataForQueryOptimization metadataForQueryOptimization,
-                                                            OntopModelFactory modelFactory,
-                                                            ExecutorRegistry executorRegistry) {
+    public Stream<IntermediateQuery> convertMappingRules(ImmutableMultimap<Predicate, CQIE> mappingsDR,
+                                                                Collection<Predicate> tablePredicates,
+                                                                MetadataForQueryOptimization metadataForQueryOptimization,
+                                                                OntopModelFactory modelFactory,
+                                                                ExecutorRegistry executorRegistry) {
 
         return mappingsDR.keySet().stream()
                 .map(predicate -> DatalogProgram2QueryConverter.convertDatalogDefinitions(metadataForQueryOptimization,

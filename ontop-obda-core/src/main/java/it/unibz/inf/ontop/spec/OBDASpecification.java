@@ -11,7 +11,7 @@ import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
  */
 public interface OBDASpecification {
 
-    Mapping getMapping();
+    Mapping getSaturatedMapping();
 
     DBMetadata getDBMetadata();
 

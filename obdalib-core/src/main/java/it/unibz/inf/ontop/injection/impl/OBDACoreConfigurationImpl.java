@@ -76,13 +76,13 @@ public class OBDACoreConfigurationImpl extends OntopMappingSQLConfigurationImpl 
     }
 
     @Override
-    public Optional<OBDAModel> loadOBDAModel() throws IOException, InvalidMappingException {
+    public Optional<OBDAModel> loadPPMapping() throws IOException, InvalidMappingException {
         return loadOBDAModel(Optional::empty);
     }
 
     Optional<OBDAModel> loadOBDAModel(Supplier<Optional<Ontology>> ontologySupplier)
             throws IOException, InvalidMappingException {
-        return loadOBDAModel(ontologySupplier,
+        return loadPPMapping(ontologySupplier,
                 () -> options.mappingFile
                         .map(Optional::of)
                         .orElseGet(() -> settings.getMappingFilePath()

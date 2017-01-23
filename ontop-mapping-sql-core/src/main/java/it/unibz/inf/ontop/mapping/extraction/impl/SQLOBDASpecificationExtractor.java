@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.mapping.extraction.impl;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.exception.InvalidMappingException;
+import it.unibz.inf.ontop.exception.OBDASpecificationException;
 import it.unibz.inf.ontop.mapping.MappingParser;
 import it.unibz.inf.ontop.mapping.conversion.SQLPPMapping2DSModelConverter;
 import it.unibz.inf.ontop.spec.OBDASpecification;
@@ -34,7 +35,7 @@ public class SQLOBDASpecificationExtractor implements OBDASpecificationExtractor
     @Override
     public OBDASpecification extract(@Nonnull File mappingFile, @Nonnull Optional<DBMetadata> dbMetadata,
                                      @Nonnull Optional<Ontology> ontology)
-            throws InvalidMappingException, IOException, DuplicateMappingException {
+            throws OBDASpecificationException, IOException {
 
         OBDAModel ppMapping =  mappingParser.parse(mappingFile);
         return convertToDataSourceModel(ppMapping, dbMetadata, ontology);
@@ -43,7 +44,7 @@ public class SQLOBDASpecificationExtractor implements OBDASpecificationExtractor
     @Override
     public OBDASpecification extract(@Nonnull Reader mappingReader, @Nonnull Optional<DBMetadata> dbMetadata,
                                      @Nonnull Optional<Ontology> ontology)
-            throws InvalidMappingException, IOException, DuplicateMappingException {
+            throws OBDASpecificationException, IOException {
         OBDAModel ppModel =  mappingParser.parse(mappingReader);
         return convertToDataSourceModel(ppModel, dbMetadata, ontology);
     }
@@ -51,7 +52,7 @@ public class SQLOBDASpecificationExtractor implements OBDASpecificationExtractor
     @Override
     public OBDASpecification extract(@Nonnull Model mappingGraph, @Nonnull Optional<DBMetadata> dbMetadata,
                                      @Nonnull Optional<Ontology> ontology)
-            throws InvalidMappingException, IOException, DuplicateMappingException {
+            throws OBDASpecificationException, IOException {
         OBDAModel ppModel =  mappingParser.parse(mappingGraph);
         return convertToDataSourceModel(ppModel, dbMetadata, ontology);
     }
@@ -59,7 +60,7 @@ public class SQLOBDASpecificationExtractor implements OBDASpecificationExtractor
     @Override
     public OBDASpecification extract(@Nonnull PreProcessedMapping ppMapping, @Nonnull Optional<DBMetadata> dbMetadata,
                                      @Nonnull Optional<Ontology> ontology)
-            throws InvalidMappingException, IOException, DuplicateMappingException {
+            throws OBDASpecificationException, IOException {
         if (ppMapping instanceof OBDAModel) {
             return convertToDataSourceModel((OBDAModel) ppMapping, dbMetadata, ontology);
         }
@@ -69,7 +70,7 @@ public class SQLOBDASpecificationExtractor implements OBDASpecificationExtractor
     }
 
     private OBDASpecification convertToDataSourceModel(OBDAModel ppMapping, Optional<DBMetadata> dbMetadata,
-                                                       Optional<Ontology> ontology) {
+                                                       Optional<Ontology> ontology) throws OBDASpecificationException {
         return converter.convert(ppMapping, dbMetadata, ontology);
     }
 }

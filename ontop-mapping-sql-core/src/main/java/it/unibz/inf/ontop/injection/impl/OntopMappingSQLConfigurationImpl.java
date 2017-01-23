@@ -2,7 +2,9 @@ package it.unibz.inf.ontop.injection.impl;
 
 
 import com.google.inject.Module;
+import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.exception.InvalidMappingException;
+import it.unibz.inf.ontop.exception.OBDASpecificationException;
 import it.unibz.inf.ontop.injection.InvalidOntopConfigurationException;
 import it.unibz.inf.ontop.injection.OntopMappingSQLConfiguration;
 import it.unibz.inf.ontop.injection.OntopMappingSQLSettings;
@@ -68,7 +70,7 @@ public class OntopMappingSQLConfigurationImpl extends OntopSQLConfigurationImpl 
      * To be overloaded
      */
     @Override
-    public Optional<OBDASpecification> loadSpecification() throws IOException, InvalidMappingException {
+    public Optional<OBDASpecification> loadSpecification() throws IOException, OBDASpecificationException {
         return loadDataSourceModel(Optional::empty, Optional::empty, Optional::empty, Optional::empty);
     }
 
@@ -76,7 +78,7 @@ public class OntopMappingSQLConfigurationImpl extends OntopSQLConfigurationImpl 
                                                     Supplier<Optional<File>> mappingFileSupplier,
                                                     Supplier<Optional<Reader>> mappingReaderSupplier,
                                                     Supplier<Optional<Model>> mappingGraphSupplier)
-            throws IOException, InvalidMappingException {
+            throws IOException, OBDASpecificationException {
         return mappingConfiguration.loadSpecification(
                 ontologySupplier,
                 () -> options.predefinedMappingModel.map(m -> (PreProcessedMapping) m),
@@ -88,18 +90,18 @@ public class OntopMappingSQLConfigurationImpl extends OntopSQLConfigurationImpl 
 
 
     @Override
-    public Optional<OBDAModel> loadOBDAModel() throws IOException, InvalidMappingException {
-        return loadOBDAModel(Optional::empty, Optional::empty, Optional::empty, Optional::empty);
+    public Optional<OBDAModel> loadPPMapping() throws IOException, InvalidMappingException, DuplicateMappingException {
+        return loadPPMapping(Optional::empty, Optional::empty, Optional::empty, Optional::empty);
     }
 
     /**
      * TODO: also consider the other steps
      */
-    Optional<OBDAModel> loadOBDAModel(Supplier<Optional<Ontology>> ontologySupplier,
+    Optional<OBDAModel> loadPPMapping(Supplier<Optional<Ontology>> ontologySupplier,
                                       Supplier<Optional<File>> mappingFileSupplier,
                                       Supplier<Optional<Reader>> mappingReaderSupplier,
                                       Supplier<Optional<Model>> mappingGraphSupplier)
-            throws IOException, InvalidMappingException {
+            throws IOException, InvalidMappingException, DuplicateMappingException {
 
         if (options.predefinedMappingModel.isPresent()) {
             return options.predefinedMappingModel;

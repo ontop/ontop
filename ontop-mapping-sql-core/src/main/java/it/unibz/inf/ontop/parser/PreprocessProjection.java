@@ -25,7 +25,7 @@ public class PreprocessProjection {
     private final DBMetadata metadata;
     private final QuotedIDFactory idfac;
     
-    public PreprocessProjection(DBMetadata metadata) throws SQLException {
+    public PreprocessProjection(DBMetadata metadata)  {
         // we use the metadata to get the column names
         this.metadata = metadata;
         this.idfac = metadata.getQuotedIDFactory();

@@ -90,7 +90,7 @@ public class DirectMappingEngine {
 	public static BootstrappingResults bootstrap(QuestConfiguration configuration, String baseIRI)
 			throws IOException, InvalidMappingException, OWLOntologyCreationException, SQLException, OWLOntologyStorageException {
 		DirectMappingEngine engine = configuration.getInjector().getInstance(DirectMappingEngine.class);
-		return engine.bootstrapMappingAndOntology(baseIRI, configuration.loadOBDAModel(),
+		return engine.bootstrapMappingAndOntology(baseIRI, configuration.loadPPMapping(),
 				configuration.loadInputOntology());
 	}
 

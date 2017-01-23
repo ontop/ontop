@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.injection;
 
 
+import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.exception.InvalidMappingException;
 import it.unibz.inf.ontop.injection.impl.OntopMappingSQLConfigurationImpl;
 import it.unibz.inf.ontop.model.OBDAModel;
@@ -21,7 +22,7 @@ public interface OntopMappingSQLConfiguration extends OntopSQLConfiguration, Ont
         return new OntopMappingSQLConfigurationImpl.BuilderImpl<>();
     }
 
-    Optional<OBDAModel> loadOBDAModel() throws IOException, InvalidMappingException;
+    Optional<OBDAModel> loadPPMapping() throws IOException, InvalidMappingException, DuplicateMappingException;
 
     /**
      * TODO: explain

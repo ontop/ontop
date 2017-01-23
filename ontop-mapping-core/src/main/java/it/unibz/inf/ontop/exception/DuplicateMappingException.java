@@ -20,13 +20,7 @@ package it.unibz.inf.ontop.exception;
  * #L%
  */
 
-public class DuplicateMappingException extends RuntimeException {
-
-	private static final long serialVersionUID = 1L;
-
-	public DuplicateMappingException() {
-		super();
-	}
+public class DuplicateMappingException extends MappingException {
 	
 	public DuplicateMappingException(String message) {
 		super(message);

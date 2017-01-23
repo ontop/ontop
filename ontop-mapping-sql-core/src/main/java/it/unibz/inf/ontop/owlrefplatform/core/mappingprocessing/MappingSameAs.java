@@ -21,6 +21,7 @@ package it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing;
  */
 
 import com.google.common.collect.ImmutableList;
+import it.unibz.inf.ontop.exception.InvalidMappingException;
 import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
@@ -44,7 +45,7 @@ public class MappingSameAs {
     /**
      * Constructs a mapping containing the URI of owl:sameAs
      */
-    public MappingSameAs(List<CQIE> rules) throws OBDAException {
+    public MappingSameAs(List<CQIE> rules) throws InvalidMappingException {
 
         this.rules = rules;
 
@@ -59,7 +60,7 @@ public class MappingSameAs {
     /**
      * method that gets the uris from the mappings of same as and store it in a map
      */
-    private void retrieveSameAsMappingsURIs() throws OBDAException {
+    private void retrieveSameAsMappingsURIs() throws InvalidMappingException {
 
         sameAsMap = new HashMap<>();
 
@@ -85,7 +86,7 @@ public class MappingSameAs {
 
 
                 } else
-                    throw new OBDAException("owl:samesAs is not built properly");
+                    throw new InvalidMappingException("owl:samesAs is not built properly");
 
             }
 
@@ -96,7 +97,7 @@ public class MappingSameAs {
     /*
     Get class data and object predicate that could refer to a same as
      */
-    private void retrievePredicatesWithSameAs() throws OBDAException {
+    private void retrievePredicatesWithSameAs() throws InvalidMappingException {
 
 
         for (CQIE rule : rules) {
@@ -160,7 +161,7 @@ public class MappingSameAs {
                 }
 
             } else
-                throw new OBDAException("error finding owl:sameAs related to " + atom);
+                throw new InvalidMappingException("error finding owl:sameAs related to " + atom);
 
         }
 

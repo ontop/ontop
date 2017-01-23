@@ -2,12 +2,19 @@ package it.unibz.inf.ontop.mapping.conversion.impl;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMultimap;
+import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
+import it.unibz.inf.ontop.exception.DuplicateMappingException;
+import it.unibz.inf.ontop.exception.MappingException;
+import it.unibz.inf.ontop.exception.MetaMappingExpansionException;
 import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
 import it.unibz.inf.ontop.injection.OntopMappingSQLSettings;
+import it.unibz.inf.ontop.mapping.Mapping;
 import it.unibz.inf.ontop.mapping.MappingMetadata;
 import it.unibz.inf.ontop.mapping.MappingSplitter;
 import it.unibz.inf.ontop.mapping.conversion.SQLPPMapping2DSModelConverter;
+import it.unibz.inf.ontop.pivotalrepr.datalog.Mapping2QueryConverter;
 import it.unibz.inf.ontop.spec.OBDASpecification;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
@@ -23,6 +30,7 @@ import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing.*;
 import it.unibz.inf.ontop.owlrefplatform.core.translator.MappingVocabularyFixer;
 import it.unibz.inf.ontop.parser.PreprocessProjection;
+import it.unibz.inf.ontop.spec.impl.OBDASpecificationImpl;
 import it.unibz.inf.ontop.sql.*;
 import it.unibz.inf.ontop.utils.IMapping2DatalogConverter;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -40,6 +48,7 @@ import java.sql.SQLException;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
 
@@ -92,7 +101,7 @@ public class DefaultSQLPPMapping2DSModelConverter implements SQLPPMapping2DSMode
 
     @Override
     public OBDASpecification convert(final OBDAModel initialPPMapping, Optional<DBMetadata> optionalDBMetadata,
-                                     Optional<Ontology> optionalOntology) throws DBMetadataExtractionException {
+                                     Optional<Ontology> optionalOntology) throws DBMetadataExtractionException, MappingException {
 
 
         // NB: this method should disappear
@@ -102,18 +111,16 @@ public class DefaultSQLPPMapping2DSModelConverter implements SQLPPMapping2DSMode
                 // TODO: should we extract it from the mapping instead?
                 .orElseGet(() -> ONTOLOGY_FACTORY.createOntology(ONTOLOGY_FACTORY.createVocabulary()));
 
+        // TODO: extract it later (after creating rules)
         TBoxReasoner tBox = TBoxReasonerImpl.create(ontology, settings.isEquivalenceOptimizationEnabled());
 
         // NB: this will be moved away
         OBDAModel simplifiedPPMapping = replaceEquivalences(fixedPPMapping, tBox, ontology);
 
-        DBMetadataAndMappingAxioms dbMetadataAndAxioms;
-        try {
-            // TODO: in the future, should only extract the DBMetadata
-            dbMetadataAndAxioms = extractDBMetadataAndNormalizeMappingAxioms(simplifiedPPMapping, optionalDBMetadata);
-        } catch (SQLException e) {
-            throw new DBMetadataExtractionException(e.getMessage());
-        }
+        // TODO: in the future, should only extract the DBMetadata
+        DBMetadataAndMappingAxioms dbMetadataAndAxioms = extractDBMetadataAndNormalizeMappingAxioms(
+                simplifiedPPMapping, optionalDBMetadata);
+
         RDBMetadata dbMetadata = dbMetadataAndAxioms.dbMetadata;
 
         // NB: may also views in the DBMetadata (for non-understood SQL queries)
@@ -134,26 +141,68 @@ public class DefaultSQLPPMapping2DSModelConverter implements SQLPPMapping2DSMode
         if (settings.isEquivalenceOptimizationEnabled()) {
             MappingVocabularyValidator vocabularyValidator = new MappingVocabularyValidator(tBox, ontology.getVocabulary(),
                     nativeQLFactory);
-            return fixedPPMapping.newModel(vocabularyValidator.replaceEquivalences(
-                    fixedPPMapping.getMappings()));
+            try {
+                return fixedPPMapping.newModel(vocabularyValidator.replaceEquivalences(
+                        fixedPPMapping.getMappings()));
+            } catch (DuplicateMappingException e) {
+                throw new IllegalStateException(
+                        "Bug: duplicated mapping produced after replacing the equivalences. \n" + e.getMessage());
+            }
         }
+        else
+            return fixedPPMapping;
     }
 
 
     private OBDASpecification transformMapping(ImmutableList<CQIE> initialMappingRules,
                                                TBoxReasoner tBox, Ontology ontology,
-                                               RDBMetadata dbMetadata, MappingMetadata mappingMetadata) {
+                                               RDBMetadata dbMetadata, MappingMetadata mappingMetadata) throws MappingException {
 
         // TODO: replace equivalences here
 
         // Adding data typing on the mapping axioms.
         ImmutableList<CQIE> fullyTypedRules = inferMissingDataTypesAndValidate(initialMappingRules, tBox, ontology, dbMetadata);
 
-        ImmutableList<CQIE> mappingWithFacts = insertFacts(fullyTypedRules, ontology);
+        ImmutableList<CQIE> mappingRulesWithFacts = insertFacts(fullyTypedRules, ontology);
 
-        ImmutableList<CQIE> saturatedMapping = saturateMapping(mappingWithFacts, tBox, dbMetadata);
+        ImmutableList<CQIE> saturatedMappingRules = saturateMapping(mappingRulesWithFacts, tBox, dbMetadata);
 
-        throw new RuntimeException("TODO: continue the conversion");
+        Mapping saturatedMapping = convertMappingRules(saturatedMappingRules);
+
+        return new OBDASpecificationImpl(saturatedMapping, dbMetadata, tBox, ontology.getVocabulary());
+    }
+
+
+    private Mapping convertMappingRules(ImmutableList<CQIE> mappingRules) {
+        ImmutableMultimap<Predicate, CQIE> ruleIndex = mappingRules.stream()
+                .collect(ImmutableCollectors.toMultimap(
+                        r -> r.getHead().getFunctionSymbol(),
+                        r -> r
+                ));
+
+        ImmutableSet<Predicate> extensionalPredicates = ruleIndex.values().stream()
+                .flatMap(r -> r.getBody().stream())
+                .flatMap(a -> extractPredicates(a))
+                .filter(p -> !ruleIndex.containsKey(p))
+                .collect(ImmutableCollectors.toSet());
+
+        //mappingStream = Mapping2QueryConverter.convertMappingRules(ruleIndex, extensionalPredicates, )
+        throw new RuntimeException("TODO: finish the conversion of the mapping rules");
+    }
+
+
+    private static Stream<Predicate> extractPredicates(Function atom) {
+        Predicate currentpred = atom.getFunctionSymbol();
+        if (currentpred instanceof OperationPredicate)
+            return Stream.of();
+        else if (currentpred instanceof AlgebraOperatorPredicate) {
+            return atom.getTerms().stream()
+                    .filter(t -> t instanceof Function)
+                    // Recursive
+                    .flatMap(t -> extractPredicates((Function) t));
+        } else {
+            return Stream.of(currentpred);
+        }
     }
 
 
@@ -181,11 +230,9 @@ public class DefaultSQLPPMapping2DSModelConverter implements SQLPPMapping2DSMode
      */
     private DBMetadataAndMappingAxioms extractDBMetadataAndNormalizeMappingAxioms(final OBDAModel fixedPPMapping,
                                                                                   Optional<DBMetadata> optionalDBMetadata)
-            throws SQLException, DBMetadataExtractionException {
-        Connection localConnection = null;
-        try {
+            throws DBMetadataExtractionException, MetaMappingExpansionException {
 
-            localConnection = createConnection();
+        try (Connection localConnection = createConnection()) {
 
             /*
              * Extracts the DBMetadata
@@ -199,9 +246,11 @@ public class DefaultSQLPPMapping2DSModelConverter implements SQLPPMapping2DSMode
 
             return new DBMetadataAndMappingAxioms(normalizedMappingAxioms, dbMetadata);
         }
-        finally {
-            if ((localConnection != null) && (!localConnection.isClosed()))
-                    localConnection.close();
+        /*
+         * Problem while creating the connection
+         */
+        catch (SQLException e) {
+            throw new DBMetadataExtractionException(e.getMessage());
         }
     }
 
@@ -214,8 +263,7 @@ public class DefaultSQLPPMapping2DSModelConverter implements SQLPPMapping2DSMode
      *
      */
     private Collection<OBDAMappingAxiom> preprocessProjection(Collection<OBDAMappingAxiom> mappingAxioms,
-                                                              RDBMetadata dbMetadata)
-            throws OBDAException {
+                                                              RDBMetadata dbMetadata) {
         for (OBDAMappingAxiom axiom : mappingAxioms) {
             String sourceString = axiom.getSourceQuery().toString();
 
@@ -237,8 +285,6 @@ public class DefaultSQLPPMapping2DSModelConverter implements SQLPPMapping2DSMode
                 /**
                  * TODO: should we just silently ignore the mapping?
                  */
-            } catch(SQLException e) {
-                throw new OBDAException(e.getMessage());
             }
         }
 
@@ -246,7 +292,8 @@ public class DefaultSQLPPMapping2DSModelConverter implements SQLPPMapping2DSMode
     }
 
     private ImmutableList<OBDAMappingAxiom> normalizeMappingAxioms(Collection<OBDAMappingAxiom> mappingAxioms,
-                                                                   final RDBMetadata dbMetadata, Connection localConnection) {
+                                                                   final RDBMetadata dbMetadata, Connection localConnection)
+            throws MetaMappingExpansionException {
         /** Substitute select * with column names (in the SQL case) **/
 
         mappingAxioms = preprocessProjection(mappingAxioms, dbMetadata);
@@ -277,15 +324,16 @@ public class DefaultSQLPPMapping2DSModelConverter implements SQLPPMapping2DSMode
     }
 
     private Collection<OBDAMappingAxiom> expandMetaMappings(Collection<OBDAMappingAxiom> mappingAxioms,
-                                                            DBMetadata metadata, Connection localConnection) {
+                                                            DBMetadata metadata, Connection localConnection)
+            throws MetaMappingExpansionException {
         MetaMappingExpander metaMappingExpander = new MetaMappingExpander(localConnection, metadata.getQuotedIDFactory(),
                 nativeQLFactory);
         try {
             return metaMappingExpander.expand(mappingAxioms);
         } catch (SQLException e) {
-            throw new OBDAException(e);
-        } catch (JSQLParserException e) {
-            throw new OBDAException(e);
+            throw new MetaMappingExpansionException(e.getMessage());
+        } catch(JSQLParserException e) {
+            throw new MetaMappingExpansionException(e.getMessage());
         }
     }
 
@@ -396,7 +444,8 @@ public class DefaultSQLPPMapping2DSModelConverter implements SQLPPMapping2DSMode
      * Adding ontology assertions (ABox) as rules (facts, head with no body).
      */
     private ImmutableList<CQIE> addAssertionsAsFacts(ImmutableList<CQIE> mapping, Iterable<ClassAssertion> cas,
-                                                     Iterable<ObjectPropertyAssertion> pas, Iterable<DataPropertyAssertion> das, List<AnnotationAssertion> aas) {
+                                                     Iterable<ObjectPropertyAssertion> pas,
+                                                     Iterable<DataPropertyAssertion> das, List<AnnotationAssertion> aas) {
 
         UriTemplateMatcher uriTemplateMatcher = UriTemplateMatcher.create(mapping);
 
@@ -504,7 +553,7 @@ public class DefaultSQLPPMapping2DSModelConverter implements SQLPPMapping2DSMode
      *
      */
     public ImmutableList<CQIE> inferMissingDataTypesAndValidate(ImmutableList<CQIE> unfoldingProgram, TBoxReasoner tBoxReasoner,
-                                                       Ontology ontology, DBMetadata metadata) {
+                                                       Ontology ontology, DBMetadata metadata) throws MappingException {
 
         VocabularyValidator vocabularyValidator = new VocabularyValidator(tBoxReasoner, ontology.getVocabulary());
 

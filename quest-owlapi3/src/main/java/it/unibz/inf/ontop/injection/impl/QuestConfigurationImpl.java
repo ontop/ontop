@@ -79,7 +79,7 @@ public class QuestConfigurationImpl extends QuestCoreConfigurationImpl implement
     }
 
     @Override
-    public Optional<OBDAModel> loadOBDAModel() throws IOException, InvalidMappingException {
+    public Optional<OBDAModel> loadPPMapping() throws IOException, InvalidMappingException {
         return loadOBDAModel(this::loadOntology);
     }
 

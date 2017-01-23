@@ -9,21 +9,31 @@ import it.unibz.inf.ontop.model.AtomPredicate;
 
 public class MetadataForQueryOptimizationImpl implements MetadataForQueryOptimization {
 
-    private final ImmutableMultimap<AtomPredicate, ImmutableList<Integer>> primaryKeys;
+    private final ImmutableMultimap<AtomPredicate, ImmutableList<Integer>> uniqueConstraints;
     private final UriTemplateMatcher uriTemplateMatcher;
     private final DBMetadata dbMetadata;
 
+    @Deprecated
     public MetadataForQueryOptimizationImpl(
             DBMetadata dbMetadata,
-            ImmutableMultimap<AtomPredicate, ImmutableList<Integer>> primaryKeys, UriTemplateMatcher uriTemplateMatcher) {
-        this.primaryKeys = primaryKeys;
+            ImmutableMultimap<AtomPredicate, ImmutableList<Integer>> uniqueConstraints, UriTemplateMatcher uriTemplateMatcher) {
+        this.uniqueConstraints = uniqueConstraints;
         this.uriTemplateMatcher = uriTemplateMatcher;
         this.dbMetadata = dbMetadata;
     }
 
+    public MetadataForQueryOptimizationImpl(
+            DBMetadata dbMetadata,
+            UriTemplateMatcher uriTemplateMatcher) {
+        this.uniqueConstraints = dbMetadata.extractUniqueConstraints();
+        this.uriTemplateMatcher = uriTemplateMatcher;
+        this.dbMetadata = dbMetadata;
+    }
+
+
     @Override
     public ImmutableMultimap<AtomPredicate, ImmutableList<Integer>> getUniqueConstraints() {
-        return primaryKeys;
+        return uniqueConstraints;
     }
 
     @Override
