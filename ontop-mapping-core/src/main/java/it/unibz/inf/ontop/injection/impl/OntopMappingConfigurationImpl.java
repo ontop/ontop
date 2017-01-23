@@ -83,7 +83,7 @@ public class OntopMappingConfigurationImpl extends OntopOBDAConfigurationImpl im
         Optional<PreProcessedMapping> optionalPPMapping = ppMappingSupplier.get();
         if (optionalPPMapping.isPresent()) {
             PreProcessedMapping ppMapping = optionalPPMapping.get();
-            return Optional.of(extractor.extract(ppMapping, optionalMetadata, optionalOntology));
+            return Optional.of(extractor.extract(ppMapping, optionalMetadata, optionalOntology, getExecutorRegistry()));
         }
 
         /*
@@ -92,7 +92,7 @@ public class OntopMappingConfigurationImpl extends OntopOBDAConfigurationImpl im
         Optional<File> optionalMappingFile = mappingFileSupplier.get();
         if (optionalMappingFile.isPresent()) {
             File mappingFile = optionalMappingFile.get();
-            return Optional.of(extractor.extract(mappingFile, optionalMetadata, optionalOntology));
+            return Optional.of(extractor.extract(mappingFile, optionalMetadata, optionalOntology, getExecutorRegistry()));
         }
 
         /*
@@ -101,7 +101,7 @@ public class OntopMappingConfigurationImpl extends OntopOBDAConfigurationImpl im
         Optional<Reader> optionalMappingReader = mappingReaderSupplier.get();
         if (optionalMappingReader.isPresent()) {
             Reader mappingReader = optionalMappingReader.get();
-            return Optional.of(extractor.extract(mappingReader, optionalMetadata, optionalOntology));
+            return Optional.of(extractor.extract(mappingReader, optionalMetadata, optionalOntology, getExecutorRegistry()));
         }
 
         /*
@@ -110,7 +110,7 @@ public class OntopMappingConfigurationImpl extends OntopOBDAConfigurationImpl im
         Optional<Model> optionalMappingGraph = mappingGraphSupplier.get();
         if (optionalMappingGraph.isPresent()) {
             Model mappingGraph = optionalMappingGraph.get();
-            return Optional.of(extractor.extract(mappingGraph, optionalMetadata, optionalOntology));
+            return Optional.of(extractor.extract(mappingGraph, optionalMetadata, optionalOntology, getExecutorRegistry()));
         }
 
         return Optional.empty();
@@ -158,7 +158,7 @@ public class OntopMappingConfigurationImpl extends OntopOBDAConfigurationImpl im
 
 
         @Override
-        public B dataSourceModel(@Nonnull OBDASpecification obdaSpecification) {
+        public B obdaSpecification(@Nonnull OBDASpecification obdaSpecification) {
             if (isMappingDefinedSupplier.get()) {
                 throw new InvalidOntopConfigurationException("Mapping already defined!");
             }
@@ -213,8 +213,8 @@ public class OntopMappingConfigurationImpl extends OntopOBDAConfigurationImpl im
         }
 
         @Override
-        public B dataSourceModel(@Nonnull OBDASpecification obdaSpecification) {
-            return mappingBuilderFragment.dataSourceModel(obdaSpecification);
+        public B obdaSpecification(@Nonnull OBDASpecification obdaSpecification) {
+            return mappingBuilderFragment.obdaSpecification(obdaSpecification);
         }
 
         @Override

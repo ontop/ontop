@@ -7,6 +7,8 @@ import it.unibz.inf.ontop.io.PrefixManager;
 import it.unibz.inf.ontop.model.AtomPredicate;
 import it.unibz.inf.ontop.pivotalrepr.IntermediateQuery;
 
+import java.util.stream.Stream;
+
 /**
  * To be build by Guice (Assisted inject pattern)
  */
@@ -16,5 +18,5 @@ public interface MappingFactory {
 
     MappingMetadata create(PrefixManager prefixManager);
 
-    Mapping create(MappingMetadata metadata, ImmutableMap<AtomPredicate, IntermediateQuery> definitions);
+    Mapping create(MappingMetadata metadata, Stream<IntermediateQuery> mappingStream);
 }

@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.pivotalrepr.datalog;
+package it.unibz.inf.ontop.pivotalrepr.datalog.impl;
 
 import java.util.Optional;
 
@@ -35,13 +35,13 @@ public class DatalogRule2QueryConverter {
         private final List<Function> booleanAtoms;
         private final Optional<Function> optionalGroupAtom;
 
-        protected AtomClassification(List<Function> atoms) throws DatalogProgram2QueryConverter.InvalidDatalogProgramException {
+        protected AtomClassification(List<Function> atoms) throws DatalogProgram2QueryConverterImpl.InvalidDatalogProgramException {
             dataAndCompositeAtoms = DatalogTools.filterDataAndCompositeAtoms(atoms);
             List<Function> otherAtoms = DatalogTools.filterNonDataAndCompositeAtoms(atoms);
             booleanAtoms = DatalogTools.filterBooleanAtoms(otherAtoms);
 
             if (dataAndCompositeAtoms.isEmpty())
-                throw new DatalogProgram2QueryConverter.InvalidDatalogProgramException("No data or composite atom in " + atoms);
+                throw new DatalogProgram2QueryConverterImpl.InvalidDatalogProgramException("No data or composite atom in " + atoms);
 
             optionalGroupAtom = extractOptionalGroupAtom(otherAtoms);
 
@@ -52,7 +52,7 @@ public class DatalogRule2QueryConverter {
         }
 
         private static Optional<Function> extractOptionalGroupAtom(List<Function> atoms)
-                throws DatalogProgram2QueryConverter.InvalidDatalogProgramException {
+                throws DatalogProgram2QueryConverterImpl.InvalidDatalogProgramException {
             List<Function> groupAtoms = atoms.filter(atom -> atom.getFunctionSymbol().equals(OBDAVocabulary.SPARQL_GROUP));
 
             switch(groupAtoms.length()) {
@@ -61,7 +61,7 @@ public class DatalogRule2QueryConverter {
                 case 1:
                     return Optional.of(groupAtoms.head());
                 default:
-                    throw new DatalogProgram2QueryConverter.InvalidDatalogProgramException("Multiple GROUP atoms found in the same body! " +
+                    throw new DatalogProgram2QueryConverterImpl.InvalidDatalogProgramException("Multiple GROUP atoms found in the same body! " +
                             groupAtoms);
             }
         }
@@ -72,7 +72,7 @@ public class DatalogRule2QueryConverter {
         private static void checkNonDataOrCompositeAtomSupport(List<Function> otherAtoms,
                                                                List<Function> booleanAtoms,
                                                                Optional<Function> optionalGroupAtom)
-                throws DatalogProgram2QueryConverter.NotSupportedConversionException {
+                throws DatalogProgram2QueryConverterImpl.NotSupportedConversionException {
 
             int groupCount = optionalGroupAtom.isPresent()? 1 : 0;
 
@@ -82,7 +82,7 @@ public class DatalogRule2QueryConverter {
                 if (groupCount == 1)
                     unsupportedAtoms.remove(optionalGroupAtom.get());
 
-                throw new DatalogProgram2QueryConverter.NotSupportedConversionException(
+                throw new DatalogProgram2QueryConverterImpl.NotSupportedConversionException(
                         "Conversion of the following atoms to the intermediate query is not (yet) supported: "
                                 + unsupportedAtoms);
             }
@@ -103,7 +103,7 @@ public class DatalogRule2QueryConverter {
                                                        Optional<ImmutableQueryModifiers> optionalModifiers,
                                                        OntopModelFactory modelFactory,
                                                        ExecutorRegistry executorRegistry)
-            throws DatalogProgram2QueryConverter.InvalidDatalogProgramException {
+            throws DatalogProgram2QueryConverterImpl.InvalidDatalogProgramException {
 
         P2<DistinctVariableOnlyDataAtom, ImmutableSubstitution<ImmutableTerm>> decomposition =
                 DatalogConversionTools.convertFromDatalogDataAtom(datalogRule.getHead());
@@ -145,7 +145,7 @@ public class DatalogRule2QueryConverter {
                                                       List<Function> booleanAtoms, Optional<Function> optionalGroupAtom,
                                                       OntopModelFactory modelFactory,
                                                       ExecutorRegistry executorRegistry)
-            throws DatalogProgram2QueryConverter.InvalidDatalogProgramException {
+            throws DatalogProgram2QueryConverterImpl.InvalidDatalogProgramException {
         /**
          * TODO: explain
          */
@@ -191,7 +191,7 @@ public class DatalogRule2QueryConverter {
             return queryBuilder.build();
         }
         catch (IntermediateQueryBuilderException e) {
-            throw new DatalogProgram2QueryConverter.InvalidDatalogProgramException(e.getMessage());
+            throw new DatalogProgram2QueryConverterImpl.InvalidDatalogProgramException(e.getMessage());
         }
     }
 
@@ -238,7 +238,7 @@ public class DatalogRule2QueryConverter {
                                                                         final QueryNode parentNode,
                                                                         Optional<ArgumentPosition> optionalPosition,
                                                                         Collection<Predicate> tablePredicates)
-            throws IntermediateQueryBuilderException, DatalogProgram2QueryConverter.InvalidDatalogProgramException {
+            throws IntermediateQueryBuilderException, DatalogProgram2QueryConverterImpl.InvalidDatalogProgramException {
         /**
          * For each atom
          */
@@ -260,7 +260,7 @@ public class DatalogRule2QueryConverter {
                             tablePredicates);
                 }
                 else {
-                    throw new DatalogProgram2QueryConverter.InvalidDatalogProgramException("Unsupported predicate: " + atomPredicate);
+                    throw new DatalogProgram2QueryConverterImpl.InvalidDatalogProgramException("Unsupported predicate: " + atomPredicate);
                 }
             }
             /**
@@ -278,7 +278,7 @@ public class DatalogRule2QueryConverter {
                 queryBuilder.addChild(parentNode, currentNode, optionalPosition);
             }
             else {
-                throw new DatalogProgram2QueryConverter.InvalidDatalogProgramException("Unsupported non-data atom: " + atom);
+                throw new DatalogProgram2QueryConverterImpl.InvalidDatalogProgramException("Unsupported non-data atom: " + atom);
             }
         }
 
@@ -290,7 +290,7 @@ public class DatalogRule2QueryConverter {
                                                                 List<Function> subAtomsOfTheLJ,
                                                                 Optional<ArgumentPosition> optionalPosition,
                                                                 Collection<Predicate> tablePredicates)
-            throws DatalogProgram2QueryConverter.InvalidDatalogProgramException, IntermediateQueryBuilderException {
+            throws DatalogProgram2QueryConverterImpl.InvalidDatalogProgramException, IntermediateQueryBuilderException {
 
         P2<List<Function>, List<Function>> decomposition = PullOutEqualityNormalizerImpl.splitLeftJoinSubAtoms(subAtomsOfTheLJ);
         final List<Function> leftAtoms = decomposition._1();
@@ -328,18 +328,18 @@ public class DatalogRule2QueryConverter {
                                                             List<Function> subAtomsOfTheJoin,
                                                             Optional<ArgumentPosition> optionalPosition,
                                                             Collection<Predicate> tablePredicates)
-            throws DatalogProgram2QueryConverter.InvalidDatalogProgramException, IntermediateQueryBuilderException {
+            throws DatalogProgram2QueryConverterImpl.InvalidDatalogProgramException, IntermediateQueryBuilderException {
 
         AtomClassification classification = new AtomClassification(subAtomsOfTheJoin);
         if (classification.optionalGroupAtom.isPresent()) {
-            throw new DatalogProgram2QueryConverter.InvalidDatalogProgramException("GROUP atom found inside a LJ meta-atom");
+            throw new DatalogProgram2QueryConverterImpl.InvalidDatalogProgramException("GROUP atom found inside a LJ meta-atom");
         }
 
         Optional<ImmutableExpression> optionalFilterCondition = createFilterExpression(
                 classification.booleanAtoms);
 
         if (classification.dataAndCompositeAtoms.isEmpty()) {
-            throw new DatalogProgram2QueryConverter.InvalidDatalogProgramException("Empty join found");
+            throw new DatalogProgram2QueryConverterImpl.InvalidDatalogProgramException("Empty join found");
         }
         /**
          * May happen because this method can also be called after the LJ conversion

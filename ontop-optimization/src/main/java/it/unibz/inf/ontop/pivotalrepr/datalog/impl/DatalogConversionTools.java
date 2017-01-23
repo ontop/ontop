@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.pivotalrepr.datalog;
+package it.unibz.inf.ontop.pivotalrepr.datalog.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -7,6 +7,7 @@ import fj.P;
 import fj.P2;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.pivotalrepr.DataNode;
+import it.unibz.inf.ontop.pivotalrepr.datalog.impl.DatalogProgram2QueryConverterImpl;
 import it.unibz.inf.ontop.pivotalrepr.impl.IntensionalDataNodeImpl;
 
 import it.unibz.inf.ontop.model.impl.AtomPredicateImpl;
@@ -42,7 +43,7 @@ public class DatalogConversionTools {
      */
     public static P2<DistinctVariableOnlyDataAtom, ImmutableSubstitution<ImmutableTerm>> convertFromDatalogDataAtom(
             Function datalogDataAtom)
-            throws DatalogProgram2QueryConverter.InvalidDatalogProgramException {
+            throws DatalogProgram2QueryConverterImpl.InvalidDatalogProgramException {
 
         Predicate datalogAtomPredicate = datalogDataAtom.getFunctionSymbol();
         AtomPredicate atomPredicate = (datalogAtomPredicate instanceof AtomPredicate)

@@ -41,7 +41,7 @@ public interface OntopMappingConfiguration extends OntopOBDAConfiguration {
 
     interface OntopMappingBuilderFragment<B extends Builder<B>> {
 
-        B dataSourceModel(@Nonnull OBDASpecification obdaSpecification);
+        B obdaSpecification(@Nonnull OBDASpecification obdaSpecification);
 
         B dbConstraintsReader(@Nonnull ImplicitDBConstraintsReader constraints);
 

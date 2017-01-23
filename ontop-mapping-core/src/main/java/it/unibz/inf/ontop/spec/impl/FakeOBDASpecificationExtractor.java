@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.spec.impl;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.exception.InvalidMappingException;
+import it.unibz.inf.ontop.pivotalrepr.utils.ExecutorRegistry;
 import it.unibz.inf.ontop.spec.OBDASpecification;
 import it.unibz.inf.ontop.spec.OBDASpecificationExtractor;
 import it.unibz.inf.ontop.mapping.extraction.PreProcessedMapping;
@@ -26,28 +27,28 @@ public class FakeOBDASpecificationExtractor implements OBDASpecificationExtracto
 
     @Override
     public OBDASpecification extract(@Nonnull File mappingFile, @Nonnull Optional<DBMetadata> dbMetadata,
-                                     @Nonnull Optional<Ontology> ontology)
+                                     @Nonnull Optional<Ontology> ontology, ExecutorRegistry executorRegistry)
             throws InvalidMappingException, IOException, DuplicateMappingException {
         throw new UnsupportedOperationException(MESSAGE);
     }
 
     @Override
     public OBDASpecification extract(@Nonnull Reader mappingReader, @Nonnull Optional<DBMetadata> dbMetadata,
-                                     @Nonnull Optional<Ontology> ontology)
+                                     @Nonnull Optional<Ontology> ontology, ExecutorRegistry executorRegistry)
             throws InvalidMappingException, IOException, DuplicateMappingException {
         throw new UnsupportedOperationException(MESSAGE);
     }
 
     @Override
     public OBDASpecification extract(@Nonnull Model mappingGraph, @Nonnull Optional<DBMetadata> dbMetadata,
-                                     @Nonnull Optional<Ontology> ontology)
+                                     @Nonnull Optional<Ontology> ontology, ExecutorRegistry executorRegistry)
             throws InvalidMappingException, IOException, DuplicateMappingException {
         throw new UnsupportedOperationException(MESSAGE);
     }
 
     @Override
     public OBDASpecification extract(@Nonnull PreProcessedMapping mapping, @Nonnull Optional<DBMetadata> dbMetadata,
-                                     @Nonnull Optional<Ontology> ontology)
+                                     @Nonnull Optional<Ontology> ontology, ExecutorRegistry executorRegistry)
             throws InvalidMappingException, IOException, DuplicateMappingException {
         throw new UnsupportedOperationException(MESSAGE);
     }

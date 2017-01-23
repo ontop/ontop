@@ -2,8 +2,6 @@ package it.unibz.inf.ontop.mapping.conversion.impl;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMultimap;
-import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.exception.MappingException;
@@ -14,7 +12,10 @@ import it.unibz.inf.ontop.mapping.Mapping;
 import it.unibz.inf.ontop.mapping.MappingMetadata;
 import it.unibz.inf.ontop.mapping.MappingSplitter;
 import it.unibz.inf.ontop.mapping.conversion.SQLPPMapping2DSModelConverter;
-import it.unibz.inf.ontop.pivotalrepr.datalog.Mapping2QueryConverter;
+import it.unibz.inf.ontop.mapping.datalog.Datalog2QueryMappingConverter;
+import it.unibz.inf.ontop.pivotalrepr.MetadataForQueryOptimization;
+import it.unibz.inf.ontop.pivotalrepr.impl.MetadataForQueryOptimizationImpl;
+import it.unibz.inf.ontop.pivotalrepr.utils.ExecutorRegistry;
 import it.unibz.inf.ontop.spec.OBDASpecification;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
@@ -41,14 +42,12 @@ import net.sf.jsqlparser.statement.select.Select;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nullable;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
 
@@ -78,30 +77,30 @@ public class DefaultSQLPPMapping2DSModelConverter implements SQLPPMapping2DSMode
     private final NativeQueryLanguageComponentFactory nativeQLFactory;
     private final RDBMetadataExtractor dbMetadataExtractor;
     private final IMapping2DatalogConverter mapping2DatalogConverter;
-    @Nullable
-    private final ImplicitDBConstraintsReader userConstraints;
     private final TMappingExclusionConfig tMappingExclusionConfig;
+    private final Datalog2QueryMappingConverter mappingConverter;
 
     @Inject
     private DefaultSQLPPMapping2DSModelConverter(OntopMappingSQLSettings settings,
                                                  MappingVocabularyFixer mappingVocabularyFixer,
                                                  NativeQueryLanguageComponentFactory nativeQLFactory,
                                                  IMapping2DatalogConverter mapping2DatalogConverter,
-                                                 @Nullable ImplicitDBConstraintsReader userConstraints,
-                                                 TMappingExclusionConfig tMappingExclusionConfig
+                                                 TMappingExclusionConfig tMappingExclusionConfig,
+                                                 Datalog2QueryMappingConverter mappingConverter
                                                  ) {
         this.settings = settings;
         this.mappingVocabularyFixer = mappingVocabularyFixer;
         this.nativeQLFactory = nativeQLFactory;
         this.dbMetadataExtractor = nativeQLFactory.create();
         this.mapping2DatalogConverter = mapping2DatalogConverter;
-        this.userConstraints = userConstraints;
         this.tMappingExclusionConfig = tMappingExclusionConfig;
+        this.mappingConverter = mappingConverter;
     }
 
     @Override
     public OBDASpecification convert(final OBDAModel initialPPMapping, Optional<DBMetadata> optionalDBMetadata,
-                                     Optional<Ontology> optionalOntology) throws DBMetadataExtractionException, MappingException {
+                                     Optional<Ontology> optionalOntology, ExecutorRegistry executorRegistry)
+            throws DBMetadataExtractionException, MappingException {
 
 
         // NB: this method should disappear
@@ -129,7 +128,8 @@ public class DefaultSQLPPMapping2DSModelConverter implements SQLPPMapping2DSMode
         /*
          * Transformations at the Datalog level
          */
-        return transformMapping(initialMappingRules, tBox, ontology, dbMetadata, fixedPPMapping.getMetadata());
+        return transformMapping(initialMappingRules, tBox, ontology, dbMetadata, fixedPPMapping.getMetadata(),
+                executorRegistry);
     }
 
 
@@ -156,7 +156,8 @@ public class DefaultSQLPPMapping2DSModelConverter implements SQLPPMapping2DSMode
 
     private OBDASpecification transformMapping(ImmutableList<CQIE> initialMappingRules,
                                                TBoxReasoner tBox, Ontology ontology,
-                                               RDBMetadata dbMetadata, MappingMetadata mappingMetadata) throws MappingException {
+                                               RDBMetadata dbMetadata, MappingMetadata mappingMetadata,
+                                               ExecutorRegistry executorRegistry) throws MappingException {
 
         // TODO: replace equivalences here
 
@@ -167,45 +168,14 @@ public class DefaultSQLPPMapping2DSModelConverter implements SQLPPMapping2DSMode
 
         ImmutableList<CQIE> saturatedMappingRules = saturateMapping(mappingRulesWithFacts, tBox, dbMetadata);
 
-        Mapping saturatedMapping = convertMappingRules(saturatedMappingRules);
+        MetadataForQueryOptimization metadataForQueryOptimization = new MetadataForQueryOptimizationImpl(dbMetadata,
+                UriTemplateMatcher.create(saturatedMappingRules));
+
+        Mapping saturatedMapping = mappingConverter.convertMappingRules(saturatedMappingRules, metadataForQueryOptimization,
+                executorRegistry, mappingMetadata);
 
         return new OBDASpecificationImpl(saturatedMapping, dbMetadata, tBox, ontology.getVocabulary());
     }
-
-
-    private Mapping convertMappingRules(ImmutableList<CQIE> mappingRules) {
-        ImmutableMultimap<Predicate, CQIE> ruleIndex = mappingRules.stream()
-                .collect(ImmutableCollectors.toMultimap(
-                        r -> r.getHead().getFunctionSymbol(),
-                        r -> r
-                ));
-
-        ImmutableSet<Predicate> extensionalPredicates = ruleIndex.values().stream()
-                .flatMap(r -> r.getBody().stream())
-                .flatMap(a -> extractPredicates(a))
-                .filter(p -> !ruleIndex.containsKey(p))
-                .collect(ImmutableCollectors.toSet());
-
-        //mappingStream = Mapping2QueryConverter.convertMappingRules(ruleIndex, extensionalPredicates, )
-        throw new RuntimeException("TODO: finish the conversion of the mapping rules");
-    }
-
-
-    private static Stream<Predicate> extractPredicates(Function atom) {
-        Predicate currentpred = atom.getFunctionSymbol();
-        if (currentpred instanceof OperationPredicate)
-            return Stream.of();
-        else if (currentpred instanceof AlgebraOperatorPredicate) {
-            return atom.getTerms().stream()
-                    .filter(t -> t instanceof Function)
-                    // Recursive
-                    .flatMap(t -> extractPredicates((Function) t));
-        } else {
-            return Stream.of(currentpred);
-        }
-    }
-
-
 
     /**
      * TODO: move this code
