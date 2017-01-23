@@ -1,12 +1,12 @@
 package it.unibz.inf.ontop.injection.impl;
 
 import com.google.inject.Module;
-import it.unibz.inf.ontop.exception.InvalidMappingException;
 import it.unibz.inf.ontop.injection.InvalidOntopConfigurationException;
 import it.unibz.inf.ontop.injection.OntopMappingConfiguration;
 import it.unibz.inf.ontop.injection.OntopMappingSettings;
-import it.unibz.inf.ontop.mapping.extraction.DataSourceModel;
-import it.unibz.inf.ontop.mapping.extraction.DataSourceModelExtractor;
+import it.unibz.inf.ontop.spec.OBDASpecification;
+import it.unibz.inf.ontop.exception.OBDASpecificationException;
+import it.unibz.inf.ontop.spec.OBDASpecificationExtractor;
 import it.unibz.inf.ontop.mapping.extraction.PreProcessedMapping;
 import it.unibz.inf.ontop.model.DBMetadata;
 import it.unibz.inf.ontop.ontology.Ontology;
@@ -46,11 +46,11 @@ public class OntopMappingConfigurationImpl extends OntopOBDAConfigurationImpl im
 
     /**
      * Can be overloaded.
-     * However, the expected usage is to use the other method loadDataSourceModel(...).
+     * However, the expected usage is to use the other method loadSpecification(...).
      */
     @Override
-    public Optional<DataSourceModel> loadDataSourceModel() throws IOException, InvalidMappingException {
-        return loadDataSourceModel(
+    public Optional<OBDASpecification> loadSpecification() throws IOException, OBDASpecificationException {
+        return loadSpecification(
                 Optional::empty,
                 Optional::empty,
                 Optional::empty,
@@ -59,13 +59,13 @@ public class OntopMappingConfigurationImpl extends OntopOBDAConfigurationImpl im
                 );
     }
 
-    Optional<DataSourceModel> loadDataSourceModel(Supplier<Optional<Ontology>> ontologySupplier,
+    Optional<OBDASpecification> loadSpecification(Supplier<Optional<Ontology>> ontologySupplier,
                                                   Supplier<Optional<PreProcessedMapping>> ppMappingSupplier,
                                                   Supplier<Optional<File>> mappingFileSupplier,
                                                   Supplier<Optional<Reader>> mappingReaderSupplier,
                                                   Supplier<Optional<Model>> mappingGraphSupplier
-                                                  ) throws IOException, InvalidMappingException {
-        DataSourceModelExtractor extractor = getInjector().getInstance(DataSourceModelExtractor.class);
+                                                  ) throws IOException, OBDASpecificationException {
+        OBDASpecificationExtractor extractor = getInjector().getInstance(OBDASpecificationExtractor.class);
 
         /*
          * Pre-defined DataSourceModel
@@ -126,9 +126,9 @@ public class OntopMappingConfigurationImpl extends OntopOBDAConfigurationImpl im
 
         final OntopOBDAOptions obdaOptions;
         private final Optional<ImplicitDBConstraintsReader> implicitDBConstraintsReader;
-        private final Optional<DataSourceModel> dataSourceModel;
+        private final Optional<OBDASpecification> dataSourceModel;
 
-        private OntopMappingOptions(Optional<DataSourceModel> dataSourceModel,
+        private OntopMappingOptions(Optional<OBDASpecification> dataSourceModel,
                                     Optional<ImplicitDBConstraintsReader> implicitDBConstraintsReader,
                                     OntopOBDAOptions obdaOptions) {
             this.dataSourceModel = dataSourceModel;
@@ -144,7 +144,7 @@ public class OntopMappingConfigurationImpl extends OntopOBDAConfigurationImpl im
         private final Supplier<Boolean> isMappingDefinedSupplier;
         private final Runnable declareMappingDefinedCB;
         private Optional<ImplicitDBConstraintsReader> userConstraints = Optional.empty();
-        private Optional<DataSourceModel> dataSourceModel = Optional.empty();
+        private Optional<OBDASpecification> dataSourceModel = Optional.empty();
         private Optional<Boolean> obtainFullMetadata = Optional.empty();
         private Optional<Boolean> queryingAnnotationsInOntology = Optional.empty();
 
@@ -158,12 +158,12 @@ public class OntopMappingConfigurationImpl extends OntopOBDAConfigurationImpl im
 
 
         @Override
-        public B dataSourceModel(@Nonnull DataSourceModel dataSourceModel) {
+        public B dataSourceModel(@Nonnull OBDASpecification obdaSpecification) {
             if (isMappingDefinedSupplier.get()) {
                 throw new InvalidOntopConfigurationException("Mapping already defined!");
             }
             declareMappingDefinedCB.run();
-            this.dataSourceModel = Optional.of(dataSourceModel);
+            this.dataSourceModel = Optional.of(obdaSpecification);
             return builder;
         }
 
@@ -213,8 +213,8 @@ public class OntopMappingConfigurationImpl extends OntopOBDAConfigurationImpl im
         }
 
         @Override
-        public B dataSourceModel(@Nonnull DataSourceModel dataSourceModel) {
-            return mappingBuilderFragment.dataSourceModel(dataSourceModel);
+        public B dataSourceModel(@Nonnull OBDASpecification obdaSpecification) {
+            return mappingBuilderFragment.dataSourceModel(obdaSpecification);
         }
 
         @Override

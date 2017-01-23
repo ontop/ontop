@@ -8,12 +8,12 @@ import it.unibz.inf.ontop.injection.OntopMappingSQLSettings;
 import it.unibz.inf.ontop.mapping.MappingMetadata;
 import it.unibz.inf.ontop.mapping.MappingSplitter;
 import it.unibz.inf.ontop.mapping.conversion.SQLPPMapping2DSModelConverter;
-import it.unibz.inf.ontop.mapping.extraction.DataSourceModel;
+import it.unibz.inf.ontop.spec.OBDASpecification;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
 import it.unibz.inf.ontop.model.impl.SQLMappingFactoryImpl;
 import it.unibz.inf.ontop.model.impl.TermUtils;
-import it.unibz.inf.ontop.nativeql.DBException;
+import it.unibz.inf.ontop.exception.DBMetadataExtractionException;
 import it.unibz.inf.ontop.nativeql.RDBMetadataExtractor;
 import it.unibz.inf.ontop.ontology.*;
 import it.unibz.inf.ontop.ontology.impl.OntologyFactoryImpl;
@@ -91,8 +91,8 @@ public class DefaultSQLPPMapping2DSModelConverter implements SQLPPMapping2DSMode
     }
 
     @Override
-    public DataSourceModel convert(final OBDAModel initialPPMapping, Optional<DBMetadata> optionalDBMetadata,
-                                   Optional<Ontology> optionalOntology) throws DBException {
+    public OBDASpecification convert(final OBDAModel initialPPMapping, Optional<DBMetadata> optionalDBMetadata,
+                                     Optional<Ontology> optionalOntology) throws DBMetadataExtractionException {
 
 
         // NB: this method should disappear
@@ -112,7 +112,7 @@ public class DefaultSQLPPMapping2DSModelConverter implements SQLPPMapping2DSMode
             // TODO: in the future, should only extract the DBMetadata
             dbMetadataAndAxioms = extractDBMetadataAndNormalizeMappingAxioms(simplifiedPPMapping, optionalDBMetadata);
         } catch (SQLException e) {
-            throw new DBException(e.getMessage());
+            throw new DBMetadataExtractionException(e.getMessage());
         }
         RDBMetadata dbMetadata = dbMetadataAndAxioms.dbMetadata;
 
@@ -140,9 +140,9 @@ public class DefaultSQLPPMapping2DSModelConverter implements SQLPPMapping2DSMode
     }
 
 
-    private DataSourceModel transformMapping(ImmutableList<CQIE> initialMappingRules,
-                                             TBoxReasoner tBox, Ontology ontology,
-                                             RDBMetadata dbMetadata, MappingMetadata mappingMetadata) {
+    private OBDASpecification transformMapping(ImmutableList<CQIE> initialMappingRules,
+                                               TBoxReasoner tBox, Ontology ontology,
+                                               RDBMetadata dbMetadata, MappingMetadata mappingMetadata) {
 
         // TODO: replace equivalences here
 
@@ -181,7 +181,7 @@ public class DefaultSQLPPMapping2DSModelConverter implements SQLPPMapping2DSMode
      */
     private DBMetadataAndMappingAxioms extractDBMetadataAndNormalizeMappingAxioms(final OBDAModel fixedPPMapping,
                                                                                   Optional<DBMetadata> optionalDBMetadata)
-            throws SQLException, DBException {
+            throws SQLException, DBMetadataExtractionException {
         Connection localConnection = null;
         try {
 
@@ -705,7 +705,7 @@ public class DefaultSQLPPMapping2DSModelConverter implements SQLPPMapping2DSMode
      */
     private RDBMetadata extractDBMetadata(final OBDAModel fixedPPMapping,
                                           Optional<DBMetadata> optionalDBMetadata, Connection localConnection)
-            throws DBException {
+            throws DBMetadataExtractionException {
         return optionalDBMetadata.isPresent()
                 ? dbMetadataExtractor.extract(fixedPPMapping, localConnection)
                 : dbMetadataExtractor.extract(fixedPPMapping, localConnection, optionalDBMetadata.get());

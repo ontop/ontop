@@ -96,7 +96,7 @@ public class OntopValidate extends OntopReasoningCommandBase {
         if (punning) System.exit(1);
 
         try {
-            config.loadDataSourceModel();
+            config.loadSpecification();
         } catch (IOException |  InvalidMappingException e) {
             System.out.format("ERROR: There is a problem loading the mapping file %s\n", mappingFile);
             e.printStackTrace();

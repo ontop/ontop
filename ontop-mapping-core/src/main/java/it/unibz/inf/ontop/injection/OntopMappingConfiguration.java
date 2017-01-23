@@ -1,9 +1,9 @@
 package it.unibz.inf.ontop.injection;
 
 
-import it.unibz.inf.ontop.exception.InvalidMappingException;
+import it.unibz.inf.ontop.exception.OBDASpecificationException;
 import it.unibz.inf.ontop.injection.impl.OntopMappingConfigurationImpl;
-import it.unibz.inf.ontop.mapping.extraction.DataSourceModel;
+import it.unibz.inf.ontop.spec.OBDASpecification;
 import it.unibz.inf.ontop.sql.ImplicitDBConstraintsReader;
 
 import javax.annotation.Nonnull;
@@ -18,17 +18,18 @@ public interface OntopMappingConfiguration extends OntopOBDAConfiguration {
     OntopMappingSettings getSettings();
 
     /**
-     * TODO: explain
+     * TODO: is it necessary?
+     *
      */
-    Optional<DataSourceModel> loadDataSourceModel() throws IOException, InvalidMappingException;
+    Optional<OBDASpecification> loadSpecification() throws IOException, OBDASpecificationException;
 
     /**
      * Only call it if you are sure that mapping assertions have been provided
      */
-    default DataSourceModel loadProvidedDataSourceModel() throws IOException, InvalidMappingException {
-        return loadDataSourceModel()
-                .orElseThrow(() -> new IllegalStateException("No mapping has been provided. " +
-                        "Do not call this method unless you are sure of the mapping provision."));
+    default OBDASpecification loadProvidedSpecification() throws IOException, OBDASpecificationException {
+        return loadSpecification()
+                .orElseThrow(() -> new IllegalStateException("No OBDA specification has been provided. " +
+                        "Do not call this method unless you are sure of the specification provision."));
     }
 
 
@@ -40,7 +41,7 @@ public interface OntopMappingConfiguration extends OntopOBDAConfiguration {
 
     interface OntopMappingBuilderFragment<B extends Builder<B>> {
 
-        B dataSourceModel(@Nonnull DataSourceModel dataSourceModel);
+        B dataSourceModel(@Nonnull OBDASpecification obdaSpecification);
 
         B dbConstraintsReader(@Nonnull ImplicitDBConstraintsReader constraints);
 

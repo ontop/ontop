@@ -47,7 +47,7 @@ public class OntopR2RMLToOBDA implements OntopCommand {
                     .properties(p)
                     .build();
 
-            OBDAModel obdaModel = configuration.loadProvidedDataSourceModel();
+            OBDAModel obdaModel = configuration.loadProvidedSpecification();
 
             OntopNativeMappingSerializer writer = new OntopNativeMappingSerializer(obdaModel);
             writer.save(out);

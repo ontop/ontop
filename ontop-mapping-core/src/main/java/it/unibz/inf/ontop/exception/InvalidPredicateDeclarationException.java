@@ -20,34 +20,26 @@ package it.unibz.inf.ontop.exception;
  * #L%
  */
 
-import it.unibz.inf.ontop.exception.Indicator;
 import it.unibz.inf.ontop.model.Predicate;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
  * This happens if the declared predicates in the OBDA file do not match to the ones
  * specified in the source ontology.
  */
-public class InvalidPredicateDeclarationException extends Exception {
+public class InvalidPredicateDeclarationException extends MappingException {
 
     private static final long serialVersionUID = 1L;
 
     public static final int UNKNOWN_PREDICATE = 1;
 
-    private List<Indicator> indicators = new ArrayList<Indicator>();
-
-    public InvalidPredicateDeclarationException(Indicator indicator) {
-        this.indicators.add(indicator);
-    }
 
     public InvalidPredicateDeclarationException(List<Indicator> indicators) {
-        this.indicators.addAll(indicators);
+        super(buildMessage(indicators));
     }
-    
-    @Override
-    public String getMessage() {
+
+    private static String buildMessage(List<Indicator> indicators) {
         StringBuilder sb = new StringBuilder();
         if (!indicators.isEmpty()) {
             sb.append("\n");
@@ -71,7 +63,6 @@ public class InvalidPredicateDeclarationException extends Exception {
                 }
             }
         }
-        String message = sb.toString();
-        return message;
+        return sb.toString();
     }
 }

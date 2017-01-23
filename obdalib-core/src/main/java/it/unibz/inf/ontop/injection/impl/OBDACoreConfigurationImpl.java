@@ -5,7 +5,7 @@ import com.google.inject.Module;
 import it.unibz.inf.ontop.exception.InvalidMappingException;
 import it.unibz.inf.ontop.injection.*;
 
-import it.unibz.inf.ontop.mapping.extraction.DataSourceModel;
+import it.unibz.inf.ontop.spec.OBDASpecification;
 import it.unibz.inf.ontop.model.OBDAModel;
 import it.unibz.inf.ontop.ontology.Ontology;
 import org.eclipse.rdf4j.model.Model;
@@ -59,11 +59,11 @@ public class OBDACoreConfigurationImpl extends OntopMappingSQLConfigurationImpl 
     }
 
     @Override
-    public Optional<DataSourceModel> loadDataSourceModel() throws IOException, InvalidMappingException {
-        return loadDataSourceModel(Optional::empty);
+    public Optional<OBDASpecification> loadSpecification() throws IOException, InvalidMappingException {
+        return loadSpecification(Optional::empty);
     }
 
-    Optional<DataSourceModel> loadDataSourceModel(Supplier<Optional<Ontology>> ontologySupplier)
+    Optional<OBDASpecification> loadSpecification(Supplier<Optional<Ontology>> ontologySupplier)
             throws IOException, InvalidMappingException {
 
         return loadDataSourceModel(ontologySupplier,

@@ -3,7 +3,7 @@ package it.unibz.inf.ontop.injection.impl;
 
 import it.unibz.inf.ontop.exception.InvalidMappingException;
 import it.unibz.inf.ontop.injection.*;
-import it.unibz.inf.ontop.mapping.extraction.DataSourceModel;
+import it.unibz.inf.ontop.spec.OBDASpecification;
 import it.unibz.inf.ontop.model.OBDAModel;
 import it.unibz.inf.ontop.ontology.Ontology;
 import org.semanticweb.owlapi.apibinding.OWLManager;
@@ -74,8 +74,8 @@ public class QuestConfigurationImpl extends QuestCoreConfigurationImpl implement
     }
 
     @Override
-    public Optional<DataSourceModel> loadDataSourceModel() throws IOException, InvalidMappingException {
-        return loadDataSourceModel(this::loadOntology);
+    public Optional<OBDASpecification> loadSpecification() throws IOException, InvalidMappingException {
+        return loadSpecification(this::loadOntology);
     }
 
     @Override

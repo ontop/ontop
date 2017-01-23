@@ -77,7 +77,7 @@ public class QuestDBVirtualStore extends QuestDBAbstractStore {
 			throw new IllegalArgumentException("Virtual mode was expected in QuestDBVirtualStore!");
 
 		//obtain the model
-		OBDAModel obdaModel = config.loadDataSourceModel()
+		OBDAModel obdaModel = config.loadSpecification()
 				.orElseThrow(() -> new IllegalStateException("Mapping are required in virtual A-box mode " +
 						"so a configuration validation error should have already been thrown"));
 

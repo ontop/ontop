@@ -8,7 +8,7 @@ import it.unibz.inf.ontop.injection.OntopMappingSQLConfiguration;
 import it.unibz.inf.ontop.injection.OntopMappingSQLSettings;
 import it.unibz.inf.ontop.injection.impl.OntopMappingConfigurationImpl.OntopMappingOptions;
 import it.unibz.inf.ontop.mapping.MappingParser;
-import it.unibz.inf.ontop.mapping.extraction.DataSourceModel;
+import it.unibz.inf.ontop.spec.OBDASpecification;
 import it.unibz.inf.ontop.mapping.extraction.PreProcessedMapping;
 import it.unibz.inf.ontop.model.OBDAModel;
 import it.unibz.inf.ontop.ontology.Ontology;
@@ -68,16 +68,16 @@ public class OntopMappingSQLConfigurationImpl extends OntopSQLConfigurationImpl 
      * To be overloaded
      */
     @Override
-    public Optional<DataSourceModel> loadDataSourceModel() throws IOException, InvalidMappingException {
+    public Optional<OBDASpecification> loadSpecification() throws IOException, InvalidMappingException {
         return loadDataSourceModel(Optional::empty, Optional::empty, Optional::empty, Optional::empty);
     }
 
-    Optional<DataSourceModel> loadDataSourceModel(Supplier<Optional<Ontology>> ontologySupplier,
-                                                  Supplier<Optional<File>> mappingFileSupplier,
-                                                  Supplier<Optional<Reader>> mappingReaderSupplier,
-                                                  Supplier<Optional<Model>> mappingGraphSupplier)
+    Optional<OBDASpecification> loadDataSourceModel(Supplier<Optional<Ontology>> ontologySupplier,
+                                                    Supplier<Optional<File>> mappingFileSupplier,
+                                                    Supplier<Optional<Reader>> mappingReaderSupplier,
+                                                    Supplier<Optional<Model>> mappingGraphSupplier)
             throws IOException, InvalidMappingException {
-        return mappingConfiguration.loadDataSourceModel(
+        return mappingConfiguration.loadSpecification(
                 ontologySupplier,
                 () -> options.predefinedMappingModel.map(m -> (PreProcessedMapping) m),
                 mappingFileSupplier,

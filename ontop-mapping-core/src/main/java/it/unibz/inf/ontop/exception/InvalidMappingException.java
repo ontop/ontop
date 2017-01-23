@@ -1,10 +1,6 @@
 package it.unibz.inf.ontop.exception;
 
-public class InvalidMappingException extends Exception{
-
-	public InvalidMappingException() {
-		super();
-	}
+public class InvalidMappingException extends MappingException {
 	
 	public InvalidMappingException(String message) {
 		super(message);

@@ -1,9 +1,6 @@
 package it.unibz.inf.ontop.owlrefplatform.core;
 
 import it.unibz.inf.ontop.model.*;
-import it.unibz.inf.ontop.nativeql.DBException;
-
-import java.util.Collection;
 
 /**
  * High-level component in charge of abstracting the interaction with the DB.

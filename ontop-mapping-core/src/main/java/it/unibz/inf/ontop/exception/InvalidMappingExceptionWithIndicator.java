@@ -20,7 +20,6 @@ package it.unibz.inf.ontop.exception;
  * #L%
  */
 
-import java.util.ArrayList;
 import java.util.List;
 
 import it.unibz.inf.ontop.model.Predicate;
@@ -45,18 +44,11 @@ public class InvalidMappingExceptionWithIndicator extends InvalidMappingExceptio
     public static final int UNKNOWN_PREDICATE_IN_TARGET_QUERY = 4;
     public static final int ERROR_PARSING_TARGET_QUERY = 5;
     
-    private List<Indicator> indicators = new ArrayList<Indicator>();
-
-    public InvalidMappingExceptionWithIndicator(Indicator indicator) {
-       this.indicators.add(indicator);
-    }
-    
     public InvalidMappingExceptionWithIndicator(List<Indicator> indicators) {
-        this.indicators.addAll(indicators);
+        super(buildMessage(indicators));
     }
-    
-    @Override
-    public String getMessage() {
+
+    private static  String buildMessage(List<Indicator> indicators) {
         StringBuilder sb = new StringBuilder();
         if (!indicators.isEmpty()) {
             sb.append("\n");
@@ -106,7 +98,6 @@ public class InvalidMappingExceptionWithIndicator extends InvalidMappingExceptio
                 }
             }
         }
-        String message = sb.toString();
-        return message;
+        return sb.toString();
     }
 }

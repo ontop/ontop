@@ -4,7 +4,7 @@ package it.unibz.inf.ontop.sql;
 import it.unibz.inf.ontop.injection.OntopMappingSQLSettings;
 import it.unibz.inf.ontop.model.DBMetadata;
 import it.unibz.inf.ontop.model.OBDAModel;
-import it.unibz.inf.ontop.nativeql.DBException;
+import it.unibz.inf.ontop.exception.DBMetadataExtractionException;
 import it.unibz.inf.ontop.nativeql.RDBMetadataExtractor;
 import net.sf.jsqlparser.JSQLParserException;
 
@@ -43,18 +43,18 @@ public class DefaultRDBMetadataExtractor implements RDBMetadataExtractor {
 
     @Override
     public RDBMetadata extract(OBDAModel obdaModel, Connection connection)
-            throws DBException {
+            throws DBMetadataExtractionException {
         try {
             RDBMetadata metadata = RDBMetadataExtractionTools.createMetadata(connection);
             return extract(obdaModel, connection, metadata);
         } catch (SQLException e) {
-            throw new DBException(e.getMessage());
+            throw new DBMetadataExtractionException(e.getMessage());
         }
     }
 
     @Override
     public RDBMetadata extract(OBDAModel model, @Nullable Connection connection,
-                               DBMetadata partiallyDefinedMetadata) throws DBException {
+                               DBMetadata partiallyDefinedMetadata) throws DBMetadataExtractionException {
 
         if (!(partiallyDefinedMetadata instanceof RDBMetadata)) {
             throw new IllegalArgumentException("Was expecting a DBMetadata");
@@ -99,6 +99,6 @@ public class DefaultRDBMetadataExtractor implements RDBMetadataExtractor {
             return metadata;
 
         } catch (SQLException e) {
-            throw new DBException(e.getMessage());
+            throw new DBMetadataExtractionException(e.getMessage());
         }    }
 }
