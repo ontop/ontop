@@ -33,6 +33,8 @@ public class DBMetadata implements Serializable {
 	private final Map<RelationID, RelationDefinition> relations = new HashMap<>();
 	private final List<DatabaseRelationDefinition> listOfTables = new LinkedList<>();
 
+	private final Map<String, ParserViewDefinition> viewDefinitionMap = new HashMap<>();
+
 	private final String driverName;
 	private final String driverVersion;
 	private final String databaseProductName;
@@ -79,17 +81,22 @@ public class DBMetadata implements Serializable {
 	 * creates a view for SQLQueryParser
 	 * (NOTE: these views are simply names for complex non-parsable subqueries, not database views)
 	 * 
-	 * @param id
 	 * @param sql
 	 * @return
 	 */
 	
 	public ParserViewDefinition createParserView(String sql) {
-		RelationID id = idfac.createRelationID(null, String.format("view_%s", parserViewCounter++));	
-		
-		ParserViewDefinition view = new ParserViewDefinition(id, sql);
-		add(view, relations);
-		return view;
+		if (!viewDefinitionMap.containsKey(sql)) {
+			RelationID id = idfac.createRelationID(null, String.format("view_%s", parserViewCounter++));
+
+			ParserViewDefinition view = new ParserViewDefinition(id, sql);
+			add(view, relations);
+
+			viewDefinitionMap.put(sql, view);
+			return view;
+		}
+		else
+			return viewDefinitionMap.get(sql);
 	}
 	
 	/**
@@ -121,7 +128,7 @@ public class DBMetadata implements Serializable {
 	 * If <name>id</name> has schema and the fully qualified id 
 	 * cannot be resolved the the table-only id is used  
 	 * 
-	 * @param name
+	 * @param id
 	 */
 	public DatabaseRelationDefinition getDatabaseRelation(RelationID id) {
 		DatabaseRelationDefinition def = tables.get(id);

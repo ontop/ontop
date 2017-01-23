@@ -79,15 +79,16 @@ public class Mapping2DatalogConverter {
                             new SelectQueryAttributeExtractor(dbMetadata).extract(sourceQuery.toString());
 
                     ParserViewDefinition view = dbMetadata.createParserView(sourceQuery.toString());
-
-                    List<Term> arguments = new ArrayList<>(variableNames.size());
+                    // TODO: clean up
+                    boolean needsCreating = view.getAttributes().isEmpty();
                     ImmutableMap.Builder<QualifiedAttributeID, Variable> builder = ImmutableMap.builder();
-
+                    List<Term> arguments = new ArrayList<>(variableNames.size());
                     variableNames.forEach(id -> {
                         QualifiedAttributeID qId = new QualifiedAttributeID(null, id);
+                        if (needsCreating)
+                            view.addAttribute(qId);
                         Variable var = fac.getVariable(id.getName());
                         builder.put(qId, var);
-                        view.addAttribute(qId);
                         arguments.add(var);
                     });
 

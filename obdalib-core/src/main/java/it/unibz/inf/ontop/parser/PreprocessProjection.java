@@ -50,9 +50,9 @@ public class PreprocessProjection {
 
          if (select.getWithItemsList() != null) {
             for (WithItem withItem : select.getWithItemsList()) 
-                withItem.accept(new ReplaceStarSelectVisitor(false, null, variableNames));
+                withItem.accept(new ReplaceStarSelectVisitor(variableNames));
         }
-        select.getSelectBody().accept(new ReplaceStarSelectVisitor(false, null, variableNames));
+        select.getSelectBody().accept(new ReplaceStarSelectVisitor(variableNames));
 
         return select.toString();
     }
@@ -76,20 +76,87 @@ public class PreprocessProjection {
     	               || variableNames.contains(columnName.toLowerCase());
     	}
     }
-    
-    
+
     private class ReplaceStarSelectVisitor implements SelectVisitor {
-    
-        private final boolean subselect;
+
+        private final VariableSet variables; // referenced variables from the target query
+
+        ReplaceStarSelectVisitor(VariableSet variables) {
+            this.variables = variables;
+        }
+
+        /*
+        Create a set of selectItem (columns)
+        if * add all selectItems obtained by the metadata or the subselect clause
+        */
+
+        @Override
+        public void visit(PlainSelect plainSelect) {
+
+            List<SelectItem> columnNames = new LinkedList<>();
+
+            //get the from clause (can have subselect)
+            FromItem table = plainSelect.getFromItem();
+
+            FromItem joinTable = null;
+
+            //get the join clause (can have subselect)
+            if (plainSelect.getJoins() != null) {
+                for (Join join : plainSelect.getJoins()) {
+                    joinTable = join.getRightItem();
+                }
+            }
+
+            // look at the projection clause
+            for (SelectItem expr : plainSelect.getSelectItems()) {
+
+                //create a set of selectItem (columns)
+                //if * add all selectItems obtained by the metadata or the subselect clause
+
+                if ((expr instanceof AllColumns)  || (expr instanceof AllTableColumns)) {
+
+                    if (joinTable != null) {
+                        joinTable.accept(new ReplaceStarFromItemVisitor(null, variables));
+                        columnNames.addAll(columns);
+                        columns.clear();
+                    }
+
+                    if (table != null) {
+                        table.accept(new ReplaceStarFromItemVisitor(null, variables));
+                        columnNames.addAll(columns);
+                        columns.clear();
+                    }
+                }
+                else {
+                    // else add only the column
+                    columnNames.add(expr);
+                }
+            }
+
+            if (!columnNames.isEmpty())
+                plainSelect.setSelectItems(columnNames);
+        }
+
+        @Override
+        public void visit(SetOperationList setOpList) {
+            // ??
+        }
+
+        @Override
+        public void visit(WithItem withItem) {
+            // ??
+        }
+    }
+    private class ReplaceStarSelectVisitorInSubSelect implements SelectVisitor {
+
         private final String aliasSubselect;
         private final VariableSet variables; // referenced variables from the target query
-        
-        ReplaceStarSelectVisitor(boolean subselect, String aliasSubselect, VariableSet variables) {
-        	this.subselect = subselect;
-        	this.aliasSubselect = aliasSubselect;
-        	this.variables = variables;
+
+        ReplaceStarSelectVisitorInSubSelect(String aliasSubselect, VariableSet variables) {
+            this.aliasSubselect = aliasSubselect;
+            this.variables = variables;
         }
-    	
+
         /*
         Create a set of selectItem (columns)
         if * add all selectItems obtained by the metadata or the subselect clause
@@ -133,57 +200,45 @@ public class PreprocessProjection {
                     }
                 }
                 else {
-                	// else add only the column
+                    // else add only the column
+                    Table tableName;
+                    if (aliasSubselect != null) // if there is an alias for the subquery
+                        tableName = new Table(aliasSubselect);
+                    else if (table.getAlias() != null) // if there is an alias for the table
+                        tableName = new Table(table.getAlias().getName());
+                    else
+                        tableName = (Table)table;
 
-                    if (!subselect) {
-                        columnNames.add(expr);
-                    }
-                    else { //in case of subselects
+                    SelectExpressionItem selectExpression = (SelectExpressionItem) expr;
+                    Alias alias = selectExpression.getAlias();
+                    String columnName;
+                    if (alias != null)
+                        columnName = alias.getName();
+                    else  // when there are no alias add the columns that are used in the mappings
+                        columnName = ((Column)selectExpression.getExpression()).getColumnName();
 
-                        Table tableName;
-                        if (aliasSubselect != null) // if there is an alias for the subquery
-                            tableName = new Table(aliasSubselect);
-                        else if (table.getAlias() != null) // if there is an alias for the table
-                            tableName = new Table(table.getAlias().getName());
-                        else 
-                            tableName = (Table)table;
+                    Column column = new Column(tableName,  columnName);
 
-                        SelectExpressionItem selectExpression = (SelectExpressionItem) expr;
-                        Alias alias = selectExpression.getAlias();
-                        String columnName;
-                        if (alias != null) 
-                        	columnName = alias.getName();
-                        else  // when there are no alias add the columns that are used in the mappings
-                            columnName = ((Column)selectExpression.getExpression()).getColumnName();
-                            
-                        Column column = new Column(tableName,  columnName);
-                            
-                        if (variables.contains(column.getFullyQualifiedName(), columnName))
-                        	columns.add(new SelectExpressionItem(column));
-                    }
+                    if (variables.contains(column.getFullyQualifiedName(), columnName))
+                        columnNames.add(new SelectExpressionItem(column));
                 }
             }
 
-            if (!subselect) {
-                if (!columnNames.isEmpty())
-                	plainSelect.setSelectItems(columnNames);
-            }
-            else {
-                columns.addAll(columnNames);
-            }
+            columns.addAll(columnNames); // sort of return (for a subselect)
         }
 
-    	@Override
-    	public void visit(SetOperationList setOpList) {
-    		// ??
-    	}
+        @Override
+        public void visit(SetOperationList setOpList) {
+            // ??
+        }
 
-    	@Override
-    	public void visit(WithItem withItem) {
-    		// ??
-    	}
+        @Override
+        public void visit(WithItem withItem) {
+            // ??
+        }
     }
-    
+
+
     private class ReplaceStarFromItemVisitor implements FromItemVisitor {
     
     	private final String aliasSubselect;
@@ -225,7 +280,8 @@ public class PreprocessProjection {
 
         @Override
         public void visit(SubSelect subSelect) {
-            subSelect.getSelectBody().accept(new ReplaceStarSelectVisitor(true, subSelect.getAlias().getName(), variables));
+            subSelect.getSelectBody().accept(
+                    new ReplaceStarSelectVisitorInSubSelect(subSelect.getAlias().getName(), variables));
         }
 
         @Override
