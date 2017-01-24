@@ -9,7 +9,6 @@ import it.unibz.inf.ontop.model.*;
  * Guice-enabled interface (see the QuestComponentFactory).
  *
  */
-@Deprecated
 public interface DBConnector {
 
     /**

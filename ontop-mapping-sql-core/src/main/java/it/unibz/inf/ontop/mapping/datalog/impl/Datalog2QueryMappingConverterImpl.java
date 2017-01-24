@@ -58,7 +58,7 @@ public class Datalog2QueryMappingConverterImpl implements Datalog2QueryMappingCo
                 .filter(Optional::isPresent)
                 .map(Optional::get);
 
-        return mappingFactory.create(mappingMetadata, mappingStream);
+        return mappingFactory.create(mappingMetadata, metadataForQueryOptimization, mappingStream);
 
     }
 

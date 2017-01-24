@@ -21,10 +21,12 @@ package it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing;
  */
 
 import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.exception.InvalidMappingException;
+import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
+import it.unibz.inf.ontop.mapping.Mapping;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
+import it.unibz.inf.ontop.pivotalrepr.IntermediateQuery;
 import it.unibz.inf.ontop.utils.IDGenerator;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
@@ -34,8 +36,7 @@ import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
 
 public class MappingSameAs {
 
-    private List<CQIE> rules;
-
+    private final Mapping mapping;
     private Map<ValueConstant, ValueConstant> sameAsMap;
 
     private Set<Predicate> dataPropertiesAndClassesMapped;
@@ -45,9 +46,9 @@ public class MappingSameAs {
     /**
      * Constructs a mapping containing the URI of owl:sameAs
      */
-    public MappingSameAs(List<CQIE> rules) throws InvalidMappingException {
+    public MappingSameAs(Mapping mapping) throws IllegalArgumentException {
 
-        this.rules = rules;
+        this.mapping = mapping;
 
         dataPropertiesAndClassesMapped = new HashSet<Predicate>();
         objectPropertiesMapped = new HashSet<Predicate>();
@@ -60,20 +61,22 @@ public class MappingSameAs {
     /**
      * method that gets the uris from the mappings of same as and store it in a map
      */
-    private void retrieveSameAsMappingsURIs() throws InvalidMappingException {
+    private void retrieveSameAsMappingsURIs() {
 
         sameAsMap = new HashMap<>();
 
-        for (CQIE rule : rules) {
+        for (AtomPredicate predicate : mapping.getPredicates()) {
 
-            Function atom = rule.getHead();
-
-            Predicate predicate = atom.getFunctionSymbol();
             if (predicate.isSameAsProperty() ) { // we check for owl same as
 
+                IntermediateQuery definition = mapping.getDefinition(predicate)
+                        .orElseThrow(() -> new IllegalStateException("The mapping contains a predicate without a definition " +
+                                "(-> inconsistent)"));
 
-                Term term1 = atom.getTerm(0);
-                Term term2 = atom.getTerm(1);
+                DistinctVariableOnlyDataAtom projectionAtom = definition.getProjectionAtom();
+
+                Term term1 = projectionAtom.getTerm(0);
+                Term term2 = projectionAtom.getTerm(1);
 
                 if (term1 instanceof Function && term2 instanceof Function) {
 
@@ -86,7 +89,7 @@ public class MappingSameAs {
 
 
                 } else
-                    throw new InvalidMappingException("owl:samesAs is not built properly");
+                    throw new IllegalArgumentException("owl:samesAs is not built properly");
 
             }
 
@@ -97,20 +100,21 @@ public class MappingSameAs {
     /*
     Get class data and object predicate that could refer to a same as
      */
-    private void retrievePredicatesWithSameAs() throws InvalidMappingException {
+    private void retrievePredicatesWithSameAs() {
 
 
-        for (CQIE rule : rules) {
+        for (AtomPredicate predicate : mapping.getPredicates()) {
 
-            Function atom = rule.getHead();
+            IntermediateQuery definition = mapping.getDefinition(predicate)
+                    .orElseThrow(() -> new IllegalStateException("The mapping contains a predicate without a definition " +
+                            "(-> inconsistent)"));
 
-            Predicate predicate = atom.getFunctionSymbol();
+            DistinctVariableOnlyDataAtom projectionAtom = definition.getProjectionAtom();
 
+            if (projectionAtom.getArity() == 2) {
 
-            if (atom.getArity() == 2) {
-
-                Function term1 = (Function) atom.getTerm(0);
-                Function term2 = (Function) atom.getTerm(1);
+                Function term1 = (Function) projectionAtom.getTerm(0);
+                Function term2 = (Function) projectionAtom.getTerm(1);
                 boolean t1uri = (term1.getFunctionSymbol() instanceof URITemplatePredicate);
                 boolean t2uri = (term2.getFunctionSymbol() instanceof URITemplatePredicate);
 
@@ -145,9 +149,9 @@ public class MappingSameAs {
 
                 }
 
-            } else if (atom.getArity() == 1) { //case of class
+            } else if (projectionAtom.getArity() == 1) { //case of class
 
-                Term term1 = atom.getTerm(0);
+                Term term1 = projectionAtom.getTerm(0);
                 if (term1 instanceof Function) {
                     Function uri1 = (Function) term1;
                     if (uri1.getFunctionSymbol() instanceof URITemplatePredicate) {
@@ -161,21 +165,21 @@ public class MappingSameAs {
                 }
 
             } else
-                throw new InvalidMappingException("error finding owl:sameAs related to " + atom);
+                throw new IllegalArgumentException("error finding owl:sameAs related to " + projectionAtom);
 
         }
 
     }
 
 
-    public Set<Predicate> getDataPropertiesAndClassesWithSameAs() {
+    public ImmutableSet<Predicate> getDataPropertiesAndClassesWithSameAs() {
 
-        return dataPropertiesAndClassesMapped;
+        return ImmutableSet.copyOf(dataPropertiesAndClassesMapped);
     }
 
-    public Set<Predicate> getObjectPropertiesWithSameAs() {
+    public ImmutableSet<Predicate> getObjectPropertiesWithSameAs() {
 
-        return objectPropertiesMapped;
+        return ImmutableSet.copyOf(objectPropertiesMapped);
     }
 
 

@@ -21,5 +21,5 @@ public interface IQuestConnection extends OBDAConnection {
 	 * For the classic mode.
 	 * MAY NOT BE SUPPORTED by certain implementations.
 	 */
-	SIQuestStatement createSIStatement() throws OBDAException;
+	//SIQuestStatement createSIStatement() throws OBDAException;
 }

@@ -26,6 +26,7 @@ import it.unibz.inf.ontop.owlrefplatform.core.queryevaluation.SPARQLQueryUtility
 import it.unibz.inf.ontop.owlrefplatform.core.resultset.EmptyTupleResultSet;
 import it.unibz.inf.ontop.owlrefplatform.core.resultset.QuestTupleResultSet;
 import it.unibz.inf.ontop.owlrefplatform.core.translator.SesameConstructTemplate;
+import it.unibz.inf.ontop.transformation.OBDAQueryProcessor;
 import org.eclipse.rdf4j.query.MalformedQueryException;
 import org.eclipse.rdf4j.query.parser.ParsedQuery;
 import org.slf4j.Logger;
@@ -44,8 +45,7 @@ import java.util.concurrent.CountDownLatch;
  */
 public abstract class QuestStatement implements IQuestStatement {
 
-	public final IQuest questInstance;
-	private final QuestQueryProcessor engine;
+	private final OBDAQueryProcessor engine;
 	private final OBDAConnection conn;
 
 
@@ -56,9 +56,8 @@ public abstract class QuestStatement implements IQuestStatement {
 	private static final Logger log = LoggerFactory.getLogger(QuestStatement.class);
 
 
-	public QuestStatement(IQuest questInstance, OBDAConnection conn) {
-		this.questInstance = questInstance;
-		this.engine = questInstance.getEngine();
+	public QuestStatement(OBDAQueryProcessor queryProcessor, OBDAConnection conn) {
+		this.engine = queryProcessor;
 		this.conn = conn;
 	}
 
@@ -383,11 +382,6 @@ public abstract class QuestStatement implements IQuestStatement {
 	@Override
 	public TupleResultSet getResultSet() throws OBDAException {
 		return null;
-	}
-
-	@Override
-	public IQuest getQuestInstance() {
-		return questInstance;
 	}
 
 //	public String getSPARQLRewriting(String query) throws OBDAException {

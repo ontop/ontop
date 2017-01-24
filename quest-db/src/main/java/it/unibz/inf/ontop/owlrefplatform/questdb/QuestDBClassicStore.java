@@ -32,7 +32,6 @@ import it.unibz.inf.ontop.model.OBDAModel;
 import it.unibz.inf.ontop.ontology.OntologyVocabulary;
 import it.unibz.inf.ontop.owlapi.OWLAPIABoxIterator;
 import it.unibz.inf.ontop.owlapi.OWLAPITranslatorUtility;
-import it.unibz.inf.ontop.owlrefplatform.core.IQuest;
 import it.unibz.inf.ontop.owlrefplatform.core.IQuestConnection;
 import it.unibz.inf.ontop.injection.QuestCoreSettings;
 import org.eclipse.rdf4j.model.Literal;

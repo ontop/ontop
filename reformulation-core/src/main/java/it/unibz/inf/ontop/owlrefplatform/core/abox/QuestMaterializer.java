@@ -24,7 +24,6 @@ import com.google.common.collect.ImmutableSet;
 import com.google.inject.Injector;
 import it.unibz.inf.ontop.model.GraphResultSet;
 import it.unibz.inf.ontop.model.OBDAException;
-import it.unibz.inf.ontop.model.OBDAModel;
 import it.unibz.inf.ontop.model.Predicate;
 import it.unibz.inf.ontop.model.ResultSet;
 import it.unibz.inf.ontop.ontology.*;
@@ -35,6 +34,7 @@ import java.util.*;
 
 import it.unibz.inf.ontop.injection.QuestComponentFactory;
 import it.unibz.inf.ontop.injection.QuestCoreConfiguration;
+import it.unibz.inf.ontop.transformation.OBDAQueryProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,9 +59,8 @@ import javax.annotation.Nonnull;
  * 
  */
 public class QuestMaterializer {
+
     private final QuestComponentFactory questComponentFactory;
-    private final OBDAModel model;
-	private final IQuest questInstance;
 
 	/**
 	 * Puts the JDBC connection in streaming mode.
@@ -69,46 +68,30 @@ public class QuestMaterializer {
 	private final boolean doStreamResults;
 	
 	private final ImmutableSet<Predicate> selectedVocabulary;
+	private final DBConnector connector;
 
 	private long counter = 0;
 	private VirtualTripleIterator iterator;
 
 	private static int FETCH_SIZE = 50000;
 
-	public QuestMaterializer(@Nonnull QuestCoreConfiguration configuration, @Nonnull OBDAModel mapping,
-							 @Nonnull Ontology tbox, @Nonnull ImmutableSet<Predicate> selectedVocabulary,
+	public QuestMaterializer(@Nonnull QuestCoreConfiguration configuration,
+							 @Nonnull ImmutableSet<Predicate> selectedVocabulary,
 							 boolean doStreamResults) throws Exception {
 
 		this.doStreamResults = doStreamResults;
-		this.model = mapping;
 
 		this.selectedVocabulary = selectedVocabulary;
 
 		Injector injector = configuration.getInjector();
 		questComponentFactory = injector.getInstance(QuestComponentFactory.class);
 
-		questInstance = questComponentFactory.create(tbox, Optional.of(this.model), Optional.empty(),
-				configuration.getExecutorRegistry());
+		OBDAQueryProcessor queryProcessor = questComponentFactory.create(
+				configuration.loadProvidedSpecification(), configuration.getExecutorRegistry());
+
+		connector = questComponentFactory.create(queryProcessor);
+
 		// Was an ugly way to ask for also querying the annotations
-
-		questInstance.setupRepository();
-	}
-
-	public QuestMaterializer(@Nonnull QuestCoreConfiguration configuration,
-							 @Nonnull Ontology tbox, @Nonnull ImmutableSet<Predicate> selectedVocabulary,
-							 boolean doStreamResults)
-			throws Exception {
-		this(configuration, configuration.loadProvidedSpecification(), tbox, selectedVocabulary, doStreamResults);
-	}
-
-	public QuestMaterializer(@Nonnull QuestCoreConfiguration configuration, @Nonnull Ontology tbox,
-							 @Nonnull OBDAModel mapping, boolean doStreamResults) throws Exception {
-		this(configuration, mapping, tbox, extractVocabulary(tbox), doStreamResults);
-	}
-
-	public QuestMaterializer(@Nonnull QuestCoreConfiguration configuration, @Nonnull Ontology tbox,
-							 boolean doStreamResults) throws Exception {
-		this(configuration, configuration.loadProvidedSpecification(), tbox, extractVocabulary(tbox), doStreamResults);
 	}
 
     private static ImmutableSet<Predicate> extractVocabulary(@Nonnull Ontology onto) {
@@ -155,7 +138,7 @@ public class QuestMaterializer {
 
 	public Iterator<Assertion> getAssertionIterator() throws Exception {
 		//return the inner class  iterator
-		iterator = new VirtualTripleIterator(questInstance, selectedVocabulary.iterator());
+		iterator = new VirtualTripleIterator(connector, selectedVocabulary.iterator());
 		return iterator;
 		
 	}
@@ -216,10 +199,10 @@ public class QuestMaterializer {
 		
 		private Logger log = LoggerFactory.getLogger(VirtualTripleIterator.class);
 
-		public VirtualTripleIterator(IQuest questInstance, Iterator<Predicate> vocabIter)
+		public VirtualTripleIterator(DBConnector connector, Iterator<Predicate> vocabIter)
 				throws SQLException {
 			try{
-				questConn = questInstance.getNonPoolConnection();
+				questConn = connector.getNonPoolConnection();
 
 				if (doStreamResults) {
 					// Autocommit must be OFF (needed for autocommit)

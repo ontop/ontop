@@ -21,15 +21,15 @@ package it.unibz.inf.ontop.owlrefplatform.owlapi;
  */
 
 import com.google.inject.Injector;
-import it.unibz.inf.ontop.exception.InvalidMappingException;
+import it.unibz.inf.ontop.exception.OBDASpecificationException;
 import it.unibz.inf.ontop.injection.*;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.ontology.*;
-import it.unibz.inf.ontop.owlapi.OWLAPIABoxIterator;
 import it.unibz.inf.ontop.owlapi.OWLAPITranslatorUtility;
 import it.unibz.inf.ontop.owlrefplatform.core.*;
-import it.unibz.inf.ontop.owlrefplatform.core.abox.QuestMaterializer;
 import it.unibz.inf.ontop.pivotalrepr.utils.ExecutorRegistry;
+import it.unibz.inf.ontop.spec.OBDASpecification;
+import it.unibz.inf.ontop.transformation.OBDAQueryProcessor;
 import it.unibz.inf.ontop.utils.VersionInfo;
 import org.semanticweb.owlapi.model.*;
 import org.semanticweb.owlapi.reasoner.*;
@@ -45,7 +45,6 @@ import javax.annotation.Nullable;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -55,7 +54,6 @@ import java.util.Set;
 public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 
 	private final QuestSettings preferences;
-	private final Optional<DBMetadata> inputDBMetadata;
 
 	StructuralReasoner structuralReasoner;
 
@@ -83,13 +81,12 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 	// //////////////////////////////////////////////////////////////////////////////////////
 
 	/* The merge and tranlsation of all loaded ontologies */
+	// TODO: see if still relevant
 	private Ontology translatedOntologyMerge;
 
-	private final Optional<OBDAModel> obdaModel;
+	private final OBDASpecification obdaSpecification;
 
 	private final ExecutorRegistry executorRegistry;
-
-	private IQuest questInstance = null;
 
 	private static Logger log = LoggerFactory.getLogger(QuestOWL.class);
 
@@ -126,6 +123,7 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 	/* Used to enable use of same as in mappings. */
 
 	private final QuestComponentFactory componentFactory;
+	private DBConnector dbConnector;
 	
 	/* Used to signal whether to apply the user constraints above */
 	//private boolean applyExcludeFromTMappings = false;
@@ -140,7 +138,6 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 
 		questConfiguration = owlConfiguration.getQuestConfiguration();
 		preferences = questConfiguration.getSettings();
-		inputDBMetadata = questConfiguration.getPredefinedDBMetadata();
 
 
 		/**
@@ -160,11 +157,11 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 		this.componentFactory = injector.getInstance(QuestComponentFactory.class);
 
 		try {
-			obdaModel = questConfiguration.loadSpecification();
+			obdaSpecification = questConfiguration.loadProvidedSpecification();
 			/**
 			 * Mapping parsing exceptions are re-thrown as configuration exceptions.
 			 */
-		} catch (IOException | InvalidMappingException e) {
+		} catch (IOException | OBDASpecificationException e) {
 			throw new IllegalConfigurationException(e.getMessage(), owlConfiguration);
 		}
 
@@ -209,11 +206,6 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 		prepareReasoner();
 		
 	}
-	
-	@Deprecated // used in one test only
-	public IQuest getQuestInstance() {
-		return questInstance;
-	}
 
 	public QuestOWLStatement getStatement() throws OWLException {
 		if (!questready) {
@@ -225,11 +217,11 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 		return owlconn.createStatement();
 	}
 
-	private void prepareQuestInstance() throws Exception {
+	private void prepareConnector() throws Exception {
 
 		try {
-			if (questInstance != null)
-				questInstance.dispose();
+			if (dbConnector != null)
+				dbConnector.dispose();
 		} catch (Exception e) {
 			log.debug(e.getMessage());
 		}
@@ -245,57 +237,57 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 		// pm.reasonerTaskStarted("Classifying...");
 		// pm.reasonerTaskBusy();
 
-		questInstance = componentFactory.create(translatedOntologyMerge, obdaModel, inputDBMetadata, executorRegistry);
+		OBDAQueryProcessor queryProcessor = componentFactory.create(obdaSpecification, executorRegistry);
+		dbConnector = componentFactory.create(queryProcessor);
+		dbConnector.connect();
 		
-		Set<OWLOntology> importsClosure = man.getImportsClosure(getRootOntology());
+		// Set<OWLOntology> importsClosure = man.getImportsClosure(getRootOntology());
 		
 
 		try {
 			// pm.reasonerTaskProgressChanged(1, 4);
-
-			// Setup repository
-			questInstance.setupRepository();
 			// pm.reasonerTaskProgressChanged(2, 4);
 
 			// Retrives the connection from Quest
 			//conn = questInstance.getConnection();
-			conn = questInstance.getNonPoolConnection();
+			conn = dbConnector.getNonPoolConnection();
 			owlconn = new QuestOWLConnection(conn);
 			// pm.reasonerTaskProgressChanged(3, 4);
 
 			// Preparing the data source
 			if (!isVirtualMode) {
-				IQuestStatement st = conn.createSIStatement();
-				if (bObtainFromOntology) {
-					// Retrieves the ABox from the ontology file.
-					log.debug("Loading data from Ontology into the database");
-					OWLAPIABoxIterator aBoxIter = new OWLAPIABoxIterator(importsClosure, questInstance.getVocabulary());
-					int count = st.insertData(aBoxIter, 5000, 500);
-					log.debug("Inserted {} triples from the ontology.", count);
-				}
-				if (bObtainFromMappings) { // TODO: GUOHUI 2016-01-16: This mode will be removed
-					// Retrieves the ABox from the target database via mapping.
-					log.debug("Loading data from Mappings into the database");
-					
-					QuestMaterializer materializer = new QuestMaterializer(questConfiguration,
-							translatedOntologyMerge, false);
-
-					/*
-					 * Now we can forget the configuration (not needed anymore)
-					 */
-					questConfiguration = null;
-
-					Iterator<Assertion> assertionIter = materializer.getAssertionIterator();
-					int count = st.insertData(assertionIter, 5000, 500);
-					materializer.disconnect();
-					log.debug("Inserted {} triples from the mappings.", count);
-				}
-//				st.createIndexes();
-				st.close();
-				if (!conn.getAutoCommit())
-				conn.commit();
-				
-				//questInstance.updateSemanticIndexMappings();
+				throw new RuntimeException("TODO: fix the classic A-box mode");
+//				IQuestStatement st = conn.createSIStatement();
+//				if (bObtainFromOntology) {
+//					// Retrieves the ABox from the ontology file.
+//					log.debug("Loading data from Ontology into the database");
+//					OWLAPIABoxIterator aBoxIter = new OWLAPIABoxIterator(importsClosure, questInstance.getVocabulary());
+//					int count = st.insertData(aBoxIter, 5000, 500);
+//					log.debug("Inserted {} triples from the ontology.", count);
+//				}
+//				if (bObtainFromMappings) { // TODO: GUOHUI 2016-01-16: This mode will be removed
+//					// Retrieves the ABox from the target database via mapping.
+//					log.debug("Loading data from Mappings into the database");
+//
+//					QuestMaterializer materializer = new QuestMaterializer(questConfiguration,
+//							translatedOntologyMerge, false);
+//
+//					/*
+//					 * Now we can forget the configuration (not needed anymore)
+//					 */
+//					questConfiguration = null;
+//
+//					Iterator<Assertion> assertionIter = materializer.getAssertionIterator();
+//					int count = st.insertData(assertionIter, 5000, 500);
+//					materializer.disconnect();
+//					log.debug("Inserted {} triples from the mappings.", count);
+//				}
+////				st.createIndexes();
+//				st.close();
+//				if (!conn.getAutoCommit())
+//				conn.commit();
+//
+//				//questInstance.updateSemanticIndexMappings();
 			} else {
 				// VIRTUAL MODE - NO-OP
 			}
@@ -319,7 +311,7 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 		}
 		
 		try {
-			questInstance.dispose();
+			dbConnector.dispose();
 		} catch (Exception e) {
 			log.debug(e.getMessage());
 		}
@@ -365,7 +357,7 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 	 */
 	public QuestOWLConnection replaceConnection() throws OBDAException {
 		QuestOWLConnection oldconn = this.owlconn;
-		conn = questInstance.getNonPoolConnection();
+		conn = dbConnector.getNonPoolConnection();
 		owlconn = new QuestOWLConnection(conn);
 		return oldconn;
 	}
@@ -439,7 +431,7 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 			questException = null;
 			errorMessage = "";
 			try {
-				prepareQuestInstance();
+				prepareConnector();
 				questready = true;
 				questException = null;
 				errorMessage = "";

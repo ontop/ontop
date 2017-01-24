@@ -1,12 +1,12 @@
 package it.unibz.inf.ontop.owlrefplatform.core.execution;
 
-import java.util.Optional;
 import it.unibz.inf.ontop.model.OBDAException;
 import it.unibz.inf.ontop.ontology.Assertion;
-import it.unibz.inf.ontop.owlrefplatform.core.IQuest;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestConnection;
+import it.unibz.inf.ontop.owlrefplatform.core.QuestQueryProcessor;
 import it.unibz.inf.ontop.owlrefplatform.core.SQLQuestStatement;
 import it.unibz.inf.ontop.owlrefplatform.core.abox.RDBMSSIRepositoryManager;
+import it.unibz.inf.ontop.transformation.OBDAQueryProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,16 +24,11 @@ public class SISQLQuestStatementImpl extends SQLQuestStatement implements SIQues
     private final RDBMSSIRepositoryManager siRepository;
     private static Logger log = LoggerFactory.getLogger(SISQLQuestStatementImpl.class);
 
-    public SISQLQuestStatementImpl(IQuest questInstance, QuestConnection questConnection, Statement sqlStatement) {
-        super(questInstance, questConnection, sqlStatement);
+    public SISQLQuestStatementImpl(OBDAQueryProcessor queryProcessor, RDBMSSIRepositoryManager siRepository,
+                                   QuestConnection questConnection, Statement sqlStatement) {
+        super(queryProcessor, questConnection, sqlStatement);
         sqlConnection = questConnection.getSQLConnection();
-        Optional<RDBMSSIRepositoryManager> optionalSIRepository = questInstance.getOptionalSemanticIndexRepository();
-        if (optionalSIRepository.isPresent()) {
-            siRepository = optionalSIRepository.get();
-        }
-        else {
-            throw new IllegalArgumentException(getClass().getCanonicalName() + " requires the quest instance to have a Semantic Index repository.");
-        }
+        this.siRepository = siRepository;
     }
 
     public void createIndexes() throws OBDAException {

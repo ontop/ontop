@@ -1,13 +1,12 @@
 package it.unibz.inf.ontop.owlrefplatform.core;
 
-import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
+import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.model.*;
-import it.unibz.inf.ontop.model.impl.SQLMappingFactoryImpl;
 import it.unibz.inf.ontop.injection.QuestCoreSettings;
+import it.unibz.inf.ontop.transformation.OBDAQueryProcessor;
 import org.apache.tomcat.jdbc.pool.DataSource;
 import org.apache.tomcat.jdbc.pool.PoolProperties;
-import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,9 +18,7 @@ import java.sql.*;
  */
 public class JDBCConnector implements DBConnector {
 
-    private static final SQLMappingFactory MAPPING_FACTORY = SQLMappingFactoryImpl.getInstance();
-
-    private final IQuest questInstance;
+    private final OBDAQueryProcessor queryProcessor;
     private final QuestCoreSettings questCoreSettings;
 
     private final QuestCoreSettings settings;
@@ -42,18 +39,11 @@ public class JDBCConnector implements DBConnector {
     private final int abandonedTimeout;
     private final boolean keepAlive;
 
-    private final NativeQueryLanguageComponentFactory nativeQLFactory;
-
-    /**
-     * TODO: see if we can ignore the questInstance
-     */
-    @Inject
-    private JDBCConnector(@Assisted IQuest questInstance,
-                          NativeQueryLanguageComponentFactory nativeQLFactory,
+    @AssistedInject
+    private JDBCConnector(@Assisted OBDAQueryProcessor queryProcessor,
                           QuestCoreSettings settings) {
+        this.queryProcessor = queryProcessor;
         this.questCoreSettings = settings;
-        this.questInstance = questInstance;
-        this.nativeQLFactory = nativeQLFactory;
         keepAlive = settings.isKeepAliveEnabled();
         removeAbandoned = settings.isRemoveAbandonedEnabled();
         abandonedTimeout = settings.getAbandonedTimeout();
@@ -212,7 +202,7 @@ public class JDBCConnector implements DBConnector {
     @Override
     public IQuestConnection getNonPoolConnection() throws OBDAException {
 
-        return new QuestConnection(this, questInstance, getSQLConnection(), questCoreSettings);
+        return new QuestConnection(this, queryProcessor, getSQLConnection(), questCoreSettings);
     }
 
     /***
@@ -234,7 +224,7 @@ public class JDBCConnector implements DBConnector {
     @Override
     public IQuestConnection getConnection() throws OBDAException {
 
-        return new QuestConnection(this, questInstance, getSQLPoolConnection(), questCoreSettings);
+        return new QuestConnection(this, queryProcessor, getSQLPoolConnection(), questCoreSettings);
     }
 
 

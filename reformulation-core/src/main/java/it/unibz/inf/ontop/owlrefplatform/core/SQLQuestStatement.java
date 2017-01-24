@@ -11,6 +11,7 @@ import it.unibz.inf.ontop.owlrefplatform.core.resultset.*;
 import it.unibz.inf.ontop.owlrefplatform.core.translator.SesameConstructTemplate;
 
 import it.unibz.inf.ontop.ontology.Assertion;
+import it.unibz.inf.ontop.transformation.OBDAQueryProcessor;
 import org.eclipse.rdf4j.query.parser.ParsedQuery;
 
 import java.sql.*;
@@ -25,8 +26,8 @@ public class SQLQuestStatement extends QuestStatement {
 
     private final Statement sqlStatement;
 
-    public SQLQuestStatement(IQuest questInstance, OBDAConnection obdaConnection, Statement sqlStatement) {
-        super(questInstance, obdaConnection);
+    public SQLQuestStatement(OBDAQueryProcessor queryProcessor, OBDAConnection obdaConnection, Statement sqlStatement) {
+        super(queryProcessor, obdaConnection);
         this.sqlStatement = sqlStatement;
     }
 

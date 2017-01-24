@@ -17,7 +17,6 @@ import java.util.Iterator;
  *
  */
 public interface IQuestStatement extends OBDAStatement {
-    IQuest getQuestInstance();
 
     /**
      * TODO: understand and implement correctly.
@@ -27,6 +26,7 @@ public interface IQuestStatement extends OBDAStatement {
     /**
      * Not always supported (for instance, write mode is not yet supported for the virtual mode).
      */
+    @Deprecated
     int insertData(Iterator<Assertion> data, int commit, int batch) throws OBDAException;
 
     int getTupleCount(String sparqlQuery);

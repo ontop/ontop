@@ -6,6 +6,7 @@ import it.unibz.inf.ontop.mapping.MappingMetadata;
 import it.unibz.inf.ontop.io.PrefixManager;
 import it.unibz.inf.ontop.model.AtomPredicate;
 import it.unibz.inf.ontop.pivotalrepr.IntermediateQuery;
+import it.unibz.inf.ontop.pivotalrepr.MetadataForQueryOptimization;
 
 import java.util.stream.Stream;
 
@@ -18,5 +19,6 @@ public interface MappingFactory {
 
     MappingMetadata create(PrefixManager prefixManager);
 
-    Mapping create(MappingMetadata metadata, Stream<IntermediateQuery> mappingStream);
+    Mapping create(MappingMetadata metadata, MetadataForQueryOptimization metadataForOptimization,
+                   Stream<IntermediateQuery> mappingStream);
 }

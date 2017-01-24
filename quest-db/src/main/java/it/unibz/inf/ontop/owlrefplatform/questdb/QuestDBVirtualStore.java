@@ -28,7 +28,6 @@ import it.unibz.inf.ontop.injection.QuestSettings;
 import it.unibz.inf.ontop.model.OBDAException;
 import it.unibz.inf.ontop.model.OBDAModel;
 import it.unibz.inf.ontop.ontology.OntologyFactory;
-import it.unibz.inf.ontop.owlrefplatform.core.IQuest;
 import it.unibz.inf.ontop.owlrefplatform.core.IQuestConnection;
 import it.unibz.inf.ontop.injection.QuestCoreSettings;
 

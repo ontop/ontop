@@ -3,7 +3,6 @@ package it.unibz.inf.ontop.injection.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Module;
 import it.unibz.inf.ontop.owlrefplatform.core.DBConnector;
-import it.unibz.inf.ontop.owlrefplatform.core.IQuest;
 import it.unibz.inf.ontop.owlrefplatform.core.QueryCache;
 import it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing.TMappingExclusionConfig;
 import it.unibz.inf.ontop.owlrefplatform.core.srcquerygeneration.NativeQueryGenerator;
