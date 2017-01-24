@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.injection.impl;
 
+import com.google.inject.Injector;
 import com.google.inject.Module;
 import it.unibz.inf.ontop.injection.OntopModelConfiguration;
 import it.unibz.inf.ontop.injection.OntopModelSettings;
@@ -10,6 +11,7 @@ import it.unibz.inf.ontop.model.DBMetadata;
 import javax.annotation.Nonnull;
 import java.util.Optional;
 import java.util.Properties;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 
@@ -20,6 +22,12 @@ public class OntopOBDAConfigurationImpl extends OntopModelConfigurationImpl impl
 
     OntopOBDAConfigurationImpl(OntopOBDASettings settings, OntopOBDAOptions options) {
         super(settings, options.modelOptions);
+        this.settings = settings;
+        this.options = options;
+    }
+
+    OntopOBDAConfigurationImpl(OntopOBDASettings settings, OntopOBDAOptions options, Supplier<Injector> injectorSupplier) {
+        super(settings, options.modelOptions, injectorSupplier);
         this.settings = settings;
         this.options = options;
     }

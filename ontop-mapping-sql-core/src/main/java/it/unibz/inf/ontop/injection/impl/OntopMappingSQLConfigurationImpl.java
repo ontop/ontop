@@ -37,7 +37,8 @@ public class OntopMappingSQLConfigurationImpl extends OntopSQLConfigurationImpl 
         super(settings, options.sqlOptions);
         this.settings = settings;
         this.options = options;
-        this.mappingConfiguration = new OntopMappingConfigurationImpl(settings, options.mappingOptions);
+        this.mappingConfiguration = new OntopMappingConfigurationImpl(settings, options.mappingOptions,
+                this::getInjector);
     }
 
     boolean isInputMappingDefined() {

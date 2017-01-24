@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.injection.impl;
 
+import com.google.inject.Injector;
 import com.google.inject.Module;
 import it.unibz.inf.ontop.injection.InvalidOntopConfigurationException;
 import it.unibz.inf.ontop.injection.OntopMappingConfiguration;
@@ -33,6 +34,14 @@ public class OntopMappingConfigurationImpl extends OntopOBDAConfigurationImpl im
 
     OntopMappingConfigurationImpl(OntopMappingSettings settings, OntopMappingOptions options) {
         super(settings, options.obdaOptions);
+        this.settings = settings;
+        this.options = options;
+        this.optimizationConfiguration = new OntopOptimizationConfigurationImpl(settings, options.optimizationOptions);
+    }
+
+    OntopMappingConfigurationImpl(OntopMappingSettings settings, OntopMappingOptions options,
+                                  Supplier<Injector> injectorSupplier) {
+        super(settings, options.obdaOptions, injectorSupplier);
         this.settings = settings;
         this.options = options;
         this.optimizationConfiguration = new OntopOptimizationConfigurationImpl(settings, options.optimizationOptions);
