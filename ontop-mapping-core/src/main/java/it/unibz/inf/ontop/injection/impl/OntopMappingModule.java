@@ -24,7 +24,6 @@ public class OntopMappingModule extends OntopAbstractModule {
     @Override
     protected void configure() {
         bind(OntopMappingSettings.class).toInstance(settings);
-        bindFromPreferences(OBDASpecificationExtractor.class);
 
         Module mappingFactoryModule = buildFactory(ImmutableList.of(
                 PrefixManager.class,

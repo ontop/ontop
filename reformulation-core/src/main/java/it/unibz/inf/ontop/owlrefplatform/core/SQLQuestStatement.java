@@ -2,10 +2,7 @@ package it.unibz.inf.ontop.owlrefplatform.core;
 
 import java.util.Optional;
 
-import it.unibz.inf.ontop.model.GraphResultSet;
-import it.unibz.inf.ontop.model.OBDAConnection;
-import it.unibz.inf.ontop.model.OBDAException;
-import it.unibz.inf.ontop.model.TupleResultSet;
+import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.owlrefplatform.core.execution.NativeQueryExecutionException;
 import it.unibz.inf.ontop.owlrefplatform.core.resultset.*;
 import it.unibz.inf.ontop.owlrefplatform.core.translator.SesameConstructTemplate;
@@ -24,10 +21,12 @@ import java.util.Iterator;
 public class SQLQuestStatement extends QuestStatement {
 
     private final Statement sqlStatement;
+    private final DBMetadata dbMetadata;
 
     public SQLQuestStatement(OBDAQueryProcessor queryProcessor, OBDAConnection obdaConnection, Statement sqlStatement) {
         super(queryProcessor, obdaConnection);
         this.sqlStatement = sqlStatement;
+        this.dbMetadata = queryProcessor.getDBMetadata();
     }
 
     @Override
@@ -131,6 +130,11 @@ public class SQLQuestStatement extends QuestStatement {
         else {
             throw new OBDAException("Action canceled.");
         }
+    }
+
+    @Override
+    public DBMetadata getMetadata() {
+        return dbMetadata;
     }
 
     @Override

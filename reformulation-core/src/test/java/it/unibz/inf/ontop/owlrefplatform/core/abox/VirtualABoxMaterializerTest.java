@@ -22,6 +22,7 @@ package it.unibz.inf.ontop.owlrefplatform.core.abox;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.injection.*;
 import it.unibz.inf.ontop.injection.QuestCoreConfiguration.Builder;
 import it.unibz.inf.ontop.mapping.MappingMetadata;
@@ -92,10 +93,10 @@ public class VirtualABoxMaterializerTest {
 	@Test
 	public void testOneSource() throws Exception {
 
-    	OBDAModel mapping = createMapping();
+    	OBDAModel ppMapping = createMapping();
 
 		QuestCoreConfiguration configuration = createAndInitConfiguration()
-				.obdaModel(mapping)
+				.obdaModel(ppMapping)
 				.build();
 		// source.setParameter(RDBMSourceParameterConstants.IS_IN_MEMORY, "true");
 		// source.setParameter(RDBMSourceParameterConstants.USE_DATASOURCE_FOR_ABOXDUMP, "true");
@@ -118,8 +119,8 @@ public class VirtualABoxMaterializerTest {
 
 		ImmutableSet<Predicate> vocabulary = ImmutableSet.of(fn, ln, age, hasschool, school);
 
-		Ontology tbox = MappingVocabularyExtractor.extractOntology(mapping);
-		QuestMaterializer materializer = new QuestMaterializer(configuration, tbox, vocabulary, false);
+		//Ontology tbox = MappingVocabularyExtractor.extractOntology(ppMapping);
+		QuestMaterializer materializer = new QuestMaterializer(configuration, vocabulary, false);
 
 		List<Assertion> assertions = materializer.getAssertionList();
 
@@ -136,7 +137,7 @@ public class VirtualABoxMaterializerTest {
 
 	}
 
-	private static OBDAModel createMapping() {
+	private static OBDAModel createMapping() throws DuplicateMappingException {
 
     	// TODO: we should not have to create an high-level configuration just for constructing these objects...
 		QuestCoreConfiguration configuration = createAndInitConfiguration()

@@ -10,6 +10,7 @@ import it.unibz.inf.ontop.owlrefplatform.core.translator.MappingVocabularyFixer;
 import it.unibz.inf.ontop.injection.QuestComponentFactory;
 import it.unibz.inf.ontop.injection.QuestCoreConfiguration;
 import it.unibz.inf.ontop.injection.QuestCoreSettings;
+import it.unibz.inf.ontop.reformulation.OBDAQueryProcessor;
 
 /**
  * TODO: describe
@@ -36,8 +37,8 @@ public class QuestComponentModule extends OntopAbstractModule {
 
         bindTMappingExclusionConfig();
 
-        Module componentFactoryModule = buildFactory(ImmutableList.<Class>of(IQuest.class,
-                        NativeQueryGenerator.class, DBConnector.class),
+        Module componentFactoryModule = buildFactory(ImmutableList.of(
+                OBDAQueryProcessor.class, NativeQueryGenerator.class, DBConnector.class),
                 QuestComponentFactory.class);
         install(componentFactoryModule);
         bindFromPreferences(MappingVocabularyFixer.class);

@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.owlrefplatform.core;
 
+import it.unibz.inf.ontop.model.DBMetadata;
 import it.unibz.inf.ontop.model.OBDAException;
 import it.unibz.inf.ontop.model.OBDAStatement;
 import it.unibz.inf.ontop.model.TupleResultSet;
@@ -30,4 +31,6 @@ public interface IQuestStatement extends OBDAStatement {
     int insertData(Iterator<Assertion> data, int commit, int batch) throws OBDAException;
 
     int getTupleCount(String sparqlQuery);
+
+    DBMetadata getMetadata();
 }

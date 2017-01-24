@@ -8,8 +8,11 @@ import it.unibz.inf.ontop.injection.OBDAFactoryWithException;
 import it.unibz.inf.ontop.injection.OntopMappingSQLConfiguration;
 import it.unibz.inf.ontop.injection.OntopMappingSQLSettings;
 import it.unibz.inf.ontop.mapping.MappingParser;
+import it.unibz.inf.ontop.mapping.conversion.SQLPPMapping2DSModelConverter;
+import it.unibz.inf.ontop.mapping.datalog.Datalog2QueryMappingConverter;
 import it.unibz.inf.ontop.model.OBDAMappingAxiom;
 import it.unibz.inf.ontop.nativeql.RDBMetadataExtractor;
+import it.unibz.inf.ontop.spec.OBDASpecificationExtractor;
 
 public class OntopMappingSQLModule extends OntopAbstractModule {
 
@@ -27,6 +30,9 @@ public class OntopMappingSQLModule extends OntopAbstractModule {
 
         bindFromPreferences(OBDAFactoryWithException.class);
         bindFromPreferences(MappingParser.class);
+        bindFromPreferences(SQLPPMapping2DSModelConverter.class);
+        bindFromPreferences(Datalog2QueryMappingConverter.class);
+        bindFromPreferences(OBDASpecificationExtractor.class);
 
         Module nativeQLFactoryModule = buildFactory(ImmutableList.of(
                 RDBMetadataExtractor.class,

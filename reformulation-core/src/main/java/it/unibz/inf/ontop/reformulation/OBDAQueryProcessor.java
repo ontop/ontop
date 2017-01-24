@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.reformulation;
 
 
+import it.unibz.inf.ontop.model.DBMetadata;
 import it.unibz.inf.ontop.model.OBDAException;
 import it.unibz.inf.ontop.owlrefplatform.core.ExecutableQuery;
 import it.unibz.inf.ontop.owlrefplatform.core.translator.SesameConstructTemplate;
@@ -21,4 +22,6 @@ public interface OBDAQueryProcessor {
     String getSPARQLRewriting(String sparql) throws OBDAException;
 
     boolean hasDistinctResultSet();
+
+    DBMetadata getDBMetadata();
 }

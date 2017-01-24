@@ -23,6 +23,7 @@ package it.unibz.inf.ontop.owlrefplatform.core.resultset;
 
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.Predicate.COL_TYPE;
+import it.unibz.inf.ontop.owlrefplatform.core.IQuestStatement;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestStatement;
 import it.unibz.inf.ontop.owlrefplatform.core.abox.SemanticIndexURIMap;
 
@@ -40,7 +41,7 @@ import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
 public class QuestTupleResultSet implements TupleResultSet {
 
 	private final ResultSet rs;
-	private final QuestStatement st;
+	private final IQuestStatement st;
 	private final List<String> signature;
 	
 	private static final DecimalFormat formatter = new DecimalFormat("0.0###E0");
@@ -77,10 +78,12 @@ public class QuestTupleResultSet implements TupleResultSet {
 	 * @param st
 	 * @throws OBDAException
 	 */
-	public QuestTupleResultSet(ResultSet set, List<String> signature, QuestStatement st) throws OBDAException {
+	public QuestTupleResultSet(ResultSet set, List<String> signature, IQuestStatement st) throws OBDAException {
 		this.rs = set;
 		this.st = st;
-		this.uriMap = st.questInstance.getUriMap();
+		// TODO: re-enable
+		//this.uriMap = st.questInstance.getUriMap();
+		this.uriMap = null;
 		this.signature = signature;
 		
 		columnMap = new HashMap<>(signature.size() * 2);
@@ -90,7 +93,7 @@ public class QuestTupleResultSet implements TupleResultSet {
 			columnMap.put(signature.get(j - 1), j);
 		}
 
-		DBMetadata metadata = st.questInstance.getMetaData();
+		DBMetadata metadata = st.getMetadata();
 		String vendor =  metadata.getDriverName();
 		isOracle = vendor.contains("Oracle");
 		isMsSQL = vendor.contains("SQL Server");

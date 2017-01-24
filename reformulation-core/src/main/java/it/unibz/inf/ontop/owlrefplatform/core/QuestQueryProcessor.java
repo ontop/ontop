@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
+import it.unibz.inf.ontop.injection.QuestComponentFactory;
 import it.unibz.inf.ontop.injection.QuestCoreSettings;
 import it.unibz.inf.ontop.injection.ReformulationFactory;
 import it.unibz.inf.ontop.mapping.Mapping;
@@ -15,7 +16,6 @@ import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing.MappingSameAs;
 import it.unibz.inf.ontop.owlrefplatform.core.optimization.*;
 import it.unibz.inf.ontop.reformulation.unfolding.QueryUnfolder;
-import it.unibz.inf.ontop.reformulation.unfolding.impl.BasicQueryUnfolder;
 import it.unibz.inf.ontop.owlrefplatform.core.queryevaluation.SPARQLQueryUtility;
 import it.unibz.inf.ontop.owlrefplatform.core.reformulation.DummyReformulator;
 import it.unibz.inf.ontop.owlrefplatform.core.reformulation.QueryRewriter;
@@ -72,8 +72,7 @@ public class QuestQueryProcessor implements OBDAQueryProcessor {
 	@AssistedInject
 	private QuestQueryProcessor(@Assisted OBDASpecification obdaSpecification,
 								@Assisted ExecutorRegistry executorRegistry,
-								VocabularyValidator vocabularyValidator,
-								NativeQueryGenerator datasourceQueryGenerator,
+								QuestComponentFactory questComponentFactory,
 								QueryCache queryCache,
 								QuestCoreSettings settings,
 								DatalogProgram2QueryConverter datalogConverter,
@@ -96,10 +95,9 @@ public class QuestQueryProcessor implements OBDAQueryProcessor {
 		this.queryUnfolder = reformulationFactory.create(saturatedMapping);
 		this.metadataForOptimization = saturatedMapping.getMetadataForOptimization();
 
-		this.vocabularyValidator = vocabularyValidator;
-		// TODO: get rid of it
-		this.uriMap = null;
-		this.datasourceQueryGenerator = datasourceQueryGenerator;
+		this.vocabularyValidator = new VocabularyValidator(obdaSpecification.getSaturatedTBox(),
+				obdaSpecification.getVocabulary());
+		this.datasourceQueryGenerator = questComponentFactory.create(metadataForOptimization.getDBMetadata());
 		this.queryCache = queryCache;
 		this.hasDistinctResultSet = settings.isDistinctPostProcessingEnabled();
 		this.executorRegistry = executorRegistry;
@@ -108,6 +106,9 @@ public class QuestQueryProcessor implements OBDAQueryProcessor {
 		MappingSameAs msa = new MappingSameAs(saturatedMapping);
 		dataPropertiesAndClassesMapped = msa.getDataPropertiesAndClassesWithSameAs();
 		objectPropertiesMapped =  msa.getObjectPropertiesWithSameAs();
+
+		// TODO: get rid of it
+		this.uriMap = null;
 	}
 
 //	/**
@@ -362,5 +363,10 @@ public class QuestQueryProcessor implements OBDAQueryProcessor {
 	@Override
 	public boolean hasDistinctResultSet() {
 		return hasDistinctResultSet;
+	}
+
+	@Override
+	public DBMetadata getDBMetadata() {
+		return metadataForOptimization.getDBMetadata();
 	}
 }
