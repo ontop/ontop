@@ -19,25 +19,23 @@ package it.unibz.inf.ontop.rdf4j.tests.general;
  * limitations under the License.
  * #L%
  */
-import java.util.List;
 
 import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.rdf4j.repository.OntopVirtualRepository;
 import junit.framework.TestCase;
-
 import org.eclipse.rdf4j.model.Statement;
-import org.eclipse.rdf4j.query.BindingSet;
-import org.eclipse.rdf4j.query.GraphQuery;
-import org.eclipse.rdf4j.query.GraphQueryResult;
-import org.eclipse.rdf4j.query.QueryLanguage;
-import org.eclipse.rdf4j.query.TupleQuery;
-import org.eclipse.rdf4j.query.TupleQueryResult;
+import org.eclipse.rdf4j.query.*;
 import org.eclipse.rdf4j.repository.Repository;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.List;
 
 
 public class SesameVirtualTest extends TestCase {
 
+	private final Logger log = LoggerFactory.getLogger(this.getClass());
 	
 	
 	public void test() throws Exception
@@ -75,7 +73,7 @@ public class SesameVirtualTest extends TestCase {
 			    	  while (result.hasNext()) {
 			    		   BindingSet bindingSet = result.next();
 			    		   for (String b : bindings)
-			    			   System.out.println(bindingSet.getBinding(b));
+			    			   log.debug("Binding: "+bindingSet.getBinding(b));
 			    	  }
 			      }
 			      finally {
