@@ -134,6 +134,9 @@ public class DBMetadata implements Serializable {
 		DatabaseRelationDefinition def = tables.get(id);
 		if (def == null && id.hasSchema()) {
 			def = tables.get(id.getSchemalessID());
+			// TODO: a bit ad hoc - a better solution is needed
+			if (def != null && def.getID().hasSchema() && !def.getID().equals(id))
+				return null;
 		}
 		return def;
 	}
