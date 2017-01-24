@@ -28,18 +28,9 @@ import java.util.Optional;
  *
  * Immutable class.
  */
-public interface QuestCoreSettings extends OBDASettings, OntopOptimizationSettings {
-
-	boolean isRewritingEnabled();
+public interface QuestCoreSettings extends OBDASettings, OntopRuntimeSettings {
 
 	boolean isKeyPrintingEnabled();
-
-	boolean isDistinctPostProcessingEnabled();
-
-	/**
-	 * In the case of SQL, inserts REPLACE functions in the generated query
-	 */
-	boolean isIRISafeEncodingEnabled();
 
 	/**
 	 * TODO: remove it when the virtual and classic A-Box modes will be completely isolated.
@@ -86,11 +77,6 @@ public interface QuestCoreSettings extends OBDASettings, OntopOptimizationSettin
 	String  BASE_IRI             	= "org.obda.owlreformulationplatform.baseiri";
 
 	String OBTAIN_FULL_METADATA = "OBTAIN_FULL_METADATA";
-
-    String SQL_GENERATE_REPLACE = "org.obda.owlreformulationplatform.sqlGenerateReplace";
-	String DISTINCT_RESULTSET = "org.obda.owlreformulationplatform.distinctResultSet";
-
-    String  REWRITE 	= "rewrite";
 	
 //	String  OPTIMIZE_TBOX_SIGMA 	= "org.obda.owlreformulationplatform.optimizeTboxSigma";
 //	String 	CREATE_TEST_MAPPINGS 	= "org.obda.owlreformulationplatform.createTestMappings";

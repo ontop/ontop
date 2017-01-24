@@ -7,7 +7,8 @@ import it.unibz.inf.ontop.executor.ProposalExecutor;
 import it.unibz.inf.ontop.injection.InvalidOntopConfigurationException;
 import it.unibz.inf.ontop.injection.impl.OntopOptimizationConfigurationImpl.DefaultOntopOptimizationBuilderFragment;
 import it.unibz.inf.ontop.injection.impl.OntopOptimizationConfigurationImpl.OntopOptimizationOptions;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
+import it.unibz.inf.ontop.injection.impl.OntopRuntimeConfigurationImpl.DefaultOntopRuntimeBuilderFragment;
+import it.unibz.inf.ontop.injection.impl.OntopRuntimeConfigurationImpl.OntopRuntimeOptions;
 import it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing.TMappingExclusionConfig;
 import it.unibz.inf.ontop.injection.QuestCoreConfiguration;
 import it.unibz.inf.ontop.injection.QuestCoreSettings;
@@ -23,13 +24,13 @@ public class QuestCoreConfigurationImpl extends OBDACoreConfigurationImpl implem
     private final QuestCoreSettings settings;
     private final QuestCoreOptions options;
     // Concrete implementation due to the "mixin style" (indirect inheritance)
-    private final OntopOptimizationConfigurationImpl optimizationConfiguration;
+    private final OntopRuntimeConfigurationImpl runtimeConfiguration;
 
     protected QuestCoreConfigurationImpl(QuestCoreSettings settings, QuestCoreOptions options) {
         super(settings, options.obdaOptions);
         this.settings = settings;
         this.options = options;
-        this.optimizationConfiguration = new OntopOptimizationConfigurationImpl(settings, options.optimizationOptions);
+        this.runtimeConfiguration = new OntopRuntimeConfigurationImpl(settings, options.runtimeOptions);
     }
 
     /**
@@ -41,7 +42,7 @@ public class QuestCoreConfigurationImpl extends OBDACoreConfigurationImpl implem
         ImmutableMap.Builder<Class<? extends QueryOptimizationProposal>, Class<? extends ProposalExecutor>>
                 internalExecutorMapBuilder = ImmutableMap.builder();
         internalExecutorMapBuilder.putAll(super.generateOptimizationConfigurationMap());
-        internalExecutorMapBuilder.putAll(optimizationConfiguration.generateOptimizationConfigurationMap());
+        internalExecutorMapBuilder.putAll(runtimeConfiguration.generateOptimizationConfigurationMap());
 
         return internalExecutorMapBuilder.build();
     }
@@ -80,22 +81,22 @@ public class QuestCoreConfigurationImpl extends OBDACoreConfigurationImpl implem
     protected Stream<Module> buildGuiceModules() {
         return Stream.concat(
                 super.buildGuiceModules(),
-                Stream.concat(optimizationConfiguration.buildGuiceModules(),
+                Stream.concat(runtimeConfiguration.buildGuiceModules(),
                     Stream.of(new QuestComponentModule(this))));
     }
 
     public static class QuestCoreOptions {
         public final Optional<TMappingExclusionConfig> excludeFromTMappings;
         private final OBDAConfigurationOptions obdaOptions;
-        private final OntopOptimizationOptions optimizationOptions;
+        private final OntopRuntimeOptions runtimeOptions;
 
 
         public QuestCoreOptions(Optional<TMappingExclusionConfig> excludeFromTMappings,
                                 OBDAConfigurationOptions obdaOptions,
-                                OntopOptimizationOptions optimizationOptions) {
+                                OntopRuntimeOptions runtimeOptions) {
             this.excludeFromTMappings = excludeFromTMappings;
             this.obdaOptions = obdaOptions;
-            this.optimizationOptions = optimizationOptions;
+            this.runtimeOptions = runtimeOptions;
         }
     }
 
@@ -106,9 +107,6 @@ public class QuestCoreConfigurationImpl extends OBDACoreConfigurationImpl implem
         private final B builder;
 
         private Optional<TMappingExclusionConfig> excludeFromTMappings = Optional.empty();
-
-        private Optional<Boolean> encodeIRISafely = Optional.empty();
-        private Optional<Boolean> existentialReasoning = Optional.empty();
 
         protected DefaultQuestCoreBuilderFragment(B builder) {
             this.builder = builder;
@@ -121,34 +119,14 @@ public class QuestCoreConfigurationImpl extends OBDACoreConfigurationImpl implem
             return builder;
         }
 
-        @Override
-        public B enableIRISafeEncoding(boolean enable) {
-            this.encodeIRISafely = Optional.of(enable);
-            return builder;
-        }
-
-        @Override
-        public B enableExistentialReasoning(boolean enable) {
-            this.existentialReasoning = Optional.of(enable);
-            return builder;
-
-        }
-
         protected Properties generateUserProperties() {
             Properties p = new Properties();
-
-            encodeIRISafely.ifPresent(e -> p.put(QuestCoreSettings.SQL_GENERATE_REPLACE, e));
-            existentialReasoning.ifPresent(r -> {
-                p.put(QuestCoreSettings.REWRITE, r);
-                p.put(QuestCoreSettings.REFORMULATION_TECHNIQUE, QuestConstants.TW);
-            });
-
             return p;
         }
 
         protected final QuestCoreOptions generateQuestCoreOptions(OBDAConfigurationOptions obdaOptions,
-                                                                  OntopOptimizationOptions optimizationOptions) {
-            return new QuestCoreOptions(excludeFromTMappings, obdaOptions, optimizationOptions);
+                                                                  OntopRuntimeOptions runtimeOptions) {
+            return new QuestCoreOptions(excludeFromTMappings, obdaOptions, runtimeOptions);
         }
     }
 
@@ -159,11 +137,13 @@ public class QuestCoreConfigurationImpl extends OBDACoreConfigurationImpl implem
 
         private final DefaultQuestCoreBuilderFragment<B> questCoreBuilderFragment;
         private final DefaultOntopOptimizationBuilderFragment<B> optimizationBuilderFragment;
+        private final DefaultOntopRuntimeBuilderFragment<B> runtimeBuilderFragment;
 
         protected QuestCoreConfigurationBuilderMixin() {
             B builder = (B) this;
             questCoreBuilderFragment = new DefaultQuestCoreBuilderFragment<>(builder);
             optimizationBuilderFragment = new DefaultOntopOptimizationBuilderFragment<>(builder);
+            runtimeBuilderFragment = new DefaultOntopRuntimeBuilderFragment<>(builder);
         }
 
         @Override
@@ -172,29 +152,33 @@ public class QuestCoreConfigurationImpl extends OBDACoreConfigurationImpl implem
         }
 
         @Override
-        public B enableIRISafeEncoding(boolean enable) {
-            return questCoreBuilderFragment.enableIRISafeEncoding(enable);
-        }
-
-        @Override
-        public B enableExistentialReasoning(boolean enable) {
-            return questCoreBuilderFragment.enableExistentialReasoning(enable);
-        }
-
-        @Override
         protected Properties generateProperties() {
             Properties properties = super.generateProperties();
             properties.putAll(optimizationBuilderFragment.generateProperties());
             properties.putAll(questCoreBuilderFragment.generateUserProperties());
+            properties.putAll(runtimeBuilderFragment.generateProperties());
             return properties;
         }
 
         protected final QuestCoreOptions generateQuestCoreOptions() {
-            OBDAConfigurationOptions obdaOptions = generateOBDACoreOptions();
+            OBDAConfigurationOptions obdaCoreOptions = generateOBDACoreOptions();
+            OntopOBDAOptions obdaOptions =  obdaCoreOptions.mappingSqlOptions.mappingOptions.obdaOptions;
+            OntopOptimizationOptions optimizationOptions = optimizationBuilderFragment.generateOptimizationOptions(
+                    obdaOptions.modelOptions);
+            OntopRuntimeOptions runtimeOptions = runtimeBuilderFragment.generateRuntimeOptions(obdaOptions,
+                    optimizationOptions);
 
-            return questCoreBuilderFragment.generateQuestCoreOptions(obdaOptions,
-                    optimizationBuilderFragment.generateOptimizationOptions(
-                            obdaOptions.mappingSqlOptions.mappingOptions.obdaOptions.modelOptions));
+            return questCoreBuilderFragment.generateQuestCoreOptions(obdaCoreOptions, runtimeOptions);
+        }
+
+        @Override
+        public B enableIRISafeEncoding(boolean enable) {
+            return runtimeBuilderFragment.enableIRISafeEncoding(enable);
+        }
+
+        @Override
+        public B enableExistentialReasoning(boolean enable) {
+            return runtimeBuilderFragment.enableExistentialReasoning(enable);
         }
     }
 

@@ -35,23 +35,8 @@ public class QuestCoreSettingsImpl extends OBDASettingsImpl implements QuestCore
     }
 
     @Override
-    public boolean isRewritingEnabled() {
-        return getRequiredBoolean(REWRITE);
-    }
-
-    @Override
     public boolean isKeyPrintingEnabled() {
         return getRequiredBoolean(PRINT_KEYS);
-    }
-
-    @Override
-    public boolean isDistinctPostProcessingEnabled() {
-        return getRequiredBoolean(DISTINCT_RESULTSET);
-    }
-
-    @Override
-    public boolean isIRISafeEncodingEnabled() {
-        return getRequiredBoolean(SQL_GENERATE_REPLACE);
     }
 
     @Override

@@ -10,7 +10,7 @@ import java.util.Optional;
  * TODO: explain
  *
  */
-public interface QuestCoreConfiguration extends OBDACoreConfiguration, OntopOptimizationConfiguration {
+public interface QuestCoreConfiguration extends OBDACoreConfiguration, OntopRuntimeConfiguration {
 
     Optional<TMappingExclusionConfig> getTmappingExclusions();
 
@@ -31,18 +31,11 @@ public interface QuestCoreConfiguration extends OBDACoreConfiguration, OntopOpti
      */
     interface QuestCoreBuilderFragment<B extends Builder<B>> {
         B tMappingExclusionConfig(@Nonnull TMappingExclusionConfig config);
-
-        /**
-         * In the case of SQL, inserts REPLACE functions in the generated query
-         */
-        B enableIRISafeEncoding(boolean enable);
-
-        B enableExistentialReasoning(boolean enable);
     }
 
     interface Builder<B extends Builder<B>> extends QuestCoreBuilderFragment<B>,
             OBDACoreConfiguration.Builder<B>,
-            OntopOptimizationConfiguration.Builder<B> {
+            OntopRuntimeConfiguration.Builder<B> {
 
         @Override
         QuestCoreConfiguration build();

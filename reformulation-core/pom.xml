@@ -17,7 +17,7 @@
 		</dependency>
 		<dependency>
 			<groupId>${project.groupId}</groupId>
-			<artifactId>ontop-optimization</artifactId>
+			<artifactId>ontop-runtime-core</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 

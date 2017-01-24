@@ -5,7 +5,6 @@ import it.unibz.inf.ontop.injection.impl.OntopOBDAConfigurationImpl;
 import it.unibz.inf.ontop.model.DBMetadata;
 
 import javax.annotation.Nonnull;
-import java.util.Optional;
 
 public interface OntopOBDAConfiguration extends OntopModelConfiguration {
 
