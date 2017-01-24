@@ -726,8 +726,8 @@ public class DefaultSQLPPMapping2DSModelConverter implements SQLPPMapping2DSMode
                                           Optional<DBMetadata> optionalDBMetadata, Connection localConnection)
             throws DBMetadataExtractionException {
         return optionalDBMetadata.isPresent()
-                ? dbMetadataExtractor.extract(fixedPPMapping, localConnection)
-                : dbMetadataExtractor.extract(fixedPPMapping, localConnection, optionalDBMetadata.get());
+                ? dbMetadataExtractor.extract(fixedPPMapping, localConnection, optionalDBMetadata.get())
+                : dbMetadataExtractor.extract(fixedPPMapping, localConnection);
     }
 
     private Connection createConnection() throws SQLException {

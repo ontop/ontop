@@ -62,12 +62,12 @@ public class QuestQueryProcessor implements OBDAQueryProcessor {
 	private final QueryUnfolder queryUnfolder;
 	
 	private static final Logger log = LoggerFactory.getLogger(QuestQueryProcessor.class);
-	private final boolean hasDistinctResultSet;
 	private final ExecutorRegistry executorRegistry;
 	private final MetadataForQueryOptimization metadataForOptimization;
 	private final DatalogProgram2QueryConverter datalogConverter;
 	private final ImmutableSet<Predicate> dataPropertiesAndClassesMapped;
 	private final ImmutableSet<Predicate> objectPropertiesMapped;
+	private final QuestCoreSettings settings;
 
 	@AssistedInject
 	private QuestQueryProcessor(@Assisted OBDASpecification obdaSpecification,
@@ -99,13 +99,18 @@ public class QuestQueryProcessor implements OBDAQueryProcessor {
 				obdaSpecification.getVocabulary());
 		this.datasourceQueryGenerator = questComponentFactory.create(metadataForOptimization.getDBMetadata());
 		this.queryCache = queryCache;
-		this.hasDistinctResultSet = settings.isDistinctPostProcessingEnabled();
+		this.settings = settings;
 		this.executorRegistry = executorRegistry;
 		this.datalogConverter = datalogConverter;
 
-		MappingSameAs msa = new MappingSameAs(saturatedMapping);
-		dataPropertiesAndClassesMapped = msa.getDataPropertiesAndClassesWithSameAs();
-		objectPropertiesMapped =  msa.getObjectPropertiesWithSameAs();
+		if (settings.isSameAsInMappingsEnabled()) {
+			MappingSameAs msa = new MappingSameAs(saturatedMapping);
+			dataPropertiesAndClassesMapped = msa.getDataPropertiesAndClassesWithSameAs();
+			objectPropertiesMapped = msa.getObjectPropertiesWithSameAs();
+		} else {
+			dataPropertiesAndClassesMapped = ImmutableSet.of();
+			objectPropertiesMapped = ImmutableSet.of();
+		}
 
 		// TODO: get rid of it
 		this.uriMap = null;
@@ -151,9 +156,11 @@ public class QuestQueryProcessor implements OBDAQueryProcessor {
 		DatalogProgram program = translation.getProgram();
 		log.debug("Datalog program translated from the SPARQL query: \n{}", program);
 
-		SameAsRewriter sameAs = new SameAsRewriter(dataPropertiesAndClassesMapped, objectPropertiesMapped);
-		program = sameAs.getSameAsRewriting(program);
-		//System.out.println("SAMEAS" + program);
+		if (settings.isSameAsInMappingsEnabled()) {
+			SameAsRewriter sameAs = new SameAsRewriter(dataPropertiesAndClassesMapped, objectPropertiesMapped);
+			program = sameAs.getSameAsRewriting(program);
+			//System.out.println("SAMEAS" + program);
+		}
 
 		log.debug("Replacing equivalences...");
 		DatalogProgram newprogramEq = DATA_FACTORY.getDatalogProgram(program.getQueryModifiers());
@@ -362,7 +369,7 @@ public class QuestQueryProcessor implements OBDAQueryProcessor {
 
 	@Override
 	public boolean hasDistinctResultSet() {
-		return hasDistinctResultSet;
+		return settings.isDistinctPostProcessingEnabled();
 	}
 
 	@Override

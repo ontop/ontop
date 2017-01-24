@@ -1,8 +1,11 @@
 package it.unibz.inf.ontop.injection.impl;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.inject.Module;
+import it.unibz.inf.ontop.executor.ProposalExecutor;
 import it.unibz.inf.ontop.injection.OntopRuntimeConfiguration;
 import it.unibz.inf.ontop.injection.OntopRuntimeSettings;
+import it.unibz.inf.ontop.pivotalrepr.proposal.QueryOptimizationProposal;
 
 import java.util.Optional;
 import java.util.Properties;
@@ -30,6 +33,20 @@ public class OntopRuntimeConfigurationImpl extends OntopOBDAConfigurationImpl im
                         super.buildGuiceModules(),
                         optimizationConfiguration.buildGuiceModules()),
                 Stream.of(new OntopRuntimeModule(this)));
+    }
+
+    /**
+     * Can be overloaded by sub-classes
+     */
+    @Override
+    protected ImmutableMap<Class<? extends QueryOptimizationProposal>, Class<? extends ProposalExecutor>>
+    generateOptimizationConfigurationMap() {
+        ImmutableMap.Builder<Class<? extends QueryOptimizationProposal>, Class<? extends ProposalExecutor>>
+                internalExecutorMapBuilder = ImmutableMap.builder();
+        internalExecutorMapBuilder.putAll(super.generateOptimizationConfigurationMap());
+        internalExecutorMapBuilder.putAll(optimizationConfiguration.generateOptimizationConfigurationMap());
+
+        return internalExecutorMapBuilder.build();
     }
 
     @Override

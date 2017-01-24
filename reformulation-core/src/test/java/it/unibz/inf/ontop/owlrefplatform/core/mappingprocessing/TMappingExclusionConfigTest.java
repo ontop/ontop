@@ -6,6 +6,8 @@ import it.unibz.inf.ontop.ontology.OntologyVocabulary;
 import it.unibz.inf.ontop.ontology.impl.OntologyFactoryImpl;
 import org.junit.Test;
 
+import java.io.FileNotFoundException;
+
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
@@ -31,7 +33,7 @@ public class TMappingExclusionConfigTest {
     }
 
     // File not found
-    @Test(expected = OBDAException.class)
+    @Test(expected = FileNotFoundException.class)
     public void testNotExistingFile() throws Exception {
         TMappingExclusionConfig.parseFile("not_existing.conf");
     }
