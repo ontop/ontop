@@ -83,10 +83,10 @@ public class SesameResultIterationTest {
         s.close();
 
         Properties p = new Properties();
-        p.put(OBDASettings.DB_NAME, "countries_iteration_test");
+        p.put(OBDASettings.JDBC_NAME, "countries_iteration_test");
         p.put(OBDASettings.JDBC_URL, jdbcUrl);
-        p.put(OBDASettings.DB_USER, "sa");
-        p.put(OBDASettings.DB_PASSWORD, "");
+        p.put(OBDASettings.JDBC_USER, "sa");
+        p.put(OBDASettings.JDBC_PASSWORD, "");
         p.put(OBDASettings.JDBC_DRIVER, "org.h2.Driver");
 
         QuestConfiguration configuration = QuestConfiguration.defaultBuilder()

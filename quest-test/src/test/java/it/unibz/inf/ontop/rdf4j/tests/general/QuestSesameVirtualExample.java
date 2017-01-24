@@ -158,10 +158,10 @@ public class QuestSesameVirtualExample {
 		
 		Properties p = new Properties();
 		//set jdbc params in config
-		p.setProperty(QuestCoreSettings.DB_NAME, "books");
+		p.setProperty(QuestCoreSettings.JDBC_NAME, "books");
 		p.setProperty(QuestCoreSettings.JDBC_URL, "jdbc:mysql://10.7.20.39/books?sessionVariables=sql_mode='ANSI'");
-		p.setProperty(QuestCoreSettings.DB_USER, "fish");
-		p.setProperty(QuestCoreSettings.DB_PASSWORD, "fish");
+		p.setProperty(QuestCoreSettings.JDBC_USER, "fish");
+		p.setProperty(QuestCoreSettings.JDBC_PASSWORD, "fish");
 		p.setProperty(QuestCoreSettings.JDBC_DRIVER, "com.mysql.jdbc.Driver");
 
 		QuestConfiguration configuration = QuestConfiguration.defaultBuilder()

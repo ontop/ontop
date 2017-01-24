@@ -85,9 +85,9 @@ public class R2rmlJoinTest {
     @Test
     public void testR2rml() throws Exception {
         Properties p = new Properties();
-        p.setProperty(QuestCoreSettings.DB_NAME, "mssql");
-        p.setProperty(QuestCoreSettings.DB_USER, "mssql");
-        p.setProperty(QuestCoreSettings.DB_PASSWORD, "obdaps83");
+        p.setProperty(QuestCoreSettings.JDBC_NAME, "mssql");
+        p.setProperty(QuestCoreSettings.JDBC_USER, "mssql");
+        p.setProperty(QuestCoreSettings.JDBC_PASSWORD, "obdaps83");
         p.setProperty(QuestCoreSettings.JDBC_URL, "jdbc:sqlserver://10.7.20.91;databaseName=OREDA_OPTIQUE");
         p.setProperty(QuestCoreSettings.JDBC_DRIVER, "com.microsoft.sqlserver.jdbc.SQLServerDriver");
 

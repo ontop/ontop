@@ -58,10 +58,10 @@ public class OBDAMappingTransformerDebugTest {
 
     private static Properties generateProperties() {
         Properties p = new Properties();
-        p.setProperty(OBDASettings.DB_NAME, "DBName");
+        p.setProperty(OBDASettings.JDBC_NAME, "DBName");
         p.setProperty(OBDASettings.JDBC_URL, "jdbc:h2:tcp://localhost/DBName");
-        p.setProperty(OBDASettings.DB_USER, "sa");
-        p.setProperty(OBDASettings.DB_PASSWORD, "");
+        p.setProperty(OBDASettings.JDBC_USER, "sa");
+        p.setProperty(OBDASettings.JDBC_PASSWORD, "");
         p.setProperty(OBDASettings.JDBC_DRIVER, "com.mysql.jdbc.Driver");
         return p;
     }

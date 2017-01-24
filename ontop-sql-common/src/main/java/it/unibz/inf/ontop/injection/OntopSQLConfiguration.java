@@ -13,10 +13,10 @@ public interface OntopSQLConfiguration extends OntopOBDAConfiguration {
     }
 
     interface OntopSQLBuilderFragment<B extends Builder<B>> {
-        B dbName(String dbName);
+        B jdbcName(String dbName);
         B jdbcUrl(String jdbcUrl);
-        B dbUser(String username);
-        B dbPassword(String password);
+        B jdbcUser(String username);
+        B jdbcPassword(String password);
         B jdbcDriver(String jdbcDriver);
     }
 

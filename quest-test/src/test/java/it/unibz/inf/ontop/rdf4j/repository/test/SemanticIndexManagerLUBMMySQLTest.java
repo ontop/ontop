@@ -68,8 +68,8 @@ public class SemanticIndexManagerLUBMMySQLTest extends TestCase {
 
 		OBDACoreConfiguration configuration = OBDACoreConfiguration.defaultBuilder()
 				.jdbcUrl(url)
-				.dbUser(username)
-				.dbPassword(password)
+				.jdbcUser(username)
+				.jdbcPassword(password)
 				.jdbcDriver(driver)
 				.build();
 
@@ -147,8 +147,8 @@ public class SemanticIndexManagerLUBMMySQLTest extends TestCase {
 		p.setProperty(QuestCoreSettings.OBTAIN_FROM_ONTOLOGY, "false");
 		p.setProperty(QuestCoreSettings.JDBC_DRIVER, driver);
 		p.setProperty(QuestCoreSettings.JDBC_URL, url);
-		p.setProperty(QuestCoreSettings.DB_USER, username);
-		p.setProperty(QuestCoreSettings.DB_PASSWORD, password);
+		p.setProperty(QuestCoreSettings.JDBC_USER, username);
+		p.setProperty(QuestCoreSettings.JDBC_PASSWORD, password);
 
 
 		QuestOWLFactory factory = new QuestOWLFactory();

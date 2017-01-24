@@ -34,8 +34,8 @@ public class OntopBootstrap extends OntopMappingOntologyRelatedCommand {
 
             QuestConfiguration configuration = QuestConfiguration.defaultBuilder()
                     .jdbcUrl(jdbcURL)
-                    .dbUser(jdbcUserName)
-                    .dbPassword(jdbcPassword)
+                    .jdbcUser(jdbcUserName)
+                    .jdbcPassword(jdbcPassword)
                     .jdbcDriver(jdbcDriverClass)
                     .ontologyFile(owlFile)
                     .nativeOntopMappingFile(mappingFile)

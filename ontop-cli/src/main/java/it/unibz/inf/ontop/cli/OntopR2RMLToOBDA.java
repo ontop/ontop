@@ -36,10 +36,10 @@ public class OntopR2RMLToOBDA implements OntopCommand {
         File out = new File(outputMappingFile);
         try {
             Properties p = new Properties();
-            p.put(OBDASettings.DB_NAME, "h2");
+            p.put(OBDASettings.JDBC_NAME, "h2");
             p.put(OBDASettings.JDBC_URL, "jdbc:h2:tcp://localhost/DBName");
-            p.put(OBDASettings.DB_USER, "username");
-            p.put(OBDASettings.DB_PASSWORD, "password");
+            p.put(OBDASettings.JDBC_USER, "username");
+            p.put(OBDASettings.JDBC_PASSWORD, "password");
             p.put(OBDASettings.JDBC_DRIVER, "com.mysql.jdbc.Driver");
 
             QuestConfiguration configuration = QuestConfiguration.defaultBuilder()

@@ -67,8 +67,8 @@ public class JDBCConnectionManager {
 	}
 
 	public Connection createConnection(OntopSQLSettings settings) throws SQLException {
-		return createConnection(settings.getJdbcUrl(), settings.getDBUser(),
-				settings.getDbPassword(), settings.getJdbcDriver());
+		return createConnection(settings.getJdbcUrl(), settings.getJdbcUser(),
+				settings.getJdbcPassword(), settings.getJdbcDriver());
 	}
 
 	/**
@@ -155,7 +155,7 @@ public class JDBCConnectionManager {
 	}
 
 	public Connection getConnection(OntopSQLSettings settings) throws SQLException {
-		return getConnection(settings.getJdbcUrl(), settings.getDBUser(),
-				settings.getDbPassword(), settings.getJdbcDriver());
+		return getConnection(settings.getJdbcUrl(), settings.getJdbcUser(),
+				settings.getJdbcPassword(), settings.getJdbcDriver());
 	}
 }

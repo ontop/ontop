@@ -162,8 +162,8 @@ public class BootstrapAction extends ProtegeAction {
 			// TODO: Retrieve the effective properties (not just the default ones).
 			QuestConfiguration configuration = QuestConfiguration.defaultBuilder()
 					.jdbcUrl(url)
-					.dbUser(username)
-					.dbPassword(password)
+					.jdbcUser(username)
+					.jdbcPassword(password)
 					.jdbcDriver(driver)
 					.obdaModel(currentModel.getCurrentImmutableOBDAModel())
 					.ontology(currentOnto)

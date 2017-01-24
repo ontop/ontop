@@ -14,7 +14,9 @@ public class SQLMappingParserTest {
     private final MappingParser mappingParser;
 
     public SQLMappingParserTest() {
-        OBDACoreConfiguration configuration = OBDACoreConfiguration.defaultBuilder().build();
+        OBDACoreConfiguration configuration = OBDACoreConfiguration.defaultBuilder()
+                .propertyFile("src/test/resources/format/obda/collectionEnding.properties")
+                .build();
         Injector injector = configuration.getInjector();
         mappingParser = injector.getInstance(MappingParser.class);
     }

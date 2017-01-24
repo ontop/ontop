@@ -239,8 +239,8 @@ public class OntopRepositoryConfig extends AbstractRepositoryImplConfig {
                     p.setProperty(QuestCoreSettings.STORAGE_LOCATION, QuestConstants.JDBC);
                     p.setProperty(OBDASettings.JDBC_DRIVER, "org.h2.Driver");
                     p.setProperty(OBDASettings.JDBC_URL, "jdbc:h2:mem:stockclient1");
-                    p.setProperty(OBDASettings.DB_USER, "sa");
-                    p.setProperty(OBDASettings.DB_PASSWORD, "");
+                    p.setProperty(OBDASettings.JDBC_USER, "sa");
+                    p.setProperty(OBDASettings.JDBC_PASSWORD, "");
 
                     configuration = QuestConfiguration.defaultBuilder()
                             .ontologyFile(owlFile)

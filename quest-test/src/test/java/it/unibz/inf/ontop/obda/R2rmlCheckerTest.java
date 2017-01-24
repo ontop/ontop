@@ -83,10 +83,10 @@ public class R2rmlCheckerTest {
 		onto = OWLAPITranslatorUtility.translate(owlOntology);
 
 		Properties p = new Properties();
-        p.setProperty(OBDASettings.DB_NAME, "npd");
+        p.setProperty(OBDASettings.JDBC_NAME, "npd");
         p.setProperty(OBDASettings.JDBC_URL, "jdbc:mysql://10.7.20.39/npd");
-        p.setProperty(OBDASettings.DB_USER, "fish");
-        p.setProperty(OBDASettings.DB_PASSWORD, "fish");
+        p.setProperty(OBDASettings.JDBC_USER, "fish");
+        p.setProperty(OBDASettings.JDBC_PASSWORD, "fish");
         p.setProperty(OBDASettings.JDBC_DRIVER, "com.mysql.jdbc.Driver");
 
 		loadOBDA(p);

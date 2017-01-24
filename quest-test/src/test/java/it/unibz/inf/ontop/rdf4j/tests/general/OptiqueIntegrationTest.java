@@ -23,11 +23,11 @@ public class OptiqueIntegrationTest extends AbstractVirtualSesameTest {
 		p.setProperty(QuestCoreSettings.REWRITE, "true");
 		p.setProperty(QuestCoreSettings.REFORMULATION_TECHNIQUE, QuestConstants.TW);
 		// set jdbc params in config
-		p.setProperty(QuestCoreSettings.DB_NAME, "npd");
+		p.setProperty(QuestCoreSettings.JDBC_NAME, "npd");
 		p.setProperty(QuestCoreSettings.JDBC_URL,
 				"jdbc:mysql://10.7.20.39/npd?sessionVariables=sql_mode='ANSI'");
-		p.setProperty(QuestCoreSettings.DB_USER, "fish");
-		p.setProperty(QuestCoreSettings.DB_PASSWORD, "fish");
+		p.setProperty(QuestCoreSettings.JDBC_USER, "fish");
+		p.setProperty(QuestCoreSettings.JDBC_PASSWORD, "fish");
 		p.setProperty(QuestCoreSettings.JDBC_DRIVER, "com.mysql.jdbc.Driver");
 
 		return p;

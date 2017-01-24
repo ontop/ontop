@@ -58,8 +58,8 @@ public class OntopOBDAToR2RML implements OntopCommand {
                 .nativeOntopMappingFile(inputMappingFile)
                 .jdbcDriver("dummy")
                 .jdbcUrl("dummy")
-                .dbUser("")
-                .dbPassword("");
+                .jdbcUser("")
+                .jdbcPassword("");
 
         if (owlFile != null)
             configBuilder.ontologyFile(owlFile);

@@ -5,27 +5,14 @@ import com.google.inject.assistedinject.Assisted;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.SQLMappingFactoryImpl;
 import it.unibz.inf.ontop.injection.QuestCoreSettings;
-import it.unibz.inf.ontop.sql.ImplicitDBConstraintsReader;
-import net.sf.jsqlparser.JSQLParserException;
-import net.sf.jsqlparser.parser.CCJSqlParserUtil;
-import net.sf.jsqlparser.statement.select.Select;
 import org.apache.tomcat.jdbc.pool.DataSource;
 import org.apache.tomcat.jdbc.pool.PoolProperties;
 import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
-import it.unibz.inf.ontop.mapping.MappingSplitter;
 
-import it.unibz.inf.ontop.parser.PreprocessProjection;
-import it.unibz.inf.ontop.sql.RDBMetadata;
-import it.unibz.inf.ontop.utils.MetaMappingExpander;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nullable;
 import java.sql.*;
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * For RDBMS having a JDBC driver.
@@ -98,7 +85,7 @@ public class JDBCConnector implements DBConnector {
                 // Does nothing because the SQLException handles this problem also.
             }
             localConnection = DriverManager.getConnection(settings.getJdbcUrl(),
-                    settings.getDBUser(), settings.getDbPassword());
+                    settings.getJdbcUser(), settings.getJdbcPassword());
 
             if (localConnection != null) {
                 return true;
@@ -140,8 +127,8 @@ public class JDBCConnector implements DBConnector {
         poolProperties = new PoolProperties();
         poolProperties.setUrl(settings.getJdbcUrl());
         poolProperties.setDriverClassName(driver);
-        poolProperties.setUsername(settings.getDBUser());
-        poolProperties.setPassword(settings.getDbPassword());
+        poolProperties.setUsername(settings.getJdbcUser());
+        poolProperties.setPassword(settings.getJdbcPassword());
         poolProperties.setJmxEnabled(true);
 
         // TEST connection before using it
@@ -212,7 +199,7 @@ public class JDBCConnector implements DBConnector {
         }
         try {
             conn = DriverManager.getConnection(settings.getJdbcUrl(),
-                    settings.getDBUser(), settings.getDbPassword());
+                    settings.getJdbcUser(), settings.getJdbcPassword());
         } catch (SQLException e) {
             throw new OBDAException(e);
         } catch (Exception e) {

@@ -34,11 +34,11 @@ public class DatetimeStampSesameTest extends TestCase {
 
 		Properties connectionProperties = new Properties();
 		// set jdbc params in config
-		connectionProperties.setProperty(QuestCoreSettings.DB_NAME, "northwind");
+		connectionProperties.setProperty(QuestCoreSettings.JDBC_NAME, "northwind");
 		connectionProperties.setProperty(QuestCoreSettings.JDBC_URL,
 				"jdbc:mysql://10.7.20.39/northwind?sessionVariables=sql_mode='ANSI'");
-		connectionProperties.setProperty(QuestCoreSettings.DB_USER, "fish");
-		connectionProperties.setProperty(QuestCoreSettings.DB_PASSWORD, "fish");
+		connectionProperties.setProperty(QuestCoreSettings.JDBC_USER, "fish");
+		connectionProperties.setProperty(QuestCoreSettings.JDBC_PASSWORD, "fish");
 		connectionProperties.setProperty(QuestCoreSettings.JDBC_DRIVER, "com.mysql.jdbc.Driver");
 
 		QuestConfiguration configuration = QuestConfiguration.defaultBuilder()

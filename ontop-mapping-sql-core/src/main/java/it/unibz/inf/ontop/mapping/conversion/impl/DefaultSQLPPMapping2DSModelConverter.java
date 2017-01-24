@@ -732,6 +732,6 @@ public class DefaultSQLPPMapping2DSModelConverter implements SQLPPMapping2DSMode
 
     private Connection createConnection() throws SQLException {
         return DriverManager.getConnection(settings.getJdbcUrl(),
-                settings.getDBUser(), settings.getDbPassword());
+                settings.getJdbcUser(), settings.getJdbcPassword());
     }
 }

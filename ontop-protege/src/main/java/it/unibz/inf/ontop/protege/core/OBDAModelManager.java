@@ -110,8 +110,8 @@ public class OBDAModelManager implements Disposable {
 		Injector defaultInjector = OBDACoreConfiguration.defaultBuilder()
 				.jdbcDriver("")
 				.jdbcUrl("")
-				.dbUser("")
-				.dbPassword("")
+				.jdbcUser("")
+				.jdbcPassword("")
 				.build().getInjector();
 
 		this.mappingFactory = defaultInjector.getInstance(MappingFactory.class);

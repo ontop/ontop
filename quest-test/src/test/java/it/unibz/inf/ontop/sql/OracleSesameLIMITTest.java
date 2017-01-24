@@ -54,10 +54,10 @@ public class OracleSesameLIMITTest  {
 		 * "Virtual ABox" mode
 		 */
 		Properties p = new Properties();
-		p.setProperty(QuestCoreSettings.DB_NAME, "db");
+		p.setProperty(QuestCoreSettings.JDBC_NAME, "db");
 		p.setProperty(QuestCoreSettings.JDBC_URL, "jdbc:oracle:thin:@//10.7.20.91:1521/xe");
-		p.setProperty(QuestCoreSettings.DB_USER, "system");
-		p.setProperty(QuestCoreSettings.DB_PASSWORD, "obdaps83");
+		p.setProperty(QuestCoreSettings.JDBC_USER, "system");
+		p.setProperty(QuestCoreSettings.JDBC_PASSWORD, "obdaps83");
 		p.setProperty(QuestCoreSettings.JDBC_DRIVER, jdbc_driver_class);
 
 		QuestConfiguration configuration = QuestConfiguration.defaultBuilder()

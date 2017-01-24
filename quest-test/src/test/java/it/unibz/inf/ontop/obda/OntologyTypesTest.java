@@ -171,10 +171,10 @@ public class OntologyTypesTest {
         String driverclass = "oracle.jdbc.driver.OracleDriver";
 
         Properties p = new Properties();
-		p.setProperty(OBDASettings.DB_NAME, jdbcurl);
+		p.setProperty(OBDASettings.JDBC_NAME, jdbcurl);
 		p.setProperty(OBDASettings.JDBC_URL, jdbcurl);
-		p.setProperty(OBDASettings.DB_USER, username);
-		p.setProperty(OBDASettings.DB_PASSWORD, password);
+		p.setProperty(OBDASettings.JDBC_USER, username);
+		p.setProperty(OBDASettings.JDBC_PASSWORD, password);
 		p.setProperty(OBDASettings.JDBC_DRIVER, driverclass);
 
         //no value in the mapping

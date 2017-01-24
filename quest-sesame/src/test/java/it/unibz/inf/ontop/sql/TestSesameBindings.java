@@ -78,10 +78,10 @@ public class TestSesameBindings {
 
         Properties p = new Properties();
         p.setProperty(QuestCoreSettings.ABOX_MODE, QuestConstants.VIRTUAL);
-        p.setProperty(OBDASettings.DB_NAME, "countries");
+        p.setProperty(OBDASettings.JDBC_NAME, "countries");
         p.setProperty(OBDASettings.JDBC_URL, "jdbc:h2:mem:countries");
-        p.setProperty(OBDASettings.DB_USER, "sa");
-        p.setProperty(OBDASettings.DB_PASSWORD, "");
+        p.setProperty(OBDASettings.JDBC_USER, "sa");
+        p.setProperty(OBDASettings.JDBC_PASSWORD, "");
         p.setProperty(OBDASettings.JDBC_DRIVER, "org.h2.Driver");
 
         QuestConfiguration config = QuestConfiguration.defaultBuilder()

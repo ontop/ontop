@@ -50,10 +50,10 @@ public class TestSesameTimeout {
 	public void init()  throws Exception {
 
 		Properties p = new Properties();
-		p.setProperty(OBDASettings.DB_NAME, "countries");
+		p.setProperty(OBDASettings.JDBC_NAME, "countries");
 		p.setProperty(OBDASettings.JDBC_URL, "jdbc:h2:mem:countries");
-		p.setProperty(OBDASettings.DB_USER, "sa");
-		p.setProperty(OBDASettings.DB_PASSWORD, "");
+		p.setProperty(OBDASettings.JDBC_USER, "sa");
+		p.setProperty(OBDASettings.JDBC_PASSWORD, "");
 		p.setProperty(OBDASettings.JDBC_DRIVER, "org.h2.Driver");
 
 		sqlConnection= DriverManager.getConnection("jdbc:h2:mem:countries","sa", "");

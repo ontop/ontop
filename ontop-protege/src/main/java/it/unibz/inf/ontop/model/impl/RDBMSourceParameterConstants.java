@@ -24,9 +24,9 @@ import it.unibz.inf.ontop.injection.OntopSQLSettings;
 
 public class RDBMSourceParameterConstants {
 
-	public static final String	DATABASE_USERNAME			= OntopSQLSettings.DB_USER;
+	public static final String	DATABASE_USERNAME			= OntopSQLSettings.JDBC_USER;
 	
-	public static final String	DATABASE_PASSWORD			= OntopSQLSettings.DB_PASSWORD;
+	public static final String	DATABASE_PASSWORD			= OntopSQLSettings.JDBC_PASSWORD;
 	
 	public static final String	DATABASE_DRIVER				= OntopSQLSettings.JDBC_DRIVER;
 	

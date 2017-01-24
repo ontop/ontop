@@ -31,7 +31,6 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.sql.Connection;
 import java.sql.Statement;
-import java.util.*;
 
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Injector;
@@ -80,8 +79,8 @@ public class VirtualABoxMaterializerTest {
 
 		return QuestCoreConfiguration.defaultBuilder()
 				.jdbcUrl(url)
-				.dbUser(username)
-				.dbPassword(password)
+				.jdbcUser(username)
+				.jdbcPassword(password)
 				.jdbcDriver(driver);
 	}
 

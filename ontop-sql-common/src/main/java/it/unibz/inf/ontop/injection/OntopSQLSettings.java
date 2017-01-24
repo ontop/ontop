@@ -3,18 +3,18 @@ package it.unibz.inf.ontop.injection;
 public interface OntopSQLSettings extends OntopOBDASettings {
 
     String getJdbcUrl();
-    String getDBName();
-    String getDBUser();
-    String getDbPassword();
+    String getJdbcName();
+    String getJdbcUser();
+    String getJdbcPassword();
     String getJdbcDriver();
 
     //-------
     // Keys
     //-------
 
-    String JDBC_URL = "JDBC_URL";
-    String DB_NAME = "DB_NAME";
-    String DB_USER = "DB_USER";
-    String DB_PASSWORD = "DB_PASSWORD";
-    String JDBC_DRIVER = "JDBC_DRIVER";
+    String JDBC_URL = "jdbc.url";
+    String JDBC_NAME = "jdbc.name";
+    String JDBC_USER = "jdbc.user";
+    String JDBC_PASSWORD = "jdbc.password";
+    String JDBC_DRIVER = "jdbc.driver";
 }

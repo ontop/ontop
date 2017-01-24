@@ -44,10 +44,10 @@ public class OntopSQLConfigurationImpl extends OntopOBDAConfigurationImpl
             OntopSQLBuilderFragment<B> {
 
         private final B builder;
-        private Optional<String> dbName = Optional.empty();
+        private Optional<String> jdbcName = Optional.empty();
         private Optional<String> jdbcUrl = Optional.empty();
-        private Optional<String> dbUser = Optional.empty();
-        private Optional<String> dbPassword = Optional.empty();
+        private Optional<String> jdbcUser = Optional.empty();
+        private Optional<String> jbdcPassword = Optional.empty();
         private Optional<String> jdbcDriver = Optional.empty();
 
         DefaultOntopSQLBuilderFragment(B builder) {
@@ -55,8 +55,8 @@ public class OntopSQLConfigurationImpl extends OntopOBDAConfigurationImpl
         }
 
         @Override
-        public B dbName(String dbName) {
-            this.dbName = Optional.of(dbName);
+        public B jdbcName(String dbName) {
+            this.jdbcName = Optional.of(dbName);
             return builder;
         }
 
@@ -67,14 +67,14 @@ public class OntopSQLConfigurationImpl extends OntopOBDAConfigurationImpl
         }
 
         @Override
-        public B dbUser(String username) {
-            this.dbUser = Optional.of(username);
+        public B jdbcUser(String username) {
+            this.jdbcUser = Optional.of(username);
             return builder;
         }
 
         @Override
-        public B dbPassword(String password) {
-            this.dbPassword = Optional.of(password);
+        public B jdbcPassword(String password) {
+            this.jbdcPassword = Optional.of(password);
             return builder;
         }
 
@@ -87,10 +87,10 @@ public class OntopSQLConfigurationImpl extends OntopOBDAConfigurationImpl
         Properties generateProperties() {
             Properties properties = new Properties();
 
-            dbName.ifPresent(n -> properties.setProperty(OntopSQLSettings.DB_NAME, n));
+            jdbcName.ifPresent(n -> properties.setProperty(OntopSQLSettings.JDBC_NAME, n));
             jdbcUrl.ifPresent(s -> properties.setProperty(OntopSQLSettings.JDBC_URL, s));
-            dbUser.ifPresent(s -> properties.setProperty(OntopSQLSettings.DB_USER, s));
-            dbPassword.ifPresent(s -> properties.setProperty(OntopSQLSettings.DB_PASSWORD, s));
+            jdbcUser.ifPresent(s -> properties.setProperty(OntopSQLSettings.JDBC_USER, s));
+            jbdcPassword.ifPresent(s -> properties.setProperty(OntopSQLSettings.JDBC_PASSWORD, s));
             jdbcDriver.ifPresent(s -> properties.setProperty(OntopSQLSettings.JDBC_DRIVER, s));
 
             return properties;
@@ -113,8 +113,8 @@ public class OntopSQLConfigurationImpl extends OntopOBDAConfigurationImpl
         }
 
         @Override
-        public B dbName(String dbName) {
-            return sqlBuilderFragment.dbName(dbName);
+        public B jdbcName(String dbName) {
+            return sqlBuilderFragment.jdbcName(dbName);
         }
 
         @Override
@@ -123,13 +123,13 @@ public class OntopSQLConfigurationImpl extends OntopOBDAConfigurationImpl
         }
 
         @Override
-        public B dbUser(String username) {
-            return sqlBuilderFragment.dbUser(username);
+        public B jdbcUser(String username) {
+            return sqlBuilderFragment.jdbcUser(username);
         }
 
         @Override
-        public B dbPassword(String password) {
-            return sqlBuilderFragment.dbPassword(password);
+        public B jdbcPassword(String password) {
+            return sqlBuilderFragment.jdbcPassword(password);
         }
 
         @Override

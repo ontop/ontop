@@ -70,11 +70,11 @@ public class SesameTableWithSpaceTest extends TestCase {
 
 		connectionProperties = new Properties();
 		// set jdbc params in config
-		connectionProperties.put(QuestCoreSettings.DB_NAME, "northwindSpaced");
+		connectionProperties.put(QuestCoreSettings.JDBC_NAME, "northwindSpaced");
 		connectionProperties.put(QuestCoreSettings.JDBC_URL,
 				"jdbc:mysql://10.7.20.39/northwindSpaced?sessionVariables=sql_mode='ANSI'");
-		connectionProperties.put(QuestCoreSettings.DB_USER, "fish");
-		connectionProperties.put(QuestCoreSettings.DB_PASSWORD, "fish");
+		connectionProperties.put(QuestCoreSettings.JDBC_USER, "fish");
+		connectionProperties.put(QuestCoreSettings.JDBC_PASSWORD, "fish");
 		connectionProperties.put(QuestCoreSettings.JDBC_DRIVER,"com.mysql.jdbc.Driver");
 	}
 

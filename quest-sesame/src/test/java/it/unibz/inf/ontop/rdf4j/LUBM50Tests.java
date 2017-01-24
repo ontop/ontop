@@ -93,8 +93,8 @@ public class LUBM50Tests {
 		p.setProperty(QuestCoreSettings.OBTAIN_FROM_ONTOLOGY, "false");
 		p.setProperty(OBDASettings.JDBC_DRIVER, driver);
 		p.setProperty(OBDASettings.JDBC_URL, url);
-		p.setProperty(OBDASettings.DB_USER, username);
-		p.setProperty(OBDASettings.DB_PASSWORD, password);
+		p.setProperty(OBDASettings.JDBC_USER, username);
+		p.setProperty(OBDASettings.JDBC_PASSWORD, password);
 		p.setProperty(QuestCoreSettings.REWRITE, "true");
 
 		config = QuestConfiguration.defaultBuilder()

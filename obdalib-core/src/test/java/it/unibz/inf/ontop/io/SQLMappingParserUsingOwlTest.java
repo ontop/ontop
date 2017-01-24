@@ -78,10 +78,10 @@ public class SQLMappingParserUsingOwlTest {
 
     public SQLMappingParserUsingOwlTest() {
         OBDACoreConfiguration configuration = OBDACoreConfiguration.defaultBuilder()
-                .dbName("http://www.example.org/db/dummy/")
+                .jdbcName("http://www.example.org/db/dummy/")
                 .jdbcUrl("jdbc:postgresql://www.example.org/dummy")
-                .dbUser("dummy")
-                .dbPassword("dummy")
+                .jdbcUser("dummy")
+                .jdbcPassword("dummy")
                 .jdbcDriver("org.postgresql.Driver")
                 .build();
 

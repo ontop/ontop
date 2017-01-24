@@ -38,20 +38,15 @@ import it.unibz.inf.ontop.owlrefplatform.core.abox.RDBMSSIRepositoryManager;
 import it.unibz.inf.ontop.owlrefplatform.core.abox.RepositoryChangedListener;
 import it.unibz.inf.ontop.owlrefplatform.core.abox.SemanticIndexURIMap;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.LinearInclusionDependencies;
-import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
-import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.reformulation.DummyReformulator;
 import it.unibz.inf.ontop.owlrefplatform.core.reformulation.QueryRewriter;
 import it.unibz.inf.ontop.owlrefplatform.core.reformulation.TreeWitnessRewriter;
 import it.unibz.inf.ontop.owlrefplatform.core.srcquerygeneration.NativeQueryGenerator;
-import it.unibz.inf.ontop.owlrefplatform.core.translator.MappingVocabularyFixer;
 
 import it.unibz.inf.ontop.ontology.Ontology;
-import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.VocabularyValidator;
 import it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing.TMappingExclusionConfig;
 import it.unibz.inf.ontop.pivotalrepr.utils.ExecutorRegistry;
 import it.unibz.inf.ontop.sql.ImplicitDBConstraintsReader;
-import it.unibz.inf.ontop.utils.IMapping2DatalogConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -292,10 +287,10 @@ public class Quest implements Serializable, IQuest {
 			aboxJdbcURL = preferences.getProperty(QuestCoreSettings.JDBC_URL)
 					.orElseThrow(() -> new IllegalStateException("JDBC_URL must have a default value"));
 
-			aboxJdbcUser = preferences.getProperty(OBDASettings.DB_USER)
-					.orElseThrow(() -> new IllegalStateException("DB_USER must have a default value"));
-			aboxJdbcPassword = preferences.getProperty(OBDASettings.DB_PASSWORD)
-					.orElseThrow(() -> new IllegalStateException("DB_PASSWORD must have a default value"));
+			aboxJdbcUser = preferences.getProperty(OBDASettings.JDBC_USER)
+					.orElseThrow(() -> new IllegalStateException("JDBC_USER must have a default value"));
+			aboxJdbcPassword = preferences.getProperty(OBDASettings.JDBC_PASSWORD)
+					.orElseThrow(() -> new IllegalStateException("JDBC_PASSWORD must have a default value"));
 			aboxJdbcDriver = preferences.getProperty(OBDASettings.JDBC_DRIVER)
 					.orElseThrow(() -> new IllegalStateException("JDBC_DRIVER must have a default value"));
 		}

@@ -88,10 +88,10 @@ public class DatetimeStampTest {
     @Test
     public void testR2rml() throws Exception {
         Properties p = new Properties();
-        p.setProperty(QuestCoreSettings.DB_NAME, "jdbc:mysql://10.7.20.39/northwind");
+        p.setProperty(QuestCoreSettings.JDBC_NAME, "jdbc:mysql://10.7.20.39/northwind");
         p.setProperty(QuestCoreSettings.JDBC_URL, "jdbc:mysql://10.7.20.39/northwind");
-        p.setProperty(QuestCoreSettings.DB_USER, "fish");
-        p.setProperty(QuestCoreSettings.DB_PASSWORD, "fish");
+        p.setProperty(QuestCoreSettings.JDBC_USER, "fish");
+        p.setProperty(QuestCoreSettings.JDBC_PASSWORD, "fish");
         p.setProperty(QuestCoreSettings.JDBC_DRIVER, "com.mysql.jdbc.Driver");
 
         log.info("Loading r2rml file");

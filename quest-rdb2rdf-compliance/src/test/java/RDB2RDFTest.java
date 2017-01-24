@@ -231,9 +231,9 @@ public class RDB2RDFTest {
 
 		PROPERTIES = new Properties();
 
-		PROPERTIES.setProperty(OBDASettings.DB_NAME, "h2");
-		PROPERTIES.setProperty(OBDASettings.DB_USER, DB_USER);
-		PROPERTIES.setProperty(OBDASettings.DB_PASSWORD, DB_PASSWORD);
+		PROPERTIES.setProperty(OBDASettings.JDBC_NAME, "h2");
+		PROPERTIES.setProperty(OBDASettings.JDBC_USER, DB_USER);
+		PROPERTIES.setProperty(OBDASettings.JDBC_PASSWORD, DB_PASSWORD);
 		PROPERTIES.setProperty(OBDASettings.JDBC_URL, JDBC_URL);
 		PROPERTIES.setProperty(OBDASettings.JDBC_DRIVER, JDBC_DRIVER);
 		PROPERTIES.setProperty(QuestCoreSettings.BASE_IRI, BASE_IRI);
@@ -290,11 +290,11 @@ public class RDB2RDFTest {
 
 	Builder<? extends Builder> createInMemoryBuilder() {
 		return createStandardConfigurationBuilder()
-				.dbName("http://www.obda.org/ABOXDUMP" + System.currentTimeMillis())
+				.jdbcName("http://www.obda.org/ABOXDUMP" + System.currentTimeMillis())
 				.jdbcUrl(JDBC_URL)
 				.jdbcDriver(JDBC_DRIVER)
-				.dbUser(DB_USER)
-				.dbPassword(DB_PASSWORD);
+				.jdbcUser(DB_USER)
+				.jdbcPassword(DB_PASSWORD);
 		// TODO: re-enable these options
 		//obdaSource.setParameter(RDBMSourceParameterConstants.IS_IN_MEMORY, "true");
 		//obdaSource.setParameter(RDBMSourceParameterConstants.USE_DATASOURCE_FOR_ABOXDUMP, "true");

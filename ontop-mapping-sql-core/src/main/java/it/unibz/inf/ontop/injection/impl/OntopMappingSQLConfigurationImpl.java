@@ -226,8 +226,8 @@ public class OntopMappingSQLConfigurationImpl extends OntopSQLConfigurationImpl 
         }
 
         @Override
-        public B dbName(String dbName) {
-            return sqlBuilderFragment.dbName(dbName);
+        public B jdbcName(String dbName) {
+            return sqlBuilderFragment.jdbcName(dbName);
         }
 
         @Override
@@ -236,13 +236,13 @@ public class OntopMappingSQLConfigurationImpl extends OntopSQLConfigurationImpl 
         }
 
         @Override
-        public B dbUser(String username) {
-            return sqlBuilderFragment.dbUser(username);
+        public B jdbcUser(String username) {
+            return sqlBuilderFragment.jdbcUser(username);
         }
 
         @Override
-        public B dbPassword(String password) {
-            return sqlBuilderFragment.dbPassword(password);
+        public B jdbcPassword(String password) {
+            return sqlBuilderFragment.jdbcPassword(password);
         }
 
         @Override

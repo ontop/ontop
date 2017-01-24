@@ -45,7 +45,8 @@ public class PrefixRendererTest extends TestCase {
 	private final MappingFactory mappingFactory;
 
 	public PrefixRendererTest() {
-		OBDACoreConfiguration configuration = OBDACoreConfiguration.defaultBuilder().build();
+		OBDACoreConfiguration configuration = OBDACoreConfiguration.defaultBuilder()
+				.build();
 		Injector injector = configuration.getInjector();
         mappingFactory = injector.getInstance(MappingFactory.class);
     }

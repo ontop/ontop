@@ -10,10 +10,10 @@ public class OntopSQLSettingsImpl extends OntopOBDASettingsImpl implements Ontop
 
     private static final String DB_PREFIX = "DB-";
     private final String jdbcUrl;
-    private final String dbUser;
-    private final String dbPassword;
+    private final String jdbcUser;
+    private final String jdbcPassword;
     private final String jdbcDriver;
-    private final String dbName;
+    private final String jdbcName;
 
     /**
      * Beware: immutable class!
@@ -29,11 +29,11 @@ public class OntopSQLSettingsImpl extends OntopOBDASettingsImpl implements Ontop
         super(userProperties);
 
         jdbcUrl = getRequiredProperty(OntopSQLSettings.JDBC_URL);
-        dbUser = getRequiredProperty(OntopSQLSettings.DB_USER);
-        dbPassword = getRequiredProperty(OntopSQLSettings.DB_PASSWORD);
+        jdbcUser = getRequiredProperty(OntopSQLSettings.JDBC_USER);
+        jdbcPassword = getRequiredProperty(OntopSQLSettings.JDBC_PASSWORD);
         jdbcDriver = getRequiredProperty(OntopSQLSettings.JDBC_DRIVER);
 
-        dbName = getProperty(OntopSQLSettings.DB_NAME)
+        jdbcName = getProperty(OntopSQLSettings.JDBC_NAME)
                 .orElseGet(() -> IDGenerator.getNextUniqueID(DB_PREFIX));
     }
 
@@ -43,18 +43,17 @@ public class OntopSQLSettingsImpl extends OntopOBDASettingsImpl implements Ontop
     }
 
     @Override
-    public String getDBName() {
-        return dbName;
+    public String getJdbcName() {
+        return jdbcName;
     }
 
     @Override
-    public String getDBUser() {
-        return dbUser;
+    public String getJdbcUser() {
+        return jdbcUser;
     }
 
-    @Override
-    public String getDbPassword() {
-        return dbPassword;
+    public String getJdbcPassword() {
+        return jdbcPassword;
     }
 
     @Override
