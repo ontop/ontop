@@ -4,6 +4,8 @@ import com.google.inject.Module;
 import it.unibz.inf.ontop.injection.InvalidOntopConfigurationException;
 import it.unibz.inf.ontop.injection.OntopMappingConfiguration;
 import it.unibz.inf.ontop.injection.OntopMappingSettings;
+import it.unibz.inf.ontop.injection.impl.OntopOptimizationConfigurationImpl.DefaultOntopOptimizationBuilderFragment;
+import it.unibz.inf.ontop.injection.impl.OntopOptimizationConfigurationImpl.OntopOptimizationOptions;
 import it.unibz.inf.ontop.spec.OBDASpecification;
 import it.unibz.inf.ontop.exception.OBDASpecificationException;
 import it.unibz.inf.ontop.spec.OBDASpecificationExtractor;
@@ -27,11 +29,13 @@ public class OntopMappingConfigurationImpl extends OntopOBDAConfigurationImpl im
 
     private final OntopMappingSettings settings;
     private final OntopMappingOptions options;
+    private final OntopOptimizationConfigurationImpl optimizationConfiguration;
 
     OntopMappingConfigurationImpl(OntopMappingSettings settings, OntopMappingOptions options) {
         super(settings, options.obdaOptions);
         this.settings = settings;
         this.options = options;
+        this.optimizationConfiguration = new OntopOptimizationConfigurationImpl(settings, options.optimizationOptions);
     }
 
     @Override
@@ -118,22 +122,26 @@ public class OntopMappingConfigurationImpl extends OntopOBDAConfigurationImpl im
 
     protected Stream<Module> buildGuiceModules() {
         return Stream.concat(
-                super.buildGuiceModules(),
+                Stream.concat(
+                        super.buildGuiceModules(),
+                        optimizationConfiguration.buildGuiceModules()),
                 Stream.of(new OntopMappingModule(this)));
     }
 
     static class OntopMappingOptions {
 
         final OntopOBDAOptions obdaOptions;
+        final OntopOptimizationOptions optimizationOptions;
         private final Optional<ImplicitDBConstraintsReader> implicitDBConstraintsReader;
         private final Optional<OBDASpecification> dataSourceModel;
 
         private OntopMappingOptions(Optional<OBDASpecification> dataSourceModel,
                                     Optional<ImplicitDBConstraintsReader> implicitDBConstraintsReader,
-                                    OntopOBDAOptions obdaOptions) {
+                                    OntopOBDAOptions obdaOptions, OntopOptimizationOptions optimizationOptions) {
             this.dataSourceModel = dataSourceModel;
             this.implicitDBConstraintsReader = implicitDBConstraintsReader;
             this.obdaOptions = obdaOptions;
+            this.optimizationOptions = optimizationOptions;
         }
     }
 
@@ -186,8 +194,9 @@ public class OntopMappingConfigurationImpl extends OntopOBDAConfigurationImpl im
             return builder;
         }
 
-        final OntopMappingOptions generateMappingOptions(OntopOBDAOptions obdaOptions) {
-            return new OntopMappingOptions(dataSourceModel, userConstraints, obdaOptions);
+        final OntopMappingOptions generateMappingOptions(OntopOBDAOptions obdaOptions,
+                                                         OntopOptimizationOptions optimizationOptions) {
+            return new OntopMappingOptions(dataSourceModel, userConstraints, obdaOptions, optimizationOptions);
         }
 
         Properties generateProperties() {
@@ -204,12 +213,15 @@ public class OntopMappingConfigurationImpl extends OntopOBDAConfigurationImpl im
         implements OntopMappingConfiguration.Builder<B> {
 
         private final DefaultOntopMappingBuilderFragment<B> mappingBuilderFragment;
+        private final DefaultOntopOptimizationBuilderFragment<B> optimizationBuilderFragment;
         private boolean isMappingDefined;
 
         OntopMappingBuilderMixin() {
-            this.mappingBuilderFragment = new DefaultOntopMappingBuilderFragment<>((B)this,
+            B builder = (B) this;
+            this.mappingBuilderFragment = new DefaultOntopMappingBuilderFragment<>(builder,
                     this::isMappingDefined,
                     this::declareMappingDefined);
+            this.optimizationBuilderFragment = new DefaultOntopOptimizationBuilderFragment<>(builder);
         }
 
         @Override
@@ -237,7 +249,13 @@ public class OntopMappingConfigurationImpl extends OntopOBDAConfigurationImpl im
         }
 
         final OntopMappingOptions generateMappingOptions(OntopOBDAOptions obdaOptions) {
-            return mappingBuilderFragment.generateMappingOptions(obdaOptions);
+            return generateMappingOptions(obdaOptions, optimizationBuilderFragment.generateOptimizationOptions(
+                    obdaOptions.modelOptions));
+        }
+
+        final OntopMappingOptions generateMappingOptions(OntopOBDAOptions obdaOptions,
+                                                         OntopOptimizationOptions optimizationOptions) {
+            return mappingBuilderFragment.generateMappingOptions(obdaOptions, optimizationOptions);
         }
 
         @Override
@@ -245,6 +263,7 @@ public class OntopMappingConfigurationImpl extends OntopOBDAConfigurationImpl im
             Properties properties = new Properties();
             properties.putAll(super.generateProperties());
             properties.putAll(mappingBuilderFragment.generateProperties());
+            properties.putAll(optimizationBuilderFragment.generateProperties());
 
             return properties;
         }

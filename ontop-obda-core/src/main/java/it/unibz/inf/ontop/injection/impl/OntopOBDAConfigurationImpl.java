@@ -35,7 +35,9 @@ public class OntopOBDAConfigurationImpl extends OntopModelConfigurationImpl impl
     }
 
     protected Stream<Module> buildGuiceModules() {
-        return Stream.of(new OntopOBDAModule(this));
+        return Stream.concat(
+                super.buildGuiceModules(),
+                Stream.of(new OntopOBDAModule(this)));
     }
 
 

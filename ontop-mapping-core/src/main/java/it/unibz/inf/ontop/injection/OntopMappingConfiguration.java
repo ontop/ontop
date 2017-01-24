@@ -10,7 +10,7 @@ import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.util.Optional;
 
-public interface OntopMappingConfiguration extends OntopOBDAConfiguration {
+public interface OntopMappingConfiguration extends OntopOBDAConfiguration, OntopOptimizationConfiguration {
 
     Optional<ImplicitDBConstraintsReader> getImplicitDBConstraintsReader();
 
@@ -51,7 +51,8 @@ public interface OntopMappingConfiguration extends OntopOBDAConfiguration {
 
     }
 
-    interface Builder<B extends Builder<B>> extends OntopMappingBuilderFragment<B>, OntopOBDAConfiguration.Builder<B> {
+    interface Builder<B extends Builder<B>> extends OntopMappingBuilderFragment<B>, OntopOBDAConfiguration.Builder<B>,
+            OntopOptimizationConfiguration.Builder<B> {
 
         @Override
         OntopMappingConfiguration build();

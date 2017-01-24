@@ -1,7 +1,7 @@
 package it.unibz.inf.ontop.injection;
 
 
-public interface OntopMappingSettings extends OntopOBDASettings {
+public interface OntopMappingSettings extends OntopOBDASettings, OntopOptimizationSettings {
 
     boolean isOntologyAnnotationQueryingEnabled();
 
