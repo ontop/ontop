@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.r2rml;
 
 import eu.optique.api.mapping.TriplesMap;
+import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.exception.InvalidMappingException;
 import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
 import it.unibz.inf.ontop.injection.OBDACoreConfiguration;
@@ -18,7 +19,7 @@ import static junit.framework.TestCase.assertTrue;
 public class OBDAMappingTransformerDebugTest {
 
     @Test
-    public void testMultipleSubjectsInMappingTarget() throws IOException, InvalidMappingException {
+    public void testMultipleSubjectsInMappingTarget() throws IOException, InvalidMappingException, DuplicateMappingException {
         File mapFile = new File("src/test/resources/obdaMappingTransformerTests/splitMappingAxiomBySubject.obda");
 
         OBDACoreConfiguration config = OBDACoreConfiguration.defaultBuilder()
@@ -26,7 +27,7 @@ public class OBDAMappingTransformerDebugTest {
                 .nativeOntopMappingFile(mapFile)
                 .build();
 
-        OBDAModel model = config.loadProvidedSpecification();
+        OBDAModel model = config.loadProvidedPPMapping();
 
         R2RMLWriter writer = new R2RMLWriter(model, null, config.getInjector().getInstance(
                 NativeQueryLanguageComponentFactory.class));
@@ -39,14 +40,14 @@ public class OBDAMappingTransformerDebugTest {
     }
 
     @Test
-    public void testPredicateMapTranslation() throws IOException, InvalidMappingException {
+    public void testPredicateMapTranslation() throws IOException, InvalidMappingException, DuplicateMappingException {
         File mapFile = new File("src/test/resources/obdaMappingTransformerTests/predicateMap.obda");
         OBDACoreConfiguration config = OBDACoreConfiguration.defaultBuilder()
                 .properties(generateProperties())
                 .nativeOntopMappingFile(mapFile)
                 .build();
 
-        OBDAModel model = config.loadProvidedSpecification();
+        OBDAModel model = config.loadProvidedPPMapping();
 
         R2RMLWriter writer = new R2RMLWriter(model,null, config.getInjector().getInstance(
                 NativeQueryLanguageComponentFactory.class));

@@ -35,6 +35,7 @@ import java.util.*;
 import it.unibz.inf.ontop.injection.QuestComponentFactory;
 import it.unibz.inf.ontop.injection.QuestCoreConfiguration;
 import it.unibz.inf.ontop.reformulation.OBDAQueryProcessor;
+import it.unibz.inf.ontop.spec.OBDASpecification;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -94,30 +95,50 @@ public class QuestMaterializer {
 		// Was an ugly way to ask for also querying the annotations
 	}
 
-    private static ImmutableSet<Predicate> extractVocabulary(@Nonnull Ontology onto) {
+	public QuestMaterializer(@Nonnull QuestCoreConfiguration configuration,
+							 boolean doStreamResults) throws Exception {
+
+		this.doStreamResults = doStreamResults;
+
+		Injector injector = configuration.getInjector();
+		questComponentFactory = injector.getInstance(QuestComponentFactory.class);
+
+		OBDASpecification obdaSpecification = configuration.loadProvidedSpecification();
+
+		OBDAQueryProcessor queryProcessor = questComponentFactory.create(
+				obdaSpecification, configuration.getExecutorRegistry());
+
+		this.selectedVocabulary = extractVocabulary(obdaSpecification.getVocabulary());
+
+		connector = questComponentFactory.create(queryProcessor);
+
+		// Was an ugly way to ask for also querying the annotations
+	}
+
+    private static ImmutableSet<Predicate> extractVocabulary(@Nonnull ImmutableOntologyVocabulary vocabulary) {
         Set<Predicate> predicates = new HashSet<>();
 
         //add all class/data/object predicates to selectedVocabulary
             //from ontology
-            for (OClass cl : onto.getVocabulary().getClasses()) {
+            for (OClass cl : vocabulary.getClasses()) {
                 Predicate p = cl.getPredicate();
                 if (!p.toString().startsWith("http://www.w3.org/2002/07/owl#")
                         && !predicates.contains(p))
                     predicates.add(p);
             }
-            for (ObjectPropertyExpression role : onto.getVocabulary().getObjectProperties()) {
+            for (ObjectPropertyExpression role : vocabulary.getObjectProperties()) {
                 Predicate p = role.getPredicate();
                 if (!p.toString().startsWith("http://www.w3.org/2002/07/owl#")
                         && !predicates.contains(p))
                     predicates.add(p);
             }
-            for (DataPropertyExpression role : onto.getVocabulary().getDataProperties()) {
+            for (DataPropertyExpression role : vocabulary.getDataProperties()) {
                 Predicate p = role.getPredicate();
                 if (!p.toString().startsWith("http://www.w3.org/2002/07/owl#")
                         && !predicates.contains(p))
                     predicates.add(p);
             }
-			for (AnnotationProperty role : onto.getVocabulary().getAnnotationProperties()) {
+			for (AnnotationProperty role : vocabulary.getAnnotationProperties()) {
 				Predicate p = role.getPredicate();
 				if (!p.toString().startsWith("http://www.w3.org/2002/07/owl#")
 							&& !predicates.contains(p))

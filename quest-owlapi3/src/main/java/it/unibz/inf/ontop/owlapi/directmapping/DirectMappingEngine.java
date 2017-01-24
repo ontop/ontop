@@ -88,7 +88,7 @@ public class DirectMappingEngine {
 	 *
 	 */
 	public static BootstrappingResults bootstrap(QuestConfiguration configuration, String baseIRI)
-			throws IOException, InvalidMappingException, OWLOntologyCreationException, SQLException, OWLOntologyStorageException {
+			throws IOException, InvalidMappingException, OWLOntologyCreationException, SQLException, OWLOntologyStorageException, DuplicateMappingException {
 		DirectMappingEngine engine = configuration.getInjector().getInstance(DirectMappingEngine.class);
 		return engine.bootstrapMappingAndOntology(baseIRI, configuration.loadPPMapping(),
 				configuration.loadInputOntology());
@@ -110,7 +110,7 @@ public class DirectMappingEngine {
 	 */
 	private BootstrappingResults bootstrapMappingAndOntology(String baseIRI, Optional<OBDAModel> inputObdaModel,
 															 Optional<OWLOntology> inputOntology)
-			throws SQLException, OWLOntologyCreationException, OWLOntologyStorageException {
+			throws SQLException, OWLOntologyCreationException, OWLOntologyStorageException, DuplicateMappingException {
 
 		setBaseURI(baseIRI);
 

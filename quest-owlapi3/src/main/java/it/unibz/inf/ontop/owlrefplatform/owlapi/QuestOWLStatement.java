@@ -132,75 +132,76 @@ public class QuestOWLStatement implements IQuestOWLStatement {
 	}
 
 	public int insertData(File owlFile, int commitSize, int batchsize, String baseURI) throws Exception {
+		throw new RuntimeException("TODO: support insertData() again?");
 
-		Iterator<Assertion> aBoxIter = null;
-
-		if (owlFile.getName().toLowerCase().endsWith(".owl")) {
-			OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-			OWLOntology ontology = manager.loadOntologyFromOntologyDocument(owlFile);
-			Set<OWLOntology> set = manager.getImportsClosure(ontology);
-
-			// Retrieves the ABox from the ontology file.
-
-			aBoxIter = new OWLAPIABoxIterator(set, st.getQuestInstance().getVocabulary());
-			return st.insertData(aBoxIter, commitSize, batchsize);
-		} 
-		else if (owlFile.getName().toLowerCase().endsWith(".ttl") || owlFile.getName().toLowerCase().endsWith(".nt")) {
-
-			RDFParser rdfParser = null;
-
-			if (owlFile.getName().toLowerCase().endsWith(".nt")) {
-				rdfParser = Rio.createParser(RDFFormat.NTRIPLES);
-			} else if (owlFile.getName().toLowerCase().endsWith(".ttl")) {
-				rdfParser = Rio.createParser(RDFFormat.TURTLE);
-			}
-
-			ParserConfig config = rdfParser.getParserConfig();
-			// To emulate DatatypeHandling.IGNORE 
-			config.addNonFatalError(BasicParserSettings.FAIL_ON_UNKNOWN_DATATYPES);
-			config.addNonFatalError(BasicParserSettings.VERIFY_DATATYPE_VALUES);
-			config.addNonFatalError(BasicParserSettings.NORMALIZE_DATATYPE_VALUES);
+//		Iterator<Assertion> aBoxIter = null;
 //
-//			rdfParser.setVerifyData(true);
-//			rdfParser.setStopAtFirstError(true);
-
-			boolean autoCommit = conn.getAutoCommit();
-			conn.setAutoCommit(false);
-
-			RDF4JRDFIterator rdfHandler = new RDF4JRDFIterator();
-			rdfParser.setRDFHandler(rdfHandler);
-
-			BufferedReader reader = new BufferedReader(new FileReader(owlFile));
-
-			try {
-
-				Thread insert = new Thread(new Insert(rdfParser, reader, baseURI));
-				Process processor = new Process(rdfHandler, this.st, commitSize, batchsize);
-				Thread process = new Thread(processor);
-
-				// start threads
-				insert.start();
-				process.start();
-
-				insert.join();
-				process.join();
-
-				return processor.getInsertCount();
-
-			} catch (RuntimeException | InterruptedException e) {
-				// System.out.println("exception, rolling back!");
-
-				if (autoCommit) {
-					conn.rollBack();
-				}
-				throw e;
-			} finally {
-				conn.setAutoCommit(autoCommit);
-			}
-
-		} else {
-			throw new IllegalArgumentException("Only .owl, .ttl and .nt files are supported for load opertions.");
-		}
+//		if (owlFile.getName().toLowerCase().endsWith(".owl")) {
+//			OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
+//			OWLOntology ontology = manager.loadOntologyFromOntologyDocument(owlFile);
+//			Set<OWLOntology> set = manager.getImportsClosure(ontology);
+//
+//			// Retrieves the ABox from the ontology file.
+//
+//			aBoxIter = new OWLAPIABoxIterator(set, st.getQuestInstance().getVocabulary());
+//			return st.insertData(aBoxIter, commitSize, batchsize);
+//		}
+//		else if (owlFile.getName().toLowerCase().endsWith(".ttl") || owlFile.getName().toLowerCase().endsWith(".nt")) {
+//
+//			RDFParser rdfParser = null;
+//
+//			if (owlFile.getName().toLowerCase().endsWith(".nt")) {
+//				rdfParser = Rio.createParser(RDFFormat.NTRIPLES);
+//			} else if (owlFile.getName().toLowerCase().endsWith(".ttl")) {
+//				rdfParser = Rio.createParser(RDFFormat.TURTLE);
+//			}
+//
+//			ParserConfig config = rdfParser.getParserConfig();
+//			// To emulate DatatypeHandling.IGNORE
+//			config.addNonFatalError(BasicParserSettings.FAIL_ON_UNKNOWN_DATATYPES);
+//			config.addNonFatalError(BasicParserSettings.VERIFY_DATATYPE_VALUES);
+//			config.addNonFatalError(BasicParserSettings.NORMALIZE_DATATYPE_VALUES);
+////
+////			rdfParser.setVerifyData(true);
+////			rdfParser.setStopAtFirstError(true);
+//
+//			boolean autoCommit = conn.getAutoCommit();
+//			conn.setAutoCommit(false);
+//
+//			RDF4JRDFIterator rdfHandler = new RDF4JRDFIterator();
+//			rdfParser.setRDFHandler(rdfHandler);
+//
+//			BufferedReader reader = new BufferedReader(new FileReader(owlFile));
+//
+//			try {
+//
+//				Thread insert = new Thread(new Insert(rdfParser, reader, baseURI));
+//				Process processor = new Process(rdfHandler, this.st, commitSize, batchsize);
+//				Thread process = new Thread(processor);
+//
+//				// start threads
+//				insert.start();
+//				process.start();
+//
+//				insert.join();
+//				process.join();
+//
+//				return processor.getInsertCount();
+//
+//			} catch (RuntimeException | InterruptedException e) {
+//				// System.out.println("exception, rolling back!");
+//
+//				if (autoCommit) {
+//					conn.rollBack();
+//				}
+//				throw e;
+//			} finally {
+//				conn.setAutoCommit(autoCommit);
+//			}
+//
+//		} else {
+//			throw new IllegalArgumentException("Only .owl, .ttl and .nt files are supported for load opertions.");
+//		}
 
 	}
 
@@ -341,8 +342,8 @@ public class QuestOWLStatement implements IQuestOWLStatement {
 
 	public String getRewriting(String query) throws OWLException {
 		try {
-			ParsedQuery pq = st.getQuestInstance().getEngine().getParsedQuery(query);
-			return st.getQuestInstance().getEngine().getRewriting(pq);
+			ParsedQuery pq = st.getParsedQuery(query);
+			return st.getRewriting(pq);
 		} 
 		catch (Exception e) {
 			throw new OntopOWLException(e);
@@ -366,8 +367,8 @@ public class QuestOWLStatement implements IQuestOWLStatement {
 
 	public ExecutableQuery getExecutableQuery(String query) throws OWLException {
 		try {
-			ParsedQuery pq = st.getQuestInstance().getEngine().getParsedQuery(query);
-			return st.getQuestInstance().getEngine().translateIntoNativeQuery(pq, Optional.empty());
+			ParsedQuery pq = st.getParsedQuery(query);
+			return st.translateIntoNativeQuery(pq, Optional.empty());
 		} catch (Exception e) {
 			throw new OntopOWLException(e);
 		}

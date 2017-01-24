@@ -85,11 +85,12 @@ public class QuestOWLConnection implements AutoCloseable {
 	 * For the classic A-box mode
      */
 	public SIQuestOWLStatement createSIStatement() throws OWLException {
-		try {
-			return new SIQuestOWLStatementImpl(conn.createSIStatement(), this);
-		} catch (OBDAException e) {
-			throw new OWLException(e);
-		}
+		throw new RuntimeException("TODO: re-enable it");
+//		try {
+//			return new SIQuestOWLStatementImpl(conn.createSIStatement(), this);
+//		} catch (OBDAException e) {
+//			throw new OWLException(e);
+//		}
 	}
 
 	public void commit() throws OWLException {

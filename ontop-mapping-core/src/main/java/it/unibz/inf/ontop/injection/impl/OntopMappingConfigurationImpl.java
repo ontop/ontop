@@ -72,7 +72,7 @@ public class OntopMappingConfigurationImpl extends OntopOBDAConfigurationImpl im
                 );
     }
 
-    Optional<OBDASpecification> loadSpecification(Supplier<Optional<Ontology>> ontologySupplier,
+    Optional<OBDASpecification> loadSpecification(OntologySupplier ontologySupplier,
                                                   Supplier<Optional<PreProcessedMapping>> ppMappingSupplier,
                                                   Supplier<Optional<File>> mappingFileSupplier,
                                                   Supplier<Optional<Reader>> mappingReaderSupplier,
@@ -86,7 +86,7 @@ public class OntopMappingConfigurationImpl extends OntopOBDAConfigurationImpl im
         if (options.dataSourceModel.isPresent())
             return options.dataSourceModel;
 
-         Optional<Ontology> optionalOntology= ontologySupplier.get();
+         Optional<Ontology> optionalOntology = ontologySupplier.get();
 
         Optional<DBMetadata> optionalMetadata = getPredefinedDBMetadata();
 

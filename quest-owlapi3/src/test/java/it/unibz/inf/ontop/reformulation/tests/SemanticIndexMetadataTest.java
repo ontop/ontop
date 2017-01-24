@@ -107,29 +107,31 @@ public class SemanticIndexMetadataTest  extends TestCase {
 					.properties(p)
 					.build();
 
-			Injector injector = config.getInjector();
-			QuestComponentFactory componentFactory = injector.getInstance(QuestComponentFactory.class);
-			IQuest questInstance = componentFactory.create(ont, Optional.empty(), Optional.empty(),
-					config.getExecutorRegistry());
-			questInstance.setupRepository();
-			
-			RDBMSSIRepositoryManager si = questInstance.getOptionalSemanticIndexRepository().get();
-			
-			si.createDBSchemaAndInsertMetadata(conn);
+			fail("TODO: fix the SI and this test");
 
-			
-			Statement st = conn.createStatement();
-			ResultSet res = st.executeQuery("SELECT * FROM IDX ORDER BY IDX");
-			while (res.next()) {
-				String string = res.getString(1);
-				int idx = res.getInt(2);
-				int type = res.getInt(3);
-				System.out.println(string + ", " + idx + ", "+ type);
-			}
-			st.close();
-			
-			// load metadata back from the DB
-			si.loadMetadata(conn);	
+//			Injector injector = config.getInjector();
+//			QuestComponentFactory componentFactory = injector.getInstance(QuestComponentFactory.class);
+//			IQuest questInstance = componentFactory.create(ont, Optional.empty(), Optional.empty(),
+//					config.getExecutorRegistry());
+//			questInstance.setupRepository();
+//
+//			RDBMSSIRepositoryManager si = questInstance.getOptionalSemanticIndexRepository().get();
+//
+//			si.createDBSchemaAndInsertMetadata(conn);
+//
+//
+//			Statement st = conn.createStatement();
+//			ResultSet res = st.executeQuery("SELECT * FROM IDX ORDER BY IDX");
+//			while (res.next()) {
+//				String string = res.getString(1);
+//				int idx = res.getInt(2);
+//				int type = res.getInt(3);
+//				System.out.println(string + ", " + idx + ", "+ type);
+//			}
+//			st.close();
+//
+//			// load metadata back from the DB
+//			si.loadMetadata(conn);
 			
 
 			

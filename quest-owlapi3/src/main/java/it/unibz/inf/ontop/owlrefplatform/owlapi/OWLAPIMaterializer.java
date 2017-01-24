@@ -21,20 +21,13 @@ package it.unibz.inf.ontop.owlrefplatform.owlapi;
  */
 
 import com.google.common.collect.ImmutableSet;
-import it.unibz.inf.ontop.exception.InvalidMappingException;
 import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.model.Predicate;
 import it.unibz.inf.ontop.ontology.Assertion;
-import it.unibz.inf.ontop.ontology.Ontology;
-import it.unibz.inf.ontop.ontology.utils.MappingVocabularyExtractor;
-import it.unibz.inf.ontop.owlapi.OWLAPITranslatorUtility;
 import it.unibz.inf.ontop.owlapi.QuestOWLIndividualAxiomIterator;
 import it.unibz.inf.ontop.owlrefplatform.core.abox.QuestMaterializer;
-import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
-import java.io.IOException;
 import java.util.Iterator;
-import java.util.Optional;
 
 /**
  * TODO: refactor (remove the exceptions from the constructors and create a Result object)
@@ -45,8 +38,7 @@ public class OWLAPIMaterializer implements AutoCloseable {
 	private final QuestMaterializer materializer;
 
 	public OWLAPIMaterializer(QuestConfiguration configuration, boolean doStreamResults) throws Exception {
-		Ontology tbox = extractTBox(configuration);
-		materializer = new QuestMaterializer(configuration, tbox, doStreamResults);
+		materializer = new QuestMaterializer(configuration, doStreamResults);
 		assertions = materializer.getAssertionIterator();
 	}
 
@@ -54,7 +46,7 @@ public class OWLAPIMaterializer implements AutoCloseable {
  	 * Only materializes the predicates in `predicates`
   	 */
 	public OWLAPIMaterializer(QuestConfiguration configuration, ImmutableSet<Predicate> selectedVocabulary, boolean doStreamResults) throws Exception {
-		materializer = new QuestMaterializer(configuration, extractTBox(configuration), selectedVocabulary, doStreamResults);
+		materializer = new QuestMaterializer(configuration, selectedVocabulary, doStreamResults);
 		assertions = materializer.getAssertionIterator();
 	}
 
@@ -88,16 +80,4 @@ public class OWLAPIMaterializer implements AutoCloseable {
     public void close() throws Exception {
         disconnect();
     }
-
-	private static Ontology extractTBox(QuestConfiguration configuration) throws OWLOntologyCreationException,
-			IOException, InvalidMappingException {
-
-		Optional<Ontology> inputOntology =  configuration.loadInputOntology()
-				.map(OWLAPITranslatorUtility::translate);
-
-		if (inputOntology.isPresent())
-			return inputOntology.get();
-
-		return MappingVocabularyExtractor.extractOntology(configuration.loadProvidedSpecification());
-	}
 }

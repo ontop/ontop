@@ -9,6 +9,7 @@ import it.unibz.inf.ontop.injection.QuestComponentFactory;
 import it.unibz.inf.ontop.injection.QuestCoreConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLConnection;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLStatement;
+import it.unibz.inf.ontop.reformulation.OBDAQueryProcessor;
 import it.unibz.inf.ontop.sql.RDBMetadata;
 import it.unibz.inf.ontop.sql.RDBMetadataExtractionTools;
 import it.unibz.inf.ontop.sql.DatabaseRelationDefinition;
@@ -30,10 +31,11 @@ public class ExampleManualMetadata {
 final String owlfile = "src/main/resources/example/exampleSensor.owl";
 final String obdafile = "src/main/resources/example/UseCaseExampleMini.obda";
 private QuestOWLStatement qst = null;
+	private DBConnector dbConnector;
 
-/*
- * 	prepare ontop for rewriting and unfolding steps 
- */
+	/*
+     * 	prepare ontop for rewriting and unfolding steps
+     */
 private void setup()  throws Exception {
 	/*
 	 * Load the ontology from an external .owl file.
@@ -50,23 +52,17 @@ private void setup()  throws Exception {
 
 	MappingParser mappingParser = injector.getInstance(MappingParser.class);
 	OBDAModel obdaModel = mappingParser.parse(new File(obdafile));
-	
-	/*
-	 * Prepare the configuration for the Quest instance. The example below shows the setup for
-	 * "Virtual ABox" mode
-	 */
-	IQuest quest = componentFactory.create(
-			OWLAPITranslatorUtility.translateImportsClosure(ontology),
-			Optional.of(obdaModel),
-			Optional.empty(),
+
+	OBDAQueryProcessor queryProcessor = componentFactory.create(configuration.loadProvidedSpecification(),
 			configuration.getExecutorRegistry());
-	quest.setupRepository();
+	dbConnector = componentFactory.create(queryProcessor);
+	dbConnector.connect();
 	
 	/*
 	 * Prepare the data connection for querying.
 	 */
 	
-	IQuestConnection conn =quest.getConnection();
+	IQuestConnection conn =dbConnector.getConnection();
 	QuestOWLConnection connOWL = new QuestOWLConnection(conn);
 	qst = connOWL.createStatement();
 }
@@ -106,7 +102,7 @@ private RDBMetadata getMeta(){
 public void runQuery() throws Exception {
 	setup();
 	System.out.println("Good");
-	
+	dbConnector.close();
 }
 
 public static void main(String[] args) {

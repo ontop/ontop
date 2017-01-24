@@ -1,8 +1,12 @@
 package it.unibz.inf.ontop.injection.impl;
 
 
+import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.exception.InvalidMappingException;
+import it.unibz.inf.ontop.exception.OBDASpecificationException;
+import it.unibz.inf.ontop.exception.OntologyException;
 import it.unibz.inf.ontop.injection.*;
+import it.unibz.inf.ontop.owlapi.OWLAPITranslatorUtility;
 import it.unibz.inf.ontop.spec.OBDASpecification;
 import it.unibz.inf.ontop.model.OBDAModel;
 import it.unibz.inf.ontop.ontology.Ontology;
@@ -74,17 +78,22 @@ public class QuestConfigurationImpl extends QuestCoreConfigurationImpl implement
     }
 
     @Override
-    public Optional<OBDASpecification> loadSpecification() throws IOException, InvalidMappingException {
+    public Optional<OBDASpecification> loadSpecification() throws IOException, OBDASpecificationException {
         return loadSpecification(this::loadOntology);
     }
 
     @Override
-    public Optional<OBDAModel> loadPPMapping() throws IOException, InvalidMappingException {
+    public Optional<OBDAModel> loadPPMapping() throws IOException, InvalidMappingException, DuplicateMappingException {
         return loadPPMapping(this::loadOntology);
     }
 
-    private Optional<Ontology> loadOntology() {
-        throw new RuntimeException("TODO: extract the ontology");
+    private Optional<Ontology> loadOntology() throws OntologyException {
+        try {
+            return loadInputOntology()
+                    .map(o -> OWLAPITranslatorUtility.translateImportsClosure(o));
+        } catch (OWLOntologyCreationException e) {
+            throw new OntologyException(e.getMessage());
+        }
     }
 
     private Optional<URL> extractOntologyURL() throws MalformedURLException {

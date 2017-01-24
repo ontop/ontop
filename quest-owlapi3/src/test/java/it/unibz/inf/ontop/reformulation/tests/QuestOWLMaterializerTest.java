@@ -112,10 +112,8 @@ public class QuestOWLMaterializerTest extends TestCase {
 				.nativeOntopMappingFile(f)
 				.build();
 
-		Ontology ontology = OWLAPITranslatorUtility.translate(configuration.loadProvidedInputOntology());
-
 		// TODO: why not using OWLAPIMaterializer instead?
-			QuestMaterializer mat = new QuestMaterializer(configuration, ontology, false);
+			QuestMaterializer mat = new QuestMaterializer(configuration,false);
 			Iterator<Assertion> iterator = mat.getAssertionIterator();
 			int classAss = 0;
 			int propAss = 0;
@@ -160,7 +158,7 @@ public class QuestOWLMaterializerTest extends TestCase {
 			System.out.println(onto.getSubDataPropertyAxioms());
 
 			// TODO: why not using OWLAPIMaterializer instead?
-			QuestMaterializer mat = new QuestMaterializer(configuration, onto, false);
+			QuestMaterializer mat = new QuestMaterializer(configuration,false);
 			Iterator<Assertion> iterator = mat.getAssertionIterator();
 			int classAss = 0;
 			int propAss = 0;

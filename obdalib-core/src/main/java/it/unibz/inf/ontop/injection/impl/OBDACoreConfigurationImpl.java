@@ -65,7 +65,7 @@ public class OBDACoreConfigurationImpl extends OntopMappingSQLConfigurationImpl 
         return loadSpecification(Optional::empty);
     }
 
-    Optional<OBDASpecification> loadSpecification(Supplier<Optional<Ontology>> ontologySupplier)
+    Optional<OBDASpecification> loadSpecification(OntologySupplier ontologySupplier)
             throws IOException, OBDASpecificationException {
 
         return loadSpecification(ontologySupplier,
@@ -82,7 +82,7 @@ public class OBDACoreConfigurationImpl extends OntopMappingSQLConfigurationImpl 
         return loadPPMapping(Optional::empty);
     }
 
-    Optional<OBDAModel> loadPPMapping(Supplier<Optional<Ontology>> ontologySupplier)
+    Optional<OBDAModel> loadPPMapping(OntologySupplier ontologySupplier)
             throws IOException, InvalidMappingException, DuplicateMappingException {
         return loadPPMapping(ontologySupplier,
                 () -> options.mappingFile

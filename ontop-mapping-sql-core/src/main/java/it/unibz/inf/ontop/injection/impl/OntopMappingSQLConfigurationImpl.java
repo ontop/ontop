@@ -75,7 +75,7 @@ public class OntopMappingSQLConfigurationImpl extends OntopSQLConfigurationImpl 
         return loadSpecification(Optional::empty, Optional::empty, Optional::empty, Optional::empty);
     }
 
-    Optional<OBDASpecification> loadSpecification(Supplier<Optional<Ontology>> ontologySupplier,
+    Optional<OBDASpecification> loadSpecification(OntologySupplier ontologySupplier,
                                                   Supplier<Optional<File>> mappingFileSupplier,
                                                   Supplier<Optional<Reader>> mappingReaderSupplier,
                                                   Supplier<Optional<Model>> mappingGraphSupplier)
@@ -98,7 +98,7 @@ public class OntopMappingSQLConfigurationImpl extends OntopSQLConfigurationImpl 
     /**
      * TODO: also consider the other steps
      */
-    Optional<OBDAModel> loadPPMapping(Supplier<Optional<Ontology>> ontologySupplier,
+    Optional<OBDAModel> loadPPMapping(OntologySupplier ontologySupplier,
                                       Supplier<Optional<File>> mappingFileSupplier,
                                       Supplier<Optional<Reader>> mappingReaderSupplier,
                                       Supplier<Optional<Model>> mappingGraphSupplier)

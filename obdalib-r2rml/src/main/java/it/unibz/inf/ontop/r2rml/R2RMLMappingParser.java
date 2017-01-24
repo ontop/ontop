@@ -69,7 +69,7 @@ public class R2RMLMappingParser implements MappingParser {
         return parse(r2rmlManager);
     }
 
-    private OBDAModel parse(R2RMLManager manager) {
+    private OBDAModel parse(R2RMLManager manager) throws DuplicateMappingException {
         //TODO: make the R2RMLManager simpler.
         ImmutableList<OBDAMappingAxiom> sourceMappings = manager.getMappings(manager.getModel());
 

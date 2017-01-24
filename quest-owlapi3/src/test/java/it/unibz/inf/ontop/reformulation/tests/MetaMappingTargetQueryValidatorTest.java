@@ -28,6 +28,7 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.exception.InvalidMappingException;
 import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.ontology.OntologyVocabulary;
@@ -114,13 +115,13 @@ public class MetaMappingTargetQueryValidatorTest extends TestCase {
 		conn.commit();
 	}
 
-	public void testValidate() throws IOException, InvalidMappingException {
+	public void testValidate() throws IOException, InvalidMappingException, DuplicateMappingException {
 
 		QuestConfiguration configuration = QuestConfiguration.defaultBuilder()
 				.nativeOntopMappingFile(obdafile)
 				.build();
 
-		OBDAModel obdaModel = configuration.loadProvidedSpecification();
+		OBDAModel obdaModel = configuration.loadProvidedPPMapping();
 
 		/**
 		 * TODO: do we want to consider a non-empty vocabulary?

@@ -24,6 +24,12 @@ public interface OntopMappingSQLConfiguration extends OntopSQLConfiguration, Ont
 
     Optional<OBDAModel> loadPPMapping() throws IOException, InvalidMappingException, DuplicateMappingException;
 
+    default OBDAModel loadProvidedPPMapping() throws DuplicateMappingException, IOException, InvalidMappingException {
+        return loadPPMapping()
+                .orElseThrow(() -> new IllegalStateException("No PreProcessedMapping could have been loaded. " +
+                        "Do not call this method unless you are sure of the input provision."));
+    }
+
     /**
      * TODO: explain
      */

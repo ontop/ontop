@@ -5,8 +5,11 @@ import it.unibz.inf.ontop.model.OBDAException;
 import it.unibz.inf.ontop.model.OBDAStatement;
 import it.unibz.inf.ontop.model.TupleResultSet;
 import it.unibz.inf.ontop.ontology.Assertion;
+import it.unibz.inf.ontop.owlrefplatform.core.translator.SesameConstructTemplate;
+import org.eclipse.rdf4j.query.parser.ParsedQuery;
 
 import java.util.Iterator;
+import java.util.Optional;
 
 /**
  * OBDAStatement specific to Quest.
@@ -32,5 +35,15 @@ public interface IQuestStatement extends OBDAStatement {
 
     int getTupleCount(String sparqlQuery);
 
+
     DBMetadata getMetadata();
+
+    @Deprecated
+    ParsedQuery getParsedQuery(String query);
+
+    @Deprecated
+    String getRewriting(ParsedQuery query);
+
+    @Deprecated
+    ExecutableQuery translateIntoNativeQuery(ParsedQuery pq, Optional<SesameConstructTemplate> constructTemplate);
 }

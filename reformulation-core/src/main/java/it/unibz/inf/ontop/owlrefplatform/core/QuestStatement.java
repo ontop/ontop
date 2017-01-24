@@ -384,6 +384,21 @@ public abstract class QuestStatement implements IQuestStatement {
 		return null;
 	}
 
+	@Override
+	public ParsedQuery getParsedQuery(String query) {
+		return engine.getParsedQuery(query);
+	}
+
+	@Override
+	public String getRewriting(ParsedQuery query) {
+		return engine.getRewriting(query);
+	}
+
+	@Override
+	public ExecutableQuery translateIntoNativeQuery(ParsedQuery pq, Optional<SesameConstructTemplate> template) {
+		return engine.translateIntoNativeQuery(pq, template);
+	}
+
 //	public String getSPARQLRewriting(String query) throws OBDAException {
 //		return engine.getSPARQLRewriting(query);
 //	}
