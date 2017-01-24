@@ -1,7 +1,0 @@
-PREFIX  : <http://example/>
-
-SELECT  ?x ?y ( str(?x) + str(?y) AS ?sum)
-WHERE
-    { ?s :p ?x ; :q ?y . 
-    }
-ORDER BY ?x ?y ?sum

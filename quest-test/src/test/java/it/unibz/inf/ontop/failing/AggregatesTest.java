@@ -24,8 +24,8 @@ import it.unibz.inf.ontop.quest.AbstractVirtualModeTest;
 
 public class AggregatesTest extends AbstractVirtualModeTest {
 
-	private static final String owlfile = "src/test/resources/test/stockexchange-unittest.owl";
-	private static final String obdafile = "src/test/resources/test/stockexchange-mysql-unittest.obda";
+	private static final String owlfile = "src/main/resources/testcases-scenarios/virtual-mode/stockexchange/simplecq/stockexchange.owl";
+	private static final String obdafile = "src/main/resources/testcases-scenarios/virtual-mode/stockexchange/simplecq/stockexchange-mysql.obda";
 
 	public AggregatesTest() {
 		super(owlfile, obdafile);
@@ -38,7 +38,7 @@ public class AggregatesTest extends AbstractVirtualModeTest {
 //		 * Initializing and H2 database with the stock exchange data
 //		 */
 //		String driver = "com.mysql.jdbc.Driver";
-//		String url = "jdbc:mysql://10.7.20.39/stockexchange";
+//		String url = "jdbc:mysql://10.7.20.39/stockexchange_new";
 //		String username = "fish";
 //		String password = "fish";
 //

@@ -1,7 +1,0 @@
-prefix ex:	<http://www.example.org/schema#>
-prefix in:	<http://www.example.org/instance#>
-
-select ?x
-where {
-{select * where {graph ?g {?x ?p ?y}}}
-}

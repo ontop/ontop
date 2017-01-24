@@ -1,4 +1,0 @@
-PREFIX : <http://example.org/>
-SELECT ?s (LCASE(?str) AS ?lstr) WHERE {
-	?s :str ?str
-}

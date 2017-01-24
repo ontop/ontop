@@ -20,7 +20,7 @@ source		select id, street, number, city, state, country from address_new
 
 mappingId	mapping-person
 target		:person-{id} a :PhysicalPerson ; :firstName {name} ; :lastName {lastname} ; :dateOfBirth {dateofbirth} ; :ssn {ssn} ; :hasAddress :address-{addressid} .
-source		select * from person_new
+source		select id, name, lastname, dateofbirth, ssn, addressid from person_new
 
 mappingId	mapping-brokers
 target		:person-{id} a :StockBroker  .

@@ -14,16 +14,16 @@ target		:Address-{id} a :Address .
 source		select id from "stockexchange".address
 
 mappingId	Name
-target		:Broker-{name} a :Broker .
+target		:Broker-{id} a :Broker .
 source		select broker.name from "stockexchange".broker
 
 mappingId	Worker
-target		:Worker-{worker} a :Worker .
-source		select broker.name as worker from "stockexchange".broker
+target		:Worker-{id} a :Worker .
+source		select broker.id as worker from "stockexchange".broker
 
 mappingId	Client
-target		:Client-{NameOfClient} :isBroker :Broker-{brokerName} .
-source		select broker.name as brokerName, client.name as NameOfClient, broker.id from "stockexchange".broker, "stockexchange".client where broker.id = client.id
+target		:Client-{IDClient} :isBroker :Broker-{brokerID} .
+source		select broker.id as brokerID, client.id as IDClient, broker.id from "stockexchange".broker, "stockexchange".client where broker.id = client.id
 
 mappingId	Mix
 target		:Broker2-{id} :hasFile :Med-{med} . 

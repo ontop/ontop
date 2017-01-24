@@ -1,4 +1,0 @@
-PREFIX : <http://www.example.org>
-
-SELECT (COUNT(*) AS ?C)
-WHERE { ?S ?P ?O }

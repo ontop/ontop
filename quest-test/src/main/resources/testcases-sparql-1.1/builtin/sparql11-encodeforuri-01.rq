@@ -1,6 +1,0 @@
-PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
-PREFIX  :  <http://example/>
-SELECT  ?lit (encode_for_uri(?lit) as ?enc)
- WHERE {
-   	?X :plainLiteral ?lit . 
-}
