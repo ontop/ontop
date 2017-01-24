@@ -19,12 +19,12 @@ public class OntopRuntimeSettingsImpl extends OntopOBDASettingsImpl implements O
 
     private static Properties loadProperties(Properties userProperties) {
         Properties properties = OntopOptimizationSettingsImpl.loadDefaultOptimizationProperties();
-        properties.putAll(loadDefaultMappingProperties());
+        properties.putAll(loadDefaultRuntimeProperties());
         properties.putAll(userProperties);
         return properties;
     }
 
-    static Properties loadDefaultMappingProperties() {
+    static Properties loadDefaultRuntimeProperties() {
         return loadDefaultPropertiesFromFile(OntopOBDASettings.class, DEFAULT_FILE);
     }
 

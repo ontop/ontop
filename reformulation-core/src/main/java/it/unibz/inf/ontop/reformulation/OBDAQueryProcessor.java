@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.transformation;
+package it.unibz.inf.ontop.reformulation;
 
 
 import it.unibz.inf.ontop.model.OBDAException;

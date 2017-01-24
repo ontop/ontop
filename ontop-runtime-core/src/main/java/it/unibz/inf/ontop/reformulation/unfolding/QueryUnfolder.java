@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.owlrefplatform.core.optimization.unfolding;
+package it.unibz.inf.ontop.reformulation.unfolding;
 
 import it.unibz.inf.ontop.owlrefplatform.core.optimization.IntermediateQueryOptimizer;
 

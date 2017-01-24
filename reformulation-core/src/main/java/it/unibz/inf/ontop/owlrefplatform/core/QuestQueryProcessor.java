@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.injection.QuestCoreSettings;
+import it.unibz.inf.ontop.injection.ReformulationFactory;
 import it.unibz.inf.ontop.mapping.Mapping;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
@@ -13,8 +14,8 @@ import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.*;
 import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing.MappingSameAs;
 import it.unibz.inf.ontop.owlrefplatform.core.optimization.*;
-import it.unibz.inf.ontop.owlrefplatform.core.optimization.unfolding.QueryUnfolder;
-import it.unibz.inf.ontop.owlrefplatform.core.optimization.unfolding.impl.BasicQueryUnfolderImpl;
+import it.unibz.inf.ontop.reformulation.unfolding.QueryUnfolder;
+import it.unibz.inf.ontop.reformulation.unfolding.impl.BasicQueryUnfolder;
 import it.unibz.inf.ontop.owlrefplatform.core.queryevaluation.SPARQLQueryUtility;
 import it.unibz.inf.ontop.owlrefplatform.core.reformulation.DummyReformulator;
 import it.unibz.inf.ontop.owlrefplatform.core.reformulation.QueryRewriter;
@@ -33,7 +34,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 import it.unibz.inf.ontop.spec.OBDASpecification;
-import it.unibz.inf.ontop.transformation.OBDAQueryProcessor;
+import it.unibz.inf.ontop.reformulation.OBDAQueryProcessor;
 import org.eclipse.rdf4j.query.MalformedQueryException;
 import org.eclipse.rdf4j.query.QueryLanguage;
 import org.eclipse.rdf4j.query.parser.ParsedQuery;
@@ -75,7 +76,8 @@ public class QuestQueryProcessor implements OBDAQueryProcessor {
 								NativeQueryGenerator datasourceQueryGenerator,
 								QueryCache queryCache,
 								QuestCoreSettings settings,
-								DatalogProgram2QueryConverter datalogConverter) {
+								DatalogProgram2QueryConverter datalogConverter,
+								ReformulationFactory reformulationFactory) {
 		TBoxReasoner saturatedTBox = obdaSpecification.getSaturatedTBox();
 		this.sigma = LinearInclusionDependencies.getABoxDependencies(saturatedTBox, true);
 
@@ -91,8 +93,7 @@ public class QuestQueryProcessor implements OBDAQueryProcessor {
 
 		Mapping saturatedMapping = obdaSpecification.getSaturatedMapping();
 
-		// TODO: make it Guice ready
-		this.queryUnfolder = new BasicQueryUnfolderImpl(saturatedMapping);
+		this.queryUnfolder = reformulationFactory.create(saturatedMapping);
 		this.metadataForOptimization = saturatedMapping.getMetadataForOptimization();
 
 		this.vocabularyValidator = vocabularyValidator;

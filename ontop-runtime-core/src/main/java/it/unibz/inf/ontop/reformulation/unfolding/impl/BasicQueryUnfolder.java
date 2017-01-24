@@ -1,24 +1,26 @@
-package it.unibz.inf.ontop.owlrefplatform.core.optimization.unfolding.impl;
+package it.unibz.inf.ontop.reformulation.unfolding.impl;
 
 
-import com.google.common.collect.ImmutableMap;
-import it.unibz.inf.ontop.model.AtomPredicate;
+import com.google.inject.assistedinject.Assisted;
+import com.google.inject.assistedinject.AssistedInject;
+import it.unibz.inf.ontop.mapping.Mapping;
 import it.unibz.inf.ontop.owlrefplatform.core.optimization.TrueNodesRemovalOptimizer;
-import it.unibz.inf.ontop.owlrefplatform.core.optimization.unfolding.QueryUnfolder;
 import it.unibz.inf.ontop.pivotalrepr.EmptyQueryException;
 import it.unibz.inf.ontop.pivotalrepr.IntensionalDataNode;
 import it.unibz.inf.ontop.pivotalrepr.IntermediateQuery;
 import it.unibz.inf.ontop.pivotalrepr.proposal.QueryMergingProposal;
 import it.unibz.inf.ontop.pivotalrepr.proposal.impl.QueryMergingProposalImpl;
+import it.unibz.inf.ontop.reformulation.unfolding.QueryUnfolder;
 
 import java.util.Optional;
 
-public class BasicQueryUnfolderImpl implements QueryUnfolder {
+public class BasicQueryUnfolder implements QueryUnfolder {
 
-    private final ImmutableMap<AtomPredicate, IntermediateQuery> mappingIndex;
+    private final Mapping mapping;
 
-    public BasicQueryUnfolderImpl(ImmutableMap<AtomPredicate, IntermediateQuery> mappingIndex) {
-        this.mappingIndex = mappingIndex;
+    @AssistedInject
+    private BasicQueryUnfolder(@Assisted Mapping mapping) {
+        this.mapping = mapping;
     }
 
     @Override
@@ -32,8 +34,8 @@ public class BasicQueryUnfolderImpl implements QueryUnfolder {
 
             IntensionalDataNode intensionalNode = optionalCurrentIntensionalNode.get();
 
-            Optional<IntermediateQuery> optionalMapping = Optional.ofNullable(
-                    mappingIndex.get(intensionalNode.getProjectionAtom().getPredicate()));
+            Optional<IntermediateQuery> optionalMapping = mapping.getDefinition(
+                    intensionalNode.getProjectionAtom().getPredicate());
 
             QueryMergingProposal queryMerging = new QueryMergingProposalImpl(intensionalNode, optionalMapping);
             query.applyProposal(queryMerging);

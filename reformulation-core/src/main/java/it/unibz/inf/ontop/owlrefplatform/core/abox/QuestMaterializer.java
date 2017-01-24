@@ -34,7 +34,7 @@ import java.util.*;
 
 import it.unibz.inf.ontop.injection.QuestComponentFactory;
 import it.unibz.inf.ontop.injection.QuestCoreConfiguration;
-import it.unibz.inf.ontop.transformation.OBDAQueryProcessor;
+import it.unibz.inf.ontop.reformulation.OBDAQueryProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

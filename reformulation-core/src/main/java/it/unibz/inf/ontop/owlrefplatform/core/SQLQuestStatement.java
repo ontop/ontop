@@ -11,8 +11,7 @@ import it.unibz.inf.ontop.owlrefplatform.core.resultset.*;
 import it.unibz.inf.ontop.owlrefplatform.core.translator.SesameConstructTemplate;
 
 import it.unibz.inf.ontop.ontology.Assertion;
-import it.unibz.inf.ontop.transformation.OBDAQueryProcessor;
-import org.eclipse.rdf4j.query.parser.ParsedQuery;
+import it.unibz.inf.ontop.reformulation.OBDAQueryProcessor;
 
 import java.sql.*;
 import java.sql.ResultSet;

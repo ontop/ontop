@@ -3,10 +3,9 @@ package it.unibz.inf.ontop.owlrefplatform.core.execution;
 import it.unibz.inf.ontop.model.OBDAException;
 import it.unibz.inf.ontop.ontology.Assertion;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestConnection;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestQueryProcessor;
 import it.unibz.inf.ontop.owlrefplatform.core.SQLQuestStatement;
 import it.unibz.inf.ontop.owlrefplatform.core.abox.RDBMSSIRepositoryManager;
-import it.unibz.inf.ontop.transformation.OBDAQueryProcessor;
+import it.unibz.inf.ontop.reformulation.OBDAQueryProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

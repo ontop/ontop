@@ -26,7 +26,7 @@ import it.unibz.inf.ontop.owlrefplatform.core.queryevaluation.SPARQLQueryUtility
 import it.unibz.inf.ontop.owlrefplatform.core.resultset.EmptyTupleResultSet;
 import it.unibz.inf.ontop.owlrefplatform.core.resultset.QuestTupleResultSet;
 import it.unibz.inf.ontop.owlrefplatform.core.translator.SesameConstructTemplate;
-import it.unibz.inf.ontop.transformation.OBDAQueryProcessor;
+import it.unibz.inf.ontop.reformulation.OBDAQueryProcessor;
 import org.eclipse.rdf4j.query.MalformedQueryException;
 import org.eclipse.rdf4j.query.parser.ParsedQuery;
 import org.slf4j.Logger;

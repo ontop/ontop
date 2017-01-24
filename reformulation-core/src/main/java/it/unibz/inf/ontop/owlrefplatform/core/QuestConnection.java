@@ -24,10 +24,8 @@ import java.sql.Connection;
 import java.sql.SQLException;
 
 import it.unibz.inf.ontop.model.OBDAException;
-import it.unibz.inf.ontop.owlrefplatform.core.execution.SIQuestStatement;
-import it.unibz.inf.ontop.owlrefplatform.core.execution.SISQLQuestStatementImpl;
 import it.unibz.inf.ontop.injection.QuestCoreSettings;
-import it.unibz.inf.ontop.transformation.OBDAQueryProcessor;
+import it.unibz.inf.ontop.reformulation.OBDAQueryProcessor;
 
 /***
  * Quest connection is responsible for wrapping a JDBC connection to the data
