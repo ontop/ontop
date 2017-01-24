@@ -2,7 +2,9 @@ package it.unibz.inf.ontop.injection.impl;
 
 
 import com.google.inject.Module;
+import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.exception.InvalidMappingException;
+import it.unibz.inf.ontop.exception.OBDASpecificationException;
 import it.unibz.inf.ontop.injection.*;
 
 import it.unibz.inf.ontop.spec.OBDASpecification;
@@ -59,14 +61,14 @@ public class OBDACoreConfigurationImpl extends OntopMappingSQLConfigurationImpl 
     }
 
     @Override
-    public Optional<OBDASpecification> loadSpecification() throws IOException, InvalidMappingException {
+    public Optional<OBDASpecification> loadSpecification() throws IOException, OBDASpecificationException {
         return loadSpecification(Optional::empty);
     }
 
     Optional<OBDASpecification> loadSpecification(Supplier<Optional<Ontology>> ontologySupplier)
-            throws IOException, InvalidMappingException {
+            throws IOException, OBDASpecificationException {
 
-        return loadDataSourceModel(ontologySupplier,
+        return loadSpecification(ontologySupplier,
                 () -> options.mappingFile
                         .map(Optional::of)
                         .orElseGet(() -> settings.getMappingFilePath()
@@ -76,12 +78,12 @@ public class OBDACoreConfigurationImpl extends OntopMappingSQLConfigurationImpl 
     }
 
     @Override
-    public Optional<OBDAModel> loadPPMapping() throws IOException, InvalidMappingException {
-        return loadOBDAModel(Optional::empty);
+    public Optional<OBDAModel> loadPPMapping() throws IOException, InvalidMappingException, DuplicateMappingException {
+        return loadPPMapping(Optional::empty);
     }
 
-    Optional<OBDAModel> loadOBDAModel(Supplier<Optional<Ontology>> ontologySupplier)
-            throws IOException, InvalidMappingException {
+    Optional<OBDAModel> loadPPMapping(Supplier<Optional<Ontology>> ontologySupplier)
+            throws IOException, InvalidMappingException, DuplicateMappingException {
         return loadPPMapping(ontologySupplier,
                 () -> options.mappingFile
                         .map(Optional::of)

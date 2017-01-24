@@ -71,13 +71,13 @@ public class OntopMappingSQLConfigurationImpl extends OntopSQLConfigurationImpl 
      */
     @Override
     public Optional<OBDASpecification> loadSpecification() throws IOException, OBDASpecificationException {
-        return loadDataSourceModel(Optional::empty, Optional::empty, Optional::empty, Optional::empty);
+        return loadSpecification(Optional::empty, Optional::empty, Optional::empty, Optional::empty);
     }
 
-    Optional<OBDASpecification> loadDataSourceModel(Supplier<Optional<Ontology>> ontologySupplier,
-                                                    Supplier<Optional<File>> mappingFileSupplier,
-                                                    Supplier<Optional<Reader>> mappingReaderSupplier,
-                                                    Supplier<Optional<Model>> mappingGraphSupplier)
+    Optional<OBDASpecification> loadSpecification(Supplier<Optional<Ontology>> ontologySupplier,
+                                                  Supplier<Optional<File>> mappingFileSupplier,
+                                                  Supplier<Optional<Reader>> mappingReaderSupplier,
+                                                  Supplier<Optional<Model>> mappingGraphSupplier)
             throws IOException, OBDASpecificationException {
         return mappingConfiguration.loadSpecification(
                 ontologySupplier,

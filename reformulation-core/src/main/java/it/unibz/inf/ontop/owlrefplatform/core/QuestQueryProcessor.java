@@ -9,14 +9,14 @@ import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.*;
 import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import it.unibz.inf.ontop.owlrefplatform.core.optimization.*;
 import it.unibz.inf.ontop.owlrefplatform.core.optimization.unfolding.QueryUnfolder;
-import it.unibz.inf.ontop.owlrefplatform.core.optimization.unfolding.impl.QueryUnfolderImpl;
+import it.unibz.inf.ontop.owlrefplatform.core.optimization.unfolding.impl.BasicQueryUnfolderImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.queryevaluation.SPARQLQueryUtility;
 import it.unibz.inf.ontop.owlrefplatform.core.reformulation.QueryRewriter;
 import it.unibz.inf.ontop.owlrefplatform.core.srcquerygeneration.NativeQueryGenerator;
 import it.unibz.inf.ontop.owlrefplatform.core.translator.*;
 import it.unibz.inf.ontop.pivotalrepr.EmptyQueryException;
 import it.unibz.inf.ontop.pivotalrepr.IntermediateQuery;
-import it.unibz.inf.ontop.pivotalrepr.datalog.DatalogProgram2QueryConverter;
+import it.unibz.inf.ontop.pivotalrepr.datalog.impl.DatalogProgram2QueryConverterImpl;
 import it.unibz.inf.ontop.pivotalrepr.utils.ExecutorRegistry;
 import it.unibz.inf.ontop.renderer.DatalogProgramRenderer;
 
@@ -33,7 +33,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
-import static it.unibz.inf.ontop.pivotalrepr.datalog.Mapping2QueryConverter.convertMappings;
 
 /**
  * BC: TODO: make it explicitly immutable
@@ -73,7 +72,7 @@ public class QuestQueryProcessor {
 				convertMappings(unfolder.getMappings(), unfolder.getExtensionalPredicates(),
 						unfolder.getMetadataForQueryOptimization(), modelFactory, executorRegistry);
 
-		this.queryUnfolder = new QueryUnfolderImpl(intermediateQueryStream);
+		this.queryUnfolder = new BasicQueryUnfolderImpl(intermediateQueryStream);
 
 		this.vocabularyValidator = vocabularyValidator;
 		this.uriMap = uriMap;
@@ -187,7 +186,7 @@ public class QuestQueryProcessor {
 
 			DatalogProgram programAfterUnfolding;
 			try {
-				IntermediateQuery intermediateQuery = DatalogProgram2QueryConverter.convertDatalogProgram(
+				IntermediateQuery intermediateQuery = DatalogProgram2QueryConverterImpl.convertDatalogProgram(
 						unfolder.getMetadataForQueryOptimization(), programAfterRewriting,
 						unfolder.getExtensionalPredicates(), modelFactory, executorRegistry);
 				log.debug("Directly translated (SPARQL) intermediate query: \n" + intermediateQuery.toString());
@@ -224,7 +223,7 @@ public class QuestQueryProcessor {
 				queryCache.put(pq, executableQuery);
 				return executableQuery;
 
-			} catch (DatalogProgram2QueryConverter.InvalidDatalogProgramException e) {
+			} catch (DatalogProgram2QueryConverterImpl.InvalidDatalogProgramException e) {
 				throw new OBDAException(e.getLocalizedMessage());
 			}
 			/**

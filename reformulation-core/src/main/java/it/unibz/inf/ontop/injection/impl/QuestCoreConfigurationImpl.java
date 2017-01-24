@@ -6,7 +6,7 @@ import com.google.inject.Module;
 import it.unibz.inf.ontop.executor.ProposalExecutor;
 import it.unibz.inf.ontop.injection.InvalidOntopConfigurationException;
 import it.unibz.inf.ontop.injection.impl.OntopOptimizationConfigurationImpl.DefaultOntopOptimizationBuilderFragment;
-import it.unibz.inf.ontop.injection.impl.OntopOptimizationConfigurationImpl.OntopOptimizationConfigurationOptions;
+import it.unibz.inf.ontop.injection.impl.OntopOptimizationConfigurationImpl.OntopOptimizationOptions;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
 import it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing.TMappingExclusionConfig;
 import it.unibz.inf.ontop.injection.QuestCoreConfiguration;
@@ -87,12 +87,12 @@ public class QuestCoreConfigurationImpl extends OBDACoreConfigurationImpl implem
     public static class QuestCoreOptions {
         public final Optional<TMappingExclusionConfig> excludeFromTMappings;
         private final OBDAConfigurationOptions obdaOptions;
-        private final OntopOptimizationConfigurationOptions optimizationOptions;
+        private final OntopOptimizationOptions optimizationOptions;
 
 
         public QuestCoreOptions(Optional<TMappingExclusionConfig> excludeFromTMappings,
                                 OBDAConfigurationOptions obdaOptions,
-                                OntopOptimizationConfigurationOptions optimizationOptions) {
+                                OntopOptimizationOptions optimizationOptions) {
             this.excludeFromTMappings = excludeFromTMappings;
             this.obdaOptions = obdaOptions;
             this.optimizationOptions = optimizationOptions;
@@ -147,7 +147,7 @@ public class QuestCoreConfigurationImpl extends OBDACoreConfigurationImpl implem
         }
 
         protected final QuestCoreOptions generateQuestCoreOptions(OBDAConfigurationOptions obdaOptions,
-                                                                  OntopOptimizationConfigurationOptions optimizationOptions) {
+                                                                  OntopOptimizationOptions optimizationOptions) {
             return new QuestCoreOptions(excludeFromTMappings, obdaOptions, optimizationOptions);
         }
     }
@@ -193,7 +193,7 @@ public class QuestCoreConfigurationImpl extends OBDACoreConfigurationImpl implem
             OBDAConfigurationOptions obdaOptions = generateOBDACoreOptions();
 
             return questCoreBuilderFragment.generateQuestCoreOptions(obdaOptions,
-                    optimizationBuilderFragment.generateOntopOptimizationConfigurationOptions(
+                    optimizationBuilderFragment.generateOptimizationOptions(
                             obdaOptions.mappingSqlOptions.mappingOptions.obdaOptions.modelOptions));
         }
     }
