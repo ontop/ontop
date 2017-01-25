@@ -26,7 +26,7 @@ source select id, street, number, city, state, country from address
 
 mappingId mapping-brokers
 target :Person-{id} a :PhysicalPerson ; :firstName {name} ; :lastName {lastname} ; :dateOfBirth {dateofbirth} ; :ssn {ssn} .
-source select id, name, lastname, dateofbirth, ssn from client
+source select id, name, lastname, dateofbirth, ssn from person
 
 
 ]]
