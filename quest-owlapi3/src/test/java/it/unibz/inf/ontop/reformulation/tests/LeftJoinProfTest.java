@@ -28,9 +28,10 @@ public class LeftJoinProfTest {
     private static final String DROP_SCRIPT = "src/test/resources/test/redundant_join/redundant_join_fk_drop.sql";
     private static final String OWL_FILE = "src/test/resources/test/redundant_join/redundant_join_fk_test.owl";
     private static final String ODBA_FILE = "src/test/resources/test/redundant_join/redundant_join_fk_test.obda";
+    private static final String PROPERTY_FILE = "src/test/resources/test/redundant_join/redundant_join_fk_test.properties";
     private static final String NO_SELF_LJ_OPTIMIZATION_MSG = "The table professors should be used only once";
 
-    private Connection conn;
+    private Connection conn;;
 
 
     @Before
@@ -399,6 +400,7 @@ public class LeftJoinProfTest {
         QuestConfiguration config = QuestConfiguration.defaultBuilder()
                 .nativeOntopMappingFile(ODBA_FILE)
                 .ontologyFile(OWL_FILE)
+                .propertyFile(PROPERTY_FILE)
                 .build();
         QuestOWL reasoner = factory.createReasoner(config);
 

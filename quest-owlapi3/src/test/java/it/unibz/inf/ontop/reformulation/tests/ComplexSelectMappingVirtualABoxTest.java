@@ -62,6 +62,10 @@ public class ComplexSelectMappingVirtualABoxTest  {
 	final String owlfile = "src/test/resources/test/complexmapping.owl";
 	final String obdafile = "src/test/resources/test/complexmapping.obda";
 
+	private static final String url = "jdbc:h2:mem:questjunitdb";
+	private static final String username = "sa";
+	private static final String password = "";
+
 	@Before
 	public void setUp() throws Exception {
 		
@@ -70,9 +74,6 @@ public class ComplexSelectMappingVirtualABoxTest  {
 		 * Initializing and H2 database with the stock exchange data
 		 */
 		// String driver = "org.h2.Driver";
-		String url = "jdbc:h2:mem:questjunitdb";
-		String username = "sa";
-		String password = "";
 
 		conn = DriverManager.getConnection(url, username, password);
 		Statement st = conn.createStatement();
@@ -117,6 +118,9 @@ public class ComplexSelectMappingVirtualABoxTest  {
 	}
 
 //   test for self join count the number of occurrences
+	private String runTests() throws Exception {
+		return runTests(new Properties());
+	}
 	private String runTests(Properties p) throws Exception {
 
         QuestOWLFactory factory = new QuestOWLFactory();
@@ -124,6 +128,9 @@ public class ComplexSelectMappingVirtualABoxTest  {
 				.nativeOntopMappingFile(obdafile)
 				.ontologyFile(owlfile)
 				.properties(p)
+				.jdbcUrl(url)
+				.jdbcUser(username)
+				.jdbcPassword(password)
 				.build();
         QuestOWL reasoner = factory.createReasoner(config);
 
@@ -171,7 +178,6 @@ public class ComplexSelectMappingVirtualABoxTest  {
 	public void testReplace() throws Exception {
 
 		Properties p = new Properties();
-		p.put(QuestCoreSettings.ABOX_MODE, QuestConstants.VIRTUAL);
         p.put(QuestCoreSettings.SQL_GENERATE_REPLACE, QuestConstants.FALSE);
 
 		this.query = "PREFIX : <http://it.unibz.inf/obda/test/simple#> SELECT * WHERE { ?x :U ?z. }";
@@ -184,58 +190,45 @@ public class ComplexSelectMappingVirtualABoxTest  {
     @Test
     public void testReplaceValue() throws Exception {
 
-        Properties p = new Properties();
-        p.put(QuestCoreSettings.ABOX_MODE, QuestConstants.VIRTUAL);
 		this.query = "PREFIX : <http://it.unibz.inf/obda/test/simple#> SELECT * WHERE { ?x :U4 ?z . }";
 
-        String val = runTests(p);
+        String val = runTests();
         assertEquals("\"ualue1\"", val);
     }
 
     @Test
 	public void testConcat() throws Exception {
 
-		Properties p = new Properties();
-		p.put(QuestCoreSettings.ABOX_MODE, QuestConstants.VIRTUAL);
 		this.query = "PREFIX : <http://it.unibz.inf/obda/test/simple#> SELECT * WHERE { ?x :U2 ?z. }";
 
-        String val = runTests(p);
+        String val = runTests();
         assertEquals("\"NO value1\"", val);
 	}
 
     @Test
 	public void testDoubleConcat() throws Exception {
 
-		Properties p = new Properties();
-		p.put(QuestCoreSettings.ABOX_MODE, QuestConstants.VIRTUAL);
-
 		this.query = "PREFIX : <http://it.unibz.inf/obda/test/simple#> SELECT * WHERE { ?x :U2 ?z; :U3 ?w. }";
 
-        String val = runTests(p);
+        String val = runTests();
         assertEquals("\"NO value1\"", val);
 	}
 
     @Test
     public void testConcat2() throws Exception {
 
-		Properties p = new Properties();
-		p.put(QuestCoreSettings.ABOX_MODE, QuestConstants.VIRTUAL);
-
         this.query = "PREFIX : <http://it.unibz.inf/obda/test/simple#> SELECT * WHERE { ?x :U5 ?z. }";
 
-        String val = runTests(p);
+        String val = runTests();
         assertEquals("\"value1test\"^^xsd:string", val);
     }
 
     @Test
     public void testConcat3() throws Exception {
 
-		Properties p = new Properties();
-		p.put(QuestCoreSettings.ABOX_MODE, QuestConstants.VIRTUAL);
-
         this.query = "PREFIX : <http://it.unibz.inf/obda/test/simple#> SELECT * WHERE { ?x :U6 ?z. }";
 
-        String val = runTests(p);
+        String val = runTests();
         assertEquals("\"value1test\"", val);
     }
 
@@ -254,24 +247,18 @@ public class ComplexSelectMappingVirtualABoxTest  {
     @Test
     public void testConcat5() throws Exception {
 
-		Properties p = new Properties();
-		p.put(QuestCoreSettings.ABOX_MODE, QuestConstants.VIRTUAL);
-
         this.query = "PREFIX : <http://it.unibz.inf/obda/test/simple#> SELECT * WHERE { ?x :U8 ?z. }";
 
-        String val = runTests(p);
+        String val = runTests();
         assertEquals("\"value1test\"", val);
     }
 
     @Test
     public void testConcatAndReplaceUri() throws Exception {
 
-        Properties p = new Properties();
-        p.put(QuestCoreSettings.ABOX_MODE, QuestConstants.VIRTUAL);
-
         this.query = "PREFIX : <http://it.unibz.inf/obda/test/simple#> SELECT * WHERE { ?x :U9 ?z. }";
 
-        String val = runTests(p);
+        String val = runTests();
         assertEquals("\"value1\"^^xsd:string", val);
     }
 

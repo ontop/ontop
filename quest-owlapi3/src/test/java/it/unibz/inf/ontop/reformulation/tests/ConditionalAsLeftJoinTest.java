@@ -28,14 +28,14 @@ public class ConditionalAsLeftJoinTest {
 
     private Connection conn;
 
+    private static final String URL = "jdbc:h2:mem:restaurant";
+    private static final String USERNAME = "sa";
+    private static final String PASSWORD = "sa";
+
     @Before
     public void setUp() throws Exception {
 
-        String url = "jdbc:h2:mem:restaurant";
-        String username = "sa";
-        String password = "sa";
-
-        conn = DriverManager.getConnection(url, username, password);
+        conn = DriverManager.getConnection(URL, USERNAME, PASSWORD);
         Statement st = conn.createStatement();
 
         FileReader reader = new FileReader(CREATE_SCRIPT);
@@ -107,6 +107,9 @@ public class ConditionalAsLeftJoinTest {
         QuestConfiguration config = QuestConfiguration.defaultBuilder()
                 .nativeOntopMappingFile(ODBA_FILE)
                 .ontologyFile(OWL_FILE)
+                .jdbcUrl(URL)
+                .jdbcUser(USERNAME)
+                .jdbcPassword(PASSWORD)
                 .build();
         QuestOWL reasoner = factory.createReasoner(config);
 

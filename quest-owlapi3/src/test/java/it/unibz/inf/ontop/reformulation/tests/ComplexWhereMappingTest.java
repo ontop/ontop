@@ -58,6 +58,10 @@ public class ComplexWhereMappingTest {
 	final String owlfile = "src/test/resources/test/complexmapping.owl";
 	final String obdafile = "src/test/resources/test/complexwheremapping.obda";
 
+	private static final String url = "jdbc:h2:mem:questjunitdb";
+	private static final String username = "sa";
+	private static final String password = "";
+
 	@Before
 	public void setUp() throws Exception {
 
@@ -66,9 +70,6 @@ public class ComplexWhereMappingTest {
 		 * Initializing and H2 database
 		 */
 		// String driver = "org.h2.Driver";
-		String url = "jdbc:h2:mem:questjunitdb";
-		String username = "sa";
-		String password = "";
 
 		conn = DriverManager.getConnection(url, username, password);
 		Statement st = conn.createStatement();
@@ -152,6 +153,9 @@ public class ComplexWhereMappingTest {
 				.nativeOntopMappingFile(obdafile)
 				.ontologyFile(owlfile)
 				.properties(p)
+				.jdbcUrl(url)
+				.jdbcUser(username)
+				.jdbcPassword(password)
 				.build();
 
 		runTests(config);
@@ -167,6 +171,9 @@ public class ComplexWhereMappingTest {
 		QuestConfiguration config = QuestConfiguration.defaultBuilder()
 				.ontologyFile(owlfile)
 				.properties(p)
+				.jdbcUrl(url)
+				.jdbcUser(username)
+				.jdbcPassword(password)
 				.build();
 
 		runTests(config);

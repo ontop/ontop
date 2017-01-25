@@ -38,6 +38,7 @@ public class TMappingDisablingTest extends TestCase {
 	
 	private final String owlfile = "src/test/resources/test/tmapping/exampleTMappingNoEquivalence.owl";
 	private final String obdafile = "src/test/resources/test/tmapping/exampleTMapping.obda";
+	private final String propertyFile = "src/test/resources/test/tmapping/exampleTMapping.properties";
 	private final String tMappingsConfFile = "src/test/resources/test/tmapping/tMappingsConf.conf";
 
 	@Before
@@ -103,6 +104,7 @@ public class TMappingDisablingTest extends TestCase {
 		QuestConfiguration configuration = QuestConfiguration.defaultBuilder()
 				.nativeOntopMappingFile(obdafile)
 				.ontologyFile(owlfile)
+				.propertyFile(propertyFile)
 				.build();
 		
 		QuestOWL reasoner = factory.createReasoner(configuration);
@@ -149,6 +151,7 @@ public class TMappingDisablingTest extends TestCase {
 		QuestConfiguration configuration = QuestConfiguration.defaultBuilder()
 				.nativeOntopMappingFile(obdafile)
 				.ontologyFile(owlfile)
+				.propertyFile(propertyFile)
 				.tMappingExclusionConfig(TMappingExclusionConfig.parseFile(tMappingsConfFile))
 				.build();
 		QuestOWL reasoner = factory.createReasoner(configuration);

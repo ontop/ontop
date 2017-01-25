@@ -9,13 +9,6 @@ foaf:		http://xmlns.com/foaf/0.1/
 rdfs:		http://www.w3.org/2000/01/rdf-schema#
 obda:       https://w3id.org/obda/vocabulary#
 
-[SourceDeclaration]
-sourceUri	university
-connectionUrl	jdbc:h2:mem:university
-username	sa
-password	
-driverClass	org.h2.Driver
-
 [MappingDeclaration] @collection [[
 mappingId	uni1-student
 target		ex:uni1/student/{s_id} a :Student ; foaf:firstName {first_name}^^xsd:string ; foaf:lastName {last_name}^^xsd:string . 

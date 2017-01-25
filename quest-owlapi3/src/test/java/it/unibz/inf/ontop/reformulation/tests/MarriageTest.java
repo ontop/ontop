@@ -48,15 +48,15 @@ public class MarriageTest {
 	private static final String OBDA_FILE = "src/test/resources/marriage/marriage.obda";
     private static final String CREATE_DB_FILE = "src/test/resources/marriage/create-db.sql";
     private static final String DROP_DB_FILE = "src/test/resources/marriage/drop-db.sql";
+	private static final String JDBC_URL = "jdbc:h2:mem:questjunitdb";
+	private static final String JDBC_USER = "sa";
+	private static final String JDBC_PASSWORD = "";
+
 
     @Before
 	public void setUp() throws Exception {
 
-    	String url = "jdbc:h2:mem:questjunitdb";
-		String username = "sa";
-		String password = "";
-
-		conn = DriverManager.getConnection(url, username, password);
+		conn = DriverManager.getConnection(JDBC_URL, JDBC_USER, JDBC_PASSWORD);
 
 
 		Statement st = conn.createStatement();
@@ -132,6 +132,9 @@ public class MarriageTest {
 		QuestConfiguration config = QuestConfiguration.defaultBuilder()
 				.nativeOntopMappingFile(OBDA_FILE)
 				.ontologyFile(ONTOLOGY_FILE)
+				.jdbcUrl(JDBC_URL)
+				.jdbcUser(JDBC_USER)
+				.jdbcPassword(JDBC_PASSWORD)
 				.build();
 		QuestOWL reasoner = factory.createReasoner(config);
 
