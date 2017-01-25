@@ -20,12 +20,12 @@ CREATE TABLE "DB2INST2"."address"  (
 		  "city" VARCHAR(100) WITH DEFAULT NULL , 
 		  "state" VARCHAR(100) WITH DEFAULT NULL , 
 		  "country" VARCHAR(100) WITH DEFAULT NULL )   
-		 IN "USERSPACE1" ; 
+		  ;
 
 
 -- DDL Statements for primary key on Table "DB2INST2"."address"
 
-ALTER TABLE "DB2INST2"."address" 
+ALTER TABLE "DB2INST2"."address"
 	ADD PRIMARY KEY
 		("id");
 
@@ -33,16 +33,16 @@ ALTER TABLE "DB2INST2"."address"
 ------------------------------------------------
 -- DDL Statements for table "DB2INST2"."broker"
 ------------------------------------------------
- 
+
 
 CREATE TABLE "DB2INST2"."broker"  (
-		  "id" INTEGER NOT NULL )   
-		 IN "USERSPACE1" ; 
+		  "id" INTEGER NOT NULL )
+		 ;
 
 
 -- DDL Statements for primary key on Table "DB2INST2"."broker"
 
-ALTER TABLE "DB2INST2"."broker" 
+ALTER TABLE "DB2INST2"."broker"
 	ADD PRIMARY KEY
 		("id");
 
@@ -50,23 +50,23 @@ ALTER TABLE "DB2INST2"."broker"
 ------------------------------------------------
 -- DDL Statements for table "DB2INST2"."brokerworksfor"
 ------------------------------------------------
- 
+
 
 CREATE TABLE "DB2INST2"."brokerworksfor"  (
-		  "brokerid" INTEGER NOT NULL , 
-		  "companyid" INTEGER WITH DEFAULT NULL , 
-		  "clientid" INTEGER WITH DEFAULT NULL )   
-		 IN "USERSPACE1" ;
+		  "brokerid" INTEGER NOT NULL ,
+		  "companyid" INTEGER WITH DEFAULT NULL ,
+		  "clientid" INTEGER WITH DEFAULT NULL )
+		 ;
 
 
 ------------------------------------------------
 -- DDL Statements for table "DB2INST2"."client"
 ------------------------------------------------
- 
+
 
 CREATE TABLE "DB2INST2"."client"  (
-		  "id" INTEGER NOT NULL )   
-		 IN "USERSPACE1" ;
+		  "id" INTEGER NOT NULL )
+		 ;
 
 
 -- DDL Statements for primary key on Table "DB2INST2"."client"
@@ -87,7 +87,7 @@ CREATE TABLE "DB2INST2"."person"  (
       "dateofbirth" DATE WITH DEFAULT NULL ,
       "ssn" VARCHAR(100) WITH DEFAULT NULL ,
       "addressid" INTEGER WITH DEFAULT NULL )
-                 IN "USERSPACE1" ;
+                 ;
 
 ALTER TABLE "DB2INST2"."person"
 	ADD PRIMARY KEY
@@ -97,20 +97,20 @@ ALTER TABLE "DB2INST2"."person"
 ------------------------------------------------
 -- DDL Statements for table "DB2INST2"."company"
 ------------------------------------------------
- 
+
 
 CREATE TABLE "DB2INST2"."company"  (
-		  "id" INTEGER NOT NULL , 
-		  "name" VARCHAR(100) WITH DEFAULT NULL , 
-		  "marketshares" INTEGER WITH DEFAULT NULL , 
-		  "networth" DOUBLE WITH DEFAULT NULL , 
-		  "addressid" INTEGER WITH DEFAULT NULL )   
-		 IN "USERSPACE1" ; 
+		  "id" INTEGER NOT NULL ,
+		  "name" VARCHAR(100) WITH DEFAULT NULL ,
+		  "marketshares" INTEGER WITH DEFAULT NULL ,
+		  "networth" DOUBLE WITH DEFAULT NULL ,
+		  "addressid" INTEGER WITH DEFAULT NULL )
+		 ;
 
 
 -- DDL Statements for primary key on Table "DB2INST2"."company"
 
-ALTER TABLE "DB2INST2"."company" 
+ALTER TABLE "DB2INST2"."company"
 	ADD PRIMARY KEY
 		("id");
 
@@ -118,17 +118,17 @@ ALTER TABLE "DB2INST2"."company"
 ------------------------------------------------
 -- DDL Statements for table "DB2INST2"."stockbooklist"
 ------------------------------------------------
- 
+
 
 CREATE TABLE "DB2INST2"."stockbooklist"  (
-		  "date" DATE NOT NULL , 
-		  "stockid" INTEGER WITH DEFAULT NULL )   
-		 IN "USERSPACE1" ; 
+		  "date" DATE NOT NULL ,
+		  "stockid" INTEGER WITH DEFAULT NULL )
+		 ;
 
 
 -- DDL Statements for primary key on Table "DB2INST2"."stockbooklist"
 
-ALTER TABLE "DB2INST2"."stockbooklist" 
+ALTER TABLE "DB2INST2"."stockbooklist"
 	ADD PRIMARY KEY
 		("date");
 
@@ -136,23 +136,23 @@ ALTER TABLE "DB2INST2"."stockbooklist"
 ------------------------------------------------
 -- DDL Statements for table "DB2INST2"."transaction"
 ------------------------------------------------
- 
+
 
 CREATE TABLE "DB2INST2"."transaction"  (
-		  "id" INTEGER NOT NULL , 
-		  "date" TIMESTAMP NOT NULL WITH DEFAULT CURRENT TIMESTAMP , 
-		  "stockid" INTEGER WITH DEFAULT NULL , 
-		  "type" SMALLINT WITH DEFAULT NULL , 
-		  "brokerid" INTEGER WITH DEFAULT NULL , 
-		  "forclientid" INTEGER WITH DEFAULT NULL , 
-		  "forcompanyid" INTEGER WITH DEFAULT NULL , 
-		  "amount" DECIMAL(10,4) WITH DEFAULT NULL )   
-		 IN "USERSPACE1" ; 
+		  "id" INTEGER NOT NULL ,
+		  "date" TIMESTAMP NOT NULL WITH DEFAULT CURRENT TIMESTAMP ,
+		  "stockid" INTEGER WITH DEFAULT NULL ,
+		  "type" SMALLINT WITH DEFAULT NULL ,
+		  "brokerid" INTEGER WITH DEFAULT NULL ,
+		  "forclientid" INTEGER WITH DEFAULT NULL ,
+		  "forcompanyid" INTEGER WITH DEFAULT NULL ,
+		  "amount" DECIMAL(10,4) WITH DEFAULT NULL )
+		 ;
 
 
 -- DDL Statements for primary key on Table "DB2INST2"."transaction"
 
-ALTER TABLE "DB2INST2"."transaction" 
+ALTER TABLE "DB2INST2"."transaction"
 	ADD PRIMARY KEY
 		("id");
 
@@ -160,15 +160,15 @@ ALTER TABLE "DB2INST2"."transaction"
 ------------------------------------------------
 -- DDL Statements for table "DB2INST2"."stockinformation"
 ------------------------------------------------
- 
+
 
 CREATE TABLE "DB2INST2"."stockinformation"  (
-		  "id" INTEGER NOT NULL , 
-		  "numberofshares" INTEGER WITH DEFAULT NULL , 
-		  "sharetype" SMALLINT WITH DEFAULT NULL , 
-		  "companyid" INTEGER WITH DEFAULT NULL , 
-		  "description" VARCHAR(255) )   
-		 IN "USERSPACE1" ; 
+		  "id" INTEGER NOT NULL ,
+		  "numberofshares" INTEGER WITH DEFAULT NULL ,
+		  "sharetype" SMALLINT WITH DEFAULT NULL ,
+		  "companyid" INTEGER WITH DEFAULT NULL ,
+		  "description" VARCHAR(255) )
+		 ;
 
 
 -- DDL Statements for primary key on Table "DB2INST2"."stockinformation"

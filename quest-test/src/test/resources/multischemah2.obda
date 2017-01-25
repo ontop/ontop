@@ -15,7 +15,7 @@ source		select id from "stockexchange".address
 
 mappingId	Name
 target		:Broker-{id} a :Broker .
-source		select broker.name from "stockexchange".broker
+source		select broker.id from "stockexchange".broker
 
 mappingId	Worker
 target		:Worker-{id} a :Worker .
