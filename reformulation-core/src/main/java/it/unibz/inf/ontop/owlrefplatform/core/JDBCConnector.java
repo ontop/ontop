@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.sql.*;
+import java.util.Optional;
 
 /**
  * For RDBMS having a JDBC driver.
@@ -69,11 +70,11 @@ public class JDBCConnector implements DBConnector {
                 return true;
             }
 
-            try {
-                Class.forName(settings.getJdbcDriver());
-            } catch (ClassNotFoundException e1) {
-                // Does nothing because the SQLException handles this problem also.
-            }
+//            try {
+//                Class.forName(settings.getJdbcDriver());
+//            } catch (ClassNotFoundException e1) {
+//                // Does nothing because the SQLException handles this problem also.
+//            }
             localConnection = DriverManager.getConnection(settings.getJdbcUrl(),
                     settings.getJdbcUser(), settings.getJdbcPassword());
 
@@ -113,10 +114,10 @@ public class JDBCConnector implements DBConnector {
     }
 
     private void setupConnectionPool() {
-        String driver = settings.getJdbcDriver();
         poolProperties = new PoolProperties();
         poolProperties.setUrl(settings.getJdbcUrl());
-        poolProperties.setDriverClassName(driver);
+        settings.getJdbcDriver()
+                .ifPresent(d -> poolProperties.setDriverClassName(d));
         poolProperties.setUsername(settings.getJdbcUser());
         poolProperties.setPassword(settings.getJdbcPassword());
         poolProperties.setJmxEnabled(true);
@@ -124,6 +125,9 @@ public class JDBCConnector implements DBConnector {
         // TEST connection before using it
         poolProperties.setTestOnBorrow(keepAlive);
         if (keepAlive) {
+            // TODO: refactor this
+            String driver = settings.getJdbcDriver()
+                    .orElse("");
             if (driver.contains("oracle"))
                 poolProperties.setValidationQuery("select 1 from dual");
             else if (driver.contains("db2"))
@@ -183,7 +187,10 @@ public class JDBCConnector implements DBConnector {
         // url = url + "?relaxAutoCommit=true";
         // }
         try {
-            Class.forName(settings.getJdbcDriver());
+            Optional<String> optionalDriver = settings.getJdbcDriver();
+            if (optionalDriver.isPresent()) {
+                Class.forName(optionalDriver.get());
+            }
         } catch (ClassNotFoundException e1) {
             log.debug(e1.getMessage());
         }

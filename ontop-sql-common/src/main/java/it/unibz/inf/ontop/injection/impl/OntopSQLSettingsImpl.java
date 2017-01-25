@@ -4,6 +4,7 @@ package it.unibz.inf.ontop.injection.impl;
 import it.unibz.inf.ontop.injection.OntopSQLSettings;
 import it.unibz.inf.ontop.utils.IDGenerator;
 
+import java.util.Optional;
 import java.util.Properties;
 
 public class OntopSQLSettingsImpl extends OntopOBDASettingsImpl implements OntopSQLSettings {
@@ -12,7 +13,7 @@ public class OntopSQLSettingsImpl extends OntopOBDASettingsImpl implements Ontop
     private final String jdbcUrl;
     private final String jdbcUser;
     private final String jdbcPassword;
-    private final String jdbcDriver;
+    private final Optional<String> jdbcDriver;
     private final String jdbcName;
 
     /**
@@ -31,8 +32,8 @@ public class OntopSQLSettingsImpl extends OntopOBDASettingsImpl implements Ontop
         jdbcUrl = getRequiredProperty(OntopSQLSettings.JDBC_URL);
         jdbcUser = getRequiredProperty(OntopSQLSettings.JDBC_USER);
         jdbcPassword = getRequiredProperty(OntopSQLSettings.JDBC_PASSWORD);
-        jdbcDriver = getRequiredProperty(OntopSQLSettings.JDBC_DRIVER);
 
+        jdbcDriver = getProperty(OntopSQLSettings.JDBC_DRIVER);
         jdbcName = getProperty(OntopSQLSettings.JDBC_NAME)
                 .orElseGet(() -> IDGenerator.getNextUniqueID(DB_PREFIX));
     }
@@ -57,7 +58,7 @@ public class OntopSQLSettingsImpl extends OntopOBDASettingsImpl implements Ontop
     }
 
     @Override
-    public String getJdbcDriver() {
+    public Optional<String> getJdbcDriver() {
         return jdbcDriver;
     }
 }

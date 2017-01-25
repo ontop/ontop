@@ -20,5 +20,5 @@ public interface OntopRuntimeSettings extends OntopOBDASettings, OntopOptimizati
     String SQL_GENERATE_REPLACE = "org.obda.owlreformulationplatform.sqlGenerateReplace";
     String DISTINCT_RESULTSET = "org.obda.owlreformulationplatform.distinctResultSet";
 
-    String  REWRITE 	= "rewrite";
+    String  REWRITE 	= "ontop.rewrite";
 }

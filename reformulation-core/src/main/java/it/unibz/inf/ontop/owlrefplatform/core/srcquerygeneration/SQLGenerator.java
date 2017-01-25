@@ -29,7 +29,6 @@ import it.unibz.inf.ontop.injection.QuestCoreSettings;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.Predicate.COL_TYPE;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
-import it.unibz.inf.ontop.model.impl.SQLMappingFactoryImpl;
 import it.unibz.inf.ontop.model.impl.TermUtils;
 import it.unibz.inf.ontop.owlrefplatform.core.ExecutableQuery;
 import it.unibz.inf.ontop.owlrefplatform.core.SQLExecutableQuery;
@@ -55,6 +54,8 @@ import org.eclipse.rdf4j.model.Literal;
 import org.eclipse.rdf4j.model.vocabulary.XMLSchema;
 import org.slf4j.LoggerFactory;
 
+import java.sql.DriverManager;
+import java.sql.SQLException;
 import java.sql.Types;
 import java.util.*;
 import java.util.Map.Entry;
@@ -121,8 +122,6 @@ public class SQLGenerator implements NativeQueryGenerator {
 
 	private Map<Predicate, String> sqlAnsViewMap;
 
-	private static final SQLMappingFactory SQL_MAPPING_FACTORY = SQLMappingFactoryImpl.getInstance();
-
 	private final ImmutableMap<ExpressionOperation, String> operations;
 
 	private static final org.slf4j.Logger log = LoggerFactory
@@ -141,7 +140,16 @@ public class SQLGenerator implements NativeQueryGenerator {
 	private SQLGenerator(@Assisted DBMetadata metadata,
 						 @Assisted SemanticIndexURIMap uriRefIds, QuestCoreSettings preferences,
 						 JdbcTypeMapper jdbcTypeMapper) {
-		String driverURI = preferences.getJdbcDriver();
+
+		String driverURI = preferences.getJdbcDriver()
+				.orElseGet(() -> {
+					try {
+						return DriverManager.getDriver(preferences.getJdbcUrl()).getClass().getCanonicalName();
+					} catch (SQLException e) {
+						// TODO: find a better exception
+						throw new RuntimeException("Impossible to get the JDBC driver. Reason: " + e.getMessage());
+					}
+				});
 
 		if (!(metadata instanceof RDBMetadata)) {
 			throw new IllegalArgumentException("Not a DBMetadata!");

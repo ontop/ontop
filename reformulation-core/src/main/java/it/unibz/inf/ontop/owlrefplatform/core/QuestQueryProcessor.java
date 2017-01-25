@@ -84,7 +84,9 @@ public class QuestQueryProcessor implements OBDAQueryProcessor {
 		// Setting up the reformulation engine
 		if (!settings.getRequiredBoolean(QuestCoreSettings.REWRITE))
 			rewriter = new DummyReformulator();
-		else if (QuestConstants.TW.equals(settings.getProperty(QuestCoreSettings.REFORMULATION_TECHNIQUE)))
+		else if (settings.getProperty(QuestCoreSettings.REFORMULATION_TECHNIQUE)
+				.filter(v -> v.equals(QuestConstants.TW))
+				.isPresent())
 			rewriter = new TreeWitnessRewriter();
 		else
 			throw new IllegalArgumentException("Invalid value for argument: " + QuestCoreSettings.REFORMULATION_TECHNIQUE);

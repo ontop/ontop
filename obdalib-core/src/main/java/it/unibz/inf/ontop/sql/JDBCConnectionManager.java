@@ -68,7 +68,7 @@ public class JDBCConnectionManager {
 
 	public Connection createConnection(OntopSQLSettings settings) throws SQLException {
 		return createConnection(settings.getJdbcUrl(), settings.getJdbcUser(),
-				settings.getJdbcPassword(), settings.getJdbcDriver());
+				settings.getJdbcPassword());
 	}
 
 	/**
@@ -77,13 +77,10 @@ public class JDBCConnectionManager {
 	 * @return The connection object.
 	 * @throws SQLException
 	 */
-	public Connection createConnection(String url, String username, String password, String driver) throws SQLException {
+	public Connection createConnection(String url, String username, String password) throws SQLException {
 
 		if (connection != null && !connection.isClosed())
 			return connection;
-
-		if (driver == null || driver.trim().equals(""))
-			throw new SQLException("Invalid driver");
 
 		connection = DriverManager.getConnection(url, username, password);
 		return connection;
@@ -95,10 +92,10 @@ public class JDBCConnectionManager {
 	 * connection.
 	 *
 	 */
-	public Connection getConnection(String url, String username, String password, String driver) throws SQLException {
+	public Connection getConnection(String url, String username, String password) throws SQLException {
 		boolean alive = isConnectionAlive();
 		if (!alive) {
-			createConnection(url, username, password, driver);
+			createConnection(url, username, password);
 		}
 		return connection;
 	}
@@ -156,6 +153,6 @@ public class JDBCConnectionManager {
 
 	public Connection getConnection(OntopSQLSettings settings) throws SQLException {
 		return getConnection(settings.getJdbcUrl(), settings.getJdbcUser(),
-				settings.getJdbcPassword(), settings.getJdbcDriver());
+				settings.getJdbcPassword());
 	}
 }

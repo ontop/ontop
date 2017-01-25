@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.injection.impl;
 import it.unibz.inf.ontop.injection.OntopMappingSQLSettings;
 import it.unibz.inf.ontop.injection.OntopSQLSettings;
 
+import java.util.Optional;
 import java.util.Properties;
 
 
@@ -47,7 +48,7 @@ public class OntopMappingSQLSettingsImpl extends OntopMappingSettingsImpl implem
     }
 
     @Override
-    public String getJdbcDriver() {
+    public Optional<String> getJdbcDriver() {
         return sqlSettings.getJdbcDriver();
     }
 }
