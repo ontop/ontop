@@ -1,11 +1,10 @@
 package it.unibz.inf.ontop.sql.parser;
 
 import com.google.common.base.Joiner;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import it.unibz.inf.ontop.model.*;
-import it.unibz.inf.ontop.model.Function;
-import it.unibz.inf.ontop.model.impl.*;
+import it.unibz.inf.ontop.model.OBDADataFactory;
+import it.unibz.inf.ontop.model.Variable;
+import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.sql.*;
 import it.unibz.inf.ontop.sql.parser.exceptions.IllegalJoinException;
 import it.unibz.inf.ontop.sql.parser.exceptions.InvalidSelectQueryException;
@@ -20,61 +19,45 @@ import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.Statement;
 import net.sf.jsqlparser.statement.select.*;
 
-import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
- * Created by Roman Kontchakov on 01/11/2016.
- *
+ * Created by Roman Kontchakov on 25/01/2017.
  */
-public class SelectQueryParser {
+public class SelectQueryAttributeExtractor2 {
     private final DBMetadata metadata;
     private final QuotedIDFactory idfac;
 
+    private static final OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
+
     private int relationIndex = 0;
 
-    public SelectQueryParser(DBMetadata metadata) {
+    public SelectQueryAttributeExtractor2(DBMetadata metadata) {
         this.metadata = metadata;
         this.idfac = metadata.getQuotedIDFactory();
     }
 
-    public RAExpression parse(String sql) {
+    public RAExpressionAttributes parse(String sql) {
         try {
             Statement statement = CCJSqlParserUtil.parse(sql);
             if (!(statement instanceof Select))
                 throw new InvalidSelectQueryException("The query is not a SELECT statement", statement);
 
-            RAExpression re = select(((Select) statement).getSelectBody());
-            return re;
+            return select(((Select) statement).getSelectBody());
         }
         catch (JSQLParserException e) {
             throw new UnsupportedSelectQueryException("Cannot parse SQL: " + sql, e);
         }
     }
 
-    private RAExpression select(SelectBody selectBody) {
+    private RAExpressionAttributes select(SelectBody selectBody) {
 
         if (!(selectBody instanceof PlainSelect))
             throw new UnsupportedSelectQueryException("Complex SELECT statements are not supported", selectBody);
 
         PlainSelect plainSelect = (PlainSelect) selectBody;
-
-        if (plainSelect.getDistinct() != null)
-            throw new UnsupportedSelectQueryException("DISTINCT is not supported", selectBody);
-
-        if (plainSelect.getGroupByColumnReferences() != null || plainSelect.getHaving() != null)
-            throw new UnsupportedSelectQueryException("GROUP BY / HAVING are not supported", selectBody);
-
-        if (plainSelect.getLimit() != null || plainSelect.getTop() != null)
-            throw new UnsupportedSelectQueryException("LIMIT / TOP are not supported", selectBody);
-
-        if (plainSelect.getOrderByElements() != null)
-            throw new UnsupportedSelectQueryException("ORDER BY is not supported", selectBody);
-
-        if (plainSelect.getOracleHierarchical() != null || plainSelect.isOracleSiblings())
-            throw new UnsupportedSelectQueryException("Oracle START WITH ... CONNECT BY / ORDER SIBLINGS BY are not supported", selectBody);
 
         if (plainSelect.getIntoTables() != null)
             throw new InvalidSelectQueryException("SELECT INTO is not allowed in mappings", selectBody);
@@ -82,47 +65,30 @@ public class SelectQueryParser {
         if (plainSelect.getFromItem() == null)
             throw new UnsupportedSelectQueryException("SELECT without FROM is not supported", selectBody);
 
-        RAExpression current = getRelationalExpression(plainSelect.getFromItem());
-        if (plainSelect.getJoins() != null) {
+        RAExpressionAttributes current = getRelationalExpression(plainSelect.getFromItem());
+        if (plainSelect.getJoins() != null)
             for (Join join : plainSelect.getJoins())
                 try {
                     current = join(current, join);
                 }
                 catch (IllegalJoinException e) {
-                    throw new InvalidSelectQueryException(e.toString(), plainSelect);
+                    throw new InvalidSelectQueryException(e.toString(), join);
                 }
-        }
 
-        ImmutableList<Function> filterAtoms = (plainSelect.getWhere() == null)
-                ? current.getFilterAtoms()
-                : ImmutableList.<Function>builder()
-                    .addAll(current.getFilterAtoms())
-                    .addAll(new BooleanExpressionParser(idfac, plainSelect.getWhere()).apply(current.getAttributes()))
-                    .build();
-
-        ImmutableList.Builder<Function> assignmentsBuilder = ImmutableList.builder();
-        ImmutableMap.Builder<QualifiedAttributeID, Variable> attributesBuilder = ImmutableMap.builder();
-        SelectItemProcessor sip = new SelectItemProcessor(current.getAttributes());
-
-        plainSelect.getSelectItems().forEach(si -> {
-            ImmutableMap<QualifiedAttributeID, Variable> attrs = sip.getAttributes(si);
-
-            // attributesBuilder.build() below checks that the keys in attrs do not intersect
-            attributesBuilder.putAll(attrs);
-
-            if (sip.assignment != null)
-                assignmentsBuilder.add(sip.assignment);
-        });
+        ImmutableMap<QualifiedAttributeID, Variable> currentAttributes = current.getAttributes();
 
         ImmutableMap<QualifiedAttributeID, Variable> attributes;
         try {
-            attributes = attributesBuilder.build();
+            attributes = plainSelect.getSelectItems().stream()
+                        .map(si -> new SelectItemProcessor(currentAttributes).getAttributes(si).entrySet())
+                        .flatMap(Collection::stream)
+                        .collect(ImmutableCollectors.toMap());
         }
         catch (IllegalArgumentException e) {
-            SelectItemProcessor sip2 = new SelectItemProcessor(current.getAttributes());
+            SelectItemProcessor sip = new SelectItemProcessor(currentAttributes);
             Map<QualifiedAttributeID, Integer> duplicates = new HashMap<>();
             plainSelect.getSelectItems().forEach(si -> {
-                ImmutableMap<QualifiedAttributeID, Variable> attrs = sip2.getAttributes(si);
+                ImmutableMap<QualifiedAttributeID, Variable> attrs = sip.getAttributes(si);
                 for (Map.Entry<QualifiedAttributeID, Variable> a : attrs.entrySet())
                     duplicates.put(a.getKey(), duplicates.getOrDefault(a.getKey(), 0) + 1);
             });
@@ -133,19 +99,17 @@ public class SelectQueryParser {
                             .collect(ImmutableCollectors.toList())) + " in the SELECT clause: ", selectBody);
         }
 
-        return new RAExpression(current.getDataAtoms(),
-                ImmutableList.<Function>builder().addAll(filterAtoms).addAll(assignmentsBuilder.build()).build(),
-                new RAExpressionAttributes(attributes, null));
+        return new RAExpressionAttributes(attributes, null);
     }
 
-    private RAExpression join(RAExpression left, Join join) throws IllegalJoinException {
+    private RAExpressionAttributes join(RAExpressionAttributes left, Join join) throws IllegalJoinException {
 
         if (join.isFull() || join.isRight() || join.isLeft() || join.isOuter())
             throw new UnsupportedSelectQueryException("LEFT/RIGHT/FULL OUTER JOINs are not supported", join);
 
-        RAExpression right = getRelationalExpression(join.getRightItem());
+        RAExpressionAttributes right = getRelationalExpression(join.getRightItem());
         if (join.isSimple()) {
-            return RAExpression.crossJoin(left, right);
+            return RAExpressionAttributes.crossJoin(left, right);
         }
         else if (join.isCross()) {
             if (join.getOnExpression() != null || join.getUsingColumns() != null)
@@ -154,7 +118,7 @@ public class SelectQueryParser {
             if (join.isInner())
                 throw new InvalidSelectQueryException("CROSS INNER JOIN is not allowed", join);
 
-            return RAExpression.crossJoin(left, right);
+            return RAExpressionAttributes.crossJoin(left, right);
         }
         else if (join.isNatural()) {
             if (join.getOnExpression() != null || join.getUsingColumns() != null)
@@ -163,20 +127,19 @@ public class SelectQueryParser {
             if (join.isInner())
                 throw new InvalidSelectQueryException("NATURAL INNER JOIN is not allowed", join);
 
-            return RAExpression.naturalJoin(left, right);
+            return RAExpressionAttributes.joinUsing(left, right, RAExpressionAttributes.getShared(left, right));
         }
         else {
             if (join.getOnExpression() != null) {
                 if (join.getUsingColumns() !=null)
                     throw new InvalidSelectQueryException("JOIN cannot have both USING and ON", join);
 
-                return RAExpression.joinOn(left, right,
-                        new BooleanExpressionParser(idfac, join.getOnExpression()));
+                return RAExpressionAttributes.crossJoin(left, right);
             }
             else if (join.getUsingColumns() != null) {
-                return RAExpression.joinUsing(left, right,
+                return RAExpressionAttributes.joinUsing(left, right,
                         join.getUsingColumns().stream()
-                                .map(p -> idfac.createAttributeID(p.getColumnName()))
+                                .map(c -> idfac.createAttributeID(c.getColumnName()))
                                 .collect(ImmutableCollectors.toSet()));
             }
             else
@@ -185,14 +148,14 @@ public class SelectQueryParser {
     }
 
 
-    private RAExpression getRelationalExpression(FromItem fromItem) {
+    private RAExpressionAttributes getRelationalExpression(FromItem fromItem) {
         return new FromItemProcessor(fromItem).result;
     }
 
 
     private class FromItemProcessor implements FromItemVisitor {
 
-        private RAExpression result = null;
+        private RAExpressionAttributes result = null;
 
         public FromItemProcessor(FromItem fromItem) {
             fromItem.accept(this);
@@ -212,30 +175,18 @@ public class SelectQueryParser {
                     ? idfac.createRelationID(null, tableName.getAlias().getName())
                     : relation.getID();
 
-            OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
-            List<Term> terms = new ArrayList<>(relation.getAttributes().size());
-            ImmutableMap.Builder attributes = ImmutableMap.<QuotedID, Variable>builder();
-            // the order in the loop is important
-            relation.getAttributes().forEach(attribute -> {
-                QuotedID attributeId = attribute.getID();
-                Variable var = fac.getVariable(attributeId.getName() + relationIndex);
-                terms.add(var);
-                attributes.put(attributeId, var);
-            });
-            // create an atom for a particular table
-            Function atom = Relation2DatalogPredicate.getAtom(relation, terms);
+            ImmutableMap<QuotedID, Variable> attributes = relation.getAttributes().stream()
+                    .collect(ImmutableCollectors.toMap(Attribute::getID,
+                            attribute -> createVariable(attribute.getID())));
 
             // DEFAULT SCHEMA
             // TODO: to be improved
-            RAExpressionAttributes attrs;
             if ((tableName.getAlias() == null) &&
                     relation.getID().getSchemaName() != null &&
                     metadata.getDatabaseRelation(relation.getID().getSchemalessID()).equals(relation))
-                attrs = RAExpressionAttributes.create(attributes.build(), alias, relation.getID().getSchemalessID());
+                result = RAExpressionAttributes.create(attributes, alias, relation.getID().getSchemalessID());
             else
-                attrs = RAExpressionAttributes.create(attributes.build(), alias);
-
-            result = new RAExpression(ImmutableList.of(atom), ImmutableList.of(), attrs);
+                result = RAExpressionAttributes.create(attributes, alias);
         }
 
 
@@ -243,11 +194,12 @@ public class SelectQueryParser {
         public void visit(SubSelect subSelect) {
             if (subSelect.getAlias() == null || subSelect.getAlias().getName() == null)
                 throw new InvalidSelectQueryException("SUB-SELECT must have an alias", subSelect);
+            relationIndex++;
 
-            RAExpression current = select(subSelect.getSelectBody());
+            RAExpressionAttributes current = select(subSelect.getSelectBody());
 
             RelationID aliasId = idfac.createRelationID(null, subSelect.getAlias().getName());
-            result = RAExpression.alias(current, aliasId);
+            result = RAExpressionAttributes.alias(current, aliasId);
         }
 
         @Override
@@ -255,8 +207,8 @@ public class SelectQueryParser {
             if (subjoin.getAlias() == null || subjoin.getAlias().getName() == null)
                 throw new InvalidSelectQueryException("SUB-JOIN must have an alias", subjoin);
 
-            RAExpression left = getRelationalExpression(subjoin.getLeft());
-            RAExpression join;
+            RAExpressionAttributes left = getRelationalExpression(subjoin.getLeft());
+            RAExpressionAttributes join;
             try {
                 join = join(left, subjoin.getJoin());
             }
@@ -265,7 +217,7 @@ public class SelectQueryParser {
             }
 
             RelationID aliasId = idfac.createRelationID(null, subjoin.getAlias().getName());
-            result = RAExpression.alias(join, aliasId);
+            result = RAExpressionAttributes.alias(join, aliasId);
         }
 
         @Override
@@ -283,14 +235,12 @@ public class SelectQueryParser {
         final ImmutableMap<QualifiedAttributeID, Variable> attributes;
 
         ImmutableMap<QualifiedAttributeID, Variable> map;
-        Function assignment;
 
         SelectItemProcessor(ImmutableMap<QualifiedAttributeID, Variable> attributes) {
             this.attributes = attributes;
         }
 
         ImmutableMap<QualifiedAttributeID, Variable> getAttributes(SelectItem si) {
-            assignment = null;
             si.accept(this);
             return map;
         }
@@ -344,16 +294,13 @@ public class SelectQueryParser {
                 if (columnAlias == null || columnAlias.getName() == null)
                     throw new InvalidSelectQueryException("Complex expression in SELECT must have an alias", selectExpressionItem);
 
-                OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
-
                 QuotedID name = idfac.createAttributeID(columnAlias.getName());
-                Variable var = fac.getVariable(columnAlias.getName() + relationIndex);
-                map = ImmutableMap.of(new QualifiedAttributeID(null, name), var);
-
-                Term term = new ExpressionParser(idfac, expr).apply(attributes);
-                assignment = fac.getFunctionEQ(var, term);
+                map = ImmutableMap.of(new QualifiedAttributeID(null, name), createVariable(name));
             }
-
         }
+    }
+
+    private Variable createVariable(QuotedID id) {
+        return fac.getVariable(id.getName() + relationIndex);
     }
 }

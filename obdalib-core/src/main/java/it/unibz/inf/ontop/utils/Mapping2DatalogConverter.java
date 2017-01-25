@@ -26,7 +26,7 @@ import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.Function;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.sql.*;
-import it.unibz.inf.ontop.sql.parser.RelationalExpression;
+import it.unibz.inf.ontop.sql.parser.RAExpression;
 import it.unibz.inf.ontop.sql.parser.SelectQueryAttributeExtractor;
 import it.unibz.inf.ontop.sql.parser.SelectQueryParser;
 import it.unibz.inf.ontop.sql.parser.exceptions.UnsupportedSelectQueryException;
@@ -62,7 +62,7 @@ public class Mapping2DatalogConverter {
                 ImmutableMap<QualifiedAttributeID, Variable> lookupTable;
 
                 try {
-                    RelationalExpression re = sqp.parse(sourceQuery.toString());
+                    RAExpression re = sqp.parse(sourceQuery.toString());
                     lookupTable = re.getAttributes();
 
                     body = new ArrayList<>(re.getDataAtoms().size() + re.getFilterAtoms().size());

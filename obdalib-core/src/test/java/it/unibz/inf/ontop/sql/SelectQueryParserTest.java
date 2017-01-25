@@ -3,7 +3,7 @@ package it.unibz.inf.ontop.sql;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
-import it.unibz.inf.ontop.sql.parser.RelationalExpression;
+import it.unibz.inf.ontop.sql.parser.RAExpression;
 import it.unibz.inf.ontop.sql.parser.SelectQueryParser;
 import it.unibz.inf.ontop.sql.parser.exceptions.InvalidSelectQueryException;
 import it.unibz.inf.ontop.sql.parser.exceptions.UnsupportedSelectQueryException;
@@ -48,7 +48,7 @@ public class SelectQueryParserTest {
     @Test
     public void inner_join_on_same_table_test() {
         SelectQueryParser parser = new SelectQueryParser(createMetadata());
-        RelationalExpression re = parser.parse("SELECT p1.A, p2.B FROM P p1 INNER JOIN  P p2 on p1.A = p2.A ");
+        RAExpression re = parser.parse("SELECT p1.A, p2.B FROM P p1 INNER JOIN  P p2 on p1.A = p2.A ");
         System.out.println(re);
 
 //        assertEquals(2, parse.getHead().getTerms().size());
@@ -72,7 +72,7 @@ public class SelectQueryParserTest {
         SelectQueryParser parser = new SelectQueryParser(createMetadata());
         // column reference "a" is ambiguous
         String sql = "SELECT A, P.B, R.C, D FROM P NATURAL JOIN Q INNER JOIN  R on Q.C =  R.C;";
-        RelationalExpression re = parser.parse(sql);
+        RAExpression re = parser.parse(sql);
         System.out.println("\n" + sql + "\n" + "column reference \"a\" is ambiguous --- this is wrongly parsed:\n" + re);
     }
 
@@ -86,7 +86,7 @@ public class SelectQueryParserTest {
     @Test
     public void subjoin_test() {
         SelectQueryParser parser = new SelectQueryParser(createMetadata());
-        RelationalExpression re = parser.parse("SELECT S.A, S.C FROM R JOIN (P NATURAL JOIN Q) AS S ON R.A = S.A");
+        RAExpression re = parser.parse("SELECT S.A, S.C FROM R JOIN (P NATURAL JOIN Q) AS S ON R.A = S.A");
         System.out.println(re);
 
         assertMatches(ImmutableList.of(eqOf(A1, A2), eqOf(A2, A3)), re.getFilterAtoms());
@@ -100,7 +100,7 @@ public class SelectQueryParserTest {
     @Test
     public void simple_join_test() {
         SelectQueryParser parser = new SelectQueryParser(createMetadata());
-        RelationalExpression re = parser.parse("SELECT * FROM P, Q;");
+        RAExpression re = parser.parse("SELECT * FROM P, Q;");
 
         assertMatches(ImmutableList.of(), re.getFilterAtoms());
         assertMatches(ImmutableList.of(dataAtomOf(P, A1, B1), dataAtomOf(Q, A2, C2)), re.getDataAtoms());
@@ -109,7 +109,7 @@ public class SelectQueryParserTest {
     @Test
     public void natural_join_test() {
         SelectQueryParser parser = new SelectQueryParser(createMetadata());
-        RelationalExpression re = parser.parse("SELECT A FROM P NATURAL JOIN  Q;");
+        RAExpression re = parser.parse("SELECT A FROM P NATURAL JOIN  Q;");
         System.out.println(re);
 
         assertMatches(ImmutableList.of(eqOf(A1, A2)), re.getFilterAtoms());
@@ -119,7 +119,7 @@ public class SelectQueryParserTest {
     @Test
     public void cross_join_test() {
         SelectQueryParser parser = new SelectQueryParser(createMetadata());
-        RelationalExpression re = parser.parse("SELECT * FROM P CROSS JOIN  Q;");
+        RAExpression re = parser.parse("SELECT * FROM P CROSS JOIN  Q;");
 
         assertMatches(ImmutableList.of(), re.getFilterAtoms());
         assertMatches(ImmutableList.of(dataAtomOf(P, A1, B1), dataAtomOf(Q, A2, C2)), re.getDataAtoms());
@@ -128,7 +128,7 @@ public class SelectQueryParserTest {
     @Test
     public void join_on_test() {
         SelectQueryParser parser = new SelectQueryParser(createMetadata());
-        RelationalExpression re = parser.parse("SELECT * FROM P JOIN  Q ON P.A = Q.A;");
+        RAExpression re = parser.parse("SELECT * FROM P JOIN  Q ON P.A = Q.A;");
 
         assertMatches(ImmutableList.of(eqOf(A1, A2)), re.getFilterAtoms());
         assertMatches(ImmutableList.of(dataAtomOf(P, A1, B1), dataAtomOf(Q, A2, C2)), re.getDataAtoms());
@@ -137,7 +137,7 @@ public class SelectQueryParserTest {
     @Test
     public void inner_join_on_test() {
         SelectQueryParser parser = new SelectQueryParser(createMetadata());
-        RelationalExpression re = parser.parse("SELECT * FROM P INNER JOIN  Q ON P.A = Q.A;");
+        RAExpression re = parser.parse("SELECT * FROM P INNER JOIN  Q ON P.A = Q.A;");
 
         assertMatches(ImmutableList.of(eqOf(A1, A2)), re.getFilterAtoms());
         assertMatches(ImmutableList.of(dataAtomOf(P, A1, B1), dataAtomOf(Q, A2, C2)), re.getDataAtoms());
@@ -146,7 +146,7 @@ public class SelectQueryParserTest {
     @Test
     public void join_using_test() {
         SelectQueryParser parser = new SelectQueryParser(createMetadata());
-        RelationalExpression re = parser.parse("SELECT * FROM P JOIN  Q USING(A);");
+        RAExpression re = parser.parse("SELECT * FROM P JOIN  Q USING(A);");
 
         assertMatches(ImmutableList.of(eqOf(A1, A2)), re.getFilterAtoms());
         assertMatches(ImmutableList.of(dataAtomOf(P, A1, B1), dataAtomOf(Q, A2, C2)), re.getDataAtoms());
@@ -174,7 +174,7 @@ public class SelectQueryParserTest {
     @Test
     public void inner_join_using_test() {
         SelectQueryParser parser = new SelectQueryParser(createMetadata());
-        RelationalExpression re = parser.parse("SELECT * FROM P INNER JOIN  Q USING(A);");
+        RAExpression re = parser.parse("SELECT * FROM P INNER JOIN  Q USING(A);");
 
         assertMatches(ImmutableList.of(eqOf(A1, A2)), re.getFilterAtoms());
         assertMatches(ImmutableList.of(dataAtomOf(P, A1, B1), dataAtomOf(Q, A2, C2)), re.getDataAtoms());
@@ -287,7 +287,7 @@ public class SelectQueryParserTest {
     public void join_using_2_test() {
         SelectQueryParser parser = new SelectQueryParser(createMetadata());
 
-        RelationalExpression re = parser.parse("SELECT A, B FROM P INNER JOIN R USING (A,B)");
+        RAExpression re = parser.parse("SELECT A, B FROM P INNER JOIN R USING (A,B)");
         System.out.println(re);
 
         //assertEquals(2, parse.getHead().getTerms().size());
@@ -303,7 +303,7 @@ public class SelectQueryParserTest {
     public void select_join_2_test() {
         SelectQueryParser parser = new SelectQueryParser(createMetadata());
         // common column name "A" appears more than once in left table
-        RelationalExpression re = parser.parse("SELECT a.A, b.B FROM P AS a JOIN R AS b  ON (a.A = b.B);");
+        RAExpression re = parser.parse("SELECT a.A, b.B FROM P AS a JOIN R AS b  ON (a.A = b.B);");
 
         // TODO: add proper asserts
         //assertNotNull(parse);
@@ -347,7 +347,7 @@ public class SelectQueryParserTest {
     public void sub_select_one_test(){
         String  query = "SELECT * FROM (SELECT * FROM P ) AS S;";
         SelectQueryParser parser = new SelectQueryParser(createMetadata());
-        RelationalExpression re = parser.parse(query);
+        RAExpression re = parser.parse(query);
         System.out.print(re);
 
         assertMatches(ImmutableList.of(), re.getFilterAtoms());
@@ -358,7 +358,7 @@ public class SelectQueryParserTest {
     public void sub_select_two_test(){
         String  query = "SELECT * FROM (SELECT * FROM (SELECT * FROM P ) AS T ) AS S;";
         SelectQueryParser parser = new SelectQueryParser(createMetadata());
-        RelationalExpression re = parser.parse(query);
+        RAExpression re = parser.parse(query);
         System.out.print(re);
 
         assertMatches(ImmutableList.of(), re.getFilterAtoms());
@@ -369,7 +369,7 @@ public class SelectQueryParserTest {
     public void sub_select_one_simple_join_internal_test(){
         String  query = "SELECT * FROM (SELECT * FROM P, Q) AS S;";
         SelectQueryParser parser = new SelectQueryParser(createMetadata());
-        RelationalExpression re = parser.parse(query);
+        RAExpression re = parser.parse(query);
         System.out.print(re);
 
         assertMatches(ImmutableList.of(), re.getFilterAtoms());
@@ -381,7 +381,7 @@ public class SelectQueryParserTest {
     public void sub_select_one_simple_join_test(){
         String  query = "SELECT * FROM (SELECT * FROM P) AS S, Q ;";
         SelectQueryParser parser = new SelectQueryParser(createMetadata());
-        RelationalExpression re = parser.parse(query);
+        RAExpression re = parser.parse(query);
         System.out.print(re);
 
         assertMatches(ImmutableList.of(), re.getFilterAtoms());

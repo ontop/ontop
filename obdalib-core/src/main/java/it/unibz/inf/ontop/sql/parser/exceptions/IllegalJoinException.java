@@ -1,16 +1,16 @@
 package it.unibz.inf.ontop.sql.parser.exceptions;
 
-import it.unibz.inf.ontop.sql.parser.RelationalExpression;
+import it.unibz.inf.ontop.sql.parser.RAExpressionAttributes;
 
 /**
  * Created by Roman Kontchakov on 10/12/2016.
  */
 
 public class IllegalJoinException extends Exception {
-    private final RelationalExpression re1;
-    private final RelationalExpression re2;
+    private final RAExpressionAttributes re1;
+    private final RAExpressionAttributes re2;
 
-    public IllegalJoinException(RelationalExpression re1, RelationalExpression re2, String message) {
+    public IllegalJoinException(RAExpressionAttributes re1, RAExpressionAttributes re2, String message) {
         super(message);
         this.re1 = re1;
         this.re2 = re2;

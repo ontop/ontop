@@ -3,49 +3,33 @@ package it.unibz.inf.ontop.sql.parser;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import it.unibz.inf.ontop.model.Function;
-import it.unibz.inf.ontop.model.OBDADataFactory;
 import it.unibz.inf.ontop.model.Variable;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.sql.QualifiedAttributeID;
 import it.unibz.inf.ontop.sql.QuotedID;
 import it.unibz.inf.ontop.sql.RelationID;
 import it.unibz.inf.ontop.sql.parser.exceptions.IllegalJoinException;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
-import java.util.Iterator;
 import java.util.Map;
-import java.util.Set;
-import java.util.stream.Stream;
 
 import static java.util.function.Function.identity;
 
 /**
- * Created by Roman Kontchakov on 01/11/2016.
- *
+ * Created by roman on 24/01/2017.
  */
-public class RelationalExpression {
-    private ImmutableList<Function> dataAtoms;
-    private ImmutableList<Function> filterAtoms;
+public class RAExpressionAttributes {
+
     private ImmutableMap<QualifiedAttributeID, Variable> attributes;
     private ImmutableMap<QuotedID, ImmutableSet<RelationID>> attributeOccurrences;
-
-    private static final OBDADataFactory FACTORY = OBDADataFactoryImpl.getInstance();
 
     /**
      * constructs a relation expression
      *
-     * @param dataAtoms            an {@link ImmutableList}<{@link Function}>
-     * @param filterAtoms          an {@link ImmutableList}<{@link Function}>
      * @param attributes           an {@link ImmutableMap}<{@link QualifiedAttributeID}, {@link Variable}>
      * @param attributeOccurrences an {@link ImmutableMap}<{@link QuotedID}, {@link ImmutableSet}<{@link RelationID}>>
      */
-    public RelationalExpression(ImmutableList<Function> dataAtoms,
-                                ImmutableList<Function> filterAtoms,
-                                ImmutableMap<QualifiedAttributeID, Variable> attributes,
-                                ImmutableMap<QuotedID, ImmutableSet<RelationID>> attributeOccurrences) {
-        this.dataAtoms = dataAtoms;
-        this.filterAtoms = filterAtoms;
+    public RAExpressionAttributes(ImmutableMap<QualifiedAttributeID, Variable> attributes,
+                                  ImmutableMap<QuotedID, ImmutableSet<RelationID>> attributeOccurrences) {
         this.attributes = attributes;
         this.attributeOccurrences = attributeOccurrences;
     }
@@ -72,14 +56,6 @@ public class RelationalExpression {
         return (occurrences != null) && occurrences.size() == 1;
     }
 
-    public ImmutableList<Function> getDataAtoms() {
-        return dataAtoms;
-    }
-
-    public ImmutableList<Function> getFilterAtoms() {
-        return filterAtoms;
-    }
-
     public ImmutableMap<QualifiedAttributeID, Variable> getAttributes() {
         return attributes;
     }
@@ -87,27 +63,12 @@ public class RelationalExpression {
     /**
      * CROSS JOIN (also denoted by , in SQL)
      *
-     * @param re1 a {@link RelationalExpression}
-     * @param re2 a {@link RelationalExpression}
-     * @return a {@link RelationalExpression}
+     * @param re1 a {@link RAExpressionAttributes}
+     * @param re2 a {@link RAExpressionAttributes}
+     * @return a {@link RAExpressionAttributes}
      * @throws IllegalJoinException if the same alias occurs in both arguments
      */
-    public static RelationalExpression crossJoin(RelationalExpression re1, RelationalExpression re2) throws IllegalJoinException {
-        return joinOn(re1, re2, BooleanExpressionParser.empty());
-    }
-
-
-    /**
-     * JOIN ON
-     *
-     * @param re1 a {@link RelationalExpression}
-     * @param re2 a {@link RelationalExpression}
-     * @param getAtomOnExpression a {@link BooleanExpressionParser}
-     * @return a {@link RelationalExpression}
-     * @throws IllegalJoinException if the same alias occurs in both arguments
-     */
-    public static RelationalExpression joinOn(RelationalExpression re1, RelationalExpression re2,
-                                       BooleanExpressionParser getAtomOnExpression) throws IllegalJoinException {
+    public static RAExpressionAttributes crossJoin(RAExpressionAttributes re1, RAExpressionAttributes re2) throws IllegalJoinException {
 
         checkRelationAliasesConsistency(re1, re2);
 
@@ -118,55 +79,40 @@ public class RelationalExpression {
                 re2.selectAttributes(id ->
                         (id.getRelation() != null) || re1.isAbsent(id.getAttribute())));
 
-        return new RelationalExpression(
-                union(re1.dataAtoms, re2.dataAtoms),
-                union(re1.filterAtoms, re2.filterAtoms, getAtomOnExpression.apply(attributes).iterator()),
-                attributes,
+        return new RAExpressionAttributes(attributes,
                 getAttributeOccurrences(re1, re2, id -> attributeOccurrencesUnion(id, re1, re2)));
     }
 
     /**
      * NATURAL JOIN
      *
-     * @param re1 a {@link RelationalExpression}
-     * @param re2 a {@link RelationalExpression}
-     * @return a {@link RelationalExpression}
-     * @throws IllegalJoinException if the same alias occurs in both arguments
-     *          or one of the shared attributes is ambiguous
+     * @param re1 a {@link RAExpressionAttributes}
+     * @param re2 a {@link RAExpressionAttributes}
+     * @return a {@link ImmutableSet}<{@link QuotedID}>
      */
 
-    public static RelationalExpression naturalJoin(RelationalExpression re1, RelationalExpression re2) throws IllegalJoinException {
+    public static ImmutableSet<QuotedID> getShared(RAExpressionAttributes re1,
+                                                   RAExpressionAttributes re2) {
 
-        checkRelationAliasesConsistency(re1, re2);
-
-        ImmutableSet<QuotedID> shared = re1.attributeOccurrences.keySet().stream()
+        return re1.attributeOccurrences.keySet().stream()
                 .filter(id -> !re1.isAbsent(id) && !re2.isAbsent(id))
                 .collect(ImmutableCollectors.toSet());
-
-        if (shared.stream().anyMatch(id -> re1.isAmbiguous(id) || re2.isAmbiguous(id)))
-            throw new IllegalJoinException(re1, re2,
-                    "Ambiguous common attribute " +
-                            shared.stream()
-                                    .filter(id -> re1.isAmbiguous(id) || re2.isAmbiguous(id))
-                                    .collect(ImmutableCollectors.toList()) +
-                            " in NATURAL JOIN");
-
-        return internalJoinUsing(re1, re2, shared);
     }
 
     /**
      * JOIN USING
      *
-     * @param re1 a {@link RelationalExpression}
-     * @param re2 a {@link RelationalExpression}
+     * @param re1 a {@link RAExpressionAttributes}
+     * @param re2 a {@link RAExpressionAttributes}
      * @param using a {@link ImmutableSet}<{@link QuotedID}>
-     * @return a {@link RelationalExpression}
+     * @return a {@link RAExpressionAttributes}
      * @throws IllegalJoinException if the same alias occurs in both arguments
      *          or one of the `using' attributes is ambiguous or absent
      */
 
-    public static RelationalExpression joinUsing(RelationalExpression re1, RelationalExpression re2,
-                                          ImmutableSet<QuotedID> using) throws IllegalJoinException {
+    public static RAExpressionAttributes joinUsing(RAExpressionAttributes re1,
+                                                   RAExpressionAttributes re2,
+                                                   ImmutableSet<QuotedID> using) throws IllegalJoinException {
 
         checkRelationAliasesConsistency(re1, re2);
 
@@ -181,24 +127,10 @@ public class RelationalExpression {
                     .collect(ImmutableCollectors.toList());
 
             throw new IllegalJoinException(re1, re2,
-                    (!notFound.isEmpty() ? "Attribute " + notFound + " in USING cannot be found" : "") +
-                    (!notFound.isEmpty() && !ambiguous.isEmpty() ? ", " : "") +
-                    (!ambiguous.isEmpty() ? "Attribute " + ambiguous + " in USING are ambiguous" : ""));
+                    (!notFound.isEmpty() ? "Attribute(s) " + notFound + " cannot be found" : "") +
+                            (!notFound.isEmpty() && !ambiguous.isEmpty() ? ", " : "") +
+                            (!ambiguous.isEmpty() ? "Attribute(s) " + ambiguous + " are ambiguous" : ""));
         }
-
-        return RelationalExpression.internalJoinUsing(re1, re2, using);
-    }
-
-    /**
-     * internal implementation of JOIN USING and NATURAL JOIN
-     *
-     * @param re1 a {@link RelationalExpression}
-     * @param re2 a {@link RelationalExpression}
-     * @param using a {@link Set}<{@link QuotedID}>
-     * @return a {@link RelationalExpression}
-     */
-    private static RelationalExpression internalJoinUsing(RelationalExpression re1, RelationalExpression re2,
-                                                          ImmutableSet<QuotedID> using) {
 
         ImmutableMap<QualifiedAttributeID, Variable> attributes = merge(
                 re1.selectAttributes(id ->
@@ -210,43 +142,24 @@ public class RelationalExpression {
                         (id.getRelation() != null && !using.contains(id.getAttribute()))
                                 || (id.getRelation() == null && re1.isAbsent(id.getAttribute()))));
 
-        ImmutableList<Function> filterAtoms = union(re1.filterAtoms, re2.filterAtoms,
-                using.stream()
-                        .map(id -> new QualifiedAttributeID(null, id))
-                        .map(id -> {
-                            // TODO: this will be removed later, when OBDA factory will start checking non-nulls
-                            Variable v1 = re1.attributes.get(id);
-                            if (v1 == null)
-                                throw new IllegalArgumentException("Variable " + id + " not found in " + re1);
-                            Variable v2 = re2.attributes.get(id);
-                            if (v2 == null)
-                                throw new IllegalArgumentException("Variable " + id + " not found in " + re2);
-                            return FACTORY.getFunctionEQ(v1, v2);
-                        })
-                        .iterator());
-
         ImmutableMap<QuotedID, ImmutableSet<RelationID>> attributeOccurrences =
                 getAttributeOccurrences(re1, re2,
                         id -> using.contains(id)
                                 ? re1.attributeOccurrences.get(id)
                                 : attributeOccurrencesUnion(id, re1, re2));
 
-        return new RelationalExpression(union(re1.dataAtoms, re2.dataAtoms), filterAtoms, attributes, attributeOccurrences);
+        return new RAExpressionAttributes(attributes, attributeOccurrences);
     }
 
     /**
      *
-     * @param dataAtoms a {@link ImmutableList}<{@link Function}>
-     * @param filterAtoms a {@link ImmutableList}<{@link Function}>
      * @param unqualifiedAttributes a {@link ImmutableMap}<{@link QuotedID}, {@link Variable}>
      * @param alias a {@link RelationID}
-     * @return a {@link RelationalExpression}
+     * @return a {@link RAExpressionAttributes}
      */
 
-    public static RelationalExpression create(ImmutableList<Function> dataAtoms,
-                                              ImmutableList<Function> filterAtoms,
-                                              ImmutableMap<QuotedID, Variable> unqualifiedAttributes,
-                                              RelationID alias) {
+    public static RAExpressionAttributes create(ImmutableMap<QuotedID, Variable> unqualifiedAttributes,
+                                                RelationID alias) {
 
         ImmutableMap<QualifiedAttributeID, Variable> attributes = merge(
                 unqualifiedAttributes.entrySet().stream()
@@ -262,13 +175,11 @@ public class RelationalExpression {
                 unqualifiedAttributes.keySet().stream()
                         .collect(ImmutableCollectors.toMap(identity(), id -> ImmutableSet.of(alias)));
 
-        return new RelationalExpression(dataAtoms, filterAtoms, attributes, attributeOccurrences);
+        return new RAExpressionAttributes(attributes, attributeOccurrences);
     }
 
-    public static RelationalExpression create(ImmutableList<Function> dataAtoms,
-                                              ImmutableList<Function> filterAtoms,
-                                              ImmutableMap<QuotedID, Variable> unqualifiedAttributes,
-                                              RelationID alias, RelationID schemalessId) {
+    public static RAExpressionAttributes create(ImmutableMap<QuotedID, Variable> unqualifiedAttributes,
+                                                RelationID alias, RelationID schemalessId) {
 
         ImmutableMap<QualifiedAttributeID, Variable> attributes = merge(
                 unqualifiedAttributes.entrySet().stream()
@@ -288,18 +199,18 @@ public class RelationalExpression {
                 unqualifiedAttributes.keySet().stream()
                         .collect(ImmutableCollectors.toMap(identity(), id -> ImmutableSet.of(alias)));
 
-        return new RelationalExpression(dataAtoms, filterAtoms, attributes, attributeOccurrences);
+        return new RAExpressionAttributes(attributes, attributeOccurrences);
     }
 
     /**
      * (relational expression) AS A
      *
-     * @param re a {@link RelationalExpression}
+     * @param re a {@link RAExpressionAttributes}
      * @param alias a {@link QuotedID}
-     * @return a {@link RelationalExpression}
+     * @return a {@link RAExpressionAttributes}
      */
 
-    public static RelationalExpression alias(RelationalExpression re, RelationID alias) {
+    public static RAExpressionAttributes alias(RAExpressionAttributes re, RelationID alias) {
 
         ImmutableMap<QuotedID, Variable> unqualifiedAttributes =
                 re.attributes.entrySet().stream()
@@ -307,23 +218,18 @@ public class RelationalExpression {
                         .collect(ImmutableCollectors.toMap(
                                 e -> e.getKey().getAttribute(), Map.Entry::getValue));
 
-        return create(re.dataAtoms, re.filterAtoms, unqualifiedAttributes, alias);
+        return create(unqualifiedAttributes, alias);
     }
 
 
-    private static ImmutableList<Function> union(ImmutableList<Function> atoms1, ImmutableList<Function> atoms2) {
-        return ImmutableList.<Function>builder().addAll(atoms1).addAll(atoms2).build();
-    }
-
-    private static ImmutableList<Function> union(ImmutableList<Function> atoms1, ImmutableList<Function> atoms2, Iterator<Function> atoms3) {
-        return ImmutableList.<Function>builder().addAll(atoms1).addAll(atoms2).addAll(atoms3).build();
-    }
-
-    private static ImmutableMap<QualifiedAttributeID, Variable> merge(ImmutableMap<QualifiedAttributeID, Variable> attrs1, ImmutableMap<QualifiedAttributeID, Variable> attrs2) {
+    private static ImmutableMap<QualifiedAttributeID, Variable> merge(ImmutableMap<QualifiedAttributeID, Variable> attrs1,
+                                                                      ImmutableMap<QualifiedAttributeID, Variable> attrs2) {
         return ImmutableMap.<QualifiedAttributeID, Variable>builder().putAll(attrs1).putAll(attrs2).build();
     }
 
-    private static ImmutableMap<QualifiedAttributeID, Variable> merge(ImmutableMap<QualifiedAttributeID, Variable> attrs1, ImmutableMap<QualifiedAttributeID, Variable> attrs2, ImmutableMap<QualifiedAttributeID, Variable> attrs3) {
+    private static ImmutableMap<QualifiedAttributeID, Variable> merge(ImmutableMap<QualifiedAttributeID, Variable> attrs1,
+                                                                      ImmutableMap<QualifiedAttributeID, Variable> attrs2,
+                                                                      ImmutableMap<QualifiedAttributeID, Variable> attrs3) {
         return ImmutableMap.<QualifiedAttributeID, Variable>builder().putAll(attrs1).putAll(attrs2).putAll(attrs3).build();
     }
 
@@ -331,13 +237,14 @@ public class RelationalExpression {
      * treats null values as empty sets
      *
      * @param id a {@link QuotedID}
-     * @param re1 a {@link RelationalExpression}
-     * @param re2 a {@link RelationalExpression}
+     * @param re1 a {@link RAExpressionAttributes}
+     * @param re2 a {@link RAExpressionAttributes}
      * @return the union of occurrences of id in e1 and e2
      */
 
     private static ImmutableSet<RelationID> attributeOccurrencesUnion(QuotedID id,
-                                                                      RelationalExpression re1, RelationalExpression re2) {
+                                                                      RAExpressionAttributes re1,
+                                                                      RAExpressionAttributes re2) {
 
         ImmutableSet<RelationID> s1 = re1.attributeOccurrences.get(id);
         ImmutableSet<RelationID> s2 = re2.attributeOccurrences.get(id);
@@ -359,10 +266,10 @@ public class RelationalExpression {
     }
 
 
-    private static ImmutableMap<QuotedID, ImmutableSet<RelationID>> getAttributeOccurrences(RelationalExpression re1,
-                                                                                            RelationalExpression re2,
-                                                                                            java.util.function.Function<QuotedID, ImmutableSet<RelationID>>
-                                                                                                    collector) {
+    private static ImmutableMap<QuotedID, ImmutableSet<RelationID>>
+            getAttributeOccurrences(RAExpressionAttributes re1,
+                                    RAExpressionAttributes re2,
+                                    java.util.function.Function<QuotedID, ImmutableSet<RelationID>> collector) {
 
         ImmutableSet<QuotedID> keys = ImmutableSet.<QuotedID>builder()
                 .addAll(re1.attributeOccurrences.keySet())
@@ -377,12 +284,13 @@ public class RelationalExpression {
     /**
      * throw IllegalJoinException if a relation alias occurs in both arguments of the join
      *
-     * @param re1 a {@link RelationalExpression}
-     * @param re2 a {@link RelationalExpression}
+     * @param re1 a {@link RAExpressionAttributes}
+     * @param re2 a {@link RAExpressionAttributes}
      * @throws IllegalJoinException if the same alias occurs in both arguments
      */
 
-    private static void checkRelationAliasesConsistency(RelationalExpression re1, RelationalExpression re2) throws IllegalJoinException {
+    private static void checkRelationAliasesConsistency(RAExpressionAttributes re1,
+                                                        RAExpressionAttributes re2) throws IllegalJoinException {
 
         ImmutableSet<RelationID> alias1 = re1.attributes.keySet().stream()
                 .filter(id -> id.getRelation() != null)
@@ -401,11 +309,6 @@ public class RelationalExpression {
 
     @Override
     public String toString() {
-        return "RelationalExpression : " + dataAtoms +
-                " FILTER " + filterAtoms +
-                " with " + attributes +
-                " and " + attributeOccurrences;
+        return "attributes: " + attributes + " with " + attributeOccurrences;
     }
-
-
 }

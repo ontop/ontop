@@ -24,15 +24,6 @@ public class BooleanExpressionParser implements java.util.function.Function<Immu
         this.root = expression;
     }
 
-    public static BooleanExpressionParser empty() {
-        return new BooleanExpressionParser(null, null) {
-            @Override
-            public ImmutableList<Function> apply(ImmutableMap<QualifiedAttributeID, Variable> attributes) {
-                return ImmutableList.of();
-            }
-        };
-    }
-
     @Override
     public ImmutableList<Function> apply(ImmutableMap<QualifiedAttributeID, Variable> attributes) {
 

@@ -21,8 +21,11 @@ package it.unibz.inf.ontop.sql.parser;
  */
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import it.unibz.inf.ontop.model.Variable;
 import it.unibz.inf.ontop.sql.*;
 import it.unibz.inf.ontop.sql.parser.exceptions.InvalidSelectQueryException;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.*;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
@@ -43,14 +46,25 @@ public class SelectQueryAttributeExtractor {
 
     private static final  String[] aliasSplitters = new String[]{" as ", " AS "};
 
+    private final SelectQueryAttributeExtractor2 sqae;
 
     public SelectQueryAttributeExtractor(DBMetadata metadata) {
         this.metadata = metadata;
         this.idfac = metadata.getQuotedIDFactory();
+        sqae = new SelectQueryAttributeExtractor2(metadata);
     }
 
     public ImmutableList<QuotedID> extract(String sql) {
 
+        try {
+            ImmutableMap<QualifiedAttributeID, Variable> attrs = sqae.parse(sql).getAttributes();
+
+            return attrs.keySet().stream()
+                    .filter(id -> id.getRelation() == null)
+                    .map(id -> id.getAttribute())
+                    .collect(ImmutableCollectors.toList());
+        }
+/*
         final ImmutableList.Builder<QuotedID> attributes = ImmutableList.builder();
 
         try {
@@ -116,6 +130,10 @@ public class SelectQueryAttributeExtractor {
             });
         }
         catch (JSQLParserException e) {
+*/
+        catch (Exception e) {
+            final ImmutableList.Builder<QuotedID> attributes = ImmutableList.builder();
+
             // COULD NOT PARSE - do a rough approximation
 
             int start = "select".length();
@@ -152,8 +170,8 @@ public class SelectQueryAttributeExtractor {
                 attributes.add(attribute);
             }
 
+            return attributes.build();
         }
-        return attributes.build();
     }
 
 }
