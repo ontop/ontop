@@ -4,7 +4,7 @@ package it.unibz.inf.ontop.failing;
 import it.unibz.inf.ontop.quest.AbstractVirtualModeTest;
 
 /**
- * Class to test if annotation property can be treated as data property and object property
+ * Class to test that a URI with double prefix has not a prefix  wrongly removed
  *
  *
  */
@@ -30,8 +30,8 @@ public class PrefixSourceTest extends AbstractVirtualModeTest{
                 "}";
 
         assertEquals(runQueryAndReturnStringOfIndividualX(queryBind),
-                "<http://example.com/resource/?repository=repo&uri=http://www.movieontology.org/2009/10/01/movieontology.owl/China-24951>");
-    }
+                "<http://www.movieontology.org/2009/10/01/movieontology.owl#Japan>");
+            }
 
 
 }
