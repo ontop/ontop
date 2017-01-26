@@ -36,14 +36,14 @@ public class TypeInferenceTest {
     private static final String CREATE_DB_FILE = "src/test/resources/test/typeinference/types-create-db.sql";
     private static final String DROP_DB_FILE = "src/test/resources/test/typeinference/types-drop-db.sql";
 
+    private static final String URL = "jdbc:h2:mem:types";
+    private static final String USER = "sa";
+    private static final String PASSWORD = "";
+
     @Before
     public void setUp() throws Exception {
 
-        String url = "jdbc:h2:mem:types";
-        String username = "sa";
-        String password = "";
-
-        conn = DriverManager.getConnection(url, username, password);
+        conn = DriverManager.getConnection(URL, USER, PASSWORD);
 
 
         Statement st = conn.createStatement();
@@ -112,6 +112,9 @@ public class TypeInferenceTest {
         QuestConfiguration config = QuestConfiguration.defaultBuilder()
                 .nativeOntopMappingFile(OBDA_FILE)
                 .ontologyFile(ONTOLOGY_FILE)
+                .jdbcUrl(URL)
+                .jdbcUser(USER)
+                .jdbcPassword(PASSWORD)
                 .build();
         QuestOWL reasoner = factory.createReasoner(config);
 

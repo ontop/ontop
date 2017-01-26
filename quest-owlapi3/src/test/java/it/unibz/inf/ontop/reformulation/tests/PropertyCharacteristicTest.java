@@ -45,6 +45,10 @@ public class PropertyCharacteristicTest extends TestCase {
 	
 	private Connection jdbcconn = null;
 	private Logger log = LoggerFactory.getLogger(this.getClass());
+
+	private static final String url = "jdbc:h2:mem:questjunitdb";
+	private static final String username = "sa";
+	private static final String password = "";
 	
 	@Override
 	public void setUp() throws Exception {
@@ -66,11 +70,6 @@ public class PropertyCharacteristicTest extends TestCase {
 		String createDDL = readSQLFile("src/test/resources/property-characteristics/sqlcreate.sql");
 		
 		// Initializing and H2 database with the stock exchange data
-		// String driver = "org.h2.Driver";
-		String url = "jdbc:h2:mem:questjunitdb";
-		String username = "sa";
-		String password = "";
-
 		jdbcconn = DriverManager.getConnection(url, username, password);
 		Statement st = jdbcconn.createStatement();
 
@@ -127,7 +126,11 @@ public class PropertyCharacteristicTest extends TestCase {
 		QuestOWLFactory factory = new QuestOWLFactory();
         QuestConfiguration config = QuestConfiguration.defaultBuilder()
 				.ontologyFile(owlFile)
-				.nativeOntopMappingFile(obdaFile).build();
+				.nativeOntopMappingFile(obdaFile)
+				.jdbcUrl(url)
+				.jdbcUser(username)
+				.jdbcPassword(password)
+				.build();
         reasoner = factory.createReasoner(config);
 	}
 	

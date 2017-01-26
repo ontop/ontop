@@ -57,12 +57,13 @@ public class JoinElminationMappingTest extends TestCase {
 	final String owlfile = "src/test/resources/test/ontologies/scenarios/join-elimination-test.owl";
 	final String obdafile = "src/test/resources/test/ontologies/scenarios/join-elimination-test.obda";
 
+	String url = "jdbc:h2:mem:questjunitdb";
+	String username = "sa";
+	String password = "";
+
 	@Override
 	public void setUp() throws Exception {
 		// String driver = "org.h2.Driver";
-		String url = "jdbc:h2:mem:questjunitdb";
-		String username = "sa";
-		String password = "";
 
 		conn = DriverManager.getConnection(url, username, password);
 		Statement st = conn.createStatement();
@@ -100,6 +101,9 @@ public class JoinElminationMappingTest extends TestCase {
 					.nativeOntopMappingFile(obdafile)
 					.ontologyFile(owlfile)
 					.properties(p)
+					.jdbcUrl(url)
+					.jdbcUser(username)
+					.jdbcPassword(password)
 					.build();
 		}
 		else {

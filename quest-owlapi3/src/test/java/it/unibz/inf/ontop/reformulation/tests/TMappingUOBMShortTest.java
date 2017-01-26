@@ -41,6 +41,9 @@ public class TMappingUOBMShortTest {
 				.nativeOntopMappingFile("src/test/resources/tmapping-uobm/univ-bench-dl.obda")
 				.ontologyFile("src/test/resources/tmapping-uobm/univ-bench-dl.owl")
 				.properties(pref)
+				.jdbcUrl(url)
+				.jdbcUser(username)
+				.jdbcPassword(password)
 				.build();
         QuestOWL reasoner = factory.createReasoner(config);
 	}

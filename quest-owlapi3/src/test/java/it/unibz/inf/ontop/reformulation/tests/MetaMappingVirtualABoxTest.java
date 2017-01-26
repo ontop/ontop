@@ -69,6 +69,10 @@ public class MetaMappingVirtualABoxTest {
 	final String owlfile = "src/test/resources/test/metamapping.owl";
 	final String obdaFileName = "src/test/resources/test/metamapping.obda";
 
+	String url = "jdbc:h2:mem:questjunitdb2;DATABASE_TO_UPPER=FALSE";
+	String username = "sa";
+	String password = "";
+
 	@Before
 	public void setUp() throws Exception {
 		
@@ -78,9 +82,6 @@ public class MetaMappingVirtualABoxTest {
 		 */
 		// String driver = "org.h2.Driver";
 		// Roman: changed the database name to avoid conflict with other tests (in .obda as well)
-		String url = "jdbc:h2:mem:questjunitdb2;DATABASE_TO_UPPER=FALSE";
-		String username = "sa";
-		String password = "";
 
 		conn = DriverManager.getConnection(url, username, password);
 		Statement st = conn.createStatement();
@@ -124,6 +125,9 @@ public class MetaMappingVirtualABoxTest {
 				.nativeOntopMappingFile(obdaFileName)
 				.ontologyFile(owlfile)
 				.properties(p)
+				.jdbcUrl(url)
+				.jdbcUser(username)
+				.jdbcPassword(password)
 				.build();
 
 

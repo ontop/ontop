@@ -51,14 +51,14 @@ public class OWLConstructDescribeTest{
 
 //			String driver = "org.h2.Driver";
 //			String url = "jdbc:h2:mem:aboxdumptestx1";
-//			String username = "sa";
-//			String password = "";
+//			String USER = "sa";
+//			String PASSWORD = "";
 //
 //			OBDADataSource source = fac.getJDBCDataSource(URI.create("http://www.obda.org/ABOXDUMP1testx1"));
 //			source.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, driver);
-//			source.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, password);
+//			source.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, PASSWORD);
 //			source.setParameter(RDBMSourceParameterConstants.DATABASE_URL, url);
-//			source.setParameter(RDBMSourceParameterConstants.DATABASE_USERNAME, username);
+//			source.setParameter(RDBMSourceParameterConstants.DATABASE_USERNAME, USER);
 //			source.setParameter(RDBMSourceParameterConstants.IS_IN_MEMORY, "true");
 //			source.setParameter(RDBMSourceParameterConstants.USE_DATASOURCE_FOR_ABOXDUMP, "true");
 //

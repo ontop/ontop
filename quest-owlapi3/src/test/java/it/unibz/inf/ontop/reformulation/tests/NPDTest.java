@@ -29,6 +29,10 @@ public class NPDTest {
 	
 	Logger log = LoggerFactory.getLogger(this.getClass());
 
+	private static final String url = "jdbc:h2:mem:npdv";
+	private static final String username = "sa";
+	private static final String password = "";
+
 	@Ignore("Ontology URIs are now broken: impossible to download them")
 	@Test
 	public void test_load_NPD() throws Exception {
@@ -97,7 +101,11 @@ public class NPDTest {
         QuestConfiguration config = QuestConfiguration.defaultBuilder()
 				.nativeOntopMappingFile(path + "npd.obda")
 				.ontologyFile(path + "npd-v2.owl")
-				.properties(pref).build();
+				.properties(pref)
+				.jdbcUrl(url)
+				.jdbcUser(username)
+				.jdbcPassword(password)
+				.build();
         QuestOWL reasoner = factory.createReasoner(config);
 		
 		//QuestOWL reasoner = factory.createReasoner(owlOnto, new SimpleConfiguration());
@@ -152,9 +160,6 @@ public class NPDTest {
 	
 	public void setupDatabase() throws SQLException, IOException {
 		// String driver = "org.h2.Driver";
-		String url = "jdbc:h2:mem:npdv";
-		String username = "sa";
-		String password = "";
 
 		Connection conn = DriverManager.getConnection(url, username, password);
 		Statement st = conn.createStatement();

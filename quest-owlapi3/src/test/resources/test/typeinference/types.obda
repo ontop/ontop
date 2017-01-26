@@ -2,13 +2,6 @@
 :		http://example.org/types/voc#
 
 
-[SourceDeclaration]
-sourceUri	h2
-connectionUrl	jdbc:h2:mem:types
-username	sa
-password	
-driverClass	org.h2.Driver
-
 [MappingDeclaration] @collection [[
 
 mappingId	Companies in Belgium

@@ -49,15 +49,14 @@ public class OBDA2DatalogTest extends TestCase {
 
 	final String owlfile = "src/test/resources/test/mappinganalyzer/ontology.owl";
 
+	private static final String url = "jdbc:h2:mem:questjunitdb";
+	private static final String username = "sa";
+	private static final String password = "";
+
 
 	@Override
 	public void setUp() throws Exception {
 		// Initializing and H2 database with the stock exchange data
-		// String driver = "org.h2.Driver";
-		String url = "jdbc:h2:mem:questjunitdb";
-		String username = "sa";
-		String password = "";
-
 		conn = DriverManager.getConnection(url, username, password);
 		Statement st = conn.createStatement();
 
@@ -102,6 +101,9 @@ public class OBDA2DatalogTest extends TestCase {
 		QuestConfiguration configuration = QuestConfiguration.defaultBuilder()
 				.nativeOntopMappingFile(obdaFileName)
 				.ontologyFile(owlfile)
+				.jdbcUrl(url)
+				.jdbcUser(username)
+				.jdbcPassword(password)
 				.build();
 
 		QuestOWL reasoner = factory.createReasoner(configuration);

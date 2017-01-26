@@ -51,6 +51,10 @@ public class QuestOWLMaterializerTest extends TestCase {
 	private static final Logger LOGGER =  LoggerFactory.getLogger(QuestOWLMaterializerTest.class);
 	private static final String PROPERTY_FILE = "src/test/resources/test/materializer/MaterializeTest.properties";
 
+	String url = "jdbc:h2:mem:questjunitdb";
+	String username = "sa";
+	String password = "";
+
 	public QuestOWLMaterializerTest() {
     }
 
@@ -75,9 +79,6 @@ public class QuestOWLMaterializerTest extends TestCase {
 
 		// Initializing and H2 database with the data		
 		// String driver = "org.h2.Driver";
-		String url = "jdbc:h2:mem:questjunitdb";
-		String username = "sa";
-		String password = "";
 		
 		jdbcconn = DriverManager.getConnection(url, username, password);
 		Statement st = jdbcconn.createStatement();
@@ -110,6 +111,9 @@ public class QuestOWLMaterializerTest extends TestCase {
 				.ontologyFile("src/test/resources/test/materializer/MaterializeTest.owl")
 				.propertyFile(PROPERTY_FILE)
 				.nativeOntopMappingFile(f)
+				.jdbcUrl(url)
+				.jdbcUser(username)
+				.jdbcPassword(password)
 				.build();
 
 		// TODO: why not using OWLAPIMaterializer instead?
@@ -148,6 +152,9 @@ public class QuestOWLMaterializerTest extends TestCase {
 				.ontologyFile("src/test/resources/test/materializer/MaterializeTest.owl")
 				.propertyFile(PROPERTY_FILE)
 				.nativeOntopMappingFile(f)
+				.jdbcUrl(url)
+				.jdbcUser(username)
+				.jdbcPassword(password)
 				.build();
 
 			// read onto

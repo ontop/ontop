@@ -6,13 +6,6 @@ xml:		http://www.w3.org/XML/1998/namespace
 xsd:		http://www.w3.org/2001/XMLSchema#
 rdfs:		http://www.w3.org/2000/01/rdf-schema#
 
-[SourceDeclaration]
-sourceUri	generatedURI
-connectionUrl	jdbc:h2:mem:raisjunit
-username	sa
-password	
-driverClass	org.h2.Driver
-
 [MappingDeclaration] @collection [[
 mappingId	mapping_<http://www.ontorais.de/ArchiveObject>
 target		<http://www.ontorais.de/ArchiveObject/{id}> a <http://www.ontorais.de/ArchiveObject> ;   <http://www.ontorais.de/title> {title}^^xsd:string ;  <http://www.ontorais.de/archivalDate> {archivaldate}^^xsd:string .

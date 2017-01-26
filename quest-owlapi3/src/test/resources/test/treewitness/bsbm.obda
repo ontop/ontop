@@ -23,13 +23,6 @@ bsbm:productPropertyNumeric2, bsbm:productPropertyNumeric3, bsbm:offerWebpage, b
 foaf:homepage, rdfs:comment, dc:title, bsbm:price, bsbm:rating1, bsbm:rating2, bsbm:rating3, bsbm:reviewDate, rdfs:label, dc:date
 ]]
 
-[SourceDeclaration]
-sourceUri	BSBM-Benchmark
-connectionUrl	jdbc:h2:mem:questjunitdb
-username	sa
-password	
-driverClass	org.h2.Driver
-
 [MappingDeclaration] @collection [[
 mappingId	Offer
 target		<"&bsbm-inst;dataFromVendor{$publisher}/Offer{$nr}"> a bsbm:Offer; bsbm:price $price; bsbm:validFrom $validFrom; bsbm:validTo $validTo; bsbm:deliveryDays $deliveryDays; bsbm:offerWebpage $offerWebpage; dc:date $publishDate; bsbm:product <"&bsbm-inst;dataFromProducer{$producer}/Product{$product}">; bsbm:vendor <"&bsbm-inst;dataFromVendor{$vendor}/Vendor{$vendor}">; dc:publisher <"&bsbm-inst;dataFromVendor{$vendor}/Vendor{$vendor}"> . 

@@ -40,10 +40,14 @@ public class LeftJoinMultipleMatchingTest {
     private QuestOWLConnection conn;
     private QuestOWL reasoner;
 
+    String URL = "jdbc:h2:mem:raisjunit";
+    String USER = "sa";
+    String PASSWORD = "";
+
     @Before
     public void setUp() throws Exception {
 
-        sqlConnection= DriverManager.getConnection("jdbc:h2:mem:raisjunit","sa", "");
+        sqlConnection= DriverManager.getConnection(URL, USER, PASSWORD);
         java.sql.Statement s = sqlConnection.createStatement();
 
         try {
@@ -102,6 +106,9 @@ public class LeftJoinMultipleMatchingTest {
         QuestConfiguration config = QuestConfiguration.defaultBuilder()
                 .ontologyFile(owlFile)
                 .nativeOntopMappingFile(obdaFile)
+                .jdbcUrl(URL)
+                .jdbcUser(USER)
+                .jdbcPassword(PASSWORD)
                 .build();
         reasoner = factory.createReasoner(config);
 
@@ -168,6 +175,9 @@ public class LeftJoinMultipleMatchingTest {
         QuestConfiguration config = QuestConfiguration.defaultBuilder()
                 .ontologyFile(owlFile)
                 .nativeOntopMappingFile(obdaFile)
+                .jdbcUrl(URL)
+                .jdbcUser(USER)
+                .jdbcPassword(PASSWORD)
                 .build();
         reasoner = factory.createReasoner(config);
 

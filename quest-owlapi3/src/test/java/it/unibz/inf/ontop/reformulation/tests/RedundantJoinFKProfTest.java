@@ -28,17 +28,18 @@ public class RedundantJoinFKProfTest {
     private static final String ODBA_FILE = "src/test/resources/test/redundant_join/redundant_join_fk_test.obda";
     private static final String NO_OPTIMIZATION_MSG = "The table professors should not be used";
 
+    private static final String URL = "jdbc:h2:mem:professor";
+    private static final String USER = "sa";
+    private static final String PASSWORD = "sa";
+
     private Connection conn;
+
 
 
     @Before
     public void setUp() throws Exception {
 
-        String url = "jdbc:h2:mem:professor";
-        String username = "sa";
-        String password = "sa";
-
-        conn = DriverManager.getConnection(url, username, password);
+        conn = DriverManager.getConnection(URL, USER, PASSWORD);
         Statement st = conn.createStatement();
 
         FileReader reader = new FileReader(CREATE_SCRIPT);
@@ -114,6 +115,9 @@ public class RedundantJoinFKProfTest {
         QuestConfiguration config = QuestConfiguration.defaultBuilder()
                 .nativeOntopMappingFile(ODBA_FILE)
                 .ontologyFile(OWL_FILE)
+                .jdbcUrl(URL)
+                .jdbcUser(USER)
+                .jdbcPassword(PASSWORD)
                 .build();
         QuestOWL reasoner = factory.createReasoner(config);
 

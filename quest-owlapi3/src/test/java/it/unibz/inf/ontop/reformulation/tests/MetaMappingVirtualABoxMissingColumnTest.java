@@ -63,6 +63,10 @@ public class MetaMappingVirtualABoxMissingColumnTest {
 	final String owlfile = "src/test/resources/test/metamapping.owl";
 	final String obdafile = "src/test/resources/test/metamapping_broken.obda";
 
+	String url = "jdbc:h2:mem:questjunitdb2_broken;DATABASE_TO_UPPER=FALSE";
+	String username = "sa";
+	String password = "";
+
 	@Before
     public void setUp() throws Exception {
 
@@ -72,9 +76,7 @@ public class MetaMappingVirtualABoxMissingColumnTest {
 		 */
 		// String driver = "org.h2.Driver";
 		// Roman: changed the database name to avoid conflict with other tests (in .obda as well)
-		String url = "jdbc:h2:mem:questjunitdb2_broken;DATABASE_TO_UPPER=FALSE";
-		String username = "sa";
-		String password = "";
+
 
 		conn = DriverManager.getConnection(url, username, password);
 		Statement st = conn.createStatement();
@@ -122,6 +124,9 @@ public class MetaMappingVirtualABoxMissingColumnTest {
         QuestConfiguration config = QuestConfiguration.defaultBuilder()
 				.nativeOntopMappingFile(obdafile)
 				.ontologyFile(owlfile)
+				.jdbcUrl(url)
+				.jdbcUser(username)
+				.jdbcPassword(password)
 				.build();
        
 		String query1 = "PREFIX : <http://it.unibz.inf/obda/test/simple#> SELECT * WHERE { ?x a :A_1 }";

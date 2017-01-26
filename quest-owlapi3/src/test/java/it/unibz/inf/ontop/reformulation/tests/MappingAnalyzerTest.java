@@ -53,16 +53,16 @@ public class MappingAnalyzerTest extends TestCase {
 
 	final String owlfile = "src/test/resources/test/mappinganalyzer/ontology.owl";
 
+	String url = "jdbc:h2:mem:questjunitdb";
+	String username = "sa";
+	String password = "";
+
     public MappingAnalyzerTest() {
     }
 
 	@Override
 	public void setUp() throws Exception {
 		// Initializing and H2 database with the stock exchange data
-		// String driver = "org.h2.Driver";
-		String url = "jdbc:h2:mem:questjunitdb";
-		String username = "sa";
-		String password = "";
 
 		conn = DriverManager.getConnection(url, username, password);
 		Statement st = conn.createStatement();
@@ -116,6 +116,9 @@ public class MappingAnalyzerTest extends TestCase {
 				.nativeOntopMappingFile(obdaFileName)
 				.ontologyFile(owlfile)
 				.properties(p)
+				.jdbcUrl(url)
+				.jdbcUser(username)
+				.jdbcPassword(password)
 				.build();
 
 		QuestOWL reasoner = factory.createReasoner(configuration);

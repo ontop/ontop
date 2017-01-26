@@ -61,6 +61,10 @@ public class MetaMappingTargetQueryValidatorTest extends TestCase {
 	final String owlfile = "src/test/resources/test/metamapping.owl";
 	final String obdafile = "src/test/resources/test/metamapping.obda";
 
+	String url = "jdbc:h2:mem:questjunitdb;DATABASE_TO_UPPER=FALSE";
+	String username = "sa";
+	String password = "";
+
 	@Override
 	public void setUp() throws Exception {
 		
@@ -69,9 +73,6 @@ public class MetaMappingTargetQueryValidatorTest extends TestCase {
 		 * Initializing and H2 database with the stock exchange data
 		 */
 		// String driver = "org.h2.Driver";
-		String url = "jdbc:h2:mem:questjunitdb;DATABASE_TO_UPPER=FALSE";
-		String username = "sa";
-		String password = "";
 
 		conn = DriverManager.getConnection(url, username, password);
 		Statement st = conn.createStatement();
@@ -119,6 +120,9 @@ public class MetaMappingTargetQueryValidatorTest extends TestCase {
 
 		QuestConfiguration configuration = QuestConfiguration.defaultBuilder()
 				.nativeOntopMappingFile(obdafile)
+				.jdbcUrl(url)
+				.jdbcUser(username)
+				.jdbcPassword(password)
 				.build();
 
 		OBDAModel obdaModel = configuration.loadProvidedPPMapping();

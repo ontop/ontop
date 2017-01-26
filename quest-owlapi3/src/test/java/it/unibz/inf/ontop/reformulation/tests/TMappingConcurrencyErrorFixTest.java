@@ -90,7 +90,11 @@ public class TMappingConcurrencyErrorFixTest{
         QuestConfiguration config = QuestConfiguration.defaultBuilder()
 				.nativeOntopMappingFile(obdaFileName)
 				.ontologyFile(owlFileName)
-				.properties(p).build();
+				.properties(p)
+				.jdbcUrl(url)
+				.jdbcUser(username)
+				.jdbcPassword(password)
+				.build();
         reasoner = factory.createReasoner(config);
 
 		// Now we are ready for querying
