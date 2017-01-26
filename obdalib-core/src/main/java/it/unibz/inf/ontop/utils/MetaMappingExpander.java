@@ -200,7 +200,8 @@ public class MetaMappingExpander {
 				}
 			}
 			catch (Exception e) {
-				log.warn("Parse exception, check no SQL reserved keywords have been used "+ e.getCause().getMessage());
+				log.warn("Parse exception, check no SQL reserved keywords have been used "+ e.getMessage());
+				throw e;
 			}
 		}
 		
