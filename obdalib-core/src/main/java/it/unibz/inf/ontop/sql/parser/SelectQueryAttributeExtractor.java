@@ -43,14 +43,12 @@ import java.util.regex.Pattern;
 public class SelectQueryAttributeExtractor {
 
     private final QuotedIDFactory idfac;
-    private final DBMetadata metadata;
 
     private static final Pattern AS = Pattern.compile("\\sAS\\s", Pattern.CASE_INSENSITIVE);
 
     private final SelectQueryAttributeExtractor2 sqae;
 
     public SelectQueryAttributeExtractor(DBMetadata metadata) {
-        this.metadata = metadata;
         this.idfac = metadata.getQuotedIDFactory();
         sqae = new SelectQueryAttributeExtractor2(metadata);
     }
@@ -65,73 +63,6 @@ public class SelectQueryAttributeExtractor {
                     .map(id -> id.getAttribute())
                     .collect(ImmutableCollectors.toList());
         }
-/*
-        final ImmutableList.Builder<QuotedID> attributes = ImmutableList.builder();
-
-        try {
-            Statement statement = CCJSqlParserUtil.parse(sql);
-            if (!(statement instanceof Select))
-                throw new InvalidSelectQueryException("The inserted query is not a SELECT statement", statement);
-
-            Select select = (Select) statement;
-            select.getSelectBody().accept(new SelectVisitor() {
-
-                @Override
-                public void visit(PlainSelect plainSelect) {
-                    for (SelectItem item : plainSelect.getSelectItems())
-                        item.accept(new SelectItemVisitor() {
-
-                            @Override
-                            public void visit(AllColumns allColumns) {
-                                // do not add columns in the case of SELECT *
-                            }
-
-                            @Override
-                            public void visit(AllTableColumns allTableColumns) {
-                                // assumes that there are no aliases and the table = relation in the database
-                                RelationID id = idfac.createRelationID(allTableColumns.getTable().getSchemaName(), allTableColumns.getTable().getName());
-                                DatabaseRelationDefinition relation = metadata.getDatabaseRelation(id);
-                                if (relation != null) {
-                                    for (Attribute attribute : relation.getAttributes())
-                                        attributes.add(attribute.getID());
-                                }
-                            }
-
-                            @Override
-                            public void visit(SelectExpressionItem selectExpressionItem) {
-                                String attributeName;
-                                if (selectExpressionItem.getAlias() != null) {
-                                    attributeName = selectExpressionItem.getAlias().getName();
-                                }
-                                else {
-                                    Expression exp = selectExpressionItem.getExpression();
-                                    if (!(exp instanceof Column))
-                                        throw new InvalidSelectQueryException("All complex expressions must have aliases", selectExpressionItem);
-
-                                    attributeName = ((Column) exp).getColumnName();
-                                }
-                                QuotedID attribute = idfac.createAttributeID(attributeName);
-                                attributes.add(attribute);
-                            }
-                        });
-                }
-
-                @Override
-                public void visit(SetOperationList setOpList) {
-                    // for INTERSECT, EXCEPT, MINUS, UNION
-                    // process only the first argument
-                    // (the other argument must be compatible, with the same list of attributes)
-                    setOpList.getPlainSelects().get(0).accept(this);
-                }
-
-                @Override
-                public void visit(WithItem withItem) {
-                    // ignore WITH clauses
-                }
-            });
-        }
-        catch (JSQLParserException e) {
-*/
         catch (Exception e) {
             final ImmutableList.Builder<QuotedID> attributes = ImmutableList.builder();
 
