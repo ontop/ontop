@@ -62,7 +62,7 @@ public class LUBM50Tests {
 	String username = "fish";
 	String password = "fish";
 
-	String owlfile = "../quest-owlapi3/src/test/resources/test/lubm-ex-20-uni1/LUBM-ex-20.owl";
+	String owlfile = "../ontop-semantic-index/src/test/resources/test/lubm-ex-20-uni1/LUBM-ex-20.owl";
 
 	private static final SQLMappingFactory MAPPING_FACTORY = SQLMappingFactoryImpl.getInstance();
 	private final OWLOntology ontology;
@@ -191,7 +191,7 @@ public class LUBM50Tests {
 
 		QueryController qc = new QueryController();
 		QueryIOManager qman = new QueryIOManager(qc);
-		qman.load("../quest-owlapi3/src/test/resources/test/treewitness/LUBM-ex-20-q3.q");
+		qman.load("../ontop-semantic-index/src/test/resources/test/treewitness/LUBM-ex-20-q3.q");
 
 		BufferedWriter out1 = new BufferedWriter(new FileWriter("/Users/mariano/Desktop/logLUBM200-queries2.txt"));
 		BufferedWriter out2 = new BufferedWriter(new FileWriter("/Users/mariano/Desktop/queriesLUBM200-queries2.txt"));

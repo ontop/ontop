@@ -61,7 +61,8 @@ public class SemanticIndexLUBMHTest extends TestCase {
 				.build();
         QuestOWL quest = factory.createReasoner(config);
 
-		QuestOWLConnection qconn =  quest.getConnection();
+        // TODO: fix this
+		SIQuestOWLConnection qconn = (SIQuestOWLConnection) quest.getConnection();
 
 		SIQuestOWLStatement st = qconn.createSIStatement();
 		long end = System.nanoTime();

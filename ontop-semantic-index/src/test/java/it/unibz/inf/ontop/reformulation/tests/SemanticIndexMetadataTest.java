@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.reformulation.tests;
 
 import com.google.inject.Injector;
+import it.unibz.inf.ontop.injection.OntopRuntimeSettings;
 import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.ontology.Ontology;
 import it.unibz.inf.ontop.ontology.OntologyFactory;
@@ -89,8 +90,6 @@ public class SemanticIndexMetadataTest  extends TestCase {
 			p.put(QuestCoreSettings.OPTIMIZE_EQUIVALENCES, "true");
 			p.put(QuestCoreSettings.OBTAIN_FROM_ONTOLOGY, "true");
 			p.put(QuestCoreSettings.STORAGE_LOCATION, QuestConstants.INMEMORY);
-			
-			p.setProperty("rewrite", "true");
 
 			OntologyFactory ofac = OntologyFactoryImpl.getInstance();
 			OntologyVocabulary vb = ofac.createVocabulary();
@@ -104,6 +103,7 @@ public class SemanticIndexMetadataTest  extends TestCase {
 			Ontology ont = ofac.createOntology(vb);
 
 			QuestConfiguration config = QuestConfiguration.defaultBuilder()
+					.enableExistentialReasoning(true)
 					.properties(p)
 					.build();
 

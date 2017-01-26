@@ -70,6 +70,7 @@
 		<module>obdalib-owlapi3</module>
 		<module>obdalib-r2rml</module>
 		<module>quest-owlapi3</module>
+		<module>ontop-semantic-index</module>
 		<module>distribution</module>
         <module>rdf4j-webapps</module>
         <module>quest-sparql-compliance</module>
