@@ -24,6 +24,7 @@ import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.Predicate.COL_TYPE;
+import it.unibz.inf.ontop.model.impl.RDBMSMappingAxiom;
 import it.unibz.inf.ontop.model.impl.SQLMappingFactoryImpl;
 import it.unibz.inf.ontop.ontology.Assertion;
 import it.unibz.inf.ontop.ontology.ClassExpression;
@@ -68,7 +69,6 @@ public class RDBMSSIRepositoryManager implements Serializable {
 
 	private final static Logger log = LoggerFactory.getLogger(RDBMSSIRepositoryManager.class);
 	private static final SQLMappingFactory MAPPING_FACTORY = SQLMappingFactoryImpl.getInstance();
-	private final NativeQueryLanguageComponentFactory nativeQLFactory;
 
 	static final class TableDescription {
 		final String tableName;
@@ -256,11 +256,9 @@ public class RDBMSSIRepositoryManager implements Serializable {
 	
 	private final List<RepositoryChangedListener> changeList = new LinkedList<>();
 
-	public RDBMSSIRepositoryManager(TBoxReasoner reasonerDag, ImmutableOntologyVocabulary voc,
-									NativeQueryLanguageComponentFactory nativeQLFactory) {
+	public RDBMSSIRepositoryManager(TBoxReasoner reasonerDag, ImmutableOntologyVocabulary voc) {
 		this.reasonerDag = reasonerDag;
 		this.voc = voc;
-		this.nativeQLFactory = nativeQLFactory;
 	}
 
 	public void generateMetadata() {
@@ -907,7 +905,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 				
 				String sourceQuery = view.getSELECT(intervalsSqlFilter);
 				List<Function> targetQuery = constructTargetQuery(ope.getPredicate(), view.getId().getType1(), view.getId().getType2());
-				OBDAMappingAxiom basicmapping = nativeQLFactory.create(MAPPING_FACTORY.getSQLQuery(sourceQuery), targetQuery);
+				OBDAMappingAxiom basicmapping = new RDBMSMappingAxiom(MAPPING_FACTORY.getSQLQuery(sourceQuery), targetQuery);
 				result.add(basicmapping);		
 			}
 		}
@@ -945,8 +943,8 @@ public class RDBMSSIRepositoryManager implements Serializable {
 				
 				String sourceQuery = view.getSELECT(intervalsSqlFilter);
 				List<Function> targetQuery = constructTargetQuery(dpe.getPredicate(), view.getId().getType1(), view.getId().getType2());
-				OBDAMappingAxiom basicmapping = nativeQLFactory.create(MAPPING_FACTORY.getSQLQuery(sourceQuery), targetQuery);
-				result.add(basicmapping);			
+				OBDAMappingAxiom basicmapping = new RDBMSMappingAxiom(MAPPING_FACTORY.getSQLQuery(sourceQuery), targetQuery);
+				result.add(basicmapping);
 			}
 		}
 		
@@ -977,7 +975,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 				
 				String sourceQuery = view.getSELECT(intervalsSqlFilter);
 				List<Function> targetQuery = constructTargetQuery(classNode.getPredicate(), view.getId().getType1());
-				OBDAMappingAxiom basicmapping = nativeQLFactory.create(MAPPING_FACTORY.getSQLQuery(sourceQuery), targetQuery);
+				OBDAMappingAxiom basicmapping = new RDBMSMappingAxiom(MAPPING_FACTORY.getSQLQuery(sourceQuery), targetQuery);
 				result.add(basicmapping);
 			}
 		}

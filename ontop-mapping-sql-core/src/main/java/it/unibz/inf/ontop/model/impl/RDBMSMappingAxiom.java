@@ -40,7 +40,7 @@ public class RDBMSMappingAxiom extends AbstractOBDAMappingAxiom
 	private List<Function> targetQuery;
 
 	@AssistedInject
-	protected RDBMSMappingAxiom(@Assisted String id, @Assisted("sourceQuery") SourceQuery sourceQuery,
+	private RDBMSMappingAxiom(@Assisted String id, @Assisted("sourceQuery") SourceQuery sourceQuery,
                                 @Assisted("targetQuery") List<Function> targetQuery) {
 		super(id);
 		setSourceQuery(sourceQuery);
@@ -48,7 +48,7 @@ public class RDBMSMappingAxiom extends AbstractOBDAMappingAxiom
 	}
 
 	@AssistedInject
-	private RDBMSMappingAxiom(@Assisted("sourceQuery") SourceQuery sourceQuery,
+	public RDBMSMappingAxiom(@Assisted("sourceQuery") SourceQuery sourceQuery,
                               @Assisted("targetQuery") List<Function> targetQuery) {
 		this(IDGenerator.getNextUniqueID("MAPID-"), sourceQuery, targetQuery);
 	}

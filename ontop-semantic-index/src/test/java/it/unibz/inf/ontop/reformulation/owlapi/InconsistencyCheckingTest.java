@@ -40,6 +40,7 @@ import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.injection.QuestCoreSettings;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWL;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLFactory;
+import it.unibz.inf.ontop.si.OntopOWLSemanticIndexFactory;
 import junit.framework.TestCase;
 
 import org.junit.Test;
@@ -89,16 +90,17 @@ public class InconsistencyCheckingTest extends TestCase{
 	}
 	
 	private void startReasoner() throws Exception {
-		Properties p = new Properties();
-		p.setProperty(QuestCoreSettings.ABOX_MODE, QuestConstants.CLASSIC);
-		p.setProperty(QuestCoreSettings.OPTIMIZE_EQUIVALENCES, "true");
-		QuestConfiguration configuration = QuestConfiguration.defaultBuilder()
-				.properties(p)
-				.ontology(ontology)
-				.build();
-
-		QuestOWLFactory questOWLFactory = new QuestOWLFactory();
-		reasoner = questOWLFactory.createReasoner(configuration);
+//		Properties p = new Properties();
+//		p.setProperty(QuestCoreSettings.ABOX_MODE, QuestConstants.CLASSIC);
+//		p.setProperty(QuestCoreSettings.OPTIMIZE_EQUIVALENCES, "true");
+//		QuestConfiguration configuration = QuestConfiguration.defaultBuilder()
+//				.properties(p)
+//				.ontology(ontology)
+//				.build();
+//
+//		QuestOWLFactory questOWLFactory = new QuestOWLFactory();
+//		reasoner = questOWLFactory.createReasoner(configuration);
+		reasoner = OntopOWLSemanticIndexFactory.createWithOntologyIndividuals(ontology);
 	}
 	
 	@Test
