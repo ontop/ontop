@@ -20,6 +20,7 @@ package it.unibz.inf.ontop.utils;
  * #L%
  */
  
+import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.model.Function;
 import it.unibz.inf.ontop.model.OBDADataFactory;
 import it.unibz.inf.ontop.model.OBDAMappingAxiom;
@@ -40,7 +41,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.*;
+import java.util.stream.Collectors;
 
+import it.unibz.inf.ontop.sql.parser.SelectQueryAttributeExtractor2;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.BinaryExpression;
 import net.sf.jsqlparser.expression.Expression;
@@ -50,6 +53,7 @@ import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.parser.ParseException;
 import net.sf.jsqlparser.schema.Column;
+import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.select.*;
 
 import org.slf4j.Logger;
@@ -124,34 +128,36 @@ public class MetaMappingExpander {
 
 		for (OBDAMappingAxiom mapping : splittedMappings) {
 
-			Function atom = mapping.getTargetQuery().get(0); // splitted mappings, so a singleton
+			try {
 
-			if (!atom.getFunctionSymbol().isTriplePredicate()) {
-				// for normal mappings, we do not need to expand it.
-				expandedMappings.add(mapping);	
-			} 
-			else {
-				Function templateAtom;
-				int arity;
-				if (isURIRDFType(atom.getTerm(1))) {
-					// variables are in the position of object
-					arity = 1;
-					templateAtom = (Function) atom.getTerm(2);
+				Function atom = mapping.getTargetQuery().get(0); // splitted mappings, so a singleton
+
+				if (!atom.getFunctionSymbol().isTriplePredicate()) {
+					// for normal mappings, we do not need to expand it.
+					expandedMappings.add(mapping);
 				}
 				else {
-					// variables are in the position of predicate
-					arity = 2;
-					templateAtom = (Function) atom.getTerm(1);
-				}
-				
-				List<Variable> varsInTemplate = getVariablesInTemplate(templateAtom);
-				if (varsInTemplate.isEmpty())
-					throw new IllegalArgumentException("No variables could be found for this metamapping. Check that the variable in the metamapping is enclosed in a URI, for instance http://.../{var}");
-				
-				try {
-					String sql = preprocessProjection(mapping.getSourceQuery().toString(), atom);
+					String sql = mapping.getSourceQuery().toString();
 
-					List<SelectExpressionItem> columnList = getColumnList(sql);
+					ImmutableList<SelectExpressionItem> columnList = getColumnList(sql);
+
+
+					Function templateAtom;
+					int arity;
+					if (isURIRDFType(atom.getTerm(1))) {
+						// variables are in the position of object
+						arity = 1;
+						templateAtom = (Function) atom.getTerm(2);
+					}
+					else {
+						// variables are in the position of predicate
+						arity = 2;
+						templateAtom = (Function) atom.getTerm(1);
+					}
+
+					List<Variable> varsInTemplate = getVariablesInTemplate(templateAtom);
+					if (varsInTemplate.isEmpty())
+						throw new IllegalArgumentException("No variables could be found for this metamapping. Check that the variable in the metamapping is enclosed in a URI, for instance http://.../{var}");
 
 					List<SelectExpressionItem> columnsForTemplate = getColumnsForTemplate(varsInTemplate, columnList);
 
@@ -168,7 +174,7 @@ public class MetaMappingExpander {
 
 						// construct new Target Query by expanding higher order atoms of the form
 						// <pre>triple(t1, 'rdf:type', URI("http://example.org/{}", X))</pre>
-	 					// to
+						// to
 						// <pre>http://example.org/cls(t1)</pre>, if X is t1
 						// (similarly for properties)
 
@@ -192,57 +198,53 @@ public class MetaMappingExpander {
 						log.debug("Expanded Mapping: {}", newMapping);
 					}
 				}
-				catch (JSQLParserException e) {
-					if (e.getCause() instanceof ParseException)
-						log.warn("Parse exception, check no SQL reserved keywords have been used "+ e.getCause().getMessage());
-				}
+			}
+			catch (Exception e) {
+				log.warn("Parse exception, check no SQL reserved keywords have been used "+ e.getCause().getMessage());
 			}
 		}
 		
 		return expandedMappings;
 	}
 
-	private String preprocessProjection(String sql, Function atom) throws JSQLParserException {
-		// PREPROCESS *
-		Set<Variable> variables = new HashSet<>();
-		TermUtils.addReferencedVariablesTo(variables, atom);
 
-		net.sf.jsqlparser.statement.Statement statement0 = CCJSqlParserUtil.parse(sql);
-		if (!(statement0 instanceof Select))
-			throw new JSQLParserException("The query is not a SELECT statement");
-		Select select0 = (Select) statement0;
+	private ImmutableList<SelectExpressionItem>  getColumnList(String sql) {
 
-		PreprocessProjection ps = new PreprocessProjection(metadata);
-		return ps.getMappingQuery(select0, variables);
-	}
+		SelectQueryAttributeExtractor2 sqae = new SelectQueryAttributeExtractor2(metadata);
 
-	private static List<SelectExpressionItem>  getColumnList(String sql) throws JSQLParserException {
-		// Construct the SQL query tree from the source query; we do not work with views
-		Select selectQuery = (Select) CCJSqlParserUtil.parse(sql);
-		if (!(selectQuery.getSelectBody() instanceof PlainSelect))
-			throw new JSQLParserException("The query is not a plain SELECT query");
+		PlainSelect plainSelect = sqae.getParsedSql(sql);
 
-		PlainSelect plainSelect = (PlainSelect)selectQuery.getSelectBody();
+		Set<QualifiedAttributeID> attributes = sqae.getQueryBodyAttributes(plainSelect).keySet();
 
-		List<SelectExpressionItem> columnList = new LinkedList<>();
-		// TODO: CHANGE TABLE SCHEMA / NAME / ALIASES AND COLUMN NAMES
-		plainSelect.getSelectItems().forEach(si -> si.accept(new SelectItemVisitor() {
-			@Override
-			public void visit(AllColumns allColumns) {
-				// do nothing
-			}
+		List<SelectExpressionItem> list = new ArrayList<>();
+		for (SelectItem si : plainSelect.getSelectItems()) {
+			si.accept(new SelectItemVisitor() {
+				@Override
+				public void visit(AllColumns allColumns) {
+					list.addAll(attributes.stream()
+							.filter(id -> id.getRelation() == null)
+							.map(id -> new SelectExpressionItem(new Column(id.getSQLRendering())))
+							.collect(ImmutableCollectors.toList()));
+				}
 
-			@Override
-			public void visit(AllTableColumns allTableColumns) {
-				// do nothing
-			}
+				@Override
+				public void visit(AllTableColumns allTableColumns) {
+					Table table = allTableColumns.getTable();
+					RelationID tableId = idfac.createRelationID(table.getSchemaName(), table.getName());
+					list.addAll(attributes.stream()
+							.filter(id -> id.getRelation() != null && id.getRelation().equals(tableId))
+							.map(id -> new SelectExpressionItem(new Column(table, id.getAttribute().getSQLRendering())))
+							.collect(ImmutableCollectors.toList()));
+				}
 
-			@Override
-			public void visit(SelectExpressionItem selectExpressionItem) {
-				columnList.add(selectExpressionItem);
-			}
-		}));
-		return columnList;
+				@Override
+				public void visit(SelectExpressionItem selectExpressionItem) {
+					list.add(selectExpressionItem);
+				}
+			});
+		}
+
+		return ImmutableList.copyOf(list);
 	}
 
 	private List<List<String>> getParamsForTemplate(String sql,
@@ -321,7 +323,7 @@ public class MetaMappingExpander {
 		for (Variable var : varsInTemplate) {
 			boolean found = false;
 			for (SelectExpressionItem selectExpression : columnList) {
-				
+
 				// ROMAN (23 Sep 2015): SelectExpressionItem is of the form Expression AS Alias
 				// this code does not work for complex expressions (i.e., 3 * A)
 				// String expression = column.getExpression().toString();
@@ -332,9 +334,9 @@ public class MetaMappingExpander {
 		        	RelationID relation = null;
 		        	if (c.getTable().getName() != null)
 		        		relation = idfac.createRelationID(c.getTable().getSchemaName(), c.getTable().getName());
-		        	
+
 		        	QualifiedAttributeID qa = new QualifiedAttributeID(relation, column1);
-		        	
+
 					if ((selectExpression.getAlias() == null && qa.getAttribute().getName().equals(var.getName())) ||
 							(selectExpression.getAlias() != null && selectExpression.getAlias().getName().equals(var.getName()))) {
 						columnsForTemplate.add(selectExpression);
@@ -343,8 +345,7 @@ public class MetaMappingExpander {
 					}
 				}
 				else {
-					if( selectExpression.getExpression() instanceof StringValue) {
-
+					if (selectExpression.getExpression() instanceof StringValue) {
 						if (selectExpression.getAlias() != null && selectExpression.getAlias().getName().equals(var.getName())) {
 							columnsForTemplate.add(selectExpression);
 							found = true;
@@ -426,10 +427,9 @@ public class MetaMappingExpander {
 	private static String getDistinctColumnsQuery(String originalSQL, List<SelectExpressionItem> columnList) throws JSQLParserException {
 		Select select = (Select)CCJSqlParserUtil.parse(originalSQL);
 		PlainSelect plainSelect = (PlainSelect)select.getSelectBody();
-		plainSelect.setDistinct(new Distinct());
 
-		plainSelect.getSelectItems().clear();
-		plainSelect.getSelectItems().addAll(columnList);
+		plainSelect.setDistinct(new Distinct());
+		plainSelect.setSelectItems(ImmutableList.copyOf(columnList));
 
 		return select.toString();
 	}
@@ -442,11 +442,10 @@ public class MetaMappingExpander {
 		Select select = (Select)CCJSqlParserUtil.parse(originalSQL);
 		PlainSelect plainSelect = (PlainSelect)select.getSelectBody();
 
-		plainSelect.getSelectItems().clear();
 		if (!columnList.isEmpty())
-			plainSelect.getSelectItems().addAll(columnList);
+			plainSelect.setSelectItems(ImmutableList.copyOf(columnList));
 		else
-			plainSelect.getSelectItems().add(new AllColumns());
+			plainSelect.setSelectItems(ImmutableList.of(new AllColumns()));
 
 		if (whereClauseExtension != null)
 			if (plainSelect.getWhere() != null)

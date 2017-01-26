@@ -34,6 +34,7 @@ import net.sf.jsqlparser.statement.Statement;
 import net.sf.jsqlparser.statement.select.*;
 
 import javax.management.relation.Relation;
+import java.util.regex.Pattern;
 
 
 /**
@@ -44,7 +45,7 @@ public class SelectQueryAttributeExtractor {
     private final QuotedIDFactory idfac;
     private final DBMetadata metadata;
 
-    private static final  String[] aliasSplitters = new String[]{" as ", " AS "};
+    private static final Pattern AS = Pattern.compile("\\sAS\\s", Pattern.CASE_INSENSITIVE);
 
     private final SelectQueryAttributeExtractor2 sqae;
 
@@ -144,22 +145,18 @@ public class SelectQueryAttributeExtractor {
 
             String projection = sql.substring(start, end).trim();
 
-            // split on commas that are not inside parenthesis
-            String[] columns = projection.split(",+(?!.*\\))");
+            // remove all brackets
+            while (projection.matches("\\([^\\(]*\\)"))
+                projection = projection.replaceAll("\\([^\\(]*\\)", "");
 
-            for (String col : columns) {
-                String columnName = col.trim();
+            for (String col : projection.split(",")) {
+                String[] components = AS.split(col);
+                String columnName = components[components.length - 1].trim();
 
-                // take the alias name if present
-                for (String aliasSplitter : aliasSplitters)
-                    if (columnName.contains(aliasSplitter)) { // has an alias
-                        columnName = columnName.split(aliasSplitter)[1].trim();
-                        break;
-                    }
-
+                // ROMAN (25 Jan 2017): do not understand the purpose
                 // split on spaces that are not inside single quotes
-                if (columnName.contains(" "))
-                    columnName = columnName.split("\\s+(?![^'\"]*')")[1].trim();
+                // if (columnName.contains(" "))
+                //    columnName = columnName.split("\\s+(?![^'\"]*')")[1].trim();
 
                 // get only the column name (but not the qualifier table name)
                 // eg: table.column -> column

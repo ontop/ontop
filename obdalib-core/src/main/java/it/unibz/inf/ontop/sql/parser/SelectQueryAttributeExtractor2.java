@@ -40,30 +40,37 @@ public class SelectQueryAttributeExtractor2 {
     }
 
     public RAExpressionAttributes parse(String sql) {
+        PlainSelect plainSelect = getParsedSql(sql);
+        return select(plainSelect);
+    }
+
+    public PlainSelect getParsedSql(String sql) {
         try {
             Statement statement = CCJSqlParserUtil.parse(sql);
             if (!(statement instanceof Select))
                 throw new InvalidSelectQueryException("The query is not a SELECT statement", statement);
 
-            return select(((Select) statement).getSelectBody());
+            SelectBody selectBody = ((Select) statement).getSelectBody();
+            if (!(selectBody instanceof PlainSelect))
+                throw new UnsupportedSelectQueryException("Complex SELECT statements are not supported", selectBody);
+
+            PlainSelect plainSelect = (PlainSelect) selectBody;
+
+            if (plainSelect.getIntoTables() != null)
+                throw new InvalidSelectQueryException("SELECT INTO is not allowed in mappings", plainSelect);
+
+            return plainSelect;
         }
         catch (JSQLParserException e) {
             throw new UnsupportedSelectQueryException("Cannot parse SQL: " + sql, e);
         }
+
     }
 
-    private RAExpressionAttributes select(SelectBody selectBody) {
-
-        if (!(selectBody instanceof PlainSelect))
-            throw new UnsupportedSelectQueryException("Complex SELECT statements are not supported", selectBody);
-
-        PlainSelect plainSelect = (PlainSelect) selectBody;
-
-        if (plainSelect.getIntoTables() != null)
-            throw new InvalidSelectQueryException("SELECT INTO is not allowed in mappings", selectBody);
+    public ImmutableMap<QualifiedAttributeID, Variable> getQueryBodyAttributes(PlainSelect plainSelect) {
 
         if (plainSelect.getFromItem() == null)
-            throw new UnsupportedSelectQueryException("SELECT without FROM is not supported", selectBody);
+            throw new UnsupportedSelectQueryException("SELECT without FROM is not supported", plainSelect);
 
         RAExpressionAttributes current = getRelationalExpression(plainSelect.getFromItem());
         if (plainSelect.getJoins() != null)
@@ -75,7 +82,12 @@ public class SelectQueryAttributeExtractor2 {
                     throw new InvalidSelectQueryException(e.toString(), join);
                 }
 
-        ImmutableMap<QualifiedAttributeID, Variable> currentAttributes = current.getAttributes();
+        return current.getAttributes();
+    }
+
+    private RAExpressionAttributes select(PlainSelect plainSelect) {
+
+        ImmutableMap<QualifiedAttributeID, Variable> currentAttributes = getQueryBodyAttributes(plainSelect);
 
         ImmutableMap<QualifiedAttributeID, Variable> attributes;
         try {
@@ -96,7 +108,7 @@ public class SelectQueryAttributeExtractor2 {
                     duplicates.entrySet().stream()
                             .filter(d -> d.getValue() > 1)
                             .map(d -> d.getKey())
-                            .collect(ImmutableCollectors.toList())) + " in the SELECT clause: ", selectBody);
+                            .collect(ImmutableCollectors.toList())) + " in the SELECT clause: ", plainSelect);
         }
 
         return new RAExpressionAttributes(attributes, null);
@@ -196,7 +208,12 @@ public class SelectQueryAttributeExtractor2 {
                 throw new InvalidSelectQueryException("SUB-SELECT must have an alias", subSelect);
             relationIndex++;
 
-            RAExpressionAttributes current = select(subSelect.getSelectBody());
+
+            SelectBody selectBody = subSelect.getSelectBody();
+            if (!(selectBody instanceof PlainSelect))
+                throw new UnsupportedSelectQueryException("Complex SELECT statements are not supported", selectBody);
+
+            RAExpressionAttributes current = select((PlainSelect) selectBody);
 
             RelationID aliasId = idfac.createRelationID(null, subSelect.getAlias().getName());
             result = RAExpressionAttributes.alias(current, aliasId);
