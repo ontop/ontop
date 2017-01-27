@@ -209,6 +209,8 @@ public class OntopSemanticIndexLoaderImpl implements OntopSemanticIndexLoader {
                 .jdbcUrl(jdbcUrl)
                 .jdbcUser(DEFAULT_USER)
                 .jdbcPassword(DEFAULT_PASSWORD)
+                //TODO: remove it (required by Tomcat...)
+                .jdbcDriver("org.h2.Driver")
                 .iriDictionary(dataRepository.getUriMap())
                 .build();
     }
