@@ -22,8 +22,11 @@ import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
+import org.semanticweb.owlapi.model.parameters.Imports;
+import org.semanticweb.owlapi.model.parameters.OntologyCopy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import uk.ac.manchester.cs.owl.owlapi.OWLOntologyManagerImpl;
 
 import java.io.File;
 import java.sql.Connection;
@@ -90,14 +93,20 @@ public class OntopOWLSemanticIndexFactory {
                                            String jdbcUrl) throws OWLOntologyCreationException {
         OBDAModel ppMapping = createPPMapping(dataRepository);
 
-        // TODO: set up the uri map
+        /**
+         * Tbox: ontology without the ABox axioms (are in the DB now).
+         */
+        OWLOntologyManager newManager = OWLManager.createOWLOntologyManager();
+        OWLOntology tbox = newManager.copyOntology(owlOntology, OntologyCopy.SHALLOW);
+        newManager.removeAxioms(tbox, tbox.getABoxAxioms(Imports.EXCLUDED));
+
         QuestConfiguration configuration = QuestConfiguration.defaultBuilder()
                 .obdaModel(ppMapping)
-                // TODO: could we avoid parsing it again?
-                .ontology(owlOntology)
+                .ontology(tbox)
                 .jdbcUrl(jdbcUrl)
                 .jdbcUser(DEFAULT_USER)
                 .jdbcPassword(DEFAULT_PASSWORD)
+                .iriDictionary(dataRepository.getUriMap())
                 .build();
 
         QuestOWLFactory factory = new QuestOWLFactory();
