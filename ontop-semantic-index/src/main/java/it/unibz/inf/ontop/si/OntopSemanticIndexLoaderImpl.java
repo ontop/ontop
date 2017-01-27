@@ -8,10 +8,12 @@ import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.io.PrefixManager;
 import it.unibz.inf.ontop.model.OBDAModel;
 import it.unibz.inf.ontop.model.impl.OBDAModelImpl;
+import it.unibz.inf.ontop.ontology.Assertion;
 import it.unibz.inf.ontop.ontology.ImmutableOntologyVocabulary;
 import it.unibz.inf.ontop.ontology.Ontology;
 import it.unibz.inf.ontop.owlapi.OWLAPIABoxIterator;
 import it.unibz.inf.ontop.owlapi.OWLAPITranslatorUtility;
+import it.unibz.inf.ontop.owlrefplatform.core.abox.QuestMaterializer;
 import it.unibz.inf.ontop.owlrefplatform.core.abox.RDBMSSIRepositoryManager;
 import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
@@ -28,6 +30,7 @@ import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.Iterator;
 import java.util.Properties;
 import java.util.Set;
 
@@ -43,6 +46,23 @@ public class OntopSemanticIndexLoaderImpl implements OntopSemanticIndexLoader {
     private static final boolean OPTIMIZE_EQUIVALENCES = true;;
     private final QuestConfiguration configuration;
     private final Connection connection;
+
+    private static class RepositoryInit {
+        final RDBMSSIRepositoryManager dataRepository;
+        final Set<OWLOntology> ontologyClosure;
+        final String jdbcUrl;
+        final ImmutableOntologyVocabulary vocabulary;
+        final Connection localConnection;
+
+        private RepositoryInit(RDBMSSIRepositoryManager dataRepository, Set<OWLOntology> ontologyClosure, String jdbcUrl,
+                               ImmutableOntologyVocabulary vocabulary, Connection localConnection) {
+            this.dataRepository = dataRepository;
+            this.ontologyClosure = ontologyClosure;
+            this.jdbcUrl = jdbcUrl;
+            this.vocabulary = vocabulary;
+            this.localConnection = localConnection;
+        }
+    }
 
 
     private OntopSemanticIndexLoaderImpl(QuestConfiguration configuration, Connection connection) {
@@ -81,15 +101,66 @@ public class OntopSemanticIndexLoaderImpl implements OntopSemanticIndexLoader {
     }
 
 
-    /**
-     * TODO: find a better name
-     */
     public static OntopSemanticIndexLoader loadOntologyIndividuals(OWLOntology owlOntology, Properties properties)
             throws SemanticIndexException {
 
-        Set<OWLOntology> ontologyClosure = owlOntology.getOWLOntologyManager().getImportsClosure(owlOntology);
+        RepositoryInit init = createRepository(owlOntology);
 
+        try {
+            /*
+            Loads the data
+             */
+            OWLAPIABoxIterator aBoxIter = new OWLAPIABoxIterator(init.ontologyClosure, init.vocabulary);
+
+            int count = init.dataRepository.insertData(init.localConnection, aBoxIter, 5000, 500);
+            log.debug("Inserted {} triples from the ontology.", count);
+
+            /*
+            Creates the configuration and the loader object
+             */
+            QuestConfiguration configuration = createConfiguration(init.dataRepository, owlOntology, init.jdbcUrl, properties);
+            return new OntopSemanticIndexLoaderImpl(configuration, init.localConnection);
+
+        } catch (SQLException e) {
+            throw new SemanticIndexException(e.getMessage());
+        }
+    }
+
+    /**
+     * TODO: do want to use a different ontology for the materialization and the output OBDA system?
+     */
+    public static OntopSemanticIndexLoader loadVirtualAbox(QuestConfiguration obdaConfiguration, Properties properties)
+            throws SemanticIndexException {
+
+        try {
+            OWLOntology inputOntology = obdaConfiguration.loadInputOntology()
+                    .orElseThrow(() -> new IllegalArgumentException("The configuration must provide an ontology"));
+
+            RepositoryInit init = createRepository(inputOntology);
+
+            QuestMaterializer materializer = new QuestMaterializer(obdaConfiguration, true);
+            Iterator<Assertion> assertionIterator = materializer.getAssertionIterator();
+
+            int count = init.dataRepository.insertData(init.localConnection, assertionIterator, 5000, 500);
+            materializer.disconnect();
+            log.debug("Inserted {} triples from the mappings.", count);
+
+            /*
+            Creates the configuration and the loader object
+             */
+            QuestConfiguration configuration = createConfiguration(init.dataRepository, inputOntology, init.jdbcUrl, properties);
+            return new OntopSemanticIndexLoaderImpl(configuration, init.localConnection);
+
+        } catch (Exception e) {
+            throw new SemanticIndexException(e.getMessage());
+        }
+    }
+
+    private static RepositoryInit createRepository(OWLOntology owlOntology) throws SemanticIndexException {
+
+        Set<OWLOntology> ontologyClosure = owlOntology.getOWLOntologyManager().getImportsClosure(owlOntology);
         Ontology ontology = OWLAPITranslatorUtility.mergeTranslateOntologies(ontologyClosure);
+
         ImmutableOntologyVocabulary vocabulary = ontology.getVocabulary();
 
         final TBoxReasoner reformulationReasoner = TBoxReasonerImpl.create(ontology, OPTIMIZE_EQUIVALENCES);
@@ -102,19 +173,13 @@ public class OntopSemanticIndexLoaderImpl implements OntopSemanticIndexLoader {
         dataRepository.generateMetadata();
 
         String jdbcUrl = buildNewJdbcUrl();
+
         try {
             Connection localConnection = DriverManager.getConnection(jdbcUrl, DEFAULT_USER, DEFAULT_PASSWORD);
 
             // Creating the ABox repository
             dataRepository.createDBSchemaAndInsertMetadata(localConnection);
-
-            OWLAPIABoxIterator aBoxIter = new OWLAPIABoxIterator(ontologyClosure, vocabulary);
-
-            int count = dataRepository.insertData(localConnection, aBoxIter, 5000, 500);
-            log.debug("Inserted {} triples from the ontology.", count);
-
-            QuestConfiguration configuration = createConfiguration(dataRepository, owlOntology, jdbcUrl, properties);
-            return new OntopSemanticIndexLoaderImpl(configuration, localConnection);
+            return new RepositoryInit(dataRepository, ontologyClosure, jdbcUrl, vocabulary, localConnection);
 
         } catch (SQLException e) {
             throw new SemanticIndexException(e.getMessage());
@@ -167,11 +232,4 @@ public class OntopSemanticIndexLoaderImpl implements OntopSemanticIndexLoader {
     private static String buildNewJdbcUrl() {
         return "jdbc:h2:mem:questrepository:" + System.currentTimeMillis() + ";LOG=0;CACHE_SIZE=65536;LOCK_MODE=0;UNDO_LOG=0";
     }
-
-
-    public static OntopSemanticIndexLoader loadVirtualAbox(QuestConfiguration obdaConfiguration, Properties properties)
-            throws SemanticIndexException {
-        throw new RuntimeException("TODO: implement loadVirtualAbox");
-    }
-
 }
