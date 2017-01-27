@@ -125,7 +125,11 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
                         ImmutableSet.of());
             case 1:
                 if (condition.isPresent()) {
-                    return new NodeTransformationProposalImpl(NO_LOCAL_CHANGE, ImmutableSet.of());
+                    return new NodeTransformationProposalImpl(
+                            REPLACE_BY_NEW_NODE,
+                            new FilterNodeImpl(condition.get()),
+                            ImmutableSet.of()
+                    );
                 } else {
                     return new NodeTransformationProposalImpl(REPLACE_BY_UNIQUE_NON_EMPTY_CHILD,
                             remainingChildren.get(0),ImmutableSet.of());
