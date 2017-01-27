@@ -21,74 +21,44 @@ package it.unibz.inf.ontop.owlrefplatform.questdb;
  */
 
 
-import java.util.Optional;
+import java.io.IOException;
 
+import it.unibz.inf.ontop.exception.OBDASpecificationException;
+import it.unibz.inf.ontop.injection.QuestComponentFactory;
 import it.unibz.inf.ontop.injection.QuestConfiguration;
-import it.unibz.inf.ontop.injection.QuestSettings;
 import it.unibz.inf.ontop.model.OBDAException;
-import it.unibz.inf.ontop.model.OBDAModel;
-import it.unibz.inf.ontop.ontology.OntologyFactory;
+import it.unibz.inf.ontop.owlrefplatform.core.DBConnector;
 import it.unibz.inf.ontop.owlrefplatform.core.IQuestConnection;
-import it.unibz.inf.ontop.injection.QuestCoreSettings;
-
-import it.unibz.inf.ontop.ontology.Ontology;
-import it.unibz.inf.ontop.ontology.impl.OntologyFactoryImpl;
-import it.unibz.inf.ontop.owlapi.OWLAPITranslatorUtility;
-import org.semanticweb.owlapi.model.OWLOntology;
+import it.unibz.inf.ontop.owlrefplatform.core.QuestDBConnection;
+import it.unibz.inf.ontop.reformulation.OBDAQueryProcessor;
+import it.unibz.inf.ontop.spec.OBDASpecification;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 /***
  * A bean that holds all the data about a store, generates a store folder and
  * maintains this data.
  */
-public class QuestDBVirtualStore extends QuestDBAbstractStore {
-
-	private static final long serialVersionUID = 2495624993519521937L;
+public class QuestDBVirtualStore implements AutoCloseable {
 
 	private static Logger log = LoggerFactory.getLogger(QuestDBVirtualStore.class);
-
-	private static final OntologyFactory ofac = OntologyFactoryImpl.getInstance();
-
-	private IQuest questInstance;
 	
 	private boolean isinitalized = false;
 
-	@Override
-	public QuestCoreSettings getPreferences() {
-		return questInstance.getPreferences();
-	}
+	// Temporary (dropped after initialization)
+	@Nullable
+	private QuestConfiguration configuration;
+	private DBConnector dbConnector;
 
 
-	public QuestDBVirtualStore(@Nonnull String name, @Nonnull QuestConfiguration config) throws Exception {
-
-		super(name, config);
-
+	public QuestDBVirtualStore(@Nonnull QuestConfiguration config) {
 		// TODO: re-cast the exception to a Sesame-specific one
 		config.validate();
 
-		QuestSettings preferences = config.getSettings();
-
-		//we are working in virtual mode
-		if (!preferences.isInVirtualMode())
-			throw new IllegalArgumentException("Virtual mode was expected in QuestDBVirtualStore!");
-
-		//obtain the model
-		OBDAModel obdaModel = config.loadSpecification()
-				.orElseThrow(() -> new IllegalStateException("Mapping are required in virtual A-box mode " +
-						"so a configuration validation error should have already been thrown"));
-
-		//obtain the ontology
-		Optional<OWLOntology> optionalInputOntology = config.loadInputOntology();
-		Ontology tbox = optionalInputOntology
-				.map(OWLAPITranslatorUtility::translateImportsClosure)
-				.orElseGet(() -> ofac.createOntology(ofac.createVocabulary()));
-
-		//set up Quest
-		questInstance = getComponentFactory().create(tbox, Optional.of(obdaModel), config.getPredefinedDBMetadata(),
-				config.getExecutorRegistry());
+		this.configuration = config;
 	}
 
 	/**
@@ -98,15 +68,24 @@ public class QuestDBVirtualStore extends QuestDBAbstractStore {
 	 * Calls IQuest.setupRepository()
 	 * @throws Exception
 	 */
-	public void initialize() throws Exception {
+	public void initialize() throws IOException, OBDASpecificationException {
 		if(this.isinitalized){
 			log.warn("Double initialization of QuestDBVirtualStore");
 		} else {
 			this.isinitalized = true;
-			questInstance.setupRepository();
 		}
+
+		OBDASpecification obdaSpecification = configuration.loadProvidedSpecification();
+		QuestComponentFactory componentFactory = configuration.getInjector().getInstance(QuestComponentFactory.class);
+
+		OBDAQueryProcessor queryProcessor = componentFactory.create(obdaSpecification, configuration.getExecutorRegistry());
+		dbConnector = componentFactory.create(queryProcessor);
 	}
-	
+
+	public QuestDBConnection getConnection() throws OBDAException {
+		//	System.out.println("getquestdbconn..");
+		return new QuestDBConnection(getQuestConnection());
+	}
 
 	/**
 	 * Get a Quest connection from the Quest instance
@@ -117,7 +96,7 @@ public class QuestDBVirtualStore extends QuestDBAbstractStore {
 			throw new Error("The QuestDBVirtualStore must be initialized before getQuestConnection can be run. See https://github.com/ontop/ontop/wiki/API-change-in-SesameVirtualRepo-and-QuestDBVirtualStore");
 		try {
 			// System.out.println("getquestconn..");
-			return questInstance.getConnection();
+			return dbConnector.getConnection();
 		} catch (OBDAException e) {
 			// TODO: throw a proper exception
 			e.printStackTrace();
@@ -130,6 +109,6 @@ public class QuestDBVirtualStore extends QuestDBAbstractStore {
 	 * Shut down Quest and its connections.
 	 */
 	public void close() {
-		questInstance.close();
+		dbConnector.close();
 	}
 }

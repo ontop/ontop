@@ -94,7 +94,7 @@ public class TestSesameImplicitDBConstraints {
 			configurationBuilder.dbMetadata(getMeta());
 		}
 
-		OntopVirtualRepository qest1 = new OntopVirtualRepository("", configurationBuilder.build());
+		OntopVirtualRepository qest1 = new OntopVirtualRepository(configurationBuilder.build());
 		qest1.initialize();
 		/*
 		 * Prepare the data connection for querying.

@@ -81,7 +81,7 @@ public class TestSesameTimeout {
 				.properties(p)
 				.build();
 
-		OntopVirtualRepository repo = new OntopVirtualRepository("", configuration);
+		OntopVirtualRepository repo = new OntopVirtualRepository(configuration);
 		repo.initialize();
 		/*
 		 * Prepare the data connection for querying.

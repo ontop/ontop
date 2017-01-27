@@ -255,7 +255,7 @@ public class OntopRepositoryConfig extends AbstractRepositoryImplConfig {
                             .ontologyFile(owlFile)
                             .properties(p)
                             .build();
-                    repository = new OntopVirtualRepository(name, configuration);
+                    repository = new OntopVirtualRepository(configuration);
                     break;
                 default:
                     throw new RepositoryConfigException("Unknown mode: " + quest_type);

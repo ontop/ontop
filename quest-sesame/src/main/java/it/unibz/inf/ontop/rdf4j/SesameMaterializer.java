@@ -21,19 +21,12 @@ package it.unibz.inf.ontop.rdf4j;
  */
 
 import com.google.common.collect.Iterators;
-import it.unibz.inf.ontop.exception.InvalidMappingException;
 import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.ontology.Assertion;
-import it.unibz.inf.ontop.ontology.Ontology;
-import it.unibz.inf.ontop.ontology.utils.MappingVocabularyExtractor;
-import it.unibz.inf.ontop.owlapi.OWLAPITranslatorUtility;
 import it.unibz.inf.ontop.owlrefplatform.core.abox.QuestMaterializer;
 import org.eclipse.rdf4j.model.Statement;
-import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
-import java.io.IOException;
 import java.util.Iterator;
-import java.util.Optional;
 
 /**
  * TODO: refactor (no exception in the constructor) + complete
@@ -44,7 +37,7 @@ public class SesameMaterializer {
 		private QuestMaterializer materializer;
 		
     public SesameMaterializer(QuestConfiguration configuration, boolean doStreamResults) throws Exception {
-        materializer = new QuestMaterializer(configuration, extractOntology(configuration), doStreamResults);
+        materializer = new QuestMaterializer(configuration, doStreamResults);
         assertions = materializer.getAssertionIterator();
 	}
 		
@@ -68,16 +61,4 @@ public class SesameMaterializer {
 		public int getVocabularySize() {
 			return materializer.getVocabSize();
 		}
-
-	private static Ontology extractOntology(QuestConfiguration configuration) throws OWLOntologyCreationException,
-			IOException, InvalidMappingException {
-
-		Optional<Ontology> inputOntology =  configuration.loadInputOntology()
-				.map(OWLAPITranslatorUtility::translate);
-
-		if (inputOntology.isPresent())
-			return inputOntology.get();
-
-		return MappingVocabularyExtractor.extractOntology(configuration.loadProvidedSpecification());
-	}
 }

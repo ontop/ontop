@@ -21,11 +21,7 @@ package it.unibz.inf.ontop.rdf4j.repository;
  */
 
 import it.unibz.inf.ontop.model.OBDAException;
-import it.unibz.inf.ontop.owlrefplatform.core.IQuestDBStatement;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestDBConnection;
-import it.unibz.inf.ontop.owlrefplatform.core.SIQuestDBStatement;
-import it.unibz.inf.ontop.rdf4j.RDF4JRDFIterator;
 import it.unibz.inf.ontop.rdf4j.query.OntopBooleanQuery;
 import it.unibz.inf.ontop.rdf4j.query.OntopGraphQuery;
 import it.unibz.inf.ontop.rdf4j.query.OntopTupleQuery;
@@ -36,7 +32,6 @@ import org.eclipse.rdf4j.common.iteration.CloseableIteration;
 import org.eclipse.rdf4j.common.iteration.CloseableIteratorIteration;
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.impl.NamespaceImpl;
-import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.model.impl.ValueFactoryImpl;
 import org.eclipse.rdf4j.query.*;
 import org.eclipse.rdf4j.query.parser.*;
@@ -45,7 +40,6 @@ import org.eclipse.rdf4j.repository.RepositoryException;
 import org.eclipse.rdf4j.repository.RepositoryResult;
 import org.eclipse.rdf4j.repository.UnknownTransactionStateException;
 import org.eclipse.rdf4j.rio.*;
-import org.eclipse.rdf4j.rio.helpers.BasicParserSettings;
 
 import java.io.*;
 import java.net.URL;
@@ -55,7 +49,8 @@ import java.util.*;
 public class OntopRepositoryConnection implements org.eclipse.rdf4j.repository.RepositoryConnection, AutoCloseable {
 
     private static final String ONTOP_VIRTUAL_REPOSITORY_IS_READ_ONLY = "Ontop virtual repository is read-only.";
-    private AbstractOntopRepository repository;
+	private static final String READ_ONLY_MESSAGE = "Ontop is a read-only system";
+	private AbstractOntopRepository repository;
 	private QuestDBConnection questConn;
     private boolean isOpen;
     private boolean autoCommit;
@@ -77,286 +72,49 @@ public class OntopRepositoryConnection implements org.eclipse.rdf4j.repository.R
 	
 	@Override
     public void add(Statement st, Resource... contexts) throws RepositoryException {
-		// Adds the supplied statement to this repository, optionally to one or
-		// more named contexts.
-		OpenRDFUtil.verifyContextNotNull(contexts);
-		if (contexts != null && contexts.length == 0 && st.getContext() != null) {
-			contexts = new Resource[] { st.getContext() };
-		}
-		try {
-			begin();
-			List<Statement> l = new ArrayList<>();
-			l.add(st);
-			Iterator<Statement> iterator = l.iterator();
-			addWithoutCommit(iterator, contexts);
-		} catch (Exception e) {
-			throw new RepositoryException(e);
-		} finally {
-			autoCommit();
-		}
+		throw new RepositoryException(READ_ONLY_MESSAGE);
 	}
 
 	@Override
     public void add(Iterable<? extends Statement> statements, Resource... contexts)
 			throws RepositoryException {
-		//Adds the supplied statements to this repository, optionally to one or more named contexts. 
-		 OpenRDFUtil.verifyContextNotNull(contexts);
-
-         begin();
-
-         try {
-             addWithoutCommit((Iterator<Statement>) statements, contexts);
-             
-         } catch (RepositoryException e) {
-             if (autoCommit) {
-                 rollback();
-             }
-             throw e;
-         } catch (RuntimeException e) {
-             if (autoCommit) {
-                 rollback();
-             }
-             throw e;
-         } catch (Exception e) {
-        	 throw new RepositoryException(e);
-		} finally {
-             autoCommit();
-         }
-
+		throw new RepositoryException(READ_ONLY_MESSAGE);
 	}
 
 
 	@Override
     public void add(File file, String baseIRI, RDFFormat dataFormat, Resource... contexts)
 			throws IOException, RDFParseException, RepositoryException {
-		//Adds RDF data from the specified file to a specific contexts in the repository. 
-
-		if (baseIRI == null) {
-			// default baseIRI to file
-			baseIRI = file.toURI().toString();
-		}
-
-        try (InputStream in = new FileInputStream(file)) {
-            add(in, baseIRI, dataFormat, contexts);
-        }
+		throw new RepositoryException(READ_ONLY_MESSAGE);
 	}
 
 	 @Override
      public void add(URL url, String baseIRI, RDFFormat dataFormat,
                      Resource... contexts) throws IOException,
              RDFParseException, RepositoryException {
-		// Adds the RDF data that can be found at the specified URL to the
-		// repository,
-		// optionally to one or more named contexts.
-		if (baseIRI == null) {
-			baseIRI = url.toExternalForm();
-		}
-
-         try (InputStream in = url.openStream()) {
-             add(in, baseIRI, dataFormat, contexts);
-         }
+		 throw new RepositoryException(READ_ONLY_MESSAGE);
      }
 
      @Override
      public void add(InputStream in, String baseIRI,
                      RDFFormat dataFormat, Resource... contexts)
              throws IOException, RDFParseException, RepositoryException {
- 		//Adds RDF data from an InputStream to the repository, optionally to one or more named contexts. 
-         addInputStreamOrReader(in, baseIRI, dataFormat, contexts);
+		 throw new RepositoryException(READ_ONLY_MESSAGE);
      }
 
      @Override
      public void add(Reader reader, String baseIRI,
                      RDFFormat dataFormat, Resource... contexts)
              throws IOException, RDFParseException, RepositoryException {
-    	//Adds RDF data from a Reader to the repository, optionally to one or more 
- 		//named contexts. Note: using a Reader to upload byte-based data means that 
- 		//you have to be careful not to destroy the data's character encoding by 
- 		//enforcing a default character encoding upon the bytes. \
- 		//If possible, adding such data using an InputStream is to be preferred.
-         addInputStreamOrReader(reader, baseIRI, dataFormat, contexts);
+		 throw new RepositoryException(READ_ONLY_MESSAGE);
      }
 
 	@Override
     public void add(Resource subject, org.eclipse.rdf4j.model.IRI predicate, Value object, Resource... contexts)
 			throws RepositoryException {
-		//Adds a statement with the specified subject, predicate and object to this repository, 
-		//optionally to one or more named contexts. 
-		OpenRDFUtil.verifyContextNotNull(contexts);
-		ValueFactory vf = SimpleValueFactory.getInstance();
-		
-		Statement st = vf.createStatement(subject, vf.createIRI(predicate.toString()), object);
-		
-		add(st, contexts);
+		throw new RepositoryException(READ_ONLY_MESSAGE);
 	}
-	
-	 /**
-     * Adds the data that can be read from the supplied InputStream or Reader to
-     * this repository.
-     * 
-     * @param inputStreamOrReader
-     *        An {@link InputStream} or {@link Reader} containing RDF data that
-     *        must be added to the repository.
-     * @param baseIRI
-     *        The base IRI for the data.
-     * @param dataFormat
-     *        The file format of the data.
-     * @param contexts
-     *        The context to which the data should be added in case
-     *        <tt>enforceContext</tt> is <tt>true</tt>. The value
-     *        <tt>null</tt> indicates the null context.
-     */
-    protected void addInputStreamOrReader(Object inputStreamOrReader,
-            String baseIRI, RDFFormat dataFormat, Resource... contexts)
-            throws IOException, RDFParseException, RepositoryException {
-    	
-    	if (Objects.equals(repository.getType(), QuestConstants.VIRTUAL))
-			throw new RepositoryException();
-    	
-        OpenRDFUtil.verifyContextNotNull(contexts);
 
-        rdfParser = Rio.createParser(dataFormat,
-                getRepository().getValueFactory());
-
-        ParserConfig config = rdfParser.getParserConfig();
-		// To emulate DatatypeHandling.IGNORE 
-		config.addNonFatalError(BasicParserSettings.FAIL_ON_UNKNOWN_DATATYPES);
-		config.addNonFatalError(BasicParserSettings.VERIFY_DATATYPE_VALUES);
-		config.addNonFatalError(BasicParserSettings.NORMALIZE_DATATYPE_VALUES);
-//		config.set(BasicParserSettings.PRESERVE_BNODE_IDS, true);
-		
-//        rdfParser.setVerifyData(true);
-//        rdfParser.setStopAtFirstError(true);
-//        rdfParser.setDatatypeHandling(RDFParser.DatatypeHandling.IGNORE);
-
-        boolean autoCommit = isAutoCommit();
-        begin();        
-        
-        RDF4JRDFIterator rdfHandler = new RDF4JRDFIterator();
-        rdfParser.setRDFHandler(rdfHandler);
-        
-        
-        try {            
-            if (inputStreamOrReader instanceof  InputStream) {
-            	inputStreamOrReader = (InputStream) inputStreamOrReader;
-            } 
-            else if (inputStreamOrReader instanceof  Reader) {
-            	inputStreamOrReader = (Reader) inputStreamOrReader;
-            } 
-            else {
-                throw new IllegalArgumentException(
-                        "inputStreamOrReader must be an InputStream or a Reader, is a: "
-                                + inputStreamOrReader.getClass());
-            }
-            
-           // System.out.println("Parsing... ");
-			SIQuestDBStatement questStm = questConn.createSIStatement();
-    		
-            Thread insert = new Thread(new Insert(rdfParser, (InputStream)inputStreamOrReader, baseIRI));
-            Thread process = new Thread(new Process(rdfHandler, questStm));
-            
-            //start threads
-            insert.start();
-            process.start();
-            
-            insert.join();
-            process.join();
-            
-            questStm.close();
-                     
-     
-        } catch (RuntimeException | InterruptedException e) {
-        	//System.out.println("exception, rolling back!");
-            if (autoCommit) {
-                rollback();
-            }
-            throw new RepositoryException(e);
-        } finally {
-            setAutoCommit(autoCommit);
-            autoCommit();
-        }
-    }
-
-
-            
-          private class Insert implements Runnable{
-        	  private RDFParser rdfParser;
-        	  private InputStream inputStreamOrReader;
-        	  private String baseIRI;
-        	  public Insert(RDFParser rdfParser, InputStream inputStreamOrReader, String baseIRI)
-        	  {
-        		  this.rdfParser = rdfParser;
-        		  this.inputStreamOrReader = inputStreamOrReader;
-        		  this.baseIRI = baseIRI;
-        	  }
-        	  @Override
-              public void run()
-        	  {
-        		  try {
-					rdfParser.parse((InputStream) inputStreamOrReader, baseIRI);
-				} catch (Exception e) {
-throw new RuntimeException(e);
-				}
-        	  }
-        	  
-          }
-          
-          private class Process implements Runnable{
-        	  private RDF4JRDFIterator iterator;
-        	  private IQuestDBStatement questStmt;
-        	  public Process(RDF4JRDFIterator iterator, IQuestDBStatement qstm) throws OBDAException
-        	  {
-        		  this.iterator = iterator;
-        		  this.questStmt = qstm;
-        	  }
-        	  
-        	  @Override
-              public void run()
-        	  {
-        		    try {
-						questStmt.add(iterator, boolToInt(autoCommit), 5000);
-        		    	
-					} catch (OBDAException e) {
-						throw new RuntimeException(e);
-					}
-        	  }
-          }
-                       
-      
-  
-    protected void addWithoutCommit(Iterator< Statement> stmIterator, Resource... contexts)
-    throws RepositoryException, OBDAException {
-    	
-    	if ( repository.getType().equals(QuestConstants.VIRTUAL))
-			throw new RepositoryException();
-    	
-    	
-    	if (contexts.length == 0) {
-    		contexts = new Resource[]{} ;
-    	}
-    	boolean currCommit = autoCommit;
-    	autoCommit = false;
- 
-    	RDF4JRDFIterator it = new RDF4JRDFIterator(stmIterator);
-    	
-    	//insert data   useFile=false, batch=0
-		SIQuestDBStatement questStm = null;
-    	try {
-			// Statement insertion is only supported in the classic A-box mode
-    		questStm = questConn.createSIStatement();
-			questStm.add(it);
-		} catch (OBDAException e) {
-			throw new RepositoryException(e);
-		}
-    	finally{
-			if (questStm != null)
-    			questStm.close();
-    	}
-		
-		autoCommit = currCommit;
-    }
-
-    
    
     protected void autoCommit() throws RepositoryException {
         if (isAutoCommit()) {
@@ -864,8 +622,7 @@ throw new RuntimeException(e);
 	 * A boolean flag signaling when a transaction is active.
 	 */
 	@Override
-	public boolean isActive() throws UnknownTransactionStateException,
-			RepositoryException {
+	public boolean isActive()  {
 		return this.isActive;
 	}
 

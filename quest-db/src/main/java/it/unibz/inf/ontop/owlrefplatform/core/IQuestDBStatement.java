@@ -29,24 +29,4 @@ public interface IQuestDBStatement extends OBDAStatement {
      * TODO: explain
      */
     String getRewriting(String query) throws OBDAException;
-
-    /**
-     * May not be supported (if read-only)
-     */
-    int add(Iterator<Assertion> data) throws OBDAException;
-
-    /**
-     * May not be supported (if read-only)
-     */
-    int add(Iterator<Assertion> data, int commit, int batch) throws OBDAException;
-
-    /**
-     * May not be supported (if read-only)
-     */
-    int add(URI rdffile) throws OBDAException;
-
-    /**
-     * May not be supported (if read-only)
-     */
-    int addWithTempFile(URI rdffile) throws OBDAException;
 }

@@ -20,7 +20,6 @@ package it.unibz.inf.ontop.rdf4j.repository;
  * #L%
  */
 
-import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
 import it.unibz.inf.ontop.ontology.ImmutableOntologyVocabulary;
 import it.unibz.inf.ontop.ontology.Ontology;
 import it.unibz.inf.ontop.owlapi.OWLAPIABoxIterator;
@@ -61,15 +60,14 @@ public class SemanticIndexManager {
 
 	private final Logger log = LoggerFactory.getLogger(this.getClass());
 
-	public SemanticIndexManager(OWLOntology tbox, Connection connection,
-								NativeQueryLanguageComponentFactory nativeQLFactory) throws Exception {
+	public SemanticIndexManager(OWLOntology tbox, Connection connection) throws Exception {
 		conn = connection;
 		Ontology ontologyClosure = QuestOWL.loadOntologies(tbox);
 		voc = ontologyClosure.getVocabulary();
 
 		reasoner = TBoxReasonerImpl.create(ontologyClosure, true);
 			
-		dataRepository = new RDBMSSIRepositoryManager(reasoner, ontologyClosure.getVocabulary(), nativeQLFactory);
+		dataRepository = new RDBMSSIRepositoryManager(reasoner, ontologyClosure.getVocabulary());
 		dataRepository.generateMetadata(); // generate just in case
 
 		log.debug("TBox has been processed. Ready to ");

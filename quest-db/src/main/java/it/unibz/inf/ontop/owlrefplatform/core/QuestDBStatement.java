@@ -31,6 +31,7 @@ import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
 
 import it.unibz.inf.ontop.ontology.Assertion;
 import it.unibz.inf.ontop.owlrefplatform.core.abox.NTripleAssertionIterator;
+import it.unibz.inf.ontop.reformulation.OBDAQueryProcessor;
 import org.eclipse.rdf4j.query.MalformedQueryException;
 import org.eclipse.rdf4j.query.parser.ParsedQuery;
 import org.semanticweb.owlapi.apibinding.OWLManager;
@@ -50,13 +51,8 @@ import org.slf4j.LoggerFactory;
 public class QuestDBStatement implements IQuestDBStatement {
 
 	private final IQuestStatement st;
-	private final NativeQueryLanguageComponentFactory nativeQLFactory;
-	private final Logger log = LoggerFactory.getLogger(QuestDBStatement.class);
 
-	private transient OWLOntologyManager man = OWLManager.createOWLOntologyManager();
-
-	public QuestDBStatement(IQuestStatement st, NativeQueryLanguageComponentFactory nativeQLFactory) {
-        this.nativeQLFactory = nativeQLFactory;
+	public QuestDBStatement(IQuestStatement st) {
 		this.st = st;
 	}
 
@@ -68,39 +64,6 @@ public class QuestDBStatement implements IQuestDBStatement {
 		return st.insertData(data, commit, batch);
 	}
 
-	public int add(URI rdffile) throws OBDAException {
-		return load(rdffile, false, -1, -1);
-	}
-
-	public int addWithTempFile(URI rdffile) throws OBDAException {
-		return load(rdffile, true, -1, -1);
-	}
-
-	/* Move to query time ? */
-	private int load(URI rdffile, boolean useFile, int commit, int batch) throws OBDAException {
-		String pathstr = rdffile.toString();
-		int dotidx = pathstr.lastIndexOf('.');
-		String ext = pathstr.substring(dotidx);
-		int result = -1;
-		try {
-			if (ext.toLowerCase().equals(".owl")) {
-				OWLOntology owlontology = man.loadOntologyFromOntologyDocument(IRI.create(rdffile));
-				Set<OWLOntology> ontos = man.getImportsClosure(owlontology);
-				
-				OWLAPIABoxIterator aBoxIter = new OWLAPIABoxIterator(ontos, st.getQuestInstance().getVocabulary());
-				result = st.insertData(aBoxIter, /*useFile,*/ commit, batch);
-			} 
-			else if (ext.toLowerCase().equals(".nt")) {				
-				NTripleAssertionIterator it = new NTripleAssertionIterator(rdffile);
-				result = st.insertData(it, /*useFile,*/ commit, batch);
-			}
-			return result;
-		} catch (Exception e) {
-			throw new OBDAException(e);
-		} finally {
-			st.close();
-		}
-	}
 
 	@Override
 	public void cancel() throws OBDAException {
@@ -170,9 +133,8 @@ public class QuestDBStatement implements IQuestDBStatement {
 	@Override
 	public String getRewriting(String sparqlQuery) throws OBDAException {
 		try {
-		QuestQueryProcessor queryProcessor = st.getQuestInstance().getEngine();
-		ParsedQuery sparqlTree = queryProcessor.getParsedQuery(sparqlQuery);
-		return queryProcessor.getRewriting(sparqlTree);
+		ParsedQuery sparqlTree = st.getParsedQuery(sparqlQuery);
+		return st.getRewriting(sparqlTree);
 		} catch (MalformedQueryException e) {
 			throw new OBDAException(e);
 		}
@@ -192,10 +154,9 @@ public class QuestDBStatement implements IQuestDBStatement {
 	@Override
 	public ExecutableQuery getExecutableQuery(String sparqlQuery) throws OBDAException {
 		try {
-			QuestQueryProcessor queryProcessor = st.getQuestInstance().getEngine();
-			ParsedQuery pq = queryProcessor.getParsedQuery(sparqlQuery);
+			ParsedQuery pq = st.getParsedQuery(sparqlQuery);
 			// TODO: extract the construction template when existing
-			return queryProcessor.translateIntoNativeQuery(
+			return st.translateIntoNativeQuery(
 					pq, Optional.empty());
 		} catch (MalformedQueryException e) {
 			throw new OBDAException(e);

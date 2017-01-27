@@ -33,33 +33,21 @@ public class OntopClassicRepository extends AbstractOntopRepository {
 	private final QuestDBClassicStore classicStore;
 	
 	public OntopClassicRepository(String name, QuestConfiguration config) throws Exception {
-		if (config.getSettings().isInVirtualMode()) {
-			throw new RepositoryException("Must be in classic A-box mode!");
-		}
-		this.classicStore = new QuestDBClassicStore(name, config);
+		throw new RuntimeException("TODO: remove the OntopClassicRepository");
 	}
 	
 	public OntopClassicRepository(String name, Dataset data, QuestConfiguration config) throws Exception {
-		if (config.getSettings().isInVirtualMode()) {
-			throw new RepositoryException("Must be in classic A-box mode!");
-		}
-		this.classicStore = new QuestDBClassicStore(name, data, config);
+		throw new RuntimeException("TODO: remove the OntopClassicRepository");
 	}
 	
 	@Override
     public void initialize() throws RepositoryException {
-		super.initialize();
-		try {
-			classicStore.getConnection();
-		} catch (OBDAException e) {
-			e.printStackTrace();
-			throw new RepositoryException(e.getMessage());
-		}
+		throw new RuntimeException("TODO: remove the OntopClassicRepository");
 	}
 	
 	@Override
 	public QuestDBConnection getQuestConnection() throws OBDAException {
-		return classicStore.getConnection();
+		throw new RuntimeException("TODO: remove the OntopClassicRepository");
 	}
 	
 	@Override

@@ -20,20 +20,13 @@ package it.unibz.inf.ontop.owlrefplatform.questdb;
  * #L%
  */
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.*;
 
 import it.unibz.inf.ontop.injection.QuestConfiguration;
-import it.unibz.inf.ontop.injection.QuestSettings;
-import it.unibz.inf.ontop.model.OBDAException;
-import it.unibz.inf.ontop.model.OBDAModel;
 import it.unibz.inf.ontop.ontology.OntologyVocabulary;
-import it.unibz.inf.ontop.owlapi.OWLAPIABoxIterator;
-import it.unibz.inf.ontop.owlapi.OWLAPITranslatorUtility;
 import it.unibz.inf.ontop.owlrefplatform.core.IQuestConnection;
-import it.unibz.inf.ontop.injection.QuestCoreSettings;
 import org.eclipse.rdf4j.model.Literal;
 import org.eclipse.rdf4j.model.Resource;
 import org.eclipse.rdf4j.model.Statement;
@@ -50,13 +43,9 @@ import org.eclipse.rdf4j.rio.helpers.BasicParserSettings;
 import org.eclipse.rdf4j.rio.helpers.RDFHandlerBase;
 
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
-import it.unibz.inf.ontop.ontology.Assertion;
 import it.unibz.inf.ontop.ontology.Ontology;
 import it.unibz.inf.ontop.ontology.OntologyFactory;
 import it.unibz.inf.ontop.ontology.impl.OntologyFactoryImpl;
-import it.unibz.inf.ontop.owlrefplatform.core.abox.QuestMaterializer;
-import it.unibz.inf.ontop.owlrefplatform.core.abox.RDBMSSIRepositoryManager;
-import it.unibz.inf.ontop.owlrefplatform.core.execution.SIQuestStatement;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -65,7 +54,7 @@ import org.slf4j.LoggerFactory;
  * An instance of Store that encapsulates all the functionality needed for a
  * "classic" store.
  */
-public class QuestDBClassicStore extends QuestDBAbstractStore {
+public class QuestDBClassicStore {
 
 	// TODO all this needs to be refactored later to allow for transactions,
 	// autocommit enable/disable, clients ids, etc
@@ -78,101 +67,60 @@ public class QuestDBClassicStore extends QuestDBAbstractStore {
 	
 	private Set<OWLOntology> closure;
 
-	private IQuest questInstance;
-
-	public QuestDBClassicStore(String name, QuestConfiguration config) throws Exception {
-		super(name, config);
-
-		Optional<OWLOntology> optionalInputOntology = config.loadInputOntology();
-		if (optionalInputOntology.isPresent()) {
-			OWLOntology ontology = optionalInputOntology.get();
-			closure = ontology.getOWLOntologyManager().getImportsClosure(ontology);
-		}
-		else {
-			closure = new HashSet<>();
-		}
-
-		Ontology tbox = optionalInputOntology
-				.map(OWLAPITranslatorUtility::translateImportsClosure)
-				// Default empty Ontology
-				.orElseGet(() -> ofac.createOntology(ofac.createVocabulary()));
-
-		createInstance(tbox, config);
-	}
-
 	/**
 	 * TODO: integrate Ontology loading from a Dataset into QuestConfiguration
      */
 	public QuestDBClassicStore(String name, Dataset data, QuestConfiguration config) throws Exception {
-		super(name, config);
 		Ontology tbox = loadTBoxFromDataset(data);
-		createInstance(tbox, config);
+		throw new RuntimeException("TODO: remove the QuestDBClassicStore");
+		//createInstance(tbox, config);
 	}
 
-	private void createInstance(Ontology tbox, QuestConfiguration configuration) throws Exception {
-		QuestSettings preferences = configuration.getSettings();
-        questInstance = getComponentFactory().create(tbox, Optional.empty(), Optional.empty(), getExecutorRegistry());
-		questInstance.setupRepository();
-		
-		final boolean bObtainFromOntology = preferences.getRequiredBoolean(QuestCoreSettings.OBTAIN_FROM_ONTOLOGY);
-		final boolean bObtainFromMappings = preferences.getRequiredBoolean(QuestCoreSettings.OBTAIN_FROM_MAPPINGS);
-		IQuestConnection conn = questInstance.getNonPoolConnection();
-        //TODO: avoid this cast
-		SIQuestStatement st = conn.createSIStatement();
-		if (bObtainFromOntology) {
-			// Retrieves the ABox from the ontology file.
-			log.debug("Loading data from Ontology into the database");
-			OWLAPIABoxIterator aBoxIter = new OWLAPIABoxIterator(closure, questInstance.getVocabulary());
-			int count = st.insertData(aBoxIter, 5000, 500);
-			log.debug("Inserted {} triples from the ontology.", count);
-		}
-		if (bObtainFromMappings) {
-			// Retrieves the ABox from the target database via mapping.
-			log.debug("Loading data from Mappings into the database");
-			OBDAModel obdaModelForMaterialization = questInstance.getOBDAModel();
-			//obdaModelForMaterialization.getOntologyVocabulary().merge(tbox.getVocabulary());
-
-			/**
-			 * TODO: check if tbox is the expected vocabulary
-			 * TODO: why is it using the QuestMaterializer, not the OWLAPIMaterializer
-			 */
-			QuestMaterializer materializer = new QuestMaterializer(configuration, tbox, false);
-			Iterator<Assertion> assertionIter = materializer.getAssertionIterator();
-			int count = st.insertData(assertionIter, 5000, 500);
-			materializer.disconnect();
-			log.debug("Inserted {} triples from the mappings.", count);
-		}
-//		st.createIndexes();
-		st.close();
-		if (!conn.getAutoCommit())
-			conn.commit();
-		
-		//questInstance.updateSemanticIndexMappings();
-
-		log.debug("Store {} has been created successfully", name);
-	}
-
-	public void saveState(String storePath) throws IOException {
-		// NO-OP
-	}
-
-	public QuestDBClassicStore restore(String storePath) throws IOException {	
-		return this;
-	}
-
-	@Override
-	public QuestCoreSettings getPreferences() {
-		return questInstance.getPreferences();
-	}
+//	private void createInstance(Ontology tbox, QuestConfiguration configuration) throws Exception {
+//		QuestSettings preferences = configuration.getSettings();
+//        questInstance = getComponentFactory().create(tbox, Optional.empty(), Optional.empty(), getExecutorRegistry());
+//		questInstance.setupRepository();
+//
+//		final boolean bObtainFromOntology = preferences.getRequiredBoolean(QuestCoreSettings.OBTAIN_FROM_ONTOLOGY);
+//		final boolean bObtainFromMappings = preferences.getRequiredBoolean(QuestCoreSettings.OBTAIN_FROM_MAPPINGS);
+//		IQuestConnection conn = questInstance.getNonPoolConnection();
+//        //TODO: avoid this cast
+//		SIQuestStatement st = conn.createSIStatement();
+//		if (bObtainFromOntology) {
+//			// Retrieves the ABox from the ontology file.
+//			log.debug("Loading data from Ontology into the database");
+//			OWLAPIABoxIterator aBoxIter = new OWLAPIABoxIterator(closure, questInstance.getVocabulary());
+//			int count = st.insertData(aBoxIter, 5000, 500);
+//			log.debug("Inserted {} triples from the ontology.", count);
+//		}
+//		if (bObtainFromMappings) {
+//			// Retrieves the ABox from the target database via mapping.
+//			log.debug("Loading data from Mappings into the database");
+//			OBDAModel obdaModelForMaterialization = questInstance.getOBDAModel();
+//			//obdaModelForMaterialization.getOntologyVocabulary().merge(tbox.getVocabulary());
+//
+//			/**
+//			 * TODO: check if tbox is the expected vocabulary
+//			 * TODO: why is it using the QuestMaterializer, not the OWLAPIMaterializer
+//			 */
+//			QuestMaterializer materializer = new QuestMaterializer(configuration, tbox, false);
+//			Iterator<Assertion> assertionIter = materializer.getAssertionIterator();
+//			int count = st.insertData(assertionIter, 5000, 500);
+//			materializer.disconnect();
+//			log.debug("Inserted {} triples from the mappings.", count);
+//		}
+////		st.createIndexes();
+//		st.close();
+//		if (!conn.getAutoCommit())
+//			conn.commit();
+//
+//		//questInstance.updateSemanticIndexMappings();
+//
+//		log.debug("Store {} has been created successfully", name);
+//	}
 
 	public IQuestConnection getQuestConnection() {
-		IQuestConnection conn = null;
-		try {
-			conn = questInstance.getConnection();
-		} catch (OBDAException e) {
-			e.printStackTrace();
-		}
-		return conn;
+		throw new RuntimeException("TODO: remove the QuestDBClassicStore");
 	}
 
 	private Ontology loadTBoxFromDataset(Dataset dataset) throws Exception {
@@ -259,13 +207,6 @@ public class QuestDBClassicStore extends QuestDBAbstractStore {
 		*/
 		}
 
-	}
-
-	/**
-	 * TODO: Import from V1. Keep it?
-	 */
-	public RDBMSSIRepositoryManager getSemanticIndexRepository() {
-		return questInstance.getOptionalSemanticIndexRepository().get();
 	}
 
 }

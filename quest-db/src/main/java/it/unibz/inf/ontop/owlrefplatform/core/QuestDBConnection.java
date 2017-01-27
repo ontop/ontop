@@ -31,12 +31,9 @@ import it.unibz.inf.ontop.model.OBDAException;
 public class QuestDBConnection implements OBDAConnection {
 
 	private final IQuestConnection conn;
-    private final NativeQueryLanguageComponentFactory nativeQLFactory;
 
-    public QuestDBConnection(IQuestConnection conn,
-                             NativeQueryLanguageComponentFactory nativeQLFactory) {
+    public QuestDBConnection(IQuestConnection conn) {
 		this.conn = conn;
-        this.nativeQLFactory = nativeQLFactory;
 	}
 
 	@Override
@@ -49,14 +46,7 @@ public class QuestDBConnection implements OBDAConnection {
 	 */
 	@Override
 	public QuestDBStatement createStatement() throws OBDAException {
-		return new QuestDBStatement(conn.createStatement(), nativeQLFactory);
-	}
-
-	/**
-	 * For the classic mode only (usage of a Semantic Index repository).
-	 */
-	public SIQuestDBStatement createSIStatement() throws OBDAException {
-		return new SIQuestDBStatementImpl(conn.createSIStatement(), nativeQLFactory);
+		return new QuestDBStatement(conn.createStatement());
 	}
 
 	@Override

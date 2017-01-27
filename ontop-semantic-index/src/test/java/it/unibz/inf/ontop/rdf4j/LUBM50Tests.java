@@ -20,7 +20,6 @@ package it.unibz.inf.ontop.rdf4j;
  * #L%
  */
 
-import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
 import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.injection.OBDASettings;
 import it.unibz.inf.ontop.io.QueryIOManager;
@@ -66,7 +65,6 @@ public class LUBM50Tests {
 
 	private static final SQLMappingFactory MAPPING_FACTORY = SQLMappingFactoryImpl.getInstance();
 	private final OWLOntology ontology;
-	private final NativeQueryLanguageComponentFactory nativeQLFactory;
 
 	Logger log = LoggerFactory.getLogger(this.getClass());
 
@@ -107,8 +105,6 @@ public class LUBM50Tests {
 		// source.setParameter(RDBMSourceParameterConstants.IS_IN_MEMORY, "false");
 		// source.setParameter(RDBMSourceParameterConstants.USE_DATASOURCE_FOR_ABOXDUMP, "true");
 
-		nativeQLFactory = config.getInjector().getInstance(NativeQueryLanguageComponentFactory.class);
-
 	}
 
 	public void test1Setup() throws Exception {
@@ -117,7 +113,7 @@ public class LUBM50Tests {
 		try {
 			conn = JDBCConnectionManager.getJDBCConnectionManager().getConnection(config.getSettings());
 
-			SemanticIndexManager simanager = new SemanticIndexManager(ontology, conn, nativeQLFactory);
+			SemanticIndexManager simanager = new SemanticIndexManager(ontology, conn);
 
 			simanager.setupRepository(true);
 
@@ -135,7 +131,7 @@ public class LUBM50Tests {
 		try {
 			conn = JDBCConnectionManager.getJDBCConnectionManager().getConnection(config.getSettings());
 
-			SemanticIndexManager simanager = new SemanticIndexManager(ontology, conn, nativeQLFactory);
+			SemanticIndexManager simanager = new SemanticIndexManager(ontology, conn);
 
 			simanager.restoreRepository();
 

@@ -90,7 +90,7 @@ public class TestSesameBindings {
                 .properties(p)
                 .build();
 
-        OntopVirtualRepository repo = new OntopVirtualRepository("", config);
+        OntopVirtualRepository repo = new OntopVirtualRepository(config);
         repo.initialize();
         /*
          * Prepare the data connection for querying.
