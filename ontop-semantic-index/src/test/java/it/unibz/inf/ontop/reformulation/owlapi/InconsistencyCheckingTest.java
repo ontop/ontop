@@ -36,15 +36,12 @@ import static org.semanticweb.owlapi.apibinding.OWLFunctionalSyntaxFactory.Funct
 import static org.semanticweb.owlapi.apibinding.OWLFunctionalSyntaxFactory.Literal;
 import static org.semanticweb.owlapi.apibinding.OWLFunctionalSyntaxFactory.Ontology;
 
-import it.unibz.inf.ontop.injection.QuestConfiguration;
-import it.unibz.inf.ontop.injection.QuestCoreSettings;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWL;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLFactory;
-import it.unibz.inf.ontop.si.OntopOWLSemanticIndexFactory;
+import it.unibz.inf.ontop.si.OntopSemanticIndexLoader;
 import junit.framework.TestCase;
 
 import org.junit.Test;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLClass;
@@ -90,17 +87,12 @@ public class InconsistencyCheckingTest extends TestCase{
 	}
 	
 	private void startReasoner() throws Exception {
-//		Properties p = new Properties();
-//		p.setProperty(QuestCoreSettings.ABOX_MODE, QuestConstants.CLASSIC);
-//		p.setProperty(QuestCoreSettings.OPTIMIZE_EQUIVALENCES, "true");
-//		QuestConfiguration configuration = QuestConfiguration.defaultBuilder()
-//				.properties(p)
-//				.ontology(ontology)
-//				.build();
-//
-//		QuestOWLFactory questOWLFactory = new QuestOWLFactory();
-//		reasoner = questOWLFactory.createReasoner(configuration);
-		reasoner = OntopOWLSemanticIndexFactory.createWithOntologyIndividuals(ontology);
+		Properties properties = new Properties();
+
+		try (OntopSemanticIndexLoader siLoader = OntopSemanticIndexLoader.loadOntologyIndividuals(ontology, properties)) {
+			QuestOWLFactory questOWLFactory = new QuestOWLFactory();
+			reasoner = questOWLFactory.createReasoner(siLoader.getConfiguration());
+		}
 	}
 	
 	@Test

@@ -1,10 +1,12 @@
 package it.unibz.inf.ontop.reformulation.tests;
 
+import it.unibz.inf.ontop.injection.OntopRuntimeSettings;
 import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
 import it.unibz.inf.ontop.injection.QuestCoreSettings;
 import it.unibz.inf.ontop.owlrefplatform.core.SQLExecutableQuery;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
+import it.unibz.inf.ontop.si.OntopSemanticIndexLoader;
 import junit.framework.TestCase;
 import org.junit.Test;
 
@@ -282,30 +284,20 @@ public class NPDUndolferTest extends TestCase {
 	 * @return
 	 * @throws Exception
 	 */
-	
 	private String getRewriting(String query) throws Exception {
-		
-		QuestOWLFactory fac = new QuestOWLFactory();
+        Properties p = new Properties();
+        p.put(OntopRuntimeSettings.REWRITE, true);
 
-        Properties pref = new Properties();
-        pref.put(QuestCoreSettings.DBTYPE, QuestConstants.SEMANTIC_INDEX);
-        pref.put(QuestCoreSettings.ABOX_MODE, QuestConstants.CLASSIC);
-        pref.put(QuestCoreSettings.REFORMULATION_TECHNIQUE, QuestConstants.TW);
-        pref.put(QuestCoreSettings.REWRITE, QuestConstants.TRUE);
 
-        QuestConfiguration config = QuestConfiguration.defaultBuilder()
-                .ontologyFile(owlfile)
-                .properties(pref).build();
+        QuestOWLFactory fac = new QuestOWLFactory();
+        String rewriting;
+        try (OntopSemanticIndexLoader loader = OntopSemanticIndexLoader.loadOntologyIndividuals(owlfile, p);
+             QuestOWL quest = fac.createReasoner(loader.getConfiguration());
+             QuestOWLConnection qconn = quest.getConnection();
+             QuestOWLStatement st = qconn.createStatement()) {
 
-        QuestOWL quest = fac.createReasoner(config);
-        QuestOWLConnection qconn = quest.getConnection();
-        QuestOWLStatement st = qconn.createStatement();
-
-        String rewriting = st.getRewriting(query);
-        st.close();
-
-        quest.dispose();
-
+            rewriting = st.getRewriting(query);
+        }
         return rewriting;
     }
 }

@@ -20,17 +20,15 @@ package it.unibz.inf.ontop.reformulation.tests;
  * #L%
  */
 
+import it.unibz.inf.ontop.injection.OntopRuntimeSettings;
 import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.io.QueryIOManager;
-import it.unibz.inf.ontop.model.OBDADataFactory;
 import it.unibz.inf.ontop.model.OBDAModel;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.inf.ontop.injection.QuestCoreSettings;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import it.unibz.inf.ontop.querymanager.QueryController;
 import it.unibz.inf.ontop.querymanager.QueryControllerEntity;
 import it.unibz.inf.ontop.querymanager.QueryControllerQuery;
+import it.unibz.inf.ontop.si.OntopSemanticIndexLoader;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -85,6 +83,10 @@ public class TreeWitnessRewriterH2Test{
 	final String owlfile = "src/test/resources/test/treewitness/" + testCase + ".owl"; 
 	final String obdafile = "src/test/resources/test/treewitness/" + testCase + ".obda";
 	final String qfile = "src/test/resources/test/treewitness/" + testCase + ".q";
+
+	private static final String url = "jdbc:h2:mem:questjunitdb";
+	private static final String username = "sa";
+	private static final String password = "";
 
 	/* These are the distinct tuples that we know each query returns */
 	final int[] tuples = { 7, 0, 4, 1, // Simple queries group
@@ -141,9 +143,6 @@ public class TreeWitnessRewriterH2Test{
 		 * Initializing and H2 database with the stock exchange data
 		 */
 		// String driver = "org.h2.Driver";
-		String url = "jdbc:h2:mem:questjunitdb";
-		String username = "sa";
-		String password = "";
 
 		conn = DriverManager.getConnection(url, username, password);
 		Statement st = conn.createStatement();
@@ -216,13 +215,19 @@ public class TreeWitnessRewriterH2Test{
 
 	private void runTests(Properties p) throws Exception {
 
-		// Creating a new instance of the reasoner
-		QuestOWLFactory factory = new QuestOWLFactory();
-        QuestConfiguration config = QuestConfiguration.defaultBuilder().properties(p)
+		QuestConfiguration obdaConfiguration = QuestConfiguration.defaultBuilder().properties(p)
 				.nativeOntopMappingFile(obdafile)
 				.ontologyFile(owlfile)
+				.jdbcUrl(url)
+				.jdbcUser(username)
+				.jdbcPassword(password)
 				.build();
-        QuestOWL reasoner = factory.createReasoner(config);
+
+		QuestOWL reasoner;
+		try (OntopSemanticIndexLoader loader = OntopSemanticIndexLoader.loadVirtualAbox(obdaConfiguration, p)) {
+			QuestOWLFactory factory = new QuestOWLFactory();
+			reasoner = factory.createReasoner(loader.getConfiguration());
+		}
 
 		// Now we are ready for querying
 		QuestOWLStatement st = reasoner.getStatement();
@@ -298,21 +303,8 @@ public class TreeWitnessRewriterH2Test{
 	public void testViEqSig() throws Exception {
 
 		prepareTestQueries(tuples);
-		/*
-		 * QuestPreferences p = new QuestPreferences();
-		 * p.setProperty(QuestPreferences.ABOX_MODE,
-		 * QuestConstants.VIRTUAL);
-		 * p.setProperty(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-		 * p.setProperty(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
-		 * p.setProperty("rewrite", "true");
-		 */
 		Properties p  = new Properties();
-		p.setProperty(QuestCoreSettings.REFORMULATION_TECHNIQUE, QuestConstants.TW);
-		p.setProperty(QuestCoreSettings.DBTYPE, QuestConstants.SEMANTIC_INDEX);
-		p.setProperty(QuestCoreSettings.ABOX_MODE, QuestConstants.CLASSIC);
-		p.setProperty(QuestCoreSettings.OPTIMIZE_EQUIVALENCES, "true");
-		p.setProperty(QuestCoreSettings.OBTAIN_FROM_ONTOLOGY, "true");
-		p.setProperty("rewrite", "true");
+		p.setProperty(OntopRuntimeSettings.REWRITE, "true");
 
 		runTests(p);
 	}

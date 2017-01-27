@@ -12,12 +12,9 @@ import it.unibz.inf.ontop.ontology.ImmutableOntologyVocabulary;
 import it.unibz.inf.ontop.ontology.Ontology;
 import it.unibz.inf.ontop.owlapi.OWLAPIABoxIterator;
 import it.unibz.inf.ontop.owlapi.OWLAPITranslatorUtility;
-import it.unibz.inf.ontop.owlrefplatform.core.DBConnector;
 import it.unibz.inf.ontop.owlrefplatform.core.abox.RDBMSSIRepositoryManager;
 import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWL;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLFactory;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
@@ -26,38 +23,69 @@ import org.semanticweb.owlapi.model.parameters.Imports;
 import org.semanticweb.owlapi.model.parameters.OntologyCopy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import uk.ac.manchester.cs.owl.owlapi.OWLOntologyManagerImpl;
 
 import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.Properties;
 import java.util.Set;
 
 /**
  * TODO: find a better name
  */
-public class OntopOWLSemanticIndexFactory {
+public class OntopSemanticIndexLoaderImpl implements OntopSemanticIndexLoader {
 
-    private static final Logger log = LoggerFactory.getLogger(OntopOWLSemanticIndexFactory.class);
+    private static final Logger log = LoggerFactory.getLogger(OntopSemanticIndexLoaderImpl.class);
 
     private static final String DEFAULT_USER = "sa";
     private static final String DEFAULT_PASSWORD = "";
-    private static final boolean OPTIMIZE_EQUIVALENCES = true;
+    private static final boolean OPTIMIZE_EQUIVALENCES = true;;
+    private final QuestConfiguration configuration;
+    private final Connection connection;
 
-    public static QuestOWL createWithOntologyIndividuals(String owlFile)
-            throws OWLOntologyCreationException, SQLException {
 
-        OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-        OWLOntology ontology = manager.loadOntologyFromOntologyDocument(new File(owlFile));
-        return createWithOntologyIndividuals(ontology);
+    private OntopSemanticIndexLoaderImpl(QuestConfiguration configuration, Connection connection) {
+        this.configuration = configuration;
+        this.connection = connection;
     }
+
+    @Override
+    public QuestConfiguration getConfiguration() {
+        return configuration;
+    }
+
+    @Override
+    public void close() {
+        try {
+            if (connection != null && (!connection.isClosed())) {
+                connection.close();
+            }
+        } catch (SQLException e) {
+            log.error("Error while closing the DB: " + e.getMessage());
+        }
+    }
+
+
+    public static OntopSemanticIndexLoader loadOntologyIndividuals(String owlFile, Properties properties)
+            throws SemanticIndexException {
+        try {
+            OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
+            OWLOntology ontology = manager.loadOntologyFromOntologyDocument(new File(owlFile));
+
+            return loadOntologyIndividuals(ontology, properties);
+
+        } catch (OWLOntologyCreationException e) {
+            throw new SemanticIndexException(e.getMessage());
+        }
+    }
+
 
     /**
      * TODO: find a better name
      */
-    public static QuestOWL createWithOntologyIndividuals(OWLOntology owlOntology)
-            throws SQLException, OWLOntologyCreationException {
+    public static OntopSemanticIndexLoader loadOntologyIndividuals(OWLOntology owlOntology, Properties properties)
+            throws SemanticIndexException {
 
         Set<OWLOntology> ontologyClosure = owlOntology.getOWLOntologyManager().getImportsClosure(owlOntology);
 
@@ -74,45 +102,50 @@ public class OntopOWLSemanticIndexFactory {
         dataRepository.generateMetadata();
 
         String jdbcUrl = buildNewJdbcUrl();
-        Connection localConnection = DriverManager.getConnection(jdbcUrl, DEFAULT_USER, DEFAULT_PASSWORD);
+        try {
+            Connection localConnection = DriverManager.getConnection(jdbcUrl, DEFAULT_USER, DEFAULT_PASSWORD);
 
-        // Creating the ABox repository
-        dataRepository.createDBSchemaAndInsertMetadata(localConnection);
+            // Creating the ABox repository
+            dataRepository.createDBSchemaAndInsertMetadata(localConnection);
 
-        OWLAPIABoxIterator aBoxIter = new OWLAPIABoxIterator(ontologyClosure, vocabulary);
+            OWLAPIABoxIterator aBoxIter = new OWLAPIABoxIterator(ontologyClosure, vocabulary);
 
-        int count = dataRepository.insertData(localConnection, aBoxIter, 5000, 500);
-        log.debug("Inserted {} triples from the ontology.", count);
+            int count = dataRepository.insertData(localConnection, aBoxIter, 5000, 500);
+            log.debug("Inserted {} triples from the ontology.", count);
 
-        QuestOWL reasoner = createReasoner(dataRepository, owlOntology, jdbcUrl);
-        localConnection.close();
-        return reasoner;
+            QuestConfiguration configuration = createConfiguration(dataRepository, owlOntology, jdbcUrl, properties);
+            return new OntopSemanticIndexLoaderImpl(configuration, localConnection);
+
+        } catch (SQLException e) {
+            throw new SemanticIndexException(e.getMessage());
+        }
     }
 
-    private static QuestOWL createReasoner(RDBMSSIRepositoryManager dataRepository, OWLOntology owlOntology,
-                                           String jdbcUrl) throws OWLOntologyCreationException {
+    private static QuestConfiguration createConfiguration(RDBMSSIRepositoryManager dataRepository, OWLOntology owlOntology,
+                                                          String jdbcUrl, Properties properties) throws SemanticIndexException {
         OBDAModel ppMapping = createPPMapping(dataRepository);
 
         /**
          * Tbox: ontology without the ABox axioms (are in the DB now).
          */
         OWLOntologyManager newManager = OWLManager.createOWLOntologyManager();
-        OWLOntology tbox = newManager.copyOntology(owlOntology, OntologyCopy.SHALLOW);
+        OWLOntology tbox;
+        try {
+            tbox = newManager.copyOntology(owlOntology, OntologyCopy.SHALLOW);
+        } catch (OWLOntologyCreationException e) {
+            throw new SemanticIndexException(e.getMessage());
+        }
         newManager.removeAxioms(tbox, tbox.getABoxAxioms(Imports.EXCLUDED));
 
-        QuestConfiguration configuration = QuestConfiguration.defaultBuilder()
+        return QuestConfiguration.defaultBuilder()
                 .obdaModel(ppMapping)
                 .ontology(tbox)
+                .properties(properties)
                 .jdbcUrl(jdbcUrl)
                 .jdbcUser(DEFAULT_USER)
                 .jdbcPassword(DEFAULT_PASSWORD)
                 .iriDictionary(dataRepository.getUriMap())
                 .build();
-
-        QuestOWLFactory factory = new QuestOWLFactory();
-        return factory.createReasoner(configuration);
-
-
     }
 
 
@@ -133,6 +166,12 @@ public class OntopOWLSemanticIndexFactory {
 
     private static String buildNewJdbcUrl() {
         return "jdbc:h2:mem:questrepository:" + System.currentTimeMillis() + ";LOG=0;CACHE_SIZE=65536;LOCK_MODE=0;UNDO_LOG=0";
+    }
+
+
+    public static OntopSemanticIndexLoader loadVirtualAbox(QuestConfiguration obdaConfiguration, Properties properties)
+            throws SemanticIndexException {
+        throw new RuntimeException("TODO: implement loadVirtualAbox");
     }
 
 }

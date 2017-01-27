@@ -20,10 +20,8 @@ package it.unibz.inf.ontop.reformulation.tests;
  * #L%
  */
 
-import it.unibz.inf.ontop.injection.QuestConfiguration;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.inf.ontop.injection.QuestCoreSettings;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
+import it.unibz.inf.ontop.si.OntopSemanticIndexLoader;
 import junit.framework.TestCase;
 import org.semanticweb.owlapi.model.OWLException;
 import org.semanticweb.owlapi.model.OWLObject;
@@ -39,34 +37,19 @@ import java.util.Properties;
  */
 public class ClassicABoxAssertionTestPositiveNoRangeTest extends TestCase {
 
-	QuestOWL reasoner = null;
 	private QuestOWLConnection conn;
 	private QuestOWLStatement st;
 
 	public ClassicABoxAssertionTestPositiveNoRangeTest() throws Exception {
 		Properties p = new Properties();
-		p.setProperty(QuestCoreSettings.REFORMULATION_TECHNIQUE, QuestConstants.UCQBASED);
-		p.setProperty(QuestCoreSettings.DBTYPE, QuestConstants.SEMANTIC_INDEX);
-		p.setProperty(QuestCoreSettings.ABOX_MODE, QuestConstants.CLASSIC);
-		p.setProperty(QuestCoreSettings.OPTIMIZE_EQUIVALENCES, "true");
-		p.setProperty(QuestCoreSettings.OBTAIN_FROM_ONTOLOGY, "true");
 
 		String owlfile = "src/test/resources/test/owl-types-simple-split.owl";
 
-		
-//		QuestOWLFactory fac = new QuestOWLFactory();
-//		fac.setPreferenceHolder(pref);
-//
-//		reasoner = (QuestOWL) fac.createReasoner(ontology);
-//		reasoner.flush();
-        QuestOWLFactory factory = new QuestOWLFactory();
-
-        QuestConfiguration config = QuestConfiguration.defaultBuilder()
-				.ontologyFile(owlfile)
-				.properties(p)
-				.build();
-        QuestOWL reasoner = factory.createReasoner(config);
-
+		QuestOWL reasoner;
+		try(OntopSemanticIndexLoader siLoader = OntopSemanticIndexLoader.loadOntologyIndividuals(owlfile, p)) {
+			QuestOWLFactory factory = new QuestOWLFactory();
+			reasoner = factory.createReasoner(siLoader.getConfiguration());
+		}
 
 		conn = reasoner.getConnection();
 		st = conn.createStatement();
