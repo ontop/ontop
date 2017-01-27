@@ -32,7 +32,6 @@ import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
 import it.unibz.inf.ontop.model.impl.TermUtils;
 import it.unibz.inf.ontop.owlrefplatform.core.ExecutableQuery;
 import it.unibz.inf.ontop.owlrefplatform.core.SQLExecutableQuery;
-import it.unibz.inf.ontop.owlrefplatform.core.abox.SemanticIndexURIMap;
 import it.unibz.inf.ontop.owlrefplatform.core.abox.XsdDatatypeConverter;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.DatalogNormalizer;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.FunctionFlattener;
@@ -47,6 +46,7 @@ import it.unibz.inf.ontop.owlrefplatform.core.translator.IntermediateQueryToData
 import it.unibz.inf.ontop.owlrefplatform.core.translator.SesameConstructTemplate;
 import it.unibz.inf.ontop.parser.EncodeForURI;
 import it.unibz.inf.ontop.pivotalrepr.IntermediateQuery;
+import it.unibz.inf.ontop.reformulation.IRIDictionary;
 import it.unibz.inf.ontop.sql.*;
 import it.unibz.inf.ontop.utils.DatalogDependencyGraphGenerator;
 import it.unibz.inf.ontop.utils.JdbcTypeMapper;
@@ -54,6 +54,7 @@ import org.eclipse.rdf4j.model.Literal;
 import org.eclipse.rdf4j.model.vocabulary.XMLSchema;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nullable;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Types;
@@ -116,7 +117,8 @@ public class SQLGenerator implements NativeQueryGenerator {
 	private boolean isOrderBy = false;
 	private final boolean isSI;
 
-	private SemanticIndexURIMap uriRefIds;
+	@Nullable
+	private IRIDictionary uriRefIds;
 
 	private Multimap<Predicate, CQIE> ruleIndex;
 
@@ -130,15 +132,7 @@ public class SQLGenerator implements NativeQueryGenerator {
 
 	@AssistedInject
 	private SQLGenerator(@Assisted DBMetadata metadata,
-						 QuestCoreSettings preferences, JdbcTypeMapper jdbcTypeMapper) {
-        // TODO: make these attributes immutable.
-        //TODO: avoid the null value
-        this(metadata, null, preferences, jdbcTypeMapper);
-    }
-
-	@AssistedInject
-	private SQLGenerator(@Assisted DBMetadata metadata,
-						 @Assisted SemanticIndexURIMap uriRefIds, QuestCoreSettings preferences,
+						 @Assisted Optional<IRIDictionary> iriDictionary, QuestCoreSettings preferences,
 						 JdbcTypeMapper jdbcTypeMapper) {
 
 		String driverURI = preferences.getJdbcDriver()
@@ -178,7 +172,7 @@ public class SQLGenerator implements NativeQueryGenerator {
 		}
 
 		this.isSI = !preferences.isInVirtualMode();
-		this.uriRefIds = uriRefIds;
+		this.uriRefIds = iriDictionary.orElse(null);
 		this.jdbcTypeMapper = jdbcTypeMapper;
  	}
 
@@ -187,7 +181,7 @@ public class SQLGenerator implements NativeQueryGenerator {
 	 */
 	private SQLGenerator(RDBMetadata metadata, SQLDialectAdapter sqlAdapter, boolean generatingReplace,
 						 boolean isSI, String replace1, String replace2, boolean distinctResultSet,
-						 SemanticIndexURIMap uriRefIds, JdbcTypeMapper jdbcTypeMapper) {
+						 IRIDictionary uriRefIds, JdbcTypeMapper jdbcTypeMapper) {
 		if (isSI && uriRefIds == null) {
 			throw new IllegalArgumentException("A SemanticIndexURIMap must be given in the classic mode.");
 		}

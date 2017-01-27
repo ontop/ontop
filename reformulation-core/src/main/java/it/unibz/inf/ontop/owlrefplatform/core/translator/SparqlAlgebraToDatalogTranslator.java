@@ -23,12 +23,10 @@ package it.unibz.inf.ontop.owlrefplatform.core.translator;
 import com.google.common.collect.*;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.Predicate.COL_TYPE;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
-import it.unibz.inf.ontop.model.impl.OntopModelSingletons;
-import it.unibz.inf.ontop.owlrefplatform.core.abox.SemanticIndexURIMap;
 import it.unibz.inf.ontop.model.UriTemplateMatcher;
 import it.unibz.inf.ontop.parser.EncodeForURI;
+import it.unibz.inf.ontop.reformulation.IRIDictionary;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Literal;
@@ -44,6 +42,7 @@ import org.eclipse.rdf4j.query.parser.ParsedTupleQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nonnull;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -65,7 +64,7 @@ public class SparqlAlgebraToDatalogTranslator {
     private static final Logger log = LoggerFactory.getLogger(SparqlAlgebraToDatalogTranslator.class);
 
 	private final UriTemplateMatcher uriTemplateMatcher;
-	private final SemanticIndexURIMap uriRef;
+	private final IRIDictionary uriRef;
 
     private final DatalogProgram program;
     private int predicateIdx = 0;
@@ -73,12 +72,13 @@ public class SparqlAlgebraToDatalogTranslator {
     /**
 	 * 
 	 * @param uriTemplateMatcher matches URIs to templates (comes from mappings)
-	 * @param uriRef maps URIs to their integer identifiers (used only in the Semantic Index mode)
+	 * @param iriDictionary maps URIs to their integer identifiers (used only in the Semantic Index mode)
 	 */
 
-	public SparqlAlgebraToDatalogTranslator(UriTemplateMatcher uriTemplateMatcher, SemanticIndexURIMap uriRef) {
+	public SparqlAlgebraToDatalogTranslator(@Nonnull UriTemplateMatcher uriTemplateMatcher,
+                                            @Nonnull Optional<IRIDictionary> iriDictionary) {
 		this.uriTemplateMatcher = uriTemplateMatcher;
-		this.uriRef = uriRef;
+		this.uriRef = iriDictionary.orElse(null);
 
         this.program = DATA_FACTORY.getDatalogProgram();
     }

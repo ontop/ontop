@@ -1,7 +1,6 @@
 package it.unibz.inf.ontop.reformulation.tests;
 
 import it.unibz.inf.ontop.model.UriTemplateMatcher;
-import it.unibz.inf.ontop.owlrefplatform.core.abox.SemanticIndexURIMap;
 import it.unibz.inf.ontop.owlrefplatform.core.translator.SparqlAlgebraToDatalogTranslator;
 import it.unibz.inf.ontop.owlrefplatform.core.translator.SparqlQuery;
 import org.junit.Test;
@@ -10,6 +9,8 @@ import org.eclipse.rdf4j.query.QueryLanguage;
 import org.eclipse.rdf4j.query.parser.ParsedQuery;
 import org.eclipse.rdf4j.query.parser.QueryParser;
 import org.eclipse.rdf4j.query.parser.QueryParserUtil;
+
+import java.util.Optional;
 
 
 /**
@@ -32,7 +33,7 @@ public class SPARQLQueryFlattenerTest {
         ParsedQuery pq = parser.parseQuery(queryBind, null);
 
         SparqlAlgebraToDatalogTranslator translator = new SparqlAlgebraToDatalogTranslator(
-                new UriTemplateMatcher(), new SemanticIndexURIMap());
+                new UriTemplateMatcher(), Optional.empty());
         SparqlQuery program = translator.translate(pq);
         System.out.println(program);
     }
@@ -54,7 +55,7 @@ public class SPARQLQueryFlattenerTest {
         ParsedQuery pq = parser.parseQuery(queryBind, null);
 
         SparqlAlgebraToDatalogTranslator translator = new SparqlAlgebraToDatalogTranslator(
-                new UriTemplateMatcher(), new SemanticIndexURIMap());
+                new UriTemplateMatcher(), Optional.empty());
         SparqlQuery program = translator.translate(pq);
         System.out.println(program);
     }
@@ -78,7 +79,7 @@ public class SPARQLQueryFlattenerTest {
         ParsedQuery pq = parser.parseQuery(query6, null);
 
         SparqlAlgebraToDatalogTranslator translator = new SparqlAlgebraToDatalogTranslator(
-                new UriTemplateMatcher(), new SemanticIndexURIMap());
+                new UriTemplateMatcher(), Optional.empty());
         SparqlQuery program = translator.translate(pq);
         System.out.println(program);
     }
@@ -97,7 +98,7 @@ public class SPARQLQueryFlattenerTest {
         ParsedQuery pq = parser.parseQuery(query6, null);
 
         SparqlAlgebraToDatalogTranslator translator = new SparqlAlgebraToDatalogTranslator(
-                new UriTemplateMatcher(), new SemanticIndexURIMap());
+                new UriTemplateMatcher(), Optional.empty());
         SparqlQuery program = translator.translate(pq);
         System.out.println(program);
     }

@@ -13,6 +13,7 @@ import it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing.TMappingExclusio
 import it.unibz.inf.ontop.injection.QuestCoreConfiguration;
 import it.unibz.inf.ontop.injection.QuestCoreSettings;
 import it.unibz.inf.ontop.pivotalrepr.proposal.QueryOptimizationProposal;
+import it.unibz.inf.ontop.reformulation.IRIDictionary;
 
 import javax.annotation.Nonnull;
 import java.util.Optional;
@@ -75,6 +76,11 @@ public class QuestCoreConfigurationImpl extends OBDACoreConfigurationImpl implem
     @Override
     public QuestCoreSettings getSettings() {
         return settings;
+    }
+
+    @Override
+    public Optional<IRIDictionary> getIRIDictionary() {
+        return runtimeConfiguration.getIRIDictionary();
     }
 
     @Override
@@ -179,6 +185,11 @@ public class QuestCoreConfigurationImpl extends OBDACoreConfigurationImpl implem
         @Override
         public B enableExistentialReasoning(boolean enable) {
             return runtimeBuilderFragment.enableExistentialReasoning(enable);
+        }
+
+        @Override
+        public B iriDictionary(@Nonnull IRIDictionary iriDictionary) {
+            return runtimeBuilderFragment.iriDictionary(iriDictionary);
         }
     }
 

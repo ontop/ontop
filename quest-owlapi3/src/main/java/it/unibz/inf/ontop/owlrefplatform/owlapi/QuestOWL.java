@@ -28,6 +28,7 @@ import it.unibz.inf.ontop.ontology.*;
 import it.unibz.inf.ontop.owlapi.OWLAPITranslatorUtility;
 import it.unibz.inf.ontop.owlrefplatform.core.*;
 import it.unibz.inf.ontop.pivotalrepr.utils.ExecutorRegistry;
+import it.unibz.inf.ontop.reformulation.IRIDictionary;
 import it.unibz.inf.ontop.spec.OBDASpecification;
 import it.unibz.inf.ontop.reformulation.OBDAQueryProcessor;
 import it.unibz.inf.ontop.utils.VersionInfo;
@@ -45,6 +46,7 @@ import javax.annotation.Nullable;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -124,6 +126,7 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 
 	private final QuestComponentFactory componentFactory;
 	private DBConnector dbConnector;
+	private Optional<IRIDictionary> iriDictionary;
 	
 	/* Used to signal whether to apply the user constraints above */
 	//private boolean applyExcludeFromTMappings = false;
@@ -155,6 +158,7 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 
 		Injector injector = questConfiguration.getInjector();
 		this.componentFactory = injector.getInstance(QuestComponentFactory.class);
+		this.iriDictionary = questConfiguration.getIRIDictionary();
 
 		try {
 			obdaSpecification = questConfiguration.loadProvidedSpecification();
@@ -237,7 +241,8 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 		// pm.reasonerTaskStarted("Classifying...");
 		// pm.reasonerTaskBusy();
 
-		OBDAQueryProcessor queryProcessor = componentFactory.create(obdaSpecification, executorRegistry);
+		OBDAQueryProcessor queryProcessor = componentFactory.create(obdaSpecification,
+				iriDictionary, executorRegistry);
 		dbConnector = componentFactory.create(queryProcessor);
 		dbConnector.connect();
 		

@@ -6,7 +6,9 @@ import it.unibz.inf.ontop.executor.ProposalExecutor;
 import it.unibz.inf.ontop.injection.OntopRuntimeConfiguration;
 import it.unibz.inf.ontop.injection.OntopRuntimeSettings;
 import it.unibz.inf.ontop.pivotalrepr.proposal.QueryOptimizationProposal;
+import it.unibz.inf.ontop.reformulation.IRIDictionary;
 
+import javax.annotation.Nonnull;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.stream.Stream;
@@ -54,11 +56,19 @@ public class OntopRuntimeConfigurationImpl extends OntopOBDAConfigurationImpl im
         return settings;
     }
 
+    @Override
+    public Optional<IRIDictionary> getIRIDictionary() {
+        return options.iriDictionary;
+    }
+
     static class OntopRuntimeOptions {
+        private final Optional<IRIDictionary> iriDictionary;
         final OntopOBDAOptions obdaOptions;
         final OntopOptimizationOptions optimizationOptions;
 
-        OntopRuntimeOptions(OntopOBDAOptions obdaOptions, OntopOptimizationOptions optimizationOptions) {
+        OntopRuntimeOptions(Optional<IRIDictionary> iriDictionary, OntopOBDAOptions obdaOptions,
+                            OntopOptimizationOptions optimizationOptions) {
+            this.iriDictionary = iriDictionary;
             this.obdaOptions = obdaOptions;
             this.optimizationOptions = optimizationOptions;
         }
@@ -70,6 +80,7 @@ public class OntopRuntimeConfigurationImpl extends OntopOBDAConfigurationImpl im
         private final B builder;
         private Optional<Boolean> encodeIRISafely = Optional.empty();
         private Optional<Boolean> existentialReasoning = Optional.empty();
+        private Optional<IRIDictionary> iriDictionary = Optional.empty();
 
         DefaultOntopRuntimeBuilderFragment(B builder) {
             this.builder = builder;
@@ -88,6 +99,12 @@ public class OntopRuntimeConfigurationImpl extends OntopOBDAConfigurationImpl im
 
         }
 
+        @Override
+        public B iriDictionary(@Nonnull IRIDictionary iriDictionary) {
+            this.iriDictionary = Optional.of(iriDictionary);
+            return builder;
+        }
+
         Properties generateProperties() {
             Properties p = new Properties();
 
@@ -99,7 +116,7 @@ public class OntopRuntimeConfigurationImpl extends OntopOBDAConfigurationImpl im
 
         final OntopRuntimeOptions generateRuntimeOptions(OntopOBDAOptions obdaOptions,
                                                          OntopOptimizationOptions optimizationOptions) {
-            return new OntopRuntimeOptions(obdaOptions, optimizationOptions);
+            return new OntopRuntimeOptions(iriDictionary, obdaOptions, optimizationOptions);
         }
     }
 
@@ -124,6 +141,11 @@ public class OntopRuntimeConfigurationImpl extends OntopOBDAConfigurationImpl im
         @Override
         public B enableExistentialReasoning(boolean enable) {
             return localBuilderFragment.enableExistentialReasoning(enable);
+        }
+
+        @Override
+        public B iriDictionary(@Nonnull IRIDictionary iriDictionary) {
+            return localBuilderFragment.iriDictionary(iriDictionary);
         }
 
         @Override

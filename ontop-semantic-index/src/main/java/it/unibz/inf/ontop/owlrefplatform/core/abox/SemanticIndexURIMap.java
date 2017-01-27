@@ -1,8 +1,10 @@
 package it.unibz.inf.ontop.owlrefplatform.core.abox;
 
+import it.unibz.inf.ontop.reformulation.IRIDictionary;
+
 import java.util.HashMap;
 
-public class SemanticIndexURIMap {
+public class SemanticIndexURIMap implements IRIDictionary {
 	
 	// Semantic Index URI reference structures
 	private final HashMap<String, Integer> uriIds = new HashMap<> (100000);
@@ -25,7 +27,7 @@ public class SemanticIndexURIMap {
 	 * @param uri
 	 * @return
 	 */
-	
+	@Override
 	public int getId(String uri) {
 		Integer index =  uriIds.get(uri);
 		if (index != null)
@@ -33,6 +35,7 @@ public class SemanticIndexURIMap {
 		return -2;
 	}
 
+	@Override
 	public String getURI(Integer id) {
 		return uriMap2.get(id);
 	}

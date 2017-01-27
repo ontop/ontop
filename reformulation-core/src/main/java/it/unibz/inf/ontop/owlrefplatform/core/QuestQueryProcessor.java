@@ -10,11 +10,11 @@ import it.unibz.inf.ontop.injection.ReformulationFactory;
 import it.unibz.inf.ontop.mapping.Mapping;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
-import it.unibz.inf.ontop.owlrefplatform.core.abox.SemanticIndexURIMap;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.*;
 import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing.MappingSameAs;
 import it.unibz.inf.ontop.owlrefplatform.core.optimization.*;
+import it.unibz.inf.ontop.reformulation.IRIDictionary;
 import it.unibz.inf.ontop.reformulation.unfolding.QueryUnfolder;
 import it.unibz.inf.ontop.owlrefplatform.core.queryevaluation.SPARQLQueryUtility;
 import it.unibz.inf.ontop.owlrefplatform.core.reformulation.DummyReformulator;
@@ -55,7 +55,7 @@ public class QuestQueryProcessor implements OBDAQueryProcessor {
 	private final QueryRewriter rewriter;
 	private final LinearInclusionDependencies sigma;
 	private final VocabularyValidator vocabularyValidator;
-	private final SemanticIndexURIMap uriMap;
+	private final Optional<IRIDictionary> iriDictionary;
 	private final NativeQueryGenerator datasourceQueryGenerator;
 	private final QueryCache queryCache;
 
@@ -72,6 +72,7 @@ public class QuestQueryProcessor implements OBDAQueryProcessor {
 	@AssistedInject
 	private QuestQueryProcessor(@Assisted OBDASpecification obdaSpecification,
 								@Assisted ExecutorRegistry executorRegistry,
+								@Assisted Optional<IRIDictionary> iriDictionary,
 								QuestComponentFactory questComponentFactory,
 								QueryCache queryCache,
 								QuestCoreSettings settings,
@@ -99,7 +100,7 @@ public class QuestQueryProcessor implements OBDAQueryProcessor {
 
 		this.vocabularyValidator = new VocabularyValidator(obdaSpecification.getSaturatedTBox(),
 				obdaSpecification.getVocabulary());
-		this.datasourceQueryGenerator = questComponentFactory.create(metadataForOptimization.getDBMetadata());
+		this.datasourceQueryGenerator = questComponentFactory.create(metadataForOptimization.getDBMetadata(), iriDictionary);
 		this.queryCache = queryCache;
 		this.settings = settings;
 		this.executorRegistry = executorRegistry;
@@ -114,8 +115,7 @@ public class QuestQueryProcessor implements OBDAQueryProcessor {
 			objectPropertiesMapped = ImmutableSet.of();
 		}
 
-		// TODO: get rid of it
-		this.uriMap = null;
+		this.iriDictionary = iriDictionary;
 	}
 
 //	/**
@@ -128,7 +128,7 @@ public class QuestQueryProcessor implements OBDAQueryProcessor {
 //		// TODO: check that it is in the classic A-box mode
 //		unfolder.changeMappings(mappings, reformulationReasoner);
 //		queryCache.clear();
-//		return new QuestQueryProcessor(rewriter, sigma, unfolder, vocabularyValidator, uriMap, datasourceQueryGenerator,
+//		return new QuestQueryProcessor(rewriter, sigma, unfolder, vocabularyValidator, iriDictionary, datasourceQueryGenerator,
 //				queryCache, hasDistinctResultSet, modelFactory, executorRegistry);
 //	}
 
@@ -149,7 +149,7 @@ public class QuestQueryProcessor implements OBDAQueryProcessor {
 	
 	private DatalogProgram translateAndPreProcess(ParsedQuery pq) {
 		SparqlAlgebraToDatalogTranslator translator = new SparqlAlgebraToDatalogTranslator(
-				metadataForOptimization.getUriTemplateMatcher(), uriMap);
+				metadataForOptimization.getUriTemplateMatcher(), iriDictionary);
 		SparqlQuery translation = translator.translate(pq);
 		return preProcess(translation);
 	}
@@ -203,7 +203,7 @@ public class QuestQueryProcessor implements OBDAQueryProcessor {
 
 		try {
 			SparqlAlgebraToDatalogTranslator translator = new SparqlAlgebraToDatalogTranslator(
-					metadataForOptimization.getUriTemplateMatcher(), uriMap);
+					metadataForOptimization.getUriTemplateMatcher(), iriDictionary);
 			SparqlQuery translation = translator.translate(pq);
 			DatalogProgram newprogram = preProcess(translation);
 
@@ -377,5 +377,10 @@ public class QuestQueryProcessor implements OBDAQueryProcessor {
 	@Override
 	public DBMetadata getDBMetadata() {
 		return metadataForOptimization.getDBMetadata();
+	}
+
+	@Override
+	public Optional<IRIDictionary> getIRIDictionary() {
+		return iriDictionary;
 	}
 }

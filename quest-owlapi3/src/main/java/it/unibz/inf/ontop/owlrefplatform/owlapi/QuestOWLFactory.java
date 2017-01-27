@@ -72,17 +72,8 @@ public class QuestOWLFactory implements OWLReasonerFactory {
      * TODO: should we really support this method?
      */
     @Override
-    public OWLReasoner createReasoner(OWLOntology ontology) {
-        Properties p = new Properties();
-        p.put(QuestCoreSettings.ABOX_MODE, QuestConstants.CLASSIC);
-
-        QuestOWLConfiguration configuration = new QuestOWLConfiguration(QuestConfiguration
-                .defaultBuilder()
-                .ontology(ontology)
-                .properties(p)
-                .build());
-
-        return createReasoner(ontology, configuration);
+    public OWLReasoner createReasoner(@Nonnull OWLOntology ontology) {
+        throw new UnsupportedOperationException("A configuration is required");
     }
 
     @Nonnull

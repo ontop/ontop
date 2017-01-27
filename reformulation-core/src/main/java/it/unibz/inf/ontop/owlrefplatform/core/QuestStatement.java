@@ -26,6 +26,7 @@ import it.unibz.inf.ontop.owlrefplatform.core.queryevaluation.SPARQLQueryUtility
 import it.unibz.inf.ontop.owlrefplatform.core.resultset.EmptyTupleResultSet;
 import it.unibz.inf.ontop.owlrefplatform.core.resultset.QuestTupleResultSet;
 import it.unibz.inf.ontop.owlrefplatform.core.translator.SesameConstructTemplate;
+import it.unibz.inf.ontop.reformulation.IRIDictionary;
 import it.unibz.inf.ontop.reformulation.OBDAQueryProcessor;
 import org.eclipse.rdf4j.query.MalformedQueryException;
 import org.eclipse.rdf4j.query.parser.ParsedQuery;
@@ -397,6 +398,11 @@ public abstract class QuestStatement implements IQuestStatement {
 	@Override
 	public ExecutableQuery translateIntoNativeQuery(ParsedQuery pq, Optional<SesameConstructTemplate> template) {
 		return engine.translateIntoNativeQuery(pq, template);
+	}
+
+	@Override
+	public Optional<IRIDictionary> getIRIDictionary() {
+		return engine.getIRIDictionary();
 	}
 
 //	public String getSPARQLRewriting(String query) throws OBDAException {

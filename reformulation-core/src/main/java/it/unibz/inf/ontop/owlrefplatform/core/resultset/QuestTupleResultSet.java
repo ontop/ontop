@@ -24,9 +24,9 @@ package it.unibz.inf.ontop.owlrefplatform.core.resultset;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.Predicate.COL_TYPE;
 import it.unibz.inf.ontop.owlrefplatform.core.IQuestStatement;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestStatement;
-import it.unibz.inf.ontop.owlrefplatform.core.abox.SemanticIndexURIMap;
+import it.unibz.inf.ontop.reformulation.IRIDictionary;
 
+import javax.annotation.Nullable;
 import java.net.URISyntaxException;
 import java.sql.*;
 import java.sql.ResultSet;
@@ -57,7 +57,8 @@ public class QuestTupleResultSet implements TupleResultSet {
 
 	private int bnodeCounter = 0;
 
-	private final SemanticIndexURIMap uriMap;
+	@Nullable
+	private final IRIDictionary iriDictionary;
 	
 	private final boolean isOracle;
     private final boolean isMsSQL;
@@ -81,9 +82,7 @@ public class QuestTupleResultSet implements TupleResultSet {
 	public QuestTupleResultSet(ResultSet set, List<String> signature, IQuestStatement st) throws OBDAException {
 		this.rs = set;
 		this.st = st;
-		// TODO: re-enable
-		//this.uriMap = st.questInstance.getUriMap();
-		this.uriMap = null;
+		this.iriDictionary = st.getIRIDictionary().orElse(null);
 		this.signature = signature;
 		
 		columnMap = new HashMap<>(signature.size() * 2);
@@ -196,10 +195,10 @@ public class QuestTupleResultSet implements TupleResultSet {
 					break;
 					
 				case OBJECT:
-					if (uriMap != null) {
+					if (iriDictionary != null) {
 						try {
 							Integer id = Integer.parseInt(value);
-							value = uriMap.getURI(id);
+							value = iriDictionary.getURI(id);
 						} 
 						catch (NumberFormatException e) {
 							 // If its not a number, then it has to be a URI, so

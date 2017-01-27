@@ -6,6 +6,7 @@ import it.unibz.inf.ontop.model.OBDAStatement;
 import it.unibz.inf.ontop.model.TupleResultSet;
 import it.unibz.inf.ontop.ontology.Assertion;
 import it.unibz.inf.ontop.owlrefplatform.core.translator.SesameConstructTemplate;
+import it.unibz.inf.ontop.reformulation.IRIDictionary;
 import org.eclipse.rdf4j.query.parser.ParsedQuery;
 
 import java.util.Iterator;
@@ -46,4 +47,6 @@ public interface IQuestStatement extends OBDAStatement {
 
     @Deprecated
     ExecutableQuery translateIntoNativeQuery(ParsedQuery pq, Optional<SesameConstructTemplate> constructTemplate);
+
+    Optional<IRIDictionary> getIRIDictionary();
 }
