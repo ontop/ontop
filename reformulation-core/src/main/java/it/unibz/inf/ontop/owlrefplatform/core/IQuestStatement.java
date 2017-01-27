@@ -47,6 +47,4 @@ public interface IQuestStatement extends OBDAStatement {
 
     @Deprecated
     ExecutableQuery translateIntoNativeQuery(ParsedQuery pq, Optional<SesameConstructTemplate> constructTemplate);
-
-    Optional<IRIDictionary> getIRIDictionary();
 }

@@ -22,9 +22,11 @@ package it.unibz.inf.ontop.owlrefplatform.core;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Optional;
 
 import it.unibz.inf.ontop.model.OBDAException;
 import it.unibz.inf.ontop.injection.QuestCoreSettings;
+import it.unibz.inf.ontop.reformulation.IRIDictionary;
 import it.unibz.inf.ontop.reformulation.OBDAQueryProcessor;
 
 /***
@@ -44,16 +46,18 @@ public class QuestConnection implements IQuestConnection {
 	private final QuestCoreSettings questCoreSettings;
 	private final OBDAQueryProcessor queryProcessor;
 	private Connection conn;
+	private final Optional<IRIDictionary> iriDictionary;
 
 	private final JDBCConnector jdbcConnector;
 	private boolean isClosed;
 
 
 	public QuestConnection(JDBCConnector jdbcConnector, OBDAQueryProcessor queryProcessor, Connection connection,
-						   QuestCoreSettings questCoreSettings) {
+						   QuestCoreSettings questCoreSettings, Optional<IRIDictionary> iriDictionary) {
 		this.jdbcConnector = jdbcConnector;
 		this.queryProcessor = queryProcessor;
 		this.conn = connection;
+		this.iriDictionary = iriDictionary;
 		this.isClosed = false;
 		this.questCoreSettings = questCoreSettings;
 	}
@@ -96,7 +100,7 @@ public class QuestConnection implements IQuestConnection {
 			}
 			IQuestStatement st = new SQLQuestStatement(this.queryProcessor, this,
 					conn.createStatement(java.sql.ResultSet.TYPE_FORWARD_ONLY,
-							java.sql.ResultSet.CONCUR_READ_ONLY));
+							java.sql.ResultSet.CONCUR_READ_ONLY), iriDictionary);
 			//st.setFetchSize(400);
 			return st;
 

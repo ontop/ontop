@@ -4,6 +4,7 @@ import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.injection.QuestCoreSettings;
+import it.unibz.inf.ontop.reformulation.IRIDictionary;
 import it.unibz.inf.ontop.reformulation.OBDAQueryProcessor;
 import org.apache.tomcat.jdbc.pool.DataSource;
 import org.apache.tomcat.jdbc.pool.PoolProperties;
@@ -11,6 +12,7 @@ import org.apache.tomcat.jdbc.pool.PoolProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nullable;
 import java.sql.*;
 import java.util.Optional;
 
@@ -23,6 +25,7 @@ public class JDBCConnector implements DBConnector {
     private final QuestCoreSettings questCoreSettings;
 
     private final QuestCoreSettings settings;
+    private final Optional<IRIDictionary> iriDictionary;
 
     /* The active connection used to get metadata from the DBMS */
     private transient Connection localConnection;
@@ -42,6 +45,7 @@ public class JDBCConnector implements DBConnector {
 
     @AssistedInject
     private JDBCConnector(@Assisted OBDAQueryProcessor queryProcessor,
+                          @Nullable IRIDictionary iriDictionary,
                           QuestCoreSettings settings) {
         this.queryProcessor = queryProcessor;
         this.questCoreSettings = settings;
@@ -51,6 +55,7 @@ public class JDBCConnector implements DBConnector {
         startPoolSize = settings.getConnectionPoolInitialSize();
         maxPoolSize = settings.getConnectionPoolMaxSize();
         this.settings = settings;
+        this.iriDictionary = Optional.ofNullable(iriDictionary);
 
         setupConnectionPool();
     }
@@ -209,7 +214,8 @@ public class JDBCConnector implements DBConnector {
     @Override
     public IQuestConnection getNonPoolConnection() throws OBDAException {
 
-        return new QuestConnection(this, queryProcessor, getSQLConnection(), questCoreSettings);
+        return new QuestConnection(this, queryProcessor, getSQLConnection(), questCoreSettings,
+                iriDictionary);
     }
 
     /***
@@ -231,7 +237,8 @@ public class JDBCConnector implements DBConnector {
     @Override
     public IQuestConnection getConnection() throws OBDAException {
 
-        return new QuestConnection(this, queryProcessor, getSQLPoolConnection(), questCoreSettings);
+        return new QuestConnection(this, queryProcessor, getSQLPoolConnection(), questCoreSettings,
+                iriDictionary);
     }
 
 

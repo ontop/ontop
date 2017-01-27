@@ -43,6 +43,8 @@ import org.eclipse.rdf4j.query.parser.QueryParserUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nullable;
+
 import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
 
 /**
@@ -72,7 +74,7 @@ public class QuestQueryProcessor implements OBDAQueryProcessor {
 	@AssistedInject
 	private QuestQueryProcessor(@Assisted OBDASpecification obdaSpecification,
 								@Assisted ExecutorRegistry executorRegistry,
-								@Assisted Optional<IRIDictionary> iriDictionary,
+								@Nullable IRIDictionary iriDictionary,
 								QuestComponentFactory questComponentFactory,
 								QueryCache queryCache,
 								QuestCoreSettings settings,
@@ -100,7 +102,8 @@ public class QuestQueryProcessor implements OBDAQueryProcessor {
 
 		this.vocabularyValidator = new VocabularyValidator(obdaSpecification.getSaturatedTBox(),
 				obdaSpecification.getVocabulary());
-		this.datasourceQueryGenerator = questComponentFactory.create(metadataForOptimization.getDBMetadata(), iriDictionary);
+		this.iriDictionary = Optional.ofNullable(iriDictionary);
+		this.datasourceQueryGenerator = questComponentFactory.create(metadataForOptimization.getDBMetadata());
 		this.queryCache = queryCache;
 		this.settings = settings;
 		this.executorRegistry = executorRegistry;
@@ -114,8 +117,6 @@ public class QuestQueryProcessor implements OBDAQueryProcessor {
 			dataPropertiesAndClassesMapped = ImmutableSet.of();
 			objectPropertiesMapped = ImmutableSet.of();
 		}
-
-		this.iriDictionary = iriDictionary;
 	}
 
 //	/**
@@ -377,10 +378,5 @@ public class QuestQueryProcessor implements OBDAQueryProcessor {
 	@Override
 	public DBMetadata getDBMetadata() {
 		return metadataForOptimization.getDBMetadata();
-	}
-
-	@Override
-	public Optional<IRIDictionary> getIRIDictionary() {
-		return iriDictionary;
 	}
 }

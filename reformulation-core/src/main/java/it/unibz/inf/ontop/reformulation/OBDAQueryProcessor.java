@@ -24,6 +24,4 @@ public interface OBDAQueryProcessor {
     boolean hasDistinctResultSet();
 
     DBMetadata getDBMetadata();
-
-    Optional<IRIDictionary> getIRIDictionary();
 }

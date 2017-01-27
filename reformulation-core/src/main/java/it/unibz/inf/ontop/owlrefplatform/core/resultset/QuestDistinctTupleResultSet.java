@@ -25,12 +25,10 @@ import it.unibz.inf.ontop.model.OBDAException;
 import it.unibz.inf.ontop.model.OBDAStatement;
 import it.unibz.inf.ontop.model.TupleResultSet;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestStatement;
+import it.unibz.inf.ontop.reformulation.IRIDictionary;
 
 import java.sql.ResultSet;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Class to handle distinct in SPARQL query. Avoid returning duplicate rows.
@@ -43,9 +41,10 @@ public class QuestDistinctTupleResultSet implements TupleResultSet {
 
     private Set<List<Object>> distinctKeys;
 
-    public QuestDistinctTupleResultSet(ResultSet set, List<String> signature, QuestStatement st) throws OBDAException {
+    public QuestDistinctTupleResultSet(ResultSet set, List<String> signature, QuestStatement st,
+                                       Optional<IRIDictionary> iriDictionary) throws OBDAException {
 
-        questTupleResultSet = new QuestTupleResultSet(set, signature, st);
+        questTupleResultSet = new QuestTupleResultSet(set, signature, st, iriDictionary);
 
         distinctKeys = new HashSet<>();
 

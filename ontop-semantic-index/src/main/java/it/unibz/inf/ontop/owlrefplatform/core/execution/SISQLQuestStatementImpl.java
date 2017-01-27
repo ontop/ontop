@@ -5,6 +5,7 @@ import it.unibz.inf.ontop.ontology.Assertion;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestConnection;
 import it.unibz.inf.ontop.owlrefplatform.core.SQLQuestStatement;
 import it.unibz.inf.ontop.owlrefplatform.core.abox.RDBMSSIRepositoryManager;
+import it.unibz.inf.ontop.reformulation.IRIDictionary;
 import it.unibz.inf.ontop.reformulation.OBDAQueryProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,6 +14,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Iterator;
+import java.util.Optional;
 
 /**
  * Contains additional methods required by the Semantic Index mode.
@@ -24,8 +26,9 @@ public class SISQLQuestStatementImpl extends SQLQuestStatement implements SIQues
     private static Logger log = LoggerFactory.getLogger(SISQLQuestStatementImpl.class);
 
     public SISQLQuestStatementImpl(OBDAQueryProcessor queryProcessor, RDBMSSIRepositoryManager siRepository,
-                                   QuestConnection questConnection, Statement sqlStatement) {
-        super(queryProcessor, questConnection, sqlStatement);
+                                   QuestConnection questConnection, Statement sqlStatement,
+                                   Optional<IRIDictionary> iriDictionary) {
+        super(queryProcessor, questConnection, sqlStatement, iriDictionary);
         sqlConnection = questConnection.getSQLConnection();
         this.siRepository = siRepository;
     }

@@ -73,8 +73,9 @@ public class SparqlAlgebraToDatalogTranslator {
 	 * 
 	 * @param uriTemplateMatcher matches URIs to templates (comes from mappings)
 	 * @param iriDictionary maps URIs to their integer identifiers (used only in the Semantic Index mode)
+     *
+     * TODO: use Guice and retrieve the IRIDictionary by injection (not assisted, nullable)
 	 */
-
 	public SparqlAlgebraToDatalogTranslator(@Nonnull UriTemplateMatcher uriTemplateMatcher,
                                             @Nonnull Optional<IRIDictionary> iriDictionary) {
 		this.uriTemplateMatcher = uriTemplateMatcher;

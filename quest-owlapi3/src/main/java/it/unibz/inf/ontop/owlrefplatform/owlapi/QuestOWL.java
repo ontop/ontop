@@ -126,7 +126,6 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 
 	private final QuestComponentFactory componentFactory;
 	private DBConnector dbConnector;
-	private Optional<IRIDictionary> iriDictionary;
 	
 	/* Used to signal whether to apply the user constraints above */
 	//private boolean applyExcludeFromTMappings = false;
@@ -158,7 +157,6 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 
 		Injector injector = questConfiguration.getInjector();
 		this.componentFactory = injector.getInstance(QuestComponentFactory.class);
-		this.iriDictionary = questConfiguration.getIRIDictionary();
 
 		try {
 			obdaSpecification = questConfiguration.loadProvidedSpecification();
@@ -241,8 +239,7 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 		// pm.reasonerTaskStarted("Classifying...");
 		// pm.reasonerTaskBusy();
 
-		OBDAQueryProcessor queryProcessor = componentFactory.create(obdaSpecification,
-				iriDictionary, executorRegistry);
+		OBDAQueryProcessor queryProcessor = componentFactory.create(obdaSpecification, executorRegistry);
 		dbConnector = componentFactory.create(queryProcessor);
 		dbConnector.connect();
 		

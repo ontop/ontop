@@ -2,7 +2,6 @@ package it.unibz.inf.ontop.owlrefplatform.core;
 
 import it.unibz.inf.ontop.model.OBDAConnection;
 import it.unibz.inf.ontop.model.OBDAException;
-import it.unibz.inf.ontop.owlrefplatform.core.execution.SIQuestStatement;
 
 /**
  * Creates IQuestStatement (mandatory) and SIQuestStatement (optional).

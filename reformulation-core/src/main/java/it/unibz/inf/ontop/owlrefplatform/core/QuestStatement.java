@@ -400,11 +400,6 @@ public abstract class QuestStatement implements IQuestStatement {
 		return engine.translateIntoNativeQuery(pq, template);
 	}
 
-	@Override
-	public Optional<IRIDictionary> getIRIDictionary() {
-		return engine.getIRIDictionary();
-	}
-
 //	public String getSPARQLRewriting(String query) throws OBDAException {
 //		return engine.getSPARQLRewriting(query);
 //	}

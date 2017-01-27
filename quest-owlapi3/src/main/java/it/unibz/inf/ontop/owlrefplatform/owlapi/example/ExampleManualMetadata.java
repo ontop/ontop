@@ -54,7 +54,7 @@ private void setup()  throws Exception {
 	OBDAModel obdaModel = mappingParser.parse(new File(obdafile));
 
 	OBDAQueryProcessor queryProcessor = componentFactory.create(configuration.loadProvidedSpecification(),
-			configuration.getIRIDictionary(), configuration.getExecutorRegistry());
+			configuration.getExecutorRegistry());
 	dbConnector = componentFactory.create(queryProcessor);
 	dbConnector.connect();
 	

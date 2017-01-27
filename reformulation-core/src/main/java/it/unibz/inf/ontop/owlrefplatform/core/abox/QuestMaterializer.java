@@ -88,7 +88,7 @@ public class QuestMaterializer {
 		questComponentFactory = injector.getInstance(QuestComponentFactory.class);
 
 		OBDAQueryProcessor queryProcessor = questComponentFactory.create(
-				configuration.loadProvidedSpecification(), configuration.getIRIDictionary(), configuration.getExecutorRegistry());
+				configuration.loadProvidedSpecification(), configuration.getExecutorRegistry());
 
 		connector = questComponentFactory.create(queryProcessor);
 
@@ -106,7 +106,7 @@ public class QuestMaterializer {
 		OBDASpecification obdaSpecification = configuration.loadProvidedSpecification();
 
 		OBDAQueryProcessor queryProcessor = questComponentFactory.create(
-				obdaSpecification, configuration.getIRIDictionary(), configuration.getExecutorRegistry());
+				obdaSpecification, configuration.getExecutorRegistry());
 
 		this.selectedVocabulary = extractVocabulary(obdaSpecification.getVocabulary());
 

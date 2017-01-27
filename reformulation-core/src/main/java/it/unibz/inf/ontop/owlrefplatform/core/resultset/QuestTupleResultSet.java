@@ -29,12 +29,10 @@ import it.unibz.inf.ontop.reformulation.IRIDictionary;
 import javax.annotation.Nullable;
 import java.net.URISyntaxException;
 import java.sql.*;
+import java.sql.Date;
 import java.sql.ResultSet;
 import java.text.*;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 
 import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
 
@@ -79,10 +77,11 @@ public class QuestTupleResultSet implements TupleResultSet {
 	 * @param st
 	 * @throws OBDAException
 	 */
-	public QuestTupleResultSet(ResultSet set, List<String> signature, IQuestStatement st) throws OBDAException {
+	public QuestTupleResultSet(ResultSet set, List<String> signature, IQuestStatement st,
+							   Optional<IRIDictionary> iriDictionary) throws OBDAException {
 		this.rs = set;
 		this.st = st;
-		this.iriDictionary = st.getIRIDictionary().orElse(null);
+		this.iriDictionary = iriDictionary.orElse(null);
 		this.signature = signature;
 		
 		columnMap = new HashMap<>(signature.size() * 2);

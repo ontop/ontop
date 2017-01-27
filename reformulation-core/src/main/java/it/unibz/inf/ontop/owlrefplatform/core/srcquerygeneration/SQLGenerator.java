@@ -132,7 +132,7 @@ public class SQLGenerator implements NativeQueryGenerator {
 
 	@AssistedInject
 	private SQLGenerator(@Assisted DBMetadata metadata,
-						 @Assisted Optional<IRIDictionary> iriDictionary, QuestCoreSettings preferences,
+						 @Nullable IRIDictionary iriDictionary, QuestCoreSettings preferences,
 						 JdbcTypeMapper jdbcTypeMapper) {
 
 		String driverURI = preferences.getJdbcDriver()
@@ -172,7 +172,7 @@ public class SQLGenerator implements NativeQueryGenerator {
 		}
 
 		this.isSI = !preferences.isInVirtualMode();
-		this.uriRefIds = iriDictionary.orElse(null);
+		this.uriRefIds = iriDictionary;
 		this.jdbcTypeMapper = jdbcTypeMapper;
  	}
 

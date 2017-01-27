@@ -8,6 +8,7 @@ import it.unibz.inf.ontop.owlrefplatform.core.resultset.*;
 import it.unibz.inf.ontop.owlrefplatform.core.translator.SesameConstructTemplate;
 
 import it.unibz.inf.ontop.ontology.Assertion;
+import it.unibz.inf.ontop.reformulation.IRIDictionary;
 import it.unibz.inf.ontop.reformulation.OBDAQueryProcessor;
 
 import java.sql.*;
@@ -22,11 +23,14 @@ public class SQLQuestStatement extends QuestStatement {
 
     private final Statement sqlStatement;
     private final DBMetadata dbMetadata;
+    private final Optional<IRIDictionary> iriDictionary;
 
-    public SQLQuestStatement(OBDAQueryProcessor queryProcessor, OBDAConnection obdaConnection, Statement sqlStatement) {
+    public SQLQuestStatement(OBDAQueryProcessor queryProcessor, OBDAConnection obdaConnection, Statement sqlStatement,
+                             Optional<IRIDictionary> iriDictionary) {
         super(queryProcessor, obdaConnection);
         this.sqlStatement = sqlStatement;
         this.dbMetadata = queryProcessor.getDBMetadata();
+        this.iriDictionary = iriDictionary;
     }
 
     @Override
@@ -182,8 +186,8 @@ public class SQLQuestStatement extends QuestStatement {
         try {
             java.sql.ResultSet set = sqlStatement.executeQuery(sqlQuery);
             return doDistinctPostProcessing
-                    ? new QuestDistinctTupleResultSet(set, executableQuery.getSignature(), this)
-                    : new QuestTupleResultSet(set, executableQuery.getSignature(), this);
+                    ? new QuestDistinctTupleResultSet(set, executableQuery.getSignature(), this, iriDictionary)
+                    : new QuestTupleResultSet(set, executableQuery.getSignature(), this, iriDictionary);
         } catch (SQLException e) {
             throw new NativeQueryExecutionException(e.getMessage());
         }
@@ -208,7 +212,7 @@ public class SQLQuestStatement extends QuestStatement {
         else {
             try {
                 ResultSet set = sqlStatement.executeQuery(sqlQuery);
-                tuples = new QuestTupleResultSet(set, executableQuery.getSignature(), this);
+                tuples = new QuestTupleResultSet(set, executableQuery.getSignature(), this, iriDictionary);
             } catch (SQLException e) {
                 throw new NativeQueryExecutionException(e.getMessage());
             }
