@@ -25,7 +25,10 @@ import java.io.File;
 import it.unibz.inf.ontop.rdf4j.repository.OntopRepositoryConnection;
 import junit.framework.TestCase;
 
+import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.eclipse.rdf4j.model.Resource;
 import org.eclipse.rdf4j.model.Statement;
@@ -45,7 +48,7 @@ import it.unibz.inf.ontop.rdf4j.repository.OntopClassicInMemoryRepository;
  * @author timi
  *
  */
-public class SesameConstructDescribeTest extends TestCase{
+public class SesameConstructDescribeTest{
 
 	OntopRepositoryConnection con = null;
 	Repository repo = null;
@@ -53,7 +56,7 @@ public class SesameConstructDescribeTest extends TestCase{
 	String fileName = "src/test/resources/describeConstruct.ttl";
 	String owlFile = "src/test/resources/describeConstruct.owl";
 	
-	@Override
+	@Before
 	public void setUp() throws Exception {
 		
 		try {
@@ -78,7 +81,7 @@ public class SesameConstructDescribeTest extends TestCase{
 		}
 	}
 	
-	@Override
+	@After
 	public void tearDown() throws Exception {
 		con.close();
 		repo.shutDown();
@@ -242,6 +245,28 @@ public class SesameConstructDescribeTest extends TestCase{
 		}
 		Assert.assertEquals(2, result);
 	}
+
+	// https://github.com/ontop/ontop/issues/161
+    @Test
+    public void testConstructOptional() throws Exception {
+        int result = 0;
+        String queryString = "PREFIX : <http://www.semanticweb.org/ontologies/test#> \n" +
+                "CONSTRUCT { ?s :p ?o1. ?s :p ?o2. }\n" +
+                "WHERE {\n" +
+                "OPTIONAL {?s :p1 ?o1}\n" +
+                "OPTIONAL {?s :p2 ?o2}\n" +
+                "}";
+        GraphQuery graphQuery = con.prepareGraphQuery(QueryLanguage.SPARQL,
+                queryString);
+
+        GraphQueryResult gresult = graphQuery.evaluate();
+        while (gresult.hasNext()) {
+            result++;
+            Statement s = gresult.next();
+            //System.out.println(s.toString());
+        }
+        Assert.assertEquals(2, result);
+    }
 	
 	@Test
 	public void testGetStatements0() throws Exception {
