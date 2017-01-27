@@ -20,23 +20,22 @@ package it.unibz.inf.ontop.reformulation.tests;
  * #L%
  */
 
-import java.security.MessageDigest;
-import java.sql.*;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Locale;
-
 import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.model.Predicate;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import org.junit.Test;
-import java.util.ArrayList;
-import java.util.List;
-
 import org.semanticweb.owlapi.model.OWLObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.security.MessageDigest;
+import java.sql.Timestamp;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
 
 import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
 import static org.junit.Assert.assertTrue;
@@ -457,6 +456,7 @@ public abstract class AbstractBindTestWithFunctions {
     }
 
 
+
     @Test
     public void testBindWithBefore() throws Exception {
 
@@ -596,6 +596,8 @@ public abstract class AbstractBindTestWithFunctions {
         return expectedValues;
     }
 
+
+
     @Test
     public void testMinutes() throws Exception {
 
@@ -731,7 +733,7 @@ public abstract class AbstractBindTestWithFunctions {
         runTests(queryBind);
     }
 
-    //    @Test timezone is not supported in h2
+    @Test
     public void testTZ() throws Exception {
 
         String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
@@ -743,15 +745,19 @@ public abstract class AbstractBindTestWithFunctions {
                 + "   ?x ns:pubYear ?year .\n"
                 + "}";
 
+        checkReturnedValues(queryBind, getTZExpectedValues());
+    }
+
+    protected List<String> getTZExpectedValues() {
         List<String> expectedValues = new ArrayList<>();
         expectedValues.add("\"0.0\"");
         expectedValues.add("\"0.0\"");
         expectedValues.add("\"0.0\"");
         expectedValues.add("\"0.0\"");
-        checkReturnedValues(queryBind, expectedValues);
-    }
 
-    //    @Test see results of datetime with locale
+        return expectedValues;
+    }
+//        @Test see results of datetime with locale
     public void testDatetime() throws Exception {
 
         String value = "Jan 31 2013 9:32AM";

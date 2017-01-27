@@ -53,6 +53,9 @@ public class BindTestWithFunctionsOracle extends AbstractBindTestWithFunctions {
         return expectedValues;
     }
 
+    /*
+	 * Tests for hash functions. Oracle does not support any hash functions if DBMS CRYPTO is not enabled
+	 */
     @Ignore("Not yet supported")
     @Test
     @Override
@@ -79,6 +82,8 @@ public class BindTestWithFunctionsOracle extends AbstractBindTestWithFunctions {
         return expectedValues;
     }
 
+    //Note: in specification of SPARQL function if the string doesn't contain the specified string empty string has to be returned,
+    //here instead return null value
     @Override
     protected List<String> getBindWithAfterExpectedValues() {
         List<String> expectedValues = new ArrayList<>();
@@ -89,6 +94,9 @@ public class BindTestWithFunctionsOracle extends AbstractBindTestWithFunctions {
 
         return expectedValues;
     }
+
+    //Note: in specification of SPARQL function if the string doesn't contain the specified string empty string has to be returned,
+    //here instead return null value
 
     @Override
     protected List<String> getBindWithBeforeExpectedValues() {
@@ -101,4 +109,14 @@ public class BindTestWithFunctionsOracle extends AbstractBindTestWithFunctions {
         return expectedValues;
     }
 
+    @Override
+    protected List<String> getTZExpectedValues() {
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"8:0\"");
+        expectedValues.add("\"1:0\"");
+        expectedValues.add("\"0:0\"");
+        expectedValues.add("\"1:0\"");
+
+        return expectedValues;
+    }
 }

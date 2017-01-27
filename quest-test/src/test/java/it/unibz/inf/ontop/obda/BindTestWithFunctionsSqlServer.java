@@ -91,4 +91,15 @@ public class BindTestWithFunctionsSqlServer extends AbstractBindTestWithFunction
 
         return expectedValues;
     }
+
+    @Override
+    protected List<String> getTZExpectedValues() {
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"08:00\"");
+        expectedValues.add("\"01:00\"");
+        expectedValues.add("\"00:00\"");
+        expectedValues.add("\"01:00\"");
+
+        return expectedValues;
+    }
 }
