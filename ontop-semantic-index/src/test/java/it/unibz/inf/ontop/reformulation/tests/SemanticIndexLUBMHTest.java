@@ -20,20 +20,25 @@ package it.unibz.inf.ontop.reformulation.tests;
  * #L%
  */
 
-import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.io.QueryIOManager;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.inf.ontop.injection.QuestCoreSettings;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import it.unibz.inf.ontop.querymanager.QueryController;
 import it.unibz.inf.ontop.querymanager.QueryControllerEntity;
 import it.unibz.inf.ontop.querymanager.QueryControllerQuery;
+import it.unibz.inf.ontop.si.OntopSemanticIndexLoader;
 import junit.framework.TestCase;
+import org.semanticweb.owlapi.apibinding.OWLManager;
+import org.semanticweb.owlapi.model.OWLAxiom;
+import org.semanticweb.owlapi.model.OWLOntology;
+import org.semanticweb.owlapi.model.OWLOntologyManager;
+import org.semanticweb.owlapi.model.parameters.Imports;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.util.HashSet;
 import java.util.Properties;
+import java.util.Set;
 
 /**
  * Tests if QuestOWL can be initialized on top of an existing semantic index
@@ -50,26 +55,18 @@ public class SemanticIndexLUBMHTest extends TestCase {
 	public void test3InitializingQuest() throws Exception {
 		long start = System.nanoTime();
 
-        Properties p = new Properties();
-        p.setProperty(QuestCoreSettings.DBTYPE, QuestConstants.SEMANTIC_INDEX);
-        p.setProperty(QuestCoreSettings.ABOX_MODE, QuestConstants.CLASSIC);
+		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
+		OWLOntology mainOntology = manager.loadOntologyFromOntologyDocument(new File(owlFilePath));
+		Set<OWLAxiom> axioms = new HashSet<>();
+		axioms.addAll(mainOntology.getTBoxAxioms(Imports.INCLUDED));
+		axioms.addAll(mainOntology.getABoxAxioms(Imports.INCLUDED));
 
-		QuestOWLFactory factory = new QuestOWLFactory();
-        QuestConfiguration config = QuestConfiguration.defaultBuilder()
-				.ontologyFile(owlFilePath)
-				.properties(p)
-				.build();
-        QuestOWL quest = factory.createReasoner(config);
-
-        // TODO: fix this
-		SIQuestOWLConnection qconn = (SIQuestOWLConnection) quest.getConnection();
-
-		SIQuestOWLStatement st = qconn.createSIStatement();
 		long end = System.nanoTime();
 		double init_time = (end - start) / 1000000;
 		start = System.nanoTime();
 //		st.insertData(new File("src/test/resources/test/lubm-ex-20-uni1/merge.owl"), 50000, 5000);
-		st.insertData(new File("src/test/resources/test/lubm-ex-20-uni1/University0.ttl"), 100000, 50000, "http://swat.cse.lehigh.edu/onto/univ-bench.owl#");
+		axioms.addAll(manager.loadOntologyFromOntologyDocument(new File("src/test/resources/test/lubm-ex-20-uni1/University0.ttl"))
+				.getABoxAxioms(Imports.EXCLUDED));
 		end = System.nanoTime();
 //		double time1 = (end - start) / 1000000000;
 //		log.debug("File 1. Total insertion time: {}", time1);
@@ -166,51 +163,61 @@ public class SemanticIndexLUBMHTest extends TestCase {
 //		time1 = (end - start) / 1000000000;
 //		log.debug("File 24. Total insertion time: {}", time1);
 //		st.insertData(new File("src/test/resources/test/lubm-ex-20-uni1/University24.ttl"), 150000, 15000, "http://swat.cse.lehigh.edu/onto/univ-bench.owl#");
-		
+
 		// V1
 		// quest.getQuestInstance().getOptionalSemanticIndexRepository().createIndexes(qconn.getConnection());
 		// END V1
-		st.createIndexes();
 		end = System.nanoTime();
+
+		OWLOntologyManager newManager = OWLManager.createOWLOntologyManager();
+		OWLOntology completeOntology = newManager.createOntology(axioms);
+
 		double insert_time = (end - start) / 1000000;
-		
-		QueryController qc = new QueryController();
-		QueryIOManager qman = new QueryIOManager(qc);
-		qman.load("src/test/resources/test/treewitness/LUBM-ex-20.q");
 
-		for (QueryControllerEntity e : qc.getElements()) {
-			if (!(e instanceof QueryControllerQuery)) {
-				continue;
-			}
-			QueryControllerQuery query = (QueryControllerQuery) e;
-			log.debug("Executing query: {}", query.getID());
-			log.debug("Query: \n{}", query.getQuery());
+		Properties p = new Properties();
 
-			// String query =
-			// "PREFIX lubm: <http://swat.cse.lehigh.edu/onto/univ-bench.owl#>"
-			// + " SELECT ?student ?staff ?course" + " WHERE { "
-			// + "	?student a lubm:Student ." +
-			// "	?student lubm:advisor ?staff ." + "	?staff a lubm:Faculty ."
-			// + "	?student lubm:takesCourse ?course ." +
-			// "	?staff lubm:teacherOf ?course ." + "	?course a lubm:Course . "
-			// + " }";
+		QuestOWLFactory factory = new QuestOWLFactory();
+		try(OntopSemanticIndexLoader loader = OntopSemanticIndexLoader.loadOntologyIndividuals(completeOntology, p);
+			QuestOWL reasoner = factory.createReasoner(loader.getConfiguration()) ;
+			QuestOWLConnection connection = reasoner.getConnection();
+			QuestOWLStatement st = connection.createStatement()) {
 
-			start = System.nanoTime();
-			QuestOWLResultSet res = st.executeTuple(query.getQuery());
-			end = System.nanoTime();
+            QueryController qc = new QueryController();
+            QueryIOManager qman = new QueryIOManager(qc);
+            qman.load("src/test/resources/test/treewitness/LUBM-ex-20.q");
 
-			double time = (end - start) / 1000000;
+            for (QueryControllerEntity e : qc.getElements()) {
+                if (!(e instanceof QueryControllerQuery)) {
+                    continue;
+                }
+                QueryControllerQuery query = (QueryControllerQuery) e;
+                log.debug("Executing query: {}", query.getID());
+                log.debug("Query: \n{}", query.getQuery());
 
-			int count = 0;
-			while (res.nextRow()) {
-				count += 1;
-			}
-			log.debug("Total result: {}", count);
-			log.debug("Initialization time: {} ms", init_time);
-			log.debug("Data insertion time: {} ms", insert_time);
-			log.debug("Query execution time: {} ms", time);
+                // String query =
+                // "PREFIX lubm: <http://swat.cse.lehigh.edu/onto/univ-bench.owl#>"
+                // + " SELECT ?student ?staff ?course" + " WHERE { "
+                // + "	?student a lubm:Student ." +
+                // "	?student lubm:advisor ?staff ." + "	?staff a lubm:Faculty ."
+                // + "	?student lubm:takesCourse ?course ." +
+                // "	?staff lubm:teacherOf ?course ." + "	?course a lubm:Course . "
+                // + " }";
+
+                start = System.nanoTime();
+                QuestOWLResultSet res = st.executeTuple(query.getQuery());
+                end = System.nanoTime();
+
+                double time = (end - start) / 1000000;
+
+                int count = 0;
+                while (res.nextRow()) {
+                    count += 1;
+                }
+                log.debug("Total result: {}", count);
+                log.debug("Initialization time: {} ms", init_time);
+                log.debug("Data insertion time: {} ms", insert_time);
+                log.debug("Query execution time: {} ms", time);
+            }
 		}
-		st.close();
-		quest.dispose();
 	}
 }
