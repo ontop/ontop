@@ -1,0 +1,122 @@
+@prefix rdf:    <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix : 		<http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/> .
+@prefix rdfs:	<http://www.w3.org/2000/01/rdf-schema#> .
+@prefix mf:     <http://obda.org/quest/tests/test-manifest#> .
+@prefix qt:     <http://obda.org/quest/tests/test-query#> .
+@prefix obdat:  <http://obda.org/quest/tests/test-scenario#> .
+
+<>  rdf:type mf:Manifest ;
+    rdfs:label "StockExchange Modifiers Queries" ;
+    mf:entries
+    ( 
+      :slice-test	# DB2 from 9.7.3 supports LIMIT and OFFSET
+      :limit-test
+      :offset-test
+      :limit0-offsetn
+      :limitn-offset0
+      :orderby-test
+      :orderbydesc-test
+      :orderbycombined-test
+      :slice-orderby
+      :orderbyliteral-test
+    ) .
+
+:slice-test rdf:type mf:QueryEvaluationTest ;
+    mf:name    "Q1: Get addresses limit, offset " ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <http://ceur-ws.org/Vol-943/SSWS_HPCSW2012_paper1.pdf> ;
+    mf:action
+            [ qt:query <slice-test.rq> ] ;
+    mf:result <slice-test.ttl> ;
+    mf:knowledgebase <stockexchange.owl> ;
+    mf:mappings <stockexchange-db2.obda> .
+    
+:limit-test rdf:type mf:QueryEvaluationTest ;
+    mf:name    "Q2: Get addresses limit 3" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <http://ceur-ws.org/Vol-943/SSWS_HPCSW2012_paper1.pdf> ;
+    mf:action
+            [ qt:query <limit-test.rq> ] ;
+    mf:result <limit-test.ttl> ;
+    mf:knowledgebase <stockexchange.owl> ;
+    mf:mappings <stockexchange-db2.obda> .
+
+:offset-test rdf:type mf:QueryEvaluationTest ;
+    mf:name    "Q3: Get addresses offset 2" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <http://ceur-ws.org/Vol-943/SSWS_HPCSW2012_paper1.pdf> ;
+    mf:action
+            [ qt:query <offset-test.rq> ] ;
+    mf:result <offset-test.ttl> ;
+    mf:knowledgebase <stockexchange.owl> ;
+    mf:mappings <stockexchange-db2.obda> .
+    
+:limit0-offsetn rdf:type mf:QueryEvaluationTest ;
+    mf:name    "Q4: Get addresses limit 0, offset 2" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <http://ceur-ws.org/Vol-943/SSWS_HPCSW2012_paper1.pdf> ;
+    mf:action
+            [ qt:query <limit0-offsetn.rq> ] ;
+    mf:result <limit0-offsetn.ttl> ;
+    mf:knowledgebase <stockexchange.owl> ;
+    mf:mappings <stockexchange-db2.obda> .
+    
+:limitn-offset0 rdf:type mf:QueryEvaluationTest ;
+    mf:name    "Q5: Get addresses limit 3 offset 0" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <http://ceur-ws.org/Vol-943/SSWS_HPCSW2012_paper1.pdf> ;
+    mf:action
+            [ qt:query <limitn-offset0.rq> ] ;
+    mf:result <limitn-offset0.ttl> ;
+    mf:knowledgebase <stockexchange.owl> ;
+    mf:mappings <stockexchange-db2.obda> .
+ 
+:orderby-test rdf:type mf:QueryEvaluationTest ;
+    mf:name    "Q6: Get addresses order by city" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <http://ceur-ws.org/Vol-943/SSWS_HPCSW2012_paper1.pdf> ;
+    mf:action
+            [ qt:query <orderby-test.rq> ] ;
+    mf:result <orderby-test.ttl> ;
+    mf:knowledgebase <stockexchange.owl> ;
+    mf:mappings <stockexchange-db2.obda> .
+    
+:orderbydesc-test rdf:type mf:QueryEvaluationTest ;
+    mf:name    "Q7: Get addresses order by desc(city)" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <http://ceur-ws.org/Vol-943/SSWS_HPCSW2012_paper1.pdf> ;
+    mf:action
+            [ qt:query <orderbydesc-test.rq> ] ;
+    mf:result <orderbydesc-test.ttl> ;
+    mf:knowledgebase <stockexchange.owl> ;
+    mf:mappings <stockexchange-db2.obda> .
+    
+:orderbycombined-test rdf:type mf:QueryEvaluationTest ;
+    mf:name    "Q8: Addresses order by city, desc(country)" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <http://ceur-ws.org/Vol-943/SSWS_HPCSW2012_paper1.pdf> ;
+    mf:action
+            [ qt:query <orderbycombined-test.rq> ] ;
+    mf:result <orderbycombined-test.ttl> ;
+    mf:knowledgebase <stockexchange.owl> ;
+    mf:mappings <stockexchange-db2.obda> .
+    
+:slice-orderby rdf:type mf:QueryEvaluationTest ;
+    mf:name    "Q9: Addresses order by, limit, offset" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <http://ceur-ws.org/Vol-943/SSWS_HPCSW2012_paper1.pdf> ;
+    mf:action
+            [ qt:query <slice-orderby.rq> ] ;
+    mf:result <slice-orderby.ttl> ;
+    mf:knowledgebase <stockexchange.owl> ;
+    mf:mappings <stockexchange-db2.obda> .
+    
+:orderbyliteral-test rdf:type mf:QueryEvaluationTest ;
+    mf:name    "Q10: Get stocks order by literal description" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <http://ceur-ws.org/Vol-943/SSWS_HPCSW2012_paper1.pdf> ;
+    mf:action
+            [ qt:query <orderbyliteral-test.rq> ] ;
+    mf:result <orderbyliteral-test.ttl> ;
+    mf:knowledgebase <stockexchange.owl> ;
+    mf:mappings <stockexchange-db2.obda> .

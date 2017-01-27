@@ -4,7 +4,8 @@ FROM ibmcom/db2express-c
 
 RUN mkdir -p /tmp/sql_scripts/
 
-COPY sql/all/*.sql /tmp/sql_scripts/
+COPY sql/all/*.sql /tmp/sql_scripts/all/
+COPY sql/db2/*.sql /tmp/sql_scripts/db2/
 COPY load-scripts-db2.sh /home/db2inst1/
 
 

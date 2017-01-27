@@ -1,0 +1,7 @@
+PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#>
+
+SELECT DISTINCT $x $name 
+WHERE { 
+   $x a :Company; :companyName $name; :netWorth ?v .
+   FILTER (?v > 1234.0) 
+}

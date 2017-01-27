@@ -7,5 +7,10 @@
     rdfs:label "Quest query evaluation scenario tests" ;
     mf:include (
         <sparql/filter/regex/manifest-db2.ttl>
+        <sparql/ask/manifest-db2.ttl>
+        <virtual-mode/stockexchange/datatypes/manifest-db2.ttl>
+        <virtual-mode/stockexchange/filters/manifest-db2.ttl>
+        <virtual-mode/stockexchange/modifiers/manifest-db2.ttl>
+        <virtual-mode/stockexchange/simplecq/manifest-db2.ttl>
     ).
 
