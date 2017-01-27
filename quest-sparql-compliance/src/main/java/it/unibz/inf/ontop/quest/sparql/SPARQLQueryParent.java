@@ -85,6 +85,7 @@ public abstract class SPARQLQueryParent extends TestCase {
 	 *-----------*/
 
 	protected Repository dataRep;
+	private final boolean shouldInsertDataset;
 
 	/*--------------*
 	 * Constructors *
@@ -107,6 +108,9 @@ public abstract class SPARQLQueryParent extends TestCase {
 		this.dataset = dataSet;
 		this.laxCardinality = laxCardinality;
 		this.checkOrder = checkOrder;
+
+		// Ontop does not support insertions (the dataset is loaded before creating the repository, not after)
+		shouldInsertDataset = false;
 	}
 
 	/*---------*
@@ -119,7 +123,7 @@ public abstract class SPARQLQueryParent extends TestCase {
 	{
 		dataRep = createRepository(dataset);
 
-		if (dataset != null) {
+		if (shouldInsertDataset && (dataset != null)) {
 			try {
 				uploadDataset(dataset);
 			}

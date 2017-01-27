@@ -20,12 +20,15 @@ package it.unibz.inf.ontop.quest.sparql;
  * #L%
  */
 
+import it.unibz.inf.ontop.rdf4j.repository.OntopVirtualRepository;
+import it.unibz.inf.ontop.si.OntopSemanticIndexLoader;
+import it.unibz.inf.ontop.si.SemanticIndexException;
 import junit.framework.Test;
 
 import org.eclipse.rdf4j.query.Dataset;
 import org.eclipse.rdf4j.repository.Repository;
 
-import it.unibz.inf.ontop.rdf4j.repository.OntopClassicInMemoryRepository;
+import java.util.Properties;
 
 public class QuestMemorySPARQLQueryTest extends SPARQLQueryParent {
 
@@ -65,15 +68,11 @@ public class QuestMemorySPARQLQueryTest extends SPARQLQueryParent {
 	}
 
 	@Override
-	protected Repository newRepository() {
-		try {
-			OntopClassicInMemoryRepository repo = new OntopClassicInMemoryRepository(
-					"QuestSPARQLTest", dataset);
-			repo.initialize();
-			return repo;
-		} catch (Exception e) {
-			e.printStackTrace();
-			return null;
+	protected Repository newRepository() throws SemanticIndexException {
+		try(OntopSemanticIndexLoader loader = OntopSemanticIndexLoader.loadRDFGraph(dataset, new Properties())) {
+			Repository repository = new OntopVirtualRepository(loader.getConfiguration());
+			repository.initialize();
+			return repository;
 		}
 	}
 }

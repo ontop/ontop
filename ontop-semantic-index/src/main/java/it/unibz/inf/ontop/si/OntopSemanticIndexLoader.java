@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.si;
 
 
 import it.unibz.inf.ontop.injection.QuestConfiguration;
+import org.eclipse.rdf4j.query.Dataset;
 import org.semanticweb.owlapi.model.OWLOntology;
 
 import java.util.Properties;
@@ -47,6 +48,13 @@ public interface OntopSemanticIndexLoader extends AutoCloseable {
     static OntopSemanticIndexLoader loadOntologyIndividuals(String ontologyFilePath, Properties properties)
             throws SemanticIndexException {
         return OntopSemanticIndexLoaderImpl.loadOntologyIndividuals(ontologyFilePath, properties);
+    }
+
+    /**
+     * Loads the graph in an in-memory Semantic Index.
+     */
+    static OntopSemanticIndexLoader loadRDFGraph(Dataset dataset, Properties properties) throws SemanticIndexException {
+        return OntopSemanticIndexLoaderImpl.loadRDFGraph(dataset, properties);
     }
 
     /**

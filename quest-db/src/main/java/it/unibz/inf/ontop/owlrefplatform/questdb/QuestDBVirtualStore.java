@@ -80,6 +80,7 @@ public class QuestDBVirtualStore implements AutoCloseable {
 
 		OBDAQueryProcessor queryProcessor = componentFactory.create(obdaSpecification, configuration.getExecutorRegistry());
 		dbConnector = componentFactory.create(queryProcessor);
+		dbConnector.connect();
 	}
 
 	public QuestDBConnection getConnection() throws OBDAException {
