@@ -7,9 +7,7 @@ import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.Function;
 import it.unibz.inf.ontop.model.impl.*;
 import it.unibz.inf.ontop.sql.*;
-import it.unibz.inf.ontop.sql.parser.exceptions.IllegalJoinException;
-import it.unibz.inf.ontop.sql.parser.exceptions.InvalidSelectQueryException;
-import it.unibz.inf.ontop.sql.parser.exceptions.UnsupportedSelectQueryException;
+import it.unibz.inf.ontop.sql.parser.exceptions.*;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.Alias;
@@ -40,7 +38,7 @@ public class SelectQueryParser {
         this.idfac = metadata.getQuotedIDFactory();
     }
 
-    public RAExpression parse(String sql) {
+    public RAExpression parse(String sql) throws InvalidSelectQueryException, UnsupportedSelectQueryException {
         try {
             Statement statement = CCJSqlParserUtil.parse(sql);
             if (!(statement instanceof Select))
@@ -52,35 +50,44 @@ public class SelectQueryParser {
         catch (JSQLParserException e) {
             throw new UnsupportedSelectQueryException("Cannot parse SQL: " + sql, e);
         }
+        catch (InvalidSelectQueryRuntimeException e) {
+            throw new InvalidSelectQueryException(e.getMessage(), e.getObject());
+        }
+        catch (UnsupportedSelectQueryRuntimeException e) {
+            throw new UnsupportedSelectQueryException(e.getMessage(), e.getObject());
+        }
     }
+
+
+
 
     private RAExpression select(SelectBody selectBody) {
 
         if (!(selectBody instanceof PlainSelect))
-            throw new UnsupportedSelectQueryException("Complex SELECT statements are not supported", selectBody);
+            throw new UnsupportedSelectQueryRuntimeException("Complex SELECT statements are not supported", selectBody);
 
         PlainSelect plainSelect = (PlainSelect) selectBody;
 
         if (plainSelect.getDistinct() != null)
-            throw new UnsupportedSelectQueryException("DISTINCT is not supported", selectBody);
+            throw new UnsupportedSelectQueryRuntimeException("DISTINCT is not supported", selectBody);
 
         if (plainSelect.getGroupByColumnReferences() != null || plainSelect.getHaving() != null)
-            throw new UnsupportedSelectQueryException("GROUP BY / HAVING are not supported", selectBody);
+            throw new UnsupportedSelectQueryRuntimeException("GROUP BY / HAVING are not supported", selectBody);
 
         if (plainSelect.getLimit() != null || plainSelect.getTop() != null)
-            throw new UnsupportedSelectQueryException("LIMIT / TOP are not supported", selectBody);
+            throw new UnsupportedSelectQueryRuntimeException("LIMIT / TOP are not supported", selectBody);
 
         if (plainSelect.getOrderByElements() != null)
-            throw new UnsupportedSelectQueryException("ORDER BY is not supported", selectBody);
+            throw new UnsupportedSelectQueryRuntimeException("ORDER BY is not supported", selectBody);
 
         if (plainSelect.getOracleHierarchical() != null || plainSelect.isOracleSiblings())
-            throw new UnsupportedSelectQueryException("Oracle START WITH ... CONNECT BY / ORDER SIBLINGS BY are not supported", selectBody);
+            throw new UnsupportedSelectQueryRuntimeException("Oracle START WITH ... CONNECT BY / ORDER SIBLINGS BY are not supported", selectBody);
 
         if (plainSelect.getIntoTables() != null)
-            throw new InvalidSelectQueryException("SELECT INTO is not allowed in mappings", selectBody);
+            throw new InvalidSelectQueryRuntimeException("SELECT INTO is not allowed in mappings", selectBody);
 
         if (plainSelect.getFromItem() == null)
-            throw new UnsupportedSelectQueryException("SELECT without FROM is not supported", selectBody);
+            throw new UnsupportedSelectQueryRuntimeException("SELECT without FROM is not supported", selectBody);
 
         RAExpression current = getRelationalExpression(plainSelect.getFromItem());
         if (plainSelect.getJoins() != null) {
@@ -89,7 +96,7 @@ public class SelectQueryParser {
                     current = join(current, join);
                 }
                 catch (IllegalJoinException e) {
-                    throw new InvalidSelectQueryException(e.toString(), plainSelect);
+                    throw new InvalidSelectQueryRuntimeException(e.toString(), plainSelect);
                 }
         }
 
@@ -126,7 +133,8 @@ public class SelectQueryParser {
                 for (Map.Entry<QualifiedAttributeID, Variable> a : attrs.entrySet())
                     duplicates.put(a.getKey(), duplicates.getOrDefault(a.getKey(), 0) + 1);
             });
-            throw new InvalidSelectQueryException("Duplicate column names " + Joiner.on(", ").join(
+            throw new InvalidSelectQueryRuntimeException(
+                    "Duplicate column names " + Joiner.on(", ").join(
                     duplicates.entrySet().stream()
                             .filter(d -> d.getValue() > 1)
                             .map(d -> d.getKey())
@@ -141,7 +149,7 @@ public class SelectQueryParser {
     private RAExpression join(RAExpression left, Join join) throws IllegalJoinException {
 
         if (join.isFull() || join.isRight() || join.isLeft() || join.isOuter())
-            throw new UnsupportedSelectQueryException("LEFT/RIGHT/FULL OUTER JOINs are not supported", join);
+            throw new UnsupportedSelectQueryRuntimeException("LEFT/RIGHT/FULL OUTER JOINs are not supported", join);
 
         RAExpression right = getRelationalExpression(join.getRightItem());
         if (join.isSimple()) {
@@ -149,26 +157,26 @@ public class SelectQueryParser {
         }
         else if (join.isCross()) {
             if (join.getOnExpression() != null || join.getUsingColumns() != null)
-                throw new InvalidSelectQueryException("CROSS JOIN cannot have USING/ON conditions", join);
+                throw new InvalidSelectQueryRuntimeException("CROSS JOIN cannot have USING/ON conditions", join);
 
             if (join.isInner())
-                throw new InvalidSelectQueryException("CROSS INNER JOIN is not allowed", join);
+                throw new InvalidSelectQueryRuntimeException("CROSS INNER JOIN is not allowed", join);
 
             return RAExpression.crossJoin(left, right);
         }
         else if (join.isNatural()) {
             if (join.getOnExpression() != null || join.getUsingColumns() != null)
-                throw new InvalidSelectQueryException("NATURAL JOIN cannot have USING/ON conditions", join);
+                throw new InvalidSelectQueryRuntimeException("NATURAL JOIN cannot have USING/ON conditions", join);
 
             if (join.isInner())
-                throw new InvalidSelectQueryException("NATURAL INNER JOIN is not allowed", join);
+                throw new InvalidSelectQueryRuntimeException("NATURAL INNER JOIN is not allowed", join);
 
             return RAExpression.naturalJoin(left, right);
         }
         else {
             if (join.getOnExpression() != null) {
                 if (join.getUsingColumns() !=null)
-                    throw new InvalidSelectQueryException("JOIN cannot have both USING and ON", join);
+                    throw new InvalidSelectQueryRuntimeException("JOIN cannot have both USING and ON", join);
 
                 return RAExpression.joinOn(left, right,
                         new BooleanExpressionParser(idfac, join.getOnExpression()));
@@ -180,7 +188,7 @@ public class SelectQueryParser {
                                 .collect(ImmutableCollectors.toSet()));
             }
             else
-                throw new InvalidSelectQueryException("[INNER] JOIN requires either ON or USING", join);
+                throw new InvalidSelectQueryRuntimeException("[INNER] JOIN requires either ON or USING", join);
         }
     }
 
@@ -194,7 +202,7 @@ public class SelectQueryParser {
 
         private RAExpression result = null;
 
-        public FromItemProcessor(FromItem fromItem) {
+        FromItemProcessor(FromItem fromItem) {
             fromItem.accept(this);
         }
 
@@ -205,7 +213,7 @@ public class SelectQueryParser {
             // construct the predicate using the table name
             DatabaseRelationDefinition relation = metadata.getDatabaseRelation(id);
             if (relation == null)
-                throw new InvalidSelectQueryException("Table " + id + " not found in metadata", tableName);
+                throw new InvalidSelectQueryRuntimeException("Table " + id + " not found in metadata", tableName);
             relationIndex++;
 
             RelationID alias = (tableName.getAlias() != null)
@@ -242,7 +250,7 @@ public class SelectQueryParser {
         @Override
         public void visit(SubSelect subSelect) {
             if (subSelect.getAlias() == null || subSelect.getAlias().getName() == null)
-                throw new InvalidSelectQueryException("SUB-SELECT must have an alias", subSelect);
+                throw new InvalidSelectQueryRuntimeException("SUB-SELECT must have an alias", subSelect);
 
             RAExpression current = select(subSelect.getSelectBody());
 
@@ -253,7 +261,7 @@ public class SelectQueryParser {
         @Override
         public void visit(SubJoin subjoin) {
             if (subjoin.getAlias() == null || subjoin.getAlias().getName() == null)
-                throw new InvalidSelectQueryException("SUB-JOIN must have an alias", subjoin);
+                throw new InvalidSelectQueryRuntimeException("SUB-JOIN must have an alias", subjoin);
 
             RAExpression left = getRelationalExpression(subjoin.getLeft());
             RAExpression join;
@@ -261,7 +269,7 @@ public class SelectQueryParser {
                 join = join(left, subjoin.getJoin());
             }
             catch (IllegalJoinException e) {
-                throw new InvalidSelectQueryException(e.toString(), subjoin);
+                throw new InvalidSelectQueryRuntimeException(e.toString(), subjoin);
             }
 
             RelationID aliasId = idfac.createRelationID(null, subjoin.getAlias().getName());
@@ -270,12 +278,12 @@ public class SelectQueryParser {
 
         @Override
         public void visit(LateralSubSelect lateralSubSelect) {
-            throw new UnsupportedSelectQueryException("LateralSubSelects are not supported", lateralSubSelect);
+            throw new UnsupportedSelectQueryRuntimeException("LateralSubSelects are not supported", lateralSubSelect);
         }
 
         @Override
         public void visit(ValuesList valuesList) {
-            throw new UnsupportedSelectQueryException("ValuesLists are not supported", valuesList);
+            throw new UnsupportedSelectQueryRuntimeException("ValuesLists are not supported", valuesList);
         }
     }
 
@@ -325,7 +333,6 @@ public class SelectQueryParser {
                         ? new QualifiedAttributeID(null, id)
                         : new QualifiedAttributeID(idfac.createRelationID(table.getSchemaName(), table.getName()), id);
 
-                //System.out.println("" + attr + " in " + attributes);
                 Variable var = attributes.get(attr);
                 if (var != null) {
                     Alias columnAlias = selectExpressionItem.getAlias();
@@ -336,13 +343,12 @@ public class SelectQueryParser {
                     map = ImmutableMap.of(new QualifiedAttributeID(null, name), var);
                 }
                 else
-                    throw new InvalidSelectQueryException("Column not found", selectExpressionItem);
+                    throw new InvalidSelectQueryRuntimeException("Column not found", selectExpressionItem);
             }
             else {
-                //throw new UnsupportedSelectQueryException("Complex expressions in SELECT", selectExpressionItem);
                 Alias columnAlias = selectExpressionItem.getAlias();
                 if (columnAlias == null || columnAlias.getName() == null)
-                    throw new InvalidSelectQueryException("Complex expression in SELECT must have an alias", selectExpressionItem);
+                    throw new InvalidSelectQueryRuntimeException("Complex expression in SELECT must have an alias", selectExpressionItem);
 
                 OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 
@@ -353,7 +359,6 @@ public class SelectQueryParser {
                 Term term = new ExpressionParser(idfac, expr).apply(attributes);
                 assignment = fac.getFunctionEQ(var, term);
             }
-
         }
     }
 }

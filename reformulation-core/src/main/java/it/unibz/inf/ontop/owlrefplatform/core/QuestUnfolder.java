@@ -14,6 +14,8 @@ import it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing.MappingSameAs;
 import it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing.TMappingExclusionConfig;
 import it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing.TMappingProcessor;
 import it.unibz.inf.ontop.owlrefplatform.core.unfolding.DatalogUnfolder;
+import it.unibz.inf.ontop.sql.parser.exceptions.InvalidSelectQueryException;
+import it.unibz.inf.ontop.sql.parser.exceptions.UnsupportedSelectQueryException;
 import it.unibz.inf.ontop.utils.Mapping2DatalogConverter;
 import it.unibz.inf.ontop.utils.MetaMappingExpander;
 import it.unibz.inf.ontop.sql.DBMetadata;
@@ -64,7 +66,7 @@ public class QuestUnfolder {
 	}
 
 	public void setupInVirtualMode(Collection<OBDAMappingAxiom> mappings,  Connection localConnection, VocabularyValidator vocabularyValidator, TBoxReasoner reformulationReasoner, Ontology inputOntology, TMappingExclusionConfig excludeFromTMappings, boolean queryingAnnotationsInOntology, boolean sameAs)
-					throws SQLException, JSQLParserException, OBDAException {
+			throws OBDAException {
 
 		mappings = vocabularyValidator.replaceEquivalences(mappings);
 
@@ -76,8 +78,7 @@ public class QuestUnfolder {
 		/**
 		 * Expand the meta mapping (creates a new set of mappings)
 		 */
-		MetaMappingExpander metaMappingExpander = new MetaMappingExpander(localConnection, metadata);
-		Collection<OBDAMappingAxiom> expandedMappings = metaMappingExpander.expand(mappings);
+		List<OBDAMappingAxiom> expandedMappings = MetaMappingExpander.expand(mappings, localConnection, metadata);
 		
 		List<CQIE> unfoldingProgram = Mapping2DatalogConverter.constructDatalogProgram(expandedMappings, metadata);
 		

@@ -53,7 +53,7 @@ public class SelectQueryAttributeExtractor {
         sqae = new SelectQueryAttributeExtractor2(metadata);
     }
 
-    public ImmutableList<QuotedID> extract(String sql) {
+    public ImmutableList<QuotedID> extract(String sql) throws InvalidSelectQueryException {
 
         try {
             ImmutableMap<QualifiedAttributeID, Variable> attrs = sqae.parse(sql).getAttributes();

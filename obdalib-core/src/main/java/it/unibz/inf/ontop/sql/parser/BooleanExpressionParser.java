@@ -8,6 +8,7 @@ import it.unibz.inf.ontop.model.Variable;
 import it.unibz.inf.ontop.sql.QualifiedAttributeID;
 import it.unibz.inf.ontop.sql.QuotedIDFactory;
 import it.unibz.inf.ontop.sql.parser.exceptions.UnsupportedSelectQueryException;
+import it.unibz.inf.ontop.sql.parser.exceptions.UnsupportedSelectQueryRuntimeException;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
 
@@ -53,7 +54,7 @@ public class BooleanExpressionParser implements java.util.function.Function<Immu
         if (t instanceof Function)
             return (Function)t;
 
-        throw new UnsupportedSelectQueryException("Unexpected conversion to Boolean", expression);
+        throw new UnsupportedSelectQueryRuntimeException("Unexpected conversion to Boolean", expression);
     }
 
 

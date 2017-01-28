@@ -10,7 +10,9 @@ import it.unibz.inf.ontop.sql.QuotedID;
 import it.unibz.inf.ontop.sql.QuotedIDFactory;
 import it.unibz.inf.ontop.sql.RelationID;
 import it.unibz.inf.ontop.sql.parser.exceptions.InvalidSelectQueryException;
+import it.unibz.inf.ontop.sql.parser.exceptions.InvalidSelectQueryRuntimeException;
 import it.unibz.inf.ontop.sql.parser.exceptions.UnsupportedSelectQueryException;
+import it.unibz.inf.ontop.sql.parser.exceptions.UnsupportedSelectQueryRuntimeException;
 import net.sf.jsqlparser.expression.*;
 import net.sf.jsqlparser.expression.operators.arithmetic.*;
 import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
@@ -85,7 +87,7 @@ public class ExpressionParser implements java.util.function.Function<ImmutableMa
                 return FACTORY.getFunction(
                         ExpressionOperation.REGEX, terms.get(0), terms.get(1), terms.get(2));
         }
-        throw new InvalidSelectQueryException("Wrong number of arguments for SQL function", expression);
+        throw new InvalidSelectQueryRuntimeException("Wrong number of arguments for SQL function", expression);
     }
 
     private static Function get_REGEXP_REPLACE(ImmutableList<Term> terms, net.sf.jsqlparser.expression.Function expression) {
@@ -102,19 +104,19 @@ public class ExpressionParser implements java.util.function.Function<ImmutableMa
                     // check that flags is either ig or g
                 }
                 else
-                    throw new UnsupportedSelectQueryException("Unsupported SQL function", expression);
+                    throw new UnsupportedSelectQueryRuntimeException("Unsupported SQL function", expression);
                 break;
             case 6:
                 // Oracle
                 if (!terms.get(3).equals(FACTORY.getConstantLiteral("1", Predicate.COL_TYPE.LONG))
                         || !terms.get(4).equals(FACTORY.getConstantLiteral("0", Predicate.COL_TYPE.LONG)))
-                    throw new UnsupportedSelectQueryException("Unsupported SQL function", expression);
+                    throw new UnsupportedSelectQueryRuntimeException("Unsupported SQL function", expression);
 
                 // check that the flags is a combination of imx
                 flags = terms.get(5);
                 break;
             default:
-                throw new UnsupportedSelectQueryException("Unsupported SQL function", expression);
+                throw new UnsupportedSelectQueryRuntimeException("Unsupported SQL function", expression);
         }
 
         return FACTORY.getFunction(
@@ -133,7 +135,7 @@ public class ExpressionParser implements java.util.function.Function<ImmutableMa
                         ExpressionOperation.REPLACE, terms.get(0), terms.get(1), terms.get(2), flags);
 
         }
-        throw new InvalidSelectQueryException("Wrong number of arguments in SQL function", expression);
+        throw new InvalidSelectQueryRuntimeException("Wrong number of arguments in SQL function", expression);
     }
 
     private static Function get_CONCAT(ImmutableList<Term> terms, net.sf.jsqlparser.expression.Function expression) {
@@ -152,28 +154,28 @@ public class ExpressionParser implements java.util.function.Function<ImmutableMa
                 return FACTORY.getFunction(ExpressionOperation.SUBSTR3, terms.get(0), terms.get(1), terms.get(2));
         }
         // DB2 has 4
-        throw new UnsupportedSelectQueryException("Unsupported SQL function", expression);
+        throw new UnsupportedSelectQueryRuntimeException("Unsupported SQL function", expression);
     }
 
     private static Function get_LCASE(ImmutableList<Term> terms, net.sf.jsqlparser.expression.Function expression) {
         if (terms.size() == 1)
             return FACTORY.getFunction(ExpressionOperation.LCASE, terms.get(0));
         // DB2 has 3
-        throw new UnsupportedSelectQueryException("Unsupported SQL function", expression);
+        throw new UnsupportedSelectQueryRuntimeException("Unsupported SQL function", expression);
     }
 
     private static Function get_UCASE(ImmutableList<Term> terms, net.sf.jsqlparser.expression.Function expression) {
         if (terms.size() == 1)
             return FACTORY.getFunction(ExpressionOperation.UCASE, terms.get(0));
         // DB2 has 3
-        throw new UnsupportedSelectQueryException("Unsupported SQL function", expression);
+        throw new UnsupportedSelectQueryRuntimeException("Unsupported SQL function", expression);
     }
 
     private static Function get_STRLEN(ImmutableList<Term> terms, net.sf.jsqlparser.expression.Function expression) {
         if (terms.size() == 1)
             return FACTORY.getFunction(ExpressionOperation.STRLEN, terms.get(0));
 
-        throw new InvalidSelectQueryException("Wrong number of arguments in SQL function", expression);
+        throw new InvalidSelectQueryRuntimeException("Wrong number of arguments in SQL function", expression);
     }
 
 
@@ -225,10 +227,10 @@ public class ExpressionParser implements java.util.function.Function<ImmutableMa
 
         private void processOJ(OldOracleJoinBinaryExpression expression, BinaryOperator<Term> op) {
             if (expression.getOraclePriorPosition() != SupportsOldOracleJoinSyntax.NO_ORACLE_PRIOR)
-                throw new UnsupportedSelectQueryException("Oracle PRIOR is not supported", expression);
+                throw new UnsupportedSelectQueryRuntimeException("Oracle PRIOR is not supported", expression);
 
             if (expression.getOldOracleJoinSyntax() != SupportsOldOracleJoinSyntax.NO_ORACLE_JOIN)
-                throw new UnsupportedSelectQueryException("Old Oracle OUTER JOIN syntax is not supported", expression);
+                throw new UnsupportedSelectQueryRuntimeException("Old Oracle OUTER JOIN syntax is not supported", expression);
 
             process(expression, op);
         }
@@ -259,7 +261,7 @@ public class ExpressionParser implements java.util.function.Function<ImmutableMa
                     = FUNCTIONS.get(expression.getName().toUpperCase());
 
             if (function == null)
-                throw new UnsupportedSelectQueryException("Unsupported SQL function", expression);
+                throw new UnsupportedSelectQueryRuntimeException("Unsupported SQL function", expression);
 
             result = function.apply(terms, expression);
         }
@@ -271,7 +273,7 @@ public class ExpressionParser implements java.util.function.Function<ImmutableMa
 
         @Override
         public void visit(NullValue expression) {
-            throw new UnsupportedSelectQueryException("NULL is not supported", expression);
+            throw new UnsupportedSelectQueryRuntimeException("NULL is not supported", expression);
         }
 
         @Override
@@ -307,7 +309,7 @@ public class ExpressionParser implements java.util.function.Function<ImmutableMa
         @Override
         public void visit(IntervalExpression expression) {
             // example: INTERVAL '4 5:12' DAY TO MINUTE
-            throw new UnsupportedSelectQueryException("Temporal INTERVALs are not supported yet", expression);
+            throw new UnsupportedSelectQueryRuntimeException("Temporal INTERVALs are not supported yet", expression);
         }
 
         // ------------------------------------------------------------
@@ -337,7 +339,7 @@ public class ExpressionParser implements java.util.function.Function<ImmutableMa
         @Override
         public void visit(Modulo expression) {
             // TODO: introduce operation and implement
-            throw new UnsupportedSelectQueryException("MODULO is not supported yet", expression);
+            throw new UnsupportedSelectQueryRuntimeException("MODULO is not supported yet", expression);
         }
 
         @Override
@@ -461,7 +463,7 @@ public class ExpressionParser implements java.util.function.Function<ImmutableMa
         public void visit(InExpression expression) {
 
             if (expression.getOldOracleJoinSyntax() != SupportsOldOracleJoinSyntax.NO_ORACLE_JOIN)
-                throw new UnsupportedSelectQueryException("Oracle OUTER JOIN syntax is not supported", expression);
+                throw new UnsupportedSelectQueryRuntimeException("Oracle OUTER JOIN syntax is not supported", expression);
 
             Stream<Function> stream;
             Expression left = expression.getLeftExpression();
@@ -469,9 +471,10 @@ public class ExpressionParser implements java.util.function.Function<ImmutableMa
                 ItemsList right = expression.getRightItemsList();
                 // right can be SubSelect, ExpressionList and MultiExpressionList
                 if (right instanceof SubSelect)
-                    throw new UnsupportedSelectQueryException("SubSelect in IN is not supported", expression);
+                    throw new UnsupportedSelectQueryRuntimeException("SubSelect in IN is not supported", expression);
+
                 if (right instanceof MultiExpressionList)
-                    throw new InvalidSelectQueryException("MultiExpressionList is not allowed with a single expression on the left in IN", expression);
+                    throw new InvalidSelectQueryRuntimeException("MultiExpressionList is not allowed with a single expression on the left in IN", expression);
 
                 stream = ((ExpressionList)right).getExpressions().stream()
                                 .map(item -> {
@@ -483,14 +486,15 @@ public class ExpressionParser implements java.util.function.Function<ImmutableMa
             else {
                 ItemsList list = expression.getLeftItemsList();
                 if (!(list instanceof ExpressionList))
-                    throw new InvalidSelectQueryException("Only ExpressionList is allowed on the left of IN", expression);
+                    throw new InvalidSelectQueryRuntimeException("Only ExpressionList is allowed on the left of IN", expression);
 
                 ItemsList right = expression.getRightItemsList();
                 // right can be SubSelect, ExpressionList and MultiExpressionList
                 if (right instanceof SubSelect)
-                    throw new UnsupportedSelectQueryException("SubSelect in IN is not supported", expression);
+                    throw new UnsupportedSelectQueryRuntimeException("SubSelect in IN is not supported", expression);
+
                 if (right instanceof ExpressionList)
-                    throw new InvalidSelectQueryException("ExpressionList is not allowed with an ExpressionList on the left in IN", expression);
+                    throw new InvalidSelectQueryRuntimeException("ExpressionList is not allowed with an ExpressionList on the left in IN", expression);
 
                 /* MultiExpressionList is not supported by JSQLParser
 
@@ -504,7 +508,7 @@ public class ExpressionParser implements java.util.function.Function<ImmutableMa
                     return getEqLists(leftList, rightList).reverse().stream()
                             .reduce(null, (a, b) -> (a == null) ? b : FACTORY.getFunctionAND(b, a));
                 }); */
-                throw new InvalidSelectQueryException("not possible in the current JSQLParser", expression);
+                throw new InvalidSelectQueryRuntimeException("not possible in the current JSQLParser", expression);
             }
 
             // do not use ImmutableCollectors.toList because this cannot be done concurrently
@@ -514,7 +518,7 @@ public class ExpressionParser implements java.util.function.Function<ImmutableMa
             Function atom;
             switch (equalities.size()) {
                 case 0:
-                    throw new InvalidSelectQueryException("IN must contain at least one expression", expression);
+                    throw new InvalidSelectQueryRuntimeException("IN must contain at least one expression", expression);
                 case 1:
                     atom = equalities.get(0);
                     break;
@@ -569,7 +573,7 @@ public class ExpressionParser implements java.util.function.Function<ImmutableMa
         @Override
         public void visit(ExtractExpression expression) {
             // Example: EXTRACT(month FROM order_date)
-            throw new UnsupportedSelectQueryException("EXTRACT is not supported yet", expression);
+            throw new UnsupportedSelectQueryRuntimeException("EXTRACT is not supported yet", expression);
         }
 
 
@@ -596,7 +600,7 @@ public class ExpressionParser implements java.util.function.Function<ImmutableMa
                 else if (column.equals(idfac.createAttributeID("false")))
                     result = FACTORY.getBooleanConstant(false);
                 else
-                    throw new UnsupportedSelectQueryException("Unable to find attribute name ", expression);
+                    throw new UnsupportedSelectQueryRuntimeException("Unable to find attribute name ", expression);
             }
             else {
                 // if it is an attribute name (qualified or not)
@@ -621,7 +625,7 @@ public class ExpressionParser implements java.util.function.Function<ImmutableMa
         //      * END
 
         public void visit(CaseExpression expression) {
-            throw new UnsupportedSelectQueryException("CASE is not supported yet", expression);
+            throw new UnsupportedSelectQueryRuntimeException("CASE is not supported yet", expression);
             // expression.getSwitchExpression();
             // expression.getWhenClauses();
             // expression.getElseExpression();
@@ -629,7 +633,7 @@ public class ExpressionParser implements java.util.function.Function<ImmutableMa
 
         @Override
         public void visit(WhenClause expression) {
-            throw new UnsupportedSelectQueryException("CASE/WHEN is not supported yet", expression);
+            throw new UnsupportedSelectQueryRuntimeException("CASE/WHEN is not supported yet", expression);
         }
 
 
@@ -646,23 +650,23 @@ public class ExpressionParser implements java.util.function.Function<ImmutableMa
 
         @Override
         public void visit(SubSelect expression) {
-            throw new UnsupportedSelectQueryException("SubSelect is not supported yet", expression);
+            throw new UnsupportedSelectQueryRuntimeException("SubSelect is not supported yet", expression);
         }
 
         @Override
         // TODO: this probably could be supported
         public void visit(ExistsExpression expression) {
-            throw new UnsupportedSelectQueryException("EXISTS is not supported yet", expression);
+            throw new UnsupportedSelectQueryRuntimeException("EXISTS is not supported yet", expression);
         }
 
         @Override
         public void visit(AllComparisonExpression expression) {
-            throw new UnsupportedSelectQueryException("ALL is not supported yet", expression);
+            throw new UnsupportedSelectQueryRuntimeException("ALL is not supported yet", expression);
         }
 
         @Override
         public void visit(AnyComparisonExpression expression) {
-            throw new UnsupportedSelectQueryException("ANY is not supported yet", expression);
+            throw new UnsupportedSelectQueryRuntimeException("ANY is not supported yet", expression);
         }
 
 
@@ -670,22 +674,22 @@ public class ExpressionParser implements java.util.function.Function<ImmutableMa
 
         @Override
         public void visit(BitwiseAnd expression) {
-            throw new UnsupportedSelectQueryException("Bitwise AND is not supported", expression);
+            throw new UnsupportedSelectQueryRuntimeException("Bitwise AND is not supported", expression);
         }
 
         @Override
         public void visit(BitwiseOr expression) {
-            throw new UnsupportedSelectQueryException("Bitwise OR is not supported", expression);
+            throw new UnsupportedSelectQueryRuntimeException("Bitwise OR is not supported", expression);
         }
 
         @Override
         public void visit(BitwiseXor expression) {
-            throw new UnsupportedSelectQueryException("Bitwise XOR is not supported", expression);
+            throw new UnsupportedSelectQueryRuntimeException("Bitwise XOR is not supported", expression);
         }
 
         @Override
         public void visit(AnalyticExpression expression) {
-            throw new UnsupportedSelectQueryException("Analytic expressions is not supported", expression);
+            throw new UnsupportedSelectQueryRuntimeException("Analytic expressions is not supported", expression);
         }
 
         // OracleHierarchicalExpression can only occur in the form of a clause after WHERE
@@ -696,23 +700,23 @@ public class ExpressionParser implements java.util.function.Function<ImmutableMa
 
         @Override
         public void visit(Matches expression) {
-            throw new UnsupportedSelectQueryException("Oracle @@ not supported", expression);
+            throw new UnsupportedSelectQueryRuntimeException("Oracle @@ not supported", expression);
             // would be processOJ
         }
 
         @Override
         public void visit(JsonExpression expression) {
-            throw new UnsupportedSelectQueryException("JSON expressions are not supported", expression);
+            throw new UnsupportedSelectQueryRuntimeException("JSON expressions are not supported", expression);
         }
 
         @Override
         public void visit(JdbcParameter expression) {
-            throw new InvalidSelectQueryException("JDBC parameters are not allowed", expression);
+            throw new InvalidSelectQueryRuntimeException("JDBC parameters are not allowed", expression);
         }
 
         @Override
         public void visit(JdbcNamedParameter expression) {
-            throw new InvalidSelectQueryException("JDBC named parameters are not allowed", expression);
+            throw new InvalidSelectQueryRuntimeException("JDBC named parameters are not allowed", expression);
         }
     }
 }
