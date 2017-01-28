@@ -6,6 +6,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.ontology.impl.OntologyVocabularyImpl;
+import org.apache.commons.rdf.rdf4j.RDF4J;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.rio.RDFHandlerException;
 import org.eclipse.rdf4j.rio.RDFParseException;
@@ -120,8 +121,9 @@ public class R2RMLMappingParser implements MappingParser {
             } catch (RDFParseException | RDFHandlerException e) {
                 throw new InvalidDataSourceException(e.getMessage());
             }
-        else if (mappingGraph != null)
-            r2rmlManager = new R2RMLManager(mappingGraph, nativeQLFactory);
+        else if (mappingGraph != null){
+            r2rmlManager = new R2RMLManager(new RDF4J().asGraph(mappingGraph), nativeQLFactory);
+        }
         else
             throw new RuntimeException("Internal inconsistency. A mappingFile or a mappingGraph should be defined.");
 

@@ -20,9 +20,10 @@ package it.unibz.inf.ontop.r2rml;
  * #L%
  */
 
-import eu.optique.api.mapping.R2RMLMappingManager;
-import eu.optique.api.mapping.TriplesMap;
-import eu.optique.api.mapping.impl.rdf4j.RDF4JR2RMLMappingManagerFactory;
+
+import eu.optique.r2rml.api.R2RMLMappingManager;
+import eu.optique.r2rml.api.binding.rdf4j.RDF4JR2RMLMappingManager;
+import eu.optique.r2rml.api.model.TriplesMap;
 import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
 import it.unibz.inf.ontop.io.PrefixManager;
 import it.unibz.inf.ontop.model.Function;
@@ -30,6 +31,9 @@ import it.unibz.inf.ontop.model.OBDAMappingAxiom;
 import it.unibz.inf.ontop.model.OBDAModel;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
+import org.apache.commons.rdf.api.Triple;
+import org.apache.commons.rdf.rdf4j.RDF4J;
+import org.apache.commons.rdf.rdf4j.RDF4JGraph;
 import org.eclipse.rdf4j.model.Graph;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.Statement;
@@ -68,27 +72,6 @@ public class R2RMLWriter {
 		this.nativeQLFactory = injector.getInstance(NativeQueryLanguageComponentFactory.class);
 	}
 
-
-    /**
-	 * call this method if you need the RDF Graph
-	 * that represents the R2RML mappings
-	 * @return an RDF Graph
-	 */
-	@Deprecated
-	public Graph getGraph() {
-		OBDAMappingTransformer transformer = new OBDAMappingTransformer();
-		transformer.setOntology(ontology);
-		List<Statement> statements = new ArrayList<Statement>();
-
-		for (OBDAMappingAxiom axiom: this.mappings) {
-			List<Statement> statements2 = transformer.getStatements(axiom,prefixmng);
-			statements.addAll(statements2);
-		}
-		@SuppressWarnings("deprecation")
-		Graph g = new GraphImpl();
-		g.addAll(statements);
-		return g;
-	}
 
 	public Collection <TriplesMap> getTripleMaps() {
 		OBDAMappingTransformer transformer = new OBDAMappingTransformer();
@@ -179,10 +162,11 @@ public class R2RMLWriter {
      */
     public void write(OutputStream os) throws Exception {
         try {
-            R2RMLMappingManager mm = new RDF4JR2RMLMappingManagerFactory().getR2RMLMappingManager();
+            RDF4JR2RMLMappingManager mm = RDF4JR2RMLMappingManager.getInstance();
             Collection<TriplesMap> coll = getTripleMaps();
-            Model out = mm.exportMappings(coll, Model.class);
-            Rio.write(out, os, RDFFormat.TURTLE);
+            final RDF4JGraph rdf4JGraph = mm.exportMappings(coll);
+
+            Rio.write(rdf4JGraph.asModel().get() , os, RDFFormat.TURTLE);
             os.close();
         } catch (Exception e) {
             e.printStackTrace();

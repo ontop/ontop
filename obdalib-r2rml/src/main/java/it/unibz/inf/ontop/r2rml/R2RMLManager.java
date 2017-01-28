@@ -25,17 +25,38 @@ package it.unibz.inf.ontop.r2rml;
  * Class responsible of parsing R2RML mappings from file or from an RDF Model
  */
 
-import eu.optique.api.mapping.Join;
-import eu.optique.api.mapping.PredicateObjectMap;
-import eu.optique.api.mapping.RefObjectMap;
-import eu.optique.api.mapping.TriplesMap;
-import it.unibz.inf.ontop.model.*;
+
+import com.google.common.collect.ImmutableList;
+import eu.optique.r2rml.api.model.Join;
+import eu.optique.r2rml.api.model.PredicateObjectMap;
+import eu.optique.r2rml.api.model.RefObjectMap;
+import eu.optique.r2rml.api.model.TriplesMap;
+import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
+import it.unibz.inf.ontop.model.Function;
+import it.unibz.inf.ontop.model.MappingFactory;
+import it.unibz.inf.ontop.model.OBDALibConstants;
+import it.unibz.inf.ontop.model.OBDAMappingAxiom;
+import it.unibz.inf.ontop.model.Predicate;
+import it.unibz.inf.ontop.model.Term;
+import it.unibz.inf.ontop.model.ValueConstant;
+import it.unibz.inf.ontop.model.Variable;
 import it.unibz.inf.ontop.model.impl.MappingFactoryImpl;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
 import it.unibz.inf.ontop.model.impl.TermUtils;
-import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
+import org.apache.commons.rdf.api.Graph;
+import org.apache.commons.rdf.rdf4j.RDF4J;
+import org.eclipse.rdf4j.model.impl.LinkedHashModel;
+import org.eclipse.rdf4j.rio.RDFFormat;
+import org.eclipse.rdf4j.rio.RDFHandlerException;
+import org.eclipse.rdf4j.rio.RDFParseException;
+import org.eclipse.rdf4j.rio.RDFParser;
+import org.eclipse.rdf4j.rio.Rio;
+import org.eclipse.rdf4j.rio.helpers.StatementCollector;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -44,19 +65,13 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import com.google.common.collect.ImmutableList;
-import org.eclipse.rdf4j.model.Model;
-import org.eclipse.rdf4j.model.impl.LinkedHashModel;
-import org.eclipse.rdf4j.rio.*;
-import org.eclipse.rdf4j.rio.helpers.StatementCollector;
-
 import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
 
 public class R2RMLManager {
 
 	private static final MappingFactory MAPPING_FACTORY = MappingFactoryImpl.getInstance();
 	private R2RMLParser r2rmlParser;
-	private Model myModel;
+	private Graph myModel;
 	private final NativeQueryLanguageComponentFactory nativeQLFactory;
 
 	/**
@@ -73,13 +88,14 @@ public class R2RMLManager {
 	 */
 	public R2RMLManager(File file, NativeQueryLanguageComponentFactory nativeQLFactory) throws IOException, RDFParseException, RDFHandlerException {
 
-			myModel = new LinkedHashModel();			
+        LinkedHashModel model = new LinkedHashModel();
 			RDFParser parser = Rio.createParser(RDFFormat.TURTLE);
 			InputStream in = new FileInputStream(file);
 			URL documentUrl = new URL("file://" + file);
-			StatementCollector collector = new StatementCollector(myModel);
+			StatementCollector collector = new StatementCollector(model);
 			parser.setRDFHandler(collector);
 			parser.parse(in, documentUrl.toString());
+			this.myModel = new RDF4J().asGraph(model);
 			r2rmlParser = new R2RMLParser();
 
 			this.nativeQLFactory = nativeQLFactory;
@@ -90,7 +106,7 @@ public class R2RMLManager {
 	 * Constructor to start the parser from an RDF Model
 	 * @param model - the sesame Model containing mappings
 	 */
-	public R2RMLManager(Model model, NativeQueryLanguageComponentFactory nativeQLFactory){
+	public R2RMLManager(Graph model, NativeQueryLanguageComponentFactory nativeQLFactory){
 		myModel = model;
 		r2rmlParser = new R2RMLParser();
 		this.nativeQLFactory = nativeQLFactory;
@@ -100,7 +116,7 @@ public class R2RMLManager {
 	 * Get the Model of mappings
 	 * @return the Model object containing the mappings
 	 */
-	public Model getModel() {
+	public Graph getModel() {
 		return myModel;
 	}
 	
@@ -110,7 +126,7 @@ public class R2RMLManager {
 	 * @param myModel - the Model structure containing mappings
 	 * @return ArrayList<OBDAMappingAxiom> - list of mapping axioms read from the Model
 	 */
-	public ImmutableList<OBDAMappingAxiom> getMappings(Model myModel) {
+	public ImmutableList<OBDAMappingAxiom> getMappings(Graph myModel) {
 
 		List<OBDAMappingAxiom> mappings = new ArrayList<OBDAMappingAxiom>();
 

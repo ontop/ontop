@@ -27,21 +27,35 @@ package it.unibz.inf.ontop.r2rml;
  * Low-level class that should not be confused with the R2RMLMappingParser.
  */
 
-import eu.optique.api.mapping.*;
-import eu.optique.api.mapping.TermMap.TermMapType;
-import eu.optique.api.mapping.impl.InvalidR2RMLMappingException;
-import eu.optique.api.mapping.impl.SubjectMapImpl;
-import eu.optique.api.mapping.impl.rdf4j.RDF4JR2RMLMappingManagerFactory;
-import it.unibz.inf.ontop.model.*;
+import eu.optique.r2rml.api.binding.rdf4j.RDF4JR2RMLMappingManager;
+import eu.optique.r2rml.api.model.ObjectMap;
+import eu.optique.r2rml.api.model.PredicateMap;
+import eu.optique.r2rml.api.model.PredicateObjectMap;
+import eu.optique.r2rml.api.model.SubjectMap;
+import eu.optique.r2rml.api.model.Template;
+import eu.optique.r2rml.api.model.TermMap;
+import eu.optique.r2rml.api.model.TriplesMap;
+import eu.optique.r2rml.api.model.impl.InvalidR2RMLMappingException;
+import it.unibz.inf.ontop.model.Constant;
+import it.unibz.inf.ontop.model.DatatypePredicate;
+import it.unibz.inf.ontop.model.ExpressionOperation;
+import it.unibz.inf.ontop.model.Function;
+import it.unibz.inf.ontop.model.Predicate;
 import it.unibz.inf.ontop.model.Predicate.COL_TYPE;
-import it.unibz.inf.ontop.model.impl.DatatypePredicateImpl;
 import it.unibz.inf.ontop.model.Term;
-import org.eclipse.rdf4j.model.Model;
+import it.unibz.inf.ontop.model.impl.DatatypePredicateImpl;
+import org.apache.commons.rdf.api.BlankNodeOrIRI;
+import org.apache.commons.rdf.api.Graph;
+import org.apache.commons.rdf.api.IRI;
 import org.eclipse.rdf4j.model.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATATYPE_FACTORY;
 import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
@@ -54,27 +68,27 @@ public class R2RMLParser {
 	String parsedString = "";
 	String subjectString = "";
 	String objectString = "";
-	R2RMLMappingManager mapManager;
+    RDF4JR2RMLMappingManager mapManager;
 	Logger logger = LoggerFactory.getLogger(R2RMLParser.class);
 
 	/**
 	 * empty constructor
 	 */
 	public R2RMLParser() {
-        mapManager = new RDF4JR2RMLMappingManagerFactory().getR2RMLMappingManager();
+        mapManager = RDF4JR2RMLMappingManager.getInstance();
 		classPredicates = new ArrayList<Predicate>();
 		joinPredObjNodes = new ArrayList<Resource>();
 	}
 
 	/**
-	 * method to get the TriplesMaps from the given Model
-	 * @param myModel - the Model to process
+	 * method to get the TriplesMaps from the given Graph
+	 * @param myGraph - the Graph to process
 	 * @return Collection<TriplesMap> - the collection of mappings
 	 */
-	public Collection<TriplesMap> getMappingNodes(Model myModel) {
+	public Collection<TriplesMap> getMappingNodes(Graph myGraph) {
 		Collection<TriplesMap> coll = null;
 		try {
-			coll = mapManager.importMappings(myModel);
+			coll = mapManager.importMappings(myGraph);
 		} catch (InvalidR2RMLMappingException e) {
 			e.printStackTrace();
 		}
@@ -108,11 +122,11 @@ public class R2RMLParser {
 	 * @param tm
 	 * @return
 	 */
-	public Set<Resource> getPredicateObjects(TriplesMap tm) {
-		Set<Resource> predobjs = new HashSet<Resource>();
+	public Set<BlankNodeOrIRI> getPredicateObjects(TriplesMap tm) {
+		Set<BlankNodeOrIRI> predobjs = new HashSet<>();
 		for (PredicateObjectMap pobj : tm.getPredicateObjectMaps()) {
 			for (PredicateMap pm : pobj.getPredicateMaps()) {
-				Resource r = (Resource) pm.getResource(Object.class);
+				BlankNodeOrIRI r = pm.getNode();
 				predobjs.add(r);
 			}
 		}
@@ -138,11 +152,11 @@ public class R2RMLParser {
 
 		// SUBJECT
 		SubjectMap sMap = tm.getSubjectMap();
-		SubjectMapImpl sm = (SubjectMapImpl) sMap;
-		// process template declaration
-		Object termType = sm.getTermType(Object.class);
 
-		TermMapType subjectTermType = sm.getTermMapType();
+		// process template declaration
+		IRI termType = sMap.getTermType();
+
+		TermMap.TermMapType subjectTermType = sMap.getTermMapType();
 
 		// WORKAROUND for:
 		// SubjectMap.getTemplateString() throws NullPointerException when
@@ -175,7 +189,8 @@ public class R2RMLParser {
 		}
 
 		// process constant declaration
-		subj = sMap.getConstant();
+        // TODO(xiao): toString() is suspicious
+		subj = sMap.getConstant().toString();
 		if (subj != null) {
 			// create uri("...",var)
 			subjectAtom = getURIFunction(subj, joinCond);
@@ -190,9 +205,10 @@ public class R2RMLParser {
 		// }
 
 		// process class declaration
-		List<Object> classes = sMap.getClasses(Object.class);
+		List<IRI> classes = sMap.getClasses();
 		for (Object o : classes) {
-			classPredicates.add(DATA_FACTORY.getClassPredicate(o.toString()));
+            // TODO(xiao): toString() is suspicious
+            classPredicates.add(DATA_FACTORY.getClassPredicate(o.toString()));
 		}
 
 		if (subjectAtom == null)
@@ -214,7 +230,8 @@ public class R2RMLParser {
 
 		// process PREDICATEs
 		for (PredicateMap pm : pom.getPredicateMaps()) {
-			String pmConstant = pm.getConstant();
+		    //
+			String pmConstant = pm.getConstant().toString();
 			if (pmConstant != null) {
 				Predicate bodyPredicate = DATA_FACTORY.getPredicate(pmConstant, 2);
 				bodyPredicates.add(bodyPredicate);
@@ -285,10 +302,11 @@ public class R2RMLParser {
 		ObjectMap om = pom.getObjectMap(0);
 
 		String lan = om.getLanguageTag();
-		Object datatype = om.getDatatype(Object.class);
+		Object datatype = om.getDatatype();
 
 		// we check if the object map is a constant (can be a iri or a literal)
-		String obj = om.getConstant();
+        // TODO(xiao): toString() is suspicious
+        String obj = om.getConstant().toString();
 		if (obj != null) {
 			// boolean isURI = false;
 			// try {
@@ -331,7 +349,7 @@ public class R2RMLParser {
 		// we check if the object map is a template (can be a iri, a literal or
 		// a blank node)
 		Template t = om.getTemplate();
-		Object typ = om.getTermType(Object.class);
+		IRI typ = om.getTermType();
 		boolean concat = false;
 		if (t != null) {
 			//we check if the template is a literal
@@ -355,7 +373,7 @@ public class R2RMLParser {
 					}
 					objectAtom = DATA_FACTORY.getVariable(value);
 				} else {
-					Object type = om.getTermType(Object.class);
+					IRI type = om.getTermType();
 
 					// we check if the template is a IRI a simple literal or a
 					// blank
@@ -366,10 +384,10 @@ public class R2RMLParser {
 		}
 		else{
 			//assign iri template
-			TermMapType termMapType = om.getTermMapType();
-			if(termMapType.equals(TermMapType.CONSTANT_VALUED)){
+			TermMap.TermMapType termMapType = om.getTermMapType();
+			if(termMapType.equals(TermMap.TermMapType.CONSTANT_VALUED)){
 
-			} else if(termMapType.equals(TermMapType.COLUMN_VALUED)){
+			} else if(termMapType.equals(TermMap.TermMapType.COLUMN_VALUED)){
 				if(typ.equals(R2RMLVocabulary.iri)) {
 					objectAtom = DATA_FACTORY.getUriTemplate(objectAtom);
 				}
@@ -438,10 +456,10 @@ public class R2RMLParser {
 	}
 
 	@Deprecated
-	public List<Resource> getJoinNodes(TriplesMap tm) {
-		List<Resource> joinPredObjNodes = new ArrayList<Resource>();
+	public List<BlankNodeOrIRI> getJoinNodes(TriplesMap tm) {
+		List<BlankNodeOrIRI> joinPredObjNodes = new ArrayList<BlankNodeOrIRI>();
 		// get predicate-object nodes
-		Set<Resource> predicateObjectNodes = getPredicateObjects(tm);
+		Set<BlankNodeOrIRI> predicateObjectNodes = getPredicateObjects(tm);
 		return joinPredObjNodes;
 	}
 
@@ -641,90 +659,5 @@ public class R2RMLParser {
 		return string;
 	}
 
-	/**
-	 * method to find the triplesmap node referenced in a parent join condition
-	 * 
-	 * @param myModel
-	 *            - the Model of mappings
-	 * @param predobjNode
-	 *            - the pred obj node containing the join condition
-	 * @return the Resource node refferred to in the condition
-	 */
-	public Resource getReferencedTripleMap(Model myModel, Resource predobjNode) {
-
-		// process OBJECTMAP
-		Model m = myModel.filter(predobjNode, R2RMLVocabulary.objectMap, null);
-		if (!m.isEmpty()) {
-			Resource object = m.objectResource().get();
-
-			// look for parentTriplesMap declaration
-			m = myModel.filter(object, R2RMLVocabulary.parentTriplesMap, null);
-			if (!m.isEmpty()) {
-				return m.objectResource().get();
-			}
-		}
-		return null;
-	}
-
-	/**
-	 * method to get the child column in a join condition
-	 * 
-	 * @param myModel
-	 *            - the Model of mappings
-	 * @param predobjNode
-	 *            - the pred obj node containing the join condition
-	 * @return the child column condition as a string
-	 */
-	public String getChildColumn(Model myModel, Resource predobjNode) {
-
-		// process OBJECTMAP
-		Model m = myModel.filter(predobjNode, R2RMLVocabulary.objectMap, null);
-		if (!m.isEmpty()) {
-			Resource object = m.objectResource().get();
-
-			// look for joincondition declaration
-			m = myModel.filter(object, R2RMLVocabulary.joinCondition, null);
-			if (!m.isEmpty()) {
-				Resource objectt = m.objectResource().get();
-
-				// look for child declaration
-				m = myModel.filter(objectt, R2RMLVocabulary.child, null);
-				if (!m.isEmpty()) {
-					return trimTo1(m.objectString().get());
-				}
-			}
-		}
-		return null;
-	}
-
-	/**
-	 * method to get the parent column in a join condition
-	 * 
-	 * @param myModel
-	 *            - the Model of mappings
-	 * @param predobjNode
-	 *            - the pred obj node containing the join condition
-	 * @return the parent column condition as a string
-	 */
-	public String getParentColumn(Model myModel, Resource predobjNode) {
-		// process OBJECTMAP
-		Model m = myModel.filter(predobjNode, R2RMLVocabulary.objectMap, null);
-		if (!m.isEmpty()) {
-			Resource object = m.objectResource().get();
-
-			// look for joincondition declaration
-			m = myModel.filter(object, R2RMLVocabulary.joinCondition, null);
-			if (!m.isEmpty()) {
-				Resource objectt = m.objectResource().get();
-
-				// look for parent declaration
-				m = myModel.filter(objectt, R2RMLVocabulary.parent, null);
-				if (!m.isEmpty()) {
-					return trimTo1(m.objectString().get());
-				}
-			}
-		}
-		return null;
-	}
 
 }

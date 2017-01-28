@@ -37,18 +37,18 @@
 			</exclusions>
 		</dependency>
 		<dependency>
+			<groupId>${project.groupId}</groupId>
 			<artifactId>ontop-obdalib-owlapi</artifactId>
-			<groupId>${project.groupId}</groupId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
+			<groupId>${project.groupId}</groupId>
 			<artifactId>ontop-reformulation-core</artifactId>
-			<groupId>${project.groupId}</groupId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
-			<artifactId>ontop-quest-owlapi</artifactId>
 			<groupId>${project.groupId}</groupId>
+			<artifactId>ontop-quest-owlapi</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
@@ -125,12 +125,12 @@
 		<!-- Optique R2RML API -->
 		<dependency>
 			<groupId>eu.optique-project</groupId>
-			<artifactId>r2rml-api</artifactId>
+			<artifactId>r2rml-api-core</artifactId>
 		</dependency>
 
 		<dependency>
 			<groupId>eu.optique-project</groupId>
-			<artifactId>r2rml-api-rdf4j-bridge</artifactId>			
+			<artifactId>r2rml-api-rdf4j-binding</artifactId>
 		</dependency>
 
     </dependencies>

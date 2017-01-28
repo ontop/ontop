@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.r2rml;
 
-import eu.optique.api.mapping.TriplesMap;
+
+import eu.optique.r2rml.api.model.TriplesMap;
 import it.unibz.inf.ontop.exception.InvalidMappingException;
 import it.unibz.inf.ontop.injection.OBDACoreConfiguration;
 import it.unibz.inf.ontop.io.InvalidDataSourceException;

@@ -23,9 +23,8 @@ package it.unibz.inf.ontop.r2rml;
  * @author timea bagosi
  * Class to represent R2RML standard vocabulary
  */
-import org.eclipse.rdf4j.model.IRI;
-import org.eclipse.rdf4j.model.ValueFactory;
-import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
+import org.apache.commons.rdf.api.IRI;
+import org.apache.commons.rdf.rdf4j.RDF4J;
 
 public class R2RMLVocabulary {
 
@@ -56,45 +55,45 @@ public class R2RMLVocabulary {
 		}
 	}
 
-	public static final ValueFactory fact = SimpleValueFactory.getInstance();
-	public static final IRI TriplesMap = fact.createIRI("http://www.w3.org/ns/r2rml#TriplesMap");
+	public static final RDF4J rdf4j = new RDF4J();
+	public static final IRI TriplesMap = rdf4j.createIRI("http://www.w3.org/ns/r2rml#TriplesMap");
 	
-	public static final IRI logicalTable = fact.createIRI("http://www.w3.org/ns/r2rml#logicalTable");
-	public static final IRI tableName = fact.createIRI("http://www.w3.org/ns/r2rml#tableName");
-	public static final IRI baseTableOrView = fact.createIRI("http://www.w3.org/ns/r2rml#baseTableOrView");
-	public static final IRI r2rmlView = fact.createIRI("http://www.w3.org/ns/r2rml#R2RMLView");
+	public static final IRI logicalTable = rdf4j.createIRI("http://www.w3.org/ns/r2rml#logicalTable");
+	public static final IRI tableName = rdf4j.createIRI("http://www.w3.org/ns/r2rml#tableName");
+	public static final IRI baseTableOrView = rdf4j.createIRI("http://www.w3.org/ns/r2rml#baseTableOrView");
+	public static final IRI r2rmlView = rdf4j.createIRI("http://www.w3.org/ns/r2rml#R2RMLView");
 
-	public static final IRI subjectMap = fact.createIRI("http://www.w3.org/ns/r2rml#subjectMap");
-	public static final IRI subjectMapClass = fact.createIRI("http://www.w3.org/ns/r2rml#SubjectMap");
+	public static final IRI subjectMap = rdf4j.createIRI("http://www.w3.org/ns/r2rml#subjectMap");
+	public static final IRI subjectMapClass = rdf4j.createIRI("http://www.w3.org/ns/r2rml#SubjectMap");
 
-	public static final IRI subject = fact.createIRI("http://www.w3.org/ns/r2rml#subject");
-	public static final IRI predicateObjectMap = fact.createIRI("http://www.w3.org/ns/r2rml#predicateObjectMap");
-	public static final IRI predicateMap = fact.createIRI("http://www.w3.org/ns/r2rml#predicateMap");
-	public static final IRI objectMap = fact.createIRI("http://www.w3.org/ns/r2rml#objectMap");
-	public static final IRI object = fact.createIRI("http://www.w3.org/ns/r2rml#object");
-	public static final IRI refObjectMap = fact.createIRI("http://www.w3.org/ns/r2rml#refObjectMap");
-	public static final IRI graphMap = fact.createIRI("http://www.w3.org/ns/r2rml#graphMap");
-	public static final IRI graph = fact.createIRI("http://www.w3.org/ns/r2rml#graph");
+	public static final IRI subject = rdf4j.createIRI("http://www.w3.org/ns/r2rml#subject");
+	public static final IRI predicateObjectMap = rdf4j.createIRI("http://www.w3.org/ns/r2rml#predicateObjectMap");
+	public static final IRI predicateMap = rdf4j.createIRI("http://www.w3.org/ns/r2rml#predicateMap");
+	public static final IRI objectMap = rdf4j.createIRI("http://www.w3.org/ns/r2rml#objectMap");
+	public static final IRI object = rdf4j.createIRI("http://www.w3.org/ns/r2rml#object");
+	public static final IRI refObjectMap = rdf4j.createIRI("http://www.w3.org/ns/r2rml#refObjectMap");
+	public static final IRI graphMap = rdf4j.createIRI("http://www.w3.org/ns/r2rml#graphMap");
+	public static final IRI graph = rdf4j.createIRI("http://www.w3.org/ns/r2rml#graph");
 
-	public static final IRI predicate = fact.createIRI("http://www.w3.org/ns/r2rml#predicate");
-	public static final IRI template = fact.createIRI("http://www.w3.org/ns/r2rml#template");
-	public static final IRI column = fact.createIRI("http://www.w3.org/ns/r2rml#column");
-	public static final IRI constant = fact.createIRI("http://www.w3.org/ns/r2rml#constant");
-	public static final IRI termType = fact.createIRI("http://www.w3.org/ns/r2rml#termType");
-	public static final IRI termMap = fact.createIRI("http://www.w3.org/ns/r2rml#TermMap");
-	public static final IRI language = fact.createIRI("http://www.w3.org/ns/r2rml#language");
-	public static final IRI datatype = fact.createIRI("http://www.w3.org/ns/r2rml#datatype");
-	public static final IRI inverseExpression = fact.createIRI("http://www.w3.org/ns/r2rml#inverseExpression");
-	public static final IRI iri = fact.createIRI("http://www.w3.org/ns/r2rml#IRI");
-	public static final IRI blankNode = fact.createIRI("http://www.w3.org/ns/r2rml#BlankNode");
-	public static final IRI literal = fact.createIRI("http://www.w3.org/ns/r2rml#Literal");
-	public static final IRI classUri = fact.createIRI("http://www.w3.org/ns/r2rml#class");
-	public static final IRI sqlQuery = fact.createIRI("http://www.w3.org/ns/r2rml#sqlQuery");
-	public static final IRI sqlVersion = fact.createIRI("http://www.w3.org/ns/r2rml#sqlVersion");
+	public static final IRI predicate = rdf4j.createIRI("http://www.w3.org/ns/r2rml#predicate");
+	public static final IRI template = rdf4j.createIRI("http://www.w3.org/ns/r2rml#template");
+	public static final IRI column = rdf4j.createIRI("http://www.w3.org/ns/r2rml#column");
+	public static final IRI constant = rdf4j.createIRI("http://www.w3.org/ns/r2rml#constant");
+	public static final IRI termType = rdf4j.createIRI("http://www.w3.org/ns/r2rml#termType");
+	public static final IRI termMap = rdf4j.createIRI("http://www.w3.org/ns/r2rml#TermMap");
+	public static final IRI language = rdf4j.createIRI("http://www.w3.org/ns/r2rml#language");
+	public static final IRI datatype = rdf4j.createIRI("http://www.w3.org/ns/r2rml#datatype");
+	public static final IRI inverseExpression = rdf4j.createIRI("http://www.w3.org/ns/r2rml#inverseExpression");
+	public static final IRI iri = rdf4j.createIRI("http://www.w3.org/ns/r2rml#IRI");
+	public static final IRI blankNode = rdf4j.createIRI("http://www.w3.org/ns/r2rml#BlankNode");
+	public static final IRI literal = rdf4j.createIRI("http://www.w3.org/ns/r2rml#Literal");
+	public static final IRI classUri = rdf4j.createIRI("http://www.w3.org/ns/r2rml#class");
+	public static final IRI sqlQuery = rdf4j.createIRI("http://www.w3.org/ns/r2rml#sqlQuery");
+	public static final IRI sqlVersion = rdf4j.createIRI("http://www.w3.org/ns/r2rml#sqlVersion");
 
-	public static final IRI parentTriplesMap = fact.createIRI("http://www.w3.org/ns/r2rml#parentTriplesMap");
-	public static final IRI joinCondition = fact.createIRI("http://www.w3.org/ns/r2rml#joinCondition");
-	public static final IRI child = fact.createIRI("http://www.w3.org/ns/r2rml#child");
-	public static final IRI parent = fact.createIRI("http://www.w3.org/ns/r2rml#parent");
+	public static final IRI parentTriplesMap = rdf4j.createIRI("http://www.w3.org/ns/r2rml#parentTriplesMap");
+	public static final IRI joinCondition = rdf4j.createIRI("http://www.w3.org/ns/r2rml#joinCondition");
+	public static final IRI child = rdf4j.createIRI("http://www.w3.org/ns/r2rml#child");
+	public static final IRI parent = rdf4j.createIRI("http://www.w3.org/ns/r2rml#parent");
 
 }
