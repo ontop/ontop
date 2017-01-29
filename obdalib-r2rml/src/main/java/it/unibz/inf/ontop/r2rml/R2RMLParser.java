@@ -47,6 +47,8 @@ import it.unibz.inf.ontop.model.impl.DatatypePredicateImpl;
 import org.apache.commons.rdf.api.BlankNodeOrIRI;
 import org.apache.commons.rdf.api.Graph;
 import org.apache.commons.rdf.api.IRI;
+import org.apache.commons.rdf.api.Literal;
+import org.apache.commons.rdf.api.RDFTerm;
 import org.eclipse.rdf4j.model.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -190,9 +192,10 @@ public class R2RMLParser {
 
 		// process constant declaration
         // TODO(xiao): toString() is suspicious
-		subj = sMap.getConstant().toString();
-		if (subj != null) {
+        RDFTerm subjConstant = sMap.getConstant();
+		if (subjConstant != null) {
 			// create uri("...",var)
+            subj = subjConstant.toString();
 			subjectAtom = getURIFunction(subj, joinCond);
 		}
 
@@ -306,8 +309,8 @@ public class R2RMLParser {
 
 		// we check if the object map is a constant (can be a iri or a literal)
         // TODO(xiao): toString() is suspicious
-        String obj = om.getConstant().toString();
-		if (obj != null) {
+        RDFTerm constantObj = om.getConstant();
+		if (constantObj != null) {
 			// boolean isURI = false;
 			// try {
 			// java.net.URI.create(obj);
@@ -315,20 +318,28 @@ public class R2RMLParser {
 			// } catch (IllegalArgumentException e){
 			//
 			// }
+            String obj = constantObj.toString();
 
 			// if the literal has a language property or a datatype property we
 			// create the function object later
 			if (lan != null || datatype != null) {
-				objectAtom = DATA_FACTORY.getConstantLiteral(obj);
+				objectAtom = DATA_FACTORY.getConstantLiteral(((Literal) constantObj).getLexicalForm());
 
 			} else {
-				Term newlit = DATA_FACTORY.getConstantLiteral(obj);
+//				Term newlit = DATA_FACTORY.getConstantLiteral( ((Literal) constantObj).getLexicalForm());
+//
+//				if (obj.startsWith("http://")) {
+//					objectAtom = DATA_FACTORY.getUriTemplate(newlit);
+//				} else {
+//					objectAtom = DATA_FACTORY.getTypedTerm(newlit, COL_TYPE.LITERAL); // .RDFS_LITERAL;
+//				}
 
-				if (obj.startsWith("http://")) {
-					objectAtom = DATA_FACTORY.getUriTemplate(newlit);
-				} else {
-					objectAtom = DATA_FACTORY.getTypedTerm(newlit, COL_TYPE.LITERAL); // .RDFS_LITERAL;
-				}
+				if (constantObj instanceof Literal){
+                    objectAtom = DATA_FACTORY.getTypedTerm(DATA_FACTORY.getConstantLiteral( ((Literal) constantObj).getLexicalForm()), COL_TYPE.LITERAL); // .RDFS_LITERAL;
+                } else if (constantObj instanceof IRI){
+                    objectAtom = DATA_FACTORY.getTypedTerm(DATA_FACTORY.getConstantLiteral( ((IRI) constantObj).getIRIString()), COL_TYPE.LITERAL);
+
+                }
 			}
 		}
 
