@@ -20,7 +20,6 @@ package it.unibz.inf.ontop.rdf4j.repository;
  * #L%
  */
 
-import it.unibz.inf.ontop.injection.OBDASettings;
 import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.injection.QuestCoreSettings;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
@@ -63,6 +62,7 @@ public class OntopRepositoryConfig extends AbstractRepositoryImplConfig {
     @Deprecated
     public final static String REMOTE_QUEST_TYPE = "ontop-remote";
 
+    @Deprecated
     public final static String IN_MEMORY_QUEST_TYPE = "ontop-inmemory";
     
     static {
@@ -211,43 +211,43 @@ public class OntopRepositoryConfig extends AbstractRepositoryImplConfig {
             }
 
             switch (quest_type) {
-                case IN_MEMORY_QUEST_TYPE:
-                    p.setProperty(QuestCoreSettings.ABOX_MODE, QuestConstants.CLASSIC);
-                    p.setProperty(QuestCoreSettings.OPTIMIZE_EQUIVALENCES, "true");
-                    p.setProperty(QuestCoreSettings.OBTAIN_FROM_MAPPINGS, "false");
-                    p.setProperty(QuestCoreSettings.OBTAIN_FROM_ONTOLOGY, "false");
-                    p.setProperty(QuestCoreSettings.DBTYPE, QuestConstants.SEMANTIC_INDEX);
-                    p.setProperty(QuestCoreSettings.STORAGE_LOCATION, QuestConstants.INMEMORY);
-
-                    configuration = QuestConfiguration.defaultBuilder()
-                            .ontologyFile(owlFile)
-                            .properties(p)
-                            .build();
-                    repository = new OntopClassicRepository(name, configuration);
-
-                    break;
-                case REMOTE_QUEST_TYPE:
-                    // TODO: rewriting not considered in the ported code. Should we consider it?
-                    p = new Properties();
-
-                    p.setProperty(QuestCoreSettings.ABOX_MODE, QuestConstants.CLASSIC);
-                    p.setProperty(QuestCoreSettings.OPTIMIZE_EQUIVALENCES, "true");
-                    // TODO: no mappings, so this option looks inconsistent
-                    p.setProperty(QuestCoreSettings.OBTAIN_FROM_MAPPINGS, "true");
-                    p.setProperty(QuestCoreSettings.OBTAIN_FROM_ONTOLOGY, "false");
-                    p.setProperty(QuestCoreSettings.DBTYPE, QuestConstants.SEMANTIC_INDEX);
-                    p.setProperty(QuestCoreSettings.STORAGE_LOCATION, QuestConstants.JDBC);
-                    p.setProperty(OBDASettings.JDBC_DRIVER, "org.h2.Driver");
-                    p.setProperty(OBDASettings.JDBC_URL, "jdbc:h2:mem:stockclient1");
-                    p.setProperty(OBDASettings.JDBC_USER, "sa");
-                    p.setProperty(OBDASettings.JDBC_PASSWORD, "");
-
-                    configuration = QuestConfiguration.defaultBuilder()
-                            .ontologyFile(owlFile)
-                            .properties(p)
-                            .build();
-                    repository = new OntopClassicRepository(name, configuration);
-                    break;
+//                case IN_MEMORY_QUEST_TYPE:
+//                    p.setProperty(QuestCoreSettings.ABOX_MODE, QuestConstants.CLASSIC);
+//                    p.setProperty(QuestCoreSettings.OPTIMIZE_EQUIVALENCES, "true");
+//                    p.setProperty(QuestCoreSettings.OBTAIN_FROM_MAPPINGS, "false");
+//                    p.setProperty(QuestCoreSettings.OBTAIN_FROM_ONTOLOGY, "false");
+//                    p.setProperty(QuestCoreSettings.DBTYPE, QuestConstants.SEMANTIC_INDEX);
+//                    p.setProperty(QuestCoreSettings.STORAGE_LOCATION, QuestConstants.INMEMORY);
+//
+//                    configuration = QuestConfiguration.defaultBuilder()
+//                            .ontologyFile(owlFile)
+//                            .properties(p)
+//                            .build();
+//                    repository = new OntopClassicRepository(name, configuration);
+//
+//                    break;
+//                case REMOTE_QUEST_TYPE:
+//                    // TODO: rewriting not considered in the ported code. Should we consider it?
+//                    p = new Properties();
+//
+//                    p.setProperty(QuestCoreSettings.ABOX_MODE, QuestConstants.CLASSIC);
+//                    p.setProperty(QuestCoreSettings.OPTIMIZE_EQUIVALENCES, "true");
+//                    // TODO: no mappings, so this option looks inconsistent
+//                    p.setProperty(QuestCoreSettings.OBTAIN_FROM_MAPPINGS, "true");
+//                    p.setProperty(QuestCoreSettings.OBTAIN_FROM_ONTOLOGY, "false");
+//                    p.setProperty(QuestCoreSettings.DBTYPE, QuestConstants.SEMANTIC_INDEX);
+//                    p.setProperty(QuestCoreSettings.STORAGE_LOCATION, QuestConstants.JDBC);
+//                    p.setProperty(OBDASettings.JDBC_DRIVER, "org.h2.Driver");
+//                    p.setProperty(OBDASettings.JDBC_URL, "jdbc:h2:mem:stockclient1");
+//                    p.setProperty(OBDASettings.JDBC_USER, "sa");
+//                    p.setProperty(OBDASettings.JDBC_PASSWORD, "");
+//
+//                    configuration = QuestConfiguration.defaultBuilder()
+//                            .ontologyFile(owlFile)
+//                            .properties(p)
+//                            .build();
+//                    repository = new OntopClassicRepository(name, configuration);
+//                    break;
                 case VIRTUAL_QUEST_TYPE:
                     configuration = QuestConfiguration.defaultBuilder()
                             // TODO: consider also r2rml
