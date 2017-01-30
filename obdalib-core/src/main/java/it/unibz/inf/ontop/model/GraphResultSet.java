@@ -25,7 +25,7 @@ import it.unibz.inf.ontop.ontology.Assertion;
 import java.util.Iterator;
 import java.util.List;
 
-public interface GraphResultSet extends ResultSet, Iterator<List<Assertion>> {
+public interface GraphResultSet extends OBDAResultSet, Iterator<List<Assertion>> {
 
 	@Override
     boolean hasNext() throws OBDAException;

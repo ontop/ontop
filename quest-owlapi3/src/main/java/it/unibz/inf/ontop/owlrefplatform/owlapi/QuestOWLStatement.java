@@ -284,14 +284,6 @@ public class QuestOWLStatement implements IQuestOWLStatement {
 		}
 	}
 
-	public QuestOWLResultSet getResultSet() throws OWLException {
-		try {
-			return new QuestOWLResultSet(st.getResultSet(), this);
-		} catch (OBDAException e) {
-			throw new OntopOWLException(e);
-		}
-	}
-
 	public int getQueryTimeout() throws OWLException {
 		try {
 			return st.getQueryTimeout();
@@ -342,36 +334,15 @@ public class QuestOWLStatement implements IQuestOWLStatement {
 
 	public String getRewriting(String query) throws OWLException {
 		try {
-			ParsedQuery pq = st.getParsedQuery(query);
-			return st.getRewriting(pq);
+			return st.getRewriting(query);
 		} 
 		catch (Exception e) {
 			throw new OntopOWLException(e);
 		}
 	}
 
-	/**
-	 * SQL-specific! Please use getExecutableQuery() instead!
-	 */
-	@Deprecated
-	public String getUnfolding(String query) throws OWLException {
-		ExecutableQuery executableQuery = getExecutableQuery(query);
-		if (executableQuery instanceof SQLExecutableQuery) {
-			return ((SQLExecutableQuery) executableQuery).getSQL();
-		}
-		else {
-			throw new RuntimeException("This deprecated method (getUnfolding) presumes the use of SQL as a native query language. " +
-					"Please use getExecutableQuery() instead.");
-		}
-	}
-
 	public ExecutableQuery getExecutableQuery(String query) throws OWLException {
-		try {
-			ParsedQuery pq = st.getParsedQuery(query);
-			return st.translateIntoNativeQuery(pq, Optional.empty());
-		} catch (Exception e) {
-			throw new OntopOWLException(e);
-		}
+		return st.getExecutableQuery(query);
 	}
 
 	private List<OWLAxiom> createOWLIndividualAxioms(GraphResultSet resultSet) throws Exception {

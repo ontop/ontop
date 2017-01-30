@@ -78,7 +78,7 @@ public class QuestTupleResultSet implements TupleResultSet {
 	 * @throws OBDAException
 	 */
 	public QuestTupleResultSet(ResultSet set, List<String> signature, IQuestStatement st,
-							   Optional<IRIDictionary> iriDictionary) throws OBDAException {
+							   DBMetadata dbMetadata, Optional<IRIDictionary> iriDictionary) throws OBDAException {
 		this.rs = set;
 		this.st = st;
 		this.iriDictionary = iriDictionary.orElse(null);
@@ -91,13 +91,12 @@ public class QuestTupleResultSet implements TupleResultSet {
 			columnMap.put(signature.get(j - 1), j);
 		}
 
-		DBMetadata metadata = st.getMetadata();
-		String vendor =  metadata.getDriverName();
+		String vendor =  dbMetadata.getDriverName();
 		isOracle = vendor.contains("Oracle");
 		isMsSQL = vendor.contains("SQL Server");
 
 		if (isOracle) {
-			String version = metadata.getDriverVersion();
+			String version = dbMetadata.getDriverVersion();
 			int versionInt = Integer.parseInt(version.substring(0, version.indexOf(".")));
 
 			if (versionInt >= 12) 

@@ -25,7 +25,7 @@ import com.google.inject.Injector;
 import it.unibz.inf.ontop.model.GraphResultSet;
 import it.unibz.inf.ontop.model.OBDAException;
 import it.unibz.inf.ontop.model.Predicate;
-import it.unibz.inf.ontop.model.ResultSet;
+import it.unibz.inf.ontop.model.OBDAResultSet;
 import it.unibz.inf.ontop.ontology.*;
 import it.unibz.inf.ontop.owlrefplatform.core.*;
 
@@ -245,7 +245,7 @@ public class QuestMaterializer {
 					if (vocabularyIterator.hasNext()) {
 						Predicate pred = vocabularyIterator.next();
 						String query = getQuery(pred);
-						ResultSet execute = stm.execute(query);
+						OBDAResultSet execute = stm.execute(query);
 
 						results = (GraphResultSet) execute;
 //						if (results!=null){
@@ -294,7 +294,7 @@ public class QuestMaterializer {
 						}
 						Predicate predicate = vocabularyIterator.next();
 						String query = getQuery(predicate);
-						ResultSet execute = stm.execute(query);
+						OBDAResultSet execute = stm.execute(query);
 
 						results = (GraphResultSet) execute;
 						if (results!=null){

@@ -22,7 +22,7 @@ package it.unibz.inf.ontop.model;
 
 import java.util.List;
 
-public interface TupleResultSet extends ResultSet{
+public interface TupleResultSet extends OBDAResultSet {
 
 	/*
 	 * ResultSet management functions

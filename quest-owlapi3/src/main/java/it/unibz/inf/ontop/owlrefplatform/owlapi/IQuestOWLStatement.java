@@ -43,8 +43,6 @@ public interface IQuestOWLStatement extends AutoCloseable {
 
 	void getMoreResults() throws OWLException;
 
-	QuestOWLResultSet getResultSet() throws OWLException;
-
 	int getQueryTimeout() throws OWLException;
 
 	void setFetchSize(int rows) throws OWLException;
@@ -60,8 +58,5 @@ public interface IQuestOWLStatement extends AutoCloseable {
 	String getRewriting(String query) throws OWLException;
 
 	ExecutableQuery getExecutableQuery(String query) throws OWLException;
-
-	@Deprecated
-	String getUnfolding(String query) throws OWLException;
 
 }

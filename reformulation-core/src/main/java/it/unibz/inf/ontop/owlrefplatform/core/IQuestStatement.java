@@ -24,27 +24,14 @@ import java.util.Optional;
 public interface IQuestStatement extends OBDAStatement {
 
     /**
-     * TODO: understand and implement correctly.
-     */
-    TupleResultSet getResultSet() throws OBDAException;
-
-    /**
      * Not always supported (for instance, write mode is not yet supported for the virtual mode).
      */
     @Deprecated
     int insertData(Iterator<Assertion> data, int commit, int batch) throws OBDAException;
 
-    int getTupleCount(String sparqlQuery);
+    int getTupleCount(String sparqlQuery) throws OBDAException;
 
+    ExecutableQuery getExecutableQuery(String inputQuery) throws OBDAException;
 
-    DBMetadata getMetadata();
-
-    @Deprecated
-    ParsedQuery getParsedQuery(String query);
-
-    @Deprecated
-    String getRewriting(ParsedQuery query);
-
-    @Deprecated
-    ExecutableQuery translateIntoNativeQuery(ParsedQuery pq, Optional<SesameConstructTemplate> constructTemplate);
+    String getRewriting(String query) throws OBDAException;
 }

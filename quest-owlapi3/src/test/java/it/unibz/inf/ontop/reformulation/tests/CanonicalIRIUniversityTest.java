@@ -5,6 +5,7 @@ import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.io.QueryIOManager;
 import it.unibz.inf.ontop.model.OBDAModel;
 
+import it.unibz.inf.ontop.owlrefplatform.core.ExecutableQuery;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import it.unibz.inf.ontop.querymanager.QueryController;
@@ -127,7 +128,7 @@ public class CanonicalIRIUniversityTest {
 			            * Print the query summary
 			         */
 
-                    String sqlQuery = st.getUnfolding(sparqlQuery);
+                    ExecutableQuery executableQuery = st.getExecutableQuery(sparqlQuery);
 
                     System.out.println();
                     System.out.println("The input SPARQL query:");
@@ -137,7 +138,7 @@ public class CanonicalIRIUniversityTest {
 
                     System.out.println("The output SQL query:");
                     System.out.println("=====================");
-                    System.out.println(sqlQuery);
+                    System.out.println(executableQuery);
 
 
                     res.close();

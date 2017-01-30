@@ -28,7 +28,6 @@ import it.unibz.inf.ontop.ontology.*;
 import it.unibz.inf.ontop.owlapi.OWLAPITranslatorUtility;
 import it.unibz.inf.ontop.owlrefplatform.core.*;
 import it.unibz.inf.ontop.pivotalrepr.utils.ExecutorRegistry;
-import it.unibz.inf.ontop.reformulation.IRIDictionary;
 import it.unibz.inf.ontop.spec.OBDASpecification;
 import it.unibz.inf.ontop.reformulation.OBDAQueryProcessor;
 import it.unibz.inf.ontop.utils.VersionInfo;
@@ -46,7 +45,6 @@ import javax.annotation.Nullable;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -590,7 +588,7 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 		IQuestStatement query;
 		try {
 			query = conn.createStatement();
-			ResultSet rs = query.execute(strQuery);
+			OBDAResultSet rs = query.execute(strQuery);
 			TupleResultSet trs = ((TupleResultSet)rs);
 			if (trs!= null && trs.nextRow()){
 				String value = trs.getConstant(0).getValue();

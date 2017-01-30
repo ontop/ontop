@@ -23,6 +23,6 @@ package it.unibz.inf.ontop.model;
 /**
  * A common interface for TupleResultSet and GraphResultSet
  */
-public interface ResultSet extends AutoCloseable{
+public interface OBDAResultSet extends AutoCloseable{
 	// NO-OP
 }

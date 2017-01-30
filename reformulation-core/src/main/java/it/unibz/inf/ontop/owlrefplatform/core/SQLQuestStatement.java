@@ -115,7 +115,7 @@ public class SQLQuestStatement extends QuestStatement {
      */
     @Override
     public int getTupleCount(String sparqlQuery) throws OBDAException {
-        SQLExecutableQuery targetQuery = checkAndConvertTargetQuery(generateExecutableQuery(sparqlQuery));
+        SQLExecutableQuery targetQuery = checkAndConvertTargetQuery(getExecutableQuery(sparqlQuery));
         String sql = targetQuery.getSQL();
         String newsql = "SELECT count(*) FROM (" + sql + ") t1";
         if (!isCanceled()) {
@@ -134,11 +134,6 @@ public class SQLQuestStatement extends QuestStatement {
         else {
             throw new OBDAException("Action canceled.");
         }
-    }
-
-    @Override
-    public DBMetadata getMetadata() {
-        return dbMetadata;
     }
 
     @Override
@@ -186,8 +181,8 @@ public class SQLQuestStatement extends QuestStatement {
         try {
             java.sql.ResultSet set = sqlStatement.executeQuery(sqlQuery);
             return doDistinctPostProcessing
-                    ? new QuestDistinctTupleResultSet(set, executableQuery.getSignature(), this, iriDictionary)
-                    : new QuestTupleResultSet(set, executableQuery.getSignature(), this, iriDictionary);
+                    ? new QuestDistinctTupleResultSet(set, executableQuery.getSignature(), this, dbMetadata, iriDictionary)
+                    : new QuestTupleResultSet(set, executableQuery.getSignature(), this, dbMetadata, iriDictionary);
         } catch (SQLException e) {
             throw new NativeQueryExecutionException(e.getMessage());
         }
@@ -212,7 +207,8 @@ public class SQLQuestStatement extends QuestStatement {
         else {
             try {
                 ResultSet set = sqlStatement.executeQuery(sqlQuery);
-                tuples = new QuestTupleResultSet(set, executableQuery.getSignature(), this, iriDictionary);
+                tuples = new QuestTupleResultSet(set, executableQuery.getSignature(), this, dbMetadata,
+                        iriDictionary);
             } catch (SQLException e) {
                 throw new NativeQueryExecutionException(e.getMessage());
             }

@@ -20,10 +20,7 @@ package it.unibz.inf.ontop.owlrefplatform.core.resultset;
  * #L%
  */
 
-import it.unibz.inf.ontop.model.Constant;
-import it.unibz.inf.ontop.model.OBDAException;
-import it.unibz.inf.ontop.model.OBDAStatement;
-import it.unibz.inf.ontop.model.TupleResultSet;
+import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestStatement;
 import it.unibz.inf.ontop.reformulation.IRIDictionary;
 
@@ -42,9 +39,10 @@ public class QuestDistinctTupleResultSet implements TupleResultSet {
     private Set<List<Object>> distinctKeys;
 
     public QuestDistinctTupleResultSet(ResultSet set, List<String> signature, QuestStatement st,
+                                       DBMetadata dbMetadata,
                                        Optional<IRIDictionary> iriDictionary) throws OBDAException {
 
-        questTupleResultSet = new QuestTupleResultSet(set, signature, st, iriDictionary);
+        questTupleResultSet = new QuestTupleResultSet(set, signature, st, dbMetadata, iriDictionary);
 
         distinctKeys = new HashSet<>();
 

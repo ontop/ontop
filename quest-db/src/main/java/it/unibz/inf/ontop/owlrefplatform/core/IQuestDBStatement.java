@@ -15,18 +15,12 @@ import java.util.Iterator;
 public interface IQuestDBStatement extends OBDAStatement {
 
     /**
-     * Deprecated. See getExecutableQuery() instead.
-     */
-    @Deprecated
-    String getSQL(String query) throws OBDAException;
-
-    /**
      * Gets the target query.
      */
     ExecutableQuery getExecutableQuery(String query) throws OBDAException;
 
     /**
-     * TODO: explain
+     * Gets the string representation of the query before unfolding w.r.t the mapping.
      */
     String getRewriting(String query) throws OBDAException;
 }

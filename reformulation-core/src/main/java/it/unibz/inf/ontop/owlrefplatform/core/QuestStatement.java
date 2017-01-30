@@ -26,7 +26,6 @@ import it.unibz.inf.ontop.owlrefplatform.core.queryevaluation.SPARQLQueryUtility
 import it.unibz.inf.ontop.owlrefplatform.core.resultset.EmptyTupleResultSet;
 import it.unibz.inf.ontop.owlrefplatform.core.resultset.QuestTupleResultSet;
 import it.unibz.inf.ontop.owlrefplatform.core.translator.SesameConstructTemplate;
-import it.unibz.inf.ontop.reformulation.IRIDictionary;
 import it.unibz.inf.ontop.reformulation.OBDAQueryProcessor;
 import org.eclipse.rdf4j.query.MalformedQueryException;
 import org.eclipse.rdf4j.query.parser.ParsedQuery;
@@ -77,7 +76,7 @@ public abstract class QuestStatement implements IQuestStatement {
 		private final ExecutableQuery executableQuery;
 		private final boolean doDistinctPostProcessing;
 
-		private ResultSet resultSet;	  // only for SELECT and ASK queries
+		private OBDAResultSet resultSet;	  // only for SELECT and ASK queries
 		private Exception exception;
 		private boolean executingTargetQuery;
 
@@ -101,7 +100,7 @@ public abstract class QuestStatement implements IQuestStatement {
 			return exception;
 		}
 
-		public ResultSet getResultSet() {
+		public OBDAResultSet getResultSet() {
 			return resultSet;
 		}
 
@@ -204,7 +203,7 @@ public abstract class QuestStatement implements IQuestStatement {
 	 * uri or var logic Returns the result set for the given query
 	 */
 	@Override
-	public ResultSet execute(String strquery) throws OBDAException {
+	public OBDAResultSet execute(String strquery) throws OBDAException {
 		if (strquery.isEmpty()) {
 			throw new OBDAException("Cannot execute an empty query");
 		}
@@ -225,7 +224,7 @@ public abstract class QuestStatement implements IQuestStatement {
 				if (SPARQLQueryUtility.isVarDescribe(strquery)) {
 					// if describe ?var, we have to do select distinct ?var first
 					String sel = SPARQLQueryUtility.getSelectVarDescribe(strquery);
-					ResultSet resultSet = executeTupleQuery(sel, engine.getParsedQuery(sel), QueryType.SELECT);
+					OBDAResultSet resultSet = executeTupleQuery(sel, engine.getParsedQuery(sel), QueryType.SELECT);
 					if (resultSet instanceof EmptyTupleResultSet)
 						return null;
 					else if (resultSet instanceof QuestTupleResultSet) {
@@ -300,14 +299,14 @@ public abstract class QuestStatement implements IQuestStatement {
 	 * @return the obtained TupleResultSet result
 	 * @throws OBDAException
 	 */
-	private ResultSet executeTupleQuery(String strquery, ParsedQuery pq, QueryType type) throws OBDAException {
+	private OBDAResultSet executeTupleQuery(String strquery, ParsedQuery pq, QueryType type) throws OBDAException {
 
 		log.debug("Executing SPARQL query: \n{}", strquery);
 
 		return executeInThread(pq, type, Optional.empty());
 	}
 
-	private ResultSet executeGraphQuery(String strquery, QueryType type) throws OBDAException {
+	private OBDAResultSet executeGraphQuery(String strquery, QueryType type) throws OBDAException {
 		
 		log.debug("Executing SPARQL query: \n{}", strquery);
 		
@@ -331,7 +330,7 @@ public abstract class QuestStatement implements IQuestStatement {
 	 * Internal method to start a new query execution thread type defines the
 	 * query type SELECT, ASK, CONSTRUCT, or DESCRIBE
 	 */
-	private ResultSet executeInThread(ParsedQuery pq, QueryType type, Optional<SesameConstructTemplate> templ) throws OBDAException {
+	private OBDAResultSet executeInThread(ParsedQuery pq, QueryType type, Optional<SesameConstructTemplate> templ) throws OBDAException {
 		CountDownLatch monitor = new CountDownLatch(1);
 		ExecutableQuery executableQuery = engine.translateIntoNativeQuery(pq, templ);
 		QueryExecutionThread executionthread = new QueryExecutionThread(executableQuery, type, templ, monitor,
@@ -381,31 +380,14 @@ public abstract class QuestStatement implements IQuestStatement {
 	}
 
 	@Override
-	public TupleResultSet getResultSet() throws OBDAException {
-		return null;
+	public String getRewriting(String query) {
+		ParsedQuery pq = engine.getParsedQuery(query);
+		return engine.getRewriting(pq);
 	}
+
 
 	@Override
-	public ParsedQuery getParsedQuery(String query) {
-		return engine.getParsedQuery(query);
-	}
-
-	@Override
-	public String getRewriting(ParsedQuery query) {
-		return engine.getRewriting(query);
-	}
-
-	@Override
-	public ExecutableQuery translateIntoNativeQuery(ParsedQuery pq, Optional<SesameConstructTemplate> template) {
-		return engine.translateIntoNativeQuery(pq, template);
-	}
-
-//	public String getSPARQLRewriting(String query) throws OBDAException {
-//		return engine.getSPARQLRewriting(query);
-//	}
-
-
-	protected ExecutableQuery generateExecutableQuery(String sparqlQuery)
+	public ExecutableQuery getExecutableQuery(String sparqlQuery)
 			throws OBDAException{
 		try {
 			ParsedQuery sparqlTree = engine.getParsedQuery(sparqlQuery);

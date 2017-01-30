@@ -2,6 +2,8 @@ package it.unibz.inf.ontop.reformulation.tests;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.injection.QuestConfiguration;
+import it.unibz.inf.ontop.owlrefplatform.core.ExecutableQuery;
+import it.unibz.inf.ontop.owlrefplatform.core.SQLExecutableQuery;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import org.junit.After;
 import org.junit.Before;
@@ -412,7 +414,10 @@ public class LeftJoinProfTest {
         int i = 0;
         List<String> returnedValues = new ArrayList<>();
         try {
-            sql = st.getUnfolding(query);
+            ExecutableQuery executableQuery = st.getExecutableQuery(query);
+            if (! (executableQuery instanceof SQLExecutableQuery))
+                throw new IllegalStateException("A SQLExecutableQuery was expected");
+            sql = ((SQLExecutableQuery)executableQuery).getSQL();
             QuestOWLResultSet rs = st.executeTuple(query);
             while (rs.nextRow()) {
                 OWLLiteral ind1 = rs.getOWLLiteral("v");

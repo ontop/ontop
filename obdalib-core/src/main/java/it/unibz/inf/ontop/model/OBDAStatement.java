@@ -27,7 +27,7 @@ public interface OBDAStatement extends AutoCloseable {
 	@Override
     void close() throws OBDAException;
 
-	ResultSet execute(String query) throws OBDAException;
+	OBDAResultSet execute(String query) throws OBDAException;
 
 	int executeUpdate(String query) throws OBDAException;
 
@@ -36,8 +36,6 @@ public interface OBDAStatement extends AutoCloseable {
 	int getMaxRows() throws OBDAException;
 
 	void getMoreResults() throws OBDAException;
-
-	ResultSet getResultSet() throws OBDAException;
 
 	int getQueryTimeout() throws OBDAException;
 

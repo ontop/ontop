@@ -22,6 +22,7 @@ package it.unibz.inf.ontop.owlrefplatform.owlapi.example;
 
 
 import it.unibz.inf.ontop.injection.QuestConfiguration;
+import it.unibz.inf.ontop.owlrefplatform.core.ExecutableQuery;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import org.semanticweb.owlapi.io.ToStringRenderer;
 import org.semanticweb.owlapi.model.OWLObject;
@@ -83,7 +84,7 @@ public class QuestOWLExample_NoReplace {
              * Print the query summary
 			 */
             QuestOWLStatement qst = st;
-            String sqlQuery = qst.getUnfolding(sparqlQuery);
+            ExecutableQuery executableQuery = qst.getExecutableQuery(sparqlQuery);
 
             System.out.println();
             System.out.println("The input SPARQL query:");
@@ -93,7 +94,7 @@ public class QuestOWLExample_NoReplace {
 
             System.out.println("The output SQL query:");
             System.out.println("=====================");
-            System.out.println(sqlQuery);
+            System.out.println(executableQuery.toString());
 
             System.out.println("Query Execution Time:");
             System.out.println("=====================");
