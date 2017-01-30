@@ -18,21 +18,15 @@ import org.eclipse.rdf4j.query.Dataset;
 import org.eclipse.rdf4j.rio.*;
 import org.eclipse.rdf4j.rio.helpers.BasicParserSettings;
 import org.eclipse.rdf4j.rio.helpers.RDFHandlerBase;
-import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyCreationException;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.HashSet;
-import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
 
@@ -45,12 +39,8 @@ public class GraphLoading {
 
     public static OntopSemanticIndexLoader loadRDFGraph(Dataset dataset, Properties properties) throws SemanticIndexException {
         try {
-            OWLOntologyManager ontologyManager = OWLManager.createOWLOntologyManager();
-            OWLOntology emptyOntology = ontologyManager.createOntology();
-
-            Ontology tbox =  loadTBoxFromDataset(dataset);
-
-            RepositoryInit init = createRepository(tbox, Optional.empty());
+            Ontology implicitTbox =  loadTBoxFromDataset(dataset);
+            RepositoryInit init = createRepository(implicitTbox);
 
             /*
             Loads the data
@@ -60,11 +50,10 @@ public class GraphLoading {
             /*
             Creates the configuration and the loader object
              */
-            // TODO: insert the TBox
-            QuestConfiguration configuration = createConfiguration(init.dataRepository, emptyOntology, init.jdbcUrl, properties);
+            QuestConfiguration configuration = createConfiguration(init.dataRepository, init.jdbcUrl, properties);
             return new OntopSemanticIndexLoaderImpl(configuration, init.localConnection);
 
-        } catch (OWLOntologyCreationException | IOException e) {
+        } catch (IOException e) {
             throw new SemanticIndexException(e.getMessage());
         }
     }
@@ -74,7 +63,7 @@ public class GraphLoading {
     private static void insertDataset(RDBMSSIRepositoryManager dataRepository, Connection localConnection, Dataset dataset)
             throws SemanticIndexException {
         // Merge default and named graphs to filter duplicates
-        Set<IRI> graphIRIs = new HashSet<IRI>();
+        Set<IRI> graphIRIs = new HashSet<>();
         graphIRIs.addAll(dataset.getDefaultGraphs());
         graphIRIs.addAll(dataset.getNamedGraphs());
 
@@ -112,11 +101,7 @@ public class GraphLoading {
 
             insert.join();
             process.join();
-        } catch (InterruptedException e) {
-            throw new SemanticIndexException(e.getMessage());
-        } catch (MalformedURLException e) {
-            throw new SemanticIndexException(e.getMessage());
-        } catch (IOException e) {
+        } catch (InterruptedException | IOException e) {
             throw new SemanticIndexException(e.getMessage());
         }
     }
@@ -127,7 +112,8 @@ public class GraphLoading {
         private RDFParser rdfParser;
         private InputStream inputStreamOrReader;
         private String baseIRI;
-        public Insert(RDFParser rdfParser, InputStream inputStream, String baseIRI)
+
+        Insert(RDFParser rdfParser, InputStream inputStream, String baseIRI)
         {
             this.rdfParser = rdfParser;
             this.inputStreamOrReader = inputStream;

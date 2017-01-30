@@ -63,7 +63,11 @@ class SILoadingTools {
         return createRepository(ontology, Optional.of(ontologyClosure));
     }
 
-    static RepositoryInit createRepository(Ontology ontology, Optional<Set<OWLOntology>> ontologyClosure)
+    static RepositoryInit createRepository(Ontology ontology) throws SemanticIndexException {
+        return createRepository(ontology, Optional.empty());
+    }
+
+    private static RepositoryInit createRepository(Ontology ontology, Optional<Set<OWLOntology>> ontologyClosure)
             throws SemanticIndexException {
         ImmutableOntologyVocabulary vocabulary = ontology.getVocabulary();
 
@@ -90,33 +94,51 @@ class SILoadingTools {
         }
     }
 
-    static QuestConfiguration createConfiguration(RDBMSSIRepositoryManager dataRepository, OWLOntology owlOntology,
-                                                          String jdbcUrl, Properties properties) throws SemanticIndexException {
+    static QuestConfiguration createConfiguration(RDBMSSIRepositoryManager dataRepository,
+                                                  OWLOntology ontology,
+                                                  String jdbcUrl, Properties properties) throws SemanticIndexException {
+        return createConfiguration(dataRepository, Optional.of(ontology), jdbcUrl, properties);
+    }
+
+    static QuestConfiguration createConfiguration(RDBMSSIRepositoryManager dataRepository,
+                                                  String jdbcUrl, Properties properties) throws SemanticIndexException {
+        return createConfiguration(dataRepository, Optional.empty(), jdbcUrl, properties);
+    }
+
+    private static QuestConfiguration createConfiguration(RDBMSSIRepositoryManager dataRepository,
+                                                  Optional<OWLOntology> optionalOntology,
+                                                  String jdbcUrl, Properties properties) throws SemanticIndexException {
         OBDAModel ppMapping = createPPMapping(dataRepository);
 
         /**
          * Tbox: ontology without the ABox axioms (are in the DB now).
          */
         OWLOntologyManager newManager = OWLManager.createOWLOntologyManager();
-        OWLOntology tbox;
-        try {
-            tbox = newManager.copyOntology(owlOntology, OntologyCopy.SHALLOW);
-        } catch (OWLOntologyCreationException e) {
-            throw new SemanticIndexException(e.getMessage());
+        Optional<OWLOntology> optionalTBox;
+        if (optionalOntology.isPresent()) {
+            try {
+                OWLOntology tbox = newManager.copyOntology(optionalOntology.get(), OntologyCopy.SHALLOW);
+                newManager.removeAxioms(tbox, tbox.getABoxAxioms(Imports.EXCLUDED));
+                optionalTBox = Optional.of(tbox);
+            } catch (OWLOntologyCreationException e) {
+                throw new SemanticIndexException(e.getMessage());
+            }
         }
-        newManager.removeAxioms(tbox, tbox.getABoxAxioms(Imports.EXCLUDED));
+        else
+            optionalTBox = Optional.empty();
 
-        return QuestConfiguration.defaultBuilder()
+        QuestConfiguration.Builder<? extends QuestConfiguration.Builder> builder = QuestConfiguration.defaultBuilder()
                 .obdaModel(ppMapping)
-                .ontology(tbox)
                 .properties(properties)
                 .jdbcUrl(jdbcUrl)
                 .jdbcUser(DEFAULT_USER)
                 .jdbcPassword(DEFAULT_PASSWORD)
                 //TODO: remove it (required by Tomcat...)
                 .jdbcDriver("org.h2.Driver")
-                .iriDictionary(dataRepository.getUriMap())
-                .build();
+                .iriDictionary(dataRepository.getUriMap());
+
+        optionalTBox.ifPresent(builder::ontology);
+        return builder.build();
     }
 
     private static OBDAModel createPPMapping(RDBMSSIRepositoryManager dataRepository) {
