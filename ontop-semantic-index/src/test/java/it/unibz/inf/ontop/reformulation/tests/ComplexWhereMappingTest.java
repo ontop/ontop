@@ -22,17 +22,14 @@ package it.unibz.inf.ontop.reformulation.tests;
 
 import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.injection.QuestCoreSettings;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
+import it.unibz.inf.ontop.si.OntopSemanticIndexLoader;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.semanticweb.owlapi.io.ToStringRenderer;
 import org.semanticweb.owlapi.model.OWLIndividual;
 import org.semanticweb.owlapi.model.OWLLiteral;
-import org.semanticweb.owlapi.reasoner.ReasonerInternalException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -53,10 +50,8 @@ public class ComplexWhereMappingTest {
 
 	private Connection conn;
 
-	Logger log = LoggerFactory.getLogger(this.getClass());
-
-	final String owlfile = "src/test/resources/test/complexmapping.owl";
-	final String obdafile = "src/test/resources/test/complexwheremapping.obda";
+	private static final String owlfile = "src/test/resources/test/complexmapping.owl";
+	private static final String obdafile = "src/test/resources/test/complexwheremapping.obda";
 
 	private static final String url = "jdbc:h2:mem:questjunitdb";
 	private static final String username = "sa";
@@ -143,13 +138,10 @@ public class ComplexWhereMappingTest {
 		}
 	}
 
-    @Test
-	public void testViEqSig() throws Exception {
-
+	private static QuestConfiguration createConfiguration() {
 		Properties p = new Properties();
-		p.put(QuestCoreSettings.ABOX_MODE, QuestConstants.VIRTUAL);
 		p.put(QuestCoreSettings.OPTIMIZE_EQUIVALENCES, "true");
-		QuestConfiguration config = QuestConfiguration.defaultBuilder()
+		return QuestConfiguration.defaultBuilder()
 				.nativeOntopMappingFile(obdafile)
 				.ontologyFile(owlfile)
 				.properties(p)
@@ -157,26 +149,23 @@ public class ComplexWhereMappingTest {
 				.jdbcUser(username)
 				.jdbcPassword(password)
 				.build();
-
-		runTests(config);
 	}
 
-    @Test(expected = ReasonerInternalException.class)
+    @Test
+	public void testViEqSig() throws Exception {
+		runTests(createConfiguration());
+	}
+
+    @Test
     public void testClassicEqSig() throws Exception {
 
 		Properties p = new Properties();
-		p.put(QuestCoreSettings.ABOX_MODE, QuestConstants.CLASSIC);
 		p.put(QuestCoreSettings.OPTIMIZE_EQUIVALENCES, "true");
-		p.put(QuestCoreSettings.OBTAIN_FROM_MAPPINGS, "true");
-		QuestConfiguration config = QuestConfiguration.defaultBuilder()
-				.ontologyFile(owlfile)
-				.properties(p)
-				.jdbcUrl(url)
-				.jdbcUser(username)
-				.jdbcPassword(password)
-				.build();
+		QuestConfiguration obdaConfig = createConfiguration();
 
-		runTests(config);
+		try(OntopSemanticIndexLoader loader = OntopSemanticIndexLoader.loadVirtualAbox(obdaConfig, p)) {
+			runTests(loader.getConfiguration());
+		}
 	}
 
 }

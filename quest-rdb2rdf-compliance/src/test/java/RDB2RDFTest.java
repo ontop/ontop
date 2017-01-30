@@ -32,13 +32,12 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.common.io.Resources;
+import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.exception.InvalidMappingException;
 import it.unibz.inf.ontop.injection.OBDASettings;
 import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.injection.QuestConfiguration.Builder;
 import it.unibz.inf.ontop.model.OBDAModel;
-import it.unibz.inf.ontop.model.SQLMappingFactory;
-import it.unibz.inf.ontop.model.impl.SQLMappingFactoryImpl;
 import it.unibz.inf.ontop.injection.QuestCoreSettings;
 import it.unibz.inf.ontop.owlapi.directmapping.DirectMappingEngine;
 import it.unibz.inf.ontop.rdf4j.repository.OntopVirtualRepository;
@@ -104,7 +103,6 @@ public class RDB2RDFTest {
 
 	private static OWLOntology EMPTY_ONT;
 	private static Properties PROPERTIES;
-	private static final SQLMappingFactory MAPPING_FACTORY = SQLMappingFactoryImpl.getInstance();
 
 	private static final String JDBC_URL = "jdbc:h2:mem:questrepository";
 	private static final String DB_USER = "sa";
@@ -277,7 +275,7 @@ public class RDB2RDFTest {
 		else {
 			configuration = bootstrapDMConfiguration();
 		}
-		OntopVirtualRepository repo = new OntopVirtualRepository(name, configuration);
+		OntopVirtualRepository repo = new OntopVirtualRepository(configuration);
 		repo.initialize();
 		return repo;
 	}
@@ -295,9 +293,6 @@ public class RDB2RDFTest {
 				.jdbcDriver(JDBC_DRIVER)
 				.jdbcUser(DB_USER)
 				.jdbcPassword(DB_PASSWORD);
-		// TODO: re-enable these options
-		//obdaSource.setParameter(RDBMSourceParameterConstants.IS_IN_MEMORY, "true");
-		//obdaSource.setParameter(RDBMSourceParameterConstants.USE_DATASOURCE_FOR_ABOXDUMP, "true");
 	}
 
 	/**
@@ -305,7 +300,7 @@ public class RDB2RDFTest {
 	 */
 	QuestConfiguration bootstrapDMConfiguration()
 			throws SQLException, IOException, InvalidMappingException, OWLOntologyStorageException,
-			OWLOntologyCreationException {
+			OWLOntologyCreationException, DuplicateMappingException {
 
 		QuestConfiguration initialConfiguration = createInMemoryBuilder().build();
 		DirectMappingEngine.BootstrappingResults results = DirectMappingEngine.bootstrap(initialConfiguration, BASE_IRI);
