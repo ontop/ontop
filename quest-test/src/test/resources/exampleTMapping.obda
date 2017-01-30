@@ -3,7 +3,7 @@
 
 [SourceDeclaration]
 sourceUri	Friends
-connectionUrl	jdbc:mysql://10.7.20.39/stockexchange
+connectionUrl	jdbc:mysql://10.7.20.39/stockexchange_new
 username	fish
 password	fish
 driverClass	com.mysql.jdbc.Driver

@@ -1,4 +1,0 @@
-PREFIX : <http://example.org/>
-SELECT ?s (STRLANG(?o,"en-US") AS ?str1) WHERE {
-	?s ?p ?o
-}
