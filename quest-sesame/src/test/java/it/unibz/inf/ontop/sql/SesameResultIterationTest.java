@@ -2,18 +2,16 @@ package it.unibz.inf.ontop.sql;
 
 import static org.junit.Assert.assertTrue;
 
-import it.unibz.inf.ontop.injection.OBDASettings;
 import it.unibz.inf.ontop.injection.QuestConfiguration;
 
 import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.util.Properties;
 import java.util.Scanner;
 
-import it.unibz.inf.ontop.rdf4j.repository.OntopRepositoryConnection;
 import it.unibz.inf.ontop.rdf4j.repository.OntopVirtualRepository;
+import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -60,7 +58,7 @@ public class SesameResultIterationTest {
     private static final String PASSWORD = "";
 
     private Connection sqlConnection;
-    private OntopRepositoryConnection conn;
+    private RepositoryConnection conn;
 
 
     @Before

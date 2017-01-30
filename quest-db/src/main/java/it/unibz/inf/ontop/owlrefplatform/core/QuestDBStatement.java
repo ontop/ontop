@@ -115,17 +115,6 @@ public class QuestDBStatement implements IQuestDBStatement {
 		return st.getRewriting(inputQuery);
 	}
 
-	/**
-	 * Ontop is not SQL-specific anymore.
-	 *
-	 * Use getExecutableQuery instead.
-	 */
-	@Deprecated
-	public String getSQL(String sparqlQuery) throws OBDAException {
-		ExecutableQuery executableQuery = getExecutableQuery(sparqlQuery);
-		return ((SQLExecutableQuery) executableQuery).getSQL();
-	}
-
 	@Override
 	public ExecutableQuery getExecutableQuery(String inputQuery) throws OBDAException {
 		return st.getExecutableQuery(inputQuery);

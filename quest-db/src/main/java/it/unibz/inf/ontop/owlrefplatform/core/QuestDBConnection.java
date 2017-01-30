@@ -20,7 +20,6 @@ package it.unibz.inf.ontop.owlrefplatform.core;
  * #L%
  */
 
-import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
 import it.unibz.inf.ontop.model.OBDAConnection;
 import it.unibz.inf.ontop.model.OBDAException;
 

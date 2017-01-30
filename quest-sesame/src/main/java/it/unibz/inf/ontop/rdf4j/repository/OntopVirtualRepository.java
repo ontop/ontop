@@ -22,28 +22,51 @@ package it.unibz.inf.ontop.rdf4j.repository;
 
 import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.model.OBDAException;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestDBConnection;
 import it.unibz.inf.ontop.owlrefplatform.questdb.QuestDBVirtualStore;
 
+import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.eclipse.rdf4j.repository.RepositoryException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class OntopVirtualRepository extends AbstractOntopRepository {
 
-	private QuestDBVirtualStore virtualStore;
+	private final QuestDBVirtualStore virtualStore;
 	private QuestDBConnection questDBConn;
+	private boolean initialized = false;
+	private static final Logger logger = LoggerFactory.getLogger(AbstractOntopRepository.class);
 	
 	public OntopVirtualRepository(QuestConfiguration configuration) {
 		super();
 		this.virtualStore = new QuestDBVirtualStore(configuration);
 	}
+
 	/**
-	 * This method leads to the reasoner being initalized, which includes the call to {@code Quest.setupRepository}: connecting to the database,
-	 * analyzing mappings etc. This must be called before any queries are run, i.e. before {@code getQuestConnection}.
+	 * Returns a new RepositoryConnection.
+	 *
+	 * (No repository connection sharing for the sake
+	 *  of thread-safeness)
+	 *
+	 */
+	public RepositoryConnection getConnection() throws RepositoryException {
+		try {
+			return new OntopRepositoryConnection(this, getQuestConnection());
+		} catch (OBDAException e) {
+			logger.error("Error creating repo connection: " + e.getMessage());
+			throw new RepositoryException(e.getMessage());
+		}
+	}
+
+
+	/**
+	 * This method leads to the reasoner being initialized (connecting to the database,
+	 * analyzing mappings, etc.). This must be called before any queries are run, i.e. before {@code getConnection}.
 	 * 
 	 */
 	@Override
 	public void initialize() throws RepositoryException{
-		super.initialize();
+		initialized = true;
 		try {
 			this.virtualStore.initialize();
 		}
@@ -54,29 +77,33 @@ public class OntopVirtualRepository extends AbstractOntopRepository {
 	
 	/**
 	 * Returns a connection which can be used to run queries over the repository
-	 * Before this method can be used, {@link initialize()} must be called once.
+	 * Before this method can be used, initialize() must be called once.
 	 */
-	@Override
-	public QuestDBConnection getQuestConnection() throws OBDAException {
-		if(!super.initialized)
-			throw new Error("The OntopVirtualRepository must be initialized before getQuestConnection can be run. See https://github.com/ontop/ontop/wiki/API-change-in-OntopVirtualRepository-and-QuestDBVirtualStore");
+	private QuestDBConnection getQuestConnection() throws RepositoryException {
+		if(!initialized)
+			throw new RepositoryException("The OntopVirtualRepository must be initialized before getConnection can be run.");
+		try {
+			questDBConn = this.virtualStore.getConnection();
+			return questDBConn;
+		} catch (OBDAException e) {
+			throw new RepositoryException(e.getMessage());
+		}
 
-		questDBConn = this.virtualStore.getConnection();
-		return questDBConn;
 	}
 
 	@Override
 	public boolean isWritable() throws RepositoryException {
-		// Checks whether this repository is writable, i.e.
-		// if the data contained in this repository can be changed.
-		// The writability of the repository is determined by the writability
-		// of the Sail that this repository operates on.
 		return false;
+	}
+
+	@Override
+	public boolean isInitialized() {
+		return initialized;
 	}
 	
 	@Override
 	public void shutDown() throws RepositoryException {
-		super.shutDown();
+		initialized = false;
 		try {
 			questDBConn.close();
 			virtualStore.close();
@@ -84,10 +111,4 @@ public class OntopVirtualRepository extends AbstractOntopRepository {
 			e.printStackTrace();
 		}
 	}
-
-	public String getType() {
-		return QuestConstants.VIRTUAL;
-	}
-
-
 }

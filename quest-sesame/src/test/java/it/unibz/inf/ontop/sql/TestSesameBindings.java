@@ -25,6 +25,7 @@ import java.util.Scanner;
 import it.unibz.inf.ontop.injection.OBDASettings;
 import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.rdf4j.repository.OntopVirtualRepository;
+import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.junit.After;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -52,7 +53,7 @@ public class TestSesameBindings {
     static String uc_create = "src/test/resources/userconstraints/create.sql";
 
     private Connection sqlConnection;
-    private OntopRepositoryConnection conn;
+    private RepositoryConnection conn;
 
     private static final String URL = "jdbc:h2:mem:countries";
     private static final String USER = "sa";

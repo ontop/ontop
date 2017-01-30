@@ -64,9 +64,7 @@ public class QuestDBVirtualStore implements AutoCloseable {
 	/**
 	 * Must be called once after the constructor call and before any queries are run, that is,
 	 * before the call to getQuestConnection.
-	 * 
-	 * Calls IQuest.setupRepository()
-	 * @throws Exception
+	 *
 	 */
 	public void initialize() throws IOException, OBDASpecificationException {
 		if(this.isinitalized){
@@ -92,18 +90,11 @@ public class QuestDBVirtualStore implements AutoCloseable {
 	 * Get a Quest connection from the Quest instance
 	 * @return the QuestConnection
 	 */
-	public IQuestConnection getQuestConnection() {
+	private IQuestConnection getQuestConnection() throws OBDAException {
 		if(!this.isinitalized)
-			throw new Error("The QuestDBVirtualStore must be initialized before getQuestConnection can be run. See https://github.com/ontop/ontop/wiki/API-change-in-SesameVirtualRepo-and-QuestDBVirtualStore");
-		try {
-			// System.out.println("getquestconn..");
-			return dbConnector.getConnection();
-		} catch (OBDAException e) {
-			// TODO: throw a proper exception
-			e.printStackTrace();
-			// UGLY!
-			return null;
-		}
+			throw new Error("The QuestDBVirtualStore must be initialized before getQuestConnection can be run.");
+		// System.out.println("getquestconn..");
+		return dbConnector.getConnection();
 	}
 
 	/**

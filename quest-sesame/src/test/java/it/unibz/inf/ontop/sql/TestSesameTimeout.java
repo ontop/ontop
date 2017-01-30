@@ -6,12 +6,11 @@ import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.util.Properties;
 import java.util.Scanner;
 
 import it.unibz.inf.ontop.injection.QuestConfiguration;
-import it.unibz.inf.ontop.rdf4j.repository.OntopRepositoryConnection;
 import it.unibz.inf.ontop.rdf4j.repository.OntopVirtualRepository;
+import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -20,7 +19,6 @@ import org.eclipse.rdf4j.query.QueryEvaluationException;
 import org.eclipse.rdf4j.query.QueryLanguage;
 import org.eclipse.rdf4j.query.TupleQuery;
 import org.eclipse.rdf4j.query.TupleQueryResult;
-import it.unibz.inf.ontop.injection.OBDASettings;
 
 /**
  * Tests that user-applied constraints can be provided through
@@ -43,7 +41,7 @@ public class TestSesameTimeout {
 	static String uc_create = "src/test/resources/userconstraints/create.sql";
 
 	private Connection sqlConnection;
-	private OntopRepositoryConnection conn;
+	private RepositoryConnection conn;
 
 	private static final String URL = "jdbc:h2:mem:countries";
 	private static final String USER = "sa";

@@ -45,10 +45,8 @@ import java.io.*;
 import java.net.URL;
 import java.util.*;
 
-// TODO(Xiao): separate the implementation into two subclasses for virtual and classic modes
 public class OntopRepositoryConnection implements org.eclipse.rdf4j.repository.RepositoryConnection, AutoCloseable {
 
-    private static final String ONTOP_VIRTUAL_REPOSITORY_IS_READ_ONLY = "Ontop virtual repository is read-only.";
 	private static final String READ_ONLY_MESSAGE = "Ontop is a read-only system";
 	private AbstractOntopRepository repository;
 	private QuestDBConnection questConn;
@@ -647,14 +645,14 @@ public class OntopRepositoryConnection implements org.eclipse.rdf4j.repository.R
 	public <E extends Exception> void add(
 			org.eclipse.rdf4j.common.iteration.Iteration<? extends Statement, E> statements, Resource... contexts)
 			throws RepositoryException, E {
-		throw new UnsupportedOperationException(ONTOP_VIRTUAL_REPOSITORY_IS_READ_ONLY);
+		throw new UnsupportedOperationException(READ_ONLY_MESSAGE);
 	}
 
 	@Override
 	public <E extends Exception> void remove(
 			org.eclipse.rdf4j.common.iteration.Iteration<? extends Statement, E> statements, Resource... contexts)
 			throws RepositoryException, E {
-        throw new UnsupportedOperationException(ONTOP_VIRTUAL_REPOSITORY_IS_READ_ONLY);
+        throw new UnsupportedOperationException(READ_ONLY_MESSAGE);
 	}
 
 }
