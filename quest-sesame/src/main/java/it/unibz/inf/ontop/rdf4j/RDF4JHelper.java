@@ -19,6 +19,8 @@ import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.model.ValueFactory;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 
+import java.util.Objects;
+
 import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATATYPE_FACTORY;
 
 public class RDF4JHelper {
@@ -37,7 +39,9 @@ public class RDF4JHelper {
 	
 	public static Literal getLiteral(ValueConstant literal)
 	{
-	    switch (literal.getType()) {
+        Objects.requireNonNull(literal);
+
+        switch (literal.getType()) {
             case OBJECT:
             case LITERAL:
             case STRING:
