@@ -14,6 +14,8 @@ import org.junit.Test;
 
 import java.util.Optional;
 
+import static it.unibz.inf.ontop.model.ExpressionOperation.EQ;
+import static it.unibz.inf.ontop.model.ExpressionOperation.NEQ;
 import static it.unibz.inf.ontop.model.Predicate.COL_TYPE.INTEGER;
 import static it.unibz.inf.ontop.pivotalrepr.NonCommutativeOperatorNode.ArgumentPosition.LEFT;
 import static it.unibz.inf.ontop.pivotalrepr.NonCommutativeOperatorNode.ArgumentPosition.RIGHT;
@@ -26,6 +28,7 @@ public class TrueNodesRemovalOptimizerTest {
 
     private final AtomPredicate TABLE1_ARITY_1_PREDICATE = new AtomPredicateImpl("table1", 1);
     private final AtomPredicate TABLE2_ARITY_1_PREDICATE = new AtomPredicateImpl("table2", 1);
+    private final AtomPredicate TABLE3_ARITY_2_PREDICATE = new AtomPredicateImpl("table3", 2);
 
     private final AtomPredicate ANS1_ARITY_0_PREDICATE = new AtomPredicateImpl("ans1", 0);
     private final AtomPredicate ANS1_ARITY_1_PREDICATE = new AtomPredicateImpl("ans1", 1);
@@ -38,6 +41,7 @@ public class TrueNodesRemovalOptimizerTest {
 
     private ExtensionalDataNode DATA_NODE_1 = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE1_ARITY_1_PREDICATE, A));
     private ExtensionalDataNode DATA_NODE_2 = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE2_ARITY_1_PREDICATE, B));
+    private ExtensionalDataNode DATA_NODE_3 = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE3_ARITY_2_PREDICATE, A, B));
 
     private ImmutableFunctionalTerm generateInt(VariableOrGroundTerm argument) {
         return DATA_FACTORY.getImmutableFunctionalTerm(
@@ -83,9 +87,48 @@ public class TrueNodesRemovalOptimizerTest {
         assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, expectedQuery));
     }
 
-
     @Test
     public void testSingleTrueNodeRemoval_innerJoinParent2() throws EmptyQueryException {
+
+        //Unoptimized query
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder(EMPTY_METADATA);
+        DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_1_PREDICATE, X);
+        ConstructionNode rootNode = new ConstructionNodeImpl(projectionAtom.getVariables(),
+                new ImmutableSubstitutionImpl<>(ImmutableMap.of(X, generateInt(A))), empty());
+        queryBuilder.init(projectionAtom, rootNode);
+
+        ImmutableExpression expression = DATA_FACTORY.getImmutableExpression(NEQ, A, B);
+        InnerJoinNode jn = new InnerJoinNodeImpl(Optional.of(expression));
+        queryBuilder.addChild(rootNode, jn);
+
+        TrueNode trueNode = new TrueNodeImpl();
+        queryBuilder.addChild(jn, trueNode);
+        queryBuilder.addChild(jn, DATA_NODE_3);
+
+        IntermediateQuery unOptimizedQuery = queryBuilder.build();
+        System.out.println("\nBefore TrueNode removal: \n" + unOptimizedQuery);
+
+        // Expected query
+        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(EMPTY_METADATA);
+
+        FilterNode filterNode = new FilterNodeImpl(expression);
+        expectedQueryBuilder.init(projectionAtom, rootNode);
+        expectedQueryBuilder.addChild(rootNode, filterNode);
+        expectedQueryBuilder.addChild(filterNode, DATA_NODE_3);
+
+        IntermediateQuery expectedQuery = expectedQueryBuilder.build();
+        System.out.println("\nExpected query: \n" + expectedQuery);
+
+        // Optimize and compare
+        IntermediateQueryOptimizer optimizer = new TrueNodesRemovalOptimizer();
+        IntermediateQuery optimizedQuery = optimizer.optimize(unOptimizedQuery);
+
+        System.out.println("\nQuery after TrueNode Removal: \n" + optimizedQuery);
+        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, expectedQuery));
+    }
+
+    @Test
+    public void testSingleTrueNodeRemoval_innerJoinParent3() throws EmptyQueryException {
 
         //Unoptimized query
         IntermediateQueryBuilder queryBuilder = createQueryBuilder(EMPTY_METADATA);
