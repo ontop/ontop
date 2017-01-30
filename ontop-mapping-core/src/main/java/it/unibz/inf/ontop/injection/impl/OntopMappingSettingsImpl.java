@@ -25,7 +25,7 @@ class OntopMappingSettingsImpl extends OntopOBDASettingsImpl implements OntopMap
     }
 
     static Properties loadDefaultMappingProperties() {
-        return loadDefaultPropertiesFromFile(OntopOBDASettings.class, DEFAULT_FILE);
+        return loadDefaultPropertiesFromFile(OntopMappingSettings.class, DEFAULT_FILE);
     }
 
     @Override
