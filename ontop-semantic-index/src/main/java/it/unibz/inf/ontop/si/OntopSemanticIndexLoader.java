@@ -2,6 +2,10 @@ package it.unibz.inf.ontop.si;
 
 
 import it.unibz.inf.ontop.injection.QuestConfiguration;
+import it.unibz.inf.ontop.si.impl.GraphLoading;
+import it.unibz.inf.ontop.si.impl.OntologyIndividualLoading;
+import it.unibz.inf.ontop.si.impl.OntopSemanticIndexLoaderImpl;
+import it.unibz.inf.ontop.si.impl.VirtualAboxLoading;
 import org.eclipse.rdf4j.query.Dataset;
 import org.semanticweb.owlapi.model.OWLOntology;
 
@@ -39,7 +43,7 @@ public interface OntopSemanticIndexLoader extends AutoCloseable {
      */
     static OntopSemanticIndexLoader loadOntologyIndividuals(OWLOntology ontology,
                                                             Properties properties) throws SemanticIndexException {
-        return OntopSemanticIndexLoaderImpl.loadOntologyIndividuals(ontology, properties);
+        return OntologyIndividualLoading.loadOntologyIndividuals(ontology, properties);
     }
 
     /**
@@ -47,14 +51,14 @@ public interface OntopSemanticIndexLoader extends AutoCloseable {
      */
     static OntopSemanticIndexLoader loadOntologyIndividuals(String ontologyFilePath, Properties properties)
             throws SemanticIndexException {
-        return OntopSemanticIndexLoaderImpl.loadOntologyIndividuals(ontologyFilePath, properties);
+        return OntologyIndividualLoading.loadOntologyIndividuals(ontologyFilePath, properties);
     }
 
     /**
      * Loads the graph in an in-memory Semantic Index.
      */
     static OntopSemanticIndexLoader loadRDFGraph(Dataset dataset, Properties properties) throws SemanticIndexException {
-        return OntopSemanticIndexLoaderImpl.loadRDFGraph(dataset, properties);
+        return GraphLoading.loadRDFGraph(dataset, properties);
     }
 
     /**
@@ -62,6 +66,6 @@ public interface OntopSemanticIndexLoader extends AutoCloseable {
      */
     static OntopSemanticIndexLoader loadVirtualAbox(QuestConfiguration obdaConfiguration, Properties properties)
             throws SemanticIndexException {
-        return OntopSemanticIndexLoaderImpl.loadVirtualAbox(obdaConfiguration, properties);
+        return VirtualAboxLoading.loadVirtualAbox(obdaConfiguration, properties);
     }
 }
