@@ -27,7 +27,6 @@ import it.unibz.inf.ontop.rdf4j.query.OntopGraphQuery;
 import it.unibz.inf.ontop.rdf4j.query.OntopTupleQuery;
 import org.eclipse.rdf4j.IsolationLevel;
 import org.eclipse.rdf4j.IsolationLevels;
-import org.eclipse.rdf4j.OpenRDFUtil;
 import org.eclipse.rdf4j.common.iteration.CloseableIteration;
 import org.eclipse.rdf4j.common.iteration.CloseableIteratorIteration;
 import org.eclipse.rdf4j.model.*;
@@ -38,7 +37,6 @@ import org.eclipse.rdf4j.query.parser.*;
 import org.eclipse.rdf4j.repository.Repository;
 import org.eclipse.rdf4j.repository.RepositoryException;
 import org.eclipse.rdf4j.repository.RepositoryResult;
-import org.eclipse.rdf4j.repository.UnknownTransactionStateException;
 import org.eclipse.rdf4j.rio.*;
 
 import java.io.*;
@@ -113,42 +111,10 @@ public class OntopRepositoryConnection implements org.eclipse.rdf4j.repository.R
 		throw new RepositoryException(READ_ONLY_MESSAGE);
 	}
 
-   
-    protected void autoCommit() throws RepositoryException {
-        if (isAutoCommit()) {
-            commit();
-        }
-    }
-    
-    
-    private int boolToInt(boolean b)
-    {
-    	if(b) return 1;
-    	return 0;
-    }
-
-    protected void removeWithoutCommit(Statement st,
-    		Resource... contexts) throws RepositoryException {
-    	if (contexts.length == 0 && st.getContext() != null) {
-    		contexts = new Resource[] { st.getContext() };
-    	}
-    
-    	removeWithoutCommit(st.getSubject(), st.getPredicate(), st.getObject(), contexts);
-    }
-
-    protected void removeWithoutCommit(Resource subject,
-    		org.eclipse.rdf4j.model.IRI predicate, Value object, Resource... contexts)
-    	throws RepositoryException{
-    	
-    	throw new RepositoryException("Removal not supported!");
-    }
-
-
 
 	@Override
     public void clear(Resource... contexts) throws RepositoryException {
-		//Removes all statements from a specific contexts in the repository. 
-        remove(null, null, null, contexts);
+		throw new RepositoryException(READ_ONLY_MESSAGE);
 	}
 
 	@Override
@@ -467,62 +433,32 @@ public class OntopRepositoryConnection implements org.eclipse.rdf4j.repository.R
 	@Override
     public Update prepareUpdate(QueryLanguage arg0, String arg1)
 			throws RepositoryException, MalformedQueryException {
-		// TODO Auto-generated method stub
-		//Prepares an Update operation. 
-		return null;
+		throw new RepositoryException(READ_ONLY_MESSAGE);
 	}
 
 	@Override
     public Update prepareUpdate(QueryLanguage arg0, String arg1, String arg2)
 			throws RepositoryException, MalformedQueryException {
-		// TODO Auto-generated method stub
-		//Prepares an Update operation. 
-		return null;
+		throw new RepositoryException(READ_ONLY_MESSAGE);
 	}
 
 	@Override
     public void remove(Statement st, Resource... contexts)
 			throws RepositoryException {
-		//Removes the supplied statement from the specified contexts in the repository. 
-		   OpenRDFUtil.verifyContextNotNull(contexts);
-           removeWithoutCommit(st, contexts);
-           autoCommit();
-
+		throw new RepositoryException(READ_ONLY_MESSAGE);
 	}
 
 	@Override
     public void remove(Iterable<? extends Statement> statements, Resource... contexts)
 			throws RepositoryException {
-		//Removes the supplied statements from the specified contexts in this repository.
-		 OpenRDFUtil.verifyContextNotNull(contexts);
-
-         begin();
-
-         try {
-             for (Statement st : statements) {
-                 remove(st, contexts);
-             }
-         } catch (RuntimeException e) {
-             if (autoCommit) {
-                 rollback();
-             }
-             throw e;
-         } finally {
-             autoCommit();
-         }
-
+		throw new RepositoryException(READ_ONLY_MESSAGE);
 	}
 
 
 	@Override
     public void remove(Resource subject, org.eclipse.rdf4j.model.IRI predicate, Value object, Resource... contexts)
 			throws RepositoryException {
-		//Removes the statement(s) with the specified subject, predicate and object 
-		//from the repository, optionally restricted to the specified contexts. 
-		  OpenRDFUtil.verifyContextNotNull(contexts);
-          removeWithoutCommit(subject, predicate, object, contexts);
-          autoCommit();
-
+		throw new RepositoryException(READ_ONLY_MESSAGE);
 	}
 
 	@Override
