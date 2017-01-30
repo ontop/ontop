@@ -23,7 +23,6 @@ import static org.junit.Assert.assertFalse;
  */
 
 public class TestSQLBlankLines {
-
 	private QuestOWLConnection conn;
 	private QuestOWL reasoner;
 
@@ -32,12 +31,14 @@ public class TestSQLBlankLines {
 	final String obdafile = "src/test/resources/sqlgenerator/blanklines.obda";
 
 	private Connection sqlConnection;
-
-
+	private static final String URL = "jdbc:h2:mem:countries";
+	private static final String USER = "sa";
+	private static final String PASSWORD = "";
 
 	@After
 	public void tearDown() throws Exception{
-		conn.close();
+		if (conn != null)
+			conn.close();
 		reasoner.dispose();
 		if (!sqlConnection.isClosed()) {
 			java.sql.Statement s = sqlConnection.createStatement();
@@ -56,7 +57,7 @@ public class TestSQLBlankLines {
 	@Before
 	public void setUp() throws Exception {
 		try {
-			sqlConnection= DriverManager.getConnection("jdbc:h2:mem:countries","sa", "");
+			sqlConnection= DriverManager.getConnection(URL, USER, PASSWORD);
 			java.sql.Statement s = sqlConnection.createStatement();
 
 			try {
@@ -76,6 +77,9 @@ public class TestSQLBlankLines {
 	        QuestConfiguration config = QuestConfiguration.defaultBuilder()
 					.ontologyFile(owlfile)
 					.nativeOntopMappingFile(obdafile)
+					.jdbcUrl(URL)
+					.jdbcUser(USER)
+					.jdbcPassword(PASSWORD)
 					.build();
 	        reasoner = factory.createReasoner(config);
 

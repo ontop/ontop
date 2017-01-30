@@ -1,13 +1,6 @@
 [PrefixDeclaration]
 :		http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#
 
-[SourceDeclaration]
-sourceUri	oracleBolzano
-connectionUrl	jdbc:h2:mem:countries
-username	sa
-password	
-driverClass	org.h2.Driver
-
 [MappingDeclaration] @collection [[
 mappingId	relatedTo
 target		:Class1-{T1C1} :relatedTo :Class2-{T2C1} . 

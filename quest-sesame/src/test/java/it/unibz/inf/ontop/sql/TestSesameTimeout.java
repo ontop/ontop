@@ -44,19 +44,16 @@ public class TestSesameTimeout {
 
 	private Connection sqlConnection;
 	private OntopRepositoryConnection conn;
+
+	private static final String URL = "jdbc:h2:mem:countries";
+	private static final String USER = "sa";
+	private static final String PASSWORD = "";
 	
 
 	@Before
 	public void init()  throws Exception {
 
-		Properties p = new Properties();
-		p.setProperty(OBDASettings.JDBC_NAME, "countries");
-		p.setProperty(OBDASettings.JDBC_URL, "jdbc:h2:mem:countries");
-		p.setProperty(OBDASettings.JDBC_USER, "sa");
-		p.setProperty(OBDASettings.JDBC_PASSWORD, "");
-		p.setProperty(OBDASettings.JDBC_DRIVER, "org.h2.Driver");
-
-		sqlConnection= DriverManager.getConnection("jdbc:h2:mem:countries","sa", "");
+		sqlConnection= DriverManager.getConnection(URL, USER, PASSWORD);
 		java.sql.Statement s = sqlConnection.createStatement();
 
 		try {
@@ -78,7 +75,9 @@ public class TestSesameTimeout {
 		QuestConfiguration configuration = QuestConfiguration.defaultBuilder()
 				.r2rmlMappingFile(r2rmlfile)
 				.ontologyFile(owlfile)
-				.properties(p)
+				.jdbcUrl(URL)
+				.jdbcUser(USER)
+				.jdbcPassword(PASSWORD)
 				.build();
 
 		OntopVirtualRepository repo = new OntopVirtualRepository(configuration);

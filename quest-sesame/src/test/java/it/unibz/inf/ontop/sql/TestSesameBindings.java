@@ -54,10 +54,14 @@ public class TestSesameBindings {
     private Connection sqlConnection;
     private OntopRepositoryConnection conn;
 
+    private static final String URL = "jdbc:h2:mem:countries";
+    private static final String USER = "sa";
+    private static final String PASSWORD = "";
+
     @Before
     public void init() throws Exception {
 
-        sqlConnection = DriverManager.getConnection("jdbc:h2:mem:countries", "sa", "");
+        sqlConnection = DriverManager.getConnection(URL, USER, PASSWORD);
         java.sql.Statement s = sqlConnection.createStatement();
 
         try {
@@ -76,18 +80,12 @@ public class TestSesameBindings {
 
         s.close();
 
-        Properties p = new Properties();
-        p.setProperty(QuestCoreSettings.ABOX_MODE, QuestConstants.VIRTUAL);
-        p.setProperty(OBDASettings.JDBC_NAME, "countries");
-        p.setProperty(OBDASettings.JDBC_URL, "jdbc:h2:mem:countries");
-        p.setProperty(OBDASettings.JDBC_USER, "sa");
-        p.setProperty(OBDASettings.JDBC_PASSWORD, "");
-        p.setProperty(OBDASettings.JDBC_DRIVER, "org.h2.Driver");
-
         QuestConfiguration config = QuestConfiguration.defaultBuilder()
                 .ontologyFile(owlfile)
                 .r2rmlMappingFile(r2rmlfile)
-                .properties(p)
+                .jdbcUrl(URL)
+                .jdbcUser(USER)
+                .jdbcPassword(PASSWORD)
                 .build();
 
         OntopVirtualRepository repo = new OntopVirtualRepository(config);

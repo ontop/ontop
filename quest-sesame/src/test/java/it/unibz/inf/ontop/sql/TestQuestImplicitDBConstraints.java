@@ -34,6 +34,10 @@ public class TestQuestImplicitDBConstraints {
 	static String fk_keyfile = "src/test/resources/userconstraints/fk-keys.lst";
 	static String fk_create = "src/test/resources/userconstraints/fk-create.sql";
 
+	private static final String URL = "jdbc:h2:mem:countries";
+	private static final String USER = "sa";
+	private static final String PASSWORD = "";
+
 	private QuestOWLConnection conn;
 
 	private QuestOWL reasoner;
@@ -42,7 +46,7 @@ public class TestQuestImplicitDBConstraints {
 	
 	public void prepareDB(String sqlfile) throws Exception {
 		try {
-			sqlConnection= DriverManager.getConnection("jdbc:h2:mem:countries","sa", "");
+			sqlConnection= DriverManager.getConnection(URL, USER, PASSWORD);
 			java.sql.Statement s = sqlConnection.createStatement();
 
 			try {
@@ -92,6 +96,9 @@ public class TestQuestImplicitDBConstraints {
         QuestConfiguration config = QuestConfiguration.defaultBuilder()
 				.ontologyFile(uc_owlfile)
 				.nativeOntopMappingFile(uc_obdafile)
+				.jdbcUrl(URL)
+				.jdbcUser(USER)
+				.jdbcPassword(PASSWORD)
 				.build();
         reasoner = factory.createReasoner(config);
         
@@ -117,6 +124,9 @@ public class TestQuestImplicitDBConstraints {
         QuestConfiguration config = QuestConfiguration.defaultBuilder()
 				.nativeOntopMappingFile(uc_obdafile)
 				.ontologyFile(uc_owlfile)
+				.jdbcUrl(URL)
+				.jdbcUser(USER)
+				.jdbcPassword(PASSWORD)
 				.build();
         reasoner = factory.createReasoner(config);
         
@@ -149,7 +159,11 @@ public class TestQuestImplicitDBConstraints {
         QuestConfiguration config = QuestConfiguration.defaultBuilder()
 				.ontologyFile(uc_owlfile)
 				.nativeOntopMappingFile(uc_obdafile)
-				.dbConstraintsReader(userConstraints).build();
+				.dbConstraintsReader(userConstraints)
+				.jdbcUrl(URL)
+				.jdbcUser(USER)
+				.jdbcPassword(PASSWORD)
+				.build();
         reasoner = factory.createReasoner(config);
 
 		// Now we are ready for querying
@@ -177,7 +191,11 @@ public class TestQuestImplicitDBConstraints {
         QuestConfiguration config = QuestConfiguration.defaultBuilder()
 				.ontologyFile(uc_owlfile)
 				.nativeOntopMappingFile(uc_obdafile)
-				.dbConstraintsReader(userConstraints).build();
+				.dbConstraintsReader(userConstraints)
+				.jdbcUrl(URL)
+				.jdbcUser(USER)
+				.jdbcPassword(PASSWORD)
+				.build();
         reasoner = factory.createReasoner(config);
         
 		// Now we are ready for querying
@@ -206,6 +224,9 @@ public class TestQuestImplicitDBConstraints {
         QuestConfiguration config = QuestConfiguration.defaultBuilder()
 				.ontologyFile(fk_owlfile)
 				.nativeOntopMappingFile(fk_obdafile)
+				.jdbcUrl(URL)
+				.jdbcUser(USER)
+				.jdbcPassword(PASSWORD)
 				.build();
         reasoner = factory.createReasoner(config);
         
@@ -243,7 +264,11 @@ public class TestQuestImplicitDBConstraints {
         QuestConfiguration config = QuestConfiguration.defaultBuilder()
 				.ontologyFile(fk_owlfile)
 				.nativeOntopMappingFile(fk_obdafile)
-				.dbConstraintsReader(userConstraints).build();
+				.dbConstraintsReader(userConstraints)
+				.jdbcUrl(URL)
+				.jdbcUser(USER)
+				.jdbcPassword(PASSWORD)
+				.build();
         reasoner = factory.createReasoner(config);
         
 		// Now we are ready for querying

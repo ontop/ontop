@@ -55,7 +55,9 @@ public class SesameResultIterationTest {
     static String uc_keyfile = "src/test/resources/userconstraints/keys.lst";
     static String uc_create = "src/test/resources/userconstraints/create.sql";
 
-    static String jdbcUrl = "jdbc:h2:mem:countries_iteration_test";
+    private static final String URL = "jdbc:h2:mem:countries_iteration_test";
+    private static final String USER = "sa";
+    private static final String PASSWORD = "";
 
     private Connection sqlConnection;
     private OntopRepositoryConnection conn;
@@ -63,7 +65,7 @@ public class SesameResultIterationTest {
 
     @Before
     public void init() throws Exception {
-        sqlConnection = DriverManager.getConnection(jdbcUrl, "sa", "");
+        sqlConnection = DriverManager.getConnection(URL, USER, PASSWORD);
         java.sql.Statement s = sqlConnection.createStatement();
 
         try {
@@ -82,17 +84,13 @@ public class SesameResultIterationTest {
 
         s.close();
 
-        Properties p = new Properties();
-        p.put(OBDASettings.JDBC_NAME, "countries_iteration_test");
-        p.put(OBDASettings.JDBC_URL, jdbcUrl);
-        p.put(OBDASettings.JDBC_USER, "sa");
-        p.put(OBDASettings.JDBC_PASSWORD, "");
-        p.put(OBDASettings.JDBC_DRIVER, "org.h2.Driver");
 
         QuestConfiguration configuration = QuestConfiguration.defaultBuilder()
                 .ontologyFile(owlfile)
                 .r2rmlMappingFile(r2rmlfile)
-                .properties(p)
+                .jdbcUrl(URL)
+                .jdbcUser(USER)
+                .jdbcPassword(PASSWORD)
                 .build();
 
         OntopVirtualRepository repo = new OntopVirtualRepository(configuration);
