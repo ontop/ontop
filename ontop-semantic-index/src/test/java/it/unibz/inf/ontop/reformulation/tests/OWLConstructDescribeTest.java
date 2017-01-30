@@ -20,10 +20,8 @@ package it.unibz.inf.ontop.reformulation.tests;
  * #L%
  */
 
-import it.unibz.inf.ontop.injection.QuestConfiguration;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.inf.ontop.injection.QuestCoreSettings;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
+import it.unibz.inf.ontop.si.OntopSemanticIndexLoader;
 import org.junit.*;
 import org.semanticweb.owlapi.model.OWLAxiom;
 
@@ -38,7 +36,6 @@ import java.util.Properties;
  * both constant and uri objects. It must be clear if it's a data property or
  * object property.
  */
-@Ignore // GUOHUI: 2016-01-16 SI+Mapping mode is disabled
 public class OWLConstructDescribeTest{
 
 	QuestOWL reasoner = null;
@@ -48,36 +45,12 @@ public class OWLConstructDescribeTest{
 	
 	@Before
 	public void setUp() throws Exception {
-
-//			String driver = "org.h2.Driver";
-//			String url = "jdbc:h2:mem:aboxdumptestx1";
-//			String USER = "sa";
-//			String PASSWORD = "";
-//
-//			OBDADataSource source = fac.getJDBCDataSource(URI.create("http://www.obda.org/ABOXDUMP1testx1"));
-//			source.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, driver);
-//			source.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, PASSWORD);
-//			source.setParameter(RDBMSourceParameterConstants.DATABASE_URL, url);
-//			source.setParameter(RDBMSourceParameterConstants.DATABASE_USERNAME, USER);
-//			source.setParameter(RDBMSourceParameterConstants.IS_IN_MEMORY, "true");
-//			source.setParameter(RDBMSourceParameterConstants.USE_DATASOURCE_FOR_ABOXDUMP, "true");
-//
-//			obdaModel = fac.parse();
-//			obdaModel.addSource(source);
-
-			Properties p = new Properties();
-			p.put(QuestCoreSettings.ABOX_MODE, QuestConstants.CLASSIC);
-
-		    QuestOWLFactory factory = new QuestOWLFactory();
-		    QuestConfiguration config = QuestConfiguration.defaultBuilder()
-					.ontologyFile(owlFile)
-					.properties(p)
-					.build();
-		    reasoner = factory.createReasoner(config);
+		try(OntopSemanticIndexLoader loader = OntopSemanticIndexLoader.loadOntologyIndividuals(owlFile, new Properties())) {
+			QuestOWLFactory factory = new QuestOWLFactory();
+			reasoner = factory.createReasoner(loader.getConfiguration());
 			conn = reasoner.getConnection();
 			st = conn.createStatement();
-		
-
+		}
 	}
 	
 	@After

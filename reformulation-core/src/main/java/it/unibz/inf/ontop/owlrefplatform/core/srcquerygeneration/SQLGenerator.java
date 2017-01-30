@@ -115,7 +115,6 @@ public class SQLGenerator implements NativeQueryGenerator {
 	 */
 	private boolean isDistinct = false;
 	private boolean isOrderBy = false;
-	private final boolean isSI;
 
 	@Nullable
 	private IRIDictionary uriRefIds;
@@ -171,7 +170,6 @@ public class SQLGenerator implements NativeQueryGenerator {
 			replace1 = replace2 = "";
 		}
 
-		this.isSI = !preferences.isInVirtualMode();
 		this.uriRefIds = iriDictionary;
 		this.jdbcTypeMapper = jdbcTypeMapper;
  	}
@@ -180,18 +178,14 @@ public class SQLGenerator implements NativeQueryGenerator {
 	 * For clone purposes only
 	 */
 	private SQLGenerator(RDBMetadata metadata, SQLDialectAdapter sqlAdapter, boolean generatingReplace,
-						 boolean isSI, String replace1, String replace2, boolean distinctResultSet,
+						 String replace1, String replace2, boolean distinctResultSet,
 						 IRIDictionary uriRefIds, JdbcTypeMapper jdbcTypeMapper) {
-		if (isSI && uriRefIds == null) {
-			throw new IllegalArgumentException("A SemanticIndexURIMap must be given in the classic mode.");
-		}
 		this.metadata = metadata;
 		this.sqladapter = sqlAdapter;
 		this.operations = buildOperations(sqlAdapter);
 		this.generatingREPLACE = generatingReplace;
 		this.replace1 = replace1;
 		this.replace2 = replace2;
-		this.isSI = isSI;
 		this.distinctResultSet = distinctResultSet;
 		this.uriRefIds = uriRefIds;
 		this.jdbcTypeMapper = jdbcTypeMapper;
@@ -250,7 +244,7 @@ public class SQLGenerator implements NativeQueryGenerator {
 	 */
 	public NativeQueryGenerator cloneIfNecessary() {
 		return new SQLGenerator(metadata.clone(), sqladapter, generatingREPLACE,
-				isSI, replace1, replace2, distinctResultSet, uriRefIds, jdbcTypeMapper);
+				replace1, replace2, distinctResultSet, uriRefIds, jdbcTypeMapper);
 	}
 
 	@Override
@@ -1764,7 +1758,7 @@ public class SQLGenerator implements NativeQueryGenerator {
 				 * A URI function always returns a string, thus it is a string
 				 * column type.
 				 */
-				return !isSI;
+				return !hasIRIDictionary();
 			} else {
 				if (isUnary(function)) {
 					if (functionSymbol.getName().equals("Count")) {
@@ -1824,6 +1818,10 @@ public class SQLGenerator implements NativeQueryGenerator {
 		return false;
 	}
 
+	private boolean hasIRIDictionary() {
+		return uriRefIds != null;
+	}
+
 	private static final Pattern pQuotes = Pattern.compile("[\"`\\['][^\\.]*[\"`\\]']");
 
 	private static String trimLiteral(String string) {
@@ -1870,7 +1868,7 @@ public class SQLGenerator implements NativeQueryGenerator {
 		}
 		if (term instanceof ValueConstant) {
 			ValueConstant ct = (ValueConstant) term;
-			if (isSI) {
+			if (hasIRIDictionary()) {
 				if (ct.getType() == OBJECT
 						|| ct.getType() == LITERAL) {
 					int id = getUriid(ct.getValue());
@@ -1881,7 +1879,7 @@ public class SQLGenerator implements NativeQueryGenerator {
 			}
 			return getSQLLexicalForm(ct);
 		} else if (term instanceof URIConstant) {
-			if (isSI) {
+			if (hasIRIDictionary()) {
 				String uri = term.toString();
 				int id = getUriid(uri);
 				return sqladapter.getSQLLexicalFormString(String.valueOf(id));

@@ -14,9 +14,8 @@ public class ConnectionTools {
         String url = source.getParameter(RDBMSourceParameterConstants.DATABASE_URL);
         String username = source.getParameter(RDBMSourceParameterConstants.DATABASE_USERNAME);
         String password = source.getParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD);
-        String driver = source.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER);
 
-        return man.getConnection(url, username, password, driver);
+        return man.getConnection(url, username, password);
 
     }
 

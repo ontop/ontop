@@ -22,12 +22,10 @@ package it.unibz.inf.ontop.reformulation.tests;
 
 import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.injection.QuestCoreSettings;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import junit.framework.TestCase;
 import org.semanticweb.owlapi.io.ToStringRenderer;
 import org.semanticweb.owlapi.model.OWLObject;
-import org.semanticweb.owlapi.reasoner.IllegalConfigurationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -173,26 +171,8 @@ public class SimpleMappingVirtualABoxTest extends TestCase {
 	public void testViEqSig() throws Exception {
 
 		Properties p = new Properties();
-		p.setProperty(QuestCoreSettings.ABOX_MODE, QuestConstants.VIRTUAL);
 		p.setProperty(QuestCoreSettings.OPTIMIZE_EQUIVALENCES, "true");
 
 		runTests(p);
 	}
-
-	public void testClassicEqSig() throws Exception {
-
-		Properties p = new Properties();
-		p.setProperty(QuestCoreSettings.ABOX_MODE, QuestConstants.CLASSIC);
-		p.setProperty(QuestCoreSettings.OPTIMIZE_EQUIVALENCES, "true");
-		p.setProperty(QuestCoreSettings.OBTAIN_FROM_MAPPINGS, "true");
-
-		try {
-			runTests(p);
-			fail("Was expecting an IllegalConfigurationException " +
-					"(mappings are currently forbidden in the classic mode)");
-		} catch (IllegalConfigurationException e) {
-		}
-	}
-
-
 }

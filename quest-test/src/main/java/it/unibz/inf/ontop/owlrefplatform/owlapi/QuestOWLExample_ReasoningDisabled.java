@@ -359,7 +359,7 @@ public class QuestOWLExample_ReasoningDisabled {
 		 * "Virtual ABox" mode
 		 */
         Properties p = new Properties();
-        p.put(QuestCoreSettings.SQL_GENERATE_REPLACE, QuestConstants.FALSE);
+        p.put(QuestCoreSettings.SQL_GENERATE_REPLACE, false);
 
 //		TEST preference.setCurrentValueOf(QuestPreferences.T_MAPPINGS, QuestConstants.FALSE); // Disable T_Mappings
 

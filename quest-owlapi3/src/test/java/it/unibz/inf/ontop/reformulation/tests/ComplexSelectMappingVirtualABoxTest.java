@@ -178,7 +178,7 @@ public class ComplexSelectMappingVirtualABoxTest  {
 	public void testReplace() throws Exception {
 
 		Properties p = new Properties();
-        p.put(QuestCoreSettings.SQL_GENERATE_REPLACE, QuestConstants.FALSE);
+        p.put(QuestCoreSettings.SQL_GENERATE_REPLACE, false);
 
 		this.query = "PREFIX : <http://it.unibz.inf/obda/test/simple#> SELECT * WHERE { ?x :U ?z. }";
 
@@ -234,9 +234,7 @@ public class ComplexSelectMappingVirtualABoxTest  {
 
     @Test
     public void testConcat4() throws Exception {
-
 		Properties p = new Properties();
-		p.put(QuestCoreSettings.ABOX_MODE, QuestConstants.VIRTUAL);
 
         this.query = "PREFIX : <http://it.unibz.inf/obda/test/simple#> SELECT * WHERE { ?x :U7 ?z. }";
 

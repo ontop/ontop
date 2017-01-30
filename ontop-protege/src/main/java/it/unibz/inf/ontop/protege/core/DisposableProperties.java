@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Properties;
 
 import static it.unibz.inf.ontop.injection.QuestCoreSettings.*;
+import static it.unibz.inf.ontop.model.impl.DeprecatedConstants.*;
 
 /**
  * Mutable

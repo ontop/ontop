@@ -7,6 +7,7 @@ import it.unibz.inf.ontop.model.OBDADataFactory;
 import it.unibz.inf.ontop.model.OBDAException;
 import it.unibz.inf.ontop.model.OBDAModel;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
+import it.unibz.inf.ontop.owlrefplatform.core.ExecutableQuery;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.*;
@@ -339,8 +340,7 @@ public class CanonicalURIOntowisTest {
 				/*
 				 * Print the query summary
 				 */
-                QuestOWLStatement qst = (QuestOWLStatement) st;
-                String sqlQuery = qst.getUnfolding(sparqlQuery);
+                ExecutableQuery executableQuery = st.getExecutableQuery(sparqlQuery);
 
                 System.out.println();
                 System.out.println("The input SPARQL query:");
@@ -350,7 +350,7 @@ public class CanonicalURIOntowisTest {
 
                 System.out.println("The output SQL query:");
                 System.out.println("=====================");
-                System.out.println(sqlQuery);
+                System.out.println(executableQuery.toString());
 
                 System.out.println("Query Execution Time:");
                 System.out.println("=====================");

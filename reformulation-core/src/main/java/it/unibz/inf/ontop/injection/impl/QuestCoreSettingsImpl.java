@@ -44,13 +44,6 @@ public class QuestCoreSettingsImpl extends OBDASettingsImpl implements QuestCore
     }
 
     @Override
-    public boolean isInVirtualMode() {
-        String mode = getRequiredProperty(ABOX_MODE);
-
-        return mode.equals(QuestConstants.VIRTUAL);
-    }
-
-    @Override
     public boolean isKeepAliveEnabled() {
         return getRequiredBoolean(KEEP_ALIVE);
     }

@@ -89,22 +89,15 @@ public class NPDTest {
 		System.out.println("Data Property names: " + (onto.getVocabulary().getDataProperties().size() - 2));
 */
 
-		Properties pref = new Properties();
-		//pref.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC_INDEX);
-		pref.put(QuestCoreSettings.ABOX_MODE, QuestConstants.VIRTUAL);
-		pref.put(QuestCoreSettings.REFORMULATION_TECHNIQUE, QuestConstants.TW);
-		pref.put(QuestCoreSettings.REWRITE, QuestConstants.TRUE);
-		pref.put(QuestCoreSettings.PRINT_KEYS, QuestConstants.FALSE);
-
 		setupDatabase();
 		QuestOWLFactory factory = new QuestOWLFactory();
         QuestConfiguration config = QuestConfiguration.defaultBuilder()
 				.nativeOntopMappingFile(path + "npd.obda")
 				.ontologyFile(path + "npd-v2.owl")
-				.properties(pref)
 				.jdbcUrl(url)
 				.jdbcUser(username)
 				.jdbcPassword(password)
+				.enableExistentialReasoning(true)
 				.build();
         QuestOWL reasoner = factory.createReasoner(config);
 		

@@ -83,8 +83,7 @@ public class TMappingConcurrencyErrorFixTest{
 		connection.commit();
 	
 		Properties p = new Properties();
-		p.setProperty(QuestCoreSettings.ABOX_MODE, QuestConstants.VIRTUAL);
-		p.setProperty(QuestCoreSettings.OBTAIN_FULL_METADATA, QuestConstants.FALSE);
+		p.put(QuestCoreSettings.OBTAIN_FULL_METADATA, false);
 		// Creating a new instance of the reasoner
         QuestOWLFactory factory = new QuestOWLFactory();
         QuestConfiguration config = QuestConfiguration.defaultBuilder()

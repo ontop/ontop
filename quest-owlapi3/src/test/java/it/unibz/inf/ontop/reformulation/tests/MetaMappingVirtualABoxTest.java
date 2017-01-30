@@ -166,28 +166,13 @@ public class MetaMappingVirtualABoxTest {
         }
 	}
 
-
-
     @Test
 	public void testViEqSig() throws Exception {
 
 		Properties p = new Properties();
-		p.setProperty(QuestCoreSettings.ABOX_MODE, QuestConstants.VIRTUAL);
 		p.setProperty(QuestCoreSettings.OPTIMIZE_EQUIVALENCES, "true");
 
 		runTests(p);
 	}
-
-	@Test(expected = IllegalConfigurationException.class)
-	public void testClassicEqSig() throws Exception {
-
-		Properties p = new Properties();
-		p.setProperty(QuestCoreSettings.ABOX_MODE, QuestConstants.CLASSIC);
-		p.setProperty(QuestCoreSettings.OPTIMIZE_EQUIVALENCES, "true");
-		p.setProperty(QuestCoreSettings.OBTAIN_FROM_MAPPINGS, "true");
-
-		runTests(p);
-	}
-
 
 }

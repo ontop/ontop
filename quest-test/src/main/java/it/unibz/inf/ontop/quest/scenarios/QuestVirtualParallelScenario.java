@@ -45,7 +45,7 @@ public abstract class QuestVirtualParallelScenario extends QuestParallelScenario
 			configBuilder.propertyFile(parameterFileURL);
 		}
 
-        OntopVirtualRepository repo = new OntopVirtualRepository(getClass().getName(), configBuilder.build());
+        OntopVirtualRepository repo = new OntopVirtualRepository(configBuilder.build());
         repo.initialize();
         return repo;
 	}

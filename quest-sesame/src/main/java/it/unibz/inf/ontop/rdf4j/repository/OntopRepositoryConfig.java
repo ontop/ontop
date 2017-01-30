@@ -204,11 +204,6 @@ public class OntopRepositoryConfig extends AbstractRepositoryImplConfig {
             } else {
                 p.setProperty(QuestCoreSettings.REWRITE, "false");
             }
-            if (rewriting.equals("TreeWitness")) {
-                p.setProperty(QuestCoreSettings.REFORMULATION_TECHNIQUE, QuestConstants.TW);
-            } else if (rewriting.equals("Default")) {
-                p.setProperty(QuestCoreSettings.REFORMULATION_TECHNIQUE, QuestConstants.UCQBASED);
-            }
 
             switch (quest_type) {
 //                case IN_MEMORY_QUEST_TYPE:

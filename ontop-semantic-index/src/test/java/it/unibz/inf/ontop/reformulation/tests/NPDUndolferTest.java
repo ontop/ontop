@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.reformulation.tests;
 
 import it.unibz.inf.ontop.injection.OntopRuntimeSettings;
 import it.unibz.inf.ontop.injection.QuestConfiguration;
+import it.unibz.inf.ontop.owlrefplatform.core.ExecutableQuery;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
 import it.unibz.inf.ontop.injection.QuestCoreSettings;
 import it.unibz.inf.ontop.owlrefplatform.core.SQLExecutableQuery;
@@ -167,8 +168,11 @@ public class NPDUndolferTest extends TestCase {
                 "}" +
                 "ORDER BY ?facility";
 
-        String unf = getNPDUnfolding(q09);
-        String unf_rew = getNPDUnfoldingThroughRewriting(q09);
+        String unf = getNPDUnfolding(q09, new Properties());
+
+        Properties p = new Properties();
+        p.put(OntopRuntimeSettings.REWRITE, true);
+        String unf_rew = getNPDUnfolding(q09, p);
 
         assertEquals(countUnions(unf), countUnions(unf_rew));
 
@@ -190,8 +194,11 @@ public class NPDUndolferTest extends TestCase {
                 "}" +
                 "ORDER BY ?wellbore";
 
-        String unf = getNPDUnfolding(q10);
-        String unf_rew = getNPDUnfoldingThroughRewriting(q10);
+        String unf = getNPDUnfolding(q10, new Properties());
+
+        Properties p = new Properties();
+        p.put(OntopRuntimeSettings.REWRITE, true);
+        String unf_rew = getNPDUnfolding(q10, p);
 
         assertEquals(countUnions(unf), countUnions(unf_rew));
 
@@ -206,41 +213,6 @@ public class NPDUndolferTest extends TestCase {
 
         return cnt;
     }
-
-    /**
-     * constructs the unfolding passing by rewriting
-     *
-     * @param query
-     * @return
-     * @throws Exception
-     */
-
-    private String getNPDUnfoldingThroughRewriting(String query) throws Exception {
-
-		Properties pref = new Properties();
-		pref.put(QuestCoreSettings.DBTYPE, QuestConstants.SEMANTIC_INDEX);
-		pref.put(QuestCoreSettings.ABOX_MODE, QuestConstants.CLASSIC);
-		pref.put(QuestCoreSettings.REFORMULATION_TECHNIQUE, QuestConstants.TW);
-		pref.put(QuestCoreSettings.REWRITE, QuestConstants.TRUE);
-
-        QuestOWLFactory factory = new QuestOWLFactory();
-        QuestConfiguration config = QuestConfiguration.defaultBuilder()
-                .nativeOntopMappingFile(obdafile)
-                .ontologyFile(owlfile)
-                .properties(pref)
-                .build();
-        QuestOWL reasoner = factory.createReasoner(config);
-
-		QuestOWLConnection qconn =  reasoner.getConnection();
-		QuestOWLStatement st = qconn.createStatement();
-
-		String unfolding = ((SQLExecutableQuery)st.getExecutableQuery(query)).getSQL();
-		st.close();
-		
-		reasoner.dispose();
-		
-		return unfolding;
-	}
 	
 	/**
 	 * constructs directly the unfolding
@@ -250,31 +222,19 @@ public class NPDUndolferTest extends TestCase {
 	 * @throws Exception
 	 */
 	
-	private String getNPDUnfolding(String query) throws Exception {
+	private String getNPDUnfolding(String query, Properties p) throws Exception {
+        QuestOWLFactory fac = new QuestOWLFactory();
+        try (OntopSemanticIndexLoader loader = OntopSemanticIndexLoader.loadOntologyIndividuals(owlfile, p);
+             QuestOWL quest = fac.createReasoner(loader.getConfiguration());
+             QuestOWLConnection qconn = quest.getConnection();
+             QuestOWLStatement st = qconn.createStatement()) {
 
-        Properties pref = new Properties();
-        pref.put(QuestCoreSettings.DBTYPE, QuestConstants.SEMANTIC_INDEX);
-        pref.put(QuestCoreSettings.ABOX_MODE, QuestConstants.CLASSIC);
-        //pref.put(QuestPreferences.REFORMULATION_TECHNIQUE, QuestConstants.TW);
-        //pref.put(QuestPreferences.REWRITE, QuestConstants.TRUE);
-
-        QuestOWLFactory factory = new QuestOWLFactory();
-        QuestConfiguration config = QuestConfiguration.defaultBuilder()
-                .nativeOntopMappingFile(obdafile)
-                .ontologyFile(owlfile)
-                .properties(pref)
-                .build();
-        QuestOWL reasoner = factory.createReasoner(config);
-
-        QuestOWLConnection qconn =  reasoner.getConnection();
-        QuestOWLStatement st = qconn.createStatement();
-
-        String unfolding = ((SQLExecutableQuery)st.getExecutableQuery(query)).getSQL();
-        st.close();
-		
-		reasoner.dispose();
-		
-		return unfolding;
+            ExecutableQuery executableQuery = st.getExecutableQuery(query);
+            if (executableQuery instanceof SQLExecutableQuery)
+                return ((SQLExecutableQuery) executableQuery).getSQL();
+            else
+                throw new IllegalStateException("Was expecting a SQLExecutableQuery");
+        }
 	}
 	
 	/**

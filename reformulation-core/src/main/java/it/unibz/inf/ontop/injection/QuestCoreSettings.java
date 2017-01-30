@@ -21,8 +21,6 @@ package it.unibz.inf.ontop.injection;
  */
 
 
-import java.util.Optional;
-
 /**
  * A class that represents the preferences overwritten by the user.
  *
@@ -31,12 +29,6 @@ import java.util.Optional;
 public interface QuestCoreSettings extends OBDASettings, OntopRuntimeSettings {
 
 	boolean isKeyPrintingEnabled();
-
-	/**
-	 * TODO: remove it when the virtual and classic A-Box modes will be completely isolated.
-     */
-	boolean isInVirtualMode();
-
 
 	//--------------------------
 	// Connection configuration
@@ -54,20 +46,15 @@ public interface QuestCoreSettings extends OBDASettings, OntopRuntimeSettings {
 	//-------------------
 
 	@Deprecated
-	Optional<Boolean> getBoolean(String key);
-	@Deprecated
 	boolean getRequiredBoolean(String key);
-
-	@Deprecated
-	String getRequiredProperty(String key);
 
 
 	//--------------------------
 	// Keys
 	//--------------------------
 
+	@Deprecated
 	String	REFORMULATION_TECHNIQUE	= "org.obda.owlreformulationplatform.reformulationTechnique";
-	String	ABOX_MODE				= "org.obda.owlreformulationplatform.aboxmode";
 
 	/**
 	 * Options to specify base IRI.
@@ -90,16 +77,4 @@ public interface QuestCoreSettings extends OBDASettings, OntopRuntimeSettings {
 	String REMOVE_ABANDONED = "remove_abandoned";
 	String ABANDONED_TIMEOUT = "abandoned_timeout";
 	String KEEP_ALIVE = "keep_alive";
-
-
-	//------------------------------
-	// Classic A-box-specific keys
-	// TODO: move them into an extension dedicated to the classic A-Box mode
-	//------------------------------
-
-	String	DBTYPE					= "org.obda.owlreformulationplatform.dbtype";
-	//	String	DATA_LOCATION			= "org.obda.owlreformulationplatform.datalocation";
-	String  OBTAIN_FROM_ONTOLOGY	= "org.obda.owlreformulationplatform.obtainFromOntology";
-	String  OBTAIN_FROM_MAPPINGS	= "org.obda.owlreformulationplatform.obtainFromMappings";
-	String STORAGE_LOCATION = "STORAGE_LOCATION";
 }

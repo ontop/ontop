@@ -111,7 +111,7 @@ public class R2RMLImportAction extends ProtegeAction {
 					URI sourceID = dataSource.getSourceID();
 
 					try {
-						OBDAModel parsedModel = configuration.loadProvidedSpecification();
+						OBDAModel parsedModel = configuration.loadProvidedPPMapping();
 
 						/**
 						 * TODO: improve this inefficient method (batch processing, not one by one)

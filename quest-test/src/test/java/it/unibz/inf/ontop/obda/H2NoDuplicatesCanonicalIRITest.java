@@ -69,7 +69,7 @@ public class H2NoDuplicatesCanonicalIRITest {
 
 		Properties properties = new Properties();
 		// TODO: better integrate
-		properties.setProperty(QuestSettings.SQL_GENERATE_REPLACE, QuestConstants.FALSE);
+		properties.put(QuestSettings.SQL_GENERATE_REPLACE, false);
 
 		QuestConfiguration config = QuestConfiguration.defaultBuilder()
 				.ontologyFile(owlfile)

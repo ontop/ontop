@@ -224,7 +224,6 @@ public class QuestOWLExample_OntowisTests {
 		 * "Virtual ABox" mode
 		 */
 		Properties p = new Properties();
-		p.setProperty(QuestCoreSettings.ABOX_MODE, QuestConstants.VIRTUAL);
 		//		TEST preference.setProperty(QuestPreferences.T_MAPPINGS, QuestConstants.FALSE); // Disable T_Mappings
 
 		/*

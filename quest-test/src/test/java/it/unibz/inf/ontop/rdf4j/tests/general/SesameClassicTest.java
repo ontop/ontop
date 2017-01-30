@@ -43,7 +43,6 @@ import org.eclipse.rdf4j.repository.Repository;
 import org.eclipse.rdf4j.repository.RepositoryException;
 import org.eclipse.rdf4j.rio.RDFFormat;
 import org.eclipse.rdf4j.rio.RDFParseException;
-import it.unibz.inf.ontop.rdf4j.repository.OntopClassicInMemoryRepository;
 
 
 public class SesameClassicTest extends TestCase {

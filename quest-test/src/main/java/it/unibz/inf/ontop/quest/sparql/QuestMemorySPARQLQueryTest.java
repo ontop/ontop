@@ -24,7 +24,6 @@ import junit.framework.Test;
 
 import org.eclipse.rdf4j.query.Dataset;
 import org.eclipse.rdf4j.repository.Repository;
-import it.unibz.inf.ontop.rdf4j.repository.OntopClassicInMemoryRepository;
 
 public class QuestMemorySPARQLQueryTest extends SPARQLQueryParent {
 

@@ -37,7 +37,6 @@ import org.eclipse.rdf4j.query.QueryLanguage;
 import org.eclipse.rdf4j.repository.Repository;
 import org.eclipse.rdf4j.repository.RepositoryResult;
 import org.eclipse.rdf4j.rio.RDFFormat;
-import it.unibz.inf.ontop.rdf4j.repository.OntopClassicInMemoryRepository;
 
 /**
  * This unit test is to ensure the correctness of construct and describe

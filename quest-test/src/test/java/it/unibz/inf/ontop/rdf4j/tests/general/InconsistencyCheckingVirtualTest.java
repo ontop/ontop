@@ -47,8 +47,6 @@ public class InconsistencyCheckingVirtualTest {
 	public void setUp() throws Exception {
 
 		p = new Properties();
-		// ???
-		p.setProperty(QuestCoreSettings.OBTAIN_FROM_ONTOLOGY, QuestConstants.TRUE);
 
 		manager = OWLManager.createOWLOntologyManager();
 		try {

@@ -20,32 +20,10 @@ package it.unibz.inf.ontop.owlrefplatform.core;
  * #L%
  */
 
+@Deprecated
 public class QuestConstants {
 	
 	// Reformulation Techniques
-	public static final String PERFECTREFORMULATION = "PerfectRef";
-	public static final String UCQBASED = "UCQ-based";
+	@Deprecated
 	public static final String TW = "TreeWitness";
-	
-	// ABox modes
-	public static final String CLASSIC = "classic";
-	public static final String VIRTUAL = "virtual";
-	
-	// DBtype
-	public static final String SEMANTIC_INDEX = "semantic";
-	public static final String UNIVERSAL = "universal";
-	public static final String DIRECT = "direct";
-	
-	// Storage location
-	public static final String JDBC = "jdbc";
-	public static final String INMEMORY = "h2-inmemory";
-	
-	// Boolean value
-	public static final String TRUE = "true";
-	public static final String FALSE = "false";
-	
-	//Unfolding Strategies
-	public static final String TDOWN = "topdown";
-	public static final String BUP = "bottomup";
-	
 }

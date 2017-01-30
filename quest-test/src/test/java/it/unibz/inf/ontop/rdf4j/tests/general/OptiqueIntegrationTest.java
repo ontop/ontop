@@ -18,10 +18,7 @@ public class OptiqueIntegrationTest extends AbstractVirtualSesameTest {
 
 	private static Properties buildProperties() {
 		Properties p = new Properties();
-		p.setProperty(QuestCoreSettings.ABOX_MODE,
-				QuestConstants.VIRTUAL);
-		p.setProperty(QuestCoreSettings.REWRITE, "true");
-		p.setProperty(QuestCoreSettings.REFORMULATION_TECHNIQUE, QuestConstants.TW);
+		p.put(QuestCoreSettings.REWRITE, true);
 		// set jdbc params in config
 		p.setProperty(QuestCoreSettings.JDBC_NAME, "npd");
 		p.setProperty(QuestCoreSettings.JDBC_URL,

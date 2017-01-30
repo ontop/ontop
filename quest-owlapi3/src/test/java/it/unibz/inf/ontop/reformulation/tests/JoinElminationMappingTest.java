@@ -31,7 +31,6 @@ import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import junit.framework.TestCase;
 
-import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
 import it.unibz.inf.ontop.injection.QuestCoreSettings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,8 +45,7 @@ import org.slf4j.LoggerFactory;
  * without optimizations.
  * 
  * The data is obtained from an inmemory database with the stock exchange
- * tuples. If the scenario is run in classic, this data gets imported
- * automatically by the reasoner.
+ * tuples.
  */
 public class JoinElminationMappingTest extends TestCase {
 	private Connection conn;
@@ -92,12 +90,7 @@ public class JoinElminationMappingTest extends TestCase {
 	
 	private void runTests(Properties p) throws Exception {
 		// Creating a new instance of the reasoner
-		QuestOWLFactory factory = new QuestOWLFactory();
-		QuestConfiguration configuration;
-		if (p.getProperty(QuestCoreSettings.ABOX_MODE).equals(QuestConstants.VIRTUAL) ||
-				Boolean.getBoolean(p.getProperty(QuestCoreSettings.OBTAIN_FROM_MAPPINGS))) {
-
-			configuration = QuestConfiguration.defaultBuilder()
+		QuestConfiguration configuration = QuestConfiguration.defaultBuilder()
 					.nativeOntopMappingFile(obdafile)
 					.ontologyFile(owlfile)
 					.properties(p)
@@ -105,14 +98,8 @@ public class JoinElminationMappingTest extends TestCase {
 					.jdbcUser(username)
 					.jdbcPassword(password)
 					.build();
-		}
-		else {
-			configuration = QuestConfiguration.defaultBuilder()
-					.ontologyFile(owlfile)
-					.properties(p)
-					.build();
-		}
 
+		QuestOWLFactory factory = new QuestOWLFactory();
 		QuestOWL reasoner = factory.createReasoner(configuration);
 		reasoner.flush();
 
@@ -140,106 +127,8 @@ public class JoinElminationMappingTest extends TestCase {
 		assertFalse(fail);
 	}
 
-//	public void testSiEqSig() throws Exception {
-//		Properties p  = new Properties();
-//		p.setProperty(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
-//		p.setProperty(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-//		p.setProperty(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
-//		p.setProperty(QuestPreferences.OBTAIN_FROM_MAPPINGS, "true");
-//		p.setProperty(QuestPreferences.OBTAIN_FROM_ONTOLOGY, "false");
-//		p.setProperty(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC_INDEX);
-//		runTests(new QuestPreferences(p));
-//	}
-//
-//	public void testSiEqNoSig() throws Exception {
-//		Properties p  = new Properties();
-//		p.setProperty(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
-//		p.setProperty(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-//		p.setProperty(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "false");
-//		p.setProperty(QuestPreferences.OBTAIN_FROM_MAPPINGS, "true");
-//		p.setProperty(QuestPreferences.OBTAIN_FROM_ONTOLOGY, "false");
-//		p.setProperty(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC_INDEX);
-//		runTests(new QuestPreferences(p));
-//	}
-//
-//	public void testSiNoEqSig() throws Exception {
-//		Properties p  = new Properties();
-//		p.setProperty(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
-//		p.setProperty(QuestPreferences.OPTIMIZE_EQUIVALENCES, "false");
-//		p.setProperty(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
-//		p.setProperty(QuestPreferences.OBTAIN_FROM_MAPPINGS, "true");
-//		p.setProperty(QuestPreferences.OBTAIN_FROM_ONTOLOGY, "false");
-//		p.setProperty(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC_INDEX);
-//		runTests(new QuestPreferences(p));
-//	}
-//
-//	public void testSiNoEqNoSig() throws Exception {
-//		Properties p  = new Properties();
-//		p.setProperty(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
-//		p.setProperty(QuestPreferences.OPTIMIZE_EQUIVALENCES, "false");
-//		p.setProperty(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "false");
-//		p.setProperty(QuestPreferences.OBTAIN_FROM_MAPPINGS, "true");
-//		p.setProperty(QuestPreferences.OBTAIN_FROM_ONTOLOGY, "false");
-//		p.setProperty(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC_INDEX);
-//		runTests(new QuestPreferences(p));
-//	}
-
-	/*
-	 * Direct Mapping
-	 */
-	public void disabletestDiEqSig() throws Exception {
-		Properties p  = new Properties();
-		p.setProperty(QuestCoreSettings.ABOX_MODE, QuestConstants.CLASSIC);
-		p.setProperty(QuestCoreSettings.OPTIMIZE_EQUIVALENCES, "true");
-		p.setProperty(QuestCoreSettings.OBTAIN_FROM_MAPPINGS, "true");
-		p.setProperty(QuestCoreSettings.OBTAIN_FROM_ONTOLOGY, "false");
-		p.setProperty(QuestCoreSettings.DBTYPE, QuestConstants.DIRECT);
-		runTests(p);
-	}
-
-	public void disabletestDiEqNoSig() throws Exception {
-		Properties p  = new Properties();
-		p.setProperty(QuestCoreSettings.ABOX_MODE, QuestConstants.CLASSIC);
-		p.setProperty(QuestCoreSettings.OPTIMIZE_EQUIVALENCES, "true");
-		p.setProperty(QuestCoreSettings.OBTAIN_FROM_MAPPINGS, "true");
-		p.setProperty(QuestCoreSettings.OBTAIN_FROM_ONTOLOGY, "false");
-		p.setProperty(QuestCoreSettings.DBTYPE, QuestConstants.DIRECT);
-		runTests(p);
-	}
-
-	/**
-	 * This is a very slow test, disable it if you are doing routine checks.
-	 * 
-	 * @throws Exception
-	 */
-	public void disabletestDiNoEqSig() throws Exception {
-		Properties p  = new Properties();
-		p.setProperty(QuestCoreSettings.ABOX_MODE, QuestConstants.CLASSIC);
-		p.setProperty(QuestCoreSettings.OPTIMIZE_EQUIVALENCES, "false");
-		p.setProperty(QuestCoreSettings.OBTAIN_FROM_MAPPINGS, "true");
-		p.setProperty(QuestCoreSettings.OBTAIN_FROM_ONTOLOGY, "false");
-		p.setProperty(QuestCoreSettings.DBTYPE, QuestConstants.DIRECT);
-		runTests(p);
-	}
-
-	/**
-	 * This is a very slow test, disable it if you are doing routine checks.
-	 * 
-	 * @throws Exception
-	 */
-	public void disabletestDiNoEqNoSig() throws Exception {
-		Properties p  = new Properties();
-		p.setProperty(QuestCoreSettings.ABOX_MODE, QuestConstants.CLASSIC);
-		p.setProperty(QuestCoreSettings.OPTIMIZE_EQUIVALENCES, "false");
-		p.setProperty(QuestCoreSettings.OBTAIN_FROM_MAPPINGS, "true");
-		p.setProperty(QuestCoreSettings.OBTAIN_FROM_ONTOLOGY, "false");
-		p.setProperty(QuestCoreSettings.DBTYPE, QuestConstants.DIRECT);
-		runTests(p);
-	}
-
 	public void testViEqSig() throws Exception {
 		Properties p  = new Properties();
-		p.setProperty(QuestCoreSettings.ABOX_MODE, QuestConstants.VIRTUAL);
 		p.setProperty(QuestCoreSettings.OPTIMIZE_EQUIVALENCES, "true");
 
 		runTests(p);
@@ -247,8 +136,6 @@ public class JoinElminationMappingTest extends TestCase {
 
 	public void testViEqNoSig() throws Exception {
 		Properties p  = new Properties();
-		p.setProperty(QuestCoreSettings.ABOX_MODE, QuestConstants.VIRTUAL);
-		p.setProperty(QuestCoreSettings.OPTIMIZE_EQUIVALENCES, "true");
 		runTests(p);
 	}
 
@@ -257,7 +144,6 @@ public class JoinElminationMappingTest extends TestCase {
 	 */
 	public void testViNoEqSig() throws Exception {
 		Properties p  = new Properties();
-		p.setProperty(QuestCoreSettings.ABOX_MODE, QuestConstants.VIRTUAL);
 		p.setProperty(QuestCoreSettings.OPTIMIZE_EQUIVALENCES, "false");
 		runTests(p);
 	}
@@ -267,7 +153,6 @@ public class JoinElminationMappingTest extends TestCase {
 	 */
 	public void testViNoEqNoSig() throws Exception {
 		Properties p  = new Properties();
-		p.setProperty(QuestCoreSettings.ABOX_MODE, QuestConstants.VIRTUAL);
 		p.setProperty(QuestCoreSettings.OPTIMIZE_EQUIVALENCES, "false");
 		runTests(p);
 	}

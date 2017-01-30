@@ -41,7 +41,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Iterator;
@@ -52,8 +51,6 @@ import java.util.Set;
  * the implementation of the reasoning method in the reformulation project.
  */
 public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
-
-	private final QuestSettings preferences;
 
 	StructuralReasoner structuralReasoner;
 
@@ -68,9 +65,6 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 	private boolean questready = false;
 	
 	private Object inconsistent = null;
-
-	// / holds the error that quest had when initializing
-	private String errorMessage = "";
 
 	private Exception questException = null;
 
@@ -91,19 +85,9 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 	private static Logger log = LoggerFactory.getLogger(QuestOWL.class);
 
 	private IQuestConnection conn = null;
-
 	private QuestOWLConnection owlconn = null;
 
-	private final OWLOntologyManager man;
 
-
-	/*
-	 * This configuration will be dropped after initialization
-	 */
-	@Nullable
-	private QuestConfiguration questConfiguration;
-	
-	
 	// //////////////////////////////////////////////////////////////////////////////////////
 	//
 	//  User Constraints are primary and foreign keys not in the database 
@@ -136,9 +120,7 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 			throws IllegalConfigurationException {
         super(rootOntology, owlConfiguration, BufferingMode.BUFFERING);
 
-		questConfiguration = owlConfiguration.getQuestConfiguration();
-		preferences = questConfiguration.getSettings();
-
+		QuestConfiguration questConfiguration = owlConfiguration.getQuestConfiguration();
 
 		/**
 		 * Validates the preferences
@@ -166,8 +148,6 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 		}
 
 		pm = owlConfiguration.getProgressMonitor();
-
-		man = rootOntology.getOWLOntologyManager();
 
 		version = extractVersion();
 
@@ -210,14 +190,16 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 	public QuestOWLStatement getStatement() throws OWLException {
 		if (!questready) {
 			OWLReasonerRuntimeException owlReasonerRuntimeException = new ReasonerInternalException(
-					"Quest was not initialized properly. This is generally indicates, connection problems or error during ontology or mapping pre-processing. \n\nOriginal error message:\n" + questException.getMessage()) ;
+					"Ontop was not initialized properly. This is generally indicates, " +
+							"connection problems or error during ontology or mapping pre-processing. " +
+							"\n\nOriginal error message:\n" + questException.getMessage()) ;
 				owlReasonerRuntimeException.setStackTrace(questException.getStackTrace());
 			throw owlReasonerRuntimeException;
 		}
 		return owlconn.createStatement();
 	}
 
-	private void prepareConnector() throws Exception {
+	private void prepareConnector() throws OBDAException {
 
 		try {
 			if (dbConnector != null)
@@ -228,11 +210,6 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 
 		log.debug("Initializing a new Quest instance...");
 
-		final boolean bObtainFromOntology = preferences.getBoolean(QuestCoreSettings.OBTAIN_FROM_ONTOLOGY)
-				.orElseThrow(() -> new IllegalStateException("Missing property: OBTAIN_FROM_ONTOLOGY"));
-		final boolean bObtainFromMappings = preferences.getBoolean(QuestCoreSettings.OBTAIN_FROM_MAPPINGS)
-				.orElseThrow(() -> new IllegalStateException("Missing property: OBTAIN_FROM_MAPPINGS"));
-		final boolean isVirtualMode = preferences.isInVirtualMode();
 
 		// pm.reasonerTaskStarted("Classifying...");
 		// pm.reasonerTaskBusy();
@@ -245,59 +222,14 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 		
 
 		try {
-			// pm.reasonerTaskProgressChanged(1, 4);
-			// pm.reasonerTaskProgressChanged(2, 4);
-
-			// Retrives the connection from Quest
 			//conn = questInstance.getConnection();
 			conn = dbConnector.getNonPoolConnection();
 			owlconn = new QuestOWLConnection(conn);
-			// pm.reasonerTaskProgressChanged(3, 4);
 
-			// Preparing the data source
-			if (!isVirtualMode) {
-				throw new RuntimeException("TODO: fix the classic A-box mode");
-//				IQuestStatement st = conn.createSIStatement();
-//				if (bObtainFromOntology) {
-//					// Retrieves the ABox from the ontology file.
-//					log.debug("Loading data from Ontology into the database");
-//					OWLAPIABoxIterator aBoxIter = new OWLAPIABoxIterator(importsClosure, questInstance.getVocabulary());
-//					int count = st.insertData(aBoxIter, 5000, 500);
-//					log.debug("Inserted {} triples from the ontology.", count);
-//				}
-//				if (bObtainFromMappings) { // TODO: GUOHUI 2016-01-16: This mode will be removed
-//					// Retrieves the ABox from the target database via mapping.
-//					log.debug("Loading data from Mappings into the database");
-//
-//					QuestMaterializer materializer = new QuestMaterializer(questConfiguration,
-//							translatedOntologyMerge, false);
-//
-//					/*
-//					 * Now we can forget the configuration (not needed anymore)
-//					 */
-//					questConfiguration = null;
-//
-//					Iterator<Assertion> assertionIter = materializer.getAssertionIterator();
-//					int count = st.insertData(assertionIter, 5000, 500);
-//					materializer.disconnect();
-//					log.debug("Inserted {} triples from the mappings.", count);
-//				}
-////				st.createIndexes();
-//				st.close();
-//				if (!conn.getAutoCommit())
-//				conn.commit();
-//
-//				//questInstance.updateSemanticIndexMappings();
-			} else {
-				// VIRTUAL MODE - NO-OP
-			}
 			questready = true;
 			log.debug("Quest has completed the setup and it is ready for query answering!");
-		} catch (Exception e) {
+		} catch (OBDAException e) {
 			throw e;
-		} finally {
-			// pm.reasonerTaskProgressChanged(4, 4);
-			// pm.reasonerTaskStopped();
 		}
 	}
 
@@ -414,7 +346,7 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 		}
 	}
 
-	public void prepareReasoner() throws ReasonerInterruptedException, TimeOutException {
+	private void prepareReasoner() throws ReasonerInterruptedException, TimeOutException {
 		pm.reasonerTaskStarted("Classifying...");
 		pm.reasonerTaskBusy();
 
@@ -429,16 +361,13 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 
 			questready = false;
 			questException = null;
-			errorMessage = "";
 			try {
 				prepareConnector();
 				questready = true;
 				questException = null;
-				errorMessage = "";
 			} catch (Exception e) {
 				questready = false;
 				questException = e;
-				errorMessage = e.getMessage();
 				log.error("Could not initialize the Quest query answering engine. Answering queries will not be available.");
 				log.error(e.getMessage(), e);
 				throw e;

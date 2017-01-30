@@ -4,6 +4,7 @@ import it.unibz.inf.ontop.exception.InvalidMappingException;
 import it.unibz.inf.ontop.exception.InvalidPredicateDeclarationException;
 import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.model.OBDAException;
+import it.unibz.inf.ontop.owlrefplatform.core.ExecutableQuery;
 import org.semanticweb.owlapi.model.*;
 
 
@@ -339,8 +340,7 @@ public class SameAsOntowisTest {
 				/*
 				 * Print the query summary
 				 */
-                QuestOWLStatement qst = (QuestOWLStatement) st;
-                String sqlQuery = qst.getUnfolding(sparqlQuery);
+                ExecutableQuery executableQuery = st.getExecutableQuery(sparqlQuery);
 
                 System.out.println();
                 System.out.println("The input SPARQL query:");
@@ -350,7 +350,7 @@ public class SameAsOntowisTest {
 
                 System.out.println("The output SQL query:");
                 System.out.println("=====================");
-                System.out.println(sqlQuery);
+                System.out.println(executableQuery.toString());
 
                 System.out.println("Query Execution Time:");
                 System.out.println("=====================");

@@ -30,11 +30,7 @@ public class TMappingUOBMShortTest {
 		execute(conn, "src/test/resources/tmapping-uobm/univ-bench-dl.sql");
 
 		Properties pref = new Properties();
-		//pref.put(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC_INDEX);
-		pref.put(QuestCoreSettings.ABOX_MODE, QuestConstants.VIRTUAL);
-		pref.put(QuestCoreSettings.REFORMULATION_TECHNIQUE, QuestConstants.TW);
-		pref.put(QuestCoreSettings.REWRITE, QuestConstants.TRUE);
-		pref.put(QuestCoreSettings.PRINT_KEYS, QuestConstants.TRUE);
+		//pref.put(QuestCoreSettings.PRINT_KEYS, QuestConstants.TRUE);
 
 		QuestOWLFactory factory = new QuestOWLFactory();
         QuestConfiguration config = QuestConfiguration.defaultBuilder()
@@ -44,6 +40,7 @@ public class TMappingUOBMShortTest {
 				.jdbcUrl(url)
 				.jdbcUser(username)
 				.jdbcPassword(password)
+				.enableExistentialReasoning(true)
 				.build();
         QuestOWL reasoner = factory.createReasoner(config);
 	}

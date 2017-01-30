@@ -56,10 +56,8 @@ public class QuestCoreConfigurationImpl extends OBDACoreConfigurationImpl implem
 
         boolean isMapping = isMappingDefined();
 
-        if ((!isMapping) && settings.isInVirtualMode()) {
-            throw new InvalidOntopConfigurationException("Mapping is not specified in virtual mode", this);
-        } else if (isMapping && (!settings.isInVirtualMode())) {
-            throw new InvalidOntopConfigurationException("Mapping is specified in classic A-box mode", this);
+        if (!isMapping) {
+            throw new InvalidOntopConfigurationException("Mapping is not specified", this);
         }
         /**
          * TODO: complete

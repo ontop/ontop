@@ -123,7 +123,7 @@ public abstract class QuestDatatypeParent extends TestCase {
 		if ((parameterFileURL != null) && (!parameterFileURL.isEmpty()))
 				configBuilder.propertyFile(parameterFileURL);
 
-		OntopVirtualRepository repo = new OntopVirtualRepository(getName(), configBuilder.build());
+		OntopVirtualRepository repo = new OntopVirtualRepository(configBuilder.build());
 		repo.initialize();
 		return repo;
 	}

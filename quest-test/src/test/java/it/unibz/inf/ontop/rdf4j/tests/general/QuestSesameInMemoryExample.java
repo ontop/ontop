@@ -23,7 +23,6 @@ package it.unibz.inf.ontop.rdf4j.tests.general;
 import java.io.File;
 import java.util.List;
 
-import it.unibz.inf.ontop.rdf4j.repository.OntopClassicInMemoryRepository;
 import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.query.BindingSet;
 import org.eclipse.rdf4j.query.QueryLanguage;

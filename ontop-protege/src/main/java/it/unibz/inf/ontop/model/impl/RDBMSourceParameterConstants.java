@@ -31,8 +31,4 @@ public class RDBMSourceParameterConstants {
 	public static final String	DATABASE_DRIVER				= OntopSQLSettings.JDBC_DRIVER;
 	
 	public static final String	DATABASE_URL				= OntopSQLSettings.JDBC_URL;
-	
-	public static final String	USE_DATASOURCE_FOR_ABOXDUMP	= "use_datasource_for_aboxdump";
-	
-	public static final String	IS_IN_MEMORY				= "is_in_memory";
 }

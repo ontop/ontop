@@ -89,7 +89,7 @@ public class DistinctResultSetTest { //
                     .propertyFile(configFile)
                     .build();
 
-        repo = new OntopVirtualRepository("my_name", configuration);
+        repo = new OntopVirtualRepository(configuration);
 
         repo.initialize();
 
@@ -147,7 +147,7 @@ public class DistinctResultSetTest { //
 
 
         Properties p = new Properties();
-        p.setProperty(QuestCoreSettings.DISTINCT_RESULTSET, QuestConstants.TRUE);
+        p.put(QuestCoreSettings.DISTINCT_RESULTSET, true);
         String query = "PREFIX : <http://meraka/moss/exampleBooks.owl#>" +
                 " select distinct * {?x a :Author}";
         int nResults = runTestsQuestOWL(p, query);
