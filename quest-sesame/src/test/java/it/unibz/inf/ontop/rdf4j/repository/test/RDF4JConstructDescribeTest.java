@@ -48,13 +48,13 @@ import it.unibz.inf.ontop.rdf4j.repository.OntopClassicInMemoryRepository;
  * @author timi
  *
  */
-public class SesameConstructDescribeTest{
+public class RDF4JConstructDescribeTest {
 
 	OntopRepositoryConnection con = null;
 	Repository repo = null;
 	ValueFactory fac = null;
-	String fileName = "src/test/resources/describeConstruct.ttl";
-	String owlFile = "src/test/resources/describeConstruct.owl";
+	String fileName = "src/test/resources/construct/describeConstruct.ttl";
+	String owlFile = "src/test/resources/construct/describeConstruct.owl";
 	
 	@Before
 	public void setUp() throws Exception {
@@ -246,28 +246,6 @@ public class SesameConstructDescribeTest{
 		Assert.assertEquals(2, result);
 	}
 
-	// https://github.com/ontop/ontop/issues/161
-    @Test
-    public void testConstructOptional() throws Exception {
-        int result = 0;
-        String queryString = "PREFIX : <http://www.semanticweb.org/ontologies/test#> \n" +
-                "CONSTRUCT { ?s :p ?o1. ?s :p ?o2. }\n" +
-                "WHERE {\n" +
-                "OPTIONAL {?s :p1 ?o1}\n" +
-                "OPTIONAL {?s :p2 ?o2}\n" +
-                "}";
-        GraphQuery graphQuery = con.prepareGraphQuery(QueryLanguage.SPARQL,
-                queryString);
-
-        GraphQueryResult gresult = graphQuery.evaluate();
-        while (gresult.hasNext()) {
-            result++;
-            Statement s = gresult.next();
-            //System.out.println(s.toString());
-        }
-        Assert.assertEquals(2, result);
-    }
-	
 	@Test
 	public void testGetStatements0() throws Exception {
 		boolean result = false;
