@@ -25,7 +25,10 @@ import java.io.File;
 import it.unibz.inf.ontop.rdf4j.repository.OntopRepositoryConnection;
 import junit.framework.TestCase;
 
+import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.eclipse.rdf4j.model.Resource;
 import org.eclipse.rdf4j.model.Statement;
@@ -45,15 +48,15 @@ import it.unibz.inf.ontop.rdf4j.repository.OntopClassicInMemoryRepository;
  * @author timi
  *
  */
-public class SesameConstructDescribeTest extends TestCase{
+public class RDF4JConstructDescribeTest {
 
 	OntopRepositoryConnection con = null;
 	Repository repo = null;
 	ValueFactory fac = null;
-	String fileName = "src/test/resources/describeConstruct.ttl";
-	String owlFile = "src/test/resources/describeConstruct.owl";
+	String fileName = "src/test/resources/construct/describeConstruct.ttl";
+	String owlFile = "src/test/resources/construct/describeConstruct.owl";
 	
-	@Override
+	@Before
 	public void setUp() throws Exception {
 		
 		try {
@@ -78,7 +81,7 @@ public class SesameConstructDescribeTest extends TestCase{
 		}
 	}
 	
-	@Override
+	@After
 	public void tearDown() throws Exception {
 		con.close();
 		repo.shutDown();
@@ -242,7 +245,7 @@ public class SesameConstructDescribeTest extends TestCase{
 		}
 		Assert.assertEquals(2, result);
 	}
-	
+
 	@Test
 	public void testGetStatements0() throws Exception {
 		boolean result = false;

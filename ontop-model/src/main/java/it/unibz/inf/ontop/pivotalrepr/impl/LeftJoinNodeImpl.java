@@ -17,6 +17,7 @@ import java.util.stream.Stream;
 import static it.unibz.inf.ontop.model.impl.ImmutabilityTools.foldBooleanExpressions;
 import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
 import static it.unibz.inf.ontop.pivotalrepr.NodeTransformationProposedState.DECLARE_AS_EMPTY;
+import static it.unibz.inf.ontop.pivotalrepr.NodeTransformationProposedState.REPLACE_BY_NEW_NODE;
 import static it.unibz.inf.ontop.pivotalrepr.NodeTransformationProposedState.REPLACE_BY_UNIQUE_NON_EMPTY_CHILD;
 import static it.unibz.inf.ontop.pivotalrepr.NonCommutativeOperatorNode.ArgumentPosition.LEFT;
 import static it.unibz.inf.ontop.pivotalrepr.NonCommutativeOperatorNode.ArgumentPosition.RIGHT;
@@ -285,6 +286,14 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
             case LEFT:
                 throw new UnsupportedOperationException("A TrueNode in the left position of a LeftJoin should not be removed");
             case RIGHT:
+                Optional<ImmutableExpression> condition = getOptionalFilterCondition();
+                if (condition.isPresent()) {
+                    return new NodeTransformationProposalImpl(
+                            REPLACE_BY_NEW_NODE,
+                            new FilterNodeImpl(condition.get()),
+                            ImmutableSet.of()
+                    );
+                }
                 return new NodeTransformationProposalImpl(REPLACE_BY_UNIQUE_NON_EMPTY_CHILD,
                         otherChild, ImmutableSet.of());
             default:

@@ -92,58 +92,60 @@ public class QuestGraphResultSet implements GraphResultSet {
 	 * In case of construct it is called upon next, to process
 	 * the only current result set.
 	 */
-	private List<Assertion> processResults(TupleResultSet result,
-			SesameConstructTemplate template) throws OBDAException {
-		List<Assertion> tripleAssertions = new ArrayList<>();
-		List<ProjectionElemList> peLists = template.getProjectionElemList();
-		
-		Extension ex = template.getExtension();
-		if (ex != null) 
-			{
-				extList = ex.getElements();
-				Map<String, ValueExpr> newExtMap = new HashMap<>();
-                for (ExtensionElem anExtList : extList) {
-                    newExtMap.put(anExtList.getName(), anExtList.getExpr());
-                }
-				extMap = newExtMap;
-			}
-		for (ProjectionElemList peList : peLists) {
-		int size = peList.getElements().size();
-		
-		for (int i = 0; i < size / 3; i++) {
-			
-			ObjectConstant subjectConstant = (ObjectConstant) getConstant(peList.getElements().get(i*3), result);
-			Constant predicateConstant = getConstant(peList.getElements().get(i*3+1), result);
-			Constant objectConstant = getConstant(peList.getElements().get(i*3+2), result);
+    private List<Assertion> processResults(TupleResultSet result,
+                                           SesameConstructTemplate template) throws OBDAException {
+        List<Assertion> tripleAssertions = new ArrayList<>();
+        List<ProjectionElemList> peLists = template.getProjectionElemList();
 
-			// Determines the type of assertion
-			String predicateName = predicateConstant.getValue();
-			Assertion assertion;
-			try {
-				if (predicateName.equals(OBDAVocabulary.RDF_TYPE)) {
-					assertion = ofac.createClassAssertion(objectConstant.getValue(), subjectConstant);
-				} 
-				else {
-					if ((objectConstant instanceof URIConstant) || (objectConstant instanceof BNode)) 
-						assertion = ofac.createObjectPropertyAssertion(predicateName, 
-								subjectConstant, (ObjectConstant) objectConstant);
-					else 
-						assertion = ofac.createDataPropertyAssertion(predicateName, 
-									subjectConstant, (ValueConstant) objectConstant);
-				} 
-				if (assertion != null)
-					tripleAssertions.add(assertion);
-			}
-			catch (InconsistentOntologyException e) {
-				throw new RuntimeException("InconsistentOntologyException: " + 
-							predicateName + " " + subjectConstant + " " + objectConstant);
-			}
-		}
-		}
-		return tripleAssertions;
-	}
-	
-	@Override
+        Extension ex = template.getExtension();
+        if (ex != null) {
+            extList = ex.getElements();
+            Map<String, ValueExpr> newExtMap = new HashMap<>();
+            for (ExtensionElem anExtList : extList) {
+                newExtMap.put(anExtList.getName(), anExtList.getExpr());
+            }
+            extMap = newExtMap;
+        }
+        for (ProjectionElemList peList : peLists) {
+            int size = peList.getElements().size();
+
+            for (int i = 0; i < size / 3; i++) {
+
+                ObjectConstant subjectConstant = (ObjectConstant) getConstant(peList.getElements().get(i * 3), result);
+                Constant predicateConstant = getConstant(peList.getElements().get(i * 3 + 1), result);
+                Constant objectConstant = getConstant(peList.getElements().get(i * 3 + 2), result);
+
+                // A triple can only be constructed when none of bindings is missing
+                if (subjectConstant == null || predicateConstant == null || objectConstant==null){
+                    continue;
+                }
+
+                // Determines the type of assertion
+                String predicateName = predicateConstant.getValue();
+                Assertion assertion;
+                try {
+                    if (predicateName.equals(OBDAVocabulary.RDF_TYPE)) {
+                        assertion = ofac.createClassAssertion(objectConstant.getValue(), subjectConstant);
+                    } else {
+                        if ((objectConstant instanceof URIConstant) || (objectConstant instanceof BNode))
+                            assertion = ofac.createObjectPropertyAssertion(predicateName,
+                                    subjectConstant, (ObjectConstant) objectConstant);
+                        else
+                            assertion = ofac.createDataPropertyAssertion(predicateName,
+                                    subjectConstant, (ValueConstant) objectConstant);
+                    }
+                    if (assertion != null)
+                        tripleAssertions.add(assertion);
+                } catch (InconsistentOntologyException e) {
+                    throw new RuntimeException("InconsistentOntologyException: " +
+                            predicateName + " " + subjectConstant + " " + objectConstant);
+                }
+            }
+        }
+        return tripleAssertions;
+    }
+
+    @Override
 	public boolean hasNext() throws OBDAException {
 		//in case of describe, we return the collected results list information
 		if (storeResults) {

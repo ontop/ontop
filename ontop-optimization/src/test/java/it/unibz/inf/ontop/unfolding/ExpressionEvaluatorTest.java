@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.AtomPredicateImpl;
+import it.unibz.inf.ontop.model.impl.ImmutableExpressionImpl;
 import it.unibz.inf.ontop.model.impl.URITemplatePredicateImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.optimization.FixedPointBindingLiftOptimizer;
@@ -20,6 +21,8 @@ import org.junit.Test;
 import java.util.Optional;
 
 import static it.unibz.inf.ontop.OptimizationTestingTools.*;
+import static it.unibz.inf.ontop.model.ExpressionOperation.NEQ;
+import static it.unibz.inf.ontop.model.ExpressionOperation.OR;
 import static it.unibz.inf.ontop.model.Predicate.COL_TYPE.INTEGER;
 import static junit.framework.TestCase.assertTrue;
 
@@ -32,6 +35,7 @@ public class ExpressionEvaluatorTest {
     private final AtomPredicate TABLE2_PREDICATE = new AtomPredicateImpl("table2", 2);
 
     private final static AtomPredicate ANS1_ARITY_3_PREDICATE = new AtomPredicateImpl("ans1", 3);
+    private final static AtomPredicate ANS1_ARITY_2_PREDICATE = new AtomPredicateImpl("ans1", 2);
 
     private final Variable X = DATA_FACTORY.getVariable("x");
     private final Variable Y = DATA_FACTORY.getVariable("y");
@@ -42,6 +46,7 @@ public class ExpressionEvaluatorTest {
     private final Variable D = DATA_FACTORY.getVariable("d");
 
     private URITemplatePredicate URI_PREDICATE =  new URITemplatePredicateImpl(2);
+    private URITemplatePredicate URI_PREDICATE2 =  new URITemplatePredicateImpl(3);
     private Constant URI_TEMPLATE_STR_1 =  DATA_FACTORY.getConstantLiteral("http://example.org/stock/{}");
 
     private ExtensionalDataNode DATA_NODE_1 = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, A, B));
@@ -303,8 +308,76 @@ public class ExpressionEvaluatorTest {
         assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, expectedQuery));
     }
 
+    /**
+     * Reproduces a bug: NEQ(f(x11, x12), f(x21, x22) was evaluated as AND((x11 != x21),  (x12 != x22)),
+     * instead of OR((x11 != x21), (x12 != x22))
+     */
+    @Test
+    public void testNonEqualOperatorDistribution() throws EmptyQueryException {
+
+        //Construct unoptimized query
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder(EMPTY_METADATA);;
+        DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom
+                (ANS1_ARITY_2_PREDICATE, X ,Y);
+        ConstructionNode rootNode = new ConstructionNodeImpl(projectionAtom.getVariables());
+        ConstructionNode constructionNode1 = new ConstructionNodeImpl(ImmutableSet.of(X),
+                new ImmutableSubstitutionImpl<>(ImmutableMap.of(X, generateURI2(A,B))), Optional.empty());
+        ConstructionNode constructionNode2 = new ConstructionNodeImpl(ImmutableSet.of(Y),
+                new ImmutableSubstitutionImpl<>(ImmutableMap.of(Y, generateURI2(C,D))), Optional.empty());
+
+        InnerJoinNode joinNode1 = new InnerJoinNodeImpl(Optional.of(DATA_FACTORY.getImmutableExpression(NEQ, X, Y)));
+
+        queryBuilder.init(projectionAtom, rootNode);
+        queryBuilder.addChild(rootNode, joinNode1);
+        queryBuilder.addChild(joinNode1, constructionNode1);
+        queryBuilder.addChild(joinNode1, constructionNode2);
+        queryBuilder.addChild(constructionNode1, DATA_NODE_1);
+        queryBuilder.addChild(constructionNode2, DATA_NODE_2);
+
+        //build unoptimized query
+        IntermediateQuery unOptimizedQuery = queryBuilder.build();
+        System.out.println("\nBefore optimization: \n" +  unOptimizedQuery);
+
+        IntermediateQueryOptimizer substitutionOptimizer = new FixedPointBindingLiftOptimizer();
+        IntermediateQuery optimizedQuery = substitutionOptimizer.optimize(unOptimizedQuery);
+
+        System.out.println("\nAfter optimization: \n" + optimizedQuery);
+
+        //----------------------------------------------------------------------
+        // Construct expected query
+
+        ConstructionNode expectedRootNode = new ConstructionNodeImpl(
+                ImmutableSet.of(X, Y),
+                new ImmutableSubstitutionImpl<>(
+                        ImmutableMap.of(X, generateURI2(A,B), Y, generateURI2(C,D))),
+                Optional.empty()
+        );
+
+        ImmutableExpression subExpression1 = DATA_FACTORY.getImmutableExpression(NEQ, A, C);
+        ImmutableExpression subExpression2 = DATA_FACTORY.getImmutableExpression(NEQ, B, D);
+
+        InnerJoinNode joinNode2 = new InnerJoinNodeImpl(Optional.of(
+                DATA_FACTORY.getImmutableExpression(OR, subExpression1, subExpression2)));
+
+        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(EMPTY_METADATA);;
+        expectedQueryBuilder.init(projectionAtom, expectedRootNode);
+        expectedQueryBuilder.addChild(expectedRootNode, joinNode2);
+        expectedQueryBuilder.addChild(joinNode2, DATA_NODE_1);
+        expectedQueryBuilder.addChild(joinNode2, DATA_NODE_2);
+
+        //build expected query
+        IntermediateQuery expectedQuery = expectedQueryBuilder.build();
+        System.out.println("\n Expected query: \n" +  expectedQuery);
+
+        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, expectedQuery));
+    }
+
     private ImmutableFunctionalTerm generateURI1(VariableOrGroundTerm argument) {
         return DATA_FACTORY.getImmutableFunctionalTerm(URI_PREDICATE, URI_TEMPLATE_STR_1, argument);
+    }
+
+    private ImmutableFunctionalTerm generateURI2(Variable var1, Variable var2) {
+        return DATA_FACTORY.getImmutableFunctionalTerm(URI_PREDICATE2, URI_TEMPLATE_STR_1, var1, var2);
     }
 
     private ImmutableFunctionalTerm generateLangString(VariableOrGroundTerm argument1, Constant argument2) {
