@@ -39,7 +39,7 @@ public class OntopRepositoryFactory implements RepositoryFactory {
 
 
     @Override
-    public AbstractOntopRepository getRepository(RepositoryImplConfig config)
+    public OntopVirtualRepository getRepository(RepositoryImplConfig config)
             throws RepositoryConfigException {
         if (!(config instanceof OntopRepositoryConfig)) {
             throw new RepositoryConfigException("The given repository config is not of the right type " +

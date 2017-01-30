@@ -25,20 +25,27 @@ import it.unibz.inf.ontop.model.OBDAException;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestDBConnection;
 import it.unibz.inf.ontop.owlrefplatform.questdb.QuestDBVirtualStore;
 
+import org.eclipse.rdf4j.model.ValueFactory;
+import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.eclipse.rdf4j.repository.RepositoryException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class OntopVirtualRepository extends AbstractOntopRepository {
+import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
+
+public class OntopVirtualRepository implements org.eclipse.rdf4j.repository.Repository, AutoCloseable {
 
 	private final QuestDBVirtualStore virtualStore;
 	private QuestDBConnection questDBConn;
 	private boolean initialized = false;
-	private static final Logger logger = LoggerFactory.getLogger(AbstractOntopRepository.class);
+	private static final Logger logger = LoggerFactory.getLogger(OntopVirtualRepository.class);
+	private Map<String, String> namespaces;
 	
 	public OntopVirtualRepository(QuestConfiguration configuration) {
-		super();
+		this.namespaces = new HashMap<>();
 		this.virtualStore = new QuestDBVirtualStore(configuration);
 	}
 
@@ -110,5 +117,51 @@ public class OntopVirtualRepository extends AbstractOntopRepository {
 		} catch (OBDAException e) {
 			e.printStackTrace();
 		}
+	}
+
+	@Override
+	public File getDataDir() {
+		throw new RepositoryException("Ontop does not have a data directory");
+	}
+
+	@Override
+	public ValueFactory getValueFactory() {
+		// Gets a ValueFactory for this Repository.
+		return SimpleValueFactory.getInstance();
+	}
+
+	@Override
+	public void setDataDir(File arg0) {
+		// Ignores it
+	}
+
+	@Override
+	public void close() throws Exception {
+		this.shutDown();
+	}
+
+	public void setNamespace(String key, String value)
+	{
+		namespaces.put(key, value);
+	}
+
+	public String getNamespace(String key)
+	{
+		return namespaces.get(key);
+	}
+
+	public Map<String, String> getNamespaces()
+	{
+		return namespaces;
+	}
+
+	public void setNamespaces(Map<String, String> nsp)
+	{
+		this.namespaces = nsp;
+	}
+
+	public void removeNamespace(String key)
+	{
+		namespaces.remove(key);
 	}
 }

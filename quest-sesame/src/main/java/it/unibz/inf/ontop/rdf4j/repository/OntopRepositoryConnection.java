@@ -46,7 +46,7 @@ import java.util.*;
 public class OntopRepositoryConnection implements org.eclipse.rdf4j.repository.RepositoryConnection, AutoCloseable {
 
 	private static final String READ_ONLY_MESSAGE = "Ontop is a read-only system";
-	private AbstractOntopRepository repository;
+	private OntopVirtualRepository repository;
 	private QuestDBConnection questConn;
     private boolean isOpen;
     private boolean autoCommit;
@@ -54,15 +54,14 @@ public class OntopRepositoryConnection implements org.eclipse.rdf4j.repository.R
     private RDFParser rdfParser;
 
 	
-	public OntopRepositoryConnection(AbstractOntopRepository rep, QuestDBConnection connection) throws OBDAException
+	public OntopRepositoryConnection(OntopVirtualRepository rep, QuestDBConnection connection) throws OBDAException
 	{
 		this.repository = rep;
 		this.questConn = connection;
 		this.isOpen = true;
 		this.isActive = false;
 		this.autoCommit = connection.getAutoCommit();
-		this.rdfParser = Rio.createParser(RDFFormat.RDFXML,
-                this.repository.getValueFactory());
+		this.rdfParser = Rio.createParser(RDFFormat.RDFXML, this.repository.getValueFactory());
 	}
 
 	

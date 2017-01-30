@@ -22,7 +22,6 @@ package it.unibz.inf.ontop.rdf4j.repository;
 
 import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.injection.QuestCoreSettings;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.Resource;
@@ -44,9 +43,6 @@ public class OntopRepositoryConfig extends AbstractRepositoryImplConfig {
 
     public static final String NAMESPACE = "http://inf.unibz.it/krdb/obda/quest#";
 
-    /** <tt>http://inf.unibz.it/krdb/obda/quest#quest_type</tt> */
-    public final static IRI QUEST_TYPE;
-
     /** <tt>http://inf.unibz.it/krdb/obda/quest#owlFile/tt> */
     public final static IRI OWLFILE;
 
@@ -55,40 +51,26 @@ public class OntopRepositoryConfig extends AbstractRepositoryImplConfig {
     
     public final static IRI EXISTENTIAL;
     
-    public final static IRI REWRITING;
-
-    public final static String VIRTUAL_QUEST_TYPE = "ontop-virtual";
-
-    @Deprecated
-    public final static String REMOTE_QUEST_TYPE = "ontop-remote";
-
-    @Deprecated
-    public final static String IN_MEMORY_QUEST_TYPE = "ontop-inmemory";
-    
     static {
         ValueFactory factory = ValueFactoryImpl.getInstance();
-        QUEST_TYPE = factory.createIRI(NAMESPACE, "quest_type");
         //NAME = factory.createIRI(NAMESPACE, "repo_name");
         //REPO_ID = factory.createIRI("http://www.openrdf.org/config/repository#repositoryID");
         OWLFILE = factory.createIRI(NAMESPACE, "owlfile");
         OBDAFILE = factory.createIRI(NAMESPACE, "obdafile");
         EXISTENTIAL = factory.createIRI(NAMESPACE, "existential");
-        REWRITING = factory.createIRI(NAMESPACE, "rewriting");
     }
-    
-	private String quest_type;
+
     private String name;
     private File owlFile;
     private File obdaFile;
     private boolean existential;
-    private String rewriting;
 
     /**
      * The repository has to be built by this class
      * so as to fit the validation and repository instantiation
      * workflow of Sesame.
      */
-    private AbstractOntopRepository repository;
+    private OntopVirtualRepository repository;
 
     /**
      * Creates a new RepositoryConfigImpl.
@@ -123,9 +105,6 @@ public class OntopRepositoryConfig extends AbstractRepositoryImplConfig {
      * Checks that the fields are not missing, and that files exist and are accessible.
      */
     private void validateFields() throws RepositoryConfigException {
-        if (quest_type == null || quest_type.isEmpty()) {
-            throw new RepositoryConfigException("No type specified for repository implementation.");
-        }
         try {
             /*
              * Ontology file
@@ -145,19 +124,16 @@ public class OntopRepositoryConfig extends AbstractRepositoryImplConfig {
             /*
              * Mapping file
              */
-            if (quest_type.equals(VIRTUAL_QUEST_TYPE)) {
-                if (obdaFile == null) {
-                    throw new RepositoryConfigException(String.format("No mapping file specified for repository creation " +
-                            "in %s mode!", quest_type));
-                }
-                if (!obdaFile.exists()) {
-                    throw new RepositoryConfigException(String.format("The mapping file %s does not exist!",
-                            obdaFile.getAbsolutePath()));
-                }
-                if (!obdaFile.canRead()) {
-                    throw new RepositoryConfigException(String.format("The mapping file %s is not accessible!",
-                            obdaFile.getAbsolutePath()));
-                }
+            if (obdaFile == null) {
+                throw new RepositoryConfigException(String.format("No mapping file specified for repository creation "));
+            }
+            if (!obdaFile.exists()) {
+                throw new RepositoryConfigException(String.format("The mapping file %s does not exist!",
+                        obdaFile.getAbsolutePath()));
+            }
+            if (!obdaFile.canRead()) {
+                throw new RepositoryConfigException(String.format("The mapping file %s is not accessible!",
+                        obdaFile.getAbsolutePath()));
             }
         }
         /*
@@ -180,7 +156,7 @@ public class OntopRepositoryConfig extends AbstractRepositoryImplConfig {
      *
      * However, the repository is only build once and then kept in cache.
      */
-    public AbstractOntopRepository buildRepository() throws RepositoryConfigException {
+    public OntopVirtualRepository buildRepository() throws RepositoryConfigException {
         /*
          * Cache (computed only once)
          */
@@ -205,56 +181,14 @@ public class OntopRepositoryConfig extends AbstractRepositoryImplConfig {
                 p.setProperty(QuestCoreSettings.REWRITE, "false");
             }
 
-            switch (quest_type) {
-//                case IN_MEMORY_QUEST_TYPE:
-//                    p.setProperty(QuestCoreSettings.ABOX_MODE, QuestConstants.CLASSIC);
-//                    p.setProperty(QuestCoreSettings.OPTIMIZE_EQUIVALENCES, "true");
-//                    p.setProperty(QuestCoreSettings.OBTAIN_FROM_MAPPINGS, "false");
-//                    p.setProperty(QuestCoreSettings.OBTAIN_FROM_ONTOLOGY, "false");
-//                    p.setProperty(QuestCoreSettings.DBTYPE, QuestConstants.SEMANTIC_INDEX);
-//                    p.setProperty(QuestCoreSettings.STORAGE_LOCATION, QuestConstants.INMEMORY);
-//
-//                    configuration = QuestConfiguration.defaultBuilder()
-//                            .ontologyFile(owlFile)
-//                            .properties(p)
-//                            .build();
-//                    repository = new OntopClassicRepository(name, configuration);
-//
-//                    break;
-//                case REMOTE_QUEST_TYPE:
-//                    // TODO: rewriting not considered in the ported code. Should we consider it?
-//                    p = new Properties();
-//
-//                    p.setProperty(QuestCoreSettings.ABOX_MODE, QuestConstants.CLASSIC);
-//                    p.setProperty(QuestCoreSettings.OPTIMIZE_EQUIVALENCES, "true");
-//                    // TODO: no mappings, so this option looks inconsistent
-//                    p.setProperty(QuestCoreSettings.OBTAIN_FROM_MAPPINGS, "true");
-//                    p.setProperty(QuestCoreSettings.OBTAIN_FROM_ONTOLOGY, "false");
-//                    p.setProperty(QuestCoreSettings.DBTYPE, QuestConstants.SEMANTIC_INDEX);
-//                    p.setProperty(QuestCoreSettings.STORAGE_LOCATION, QuestConstants.JDBC);
-//                    p.setProperty(OBDASettings.JDBC_DRIVER, "org.h2.Driver");
-//                    p.setProperty(OBDASettings.JDBC_URL, "jdbc:h2:mem:stockclient1");
-//                    p.setProperty(OBDASettings.JDBC_USER, "sa");
-//                    p.setProperty(OBDASettings.JDBC_PASSWORD, "");
-//
-//                    configuration = QuestConfiguration.defaultBuilder()
-//                            .ontologyFile(owlFile)
-//                            .properties(p)
-//                            .build();
-//                    repository = new OntopClassicRepository(name, configuration);
-//                    break;
-                case VIRTUAL_QUEST_TYPE:
-                    configuration = QuestConfiguration.defaultBuilder()
-                            // TODO: consider also r2rml
-                            .nativeOntopMappingFile(obdaFile)
-                            .ontologyFile(owlFile)
-                            .properties(p)
-                            .build();
-                    repository = new OntopVirtualRepository(configuration);
-                    break;
-                default:
-                    throw new RepositoryConfigException("Unknown mode: " + quest_type);
-            }
+            configuration = QuestConfiguration.defaultBuilder()
+                    // TODO: consider also r2rml
+                    .nativeOntopMappingFile(obdaFile)
+                    .ontologyFile(owlFile)
+                    .properties(p)
+                    .build();
+            repository = new OntopVirtualRepository(configuration);
+
         }
         /*
          * Problem during the repository instantiation.
@@ -274,9 +208,6 @@ public class OntopRepositoryConfig extends AbstractRepositoryImplConfig {
     	
         ValueFactory vf = SimpleValueFactory.getInstance();
 
-        if (quest_type != null) {
-            graph.add(implNode, QUEST_TYPE, vf.createLiteral(quest_type));
-        }
 //        if (name != null) {
 //            graph.add(implNode, REPO_ID, vf.createLiteral(name));
 //        }
@@ -288,10 +219,6 @@ public class OntopRepositoryConfig extends AbstractRepositoryImplConfig {
         }
 
         graph.add(implNode, EXISTENTIAL, vf.createLiteral(existential));
-
-        if (rewriting != null) {
-            graph.add(implNode, REWRITING, vf.createLiteral(rewriting));
-        }
       
         return implNode;
     }
@@ -308,9 +235,6 @@ public class OntopRepositoryConfig extends AbstractRepositoryImplConfig {
             objectLiteral(graph.filter(implNode, REPOSITORYTYPE, null))
                     .ifPresent(lit -> setType(lit.getLabel()));
 
-            objectLiteral(graph.filter(implNode, QUEST_TYPE, null))
-                    .ifPresent(lit -> this.quest_type = lit.getLabel());
-
             objectLiteral(graph.filter(implNode, OWLFILE, null))
                     .ifPresent(lit -> this.owlFile = new File(lit.getLabel()));
 
@@ -319,9 +243,6 @@ public class OntopRepositoryConfig extends AbstractRepositoryImplConfig {
 
             objectLiteral(graph.filter(implNode, EXISTENTIAL, null))
                     .ifPresent(lit -> this.existential = lit.booleanValue());
-
-            objectLiteral(graph.filter(implNode, REWRITING, null))
-                    .ifPresent(lit -> this.rewriting = lit.getLabel());
 
         } catch (Exception e) {
             throw new RepositoryConfigException(e.getMessage(), e);
