@@ -45,13 +45,13 @@ import java.io.File;
  * @author timi
  *
  */
-public class SesameComplexConstructDescribeTest {
+public class RDF4JComplexConstructDescribeTest {
 
 	OntopRepositoryConnection con = null;
 	Repository repo = null;
 	ValueFactory fac = null;
-	String fileName = "src/test/resources/complexConstruct.ttl";
-	String owlFile = "src/test/resources/describeConstruct.owl";
+	String fileName = "src/test/resources/construct/complexConstruct.ttl";
+	String owlFile = "src/test/resources/construct/describeConstruct.owl";
 	
 	@Before
 	public void setUp() throws Exception {
@@ -97,27 +97,10 @@ public class SesameComplexConstructDescribeTest {
 			result++;
 			System.out.println(s.toString());
 		}
-		Assert.assertEquals(4, result);
+		Assert.assertEquals(5, result);
 	}
 
-
-	@Test
-	public void testConstruct2() throws Exception {
-		int result = 0;
-		String queryString = "CONSTRUCT {<http://example.org/C> ?p ?o} WHERE {<http://example.org/C> ?p ?o}";
-		GraphQuery graphQuery = con.prepareGraphQuery(QueryLanguage.SPARQL,
-				queryString);
-
-		GraphQueryResult gresult = graphQuery.evaluate();
-		while (gresult.hasNext()) {
-			result++;
-			Statement s = gresult.next();
-			//System.out.println(s.toString());
-		}
-		Assert.assertEquals(2, result);
-	}
-
-	// https://github.com/ontop/ontop/issues/161
+	// Test case for: https://github.com/ontop/ontop/issues/161
     @Test
     public void testConstructOptional() throws Exception {
         int result = 0;
@@ -136,7 +119,7 @@ public class SesameComplexConstructDescribeTest {
             Statement s = gresult.next();
             System.out.println(s.toString());
         }
-        Assert.assertEquals(2, result);
+        Assert.assertEquals(4, result);
     }
 
 
