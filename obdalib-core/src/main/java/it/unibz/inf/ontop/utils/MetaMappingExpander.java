@@ -124,7 +124,8 @@ public class MetaMappingExpander {
                 ? target.getTerm(2)   // template is in the position of object
                 : target.getTerm(1)); // template is in the position of predicate
 
-		ImmutableList<SelectExpressionItem> templateColumns = getTemplateColumns(metadata.getQuotedIDFactory(), templateAtom, queryColumns);
+		ImmutableList<SelectExpressionItem> templateColumns =
+                getTemplateColumns(metadata.getQuotedIDFactory(), templateAtom, queryColumns);
 
 		ImmutableList<SelectItem> newColumns = queryColumns.stream()
                 .filter(c -> !templateColumns.contains(c))
@@ -315,7 +316,6 @@ public class MetaMappingExpander {
                         },
                         si -> si));
 
-
         List<Variable> templateVariables = getTemplateVariables(templateAtom);
         if (templateVariables.isEmpty())
             throw new IllegalArgumentException("No variables could be found for this metamapping." +
@@ -347,7 +347,7 @@ public class MetaMappingExpander {
 	 * <p>
 	 *
 	 * @param templateAtom
-	 * @return
+	 * @return list of variables
 	 */
 	private static ImmutableList<Variable> getTemplateVariables(Function templateAtom) {
 
@@ -370,10 +370,6 @@ public class MetaMappingExpander {
 		}
 	}
 
-	
-
-	
-
 	private static String getPredicateName(Term templateTerm, List<String> values) {
 		if (templateTerm instanceof Variable) {
 			return values.get(0);
@@ -383,5 +379,4 @@ public class MetaMappingExpander {
 			return URITemplates.format(uriTemplate, values);
 		}
 	}
-
 }
