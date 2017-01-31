@@ -1,7 +1,5 @@
 package it.unibz.inf.ontop.injection;
 
-import java.util.Optional;
-
 /**
  * General properties.
  *
@@ -17,14 +15,6 @@ import java.util.Optional;
  */
 public interface OBDASettings extends OntopMappingSQLSettings {
 
-    //-------------------
-    // High-level methods
-    //-------------------
-
-    Optional<String> getMappingFilePath();
-
     // String DB_CONSTRAINTS = "DB_CONSTRAINTS";
-
-    String MAPPING_FILE_PATH = "MAPPING_FILE_PATH";
 
 }

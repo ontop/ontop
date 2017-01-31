@@ -61,15 +61,13 @@ public interface QuestCoreSettings extends OBDASettings, OntopRuntimeSettings {
 	 *
 	 * @see <a href="http://www.w3.org/TR/r2rml/#dfn-base-iri">Base IRI</a>
 	 */
-	String  BASE_IRI             	= "org.obda.owlreformulationplatform.baseiri";
-
-	String OBTAIN_FULL_METADATA = "OBTAIN_FULL_METADATA";
+	String  BASE_IRI             	= "mapping.baseIri";
 	
 //	String  OPTIMIZE_TBOX_SIGMA 	= "org.obda.owlreformulationplatform.optimizeTboxSigma";
 //	String 	CREATE_TEST_MAPPINGS 	= "org.obda.owlreformulationplatform.createTestMappings";
 
 
-	String PRINT_KEYS = "PRINT_KEYS";
+	String PRINT_KEYS = "ontop.debug.printKeys";
 
 	// Tomcat connection pool properties
 	String MAX_POOL_SIZE = "max_pool_size";

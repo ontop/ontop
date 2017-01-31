@@ -61,7 +61,7 @@ public class QuestConfigurationImpl extends QuestCoreConfigurationImpl implement
          * URL
          */
         try {
-            Optional<URL> optionalURL = extractOntologyURL();
+            Optional<URL> optionalURL = options.ontologyURL;
             if (optionalURL.isPresent()) {
                 return Optional.of(
                         manager.loadOntologyFromOntologyDocument(
@@ -93,19 +93,6 @@ public class QuestConfigurationImpl extends QuestCoreConfigurationImpl implement
                     .map(o -> OWLAPITranslatorUtility.translateImportsClosure(o));
         } catch (OWLOntologyCreationException e) {
             throw new OntologyException(e.getMessage());
-        }
-    }
-
-    private Optional<URL> extractOntologyURL() throws MalformedURLException {
-        if (options.ontologyURL.isPresent()) {
-            return options.ontologyURL;
-        }
-        Optional<String> optionalString = settings.getOntologyURL();
-        if (optionalString.isPresent()) {
-            return Optional.of(new URL(optionalString.get()));
-        }
-        else {
-            return Optional.empty();
         }
     }
 

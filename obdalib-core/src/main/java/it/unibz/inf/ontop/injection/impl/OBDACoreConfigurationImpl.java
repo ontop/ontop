@@ -9,7 +9,6 @@ import it.unibz.inf.ontop.injection.*;
 
 import it.unibz.inf.ontop.spec.OBDASpecification;
 import it.unibz.inf.ontop.model.OBDAModel;
-import it.unibz.inf.ontop.ontology.Ontology;
 import org.eclipse.rdf4j.model.Model;
 
 import javax.annotation.Nonnull;
@@ -69,10 +68,7 @@ public class OBDACoreConfigurationImpl extends OntopMappingSQLConfigurationImpl 
             throws IOException, OBDASpecificationException {
 
         return loadSpecification(ontologySupplier,
-                () -> options.mappingFile
-                        .map(Optional::of)
-                        .orElseGet(() -> settings.getMappingFilePath()
-                                .map(File::new)),
+                () -> options.mappingFile,
                 () -> options.mappingReader,
                 () -> options.mappingGraph);
     }
@@ -85,10 +81,7 @@ public class OBDACoreConfigurationImpl extends OntopMappingSQLConfigurationImpl 
     Optional<OBDAModel> loadPPMapping(OntologySupplier ontologySupplier)
             throws IOException, InvalidMappingException, DuplicateMappingException {
         return loadPPMapping(ontologySupplier,
-                () -> options.mappingFile
-                        .map(Optional::of)
-                        .orElseGet(() -> settings.getMappingFilePath()
-                                .map(File::new)),
+                () -> options.mappingFile,
                 () -> options.mappingReader,
                 () -> options.mappingGraph);
     }
@@ -99,7 +92,6 @@ public class OBDACoreConfigurationImpl extends OntopMappingSQLConfigurationImpl 
     @Override
     boolean isInputMappingDefined() {
         return super.isInputMappingDefined()
-                || settings.contains(OBDASettings.MAPPING_FILE_PATH)
                 || options.mappingFile.isPresent()
                 || options.mappingGraph.isPresent()
                 || options.mappingReader.isPresent();

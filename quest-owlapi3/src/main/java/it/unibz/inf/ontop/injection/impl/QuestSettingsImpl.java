@@ -11,9 +11,4 @@ public class QuestSettingsImpl extends QuestCoreSettingsImpl implements QuestSet
     protected QuestSettingsImpl(Properties userPreferences, boolean isR2rml) {
         super(userPreferences, isR2rml);
     }
-
-    @Override
-    public Optional<String> getOntologyURL() {
-        return getProperty(ONTOLOGY_URL);
-    }
 }

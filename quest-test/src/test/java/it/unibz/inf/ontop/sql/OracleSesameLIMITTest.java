@@ -22,6 +22,7 @@ package it.unibz.inf.ontop.sql;
 
 import static org.junit.Assert.assertTrue;
 
+import it.unibz.inf.ontop.injection.OntopOBDASettings;
 import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestDBConnection;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestDBStatement;
@@ -59,9 +60,9 @@ public class OracleSesameLIMITTest  {
 		p.setProperty(QuestCoreSettings.JDBC_USER, "system");
 		p.setProperty(QuestCoreSettings.JDBC_PASSWORD, "obdaps83");
 		p.setProperty(QuestCoreSettings.JDBC_DRIVER, jdbc_driver_class);
+		p.put(OntopOBDASettings.OPTIMIZE_EQUIVALENCES, false);
 
 		QuestConfiguration configuration = QuestConfiguration.defaultBuilder()
-				.enableEquivalenceOptimization(false)
 				.enableExistentialReasoning(true)
 				.dbMetadata(getMeta(jdbc_driver_class))
 				.ontologyFile(owlfile)

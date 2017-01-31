@@ -3,7 +3,6 @@ package it.unibz.inf.ontop.injection.impl;
 import it.unibz.inf.ontop.injection.InvalidOntopConfigurationException;
 import it.unibz.inf.ontop.injection.OBDASettings;
 
-import java.util.Optional;
 import java.util.Properties;
 
 public class OBDASettingsImpl extends OntopMappingSQLSettingsImpl implements OBDASettings {
@@ -22,11 +21,6 @@ public class OBDASettingsImpl extends OntopMappingSQLSettingsImpl implements OBD
         Properties properties = loadDefaultPropertiesFromFile(OBDASettings.class, defaultFile);
         properties.putAll(userPreferences);
         return properties;
-    }
-
-    @Override
-    public Optional<String> getMappingFilePath() {
-        return getProperty(OBDASettings.MAPPING_FILE_PATH);
     }
 
 }

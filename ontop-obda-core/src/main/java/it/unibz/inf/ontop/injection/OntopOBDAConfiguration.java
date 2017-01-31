@@ -19,8 +19,6 @@ public interface OntopOBDAConfiguration extends OntopModelConfiguration {
 
         B sameAsMappings(boolean enable);
 
-        B enableEquivalenceOptimization(boolean enable);
-
         B dbMetadata(@Nonnull DBMetadata dbMetadata);
     }
 

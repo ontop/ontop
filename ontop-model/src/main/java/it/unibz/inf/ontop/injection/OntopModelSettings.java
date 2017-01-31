@@ -42,6 +42,6 @@ public interface OntopModelSettings {
     // Keys
     //-------
 
-    String CARDINALITY_MODE = "CARDINALITY_MODE";
-    String TEST_MODE = "TEST_MODE";
+    String CARDINALITY_MODE = "ontop.cardinalityMode";
+    String TEST_MODE = "ontop.testMode";
 }
