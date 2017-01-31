@@ -24,12 +24,11 @@ package it.unibz.inf.ontop.owlrefplatform.questdb;
 import java.io.IOException;
 
 import it.unibz.inf.ontop.exception.OBDASpecificationException;
+import it.unibz.inf.ontop.exception.OntopConnectionException;
 import it.unibz.inf.ontop.injection.QuestComponentFactory;
 import it.unibz.inf.ontop.injection.QuestConfiguration;
-import it.unibz.inf.ontop.model.OBDAException;
 import it.unibz.inf.ontop.owlrefplatform.core.DBConnector;
-import it.unibz.inf.ontop.owlrefplatform.core.IQuestConnection;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestDBConnection;
+import it.unibz.inf.ontop.owlrefplatform.core.OntopConnection;
 import it.unibz.inf.ontop.reformulation.OBDAQueryProcessor;
 import it.unibz.inf.ontop.spec.OBDASpecification;
 import org.slf4j.Logger;
@@ -81,18 +80,9 @@ public class QuestDBVirtualStore implements AutoCloseable {
 		dbConnector.connect();
 	}
 
-	public QuestDBConnection getConnection() throws OBDAException {
-		//	System.out.println("getquestdbconn..");
-		return new QuestDBConnection(getQuestConnection());
-	}
-
-	/**
-	 * Get a Quest connection from the Quest instance
-	 * @return the QuestConnection
-	 */
-	private IQuestConnection getQuestConnection() throws OBDAException {
+	public OntopConnection getConnection() throws OntopConnectionException {
 		if(!this.isinitalized)
-			throw new Error("The QuestDBVirtualStore must be initialized before getQuestConnection can be run.");
+			throw new Error("The QuestDBVirtualStore must be initialized before getConnection can be run.");
 		// System.out.println("getquestconn..");
 		return dbConnector.getConnection();
 	}

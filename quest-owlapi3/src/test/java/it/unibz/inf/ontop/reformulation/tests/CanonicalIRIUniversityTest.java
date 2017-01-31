@@ -3,10 +3,8 @@ package it.unibz.inf.ontop.reformulation.tests;
 
 import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.io.QueryIOManager;
-import it.unibz.inf.ontop.model.OBDAModel;
 
 import it.unibz.inf.ontop.owlrefplatform.core.ExecutableQuery;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import it.unibz.inf.ontop.querymanager.QueryController;
 import it.unibz.inf.ontop.querymanager.QueryControllerGroup;
@@ -15,11 +13,9 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.io.ToStringRenderer;
 import org.semanticweb.owlapi.model.OWLException;
 import org.semanticweb.owlapi.model.OWLObject;
-import org.semanticweb.owlapi.model.OWLOntology;
 
 import java.io.File;
 
@@ -40,7 +36,7 @@ public class CanonicalIRIUniversityTest {
     final String sparqlFile = "src/test/resources/canonicalIRI/university/univ-ontology.q";
 
     private QuestOWL reasoner;
-    private QuestOWLConnection conn;
+    private OntopOWLConnection conn;
     Connection sqlConnection;
 
     private static final String JDBC_URL =  "jdbc:h2:mem:university";
@@ -104,7 +100,7 @@ public class CanonicalIRIUniversityTest {
 
 
         try (
-             QuestOWLStatement st = conn.createStatement();
+             OntopOWLStatement st = conn.createStatement();
         ) {
             QueryController qc = new QueryController();
             QueryIOManager qman = new QueryIOManager(qc);
@@ -175,7 +171,7 @@ public class CanonicalIRIUniversityTest {
     }
 
     private void runQuery(String query) throws OWLException {
-        QuestOWLStatement st = conn.createStatement();
+        OntopOWLStatement st = conn.createStatement();
         ArrayList<String> retVal = new ArrayList<>();
         try {
             QuestOWLResultSet rs = st.executeTuple(query);

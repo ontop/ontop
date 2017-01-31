@@ -19,7 +19,7 @@
  */
 package it.unibz.inf.ontop.rdf4j.query;
 
-import it.unibz.inf.ontop.owlrefplatform.core.QuestDBConnection;
+import it.unibz.inf.ontop.owlrefplatform.core.OntopConnection;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Literal;
 import org.eclipse.rdf4j.model.Value;
@@ -31,11 +31,11 @@ import org.eclipse.rdf4j.query.impl.MapBindingSet;
 public abstract class AbstractOntopQuery implements Query {
 
     protected final String queryString;
-    protected final QuestDBConnection conn;
+    protected final OntopConnection conn;
     protected int queryTimeout;
     protected MapBindingSet bindings = new MapBindingSet();
 
-    protected AbstractOntopQuery(String queryString, QuestDBConnection conn) {
+    protected AbstractOntopQuery(String queryString, OntopConnection conn) {
         this.queryString = queryString;
         this.conn = conn;
         this.queryTimeout = 0;

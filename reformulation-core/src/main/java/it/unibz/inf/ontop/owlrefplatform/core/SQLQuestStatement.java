@@ -2,18 +2,19 @@ package it.unibz.inf.ontop.owlrefplatform.core;
 
 import java.util.Optional;
 
+import it.unibz.inf.ontop.exception.OntopConnectionException;
+import it.unibz.inf.ontop.exception.OntopQueryAnsweringException;
+import it.unibz.inf.ontop.exception.OntopQueryEvaluationException;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.owlrefplatform.core.execution.NativeQueryExecutionException;
 import it.unibz.inf.ontop.owlrefplatform.core.resultset.*;
 import it.unibz.inf.ontop.owlrefplatform.core.translator.SesameConstructTemplate;
 
-import it.unibz.inf.ontop.ontology.Assertion;
 import it.unibz.inf.ontop.reformulation.IRIDictionary;
 import it.unibz.inf.ontop.reformulation.OBDAQueryProcessor;
 
 import java.sql.*;
 import java.sql.ResultSet;
-import java.util.Iterator;
 
 /**
  * SQL-specific implementation of OBDAStatement.
@@ -25,88 +26,88 @@ public class SQLQuestStatement extends QuestStatement {
     private final DBMetadata dbMetadata;
     private final Optional<IRIDictionary> iriDictionary;
 
-    public SQLQuestStatement(OBDAQueryProcessor queryProcessor, OBDAConnection obdaConnection, Statement sqlStatement,
+    public SQLQuestStatement(OBDAQueryProcessor queryProcessor, Statement sqlStatement,
                              Optional<IRIDictionary> iriDictionary) {
-        super(queryProcessor, obdaConnection);
+        super(queryProcessor);
         this.sqlStatement = sqlStatement;
         this.dbMetadata = queryProcessor.getDBMetadata();
         this.iriDictionary = iriDictionary;
     }
 
     @Override
-    public int getFetchSize() throws OBDAException {
+    public int getFetchSize() throws OntopConnectionException {
         try {
             return sqlStatement.getFetchSize();
-        } catch (Exception e) {
-            throw new OBDAException(e);
+        } catch (SQLException e) {
+            throw new OntopConnectionException(e);
         }
 
     }
 
     @Override
-    public int getMaxRows() throws OBDAException {
+    public int getMaxRows() throws OntopConnectionException {
         try {
             return sqlStatement.getMaxRows();
-        } catch (Exception e) {
-            throw new OBDAException(e);
+        } catch (SQLException e) {
+            throw new OntopConnectionException(e);
         }
 
     }
 
     @Override
-    public void getMoreResults() throws OBDAException {
+    public void getMoreResults() throws OntopConnectionException {
         try {
             sqlStatement.getMoreResults();
-        } catch (Exception e) {
-            throw new OBDAException(e);
+        } catch (SQLException e) {
+            throw new OntopConnectionException(e);
         }
 
     }
 
     @Override
-    public void setFetchSize(int rows) throws OBDAException {
+    public void setFetchSize(int rows) throws OntopConnectionException {
         try {
             sqlStatement.setFetchSize(rows);
-        } catch (Exception e) {
-            throw new OBDAException(e);
+        } catch (SQLException e) {
+            throw new OntopConnectionException(e);
         }
 
     }
 
     @Override
-    public void setMaxRows(int max) throws OBDAException {
+    public void setMaxRows(int max) throws OntopConnectionException {
         try {
             sqlStatement.setMaxRows(max);
-        } catch (Exception e) {
-            throw new OBDAException(e);
+        } catch (SQLException e) {
+            throw new OntopConnectionException(e);
         }
 
     }
 
     @Override
-    public void setQueryTimeout(int seconds) throws OBDAException {
+    public void setQueryTimeout(int seconds) throws OntopConnectionException {
         try {
             sqlStatement.setQueryTimeout(seconds);
-        } catch (Exception e) {
-            throw new OBDAException(e);
+        } catch (SQLException e) {
+            throw new OntopConnectionException(e);
         }
     }
 
     @Override
-    public int getQueryTimeout() throws OBDAException {
+    public int getQueryTimeout() throws OntopConnectionException {
         try {
             return sqlStatement.getQueryTimeout();
-        } catch (Exception e) {
-            throw new OBDAException(e);
+        } catch (SQLException e) {
+            throw new OntopConnectionException(e);
         }
     }
 
     @Override
-    public boolean isClosed() throws OBDAException {
+    public boolean isClosed() throws OntopConnectionException {
         try {
             return sqlStatement.isClosed();
-        } catch (Exception e) {
-            throw new OBDAException(e);
+        } catch (SQLException e) {
+            throw new OntopConnectionException(e);
         }
     }
 
@@ -114,7 +115,7 @@ public class SQLQuestStatement extends QuestStatement {
      * Returns the number of tuples returned by the query
      */
     @Override
-    public int getTupleCount(String sparqlQuery) throws OBDAException {
+    public int getTupleCount(String sparqlQuery) throws OntopQueryAnsweringException {
         SQLExecutableQuery targetQuery = checkAndConvertTargetQuery(getExecutableQuery(sparqlQuery));
         String sql = targetQuery.getSQL();
         String newsql = "SELECT count(*) FROM (" + sql + ") t1";
@@ -125,32 +126,33 @@ public class SQLQuestStatement extends QuestStatement {
                 if (set.next()) {
                     return set.getInt(1);
                 } else {
-                    throw new OBDAException("Tuple count failed due to empty result set.");
+                    //throw new OBDAException("Tuple count failed due to empty result set.");
+                    return 0;
                 }
             } catch (SQLException e) {
-                throw new OBDAException(e.getMessage());
+                throw new OntopQueryEvaluationException(e);
             }
         }
         else {
-            throw new OBDAException("Action canceled.");
+            throw new OntopQueryEvaluationException("Action canceled.");
         }
     }
 
     @Override
-    public void close() throws OBDAException {
+    public void close() throws OntopConnectionException {
         try {
             if (sqlStatement != null)
                 sqlStatement.close();
-        } catch (Exception e) {
-            throw new OBDAException(e);
+        } catch (SQLException e) {
+            throw new OntopConnectionException(e);
         }
     }
 
-    protected void cancelExecution() throws NativeQueryExecutionException {
+    protected void cancelExecution() throws OntopQueryEvaluationException {
         try {
             sqlStatement.cancel();
         } catch (SQLException e) {
-            throw new NativeQueryExecutionException(e.getMessage());
+            throw new OntopQueryEvaluationException(e);
         }
     }
 
@@ -184,7 +186,7 @@ public class SQLQuestStatement extends QuestStatement {
                     ? new QuestDistinctTupleResultSet(set, executableQuery.getSignature(), this, dbMetadata, iriDictionary)
                     : new QuestTupleResultSet(set, executableQuery.getSignature(), this, dbMetadata, iriDictionary);
         } catch (SQLException e) {
-            throw new NativeQueryExecutionException(e.getMessage());
+            throw new OntopQueryEvaluationException(e);
         }
     }
 
@@ -221,17 +223,5 @@ public class SQLQuestStatement extends QuestStatement {
             throw new IllegalArgumentException("A SQLQuestStatement only accepts SQLTargetQuery instances");
         }
         return (SQLExecutableQuery) executableQuery;
-    }
-
-    protected Statement getSQLStatement() {
-        return sqlStatement;
-    }
-
-    /**
-     * Not implemented by default (in the virtual mode)
-     */
-    @Override
-    public int insertData(Iterator<Assertion> data, int commit, int batch) throws OBDAException {
-        throw new OBDAException("Data insertion not supported by default.");
     }
 }

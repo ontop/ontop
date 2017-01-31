@@ -20,8 +20,8 @@ package it.unibz.inf.ontop.owlrefplatform.core;
  * #L%
  */
 
+import it.unibz.inf.ontop.exception.*;
 import it.unibz.inf.ontop.model.*;
-import it.unibz.inf.ontop.owlrefplatform.core.execution.NativeQueryExecutionException;
 import it.unibz.inf.ontop.owlrefplatform.core.queryevaluation.SPARQLQueryUtility;
 import it.unibz.inf.ontop.owlrefplatform.core.resultset.EmptyTupleResultSet;
 import it.unibz.inf.ontop.owlrefplatform.core.resultset.QuestTupleResultSet;
@@ -43,11 +43,9 @@ import java.util.concurrent.CountDownLatch;
  *
  * TODO: rename it (not now) AbstractQuestStatement.
  */
-public abstract class QuestStatement implements IQuestStatement {
+public abstract class QuestStatement implements OntopStatement {
 
 	private final OBDAQueryProcessor engine;
-	private final OBDAConnection conn;
-
 
 	private QueryExecutionThread executionThread;
 	private boolean canceled = false;
@@ -56,9 +54,8 @@ public abstract class QuestStatement implements IQuestStatement {
 	private static final Logger log = LoggerFactory.getLogger(QuestStatement.class);
 
 
-	public QuestStatement(OBDAQueryProcessor queryProcessor, OBDAConnection conn) {
+	public QuestStatement(OBDAQueryProcessor queryProcessor) {
 		this.engine = queryProcessor;
-		this.conn = conn;
 	}
 
 	private enum QueryType {
@@ -104,7 +101,7 @@ public abstract class QuestStatement implements IQuestStatement {
 			return resultSet;
 		}
 
-		public void cancel() throws NativeQueryExecutionException {
+		public void cancel() throws OntopQueryEvaluationException {
 			canceled = true;
 			if (!executingTargetQuery) {
 				this.stop();
@@ -126,32 +123,25 @@ public abstract class QuestStatement implements IQuestStatement {
 				 * Executes the target query.
 				 */
 				log.debug("Executing the query and get the result...");
-					try {
-					executingTargetQuery = true;
-					switch (queryType) {
-						case ASK:
-							resultSet = executeBooleanQuery(executableQuery);
-							break;
-						case SELECT:
-							resultSet = executeSelectQuery(executableQuery, doDistinctPostProcessing);
-							break;
-						case CONSTRUCT:
-							resultSet = executeConstructQuery(executableQuery);
-							break;
-						case DESCRIBE:
-							resultSet = executeDescribeQuery(executableQuery);
-							break;
-						}
-						/**
-                         * TODO: re-handle the timeout exception.
-						 */
-				} catch (NativeQueryExecutionException e) {
-						exception = e;
-						log.error(e.getMessage(), e);
-
-						throw new OBDAException("Error executing the target query: \n" + e.getMessage() + "\nTarget query:\n " + executableQuery, e);
-				}
+				executingTargetQuery = true;
+				switch (queryType) {
+					case ASK:
+						resultSet = executeBooleanQuery(executableQuery);
+						break;
+					case SELECT:
+						resultSet = executeSelectQuery(executableQuery, doDistinctPostProcessing);
+						break;
+					case CONSTRUCT:
+						resultSet = executeConstructQuery(executableQuery);
+						break;
+					case DESCRIBE:
+						resultSet = executeDescribeQuery(executableQuery);
+						break;
+					}
 				log.debug("Execution finished.\n");
+				/*
+				 * TODO: re-handle the timeout exception.
+				 */
 			} catch (Exception e) {
 				e.printStackTrace();
 				exception = e;
@@ -167,45 +157,46 @@ public abstract class QuestStatement implements IQuestStatement {
 	 * TODO: describe
 	 */
 	protected abstract TupleResultSet executeSelectQuery(ExecutableQuery executableQuery, boolean doDistinctPostProcessing)
-			throws NativeQueryExecutionException, OBDAException;
+			throws OntopQueryEvaluationException;
 
 	/**
 	 * TODO: describe
 	 */
-	protected abstract TupleResultSet executeBooleanQuery(ExecutableQuery executableQuery) throws NativeQueryExecutionException;
+	protected abstract TupleResultSet executeBooleanQuery(ExecutableQuery executableQuery) throws OntopQueryEvaluationException;
 
 	/**
 	 * TODO: describe
 	 */
-	protected GraphResultSet executeDescribeQuery(ExecutableQuery executableQuery) throws NativeQueryExecutionException, OBDAException {
+	protected GraphResultSet executeDescribeQuery(ExecutableQuery executableQuery) throws OntopQueryEvaluationException {
 		return executeGraphQuery(executableQuery, true);
 	}
 
 	/**
 	 * TODO: describe
 	 */
-	protected GraphResultSet executeConstructQuery(ExecutableQuery executableQuery) throws NativeQueryExecutionException, OBDAException {
+	protected GraphResultSet executeConstructQuery(ExecutableQuery executableQuery) throws OntopQueryEvaluationException {
 		return executeGraphQuery(executableQuery, false);
 	}
 
 	/**
 	 * TODO: describe
 	 */
-	protected abstract GraphResultSet executeGraphQuery(ExecutableQuery executableQuery, boolean collectResults) throws NativeQueryExecutionException, OBDAException;
+	protected abstract GraphResultSet executeGraphQuery(ExecutableQuery executableQuery, boolean collectResults)
+			throws OntopQueryEvaluationException;
 
 	/**
 	 * Cancel the processing of the target query.
 	 */
-	protected abstract void cancelExecution() throws NativeQueryExecutionException;
+	protected abstract void cancelExecution() throws OntopQueryEvaluationException;
 
 	/**
 	 * Calls the necessary tuple or graph query execution Implements describe
 	 * uri or var logic Returns the result set for the given query
 	 */
 	@Override
-	public OBDAResultSet execute(String strquery) throws OBDAException {
+	public OBDAResultSet execute(String strquery) throws OntopQueryEvaluationException, OntopReformulationException {
 		if (strquery.isEmpty()) {
-			throw new OBDAException("Cannot execute an empty query");
+			throw new OntopInvalidInputQueryException("Cannot process an empty query");
 		}
 		try {
 			ParsedQuery pq = engine.getParsedQuery(strquery);
@@ -278,12 +269,14 @@ public abstract class QuestStatement implements IQuestStatement {
 				}
 				return describeResultSet;
 			}
+			else {
+				throw new OntopInvalidInputQueryException("Unsupported query type: " + strquery);
+			}
 		}
 		catch (MalformedQueryException e) {
-			throw new OBDAException(e);
+			throw new OntopInvalidInputQueryException(e.getMessage());
 			
 		}
-		throw new OBDAException("Error, the result set was null");
 	}
 	
 
@@ -297,16 +290,17 @@ public abstract class QuestStatement implements IQuestStatement {
 	 *            the select or ask query string
 	 * @param type  (SELECT or ASK)
 	 * @return the obtained TupleResultSet result
-	 * @throws OBDAException
 	 */
-	private OBDAResultSet executeTupleQuery(String strquery, ParsedQuery pq, QueryType type) throws OBDAException {
+	private OBDAResultSet executeTupleQuery(String strquery, ParsedQuery pq, QueryType type)
+			throws OntopQueryEvaluationException, OntopReformulationException {
 
 		log.debug("Executing SPARQL query: \n{}", strquery);
 
 		return executeInThread(pq, type, Optional.empty());
 	}
 
-	private OBDAResultSet executeGraphQuery(String strquery, QueryType type) throws OBDAException {
+	private OBDAResultSet executeGraphQuery(String strquery, QueryType type)
+			throws OntopQueryEvaluationException, OntopReformulationException {
 		
 		log.debug("Executing SPARQL query: \n{}", strquery);
 		
@@ -320,7 +314,7 @@ public abstract class QuestStatement implements IQuestStatement {
 		} 
 		catch (MalformedQueryException e) {
 			e.printStackTrace();
-			throw new OBDAException(e);
+			throw new OntopInvalidInputQueryException(e.getMessage());
 		}
 	}
 	
@@ -330,7 +324,8 @@ public abstract class QuestStatement implements IQuestStatement {
 	 * Internal method to start a new query execution thread type defines the
 	 * query type SELECT, ASK, CONSTRUCT, or DESCRIBE
 	 */
-	private OBDAResultSet executeInThread(ParsedQuery pq, QueryType type, Optional<SesameConstructTemplate> templ) throws OBDAException {
+	private OBDAResultSet executeInThread(ParsedQuery pq, QueryType type, Optional<SesameConstructTemplate> templ)
+			throws OntopQueryAnsweringException {
 		CountDownLatch monitor = new CountDownLatch(1);
 		ExecutableQuery executableQuery = engine.translateIntoNativeQuery(pq, templ);
 		QueryExecutionThread executionthread = new QueryExecutionThread(executableQuery, type, templ, monitor,
@@ -343,40 +338,34 @@ public abstract class QuestStatement implements IQuestStatement {
 			e.printStackTrace();
 		}
 		if (executionthread.errorStatus()) {
-			OBDAException ex = new OBDAException(executionthread.getException().getMessage());
+			OntopQueryAnsweringException ex = new OntopQueryAnsweringException(executionthread.getException());
 			ex.setStackTrace(executionthread.getStackTrace());
 			throw ex;
 		}
 
 		if (canceled == true) {
 			canceled = false;
-			throw new OBDAException("Query execution was cancelled");
+			throw new OntopQueryEvaluationException("Query execution was cancelled");
 		}
 		return executionthread.getResultSet();
 	}
 
 	
 	@Override
-	public void cancel() throws OBDAException {
+	public void cancel() throws OntopConnectionException {
 		canceled = true;
 		try {
 			QuestStatement.this.executionThread.cancel();
 		} catch (Exception e) {
-			throw new OBDAException(e);
+			throw new OntopConnectionException(e);
 		}
 	}
 
 	/**
 	 * Called to check whether the statement was cancelled on purpose
-	 * @return
 	 */
 	public boolean isCanceled(){
 		return canceled;
-	}
-	
-	@Override
-	public int executeUpdate(String query) throws OBDAException {
-		throw new UnsupportedOperationException();
 	}
 
 	@Override
@@ -388,13 +377,13 @@ public abstract class QuestStatement implements IQuestStatement {
 
 	@Override
 	public ExecutableQuery getExecutableQuery(String sparqlQuery)
-			throws OBDAException{
+			throws OntopReformulationException {
 		try {
 			ParsedQuery sparqlTree = engine.getParsedQuery(sparqlQuery);
 			// TODO: handle the construction template correctly
 			return engine.translateIntoNativeQuery(sparqlTree, Optional.empty());
 		} catch (MalformedQueryException e) {
-			throw new OBDAException(e);
+			throw new OntopInvalidInputQueryException(e);
 		}
 	}
 

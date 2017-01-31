@@ -34,7 +34,7 @@ import java.io.File;
  */
 public class OracleLongNameTest {
 
-	private QuestOWLConnection conn;
+	private OntopOWLConnection conn;
 	
 	final String owlfile = "resources/oraclesql/o.owl";
 	final String obdafile1 = "resources/oraclesql/o1.obda";
@@ -62,7 +62,7 @@ public class OracleLongNameTest {
 		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> " +
 				"SELECT " + varName + " WHERE { " + varName  + " a :Country}";
 		
-		QuestOWLStatement st = conn.createStatement();
+		OntopOWLStatement st = conn.createStatement();
 		st.executeTuple(query);
 	}
 	

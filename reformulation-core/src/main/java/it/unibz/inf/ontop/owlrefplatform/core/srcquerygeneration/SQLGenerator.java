@@ -25,11 +25,14 @@ import com.google.common.base.Joiner;
 import com.google.common.collect.*;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
+import it.unibz.inf.ontop.exception.OntopReformulationException;
+import it.unibz.inf.ontop.exception.OntopTypingException;
 import it.unibz.inf.ontop.injection.QuestCoreSettings;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.Predicate.COL_TYPE;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
 import it.unibz.inf.ontop.model.impl.TermUtils;
+import it.unibz.inf.ontop.model.type.IncompatibleTermException;
 import it.unibz.inf.ontop.owlrefplatform.core.ExecutableQuery;
 import it.unibz.inf.ontop.owlrefplatform.core.SQLExecutableQuery;
 import it.unibz.inf.ontop.owlrefplatform.core.abox.XsdDatatypeConverter;
@@ -412,14 +415,22 @@ public class SQLGenerator implements NativeQueryGenerator {
 	private String generateQuery(List<String> signature,
 								 Multimap<Predicate, CQIE> ruleIndex,
 								 List<Predicate> predicatesInBottomUp,
-								 List<Predicate> extensionalPredicates) throws OBDAException {
+								 List<Predicate> extensionalPredicates) throws OntopReformulationException {
 
 		int numPreds = predicatesInBottomUp.size();
 		int i = 0;
 
 		 Map<Predicate, ParserViewDefinition> subQueryDefinitions = new HashMap<>();
 
-		TypeExtractor.TypeResults typeResults = TypeExtractor.extractTypes(ruleIndex, predicatesInBottomUp, metadata);
+		TypeExtractor.TypeResults typeResults;
+		try {
+			typeResults = TypeExtractor.extractTypes(ruleIndex, predicatesInBottomUp, metadata);
+			/*
+			 * Currently, incompatible terms are treated as a reformulation error
+			 */
+		} catch (IncompatibleTermException e) {
+			throw new OntopTypingException(e.getMessage());
+		}
 
 		ImmutableMap<CQIE, ImmutableList<Optional<TermType>>> termTypeMap = typeResults.getTermTypeMap();
 		ImmutableMap<Predicate, ImmutableList<COL_TYPE>> castTypeMap = typeResults.getCastTypeMap();

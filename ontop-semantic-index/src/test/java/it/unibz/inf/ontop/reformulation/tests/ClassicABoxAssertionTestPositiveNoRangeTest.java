@@ -37,8 +37,8 @@ import java.util.Properties;
  */
 public class ClassicABoxAssertionTestPositiveNoRangeTest extends TestCase {
 
-	private QuestOWLConnection conn;
-	private QuestOWLStatement st;
+	private OntopOWLConnection conn;
+	private OntopOWLStatement st;
 
 	public ClassicABoxAssertionTestPositiveNoRangeTest() throws Exception {
 		Properties p = new Properties();

@@ -36,7 +36,7 @@ import static org.junit.Assert.assertTrue;
  */
 public class AdventureWorksDatetimeTest {
 
-	private QuestOWLConnection conn;
+	private OntopOWLConnection conn;
 
 	Logger log = LoggerFactory.getLogger(this.getClass());
 
@@ -66,7 +66,7 @@ public class AdventureWorksDatetimeTest {
 
 	
 	private String runTests(String query) throws Exception {
-		QuestOWLStatement st = conn.createStatement();
+		OntopOWLStatement st = conn.createStatement();
 		String retval="";
 		try {
 			QuestOWLResultSet rs = st.executeTuple(query);

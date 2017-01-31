@@ -21,9 +21,10 @@ package it.unibz.inf.ontop.owlrefplatform.core.resultset;
  */
 
 
+import it.unibz.inf.ontop.exception.OntopConnectionException;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.Predicate.COL_TYPE;
-import it.unibz.inf.ontop.owlrefplatform.core.IQuestStatement;
+import it.unibz.inf.ontop.owlrefplatform.core.OntopStatement;
 import it.unibz.inf.ontop.reformulation.IRIDictionary;
 
 import javax.annotation.Nullable;
@@ -39,7 +40,7 @@ import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
 public class QuestTupleResultSet implements TupleResultSet {
 
 	private final ResultSet rs;
-	private final IQuestStatement st;
+	private final OntopStatement st;
 	private final List<String> signature;
 	
 	private static final DecimalFormat formatter = new DecimalFormat("0.0###E0");
@@ -77,7 +78,7 @@ public class QuestTupleResultSet implements TupleResultSet {
 	 * @param st
 	 * @throws OBDAException
 	 */
-	public QuestTupleResultSet(ResultSet set, List<String> signature, IQuestStatement st,
+	public QuestTupleResultSet(ResultSet set, List<String> signature, OntopStatement st,
 							   DBMetadata dbMetadata, Optional<IRIDictionary> iriDictionary) throws OBDAException {
 		this.rs = set;
 		this.st = st;
@@ -112,16 +113,16 @@ public class QuestTupleResultSet implements TupleResultSet {
 	}
 
 	@Override
-    public int getColumnCount() throws OBDAException {
+    public int getColumnCount() {
 		return signature.size();
 	}
 
 	@Override
-    public int getFetchSize() throws OBDAException {
+    public int getFetchSize() throws OntopConnectionException {
 		try {
 			return rs.getFetchSize();
 		} catch (SQLException e) {
-			throw new OBDAException(e.getMessage());
+			throw new OntopConnectionException(e.getMessage());
 		}
 	}
 

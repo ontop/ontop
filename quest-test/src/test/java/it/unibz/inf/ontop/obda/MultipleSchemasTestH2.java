@@ -19,7 +19,7 @@ import java.sql.SQLException;
 
 public class MultipleSchemasTestH2 {
 
-    private static QuestOWLConnection conn;
+    private static OntopOWLConnection conn;
 
     static Logger log = LoggerFactory.getLogger(MultipleSchemasTestH2.class);
 
@@ -101,7 +101,7 @@ public class MultipleSchemasTestH2 {
     }
 
     private void runTests(String query, int numberOfResults) throws Exception {
-        QuestOWLStatement st = conn.createStatement();
+        OntopOWLStatement st = conn.createStatement();
         try {
             QuestOWLResultSet rs = st.executeTuple(query);
 

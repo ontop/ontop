@@ -27,7 +27,6 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.Properties;
 
 import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.owlapi.OntopOWLException;
@@ -39,8 +38,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.inf.ontop.injection.QuestCoreSettings;
 import org.semanticweb.owlapi.model.OWLObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -139,8 +136,8 @@ public class BindTest {
 		QuestOWL reasoner = factory.createReasoner(configuration);
 
         // Now we are ready for querying
-        QuestOWLConnection conn = reasoner.getConnection();
-        QuestOWLStatement st = conn.createStatement();
+        OntopOWLConnection conn = reasoner.getConnection();
+        OntopOWLStatement st = conn.createStatement();
 
 
         try {
@@ -294,8 +291,8 @@ public class BindTest {
         checkReturnedValues(queryBind, expectedValues);
     }
 
-    @Test
-    public void testFailingSelect()  throws Exception {
+    @Test(expected = OntopOWLException.class)
+    public void testFailingSelect1()  throws Exception {
 
         //complex case
         //variable should be assigned again in the same SELECT clause. SELECT Expressions, reuse the same variable
@@ -306,16 +303,11 @@ public class BindTest {
                 "   ?x dc:title ?title . \n" +
                 "   ?x ns:discount ?discount \n" +
                 "}";
-        OWLObject price1 = null;
+        runTests(querySelect1);
+    }
 
-        try {
-
-            price1 = runTests(querySelect1);
-
-        } catch (OntopOWLException e) {
-
-            assertEquals("it.unibz.inf.ontop.model.OBDAException", e.getCause().getClass().getName());
-        }
+    @Test(expected = OntopOWLException.class)
+    public void testFailingSelect2()  throws Exception {
 
         //variable cannot be assigned again in the same SELECT clause. SELECT Expressions, reuse the same variable in FILTER
         String querySelect2 = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n" +
@@ -326,14 +318,7 @@ public class BindTest {
                 "  ?x ns:discount ?discount . \n" +
                 "  FILTER(?price < 20) \n" +
                 "}";
-        OWLObject price2 = null;
-        try {
-            price2 = runTests(querySelect2);
-        } catch (OntopOWLException e) {
-
-            assertEquals("it.unibz.inf.ontop.model.OBDAException", e.getCause().getClass().getName());
-        }
-
+        runTests(querySelect2);
     }
 
     /**
@@ -525,8 +510,8 @@ public class BindTest {
 			QuestOWL reasoner = factory.createReasoner(configuration);
 
 			// Now we are ready for querying
-			QuestOWLConnection conn = reasoner.getConnection();
-			QuestOWLStatement st = conn.createStatement();
+			OntopOWLConnection conn = reasoner.getConnection();
+			OntopOWLStatement st = conn.createStatement();
 
 
 

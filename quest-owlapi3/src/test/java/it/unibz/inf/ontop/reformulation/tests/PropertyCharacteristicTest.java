@@ -39,8 +39,8 @@ import java.sql.Statement;
 
 public class PropertyCharacteristicTest extends TestCase {
 	
-	private QuestOWLConnection conn = null;
-	private QuestOWLStatement stmt = null;
+	private OntopOWLConnection conn = null;
+	private OntopOWLStatement stmt = null;
 	private QuestOWL reasoner = null;
 	
 	private Connection jdbcconn = null;

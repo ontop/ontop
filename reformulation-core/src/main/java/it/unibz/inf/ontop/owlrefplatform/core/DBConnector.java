@@ -24,11 +24,11 @@ public interface DBConnector {
     /**
      * Gets a direct QuestConnection.
      */
-    IQuestConnection getNonPoolConnection() throws OBDAException;
+    OntopConnection getNonPoolConnection() throws OBDAException;
 
     /**
      * Gets a QuestConnection usually coming from a connection pool.
      */
-    IQuestConnection getConnection() throws OBDAException;
+    OntopConnection getConnection() throws OBDAException;
 
 }

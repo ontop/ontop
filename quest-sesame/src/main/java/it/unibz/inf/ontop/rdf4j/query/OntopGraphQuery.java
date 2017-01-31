@@ -23,14 +23,14 @@ package it.unibz.inf.ontop.rdf4j.query;
 import it.unibz.inf.ontop.model.GraphResultSet;
 import it.unibz.inf.ontop.model.OBDAException;
 import it.unibz.inf.ontop.ontology.Assertion;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestDBConnection;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestDBStatement;
 
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import it.unibz.inf.ontop.owlrefplatform.core.OntopConnection;
+import it.unibz.inf.ontop.owlrefplatform.core.OntopStatement;
 import it.unibz.inf.ontop.rdf4j.RDF4JHelper;
 import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.query.GraphQuery;
@@ -48,7 +48,7 @@ public class OntopGraphQuery extends AbstractOntopQuery implements GraphQuery {
 	private String baseURI;
 
 	public OntopGraphQuery(String queryString, String baseURI,
-                           QuestDBConnection conn) throws MalformedQueryException {
+                           OntopConnection conn) throws MalformedQueryException {
         super(queryString, conn);
 		if (queryString.toLowerCase().contains("construct") || queryString.toLowerCase().contains("describe")) {
 			this.baseURI = baseURI;
@@ -68,7 +68,7 @@ public class OntopGraphQuery extends AbstractOntopQuery implements GraphQuery {
     @Override
 	public GraphQueryResult evaluate() throws QueryEvaluationException {
 		GraphResultSet res = null;
-		QuestDBStatement stm = null;
+		OntopStatement stm = null;
 		try {
 			stm = conn.createStatement();
 			res = (GraphResultSet) stm.execute(getQueryString());

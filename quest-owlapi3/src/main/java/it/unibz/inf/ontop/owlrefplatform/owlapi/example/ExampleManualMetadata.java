@@ -3,12 +3,12 @@ package it.unibz.inf.ontop.owlrefplatform.owlapi.example;
 import com.google.inject.Injector;
 import it.unibz.inf.ontop.mapping.MappingParser;
 import it.unibz.inf.ontop.model.OBDAModel;
-import it.unibz.inf.ontop.owlapi.OWLAPITranslatorUtility;
 import it.unibz.inf.ontop.owlrefplatform.core.*;
 import it.unibz.inf.ontop.injection.QuestComponentFactory;
 import it.unibz.inf.ontop.injection.QuestCoreConfiguration;
+import it.unibz.inf.ontop.owlrefplatform.owlapi.OntopOWLConnection;
+import it.unibz.inf.ontop.owlrefplatform.owlapi.OntopOWLStatement;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLConnection;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLStatement;
 import it.unibz.inf.ontop.reformulation.OBDAQueryProcessor;
 import it.unibz.inf.ontop.sql.RDBMetadata;
 import it.unibz.inf.ontop.sql.RDBMetadataExtractionTools;
@@ -19,7 +19,6 @@ import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 
 import java.io.File;
-import java.util.Optional;
 
 /**
  * This class shows how to create an instance of quest giving the metadata manually 
@@ -30,7 +29,7 @@ import java.util.Optional;
 public class ExampleManualMetadata {
 final String owlfile = "src/main/resources/example/exampleSensor.owl";
 final String obdafile = "src/main/resources/example/UseCaseExampleMini.obda";
-private QuestOWLStatement qst = null;
+private OntopOWLStatement qst = null;
 	private DBConnector dbConnector;
 
 	/*
@@ -62,8 +61,8 @@ private void setup()  throws Exception {
 	 * Prepare the data connection for querying.
 	 */
 	
-	IQuestConnection conn =dbConnector.getConnection();
-	QuestOWLConnection connOWL = new QuestOWLConnection(conn);
+	OntopConnection conn =dbConnector.getConnection();
+	OntopOWLConnection connOWL = new QuestOWLConnection(conn);
 	qst = connOWL.createStatement();
 }
 

@@ -67,8 +67,8 @@ public class OntologyTypesTest {
         QuestOWL reasoner = factory.createReasoner(configBuilder.build());
 
 		// Now we are ready for querying
-		QuestOWLConnection conn = reasoner.getConnection();
-		QuestOWLStatement st = conn.createStatement();
+		OntopOWLConnection conn = reasoner.getConnection();
+		OntopOWLStatement st = conn.createStatement();
 
 		
 		try {
@@ -87,7 +87,7 @@ public class OntologyTypesTest {
 		}
 	}
 	
-	private void executeQueryAssertResults(String query, QuestOWLStatement st, int expectedRows) throws Exception {
+	private void executeQueryAssertResults(String query, OntopOWLStatement st, int expectedRows) throws Exception {
 		QuestOWLResultSet rs = st.executeTuple(query);
 		int count = 0;
 		while (rs.nextRow()) {

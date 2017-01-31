@@ -20,9 +20,10 @@ package it.unibz.inf.ontop.rdf4j.repository;
  * #L%
  */
 
+import it.unibz.inf.ontop.exception.OntopConnectionException;
 import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.model.OBDAException;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestDBConnection;
+import it.unibz.inf.ontop.owlrefplatform.core.OntopConnection;
 import it.unibz.inf.ontop.owlrefplatform.questdb.QuestDBVirtualStore;
 
 import org.eclipse.rdf4j.model.ValueFactory;
@@ -39,7 +40,7 @@ import java.util.Map;
 public class OntopVirtualRepository implements org.eclipse.rdf4j.repository.Repository, AutoCloseable {
 
 	private final QuestDBVirtualStore virtualStore;
-	private QuestDBConnection questDBConn;
+	private OntopConnection ontopConnection;
 	private boolean initialized = false;
 	private static final Logger logger = LoggerFactory.getLogger(OntopVirtualRepository.class);
 	private Map<String, String> namespaces;
@@ -58,7 +59,7 @@ public class OntopVirtualRepository implements org.eclipse.rdf4j.repository.Repo
 	 */
 	public RepositoryConnection getConnection() throws RepositoryException {
 		try {
-			return new OntopRepositoryConnection(this, getQuestConnection());
+			return new OntopRepositoryConnection(this, getOntopConnection());
 		} catch (OBDAException e) {
 			logger.error("Error creating repo connection: " + e.getMessage());
 			throw new RepositoryException(e.getMessage());
@@ -86,14 +87,14 @@ public class OntopVirtualRepository implements org.eclipse.rdf4j.repository.Repo
 	 * Returns a connection which can be used to run queries over the repository
 	 * Before this method can be used, initialize() must be called once.
 	 */
-	private QuestDBConnection getQuestConnection() throws RepositoryException {
+	private OntopConnection getOntopConnection() throws RepositoryException {
 		if(!initialized)
 			throw new RepositoryException("The OntopVirtualRepository must be initialized before getConnection can be run.");
 		try {
-			questDBConn = this.virtualStore.getConnection();
-			return questDBConn;
-		} catch (OBDAException e) {
-			throw new RepositoryException(e.getMessage());
+			ontopConnection = this.virtualStore.getConnection();
+			return ontopConnection;
+		} catch (OntopConnectionException e) {
+			throw new RepositoryException(e);
 		}
 
 	}
@@ -112,7 +113,7 @@ public class OntopVirtualRepository implements org.eclipse.rdf4j.repository.Repo
 	public void shutDown() throws RepositoryException {
 		initialized = false;
 		try {
-			questDBConn.close();
+			ontopConnection.close();
 			virtualStore.close();
 		} catch (OBDAException e) {
 			e.printStackTrace();

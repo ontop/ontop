@@ -127,8 +127,8 @@ public class SimpleMappingVirtualABoxTest extends TestCase {
         QuestOWL reasoner = factory.createReasoner(config);
 
 		// Now we are ready for querying
-		QuestOWLConnection conn = reasoner.getConnection();
-		QuestOWLStatement st = conn.createStatement();
+		OntopOWLConnection conn = reasoner.getConnection();
+		OntopOWLStatement st = conn.createStatement();
 
 		String query = "PREFIX : <http://it.unibz.inf/obda/test/simple#> SELECT * WHERE { ?x a :A; :P ?y; :U ?z; :P ?y; :U ?z; :P ?y ; :U ?z; :P ?y; :U ?z; :P ?y ; :U ?z; :P ?y; :U ?z; :P ?y ; :U ?z; :P ?y; :U ?z; :P ?y ; :U ?z; :P ?y; :U ?z; :P ?y ; :U ?z; :P ?y; :U ?z; :P ?y ; :U ?z; :P ?y; :U ?z; :P ?y ; :U ?z }";
 		try {
@@ -138,7 +138,7 @@ public class SimpleMappingVirtualABoxTest extends TestCase {
 			 */
 //			long start = System.currentTimeMillis();
 //			for (int i = 0; i < 3000; i++) {
-//				QuestQuestOWLStatement sto = (QuestQuestOWLStatement)st;
+//				QuestOntopOWLStatement sto = (QuestQuestOWLStatement)st;
 //				String q = sto.getExecutableQuery(bf.insert(7, ' ').toString());
 //			}
 //			long end = System.currentTimeMillis();

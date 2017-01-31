@@ -40,8 +40,8 @@ public class DatetimeStampTest {
 
         QuestOWL reasoner = factory.createReasoner(configBuilder.build());
         // Now we are ready for querying
-        QuestOWLConnection conn = reasoner.getConnection();
-        QuestOWLStatement st = conn.createStatement();
+        OntopOWLConnection conn = reasoner.getConnection();
+        OntopOWLStatement st = conn.createStatement();
 
 
         QueryController qc = new QueryController();

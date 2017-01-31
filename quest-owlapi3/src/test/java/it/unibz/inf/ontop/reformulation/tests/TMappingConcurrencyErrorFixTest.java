@@ -21,7 +21,6 @@ package it.unibz.inf.ontop.reformulation.tests;
  */
 
 import it.unibz.inf.ontop.injection.QuestConfiguration;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
 import it.unibz.inf.ontop.injection.QuestCoreSettings;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import org.junit.After;
@@ -48,7 +47,7 @@ import static org.junit.Assert.assertTrue;
  * Use to check that no concurrency error appears. 
  */
 public class TMappingConcurrencyErrorFixTest{
-	private QuestOWLConnection conn;
+	private OntopOWLConnection conn;
 	private Connection connection;
 	
 
@@ -130,7 +129,7 @@ public class TMappingConcurrencyErrorFixTest{
 	}
 	
 	private String runTests(String query) throws Exception {
-		QuestOWLStatement st = conn.createStatement();
+		OntopOWLStatement st = conn.createStatement();
 		String retval=null;
 		try {
 			QuestOWLResultSet rs = st.executeTuple(query);

@@ -5,7 +5,6 @@ import it.unibz.inf.ontop.exception.InvalidMappingException;
 import it.unibz.inf.ontop.exception.InvalidPredicateDeclarationException;
 import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.model.OBDAException;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
 import it.unibz.inf.ontop.owlrefplatform.core.SQLExecutableQuery;
 import it.unibz.inf.ontop.injection.QuestCoreSettings;
 import it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing.TMappingExclusionConfig;
@@ -333,7 +332,7 @@ public class QuestOWLExample_ReasoningDisabled {
      * @param conn
      * @throws org.semanticweb.owlapi.model.OWLException
      */
-    private void closeEverything(QuestOWLConnection conn) throws OWLException {
+    private void closeEverything(OntopOWLConnection conn) throws OWLException {
 		/*
 		 * Close connection and resources
 		 */
@@ -352,7 +351,7 @@ public class QuestOWLExample_ReasoningDisabled {
      * @throws java.io.IOException
      * @throws OWLException
      */
-    private QuestOWLConnection createStuff() throws OBDAException, OWLOntologyCreationException, IOException, InvalidPredicateDeclarationException, InvalidMappingException {
+    private OntopOWLConnection createStuff() throws OBDAException, OWLOntologyCreationException, IOException, InvalidPredicateDeclarationException, InvalidMappingException {
 
 		/*
 		 * Prepare the configuration for the Quest instance. The example below shows the setup for
@@ -377,7 +376,7 @@ public class QuestOWLExample_ReasoningDisabled {
 		/*
 		 * Prepare the data connection for querying.
 		 */
-        QuestOWLConnection conn = reasoner.getConnection();
+        OntopOWLConnection conn = reasoner.getConnection();
 
         return conn;
     }
@@ -464,8 +463,8 @@ public class QuestOWLExample_ReasoningDisabled {
         for(String sparqlQuery:queries){
             //String sparqlQuery = queries[j];
 
-            QuestOWLConnection conn;
-            QuestOWLStatement st = null;
+            OntopOWLConnection conn;
+            OntopOWLStatement st = null;
             try {
 
                 // Warm ups

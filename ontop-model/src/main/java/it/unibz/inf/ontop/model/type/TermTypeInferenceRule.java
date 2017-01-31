@@ -18,7 +18,7 @@ public interface TermTypeInferenceRule {
      *
      */
     Optional<TermType> inferType(List<Term> terms, ImmutableList<Optional<COL_TYPE>> expectedBaseTypes)
-            throws TermTypeException;
+            throws IncompatibleTermException;
 
     /**
      * TODO: explain
@@ -26,5 +26,5 @@ public interface TermTypeInferenceRule {
      */
     Optional<TermType> inferTypeFromArgumentTypes(ImmutableList<Optional<TermType>> actualArgumentTypes,
                                                   ImmutableList<Optional<COL_TYPE>> expectedBaseTypes)
-            throws TermTypeException;
+            throws IncompatibleTermException;
 }

@@ -20,6 +20,8 @@ package it.unibz.inf.ontop.model;
  * #L%
  */
 
+import it.unibz.inf.ontop.exception.OntopConnectionException;
+
 import java.util.List;
 
 public interface TupleResultSet extends OBDAResultSet {
@@ -32,14 +34,14 @@ public interface TupleResultSet extends OBDAResultSet {
 
 	List<String> getSignature();
 
-	int getFetchSize() throws OBDAException;
+	int getFetchSize() throws OntopConnectionException;
 
 	@Override
-    void close() throws OBDAException;
+    void close() throws OntopConnectionException;
 
 	OBDAStatement getStatement();
 
-	boolean nextRow() throws OBDAException;
+	boolean nextRow() throws OntopConnectionException;
 
 	/*
 	 * Main data fetching functions
@@ -50,10 +52,10 @@ public interface TupleResultSet extends OBDAResultSet {
 	 * 
 	 * @param column The column index of the value to be returned, start at 1
 	 * @return a constant
-	 * @throws OBDAException
+	 * @throws OntopConnectionException
 	 */
-    Constant getConstant(int column) throws OBDAException;
+    Constant getConstant(int column) throws OntopConnectionException;
 
-	Constant getConstant(String name) throws OBDAException;
+	Constant getConstant(String name) throws OntopConnectionException;
 
 }

@@ -36,8 +36,8 @@ public class ADPOntopTest {
 		/*
 		 * Prepare the data connection for querying.
 		 */
-		QuestOWLConnection conn = reasoner.getConnection();
-		QuestOWLStatement st = conn.createStatement();
+		OntopOWLConnection conn = reasoner.getConnection();
+		OntopOWLStatement st = conn.createStatement();
 
 		String sparqlQuery = Joiner.on("\n").join(
 				CharStreams.readLines(new FileReader(queryfile))); 

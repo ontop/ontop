@@ -230,7 +230,7 @@ public class TreeWitnessRewriterH2Test{
 		}
 
 		// Now we are ready for querying
-		QuestOWLStatement st = reasoner.getStatement();
+		OntopOWLStatement st = reasoner.getStatement();
 
 		List<Result> summaries = new LinkedList<TreeWitnessRewriterH2Test.Result>();
 

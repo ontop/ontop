@@ -22,7 +22,7 @@ public class HasIdTest extends AbstractVirtualModeTest {
 
     private QuestOWLResultSet runLocalQuery(String query) throws OBDAException, OWLException {
 
-        QuestOWLStatement st = conn.createStatement();
+        OntopOWLStatement st = conn.createStatement();
         return st.executeTuple(query);
     }
 

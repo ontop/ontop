@@ -126,8 +126,8 @@ public class BindTestWithFunctions {
         QuestOWL reasoner = factory.createReasoner(config);
 
         // Now we are ready for querying
-        QuestOWLConnection conn = reasoner.getConnection();
-        QuestOWLStatement st = conn.createStatement();
+        OntopOWLConnection conn = reasoner.getConnection();
+        OntopOWLStatement st = conn.createStatement();
 
 
         int i = 0;
@@ -792,8 +792,8 @@ public class BindTestWithFunctions {
 
 
         // Now we are ready for querying
-        QuestOWLConnection conn = reasoner.getConnection();
-        QuestOWLStatement st = conn.createStatement();
+        OntopOWLConnection conn = reasoner.getConnection();
+        OntopOWLStatement st = conn.createStatement();
 
 
 

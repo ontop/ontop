@@ -38,7 +38,7 @@ public class TestQuestImplicitDBConstraints {
 	private static final String USER = "sa";
 	private static final String PASSWORD = "";
 
-	private QuestOWLConnection conn;
+	private OntopOWLConnection conn;
 
 	private QuestOWL reasoner;
 	private Connection sqlConnection;
@@ -106,7 +106,7 @@ public class TestQuestImplicitDBConstraints {
 		// Now we are ready for querying
 		this.conn = reasoner.getConnection();
 		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT * WHERE {?x :hasVal1 ?v1; :hasVal2 ?v2.}";
-		QuestOWLStatement st = conn.createStatement();
+		OntopOWLStatement st = conn.createStatement();
 		
 		
 		String sql = ((SQLExecutableQuery)st.getExecutableQuery(query)).getSQL();
@@ -137,7 +137,7 @@ public class TestQuestImplicitDBConstraints {
 		// Now we are ready for querying
 		this.conn = reasoner.getConnection();
 		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT * WHERE {?x :hasVal3 ?v1; :hasVal4 ?v4.}";
-		QuestOWLStatement st = conn.createStatement();
+		OntopOWLStatement st = conn.createStatement();
 
 
 		String sql = ((SQLExecutableQuery)st.getExecutableQuery(query)).getSQL();
@@ -169,7 +169,7 @@ public class TestQuestImplicitDBConstraints {
 		// Now we are ready for querying
 		this.conn = reasoner.getConnection();
 		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT * WHERE {?x :hasVal1 ?v1; :hasVal2 ?v2.}";
-		QuestOWLStatement st = conn.createStatement();
+		OntopOWLStatement st = conn.createStatement();
 
 
 		String sql = ((SQLExecutableQuery)st.getExecutableQuery(query)).getSQL();
@@ -201,7 +201,7 @@ public class TestQuestImplicitDBConstraints {
 		// Now we are ready for querying
 		this.conn = reasoner.getConnection();
 		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT * WHERE {?x :hasVal3 ?v1; :hasVal4 ?v4.}";
-		QuestOWLStatement st = conn.createStatement();
+		OntopOWLStatement st = conn.createStatement();
 
 
 		String sql = ((SQLExecutableQuery)st.getExecutableQuery(query)).getSQL();
@@ -236,7 +236,7 @@ public class TestQuestImplicitDBConstraints {
 		// Now we are ready for querying
 		this.conn = reasoner.getConnection();
 		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT * WHERE {?x :relatedTo ?y; :hasVal1 ?v1. ?y :hasVal2 ?v2.}";
-		QuestOWLStatement st = conn.createStatement();
+		OntopOWLStatement st = conn.createStatement();
 
 
 		String sql = ((SQLExecutableQuery)st.getExecutableQuery(query)).getSQL();
@@ -274,7 +274,7 @@ public class TestQuestImplicitDBConstraints {
 		// Now we are ready for querying
 		this.conn = reasoner.getConnection();
 		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT * WHERE {?x :relatedTo ?y; :hasVal1 ?v1. ?y :hasVal2 ?v2.}";
-		QuestOWLStatement st = conn.createStatement();
+		OntopOWLStatement st = conn.createStatement();
 
 
 		String sql = ((SQLExecutableQuery)st.getExecutableQuery(query)).getSQL();

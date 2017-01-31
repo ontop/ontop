@@ -84,8 +84,8 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 
 	private static Logger log = LoggerFactory.getLogger(QuestOWL.class);
 
-	private IQuestConnection conn = null;
-	private QuestOWLConnection owlconn = null;
+	private OntopConnection conn = null;
+	private OntopOWLConnection owlconn = null;
 
 
 	// //////////////////////////////////////////////////////////////////////////////////////
@@ -187,7 +187,7 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 		
 	}
 
-	public QuestOWLStatement getStatement() throws OWLException {
+	public OntopOWLStatement getStatement() throws OWLException {
 		if (!questready) {
 			OWLReasonerRuntimeException owlReasonerRuntimeException = new ReasonerInternalException(
 					"Ontop was not initialized properly. This is generally indicates, " +
@@ -277,7 +277,7 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 
 
 
-	public QuestOWLConnection getConnection() throws OBDAException {
+	public OntopOWLConnection getConnection() throws OBDAException {
 		return owlconn;
 	}
 
@@ -287,8 +287,8 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 	 * @return The old connection: The caller must close this connection
 	 * @throws OBDAException
 	 */
-	public QuestOWLConnection replaceConnection() throws OBDAException {
-		QuestOWLConnection oldconn = this.owlconn;
+	public OntopOWLConnection replaceConnection() throws OBDAException {
+		OntopOWLConnection oldconn = this.owlconn;
 		conn = dbConnector.getNonPoolConnection();
 		owlconn = new QuestOWLConnection(conn);
 		return oldconn;
@@ -514,7 +514,7 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 	}
 	
 	private boolean executeConsistencyQuery(String strQuery) {
-		IQuestStatement query;
+		OntopStatement query;
 		try {
 			query = conn.createStatement();
 			OBDAResultSet rs = query.execute(strQuery);

@@ -44,7 +44,7 @@ public class ConferenceConcatMySQLTest extends AbstractVirtualModeTest {
 
 	private void runTests(String query1) throws Exception {
 
-		QuestOWLStatement st = conn.createStatement();
+		OntopOWLStatement st = conn.createStatement();
 
 
 		try {
@@ -63,7 +63,7 @@ public class ConferenceConcatMySQLTest extends AbstractVirtualModeTest {
 		}
 	}
 	
-	private void executeQueryAssertResults(String query, QuestOWLStatement st) throws Exception {
+	private void executeQueryAssertResults(String query, OntopOWLStatement st) throws Exception {
 		QuestOWLResultSet rs = st.executeTuple(query);
 
 		OWLObject answer, answer2;

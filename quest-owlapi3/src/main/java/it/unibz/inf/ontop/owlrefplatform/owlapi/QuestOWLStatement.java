@@ -20,34 +20,20 @@ package it.unibz.inf.ontop.owlrefplatform.owlapi;
  * #L%
  */
 
+import it.unibz.inf.ontop.exception.OntopConnectionException;
 import it.unibz.inf.ontop.model.GraphResultSet;
-import it.unibz.inf.ontop.model.OBDAException;
 import it.unibz.inf.ontop.model.TupleResultSet;
 import it.unibz.inf.ontop.ontology.Assertion;
 import it.unibz.inf.ontop.ontology.ClassAssertion;
 import it.unibz.inf.ontop.ontology.DataPropertyAssertion;
 import it.unibz.inf.ontop.ontology.ObjectPropertyAssertion;
-import it.unibz.inf.ontop.owlapi.OWLAPIABoxIterator;
 import it.unibz.inf.ontop.owlapi.OWLAPIIndividualTranslator;
 import it.unibz.inf.ontop.owlapi.OntopOWLException;
 import it.unibz.inf.ontop.owlrefplatform.core.ExecutableQuery;
-import it.unibz.inf.ontop.owlrefplatform.core.IQuestStatement;
-import it.unibz.inf.ontop.owlrefplatform.core.SQLExecutableQuery;
+import it.unibz.inf.ontop.owlrefplatform.core.OntopStatement;
 import it.unibz.inf.ontop.owlrefplatform.core.queryevaluation.SPARQLQueryUtility;
-import it.unibz.inf.ontop.rdf4j.RDF4JRDFIterator;
-import org.eclipse.rdf4j.query.parser.ParsedQuery;
-import org.eclipse.rdf4j.rio.ParserConfig;
-import org.eclipse.rdf4j.rio.RDFFormat;
-import org.eclipse.rdf4j.rio.RDFParser;
-import org.eclipse.rdf4j.rio.Rio;
-import org.eclipse.rdf4j.rio.helpers.BasicParserSettings;
-import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.*;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.Reader;
 import java.util.*;
 
 /***
@@ -70,11 +56,11 @@ import java.util.*;
  */
 // DISABLED TEMPORARILY FOR MERGING PURPOSES (NOT BREAKING CLIENTS WITH this ugly name IQquestOWLStatement)
 //public class QuestOWLStatement implements IQuestOWLStatement {
-public class QuestOWLStatement implements IQuestOWLStatement {
-	private IQuestStatement st;
-	private QuestOWLConnection conn;
+public class QuestOWLStatement implements OntopOWLStatement {
+	private OntopStatement st;
+	private OntopOWLConnection conn;
 
-	public QuestOWLStatement(IQuestStatement st, QuestOWLConnection conn) {
+	public QuestOWLStatement(OntopStatement st, OntopOWLConnection conn) {
 		this.conn = conn;
 		this.st = st;
 	}
@@ -82,7 +68,7 @@ public class QuestOWLStatement implements IQuestOWLStatement {
 	public void cancel() throws OWLException {
 		try {
 			st.cancel();
-		} catch (OBDAException e) {
+		} catch (OntopConnectionException e) {
 			throw new OntopOWLException(e);
 		}
 	}
@@ -91,7 +77,7 @@ public class QuestOWLStatement implements IQuestOWLStatement {
 	public void close() throws OWLException {
 		try {
 			st.close();
-		} catch (OBDAException e) {
+		} catch (OntopConnectionException e) {
 			throw new OntopOWLException(e);
 		}
 	}
@@ -104,10 +90,10 @@ public class QuestOWLStatement implements IQuestOWLStatement {
 
 	 		
 			return questOWLResultSet;
-		} catch (OBDAException e) {
+		} catch (Exception e) {
 			throw new OntopOWLException(e);
 		}} else {
-			throw new RuntimeException("Query is not tuple query (SELECT / ASK).");
+			throw new OWLException("Query is not tuple query (SELECT / ASK).");
 		}
 	}
 
@@ -119,151 +105,18 @@ public class QuestOWLStatement implements IQuestOWLStatement {
 		} catch (Exception e) {
 			throw new OWLOntologyCreationException(e);
 		}} else {
-			throw new RuntimeException("Query is not graph query (CONSTRUCT / DESCRIBE).");
+			throw new OWLException("Query is not graph query (CONSTRUCT / DESCRIBE).");
 		}
 	}
 
-	public int executeUpdate(String query) throws OWLException {
-		try {
-			return st.executeUpdate(query);
-		} catch (OBDAException e) {
-			throw new OntopOWLException(e);
-		}
-	}
-
-	public int insertData(File owlFile, int commitSize, int batchsize, String baseURI) throws Exception {
-		throw new RuntimeException("TODO: support insertData() again?");
-
-//		Iterator<Assertion> aBoxIter = null;
-//
-//		if (owlFile.getName().toLowerCase().endsWith(".owl")) {
-//			OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-//			OWLOntology ontology = manager.loadOntologyFromOntologyDocument(owlFile);
-//			Set<OWLOntology> set = manager.getImportsClosure(ontology);
-//
-//			// Retrieves the ABox from the ontology file.
-//
-//			aBoxIter = new OWLAPIABoxIterator(set, st.getQuestInstance().getVocabulary());
-//			return st.insertData(aBoxIter, commitSize, batchsize);
-//		}
-//		else if (owlFile.getName().toLowerCase().endsWith(".ttl") || owlFile.getName().toLowerCase().endsWith(".nt")) {
-//
-//			RDFParser rdfParser = null;
-//
-//			if (owlFile.getName().toLowerCase().endsWith(".nt")) {
-//				rdfParser = Rio.createParser(RDFFormat.NTRIPLES);
-//			} else if (owlFile.getName().toLowerCase().endsWith(".ttl")) {
-//				rdfParser = Rio.createParser(RDFFormat.TURTLE);
-//			}
-//
-//			ParserConfig config = rdfParser.getParserConfig();
-//			// To emulate DatatypeHandling.IGNORE
-//			config.addNonFatalError(BasicParserSettings.FAIL_ON_UNKNOWN_DATATYPES);
-//			config.addNonFatalError(BasicParserSettings.VERIFY_DATATYPE_VALUES);
-//			config.addNonFatalError(BasicParserSettings.NORMALIZE_DATATYPE_VALUES);
-////
-////			rdfParser.setVerifyData(true);
-////			rdfParser.setStopAtFirstError(true);
-//
-//			boolean autoCommit = conn.getAutoCommit();
-//			conn.setAutoCommit(false);
-//
-//			RDF4JRDFIterator rdfHandler = new RDF4JRDFIterator();
-//			rdfParser.setRDFHandler(rdfHandler);
-//
-//			BufferedReader reader = new BufferedReader(new FileReader(owlFile));
-//
-//			try {
-//
-//				Thread insert = new Thread(new Insert(rdfParser, reader, baseURI));
-//				Process processor = new Process(rdfHandler, this.st, commitSize, batchsize);
-//				Thread process = new Thread(processor);
-//
-//				// start threads
-//				insert.start();
-//				process.start();
-//
-//				insert.join();
-//				process.join();
-//
-//				return processor.getInsertCount();
-//
-//			} catch (RuntimeException | InterruptedException e) {
-//				// System.out.println("exception, rolling back!");
-//
-//				if (autoCommit) {
-//					conn.rollBack();
-//				}
-//				throw e;
-//			} finally {
-//				conn.setAutoCommit(autoCommit);
-//			}
-//
-//		} else {
-//			throw new IllegalArgumentException("Only .owl, .ttl and .nt files are supported for load opertions.");
-//		}
-
-	}
-
-	private class Insert implements Runnable {
-		private RDFParser rdfParser;
-		private Reader inputStreamOrReader;
-		private String baseURI;
-
-		public Insert(RDFParser rdfParser, Reader inputStreamOrReader, String baseURI) {
-			this.rdfParser = rdfParser;
-			this.inputStreamOrReader = inputStreamOrReader;
-			this.baseURI = baseURI;
-		}
-
-		@Override
-		public void run() {
-			try {
-				rdfParser.parse(inputStreamOrReader, baseURI);
-			} catch (Exception e) {
-				throw new RuntimeException(e);
-			}
-		}
-
-	}
-
-	private class Process implements Runnable {
-		private Iterator<Assertion> iterator;
-		private IQuestStatement questStmt;
-
-		int insertCount = -1;
-		private int commitsize;
-		private int batchsize;
-
-		public Process(Iterator<Assertion> iterator, IQuestStatement qstm, int commitsize, int batchsize) throws OBDAException {
-			this.iterator = iterator;
-			this.questStmt = qstm;
-			this.commitsize = commitsize;
-			this.batchsize = batchsize;
-		}
-
-		@Override
-		public void run() {
-			try {
-				insertCount = questStmt.insertData(iterator, commitsize, batchsize);
-			} catch (OBDAException e) {
-				throw new RuntimeException(e);
-			}
-		}
-
-		public int getInsertCount() {
-			return insertCount;
-		}
-	}
-
-	public QuestOWLConnection getConnection() throws OWLException {
+	public OntopOWLConnection getConnection() throws OWLException {
 		return conn;
 	}
 
 	public int getFetchSize() throws OWLException {
 		try {
 			return st.getFetchSize();
-		} catch (OBDAException e) {
+		} catch (OntopConnectionException e) {
 			throw new OntopOWLException(e);
 		}
 	}
@@ -271,7 +124,7 @@ public class QuestOWLStatement implements IQuestOWLStatement {
 	public int getMaxRows() throws OWLException {
 		try {
 			return st.getMaxRows();
-		} catch (OBDAException e) {
+		} catch (OntopConnectionException e) {
 			throw new OntopOWLException(e);
 		}
 	}
@@ -279,7 +132,7 @@ public class QuestOWLStatement implements IQuestOWLStatement {
 	public void getMoreResults() throws OWLException {
 		try {
 			st.getMoreResults();
-		} catch (OBDAException e) {
+		} catch (OntopConnectionException e) {
 			throw new OntopOWLException(e);
 		}
 	}
@@ -287,7 +140,7 @@ public class QuestOWLStatement implements IQuestOWLStatement {
 	public int getQueryTimeout() throws OWLException {
 		try {
 			return st.getQueryTimeout();
-		} catch (OBDAException e) {
+		} catch (OntopConnectionException e) {
 			throw new OntopOWLException(e);
 		}
 	}
@@ -295,7 +148,7 @@ public class QuestOWLStatement implements IQuestOWLStatement {
 	public void setFetchSize(int rows) throws OWLException {
 		try {
 			st.setFetchSize(rows);
-		} catch (OBDAException e) {
+		} catch (OntopConnectionException e) {
 			throw new OntopOWLException(e);
 		}
 	}
@@ -303,7 +156,7 @@ public class QuestOWLStatement implements IQuestOWLStatement {
 	public void setMaxRows(int max) throws OWLException {
 		try {
 			st.setMaxRows(max);
-		} catch (OBDAException e) {
+		} catch (OntopConnectionException e) {
 			throw new OntopOWLException(e);
 		}
 	}
@@ -311,15 +164,15 @@ public class QuestOWLStatement implements IQuestOWLStatement {
 	public boolean isClosed() throws OWLException {
 		try {
 			return st.isClosed();
-		} catch (OBDAException e) {
+		} catch (OntopConnectionException e) {
 			throw new OntopOWLException(e);
 		}
 	}
 
-	public void setQueryTimeout(int seconds) throws Exception {
+	public void setQueryTimeout(int seconds) throws OWLException {
 		try {
 			st.setQueryTimeout(seconds);
-		} catch (OBDAException e) {
+		} catch (OntopConnectionException e) {
 			throw new OntopOWLException(e);
 		}
 	}

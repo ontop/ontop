@@ -1,8 +1,6 @@
 package it.unibz.inf.ontop.reformulation.tests;
 
 import it.unibz.inf.ontop.injection.QuestConfiguration;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.inf.ontop.injection.QuestCoreSettings;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -21,7 +19,6 @@ import java.io.IOException;
 import java.sql.*;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Properties;
 
 import static org.junit.Assert.assertEquals;
 
@@ -140,8 +137,8 @@ public class NPDTest {
 //				    "FILTER(?max < ?min) " +
 				    "} ORDER BY ?unit ?well";
 
-			QuestOWLConnection qconn =  reasoner.getConnection();
-			QuestOWLStatement st = qconn.createStatement();
+			OntopOWLConnection qconn =  reasoner.getConnection();
+			OntopOWLStatement st = qconn.createStatement();
 			
 			st.getExecutableQuery(q12);
 			st.close();

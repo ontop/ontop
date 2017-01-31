@@ -209,8 +209,8 @@ public class QuestMaterializer {
 		private String query1 = "CONSTRUCT {?s <%s> ?o} WHERE {?s <%s> ?o}";
 		private String query2 = "CONSTRUCT {?s a <%s>} WHERE {?s a <%s>}";
 
-		private IQuestConnection questConn;
-		private IQuestStatement stm;
+		private OntopConnection questConn;
+		private OntopStatement stm;
 		
 		private boolean read = false, hasNext = false;
 
@@ -227,7 +227,7 @@ public class QuestMaterializer {
 
 				if (doStreamResults) {
 					// Autocommit must be OFF (needed for autocommit)
-					questConn.setAutoCommit(false);
+					//questConn.setAutoCommit(false);
 				}
 
 				vocabularyIterator = vocabIter;

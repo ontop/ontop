@@ -47,7 +47,7 @@ public class OracleORDERBYTest extends AbstractVirtualModeTest {
 
     private void runQueryAndCheckSQL(String query) throws OBDAException, OWLException{
 
-        QuestOWLStatement st = conn.createStatement();
+        OntopOWLStatement st = conn.createStatement();
         String sql = ((SQLExecutableQuery)st.getExecutableQuery(query)).getSQL();
         //boolean m = sql.matches("(?ms)(.*)ORDER BY country_name (.*)");
         boolean m = sql.matches("(?ms)(.*)ORDER BY (.*)");

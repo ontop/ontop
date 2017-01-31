@@ -39,8 +39,8 @@ import java.util.Properties;
 public class OWLConstructDescribeTest{
 
 	QuestOWL reasoner = null;
-	QuestOWLConnection conn = null;
-	QuestOWLStatement st = null;
+	OntopOWLConnection conn = null;
+	OntopOWLStatement st = null;
 	String owlFile = "src/test/resources/describeConstruct.owl";
 	
 	@Before

@@ -44,7 +44,7 @@ public class OracleDateTimeTest extends AbstractVirtualModeTest {
 	}
 
 
-	private String runTest(QuestOWLStatement st, String query, boolean hasResult) throws Exception {
+	private String runTest(OntopOWLStatement st, String query, boolean hasResult) throws Exception {
 		String retval;
 		QuestOWLResultSet rs = st.executeTuple(query);
 		if(hasResult){
@@ -64,7 +64,7 @@ public class OracleDateTimeTest extends AbstractVirtualModeTest {
 	 * @throws Exception
 	 */
 	public void testSparql2OracleRegex() throws Exception {
-		QuestOWLStatement st = null;
+		OntopOWLStatement st = null;
 		try {
 			st = conn.createStatement();
 

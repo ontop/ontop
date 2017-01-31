@@ -49,7 +49,7 @@ public class H2IdentifierTest {
 	static final String obdaFile = "resources/identifiers/identifiers-h2.obda";
 
 	private QuestOWL reasoner;
-	private QuestOWLConnection conn;
+	private OntopOWLConnection conn;
 	Connection sqlConnection;
 
 
@@ -170,7 +170,7 @@ public class H2IdentifierTest {
 	}
 
 	private String runQueryReturnIndividual(String query) throws OWLException, SQLException {
-		QuestOWLStatement st = conn.createStatement();
+		OntopOWLStatement st = conn.createStatement();
 		String retval;
 		try {
 			QuestOWLResultSet rs = st.executeTuple(query);

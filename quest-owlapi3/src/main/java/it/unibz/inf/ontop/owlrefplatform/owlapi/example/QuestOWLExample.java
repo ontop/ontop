@@ -63,8 +63,8 @@ public class QuestOWLExample {
         try (/*
               * Prepare the data connection for querying.
 		 	 */
-             QuestOWLConnection conn = reasoner.getConnection();
-             QuestOWLStatement st = conn.createStatement()) {
+             OntopOWLConnection conn = reasoner.getConnection();
+             OntopOWLStatement st = conn.createStatement()) {
 
             long t1 = System.currentTimeMillis();
             QuestOWLResultSet rs = st.executeTuple(sparqlQuery);
@@ -82,8 +82,7 @@ public class QuestOWLExample {
 			/*
              * Print the query summary
 			 */
-            QuestOWLStatement qst = st;
-            String sqlQuery = qst.getExecutableQuery(sparqlQuery).toString();
+            String sqlQuery = st.getExecutableQuery(sparqlQuery).toString();
 
             System.out.println();
             System.out.println("The input SPARQL query:");

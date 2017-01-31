@@ -23,7 +23,7 @@ import static org.junit.Assert.assertFalse;
  */
 
 public class TestSQLBlankLines {
-	private QuestOWLConnection conn;
+	private OntopOWLConnection conn;
 	private QuestOWL reasoner;
 
 
@@ -101,7 +101,7 @@ public class TestSQLBlankLines {
 	public void testNoSQLBlankLines() throws Exception {
 
 		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT * WHERE {?x a :Class1}";
-		QuestOWLStatement st = conn.createStatement();
+		OntopOWLStatement st = conn.createStatement();
 
 
 		String sql = ((SQLExecutableQuery)st.getExecutableQuery(query)).getSQL();

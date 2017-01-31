@@ -57,8 +57,8 @@ public class QuestOWLExampleNotLatin {
 		/*
 		 * Prepare the data connection for querying.
 		 */
-		QuestOWLConnection conn = reasoner.getConnection();
-		QuestOWLStatement st = conn.createStatement();
+		OntopOWLConnection conn = reasoner.getConnection();
+		OntopOWLStatement st = conn.createStatement();
 
 		/*
 		 * Get the book information that is stored in the database

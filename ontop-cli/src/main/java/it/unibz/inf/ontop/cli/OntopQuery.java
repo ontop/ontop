@@ -92,8 +92,8 @@ public class OntopQuery extends OntopReasoningCommandBase {
         factory = new QuestOWLFactory();
 
         try (QuestOWL reasoner = factory.createReasoner(configurationBuilder.build());
-             QuestOWLConnection conn = reasoner.getConnection();
-             QuestOWLStatement st = conn.createStatement();
+             OntopOWLConnection conn = reasoner.getConnection();
+             OntopOWLStatement st = conn.createStatement();
         ) {
 
 			/*

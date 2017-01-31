@@ -52,7 +52,7 @@ public class MultiSchemaTestH2  {
             "src/test/resources/multischemah2.obda";
 
 	private QuestOWL reasoner;
-	private QuestOWLConnection conn;
+	private OntopOWLConnection conn;
 	Connection sqlConnection;
 
 	@Before
@@ -150,7 +150,7 @@ public class MultiSchemaTestH2  {
 	}
 
 	private void checkThereIsAtLeastOneResult(String query) throws Exception {
-		QuestOWLStatement st = conn.createStatement();
+		OntopOWLStatement st = conn.createStatement();
 		try {
 			QuestOWLResultSet rs = st.executeTuple(query);
 			assertTrue(rs.nextRow());

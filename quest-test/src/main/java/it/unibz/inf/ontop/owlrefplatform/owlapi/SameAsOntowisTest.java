@@ -65,7 +65,7 @@ public class SameAsOntowisTest {
     public void runQuery() throws Exception {
 
         long t1 = System.currentTimeMillis();
-        QuestOWLConnection conn =  createStuff();
+        OntopOWLConnection conn =  createStuff();
         long t2 = System.currentTimeMillis();
 
         long time =  (t2-t1);
@@ -247,7 +247,7 @@ public class SameAsOntowisTest {
      * @param conn
      * @throws OWLException
      */
-    private void closeEverything(QuestOWLConnection conn) throws OWLException {
+    private void closeEverything(OntopOWLConnection conn) throws OWLException {
 		/*
 		 * Close connection and resources
 		 */
@@ -266,7 +266,7 @@ public class SameAsOntowisTest {
      * @throws IOException
      * @throws OWLException
      */
-    private QuestOWLConnection createStuff() throws OBDAException, OWLOntologyCreationException, IOException, InvalidPredicateDeclarationException, InvalidMappingException{
+    private OntopOWLConnection createStuff() throws OBDAException, OWLOntologyCreationException, IOException, InvalidPredicateDeclarationException, InvalidMappingException{
 
 		/*
 		 * Create the instance of Quest OWL reasoner.
@@ -290,7 +290,7 @@ public class SameAsOntowisTest {
 		/*
 		 * Prepare the data connection for querying.
 		 */
-        QuestOWLConnection conn = reasoner.getConnection();
+        OntopOWLConnection conn = reasoner.getConnection();
 
         return conn;
 
@@ -299,7 +299,7 @@ public class SameAsOntowisTest {
 
 
 
-    private List<Long> runQueries(QuestOWLConnection conn, List<String> queries) throws OWLException {
+    private List<Long> runQueries(OntopOWLConnection conn, List<String> queries) throws OWLException {
 
         //int nWarmUps = Constants.NUM_WARM_UPS;
         //int nRuns = Constants.NUM_RUNS;
@@ -310,7 +310,7 @@ public class SameAsOntowisTest {
         int length = queries.size();
         while (j < length){
             String sparqlQuery = queries.get(j);
-            QuestOWLStatement st = conn.createStatement();
+            OntopOWLStatement st = conn.createStatement();
             try {
 
                 long time = 0;

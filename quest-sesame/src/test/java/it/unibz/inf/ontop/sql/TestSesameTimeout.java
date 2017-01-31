@@ -8,6 +8,8 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Scanner;
 
+import it.unibz.inf.ontop.exception.OntopQueryAnsweringException;
+import it.unibz.inf.ontop.exception.OntopQueryEvaluationException;
 import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.rdf4j.repository.OntopVirtualRepository;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
@@ -118,7 +120,7 @@ public class TestSesameTimeout {
         try {
         	TupleQueryResult result = tq.evaluate();
         	result.close();
-        } catch (QueryEvaluationException e) {
+        } catch (OntopQueryAnsweringException e) {
         	long end = System.currentTimeMillis();
         	assertTrue(e.toString().indexOf("OntopTupleQuery timed out. More than 1 seconds passed") >= 0);
         	assertTrue(end - start >= 1000);

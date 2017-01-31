@@ -223,8 +223,8 @@ public class NPDUndolferTest extends TestCase {
         QuestOWLFactory fac = new QuestOWLFactory();
         try (OntopSemanticIndexLoader loader = OntopSemanticIndexLoader.loadOntologyIndividuals(owlfile, p);
              QuestOWL quest = fac.createReasoner(loader.getConfiguration());
-             QuestOWLConnection qconn = quest.getConnection();
-             QuestOWLStatement st = qconn.createStatement()) {
+             OntopOWLConnection qconn = quest.getConnection();
+             OntopOWLStatement st = qconn.createStatement()) {
 
             ExecutableQuery executableQuery = st.getExecutableQuery(query);
             if (executableQuery instanceof SQLExecutableQuery)
@@ -250,8 +250,8 @@ public class NPDUndolferTest extends TestCase {
         String rewriting;
         try (OntopSemanticIndexLoader loader = OntopSemanticIndexLoader.loadOntologyIndividuals(owlfile, p);
              QuestOWL quest = fac.createReasoner(loader.getConfiguration());
-             QuestOWLConnection qconn = quest.getConnection();
-             QuestOWLStatement st = qconn.createStatement()) {
+             OntopOWLConnection qconn = quest.getConnection();
+             OntopOWLStatement st = qconn.createStatement()) {
 
             rewriting = st.getRewriting(query);
         }

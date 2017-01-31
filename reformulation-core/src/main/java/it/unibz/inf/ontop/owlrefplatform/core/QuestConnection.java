@@ -24,8 +24,8 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Optional;
 
+import it.unibz.inf.ontop.exception.OntopConnectionException;
 import it.unibz.inf.ontop.model.OBDAException;
-import it.unibz.inf.ontop.injection.QuestCoreSettings;
 import it.unibz.inf.ontop.reformulation.IRIDictionary;
 import it.unibz.inf.ontop.reformulation.OBDAQueryProcessor;
 
@@ -41,9 +41,8 @@ import it.unibz.inf.ontop.reformulation.OBDAQueryProcessor;
  * @author mariano
  * 
  */
-public class QuestConnection implements IQuestConnection {
+public class QuestConnection implements OntopConnection {
 
-	private final QuestCoreSettings questCoreSettings;
 	private final OBDAQueryProcessor queryProcessor;
 	private Connection conn;
 	private final Optional<IRIDictionary> iriDictionary;
@@ -53,17 +52,12 @@ public class QuestConnection implements IQuestConnection {
 
 
 	public QuestConnection(JDBCConnector jdbcConnector, OBDAQueryProcessor queryProcessor, Connection connection,
-						   QuestCoreSettings questCoreSettings, Optional<IRIDictionary> iriDictionary) {
+						   Optional<IRIDictionary> iriDictionary) {
 		this.jdbcConnector = jdbcConnector;
 		this.queryProcessor = queryProcessor;
 		this.conn = connection;
 		this.iriDictionary = iriDictionary;
 		this.isClosed = false;
-		this.questCoreSettings = questCoreSettings;
-	}
-
-	public Connection getSQLConnection() {
-		return conn;
 	}
 	
 	@Override
@@ -76,134 +70,66 @@ public class QuestConnection implements IQuestConnection {
 		}
 	}
 
-	/**
-	 * For both the virtual and classic modes.
-	 */
 	@Override
-	public IQuestStatement createStatement() throws OBDAException {
-		/**
-		 * If in the classic mode, creates a SIQuestStatement.
-		 * Why? Because the insertData method is not implemented by SQLQuestStatement while
-		 * it is by SISQLQuestStatementImpl.
-		 */
-//		if (questCoreSettings.getProperty(QuestCoreSettings.ABOX_MODE).equals(QuestConstants.CLASSIC)) {
-//			return createSIStatement();
-//		}
-
-		/**
-		 * Virtual mode.
-		 */
+	public OntopStatement createStatement() throws OntopConnectionException {
 		try {
 			if (conn.isClosed()) {
 				// Sometimes it gets dropped, reconnect
 				conn = jdbcConnector.getSQLPoolConnection();
 			}
-			IQuestStatement st = new SQLQuestStatement(this.queryProcessor, this,
-					conn.createStatement(java.sql.ResultSet.TYPE_FORWARD_ONLY,
-							java.sql.ResultSet.CONCUR_READ_ONLY), iriDictionary);
-			//st.setFetchSize(400);
-			return st;
-
+			return new SQLQuestStatement(
+					this.queryProcessor,
+					conn.createStatement(java.sql.ResultSet.TYPE_FORWARD_ONLY, java.sql.ResultSet.CONCUR_READ_ONLY),
+					iriDictionary);
 		} catch (SQLException e1) {
-			OBDAException obdaException = new OBDAException(e1);
-			throw obdaException;
+			throw new OntopConnectionException(e1);
 		}
 	}
 
-
-//	/**
-//	 * Only for the classic mode!
-//	 */
-//	@Override
-//	public SIQuestStatement createSIStatement() throws OBDAException {
-//		try {
-//			if (conn.isClosed()) {
-//				// Sometimes it gets dropped, reconnect
-//				conn = jdbcConnector.getSQLPoolConnection();
-//			}
-//			SIQuestStatement st = new SISQLQuestStatementImpl(this.questinstance, this,
-//					conn.createStatement(java.sql.ResultSet.TYPE_FORWARD_ONLY,
-//							java.sql.ResultSet.CONCUR_READ_ONLY));
-//			//st.setFetchSize(400);
-//			return st;
-//
-//		} catch (SQLException e1) {
-//			OBDAException obdaException = new OBDAException(e1);
-//			throw obdaException;
-//		}
-//	}
-		
 	@Override
-	public void commit() throws OBDAException {
+	public void commit() throws OntopConnectionException {
 		try {
 			conn.commit();
 		} catch (Exception e) {
-			OBDAException obdaException = new OBDAException(e.getMessage());
-			obdaException.setStackTrace(e.getStackTrace());
-			throw obdaException;
+			throw new OntopConnectionException(e);
 		}
 	}
 
 	@Override
-	public void setAutoCommit(boolean autocommit) throws OBDAException {
+	public void setAutoCommit(boolean autocommit) throws OntopConnectionException {
 		try {
 			conn.setAutoCommit(autocommit);
 		} catch (Exception e) {
-			OBDAException obdaException = new OBDAException(e.getMessage());
-			obdaException.setStackTrace(e.getStackTrace());
-			throw obdaException;
+			throw new OntopConnectionException(e);
 		}
 
 	}
 
 	@Override
-	public boolean getAutoCommit() throws OBDAException {
+	public boolean getAutoCommit() throws OntopConnectionException {
 		try {
 			return conn.getAutoCommit();
 		} catch (Exception e) {
-			OBDAException obdaException = new OBDAException(e.getMessage());
-			obdaException.setStackTrace(e.getStackTrace());
-			throw obdaException;
+			throw new OntopConnectionException(e);
 		}
 	}
 
 	@Override
-	public boolean isClosed() throws OBDAException {
+	public boolean isClosed() throws OntopConnectionException {
 		try {
 			isClosed = conn.isClosed();
 			return isClosed;
 		} catch (Exception e) {
-			
-			OBDAException obdaException = new OBDAException(e);
-			throw obdaException;
+			throw new OntopConnectionException(e);
 		}
 	}
 
 	@Override
-	public boolean isReadOnly() throws OBDAException {
-		return true;
-//		/**
-//		 * Write is currently supported by the classic mode.
-//		 */
-//		if (!this.questinstance.getOptionalSemanticIndexRepository().isPresent())
-//			return true;
-//		try {
-//			return conn.isReadOnly();
-//		} catch (Exception e) {
-//			OBDAException obdaException = new OBDAException(e.getMessage());
-//			obdaException.setStackTrace(e.getStackTrace());
-//			throw obdaException;
-//		}
-	}
-
-	@Override
-	public void rollBack() throws OBDAException {
+	public void rollBack() throws OntopConnectionException {
 		try {
 			conn.rollback();
 		} catch (Exception e) {
-			OBDAException obdaException = new OBDAException(e.getMessage());
-			obdaException.setStackTrace(e.getStackTrace());
-			throw obdaException;
+			throw new OntopConnectionException(e);
 		}
 	}
 

@@ -47,7 +47,7 @@ import java.sql.Statement;
  */
 public class ReverseURITestH2 {
 
-	private static QuestOWLConnection conn;
+	private static OntopOWLConnection conn;
 
 	static Logger log = LoggerFactory.getLogger(ReverseURITestH2.class);
 
@@ -169,7 +169,7 @@ public class ReverseURITestH2 {
 	}
 
 	private void runTests(String query, int numberOfResults) throws Exception {
-		QuestOWLStatement st = conn.createStatement();
+		OntopOWLStatement st = conn.createStatement();
 		try {
 
 			QuestOWLResultSet rs = st.executeTuple(query);

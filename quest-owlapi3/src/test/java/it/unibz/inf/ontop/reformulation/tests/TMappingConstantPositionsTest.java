@@ -120,8 +120,8 @@ public class TMappingConstantPositionsTest extends TestCase {
 		//System.out.println(reasoner.getQuestInstance().getUnfolder().getRules());
 		
 		// Now we are ready for querying
-		QuestOWLConnection conn = reasoner.getConnection();
-		QuestOWLStatement st = conn.createStatement();
+		OntopOWLConnection conn = reasoner.getConnection();
+		OntopOWLStatement st = conn.createStatement();
 
 		String query = "PREFIX : <http://it.unibz.inf/obda/test/simple#> SELECT * WHERE { ?x a :A. }";
 		try {

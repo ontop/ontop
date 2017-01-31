@@ -48,7 +48,7 @@ import static org.junit.Assert.assertTrue;
  */
 public class H2SameAsTest {
 
-	private QuestOWLConnection conn;
+	private OntopOWLConnection conn;
 
 	Logger log = LoggerFactory.getLogger(this.getClass());
 
@@ -112,7 +112,7 @@ public class H2SameAsTest {
 		// Now we are ready for querying
 		conn = reasoner.getConnection();
 
-		QuestOWLStatement st = conn.createStatement();
+		OntopOWLStatement st = conn.createStatement();
 		ArrayList<String> retVal = new ArrayList<>();
 		try {
 			QuestOWLResultSet rs = st.executeTuple(query);

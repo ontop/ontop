@@ -27,7 +27,7 @@ public abstract class AbstractVirtualModeTest extends TestCase {
     private final String obdaFileName;
 
     protected QuestOWL reasoner;
-    protected QuestOWLConnection conn;
+    protected OntopOWLConnection conn;
 
     public AbstractVirtualModeTest(String owlfile, String obdafile) {
         this.owlFileName = owlfile;
@@ -55,7 +55,7 @@ public abstract class AbstractVirtualModeTest extends TestCase {
     }
 
     protected String runQueryAndReturnStringOfIndividualX(String query) throws Exception {
-        QuestOWLStatement st = conn.createStatement();
+        OntopOWLStatement st = conn.createStatement();
         String retval;
         try {
             QuestOWLResultSet rs = st.executeTuple(query);
@@ -74,7 +74,7 @@ public abstract class AbstractVirtualModeTest extends TestCase {
     }
 
     protected String runQueryAndReturnStringOfLiteralX(String query) throws Exception {
-        QuestOWLStatement st = conn.createStatement();
+        OntopOWLStatement st = conn.createStatement();
         String retval;
         try {
             QuestOWLResultSet rs = st.executeTuple(query);
@@ -93,7 +93,7 @@ public abstract class AbstractVirtualModeTest extends TestCase {
     }
 
     protected boolean runQueryAndReturnBooleanX(String query) throws Exception {
-        QuestOWLStatement st = conn.createStatement();
+        OntopOWLStatement st = conn.createStatement();
         boolean retval;
         try {
             QuestOWLResultSet rs = st.executeTuple(query);
@@ -117,7 +117,7 @@ public abstract class AbstractVirtualModeTest extends TestCase {
 
     protected void countResults(String query, int expectedCount) throws OBDAException, OWLException {
 
-        QuestOWLStatement st = conn.createStatement();
+        OntopOWLStatement st = conn.createStatement();
         QuestOWLResultSet results = st.executeTuple(query);
         int count = 0;
         while (results.nextRow()) {
@@ -127,7 +127,7 @@ public abstract class AbstractVirtualModeTest extends TestCase {
     }
 
     protected void checkReturnedUris(String query, List<String> expectedUris) throws Exception {
-        QuestOWLStatement st = conn.createStatement();
+        OntopOWLStatement st = conn.createStatement();
         int i = 0;
         List<String> returnedUris = new ArrayList<>();
         try {
@@ -151,7 +151,7 @@ public abstract class AbstractVirtualModeTest extends TestCase {
     }
 
     protected void checkThereIsAtLeastOneResult(String query) throws Exception {
-        QuestOWLStatement st = conn.createStatement();
+        OntopOWLStatement st = conn.createStatement();
         try {
             QuestOWLResultSet rs = st.executeTuple(query);
             assertTrue(rs.nextRow());
@@ -171,7 +171,7 @@ public abstract class AbstractVirtualModeTest extends TestCase {
     }
 
     protected boolean runASKTests(String query) throws Exception {
-        QuestOWLStatement st = conn.createStatement();
+        OntopOWLStatement st = conn.createStatement();
         boolean retval;
         try {
             QuestOWLResultSet rs = st.executeTuple(query);
@@ -195,7 +195,7 @@ public abstract class AbstractVirtualModeTest extends TestCase {
 
     protected void runQueries(String queryFileName) throws Exception {
 
-        QuestOWLStatement st = conn.createStatement();
+        OntopOWLStatement st = conn.createStatement();
 
         QueryController qc = new QueryController();
         QueryIOManager qman = new QueryIOManager(qc);
@@ -227,7 +227,7 @@ public abstract class AbstractVirtualModeTest extends TestCase {
     protected void runQuery(String query) throws Exception {
         long t1 = System.currentTimeMillis();
 
-        QuestOWLStatement st = conn.createStatement();
+        OntopOWLStatement st = conn.createStatement();
         QuestOWLResultSet rs = st.executeTuple(query);
 
         int columnSize = rs.getColumnCount();

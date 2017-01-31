@@ -38,8 +38,8 @@ public class AnnotationTest {
                 .build();
         QuestOWL reasoner = factory.createReasoner(config);
         // Now we are ready for querying
-        QuestOWLConnection conn = reasoner.getConnection();
-        QuestOWLStatement st = conn.createStatement();
+        OntopOWLConnection conn = reasoner.getConnection();
+        OntopOWLStatement st = conn.createStatement();
 
         String query = Joiner.on("\n").join(
                 CharStreams.readLines(new FileReader("src/test/resources/annotation/q1.q")));

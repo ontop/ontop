@@ -112,7 +112,7 @@ public class TMappingDisablingTest extends TestCase {
 		/*
 		 * Prepare the data connection for querying.
 		 */
-		QuestOWLConnection conn = null;
+		OntopOWLConnection conn = null;
 		try {
 			conn = reasoner.getConnection();
 		} catch (OBDAException e1) {
@@ -127,7 +127,7 @@ public class TMappingDisablingTest extends TestCase {
 		String sparqlQuery1 = 
 				"PREFIX  : <http://www.semanticweb.org/sarah/ontologies/2014/4/untitled-ontology-73#> "
 				+ "SELECT ?y WHERE { ?y a :Man }";
-		QuestOWLStatement st = null;
+		OntopOWLStatement st = null;
 		try {
 			st = conn.createStatement();
 			QuestOWLResultSet rs = st.executeTuple(sparqlQuery);
@@ -159,7 +159,7 @@ public class TMappingDisablingTest extends TestCase {
 		/*
 		 * Prepare the data connection for querying.
 		 */
-		QuestOWLConnection conn = null;
+		OntopOWLConnection conn = null;
 		try {
 			conn = reasoner.getConnection();
 		} catch (OBDAException e1) {
@@ -174,7 +174,7 @@ public class TMappingDisablingTest extends TestCase {
 		String sparqlQuery1 = 
 				"PREFIX  : <http://www.semanticweb.org/sarah/ontologies/2014/4/untitled-ontology-73#> "
 				+ "SELECT ?y WHERE { ?y a :Man }";
-		QuestOWLStatement st = null;
+		OntopOWLStatement st = null;
 		try {
 			st = conn.createStatement();
 			QuestOWLResultSet rs = st.executeTuple(sparqlQuery);

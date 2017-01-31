@@ -20,22 +20,28 @@ package it.unibz.inf.ontop.model;
  * #L%
  */
 
-import it.unibz.inf.ontop.ontology.Assertion;
+import it.unibz.inf.ontop.exception.OntopConnectionException;
 
-import java.util.Iterator;
-import java.util.List;
-
-public interface GraphResultSet extends OBDAResultSet, Iterator<List<Assertion>> {
+public interface OBDAConnection extends AutoCloseable {
 
 	@Override
-    boolean hasNext() throws OBDAException;
+    void close() throws OntopConnectionException;
 
-	@Override
-    List<Assertion> next() throws OBDAException;
+	OBDAStatement createStatement() throws OntopConnectionException;
 
-	@Override
-    void close() throws OBDAException;
+	boolean isClosed() throws OntopConnectionException;
 
-    void addNewResultSet(List<Assertion> result);
+	//---------------------------
+	// Transaction (read-only)
+	//---------------------------
 
+	/**
+	 * Set it to false if you want a transaction
+	 */
+	void setAutoCommit(boolean autocommit) throws OntopConnectionException;
+
+	boolean getAutoCommit() throws OntopConnectionException;
+
+	void rollBack() throws OntopConnectionException;
+	void commit() throws OntopConnectionException;
 }

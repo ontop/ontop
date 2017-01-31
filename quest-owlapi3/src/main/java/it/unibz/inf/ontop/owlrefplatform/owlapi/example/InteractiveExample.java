@@ -41,10 +41,10 @@ public class InteractiveExample {
 	/*
 	 * Prepare the data connection for querying.
 	 */
-	QuestOWLConnection conn = reasoner.getConnection();
+	OntopOWLConnection conn = reasoner.getConnection();
 
 		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-		QuestOWLStatement st = conn.createStatement();
+		OntopOWLStatement st = conn.createStatement();
 		while(true){
 			System.out.println("INSERT A QUERY");
 			try {
@@ -61,8 +61,7 @@ public class InteractiveExample {
 			/*
 			 * Print the query summary
 			 */
-				QuestOWLStatement qst = st;
-				String sqlQuery = ((SQLExecutableQuery)qst.getExecutableQuery(sparqlQuery)).getSQL();
+				String sqlQuery = ((SQLExecutableQuery)st.getExecutableQuery(sparqlQuery)).getSQL();
 								
 				System.out.println();
 				System.out.println("The input SPARQL query:");

@@ -20,8 +20,9 @@ package it.unibz.inf.ontop.rdf4j.repository;
  * #L%
  */
 
+import it.unibz.inf.ontop.exception.OntopConnectionException;
 import it.unibz.inf.ontop.model.OBDAException;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestDBConnection;
+import it.unibz.inf.ontop.owlrefplatform.core.OntopConnection;
 import it.unibz.inf.ontop.rdf4j.query.OntopBooleanQuery;
 import it.unibz.inf.ontop.rdf4j.query.OntopGraphQuery;
 import it.unibz.inf.ontop.rdf4j.query.OntopTupleQuery;
@@ -47,20 +48,18 @@ public class OntopRepositoryConnection implements org.eclipse.rdf4j.repository.R
 
 	private static final String READ_ONLY_MESSAGE = "Ontop is a read-only system";
 	private OntopVirtualRepository repository;
-	private QuestDBConnection questConn;
+	private OntopConnection ontopConnection;
     private boolean isOpen;
-    private boolean autoCommit;
     private boolean isActive;
     private RDFParser rdfParser;
 
 	
-	public OntopRepositoryConnection(OntopVirtualRepository rep, QuestDBConnection connection) throws OBDAException
+	public OntopRepositoryConnection(OntopVirtualRepository rep, OntopConnection connection) throws OBDAException
 	{
 		this.repository = rep;
-		this.questConn = connection;
+		this.ontopConnection = connection;
 		this.isOpen = true;
 		this.isActive = false;
-		this.autoCommit = connection.getAutoCommit();
 		this.rdfParser = Rio.createParser(RDFFormat.RDFXML, this.repository.getValueFactory());
 	}
 
@@ -130,7 +129,7 @@ public class OntopRepositoryConnection implements org.eclipse.rdf4j.repository.R
 		//all non-committed operations will be lost. 
 		isOpen = false;
 			try {
-				questConn.close();
+				ontopConnection.close();
 			} catch (Exception e) {
 				throw new RepositoryException(e);
 			}
@@ -143,9 +142,9 @@ public class OntopRepositoryConnection implements org.eclipse.rdf4j.repository.R
 		if (isActive()) {
 			try {
 				// System.out.println("QuestConn commit..");
-				questConn.commit();
+				ontopConnection.commit();
 				this.isActive = false;
-			} catch (OBDAException e) {
+			} catch (OntopConnectionException e) {
 				throw new RepositoryException(e);
 			}
 		} else {
@@ -323,8 +322,8 @@ public class OntopRepositoryConnection implements org.eclipse.rdf4j.repository.R
 
 	@Override
     public boolean isAutoCommit() throws RepositoryException {
-		//Checks whether the connection is in auto-commit mode. 
-		return this.autoCommit;
+		//Checks whether the connection is in auto-commit mode.
+		return ontopConnection.getAutoCommit();
 	}
 
 	@Override
@@ -356,7 +355,7 @@ public class OntopRepositoryConnection implements org.eclipse.rdf4j.repository.R
 		if (ql != QueryLanguage.SPARQL)
 			throw new MalformedQueryException("SPARQL query expected!");
 
-		return new OntopBooleanQuery(queryString, baseIRI, questConn);
+		return new OntopBooleanQuery(queryString, baseIRI, ontopConnection);
 		
 	}
 
@@ -376,7 +375,7 @@ public class OntopRepositoryConnection implements org.eclipse.rdf4j.repository.R
 		if (ql != QueryLanguage.SPARQL)
 			throw new MalformedQueryException("SPARQL query expected!");
 
-		return new OntopGraphQuery(queryString, baseIRI, questConn);
+		return new OntopGraphQuery(queryString, baseIRI, ontopConnection);
 			
 	}
 
@@ -425,7 +424,7 @@ public class OntopRepositoryConnection implements org.eclipse.rdf4j.repository.R
 		if (ql != QueryLanguage.SPARQL)
 			throw new MalformedQueryException("SPARQL query expected!");
 
-			return new OntopTupleQuery(queryString, baseIRI, questConn);
+			return new OntopTupleQuery(queryString, baseIRI, ontopConnection);
 
 	}
 
@@ -472,9 +471,9 @@ public class OntopRepositoryConnection implements org.eclipse.rdf4j.repository.R
 		// connection sofar.
 		if (isActive()) {
 			try {
-				this.questConn.rollBack();
+				this.ontopConnection.rollBack();
 				this.isActive = false;
-			} catch (OBDAException e) {
+			} catch (OntopConnectionException e) {
 				throw new RepositoryException(e);
 			}
 		} else {
@@ -491,19 +490,18 @@ public class OntopRepositoryConnection implements org.eclipse.rdf4j.repository.R
 		//Otherwise, the updates are grouped into transactions that are 
 		// terminated by a call to either commit() or rollback().
 		// By default, new connections are in auto-commit mode.
-		if (autoCommit == this.autoCommit) {
+		if (autoCommit == this.ontopConnection.getAutoCommit()) {
 			return;
 		}
 		if (isActive()) {
-			this.autoCommit = autoCommit;
 			try {
-				this.questConn.setAutoCommit(autoCommit);
-			} catch (OBDAException e) {
+				this.ontopConnection.setAutoCommit(autoCommit);
+			} catch (OntopConnectionException e) {
 				throw new RepositoryException(e);
 
 			}
 
-			// if we are switching from non-autocommit to autocommit mode,
+			// if we are switching from non-autoCommit to autoCommit mode,
 			// commit any
 			// pending updates
 			if (autoCommit) {

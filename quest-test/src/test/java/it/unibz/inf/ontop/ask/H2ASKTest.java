@@ -24,7 +24,7 @@ public class H2ASKTest  {
 	 "src/main/resources/testcases-scenarios/virtual-mode/stockexchange/simplecq/stockexchange-h2.obda";
 
 	private QuestOWL reasoner;
-	private QuestOWLConnection conn;
+	private OntopOWLConnection conn;
 	Connection sqlConnection;
 
 	@Before
@@ -97,7 +97,7 @@ public class H2ASKTest  {
 	}
 
 	private boolean runQueryAndReturnBooleanX(String query) throws Exception {
-		QuestOWLStatement st = conn.createStatement();
+		OntopOWLStatement st = conn.createStatement();
 		boolean retval;
 		try {
 			QuestOWLResultSet rs = st.executeTuple(query);

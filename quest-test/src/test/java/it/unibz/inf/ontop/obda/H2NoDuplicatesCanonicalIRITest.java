@@ -22,7 +22,6 @@ package it.unibz.inf.ontop.obda;
 
 import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.injection.QuestSettings;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import org.junit.After;
 import org.junit.Before;
@@ -49,7 +48,7 @@ import static org.junit.Assert.assertTrue;
  */
 public class H2NoDuplicatesCanonicalIRITest {
 
-	private QuestOWLConnection conn;
+	private OntopOWLConnection conn;
 
 	Logger log = LoggerFactory.getLogger(this.getClass());
 
@@ -104,7 +103,7 @@ public class H2NoDuplicatesCanonicalIRITest {
 	}
 
 	private ArrayList runTests(String query) throws Exception {
-		QuestOWLStatement st = conn.createStatement();
+		OntopOWLStatement st = conn.createStatement();
 		ArrayList<String> retVal = new ArrayList<>();
 		try {
 			QuestOWLResultSet rs = st.executeTuple(query);

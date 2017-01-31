@@ -132,8 +132,8 @@ public class MetaMappingVirtualABoxMissingColumnTest {
 		String query1 = "PREFIX : <http://it.unibz.inf/obda/test/simple#> SELECT * WHERE { ?x a :A_1 }";
         try (QuestOWL reasoner = factory.createReasoner(config);
              // Now we are ready for querying
-             QuestOWLConnection conn = reasoner.getConnection();
-             QuestOWLStatement st = conn.createStatement();
+             OntopOWLConnection conn = reasoner.getConnection();
+             OntopOWLStatement st = conn.createStatement();
              QuestOWLResultSet rs1 = st.executeTuple(query1);
         ) {
             assertTrue(rs1.nextRow());

@@ -129,8 +129,8 @@ public class URITemplateMatcherTest {
 		QuestOWL reasoner = factory.createReasoner(config);
 
 		// Now we are ready for querying
-		QuestOWLConnection conn = reasoner.getConnection();
-		QuestOWLStatement st = conn.createStatement();
+		OntopOWLConnection conn = reasoner.getConnection();
+		OntopOWLStatement st = conn.createStatement();
 
 
 		log.debug("Executing query: ");

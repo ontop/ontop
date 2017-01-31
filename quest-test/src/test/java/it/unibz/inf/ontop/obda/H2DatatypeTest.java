@@ -46,7 +46,7 @@ public class H2DatatypeTest {
 	static final String obdaFile = "src/test/resources/datatype/datetime-h2.obda";
 
 	private QuestOWL reasoner;
-	private QuestOWLConnection conn;
+	private OntopOWLConnection conn;
 	Connection sqlConnection;
 
 
@@ -140,7 +140,7 @@ public class H2DatatypeTest {
 
 
 	private String runQueryReturnIndividual(String query) throws OWLException, SQLException {
-		QuestOWLStatement st = conn.createStatement();
+		OntopOWLStatement st = conn.createStatement();
 		String retval;
 		try {
 			QuestOWLResultSet rs = st.executeTuple(query);
@@ -159,7 +159,7 @@ public class H2DatatypeTest {
 	}
 
 	private String runQueryReturnLiteral(String query) throws OWLException, SQLException {
-		QuestOWLStatement st = conn.createStatement();
+		OntopOWLStatement st = conn.createStatement();
 		String retval;
 		try {
 			QuestOWLResultSet rs = st.executeTuple(query);

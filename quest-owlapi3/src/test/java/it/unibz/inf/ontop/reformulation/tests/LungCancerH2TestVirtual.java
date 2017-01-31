@@ -127,8 +127,8 @@ public class LungCancerH2TestVirtual extends TestCase {
         QuestOWL reasoner = factory.createReasoner(config);
 
 		// Now we are ready for querying
-		QuestOWLConnection conn = reasoner.getConnection();
-		QuestOWLStatement st = conn.createStatement();
+		OntopOWLConnection conn = reasoner.getConnection();
+		OntopOWLStatement st = conn.createStatement();
 
 		String query1 = "PREFIX : <http://example.org/> SELECT * WHERE { ?x :hasNeoplasm <http://example.org/db1/neoplasm/1> }";
 		String query2 = "PREFIX : <http://example.org/> SELECT * WHERE { <http://example.org/db1/1> :hasNeoplasm ?y }";
@@ -177,7 +177,7 @@ public class LungCancerH2TestVirtual extends TestCase {
 		}
 	}
 	
-	public void executeQueryAssertResults(String query, QuestOWLStatement st, int expectedRows) throws Exception {
+	public void executeQueryAssertResults(String query, OntopOWLStatement st, int expectedRows) throws Exception {
 		QuestOWLResultSet rs = st.executeTuple(query);
 		int count = 0;
 		while (rs.nextRow()) {
@@ -193,7 +193,7 @@ public class LungCancerH2TestVirtual extends TestCase {
 		assertEquals(expectedRows, count);
 	}
 	
-	public void executeGraphQueryAssertResults(String query, QuestOWLStatement st, int expectedRows) throws Exception {
+	public void executeGraphQueryAssertResults(String query, OntopOWLStatement st, int expectedRows) throws Exception {
 		List<OWLAxiom> rs = st.executeGraph(query);
 		int count = 0;
 		Iterator<OWLAxiom> axit = rs.iterator();

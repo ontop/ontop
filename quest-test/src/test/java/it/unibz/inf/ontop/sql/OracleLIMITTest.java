@@ -26,10 +26,7 @@ import java.io.File;
 import java.io.IOException;
 
 import it.unibz.inf.ontop.injection.QuestConfiguration;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWL;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLConnection;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLFactory;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLStatement;
+import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -51,7 +48,7 @@ import static org.junit.Assert.assertTrue;
  * Tests with both valid versions of the oracle driverClass string in the SourceDeclaration of the obda file
  */
 public class OracleLIMITTest  {
-	private QuestOWLConnection conn;
+	private OntopOWLConnection conn;
 
 	Logger log = LoggerFactory.getLogger(this.getClass());
 	private OWLOntology ontology;
@@ -94,7 +91,7 @@ public class OracleLIMITTest  {
 		conn = reasoner.getConnection();
 		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT * WHERE {?x a :Country} LIMIT 10";
 		
-		QuestOWLStatement st = conn.createStatement();
+		OntopOWLStatement st = conn.createStatement();
 		String sql = ((SQLExecutableQuery)st.getExecutableQuery(query)).getSQL();;
 		boolean m = sql.matches("(?ms)(.*)WHERE ROWNUM <= 10(.*)");
 		assertTrue(m);

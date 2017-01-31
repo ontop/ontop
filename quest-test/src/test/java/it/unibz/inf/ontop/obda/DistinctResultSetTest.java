@@ -3,7 +3,6 @@ package it.unibz.inf.ontop.obda;
 
 import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.injection.QuestCoreSettings;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
 import it.unibz.inf.ontop.owlrefplatform.core.resultset.QuestDistinctTupleResultSet;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import it.unibz.inf.ontop.rdf4j.repository.OntopVirtualRepository;
@@ -54,8 +53,8 @@ public class DistinctResultSetTest { //
                 .build();
         QuestOWL reasoner = factory.createReasoner(config);
         // Now we are ready for querying
-        QuestOWLConnection conn = reasoner.getConnection();
-        QuestOWLStatement st = conn.createStatement();
+        OntopOWLConnection conn = reasoner.getConnection();
+        OntopOWLStatement st = conn.createStatement();
 
         int results = 0;
 
@@ -124,7 +123,7 @@ public class DistinctResultSetTest { //
 
         }
 
-    private int executeQueryAssertResults(String query, QuestOWLStatement st) throws Exception {
+    private int executeQueryAssertResults(String query, OntopOWLStatement st) throws Exception {
         QuestOWLResultSet rs = st.executeTuple(query);
         int count = 0;
         while (rs.nextRow()) {

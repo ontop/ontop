@@ -22,39 +22,34 @@ package it.unibz.inf.ontop.model;
 
 public interface OBDAStatement extends AutoCloseable {
 
-	void cancel() throws OBDAException;
+	void cancel();
 
 	@Override
-    void close() throws OBDAException;
+    void close();
 
-	OBDAResultSet execute(String query) throws OBDAException;
+	OBDAResultSet execute(String query);
 
-	int executeUpdate(String query) throws OBDAException;
+	int getFetchSize();
 
-	int getFetchSize() throws OBDAException;
+	int getMaxRows();
 
-	int getMaxRows() throws OBDAException;
+	void getMoreResults();
 
-	void getMoreResults() throws OBDAException;
+	int getQueryTimeout();
 
-	int getQueryTimeout() throws OBDAException;
+	void setFetchSize(int rows);
 
-	void setFetchSize(int rows) throws OBDAException;
+	void setMaxRows(int max);
 
-	void setMaxRows(int max) throws OBDAException;
-
-	boolean isClosed() throws OBDAException;
+	boolean isClosed();
 
 	/**
 	 * Sets the number of seconds the driver will wait for a Statement object to
 	 * execute to the given number of seconds. If the limit is exceeded, an
-	 * SQLException is thrown.
+	 * exception is thrown.
 	 * 
 	 * @param seconds
 	 *            the new query timeout limit in seconds; zero means no limit.
-	 * @throws Exception
 	 */
-    void setQueryTimeout(int seconds) throws OBDAException;
-
-	//int getTupleCount(String query) throws OBDAException;
+    void setQueryTimeout(int seconds);
 }

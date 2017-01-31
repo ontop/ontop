@@ -20,6 +20,7 @@ package it.unibz.inf.ontop.model;
  * #L%
  */
 
+@Deprecated
 public class OBDAException extends RuntimeException {
 
 	private static final long serialVersionUID = -378610789773679125L;

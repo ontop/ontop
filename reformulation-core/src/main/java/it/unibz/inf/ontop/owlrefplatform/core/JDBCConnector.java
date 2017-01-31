@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.owlrefplatform.core;
 
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
+import it.unibz.inf.ontop.exception.OntopConnectionException;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.injection.QuestCoreSettings;
 import it.unibz.inf.ontop.reformulation.IRIDictionary;
@@ -22,7 +23,6 @@ import java.util.Optional;
 public class JDBCConnector implements DBConnector {
 
     private final OBDAQueryProcessor queryProcessor;
-    private final QuestCoreSettings questCoreSettings;
 
     private final QuestCoreSettings settings;
     private final Optional<IRIDictionary> iriDictionary;
@@ -48,7 +48,6 @@ public class JDBCConnector implements DBConnector {
                           @Nullable IRIDictionary iriDictionary,
                           QuestCoreSettings settings) {
         this.queryProcessor = queryProcessor;
-        this.questCoreSettings = settings;
         keepAlive = settings.isKeepAliveEnabled();
         removeAbandoned = settings.isRemoveAbandonedEnabled();
         abandonedTimeout = settings.getAbandonedTimeout();
@@ -166,12 +165,12 @@ public class JDBCConnector implements DBConnector {
         tomcatPool.close();
     }
 
-    public synchronized Connection getSQLPoolConnection() throws OBDAException {
+    public synchronized Connection getSQLPoolConnection() throws OntopConnectionException {
         Connection conn = null;
         try {
             conn = tomcatPool.getConnection();
         } catch (SQLException e) {
-            throw new OBDAException(e);
+            throw new OntopConnectionException(e);
         }
         return conn;
     }
@@ -185,7 +184,7 @@ public class JDBCConnector implements DBConnector {
      * @return
      * @throws OBDAException
      */
-    protected Connection getSQLConnection() throws OBDAException {
+    protected Connection getSQLConnection() throws OntopConnectionException {
         Connection conn;
 
         // if (driver.contains("mysql")) {
@@ -203,42 +202,38 @@ public class JDBCConnector implements DBConnector {
             conn = DriverManager.getConnection(settings.getJdbcUrl(),
                     settings.getJdbcUser(), settings.getJdbcPassword());
         } catch (SQLException e) {
-            throw new OBDAException(e);
+            throw new OntopConnectionException(e);
         } catch (Exception e) {
-            throw new OBDAException(e);
+            throw new OntopConnectionException(e);
         }
         return conn;
     }
 
     // get a real (non pool) connection - used for protege plugin
     @Override
-    public IQuestConnection getNonPoolConnection() throws OBDAException {
+    public OntopConnection getNonPoolConnection() throws OntopConnectionException {
 
-        return new QuestConnection(this, queryProcessor, getSQLConnection(), questCoreSettings,
-                iriDictionary);
+        return new QuestConnection(this, queryProcessor, getSQLConnection(), iriDictionary);
     }
 
     /***
-     * Returns a QuestConnection, the main object that a client should use to
+     * Returns an OntopConnection, the main object that a client should use to
      * access the query answering services of Quest. With the QuestConnection
      * you can get a QuestStatement to execute queries.
      *
      * <p>
-     * Note, the QuestConnection is not a normal JDBC connection. It is a
+     * Note, the OntopConnection is not a normal JDBC connection. It is a
      * wrapper of one of the N JDBC connections that quest's connection pool
      * starts on initialization. Calling .close() will not actually close the
      * connection, with will just release it back to the pool.
      * <p>
-     * to close all connections you must call Quest.close().
+     * to close all connections you must call DBConnector.close().
      *
-     * @return
-     * @throws OBDAException
      */
     @Override
-    public IQuestConnection getConnection() throws OBDAException {
+    public OntopConnection getConnection() throws OntopConnectionException {
 
-        return new QuestConnection(this, queryProcessor, getSQLPoolConnection(), questCoreSettings,
-                iriDictionary);
+        return new QuestConnection(this, queryProcessor, getSQLPoolConnection(), iriDictionary);
     }
 
 

@@ -54,7 +54,7 @@ import static org.junit.Assert.assertTrue;
  * We use the npd database.
  */
 public class R2rmlCheckerTest {
-	private QuestOWLConnection conn;
+	private OntopOWLConnection conn;
 
 	Logger log = LoggerFactory.getLogger(this.getClass());
 	private OWLOntology owlOntology;
@@ -299,14 +299,14 @@ public class R2rmlCheckerTest {
 	 * Execute Npd query 1 and give the number of results
 	 * @return 
 	 */
-	private int npdQuery(QuestOWLConnection questOWLConnection) throws OWLException {
+	private int npdQuery(OntopOWLConnection ontopOWLConnection) throws OWLException {
 		String query = "PREFIX npdv: <http://sws.ifi.uio.no/vocab/npd-v2#> SELECT DISTINCT ?licenceURI WHERE { ?licenceURI a npdv:ProductionLicence ."
 				+ "[ ] a npdv:ProductionLicenceLicensee ; "
 				+ "npdv:dateLicenseeValidFrom ?date ;"
 				+ "npdv:licenseeInterest ?interest ;"
 				+ "npdv:licenseeForLicence ?licenceURI . "
 				+ "FILTER(?date > '1979-12-31T00:00:00')	}";
-		QuestOWLStatement st = questOWLConnection.createStatement();
+		OntopOWLStatement st = ontopOWLConnection.createStatement();
 		int n = 0;
 		try {
 			QuestOWLResultSet rs = st.executeTuple(query);
@@ -375,9 +375,9 @@ public class R2rmlCheckerTest {
 
 	}
 
-	private int runSPARQLConceptsQuery(String description,	QuestOWLConnection conn) throws Exception {
+	private int runSPARQLConceptsQuery(String description,	OntopOWLConnection conn) throws Exception {
 		String query = "SELECT ?x WHERE {?x a " + description + ".}";
-		QuestOWLStatement st = conn.createStatement();
+		OntopOWLStatement st = conn.createStatement();
 		int n = 0;
 		try {
 			QuestOWLResultSet rs = st.executeTuple(query);
@@ -403,9 +403,9 @@ public class R2rmlCheckerTest {
 
 	}
 
-	private int runSPARQLRolesQuery(String description, QuestOWLConnection conn) throws Exception {
+	private int runSPARQLRolesQuery(String description, OntopOWLConnection conn) throws Exception {
 		String query = "SELECT * WHERE {?x " + description + " ?y.}";
-		QuestOWLStatement st = conn.createStatement();
+		OntopOWLStatement st = conn.createStatement();
 		int n = 0;
 		try {
 			QuestOWLResultSet rs = st.executeTuple(query);
@@ -442,9 +442,9 @@ public class R2rmlCheckerTest {
 
 	}
 	
-	private int runSPARQLRoleFilterQuery(String description, QuestOWLConnection connection) throws OWLException {
+	private int runSPARQLRoleFilterQuery(String description, OntopOWLConnection connection) throws OWLException {
 		String query = "SELECT * WHERE {?x " + description + " ?y. FILTER(isLiteral(?y))}";
-		QuestOWLStatement st = connection.createStatement();
+		OntopOWLStatement st = connection.createStatement();
 		int n = 0;
 		try {
 			QuestOWLResultSet rs = st.executeTuple(query);

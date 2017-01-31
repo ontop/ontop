@@ -22,9 +22,9 @@ package it.unibz.inf.ontop.rdf4j.query;
 
 import it.unibz.inf.ontop.model.OBDAException;
 import it.unibz.inf.ontop.model.TupleResultSet;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestDBConnection;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestDBStatement;
 
+import it.unibz.inf.ontop.owlrefplatform.core.OntopConnection;
+import it.unibz.inf.ontop.owlrefplatform.core.OntopStatement;
 import org.eclipse.rdf4j.query.MalformedQueryException;
 import org.eclipse.rdf4j.query.QueryEvaluationException;
 import org.eclipse.rdf4j.query.TupleQuery;
@@ -37,7 +37,7 @@ import java.util.List;
 
 public class OntopTupleQuery extends AbstractOntopQuery implements TupleQuery {
 
-	public OntopTupleQuery(String queryString, String baseURI, QuestDBConnection conn)
+	public OntopTupleQuery(String queryString, String baseURI, OntopConnection conn)
 			throws MalformedQueryException {
         super(queryString, conn);
 	}
@@ -45,7 +45,7 @@ public class OntopTupleQuery extends AbstractOntopQuery implements TupleQuery {
 	@Override
 	public TupleQueryResult evaluate() throws QueryEvaluationException {
 		TupleResultSet res = null;
-		QuestDBStatement stm = null;
+		OntopStatement stm = null;
 		long start = System.currentTimeMillis();
 		try {
 			stm = conn.createStatement();

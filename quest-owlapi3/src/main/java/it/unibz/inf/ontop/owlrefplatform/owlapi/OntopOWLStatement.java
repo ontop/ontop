@@ -7,7 +7,7 @@ import org.semanticweb.owlapi.model.OWLException;
 import java.util.List;
 
 /***
- * A Statement to execute queries over a QuestOWLConnection. The logic of this
+ * A Statement to execute queries over a OntopOWLConnection. The logic of this
  * statement is equivalent to that of JDBC's Statements.
  *
  * <p>
@@ -21,10 +21,9 @@ import java.util.List;
  *
  * Used by the OWLAPI.
  *
- * TODO: rename it (not now) QuestOWLStatement
  *
  */
-public interface IQuestOWLStatement extends AutoCloseable {
+public interface OntopOWLStatement extends AutoCloseable {
 	void cancel() throws OWLException;
 
 	void close() throws OWLException;
@@ -33,25 +32,11 @@ public interface IQuestOWLStatement extends AutoCloseable {
 
 	List<OWLAxiom> executeGraph(String query) throws OWLException;
 
-	int executeUpdate(String query) throws OWLException;
-
-	QuestOWLConnection getConnection() throws OWLException;
-
-	int getFetchSize() throws OWLException;
-
-	int getMaxRows() throws OWLException;
-
-	void getMoreResults() throws OWLException;
-
-	int getQueryTimeout() throws OWLException;
-
-	void setFetchSize(int rows) throws OWLException;
-
-	void setMaxRows(int max) throws OWLException;
+	OntopOWLConnection getConnection() throws OWLException;
 
 	boolean isClosed() throws OWLException;
 
-	void setQueryTimeout(int seconds) throws Exception;
+	void setQueryTimeout(int seconds) throws OWLException;
 
 	long getTupleCount(String query) throws OWLException;
 

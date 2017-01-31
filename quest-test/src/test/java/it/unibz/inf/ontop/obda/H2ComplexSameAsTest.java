@@ -102,9 +102,9 @@ public class H2ComplexSameAsTest {
 		QuestOWL reasoner = factory.createReasoner(config);
 
 		// Now we are ready for querying
-		QuestOWLConnection conn = reasoner.getConnection();
+		OntopOWLConnection conn = reasoner.getConnection();
 
-		QuestOWLStatement st = conn.createStatement();
+		OntopOWLStatement st = conn.createStatement();
 		ArrayList<String> retVal = new ArrayList<>();
 		try {
 			QuestOWLResultSet rs = st.executeTuple(query);

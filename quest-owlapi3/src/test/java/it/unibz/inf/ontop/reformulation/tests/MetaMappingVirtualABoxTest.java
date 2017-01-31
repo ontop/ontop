@@ -24,7 +24,6 @@ import com.google.common.base.Joiner;
 import com.google.common.io.CharStreams;
 import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.injection.QuestCoreSettings;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import org.junit.After;
 import org.junit.Before;
@@ -32,7 +31,6 @@ import org.junit.Test;
 import org.semanticweb.owlapi.io.ToStringRenderer;
 import org.semanticweb.owlapi.model.OWLLiteral;
 import org.semanticweb.owlapi.model.OWLObject;
-import org.semanticweb.owlapi.reasoner.IllegalConfigurationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -135,8 +133,8 @@ public class MetaMappingVirtualABoxTest {
 		String query2 = "PREFIX : <http://it.unibz.inf/obda/test/simple#> SELECT * WHERE { ?x :P_1 ?y }";
         try (QuestOWL reasoner = factory.createReasoner(config);
              // Now we are ready for querying
-             QuestOWLConnection conn = reasoner.getConnection();
-             QuestOWLStatement st = conn.createStatement();
+             OntopOWLConnection conn = reasoner.getConnection();
+             OntopOWLStatement st = conn.createStatement();
              QuestOWLResultSet rs1 = st.executeTuple(query1);
         ) {
             assertTrue(rs1.nextRow());
@@ -152,8 +150,8 @@ public class MetaMappingVirtualABoxTest {
 
         try (QuestOWL reasoner = factory.createReasoner(config);
              // Now we are ready for querying
-             QuestOWLConnection conn = reasoner.getConnection();
-             QuestOWLStatement st = conn.createStatement();
+             OntopOWLConnection conn = reasoner.getConnection();
+             OntopOWLStatement st = conn.createStatement();
              QuestOWLResultSet rs2 = st.executeTuple(query2);
         ) {
             assertTrue(rs2.nextRow());

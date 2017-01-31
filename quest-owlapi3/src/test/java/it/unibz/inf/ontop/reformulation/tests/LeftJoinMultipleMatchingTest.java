@@ -37,7 +37,7 @@ public class LeftJoinMultipleMatchingTest {
 
 
     private Connection sqlConnection;
-    private QuestOWLConnection conn;
+    private OntopOWLConnection conn;
     private QuestOWL reasoner;
 
     String URL = "jdbc:h2:mem:raisjunit";
@@ -114,7 +114,7 @@ public class LeftJoinMultipleMatchingTest {
 
         // Now we are ready for querying
         conn = reasoner.getConnection();
-        QuestOWLStatement st = conn.createStatement();
+        OntopOWLStatement st = conn.createStatement();
 
 
         QueryController qc = new QueryController();
@@ -183,7 +183,7 @@ public class LeftJoinMultipleMatchingTest {
 
         // Now we are ready for querying
         conn = reasoner.getConnection();
-        QuestOWLStatement st = conn.createStatement();
+        OntopOWLStatement st = conn.createStatement();
 
         log.debug("Executing query: ");
         log.debug("Query: \n{}", query);

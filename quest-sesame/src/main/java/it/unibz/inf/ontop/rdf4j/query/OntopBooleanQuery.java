@@ -20,18 +20,18 @@ package it.unibz.inf.ontop.rdf4j.query;
  * #L%
  */
 
+import it.unibz.inf.ontop.owlrefplatform.core.OntopConnection;
+import it.unibz.inf.ontop.owlrefplatform.core.OntopStatement;
 import org.eclipse.rdf4j.query.BooleanQuery;
 import org.eclipse.rdf4j.query.MalformedQueryException;
 import org.eclipse.rdf4j.query.QueryEvaluationException;
 
 import it.unibz.inf.ontop.model.OBDAQueryModifiers;
 import it.unibz.inf.ontop.model.TupleResultSet;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestDBConnection;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestDBStatement;
 
 public class OntopBooleanQuery extends AbstractOntopQuery implements BooleanQuery {
 
-	public OntopBooleanQuery(String queryString, String baseURI, QuestDBConnection conn) throws MalformedQueryException {
+	public OntopBooleanQuery(String queryString, String baseURI, OntopConnection conn) throws MalformedQueryException {
         super(queryString, conn);
 		// check if valid query string
 //		if (queryString.contains("ASK")) {
@@ -42,7 +42,7 @@ public class OntopBooleanQuery extends AbstractOntopQuery implements BooleanQuer
 	@Override
 	public boolean evaluate() throws QueryEvaluationException {
 		TupleResultSet rs = null;
-		QuestDBStatement stm = null;
+		OntopStatement stm = null;
 		try {
 			stm = conn.createStatement();
 			rs = (TupleResultSet) stm.execute(getQueryString());

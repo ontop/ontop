@@ -120,7 +120,7 @@ public class CompanyTest2 extends AbstractVirtualModeTest {
 
 	private void runTests() throws Exception {
 
-		QuestOWLStatement st = conn.createStatement();
+		OntopOWLStatement st = conn.createStatement();
 
 		
 		String queryEx =  "PREFIX : <http://it.unibz.krdb/obda/test/company#> SELECT * WHERE"

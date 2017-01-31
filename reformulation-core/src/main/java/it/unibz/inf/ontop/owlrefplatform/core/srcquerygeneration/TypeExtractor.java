@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.owlrefplatform.core.srcquerygeneration;
 
 import com.google.common.collect.*;
 import it.unibz.inf.ontop.model.*;
+import it.unibz.inf.ontop.model.type.IncompatibleTermException;
 import it.unibz.inf.ontop.model.type.impl.TermTypeInferenceTools;
 import it.unibz.inf.ontop.sql.Attribute;
 import it.unibz.inf.ontop.sql.Relation2DatalogPredicate;
@@ -55,14 +56,16 @@ public class TypeExtractor {
      *
      * Extracts the TermTypes and the cast types from a set of Datalog rules.
      */
-    public static TypeResults extractTypes(Multimap<Predicate, CQIE> ruleIndex, List<Predicate> predicatesInBottomUp, DBMetadata metadata) {
+    public static TypeResults extractTypes(Multimap<Predicate, CQIE> ruleIndex, List<Predicate> predicatesInBottomUp, DBMetadata metadata)
+            throws IncompatibleTermException {
         ImmutableMap<CQIE, ImmutableList<Optional<TermType>>> termTypeMap = extractTermTypeMap(ruleIndex.values());
 
         return new TypeResults(termTypeMap,
                 extractCastTypeMap(ruleIndex, predicatesInBottomUp, termTypeMap, metadata));
     }
 
-    private static ImmutableMap<CQIE, ImmutableList<Optional<TermType>>> extractTermTypeMap(Collection<CQIE> rules) {
+    private static ImmutableMap<CQIE, ImmutableList<Optional<TermType>>> extractTermTypeMap(Collection<CQIE> rules)
+            throws IncompatibleTermException {
         return rules.stream()
                 .collect(ImmutableCollectors.toMap(
                         // Key mapper

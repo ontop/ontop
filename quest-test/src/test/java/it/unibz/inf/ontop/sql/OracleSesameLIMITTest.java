@@ -24,8 +24,6 @@ import static org.junit.Assert.assertTrue;
 
 import it.unibz.inf.ontop.injection.OntopOBDASettings;
 import it.unibz.inf.ontop.injection.QuestConfiguration;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestDBConnection;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestDBStatement;
 import it.unibz.inf.ontop.injection.QuestCoreSettings;
 import it.unibz.inf.ontop.rdf4j.repository.OntopVirtualRepository;
 
