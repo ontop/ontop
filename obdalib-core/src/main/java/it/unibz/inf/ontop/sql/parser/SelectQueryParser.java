@@ -104,7 +104,8 @@ public class SelectQueryParser {
                 ? current.getFilterAtoms()
                 : ImmutableList.<Function>builder()
                     .addAll(current.getFilterAtoms())
-                    .addAll(new BooleanExpressionParser(idfac, plainSelect.getWhere()).apply(current.getAttributes()))
+                    .addAll(new ExpressionParser(idfac, current.getAttributes())
+                            .parseBooleanExpression(plainSelect.getWhere()))
                     .build();
 
         ImmutableList.Builder<Function> assignmentsBuilder = ImmutableList.builder();
@@ -179,7 +180,8 @@ public class SelectQueryParser {
                     throw new InvalidSelectQueryRuntimeException("JOIN cannot have both USING and ON", join);
 
                 return RAExpression.joinOn(left, right,
-                        new BooleanExpressionParser(idfac, join.getOnExpression()));
+                        (attributes ->  new ExpressionParser(idfac, attributes)
+                                .parseBooleanExpression(join.getOnExpression())));
             }
             else if (join.getUsingColumns() != null) {
                 return RAExpression.joinUsing(left, right,
@@ -356,7 +358,7 @@ public class SelectQueryParser {
                 Variable var = fac.getVariable(columnAlias.getName() + relationIndex);
                 map = ImmutableMap.of(new QualifiedAttributeID(null, name), var);
 
-                Term term = new ExpressionParser(idfac, expr).apply(attributes);
+                Term term = new ExpressionParser(idfac, attributes).parseTerm(expr);
                 assignment = fac.getFunctionEQ(var, term);
             }
         }

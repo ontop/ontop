@@ -5,7 +5,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
-import it.unibz.inf.ontop.sql.parser.BooleanExpressionParser;
+import it.unibz.inf.ontop.sql.parser.ExpressionParser;
 import it.unibz.inf.ontop.sql.parser.RAExpression;
 import it.unibz.inf.ontop.sql.parser.RAExpressionAttributes;
 import it.unibz.inf.ontop.sql.parser.exceptions.IllegalJoinException;
@@ -145,7 +145,7 @@ public class RelationalExpressionTest {
         System.out.println(eq);
 
         RAExpression relationalExpression = RAExpression.joinOn(re1, re2,
-                new BooleanExpressionParser(MDFAC, onExpression));
+                attributes -> new ExpressionParser(MDFAC, attributes).parseBooleanExpression(onExpression));
 
         System.out.println(relationalExpression);
 
@@ -158,7 +158,8 @@ public class RelationalExpressionTest {
         System.out.println(re1);
         System.out.println(re1_1);
 
-        RAExpression.joinOn(re1, re1_1, new BooleanExpressionParser(MDFAC, onExpression));
+        RAExpression.joinOn(re1, re1_1,
+                attributes -> new ExpressionParser(MDFAC, attributes).parseBooleanExpression(onExpression));
     }
 
     @Test
@@ -188,7 +189,7 @@ public class RelationalExpressionTest {
         System.out.println(re2);
 
         RAExpression relationalExpression = RAExpression.joinOn(re1, re2,
-                new BooleanExpressionParser(MDFAC, onExpression));
+                attributes -> new ExpressionParser(MDFAC, attributes).parseBooleanExpression(onExpression));
 
         System.out.println(relationalExpression);
         System.out.println(re3);
@@ -243,7 +244,7 @@ public class RelationalExpressionTest {
         System.out.println(re2);
 
         RAExpression relationalExpression = RAExpression.joinOn(re1, re2,
-                new BooleanExpressionParser(MDFAC, onExpression));
+                attributes -> new ExpressionParser(MDFAC, attributes).parseBooleanExpression(onExpression));
 
         System.out.println(relationalExpression);
         System.out.println(re3);

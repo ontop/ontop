@@ -76,12 +76,12 @@ public class RAExpression {
      *
      * @param re1 a {@link RAExpression}
      * @param re2 a {@link RAExpression}
-     * @param getAtomOnExpression a {@link BooleanExpressionParser}
+     * @param getAtomOnExpression
      * @return a {@link RAExpression}
      * @throws IllegalJoinException if the same alias occurs in both arguments
      */
     public static RAExpression joinOn(RAExpression re1, RAExpression re2,
-                                      BooleanExpressionParser getAtomOnExpression) throws IllegalJoinException {
+                                      java.util.function.Function<ImmutableMap<QualifiedAttributeID, Variable>, ImmutableList<Function>> getAtomOnExpression) throws IllegalJoinException {
 
         RAExpressionAttributes attributes =
                 RAExpressionAttributes.crossJoin(re1.attributes, re2.attributes);
