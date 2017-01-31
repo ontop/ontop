@@ -176,9 +176,9 @@ public class OntopRepositoryConfig extends AbstractRepositoryImplConfig {
             QuestConfiguration configuration;
             Properties p = new Properties();
             if (existential) {
-                p.setProperty(QuestCoreSettings.REWRITE, "true");
+                p.setProperty(QuestCoreSettings.EXISTENTIAL_REASONING, "true");
             } else {
-                p.setProperty(QuestCoreSettings.REWRITE, "false");
+                p.setProperty(QuestCoreSettings.EXISTENTIAL_REASONING, "false");
             }
 
             configuration = QuestConfiguration.defaultBuilder()

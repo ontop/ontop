@@ -85,7 +85,7 @@ public class QuestQueryProcessor implements OBDAQueryProcessor {
 
 		// TODO: use Guice instead
 		// Setting up the reformulation engine
-		if (!settings.getRequiredBoolean(QuestCoreSettings.REWRITE))
+		if (!settings.getRequiredBoolean(QuestCoreSettings.EXISTENTIAL_REASONING))
 			rewriter = new DummyReformulator();
 		else if (settings.getProperty(QuestCoreSettings.REFORMULATION_TECHNIQUE)
 				.filter(v -> v.equals(QuestConstants.TW))

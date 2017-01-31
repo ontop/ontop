@@ -1,6 +1,5 @@
 package it.unibz.inf.ontop.rdf4j.tests.general;
 
-import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
 import it.unibz.inf.ontop.injection.QuestCoreSettings;
 
 import java.util.Properties;
@@ -18,7 +17,7 @@ public class OptiqueIntegrationTest extends AbstractVirtualSesameTest {
 
 	private static Properties buildProperties() {
 		Properties p = new Properties();
-		p.put(QuestCoreSettings.REWRITE, true);
+		p.put(QuestCoreSettings.EXISTENTIAL_REASONING, true);
 		// set jdbc params in config
 		p.setProperty(QuestCoreSettings.JDBC_NAME, "npd");
 		p.setProperty(QuestCoreSettings.JDBC_URL,

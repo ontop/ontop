@@ -30,7 +30,7 @@ public class OntopRuntimeSettingsImpl extends OntopOBDASettingsImpl implements O
 
     @Override
     public boolean isRewritingEnabled() {
-        return getRequiredBoolean(REWRITE);
+        return getRequiredBoolean(EXISTENTIAL_REASONING);
     }
 
     @Override

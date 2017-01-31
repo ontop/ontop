@@ -53,7 +53,7 @@ public class QuestConfigPanel extends javax.swing.JPanel {
 //            cmbReformulationMethods.setSelectedIndex(1);
 //        }
 
-        boolean bChecked = preference.getBoolean(QuestCoreSettings.REWRITE);
+        boolean bChecked = preference.getBoolean(QuestCoreSettings.EXISTENTIAL_REASONING);
         chkRewrite.setSelected(bChecked);
         
         bChecked = preference.getBoolean(QuestCoreSettings.QUERY_ONTOLOGY_ANNOTATIONS);
@@ -506,7 +506,7 @@ public class QuestConfigPanel extends javax.swing.JPanel {
     }//GEN-LAST:event_radVirtualObdaActionPerformed
 
     private void chkRewriteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkRewriteActionPerformed
-        preference.put(QuestCoreSettings.REWRITE, String.valueOf(chkRewrite.isSelected()));
+        preference.put(QuestCoreSettings.EXISTENTIAL_REASONING, String.valueOf(chkRewrite.isSelected()));
 
     }//GEN-LAST:event_chkRewriteActionPerformed
 

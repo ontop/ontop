@@ -304,7 +304,7 @@ public class TreeWitnessRewriterH2Test{
 
 		prepareTestQueries(tuples);
 		Properties p  = new Properties();
-		p.setProperty(OntopRuntimeSettings.REWRITE, "true");
+		p.setProperty(OntopRuntimeSettings.EXISTENTIAL_REASONING, "true");
 
 		runTests(p);
 	}

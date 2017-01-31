@@ -109,7 +109,7 @@ public class OntopRuntimeConfigurationImpl extends OntopOBDAConfigurationImpl im
             Properties p = new Properties();
 
             encodeIRISafely.ifPresent(e -> p.put(OntopRuntimeSettings.SQL_GENERATE_REPLACE, e));
-            existentialReasoning.ifPresent(r -> p.put(OntopRuntimeSettings.REWRITE, r));
+            existentialReasoning.ifPresent(r -> p.put(OntopRuntimeSettings.EXISTENTIAL_REASONING, r));
 
             return p;
         }
