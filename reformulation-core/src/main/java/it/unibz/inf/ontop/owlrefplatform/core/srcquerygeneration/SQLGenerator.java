@@ -49,7 +49,7 @@ import it.unibz.inf.ontop.owlrefplatform.core.translator.IntermediateQueryToData
 import it.unibz.inf.ontop.owlrefplatform.core.translator.SesameConstructTemplate;
 import it.unibz.inf.ontop.parser.EncodeForURI;
 import it.unibz.inf.ontop.pivotalrepr.IntermediateQuery;
-import it.unibz.inf.ontop.reformulation.IRIDictionary;
+import it.unibz.inf.ontop.answering.reformulation.IRIDictionary;
 import it.unibz.inf.ontop.sql.*;
 import it.unibz.inf.ontop.utils.DatalogDependencyGraphGenerator;
 import it.unibz.inf.ontop.utils.JdbcTypeMapper;

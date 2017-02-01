@@ -20,8 +20,8 @@ package it.unibz.inf.ontop.quest.sparql;
  * #L%
  */
 
+import it.unibz.inf.ontop.owlrefplatform.owlapi.OntopOWLStatement;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLResultSet;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLStatement;
 import it.unibz.inf.ontop.quest.AbstractVirtualModeTest;
 import org.semanticweb.owlapi.model.OWLIndividual;
 

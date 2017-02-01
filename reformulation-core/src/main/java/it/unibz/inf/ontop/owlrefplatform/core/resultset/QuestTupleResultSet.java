@@ -25,7 +25,7 @@ import it.unibz.inf.ontop.exception.OntopConnectionException;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.Predicate.COL_TYPE;
 import it.unibz.inf.ontop.owlrefplatform.core.OntopStatement;
-import it.unibz.inf.ontop.reformulation.IRIDictionary;
+import it.unibz.inf.ontop.answering.reformulation.IRIDictionary;
 
 import javax.annotation.Nullable;
 import java.net.URISyntaxException;

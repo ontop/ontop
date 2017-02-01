@@ -27,7 +27,7 @@ import it.unibz.inf.ontop.model.OBDAException;
 import it.unibz.inf.ontop.owlrefplatform.core.DBConnector;
 import it.unibz.inf.ontop.owlrefplatform.core.OntopConnection;
 
-import it.unibz.inf.ontop.reformulation.OBDAQueryProcessor;
+import it.unibz.inf.ontop.answering.reformulation.OntopQueryReformulator;
 import it.unibz.inf.ontop.spec.OBDASpecification;
 import org.eclipse.rdf4j.model.ValueFactory;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
@@ -87,7 +87,7 @@ public class OntopVirtualRepository implements org.eclipse.rdf4j.repository.Repo
 			OBDASpecification obdaSpecification = configuration.loadProvidedSpecification();
 			QuestComponentFactory componentFactory = configuration.getInjector().getInstance(QuestComponentFactory.class);
 
-			OBDAQueryProcessor queryProcessor = componentFactory.create(obdaSpecification, configuration.getExecutorRegistry());
+			OntopQueryReformulator queryProcessor = componentFactory.create(obdaSpecification, configuration.getExecutorRegistry());
 			dbConnector = componentFactory.create(queryProcessor);
 			dbConnector.connect();
 		}

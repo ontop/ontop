@@ -22,7 +22,7 @@ package it.unibz.inf.ontop.owlrefplatform.core.resultset;
 
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestStatement;
-import it.unibz.inf.ontop.reformulation.IRIDictionary;
+import it.unibz.inf.ontop.answering.reformulation.IRIDictionary;
 
 import java.sql.ResultSet;
 import java.util.*;

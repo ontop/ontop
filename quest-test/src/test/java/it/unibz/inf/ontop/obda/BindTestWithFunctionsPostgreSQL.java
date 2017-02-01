@@ -21,7 +21,7 @@ package it.unibz.inf.ontop.obda;
  */
 
 
-import it.unibz.inf.ontop.reformulation.tests.AbstractBindTestWithFunctions;
+import it.unibz.inf.ontop.answering.reformulation.tests.AbstractBindTestWithFunctions;
 import org.junit.Ignore;
 import org.junit.Test;
 

@@ -5,8 +5,8 @@ import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.exception.OntopConnectionException;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.injection.QuestCoreSettings;
-import it.unibz.inf.ontop.reformulation.IRIDictionary;
-import it.unibz.inf.ontop.reformulation.OBDAQueryProcessor;
+import it.unibz.inf.ontop.answering.reformulation.IRIDictionary;
+import it.unibz.inf.ontop.answering.reformulation.OntopQueryReformulator;
 import org.apache.tomcat.jdbc.pool.DataSource;
 import org.apache.tomcat.jdbc.pool.PoolProperties;
 
@@ -22,7 +22,7 @@ import java.util.Optional;
  */
 public class JDBCConnector implements DBConnector {
 
-    private final OBDAQueryProcessor queryProcessor;
+    private final OntopQueryReformulator queryProcessor;
 
     private final QuestCoreSettings settings;
     private final Optional<IRIDictionary> iriDictionary;
@@ -44,7 +44,7 @@ public class JDBCConnector implements DBConnector {
     private final boolean keepAlive;
 
     @AssistedInject
-    private JDBCConnector(@Assisted OBDAQueryProcessor queryProcessor,
+    private JDBCConnector(@Assisted OntopQueryReformulator queryProcessor,
                           @Nullable IRIDictionary iriDictionary,
                           QuestCoreSettings settings) {
         this.queryProcessor = queryProcessor;

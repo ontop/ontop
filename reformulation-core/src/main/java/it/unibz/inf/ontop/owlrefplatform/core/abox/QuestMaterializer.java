@@ -34,7 +34,7 @@ import java.util.*;
 
 import it.unibz.inf.ontop.injection.QuestComponentFactory;
 import it.unibz.inf.ontop.injection.QuestCoreConfiguration;
-import it.unibz.inf.ontop.reformulation.OBDAQueryProcessor;
+import it.unibz.inf.ontop.answering.reformulation.OntopQueryReformulator;
 import it.unibz.inf.ontop.spec.OBDASpecification;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -87,7 +87,7 @@ public class QuestMaterializer {
 		Injector injector = configuration.getInjector();
 		questComponentFactory = injector.getInstance(QuestComponentFactory.class);
 
-		OBDAQueryProcessor queryProcessor = questComponentFactory.create(
+		OntopQueryReformulator queryProcessor = questComponentFactory.create(
 				configuration.loadProvidedSpecification(), configuration.getExecutorRegistry());
 
 		connector = questComponentFactory.create(queryProcessor);
@@ -105,7 +105,7 @@ public class QuestMaterializer {
 
 		OBDASpecification obdaSpecification = configuration.loadProvidedSpecification();
 
-		OBDAQueryProcessor queryProcessor = questComponentFactory.create(
+		OntopQueryReformulator queryProcessor = questComponentFactory.create(
 				obdaSpecification, configuration.getExecutorRegistry());
 
 		this.selectedVocabulary = extractVocabulary(obdaSpecification.getVocabulary());

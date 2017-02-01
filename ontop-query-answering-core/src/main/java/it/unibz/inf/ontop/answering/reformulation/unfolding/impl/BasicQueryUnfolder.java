@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.reformulation.unfolding.impl;
+package it.unibz.inf.ontop.answering.reformulation.unfolding.impl;
 
 
 import com.google.inject.assistedinject.Assisted;
@@ -10,7 +10,7 @@ import it.unibz.inf.ontop.pivotalrepr.IntensionalDataNode;
 import it.unibz.inf.ontop.pivotalrepr.IntermediateQuery;
 import it.unibz.inf.ontop.pivotalrepr.proposal.QueryMergingProposal;
 import it.unibz.inf.ontop.pivotalrepr.proposal.impl.QueryMergingProposalImpl;
-import it.unibz.inf.ontop.reformulation.unfolding.QueryUnfolder;
+import it.unibz.inf.ontop.answering.reformulation.unfolding.QueryUnfolder;
 
 import java.util.Optional;
 

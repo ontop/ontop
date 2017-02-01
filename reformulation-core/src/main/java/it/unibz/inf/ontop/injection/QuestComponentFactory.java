@@ -5,13 +5,13 @@ import it.unibz.inf.ontop.owlrefplatform.core.srcquerygeneration.NativeQueryGene
 import it.unibz.inf.ontop.model.DBMetadata;
 import it.unibz.inf.ontop.pivotalrepr.utils.ExecutorRegistry;
 import it.unibz.inf.ontop.spec.OBDASpecification;
-import it.unibz.inf.ontop.reformulation.OBDAQueryProcessor;
+import it.unibz.inf.ontop.answering.reformulation.OntopQueryReformulator;
 
 public interface QuestComponentFactory {
 
-    OBDAQueryProcessor create(OBDASpecification obdaSpecification, ExecutorRegistry executorRegistry);
+    OntopQueryReformulator create(OBDASpecification obdaSpecification, ExecutorRegistry executorRegistry);
 
     NativeQueryGenerator create(DBMetadata metadata);
 
-    DBConnector create(OBDAQueryProcessor questProcessor);
+    DBConnector create(OntopQueryReformulator questProcessor);
 }

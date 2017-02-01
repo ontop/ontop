@@ -4,6 +4,7 @@ package it.unibz.inf.ontop.exception;
  * High-level exception produced by the query engine.
  */
 public abstract class OntopQueryEngineException extends RuntimeException {
+    
     protected OntopQueryEngineException(String message) {
         super(message);
     }

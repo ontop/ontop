@@ -26,8 +26,8 @@ import java.util.Optional;
 
 import it.unibz.inf.ontop.exception.OntopConnectionException;
 import it.unibz.inf.ontop.model.OBDAException;
-import it.unibz.inf.ontop.reformulation.IRIDictionary;
-import it.unibz.inf.ontop.reformulation.OBDAQueryProcessor;
+import it.unibz.inf.ontop.answering.reformulation.IRIDictionary;
+import it.unibz.inf.ontop.answering.reformulation.OntopQueryReformulator;
 
 /***
  * Quest connection is responsible for wrapping a JDBC connection to the data
@@ -43,7 +43,7 @@ import it.unibz.inf.ontop.reformulation.OBDAQueryProcessor;
  */
 public class QuestConnection implements OntopConnection {
 
-	private final OBDAQueryProcessor queryProcessor;
+	private final OntopQueryReformulator queryProcessor;
 	private Connection conn;
 	private final Optional<IRIDictionary> iriDictionary;
 
@@ -51,7 +51,7 @@ public class QuestConnection implements OntopConnection {
 	private boolean isClosed;
 
 
-	public QuestConnection(JDBCConnector jdbcConnector, OBDAQueryProcessor queryProcessor, Connection connection,
+	public QuestConnection(JDBCConnector jdbcConnector, OntopQueryReformulator queryProcessor, Connection connection,
 						   Optional<IRIDictionary> iriDictionary) {
 		this.jdbcConnector = jdbcConnector;
 		this.queryProcessor = queryProcessor;

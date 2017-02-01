@@ -10,8 +10,8 @@ import it.unibz.inf.ontop.owlrefplatform.core.execution.NativeQueryExecutionExce
 import it.unibz.inf.ontop.owlrefplatform.core.resultset.*;
 import it.unibz.inf.ontop.owlrefplatform.core.translator.SesameConstructTemplate;
 
-import it.unibz.inf.ontop.reformulation.IRIDictionary;
-import it.unibz.inf.ontop.reformulation.OBDAQueryProcessor;
+import it.unibz.inf.ontop.answering.reformulation.IRIDictionary;
+import it.unibz.inf.ontop.answering.reformulation.OntopQueryReformulator;
 
 import java.sql.*;
 import java.sql.ResultSet;
@@ -26,7 +26,7 @@ public class SQLQuestStatement extends QuestStatement {
     private final DBMetadata dbMetadata;
     private final Optional<IRIDictionary> iriDictionary;
 
-    public SQLQuestStatement(OBDAQueryProcessor queryProcessor, Statement sqlStatement,
+    public SQLQuestStatement(OntopQueryReformulator queryProcessor, Statement sqlStatement,
                              Optional<IRIDictionary> iriDictionary) {
         super(queryProcessor);
         this.sqlStatement = sqlStatement;

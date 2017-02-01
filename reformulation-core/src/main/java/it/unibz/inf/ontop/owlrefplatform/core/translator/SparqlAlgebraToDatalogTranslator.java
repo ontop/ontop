@@ -26,7 +26,7 @@ import it.unibz.inf.ontop.model.Predicate.COL_TYPE;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
 import it.unibz.inf.ontop.model.UriTemplateMatcher;
 import it.unibz.inf.ontop.parser.EncodeForURI;
-import it.unibz.inf.ontop.reformulation.IRIDictionary;
+import it.unibz.inf.ontop.answering.reformulation.IRIDictionary;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Literal;

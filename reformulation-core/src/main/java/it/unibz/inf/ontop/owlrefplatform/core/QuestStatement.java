@@ -26,7 +26,7 @@ import it.unibz.inf.ontop.owlrefplatform.core.queryevaluation.SPARQLQueryUtility
 import it.unibz.inf.ontop.owlrefplatform.core.resultset.EmptyTupleResultSet;
 import it.unibz.inf.ontop.owlrefplatform.core.resultset.QuestTupleResultSet;
 import it.unibz.inf.ontop.owlrefplatform.core.translator.SesameConstructTemplate;
-import it.unibz.inf.ontop.reformulation.OBDAQueryProcessor;
+import it.unibz.inf.ontop.answering.reformulation.OntopQueryReformulator;
 import org.eclipse.rdf4j.query.MalformedQueryException;
 import org.eclipse.rdf4j.query.parser.ParsedQuery;
 import org.slf4j.Logger;
@@ -45,7 +45,7 @@ import java.util.concurrent.CountDownLatch;
  */
 public abstract class QuestStatement implements OntopStatement {
 
-	private final OBDAQueryProcessor engine;
+	private final OntopQueryReformulator engine;
 
 	private QueryExecutionThread executionThread;
 	private boolean canceled = false;
@@ -54,7 +54,7 @@ public abstract class QuestStatement implements OntopStatement {
 	private static final Logger log = LoggerFactory.getLogger(QuestStatement.class);
 
 
-	public QuestStatement(OBDAQueryProcessor queryProcessor) {
+	public QuestStatement(OntopQueryReformulator queryProcessor) {
 		this.engine = queryProcessor;
 	}
 

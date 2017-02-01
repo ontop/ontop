@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.injection;
 
 
 import it.unibz.inf.ontop.injection.impl.OntopRuntimeConfigurationImpl;
-import it.unibz.inf.ontop.reformulation.IRIDictionary;
+import it.unibz.inf.ontop.answering.reformulation.IRIDictionary;
 
 import javax.annotation.Nonnull;
 import java.util.Optional;

@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.reformulation;
+package it.unibz.inf.ontop.answering.reformulation;
 
 
 public interface IRIDictionary {

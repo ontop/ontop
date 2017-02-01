@@ -9,7 +9,7 @@ import it.unibz.inf.ontop.injection.QuestCoreConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.OntopOWLConnection;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.OntopOWLStatement;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLConnection;
-import it.unibz.inf.ontop.reformulation.OBDAQueryProcessor;
+import it.unibz.inf.ontop.answering.reformulation.OntopQueryReformulator;
 import it.unibz.inf.ontop.sql.RDBMetadata;
 import it.unibz.inf.ontop.sql.RDBMetadataExtractionTools;
 import it.unibz.inf.ontop.sql.DatabaseRelationDefinition;
@@ -52,7 +52,7 @@ private void setup()  throws Exception {
 	MappingParser mappingParser = injector.getInstance(MappingParser.class);
 	OBDAModel obdaModel = mappingParser.parse(new File(obdafile));
 
-	OBDAQueryProcessor queryProcessor = componentFactory.create(configuration.loadProvidedSpecification(),
+	OntopQueryReformulator queryProcessor = componentFactory.create(configuration.loadProvidedSpecification(),
 			configuration.getExecutorRegistry());
 	dbConnector = componentFactory.create(queryProcessor);
 	dbConnector.connect();

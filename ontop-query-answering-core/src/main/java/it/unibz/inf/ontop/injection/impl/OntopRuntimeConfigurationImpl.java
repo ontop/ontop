@@ -6,7 +6,7 @@ import it.unibz.inf.ontop.executor.ProposalExecutor;
 import it.unibz.inf.ontop.injection.OntopRuntimeConfiguration;
 import it.unibz.inf.ontop.injection.OntopRuntimeSettings;
 import it.unibz.inf.ontop.pivotalrepr.proposal.QueryOptimizationProposal;
-import it.unibz.inf.ontop.reformulation.IRIDictionary;
+import it.unibz.inf.ontop.answering.reformulation.IRIDictionary;
 
 import javax.annotation.Nonnull;
 import java.util.Optional;

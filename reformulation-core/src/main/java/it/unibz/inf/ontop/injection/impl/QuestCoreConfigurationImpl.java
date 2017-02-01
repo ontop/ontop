@@ -13,7 +13,7 @@ import it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing.TMappingExclusio
 import it.unibz.inf.ontop.injection.QuestCoreConfiguration;
 import it.unibz.inf.ontop.injection.QuestCoreSettings;
 import it.unibz.inf.ontop.pivotalrepr.proposal.QueryOptimizationProposal;
-import it.unibz.inf.ontop.reformulation.IRIDictionary;
+import it.unibz.inf.ontop.answering.reformulation.IRIDictionary;
 
 import javax.annotation.Nonnull;
 import java.util.Optional;

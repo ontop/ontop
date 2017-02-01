@@ -4,6 +4,8 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
+import it.unibz.inf.ontop.exception.OntopInvalidInputQueryException;
+import it.unibz.inf.ontop.exception.OntopReformulationException;
 import it.unibz.inf.ontop.injection.QuestComponentFactory;
 import it.unibz.inf.ontop.injection.QuestCoreSettings;
 import it.unibz.inf.ontop.injection.ReformulationFactory;
@@ -14,9 +16,8 @@ import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.*;
 import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing.MappingSameAs;
 import it.unibz.inf.ontop.owlrefplatform.core.optimization.*;
-import it.unibz.inf.ontop.reformulation.IRIDictionary;
-import it.unibz.inf.ontop.reformulation.unfolding.QueryUnfolder;
-import it.unibz.inf.ontop.owlrefplatform.core.queryevaluation.SPARQLQueryUtility;
+import it.unibz.inf.ontop.answering.reformulation.IRIDictionary;
+import it.unibz.inf.ontop.answering.reformulation.unfolding.QueryUnfolder;
 import it.unibz.inf.ontop.owlrefplatform.core.reformulation.DummyReformulator;
 import it.unibz.inf.ontop.owlrefplatform.core.reformulation.QueryRewriter;
 import it.unibz.inf.ontop.owlrefplatform.core.reformulation.TreeWitnessRewriter;
@@ -34,9 +35,10 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 import it.unibz.inf.ontop.spec.OBDASpecification;
-import it.unibz.inf.ontop.reformulation.OBDAQueryProcessor;
+import it.unibz.inf.ontop.answering.reformulation.OntopQueryReformulator;
 import org.eclipse.rdf4j.query.MalformedQueryException;
 import org.eclipse.rdf4j.query.QueryLanguage;
+import org.eclipse.rdf4j.query.UnsupportedQueryLanguageException;
 import org.eclipse.rdf4j.query.parser.ParsedQuery;
 import org.eclipse.rdf4j.query.parser.QueryParser;
 import org.eclipse.rdf4j.query.parser.QueryParserUtil;
@@ -48,9 +50,9 @@ import javax.annotation.Nullable;
 import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
 
 /**
- * BC: TODO: make it explicitly immutable
+ * TODO: rename it OntopQueryReformulatorImpl ?
  */
-public class QuestQueryProcessor implements OBDAQueryProcessor {
+public class QuestQueryProcessor implements OntopQueryReformulator {
 
 	private final Map<String, ParsedQuery> parsedQueryCache = new ConcurrentHashMap<>();
 
@@ -73,13 +75,13 @@ public class QuestQueryProcessor implements OBDAQueryProcessor {
 
 	@AssistedInject
 	private QuestQueryProcessor(@Assisted OBDASpecification obdaSpecification,
-								@Assisted ExecutorRegistry executorRegistry,
-								@Nullable IRIDictionary iriDictionary,
-								QuestComponentFactory questComponentFactory,
-								QueryCache queryCache,
-								QuestCoreSettings settings,
-								DatalogProgram2QueryConverter datalogConverter,
-								ReformulationFactory reformulationFactory) {
+                                @Assisted ExecutorRegistry executorRegistry,
+                                @Nullable IRIDictionary iriDictionary,
+                                QuestComponentFactory questComponentFactory,
+                                QueryCache queryCache,
+                                QuestCoreSettings settings,
+                                DatalogProgram2QueryConverter datalogConverter,
+                                ReformulationFactory reformulationFactory) {
 		TBoxReasoner saturatedTBox = obdaSpecification.getSaturatedTBox();
 		this.sigma = LinearInclusionDependencies.getABoxDependencies(saturatedTBox, true);
 
@@ -137,12 +139,16 @@ public class QuestQueryProcessor implements OBDAQueryProcessor {
 	 * BC: TODO: rename parseSPARQL
      */
 	@Override
-	public ParsedQuery getParsedQuery(String sparql) throws MalformedQueryException {
+	public ParsedQuery getParsedQuery(String sparql) throws OntopInvalidInputQueryException {
 		ParsedQuery pq = parsedQueryCache.get(sparql);
 		if (pq == null) {
-			QueryParser parser = QueryParserUtil.createParser(QueryLanguage.SPARQL);
-			pq = parser.parseQuery(sparql, null);
-			parsedQueryCache.put(sparql,  pq);
+			try {
+				QueryParser parser = QueryParserUtil.createParser(QueryLanguage.SPARQL);
+				pq = parser.parseQuery(sparql, null);
+				parsedQueryCache.put(sparql, pq);
+			} catch (UnsupportedQueryLanguageException | MalformedQueryException e) {
+				throw new OntopInvalidInputQueryException(e);
+			}
 		}
 		return pq;
 	}
@@ -296,10 +302,12 @@ public class QuestQueryProcessor implements OBDAQueryProcessor {
 	}
 
 	private ExecutableQuery generateExecutableQuery(IntermediateQuery intermediateQuery, ImmutableList<String> signature,
-													Optional<SesameConstructTemplate> optionalConstructTemplate) throws OBDAException {
+													Optional<SesameConstructTemplate> optionalConstructTemplate)
+			throws OntopReformulationException {
 		log.debug("Producing the native query string...");
 
-		ExecutableQuery executableQuery = datasourceQueryGenerator.generateSourceQuery(intermediateQuery, signature, optionalConstructTemplate);
+		ExecutableQuery executableQuery = datasourceQueryGenerator.generateSourceQuery(intermediateQuery, signature,
+				optionalConstructTemplate);
 
 		log.debug("Resulting native query: \n{}", executableQuery);
 
@@ -309,6 +317,8 @@ public class QuestQueryProcessor implements OBDAQueryProcessor {
 
 	/**
 	 * Returns the final rewriting of the given query
+	 *
+	 * TODO: replace OBDAException by OntopReformulationException
 	 */
 	@Override
 	public String getRewriting(ParsedQuery query) throws OBDAException {
@@ -319,51 +329,6 @@ public class QuestQueryProcessor implements OBDAQueryProcessor {
 		}
 		catch (Exception e) {
 			log.debug(e.getMessage(), e);
-			e.printStackTrace();
-			OBDAException ex = new OBDAException("Error rewriting\n" +  e.getMessage());
-			ex.setStackTrace(e.getStackTrace());
-			throw ex;
-		}
-	}
-	
-	
-	/**
-	 * Rewrites the given input SPARQL query and returns back an expanded SPARQL
-	 * query. The query expansion involves query transformation from SPARQL
-	 * algebra to Datalog objects and then translating back to SPARQL algebra.
-	 * The transformation to Datalog is required to apply the rewriting
-	 * algorithm.
-	 * 
-	 * @param sparql
-	 *            The input SPARQL query.
-	 * @return An expanded SPARQL query.
-	 * @throws OBDAException
-	 *             if errors occur during the transformation and translation.
-	 */
-	@Override
-	public String getSPARQLRewriting(String sparql) throws OBDAException {
-		if (!SPARQLQueryUtility.isSelectQuery(sparql)) {
-			throw new OBDAException("Support only SELECT query");
-		}
-		try {
-			// Parse the SPARQL string into SPARQL algebra object
-			ParsedQuery query = getParsedQuery(sparql);
-			
-			// Translate the SPARQL algebra to datalog program
-			DatalogProgram initialProgram = translateAndPreProcess(query);
-			
-			// Perform the query rewriting
-			DatalogProgram programAfterRewriting = rewriter.rewrite(initialProgram);
-			
-			// Translate the output datalog program back to SPARQL string
-			// TODO Re-enable the prefix manager using Sesame prefix manager
-//			PrefixManager prefixManager = new SparqlPrefixManager(query.getPrefixMapping());
-			DatalogToSparqlTranslator datalogTranslator = new DatalogToSparqlTranslator();
-			return datalogTranslator.translate(programAfterRewriting);
-		} 
-		catch (Exception e) {
-			log.debug(e.getMessage(), e);
-			e.printStackTrace();
 			OBDAException ex = new OBDAException("Error rewriting\n" +  e.getMessage());
 			ex.setStackTrace(e.getStackTrace());
 			throw ex;

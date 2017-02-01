@@ -29,7 +29,7 @@ import it.unibz.inf.ontop.owlapi.OWLAPITranslatorUtility;
 import it.unibz.inf.ontop.owlrefplatform.core.*;
 import it.unibz.inf.ontop.pivotalrepr.utils.ExecutorRegistry;
 import it.unibz.inf.ontop.spec.OBDASpecification;
-import it.unibz.inf.ontop.reformulation.OBDAQueryProcessor;
+import it.unibz.inf.ontop.answering.reformulation.OntopQueryReformulator;
 import it.unibz.inf.ontop.utils.VersionInfo;
 import org.semanticweb.owlapi.model.*;
 import org.semanticweb.owlapi.reasoner.*;
@@ -214,7 +214,7 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 		// pm.reasonerTaskStarted("Classifying...");
 		// pm.reasonerTaskBusy();
 
-		OBDAQueryProcessor queryProcessor = componentFactory.create(obdaSpecification, executorRegistry);
+		OntopQueryReformulator queryProcessor = componentFactory.create(obdaSpecification, executorRegistry);
 		dbConnector = componentFactory.create(queryProcessor);
 		dbConnector.connect();
 		

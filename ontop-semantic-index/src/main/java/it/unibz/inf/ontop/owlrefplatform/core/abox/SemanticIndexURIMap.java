@@ -1,6 +1,6 @@
 package it.unibz.inf.ontop.owlrefplatform.core.abox;
 
-import it.unibz.inf.ontop.reformulation.IRIDictionary;
+import it.unibz.inf.ontop.answering.reformulation.IRIDictionary;
 
 import java.util.HashMap;
 

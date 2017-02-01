@@ -7,8 +7,8 @@ import com.google.inject.util.Providers;
 import it.unibz.inf.ontop.injection.OntopRuntimeConfiguration;
 import it.unibz.inf.ontop.injection.OntopRuntimeSettings;
 import it.unibz.inf.ontop.injection.ReformulationFactory;
-import it.unibz.inf.ontop.reformulation.IRIDictionary;
-import it.unibz.inf.ontop.reformulation.unfolding.QueryUnfolder;
+import it.unibz.inf.ontop.answering.reformulation.IRIDictionary;
+import it.unibz.inf.ontop.answering.reformulation.unfolding.QueryUnfolder;
 
 import java.util.Optional;
 
