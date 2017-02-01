@@ -51,11 +51,6 @@
 			<groupId>${project.groupId}</groupId>
 			<version>${project.version}</version>
 		</dependency>
-		<dependency>
-			<artifactId>ontop-quest-db</artifactId>
-			<groupId>${project.groupId}</groupId>
-			<version>${project.version}</version>
-		</dependency>
 
 		<dependency>
 			<groupId>net.sourceforge.owlapi</groupId>

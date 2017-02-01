@@ -21,11 +21,14 @@ package it.unibz.inf.ontop.rdf4j.repository;
  */
 
 import it.unibz.inf.ontop.exception.OntopConnectionException;
+import it.unibz.inf.ontop.injection.QuestComponentFactory;
 import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.model.OBDAException;
+import it.unibz.inf.ontop.owlrefplatform.core.DBConnector;
 import it.unibz.inf.ontop.owlrefplatform.core.OntopConnection;
-import it.unibz.inf.ontop.owlrefplatform.questdb.QuestDBVirtualStore;
 
+import it.unibz.inf.ontop.reformulation.OBDAQueryProcessor;
+import it.unibz.inf.ontop.spec.OBDASpecification;
 import org.eclipse.rdf4j.model.ValueFactory;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
@@ -33,21 +36,26 @@ import org.eclipse.rdf4j.repository.RepositoryException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nullable;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
 public class OntopVirtualRepository implements org.eclipse.rdf4j.repository.Repository, AutoCloseable {
 
-	private final QuestDBVirtualStore virtualStore;
-	private OntopConnection ontopConnection;
 	private boolean initialized = false;
 	private static final Logger logger = LoggerFactory.getLogger(OntopVirtualRepository.class);
 	private Map<String, String> namespaces;
-	
+
+	// Temporary (dropped after initialization)
+	@Nullable
+	private QuestConfiguration configuration;
+	@Nullable
+	private DBConnector dbConnector;
+
 	public OntopVirtualRepository(QuestConfiguration configuration) {
 		this.namespaces = new HashMap<>();
-		this.virtualStore = new QuestDBVirtualStore(configuration);
+		this.configuration = configuration;
 	}
 
 	/**
@@ -76,7 +84,12 @@ public class OntopVirtualRepository implements org.eclipse.rdf4j.repository.Repo
 	public void initialize() throws RepositoryException{
 		initialized = true;
 		try {
-			this.virtualStore.initialize();
+			OBDASpecification obdaSpecification = configuration.loadProvidedSpecification();
+			QuestComponentFactory componentFactory = configuration.getInjector().getInstance(QuestComponentFactory.class);
+
+			OBDAQueryProcessor queryProcessor = componentFactory.create(obdaSpecification, configuration.getExecutorRegistry());
+			dbConnector = componentFactory.create(queryProcessor);
+			dbConnector.connect();
 		}
 		catch (Exception e){
 			throw new RepositoryException(e);
@@ -91,8 +104,7 @@ public class OntopVirtualRepository implements org.eclipse.rdf4j.repository.Repo
 		if(!initialized)
 			throw new RepositoryException("The OntopVirtualRepository must be initialized before getConnection can be run.");
 		try {
-			ontopConnection = this.virtualStore.getConnection();
-			return ontopConnection;
+			return dbConnector.getConnection();
 		} catch (OntopConnectionException e) {
 			throw new RepositoryException(e);
 		}
@@ -108,15 +120,14 @@ public class OntopVirtualRepository implements org.eclipse.rdf4j.repository.Repo
 	public boolean isInitialized() {
 		return initialized;
 	}
-	
+
 	@Override
 	public void shutDown() throws RepositoryException {
 		initialized = false;
 		try {
-			ontopConnection.close();
-			virtualStore.close();
-		} catch (OBDAException e) {
-			e.printStackTrace();
+			dbConnector.close();
+		} catch (Exception e) {
+			throw new RepositoryException(e);
 		}
 	}
 
@@ -137,31 +148,31 @@ public class OntopVirtualRepository implements org.eclipse.rdf4j.repository.Repo
 	}
 
 	@Override
-	public void close() throws Exception {
+	public void close() throws RepositoryException {
 		this.shutDown();
 	}
 
-	public void setNamespace(String key, String value)
+	void setNamespace(String key, String value)
 	{
 		namespaces.put(key, value);
 	}
 
-	public String getNamespace(String key)
+	String getNamespace(String key)
 	{
 		return namespaces.get(key);
 	}
 
-	public Map<String, String> getNamespaces()
+	Map<String, String> getNamespaces()
 	{
 		return namespaces;
 	}
 
-	public void setNamespaces(Map<String, String> nsp)
+	void setNamespaces(Map<String, String> nsp)
 	{
 		this.namespaces = nsp;
 	}
 
-	public void removeNamespace(String key)
+	void removeNamespace(String key)
 	{
 		namespaces.remove(key);
 	}

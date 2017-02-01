@@ -75,7 +75,6 @@
         <module>rdf4j-webapps</module>
         <module>quest-sparql-compliance</module>
 		<module>quest-sesame</module>
-		<module>quest-db</module>
 		<module>quest-rdb2rdf-compliance</module>
 		<module>ontop-protege</module>
 		<module>ontop-cli</module>
