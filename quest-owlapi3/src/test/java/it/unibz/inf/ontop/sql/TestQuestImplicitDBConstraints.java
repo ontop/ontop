@@ -24,15 +24,16 @@ import it.unibz.inf.ontop.owlrefplatform.core.SQLExecutableQuery;
  */
 public class TestQuestImplicitDBConstraints {
 
-	static String uc_owlfile = "src/test/resources/userconstraints/uc.owl";
-	static String uc_obdafile = "src/test/resources/userconstraints/uc.obda";
-	static String uc_keyfile = "src/test/resources/userconstraints/keys.lst";
-	static String uc_create = "src/test/resources/userconstraints/create.sql";
+	private static final String RESOURCE_DIR = "../quest-sesame/src/test/resources/userconstraints/";
+	static String uc_owlfile = RESOURCE_DIR + "uc.owl";
+	static String uc_obdafile = RESOURCE_DIR + "uc.obda";
+	static String uc_keyfile = RESOURCE_DIR + "keys.lst";
+	static String uc_create = RESOURCE_DIR + "create.sql";
 	
-	static String fk_owlfile = "src/test/resources/userconstraints/uc.owl";
-	static String fk_obdafile = "src/test/resources/userconstraints/fk.obda";
-	static String fk_keyfile = "src/test/resources/userconstraints/fk-keys.lst";
-	static String fk_create = "src/test/resources/userconstraints/fk-create.sql";
+	static String fk_owlfile = RESOURCE_DIR + "uc.owl";
+	static String fk_obdafile = RESOURCE_DIR + "fk.obda";
+	static String fk_keyfile = RESOURCE_DIR + "fk-keys.lst";
+	static String fk_create = RESOURCE_DIR + "fk-create.sql";
 
 	private static final String URL = "jdbc:h2:mem:countries";
 	private static final String USER = "sa";
