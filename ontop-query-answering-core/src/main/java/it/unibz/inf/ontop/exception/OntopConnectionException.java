@@ -5,7 +5,7 @@ package it.unibz.inf.ontop.exception;
  *
  * TODO: find a better name
  */
-public class OntopConnectionException extends OntopRuntimeException {
+public class OntopConnectionException extends OntopQueryEngineException {
     public OntopConnectionException(String message) {
         super(message);
     }

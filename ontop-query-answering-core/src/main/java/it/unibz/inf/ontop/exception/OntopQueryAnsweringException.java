@@ -1,7 +1,7 @@
 package it.unibz.inf.ontop.exception;
 
 
-public class OntopQueryAnsweringException extends OntopRuntimeException {
+public class OntopQueryAnsweringException extends OntopQueryEngineException {
 
     protected OntopQueryAnsweringException(String message) {
         super(message);
