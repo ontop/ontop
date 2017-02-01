@@ -54,7 +54,9 @@ public class OntopMappingSQLConfigurationImpl extends OntopSQLConfigurationImpl 
         return Stream.concat(Stream.concat(
                     super.buildGuiceModules(),
                     mappingConfiguration.buildGuiceModules()),
-                Stream.of(new OntopMappingSQLModule(this)));
+                Stream.of(
+                        new OntopMappingSQLModule(this),
+                        new OntopMappingPostModule(getSettings())));
     }
 
     @Override

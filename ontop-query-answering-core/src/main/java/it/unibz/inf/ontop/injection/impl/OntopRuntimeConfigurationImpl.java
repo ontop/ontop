@@ -34,7 +34,7 @@ public class OntopRuntimeConfigurationImpl extends OntopOBDAConfigurationImpl im
                 Stream.concat(
                         super.buildGuiceModules(),
                         optimizationConfiguration.buildGuiceModules()),
-                Stream.of(new OntopRuntimeModule(this)));
+                Stream.of(new OntopQueryAnsweringModule(this)));
     }
 
     /**

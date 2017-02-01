@@ -86,7 +86,10 @@ public class QuestCoreConfigurationImpl extends OBDACoreConfigurationImpl implem
         return Stream.concat(
                 super.buildGuiceModules(),
                 Stream.concat(runtimeConfiguration.buildGuiceModules(),
-                    Stream.of(new QuestComponentModule(this))));
+                    Stream.of(
+                            new QuestComponentModule(this),
+                            new OntopQueryAnsweringPostModule(getSettings())
+                            )));
     }
 
     public static class QuestCoreOptions {

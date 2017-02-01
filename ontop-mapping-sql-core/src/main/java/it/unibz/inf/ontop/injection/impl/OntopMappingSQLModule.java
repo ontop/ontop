@@ -32,7 +32,6 @@ public class OntopMappingSQLModule extends OntopAbstractModule {
         bindFromPreferences(MappingParser.class);
         bindFromPreferences(SQLPPMapping2DSModelConverter.class);
         bindFromPreferences(Datalog2QueryMappingConverter.class);
-        bindFromPreferences(OBDASpecificationExtractor.class);
 
         Module nativeQLFactoryModule = buildFactory(ImmutableList.of(
                 RDBMetadataExtractor.class,
