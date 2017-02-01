@@ -1,7 +1,7 @@
 package it.unibz.inf.ontop.injection;
 
 
-public interface OntopRuntimeSettings extends OntopOBDASettings, OntopOptimizationSettings {
+public interface OntopQueryAnsweringSettings extends OntopOBDASettings, OntopOptimizationSettings {
 
     boolean isRewritingEnabled();
 

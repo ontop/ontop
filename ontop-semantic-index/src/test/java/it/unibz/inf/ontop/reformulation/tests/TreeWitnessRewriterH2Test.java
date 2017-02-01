@@ -20,7 +20,7 @@ package it.unibz.inf.ontop.reformulation.tests;
  * #L%
  */
 
-import it.unibz.inf.ontop.injection.OntopRuntimeSettings;
+import it.unibz.inf.ontop.injection.OntopQueryAnsweringSettings;
 import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.io.QueryIOManager;
 import it.unibz.inf.ontop.model.OBDAModel;
@@ -304,7 +304,7 @@ public class TreeWitnessRewriterH2Test{
 
 		prepareTestQueries(tuples);
 		Properties p  = new Properties();
-		p.setProperty(OntopRuntimeSettings.EXISTENTIAL_REASONING, "true");
+		p.setProperty(OntopQueryAnsweringSettings.EXISTENTIAL_REASONING, "true");
 
 		runTests(p);
 	}

@@ -2,16 +2,16 @@ package it.unibz.inf.ontop.injection.impl;
 
 import it.unibz.inf.ontop.injection.OntopOBDASettings;
 import it.unibz.inf.ontop.injection.OntopOptimizationSettings;
-import it.unibz.inf.ontop.injection.OntopRuntimeSettings;
+import it.unibz.inf.ontop.injection.OntopQueryAnsweringSettings;
 
 import java.util.Properties;
 
-public class OntopRuntimeSettingsImpl extends OntopOBDASettingsImpl implements OntopRuntimeSettings {
+public class OntopQueryAnsweringSettingsImpl extends OntopOBDASettingsImpl implements OntopQueryAnsweringSettings {
 
     private static final String DEFAULT_FILE = "runtime-default.properties";
     private final OntopOptimizationSettings optimizationSettings;
 
-    OntopRuntimeSettingsImpl(Properties userProperties) {
+    OntopQueryAnsweringSettingsImpl(Properties userProperties) {
         super(loadProperties(userProperties));
         optimizationSettings = new OntopOptimizationSettingsImpl(copyProperties());
     }

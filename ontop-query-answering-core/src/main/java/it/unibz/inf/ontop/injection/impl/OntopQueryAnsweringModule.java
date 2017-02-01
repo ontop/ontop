@@ -2,8 +2,8 @@ package it.unibz.inf.ontop.injection.impl;
 
 
 import com.google.inject.util.Providers;
-import it.unibz.inf.ontop.injection.OntopRuntimeConfiguration;
-import it.unibz.inf.ontop.injection.OntopRuntimeSettings;
+import it.unibz.inf.ontop.injection.OntopQueryAnsweringConfiguration;
+import it.unibz.inf.ontop.injection.OntopQueryAnsweringSettings;
 import it.unibz.inf.ontop.answering.reformulation.IRIDictionary;
 
 import java.util.Optional;
@@ -13,16 +13,16 @@ import java.util.Optional;
  */
 public class OntopQueryAnsweringModule extends OntopAbstractModule {
     // Temporary
-    private OntopRuntimeConfiguration configuration;
+    private OntopQueryAnsweringConfiguration configuration;
 
-    protected OntopQueryAnsweringModule(OntopRuntimeConfiguration configuration) {
+    protected OntopQueryAnsweringModule(OntopQueryAnsweringConfiguration configuration) {
         super(configuration.getSettings());
         this.configuration = configuration;
     }
 
     @Override
     protected void configure() {
-        bind(OntopRuntimeSettings.class).toInstance(configuration.getSettings());
+        bind(OntopQueryAnsweringSettings.class).toInstance(configuration.getSettings());
 
         Optional<IRIDictionary> iriDictionary = configuration.getIRIDictionary();
         if (iriDictionary.isPresent()) {

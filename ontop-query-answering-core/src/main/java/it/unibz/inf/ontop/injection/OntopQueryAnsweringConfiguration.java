@@ -1,25 +1,20 @@
 package it.unibz.inf.ontop.injection;
 
 
-import it.unibz.inf.ontop.injection.impl.OntopRuntimeConfigurationImpl;
 import it.unibz.inf.ontop.answering.reformulation.IRIDictionary;
 
 import javax.annotation.Nonnull;
 import java.util.Optional;
 
-public interface OntopRuntimeConfiguration extends OntopOBDAConfiguration, OntopOptimizationConfiguration {
+public interface OntopQueryAnsweringConfiguration extends OntopOBDAConfiguration, OntopOptimizationConfiguration {
 
     @Override
-    OntopRuntimeSettings getSettings();
-
-    static Builder<? extends Builder> defaultBuilder() {
-        return new OntopRuntimeConfigurationImpl.BuilderImpl<>();
-    }
+    OntopQueryAnsweringSettings getSettings();
 
     Optional<IRIDictionary> getIRIDictionary();
 
 
-    interface OntopRuntimeBuilderFragment<B extends Builder<B>> {
+    interface OntopQueryAnsweringBuilderFragment<B extends Builder<B>> {
         /**
          * In the case of SQL, inserts REPLACE functions in the generated query
          */
@@ -33,11 +28,11 @@ public interface OntopRuntimeConfiguration extends OntopOBDAConfiguration, Ontop
         B iriDictionary(@Nonnull IRIDictionary iriDictionary);
     }
 
-    interface Builder<B extends Builder<B>> extends OntopRuntimeBuilderFragment<B>, OntopOBDAConfiguration.Builder<B>,
+    interface Builder<B extends Builder<B>> extends OntopQueryAnsweringBuilderFragment<B>, OntopOBDAConfiguration.Builder<B>,
             OntopOptimizationConfiguration.Builder<B> {
 
         @Override
-        OntopRuntimeConfiguration build();
+        OntopQueryAnsweringConfiguration build();
     }
 
 }

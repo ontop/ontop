@@ -1,8 +1,7 @@
 package it.unibz.inf.ontop.injection.impl;
 
 
-import it.unibz.inf.ontop.injection.OntopRuntimeSettings;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
+import it.unibz.inf.ontop.injection.OntopQueryAnsweringSettings;
 import it.unibz.inf.ontop.injection.QuestCoreSettings;
 
 import java.util.Optional;
@@ -11,7 +10,7 @@ import java.util.Properties;
 public class QuestCoreSettingsImpl extends OBDASettingsImpl implements QuestCoreSettings {
 
     private static final String DEFAULT_QUEST_PROPERTIES_FILE = "QuestDefaults.properties";
-    private final OntopRuntimeSettings runtimeSettings;
+    private final OntopQueryAnsweringSettings runtimeSettings;
 
     /**
      * Recommended constructor.
@@ -23,12 +22,12 @@ public class QuestCoreSettingsImpl extends OBDASettingsImpl implements QuestCore
      */
     protected QuestCoreSettingsImpl(Properties userPreferences, boolean isR2rml) {
         super(loadQuestPreferences(userPreferences), isR2rml);
-        runtimeSettings = new OntopRuntimeSettingsImpl(copyProperties());
+        runtimeSettings = new OntopQueryAnsweringSettingsImpl(copyProperties());
     }
 
     private static Properties loadQuestPreferences(Properties userPreferences) {
         Properties properties = OntopOptimizationSettingsImpl.loadDefaultOptimizationProperties();
-        properties.putAll(OntopRuntimeSettingsImpl.loadDefaultRuntimeProperties());
+        properties.putAll(OntopQueryAnsweringSettingsImpl.loadDefaultRuntimeProperties());
         properties.putAll(loadDefaultQuestCorePreferences());
         properties.putAll(userPreferences);
         return properties;

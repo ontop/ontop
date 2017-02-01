@@ -3,8 +3,8 @@ package it.unibz.inf.ontop.injection.impl;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Module;
 import it.unibz.inf.ontop.executor.ProposalExecutor;
-import it.unibz.inf.ontop.injection.OntopRuntimeConfiguration;
-import it.unibz.inf.ontop.injection.OntopRuntimeSettings;
+import it.unibz.inf.ontop.injection.OntopQueryAnsweringConfiguration;
+import it.unibz.inf.ontop.injection.OntopQueryAnsweringSettings;
 import it.unibz.inf.ontop.pivotalrepr.proposal.QueryOptimizationProposal;
 import it.unibz.inf.ontop.answering.reformulation.IRIDictionary;
 
@@ -16,13 +16,13 @@ import java.util.stream.Stream;
 import static it.unibz.inf.ontop.injection.impl.OntopOptimizationConfigurationImpl.*;
 
 
-public class OntopRuntimeConfigurationImpl extends OntopOBDAConfigurationImpl implements OntopRuntimeConfiguration {
+public class OntopQueryAnsweringConfigurationImpl extends OntopOBDAConfigurationImpl implements OntopQueryAnsweringConfiguration {
 
     private final OntopOptimizationConfigurationImpl optimizationConfiguration;
-    private final OntopRuntimeSettings settings;
+    private final OntopQueryAnsweringSettings settings;
     private final OntopRuntimeOptions options;
 
-    OntopRuntimeConfigurationImpl(OntopRuntimeSettings settings, OntopRuntimeOptions options) {
+    OntopQueryAnsweringConfigurationImpl(OntopQueryAnsweringSettings settings, OntopRuntimeOptions options) {
         super(settings, options.obdaOptions);
         this.settings = settings;
         this.options = options;
@@ -52,7 +52,7 @@ public class OntopRuntimeConfigurationImpl extends OntopOBDAConfigurationImpl im
     }
 
     @Override
-    public OntopRuntimeSettings getSettings() {
+    public OntopQueryAnsweringSettings getSettings() {
         return settings;
     }
 
@@ -74,15 +74,15 @@ public class OntopRuntimeConfigurationImpl extends OntopOBDAConfigurationImpl im
         }
     }
 
-    static class DefaultOntopRuntimeBuilderFragment<B extends OntopRuntimeConfiguration.Builder<B>>
-            implements OntopRuntimeBuilderFragment<B> {
+    static class DefaultOntopQueryAnsweringBuilderFragment<B extends OntopQueryAnsweringConfiguration.Builder<B>>
+            implements OntopQueryAnsweringBuilderFragment<B> {
 
         private final B builder;
         private Optional<Boolean> encodeIRISafely = Optional.empty();
         private Optional<Boolean> existentialReasoning = Optional.empty();
         private Optional<IRIDictionary> iriDictionary = Optional.empty();
 
-        DefaultOntopRuntimeBuilderFragment(B builder) {
+        DefaultOntopQueryAnsweringBuilderFragment(B builder) {
             this.builder = builder;
         }
 
@@ -108,8 +108,8 @@ public class OntopRuntimeConfigurationImpl extends OntopOBDAConfigurationImpl im
         Properties generateProperties() {
             Properties p = new Properties();
 
-            encodeIRISafely.ifPresent(e -> p.put(OntopRuntimeSettings.SQL_GENERATE_REPLACE, e));
-            existentialReasoning.ifPresent(r -> p.put(OntopRuntimeSettings.EXISTENTIAL_REASONING, r));
+            encodeIRISafely.ifPresent(e -> p.put(OntopQueryAnsweringSettings.SQL_GENERATE_REPLACE, e));
+            existentialReasoning.ifPresent(r -> p.put(OntopQueryAnsweringSettings.EXISTENTIAL_REASONING, r));
 
             return p;
         }
@@ -120,16 +120,16 @@ public class OntopRuntimeConfigurationImpl extends OntopOBDAConfigurationImpl im
         }
     }
 
-    static abstract class OntopRuntimeBuilderMixin<B extends OntopRuntimeConfiguration.Builder<B>>
+    static abstract class OntopQueryAnsweringBuilderMixin<B extends OntopQueryAnsweringConfiguration.Builder<B>>
             extends OntopOBDAConfigurationBuilderMixin<B>
-            implements OntopRuntimeConfiguration.Builder<B> {
+            implements OntopQueryAnsweringConfiguration.Builder<B> {
 
-        private final DefaultOntopRuntimeBuilderFragment<B> localBuilderFragment;
+        private final DefaultOntopQueryAnsweringBuilderFragment<B> localBuilderFragment;
         private final DefaultOntopOptimizationBuilderFragment<B> optimizationBuilderFragment;
 
-        OntopRuntimeBuilderMixin() {
+        OntopQueryAnsweringBuilderMixin() {
             B builder = (B) this;
-            localBuilderFragment = new DefaultOntopRuntimeBuilderFragment<>(builder);
+            localBuilderFragment = new DefaultOntopQueryAnsweringBuilderFragment<>(builder);
             optimizationBuilderFragment = new DefaultOntopOptimizationBuilderFragment<>(builder);
         }
 
@@ -162,13 +162,13 @@ public class OntopRuntimeConfigurationImpl extends OntopOBDAConfigurationImpl im
         }
     }
 
-    public static class BuilderImpl<B extends OntopRuntimeConfiguration.Builder<B>> extends OntopRuntimeBuilderMixin<B> {
+    public static class BuilderImpl<B extends OntopQueryAnsweringConfiguration.Builder<B>> extends OntopQueryAnsweringBuilderMixin<B> {
 
         @Override
-        public OntopRuntimeConfiguration build() {
-            OntopRuntimeSettings settings = new OntopRuntimeSettingsImpl(generateProperties());
+        public OntopQueryAnsweringConfiguration build() {
+            OntopQueryAnsweringSettings settings = new OntopQueryAnsweringSettingsImpl(generateProperties());
             OntopRuntimeOptions options = generateRuntimeOptions();
-            return new OntopRuntimeConfigurationImpl(settings, options);
+            return new OntopQueryAnsweringConfigurationImpl(settings, options);
         }
     }
 

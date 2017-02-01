@@ -10,7 +10,7 @@ import java.util.Optional;
  * TODO: explain
  *
  */
-public interface QuestCoreConfiguration extends OBDACoreConfiguration, OntopRuntimeConfiguration {
+public interface QuestCoreConfiguration extends OBDACoreConfiguration, OntopQueryAnsweringConfiguration {
 
     Optional<TMappingExclusionConfig> getTmappingExclusions();
 
@@ -35,7 +35,7 @@ public interface QuestCoreConfiguration extends OBDACoreConfiguration, OntopRunt
 
     interface Builder<B extends Builder<B>> extends QuestCoreBuilderFragment<B>,
             OBDACoreConfiguration.Builder<B>,
-            OntopRuntimeConfiguration.Builder<B> {
+            OntopQueryAnsweringConfiguration.Builder<B> {
 
         @Override
         QuestCoreConfiguration build();

@@ -1,6 +1,6 @@
 package it.unibz.inf.ontop.reformulation.tests;
 
-import it.unibz.inf.ontop.injection.OntopRuntimeSettings;
+import it.unibz.inf.ontop.injection.OntopQueryAnsweringSettings;
 import it.unibz.inf.ontop.owlrefplatform.core.ExecutableQuery;
 import it.unibz.inf.ontop.owlrefplatform.core.SQLExecutableQuery;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
@@ -168,7 +168,7 @@ public class NPDUndolferTest extends TestCase {
         String unf = getNPDUnfolding(q09, new Properties());
 
         Properties p = new Properties();
-        p.put(OntopRuntimeSettings.EXISTENTIAL_REASONING, true);
+        p.put(OntopQueryAnsweringSettings.EXISTENTIAL_REASONING, true);
         String unf_rew = getNPDUnfolding(q09, p);
 
         assertEquals(countUnions(unf), countUnions(unf_rew));
@@ -194,7 +194,7 @@ public class NPDUndolferTest extends TestCase {
         String unf = getNPDUnfolding(q10, new Properties());
 
         Properties p = new Properties();
-        p.put(OntopRuntimeSettings.EXISTENTIAL_REASONING, true);
+        p.put(OntopQueryAnsweringSettings.EXISTENTIAL_REASONING, true);
         String unf_rew = getNPDUnfolding(q10, p);
 
         assertEquals(countUnions(unf), countUnions(unf_rew));
@@ -243,7 +243,7 @@ public class NPDUndolferTest extends TestCase {
 	 */
 	private String getRewriting(String query) throws Exception {
         Properties p = new Properties();
-        p.put(OntopRuntimeSettings.EXISTENTIAL_REASONING, true);
+        p.put(OntopQueryAnsweringSettings.EXISTENTIAL_REASONING, true);
 
 
         QuestOWLFactory fac = new QuestOWLFactory();

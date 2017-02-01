@@ -16,7 +16,7 @@ import it.unibz.inf.ontop.owlrefplatform.core.srcquerygeneration.NativeQueryGene
  */
 public class OntopQueryAnsweringPostModule extends OntopAbstractModule {
 
-    protected OntopQueryAnsweringPostModule(OntopRuntimeSettings settings) {
+    protected OntopQueryAnsweringPostModule(OntopQueryAnsweringSettings settings) {
         super(settings);
     }
 

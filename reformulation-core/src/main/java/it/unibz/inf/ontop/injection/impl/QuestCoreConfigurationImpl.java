@@ -7,8 +7,8 @@ import it.unibz.inf.ontop.executor.ProposalExecutor;
 import it.unibz.inf.ontop.injection.InvalidOntopConfigurationException;
 import it.unibz.inf.ontop.injection.impl.OntopOptimizationConfigurationImpl.DefaultOntopOptimizationBuilderFragment;
 import it.unibz.inf.ontop.injection.impl.OntopOptimizationConfigurationImpl.OntopOptimizationOptions;
-import it.unibz.inf.ontop.injection.impl.OntopRuntimeConfigurationImpl.DefaultOntopRuntimeBuilderFragment;
-import it.unibz.inf.ontop.injection.impl.OntopRuntimeConfigurationImpl.OntopRuntimeOptions;
+import it.unibz.inf.ontop.injection.impl.OntopQueryAnsweringConfigurationImpl.DefaultOntopQueryAnsweringBuilderFragment;
+import it.unibz.inf.ontop.injection.impl.OntopQueryAnsweringConfigurationImpl.OntopRuntimeOptions;
 import it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing.TMappingExclusionConfig;
 import it.unibz.inf.ontop.injection.QuestCoreConfiguration;
 import it.unibz.inf.ontop.injection.QuestCoreSettings;
@@ -25,13 +25,13 @@ public class QuestCoreConfigurationImpl extends OBDACoreConfigurationImpl implem
     private final QuestCoreSettings settings;
     private final QuestCoreOptions options;
     // Concrete implementation due to the "mixin style" (indirect inheritance)
-    private final OntopRuntimeConfigurationImpl runtimeConfiguration;
+    private final OntopQueryAnsweringConfigurationImpl runtimeConfiguration;
 
     protected QuestCoreConfigurationImpl(QuestCoreSettings settings, QuestCoreOptions options) {
         super(settings, options.obdaOptions);
         this.settings = settings;
         this.options = options;
-        this.runtimeConfiguration = new OntopRuntimeConfigurationImpl(settings, options.runtimeOptions);
+        this.runtimeConfiguration = new OntopQueryAnsweringConfigurationImpl(settings, options.runtimeOptions);
     }
 
     /**
@@ -144,13 +144,13 @@ public class QuestCoreConfigurationImpl extends OBDACoreConfigurationImpl implem
 
         private final DefaultQuestCoreBuilderFragment<B> questCoreBuilderFragment;
         private final DefaultOntopOptimizationBuilderFragment<B> optimizationBuilderFragment;
-        private final DefaultOntopRuntimeBuilderFragment<B> runtimeBuilderFragment;
+        private final DefaultOntopQueryAnsweringBuilderFragment<B> runtimeBuilderFragment;
 
         protected QuestCoreConfigurationBuilderMixin() {
             B builder = (B) this;
             questCoreBuilderFragment = new DefaultQuestCoreBuilderFragment<>(builder);
             optimizationBuilderFragment = new DefaultOntopOptimizationBuilderFragment<>(builder);
-            runtimeBuilderFragment = new DefaultOntopRuntimeBuilderFragment<>(builder);
+            runtimeBuilderFragment = new DefaultOntopQueryAnsweringBuilderFragment<>(builder);
         }
 
         @Override
