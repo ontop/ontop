@@ -641,13 +641,13 @@ public class ExpressionParserTest {
 
         System.out.println(translation);
 
-        assertEquals(FACTORY.getFunction(ExpressionOperation.AND,
+        assertEquals(ImmutableList.of(// FACTORY.getFunction(ExpressionOperation.AND,
                 FACTORY.getFunction(ExpressionOperation.GTE,
                         v,
                         FACTORY.getConstantLiteral("1", COL_TYPE.LONG)),
                 FACTORY.getFunction(ExpressionOperation.LTE,
                         v,
-                        FACTORY.getConstantLiteral("3", COL_TYPE.LONG))), translation.get(0));
+                        FACTORY.getConstantLiteral("3", COL_TYPE.LONG))), translation);
     }
 
     @Test
@@ -662,14 +662,14 @@ public class ExpressionParserTest {
 
         System.out.println(translation);
 
-        assertEquals(FACTORY.getFunction(ExpressionOperation.NOT,
-                FACTORY.getFunction(ExpressionOperation.AND,
-                        FACTORY.getFunction(ExpressionOperation.GTE,
+        assertEquals(//FACTORY.getFunction(ExpressionOperation.NOT,
+                FACTORY.getFunction(ExpressionOperation.OR,
+                        FACTORY.getFunction(ExpressionOperation.LT,
                                 v,
                                 FACTORY.getConstantLiteral("1", COL_TYPE.LONG)),
-                        FACTORY.getFunction(ExpressionOperation.LTE,
+                        FACTORY.getFunction(ExpressionOperation.GT,
                                 v,
-                                FACTORY.getConstantLiteral("3", COL_TYPE.LONG)))), translation.get(0));
+                                FACTORY.getConstantLiteral("3", COL_TYPE.LONG))), translation.get(0));
     }
 
     @Test

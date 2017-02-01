@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.sql.parser;
 
+import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.model.*;
@@ -13,6 +14,7 @@ import it.unibz.inf.ontop.sql.parser.exceptions.InvalidSelectQueryException;
 import it.unibz.inf.ontop.sql.parser.exceptions.InvalidSelectQueryRuntimeException;
 import it.unibz.inf.ontop.sql.parser.exceptions.UnsupportedSelectQueryException;
 import it.unibz.inf.ontop.sql.parser.exceptions.UnsupportedSelectQueryRuntimeException;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import net.sf.jsqlparser.expression.*;
 import net.sf.jsqlparser.expression.operators.arithmetic.*;
 import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
@@ -23,6 +25,7 @@ import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.create.table.ColDataType;
 import net.sf.jsqlparser.statement.select.SubSelect;
 
+import java.util.Collection;
 import java.util.function.BiFunction;
 import java.util.function.BinaryOperator;
 import java.util.function.UnaryOperator;
@@ -52,27 +55,8 @@ public class ExpressionParser {
     }
 
     public ImmutableList<Function> parseBooleanExpression(Expression expression) {
-
         BooleanExpressionVisitor parser = new BooleanExpressionVisitor(attributes);
-
-        Expression current = expression;
-
-        if (current instanceof AndExpression) {
-            ImmutableList.Builder<Function> builder = ImmutableList.builder();
-            do {
-                AndExpression and = (AndExpression) current;
-                // for a sequence of AND operations, JSQLParser makes the right argument simple
-                builder.add(parser.translate(and.getRightExpression()));
-                // and the left argument complex (nested AND)
-                current = and.getLeftExpression();
-            } while (current instanceof AndExpression);
-
-            builder.add(parser.translate(current));
-
-            // restore the original order
-            return builder.build().reverse();
-        }
-        return ImmutableList.of(parser.translate(current));
+        return parser.translate(expression);
     }
 
 
@@ -97,38 +81,35 @@ public class ExpressionParser {
 
         // CAREFUL: this variable gets reset in each visit method implementation
         // concurrent evaluation is not possible
-        private Function result;
+        private ImmutableList<Function> result;
 
         BooleanExpressionVisitor(ImmutableMap<QualifiedAttributeID, Variable> attributes) {
             termVisitor = new TermVisitor(attributes);
         }
 
-        private Function translate(Expression expression) {
+        private ImmutableList<Function> translate(Expression expression) {
             expression.accept(this);
             return this.result;
         }
 
-        private java.util.function.UnaryOperator<Function> notOperation(boolean isNot) {
-            return isNot
-                    // cancel double negation
-                    ? arg -> (arg.getFunctionSymbol() == ExpressionOperation.NOT)
-                        ? (Function) arg.getTerm(0)
-                        : FACTORY.getFunctionNOT(arg)
-                    : UnaryOperator.identity();
+        // cancel double negation
+        private Function negation(Function arg) {
+            return (arg.getFunctionSymbol() == ExpressionOperation.NOT)
+                    ? (Function) arg.getTerm(0)
+                    : FACTORY.getFunctionNOT(arg);
         }
 
-        private void processBoolean(BinaryExpression expression, BinaryOperator<Function> op) {
-            Function leftTerm = translate(expression.getLeftExpression());
-            Function rightTerm = translate(expression.getRightExpression());
-            Function expTerm = op.apply(leftTerm, rightTerm);
-            result = notOperation(expression.isNot()).apply(expTerm);
+        private java.util.function.Function<Function, ImmutableList<Function>> notOperation(boolean isNot) {
+            return isNot
+                    ? arg -> ImmutableList.of(negation(arg))
+                    : arg -> ImmutableList.of(arg);
         }
 
         private void process(BinaryExpression expression, BiFunction<Term, Term, Function> op) {
             Term leftTerm = termVisitor.getTerm(expression.getLeftExpression());
             Term rightTerm = termVisitor.getTerm(expression.getRightExpression());
-            Function expTerm = op.apply(leftTerm, rightTerm);
-            result = notOperation(expression.isNot()).apply(expTerm);
+            Function f = op.apply(leftTerm, rightTerm);
+            result = notOperation(expression.isNot()).apply(f);
         }
 
         private void processOJ(OldOracleJoinBinaryExpression expression, BiFunction<Term, Term, Function> op) {
@@ -138,12 +119,18 @@ public class ExpressionParser {
             if (expression.getOldOracleJoinSyntax() != SupportsOldOracleJoinSyntax.NO_ORACLE_JOIN)
                 throw new UnsupportedSelectQueryRuntimeException("Old Oracle OUTER JOIN syntax is not supported", expression);
 
-            Term leftTerm = termVisitor.getTerm(expression.getLeftExpression());
-            Term rightTerm = termVisitor.getTerm(expression.getRightExpression());
-            Function expTerm = op.apply(leftTerm, rightTerm);
-            result = notOperation(expression.isNot()).apply(expTerm);
+            process(expression, op);
         }
 
+        private Function getOR(ImmutableList<Function> list) {
+            return list.reverse().stream()
+                    .reduce(null, (a, b) -> (a == null) ? b : FACTORY.getFunctionOR(b, a));
+        }
+
+        private Function getAND(ImmutableList<Function> list) {
+            return list.reverse().stream()
+                    .reduce(null, (a, b) -> (a == null) ? b : FACTORY.getFunctionAND(b, a));
+        }
 
         // ------------------------------------------------------------
         //        BOOLEAN OPERATIONS
@@ -151,18 +138,29 @@ public class ExpressionParser {
 
         @Override
         public void visit(AndExpression expression) {
-            processBoolean(expression, (t1, t2) -> FACTORY.getFunctionAND(t1, t2));
+            ImmutableList<Function> left = translate(expression.getLeftExpression());
+            ImmutableList<Function> right = translate(expression.getRightExpression());
+            ImmutableList<Function> and = Stream.of(left, right).flatMap(Collection::stream)
+                    .collect(ImmutableCollectors.toList());
+
+            result = (expression.isNot())
+                        ? ImmutableList.of(negation(getAND(and)))
+                        : and;
         }
 
         @Override
         public void visit(OrExpression expression) {
-            processBoolean(expression, (t1, t2) -> FACTORY.getFunctionOR(t1, t2));
+            Function left = getAND(translate(expression.getLeftExpression()));
+            Function right = getAND(translate(expression.getRightExpression()));
+            result = (expression.isNot())
+                        ? ImmutableList.of(negation(left), negation(right))
+                        : ImmutableList.of(FACTORY.getFunctionOR(left, right));
         }
 
         @Override
         public void visit(Parenthesis expression) {
-            Function arg = translate(expression.getExpression());
-            result = notOperation(expression.isNot()).apply(arg);
+            ImmutableList<Function> arg = translate(expression.getExpression());
+            result = (expression.isNot()) ? ImmutableList.of(negation(getAND(arg))) : arg;
         }
 
 
@@ -238,29 +236,29 @@ public class ExpressionParser {
         @Override
         public void visit(RegExpMatchOperator expression) {
             Term flags;
-            boolean not;
+            java.util.function.UnaryOperator<Function> not;
             switch (expression.getOperatorType()) {
                 case MATCH_CASESENSITIVE:
                     flags = FACTORY.getConstantLiteral("");
-                    not = false;
+                    not = UnaryOperator.identity();
                     break;
                 case MATCH_CASEINSENSITIVE:
                     flags = FACTORY.getConstantLiteral("i");
-                    not = false;
+                    not = UnaryOperator.identity();
                     break;
                 case NOT_MATCH_CASESENSITIVE:
                     flags = FACTORY.getConstantLiteral("");
-                    not = true;
+                    not = arg -> FACTORY.getFunctionNOT(arg);
                     break;
                 case NOT_MATCH_CASEINSENSITIVE:
                     flags = FACTORY.getConstantLiteral("i");
-                    not = true;
+                    not = arg -> FACTORY.getFunctionNOT(arg);
                     break;
                 default:
                     throw new UnsupportedOperationException();
             }
             process(expression, (t1, t2) ->
-                    notOperation(not).apply(FACTORY.getFunction(ExpressionOperation.REGEX, t1, t2, flags)));
+                            not.apply(FACTORY.getFunction(ExpressionOperation.REGEX, t1, t2, flags)));
         }
 
 
@@ -271,13 +269,22 @@ public class ExpressionParser {
         public void visit(Between expression) {
             Term t1 = termVisitor.getTerm(expression.getLeftExpression());
             Term t2 = termVisitor.getTerm(expression.getBetweenExpressionStart());
-            Function atom1 = FACTORY.getFunction(ExpressionOperation.GTE, t1, t2);
 
             Term t3 = termVisitor.getTerm(expression.getLeftExpression());
             Term t4 = termVisitor.getTerm(expression.getBetweenExpressionEnd());
-            Function atom2 = FACTORY.getFunction(ExpressionOperation.LTE, t3, t4);
 
-            result = notOperation(expression.isNot()).apply(FACTORY.getFunctionAND(atom1, atom2));
+            if (expression.isNot()) {
+                Function atom1 = FACTORY.getFunction(ExpressionOperation.LT, t1, t2);
+                Function atom2 = FACTORY.getFunction(ExpressionOperation.GT, t3, t4);
+
+                result = ImmutableList.of(FACTORY.getFunctionOR(atom1, atom2));
+            }
+            else {
+                Function atom1 = FACTORY.getFunction(ExpressionOperation.GTE, t1, t2);
+                Function atom2 = FACTORY.getFunction(ExpressionOperation.LTE, t3, t4);
+
+                result = ImmutableList.of(atom1, atom2);
+            }
         }
 
 
@@ -346,8 +353,7 @@ public class ExpressionParser {
                     atom = equalities.get(0);
                     break;
                 default:
-                    atom = equalities.reverse().stream()
-                            .reduce(null, (a, b) -> (a == null) ? b : FACTORY.getFunctionOR(b, a));
+                    atom = getOR(equalities);
             }
             result = notOperation(expression.isNot()).apply(atom);
         }
