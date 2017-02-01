@@ -9,6 +9,7 @@ import it.unibz.inf.ontop.injection.OntopRuntimeSettings;
 import it.unibz.inf.ontop.injection.ReformulationFactory;
 import it.unibz.inf.ontop.answering.reformulation.IRIDictionary;
 import it.unibz.inf.ontop.answering.reformulation.unfolding.QueryUnfolder;
+import it.unibz.inf.ontop.owlrefplatform.core.srcquerygeneration.NativeQueryGenerator;
 
 import java.util.Optional;
 
@@ -33,12 +34,6 @@ public class OntopRuntimeModule extends OntopAbstractModule {
             bind(IRIDictionary.class).toProvider(Providers.of(null));
         }
 
-        Module reformulationFactoryModule = buildFactory(
-                ImmutableList.of(
-                        QueryUnfolder.class),
-                ReformulationFactory.class);
-
-        install(reformulationFactoryModule);
         configuration = null;
     }
 }

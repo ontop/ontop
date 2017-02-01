@@ -22,7 +22,7 @@ import java.util.Optional;
  */
 public class JDBCConnector implements DBConnector {
 
-    private final OntopQueryReformulator queryProcessor;
+    private final OntopQueryReformulator queryReformulator;
 
     private final QuestCoreSettings settings;
     private final Optional<IRIDictionary> iriDictionary;
@@ -44,10 +44,10 @@ public class JDBCConnector implements DBConnector {
     private final boolean keepAlive;
 
     @AssistedInject
-    private JDBCConnector(@Assisted OntopQueryReformulator queryProcessor,
+    private JDBCConnector(@Assisted OntopQueryReformulator queryReformulator,
                           @Nullable IRIDictionary iriDictionary,
                           QuestCoreSettings settings) {
-        this.queryProcessor = queryProcessor;
+        this.queryReformulator = queryReformulator;
         keepAlive = settings.isKeepAliveEnabled();
         removeAbandoned = settings.isRemoveAbandonedEnabled();
         abandonedTimeout = settings.getAbandonedTimeout();
@@ -68,7 +68,7 @@ public class JDBCConnector implements DBConnector {
      * @return
      * @throws SQLException
      */
-    public boolean connect() throws OBDAException {
+    public boolean connect() throws OntopConnectionException {
         try {
             if (localConnection != null && !localConnection.isClosed()) {
                 return true;
@@ -87,33 +87,16 @@ public class JDBCConnector implements DBConnector {
             }
             return false;
         } catch (SQLException e) {
-            throw new OBDAException(e);
+            throw new OntopConnectionException(e);
         }
     }
 
     @Override
-    public void disconnect() throws OBDAException {
+    public void disconnect() {
         try {
             localConnection.close();
         } catch (Exception e) {
             log.debug(e.getMessage());
-        }
-    }
-
-    @Override
-    public void dispose() {
-/*		try {
-			if (evaluationEngine != null)
-				this.evaluationEngine.dispose();
-		} catch (Exception e) {
-			log.debug("Error during disconnect: " + e.getMessage());
-		}
-*/
-        try {
-            if (localConnection != null && !localConnection.isClosed())
-                disconnect();
-        } catch (Exception e) {
-            log.debug("Error during disconnect: " + e.getMessage());
         }
     }
 
@@ -213,7 +196,7 @@ public class JDBCConnector implements DBConnector {
     @Override
     public OntopConnection getNonPoolConnection() throws OntopConnectionException {
 
-        return new QuestConnection(this, queryProcessor, getSQLConnection(), iriDictionary);
+        return new QuestConnection(this, queryReformulator, getSQLConnection(), iriDictionary);
     }
 
     /***
@@ -233,7 +216,7 @@ public class JDBCConnector implements DBConnector {
     @Override
     public OntopConnection getConnection() throws OntopConnectionException {
 
-        return new QuestConnection(this, queryProcessor, getSQLPoolConnection(), iriDictionary);
+        return new QuestConnection(this, queryReformulator, getSQLPoolConnection(), iriDictionary);
     }
 
 

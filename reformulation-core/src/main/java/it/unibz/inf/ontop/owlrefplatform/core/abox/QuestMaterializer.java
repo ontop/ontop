@@ -22,6 +22,8 @@ package it.unibz.inf.ontop.owlrefplatform.core.abox;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Injector;
+import it.unibz.inf.ontop.answering.OntopQueryEngine;
+import it.unibz.inf.ontop.injection.OntopEngineFactory;
 import it.unibz.inf.ontop.model.GraphResultSet;
 import it.unibz.inf.ontop.model.OBDAException;
 import it.unibz.inf.ontop.model.Predicate;
@@ -32,9 +34,7 @@ import it.unibz.inf.ontop.owlrefplatform.core.*;
 import java.sql.SQLException;
 import java.util.*;
 
-import it.unibz.inf.ontop.injection.QuestComponentFactory;
 import it.unibz.inf.ontop.injection.QuestCoreConfiguration;
-import it.unibz.inf.ontop.answering.reformulation.OntopQueryReformulator;
 import it.unibz.inf.ontop.spec.OBDASpecification;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,15 +61,13 @@ import javax.annotation.Nonnull;
  */
 public class QuestMaterializer {
 
-    private final QuestComponentFactory questComponentFactory;
-
 	/**
 	 * Puts the JDBC connection in streaming mode.
 	 */
 	private final boolean doStreamResults;
 	
 	private final ImmutableSet<Predicate> selectedVocabulary;
-	private final DBConnector connector;
+	private final OntopQueryEngine queryEngine;
 
 	private long counter = 0;
 	private VirtualTripleIterator iterator;
@@ -85,14 +83,10 @@ public class QuestMaterializer {
 		this.selectedVocabulary = selectedVocabulary;
 
 		Injector injector = configuration.getInjector();
-		questComponentFactory = injector.getInstance(QuestComponentFactory.class);
+		OntopEngineFactory engineFactory = injector.getInstance(OntopEngineFactory.class);
 
-		OntopQueryReformulator queryProcessor = questComponentFactory.create(
-				configuration.loadProvidedSpecification(), configuration.getExecutorRegistry());
-
-		connector = questComponentFactory.create(queryProcessor);
-
-		// Was an ugly way to ask for also querying the annotations
+		this.queryEngine = engineFactory.create(configuration.loadProvidedSpecification(),
+				configuration.getExecutorRegistry());
 	}
 
 	public QuestMaterializer(@Nonnull QuestCoreConfiguration configuration,
@@ -101,16 +95,12 @@ public class QuestMaterializer {
 		this.doStreamResults = doStreamResults;
 
 		Injector injector = configuration.getInjector();
-		questComponentFactory = injector.getInstance(QuestComponentFactory.class);
+		OntopEngineFactory engineFactory = injector.getInstance(OntopEngineFactory.class);
 
 		OBDASpecification obdaSpecification = configuration.loadProvidedSpecification();
 
-		OntopQueryReformulator queryProcessor = questComponentFactory.create(
-				obdaSpecification, configuration.getExecutorRegistry());
-
 		this.selectedVocabulary = extractVocabulary(obdaSpecification.getVocabulary());
-
-		connector = questComponentFactory.create(queryProcessor);
+		this.queryEngine = engineFactory.create(obdaSpecification, configuration.getExecutorRegistry());
 
 		// Was an ugly way to ask for also querying the annotations
 	}
@@ -159,7 +149,7 @@ public class QuestMaterializer {
 
 	public Iterator<Assertion> getAssertionIterator() throws Exception {
 		//return the inner class  iterator
-		iterator = new VirtualTripleIterator(connector, selectedVocabulary.iterator());
+		iterator = new VirtualTripleIterator(queryEngine, selectedVocabulary.iterator());
 		return iterator;
 		
 	}
@@ -209,7 +199,7 @@ public class QuestMaterializer {
 		private String query1 = "CONSTRUCT {?s <%s> ?o} WHERE {?s <%s> ?o}";
 		private String query2 = "CONSTRUCT {?s a <%s>} WHERE {?s a <%s>}";
 
-		private OntopConnection questConn;
+		private OntopConnection queryEngine;
 		private OntopStatement stm;
 		
 		private boolean read = false, hasNext = false;
@@ -220,20 +210,20 @@ public class QuestMaterializer {
 		
 		private Logger log = LoggerFactory.getLogger(VirtualTripleIterator.class);
 
-		public VirtualTripleIterator(DBConnector connector, Iterator<Predicate> vocabIter)
+		public VirtualTripleIterator(OntopQueryEngine queryEngine, Iterator<Predicate> vocabIter)
 				throws SQLException {
 			try{
-				questConn = connector.getNonPoolConnection();
+				this.queryEngine = queryEngine.getNonPoolConnection();
 
 				if (doStreamResults) {
 					// Autocommit must be OFF (needed for autocommit)
-					//questConn.setAutoCommit(false);
+					//queryEngine.setAutoCommit(false);
 				}
 
 				vocabularyIterator = vocabIter;
 				//execute first query to start the process
 				counter = 0;
-				stm = questConn.createStatement();
+				stm = this.queryEngine.createStatement();
 
 				if (doStreamResults) {
 					// Fetch 50 000 lines at the same time
@@ -288,7 +278,7 @@ public class QuestMaterializer {
 							{stm.close(); results.close(); }
 
 						//execute next query
-						stm = questConn.createStatement();
+						stm = queryEngine.createStatement();
 						if (doStreamResults) {
 							stm.setFetchSize(FETCH_SIZE);
 						}
@@ -348,9 +338,9 @@ public class QuestMaterializer {
 				}
 			}
 
-			if (questConn != null) {
+			if (queryEngine != null) {
 				try {
-					questConn.close();
+					queryEngine.close();
 				} catch (Exception e) {
 					// NO-OP
 				}

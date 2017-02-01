@@ -6,7 +6,6 @@ import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.exception.OntopInvalidInputQueryException;
 import it.unibz.inf.ontop.exception.OntopReformulationException;
-import it.unibz.inf.ontop.injection.QuestComponentFactory;
 import it.unibz.inf.ontop.injection.QuestCoreSettings;
 import it.unibz.inf.ontop.injection.ReformulationFactory;
 import it.unibz.inf.ontop.mapping.Mapping;
@@ -77,7 +76,6 @@ public class QuestQueryProcessor implements OntopQueryReformulator {
 	private QuestQueryProcessor(@Assisted OBDASpecification obdaSpecification,
                                 @Assisted ExecutorRegistry executorRegistry,
                                 @Nullable IRIDictionary iriDictionary,
-                                QuestComponentFactory questComponentFactory,
                                 QueryCache queryCache,
                                 QuestCoreSettings settings,
                                 DatalogProgram2QueryConverter datalogConverter,
@@ -105,7 +103,7 @@ public class QuestQueryProcessor implements OntopQueryReformulator {
 		this.vocabularyValidator = new VocabularyValidator(obdaSpecification.getSaturatedTBox(),
 				obdaSpecification.getVocabulary());
 		this.iriDictionary = Optional.ofNullable(iriDictionary);
-		this.datasourceQueryGenerator = questComponentFactory.create(metadataForOptimization.getDBMetadata());
+		this.datasourceQueryGenerator = reformulationFactory.create(metadataForOptimization.getDBMetadata());
 		this.queryCache = queryCache;
 		this.settings = settings;
 		this.executorRegistry = executorRegistry;

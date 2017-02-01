@@ -1,24 +1,17 @@
 package it.unibz.inf.ontop.owlrefplatform.owlapi.example;
 
 import com.google.inject.Injector;
-import it.unibz.inf.ontop.mapping.MappingParser;
-import it.unibz.inf.ontop.model.OBDAModel;
+import it.unibz.inf.ontop.answering.OntopQueryEngine;
+import it.unibz.inf.ontop.injection.OntopEngineFactory;
+import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.core.*;
-import it.unibz.inf.ontop.injection.QuestComponentFactory;
-import it.unibz.inf.ontop.injection.QuestCoreConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.OntopOWLConnection;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.OntopOWLStatement;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLConnection;
-import it.unibz.inf.ontop.answering.reformulation.OntopQueryReformulator;
 import it.unibz.inf.ontop.sql.RDBMetadata;
 import it.unibz.inf.ontop.sql.RDBMetadataExtractionTools;
 import it.unibz.inf.ontop.sql.DatabaseRelationDefinition;
 import it.unibz.inf.ontop.sql.QuotedIDFactory;
-import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
-
-import java.io.File;
 
 /**
  * This class shows how to create an instance of quest giving the metadata manually 
@@ -27,41 +20,33 @@ import java.io.File;
  *
  */
 public class ExampleManualMetadata {
-final String owlfile = "src/main/resources/example/exampleSensor.owl";
-final String obdafile = "src/main/resources/example/UseCaseExampleMini.obda";
-private OntopOWLStatement qst = null;
-	private DBConnector dbConnector;
+	final String owlfile = "src/main/resources/example/exampleSensor.owl";
+	final String obdafile = "src/main/resources/example/UseCaseExampleMini.obda";
+	private OntopOWLStatement qst = null;
+	private OntopQueryEngine queryEngine;
 
 	/*
      * 	prepare ontop for rewriting and unfolding steps
      */
 private void setup()  throws Exception {
-	/*
-	 * Load the ontology from an external .owl file.
-	 */
-	OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-	OWLOntology ontology = manager.loadOntologyFromOntologyDocument(new File(owlfile));
 
-	QuestCoreConfiguration configuration = QuestCoreConfiguration.defaultBuilder()
+	QuestConfiguration configuration = QuestConfiguration.defaultBuilder()
 			.nativeOntopMappingFile(obdafile)
+			.ontologyFile(owlfile)
 			.dbMetadata(getMeta())
 			.build();
 	Injector injector = configuration.getInjector();
-	QuestComponentFactory componentFactory = injector.getInstance(QuestComponentFactory.class);
+	OntopEngineFactory engineFactory = injector.getInstance(OntopEngineFactory.class);
 
-	MappingParser mappingParser = injector.getInstance(MappingParser.class);
-	OBDAModel obdaModel = mappingParser.parse(new File(obdafile));
-
-	OntopQueryReformulator queryProcessor = componentFactory.create(configuration.loadProvidedSpecification(),
+	queryEngine = engineFactory.create(configuration.loadProvidedSpecification(),
 			configuration.getExecutorRegistry());
-	dbConnector = componentFactory.create(queryProcessor);
-	dbConnector.connect();
+	queryEngine.connect();
 	
 	/*
 	 * Prepare the data connection for querying.
 	 */
 	
-	OntopConnection conn =dbConnector.getConnection();
+	OntopConnection conn = queryEngine.getConnection();
 	OntopOWLConnection connOWL = new QuestOWLConnection(conn);
 	qst = connOWL.createStatement();
 }
@@ -101,7 +86,7 @@ private RDBMetadata getMeta(){
 public void runQuery() throws Exception {
 	setup();
 	System.out.println("Good");
-	dbConnector.close();
+	queryEngine.close();
 }
 
 public static void main(String[] args) {

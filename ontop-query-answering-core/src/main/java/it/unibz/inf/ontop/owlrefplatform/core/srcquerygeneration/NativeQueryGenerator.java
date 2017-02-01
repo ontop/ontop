@@ -24,7 +24,7 @@ import java.io.Serializable;
 import java.util.Optional;
 
 import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.model.OBDAException;
+import it.unibz.inf.ontop.exception.OntopReformulationException;
 import it.unibz.inf.ontop.owlrefplatform.core.translator.SesameConstructTemplate;
 import it.unibz.inf.ontop.owlrefplatform.core.ExecutableQuery;
 import it.unibz.inf.ontop.pivotalrepr.IntermediateQuery;
@@ -40,15 +40,17 @@ public interface NativeQueryGenerator extends Serializable {
 	 * be evaluated by a evaluation engine.
 	 *
 	 */
-	public ExecutableQuery generateSourceQuery(IntermediateQuery query, ImmutableList<String> signature,
-										   Optional<SesameConstructTemplate> optionalConstructTemplate) throws OBDAException;
+	ExecutableQuery generateSourceQuery(IntermediateQuery query, ImmutableList<String> signature,
+										Optional<SesameConstructTemplate> optionalConstructTemplate)
+			throws OntopReformulationException;
 
-	public boolean hasDistinctResultSet() ;
+	boolean hasDistinctResultSet() ;
     /**
      * If the generator is immutable, the generator
      * can return itself instead of a clone.
      */
-    public NativeQueryGenerator cloneIfNecessary();
+    NativeQueryGenerator cloneIfNecessary();
 
-	ExecutableQuery generateEmptyQuery(ImmutableList<String> signatureContainer, Optional<SesameConstructTemplate> optionalConstructTemplate);
+	ExecutableQuery generateEmptyQuery(ImmutableList<String> signatureContainer,
+									   Optional<SesameConstructTemplate> optionalConstructTemplate);
 }

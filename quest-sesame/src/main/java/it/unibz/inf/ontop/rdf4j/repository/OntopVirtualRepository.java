@@ -20,14 +20,13 @@ package it.unibz.inf.ontop.rdf4j.repository;
  * #L%
  */
 
+import it.unibz.inf.ontop.answering.OntopQueryEngine;
 import it.unibz.inf.ontop.exception.OntopConnectionException;
-import it.unibz.inf.ontop.injection.QuestComponentFactory;
+import it.unibz.inf.ontop.injection.OntopEngineFactory;
 import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.model.OBDAException;
-import it.unibz.inf.ontop.owlrefplatform.core.DBConnector;
 import it.unibz.inf.ontop.owlrefplatform.core.OntopConnection;
 
-import it.unibz.inf.ontop.answering.reformulation.OntopQueryReformulator;
 import it.unibz.inf.ontop.spec.OBDASpecification;
 import org.eclipse.rdf4j.model.ValueFactory;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
@@ -51,7 +50,7 @@ public class OntopVirtualRepository implements org.eclipse.rdf4j.repository.Repo
 	@Nullable
 	private QuestConfiguration configuration;
 	@Nullable
-	private DBConnector dbConnector;
+	private OntopQueryEngine queryEngine;
 
 	public OntopVirtualRepository(QuestConfiguration configuration) {
 		this.namespaces = new HashMap<>();
@@ -68,9 +67,9 @@ public class OntopVirtualRepository implements org.eclipse.rdf4j.repository.Repo
 	public RepositoryConnection getConnection() throws RepositoryException {
 		try {
 			return new OntopRepositoryConnection(this, getOntopConnection());
-		} catch (OBDAException e) {
+		} catch (Exception e) {
 			logger.error("Error creating repo connection: " + e.getMessage());
-			throw new RepositoryException(e.getMessage());
+			throw new RepositoryException(e);
 		}
 	}
 
@@ -85,11 +84,10 @@ public class OntopVirtualRepository implements org.eclipse.rdf4j.repository.Repo
 		initialized = true;
 		try {
 			OBDASpecification obdaSpecification = configuration.loadProvidedSpecification();
-			QuestComponentFactory componentFactory = configuration.getInjector().getInstance(QuestComponentFactory.class);
+			OntopEngineFactory factory = configuration.getInjector().getInstance(OntopEngineFactory.class);
 
-			OntopQueryReformulator queryProcessor = componentFactory.create(obdaSpecification, configuration.getExecutorRegistry());
-			dbConnector = componentFactory.create(queryProcessor);
-			dbConnector.connect();
+			queryEngine = factory.create(obdaSpecification, configuration.getExecutorRegistry());
+			queryEngine.connect();
 		}
 		catch (Exception e){
 			throw new RepositoryException(e);
@@ -104,8 +102,8 @@ public class OntopVirtualRepository implements org.eclipse.rdf4j.repository.Repo
 		if(!initialized)
 			throw new RepositoryException("The OntopVirtualRepository must be initialized before getConnection can be run.");
 		try {
-			return dbConnector.getConnection();
-		} catch (OntopConnectionException e) {
+			return queryEngine.getConnection();
+		} catch (Exception e) {
 			throw new RepositoryException(e);
 		}
 
@@ -125,7 +123,7 @@ public class OntopVirtualRepository implements org.eclipse.rdf4j.repository.Repo
 	public void shutDown() throws RepositoryException {
 		initialized = false;
 		try {
-			dbConnector.close();
+			queryEngine.close();
 		} catch (Exception e) {
 			throw new RepositoryException(e);
 		}

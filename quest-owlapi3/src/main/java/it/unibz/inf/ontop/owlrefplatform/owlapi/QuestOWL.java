@@ -21,6 +21,7 @@ package it.unibz.inf.ontop.owlrefplatform.owlapi;
  */
 
 import com.google.inject.Injector;
+import it.unibz.inf.ontop.answering.OntopQueryEngine;
 import it.unibz.inf.ontop.exception.OBDASpecificationException;
 import it.unibz.inf.ontop.injection.*;
 import it.unibz.inf.ontop.model.*;
@@ -29,7 +30,6 @@ import it.unibz.inf.ontop.owlapi.OWLAPITranslatorUtility;
 import it.unibz.inf.ontop.owlrefplatform.core.*;
 import it.unibz.inf.ontop.pivotalrepr.utils.ExecutorRegistry;
 import it.unibz.inf.ontop.spec.OBDASpecification;
-import it.unibz.inf.ontop.answering.reformulation.OntopQueryReformulator;
 import it.unibz.inf.ontop.utils.VersionInfo;
 import org.semanticweb.owlapi.model.*;
 import org.semanticweb.owlapi.reasoner.*;
@@ -106,8 +106,8 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 
 	/* Used to enable use of same as in mappings. */
 
-	private final QuestComponentFactory componentFactory;
-	private DBConnector dbConnector;
+	private final OntopEngineFactory engineFactory;
+	private OntopQueryEngine queryEngine;
 	
 	/* Used to signal whether to apply the user constraints above */
 	//private boolean applyExcludeFromTMappings = false;
@@ -136,7 +136,7 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 		executorRegistry = questConfiguration.getExecutorRegistry();
 
 		Injector injector = questConfiguration.getInjector();
-		this.componentFactory = injector.getInstance(QuestComponentFactory.class);
+		this.engineFactory = injector.getInstance(OntopEngineFactory.class);
 
 		try {
 			obdaSpecification = questConfiguration.loadProvidedSpecification();
@@ -202,8 +202,8 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 	private void prepareConnector() throws OBDAException {
 
 		try {
-			if (dbConnector != null)
-				dbConnector.dispose();
+			if (queryEngine != null)
+				queryEngine.close();
 		} catch (Exception e) {
 			log.debug(e.getMessage());
 		}
@@ -214,16 +214,15 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 		// pm.reasonerTaskStarted("Classifying...");
 		// pm.reasonerTaskBusy();
 
-		OntopQueryReformulator queryProcessor = componentFactory.create(obdaSpecification, executorRegistry);
-		dbConnector = componentFactory.create(queryProcessor);
-		dbConnector.connect();
+		queryEngine = engineFactory.create(obdaSpecification, executorRegistry);
+		queryEngine.connect();
 		
 		// Set<OWLOntology> importsClosure = man.getImportsClosure(getRootOntology());
 		
 
 		try {
 			//conn = questInstance.getConnection();
-			conn = dbConnector.getNonPoolConnection();
+			conn = queryEngine.getNonPoolConnection();
 			owlconn = new QuestOWLConnection(conn);
 
 			questready = true;
@@ -243,7 +242,7 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 		}
 		
 		try {
-			dbConnector.dispose();
+			queryEngine.close();
 		} catch (Exception e) {
 			log.debug(e.getMessage());
 		}
@@ -289,7 +288,7 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 	 */
 	public OntopOWLConnection replaceConnection() throws OBDAException {
 		OntopOWLConnection oldconn = this.owlconn;
-		conn = dbConnector.getNonPoolConnection();
+		conn = queryEngine.getNonPoolConnection();
 		owlconn = new QuestOWLConnection(conn);
 		return oldconn;
 	}

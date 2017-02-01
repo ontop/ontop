@@ -291,8 +291,8 @@ public class BindTest {
         checkReturnedValues(queryBind, expectedValues);
     }
 
-    @Test(expected = OntopOWLException.class)
-    public void testFailingSelect1()  throws Exception {
+    @Test
+    public void testSelect2()  throws Exception {
 
         //complex case
         //variable should be assigned again in the same SELECT clause. SELECT Expressions, reuse the same variable
@@ -307,7 +307,7 @@ public class BindTest {
     }
 
     @Test(expected = OntopOWLException.class)
-    public void testFailingSelect2()  throws Exception {
+    public void testFailingSelect1()  throws Exception {
 
         //variable cannot be assigned again in the same SELECT clause. SELECT Expressions, reuse the same variable in FILTER
         String querySelect2 = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n" +
