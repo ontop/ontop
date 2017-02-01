@@ -20,15 +20,15 @@ package it.unibz.inf.ontop.owlrefplatform.core.reformulation;
  * #L%
  */
 
+import it.unibz.inf.ontop.exception.OntopReformulationException;
 import it.unibz.inf.ontop.model.DatalogProgram;
-import it.unibz.inf.ontop.model.OBDAException;
 import it.unibz.inf.ontop.ontology.ImmutableOntologyVocabulary;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.LinearInclusionDependencies;
 import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 
 public interface QueryRewriter {
 
-	public DatalogProgram rewrite(DatalogProgram input) throws OBDAException;
+	DatalogProgram rewrite(DatalogProgram input) throws OntopReformulationException;
 
 	/***
 	 * Sets the ontology and the ABox dependencies that this rewriter should 
@@ -37,5 +37,5 @@ public interface QueryRewriter {
 	 * @param ontology
 	 * @param sigma
 	 */
-	public void setTBox(TBoxReasoner ontology, ImmutableOntologyVocabulary voc, LinearInclusionDependencies sigma);
+	void setTBox(TBoxReasoner ontology, ImmutableOntologyVocabulary voc, LinearInclusionDependencies sigma);
 }

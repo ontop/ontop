@@ -6,27 +6,24 @@ import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.exception.OntopInvalidInputQueryException;
 import it.unibz.inf.ontop.exception.OntopReformulationException;
-import it.unibz.inf.ontop.injection.QuestCoreSettings;
+import it.unibz.inf.ontop.injection.OntopQueryAnsweringSettings;
 import it.unibz.inf.ontop.injection.ReformulationFactory;
 import it.unibz.inf.ontop.mapping.Mapping;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.*;
 import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
-import it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing.MappingSameAs;
+import it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing.MappingSameAsPredicateExtractor;
 import it.unibz.inf.ontop.owlrefplatform.core.optimization.*;
 import it.unibz.inf.ontop.answering.reformulation.IRIDictionary;
 import it.unibz.inf.ontop.answering.reformulation.unfolding.QueryUnfolder;
-import it.unibz.inf.ontop.owlrefplatform.core.reformulation.DummyReformulator;
 import it.unibz.inf.ontop.owlrefplatform.core.reformulation.QueryRewriter;
-import it.unibz.inf.ontop.owlrefplatform.core.reformulation.TreeWitnessRewriter;
 import it.unibz.inf.ontop.owlrefplatform.core.srcquerygeneration.NativeQueryGenerator;
 import it.unibz.inf.ontop.owlrefplatform.core.translator.*;
 import it.unibz.inf.ontop.pivotalrepr.EmptyQueryException;
 import it.unibz.inf.ontop.pivotalrepr.IntermediateQuery;
 import it.unibz.inf.ontop.pivotalrepr.MetadataForQueryOptimization;
 import it.unibz.inf.ontop.pivotalrepr.datalog.DatalogProgram2QueryConverter;
-import it.unibz.inf.ontop.pivotalrepr.datalog.impl.DatalogProgram2QueryConverterImpl;
 import it.unibz.inf.ontop.pivotalrepr.utils.ExecutorRegistry;
 import it.unibz.inf.ontop.renderer.DatalogProgramRenderer;
 
@@ -70,30 +67,22 @@ public class QuestQueryProcessor implements OntopQueryReformulator {
 	private final DatalogProgram2QueryConverter datalogConverter;
 	private final ImmutableSet<Predicate> dataPropertiesAndClassesMapped;
 	private final ImmutableSet<Predicate> objectPropertiesMapped;
-	private final QuestCoreSettings settings;
+	private final OntopQueryAnsweringSettings settings;
 
 	@AssistedInject
 	private QuestQueryProcessor(@Assisted OBDASpecification obdaSpecification,
                                 @Assisted ExecutorRegistry executorRegistry,
                                 @Nullable IRIDictionary iriDictionary,
                                 QueryCache queryCache,
-                                QuestCoreSettings settings,
+                                OntopQueryAnsweringSettings settings,
                                 DatalogProgram2QueryConverter datalogConverter,
-                                ReformulationFactory reformulationFactory) {
+                                ReformulationFactory reformulationFactory,
+								QueryRewriter rewriter) {
 		TBoxReasoner saturatedTBox = obdaSpecification.getSaturatedTBox();
-		this.sigma = LinearInclusionDependencies.getABoxDependencies(saturatedTBox, true);
+		this.sigma = LinearInclusionDependencyTools.getABoxDependencies(saturatedTBox, true);
 
-		// TODO: use Guice instead
-		// Setting up the reformulation engine
-		if (!settings.getRequiredBoolean(QuestCoreSettings.EXISTENTIAL_REASONING))
-			rewriter = new DummyReformulator();
-		else if (settings.getProperty(QuestCoreSettings.REFORMULATION_TECHNIQUE)
-				.filter(v -> v.equals(QuestConstants.TW))
-				.isPresent())
-			rewriter = new TreeWitnessRewriter();
-		else
-			throw new IllegalArgumentException("Invalid value for argument: " + QuestCoreSettings.REFORMULATION_TECHNIQUE);
-		rewriter.setTBox(saturatedTBox, obdaSpecification.getVocabulary(), sigma);
+		this.rewriter = rewriter;
+		this.rewriter.setTBox(saturatedTBox, obdaSpecification.getVocabulary(), sigma);
 
 		Mapping saturatedMapping = obdaSpecification.getSaturatedMapping();
 
@@ -110,7 +99,7 @@ public class QuestQueryProcessor implements OntopQueryReformulator {
 		this.datalogConverter = datalogConverter;
 
 		if (settings.isSameAsInMappingsEnabled()) {
-			MappingSameAs msa = new MappingSameAs(saturatedMapping);
+			MappingSameAsPredicateExtractor msa = new MappingSameAsPredicateExtractor(saturatedMapping);
 			dataPropertiesAndClassesMapped = msa.getDataPropertiesAndClassesWithSameAs();
 			objectPropertiesMapped = msa.getObjectPropertiesWithSameAs();
 		} else {
@@ -152,7 +141,7 @@ public class QuestQueryProcessor implements OntopQueryReformulator {
 	}
 
 	
-	private DatalogProgram translateAndPreProcess(ParsedQuery pq) {
+	private DatalogProgram translateAndPreProcess(ParsedQuery pq) throws OntopInvalidInputQueryException {
 		SparqlAlgebraToDatalogTranslator translator = new SparqlAlgebraToDatalogTranslator(
 				metadataForOptimization.getUriTemplateMatcher(), iriDictionary);
 		SparqlQuery translation = translator.translate(pq);
@@ -200,7 +189,7 @@ public class QuestQueryProcessor implements OntopQueryReformulator {
 	@Override
 	public ExecutableQuery translateIntoNativeQuery(ParsedQuery pq,
 													Optional<SesameConstructTemplate> optionalConstructTemplate)
-			throws OBDAException {
+			throws OntopReformulationException {
 
 		ExecutableQuery executableQuery = queryCache.get(pq);
 		if (executableQuery != null)
@@ -217,7 +206,8 @@ public class QuestQueryProcessor implements OntopQueryReformulator {
 			log.debug("Normalized program: \n{}", newprogram);
 
 			if (newprogram.getRules().size() < 1)
-				throw new OBDAException("Error, the translation of the query generated 0 rules. This is not possible for any SELECT query (other queries are not supported by the translator).");
+				throw new OntopInvalidInputQueryException("Error, the translation of the query generated 0 rules. " +
+						"This is not possible for any SELECT query (other queries are not supported by the translator).");
 
 			log.debug("Start the rewriting process...");
 
@@ -269,8 +259,6 @@ public class QuestQueryProcessor implements OntopQueryReformulator {
 				queryCache.put(pq, executableQuery);
 				return executableQuery;
 
-			} catch (DatalogProgram2QueryConverterImpl.InvalidDatalogProgramException e) {
-				throw new OBDAException(e.getLocalizedMessage());
 			}
 			/**
 			 * No solution.
@@ -286,16 +274,18 @@ public class QuestQueryProcessor implements OntopQueryReformulator {
 
 			//unfoldingTime = System.currentTimeMillis() - startTime;
 		}
-		catch (OBDAException e) {
+		catch (OntopReformulationException e) {
 			throw e;
 		}
+		/*
+		 * Bug: should normally not be reached
+		 * TODO: remove it
+		 */
 		catch (Exception e) {
-			log.debug(e.getMessage(), e);
+			log.warn("Unexpected exception: " + e.getMessage(), e);
 			e.printStackTrace();
-
-			OBDAException ex = new OBDAException("Error rewriting and unfolding into SQL\n" + e.getMessage());
-			ex.setStackTrace(e.getStackTrace());
-			throw ex;
+			throw new OntopReformulationException(e);
+			//throw new OntopReformulationException("Error rewriting and unfolding into SQL\n" + e.getMessage());
 		}
 	}
 
@@ -315,21 +305,24 @@ public class QuestQueryProcessor implements OntopQueryReformulator {
 
 	/**
 	 * Returns the final rewriting of the given query
-	 *
-	 * TODO: replace OBDAException by OntopReformulationException
 	 */
 	@Override
-	public String getRewriting(ParsedQuery query) throws OBDAException {
+	public String getRewriting(ParsedQuery query) throws OntopReformulationException {
 		try {
 			DatalogProgram program = translateAndPreProcess(query);
 			DatalogProgram rewriting = rewriter.rewrite(program);
 			return DatalogProgramRenderer.encode(rewriting);
 		}
+		catch (OntopReformulationException e) {
+			throw e;
+		}
+		/*
+		 * Bug: should be reached
+		 * TODO: remove it
+		 */
 		catch (Exception e) {
-			log.debug(e.getMessage(), e);
-			OBDAException ex = new OBDAException("Error rewriting\n" +  e.getMessage());
-			ex.setStackTrace(e.getStackTrace());
-			throw ex;
+			log.debug("Unexpected exception: " + e.getMessage(), e);
+			throw new OntopReformulationException(e);
 		}
 	}
 

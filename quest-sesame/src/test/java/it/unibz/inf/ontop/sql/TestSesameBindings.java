@@ -19,10 +19,8 @@ import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.util.Properties;
 import java.util.Scanner;
 
-import it.unibz.inf.ontop.injection.OBDASettings;
 import it.unibz.inf.ontop.injection.QuestConfiguration;
 import it.unibz.inf.ontop.rdf4j.repository.OntopVirtualRepository;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
@@ -39,9 +37,6 @@ import org.eclipse.rdf4j.query.GraphQueryResult;
 import org.eclipse.rdf4j.query.QueryLanguage;
 import org.eclipse.rdf4j.query.TupleQuery;
 import org.eclipse.rdf4j.query.TupleQueryResult;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.inf.ontop.injection.QuestCoreSettings;
-import it.unibz.inf.ontop.rdf4j.repository.OntopRepositoryConnection;
 
 public class TestSesameBindings {
 

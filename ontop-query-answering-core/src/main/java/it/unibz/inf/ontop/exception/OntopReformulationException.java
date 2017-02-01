@@ -10,7 +10,7 @@ public class OntopReformulationException extends OntopQueryAnsweringException {
         super(message);
     }
 
-    protected OntopReformulationException(Exception e) {
+    public OntopReformulationException(Exception e) {
         super(e);
     }
 

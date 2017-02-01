@@ -36,7 +36,6 @@ import junit.framework.TestCase;
 
 import it.unibz.inf.ontop.exception.InvalidMappingException;
 import it.unibz.inf.ontop.exception.InvalidPredicateDeclarationException;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
 import it.unibz.inf.ontop.injection.QuestCoreSettings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

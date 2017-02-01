@@ -3,7 +3,7 @@ package it.unibz.inf.ontop.injection;
 
 public interface OntopQueryAnsweringSettings extends OntopOBDASettings, OntopOptimizationSettings {
 
-    boolean isRewritingEnabled();
+    boolean isExistentialReasoningEnabled();
 
     boolean isDistinctPostProcessingEnabled();
 

@@ -8,6 +8,9 @@ import it.unibz.inf.ontop.answering.reformulation.OntopQueryReformulator;
 import it.unibz.inf.ontop.answering.reformulation.unfolding.QueryUnfolder;
 import it.unibz.inf.ontop.injection.*;
 import it.unibz.inf.ontop.owlrefplatform.core.DBConnector;
+import it.unibz.inf.ontop.owlrefplatform.core.reformulation.DummyRewriter;
+import it.unibz.inf.ontop.owlrefplatform.core.reformulation.ExistentialQueryRewriter;
+import it.unibz.inf.ontop.owlrefplatform.core.reformulation.QueryRewriter;
 import it.unibz.inf.ontop.owlrefplatform.core.srcquerygeneration.NativeQueryGenerator;
 
 /**
@@ -16,12 +19,22 @@ import it.unibz.inf.ontop.owlrefplatform.core.srcquerygeneration.NativeQueryGene
  */
 public class OntopQueryAnsweringPostModule extends OntopAbstractModule {
 
+    private final OntopQueryAnsweringSettings settings;
+
     protected OntopQueryAnsweringPostModule(OntopQueryAnsweringSettings settings) {
         super(settings);
+        this.settings = settings;
     }
 
     @Override
     protected void configure() {
+        if (settings.isExistentialReasoningEnabled()) {
+            bind(QueryRewriter.class).to(getImplementation(ExistentialQueryRewriter.class));
+        }
+        else {
+            bind(QueryRewriter.class).to(DummyRewriter.class);
+        }
+
         Module reformulationFactoryModule = buildFactory(
                 ImmutableList.of(
                         QueryUnfolder.class,

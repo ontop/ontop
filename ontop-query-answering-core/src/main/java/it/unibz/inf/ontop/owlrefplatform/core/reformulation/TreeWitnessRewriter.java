@@ -57,7 +57,7 @@ import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
  * 
  */
 
-public class TreeWitnessRewriter implements QueryRewriter {
+public class TreeWitnessRewriter implements ExistentialQueryRewriter {
 
 	private static final Logger log = LoggerFactory.getLogger(TreeWitnessRewriter.class);
 

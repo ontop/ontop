@@ -8,7 +8,7 @@ import java.util.Properties;
 
 public class OntopQueryAnsweringSettingsImpl extends OntopOBDASettingsImpl implements OntopQueryAnsweringSettings {
 
-    private static final String DEFAULT_FILE = "runtime-default.properties";
+    private static final String DEFAULT_FILE = "query-answering-default.properties";
     private final OntopOptimizationSettings optimizationSettings;
 
     OntopQueryAnsweringSettingsImpl(Properties userProperties) {
@@ -29,7 +29,7 @@ public class OntopQueryAnsweringSettingsImpl extends OntopOBDASettingsImpl imple
     }
 
     @Override
-    public boolean isRewritingEnabled() {
+    public boolean isExistentialReasoningEnabled() {
         return getRequiredBoolean(EXISTENTIAL_REASONING);
     }
 

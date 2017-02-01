@@ -21,8 +21,6 @@ package it.unibz.inf.ontop.protege.core;
  */
 
 import it.unibz.inf.ontop.model.impl.OBDAModelImpl;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.inf.ontop.injection.QuestCoreSettings;
 import org.protege.editor.core.editorkit.EditorKit;
 import org.protege.editor.core.editorkit.plugin.EditorKitHook;
 import org.protege.editor.core.prefs.Preferences;

@@ -1,8 +1,6 @@
 package it.unibz.inf.ontop.rdf4j.tests.general;
 
 import it.unibz.inf.ontop.injection.QuestConfiguration;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.inf.ontop.injection.QuestCoreSettings;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWL;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLFactory;
 import org.junit.Before;

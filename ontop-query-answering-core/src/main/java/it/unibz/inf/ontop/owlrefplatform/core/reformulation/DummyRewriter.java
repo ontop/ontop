@@ -21,22 +21,21 @@ package it.unibz.inf.ontop.owlrefplatform.core.reformulation;
  */
 
 import it.unibz.inf.ontop.model.DatalogProgram;
-import it.unibz.inf.ontop.model.OBDAException;
 import it.unibz.inf.ontop.ontology.ImmutableOntologyVocabulary;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.LinearInclusionDependencies;
 import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 
 /***
- * A query reformulator that does nothing on the given query. 
+ * A query rewriter that does nothing on the given query.
  * 
  * @author mariano
  *
  */
-public class DummyReformulator implements QueryRewriter {
+public class DummyRewriter implements QueryRewriter {
 
 	
 	@Override
-	public DatalogProgram rewrite(DatalogProgram input) throws OBDAException {
+	public DatalogProgram rewrite(DatalogProgram input) {
 		return input;
 	}
 

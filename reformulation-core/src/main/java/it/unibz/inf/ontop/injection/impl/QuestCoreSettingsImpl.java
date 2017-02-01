@@ -88,8 +88,8 @@ public class QuestCoreSettingsImpl extends OBDASettingsImpl implements QuestCore
     }
 
     @Override
-    public boolean isRewritingEnabled() {
-        return runtimeSettings.isRewritingEnabled();
+    public boolean isExistentialReasoningEnabled() {
+        return runtimeSettings.isExistentialReasoningEnabled();
     }
 
     @Override

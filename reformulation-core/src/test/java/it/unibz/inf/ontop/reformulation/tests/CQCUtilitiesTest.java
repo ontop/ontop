@@ -28,6 +28,7 @@ import it.unibz.inf.ontop.ontology.impl.OntologyFactoryImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.CQCUtilities;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.CQContainmentCheckUnderLIDs;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.LinearInclusionDependencies;
+import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.LinearInclusionDependencyTools;
 import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
 import org.junit.Before;
 import org.junit.Test;
@@ -432,7 +433,7 @@ public class CQCUtilitiesTest {
 			CQIE query2 = DATA_FACTORY.getCQIE(head2, body2);
 
 			
-			LinearInclusionDependencies dep = LinearInclusionDependencies.getABoxDependencies(TBoxReasonerImpl.create(sigma), false);
+			LinearInclusionDependencies dep = LinearInclusionDependencyTools.getABoxDependencies(TBoxReasonerImpl.create(sigma), false);
 			
 			CQContainmentCheckUnderLIDs cqc = new CQContainmentCheckUnderLIDs(dep);
 			
@@ -460,7 +461,7 @@ public class CQCUtilitiesTest {
 					DATA_FACTORY.getVariable("y"), DATA_FACTORY.getVariable("z"));
 			CQIE query2 = DATA_FACTORY.getCQIE(head2, body2);
 
-			LinearInclusionDependencies dep = LinearInclusionDependencies.getABoxDependencies(TBoxReasonerImpl.create(sigma), false);
+			LinearInclusionDependencies dep = LinearInclusionDependencyTools.getABoxDependencies(TBoxReasonerImpl.create(sigma), false);
 
 			CQContainmentCheckUnderLIDs cqc = new CQContainmentCheckUnderLIDs(dep);
 			
@@ -488,7 +489,7 @@ public class CQCUtilitiesTest {
 					DATA_FACTORY.getVariable("z"), DATA_FACTORY.getVariable("y"));
 			CQIE query2 = DATA_FACTORY.getCQIE(head2, body2);
 
-			LinearInclusionDependencies dep = LinearInclusionDependencies.getABoxDependencies(TBoxReasonerImpl.create(sigma), false);
+			LinearInclusionDependencies dep = LinearInclusionDependencyTools.getABoxDependencies(TBoxReasonerImpl.create(sigma), false);
 			
 			CQContainmentCheckUnderLIDs cqc = new CQContainmentCheckUnderLIDs(dep);
 			
@@ -516,7 +517,7 @@ public class CQCUtilitiesTest {
 			Function body2 = DATA_FACTORY.getFunction(DATA_FACTORY.getClassPredicate("A"), DATA_FACTORY.getVariable("z"));
 			CQIE query2 = DATA_FACTORY.getCQIE(head2, body2);
 
-			LinearInclusionDependencies dep = LinearInclusionDependencies.getABoxDependencies(TBoxReasonerImpl.create(sigma), false);
+			LinearInclusionDependencies dep = LinearInclusionDependencyTools.getABoxDependencies(TBoxReasonerImpl.create(sigma), false);
 
 			CQContainmentCheckUnderLIDs cqc = new CQContainmentCheckUnderLIDs(dep);
 			
@@ -545,7 +546,7 @@ public class CQCUtilitiesTest {
 			Function body2 = DATA_FACTORY.getFunction(DATA_FACTORY.getClassPredicate("A"), DATA_FACTORY.getVariable("z"));
 			CQIE query2 = DATA_FACTORY.getCQIE(head2, body2);
 
-			LinearInclusionDependencies dep = LinearInclusionDependencies.getABoxDependencies(TBoxReasonerImpl.create(sigma), false);
+			LinearInclusionDependencies dep = LinearInclusionDependencyTools.getABoxDependencies(TBoxReasonerImpl.create(sigma), false);
 
 			CQContainmentCheckUnderLIDs cqc = new CQContainmentCheckUnderLIDs(dep);
 			
@@ -605,7 +606,7 @@ public class CQCUtilitiesTest {
         body = new LinkedList<Function>();
         CQIE query2 = DATA_FACTORY.getCQIE(head, body);
 
-		LinearInclusionDependencies dep = LinearInclusionDependencies.getABoxDependencies(TBoxReasonerImpl.create(sigma), false);
+		LinearInclusionDependencies dep = LinearInclusionDependencyTools.getABoxDependencies(TBoxReasonerImpl.create(sigma), false);
 		CQContainmentCheckUnderLIDs cqc = new CQContainmentCheckUnderLIDs(dep);
 				
         assertTrue(cqc.isContainedIn(query1, query2));  // ROMAN: changed from False
