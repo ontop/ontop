@@ -162,14 +162,4 @@ public class OntopQueryAnsweringConfigurationImpl extends OntopOBDAConfiguration
         }
     }
 
-    public static class BuilderImpl<B extends OntopQueryAnsweringConfiguration.Builder<B>> extends OntopQueryAnsweringBuilderMixin<B> {
-
-        @Override
-        public OntopQueryAnsweringConfiguration build() {
-            OntopQueryAnsweringSettings settings = new OntopQueryAnsweringSettingsImpl(generateProperties());
-            OntopRuntimeOptions options = generateRuntimeOptions();
-            return new OntopQueryAnsweringConfigurationImpl(settings, options);
-        }
-    }
-
 }
