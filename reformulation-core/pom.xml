@@ -17,7 +17,7 @@
 		</dependency>
 		<dependency>
 			<groupId>${project.groupId}</groupId>
-			<artifactId>ontop-runtime-core</artifactId>
+			<artifactId>ontop-query-answering-core</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 

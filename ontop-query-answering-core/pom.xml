@@ -7,9 +7,9 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>ontop-runtime-core</artifactId>
+    <artifactId>ontop-query-answering-core</artifactId>
     <packaging>jar</packaging>
-    <name>ontop-runtime-core</name>
+    <name>ontop-query-answering-core</name>
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>
