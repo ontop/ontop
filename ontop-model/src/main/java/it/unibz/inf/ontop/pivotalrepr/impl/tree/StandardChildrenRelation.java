@@ -20,9 +20,9 @@ public class StandardChildrenRelation implements ChildrenRelation {
     private final TreeNode parent;
 
     protected StandardChildrenRelation(TreeNode parent) {
-        if (parent.getQueryNode() instanceof OrderedOperatorNode) {
+        if (parent.getQueryNode() instanceof BinaryOrderedOperatorNode) {
             throw new IllegalArgumentException("The StandardChildrenRelation does not accept " +
-                    "OrderedOperatorNodes as parents");
+                    "BinaryOrderedOperatorNodes as parents");
         }
         this.parent = parent;
         this.children = new LinkedList<>();
