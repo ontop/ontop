@@ -26,19 +26,9 @@ package it.unibz.inf.ontop.injection;
  *
  * Immutable class.
  */
-public interface QuestCoreSettings extends OBDASettings, OntopQueryAnsweringSettings {
+public interface QuestCoreSettings extends OBDASettings, OntopQueryAnsweringSQLSettings {
 
 	boolean isKeyPrintingEnabled();
-
-	//--------------------------
-	// Connection configuration
-	//--------------------------
-
-	boolean isKeepAliveEnabled();
-	boolean isRemoveAbandonedEnabled();
-	int getAbandonedTimeout();
-	int getConnectionPoolInitialSize();
-	int getConnectionPoolMaxSize();
 
 	//-------------------
 	// Low-level methods
@@ -68,11 +58,4 @@ public interface QuestCoreSettings extends OBDASettings, OntopQueryAnsweringSett
 
 
 	String PRINT_KEYS = "ontop.debug.printKeys";
-
-	// Tomcat connection pool properties
-	String MAX_POOL_SIZE = "max_pool_size";
-	String INIT_POOL_SIZE = "initial_pool_size";
-	String REMOVE_ABANDONED = "remove_abandoned";
-	String ABANDONED_TIMEOUT = "abandoned_timeout";
-	String KEEP_ALIVE = "keep_alive";
 }

@@ -3,8 +3,7 @@ package it.unibz.inf.ontop.owlrefplatform.core;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.exception.OntopConnectionException;
-import it.unibz.inf.ontop.model.*;
-import it.unibz.inf.ontop.injection.QuestCoreSettings;
+import it.unibz.inf.ontop.injection.OntopQueryAnsweringSQLSettings;
 import it.unibz.inf.ontop.answering.reformulation.IRIDictionary;
 import it.unibz.inf.ontop.answering.reformulation.OntopQueryReformulator;
 import org.apache.tomcat.jdbc.pool.DataSource;
@@ -24,7 +23,7 @@ public class JDBCConnector implements DBConnector {
 
     private final OntopQueryReformulator queryReformulator;
 
-    private final QuestCoreSettings settings;
+    private final OntopQueryAnsweringSQLSettings settings;
     private final Optional<IRIDictionary> iriDictionary;
 
     /* The active connection used to get metadata from the DBMS */
@@ -46,7 +45,7 @@ public class JDBCConnector implements DBConnector {
     @AssistedInject
     private JDBCConnector(@Assisted OntopQueryReformulator queryReformulator,
                           @Nullable IRIDictionary iriDictionary,
-                          QuestCoreSettings settings) {
+                          OntopQueryAnsweringSQLSettings settings) {
         this.queryReformulator = queryReformulator;
         keepAlive = settings.isKeepAliveEnabled();
         removeAbandoned = settings.isRemoveAbandonedEnabled();
@@ -164,8 +163,6 @@ public class JDBCConnector implements DBConnector {
      *
      * TODO: update comment
      *
-     * @return
-     * @throws OBDAException
      */
     protected Connection getSQLConnection() throws OntopConnectionException {
         Connection conn;

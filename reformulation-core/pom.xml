@@ -17,7 +17,7 @@
 		</dependency>
 		<dependency>
 			<groupId>${project.groupId}</groupId>
-			<artifactId>ontop-query-answering-core</artifactId>
+			<artifactId>ontop-query-answering-sql</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 
@@ -77,12 +77,6 @@
 			<groupId>mysql</groupId>
 			<artifactId>mysql-connector-java</artifactId>
 			<scope>test</scope>
-		</dependency>
-
-			
-		<dependency>
-			<groupId>org.apache.tomcat</groupId>
-			<artifactId>tomcat-jdbc</artifactId>
 		</dependency>
 	</dependencies>
 	

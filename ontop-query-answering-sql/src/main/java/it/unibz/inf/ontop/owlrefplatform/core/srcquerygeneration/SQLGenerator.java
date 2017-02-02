@@ -27,7 +27,7 @@ import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.exception.OntopReformulationException;
 import it.unibz.inf.ontop.exception.OntopTypingException;
-import it.unibz.inf.ontop.injection.QuestCoreSettings;
+import it.unibz.inf.ontop.injection.OntopQueryAnsweringSQLSettings;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.Predicate.COL_TYPE;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
@@ -134,13 +134,13 @@ public class SQLGenerator implements NativeQueryGenerator {
 
 	@AssistedInject
 	private SQLGenerator(@Assisted DBMetadata metadata,
-						 @Nullable IRIDictionary iriDictionary, QuestCoreSettings preferences,
+						 @Nullable IRIDictionary iriDictionary, OntopQueryAnsweringSQLSettings settings,
 						 JdbcTypeMapper jdbcTypeMapper) {
 
-		String driverURI = preferences.getJdbcDriver()
+		String driverURI = settings.getJdbcDriver()
 				.orElseGet(() -> {
 					try {
-						return DriverManager.getDriver(preferences.getJdbcUrl()).getClass().getCanonicalName();
+						return DriverManager.getDriver(settings.getJdbcUrl()).getClass().getCanonicalName();
 					} catch (SQLException e) {
 						// TODO: find a better exception
 						throw new RuntimeException("Impossible to get the JDBC driver. Reason: " + e.getMessage());
@@ -152,12 +152,12 @@ public class SQLGenerator implements NativeQueryGenerator {
 		}
 
 		this.metadata = (RDBMetadata)metadata;
-		this.sqladapter = SQLAdapterFactory.getSQLDialectAdapter(driverURI,this.metadata.getDbmsVersion(), preferences);
+		this.sqladapter = SQLAdapterFactory.getSQLDialectAdapter(driverURI,this.metadata.getDbmsVersion(), settings);
 		this.operations = buildOperations(sqladapter);
-		this.distinctResultSet = preferences.isDistinctPostProcessingEnabled();
+		this.distinctResultSet = settings.isDistinctPostProcessingEnabled();
 
 
-		this.generatingREPLACE = preferences.isIRISafeEncodingEnabled();
+		this.generatingREPLACE = settings.isIRISafeEncodingEnabled();
 
 		if (generatingREPLACE) {
 			StringBuilder sb1 = new StringBuilder();
@@ -265,7 +265,7 @@ public class SQLGenerator implements NativeQueryGenerator {
 	 */
 	@Override
 	public SQLExecutableQuery generateSourceQuery(IntermediateQuery intermediateQuery, ImmutableList<String> signature,
-												  Optional<SesameConstructTemplate> optionalConstructTemplate) throws OBDAException {
+												  Optional<SesameConstructTemplate> optionalConstructTemplate) throws OntopReformulationException {
 
 		DatalogProgram queryProgram = convertAndPrepare(intermediateQuery);
 
@@ -410,7 +410,6 @@ public class SQLGenerator implements NativeQueryGenerator {
 	 *            The predicates that are not defined by any rule in <code>
 	 *            query </code>
 	 * @return
-	 * @throws OBDAException
 	 */
 	private String generateQuery(List<String> signature,
 								 Multimap<Predicate, CQIE> ruleIndex,
@@ -529,14 +528,11 @@ public class SQLGenerator implements NativeQueryGenerator {
 	 * @param castDatatypes
 	 * @param subQueryDefinitions
 	 * @param termTypes
-	 * @return
-	 * @throws OBDAException
 	 */
 	public String generateQueryFromSingleRule(CQIE cq, List<String> signature,
 											  boolean isAns1, List<COL_TYPE> castDatatypes,
 											  Map<Predicate, ParserViewDefinition> subQueryDefinitions,
-											  ImmutableList<Optional<TermType>> termTypes)
-			throws OBDAException {
+											  ImmutableList<Optional<TermType>> termTypes) {
 		QueryAliasIndex index = new QueryAliasIndex(cq, subQueryDefinitions);
 
 		boolean innerdistincts = false;
@@ -704,8 +700,7 @@ public class SQLGenerator implements NativeQueryGenerator {
 												Multimap<Predicate, CQIE> ruleIndex,
 												Map<Predicate, ParserViewDefinition> subQueryDefinitions,
 												ImmutableMap<CQIE, ImmutableList<Optional<TermType>>> termTypeMap,
-												ImmutableList<COL_TYPE> castTypes)
-			throws OBDAException {
+												ImmutableList<COL_TYPE> castTypes) {
 
 		/* Creates BODY of the view query */
 
@@ -1318,8 +1313,7 @@ public class SQLGenerator implements NativeQueryGenerator {
 	 */
 	private String getSelectClause(List<String> signature, CQIE query,
 								   QueryAliasIndex index, boolean distinct, boolean isAns1,
-								   List<COL_TYPE> castTypes, ImmutableList<Optional<TermType>> termTypes)
-			throws OBDAException {
+								   List<COL_TYPE> castTypes, ImmutableList<Optional<TermType>> termTypes) {
 		/*
 		 * If the head has size 0 this is a boolean query.
 		 */

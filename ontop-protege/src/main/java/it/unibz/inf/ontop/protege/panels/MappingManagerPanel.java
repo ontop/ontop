@@ -22,7 +22,7 @@ package it.unibz.inf.ontop.protege.panels;
 
 import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
-import it.unibz.inf.ontop.injection.OntopSQLConfiguration;
+import it.unibz.inf.ontop.injection.OntopSQLCoreConfiguration;
 import it.unibz.inf.ontop.io.DataSource2PropertiesConvertor;
 import it.unibz.inf.ontop.io.TargetQueryVocabularyValidator;
 import it.unibz.inf.ontop.mapping.sql.SQLSourceQueryValidator;
@@ -522,7 +522,7 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
                 OBDAMappingAxiom o = (OBDAMappingAxiom) path.get(i);
                 String id = o.getId();
                 outputField.addText("  id: '" + id + "'... ", outputField.NORMAL);
-                OntopSQLConfiguration config = OntopSQLConfiguration.defaultBuilder()
+                OntopSQLCoreConfiguration config = OntopSQLCoreConfiguration.defaultBuilder()
                         .properties(DataSource2PropertiesConvertor.convert(selectedSource))
                         .build();
                 validator = new SQLSourceQueryValidator(config.getSettings(), (OBDASQLQuery)o.getSourceQuery());

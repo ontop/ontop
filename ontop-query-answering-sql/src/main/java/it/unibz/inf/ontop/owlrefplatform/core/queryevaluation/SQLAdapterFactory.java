@@ -21,7 +21,7 @@ package it.unibz.inf.ontop.owlrefplatform.core.queryevaluation;
  */
 
 
-import it.unibz.inf.ontop.injection.QuestCoreSettings;
+import it.unibz.inf.ontop.injection.OntopQueryAnsweringSQLSettings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,7 +29,7 @@ public class SQLAdapterFactory {
 
 	private static Logger log = LoggerFactory.getLogger(SQLAdapterFactory.class);
 
-	public static SQLDialectAdapter getSQLDialectAdapter(String className, String databaseName, QuestCoreSettings preferences) {
+	public static SQLDialectAdapter getSQLDialectAdapter(String className, String databaseName, OntopQueryAnsweringSQLSettings preferences) {
 
 		switch (className) {
 			case "org.postgresql.Driver":

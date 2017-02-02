@@ -20,6 +20,7 @@ package it.unibz.inf.ontop.owlrefplatform.core.resultset;
  * #L%
  */
 
+import it.unibz.inf.ontop.exception.OntopConnectionException;
 import it.unibz.inf.ontop.model.*;
 
 import java.sql.ResultSet;
@@ -57,13 +58,13 @@ public class BooleanResultSet implements TupleResultSet {
     }
 
     @Override
-    public void close() throws OBDAException {
+    public void close() throws OntopConnectionException {
         if (set == null)
             return;
         try {
             set.close();
-        } catch (SQLException e) {
-            throw new OBDAException(e.getMessage());
+        } catch (Exception e) {
+            throw new OntopConnectionException(e);
         }
     }
 
@@ -71,7 +72,7 @@ public class BooleanResultSet implements TupleResultSet {
      * returns always 1
      */
     @Override
-    public int getColumnCount() throws OBDAException {
+    public int getColumnCount() {
         return 1;
     }
 
@@ -79,7 +80,7 @@ public class BooleanResultSet implements TupleResultSet {
      * returns the current fetch size. the default value is 100
      */
     @Override
-    public int getFetchSize() throws OBDAException {
+    public int getFetchSize() {
         return 100;
     }
 
@@ -87,7 +88,7 @@ public class BooleanResultSet implements TupleResultSet {
      * TODO: GUOHUI (2016-01-09) Understand what should be the right behavior
      */
     @Override
-    public List<String> getSignature() throws OBDAException {
+    public List<String> getSignature() throws OntopConnectionException {
         Vector<String> signature = new Vector<String>();
         if (set != null) {
             int i = getColumnCount();
@@ -95,8 +96,8 @@ public class BooleanResultSet implements TupleResultSet {
             for (int j = 1; j <= i; j++) {
                 try {
                     signature.add(set.getMetaData().getColumnLabel(j));
-                } catch (SQLException e) {
-                    throw new OBDAException(e.getMessage());
+                } catch (Exception e) {
+                    throw new OntopConnectionException(e.getMessage());
                 }
             }
         } else {
@@ -111,7 +112,7 @@ public class BooleanResultSet implements TupleResultSet {
      * TODO: GUOHUI (2016-01-09) Understand what should be the right behavior
      */
     @Override
-    public boolean nextRow() throws OBDAException {
+    public boolean nextRow() {
         if (!isTrue || counter > 0) {
             return false;
         } else {
@@ -126,13 +127,13 @@ public class BooleanResultSet implements TupleResultSet {
     }
 
     @Override
-    public Constant getConstant(int column) throws OBDAException {
+    public Constant getConstant(int column) {
 
         return valueConstant;
     }
 
     @Override
-    public Constant getConstant(String name) throws OBDAException {
+    public Constant getConstant(String name) {
         return valueConstant;
     }
 

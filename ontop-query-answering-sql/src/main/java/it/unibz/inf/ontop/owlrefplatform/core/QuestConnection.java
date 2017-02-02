@@ -25,7 +25,6 @@ import java.sql.SQLException;
 import java.util.Optional;
 
 import it.unibz.inf.ontop.exception.OntopConnectionException;
-import it.unibz.inf.ontop.model.OBDAException;
 import it.unibz.inf.ontop.answering.reformulation.IRIDictionary;
 import it.unibz.inf.ontop.answering.reformulation.OntopQueryReformulator;
 
@@ -61,12 +60,11 @@ public class QuestConnection implements OntopConnection {
 	}
 	
 	@Override
-	public void close() throws OBDAException {
+	public void close() throws OntopConnectionException {
 		try {
 			conn.close();
-		} catch (SQLException e) {
-			e.printStackTrace();
-			//throw new OBDAException(e);
+		} catch (Exception e) {
+			throw new OntopConnectionException(e);
 		}
 	}
 
@@ -81,8 +79,8 @@ public class QuestConnection implements OntopConnection {
 					this.queryProcessor,
 					conn.createStatement(java.sql.ResultSet.TYPE_FORWARD_ONLY, java.sql.ResultSet.CONCUR_READ_ONLY),
 					iriDictionary);
-		} catch (SQLException e1) {
-			throw new OntopConnectionException(e1);
+		} catch (Exception e) {
+			throw new OntopConnectionException(e);
 		}
 	}
 

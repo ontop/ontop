@@ -20,15 +20,15 @@ package it.unibz.inf.ontop.model.impl;
  * #L%
  */
 
-import it.unibz.inf.ontop.injection.OntopSQLSettings;
+import it.unibz.inf.ontop.injection.OntopSQLCoreSettings;
 
 public class RDBMSourceParameterConstants {
 
-	public static final String	DATABASE_USERNAME			= OntopSQLSettings.JDBC_USER;
+	public static final String	DATABASE_USERNAME			= OntopSQLCoreSettings.JDBC_USER;
 	
-	public static final String	DATABASE_PASSWORD			= OntopSQLSettings.JDBC_PASSWORD;
+	public static final String	DATABASE_PASSWORD			= OntopSQLCoreSettings.JDBC_PASSWORD;
 	
-	public static final String	DATABASE_DRIVER				= OntopSQLSettings.JDBC_DRIVER;
+	public static final String	DATABASE_DRIVER				= OntopSQLCoreSettings.JDBC_DRIVER;
 	
-	public static final String	DATABASE_URL				= OntopSQLSettings.JDBC_URL;
+	public static final String	DATABASE_URL				= OntopSQLCoreSettings.JDBC_URL;
 }

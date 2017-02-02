@@ -21,6 +21,7 @@ package it.unibz.inf.ontop.model;
  */
 
 import it.unibz.inf.ontop.exception.OntopConnectionException;
+import it.unibz.inf.ontop.exception.OntopResultConversionException;
 
 import java.util.List;
 
@@ -52,10 +53,9 @@ public interface TupleResultSet extends OBDAResultSet {
 	 * 
 	 * @param column The column index of the value to be returned, start at 1
 	 * @return a constant
-	 * @throws OntopConnectionException
 	 */
-    Constant getConstant(int column) throws OntopConnectionException;
+    Constant getConstant(int column) throws OntopConnectionException, OntopResultConversionException;
 
-	Constant getConstant(String name) throws OntopConnectionException;
+	Constant getConstant(String name) throws OntopConnectionException, OntopResultConversionException;
 
 }

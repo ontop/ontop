@@ -77,7 +77,7 @@ public class DirectMappingEngine {
 	private final MappingFactory mappingFactory;
 	private final NativeQueryLanguageComponentFactory nativeQLFactory;
 	private final OBDAFactoryWithException obdaFactory;
-	private final OntopSQLSettings settings;
+	private final OntopSQLCoreSettings settings;
 	private final JDBCConnectionManager connManager;
 
     private String baseIRI;
@@ -95,9 +95,9 @@ public class DirectMappingEngine {
 	}
 
 	@Inject
-	private DirectMappingEngine(OntopSQLSettings settings, MappingFactory mappingFactory,
-								NativeQueryLanguageComponentFactory nativeQLFactory,
-								OBDAFactoryWithException obdaFactory) {
+	private DirectMappingEngine(OntopSQLCoreSettings settings, MappingFactory mappingFactory,
+                                NativeQueryLanguageComponentFactory nativeQLFactory,
+                                OBDAFactoryWithException obdaFactory) {
 		connManager = JDBCConnectionManager.getJDBCConnectionManager();
 		this.mappingFactory = mappingFactory;
 		this.nativeQLFactory = nativeQLFactory;

@@ -1,19 +1,19 @@
 package it.unibz.inf.ontop.injection.impl;
 
-import it.unibz.inf.ontop.injection.OntopSQLConfiguration;
-import it.unibz.inf.ontop.injection.OntopSQLSettings;
+import it.unibz.inf.ontop.injection.OntopSQLCoreConfiguration;
+import it.unibz.inf.ontop.injection.OntopSQLCoreSettings;
 
 public class OntopSQLCommonModule extends OntopAbstractModule {
 
-    private final OntopSQLSettings settings;
+    private final OntopSQLCoreSettings settings;
 
-    protected OntopSQLCommonModule(OntopSQLConfiguration configuration) {
+    protected OntopSQLCommonModule(OntopSQLCoreConfiguration configuration) {
         super(configuration.getSettings());
         this.settings = configuration.getSettings();
     }
 
     @Override
     protected void configure() {
-        bind(OntopSQLSettings.class).toInstance(settings);
+        bind(OntopSQLCoreSettings.class).toInstance(settings);
     }
 }

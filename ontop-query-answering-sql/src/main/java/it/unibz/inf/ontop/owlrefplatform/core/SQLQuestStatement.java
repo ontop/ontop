@@ -6,7 +6,6 @@ import it.unibz.inf.ontop.exception.OntopConnectionException;
 import it.unibz.inf.ontop.exception.OntopQueryAnsweringException;
 import it.unibz.inf.ontop.exception.OntopQueryEvaluationException;
 import it.unibz.inf.ontop.model.*;
-import it.unibz.inf.ontop.owlrefplatform.core.execution.NativeQueryExecutionException;
 import it.unibz.inf.ontop.owlrefplatform.core.resultset.*;
 import it.unibz.inf.ontop.owlrefplatform.core.translator.SesameConstructTemplate;
 
@@ -157,7 +156,7 @@ public class SQLQuestStatement extends QuestStatement {
     }
 
     @Override
-    protected TupleResultSet executeBooleanQuery(ExecutableQuery executableQuery) throws NativeQueryExecutionException {
+    protected TupleResultSet executeBooleanQuery(ExecutableQuery executableQuery) throws OntopQueryEvaluationException {
         SQLExecutableQuery sqlTargetQuery = checkAndConvertTargetQuery(executableQuery);
         String sqlQuery = sqlTargetQuery.getSQL();
         if (sqlQuery.equals("")) {
@@ -168,12 +167,13 @@ public class SQLQuestStatement extends QuestStatement {
             java.sql.ResultSet set = sqlStatement.executeQuery(sqlQuery);
             return new BooleanResultSet(set, this);
         } catch (SQLException e) {
-            throw new NativeQueryExecutionException(e.getMessage());
+            throw new OntopQueryEvaluationException(e.getMessage());
         }
     }
 
     @Override
-    protected TupleResultSet executeSelectQuery(ExecutableQuery executableQuery, boolean doDistinctPostProcessing) throws OBDAException {
+    protected TupleResultSet executeSelectQuery(ExecutableQuery executableQuery, boolean doDistinctPostProcessing)
+            throws OntopQueryEvaluationException {
         SQLExecutableQuery sqlTargetQuery = checkAndConvertTargetQuery(executableQuery);
         String sqlQuery = sqlTargetQuery.getSQL();
 
@@ -191,7 +191,8 @@ public class SQLQuestStatement extends QuestStatement {
     }
 
     @Override
-    protected GraphResultSet executeGraphQuery(ExecutableQuery executableQuery, boolean collectResults) throws  OBDAException {
+    protected GraphResultSet executeGraphQuery(ExecutableQuery executableQuery, boolean collectResults)
+            throws OntopQueryEvaluationException {
         SQLExecutableQuery sqlTargetQuery = checkAndConvertTargetQuery(executableQuery);
 
         String sqlQuery = sqlTargetQuery.getSQL();
@@ -212,7 +213,7 @@ public class SQLQuestStatement extends QuestStatement {
                 tuples = new QuestTupleResultSet(set, executableQuery.getSignature(), this, dbMetadata,
                         iriDictionary);
             } catch (SQLException e) {
-                throw new NativeQueryExecutionException(e.getMessage());
+                throw new OntopQueryEvaluationException(e.getMessage());
             }
         }
         return new QuestGraphResultSet(tuples, optionalTemplate.get(), collectResults);

@@ -10,7 +10,7 @@ import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.util.Optional;
 
-public interface OntopMappingSQLConfiguration extends OntopSQLConfiguration, OntopMappingConfiguration {
+public interface OntopMappingSQLConfiguration extends OntopSQLCoreConfiguration, OntopMappingConfiguration {
 
     @Override
     OntopMappingSQLSettings getSettings();
@@ -39,7 +39,7 @@ public interface OntopMappingSQLConfiguration extends OntopSQLConfiguration, Ont
     }
 
     interface Builder<B extends Builder<B>> extends OntopMappingSQLBuilderFragment<B>,
-            OntopSQLConfiguration.Builder<B>, OntopMappingConfiguration.Builder<B> {
+            OntopSQLCoreConfiguration.Builder<B>, OntopMappingConfiguration.Builder<B> {
 
         @Override
         OntopMappingSQLConfiguration build();

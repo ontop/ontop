@@ -1,26 +1,26 @@
 package it.unibz.inf.ontop.injection.impl;
 
 import com.google.inject.Module;
-import it.unibz.inf.ontop.injection.OntopSQLConfiguration;
-import it.unibz.inf.ontop.injection.OntopSQLSettings;
+import it.unibz.inf.ontop.injection.OntopSQLCoreConfiguration;
+import it.unibz.inf.ontop.injection.OntopSQLCoreSettings;
 
 import java.util.Optional;
 import java.util.Properties;
 import java.util.stream.Stream;
 
 
-public class OntopSQLConfigurationImpl extends OntopOBDAConfigurationImpl
-        implements OntopSQLConfiguration {
+public class OntopSQLCoreConfigurationImpl extends OntopOBDAConfigurationImpl
+        implements OntopSQLCoreConfiguration {
 
-    private final OntopSQLSettings settings;
+    private final OntopSQLCoreSettings settings;
 
-    protected OntopSQLConfigurationImpl(OntopSQLSettings settings, OntopSQLOptions options) {
+    protected OntopSQLCoreConfigurationImpl(OntopSQLCoreSettings settings, OntopSQLOptions options) {
         super(settings, options.obdaOptions);
         this.settings = settings;
     }
 
     @Override
-    public OntopSQLSettings getSettings() {
+    public OntopSQLCoreSettings getSettings() {
         return settings;
     }
 
@@ -40,7 +40,7 @@ public class OntopSQLConfigurationImpl extends OntopOBDAConfigurationImpl
         }
     }
 
-    protected static class DefaultOntopSQLBuilderFragment<B extends OntopSQLConfiguration.Builder<B>> implements
+    protected static class DefaultOntopSQLBuilderFragment<B extends OntopSQLCoreConfiguration.Builder<B>> implements
             OntopSQLBuilderFragment<B> {
 
         private final B builder;
@@ -87,11 +87,11 @@ public class OntopSQLConfigurationImpl extends OntopOBDAConfigurationImpl
         Properties generateProperties() {
             Properties properties = new Properties();
 
-            jdbcName.ifPresent(n -> properties.setProperty(OntopSQLSettings.JDBC_NAME, n));
-            jdbcUrl.ifPresent(s -> properties.setProperty(OntopSQLSettings.JDBC_URL, s));
-            jdbcUser.ifPresent(s -> properties.setProperty(OntopSQLSettings.JDBC_USER, s));
-            jbdcPassword.ifPresent(s -> properties.setProperty(OntopSQLSettings.JDBC_PASSWORD, s));
-            jdbcDriver.ifPresent(s -> properties.setProperty(OntopSQLSettings.JDBC_DRIVER, s));
+            jdbcName.ifPresent(n -> properties.setProperty(OntopSQLCoreSettings.JDBC_NAME, n));
+            jdbcUrl.ifPresent(s -> properties.setProperty(OntopSQLCoreSettings.JDBC_URL, s));
+            jdbcUser.ifPresent(s -> properties.setProperty(OntopSQLCoreSettings.JDBC_USER, s));
+            jbdcPassword.ifPresent(s -> properties.setProperty(OntopSQLCoreSettings.JDBC_PASSWORD, s));
+            jdbcDriver.ifPresent(s -> properties.setProperty(OntopSQLCoreSettings.JDBC_DRIVER, s));
 
             return properties;
         }
@@ -102,9 +102,9 @@ public class OntopSQLConfigurationImpl extends OntopOBDAConfigurationImpl
 
     }
 
-    protected abstract static class OntopSQLBuilderMixin<B extends OntopSQLConfiguration.Builder<B>>
+    protected abstract static class OntopSQLBuilderMixin<B extends OntopSQLCoreConfiguration.Builder<B>>
             extends OntopOBDAConfigurationImpl.OntopOBDAConfigurationBuilderMixin<B>
-            implements OntopSQLConfiguration.Builder<B> {
+            implements OntopSQLCoreConfiguration.Builder<B> {
 
         private final DefaultOntopSQLBuilderFragment<B> sqlBuilderFragment;
 
@@ -149,15 +149,15 @@ public class OntopSQLConfigurationImpl extends OntopOBDAConfigurationImpl
         }
     }
 
-    public static class BuilderImpl<B extends OntopSQLConfiguration.Builder<B>> extends OntopSQLBuilderMixin<B> {
+    public static class BuilderImpl<B extends OntopSQLCoreConfiguration.Builder<B>> extends OntopSQLBuilderMixin<B> {
 
         @Override
-        public OntopSQLConfiguration build() {
+        public OntopSQLCoreConfiguration build() {
             Properties properties = generateProperties();
-            OntopSQLSettings settings = new OntopSQLSettingsImpl(properties);
+            OntopSQLCoreSettings settings = new OntopSQLCoreSettingsImpl(properties);
             OntopSQLOptions options = generateSQLOptions();
 
-            return new OntopSQLConfigurationImpl(settings, options);
+            return new OntopSQLCoreConfigurationImpl(settings, options);
         }
     }
 

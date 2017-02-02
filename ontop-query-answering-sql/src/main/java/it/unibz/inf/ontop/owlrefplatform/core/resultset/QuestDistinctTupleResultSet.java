@@ -20,6 +20,8 @@ package it.unibz.inf.ontop.owlrefplatform.core.resultset;
  * #L%
  */
 
+import it.unibz.inf.ontop.exception.OntopConnectionException;
+import it.unibz.inf.ontop.exception.OntopResultConversionException;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.owlrefplatform.core.QuestStatement;
 import it.unibz.inf.ontop.answering.reformulation.IRIDictionary;
@@ -40,7 +42,7 @@ public class QuestDistinctTupleResultSet implements TupleResultSet {
 
     public QuestDistinctTupleResultSet(ResultSet set, List<String> signature, QuestStatement st,
                                        DBMetadata dbMetadata,
-                                       Optional<IRIDictionary> iriDictionary) throws OBDAException {
+                                       Optional<IRIDictionary> iriDictionary) {
 
         questTupleResultSet = new QuestTupleResultSet(set, signature, st, dbMetadata, iriDictionary);
 
@@ -50,22 +52,22 @@ public class QuestDistinctTupleResultSet implements TupleResultSet {
 
 
     @Override
-    public int getColumnCount() throws OBDAException {
+    public int getColumnCount() {
         return questTupleResultSet.getColumnCount();
     }
 
     @Override
-    public List<String> getSignature() throws OBDAException {
+    public List<String> getSignature() {
         return questTupleResultSet.getSignature();
     }
 
     @Override
-    public int getFetchSize() throws OBDAException {
+    public int getFetchSize() throws OntopConnectionException {
         return questTupleResultSet.getFetchSize();
     }
 
     @Override
-    public void close() throws OBDAException {
+    public void close() throws OntopConnectionException {
         distinctKeys.clear();
         questTupleResultSet.close();
 
@@ -77,7 +79,7 @@ public class QuestDistinctTupleResultSet implements TupleResultSet {
     }
 
     @Override
-    public boolean nextRow() throws OBDAException {
+    public boolean nextRow() throws OntopConnectionException {
         // return the row only if it is not a duplicate
 
         boolean next = false;
@@ -106,12 +108,12 @@ public class QuestDistinctTupleResultSet implements TupleResultSet {
     }
 
     @Override
-    public Constant getConstant(int column) throws OBDAException {
+    public Constant getConstant(int column) throws OntopConnectionException, OntopResultConversionException {
         return questTupleResultSet.getConstant(column);
     }
 
     @Override
-    public Constant getConstant(String name) throws OBDAException {
+    public Constant getConstant(String name) throws OntopConnectionException, OntopResultConversionException {
         return questTupleResultSet.getConstant(name);
     }
 

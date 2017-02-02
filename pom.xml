@@ -65,6 +65,7 @@
 		<module>ontop-mapping-sql-core</module>
 		<module>ontop-mapping-native</module>
 		<module>ontop-query-answering-core</module>
+		<module>ontop-query-answering-sql</module>
 		<module>obdalib-core</module>
 		<module>reformulation-core</module>
 		<module>obdalib-owlapi3</module>

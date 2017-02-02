@@ -13,7 +13,6 @@ import it.unibz.inf.ontop.mapping.MappingParser;
 import it.unibz.inf.ontop.spec.OBDASpecification;
 import it.unibz.inf.ontop.mapping.extraction.PreProcessedMapping;
 import it.unibz.inf.ontop.model.OBDAModel;
-import it.unibz.inf.ontop.ontology.Ontology;
 import it.unibz.inf.ontop.sql.ImplicitDBConstraintsReader;
 import org.eclipse.rdf4j.model.Model;
 
@@ -26,7 +25,7 @@ import java.util.Properties;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
-public class OntopMappingSQLConfigurationImpl extends OntopSQLConfigurationImpl implements OntopMappingSQLConfiguration {
+public class OntopMappingSQLConfigurationImpl extends OntopSQLCoreConfigurationImpl implements OntopMappingSQLConfiguration {
 
     private final OntopMappingSQLSettings settings;
     private final OntopMappingSQLOptions options;

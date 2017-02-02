@@ -20,7 +20,7 @@ package it.unibz.inf.ontop.sql;
  * #L%
  */
 
-import it.unibz.inf.ontop.injection.OntopSQLSettings;
+import it.unibz.inf.ontop.injection.OntopSQLCoreSettings;
 import it.unibz.inf.ontop.model.OBDAException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -66,7 +66,7 @@ public class JDBCConnectionManager {
 		return instance;
 	}
 
-	public Connection createConnection(OntopSQLSettings settings) throws SQLException {
+	public Connection createConnection(OntopSQLCoreSettings settings) throws SQLException {
 		return createConnection(settings.getJdbcUrl(), settings.getJdbcUser(),
 				settings.getJdbcPassword());
 	}
@@ -151,7 +151,7 @@ public class JDBCConnectionManager {
 		}
 	}
 
-	public Connection getConnection(OntopSQLSettings settings) throws SQLException {
+	public Connection getConnection(OntopSQLCoreSettings settings) throws SQLException {
 		return getConnection(settings.getJdbcUrl(), settings.getJdbcUser(),
 				settings.getJdbcPassword());
 	}

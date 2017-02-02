@@ -1,13 +1,13 @@
 package it.unibz.inf.ontop.injection.impl;
 
 
-import it.unibz.inf.ontop.injection.OntopSQLSettings;
+import it.unibz.inf.ontop.injection.OntopSQLCoreSettings;
 import it.unibz.inf.ontop.utils.IDGenerator;
 
 import java.util.Optional;
 import java.util.Properties;
 
-public class OntopSQLSettingsImpl extends OntopOBDASettingsImpl implements OntopSQLSettings {
+public class OntopSQLCoreSettingsImpl extends OntopOBDASettingsImpl implements OntopSQLCoreSettings {
 
     private static final String DB_PREFIX = "DB-";
     private final String jdbcUrl;
@@ -26,15 +26,15 @@ public class OntopSQLSettingsImpl extends OntopOBDASettingsImpl implements Ontop
      *
      * @param userProperties
      */
-    protected OntopSQLSettingsImpl(Properties userProperties) {
+    protected OntopSQLCoreSettingsImpl(Properties userProperties) {
         super(userProperties);
 
-        jdbcUrl = getRequiredProperty(OntopSQLSettings.JDBC_URL);
-        jdbcUser = getRequiredProperty(OntopSQLSettings.JDBC_USER);
-        jdbcPassword = getRequiredProperty(OntopSQLSettings.JDBC_PASSWORD);
+        jdbcUrl = getRequiredProperty(OntopSQLCoreSettings.JDBC_URL);
+        jdbcUser = getRequiredProperty(OntopSQLCoreSettings.JDBC_USER);
+        jdbcPassword = getRequiredProperty(OntopSQLCoreSettings.JDBC_PASSWORD);
 
-        jdbcDriver = getProperty(OntopSQLSettings.JDBC_DRIVER);
-        jdbcName = getProperty(OntopSQLSettings.JDBC_NAME)
+        jdbcDriver = getProperty(OntopSQLCoreSettings.JDBC_DRIVER);
+        jdbcName = getProperty(OntopSQLCoreSettings.JDBC_NAME)
                 .orElseGet(() -> IDGenerator.getNextUniqueID(DB_PREFIX));
     }
 

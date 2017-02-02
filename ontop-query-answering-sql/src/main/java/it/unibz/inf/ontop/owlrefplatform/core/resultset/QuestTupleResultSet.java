@@ -22,6 +22,7 @@ package it.unibz.inf.ontop.owlrefplatform.core.resultset;
 
 
 import it.unibz.inf.ontop.exception.OntopConnectionException;
+import it.unibz.inf.ontop.exception.OntopResultConversionException;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.Predicate.COL_TYPE;
 import it.unibz.inf.ontop.owlrefplatform.core.OntopStatement;
@@ -76,10 +77,9 @@ public class QuestTupleResultSet implements TupleResultSet {
 	 *            A list of terms that determines the type of the columns of
 	 *            this results set.
 	 * @param st
-	 * @throws OBDAException
 	 */
 	public QuestTupleResultSet(ResultSet set, List<String> signature, OntopStatement st,
-							   DBMetadata dbMetadata, Optional<IRIDictionary> iriDictionary) throws OBDAException {
+							   DBMetadata dbMetadata, Optional<IRIDictionary> iriDictionary) {
 		this.rs = set;
 		this.st = st;
 		this.iriDictionary = iriDictionary.orElse(null);
@@ -121,31 +121,31 @@ public class QuestTupleResultSet implements TupleResultSet {
     public int getFetchSize() throws OntopConnectionException {
 		try {
 			return rs.getFetchSize();
-		} catch (SQLException e) {
+		} catch (Exception e) {
 			throw new OntopConnectionException(e.getMessage());
 		}
 	}
 
 	@Override
-    public List<String> getSignature() throws OBDAException {
+    public List<String> getSignature() {
 		return signature;
 	}
 
 	@Override
-    public boolean nextRow() throws OBDAException {
+    public boolean nextRow() throws OntopConnectionException {
 		try {
 			return rs.next();
-		} catch (SQLException e) {
-			throw new OBDAException(e);
+		} catch (Exception e) {
+			throw new OntopConnectionException(e);
 		}
 	}
 
 	@Override
-    public void close() throws OBDAException {
+    public void close() throws OntopConnectionException {
 		try {
 			rs.close();
-		} catch (SQLException e) {
-			throw new OBDAException(e);
+		} catch (Exception e) {
+			throw new OntopConnectionException(e);
 		}
 	}
 
@@ -154,13 +154,13 @@ public class QuestTupleResultSet implements TupleResultSet {
 		return st;
 	}
 
-	public Object getRawObject(int column) throws OBDAException {
+	public Object getRawObject(int column) throws OntopConnectionException {
 		try {
 			Object realValue = rs.getObject(column);
 			return realValue;
 		} 
-		catch (SQLException e) {
-			throw new OBDAException(e);
+		catch (Exception e) {
+			throw new OntopConnectionException(e);
 		}
 	}
 
@@ -168,7 +168,7 @@ public class QuestTupleResultSet implements TupleResultSet {
 	 * Returns the constant at column "column" recall that columns start at index 1.
 	 */
 	@Override
-	public Constant getConstant(int column) throws OBDAException {
+	public Constant getConstant(int column) throws OntopConnectionException, OntopResultConversionException {
 		column = column * 3; // recall that the real SQL result set has 3
 								// columns per value. From each group of 3 the actual value is the
 								// 3rd column, the 2nd is the language, the 1st is the type code (an integer)
@@ -186,7 +186,7 @@ public class QuestTupleResultSet implements TupleResultSet {
 				int t = rs.getInt(column - 2);
 			    COL_TYPE type = COL_TYPE.getQuestType(t);
 			    if (type == null)
-			    	throw new RuntimeException("typeCode unknown: " + t);
+			    	throw new OntopResultConversionException("typeCode unknown: " + t);
 			    
 				switch (type) {
 				case NULL:
@@ -286,11 +286,11 @@ public class QuestTupleResultSet implements TupleResultSet {
                                 result = DATA_FACTORY.getConstantLiteral(ts.toString().replace(' ', 'T'), COL_TYPE.DATETIME);
                             } 
                             catch (ParseException pe) {
-                                throw new RuntimeException(pe);
+                                throw new OntopResultConversionException(pe);
                             }
                         } 
                         else
-                            throw new RuntimeException(e);
+                            throw new OntopResultConversionException(e);
                     }
                     break;
                
@@ -312,7 +312,7 @@ public class QuestTupleResultSet implements TupleResultSet {
 							result = DATA_FACTORY.getConstantLiteral(ts.toString().replaceFirst(" ", "T").replaceAll(" ", "")+timezone, COL_TYPE.DATETIME_STAMP);
 						} 
 						catch (ParseException pe) {
-							throw new RuntimeException(pe);
+							throw new OntopResultConversionException(pe);
 						}
 					}
 					break;
@@ -328,7 +328,7 @@ public class QuestTupleResultSet implements TupleResultSet {
 							java.util.Date date = df.parse(value);
 						} 
 						catch (ParseException e) {
-							throw new RuntimeException(e);
+							throw new OntopResultConversionException(e);
 						}
 						result = DATA_FACTORY.getConstantLiteral(value.toString(), COL_TYPE.DATE);
 					}
@@ -347,7 +347,7 @@ public class QuestTupleResultSet implements TupleResultSet {
 		catch (IllegalArgumentException e) {
 			Throwable cause = e.getCause();
 			if (cause instanceof URISyntaxException) {
-				OBDAException ex = new OBDAException(
+				OntopResultConversionException ex = new OntopResultConversionException(
 						"Error creating an object's URI. This is often due to mapping with URI templates that refer to "
 								+ "columns in which illegal values may appear, e.g., white spaces and special characters.\n"
 								+ "To avoid this error do not use these columns for URI templates in your mappings, or process "
@@ -359,14 +359,14 @@ public class QuestTupleResultSet implements TupleResultSet {
 				throw ex;
 			} 
 			else {
-				OBDAException ex = new OBDAException("Quest couldn't parse the data value to Java object: " + value + "\n"
+				OntopResultConversionException ex = new OntopResultConversionException("Quest couldn't parse the data value to Java object: " + value + "\n"
 						+ "Please review the mapping rules to have the datatype assigned properly.");
 				ex.setStackTrace(e.getStackTrace());
 				throw ex;
 			}
 		} 
 		catch (SQLException e) {
-			throw new OBDAException(e);
+			throw new OntopConnectionException(e);
 		}
 
 		return result;
@@ -374,7 +374,7 @@ public class QuestTupleResultSet implements TupleResultSet {
 
 
 	@Override
-	public Constant getConstant(String name) throws OBDAException {
+	public Constant getConstant(String name) throws OntopConnectionException, OntopResultConversionException {
 		Integer columnIndex = columnMap.get(name);
 		return getConstant(columnIndex);
 	}

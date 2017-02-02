@@ -1,7 +1,7 @@
 package it.unibz.inf.ontop.injection.impl;
 
 import it.unibz.inf.ontop.injection.OntopMappingSQLSettings;
-import it.unibz.inf.ontop.injection.OntopSQLSettings;
+import it.unibz.inf.ontop.injection.OntopSQLCoreSettings;
 
 import java.util.Optional;
 import java.util.Properties;
@@ -10,15 +10,15 @@ import java.util.Properties;
 public class OntopMappingSQLSettingsImpl extends OntopMappingSettingsImpl implements OntopMappingSQLSettings {
 
     private static final String DEFAULT_PROPERTY_FILE = "mapping-sql-default.properties";
-    private final OntopSQLSettings sqlSettings;
+    private final OntopSQLCoreSettings sqlSettings;
 
     OntopMappingSQLSettingsImpl(Properties properties) {
         super(loadProperties(properties));
-        sqlSettings = new OntopSQLSettingsImpl(copyProperties());
+        sqlSettings = new OntopSQLCoreSettingsImpl(copyProperties());
     }
 
     private static Properties loadProperties(Properties userProperties) {
-        Properties properties = OntopSQLSettingsImpl.loadDefaultSQLProperties();
+        Properties properties = OntopSQLCoreSettingsImpl.loadDefaultSQLProperties();
         properties.putAll(loadDefaultMappingSQLProperties());
         properties.putAll(userProperties);
         return properties;

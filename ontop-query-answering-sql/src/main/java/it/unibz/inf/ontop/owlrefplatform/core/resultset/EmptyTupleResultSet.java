@@ -21,7 +21,6 @@ package it.unibz.inf.ontop.owlrefplatform.core.resultset;
  */
 
 import it.unibz.inf.ontop.model.Constant;
-import it.unibz.inf.ontop.model.OBDAException;
 import it.unibz.inf.ontop.model.OBDAStatement;
 import it.unibz.inf.ontop.model.TupleResultSet;
 
@@ -30,8 +29,8 @@ import java.util.NoSuchElementException;
 
 public class EmptyTupleResultSet implements TupleResultSet {
 
-	List<String> signature = null;
-	private OBDAStatement st;
+	private final List<String> signature;
+	private final OBDAStatement st;
 
 	public EmptyTupleResultSet(List<String> signature, OBDAStatement st) {
 		this.signature = signature;
@@ -39,16 +38,16 @@ public class EmptyTupleResultSet implements TupleResultSet {
 	}
 
 	@Override
-	public void close() throws OBDAException {
+	public void close() {
 	}
 
 	@Override
-	public int getColumnCount() throws OBDAException {
+	public int getColumnCount()  {
 		return signature.size();
 	}
 
 	@Override
-	public int getFetchSize() throws OBDAException {
+	public int getFetchSize() {
 		return 0;
 	}
 
@@ -58,7 +57,7 @@ public class EmptyTupleResultSet implements TupleResultSet {
 	}
 
 	@Override
-	public boolean nextRow() throws OBDAException {
+	public boolean nextRow()  {
 		return false;
 	}
 

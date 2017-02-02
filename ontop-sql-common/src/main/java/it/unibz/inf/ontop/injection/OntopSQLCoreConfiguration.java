@@ -1,15 +1,15 @@
 package it.unibz.inf.ontop.injection;
 
 
-import it.unibz.inf.ontop.injection.impl.OntopSQLConfigurationImpl;
+import it.unibz.inf.ontop.injection.impl.OntopSQLCoreConfigurationImpl;
 
-public interface OntopSQLConfiguration extends OntopOBDAConfiguration {
+public interface OntopSQLCoreConfiguration extends OntopOBDAConfiguration {
 
     @Override
-    OntopSQLSettings getSettings();
+    OntopSQLCoreSettings getSettings();
 
     static Builder<? extends Builder> defaultBuilder() {
-        return new OntopSQLConfigurationImpl.BuilderImpl<>();
+        return new OntopSQLCoreConfigurationImpl.BuilderImpl<>();
     }
 
     interface OntopSQLBuilderFragment<B extends Builder<B>> {
@@ -22,6 +22,6 @@ public interface OntopSQLConfiguration extends OntopOBDAConfiguration {
 
     interface Builder<B extends Builder<B>> extends OntopSQLBuilderFragment<B>, OntopOBDAConfiguration.Builder<B> {
         @Override
-        OntopSQLConfiguration build();
+        OntopSQLCoreConfiguration build();
     }
 }

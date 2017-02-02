@@ -20,6 +20,8 @@ package it.unibz.inf.ontop.owlrefplatform.core.resultset;
  * #L%
  */
 
+import it.unibz.inf.ontop.exception.OntopConnectionException;
+import it.unibz.inf.ontop.exception.OntopResultConversionException;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.ValueConstant;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
@@ -30,8 +32,6 @@ import it.unibz.inf.ontop.ontology.impl.AssertionFactoryImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.translator.SesameConstructTemplate;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Literal;
-import org.eclipse.rdf4j.model.impl.LiteralImpl;
-import org.eclipse.rdf4j.model.impl.URIImpl;
 import org.eclipse.rdf4j.query.algebra.*;
 
 import java.util.ArrayList;
@@ -60,7 +60,7 @@ public class QuestGraphResultSet implements GraphResultSet {
 	private AssertionFactory ofac = AssertionFactoryImpl.getInstance();
 
 	public QuestGraphResultSet(TupleResultSet results, SesameConstructTemplate template,
-			boolean storeResult) throws OBDAException {
+			boolean storeResult) throws OntopResultConversionException {
 		this.tupleResultSet = results;
 		this.sesameTemplate = template;
 		this.storeResults = storeResult;
@@ -68,7 +68,7 @@ public class QuestGraphResultSet implements GraphResultSet {
 	}
 
     private void processResultSet(TupleResultSet resSet, SesameConstructTemplate template)
-			throws OBDAException {
+			throws OntopResultConversionException {
 		if (storeResults) {
 			//process current result set into local buffer, 
 			//since additional results will be collected
@@ -93,7 +93,7 @@ public class QuestGraphResultSet implements GraphResultSet {
 	 * the only current result set.
 	 */
     private List<Assertion> processResults(TupleResultSet result,
-                                           SesameConstructTemplate template) throws OBDAException {
+                                           SesameConstructTemplate template) throws OntopResultConversionException {
         List<Assertion> tripleAssertions = new ArrayList<>();
         List<ProjectionElemList> peLists = template.getProjectionElemList();
 
@@ -137,7 +137,7 @@ public class QuestGraphResultSet implements GraphResultSet {
                     if (assertion != null)
                         tripleAssertions.add(assertion);
                 } catch (InconsistentOntologyException e) {
-                    throw new RuntimeException("InconsistentOntologyException: " +
+                    throw new OntopResultConversionException("InconsistentOntologyException: " +
                             predicateName + " " + subjectConstant + " " + objectConstant);
                 }
             }
@@ -146,7 +146,7 @@ public class QuestGraphResultSet implements GraphResultSet {
     }
 
     @Override
-	public boolean hasNext() throws OBDAException {
+	public boolean hasNext() throws OntopConnectionException {
 		//in case of describe, we return the collected results list information
 		if (storeResults) {
 			return results.size() != 0;
@@ -157,7 +157,7 @@ public class QuestGraphResultSet implements GraphResultSet {
 	}
 
 	@Override
-	public List<Assertion> next() throws OBDAException {
+	public List<Assertion> next() throws OntopConnectionException {
 		//if we collect results, then remove and return the next one in the list
 		if (results.size() > 0) {
 			return results.remove(0);
@@ -168,7 +168,7 @@ public class QuestGraphResultSet implements GraphResultSet {
 	}
 
     private Constant getConstant(ProjectionElem node, TupleResultSet resSet)
-            throws OBDAException {
+            throws OntopResultConversionException {
         Constant constant = null;
         String node_name = node.getSourceName();
         ValueExpr ve = null;
@@ -176,7 +176,7 @@ public class QuestGraphResultSet implements GraphResultSet {
         if (extMap != null) {
             ve = extMap.get(node_name);
             if (ve != null && ve instanceof Var)
-                throw new RuntimeException("Invalid query. Found unbound variable: " + ve);
+                throw new OntopResultConversionException("Invalid query. Found unbound variable: " + ve);
         }
 
 //		if (node_name.charAt(0) == '-') {
@@ -196,7 +196,7 @@ public class QuestGraphResultSet implements GraphResultSet {
     }
 
     @Override
-	public void close() throws OBDAException {
+	public void close() throws OntopConnectionException {
 		tupleResultSet.close();
 	}
 
