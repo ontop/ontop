@@ -30,10 +30,6 @@ public class OntopOBDAConfigurationImpl extends OntopModelConfigurationImpl impl
         this.options = options;
     }
 
-    Optional<DBMetadata> getPredefinedDBMetadata() {
-        return options.dbMetadata;
-    }
-
     @Override
     public OntopOBDASettings getSettings() {
         return settings;
@@ -49,11 +45,9 @@ public class OntopOBDAConfigurationImpl extends OntopModelConfigurationImpl impl
     static class OntopOBDAOptions {
 
         final OntopModelConfigurationOptions modelOptions;
-        final Optional<DBMetadata> dbMetadata;
 
-        private OntopOBDAOptions(Optional<DBMetadata> dbMetadata, OntopModelConfigurationOptions modelOptions) {
+        private OntopOBDAOptions(OntopModelConfigurationOptions modelOptions) {
             this.modelOptions = modelOptions;
-            this.dbMetadata = dbMetadata;
         }
     }
 
@@ -61,7 +55,6 @@ public class OntopOBDAConfigurationImpl extends OntopModelConfigurationImpl impl
             implements OntopOBDABuilderFragment<B> {
 
         private final B builder;
-        private Optional<DBMetadata> dbMetadata = Optional.empty();
         private Optional<Boolean> sameAsMappings = Optional.empty();
 
         DefaultOntopOBDABuilderFragment(B builder) {
@@ -74,12 +67,6 @@ public class OntopOBDAConfigurationImpl extends OntopModelConfigurationImpl impl
             return builder;
         }
 
-        @Override
-        public B dbMetadata(@Nonnull DBMetadata dbMetadata) {
-            this.dbMetadata = Optional.of(dbMetadata);
-            return builder;
-        }
-
         Properties generateProperties() {
             Properties p = new Properties();
             sameAsMappings.ifPresent(b -> p.put(OntopOBDASettings.SAME_AS, b));
@@ -88,7 +75,7 @@ public class OntopOBDAConfigurationImpl extends OntopModelConfigurationImpl impl
         }
 
         final OntopOBDAOptions generateOBDAOptions(OntopModelConfigurationOptions modelOptions) {
-            return new OntopOBDAOptions(dbMetadata, modelOptions);
+            return new OntopOBDAOptions(modelOptions);
         }
 
     }
@@ -110,11 +97,6 @@ public class OntopOBDAConfigurationImpl extends OntopModelConfigurationImpl impl
         @Override
         public B sameAsMappings(boolean enable) {
             return localBuilderFragment.sameAsMappings(enable);
-        }
-
-        @Override
-        public B dbMetadata(@Nonnull DBMetadata dbMetadata) {
-            return localBuilderFragment.dbMetadata(dbMetadata);
         }
 
         @Override

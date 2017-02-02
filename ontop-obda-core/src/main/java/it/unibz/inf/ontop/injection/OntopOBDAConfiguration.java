@@ -18,8 +18,6 @@ public interface OntopOBDAConfiguration extends OntopModelConfiguration {
     interface OntopOBDABuilderFragment<B extends Builder<B>> {
 
         B sameAsMappings(boolean enable);
-
-        B dbMetadata(@Nonnull DBMetadata dbMetadata);
     }
 
     interface Builder<B extends Builder<B>> extends OntopOBDABuilderFragment<B>, OntopModelConfiguration.Builder<B> {

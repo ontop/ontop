@@ -88,7 +88,7 @@ public class OntopMappingConfigurationImpl extends OntopOBDAConfigurationImpl im
 
          Optional<Ontology> optionalOntology = ontologySupplier.get();
 
-        Optional<DBMetadata> optionalMetadata = getPredefinedDBMetadata();
+        Optional<DBMetadata> optionalMetadata = options.dbMetadata;
 
         /*
          * Pre-processed mapping
@@ -143,14 +143,16 @@ public class OntopMappingConfigurationImpl extends OntopOBDAConfigurationImpl im
         final OntopOptimizationOptions optimizationOptions;
         private final Optional<ImplicitDBConstraintsReader> implicitDBConstraintsReader;
         private final Optional<OBDASpecification> dataSourceModel;
+        final Optional<DBMetadata> dbMetadata;
 
         private OntopMappingOptions(Optional<OBDASpecification> dataSourceModel,
                                     Optional<ImplicitDBConstraintsReader> implicitDBConstraintsReader,
-                                    OntopOBDAOptions obdaOptions, OntopOptimizationOptions optimizationOptions) {
+                                    Optional<DBMetadata> dbMetadata, OntopOBDAOptions obdaOptions, OntopOptimizationOptions optimizationOptions) {
             this.dataSourceModel = dataSourceModel;
             this.implicitDBConstraintsReader = implicitDBConstraintsReader;
             this.obdaOptions = obdaOptions;
             this.optimizationOptions = optimizationOptions;
+            this.dbMetadata = dbMetadata;
         }
     }
 
@@ -164,6 +166,7 @@ public class OntopMappingConfigurationImpl extends OntopOBDAConfigurationImpl im
         private Optional<OBDASpecification> dataSourceModel = Optional.empty();
         private Optional<Boolean> obtainFullMetadata = Optional.empty();
         private Optional<Boolean> queryingAnnotationsInOntology = Optional.empty();
+        private Optional<DBMetadata> dbMetadata = Optional.empty();
 
         DefaultOntopMappingBuilderFragment(B builder,
                                            Supplier<Boolean> isMappingDefinedSupplier,
@@ -196,16 +199,21 @@ public class OntopMappingConfigurationImpl extends OntopOBDAConfigurationImpl im
             return builder;
         }
 
-
         @Override
         public B enableOntologyAnnotationQuerying(boolean queryingAnnotationsInOntology) {
             this.queryingAnnotationsInOntology = Optional.of(queryingAnnotationsInOntology);
             return builder;
         }
 
+        @Override
+        public B dbMetadata(@Nonnull DBMetadata dbMetadata) {
+            this.dbMetadata = Optional.of(dbMetadata);
+            return builder;
+        }
+
         final OntopMappingOptions generateMappingOptions(OntopOBDAOptions obdaOptions,
                                                          OntopOptimizationOptions optimizationOptions) {
-            return new OntopMappingOptions(dataSourceModel, userConstraints, obdaOptions, optimizationOptions);
+            return new OntopMappingOptions(dataSourceModel, userConstraints, dbMetadata, obdaOptions, optimizationOptions);
         }
 
         Properties generateProperties() {
@@ -251,6 +259,11 @@ public class OntopMappingConfigurationImpl extends OntopOBDAConfigurationImpl im
         @Override
         public B enableOntologyAnnotationQuerying(boolean queryingAnnotationsInOntology) {
             return mappingBuilderFragment.enableOntologyAnnotationQuerying(queryingAnnotationsInOntology);
+        }
+
+        @Override
+        public B dbMetadata(@Nonnull DBMetadata dbMetadata) {
+            return mappingBuilderFragment.dbMetadata(dbMetadata);
         }
 
         final OntopMappingOptions generateMappingOptions() {

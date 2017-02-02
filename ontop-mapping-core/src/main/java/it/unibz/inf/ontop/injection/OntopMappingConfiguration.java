@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.injection;
 
 import it.unibz.inf.ontop.exception.OBDASpecificationException;
 import it.unibz.inf.ontop.injection.impl.OntopMappingConfigurationImpl;
+import it.unibz.inf.ontop.model.DBMetadata;
 import it.unibz.inf.ontop.spec.OBDASpecification;
 import it.unibz.inf.ontop.sql.ImplicitDBConstraintsReader;
 
@@ -48,6 +49,8 @@ public interface OntopMappingConfiguration extends OntopOBDAConfiguration, Ontop
         B enableFullMetadataExtraction(boolean obtainFullMetadata);
 
         B enableOntologyAnnotationQuerying(boolean queryingAnnotationsInOntology);
+
+        B dbMetadata(@Nonnull DBMetadata dbMetadata);
 
     }
 
