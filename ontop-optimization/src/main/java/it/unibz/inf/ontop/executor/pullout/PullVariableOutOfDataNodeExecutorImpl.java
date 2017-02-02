@@ -125,7 +125,7 @@ public class PullVariableOutOfDataNodeExecutorImpl implements PullVariableOutOfD
                 return newFocusNode;
             }
             else if (ancestorNode instanceof LeftJoinNode) {
-                NonCommutativeOperatorNode.ArgumentPosition position =
+                BinaryOrderedOperatorNode.ArgumentPosition position =
                         treeComponent.getOptionalPosition(ancestorNode, lastChildNode).get();
                 switch (position) {
                     case LEFT:

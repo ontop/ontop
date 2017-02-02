@@ -1,15 +1,10 @@
 package it.unibz.inf.ontop.pivotalrepr;
 
 /**
- * For operator QueryNode that are binary and that care about
- * the ordering of their children.
+ * Operator QueryNode which are binary and whose operands ordering is semantically meaningful.
  *
  * For instance: Left Join.
  */
-public interface NonCommutativeOperatorNode extends QueryNode {
+public interface NonCommutativeOperatorNode extends BinaryOrderedOperatorNode {
 
-    public enum ArgumentPosition {
-        LEFT,
-        RIGHT
-    }
 }

@@ -2,7 +2,6 @@ package it.unibz.inf.ontop.pivotalrepr;
 
 import java.util.Optional;
 import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.injection.OntopModelFactory;
 import it.unibz.inf.ontop.model.DistinctVariableOnlyDataAtom;
 
 /**
@@ -23,14 +22,14 @@ public interface IntermediateQueryBuilder {
     /**
      * When the parent is a BinaryAsymetricOperatorNode.
      */
-    void addChild(QueryNode parentNode, QueryNode child, NonCommutativeOperatorNode.ArgumentPosition position)
+    void addChild(QueryNode parentNode, QueryNode child, BinaryOrderedOperatorNode.ArgumentPosition position)
             throws IntermediateQueryBuilderException;
 
     /**
      * For commodity
      */
     void addChild(QueryNode parentNode, QueryNode child,
-                  Optional<NonCommutativeOperatorNode.ArgumentPosition> optionalPosition)
+                  Optional<BinaryOrderedOperatorNode.ArgumentPosition> optionalPosition)
             throws IntermediateQueryBuilderException;
 
 

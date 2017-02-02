@@ -1,7 +1,7 @@
 package it.unibz.inf.ontop.pivotalrepr.impl.tree;
 
 import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.pivotalrepr.NonCommutativeOperatorNode;
+import it.unibz.inf.ontop.pivotalrepr.BinaryOrderedOperatorNode;
 import it.unibz.inf.ontop.pivotalrepr.impl.IllegalTreeUpdateException;
 import it.unibz.inf.ontop.pivotalrepr.QueryNode;
 
@@ -22,7 +22,7 @@ public interface ChildrenRelation {
 
     boolean contains(TreeNode node);
 
-    void addChild(TreeNode childNode, Optional<NonCommutativeOperatorNode.ArgumentPosition> optionalPosition, boolean canReplace)
+    void addChild(TreeNode childNode, Optional<BinaryOrderedOperatorNode.ArgumentPosition> optionalPosition, boolean canReplace)
             throws IllegalTreeUpdateException;
 
     void replaceChild(TreeNode formerChild, TreeNode newChild);
@@ -33,9 +33,9 @@ public interface ChildrenRelation {
 
     Stream<QueryNode> getChildQueryNodeStream();
 
-    Optional<NonCommutativeOperatorNode.ArgumentPosition> getOptionalPosition(TreeNode childTreeNode);
+    Optional<BinaryOrderedOperatorNode.ArgumentPosition> getOptionalPosition(TreeNode childTreeNode);
 
-    Optional<TreeNode> getChild(NonCommutativeOperatorNode.ArgumentPosition position);
+    Optional<TreeNode> getChild(BinaryOrderedOperatorNode.ArgumentPosition position);
 
     ChildrenRelation clone(Map<QueryNode, TreeNode> newNodeIndex);
 

@@ -3,7 +3,7 @@ package it.unibz.inf.ontop.pivotalrepr.impl.tree;
 import java.util.Map;
 import java.util.Optional;
 import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.pivotalrepr.NonCommutativeOperatorNode;
+import it.unibz.inf.ontop.pivotalrepr.BinaryOrderedOperatorNode;
 import it.unibz.inf.ontop.pivotalrepr.QueryNode;
 
 import java.util.LinkedList;
@@ -20,9 +20,9 @@ public class StandardChildrenRelation implements ChildrenRelation {
     private final TreeNode parent;
 
     protected StandardChildrenRelation(TreeNode parent) {
-        if (parent.getQueryNode() instanceof NonCommutativeOperatorNode) {
+        if (parent.getQueryNode() instanceof OrderedOperatorNode) {
             throw new IllegalArgumentException("The StandardChildrenRelation does not accept " +
-                    "BinaryAsymmetricOperatorNode as parents");
+                    "OrderedOperatorNodes as parents");
         }
         this.parent = parent;
         this.children = new LinkedList<>();
@@ -54,7 +54,7 @@ public class StandardChildrenRelation implements ChildrenRelation {
     }
 
     @Override
-    public void addChild(TreeNode childNode, Optional<NonCommutativeOperatorNode.ArgumentPosition> optionalPosition,
+    public void addChild(TreeNode childNode, Optional<BinaryOrderedOperatorNode.ArgumentPosition> optionalPosition,
                          boolean canReplace) {
         if (optionalPosition.isPresent()) {
             throw new IllegalArgumentException("The StandardChildrenRelation does not accept argument positions");
@@ -98,12 +98,12 @@ public class StandardChildrenRelation implements ChildrenRelation {
     }
 
     @Override
-    public Optional<NonCommutativeOperatorNode.ArgumentPosition> getOptionalPosition(TreeNode childTreeNode) {
+    public Optional<BinaryOrderedOperatorNode.ArgumentPosition> getOptionalPosition(TreeNode childTreeNode) {
         return Optional.empty();
     }
 
     @Override
-    public Optional<TreeNode> getChild(NonCommutativeOperatorNode.ArgumentPosition position) {
+    public Optional<TreeNode> getChild(BinaryOrderedOperatorNode.ArgumentPosition position) {
         return Optional.empty();
     }
 
