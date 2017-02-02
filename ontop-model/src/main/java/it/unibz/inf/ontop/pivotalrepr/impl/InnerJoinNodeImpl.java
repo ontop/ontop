@@ -115,7 +115,6 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
 
     @Override
     public NodeTransformationProposal reactToTrueChildRemovalProposal(IntermediateQuery query, TrueNode trueChild) {
-        Optional<ImmutableExpression> condition = getOptionalFilterCondition();
         ImmutableList<QueryNode> remainingChildren = query.getChildrenStream(this)
                 .filter(c -> c != trueChild)
                 .collect(ImmutableCollectors.toList());
@@ -124,12 +123,16 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
                 return new NodeTransformationProposalImpl(DECLARE_AS_TRUE,
                         ImmutableSet.of());
             case 1:
+                Optional<ImmutableExpression> condition = getOptionalFilterCondition();
                 if (condition.isPresent()) {
-                    return new NodeTransformationProposalImpl(NO_LOCAL_CHANGE, ImmutableSet.of());
-                } else {
-                    return new NodeTransformationProposalImpl(REPLACE_BY_UNIQUE_NON_EMPTY_CHILD,
-                            remainingChildren.get(0),ImmutableSet.of());
+                    return new NodeTransformationProposalImpl(
+                            REPLACE_BY_NEW_NODE,
+                            new FilterNodeImpl(condition.get()),
+                            ImmutableSet.of()
+                    );
                 }
+                return new NodeTransformationProposalImpl(REPLACE_BY_UNIQUE_NON_EMPTY_CHILD,
+                            remainingChildren.get(0),ImmutableSet.of());
             default:
                 return new NodeTransformationProposalImpl(NO_LOCAL_CHANGE, ImmutableSet.of());
         }

@@ -1,3 +1,0 @@
-@prefix : <http://example.org/> .
-
-<> :name "Default Graph" .

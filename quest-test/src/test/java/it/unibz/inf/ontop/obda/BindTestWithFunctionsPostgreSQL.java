@@ -79,6 +79,7 @@ public class BindTestWithFunctionsPostgreSQL extends AbstractBindTestWithFunctio
         return expectedValues;
     }
 
+    @Override
     protected List<String> getMonthExpectedValues() {
         List<String> expectedValues = new ArrayList<>();
         expectedValues.add("\"7\"^^xsd:integer");
@@ -89,6 +90,7 @@ public class BindTestWithFunctionsPostgreSQL extends AbstractBindTestWithFunctio
         return expectedValues;
     }
 
+    @Override
     protected List<String> getDayExpectedValues() {
         List<String> expectedValues = new ArrayList<>();
         expectedValues.add("\"14\"^^xsd:integer");
@@ -98,4 +100,15 @@ public class BindTestWithFunctionsPostgreSQL extends AbstractBindTestWithFunctio
 
         return expectedValues;
     }
+
+    @Override
+    protected List<String> getTZExpectedValues() {
+    List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"2:0\"");
+        expectedValues.add("\"1:0\"");
+        expectedValues.add("\"2:0\"");
+        expectedValues.add("\"1:0\"");
+        return expectedValues;
+    }
+
 }

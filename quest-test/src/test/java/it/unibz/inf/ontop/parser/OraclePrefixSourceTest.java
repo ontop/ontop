@@ -3,7 +3,7 @@ package it.unibz.inf.ontop.parser;
 import it.unibz.inf.ontop.quest.AbstractVirtualModeTest;
 
 /**
- * Class to test if annotation property can be treated as data property and object property
+ *  Class to test that a URI with double prefix has not a prefix  wrongly removed
  *
  *
  */

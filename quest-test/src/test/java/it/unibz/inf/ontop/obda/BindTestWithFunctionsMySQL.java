@@ -48,6 +48,12 @@ public class BindTestWithFunctionsMySQL extends AbstractBindTestWithFunctions {
     public void testHash() {
     }
 
+    @Ignore("Not yet supported")
+    @Test
+    @Override
+    public void testTZ() {
+    }
+
     @Override
     protected List<String> getRoundExpectedValues() {
         List<String> expectedValues = new ArrayList<>();

@@ -34,12 +34,12 @@ public class H2ASKTest  {
 		java.sql.Statement s = sqlConnection.createStatement();
 
 		try {
-			String text = new Scanner( new File("src/test/resources/stockexchange-h2.sql") ).useDelimiter("\\A").next();
+			String text = new Scanner( new File("src/test/resources/test/stockexchange-create-h2.sql") ).useDelimiter("\\A").next();
 			s.execute(text);
 			//Server.startWebServer(sqlConnection);
 
 		} catch(SQLException sqle) {
-			System.out.println("Exception in creating db from script");
+			System.out.println("Exception in creating db from script "+sqle.getMessage());
 		}
 
 		s.close();
