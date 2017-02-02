@@ -23,15 +23,16 @@ package it.unibz.inf.ontop.owlrefplatform.core.abox;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Injector;
 import it.unibz.inf.ontop.answering.OntopQueryEngine;
+import it.unibz.inf.ontop.exception.OBDASpecificationException;
+import it.unibz.inf.ontop.exception.OntopConnectionException;
 import it.unibz.inf.ontop.injection.OntopEngineFactory;
 import it.unibz.inf.ontop.model.GraphResultSet;
-import it.unibz.inf.ontop.model.OBDAException;
 import it.unibz.inf.ontop.model.Predicate;
 import it.unibz.inf.ontop.model.OBDAResultSet;
 import it.unibz.inf.ontop.ontology.*;
 import it.unibz.inf.ontop.owlrefplatform.core.*;
 
-import java.sql.SQLException;
+import java.io.IOException;
 import java.util.*;
 
 import it.unibz.inf.ontop.injection.QuestCoreConfiguration;
@@ -76,7 +77,7 @@ public class QuestMaterializer {
 
 	public QuestMaterializer(@Nonnull QuestCoreConfiguration configuration,
 							 @Nonnull ImmutableSet<Predicate> selectedVocabulary,
-							 boolean doStreamResults) throws Exception {
+							 boolean doStreamResults) throws IOException, OBDASpecificationException {
 
 		this.doStreamResults = doStreamResults;
 
@@ -90,7 +91,7 @@ public class QuestMaterializer {
 	}
 
 	public QuestMaterializer(@Nonnull QuestCoreConfiguration configuration,
-							 boolean doStreamResults) throws Exception {
+							 boolean doStreamResults) throws IOException, OBDASpecificationException {
 
 		this.doStreamResults = doStreamResults;
 
@@ -210,8 +211,7 @@ public class QuestMaterializer {
 		
 		private Logger log = LoggerFactory.getLogger(VirtualTripleIterator.class);
 
-		public VirtualTripleIterator(OntopQueryEngine queryEngine, Iterator<Predicate> vocabIter)
-				throws SQLException {
+		public VirtualTripleIterator(OntopQueryEngine queryEngine, Iterator<Predicate> vocabIter) {
 			try{
 				this.queryEngine = queryEngine.getNonPoolConnection();
 
@@ -317,12 +317,14 @@ public class QuestMaterializer {
 					hasNext();
 					return next();
 				}
+				else {
+					throw new IllegalStateException("You cannot call next() twice in a row without calling hasNext()");
+				}
 				
-			} catch (OBDAException e) {
-				e.printStackTrace();
+			} catch (OntopConnectionException e) {
 				log.warn("Exception in Assertion Iterator next");
+				throw new NoSuchElementException();
 			}
-			return null;
 		}
 			
 

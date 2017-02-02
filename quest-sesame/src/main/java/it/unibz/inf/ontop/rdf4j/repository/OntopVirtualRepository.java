@@ -21,10 +21,8 @@ package it.unibz.inf.ontop.rdf4j.repository;
  */
 
 import it.unibz.inf.ontop.answering.OntopQueryEngine;
-import it.unibz.inf.ontop.exception.OntopConnectionException;
 import it.unibz.inf.ontop.injection.OntopEngineFactory;
 import it.unibz.inf.ontop.injection.QuestConfiguration;
-import it.unibz.inf.ontop.model.OBDAException;
 import it.unibz.inf.ontop.owlrefplatform.core.OntopConnection;
 
 import it.unibz.inf.ontop.spec.OBDASpecification;
