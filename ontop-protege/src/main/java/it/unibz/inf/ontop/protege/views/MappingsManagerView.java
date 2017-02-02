@@ -60,13 +60,12 @@ public class MappingsManagerView extends AbstractOWLViewComponent implements OBD
 
 		controller = (OBDAModelManager) editor.get(OBDAModelImpl.class.getName());
 		controller.addListener(this);
-
 		obdaModel = controller.getActiveOBDAModel();
 		
 		TargetQueryVocabularyValidator validator = new TargetQueryValidator(obdaModel.getOntologyVocabulary());
 		
 		// Init the Mapping Manager panel.
-		mappingPanel = new MappingManagerPanel(obdaModel, validator);
+		mappingPanel = new MappingManagerPanel(obdaModel, editor, validator);
 
 		editor.getOWLWorkspace().getOWLSelectionModel().addListener(new OWLSelectionModelListener() {
 			@Override

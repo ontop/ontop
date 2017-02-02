@@ -25,14 +25,22 @@ import it.unibz.inf.ontop.io.PrefixManager;
 import it.unibz.inf.ontop.io.TargetQueryVocabularyValidator;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
+import it.unibz.inf.ontop.model.impl.OBDAModelImpl;
+import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import it.unibz.inf.ontop.parser.TargetQueryParserException;
 import it.unibz.inf.ontop.parser.TurtleOBDASyntaxParser;
 import it.unibz.inf.ontop.protege.gui.IconLoader;
 import it.unibz.inf.ontop.protege.gui.treemodels.IncrementalResultSetTableModel;
 import it.unibz.inf.ontop.protege.utils.*;
+import it.unibz.inf.ontop.protege.views.OWLAxiomToTurtleVisitor;
 import it.unibz.inf.ontop.renderer.SourceQueryRenderer;
 import it.unibz.inf.ontop.renderer.TargetQueryRenderer;
 import it.unibz.inf.ontop.sql.JDBCConnectionManager;
+import org.protege.editor.owl.OWLEditorKit;
+import org.semanticweb.owlapi.model.OWLAxiom;
+import org.semanticweb.owlapi.model.OWLException;
+import org.semanticweb.owlapi.model.OWLOntology;
+import org.semanticweb.owlapi.reasoner.IllegalConfigurationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,6 +67,7 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 	private static final long serialVersionUID = 4351696247473906680L;
 
 	/** Fields */
+	private final OWLEditorKit editor;
 	private OBDAModel obdaModel;
 	private OBDADataSource dataSource;
 	private JDialog parent;
@@ -73,9 +82,10 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 	/**
 	 * Create the dialog for inserting a new mapping.
 	 */
-	public NewMappingDialogPanel(OBDAModel obdaModel, JDialog parent, OBDADataSource dataSource, TargetQueryVocabularyValidator validator) {
+	public NewMappingDialogPanel(OBDAModel obdaModel, OWLEditorKit editorKit, JDialog parent, OBDADataSource dataSource, TargetQueryVocabularyValidator validator) {
 
 		DialogUtils.installEscapeCloseOperation(parent);
+        this.editor = editorKit;
 		this.obdaModel = obdaModel;
 		this.parent = parent;
 		this.dataSource = dataSource;
@@ -229,8 +239,9 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
         java.awt.GridBagConstraints gridBagConstraints;
 
         lblMappingID = new javax.swing.JLabel();
-        cmdTestQuery = new javax.swing.JButton();
         pnlCommandButton = new javax.swing.JPanel();
+        cmdTestQuery = new javax.swing.JButton();
+        cmdTestMapping = new javax.swing.JButton();
         cmdInsertMapping = new javax.swing.JButton();
         cmdCancel = new javax.swing.JButton();
         txtMappingID = new javax.swing.JTextField();
@@ -263,6 +274,9 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
         gridBagConstraints.insets = new java.awt.Insets(8, 10, 8, 0);
         add(lblMappingID, gridBagConstraints);
 
+        pnlCommandButton.setFocusable(false);
+        pnlCommandButton.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.RIGHT));
+
         cmdTestQuery.setIcon(IconLoader.getImageIcon("images/execute.png"));
         cmdTestQuery.setMnemonic('t');
         cmdTestQuery.setText("Test SQL Query");
@@ -273,20 +287,31 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
         cmdTestQuery.setIconTextGap(5);
         cmdTestQuery.setMaximumSize(new java.awt.Dimension(115, 25));
         cmdTestQuery.setMinimumSize(new java.awt.Dimension(115, 25));
-        cmdTestQuery.setPreferredSize(new java.awt.Dimension(115, 25));
+        cmdTestQuery.setPreferredSize(new java.awt.Dimension(135, 25));
         cmdTestQuery.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 cmdTestQueryActionPerformed(evt);
             }
         });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 5;
-        gridBagConstraints.insets = new java.awt.Insets(4, 10, 4, 4);
-        add(cmdTestQuery, gridBagConstraints);
+        pnlCommandButton.add(cmdTestQuery);
 
-        pnlCommandButton.setFocusable(false);
-        pnlCommandButton.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.RIGHT));
+        cmdTestMapping.setIcon(IconLoader.getImageIcon("images/execute.png"));
+        cmdTestMapping.setMnemonic('t');
+        cmdTestMapping.setText("Test Mapping");
+        cmdTestMapping.setToolTipText("Execute the mapping triples in the mapping query text pane<p> and display the results in the table below.");
+        cmdTestMapping.setActionCommand("Test SQL query");
+        cmdTestMapping.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+        cmdTestMapping.setContentAreaFilled(false);
+        cmdTestMapping.setIconTextGap(5);
+        cmdTestMapping.setMaximumSize(new java.awt.Dimension(115, 25));
+        cmdTestMapping.setMinimumSize(new java.awt.Dimension(115, 25));
+        cmdTestMapping.setPreferredSize(new java.awt.Dimension(135, 25));
+        cmdTestMapping.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cmdTestMappingActionPerformed(evt);
+            }
+        });
+        pnlCommandButton.add(cmdTestMapping);
 
         cmdInsertMapping.setIcon(IconLoader.getImageIcon("images/accept.png"));
         cmdInsertMapping.setText("Accept");
@@ -325,9 +350,9 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
         gridBagConstraints.insets = new java.awt.Insets(8, 0, 8, 10);
         add(txtMappingID, gridBagConstraints);
 
-        splitTargetSource.setBorder(null);
         splitTargetSource.setOrientation(javax.swing.JSplitPane.VERTICAL_SPLIT);
         splitTargetSource.setResizeWeight(0.5);
+        splitTargetSource.setToolTipText("");
         splitTargetSource.setDoubleBuffered(true);
         splitTargetSource.setFocusable(false);
         splitTargetSource.setMinimumSize(new java.awt.Dimension(600, 430));
@@ -374,7 +399,7 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
         lblSourceQuery.setFont(new java.awt.Font("Tahoma", 1, 11)); // NOI18N
         lblSourceQuery.setText("Source (SQL Query):");
         lblSourceQuery.setFocusable(false);
-        pnlSourceQueryEditor.add(lblSourceQuery, java.awt.BorderLayout.NORTH);
+        pnlSourceQueryEditor.add(lblSourceQuery, java.awt.BorderLayout.PAGE_START);
 
         scrSourceQuery.setFocusable(false);
 
@@ -424,7 +449,107 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
         add(splitTargetSource, gridBagConstraints);
 
         getAccessibleContext().setAccessibleName("Mapping editor");
+        getAccessibleContext().setAccessibleDescription("");
+        getAccessibleContext().setAccessibleParent(splitTargetSource);
     }// </editor-fold>//GEN-END:initComponents
+
+    private void cmdTestMappingActionPerformed(java.awt.event.ActionEvent evt) {                                               
+        // TODO add your handling code here:
+        boolean mappingValidatorSuccess = mappingValidator(txtTargetQuery.getText(), txtSourceQuery.getText());
+    }
+
+
+    //This function will create an instance of the reasoner and check whether the mapping is correct or not
+    private String callReasoner(OBDAModel targetQueryOBDAModel) throws IllegalConfigurationException, OBDAException, OWLException
+    {
+        OWLOntology ontology = editor.getModelManager().getActiveOntology();
+        QuestOWLFactory factory = new QuestOWLFactory();
+        QuestOWLConfiguration config = QuestOWLConfiguration.builder().obdaModel(targetQueryOBDAModel).build();
+        try{
+            QuestOWL reasoner = factory.createReasoner(ontology, config);
+            QuestOWLConnection conn = reasoner.getConnection();
+            QuestOWLStatement st = conn.createStatement();
+            String sparqlQuery = this.getReasonerSPARQLQuery();
+
+            List<OWLAxiom> owlAxioms = st.executeGraph(sparqlQuery);
+            OWLAxiomToTurtleVisitor owlVisitor = new OWLAxiomToTurtleVisitor(prefixManager);
+            owlAxioms.forEach(ax -> ax.accept(owlVisitor));
+            return owlVisitor.getString();
+        }
+        catch(Exception e)
+        {
+            throw e;
+        }
+    }
+
+    private String getReasonerSPARQLQuery() {
+        String sparqlQueeryString = "CONSTRUCT {?s ?p ?o}\n" +
+                "WHERE {?s ?p ?o}\n";
+        return sparqlQueeryString;
+    }
+
+    //This initial code is taken from the cmdInsertMappingActionPerformed() function. Needs to be refactored
+    private boolean mappingValidator(String targetQueryString, String sourceQueryString)
+    {
+        if (targetQueryString.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "ERROR: The target cannot be empty", "Error", JOptionPane.ERROR_MESSAGE);
+            return false;
+        }
+        if (sourceQueryString.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "ERROR: The source cannot be empty", "Error", JOptionPane.ERROR_MESSAGE);
+            return false;
+        }
+        OBDAModel targetQueryOBDAModel = new OBDAModelImpl();
+        targetQueryOBDAModel.setPrefixManager(obdaModel.getPrefixManager());
+
+        List<Function> targetQuery = parse(targetQueryString);
+        //check which case target query is null
+        if (targetQuery != null) {
+            final boolean isValid = validator.validate(targetQuery);
+            if (isValid) {
+                    URI sourceID = dataSource.getSourceID();
+                    System.out.println(sourceID.toString()+" \n");
+
+                    OBDASQLQuery body = dataFactory.getSQLQuery(sourceQueryString);
+                    System.out.println(body.toString()+" \n");
+
+                    OBDAMappingAxiom newmapping = dataFactory.getRDBMSMappingAxiom(txtMappingID.getText().trim(), body, targetQuery);
+                    System.out.println(newmapping.toString()+" \n");
+
+                    targetQueryOBDAModel.addSource(dataSource);
+
+                    targetQueryOBDAModel.addMapping(sourceID, newmapping, true);
+                    try
+                    {
+                        String message = callReasoner(targetQueryOBDAModel);
+                        JTextArea textArea = new JTextArea(message);
+                        JScrollPane scrollPane = new JScrollPane(textArea);
+                        textArea.setLineWrap(true);
+                        textArea.setWrapStyleWord(true);
+                        scrollPane.setPreferredSize( new Dimension( 500, 500 ) );
+                        JOptionPane.showMessageDialog(this, scrollPane, "Triples", JOptionPane.PLAIN_MESSAGE);
+                    }
+                    catch (Exception e)
+                    {
+                        JOptionPane.showMessageDialog(this, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                    }
+
+
+            } else {
+                // List of invalid predicates that are found by the validator.
+                List<String> invalidPredicates = validator.getInvalidPredicates();
+                String invalidList = "";
+                for (String predicate : invalidPredicates) {
+                    invalidList += "- " + predicate + "\n";
+                }
+                JOptionPane.showMessageDialog(this, "This list of predicates is unknown by the ontology: \n" + invalidList, "New Mapping", JOptionPane.WARNING_MESSAGE);
+                return false;
+            }
+        }
+
+        return true;
+    }
+
 
 	private void releaseResultset() {
 		TableModel model = tblQueryResult.getModel();
@@ -565,6 +690,7 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton cmdCancel;
     private javax.swing.JButton cmdInsertMapping;
+    private javax.swing.JButton cmdTestMapping;
     private javax.swing.JButton cmdTestQuery;
     private javax.swing.JLabel lblMappingID;
     private javax.swing.JLabel lblSourceQuery;

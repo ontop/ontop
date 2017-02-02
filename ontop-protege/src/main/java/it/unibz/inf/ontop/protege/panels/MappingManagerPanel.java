@@ -35,6 +35,7 @@ import it.unibz.inf.ontop.utils.IDGenerator;
 import it.unibz.inf.ontop.utils.SourceQueryValidator;
 import org.antlr.runtime.ANTLRStringStream;
 import org.antlr.runtime.CommonTokenStream;
+import org.protege.editor.owl.OWLEditorKit;
 import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
@@ -53,6 +54,8 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
     private static final long serialVersionUID = -486013653814714526L;
 
 	private Thread validatorThread;
+
+    private OWLEditorKit editor;
 
 	private SourceQueryValidator validator;
 
@@ -80,9 +83,11 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
          * @param validator
          *            TargetQueryVocabularyValidator 
 	 */
-	public MappingManagerPanel(OBDAModel apic, TargetQueryVocabularyValidator validator) {
+	public MappingManagerPanel(OBDAModel apic, OWLEditorKit editorkit, TargetQueryVocabularyValidator validator) {
 
-		validatortrg = validator;
+		editor = editorkit;
+
+        validatortrg = validator;
 		
 		mappingsTree = new JTree();
 
@@ -238,7 +243,7 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
 		dialog.setTitle("Edit Mapping");
 		dialog.setModal(true);
 
-		NewMappingDialogPanel panel = new NewMappingDialogPanel(apic, dialog, selectedSource, validatortrg);
+		NewMappingDialogPanel panel = new NewMappingDialogPanel(apic, editor, dialog, selectedSource, validatortrg);
 		panel.setMapping(mapping);
 		dialog.setContentPane(panel);
 		dialog.setSize(600, 500);
@@ -688,7 +693,7 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
 		dialog.setTitle("New Mapping");
 		dialog.setModal(true);
 
-		NewMappingDialogPanel panel = new NewMappingDialogPanel(apic, dialog, selectedSource, validatortrg);
+		NewMappingDialogPanel panel = new NewMappingDialogPanel(apic, editor, dialog, selectedSource, validatortrg);
 		panel.setID(id);
 		dialog.setContentPane(panel);
 		dialog.setSize(600, 500);
