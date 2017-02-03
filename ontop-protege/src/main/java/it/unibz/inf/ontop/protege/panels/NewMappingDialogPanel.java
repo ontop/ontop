@@ -26,6 +26,7 @@ import it.unibz.inf.ontop.io.TargetQueryVocabularyValidator;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.model.impl.OBDAModelImpl;
+import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import it.unibz.inf.ontop.parser.TargetQueryParserException;
 import it.unibz.inf.ontop.parser.TurtleOBDASyntaxParser;
@@ -59,6 +60,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
+import java.util.Map;
 import java.util.Vector;
 import java.util.concurrent.CountDownLatch;
 
@@ -460,7 +462,7 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 
 
     //This function will create an instance of the reasoner and check whether the mapping is correct or not
-    private String callReasoner(OBDAModel targetQueryOBDAModel) throws IllegalConfigurationException, OBDAException, OWLException
+    private String callReasoner(OBDAModel targetQueryOBDAModel, List<Function> targetQuery) throws IllegalConfigurationException, OBDAException, OWLException
     {
         OWLOntology ontology = editor.getModelManager().getActiveOntology();
         QuestOWLFactory factory = new QuestOWLFactory();
@@ -469,8 +471,7 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
             QuestOWL reasoner = factory.createReasoner(ontology, config);
             QuestOWLConnection conn = reasoner.getConnection();
             QuestOWLStatement st = conn.createStatement();
-            String sparqlQuery = this.getReasonerSPARQLQuery();
-
+            String sparqlQuery = this.getReasonerSPARQLQuery(targetQuery, targetQueryOBDAModel);
             List<OWLAxiom> owlAxioms = st.executeGraph(sparqlQuery);
             OWLAxiomToTurtleVisitor owlVisitor = new OWLAxiomToTurtleVisitor(prefixManager);
             owlAxioms.forEach(ax -> ax.accept(owlVisitor));
@@ -482,10 +483,64 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
         }
     }
 
-    private String getReasonerSPARQLQuery() {
-        String sparqlQueeryString = "CONSTRUCT {?s ?p ?o}\n" +
-                "WHERE {?s ?p ?o}\n";
-        return sparqlQueeryString;
+    private String getReasonerSPARQLQuery(List<Function> targetQuery, OBDAModel targetQueryOBDAModel) {
+        StringBuffer sparqlConstructClause = new StringBuffer();
+        sparqlConstructClause.append(" {?subject ");
+        for (Function func:targetQuery){
+            if (func.getArity() == 1){
+                sparqlConstructClause.append("a " + targetQueryOBDAModel.getPrefixManager().getShortForm(func.getFunctionSymbol().getName()));
+            }
+            else if(func.getArity() == 2){
+                sparqlConstructClause.append(targetQueryOBDAModel.getPrefixManager().getShortForm(func.getFunctionSymbol().getName()) +
+                        " ?var" + Integer.toString(targetQuery.indexOf(func)));
+            }
+            else{
+                //Don't think that this block will ever be executed
+            }
+            if(targetQuery.indexOf(func) != (targetQuery.size() - 1)){
+                sparqlConstructClause.append(" ; ");
+            }
+            else{
+                sparqlConstructClause.append(" . } \n");
+            }
+        }
+        StringBuffer sparqlWhereClause = new StringBuffer(sparqlConstructClause);
+        sparqlConstructClause.insert(0, "CONSTRUCT");
+        sparqlWhereClause.insert(0, "WHERE");
+        StringBuffer sparqlQueryString = new StringBuffer(sparqlConstructClause + " \n " + sparqlWhereClause);
+        addMappingPrefixes(sparqlQueryString, targetQueryOBDAModel);
+        return sparqlQueryString.toString();
+    }
+
+    private void addMappingPrefixes(StringBuffer sparqlQueryString, OBDAModel targetQueryOBDAModel) {
+        Map<String, String> prefixMap = targetQueryOBDAModel.getPrefixManager().getPrefixMap();
+        StringBuffer sb = new StringBuffer();
+        for (String prefix : prefixMap.keySet()) {
+            sb.append("PREFIX");
+            sb.append(" ");
+            sb.append(prefix);
+            sb.append(" ");
+            sb.append("<");
+            sb.append(prefixMap.get(prefix));
+            sb.append(">");
+            sb.append(" \n");
+        }
+        if(!prefixMap.containsKey(OBDAVocabulary.PREFIX_XSD)){
+            sb.append("PREFIX " + OBDAVocabulary.PREFIX_XSD + " <" + OBDAVocabulary.NS_XSD + "> \n");
+        }
+        if(!prefixMap.containsKey(OBDAVocabulary.PREFIX_OBDA)){
+            sb.append("PREFIX " + OBDAVocabulary.PREFIX_OBDA + " <" + OBDAVocabulary.NS_OBDA + "> \n");
+        }
+        if(!prefixMap.containsKey(OBDAVocabulary.PREFIX_RDF)){
+            sb.append("PREFIX " + OBDAVocabulary.PREFIX_RDF + " <" + OBDAVocabulary.NS_RDF + "> \n");
+        }
+        if(!prefixMap.containsKey(OBDAVocabulary.PREFIX_RDFS)){
+            sb.append("PREFIX " + OBDAVocabulary.PREFIX_RDFS + " <" + OBDAVocabulary.NS_RDFS + "> \n");
+        }
+        if(!prefixMap.containsKey(OBDAVocabulary.PREFIX_OWL)){
+            sb.append("PREFIX " + OBDAVocabulary.PREFIX_OWL + " <" + OBDAVocabulary.NS_OWL + "> \n");
+        }
+        sparqlQueryString.insert(0, sb);
     }
 
     //This initial code is taken from the cmdInsertMappingActionPerformed() function. Needs to be refactored
@@ -521,7 +576,7 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
                     targetQueryOBDAModel.addMapping(sourceID, newmapping, true);
                     try
                     {
-                        String message = callReasoner(targetQueryOBDAModel);
+                        String message = callReasoner(targetQueryOBDAModel, targetQuery);
                         JTextArea textArea = new JTextArea(message);
                         JScrollPane scrollPane = new JScrollPane(textArea);
                         textArea.setLineWrap(true);
