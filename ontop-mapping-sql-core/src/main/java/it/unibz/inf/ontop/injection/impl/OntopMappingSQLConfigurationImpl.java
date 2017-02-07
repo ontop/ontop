@@ -1,16 +1,19 @@
 package it.unibz.inf.ontop.injection.impl;
 
 
+import com.google.common.collect.ImmutableMap;
 import com.google.inject.Module;
 import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.exception.InvalidMappingException;
 import it.unibz.inf.ontop.exception.OBDASpecificationException;
+import it.unibz.inf.ontop.executor.ProposalExecutor;
 import it.unibz.inf.ontop.injection.InvalidOntopConfigurationException;
 import it.unibz.inf.ontop.injection.OntopMappingSQLConfiguration;
 import it.unibz.inf.ontop.injection.OntopMappingSQLSettings;
 import it.unibz.inf.ontop.injection.impl.OntopMappingConfigurationImpl.OntopMappingOptions;
 import it.unibz.inf.ontop.mapping.MappingParser;
 import it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing.TMappingExclusionConfig;
+import it.unibz.inf.ontop.pivotalrepr.proposal.QueryOptimizationProposal;
 import it.unibz.inf.ontop.spec.OBDASpecification;
 import it.unibz.inf.ontop.mapping.extraction.PreProcessedMapping;
 import it.unibz.inf.ontop.model.OBDAModel;
@@ -132,6 +135,20 @@ public class OntopMappingSQLConfigurationImpl extends OntopSQLCoreConfigurationI
         }
 
         return Optional.empty();
+    }
+
+    /**
+     * Can be overloaded by sub-classes
+     */
+    @Override
+    protected ImmutableMap<Class<? extends QueryOptimizationProposal>, Class<? extends ProposalExecutor>>
+    generateOptimizationConfigurationMap() {
+        ImmutableMap.Builder<Class<? extends QueryOptimizationProposal>, Class<? extends ProposalExecutor>>
+                internalExecutorMapBuilder = ImmutableMap.builder();
+        internalExecutorMapBuilder.putAll(super.generateOptimizationConfigurationMap());
+        internalExecutorMapBuilder.putAll(mappingConfiguration.generateOptimizationConfigurationMap());
+
+        return internalExecutorMapBuilder.build();
     }
 
 

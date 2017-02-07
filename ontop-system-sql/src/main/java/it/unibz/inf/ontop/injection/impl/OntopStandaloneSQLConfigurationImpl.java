@@ -1,12 +1,16 @@
 package it.unibz.inf.ontop.injection.impl;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.inject.Module;
 import it.unibz.inf.ontop.answering.reformulation.IRIDictionary;
+import it.unibz.inf.ontop.executor.ProposalExecutor;
 import it.unibz.inf.ontop.injection.OntopStandaloneSQLConfiguration;
 import it.unibz.inf.ontop.injection.OntopStandaloneSQLSettings;
 import it.unibz.inf.ontop.injection.impl.OntopQueryAnsweringConfigurationImpl.DefaultOntopQueryAnsweringBuilderFragment;
 import it.unibz.inf.ontop.injection.impl.OntopQueryAnsweringSQLConfigurationImpl.DefaultOntopQueryAnsweringSQLBuilderFragment;
 import it.unibz.inf.ontop.injection.impl.OntopQueryAnsweringSQLConfigurationImpl.OntopQueryAnsweringSQLOptions;
+import it.unibz.inf.ontop.pivotalrepr.proposal.QueryOptimizationProposal;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import javax.annotation.Nonnull;
 import java.util.Optional;
@@ -43,6 +47,18 @@ public class OntopStandaloneSQLConfigurationImpl extends OntopMappingSQLAllConfi
                 qaConfiguration.buildGuiceModules());
     }
 
+    /**
+     * Can be overloaded by sub-classes
+     */
+    @Override
+    protected ImmutableMap<Class<? extends QueryOptimizationProposal>, Class<? extends ProposalExecutor>>
+    generateOptimizationConfigurationMap() {
+        return Stream.concat(
+                    super.generateOptimizationConfigurationMap().entrySet().stream(),
+                    qaConfiguration.generateOptimizationConfigurationMap().entrySet().stream())
+                .distinct()
+                .collect(ImmutableCollectors.toMap());
+    }
 
 
     static class OntopStandaloneSQLOptions {

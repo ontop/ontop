@@ -5,7 +5,6 @@ import it.unibz.inf.ontop.injection.OntopQueryAnsweringSQLConfiguration;
 import it.unibz.inf.ontop.injection.OntopQueryAnsweringSQLSettings;
 import it.unibz.inf.ontop.injection.impl.OntopSQLCoreConfigurationImpl.OntopSQLOptions;
 
-import java.util.Map;
 import java.util.Properties;
 import java.util.stream.Stream;
 
@@ -32,7 +31,8 @@ public class OntopQueryAnsweringSQLConfigurationImpl extends OntopQueryAnswering
                 Stream.concat(
                         super.buildGuiceModules(),
                         sqlConfiguration.buildGuiceModules()),
-                Stream.of(new OntopQueryAnsweringSQLModule(this)));
+                Stream.of(new OntopQueryAnsweringSQLModule(this),
+                        new OntopQueryAnsweringPostModule(getSettings())));
     }
 
     static class OntopQueryAnsweringSQLOptions {

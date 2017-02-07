@@ -17,8 +17,8 @@ public interface OntopQueryAnsweringSettings extends OntopOBDASettings, OntopOpt
     // Keys
     //--------------------------
 
-    String SQL_GENERATE_REPLACE = "org.obda.owlreformulationplatform.sqlGenerateReplace";
-    String DISTINCT_RESULTSET = "org.obda.owlreformulationplatform.distinctResultSet";
+    String SQL_GENERATE_REPLACE = "ontop.iriSafeEncoding";
+    String DISTINCT_RESULTSET = "ontop.distinctResultSet";
 
     String EXISTENTIAL_REASONING = "ontop.existentialReasoning";
 }

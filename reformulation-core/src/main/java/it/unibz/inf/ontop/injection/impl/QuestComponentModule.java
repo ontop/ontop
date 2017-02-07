@@ -27,7 +27,5 @@ public class QuestComponentModule extends OntopAbstractModule {
     @Override
     protected void configure() {
         configureCoreConfiguration();
-
-        bindFromPreferences(QueryCache.class);
     }
 }

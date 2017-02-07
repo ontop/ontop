@@ -16,7 +16,7 @@ public class OntopStandaloneSQLSettingsImpl extends OntopMappingSQLAllSettingsIm
     }
 
     private static Properties loadProperties(Properties userProperties) {
-        Properties properties = OntopQueryAnsweringSQLSettingsImpl.loadDefaultQASQLProperties();
+        Properties properties = new OntopQueryAnsweringSQLSettingsImpl(userProperties).copyProperties();
         properties.putAll(userProperties);
         return properties;
     }

@@ -8,6 +8,7 @@ import it.unibz.inf.ontop.answering.reformulation.OntopQueryReformulator;
 import it.unibz.inf.ontop.answering.reformulation.unfolding.QueryUnfolder;
 import it.unibz.inf.ontop.injection.*;
 import it.unibz.inf.ontop.owlrefplatform.core.DBConnector;
+import it.unibz.inf.ontop.owlrefplatform.core.QueryCache;
 import it.unibz.inf.ontop.owlrefplatform.core.reformulation.DummyRewriter;
 import it.unibz.inf.ontop.owlrefplatform.core.reformulation.ExistentialQueryRewriter;
 import it.unibz.inf.ontop.owlrefplatform.core.reformulation.QueryRewriter;
@@ -34,6 +35,8 @@ public class OntopQueryAnsweringPostModule extends OntopAbstractModule {
         else {
             bind(QueryRewriter.class).to(DummyRewriter.class);
         }
+
+        bindFromPreferences(QueryCache.class);
 
         Module reformulationFactoryModule = buildFactory(
                 ImmutableList.of(
