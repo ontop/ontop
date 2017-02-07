@@ -5,6 +5,6 @@ package it.unibz.inf.ontop.pivotalrepr;
  *
  * For instance: Left Join.
  */
-public interface NonCommutativeOperatorNode extends BinaryOrderedOperatorNode {
+public interface BinaryNonCommutativeOperatorNode extends BinaryOrderedOperatorNode {
 
 }
