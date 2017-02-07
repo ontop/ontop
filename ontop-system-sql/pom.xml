@@ -23,7 +23,7 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>ontop-mapping-sql-core</artifactId>
+            <artifactId>ontop-mapping-sql-all</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

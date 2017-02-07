@@ -12,7 +12,6 @@ import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.exception.InvalidMappingException;
 import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
 import it.unibz.inf.ontop.injection.OBDAFactoryWithException;
-import it.unibz.inf.ontop.injection.OBDASettings;
 import it.unibz.inf.ontop.io.PrefixManager;
 import it.unibz.inf.ontop.mapping.MappingParser;
 import it.unibz.inf.ontop.model.OBDAMappingAxiom;
@@ -27,7 +26,6 @@ import java.io.Reader;
  */
 public class R2RMLMappingParser implements MappingParser {
 
-    private final OBDASettings configuration;
     private final NativeQueryLanguageComponentFactory nativeQLFactory;
     private final OBDAFactoryWithException obdaFactory;
     private final MappingFactory mappingFactory;
@@ -35,11 +33,9 @@ public class R2RMLMappingParser implements MappingParser {
 
     @Inject
     private R2RMLMappingParser(NativeQueryLanguageComponentFactory nativeQLFactory,
-                               OBDAFactoryWithException obdaFactory, MappingFactory mappingFactory,
-                               OBDASettings configuration) {
+                               OBDAFactoryWithException obdaFactory, MappingFactory mappingFactory) {
         this.nativeQLFactory = nativeQLFactory;
         this.obdaFactory = obdaFactory;
-        this.configuration = configuration;
         this.mappingFactory = mappingFactory;
     }
 

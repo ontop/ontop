@@ -1,18 +1,29 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-    <modelVersion>4.0.0</modelVersion>
     <parent>
         <artifactId>ontop</artifactId>
         <groupId>it.unibz.inf.ontop</groupId>
         <version>3.0.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
-    <artifactId>ontop-mapping-native</artifactId>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>ontop-mapping-sql-all</artifactId>
     <packaging>jar</packaging>
-    <name>ontop-mapping-native</name>
+    <name>ontop-mapping-sql-all</name>
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>ontop-mapping-sql-core</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>ontop-mapping-native</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>ontop-obdalib-r2rml</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

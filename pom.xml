@@ -64,6 +64,7 @@
 		<module>ontop-sql-common</module>
 		<module>ontop-mapping-sql-core</module>
 		<module>ontop-mapping-native</module>
+		<module>ontop-mapping-sql-all</module>
 		<module>ontop-ontology-owlapi</module>
 		<module>ontop-query-answering-core</module>
 		<module>ontop-query-answering-sql</module>

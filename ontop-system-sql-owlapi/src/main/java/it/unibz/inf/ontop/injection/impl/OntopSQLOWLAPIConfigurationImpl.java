@@ -99,7 +99,7 @@ public class OntopSQLOWLAPIConfigurationImpl extends OntopStandaloneSQLConfigura
         final OntopSQLOWLAPIOptions generateSQLOWLAPIOptions() {
             OntopStandaloneSQLOptions standaloneSQLOptions = generateStandaloneSQLOptions();
             OntopMappingOntologyOptions mappingOntologyOptions = ontologyBuilderFragment.generateMappingOntologyOptions(
-                    standaloneSQLOptions.mappingOptions.mappingOptions);
+                    standaloneSQLOptions.mappingOptions.mappingSQLOptions.mappingOptions);
 
             OntopMappingOWLAPIOptions owlOptions = owlBuilderFragment.generateOntologyOWLAPIOptions(mappingOntologyOptions);
             return new OntopSQLOWLAPIOptions(standaloneSQLOptions, owlOptions);
@@ -112,7 +112,7 @@ public class OntopSQLOWLAPIConfigurationImpl extends OntopStandaloneSQLConfigura
 
         @Override
         public OntopSQLOWLAPIConfiguration build() {
-            OntopStandaloneSQLSettings settings = new OntopStandaloneSQLSettingsImpl(generateProperties());
+            OntopStandaloneSQLSettings settings = new OntopStandaloneSQLSettingsImpl(generateProperties(), isR2rml());
             OntopSQLOWLAPIOptions options = generateSQLOWLAPIOptions();
             return new OntopSQLOWLAPIConfigurationImpl(settings, options);
         }

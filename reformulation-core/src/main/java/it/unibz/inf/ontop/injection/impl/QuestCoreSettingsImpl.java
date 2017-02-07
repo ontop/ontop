@@ -1,13 +1,14 @@
 package it.unibz.inf.ontop.injection.impl;
 
 
+import it.unibz.inf.ontop.injection.OBDASettings;
 import it.unibz.inf.ontop.injection.OntopQueryAnsweringSettings;
 import it.unibz.inf.ontop.injection.QuestCoreSettings;
 
 import java.util.Optional;
 import java.util.Properties;
 
-public class QuestCoreSettingsImpl extends OBDASettingsImpl implements QuestCoreSettings {
+public class QuestCoreSettingsImpl extends OntopMappingSQLSettingsImpl implements QuestCoreSettings, OBDASettings {
 
     private static final String DEFAULT_QUEST_PROPERTIES_FILE = "QuestDefaults.properties";
     private final OntopQueryAnsweringSettings runtimeSettings;

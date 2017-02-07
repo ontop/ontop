@@ -22,8 +22,7 @@ package it.unibz.inf.ontop.r2rml;
 
 import it.unibz.inf.ontop.exception.InvalidMappingExceptionWithIndicator;
 import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
-import it.unibz.inf.ontop.injection.OBDACoreConfiguration;
-import it.unibz.inf.ontop.injection.OBDASettings;
+import it.unibz.inf.ontop.injection.OntopMappingSQLAllConfiguration;
 import it.unibz.inf.ontop.io.OntopNativeMappingSerializer;
 import it.unibz.inf.ontop.model.OBDAModel;
 
@@ -34,6 +33,9 @@ import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 
+import static it.unibz.inf.ontop.injection.OntopSQLCoreSettings.*;
+
+@Deprecated
 class MappingConverterCMD {
 
 	public static void main(String[] args) {
@@ -56,7 +58,7 @@ class MappingConverterCMD {
 
 		try {
 			if (mapFile.endsWith(".obda")) {
-				OBDACoreConfiguration configuration = OBDACoreConfiguration.defaultBuilder()
+				OntopMappingSQLAllConfiguration configuration = OntopMappingSQLAllConfiguration.defaultBuilder()
 						.properties(generateProperties())
 						.nativeOntopMappingFile(mapFile)
 						.build();
@@ -92,7 +94,7 @@ class MappingConverterCMD {
 						+ " written!");
 			} else if (mapFile.endsWith(".ttl")) {
 
-				OBDACoreConfiguration configuration = OBDACoreConfiguration.defaultBuilder()
+				OntopMappingSQLAllConfiguration configuration = OntopMappingSQLAllConfiguration.defaultBuilder()
 						.properties(generateProperties())
 						.r2rmlMappingFile(mapFile)
 						.build();
@@ -119,11 +121,11 @@ class MappingConverterCMD {
 
 	private static Properties generateProperties() {
 		Properties p = new Properties();
-		p.setProperty(OBDASettings.JDBC_NAME, "DBName");
-		p.setProperty(OBDASettings.JDBC_URL, "jdbc:h2:tcp://localhost/DBName");
-		p.setProperty(OBDASettings.JDBC_USER, "sa");
-		p.setProperty(OBDASettings.JDBC_PASSWORD, "");
-		p.setProperty(OBDASettings.JDBC_DRIVER, "com.mysql.jdbc.Driver");
+		p.setProperty(JDBC_NAME, "DBName");
+		p.setProperty(JDBC_URL, "jdbc:h2:tcp://localhost/DBName");
+		p.setProperty(JDBC_USER, "sa");
+		p.setProperty(JDBC_PASSWORD, "");
+		p.setProperty(JDBC_DRIVER, "com.mysql.jdbc.Driver");
 		return p;
 	}
 

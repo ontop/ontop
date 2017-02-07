@@ -4,8 +4,7 @@ import eu.optique.api.mapping.TriplesMap;
 import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.exception.InvalidMappingException;
 import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
-import it.unibz.inf.ontop.injection.OBDACoreConfiguration;
-import it.unibz.inf.ontop.injection.OBDASettings;
+import it.unibz.inf.ontop.injection.OntopMappingSQLAllConfiguration;
 import it.unibz.inf.ontop.model.OBDAModel;
 import org.junit.Test;
 
@@ -14,6 +13,7 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.Properties;
 
+import static it.unibz.inf.ontop.injection.OntopSQLCoreSettings.*;
 import static junit.framework.TestCase.assertTrue;
 
 public class OBDAMappingTransformerDebugTest {
@@ -22,7 +22,7 @@ public class OBDAMappingTransformerDebugTest {
     public void testMultipleSubjectsInMappingTarget() throws IOException, InvalidMappingException, DuplicateMappingException {
         File mapFile = new File("src/test/resources/obdaMappingTransformerTests/splitMappingAxiomBySubject.obda");
 
-        OBDACoreConfiguration config = OBDACoreConfiguration.defaultBuilder()
+        OntopMappingSQLAllConfiguration config = OntopMappingSQLAllConfiguration.defaultBuilder()
                 .properties(generateProperties())
                 .nativeOntopMappingFile(mapFile)
                 .build();
@@ -42,7 +42,7 @@ public class OBDAMappingTransformerDebugTest {
     @Test
     public void testPredicateMapTranslation() throws IOException, InvalidMappingException, DuplicateMappingException {
         File mapFile = new File("src/test/resources/obdaMappingTransformerTests/predicateMap.obda");
-        OBDACoreConfiguration config = OBDACoreConfiguration.defaultBuilder()
+        OntopMappingSQLAllConfiguration config = OntopMappingSQLAllConfiguration.defaultBuilder()
                 .properties(generateProperties())
                 .nativeOntopMappingFile(mapFile)
                 .build();
@@ -59,11 +59,11 @@ public class OBDAMappingTransformerDebugTest {
 
     private static Properties generateProperties() {
         Properties p = new Properties();
-        p.setProperty(OBDASettings.JDBC_NAME, "DBName");
-        p.setProperty(OBDASettings.JDBC_URL, "jdbc:h2:tcp://localhost/DBName");
-        p.setProperty(OBDASettings.JDBC_USER, "sa");
-        p.setProperty(OBDASettings.JDBC_PASSWORD, "");
-        p.setProperty(OBDASettings.JDBC_DRIVER, "com.mysql.jdbc.Driver");
+        p.setProperty(JDBC_NAME, "DBName");
+        p.setProperty(JDBC_URL, "jdbc:h2:tcp://localhost/DBName");
+        p.setProperty(JDBC_USER, "sa");
+        p.setProperty(JDBC_PASSWORD, "");
+        p.setProperty(JDBC_DRIVER, "com.mysql.jdbc.Driver");
         return p;
     }
 }

@@ -6,12 +6,12 @@ import it.unibz.inf.ontop.injection.OntopStandaloneSQLSettings;
 import java.util.Properties;
 
 
-public class OntopStandaloneSQLSettingsImpl extends OntopMappingSQLSettingsImpl implements OntopStandaloneSQLSettings {
+public class OntopStandaloneSQLSettingsImpl extends OntopMappingSQLAllSettingsImpl implements OntopStandaloneSQLSettings {
 
     private final OntopQueryAnsweringSQLSettings qaSettings;
 
-    OntopStandaloneSQLSettingsImpl(Properties userProperties) {
-        super(loadProperties(userProperties));
+    OntopStandaloneSQLSettingsImpl(Properties userProperties, boolean isR2rml) {
+        super(loadProperties(userProperties), isR2rml);
         qaSettings = new OntopQueryAnsweringSQLSettingsImpl(copyProperties());
     }
 
