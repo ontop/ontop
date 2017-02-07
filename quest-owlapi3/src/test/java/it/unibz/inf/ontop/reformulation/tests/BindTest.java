@@ -28,7 +28,7 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-import it.unibz.inf.ontop.injection.QuestConfiguration;
+import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.owlapi.OntopOWLException;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import org.junit.*;
@@ -127,7 +127,7 @@ public class BindTest {
 
 		// Creating a new instance of the reasoner
 		QuestOWLFactory factory = new QuestOWLFactory();
-        QuestConfiguration configuration = QuestConfiguration.defaultBuilder()
+        OntopSQLOWLAPIConfiguration configuration = OntopSQLOWLAPIConfiguration.defaultBuilder()
                 .nativeOntopMappingFile(OBDA_FILE)
                 .ontologyFile(OWL_FILE)
                 .propertyFile(PROPERTY_FILE)
@@ -501,7 +501,7 @@ public class BindTest {
 
 			// Creating a new instance of the reasoner
 			QuestOWLFactory factory = new QuestOWLFactory();
-            QuestConfiguration configuration = QuestConfiguration.defaultBuilder()
+            OntopSQLOWLAPIConfiguration configuration = OntopSQLOWLAPIConfiguration.defaultBuilder()
                     .nativeOntopMappingFile(OBDA_FILE)
                     .ontologyFile(OWL_FILE)
                     .propertyFile(PROPERTY_FILE)

@@ -20,8 +20,7 @@ package it.unibz.inf.ontop.owlrefplatform.owlapi;
  * #L%
  */
 
-import it.unibz.inf.ontop.injection.QuestConfiguration;
-import it.unibz.inf.ontop.model.OBDAModel;
+import it.unibz.inf.ontop.injection.OntopSystemOWLAPIConfiguration;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.reasoner.IllegalConfigurationException;
@@ -39,13 +38,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 /***
  * TODO: rewrite the doc
  * <p>
- * Implementation of an OWLReasonerFactory that can create instances of Quest.
- * Note, to create an instance of Quest first you must call the method
- * {@code #setPreferenceHolder(Properties)} with your parameters see Quest.java
- * for a description of the preferences. Also, if you use Quest in Virtual ABox
- * mode you must set an {@link OBDAModel} with your mappings.
- *
- * @see OBDAModel
+ * Implementation of an OWLReasonerFactory that can create instances of Ontop.
  */
 public class QuestOWLFactory implements OWLReasonerFactory {
 
@@ -87,7 +80,7 @@ public class QuestOWLFactory implements OWLReasonerFactory {
     }
 
     @Nonnull
-    public QuestOWL createReasoner(@Nonnull QuestConfiguration config)
+    public QuestOWL createReasoner(@Nonnull OntopSystemOWLAPIConfiguration config)
             throws IllegalConfigurationException, OWLOntologyCreationException {
 
         QuestOWLConfiguration owlConfiguration = new QuestOWLConfiguration(config);

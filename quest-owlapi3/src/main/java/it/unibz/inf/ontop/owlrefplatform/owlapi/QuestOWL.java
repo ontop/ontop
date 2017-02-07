@@ -23,6 +23,7 @@ package it.unibz.inf.ontop.owlrefplatform.owlapi;
 import com.google.inject.Injector;
 import it.unibz.inf.ontop.answering.OntopQueryEngine;
 import it.unibz.inf.ontop.exception.OBDASpecificationException;
+import it.unibz.inf.ontop.exception.OntopConnectionException;
 import it.unibz.inf.ontop.injection.*;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.ontology.*;
@@ -120,7 +121,7 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 			throws IllegalConfigurationException {
         super(rootOntology, owlConfiguration, BufferingMode.BUFFERING);
 
-		QuestConfiguration questConfiguration = owlConfiguration.getQuestConfiguration();
+		OntopSystemConfiguration questConfiguration = owlConfiguration.getOntopConfiguration();
 
 		/**
 		 * Validates the preferences
@@ -199,7 +200,7 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 		return owlconn.createStatement();
 	}
 
-	private void prepareConnector() throws OBDAException {
+	private void prepareConnector() throws OntopConnectionException {
 
 		try {
 			if (queryEngine != null)
@@ -218,18 +219,13 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 		queryEngine.connect();
 		
 		// Set<OWLOntology> importsClosure = man.getImportsClosure(getRootOntology());
-		
 
-		try {
-			//conn = questInstance.getConnection();
-			conn = queryEngine.getNonPoolConnection();
-			owlconn = new QuestOWLConnection(conn);
+		//conn = questInstance.getConnection();
+		conn = queryEngine.getNonPoolConnection();
+		owlconn = new QuestOWLConnection(conn);
 
-			questready = true;
-			log.debug("Quest has completed the setup and it is ready for query answering!");
-		} catch (OBDAException e) {
-			throw e;
-		}
+		questready = true;
+		log.debug("Ontop has completed the setup and it is ready for query answering!");
 	}
 
 	@Override
@@ -276,7 +272,7 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 
 
 
-	public OntopOWLConnection getConnection() throws OBDAException {
+	public OntopOWLConnection getConnection() {
 		return owlconn;
 	}
 
@@ -284,9 +280,8 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 	 * Replaces the owl connection with a new one
 	 * Called when the user cancels a query. Easier to get a new connection, than waiting for the cancel
 	 * @return The old connection: The caller must close this connection
-	 * @throws OBDAException
 	 */
-	public OntopOWLConnection replaceConnection() throws OBDAException {
+	public OntopOWLConnection replaceConnection() throws OntopConnectionException {
 		OntopOWLConnection oldconn = this.owlconn;
 		conn = queryEngine.getNonPoolConnection();
 		owlconn = new QuestOWLConnection(conn);
@@ -514,20 +509,15 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 	
 	private boolean executeConsistencyQuery(String strQuery) {
 		OntopStatement query;
-		try {
-			query = conn.createStatement();
-			OBDAResultSet rs = query.execute(strQuery);
-			TupleResultSet trs = ((TupleResultSet)rs);
-			if (trs!= null && trs.nextRow()){
-				String value = trs.getConstant(0).getValue();
-				boolean b = Boolean.parseBoolean(value);
-				trs.close();
-				if (b) 
-					return false;
-			}
-			
-		} catch (OBDAException e) {
-			e.printStackTrace();
+		query = conn.createStatement();
+		OBDAResultSet rs = query.execute(strQuery);
+		TupleResultSet trs = ((TupleResultSet)rs);
+		if (trs!= null && trs.nextRow()){
+			String value = trs.getConstant(0).getValue();
+			boolean b = Boolean.parseBoolean(value);
+			trs.close();
+			if (b)
+				return false;
 		}
 		return true;
 	}

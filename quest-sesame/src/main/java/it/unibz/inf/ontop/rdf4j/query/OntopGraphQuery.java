@@ -21,7 +21,6 @@ package it.unibz.inf.ontop.rdf4j.query;
  */
 
 import it.unibz.inf.ontop.model.GraphResultSet;
-import it.unibz.inf.ontop.model.OBDAException;
 import it.unibz.inf.ontop.ontology.Assertion;
 
 import java.util.HashMap;
@@ -67,11 +66,10 @@ public class OntopGraphQuery extends AbstractOntopQuery implements GraphQuery {
 
     @Override
 	public GraphQueryResult evaluate() throws QueryEvaluationException {
-		GraphResultSet res = null;
-		OntopStatement stm = null;
-		try {
-			stm = conn.createStatement();
-			res = (GraphResultSet) stm.execute(getQueryString());
+		try (
+				OntopStatement stm = conn.createStatement();
+				GraphResultSet res = (GraphResultSet) stm.execute(getQueryString())
+		){
 			
 			Map<String, String> namespaces = new HashMap<>();
 			List<Statement> results = new LinkedList<>();
@@ -89,22 +87,8 @@ public class OntopGraphQuery extends AbstractOntopQuery implements GraphQuery {
 			//return new GraphQueryResultImpl(namespaces, results.iterator());
             return new GraphQueryResultImpl(namespaces, new CollectionIteration<>(results));
 			
-		} catch (OBDAException e) {
+		} catch (Exception e) {
 			throw new QueryEvaluationException(e);
-		}
-		finally{
-			try {
-				if (res != null)
-				res.close();
-			} catch (OBDAException e1) {
-				e1.printStackTrace();
-			}
-			try {
-				if (stm != null)
-						stm.close();
-			} catch (OBDAException e) {
-				e.printStackTrace();
-			}
 		}
 	}
 

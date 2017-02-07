@@ -10,6 +10,7 @@ import it.unibz.inf.ontop.injection.OntopMappingSQLConfiguration;
 import it.unibz.inf.ontop.injection.OntopMappingSQLSettings;
 import it.unibz.inf.ontop.injection.impl.OntopMappingConfigurationImpl.OntopMappingOptions;
 import it.unibz.inf.ontop.mapping.MappingParser;
+import it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing.TMappingExclusionConfig;
 import it.unibz.inf.ontop.spec.OBDASpecification;
 import it.unibz.inf.ontop.mapping.extraction.PreProcessedMapping;
 import it.unibz.inf.ontop.model.OBDAModel;
@@ -61,6 +62,11 @@ public class OntopMappingSQLConfigurationImpl extends OntopSQLCoreConfigurationI
     @Override
     public Optional<ImplicitDBConstraintsReader> getImplicitDBConstraintsReader() {
         return mappingConfiguration.getImplicitDBConstraintsReader();
+    }
+
+    @Override
+    public Optional<TMappingExclusionConfig> getTmappingExclusions() {
+        return mappingConfiguration.getTmappingExclusions();
     }
 
     @Override

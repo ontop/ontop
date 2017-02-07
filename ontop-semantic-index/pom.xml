@@ -20,7 +20,6 @@
             <groupId>${project.groupId}</groupId>
             <artifactId>ontop-quest-rdf4j</artifactId>
             <version>${project.version}</version>
-            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>

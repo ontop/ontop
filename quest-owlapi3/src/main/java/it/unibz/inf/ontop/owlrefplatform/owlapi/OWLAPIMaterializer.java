@@ -21,7 +21,7 @@ package it.unibz.inf.ontop.owlrefplatform.owlapi;
  */
 
 import com.google.common.collect.ImmutableSet;
-import it.unibz.inf.ontop.injection.QuestConfiguration;
+import it.unibz.inf.ontop.injection.OntopSystemConfiguration;
 import it.unibz.inf.ontop.model.Predicate;
 import it.unibz.inf.ontop.ontology.Assertion;
 import it.unibz.inf.ontop.owlapi.QuestOWLIndividualAxiomIterator;
@@ -37,7 +37,7 @@ public class OWLAPIMaterializer implements AutoCloseable {
 	private final Iterator<Assertion> assertions;
 	private final QuestMaterializer materializer;
 
-	public OWLAPIMaterializer(QuestConfiguration configuration, boolean doStreamResults) throws Exception {
+	public OWLAPIMaterializer(OntopSystemConfiguration configuration, boolean doStreamResults) throws Exception {
 		materializer = new QuestMaterializer(configuration, doStreamResults);
 		assertions = materializer.getAssertionIterator();
 	}
@@ -45,12 +45,14 @@ public class OWLAPIMaterializer implements AutoCloseable {
 	/**
  	 * Only materializes the predicates in `predicates`
   	 */
-	public OWLAPIMaterializer(QuestConfiguration configuration, ImmutableSet<Predicate> selectedVocabulary, boolean doStreamResults) throws Exception {
+	public OWLAPIMaterializer(OntopSystemConfiguration configuration, ImmutableSet<Predicate> selectedVocabulary,
+							  boolean doStreamResults) throws Exception {
 		materializer = new QuestMaterializer(configuration, selectedVocabulary, doStreamResults);
 		assertions = materializer.getAssertionIterator();
 	}
 
-	public OWLAPIMaterializer(QuestConfiguration configuration, Predicate selectedPredicate, boolean doStreamResults) throws Exception {
+	public OWLAPIMaterializer(OntopSystemConfiguration configuration, Predicate selectedPredicate,
+							  boolean doStreamResults) throws Exception {
 		this(configuration, ImmutableSet.of(selectedPredicate), doStreamResults);
 	}
 

@@ -20,7 +20,7 @@ package it.unibz.inf.ontop.rdf4j.query;
  * #L%
  */
 
-import it.unibz.inf.ontop.model.OBDAException;
+import it.unibz.inf.ontop.exception.OntopQueryAnsweringException;
 import it.unibz.inf.ontop.model.TupleResultSet;
 
 import it.unibz.inf.ontop.owlrefplatform.core.OntopConnection;
@@ -53,7 +53,7 @@ public class OntopTupleQuery extends AbstractOntopQuery implements TupleQuery {
 				stm.setQueryTimeout(this.queryTimeout);
 			try {
 				res = (TupleResultSet) stm.execute(getQueryString());
-			} catch (OBDAException e) {
+			} catch (OntopQueryAnsweringException e) {
 				long end = System.currentTimeMillis();
 				if (this.queryTimeout > 0 && (end - start) >= this.queryTimeout * 1000){
 					throw new QueryEvaluationException("OntopTupleQuery timed out. More than " + this.queryTimeout + " seconds passed", e);
@@ -64,8 +64,10 @@ public class OntopTupleQuery extends AbstractOntopQuery implements TupleQuery {
 			List<String> signature = res.getSignature();
 			return new OntopTupleQueryResult(res, signature);
 
-		} catch (OBDAException e) {
-			e.printStackTrace();
+		} catch (QueryEvaluationException e) {
+			throw e;
+		}
+		catch (Exception e) {
 			throw new QueryEvaluationException(e);
 		}
 	}

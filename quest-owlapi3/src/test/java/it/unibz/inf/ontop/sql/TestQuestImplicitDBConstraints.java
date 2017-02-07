@@ -12,7 +12,7 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Scanner;
 
-import it.unibz.inf.ontop.injection.QuestConfiguration;
+import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import org.junit.After;
 import org.junit.Test;
@@ -94,7 +94,7 @@ public class TestQuestImplicitDBConstraints {
 		this.prepareDB(uc_create);
 		//this.reasoner = factory.createReasoner(new SimpleConfiguration());
 		QuestOWLFactory factory = new QuestOWLFactory();
-        QuestConfiguration config = QuestConfiguration.defaultBuilder()
+        OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.ontologyFile(uc_owlfile)
 				.nativeOntopMappingFile(uc_obdafile)
 				.jdbcUrl(URL)
@@ -122,7 +122,7 @@ public class TestQuestImplicitDBConstraints {
 		this.prepareDB(uc_create);
 		
 		QuestOWLFactory factory = new QuestOWLFactory();
-        QuestConfiguration config = QuestConfiguration.defaultBuilder()
+        OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.nativeOntopMappingFile(uc_obdafile)
 				.ontologyFile(uc_owlfile)
 				.jdbcUrl(URL)
@@ -157,7 +157,7 @@ public class TestQuestImplicitDBConstraints {
 
 
 		QuestOWLFactory factory = new QuestOWLFactory();
-        QuestConfiguration config = QuestConfiguration.defaultBuilder()
+        OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.ontologyFile(uc_owlfile)
 				.nativeOntopMappingFile(uc_obdafile)
 				.dbConstraintsReader(userConstraints)
@@ -189,7 +189,7 @@ public class TestQuestImplicitDBConstraints {
 //		this.reasoner = factory.createReasoner(new SimpleConfiguration());
 
 		QuestOWLFactory factory = new QuestOWLFactory();
-        QuestConfiguration config = QuestConfiguration.defaultBuilder()
+        OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.ontologyFile(uc_owlfile)
 				.nativeOntopMappingFile(uc_obdafile)
 				.dbConstraintsReader(userConstraints)
@@ -222,7 +222,7 @@ public class TestQuestImplicitDBConstraints {
 		this.prepareDB(fk_create);
 		
 		QuestOWLFactory factory = new QuestOWLFactory();
-        QuestConfiguration config = QuestConfiguration.defaultBuilder()
+        OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.ontologyFile(fk_owlfile)
 				.nativeOntopMappingFile(fk_obdafile)
 				.jdbcUrl(URL)
@@ -262,7 +262,7 @@ public class TestQuestImplicitDBConstraints {
 //		this.reasoner = factory.createReasoner(new SimpleConfiguration());
 
 		QuestOWLFactory factory = new QuestOWLFactory();
-        QuestConfiguration config = QuestConfiguration.defaultBuilder()
+        OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.ontologyFile(fk_owlfile)
 				.nativeOntopMappingFile(fk_obdafile)
 				.dbConstraintsReader(userConstraints)

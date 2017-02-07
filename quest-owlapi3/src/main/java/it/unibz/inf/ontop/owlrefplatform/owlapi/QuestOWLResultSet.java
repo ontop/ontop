@@ -49,7 +49,7 @@ public class QuestOWLResultSet implements AutoCloseable {
 	public int getColumnCount() throws OWLException {
 		try {
 			return res.getColumnCount();
-		} catch (OBDAException e) {
+		} catch (Exception e) {
 			throw new OntopOWLException(e);
 		}
 	}
@@ -57,7 +57,7 @@ public class QuestOWLResultSet implements AutoCloseable {
 	public List<String> getSignature() throws OWLException {
 		try {
 			return res.getSignature();
-		} catch (OBDAException e) {
+		} catch (Exception e) {
 			throw new OntopOWLException(e);
 		}
 	}
@@ -65,7 +65,7 @@ public class QuestOWLResultSet implements AutoCloseable {
 	public int getFetchSize() throws OWLException {
 		try {
 			return res.getFetchSize();
-		} catch (OBDAException e) {
+		} catch (Exception e) {
 			throw new OntopOWLException(e);
 		}
 	}
@@ -74,7 +74,7 @@ public class QuestOWLResultSet implements AutoCloseable {
     public void close() throws OWLException {
 		try {
 			res.close();
-		} catch (OBDAException e) {
+		} catch (Exception e) {
 			throw new OntopOWLException(e);
 		}
 
@@ -87,7 +87,7 @@ public class QuestOWLResultSet implements AutoCloseable {
 	public boolean nextRow() throws OWLException {
 		try {
 			return res.nextRow();
-		} catch (OBDAException e) {
+		} catch (Exception e) {
 			throw new OntopOWLException(e);
 		}
 	}
@@ -104,7 +104,7 @@ public class QuestOWLResultSet implements AutoCloseable {
 	public OWLPropertyAssertionObject getOWLPropertyAssertionObject(int column) throws OWLException {
 		try {
 			return translate(res.getConstant(column));
-		} catch (OBDAException e) {
+		} catch (Exception e) {
 			throw new OntopOWLException(e + " Column: " + column);
 		}
 	}
@@ -112,7 +112,7 @@ public class QuestOWLResultSet implements AutoCloseable {
 	public OWLIndividual getOWLIndividual(int column) throws OWLException {
 		try {
 			return (OWLIndividual) translate(res.getConstant(column));
-		} catch (OBDAException e) {
+		} catch (Exception e) {
 			throw new OntopOWLException(e);
 		}
 	}
@@ -120,7 +120,7 @@ public class QuestOWLResultSet implements AutoCloseable {
 	public OWLIndividual getOWLIndividual(String column) throws OWLException {
 		try {
 			return (OWLIndividual) translate(res.getConstant(column));
-		} catch (OBDAException e) {
+		} catch (Exception e) {
 			throw new OntopOWLException(e);
 		}
 	}
@@ -128,7 +128,7 @@ public class QuestOWLResultSet implements AutoCloseable {
 	public OWLNamedIndividual getOWLNamedIndividual(int column) throws OWLException {
 		try {
 			return (OWLNamedIndividual) translate(res.getConstant(column));
-		} catch (OBDAException e) {
+		} catch (Exception e) {
 			throw new OntopOWLException(e);
 		}
 	}
@@ -136,7 +136,7 @@ public class QuestOWLResultSet implements AutoCloseable {
 	public OWLAnonymousIndividual getOWLAnonymousIndividual(int column) throws OWLException {
 		try {
 			return (OWLAnonymousIndividual) translate(res.getConstant(column));
-		} catch (OBDAException e) {
+		} catch (Exception e) {
 			throw new OntopOWLException(e);
 		}
 	}
@@ -145,7 +145,7 @@ public class QuestOWLResultSet implements AutoCloseable {
 	public OWLLiteral getOWLLiteral(int column) throws OWLException {
 		try {
 			return (OWLLiteral) translate(res.getConstant(column));
-		} catch (OBDAException e) {
+		} catch (Exception e) {
 			throw new OntopOWLException(e);
 		}
 	}
@@ -153,7 +153,7 @@ public class QuestOWLResultSet implements AutoCloseable {
 	public OWLLiteral getOWLLiteral(String column) throws OWLException {
 		try {
 			return (OWLLiteral) translate(res.getConstant(column));
-		} catch (OBDAException e) {
+		} catch (Exception e) {
 			throw new OntopOWLException(e);
 		}
 	}
@@ -161,7 +161,7 @@ public class QuestOWLResultSet implements AutoCloseable {
 	public OWLObject getOWLObject(int column) throws OWLException {
 		try {
 			return translate(res.getConstant(column));
-		} catch (OBDAException e) {
+		} catch (Exception e) {
 			throw new OntopOWLException(e);
 		}
 	}
@@ -169,7 +169,7 @@ public class QuestOWLResultSet implements AutoCloseable {
 	public OWLObject getOWLObject(String column) throws OWLException {
 		try {
 			return translate(res.getConstant(column));
-		} catch (OBDAException e) {
+		} catch (Exception e) {
 			throw new OntopOWLException(e);
 		}
 	}

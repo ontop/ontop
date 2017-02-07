@@ -27,13 +27,13 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Properties;
 
-import it.unibz.inf.ontop.injection.QuestConfiguration;
+import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import junit.framework.TestCase;
-
-import it.unibz.inf.ontop.injection.QuestCoreSettings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static it.unibz.inf.ontop.injection.OntopOBDASettings.OPTIMIZE_EQUIVALENCES;
 
 /**
  * The following tests take the Stock exchange scenario and execute the queries
@@ -90,7 +90,7 @@ public class JoinElminationMappingTest extends TestCase {
 	
 	private void runTests(Properties p) throws Exception {
 		// Creating a new instance of the reasoner
-		QuestConfiguration configuration = QuestConfiguration.defaultBuilder()
+		OntopSQLOWLAPIConfiguration configuration = OntopSQLOWLAPIConfiguration.defaultBuilder()
 					.nativeOntopMappingFile(obdafile)
 					.ontologyFile(owlfile)
 					.properties(p)
@@ -129,7 +129,7 @@ public class JoinElminationMappingTest extends TestCase {
 
 	public void testViEqSig() throws Exception {
 		Properties p  = new Properties();
-		p.setProperty(QuestCoreSettings.OPTIMIZE_EQUIVALENCES, "true");
+		p.setProperty(OPTIMIZE_EQUIVALENCES, "true");
 
 		runTests(p);
 	}
@@ -144,7 +144,7 @@ public class JoinElminationMappingTest extends TestCase {
 	 */
 	public void testViNoEqSig() throws Exception {
 		Properties p  = new Properties();
-		p.setProperty(QuestCoreSettings.OPTIMIZE_EQUIVALENCES, "false");
+		p.setProperty(OPTIMIZE_EQUIVALENCES, "false");
 		runTests(p);
 	}
 
@@ -153,7 +153,7 @@ public class JoinElminationMappingTest extends TestCase {
 	 */
 	public void testViNoEqNoSig() throws Exception {
 		Properties p  = new Properties();
-		p.setProperty(QuestCoreSettings.OPTIMIZE_EQUIVALENCES, "false");
+		p.setProperty(OPTIMIZE_EQUIVALENCES, "false");
 		runTests(p);
 	}
 }

@@ -1,7 +1,7 @@
 package it.unibz.inf.ontop.reformulation.tests;
 
 
-import it.unibz.inf.ontop.injection.QuestConfiguration;
+import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.io.QueryIOManager;
 
 import it.unibz.inf.ontop.owlrefplatform.core.ExecutableQuery;
@@ -52,7 +52,7 @@ public class CanonicalIRIUniversityTest {
         s.execute(text);
         s.close();
 
-        QuestConfiguration config = QuestConfiguration.defaultBuilder()
+        OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
                 .ontologyFile(owlFile)
                 .nativeOntopMappingFile(obdaFile)
                 .enableExistentialReasoning(true)

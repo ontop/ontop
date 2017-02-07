@@ -26,30 +26,15 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<artifactId>ontop-obdalib-core</artifactId>
-			<groupId>${project.groupId}</groupId>
-			<version>${project.version}</version>
-			<exclusions>
-				<exclusion>
-					<artifactId>slf4j-log4j12</artifactId>
-					<groupId>org.slf4j</groupId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-		<dependency>
-			<artifactId>ontop-obdalib-owlapi</artifactId>
+			<artifactId>ontop-system-core</artifactId>
 			<groupId>${project.groupId}</groupId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
-			<artifactId>ontop-reformulation-core</artifactId>
+			<artifactId>ontop-system-sql-owlapi</artifactId>
 			<groupId>${project.groupId}</groupId>
 			<version>${project.version}</version>
-		</dependency>
-		<dependency>
-			<artifactId>ontop-quest-owlapi</artifactId>
-			<groupId>${project.groupId}</groupId>
-			<version>${project.version}</version>
+			<scope>test</scope>
 		</dependency>
 
 		<dependency>
@@ -111,6 +96,11 @@
 			<artifactId>rdf4j-rio-ntriples</artifactId>
 		</dependency>
 
+		<dependency>
+			<groupId>com.h2database</groupId>
+			<artifactId>h2</artifactId>
+			<scope>test</scope>
+		</dependency>
 		<dependency>
 			<groupId>mysql</groupId>
 			<artifactId>mysql-connector-java</artifactId>

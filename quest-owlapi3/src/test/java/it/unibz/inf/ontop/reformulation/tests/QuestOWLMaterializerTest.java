@@ -20,7 +20,7 @@ package it.unibz.inf.ontop.reformulation.tests;
  * #L%
  */
 
-import it.unibz.inf.ontop.injection.QuestConfiguration;
+import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.model.OBDAModel;
 import it.unibz.inf.ontop.ontology.Assertion;
 import it.unibz.inf.ontop.ontology.ClassAssertion;
@@ -107,7 +107,7 @@ public class QuestOWLMaterializerTest extends TestCase {
 	
 	    File f = new File("src/test/resources/test/materializer/MaterializeTest.obda");
 
-		QuestConfiguration configuration = QuestConfiguration.defaultBuilder()
+		OntopSQLOWLAPIConfiguration configuration = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.ontologyFile("src/test/resources/test/materializer/MaterializeTest.owl")
 				.propertyFile(PROPERTY_FILE)
 				.nativeOntopMappingFile(f)
@@ -148,7 +148,7 @@ public class QuestOWLMaterializerTest extends TestCase {
 			// read model
 			File f = new File("src/test/resources/test/materializer/MaterializeTest.obda");
 
-		QuestConfiguration configuration = QuestConfiguration.defaultBuilder()
+		OntopSQLOWLAPIConfiguration configuration = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.ontologyFile("src/test/resources/test/materializer/MaterializeTest.owl")
 				.propertyFile(PROPERTY_FILE)
 				.nativeOntopMappingFile(f)

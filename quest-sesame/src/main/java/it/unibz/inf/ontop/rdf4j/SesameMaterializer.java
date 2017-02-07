@@ -21,7 +21,7 @@ package it.unibz.inf.ontop.rdf4j;
  */
 
 import com.google.common.collect.Iterators;
-import it.unibz.inf.ontop.injection.QuestConfiguration;
+import it.unibz.inf.ontop.injection.OntopSystemConfiguration;
 import it.unibz.inf.ontop.ontology.Assertion;
 import it.unibz.inf.ontop.owlrefplatform.core.abox.QuestMaterializer;
 import org.eclipse.rdf4j.model.Statement;
@@ -36,7 +36,7 @@ public class SesameMaterializer {
 		private Iterator<Assertion> assertions = null;
 		private QuestMaterializer materializer;
 		
-    public SesameMaterializer(QuestConfiguration configuration, boolean doStreamResults) throws Exception {
+    public SesameMaterializer(OntopSystemConfiguration configuration, boolean doStreamResults) throws Exception {
         materializer = new QuestMaterializer(configuration, doStreamResults);
         assertions = materializer.getAssertionIterator();
 	}

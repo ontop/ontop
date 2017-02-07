@@ -21,7 +21,6 @@ package it.unibz.inf.ontop.rdf4j.repository;
  */
 
 import it.unibz.inf.ontop.exception.OntopConnectionException;
-import it.unibz.inf.ontop.model.OBDAException;
 import it.unibz.inf.ontop.owlrefplatform.core.OntopConnection;
 import it.unibz.inf.ontop.rdf4j.query.OntopBooleanQuery;
 import it.unibz.inf.ontop.rdf4j.query.OntopGraphQuery;
@@ -54,7 +53,7 @@ public class OntopRepositoryConnection implements org.eclipse.rdf4j.repository.R
     private RDFParser rdfParser;
 
 	
-	public OntopRepositoryConnection(OntopVirtualRepository rep, OntopConnection connection) throws OBDAException
+	public OntopRepositoryConnection(OntopVirtualRepository rep, OntopConnection connection)
 	{
 		this.repository = rep;
 		this.ontopConnection = connection;

@@ -10,7 +10,7 @@ import java.util.Scanner;
 
 import it.unibz.inf.ontop.exception.OntopQueryAnsweringException;
 import it.unibz.inf.ontop.exception.OntopQueryEvaluationException;
-import it.unibz.inf.ontop.injection.QuestConfiguration;
+import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.rdf4j.repository.OntopVirtualRepository;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.junit.After;
@@ -72,7 +72,7 @@ public class TestSesameTimeout {
 
 		s.close();
 
-		QuestConfiguration configuration = QuestConfiguration.defaultBuilder()
+		OntopSQLOWLAPIConfiguration configuration = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.r2rmlMappingFile(r2rmlfile)
 				.ontologyFile(owlfile)
 				.jdbcUrl(URL)

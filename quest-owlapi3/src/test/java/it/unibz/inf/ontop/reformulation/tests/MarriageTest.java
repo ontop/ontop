@@ -21,7 +21,7 @@ package it.unibz.inf.ontop.reformulation.tests;
  */
 
 import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.injection.QuestConfiguration;
+import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import org.junit.After;
 import org.junit.Before;
@@ -129,7 +129,7 @@ public class MarriageTest {
     private void checkReturnedValues(String query, List<String> expectedValues) throws Exception {
 
 		QuestOWLFactory factory = new QuestOWLFactory();
-		QuestConfiguration config = QuestConfiguration.defaultBuilder()
+		OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.nativeOntopMappingFile(OBDA_FILE)
 				.ontologyFile(ONTOLOGY_FILE)
 				.jdbcUrl(JDBC_URL)

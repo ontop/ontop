@@ -11,7 +11,7 @@ public interface OntopQueryAnsweringSQLConfiguration extends OntopQueryAnswering
 
     interface Builder<B extends OntopQueryAnsweringSQLConfiguration.Builder<B>>
             extends OntopQueryAnsweringSQLConfiguration.OntopQueryAnsweringSQLBuilderFragment<B>,
-            OntopSQLCoreConfiguration.Builder<B> {
+            OntopQueryAnsweringConfiguration.Builder<B>, OntopSQLCoreConfiguration.Builder<B> {
 
         @Override
         OntopQueryAnsweringSQLConfiguration build();

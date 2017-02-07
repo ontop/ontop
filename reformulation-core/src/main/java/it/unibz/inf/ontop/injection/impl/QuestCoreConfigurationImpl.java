@@ -8,7 +8,7 @@ import it.unibz.inf.ontop.injection.InvalidOntopConfigurationException;
 import it.unibz.inf.ontop.injection.impl.OntopOptimizationConfigurationImpl.DefaultOntopOptimizationBuilderFragment;
 import it.unibz.inf.ontop.injection.impl.OntopOptimizationConfigurationImpl.OntopOptimizationOptions;
 import it.unibz.inf.ontop.injection.impl.OntopQueryAnsweringConfigurationImpl.DefaultOntopQueryAnsweringBuilderFragment;
-import it.unibz.inf.ontop.injection.impl.OntopQueryAnsweringConfigurationImpl.OntopRuntimeOptions;
+import it.unibz.inf.ontop.injection.impl.OntopQueryAnsweringConfigurationImpl.OntopQueryAnsweringOptions;
 import it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing.TMappingExclusionConfig;
 import it.unibz.inf.ontop.injection.QuestCoreConfiguration;
 import it.unibz.inf.ontop.injection.QuestCoreSettings;
@@ -95,45 +95,15 @@ public class QuestCoreConfigurationImpl extends OBDACoreConfigurationImpl implem
     public static class QuestCoreOptions {
         public final Optional<TMappingExclusionConfig> excludeFromTMappings;
         private final OBDAConfigurationOptions obdaOptions;
-        private final OntopRuntimeOptions runtimeOptions;
+        private final OntopQueryAnsweringOptions runtimeOptions;
 
 
         public QuestCoreOptions(Optional<TMappingExclusionConfig> excludeFromTMappings,
                                 OBDAConfigurationOptions obdaOptions,
-                                OntopRuntimeOptions runtimeOptions) {
+                                OntopQueryAnsweringOptions runtimeOptions) {
             this.excludeFromTMappings = excludeFromTMappings;
             this.obdaOptions = obdaOptions;
             this.runtimeOptions = runtimeOptions;
-        }
-    }
-
-
-    protected static class DefaultQuestCoreBuilderFragment<B extends QuestCoreConfiguration.Builder<B>>
-        implements QuestCoreBuilderFragment<B> {
-
-        private final B builder;
-
-        private Optional<TMappingExclusionConfig> excludeFromTMappings = Optional.empty();
-
-        protected DefaultQuestCoreBuilderFragment(B builder) {
-            this.builder = builder;
-        }
-
-
-        @Override
-        public B tMappingExclusionConfig(@Nonnull TMappingExclusionConfig config) {
-            this.excludeFromTMappings = Optional.of(config);
-            return builder;
-        }
-
-        protected Properties generateUserProperties() {
-            Properties p = new Properties();
-            return p;
-        }
-
-        protected final QuestCoreOptions generateQuestCoreOptions(OBDAConfigurationOptions obdaOptions,
-                                                                  OntopRuntimeOptions runtimeOptions) {
-            return new QuestCoreOptions(excludeFromTMappings, obdaOptions, runtimeOptions);
         }
     }
 
@@ -142,7 +112,6 @@ public class QuestCoreConfigurationImpl extends OBDACoreConfigurationImpl implem
         extends OBDACoreConfigurationBuilderMixin<B>
         implements QuestCoreConfiguration.Builder<B> {
 
-        private final DefaultQuestCoreBuilderFragment<B> questCoreBuilderFragment;
         private final DefaultOntopOptimizationBuilderFragment<B> optimizationBuilderFragment;
         private final DefaultOntopQueryAnsweringBuilderFragment<B> runtimeBuilderFragment;
 
@@ -172,7 +141,7 @@ public class QuestCoreConfigurationImpl extends OBDACoreConfigurationImpl implem
             OntopOBDAOptions obdaOptions =  obdaCoreOptions.mappingSqlOptions.mappingOptions.obdaOptions;
             OntopOptimizationOptions optimizationOptions = optimizationBuilderFragment.generateOptimizationOptions(
                     obdaOptions.modelOptions);
-            OntopRuntimeOptions runtimeOptions = runtimeBuilderFragment.generateRuntimeOptions(obdaOptions,
+            OntopQueryAnsweringOptions runtimeOptions = runtimeBuilderFragment.generateQAOptions(obdaOptions,
                     optimizationOptions);
 
             return questCoreBuilderFragment.generateQuestCoreOptions(obdaCoreOptions, runtimeOptions);

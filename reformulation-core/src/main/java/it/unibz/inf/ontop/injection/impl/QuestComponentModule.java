@@ -28,16 +28,6 @@ public class QuestComponentModule extends OntopAbstractModule {
     protected void configure() {
         configureCoreConfiguration();
 
-        bindTMappingExclusionConfig();
-
-        bindFromPreferences(MappingVocabularyFixer.class);
         bindFromPreferences(QueryCache.class);
-    }
-
-    private void bindTMappingExclusionConfig() {
-        TMappingExclusionConfig tMappingExclusionConfig = configuration.getTmappingExclusions()
-                .orElseGet(TMappingExclusionConfig::empty);
-
-        bind(TMappingExclusionConfig.class).toInstance(tMappingExclusionConfig);
     }
 }

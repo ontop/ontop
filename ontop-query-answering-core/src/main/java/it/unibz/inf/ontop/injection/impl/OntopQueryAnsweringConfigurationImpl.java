@@ -20,9 +20,9 @@ public class OntopQueryAnsweringConfigurationImpl extends OntopOBDAConfiguration
 
     private final OntopOptimizationConfigurationImpl optimizationConfiguration;
     private final OntopQueryAnsweringSettings settings;
-    private final OntopRuntimeOptions options;
+    private final OntopQueryAnsweringOptions options;
 
-    OntopQueryAnsweringConfigurationImpl(OntopQueryAnsweringSettings settings, OntopRuntimeOptions options) {
+    OntopQueryAnsweringConfigurationImpl(OntopQueryAnsweringSettings settings, OntopQueryAnsweringOptions options) {
         super(settings, options.obdaOptions);
         this.settings = settings;
         this.options = options;
@@ -61,13 +61,13 @@ public class OntopQueryAnsweringConfigurationImpl extends OntopOBDAConfiguration
         return options.iriDictionary;
     }
 
-    static class OntopRuntimeOptions {
+    static class OntopQueryAnsweringOptions {
         private final Optional<IRIDictionary> iriDictionary;
         final OntopOBDAOptions obdaOptions;
         final OntopOptimizationOptions optimizationOptions;
 
-        OntopRuntimeOptions(Optional<IRIDictionary> iriDictionary, OntopOBDAOptions obdaOptions,
-                            OntopOptimizationOptions optimizationOptions) {
+        OntopQueryAnsweringOptions(Optional<IRIDictionary> iriDictionary, OntopOBDAOptions obdaOptions,
+                                   OntopOptimizationOptions optimizationOptions) {
             this.iriDictionary = iriDictionary;
             this.obdaOptions = obdaOptions;
             this.optimizationOptions = optimizationOptions;
@@ -114,9 +114,9 @@ public class OntopQueryAnsweringConfigurationImpl extends OntopOBDAConfiguration
             return p;
         }
 
-        final OntopRuntimeOptions generateRuntimeOptions(OntopOBDAOptions obdaOptions,
-                                                         OntopOptimizationOptions optimizationOptions) {
-            return new OntopRuntimeOptions(iriDictionary, obdaOptions, optimizationOptions);
+        final OntopQueryAnsweringOptions generateQAOptions(OntopOBDAOptions obdaOptions,
+                                                           OntopOptimizationOptions optimizationOptions) {
+            return new OntopQueryAnsweringOptions(iriDictionary, obdaOptions, optimizationOptions);
         }
     }
 
@@ -155,9 +155,9 @@ public class OntopQueryAnsweringConfigurationImpl extends OntopOBDAConfiguration
             return properties;
         }
 
-        OntopRuntimeOptions generateRuntimeOptions() {
+        OntopQueryAnsweringOptions generateRuntimeOptions() {
             OntopOBDAOptions obdaOptions = generateOBDAOptions();
-            return localBuilderFragment.generateRuntimeOptions(obdaOptions,
+            return localBuilderFragment.generateQAOptions(obdaOptions,
                     optimizationBuilderFragment.generateOptimizationOptions(obdaOptions.modelOptions));
         }
     }

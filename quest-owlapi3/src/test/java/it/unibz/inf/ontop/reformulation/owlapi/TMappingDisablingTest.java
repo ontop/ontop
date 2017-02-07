@@ -2,10 +2,9 @@ package it.unibz.inf.ontop.reformulation.owlapi;
 
 
 import it.unibz.inf.ontop.exception.DuplicateMappingException;
-import it.unibz.inf.ontop.injection.QuestConfiguration;
+import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing.TMappingExclusionConfig;
 import it.unibz.inf.ontop.exception.InvalidMappingException;
-import it.unibz.inf.ontop.model.OBDAException;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -101,7 +100,7 @@ public class TMappingDisablingTest extends TestCase {
 		 * Create the instance of Quest OWL reasoner.
 		 */
 		QuestOWLFactory factory = new QuestOWLFactory();
-		QuestConfiguration configuration = QuestConfiguration.defaultBuilder()
+		OntopSQLOWLAPIConfiguration configuration = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.nativeOntopMappingFile(obdafile)
 				.ontologyFile(owlfile)
 				.propertyFile(propertyFile)
@@ -112,12 +111,7 @@ public class TMappingDisablingTest extends TestCase {
 		/*
 		 * Prepare the data connection for querying.
 		 */
-		OntopOWLConnection conn = null;
-		try {
-			conn = reasoner.getConnection();
-		} catch (OBDAException e1) {
-			e1.printStackTrace();
-		}
+		OntopOWLConnection conn = reasoner.getConnection();
 		
 		
 		String sparqlQuery = 
@@ -148,7 +142,7 @@ public class TMappingDisablingTest extends TestCase {
 		 * Create the instance of Quest OWL reasoner.
 		 */
 		QuestOWLFactory factory = new QuestOWLFactory();
-		QuestConfiguration configuration = QuestConfiguration.defaultBuilder()
+		OntopSQLOWLAPIConfiguration configuration = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.nativeOntopMappingFile(obdafile)
 				.ontologyFile(owlfile)
 				.propertyFile(propertyFile)
@@ -159,12 +153,7 @@ public class TMappingDisablingTest extends TestCase {
 		/*
 		 * Prepare the data connection for querying.
 		 */
-		OntopOWLConnection conn = null;
-		try {
-			conn = reasoner.getConnection();
-		} catch (OBDAException e1) {
-			e1.printStackTrace();
-		}
+		OntopOWLConnection conn = reasoner.getConnection();
 		
 		
 		String sparqlQuery = 

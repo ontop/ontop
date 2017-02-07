@@ -18,15 +18,6 @@ public class OBDACoreModule extends OntopAbstractModule {
         this.configuration = configuration;
     }
 
-    private void bindImplicitDBConstraints() {
-        Optional<ImplicitDBConstraintsReader> optionalDBConstraints = configuration.getImplicitDBConstraintsReader();
-        if (optionalDBConstraints.isPresent()) {
-            bind(ImplicitDBConstraintsReader.class).toInstance(optionalDBConstraints.get());
-        } else {
-            bind(ImplicitDBConstraintsReader.class).toProvider(Providers.<ImplicitDBConstraintsReader>of(null));
-        }
-    }
-
     @Override
     protected void configureCoreConfiguration() {
         super.configureCoreConfiguration();
@@ -37,9 +28,6 @@ public class OBDACoreModule extends OntopAbstractModule {
     @Override
     protected void configure() {
         configureCoreConfiguration();
-
-        bindImplicitDBConstraints();
-        bindFromPreferences(IMapping2DatalogConverter.class);
 
         // Forgets the configuration (useful for the GC in case of large input objects)
         this.configuration = null;

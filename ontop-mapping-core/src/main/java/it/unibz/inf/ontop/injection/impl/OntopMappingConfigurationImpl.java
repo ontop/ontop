@@ -7,6 +7,7 @@ import it.unibz.inf.ontop.injection.OntopMappingConfiguration;
 import it.unibz.inf.ontop.injection.OntopMappingSettings;
 import it.unibz.inf.ontop.injection.impl.OntopOptimizationConfigurationImpl.DefaultOntopOptimizationBuilderFragment;
 import it.unibz.inf.ontop.injection.impl.OntopOptimizationConfigurationImpl.OntopOptimizationOptions;
+import it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing.TMappingExclusionConfig;
 import it.unibz.inf.ontop.spec.OBDASpecification;
 import it.unibz.inf.ontop.exception.OBDASpecificationException;
 import it.unibz.inf.ontop.spec.OBDASpecificationExtractor;
@@ -53,6 +54,11 @@ public class OntopMappingConfigurationImpl extends OntopOBDAConfigurationImpl im
     }
 
     @Override
+    public Optional<TMappingExclusionConfig> getTmappingExclusions() {
+        return options.excludeFromTMappings;
+    }
+
+    @Override
     public OntopMappingSettings getSettings() {
         return settings;
     }
@@ -79,12 +85,6 @@ public class OntopMappingConfigurationImpl extends OntopOBDAConfigurationImpl im
                                                   Supplier<Optional<Model>> mappingGraphSupplier
                                                   ) throws IOException, OBDASpecificationException {
         OBDASpecificationExtractor extractor = getInjector().getInstance(OBDASpecificationExtractor.class);
-
-        /*
-         * Pre-defined DataSourceModel
-         */
-        if (options.dataSourceModel.isPresent())
-            return options.dataSourceModel;
 
          Optional<Ontology> optionalOntology = ontologySupplier.get();
 
@@ -142,14 +142,15 @@ public class OntopMappingConfigurationImpl extends OntopOBDAConfigurationImpl im
         final OntopOBDAOptions obdaOptions;
         final OntopOptimizationOptions optimizationOptions;
         private final Optional<ImplicitDBConstraintsReader> implicitDBConstraintsReader;
-        private final Optional<OBDASpecification> dataSourceModel;
+        private final Optional<TMappingExclusionConfig> excludeFromTMappings;
         final Optional<DBMetadata> dbMetadata;
 
-        private OntopMappingOptions(Optional<OBDASpecification> dataSourceModel,
-                                    Optional<ImplicitDBConstraintsReader> implicitDBConstraintsReader,
-                                    Optional<DBMetadata> dbMetadata, OntopOBDAOptions obdaOptions, OntopOptimizationOptions optimizationOptions) {
-            this.dataSourceModel = dataSourceModel;
+        private OntopMappingOptions(Optional<ImplicitDBConstraintsReader> implicitDBConstraintsReader,
+                                    Optional<DBMetadata> dbMetadata,
+                                    Optional<TMappingExclusionConfig> excludeFromTMappings,
+                                    OntopOBDAOptions obdaOptions, OntopOptimizationOptions optimizationOptions) {
             this.implicitDBConstraintsReader = implicitDBConstraintsReader;
+            this.excludeFromTMappings = excludeFromTMappings;
             this.obdaOptions = obdaOptions;
             this.optimizationOptions = optimizationOptions;
             this.dbMetadata = dbMetadata;
@@ -160,36 +161,25 @@ public class OntopMappingConfigurationImpl extends OntopOBDAConfigurationImpl im
             implements OntopMappingBuilderFragment<B> {
 
         private final B builder;
-        private final Supplier<Boolean> isMappingDefinedSupplier;
-        private final Runnable declareMappingDefinedCB;
         private Optional<ImplicitDBConstraintsReader> userConstraints = Optional.empty();
-        private Optional<OBDASpecification> dataSourceModel = Optional.empty();
         private Optional<Boolean> obtainFullMetadata = Optional.empty();
         private Optional<Boolean> queryingAnnotationsInOntology = Optional.empty();
         private Optional<DBMetadata> dbMetadata = Optional.empty();
+        private Optional<TMappingExclusionConfig> excludeFromTMappings = Optional.empty();
 
-        DefaultOntopMappingBuilderFragment(B builder,
-                                           Supplier<Boolean> isMappingDefinedSupplier,
-                                           Runnable declareMappingDefinedCB) {
-            this.isMappingDefinedSupplier = isMappingDefinedSupplier;
-            this.declareMappingDefinedCB = declareMappingDefinedCB;
+        DefaultOntopMappingBuilderFragment(B builder) {
             this.builder = builder;
-        }
-
-
-        @Override
-        public B obdaSpecification(@Nonnull OBDASpecification obdaSpecification) {
-            if (isMappingDefinedSupplier.get()) {
-                throw new InvalidOntopConfigurationException("Mapping already defined!");
-            }
-            declareMappingDefinedCB.run();
-            this.dataSourceModel = Optional.of(obdaSpecification);
-            return builder;
         }
 
         @Override
         public B dbConstraintsReader(@Nonnull ImplicitDBConstraintsReader constraints) {
             this.userConstraints = Optional.of(constraints);
+            return builder;
+        }
+
+        @Override
+        public B tMappingExclusionConfig(@Nonnull TMappingExclusionConfig config) {
+            this.excludeFromTMappings = Optional.of(config);
             return builder;
         }
 
@@ -213,7 +203,8 @@ public class OntopMappingConfigurationImpl extends OntopOBDAConfigurationImpl im
 
         final OntopMappingOptions generateMappingOptions(OntopOBDAOptions obdaOptions,
                                                          OntopOptimizationOptions optimizationOptions) {
-            return new OntopMappingOptions(dataSourceModel, userConstraints, dbMetadata, obdaOptions, optimizationOptions);
+            return new OntopMappingOptions(userConstraints, dbMetadata, excludeFromTMappings, obdaOptions,
+                    optimizationOptions);
         }
 
         Properties generateProperties() {
@@ -235,20 +226,18 @@ public class OntopMappingConfigurationImpl extends OntopOBDAConfigurationImpl im
 
         OntopMappingBuilderMixin() {
             B builder = (B) this;
-            this.mappingBuilderFragment = new DefaultOntopMappingBuilderFragment<>(builder,
-                    this::isMappingDefined,
-                    this::declareMappingDefined);
+            this.mappingBuilderFragment = new DefaultOntopMappingBuilderFragment<>(builder);
             this.optimizationBuilderFragment = new DefaultOntopOptimizationBuilderFragment<>(builder);
-        }
-
-        @Override
-        public B obdaSpecification(@Nonnull OBDASpecification obdaSpecification) {
-            return mappingBuilderFragment.obdaSpecification(obdaSpecification);
         }
 
         @Override
         public B dbConstraintsReader(@Nonnull ImplicitDBConstraintsReader constraints) {
             return mappingBuilderFragment.dbConstraintsReader(constraints);
+        }
+
+        @Override
+        public B tMappingExclusionConfig(@Nonnull TMappingExclusionConfig config) {
+            return mappingBuilderFragment.tMappingExclusionConfig(config);
         }
 
         @Override
@@ -294,6 +283,8 @@ public class OntopMappingConfigurationImpl extends OntopOBDAConfigurationImpl im
          * Allows to detect double mapping definition (error).
          */
         protected final void declareMappingDefined() {
+            if (isMappingDefined)
+                throw new InvalidOntopConfigurationException("The mapping is already defined");
             isMappingDefined = true;
         }
 

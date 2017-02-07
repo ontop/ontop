@@ -64,8 +64,12 @@
 		<module>ontop-sql-common</module>
 		<module>ontop-mapping-sql-core</module>
 		<module>ontop-mapping-native</module>
+		<module>ontop-ontology-owlapi</module>
 		<module>ontop-query-answering-core</module>
 		<module>ontop-query-answering-sql</module>
+		<module>ontop-system-core</module>
+		<module>ontop-system-sql</module>
+		<module>ontop-system-sql-owlapi</module>
 		<module>obdalib-core</module>
 		<module>reformulation-core</module>
 		<module>obdalib-owlapi3</module>
@@ -76,6 +80,7 @@
         <module>rdf4j-webapps</module>
         <module>quest-sparql-compliance</module>
 		<module>quest-sesame</module>
+		<module>ontop-rdf4j-sql</module>
 		<module>quest-rdb2rdf-compliance</module>
 		<module>ontop-protege</module>
 		<module>ontop-cli</module>

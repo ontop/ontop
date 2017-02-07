@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.sql;
 
 import static org.junit.Assert.assertTrue;
 
-import it.unibz.inf.ontop.injection.QuestConfiguration;
+import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 
 import java.io.File;
 import java.sql.Connection;
@@ -83,7 +83,7 @@ public class SesameResultIterationTest {
         s.close();
 
 
-        QuestConfiguration configuration = QuestConfiguration.defaultBuilder()
+        OntopSQLOWLAPIConfiguration configuration = OntopSQLOWLAPIConfiguration.defaultBuilder()
                 .ontologyFile(owlfile)
                 .r2rmlMappingFile(r2rmlfile)
                 .jdbcUrl(URL)

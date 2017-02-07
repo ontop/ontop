@@ -22,7 +22,7 @@ package it.unibz.inf.ontop.rdf4j.repository;
 
 import it.unibz.inf.ontop.answering.OntopQueryEngine;
 import it.unibz.inf.ontop.injection.OntopEngineFactory;
-import it.unibz.inf.ontop.injection.QuestConfiguration;
+import it.unibz.inf.ontop.injection.OntopSystemConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.core.OntopConnection;
 
 import it.unibz.inf.ontop.spec.OBDASpecification;
@@ -46,11 +46,11 @@ public class OntopVirtualRepository implements org.eclipse.rdf4j.repository.Repo
 
 	// Temporary (dropped after initialization)
 	@Nullable
-	private QuestConfiguration configuration;
+	private OntopSystemConfiguration configuration;
 	@Nullable
 	private OntopQueryEngine queryEngine;
 
-	public OntopVirtualRepository(QuestConfiguration configuration) {
+	public OntopVirtualRepository(OntopSystemConfiguration configuration) {
 		this.namespaces = new HashMap<>();
 		this.configuration = configuration;
 	}
