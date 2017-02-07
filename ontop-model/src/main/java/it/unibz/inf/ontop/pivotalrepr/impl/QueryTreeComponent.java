@@ -48,8 +48,8 @@ public interface QueryTreeComponent {
      */
     ImmutableList<QueryNode> getSubTreeNodesInTopDownOrder(QueryNode currentNode);
 
-    Optional<NonCommutativeOperatorNode.ArgumentPosition> getOptionalPosition(QueryNode parentNode,
-                                                                              QueryNode childNode);
+    Optional<BinaryOrderedOperatorNode.ArgumentPosition> getOptionalPosition(QueryNode parentNode,
+                                                                             QueryNode childNode);
 
     /**
      * From the parent to the oldest ancestor.
@@ -67,14 +67,14 @@ public interface QueryTreeComponent {
      * TODO: explain
      */
     void replaceNodesByOneNode(ImmutableList<QueryNode> queryNodes, QueryNode replacingNode, QueryNode parentNode,
-                               Optional<NonCommutativeOperatorNode.ArgumentPosition> optionalPosition)
+                               Optional<BinaryOrderedOperatorNode.ArgumentPosition> optionalPosition)
             throws IllegalTreeUpdateException;
 
     /**
      * Please consider using an IntermediateQueryBuilder instead of this tree component.
      */
     void addChild(QueryNode parentNode, QueryNode childNode,
-                  Optional<NonCommutativeOperatorNode.ArgumentPosition> optionalPosition,
+                  Optional<BinaryOrderedOperatorNode.ArgumentPosition> optionalPosition,
                   boolean canReplacePreviousChildren) throws IllegalTreeUpdateException;
 
     Optional<QueryNode> nextSibling(QueryNode node) throws IllegalTreeException;
@@ -89,14 +89,14 @@ public interface QueryTreeComponent {
     /**
      * Inserts a new node between a node and its former parent (now grand-parent)
      */
-    void insertParent(QueryNode childNode, QueryNode newParentNode, Optional<NonCommutativeOperatorNode.ArgumentPosition> optionalPosition)
+    void insertParent(QueryNode childNode, QueryNode newParentNode, Optional<BinaryOrderedOperatorNode.ArgumentPosition> optionalPosition)
             throws IllegalTreeUpdateException;
 
     /**
      * Transfers a child node from a parent to another parent
      */
     void transferChild(QueryNode childNode, QueryNode formerParentNode, QueryNode newParentNode,
-                       Optional<NonCommutativeOperatorNode.ArgumentPosition> optionalPosition)
+                       Optional<BinaryOrderedOperatorNode.ArgumentPosition> optionalPosition)
             throws IllegalTreeUpdateException;
 
 
@@ -122,7 +122,7 @@ public interface QueryTreeComponent {
      * If no position is given, replaces the parent node by its first child
      */
     QueryNode replaceNodeByChild(QueryNode parentNode,
-                                 Optional<NonCommutativeOperatorNode.ArgumentPosition> optionalReplacingChildPosition);
+                                 Optional<BinaryOrderedOperatorNode.ArgumentPosition> optionalReplacingChildPosition);
 
 
     /**

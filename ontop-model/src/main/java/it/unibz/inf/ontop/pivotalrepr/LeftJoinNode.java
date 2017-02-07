@@ -6,7 +6,7 @@ import it.unibz.inf.ontop.model.ImmutableExpression;
 import it.unibz.inf.ontop.model.ImmutableTerm;
 import it.unibz.inf.ontop.model.ImmutableSubstitution;
 
-public interface LeftJoinNode extends JoinLikeNode, NonCommutativeOperatorNode {
+public interface LeftJoinNode extends JoinLikeNode, BinaryNonCommutativeOperatorNode {
 
     @Override
     LeftJoinNode clone();

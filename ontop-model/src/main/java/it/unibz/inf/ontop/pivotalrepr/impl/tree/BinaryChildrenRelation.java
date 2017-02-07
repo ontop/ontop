@@ -1,7 +1,7 @@
 package it.unibz.inf.ontop.pivotalrepr.impl.tree;
 
 import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.pivotalrepr.NonCommutativeOperatorNode;
+import it.unibz.inf.ontop.pivotalrepr.BinaryOrderedOperatorNode;
 import it.unibz.inf.ontop.pivotalrepr.impl.IllegalTreeUpdateException;
 import it.unibz.inf.ontop.pivotalrepr.QueryNode;
 
@@ -20,7 +20,7 @@ public class BinaryChildrenRelation implements ChildrenRelation {
 
 
     protected BinaryChildrenRelation(TreeNode parent) {
-        if (!(parent.getQueryNode() instanceof NonCommutativeOperatorNode)) {
+        if (!(parent.getQueryNode() instanceof BinaryOrderedOperatorNode)) {
             throw new IllegalArgumentException("The StandardChildrenRelation requires " +
                     "BinaryAsymmetricOperatorNode as parents");
         }
@@ -68,7 +68,7 @@ public class BinaryChildrenRelation implements ChildrenRelation {
     }
 
     @Override
-    public void addChild(TreeNode childNode, Optional<NonCommutativeOperatorNode.ArgumentPosition> optionalPosition, boolean canReplace)
+    public void addChild(TreeNode childNode, Optional<BinaryOrderedOperatorNode.ArgumentPosition> optionalPosition, boolean canReplace)
             throws IllegalTreeUpdateException {
         if (!optionalPosition.isPresent()) {
             throw new IllegalArgumentException("The BinaryChildrenRelation requires argument positions");
@@ -134,12 +134,12 @@ public class BinaryChildrenRelation implements ChildrenRelation {
     }
 
     @Override
-    public Optional<NonCommutativeOperatorNode.ArgumentPosition> getOptionalPosition(TreeNode childNode) {
+    public Optional<BinaryOrderedOperatorNode.ArgumentPosition> getOptionalPosition(TreeNode childNode) {
         if (optionalLeftChild.isPresent() && (optionalLeftChild.get() == childNode)) {
-            return Optional.of(NonCommutativeOperatorNode.ArgumentPosition.LEFT);
+            return Optional.of(BinaryOrderedOperatorNode.ArgumentPosition.LEFT);
         }
         else if (optionalRightChild.isPresent() && (optionalRightChild.get() == childNode)) {
-            return Optional.of(NonCommutativeOperatorNode.ArgumentPosition.RIGHT);
+            return Optional.of(BinaryOrderedOperatorNode.ArgumentPosition.RIGHT);
         }
         else {
             throw new IllegalArgumentException(childNode.getQueryNode() + " does not appear as a child.");
@@ -147,7 +147,7 @@ public class BinaryChildrenRelation implements ChildrenRelation {
     }
 
     @Override
-    public Optional<TreeNode> getChild(NonCommutativeOperatorNode.ArgumentPosition position) {
+    public Optional<TreeNode> getChild(BinaryOrderedOperatorNode.ArgumentPosition position) {
         switch (position) {
             case LEFT:
                 return optionalLeftChild;

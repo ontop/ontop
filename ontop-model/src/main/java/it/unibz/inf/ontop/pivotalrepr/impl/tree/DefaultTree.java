@@ -71,7 +71,7 @@ public class DefaultTree implements QueryTree {
     }
 
     @Override
-    public void addChild(QueryNode parentQueryNode, QueryNode childQueryNode, Optional<NonCommutativeOperatorNode.ArgumentPosition> optionalPosition,
+    public void addChild(QueryNode parentQueryNode, QueryNode childQueryNode, Optional<BinaryOrderedOperatorNode.ArgumentPosition> optionalPosition,
                          boolean mustBeNew, boolean canReplace) throws IllegalTreeUpdateException {
         TreeNode parentNode = accessTreeNode(parentQueryNode);
 
@@ -103,7 +103,7 @@ public class DefaultTree implements QueryTree {
      * Low-level
      */
     private void createNewNode(QueryNode childQueryNode, TreeNode parentNode,
-                               Optional<NonCommutativeOperatorNode.ArgumentPosition> optionalPosition, boolean canReplace)
+                               Optional<BinaryOrderedOperatorNode.ArgumentPosition> optionalPosition, boolean canReplace)
             throws IllegalTreeUpdateException {
         TreeNode childNode = new TreeNode(childQueryNode);
         insertNodeIntoIndex(childQueryNode, childNode);
@@ -115,7 +115,7 @@ public class DefaultTree implements QueryTree {
     }
 
     private static ChildrenRelation createChildrenRelation(TreeNode parentTreeNode) {
-        if (parentTreeNode.getQueryNode() instanceof NonCommutativeOperatorNode) {
+        if (parentTreeNode.getQueryNode() instanceof BinaryOrderedOperatorNode) {
             return new BinaryChildrenRelation(parentTreeNode);
         }
         else {
@@ -187,15 +187,15 @@ public class DefaultTree implements QueryTree {
         removeNodeFromIndex(previousNode);
         insertNodeIntoIndex(replacingNode, treeNode);
 
-        if ((!(previousNode instanceof NonCommutativeOperatorNode))
-                && (replacingNode instanceof NonCommutativeOperatorNode)) {
+        if ((!(previousNode instanceof BinaryOrderedOperatorNode))
+                && (replacingNode instanceof BinaryOrderedOperatorNode)) {
             ChildrenRelation newChildrenRelation = accessChildrenRelation(treeNode)
                     .convertToBinaryChildrenRelation();
             // Overrides the previous entry
             childrenIndex.put(treeNode, newChildrenRelation);
         }
-        else if ((previousNode instanceof NonCommutativeOperatorNode)
-                && (!(replacingNode instanceof NonCommutativeOperatorNode))) {
+        else if ((previousNode instanceof BinaryOrderedOperatorNode)
+                && (!(replacingNode instanceof BinaryOrderedOperatorNode))) {
             ChildrenRelation newChildrenRelation = accessChildrenRelation(treeNode)
                     .convertToStandardChildrenRelation();
             // Overrides the previous entry
@@ -275,15 +275,15 @@ public class DefaultTree implements QueryTree {
 
     @Override
     public void replaceNodesByOneNode(ImmutableList<QueryNode> nodesToRemove, QueryNode replacingNode,
-                                      QueryNode parentNode, Optional<NonCommutativeOperatorNode.ArgumentPosition> optionalPosition) throws IllegalTreeUpdateException {
-        if (replacingNode instanceof NonCommutativeOperatorNode) {
+                                      QueryNode parentNode, Optional<BinaryOrderedOperatorNode.ArgumentPosition> optionalPosition) throws IllegalTreeUpdateException {
+        if (replacingNode instanceof BinaryOrderedOperatorNode) {
             throw new RuntimeException("Having a BinaryAsymmetricOperatorNode replacing node is not yet supported");
         }
         addChild(parentNode, replacingNode, optionalPosition, true, true);
 
 
         for(QueryNode nodeToRemove : nodesToRemove) {
-            boolean isParentBinaryAsymmetricOperator = (nodeToRemove instanceof NonCommutativeOperatorNode);
+            boolean isParentBinaryAsymmetricOperator = (nodeToRemove instanceof BinaryOrderedOperatorNode);
 
             TreeNode treeNodeToRemove = accessTreeNode(nodeToRemove);
 
@@ -294,7 +294,7 @@ public class DefaultTree implements QueryTree {
                                 "is not yet supported");
                     }
                     else {
-                        addChild(replacingNode, child, Optional.<NonCommutativeOperatorNode.ArgumentPosition>empty(), false, true);
+                        addChild(replacingNode, child, Optional.<BinaryOrderedOperatorNode.ArgumentPosition>empty(), false, true);
                     }
                 }
             }
@@ -303,7 +303,7 @@ public class DefaultTree implements QueryTree {
     }
 
     @Override
-    public Optional<NonCommutativeOperatorNode.ArgumentPosition> getOptionalPosition(QueryNode parentNode, QueryNode childNode) {
+    public Optional<BinaryOrderedOperatorNode.ArgumentPosition> getOptionalPosition(QueryNode parentNode, QueryNode childNode) {
         TreeNode parentTreeNode = accessTreeNode(parentNode);
         TreeNode childTreeNode = accessTreeNode(childNode);
 
@@ -313,7 +313,7 @@ public class DefaultTree implements QueryTree {
 
     @Override
     public void insertParent(QueryNode childNode, QueryNode newParentNode,
-                             Optional<NonCommutativeOperatorNode.ArgumentPosition> optionalPosition) throws IllegalTreeUpdateException {
+                             Optional<BinaryOrderedOperatorNode.ArgumentPosition> optionalPosition) throws IllegalTreeUpdateException {
         if (contains(newParentNode)) {
             throw new IllegalTreeUpdateException(newParentNode + " is already present so cannot be inserted again");
         }
@@ -364,7 +364,7 @@ public class DefaultTree implements QueryTree {
 
     @Override
     public QueryNode replaceNodeByChild(QueryNode parentNode,
-                                        Optional<NonCommutativeOperatorNode.ArgumentPosition> optionalReplacingChildPosition) {
+                                        Optional<BinaryOrderedOperatorNode.ArgumentPosition> optionalReplacingChildPosition) {
         TreeNode parentTreeNode = accessTreeNode(parentNode);
 
         ChildrenRelation childrenRelation = accessChildrenRelation(parentTreeNode);
@@ -424,7 +424,7 @@ public class DefaultTree implements QueryTree {
 
     @Override
     public void transferChild(QueryNode childNode, QueryNode formerParentNode, QueryNode newParentNode,
-                              Optional<NonCommutativeOperatorNode.ArgumentPosition> optionalPosition) {
+                              Optional<BinaryOrderedOperatorNode.ArgumentPosition> optionalPosition) {
 
         TreeNode formerParentTreeNode = accessTreeNode(formerParentNode);
         TreeNode childTreeNode = accessTreeNode(childNode);

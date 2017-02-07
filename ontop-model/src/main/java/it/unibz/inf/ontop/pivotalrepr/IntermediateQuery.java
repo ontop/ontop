@@ -31,7 +31,7 @@ public interface IntermediateQuery {
 
     Stream<QueryNode> getOtherChildrenStream(QueryNode parent, QueryNode childToOmmit);
 
-    Optional<QueryNode> getChild(QueryNode currentNode, NonCommutativeOperatorNode.ArgumentPosition position);
+    Optional<QueryNode> getChild(QueryNode currentNode, BinaryOrderedOperatorNode.ArgumentPosition position);
 
     /**
      * From the parent to the oldest ancestor.
@@ -47,9 +47,9 @@ public interface IntermediateQuery {
     /**
      * TODO: explain
      */
-    Optional<NonCommutativeOperatorNode.ArgumentPosition> getOptionalPosition(QueryNode parentNode, QueryNode child);
+    Optional<BinaryOrderedOperatorNode.ArgumentPosition> getOptionalPosition(QueryNode parentNode, QueryNode child);
 
-    Optional<NonCommutativeOperatorNode.ArgumentPosition> getOptionalPosition(QueryNode child);
+    Optional<BinaryOrderedOperatorNode.ArgumentPosition> getOptionalPosition(QueryNode child);
 
     /**
      * EXCLUDES the root of the sub-tree (currentNode).

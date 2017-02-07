@@ -174,7 +174,7 @@ public class IQValidationTest {
         queryBuilder.init(projectionAtom, constructionNode);
         queryBuilder.addChild(constructionNode, leftJoinNode);
         ExtensionalDataNode dataNode = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE2_PREDICATE, X, Z));
-        queryBuilder.addChild(leftJoinNode, dataNode, NonCommutativeOperatorNode.ArgumentPosition.LEFT);
+        queryBuilder.addChild(leftJoinNode, dataNode, BinaryOrderedOperatorNode.ArgumentPosition.LEFT);
         IntermediateQuery query = queryBuilder.build();
     }
 

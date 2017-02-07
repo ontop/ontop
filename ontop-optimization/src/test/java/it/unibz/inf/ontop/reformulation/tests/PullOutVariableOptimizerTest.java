@@ -123,8 +123,8 @@ public class PullOutVariableOptimizerTest {
 
         queryBuilder1.init(projectionAtom, constructionNode);
         queryBuilder1.addChild(constructionNode, leftJoinNode1);
-        queryBuilder1.addChild(leftJoinNode1, dataNode1, NonCommutativeOperatorNode.ArgumentPosition.LEFT);
-        queryBuilder1.addChild(leftJoinNode1, dataNode2, NonCommutativeOperatorNode.ArgumentPosition.RIGHT);
+        queryBuilder1.addChild(leftJoinNode1, dataNode1, BinaryOrderedOperatorNode.ArgumentPosition.LEFT);
+        queryBuilder1.addChild(leftJoinNode1, dataNode2, BinaryOrderedOperatorNode.ArgumentPosition.RIGHT);
 
         IntermediateQuery query1 = queryBuilder1.build();
 
@@ -144,8 +144,8 @@ public class PullOutVariableOptimizerTest {
 
         queryBuilder2.init(projectionAtom2, constructionNode2);
         queryBuilder2.addChild(constructionNode2, leftJoinNode2);
-        queryBuilder2.addChild(leftJoinNode2, dataNode1, NonCommutativeOperatorNode.ArgumentPosition.LEFT);
-        queryBuilder2.addChild(leftJoinNode2, dataNode3, NonCommutativeOperatorNode.ArgumentPosition.RIGHT);
+        queryBuilder2.addChild(leftJoinNode2, dataNode1, BinaryOrderedOperatorNode.ArgumentPosition.LEFT);
+        queryBuilder2.addChild(leftJoinNode2, dataNode3, BinaryOrderedOperatorNode.ArgumentPosition.RIGHT);
 
         IntermediateQuery query2 = queryBuilder2.build();
 
@@ -270,8 +270,8 @@ public class PullOutVariableOptimizerTest {
 
         queryBuilder1.init(projectionAtom1, constructionNode1);
         queryBuilder1.addChild(constructionNode1, leftJoinNode1);
-        queryBuilder1.addChild(leftJoinNode1, dataNode1, NonCommutativeOperatorNode.ArgumentPosition.LEFT);
-        queryBuilder1.addChild(leftJoinNode1, dataNode2, NonCommutativeOperatorNode.ArgumentPosition.RIGHT);
+        queryBuilder1.addChild(leftJoinNode1, dataNode1, BinaryOrderedOperatorNode.ArgumentPosition.LEFT);
+        queryBuilder1.addChild(leftJoinNode1, dataNode2, BinaryOrderedOperatorNode.ArgumentPosition.RIGHT);
 
         IntermediateQuery query1 = queryBuilder1.build();
 
@@ -294,9 +294,9 @@ public class PullOutVariableOptimizerTest {
 
         expectedQuery.init(projectionAtom2, constructionNode2);
         expectedQuery.addChild(constructionNode2, leftJoinNode2);
-        expectedQuery.addChild(leftJoinNode2, filterNode1, NonCommutativeOperatorNode.ArgumentPosition.LEFT);
+        expectedQuery.addChild(leftJoinNode2, filterNode1, BinaryOrderedOperatorNode.ArgumentPosition.LEFT);
         expectedQuery.addChild(filterNode1, dataNode3);
-        expectedQuery.addChild(leftJoinNode2, dataNode4, NonCommutativeOperatorNode.ArgumentPosition.RIGHT);
+        expectedQuery.addChild(leftJoinNode2, dataNode4, BinaryOrderedOperatorNode.ArgumentPosition.RIGHT);
 
         IntermediateQuery query2 = expectedQuery.build();
 
@@ -322,8 +322,8 @@ public class PullOutVariableOptimizerTest {
         queryBuilder1.addChild(constructionNode, joinNode1);
         queryBuilder1.addChild(joinNode1, dataNode1);
         queryBuilder1.addChild(joinNode1, leftJoinNode1);
-        queryBuilder1.addChild(leftJoinNode1, dataNode2, NonCommutativeOperatorNode.ArgumentPosition.LEFT);
-        queryBuilder1.addChild(leftJoinNode1, dataNode3, NonCommutativeOperatorNode.ArgumentPosition.RIGHT);
+        queryBuilder1.addChild(leftJoinNode1, dataNode2, BinaryOrderedOperatorNode.ArgumentPosition.LEFT);
+        queryBuilder1.addChild(leftJoinNode1, dataNode3, BinaryOrderedOperatorNode.ArgumentPosition.RIGHT);
 
         IntermediateQuery query1 = queryBuilder1.build();
 
@@ -346,8 +346,8 @@ public class PullOutVariableOptimizerTest {
         expectedQueryBuilder.addChild(constructionNode, joinNode2);
         expectedQueryBuilder.addChild(joinNode2, dataNode4);
         expectedQueryBuilder.addChild(joinNode2, leftJoinNode2);
-        expectedQueryBuilder.addChild(leftJoinNode2, dataNode5, NonCommutativeOperatorNode.ArgumentPosition.LEFT);
-        expectedQueryBuilder.addChild(leftJoinNode2, dataNode6, NonCommutativeOperatorNode.ArgumentPosition.RIGHT);
+        expectedQueryBuilder.addChild(leftJoinNode2, dataNode5, BinaryOrderedOperatorNode.ArgumentPosition.LEFT);
+        expectedQueryBuilder.addChild(leftJoinNode2, dataNode6, BinaryOrderedOperatorNode.ArgumentPosition.RIGHT);
 
         IntermediateQuery query2 = expectedQueryBuilder.build();
 

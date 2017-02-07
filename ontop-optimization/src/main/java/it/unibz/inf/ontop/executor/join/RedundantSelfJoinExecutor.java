@@ -175,7 +175,7 @@ public class RedundantSelfJoinExecutor extends SelfJoinLikeExecutor implements I
 
         proposal.getNewDataNodes()
                 .forEach(newNode -> treeComponent.addChild(topJoinNode, newNode,
-                        Optional.<NonCommutativeOperatorNode.ArgumentPosition>empty(), false));
+                        Optional.<BinaryOrderedOperatorNode.ArgumentPosition>empty(), false));
 
         return getJoinNodeCentricOptimizationResults(query, treeComponent, topJoinNode, proposal);
     }

@@ -9,7 +9,7 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
-import static it.unibz.inf.ontop.pivotalrepr.NonCommutativeOperatorNode.ArgumentPosition.RIGHT;
+import static it.unibz.inf.ontop.pivotalrepr.BinaryOrderedOperatorNode.ArgumentPosition.RIGHT;
 
 /**
  * Choose the ancestor for the UnionNode lift.
@@ -37,8 +37,8 @@ public class SimpleUnionNodeLifter implements UnionNodeLifter {
 
                 if(parentNode instanceof LeftJoinNode){
 
-                    Optional<NonCommutativeOperatorNode.ArgumentPosition> optionalPosition = currentQuery.getOptionalPosition(parentNode, unionNode);
-                    NonCommutativeOperatorNode.ArgumentPosition position = optionalPosition.orElseThrow(() -> new IllegalStateException("Missing position of leftJoin child"));
+                    Optional<BinaryOrderedOperatorNode.ArgumentPosition> optionalPosition = currentQuery.getOptionalPosition(parentNode, unionNode);
+                    BinaryOrderedOperatorNode.ArgumentPosition position = optionalPosition.orElseThrow(() -> new IllegalStateException("Missing position of leftJoin child"));
 
                     //cannot lift coming from the right part of the left join
                     if (position.equals(RIGHT)){

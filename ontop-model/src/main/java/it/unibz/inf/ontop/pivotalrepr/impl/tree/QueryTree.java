@@ -14,7 +14,7 @@ import java.util.stream.Stream;
 public interface QueryTree {
     ConstructionNode getRootNode();
 
-    void addChild(QueryNode parentQueryNode, QueryNode childQueryNode, Optional<NonCommutativeOperatorNode.ArgumentPosition> optionalPosition,
+    void addChild(QueryNode parentQueryNode, QueryNode childQueryNode, Optional<BinaryOrderedOperatorNode.ArgumentPosition> optionalPosition,
                   boolean mustBeNew, boolean canReplace) throws IllegalTreeUpdateException;
 
     ImmutableList<QueryNode> getChildren(QueryNode node);
@@ -41,18 +41,18 @@ public interface QueryTree {
     QueryNode removeOrReplaceNodeByUniqueChild(QueryNode node) throws IllegalTreeUpdateException;
 
     void replaceNodesByOneNode(ImmutableList<QueryNode> queryNodes, QueryNode replacingNode, QueryNode parentNode,
-                               Optional<NonCommutativeOperatorNode.ArgumentPosition> optionalPosition) throws IllegalTreeUpdateException;
+                               Optional<BinaryOrderedOperatorNode.ArgumentPosition> optionalPosition) throws IllegalTreeUpdateException;
 
-    Optional<NonCommutativeOperatorNode.ArgumentPosition> getOptionalPosition(QueryNode parentNode, QueryNode childNode);
+    Optional<BinaryOrderedOperatorNode.ArgumentPosition> getOptionalPosition(QueryNode parentNode, QueryNode childNode);
 
-    void insertParent(QueryNode childNode, QueryNode newParentNode, Optional<NonCommutativeOperatorNode.ArgumentPosition> optionalPosition) throws IllegalTreeUpdateException;
+    void insertParent(QueryNode childNode, QueryNode newParentNode, Optional<BinaryOrderedOperatorNode.ArgumentPosition> optionalPosition) throws IllegalTreeUpdateException;
 
     ImmutableSet<EmptyNode> getEmptyNodes();
 
     ImmutableSet<TrueNode> getTrueNodes();
 
     QueryNode replaceNodeByChild(QueryNode parentNode,
-                                 Optional<NonCommutativeOperatorNode.ArgumentPosition> optionalReplacingChildPosition);
+                                 Optional<BinaryOrderedOperatorNode.ArgumentPosition> optionalReplacingChildPosition);
 
     ImmutableSet<IntensionalDataNode> getIntensionalNodes();
 
@@ -64,7 +64,7 @@ public interface QueryTree {
     QueryTree createSnapshot();
 
     void transferChild(QueryNode childNode, QueryNode formerParentNode, QueryNode newParentNode,
-                       Optional<NonCommutativeOperatorNode.ArgumentPosition> optionalPosition);
+                       Optional<BinaryOrderedOperatorNode.ArgumentPosition> optionalPosition);
 
 
 
