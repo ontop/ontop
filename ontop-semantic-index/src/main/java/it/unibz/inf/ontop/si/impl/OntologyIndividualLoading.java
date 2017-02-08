@@ -1,7 +1,7 @@
 package it.unibz.inf.ontop.si.impl;
 
 
-import it.unibz.inf.ontop.injection.QuestConfiguration;
+import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.owlapi.OWLAPIABoxIterator;
 import it.unibz.inf.ontop.si.OntopSemanticIndexLoader;
 import it.unibz.inf.ontop.si.SemanticIndexException;
@@ -61,7 +61,7 @@ public class OntologyIndividualLoading {
             /*
             Creates the configuration and the loader object
              */
-            QuestConfiguration configuration = createConfiguration(init.dataRepository, owlOntology, init.jdbcUrl, properties);
+            OntopSQLOWLAPIConfiguration configuration = createConfiguration(init.dataRepository, owlOntology, init.jdbcUrl, properties);
             return new OntopSemanticIndexLoaderImpl(configuration, init.localConnection);
 
         } catch (SQLException e) {

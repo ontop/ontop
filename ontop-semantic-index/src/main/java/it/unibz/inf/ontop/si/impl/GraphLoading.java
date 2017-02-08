@@ -1,8 +1,7 @@
 package it.unibz.inf.ontop.si.impl;
 
 
-import it.unibz.inf.ontop.injection.QuestConfiguration;
-import it.unibz.inf.ontop.model.OBDAException;
+import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
 import it.unibz.inf.ontop.ontology.Ontology;
 import it.unibz.inf.ontop.ontology.OntologyFactory;
@@ -50,7 +49,7 @@ public class GraphLoading {
             /*
             Creates the configuration and the loader object
              */
-            QuestConfiguration configuration = createConfiguration(init.dataRepository, init.jdbcUrl, properties);
+            OntopSQLOWLAPIConfiguration configuration = createConfiguration(init.dataRepository, init.jdbcUrl, properties);
             return new OntopSemanticIndexLoaderImpl(configuration, init.localConnection);
 
         } catch (IOException e) {
@@ -138,7 +137,7 @@ public class GraphLoading {
         private final String graphIRI;
 
         public Process(RDF4JRDFIterator iterator, RDBMSSIRepositoryManager dataRepository,
-                       Connection localConnection, String graphIRI) throws OBDAException
+                       Connection localConnection, String graphIRI)
         {
             this.iterator = iterator;
             this.dataRepository = dataRepository;

@@ -21,7 +21,7 @@ package it.unibz.inf.ontop.reformulation.tests;
  */
 
 import it.unibz.inf.ontop.injection.OntopQueryAnsweringSettings;
-import it.unibz.inf.ontop.injection.QuestConfiguration;
+import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.io.QueryIOManager;
 import it.unibz.inf.ontop.model.OBDAModel;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
@@ -215,7 +215,7 @@ public class TreeWitnessRewriterH2Test{
 
 	private void runTests(Properties p) throws Exception {
 
-		QuestConfiguration obdaConfiguration = QuestConfiguration.defaultBuilder().properties(p)
+		OntopSQLOWLAPIConfiguration obdaConfiguration = OntopSQLOWLAPIConfiguration.defaultBuilder().properties(p)
 				.nativeOntopMappingFile(obdafile)
 				.ontologyFile(owlfile)
 				.jdbcUrl(url)

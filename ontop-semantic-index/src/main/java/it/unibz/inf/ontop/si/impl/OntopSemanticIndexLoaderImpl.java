@@ -1,6 +1,6 @@
 package it.unibz.inf.ontop.si.impl;
 
-import it.unibz.inf.ontop.injection.QuestConfiguration;
+import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.si.OntopSemanticIndexLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,17 +15,17 @@ public class OntopSemanticIndexLoaderImpl implements OntopSemanticIndexLoader {
 
     private static final Logger LOG = LoggerFactory.getLogger(OntopSemanticIndexLoaderImpl.class);
 
-    private final QuestConfiguration configuration;
+    private final OntopSQLOWLAPIConfiguration configuration;
     private final Connection connection;
 
 
-    OntopSemanticIndexLoaderImpl(QuestConfiguration configuration, Connection connection) {
+    OntopSemanticIndexLoaderImpl(OntopSQLOWLAPIConfiguration configuration, Connection connection) {
         this.configuration = configuration;
         this.connection = connection;
     }
 
     @Override
-    public QuestConfiguration getConfiguration() {
+    public OntopSQLOWLAPIConfiguration getConfiguration() {
         return configuration;
     }
 

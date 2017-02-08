@@ -21,7 +21,6 @@ package it.unibz.inf.ontop.owlrefplatform.core.abox;
  */
 
 import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.Predicate.COL_TYPE;
 import it.unibz.inf.ontop.model.impl.RDBMSMappingAxiom;
@@ -857,7 +856,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 	}
 
 	
-	public ImmutableList<OBDAMappingAxiom> getMappings() throws OBDAException {
+	public ImmutableList<OBDAMappingAxiom> getMappings() {
 
 		List<OBDAMappingAxiom> result = new LinkedList<>();
 

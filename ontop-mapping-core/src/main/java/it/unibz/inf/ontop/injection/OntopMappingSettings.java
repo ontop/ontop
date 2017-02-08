@@ -14,4 +14,11 @@ public interface OntopMappingSettings extends OntopOBDASettings, OntopOptimizati
     String OBTAIN_FULL_METADATA = "ontop.fullMetadataExtraction";
     String QUERY_ONTOLOGY_ANNOTATIONS = "ontop.queryOntologyAnnotation";
 
+    /**
+     * Options to specify base IRI.
+     *
+     * @see <a href="http://www.w3.org/TR/r2rml/#dfn-base-iri">Base IRI</a>
+     */
+    String  BASE_IRI             	= "mapping.baseIri";
+
 }

@@ -5,7 +5,7 @@ import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.injection.MappingFactory;
 import it.unibz.inf.ontop.injection.OntopMappingConfiguration;
-import it.unibz.inf.ontop.injection.QuestConfiguration;
+import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.io.PrefixManager;
 import it.unibz.inf.ontop.model.OBDAModel;
 import it.unibz.inf.ontop.model.impl.OBDAModelImpl;
@@ -94,18 +94,18 @@ class SILoadingTools {
         }
     }
 
-    static QuestConfiguration createConfiguration(RDBMSSIRepositoryManager dataRepository,
-                                                  OWLOntology ontology,
-                                                  String jdbcUrl, Properties properties) throws SemanticIndexException {
+    static OntopSQLOWLAPIConfiguration createConfiguration(RDBMSSIRepositoryManager dataRepository,
+                                                           OWLOntology ontology,
+                                                           String jdbcUrl, Properties properties) throws SemanticIndexException {
         return createConfiguration(dataRepository, Optional.of(ontology), jdbcUrl, properties);
     }
 
-    static QuestConfiguration createConfiguration(RDBMSSIRepositoryManager dataRepository,
+    static OntopSQLOWLAPIConfiguration createConfiguration(RDBMSSIRepositoryManager dataRepository,
                                                   String jdbcUrl, Properties properties) throws SemanticIndexException {
         return createConfiguration(dataRepository, Optional.empty(), jdbcUrl, properties);
     }
 
-    private static QuestConfiguration createConfiguration(RDBMSSIRepositoryManager dataRepository,
+    private static OntopSQLOWLAPIConfiguration createConfiguration(RDBMSSIRepositoryManager dataRepository,
                                                   Optional<OWLOntology> optionalOntology,
                                                   String jdbcUrl, Properties properties) throws SemanticIndexException {
         OBDAModel ppMapping = createPPMapping(dataRepository);
@@ -127,7 +127,7 @@ class SILoadingTools {
         else
             optionalTBox = Optional.empty();
 
-        QuestConfiguration.Builder<? extends QuestConfiguration.Builder> builder = QuestConfiguration.defaultBuilder()
+        OntopSQLOWLAPIConfiguration.Builder builder = OntopSQLOWLAPIConfiguration.defaultBuilder()
                 .obdaModel(ppMapping)
                 .properties(properties)
                 .jdbcUrl(jdbcUrl)

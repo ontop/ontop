@@ -45,13 +45,6 @@ public interface QuestCoreSettings extends OBDASettings, OntopQueryAnsweringSQLS
 
 	@Deprecated
 	String	REFORMULATION_TECHNIQUE	= "org.obda.owlreformulationplatform.reformulationTechnique";
-
-	/**
-	 * Options to specify base IRI.
-	 *
-	 * @see <a href="http://www.w3.org/TR/r2rml/#dfn-base-iri">Base IRI</a>
-	 */
-	String  BASE_IRI             	= "mapping.baseIri";
 	
 //	String  OPTIMIZE_TBOX_SIGMA 	= "org.obda.owlreformulationplatform.optimizeTboxSigma";
 //	String 	CREATE_TEST_MAPPINGS 	= "org.obda.owlreformulationplatform.createTestMappings";

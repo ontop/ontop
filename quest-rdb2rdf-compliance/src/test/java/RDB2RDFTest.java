@@ -34,11 +34,11 @@ import com.google.common.collect.Sets;
 import com.google.common.io.Resources;
 import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.exception.InvalidMappingException;
-import it.unibz.inf.ontop.injection.OBDASettings;
-import it.unibz.inf.ontop.injection.QuestConfiguration;
-import it.unibz.inf.ontop.injection.QuestConfiguration.Builder;
+import it.unibz.inf.ontop.injection.OntopMappingSettings;
+import it.unibz.inf.ontop.injection.OntopSQLCoreSettings;
+import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
+import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration.Builder;
 import it.unibz.inf.ontop.model.OBDAModel;
-import it.unibz.inf.ontop.injection.QuestCoreSettings;
 import it.unibz.inf.ontop.owlapi.directmapping.DirectMappingEngine;
 import it.unibz.inf.ontop.rdf4j.repository.OntopVirtualRepository;
 import org.junit.AfterClass;
@@ -229,12 +229,12 @@ public class RDB2RDFTest {
 
 		PROPERTIES = new Properties();
 
-		PROPERTIES.setProperty(OBDASettings.JDBC_NAME, "h2");
-		PROPERTIES.setProperty(OBDASettings.JDBC_USER, DB_USER);
-		PROPERTIES.setProperty(OBDASettings.JDBC_PASSWORD, DB_PASSWORD);
-		PROPERTIES.setProperty(OBDASettings.JDBC_URL, JDBC_URL);
-		PROPERTIES.setProperty(OBDASettings.JDBC_DRIVER, JDBC_DRIVER);
-		PROPERTIES.setProperty(QuestCoreSettings.BASE_IRI, BASE_IRI);
+		PROPERTIES.setProperty(OntopSQLCoreSettings.JDBC_NAME, "h2");
+		PROPERTIES.setProperty(OntopSQLCoreSettings.JDBC_USER, DB_USER);
+		PROPERTIES.setProperty(OntopSQLCoreSettings.JDBC_PASSWORD, DB_PASSWORD);
+		PROPERTIES.setProperty(OntopSQLCoreSettings.JDBC_URL, JDBC_URL);
+		PROPERTIES.setProperty(OntopSQLCoreSettings.JDBC_DRIVER, JDBC_DRIVER);
+		PROPERTIES.setProperty(OntopMappingSettings.BASE_IRI, BASE_IRI);
 	}
 
 	@Before
@@ -262,7 +262,7 @@ public class RDB2RDFTest {
 	protected Repository createRepository() throws Exception {
 		logger.info("RDB2RDFTest " + name + " " + mappingFile);
 
-		QuestConfiguration configuration;
+		OntopSQLOWLAPIConfiguration configuration;
 		if (mappingFile != null) {
 			String absoluteFilePath = Optional.ofNullable(getClass().getResource(mappingFile))
 					.map(URL::getFile)
@@ -281,7 +281,7 @@ public class RDB2RDFTest {
 	}
 
 	Builder<? extends Builder> createStandardConfigurationBuilder() {
-		  return QuestConfiguration.defaultBuilder()
+		  return OntopSQLOWLAPIConfiguration.defaultBuilder()
 				 .properties(PROPERTIES)
 				 .ontology(EMPTY_ONT);
 	}
@@ -298,11 +298,11 @@ public class RDB2RDFTest {
 	/**
 	 * Bootstraps the mapping and returns a new configuration
 	 */
-	QuestConfiguration bootstrapDMConfiguration()
+	OntopSQLOWLAPIConfiguration bootstrapDMConfiguration()
 			throws SQLException, IOException, InvalidMappingException, OWLOntologyStorageException,
 			OWLOntologyCreationException, DuplicateMappingException {
 
-		QuestConfiguration initialConfiguration = createInMemoryBuilder().build();
+		OntopSQLOWLAPIConfiguration initialConfiguration = createInMemoryBuilder().build();
 		DirectMappingEngine.BootstrappingResults results = DirectMappingEngine.bootstrap(initialConfiguration, BASE_IRI);
 
 		OBDAModel bootstrappedMapping = results.getMapping();

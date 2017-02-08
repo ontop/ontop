@@ -1,10 +1,9 @@
 package it.unibz.inf.ontop.si;
 
 
-import it.unibz.inf.ontop.injection.QuestConfiguration;
+import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.si.impl.GraphLoading;
 import it.unibz.inf.ontop.si.impl.OntologyIndividualLoading;
-import it.unibz.inf.ontop.si.impl.OntopSemanticIndexLoaderImpl;
 import it.unibz.inf.ontop.si.impl.VirtualAboxLoading;
 import org.eclipse.rdf4j.query.Dataset;
 import org.semanticweb.owlapi.model.OWLOntology;
@@ -17,7 +16,7 @@ import java.util.Properties;
 public interface OntopSemanticIndexLoader extends AutoCloseable {
 
 
-    QuestConfiguration getConfiguration();
+    OntopSQLOWLAPIConfiguration getConfiguration();
 
     /**
      * Closes its connection to the in-memory DB that was kept
@@ -64,7 +63,7 @@ public interface OntopSemanticIndexLoader extends AutoCloseable {
     /**
      * Loads the virtual ABox of an OBDA system in an in-memory Semantic Index.
      */
-    static OntopSemanticIndexLoader loadVirtualAbox(QuestConfiguration obdaConfiguration, Properties properties)
+    static OntopSemanticIndexLoader loadVirtualAbox(OntopSQLOWLAPIConfiguration obdaConfiguration, Properties properties)
             throws SemanticIndexException {
         return VirtualAboxLoading.loadVirtualAbox(obdaConfiguration, properties);
     }

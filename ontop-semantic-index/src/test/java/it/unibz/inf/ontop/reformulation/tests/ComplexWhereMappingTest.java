@@ -20,8 +20,7 @@ package it.unibz.inf.ontop.reformulation.tests;
  * #L%
  */
 
-import it.unibz.inf.ontop.injection.QuestConfiguration;
-import it.unibz.inf.ontop.injection.QuestCoreSettings;
+import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import it.unibz.inf.ontop.si.OntopSemanticIndexLoader;
 import org.junit.After;
@@ -40,6 +39,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Properties;
 
+import static it.unibz.inf.ontop.injection.OntopOBDASettings.OPTIMIZE_EQUIVALENCES;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -108,7 +108,7 @@ public class ComplexWhereMappingTest {
 		conn.commit();
 	}
 
-	private void runTests(QuestConfiguration config) throws Exception {
+	private void runTests(OntopSQLOWLAPIConfiguration config) throws Exception {
 
         QuestOWLFactory factory = new QuestOWLFactory();
         QuestOWL reasoner = factory.createReasoner(config);
@@ -138,10 +138,10 @@ public class ComplexWhereMappingTest {
 		}
 	}
 
-	private static QuestConfiguration createConfiguration() {
+	private static OntopSQLOWLAPIConfiguration createConfiguration() {
 		Properties p = new Properties();
-		p.put(QuestCoreSettings.OPTIMIZE_EQUIVALENCES, "true");
-		return QuestConfiguration.defaultBuilder()
+		p.put(OPTIMIZE_EQUIVALENCES, "true");
+		return OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.nativeOntopMappingFile(obdafile)
 				.ontologyFile(owlfile)
 				.properties(p)
@@ -160,8 +160,8 @@ public class ComplexWhereMappingTest {
     public void testClassicEqSig() throws Exception {
 
 		Properties p = new Properties();
-		p.put(QuestCoreSettings.OPTIMIZE_EQUIVALENCES, "true");
-		QuestConfiguration obdaConfig = createConfiguration();
+		p.put(OPTIMIZE_EQUIVALENCES, "true");
+		OntopSQLOWLAPIConfiguration obdaConfig = createConfiguration();
 
 		try(OntopSemanticIndexLoader loader = OntopSemanticIndexLoader.loadVirtualAbox(obdaConfig, p)) {
 			runTests(loader.getConfiguration());
