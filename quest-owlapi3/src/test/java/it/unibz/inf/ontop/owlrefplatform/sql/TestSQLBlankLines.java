@@ -59,44 +59,34 @@ public class TestSQLBlankLines {
 
 	@Before
 	public void setUp() throws Exception {
+		sqlConnection= DriverManager.getConnection(URL, USER, PASSWORD);
+		java.sql.Statement s = sqlConnection.createStatement();
+
 		try {
-			sqlConnection= DriverManager.getConnection(URL, USER, PASSWORD);
-			java.sql.Statement s = sqlConnection.createStatement();
+			String text = new Scanner( new File("src/test/resources/sqlgenerator/create-h2.sql") ).useDelimiter("\\A").next();
+			s.execute(text);
+			//Server.startWebServer(sqlConnection);
 
-			try {
-				String text = new Scanner( new File("src/test/resources/sqlgenerator/create-h2.sql") ).useDelimiter("\\A").next();
-				s.execute(text);
-				//Server.startWebServer(sqlConnection);
+		} catch(SQLException sqle) {
+			System.out.println("Exception in creating db from script");
+		}
 
-			} catch(SQLException sqle) {
-				System.out.println("Exception in creating db from script");
-			}
+		s.close();
+		// Loading the OWL file
 
-			s.close();
-			// Loading the OWL file
+		// Creating a new instance of the reasoner
+		QuestOWLFactory factory = new QuestOWLFactory();
+		OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
+				.ontologyFile(owlfile)
+				.nativeOntopMappingFile(obdafile)
+				.jdbcUrl(URL)
+				.jdbcUser(USER)
+				.jdbcPassword(PASSWORD)
+				.build();
+		reasoner = factory.createReasoner(config);
 
-			// Creating a new instance of the reasoner
-			QuestOWLFactory factory = new QuestOWLFactory();
-	        OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
-					.ontologyFile(owlfile)
-					.nativeOntopMappingFile(obdafile)
-					.jdbcUrl(URL)
-					.jdbcUser(USER)
-					.jdbcPassword(PASSWORD)
-					.build();
-	        reasoner = factory.createReasoner(config);
-
-			// Now we are ready for querying
-			conn = reasoner.getConnection();
-
-
-		} catch (Exception exc) {
-			try {
-				tearDown();
-			} catch (Exception e2) {
-				e2.printStackTrace();
-			}
-		}	
+		// Now we are ready for querying
+		conn = reasoner.getConnection();
 	}
 
 
