@@ -111,22 +111,9 @@
 
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>ontop-obdalib-core</artifactId>
+            <artifactId>ontop-mapping-sql-all</artifactId>
             <version>${project.version}</version>
         </dependency>
-
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>ontop-model</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>ontop-optimization</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>ontop-reformulation-core</artifactId>
@@ -147,12 +134,6 @@
                 </exclusion>
             </exclusions>
         </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>ontop-quest-db</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>ontop-obdalib-owlapi</artifactId>

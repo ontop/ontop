@@ -22,9 +22,7 @@ package it.unibz.inf.ontop.protege.panels;
 
 
 import it.unibz.inf.ontop.model.OBDADataSourceFactory;
-import it.unibz.inf.ontop.model.SQLMappingFactory;
 import it.unibz.inf.ontop.model.OBDADataSource;
-import it.unibz.inf.ontop.model.OBDAException;
 import it.unibz.inf.ontop.model.impl.*;
 import it.unibz.inf.ontop.protege.core.OBDAModelManager;
 import it.unibz.inf.ontop.protege.core.OBDAModelWrapper;
