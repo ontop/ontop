@@ -25,10 +25,12 @@
 		<dependency>
 			<groupId>${project.groupId}</groupId>
 			<artifactId>ontop-quest-rdf4j</artifactId>
+			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>${project.groupId}</groupId>
 			<artifactId>ontop-semantic-index</artifactId>
+			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>net.sourceforge.owlapi</groupId>

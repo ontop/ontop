@@ -1,6 +1,5 @@
 package it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing;
 
-import it.unibz.inf.ontop.model.OBDAException;
 import it.unibz.inf.ontop.ontology.OntologyFactory;
 import it.unibz.inf.ontop.ontology.OntologyVocabulary;
 import it.unibz.inf.ontop.ontology.impl.OntologyFactoryImpl;

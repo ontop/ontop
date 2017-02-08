@@ -26,7 +26,7 @@ package it.unibz.inf.ontop.injection;
  *
  * Immutable class.
  */
-public interface QuestCoreSettings extends OBDASettings, OntopQueryAnsweringSQLSettings {
+public interface QuestCoreSettings extends OntopQueryAnsweringSQLSettings, OntopMappingSQLSettings {
 
 	boolean isKeyPrintingEnabled();
 
