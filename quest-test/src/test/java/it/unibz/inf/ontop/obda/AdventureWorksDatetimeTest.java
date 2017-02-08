@@ -20,7 +20,7 @@ package it.unibz.inf.ontop.obda;
  * #L%
  */
 
-import it.unibz.inf.ontop.injection.QuestConfiguration;
+import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import org.junit.Before;
 import org.junit.Test;
@@ -48,7 +48,7 @@ public class AdventureWorksDatetimeTest {
 		// Creating a new instance of the reasoner
 		QuestOWLFactory factory = new QuestOWLFactory();
 
-		QuestConfiguration configuration = QuestConfiguration.defaultBuilder()
+		OntopSQLOWLAPIConfiguration configuration = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				//.enableEquivalenceOptimization(true)
 				.nativeOntopMappingFile(obdaFile)
 				.ontologyFile(owlFile)

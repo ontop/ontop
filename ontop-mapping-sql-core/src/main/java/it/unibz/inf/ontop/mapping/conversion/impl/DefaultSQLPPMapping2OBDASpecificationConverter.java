@@ -11,7 +11,7 @@ import it.unibz.inf.ontop.injection.OntopMappingSQLSettings;
 import it.unibz.inf.ontop.mapping.Mapping;
 import it.unibz.inf.ontop.mapping.MappingMetadata;
 import it.unibz.inf.ontop.mapping.MappingSplitter;
-import it.unibz.inf.ontop.mapping.conversion.SQLPPMapping2DSModelConverter;
+import it.unibz.inf.ontop.mapping.conversion.SQLPPMapping2OBDASpecificationConverter;
 import it.unibz.inf.ontop.mapping.datalog.Datalog2QueryMappingConverter;
 import it.unibz.inf.ontop.pivotalrepr.MetadataForQueryOptimization;
 import it.unibz.inf.ontop.pivotalrepr.impl.MetadataForQueryOptimizationImpl;
@@ -52,7 +52,7 @@ import java.util.stream.IntStream;
 import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
 
 
-public class DefaultSQLPPMapping2DSModelConverter implements SQLPPMapping2DSModelConverter {
+public class DefaultSQLPPMapping2OBDASpecificationConverter implements SQLPPMapping2OBDASpecificationConverter {
 
 
     private static final SQLMappingFactory SQL_MAPPING_FACTORY = SQLMappingFactoryImpl.getInstance();
@@ -70,7 +70,7 @@ public class DefaultSQLPPMapping2DSModelConverter implements SQLPPMapping2DSMode
 
 
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(DefaultSQLPPMapping2DSModelConverter.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(DefaultSQLPPMapping2OBDASpecificationConverter.class);
 
     private final OntopMappingSQLSettings settings;
     private final MappingVocabularyFixer mappingVocabularyFixer;
@@ -81,12 +81,12 @@ public class DefaultSQLPPMapping2DSModelConverter implements SQLPPMapping2DSMode
     private final Datalog2QueryMappingConverter mappingConverter;
 
     @Inject
-    private DefaultSQLPPMapping2DSModelConverter(OntopMappingSQLSettings settings,
-                                                 MappingVocabularyFixer mappingVocabularyFixer,
-                                                 NativeQueryLanguageComponentFactory nativeQLFactory,
-                                                 IMapping2DatalogConverter mapping2DatalogConverter,
-                                                 TMappingExclusionConfig tMappingExclusionConfig,
-                                                 Datalog2QueryMappingConverter mappingConverter
+    private DefaultSQLPPMapping2OBDASpecificationConverter(OntopMappingSQLSettings settings,
+                                                           MappingVocabularyFixer mappingVocabularyFixer,
+                                                           NativeQueryLanguageComponentFactory nativeQLFactory,
+                                                           IMapping2DatalogConverter mapping2DatalogConverter,
+                                                           TMappingExclusionConfig tMappingExclusionConfig,
+                                                           Datalog2QueryMappingConverter mappingConverter
                                                  ) {
         this.settings = settings;
         this.mappingVocabularyFixer = mappingVocabularyFixer;

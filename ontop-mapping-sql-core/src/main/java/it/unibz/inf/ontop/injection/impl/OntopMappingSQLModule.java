@@ -8,12 +8,11 @@ import it.unibz.inf.ontop.injection.OBDAFactoryWithException;
 import it.unibz.inf.ontop.injection.OntopMappingSQLConfiguration;
 import it.unibz.inf.ontop.injection.OntopMappingSQLSettings;
 import it.unibz.inf.ontop.mapping.MappingParser;
-import it.unibz.inf.ontop.mapping.conversion.SQLPPMapping2DSModelConverter;
+import it.unibz.inf.ontop.mapping.conversion.SQLPPMapping2OBDASpecificationConverter;
 import it.unibz.inf.ontop.mapping.datalog.Datalog2QueryMappingConverter;
 import it.unibz.inf.ontop.model.OBDAMappingAxiom;
 import it.unibz.inf.ontop.nativeql.RDBMetadataExtractor;
 import it.unibz.inf.ontop.owlrefplatform.core.translator.MappingVocabularyFixer;
-import it.unibz.inf.ontop.spec.OBDASpecificationExtractor;
 import it.unibz.inf.ontop.utils.IMapping2DatalogConverter;
 
 public class OntopMappingSQLModule extends OntopAbstractModule {
@@ -32,7 +31,7 @@ public class OntopMappingSQLModule extends OntopAbstractModule {
 
         bindFromPreferences(OBDAFactoryWithException.class);
         bindFromPreferences(MappingParser.class);
-        bindFromPreferences(SQLPPMapping2DSModelConverter.class);
+        bindFromPreferences(SQLPPMapping2OBDASpecificationConverter.class);
         bindFromPreferences(Datalog2QueryMappingConverter.class);
         bindFromPreferences(MappingVocabularyFixer.class);
         bindFromPreferences(IMapping2DatalogConverter.class);

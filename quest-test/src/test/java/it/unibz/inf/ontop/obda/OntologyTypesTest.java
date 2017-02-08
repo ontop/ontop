@@ -21,7 +21,7 @@ package it.unibz.inf.ontop.obda;
  */
 
 import it.unibz.inf.ontop.injection.OBDASettings;
-import it.unibz.inf.ontop.injection.QuestConfiguration;
+import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -55,7 +55,7 @@ public class OntologyTypesTest {
 
 		// Creating a new instance of the reasoner
 		QuestOWLFactory factory = new QuestOWLFactory();
-        QuestConfiguration.Builder configBuilder = QuestConfiguration.defaultBuilder()
+        OntopSQLOWLAPIConfiguration.Builder configBuilder = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.properties(p)
 				.ontologyFile(owlFile);
 		
@@ -237,7 +237,7 @@ public class OntologyTypesTest {
 		try {
 			// Creating a new instance of the reasoner
 	        QuestOWLFactory factory = new QuestOWLFactory();
-	        QuestConfiguration config = QuestConfiguration.defaultBuilder()
+	        OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
 					.nativeOntopMappingFile(new File(obdaErroredFile))
 					.ontologyFile(owlFile)
 					.build();

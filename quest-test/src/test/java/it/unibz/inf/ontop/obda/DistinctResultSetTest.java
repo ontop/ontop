@@ -1,7 +1,7 @@
 package it.unibz.inf.ontop.obda;
 
 
-import it.unibz.inf.ontop.injection.QuestConfiguration;
+import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.injection.QuestCoreSettings;
 import it.unibz.inf.ontop.owlrefplatform.core.resultset.QuestDistinctTupleResultSet;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
@@ -46,7 +46,7 @@ public class DistinctResultSetTest { //
 
         // Creating a new instance of the reasoner
         QuestOWLFactory factory = new QuestOWLFactory();
-        QuestConfiguration config = QuestConfiguration.defaultBuilder()
+        OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
                 .properties(p)
                 .nativeOntopMappingFile(obdaFile)
                 .ontologyFile(owlFile)
@@ -82,7 +82,7 @@ public class DistinctResultSetTest { //
         Repository repo = null;
         int count = 0;
         try {
-            QuestConfiguration configuration = QuestConfiguration.defaultBuilder()
+            OntopSQLOWLAPIConfiguration configuration = OntopSQLOWLAPIConfiguration.defaultBuilder()
                     .ontologyFile(owlFile)
                     .nativeOntopMappingFile(obdaFile)
                     .propertyFile(configFile)

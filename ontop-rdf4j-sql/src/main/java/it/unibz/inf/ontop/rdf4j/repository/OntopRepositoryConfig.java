@@ -20,7 +20,7 @@ package it.unibz.inf.ontop.rdf4j.repository;
  * #L%
  */
 
-import it.unibz.inf.ontop.injection.QuestConfiguration;
+import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.injection.QuestCoreSettings;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Model;
@@ -173,7 +173,7 @@ public class OntopRepositoryConfig extends AbstractRepositoryImplConfig {
             /*
              * Creates the repository according to the Quest type.
              */
-            QuestConfiguration configuration;
+            OntopSQLOWLAPIConfiguration configuration;
             Properties p = new Properties();
             if (existential) {
                 p.setProperty(QuestCoreSettings.EXISTENTIAL_REASONING, "true");
@@ -181,7 +181,7 @@ public class OntopRepositoryConfig extends AbstractRepositoryImplConfig {
                 p.setProperty(QuestCoreSettings.EXISTENTIAL_REASONING, "false");
             }
 
-            configuration = QuestConfiguration.defaultBuilder()
+            configuration = OntopSQLOWLAPIConfiguration.defaultBuilder()
                     // TODO: consider also r2rml
                     .nativeOntopMappingFile(obdaFile)
                     .ontologyFile(owlFile)

@@ -22,8 +22,7 @@ package it.unibz.inf.ontop.owlrefplatform.owlapi;
 
 import it.unibz.inf.ontop.exception.InvalidMappingException;
 import it.unibz.inf.ontop.exception.InvalidPredicateDeclarationException;
-import it.unibz.inf.ontop.injection.QuestConfiguration;
-import it.unibz.inf.ontop.model.OBDAException;
+import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.core.SQLExecutableQuery;
 import it.unibz.inf.ontop.sql.ImplicitDBConstraintsReader;
 import org.semanticweb.owlapi.model.*;
@@ -234,16 +233,16 @@ public class QuestOWLExample_OntowisTests {
 		/*
 		 * USR CONSTRAINTS !!!!
 		 */
-		QuestConfiguration config;
+		OntopSQLOWLAPIConfiguration config;
 		if (manualKeys){
 			System.out.println();
 			ImplicitDBConstraintsReader constr = new ImplicitDBConstraintsReader(new File(usrConstrinFile));
 			//factory.setImplicitDBConstraints(constr);
-			config = QuestConfiguration.defaultBuilder()
+			config = OntopSQLOWLAPIConfiguration.defaultBuilder()
 					.ontologyFile(owlfile)
 					.nativeOntopMappingFile(new File(obdaFile)).dbConstraintsReader(constr).build();
 		} else {
-			config = QuestConfiguration.defaultBuilder()
+			config = OntopSQLOWLAPIConfiguration.defaultBuilder()
 					.ontologyFile(owlfile)
 					.nativeOntopMappingFile(new File(obdaFile))
 					.build();

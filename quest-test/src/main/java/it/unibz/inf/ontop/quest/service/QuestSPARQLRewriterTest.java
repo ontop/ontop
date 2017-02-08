@@ -23,7 +23,7 @@ package it.unibz.inf.ontop.quest.service;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWL;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLFactory;
 import org.eclipse.rdf4j.common.io.IOUtil;
-import it.unibz.inf.ontop.injection.QuestConfiguration;
+import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -48,7 +48,7 @@ public class QuestSPARQLRewriterTest extends TestCase {
 		try {
 			final URL owlFileUrl = QuestSPARQLRewriterTest.class.getResource(OWL_FILE_LOCATION);
 			final URL obdaFileUrl = QuestSPARQLRewriterTest.class.getResource(OBDA_FILE_LOCATION);
-			QuestConfiguration configuration = QuestConfiguration.defaultBuilder()
+			OntopSQLOWLAPIConfiguration configuration = OntopSQLOWLAPIConfiguration.defaultBuilder()
 					.ontologyFile(owlFileUrl)
 					.nativeOntopMappingFile(obdaFileUrl.toString())
 					.build();

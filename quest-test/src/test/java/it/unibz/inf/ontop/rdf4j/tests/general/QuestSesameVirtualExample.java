@@ -20,7 +20,7 @@ package it.unibz.inf.ontop.rdf4j.tests.general;
  * #L%
  */
 
-import it.unibz.inf.ontop.injection.QuestConfiguration;
+import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.injection.QuestCoreSettings;
 
 import java.io.File;
@@ -68,7 +68,7 @@ public class QuestSesameVirtualExample {
 		 * existential reasoning and the rewriting technique is using
 		 * TreeWitness algorithm.
 		 */
-		QuestConfiguration configuration = QuestConfiguration.defaultBuilder()
+		OntopSQLOWLAPIConfiguration configuration = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.ontologyFile(owlFile)
 				.nativeOntopMappingFile(obdaFile)
 				.build();
@@ -164,7 +164,7 @@ public class QuestSesameVirtualExample {
 		p.setProperty(QuestCoreSettings.JDBC_PASSWORD, "fish");
 		p.setProperty(QuestCoreSettings.JDBC_DRIVER, "com.mysql.jdbc.Driver");
 
-		QuestConfiguration configuration = QuestConfiguration.defaultBuilder()
+		OntopSQLOWLAPIConfiguration configuration = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.ontologyFile(owlFile)
 				.r2rmlMappingFile(ttlFile)
 				.enableExistentialReasoning(true)

@@ -108,20 +108,6 @@ public class QuestQueryProcessor implements OntopQueryReformulator {
 		}
 	}
 
-//	/**
-//	 * Returns a new QuestQueryProcessor(will be immutable in the future)
-//	 *
-//	 * Specific to the Classic A-box mode!
-//	 */
-//	public QuestQueryProcessor changeMappings(Collection<OBDAMappingAxiom> mappings, TBoxReasoner reformulationReasoner) {
-//		// TODO: clone it and then configure it
-//		// TODO: check that it is in the classic A-box mode
-//		unfolder.changeMappings(mappings, reformulationReasoner);
-//		queryCache.clear();
-//		return new QuestQueryProcessor(rewriter, sigma, unfolder, vocabularyValidator, iriDictionary, datasourceQueryGenerator,
-//				queryCache, hasDistinctResultSet, modelFactory, executorRegistry);
-//	}
-
 	/**
 	 * BC: TODO: rename parseSPARQL
      */

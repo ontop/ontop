@@ -1,6 +1,6 @@
 package it.unibz.inf.ontop.obda;
 
-import it.unibz.inf.ontop.injection.QuestConfiguration;
+import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.injection.QuestCoreSettings;
 import it.unibz.inf.ontop.io.QueryIOManager;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
@@ -27,7 +27,7 @@ public class R2rmlJoinTest {
 
         // Creating a new instance of the reasoner
         QuestOWLFactory factory = new QuestOWLFactory();
-        QuestConfiguration.Builder configBuilder = QuestConfiguration.defaultBuilder()
+        OntopSQLOWLAPIConfiguration.Builder configBuilder = OntopSQLOWLAPIConfiguration.defaultBuilder()
                 .ontologyFile(owlFile);
 
         if (optionalProperties.isPresent()) {

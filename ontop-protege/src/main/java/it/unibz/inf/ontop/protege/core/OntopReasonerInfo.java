@@ -20,7 +20,7 @@ package it.unibz.inf.ontop.protege.core;
  * #L%
  */
 
-import it.unibz.inf.ontop.injection.QuestConfiguration;
+import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.model.OBDAModel;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLConfiguration;
 import it.unibz.inf.ontop.sql.ImplicitDBConstraintsReader;
@@ -43,8 +43,8 @@ public class OntopReasonerInfo extends AbstractProtegeOWLReasonerInfo {
 		private Optional<OBDAModelWrapper> optionalObdaModelWrapper = Optional.empty();
 		private Optional<ImplicitDBConstraintsReader> optionalDBConstraintReader = Optional.empty();
 
-		public QuestConfiguration buildQuestConfiguration() {
-			QuestConfiguration.Builder builder = QuestConfiguration.defaultBuilder();
+		public OntopSQLOWLAPIConfiguration buildOntopSQLOWLAPIConfiguration() {
+			OntopSQLOWLAPIConfiguration.Builder builder = OntopSQLOWLAPIConfiguration.defaultBuilder();
 			optionalProperties
 					.ifPresent(p -> builder.properties(p));
 			optionalObdaModelWrapper
@@ -101,6 +101,6 @@ public class OntopReasonerInfo extends AbstractProtegeOWLReasonerInfo {
 
     @Override
     public OWLReasonerConfiguration getConfiguration(ReasonerProgressMonitor monitor) {
-		return new QuestOWLConfiguration(configBuilder.buildQuestConfiguration(), monitor);
+		return new QuestOWLConfiguration(configBuilder.buildOntopSQLOWLAPIConfiguration(), monitor);
     }
 }

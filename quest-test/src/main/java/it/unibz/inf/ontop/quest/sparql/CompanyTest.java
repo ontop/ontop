@@ -20,7 +20,7 @@ package it.unibz.inf.ontop.quest.sparql;
  * #L%
  */
 
-import it.unibz.inf.ontop.injection.QuestConfiguration;
+import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import org.junit.After;
 import org.junit.Before;
@@ -72,7 +72,7 @@ public class CompanyTest  {
 		s.execute(text);
 		s.close();
 
-		QuestConfiguration config = QuestConfiguration.defaultBuilder()
+		OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.ontologyFile(owlFile)
 				.nativeOntopMappingFile(obdaFile)
 				.build();

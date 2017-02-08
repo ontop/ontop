@@ -121,26 +121,26 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 			throws IllegalConfigurationException {
         super(rootOntology, owlConfiguration, BufferingMode.BUFFERING);
 
-		OntopSystemConfiguration questConfiguration = owlConfiguration.getOntopConfiguration();
+		OntopSystemConfiguration ontopConfiguration = owlConfiguration.getOntopConfiguration();
 
 		/**
 		 * Validates the preferences
 		 */
 		try {
-			questConfiguration.validate();
+			ontopConfiguration.validate();
 		} catch (InvalidOntopConfigurationException e) {
 			throw new IllegalConfigurationException(e.getMessage(), owlConfiguration);
 		}
 
         this.structuralReasoner = new StructuralReasoner(rootOntology, owlConfiguration, BufferingMode.BUFFERING);
 
-		executorRegistry = questConfiguration.getExecutorRegistry();
+		executorRegistry = ontopConfiguration.getExecutorRegistry();
 
-		Injector injector = questConfiguration.getInjector();
+		Injector injector = ontopConfiguration.getInjector();
 		this.engineFactory = injector.getInstance(OntopEngineFactory.class);
 
 		try {
-			obdaSpecification = questConfiguration.loadProvidedSpecification();
+			obdaSpecification = ontopConfiguration.loadProvidedSpecification();
 			/**
 			 * Mapping parsing exceptions are re-thrown as configuration exceptions.
 			 */

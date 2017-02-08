@@ -23,7 +23,7 @@ package it.unibz.inf.ontop.sql;
 import static org.junit.Assert.assertTrue;
 
 import it.unibz.inf.ontop.injection.OntopOBDASettings;
-import it.unibz.inf.ontop.injection.QuestConfiguration;
+import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.injection.QuestCoreSettings;
 import it.unibz.inf.ontop.rdf4j.repository.OntopVirtualRepository;
 
@@ -60,7 +60,7 @@ public class OracleSesameLIMITTest  {
 		p.setProperty(QuestCoreSettings.JDBC_DRIVER, jdbc_driver_class);
 		p.put(OntopOBDASettings.OPTIMIZE_EQUIVALENCES, false);
 
-		QuestConfiguration configuration = QuestConfiguration.defaultBuilder()
+		OntopSQLOWLAPIConfiguration configuration = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.enableExistentialReasoning(true)
 				.dbMetadata(getMeta(jdbc_driver_class))
 				.ontologyFile(owlfile)

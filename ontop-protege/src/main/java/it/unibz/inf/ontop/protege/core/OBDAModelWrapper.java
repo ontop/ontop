@@ -6,7 +6,7 @@ import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.exception.InvalidMappingException;
 import it.unibz.inf.ontop.injection.MappingFactory;
 import it.unibz.inf.ontop.injection.OBDAFactoryWithException;
-import it.unibz.inf.ontop.injection.QuestConfiguration;
+import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.io.DataSource2PropertiesConvertor;
 import it.unibz.inf.ontop.io.PrefixManager;
 import it.unibz.inf.ontop.mapping.MappingParser;
@@ -97,7 +97,7 @@ public class OBDAModelWrapper {
                 .map(DataSource2PropertiesConvertor::convert)
                 .orElseThrow(() -> new IllegalStateException("Cannot parse the mapping without a data source"));
 
-        QuestConfiguration configuration = QuestConfiguration.defaultBuilder()
+        OntopSQLOWLAPIConfiguration configuration = OntopSQLOWLAPIConfiguration.defaultBuilder()
                 .properties(properties)
                 .nativeOntopMappingFile(mappingFile)
                 .build();

@@ -21,7 +21,7 @@ package it.unibz.inf.ontop.obda;
  */
 
 import it.unibz.inf.ontop.injection.OBDASettings;
-import it.unibz.inf.ontop.injection.QuestConfiguration;
+import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.ontology.DataPropertyExpression;
 import it.unibz.inf.ontop.ontology.OClass;
@@ -343,7 +343,7 @@ public class R2rmlCheckerTest {
 		log.info("Loading r2rml file");
 		QuestOWLFactory factory = new QuestOWLFactory();
 
-		QuestConfiguration config = QuestConfiguration.defaultBuilder()
+		OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.r2rmlMappingFile(r2rmlfile)
 				.ontology(owlOntology)
 				.properties(p)
@@ -365,7 +365,7 @@ public class R2rmlCheckerTest {
 		// Creating a new instance of the reasoner
 		QuestOWLFactory factory = new QuestOWLFactory();
 
-		QuestConfiguration config = QuestConfiguration.defaultBuilder()
+		OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.nativeOntopMappingFile(obdafile)
 				.properties(p)
 				.ontology(owlOntology)

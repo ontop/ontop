@@ -1,6 +1,6 @@
 package it.unibz.inf.ontop.quest;
 
-import it.unibz.inf.ontop.injection.QuestConfiguration;
+import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.io.QueryIOManager;
 import it.unibz.inf.ontop.model.OBDAException;
 import it.unibz.inf.ontop.owlrefplatform.core.SQLExecutableQuery;
@@ -38,7 +38,7 @@ public abstract class AbstractVirtualModeTest extends TestCase {
     public void setUp() throws Exception {
         // Creating a new instance of the reasoner
         QuestOWLFactory factory = new QuestOWLFactory();
-        QuestConfiguration config = QuestConfiguration.defaultBuilder()
+        OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
                 .enableFullMetadataExtraction(false)
                 .ontologyFile(owlFileName)
                 .nativeOntopMappingFile(new File(obdaFileName))

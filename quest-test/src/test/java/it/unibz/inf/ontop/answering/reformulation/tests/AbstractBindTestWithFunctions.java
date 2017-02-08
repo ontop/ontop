@@ -27,7 +27,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Locale;
 
-import it.unibz.inf.ontop.injection.QuestConfiguration;
+import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.model.Predicate;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import org.junit.Test;
@@ -64,7 +64,7 @@ public abstract class AbstractBindTestWithFunctions {
         // Creating a new instance of the reasoner
 
         QuestOWLFactory factory = new QuestOWLFactory();
-        QuestConfiguration config = QuestConfiguration.defaultBuilder()
+        OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
                 .nativeOntopMappingFile(obdafile)
                 .ontologyFile(owlfile)
                 .build();
@@ -773,7 +773,7 @@ public abstract class AbstractBindTestWithFunctions {
     private void checkReturnedValues(String query, List<String> expectedValues) throws Exception {
 
         QuestOWLFactory factory = new QuestOWLFactory();
-        QuestConfiguration config = QuestConfiguration.defaultBuilder()
+        OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
                 .nativeOntopMappingFile(obdafile)
                 .ontologyFile(owlfile)
                 .build();

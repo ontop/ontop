@@ -20,7 +20,7 @@ package it.unibz.inf.ontop.obda;
  * #L%
  */
 
-import it.unibz.inf.ontop.injection.QuestConfiguration;
+import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.injection.QuestSettings;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import org.junit.After;
@@ -70,7 +70,7 @@ public class H2NoDuplicatesCanonicalIRITest {
 		// TODO: better integrate
 		properties.put(QuestSettings.SQL_GENERATE_REPLACE, false);
 
-		QuestConfiguration config = QuestConfiguration.defaultBuilder()
+		OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.ontologyFile(owlfile)
 				.nativeOntopMappingFile(obdafile)
 				.properties(properties)

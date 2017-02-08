@@ -25,7 +25,7 @@ package it.unibz.inf.ontop.sql;
 import java.io.File;
 import java.io.IOException;
 
-import it.unibz.inf.ontop.injection.QuestConfiguration;
+import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import org.junit.After;
 import org.junit.Before;
@@ -79,7 +79,7 @@ public class OracleLIMITTest  {
 
 		QuestOWLFactory factory = new QuestOWLFactory();
 
-		QuestConfiguration configuration = QuestConfiguration.defaultBuilder()
+		OntopSQLOWLAPIConfiguration configuration = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.ontologyFile(owlfile)
 				.nativeOntopMappingFile(obdaFileName)
 				.enableFullMetadataExtraction(false)

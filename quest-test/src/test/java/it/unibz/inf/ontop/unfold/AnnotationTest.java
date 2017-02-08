@@ -3,7 +3,7 @@ package it.unibz.inf.ontop.unfold;
 
 import com.google.common.base.Joiner;
 import com.google.common.io.CharStreams;
-import it.unibz.inf.ontop.injection.QuestConfiguration;
+import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import org.junit.Test;
 
@@ -31,7 +31,7 @@ public class AnnotationTest {
 
         // Creating a new instance of the reasoner
         QuestOWLFactory factory = new QuestOWLFactory();
-        QuestConfiguration config = QuestConfiguration.defaultBuilder()
+        OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
                 .nativeOntopMappingFile(obdaFile)
                 .ontologyFile(owlFile)
                 .enableOntologyAnnotationQuerying(true)

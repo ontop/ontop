@@ -20,7 +20,7 @@ package it.unibz.inf.ontop.tests.docker.sparql.filter;
  * #L%
  */
 
-import it.unibz.inf.ontop.injection.QuestConfiguration;
+import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import it.unibz.inf.ontop.utils.SQLScriptRunner;
@@ -94,7 +94,7 @@ public class SPARQLRegExTest {
 			
 			// Creating a new instance of the reasoner
 			QuestOWLFactory factory = new QuestOWLFactory();
-	        QuestConfiguration config = QuestConfiguration.defaultBuilder()
+	        OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
 					.nativeOntopMappingFile(obdafile)
 					.ontologyFile(owlfile)
 					.enableFullMetadataExtraction(false)

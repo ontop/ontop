@@ -10,7 +10,7 @@ import it.unibz.inf.ontop.ontology.Ontology;
 
 import java.util.Optional;
 
-public interface SQLPPMapping2DSModelConverter {
+public interface SQLPPMapping2OBDASpecificationConverter {
 
     OBDASpecification convert(OBDAModel ppMapping, Optional<DBMetadata> dbMetadata, Optional<Ontology> ontology, ExecutorRegistry executorRegistry)
             throws OBDASpecificationException;

@@ -1,6 +1,6 @@
 package it.unibz.inf.ontop.failing.local;
 
-import it.unibz.inf.ontop.injection.QuestConfiguration;
+import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import org.junit.Test;
 import org.semanticweb.owlapi.model.OWLObject;
@@ -21,7 +21,7 @@ public class MonetDBTest {
             * Create the instance of Quest OWL reasoner. 
             */
             QuestOWLFactory factory = new QuestOWLFactory();
-            QuestConfiguration config = QuestConfiguration.defaultBuilder()
+            OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
                     .nativeOntopMappingFile(obdafile)
                     .ontologyFile(owlfile)
                     .build();

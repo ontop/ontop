@@ -20,7 +20,7 @@ package it.unibz.inf.ontop.rdf4j.tests.general;
  * #L%
  */
 
-import it.unibz.inf.ontop.injection.QuestConfiguration;
+import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.model.OBDAModel;
 import it.unibz.inf.ontop.rdf4j.SesameMaterializer;
 import org.eclipse.rdf4j.model.Statement;
@@ -50,7 +50,7 @@ public class ABoxSesameMaterializerExample {
 	
 	public void generateTriples() throws Exception {
 
-		QuestConfiguration configuration = QuestConfiguration.defaultBuilder()
+		OntopSQLOWLAPIConfiguration configuration = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.nativeOntopMappingFile(inputFile)
 				.propertyFile(PROPERTY_FILE)
 				.build();

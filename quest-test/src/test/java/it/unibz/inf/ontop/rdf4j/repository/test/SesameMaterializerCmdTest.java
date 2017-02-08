@@ -20,7 +20,7 @@ package it.unibz.inf.ontop.rdf4j.repository.test;
  * #L%
  */
 
-import it.unibz.inf.ontop.injection.QuestConfiguration;
+import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.owlapi.QuestOWLIndividualAxiomIterator;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.OWLAPIMaterializer;
 import it.unibz.inf.ontop.rdf4j.SesameMaterializer;
@@ -55,7 +55,7 @@ public class SesameMaterializerCmdTest extends TestCase {
 		String outfile = out.getAbsolutePath();
 		System.out.println(outfile);
 
-		QuestConfiguration configuration = createConfigurationBuilder()
+		OntopSQLOWLAPIConfiguration configuration = createConfigurationBuilder()
 				.build();
 
 		SesameMaterializer materializer = new SesameMaterializer(configuration, DO_STREAM_RESULTS);
@@ -84,7 +84,7 @@ public class SesameMaterializerCmdTest extends TestCase {
 		String outfile = out.getAbsolutePath();
 		System.out.println(outfile);
 
-		QuestConfiguration configuration = createConfigurationBuilder()
+		OntopSQLOWLAPIConfiguration configuration = createConfigurationBuilder()
 				.build();
 
 		// output
@@ -114,7 +114,7 @@ public class SesameMaterializerCmdTest extends TestCase {
 		String outfile = out.getAbsolutePath();
 		System.out.println(outfile);
 
-		QuestConfiguration configuration = createConfigurationBuilder().build();
+		OntopSQLOWLAPIConfiguration configuration = createConfigurationBuilder().build();
 
 		// output
 		SesameMaterializer materializer = new SesameMaterializer(configuration, DO_STREAM_RESULTS);
@@ -143,7 +143,7 @@ public class SesameMaterializerCmdTest extends TestCase {
 		String outfile = out.getAbsolutePath();
 		System.out.println(outfile);
 		
-		QuestConfiguration configuration = createConfigurationWithOntology();
+		OntopSQLOWLAPIConfiguration configuration = createConfigurationWithOntology();
 		SesameMaterializer materializer = new SesameMaterializer(configuration, DO_STREAM_RESULTS);
 		Iterator<Statement> iterator = materializer.getIterator();
 		Writer writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(out), "UTF-8")); 
@@ -169,7 +169,7 @@ public class SesameMaterializerCmdTest extends TestCase {
 		String outfile = out.getAbsolutePath();
 		System.out.println(outfile);
 
-		QuestConfiguration configuration = createConfigurationWithOntology();
+		OntopSQLOWLAPIConfiguration configuration = createConfigurationWithOntology();
 		// output
 		SesameMaterializer materializer = new SesameMaterializer(configuration, DO_STREAM_RESULTS);
 		Iterator<Statement> iterator = materializer.getIterator();
@@ -197,7 +197,7 @@ public class SesameMaterializerCmdTest extends TestCase {
 		String outfile = out.getAbsolutePath();
 		System.out.println(outfile);
 
-		QuestConfiguration configuration = createConfigurationWithOntology();
+		OntopSQLOWLAPIConfiguration configuration = createConfigurationWithOntology();
 		// output
 		SesameMaterializer materializer = new SesameMaterializer(configuration, DO_STREAM_RESULTS);
 		Iterator<Statement> iterator = materializer.getIterator();
@@ -233,7 +233,7 @@ public class SesameMaterializerCmdTest extends TestCase {
 		OWLOntology ontology = manager.createOntology(IRI.create(out));
 		manager = ontology.getOWLOntologyManager();
 
-		QuestConfiguration configuration = createConfigurationBuilder()
+		OntopSQLOWLAPIConfiguration configuration = createConfigurationBuilder()
 				.build();
 
 		OWLAPIMaterializer materializer = new OWLAPIMaterializer(configuration, DO_STREAM_RESULTS);
@@ -270,7 +270,7 @@ public class SesameMaterializerCmdTest extends TestCase {
 		// Loading the OWL ontology from the file as with normal OWLReasoners
 		OWLOntology ontology = manager.loadOntologyFromOntologyDocument(f);
 
-		QuestConfiguration configuration = createConfigurationBuilder()
+		OntopSQLOWLAPIConfiguration configuration = createConfigurationBuilder()
 				.ontology(ontology)
 				.build();
 
@@ -293,13 +293,13 @@ public class SesameMaterializerCmdTest extends TestCase {
 			out.delete();
 	}
 
-	private static QuestConfiguration.Builder<? extends QuestConfiguration.Builder> createConfigurationBuilder() {
-		return QuestConfiguration.defaultBuilder()
+	private static OntopSQLOWLAPIConfiguration.Builder<? extends OntopSQLOWLAPIConfiguration.Builder> createConfigurationBuilder() {
+		return OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.nativeOntopMappingFile("src/test/resources/materializer/MaterializeTest.obda")
 				.propertyFile("src/test/resources/materializer/MaterializeTest.properties");
 	}
 
-	private static QuestConfiguration createConfigurationWithOntology() {
+	private static OntopSQLOWLAPIConfiguration createConfigurationWithOntology() {
 		return createConfigurationBuilder()
 				.ontologyFile(ONTOLOGY_FILE_PATH)
 				.build();

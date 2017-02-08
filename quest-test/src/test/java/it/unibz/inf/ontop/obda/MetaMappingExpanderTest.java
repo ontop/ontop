@@ -1,6 +1,6 @@
 package it.unibz.inf.ontop.obda;
 
-import it.unibz.inf.ontop.injection.QuestConfiguration;
+import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import org.junit.Test;
 import org.semanticweb.owlapi.model.OWLObject;
@@ -30,7 +30,7 @@ public class MetaMappingExpanderTest {
 		 * Create the instance of Quest OWL reasoner.
 		 */
             QuestOWLFactory factory = new QuestOWLFactory();
-            QuestConfiguration config = QuestConfiguration.defaultBuilder()
+            OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
                     .ontologyFile(owlfile)
                     .nativeOntopMappingFile(obdafile)
                     .build();

@@ -3,7 +3,7 @@ package it.unibz.inf.ontop.mapping.extraction.impl;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.exception.OBDASpecificationException;
 import it.unibz.inf.ontop.mapping.MappingParser;
-import it.unibz.inf.ontop.mapping.conversion.SQLPPMapping2DSModelConverter;
+import it.unibz.inf.ontop.mapping.conversion.SQLPPMapping2OBDASpecificationConverter;
 import it.unibz.inf.ontop.pivotalrepr.utils.ExecutorRegistry;
 import it.unibz.inf.ontop.spec.OBDASpecification;
 import it.unibz.inf.ontop.spec.OBDASpecificationExtractor;
@@ -22,11 +22,11 @@ import java.util.Optional;
 public class SQLOBDASpecificationExtractor implements OBDASpecificationExtractor {
 
     private final MappingParser mappingParser;
-    private final SQLPPMapping2DSModelConverter converter;
+    private final SQLPPMapping2OBDASpecificationConverter converter;
 
     @Inject
     private SQLOBDASpecificationExtractor(MappingParser mappingParser,
-                                          SQLPPMapping2DSModelConverter converter) {
+                                          SQLPPMapping2OBDASpecificationConverter converter) {
         this.mappingParser = mappingParser;
         this.converter = converter;
     }

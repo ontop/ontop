@@ -1,6 +1,6 @@
 package it.unibz.inf.ontop.rdf4j.tests.general;
 
-import it.unibz.inf.ontop.injection.QuestConfiguration;
+import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.rdf4j.repository.OntopVirtualRepository;
 import junit.framework.TestCase;
 import org.eclipse.rdf4j.query.QueryLanguage;
@@ -29,7 +29,7 @@ public abstract class AbstractVirtualSesameTest extends TestCase {
     public void setUp() {
         Repository repo;
         try {
-            QuestConfiguration configuration = QuestConfiguration.defaultBuilder()
+            OntopSQLOWLAPIConfiguration configuration = OntopSQLOWLAPIConfiguration.defaultBuilder()
                     .ontologyFile(owlfile)
                     .r2rmlMappingFile(r2rmlfile)
                     .enableExistentialReasoning(true)

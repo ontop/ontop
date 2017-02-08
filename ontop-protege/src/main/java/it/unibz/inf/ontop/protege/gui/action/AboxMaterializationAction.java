@@ -21,7 +21,7 @@ package it.unibz.inf.ontop.protege.gui.action;
  */
 
 import com.google.common.collect.Sets;
-import it.unibz.inf.ontop.injection.QuestConfiguration;
+import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.model.OBDAModel;
 import it.unibz.inf.ontop.model.impl.OBDAModelImpl;
 import it.unibz.inf.ontop.owlapi.OWLAPITranslatorUtility;
@@ -210,7 +210,7 @@ public class AboxMaterializationAction extends ProtegeAction {
 						throw new Exception("Unknown format: " + format);
 				}
 
-				QuestConfiguration configuration = QuestConfiguration.defaultBuilder()
+				OntopSQLOWLAPIConfiguration configuration = OntopSQLOWLAPIConfiguration.defaultBuilder()
 						// TODO: should we keep it?
 						.enableOntologyAnnotationQuerying(true)
 						.obdaModel(obdaModel)
@@ -262,7 +262,7 @@ public class AboxMaterializationAction extends ProtegeAction {
 
 		if (response == JOptionPane.YES_OPTION) {
 			try {
-				QuestConfiguration configuration = QuestConfiguration.defaultBuilder()
+				OntopSQLOWLAPIConfiguration configuration = OntopSQLOWLAPIConfiguration.defaultBuilder()
 						// TODO: should we keep it?
 						.enableOntologyAnnotationQuerying(true)
 						.obdaModel(obdaModel)

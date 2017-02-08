@@ -1,7 +1,7 @@
 package it.unibz.inf.ontop.rdf4j.tests.general;
 
 
-import it.unibz.inf.ontop.injection.QuestConfiguration;
+import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.rdf4j.repository.OntopVirtualRepository;
 import junit.framework.TestCase;
 import it.unibz.inf.ontop.injection.QuestCoreSettings;
@@ -41,7 +41,7 @@ public class DatetimeStampSesameTest extends TestCase {
 		connectionProperties.setProperty(QuestCoreSettings.JDBC_PASSWORD, "fish");
 		connectionProperties.setProperty(QuestCoreSettings.JDBC_DRIVER, "com.mysql.jdbc.Driver");
 
-		QuestConfiguration configuration = QuestConfiguration.defaultBuilder()
+		OntopSQLOWLAPIConfiguration configuration = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.ontologyFile(owlfile)
 				.r2rmlMappingFile(mappingfile)
 				.enableExistentialReasoning(true)

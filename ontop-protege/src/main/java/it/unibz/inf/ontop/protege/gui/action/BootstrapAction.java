@@ -20,7 +20,7 @@ package it.unibz.inf.ontop.protege.gui.action;
  * #L%
  */
 
-import it.unibz.inf.ontop.injection.QuestConfiguration;
+import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.model.OBDADataSource;
 import it.unibz.inf.ontop.model.impl.OBDAModelImpl;
 import it.unibz.inf.ontop.model.impl.RDBMSourceParameterConstants;
@@ -160,7 +160,7 @@ public class BootstrapAction extends ProtegeAction {
 			String driver = currentSource.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER);
 
 			// TODO: Retrieve the effective properties (not just the default ones).
-			QuestConfiguration configuration = QuestConfiguration.defaultBuilder()
+			OntopSQLOWLAPIConfiguration configuration = OntopSQLOWLAPIConfiguration.defaultBuilder()
 					.jdbcUrl(url)
 					.jdbcUser(username)
 					.jdbcPassword(password)

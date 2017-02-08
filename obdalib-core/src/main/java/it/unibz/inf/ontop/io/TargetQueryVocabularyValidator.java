@@ -20,10 +20,7 @@ package it.unibz.inf.ontop.io;
  * #L%
  */
 
-import java.util.Vector;
-
 import it.unibz.inf.ontop.model.Predicate;
-import it.unibz.inf.ontop.model.CQIE;
 import it.unibz.inf.ontop.model.Function;
 
 import java.util.List;
