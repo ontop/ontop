@@ -26,7 +26,7 @@ import com.github.rvesse.airline.annotations.Option;
 import com.github.rvesse.airline.annotations.OptionType;
 import com.github.rvesse.airline.annotations.help.BashCompletion;
 import com.github.rvesse.airline.help.cli.bash.CompletionBehaviour;
-import it.unibz.inf.ontop.injection.QuestConfiguration;
+import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.io.ToStringRenderer;
@@ -79,7 +79,7 @@ public class OntopQuery extends OntopReasoningCommandBase {
 
 
         QuestOWLFactory factory = new QuestOWLFactory();
-        QuestConfiguration.Builder configurationBuilder = QuestConfiguration.defaultBuilder()
+        OntopSQLOWLAPIConfiguration.Builder configurationBuilder = OntopSQLOWLAPIConfiguration.defaultBuilder()
                 .ontology(ontology)
                 .enableOntologyAnnotationQuerying(enableAnnotations);
 

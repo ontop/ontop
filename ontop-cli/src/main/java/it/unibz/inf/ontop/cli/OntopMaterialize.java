@@ -27,8 +27,8 @@ import com.github.rvesse.airline.annotations.OptionType;
 import com.github.rvesse.airline.annotations.restrictions.AllowedValues;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.injection.QuestConfiguration;
-import it.unibz.inf.ontop.injection.QuestConfiguration.Builder;
+import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
+import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration.Builder;
 import it.unibz.inf.ontop.model.OBDAModel;
 import it.unibz.inf.ontop.model.Predicate;
 import it.unibz.inf.ontop.owlapi.QuestOWLIndividualAxiomIterator;
@@ -101,7 +101,7 @@ public class OntopMaterialize extends OntopReasoningCommandBase {
         }
         try {
 
-            QuestConfiguration configuration = createAndInitConfigurationBuilder()
+            OntopSQLOWLAPIConfiguration configuration = createAndInitConfigurationBuilder()
                     .ontologyFile(owlFile)
                     .build();
 
@@ -117,8 +117,8 @@ public class OntopMaterialize extends OntopReasoningCommandBase {
             ImmutableCollection<Predicate> predicates = extractPredicates(ontology);
 
             // Loads it only once
-            OBDAModel obdaModel = configuration.loadProvidedSpecification();
-            QuestConfiguration materializationConfig = createAndInitConfigurationBuilder()
+            OBDAModel obdaModel = configuration.loadProvidedPPMapping();
+            OntopSQLOWLAPIConfiguration materializationConfig = createAndInitConfigurationBuilder()
                     // To avoid parsing it again and again
                     .obdaModel(obdaModel)
                     .build();
@@ -163,7 +163,7 @@ public class OntopMaterialize extends OntopReasoningCommandBase {
     /**
      * Serializes the A-box corresponding to a predicate into one or multiple file.
      */
-    private void serializePredicate(QuestConfiguration materializationConfig, Predicate predicate,
+    private void serializePredicate(OntopSQLOWLAPIConfiguration materializationConfig, Predicate predicate,
                                     String outputFile, String format, OWLOntology ontology) throws Exception {
         final long startTime = System.currentTimeMillis();
 
@@ -279,11 +279,11 @@ public class OntopMaterialize extends OntopReasoningCommandBase {
                 configBuilder.ontologyFile(owlFile);
             }
 
-            QuestConfiguration initialConfiguration = configBuilder.build();
+            OntopSQLOWLAPIConfiguration initialConfiguration = configBuilder.build();
             //OBDAModel obdaModel = initialConfiguration.loadProvidedSpecification();
 
             OWLOntology ontology;
-            QuestConfiguration materializerConfiguration;
+            OntopSQLOWLAPIConfiguration materializerConfiguration;
 
             if (owlFile != null) {
             // Loading the OWL ontology from the file as with normal OWLReasoners
@@ -345,7 +345,7 @@ public class OntopMaterialize extends OntopReasoningCommandBase {
      * Mapping file + connection info
      */
     private Builder<? extends Builder> createAndInitConfigurationBuilder() {
-        Builder configBuilder = QuestConfiguration.defaultBuilder()
+        Builder configBuilder = OntopSQLOWLAPIConfiguration.defaultBuilder()
                 .enableOntologyAnnotationQuerying(true)
                 .properties(createConnectionProperties());
 

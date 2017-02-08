@@ -12,7 +12,7 @@ import com.hp.hpl.jena.rdf.model.ModelFactory;
 import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.exception.InvalidMappingException;
 import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
-import it.unibz.inf.ontop.injection.QuestConfiguration;
+import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.model.OBDAModel;
 import it.unibz.inf.ontop.r2rml.R2RMLWriter;
 import org.apache.jena.riot.Lang;
@@ -54,7 +54,7 @@ public class OntopOBDAToR2RML implements OntopCommand {
 
         File out = new File(outputMappingFile);
 
-        QuestConfiguration.Builder configBuilder = QuestConfiguration.defaultBuilder()
+        OntopSQLOWLAPIConfiguration.Builder configBuilder = OntopSQLOWLAPIConfiguration.defaultBuilder()
                 .nativeOntopMappingFile(inputMappingFile)
                 .jdbcDriver("dummy")
                 .jdbcUrl("dummy")
@@ -64,14 +64,14 @@ public class OntopOBDAToR2RML implements OntopCommand {
         if (owlFile != null)
             configBuilder.ontologyFile(owlFile);
 
-        QuestConfiguration config = configBuilder.build();
+        OntopSQLOWLAPIConfiguration config = configBuilder.build();
 
         OBDAModel model;
         /**
          * load the mapping in native Ontop syntax
          */
         try {
-            model = config.loadProvidedSpecification();
+            model = config.loadProvidedPPMapping();
         } catch (IOException | InvalidMappingException | DuplicateMappingException e) {
             e.printStackTrace();
             System.exit(1);

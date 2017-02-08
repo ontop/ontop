@@ -3,7 +3,7 @@ package it.unibz.inf.ontop.cli;
 import com.github.rvesse.airline.annotations.Command;
 import com.github.rvesse.airline.annotations.Option;
 import com.github.rvesse.airline.annotations.OptionType;
-import it.unibz.inf.ontop.injection.QuestConfiguration;
+import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.io.OntopNativeMappingSerializer;
 import it.unibz.inf.ontop.owlapi.directmapping.DirectMappingEngine;
 import it.unibz.inf.ontop.owlapi.directmapping.DirectMappingEngine.BootstrappingResults;
@@ -32,7 +32,7 @@ public class OntopBootstrap extends OntopMappingOntologyRelatedCommand {
 
             Objects.requireNonNull(owlFile, "ontology file must not be null");
 
-            QuestConfiguration configuration = QuestConfiguration.defaultBuilder()
+            OntopSQLOWLAPIConfiguration configuration = OntopSQLOWLAPIConfiguration.defaultBuilder()
                     .jdbcUrl(jdbcURL)
                     .jdbcUser(jdbcUserName)
                     .jdbcPassword(jdbcPassword)
