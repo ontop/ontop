@@ -24,7 +24,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.injection.*;
-import it.unibz.inf.ontop.injection.QuestCoreConfiguration.Builder;
 import it.unibz.inf.ontop.mapping.MappingMetadata;
 import it.unibz.inf.ontop.model.*;
 
@@ -39,8 +38,6 @@ import it.unibz.inf.ontop.io.PrefixManager;
 import it.unibz.inf.ontop.model.Predicate.COL_TYPE;
 import it.unibz.inf.ontop.model.impl.SQLMappingFactoryImpl;
 import it.unibz.inf.ontop.ontology.Assertion;
-import it.unibz.inf.ontop.ontology.Ontology;
-import it.unibz.inf.ontop.ontology.utils.MappingVocabularyExtractor;
 import it.unibz.inf.ontop.sql.JDBCConnectionManager;
 
 import java.util.LinkedList;
@@ -71,14 +68,14 @@ public class VirtualABoxMaterializerTest {
     public VirtualABoxMaterializerTest() {
     }
 
-	private static Builder<? extends Builder> createAndInitConfiguration() {
+	private static OntopStandaloneSQLConfiguration.Builder<? extends OntopStandaloneSQLConfiguration.Builder> createAndInitConfiguration() {
 		/* Setting the database */
 		String driver = "org.h2.Driver";
 		String url = "jdbc:h2:mem:aboxdump";
 		String username = "sa";
 		String password = "";
 
-		return QuestCoreConfiguration.defaultBuilder()
+		return OntopStandaloneSQLConfiguration.defaultBuilder()
 				.jdbcUrl(url)
 				.jdbcUser(username)
 				.jdbcPassword(password)
@@ -87,7 +84,7 @@ public class VirtualABoxMaterializerTest {
 
 	@Test(expected = InvalidOntopConfigurationException.class)
 	public void testNoSource() throws Exception {
-		QuestCoreConfiguration.defaultBuilder().build();
+		OntopStandaloneSQLConfiguration.defaultBuilder().build();
 	}
 
 	@Test
@@ -95,7 +92,7 @@ public class VirtualABoxMaterializerTest {
 
     	OBDAModel ppMapping = createMapping();
 
-		QuestCoreConfiguration configuration = createAndInitConfiguration()
+		OntopStandaloneSQLConfiguration configuration = createAndInitConfiguration()
 				.obdaModel(ppMapping)
 				.build();
 		// source.setParameter(RDBMSourceParameterConstants.IS_IN_MEMORY, "true");
@@ -104,7 +101,7 @@ public class VirtualABoxMaterializerTest {
 		Connection conn = JDBCConnectionManager.getJDBCConnectionManager().getConnection(configuration.getSettings());
 		Statement st = conn.createStatement();
 
-		FileReader reader = new FileReader("src/test/resources/test/mapping-test-db.sql");
+		FileReader reader = new FileReader("src/test/resources/mapping-test-db.sql");
 		BufferedReader in = new BufferedReader(reader);
 		StringBuilder bf = new StringBuilder();
 		String line = in.readLine();
@@ -140,7 +137,7 @@ public class VirtualABoxMaterializerTest {
 	private static OBDAModel createMapping() throws DuplicateMappingException {
 
     	// TODO: we should not have to create an high-level configuration just for constructing these objects...
-		QuestCoreConfiguration configuration = createAndInitConfiguration()
+		OntopStandaloneSQLConfiguration configuration = createAndInitConfiguration()
 				.build();
 		Injector injector = configuration.getInjector();
 		NativeQueryLanguageComponentFactory nativeQLFactory = injector.getInstance(NativeQueryLanguageComponentFactory.class);
