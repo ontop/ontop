@@ -20,6 +20,16 @@ package it.unibz.inf.ontop.reformulation.tests;
  * #L%
  */
 
+import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
+import it.unibz.inf.ontop.owlapi.OntopOWLException;
+import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.semanticweb.owlapi.model.OWLObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
@@ -27,20 +37,8 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
-
-import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
-import it.unibz.inf.ontop.owlapi.OntopOWLException;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
-import org.junit.*;
-import org.junit.Before;
-import org.junit.Test;
 import java.util.ArrayList;
 import java.util.List;
-
-
-import org.semanticweb.owlapi.model.OWLObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -490,7 +488,7 @@ public class BindTest {
 
         } catch (OntopOWLException e) {
 
-            assertEquals("it.unibz.inf.ontop.model.OBDAException", e.getCause().getClass().getName());
+            assertEquals("it.unibz.inf.ontop.exception.OntopReformulationException", e.getCause().getClass().getName());
 
         }
 
