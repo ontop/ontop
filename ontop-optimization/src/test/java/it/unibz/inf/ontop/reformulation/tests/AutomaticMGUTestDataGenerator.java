@@ -87,7 +87,6 @@ public class AutomaticMGUTestDataGenerator {
 	public boolean compareSubstitutions(SingletonSubstitution s1, SingletonSubstitution s2) {
 		boolean equalVars = s1.getVariable().toString().equals(s2.getVariable().toString());
 		boolean equalTerms = s1.getTerm().toString().equals(s2.getTerm().toString());
-F
 		return equalVars && equalTerms;
 	}
 
