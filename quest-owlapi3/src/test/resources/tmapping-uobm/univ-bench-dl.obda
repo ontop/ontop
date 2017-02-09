@@ -11,15 +11,15 @@ benchmark-dl:	http://uob.iodt.ibm.com/univ-bench-dl.owl#
 [MappingDeclaration] @collection [[
 mappingId	Associate Professor
 target		<http://www.Department{deptID}.University{uniID}.edu/{profType}{profID}> benchmark-dl:worksFor <http://www.Department{deptID}.University{uniID}.edu> . 
-source		SELECT deptID, uniID, profID FROM Professors WHERE profType = 'AssociateProfessor'
+source		SELECT deptID, uniID, profType, profID FROM Professors WHERE profType = 'AssociateProfessor'
 
 mappingId	Assistant Professor
 target		<http://www.Department{deptID}.University{uniID}.edu/{profType}{profID}> benchmark-dl:worksFor <http://www.Department{deptID}.University{uniID}.edu> .
-source		SELECT deptID, uniID, profID FROM Professors WHERE profType = 'AssistantProfessor'
+source		SELECT deptID, uniID, profType, profID FROM Professors WHERE profType = 'AssistantProfessor'
 
 mappingId	Lecturer
 target		<http://www.Department{deptID}.University{uniID}.edu/{role}{lecturerID}> benchmark-dl:worksFor <http://www.Department{deptID}.University{uniID}.edu> .
-source		SELECT deptID, uniID, 'Lecturer' as role FROM Lecturers
+source		SELECT deptID, uniID, lecturerID, 'Lecturer' as role FROM Lecturers
 
 mappingId	Full Professor Works For Department
 target		<http://www.Department{deptID}.University{uniID}.edu/{profType}{profID}> benchmark-dl:worksFor <http://www.Department{deptID}.University{uniID}.edu> . 

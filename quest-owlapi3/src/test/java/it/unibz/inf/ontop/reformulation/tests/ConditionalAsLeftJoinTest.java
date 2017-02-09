@@ -8,6 +8,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.semanticweb.owlapi.model.OWLObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -33,6 +35,8 @@ public class ConditionalAsLeftJoinTest {
     private static final String URL = "jdbc:h2:mem:restaurant";
     private static final String USERNAME = "sa";
     private static final String PASSWORD = "sa";
+
+    final static Logger log = LoggerFactory.getLogger(ConditionalAsLeftJoinTest.class);
 
     @Before
     public void setUp() throws Exception {
@@ -100,7 +104,7 @@ public class ConditionalAsLeftJoinTest {
         expectedValues.add("<http://www.semanticweb.org/ontologies/2016/10/untitled-ontology-2#aa>");
         String sql = checkReturnedValuesAndReturnSql(query, expectedValues);
 
-        System.out.println("SQL Query: \n" + sql);
+        log.debug("SQL Query: \n" + sql);
     }
 
     private String checkReturnedValuesAndReturnSql(String query, List<String> expectedValues) throws Exception {
@@ -131,7 +135,7 @@ public class ConditionalAsLeftJoinTest {
             while (rs.nextRow()) {
                 OWLObject ind1 = rs.getOWLObject("a");
                 returnedValues.add(ind1.toString());
-                java.lang.System.out.println(ind1);
+                log.debug("Returned values:" + ind1);
                 i++;
             }
         } catch (Exception e) {
