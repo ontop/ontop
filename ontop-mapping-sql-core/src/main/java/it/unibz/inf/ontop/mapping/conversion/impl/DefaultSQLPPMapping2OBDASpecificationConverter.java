@@ -10,7 +10,6 @@ import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
 import it.unibz.inf.ontop.injection.OntopMappingSQLSettings;
 import it.unibz.inf.ontop.mapping.Mapping;
 import it.unibz.inf.ontop.mapping.MappingMetadata;
-import it.unibz.inf.ontop.mapping.MappingSplitter;
 import it.unibz.inf.ontop.mapping.conversion.SQLPPMapping2OBDASpecificationConverter;
 import it.unibz.inf.ontop.mapping.datalog.Datalog2QueryMappingConverter;
 import it.unibz.inf.ontop.pivotalrepr.MetadataForQueryOptimization;
@@ -30,15 +29,11 @@ import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing.*;
 import it.unibz.inf.ontop.owlrefplatform.core.translator.MappingVocabularyFixer;
-import it.unibz.inf.ontop.parser.PreprocessProjection;
 import it.unibz.inf.ontop.spec.impl.OBDASpecificationImpl;
 import it.unibz.inf.ontop.sql.*;
-import it.unibz.inf.ontop.utils.IMapping2DatalogConverter;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
+import it.unibz.inf.ontop.utils.Mapping2DatalogConverter;
 import it.unibz.inf.ontop.utils.MetaMappingExpander;
-import net.sf.jsqlparser.JSQLParserException;
-import net.sf.jsqlparser.parser.CCJSqlParserUtil;
-import net.sf.jsqlparser.statement.select.Select;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,7 +41,6 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.*;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
@@ -76,7 +70,6 @@ public class DefaultSQLPPMapping2OBDASpecificationConverter implements SQLPPMapp
     private final MappingVocabularyFixer mappingVocabularyFixer;
     private final NativeQueryLanguageComponentFactory nativeQLFactory;
     private final RDBMetadataExtractor dbMetadataExtractor;
-    private final IMapping2DatalogConverter mapping2DatalogConverter;
     private final TMappingExclusionConfig tMappingExclusionConfig;
     private final Datalog2QueryMappingConverter mappingConverter;
 
@@ -84,7 +77,6 @@ public class DefaultSQLPPMapping2OBDASpecificationConverter implements SQLPPMapp
     private DefaultSQLPPMapping2OBDASpecificationConverter(OntopMappingSQLSettings settings,
                                                            MappingVocabularyFixer mappingVocabularyFixer,
                                                            NativeQueryLanguageComponentFactory nativeQLFactory,
-                                                           IMapping2DatalogConverter mapping2DatalogConverter,
                                                            TMappingExclusionConfig tMappingExclusionConfig,
                                                            Datalog2QueryMappingConverter mappingConverter
                                                  ) {
@@ -92,7 +84,6 @@ public class DefaultSQLPPMapping2OBDASpecificationConverter implements SQLPPMapp
         this.mappingVocabularyFixer = mappingVocabularyFixer;
         this.nativeQLFactory = nativeQLFactory;
         this.dbMetadataExtractor = nativeQLFactory.create();
-        this.mapping2DatalogConverter = mapping2DatalogConverter;
         this.tMappingExclusionConfig = tMappingExclusionConfig;
         this.mappingConverter = mappingConverter;
     }
@@ -225,60 +216,18 @@ public class DefaultSQLPPMapping2OBDASpecificationConverter implements SQLPPMapp
     }
 
 
-    /***
-     * Expands a SELECT * into a SELECT with all columns implicit in the *
-     *
-     *
-     * Has side-effects on the input mapping axioms
-     *
-     */
-    private Collection<OBDAMappingAxiom> preprocessProjection(Collection<OBDAMappingAxiom> mappingAxioms,
-                                                              RDBMetadata dbMetadata) {
-        for (OBDAMappingAxiom axiom : mappingAxioms) {
-            String sourceString = axiom.getSourceQuery().toString();
-
-            List<Function> targetQuery = axiom.getTargetQuery();
-
-            Select select;
-            try {
-                select = (Select) CCJSqlParserUtil.parse(sourceString);
-
-                Set<Variable> variables = targetQuery.stream()
-                        .flatMap(atom -> atom.getVariables().stream())
-                        .collect(Collectors.toSet());
-                PreprocessProjection ps = new PreprocessProjection(dbMetadata);
-                String query = ps.getMappingQuery(select, variables);
-                axiom.setSourceQuery(SQL_MAPPING_FACTORY.getSQLQuery(query));
-
-            } catch (JSQLParserException e) {
-                LOGGER.warn("SQL Query cannot be preprocessed by the parser");
-                /**
-                 * TODO: should we just silently ignore the mapping?
-                 */
-            }
-        }
-
-        return mappingAxioms;
-    }
 
     private ImmutableList<OBDAMappingAxiom> normalizeMappingAxioms(Collection<OBDAMappingAxiom> mappingAxioms,
                                                                    final RDBMetadata dbMetadata, Connection localConnection)
             throws MetaMappingExpansionException {
-        /** Substitute select * with column names (in the SQL case) **/
-
-        mappingAxioms = preprocessProjection(mappingAxioms, dbMetadata);
-
-        /**
-         * Split the mapping
-         */
-        List<OBDAMappingAxiom> splitMappingsAxioms = MappingSplitter.splitMappings(mappingAxioms, nativeQLFactory);
 
         /**
          * Expand the meta mapping
          *
          * TODO: reimplement it to work on instances of the class Mapping (not on OBDAMappingAxioms).
          */
-        Collection<OBDAMappingAxiom> expandedMappingAxioms = expandMetaMappings(splitMappingsAxioms, dbMetadata, localConnection);
+        Collection<OBDAMappingAxiom> expandedMappingAxioms =
+            MetaMappingExpander.expand(mappingAxioms, localConnection, dbMetadata, nativeQLFactory);
 
        /*
         *  TODO: do it later, on Datalog (before mapping saturation)
@@ -293,27 +242,14 @@ public class DefaultSQLPPMapping2OBDASpecificationConverter implements SQLPPMapp
         return ImmutableList.copyOf(normalizedMappingAxioms);
     }
 
-    private Collection<OBDAMappingAxiom> expandMetaMappings(Collection<OBDAMappingAxiom> mappingAxioms,
-                                                            DBMetadata metadata, Connection localConnection)
-            throws MetaMappingExpansionException {
-        MetaMappingExpander metaMappingExpander = new MetaMappingExpander(localConnection, metadata.getQuotedIDFactory(),
-                nativeQLFactory);
-        try {
-            return metaMappingExpander.expand(mappingAxioms);
-        } catch (SQLException e) {
-            throw new MetaMappingExpansionException(e.getMessage());
-        } catch(JSQLParserException e) {
-            throw new MetaMappingExpansionException(e.getMessage());
-        }
-    }
 
     /**
      * May also views in the DBMetadata!
      */
     private ImmutableList<CQIE> convertMappingAxioms(ImmutableList<OBDAMappingAxiom> mappingAxioms, RDBMetadata dbMetadata) {
 
-        ImmutableList<CQIE> unfoldingProgram = mapping2DatalogConverter.constructDatalogProgram(
-                mappingAxioms, dbMetadata);
+
+        ImmutableList<CQIE> unfoldingProgram = Mapping2DatalogConverter.constructDatalogProgram(mappingAxioms, dbMetadata);
 
         LOGGER.debug("Original mapping size: {}", unfoldingProgram.size());
 

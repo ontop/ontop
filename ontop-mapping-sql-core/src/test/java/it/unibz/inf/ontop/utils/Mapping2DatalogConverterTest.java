@@ -99,8 +99,7 @@ public class Mapping2DatalogConverterTest extends TestCase {
 		ArrayList<OBDAMappingAxiom> mappingList = new ArrayList<OBDAMappingAxiom>();
 		mappingList.add(mappingAxiom);
 
-		IMapping2DatalogConverter mapping2DatalogConverter = new Mapping2DatalogConverter();
-		List<CQIE> dp = mapping2DatalogConverter.constructDatalogProgram(mappingList, md);
+		List<CQIE> dp = Mapping2DatalogConverter.constructDatalogProgram(mappingList, md);
 		
 		assertNotNull(dp);
 		System.out.println(dp.toString());

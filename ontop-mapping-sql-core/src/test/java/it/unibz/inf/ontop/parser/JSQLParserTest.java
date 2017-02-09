@@ -23,7 +23,6 @@ package it.unibz.inf.ontop.parser;
 import it.unibz.inf.ontop.sql.RDBMetadata;
 import it.unibz.inf.ontop.sql.RDBMetadataExtractionTools;
 import it.unibz.inf.ontop.sql.QuotedIDFactory;
-import it.unibz.inf.ontop.sql.api.ParsedSQLQuery;
 import junit.framework.TestCase;
 
 import org.slf4j.Logger;
@@ -785,8 +784,6 @@ public class JSQLParserTest extends TestCase {
 
 	private String queryText;
 
-	ParsedSQLQuery queryP;
-
 	private boolean parseJSQL(String input) {
 
 		queryText = input;
@@ -794,7 +791,7 @@ public class JSQLParserTest extends TestCase {
 		try {
 			RDBMetadata dbMetadata = RDBMetadataExtractionTools.createDummyMetadata();
 			QuotedIDFactory idfac = dbMetadata.getQuotedIDFactory();
-			queryP = new ParsedSQLQuery(input, false, idfac);
+			//queryP = new ParsedSQLQuery(input, false, idfac);
 		} catch (Exception e) {
 
 			e.printStackTrace();
@@ -806,30 +803,6 @@ public class JSQLParserTest extends TestCase {
 
 	private void printJSQL(String title, boolean isSupported) {
 		if (isSupported) {
-			System.out.println(title + ": " + queryP.toString());
-
-			try {
-				System.out.println("  Tables: " + queryP.getTables());
-				System.out.println("  Projection: " + queryP.getProjection());
-
-				System.out.println("  Selection: "
-						+ ((queryP.getWhereClause() == null) ? "--" : queryP
-						.getWhereClause()));
-
-				System.out.println("  Aliases: "
-						+ (queryP.getAliasMap().isEmpty() ? "--" : queryP
-						.getAliasMap()));
-				//System.out.println("  GroupBy: " + queryP.getGroupByClause());
-				System.out.println("  Join conditions: "
-						+ (queryP.getJoinConditions().isEmpty() ? "--" : queryP
-						.getJoinConditions()));
-				System.out.println("  Columns: "
-						+ (queryP.getColumns().isEmpty() ? "--" : queryP
-						.getColumns()));
-			} catch (Exception e) {
-
-				e.printStackTrace();
-			}
 		} else {
 			System.out.println("Parser JSQL doesn't support for query: "
 					+ queryText);
@@ -846,7 +819,7 @@ public class JSQLParserTest extends TestCase {
 			RDBMetadata dbMetadata = RDBMetadataExtractionTools.createDummyMetadata();
 			QuotedIDFactory idfac = dbMetadata.getQuotedIDFactory();
 
-			queryP = new ParsedSQLQuery(input, true, idfac);
+			//queryP = new ParsedSQLQuery(input, true, idfac);
 		} catch (Exception e) {
 			e.printStackTrace();
 			return false;

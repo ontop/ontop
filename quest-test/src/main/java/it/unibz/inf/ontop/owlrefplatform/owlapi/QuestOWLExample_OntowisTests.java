@@ -207,14 +207,13 @@ public class QuestOWLExample_OntowisTests {
 	}
 
 	/**
-	 * @throws OBDAException 
-	 * @throws OWLOntologyCreationException 
+	 * @throws OWLOntologyCreationException
 	 * @throws InvalidMappingException
 	 * @throws InvalidPredicateDeclarationException 
 	 * @throws IOException 
 	 * @throws OWLException
 	 */
-	private OntopOWLConnection createStuff(boolean manualKeys) throws OBDAException, OWLOntologyCreationException, IOException, InvalidPredicateDeclarationException, InvalidMappingException{
+	private OntopOWLConnection createStuff(boolean manualKeys) throws OWLOntologyCreationException, IOException, InvalidPredicateDeclarationException, InvalidMappingException{
 
 		/*
 		 * Prepare the configuration for the Quest instance. The example below shows the setup for
