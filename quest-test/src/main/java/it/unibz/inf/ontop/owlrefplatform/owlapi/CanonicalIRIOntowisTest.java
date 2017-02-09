@@ -3,7 +3,6 @@ package it.unibz.inf.ontop.owlrefplatform.owlapi;
 import it.unibz.inf.ontop.exception.InvalidMappingException;
 import it.unibz.inf.ontop.exception.InvalidPredicateDeclarationException;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
-import it.unibz.inf.ontop.model.OBDAException;
 import org.semanticweb.owlapi.model.*;
 
 import java.io.*;
@@ -486,14 +485,13 @@ public class CanonicalIRIOntowisTest {
     }
 
     /**
-     * @throws OBDAException
      * @throws OWLOntologyCreationException
      * @throws InvalidMappingException
      * @throws InvalidPredicateDeclarationException
      * @throws IOException
      * @throws OWLException
      */
-    private OntopOWLConnection createStuff() throws OBDAException, OWLOntologyCreationException, IOException, InvalidPredicateDeclarationException, InvalidMappingException{
+    private OntopOWLConnection createStuff() throws OWLOntologyCreationException, IOException, InvalidPredicateDeclarationException, InvalidMappingException{
 
         OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
                 .ontologyFile(owlfile)

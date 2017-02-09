@@ -20,25 +20,32 @@ package it.unibz.inf.ontop.utils;
  * #L%
  */
 
+import com.google.common.base.Joiner;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import it.unibz.inf.ontop.exception.MetaMappingExpansionException;
 import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
 import it.unibz.inf.ontop.model.*;
+import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
 import it.unibz.inf.ontop.model.impl.SQLMappingFactoryImpl;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
-import it.unibz.inf.ontop.parser.SQLQueryShallowParser;
 import it.unibz.inf.ontop.sql.QualifiedAttributeID;
 import it.unibz.inf.ontop.sql.QuotedID;
 import it.unibz.inf.ontop.sql.QuotedIDFactory;
 import it.unibz.inf.ontop.sql.RelationID;
-import it.unibz.inf.ontop.sql.api.ParsedSQLQuery;
-import it.unibz.inf.ontop.sql.api.ProjectionJSQL;
+import it.unibz.inf.ontop.sql.parser.SelectQueryAttributeExtractor2;
+import it.unibz.inf.ontop.sql.parser.exceptions.InvalidSelectQueryException;
+import it.unibz.inf.ontop.sql.parser.exceptions.UnsupportedSelectQueryException;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.BinaryExpression;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.StringValue;
 import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
 import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
+import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.schema.Column;
-import net.sf.jsqlparser.statement.select.SelectExpressionItem;
+import net.sf.jsqlparser.schema.Table;
+import net.sf.jsqlparser.statement.select.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -58,422 +65,327 @@ import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
  */
 public class MetaMappingExpander {
 
-	private final Logger log = LoggerFactory.getLogger(this.getClass());
+	private static final Logger log = LoggerFactory.getLogger(MetaMappingExpander.class);
 	
-	private final Connection connection;
-	private final QuotedIDFactory idfac;
-	private final NativeQueryLanguageComponentFactory nativeQLFactory;
 	private static final SQLMappingFactory MAPPING_FACTORY = SQLMappingFactoryImpl.getInstance();
 
-    /**
-	 *
-	 * 
-	 * @param connection a JDBC connection
-	 */
-	public MetaMappingExpander(Connection connection, QuotedIDFactory idfac,
-							   NativeQueryLanguageComponentFactory nativeQLFactory) {
-		this.connection = connection;
-		this.idfac = idfac;
-		this.nativeQLFactory = nativeQLFactory;
-	}
 
 	/**
 	 * this method expand the input mappings, which may include meta mappings, to the concrete mappings
-	 * 
-	 * @param splittedMappings
+	 *
+	 * @param mappings
 	 * 		a list of mappings, which may include meta mappings
 	 * @return
 	 * 		expanded normal mappings
-	 * @throws SQLException
-	 * @throws JSQLParserException 
 	 */
-	public Collection<OBDAMappingAxiom> expand(Collection<OBDAMappingAxiom> splittedMappings) throws SQLException, JSQLParserException {
+	public static Collection<OBDAMappingAxiom> expand(Collection<OBDAMappingAxiom> mappings, Connection connection, DBMetadata metadata, NativeQueryLanguageComponentFactory nativeQLFactory) throws MetaMappingExpansionException {
+
+		List<String> errorMessages = new LinkedList<>();
 
 		List<OBDAMappingAxiom> expandedMappings = new LinkedList<>();
 
-		for (OBDAMappingAxiom mapping : splittedMappings) {
+		for (OBDAMappingAxiom mapping : mappings) {
 
-			List<Function> targetQuery = mapping.getTargetQuery();
-			Function bodyAtom = targetQuery.get(0);
-			Predicate pred = bodyAtom.getFunctionSymbol();
+			boolean split = mapping.getTargetQuery().stream()
+					.anyMatch(atom -> atom.getFunctionSymbol().isTriplePredicate());
 
-			if (!pred.isTriplePredicate()){
-				// for normal mappings, we do not need to expand it.
-				expandedMappings.add(mapping);	
-			} 
-			else {
-
-				int arity;
-				if (isURIRDFType(bodyAtom.getTerm(1))) {
-					// variables are in the position of object
-					arity = 1;
-				} 
-				else {
-					// variables are in the position of predicate
-					arity = 2;
-				}
-				
-				List<Variable> varsInTemplate = getVariablesInTemplate(bodyAtom, arity);
-				if (varsInTemplate.isEmpty()) {
-					throw new IllegalArgumentException("No Variables could be found for this metamapping. Check that the variable in the metamapping is enclosed in a URI, for instance http://.../{var}");
-				}
-				
-				// Construct the SQL query tree from the source query we do not work with views 
-				OBDASQLQuery sourceQuery = (OBDASQLQuery) mapping.getSourceQuery();
-				ParsedSQLQuery sourceQueryParsed = SQLQueryShallowParser.parse(idfac, sourceQuery.toString());
-				
-				List<SelectExpressionItem> columnList = null;
-				
-				// distinctParamsProjection.addAll(columnsForTemplate);
-				
-				/**
-				 * The query for params is almost the same with the original source query, except that
-				 * we only need to distinct project the columns needed for the template expansion 
-				 */
-				
-				try {
-					columnList = sourceQueryParsed.getProjection().getColumnList();
-				} 
-				catch (JSQLParserException e2) {
-					continue;
-				}
-				
-				List<SelectExpressionItem> columnsForTemplate = getColumnsForTemplate(varsInTemplate, columnList, idfac);
-				
-				List<List<String>> paramsForClassTemplate = getParamsForClassTemplate(sourceQueryParsed, columnsForTemplate, varsInTemplate, idfac);
-				
-				List<SelectExpressionItem> columnsForValues = new ArrayList<>(columnList);
-				columnsForValues.removeAll(columnsForTemplate);
-				
+			if (split) {
 				String id = mapping.getId();
-				
-				for(List<String> params : paramsForClassTemplate) {
-					String newId = IDGenerator.getNextUniqueID(id + "#");
-					OBDAMappingAxiom newMapping = instantiateMapping(newId, targetQuery,
-							bodyAtom, sourceQueryParsed, columnsForTemplate,
-							columnsForValues, params, arity, idfac);
-										
-					expandedMappings.add(newMapping);	
-					
-					log.debug("Expanded Mapping: {}", newMapping);
-				}
-				
-			}
+				SourceQuery sourceQuery = mapping.getSourceQuery();
 
+				for (Function atom : mapping.getTargetQuery()) {
+					if (!atom.getFunctionSymbol().isTriplePredicate()) {
+						// for normal mappings, we do not need to expand it.
+						String newId = IDGenerator.getNextUniqueID(id + "#");
+
+						OBDAMappingAxiom newMapping = nativeQLFactory.create(newId, sourceQuery, Collections.singletonList(atom));
+
+						expandedMappings.add(newMapping);
+					}
+					else {
+						try {
+							expandedMappings.addAll(instantiateMapping(connection, metadata, id, atom, sourceQuery.toString(), nativeQLFactory));
+						}
+						catch (Exception e) {
+							log.warn("Parse exception, check no SQL reserved keywords have been used " + e.getMessage());
+							errorMessages.add(e.getMessage());
+						}
+					}
+				}
+			}
+			else
+				expandedMappings.add(mapping);
 		}
-		
+
+		if (!errorMessages.isEmpty())
+			throw new MetaMappingExpansionException(Joiner.on("\n").join(errorMessages));
+
 		return expandedMappings;
 	}
 
-	private List<List<String>> getParamsForClassTemplate(ParsedSQLQuery sourceQueryParsed, List<SelectExpressionItem> columnsForTemplate, List<Variable> varsInTemplate, QuotedIDFactory idfac) throws SQLException {
-		
-		/**
-		 * The query for params is almost the same with the original source query, except that
-		 * we only need to distinct project the columns needed for the template expansion 
-		 */
-		
-		ParsedSQLQuery distinctParsedQuery = null;
-		try {
-			distinctParsedQuery = new ParsedSQLQuery(sourceQueryParsed.getStatement(), false, idfac);
-		} 
-		catch (JSQLParserException e1) {
-			throw new IllegalArgumentException(e1);
-			//continue;
+	private static List<OBDAMappingAxiom> instantiateMapping(Connection connection, DBMetadata metadata, String id, Function target, String sql, NativeQueryLanguageComponentFactory nativeQLFactory) throws SQLException, JSQLParserException, InvalidSelectQueryException, UnsupportedSelectQueryException {
+
+		ImmutableList<SelectExpressionItem> queryColumns = getQueryColumns(metadata, sql);
+
+		int arity = isURIRDFType(target.getTerm(1)) ? 1 : 2;
+		Function templateAtom = (Function)((arity == 1)
+				? target.getTerm(2)   // template is in the position of object
+				: target.getTerm(1)); // template is in the position of predicate
+
+		ImmutableList<SelectExpressionItem> templateColumns =
+				getTemplateColumns(metadata.getQuotedIDFactory(), templateAtom, queryColumns);
+
+		ImmutableList<SelectItem> newColumns = queryColumns.stream()
+				.filter(c -> !templateColumns.contains(c))
+				.collect(ImmutableCollectors.toList());
+		if (newColumns.isEmpty())   // avoid empty SELECT clause
+			newColumns = ImmutableList.of(new AllColumns());
+
+		List<List<String>> templateValues = getTemplateValues(connection, sql, templateColumns);
+
+		List<OBDAMappingAxiom> expandedMappings = new ArrayList<>(templateValues.size());
+
+		for(List<String> values : templateValues) {
+			// create a new  query with the changed projection and selection
+			Expression whereClauseExtension = getWhereClauseExtension(templateColumns, values);
+
+			Select select = (Select) CCJSqlParserUtil.parse(sql);
+			PlainSelect plainSelect = (PlainSelect)select.getSelectBody();
+
+			plainSelect.setSelectItems(newColumns);
+
+			// whereClauseExtension is never null
+			plainSelect.setWhere((plainSelect.getWhere() == null)
+					? whereClauseExtension
+					: new AndExpression(plainSelect.getWhere(), whereClauseExtension));
+
+			OBDASQLQuery newSourceQuery =  MAPPING_FACTORY.getSQLQuery(select.toString());
+
+			// construct new Target Query by expanding higher order atoms of the form
+			// <pre>triple(t1, 'rdf:type', URI("http://example.org/{}", X))</pre>
+			// to
+			// <pre>http://example.org/cls(t1)</pre>, if X is t1
+			// (similarly for properties)
+
+			String predicateName = getPredicateName(templateAtom.getTerm(0), values);
+			Function newTarget = (arity == 1)
+					? DATA_FACTORY.getFunction(DATA_FACTORY.getClassPredicate(predicateName),
+					target.getTerm(0))
+					: DATA_FACTORY.getFunction(DATA_FACTORY.getObjectPropertyPredicate(predicateName),
+					target.getTerm(0), target.getTerm(2));
+
+			String newId = IDGenerator.getNextUniqueID(id + "#");
+
+			OBDAMappingAxiom mapping = nativeQLFactory.create(newId, newSourceQuery,
+					Collections.singletonList(newTarget));
+
+			expandedMappings.add(mapping);
+
+			log.debug("Expanded Mapping: {}", mapping);
 		}
 
-		
-		ProjectionJSQL distinctParamsProjection = new ProjectionJSQL();
-		distinctParamsProjection.setType(ProjectionJSQL.SELECT_DISTINCT);
-		distinctParamsProjection.addAll(columnsForTemplate);
-		
-		distinctParsedQuery.setProjection(distinctParamsProjection);
-		
-		
-		String distinctParamsSQL = distinctParsedQuery.toString();
+		return expandedMappings;
+	}
 
-	
-		List<List<String>> paramsForClassTemplate = new LinkedList<List<String>>();
+
+
+	private static ImmutableList<SelectExpressionItem> getQueryColumns(DBMetadata metadata, String sql) throws InvalidSelectQueryException, UnsupportedSelectQueryException {
+
+		SelectQueryAttributeExtractor2 sqae = new SelectQueryAttributeExtractor2(metadata);
+
+		PlainSelect plainSelect = sqae.getParsedSql(sql);
+
+		Set<QualifiedAttributeID> attributes = sqae.getQueryBodyAttributes(plainSelect).keySet();
+
+		QuotedIDFactory idfac = metadata.getQuotedIDFactory();
+
+		List<SelectExpressionItem> list = new ArrayList<>();
+		for (SelectItem si : plainSelect.getSelectItems()) {
+			si.accept(new SelectItemVisitor() {
+				@Override
+				public void visit(AllColumns allColumns) {
+					list.addAll(attributes.stream()
+							.filter(id -> id.getRelation() == null)
+							.map(id -> new SelectExpressionItem(new Column(id.getSQLRendering())))
+							.collect(ImmutableCollectors.toList()));
+				}
+
+				@Override
+				public void visit(AllTableColumns allTableColumns) {
+					Table table = allTableColumns.getTable();
+					RelationID tableId = idfac.createRelationID(table.getSchemaName(), table.getName());
+					list.addAll(attributes.stream()
+							.filter(id -> id.getRelation() != null && id.getRelation().equals(tableId))
+							.map(id -> new SelectExpressionItem(new Column(table, id.getAttribute().getSQLRendering())))
+							.collect(ImmutableCollectors.toList()));
+				}
+
+				@Override
+				public void visit(SelectExpressionItem selectExpressionItem) {
+					list.add(selectExpressionItem);
+				}
+			});
+		}
+
+		return ImmutableList.copyOf(list);
+	}
+
+	private static List<List<String>> getTemplateValues(Connection connection, String sql,
+														ImmutableList<SelectExpressionItem> templateColumns) throws SQLException, JSQLParserException {
+
+
+		// The query for params is almost the same with the original source query, except that
+		// we only need to distinct project the columns needed for the template expansion
+
+		Select select = (Select)CCJSqlParserUtil.parse(sql);
+		PlainSelect plainSelect = (PlainSelect)select.getSelectBody();
+
+		plainSelect.setDistinct(new Distinct());
+		plainSelect.setSelectItems(ImmutableList.copyOf(templateColumns)); // SelectExpressionItem -> SelectItem
+
+		String distinctParamsSQL = select.toString();
+
+		List<List<String>> templateValues = new ArrayList<>();
 		try (Statement st = connection.createStatement()) {
 			try (ResultSet rs = st.executeQuery(distinctParamsSQL)) {
-				
-				int varsInTemplateSize = varsInTemplate.size();
+				int size = templateColumns.size();
 				while (rs.next()) {
-					ArrayList<String> params = new ArrayList<>(varsInTemplateSize);
-					for (int i = 1; i <= varsInTemplateSize; i++) {
+					List<String> params = new ArrayList<>(size);
+					for (int i = 1; i <= size; i++)
 						params.add(rs.getString(i));
-					}
-					paramsForClassTemplate.add(params);
+
+					templateValues.add(params);
 				}
 			}
 		}
-		return paramsForClassTemplate;
+		return templateValues;
 	}
-	
+
 	/**
 	 * check if the term is {@code URI("http://www.w3.org/1999/02/22-rdf-syntax-ns#type")}
 	 * @param term
 	 * @return
 	 */
 	private static boolean isURIRDFType(Term term) {
-		boolean result = true;
-		if(term instanceof Function){
+		if (term instanceof Function) {
 			Function func = (Function) term;
-			if (func.getArity() != 1){
-				result = false;
-			} 
-			else {
-				result  = result && (func.getFunctionSymbol() instanceof URITemplatePredicate);
-				result  = result && (func.getTerm(0) instanceof ValueConstant) &&
-						((ValueConstant) func.getTerm(0)).getValue(). equals(OBDAVocabulary.RDF_TYPE);
+			if (func.getArity() == 1 && (func.getFunctionSymbol() instanceof URITemplatePredicate)) {
+				Term t0 = func.getTerm(0);
+				if (t0 instanceof ValueConstant)
+					return ((ValueConstant) t0).getValue().equals(OBDAVocabulary.RDF_TYPE);
 			}
-		} 
-		else {
-			result = false;
 		}
-		return result;
+		return false;
 	}
 
-	/**
-	 * This method instantiate a meta mapping by the concrete parameters
-	 *
-	 * @throws JSQLParserException 
-	 */
-	private OBDAMappingAxiom instantiateMapping(String id, List<Function> targetQuery,
-												Function bodyAtom, ParsedSQLQuery sourceParsedQuery,
-												List<SelectExpressionItem> columnsForTemplate,
-												List<SelectExpressionItem> columnsForValues,
-												List<String> params, int arity, QuotedIDFactory idfac) throws JSQLParserException {
-		
-		/*
-		 * First construct new Target Query 
-		 */
-		Function newTargetBody = expandHigherOrderAtom(bodyAtom, params, arity);
-		
+
+	private static Expression getWhereClauseExtension(List<SelectExpressionItem> templateColumns,
+													  List<String> values) {
 		Expression selection = null;
-		try {
-			selection = sourceParsedQuery.getWhereClause();
-		} 
-		catch (JSQLParserException e1) {
-			e1.printStackTrace();
-		}
-		
-		int j = 0;
-		for (SelectExpressionItem column : columnsForTemplate) {
-			
-			Expression columnRefExpression = column.getExpression();
-			StringValue clsStringValue = new StringValue("'" + params.get(j) + "'");
-			
-			//we are considering only equivalences
+		int size = templateColumns.size(); // both lists are ArrayLists of the same size
+		for (int j = 0; j < size; j++) {
 			BinaryExpression condition = new EqualsTo();
-			condition.setLeftExpression(columnRefExpression);
-			condition.setRightExpression(clsStringValue);
-			
-			if (selection != null) 
-				selection = new AndExpression(selection, condition);
+			condition.setLeftExpression(templateColumns.get(j).getExpression());
+			condition.setRightExpression(new StringValue("'" + values.get(j) + "'"));
+
+			selection = (selection != null) ? new AndExpression(selection, condition) : condition;
+		}
+		return selection;
+	}
+
+
+	/**
+	 * This method get the columns which will be used for the predicate template
+	 *
+	 * @param templateAtom
+	 * @param queryColumns
+	 * @return
+	 */
+	private static ImmutableList<SelectExpressionItem> getTemplateColumns(QuotedIDFactory idfac, Function templateAtom,
+																		  List<SelectExpressionItem> queryColumns) {
+
+		ImmutableMap<String, SelectExpressionItem> lookup = queryColumns.stream()
+				.collect(ImmutableCollectors.toMap(
+						si -> {
+							if (si.getAlias() != null && si.getAlias().getName() != null)
+								return si.getAlias().getName();
+
+							if (!(si.getExpression() instanceof Column))
+								throw new RuntimeException("Complex expressions in SELECT require an alias");
+
+							Column c = (Column)si.getExpression();
+
+							QuotedID attribute = idfac.createAttributeID(c.getColumnName());
+							RelationID relation = null;
+							if (c.getTable().getName() != null)
+								relation = idfac.createRelationID(c.getTable().getSchemaName(), c.getTable().getName());
+
+							QualifiedAttributeID qa = new QualifiedAttributeID(relation, attribute);
+							return qa.getAttribute().getName(); // TODO: IGNORES TABLE NAME! (TO BE FIXED)
+						},
+						si -> si));
+
+		List<Variable> templateVariables = getTemplateVariables(templateAtom);
+		if (templateVariables.isEmpty())
+			throw new IllegalArgumentException("No variables could be found for this metamapping." +
+					"Check that the variable in the metamapping is enclosed in a URI, for instance, " +
+					"http://.../{var}");
+
+
+		return templateVariables.stream()
+				.map(var -> {
+					SelectExpressionItem si = lookup.get(var.getName());
+					if (si == null)
+						throw new IllegalArgumentException("The placeholder '" + var.getName() +
+								"' in the target does not occur in the body of the mapping");
+					return si;
+				})
+				.collect(ImmutableCollectors.toList());
+	}
+
+	/**
+	 *
+	 * This method extracts the variables in the template from the atom
+	 * <p>
+	 * Example:
+	 * <p>
+	 * Input templateAtom:
+	 * <pre>URI("http://example.org/{}/{}", X, Y)</pre>
+	 *
+	 * Output: [X, Y]
+	 * <p>
+	 *
+	 * @param templateAtom
+	 * @return list of variables
+	 */
+	private static ImmutableList<Variable> getTemplateVariables(Function templateAtom) {
+
+		int len = templateAtom.getTerms().size();
+
+		if (len == 1) { // the case of <{varUri}>
+			Term uri = templateAtom.getTerm(0);
+			if (uri instanceof Variable)
+				return ImmutableList.of((Variable) uri);
 			else
-				selection = condition;
-			j++;	
-		}
-			
-		
-		ProjectionJSQL newProjection = new ProjectionJSQL();
-		newProjection.addAll(columnsForValues);
-		
-		/*
-		 * new statement for the source query
-		 * we create a new statement with the changed projection and selection
-		 */
-		
-		ParsedSQLQuery newSourceParsedQuery = new ParsedSQLQuery(sourceParsedQuery.getStatement(), false, idfac);
-		newSourceParsedQuery.setProjection(newProjection);
-		newSourceParsedQuery.setWhereClause(selection);
-		
-		String newSourceQuerySQL = newSourceParsedQuery.toString();
-		OBDASQLQuery newSourceQuery =  MAPPING_FACTORY.getSQLQuery(newSourceQuerySQL);
-
-		OBDAMappingAxiom newMapping = nativeQLFactory.create(id, newSourceQuery,
-										Collections.singletonList(newTargetBody));
-		return newMapping;
-	}
-
-	
-	/**
-	 * This method get the columns which will be used for the predicate template 
-	 * 
-	 * @param varsInTemplate
-	 * @param columnList
-     * @return
-	 */
-	private static List<SelectExpressionItem> getColumnsForTemplate(List<Variable> varsInTemplate,
-																	List<SelectExpressionItem> columnList, QuotedIDFactory idfac) {
-		
-		List<SelectExpressionItem> columnsForTemplate = new ArrayList<>(varsInTemplate.size());
-
-		for (Variable var : varsInTemplate) {
-			boolean found = false;
-			for (SelectExpressionItem selectExpression : columnList) {
-				
-				// ROMAN (23 Sep 2015): SelectExpressionItem is of the form Expression AS Alias
-				// this code does not work for complex expressions (i.e., 3 * A)
-				// String expression = column.getExpression().toString();
-				if (selectExpression.getExpression() instanceof Column) {
-					Column c = (Column)selectExpression.getExpression();
-
-		        	QuotedID column1 = idfac.createAttributeID(c.getColumnName());
-		        	RelationID relation = null;
-		        	if (c.getTable().getName() != null)
-		        		relation = idfac.createRelationID(c.getTable().getSchemaName(), c.getTable().getName());
-		        	
-		        	QualifiedAttributeID qa = new QualifiedAttributeID(relation, column1);
-		        	
-					if ((selectExpression.getAlias() == null && qa.getAttribute().getName().equals(var.getName())) ||
-							(selectExpression.getAlias() != null && selectExpression.getAlias().getName().equals(var.getName()))) {
-						columnsForTemplate.add(selectExpression);
-						found = true;
-						break;
-					}
-				}
-				else {
-					if( selectExpression.getExpression() instanceof StringValue) {
-
-						if (selectExpression.getAlias() != null && selectExpression.getAlias().getName().equals(var.getName())) {
-							columnsForTemplate.add(selectExpression);
-							found = true;
-							break;
-						}
-					}
-				}
-
-									
-			}
-			if(!found){
-                String format = "The placeholder '%s' in the target does not occur in the body of the mapping";
-
-                throw new IllegalStateException(String.format(format,
-                        var.getName()/*,  mapping.toString()*/));
-			}
-		}
-		
-		return columnsForTemplate;
-	}
-
-	/**
-	 * 
-	 * This method extracts the variables in the template from the atom 
-	 * <p>
-	 * Example 1: 
-	 * <p>
-	 * arity = 1. 
-	 * Input Atom:
-	 * <pre>triple(t1, 'rdf:type', URI("http://example.org/{}/{}", X, Y))</pre>
-	 * 
-	 * Output: [X, Y]
-	 * <p>
-	 * Example 2: 
-	 * <p>
-	 * arity = 2. 
-	 * Input Atom:
-	 * <pre>triple(t1,  URI("http://example.org/{}/{}", X, Y), t2)</pre>
-	 * 
-	 * Output: [X, Y]
-	 * 
-	 * @param atom
-	 * @param arity 
-	 * @return
-	 */
-	private static List<Variable> getVariablesInTemplate(Function atom, int arity) {
-		
-		Function uriTermForPredicate = findTemplatePredicateTerm(atom, arity);
-		
-		int len = uriTermForPredicate.getTerms().size();
-		List<Variable> vars;
-
-		//consider the case of <{varUri}>
-		if(len == 1){
-			vars = new ArrayList<Variable>(1);
-			Term uri = uriTermForPredicate.getTerm(0);
-			if(uri instanceof Variable){
-				vars.add((Variable) uri);
-			}
-			else{
-				vars = Collections.emptyList();
-			}
+				return ImmutableList.of();
 		}
 		else {
-			vars = new ArrayList<Variable>(len - 1);
-
+			ImmutableList.Builder<Variable> vars = ImmutableList.builder();
 			// TODO: check when getTerms().size() != getArity()
-
-			// index 0 is for the URI template
-			for (int i = 1; i < len; i++) {
-				vars.add((Variable) uriTermForPredicate.getTerm(i));
-			}
+			// index 0 is for the URI template term
+			for (int i = 1; i < len; i++)
+				vars.add((Variable) templateAtom.getTerm(i));
+			return vars.build();
 		}
-		return vars;
 	}
 
-	
-
-	
-	/***
-	 * This method expands the higher order atom 
-	 * <pre>triple(t1, 'rdf:type', URI("http://example.org/{}", X))</pre>
-	 *  to 
-	 *  <pre>http://example.org/cls(t1)</pre>, if X is t1
-	 * 
-	 * @param atom 
-	 * 			a Function of the form triple(t1, 'rdf:type', X)
-	 * @param values
-	 * 			the concrete name of the X 
-	 * @param arity 
-	 * @return
-	 * 			expanded atom in form of <pre>http://example.org/cls(t1)</pre>
-	 */
-	private Function expandHigherOrderAtom(Function atom, List<String> values, int arity) {
-
-		Function uriTermForPredicate = findTemplatePredicateTerm(atom, arity);
-
-		Term uriTermForPredicateTerm = uriTermForPredicate.getTerm(0);
-
-		String predName;
-		if(uriTermForPredicateTerm instanceof Variable){
-
-			predName = values.get(0);
+	private static String getPredicateName(Term templateTerm, List<String> values) {
+		if (templateTerm instanceof Variable) {
+			return values.get(0);
 		}
-
 		else {
-			String uriTemplate = ((ValueConstant) uriTermForPredicateTerm).getValue();
-
-			predName = URITemplates.format(uriTemplate, values);
+			String uriTemplate = ((ValueConstant) templateTerm).getValue();
+			return URITemplates.format(uriTemplate, values);
 		}
-		
-		Function result = null;
-		if (arity == 1) {
-			Predicate p = DATA_FACTORY.getClassPredicate(predName);
-			result = DATA_FACTORY.getFunction(p, atom.getTerm(0));
-		} 
-		else if (arity == 2) {
-			Predicate p = DATA_FACTORY.getObjectPropertyPredicate(predName);
-			result = DATA_FACTORY.getFunction(p, atom.getTerm(0), atom.getTerm(2));
-		}
-		return result;
 	}
-	
-	/**
-	 * This method finds the term for the predicate template
-	 */
-	private static Function findTemplatePredicateTerm(Function atom, int arity) {
-		Function uriTermForPredicate;
-		
-		if(arity == 1) {
-			uriTermForPredicate = (Function) atom.getTerm(2);
-		} 
-		else if (arity == 2) {
-			uriTermForPredicate = (Function) atom.getTerm(1);
-		} 
-		else {
-			throw new IllegalArgumentException("The parameter arity should be 1 or 2");
-		}
-		return uriTermForPredicate;
-	}	
 }

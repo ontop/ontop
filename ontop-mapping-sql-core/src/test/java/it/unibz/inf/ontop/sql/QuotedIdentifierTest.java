@@ -5,9 +5,6 @@ import static org.junit.Assert.*;
 import java.util.HashSet;
 import java.util.Set;
 
-import it.unibz.inf.ontop.parser.SQLQueryDeepParser;
-import it.unibz.inf.ontop.sql.api.ParsedSQLQuery;
-
 import org.junit.Test;
 
 public class QuotedIdentifierTest {
@@ -68,9 +65,6 @@ public class QuotedIdentifierTest {
 		
 		System.out.println(s);
 		
-		ParsedSQLQuery q = SQLQueryDeepParser.parse(dbMetadata, s);
-		
-		System.out.println(q.toString());
 	}
 
 	@Test
@@ -79,9 +73,6 @@ public class QuotedIdentifierTest {
 		
 		System.out.println(s);
 		
-		ParsedSQLQuery q = SQLQueryDeepParser.parse(dbMetadata, s);
-		
-		System.out.println(q.toString());
 	}
 	
 	@Test
@@ -90,10 +81,6 @@ public class QuotedIdentifierTest {
 		
 		System.out.println(s);
 		
-		ParsedSQLQuery q = SQLQueryDeepParser.parse(dbMetadata, s);
-		
-		System.out.println(q.toString());
-		System.out.println(q.getJoinConditions().toString());
 	}
 	
 }

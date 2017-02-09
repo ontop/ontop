@@ -4,7 +4,6 @@ package it.unibz.inf.ontop.owlrefplatform.owlapi;
 import it.unibz.inf.ontop.exception.InvalidMappingException;
 import it.unibz.inf.ontop.exception.InvalidPredicateDeclarationException;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
-import it.unibz.inf.ontop.model.OBDAException;
 import it.unibz.inf.ontop.owlrefplatform.core.SQLExecutableQuery;
 import it.unibz.inf.ontop.injection.QuestCoreSettings;
 import it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing.TMappingExclusionConfig;
@@ -344,14 +343,13 @@ public class QuestOWLExample_ReasoningDisabled {
     }
 
     /**
-     * @throws it.unibz.inf.ontop.model.OBDAException
      * @throws org.semanticweb.owlapi.model.OWLOntologyCreationException
      * @throws it.unibz.inf.ontop.exception.InvalidMappingException
      * @throws it.unibz.inf.ontop.exception.InvalidPredicateDeclarationException
      * @throws java.io.IOException
      * @throws OWLException
      */
-    private OntopOWLConnection createStuff() throws OBDAException, OWLOntologyCreationException, IOException, InvalidPredicateDeclarationException, InvalidMappingException {
+    private OntopOWLConnection createStuff() throws OWLOntologyCreationException, IOException, InvalidPredicateDeclarationException, InvalidMappingException {
 
 		/*
 		 * Prepare the configuration for the Quest instance. The example below shows the setup for
@@ -453,7 +451,7 @@ public class QuestOWLExample_ReasoningDisabled {
     }
 
     private List<Long> runQueries(//QuestOWLConnection conn,
-                                  List<String> queries) throws OWLException, InvalidPredicateDeclarationException, InvalidMappingException, OBDAException, IOException {
+                                  List<String> queries) throws OWLException, InvalidPredicateDeclarationException, InvalidMappingException, IOException {
 
         //int nWarmUps = Constants.NUM_WARM_UPS;
         //int nRuns = Constants.NUM_RUNS;

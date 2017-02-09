@@ -13,7 +13,6 @@ import it.unibz.inf.ontop.mapping.datalog.Datalog2QueryMappingConverter;
 import it.unibz.inf.ontop.model.OBDAMappingAxiom;
 import it.unibz.inf.ontop.nativeql.RDBMetadataExtractor;
 import it.unibz.inf.ontop.owlrefplatform.core.translator.MappingVocabularyFixer;
-import it.unibz.inf.ontop.utils.IMapping2DatalogConverter;
 
 public class OntopMappingSQLModule extends OntopAbstractModule {
 
@@ -34,7 +33,6 @@ public class OntopMappingSQLModule extends OntopAbstractModule {
         bindFromPreferences(SQLPPMapping2OBDASpecificationConverter.class);
         bindFromPreferences(Datalog2QueryMappingConverter.class);
         bindFromPreferences(MappingVocabularyFixer.class);
-        bindFromPreferences(IMapping2DatalogConverter.class);
 
         Module nativeQLFactoryModule = buildFactory(ImmutableList.of(
                 RDBMetadataExtractor.class,

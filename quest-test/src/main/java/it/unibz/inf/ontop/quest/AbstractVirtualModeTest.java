@@ -2,7 +2,6 @@ package it.unibz.inf.ontop.quest;
 
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.io.QueryIOManager;
-import it.unibz.inf.ontop.model.OBDAException;
 import it.unibz.inf.ontop.owlrefplatform.core.SQLExecutableQuery;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import it.unibz.inf.ontop.querymanager.QueryController;
@@ -115,7 +114,7 @@ public abstract class AbstractVirtualModeTest extends TestCase {
         return retval;
     }
 
-    protected void countResults(String query, int expectedCount) throws OBDAException, OWLException {
+    protected void countResults(String query, int expectedCount) throws OWLException {
 
         OntopOWLStatement st = conn.createStatement();
         QuestOWLResultSet results = st.executeTuple(query);
