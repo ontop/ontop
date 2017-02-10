@@ -98,7 +98,7 @@ public class ExpressionEvaluator {
 							evaluatedFunctionalTerm.getTerms())));
 		}
 		else if (evaluatedTerm instanceof Constant) {
-			if (evaluatedTerm.equals(OBDAVocabulary.FALSE)) {
+			if (evaluatedTerm == OBDAVocabulary.FALSE || evaluatedTerm == OBDAVocabulary.NULL) {
 				return new Evaluation(false);
 			}
 			else {
@@ -240,8 +240,9 @@ public class ExpressionEvaluator {
 			return term;
 		} else if (pred == ExpressionOperation.SPARQL_STR) {
 			return evalStr(term);
-		} 
-		else if (pred == ExpressionOperation.SPARQL_DATATYPE) {
+		} else if (pred == ExpressionOperation.REPLACE) {
+			return term;
+		} else if (pred == ExpressionOperation.SPARQL_DATATYPE) {
 			return evalDatatype(term);
 		} 
 		else if (pred == ExpressionOperation.SPARQL_LANG) {
@@ -489,14 +490,14 @@ public class ExpressionEvaluator {
 		 */
 		Term teval1 = eval(term.getTerm(0));
 		if (teval1 == null) {
-			return OBDAVocabulary.FALSE;
+			return OBDAVocabulary.NULL; // ROMAN (10 Jan 2017): not FALSE
 		}
 		/*
 		 * Evaluate the second term
 		 */
 		Term innerTerm2 = term.getTerm(1);
 		if (innerTerm2 == null) {
-			return OBDAVocabulary.FALSE;
+			return OBDAVocabulary.NULL; // ROMAN (10 Jan 2017): not FALSE
 		}
 
 		/*
@@ -645,6 +646,13 @@ public class ExpressionEvaluator {
 				return DATA_FACTORY.getFunctionNEQ(f.getTerm(0), f.getTerm(1));
 			}
 		} else if (teval instanceof Constant) {
+			if (teval == OBDAVocabulary.FALSE)
+				return OBDAVocabulary.TRUE;
+			else if (teval == OBDAVocabulary.TRUE)
+				return OBDAVocabulary.FALSE;
+			else if (teval == OBDAVocabulary.NULL)
+				return teval;
+			// ROMAN (10 Jan 2017): this needs to be revised
 			return teval;
 		}
 		return term;

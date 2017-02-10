@@ -24,11 +24,15 @@ import com.google.inject.Injector;
 import it.unibz.inf.ontop.answering.OntopQueryEngine;
 import it.unibz.inf.ontop.exception.OBDASpecificationException;
 import it.unibz.inf.ontop.exception.OntopConnectionException;
-import it.unibz.inf.ontop.injection.*;
-import it.unibz.inf.ontop.model.*;
+import it.unibz.inf.ontop.injection.InvalidOntopConfigurationException;
+import it.unibz.inf.ontop.injection.OntopEngineFactory;
+import it.unibz.inf.ontop.injection.OntopSystemOWLAPIConfiguration;
+import it.unibz.inf.ontop.model.OBDAResultSet;
+import it.unibz.inf.ontop.model.TupleResultSet;
 import it.unibz.inf.ontop.ontology.*;
 import it.unibz.inf.ontop.owlapi.OWLAPITranslatorUtility;
-import it.unibz.inf.ontop.owlrefplatform.core.*;
+import it.unibz.inf.ontop.owlrefplatform.core.OntopConnection;
+import it.unibz.inf.ontop.owlrefplatform.core.OntopStatement;
 import it.unibz.inf.ontop.pivotalrepr.utils.ExecutorRegistry;
 import it.unibz.inf.ontop.spec.OBDASpecification;
 import it.unibz.inf.ontop.utils.VersionInfo;
@@ -121,7 +125,7 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 			throws IllegalConfigurationException {
         super(rootOntology, owlConfiguration, BufferingMode.BUFFERING);
 
-		OntopSystemConfiguration ontopConfiguration = owlConfiguration.getOntopConfiguration();
+		OntopSystemOWLAPIConfiguration ontopConfiguration = owlConfiguration.getOntopConfiguration();
 
 		/**
 		 * Validates the preferences
