@@ -1,7 +1,6 @@
 package it.unibz.inf.ontop.owlrefplatform.owlapi;
 
 
-import it.unibz.inf.ontop.injection.OntopSystemConfiguration;
 import it.unibz.inf.ontop.injection.OntopSystemOWLAPIConfiguration;
 import org.semanticweb.owlapi.reasoner.NullReasonerProgressMonitor;
 import org.semanticweb.owlapi.reasoner.ReasonerProgressMonitor;
@@ -18,7 +17,7 @@ public class QuestOWLConfiguration extends SimpleConfiguration {
     private final OntopSystemOWLAPIConfiguration ontopConfiguration;
 
     @Nonnull
-    public OntopSystemConfiguration getOntopConfiguration() {
+    public OntopSystemOWLAPIConfiguration getOntopConfiguration() {
         return ontopConfiguration;
     }
 

@@ -31,7 +31,10 @@ import it.unibz.inf.ontop.ontology.Datatype;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.VocabularyValidator;
 import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.Equivalences;
 import it.unibz.inf.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
-import it.unibz.inf.ontop.sql.*;
+import it.unibz.inf.ontop.sql.Attribute;
+import it.unibz.inf.ontop.sql.Relation2DatalogPredicate;
+import it.unibz.inf.ontop.sql.RelationDefinition;
+import it.unibz.inf.ontop.sql.RelationID;
 import it.unibz.inf.ontop.utils.JdbcTypeMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -212,7 +215,7 @@ public class MappingDataTypeRepair {
                         //No Boolean datatype in DB2 database, the value in the database is used
                         Predicate.COL_TYPE type = getDataType(termOccurenceIndex, variable);
                         Term newTerm = DATA_FACTORY.getTypedTerm(variable, type);
-                        log.warn("Datatype for the value " +variable + "of the property "+ predicate+ " has been inferred from the database");
+                        log.warn("Datatype for the value " +variable + " of the property "+ predicate+ " has been inferred from the database");
                         atom.setTerm(position, newTerm);
                     }
                 }
@@ -236,7 +239,7 @@ public class MappingDataTypeRepair {
             if (dataType == null || isBooleanDB2(dataType.getPredicate())) {
                 Predicate.COL_TYPE type = getDataType(termOccurenceIndex, variable);
                 newTerm = DATA_FACTORY.getTypedTerm(variable, type);
-                log.warn("Datatype for the value " +variable + "of the property "+ predicate+ " has been inferred from the database");
+                log.warn("Datatype for the value " +variable + " of the property "+ predicate+ " has been inferred from the database");
             }
             else {
                 Predicate replacement = dataType.getPredicate();

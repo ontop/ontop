@@ -147,9 +147,9 @@ public class PropertyCharacteristicTest extends TestCase {
 			if (stdout) {
 				for (int column = 1; column <= rs.getColumnCount(); column++) {
 					OWLObject binding = rs.getOWLObject(column);
-					System.out.print(binding.toString() + ", ");
+					log.debug(binding.toString() + ", ");
 				}
-				System.out.print("\n");
+
 			}
 		}
 		return counter;
