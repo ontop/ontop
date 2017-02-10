@@ -21,7 +21,6 @@ package it.unibz.inf.ontop.rdf4j.repository;
  */
 
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
-import it.unibz.inf.ontop.injection.QuestCoreSettings;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.Resource;
@@ -32,7 +31,6 @@ import org.eclipse.rdf4j.repository.config.AbstractRepositoryImplConfig;
 import org.eclipse.rdf4j.repository.config.RepositoryConfigException;
 
 import java.io.File;
-import java.util.Properties;
 
 import static org.eclipse.rdf4j.model.util.Models.objectLiteral;
 import static org.eclipse.rdf4j.repository.config.RepositoryConfigSchema.REPOSITORYID;
@@ -171,21 +169,13 @@ public class OntopRepositoryConfig extends AbstractRepositoryImplConfig {
 
         try {
             /*
-             * Creates the repository according to the Quest type.
+             * Creates the repository
              */
-            OntopSQLOWLAPIConfiguration configuration;
-            Properties p = new Properties();
-            if (existential) {
-                p.setProperty(QuestCoreSettings.EXISTENTIAL_REASONING, "true");
-            } else {
-                p.setProperty(QuestCoreSettings.EXISTENTIAL_REASONING, "false");
-            }
-
-            configuration = OntopSQLOWLAPIConfiguration.defaultBuilder()
+            OntopSQLOWLAPIConfiguration configuration = OntopSQLOWLAPIConfiguration.defaultBuilder()
                     // TODO: consider also r2rml
                     .nativeOntopMappingFile(obdaFile)
                     .ontologyFile(owlFile)
-                    .properties(p)
+                    .enableExistentialReasoning(existential)
                     .build();
             repository = new OntopVirtualRepository(configuration);
 
