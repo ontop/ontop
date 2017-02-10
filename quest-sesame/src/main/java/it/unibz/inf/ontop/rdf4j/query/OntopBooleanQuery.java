@@ -26,11 +26,13 @@ import org.eclipse.rdf4j.query.BooleanQuery;
 import org.eclipse.rdf4j.query.MalformedQueryException;
 import org.eclipse.rdf4j.query.QueryEvaluationException;
 
-import it.unibz.inf.ontop.model.OBDAQueryModifiers;
 import it.unibz.inf.ontop.model.TupleResultSet;
 
 public class OntopBooleanQuery extends AbstractOntopQuery implements BooleanQuery {
 
+	/**
+	 * TODO: validate the input query
+	 */
 	public OntopBooleanQuery(String queryString, String baseURI, OntopConnection conn) throws MalformedQueryException {
         super(queryString, conn);
 		// check if valid query string
@@ -41,11 +43,9 @@ public class OntopBooleanQuery extends AbstractOntopQuery implements BooleanQuer
 
 	@Override
 	public boolean evaluate() throws QueryEvaluationException {
-		TupleResultSet rs = null;
-		OntopStatement stm = null;
-		try {
-			stm = conn.createStatement();
-			rs = (TupleResultSet) stm.execute(getQueryString());
+		try (OntopStatement stm = conn.createStatement();
+			 TupleResultSet rs = (TupleResultSet) stm.execute(getQueryString())) {
+
 			boolean next = rs.nextRow();
 			if (next){
 				return true;
@@ -53,32 +53,8 @@ public class OntopBooleanQuery extends AbstractOntopQuery implements BooleanQuer
 			}
 			return false;
 		} catch (Exception e) {
-			e.printStackTrace();
 			throw new QueryEvaluationException(e);
-		} finally {
-			try {
-				if (rs != null)
-				rs.close();
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-			try {
-				if (stm != null)
-				stm.close();
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
 		}
-	}
-
-	public OBDAQueryModifiers getQueryModifiers() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	public void setQueryModifiers(OBDAQueryModifiers modifiers) {
-		// TODO Auto-generated method stub
-
 	}
 
     @Override
