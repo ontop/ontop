@@ -28,6 +28,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.semanticweb.owlapi.model.OWLIndividual;
+import org.semanticweb.owlapi.reasoner.IllegalConfigurationException;
 import org.semanticweb.owlapi.reasoner.ReasonerInternalException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -154,7 +155,7 @@ public class MetaMappingVirtualABoxMissingColumnTest {
     @Test
 	public void testViEqSig() throws Exception {
 
-        expectedEx.expect(ReasonerInternalException.class);
+        expectedEx.expect(IllegalConfigurationException.class);
         expectedEx.expectMessage("The placeholder 'code1' in the target does not occur in the body of the mapping");
 
 		runTests();

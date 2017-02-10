@@ -240,8 +240,9 @@ public class ExpressionEvaluator {
 			return term;
 		} else if (pred == ExpressionOperation.SPARQL_STR) {
 			return evalStr(term);
-		} 
-		else if (pred == ExpressionOperation.SPARQL_DATATYPE) {
+		} else if (pred == ExpressionOperation.REPLACE) {
+			return term;
+		} else if (pred == ExpressionOperation.SPARQL_DATATYPE) {
 			return evalDatatype(term);
 		} 
 		else if (pred == ExpressionOperation.SPARQL_LANG) {
