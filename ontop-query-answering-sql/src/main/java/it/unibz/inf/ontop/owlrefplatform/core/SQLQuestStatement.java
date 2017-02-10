@@ -5,6 +5,7 @@ import java.util.Optional;
 import it.unibz.inf.ontop.exception.OntopConnectionException;
 import it.unibz.inf.ontop.exception.OntopQueryAnsweringException;
 import it.unibz.inf.ontop.exception.OntopQueryEvaluationException;
+import it.unibz.inf.ontop.exception.OntopResultConversionException;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.owlrefplatform.core.resultset.*;
 import it.unibz.inf.ontop.owlrefplatform.core.translator.SesameConstructTemplate;
@@ -192,7 +193,7 @@ public class SQLQuestStatement extends QuestStatement {
 
     @Override
     protected GraphResultSet executeGraphQuery(ExecutableQuery executableQuery, boolean collectResults)
-            throws OntopQueryEvaluationException {
+            throws OntopQueryEvaluationException, OntopResultConversionException, OntopConnectionException {
         SQLExecutableQuery sqlTargetQuery = checkAndConvertTargetQuery(executableQuery);
 
         String sqlQuery = sqlTargetQuery.getSQL();

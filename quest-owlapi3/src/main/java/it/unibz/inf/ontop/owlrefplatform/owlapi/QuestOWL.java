@@ -405,11 +405,11 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 		return inconsistent;
 	}
 	
-	public boolean isQuestConsistent() throws ReasonerInterruptedException, TimeOutException {
+	public boolean isQuestConsistent() throws ReasonerInterruptedException, TimeOutException, OWLException {
 		return isDisjointAxiomsConsistent() && isFunctionalPropertyAxiomsConsistent();
 	}
 	
-	private boolean isDisjointAxiomsConsistent() throws ReasonerInterruptedException, TimeOutException {
+	private boolean isDisjointAxiomsConsistent() throws ReasonerInterruptedException, TimeOutException, OWLException {
 
 		//deal with disjoint classes
 		{
@@ -475,7 +475,7 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 		return true;
 	}
 	
-	private boolean isFunctionalPropertyAxiomsConsistent() throws ReasonerInterruptedException, TimeOutException {
+	private boolean isFunctionalPropertyAxiomsConsistent() throws ReasonerInterruptedException, TimeOutException, OWLException {
 		
 		//deal with functional properties
 
@@ -507,19 +507,23 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 		return true;
 	}
 	
-	private boolean executeConsistencyQuery(String strQuery) {
-		OntopStatement query;
-		query = conn.createStatement();
-		OBDAResultSet rs = query.execute(strQuery);
-		TupleResultSet trs = ((TupleResultSet)rs);
-		if (trs!= null && trs.nextRow()){
-			String value = trs.getConstant(0).getValue();
-			boolean b = Boolean.parseBoolean(value);
-			trs.close();
-			if (b)
-				return false;
+	private boolean executeConsistencyQuery(String strQuery) throws OWLException {
+		try {
+			OntopStatement query;
+			query = conn.createStatement();
+			OBDAResultSet rs = query.execute(strQuery);
+			TupleResultSet trs = ((TupleResultSet) rs);
+			if (trs != null && trs.nextRow()) {
+				String value = trs.getConstant(0).getValue();
+				boolean b = Boolean.parseBoolean(value);
+				trs.close();
+				if (b)
+					return false;
+			}
+			return true;
+		} catch (Exception e) {
+			throw new OWLException(e);
 		}
-		return true;
 	}
 
 	@Override

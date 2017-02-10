@@ -20,28 +20,30 @@ package it.unibz.inf.ontop.model;
  * #L%
  */
 
+import it.unibz.inf.ontop.exception.*;
+
 public interface OBDAStatement extends AutoCloseable {
 
-	void cancel();
+	void cancel() throws OntopConnectionException;
 
 	@Override
-    void close();
+    void close() throws OntopConnectionException;
 
-	OBDAResultSet execute(String query);
+	OBDAResultSet execute(String query) throws OntopQueryAnsweringException, OntopConnectionException;
 
-	int getFetchSize();
+	int getFetchSize() throws OntopConnectionException;
 
-	int getMaxRows();
+	int getMaxRows() throws OntopConnectionException;
 
-	void getMoreResults();
+	void getMoreResults() throws OntopConnectionException;
 
-	int getQueryTimeout();
+	int getQueryTimeout() throws OntopConnectionException;
 
-	void setFetchSize(int rows);
+	void setFetchSize(int rows) throws OntopConnectionException;
 
-	void setMaxRows(int max);
+	void setMaxRows(int max) throws OntopConnectionException;
 
-	boolean isClosed();
+	boolean isClosed() throws OntopConnectionException;
 
 	/**
 	 * Sets the number of seconds the driver will wait for a Statement object to
@@ -51,5 +53,5 @@ public interface OBDAStatement extends AutoCloseable {
 	 * @param seconds
 	 *            the new query timeout limit in seconds; zero means no limit.
 	 */
-    void setQueryTimeout(int seconds);
+    void setQueryTimeout(int seconds) throws OntopConnectionException;
 }

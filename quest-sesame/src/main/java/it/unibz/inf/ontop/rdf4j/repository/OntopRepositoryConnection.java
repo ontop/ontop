@@ -322,7 +322,11 @@ public class OntopRepositoryConnection implements org.eclipse.rdf4j.repository.R
 	@Override
     public boolean isAutoCommit() throws RepositoryException {
 		//Checks whether the connection is in auto-commit mode.
-		return ontopConnection.getAutoCommit();
+		try {
+			return ontopConnection.getAutoCommit();
+		} catch (OntopConnectionException e) {
+			throw new RepositoryException(e);
+		}
 	}
 
 	@Override
@@ -489,8 +493,12 @@ public class OntopRepositoryConnection implements org.eclipse.rdf4j.repository.R
 		//Otherwise, the updates are grouped into transactions that are 
 		// terminated by a call to either commit() or rollback().
 		// By default, new connections are in auto-commit mode.
-		if (autoCommit == this.ontopConnection.getAutoCommit()) {
-			return;
+		try {
+			if (autoCommit == this.ontopConnection.getAutoCommit()) {
+                return;
+            }
+		} catch (OntopConnectionException e) {
+			throw new RepositoryException(e);
 		}
 		if (isActive()) {
 			try {

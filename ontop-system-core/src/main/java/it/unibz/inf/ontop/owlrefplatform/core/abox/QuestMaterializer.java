@@ -25,6 +25,7 @@ import com.google.inject.Injector;
 import it.unibz.inf.ontop.answering.OntopQueryEngine;
 import it.unibz.inf.ontop.exception.OBDASpecificationException;
 import it.unibz.inf.ontop.exception.OntopConnectionException;
+import it.unibz.inf.ontop.exception.OntopResultConversionException;
 import it.unibz.inf.ontop.injection.OntopEngineFactory;
 import it.unibz.inf.ontop.injection.OntopSystemConfiguration;
 import it.unibz.inf.ontop.model.GraphResultSet;
@@ -321,9 +322,9 @@ public class QuestMaterializer {
 					throw new IllegalStateException("You cannot call next() twice in a row without calling hasNext()");
 				}
 				
-			} catch (OntopConnectionException e) {
-				log.warn("Exception in Assertion Iterator next");
-				throw new NoSuchElementException();
+			} catch (OntopConnectionException | OntopResultConversionException e) {
+				log.warn("Exception in Assertion Iterator next: " + e.getMessage());
+				throw new NoSuchElementException(e.getMessage());
 			}
 		}
 			

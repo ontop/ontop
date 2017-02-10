@@ -21,6 +21,8 @@ package it.unibz.inf.ontop.owlrefplatform.owlapi;
  */
 
 import it.unibz.inf.ontop.exception.OntopConnectionException;
+import it.unibz.inf.ontop.exception.OntopInvalidInputQueryException;
+import it.unibz.inf.ontop.exception.OntopReformulationException;
 import it.unibz.inf.ontop.model.GraphResultSet;
 import it.unibz.inf.ontop.model.TupleResultSet;
 import it.unibz.inf.ontop.ontology.Assertion;
@@ -195,7 +197,11 @@ public class QuestOWLStatement implements OntopOWLStatement {
 	}
 
 	public ExecutableQuery getExecutableQuery(String query) throws OWLException {
-		return st.getExecutableQuery(query);
+		try {
+			return st.getExecutableQuery(query);
+		} catch (OntopReformulationException | OntopInvalidInputQueryException e) {
+			throw new OWLException(e);
+		}
 	}
 
 	private List<OWLAxiom> createOWLIndividualAxioms(GraphResultSet resultSet) throws Exception {

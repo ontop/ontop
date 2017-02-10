@@ -167,14 +167,16 @@ public abstract class QuestStatement implements OntopStatement {
 	/**
 	 * TODO: describe
 	 */
-	protected GraphResultSet executeDescribeQuery(ExecutableQuery executableQuery) throws OntopQueryEvaluationException {
+	protected GraphResultSet executeDescribeQuery(ExecutableQuery executableQuery)
+			throws OntopQueryEvaluationException, OntopResultConversionException, OntopConnectionException {
 		return executeGraphQuery(executableQuery, true);
 	}
 
 	/**
 	 * TODO: describe
 	 */
-	protected GraphResultSet executeConstructQuery(ExecutableQuery executableQuery) throws OntopQueryEvaluationException {
+	protected GraphResultSet executeConstructQuery(ExecutableQuery executableQuery)
+			throws OntopQueryEvaluationException, OntopResultConversionException, OntopConnectionException {
 		return executeGraphQuery(executableQuery, false);
 	}
 
@@ -182,7 +184,7 @@ public abstract class QuestStatement implements OntopStatement {
 	 * TODO: describe
 	 */
 	protected abstract GraphResultSet executeGraphQuery(ExecutableQuery executableQuery, boolean collectResults)
-			throws OntopQueryEvaluationException;
+			throws OntopQueryEvaluationException, OntopResultConversionException, OntopConnectionException;
 
 	/**
 	 * Cancel the processing of the target query.
@@ -194,7 +196,8 @@ public abstract class QuestStatement implements OntopStatement {
 	 * uri or var logic Returns the result set for the given query
 	 */
 	@Override
-	public OBDAResultSet execute(String strquery) throws OntopQueryEvaluationException, OntopReformulationException {
+	public OBDAResultSet execute(String strquery) throws OntopConnectionException, OntopInvalidInputQueryException,
+			OntopReformulationException, OntopQueryEvaluationException, OntopResultConversionException {
 		if (strquery.isEmpty()) {
 			throw new OntopInvalidInputQueryException("Cannot process an empty query");
 		}
@@ -292,7 +295,7 @@ public abstract class QuestStatement implements OntopStatement {
 	 * @return the obtained TupleResultSet result
 	 */
 	private OBDAResultSet executeTupleQuery(String strquery, ParsedQuery pq, QueryType type)
-			throws OntopQueryEvaluationException, OntopReformulationException {
+			throws OntopReformulationException, OntopQueryEvaluationException {
 
 		log.debug("Executing SPARQL query: \n{}", strquery);
 
@@ -300,7 +303,7 @@ public abstract class QuestStatement implements OntopStatement {
 	}
 
 	private OBDAResultSet executeGraphQuery(String strquery, QueryType type)
-			throws OntopQueryEvaluationException, OntopReformulationException {
+			throws OntopReformulationException, OntopQueryEvaluationException, OntopInvalidInputQueryException {
 		
 		log.debug("Executing SPARQL query: \n{}", strquery);
 		
@@ -325,7 +328,7 @@ public abstract class QuestStatement implements OntopStatement {
 	 * query type SELECT, ASK, CONSTRUCT, or DESCRIBE
 	 */
 	private OBDAResultSet executeInThread(ParsedQuery pq, QueryType type, Optional<SesameConstructTemplate> templ)
-			throws OntopQueryAnsweringException {
+			throws OntopReformulationException, OntopQueryEvaluationException {
 		CountDownLatch monitor = new CountDownLatch(1);
 		ExecutableQuery executableQuery = engine.translateIntoNativeQuery(pq, templ);
 		QueryExecutionThread executionthread = new QueryExecutionThread(executableQuery, type, templ, monitor,
@@ -338,12 +341,19 @@ public abstract class QuestStatement implements OntopStatement {
 			e.printStackTrace();
 		}
 		if (executionthread.errorStatus()) {
-			OntopQueryAnsweringException ex = new OntopQueryAnsweringException(executionthread.getException());
-			ex.setStackTrace(executionthread.getStackTrace());
-			throw ex;
+			Exception ex = executionthread.getException();
+			if (ex instanceof OntopReformulationException) {
+				throw (OntopReformulationException) ex;
+			}
+			else if (ex instanceof OntopQueryEvaluationException) {
+				throw (OntopQueryEvaluationException) ex;
+			}
+			else {
+				throw new OntopQueryEvaluationException(ex);
+			}
 		}
 
-		if (canceled == true) {
+		if (canceled) {
 			canceled = false;
 			throw new OntopQueryEvaluationException("Query execution was cancelled");
 		}
@@ -369,7 +379,7 @@ public abstract class QuestStatement implements OntopStatement {
 	}
 
 	@Override
-	public String getRewriting(String query) {
+	public String getRewriting(String query) throws OntopReformulationException, OntopInvalidInputQueryException {
 		ParsedQuery pq = engine.getParsedQuery(query);
 		return engine.getRewriting(pq);
 	}
@@ -377,7 +387,7 @@ public abstract class QuestStatement implements OntopStatement {
 
 	@Override
 	public ExecutableQuery getExecutableQuery(String sparqlQuery)
-			throws OntopReformulationException {
+			throws OntopReformulationException, OntopInvalidInputQueryException {
 		try {
 			ParsedQuery sparqlTree = engine.getParsedQuery(sparqlQuery);
 			// TODO: handle the construction template correctly

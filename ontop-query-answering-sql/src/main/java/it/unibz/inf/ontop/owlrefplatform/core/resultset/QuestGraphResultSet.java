@@ -60,7 +60,7 @@ public class QuestGraphResultSet implements GraphResultSet {
 	private AssertionFactory ofac = AssertionFactoryImpl.getInstance();
 
 	public QuestGraphResultSet(TupleResultSet results, SesameConstructTemplate template,
-			boolean storeResult) throws OntopResultConversionException {
+			boolean storeResult) throws OntopResultConversionException, OntopConnectionException {
 		this.tupleResultSet = results;
 		this.sesameTemplate = template;
 		this.storeResults = storeResult;
@@ -68,7 +68,7 @@ public class QuestGraphResultSet implements GraphResultSet {
 	}
 
     private void processResultSet(TupleResultSet resSet, SesameConstructTemplate template)
-			throws OntopResultConversionException {
+            throws OntopResultConversionException, OntopConnectionException {
 		if (storeResults) {
 			//process current result set into local buffer, 
 			//since additional results will be collected
@@ -93,7 +93,8 @@ public class QuestGraphResultSet implements GraphResultSet {
 	 * the only current result set.
 	 */
     private List<Assertion> processResults(TupleResultSet result,
-                                           SesameConstructTemplate template) throws OntopResultConversionException {
+                                           SesameConstructTemplate template)
+            throws OntopResultConversionException, OntopConnectionException {
         List<Assertion> tripleAssertions = new ArrayList<>();
         List<ProjectionElemList> peLists = template.getProjectionElemList();
 
@@ -157,7 +158,7 @@ public class QuestGraphResultSet implements GraphResultSet {
 	}
 
 	@Override
-	public List<Assertion> next() throws OntopConnectionException {
+	public List<Assertion> next() throws OntopConnectionException, OntopResultConversionException {
 		//if we collect results, then remove and return the next one in the list
 		if (results.size() > 0) {
 			return results.remove(0);
@@ -168,7 +169,7 @@ public class QuestGraphResultSet implements GraphResultSet {
 	}
 
     private Constant getConstant(ProjectionElem node, TupleResultSet resSet)
-            throws OntopResultConversionException {
+            throws OntopResultConversionException, OntopConnectionException {
         Constant constant = null;
         String node_name = node.getSourceName();
         ValueExpr ve = null;
