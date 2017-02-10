@@ -48,7 +48,7 @@ public class S_Indexes_Compare extends TestCase {
 	}
 	
 	public void setUp() {
-		input.add("src/test/resources/test/equivalence/test_404.owl");
+		input.add("src/test/resources/completeness/equivalence/test_404.owl");
 	}
 
 	public void testIndexes() throws Exception {
