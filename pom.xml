@@ -71,7 +71,6 @@
 		<module>ontop-system-core</module>
 		<module>ontop-system-sql</module>
 		<module>ontop-system-sql-owlapi</module>
-		<module>reformulation-core</module>
 		<module>obdalib-owlapi3</module>
 		<module>obdalib-r2rml</module>
 		<module>quest-owlapi3</module>
