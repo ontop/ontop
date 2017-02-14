@@ -26,19 +26,33 @@ import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.query.BindingSet;
 import org.eclipse.rdf4j.query.Dataset;
 import org.eclipse.rdf4j.query.Query;
+import org.eclipse.rdf4j.query.QueryLanguage;
 import org.eclipse.rdf4j.query.impl.MapBindingSet;
+import org.eclipse.rdf4j.query.parser.ParsedQuery;
+import org.eclipse.rdf4j.query.parser.QueryParserUtil;
 
+/**
+ * TODO: get rid of the query string and keeps the bindings separated from the ParsedQuery
+ */
 public abstract class AbstractOntopQuery implements Query {
 
-    protected final String queryString;
+    /**
+     * TODO: remove the query string (when having a proper support of bindings)
+     */
+    private final String queryString;
+    private final ParsedQuery initialParsedQuery;
+    private final String baseIRI;
     protected final OntopConnection conn;
     protected int queryTimeout;
     protected MapBindingSet bindings = new MapBindingSet();
 
-    protected AbstractOntopQuery(String queryString, OntopConnection conn) {
+    protected AbstractOntopQuery(String queryString, String baseIRI,
+                                 ParsedQuery initialParsedQuery, OntopConnection conn) {
         this.queryString = queryString;
+        this.baseIRI = baseIRI;
         this.conn = conn;
         this.queryTimeout = 0;
+        this.initialParsedQuery = initialParsedQuery;
     }
 
     @Override
@@ -113,6 +127,16 @@ public abstract class AbstractOntopQuery implements Query {
         }
         return select + where;
     }
+
+    protected ParsedQuery getParsedQuery() {
+        // NB: no binding at construction time
+        if (bindings.size() == 0)
+            return initialParsedQuery;
+        else {
+            return QueryParserUtil.parseQuery(QueryLanguage.SPARQL, getQueryString(), baseIRI);
+        }
+    }
+
 
     private String getReplacement(Value value) {
         StringBuilder sb = new StringBuilder();

@@ -20,21 +20,13 @@ package it.unibz.inf.ontop.owlrefplatform.core;
  * #L%
  */
 
+import it.unibz.inf.ontop.answering.input.*;
 import it.unibz.inf.ontop.exception.*;
 import it.unibz.inf.ontop.model.*;
-import it.unibz.inf.ontop.owlrefplatform.core.queryevaluation.SPARQLQueryUtility;
-import it.unibz.inf.ontop.owlrefplatform.core.resultset.EmptyTupleResultSet;
-import it.unibz.inf.ontop.owlrefplatform.core.resultset.QuestTupleResultSet;
-import it.unibz.inf.ontop.owlrefplatform.core.translator.SesameConstructTemplate;
 import it.unibz.inf.ontop.answering.reformulation.OntopQueryReformulator;
-import org.eclipse.rdf4j.query.MalformedQueryException;
-import org.eclipse.rdf4j.query.parser.ParsedQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 
 
@@ -58,33 +50,36 @@ public abstract class QuestStatement implements OntopStatement {
 		this.engine = queryProcessor;
 	}
 
-	private enum QueryType {
-		SELECT,
-		ASK,  
-		CONSTRUCT,
-		DESCRIBE
+	/**
+	 * TODO: explain
+	 */
+	@FunctionalInterface
+	private interface Evaluator<R extends OBDAResultSet, Q extends InputQuery<R>> {
+
+		R evaluate(Q inputQuery, ExecutableQuery executableQuery)
+				throws OntopQueryEvaluationException, OntopResultConversionException, OntopConnectionException;
 	}
 
-	private class QueryExecutionThread extends Thread {
+	/**
+	 * Execution thread
+	 */
+	private class QueryExecutionThread<R extends OBDAResultSet, Q extends InputQuery<R>> extends Thread {
 
+		private final Q inputQuery;
+		private final QuestStatement.Evaluator<R, Q> evaluator;
 		private final CountDownLatch monitor;
-		private final QueryType queryType;
-		private final Optional<SesameConstructTemplate> templ; // only for CONSTRUCT and DESCRIBE queries
 		private final ExecutableQuery executableQuery;
-		private final boolean doDistinctPostProcessing;
 
-		private OBDAResultSet resultSet;	  // only for SELECT and ASK queries
+		private R resultSet;	  // only for SELECT and ASK queries
 		private Exception exception;
 		private boolean executingTargetQuery;
 
-		public QueryExecutionThread(ExecutableQuery executableQuery, QueryType queryType,
-									Optional<SesameConstructTemplate> templ, CountDownLatch monitor,
-									boolean doDistinctPostProcessing) {
+		QueryExecutionThread(Q inputQuery, ExecutableQuery executableQuery, Evaluator<R,Q> evaluator,
+							 CountDownLatch monitor) {
 			this.executableQuery = executableQuery;
+			this.inputQuery = inputQuery;
+			this.evaluator = evaluator;
 			this.monitor = monitor;
-			this.templ = templ;
-			this.queryType = queryType;
-			this.doDistinctPostProcessing = doDistinctPostProcessing;
 			this.exception = null;
 			this.executingTargetQuery = false;
 		}
@@ -97,7 +92,7 @@ public abstract class QuestStatement implements OntopStatement {
 			return exception;
 		}
 
-		public OBDAResultSet getResultSet() {
+		public R getResultSet() {
 			return resultSet;
 		}
 
@@ -124,20 +119,7 @@ public abstract class QuestStatement implements OntopStatement {
 				 */
 				log.debug("Executing the query and get the result...");
 				executingTargetQuery = true;
-				switch (queryType) {
-					case ASK:
-						resultSet = executeBooleanQuery(executableQuery);
-						break;
-					case SELECT:
-						resultSet = executeSelectQuery(executableQuery, doDistinctPostProcessing);
-						break;
-					case CONSTRUCT:
-						resultSet = executeConstructQuery(executableQuery);
-						break;
-					case DESCRIBE:
-						resultSet = executeDescribeQuery(executableQuery);
-						break;
-					}
+				resultSet = evaluator.evaluate(inputQuery, executableQuery);
 				log.debug("Execution finished.\n");
 				/*
 				 * TODO: re-handle the timeout exception.
@@ -156,34 +138,36 @@ public abstract class QuestStatement implements OntopStatement {
 	/**
 	 * TODO: describe
 	 */
-	protected abstract TupleResultSet executeSelectQuery(ExecutableQuery executableQuery, boolean doDistinctPostProcessing)
+	protected abstract TupleResultSet executeSelectQuery(SelectQuery inputQuery, ExecutableQuery executableQuery)
 			throws OntopQueryEvaluationException;
 
 	/**
 	 * TODO: describe
 	 */
-	protected abstract TupleResultSet executeBooleanQuery(ExecutableQuery executableQuery) throws OntopQueryEvaluationException;
+	protected abstract BooleanResultSet executeBooleanQuery(AskQuery inputQuery, ExecutableQuery executableQuery)
+			throws OntopQueryEvaluationException;
 
 	/**
 	 * TODO: describe
 	 */
-	protected GraphResultSet executeDescribeQuery(ExecutableQuery executableQuery)
+	private GraphResultSet executeDescribeConstructQuery(ConstructQuery constructQuery, ExecutableQuery executableQuery)
 			throws OntopQueryEvaluationException, OntopResultConversionException, OntopConnectionException {
-		return executeGraphQuery(executableQuery, true);
+		return executeGraphQuery(constructQuery, executableQuery, true);
 	}
 
 	/**
 	 * TODO: describe
 	 */
-	protected GraphResultSet executeConstructQuery(ExecutableQuery executableQuery)
+	private GraphResultSet executeConstructQuery(ConstructQuery constructQuery, ExecutableQuery executableQuery)
 			throws OntopQueryEvaluationException, OntopResultConversionException, OntopConnectionException {
-		return executeGraphQuery(executableQuery, false);
+		return executeGraphQuery(constructQuery, executableQuery, false);
 	}
 
 	/**
-	 * TODO: describe
+	 * TODO: refactor
 	 */
-	protected abstract GraphResultSet executeGraphQuery(ExecutableQuery executableQuery, boolean collectResults)
+	protected abstract GraphResultSet executeGraphQuery(ConstructQuery query, ExecutableQuery executableQuery,
+														boolean collectResults)
 			throws OntopQueryEvaluationException, OntopResultConversionException, OntopConnectionException;
 
 	/**
@@ -196,143 +180,99 @@ public abstract class QuestStatement implements OntopStatement {
 	 * uri or var logic Returns the result set for the given query
 	 */
 	@Override
-	public OBDAResultSet execute(String strquery) throws OntopConnectionException, OntopInvalidInputQueryException,
+	public <R extends OBDAResultSet> R execute(InputQuery<R> inputQuery) throws OntopConnectionException,
 			OntopReformulationException, OntopQueryEvaluationException, OntopResultConversionException {
-		if (strquery.isEmpty()) {
-			throw new OntopInvalidInputQueryException("Cannot process an empty query");
+		if (inputQuery instanceof SelectQuery) {
+			return (R) executeInThread((SelectQuery) inputQuery, this::executeSelectQuery);
 		}
-		try {
-			ParsedQuery pq = engine.getParsedQuery(strquery);
-			if (SPARQLQueryUtility.isSelectQuery(pq)) {
-				return executeTupleQuery(strquery, pq, QueryType.SELECT);
-			} 
-			else if (SPARQLQueryUtility.isAskQuery(pq)) {
-				return executeTupleQuery(strquery, pq, QueryType.ASK);
-			} 
-			else if (SPARQLQueryUtility.isConstructQuery(pq)) {
-				return executeGraphQuery(strquery, QueryType.CONSTRUCT);
-			} 
-			else if (SPARQLQueryUtility.isDescribeQuery(pq)) {
-				// create list of URI constants we want to describe
-				List<String> constants = new ArrayList<>();
-				if (SPARQLQueryUtility.isVarDescribe(strquery)) {
-					// if describe ?var, we have to do select distinct ?var first
-					String sel = SPARQLQueryUtility.getSelectVarDescribe(strquery);
-					OBDAResultSet resultSet = executeTupleQuery(sel, engine.getParsedQuery(sel), QueryType.SELECT);
-					if (resultSet instanceof EmptyTupleResultSet)
-						return null;
-					else if (resultSet instanceof QuestTupleResultSet) {
-						QuestTupleResultSet res = (QuestTupleResultSet) resultSet;
-						while (res.nextRow()) {
-							Constant constant = res.getConstant(1);
-							if (constant instanceof URIConstant) {
-								// collect constants in list
-								constants.add(((URIConstant)constant).getURI());
-							}
-						}
-					}
-				} 
-				else if (SPARQLQueryUtility.isURIDescribe(strquery)) {
-					// DESCRIBE <uri> gives direct results, so we put the
-					// <uri> constant directly in the list of constants
-					try {
-						constants.add(SPARQLQueryUtility.getDescribeURI(strquery));
-					} catch (MalformedQueryException e) {
-						e.printStackTrace();
-					}
-				}
+		else if (inputQuery instanceof AskQuery) {
+			return (R) executeInThread((AskQuery) inputQuery, this::executeBooleanQuery);
+		}
+		else if (inputQuery instanceof ConstructQuery) {
+			return (R) executeInThread((ConstructQuery) inputQuery, this::executeConstructQuery);
+		}
+		else if (inputQuery instanceof DescribeQuery) {
+			throw new RuntimeException("TODO: fix Describe queries");
 
-				GraphResultSet describeResultSet = null;
-				// execute describe <uriconst> in subject position
-				for (String constant : constants) {
-					// for each constant we execute a construct with
-					// the uri as subject, and collect the results
-					String str = SPARQLQueryUtility.getConstructSubjQuery(constant);
-					GraphResultSet set = (GraphResultSet) executeGraphQuery(str, QueryType.DESCRIBE);
-					if (describeResultSet == null) { // just for the first time
-						describeResultSet = set;	
-					} 
-					else if (set != null) {
-						// 2nd and manyth times execute, but collect result into one object
-						while (set.hasNext()) 
-							describeResultSet.addNewResultSet(set.next());
-					}
-				}
-				// execute describe <uriconst> in object position
-				for (String constant : constants) {
-					String str = SPARQLQueryUtility.getConstructObjQuery(constant);
-					GraphResultSet set = (GraphResultSet) executeGraphQuery(str, QueryType.DESCRIBE);
-					if (describeResultSet == null) { // just for the first time
-						describeResultSet = set;
-					} 
-					else if (set != null) {
-						while (set.hasNext()) 
-							describeResultSet.addNewResultSet(set.next());
-					}
-				}
-				return describeResultSet;
-			}
-			else {
-				throw new OntopInvalidInputQueryException("Unsupported query type: " + strquery);
-			}
+//			// create list of URI constants we want to describe
+//			List<String> constants = new ArrayList<>();
+//			if (SPARQLQueryUtility.isVarDescribe(inputQueryString)) {
+//				// if describe ?var, we have to do select distinct ?var first
+//				String sel = SPARQLQueryUtility.getSelectVarDescribe(inputQueryString);
+//				OBDAResultSet resultSet = executeTupleQuery(sel, engine.parseQuery(sel), QueryType.SELECT);
+//				if (resultSet instanceof EmptyTupleResultSet)
+//					return null;
+//				else if (resultSet instanceof QuestTupleResultSet) {
+//					QuestTupleResultSet res = (QuestTupleResultSet) resultSet;
+//					while (res.nextRow()) {
+//						Constant constant = res.getConstant(1);
+//						if (constant instanceof URIConstant) {
+//							// collect constants in list
+//							constants.add(((URIConstant)constant).getURI());
+//						}
+//					}
+//				}
+//			}
+//			else if (SPARQLQueryUtility.isURIDescribe(inputQueryString)) {
+//				// DESCRIBE <uri> gives direct results, so we put the
+//				// <uri> constant directly in the list of constants
+//				try {
+//					constants.add(SPARQLQueryUtility.getDescribeURI(inputQueryString));
+//				} catch (MalformedQueryException e) {
+//					e.printStackTrace();
+//				}
+//			}
+//
+//			GraphResultSet describeResultSet = null;
+//			// execute describe <uriconst> in subject position
+//			for (String constant : constants) {
+//				// for each constant we execute a construct with
+//				// the uri as subject, and collect the results
+//				String str = SPARQLQueryUtility.getConstructSubjQuery(constant);
+//				GraphResultSet set = (GraphResultSet) executeGraphQuery(str, QueryType.DESCRIBE);
+//				if (describeResultSet == null) { // just for the first time
+//					describeResultSet = set;
+//				}
+//				else if (set != null) {
+//					// 2nd and manyth times execute, but collect result into one object
+//					while (set.hasNext())
+//						describeResultSet.addNewResultSet(set.next());
+//				}
+//			}
+//			// execute describe <uriconst> in object position
+//			for (String constant : constants) {
+//				String str = SPARQLQueryUtility.getConstructObjQuery(constant);
+//				GraphResultSet set = (GraphResultSet) executeGraphQuery(str, QueryType.DESCRIBE);
+//				if (describeResultSet == null) { // just for the first time
+//					describeResultSet = set;
+//				}
+//				else if (set != null) {
+//					while (set.hasNext())
+//						describeResultSet.addNewResultSet(set.next());
+//				}
+//			}
+//			return describeResultSet;
 		}
-		catch (MalformedQueryException e) {
-			throw new OntopInvalidInputQueryException(e.getMessage());
-			
+		else {
+			throw new OntopUnsupportedInputQueryException("Unsupported query type: " + inputQuery);
 		}
 	}
-	
-
-
-
-	/**
-	 * The method executes select or ask queries by starting a new quest
-	 * execution thread
-	 * 
-	 * @param strquery
-	 *            the select or ask query string
-	 * @param type  (SELECT or ASK)
-	 * @return the obtained TupleResultSet result
-	 */
-	private OBDAResultSet executeTupleQuery(String strquery, ParsedQuery pq, QueryType type)
-			throws OntopReformulationException, OntopQueryEvaluationException {
-
-		log.debug("Executing SPARQL query: \n{}", strquery);
-
-		return executeInThread(pq, type, Optional.empty());
-	}
-
-	private OBDAResultSet executeGraphQuery(String strquery, QueryType type)
-			throws OntopReformulationException, OntopQueryEvaluationException, OntopInvalidInputQueryException {
-		
-		log.debug("Executing SPARQL query: \n{}", strquery);
-		
-		try {
-			// Here we need to get the template for the CONSTRUCT query results
-			SesameConstructTemplate templ = new SesameConstructTemplate(strquery);
-			String query = SPARQLQueryUtility.getSelectFromConstruct(strquery);
-			ParsedQuery pq = engine.getParsedQuery(query);
-			
-			return executeInThread(pq, type, Optional.of(templ));
-		} 
-		catch (MalformedQueryException e) {
-			e.printStackTrace();
-			throw new OntopInvalidInputQueryException(e.getMessage());
-		}
-	}
-	
-	
 
 	/**
 	 * Internal method to start a new query execution thread type defines the
 	 * query type SELECT, ASK, CONSTRUCT, or DESCRIBE
 	 */
-	private OBDAResultSet executeInThread(ParsedQuery pq, QueryType type, Optional<SesameConstructTemplate> templ)
+	private <R extends OBDAResultSet, Q extends InputQuery<R>> R executeInThread(Q inputQuery, Evaluator<R, Q> evaluator)
 			throws OntopReformulationException, OntopQueryEvaluationException {
+
+		log.debug("Executing SPARQL query: \n{}", inputQuery);
+
 		CountDownLatch monitor = new CountDownLatch(1);
-		ExecutableQuery executableQuery = engine.translateIntoNativeQuery(pq, templ);
-		QueryExecutionThread executionthread = new QueryExecutionThread(executableQuery, type, templ, monitor,
-				engine.hasDistinctResultSet());
+		ExecutableQuery executableQuery = engine.translateIntoNativeQuery(inputQuery);
+
+		QueryExecutionThread<R, Q> executionthread = new QueryExecutionThread<>(inputQuery, executableQuery, evaluator,
+				monitor);
+
 		this.executionThread = executionthread;
 		executionthread.start();
 		try {
@@ -379,22 +319,18 @@ public abstract class QuestStatement implements OntopStatement {
 	}
 
 	@Override
-	public String getRewriting(String query) throws OntopReformulationException, OntopInvalidInputQueryException {
-		ParsedQuery pq = engine.getParsedQuery(query);
-		return engine.getRewriting(pq);
+	public String getRewritingRendering(InputQuery query) throws OntopReformulationException, OntopInvalidInputQueryException {
+		return engine.getRewritingRendering(query);
 	}
 
 
 	@Override
-	public ExecutableQuery getExecutableQuery(String sparqlQuery)
-			throws OntopReformulationException, OntopInvalidInputQueryException {
-		try {
-			ParsedQuery sparqlTree = engine.getParsedQuery(sparqlQuery);
-			// TODO: handle the construction template correctly
-			return engine.translateIntoNativeQuery(sparqlTree, Optional.empty());
-		} catch (MalformedQueryException e) {
-			throw new OntopInvalidInputQueryException(e);
-		}
+	public ExecutableQuery getExecutableQuery(InputQuery inputQuery) throws OntopReformulationException {
+			return engine.translateIntoNativeQuery(inputQuery);
+	}
+
+	protected boolean hasDistinctResultSet() {
+		return engine.hasDistinctResultSet();
 	}
 
 }

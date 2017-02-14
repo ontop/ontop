@@ -21,11 +21,9 @@ package it.unibz.inf.ontop.owlrefplatform.core.srcquerygeneration;
  */
 
 import java.io.Serializable;
-import java.util.Optional;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.exception.OntopReformulationException;
-import it.unibz.inf.ontop.owlrefplatform.core.translator.SesameConstructTemplate;
 import it.unibz.inf.ontop.owlrefplatform.core.ExecutableQuery;
 import it.unibz.inf.ontop.pivotalrepr.IntermediateQuery;
 
@@ -40,17 +38,14 @@ public interface NativeQueryGenerator extends Serializable {
 	 * be evaluated by a evaluation engine.
 	 *
 	 */
-	ExecutableQuery generateSourceQuery(IntermediateQuery query, ImmutableList<String> signature,
-										Optional<SesameConstructTemplate> optionalConstructTemplate)
+	ExecutableQuery generateSourceQuery(IntermediateQuery query, ImmutableList<String> signature)
 			throws OntopReformulationException;
 
-	boolean hasDistinctResultSet() ;
     /**
      * If the generator is immutable, the generator
      * can return itself instead of a clone.
      */
     NativeQueryGenerator cloneIfNecessary();
 
-	ExecutableQuery generateEmptyQuery(ImmutableList<String> signatureContainer,
-									   Optional<SesameConstructTemplate> optionalConstructTemplate);
+	ExecutableQuery generateEmptyQuery(ImmutableList<String> signature);
 }

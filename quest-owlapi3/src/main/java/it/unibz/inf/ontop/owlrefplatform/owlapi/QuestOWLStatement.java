@@ -187,9 +187,9 @@ public class QuestOWLStatement implements OntopOWLStatement {
 		}
 	}
 
-	public String getRewriting(String query) throws OWLException {
+	public String getRewritingRendering(String query) throws OWLException {
 		try {
-			return st.getRewriting(query);
+			return st.getRewritingRendering(query);
 		} 
 		catch (Exception e) {
 			throw new OntopOWLException(e);

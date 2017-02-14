@@ -253,7 +253,7 @@ public class NPDUndolferTest extends TestCase {
              OntopOWLConnection qconn = quest.getConnection();
              OntopOWLStatement st = qconn.createStatement()) {
 
-            rewriting = st.getRewriting(query);
+            rewriting = st.getRewritingRendering(query);
         }
         return rewriting;
     }

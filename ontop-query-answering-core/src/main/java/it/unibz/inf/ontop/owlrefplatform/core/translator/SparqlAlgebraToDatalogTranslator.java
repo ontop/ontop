@@ -21,6 +21,8 @@ package it.unibz.inf.ontop.owlrefplatform.core.translator;
  */
 
 import com.google.common.collect.*;
+import it.unibz.inf.ontop.answering.input.translation.RDF4JInputQueryTranslator;
+import it.unibz.inf.ontop.exception.OntopUnsupportedInputQueryException;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.Predicate.COL_TYPE;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
@@ -58,7 +60,7 @@ import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
  * 
  * @author Roman Kontchakov
  */
-public class SparqlAlgebraToDatalogTranslator {
+public class SparqlAlgebraToDatalogTranslator implements RDF4JInputQueryTranslator {
 
 
     private static final Logger log = LoggerFactory.getLogger(SparqlAlgebraToDatalogTranslator.class);
@@ -91,8 +93,10 @@ public class SparqlAlgebraToDatalogTranslator {
 	 *
 	 * @pq     SPARQL query object
 	 * @return our representation of the SPARQL query (as a datalog program)
+     *
+     * TODO: return an IntermediateQuery instead!
 	 */
-	public SparqlQuery translate(ParsedQuery pq) {
+	public InternalSparqlQuery translate(ParsedQuery pq) throws OntopUnsupportedInputQueryException {
 
         if (predicateIdx != 0 || !program.getRules().isEmpty())
             throw new RuntimeException("SparqlAlgebraToDatalogTranslator.translate can only be called once.");
@@ -120,7 +124,7 @@ public class SparqlAlgebraToDatalogTranslator {
         List<String> signature = Lists.transform(answerVariables, t -> ((Variable)t).getName());
 
         //System.out.println("PROGRAM\n" + program.program);
-		return new SparqlQuery(program, signature);
+		return new InternalSparqlQuery(program, signature);
 	}
 
     private static class TranslationResult {

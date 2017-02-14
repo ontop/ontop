@@ -20,39 +20,45 @@ package it.unibz.inf.ontop.rdf4j.query;
  * #L%
  */
 
+import it.unibz.inf.ontop.answering.input.RDF4JInputQueryFactory;
+import it.unibz.inf.ontop.answering.input.SelectQuery;
 import it.unibz.inf.ontop.exception.OntopQueryAnsweringException;
 import it.unibz.inf.ontop.model.TupleResultSet;
 
 import it.unibz.inf.ontop.owlrefplatform.core.OntopConnection;
 import it.unibz.inf.ontop.owlrefplatform.core.OntopStatement;
-import org.eclipse.rdf4j.query.MalformedQueryException;
 import org.eclipse.rdf4j.query.QueryEvaluationException;
 import org.eclipse.rdf4j.query.TupleQuery;
 import org.eclipse.rdf4j.query.TupleQueryResult;
 import org.eclipse.rdf4j.query.TupleQueryResultHandler;
 import org.eclipse.rdf4j.query.TupleQueryResultHandlerException;
+import org.eclipse.rdf4j.query.parser.ParsedQuery;
 
 import java.util.List;
 
 
 public class OntopTupleQuery extends AbstractOntopQuery implements TupleQuery {
 
-	public OntopTupleQuery(String queryString, String baseURI, OntopConnection conn)
-			throws MalformedQueryException {
-        super(queryString, conn);
+	private final RDF4JInputQueryFactory factory;
+
+	public OntopTupleQuery(String queryString, ParsedQuery parsedQuery, String baseIRI, OntopConnection conn,
+						   RDF4JInputQueryFactory factory) {
+		super(queryString, baseIRI, parsedQuery, conn);
+		this.factory = factory;
 	}
-	
-	@Override
+
+    @Override
 	public TupleQueryResult evaluate() throws QueryEvaluationException {
-		TupleResultSet res = null;
-		OntopStatement stm = null;
+		TupleResultSet res;
+		OntopStatement stm;
 		long start = System.currentTimeMillis();
 		try {
 			stm = conn.createStatement();
 			if(this.queryTimeout > 0)
 				stm.setQueryTimeout(this.queryTimeout);
 			try {
-				res = (TupleResultSet) stm.execute(getQueryString());
+				SelectQuery inputQuery = factory.createSelectQuery(getParsedQuery());
+				res = stm.execute(inputQuery);
 			} catch (OntopQueryAnsweringException e) {
 				long end = System.currentTimeMillis();
 				if (this.queryTimeout > 0 && (end - start) >= this.queryTimeout * 1000){

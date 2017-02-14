@@ -40,7 +40,7 @@ public interface OntopOWLStatement extends AutoCloseable {
 
 	long getTupleCount(String query) throws OWLException;
 
-	String getRewriting(String query) throws OWLException;
+	String getRewritingRendering(String query) throws OWLException;
 
 	ExecutableQuery getExecutableQuery(String query) throws OWLException;
 

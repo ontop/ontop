@@ -20,6 +20,7 @@ package it.unibz.inf.ontop.model;
  * #L%
  */
 
+import it.unibz.inf.ontop.answering.input.InputQuery;
 import it.unibz.inf.ontop.exception.*;
 
 public interface OBDAStatement extends AutoCloseable {
@@ -29,7 +30,15 @@ public interface OBDAStatement extends AutoCloseable {
 	@Override
     void close() throws OntopConnectionException;
 
-	OBDAResultSet execute(String query) throws OntopQueryAnsweringException, OntopConnectionException;
+//	InputQuery parseInputQuery(String inputQueryString) throws OntopInvalidInputQueryException;
+
+	<R extends OBDAResultSet> R execute(InputQuery<R> inputQuery) throws OntopReformulationException, OntopQueryEvaluationException,
+	OntopConnectionException, OntopResultConversionException;
+//
+//	default OBDAResultSet execute(String inputQueryString) throws OntopReformulationException, OntopQueryEvaluationException,
+//			OntopInvalidInputQueryException, OntopConnectionException, OntopResultConversionException {
+//		return execute(parseInputQuery(inputQueryString));
+//	}
 
 	int getFetchSize() throws OntopConnectionException;
 

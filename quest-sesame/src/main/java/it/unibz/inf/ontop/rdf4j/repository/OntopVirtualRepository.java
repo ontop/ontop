@@ -21,6 +21,7 @@ package it.unibz.inf.ontop.rdf4j.repository;
  */
 
 import it.unibz.inf.ontop.answering.OntopQueryEngine;
+import it.unibz.inf.ontop.answering.input.RDF4JInputQueryFactory;
 import it.unibz.inf.ontop.injection.OntopEngineFactory;
 import it.unibz.inf.ontop.injection.OntopSystemConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.core.OntopConnection;
@@ -49,10 +50,12 @@ public class OntopVirtualRepository implements org.eclipse.rdf4j.repository.Repo
 	private OntopSystemConfiguration configuration;
 	@Nullable
 	private OntopQueryEngine queryEngine;
+	private final RDF4JInputQueryFactory inputQueryFactory;
 
 	public OntopVirtualRepository(OntopSystemConfiguration configuration) {
 		this.namespaces = new HashMap<>();
 		this.configuration = configuration;
+		inputQueryFactory = configuration.getInjector().getInstance(RDF4JInputQueryFactory.class);
 	}
 
 	/**
@@ -64,7 +67,7 @@ public class OntopVirtualRepository implements org.eclipse.rdf4j.repository.Repo
 	 */
 	public RepositoryConnection getConnection() throws RepositoryException {
 		try {
-			return new OntopRepositoryConnection(this, getOntopConnection());
+			return new OntopRepositoryConnection(this, getOntopConnection(), inputQueryFactory);
 		} catch (Exception e) {
 			logger.error("Error creating repo connection: " + e.getMessage());
 			throw new RepositoryException(e);
