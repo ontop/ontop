@@ -1,8 +1,8 @@
 package it.unibz.inf.ontop.owlrefplatform.owlapi;
 
+import it.unibz.inf.ontop.owlapi.OntopOWLException;
 import it.unibz.inf.ontop.owlrefplatform.core.ExecutableQuery;
 import org.semanticweb.owlapi.model.OWLAxiom;
-import org.semanticweb.owlapi.model.OWLException;
 
 import java.util.List;
 
@@ -24,24 +24,28 @@ import java.util.List;
  *
  */
 public interface OntopOWLStatement extends AutoCloseable {
-	void cancel() throws OWLException;
+	void cancel() throws OntopOWLException;
 
-	void close() throws OWLException;
+	void close() throws OntopOWLException;
 
-	QuestOWLResultSet executeTuple(String query) throws OWLException;
+	QuestOWLResultSet executeSelectQuery(String query) throws OntopOWLException;
+	QuestOWLResultSet executeAskQuery(String query) throws OntopOWLException;
+	QuestOWLResultSet executeTuple(String query) throws OntopOWLException;
 
-	List<OWLAxiom> executeGraph(String query) throws OWLException;
+	List<OWLAxiom> executeConstructQuery(String query) throws OntopOWLException;
+	List<OWLAxiom> executeDescribeQuery(String query) throws OntopOWLException;
+	List<OWLAxiom> executeGraph(String query) throws OntopOWLException;
 
-	OntopOWLConnection getConnection() throws OWLException;
+	OntopOWLConnection getConnection() throws OntopOWLException;
 
-	boolean isClosed() throws OWLException;
+	boolean isClosed() throws OntopOWLException;
 
-	void setQueryTimeout(int seconds) throws OWLException;
+	void setQueryTimeout(int seconds) throws OntopOWLException;
 
-	long getTupleCount(String query) throws OWLException;
+	long getTupleCount(String query) throws OntopOWLException;
 
-	String getRewritingRendering(String query) throws OWLException;
+	String getRewritingRendering(String query) throws OntopOWLException;
 
-	ExecutableQuery getExecutableQuery(String query) throws OWLException;
+	ExecutableQuery getExecutableQuery(String query) throws OntopOWLException;
 
 }

@@ -230,7 +230,7 @@ public class QuestOWLEmptyEntitiesChecker {
 			//execute next query
 			try (OntopOWLStatement stm = questConn.createStatement()){
 
-				try (QuestOWLResultSet rs = stm.executeTuple(query)) {
+				try (QuestOWLResultSet rs = stm.executeSelectQuery(query)) {
 
 					if (!rs.nextRow()) {
 

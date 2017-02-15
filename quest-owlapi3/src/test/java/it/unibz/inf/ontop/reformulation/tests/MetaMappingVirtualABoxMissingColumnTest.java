@@ -135,7 +135,7 @@ public class MetaMappingVirtualABoxMissingColumnTest {
              // Now we are ready for querying
              OntopOWLConnection conn = reasoner.getConnection();
              OntopOWLStatement st = conn.createStatement();
-             QuestOWLResultSet rs1 = st.executeTuple(query1);
+             QuestOWLResultSet rs1 = st.executeSelectQuery(query1);
         ) {
             assertTrue(rs1.nextRow());
 			OWLIndividual ind = rs1.getOWLIndividual("x");

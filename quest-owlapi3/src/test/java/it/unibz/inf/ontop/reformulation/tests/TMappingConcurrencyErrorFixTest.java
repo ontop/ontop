@@ -132,7 +132,7 @@ public class TMappingConcurrencyErrorFixTest{
 		OntopOWLStatement st = conn.createStatement();
 		String retval=null;
 		try {
-			QuestOWLResultSet rs = st.executeTuple(query);
+			QuestOWLResultSet rs = st.executeSelectQuery(query);
 			assertTrue(rs.nextRow());
 			OWLIndividual ind1 =	rs.getOWLIndividual("y")	 ;
 			retval = ind1.toString();

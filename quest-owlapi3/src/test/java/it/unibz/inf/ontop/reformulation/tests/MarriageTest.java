@@ -146,7 +146,7 @@ public class MarriageTest {
         int i = 0;
         List<String> returnedValues = new ArrayList<>();
         try {
-            QuestOWLResultSet rs = st.executeTuple(query);
+            QuestOWLResultSet rs = st.executeSelectQuery(query);
             while (rs.nextRow()) {
                 OWLObject ind1 = rs.getOWLObject("x");
                 // log.debug(ind1.toString());

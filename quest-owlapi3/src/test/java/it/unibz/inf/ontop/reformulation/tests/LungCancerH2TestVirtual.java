@@ -178,7 +178,7 @@ public class LungCancerH2TestVirtual extends TestCase {
 	}
 	
 	public void executeQueryAssertResults(String query, OntopOWLStatement st, int expectedRows) throws Exception {
-		QuestOWLResultSet rs = st.executeTuple(query);
+		QuestOWLResultSet rs = st.executeSelectQuery(query);
 		int count = 0;
 		while (rs.nextRow()) {
 			count++;
@@ -193,8 +193,8 @@ public class LungCancerH2TestVirtual extends TestCase {
 		assertEquals(expectedRows, count);
 	}
 	
-	public void executeGraphQueryAssertResults(String query, OntopOWLStatement st, int expectedRows) throws Exception {
-		List<OWLAxiom> rs = st.executeGraph(query);
+	public void executeConstructQueryAssertResults(String query, OntopOWLStatement st, int expectedRows) throws Exception {
+		List<OWLAxiom> rs = st.executeConstructQuery(query);
 		int count = 0;
 		Iterator<OWLAxiom> axit = rs.iterator();
 		while (axit.hasNext()) {

@@ -20,9 +20,9 @@ package it.unibz.inf.ontop.owlrefplatform.owlapi;
  * #L%
  */
 
-import it.unibz.inf.ontop.exception.OntopConnectionException;
-import it.unibz.inf.ontop.exception.OntopInvalidInputQueryException;
-import it.unibz.inf.ontop.exception.OntopReformulationException;
+import it.unibz.inf.ontop.answering.input.*;
+import it.unibz.inf.ontop.exception.*;
+import it.unibz.inf.ontop.model.BooleanResultSet;
 import it.unibz.inf.ontop.model.GraphResultSet;
 import it.unibz.inf.ontop.model.TupleResultSet;
 import it.unibz.inf.ontop.ontology.Assertion;
@@ -33,7 +33,6 @@ import it.unibz.inf.ontop.owlapi.OWLAPIIndividualTranslator;
 import it.unibz.inf.ontop.owlapi.OntopOWLException;
 import it.unibz.inf.ontop.owlrefplatform.core.ExecutableQuery;
 import it.unibz.inf.ontop.owlrefplatform.core.OntopStatement;
-import it.unibz.inf.ontop.owlrefplatform.core.queryevaluation.SPARQLQueryUtility;
 import org.semanticweb.owlapi.model.*;
 
 import java.util.*;
@@ -53,21 +52,19 @@ import java.util.*;
  *
  * Used by the OWLAPI.
  *
- * TODO: rename it (not now) QuestOWLStatementImpl.
- *
  */
-// DISABLED TEMPORARILY FOR MERGING PURPOSES (NOT BREAKING CLIENTS WITH this ugly name IQquestOWLStatement)
-//public class QuestOWLStatement implements IQuestOWLStatement {
 public class QuestOWLStatement implements OntopOWLStatement {
 	private OntopStatement st;
+	private final InputQueryFactory inputQueryFactory;
 	private OntopOWLConnection conn;
 
-	public QuestOWLStatement(OntopStatement st, OntopOWLConnection conn) {
+	public QuestOWLStatement(OntopStatement st, OntopOWLConnection conn, InputQueryFactory inputQueryFactory) {
 		this.conn = conn;
 		this.st = st;
+		this.inputQueryFactory = inputQueryFactory;
 	}
 
-	public void cancel() throws OWLException {
+	public void cancel() throws OntopOWLException {
 		try {
 			st.cancel();
 		} catch (OntopConnectionException e) {
@@ -76,7 +73,7 @@ public class QuestOWLStatement implements OntopOWLStatement {
 	}
 
 	@Override
-	public void close() throws OWLException {
+	public void close() throws OntopOWLException {
 		try {
 			st.close();
 		} catch (OntopConnectionException e) {
@@ -84,38 +81,88 @@ public class QuestOWLStatement implements OntopOWLStatement {
 		}
 	}
 
-	public QuestOWLResultSet executeTuple(String query) throws OWLException {
-		if (SPARQLQueryUtility.isSelectQuery(query) || SPARQLQueryUtility.isAskQuery(query)) {
+	@Override
+	public QuestOWLResultSet executeSelectQuery(String inputQuery) throws OntopOWLException {
 		try {
-			TupleResultSet executedQuery = (TupleResultSet) st.execute(query);
-			QuestOWLResultSet questOWLResultSet = new QuestOWLResultSet(executedQuery, this);
+			SelectQuery query = inputQueryFactory.createSelectQuery(inputQuery);
+			TupleResultSet resultSet = st.execute(query);
 
-	 		
-			return questOWLResultSet;
-		} catch (Exception e) {
+			return new QuestOWLResultSet(resultSet, this);
+
+		} catch (OntopQueryEngineException e) {
 			throw new OntopOWLException(e);
-		}} else {
-			throw new OWLException("Query is not tuple query (SELECT / ASK).");
 		}
 	}
 
-	public List<OWLAxiom> executeGraph(String query) throws OWLException {
-		if (SPARQLQueryUtility.isConstructQuery(query) || SPARQLQueryUtility.isDescribeQuery(query)) {
+	@Override
+	public QuestOWLResultSet executeAskQuery(String inputQuery) throws OntopOWLException {
 		try {
-			GraphResultSet resultSet = (GraphResultSet) st.execute(query);
-			return createOWLIndividualAxioms(resultSet);
-		} catch (Exception e) {
-			throw new OWLOntologyCreationException(e);
-		}} else {
-			throw new OWLException("Query is not graph query (CONSTRUCT / DESCRIBE).");
+			AskQuery query = inputQueryFactory.createAskQuery(inputQuery);
+			BooleanResultSet resultSet = st.execute(query);
+
+			return new QuestOWLResultSet(resultSet, this);
+
+		} catch (OntopQueryEngineException e) {
+			throw new OntopOWLException(e);
 		}
 	}
 
-	public OntopOWLConnection getConnection() throws OWLException {
+	@Override
+	public QuestOWLResultSet executeTuple(String inputQuery) throws OntopOWLException {
+		try {
+			TupleSPARQLQuery<? extends TupleResultSet> query = inputQueryFactory.createTupleQuery(inputQuery);
+			TupleResultSet resultSet = st.execute(query);
+
+			return new QuestOWLResultSet(resultSet, this);
+
+		} catch (OntopQueryEngineException e) {
+			throw new OntopOWLException(e);
+		}
+	}
+
+	@Override
+	public List<OWLAxiom> executeConstructQuery(String inputQuery) throws OntopOWLException {
+		try {
+			ConstructQuery query = inputQueryFactory.createConstructQuery(inputQuery);
+			return executeGraph(query);
+		} catch (OntopQueryEngineException e) {
+			throw new OntopOWLException(e);
+		}
+	}
+
+	@Override
+	public List<OWLAxiom> executeDescribeQuery(String inputQuery) throws OntopOWLException {
+		try {
+			DescribeQuery query = inputQueryFactory.createDescribeQuery(inputQuery);
+			return executeGraph(query);
+		} catch (OntopQueryEngineException e) {
+			throw new OntopOWLException(e);
+		}
+	}
+
+	@Override
+	public List<OWLAxiom> executeGraph(String inputQuery) throws OntopOWLException {
+		try {
+			GraphSPARQLQuery query = inputQueryFactory.createGraphQuery(inputQuery);
+			return executeGraph(query);
+		} catch (OntopQueryEngineException e) {
+			throw new OntopOWLException(e);
+		}
+	}
+
+	private List<OWLAxiom> executeGraph(GraphSPARQLQuery query)
+			throws OntopQueryEvaluationException, OntopConnectionException, OntopReformulationException,
+			OntopResultConversionException {
+
+		GraphResultSet resultSet = st.execute(query);
+		return createOWLIndividualAxioms(resultSet);
+	}
+
+	public OntopOWLConnection getConnection() throws OntopOWLException {
 		return conn;
 	}
 
-	public int getFetchSize() throws OWLException {
+	public int getFetchSize() throws OntopOWLException {
 		try {
 			return st.getFetchSize();
 		} catch (OntopConnectionException e) {
@@ -123,7 +170,7 @@ public class QuestOWLStatement implements OntopOWLStatement {
 		}
 	}
 
-	public int getMaxRows() throws OWLException {
+	public int getMaxRows() throws OntopOWLException {
 		try {
 			return st.getMaxRows();
 		} catch (OntopConnectionException e) {
@@ -131,7 +178,7 @@ public class QuestOWLStatement implements OntopOWLStatement {
 		}
 	}
 
-	public void getMoreResults() throws OWLException {
+	public void getMoreResults() throws OntopOWLException {
 		try {
 			st.getMoreResults();
 		} catch (OntopConnectionException e) {
@@ -139,7 +186,7 @@ public class QuestOWLStatement implements OntopOWLStatement {
 		}
 	}
 
-	public int getQueryTimeout() throws OWLException {
+	public int getQueryTimeout() throws OntopOWLException {
 		try {
 			return st.getQueryTimeout();
 		} catch (OntopConnectionException e) {
@@ -147,7 +194,7 @@ public class QuestOWLStatement implements OntopOWLStatement {
 		}
 	}
 
-	public void setFetchSize(int rows) throws OWLException {
+	public void setFetchSize(int rows) throws OntopOWLException {
 		try {
 			st.setFetchSize(rows);
 		} catch (OntopConnectionException e) {
@@ -155,7 +202,7 @@ public class QuestOWLStatement implements OntopOWLStatement {
 		}
 	}
 
-	public void setMaxRows(int max) throws OWLException {
+	public void setMaxRows(int max) throws OntopOWLException {
 		try {
 			st.setMaxRows(max);
 		} catch (OntopConnectionException e) {
@@ -163,7 +210,7 @@ public class QuestOWLStatement implements OntopOWLStatement {
 		}
 	}
 
-	public boolean isClosed() throws OWLException {
+	public boolean isClosed() throws OntopOWLException {
 		try {
 			return st.isClosed();
 		} catch (OntopConnectionException e) {
@@ -171,7 +218,7 @@ public class QuestOWLStatement implements OntopOWLStatement {
 		}
 	}
 
-	public void setQueryTimeout(int seconds) throws OWLException {
+	public void setQueryTimeout(int seconds) throws OntopOWLException {
 		try {
 			st.setQueryTimeout(seconds);
 		} catch (OntopConnectionException e) {
@@ -179,32 +226,33 @@ public class QuestOWLStatement implements OntopOWLStatement {
 		}
 	}
 
-	public long getTupleCount(String query) throws OWLException {
+	public long getTupleCount(String query) throws OntopOWLException {
 		try {
-			return st.getTupleCount(query);
+			return st.getTupleCount(parseQueryString(query));
 		} catch (Exception e) {
 			throw new OntopOWLException(e);
 		}
 	}
 
-	public String getRewritingRendering(String query) throws OWLException {
+	public String getRewritingRendering(String query) throws OntopOWLException {
 		try {
-			return st.getRewritingRendering(query);
+			return st.getRewritingRendering(parseQueryString(query));
 		} 
 		catch (Exception e) {
 			throw new OntopOWLException(e);
 		}
 	}
 
-	public ExecutableQuery getExecutableQuery(String query) throws OWLException {
+	public ExecutableQuery getExecutableQuery(String query) throws OntopOWLException {
 		try {
-			return st.getExecutableQuery(query);
-		} catch (OntopReformulationException | OntopInvalidInputQueryException e) {
-			throw new OWLException(e);
+			return st.getExecutableQuery(parseQueryString(query));
+		} catch (OntopReformulationException e) {
+			throw new OntopOWLException(e);
 		}
 	}
 
-	private List<OWLAxiom> createOWLIndividualAxioms(GraphResultSet resultSet) throws Exception {
+	private List<OWLAxiom> createOWLIndividualAxioms(GraphResultSet resultSet)
+			throws OntopConnectionException, OntopResultConversionException {
 		
 		OWLAPIIndividualTranslator translator = new OWLAPIIndividualTranslator();
 		
@@ -229,4 +277,16 @@ public class QuestOWLStatement implements OntopOWLStatement {
 		}
 		return axiomList;
 	}
+
+	/**
+	 * In contexts where we don't know the precise type
+	 */
+	private InputQuery parseQueryString(String queryString) throws OntopOWLException {
+		try {
+			return inputQueryFactory.createSPARQLQuery(queryString);
+		} catch (OntopInvalidInputQueryException | OntopUnsupportedInputQueryException e) {
+			throw new OntopOWLException(e);
+		}
+	}
+
 }
