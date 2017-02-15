@@ -135,7 +135,7 @@ public class MetaMappingVirtualABoxTest {
              // Now we are ready for querying
              OntopOWLConnection conn = reasoner.getConnection();
              OntopOWLStatement st = conn.createStatement();
-             QuestOWLResultSet rs1 = st.executeTuple(query1);
+             QuestOWLResultSet rs1 = st.executeSelectQuery(query1);
         ) {
             assertTrue(rs1.nextRow());
 			OWLObject ind = rs1.getOWLObject("x");
@@ -152,7 +152,7 @@ public class MetaMappingVirtualABoxTest {
              // Now we are ready for querying
              OntopOWLConnection conn = reasoner.getConnection();
              OntopOWLStatement st = conn.createStatement();
-             QuestOWLResultSet rs2 = st.executeTuple(query2);
+             QuestOWLResultSet rs2 = st.executeSelectQuery(query2);
         ) {
             assertTrue(rs2.nextRow());
 			OWLObject ind1 = rs2.getOWLObject("x");

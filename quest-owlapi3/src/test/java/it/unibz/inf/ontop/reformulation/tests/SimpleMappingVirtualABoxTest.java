@@ -145,7 +145,7 @@ public class SimpleMappingVirtualABoxTest extends TestCase {
 //			long end = System.currentTimeMillis();
 //			long elapsed = end-start;
 //			log.info("Elapsed time: {}", elapsed);
-			QuestOWLResultSet rs = st.executeTuple(query);
+			QuestOWLResultSet rs = st.executeSelectQuery(query);
 			assertTrue(rs.nextRow());
 			OWLObject ind1 = rs.getOWLObject("x");
 			OWLObject ind2 = rs.getOWLObject("y");

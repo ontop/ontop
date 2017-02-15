@@ -1,16 +1,17 @@
 package it.unibz.inf.ontop.owlrefplatform.core;
 
-import org.eclipse.rdf4j.query.parser.ParsedQuery;
+import it.unibz.inf.ontop.answering.input.InputQuery;
 
 /**
  * Cache of queries.
  *
  * Mutable class.
+ *
  */
 public interface QueryCache {
-    ExecutableQuery get(ParsedQuery sparqlTree);
+    ExecutableQuery get(InputQuery inputQuery);
 
-    void put(ParsedQuery sparqlTree, ExecutableQuery executableQuery);
+    void put(InputQuery inputQuery, ExecutableQuery executableQuery);
 
     void clear();
 }

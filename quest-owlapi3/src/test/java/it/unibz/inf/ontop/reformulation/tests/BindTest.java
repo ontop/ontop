@@ -139,7 +139,7 @@ public class BindTest {
 
 
         try {
-            QuestOWLResultSet rs = st.executeTuple(query);
+            QuestOWLResultSet rs = st.executeSelectQuery(query);
             rs.nextRow();
             OWLObject ind1 = rs.getOWLObject("title");
             OWLObject ind2 = rs.getOWLObject("price");
@@ -516,7 +516,7 @@ public class BindTest {
         int i = 0;
         List<String> returnedValues = new ArrayList<>();
         try {
-            QuestOWLResultSet rs = st.executeTuple(query);
+            QuestOWLResultSet rs = st.executeSelectQuery(query);
             while (rs.nextRow()) {
                 OWLObject ind1 = rs.getOWLObject("w");
                 // log.debug(ind1.toString());

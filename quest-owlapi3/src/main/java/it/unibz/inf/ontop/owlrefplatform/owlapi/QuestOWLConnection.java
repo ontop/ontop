@@ -20,6 +20,8 @@ package it.unibz.inf.ontop.owlrefplatform.owlapi;
  * #L%
  */
 
+import it.unibz.inf.ontop.answering.input.InputQueryFactory;
+import it.unibz.inf.ontop.answering.input.RDF4JInputQueryFactory;
 import it.unibz.inf.ontop.exception.OntopConnectionException;
 import it.unibz.inf.ontop.owlrefplatform.core.OntopConnection;
 import org.semanticweb.owlapi.model.OWLException;
@@ -28,15 +30,17 @@ import org.semanticweb.owlapi.model.OWLException;
 public class QuestOWLConnection implements OntopOWLConnection {
 
 	private final OntopConnection conn;
+	private final InputQueryFactory inputQueryFactory;
 
-	public QuestOWLConnection(OntopConnection conn) {
+	public QuestOWLConnection(OntopConnection conn, InputQueryFactory inputQueryFactory) {
 		this.conn = conn;
+		this.inputQueryFactory = inputQueryFactory;
 	}
 
 	@Override
 	public OntopOWLStatement createStatement() throws OWLException {
 		try {
-			return new QuestOWLStatement(conn.createStatement(), this);
+			return new QuestOWLStatement(conn.createStatement(), this, inputQueryFactory);
 		} catch (OntopConnectionException e) {
 			throw new OWLException(e);
 		}

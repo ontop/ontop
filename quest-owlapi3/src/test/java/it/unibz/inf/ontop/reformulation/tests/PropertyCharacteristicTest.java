@@ -99,7 +99,7 @@ public class PropertyCharacteristicTest extends TestCase {
 		final File obdaFile = new File("src/test/resources/property-characteristics/noproperty.obda");
 		
 		setupReasoner(owlFile, obdaFile);
-		QuestOWLResultSet rs = executeQuery("" +
+		QuestOWLResultSet rs = executeSelectQuery("" +
 				"PREFIX : <http://www.semanticweb.org/johardi/ontologies/2013/3/Ontology1365668829973.owl#> \n" +
 				"SELECT ?x ?y \n" +
 				"WHERE { ?x :knows ?y . }"
@@ -113,7 +113,7 @@ public class PropertyCharacteristicTest extends TestCase {
 		final File obdaFile = new File("src/test/resources/property-characteristics/symmetric.obda");
 		
 		setupReasoner(owlFile, obdaFile);
-		QuestOWLResultSet rs = executeQuery("" +
+		QuestOWLResultSet rs = executeSelectQuery("" +
 				"PREFIX : <http://www.semanticweb.org/johardi/ontologies/2013/3/Ontology1365668829973.owl#> \n" +
 				"SELECT ?x ?y \n" +
 				"WHERE { ?x :knows ?y . }"
@@ -134,10 +134,10 @@ public class PropertyCharacteristicTest extends TestCase {
         reasoner = factory.createReasoner(config);
 	}
 	
-	private QuestOWLResultSet executeQuery(String sparql) throws Exception {
+	private QuestOWLResultSet executeSelectQuery(String sparql) throws Exception {
 			conn = reasoner.getConnection();
 			stmt = conn.createStatement();
-			return stmt.executeTuple(sparql);
+			return stmt.executeSelectQuery(sparql);
 	}
 	
 	private int countResult(QuestOWLResultSet rs, boolean stdout) throws OWLException {

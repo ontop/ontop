@@ -2,6 +2,8 @@ package it.unibz.inf.ontop.injection.impl;
 
 
 import com.google.inject.util.Providers;
+import it.unibz.inf.ontop.answering.input.InputQueryFactory;
+import it.unibz.inf.ontop.answering.input.RDF4JInputQueryFactory;
 import it.unibz.inf.ontop.injection.OntopQueryAnsweringConfiguration;
 import it.unibz.inf.ontop.injection.OntopQueryAnsweringSettings;
 import it.unibz.inf.ontop.answering.reformulation.IRIDictionary;
@@ -23,6 +25,8 @@ public class OntopQueryAnsweringModule extends OntopAbstractModule {
     @Override
     protected void configure() {
         bind(OntopQueryAnsweringSettings.class).toInstance(configuration.getSettings());
+        bindFromPreferences(RDF4JInputQueryFactory.class);
+        bindFromPreferences(InputQueryFactory.class);
 
         Optional<IRIDictionary> iriDictionary = configuration.getIRIDictionary();
         if (iriDictionary.isPresent()) {

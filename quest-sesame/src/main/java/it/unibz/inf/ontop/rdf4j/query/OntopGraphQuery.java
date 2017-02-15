@@ -20,6 +20,8 @@ package it.unibz.inf.ontop.rdf4j.query;
  * #L%
  */
 
+import it.unibz.inf.ontop.answering.input.GraphSPARQLQuery;
+import it.unibz.inf.ontop.answering.input.RDF4JInputQueryFactory;
 import it.unibz.inf.ontop.model.GraphResultSet;
 import it.unibz.inf.ontop.ontology.Assertion;
 
@@ -30,29 +32,31 @@ import java.util.Map;
 
 import it.unibz.inf.ontop.owlrefplatform.core.OntopConnection;
 import it.unibz.inf.ontop.owlrefplatform.core.OntopStatement;
+import it.unibz.inf.ontop.owlrefplatform.core.queryevaluation.SPARQLQueryUtility;
 import it.unibz.inf.ontop.rdf4j.RDF4JHelper;
 import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.query.GraphQuery;
 import org.eclipse.rdf4j.query.GraphQueryResult;
-import org.eclipse.rdf4j.query.MalformedQueryException;
 import org.eclipse.rdf4j.query.QueryEvaluationException;
 import org.eclipse.rdf4j.query.algebra.evaluation.iterator.CollectionIteration;
 import org.eclipse.rdf4j.query.impl.GraphQueryResultImpl;
+import org.eclipse.rdf4j.query.parser.ParsedQuery;
 import org.eclipse.rdf4j.rio.RDFHandler;
 import org.eclipse.rdf4j.rio.RDFHandlerException;
 
 
 public class OntopGraphQuery extends AbstractOntopQuery implements GraphQuery {
 
-	private String baseURI;
+	private final RDF4JInputQueryFactory inputQueryFactory;
+	private final boolean isConstruct;
 
-	public OntopGraphQuery(String queryString, String baseURI,
-                           OntopConnection conn) throws MalformedQueryException {
-        super(queryString, conn);
-		if (queryString.toLowerCase().contains("construct") || queryString.toLowerCase().contains("describe")) {
-			this.baseURI = baseURI;
-		} else
-			throw new MalformedQueryException("Graph query expected!");
+	public OntopGraphQuery(String queryString, ParsedQuery parsedQuery, String baseIRI, OntopConnection ontopConnection,
+						   RDF4JInputQueryFactory inputQueryFactory) {
+		super(queryString, baseIRI, parsedQuery, ontopConnection);
+		// TODO: replace by something stronger (based on the parsed query)
+		this.isConstruct = SPARQLQueryUtility.isConstructQuery(queryString);
+
+		this.inputQueryFactory = inputQueryFactory;
 	}
 
 	private Statement createStatement(Assertion assertion) {
@@ -66,9 +70,13 @@ public class OntopGraphQuery extends AbstractOntopQuery implements GraphQuery {
 
     @Override
 	public GraphQueryResult evaluate() throws QueryEvaluationException {
+		ParsedQuery parsedQuery = getParsedQuery();
+		GraphSPARQLQuery query = isConstruct
+				? inputQueryFactory.createConstructQuery(getQueryString(), parsedQuery)
+				: inputQueryFactory.createDescribeQuery(getQueryString(), parsedQuery);
 		try (
 				OntopStatement stm = conn.createStatement();
-				GraphResultSet res = (GraphResultSet) stm.execute(getQueryString())
+				GraphResultSet res = stm.execute(query)
 		){
 			
 			Map<String, String> namespaces = new HashMap<>();

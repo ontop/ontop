@@ -2,12 +2,10 @@ package it.unibz.inf.ontop.owlrefplatform.core;
 
 import java.util.Optional;
 
-import it.unibz.inf.ontop.exception.OntopConnectionException;
-import it.unibz.inf.ontop.exception.OntopQueryAnsweringException;
-import it.unibz.inf.ontop.exception.OntopQueryEvaluationException;
+import it.unibz.inf.ontop.answering.input.*;
+import it.unibz.inf.ontop.exception.*;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.owlrefplatform.core.resultset.*;
-import it.unibz.inf.ontop.owlrefplatform.core.translator.SesameConstructTemplate;
 
 import it.unibz.inf.ontop.answering.reformulation.IRIDictionary;
 import it.unibz.inf.ontop.answering.reformulation.OntopQueryReformulator;
@@ -26,8 +24,8 @@ public class SQLQuestStatement extends QuestStatement {
     private final Optional<IRIDictionary> iriDictionary;
 
     public SQLQuestStatement(OntopQueryReformulator queryProcessor, Statement sqlStatement,
-                             Optional<IRIDictionary> iriDictionary) {
-        super(queryProcessor);
+                             Optional<IRIDictionary> iriDictionary, InputQueryFactory inputQueryFactory) {
+        super(queryProcessor, inputQueryFactory);
         this.sqlStatement = sqlStatement;
         this.dbMetadata = queryProcessor.getDBMetadata();
         this.iriDictionary = iriDictionary;
@@ -114,8 +112,8 @@ public class SQLQuestStatement extends QuestStatement {
      * Returns the number of tuples returned by the query
      */
     @Override
-    public int getTupleCount(String sparqlQuery) throws OntopQueryAnsweringException {
-        SQLExecutableQuery targetQuery = checkAndConvertTargetQuery(getExecutableQuery(sparqlQuery));
+    public int getTupleCount(InputQuery inputQuery) throws OntopReformulationException, OntopQueryEvaluationException {
+        SQLExecutableQuery targetQuery = checkAndConvertTargetQuery(getExecutableQuery(inputQuery));
         String sql = targetQuery.getSQL();
         String newsql = "SELECT count(*) FROM (" + sql + ") t1";
         if (!isCanceled()) {
@@ -156,23 +154,24 @@ public class SQLQuestStatement extends QuestStatement {
     }
 
     @Override
-    protected TupleResultSet executeBooleanQuery(ExecutableQuery executableQuery) throws OntopQueryEvaluationException {
+    protected BooleanResultSet executeBooleanQuery(AskQuery query, ExecutableQuery executableQuery)
+            throws OntopQueryEvaluationException {
         SQLExecutableQuery sqlTargetQuery = checkAndConvertTargetQuery(executableQuery);
         String sqlQuery = sqlTargetQuery.getSQL();
         if (sqlQuery.equals("")) {
-            return new BooleanResultSet(false, this);
+            return new SQLBooleanResultSet(false, this);
         }
 
         try {
             java.sql.ResultSet set = sqlStatement.executeQuery(sqlQuery);
-            return new BooleanResultSet(set, this);
+            return new SQLBooleanResultSet(set, this);
         } catch (SQLException e) {
             throw new OntopQueryEvaluationException(e.getMessage());
         }
     }
 
     @Override
-    protected TupleResultSet executeSelectQuery(ExecutableQuery executableQuery, boolean doDistinctPostProcessing)
+    protected TupleResultSet executeSelectQuery(SelectQuery query, ExecutableQuery executableQuery)
             throws OntopQueryEvaluationException {
         SQLExecutableQuery sqlTargetQuery = checkAndConvertTargetQuery(executableQuery);
         String sqlQuery = sqlTargetQuery.getSQL();
@@ -182,7 +181,7 @@ public class SQLQuestStatement extends QuestStatement {
         }
         try {
             java.sql.ResultSet set = sqlStatement.executeQuery(sqlQuery);
-            return doDistinctPostProcessing
+            return hasDistinctResultSet()
                     ? new QuestDistinctTupleResultSet(set, executableQuery.getSignature(), this, dbMetadata, iriDictionary)
                     : new QuestTupleResultSet(set, executableQuery.getSignature(), this, dbMetadata, iriDictionary);
         } catch (SQLException e) {
@@ -191,16 +190,12 @@ public class SQLQuestStatement extends QuestStatement {
     }
 
     @Override
-    protected GraphResultSet executeGraphQuery(ExecutableQuery executableQuery, boolean collectResults)
-            throws OntopQueryEvaluationException {
+    protected GraphResultSet executeGraphQuery(ConstructQuery inputQuery, ExecutableQuery executableQuery,
+                                               boolean collectResults)
+            throws OntopQueryEvaluationException, OntopResultConversionException, OntopConnectionException {
         SQLExecutableQuery sqlTargetQuery = checkAndConvertTargetQuery(executableQuery);
 
         String sqlQuery = sqlTargetQuery.getSQL();
-        Optional<SesameConstructTemplate> optionalTemplate = sqlTargetQuery.getOptionalConstructTemplate();
-
-        if (!optionalTemplate.isPresent()) {
-            throw new IllegalArgumentException("A CONSTRUCT template is required for executing a graph query");
-        }
 
         TupleResultSet tuples;
 
@@ -216,7 +211,7 @@ public class SQLQuestStatement extends QuestStatement {
                 throw new OntopQueryEvaluationException(e.getMessage());
             }
         }
-        return new QuestGraphResultSet(tuples, optionalTemplate.get(), collectResults);
+        return new QuestGraphResultSet(tuples, inputQuery.getConstructTemplate(), collectResults);
     }
 
     private SQLExecutableQuery checkAndConvertTargetQuery(ExecutableQuery executableQuery) {

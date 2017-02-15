@@ -30,7 +30,7 @@ import java.util.Vector;
 
 import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
 
-public class BooleanResultSet implements TupleResultSet {
+public class SQLBooleanResultSet implements BooleanResultSet {
 
     private ResultSet set = null;
     private boolean isTrue = false;
@@ -39,7 +39,7 @@ public class BooleanResultSet implements TupleResultSet {
 
     private ValueConstant valueConstant;
 
-    public BooleanResultSet(ResultSet set, OBDAStatement st) {
+    public SQLBooleanResultSet(ResultSet set, OBDAStatement st) {
         this.set = set;
         this.st = st;
         try {
@@ -51,7 +51,7 @@ public class BooleanResultSet implements TupleResultSet {
 
     }
 
-    public BooleanResultSet(boolean value, OBDAStatement st) {
+    public SQLBooleanResultSet(boolean value, OBDAStatement st) {
         this.set = null;
         this.st = st;
         isTrue = value;

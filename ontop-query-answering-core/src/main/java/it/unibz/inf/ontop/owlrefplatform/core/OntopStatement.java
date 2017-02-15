@@ -1,7 +1,7 @@
 package it.unibz.inf.ontop.owlrefplatform.core;
 
-import it.unibz.inf.ontop.exception.OntopQueryAnsweringException;
-import it.unibz.inf.ontop.exception.OntopReformulationException;
+import it.unibz.inf.ontop.answering.input.InputQuery;
+import it.unibz.inf.ontop.exception.*;
 import it.unibz.inf.ontop.model.OBDAStatement;
 
 /**
@@ -13,10 +13,9 @@ import it.unibz.inf.ontop.model.OBDAStatement;
  */
 public interface OntopStatement extends OBDAStatement {
 
-    int getTupleCount(String userQuery) throws OntopQueryAnsweringException;
+    int getTupleCount(InputQuery inputQuery) throws OntopReformulationException, OntopQueryEvaluationException, OntopConnectionException;
 
-    String getRewriting(String userQuery);
+    String getRewritingRendering(InputQuery inputQuery) throws OntopReformulationException, OntopInvalidInputQueryException;
 
-    ExecutableQuery getExecutableQuery(String userQuery)
-            throws OntopReformulationException;
+    ExecutableQuery getExecutableQuery(InputQuery inputQuery) throws OntopReformulationException;
 }

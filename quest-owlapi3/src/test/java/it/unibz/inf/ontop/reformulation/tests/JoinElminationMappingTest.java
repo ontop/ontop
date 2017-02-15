@@ -113,7 +113,7 @@ public class JoinElminationMappingTest extends TestCase {
 				"SELECT ?x WHERE {?x :R ?y. ?y a :A}";
 		try {
 			System.out.println("\n\nSQL:\n" + st.getExecutableQuery(query));
-			QuestOWLResultSet rs = st.executeTuple(query);
+			QuestOWLResultSet rs = st.executeSelectQuery(query);
 			rs.nextRow();
 		} catch (Exception e) {
 			log.debug(e.getMessage(), e);

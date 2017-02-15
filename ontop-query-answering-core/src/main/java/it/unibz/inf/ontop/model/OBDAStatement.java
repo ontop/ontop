@@ -20,28 +20,39 @@ package it.unibz.inf.ontop.model;
  * #L%
  */
 
+import it.unibz.inf.ontop.answering.input.InputQuery;
+import it.unibz.inf.ontop.exception.*;
+
 public interface OBDAStatement extends AutoCloseable {
 
-	void cancel();
+	void cancel() throws OntopConnectionException;
 
 	@Override
-    void close();
+    void close() throws OntopConnectionException;
 
-	OBDAResultSet execute(String query);
+//	InputQuery parseInputQuery(String inputQueryString) throws OntopInvalidInputQueryException;
 
-	int getFetchSize();
+	<R extends OBDAResultSet> R execute(InputQuery<R> inputQuery) throws OntopReformulationException, OntopQueryEvaluationException,
+	OntopConnectionException, OntopResultConversionException;
+//
+//	default OBDAResultSet execute(String inputQueryString) throws OntopReformulationException, OntopQueryEvaluationException,
+//			OntopInvalidInputQueryException, OntopConnectionException, OntopResultConversionException {
+//		return execute(parseInputQuery(inputQueryString));
+//	}
 
-	int getMaxRows();
+	int getFetchSize() throws OntopConnectionException;
 
-	void getMoreResults();
+	int getMaxRows() throws OntopConnectionException;
 
-	int getQueryTimeout();
+	void getMoreResults() throws OntopConnectionException;
 
-	void setFetchSize(int rows);
+	int getQueryTimeout() throws OntopConnectionException;
 
-	void setMaxRows(int max);
+	void setFetchSize(int rows) throws OntopConnectionException;
 
-	boolean isClosed();
+	void setMaxRows(int max) throws OntopConnectionException;
+
+	boolean isClosed() throws OntopConnectionException;
 
 	/**
 	 * Sets the number of seconds the driver will wait for a Statement object to
@@ -51,5 +62,5 @@ public interface OBDAStatement extends AutoCloseable {
 	 * @param seconds
 	 *            the new query timeout limit in seconds; zero means no limit.
 	 */
-    void setQueryTimeout(int seconds);
+    void setQueryTimeout(int seconds) throws OntopConnectionException;
 }

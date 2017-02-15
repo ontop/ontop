@@ -4,8 +4,11 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
+import it.unibz.inf.ontop.answering.input.InputQuery;
+import it.unibz.inf.ontop.answering.input.translation.InputQueryTranslator;
 import it.unibz.inf.ontop.exception.OntopInvalidInputQueryException;
 import it.unibz.inf.ontop.exception.OntopReformulationException;
+import it.unibz.inf.ontop.exception.OntopUnsupportedInputQueryException;
 import it.unibz.inf.ontop.injection.OntopQueryAnsweringSettings;
 import it.unibz.inf.ontop.injection.ReformulationFactory;
 import it.unibz.inf.ontop.mapping.Mapping;
@@ -28,16 +31,9 @@ import it.unibz.inf.ontop.pivotalrepr.utils.ExecutorRegistry;
 import it.unibz.inf.ontop.renderer.DatalogProgramRenderer;
 
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 
 import it.unibz.inf.ontop.spec.OBDASpecification;
 import it.unibz.inf.ontop.answering.reformulation.OntopQueryReformulator;
-import org.eclipse.rdf4j.query.MalformedQueryException;
-import org.eclipse.rdf4j.query.QueryLanguage;
-import org.eclipse.rdf4j.query.UnsupportedQueryLanguageException;
-import org.eclipse.rdf4j.query.parser.ParsedQuery;
-import org.eclipse.rdf4j.query.parser.QueryParser;
-import org.eclipse.rdf4j.query.parser.QueryParserUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,8 +45,6 @@ import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
  * TODO: rename it OntopQueryReformulatorImpl ?
  */
 public class QuestQueryProcessor implements OntopQueryReformulator {
-
-	private final Map<String, ParsedQuery> parsedQueryCache = new ConcurrentHashMap<>();
 
 	private final QueryRewriter rewriter;
 	private final LinearInclusionDependencies sigma;
@@ -107,34 +101,15 @@ public class QuestQueryProcessor implements OntopQueryReformulator {
 			objectPropertiesMapped = ImmutableSet.of();
 		}
 	}
-
-	/**
-	 * BC: TODO: rename parseSPARQL
-     */
-	@Override
-	public ParsedQuery getParsedQuery(String sparql) throws OntopInvalidInputQueryException {
-		ParsedQuery pq = parsedQueryCache.get(sparql);
-		if (pq == null) {
-			try {
-				QueryParser parser = QueryParserUtil.createParser(QueryLanguage.SPARQL);
-				pq = parser.parseQuery(sparql, null);
-				parsedQueryCache.put(sparql, pq);
-			} catch (UnsupportedQueryLanguageException | MalformedQueryException e) {
-				throw new OntopInvalidInputQueryException(e);
-			}
-		}
-		return pq;
-	}
-
 	
-	private DatalogProgram translateAndPreProcess(ParsedQuery pq) throws OntopInvalidInputQueryException {
-		SparqlAlgebraToDatalogTranslator translator = new SparqlAlgebraToDatalogTranslator(
+	private DatalogProgram translateAndPreProcess(InputQuery inputQuery) throws OntopUnsupportedInputQueryException {
+		InputQueryTranslator translator = new SparqlAlgebraToDatalogTranslator(
 				metadataForOptimization.getUriTemplateMatcher(), iriDictionary);
-		SparqlQuery translation = translator.translate(pq);
+		InternalSparqlQuery translation = inputQuery.translate(translator);
 		return preProcess(translation);
 	}
 
-	private DatalogProgram preProcess(SparqlQuery translation) {
+	private DatalogProgram preProcess(InternalSparqlQuery translation) {
 		DatalogProgram program = translation.getProgram();
 		log.debug("Datalog program translated from the SPARQL query: \n{}", program);
 
@@ -166,25 +141,24 @@ public class QuestQueryProcessor implements OntopQueryReformulator {
 		return newprogram;
 	}
 	
-	
+
 	public void clearNativeQueryCache() {
 		queryCache.clear();
 	}
-	
+
 
 	@Override
-	public ExecutableQuery translateIntoNativeQuery(ParsedQuery pq,
-													Optional<SesameConstructTemplate> optionalConstructTemplate)
+	public ExecutableQuery translateIntoNativeQuery(InputQuery inputQuery)
 			throws OntopReformulationException {
 
-		ExecutableQuery executableQuery = queryCache.get(pq);
-		if (executableQuery != null)
-			return executableQuery;
+		ExecutableQuery cachedQuery = queryCache.get(inputQuery);
+		if (cachedQuery != null)
+			return cachedQuery;
 
 		try {
-			SparqlAlgebraToDatalogTranslator translator = new SparqlAlgebraToDatalogTranslator(
+			InputQueryTranslator translator = new SparqlAlgebraToDatalogTranslator(
 					metadataForOptimization.getUriTemplateMatcher(), iriDictionary);
-			SparqlQuery translation = translator.translate(pq);
+			InternalSparqlQuery translation = inputQuery.translate(translator);
 			DatalogProgram newprogram = preProcess(translation);
 
 			for (CQIE q : newprogram.getRules()) 
@@ -240,9 +214,9 @@ public class QuestQueryProcessor implements OntopQueryReformulator {
 //				intermediateQuery = joinOptimizer.optimize(intermediateQuery);
 //				log.debug("New query after join optimization: \n" + intermediateQuery.toString());
 
-				executableQuery = generateExecutableQuery(intermediateQuery, ImmutableList.copyOf(translation.getSignature()),
-						optionalConstructTemplate);
-				queryCache.put(pq, executableQuery);
+				ExecutableQuery executableQuery = generateExecutableQuery(intermediateQuery,
+						ImmutableList.copyOf(translation.getSignature()));
+				queryCache.put(inputQuery, executableQuery);
 				return executableQuery;
 
 			}
@@ -251,10 +225,10 @@ public class QuestQueryProcessor implements OntopQueryReformulator {
 			 */
 			catch (EmptyQueryException e) {
 				ExecutableQuery emptyQuery = datasourceQueryGenerator.generateEmptyQuery(
-						ImmutableList.copyOf(translation.getSignature()), optionalConstructTemplate);
+						ImmutableList.copyOf(translation.getSignature()));
 
 				log.debug("Empty query --> no solution.");
-				queryCache.put(pq, emptyQuery);
+				queryCache.put(inputQuery, emptyQuery);
 				return emptyQuery;
 			}
 
@@ -275,13 +249,11 @@ public class QuestQueryProcessor implements OntopQueryReformulator {
 		}
 	}
 
-	private ExecutableQuery generateExecutableQuery(IntermediateQuery intermediateQuery, ImmutableList<String> signature,
-													Optional<SesameConstructTemplate> optionalConstructTemplate)
+	private ExecutableQuery generateExecutableQuery(IntermediateQuery intermediateQuery, ImmutableList<String> signature)
 			throws OntopReformulationException {
 		log.debug("Producing the native query string...");
 
-		ExecutableQuery executableQuery = datasourceQueryGenerator.generateSourceQuery(intermediateQuery, signature,
-				optionalConstructTemplate);
+		ExecutableQuery executableQuery = datasourceQueryGenerator.generateSourceQuery(intermediateQuery, signature);
 
 		log.debug("Resulting native query: \n{}", executableQuery);
 
@@ -293,23 +265,10 @@ public class QuestQueryProcessor implements OntopQueryReformulator {
 	 * Returns the final rewriting of the given query
 	 */
 	@Override
-	public String getRewriting(ParsedQuery query) throws OntopReformulationException {
-		try {
-			DatalogProgram program = translateAndPreProcess(query);
-			DatalogProgram rewriting = rewriter.rewrite(program);
-			return DatalogProgramRenderer.encode(rewriting);
-		}
-		catch (OntopReformulationException e) {
-			throw e;
-		}
-		/*
-		 * Bug: should be reached
-		 * TODO: remove it
-		 */
-		catch (Exception e) {
-			log.debug("Unexpected exception: " + e.getMessage(), e);
-			throw new OntopReformulationException(e);
-		}
+	public String getRewritingRendering(InputQuery query) throws OntopReformulationException {
+		DatalogProgram program = translateAndPreProcess(query);
+		DatalogProgram rewriting = rewriter.rewrite(program);
+		return DatalogProgramRenderer.encode(rewriting);
 	}
 
 	@Override

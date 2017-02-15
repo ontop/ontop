@@ -135,7 +135,7 @@ public class RedundantJoinFKProfTest {
             if (! (executableQuery instanceof SQLExecutableQuery))
                 throw new IllegalStateException("A SQLExecutableQuery was expected");
             sql = ((SQLExecutableQuery)executableQuery).getSQL();
-            QuestOWLResultSet rs = st.executeTuple(query);
+            QuestOWLResultSet rs = st.executeSelectQuery(query);
             while (rs.nextRow()) {
                 OWLObject ind1 = rs.getOWLObject("p");
                 // log.debug(ind1.toString());
