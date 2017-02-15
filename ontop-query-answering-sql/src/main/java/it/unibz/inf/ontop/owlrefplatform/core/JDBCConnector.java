@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.owlrefplatform.core;
 
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
+import it.unibz.inf.ontop.answering.input.InputQueryFactory;
 import it.unibz.inf.ontop.exception.OntopConnectionException;
 import it.unibz.inf.ontop.injection.OntopQueryAnsweringSQLSettings;
 import it.unibz.inf.ontop.answering.reformulation.IRIDictionary;
@@ -40,13 +41,16 @@ public class JDBCConnector implements DBConnector {
     private final boolean removeAbandoned ;
     private final boolean logAbandoned = false;
     private final int abandonedTimeout;
+    private final InputQueryFactory inputQueryFactory;
     private final boolean keepAlive;
 
     @AssistedInject
     private JDBCConnector(@Assisted OntopQueryReformulator queryReformulator,
                           @Nullable IRIDictionary iriDictionary,
+                          InputQueryFactory inputQueryFactory,
                           OntopQueryAnsweringSQLSettings settings) {
         this.queryReformulator = queryReformulator;
+        this.inputQueryFactory = inputQueryFactory;
         keepAlive = settings.isKeepAliveEnabled();
         removeAbandoned = settings.isRemoveAbandonedEnabled();
         abandonedTimeout = settings.getAbandonedTimeout();
@@ -193,7 +197,8 @@ public class JDBCConnector implements DBConnector {
     @Override
     public OntopConnection getNonPoolConnection() throws OntopConnectionException {
 
-        return new QuestConnection(this, queryReformulator, getSQLConnection(), iriDictionary);
+        return new QuestConnection(this, queryReformulator, getSQLConnection(), iriDictionary,
+                inputQueryFactory);
     }
 
     /***
@@ -213,7 +218,8 @@ public class JDBCConnector implements DBConnector {
     @Override
     public OntopConnection getConnection() throws OntopConnectionException {
 
-        return new QuestConnection(this, queryReformulator, getSQLPoolConnection(), iriDictionary);
+        return new QuestConnection(this, queryReformulator, getSQLPoolConnection(), iriDictionary,
+                inputQueryFactory);
     }
 
 

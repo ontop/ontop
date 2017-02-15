@@ -57,7 +57,7 @@ public class OntopTupleQuery extends AbstractOntopQuery implements TupleQuery {
 			if(this.queryTimeout > 0)
 				stm.setQueryTimeout(this.queryTimeout);
 			try {
-				SelectQuery inputQuery = factory.createSelectQuery(getParsedQuery());
+				SelectQuery inputQuery = factory.createSelectQuery(getQueryString(), getParsedQuery());
 				res = stm.execute(inputQuery);
 			} catch (OntopQueryAnsweringException e) {
 				long end = System.currentTimeMillis();

@@ -10,12 +10,12 @@ public interface RDF4JInputQueryFactory {
     /**
      * TODO: support bindings
      */
-    SelectQuery createSelectQuery(ParsedQuery parsedQuery);
+    SelectQuery createSelectQuery(String queryString, ParsedQuery parsedQuery);
 
     /**
      * TODO: support bindings
      */
-    AskQuery createAskQuery(ParsedQuery parsedQuery);
+    AskQuery createAskQuery(String queryString, ParsedQuery parsedQuery);
 
     /**
      * TODO: support bindings
@@ -25,5 +25,5 @@ public interface RDF4JInputQueryFactory {
     /**
      * TODO: support bindings
      */
-    DescribeQuery createDescribeQuery(ParsedQuery parsedQuery);
+    DescribeQuery createDescribeQuery(String queryString, ParsedQuery parsedQuery);
 }

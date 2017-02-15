@@ -7,8 +7,8 @@ import org.eclipse.rdf4j.query.parser.ParsedQuery;
 
 class RDF4JAskQuery extends RDF4JInputQuery<BooleanResultSet>  implements AskQuery {
 
-    RDF4JAskQuery(ParsedQuery parsedQuery) {
-        super(parsedQuery);
+    RDF4JAskQuery(ParsedQuery parsedQuery, String queryString) {
+        super(parsedQuery, queryString);
     }
 
     @Override

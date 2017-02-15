@@ -6,8 +6,8 @@ import org.eclipse.rdf4j.query.parser.ParsedQuery;
 
 
 class RDF4JDescribeQuery extends RDF4JInputQuery<GraphResultSet> implements DescribeQuery {
-    RDF4JDescribeQuery(ParsedQuery parsedQuery) {
-        super(parsedQuery);
+    RDF4JDescribeQuery(ParsedQuery parsedQuery, String queryString) {
+        super(parsedQuery, queryString);
     }
 
     @Override

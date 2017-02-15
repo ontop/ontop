@@ -14,7 +14,7 @@ class RDF4JConstructQuery extends RDF4JInputQuery<GraphResultSet> implements Con
     private final ConstructTemplate template;
 
     RDF4JConstructQuery(String queryString, ParsedQuery parsedQuery) {
-        super(extractSelectParsedQuery(queryString));
+        super(extractSelectParsedQuery(queryString), queryString);
         this.template = new RDF4JConstructTemplate(parsedQuery);
     }
 

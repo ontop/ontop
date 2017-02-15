@@ -2,10 +2,7 @@ package it.unibz.inf.ontop.owlrefplatform.core;
 
 import java.util.Optional;
 
-import it.unibz.inf.ontop.answering.input.AskQuery;
-import it.unibz.inf.ontop.answering.input.ConstructQuery;
-import it.unibz.inf.ontop.answering.input.InputQuery;
-import it.unibz.inf.ontop.answering.input.SelectQuery;
+import it.unibz.inf.ontop.answering.input.*;
 import it.unibz.inf.ontop.exception.*;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.owlrefplatform.core.resultset.*;
@@ -27,8 +24,8 @@ public class SQLQuestStatement extends QuestStatement {
     private final Optional<IRIDictionary> iriDictionary;
 
     public SQLQuestStatement(OntopQueryReformulator queryProcessor, Statement sqlStatement,
-                             Optional<IRIDictionary> iriDictionary) {
-        super(queryProcessor);
+                             Optional<IRIDictionary> iriDictionary, InputQueryFactory inputQueryFactory) {
+        super(queryProcessor, inputQueryFactory);
         this.sqlStatement = sqlStatement;
         this.dbMetadata = queryProcessor.getDBMetadata();
         this.iriDictionary = iriDictionary;

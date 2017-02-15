@@ -43,7 +43,7 @@ public class OntopBooleanQuery extends AbstractOntopQuery implements BooleanQuer
 
     @Override
 	public boolean evaluate() throws QueryEvaluationException {
-		AskQuery query = factory.createAskQuery(getParsedQuery());
+		AskQuery query = factory.createAskQuery(getQueryString(), getParsedQuery());
 
 		try (OntopStatement stm = conn.createStatement();
 			 TupleResultSet rs = stm.execute(query)) {

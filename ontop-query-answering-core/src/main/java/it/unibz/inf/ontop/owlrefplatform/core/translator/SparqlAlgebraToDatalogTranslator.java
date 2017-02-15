@@ -96,6 +96,7 @@ public class SparqlAlgebraToDatalogTranslator implements RDF4JInputQueryTranslat
      *
      * TODO: return an IntermediateQuery instead!
 	 */
+	@Override
 	public InternalSparqlQuery translate(ParsedQuery pq) throws OntopUnsupportedInputQueryException {
 
         if (predicateIdx != 0 || !program.getRules().isEmpty())

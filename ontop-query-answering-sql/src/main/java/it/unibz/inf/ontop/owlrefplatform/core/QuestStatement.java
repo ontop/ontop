@@ -20,10 +20,13 @@ package it.unibz.inf.ontop.owlrefplatform.core;
  * #L%
  */
 
+import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.answering.input.*;
 import it.unibz.inf.ontop.exception.*;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.answering.reformulation.OntopQueryReformulator;
+import it.unibz.inf.ontop.owlrefplatform.core.queryevaluation.SPARQLQueryUtility;
+import org.eclipse.rdf4j.query.MalformedQueryException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,11 +36,11 @@ import java.util.concurrent.CountDownLatch;
 /**
  * Abstract class for QuestStatement.
  *
- * TODO: rename it (not now) AbstractQuestStatement.
  */
 public abstract class QuestStatement implements OntopStatement {
 
 	private final OntopQueryReformulator engine;
+	private final InputQueryFactory inputQueryFactory;
 
 	private QueryExecutionThread executionThread;
 	private boolean canceled = false;
@@ -46,8 +49,9 @@ public abstract class QuestStatement implements OntopStatement {
 	private static final Logger log = LoggerFactory.getLogger(QuestStatement.class);
 
 
-	public QuestStatement(OntopQueryReformulator queryProcessor) {
+	public QuestStatement(OntopQueryReformulator queryProcessor, InputQueryFactory inputQueryFactory) {
 		this.engine = queryProcessor;
+		this.inputQueryFactory = inputQueryFactory;
 	}
 
 	/**
@@ -192,71 +196,103 @@ public abstract class QuestStatement implements OntopStatement {
 			return (R) executeInThread((ConstructQuery) inputQuery, this::executeConstructQuery);
 		}
 		else if (inputQuery instanceof DescribeQuery) {
-			throw new RuntimeException("TODO: fix Describe queries");
-
-//			// create list of URI constants we want to describe
-//			List<String> constants = new ArrayList<>();
-//			if (SPARQLQueryUtility.isVarDescribe(inputQueryString)) {
-//				// if describe ?var, we have to do select distinct ?var first
-//				String sel = SPARQLQueryUtility.getSelectVarDescribe(inputQueryString);
-//				OBDAResultSet resultSet = executeTupleQuery(sel, engine.parseQuery(sel), QueryType.SELECT);
-//				if (resultSet instanceof EmptyTupleResultSet)
-//					return null;
-//				else if (resultSet instanceof QuestTupleResultSet) {
-//					QuestTupleResultSet res = (QuestTupleResultSet) resultSet;
-//					while (res.nextRow()) {
-//						Constant constant = res.getConstant(1);
-//						if (constant instanceof URIConstant) {
-//							// collect constants in list
-//							constants.add(((URIConstant)constant).getURI());
-//						}
-//					}
-//				}
-//			}
-//			else if (SPARQLQueryUtility.isURIDescribe(inputQueryString)) {
-//				// DESCRIBE <uri> gives direct results, so we put the
-//				// <uri> constant directly in the list of constants
-//				try {
-//					constants.add(SPARQLQueryUtility.getDescribeURI(inputQueryString));
-//				} catch (MalformedQueryException e) {
-//					e.printStackTrace();
-//				}
-//			}
-//
-//			GraphResultSet describeResultSet = null;
-//			// execute describe <uriconst> in subject position
-//			for (String constant : constants) {
-//				// for each constant we execute a construct with
-//				// the uri as subject, and collect the results
-//				String str = SPARQLQueryUtility.getConstructSubjQuery(constant);
-//				GraphResultSet set = (GraphResultSet) executeGraphQuery(str, QueryType.DESCRIBE);
-//				if (describeResultSet == null) { // just for the first time
-//					describeResultSet = set;
-//				}
-//				else if (set != null) {
-//					// 2nd and manyth times execute, but collect result into one object
-//					while (set.hasNext())
-//						describeResultSet.addNewResultSet(set.next());
-//				}
-//			}
-//			// execute describe <uriconst> in object position
-//			for (String constant : constants) {
-//				String str = SPARQLQueryUtility.getConstructObjQuery(constant);
-//				GraphResultSet set = (GraphResultSet) executeGraphQuery(str, QueryType.DESCRIBE);
-//				if (describeResultSet == null) { // just for the first time
-//					describeResultSet = set;
-//				}
-//				else if (set != null) {
-//					while (set.hasNext())
-//						describeResultSet.addNewResultSet(set.next());
-//				}
-//			}
-//			return describeResultSet;
+			return (R) executeDescribeQuery((DescribeQuery) inputQuery);
 		}
 		else {
 			throw new OntopUnsupportedInputQueryException("Unsupported query type: " + inputQuery);
 		}
 	}
+
+	/**
+	 * TODO: completely refactor this old-way of processing DESCRIBE.
+	 *  ---> should be converted into 1 CONSTRUCT query
+	 */
+	private GraphResultSet executeDescribeQuery(DescribeQuery inputQuery)
+			throws OntopReformulationException, OntopResultConversionException, OntopConnectionException,
+			OntopQueryEvaluationException {
+
+		ImmutableSet<String> constants = extractDescribeQueryConstants(inputQuery);
+
+		GraphResultSet describeResultSet = null;
+
+		try {
+			// execute describe <uriconst> in subject position
+			for (String constant : constants) {
+				// for each constant we execute a construct with
+				// the uri as subject, and collect the results
+				String str = SPARQLQueryUtility.getConstructSubjQuery(constant);
+				ConstructQuery constructQuery = inputQueryFactory.createConstructQuery(str);
+
+				GraphResultSet set = executeInThread(constructQuery, this::executeDescribeConstructQuery);
+				if (describeResultSet == null) { // just for the first time
+					describeResultSet = set;
+				} else if (set != null) {
+					// 2nd and manyth times execute, but collect result into one object
+					while (set.hasNext())
+						describeResultSet.addNewResultSet(set.next());
+				}
+			}
+			// execute describe <uriconst> in object position
+			for (String constant : constants) {
+				String str = SPARQLQueryUtility.getConstructObjQuery(constant);
+
+				ConstructQuery constructQuery = inputQueryFactory.createConstructQuery(str);
+				GraphResultSet set = executeInThread(constructQuery, this::executeDescribeConstructQuery);
+
+				if (describeResultSet == null) { // just for the first time
+					describeResultSet = set;
+				} else if (set != null) {
+					while (set.hasNext())
+						describeResultSet.addNewResultSet(set.next());
+				}
+			}
+			// Exception is re-cast because not due to the initial input query
+		} catch (OntopInvalidInputQueryException e) {
+			throw new OntopReformulationException(e);
+		}
+		return describeResultSet;
+	}
+
+	private ImmutableSet<String> extractDescribeQueryConstants(DescribeQuery inputQuery)
+			throws OntopQueryEvaluationException, OntopConnectionException,
+			OntopReformulationException, OntopResultConversionException {
+		String inputQueryString = inputQuery.getInputString();
+
+		// create list of URI constants we want to describe
+		if (SPARQLQueryUtility.isVarDescribe(inputQueryString)) {
+			// if describe ?var, we have to do select distinct ?var first
+			String sel = SPARQLQueryUtility.getSelectVarDescribe(inputQueryString);
+			try {
+				SelectQuery selectQuery = inputQueryFactory.createSelectQuery(sel);
+				TupleResultSet resultSet = execute(selectQuery);
+
+				ImmutableSet.Builder<String> constantSetBuilder = ImmutableSet.builder();
+				while (resultSet.nextRow()) {
+					Constant constant = resultSet.getConstant(1);
+					if (constant instanceof URIConstant) {
+						// collect constants in list
+						constantSetBuilder.add(((URIConstant) constant).getURI());
+					}
+				}
+				return constantSetBuilder.build();
+				// Exception is re-cast because not due to the initial input query
+			} catch (OntopInvalidInputQueryException e) {
+				throw new OntopReformulationException(e);
+			}
+		}
+		else if (SPARQLQueryUtility.isURIDescribe(inputQueryString)) {
+			// DESCRIBE <uri> gives direct results, so we put the
+			// <uri> constant directly in the list of constants
+			try {
+				return ImmutableSet.of(SPARQLQueryUtility.getDescribeURI(inputQueryString));
+			} catch (MalformedQueryException e) {
+				throw new OntopReformulationException(e);
+			}
+		}
+		else
+			return ImmutableSet.of();
+	}
+
 
 	/**
 	 * Internal method to start a new query execution thread type defines the

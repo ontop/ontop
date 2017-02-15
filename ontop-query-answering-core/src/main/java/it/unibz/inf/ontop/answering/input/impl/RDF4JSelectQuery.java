@@ -9,8 +9,8 @@ class RDF4JSelectQuery extends RDF4JInputQuery<TupleResultSet> implements Select
     /**
      * TODO: support bindings
      */
-    RDF4JSelectQuery(ParsedQuery parsedQuery) {
-        super(parsedQuery);
+    RDF4JSelectQuery(ParsedQuery parsedQuery, String queryString) {
+        super(parsedQuery, queryString);
     }
 
     @Override

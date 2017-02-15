@@ -12,12 +12,19 @@ import org.eclipse.rdf4j.query.parser.ParsedQuery;
 class RDF4JInputQuery<R extends OBDAResultSet> implements InputQuery<R> {
 
     private final ParsedQuery parsedQuery;
+    private final String inputQueryString;
 
     /**
      * TODO: support bindings
      */
-    RDF4JInputQuery(ParsedQuery parsedQuery) {
+    RDF4JInputQuery(ParsedQuery parsedQuery, String inputQueryString) {
         this.parsedQuery = parsedQuery;
+        this.inputQueryString = inputQueryString;
+    }
+
+    @Override
+    public String getInputString() {
+        return inputQueryString;
     }
 
     @Override

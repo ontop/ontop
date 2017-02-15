@@ -24,6 +24,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Optional;
 
+import it.unibz.inf.ontop.answering.input.InputQueryFactory;
 import it.unibz.inf.ontop.exception.OntopConnectionException;
 import it.unibz.inf.ontop.answering.reformulation.IRIDictionary;
 import it.unibz.inf.ontop.answering.reformulation.OntopQueryReformulator;
@@ -45,17 +46,19 @@ public class QuestConnection implements OntopConnection {
 	private final OntopQueryReformulator queryProcessor;
 	private Connection conn;
 	private final Optional<IRIDictionary> iriDictionary;
+	private final InputQueryFactory inputQueryFactory;
 
 	private final JDBCConnector jdbcConnector;
 	private boolean isClosed;
 
 
 	public QuestConnection(JDBCConnector jdbcConnector, OntopQueryReformulator queryProcessor, Connection connection,
-						   Optional<IRIDictionary> iriDictionary) {
+						   Optional<IRIDictionary> iriDictionary, InputQueryFactory inputQueryFactory) {
 		this.jdbcConnector = jdbcConnector;
 		this.queryProcessor = queryProcessor;
 		this.conn = connection;
 		this.iriDictionary = iriDictionary;
+		this.inputQueryFactory = inputQueryFactory;
 		this.isClosed = false;
 	}
 	
@@ -78,7 +81,7 @@ public class QuestConnection implements OntopConnection {
 			return new SQLQuestStatement(
 					this.queryProcessor,
 					conn.createStatement(java.sql.ResultSet.TYPE_FORWARD_ONLY, java.sql.ResultSet.CONCUR_READ_ONLY),
-					iriDictionary);
+					iriDictionary, inputQueryFactory);
 		} catch (Exception e) {
 			throw new OntopConnectionException(e);
 		}

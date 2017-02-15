@@ -12,13 +12,13 @@ public class RDF4JInputQueryFactoryImpl implements RDF4JInputQueryFactory {
     }
 
     @Override
-    public SelectQuery createSelectQuery(ParsedQuery parsedQuery) {
-        return new RDF4JSelectQuery(parsedQuery);
+    public SelectQuery createSelectQuery(String queryString, ParsedQuery parsedQuery) {
+        return new RDF4JSelectQuery(parsedQuery, queryString);
     }
 
     @Override
-    public AskQuery createAskQuery(ParsedQuery parsedQuery) {
-        return new RDF4JAskQuery(parsedQuery);
+    public AskQuery createAskQuery(String queryString, ParsedQuery parsedQuery) {
+        return new RDF4JAskQuery(parsedQuery, queryString);
     }
 
     @Override
@@ -27,7 +27,7 @@ public class RDF4JInputQueryFactoryImpl implements RDF4JInputQueryFactory {
     }
 
     @Override
-    public DescribeQuery createDescribeQuery(ParsedQuery parsedQuery) {
-        return new RDF4JDescribeQuery(parsedQuery);
+    public DescribeQuery createDescribeQuery(String queryString, ParsedQuery parsedQuery) {
+        return new RDF4JDescribeQuery(parsedQuery, queryString);
     }
 }

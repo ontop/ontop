@@ -73,7 +73,7 @@ public class OntopGraphQuery extends AbstractOntopQuery implements GraphQuery {
 		ParsedQuery parsedQuery = getParsedQuery();
 		GraphSPARQLQuery query = isConstruct
 				? inputQueryFactory.createConstructQuery(getQueryString(), parsedQuery)
-				: inputQueryFactory.createDescribeQuery(parsedQuery);
+				: inputQueryFactory.createDescribeQuery(getQueryString(), parsedQuery);
 		try (
 				OntopStatement stm = conn.createStatement();
 				GraphResultSet res = stm.execute(query)

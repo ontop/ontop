@@ -14,6 +14,8 @@ import it.unibz.inf.ontop.owlrefplatform.core.translator.InternalSparqlQuery;
  */
 public interface InputQuery<R extends OBDAResultSet> {
 
+    String getInputString();
+
     /**
      * TODO: return an IntermediateQuery instead!
      */

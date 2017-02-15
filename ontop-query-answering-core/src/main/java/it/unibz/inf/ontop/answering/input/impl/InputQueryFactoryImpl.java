@@ -24,7 +24,7 @@ public class InputQueryFactoryImpl implements InputQueryFactory {
         ParsedQuery parsedQuery = parseQueryString(queryString);
 
         if (parsedQuery instanceof ParsedTupleQuery)
-            return rdf4jFactory.createSelectQuery(parsedQuery);
+            return rdf4jFactory.createSelectQuery(queryString, parsedQuery);
         else
             throw new OntopInvalidInputQueryException("Not a valid SELECT query: " + queryString);
     }
@@ -34,7 +34,7 @@ public class InputQueryFactoryImpl implements InputQueryFactory {
         ParsedQuery parsedQuery = parseQueryString(queryString);
 
         if (parsedQuery instanceof ParsedBooleanQuery)
-            return rdf4jFactory.createAskQuery(parsedQuery);
+            return rdf4jFactory.createAskQuery(queryString, parsedQuery);
         else
             throw new OntopInvalidInputQueryException("Not a valid ASK query: " + queryString);
     }
@@ -54,7 +54,7 @@ public class InputQueryFactoryImpl implements InputQueryFactory {
         ParsedQuery parsedQuery = parseQueryString(queryString);
 
         if ((parsedQuery instanceof ParsedGraphQuery) && (!SPARQLQueryUtility.isConstructQuery(queryString)))
-            return rdf4jFactory.createDescribeQuery(parsedQuery);
+            return rdf4jFactory.createDescribeQuery(queryString, parsedQuery);
         else
             throw new OntopInvalidInputQueryException("Not a valid DESCRIBE query: " + queryString);
     }
@@ -65,13 +65,13 @@ public class InputQueryFactoryImpl implements InputQueryFactory {
         ParsedQuery parsedQuery = parseQueryString(queryString);
 
         if (parsedQuery instanceof ParsedTupleQuery)
-            return rdf4jFactory.createSelectQuery(parsedQuery);
+            return rdf4jFactory.createSelectQuery(queryString, parsedQuery);
         else if (parsedQuery instanceof ParsedBooleanQuery)
-            return rdf4jFactory.createAskQuery(parsedQuery);
+            return rdf4jFactory.createAskQuery(queryString, parsedQuery);
         else if (parsedQuery instanceof ParsedGraphQuery)
             return SPARQLQueryUtility.isConstructQuery(queryString)
                     ? rdf4jFactory.createConstructQuery(queryString, parsedQuery)
-                    : rdf4jFactory.createDescribeQuery(parsedQuery);
+                    : rdf4jFactory.createDescribeQuery(queryString, parsedQuery);
         else
             throw new OntopUnsupportedInputQueryException("Unsupported query: " + queryString);
     }
@@ -82,9 +82,9 @@ public class InputQueryFactoryImpl implements InputQueryFactory {
         ParsedQuery parsedQuery = parseQueryString(queryString);
 
         if (parsedQuery instanceof ParsedTupleQuery)
-            return rdf4jFactory.createSelectQuery(parsedQuery);
+            return rdf4jFactory.createSelectQuery(queryString, parsedQuery);
         else if (parsedQuery instanceof ParsedBooleanQuery)
-            return rdf4jFactory.createAskQuery(parsedQuery);
+            return rdf4jFactory.createAskQuery(queryString, parsedQuery);
         else
             throw new OntopUnsupportedInputQueryException("Unsupported tuple query: " + queryString);
     }
@@ -97,7 +97,7 @@ public class InputQueryFactoryImpl implements InputQueryFactory {
         if (parsedQuery instanceof ParsedGraphQuery)
             return SPARQLQueryUtility.isConstructQuery(queryString)
                     ? rdf4jFactory.createConstructQuery(queryString, parsedQuery)
-                    : rdf4jFactory.createDescribeQuery(parsedQuery);
+                    : rdf4jFactory.createDescribeQuery(queryString, parsedQuery);
         else
             throw new OntopUnsupportedInputQueryException("Unsupported query: " + queryString);
     }
