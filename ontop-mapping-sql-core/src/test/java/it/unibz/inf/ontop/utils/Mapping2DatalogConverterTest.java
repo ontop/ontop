@@ -186,7 +186,7 @@ public class Mapping2DatalogConverterTest extends TestCase {
 	public void testAnalysis_14() throws Exception {
 		runAnalysis(
 				"select cid as CourseCode, title as CourseTitle from Course as TableCourse where TableCourse.credits>=4",
-				":C_{cid} a :Course ; :title {title} .");
+				":C_{CourseCode} a :Course ; :title {CourseTitle} .");
 	}
 	
 	public void testAnalysis_15() throws Exception {
@@ -215,25 +215,25 @@ public class Mapping2DatalogConverterTest extends TestCase {
 	
 	public void testAnalysis_18() throws Exception {
 		runAnalysis(
-				"select id as StudentId from (select id from Student) JOIN Enrollment ON student_id = StudentId where year> 2010 ",
+				"select id as StudentId from (select id from Student) as Sub JOIN Enrollment ON student_id = StudentId where year> 2010 ",
 				":S_{StudentId} a :Student .");
 	}
 	
 	public void testAnalysis_19() throws Exception {
 		runAnalysis(
-				"select id as StudentId from (select id from Student) JOIN Enrollment ON student_id = StudentId where first_name !~ 'foo' ",
+				"select id as StudentId from (select id from Student) as Sub JOIN Enrollment ON student_id = StudentId where first_name !~ 'foo' ",
 				":S_{StudentId} a :Student .");
 	}
 	
 	public void testAnalysis_20() throws Exception {
 		runAnalysis(
-				"select id as StudentId from (select id from Student) JOIN Enrollment ON student_id = StudentId where regexp_like(first_name,'foo') ",
+				"select id as StudentId from (select id from Student) as Sub JOIN Enrollment ON student_id = StudentId where regexp_like(first_name,'foo') ",
 				":S_{StudentId} a :Student .");
 	}
 	
 	public void testAnalysis_21() throws Exception {
 		runAnalysis(
-				"select id as StudentId from (select id from Student) JOIN Enrollment ON student_id = StudentId where first_name regexp 'foo' ",
+				"select id as StudentId from (select id from Student) as Sub JOIN Enrollment ON student_id = StudentId where first_name regexp 'foo' ",
 				":S_{StudentId} a :Student .");
 	}
 
@@ -249,7 +249,7 @@ public class Mapping2DatalogConverterTest extends TestCase {
 
     public void testAnalysis_24() throws Exception {
         runAnalysis(
-                "select id from (select id from Student) JOIN Enrollment ON student_id = id where regexp_like(first_name,'foo') ",
+                "select id from (select id from Student) as Sub JOIN Enrollment ON student_id = id where regexp_like(first_name,'foo') ",
                 ":S_{id} a :Student .");
     }
 
