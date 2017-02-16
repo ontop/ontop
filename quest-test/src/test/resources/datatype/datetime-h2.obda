@@ -2,12 +2,6 @@
 :		http://ontop.inf.unibz.it/test/datatypes#
 xsd:	http://www.w3.org/2001/XMLSchema#
 
-[SourceDeclaration]
-sourceUri	h2
-connectionUrl	jdbc:h2:mem:datatypes
-username	sa	
-password	
-driverClass	org.h2.Driver
 
 [MappingDeclaration] @collection [[
 

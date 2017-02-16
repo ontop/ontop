@@ -4,12 +4,6 @@ owl:		http://www.w3.org/2002/07/owl#
 rdf:		http://www.w3.org/1999/02/22-rdf-syntax-ns#
 rdfs:		http://www.w3.org/2000/01/rdf-schema#
 
-[SourceDeclaration]
-sourceUri	lubm
-connectionUrl	jdbc:db2://10.7.20.39:50000/lubm1
-username	db2inst1
-password	fish
-driverClass	com.ibm.db2.jcc.DB2Driver
 
 [MappingDeclaration] @collection [[
 mappingId	Undergraduate Students

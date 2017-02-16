@@ -1,8 +1,7 @@
 package it.unibz.inf.ontop.sql;
 
-import it.unibz.inf.ontop.model.OBDAException;
+import it.unibz.inf.ontop.owlrefplatform.owlapi.OntopOWLStatement;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLResultSet;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLStatement;
 import it.unibz.inf.ontop.quest.AbstractVirtualModeTest;
 import org.semanticweb.owlapi.model.OWLException;
 
@@ -14,19 +13,20 @@ public class HasIdTest extends AbstractVirtualModeTest {
 
     static final String owlFileName = "resources/pullOutEq/pullOutEq.ttl";
     static final String obdaFileName = "resources/pullOutEq/pullOutEq.obda";
+    static final String propertyFileName = "resources/pullOutEq/pullOutEq.properties";
 
     public HasIdTest() {
-        super(owlFileName, obdaFileName);
+        super(owlFileName, obdaFileName, propertyFileName);
     }
 
 
-    private QuestOWLResultSet runLocalQuery(String query) throws OBDAException, OWLException {
+    private QuestOWLResultSet runLocalQuery(String query) throws OWLException {
 
         OntopOWLStatement st = conn.createStatement();
         return st.executeTuple(query);
     }
 
-    public void test() throws OBDAException, OWLException {
+    public void test() throws OWLException {
         QuestOWLResultSet results = runLocalQuery("PREFIX : <http://example.com/vocab#>" +
                 "PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>" +
                 "SELECT ?p ?firstName ?lastName " +

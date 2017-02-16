@@ -5,12 +5,6 @@ xsd:        http://www.w3.org/2001/XMLSchema#
 quest:      http://obda.org/quest#
 rdfs:       http://www.w3.org/2000/01/rdf-schema#
 
-[SourceDeclaration]
-sourceUri   adventureWorks.owl
-connectionUrl   jdbc:sqlserver://10.7.20.91;DatabaseName=AdventureWorks2008
-username    mssql
-password    obdaps83
-driverClass com.microsoft.sqlserver.jdbc.SQLServerDriver
 
 [MappingDeclaration] @collection [[
 mappingId   cl_specialoffer

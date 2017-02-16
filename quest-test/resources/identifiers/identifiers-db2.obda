@@ -2,12 +2,6 @@
 :		http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#
 
 
-[SourceDeclaration]
-sourceUri	RandBStockExchange
-connectionUrl jdbc:db2://10.7.20.39:50001/stocknew
-username	db2inst2
-password	fish
-driverClass	com.ibm.db2.jcc.DB2Driver
 
 [MappingDeclaration] @collection [[
 mappingId	Countries

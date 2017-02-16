@@ -33,9 +33,10 @@ public class OntologyTypesStockexchangeTest extends AbstractVirtualModeTest {
     
 	static final String owlFile = "src/main/resources/testcases-scenarios/virtual-mode/stockexchange/simplecq/stockexchange.owl";
 	static final String obdaFile = "src/main/resources/testcases-scenarios/virtual-mode/stockexchange/simplecq/stockexchange-db2.obda";
+    static final String propertyFile = "src/main/resources/testcases-scenarios/virtual-mode/stockexchange/simplecq/stockexchange-db2.properties";
 
     public OntologyTypesStockexchangeTest() {
-        super(owlFile, obdaFile);
+        super(owlFile, obdaFile, propertyFile);
     }
 
 

@@ -2,12 +2,6 @@
 :		http://ontop.inf.unibz.it/test/datatypes#
 xsd:	http://www.w3.org/2001/XMLSchema#
 
-[SourceDeclaration]
-sourceUri	MysqlTypes
-connectionUrl	jdbc:mysql://10.7.20.39/datatypes
-username	fish
-password	fish
-driverClass	com.mysql.jdbc.Driver
 
 [MappingDeclaration] @collection [[
 mappingId	Numeric Types

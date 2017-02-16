@@ -3,12 +3,6 @@ dc:  http://purl.org/dc/elements/1.1/
 :   http://example.org/book
 ns:  http://example.org/ns#
 
-[SourceDeclaration]
-sourceUri	sqlServer
-connectionUrl	jdbc:sqlserver://10.7.20.91;databaseName=ontopPlanning
-username	mssql
-password	obdaps83
-driverClass	com.microsoft.sqlserver.jdbc.SQLServerDriver
 
 [MappingDeclaration] @collection [[
 mappingId	mapping1

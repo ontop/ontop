@@ -20,23 +20,22 @@ package it.unibz.inf.ontop.answering.reformulation.tests;
  * #L%
  */
 
-import java.security.MessageDigest;
-import java.sql.*;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Locale;
-
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.model.Predicate;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import org.junit.Test;
-import java.util.ArrayList;
-import java.util.List;
-
 import org.semanticweb.owlapi.model.OWLObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.security.MessageDigest;
+import java.sql.Timestamp;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
 
 import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
 import static org.junit.Assert.assertTrue;
@@ -743,12 +742,17 @@ public abstract class AbstractBindTestWithFunctions {
                 + "   ?x ns:pubYear ?year .\n"
                 + "}";
 
+        checkReturnedValues(queryBind, getTZExpectedValues());
+
+    }
+
+    protected List<String> getTZExpectedValues(){
         List<String> expectedValues = new ArrayList<>();
         expectedValues.add("\"0.0\"");
         expectedValues.add("\"0.0\"");
         expectedValues.add("\"0.0\"");
         expectedValues.add("\"0.0\"");
-        checkReturnedValues(queryBind, expectedValues);
+        return expectedValues;
     }
 
     //    @Test see results of datetime with locale

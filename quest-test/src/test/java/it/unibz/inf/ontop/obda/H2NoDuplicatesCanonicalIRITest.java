@@ -21,7 +21,6 @@ package it.unibz.inf.ontop.obda;
  */
 
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
-import it.unibz.inf.ontop.injection.QuestSettings;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import org.junit.After;
 import org.junit.Before;
@@ -36,7 +35,6 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Properties;
 import java.util.Scanner;
 
 import static org.junit.Assert.assertEquals;
@@ -57,23 +55,26 @@ public class H2NoDuplicatesCanonicalIRITest {
 	private QuestOWL reasoner;
 	private Connection sqlConnection;
 
+	private static final String JDBC_URL =  "jdbc:h2:mem:wellboresNoDuplicates";
+	private static final String JDBC_USER =  "sa";
+	private static final String JDBC_PASSWORD =  "";
+
 	@Before
 	public void setUp() throws Exception {
 
-		sqlConnection = DriverManager.getConnection("jdbc:h2:mem:wellboresNoDuplicates","sa", "");
+		sqlConnection = DriverManager.getConnection(JDBC_URL,JDBC_USER, JDBC_PASSWORD);
 		java.sql.Statement s = sqlConnection.createStatement();
 		String text = new Scanner( new File("src/test/resources/sameAs/wellbores-same-as-can.sql") ).useDelimiter("\\A").next();
 		s.execute(text);
 		s.close();
 
-		Properties properties = new Properties();
-		// TODO: better integrate
-		properties.put(QuestSettings.SQL_GENERATE_REPLACE, false);
-
 		OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.ontologyFile(owlfile)
 				.nativeOntopMappingFile(obdafile)
-				.properties(properties)
+				.jdbcUrl(JDBC_URL)
+				.jdbcUser(JDBC_USER)
+				.jdbcPassword(JDBC_PASSWORD)
+				.enableIRISafeEncoding(false)
 				.build();
 
 		// Creating a new instance of the reasoner

@@ -28,9 +28,10 @@ public class NestedConcatTest extends AbstractVirtualModeTest {
 
     static final String owlfile = "src/test/resources/nestedConcat/test.owl";
     static final String obdafile = "src/test/resources/nestedConcat/test.obda";
+    static final String propertyfile = "src/test/resources/nestedConcat/test.properties";
 
     public NestedConcatTest() {
-        super(owlfile, obdafile);
+        super(owlfile, obdafile, propertyfile);
     }
 
 

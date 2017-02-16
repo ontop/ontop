@@ -11,9 +11,10 @@ public class OraclePrefixSourceTest extends AbstractVirtualModeTest {
 
     static final String owlFile = "src/test/resources/regex/stockBolzanoAddress.owl";
     static final String obdaFile = "src/test/resources/stockexchangePrefix.obda";
+    static final String propertiesFile = "src/test/resources/stockexchangePrefix.properties";
 
     public OraclePrefixSourceTest() {
-        super(owlFile, obdaFile);
+        super(owlFile, obdaFile, propertiesFile);
     }
 
 

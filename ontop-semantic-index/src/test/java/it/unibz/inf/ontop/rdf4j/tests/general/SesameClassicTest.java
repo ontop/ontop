@@ -19,48 +19,71 @@ package it.unibz.inf.ontop.rdf4j.tests.general;
  * limitations under the License.
  * #L%
  */
+
+import it.unibz.inf.ontop.injection.OntopQueryAnsweringSettings;
+import it.unibz.inf.ontop.rdf4j.repository.OntopVirtualRepository;
+import it.unibz.inf.ontop.si.OntopSemanticIndexLoader;
+import org.eclipse.rdf4j.model.*;
+import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
+import org.eclipse.rdf4j.model.vocabulary.RDF;
+import org.eclipse.rdf4j.query.*;
+import org.eclipse.rdf4j.query.impl.SimpleDataset;
+import org.eclipse.rdf4j.repository.Repository;
+import org.eclipse.rdf4j.repository.RepositoryConnection;
+import org.eclipse.rdf4j.repository.RepositoryException;
+import org.eclipse.rdf4j.rio.RDFParseException;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+
 import java.io.File;
 import java.io.IOException;
-
-import it.unibz.inf.ontop.rdf4j.repository.OntopRepositoryConnection;
-import junit.framework.TestCase;
-
-import org.eclipse.rdf4j.model.Literal;
-import org.eclipse.rdf4j.model.Statement;
-import org.eclipse.rdf4j.model.Value;
-import org.eclipse.rdf4j.model.ValueFactory;
-import org.eclipse.rdf4j.model.vocabulary.RDF;
-import org.eclipse.rdf4j.query.BindingSet;
-import org.eclipse.rdf4j.query.BooleanQuery;
-import org.eclipse.rdf4j.query.GraphQuery;
-import org.eclipse.rdf4j.query.GraphQueryResult;
-import org.eclipse.rdf4j.query.MalformedQueryException;
-import org.eclipse.rdf4j.query.QueryEvaluationException;
-import org.eclipse.rdf4j.query.QueryLanguage;
-import org.eclipse.rdf4j.query.TupleQuery;
-import org.eclipse.rdf4j.query.TupleQueryResult;
-import org.eclipse.rdf4j.repository.Repository;
-import org.eclipse.rdf4j.repository.RepositoryException;
-import org.eclipse.rdf4j.rio.RDFFormat;
-import org.eclipse.rdf4j.rio.RDFParseException;
+import java.util.Properties;
 
 
-public class SesameClassicTest extends TestCase {
+public class SesameClassicTest {
 
-	OntopRepositoryConnection con = null;
-	Repository repo = null;
+	RepositoryConnection con;
+	Repository repo;
 	String baseURI = "http://it.unibz.inf/obda/ontologies/test/translation/onto2.owl#";
-	
+	SimpleDataset dataset;
+	ValueFactory valueFactory;
+
+	@Before
 	public void setupInMemory() throws Exception 
 	{
 		// create a sesame in-memory repository
 		String owlfile = "src/test/resources/onto2.owl";
 
-		repo = new OntopClassicInMemoryRepository("my_name", owlfile, false, "TreeWitness");
-		repo.initialize();
-		con = (OntopRepositoryConnection) repo.getConnection();
+		Properties p = new Properties();
+		p.put(OntopQueryAnsweringSettings.EXISTENTIAL_REASONING, false);
+
+		dataset = new SimpleDataset();
+		File dataFile = new File(owlfile);
+		valueFactory = SimpleValueFactory.getInstance();
+		dataset.addDefaultGraph(valueFactory.createIRI(dataFile.toURI().toString()));
+
+		addFromURI();
+
+		try(OntopSemanticIndexLoader loader = OntopSemanticIndexLoader.loadRDFGraph(dataset, p)) {
+			repo = new OntopVirtualRepository(loader.getConfiguration());
+				/*
+		 		* Repository must be always initialized first
+				 */
+			repo.initialize();
+		}
+
+		con = repo.getConnection();
 	}
-	
+
+	@After
+	public void close() throws RepositoryException
+	{
+		System.out.println("Closing...");
+		con.close();
+		repo.shutDown();
+		System.out.println("Done.");
+	}
 	
 	public void addFromFile() throws RDFParseException, RepositoryException, IOException
 	{
@@ -68,34 +91,42 @@ public class SesameClassicTest extends TestCase {
 		File file = new File("src/test/resources/example/onto2plus.owl");
 
 		System.out.println("Add from file.");
-		con.add(file, baseURI, RDFFormat.RDFXML);
+		dataset.addDefaultGraph(valueFactory.createIRI(file.toURI().toString()));
+//		con.add(file, baseURI, RDFFormat.RDFXML);
 	}
 	
 	
 	public void addFromURI() throws RepositoryException
 	{
-		ValueFactory f = repo.getValueFactory();
+
 
 		// create some resources and literals to make statements out of
-		org.eclipse.rdf4j.model.URI alice = f.createURI(baseURI+"Alice");
-		org.eclipse.rdf4j.model.URI bob = f.createURI(baseURI+"Bob");
-		org.eclipse.rdf4j.model.URI age = f.createURI(baseURI + "age");
-		org.eclipse.rdf4j.model.URI person = f.createURI(baseURI+ "Person");
-		Literal bobsAge = f.createLiteral(5);
-		Literal alicesAge = f.createLiteral(14);
+		IRI alice = valueFactory.createIRI(baseURI+"Alice");
+		IRI bob = valueFactory.createIRI(baseURI+"Bob");
+		IRI age = valueFactory.createIRI(baseURI + "age");
+		IRI person = valueFactory.createIRI(baseURI+ "Person");
+		Literal bobsAge = valueFactory.createLiteral(5);
+		Literal alicesAge = valueFactory.createLiteral(14);
 
+		Statement aliceStatement = valueFactory.createStatement(alice, RDF.TYPE, person);
+
+		dataset.addNamedGraph((IRI)aliceStatement.getContext());
+
+
+//		dataset.addDefaultGraph(valueFactory.createIRI(dataFile.toURI().toString()));
 		// alice is a person
-		con.add(alice, RDF.TYPE, person);
-		// alice's name is "Alice"
-		//con.add(alice, age, alicesAge);
+//		Statement aliceStatement = valueFactory.createStatement(alice, RDF.TYPE, person);
+
+//		Statement aliceAgeStatement = valueFactory.createStatement(alice, age, alicesAge);
 
 		// bob is a person
-		con.add(bob, RDF.TYPE, person);
-		// bob's name is "Bob"
-		//con.add(bob, age, bobsAge);
+		Statement bobStatement = valueFactory.createStatement(alice, RDF.TYPE, person);
+
+
+//		Statement bobAgeStatement = valueFactory.createStatement(bob, age, bobsAge);
 	}
 	
-	
+
 	public void tupleQuery() throws QueryEvaluationException, RepositoryException, MalformedQueryException
 	{	
 
@@ -149,24 +180,18 @@ public class SesameClassicTest extends TestCase {
 		System.out.println(result);
 	}
 	
-	public void close() throws RepositoryException
-	{
-		System.out.println("Closing...");
-		con.close();
-		System.out.println("Done.");
-	}
-	
-	
+
+
+	@Test
 	public void test1() throws Exception
 	{
 		try{
-		setupInMemory();
-		addFromURI();
+
+
 		//addFromFile();
 	//	tupleQuery();
 		//booleanQuery();
 		graphQuery();
-		close();
 		}
 		catch(Exception e)
 		{e.printStackTrace();

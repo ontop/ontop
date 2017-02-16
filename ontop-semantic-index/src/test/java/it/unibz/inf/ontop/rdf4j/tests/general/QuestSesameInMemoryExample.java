@@ -20,49 +20,85 @@ package it.unibz.inf.ontop.rdf4j.tests.general;
  * #L%
  */
 
-import java.io.File;
-import java.util.List;
-
+import it.unibz.inf.ontop.injection.OntopQueryAnsweringSettings;
+import it.unibz.inf.ontop.rdf4j.repository.OntopVirtualRepository;
+import it.unibz.inf.ontop.si.OntopSemanticIndexLoader;
 import org.eclipse.rdf4j.model.Value;
+import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.query.BindingSet;
 import org.eclipse.rdf4j.query.QueryLanguage;
 import org.eclipse.rdf4j.query.TupleQuery;
 import org.eclipse.rdf4j.query.TupleQueryResult;
+import org.eclipse.rdf4j.query.impl.SimpleDataset;
 import org.eclipse.rdf4j.repository.Repository;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
-import org.eclipse.rdf4j.rio.RDFFormat;
+import org.junit.*;
+
+import java.io.File;
+import java.util.List;
+import java.util.Properties;
 
 public class QuestSesameInMemoryExample {
 
-	final String owlFile = "src/main/resources/example/exampleBooks.owl";
-	final String owlAboxFile = "src/main/resources/example/exampleBooksAbox.owl";
+	final static String owlFile = "src/test/resources/test/exampleBooks.owl";
+	final static String owlAboxFile = "src/test/resources/test/exampleBooksAbox.owl";
 	
 	final static String BASE_URI = "http://meraka/moss/exampleBooks.owl#";
-	
-	public void runQuery() throws Exception {
+	private static Repository repository;
+	private RepositoryConnection con;
+
+	@BeforeClass
+	public static void init() throws Exception {
 
 		/*
 		 * Create a Quest Sesame (in-memory) repository with additional setup
 		 * that uses no existential reasoning and the rewriting technique is
 		 * using TreeWitness algorithm.
 		 */
-		Repository repo = new OntopClassicInMemoryRepository("inMemoryExample", owlFile, false, "TreeWitness");
 
-		/*
-		 * Repository must be always initialized first
-		 */
-		repo.initialize();
-
-		/*
-		 * Get the repository connection
-		 */
-		RepositoryConnection con = repo.getConnection();
+		Properties p = new Properties();
+		p.put(OntopQueryAnsweringSettings.EXISTENTIAL_REASONING, false);
 
 		/*
 		 * Add RDF data to the repository
 		 */
-		File aboxFile = new File(owlAboxFile);
-		con.add(aboxFile, BASE_URI, RDFFormat.RDFXML);
+		File ontologyAboxFile = new File(owlAboxFile);
+		File ontologyFile = new File(owlFile);
+
+		SimpleDataset dataset = new SimpleDataset();
+		SimpleValueFactory valueFactory = SimpleValueFactory.getInstance();
+		dataset.addDefaultGraph(valueFactory.createIRI(ontologyAboxFile.toURI().toString()));
+		dataset.addDefaultGraph(valueFactory.createIRI(ontologyFile.toURI().toString()));
+
+		try(OntopSemanticIndexLoader loader = OntopSemanticIndexLoader.loadRDFGraph(dataset, p)) {
+			repository = new OntopVirtualRepository(loader.getConfiguration());
+				/*
+		 		* Repository must be always initialized first
+				 */
+			repository.initialize();
+		}
+	}
+
+	@AfterClass
+	public static void terminate() throws Exception {
+		repository.shutDown();
+	}
+
+	@Before
+	public void setUp() throws Exception {
+		/*
+		 * Get the repository connection
+		 */
+		con = repository.getConnection();
+	}
+
+	@After
+	public void tearDown() throws Exception {
+		con.close();
+	}
+
+	@Test
+	public void runQuery() throws Exception {
 		
 		/*
 		 * Sample query: show all books with their title.

@@ -12,9 +12,10 @@ public class PrefixSourceTest extends AbstractVirtualModeTest{
 
     static final String owlfile = "src/test/resources/movieontology.owl";
     static final String obdafile = "src/test/resources/newPrefixMovieOntology.obda";
+    static final String propertiesfile = "src/test/resources/newPrefixMovieOntology.properties";
 
     public PrefixSourceTest() {
-        super(owlfile, obdafile);
+        super(owlfile, obdafile, propertiesfile);
     }
 
 

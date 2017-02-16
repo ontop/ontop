@@ -1,12 +1,6 @@
 [PrefixDeclaration]
 :		http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/
 
-[SourceDeclaration]
-sourceUri	fishdelish
-connectionUrl	
-username	fish
-password	fish
-driverClass	org.h2.Driver
 
 [MappingDeclaration] @collection [[
 mappingId	Species

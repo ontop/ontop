@@ -87,7 +87,7 @@ public class QuestOWLExampleNotLatin {
 			/*
 			 * Print the query summary
 			 */
-			QuestOWLStatement qst = st;
+			OntopOWLStatement qst = st;
 			String sqlQuery = ((SQLExecutableQuery)qst.getExecutableQuery(sparqlQuery)).getSQL();
 
 			System.out.println();

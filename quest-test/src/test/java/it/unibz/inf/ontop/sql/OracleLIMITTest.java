@@ -21,25 +21,26 @@ package it.unibz.inf.ontop.sql;
  */
 
 
-
-import java.io.File;
-import java.io.IOException;
-
+import it.unibz.inf.ontop.exception.DuplicateMappingException;
+import it.unibz.inf.ontop.exception.InvalidMappingException;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
+import it.unibz.inf.ontop.owlrefplatform.core.SQLExecutableQuery;
+import it.unibz.inf.ontop.owlrefplatform.owlapi.OntopOWLConnection;
+import it.unibz.inf.ontop.owlrefplatform.owlapi.OntopOWLStatement;
+import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWL;
+import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLFactory;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import it.unibz.inf.ontop.exception.DuplicateMappingException;
-import it.unibz.inf.ontop.exception.InvalidMappingException;
-import it.unibz.inf.ontop.model.OBDAException;
-import it.unibz.inf.ontop.owlrefplatform.core.SQLExecutableQuery;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLException;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.io.IOException;
 
 import static org.junit.Assert.assertTrue;
 
@@ -56,6 +57,7 @@ public class OracleLIMITTest  {
 	final String owlfile = "resources/oraclesql/o.owl";
 	final String obdafile1 = "resources/oraclesql/o1.obda";
 	final String obdafile2 = "resources/oraclesql/o2.obda";
+	final String propertyFile = "resources/oraclesql/o2.properties";
 	private QuestOWL reasoner;
 
 	@Before
@@ -74,7 +76,7 @@ public class OracleLIMITTest  {
 	}
 	
 
-	private void runQuery(String obdaFileName) throws OBDAException, OWLException, IOException,
+	private void runQuery(String obdaFileName) throws OWLException, IOException,
             InvalidMappingException, DuplicateMappingException {
 
 		QuestOWLFactory factory = new QuestOWLFactory();
@@ -83,6 +85,7 @@ public class OracleLIMITTest  {
 				.ontologyFile(owlfile)
 				.nativeOntopMappingFile(obdaFileName)
 				.enableFullMetadataExtraction(false)
+				.propertyFile(propertyFile)
 				.build();
 
 		reasoner = factory.createReasoner(configuration);

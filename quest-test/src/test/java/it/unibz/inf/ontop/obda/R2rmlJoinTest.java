@@ -1,7 +1,6 @@
 package it.unibz.inf.ontop.obda;
 
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
-import it.unibz.inf.ontop.injection.QuestCoreSettings;
 import it.unibz.inf.ontop.io.QueryIOManager;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import it.unibz.inf.ontop.querymanager.QueryController;
@@ -22,13 +21,14 @@ public class R2rmlJoinTest {
     final String owlFile = "src/test/resources/oreda/oreda_bootstrapped_ontology.owl";
     final String r2rmlFile = "src/test/resources/oreda/oreda_bootstrapped_mapping.ttl";
     final String obdaFile = "src/test/resources/oreda/oreda_bootstrapped_mapping.obda";
+    final String propertyFile = "src/test/resources/oreda/oreda_bootstrapped_mapping.properties";
 
     private void runTests(Optional<Properties> optionalProperties, String filename) throws Exception {
 
         // Creating a new instance of the reasoner
         QuestOWLFactory factory = new QuestOWLFactory();
         OntopSQLOWLAPIConfiguration.Builder configBuilder = OntopSQLOWLAPIConfiguration.defaultBuilder()
-                .ontologyFile(owlFile);
+                .ontologyFile(owlFile).propertyFile(propertyFile);
 
         if (optionalProperties.isPresent()) {
             configBuilder
@@ -85,11 +85,6 @@ public class R2rmlJoinTest {
     @Test
     public void testR2rml() throws Exception {
         Properties p = new Properties();
-        p.setProperty(QuestCoreSettings.JDBC_NAME, "mssql");
-        p.setProperty(QuestCoreSettings.JDBC_USER, "mssql");
-        p.setProperty(QuestCoreSettings.JDBC_PASSWORD, "obdaps83");
-        p.setProperty(QuestCoreSettings.JDBC_URL, "jdbc:sqlserver://10.7.20.91;databaseName=OREDA_OPTIQUE");
-        p.setProperty(QuestCoreSettings.JDBC_DRIVER, "com.microsoft.sqlserver.jdbc.SQLServerDriver");
 
         log.info("Loading r2rml file");
 

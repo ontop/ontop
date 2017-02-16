@@ -4,12 +4,6 @@ owl:		http://www.w3.org/2002/07/owl#
 rdf:		http://www.w3.org/1999/02/22-rdf-syntax-ns#
 rdfs:		http://www.w3.org/2000/01/rdf-schema#
 
-[SourceDeclaration]
-sourceUri	lubm
-connectionUrl	jdbc:mysql://10.7.20.39/lubm1
-username	fish
-password	fish
-driverClass	com.mysql.jdbc.Driver
 
 [MappingDeclaration] @collection [[
 mappingId	Undergraduate Students

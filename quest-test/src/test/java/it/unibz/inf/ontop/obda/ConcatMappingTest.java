@@ -13,9 +13,10 @@ public class ConcatMappingTest extends AbstractVirtualModeTest {
 
     static final String owlFile = "src/test/resources/northwind/mapping-northwind.owl";
     static final String obdaFile = "src/test/resources/northwind/mapping-northwind.obda";
+    static final String propertiesFile = "src/test/resources/northwind/mapping-northwind.properties";
 
     public ConcatMappingTest() {
-        super(owlFile, obdaFile);
+        super(owlFile, obdaFile, propertiesFile);
     }
 
     public void testConcatQuery() throws Exception {

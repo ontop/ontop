@@ -20,9 +20,8 @@ package it.unibz.inf.ontop.obda;
  * #L%
  */
 
-import it.unibz.inf.ontop.injection.OBDASettings;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
-import it.unibz.inf.ontop.model.*;
+import it.unibz.inf.ontop.model.Predicate;
 import it.unibz.inf.ontop.ontology.DataPropertyExpression;
 import it.unibz.inf.ontop.ontology.OClass;
 import it.unibz.inf.ontop.ontology.ObjectPropertyExpression;
@@ -62,6 +61,7 @@ public class R2rmlCheckerTest {
 
 	final String owlfile = "src/test/resources/r2rml/npd-v2-ql_a.owl";
     final String obdafile = "src/test/resources/r2rml/npd-v2-ql_a.obda";
+	final String propertyfile = "src/test/resources/r2rml/npd-v2-ql_a.properties";
 	final String r2rmlfile = "src/test/resources/r2rml/npd-v2-ql_test_a.ttl";
 
 	private List<Predicate> emptyConceptsObda = new ArrayList<>();
@@ -82,15 +82,6 @@ public class R2rmlCheckerTest {
 
 		onto = OWLAPITranslatorUtility.translate(owlOntology);
 
-		Properties p = new Properties();
-        p.setProperty(OBDASettings.JDBC_NAME, "npd");
-        p.setProperty(OBDASettings.JDBC_URL, "jdbc:mysql://10.7.20.39/npd");
-        p.setProperty(OBDASettings.JDBC_USER, "fish");
-        p.setProperty(OBDASettings.JDBC_PASSWORD, "fish");
-        p.setProperty(OBDASettings.JDBC_DRIVER, "com.mysql.jdbc.Driver");
-
-		loadOBDA(p);
-		loadR2rml(p);
 	}
 
 	@After
@@ -110,18 +101,19 @@ public class R2rmlCheckerTest {
 		}
 
 	}
-	
-	@Test 
-	public void testMappings() throws Exception {
-		for (CQIE q : reasonerOBDA.getQuestInstance().getUnfolderRules()) {
-			if (!reasonerR2rml.getQuestInstance().getUnfolderRules().contains(q))
-				System.out.println("NOT IN R2RML: " + q);
-		}
-		for (CQIE q : reasonerR2rml.getQuestInstance().getUnfolderRules()) {
-			if (!reasonerOBDA.getQuestInstance().getUnfolderRules().contains(q))
-				System.out.println("NOT IN OBDA: " + q);
-		}
-	}
+
+	//TODO:  extract the two OBDA specifications to compare the mapping objects
+//	@Test Cannot get anymore the unfolder rules,
+//	public void testMappings() throws Exception {
+//		for (CQIE q : reasonerOBDA.getQuestInstance().getUnfolderRules()) {
+//			if (!reasonerR2rml.getQuestInstance().getUnfolderRules().contains(q))
+//				System.out.println("NOT IN R2RML: " + q);
+//		}
+//		for (CQIE q : reasonerR2rml.getQuestInstance().getUnfolderRules()) {
+//			if (!reasonerOBDA.getQuestInstance().getUnfolderRules().contains(q))
+//				System.out.println("NOT IN OBDA: " + q);
+//		}
+//	}
 
 	/**
 	 * Check the number of descriptions retrieved by the obda mapping and the
@@ -346,7 +338,7 @@ public class R2rmlCheckerTest {
 		OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.r2rmlMappingFile(r2rmlfile)
 				.ontology(owlOntology)
-				.properties(p)
+				.propertyFile(propertyfile)
 				.build();
         reasonerR2rml = factory.createReasoner(config);
 	}
@@ -367,7 +359,7 @@ public class R2rmlCheckerTest {
 
 		OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.nativeOntopMappingFile(obdafile)
-				.properties(p)
+				.propertyFile(propertyfile)
 				.ontology(owlOntology)
 				.build();
 		reasonerOBDA = factory.createReasoner(config);

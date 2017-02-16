@@ -1,12 +1,6 @@
 [PrefixDeclaration]
 :		http://www.example.org/
 
-[SourceDeclaration]
-sourceUri	viewTest
-connectionUrl	jdbc:mysql://localhost/ontowis_10k
-username	root
-password	fish
-driverClass	com.mysql.jdbc.Driver
 
 [MappingDeclaration] @collection [[
 mappingId	MAPID-A1

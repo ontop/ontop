@@ -1,12 +1,6 @@
 [PrefixDeclaration]
 :		http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#
 
-[SourceDeclaration]
-sourceUri	IdentifierMsSQL
-connectionUrl	jdbc:sqlserver://10.7.20.91;databaseName=stockexchange_new
-username	mssql
-password	obdaps83
-driverClass	com.microsoft.sqlserver.jdbc.SQLServerDriver
 
 [MappingDeclaration] @collection [[
 mappingId	Countries
