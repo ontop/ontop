@@ -6,6 +6,7 @@ import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.ImmutableSubstitution;
 import it.unibz.inf.ontop.model.ImmutableTerm;
 import it.unibz.inf.ontop.model.Variable;
+import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionImpl;
 import it.unibz.inf.ontop.pivotalrepr.*;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
@@ -46,6 +47,15 @@ public class UnionNodeImpl extends QueryNodeImpl implements UnionNode {
     public SubstitutionResults<UnionNode> applyAscendingSubstitution(
             ImmutableSubstitution<? extends ImmutableTerm> substitution,
             QueryNode childNode, IntermediateQuery query) {
+        /**
+         * Reduce the domain of the substitution to the variables projected out by the union node
+         */
+        substitution = new ImmutableSubstitutionImpl(
+                substitution.getImmutableMap().entrySet().stream()
+                        .filter(e -> projectedVariables.contains(e.getKey()))
+                .collect(ImmutableCollectors.toMap())
+        );
+
         if (substitution.isEmpty()) {
             return new SubstitutionResultsImpl<>(NO_CHANGE);
         }
@@ -53,11 +63,9 @@ public class UnionNodeImpl extends QueryNodeImpl implements UnionNode {
          * Asks for inserting a construction node between the child node and this node.
          * Such a construction node will contain the substitution.
          */
-        else {
-            ConstructionNode newParentOfChildNode = new ConstructionNodeImpl(projectedVariables,
-                    (ImmutableSubstitution<ImmutableTerm>) substitution, Optional.empty());
-            return new SubstitutionResultsImpl<>(newParentOfChildNode, childNode);
-        }
+         ConstructionNode newParentOfChildNode = new ConstructionNodeImpl(projectedVariables,
+                 (ImmutableSubstitution<ImmutableTerm>) substitution, Optional.empty());
+         return new SubstitutionResultsImpl<>(newParentOfChildNode, childNode);
     }
 
     @Override
