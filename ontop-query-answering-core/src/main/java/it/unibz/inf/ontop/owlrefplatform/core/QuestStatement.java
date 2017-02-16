@@ -34,7 +34,7 @@ import java.util.concurrent.CountDownLatch;
 
 
 /**
- * Abstract class for QuestStatement.
+ * Abstract implementation of OntopStatement.
  *
  */
 public abstract class QuestStatement implements OntopStatement {
