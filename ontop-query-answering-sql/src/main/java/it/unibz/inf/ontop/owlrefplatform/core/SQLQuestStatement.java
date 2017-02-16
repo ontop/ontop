@@ -154,7 +154,7 @@ public class SQLQuestStatement extends QuestStatement {
     }
 
     @Override
-    protected BooleanResultSet executeBooleanQuery(AskQuery query, ExecutableQuery executableQuery)
+    protected BooleanResultSet executeBooleanQuery(ExecutableQuery executableQuery)
             throws OntopQueryEvaluationException {
         SQLExecutableQuery sqlTargetQuery = checkAndConvertTargetQuery(executableQuery);
         String sqlQuery = sqlTargetQuery.getSQL();
@@ -171,7 +171,7 @@ public class SQLQuestStatement extends QuestStatement {
     }
 
     @Override
-    protected TupleResultSet executeSelectQuery(SelectQuery query, ExecutableQuery executableQuery)
+    protected TupleResultSet executeSelectQuery(ExecutableQuery executableQuery)
             throws OntopQueryEvaluationException {
         SQLExecutableQuery sqlTargetQuery = checkAndConvertTargetQuery(executableQuery);
         String sqlQuery = sqlTargetQuery.getSQL();

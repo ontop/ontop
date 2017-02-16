@@ -138,18 +138,21 @@ public abstract class QuestStatement implements OntopStatement {
 		}
 	}
 
-
-	/**
-	 * TODO: describe
-	 */
-	protected abstract TupleResultSet executeSelectQuery(SelectQuery inputQuery, ExecutableQuery executableQuery)
+	protected abstract TupleResultSet executeSelectQuery(ExecutableQuery executableQuery)
 			throws OntopQueryEvaluationException;
 
-	/**
-	 * TODO: describe
-	 */
-	protected abstract BooleanResultSet executeBooleanQuery(AskQuery inputQuery, ExecutableQuery executableQuery)
+	private TupleResultSet executeSelectQuery(SelectQuery inputQuery, ExecutableQuery executableQuery)
+			throws OntopQueryEvaluationException {
+		return executeSelectQuery(executableQuery);
+	}
+
+	protected abstract BooleanResultSet executeBooleanQuery(ExecutableQuery executableQuery)
 			throws OntopQueryEvaluationException;
+
+	private BooleanResultSet executeBooleanQuery(AskQuery inputQuery, ExecutableQuery executableQuery)
+			throws OntopQueryEvaluationException {
+		return executeBooleanQuery(executableQuery);
+	}
 
 	/**
 	 * TODO: describe
