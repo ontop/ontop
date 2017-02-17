@@ -38,12 +38,14 @@ import java.io.File;
 import java.util.List;
 import java.util.Properties;
 
+import static junit.framework.TestCase.assertEquals;
+import static junit.framework.TestCase.assertTrue;
+
 public class QuestSesameInMemoryExample {
 
 	final static String owlFile = "src/test/resources/test/exampleBooks.owl";
 	final static String owlAboxFile = "src/test/resources/test/exampleBooksAbox.owl";
-	
-	final static String BASE_URI = "http://meraka/moss/exampleBooks.owl#";
+
 	private static Repository repository;
 	private RepositoryConnection con;
 
@@ -117,8 +119,10 @@ public class QuestSesameInMemoryExample {
 			 */
 			List<String> bindingNames = result.getBindingNames();
 			System.out.println(bindingNames);
-	
+	        assertTrue(result.hasNext());
+	        int nresults = 0;
 			while (result.hasNext()) {
+			    nresults++;
 				BindingSet bindingSet = result.next();
 				boolean needSeparator = false;
 				for (String binding : bindingNames) {
@@ -131,6 +135,7 @@ public class QuestSesameInMemoryExample {
 				}
 				System.out.println();
 			}
+			assertEquals(23, nresults);
 	
 			/*
 			 * Close result set to release resources
@@ -150,7 +155,11 @@ public class QuestSesameInMemoryExample {
 	public static void main(String[] args) {
 		try {
 			QuestSesameInMemoryExample example = new QuestSesameInMemoryExample();
+			example.init();
+			example.setUp();
 			example.runQuery();
+			example.tearDown();
+			example.terminate();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

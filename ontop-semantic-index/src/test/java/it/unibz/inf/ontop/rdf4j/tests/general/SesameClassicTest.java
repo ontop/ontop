@@ -31,26 +31,27 @@ import org.eclipse.rdf4j.query.impl.SimpleDataset;
 import org.eclipse.rdf4j.repository.Repository;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.eclipse.rdf4j.repository.RepositoryException;
-import org.eclipse.rdf4j.rio.RDFParseException;
-import org.junit.After;
-import org.junit.Before;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.Properties;
+
+import static junit.framework.TestCase.assertEquals;
+import static junit.framework.TestCase.assertTrue;
 
 
 public class SesameClassicTest {
 
-	RepositoryConnection con;
-	Repository repo;
-	String baseURI = "http://it.unibz.inf/obda/ontologies/test/translation/onto2.owl#";
-	SimpleDataset dataset;
-	ValueFactory valueFactory;
 
-	@Before
-	public void setupInMemory() throws Exception 
+	static Repository repo;
+	String baseURI = "http://it.unibz.inf/obda/ontologies/test/translation/onto2.owl#";
+	static SimpleDataset dataset;
+	static ValueFactory valueFactory;
+
+	@BeforeClass
+	public static void setupInMemory() throws Exception
 	{
 		// create a sesame in-memory repository
 		String owlfile = "src/test/resources/onto2.owl";
@@ -61,9 +62,19 @@ public class SesameClassicTest {
 		dataset = new SimpleDataset();
 		File dataFile = new File(owlfile);
 		valueFactory = SimpleValueFactory.getInstance();
+
+		System.out.println("First file.");
 		dataset.addDefaultGraph(valueFactory.createIRI(dataFile.toURI().toString()));
 
-		addFromURI();
+		System.out.println("Add from files.");
+
+		// /add data to dataset for the repository
+		File file = new File("src/test/resources/onto2plus.owl");
+		File file2 = new File("src/test/resources/onto2.ttl");
+
+		dataset.addDefaultGraph(valueFactory.createIRI(file.toURI().toString()));
+
+		dataset.addDefaultGraph(valueFactory.createIRI(file2.toURI().toString()));
 
 		try(OntopSemanticIndexLoader loader = OntopSemanticIndexLoader.loadRDFGraph(dataset, p)) {
 			repo = new OntopVirtualRepository(loader.getConfiguration());
@@ -73,30 +84,19 @@ public class SesameClassicTest {
 			repo.initialize();
 		}
 
-		con = repo.getConnection();
 	}
 
-	@After
-	public void close() throws RepositoryException
+	@AfterClass
+	public static void close() throws RepositoryException
 	{
 		System.out.println("Closing...");
-		con.close();
 		repo.shutDown();
 		System.out.println("Done.");
 	}
-	
-	public void addFromFile() throws RDFParseException, RepositoryException, IOException
-	{
-		// /add data to repo
-		File file = new File("src/test/resources/example/onto2plus.owl");
 
-		System.out.println("Add from file.");
-		dataset.addDefaultGraph(valueFactory.createIRI(file.toURI().toString()));
-//		con.add(file, baseURI, RDFFormat.RDFXML);
-	}
-	
-	
-	public void addFromURI() throws RepositoryException
+
+	// I need to pass a dataset to the repository, it is not possible anymore to add triples to the repository later
+	private void addFromURI() throws RepositoryException
 	{
 
 
@@ -110,10 +110,8 @@ public class SesameClassicTest {
 
 		Statement aliceStatement = valueFactory.createStatement(alice, RDF.TYPE, person);
 
-		dataset.addNamedGraph((IRI)aliceStatement.getContext());
 
 
-//		dataset.addDefaultGraph(valueFactory.createIRI(dataFile.toURI().toString()));
 		// alice is a person
 //		Statement aliceStatement = valueFactory.createStatement(alice, RDF.TYPE, person);
 
@@ -126,9 +124,10 @@ public class SesameClassicTest {
 //		Statement bobAgeStatement = valueFactory.createStatement(bob, age, bobsAge);
 	}
 	
-
+	@Test
 	public void tupleQuery() throws QueryEvaluationException, RepositoryException, MalformedQueryException
 	{	
+
 
 		// /query repo
 		// con.setNamespace("onto",
@@ -138,66 +137,61 @@ public class SesameClassicTest {
 				+ "SELECT ?x ?y WHERE { ?x a :Person. ?x :age ?y } ";
 		// String queryString =
 		// "SELECT ?x ?y WHERE { ?x a onto:Person. ?x onto:age ?y } ";
-		TupleQuery tupleQuery = (con).prepareTupleQuery(QueryLanguage.SPARQL, queryString);
-		TupleQueryResult result = tupleQuery.evaluate();
 
-		System.out.println(result.getBindingNames());
+		try (RepositoryConnection con = repo.getConnection()) {
+			TupleQuery tupleQuery = (con).prepareTupleQuery(QueryLanguage.SPARQL, queryString);
+			TupleQueryResult result = tupleQuery.evaluate();
 
-		while (result.hasNext()) {
-			BindingSet bindingSet = result.next();
-			Value valueOfX = bindingSet.getValue("x");
-			Literal valueOfY = (Literal) bindingSet.getValue("y");
-			System.out.println(valueOfX.stringValue() + ", "+ valueOfY.floatValue());
+			System.out.println(result.getBindingNames());
+			int nresult = 0;
+			while (result.hasNext()) {
+				BindingSet bindingSet = result.next();
+				Value valueOfX = bindingSet.getValue("x");
+				Literal valueOfY = (Literal) bindingSet.getValue("y");
+				System.out.println(valueOfX.stringValue() + ", " + valueOfY.floatValue());
+				nresult++;
+			}
+			assertEquals(3, nresult);
+			result.close();
 		}
-		result.close();
 	}
-	
+
+	@Test
 	public void graphQuery() throws RepositoryException, MalformedQueryException, QueryEvaluationException
 	{
 		String queryString = "CONSTRUCT {?x a ?y} WHERE { ?x a ?y} ";
 		// String queryString =
 		// "SELECT ?x ?y WHERE { ?x a onto:Person. ?x onto:age ?y } ";
-		GraphQuery graphQuery = (con).prepareGraphQuery(QueryLanguage.SPARQL, queryString);
-		GraphQueryResult result = graphQuery.evaluate();
+		try (RepositoryConnection con = repo.getConnection()) {
+			GraphQuery graphQuery = (con).prepareGraphQuery(QueryLanguage.SPARQL, queryString);
+			GraphQueryResult result = graphQuery.evaluate();
 
-		while (result.hasNext()) {
-			Statement st = result.next();
-			System.out.println(st.toString());
+			int nresult = 0;
+			while (result.hasNext()) {
+				Statement st = result.next();
+				System.out.println(st.toString());
+				nresult++;
+			}
+			assertEquals(14, nresult);
+			result.close();
 		}
-		result.close();
 	}
-	
+
+	@Test
 	public void booleanQuery() throws QueryEvaluationException, RepositoryException, MalformedQueryException
 	{	
 		
 		// /query repo
 		String queryString = "PREFIX : \n<http://it.unibz.inf/obda/ontologies/test/translation/onto2.owl#>\n "
 				+ "ASK { :Lisa a :Person} ";
-		BooleanQuery boolQuery = (con).prepareBooleanQuery(
-				QueryLanguage.SPARQL, queryString);
-		boolean result = boolQuery.evaluate();
-
-		System.out.println(result);
-	}
-	
-
-
-	@Test
-	public void test1() throws Exception
-	{
-		try{
-
-
-		//addFromFile();
-	//	tupleQuery();
-		//booleanQuery();
-		graphQuery();
+		try (RepositoryConnection con = repo.getConnection()) {
+			BooleanQuery boolQuery = (con).prepareBooleanQuery(
+					QueryLanguage.SPARQL, queryString);
+			boolean result = boolQuery.evaluate();
+			assertTrue(result);
 		}
-		catch(Exception e)
-		{e.printStackTrace();
-		throw e;}
-		
 	}
+
 	
 
 }
