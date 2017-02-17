@@ -120,8 +120,5 @@
             <SQLQuery string="select name.id as id, name.name as name from name"/>
         </mapping>
     </mappings>
-    <dataSource URI="kbdb_imdb" databaseDriver="org.postgresql.Driver"
-        databaseName="imdbobda" databasePassword="imdb-09"
-        databaseURL="jbdc:postgresql://obdalin.inf.unibz.it/imdbobda"
-        databaseUsername="imdbobda" isAboxDump="" name="kbdb_imdb" ontouri="http://www.owl-ontologies.com/Ontology1242910306.owl"/>
+    
 </OBDA>

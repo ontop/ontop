@@ -31,9 +31,10 @@ public class PostgresLowercaseIdentifierTest extends AbstractVirtualModeTest {
 
 	static final String owlfile = "resources/identifiers/identifiers.owl";
 	static final String obdafile = "resources/identifiers/identifiers-lowercase-postgres.obda";
+	static final String propertyfile = "resources/identifiers/identifiers-lowercase-postgres.properties";
 
 	public PostgresLowercaseIdentifierTest() {
-		super(owlfile, obdafile);
+		super(owlfile, obdafile, propertyfile);
 	}
 
 	/**

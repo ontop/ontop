@@ -3,12 +3,6 @@ person:		http://www.semanticweb.org/tibagosi/ontologies/2012/11/Ontology13558196
 book:		http://www.semanticweb.org/tibagosi/ontologies/2012/11/Ontology1355819752067.owl#
 :		http://www.semanticweb.org/tibagosi/ontologies/2012/11/Ontology1355821406833.owl#
 
-[SourceDeclaration]
-sourceUri	simple-h2
-connectionUrl	jdbc:h2:tcp://localhost/test
-username	sa
-password	
-driverClass	org.h2.Driver
 
 [MappingDeclaration] @collection [[
 mappingId	Book

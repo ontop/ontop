@@ -2,12 +2,6 @@
 :		    http://www.ola.fr#
 oboe-core:  http://ecoinformatics.org/oboe/oboe.1.0/oboe-core.owl#
 
-[SourceDeclaration]
-sourceUri	SmallDataset
-connectionUrl	jdbc:h2:mem:questjunitdb
-username	sa
-password	test
-driverClass	org.h2.Driver
 
 [MappingDeclaration] @collection [[
 mappingId	mappingMeasure

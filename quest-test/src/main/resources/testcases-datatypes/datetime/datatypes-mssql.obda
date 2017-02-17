@@ -1,12 +1,6 @@
 [PrefixDeclaration]
 :		http://ontop.inf.unibz.it/test/datatypes#
 
-[SourceDeclaration]
-sourceUri	MssqlTypes
-connectionUrl	jdbc:sqlserver://10.7.20.91;databaseName=datatypes
-username	mssql
-password	obdaps83
-driverClass	com.microsoft.sqlserver.jdbc.SQLServerDriver
 
 [MappingDeclaration] @collection [[
 mappingId	Numeric Types

@@ -31,9 +31,10 @@ public class MySQLIdentifierTest extends AbstractVirtualModeTest {
 
 	private static final String owlfile = "resources/identifiers/identifiers.owl";
 	private static final String obdafile = "resources/identifiers/identifiers-mysql.obda";
+	private static final String propertiesfile = "resources/identifiers/identifiers-mysql.properties";
 
 	public MySQLIdentifierTest() {
-		super(owlfile, obdafile);
+		super(owlfile, obdafile, propertiesfile);
 	}
 
 	/**

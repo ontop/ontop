@@ -1,11 +1,10 @@
 package it.unibz.inf.ontop.rdf4j.tests.general;
 
 
+import it.unibz.inf.ontop.injection.OntopSQLCoreSettings;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.rdf4j.repository.OntopVirtualRepository;
 import junit.framework.TestCase;
-import it.unibz.inf.ontop.injection.QuestCoreSettings;
-import org.junit.Test;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
 import org.eclipse.rdf4j.query.QueryLanguage;
@@ -16,13 +15,13 @@ import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.eclipse.rdf4j.repository.RepositoryException;
 import org.eclipse.rdf4j.rio.*;
 import org.eclipse.rdf4j.rio.helpers.StatementCollector;
+import org.junit.Test;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyIRIMapper;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.util.AutoIRIMapper;
-
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -35,7 +34,6 @@ public class SesameTableWithSpaceTest extends TestCase {
 
 	String owlfile = "src/test/resources/northwind/1.4a.owl";
 	String mappingfile = "src/test/resources/northwind/mapping-northwind-1421066727259.ttl";
-	String queryfile = "";
 
 	OWLOntology owlontology;
 	Model mappings;
@@ -70,12 +68,12 @@ public class SesameTableWithSpaceTest extends TestCase {
 
 		connectionProperties = new Properties();
 		// set jdbc params in config
-		connectionProperties.put(QuestCoreSettings.JDBC_NAME, "northwindSpaced");
-		connectionProperties.put(QuestCoreSettings.JDBC_URL,
+		connectionProperties.put(OntopSQLCoreSettings.JDBC_NAME, "northwindSpaced");
+		connectionProperties.put(OntopSQLCoreSettings.JDBC_URL,
 				"jdbc:mysql://10.7.20.39/northwindSpaced?sessionVariables=sql_mode='ANSI'");
-		connectionProperties.put(QuestCoreSettings.JDBC_USER, "fish");
-		connectionProperties.put(QuestCoreSettings.JDBC_PASSWORD, "fish");
-		connectionProperties.put(QuestCoreSettings.JDBC_DRIVER,"com.mysql.jdbc.Driver");
+		connectionProperties.put(OntopSQLCoreSettings.JDBC_USER, "fish");
+		connectionProperties.put(OntopSQLCoreSettings.JDBC_PASSWORD, "fish");
+		connectionProperties.put(OntopSQLCoreSettings.JDBC_DRIVER,"com.mysql.jdbc.Driver");
 	}
 
 	public void setUp() {
@@ -89,7 +87,7 @@ public class SesameTableWithSpaceTest extends TestCase {
 					.properties(connectionProperties)
 					.build();
 
-			repo = new OntopVirtualRepository("virtualExample2", configuration);
+			repo = new OntopVirtualRepository(configuration);
 			/*
 			 * Repository must be always initialized first
 			 */

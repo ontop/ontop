@@ -3,16 +3,19 @@ package it.unibz.inf.ontop.owlrefplatform.owlapi;
 import it.unibz.inf.ontop.exception.InvalidMappingException;
 import it.unibz.inf.ontop.exception.InvalidPredicateDeclarationException;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
-import org.semanticweb.owlapi.model.*;
+import org.semanticweb.owlapi.model.OWLException;
+import org.semanticweb.owlapi.model.OWLObject;
+import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
-import java.io.*;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 
-import static it.unibz.inf.ontop.owlrefplatform.owlapi.CanonicalIRIOntowisTest.ParamConst.POSTGRES2DSsixty;
-import static it.unibz.inf.ontop.owlrefplatform.owlapi.CanonicalIRIOntowisTest.ParamConst.POSTGRES2DSten;
-import static it.unibz.inf.ontop.owlrefplatform.owlapi.CanonicalIRIOntowisTest.ParamConst.POSTGRES2DSthirty;
+import static it.unibz.inf.ontop.owlrefplatform.owlapi.CanonicalIRIOntowisTest.ParamConst.*;
 
 
 public class CanonicalIRIOntowisTest {
@@ -27,17 +30,24 @@ public class CanonicalIRIOntowisTest {
     interface ParamConst{
         // Postgres
         public static final String POSTGRES2DSten = "ontowisOBDA2-ten.obda";
+        public static final String POSTGRES2DStenP = "ontowisOBDA2-ten.properties";
         public static final String POSTGRES2DSthirty = "ontowisOBDA2-thirty.obda";
+        public static final String POSTGRES2DSthirtyP = "ontowisOBDA2-thirty.properties";
         public static final String POSTGRES2DSsixty = "ontowisOBDA2-sixty.obda";
+        public static final String POSTGRES2DSsixtyP = "ontowisOBDA2-sixty.properties";
         public static final String POSTGRES3DSten = "ontowisOBDA3-ten.obda";
+        public static final String POSTGRES3DStenP = "ontowisOBDA3-ten.properties";
         public static final String POSTGRES3DSthirty = "ontowisOBDA3-thirty.obda";
+        public static final String POSTGRES3DSthirtyP = "ontowisOBDA3-thirty.properties";
         public static final String POSTGRES3DSsixty = "ontowisOBDA3-sixty.obda";
+        public static final String POSTGRES3DSsixtyP = "ontowisOBDA3-sixty.properties";
 
 
     }
 
     public static class Settings{
         static String obdaFile;
+        static String propertyFile;
         static String resultFileName;
         static int runs;
         static  int NUM_TABLES ;
@@ -49,6 +59,8 @@ public class CanonicalIRIOntowisTest {
 
     final String obdaFile;
 
+    final String propertyFile;
+
 
     final String owlfile = "ontowis.owl";
 
@@ -56,8 +68,9 @@ public class CanonicalIRIOntowisTest {
     // Internal Modifiable State
     QuestOWL reasoner ;
 
-    public CanonicalIRIOntowisTest(String obdaFile){
+    public CanonicalIRIOntowisTest(String obdaFile, String propertyFile){
         this.obdaFile = obdaFile;
+        this.propertyFile = propertyFile;
     }
 
 
@@ -496,6 +509,7 @@ public class CanonicalIRIOntowisTest {
         OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
                 .ontologyFile(owlfile)
                 .nativeOntopMappingFile(obdaFile)
+                .propertyFile(propertyFile)
                 .sameAsMappings(true)
                 .build();
 
@@ -562,7 +576,7 @@ public class CanonicalIRIOntowisTest {
 				 * Print the query summary
 				 */
                 QuestOWLStatement qst = (QuestOWLStatement) st;
-                String sqlQuery = qst.getUnfolding(sparqlQuery);
+                String sqlQuery = qst.getRewriting(sparqlQuery);
 
                 System.out.println();
                 System.out.println("The input SPARQL query:");
@@ -619,7 +633,7 @@ public class CanonicalIRIOntowisTest {
         try {
             System.out.println(Settings.obdaFile);
 
-            CanonicalIRIOntowisTest example = new CanonicalIRIOntowisTest(Settings.obdaFile);
+            CanonicalIRIOntowisTest example = new CanonicalIRIOntowisTest(Settings.obdaFile, Settings.propertyFile);
             example.runQuery();
         } catch (Exception e) {
             e.printStackTrace();
@@ -632,6 +646,7 @@ public class CanonicalIRIOntowisTest {
 
             case "--POSTGRES2DSten":{
                 Settings.obdaFile = ParamConst.POSTGRES2DSten;
+                Settings.propertyFile = ParamConst.POSTGRES2DStenP;
                 Settings.resultFileName = "POSTGRES2DSten";
                 Settings.NUM_TABLES = 3;
                 Settings.NUM_OBJECTS = 3;
@@ -643,6 +658,7 @@ public class CanonicalIRIOntowisTest {
 
             case "--POSTGRES2DSthirty":{
                 Settings.obdaFile = ParamConst.POSTGRES2DSthirty;
+                Settings.propertyFile = ParamConst.POSTGRES2DSthirtyP;
                 Settings.resultFileName = "POSTGRES2DSthirty";
                 Settings.NUM_TABLES = 3;
                 Settings.NUM_OBJECTS = 3;
@@ -653,6 +669,7 @@ public class CanonicalIRIOntowisTest {
 
             case "--POSTGRES2DSsixty":{
                 Settings.obdaFile = ParamConst.POSTGRES2DSsixty;
+                Settings.propertyFile = ParamConst.POSTGRES2DSsixtyP;
                 Settings.resultFileName = "POSTGRES2DSsixty";
                 Settings.NUM_TABLES = 3;
                 Settings.NUM_OBJECTS = 3;
@@ -663,6 +680,7 @@ public class CanonicalIRIOntowisTest {
 
             case "--POSTGRES3DSten":{
                 Settings.obdaFile = ParamConst.POSTGRES3DSten;
+                Settings.propertyFile = ParamConst.POSTGRES3DStenP;
                 Settings.resultFileName = "POSTGRES3DSten";
                 Settings.NUM_TABLES = 4;
                 Settings.NUM_OBJECTS = 4;
@@ -673,6 +691,7 @@ public class CanonicalIRIOntowisTest {
 
             case "--POSTGRES3DSthirty":{
                 Settings.obdaFile = ParamConst.POSTGRES3DSthirty;
+                Settings.propertyFile = ParamConst.POSTGRES3DSthirtyP;
                 Settings.resultFileName = "POSTGRES3DSthirty";
                 Settings.NUM_TABLES = 4;
                 Settings.NUM_OBJECTS = 4;
@@ -683,6 +702,7 @@ public class CanonicalIRIOntowisTest {
 
             case "--POSTGRES3DSsixty":{
                 Settings.obdaFile = ParamConst.POSTGRES3DSsixty;
+                Settings.propertyFile = ParamConst.POSTGRES3DSsixtyP;
                 Settings.resultFileName = "POSTGRES3DSsixty";
                 Settings.NUM_TABLES = 4;
                 Settings.NUM_OBJECTS = 4;

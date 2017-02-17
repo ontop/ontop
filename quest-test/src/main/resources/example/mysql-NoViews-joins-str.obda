@@ -1,12 +1,6 @@
 [PrefixDeclaration]
 :		http://www.example.org/#
 
-[SourceDeclaration]
-sourceUri	viewTest
-connectionUrl	jdbc:mysql://vulcan/ontowis_100k
-username	test
-password	fish
-driverClass	com.mysql.jdbc.Driver
 
 
 [MappingDeclaration] @collection [[

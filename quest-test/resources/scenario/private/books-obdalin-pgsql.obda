@@ -50,5 +50,5 @@
       <SQLQuery string="select ed_code,bk_id from tb_edition"/>
     </mapping>
   </mappings>
-  <dataSource URI="Books" databaseDriver="org.postgresql.Driver" databasePassword="obdaps83" databaseURL="jdbc:postgresql://obdalin.inf.unibz.it/books" databaseUsername="postgres" isAboxDump="" ontouri="http://meraka/moss/exampleBooks.owl#"/>
+  
 </OBDA>

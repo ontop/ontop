@@ -31,9 +31,10 @@ public class MsSQLIdentifierTest extends AbstractVirtualModeTest {
 
 	private static final String owlfile = "resources/identifiers/identifiers.owl";
 	private static final String obdafile = "resources/identifiers/identifiers-mssql.obda";
+	private static final String propertyfile = "resources/identifiers/identifiers-mssql.properties";
 
 	public MsSQLIdentifierTest() {
-		super(owlfile, obdafile);
+		super(owlfile, obdafile, propertyfile);
 	}
 
 	/**

@@ -24,13 +24,15 @@ public abstract class AbstractVirtualModeTest extends TestCase {
     private final Logger log = LoggerFactory.getLogger(this.getClass());
     private final String owlFileName;
     private final String obdaFileName;
+    private final String propertyFileName;
 
     protected QuestOWL reasoner;
     protected OntopOWLConnection conn;
 
-    public AbstractVirtualModeTest(String owlfile, String obdafile) {
-        this.owlFileName = owlfile;
-        this.obdaFileName = obdafile;
+    public AbstractVirtualModeTest(String owlFile, String obdaFile, String propertyFile) {
+        this.owlFileName = owlFile;
+        this.obdaFileName = obdaFile;
+        this.propertyFileName = propertyFile;
     }
 
     @Override
@@ -41,6 +43,7 @@ public abstract class AbstractVirtualModeTest extends TestCase {
                 .enableFullMetadataExtraction(false)
                 .ontologyFile(owlFileName)
                 .nativeOntopMappingFile(new File(obdaFileName))
+                .propertyFile(propertyFileName)
                 .build();
         reasoner = factory.createReasoner(config);
 

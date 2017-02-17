@@ -56,7 +56,7 @@ public class SesameVirtualTest extends TestCase {
 					.nativeOntopMappingFile(obdafile)
 					.build();
 
-			repo = new OntopVirtualRepository("my_name", configuration);
+			repo = new OntopVirtualRepository(configuration);
 	
 			repo.initialize();
 			

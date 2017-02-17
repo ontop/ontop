@@ -10,20 +10,18 @@ import org.eclipse.rdf4j.repository.Repository;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.eclipse.rdf4j.repository.RepositoryException;
 
-import java.util.Properties;
-
 public abstract class AbstractVirtualSesameTest extends TestCase {
 
     private final String owlfile;
     private final String r2rmlfile;
-    private final Properties properties;
+    private final String propertyFile;
 
     RepositoryConnection con;
 
-    public AbstractVirtualSesameTest(String owlfile, String r2rmlfile, Properties p) {
+    public AbstractVirtualSesameTest(String owlfile, String r2rmlfile, String propertyFile) {
         this.owlfile = owlfile;
         this.r2rmlfile = r2rmlfile;
-        this.properties = p;
+        this.propertyFile = propertyFile;
     }
 
     public void setUp() {
@@ -33,10 +31,10 @@ public abstract class AbstractVirtualSesameTest extends TestCase {
                     .ontologyFile(owlfile)
                     .r2rmlMappingFile(r2rmlfile)
                     .enableExistentialReasoning(true)
-                    .properties(properties)
+                    .propertyFile(propertyFile)
                     .build();
 
-            repo = new OntopVirtualRepository("virtualExample2", configuration);
+            repo = new OntopVirtualRepository(configuration);
 			/*
 			 * Repository must be always initialized first
 			 */

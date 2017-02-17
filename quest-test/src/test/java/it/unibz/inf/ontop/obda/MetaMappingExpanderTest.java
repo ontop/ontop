@@ -84,7 +84,7 @@ public class MetaMappingExpanderTest {
 			 * Print the query summary
 			 */
                 QuestOWLStatement qst = (QuestOWLStatement) st;
-                String sqlQuery = qst.getUnfolding(sparqlQuery);
+                String sqlQuery = qst.getRewriting(sparqlQuery);
 
                 System.out.println();
                 System.out.println("The input SPARQL query:");

@@ -12,12 +12,6 @@ dctype:		http://purl.org/dc/dcmitype/Image#
 dcterms:		http://purl.org/dc/terms/
 owl2xml:		http://www.w3.org/2006/12/owl2-xml#
 
-[SourceDeclaration]
-sourceUri	datasource
-connectionUrl	jdbc:postgresql://localhost/
-username	kbdbhabana
-password	habana10
-driverClass	org.postgresql.Driver
 
 [MappingDeclaration] @collection [[
 mappingId	M1:Editor

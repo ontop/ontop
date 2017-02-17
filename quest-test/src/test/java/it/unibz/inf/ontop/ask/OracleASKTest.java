@@ -9,9 +9,11 @@ public class OracleASKTest extends AbstractVirtualModeTest {
 	 "src/main/resources/testcases-scenarios/virtual-mode/stockexchange/simplecq/stockexchange.owl";
 	 static final String obdafile =
 	 "src/main/resources/testcases-scenarios/virtual-mode/stockexchange/simplecq/stockexchange-oracle.obda";
+	static final String propertiesfile =
+			"src/main/resources/testcases-scenarios/virtual-mode/stockexchange/simplecq/stockexchange-oracle.properties";
 
 	public OracleASKTest() {
-		super(owlfile, obdafile);
+		super(owlfile, obdafile, propertiesfile);
 	}
 
 	public void testTrue() throws Exception {

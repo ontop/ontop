@@ -12,9 +12,10 @@ public class FqdnInTargetTest extends AbstractVirtualModeTest
 
     static final String owlfile = "src/test/resources/ontologyIMDB.owl";
     static final String obdafile = "src/test/resources/ontologyIMDB-fqdn.obda";
+	static final String propertiesfile = "src/test/resources/ontologyIMDB-fqdn.properties";
 
 	public FqdnInTargetTest() {
-		super(owlfile, obdafile);
+		super(owlfile, obdafile, propertiesfile);
 	}
 
 

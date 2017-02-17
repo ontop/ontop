@@ -53,7 +53,8 @@
             [ qt:query <boolean-and.rq> ] ;
     mf:result <boolean-and.ttl> ;
     mf:knowledgebase <stockexchange.owl> ;
-    mf:mappings <stockexchange-oracle.obda> .
+    mf:mappings <stockexchange-oracle.obda>;
+	mf:parameters <stockexchange-oracle.properties> .
     
 :boolean-or rdf:type mf:QueryEvaluationTest ;
     mf:name    "Q2: Filter street or city" ;
@@ -63,7 +64,8 @@
             [ qt:query <boolean-or.rq> ] ;
     mf:result <boolean-or.ttl> ;
     mf:knowledgebase <stockexchange.owl> ;
-    mf:mappings <stockexchange-oracle.obda> .
+    mf:mappings <stockexchange-oracle.obda>;
+	mf:parameters <stockexchange-oracle.properties> .
 
 :boolean-nested-1 rdf:type mf:QueryEvaluationTest ;
     mf:name    "Q3: Filter street and (city or street)" ;
@@ -73,7 +75,8 @@
             [ qt:query <boolean-nested-1.rq> ] ;
     mf:result <boolean-nested-1.ttl> ;
     mf:knowledgebase <stockexchange.owl> ;
-    mf:mappings <stockexchange-oracle.obda> .
+    mf:mappings <stockexchange-oracle.obda>;
+	mf:parameters <stockexchange-oracle.properties> .
     
 :boolean-nested-2 rdf:type mf:QueryEvaluationTest ;
     mf:name    "Q4: Filter country, street, city" ;
@@ -83,7 +86,8 @@
             [ qt:query <boolean-nested-2.rq> ] ;
     mf:result <boolean-nested-2.ttl> ;
     mf:knowledgebase <stockexchange.owl> ;
-    mf:mappings <stockexchange-oracle.obda> .
+    mf:mappings <stockexchange-oracle.obda>;
+	mf:parameters <stockexchange-oracle.properties> .
     
 :boolean-nested-3 rdf:type mf:QueryEvaluationTest ;
     mf:name    "Q5: Filter nested" ;
@@ -93,7 +97,8 @@
             [ qt:query <boolean-nested-3.rq> ] ;
     mf:result <boolean-nested-3.ttl> ;
     mf:knowledgebase <stockexchange.owl> ;
-    mf:mappings <stockexchange-oracle.obda> .
+    mf:mappings <stockexchange-oracle.obda>;
+	mf:parameters <stockexchange-oracle.properties> .
  
 :string-eq rdf:type mf:QueryEvaluationTest ;
     mf:name    "Q6: Filter city string with equality" ;
@@ -103,7 +108,8 @@
             [ qt:query <string-eq.rq> ] ;
     mf:result <string-eq.ttl> ;
     mf:knowledgebase <stockexchange.owl> ;
-    mf:mappings <stockexchange-oracle.obda> .
+    mf:mappings <stockexchange-oracle.obda>;
+	mf:parameters <stockexchange-oracle.properties> .
 
 :string-neq rdf:type mf:QueryEvaluationTest ;
     mf:name    "Q7: Filter city string with inequality" ;
@@ -113,7 +119,8 @@
             [ qt:query <string-neq.rq> ] ;
     mf:result <string-neq.ttl> ;
     mf:knowledgebase <stockexchange.owl> ;
-    mf:mappings <stockexchange-oracle.obda> .
+    mf:mappings <stockexchange-oracle.obda>;
+	mf:parameters <stockexchange-oracle.properties> .
 
 :integer-eq rdf:type mf:QueryEvaluationTest ;
     mf:name    "Q8: Filter street number with equality" ;
@@ -123,7 +130,8 @@
             [ qt:query <integer-eq.rq> ] ;
     mf:result <integer-eq.ttl> ;
     mf:knowledgebase <stockexchange.owl> ;
-    mf:mappings <stockexchange-oracle.obda> .
+    mf:mappings <stockexchange-oracle.obda>;
+	mf:parameters <stockexchange-oracle.properties> .
 
 :integer-neq rdf:type mf:QueryEvaluationTest ;
     mf:name    "Q9: Filter street number with inequality" ;
@@ -133,7 +141,8 @@
             [ qt:query <integer-neq.rq> ] ;
     mf:result <integer-neq.ttl> ;
     mf:knowledgebase <stockexchange.owl> ;
-    mf:mappings <stockexchange-oracle.obda> .
+    mf:mappings <stockexchange-oracle.obda>;
+	mf:parameters <stockexchange-oracle.properties> .
 
 :integer-gt rdf:type mf:QueryEvaluationTest ;
     mf:name    "Q10: Filter street number with greater-than" ;
@@ -143,7 +152,8 @@
             [ qt:query <integer-gt.rq> ] ;
     mf:result <integer-gt.ttl> ;
     mf:knowledgebase <stockexchange.owl> ;
-    mf:mappings <stockexchange-oracle.obda> .
+    mf:mappings <stockexchange-oracle.obda>;
+	mf:parameters <stockexchange-oracle.properties> .
 
 :integer-gte rdf:type mf:QueryEvaluationTest ;
     mf:name    "Q11: Filter street number with greater-or-equal-than" ;
@@ -153,7 +163,8 @@
             [ qt:query <integer-gte.rq> ] ;
     mf:result <integer-gte.ttl> ;
     mf:knowledgebase <stockexchange.owl> ;
-    mf:mappings <stockexchange-oracle.obda> .
+    mf:mappings <stockexchange-oracle.obda>;
+	mf:parameters <stockexchange-oracle.properties> .
 
 :integer-lt rdf:type mf:QueryEvaluationTest ;
     mf:name    "Q12: Filter street number with less-than" ;
@@ -163,7 +174,8 @@
             [ qt:query <integer-lt.rq> ] ;
     mf:result <integer-lt.ttl> ;
     mf:knowledgebase <stockexchange.owl> ;
-    mf:mappings <stockexchange-oracle.obda> .
+    mf:mappings <stockexchange-oracle.obda>;
+	mf:parameters <stockexchange-oracle.properties> .
 
 :integer-lte rdf:type mf:QueryEvaluationTest ;
     mf:name    "Q13: Filter street number with less-or-equal-than" ;
@@ -173,7 +185,8 @@
             [ qt:query <integer-lte.rq> ] ;
     mf:result <integer-lte.ttl> ;
     mf:knowledgebase <stockexchange.owl> ;
-    mf:mappings <stockexchange-oracle.obda> .
+    mf:mappings <stockexchange-oracle.obda>;
+	mf:parameters <stockexchange-oracle.properties> .
 
 :decimal-eq rdf:type mf:QueryEvaluationTest ;
     mf:name    "Q14: Decimal EQ" ;
@@ -183,7 +196,8 @@
             [ qt:query <decimal-eq.rq> ] ;
     mf:result <decimal-eq.ttl> ;
     mf:knowledgebase <stockexchange.owl> ;
-    mf:mappings <stockexchange-oracle.obda> .
+    mf:mappings <stockexchange-oracle.obda>;
+	mf:parameters <stockexchange-oracle.properties> .
 
 :decimal-neq rdf:type mf:QueryEvaluationTest ;
     mf:name    "Q15: Decimal NEQ" ;
@@ -193,7 +207,8 @@
             [ qt:query <decimal-neq.rq> ] ;
     mf:result <decimal-neq.ttl> ;
     mf:knowledgebase <stockexchange.owl> ;
-    mf:mappings <stockexchange-oracle.obda> .
+    mf:mappings <stockexchange-oracle.obda>;
+	mf:parameters <stockexchange-oracle.properties> .
 
 :decimal-gt rdf:type mf:QueryEvaluationTest ;
     mf:name    "Q16: Decimal GT" ;
@@ -203,7 +218,8 @@
             [ qt:query <decimal-gt.rq> ] ;
     mf:result <decimal-gt.ttl> ;
     mf:knowledgebase <stockexchange.owl> ;
-    mf:mappings <stockexchange-oracle.obda> .
+    mf:mappings <stockexchange-oracle.obda>;
+	mf:parameters <stockexchange-oracle.properties> .
 
 :decimal-gte rdf:type mf:QueryEvaluationTest ;
     mf:name    "Q17: Decimal GTE" ;
@@ -213,7 +229,8 @@
             [ qt:query <decimal-gte.rq> ] ;
     mf:result <decimal-gte.ttl> ;
     mf:knowledgebase <stockexchange.owl> ;
-    mf:mappings <stockexchange-oracle.obda> .
+    mf:mappings <stockexchange-oracle.obda>;
+	mf:parameters <stockexchange-oracle.properties> .
 
 :decimal-lt rdf:type mf:QueryEvaluationTest ;
     mf:name    "Q18: Decimal LT" ;
@@ -223,7 +240,8 @@
             [ qt:query <decimal-lt.rq> ] ;
     mf:result <decimal-lt.ttl> ;
     mf:knowledgebase <stockexchange.owl> ;
-    mf:mappings <stockexchange-oracle.obda> .
+    mf:mappings <stockexchange-oracle.obda>;
+	mf:parameters <stockexchange-oracle.properties> .
 
 :decimal-lte rdf:type mf:QueryEvaluationTest ;
     mf:name    "Q19: Decimal LTE" ;
@@ -233,7 +251,8 @@
             [ qt:query <decimal-lte.rq> ] ;
     mf:result <decimal-lte.ttl> ;
     mf:knowledgebase <stockexchange.owl> ;
-    mf:mappings <stockexchange-oracle.obda> .
+    mf:mappings <stockexchange-oracle.obda>;
+	mf:parameters <stockexchange-oracle.properties> .
 
 :double-eq rdf:type mf:QueryEvaluationTest ;
     mf:name    "Q20: Double EQ" ;
@@ -243,7 +262,8 @@
             [ qt:query <double-eq.rq> ] ;
     mf:result <double-eq.ttl> ;
     mf:knowledgebase <stockexchange.owl> ;
-    mf:mappings <stockexchange-oracle.obda> .
+    mf:mappings <stockexchange-oracle.obda>;
+	mf:parameters <stockexchange-oracle.properties> .
 
 :double-neq rdf:type mf:QueryEvaluationTest ;
     mf:name    "Q21: Double NEQ" ;
@@ -253,7 +273,8 @@
             [ qt:query <double-neq.rq> ] ;
     mf:result <double-neq.ttl> ;
     mf:knowledgebase <stockexchange.owl> ;
-    mf:mappings <stockexchange-oracle.obda> .
+    mf:mappings <stockexchange-oracle.obda>;
+	mf:parameters <stockexchange-oracle.properties> .
 
 :double-gt rdf:type mf:QueryEvaluationTest ;
     mf:name    "Q22: Double GT" ;
@@ -263,7 +284,8 @@
             [ qt:query <double-gt.rq> ] ;
     mf:result <double-gt.ttl> ;
     mf:knowledgebase <stockexchange.owl> ;
-    mf:mappings <stockexchange-oracle.obda> .
+    mf:mappings <stockexchange-oracle.obda>;
+	mf:parameters <stockexchange-oracle.properties> .
 
 :double-gte rdf:type mf:QueryEvaluationTest ;
     mf:name    "Q23: Double GTE" ;
@@ -273,7 +295,8 @@
             [ qt:query <double-gte.rq> ] ;
     mf:result <double-gte.ttl> ;
     mf:knowledgebase <stockexchange.owl> ;
-    mf:mappings <stockexchange-oracle.obda> .
+    mf:mappings <stockexchange-oracle.obda>;
+	mf:parameters <stockexchange-oracle.properties> .
 
 :double-lt rdf:type mf:QueryEvaluationTest ;
     mf:name    "Q24: Double LT" ;
@@ -283,7 +306,8 @@
             [ qt:query <double-lt.rq> ] ;
     mf:result <double-lt.ttl> ;
     mf:knowledgebase <stockexchange.owl> ;
-    mf:mappings <stockexchange-oracle.obda> .
+    mf:mappings <stockexchange-oracle.obda>;
+	mf:parameters <stockexchange-oracle.properties> .
 
 :double-lte rdf:type mf:QueryEvaluationTest ;
     mf:name    "Q25: Double LTE" ;
@@ -293,7 +317,8 @@
             [ qt:query <double-lte.rq> ] ;
     mf:result <double-lte.ttl> ;
     mf:knowledgebase <stockexchange.owl> ;
-    mf:mappings <stockexchange-oracle.obda> .
+    mf:mappings <stockexchange-oracle.obda>;
+	mf:parameters <stockexchange-oracle.properties> .
 
 :datetime-eq rdf:type mf:QueryEvaluationTest ;
     mf:name    "Q26: DateTime EQ" ;
@@ -303,7 +328,8 @@
             [ qt:query <datetime-eq.rq> ] ;
     mf:result <datetime-eq.ttl> ;
     mf:knowledgebase <stockexchange.owl> ;
-    mf:mappings <stockexchange-oracle.obda> .
+    mf:mappings <stockexchange-oracle.obda>;
+	mf:parameters <stockexchange-oracle.properties> .
 
 :datetime-neq rdf:type mf:QueryEvaluationTest ;
     mf:name    "Q27: DateTime NEQ" ;
@@ -313,7 +339,8 @@
             [ qt:query <datetime-neq.rq> ] ;
     mf:result <datetime-neq.ttl> ;
     mf:knowledgebase <stockexchange.owl> ;
-    mf:mappings <stockexchange-oracle.obda> .
+    mf:mappings <stockexchange-oracle.obda>;
+	mf:parameters <stockexchange-oracle.properties> .
 
 :datetime-gt rdf:type mf:QueryEvaluationTest ;
     mf:name    "Q28: DateTime GT" ;
@@ -323,7 +350,8 @@
             [ qt:query <datetime-gt.rq> ] ;
     mf:result <datetime-gt.ttl> ;
     mf:knowledgebase <stockexchange.owl> ;
-    mf:mappings <stockexchange-oracle.obda> .
+    mf:mappings <stockexchange-oracle.obda>;
+	mf:parameters <stockexchange-oracle.properties> .
 
 :datetime-gte rdf:type mf:QueryEvaluationTest ;
     mf:name    "Q29: DateTime GTE" ;
@@ -333,7 +361,8 @@
             [ qt:query <datetime-gte.rq> ] ;
     mf:result <datetime-gte.ttl> ;
     mf:knowledgebase <stockexchange.owl> ;
-    mf:mappings <stockexchange-oracle.obda> .
+    mf:mappings <stockexchange-oracle.obda>;
+	mf:parameters <stockexchange-oracle.properties> .
 
 :datetime-lt rdf:type mf:QueryEvaluationTest ;
     mf:name    "Q30: DateTime LT" ;
@@ -343,7 +372,8 @@
             [ qt:query <datetime-lt.rq> ] ;
     mf:result <datetime-lt.ttl> ;
     mf:knowledgebase <stockexchange.owl> ;
-    mf:mappings <stockexchange-oracle.obda> .
+    mf:mappings <stockexchange-oracle.obda>;
+	mf:parameters <stockexchange-oracle.properties> .
 
 :datetime-lte rdf:type mf:QueryEvaluationTest ;
     mf:name    "Q31: DateTime LTE" ;
@@ -353,7 +383,8 @@
             [ qt:query <datetime-lte.rq> ] ;
     mf:result <datetime-lte.ttl> ;
     mf:knowledgebase <stockexchange.owl> ;
-    mf:mappings <stockexchange-oracle.obda> .
+    mf:mappings <stockexchange-oracle.obda>;
+	mf:parameters <stockexchange-oracle.properties> .
 
 :boolean-eq rdf:type mf:QueryEvaluationTest ;
     mf:name    "Q32: Boolean EQ" ;
@@ -363,7 +394,8 @@
             [ qt:query <boolean-eq.rq> ] ;
     mf:result <boolean-eq.ttl> ;
     mf:knowledgebase <stockexchange.owl> ;
-    mf:mappings <stockexchange-oracle.obda> .
+    mf:mappings <stockexchange-oracle.obda>;
+	mf:parameters <stockexchange-oracle.properties> .
 
 :boolean-neq rdf:type mf:QueryEvaluationTest ;
     mf:name    "Q33: Boolean NEQ" ;
@@ -373,7 +405,8 @@
             [ qt:query <boolean-neq.rq> ] ;
     mf:result <boolean-neq.ttl> ;
     mf:knowledgebase <stockexchange.owl> ;
-    mf:mappings <stockexchange-oracle.obda> .
+    mf:mappings <stockexchange-oracle.obda>;
+	mf:parameters <stockexchange-oracle.properties> .
 
 :literal-langmatch rdf:type mf:QueryEvaluationTest ;
     mf:name    "Q34: Literal Langmatch" ;
@@ -383,5 +416,6 @@
             [ qt:query <literal-langmatch.rq> ] ;
     mf:result <literal-langmatch.ttl> ;
     mf:knowledgebase <stockexchange.owl> ;
-    mf:mappings <stockexchange-oracle.obda> .
+    mf:mappings <stockexchange-oracle.obda>;
+	mf:parameters <stockexchange-oracle.properties> .
 

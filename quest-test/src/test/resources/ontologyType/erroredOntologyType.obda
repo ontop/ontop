@@ -2,12 +2,6 @@
 :		http://www.company.com/ARES#
 franz:	http://www.franz.com/
 
-[SourceDeclaration]
-sourceUri	novartis
-connectionUrl	jdbc:oracle:thin:@//10.7.20.91:1521/xe
-username	system
-password	obdaps83
-driverClass	oracle.jdbc.driver.OracleDriver
 
 [MappingDeclaration] @collection [[
 mappingId	MAPID-e250eda48e0e42e5a0624a86e2106fb1(0)

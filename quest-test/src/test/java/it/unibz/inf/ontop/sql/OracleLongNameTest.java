@@ -21,10 +21,12 @@ package it.unibz.inf.ontop.sql;
  */
 
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
+import it.unibz.inf.ontop.owlrefplatform.owlapi.OntopOWLConnection;
+import it.unibz.inf.ontop.owlrefplatform.owlapi.OntopOWLStatement;
+import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWL;
+import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLFactory;
 import org.junit.After;
 import org.junit.Test;
-import it.unibz.inf.ontop.model.OBDAException;
 import org.semanticweb.owlapi.model.OWLException;
 
 import java.io.File;
@@ -38,6 +40,7 @@ public class OracleLongNameTest {
 	
 	final String owlfile = "resources/oraclesql/o.owl";
 	final String obdafile1 = "resources/oraclesql/o1.obda";
+	final String propertyfile = "resources/oraclesql/o1.properties";
 	private QuestOWL reasoner;
 
 	@After
@@ -47,13 +50,14 @@ public class OracleLongNameTest {
 	}
 	
 
-	private void runQuery(String varName) throws OBDAException, OWLException{
+	private void runQuery(String varName) throws OWLException{
 
 		// Creating a new instance of the reasoner
 		QuestOWLFactory factory = new QuestOWLFactory();
         OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.nativeOntopMappingFile(new File(obdafile1))
 				.ontologyFile(owlfile)
+				.propertyFile(propertyfile)
 				.build();
         reasoner = factory.createReasoner(config);
 

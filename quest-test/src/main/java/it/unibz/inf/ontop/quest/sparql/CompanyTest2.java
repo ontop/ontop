@@ -23,7 +23,6 @@ package it.unibz.inf.ontop.quest.sparql;
 
 import it.unibz.inf.ontop.owlrefplatform.owlapi.OntopOWLStatement;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLResultSet;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLStatement;
 import it.unibz.inf.ontop.quest.AbstractVirtualModeTest;
 import org.junit.Ignore;
 import org.semanticweb.owlapi.model.OWLObject;
@@ -43,9 +42,10 @@ public class CompanyTest2 extends AbstractVirtualModeTest {
 
 	private static final String owlfile = "resources/optional/company.owl";
 	private static final String obdafile = "resources/optional/company.obda";
+	private static final String propertyfile = "resources/optional/company.properties";
 
 	protected CompanyTest2() {
-		super(owlfile, obdafile);
+		super(owlfile, obdafile, propertyfile);
 	}
 
 //	@Override

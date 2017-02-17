@@ -8,12 +8,6 @@ npd: http://npd/wellbore/
 ow: http://ow/wellbore/
 well: http://ontop.inf.unibz.it/test/well/
 
-[SourceDeclaration]
-sourceUri	WellboreDataset
-connectionUrl	jdbc:h2:mem:wellboresNoDuplicates
-username	sa
-password	
-driverClass	org.h2.Driver
 
 [MappingDeclaration] @collection [[
 

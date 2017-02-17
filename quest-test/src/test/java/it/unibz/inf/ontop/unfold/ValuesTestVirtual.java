@@ -27,10 +27,11 @@ public class ValuesTestVirtual extends AbstractVirtualModeTest {
 	
 	private static final String owlfile = "src/test/resources/person.owl";
 	private static final String obdafile = "src/test/resources/person.obda";
+	private static final String propertiesfile = "src/test/resources/person.properties";
 	private static final String PREFIX = "PREFIX : <http://www.semanticweb.org/mindaugas/ontologies/2013/9/untitled-ontology-58#> ";
 
 	public ValuesTestVirtual() {
-		super(owlfile, obdafile);
+		super(owlfile, obdafile, propertiesfile);
 	}
 
 	private void runTest(String query, int expectedRows) throws Exception {

@@ -30,7 +30,8 @@
             [ qt:query <addresses.rq> ] ;
     mf:result <addresses.ttl> ;
     mf:knowledgebase <stockexchange.owl> ;
-    mf:mappings <stockexchange-oracle.obda> .
+    mf:mappings <stockexchange-oracle.obda>;
+	mf:parameters <stockexchange-oracle.properties> .
     
 :addresses-id rdf:type mf:QueryEvaluationTest ;
     mf:name    "Q2: Select distinct addresses diff formulation" ;
@@ -40,7 +41,8 @@
             [ qt:query <addresses-id.rq> ] ;
     mf:result <addresses-id.ttl> ;
     mf:knowledgebase <stockexchange.owl> ;
-    mf:mappings <stockexchange-oracle.obda> .
+    mf:mappings <stockexchange-oracle.obda>;
+	mf:parameters <stockexchange-oracle.properties> .
 
 :person-addresses rdf:type mf:QueryEvaluationTest ;
     mf:name    "Q3: Get distinct persons and their addresses" ;
@@ -50,7 +52,8 @@
             [ qt:query <person-addresses.rq> ] ;
     mf:result <person-addresses.ttl> ;
     mf:knowledgebase <stockexchange.owl> ;
-    mf:mappings <stockexchange-oracle.obda> .
+    mf:mappings <stockexchange-oracle.obda>;
+	mf:parameters <stockexchange-oracle.properties> .
     
 :stocktraders rdf:type mf:QueryEvaluationTest ;
     mf:name    "Q4: Get distinct stocktraders" ;
@@ -60,7 +63,8 @@
             [ qt:query <stocktraders.rq> ] ;
     mf:result <stocktraders.ttl> ;
     mf:knowledgebase <stockexchange.owl> ;
-    mf:mappings <stockexchange-oracle.obda> .
+    mf:mappings <stockexchange-oracle.obda>;
+	mf:parameters <stockexchange-oracle.properties> .
     
 :brokers-workfor-themselves rdf:type mf:QueryEvaluationTest ;
     mf:name    "Q5: Get brokers who tradeOnBehalfOf themselves" ;
@@ -70,7 +74,8 @@
             [ qt:query <brokers-workfor-themselves.rq> ] ;
     mf:result <brokers-workfor-themselves.ttl> ;
     mf:knowledgebase <stockexchange.owl> ;
-    mf:mappings <stockexchange-oracle.obda> .
+    mf:mappings <stockexchange-oracle.obda>;
+	mf:parameters <stockexchange-oracle.properties> .
  
 :brokers-workfor-physical rdf:type mf:QueryEvaluationTest ;
     mf:name    "Q6: Get brokers who tradeOnBehalfOf physical persons" ;
@@ -80,7 +85,8 @@
             [ qt:query <brokers-workfor-physical.rq> ] ;
     mf:result <brokers-workfor-physical.ttl> ;
     mf:knowledgebase <stockexchange.owl> ;
-    mf:mappings <stockexchange-oracle.obda> .
+    mf:mappings <stockexchange-oracle.obda>;
+	mf:parameters <stockexchange-oracle.properties> .
     
 :brokers-workfor-legal rdf:type mf:QueryEvaluationTest ;
     mf:name    "Q7: Get brokers who tradeOnBehalfOf legal persons" ;
@@ -90,7 +96,8 @@
             [ qt:query <brokers-workfor-legal.rq> ] ;
     mf:result <brokers-workfor-legal.ttl> ;
     mf:knowledgebase <stockexchange.owl> ;
-    mf:mappings <stockexchange-oracle.obda> .
+    mf:mappings <stockexchange-oracle.obda>;
+	mf:parameters <stockexchange-oracle.properties> .
     
 :brokers-workfor-legal-physical rdf:type mf:QueryEvaluationTest ;
     mf:name    "Q8: Get brokers who tradeOnBehalfOf a legal and a physical person" ;
@@ -100,7 +107,8 @@
             [ qt:query <brokers-workfor-legal-physical.rq> ] ;
     mf:result <brokers-workfor-legal-physical.ttl> ;
     mf:knowledgebase <stockexchange.owl> ;
-    mf:mappings <stockexchange-oracle.obda> .
+    mf:mappings <stockexchange-oracle.obda>;
+	mf:parameters <stockexchange-oracle.properties> .
     
 :transactions-finantialinstrument rdf:type mf:QueryEvaluationTest ;
     mf:name    "Q9: Get transactions of a finantial instrument" ;
@@ -110,7 +118,8 @@
             [ qt:query <transactions-finantialinstrument.rq> ] ;
     mf:result <transactions-finantialinstrument.ttl> ;
     mf:knowledgebase <stockexchange.owl> ;
-    mf:mappings <stockexchange-oracle.obda> .
+    mf:mappings <stockexchange-oracle.obda>;
+	mf:parameters <stockexchange-oracle.properties> .
     
 :transaction-stock-type rdf:type mf:QueryEvaluationTest ;
     mf:name    "Q10: Get transactions involving stocks" ;
@@ -120,7 +129,8 @@
             [ qt:query <transaction-stock-type.rq> ] ;
     mf:result <transaction-stock-type.ttl> ;
     mf:knowledgebase <stockexchange.owl> ;
-    mf:mappings <stockexchange-oracle.obda> .
+    mf:mappings <stockexchange-oracle.obda>;
+	mf:parameters <stockexchange-oracle.properties> .
 
 :transaction-offer-stock rdf:type mf:QueryEvaluationTest ;
     mf:name    "Q11: Get offers of stocks" ;
@@ -130,5 +140,6 @@
             [ qt:query <transaction-offer-stock.rq> ] ;
     mf:result <transaction-offer-stock.ttl> ;
     mf:knowledgebase <stockexchange.owl> ;
-    mf:mappings <stockexchange-oracle.obda> .
+    mf:mappings <stockexchange-oracle.obda>;
+	mf:parameters <stockexchange-oracle.properties> .
     

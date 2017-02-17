@@ -38,7 +38,9 @@
             [ qt:query <literal-1.rq> ] ;
     mf:result <literal-1.ttl> ;
     mf:knowledgebase <stockexchange.owl> ;
-    mf:mappings <stockexchange-db2.obda> .
+    mf:mappings <stockexchange-db2.obda> ;
+	mf:parameters <stockexchange-db2.properties> .
+
     
 :literal-2 rdf:type mf:QueryEvaluationTest ;
     mf:name    "Q2: Literal with quotes and language tag" ;
@@ -48,7 +50,9 @@
             [ qt:query <literal-2.rq> ] ;
     mf:result <literal-2.ttl> ;
     mf:knowledgebase <stockexchange.owl> ;
-    mf:mappings <stockexchange-db2.obda> .
+    mf:mappings <stockexchange-db2.obda> ;
+	mf:parameters <stockexchange-db2.properties> .
+
     
 :string-1 rdf:type mf:QueryEvaluationTest ;
     mf:name    "Q3: String with quotes" ;
@@ -58,7 +62,9 @@
             [ qt:query <string-1.rq> ] ;
     mf:result <string-1.ttl> ;
     mf:knowledgebase <stockexchange.owl> ;
-    mf:mappings <stockexchange-db2.obda> .
+    mf:mappings <stockexchange-db2.obda> ;
+	mf:parameters <stockexchange-db2.properties> .
+
     
 :string-2 rdf:type mf:QueryEvaluationTest ;
     mf:name    "Q4: String without quotes" ;
@@ -68,7 +74,9 @@
             [ qt:query <string-2.rq> ] ;
     mf:result <string-2.ttl> ;
     mf:knowledgebase <stockexchange.owl> ;
-    mf:mappings <stockexchange-db2.obda> .
+    mf:mappings <stockexchange-db2.obda> ;
+	mf:parameters <stockexchange-db2.properties> .
+
  
 :string-3 rdf:type mf:QueryEvaluationTest ;
     mf:name    "Q5: String with xsd:string" ;
@@ -78,7 +86,9 @@
             [ qt:query <string-3.rq> ] ;
     mf:result <string-3.ttl> ;
     mf:knowledgebase <stockexchange.owl> ;
-    mf:mappings <stockexchange-db2.obda> .
+    mf:mappings <stockexchange-db2.obda> ;
+	mf:parameters <stockexchange-db2.properties> .
+
 
 :integer-1 rdf:type mf:QueryEvaluationTest ;
     mf:name    "Q6: Integer with quotes" ;
@@ -88,7 +98,9 @@
             [ qt:query <integer-1.rq> ] ;
     mf:result <integer-1.ttl> ;
     mf:knowledgebase <stockexchange.owl> ;
-    mf:mappings <stockexchange-db2.obda> .
+    mf:mappings <stockexchange-db2.obda> ;
+	mf:parameters <stockexchange-db2.properties> .
+
 
 :integer-2 rdf:type mf:QueryEvaluationTest ;
     mf:name    "Q7: Integer without quotes" ;
@@ -98,7 +110,9 @@
             [ qt:query <integer-2.rq> ] ;
     mf:result <integer-2.ttl> ;
     mf:knowledgebase <stockexchange.owl> ;
-    mf:mappings <stockexchange-db2.obda> .
+    mf:mappings <stockexchange-db2.obda> ;
+	mf:parameters <stockexchange-db2.properties> .
+
     
 :integer-3 rdf:type mf:QueryEvaluationTest ;
     mf:name    "Q8: Integer with xsd:integer" ;
@@ -108,7 +122,9 @@
             [ qt:query <integer-3.rq> ] ;
     mf:result <integer-3.ttl> ;
     mf:knowledgebase <stockexchange.owl> ;
-    mf:mappings <stockexchange-db2.obda> .
+    mf:mappings <stockexchange-db2.obda> ;
+	mf:parameters <stockexchange-db2.properties> .
+
     
 :pos-integer-1 rdf:type mf:QueryEvaluationTest ;
     mf:name    "Q9: PositiveInteger with quotes" ;
@@ -118,7 +134,9 @@
             [ qt:query <pos-integer-1.rq> ] ;
     mf:result <pos-integer-1.ttl> ;
     mf:knowledgebase <stockexchange.owl> ;
-    mf:mappings <stockexchange-db2.obda> .
+    mf:mappings <stockexchange-db2.obda> ;
+	mf:parameters <stockexchange-db2.properties> .
+
 
 :pos-integer-2 rdf:type mf:QueryEvaluationTest ;
     mf:name    "Q10: PositiveInteger without quotes" ;
@@ -128,7 +146,9 @@
             [ qt:query <pos-integer-2.rq> ] ;
     mf:result <pos-integer-2.ttl> ;
     mf:knowledgebase <stockexchange.owl> ;
-    mf:mappings <stockexchange-db2.obda> .
+    mf:mappings <stockexchange-db2.obda> ;
+	mf:parameters <stockexchange-db2.properties> .
+
     
 :pos-integer-3 rdf:type mf:QueryEvaluationTest ;
     mf:name    "Q11: PositiveInteger with xsd:integer" ;
@@ -138,7 +158,9 @@
             [ qt:query <pos-integer-3.rq> ] ;
     mf:result <pos-integer-3.ttl> ;
     mf:knowledgebase <stockexchange.owl> ;
-    mf:mappings <stockexchange-db2.obda> .
+    mf:mappings <stockexchange-db2.obda> ;
+	mf:parameters <stockexchange-db2.properties> .
+
     
 :neg-integer-1 rdf:type mf:QueryEvaluationTest ;
     mf:name    "Q12: NegativeInteger with quotes" ;
@@ -148,7 +170,9 @@
             [ qt:query <neg-integer-1.rq> ] ;
     mf:result <neg-integer-1.ttl> ;
     mf:knowledgebase <stockexchange.owl> ;
-    mf:mappings <stockexchange-db2.obda> .
+    mf:mappings <stockexchange-db2.obda> ;
+	mf:parameters <stockexchange-db2.properties> .
+
 
 :neg-integer-2 rdf:type mf:QueryEvaluationTest ;
     mf:name    "Q13: NegativeInteger without quotes" ;
@@ -158,7 +182,9 @@
             [ qt:query <neg-integer-2.rq> ] ;
     mf:result <neg-integer-2.ttl> ;
     mf:knowledgebase <stockexchange.owl> ;
-    mf:mappings <stockexchange-db2.obda> .
+    mf:mappings <stockexchange-db2.obda> ;
+	mf:parameters <stockexchange-db2.properties> .
+
     
 :neg-integer-3 rdf:type mf:QueryEvaluationTest ;
     mf:name    "Q14: NegativeInteger with xsd:integer" ;
@@ -168,7 +194,9 @@
             [ qt:query <neg-integer-3.rq> ] ;
     mf:result <neg-integer-3.ttl> ;
     mf:knowledgebase <stockexchange.owl> ;
-    mf:mappings <stockexchange-db2.obda> .
+    mf:mappings <stockexchange-db2.obda> ;
+	mf:parameters <stockexchange-db2.properties> .
+
     
 :decimal-1 rdf:type mf:QueryEvaluationTest ;
     mf:name    "Q15: Decimal with quotes" ;
@@ -178,7 +206,9 @@
             [ qt:query <decimal-1.rq> ] ;
     mf:result <decimal-1.ttl> ;
     mf:knowledgebase <stockexchange.owl> ;
-    mf:mappings <stockexchange-db2.obda> .
+    mf:mappings <stockexchange-db2.obda> ;
+	mf:parameters <stockexchange-db2.properties> .
+
 
 :decimal-2 rdf:type mf:QueryEvaluationTest ;
     mf:name    "Q16: Decimal without quotes" ;
@@ -188,7 +218,9 @@
             [ qt:query <decimal-2.rq> ] ;
     mf:result <decimal-2.ttl> ;
     mf:knowledgebase <stockexchange.owl> ;
-    mf:mappings <stockexchange-db2.obda> .
+    mf:mappings <stockexchange-db2.obda> ;
+	mf:parameters <stockexchange-db2.properties> .
+
     
 :decimal-3 rdf:type mf:QueryEvaluationTest ;
     mf:name    "Q17: Decimal with xsd:decimal" ;
@@ -198,7 +230,9 @@
             [ qt:query <decimal-3.rq> ] ;
     mf:result <decimal-3.ttl> ;
     mf:knowledgebase <stockexchange.owl> ;
-    mf:mappings <stockexchange-db2.obda> .
+    mf:mappings <stockexchange-db2.obda> ;
+	mf:parameters <stockexchange-db2.properties> .
+
     
 :pos-decimal-1 rdf:type mf:QueryEvaluationTest ;
     mf:name    "Q18: PositiveDecimal with quotes" ;
@@ -208,7 +242,9 @@
             [ qt:query <pos-decimal-1.rq> ] ;
     mf:result <pos-decimal-1.ttl> ;
     mf:knowledgebase <stockexchange.owl> ;
-    mf:mappings <stockexchange-db2.obda> .
+    mf:mappings <stockexchange-db2.obda> ;
+	mf:parameters <stockexchange-db2.properties> .
+
 
 :pos-decimal-2 rdf:type mf:QueryEvaluationTest ;
     mf:name    "Q19: PositiveDecimal without quotes" ;
@@ -218,7 +254,9 @@
             [ qt:query <pos-decimal-2.rq> ] ;
     mf:result <pos-decimal-2.ttl> ;
     mf:knowledgebase <stockexchange.owl> ;
-    mf:mappings <stockexchange-db2.obda> .
+    mf:mappings <stockexchange-db2.obda> ;
+	mf:parameters <stockexchange-db2.properties> .
+
     
 :pos-decimal-3 rdf:type mf:QueryEvaluationTest ;
     mf:name    "Q20: PositiveDecimal with xsd:decimal" ;
@@ -228,7 +266,9 @@
             [ qt:query <pos-decimal-3.rq> ] ;
     mf:result <pos-decimal-3.ttl> ;
     mf:knowledgebase <stockexchange.owl> ;
-    mf:mappings <stockexchange-db2.obda> .
+    mf:mappings <stockexchange-db2.obda> ;
+	mf:parameters <stockexchange-db2.properties> .
+
     
 :neg-decimal-1 rdf:type mf:QueryEvaluationTest ;
     mf:name    "Q21: NegativeDecimal with quotes" ;
@@ -238,7 +278,9 @@
             [ qt:query <neg-decimal-1.rq> ] ;
     mf:result <neg-decimal-1.ttl> ;
     mf:knowledgebase <stockexchange.owl> ;
-    mf:mappings <stockexchange-db2.obda> .
+    mf:mappings <stockexchange-db2.obda> ;
+	mf:parameters <stockexchange-db2.properties> .
+
 
 :neg-decimal-2 rdf:type mf:QueryEvaluationTest ;
     mf:name    "Q22: NegativeDecimal without quotes" ;
@@ -248,7 +290,9 @@
             [ qt:query <neg-decimal-2.rq> ] ;
     mf:result <neg-decimal-2.ttl> ;
     mf:knowledgebase <stockexchange.owl> ;
-    mf:mappings <stockexchange-db2.obda> .
+    mf:mappings <stockexchange-db2.obda> ;
+	mf:parameters <stockexchange-db2.properties> .
+
     
 :neg-decimal-3 rdf:type mf:QueryEvaluationTest ;
     mf:name    "Q23: NegativeDecimal with xsd:decimal" ;
@@ -258,7 +302,9 @@
             [ qt:query <neg-decimal-3.rq> ] ;
     mf:result <neg-decimal-3.ttl> ;
     mf:knowledgebase <stockexchange.owl> ;
-    mf:mappings <stockexchange-db2.obda> .
+    mf:mappings <stockexchange-db2.obda> ;
+	mf:parameters <stockexchange-db2.properties> .
+
     
 :double-1 rdf:type mf:QueryEvaluationTest ;
     mf:name    "Q24: Double with quotes" ;
@@ -268,7 +314,9 @@
             [ qt:query <double-1.rq> ] ;
     mf:result <double-1.ttl> ;
     mf:knowledgebase <stockexchange.owl> ;
-    mf:mappings <stockexchange-db2.obda> .
+    mf:mappings <stockexchange-db2.obda> ;
+	mf:parameters <stockexchange-db2.properties> .
+
 
 :double-2 rdf:type mf:QueryEvaluationTest ;
     mf:name    "Q25: Double without quotes" ;
@@ -278,7 +326,9 @@
             [ qt:query <double-2-DB2.rq> ] ;
     mf:result <double-2.ttl> ;
     mf:knowledgebase <stockexchange.owl> ;
-    mf:mappings <stockexchange-db2.obda> .
+    mf:mappings <stockexchange-db2.obda> ;
+	mf:parameters <stockexchange-db2.properties> .
+
     
 :double-3 rdf:type mf:QueryEvaluationTest ;
     mf:name    "Q26: Double with xsd:double" ;
@@ -288,7 +338,9 @@
             [ qt:query <double-3-DB2.rq> ] ;
     mf:result <double-3.ttl> ;
     mf:knowledgebase <stockexchange.owl> ;
-    mf:mappings <stockexchange-db2.obda> .
+    mf:mappings <stockexchange-db2.obda> ;
+	mf:parameters <stockexchange-db2.properties> .
+
     
 :pos-double-1 rdf:type mf:QueryEvaluationTest ;
     mf:name    "Q27: PositiveDouble with quotes" ;
@@ -298,7 +350,9 @@
             [ qt:query <pos-double-1.rq> ] ;
     mf:result <pos-double-1.ttl> ;
     mf:knowledgebase <stockexchange.owl> ;
-    mf:mappings <stockexchange-db2.obda> .
+    mf:mappings <stockexchange-db2.obda> ;
+	mf:parameters <stockexchange-db2.properties> .
+
 
 :pos-double-2 rdf:type mf:QueryEvaluationTest ;
     mf:name    "Q28: PositiveDouble without quotes" ;
@@ -308,7 +362,9 @@
             [ qt:query <pos-double-2-DB2.rq> ] ;
     mf:result <pos-double-2.ttl> ;
     mf:knowledgebase <stockexchange.owl> ;
-    mf:mappings <stockexchange-db2.obda> .
+    mf:mappings <stockexchange-db2.obda> ;
+	mf:parameters <stockexchange-db2.properties> .
+
     
 :pos-double-3 rdf:type mf:QueryEvaluationTest ;
     mf:name    "Q29: PositiveDouble with xsd:double" ;
@@ -318,7 +374,9 @@
             [ qt:query <pos-double-3-DB2.rq> ] ;
     mf:result <pos-double-3.ttl> ;
     mf:knowledgebase <stockexchange.owl> ;
-    mf:mappings <stockexchange-db2.obda> .
+    mf:mappings <stockexchange-db2.obda> ;
+	mf:parameters <stockexchange-db2.properties> .
+
     
 :neg-double-1 rdf:type mf:QueryEvaluationTest ;
     mf:name    "Q30: NegativeDouble with quotes" ;
@@ -328,7 +386,9 @@
             [ qt:query <neg-double-1.rq> ] ;
     mf:result <neg-double-1.ttl> ;
     mf:knowledgebase <stockexchange.owl> ;
-    mf:mappings <stockexchange-db2.obda> .
+    mf:mappings <stockexchange-db2.obda> ;
+	mf:parameters <stockexchange-db2.properties> .
+
 
 :neg-double-2 rdf:type mf:QueryEvaluationTest ;
     mf:name    "Q31: NegativeDouble without quotes" ;
@@ -338,7 +398,9 @@
             [ qt:query <neg-double-2.rq> ] ;
     mf:result <neg-double-2.ttl> ;
     mf:knowledgebase <stockexchange.owl> ;
-    mf:mappings <stockexchange-db2.obda> .
+    mf:mappings <stockexchange-db2.obda> ;
+	mf:parameters <stockexchange-db2.properties> .
+
     
 :neg-double-3 rdf:type mf:QueryEvaluationTest ;
     mf:name    "Q32: NegativeDouble with xsd:double" ;
@@ -348,7 +410,9 @@
             [ qt:query <neg-double-3.rq> ] ;
     mf:result <neg-double-3.ttl> ;
     mf:knowledgebase <stockexchange.owl> ;
-    mf:mappings <stockexchange-db2.obda> .
+    mf:mappings <stockexchange-db2.obda> ;
+	mf:parameters <stockexchange-db2.properties> .
+
     
 :datetime-1a rdf:type mf:QueryEvaluationTest ;
     mf:name    "Q33: Datetime YYYY-MM-DD with quotes" ;
@@ -358,7 +422,9 @@
             [ qt:query <datetime-1a.rq> ] ;
     mf:result <datetime-1a.ttl> ;
     mf:knowledgebase <stockexchange.owl> ;
-    mf:mappings <stockexchange-db2.obda> .
+    mf:mappings <stockexchange-db2.obda> ;
+	mf:parameters <stockexchange-db2.properties> .
+
 
 :datetime-1b rdf:type mf:QueryEvaluationTest ;
     mf:name    "Q34: Datetime YYYY-MM-DD hh:mm:ss.s with quotes" ;
@@ -368,7 +434,9 @@
             [ qt:query <datetime-1b.rq> ] ;
     mf:result <datetime-1b.ttl> ;
     mf:knowledgebase <stockexchange.owl> ;
-    mf:mappings <stockexchange-db2.obda> .
+    mf:mappings <stockexchange-db2.obda> ;
+	mf:parameters <stockexchange-db2.properties> .
+
         
 :datetime-1c rdf:type mf:QueryEvaluationTest ;
     mf:name    "Q35: Datetime YYYY-MM-DDThh:mm:ss with quotes" ;
@@ -378,7 +446,9 @@
             [ qt:query <datetime-1c.rq> ] ;
     mf:result <datetime-1c.ttl> ;
     mf:knowledgebase <stockexchange.owl> ;
-    mf:mappings <stockexchange-db2.obda> .
+    mf:mappings <stockexchange-db2.obda> ;
+	mf:parameters <stockexchange-db2.properties> .
+
     
 :datetime-2a rdf:type mf:QueryEvaluationTest ;
     mf:name    "Q36: Datetime YYYY-MM-DD without quotes" ;
@@ -388,7 +458,9 @@
             [ qt:query <datetime-2a.rq> ] ;
     mf:result <datetime-2a.ttl> ;
     mf:knowledgebase <stockexchange.owl> ;
-    mf:mappings <stockexchange-db2.obda> .
+    mf:mappings <stockexchange-db2.obda> ;
+	mf:parameters <stockexchange-db2.properties> .
+
 
 :datetime-2b rdf:type mf:QueryEvaluationTest ;
     mf:name    "Q37: Datetime YYYY-MM-DD hh:mm:ss.s without quotes" ;
@@ -398,7 +470,9 @@
             [ qt:query <datetime-2b.rq> ] ;
     mf:result <datetime-2b.ttl> ;
     mf:knowledgebase <stockexchange.owl> ;
-    mf:mappings <stockexchange-db2.obda> .
+    mf:mappings <stockexchange-db2.obda> ;
+	mf:parameters <stockexchange-db2.properties> .
+
         
 :datetime-2c rdf:type mf:QueryEvaluationTest ;
     mf:name    "Q38: Datetime YYYY-MM-DDThh:mm:ss without quotes" ;
@@ -408,7 +482,9 @@
             [ qt:query <datetime-2c.rq> ] ;
     mf:result <datetime-2c.ttl> ;
     mf:knowledgebase <stockexchange.owl> ;
-    mf:mappings <stockexchange-db2.obda> .
+    mf:mappings <stockexchange-db2.obda> ;
+	mf:parameters <stockexchange-db2.properties> .
+
 
 :datetime-3a rdf:type mf:QueryEvaluationTest ;
     mf:name    "Q39: Datetime YYYY-MM-DD with xsd:datetime" ;
@@ -418,7 +494,9 @@
             [ qt:query <datetime-3a.rq> ] ;
     mf:result <datetime-3a.ttl> ;
     mf:knowledgebase <stockexchange.owl> ;
-    mf:mappings <stockexchange-db2.obda> .
+    mf:mappings <stockexchange-db2.obda> ;
+	mf:parameters <stockexchange-db2.properties> .
+
 
 :datetime-3b rdf:type mf:QueryEvaluationTest ;
     mf:name    "Q40: Datetime YYYY-MM-DD hh:mm:ss.s with xsd:datetime" ;
@@ -428,7 +506,9 @@
             [ qt:query <datetime-3b.rq> ] ;
     mf:result <datetime-3b.ttl> ;
     mf:knowledgebase <stockexchange.owl> ;
-    mf:mappings <stockexchange-db2.obda> .
+    mf:mappings <stockexchange-db2.obda> ;
+	mf:parameters <stockexchange-db2.properties> .
+
         
 :datetime-3c rdf:type mf:QueryEvaluationTest ;
     mf:name    "Q41: Datetime YYYY-MM-DDThh:mm:ss with xsd:datetime" ;
@@ -438,7 +518,9 @@
             [ qt:query <datetime-3c.rq> ] ;
     mf:result <datetime-3c.ttl> ;
     mf:knowledgebase <stockexchange.owl> ;
-    mf:mappings <stockexchange-db2.obda> .
+    mf:mappings <stockexchange-db2.obda> ;
+	mf:parameters <stockexchange-db2.properties> .
+
 
 :datetime-3d rdf:type mf:QueryEvaluationTest ;
     mf:name    "Q42: Datetime YYYY-MM-DDThh:mm:ssZ [in UTC] with xsd:datetime" ;
@@ -448,7 +530,9 @@
             [ qt:query <datetime-3d.rq> ] ;
     mf:result <datetime-3d.ttl> ;
     mf:knowledgebase <stockexchange.owl> ;
-    mf:mappings <stockexchange-db2.obda> .
+    mf:mappings <stockexchange-db2.obda> ;
+	mf:parameters <stockexchange-db2.properties> .
+
     
 :datetime-3e rdf:type mf:QueryEvaluationTest ;
     mf:name    "Q43: Datetime YYYY-MM-DDThh:mm:ss-hh:mm [in UTC minus offset - var 1] with xsd:datetime" ;
@@ -458,7 +542,9 @@
             [ qt:query <datetime-3e.rq> ] ;
     mf:result <datetime-3e.ttl> ;
     mf:knowledgebase <stockexchange.owl> ;
-    mf:mappings <stockexchange-db2.obda> .
+    mf:mappings <stockexchange-db2.obda> ;
+	mf:parameters <stockexchange-db2.properties> .
+
     
 :datetime-3f rdf:type mf:QueryEvaluationTest ;
     mf:name    "Q44: Datetime YYYY-MM-DDThh:mm:ss-hhmm [in UTC minus offset - var 2] with xsd:datetime" ;
@@ -468,7 +554,9 @@
             [ qt:query <datetime-3f.rq> ] ;
     mf:result <datetime-3f.ttl> ;
     mf:knowledgebase <stockexchange.owl> ;
-    mf:mappings <stockexchange-db2.obda> .
+    mf:mappings <stockexchange-db2.obda> ;
+	mf:parameters <stockexchange-db2.properties> .
+
 
 :datetime-3g rdf:type mf:QueryEvaluationTest ;
     mf:name    "Q45: Datetime YYYY-MM-DDThh:mm:ss-hh [in UTC minus offset - var 3] with xsd:datetime" ;
@@ -478,7 +566,9 @@
             [ qt:query <datetime-3g.rq> ] ;
     mf:result <datetime-3g.ttl> ;
     mf:knowledgebase <stockexchange.owl> ;
-    mf:mappings <stockexchange-db2.obda> .
+    mf:mappings <stockexchange-db2.obda> ;
+	mf:parameters <stockexchange-db2.properties> .
+
     
 :datetime-3h rdf:type mf:QueryEvaluationTest ;
     mf:name    "Q46: Datetime YYYY-MM-DDThh:mm:ss+hh:mm [in UTC plus offset - var 1] with xsd:datetime" ;
@@ -488,7 +578,9 @@
             [ qt:query <datetime-3h.rq> ] ;
     mf:result <datetime-3h.ttl> ;
     mf:knowledgebase <stockexchange.owl> ;
-    mf:mappings <stockexchange-db2.obda> .
+    mf:mappings <stockexchange-db2.obda> ;
+	mf:parameters <stockexchange-db2.properties> .
+
 
 :datetime-3i rdf:type mf:QueryEvaluationTest ;
     mf:name    "Q47: Datetime YYYY-MM-DDThh:mm:ss+hhmm [in UTC minus offset - var 2] with xsd:datetime" ;
@@ -498,7 +590,9 @@
             [ qt:query <datetime-3i.rq> ] ;
     mf:result <datetime-3i.ttl> ;
     mf:knowledgebase <stockexchange.owl> ;
-    mf:mappings <stockexchange-db2.obda> .
+    mf:mappings <stockexchange-db2.obda> ;
+	mf:parameters <stockexchange-db2.properties> .
+
     
 :datetime-3j rdf:type mf:QueryEvaluationTest ;
     mf:name    "Q48: Datetime YYYY-MM-DDThh:mm:ss+hh [in UTC plus offset - var 3] with xsd:datetime" ;
@@ -508,7 +602,9 @@
             [ qt:query <datetime-3j.rq> ] ;
     mf:result <datetime-3j.ttl> ;
     mf:knowledgebase <stockexchange.owl> ;
-    mf:mappings <stockexchange-db2.obda> .
+    mf:mappings <stockexchange-db2.obda> ;
+	mf:parameters <stockexchange-db2.properties> .
+
    
 :boolean-1a rdf:type mf:QueryEvaluationTest ;
     mf:name    "Q49: Boolean [true|false] with quotes" ;
@@ -518,7 +614,9 @@
             [ qt:query <boolean-1a.rq> ] ;
     mf:result <boolean-1a.ttl> ;
     mf:knowledgebase <stockexchange.owl> ;
-    mf:mappings <stockexchange-db2.obda> .
+    mf:mappings <stockexchange-db2.obda> ;
+	mf:parameters <stockexchange-db2.properties> .
+
 
 :boolean-1b rdf:type mf:QueryEvaluationTest ;
     mf:name    "Q50: Boolean [TRUE|FALSE] with quotes" ;
@@ -528,7 +626,9 @@
             [ qt:query <boolean-1b.rq> ] ;
     mf:result <boolean-1b.ttl> ;
     mf:knowledgebase <stockexchange.owl> ;
-    mf:mappings <stockexchange-db2.obda> .
+    mf:mappings <stockexchange-db2.obda> ;
+	mf:parameters <stockexchange-db2.properties> .
+
         
 :boolean-1c rdf:type mf:QueryEvaluationTest ;
     mf:name    "Q51: Boolean [t|f] with quotes" ;
@@ -538,7 +638,9 @@
             [ qt:query <boolean-1c.rq> ] ;
     mf:result <boolean-1c.ttl> ;
     mf:knowledgebase <stockexchange.owl> ;
-    mf:mappings <stockexchange-db2.obda> .
+    mf:mappings <stockexchange-db2.obda> ;
+	mf:parameters <stockexchange-db2.properties> .
+
 
 :boolean-1d rdf:type mf:QueryEvaluationTest ;
     mf:name    "Q52: Boolean [1|0] with quotes" ;
@@ -548,7 +650,9 @@
             [ qt:query <boolean-1d.rq> ] ;
     mf:result <boolean-1d.ttl> ;
     mf:knowledgebase <stockexchange.owl> ;
-    mf:mappings <stockexchange-db2.obda> .
+    mf:mappings <stockexchange-db2.obda> ;
+	mf:parameters <stockexchange-db2.properties> .
+
 
 :boolean-2a rdf:type mf:QueryEvaluationTest ;
     mf:name    "Q53: Boolean [true|false] without quotes" ;
@@ -558,7 +662,9 @@
             [ qt:query <boolean-2a-DB2.rq> ] ;
     mf:result <boolean-2a.ttl> ;
     mf:knowledgebase <stockexchange.owl> ;
-    mf:mappings <stockexchange-db2.obda> .
+    mf:mappings <stockexchange-db2.obda> ;
+	mf:parameters <stockexchange-db2.properties> .
+
 
 :boolean-2b rdf:type mf:QueryEvaluationTest ;
     mf:name    "Q54: Boolean [TRUE|FALSE] without quotes" ;
@@ -568,7 +674,9 @@
             [ qt:query <boolean-2b-DB2.rq> ] ;
     mf:result <boolean-2b.ttl> ;
     mf:knowledgebase <stockexchange.owl> ;
-    mf:mappings <stockexchange-db2.obda> .
+    mf:mappings <stockexchange-db2.obda> ;
+	mf:parameters <stockexchange-db2.properties> .
+
         
 :boolean-2c rdf:type mf:QueryEvaluationTest ;
     mf:name    "Q55: Boolean [t|f] without quotes" ;
@@ -578,7 +686,9 @@
             [ qt:query <boolean-2c.rq> ] ;
     mf:result <boolean-2c.ttl> ;
     mf:knowledgebase <stockexchange.owl> ;
-    mf:mappings <stockexchange-db2.obda> .
+    mf:mappings <stockexchange-db2.obda> ;
+	mf:parameters <stockexchange-db2.properties> .
+
 
 :boolean-2d rdf:type mf:QueryEvaluationTest ;
     mf:name    "Q56: Boolean [1|0] without quotes" ;
@@ -588,7 +698,9 @@
             [ qt:query <boolean-2d-DB2.rq> ] ;
     mf:result <boolean-2d.ttl> ;
     mf:knowledgebase <stockexchange.owl> ;
-    mf:mappings <stockexchange-db2.obda> .
+    mf:mappings <stockexchange-db2.obda> ;
+	mf:parameters <stockexchange-db2.properties> .
+
     
 :boolean-3a rdf:type mf:QueryEvaluationTest ;
     mf:name    "Q57: Boolean [true|false] with xsd:boolean" ;
@@ -598,7 +710,9 @@
             [ qt:query <boolean-3a-DB2.rq> ] ;
     mf:result <boolean-3a.ttl> ;
     mf:knowledgebase <stockexchange.owl> ;
-    mf:mappings <stockexchange-db2.obda> .
+    mf:mappings <stockexchange-db2.obda> ;
+	mf:parameters <stockexchange-db2.properties> .
+
 
 :boolean-3b rdf:type mf:QueryEvaluationTest ;
     mf:name    "Q58: Boolean [TRUE|FALSE] with xsd:boolean" ;
@@ -608,7 +722,9 @@
             [ qt:query <boolean-3b.rq> ] ;
     mf:result <boolean-3b.ttl> ;
     mf:knowledgebase <stockexchange.owl> ;
-    mf:mappings <stockexchange-db2.obda> .
+    mf:mappings <stockexchange-db2.obda> ;
+	mf:parameters <stockexchange-db2.properties> .
+
         
 :boolean-3c rdf:type mf:QueryEvaluationTest ;
     mf:name    "Q59: Boolean [t|f] with xsd:boolean" ;
@@ -618,7 +734,9 @@
             [ qt:query <boolean-3c.rq> ] ;
     mf:result <boolean-3c.ttl> ;
     mf:knowledgebase <stockexchange.owl> ;
-    mf:mappings <stockexchange-db2.obda> .
+    mf:mappings <stockexchange-db2.obda> ;
+	mf:parameters <stockexchange-db2.properties> .
+
 
 :boolean-3d rdf:type mf:QueryEvaluationTest ;
     mf:name    "Q60: Boolean [1|0] with xsd:boolean" ;
@@ -628,4 +746,5 @@
             [ qt:query <boolean-3d-DB2.rq> ] ;
     mf:result <boolean-3d.ttl> ;
     mf:knowledgebase <stockexchange.owl> ;
-    mf:mappings <stockexchange-db2.obda> .
+    mf:mappings <stockexchange-db2.obda> ;
+	mf:parameters <stockexchange-db2.properties> .

@@ -23,7 +23,6 @@ package it.unibz.inf.ontop.quest.sparql;
 
 import it.unibz.inf.ontop.owlrefplatform.owlapi.OntopOWLStatement;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLResultSet;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLStatement;
 import it.unibz.inf.ontop.quest.AbstractVirtualModeTest;
 import org.semanticweb.owlapi.model.OWLIndividual;
 
@@ -36,9 +35,10 @@ public class OracleRegexpTest extends AbstractVirtualModeTest {
 
 	static final String owlfile = "resources/regexp/oracle-regexp.owl";
 	static final String obdafile = "resources/regexp/oracle-regexp.obda";
+	static final String propertyfile = "resources/regexp/oracle-regexp.properties";
 
 	public OracleRegexpTest() {
-		super(owlfile, obdafile);
+		super(owlfile, obdafile, propertyfile);
 	}
 
 

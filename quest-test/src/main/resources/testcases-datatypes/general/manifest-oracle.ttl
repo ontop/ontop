@@ -22,5 +22,6 @@
             [ qt:query <select-all.rq> ] ;
     mf:result <select-all.ttl> ;
     mf:knowledgebase <datatypes.owl> ;
-    mf:mappings <datatypes-oracle.obda> .
+    mf:mappings <datatypes-oracle.obda>;
+    mf:parameters <datatypes-oracle.properties> .
 

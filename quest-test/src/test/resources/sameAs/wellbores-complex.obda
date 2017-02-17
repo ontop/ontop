@@ -3,12 +3,6 @@
 owl:		http://www.w3.org/2002/07/owl#
 xsd:		http://www.w3.org/2001/XMLSchema#
 
-[SourceDeclaration]
-sourceUri	WellboreDataset
-connectionUrl	jdbc:h2:mem:wellboresComplex
-username	sa
-password	
-driverClass	org.h2.Driver
 
 [MappingDeclaration] @collection [[
 mappingId	mappingDS1

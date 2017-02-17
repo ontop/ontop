@@ -31,9 +31,10 @@ public class TMappingConcurrencyError extends AbstractVirtualModeTest {
 
 	static final String owlfile = "src/test/resources/exampleTMapping.owl";
 	static final String obdafile = "src/test/resources/exampleTMapping.obda";
+	static final String propertiesfile = "src/test/resources/exampleTMapping.properties";
 
 	public TMappingConcurrencyError() {
-		super(owlfile, obdafile);
+		super(owlfile, obdafile, propertiesfile);
 	}
 
 

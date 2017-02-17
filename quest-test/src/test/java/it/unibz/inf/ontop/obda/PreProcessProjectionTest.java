@@ -7,9 +7,10 @@ public class PreProcessProjectionTest extends AbstractVirtualModeTest {
 
     static final String owlfile = "src/test/resources/northwind/northwind.owl";
     static final String obdafile = "src/test/resources/mappingStars.obda";
+    static final String propertiesfile = "src/test/resources/mappingStars.properties";
 
     public PreProcessProjectionTest() {
-        super(owlfile, obdafile);
+        super(owlfile, obdafile, propertiesfile);
     }
 
     public void testSimpleQuery() throws Exception {

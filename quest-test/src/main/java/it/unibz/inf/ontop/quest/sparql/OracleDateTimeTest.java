@@ -26,9 +26,10 @@ package it.unibz.inf.ontop.quest.sparql;
 
 import it.unibz.inf.ontop.owlrefplatform.owlapi.OntopOWLStatement;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLResultSet;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLStatement;
 import it.unibz.inf.ontop.quest.AbstractVirtualModeTest;
 import org.semanticweb.owlapi.model.OWLObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /***
@@ -39,9 +40,11 @@ public class OracleDateTimeTest extends AbstractVirtualModeTest {
 
 	static final String owlfile = "src/test/resources/dateTimeExampleBooks.owl";
 	static final String obdafile = "src/test/resources/dateTimeExampleBooks.obda";
+	static final String propertyfile = "src/test/resources/dateTimeExampleBooks.properties";
+	private final Logger log = LoggerFactory.getLogger(this.getClass());
 
 	public OracleDateTimeTest() {
-		super(owlfile, obdafile);
+		super(owlfile, obdafile, propertyfile);
 	}
 
 
@@ -73,7 +76,7 @@ public class OracleDateTimeTest extends AbstractVirtualModeTest {
 						" SELECT ?x ?y WHERE " +
 						"{?x :dateOfPublication ?y .}";
 				String date = runTest(st, query, true);
-				System.out.println(date);
+				log.debug(date);
 				
 				//assertEquals(countryName, "<http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country-Egypt>");
 			

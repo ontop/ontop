@@ -30,9 +30,10 @@ public class JTDSDatatypesTest extends AbstractVirtualModeTest {
 
 	static final String owlfile = "src/test/resources/datatype/datatypesjtds.owl";
 	static final String obdafile = "src/test/resources/datatype/datatypejtds.obda";
+	static final String propertiesfile = "src/test/resources/datatype/datatypejtds.properties";
 
 	public JTDSDatatypesTest() {
-		super(owlfile, obdafile);
+		super(owlfile, obdafile, propertiesfile);
 	}
 
 

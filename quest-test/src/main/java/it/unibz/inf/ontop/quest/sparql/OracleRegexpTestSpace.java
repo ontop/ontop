@@ -32,11 +32,12 @@ import org.semanticweb.owlapi.model.OWLIndividual;
  */
 public class OracleRegexpTestSpace extends AbstractVirtualModeTest {
 
-	static final String owlfile = "resources/regexp/oracle-regexp.owl";
-	static final String obdafile = "resources/regexp/oracle-regexp.obda";
+	static final String owlFile = "resources/regexp/oracle-regexp.owl";
+	static final String obdaFile = "resources/regexp/oracle-regexp.obda";
+	static final String propertyFile = "resources/regexp/oracle-regexp.properties";
 
 	public OracleRegexpTestSpace() {
-		super(owlfile, obdafile);
+		super(owlFile, obdaFile, propertyFile);
 	}
 
 
