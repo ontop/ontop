@@ -20,6 +20,7 @@ package it.unibz.inf.ontop.rdf4j.repository;
  * #L%
  */
 
+import it.unibz.inf.ontop.answering.input.RDF4JInputQueryFactory;
 import it.unibz.inf.ontop.exception.OntopConnectionException;
 import it.unibz.inf.ontop.owlrefplatform.core.OntopConnection;
 import it.unibz.inf.ontop.rdf4j.query.OntopBooleanQuery;
@@ -48,15 +49,18 @@ public class OntopRepositoryConnection implements org.eclipse.rdf4j.repository.R
 	private static final String READ_ONLY_MESSAGE = "Ontop is a read-only system";
 	private OntopVirtualRepository repository;
 	private OntopConnection ontopConnection;
-    private boolean isOpen;
+	private final RDF4JInputQueryFactory inputQueryFactory;
+	private boolean isOpen;
     private boolean isActive;
     private RDFParser rdfParser;
 
 	
-	public OntopRepositoryConnection(OntopVirtualRepository rep, OntopConnection connection)
+	OntopRepositoryConnection(OntopVirtualRepository rep, OntopConnection connection,
+							  RDF4JInputQueryFactory inputQueryFactory)
 	{
 		this.repository = rep;
 		this.ontopConnection = connection;
+		this.inputQueryFactory = inputQueryFactory;
 		this.isOpen = true;
 		this.isActive = false;
 		this.rdfParser = Rio.createParser(RDFFormat.RDFXML, this.repository.getValueFactory());
@@ -322,7 +326,11 @@ public class OntopRepositoryConnection implements org.eclipse.rdf4j.repository.R
 	@Override
     public boolean isAutoCommit() throws RepositoryException {
 		//Checks whether the connection is in auto-commit mode.
-		return ontopConnection.getAutoCommit();
+		try {
+			return ontopConnection.getAutoCommit();
+		} catch (OntopConnectionException e) {
+			throw new RepositoryException(e);
+		}
 	}
 
 	@Override
@@ -354,8 +362,12 @@ public class OntopRepositoryConnection implements org.eclipse.rdf4j.repository.R
 		if (ql != QueryLanguage.SPARQL)
 			throw new MalformedQueryException("SPARQL query expected!");
 
-		return new OntopBooleanQuery(queryString, baseIRI, ontopConnection);
-		
+		String safeBaseIRI = baseIRI == null
+				? null
+				: baseIRI.isEmpty() ? null : baseIRI ;
+
+		ParsedQuery q = QueryParserUtil.parseQuery(QueryLanguage.SPARQL, queryString, safeBaseIRI);
+		return new OntopBooleanQuery(queryString, q, safeBaseIRI, ontopConnection, inputQueryFactory);
 	}
 
 	@Override
@@ -374,7 +386,12 @@ public class OntopRepositoryConnection implements org.eclipse.rdf4j.repository.R
 		if (ql != QueryLanguage.SPARQL)
 			throw new MalformedQueryException("SPARQL query expected!");
 
-		return new OntopGraphQuery(queryString, baseIRI, ontopConnection);
+		String safeBaseIRI = baseIRI == null
+				? null
+				: baseIRI.isEmpty() ? null : baseIRI ;
+
+		ParsedQuery q = QueryParserUtil.parseQuery(QueryLanguage.SPARQL, queryString, safeBaseIRI);
+		return new OntopGraphQuery(queryString, q, safeBaseIRI, ontopConnection, inputQueryFactory);
 			
 	}
 
@@ -396,14 +413,13 @@ public class OntopRepositoryConnection implements org.eclipse.rdf4j.repository.R
 		ParsedQuery q = QueryParserUtil.parseQuery(QueryLanguage.SPARQL, queryString, baseIRI);
 		
 		if (q instanceof ParsedTupleQuery)
-			return prepareTupleQuery(ql,queryString, baseIRI);
+			return new OntopTupleQuery(queryString, q, baseIRI, ontopConnection, inputQueryFactory);
 		else if (q instanceof ParsedBooleanQuery)
-			return prepareBooleanQuery(ql, queryString, baseIRI);
+			return new OntopBooleanQuery(queryString, q, baseIRI, ontopConnection, inputQueryFactory);
 		else if (q instanceof ParsedGraphQuery)
-			return prepareGraphQuery(ql, queryString, baseIRI);
+			return new OntopGraphQuery(queryString, q, baseIRI, ontopConnection, inputQueryFactory);
 		else 
 			throw new MalformedQueryException("Unrecognized query type. " + queryString);
-		
 	}
 
 	@Override
@@ -423,8 +439,12 @@ public class OntopRepositoryConnection implements org.eclipse.rdf4j.repository.R
 		if (ql != QueryLanguage.SPARQL)
 			throw new MalformedQueryException("SPARQL query expected!");
 
-			return new OntopTupleQuery(queryString, baseIRI, ontopConnection);
+		String safeBaseIRI = baseIRI == null
+				? null
+				: baseIRI.isEmpty() ? null : baseIRI ;
+		ParsedQuery q = QueryParserUtil.parseQuery(QueryLanguage.SPARQL, queryString, safeBaseIRI);
 
+		return new OntopTupleQuery(queryString, q, safeBaseIRI, ontopConnection, inputQueryFactory);
 	}
 
 	@Override
@@ -489,8 +509,12 @@ public class OntopRepositoryConnection implements org.eclipse.rdf4j.repository.R
 		//Otherwise, the updates are grouped into transactions that are 
 		// terminated by a call to either commit() or rollback().
 		// By default, new connections are in auto-commit mode.
-		if (autoCommit == this.ontopConnection.getAutoCommit()) {
-			return;
+		try {
+			if (autoCommit == this.ontopConnection.getAutoCommit()) {
+                return;
+            }
+		} catch (OntopConnectionException e) {
+			throw new RepositoryException(e);
 		}
 		if (isActive()) {
 			try {

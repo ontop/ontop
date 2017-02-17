@@ -23,8 +23,11 @@ package it.unibz.inf.ontop.owlrefplatform.core.abox;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Injector;
 import it.unibz.inf.ontop.answering.OntopQueryEngine;
+import it.unibz.inf.ontop.answering.input.ConstructQuery;
+import it.unibz.inf.ontop.answering.input.InputQueryFactory;
 import it.unibz.inf.ontop.exception.OBDASpecificationException;
 import it.unibz.inf.ontop.exception.OntopConnectionException;
+import it.unibz.inf.ontop.exception.OntopResultConversionException;
 import it.unibz.inf.ontop.injection.OntopEngineFactory;
 import it.unibz.inf.ontop.injection.OntopSystemConfiguration;
 import it.unibz.inf.ontop.model.GraphResultSet;
@@ -69,6 +72,7 @@ public class QuestMaterializer {
 	
 	private final ImmutableSet<Predicate> selectedVocabulary;
 	private final OntopQueryEngine queryEngine;
+	private final InputQueryFactory inputQueryFactory;
 
 	private long counter = 0;
 	private VirtualTripleIterator iterator;
@@ -88,6 +92,7 @@ public class QuestMaterializer {
 
 		this.queryEngine = engineFactory.create(configuration.loadProvidedSpecification(),
 				configuration.getExecutorRegistry());
+		this.inputQueryFactory = injector.getInstance(InputQueryFactory.class);
 	}
 
 	public QuestMaterializer(@Nonnull OntopSystemConfiguration configuration,
@@ -102,6 +107,7 @@ public class QuestMaterializer {
 
 		this.selectedVocabulary = extractVocabulary(obdaSpecification.getVocabulary());
 		this.queryEngine = engineFactory.create(obdaSpecification, configuration.getExecutorRegistry());
+		this.inputQueryFactory = injector.getInstance(InputQueryFactory.class);
 
 		// Was an ugly way to ask for also querying the annotations
 	}
@@ -234,7 +240,7 @@ public class QuestMaterializer {
 				while (results == null) {
 					if (vocabularyIterator.hasNext()) {
 						Predicate pred = vocabularyIterator.next();
-						String query = getQuery(pred);
+						ConstructQuery query = inputQueryFactory.createConstructQuery(getQuery(pred));
 						OBDAResultSet execute = stm.execute(query);
 
 						results = (GraphResultSet) execute;
@@ -283,7 +289,7 @@ public class QuestMaterializer {
 							stm.setFetchSize(FETCH_SIZE);
 						}
 						Predicate predicate = vocabularyIterator.next();
-						String query = getQuery(predicate);
+						ConstructQuery query = inputQueryFactory.createConstructQuery(getQuery(predicate));
 						OBDAResultSet execute = stm.execute(query);
 
 						results = (GraphResultSet) execute;
@@ -321,9 +327,9 @@ public class QuestMaterializer {
 					throw new IllegalStateException("You cannot call next() twice in a row without calling hasNext()");
 				}
 				
-			} catch (OntopConnectionException e) {
-				log.warn("Exception in Assertion Iterator next");
-				throw new NoSuchElementException();
+			} catch (OntopConnectionException | OntopResultConversionException e) {
+				log.warn("Exception in Assertion Iterator next: " + e.getMessage());
+				throw new NoSuchElementException(e.getMessage());
 			}
 		}
 			

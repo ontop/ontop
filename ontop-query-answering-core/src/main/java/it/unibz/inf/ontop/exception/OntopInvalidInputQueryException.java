@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.exception;
 
-public class OntopInvalidInputQueryException extends OntopReformulationException {
+public class OntopInvalidInputQueryException extends OntopQueryAnsweringException {
+
     public OntopInvalidInputQueryException(String message) {
         super(message);
     }

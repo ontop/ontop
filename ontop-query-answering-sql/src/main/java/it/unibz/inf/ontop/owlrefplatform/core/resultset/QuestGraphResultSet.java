@@ -20,6 +20,7 @@ package it.unibz.inf.ontop.owlrefplatform.core.resultset;
  * #L%
  */
 
+import it.unibz.inf.ontop.answering.input.ConstructTemplate;
 import it.unibz.inf.ontop.exception.OntopConnectionException;
 import it.unibz.inf.ontop.exception.OntopResultConversionException;
 import it.unibz.inf.ontop.model.*;
@@ -29,7 +30,6 @@ import it.unibz.inf.ontop.ontology.Assertion;
 import it.unibz.inf.ontop.ontology.AssertionFactory;
 import it.unibz.inf.ontop.ontology.InconsistentOntologyException;
 import it.unibz.inf.ontop.ontology.impl.AssertionFactoryImpl;
-import it.unibz.inf.ontop.owlrefplatform.core.translator.SesameConstructTemplate;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Literal;
 import org.eclipse.rdf4j.query.algebra.*;
@@ -48,7 +48,7 @@ public class QuestGraphResultSet implements GraphResultSet {
 	private TupleResultSet tupleResultSet;
 
 
-	private SesameConstructTemplate sesameTemplate;
+	private ConstructTemplate constructTemplate;
 
 	List<ExtensionElem> extList = null;
 	
@@ -59,16 +59,16 @@ public class QuestGraphResultSet implements GraphResultSet {
 
 	private AssertionFactory ofac = AssertionFactoryImpl.getInstance();
 
-	public QuestGraphResultSet(TupleResultSet results, SesameConstructTemplate template,
-			boolean storeResult) throws OntopResultConversionException {
+	public QuestGraphResultSet(TupleResultSet results, ConstructTemplate template,
+			boolean storeResult) throws OntopResultConversionException, OntopConnectionException {
 		this.tupleResultSet = results;
-		this.sesameTemplate = template;
+		this.constructTemplate = template;
 		this.storeResults = storeResult;
-		processResultSet(tupleResultSet, sesameTemplate);
+		processResultSet(tupleResultSet, constructTemplate);
 	}
 
-    private void processResultSet(TupleResultSet resSet, SesameConstructTemplate template)
-			throws OntopResultConversionException {
+    private void processResultSet(TupleResultSet resSet, ConstructTemplate template)
+            throws OntopResultConversionException, OntopConnectionException {
 		if (storeResults) {
 			//process current result set into local buffer, 
 			//since additional results will be collected
@@ -93,7 +93,8 @@ public class QuestGraphResultSet implements GraphResultSet {
 	 * the only current result set.
 	 */
     private List<Assertion> processResults(TupleResultSet result,
-                                           SesameConstructTemplate template) throws OntopResultConversionException {
+                                           ConstructTemplate template)
+            throws OntopResultConversionException, OntopConnectionException {
         List<Assertion> tripleAssertions = new ArrayList<>();
         List<ProjectionElemList> peLists = template.getProjectionElemList();
 
@@ -157,18 +158,18 @@ public class QuestGraphResultSet implements GraphResultSet {
 	}
 
 	@Override
-	public List<Assertion> next() throws OntopConnectionException {
+	public List<Assertion> next() throws OntopConnectionException, OntopResultConversionException {
 		//if we collect results, then remove and return the next one in the list
 		if (results.size() > 0) {
 			return results.remove(0);
 		} else {
 			//otherwise we need to process the unstored result
-			return processResults(tupleResultSet, sesameTemplate);
+			return processResults(tupleResultSet, constructTemplate);
 		}
 	}
 
     private Constant getConstant(ProjectionElem node, TupleResultSet resSet)
-            throws OntopResultConversionException {
+            throws OntopResultConversionException, OntopConnectionException {
         Constant constant = null;
         String node_name = node.getSourceName();
         ValueExpr ve = null;

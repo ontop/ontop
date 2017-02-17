@@ -21,18 +21,17 @@ package it.unibz.inf.ontop.model;
  */
 
 import it.unibz.inf.ontop.exception.OntopConnectionException;
+import it.unibz.inf.ontop.exception.OntopResultConversionException;
 import it.unibz.inf.ontop.ontology.Assertion;
 
 import java.util.Iterator;
 import java.util.List;
 
-public interface GraphResultSet extends OBDAResultSet, Iterator<List<Assertion>> {
+public interface GraphResultSet extends OBDAResultSet {
 
-	@Override
     boolean hasNext() throws OntopConnectionException;
 
-	@Override
-    List<Assertion> next() throws OntopConnectionException;
+    List<Assertion> next() throws OntopConnectionException, OntopResultConversionException;
 
 	@Override
     void close() throws OntopConnectionException;

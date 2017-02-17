@@ -110,7 +110,7 @@ public class CanonicalIRIUniversityTest {
                 for (QueryControllerQuery query : group.getQueries()) {
 
                     String sparqlQuery = query.getQuery();
-                    QuestOWLResultSet res = st.executeTuple(sparqlQuery);
+                    QuestOWLResultSet res = st.executeSelectQuery(sparqlQuery);
                     int columnSize = res.getColumnCount();
                     while (res.nextRow()) {
                         for (int idx = 1; idx <= columnSize; idx++) {
@@ -127,7 +127,7 @@ public class CanonicalIRIUniversityTest {
                     ExecutableQuery executableQuery = st.getExecutableQuery(sparqlQuery);
 
                     System.out.println();
-                    System.out.println("The input SPARQL query:");
+                    System.out.println("The input SELECT SPARQL query:");
                     System.out.println("=======================");
                     System.out.println(sparqlQuery);
                     System.out.println();
@@ -166,15 +166,15 @@ public class CanonicalIRIUniversityTest {
                 "  }\n" +
                 "}";
 
-        runQuery(query);
+        runSelectQuery(query);
 
     }
 
-    private void runQuery(String query) throws OWLException {
+    private void runSelectQuery(String query) throws OWLException {
         OntopOWLStatement st = conn.createStatement();
         ArrayList<String> retVal = new ArrayList<>();
         try {
-            QuestOWLResultSet rs = st.executeTuple(query);
+            QuestOWLResultSet rs = st.executeSelectQuery(query);
             while(rs.nextRow()) {
                 for (String s : rs.getSignature()) {
                     OWLObject binding = rs.getOWLObject(s);
@@ -207,7 +207,7 @@ public class CanonicalIRIUniversityTest {
             "  ?teacher a :Teacher ; foaf:lastName ?lastName .\n" +
                     "}\n";
 
-        runQuery(query);
+        runSelectQuery(query);
 
     }
 
@@ -222,7 +222,7 @@ public class CanonicalIRIUniversityTest {
                         "   ?researcher a :Researcher .\n" +
                         "}";
 
-        runQuery(query);
+        runSelectQuery(query);
 
 
     }
@@ -238,7 +238,7 @@ public class CanonicalIRIUniversityTest {
                         "   ?x :isSupervisedBy [ a :Professor ] .\n" +
                         "}";
 
-        runQuery(query);
+        runSelectQuery(query);
 
 
     }

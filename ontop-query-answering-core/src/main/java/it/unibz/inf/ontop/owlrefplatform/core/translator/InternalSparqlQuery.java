@@ -4,15 +4,12 @@ import it.unibz.inf.ontop.model.DatalogProgram;
 
 import java.util.List;
 
-/**
- * Created by roman on 27/03/2016.
- */
-public class SparqlQuery {
+public class InternalSparqlQuery {
 
     private final DatalogProgram program;
     private final List<String> signature;
 
-    public SparqlQuery(DatalogProgram program, List<String> signature) {
+    public InternalSparqlQuery(DatalogProgram program, List<String> signature) {
         this.program = program;
         this.signature = signature;
     }

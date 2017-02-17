@@ -1,8 +1,9 @@
 package it.unibz.inf.ontop.reformulation.tests;
 
+import it.unibz.inf.ontop.exception.OntopUnsupportedInputQueryException;
 import it.unibz.inf.ontop.model.UriTemplateMatcher;
 import it.unibz.inf.ontop.owlrefplatform.core.translator.SparqlAlgebraToDatalogTranslator;
-import it.unibz.inf.ontop.owlrefplatform.core.translator.SparqlQuery;
+import it.unibz.inf.ontop.owlrefplatform.core.translator.InternalSparqlQuery;
 import org.junit.Test;
 import org.eclipse.rdf4j.query.MalformedQueryException;
 import org.eclipse.rdf4j.query.QueryLanguage;
@@ -19,7 +20,7 @@ import java.util.Optional;
 public class SPARQLQueryFlattenerTest {
 
     @Test
-    public void testBind0() throws MalformedQueryException {
+    public void testBind0() throws MalformedQueryException, OntopUnsupportedInputQueryException {
 
         String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
                 + "PREFIX  ns:  <http://example.org/ns#>\n"
@@ -34,12 +35,13 @@ public class SPARQLQueryFlattenerTest {
 
         SparqlAlgebraToDatalogTranslator translator = new SparqlAlgebraToDatalogTranslator(
                 new UriTemplateMatcher(), Optional.empty());
-        SparqlQuery program = translator.translate(pq);
+
+        InternalSparqlQuery program = translator.translate(pq);
         System.out.println(program);
     }
 
     @Test
-    public void testBind() throws MalformedQueryException {
+    public void testBind() throws MalformedQueryException, OntopUnsupportedInputQueryException {
 
         String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
                 + "PREFIX  ns:  <http://example.org/ns#>\n"
@@ -56,13 +58,13 @@ public class SPARQLQueryFlattenerTest {
 
         SparqlAlgebraToDatalogTranslator translator = new SparqlAlgebraToDatalogTranslator(
                 new UriTemplateMatcher(), Optional.empty());
-        SparqlQuery program = translator.translate(pq);
+        InternalSparqlQuery program = translator.translate(pq);
         System.out.println(program);
     }
 
 
     @Test
-    public void testUnion() throws MalformedQueryException {
+    public void testUnion() throws MalformedQueryException, OntopUnsupportedInputQueryException {
 
         String query6 = "PREFIX : <http://www.example.org/test#> "
                 + "PREFIX owl: <http://www.w3.org/2002/07/owl#> "
@@ -80,12 +82,12 @@ public class SPARQLQueryFlattenerTest {
 
         SparqlAlgebraToDatalogTranslator translator = new SparqlAlgebraToDatalogTranslator(
                 new UriTemplateMatcher(), Optional.empty());
-        SparqlQuery program = translator.translate(pq);
+        InternalSparqlQuery program = translator.translate(pq);
         System.out.println(program);
     }
 
     @Test
-    public void testUnionJoin() throws MalformedQueryException {
+    public void testUnionJoin() throws MalformedQueryException, OntopUnsupportedInputQueryException {
 
         String query6 = "PREFIX : <http://www.example.org/test#> "
                 + "PREFIX owl: <http://www.w3.org/2002/07/owl#> "
@@ -99,7 +101,7 @@ public class SPARQLQueryFlattenerTest {
 
         SparqlAlgebraToDatalogTranslator translator = new SparqlAlgebraToDatalogTranslator(
                 new UriTemplateMatcher(), Optional.empty());
-        SparqlQuery program = translator.translate(pq);
+        InternalSparqlQuery program = translator.translate(pq);
         System.out.println(program);
     }
 

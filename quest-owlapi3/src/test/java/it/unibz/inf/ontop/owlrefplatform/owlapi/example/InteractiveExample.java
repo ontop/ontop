@@ -46,7 +46,7 @@ public class InteractiveExample {
 		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 		OntopOWLStatement st = conn.createStatement();
 		while(true){
-			System.out.println("INSERT A QUERY");
+			System.out.println("INSERT A SELECT QUERY");
 			try {
 				StringBuilder builder = new StringBuilder();
 				String curLine = null;
@@ -55,7 +55,7 @@ public class InteractiveExample {
 				}
 				String sparqlQuery = builder.toString();
 				System.out.println(sparqlQuery);
-				QuestOWLResultSet rs = st.executeTuple(sparqlQuery);
+				QuestOWLResultSet rs = st.executeSelectQuery(sparqlQuery);
 				rs.close();
 				
 			/*

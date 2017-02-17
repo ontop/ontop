@@ -33,7 +33,7 @@ public interface TupleResultSet extends OBDAResultSet {
 
 	int getColumnCount();
 
-	List<String> getSignature();
+	List<String> getSignature() throws OntopConnectionException;
 
 	int getFetchSize() throws OntopConnectionException;
 

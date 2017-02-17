@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.owlrefplatform.core.translator;
+package it.unibz.inf.ontop.answering.input.impl;
 
 /*
  * #%L
@@ -20,48 +20,43 @@ package it.unibz.inf.ontop.owlrefplatform.core.translator;
  * #L%
  */
 
-import org.eclipse.rdf4j.query.MalformedQueryException;
-import org.eclipse.rdf4j.query.QueryLanguage;
+import com.google.common.collect.ImmutableList;
+import it.unibz.inf.ontop.answering.input.ConstructTemplate;
 import org.eclipse.rdf4j.query.algebra.*;
 import org.eclipse.rdf4j.query.parser.ParsedQuery;
-import org.eclipse.rdf4j.query.parser.QueryParser;
-import org.eclipse.rdf4j.query.parser.QueryParserUtil;
 
-import java.util.ArrayList;
-import java.util.List;
-
-public class SesameConstructTemplate {
+class RDF4JConstructTemplate implements ConstructTemplate {
     private TupleExpr projection = null;
 	private TupleExpr extension = null;
 
-    public SesameConstructTemplate(String strquery) throws MalformedQueryException {
-		QueryParser qp = QueryParserUtil.createParser(QueryLanguage.SPARQL);
-		ParsedQuery pq = qp.parseQuery(strquery, null); // base URI is null
-        TupleExpr sesameAlgebra = pq.getTupleExpr();
+	RDF4JConstructTemplate(ParsedQuery pq) {
+		TupleExpr sesameAlgebra = pq.getTupleExpr();
 		Reduced r = (Reduced) sesameAlgebra;
 		projection = r.getArg();
-		TupleExpr texpr = null;
+		TupleExpr texpr;
 		if (projection instanceof MultiProjection) {
-			 texpr = ((MultiProjection) projection).getArg();
+			texpr = ((MultiProjection) projection).getArg();
 		} else {
-			 texpr = ((Projection) projection).getArg();
+			texpr = ((Projection) projection).getArg();
 		}
-		if (texpr!= null && texpr instanceof Extension) 
+		if (texpr!= null && texpr instanceof Extension)
 			extension = texpr;
-		
-	}
-	
-	public List<ProjectionElemList> getProjectionElemList() {
-		List<ProjectionElemList> projElemList = new ArrayList<>();
-		if (projection instanceof Projection) {
-			projElemList.add(((Projection) projection).getProjectionElemList());
-		}
-		else if (projection instanceof MultiProjection) {
-			projElemList = ((MultiProjection) projection).getProjections();
-		}
-		return projElemList;
 	}
 
+
+	@Override
+	public ImmutableList<ProjectionElemList> getProjectionElemList() {
+		if (projection instanceof Projection) {
+			return ImmutableList.of(((Projection) projection).getProjectionElemList());
+		}
+		else if (projection instanceof MultiProjection) {
+			return ImmutableList.copyOf(((MultiProjection) projection).getProjections());
+		}
+		else
+			return ImmutableList.of();
+	}
+
+	@Override
 	public Extension getExtension() {
 		return (Extension) extension;
 	}

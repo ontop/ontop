@@ -120,7 +120,7 @@ public class TestSesameTimeout {
         try {
         	TupleQueryResult result = tq.evaluate();
         	result.close();
-        } catch (OntopQueryAnsweringException e) {
+        } catch (Exception e) {
         	long end = System.currentTimeMillis();
         	assertTrue(e.toString().indexOf("OntopTupleQuery timed out. More than 1 seconds passed") >= 0);
         	assertTrue(end - start >= 1000);

@@ -46,7 +46,6 @@ import it.unibz.inf.ontop.owlrefplatform.core.queryevaluation.DB2SQLDialectAdapt
 import it.unibz.inf.ontop.owlrefplatform.core.queryevaluation.SQLAdapterFactory;
 import it.unibz.inf.ontop.owlrefplatform.core.queryevaluation.SQLDialectAdapter;
 import it.unibz.inf.ontop.owlrefplatform.core.translator.IntermediateQueryToDatalogTranslator;
-import it.unibz.inf.ontop.owlrefplatform.core.translator.SesameConstructTemplate;
 import it.unibz.inf.ontop.parser.EncodeForURI;
 import it.unibz.inf.ontop.pivotalrepr.IntermediateQuery;
 import it.unibz.inf.ontop.answering.reformulation.IRIDictionary;
@@ -251,9 +250,9 @@ public class SQLGenerator implements NativeQueryGenerator {
 	}
 
 	@Override
-	public ExecutableQuery generateEmptyQuery(ImmutableList<String> signatureContainer, Optional<SesameConstructTemplate> optionalConstructTemplate) {
+	public ExecutableQuery generateEmptyQuery(ImmutableList<String> signatureContainer) {
 		// Empty string query
-		return new SQLExecutableQuery(signatureContainer, optionalConstructTemplate);
+		return new SQLExecutableQuery(signatureContainer);
 	}
 
 	/**
@@ -264,8 +263,8 @@ public class SQLGenerator implements NativeQueryGenerator {
 	 *
 	 */
 	@Override
-	public SQLExecutableQuery generateSourceQuery(IntermediateQuery intermediateQuery, ImmutableList<String> signature,
-												  Optional<SesameConstructTemplate> optionalConstructTemplate) throws OntopReformulationException {
+	public SQLExecutableQuery generateSourceQuery(IntermediateQuery intermediateQuery, ImmutableList<String> signature)
+			throws OntopReformulationException {
 
 		DatalogProgram queryProgram = convertAndPrepare(intermediateQuery);
 
@@ -321,10 +320,10 @@ public class SQLGenerator implements NativeQueryGenerator {
 			sql += subquery + "\n";
 			sql += ") " + outerViewName + "\n";
 			sql += modifier;
-			return new SQLExecutableQuery(sql, signature, optionalConstructTemplate);
+			return new SQLExecutableQuery(sql, signature);
 		} else {
 			String sqlQuery = generateQuery(signature, ruleIndex, predicatesInBottomUp, extensionalPredicates);
-			return new SQLExecutableQuery(sqlQuery, signature, optionalConstructTemplate);
+			return new SQLExecutableQuery(sqlQuery, signature);
 		}
 	}
 
@@ -368,11 +367,6 @@ public class SQLGenerator implements NativeQueryGenerator {
 
 		return datalogProgram;
 	}
-
-	@Override
-    public boolean hasDistinctResultSet() {
-        return distinctResultSet;
-    }
 
     private boolean hasSelectDistinctStatement(DatalogProgram query) {
 		boolean toReturn = false;

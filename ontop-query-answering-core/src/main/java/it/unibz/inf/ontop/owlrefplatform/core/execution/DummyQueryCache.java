@@ -1,8 +1,8 @@
 package it.unibz.inf.ontop.owlrefplatform.core.execution;
 
+import it.unibz.inf.ontop.answering.input.InputQuery;
 import it.unibz.inf.ontop.owlrefplatform.core.ExecutableQuery;
 import it.unibz.inf.ontop.owlrefplatform.core.QueryCache;
-import org.eclipse.rdf4j.query.parser.ParsedQuery;
 
 /**
  * Does not cache anything.
@@ -10,12 +10,12 @@ import org.eclipse.rdf4j.query.parser.ParsedQuery;
 public class DummyQueryCache implements QueryCache {
 
     @Override
-    public ExecutableQuery get(ParsedQuery sparqlTree) {
+    public ExecutableQuery get(InputQuery inputQuery) {
         return null;
     }
 
     @Override
-    public void put(ParsedQuery sparqlTree, ExecutableQuery executableQuery) {
+    public void put(InputQuery inputQuery, ExecutableQuery executableQuery) {
     }
 
     @Override

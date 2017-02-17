@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.owlrefplatform.owlapi.example;
 
 import com.google.inject.Injector;
 import it.unibz.inf.ontop.answering.OntopQueryEngine;
+import it.unibz.inf.ontop.answering.input.InputQueryFactory;
 import it.unibz.inf.ontop.injection.OntopEngineFactory;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.core.*;
@@ -47,7 +48,7 @@ private void setup()  throws Exception {
 	 */
 	
 	OntopConnection conn = queryEngine.getConnection();
-	OntopOWLConnection connOWL = new QuestOWLConnection(conn);
+	OntopOWLConnection connOWL = new QuestOWLConnection(conn, injector.getInstance(InputQueryFactory.class));
 	qst = connOWL.createStatement();
 }
 

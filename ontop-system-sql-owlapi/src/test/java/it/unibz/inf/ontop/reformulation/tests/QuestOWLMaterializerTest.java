@@ -49,7 +49,6 @@ public class QuestOWLMaterializerTest extends TestCase {
 	private Connection jdbcconn = null;
 
 	private static final Logger LOGGER =  LoggerFactory.getLogger(QuestOWLMaterializerTest.class);
-	private static final String PROPERTY_FILE = "src/test/resources/test/materializer/MaterializeTest.properties";
 
 	String url = "jdbc:h2:mem:questjunitdb";
 	String username = "sa";
@@ -75,7 +74,7 @@ public class QuestOWLMaterializerTest extends TestCase {
 	}
 
 	private void createTables() throws IOException, SQLException, URISyntaxException {
-		String createDDL = readSQLFile("src/test/resources/test/materializer/createMaterializeTest.sql");
+		String createDDL = readSQLFile("src/test/resources/materializer/createMaterializeTest.sql");
 
 		// Initializing and H2 database with the data		
 		// String driver = "org.h2.Driver";
@@ -96,7 +95,7 @@ public class QuestOWLMaterializerTest extends TestCase {
 	}
 
 	private void dropTables() throws SQLException, IOException {
-		String dropDDL = readSQLFile("src/test/resources/test/materializer/dropMaterializeTest.sql");
+		String dropDDL = readSQLFile("src/test/resources/materializer/dropMaterializeTest.sql");
 		Statement st = jdbcconn.createStatement();
 		st.executeUpdate(dropDDL);
 		st.close();
@@ -105,18 +104,16 @@ public class QuestOWLMaterializerTest extends TestCase {
 
 	public void testDataWithModel() throws Exception {
 	
-	    File f = new File("src/test/resources/test/materializer/MaterializeTest.obda");
+	    File f = new File("src/test/resources/materializer/MaterializeTest.obda");
 
 		OntopSQLOWLAPIConfiguration configuration = OntopSQLOWLAPIConfiguration.defaultBuilder()
-				.ontologyFile("src/test/resources/test/materializer/MaterializeTest.owl")
-				.propertyFile(PROPERTY_FILE)
+				.ontologyFile("src/test/resources/materializer/MaterializeTest.owl")
 				.nativeOntopMappingFile(f)
 				.jdbcUrl(url)
 				.jdbcUser(username)
 				.jdbcPassword(password)
 				.build();
-
-		// TODO: why not using OWLAPIMaterializer instead?
+		
 			QuestMaterializer mat = new QuestMaterializer(configuration,false);
 			Iterator<Assertion> iterator = mat.getAssertionIterator();
 			int classAss = 0;
@@ -146,11 +143,10 @@ public class QuestOWLMaterializerTest extends TestCase {
 	public void testDataWithModelAndOnto() throws Exception {
 
 			// read model
-			File f = new File("src/test/resources/test/materializer/MaterializeTest.obda");
+			File f = new File("src/test/resources/materializer/MaterializeTest.obda");
 
 		OntopSQLOWLAPIConfiguration configuration = OntopSQLOWLAPIConfiguration.defaultBuilder()
-				.ontologyFile("src/test/resources/test/materializer/MaterializeTest.owl")
-				.propertyFile(PROPERTY_FILE)
+				.ontologyFile("src/test/resources/materializer/MaterializeTest.owl")
 				.nativeOntopMappingFile(f)
 				.jdbcUrl(url)
 				.jdbcUser(username)
