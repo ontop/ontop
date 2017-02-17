@@ -35,9 +35,10 @@ import java.util.List;
 public class BindTestWithFunctionsSqlServer extends AbstractBindTestWithFunctions {
     private static final String owlfile = "src/test/resources/bindTest/sparqlBind.owl";
     private static final String obdafile = "src/test/resources/bindTest/sparqlBindSqlServer.obda";
+    private static final String propertiesfile = "src/test/resources/bindTest/sparqlBindSqlServer.properties";
 
     public BindTestWithFunctionsSqlServer() {
-        super(owlfile, obdafile);
+        super(owlfile, obdafile, propertiesfile );
     }
 
     @Override

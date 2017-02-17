@@ -27,7 +27,8 @@
             [ qt:query <date-oracle.rq> ] ;
     mf:result <noresult.ttl> ;
     mf:knowledgebase <datatypes.owl> ;
-    mf:mappings <datatypes-oracle.obda> .
+    mf:mappings <datatypes-oracle.obda> ;
+    mf:parameters <datatypes-oracle.properties> .
 
 ## >>> This test should fail!
 :date-bgp rdf:type mf:DatatypeEvaluationTest ;
@@ -39,7 +40,8 @@
             [ qt:query <date-bgp-oracle.rq> ] ;
     mf:result <noresult.ttl> ;
     mf:knowledgebase <datatypes.owl> ;
-    mf:mappings <datatypes-oracle.obda> .
+    mf:mappings <datatypes-oracle.obda> ;
+    mf:parameters <datatypes-oracle.properties> .
     
 :date-str rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: DATE - cast to xsd:string" ;
@@ -50,7 +52,8 @@
             [ qt:query <date_oracle-str.rq> ] ;
     mf:result <date-str.ttl> ;
     mf:knowledgebase <datatypes.owl> ;
-    mf:mappings <datatypes-oracle.obda> .
+    mf:mappings <datatypes-oracle.obda> ;
+    mf:parameters <datatypes-oracle.properties> .
 
 ## >>> This test should fail!
 :date-str-bgp rdf:type mf:DatatypeEvaluationTest ;
@@ -62,7 +65,8 @@
             [ qt:query <date-bgp-oracle-str.rq> ] ;
     mf:result <noresult.ttl> ;
     mf:knowledgebase <datatypes.owl> ;
-    mf:mappings <datatypes-oracle.obda> .    
+    mf:mappings <datatypes-oracle.obda> ;
+    mf:parameters <datatypes-oracle.properties> .
     
 :timestamp rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: TIMESTAMP" ;
@@ -72,7 +76,8 @@
             [ qt:query <timestamp.rq> ] ;
     mf:result <timestamp.ttl> ;
     mf:knowledgebase <datatypes.owl> ;
-    mf:mappings <datatypes-oracle.obda> .
+    mf:mappings <datatypes-oracle.obda> ;
+    mf:parameters <datatypes-oracle.properties> .
     
 :timestamp-str rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: TIMESTAMP -  cast to xsd:string" ;
@@ -82,7 +87,8 @@
             [ qt:query <timestamp-str-oracle.rq> ] ;
     mf:result <timestamp.ttl> ;
     mf:knowledgebase <datatypes.owl> ;
-    mf:mappings <datatypes-oracle.obda> .
+    mf:mappings <datatypes-oracle.obda> ;
+    mf:parameters <datatypes-oracle.properties> .
 
 :timestamptz rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: TIMESTAMP WITH TIMEZONE" ;
@@ -92,7 +98,8 @@
             [ qt:query <timestamptz.rq> ] ;
     mf:result <timestamp_tz.ttl> ;
     mf:knowledgebase <datatypes.owl> ;
-    mf:mappings <datatypes-oracle.obda> .
+    mf:mappings <datatypes-oracle.obda> ;
+    mf:parameters <datatypes-oracle.properties> .
 
 
 

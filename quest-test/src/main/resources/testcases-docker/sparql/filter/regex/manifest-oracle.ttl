@@ -10,11 +10,7 @@
     mf:entries
     ( 
       :query-1
-#      :query-2
-#      :query-3
-#      :query-4 
-#      :query-5
-#      :query-6
+
     ) .
 
 :query-1 rdf:type mf:QueryEvaluationTest ;
@@ -24,4 +20,5 @@
             [ qt:query <query-1.rq> ] ;
     mf:result <query-1-result.ttl> ;
     mf:knowledgebase <regex.owl> ;
-    mf:mappings <regex-oracle.obda> .
+    mf:mappings <regex-oracle.obda> ;
+    mf:parameters <regex-oracle.properties> .

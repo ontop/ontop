@@ -27,7 +27,9 @@
             [ qt:query <integer.rq> ] ;
     mf:result <integer.ttl> ;
     mf:knowledgebase <datatypes.owl> ;
-    mf:mappings <datatypes-pgsql.obda> .
+    mf:mappings <datatypes-pgsql.obda> ;
+	mf:parameters <datatypes-pgsql.properties> .
+
     
 :smallint rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: SMALLINT" ;
@@ -37,7 +39,9 @@
             [ qt:query <smallint.rq> ] ;
     mf:result <smallint.ttl> ;
     mf:knowledgebase <datatypes.owl> ;
-    mf:mappings <datatypes-pgsql.obda> .
+    mf:mappings <datatypes-pgsql.obda> ;
+	mf:parameters <datatypes-pgsql.properties> .
+
     
  :bigint rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: BIGINT" ;
@@ -47,7 +51,9 @@
             [ qt:query <bigint.rq> ] ;
     mf:result <bigint.ttl> ;
     mf:knowledgebase <datatypes.owl> ;
-    mf:mappings <datatypes-pgsql.obda> .
+    mf:mappings <datatypes-pgsql.obda> ;
+	mf:parameters <datatypes-pgsql.properties> .
+
  
  :numeric rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: NUMERIC" ;
@@ -57,7 +63,9 @@
             [ qt:query <numeric.rq> ] ;
     mf:result <numeric.ttl> ;
     mf:knowledgebase <datatypes.owl> ;
-    mf:mappings <datatypes-pgsql.obda> .
+    mf:mappings <datatypes-pgsql.obda> ;
+	mf:parameters <datatypes-pgsql.properties> .
+
     
  :real rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: REAL" ;
@@ -67,7 +75,9 @@
             [ qt:query <real.rq> ] ;
     mf:result <real.ttl> ;
     mf:knowledgebase <datatypes.owl> ;
-    mf:mappings <datatypes-pgsql.obda> .
+    mf:mappings <datatypes-pgsql.obda> ;
+	mf:parameters <datatypes-pgsql.properties> .
+
     
  :double rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: DOUBLE PRECISION" ;
@@ -77,7 +87,9 @@
             [ qt:query <double.rq> ] ;
     mf:result <double.ttl> ;
     mf:knowledgebase <datatypes.owl> ;
-    mf:mappings <datatypes-pgsql.obda> .
+    mf:mappings <datatypes-pgsql.obda> ;
+	mf:parameters <datatypes-pgsql.properties> .
+
     
 :serial rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: SERIAL" ;
@@ -87,7 +99,9 @@
             [ qt:query <serial.rq> ] ;
     mf:result <serial.ttl> ;
     mf:knowledgebase <datatypes.owl> ;
-    mf:mappings <datatypes-pgsql.obda> .
+    mf:mappings <datatypes-pgsql.obda> ;
+	mf:parameters <datatypes-pgsql.properties> .
+
     
 :bigserial rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: BIG SERIAL" ;
@@ -97,4 +111,5 @@
             [ qt:query <bigserial.rq> ] ;
     mf:result <bigserial.ttl> ;
     mf:knowledgebase <datatypes.owl> ;
-    mf:mappings <datatypes-pgsql.obda> .
+    mf:mappings <datatypes-pgsql.obda> ;
+	mf:parameters <datatypes-pgsql.properties> .

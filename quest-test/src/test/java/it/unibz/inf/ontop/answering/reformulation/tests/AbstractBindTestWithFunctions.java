@@ -49,13 +49,15 @@ public abstract class AbstractBindTestWithFunctions {
 
     private final String owlfile;
     private final String obdafile;
+    private final String propertiesfile;
 
     protected static Logger log = LoggerFactory.getLogger(AbstractBindTestWithFunctions.class);
 
 
-    protected AbstractBindTestWithFunctions(String owlfile, String obdafile) {
+    protected AbstractBindTestWithFunctions(String owlfile, String obdafile, String propertiesfile) {
         this.owlfile = owlfile;
         this.obdafile = obdafile;
+        this.propertiesfile = propertiesfile;
     }
 
     private void runTests(String query) throws Exception {
@@ -66,6 +68,7 @@ public abstract class AbstractBindTestWithFunctions {
         OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
                 .nativeOntopMappingFile(obdafile)
                 .ontologyFile(owlfile)
+                .propertyFile(propertiesfile)
                 .build();
         QuestOWL reasoner = factory.createReasoner(config);
 
@@ -780,6 +783,7 @@ public abstract class AbstractBindTestWithFunctions {
         OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
                 .nativeOntopMappingFile(obdafile)
                 .ontologyFile(owlfile)
+                .propertyFile(propertiesfile)
                 .build();
         QuestOWL reasoner = factory.createReasoner(config);
 

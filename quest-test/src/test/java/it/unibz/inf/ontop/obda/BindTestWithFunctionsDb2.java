@@ -37,9 +37,10 @@ import java.util.List;
 public class BindTestWithFunctionsDb2 extends AbstractBindTestWithFunctions {
 	private static final String owlfile = "src/test/resources/bindTest/sparqlBind.owl";
 	private static final String obdafile = "src/test/resources/bindTest/sparqlBindDb2.obda";
+    private static final String propertiesfile = "src/test/resources/bindTest/sparqlBindDb2.properties";
 
     public BindTestWithFunctionsDb2() {
-        super(owlfile, obdafile);
+        super(owlfile, obdafile, propertiesfile);
     }
 
     @Ignore("Not yet supported")

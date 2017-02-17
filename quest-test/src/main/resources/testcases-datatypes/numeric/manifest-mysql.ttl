@@ -27,7 +27,9 @@
             [ qt:query <tinyint.rq> ] ;
     mf:result <tinyint.ttl> ;
     mf:knowledgebase <datatypes.owl> ;
-    mf:mappings <datatypes-mysql.obda> .
+    mf:mappings <datatypes-mysql.obda> ;
+	mf:parameters <datatypes-mysql.properties> .
+
     
 :smallint rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: SMALLINT" ;
@@ -37,7 +39,9 @@
             [ qt:query <smallint.rq> ] ;
     mf:result <smallint.ttl> ;
     mf:knowledgebase <datatypes.owl> ;
-    mf:mappings <datatypes-mysql.obda> .
+    mf:mappings <datatypes-mysql.obda> ;
+	mf:parameters <datatypes-mysql.properties> .
+
     
 :mediumint rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: MEDIUMINT" ;
@@ -47,7 +51,9 @@
             [ qt:query <mediumint.rq> ] ;
     mf:result <mediumint.ttl> ;
     mf:knowledgebase <datatypes.owl> ;
-    mf:mappings <datatypes-mysql.obda> .
+    mf:mappings <datatypes-mysql.obda> ;
+	mf:parameters <datatypes-mysql.properties> .
+
     
  :int rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: INT" ;
@@ -57,7 +63,9 @@
             [ qt:query <int.rq> ] ;
     mf:result <int.ttl> ;
     mf:knowledgebase <datatypes.owl> ;
-    mf:mappings <datatypes-mysql.obda> .
+    mf:mappings <datatypes-mysql.obda> ;
+	mf:parameters <datatypes-mysql.properties> .
+
     
  :bigint rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: BIGINT" ;
@@ -67,7 +75,9 @@
             [ qt:query <bigint.rq> ] ;
     mf:result <bigint.ttl> ;
     mf:knowledgebase <datatypes.owl> ;
-    mf:mappings <datatypes-mysql.obda> .
+    mf:mappings <datatypes-mysql.obda> ;
+	mf:parameters <datatypes-mysql.properties> .
+
  
  :decimal rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: DECIMAL" ;
@@ -77,7 +87,9 @@
             [ qt:query <decimal.rq> ] ;
     mf:result <decimal.ttl> ;
     mf:knowledgebase <datatypes.owl> ;
-    mf:mappings <datatypes-mysql.obda> .
+    mf:mappings <datatypes-mysql.obda> ;
+	mf:parameters <datatypes-mysql.properties> .
+
     
  :float rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: FLOAT" ;
@@ -87,7 +99,9 @@
             [ qt:query <float.rq> ] ;
     mf:result <float.ttl> ;
     mf:knowledgebase <datatypes.owl> ;
-    mf:mappings <datatypes-mysql.obda> .
+    mf:mappings <datatypes-mysql.obda> ;
+	mf:parameters <datatypes-mysql.properties> .
+
     
  :double rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: DOUBLE" ;
@@ -97,4 +111,5 @@
             [ qt:query <double.rq> ] ;
     mf:result <double.ttl> ;
     mf:knowledgebase <datatypes.owl> ;
-    mf:mappings <datatypes-mysql.obda> .
+    mf:mappings <datatypes-mysql.obda> ;
+	mf:parameters <datatypes-mysql.properties> .
