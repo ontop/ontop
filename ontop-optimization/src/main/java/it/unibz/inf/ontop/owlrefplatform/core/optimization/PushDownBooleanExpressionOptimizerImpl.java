@@ -41,7 +41,7 @@ public class PushDownBooleanExpressionOptimizerImpl implements PushDownBooleanEx
      * Note that a lefJoinNode may be either a direct recipient node (if it is also the provider node),
      * or an indirect one
      */
-    private static class Recipient {
+    protected static class Recipient {
         public final Optional<JoinOrFilterNode> directRecipientNode;
         public final Optional<QueryNode> indirectRecipientNode;
 
@@ -88,7 +88,7 @@ public class PushDownBooleanExpressionOptimizerImpl implements PushDownBooleanEx
     }
 
 
-    private Recipient getProviderAsRecipientNode(QueryNode queryNode){
+    protected Recipient getProviderAsRecipientNode(QueryNode queryNode){
         if(queryNode instanceof CommutativeJoinOrFilterNode){
             return new Recipient(queryNode);
         }
@@ -304,7 +304,8 @@ public class PushDownBooleanExpressionOptimizerImpl implements PushDownBooleanEx
     /**
      * TODO: explain
      */
-    private Stream<Recipient> findRecipientsInSelectedSubtree(IntermediateQuery query, QueryNode subtreeRoot, JoinOrFilterNode providerNode,
+    protected Stream<Recipient> findRecipientsInSelectedSubtree(IntermediateQuery query, QueryNode subtreeRoot,
+                                                          JoinOrFilterNode providerNode,
                                                               ImmutableExpression expression) {
 
         if (subtreeRoot instanceof CommutativeJoinOrFilterNode) {
