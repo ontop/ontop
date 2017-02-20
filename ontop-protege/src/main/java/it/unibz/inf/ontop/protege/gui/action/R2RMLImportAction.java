@@ -22,6 +22,7 @@ package it.unibz.inf.ontop.protege.gui.action;
 
 import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
+import it.unibz.inf.ontop.injection.OntopMappingSQLAllConfiguration;
 import it.unibz.inf.ontop.io.DataSource2PropertiesConvertor;
 import it.unibz.inf.ontop.model.OBDADataSource;
 import it.unibz.inf.ontop.model.OBDAMappingAxiom;
@@ -32,8 +33,8 @@ import it.unibz.inf.ontop.protege.core.OBDAModelWrapper;
 import org.protege.editor.core.Disposable;
 import org.protege.editor.core.ui.action.ProtegeAction;
 import org.protege.editor.owl.OWLEditorKit;
-import org.protege.editor.owl.model.OWLWorkspace;
 import org.protege.editor.owl.model.OWLModelManager;
+import org.protege.editor.owl.model.OWLWorkspace;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.slf4j.Logger;
@@ -102,7 +103,7 @@ public class R2RMLImportAction extends ProtegeAction {
 					 */
 					OBDADataSource dataSource = obdaModelController.getSources().get(0);
 
-					OBDACoreConfiguration configuration = OBDACoreConfiguration.defaultBuilder()
+					OntopMappingSQLAllConfiguration configuration = OntopMappingSQLAllConfiguration.defaultBuilder()
 							.properties(DataSource2PropertiesConvertor.convert(dataSource))
 							.r2rmlMappingFile(file)
 							.build();

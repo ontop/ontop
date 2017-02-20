@@ -1,8 +1,9 @@
 package it.unibz.inf.ontop.protege.gui.action;
 
+import it.unibz.inf.ontop.exception.OntopConnectionException;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.OntopOWLConnection;
+import it.unibz.inf.ontop.owlrefplatform.owlapi.OntopOWLStatement;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWL;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLStatement;
 import it.unibz.inf.ontop.protege.utils.DialogUtils;
 import it.unibz.inf.ontop.protege.utils.OBDAProgressListener;
 import it.unibz.inf.ontop.protege.utils.OBDAProgressMonitor;
@@ -173,9 +174,9 @@ public abstract class OBDADataQueryAction<T> implements OBDAProgressListener {
 	private class Canceller extends Thread{
 		private CountDownLatch old_latch;
 		private OntopOWLConnection old_conn;
-		private QuestOWLStatement old_stmt;
+		private OntopOWLStatement old_stmt;
 
-		Canceller() throws OBDAException{
+		Canceller() throws OntopConnectionException {
 			super();
 			this.old_latch = latch;
 			this.old_stmt = statement;
@@ -203,7 +204,7 @@ public abstract class OBDADataQueryAction<T> implements OBDAProgressListener {
 		try {
 			Canceller canceller = new Canceller();
 			canceller.start();
-		} catch (OBDAException e) {
+		} catch (OntopConnectionException e) {
 			DialogUtils.showQuickErrorDialog(rootView, e, "Error creating new database connection.");
 		} finally {
 			this.actionStarted = false;

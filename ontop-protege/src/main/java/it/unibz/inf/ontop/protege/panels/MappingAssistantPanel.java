@@ -22,12 +22,10 @@ package it.unibz.inf.ontop.protege.panels;
 
 import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
-import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
-import it.unibz.inf.ontop.injection.QuestSettings;
 import it.unibz.inf.ontop.io.PrefixManager;
 import it.unibz.inf.ontop.model.*;
-import it.unibz.inf.ontop.model.impl.SQLMappingFactoryImpl;
 import it.unibz.inf.ontop.model.impl.RDBMSourceParameterConstants;
+import it.unibz.inf.ontop.model.impl.SQLMappingFactoryImpl;
 import it.unibz.inf.ontop.ontology.OClass;
 import it.unibz.inf.ontop.owlrefplatform.core.queryevaluation.SQLAdapterFactory;
 import it.unibz.inf.ontop.owlrefplatform.core.queryevaluation.SQLDialectAdapter;
@@ -984,9 +982,9 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 						// Construct the sql query
 						final String dbType = selectedSource.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER);
 
-                        //TODO: find a way to get the current preferences. Necessary if an third-party adapter should be used.
-						QuestSettings defaultPreferences = OntopSQLOWLAPIConfiguration.defaultBuilder().build().getSettings();
-						SQLDialectAdapter sqlDialect = SQLAdapterFactory.getSQLDialectAdapter(dbType, "", defaultPreferences);
+//                        //TODO: find a way to get the current preferences. Necessary if an third-party adapter should be used.
+//						OntopStandaloneSQLSettings defaultPreferences = OntopSQLOWLAPIConfiguration.defaultBuilder().build().getSettings();
+						SQLDialectAdapter sqlDialect = SQLAdapterFactory.getSQLDialectAdapter(dbType, "");
 						String sqlString = txtQueryEditor.getText();
 
 						int rowCount = fetchSize();

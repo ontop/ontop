@@ -26,7 +26,9 @@ import it.unibz.inf.ontop.injection.*;
 import it.unibz.inf.ontop.io.OntopNativeMappingSerializer;
 import it.unibz.inf.ontop.io.PrefixManager;
 import it.unibz.inf.ontop.io.QueryIOManager;
-import it.unibz.inf.ontop.model.*;
+import it.unibz.inf.ontop.model.OBDADataSource;
+import it.unibz.inf.ontop.model.OBDAModel;
+import it.unibz.inf.ontop.model.Predicate;
 import it.unibz.inf.ontop.owlapi.OBDAModelValidator;
 import it.unibz.inf.ontop.protege.utils.DialogUtils;
 import it.unibz.inf.ontop.querymanager.*;
@@ -107,7 +109,7 @@ public class OBDAModelManager implements Disposable {
 		 * TODO: avoid this use
 		 */
 		// Default injector
-		Injector defaultInjector = OBDACoreConfiguration.defaultBuilder()
+		Injector defaultInjector = OntopMappingSQLAllConfiguration.defaultBuilder()
 				.jdbcDriver("")
 				.jdbcUrl("")
 				.jdbcUser("")
@@ -715,7 +717,7 @@ public class OBDAModelManager implements Disposable {
                 OBDAModelValidator.validate(activeOBDAModel.getCurrentImmutableOBDAModel(), activeOBDAModel.getOntologyVocabulary());
             }
             catch (Exception e) {
-                OBDAException ex = new OBDAException("An exception has occurred when loading input file.\nMessage: " + e.getMessage());
+				InvalidOntopConfigurationException ex = new InvalidOntopConfigurationException("An exception has occurred when loading input file.\nMessage: " + e.getMessage());
                 DialogUtils.showQuickErrorDialog(null, ex, "Open file error");
                 log.error(e.getMessage());
             } finally {

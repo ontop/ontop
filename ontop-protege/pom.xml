@@ -121,6 +121,11 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
+            <artifactId>ontop-system-sql-owlapi</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
             <artifactId>ontop-quest-owlapi</artifactId>
             <version>${project.version}</version>
             <exclusions>

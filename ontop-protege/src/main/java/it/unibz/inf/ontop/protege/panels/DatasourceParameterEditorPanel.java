@@ -21,9 +21,11 @@ package it.unibz.inf.ontop.protege.panels;
  */
 
 
-import it.unibz.inf.ontop.model.OBDADataSourceFactory;
 import it.unibz.inf.ontop.model.OBDADataSource;
-import it.unibz.inf.ontop.model.impl.*;
+import it.unibz.inf.ontop.model.OBDADataSourceFactory;
+import it.unibz.inf.ontop.model.impl.OBDADataSourceFactoryImpl;
+import it.unibz.inf.ontop.model.impl.OBDAModelImpl;
+import it.unibz.inf.ontop.model.impl.RDBMSourceParameterConstants;
 import it.unibz.inf.ontop.protege.core.OBDAModelManager;
 import it.unibz.inf.ontop.protege.core.OBDAModelWrapper;
 import it.unibz.inf.ontop.protege.gui.IconLoader;
@@ -508,7 +510,7 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
         JDBCConnectionManager man = JDBCConnectionManager.getJDBCConnectionManager();
         try {
             man.closeConnection();
-        } catch (OBDAException | SQLException e) {
+        } catch (SQLException e) {
             // do nothing
         }
 

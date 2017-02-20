@@ -20,18 +20,17 @@ package it.unibz.inf.ontop.quest.service;
  * #L%
  */
 
+import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWL;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLFactory;
+import junit.framework.TestCase;
 import org.eclipse.rdf4j.common.io.IOUtil;
-import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
+import org.semanticweb.owlapi.model.OWLException;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
-
-import junit.framework.TestCase;
-import org.semanticweb.owlapi.model.OWLException;
 
 /**
  * Test class using StockExchange scenario in MySQL
@@ -131,7 +130,7 @@ public class QuestSPARQLRewriterTest extends TestCase {
 	private String getSPARQLRewriting(String sparqlInput) {
 		String sparqlOutput;
 		try {
-			sparqlOutput = reasoner.getStatement().getRewriting(sparqlInput);
+			sparqlOutput = reasoner.getStatement().getRewritingRendering(sparqlInput);
 		} catch (OWLException e) {
 			sparqlOutput = "NULL";
 		}
