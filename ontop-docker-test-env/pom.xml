@@ -7,5 +7,5 @@
   </parent>
   <artifactId>ontop-docker-test-env</artifactId>
   <name>ontop-docker</name>
-  <description>Ontops docker testing evironment. A set of containers with the databases that contain the schemas used in unit tests and with accounts that allow the unit tests to create/remove databases for tests.</description>
+  <description>Ontop testing environment. A set of containers with the databases that contain the schemas used in unit tests and with accounts that allow the unit tests to create/remove databases for tests.</description>
 </project>
