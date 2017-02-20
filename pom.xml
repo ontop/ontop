@@ -76,6 +76,7 @@
 		<module>quest-rdb2rdf-compliance</module>
 		<module>ontop-protege</module>
 		<module>ontop-cli</module>
+        <module>ontop-temporal</module>
 		<module>quest-test</module>
 		<module>ontop-docker-test-env</module>
     </modules>
