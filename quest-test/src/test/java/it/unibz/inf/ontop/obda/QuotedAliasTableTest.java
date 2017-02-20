@@ -26,14 +26,15 @@ import it.unibz.inf.ontop.quest.AbstractVirtualModeTest;
 /**
  * Class to test that quotes from table names are removed correctly.
  * We use the npd database.
- * @see TableJSQL
+ *L
  */
 public class QuotedAliasTableTest extends AbstractVirtualModeTest {
 	static final String owlfile = "src/test/resources/new/extended-npd-v2-ql_a_postgres.owl";
     static final String obdafile = "src/test/resources/new/npd-v2.obda";
+	static final String propertiesfile = "src/test/resources/new/npd-v2.properties";
 
 	public QuotedAliasTableTest() {
-		super(owlfile, obdafile);
+		super(owlfile, obdafile, propertiesfile);
 	}
 
 

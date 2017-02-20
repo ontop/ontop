@@ -32,9 +32,10 @@ public class OntologyTypesDatatypeTest extends AbstractVirtualModeTest {
 
     static final String owlfile = "src/main/resources/testcases-datatypes/datetime/datatypes.owl";
     static final String obdafile = "src/main/resources/testcases-datatypes/datetime/datatypes-mysql.obda";
+    static final String propertiesfile = "src/main/resources/testcases-datatypes/datetime/datatypes-mysql.properties";
 
     public OntologyTypesDatatypeTest() {
-        super(owlfile, obdafile);
+        super(owlfile, obdafile, propertiesfile);
     }
 
 

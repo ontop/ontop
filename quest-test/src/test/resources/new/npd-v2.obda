@@ -18,12 +18,6 @@ diskos:		http://sws.ifi.uio.no/data/diskos/
 diskosv:		http://sws.ifi.uio.no/vocab/diskos#
 nlxv:		http://sws.ifi.uio.no/vocab/norlex#
 
-[SourceDeclaration]
-sourceUri	x
-connectionUrl	jdbc:postgresql://obdalin3.inf.unibz.it/npd_no_spatial
-username	postgres
-password	postgres
-driverClass	org.postgresql.Driver
 
 [MappingDeclaration] @collection [[
 

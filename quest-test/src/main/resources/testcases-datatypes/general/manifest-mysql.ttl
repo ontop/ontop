@@ -22,5 +22,6 @@
             [ qt:query <select-all.rq> ] ;
     mf:result <select-all-mysql.ttl> ;
     mf:knowledgebase <datatypes.owl> ;
-    mf:mappings <datatypes-mysql.obda> .
+    mf:mappings <datatypes-mysql.obda> ;
+	mf:parameters <datatypes-mysql.properties> .
 

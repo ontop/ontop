@@ -20,16 +20,7 @@ package it.unibz.inf.ontop.rdf4j.tests.general;
  * #L%
  */
 
-import it.unibz.inf.ontop.injection.QuestConfiguration;
-import it.unibz.inf.ontop.injection.QuestCoreSettings;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
-import java.net.URL;
-import java.util.List;
-import java.util.Properties;
-
+import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.rdf4j.repository.OntopVirtualRepository;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.Value;
@@ -50,6 +41,12 @@ import org.semanticweb.owlapi.model.OWLOntologyIRIMapper;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.util.AutoIRIMapper;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.net.URL;
+import java.util.List;
+
 
 public class QuestSesameVirtualExample {
 
@@ -60,7 +57,8 @@ public class QuestSesameVirtualExample {
 	final String owlFile = "src/test/resources/example/exampleBooks.owl";
 	final String obdaFile = "src/test/resources/example/exampleBooks.obda";
 	final String ttlFile = "src/test/resources/example/Books-mappings.ttl";
-	
+	final String propertyFile = "src/test/resources/example/exampleBooks.properties";
+
 	public void runQuery() throws Exception {
 
 		/*
@@ -68,12 +66,13 @@ public class QuestSesameVirtualExample {
 		 * existential reasoning and the rewriting technique is using
 		 * TreeWitness algorithm.
 		 */
-		QuestConfiguration configuration = QuestConfiguration.defaultBuilder()
+		OntopSQLOWLAPIConfiguration configuration = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.ontologyFile(owlFile)
 				.nativeOntopMappingFile(obdaFile)
+				.propertyFile(propertyFile)
 				.build();
 
-		Repository repo = new OntopVirtualRepository("virtualExample", configuration);
+		Repository repo = new OntopVirtualRepository(configuration);
 		
 
 		/*
@@ -155,23 +154,15 @@ public class QuestSesameVirtualExample {
 		StatementCollector collector = new StatementCollector(myModel);
 		parser.setRDFHandler(collector);
 		parser.parse(in, documentUrl.toString());
-		
-		Properties p = new Properties();
-		//set jdbc params in config
-		p.setProperty(QuestCoreSettings.DB_NAME, "books");
-		p.setProperty(QuestCoreSettings.JDBC_URL, "jdbc:mysql://10.7.20.39/books?sessionVariables=sql_mode='ANSI'");
-		p.setProperty(QuestCoreSettings.DB_USER, "fish");
-		p.setProperty(QuestCoreSettings.DB_PASSWORD, "fish");
-		p.setProperty(QuestCoreSettings.JDBC_DRIVER, "com.mysql.jdbc.Driver");
 
-		QuestConfiguration configuration = QuestConfiguration.defaultBuilder()
+		OntopSQLOWLAPIConfiguration configuration = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.ontologyFile(owlFile)
 				.r2rmlMappingFile(ttlFile)
 				.enableExistentialReasoning(true)
-				.properties(p)
+				.propertyFile(propertyFile)
 				.build();
 		
-		Repository repo = new OntopVirtualRepository("virtualExample2", configuration);
+		Repository repo = new OntopVirtualRepository(configuration);
 
 		System.out.println(myModel);
 		/*

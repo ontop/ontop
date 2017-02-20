@@ -2,13 +2,6 @@
 :		http://it.unibz.inf/obda/test/simple#
 quest:	http://obda.org/quest#
 
-[SourceDeclaration]
-sourceUri	      h2
-connectionUrl	  jdbc:h2:mem:questjunitdb
-username	      sa
-password	
-driverClass	      org.h2.Driver
-
 [MappingDeclaration] @collection [[
 mappingId	M:0
 target	    :{id} a :A ; :U {name} .

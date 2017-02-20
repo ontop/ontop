@@ -21,9 +21,9 @@ package it.unibz.inf.ontop.protege.gui.action;
  */
 
 import com.google.common.collect.Sets;
+import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.model.OBDAModel;
 import it.unibz.inf.ontop.model.impl.OBDAModelImpl;
-import it.unibz.inf.ontop.ontology.Ontology;
 import it.unibz.inf.ontop.owlapi.OWLAPITranslatorUtility;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.OWLAPIMaterializer;
 import it.unibz.inf.ontop.protege.core.OBDAModelManager;
@@ -190,8 +190,6 @@ public class AboxMaterializationAction extends ProtegeAction {
 				OWLOntology ontology = modelManager.getActiveOntology();
 				OWLOntologyManager manager = modelManager.getOWLOntologyManager();
 
-				Ontology onto = OWLAPITranslatorUtility.translate(ontology);
-
 				final long startTime = System.currentTimeMillis();
 				OWLDocumentFormat ontoFormat;
 
@@ -212,7 +210,14 @@ public class AboxMaterializationAction extends ProtegeAction {
 						throw new Exception("Unknown format: " + format);
 				}
 
-				try (OWLAPIMaterializer materializer = new OWLAPIMaterializer(obdaModel, onto, DO_STREAM_RESULTS)) {
+				OntopSQLOWLAPIConfiguration configuration = OntopSQLOWLAPIConfiguration.defaultBuilder()
+						// TODO: should we keep it?
+						.enableOntologyAnnotationQuerying(true)
+						.obdaModel(obdaModel)
+						.ontology(ontology)
+						.build();
+
+				try (OWLAPIMaterializer materializer = new OWLAPIMaterializer(configuration, DO_STREAM_RESULTS)) {
 
 					Iterator<OWLIndividualAxiom> iterator = materializer.getIterator();
 
@@ -257,9 +262,14 @@ public class AboxMaterializationAction extends ProtegeAction {
 
 		if (response == JOptionPane.YES_OPTION) {
 			try {
-				Ontology onto = OWLAPITranslatorUtility.translate(ontology);
+				OntopSQLOWLAPIConfiguration configuration = OntopSQLOWLAPIConfiguration.defaultBuilder()
+						// TODO: should we keep it?
+						.enableOntologyAnnotationQuerying(true)
+						.obdaModel(obdaModel)
+						.ontology(ontology)
+						.build();
 
-				OWLAPIMaterializer individuals = new OWLAPIMaterializer(obdaModel, onto, DO_STREAM_RESULTS);
+				OWLAPIMaterializer individuals = new OWLAPIMaterializer(configuration, DO_STREAM_RESULTS);
 				Container container = workspace.getRootPane().getParent();
 				final MaterializeAction action = new MaterializeAction(ontology, ontoManager, individuals, container);
 

@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE OBDA [
-]>
-<OBDA version="1.0">
-  <SavedQueries>
-    <Query id="a" text="ASK WHERE {$x dllite:P$y . $x dllite:Q$y}"/>
-  </SavedQueries>
-</OBDA>

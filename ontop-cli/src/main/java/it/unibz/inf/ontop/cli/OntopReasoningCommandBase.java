@@ -3,7 +3,7 @@ package it.unibz.inf.ontop.cli;
 
 import com.github.rvesse.airline.annotations.Option;
 import com.github.rvesse.airline.annotations.OptionType;
-import it.unibz.inf.ontop.injection.OBDASettings;
+import it.unibz.inf.ontop.injection.OntopSQLCoreSettings;
 import org.semanticweb.owlapi.formats.N3DocumentFormat;
 import org.semanticweb.owlapi.formats.OWLXMLDocumentFormat;
 import org.semanticweb.owlapi.formats.RDFXMLDocumentFormat;
@@ -78,11 +78,11 @@ public abstract class OntopReasoningCommandBase extends OntopMappingOntologyRela
 
     protected Properties createConnectionProperties() {
             Properties p = new Properties();
-            p.setProperty(OBDASettings.DB_NAME, jdbcURL);
-            p.setProperty(OBDASettings.JDBC_URL, jdbcURL);
-            p.setProperty(OBDASettings.DB_USER, jdbcUserName);
-            p.setProperty(OBDASettings.DB_PASSWORD, jdbcPassword);
-            p.setProperty(OBDASettings.JDBC_DRIVER, jdbcDriverClass);
+            p.setProperty(OntopSQLCoreSettings.JDBC_NAME, jdbcURL);
+            p.setProperty(OntopSQLCoreSettings.JDBC_URL, jdbcURL);
+            p.setProperty(OntopSQLCoreSettings.JDBC_USER, jdbcUserName);
+            p.setProperty(OntopSQLCoreSettings.JDBC_PASSWORD, jdbcPassword);
+            p.setProperty(OntopSQLCoreSettings.JDBC_DRIVER, jdbcDriverClass);
 
             return p;
     }

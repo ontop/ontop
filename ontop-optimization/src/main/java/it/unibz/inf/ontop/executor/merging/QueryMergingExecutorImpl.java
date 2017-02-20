@@ -50,7 +50,7 @@ public class QueryMergingExecutorImpl implements QueryMergingExecutor {
         private final QueryNode transformedParent;
         private final QueryNode transformedNode;
 
-        private final Optional<NonCommutativeOperatorNode.ArgumentPosition> optionalPosition;
+        private final Optional<BinaryOrderedOperatorNode.ArgumentPosition> optionalPosition;
 
         /**
          * Substitution to propagate to the children
@@ -60,7 +60,7 @@ public class QueryMergingExecutorImpl implements QueryMergingExecutor {
         private Transformation(IntermediateQuery query, QueryNode originalNode,
                                Optional<? extends ImmutableSubstitution<? extends ImmutableTerm>> substitutionToApply,
                                QueryNode transformedParent,
-                               Optional<NonCommutativeOperatorNode.ArgumentPosition> optionalPosition) {
+                               Optional<BinaryOrderedOperatorNode.ArgumentPosition> optionalPosition) {
             this.transformedParent = transformedParent;
             this.optionalPosition = optionalPosition;
 
@@ -145,7 +145,7 @@ public class QueryMergingExecutorImpl implements QueryMergingExecutor {
             return transformedParent;
         }
 
-        public Optional<NonCommutativeOperatorNode.ArgumentPosition> getOptionalPosition() {
+        public Optional<BinaryOrderedOperatorNode.ArgumentPosition> getOptionalPosition() {
             return optionalPosition;
         }
     }
@@ -198,7 +198,7 @@ public class QueryMergingExecutorImpl implements QueryMergingExecutor {
          */
         QueryNode parentOfTheIntensionalNode = treeComponent.getParent(intensionalDataNode)
                 .orElseThrow(()-> new IllegalStateException("Bug: the intensional does not have a parent"));
-        Optional<NonCommutativeOperatorNode.ArgumentPosition> topOptionalPosition = treeComponent.getOptionalPosition(
+        Optional<BinaryOrderedOperatorNode.ArgumentPosition> topOptionalPosition = treeComponent.getOptionalPosition(
                 parentOfTheIntensionalNode, intensionalDataNode);
         treeComponent.removeSubTree(intensionalDataNode);
 

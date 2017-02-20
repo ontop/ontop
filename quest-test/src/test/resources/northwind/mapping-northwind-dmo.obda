@@ -5,12 +5,6 @@ quest:		http://obda.org/quest#
 rdf:		http://www.w3.org/1999/02/22-rdf-syntax-ns#
 rdfs:		http://www.w3.org/2000/01/rdf-schema#
 
-[SourceDeclaration]
-sourceUri	northwind-dmo
-connectionUrl	jdbc:mysql://10.7.20.39/northwind
-username	fish
-password	fish
-driverClass	com.mysql.jdbc.Driver
 
 [MappingDeclaration] @collection [[
 mappingId	mapping--824228387

@@ -29,7 +29,8 @@
             [ qt:query <char.rq> ] ;
     mf:result <char.ttl> ;
     mf:knowledgebase <datatypes.owl> ;
-    mf:mappings <datatypes-pgsql.obda> .
+    mf:mappings <datatypes-pgsql.obda>;
+	mf:parameters <datatypes-pgsql.properties> .
 
 :char-graph rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: CHAR-GRAPH" ;
@@ -39,7 +40,8 @@
             [ qt:query <char-graph.rq> ] ;
     mf:result <char.ttl> ;
     mf:knowledgebase <datatypes.owl> ;
-    mf:mappings <datatypes-pgsql.obda> .
+    mf:mappings <datatypes-pgsql.obda>;
+	mf:parameters <datatypes-pgsql.properties> .
     
 :varchar rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: VARCHAR" ;
@@ -49,7 +51,8 @@
             [ qt:query <varchar.rq> ] ;
     mf:result <varchar.ttl> ;
     mf:knowledgebase <datatypes.owl> ;
-    mf:mappings <datatypes-pgsql.obda> .
+    mf:mappings <datatypes-pgsql.obda>;
+	mf:parameters <datatypes-pgsql.properties> .
 
 :varchar-graph rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: VARCHAR-GRAPH" ;
@@ -59,7 +62,8 @@
             [ qt:query <varchar-graph.rq> ] ;
     mf:result <varchar.ttl> ;
     mf:knowledgebase <datatypes.owl> ;
-    mf:mappings <datatypes-pgsql.obda> .
+    mf:mappings <datatypes-pgsql.obda>;
+	mf:parameters <datatypes-pgsql.properties> .
     
 :text rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: TEXT" ;
@@ -69,7 +73,8 @@
             [ qt:query <text.rq> ] ;
     mf:result <text.ttl> ;
     mf:knowledgebase <datatypes.owl> ;
-    mf:mappings <datatypes-pgsql.obda> .
+    mf:mappings <datatypes-pgsql.obda>;
+	mf:parameters <datatypes-pgsql.properties> .
 
 :text-graph rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: TEXT-GRAPH" ;
@@ -79,7 +84,8 @@
             [ qt:query <text-graph.rq> ] ;
     mf:result <text.ttl> ;
     mf:knowledgebase <datatypes.owl> ;
-    mf:mappings <datatypes-pgsql.obda> .
+    mf:mappings <datatypes-pgsql.obda>;
+	mf:parameters <datatypes-pgsql.properties> .
     
 :character rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: CHARACTER" ;
@@ -89,7 +95,8 @@
             [ qt:query <character.rq> ] ;
     mf:result <character.ttl> ;
     mf:knowledgebase <datatypes.owl> ;
-    mf:mappings <datatypes-pgsql.obda> .
+    mf:mappings <datatypes-pgsql.obda>;
+	mf:parameters <datatypes-pgsql.properties> .
 
 :character-graph rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: CHARACTER-GRAPH" ;
@@ -99,7 +106,8 @@
             [ qt:query <character-graph.rq> ] ;
     mf:result <character.ttl> ;
     mf:knowledgebase <datatypes.owl> ;
-    mf:mappings <datatypes-pgsql.obda> .
+    mf:mappings <datatypes-pgsql.obda>;
+	mf:parameters <datatypes-pgsql.properties> .
     
 :name rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: NAME" ;
@@ -109,7 +117,8 @@
             [ qt:query <name.rq> ] ;
     mf:result <name.ttl> ;
     mf:knowledgebase <datatypes.owl> ;
-    mf:mappings <datatypes-pgsql.obda> .
+    mf:mappings <datatypes-pgsql.obda>;
+	mf:parameters <datatypes-pgsql.properties> .
 
 :name-graph rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: NAME-GRAPH" ;
@@ -119,4 +128,5 @@
             [ qt:query <name-graph.rq> ] ;
     mf:result <name.ttl> ;
     mf:knowledgebase <datatypes.owl> ;
-    mf:mappings <datatypes-pgsql.obda> .    
+    mf:mappings <datatypes-pgsql.obda> ;
+    mf:parameters <datatypes-pgsql.properties> .

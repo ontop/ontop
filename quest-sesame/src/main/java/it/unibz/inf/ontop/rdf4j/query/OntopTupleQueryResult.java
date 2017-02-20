@@ -21,7 +21,6 @@ package it.unibz.inf.ontop.rdf4j.query;
  */
 
 
-import it.unibz.inf.ontop.model.OBDAException;
 import it.unibz.inf.ontop.model.TupleResultSet;
 
 import java.util.HashSet;
@@ -45,14 +44,14 @@ public class OntopTupleQueryResult implements TupleQueryResult {
 			throw new NullPointerException();
 		this.res = res;
 		this.signature = signature;
-		this.bindingNames = new HashSet<String>(signature);
+		this.bindingNames = new HashSet<>(signature);
 	}
 	
 	@Override
 	public void close() throws QueryEvaluationException {
 		try {
 			res.close();
-		} catch (OBDAException e) {
+		} catch (Exception e) {
 			throw new QueryEvaluationException(e);
 		}
 	}
@@ -61,7 +60,7 @@ public class OntopTupleQueryResult implements TupleQueryResult {
 	public boolean hasNext() throws QueryEvaluationException {
 		try {
 			return res.nextRow();
-		} catch (OBDAException e) {
+		} catch (Exception e) {
 			throw new QueryEvaluationException(e);
 		}
 	}

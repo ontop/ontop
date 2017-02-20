@@ -11,8 +11,8 @@ import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.exception.InvalidMappingException;
-import it.unibz.inf.ontop.injection.QuestConfiguration;
-import it.unibz.inf.ontop.io.InvalidDataSourceException;
+import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
+import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.model.OBDAModel;
 import it.unibz.inf.ontop.r2rml.R2RMLWriter;
 import org.apache.jena.riot.Lang;
@@ -22,7 +22,6 @@ import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
 import java.io.*;
-import java.net.URI;
 
 @Command(name = "to-r2rml",
         description = "Convert ontop native mapping format (.obda) to R2RML format")
@@ -55,21 +54,25 @@ public class OntopOBDAToR2RML implements OntopCommand {
 
         File out = new File(outputMappingFile);
 
-        QuestConfiguration.Builder configBuilder = QuestConfiguration.defaultBuilder()
-                .nativeOntopMappingFile(inputMappingFile);
+        OntopSQLOWLAPIConfiguration.Builder configBuilder = OntopSQLOWLAPIConfiguration.defaultBuilder()
+                .nativeOntopMappingFile(inputMappingFile)
+                .jdbcDriver("dummy")
+                .jdbcUrl("dummy")
+                .jdbcUser("")
+                .jdbcPassword("");
 
         if (owlFile != null)
             configBuilder.ontologyFile(owlFile);
 
-        QuestConfiguration config = configBuilder.build();
+        OntopSQLOWLAPIConfiguration config = configBuilder.build();
 
         OBDAModel model;
         /**
          * load the mapping in native Ontop syntax
          */
         try {
-            model = config.loadProvidedMapping();
-        } catch (IOException | InvalidMappingException | DuplicateMappingException | InvalidDataSourceException e) {
+            model = config.loadProvidedPPMapping();
+        } catch (IOException | InvalidMappingException | DuplicateMappingException e) {
             e.printStackTrace();
             System.exit(1);
             return;
@@ -85,12 +88,11 @@ public class OntopOBDAToR2RML implements OntopCommand {
             return;
         }
 
-        URI srcURI = model.getSources().iterator().next().getSourceID();
-
         /**
          * render the mapping in the (ugly) Turtle syntax and save it to a string
          */
-        R2RMLWriter writer = new R2RMLWriter(model, srcURI, ontology, config.getInjector());
+        R2RMLWriter writer = new R2RMLWriter(model, ontology,
+                config.getInjector().getInstance(NativeQueryLanguageComponentFactory.class));
 
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 

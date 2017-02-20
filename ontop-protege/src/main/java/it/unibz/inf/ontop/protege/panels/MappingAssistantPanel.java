@@ -22,12 +22,11 @@ package it.unibz.inf.ontop.protege.panels;
 
 import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
-import it.unibz.inf.ontop.injection.QuestConfiguration;
+import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.injection.QuestSettings;
 import it.unibz.inf.ontop.io.PrefixManager;
 import it.unibz.inf.ontop.model.*;
-import it.unibz.inf.ontop.model.impl.MappingFactoryImpl;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
+import it.unibz.inf.ontop.model.impl.SQLMappingFactoryImpl;
 import it.unibz.inf.ontop.model.impl.RDBMSourceParameterConstants;
 import it.unibz.inf.ontop.ontology.OClass;
 import it.unibz.inf.ontop.owlrefplatform.core.queryevaluation.SQLAdapterFactory;
@@ -42,10 +41,7 @@ import it.unibz.inf.ontop.protege.gui.component.AutoSuggestComboBox;
 import it.unibz.inf.ontop.protege.gui.component.PropertyMappingPanel;
 import it.unibz.inf.ontop.protege.gui.component.SQLResultTable;
 import it.unibz.inf.ontop.protege.gui.treemodels.IncrementalResultSetTableModel;
-import it.unibz.inf.ontop.protege.utils.DatasourceSelectorListener;
-import it.unibz.inf.ontop.protege.utils.DialogUtils;
-import it.unibz.inf.ontop.protege.utils.OBDAProgressListener;
-import it.unibz.inf.ontop.protege.utils.OBDAProgressMonitor;
+import it.unibz.inf.ontop.protege.utils.*;
 import it.unibz.inf.ontop.sql.*;
 
 import javax.swing.*;
@@ -82,7 +78,7 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 
     private boolean isSubjectClassValid = true;
 
-	private static final MappingFactory MAPPING_FACTORY = MappingFactoryImpl.getInstance();
+	private static final SQLMappingFactory MAPPING_FACTORY = SQLMappingFactoryImpl.getInstance();
 
 	private static final String EMPTY_TEXT = "";
 
@@ -295,8 +291,7 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 
         pnlClassSeachComboBox.setLayout(new java.awt.BorderLayout());
         Vector<Object> v = new Vector<Object>();
-		OBDAModel model = obdaModel.getCurrentImmutableOBDAModel();
-        for (OClass c : model.getOntologyVocabulary().getClasses()) {
+        for (OClass c : obdaModel.getOntologyVocabulary().getClasses()) {
         	Predicate pred = c.getPredicate();
             v.addElement(new PredicateItem(pred, prefixManager));
         }
@@ -788,8 +783,7 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 	private void addDatabaseTableToDataSetComboBox() {
 		DefaultComboBoxModel<RelationDefinition> relationList = new DefaultComboBoxModel<>();
 		try {
-			JDBCConnectionManager man = JDBCConnectionManager.getJDBCConnectionManager();
-			Connection conn = man.getConnection(selectedSource);
+			Connection conn = ConnectionTools.getConnection(selectedSource);
 			RDBMetadata md = RDBMetadataExtractionTools.createMetadata(conn);
 			// this operation is EXPENSIVE -- only names are needed + a flag for table/view
 			RDBMetadataExtractionTools.loadMetadata(md, conn, null);
@@ -991,7 +985,7 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 						final String dbType = selectedSource.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER);
 
                         //TODO: find a way to get the current preferences. Necessary if an third-party adapter should be used.
-						QuestSettings defaultPreferences = QuestConfiguration.defaultBuilder().build().getSettings();
+						QuestSettings defaultPreferences = OntopSQLOWLAPIConfiguration.defaultBuilder().build().getSettings();
 						SQLDialectAdapter sqlDialect = SQLAdapterFactory.getSQLDialectAdapter(dbType, "", defaultPreferences);
 						String sqlString = txtQueryEditor.getText();
 
@@ -1006,8 +1000,7 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 						} else {
 							throw new RuntimeException("Invalid limit number.");
 						}
-						JDBCConnectionManager man = JDBCConnectionManager.getJDBCConnectionManager();
-						Connection c = man.getConnection(selectedSource);
+						Connection c = ConnectionTools.getConnection(selectedSource);
 						Statement s = c.createStatement();
 						result = s.executeQuery(sqlString);
 						latch.countDown();

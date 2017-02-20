@@ -1,8 +1,6 @@
 package it.unibz.inf.ontop.reformulation.tests;
 
-import it.unibz.inf.ontop.injection.QuestConfiguration;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.inf.ontop.injection.QuestCoreSettings;
+import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWL;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLFactory;
 import junit.framework.TestCase;
@@ -12,7 +10,6 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.Properties;
 
 public class MovieOntologyTest extends TestCase {
 
@@ -21,6 +18,7 @@ public class MovieOntologyTest extends TestCase {
 	final String testCase = "movieontology";
 	final String owlfile = "src/test/resources/test/treewitness/" + testCase + ".owl"; 
 	final String obdafile = "src/test/resources/test/treewitness/" + testCase + ".obda";
+	final String propertyFile = "src/test/resources/test/treewitness/" + testCase + ".properties";
 	final String qfile = "src/test/resources/test/treewitness/" + testCase + ".q";
 
 
@@ -41,23 +39,14 @@ public class MovieOntologyTest extends TestCase {
 
 	public void testOntologyLoad() throws Exception {
 
-		Properties p = new Properties();
-		p.setProperty(QuestCoreSettings.REFORMULATION_TECHNIQUE, QuestConstants.TW);
-		// p.setProperty(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC_INDEX);
-		p.setProperty(QuestCoreSettings.ABOX_MODE, QuestConstants.VIRTUAL); // CLASSIC IS A TRIPLE STORE
-		p.setProperty(QuestCoreSettings.OPTIMIZE_EQUIVALENCES, "true");
-		//p.setProperty(QuestPreferences.OBTAIN_FROM_ONTOLOGY, "true");
-		p.setProperty("rewrite", "true");
-	
-
 		/*
 		 * Create the instance of Quest OWL reasoner.
 		 */
         QuestOWLFactory factory = new QuestOWLFactory();
-        QuestConfiguration config = QuestConfiguration.defaultBuilder()
+        OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.nativeOntopMappingFile(obdafile)
 				.ontologyFile(owlfile)
-				.properties(p)
+				.propertyFile(propertyFile)
 				.build();
         QuestOWL reasoner = factory.createReasoner(config);
 

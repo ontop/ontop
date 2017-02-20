@@ -20,65 +20,42 @@ package it.unibz.inf.ontop.rdf4j.query;
  * #L%
  */
 
+import it.unibz.inf.ontop.answering.input.AskQuery;
+import it.unibz.inf.ontop.answering.input.RDF4JInputQueryFactory;
+import it.unibz.inf.ontop.owlrefplatform.core.OntopConnection;
+import it.unibz.inf.ontop.owlrefplatform.core.OntopStatement;
 import org.eclipse.rdf4j.query.BooleanQuery;
-import org.eclipse.rdf4j.query.MalformedQueryException;
 import org.eclipse.rdf4j.query.QueryEvaluationException;
 
-import it.unibz.inf.ontop.model.OBDAQueryModifiers;
 import it.unibz.inf.ontop.model.TupleResultSet;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestDBConnection;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestDBStatement;
+import org.eclipse.rdf4j.query.parser.ParsedQuery;
 
 public class OntopBooleanQuery extends AbstractOntopQuery implements BooleanQuery {
 
-	public OntopBooleanQuery(String queryString, String baseURI, QuestDBConnection conn) throws MalformedQueryException {
-        super(queryString, conn);
-		// check if valid query string
-//		if (queryString.contains("ASK")) {
-//		} else
-//			throw new MalformedQueryException("Boolean Query expected!");
-	}
 
-	@Override
+	private final RDF4JInputQueryFactory factory;
+
+	public OntopBooleanQuery(String queryString, ParsedQuery q, String baseIRI, OntopConnection ontopConnection,
+							 RDF4JInputQueryFactory inputQueryFactory) {
+        super(queryString, baseIRI, q, ontopConnection);
+		this.factory = inputQueryFactory;
+    }
+
+    @Override
 	public boolean evaluate() throws QueryEvaluationException {
-		TupleResultSet rs = null;
-		QuestDBStatement stm = null;
-		try {
-			stm = conn.createStatement();
-			rs = (TupleResultSet) stm.execute(getQueryString());
+		AskQuery query = factory.createAskQuery(getQueryString(), getParsedQuery());
+
+		try (OntopStatement stm = conn.createStatement();
+			 TupleResultSet rs = stm.execute(query)) {
+
 			boolean next = rs.nextRow();
 			if (next){
 				return true;
-				
 			}
 			return false;
 		} catch (Exception e) {
-			e.printStackTrace();
 			throw new QueryEvaluationException(e);
-		} finally {
-			try {
-				if (rs != null)
-				rs.close();
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-			try {
-				if (stm != null)
-				stm.close();
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
 		}
-	}
-
-	public OBDAQueryModifiers getQueryModifiers() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	public void setQueryModifiers(OBDAQueryModifiers modifiers) {
-		// TODO Auto-generated method stub
-
 	}
 
     @Override

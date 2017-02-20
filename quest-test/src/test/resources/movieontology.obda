@@ -14,12 +14,6 @@ quest:		http://obda.org/quest#
 dbpedia:		http://dbpedia.org/ontology/
 owl2xml:		http://www.w3.org/2006/12/owl2-xml#
 
-[SourceDeclaration]
-sourceUri	imdb-obda
-connectionUrl	jdbc:postgresql://10.7.20.39/imdbobda
-username	postgres
-password	postgres
-driverClass	org.postgresql.Driver
 
 [MappingDeclaration] @collection [[
 mappingId	Actor

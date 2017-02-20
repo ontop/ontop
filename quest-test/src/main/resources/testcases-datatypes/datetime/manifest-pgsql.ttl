@@ -26,7 +26,8 @@
             [ qt:query <dateLiteral.rq> ] ;
     mf:result <noresult.ttl> ;
     mf:knowledgebase <datatypes.owl> ;
-    mf:mappings <datatypes-pgsql.obda> .
+    mf:mappings <datatypes-pgsql.obda> ;
+	mf:parameters <datatypes-pgsql.properties> .
 
 :date rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: DATE" ;
@@ -37,7 +38,8 @@
             [ qt:query <date.rq> ] ;
     mf:result <date.ttl> ;
     mf:knowledgebase <datatypes.owl> ;
-    mf:mappings <datatypes-pgsql.obda> .
+    mf:mappings <datatypes-pgsql.obda> ;
+	mf:parameters <datatypes-pgsql.properties> .
 
 :date-str rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: DATE cast to xsd:string" ;
@@ -47,7 +49,8 @@
             [ qt:query <date-str.rq> ] ;
     mf:result <date-str.ttl> ;
     mf:knowledgebase <datatypes.owl> ;
-    mf:mappings <datatypes-pgsql.obda> .
+    mf:mappings <datatypes-pgsql.obda> ;
+	mf:parameters <datatypes-pgsql.properties> .
 
 :date-bgp rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: DATE - using basic graph pattern" ;
@@ -57,7 +60,8 @@
             [ qt:query <date-bgp.rq> ] ;
     mf:result <date.ttl> ;
     mf:knowledgebase <datatypes.owl> ;
-    mf:mappings <datatypes-pgsql.obda> .
+    mf:mappings <datatypes-pgsql.obda> ;
+	mf:parameters <datatypes-pgsql.properties> .
 
 ## >>> This test should fail!
 :timeLiteral rdf:type mf:DatatypeEvaluationTest ;
@@ -69,7 +73,8 @@
             [ qt:query <timeLiteral.rq> ] ;
     mf:result <noresult.ttl> ;
     mf:knowledgebase <datatypes.owl> ;
-    mf:mappings <datatypes-pgsql.obda> .
+    mf:mappings <datatypes-pgsql.obda> ;
+	mf:parameters <datatypes-pgsql.properties> .
 
 :time rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: TIME" ;
@@ -79,7 +84,8 @@
             [ qt:query <time.rq> ] ;
     mf:result <time.ttl> ;
     mf:knowledgebase <datatypes.owl> ;
-    mf:mappings <datatypes-pgsql.obda> .
+    mf:mappings <datatypes-pgsql.obda> ;
+	mf:parameters <datatypes-pgsql.properties> .
 
 :time-str rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: TIME casto to xsd-string" ;
@@ -89,7 +95,8 @@
             [ qt:query <time-str.rq> ] ;
     mf:result <time-str.ttl> ;
     mf:knowledgebase <datatypes.owl> ;
-    mf:mappings <datatypes-pgsql.obda> .
+    mf:mappings <datatypes-pgsql.obda> ;
+	mf:parameters <datatypes-pgsql.properties> .
 
 :time-bgp rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: TIME - using basic graph pattern" ;
@@ -99,7 +106,8 @@
             [ qt:query <time-bgp.rq> ] ;
     mf:result <time.ttl> ;
     mf:knowledgebase <datatypes.owl> ;
-    mf:mappings <datatypes-pgsql.obda> .
+    mf:mappings <datatypes-pgsql.obda> ;
+	mf:parameters <datatypes-pgsql.properties> .
 
 ## >>> This test should fail!
 :time_tz_Literal rdf:type mf:DatatypeEvaluationTest ;
@@ -111,7 +119,8 @@
             [ qt:query <time_tz_Literal.rq> ] ;
     mf:result <noresult.ttl> ;
     mf:knowledgebase <datatypes.owl> ;
-    mf:mappings <datatypes-pgsql.obda> .
+    mf:mappings <datatypes-pgsql.obda> ;
+	mf:parameters <datatypes-pgsql.properties> .
 
 
 :time_tz rdf:type mf:DatatypeEvaluationTest ;
@@ -122,7 +131,8 @@
             [ qt:query <time_tz.rq> ] ;
     mf:result <time_tz.ttl> ;
     mf:knowledgebase <datatypes.owl> ;
-    mf:mappings <datatypes-pgsql.obda> .
+    mf:mappings <datatypes-pgsql.obda> ;
+	mf:parameters <datatypes-pgsql.properties> .
 
 :time_tz-bgp rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: TIME WITH TIMEZONE - using basic graph pattern" ;
@@ -132,7 +142,8 @@
             [ qt:query <time_tz-bgp.rq> ] ;
     mf:result <time_tz.ttl> ;
     mf:knowledgebase <datatypes.owl> ;
-    mf:mappings <datatypes-pgsql.obda> .
+    mf:mappings <datatypes-pgsql.obda> ;
+	mf:parameters <datatypes-pgsql.properties> .
     
 :timestamp rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: TIMESTAMP" ;
@@ -142,7 +153,8 @@
             [ qt:query <timestamp.rq> ] ;
     mf:result <timestamp.ttl> ;
     mf:knowledgebase <datatypes.owl> ;
-    mf:mappings <datatypes-pgsql.obda> .
+    mf:mappings <datatypes-pgsql.obda> ;
+	mf:parameters <datatypes-pgsql.properties> .
 
 :timestamp-str rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: TIMESTAMP - cast to xsd:string" ;
@@ -152,7 +164,8 @@
             [ qt:query <timestamp-str.rq> ] ;
     mf:result <timestamp-str.ttl> ;
     mf:knowledgebase <datatypes.owl> ;
-    mf:mappings <datatypes-pgsql.obda> .
+    mf:mappings <datatypes-pgsql.obda> ;
+	mf:parameters <datatypes-pgsql.properties> .
     
 :timestamp_tz rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: TIMESTAMP WITH TIMEZONE" ;
@@ -162,7 +175,8 @@
             [ qt:query <timestamp_tz.rq> ] ;
     mf:result <timestamp_tz.ttl> ;
     mf:knowledgebase <datatypes.owl> ;
-    mf:mappings <datatypes-pgsql.obda> .
+    mf:mappings <datatypes-pgsql.obda> ;
+	mf:parameters <datatypes-pgsql.properties> .
 
 :timestamp_tz-str rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: TIMESTAMP WITH TIMEZONE - cast to Literal" ;
@@ -172,4 +186,5 @@
             [ qt:query <timestamp_tz-str.rq> ] ;
     mf:result <timestamp_tz.ttl> ;
     mf:knowledgebase <datatypes.owl> ;
-    mf:mappings <datatypes-pgsql.obda> .
+    mf:mappings <datatypes-pgsql.obda> ;
+    mf:parameters <datatypes-pgsql.properties> .

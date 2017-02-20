@@ -149,7 +149,7 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 
 
 			@Override
-			public Long executeQuery(QuestOWLStatement st, String query) throws OWLException {
+			public Long executeQuery(OntopOWLStatement st, String query) throws OWLException {
 				return st.getTupleCount(query);
 			}
 
@@ -190,7 +190,7 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
                 return tm != null && tm.isFetching();
             }
 			@Override
-			public QuestOWLResultSet executeQuery(QuestOWLStatement st,
+			public QuestOWLResultSet executeQuery(OntopOWLStatement st,
 					String queryString) throws OWLException {
 				return st.executeTuple(queryString);
 			}
@@ -206,7 +206,7 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 			}
 
 			@Override
-			public List<OWLAxiom> executeQuery(QuestOWLStatement st, String queryString) throws OWLException {
+			public List<OWLAxiom> executeQuery(OntopOWLStatement st, String queryString) throws OWLException {
 				return st.executeGraph(queryString); 
 			}
 
@@ -238,7 +238,7 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 		queryEditorPanel.setRetrieveUCQExpansionAction(new OBDADataQueryAction<String>("Rewriting query...", QueryInterfaceView.this) {
 
 			@Override
-			public String executeQuery(QuestOWLStatement st, String query) throws OWLException {
+			public String executeQuery(OntopOWLStatement st, String query) throws OWLException {
 				return st.getRewriting(query);
 			}
 
@@ -263,7 +263,7 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 
 		queryEditorPanel.setRetrieveUCQUnfoldingAction(new OBDADataQueryAction<String>("Unfolding queries...", QueryInterfaceView.this) {
 			@Override
-			public String executeQuery(QuestOWLStatement st, String query) throws OWLException{
+			public String executeQuery(OntopOWLStatement st, String query) throws OWLException{
 				// UGLY!!! SQL-specific!
 				return ((SQLExecutableQuery)st.getExecutableQuery(query)).getSQL();
 			}

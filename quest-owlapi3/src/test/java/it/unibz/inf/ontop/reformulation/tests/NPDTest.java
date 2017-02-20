@@ -1,8 +1,6 @@
 package it.unibz.inf.ontop.reformulation.tests;
 
-import it.unibz.inf.ontop.injection.QuestConfiguration;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.inf.ontop.injection.QuestCoreSettings;
+import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -21,13 +19,16 @@ import java.io.IOException;
 import java.sql.*;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Properties;
 
 import static org.junit.Assert.assertEquals;
 
 public class NPDTest {
 	
 	Logger log = LoggerFactory.getLogger(this.getClass());
+
+	private static final String url = "jdbc:h2:mem:npdv";
+	private static final String username = "sa";
+	private static final String password = "";
 
 	@Ignore("Ontology URIs are now broken: impossible to download them")
 	@Test
@@ -85,19 +86,16 @@ public class NPDTest {
 		System.out.println("Data Property names: " + (onto.getVocabulary().getDataProperties().size() - 2));
 */
 
-		Properties pref = new Properties();
-		//pref.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC_INDEX);
-		pref.put(QuestCoreSettings.ABOX_MODE, QuestConstants.VIRTUAL);
-		pref.put(QuestCoreSettings.REFORMULATION_TECHNIQUE, QuestConstants.TW);
-		pref.put(QuestCoreSettings.REWRITE, QuestConstants.TRUE);
-		pref.put(QuestCoreSettings.PRINT_KEYS, QuestConstants.FALSE);
-
 		setupDatabase();
 		QuestOWLFactory factory = new QuestOWLFactory();
-        QuestConfiguration config = QuestConfiguration.defaultBuilder()
+        OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.nativeOntopMappingFile(path + "npd.obda")
 				.ontologyFile(path + "npd-v2.owl")
-				.properties(pref).build();
+				.jdbcUrl(url)
+				.jdbcUser(username)
+				.jdbcPassword(password)
+				.enableExistentialReasoning(true)
+				.build();
         QuestOWL reasoner = factory.createReasoner(config);
 		
 		//QuestOWL reasoner = factory.createReasoner(owlOnto, new SimpleConfiguration());
@@ -139,10 +137,10 @@ public class NPDTest {
 //				    "FILTER(?max < ?min) " +
 				    "} ORDER BY ?unit ?well";
 
-			QuestOWLConnection qconn =  reasoner.getConnection();
-			QuestOWLStatement st = qconn.createStatement();
+			OntopOWLConnection qconn =  reasoner.getConnection();
+			OntopOWLStatement st = qconn.createStatement();
 			
-			String unfolding = st.getUnfolding(q12);
+			st.getExecutableQuery(q12);
 			st.close();
 		
 			//System.out.println(unfolding);
@@ -152,9 +150,6 @@ public class NPDTest {
 	
 	public void setupDatabase() throws SQLException, IOException {
 		// String driver = "org.h2.Driver";
-		String url = "jdbc:h2:mem:npdv";
-		String username = "sa";
-		String password = "";
 
 		Connection conn = DriverManager.getConnection(url, username, password);
 		Statement st = conn.createStatement();

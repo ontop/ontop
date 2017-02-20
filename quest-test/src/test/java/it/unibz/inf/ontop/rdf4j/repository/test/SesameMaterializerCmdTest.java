@@ -20,13 +20,7 @@ package it.unibz.inf.ontop.rdf4j.repository.test;
  * #L%
  */
 
-import it.unibz.inf.ontop.exception.DuplicateMappingException;
-import it.unibz.inf.ontop.exception.InvalidMappingException;
-import it.unibz.inf.ontop.injection.OBDACoreConfiguration;
-import it.unibz.inf.ontop.io.InvalidDataSourceException;
-import it.unibz.inf.ontop.model.OBDAModel;
-import it.unibz.inf.ontop.ontology.Ontology;
-import it.unibz.inf.ontop.owlapi.OWLAPITranslatorUtility;
+import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.owlapi.QuestOWLIndividualAxiomIterator;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.OWLAPIMaterializer;
 import it.unibz.inf.ontop.rdf4j.SesameMaterializer;
@@ -41,7 +35,6 @@ import org.semanticweb.owlapi.formats.OWLXMLDocumentFormat;
 import org.semanticweb.owlapi.io.WriterDocumentTarget;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 
 import java.io.*;
@@ -49,40 +42,23 @@ import java.util.Iterator;
 
 public class SesameMaterializerCmdTest extends TestCase {
 
-	private final OBDAModel model;
-	private Ontology onto;
-	private OWLOntology ontology = null;
-
+	private static final String ONTOLOGY_FILE_PATH = "src/test/resources/materializer/MaterializeTest.owl";
 	/**
 	 * Necessary for materialize large RDF graphs without
 	 * storing all the SQL results of one big query in memory.
 	 */
 	private static boolean DO_STREAM_RESULTS = true;
-
-    public SesameMaterializerCmdTest() throws IOException, InvalidMappingException, DuplicateMappingException, InvalidDataSourceException {
-
-		OBDACoreConfiguration configuration = OBDACoreConfiguration.defaultBuilder()
-				.nativeOntopMappingFile("src/test/resources/materializer/MaterializeTest.obda")
-				.build();
-        model = configuration.loadProvidedMapping();
-    }
-	
-	public void setUpOnto() throws OWLOntologyCreationException {
-		//create onto
-		
-		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-		File f = new File("src/test/resources/materializer/MaterializeTest.owl");
-		// Loading the OWL ontology from the file as with normal OWLReasoners
-		ontology = manager.loadOntologyFromOntologyDocument(f);
-		onto =  OWLAPITranslatorUtility.translate(ontology);
-	}
 	
 	public void testModelN3() throws Exception {
 		// output
 		File out = new File("src/test/resources/materializer/materializeN3.N3");
 		String outfile = out.getAbsolutePath();
 		System.out.println(outfile);
-		SesameMaterializer materializer = new SesameMaterializer(model, DO_STREAM_RESULTS);
+
+		OntopSQLOWLAPIConfiguration configuration = createConfigurationBuilder()
+				.build();
+
+		SesameMaterializer materializer = new SesameMaterializer(configuration, DO_STREAM_RESULTS);
 		Iterator<Statement> iterator = materializer.getIterator();
 		Writer writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(out), "UTF-8")); 
 		RDFHandler handler = new N3Writer(writer);
@@ -108,8 +84,11 @@ public class SesameMaterializerCmdTest extends TestCase {
 		String outfile = out.getAbsolutePath();
 		System.out.println(outfile);
 
+		OntopSQLOWLAPIConfiguration configuration = createConfigurationBuilder()
+				.build();
+
 		// output
-		SesameMaterializer materializer = new SesameMaterializer(model, DO_STREAM_RESULTS);
+		SesameMaterializer materializer = new SesameMaterializer(configuration, DO_STREAM_RESULTS);
 		Iterator<Statement> iterator = materializer.getIterator();
 		Writer writer = new BufferedWriter(new OutputStreamWriter(
 				new FileOutputStream(out), "UTF-8"));
@@ -135,8 +114,10 @@ public class SesameMaterializerCmdTest extends TestCase {
 		String outfile = out.getAbsolutePath();
 		System.out.println(outfile);
 
+		OntopSQLOWLAPIConfiguration configuration = createConfigurationBuilder().build();
+
 		// output
-		SesameMaterializer materializer = new SesameMaterializer(model, DO_STREAM_RESULTS);
+		SesameMaterializer materializer = new SesameMaterializer(configuration, DO_STREAM_RESULTS);
 		Iterator<Statement> iterator = materializer.getIterator();
 		Writer writer = new BufferedWriter(new OutputStreamWriter(
 				new FileOutputStream(out), "UTF-8"));
@@ -162,8 +143,8 @@ public class SesameMaterializerCmdTest extends TestCase {
 		String outfile = out.getAbsolutePath();
 		System.out.println(outfile);
 		
-		setUpOnto();
-		SesameMaterializer materializer = new SesameMaterializer(model, onto, DO_STREAM_RESULTS);
+		OntopSQLOWLAPIConfiguration configuration = createConfigurationWithOntology();
+		SesameMaterializer materializer = new SesameMaterializer(configuration, DO_STREAM_RESULTS);
 		Iterator<Statement> iterator = materializer.getIterator();
 		Writer writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(out), "UTF-8")); 
 		RDFHandler handler = new N3Writer(writer);
@@ -188,9 +169,9 @@ public class SesameMaterializerCmdTest extends TestCase {
 		String outfile = out.getAbsolutePath();
 		System.out.println(outfile);
 
-		setUpOnto();
+		OntopSQLOWLAPIConfiguration configuration = createConfigurationWithOntology();
 		// output
-		SesameMaterializer materializer = new SesameMaterializer(model, onto, DO_STREAM_RESULTS);
+		SesameMaterializer materializer = new SesameMaterializer(configuration, DO_STREAM_RESULTS);
 		Iterator<Statement> iterator = materializer.getIterator();
 		Writer writer = new BufferedWriter(new OutputStreamWriter(
 				new FileOutputStream(out), "UTF-8"));
@@ -216,9 +197,9 @@ public class SesameMaterializerCmdTest extends TestCase {
 		String outfile = out.getAbsolutePath();
 		System.out.println(outfile);
 
-		setUpOnto();
+		OntopSQLOWLAPIConfiguration configuration = createConfigurationWithOntology();
 		// output
-		SesameMaterializer materializer = new SesameMaterializer(model, onto, DO_STREAM_RESULTS);
+		SesameMaterializer materializer = new SesameMaterializer(configuration, DO_STREAM_RESULTS);
 		Iterator<Statement> iterator = materializer.getIterator();
 		Writer writer = new BufferedWriter(new OutputStreamWriter(
 				new FileOutputStream(out), "UTF-8"));
@@ -245,25 +226,29 @@ public class SesameMaterializerCmdTest extends TestCase {
 		BufferedOutputStream output = new BufferedOutputStream(new FileOutputStream(out)); 
 		BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(output, "UTF-8"));
 		try {
-		
-	
-		
+
+
+
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 		OWLOntology ontology = manager.createOntology(IRI.create(out));
 		manager = ontology.getOWLOntologyManager();
-		OWLAPIMaterializer materializer = new OWLAPIMaterializer(model, DO_STREAM_RESULTS);
+
+		OntopSQLOWLAPIConfiguration configuration = createConfigurationBuilder()
+				.build();
+
+		OWLAPIMaterializer materializer = new OWLAPIMaterializer(configuration, DO_STREAM_RESULTS);
 
 		
-		QuestOWLIndividualAxiomIterator iterator = materializer.getIterator();
+			QuestOWLIndividualAxiomIterator iterator = materializer.getIterator();
 		
-		while(iterator.hasNext()) 
-			manager.addAxiom(ontology, iterator.next());
-		manager.saveOntology(ontology, new OWLXMLDocumentFormat(), new WriterDocumentTarget(writer));
-		
-		assertEquals(27, materializer.getTriplesCount());
-		assertEquals(3, materializer.getVocabularySize());
-		
-		materializer.disconnect();
+			while(iterator.hasNext())
+				manager.addAxiom(ontology, iterator.next());
+			manager.saveOntology(ontology, new OWLXMLDocumentFormat(), new WriterDocumentTarget(writer));
+
+			assertEquals(27, materializer.getTriplesCount());
+			assertEquals(3, materializer.getVocabularySize());
+
+			materializer.disconnect();
 		}catch (Exception e) {throw e; }
 		finally {
 		if (out!=null) {
@@ -279,11 +264,17 @@ public class SesameMaterializerCmdTest extends TestCase {
 		File out = new File("src/test/resources/materializer/materializeOWL2.owl");
 		String outfile = out.getAbsolutePath();
 		System.out.println(outfile);
-		
-		setUpOnto();
-		
-		OWLOntologyManager manager = ontology.getOWLOntologyManager();
-		OWLAPIMaterializer materializer = new OWLAPIMaterializer(model, onto, DO_STREAM_RESULTS);
+
+		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
+		File f = new File(ONTOLOGY_FILE_PATH);
+		// Loading the OWL ontology from the file as with normal OWLReasoners
+		OWLOntology ontology = manager.loadOntologyFromOntologyDocument(f);
+
+		OntopSQLOWLAPIConfiguration configuration = createConfigurationBuilder()
+				.ontology(ontology)
+				.build();
+
+		OWLAPIMaterializer materializer = new OWLAPIMaterializer(configuration, DO_STREAM_RESULTS);
 		BufferedOutputStream output = new BufferedOutputStream(new FileOutputStream(out)); 
 		BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(output, "UTF-8"));
 		QuestOWLIndividualAxiomIterator iterator = materializer.getIterator();
@@ -300,5 +291,17 @@ public class SesameMaterializerCmdTest extends TestCase {
 			output.close();
 		if (out.exists())
 			out.delete();
+	}
+
+	private static OntopSQLOWLAPIConfiguration.Builder<? extends OntopSQLOWLAPIConfiguration.Builder> createConfigurationBuilder() {
+		return OntopSQLOWLAPIConfiguration.defaultBuilder()
+				.nativeOntopMappingFile("src/test/resources/materializer/MaterializeTest.obda")
+				.propertyFile("src/test/resources/materializer/MaterializeTest.properties");
+	}
+
+	private static OntopSQLOWLAPIConfiguration createConfigurationWithOntology() {
+		return createConfigurationBuilder()
+				.ontologyFile(ONTOLOGY_FILE_PATH)
+				.build();
 	}
 }

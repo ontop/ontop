@@ -4,7 +4,7 @@ import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.model.Predicate;
 import it.unibz.inf.ontop.model.Term;
 import it.unibz.inf.ontop.model.TermType;
-import it.unibz.inf.ontop.model.type.TermTypeException;
+import it.unibz.inf.ontop.model.type.IncompatibleTermException;
 import it.unibz.inf.ontop.model.type.TermTypeInferenceRule;
 
 import java.util.List;
@@ -21,7 +21,7 @@ public abstract class AbstractTermTypeInferenceRule implements TermTypeInference
 
     @Override
     public Optional<TermType> inferType(List<Term> terms, ImmutableList<Optional<Predicate.COL_TYPE>> expectedBaseTypes)
-            throws TermTypeException {
+            throws IncompatibleTermException {
 
         ImmutableList<Optional<TermType>> argumentTypes = ImmutableList.copyOf(
                 terms.stream()
@@ -34,7 +34,7 @@ public abstract class AbstractTermTypeInferenceRule implements TermTypeInference
     @Override
     public Optional<TermType> inferTypeFromArgumentTypes(ImmutableList<Optional<TermType>> argumentTypes,
                                                   ImmutableList<Optional<Predicate.COL_TYPE>> expectedBaseTypes)
-            throws TermTypeException {
+            throws IncompatibleTermException {
 
         /**
          * TODO: restore inequality test between the arities
@@ -50,7 +50,7 @@ public abstract class AbstractTermTypeInferenceRule implements TermTypeInference
                 .forEach(i -> argumentTypes.get(i)
                         .ifPresent(t -> expectedBaseTypes.get(i).ifPresent(expectedBaseType -> {
                             if (!t.isCompatibleWith(expectedBaseType)) {
-                                throw new TermTypeException(DATA_FACTORY.getTermType(expectedBaseType), t);
+                                throw new IncompatibleTermException(DATA_FACTORY.getTermType(expectedBaseType), t);
                             }
                         })));
         doAdditionalChecks(argumentTypes);
@@ -69,7 +69,7 @@ public abstract class AbstractTermTypeInferenceRule implements TermTypeInference
      * Hook, does nothing by default
      */
     protected void doAdditionalChecks(ImmutableList<Optional<TermType>> argumentTypes)
-            throws TermTypeException {
+            throws IncompatibleTermException {
     }
 
     /**

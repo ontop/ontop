@@ -26,9 +26,10 @@ public class AggregatesTest extends AbstractVirtualModeTest {
 
 	private static final String owlfile = "src/main/resources/testcases-scenarios/virtual-mode/stockexchange/simplecq/stockexchange.owl";
 	private static final String obdafile = "src/main/resources/testcases-scenarios/virtual-mode/stockexchange/simplecq/stockexchange-mysql.obda";
+	private static final String propertiesfile = "src/main/resources/testcases-scenarios/virtual-mode/stockexchange/simplecq/stockexchange-mysql.properties";
 
 	public AggregatesTest() {
-		super(owlfile, obdafile);
+		super(owlfile, obdafile, propertiesfile);
 	}
 
 //	@Override
@@ -71,7 +72,7 @@ public class AggregatesTest extends AbstractVirtualModeTest {
 //		ontology = manager.loadOntologyFromOntologyDocument((new File(owlfile)));
 //
 //		// Loading the OBDA data
-//		obdaModel = fac.getOBDAModel();
+//		obdaModel = fac.parse();
 //
 //		ModelIOManager ioManager = new ModelIOManager(obdaModel);
 //		ioManager.load(obdafile);

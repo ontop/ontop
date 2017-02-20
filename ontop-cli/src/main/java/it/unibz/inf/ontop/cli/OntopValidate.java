@@ -4,8 +4,8 @@ import com.github.rvesse.airline.annotations.Command;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import it.unibz.inf.ontop.exception.InvalidMappingException;
-import it.unibz.inf.ontop.injection.QuestConfiguration;
-import it.unibz.inf.ontop.io.InvalidDataSourceException;
+import it.unibz.inf.ontop.exception.OBDASpecificationException;
+import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import org.semanticweb.owlapi.model.*;
 
 import java.io.IOException;
@@ -30,15 +30,15 @@ public class OntopValidate extends OntopReasoningCommandBase {
             System.exit(1);
         }
 
-        QuestConfiguration config;
+        OntopSQLOWLAPIConfiguration config;
         if (isR2rmlFile(mappingFile)) {
-            config = QuestConfiguration.defaultBuilder()
+            config = OntopSQLOWLAPIConfiguration.defaultBuilder()
                     .ontologyFile(owlFile)
                     .r2rmlMappingFile(mappingFile)
                     .build();
         }
         else {
-            config = QuestConfiguration.defaultBuilder()
+            config = OntopSQLOWLAPIConfiguration.defaultBuilder()
                     .ontologyFile(owlFile)
                     .nativeOntopMappingFile(mappingFile)
                     .build();
@@ -97,8 +97,8 @@ public class OntopValidate extends OntopReasoningCommandBase {
         if (punning) System.exit(1);
 
         try {
-            config.loadMapping();
-        } catch (IOException | InvalidDataSourceException | InvalidMappingException e) {
+            config.loadSpecification();
+        } catch (IOException | OBDASpecificationException e) {
             System.out.format("ERROR: There is a problem loading the mapping file %s\n", mappingFile);
             e.printStackTrace();
             System.exit(1);

@@ -30,7 +30,8 @@
             [ qt:query <char.rq> ] ;
     mf:result <char.ttl> ;
     mf:knowledgebase <datatypes.owl> ;
-    mf:mappings <datatypes-mssql.obda> .
+    mf:mappings <datatypes-mssql.obda>;
+	mf:parameters <datatypes-mssql.properties> .
 
 :char-graph rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: CHAR-GRAPH" ;
@@ -40,7 +41,8 @@
             [ qt:query <char-graph.rq> ] ;
     mf:result <char.ttl> ;
     mf:knowledgebase <datatypes.owl> ;
-    mf:mappings <datatypes-mssql.obda> .
+    mf:mappings <datatypes-mssql.obda>;
+	mf:parameters <datatypes-mssql.properties> .
     
 :varchar rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: VARCHAR" ;
@@ -50,7 +52,8 @@
             [ qt:query <varchar.rq> ] ;
     mf:result <varchar.ttl> ;
     mf:knowledgebase <datatypes.owl> ;
-    mf:mappings <datatypes-mssql.obda> .
+    mf:mappings <datatypes-mssql.obda>;
+	mf:parameters <datatypes-mssql.properties> .
 
 :varchar-graph rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: VARCHAR-GRAPH" ;
@@ -60,7 +63,8 @@
             [ qt:query <varchar-graph.rq> ] ;
     mf:result <varchar.ttl> ;
     mf:knowledgebase <datatypes.owl> ;
-    mf:mappings <datatypes-mssql.obda> .
+    mf:mappings <datatypes-mssql.obda>;
+	mf:parameters <datatypes-mssql.properties> .
 
 :nchar rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: NCHAR" ;
@@ -70,7 +74,8 @@
             [ qt:query <nchar.rq> ] ;
     mf:result <nchar.ttl> ;
     mf:knowledgebase <datatypes.owl> ;
-    mf:mappings <datatypes-mssql.obda> .
+    mf:mappings <datatypes-mssql.obda>;
+	mf:parameters <datatypes-mssql.properties> .
 
 :nchar-graph rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: NCHAR-GRAPH" ;
@@ -80,7 +85,8 @@
             [ qt:query <nchar-graph.rq> ] ;
     mf:result <nchar.ttl> ;
     mf:knowledgebase <datatypes.owl> ;
-    mf:mappings <datatypes-mssql.obda> .
+    mf:mappings <datatypes-mssql.obda>;
+	mf:parameters <datatypes-mssql.properties> .
 
 :nvarchar rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: NVARCHAR" ;
@@ -90,7 +96,8 @@
             [ qt:query <ncharvarying.rq> ] ;
     mf:result <ncharvarying.ttl> ;
     mf:knowledgebase <datatypes.owl> ;
-    mf:mappings <datatypes-mssql.obda> .
+    mf:mappings <datatypes-mssql.obda>;
+	mf:parameters <datatypes-mssql.properties> .
 
 :nvarchar-graph rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: NVARCHAR-GRAPH" ;
@@ -100,7 +107,8 @@
             [ qt:query <ncharvarying.rq> ] ;
     mf:result <ncharvarying.ttl> ;
     mf:knowledgebase <datatypes.owl> ;
-    mf:mappings <datatypes-mssql.obda> .
+    mf:mappings <datatypes-mssql.obda>;
+	mf:parameters <datatypes-mssql.properties> .
 
 #ntext , text, and image data types will be removed in a future version of Microsoft SQL Server.
 #Avoid using these data types in new development work, and plan to modify applications that currently use them. Use nvarchar(max), varchar(max), and varbinary(max) instead.
@@ -114,7 +122,8 @@
             [ qt:query <text_mssql.rq> ] ;
     mf:result <text_mssql.ttl> ;
     mf:knowledgebase <datatypes.owl> ;
-    mf:mappings <datatypes-mssql.obda> .
+    mf:mappings <datatypes-mssql.obda>;
+	mf:parameters <datatypes-mssql.properties> .
  
 :text-graph rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: TEXT-GRAPH" ;
@@ -124,5 +133,6 @@
             [ qt:query <text_mssql-graph.rq> ] ;
     mf:result <text_mssql.ttl> ;
     mf:knowledgebase <datatypes.owl> ;
-    mf:mappings <datatypes-mssql.obda> .
+    mf:mappings <datatypes-mssql.obda>;
+	mf:parameters <datatypes-mssql.properties> .
     

@@ -8,9 +8,10 @@ public class ViewGenerationParserTest extends AbstractVirtualModeTest {
 
     static final String owlFile = "src/test/resources/northwind/northwind.owl";
     static final String obdaFile = "src/test/resources/northwind/northwindComplex.obda";
+    static final String propertiesFile = "src/test/resources/northwind/northwindComplex.properties";
 
     public ViewGenerationParserTest() {
-        super(owlFile, obdaFile);
+        super(owlFile, obdaFile, propertiesFile);
     }
 
     public void testComplexFunction() throws Exception {

@@ -25,14 +25,14 @@ import java.util.stream.Stream;
 public class OntopOptimizationConfigurationImpl extends OntopModelConfigurationImpl
         implements OntopOptimizationConfiguration {
 
-    protected OntopOptimizationConfigurationImpl(OntopOptimizationSettings settings, OntopOptimizationConfigurationOptions options) {
+    protected OntopOptimizationConfigurationImpl(OntopOptimizationSettings settings, OntopOptimizationOptions options) {
         super(settings, options.getModelOptions());
     }
 
-    public static class OntopOptimizationConfigurationOptions {
+    public static class OntopOptimizationOptions {
         private final OntopModelConfigurationOptions modelOptions;
 
-        OntopOptimizationConfigurationOptions(OntopModelConfigurationOptions modelOptions) {
+        OntopOptimizationOptions(OntopModelConfigurationOptions modelOptions) {
             this.modelOptions = modelOptions;
         }
 
@@ -82,7 +82,7 @@ public class OntopOptimizationConfigurationImpl extends OntopModelConfigurationI
         return internalExecutorMapBuilder.build();
     }
 
-    protected static class DefaultOntopOptimizationBuilderFragment<B extends OntopOptimizationConfiguration.Builder>
+    protected static class DefaultOntopOptimizationBuilderFragment<B extends OntopOptimizationConfiguration.Builder<B>>
             implements OntopOptimizationBuilderFragment<B> {
 
         private final B builder;
@@ -105,9 +105,9 @@ public class OntopOptimizationConfigurationImpl extends OntopModelConfigurationI
             return new Properties();
         }
 
-        protected final OntopOptimizationConfigurationOptions generateOntopOptimizationConfigurationOptions(
+        protected final OntopOptimizationOptions generateOptimizationOptions(
                 OntopModelConfigurationOptions modelOptions) {
-            return new OntopOptimizationConfigurationOptions(modelOptions);
+            return new OntopOptimizationOptions(modelOptions);
         }
 
     }
@@ -116,7 +116,7 @@ public class OntopOptimizationConfigurationImpl extends OntopModelConfigurationI
      * Inherits from DefaultOntopModelBuilderFragment because it has more methods
      * than DefaultOntopOptimizationBuilderFragment (more convenient).
      */
-    protected static abstract class AbstractOntopOptimizationBuilderMixin<B extends OntopOptimizationConfiguration.Builder>
+    protected static abstract class AbstractOntopOptimizationBuilderMixin<B extends OntopOptimizationConfiguration.Builder<B>>
             extends DefaultOntopModelBuilderFragment<B>
             implements OntopOptimizationConfiguration.Builder<B> {
 
@@ -136,21 +136,21 @@ public class OntopOptimizationConfigurationImpl extends OntopModelConfigurationI
             return properties;
         }
 
-        protected OntopOptimizationConfigurationOptions generateOntopOptimizationConfigurationOptions() {
+        protected OntopOptimizationOptions generateOntopOptimizationConfigurationOptions() {
             OntopModelConfigurationOptions modelOptions = generateModelOptions();
-            return optimizationBuilderFragment.generateOntopOptimizationConfigurationOptions(modelOptions);
+            return optimizationBuilderFragment.generateOptimizationOptions(modelOptions);
         }
     }
 
 
-    public final static class BuilderImpl<B extends OntopOptimizationConfiguration.Builder>
+    public final static class BuilderImpl<B extends OntopOptimizationConfiguration.Builder<B>>
             extends AbstractOntopOptimizationBuilderMixin<B> {
 
         @Override
         public OntopOptimizationConfiguration build() {
             Properties properties = generateProperties();
 
-            OntopOptimizationConfigurationOptions options = generateOntopOptimizationConfigurationOptions();
+            OntopOptimizationOptions options = generateOntopOptimizationConfigurationOptions();
             OntopOptimizationSettings settings = new OntopOptimizationSettingsImpl(properties);
 
             return new OntopOptimizationConfigurationImpl(settings, options);

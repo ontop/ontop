@@ -74,10 +74,10 @@ public class NodeDeletionTest {
 
         String table1Name = "table1";
         ExtensionalDataNode table1 = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(new AtomPredicateImpl(table1Name, 1), x));
-        queryBuilder.addChild(ljNode, table1, NonCommutativeOperatorNode.ArgumentPosition.LEFT);
+        queryBuilder.addChild(ljNode, table1, BinaryOrderedOperatorNode.ArgumentPosition.LEFT);
 
         InnerJoinNode joinNode = new InnerJoinNodeImpl(Optional.of(falseCondition));
-        queryBuilder.addChild(ljNode, joinNode, NonCommutativeOperatorNode.ArgumentPosition.RIGHT);
+        queryBuilder.addChild(ljNode, joinNode, BinaryOrderedOperatorNode.ArgumentPosition.RIGHT);
 
         ExtensionalDataNode table2 = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(new AtomPredicateImpl("table2", 2), x, y));
         queryBuilder.addChild(joinNode, table2);
@@ -263,7 +263,7 @@ public class NodeDeletionTest {
         queryBuilder.addChild(rootNode, ljNode);
 
         InnerJoinNode joinNode = new InnerJoinNodeImpl(Optional.of(falseCondition));
-        queryBuilder.addChild(ljNode, joinNode, NonCommutativeOperatorNode.ArgumentPosition.LEFT);
+        queryBuilder.addChild(ljNode, joinNode, BinaryOrderedOperatorNode.ArgumentPosition.LEFT);
 
         ExtensionalDataNode table2 = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(new AtomPredicateImpl("table2", 2), x, y));
         queryBuilder.addChild(joinNode, table2);
@@ -272,7 +272,7 @@ public class NodeDeletionTest {
         queryBuilder.addChild(joinNode, table3);
 
         ExtensionalDataNode table4 = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(new AtomPredicateImpl("table4", 1), x));
-        queryBuilder.addChild(ljNode, table4, NonCommutativeOperatorNode.ArgumentPosition.RIGHT);
+        queryBuilder.addChild(ljNode, table4, BinaryOrderedOperatorNode.ArgumentPosition.RIGHT);
 
 
         IntermediateQuery initialQuery = queryBuilder.build();

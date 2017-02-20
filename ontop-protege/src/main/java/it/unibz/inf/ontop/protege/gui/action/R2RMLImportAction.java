@@ -22,7 +22,6 @@ package it.unibz.inf.ontop.protege.gui.action;
 
 import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
-import it.unibz.inf.ontop.injection.OBDACoreConfiguration;
 import it.unibz.inf.ontop.io.DataSource2PropertiesConvertor;
 import it.unibz.inf.ontop.model.OBDADataSource;
 import it.unibz.inf.ontop.model.OBDAMappingAxiom;
@@ -111,12 +110,12 @@ public class R2RMLImportAction extends ProtegeAction {
 					URI sourceID = dataSource.getSourceID();
 
 					try {
-						OBDAModel parsedModel = configuration.loadProvidedMapping();
+						OBDAModel parsedModel = configuration.loadProvidedPPMapping();
 
 						/**
 						 * TODO: improve this inefficient method (batch processing, not one by one)
 						 */
-						for (OBDAMappingAxiom mapping : parsedModel.getMappings(sourceID)) {
+						for (OBDAMappingAxiom mapping : parsedModel.getMappings()) {
 							if (mapping.getTargetQuery().toString().contains("BNODE")) {
 								JOptionPane.showMessageDialog(workspace, "The mapping " + mapping.getId() + " contains BNode. -ontoPro- does not support it yet.");
 							} else {

@@ -21,7 +21,7 @@ package it.unibz.inf.ontop.obda;
  */
 
 
-import it.unibz.inf.ontop.reformulation.tests.AbstractBindTestWithFunctions;
+import it.unibz.inf.ontop.answering.reformulation.tests.AbstractBindTestWithFunctions;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -38,9 +38,10 @@ public class BindTestWithFunctionsOracle extends AbstractBindTestWithFunctions {
 
     private static final String owlfile = "src/test/resources/bindTest/sparqlBind.owl";
     private static final String obdafile = "src/test/resources/bindTest/sparqlBindOracle.obda";
+    private static final String propertiesfile = "src/test/resources/bindTest/sparqlBindOracle.properties";
 
     public BindTestWithFunctionsOracle() {
-        super(owlfile, obdafile);
+        super(owlfile, obdafile, propertiesfile);
     }
 
     @Override

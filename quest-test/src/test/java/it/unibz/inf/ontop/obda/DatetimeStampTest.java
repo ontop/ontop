@@ -1,8 +1,7 @@
 package it.unibz.inf.ontop.obda;
 
 
-import it.unibz.inf.ontop.injection.QuestConfiguration;
-import it.unibz.inf.ontop.injection.QuestCoreSettings;
+import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.io.QueryIOManager;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import it.unibz.inf.ontop.querymanager.QueryController;
@@ -11,8 +10,6 @@ import it.unibz.inf.ontop.querymanager.QueryControllerQuery;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.Properties;
 
 import static org.junit.Assert.assertFalse;
 
@@ -23,13 +20,14 @@ public class DatetimeStampTest {
     final String owlFile = "src/test/resources/northwind/northwind-dmo.owl";
     final String r2rmlFile = "src/test/resources/northwind/mapping-northwind-dmo.ttl";
     final String obdaFile = "src/test/resources/northwind/mapping-northwind-dmo.obda";
+    final String propertyFile = "src/test/resources/northwind/mapping-northwind-dmo.properties";
 
-    private void runTests(String filename, boolean isR2rml, Properties p) throws Exception {
+    private void runTests(String filename, boolean isR2rml, String propertyFile) throws Exception {
 
         // Creating a new instance of the reasoner
         QuestOWLFactory factory = new QuestOWLFactory();
-        QuestConfiguration.Builder configBuilder = QuestConfiguration.defaultBuilder()
-                .ontologyFile(owlFile).properties(p);
+        OntopSQLOWLAPIConfiguration.Builder configBuilder = OntopSQLOWLAPIConfiguration.defaultBuilder()
+                .ontologyFile(owlFile).propertyFile(propertyFile);
 
         if (isR2rml) {
             configBuilder.r2rmlMappingFile(filename);
@@ -40,8 +38,8 @@ public class DatetimeStampTest {
 
         QuestOWL reasoner = factory.createReasoner(configBuilder.build());
         // Now we are ready for querying
-        QuestOWLConnection conn = reasoner.getConnection();
-        QuestOWLStatement st = conn.createStatement();
+        OntopOWLConnection conn = reasoner.getConnection();
+        OntopOWLStatement st = conn.createStatement();
 
 
         QueryController qc = new QueryController();
@@ -87,23 +85,17 @@ public class DatetimeStampTest {
 
     @Test
     public void testR2rml() throws Exception {
-        Properties p = new Properties();
-        p.setProperty(QuestCoreSettings.DB_NAME, "jdbc:mysql://10.7.20.39/northwind");
-        p.setProperty(QuestCoreSettings.JDBC_URL, "jdbc:mysql://10.7.20.39/northwind");
-        p.setProperty(QuestCoreSettings.DB_USER, "fish");
-        p.setProperty(QuestCoreSettings.DB_PASSWORD, "fish");
-        p.setProperty(QuestCoreSettings.JDBC_DRIVER, "com.mysql.jdbc.Driver");
 
         log.info("Loading r2rml file");
-        runTests(r2rmlFile, true, p);
+        runTests(r2rmlFile, true, propertyFile);
     }
 
 
     @Test
     public void testOBDA() throws Exception {
-        Properties p = new Properties();
+
         log.info("Loading OBDA file");
-        runTests(obdaFile, false, p);
+        runTests(obdaFile, false, propertyFile);
     }
 
 

@@ -21,7 +21,7 @@ package it.unibz.inf.ontop.identifiers;
  */
 
 
-import it.unibz.inf.ontop.injection.QuestConfiguration;
+import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import org.junit.After;
 import org.junit.Before;
@@ -49,7 +49,7 @@ public class H2IdentifierTest {
 	static final String obdaFile = "resources/identifiers/identifiers-h2.obda";
 
 	private QuestOWL reasoner;
-	private QuestOWLConnection conn;
+	private OntopOWLConnection conn;
 	Connection sqlConnection;
 
 
@@ -70,7 +70,7 @@ public class H2IdentifierTest {
 
 		s.close();
 
-		QuestConfiguration config = QuestConfiguration.defaultBuilder()
+		OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.ontologyFile(owlFile)
 				.nativeOntopMappingFile(obdaFile)
 				.build();
@@ -170,7 +170,7 @@ public class H2IdentifierTest {
 	}
 
 	private String runQueryReturnIndividual(String query) throws OWLException, SQLException {
-		QuestOWLStatement st = conn.createStatement();
+		OntopOWLStatement st = conn.createStatement();
 		String retval;
 		try {
 			QuestOWLResultSet rs = st.executeTuple(query);

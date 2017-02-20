@@ -21,8 +21,8 @@ package it.unibz.inf.ontop.quest.sparql;
  */
 
 
+import it.unibz.inf.ontop.owlrefplatform.owlapi.OntopOWLStatement;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLResultSet;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLStatement;
 import it.unibz.inf.ontop.quest.AbstractVirtualModeTest;
 import org.junit.Ignore;
 import org.semanticweb.owlapi.model.OWLObject;
@@ -42,9 +42,10 @@ public class CompanyTest2 extends AbstractVirtualModeTest {
 
 	private static final String owlfile = "resources/optional/company.owl";
 	private static final String obdafile = "resources/optional/company.obda";
+	private static final String propertyfile = "resources/optional/company.properties";
 
 	protected CompanyTest2() {
-		super(owlfile, obdafile);
+		super(owlfile, obdafile, propertyfile);
 	}
 
 //	@Override
@@ -83,7 +84,7 @@ public class CompanyTest2 extends AbstractVirtualModeTest {
 //		ontology = manager.loadOntologyFromOntologyDocument((new File(owlfile)));
 //
 //		// Loading the OBDA data
-//		obdaModel = fac.getOBDAModel();
+//		obdaModel = fac.parse();
 //
 //		ModelIOManager ioManager = new ModelIOManager(obdaModel);
 //		ioManager.load(obdafile);
@@ -120,7 +121,7 @@ public class CompanyTest2 extends AbstractVirtualModeTest {
 
 	private void runTests() throws Exception {
 
-		QuestOWLStatement st = conn.createStatement();
+		OntopOWLStatement st = conn.createStatement();
 
 		
 		String queryEx =  "PREFIX : <http://it.unibz.krdb/obda/test/company#> SELECT * WHERE"

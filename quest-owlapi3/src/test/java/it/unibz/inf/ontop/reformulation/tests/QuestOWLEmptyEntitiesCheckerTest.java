@@ -20,12 +20,10 @@ package it.unibz.inf.ontop.reformulation.tests;
  * #L%
  */
 
-import it.unibz.inf.ontop.injection.QuestConfiguration;
+import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.model.Predicate;
 import it.unibz.inf.ontop.ontology.Ontology;
 import it.unibz.inf.ontop.owlapi.OWLAPITranslatorUtility;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.inf.ontop.injection.QuestCoreSettings;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import org.junit.After;
 import org.junit.Before;
@@ -47,7 +45,6 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Properties;
 
 import static org.junit.Assert.assertEquals;
 
@@ -59,7 +56,7 @@ import static org.junit.Assert.assertEquals;
  */
 public class QuestOWLEmptyEntitiesCheckerTest {
 
-	private QuestOWLConnection conn;
+	private OntopOWLConnection conn;
 	private Connection connection;
 
 	Logger log = LoggerFactory.getLogger(this.getClass());
@@ -81,7 +78,6 @@ public class QuestOWLEmptyEntitiesCheckerTest {
 	@Before
 	public void setUp() throws Exception {
 
-		String driver = "org.h2.Driver";
 		String url = "jdbc:h2:mem:questjunitdb;";
 		String username = "sa";
 		String password = "";
@@ -107,15 +103,14 @@ public class QuestOWLEmptyEntitiesCheckerTest {
 		OWLOntology ontology = manager.loadOntologyFromOntologyDocument((new File(owlfile)));
 		onto =  OWLAPITranslatorUtility.translate(ontology);
 
-		Properties p = new Properties();
-		p.setProperty(QuestCoreSettings.ABOX_MODE, QuestConstants.VIRTUAL);
-		p.setProperty(QuestCoreSettings.OBTAIN_FULL_METADATA, QuestConstants.FALSE);
 		// Creating a new instance of the reasoner
 		QuestOWLFactory factory = new QuestOWLFactory();
-        QuestConfiguration config = QuestConfiguration.defaultBuilder()
+        OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.nativeOntopMappingFile(obdafile)
 				.ontology(ontology)
-				.properties(p)
+				.jdbcUrl(url)
+				.jdbcUser(username)
+				.jdbcPassword(password)
 				.build();
         reasoner = factory.createReasoner(config);
 		// Now we are ready for querying

@@ -20,5 +20,6 @@
             [ qt:query <bit.rq> ] ;
     mf:result <bit.ttl> ;
     mf:knowledgebase <datatypes.owl> ;
-    mf:mappings <datatypes-mysql.obda> .
+    mf:mappings <datatypes-mysql.obda> ;
+    mf:parameters <datatypes-mysql.properties> .
   

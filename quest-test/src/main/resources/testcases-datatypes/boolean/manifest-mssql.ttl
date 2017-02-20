@@ -20,5 +20,6 @@
             [ qt:query <bit.rq> ] ;
     mf:result <bit.ttl> ;
     mf:knowledgebase <datatypes.owl> ;
-    mf:mappings <datatypes-mssql.obda> .
+    mf:mappings <datatypes-mssql.obda> ;
+    mf:parameters <datatypes-mssql.properties> .
   

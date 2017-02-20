@@ -23,10 +23,7 @@ package it.unibz.inf.ontop.protege.panels;
 import it.unibz.inf.ontop.model.OBDADataSource;
 import it.unibz.inf.ontop.protege.gui.IconLoader;
 import it.unibz.inf.ontop.protege.gui.treemodels.IncrementalResultSetTableModel;
-import it.unibz.inf.ontop.protege.utils.DatasourceSelectorListener;
-import it.unibz.inf.ontop.protege.utils.OBDAProgressListener;
-import it.unibz.inf.ontop.protege.utils.OBDAProgressMonitor;
-import it.unibz.inf.ontop.protege.utils.OptionPaneUtils;
+import it.unibz.inf.ontop.protege.utils.*;
 import it.unibz.inf.ontop.sql.JDBCConnectionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -260,8 +257,7 @@ public class SQLQueryPanel extends javax.swing.JPanel implements DatasourceSelec
 							IncrementalResultSetTableModel rstm = (IncrementalResultSetTableModel) oldmodel;
 							rstm.close();
 						}
-						JDBCConnectionManager man = JDBCConnectionManager.getJDBCConnectionManager();
-						Connection c = man.getConnection(selectedSource);
+						Connection c = ConnectionTools.getConnection(selectedSource);
 						Statement s = c.createStatement();
 						result = s.executeQuery(txtSqlQuery.getText());
 						latch.countDown();

@@ -21,7 +21,7 @@ package it.unibz.inf.ontop.quest.datatypes;
  */
 
 import org.eclipse.rdf4j.common.io.IOUtil;
-import it.unibz.inf.ontop.injection.QuestConfiguration;
+import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.quest.ResultSetInfo;
 import it.unibz.inf.ontop.quest.ResultSetInfoTupleUtil;
 
@@ -116,14 +116,14 @@ public abstract class QuestDatatypeParent extends TestCase {
 	}
 	
 	protected Repository createRepository() throws Exception {
-		QuestConfiguration.Builder configBuilder = QuestConfiguration.defaultBuilder()
+		OntopSQLOWLAPIConfiguration.Builder configBuilder = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.ontologyFile(owlFileURL)
 				.nativeOntopMappingFile(obdaFileURL);
 
 		if ((parameterFileURL != null) && (!parameterFileURL.isEmpty()))
 				configBuilder.propertyFile(parameterFileURL);
 
-		OntopVirtualRepository repo = new OntopVirtualRepository(getName(), configBuilder.build());
+		OntopVirtualRepository repo = new OntopVirtualRepository(configBuilder.build());
 		repo.initialize();
 		return repo;
 	}

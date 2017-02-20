@@ -12,9 +12,10 @@ public class ImdbTestPostgres extends AbstractVirtualModeTest {
 
     private static final String owlFile = "src/test/resources/movieontology.owl";
     private static final String obdaFile = "src/test/resources/movieontology.obda";
+    private static final String propertyFile = "src/test/resources/movieontology.properties";
 
     public ImdbTestPostgres() {
-        super(owlFile, obdaFile);
+        super(owlFile, obdaFile, propertyFile);
     }
 
 

@@ -61,7 +61,7 @@ public abstract class NodeBasedQueryTransformer
 
             QueryNode newChildNode;
             newChildNode = originalChildNode.acceptNodeTransformer(nodeTransformer);
-            Optional<NonCommutativeOperatorNode.ArgumentPosition> optionalPosition = originalQuery.getOptionalPosition(originalParentNode, originalChildNode);
+            Optional<BinaryOrderedOperatorNode.ArgumentPosition> optionalPosition = originalQuery.getOptionalPosition(originalParentNode, originalChildNode);
             queryBuilder.addChild(newParentNode, newChildNode, optionalPosition);
 
             // Recursive call

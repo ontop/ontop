@@ -20,6 +20,16 @@ package it.unibz.inf.ontop.reformulation.tests;
  * #L%
  */
 
+import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
+import it.unibz.inf.ontop.owlapi.OntopOWLException;
+import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.semanticweb.owlapi.model.OWLObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
@@ -27,23 +37,8 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.Properties;
-
-import it.unibz.inf.ontop.injection.QuestConfiguration;
-import it.unibz.inf.ontop.owlapi.OntopOWLException;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
-import org.junit.*;
-import org.junit.Before;
-import org.junit.Test;
 import java.util.ArrayList;
 import java.util.List;
-
-
-import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.inf.ontop.injection.QuestCoreSettings;
-import org.semanticweb.owlapi.model.OWLObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -68,8 +63,9 @@ public class BindTest {
 
 	Logger log = LoggerFactory.getLogger(this.getClass());
 
-    final String owlfile = "src/test/resources/test/bind/sparqlBind.owl";
-    final String obdafile = "src/test/resources/test/bind/sparqlBind.obda";
+    private static final String OWL_FILE = "src/test/resources/test/bind/sparqlBind.owl";
+    private static final String OBDA_FILE = "src/test/resources/test/bind/sparqlBind.obda";
+    private static final String PROPERTY_FILE = "src/test/resources/test/bind/sparqlBind.properties";
 
     @Before
     public void setUp() throws Exception {
@@ -125,25 +121,25 @@ public class BindTest {
         conn.commit();
     }
 
-    private OWLObject runTests(Properties p, String query) throws Exception {
+    private OWLObject runTests(String query) throws Exception {
 
 		// Creating a new instance of the reasoner
 		QuestOWLFactory factory = new QuestOWLFactory();
-        QuestConfiguration configuration = QuestConfiguration.defaultBuilder()
-                .nativeOntopMappingFile(obdafile)
-                .ontologyFile(owlfile)
-                .properties(p)
+        OntopSQLOWLAPIConfiguration configuration = OntopSQLOWLAPIConfiguration.defaultBuilder()
+                .nativeOntopMappingFile(OBDA_FILE)
+                .ontologyFile(OWL_FILE)
+                .propertyFile(PROPERTY_FILE)
                 .build();
 
 		QuestOWL reasoner = factory.createReasoner(configuration);
 
         // Now we are ready for querying
-        QuestOWLConnection conn = reasoner.getConnection();
-        QuestOWLStatement st = conn.createStatement();
+        OntopOWLConnection conn = reasoner.getConnection();
+        OntopOWLStatement st = conn.createStatement();
 
 
         try {
-            QuestOWLResultSet rs = st.executeTuple(query);
+            QuestOWLResultSet rs = st.executeSelectQuery(query);
             rs.nextRow();
             OWLObject ind1 = rs.getOWLObject("title");
             OWLObject ind2 = rs.getOWLObject("price");
@@ -164,10 +160,6 @@ public class BindTest {
     @Test
     public void testSelect() throws Exception {
 
-		Properties p = new Properties();
-		p.setProperty(QuestCoreSettings.ABOX_MODE, QuestConstants.VIRTUAL);
-		p.setProperty(QuestCoreSettings.OPTIMIZE_EQUIVALENCES, "true");
-
         //simple case
         String querySelect = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n" +
                 "PREFIX  ns:  <http://example.org/ns#>\n" +
@@ -176,7 +168,7 @@ public class BindTest {
                 "  ?x dc:title ?title . \n" +
                 "  ?x ns:discount ?discount . \n" +
                 "}";
-        OWLObject price = runTests(p, querySelect);
+        OWLObject price = runTests(querySelect);
 
         assertEquals("\"17.25\"^^xsd:decimal", price.toString());
 
@@ -188,7 +180,7 @@ public class BindTest {
                 "  ?x dc:title ?title . \n" +
                 "  ?x ns:discount ?discount . \n" +
                 "}";
-        OWLObject price1 = runTests(p, querySelect1);
+        OWLObject price1 = runTests(querySelect1);
 
         assertEquals("\"33.6\"^^xsd:decimal", price1.toString());
 
@@ -200,10 +192,6 @@ public class BindTest {
 
     @Test
     public void testBind() throws Exception {
-
-        Properties p = new Properties();
-        p.setProperty(QuestCoreSettings.ABOX_MODE, QuestConstants.VIRTUAL);
-        p.setProperty(QuestCoreSettings.OPTIMIZE_EQUIVALENCES, "true");
 
         String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
                 + "PREFIX  ns:  <http://example.org/ns#>\n"
@@ -220,7 +208,7 @@ public class BindTest {
         expectedValues.add("\"17.25\"^^xsd:decimal");
 
 
-        checkReturnedValues(p, queryBind, expectedValues);
+        checkReturnedValues(queryBind, expectedValues);
 //        OWLObject price = runTests(p, queryBind);
 //
 //        assertEquals("\"17.25\"", price.toString());
@@ -230,10 +218,6 @@ public class BindTest {
 
     @Test
     public void testBindWithStrlen() throws Exception {
-
-        Properties p = new Properties();
-        p.setProperty(QuestCoreSettings.ABOX_MODE, QuestConstants.VIRTUAL);
-        p.setProperty(QuestCoreSettings.OPTIMIZE_EQUIVALENCES, "true");
 
         String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
                 + "PREFIX  ns:  <http://example.org/ns#>\n"
@@ -250,7 +234,7 @@ public class BindTest {
         expectedValues.add("\"17.25\"^^xsd:decimal");
 
 
-        checkReturnedValues(p, queryBind, expectedValues);
+        checkReturnedValues(queryBind, expectedValues);
 //        OWLObject price = runTests(p, queryBind);
 //
 //        assertEquals("\"17.25\"", price.toString());
@@ -259,11 +243,7 @@ public class BindTest {
     }
     @Test
     public void testDoubleBind() throws Exception{
-
-		Properties p = new Properties();
-        p.setProperty(QuestCoreSettings.ABOX_MODE, QuestConstants.VIRTUAL);
-        p.setProperty(QuestCoreSettings.OPTIMIZE_EQUIVALENCES, "true");
-
+        
 		// double bind
         String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
                 + "PREFIX  ns:  <http://example.org/ns#>\n" +
@@ -282,17 +262,12 @@ public class BindTest {
         expectedValues.add("\"22.75\"^^xsd:decimal");
 
 
-        checkReturnedValues(p, queryBind, expectedValues);
+        checkReturnedValues(queryBind, expectedValues);
     }
 
 
     @Test
     public void testBindWithSelect() throws Exception {
-
-		Properties p = new Properties();
-        p.setProperty(QuestCoreSettings.ABOX_MODE, QuestConstants.VIRTUAL);
-        p.setProperty(QuestCoreSettings.OPTIMIZE_EQUIVALENCES, "true");
-
 
         //error in DataFactoryImpl to handle  nested functional terms getFreshCQIECopy
         String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
@@ -311,15 +286,11 @@ public class BindTest {
         expectedValues.add("\"5.75\"^^xsd:decimal");
 
 
-        checkReturnedValues(p, queryBind, expectedValues);
+        checkReturnedValues(queryBind, expectedValues);
     }
 
     @Test
-    public void testFailingSelect()  throws Exception {
-
-		Properties p = new Properties();
-        p.setProperty(QuestCoreSettings.ABOX_MODE, QuestConstants.VIRTUAL);
-        p.setProperty(QuestCoreSettings.OPTIMIZE_EQUIVALENCES, "true");
+    public void testSelect2()  throws Exception {
 
         //complex case
         //variable should be assigned again in the same SELECT clause. SELECT Expressions, reuse the same variable
@@ -330,16 +301,11 @@ public class BindTest {
                 "   ?x dc:title ?title . \n" +
                 "   ?x ns:discount ?discount \n" +
                 "}";
-        OWLObject price1 = null;
+        runTests(querySelect1);
+    }
 
-        try {
-
-            price1 = runTests(p, querySelect1);
-
-        } catch (OntopOWLException e) {
-
-            assertEquals("it.unibz.inf.ontop.model.OBDAException", e.getCause().getClass().getName());
-        }
+    @Test(expected = OntopOWLException.class)
+    public void testFailingSelect1()  throws Exception {
 
         //variable cannot be assigned again in the same SELECT clause. SELECT Expressions, reuse the same variable in FILTER
         String querySelect2 = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n" +
@@ -350,14 +316,7 @@ public class BindTest {
                 "  ?x ns:discount ?discount . \n" +
                 "  FILTER(?price < 20) \n" +
                 "}";
-        OWLObject price2 = null;
-        try {
-            price2 = runTests(p, querySelect2);
-        } catch (OntopOWLException e) {
-
-            assertEquals("it.unibz.inf.ontop.model.OBDAException", e.getCause().getClass().getName());
-        }
-
+        runTests(querySelect2);
     }
 
     /**
@@ -367,10 +326,6 @@ public class BindTest {
      */
     @Test
     public void testFailingBind() throws Exception {
-
-		Properties p = new Properties();
-        p.setProperty(QuestCoreSettings.ABOX_MODE, QuestConstants.VIRTUAL);
-        p.setProperty(QuestCoreSettings.OPTIMIZE_EQUIVALENCES, "true");
 
 /*      ROMAN (26 June 2016): commented out - the query has little sense because the expressions
                               used in BIND can never have any values
@@ -407,7 +362,7 @@ public class BindTest {
                 "}";
 
         try {
-            OWLObject price = runTests(p, queryBind1);
+            OWLObject price = runTests(queryBind1);
 
         } catch (OntopOWLException e) {
 
@@ -423,11 +378,6 @@ public class BindTest {
     @Test
     public void testBindWithConcat() throws Exception {
 
-		Properties p = new Properties();
-        p.setProperty(QuestCoreSettings.ABOX_MODE, QuestConstants.VIRTUAL);
-        p.setProperty(QuestCoreSettings.OPTIMIZE_EQUIVALENCES, "true");
-
-
         String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
                 + "PREFIX  ns:  <http://example.org/ns#>\n"
                 + "SELECT  ?title ?w WHERE \n"
@@ -441,7 +391,7 @@ public class BindTest {
         List<String> expectedValues = new ArrayList<>();
         expectedValues.add("\"SPARQL Tutorial title\"");
         expectedValues.add("\"The Semantic Web title\"");
-        checkReturnedValues(p, queryBind, expectedValues);
+        checkReturnedValues(queryBind, expectedValues);
 
 
 
@@ -449,10 +399,6 @@ public class BindTest {
 
     @Test
     public void testBindWithConcatStrLen() throws Exception {
-
-        Properties p = new Properties();
-        p.setProperty(QuestCoreSettings.ABOX_MODE, QuestConstants.VIRTUAL);
-        p.setProperty(QuestCoreSettings.OPTIMIZE_EQUIVALENCES, "true");
 
         String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
                 + "PREFIX  ns:  <http://example.org/ns#>\n"
@@ -468,18 +414,13 @@ public class BindTest {
         List<String> expectedValues = new ArrayList<>();
         expectedValues.add("\"SPARQL Tutorial 16\"");
         expectedValues.add("\"The Semantic Web 17\"");
-        checkReturnedValues(p, queryBind, expectedValues);
+        checkReturnedValues(queryBind, expectedValues);
 
 
     }
 
     @Test
     public void testBindWithConcatLanguage() throws Exception {
-
-		Properties p = new Properties();
-        p.setProperty(QuestCoreSettings.ABOX_MODE, QuestConstants.VIRTUAL);
-        p.setProperty(QuestCoreSettings.OPTIMIZE_EQUIVALENCES, "true");
-
 
 		String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
                 + "PREFIX  ns:  <http://example.org/ns#>\n"
@@ -494,7 +435,7 @@ public class BindTest {
         List<String> expectedValues = new ArrayList<>();
         expectedValues.add("\"SPARQL TutorialSPARQL Tutorial\"@en");
         expectedValues.add("\"The Semantic WebThe Semantic Web\"@en");
-        checkReturnedValues(p, queryBind, expectedValues);
+        checkReturnedValues(queryBind, expectedValues);
 
 
 
@@ -505,11 +446,6 @@ public class BindTest {
     //the correct results would have been with "@en" language tag
     @Test
     public void testBindWithConcatLanguageinDatabase() throws Exception {
-
-		Properties p = new Properties();
-        p.setProperty(QuestCoreSettings.ABOX_MODE, QuestConstants.VIRTUAL);
-		p.setProperty(QuestCoreSettings.OPTIMIZE_EQUIVALENCES, "true");
-
 
 		String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
                 + "PREFIX  ns:  <http://example.org/ns#>\n"
@@ -525,7 +461,7 @@ public class BindTest {
         List<String> expectedValues = new ArrayList<>();
         expectedValues.add("\"goodSPARQL Tutorial\"");
         expectedValues.add("\"badThe Semantic Web\"");
-        checkReturnedValues(p, queryBind, expectedValues);
+        checkReturnedValues(queryBind, expectedValues);
 
 
 
@@ -536,11 +472,6 @@ public class BindTest {
     //The builtin function http://www.w3.org/2001/XMLSchema#string is not supported yet!
     @Test
     public void testBindWithCast() throws Exception {
-
-		Properties p = new Properties();
-        p.setProperty(QuestCoreSettings.ABOX_MODE, QuestConstants.VIRTUAL);
-		p.setProperty(QuestCoreSettings.OPTIMIZE_EQUIVALENCES, "true");
-
 
 		String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
                 + "PREFIX  ns:  <http://example.org/ns#>\n"
@@ -553,39 +484,39 @@ public class BindTest {
                 + "}";
 
         try {
-            OWLObject price = runTests(p, queryBind);
+            OWLObject price = runTests(queryBind);
 
         } catch (OntopOWLException e) {
 
-            assertEquals("it.unibz.inf.ontop.model.OBDAException", e.getCause().getClass().getName());
+            assertEquals("it.unibz.inf.ontop.exception.OntopReformulationException", e.getCause().getClass().getName());
 
         }
 
     }
 
 
-        private void checkReturnedValues(Properties p, String query, List<String> expectedValues) throws Exception {
+        private void checkReturnedValues(String query, List<String> expectedValues) throws Exception {
 
 			// Creating a new instance of the reasoner
 			QuestOWLFactory factory = new QuestOWLFactory();
-            QuestConfiguration configuration = QuestConfiguration.defaultBuilder()
-                    .nativeOntopMappingFile(obdafile)
-                    .ontologyFile(owlfile)
-                    .properties(p)
+            OntopSQLOWLAPIConfiguration configuration = OntopSQLOWLAPIConfiguration.defaultBuilder()
+                    .nativeOntopMappingFile(OBDA_FILE)
+                    .ontologyFile(OWL_FILE)
+                    .propertyFile(PROPERTY_FILE)
                     .build();
 
 			QuestOWL reasoner = factory.createReasoner(configuration);
 
 			// Now we are ready for querying
-			QuestOWLConnection conn = reasoner.getConnection();
-			QuestOWLStatement st = conn.createStatement();
+			OntopOWLConnection conn = reasoner.getConnection();
+			OntopOWLStatement st = conn.createStatement();
 
 
 
         int i = 0;
         List<String> returnedValues = new ArrayList<>();
         try {
-            QuestOWLResultSet rs = st.executeTuple(query);
+            QuestOWLResultSet rs = st.executeSelectQuery(query);
             while (rs.nextRow()) {
                 OWLObject ind1 = rs.getOWLObject("w");
                 // log.debug(ind1.toString());

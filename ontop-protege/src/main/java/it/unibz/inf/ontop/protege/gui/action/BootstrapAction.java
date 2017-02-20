@@ -20,13 +20,11 @@ package it.unibz.inf.ontop.protege.gui.action;
  * #L%
  */
 
-import com.google.inject.Injector;
-import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
-import it.unibz.inf.ontop.injection.OBDACoreConfiguration;
-import it.unibz.inf.ontop.injection.OBDAFactoryWithException;
+import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.model.OBDADataSource;
 import it.unibz.inf.ontop.model.impl.OBDAModelImpl;
-import it.unibz.inf.ontop.owlapi.bootstrapping.DirectMappingBootstrapper;
+import it.unibz.inf.ontop.model.impl.RDBMSourceParameterConstants;
+import it.unibz.inf.ontop.owlapi.directmapping.DirectMappingEngine;
 import it.unibz.inf.ontop.protege.core.OBDAModelManager;
 import it.unibz.inf.ontop.protege.core.OBDAModelWrapper;
 import it.unibz.inf.ontop.protege.utils.OBDAProgressListener;
@@ -53,7 +51,6 @@ public class BootstrapAction extends ProtegeAction {
 	private OWLWorkspace workspace;
 	private OWLModelManager owlManager;
 	private OBDAModelManager modelManager;
-	private DirectMappingBootstrapper dm = null;
 	private String baseUri = "";
 	private OWLOntology currentOnto;
 	private OBDAModelWrapper currentModel;
@@ -157,19 +154,23 @@ public class BootstrapAction extends ProtegeAction {
 						OBDAModelWrapper currentModel, OBDADataSource currentSource)
 				throws Exception {
 
-            // TODO: Retrieve the effective properties (not just the default ones).
+			String url = currentSource.getParameter(RDBMSourceParameterConstants.DATABASE_URL);
+			String username = currentSource.getParameter(RDBMSourceParameterConstants.DATABASE_USERNAME);
+			String password = currentSource.getParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD);
+			String driver = currentSource.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER);
 
-			OBDACoreConfiguration defaultConfiguration = OBDACoreConfiguration.defaultBuilder().build();
-            Injector injector = defaultConfiguration.getInjector();
+			// TODO: Retrieve the effective properties (not just the default ones).
+			OntopSQLOWLAPIConfiguration configuration = OntopSQLOWLAPIConfiguration.defaultBuilder()
+					.jdbcUrl(url)
+					.jdbcUser(username)
+					.jdbcPassword(password)
+					.jdbcDriver(driver)
+					.obdaModel(currentModel.getCurrentImmutableOBDAModel())
+					.ontology(currentOnto)
+					.build();
 
-            NativeQueryLanguageComponentFactory nativeQLFactory = injector.getInstance(
-                    NativeQueryLanguageComponentFactory.class);
-            OBDAFactoryWithException factoryWithException = injector.getInstance(
-                    OBDAFactoryWithException.class);
-
-            dm = new DirectMappingBootstrapper(baseUri, currentOnto,
-					currentModel.getCurrentImmutableOBDAModel(), currentSource,
-                    nativeQLFactory, factoryWithException);
+			// Side-effect on the mapping and ontology objects
+			DirectMappingEngine.bootstrap(configuration, baseUri);
 		}
 
 		@Override

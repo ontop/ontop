@@ -3,7 +3,7 @@ package it.unibz.inf.ontop.model.type.impl;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.model.TermType;
-import it.unibz.inf.ontop.model.type.TermTypeException;
+import it.unibz.inf.ontop.model.type.IncompatibleTermException;
 
 import java.util.Optional;
 import java.util.stream.IntStream;
@@ -20,14 +20,14 @@ public class NumericTermTypeInferenceRule extends UnifierTermTypeInferenceRule {
      * Checks that all the terms are numeric
      */
     protected void doAdditionalChecks(ImmutableList<Optional<TermType>> argumentTypes)
-            throws TermTypeException {
+            throws IncompatibleTermException {
         IntStream.range(0, argumentTypes.size())
                 .forEach(i ->  {
                     if(!argumentTypes.get(i)
                             .map(t -> NUMERIC_TYPES.contains(t.getColType()))
                             .orElse(true)) {
                         // TODO: refactor the exception
-                        throw new TermTypeException(null, argumentTypes.get(i).get());
+                        throw new IncompatibleTermException(null, argumentTypes.get(i).get());
                     }
                 });
     }

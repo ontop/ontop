@@ -38,7 +38,7 @@ public interface SubstitutionResults<T extends QueryNode> {
      *
      * Useful for LeftJoinNode.
      */
-    Optional<NonCommutativeOperatorNode.ArgumentPosition> getOptionalReplacingChildPosition();
+    Optional<BinaryOrderedOperatorNode.ArgumentPosition> getOptionalReplacingChildPosition();
 
     /**
      * If absent, stop propagating to the parent/children (depending on the propagation direction).

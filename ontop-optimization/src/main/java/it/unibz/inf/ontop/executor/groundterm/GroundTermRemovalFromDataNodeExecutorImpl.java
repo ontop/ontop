@@ -172,7 +172,7 @@ public class GroundTermRemovalFromDataNodeExecutorImpl implements
                 return Optional.of((JoinOrFilterNode) ancestor);
             }
             else if (ancestor instanceof LeftJoinNode) {
-                Optional<NonCommutativeOperatorNode.ArgumentPosition> optionalPosition = query.getOptionalPosition(ancestor, ancestorChild);
+                Optional<BinaryOrderedOperatorNode.ArgumentPosition> optionalPosition = query.getOptionalPosition(ancestor, ancestorChild);
                 if (optionalPosition.isPresent()) {
                     /**
                      * TODO: explain

@@ -19,12 +19,11 @@ import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.util.Properties;
 import java.util.Scanner;
 
-import it.unibz.inf.ontop.injection.OBDASettings;
-import it.unibz.inf.ontop.injection.QuestConfiguration;
+import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.rdf4j.repository.OntopVirtualRepository;
+import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.junit.After;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -38,9 +37,6 @@ import org.eclipse.rdf4j.query.GraphQueryResult;
 import org.eclipse.rdf4j.query.QueryLanguage;
 import org.eclipse.rdf4j.query.TupleQuery;
 import org.eclipse.rdf4j.query.TupleQueryResult;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.inf.ontop.injection.QuestCoreSettings;
-import it.unibz.inf.ontop.rdf4j.repository.OntopRepositoryConnection;
 
 public class TestSesameBindings {
 
@@ -52,12 +48,16 @@ public class TestSesameBindings {
     static String uc_create = "src/test/resources/userconstraints/create.sql";
 
     private Connection sqlConnection;
-    private OntopRepositoryConnection conn;
+    private RepositoryConnection conn;
+
+    private static final String URL = "jdbc:h2:mem:countries";
+    private static final String USER = "sa";
+    private static final String PASSWORD = "";
 
     @Before
     public void init() throws Exception {
 
-        sqlConnection = DriverManager.getConnection("jdbc:h2:mem:countries", "sa", "");
+        sqlConnection = DriverManager.getConnection(URL, USER, PASSWORD);
         java.sql.Statement s = sqlConnection.createStatement();
 
         try {
@@ -76,21 +76,15 @@ public class TestSesameBindings {
 
         s.close();
 
-        Properties p = new Properties();
-        p.setProperty(QuestCoreSettings.ABOX_MODE, QuestConstants.VIRTUAL);
-        p.setProperty(OBDASettings.DB_NAME, "countries");
-        p.setProperty(OBDASettings.JDBC_URL, "jdbc:h2:mem:countries");
-        p.setProperty(OBDASettings.DB_USER, "sa");
-        p.setProperty(OBDASettings.DB_PASSWORD, "");
-        p.setProperty(OBDASettings.JDBC_DRIVER, "org.h2.Driver");
-
-        QuestConfiguration config = QuestConfiguration.defaultBuilder()
+        OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
                 .ontologyFile(owlfile)
                 .r2rmlMappingFile(r2rmlfile)
-                .properties(p)
+                .jdbcUrl(URL)
+                .jdbcUser(USER)
+                .jdbcPassword(PASSWORD)
                 .build();
 
-        OntopVirtualRepository repo = new OntopVirtualRepository("", config);
+        OntopVirtualRepository repo = new OntopVirtualRepository(config);
         repo.initialize();
         /*
          * Prepare the data connection for querying.

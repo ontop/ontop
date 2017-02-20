@@ -28,7 +28,7 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-import it.unibz.inf.ontop.injection.QuestConfiguration;
+import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import junit.framework.TestCase;
 
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
@@ -59,6 +59,10 @@ public class LungCancerH2TestVirtual extends TestCase {
 	final String owlfile = "src/test/resources/test/lung-cancer3.owl";
 	final String obdafile = "src/test/resources/test/lung-cancer3.obda";
 
+	String url = "jdbc:h2:mem:questjunitdb";
+	String username = "sa";
+	String password = "";
+
 	@Override
 	public void setUp() throws Exception {
 		
@@ -67,9 +71,6 @@ public class LungCancerH2TestVirtual extends TestCase {
 		 * Initializing and H2 database with the stock exchange data
 		 */
 		// String driver = "org.h2.Driver";
-		String url = "jdbc:h2:mem:questjunitdb";
-		String username = "sa";
-		String password = "";
 
 		conn = DriverManager.getConnection(url, username, password);
 		Statement st = conn.createStatement();
@@ -116,15 +117,18 @@ public class LungCancerH2TestVirtual extends TestCase {
 	private void runTests() throws Exception {
 
         QuestOWLFactory factory = new QuestOWLFactory();
-        QuestConfiguration config = QuestConfiguration.defaultBuilder()
+        OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.nativeOntopMappingFile(obdafile)
 				.ontologyFile(owlfile)
+				.jdbcUrl(url)
+				.jdbcUser(username)
+				.jdbcPassword(password)
 				.build();
         QuestOWL reasoner = factory.createReasoner(config);
 
 		// Now we are ready for querying
-		QuestOWLConnection conn = reasoner.getConnection();
-		QuestOWLStatement st = conn.createStatement();
+		OntopOWLConnection conn = reasoner.getConnection();
+		OntopOWLStatement st = conn.createStatement();
 
 		String query1 = "PREFIX : <http://example.org/> SELECT * WHERE { ?x :hasNeoplasm <http://example.org/db1/neoplasm/1> }";
 		String query2 = "PREFIX : <http://example.org/> SELECT * WHERE { <http://example.org/db1/1> :hasNeoplasm ?y }";
@@ -173,8 +177,8 @@ public class LungCancerH2TestVirtual extends TestCase {
 		}
 	}
 	
-	public void executeQueryAssertResults(String query, QuestOWLStatement st, int expectedRows) throws Exception {
-		QuestOWLResultSet rs = st.executeTuple(query);
+	public void executeQueryAssertResults(String query, OntopOWLStatement st, int expectedRows) throws Exception {
+		QuestOWLResultSet rs = st.executeSelectQuery(query);
 		int count = 0;
 		while (rs.nextRow()) {
 			count++;
@@ -189,8 +193,8 @@ public class LungCancerH2TestVirtual extends TestCase {
 		assertEquals(expectedRows, count);
 	}
 	
-	public void executeGraphQueryAssertResults(String query, QuestOWLStatement st, int expectedRows) throws Exception {
-		List<OWLAxiom> rs = st.executeGraph(query);
+	public void executeConstructQueryAssertResults(String query, OntopOWLStatement st, int expectedRows) throws Exception {
+		List<OWLAxiom> rs = st.executeConstructQuery(query);
 		int count = 0;
 		Iterator<OWLAxiom> axit = rs.iterator();
 		while (axit.hasNext()) {

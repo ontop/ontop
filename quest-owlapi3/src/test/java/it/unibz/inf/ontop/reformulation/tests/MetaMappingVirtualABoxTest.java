@@ -22,9 +22,7 @@ package it.unibz.inf.ontop.reformulation.tests;
 
 import com.google.common.base.Joiner;
 import com.google.common.io.CharStreams;
-import it.unibz.inf.ontop.injection.QuestConfiguration;
-import it.unibz.inf.ontop.injection.QuestCoreSettings;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
+import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import org.junit.After;
 import org.junit.Before;
@@ -32,7 +30,6 @@ import org.junit.Test;
 import org.semanticweb.owlapi.io.ToStringRenderer;
 import org.semanticweb.owlapi.model.OWLLiteral;
 import org.semanticweb.owlapi.model.OWLObject;
-import org.semanticweb.owlapi.reasoner.IllegalConfigurationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,6 +42,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Properties;
 
+import static it.unibz.inf.ontop.injection.OntopOBDASettings.OPTIMIZE_EQUIVALENCES;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -69,6 +67,10 @@ public class MetaMappingVirtualABoxTest {
 	final String owlfile = "src/test/resources/test/metamapping.owl";
 	final String obdaFileName = "src/test/resources/test/metamapping.obda";
 
+	String url = "jdbc:h2:mem:questjunitdb2;DATABASE_TO_UPPER=FALSE";
+	String username = "sa";
+	String password = "";
+
 	@Before
 	public void setUp() throws Exception {
 		
@@ -78,9 +80,6 @@ public class MetaMappingVirtualABoxTest {
 		 */
 		// String driver = "org.h2.Driver";
 		// Roman: changed the database name to avoid conflict with other tests (in .obda as well)
-		String url = "jdbc:h2:mem:questjunitdb2;DATABASE_TO_UPPER=FALSE";
-		String username = "sa";
-		String password = "";
 
 		conn = DriverManager.getConnection(url, username, password);
 		Statement st = conn.createStatement();
@@ -120,10 +119,13 @@ public class MetaMappingVirtualABoxTest {
 	private void runTests(Properties p) throws Exception {
 
         QuestOWLFactory factory = new QuestOWLFactory();
-        QuestConfiguration config = QuestConfiguration.defaultBuilder()
+        OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.nativeOntopMappingFile(obdaFileName)
 				.ontologyFile(owlfile)
 				.properties(p)
+				.jdbcUrl(url)
+				.jdbcUser(username)
+				.jdbcPassword(password)
 				.build();
 
 
@@ -131,9 +133,9 @@ public class MetaMappingVirtualABoxTest {
 		String query2 = "PREFIX : <http://it.unibz.inf/obda/test/simple#> SELECT * WHERE { ?x :P_1 ?y }";
         try (QuestOWL reasoner = factory.createReasoner(config);
              // Now we are ready for querying
-             QuestOWLConnection conn = reasoner.getConnection();
-             QuestOWLStatement st = conn.createStatement();
-             QuestOWLResultSet rs1 = st.executeTuple(query1);
+             OntopOWLConnection conn = reasoner.getConnection();
+             OntopOWLStatement st = conn.createStatement();
+             QuestOWLResultSet rs1 = st.executeSelectQuery(query1);
         ) {
             assertTrue(rs1.nextRow());
 			OWLObject ind = rs1.getOWLObject("x");
@@ -148,9 +150,9 @@ public class MetaMappingVirtualABoxTest {
 
         try (QuestOWL reasoner = factory.createReasoner(config);
              // Now we are ready for querying
-             QuestOWLConnection conn = reasoner.getConnection();
-             QuestOWLStatement st = conn.createStatement();
-             QuestOWLResultSet rs2 = st.executeTuple(query2);
+             OntopOWLConnection conn = reasoner.getConnection();
+             OntopOWLStatement st = conn.createStatement();
+             QuestOWLResultSet rs2 = st.executeSelectQuery(query2);
         ) {
             assertTrue(rs2.nextRow());
 			OWLObject ind1 = rs2.getOWLObject("x");
@@ -162,28 +164,13 @@ public class MetaMappingVirtualABoxTest {
         }
 	}
 
-
-
     @Test
 	public void testViEqSig() throws Exception {
 
 		Properties p = new Properties();
-		p.setProperty(QuestCoreSettings.ABOX_MODE, QuestConstants.VIRTUAL);
-		p.setProperty(QuestCoreSettings.OPTIMIZE_EQUIVALENCES, "true");
+		p.setProperty(OPTIMIZE_EQUIVALENCES, "true");
 
 		runTests(p);
 	}
-
-	@Test(expected = IllegalConfigurationException.class)
-	public void testClassicEqSig() throws Exception {
-
-		Properties p = new Properties();
-		p.setProperty(QuestCoreSettings.ABOX_MODE, QuestConstants.CLASSIC);
-		p.setProperty(QuestCoreSettings.OPTIMIZE_EQUIVALENCES, "true");
-		p.setProperty(QuestCoreSettings.OBTAIN_FROM_MAPPINGS, "true");
-
-		runTests(p);
-	}
-
 
 }

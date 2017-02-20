@@ -5,11 +5,12 @@ import com.google.common.collect.ImmutableList;
 import fj.P2;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.AtomPredicateImpl;
+import it.unibz.inf.ontop.pivotalrepr.datalog.impl.DatalogProgram2QueryConverterImpl;
 import org.junit.Test;
 
 import static it.unibz.inf.ontop.OptimizationTestingTools.*;
 import static it.unibz.inf.ontop.model.Predicate.COL_TYPE.INTEGER;
-import static it.unibz.inf.ontop.pivotalrepr.datalog.DatalogConversionTools.convertFromDatalogDataAtom;
+import static it.unibz.inf.ontop.pivotalrepr.datalog.impl.DatalogConversionTools.convertFromDatalogDataAtom;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
@@ -27,7 +28,7 @@ public class Datalog2IQConversionTest {
             DATA_FACTORY.getVariable("z"));
 
     @Test
-    public void testHeadConversion() throws DatalogProgram2QueryConverter.InvalidDatalogProgramException {
+    public void testHeadConversion() throws DatalogProgram2QueryConverterImpl.InvalidDatalogProgramException {
         AtomPredicate predicate = new AtomPredicateImpl("ans", 5);
 
         Function datalogHead = DATA_FACTORY.getFunction(predicate,X,X,TWO, Y, URI_TEMPLATE);

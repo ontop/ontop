@@ -17,8 +17,8 @@ import java.util.*;
 import static it.unibz.inf.ontop.executor.leftjoin.RedundantSelfLeftJoinExecutor.Action.DO_NOTHING;
 import static it.unibz.inf.ontop.executor.leftjoin.RedundantSelfLeftJoinExecutor.Action.DROP_RIGHT;
 import static it.unibz.inf.ontop.executor.leftjoin.RedundantSelfLeftJoinExecutor.Action.UNIFY;
-import static it.unibz.inf.ontop.pivotalrepr.NonCommutativeOperatorNode.ArgumentPosition.LEFT;
-import static it.unibz.inf.ontop.pivotalrepr.NonCommutativeOperatorNode.ArgumentPosition.RIGHT;
+import static it.unibz.inf.ontop.pivotalrepr.BinaryOrderedOperatorNode.ArgumentPosition.LEFT;
+import static it.unibz.inf.ontop.pivotalrepr.BinaryOrderedOperatorNode.ArgumentPosition.RIGHT;
 
 /**
  * TODO: explain

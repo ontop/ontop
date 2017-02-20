@@ -22,11 +22,8 @@ package it.unibz.inf.ontop.owlrefplatform.owlapi;
 
 import it.unibz.inf.ontop.exception.InvalidMappingException;
 import it.unibz.inf.ontop.exception.InvalidPredicateDeclarationException;
-import it.unibz.inf.ontop.injection.QuestConfiguration;
-import it.unibz.inf.ontop.model.OBDAException;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
+import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.core.SQLExecutableQuery;
-import it.unibz.inf.ontop.injection.QuestCoreSettings;
 import it.unibz.inf.ontop.sql.ImplicitDBConstraintsReader;
 import org.semanticweb.owlapi.model.*;
 
@@ -100,7 +97,7 @@ public class QuestOWLExample_OntowisTests {
 
 		//	queries[30]="PREFIX :	<http://www.example.org/>  SELECT ?x   WHERE {?x a  :4Tab1 .   } LIMIT 100000  ";
 
-		QuestOWLConnection conn =  createStuff(mKeys);
+		OntopOWLConnection conn =  createStuff(mKeys);
 
 		// Results
 //		String[] resultsOne = new String[31];
@@ -198,7 +195,7 @@ public class QuestOWLExample_OntowisTests {
 	 * @param conn
 	 * @throws OWLException
 	 */
-	private void closeEverything(QuestOWLConnection conn) throws OWLException {
+	private void closeEverything(OntopOWLConnection conn) throws OWLException {
 		/*
 		 * Close connection and resources
 		 */
@@ -210,21 +207,19 @@ public class QuestOWLExample_OntowisTests {
 	}
 
 	/**
-	 * @throws OBDAException 
-	 * @throws OWLOntologyCreationException 
+	 * @throws OWLOntologyCreationException
 	 * @throws InvalidMappingException
 	 * @throws InvalidPredicateDeclarationException 
 	 * @throws IOException 
 	 * @throws OWLException
 	 */
-	private QuestOWLConnection createStuff(boolean manualKeys) throws OBDAException, OWLOntologyCreationException, IOException, InvalidPredicateDeclarationException, InvalidMappingException{
+	private OntopOWLConnection createStuff(boolean manualKeys) throws OWLOntologyCreationException, IOException, InvalidPredicateDeclarationException, InvalidMappingException{
 
 		/*
 		 * Prepare the configuration for the Quest instance. The example below shows the setup for
 		 * "Virtual ABox" mode
 		 */
 		Properties p = new Properties();
-		p.setProperty(QuestCoreSettings.ABOX_MODE, QuestConstants.VIRTUAL);
 		//		TEST preference.setProperty(QuestPreferences.T_MAPPINGS, QuestConstants.FALSE); // Disable T_Mappings
 
 		/*
@@ -237,16 +232,16 @@ public class QuestOWLExample_OntowisTests {
 		/*
 		 * USR CONSTRAINTS !!!!
 		 */
-		QuestConfiguration config;
+		OntopSQLOWLAPIConfiguration config;
 		if (manualKeys){
 			System.out.println();
 			ImplicitDBConstraintsReader constr = new ImplicitDBConstraintsReader(new File(usrConstrinFile));
 			//factory.setImplicitDBConstraints(constr);
-			config = QuestConfiguration.defaultBuilder()
+			config = OntopSQLOWLAPIConfiguration.defaultBuilder()
 					.ontologyFile(owlfile)
 					.nativeOntopMappingFile(new File(obdaFile)).dbConstraintsReader(constr).build();
 		} else {
-			config = QuestConfiguration.defaultBuilder()
+			config = OntopSQLOWLAPIConfiguration.defaultBuilder()
 					.ontologyFile(owlfile)
 					.nativeOntopMappingFile(new File(obdaFile))
 					.build();
@@ -263,14 +258,14 @@ public class QuestOWLExample_OntowisTests {
 		/*
 		 * Prepare the data connection for querying.
 		 */
-		QuestOWLConnection conn = reasoner.getConnection();
+		OntopOWLConnection conn = reasoner.getConnection();
 
 		return conn;
 
 	}
 
 
-	private List<Long> runQueries(QuestOWLConnection conn, String[] queries) throws OWLException {
+	private List<Long> runQueries(OntopOWLConnection conn, String[] queries) throws OWLException {
 		
 		//int nWarmUps = Constants.NUM_WARM_UPS;
 		//int nRuns = Constants.NUM_RUNS;
@@ -280,7 +275,7 @@ public class QuestOWLExample_OntowisTests {
 		int j=0;
 		while (j < queries.length){
 			String sparqlQuery = queries[j];
-			QuestOWLStatement st = conn.createStatement();
+			OntopOWLStatement st = conn.createStatement();
 			try {
 
 				long time = 0;

@@ -114,8 +114,8 @@ public class UnionLiftInternalTest {
         originalBuilder.addChild(joinNode, table4Construction);
         originalBuilder.addChild(table4Construction, table4DataNode);
 
-        originalBuilder.addChild(leftJoinNode, unionNode, NonCommutativeOperatorNode.ArgumentPosition.LEFT);
-        originalBuilder.addChild(leftJoinNode, table3Construction, NonCommutativeOperatorNode.ArgumentPosition.RIGHT);
+        originalBuilder.addChild(leftJoinNode, unionNode, BinaryOrderedOperatorNode.ArgumentPosition.LEFT);
+        originalBuilder.addChild(leftJoinNode, table3Construction, BinaryOrderedOperatorNode.ArgumentPosition.RIGHT);
         originalBuilder.addChild(unionNode, table1Construction);
         originalBuilder.addChild(unionNode, table2Construction);
 
@@ -150,10 +150,10 @@ public class UnionLiftInternalTest {
         expectedBuilder.addChild(joinNodeExpected, table4Construction);
         expectedBuilder.addChild(unionNodeExpected, leftJoinNode1);
         expectedBuilder.addChild(unionNodeExpected, leftJoinNode2);
-        expectedBuilder.addChild(leftJoinNode1, table1Construction, NonCommutativeOperatorNode.ArgumentPosition.LEFT);
-        expectedBuilder.addChild(leftJoinNode1, table3Construction, NonCommutativeOperatorNode.ArgumentPosition.RIGHT);
-        expectedBuilder.addChild(leftJoinNode2, table2Construction, NonCommutativeOperatorNode.ArgumentPosition.LEFT);
-        expectedBuilder.addChild(leftJoinNode2, table3ConstructionExpected, NonCommutativeOperatorNode.ArgumentPosition.RIGHT);
+        expectedBuilder.addChild(leftJoinNode1, table1Construction, BinaryOrderedOperatorNode.ArgumentPosition.LEFT);
+        expectedBuilder.addChild(leftJoinNode1, table3Construction, BinaryOrderedOperatorNode.ArgumentPosition.RIGHT);
+        expectedBuilder.addChild(leftJoinNode2, table2Construction, BinaryOrderedOperatorNode.ArgumentPosition.LEFT);
+        expectedBuilder.addChild(leftJoinNode2, table3ConstructionExpected, BinaryOrderedOperatorNode.ArgumentPosition.RIGHT);
         expectedBuilder.addChild(table1Construction, table1DataNode);
         expectedBuilder.addChild(table2Construction, table2DataNode);
         expectedBuilder.addChild(table3Construction, table3DataNode);
@@ -727,8 +727,8 @@ public class UnionLiftInternalTest {
         originalBuilder.addChild(joinNode, joinNode1);
         originalBuilder.addChild(joinNode1, table3DataNode);
         originalBuilder.addChild(joinNode1, table5DataNode);
-        originalBuilder.addChild(leftJoinNode, unionNode, NonCommutativeOperatorNode.ArgumentPosition.LEFT);
-        originalBuilder.addChild(leftJoinNode, table4DataNode, NonCommutativeOperatorNode.ArgumentPosition.RIGHT);
+        originalBuilder.addChild(leftJoinNode, unionNode, BinaryOrderedOperatorNode.ArgumentPosition.LEFT);
+        originalBuilder.addChild(leftJoinNode, table4DataNode, BinaryOrderedOperatorNode.ArgumentPosition.RIGHT);
         originalBuilder.addChild(unionNode, table1DataNode);
         originalBuilder.addChild(unionNode, table2DataNode);
 
@@ -781,8 +781,8 @@ public class UnionLiftInternalTest {
         originalBuilder.addChild(joinNode, joinNode1);
         originalBuilder.addChild(joinNode1, table3DataNode);
         originalBuilder.addChild(joinNode1, table5DataNode);
-        originalBuilder.addChild(leftJoinNode, unionNode, NonCommutativeOperatorNode.ArgumentPosition.RIGHT);
-        originalBuilder.addChild(leftJoinNode, table4DataNode, NonCommutativeOperatorNode.ArgumentPosition.LEFT);
+        originalBuilder.addChild(leftJoinNode, unionNode, BinaryOrderedOperatorNode.ArgumentPosition.RIGHT);
+        originalBuilder.addChild(leftJoinNode, table4DataNode, BinaryOrderedOperatorNode.ArgumentPosition.LEFT);
         originalBuilder.addChild(unionNode, table1DataNode);
         originalBuilder.addChild(unionNode, table2DataNode);
 
@@ -831,8 +831,8 @@ public class UnionLiftInternalTest {
         originalBuilder.addChild(rootConstructionNode, joinNode);
         originalBuilder.addChild(joinNode, leftJoinNode);
         originalBuilder.addChild(joinNode, table5DataNode);
-        originalBuilder.addChild(leftJoinNode, unionNode, NonCommutativeOperatorNode.ArgumentPosition.LEFT);
-        originalBuilder.addChild(leftJoinNode, table4DataNode, NonCommutativeOperatorNode.ArgumentPosition.RIGHT);
+        originalBuilder.addChild(leftJoinNode, unionNode, BinaryOrderedOperatorNode.ArgumentPosition.LEFT);
+        originalBuilder.addChild(leftJoinNode, table4DataNode, BinaryOrderedOperatorNode.ArgumentPosition.RIGHT);
         originalBuilder.addChild(unionNode, table1DataNode);
         originalBuilder.addChild(unionNode, table2DataNode);
 
@@ -863,10 +863,10 @@ public class UnionLiftInternalTest {
         expectedBuilder.addChild(joinNode1, table5DataNode.clone());
         expectedBuilder.addChild(joinNode2, leftJoinNode2);
         expectedBuilder.addChild(joinNode2, table5DataNode.clone());
-        expectedBuilder.addChild(leftJoinNode1, table1DataNode.clone(), NonCommutativeOperatorNode.ArgumentPosition.LEFT);
-        expectedBuilder.addChild(leftJoinNode1, table4DataNode.clone(), NonCommutativeOperatorNode.ArgumentPosition.RIGHT);
-        expectedBuilder.addChild(leftJoinNode2, table2DataNode.clone(), NonCommutativeOperatorNode.ArgumentPosition.LEFT);
-        expectedBuilder.addChild(leftJoinNode2, table4DataNode.clone(), NonCommutativeOperatorNode.ArgumentPosition.RIGHT);
+        expectedBuilder.addChild(leftJoinNode1, table1DataNode.clone(), BinaryOrderedOperatorNode.ArgumentPosition.LEFT);
+        expectedBuilder.addChild(leftJoinNode1, table4DataNode.clone(), BinaryOrderedOperatorNode.ArgumentPosition.RIGHT);
+        expectedBuilder.addChild(leftJoinNode2, table2DataNode.clone(), BinaryOrderedOperatorNode.ArgumentPosition.LEFT);
+        expectedBuilder.addChild(leftJoinNode2, table4DataNode.clone(), BinaryOrderedOperatorNode.ArgumentPosition.RIGHT);
 
         IntermediateQuery expectedQuery = expectedBuilder.build();
 

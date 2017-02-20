@@ -4,12 +4,6 @@ owl:    http://www.w3.org/2002/07/owl#
 xsd:    http://www.w3.org/2001/XMLSchema#
 obda:  https://w3id.org/obda/vocabulary#
 
-[SourceDeclaration]
-sourceUri	viewTest
-connectionUrl	jdbc:postgresql://10.7.20.39/ontowis_100m
-username	postgres
-password	postgres
-driverClass	org.postgresql.Driver
 
 [MappingDeclaration] @collection [[
 mappingId	MAPID-A1

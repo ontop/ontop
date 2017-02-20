@@ -32,9 +32,10 @@ public class OrderByTest extends AbstractVirtualModeTest {
 
     static final String owlFile = "src/test/resources/orderBy/stockBolzanoAddress.owl";
     static final String obdaFile = "src/test/resources/orderBy/stockBolzanoAddress.obda";
+    static final String propertiesFile = "src/test/resources/orderBy/stockBolzanoAddress.properties";
 
     public OrderByTest() {
-        super(owlFile, obdaFile);
+        super(owlFile, obdaFile, propertiesFile);
     }
 
     public void testBolzanoOrderingAsc() throws Exception {

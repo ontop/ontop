@@ -5,7 +5,7 @@ package it.unibz.inf.ontop.reformulation.tests;
  * Problem with OPTIONAL when the left join is having on the right multiple mappings
  */
 
-import it.unibz.inf.ontop.injection.QuestConfiguration;
+import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.io.QueryIOManager;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import it.unibz.inf.ontop.querymanager.QueryController;
@@ -37,13 +37,17 @@ public class LeftJoinMultipleMatchingTest {
 
 
     private Connection sqlConnection;
-    private QuestOWLConnection conn;
+    private OntopOWLConnection conn;
     private QuestOWL reasoner;
+
+    String URL = "jdbc:h2:mem:raisjunit";
+    String USER = "sa";
+    String PASSWORD = "";
 
     @Before
     public void setUp() throws Exception {
 
-        sqlConnection= DriverManager.getConnection("jdbc:h2:mem:raisjunit","sa", "");
+        sqlConnection= DriverManager.getConnection(URL, USER, PASSWORD);
         java.sql.Statement s = sqlConnection.createStatement();
 
         try {
@@ -99,15 +103,18 @@ public class LeftJoinMultipleMatchingTest {
 
         // Creating a new instance of the reasoner
         QuestOWLFactory factory = new QuestOWLFactory();
-        QuestConfiguration config = QuestConfiguration.defaultBuilder()
+        OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
                 .ontologyFile(owlFile)
                 .nativeOntopMappingFile(obdaFile)
+                .jdbcUrl(URL)
+                .jdbcUser(USER)
+                .jdbcPassword(PASSWORD)
                 .build();
         reasoner = factory.createReasoner(config);
 
         // Now we are ready for querying
         conn = reasoner.getConnection();
-        QuestOWLStatement st = conn.createStatement();
+        OntopOWLStatement st = conn.createStatement();
 
 
         QueryController qc = new QueryController();
@@ -165,15 +172,18 @@ public class LeftJoinMultipleMatchingTest {
 
         // Creating a new instance of the reasoner
     	QuestOWLFactory factory = new QuestOWLFactory();
-        QuestConfiguration config = QuestConfiguration.defaultBuilder()
+        OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
                 .ontologyFile(owlFile)
                 .nativeOntopMappingFile(obdaFile)
+                .jdbcUrl(URL)
+                .jdbcUser(USER)
+                .jdbcPassword(PASSWORD)
                 .build();
         reasoner = factory.createReasoner(config);
 
         // Now we are ready for querying
         conn = reasoner.getConnection();
-        QuestOWLStatement st = conn.createStatement();
+        OntopOWLStatement st = conn.createStatement();
 
         log.debug("Executing query: ");
         log.debug("Query: \n{}", query);

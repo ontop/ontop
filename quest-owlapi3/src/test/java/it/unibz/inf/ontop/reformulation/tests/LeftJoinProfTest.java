@@ -1,7 +1,9 @@
 package it.unibz.inf.ontop.reformulation.tests;
 
 import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.injection.QuestConfiguration;
+import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
+import it.unibz.inf.ontop.owlrefplatform.core.ExecutableQuery;
+import it.unibz.inf.ontop.owlrefplatform.core.SQLExecutableQuery;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import org.junit.After;
 import org.junit.Before;
@@ -28,9 +30,10 @@ public class LeftJoinProfTest {
     private static final String DROP_SCRIPT = "src/test/resources/test/redundant_join/redundant_join_fk_drop.sql";
     private static final String OWL_FILE = "src/test/resources/test/redundant_join/redundant_join_fk_test.owl";
     private static final String ODBA_FILE = "src/test/resources/test/redundant_join/redundant_join_fk_test.obda";
+    private static final String PROPERTY_FILE = "src/test/resources/test/redundant_join/redundant_join_fk_test.properties";
     private static final String NO_SELF_LJ_OPTIMIZATION_MSG = "The table professors should be used only once";
 
-    private Connection conn;
+    private Connection conn;;
 
 
     @Before
@@ -396,22 +399,26 @@ public class LeftJoinProfTest {
     private String checkReturnedValuesAndReturnSql(String query, List<String> expectedValues) throws Exception {
 
         QuestOWLFactory factory = new QuestOWLFactory();
-        QuestConfiguration config = QuestConfiguration.defaultBuilder()
+        OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
                 .nativeOntopMappingFile(ODBA_FILE)
                 .ontologyFile(OWL_FILE)
+                .propertyFile(PROPERTY_FILE)
                 .build();
         QuestOWL reasoner = factory.createReasoner(config);
 
         // Now we are ready for querying
-        QuestOWLConnection conn = reasoner.getConnection();
-        QuestOWLStatement st = conn.createStatement();
+        OntopOWLConnection conn = reasoner.getConnection();
+        OntopOWLStatement st = conn.createStatement();
         String sql;
 
         int i = 0;
         List<String> returnedValues = new ArrayList<>();
         try {
-            sql = st.getUnfolding(query);
-            QuestOWLResultSet rs = st.executeTuple(query);
+            ExecutableQuery executableQuery = st.getExecutableQuery(query);
+            if (! (executableQuery instanceof SQLExecutableQuery))
+                throw new IllegalStateException("A SQLExecutableQuery was expected");
+            sql = ((SQLExecutableQuery)executableQuery).getSQL();
+            QuestOWLResultSet rs = st.executeSelectQuery(query);
             while (rs.nextRow()) {
                 OWLLiteral ind1 = rs.getOWLLiteral("v");
                 // log.debug(ind1.toString());

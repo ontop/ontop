@@ -1,12 +1,9 @@
 package it.unibz.inf.ontop.rdf4j.tests.general;
 
 
-import it.unibz.inf.ontop.injection.QuestConfiguration;
+import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.rdf4j.repository.OntopVirtualRepository;
 import junit.framework.TestCase;
-import it.unibz.inf.ontop.injection.QuestCoreSettings;
-import org.junit.Test;
-
 import org.eclipse.rdf4j.query.BindingSet;
 import org.eclipse.rdf4j.query.QueryLanguage;
 import org.eclipse.rdf4j.query.TupleQuery;
@@ -14,10 +11,9 @@ import org.eclipse.rdf4j.query.TupleQueryResult;
 import org.eclipse.rdf4j.repository.Repository;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.eclipse.rdf4j.repository.RepositoryException;
-
+import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 
 import java.util.Properties;
 
@@ -25,6 +21,7 @@ public class DatetimeStampSesameTest extends TestCase {
 
 	String owlfile = "src/test/resources/northwind/northwind-dmo.owl";
 	String mappingfile = "src/test/resources/northwind/mapping-northwind-dmo.ttl";
+	String propertyfile = "src/test/resources/northwind/mapping-northwind-dmo.properties";
 
 	Logger log = LoggerFactory.getLogger(this.getClass());
 	RepositoryConnection con;
@@ -34,21 +31,16 @@ public class DatetimeStampSesameTest extends TestCase {
 
 		Properties connectionProperties = new Properties();
 		// set jdbc params in config
-		connectionProperties.setProperty(QuestCoreSettings.DB_NAME, "northwind");
-		connectionProperties.setProperty(QuestCoreSettings.JDBC_URL,
-				"jdbc:mysql://10.7.20.39/northwind?sessionVariables=sql_mode='ANSI'");
-		connectionProperties.setProperty(QuestCoreSettings.DB_USER, "fish");
-		connectionProperties.setProperty(QuestCoreSettings.DB_PASSWORD, "fish");
-		connectionProperties.setProperty(QuestCoreSettings.JDBC_DRIVER, "com.mysql.jdbc.Driver");
 
-		QuestConfiguration configuration = QuestConfiguration.defaultBuilder()
+		OntopSQLOWLAPIConfiguration configuration = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.ontologyFile(owlfile)
 				.r2rmlMappingFile(mappingfile)
+				.propertyFile(propertyfile)
 				.enableExistentialReasoning(true)
 				.properties(connectionProperties)
 				.build();
 		try {
-			repository = new OntopVirtualRepository("virtualExample2", configuration);
+			repository = new OntopVirtualRepository( configuration);
 			repository.initialize();
 		} catch (Exception e) {
 			e.printStackTrace();

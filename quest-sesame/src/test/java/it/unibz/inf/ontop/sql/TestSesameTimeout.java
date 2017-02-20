@@ -6,12 +6,13 @@ import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.util.Properties;
 import java.util.Scanner;
 
-import it.unibz.inf.ontop.injection.QuestConfiguration;
-import it.unibz.inf.ontop.rdf4j.repository.OntopRepositoryConnection;
+import it.unibz.inf.ontop.exception.OntopQueryAnsweringException;
+import it.unibz.inf.ontop.exception.OntopQueryEvaluationException;
+import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.rdf4j.repository.OntopVirtualRepository;
+import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -20,7 +21,6 @@ import org.eclipse.rdf4j.query.QueryEvaluationException;
 import org.eclipse.rdf4j.query.QueryLanguage;
 import org.eclipse.rdf4j.query.TupleQuery;
 import org.eclipse.rdf4j.query.TupleQueryResult;
-import it.unibz.inf.ontop.injection.OBDASettings;
 
 /**
  * Tests that user-applied constraints can be provided through
@@ -43,20 +43,17 @@ public class TestSesameTimeout {
 	static String uc_create = "src/test/resources/userconstraints/create.sql";
 
 	private Connection sqlConnection;
-	private OntopRepositoryConnection conn;
+	private RepositoryConnection conn;
+
+	private static final String URL = "jdbc:h2:mem:countries";
+	private static final String USER = "sa";
+	private static final String PASSWORD = "";
 	
 
 	@Before
 	public void init()  throws Exception {
 
-		Properties p = new Properties();
-		p.setProperty(OBDASettings.DB_NAME, "countries");
-		p.setProperty(OBDASettings.JDBC_URL, "jdbc:h2:mem:countries");
-		p.setProperty(OBDASettings.DB_USER, "sa");
-		p.setProperty(OBDASettings.DB_PASSWORD, "");
-		p.setProperty(OBDASettings.JDBC_DRIVER, "org.h2.Driver");
-
-		sqlConnection= DriverManager.getConnection("jdbc:h2:mem:countries","sa", "");
+		sqlConnection= DriverManager.getConnection(URL, USER, PASSWORD);
 		java.sql.Statement s = sqlConnection.createStatement();
 
 		try {
@@ -75,13 +72,15 @@ public class TestSesameTimeout {
 
 		s.close();
 
-		QuestConfiguration configuration = QuestConfiguration.defaultBuilder()
+		OntopSQLOWLAPIConfiguration configuration = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.r2rmlMappingFile(r2rmlfile)
 				.ontologyFile(owlfile)
-				.properties(p)
+				.jdbcUrl(URL)
+				.jdbcUser(USER)
+				.jdbcPassword(PASSWORD)
 				.build();
 
-		OntopVirtualRepository repo = new OntopVirtualRepository("", configuration);
+		OntopVirtualRepository repo = new OntopVirtualRepository(configuration);
 		repo.initialize();
 		/*
 		 * Prepare the data connection for querying.
@@ -121,7 +120,7 @@ public class TestSesameTimeout {
         try {
         	TupleQueryResult result = tq.evaluate();
         	result.close();
-        } catch (QueryEvaluationException e) {
+        } catch (Exception e) {
         	long end = System.currentTimeMillis();
         	assertTrue(e.toString().indexOf("OntopTupleQuery timed out. More than 1 seconds passed") >= 0);
         	assertTrue(end - start >= 1000);

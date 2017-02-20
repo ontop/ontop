@@ -29,7 +29,8 @@
             [ qt:query <int-oracle.rq> ] ;
     mf:result <int.ttl> ;
     mf:knowledgebase <datatypes.owl> ;
-    mf:mappings <datatypes-oracle.obda> .
+    mf:mappings <datatypes-oracle.obda> ;
+    mf:parameters <datatypes-oracle.properties> .
     
 :integer rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: INTEGER" ;
@@ -39,7 +40,8 @@
             [ qt:query <integer-oracle.rq> ] ;
     mf:result <integer.ttl> ;
     mf:knowledgebase <datatypes.owl> ;
-    mf:mappings <datatypes-oracle.obda> .
+    mf:mappings <datatypes-oracle.obda> ;
+    mf:parameters <datatypes-oracle.properties> .
     
 :smallint rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: SMALLINT" ;
@@ -49,7 +51,8 @@
             [ qt:query <smallint-oracle.rq> ] ;
     mf:result <smallint.ttl> ;
     mf:knowledgebase <datatypes.owl> ;
-    mf:mappings <datatypes-oracle.obda> .
+    mf:mappings <datatypes-oracle.obda> ;
+    mf:parameters <datatypes-oracle.properties> .
     
 :dec rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: DEC" ;
@@ -59,7 +62,8 @@
             [ qt:query <dec.rq> ] ;
     mf:result <dec.ttl> ;
     mf:knowledgebase <datatypes.owl> ;
-    mf:mappings <datatypes-oracle.obda> .
+    mf:mappings <datatypes-oracle.obda> ;
+    mf:parameters <datatypes-oracle.properties> .
 
 :decimal rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: DECIMAL" ;
@@ -69,7 +73,8 @@
             [ qt:query <decimal.rq> ] ;
     mf:result <decimal.ttl> ;
     mf:knowledgebase <datatypes.owl> ;
-    mf:mappings <datatypes-oracle.obda> .
+    mf:mappings <datatypes-oracle.obda> ;
+    mf:parameters <datatypes-oracle.properties> .
 
 :number rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: NUMBER" ;
@@ -79,7 +84,8 @@
             [ qt:query <number.rq> ] ;
     mf:result <number.ttl> ;
     mf:knowledgebase <datatypes.owl> ;
-    mf:mappings <datatypes-oracle.obda> .
+    mf:mappings <datatypes-oracle.obda> ;
+    mf:parameters <datatypes-oracle.properties> .
     
 :numeric rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: NUMERIC" ;
@@ -89,7 +95,8 @@
             [ qt:query <numeric.rq> ] ;
     mf:result <numeric.ttl> ;
     mf:knowledgebase <datatypes.owl> ;
-    mf:mappings <datatypes-oracle.obda> .
+    mf:mappings <datatypes-oracle.obda> ;
+    mf:parameters <datatypes-oracle.properties> .
     
 :real rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: REAL" ;
@@ -99,7 +106,8 @@
             [ qt:query <real.rq> ] ;
     mf:result <real.ttl> ;
     mf:knowledgebase <datatypes.owl> ;
-    mf:mappings <datatypes-oracle.obda> .
+    mf:mappings <datatypes-oracle.obda> ;
+    mf:parameters <datatypes-oracle.properties> .
 
 :float rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: FLOAT" ;
@@ -109,7 +117,8 @@
             [ qt:query <float.rq> ] ;
     mf:result <float.ttl> ;
     mf:knowledgebase <datatypes.owl> ;
-    mf:mappings <datatypes-oracle.obda> .
+    mf:mappings <datatypes-oracle.obda> ;
+    mf:parameters <datatypes-oracle.properties> .
     
 :double rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: DOUBLE PRECISION" ;
@@ -119,4 +128,5 @@
             [ qt:query <double.rq> ] ;
     mf:result <double.ttl> ;
     mf:knowledgebase <datatypes.owl> ;
-    mf:mappings <datatypes-oracle.obda> .
+    mf:mappings <datatypes-oracle.obda> ;
+    mf:parameters <datatypes-oracle.properties> .

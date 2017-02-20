@@ -30,9 +30,10 @@ public class MySQLBackticksTest extends AbstractVirtualModeTest {
 
 	static final String owlfile = "resources/identifiers/identifiers.owl";
 	static final String obdafile = "resources/identifiers/identifiers-backtick-mysql.obda";
+	static final String propertiesfile = "resources/identifiers/identifiers-backtick-mysql.properties";
 
 	public MySQLBackticksTest() {
-		super(owlfile, obdafile);
+		super(owlfile, obdafile, propertiesfile);
 	}
 
 	/**

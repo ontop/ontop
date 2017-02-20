@@ -20,7 +20,7 @@ package it.unibz.inf.ontop.reformulation.tests;
  * #L%
  */
 
-import it.unibz.inf.ontop.injection.QuestConfiguration;
+import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import junit.framework.TestCase;
 import org.semanticweb.owlapi.model.OWLException;
@@ -39,12 +39,16 @@ import java.sql.Statement;
 
 public class PropertyCharacteristicTest extends TestCase {
 	
-	private QuestOWLConnection conn = null;
-	private QuestOWLStatement stmt = null;
+	private OntopOWLConnection conn = null;
+	private OntopOWLStatement stmt = null;
 	private QuestOWL reasoner = null;
 	
 	private Connection jdbcconn = null;
 	private Logger log = LoggerFactory.getLogger(this.getClass());
+
+	private static final String url = "jdbc:h2:mem:questjunitdb";
+	private static final String username = "sa";
+	private static final String password = "";
 	
 	@Override
 	public void setUp() throws Exception {
@@ -66,11 +70,6 @@ public class PropertyCharacteristicTest extends TestCase {
 		String createDDL = readSQLFile("src/test/resources/property-characteristics/sqlcreate.sql");
 		
 		// Initializing and H2 database with the stock exchange data
-		// String driver = "org.h2.Driver";
-		String url = "jdbc:h2:mem:questjunitdb";
-		String username = "sa";
-		String password = "";
-
 		jdbcconn = DriverManager.getConnection(url, username, password);
 		Statement st = jdbcconn.createStatement();
 
@@ -100,7 +99,7 @@ public class PropertyCharacteristicTest extends TestCase {
 		final File obdaFile = new File("src/test/resources/property-characteristics/noproperty.obda");
 		
 		setupReasoner(owlFile, obdaFile);
-		QuestOWLResultSet rs = executeQuery("" +
+		QuestOWLResultSet rs = executeSelectQuery("" +
 				"PREFIX : <http://www.semanticweb.org/johardi/ontologies/2013/3/Ontology1365668829973.owl#> \n" +
 				"SELECT ?x ?y \n" +
 				"WHERE { ?x :knows ?y . }"
@@ -114,7 +113,7 @@ public class PropertyCharacteristicTest extends TestCase {
 		final File obdaFile = new File("src/test/resources/property-characteristics/symmetric.obda");
 		
 		setupReasoner(owlFile, obdaFile);
-		QuestOWLResultSet rs = executeQuery("" +
+		QuestOWLResultSet rs = executeSelectQuery("" +
 				"PREFIX : <http://www.semanticweb.org/johardi/ontologies/2013/3/Ontology1365668829973.owl#> \n" +
 				"SELECT ?x ?y \n" +
 				"WHERE { ?x :knows ?y . }"
@@ -125,16 +124,20 @@ public class PropertyCharacteristicTest extends TestCase {
 	
 	private void setupReasoner(File owlFile, File obdaFile) throws Exception {
 		QuestOWLFactory factory = new QuestOWLFactory();
-        QuestConfiguration config = QuestConfiguration.defaultBuilder()
+        OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.ontologyFile(owlFile)
-				.nativeOntopMappingFile(obdaFile).build();
+				.nativeOntopMappingFile(obdaFile)
+				.jdbcUrl(url)
+				.jdbcUser(username)
+				.jdbcPassword(password)
+				.build();
         reasoner = factory.createReasoner(config);
 	}
 	
-	private QuestOWLResultSet executeQuery(String sparql) throws Exception {
+	private QuestOWLResultSet executeSelectQuery(String sparql) throws Exception {
 			conn = reasoner.getConnection();
 			stmt = conn.createStatement();
-			return stmt.executeTuple(sparql);
+			return stmt.executeSelectQuery(sparql);
 	}
 	
 	private int countResult(QuestOWLResultSet rs, boolean stdout) throws OWLException {
@@ -144,9 +147,9 @@ public class PropertyCharacteristicTest extends TestCase {
 			if (stdout) {
 				for (int column = 1; column <= rs.getColumnCount(); column++) {
 					OWLObject binding = rs.getOWLObject(column);
-					System.out.print(binding.toString() + ", ");
+					log.debug(binding.toString() + ", ");
 				}
-				System.out.print("\n");
+
 			}
 		}
 		return counter;

@@ -21,27 +21,25 @@ package it.unibz.inf.ontop.rdf4j;
  */
 
 import com.google.common.collect.Iterators;
-import it.unibz.inf.ontop.model.OBDAModel;
+import it.unibz.inf.ontop.injection.OntopSystemConfiguration;
 import it.unibz.inf.ontop.ontology.Assertion;
-import it.unibz.inf.ontop.ontology.Ontology;
 import it.unibz.inf.ontop.owlrefplatform.core.abox.QuestMaterializer;
 import org.eclipse.rdf4j.model.Statement;
 
 import java.util.Iterator;
 
+/**
+ * TODO: refactor (no exception in the constructor) + complete
+ */
 public class SesameMaterializer {
 	
 		private Iterator<Assertion> assertions = null;
 		private QuestMaterializer materializer;
 		
-    public SesameMaterializer(OBDAModel model, boolean doStreamResults) throws Exception {
-        this(model, null, doStreamResults);
-		}
-		
-    public SesameMaterializer(OBDAModel model, Ontology onto, boolean doStreamResults) throws Exception {
-        materializer = new QuestMaterializer(model, onto, doStreamResults);
-			 assertions = materializer.getAssertionIterator();
-		}
+    public SesameMaterializer(OntopSystemConfiguration configuration, boolean doStreamResults) throws Exception {
+        materializer = new QuestMaterializer(configuration, doStreamResults);
+        assertions = materializer.getAssertionIterator();
+	}
 		
 		public Iterator<Statement> getIterator() {
             return Iterators.transform(assertions, RDF4JHelper::createStatement);

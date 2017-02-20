@@ -20,8 +20,8 @@ package it.unibz.inf.ontop.quest.sparql;
  * #L%
  */
 
+import it.unibz.inf.ontop.owlrefplatform.owlapi.OntopOWLStatement;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLResultSet;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLStatement;
 import it.unibz.inf.ontop.quest.AbstractVirtualModeTest;
 import org.semanticweb.owlapi.model.OWLIndividual;
 
@@ -32,15 +32,16 @@ import org.semanticweb.owlapi.model.OWLIndividual;
  */
 public class OracleRegexpTestSpace extends AbstractVirtualModeTest {
 
-	static final String owlfile = "resources/regexp/oracle-regexp.owl";
-	static final String obdafile = "resources/regexp/oracle-regexp.obda";
+	static final String owlFile = "resources/regexp/oracle-regexp.owl";
+	static final String obdaFile = "resources/regexp/oracle-regexp.obda";
+	static final String propertyFile = "resources/regexp/oracle-regexp.properties";
 
 	public OracleRegexpTestSpace() {
-		super(owlfile, obdafile);
+		super(owlFile, obdaFile, propertyFile);
 	}
 
 
-	private String runTest(QuestOWLStatement st, String query, boolean hasResult) throws Exception {
+	private String runTest(OntopOWLStatement st, String query, boolean hasResult) throws Exception {
 		String retval;
 		QuestOWLResultSet rs = st.executeTuple(query);
 		if(hasResult){
@@ -60,7 +61,7 @@ public class OracleRegexpTestSpace extends AbstractVirtualModeTest {
 	 * @throws Exception
 	 */
 	public void testSparql2OracleRegexWhere() throws Exception {
-		QuestOWLStatement st = null;
+		OntopOWLStatement st = null;
 		try {
 			st = conn.createStatement();
 
@@ -87,7 +88,7 @@ public class OracleRegexpTestSpace extends AbstractVirtualModeTest {
 	 * @throws Exception
 	 */
 	public void testSparql2OracleRegexNoWhere() throws Exception {
-		QuestOWLStatement st = null;
+		OntopOWLStatement st = null;
 		try {
 			st = conn.createStatement();
 
@@ -113,7 +114,7 @@ public class OracleRegexpTestSpace extends AbstractVirtualModeTest {
 	 * @throws Exception
 	 */
 	public void testSparql2OracleRegexNoWhereNoSubquery() throws Exception {
-		QuestOWLStatement st = null;
+		OntopOWLStatement st = null;
 		try {
 			st = conn.createStatement();
 			

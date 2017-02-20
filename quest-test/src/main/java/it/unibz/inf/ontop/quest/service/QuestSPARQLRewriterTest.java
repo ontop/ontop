@@ -20,11 +20,10 @@ package it.unibz.inf.ontop.quest.service;
  * #L%
  */
 
-import it.unibz.inf.ontop.rdf4j.repository.OntopVirtualRepository;
+import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWL;
+import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLFactory;
 import org.eclipse.rdf4j.common.io.IOUtil;
-import it.unibz.inf.ontop.injection.QuestConfiguration;
-import it.unibz.inf.ontop.model.OBDAException;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestDBStatement;
+import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -32,6 +31,7 @@ import java.io.InputStreamReader;
 import java.net.URL;
 
 import junit.framework.TestCase;
+import org.semanticweb.owlapi.model.OWLException;
 
 /**
  * Test class using StockExchange scenario in MySQL
@@ -41,30 +41,23 @@ public class QuestSPARQLRewriterTest extends TestCase {
 	private static final String ROOT_LOCATION = "/testcases-scenarios/virtual-mode/stockexchange/simplecq/";
 	private static final String OWL_FILE_LOCATION = ROOT_LOCATION + "stockexchange.owl";
 	private static final String OBDA_FILE_LOCATION = ROOT_LOCATION + "stockexchange-mysql.obda";
-	
-	protected OntopVirtualRepository repository;
-	
+	private QuestOWL reasoner;
+
 	@Override
 	protected void setUp() throws Exception {
 		try {
 			final URL owlFileUrl = QuestSPARQLRewriterTest.class.getResource(OWL_FILE_LOCATION);
 			final URL obdaFileUrl = QuestSPARQLRewriterTest.class.getResource(OBDA_FILE_LOCATION);
-			QuestConfiguration configuration = QuestConfiguration.defaultBuilder()
+			OntopSQLOWLAPIConfiguration configuration = OntopSQLOWLAPIConfiguration.defaultBuilder()
 					.ontologyFile(owlFileUrl)
 					.nativeOntopMappingFile(obdaFileUrl.toString())
 					.build();
-			repository = new OntopVirtualRepository(getName(), configuration);
-			repository.initialize();
+
+			QuestOWLFactory factory = new QuestOWLFactory();
+			reasoner = factory.createReasoner(configuration);
+
 		} catch (Exception exc) {
-			repository.shutDown();
-		}
-	}
-	
-	private QuestDBStatement getStatement() {
-		try {
-			return repository.getQuestConnection().createStatement();
-		} catch (OBDAException e) {
-			throw new RuntimeException("Cannot retrieve Quest statement");
+			reasoner.close();
 		}
 	}
 
@@ -138,8 +131,8 @@ public class QuestSPARQLRewriterTest extends TestCase {
 	private String getSPARQLRewriting(String sparqlInput) {
 		String sparqlOutput;
 		try {
-			sparqlOutput = getStatement().getRewriting(sparqlInput);
-		} catch (OBDAException e) {
+			sparqlOutput = reasoner.getStatement().getRewriting(sparqlInput);
+		} catch (OWLException e) {
 			sparqlOutput = "NULL";
 		}
 		return sparqlOutput;

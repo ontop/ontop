@@ -21,20 +21,21 @@ package it.unibz.inf.ontop.owlrefplatform.owlapi;
  */
 
 import com.google.inject.Injector;
-import it.unibz.inf.ontop.exception.InvalidMappingException;
+import it.unibz.inf.ontop.answering.OntopQueryEngine;
+import it.unibz.inf.ontop.answering.input.AskQuery;
+import it.unibz.inf.ontop.answering.input.InputQueryFactory;
+import it.unibz.inf.ontop.exception.OBDASpecificationException;
+import it.unibz.inf.ontop.exception.OntopConnectionException;
 import it.unibz.inf.ontop.injection.InvalidOntopConfigurationException;
-import it.unibz.inf.ontop.injection.QuestConfiguration;
-import it.unibz.inf.ontop.injection.QuestSettings;
-import it.unibz.inf.ontop.io.InvalidDataSourceException;
-import it.unibz.inf.ontop.model.*;
+import it.unibz.inf.ontop.injection.OntopEngineFactory;
+import it.unibz.inf.ontop.injection.OntopSystemOWLAPIConfiguration;
+import it.unibz.inf.ontop.model.BooleanResultSet;
 import it.unibz.inf.ontop.ontology.*;
-import it.unibz.inf.ontop.owlapi.OWLAPIABoxIterator;
 import it.unibz.inf.ontop.owlapi.OWLAPITranslatorUtility;
-import it.unibz.inf.ontop.owlrefplatform.core.*;
-import it.unibz.inf.ontop.owlrefplatform.core.abox.QuestMaterializer;
-import it.unibz.inf.ontop.injection.QuestComponentFactory;
-import it.unibz.inf.ontop.injection.QuestCoreSettings;
+import it.unibz.inf.ontop.owlrefplatform.core.OntopConnection;
+import it.unibz.inf.ontop.owlrefplatform.core.OntopStatement;
 import it.unibz.inf.ontop.pivotalrepr.utils.ExecutorRegistry;
+import it.unibz.inf.ontop.spec.OBDASpecification;
 import it.unibz.inf.ontop.utils.VersionInfo;
 import org.semanticweb.owlapi.model.*;
 import org.semanticweb.owlapi.reasoner.*;
@@ -49,7 +50,6 @@ import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -58,8 +58,6 @@ import java.util.Set;
  */
 public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 
-	private final QuestSettings preferences;
-	private final Optional<DBMetadata> inputDBMetadata;
 	StructuralReasoner structuralReasoner;
 
     private final Version version;
@@ -74,9 +72,6 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 	
 	private Object inconsistent = null;
 
-	// / holds the error that quest had when initializing
-	private String errorMessage = "";
-
 	private Exception questException = null;
 
 	// //////////////////////////////////////////////////////////////////////////////////////
@@ -86,23 +81,19 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 	// //////////////////////////////////////////////////////////////////////////////////////
 
 	/* The merge and tranlsation of all loaded ontologies */
+	// TODO: see if still relevant
 	private Ontology translatedOntologyMerge;
 
-	private final Optional<OBDAModel> obdaModel;
+	private final OBDASpecification obdaSpecification;
 
 	private final ExecutorRegistry executorRegistry;
 
-	private IQuest questInstance = null;
-
 	private static Logger log = LoggerFactory.getLogger(QuestOWL.class);
 
-	private IQuestConnection conn = null;
+	private OntopConnection conn = null;
+	private OntopOWLConnection owlconn = null;
 
-	private QuestOWLConnection owlconn = null;
 
-	private final OWLOntologyManager man;
-	
-	
 	// //////////////////////////////////////////////////////////////////////////////////////
 	//
 	//  User Constraints are primary and foreign keys not in the database 
@@ -121,7 +112,9 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 
 	/* Used to enable use of same as in mappings. */
 
-	private final QuestComponentFactory componentFactory;
+	private final OntopEngineFactory engineFactory;
+	private OntopQueryEngine queryEngine;
+	private final InputQueryFactory inputQueryFactory;
 	
 	/* Used to signal whether to apply the user constraints above */
 	//private boolean applyExcludeFromTMappings = false;
@@ -134,39 +127,36 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 			throws IllegalConfigurationException {
         super(rootOntology, owlConfiguration, BufferingMode.BUFFERING);
 
-		QuestConfiguration questConfiguration = owlConfiguration.getQuestConfiguration();
-		preferences = questConfiguration.getSettings();
-		inputDBMetadata = questConfiguration.getDatasourceMetadata();
-
+		OntopSystemOWLAPIConfiguration ontopConfiguration = owlConfiguration.getOntopConfiguration();
 
 		/**
 		 * Validates the preferences
 		 */
 		try {
-			questConfiguration.validate();
+			ontopConfiguration.validate();
 		} catch (InvalidOntopConfigurationException e) {
 			throw new IllegalConfigurationException(e.getMessage(), owlConfiguration);
 		}
 
         this.structuralReasoner = new StructuralReasoner(rootOntology, owlConfiguration, BufferingMode.BUFFERING);
 
-		executorRegistry = questConfiguration.getExecutorRegistry();
+		executorRegistry = ontopConfiguration.getExecutorRegistry();
 
-		Injector injector = questConfiguration.getInjector();
-		this.componentFactory = injector.getInstance(QuestComponentFactory.class);
+		Injector injector = ontopConfiguration.getInjector();
+		this.engineFactory = injector.getInstance(OntopEngineFactory.class);
 
 		try {
-			obdaModel = questConfiguration.loadMapping();
+			obdaSpecification = ontopConfiguration.loadProvidedSpecification();
 			/**
 			 * Mapping parsing exceptions are re-thrown as configuration exceptions.
 			 */
-		} catch (InvalidDataSourceException | IOException | InvalidMappingException e) {
+		} catch (IOException | OBDASpecificationException e) {
 			throw new IllegalConfigurationException(e.getMessage(), owlConfiguration);
 		}
 
-		pm = owlConfiguration.getProgressMonitor();
+		this.inputQueryFactory = injector.getInstance(InputQueryFactory.class);
 
-		man = rootOntology.getOWLOntologyManager();
+		pm = owlConfiguration.getProgressMonitor();
 
 		version = extractVersion();
 
@@ -205,100 +195,45 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 		prepareReasoner();
 		
 	}
-	
-	@Deprecated // used in one test only
-	public IQuest getQuestInstance() {
-		return questInstance;
-	}
 
-	public QuestOWLStatement getStatement() throws OWLException {
+	public OntopOWLStatement getStatement() throws OWLException {
 		if (!questready) {
 			OWLReasonerRuntimeException owlReasonerRuntimeException = new ReasonerInternalException(
-					"Quest was not initialized properly. This is generally indicates, connection problems or error during ontology or mapping pre-processing. \n\nOriginal error message:\n" + questException.getMessage()) ;
+					"Ontop was not initialized properly. This is generally indicates, " +
+							"connection problems or error during ontology or mapping pre-processing. " +
+							"\n\nOriginal error message:\n" + questException.getMessage()) ;
 				owlReasonerRuntimeException.setStackTrace(questException.getStackTrace());
 			throw owlReasonerRuntimeException;
 		}
 		return owlconn.createStatement();
 	}
 
-	private void prepareQuestInstance() throws Exception {
+	private void prepareConnector() throws OntopConnectionException {
 
 		try {
-			if (questInstance != null)
-				questInstance.dispose();
+			if (queryEngine != null)
+				queryEngine.close();
 		} catch (Exception e) {
 			log.debug(e.getMessage());
 		}
 
 		log.debug("Initializing a new Quest instance...");
 
-		final boolean bObtainFromOntology = preferences.getBoolean(QuestCoreSettings.OBTAIN_FROM_ONTOLOGY)
-				.orElseThrow(() -> new IllegalStateException("Missing property: OBTAIN_FROM_ONTOLOGY"));
-		final boolean bObtainFromMappings = preferences.getBoolean(QuestCoreSettings.OBTAIN_FROM_MAPPINGS)
-				.orElseThrow(() -> new IllegalStateException("Missing property: OBTAIN_FROM_MAPPINGS"));
-		final boolean isVirtualMode = preferences.isInVirtualMode();
 
 		// pm.reasonerTaskStarted("Classifying...");
 		// pm.reasonerTaskBusy();
 
-		questInstance = componentFactory.create(translatedOntologyMerge, obdaModel, inputDBMetadata, executorRegistry);
+		queryEngine = engineFactory.create(obdaSpecification, executorRegistry);
+		queryEngine.connect();
 		
-		Set<OWLOntology> importsClosure = man.getImportsClosure(getRootOntology());
-		
+		// Set<OWLOntology> importsClosure = man.getImportsClosure(getRootOntology());
 
-		try {
-			// pm.reasonerTaskProgressChanged(1, 4);
+		//conn = questInstance.getConnection();
+		conn = queryEngine.getNonPoolConnection();
+		owlconn = new QuestOWLConnection(conn, inputQueryFactory);
 
-			// Setup repository
-			questInstance.setupRepository();
-			// pm.reasonerTaskProgressChanged(2, 4);
-
-			// Retrives the connection from Quest
-			//conn = questInstance.getConnection();
-			conn = questInstance.getNonPoolConnection();
-			owlconn = new QuestOWLConnection(conn);
-			// pm.reasonerTaskProgressChanged(3, 4);
-
-			// Preparing the data source
-			if (!isVirtualMode) {
-				IQuestStatement st = conn.createSIStatement();
-				if (bObtainFromOntology) {
-					// Retrieves the ABox from the ontology file.
-					log.debug("Loading data from Ontology into the database");
-					OWLAPIABoxIterator aBoxIter = new OWLAPIABoxIterator(importsClosure, questInstance.getVocabulary());
-					int count = st.insertData(aBoxIter, 5000, 500);
-					log.debug("Inserted {} triples from the ontology.", count);
-				}
-				if (bObtainFromMappings) { // TODO: GUOHUI 2016-01-16: This mode will be removed
-					// Retrieves the ABox from the target database via mapping.
-					log.debug("Loading data from Mappings into the database");
-
-					OBDAModel obdaModelForMaterialization = questInstance.getOBDAModel();
-					obdaModelForMaterialization.getOntologyVocabulary().merge(translatedOntologyMerge.getVocabulary());
-					
-					QuestMaterializer materializer = new QuestMaterializer(obdaModelForMaterialization, false);
-					Iterator<Assertion> assertionIter = materializer.getAssertionIterator();
-					int count = st.insertData(assertionIter, 5000, 500);
-					materializer.disconnect();
-					log.debug("Inserted {} triples from the mappings.", count);
-				}
-//				st.createIndexes();
-				st.close();
-				if (!conn.getAutoCommit())
-				conn.commit();
-				
-				//questInstance.updateSemanticIndexMappings();
-			} else {
-				// VIRTUAL MODE - NO-OP
-			}
-			questready = true;
-			log.debug("Quest has completed the setup and it is ready for query answering!");
-		} catch (Exception e) {
-			throw e;
-		} finally {
-			// pm.reasonerTaskProgressChanged(4, 4);
-			// pm.reasonerTaskStopped();
-		}
+		questready = true;
+		log.debug("Ontop has completed the setup and it is ready for query answering!");
 	}
 
 	@Override
@@ -311,7 +246,7 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 		}
 		
 		try {
-			questInstance.dispose();
+			queryEngine.close();
 		} catch (Exception e) {
 			log.debug(e.getMessage());
 		}
@@ -345,7 +280,7 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 
 
 
-	public QuestOWLConnection getConnection() throws OBDAException {
+	public OntopOWLConnection getConnection() {
 		return owlconn;
 	}
 
@@ -353,12 +288,11 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 	 * Replaces the owl connection with a new one
 	 * Called when the user cancels a query. Easier to get a new connection, than waiting for the cancel
 	 * @return The old connection: The caller must close this connection
-	 * @throws OBDAException
 	 */
-	public QuestOWLConnection replaceConnection() throws OBDAException {
-		QuestOWLConnection oldconn = this.owlconn;
-		conn = questInstance.getNonPoolConnection();
-		owlconn = new QuestOWLConnection(conn);
+	public OntopOWLConnection replaceConnection() throws OntopConnectionException {
+		OntopOWLConnection oldconn = this.owlconn;
+		conn = queryEngine.getNonPoolConnection();
+		owlconn = new QuestOWLConnection(conn, inputQueryFactory);
 		return oldconn;
 	}
 	
@@ -414,7 +348,7 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 		}
 	}
 
-	public void prepareReasoner() throws ReasonerInterruptedException, TimeOutException {
+	private void prepareReasoner() throws ReasonerInterruptedException, TimeOutException {
 		pm.reasonerTaskStarted("Classifying...");
 		pm.reasonerTaskBusy();
 
@@ -429,16 +363,13 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 
 			questready = false;
 			questException = null;
-			errorMessage = "";
 			try {
-				prepareQuestInstance();
+				prepareConnector();
 				questready = true;
 				questException = null;
-				errorMessage = "";
 			} catch (Exception e) {
 				questready = false;
 				questException = e;
-				errorMessage = e.getMessage();
 				log.error("Could not initialize the Quest query answering engine. Answering queries will not be available.");
 				log.error(e.getMessage(), e);
 				throw e;
@@ -482,11 +413,11 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 		return inconsistent;
 	}
 	
-	public boolean isQuestConsistent() throws ReasonerInterruptedException, TimeOutException {
+	public boolean isQuestConsistent() throws ReasonerInterruptedException, TimeOutException, OWLException {
 		return isDisjointAxiomsConsistent() && isFunctionalPropertyAxiomsConsistent();
 	}
 	
-	private boolean isDisjointAxiomsConsistent() throws ReasonerInterruptedException, TimeOutException {
+	private boolean isDisjointAxiomsConsistent() throws ReasonerInterruptedException, TimeOutException, OWLException {
 
 		//deal with disjoint classes
 		{
@@ -552,7 +483,7 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 		return true;
 	}
 	
-	private boolean isFunctionalPropertyAxiomsConsistent() throws ReasonerInterruptedException, TimeOutException {
+	private boolean isFunctionalPropertyAxiomsConsistent() throws ReasonerInterruptedException, TimeOutException, OWLException {
 		
 		//deal with functional properties
 
@@ -584,24 +515,22 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 		return true;
 	}
 	
-	private boolean executeConsistencyQuery(String strQuery) {
-		IQuestStatement query;
+	private boolean executeConsistencyQuery(String strQuery) throws OWLException {
 		try {
-			query = conn.createStatement();
-			ResultSet rs = query.execute(strQuery);
-			TupleResultSet trs = ((TupleResultSet)rs);
-			if (trs!= null && trs.nextRow()){
+			OntopStatement st = conn.createStatement();
+			AskQuery query = inputQueryFactory.createAskQuery(strQuery);
+			BooleanResultSet trs = st.execute(query);
+			if (trs != null && trs.nextRow()) {
 				String value = trs.getConstant(0).getValue();
 				boolean b = Boolean.parseBoolean(value);
 				trs.close();
-				if (b) 
+				if (b)
 					return false;
 			}
-			
-		} catch (OBDAException e) {
-			e.printStackTrace();
+			return true;
+		} catch (Exception e) {
+			throw new OWLException(e);
 		}
-		return true;
 	}
 
 	@Override

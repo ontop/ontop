@@ -20,9 +20,8 @@ package it.unibz.inf.ontop.obda;
  * #L%
  */
 
-import it.unibz.inf.ontop.injection.OBDASettings;
-import it.unibz.inf.ontop.injection.QuestConfiguration;
-import it.unibz.inf.ontop.model.*;
+import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
+import it.unibz.inf.ontop.model.Predicate;
 import it.unibz.inf.ontop.ontology.DataPropertyExpression;
 import it.unibz.inf.ontop.ontology.OClass;
 import it.unibz.inf.ontop.ontology.ObjectPropertyExpression;
@@ -54,7 +53,7 @@ import static org.junit.Assert.assertTrue;
  * We use the npd database.
  */
 public class R2rmlCheckerTest {
-	private QuestOWLConnection conn;
+	private OntopOWLConnection conn;
 
 	Logger log = LoggerFactory.getLogger(this.getClass());
 	private OWLOntology owlOntology;
@@ -62,6 +61,7 @@ public class R2rmlCheckerTest {
 
 	final String owlfile = "src/test/resources/r2rml/npd-v2-ql_a.owl";
     final String obdafile = "src/test/resources/r2rml/npd-v2-ql_a.obda";
+	final String propertyfile = "src/test/resources/r2rml/npd-v2-ql_a.properties";
 	final String r2rmlfile = "src/test/resources/r2rml/npd-v2-ql_test_a.ttl";
 
 	private List<Predicate> emptyConceptsObda = new ArrayList<>();
@@ -82,15 +82,6 @@ public class R2rmlCheckerTest {
 
 		onto = OWLAPITranslatorUtility.translate(owlOntology);
 
-		Properties p = new Properties();
-        p.setProperty(OBDASettings.DB_NAME, "npd");
-        p.setProperty(OBDASettings.JDBC_URL, "jdbc:mysql://10.7.20.39/npd");
-        p.setProperty(OBDASettings.DB_USER, "fish");
-        p.setProperty(OBDASettings.DB_PASSWORD, "fish");
-        p.setProperty(OBDASettings.JDBC_DRIVER, "com.mysql.jdbc.Driver");
-
-		loadOBDA(p);
-		loadR2rml(p);
 	}
 
 	@After
@@ -110,18 +101,19 @@ public class R2rmlCheckerTest {
 		}
 
 	}
-	
-	@Test 
-	public void testMappings() throws Exception {
-		for (CQIE q : reasonerOBDA.getQuestInstance().getUnfolderRules()) {
-			if (!reasonerR2rml.getQuestInstance().getUnfolderRules().contains(q))
-				System.out.println("NOT IN R2RML: " + q);
-		}
-		for (CQIE q : reasonerR2rml.getQuestInstance().getUnfolderRules()) {
-			if (!reasonerOBDA.getQuestInstance().getUnfolderRules().contains(q))
-				System.out.println("NOT IN OBDA: " + q);
-		}
-	}
+
+	//TODO:  extract the two OBDA specifications to compare the mapping objects
+//	@Test Cannot get anymore the unfolder rules,
+//	public void testMappings() throws Exception {
+//		for (CQIE q : reasonerOBDA.getQuestInstance().getUnfolderRules()) {
+//			if (!reasonerR2rml.getQuestInstance().getUnfolderRules().contains(q))
+//				System.out.println("NOT IN R2RML: " + q);
+//		}
+//		for (CQIE q : reasonerR2rml.getQuestInstance().getUnfolderRules()) {
+//			if (!reasonerOBDA.getQuestInstance().getUnfolderRules().contains(q))
+//				System.out.println("NOT IN OBDA: " + q);
+//		}
+//	}
 
 	/**
 	 * Check the number of descriptions retrieved by the obda mapping and the
@@ -299,14 +291,14 @@ public class R2rmlCheckerTest {
 	 * Execute Npd query 1 and give the number of results
 	 * @return 
 	 */
-	private int npdQuery(QuestOWLConnection questOWLConnection) throws OWLException {
+	private int npdQuery(OntopOWLConnection ontopOWLConnection) throws OWLException {
 		String query = "PREFIX npdv: <http://sws.ifi.uio.no/vocab/npd-v2#> SELECT DISTINCT ?licenceURI WHERE { ?licenceURI a npdv:ProductionLicence ."
 				+ "[ ] a npdv:ProductionLicenceLicensee ; "
 				+ "npdv:dateLicenseeValidFrom ?date ;"
 				+ "npdv:licenseeInterest ?interest ;"
 				+ "npdv:licenseeForLicence ?licenceURI . "
 				+ "FILTER(?date > '1979-12-31T00:00:00')	}";
-		QuestOWLStatement st = questOWLConnection.createStatement();
+		OntopOWLStatement st = ontopOWLConnection.createStatement();
 		int n = 0;
 		try {
 			QuestOWLResultSet rs = st.executeTuple(query);
@@ -343,10 +335,10 @@ public class R2rmlCheckerTest {
 		log.info("Loading r2rml file");
 		QuestOWLFactory factory = new QuestOWLFactory();
 
-		QuestConfiguration config = QuestConfiguration.defaultBuilder()
+		OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.r2rmlMappingFile(r2rmlfile)
 				.ontology(owlOntology)
-				.properties(p)
+				.propertyFile(propertyfile)
 				.build();
         reasonerR2rml = factory.createReasoner(config);
 	}
@@ -365,9 +357,9 @@ public class R2rmlCheckerTest {
 		// Creating a new instance of the reasoner
 		QuestOWLFactory factory = new QuestOWLFactory();
 
-		QuestConfiguration config = QuestConfiguration.defaultBuilder()
+		OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.nativeOntopMappingFile(obdafile)
-				.properties(p)
+				.propertyFile(propertyfile)
 				.ontology(owlOntology)
 				.build();
 		reasonerOBDA = factory.createReasoner(config);
@@ -375,9 +367,9 @@ public class R2rmlCheckerTest {
 
 	}
 
-	private int runSPARQLConceptsQuery(String description,	QuestOWLConnection conn) throws Exception {
+	private int runSPARQLConceptsQuery(String description,	OntopOWLConnection conn) throws Exception {
 		String query = "SELECT ?x WHERE {?x a " + description + ".}";
-		QuestOWLStatement st = conn.createStatement();
+		OntopOWLStatement st = conn.createStatement();
 		int n = 0;
 		try {
 			QuestOWLResultSet rs = st.executeTuple(query);
@@ -403,9 +395,9 @@ public class R2rmlCheckerTest {
 
 	}
 
-	private int runSPARQLRolesQuery(String description, QuestOWLConnection conn) throws Exception {
+	private int runSPARQLRolesQuery(String description, OntopOWLConnection conn) throws Exception {
 		String query = "SELECT * WHERE {?x " + description + " ?y.}";
-		QuestOWLStatement st = conn.createStatement();
+		OntopOWLStatement st = conn.createStatement();
 		int n = 0;
 		try {
 			QuestOWLResultSet rs = st.executeTuple(query);
@@ -442,9 +434,9 @@ public class R2rmlCheckerTest {
 
 	}
 	
-	private int runSPARQLRoleFilterQuery(String description, QuestOWLConnection connection) throws OWLException {
+	private int runSPARQLRoleFilterQuery(String description, OntopOWLConnection connection) throws OWLException {
 		String query = "SELECT * WHERE {?x " + description + " ?y. FILTER(isLiteral(?y))}";
-		QuestOWLStatement st = connection.createStatement();
+		OntopOWLStatement st = connection.createStatement();
 		int n = 0;
 		try {
 			QuestOWLResultSet rs = st.executeTuple(query);

@@ -24,4 +24,6 @@
             [ qt:query <query-1.rq> ] ;
     mf:result <query-1-result.ttl> ;
     mf:knowledgebase <regex.owl> ;
-    mf:mappings <regex-postgres.obda> .
+    mf:mappings <regex-postgres.obda> ;
+	mf:parameters <regex-postgres.properties> .
+

@@ -20,9 +20,7 @@ package it.unibz.inf.ontop.reformulation.tests;
  * #L%
  */
 
-import it.unibz.inf.ontop.injection.QuestConfiguration;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.inf.ontop.injection.QuestCoreSettings;
+import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import org.junit.After;
 import org.junit.Before;
@@ -40,6 +38,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Properties;
 
+import static it.unibz.inf.ontop.injection.OntopMappingSettings.OBTAIN_FULL_METADATA;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -48,7 +47,7 @@ import static org.junit.Assert.assertTrue;
  * Use to check that no concurrency error appears. 
  */
 public class TMappingConcurrencyErrorFixTest{
-	private QuestOWLConnection conn;
+	private OntopOWLConnection conn;
 	private Connection connection;
 	
 
@@ -83,14 +82,17 @@ public class TMappingConcurrencyErrorFixTest{
 		connection.commit();
 	
 		Properties p = new Properties();
-		p.setProperty(QuestCoreSettings.ABOX_MODE, QuestConstants.VIRTUAL);
-		p.setProperty(QuestCoreSettings.OBTAIN_FULL_METADATA, QuestConstants.FALSE);
+		p.put(OBTAIN_FULL_METADATA, false);
 		// Creating a new instance of the reasoner
         QuestOWLFactory factory = new QuestOWLFactory();
-        QuestConfiguration config = QuestConfiguration.defaultBuilder()
+        OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.nativeOntopMappingFile(obdaFileName)
 				.ontologyFile(owlFileName)
-				.properties(p).build();
+				.properties(p)
+				.jdbcUrl(url)
+				.jdbcUser(username)
+				.jdbcPassword(password)
+				.build();
         reasoner = factory.createReasoner(config);
 
 		// Now we are ready for querying
@@ -127,10 +129,10 @@ public class TMappingConcurrencyErrorFixTest{
 	}
 	
 	private String runTests(String query) throws Exception {
-		QuestOWLStatement st = conn.createStatement();
+		OntopOWLStatement st = conn.createStatement();
 		String retval=null;
 		try {
-			QuestOWLResultSet rs = st.executeTuple(query);
+			QuestOWLResultSet rs = st.executeSelectQuery(query);
 			assertTrue(rs.nextRow());
 			OWLIndividual ind1 =	rs.getOWLIndividual("y")	 ;
 			retval = ind1.toString();

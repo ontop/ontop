@@ -8,7 +8,7 @@
   <artifactId>ontop-obdalib-r2rml</artifactId>
   <dependencies>
   		<dependency>
-			<artifactId>ontop-obdalib-core</artifactId>
+			<artifactId>ontop-mapping-sql-core</artifactId>
 			<groupId>${project.groupId}</groupId>
 			<version>${project.version}</version>
 			<exclusions>
@@ -18,7 +18,11 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
-	
+	  <dependency>
+		  <artifactId>ontop-mapping-native</artifactId>
+		  <groupId>${project.groupId}</groupId>
+		  <version>${project.version}</version>
+	  </dependency>
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>

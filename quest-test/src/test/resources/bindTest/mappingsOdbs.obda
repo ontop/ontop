@@ -1,12 +1,6 @@
 [PrefixDeclaration]
 :		http://myproject.org/odbs#
 
-[SourceDeclaration]
-sourceUri	database
-connectionUrl	jdbc:mysql://10.7.20.39/sakila
-username	test
-password	ontop2014
-driverClass	com.mysql.jdbc.Driver
 
 [MappingDeclaration] @collection [[
 mappingId	film-filmcategory-category-language

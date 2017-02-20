@@ -6,9 +6,10 @@ public class SAPHANATest extends AbstractVirtualModeTest {
 
     private static final String owlfile = "src/test/resources/example/SAPbooktutorial.owl";
     private static final String obdafile = "src/test/resources/example/SAPbooktutorial.obda";
+    private static final String propertyfile = "src/test/resources/example/SAPbooktutorial.properties";
 
     public SAPHANATest() {
-        super(owlfile, obdafile);
+        super(owlfile, obdafile, propertyfile);
     }
 
 //    final String owlfile = "src/test/resources/example/exampleBooks.owl";

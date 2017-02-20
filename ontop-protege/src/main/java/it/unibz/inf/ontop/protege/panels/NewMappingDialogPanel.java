@@ -25,7 +25,8 @@ import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
 import it.unibz.inf.ontop.io.PrefixManager;
 import it.unibz.inf.ontop.io.TargetQueryVocabularyValidator;
 import it.unibz.inf.ontop.model.*;
-import it.unibz.inf.ontop.model.impl.MappingFactoryImpl;
+import it.unibz.inf.ontop.model.impl.RDBMSourceParameterConstants;
+import it.unibz.inf.ontop.model.impl.SQLMappingFactoryImpl;
 import it.unibz.inf.ontop.parser.TargetQueryParserException;
 import it.unibz.inf.ontop.parser.TurtleOBDASyntaxParser;
 import it.unibz.inf.ontop.protege.core.OBDAModelWrapper;
@@ -65,7 +66,7 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 	private OBDADataSource dataSource;
 	private JDialog parent;
 	private TargetQueryVocabularyValidator validator;
-	private static final MappingFactory MAPPING_FACTORY = MappingFactoryImpl.getInstance();
+	private static final SQLMappingFactory MAPPING_FACTORY = SQLMappingFactoryImpl.getInstance();
 
 	private PrefixManager prefixManager;
 
@@ -507,8 +508,7 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 							rstm.close();
 						}
 						JDBCConnectionManager man = JDBCConnectionManager.getJDBCConnectionManager();
-
-						Connection c = man.getConnection(dataSource);
+						Connection c = ConnectionTools.getConnection(dataSource);
 
 //						String driver = dataSource.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER);
 

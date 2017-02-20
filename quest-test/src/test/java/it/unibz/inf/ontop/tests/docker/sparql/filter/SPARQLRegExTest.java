@@ -20,8 +20,7 @@ package it.unibz.inf.ontop.tests.docker.sparql.filter;
  * #L%
  */
 
-import it.unibz.inf.ontop.injection.QuestConfiguration;
-import it.unibz.inf.ontop.model.impl.OBDADataFactoryImpl;
+import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import it.unibz.inf.ontop.utils.SQLScriptRunner;
@@ -50,7 +49,7 @@ public class SPARQLRegExTest {
 	// TODO We need to extend this test to import the contents of the mappings
 	// into OWL and repeat everything taking form OWL
 
-	private static QuestOWLConnection conn;
+	private static OntopOWLConnection conn;
 
 	static Logger log = LoggerFactory.getLogger(SPARQLRegExTest.class);
 
@@ -95,7 +94,7 @@ public class SPARQLRegExTest {
 			
 			// Creating a new instance of the reasoner
 			QuestOWLFactory factory = new QuestOWLFactory();
-	        QuestConfiguration config = QuestConfiguration.defaultBuilder()
+	        OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
 					.nativeOntopMappingFile(obdafile)
 					.ontologyFile(owlfile)
 					.enableFullMetadataExtraction(false)
@@ -138,7 +137,7 @@ public class SPARQLRegExTest {
 	}
 
 	private void runTests(String query, int numberOfResults) throws Exception {
-		QuestOWLStatement st = conn.createStatement();
+		OntopOWLStatement st = conn.createStatement();
 		try {
 
 			QuestOWLResultSet rs = st.executeTuple(query);

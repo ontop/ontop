@@ -1,11 +1,15 @@
 package it.unibz.inf.ontop.reformulation.tests;
 
-import it.unibz.inf.ontop.injection.QuestConfiguration;
+import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
+import it.unibz.inf.ontop.owlrefplatform.core.ExecutableQuery;
+import it.unibz.inf.ontop.owlrefplatform.core.SQLExecutableQuery;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.semanticweb.owlapi.model.OWLObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -28,14 +32,16 @@ public class ConditionalAsLeftJoinTest {
 
     private Connection conn;
 
+    private static final String URL = "jdbc:h2:mem:restaurant";
+    private static final String USERNAME = "sa";
+    private static final String PASSWORD = "sa";
+
+    final static Logger log = LoggerFactory.getLogger(ConditionalAsLeftJoinTest.class);
+
     @Before
     public void setUp() throws Exception {
 
-        String url = "jdbc:h2:mem:restaurant";
-        String username = "sa";
-        String password = "sa";
-
-        conn = DriverManager.getConnection(url, username, password);
+        conn = DriverManager.getConnection(URL, USERNAME, PASSWORD);
         Statement st = conn.createStatement();
 
         FileReader reader = new FileReader(CREATE_SCRIPT);
@@ -98,32 +104,38 @@ public class ConditionalAsLeftJoinTest {
         expectedValues.add("<http://www.semanticweb.org/ontologies/2016/10/untitled-ontology-2#aa>");
         String sql = checkReturnedValuesAndReturnSql(query, expectedValues);
 
-        System.out.println("SQL Query: \n" + sql);
+        log.debug("SQL Query: \n" + sql);
     }
 
     private String checkReturnedValuesAndReturnSql(String query, List<String> expectedValues) throws Exception {
 
         QuestOWLFactory factory = new QuestOWLFactory();
-        QuestConfiguration config = QuestConfiguration.defaultBuilder()
+        OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
                 .nativeOntopMappingFile(ODBA_FILE)
                 .ontologyFile(OWL_FILE)
+                .jdbcUrl(URL)
+                .jdbcUser(USERNAME)
+                .jdbcPassword(PASSWORD)
                 .build();
         QuestOWL reasoner = factory.createReasoner(config);
 
         // Now we are ready for querying
-        QuestOWLConnection conn = reasoner.getConnection();
-        QuestOWLStatement st = conn.createStatement();
+        OntopOWLConnection conn = reasoner.getConnection();
+        OntopOWLStatement st = conn.createStatement();
         String sql;
 
         int i = 0;
         List<String> returnedValues = new ArrayList<>();
         try {
-            sql = st.getUnfolding(query);
-            QuestOWLResultSet rs = st.executeTuple(query);
+            ExecutableQuery executableQuery = st.getExecutableQuery(query);
+            if (! (executableQuery instanceof SQLExecutableQuery))
+                throw new IllegalStateException("A SQLExecutableQuery was expected");
+            sql = ((SQLExecutableQuery)executableQuery).getSQL();
+            QuestOWLResultSet rs = st.executeSelectQuery(query);
             while (rs.nextRow()) {
                 OWLObject ind1 = rs.getOWLObject("a");
                 returnedValues.add(ind1.toString());
-                java.lang.System.out.println(ind1);
+                log.debug("Returned values:" + ind1);
                 i++;
             }
         } catch (Exception e) {

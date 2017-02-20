@@ -21,8 +21,8 @@ package it.unibz.inf.ontop.quest.sparql;
  */
 
 
+import it.unibz.inf.ontop.owlrefplatform.owlapi.OntopOWLStatement;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLResultSet;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLStatement;
 import it.unibz.inf.ontop.quest.AbstractVirtualModeTest;
 import org.semanticweb.owlapi.model.OWLIndividual;
 
@@ -35,13 +35,14 @@ public class OracleRegexpTest extends AbstractVirtualModeTest {
 
 	static final String owlfile = "resources/regexp/oracle-regexp.owl";
 	static final String obdafile = "resources/regexp/oracle-regexp.obda";
+	static final String propertyfile = "resources/regexp/oracle-regexp.properties";
 
 	public OracleRegexpTest() {
-		super(owlfile, obdafile);
+		super(owlfile, obdafile, propertyfile);
 	}
 
 
-	private String runTest(QuestOWLStatement st, String query, boolean hasResult) throws Exception {
+	private String runTest(OntopOWLStatement st, String query, boolean hasResult) throws Exception {
 		String retval;
 		QuestOWLResultSet rs = st.executeTuple(query);
 		if(hasResult){
@@ -61,7 +62,7 @@ public class OracleRegexpTest extends AbstractVirtualModeTest {
 	 * @throws Exception
 	 */
 	public void testSparql2OracleRegex() throws Exception {
-		QuestOWLStatement st = null;
+		OntopOWLStatement st = null;
 		try {
 			st = conn.createStatement();
 
