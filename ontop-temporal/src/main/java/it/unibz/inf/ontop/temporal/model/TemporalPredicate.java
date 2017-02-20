@@ -7,7 +7,7 @@ import it.unibz.inf.ontop.model.Predicate;
  */
 public interface TemporalPredicate extends Predicate {
 
-    TemporalModifer getTemporalOperator();
+    TemporalModifier getTemporalModifier();
 
     Predicate getInnerPredicate();
 }

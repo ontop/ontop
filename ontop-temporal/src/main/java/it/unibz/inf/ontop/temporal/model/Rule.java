@@ -1,14 +1,13 @@
 package it.unibz.inf.ontop.temporal.model;
 
+import it.unibz.inf.ontop.model.Predicate;
+
 import java.util.List;
 
-/**
- * Created by elem on 20/02/2017.
- */
 public interface Rule {
 
-    TemporalPredicate getHead();
+    Predicate getHead();
 
-    List<TemporalPredicate> getBody();
+    List<Predicate> getBody();
 
 }

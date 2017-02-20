@@ -1,6 +1,6 @@
 package it.unibz.inf.ontop.temporal.model;
 
-public interface UnaryTemporalModifier extends TemporalModifer {
+public interface UnaryTemporalModifier extends TemporalModifier {
 
     UnaryTemporalOperator getOperator();
 

@@ -1,5 +1,5 @@
 package it.unibz.inf.ontop.temporal.model;
 
-public interface TemporalModifer {
+public interface TemporalModifier {
 
 }

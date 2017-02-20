@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.temporal.model.impl.it.unibz.inf.ontop.temporal.model.impl;
 
+import it.unibz.inf.ontop.model.Predicate;
 import it.unibz.inf.ontop.temporal.model.NormalizedRule;
 import it.unibz.inf.ontop.temporal.model.TemporalPredicate;
 
@@ -8,10 +9,10 @@ import java.util.List;
 
 public class NormalizedRuleImpl implements NormalizedRule {
 
-    TemporalPredicate head;
-    ArrayList<TemporalPredicate> body;
+    Predicate head;
+    ArrayList<Predicate> body;
 
-    public NormalizedRuleImpl(TemporalPredicate head, ArrayList<TemporalPredicate> body){
+    public NormalizedRuleImpl(Predicate head, ArrayList<Predicate> body){
         this.head = head;
         this.body = body;
     }
@@ -22,7 +23,7 @@ public class NormalizedRuleImpl implements NormalizedRule {
     }
 
     @Override
-    public List<TemporalPredicate> getBody() {
+    public List<Predicate> getBody() {
         return null;
     }
 }
