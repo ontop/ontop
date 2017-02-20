@@ -4,7 +4,7 @@ FROM alexeiled/docker-oracle-xe-11g
 
 RUN mkdir -p /tmp/sql_scripts/
 
-COPY sql/all/*.sql /tmp/sql_scripts/
+COPY sql/oracle/*.sql /tmp/sql_scripts/
 
 USER root
 ENV HOME /root

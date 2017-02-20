@@ -1,15 +1,15 @@
 --------------------------------------------------------
 --  File created - Thursday-January-19-2017   
 --------------------------------------------------------
-DROP TABLE "SYSTEM"."ADDRESS_NEW" cascade constraints;
-DROP TABLE "SYSTEM"."PERSON_NEW" cascade constraints;
-DROP TABLE "SYSTEM"."BROKER_NEW" cascade constraints;
-DROP TABLE "SYSTEM"."CLIENT_NEW" cascade constraints;
-DROP TABLE "SYSTEM"."COMPANY_NEW" cascade constraints;
-DROP TABLE "SYSTEM"."STOCKINFORMATION_NEW" cascade constraints;
-DROP TABLE "SYSTEM"."STOCKBOOKLIST_NEW" cascade constraints;
-DROP TABLE "SYSTEM"."BROKERWORKSFOR_NEW" cascade constraints;
-DROP TABLE "SYSTEM"."TRANSACTION_NEW" cascade constraints;
+-- DROP TABLE "SYSTEM"."ADDRESS_NEW" cascade constraints;
+-- DROP TABLE "SYSTEM"."PERSON_NEW" cascade constraints;
+-- DROP TABLE "SYSTEM"."BROKER_NEW" cascade constraints;
+-- DROP TABLE "SYSTEM"."CLIENT_NEW" cascade constraints;
+-- DROP TABLE "SYSTEM"."COMPANY_NEW" cascade constraints;
+-- DROP TABLE "SYSTEM"."STOCKINFORMATION_NEW" cascade constraints;
+-- DROP TABLE "SYSTEM"."STOCKBOOKLIST_NEW" cascade constraints;
+-- DROP TABLE "SYSTEM"."BROKERWORKSFOR_NEW" cascade constraints;
+-- DROP TABLE "SYSTEM"."TRANSACTION_NEW" cascade constraints;
 
 --------------------------------------------------------
 --  DDL for Table ADDRESS_NEW
@@ -21,7 +21,8 @@ DROP TABLE "SYSTEM"."TRANSACTION_NEW" cascade constraints;
 	"NUMBER" NUMBER(*,0), 
 	"CITY" VARCHAR2(100), 
 	"STATE" VARCHAR2(100), 
-	"COUNTRY" VARCHAR2(100)
+	"COUNTRY" VARCHAR2(100),
+	CONSTRAINT address_pk PRIMARY KEY ("ID")
    ) ;
 --------------------------------------------------------
 --  DDL for Table PERSON_NEW
@@ -33,21 +34,24 @@ DROP TABLE "SYSTEM"."TRANSACTION_NEW" cascade constraints;
 	"LASTNAME" VARCHAR2(100), 
 	"DATEOFBIRTH" DATE, 
 	"SSN" VARCHAR2(100), 
-	"ADDRESSID" NUMBER(*,0)
+	"ADDRESSID" NUMBER(*,0),
+	CONSTRAINT person_pk PRIMARY KEY ("ID")
    ) ;
 --------------------------------------------------------
 --  DDL for Table BROKER_NEW
 --------------------------------------------------------
 
   CREATE TABLE "SYSTEM"."BROKER_NEW" 
-   (	"ID" NUMBER(*,0)
+   (	"ID" NUMBER(*,0),
+	  CONSTRAINT broker_pk PRIMARY KEY ("ID")
    ) ;
 --------------------------------------------------------
 --  DDL for Table CLIENT_NEW
 --------------------------------------------------------
 
   CREATE TABLE "SYSTEM"."CLIENT_NEW" 
-   (	"ID" NUMBER(*,0)
+   (	"ID" NUMBER(*,0),
+	    CONSTRAINT client_pk PRIMARY KEY ("ID")
    ) ;
 --------------------------------------------------------
 --  DDL for Table COMPANY_NEW
@@ -58,7 +62,8 @@ DROP TABLE "SYSTEM"."TRANSACTION_NEW" cascade constraints;
 	"NAME" VARCHAR2(100), 
 	"MARKETSHARES" NUMBER(*,0), 
 	"NETWORTH" FLOAT(63), 
-	"ADDRESSID" NUMBER(*,0)
+	"ADDRESSID" NUMBER(*,0),
+	CONSTRAINT company_pk PRIMARY KEY ("ID")
    ) ;
 --------------------------------------------------------
 --  DDL for Table STOCKINFORMATION_NEW
@@ -69,7 +74,8 @@ DROP TABLE "SYSTEM"."TRANSACTION_NEW" cascade constraints;
 	"NUMBEROFSHARES" NUMBER(*,0), 
 	"SHARETYPE" NUMBER(1,0), 
 	"COMPANYID" NUMBER(*,0), 
-	"DESCRIPTION" VARCHAR2(1000)
+	"DESCRIPTION" VARCHAR2(1000),
+	CONSTRAINT stockinfo_pk PRIMARY KEY ("ID")
    ) ;
 --------------------------------------------------------
 --  DDL for Table STOCKBOOKLIST_NEW
@@ -77,7 +83,8 @@ DROP TABLE "SYSTEM"."TRANSACTION_NEW" cascade constraints;
 
   CREATE TABLE "SYSTEM"."STOCKBOOKLIST_NEW" 
    (	"DATE" TIMESTAMP (6), 
-	"STOCKID" NUMBER(*,0)
+	"STOCKID" NUMBER(*,0),
+	CONSTRAINT stockbook_pk PRIMARY KEY ("DATE")
    ) ;
 --------------------------------------------------------
 --  DDL for Table BROKERWORKSFOR_NEW
@@ -100,57 +107,58 @@ DROP TABLE "SYSTEM"."TRANSACTION_NEW" cascade constraints;
 	"BROKERID" NUMBER(*,0), 
 	"FORCLIENTID" NUMBER(*,0), 
 	"FORCOMPANYID" NUMBER(*,0), 
-	"AMOUNT" NUMBER(10,5)
+	"AMOUNT" NUMBER(10,5),
+	CONSTRAINT transaction_pk PRIMARY KEY ("ID")
    ) ;
 
---------------------------------------------------------
---  DDL for Index ADDRESS_NEW_PKEY
---------------------------------------------------------
-
-  CREATE UNIQUE INDEX "SYSTEM"."ADDRESS_NEW_PKEY" ON "SYSTEM"."ADDRESS_NEW" ("ID") 
-  ;
---------------------------------------------------------
---  DDL for Index PERSON_NEW_PKEY
---------------------------------------------------------
-
-  CREATE UNIQUE INDEX "SYSTEM"."PERSON_NEW_PKEY" ON "SYSTEM"."PERSON_NEW" ("ID") 
-  ;
---------------------------------------------------------
---  DDL for Index BROKER_NEW_PKEY
---------------------------------------------------------
-
-  CREATE UNIQUE INDEX "SYSTEM"."BROKER_NEW_PKEY" ON "SYSTEM"."BROKER_NEW" ("ID") 
-  ;
---------------------------------------------------------
---  DDL for Index CLIENT_NEW_PKEY
---------------------------------------------------------
-
-  CREATE UNIQUE INDEX "SYSTEM"."CLIENT_NEW_PKEY" ON "SYSTEM"."CLIENT_NEW" ("ID") 
-  ;
---------------------------------------------------------
---  DDL for Index COMPANY_NEW_PKEY
---------------------------------------------------------
-
-  CREATE UNIQUE INDEX "SYSTEM"."COMPANY_NEW_PKEY" ON "SYSTEM"."COMPANY_NEW" ("ID") 
-  ;
---------------------------------------------------------
---  DDL for Index STOCKINFORMATION_NEW_PKEY
---------------------------------------------------------
-
-  CREATE UNIQUE INDEX "SYSTEM"."STOCKINFORMATION_NEW_PKEY" ON "SYSTEM"."STOCKINFORMATION_NEW" ("ID") 
-  ;
---------------------------------------------------------
---  DDL for Index STOCKBOOKLIST_NEW_PKEY
---------------------------------------------------------
-
-  CREATE UNIQUE INDEX "SYSTEM"."STOCKBOOKLIST_NEW_PKEY" ON "SYSTEM"."STOCKBOOKLIST_NEW" ("DATE") 
-  ;
---------------------------------------------------------
---  DDL for Index TRANSACTION_NEW_PKEY
---------------------------------------------------------
-
-  CREATE UNIQUE INDEX "SYSTEM"."TRANSACTION_NEW_PKEY" ON "SYSTEM"."TRANSACTION_NEW" ("ID") 
-  ;
+-- --------------------------------------------------------
+-- --  DDL for Index ADDRESS_NEW_PKEY
+-- --------------------------------------------------------
+--
+--   CREATE UNIQUE INDEX "SYSTEM"."ADDRESS_NEW_PKEY" ON "SYSTEM"."ADDRESS_NEW" ("ID")
+--   ;
+-- --------------------------------------------------------
+-- --  DDL for Index PERSON_NEW_PKEY
+-- --------------------------------------------------------
+--
+--   CREATE UNIQUE INDEX "SYSTEM"."PERSON_NEW_PKEY" ON "SYSTEM"."PERSON_NEW" ("ID")
+--   ;
+-- --------------------------------------------------------
+-- --  DDL for Index BROKER_NEW_PKEY
+-- --------------------------------------------------------
+--
+--   CREATE UNIQUE INDEX "SYSTEM"."BROKER_NEW_PKEY" ON "SYSTEM"."BROKER_NEW" ("ID")
+--   ;
+-- --------------------------------------------------------
+-- --  DDL for Index CLIENT_NEW_PKEY
+-- --------------------------------------------------------
+--
+--   CREATE UNIQUE INDEX "SYSTEM"."CLIENT_NEW_PKEY" ON "SYSTEM"."CLIENT_NEW" ("ID")
+--   ;
+-- --------------------------------------------------------
+-- --  DDL for Index COMPANY_NEW_PKEY
+-- --------------------------------------------------------
+--
+--   CREATE UNIQUE INDEX "SYSTEM"."COMPANY_NEW_PKEY" ON "SYSTEM"."COMPANY_NEW" ("ID")
+--   ;
+-- --------------------------------------------------------
+-- --  DDL for Index STOCKINFORMATION_NEW_PKEY
+-- --------------------------------------------------------
+--
+--   CREATE UNIQUE INDEX "SYSTEM"."STOCKINFORMATION_NEW_PKEY" ON "SYSTEM"."STOCKINFORMATION_NEW" ("ID")
+--   ;
+-- --------------------------------------------------------
+-- --  DDL for Index STOCKBOOKLIST_NEW_PKEY
+-- --------------------------------------------------------
+--
+--   CREATE UNIQUE INDEX "SYSTEM"."STOCKBOOKLIST_NEW_PKEY" ON "SYSTEM"."STOCKBOOKLIST_NEW" ("DATE")
+--   ;
+-- --------------------------------------------------------
+-- --  DDL for Index TRANSACTION_NEW_PKEY
+-- --------------------------------------------------------
+--
+--   CREATE UNIQUE INDEX "SYSTEM"."TRANSACTION_NEW_PKEY" ON "SYSTEM"."TRANSACTION_NEW" ("ID")
+--   ;
 --------------------------------------------------------
 --  Ref Constraints for Table PERSON_NEW
 --------------------------------------------------------
@@ -236,8 +244,8 @@ Insert into SYSTEM.CLIENT_NEW (ID) values ('111');
 Insert into SYSTEM.CLIENT_NEW (ID) values ('112');
 REM INSERTING into SYSTEM.COMPANY_NEW
 SET DEFINE OFF;
-Insert into SYSTEM.COMPANY_NEW (ID,NAME,MARKETSHARES,NETWORTH,ADDRESSID) values ('211','General Motors','25000000','1234,5678','995');
-Insert into SYSTEM.COMPANY_NEW (ID,NAME,MARKETSHARES,NETWORTH,ADDRESSID) values ('212','GnA Investments','100000','1234,5678','996');
+Insert into SYSTEM.COMPANY_NEW (ID,NAME,MARKETSHARES,NETWORTH,ADDRESSID) values ('211','General Motors','25000000','1234.5678','995');
+Insert into SYSTEM.COMPANY_NEW (ID,NAME,MARKETSHARES,NETWORTH,ADDRESSID) values ('212','GnA Investments','100000','1234.5678','996');
 REM INSERTING into SYSTEM.STOCKINFORMATION_NEW
 SET DEFINE OFF;
 Insert into SYSTEM.STOCKINFORMATION_NEW (ID,NUMBEROFSHARES,SHARETYPE,COMPANYID,DESCRIPTION) values ('661','100','0','211','Text description 1');
@@ -252,15 +260,15 @@ Insert into SYSTEM.STOCKINFORMATION_NEW (ID,NUMBEROFSHARES,SHARETYPE,COMPANYID,D
 Insert into SYSTEM.STOCKINFORMATION_NEW (ID,NUMBEROFSHARES,SHARETYPE,COMPANYID,DESCRIPTION) values ('668','100','1','211','Testo di descrizione 5');
 REM INSERTING into SYSTEM.STOCKBOOKLIST_NEW
 SET DEFINE OFF;
-Insert into SYSTEM.STOCKBOOKLIST_NEW ("DATE",STOCKID) values (to_timestamp('01-APR-08 00:00:00,000000000','DD-MON-RR HH24:MI:SSXFF'),'661');
-Insert into SYSTEM.STOCKBOOKLIST_NEW ("DATE",STOCKID) values (to_timestamp('02-APR-08 00:00:00,000000000','DD-MON-RR HH24:MI:SSXFF'),'662');
-Insert into SYSTEM.STOCKBOOKLIST_NEW ("DATE",STOCKID) values (to_timestamp('03-APR-08 00:00:00,000000000','DD-MON-RR HH24:MI:SSXFF'),'663');
-Insert into SYSTEM.STOCKBOOKLIST_NEW ("DATE",STOCKID) values (to_timestamp('04-APR-08 00:00:00,000000000','DD-MON-RR HH24:MI:SSXFF'),'664');
-Insert into SYSTEM.STOCKBOOKLIST_NEW ("DATE",STOCKID) values (to_timestamp('05-APR-08 00:00:00,000000000','DD-MON-RR HH24:MI:SSXFF'),'665');
-Insert into SYSTEM.STOCKBOOKLIST_NEW ("DATE",STOCKID) values (to_timestamp('06-APR-08 00:00:00,000000000','DD-MON-RR HH24:MI:SSXFF'),'666');
-Insert into SYSTEM.STOCKBOOKLIST_NEW ("DATE",STOCKID) values (to_timestamp('07-APR-08 00:00:00,000000000','DD-MON-RR HH24:MI:SSXFF'),'667');
-Insert into SYSTEM.STOCKBOOKLIST_NEW ("DATE",STOCKID) values (to_timestamp('08-APR-08 00:00:00,000000000','DD-MON-RR HH24:MI:SSXFF'),'668');
-Insert into SYSTEM.STOCKBOOKLIST_NEW ("DATE",STOCKID) values (to_timestamp('09-APR-08 00:00:00,000000000','DD-MON-RR HH24:MI:SSXFF'),'669');
+Insert into SYSTEM.STOCKBOOKLIST_NEW ("DATE",STOCKID) values (to_timestamp('01-APR-08 00:00:00.000000000','DD-MON-RR HH24:MI:SSXFF'),'661');
+Insert into SYSTEM.STOCKBOOKLIST_NEW ("DATE",STOCKID) values (to_timestamp('02-APR-08 00:00:00.000000000','DD-MON-RR HH24:MI:SSXFF'),'662');
+Insert into SYSTEM.STOCKBOOKLIST_NEW ("DATE",STOCKID) values (to_timestamp('03-APR-08 00:00:00.000000000','DD-MON-RR HH24:MI:SSXFF'),'663');
+Insert into SYSTEM.STOCKBOOKLIST_NEW ("DATE",STOCKID) values (to_timestamp('04-APR-08 00:00:00.000000000','DD-MON-RR HH24:MI:SSXFF'),'664');
+Insert into SYSTEM.STOCKBOOKLIST_NEW ("DATE",STOCKID) values (to_timestamp('05-APR-08 00:00:00.000000000','DD-MON-RR HH24:MI:SSXFF'),'665');
+Insert into SYSTEM.STOCKBOOKLIST_NEW ("DATE",STOCKID) values (to_timestamp('06-APR-08 00:00:00.000000000','DD-MON-RR HH24:MI:SSXFF'),'666');
+Insert into SYSTEM.STOCKBOOKLIST_NEW ("DATE",STOCKID) values (to_timestamp('07-APR-08 00:00:00.000000000','DD-MON-RR HH24:MI:SSXFF'),'667');
+Insert into SYSTEM.STOCKBOOKLIST_NEW ("DATE",STOCKID) values (to_timestamp('08-APR-08 00:00:00.000000000','DD-MON-RR HH24:MI:SSXFF'),'668');
+Insert into SYSTEM.STOCKBOOKLIST_NEW ("DATE",STOCKID) values (to_timestamp('09-APR-08 00:00:00.000000000','DD-MON-RR HH24:MI:SSXFF'),'669');
 REM INSERTING into SYSTEM.BROKERWORKSFOR_NEW
 SET DEFINE OFF;
 Insert into SYSTEM.BROKERWORKSFOR_NEW (BROKERID,COMPANYID,CLIENTID) values ('112',null,'111');
@@ -277,7 +285,7 @@ Insert into SYSTEM.BROKERWORKSFOR_NEW (BROKERID,COMPANYID,CLIENTID) values ('114
 Insert into SYSTEM.BROKERWORKSFOR_NEW (BROKERID,COMPANYID,CLIENTID) values ('114',null,'111');
 REM INSERTING into SYSTEM.TRANSACTION_NEW
 SET DEFINE OFF;
-Insert into SYSTEM.TRANSACTION_NEW (ID,"DATE",STOCKID,TYPE,BROKERID,FORCLIENTID,FORCOMPANYID,AMOUNT) values ('3331',to_timestamp('01-APR-08 00:00:00,000000000','DD-MON-RR HH24:MI:SSXFF'),'661','1','112','111',null,'12,6');
-Insert into SYSTEM.TRANSACTION_NEW (ID,"DATE",STOCKID,TYPE,BROKERID,FORCLIENTID,FORCOMPANYID,AMOUNT) values ('3332',to_timestamp('02-APR-08 00:00:00,000000000','DD-MON-RR HH24:MI:SSXFF'),'662','1','112','111',null,'108,34');
-Insert into SYSTEM.TRANSACTION_NEW (ID,"DATE",STOCKID,TYPE,BROKERID,FORCLIENTID,FORCOMPANYID,AMOUNT) values ('3333',to_timestamp('03-APR-08 00:00:00,000000000','DD-MON-RR HH24:MI:SSXFF'),'663','1','112',null,'212','-2,349');
-Insert into SYSTEM.TRANSACTION_NEW (ID,"DATE",STOCKID,TYPE,BROKERID,FORCLIENTID,FORCOMPANYID,AMOUNT) values ('3334',to_timestamp('14-APR-08 00:00:00,000000000','DD-MON-RR HH24:MI:SSXFF'),'663','1','113',null,null,'1667,0092');
+Insert into SYSTEM.TRANSACTION_NEW (ID,"DATE",STOCKID,TYPE,BROKERID,FORCLIENTID,FORCOMPANYID,AMOUNT) values ('3331',to_timestamp('01-APR-08 00:00:00.000000000','DD-MON-RR HH24:MI:SSXFF'),'661','1','112','111',null,'12.6');
+Insert into SYSTEM.TRANSACTION_NEW (ID,"DATE",STOCKID,TYPE,BROKERID,FORCLIENTID,FORCOMPANYID,AMOUNT) values ('3332',to_timestamp('02-APR-08 00:00:00.000000000','DD-MON-RR HH24:MI:SSXFF'),'662','1','112','111',null,'108.34');
+Insert into SYSTEM.TRANSACTION_NEW (ID,"DATE",STOCKID,TYPE,BROKERID,FORCLIENTID,FORCOMPANYID,AMOUNT) values ('3333',to_timestamp('03-APR-08 00:00:00.000000000','DD-MON-RR HH24:MI:SSXFF'),'663','1','112',null,'212','-2.349');
+Insert into SYSTEM.TRANSACTION_NEW (ID,"DATE",STOCKID,TYPE,BROKERID,FORCLIENTID,FORCOMPANYID,AMOUNT) values ('3334',to_timestamp('14-APR-08 00:00:00.000000000','DD-MON-RR HH24:MI:SSXFF'),'663','1','113',null,null,'1667.0092');
