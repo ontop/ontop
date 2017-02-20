@@ -26,7 +26,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
-import static it.unibz.inf.ontop.injection.QuestCoreSettings.*;
+import static it.unibz.inf.ontop.injection.OntopMappingSettings.OPTIMIZE_EQUIVALENCES;
 import static it.unibz.inf.ontop.model.impl.DeprecatedConstants.*;
 
 /**
@@ -50,7 +50,7 @@ public class DisposableProperties extends Properties implements Disposable {
 
 	public List<String> getReformulationPlatformPreferencesKeys(){
 		ArrayList<String> keys = new ArrayList<String>();
-		keys.add(REFORMULATION_TECHNIQUE);
+//		keys.add(REFORMULATION_TECHNIQUE);
 		keys.add(ABOX_MODE);
 		keys.add(DBTYPE);
 //		keys.add(DATA_LOCATION);

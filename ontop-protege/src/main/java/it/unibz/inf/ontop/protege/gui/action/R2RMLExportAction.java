@@ -22,7 +22,6 @@ package it.unibz.inf.ontop.protege.gui.action;
 
 import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
 import it.unibz.inf.ontop.injection.OntopModelConfiguration;
-import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.model.impl.OBDAModelImpl;
 import it.unibz.inf.ontop.protege.core.OBDAModelManager;
 import it.unibz.inf.ontop.protege.core.OBDAModelWrapper;
