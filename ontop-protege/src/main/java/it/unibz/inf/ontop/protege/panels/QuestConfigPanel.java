@@ -20,7 +20,10 @@ package it.unibz.inf.ontop.protege.panels;
  * #L%
  */
 
-import it.unibz.inf.ontop.injection.QuestCoreSettings;
+
+import it.unibz.inf.ontop.injection.OntopMappingSettings;
+import it.unibz.inf.ontop.injection.OntopOBDASettings;
+import it.unibz.inf.ontop.injection.OntopQueryAnsweringSettings;
 import it.unibz.inf.ontop.protege.core.DisposableProperties;
 
 import java.awt.*;
@@ -53,10 +56,10 @@ public class QuestConfigPanel extends javax.swing.JPanel {
 //            cmbReformulationMethods.setSelectedIndex(1);
 //        }
 
-        boolean bChecked = preference.getBoolean(QuestCoreSettings.EXISTENTIAL_REASONING);
+        boolean bChecked = preference.getBoolean(OntopQueryAnsweringSettings.EXISTENTIAL_REASONING);
         chkRewrite.setSelected(bChecked);
         
-        bChecked = preference.getBoolean(QuestCoreSettings.QUERY_ONTOLOGY_ANNOTATIONS);
+        bChecked = preference.getBoolean(OntopMappingSettings.QUERY_ONTOLOGY_ANNOTATIONS);
         chkAnnotations.setSelected(bChecked);
 
         String value = preference.getProperty(ABOX_MODE);
@@ -96,7 +99,7 @@ public class QuestConfigPanel extends javax.swing.JPanel {
         bChecked = preference.getBoolean(OBTAIN_FROM_MAPPINGS);
         chkObtainFromMappings.setSelected(bChecked);
 
-        bChecked = preference.getBoolean(QuestCoreSettings.SAME_AS);
+        bChecked = preference.getBoolean(OntopOBDASettings.SAME_AS);
         chkSameAs.setSelected(bChecked);
     }
 
@@ -506,17 +509,17 @@ public class QuestConfigPanel extends javax.swing.JPanel {
     }//GEN-LAST:event_radVirtualObdaActionPerformed
 
     private void chkRewriteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkRewriteActionPerformed
-        preference.put(QuestCoreSettings.EXISTENTIAL_REASONING, String.valueOf(chkRewrite.isSelected()));
+        preference.put(OntopQueryAnsweringSettings.EXISTENTIAL_REASONING, String.valueOf(chkRewrite.isSelected()));
 
     }//GEN-LAST:event_chkRewriteActionPerformed
 
     private void chkAnnotationsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkAnnotationsActionPerformed
-        preference.put(QuestCoreSettings.QUERY_ONTOLOGY_ANNOTATIONS, String.valueOf(chkAnnotations.isSelected()));
+        preference.put(OntopMappingSettings.QUERY_ONTOLOGY_ANNOTATIONS, String.valueOf(chkAnnotations.isSelected()));
 
     }//GEN-LAST:event_chkAnnotationsActionPerformed
 
     private void chkSameAsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkSameAsActionPerformed
-        preference.put(QuestCoreSettings.SAME_AS, String.valueOf(chkSameAs.isSelected()));
+        preference.put(OntopOBDASettings.SAME_AS, String.valueOf(chkSameAs.isSelected()));
 
     }//GEN-LAST:event_chkSameAsActionPerformed
 

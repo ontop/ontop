@@ -576,7 +576,7 @@ public class CanonicalIRIOntowisTest {
 				 * Print the query summary
 				 */
                 QuestOWLStatement qst = (QuestOWLStatement) st;
-                String sqlQuery = qst.getRewriting(sparqlQuery);
+                String sqlQuery = qst.getRewritingRendering(sparqlQuery);
 
                 System.out.println();
                 System.out.println("The input SPARQL query:");
