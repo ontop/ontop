@@ -8,7 +8,7 @@
   CREATE TABLE "SYSTEM"."TB_AFFILIATED_WRITERS"
    (	"WR_CODE" NUMBER(*,0),
 	"WR_NAME" VARCHAR2(100)
-   )
+   );
 --------------------------------------------------------
 --  DDL for Table TB_AUTHORS
 --------------------------------------------------------
@@ -16,7 +16,7 @@
   CREATE TABLE "SYSTEM"."TB_AUTHORS"
    (	"BK_CODE" NUMBER(*,0),
 	"WR_ID" NUMBER(*,0)
-   )
+   );
 --------------------------------------------------------
 --  DDL for Table TB_BK_GEN
 --------------------------------------------------------
@@ -24,7 +24,7 @@
   CREATE TABLE "SYSTEM"."TB_BK_GEN"
    (	"ID_BK" NUMBER(*,0),
 	"GEN_NAME" VARCHAR2(100)
-   )
+   );
 --------------------------------------------------------
 --  DDL for Table TB_BOOKS
 --------------------------------------------------------
@@ -33,7 +33,7 @@
    (	"BK_CODE" NUMBER(*,0),
 	"BK_TITLE" VARCHAR2(100),
 	"BK_TYPE" CHAR(1) DEFAULT 'X'
-   )
+   );
 --------------------------------------------------------
 --  DDL for Table TB_EDITION
 --------------------------------------------------------
@@ -45,7 +45,7 @@
 	"N_EDT" NUMBER(*,0),
 	"EDITOR" NUMBER(*,0),
 	"BK_ID" NUMBER(*,0)
-   )
+   );
 --------------------------------------------------------
 --  DDL for Table TB_EDITOR
 --------------------------------------------------------
@@ -53,7 +53,7 @@
   CREATE TABLE "SYSTEM"."TB_EDITOR"
    (	"ED_CODE" NUMBER(*,0),
 	"ED_NAME" VARCHAR2(100)
-   )
+   );
 --------------------------------------------------------
 --  DDL for Table TB_EMERGE_AUTHORS
 --------------------------------------------------------
@@ -61,7 +61,7 @@
   CREATE TABLE "SYSTEM"."TB_EMERGE_AUTHORS"
    (	"BK_CODE" NUMBER(*,0),
 	"WR_ID" NUMBER(*,0)
-   )
+   );
 --------------------------------------------------------
 --  DDL for Table TB_ON_PROB_WR
 --------------------------------------------------------
@@ -69,7 +69,43 @@
   CREATE TABLE "SYSTEM"."TB_ON_PROB_WR"
    (	"WR_CODE" NUMBER(*,0),
 	"WR_NAME" VARCHAR2(100)
-   )
+   );
+--------------------------------------------------------
+--  DDL for Index AFF_WR_PK
+--------------------------------------------------------
+
+  CREATE UNIQUE INDEX "SYSTEM"."AFF_WR_PK" ON "SYSTEM"."TB_AFFILIATED_WRITERS" ("WR_CODE");
+--------------------------------------------------------
+--  DDL for Index PK_AU
+--------------------------------------------------------
+
+  CREATE UNIQUE INDEX "SYSTEM"."PK_AU" ON "SYSTEM"."TB_AUTHORS" ("BK_CODE", "WR_ID");
+--------------------------------------------------------
+--  DDL for Index PK_GEN
+--------------------------------------------------------
+
+  CREATE UNIQUE INDEX "SYSTEM"."PK_GEN" ON "SYSTEM"."TB_BK_GEN" ("ID_BK", "GEN_NAME");
+--------------------------------------------------------
+--  DDL for Index BK_PK
+--------------------------------------------------------
+
+  CREATE UNIQUE INDEX "SYSTEM"."BK_PK" ON "SYSTEM"."TB_BOOKS" ("BK_CODE");
+--------------------------------------------------------
+--  DDL for Index ED_PK
+--------------------------------------------------------
+
+  CREATE UNIQUE INDEX "SYSTEM"."ED_PK" ON "SYSTEM"."TB_EDITOR" ("ED_CODE");
+--------------------------------------------------------
+--  DDL for Index PK_EMERGE_AUTHORS
+--------------------------------------------------------
+
+  CREATE UNIQUE INDEX "SYSTEM"."PK_EMERGE_AUTHORS" ON "SYSTEM"."TB_EMERGE_AUTHORS" ("BK_CODE", "WR_ID");
+--------------------------------------------------------
+--  DDL for Index PR_PK
+--------------------------------------------------------
+
+  CREATE UNIQUE INDEX "SYSTEM"."PR_PK" ON "SYSTEM"."TB_ON_PROB_WR" ("WR_CODE");
+
 REM INSERTING into SYSTEM.TB_AFFILIATED_WRITERS
 SET DEFINE OFF;
 Insert into SYSTEM.TB_AFFILIATED_WRITERS (WR_CODE,WR_NAME) values ('23','AJ Scudiere');
@@ -233,128 +269,94 @@ SET DEFINE OFF;
 Insert into SYSTEM.TB_ON_PROB_WR (WR_CODE,WR_NAME) values ('267','Peter Griffin');
 Insert into SYSTEM.TB_ON_PROB_WR (WR_CODE,WR_NAME) values ('278','Homer Simpson');
 Insert into SYSTEM.TB_ON_PROB_WR (WR_CODE,WR_NAME) values ('289','Jon Stewart');
---------------------------------------------------------
---  DDL for Index AFF_WR_PK
---------------------------------------------------------
 
-  CREATE UNIQUE INDEX "SYSTEM"."AFF_WR_PK" ON "SYSTEM"."TB_AFFILIATED_WRITERS" ("WR_CODE")
---------------------------------------------------------
---  DDL for Index PK_AU
---------------------------------------------------------
-
-  CREATE UNIQUE INDEX "SYSTEM"."PK_AU" ON "SYSTEM"."TB_AUTHORS" ("BK_CODE", "WR_ID")
---------------------------------------------------------
---  DDL for Index PK_GEN
---------------------------------------------------------
-
-  CREATE UNIQUE INDEX "SYSTEM"."PK_GEN" ON "SYSTEM"."TB_BK_GEN" ("ID_BK", "GEN_NAME")
---------------------------------------------------------
---  DDL for Index BK_PK
---------------------------------------------------------
-
-  CREATE UNIQUE INDEX "SYSTEM"."BK_PK" ON "SYSTEM"."TB_BOOKS" ("BK_CODE")
---------------------------------------------------------
---  DDL for Index ED_PK
---------------------------------------------------------
-
-  CREATE UNIQUE INDEX "SYSTEM"."ED_PK" ON "SYSTEM"."TB_EDITOR" ("ED_CODE")
---------------------------------------------------------
---  DDL for Index PK_EMERGE_AUTHORS
---------------------------------------------------------
-
-  CREATE UNIQUE INDEX "SYSTEM"."PK_EMERGE_AUTHORS" ON "SYSTEM"."TB_EMERGE_AUTHORS" ("BK_CODE", "WR_ID")
---------------------------------------------------------
---  DDL for Index PR_PK
---------------------------------------------------------
-
-  CREATE UNIQUE INDEX "SYSTEM"."PR_PK" ON "SYSTEM"."TB_ON_PROB_WR" ("WR_CODE")
 --------------------------------------------------------
 --  Constraints for Table TB_AFFILIATED_WRITERS
 --------------------------------------------------------
 
-  ALTER TABLE "SYSTEM"."TB_AFFILIATED_WRITERS" ADD CONSTRAINT "AFF_WR_PK" PRIMARY KEY ("WR_CODE") ENABLE
-  ALTER TABLE "SYSTEM"."TB_AFFILIATED_WRITERS" MODIFY ("WR_NAME" NOT NULL ENABLE)
-  ALTER TABLE "SYSTEM"."TB_AFFILIATED_WRITERS" MODIFY ("WR_CODE" NOT NULL ENABLE)
+  ALTER TABLE "SYSTEM"."TB_AFFILIATED_WRITERS" ADD CONSTRAINT "AFF_WR_PK" PRIMARY KEY ("WR_CODE") ENABLE;
+  ALTER TABLE "SYSTEM"."TB_AFFILIATED_WRITERS" MODIFY ("WR_NAME" NOT NULL ENABLE);
+  ALTER TABLE "SYSTEM"."TB_AFFILIATED_WRITERS" MODIFY ("WR_CODE" NOT NULL ENABLE);
 --------------------------------------------------------
 --  Constraints for Table TB_AUTHORS
 --------------------------------------------------------
 
-  ALTER TABLE "SYSTEM"."TB_AUTHORS" ADD CONSTRAINT "PK_AU" PRIMARY KEY ("BK_CODE", "WR_ID") ENABLE
-  ALTER TABLE "SYSTEM"."TB_AUTHORS" MODIFY ("WR_ID" NOT NULL ENABLE)
-  ALTER TABLE "SYSTEM"."TB_AUTHORS" MODIFY ("BK_CODE" NOT NULL ENABLE)
+  ALTER TABLE "SYSTEM"."TB_AUTHORS" ADD CONSTRAINT "PK_AU" PRIMARY KEY ("BK_CODE", "WR_ID") ENABLE;
+  ALTER TABLE "SYSTEM"."TB_AUTHORS" MODIFY ("WR_ID" NOT NULL ENABLE);
+  ALTER TABLE "SYSTEM"."TB_AUTHORS" MODIFY ("BK_CODE" NOT NULL ENABLE);
 --------------------------------------------------------
 --  Constraints for Table TB_BK_GEN
 --------------------------------------------------------
 
-  ALTER TABLE "SYSTEM"."TB_BK_GEN" ADD CONSTRAINT "PK_GEN" PRIMARY KEY ("ID_BK", "GEN_NAME") ENABLE
-  ALTER TABLE "SYSTEM"."TB_BK_GEN" MODIFY ("GEN_NAME" NOT NULL ENABLE)
-  ALTER TABLE "SYSTEM"."TB_BK_GEN" MODIFY ("ID_BK" NOT NULL ENABLE)
+  ALTER TABLE "SYSTEM"."TB_BK_GEN" ADD CONSTRAINT "PK_GEN" PRIMARY KEY ("ID_BK", "GEN_NAME") ENABLE;
+  ALTER TABLE "SYSTEM"."TB_BK_GEN" MODIFY ("GEN_NAME" NOT NULL ENABLE);
+  ALTER TABLE "SYSTEM"."TB_BK_GEN" MODIFY ("ID_BK" NOT NULL ENABLE);
 --------------------------------------------------------
 --  Constraints for Table TB_BOOKS
 --------------------------------------------------------
 
-  ALTER TABLE "SYSTEM"."TB_BOOKS" ADD CONSTRAINT "BK_PK" PRIMARY KEY ("BK_CODE") ENABLE
-  ALTER TABLE "SYSTEM"."TB_BOOKS" MODIFY ("BK_TYPE" NOT NULL ENABLE)
-  ALTER TABLE "SYSTEM"."TB_BOOKS" MODIFY ("BK_TITLE" NOT NULL ENABLE)
-  ALTER TABLE "SYSTEM"."TB_BOOKS" MODIFY ("BK_CODE" NOT NULL ENABLE)
+  ALTER TABLE "SYSTEM"."TB_BOOKS" ADD CONSTRAINT "BK_PK" PRIMARY KEY ("BK_CODE") ENABLE;
+  ALTER TABLE "SYSTEM"."TB_BOOKS" MODIFY ("BK_TYPE" NOT NULL ENABLE);
+  ALTER TABLE "SYSTEM"."TB_BOOKS" MODIFY ("BK_TITLE" NOT NULL ENABLE);
+  ALTER TABLE "SYSTEM"."TB_BOOKS" MODIFY ("BK_CODE" NOT NULL ENABLE);
 --------------------------------------------------------
 --  Constraints for Table TB_EDITION
 --------------------------------------------------------
 
-  ALTER TABLE "SYSTEM"."TB_EDITION" MODIFY ("BK_ID" NOT NULL ENABLE)
-  ALTER TABLE "SYSTEM"."TB_EDITION" MODIFY ("EDITOR" NOT NULL ENABLE)
-  ALTER TABLE "SYSTEM"."TB_EDITION" MODIFY ("N_EDT" NOT NULL ENABLE)
-  ALTER TABLE "SYSTEM"."TB_EDITION" MODIFY ("PUB_DATE" NOT NULL ENABLE)
-  ALTER TABLE "SYSTEM"."TB_EDITION" MODIFY ("ED_TYPE" NOT NULL ENABLE)
-  ALTER TABLE "SYSTEM"."TB_EDITION" MODIFY ("ED_CODE" NOT NULL ENABLE)
+  ALTER TABLE "SYSTEM"."TB_EDITION" MODIFY ("BK_ID" NOT NULL ENABLE);
+  ALTER TABLE "SYSTEM"."TB_EDITION" MODIFY ("EDITOR" NOT NULL ENABLE);
+  ALTER TABLE "SYSTEM"."TB_EDITION" MODIFY ("N_EDT" NOT NULL ENABLE);
+  ALTER TABLE "SYSTEM"."TB_EDITION" MODIFY ("PUB_DATE" NOT NULL ENABLE);
+  ALTER TABLE "SYSTEM"."TB_EDITION" MODIFY ("ED_TYPE" NOT NULL ENABLE);
+  ALTER TABLE "SYSTEM"."TB_EDITION" MODIFY ("ED_CODE" NOT NULL ENABLE);
 --------------------------------------------------------
 --  Constraints for Table TB_EDITOR
 --------------------------------------------------------
 
-  ALTER TABLE "SYSTEM"."TB_EDITOR" ADD CONSTRAINT "ED_PK" PRIMARY KEY ("ED_CODE") ENABLE
-  ALTER TABLE "SYSTEM"."TB_EDITOR" MODIFY ("ED_NAME" NOT NULL ENABLE)
-  ALTER TABLE "SYSTEM"."TB_EDITOR" MODIFY ("ED_CODE" NOT NULL ENABLE)
+  ALTER TABLE "SYSTEM"."TB_EDITOR" ADD CONSTRAINT "ED_PK" PRIMARY KEY ("ED_CODE") ENABLE;
+  ALTER TABLE "SYSTEM"."TB_EDITOR" MODIFY ("ED_NAME" NOT NULL ENABLE);
+  ALTER TABLE "SYSTEM"."TB_EDITOR" MODIFY ("ED_CODE" NOT NULL ENABLE);
 --------------------------------------------------------
 --  Constraints for Table TB_EMERGE_AUTHORS
 --------------------------------------------------------
 
-  ALTER TABLE "SYSTEM"."TB_EMERGE_AUTHORS" ADD CONSTRAINT "PK_EMERGE_AUTHORS" PRIMARY KEY ("BK_CODE", "WR_ID") ENABLE
-  ALTER TABLE "SYSTEM"."TB_EMERGE_AUTHORS" MODIFY ("WR_ID" NOT NULL ENABLE)
-  ALTER TABLE "SYSTEM"."TB_EMERGE_AUTHORS" MODIFY ("BK_CODE" NOT NULL ENABLE)
+  ALTER TABLE "SYSTEM"."TB_EMERGE_AUTHORS" ADD CONSTRAINT "PK_EMERGE_AUTHORS" PRIMARY KEY ("BK_CODE", "WR_ID") ENABLE;
+  ALTER TABLE "SYSTEM"."TB_EMERGE_AUTHORS" MODIFY ("WR_ID" NOT NULL ENABLE);
+  ALTER TABLE "SYSTEM"."TB_EMERGE_AUTHORS" MODIFY ("BK_CODE" NOT NULL ENABLE);
 --------------------------------------------------------
 --  Constraints for Table TB_ON_PROB_WR
 --------------------------------------------------------
 
-  ALTER TABLE "SYSTEM"."TB_ON_PROB_WR" ADD CONSTRAINT "PR_PK" PRIMARY KEY ("WR_CODE") ENABLE
-  ALTER TABLE "SYSTEM"."TB_ON_PROB_WR" MODIFY ("WR_NAME" NOT NULL ENABLE)
-  ALTER TABLE "SYSTEM"."TB_ON_PROB_WR" MODIFY ("WR_CODE" NOT NULL ENABLE)
+  ALTER TABLE "SYSTEM"."TB_ON_PROB_WR" ADD CONSTRAINT "PR_PK" PRIMARY KEY ("WR_CODE") ENABLE;
+  ALTER TABLE "SYSTEM"."TB_ON_PROB_WR" MODIFY ("WR_NAME" NOT NULL ENABLE);
+  ALTER TABLE "SYSTEM"."TB_ON_PROB_WR" MODIFY ("WR_CODE" NOT NULL ENABLE);
 --------------------------------------------------------
 --  Ref Constraints for Table TB_AUTHORS
 --------------------------------------------------------
 
   ALTER TABLE "SYSTEM"."TB_AUTHORS" ADD CONSTRAINT "FK_AFFILIATED_WRITES_BOOK" FOREIGN KEY ("WR_ID")
-	  REFERENCES "SYSTEM"."TB_AFFILIATED_WRITERS" ("WR_CODE") ENABLE
+	  REFERENCES "SYSTEM"."TB_AFFILIATED_WRITERS" ("WR_CODE") ENABLE;
   ALTER TABLE "SYSTEM"."TB_AUTHORS" ADD CONSTRAINT "FK_WRITTEN_BOOKS" FOREIGN KEY ("BK_CODE")
-	  REFERENCES "SYSTEM"."TB_BOOKS" ("BK_CODE") ENABLE
+	  REFERENCES "SYSTEM"."TB_BOOKS" ("BK_CODE") ENABLE;
 --------------------------------------------------------
 --  Ref Constraints for Table TB_BK_GEN
 --------------------------------------------------------
 
   ALTER TABLE "SYSTEM"."TB_BK_GEN" ADD CONSTRAINT "FK_BK_GEN" FOREIGN KEY ("ID_BK")
-	  REFERENCES "SYSTEM"."TB_BOOKS" ("BK_CODE") ENABLE
+	  REFERENCES "SYSTEM"."TB_BOOKS" ("BK_CODE") ENABLE;
 --------------------------------------------------------
 --  Ref Constraints for Table TB_EDITION
 --------------------------------------------------------
 
   ALTER TABLE "SYSTEM"."TB_EDITION" ADD CONSTRAINT "FK_BOOK_HAS_EDITION" FOREIGN KEY ("BK_ID")
-	  REFERENCES "SYSTEM"."TB_BOOKS" ("BK_CODE") ENABLE
+	  REFERENCES "SYSTEM"."TB_BOOKS" ("BK_CODE") ENABLE;
   ALTER TABLE "SYSTEM"."TB_EDITION" ADD CONSTRAINT "FK_EDITION_HAS_EDITOR" FOREIGN KEY ("EDITOR")
-	  REFERENCES "SYSTEM"."TB_EDITOR" ("ED_CODE") ENABLE
+	  REFERENCES "SYSTEM"."TB_EDITOR" ("ED_CODE") ENABLE;
 --------------------------------------------------------
 --  Ref Constraints for Table TB_EMERGE_AUTHORS
 --------------------------------------------------------
 
   ALTER TABLE "SYSTEM"."TB_EMERGE_AUTHORS" ADD CONSTRAINT "FK_EMERGE_WRITES_BOOK" FOREIGN KEY ("WR_ID")
-	  REFERENCES "SYSTEM"."TB_ON_PROB_WR" ("WR_CODE") ENABLE
+	  REFERENCES "SYSTEM"."TB_ON_PROB_WR" ("WR_CODE") ENABLE;
   ALTER TABLE "SYSTEM"."TB_EMERGE_AUTHORS" ADD CONSTRAINT "FK_WRITTEN_BOOK2" FOREIGN KEY ("BK_CODE")
-	  REFERENCES "SYSTEM"."TB_BOOKS" ("BK_CODE") ENABLE
+	  REFERENCES "SYSTEM"."TB_BOOKS" ("BK_CODE") ENABLE;

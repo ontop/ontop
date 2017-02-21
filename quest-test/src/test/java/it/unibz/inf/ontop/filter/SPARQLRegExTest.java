@@ -1,4 +1,4 @@
-package filter;
+package it.unibz.inf.ontop.filter;
 
 /*
  * #%L
@@ -97,6 +97,9 @@ public class SPARQLRegExTest {
 					.nativeOntopMappingFile(obdafile)
 					.ontologyFile(owlfile)
 					.enableFullMetadataExtraction(false)
+					.jdbcUrl(url)
+					.jdbcUser(username)
+					.jdbcPassword(password)
 					.build();
 	        reasoner = factory.createReasoner(config);
 	        
