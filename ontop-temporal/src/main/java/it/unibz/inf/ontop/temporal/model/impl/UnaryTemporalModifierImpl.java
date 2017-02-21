@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.temporal.model.impl.it.unibz.inf.ontop.temporal.model.impl;
+package it.unibz.inf.ontop.temporal.model.impl;
 
 import it.unibz.inf.ontop.temporal.model.Range;
 import it.unibz.inf.ontop.temporal.model.UnaryTemporalModifier;

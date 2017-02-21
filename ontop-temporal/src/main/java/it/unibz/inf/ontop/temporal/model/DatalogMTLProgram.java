@@ -7,9 +7,9 @@ import java.util.List;
 
 public interface DatalogMTLProgram /*extends DatalogProgramImpl implements  DatalogProgram*/ {
 
-    public void appendRule(NormalizedRule nRule);
+    public void appendRule(Rule nRule);
 
-    public List<NormalizedRule> getRules();
+    public List<Rule> getRules();
 
 
 

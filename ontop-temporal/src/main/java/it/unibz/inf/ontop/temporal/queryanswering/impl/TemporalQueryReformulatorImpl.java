@@ -8,7 +8,9 @@ import it.unibz.inf.ontop.temporal.queryanswering.TemporalQueryReformulator;
 import java.util.List;
 
 public class TemporalQueryReformulatorImpl implements TemporalQueryReformulator {
+
     public TemporalQueryReformulatorImpl(DatalogMTLProgram program, List<RDBMSMappingAxiom> axioms) {
+
 
     }
 
