@@ -18,7 +18,7 @@ public class OntopQueryAnsweringSQLSettingsImpl extends OntopQueryAnsweringSetti
     }
 
     private static Properties loadProperties(Properties userProperties) {
-        Properties properties = OntopSQLCoreSettingsImpl.loadDefaultSQLProperties();
+        Properties properties = OntopSQLCoreSettingsImpl.loadDefaultOBDAProperties();
         properties.putAll(loadDefaultQASQLProperties());
         properties.putAll(userProperties);
         return properties;

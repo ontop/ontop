@@ -18,12 +18,12 @@ public class OntopOBDASettingsImpl extends OntopModelSettingsImpl implements Ont
     }
 
     private static Properties loadProperties(Properties userProperties) {
-        Properties properties = loadDefaultSQLProperties();
+        Properties properties = loadDefaultOBDAProperties();
         properties.putAll(userProperties);
         return properties;
     }
 
-    static Properties loadDefaultSQLProperties() {
+    static Properties loadDefaultOBDAProperties() {
         return loadDefaultPropertiesFromFile(OntopOBDASettings.class, DEFAULT_FILE);
     }
 

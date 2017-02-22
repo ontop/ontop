@@ -1,7 +1,6 @@
 package it.unibz.inf.ontop.injection.impl;
 
 
-import it.unibz.inf.ontop.injection.InvalidOntopConfigurationException;
 import it.unibz.inf.ontop.injection.OntopMappingOntologyConfiguration;
 import it.unibz.inf.ontop.injection.impl.OntopMappingConfigurationImpl.OntopMappingOptions;
 
@@ -10,7 +9,6 @@ import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Optional;
-import java.util.function.Supplier;
 
 public class OntopMappingOntologyBuilders {
 
