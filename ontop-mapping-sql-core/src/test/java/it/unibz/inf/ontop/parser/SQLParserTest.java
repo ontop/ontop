@@ -20,7 +20,6 @@ package it.unibz.inf.ontop.parser;
  * #L%
  */
 
-import com.sun.javaws.exceptions.UnsignedAccessViolationException;
 import it.unibz.inf.ontop.sql.DatabaseRelationDefinition;
 import it.unibz.inf.ontop.sql.RDBMetadata;
 import it.unibz.inf.ontop.sql.RDBMetadataExtractionTools;
