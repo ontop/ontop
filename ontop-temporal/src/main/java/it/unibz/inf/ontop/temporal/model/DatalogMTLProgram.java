@@ -9,4 +9,6 @@ public interface DatalogMTLProgram {
 
     List<DatalogMTLRule> getRules();
 
+    String render();
+
 }

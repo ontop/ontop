@@ -10,4 +10,5 @@ public interface DatalogMTLRule {
 
     TemporalExpression getBody();
 
+    String render();
 }

@@ -1,6 +1,6 @@
 package it.unibz.inf.ontop.temporal.model;
 
-public interface BinaryTemporalExpression {
+public interface BinaryTemporalExpression extends TemporalExpression{
 
     TemporalExpression getLeftOperand();
 

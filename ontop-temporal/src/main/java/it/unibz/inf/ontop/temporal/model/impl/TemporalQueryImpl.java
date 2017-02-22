@@ -5,9 +5,9 @@ import it.unibz.inf.ontop.temporal.model.TemporalQuery;
 
 public class TemporalQueryImpl implements TemporalQuery{
 
-    private Predicate queryPredicate;
+    private final Predicate queryPredicate;
 
-    public TemporalQueryImpl(Predicate queryPredicate){
+    TemporalQueryImpl(Predicate queryPredicate){
         this.queryPredicate = queryPredicate;
     }
 
