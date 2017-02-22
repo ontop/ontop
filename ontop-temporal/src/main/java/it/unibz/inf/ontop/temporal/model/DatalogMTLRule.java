@@ -4,10 +4,10 @@ import it.unibz.inf.ontop.model.Predicate;
 
 import java.util.List;
 
-public interface Rule {
+public interface DatalogMTLRule {
 
-    Predicate getHead();
+    TemporalExpression getHead();
 
-    List<Predicate> getBody();
+    TemporalExpression getBody();
 
 }

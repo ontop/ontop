@@ -1,5 +1,5 @@
 package it.unibz.inf.ontop.temporal.model;
 
-public interface NormalizedRule extends Rule {
+public interface NormalizedRule extends DatalogMTLRule {
 
 }

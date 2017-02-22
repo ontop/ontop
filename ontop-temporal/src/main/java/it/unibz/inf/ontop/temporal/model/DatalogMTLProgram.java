@@ -5,12 +5,8 @@ import it.unibz.inf.ontop.model.impl.DatalogProgramImpl;
 
 import java.util.List;
 
-public interface DatalogMTLProgram /*extends DatalogProgramImpl implements  DatalogProgram*/ {
+public interface DatalogMTLProgram {
 
-    public void appendRule(Rule nRule);
-
-    public List<Rule> getRules();
-
-
+    List<DatalogMTLRule> getRules();
 
 }
