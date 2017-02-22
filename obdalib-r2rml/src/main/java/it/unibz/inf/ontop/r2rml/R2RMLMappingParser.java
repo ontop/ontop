@@ -13,7 +13,7 @@ import it.unibz.inf.ontop.exception.InvalidMappingException;
 import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
 import it.unibz.inf.ontop.injection.OBDAFactoryWithException;
 import it.unibz.inf.ontop.io.PrefixManager;
-import it.unibz.inf.ontop.mapping.MappingParser;
+import it.unibz.inf.ontop.mapping.SQLMappingParser;
 import it.unibz.inf.ontop.model.OBDAMappingAxiom;
 import it.unibz.inf.ontop.model.OBDAModel;
 
@@ -24,7 +24,7 @@ import java.io.Reader;
 /**
  * High-level class that implements the MappingParser interface for R2RML.
  */
-public class R2RMLMappingParser implements MappingParser {
+public class R2RMLMappingParser implements SQLMappingParser {
 
     private final NativeQueryLanguageComponentFactory nativeQLFactory;
     private final OBDAFactoryWithException obdaFactory;

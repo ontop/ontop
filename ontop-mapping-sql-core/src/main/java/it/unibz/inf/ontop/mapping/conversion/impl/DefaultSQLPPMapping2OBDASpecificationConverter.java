@@ -18,7 +18,6 @@ import it.unibz.inf.ontop.pivotalrepr.utils.ExecutorRegistry;
 import it.unibz.inf.ontop.spec.OBDASpecification;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
-import it.unibz.inf.ontop.model.impl.SQLMappingFactoryImpl;
 import it.unibz.inf.ontop.model.impl.TermUtils;
 import it.unibz.inf.ontop.exception.DBMetadataExtractionException;
 import it.unibz.inf.ontop.nativeql.RDBMetadataExtractor;
@@ -48,8 +47,6 @@ import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
 
 public class DefaultSQLPPMapping2OBDASpecificationConverter implements SQLPPMapping2OBDASpecificationConverter {
 
-
-    private static final SQLMappingFactory SQL_MAPPING_FACTORY = SQLMappingFactoryImpl.getInstance();
     private static final OntologyFactory ONTOLOGY_FACTORY = OntologyFactoryImpl.getInstance();
 
     private static class DBMetadataAndMappingAxioms {
@@ -456,6 +453,8 @@ public class DefaultSQLPPMapping2OBDASpecificationConverter implements SQLPPMapp
      *  (e.g., owl:sameAs, obda:canonicalIRI)
      *
      * TODO: split these two different concerns
+     *
+     * --> Should be moved to the MappingExtraction part
      *
      */
     public ImmutableList<CQIE> inferMissingDataTypesAndValidate(ImmutableList<CQIE> unfoldingProgram, TBoxReasoner tBoxReasoner,

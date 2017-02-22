@@ -10,7 +10,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.Reader;
 
-public interface MappingParser {
+public interface SQLMappingParser {
 
     OBDAModel parse(File file) throws InvalidMappingException, IOException, DuplicateMappingException;
 

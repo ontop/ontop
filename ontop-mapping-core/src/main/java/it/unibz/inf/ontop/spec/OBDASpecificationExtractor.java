@@ -28,7 +28,7 @@ public interface OBDASpecificationExtractor {
                               @Nonnull Optional<Ontology> ontology, ExecutorRegistry executorRegistry)
             throws OBDASpecificationException, IOException;
 
-    OBDASpecification extract(@Nonnull PreProcessedMapping mapping, @Nonnull Optional<DBMetadata> dbMetadata,
+    OBDASpecification extract(@Nonnull PreProcessedMapping ppMapping, @Nonnull Optional<DBMetadata> dbMetadata,
                               @Nonnull Optional<Ontology> ontology, ExecutorRegistry executorRegistry)
             throws OBDASpecificationException, IOException;
 

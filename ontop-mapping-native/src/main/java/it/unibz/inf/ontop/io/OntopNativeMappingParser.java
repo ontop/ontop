@@ -35,7 +35,7 @@ import it.unibz.inf.ontop.model.impl.SQLMappingFactoryImpl;
 import org.eclipse.rdf4j.model.Model;
 import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
 import it.unibz.inf.ontop.injection.OBDAFactoryWithException;
-import it.unibz.inf.ontop.mapping.MappingParser;
+import it.unibz.inf.ontop.mapping.SQLMappingParser;
 
 import it.unibz.inf.ontop.parser.TargetQueryParser;
 import it.unibz.inf.ontop.parser.TargetQueryParserException;
@@ -52,7 +52,7 @@ import static it.unibz.inf.ontop.exception.InvalidMappingExceptionWithIndicator.
  * Available through Guice.
  *
  */
-public class OntopNativeMappingParser implements MappingParser {
+public class OntopNativeMappingParser implements SQLMappingParser {
 
     protected enum Label {
         /* Source decl.: */sourceUri, connectionUrl, username, password, driverClass,

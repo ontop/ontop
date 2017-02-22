@@ -11,7 +11,7 @@ import it.unibz.inf.ontop.injection.InvalidOntopConfigurationException;
 import it.unibz.inf.ontop.injection.OntopMappingSQLConfiguration;
 import it.unibz.inf.ontop.injection.OntopMappingSQLSettings;
 import it.unibz.inf.ontop.injection.impl.OntopMappingConfigurationImpl.OntopMappingOptions;
-import it.unibz.inf.ontop.mapping.MappingParser;
+import it.unibz.inf.ontop.mapping.SQLMappingParser;
 import it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing.TMappingExclusionConfig;
 import it.unibz.inf.ontop.pivotalrepr.proposal.QueryOptimizationProposal;
 import it.unibz.inf.ontop.spec.OBDASpecification;
@@ -118,7 +118,7 @@ public class OntopMappingSQLConfigurationImpl extends OntopSQLCoreConfigurationI
             return options.predefinedMappingModel;
         }
 
-        MappingParser parser = getInjector().getInstance(MappingParser.class);
+        SQLMappingParser parser = getInjector().getInstance(SQLMappingParser.class);
 
         Optional<File> optionalMappingFile = mappingFileSupplier.get();
         if (optionalMappingFile.isPresent()) {

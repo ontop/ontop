@@ -43,7 +43,7 @@ import it.unibz.inf.ontop.exception.InvalidMappingExceptionWithIndicator;
 import it.unibz.inf.ontop.exception.InvalidPredicateDeclarationException;
 import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
 import it.unibz.inf.ontop.injection.OBDAFactoryWithException;
-import it.unibz.inf.ontop.mapping.MappingParser;
+import it.unibz.inf.ontop.mapping.SQLMappingParser;
 
 import it.unibz.inf.ontop.parser.TurtleOBDASyntaxParser;
 
@@ -55,7 +55,7 @@ public class SQLMappingParserUsingOwlTest {
     private final NativeQueryLanguageComponentFactory nativeQLFactory;
     private final OBDAFactoryWithException modelFactory;
     private final MappingFactory mappingFactory;
-    private final MappingParser mappingParser;
+    private final SQLMappingParser mappingParser;
 
     private TurtleOBDASyntaxParser parser;
 
@@ -88,7 +88,7 @@ public class SQLMappingParserUsingOwlTest {
         Injector injector = configuration.getInjector();
         mappingFactory = injector.getInstance(MappingFactory.class);
 
-        mappingParser = injector.getInstance(MappingParser.class);
+        mappingParser = injector.getInstance(SQLMappingParser.class);
         nativeQLFactory = injector.getInstance(NativeQueryLanguageComponentFactory.class);
         modelFactory = injector.getInstance(OBDAFactoryWithException.class);
     }

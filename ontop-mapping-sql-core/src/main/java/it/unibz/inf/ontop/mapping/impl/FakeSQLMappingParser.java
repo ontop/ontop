@@ -3,7 +3,7 @@ package it.unibz.inf.ontop.mapping.impl;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.exception.InvalidMappingException;
-import it.unibz.inf.ontop.mapping.MappingParser;
+import it.unibz.inf.ontop.mapping.SQLMappingParser;
 import it.unibz.inf.ontop.model.OBDAModel;
 import org.eclipse.rdf4j.model.Model;
 
@@ -14,10 +14,10 @@ import java.io.Reader;
 /**
  * Allows to create a OntopMappingConfiguration instance without having a proper MappingParser
  */
-public class FakeMappingParser implements MappingParser {
+public class FakeSQLMappingParser implements SQLMappingParser {
 
     @Inject
-    private FakeMappingParser() {
+    private FakeSQLMappingParser() {
     }
 
     @Override
