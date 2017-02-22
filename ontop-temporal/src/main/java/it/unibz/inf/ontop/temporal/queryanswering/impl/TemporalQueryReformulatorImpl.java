@@ -9,9 +9,12 @@ import java.util.List;
 
 public class TemporalQueryReformulatorImpl implements TemporalQueryReformulator {
 
+    private DatalogMTLProgram program;
+    List<RDBMSMappingAxiom> axioms;
+
     public TemporalQueryReformulatorImpl(DatalogMTLProgram program, List<RDBMSMappingAxiom> axioms) {
-
-
+        this.program = program;
+        this.axioms = axioms;
     }
 
     @Override
