@@ -6,6 +6,6 @@
     <version>3.0.0-SNAPSHOT</version>
   </parent>
   <artifactId>ontop-docker-test-env</artifactId>
-  <name>ontop-docker</name>
+  <name>ontop-docker-test-env</name>
   <description>Ontop testing environment. A set of containers with the databases that contain the schemas used in unit tests and with accounts that allow the unit tests to create/remove databases for tests.</description>
 </project>

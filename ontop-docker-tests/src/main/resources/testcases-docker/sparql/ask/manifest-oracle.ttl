@@ -19,5 +19,5 @@
             [ qt:query <ask.rq> ] ;
     mf:result <ask.srx> ;
     mf:knowledgebase <stockexchange.owl> ;
-    mf:mappings <stockexchange-db2.obda> ;
-    mf:parameters <stockexchange-db2.properties> .
+    mf:mappings <stockexchange-oracle.obda> ;
+    mf:parameters <stockexchange-oracle.properties> .

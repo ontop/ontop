@@ -11,7 +11,7 @@
 
     <artifactId>ontop-docker-tests</artifactId>
     <name>ontop-docker-tests</name>
-    <description>Ontop it.unibz.inf.ontop.docker testing module. It contains the test that can be run by the it.unibz.inf.ontop.docker.</description>
+    <description>Ontop docker testing module. It contains the test that can be run by the docker.</description>
 
     <dependencies>
         <dependency>
