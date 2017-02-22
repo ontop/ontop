@@ -1,4 +1,4 @@
-package oracle;
+package it.unibz.inf.ontop.oracle;
 
 /*
  * #%L
@@ -33,9 +33,9 @@ import it.unibz.inf.ontop.quest.AbstractVirtualModeTest;
  */
 public class MultiSchemaTest extends AbstractVirtualModeTest {
 
-	static final String owlfile = "src/test/resources/it/unibz/inf/ontop/oracle/oracle-schema.owl";
-	static final String obdafile = "src/test/resources/it/unibz/inf/ontop/oracle/oracle-schema.obda";
-	static final String propertiesfile = "src/test/resources/it/unibz/inf/ontop/oracle/oracle.properties";
+	static final String owlfile = "src/test/resources/oracle/oracle-schema.owl";
+	static final String obdafile = "src/test/resources/oracle/oracle-schema.obda";
+	static final String propertiesfile = "src/test/resources/oracle/oracle.properties";
 
 	public MultiSchemaTest() {
 		super(owlfile, obdafile, propertiesfile);

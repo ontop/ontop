@@ -47,7 +47,7 @@ public class DockerOracleTestsuite extends QuestVirtualScenarioParent {
 			}
 			@Override
 			public String getMainManifestFile() {
-				return "/it/unibz/inf/ontop/testcases-docker/manifest-scenario-oracle.ttl";
+				return "/testcases-docker/manifest-scenario-oracle.ttl";
 			}
 		});
 	}

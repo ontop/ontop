@@ -47,7 +47,7 @@ public class DockerPostgresTestsuite extends QuestVirtualScenarioParent {
 			}
 			@Override
 			public String getMainManifestFile() {
-				return "/it/unibz/inf/ontop/testcases-docker/manifest-scenario-postgres.ttl";
+				return "/testcases-docker/manifest-scenario-postgres.ttl";
 			}
 		});
 	}

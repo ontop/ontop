@@ -47,7 +47,7 @@ public class DockerMysqlTestsuite extends QuestVirtualScenarioParent {
 			}
 			@Override
 			public String getMainManifestFile() {
-				return "/it/unibz/inf/ontop/testcases-docker/manifest-scenario-mysql.ttl";
+				return "/testcases-docker/manifest-scenario-mysql.ttl";
 			}
 		});
 	}
