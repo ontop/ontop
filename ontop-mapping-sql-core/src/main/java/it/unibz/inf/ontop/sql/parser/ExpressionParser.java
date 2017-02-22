@@ -379,7 +379,21 @@ public class ExpressionParser {
 
         @Override
         public void visit(net.sf.jsqlparser.expression.Function expression) {
-            throw new UnsupportedSelectQueryRuntimeException("Not a Boolean expression", expression);
+            // do not use ImmutableCollectors.toList because this cannot be done concurrently
+            ImmutableList<Term> terms = (expression.getParameters() != null)
+                    ? ImmutableList.<Term>builder()
+                    .addAll(expression.getParameters().getExpressions().stream()
+                            .map(t -> termVisitor.getTerm(t)).iterator())
+                    .build()
+                    : ImmutableList.of();
+
+            BiFunction<ImmutableList<Term>, net.sf.jsqlparser.expression.Function, Function> function
+                    = BOOLEAN_FUNCTIONS.get(expression.getName().toUpperCase());
+
+            if (function == null)
+                throw new UnsupportedSelectQueryRuntimeException("Unsupported SQL function", expression);
+
+            result = ImmutableList.of(function.apply(terms, expression));
         }
 
 
@@ -912,6 +926,7 @@ public class ExpressionParser {
             String datatype = type.getDataType();
             // TODO: proper datatype conversion is required at this stage
             // result = FACTORY.getFunctionCast(term, datatype);
+            throw new UnsupportedSelectQueryRuntimeException("CAST is not supported yet", expression);
         }
 
 
@@ -997,7 +1012,6 @@ public class ExpressionParser {
 
     private static final ImmutableMap<String, BiFunction<ImmutableList<Term>, net.sf.jsqlparser.expression.Function, Function>>
             FUNCTIONS = ImmutableMap.<String, BiFunction<ImmutableList<Term>, net.sf.jsqlparser.expression.Function, Function>>builder()
-            .put("REGEXP_LIKE", ExpressionParser::get_REGEXP_LIKE)
             .put("REGEXP_REPLACE", ExpressionParser::get_REGEXP_REPLACE)
             .put("REPLACE", ExpressionParser::get_REPLACE)
             .put("CONCAT", ExpressionParser::get_CONCAT)
@@ -1008,6 +1022,12 @@ public class ExpressionParser {
             .put("UCASE", ExpressionParser::get_UCASE)
             .put("UPPER", ExpressionParser::get_UCASE)
             .put("LENGTH", ExpressionParser::get_STRLEN)
+            .put("RAND", ExpressionParser::get_RAND)
+            .build();
+
+    private static final ImmutableMap<String, BiFunction<ImmutableList<Term>, net.sf.jsqlparser.expression.Function, Function>>
+            BOOLEAN_FUNCTIONS = ImmutableMap.<String, BiFunction<ImmutableList<Term>, net.sf.jsqlparser.expression.Function, Function>>builder()
+            .put("REGEXP_LIKE", ExpressionParser::get_REGEXP_LIKE)
             .build();
 
     private static Function get_REGEXP_LIKE(ImmutableList<Term> terms, net.sf.jsqlparser.expression.Function expression) {
@@ -1089,6 +1109,14 @@ public class ExpressionParser {
                 return DATA_FACTORY.getFunction(ExpressionOperation.SUBSTR3, terms.get(0), terms.get(1), terms.get(2));
         }
         // DB2 has 4
+        throw new UnsupportedSelectQueryRuntimeException("Unsupported SQL function", expression);
+    }
+
+    private static Function get_RAND(ImmutableList<Term> terms, net.sf.jsqlparser.expression.Function expression) {
+        switch (terms.size()) {
+            case 0:
+                return DATA_FACTORY.getFunction(ExpressionOperation.RAND);
+        }
         throw new UnsupportedSelectQueryRuntimeException("Unsupported SQL function", expression);
     }
 
