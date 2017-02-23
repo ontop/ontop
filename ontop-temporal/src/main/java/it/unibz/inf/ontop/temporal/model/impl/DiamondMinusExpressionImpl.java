@@ -1,8 +1,6 @@
 package it.unibz.inf.ontop.temporal.model.impl;
 
-import it.unibz.inf.ontop.temporal.model.DiamondMinusExpression;
-import it.unibz.inf.ontop.temporal.model.TemporalExpression;
-import it.unibz.inf.ontop.temporal.model.TemporalRange;
+import it.unibz.inf.ontop.temporal.model.*;
 
 public class DiamondMinusExpressionImpl extends AbstractUnaryTemporalExpressionWithRange implements DiamondMinusExpression {
     DiamondMinusExpressionImpl(TemporalRange range, TemporalExpression operand) {
@@ -11,7 +9,10 @@ public class DiamondMinusExpressionImpl extends AbstractUnaryTemporalExpressionW
 
     @Override
     public String render() {
-        return String.format("<-> %s %s", getRange(), getOperand());
+        if (getOperand() instanceof BinaryTemporalExpression || getOperand() instanceof TemporalJoinExpression)
+            return String.format("<-> %s (%s)", getRange(), getOperand().render());
+
+        return String.format("<-> %s %s", getRange(), getOperand().render());
     }
 
     @Override

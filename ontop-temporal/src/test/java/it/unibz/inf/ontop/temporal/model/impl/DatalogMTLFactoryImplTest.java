@@ -61,14 +61,38 @@ public class DatalogMTLFactoryImplTest {
     }
 
     @Test
-    public void testInterval() {
+    public void test2() {
+
         DatalogMTLFactory f = DatalogMTLFactoryImpl.getInstance();
 
-        final TemporalInterval interval = f.createTemporalInterval(true, false,
-                Instant.now().minus(Duration.of(10, ChronoUnit.SECONDS)),
-                Instant.now());
+        TemporalRange range1 = f.createTemporalRange(false, true, Duration.parse("PT20.345S"), Duration.parse("PT1H1M"));
 
-        System.out.println(interval);
+        TemporalRange range2 = f.createTemporalRange(true, true, Duration.parse("PT20.345S"), Duration.parse("PT1H1M"));
+
+        OBDADataFactory odf = DATA_FACTORY;
+
+        final Predicate p1 = odf.getPredicate("P1", 1);
+        final Predicate p2 = odf.getPredicate("P2", 2);
+        final Predicate p3 = odf.getPredicate("P3", 1);
+        final Predicate p4 = odf.getPredicate("P4", 1);
+
+        final Variable v1 = odf.getVariable("v1");
+        final Variable v2 = odf.getVariable("v2");
+        final Variable v3 = odf.getVariable("v3");
+        final Variable v4 = odf.getVariable("v4");
+
+        TemporalAtomicExpression head = f.createTemporalAtomicExpression(p4, v1);
+
+        TemporalExpression body = f.createTemporalJoinExpression(f.createDiamondPlusExpression(range1,
+                f.createTemporalJoinExpression(f.createBoxPlusExpression(range2, f.createTemporalAtomicExpression(p1, v4)), f.createTemporalAtomicExpression(p2, v4))),f.createTemporalAtomicExpression(p3,v1));
+
+        DatalogMTLRule rule = f.createRule(head, body);
+
+        final DatalogMTLProgram program = f.createProgram(rule);
+
+        System.out.println(program.render());
 
     }
+
+
 }

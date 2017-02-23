@@ -1,8 +1,6 @@
 package it.unibz.inf.ontop.temporal.model.impl;
 
-import it.unibz.inf.ontop.temporal.model.BoxMinusExpression;
-import it.unibz.inf.ontop.temporal.model.TemporalExpression;
-import it.unibz.inf.ontop.temporal.model.TemporalRange;
+import it.unibz.inf.ontop.temporal.model.*;
 
 public class BoxMinusExpressionImpl extends AbstractUnaryTemporalExpressionWithRange implements BoxMinusExpression {
     BoxMinusExpressionImpl(TemporalRange range, TemporalExpression operand) {
@@ -11,6 +9,9 @@ public class BoxMinusExpressionImpl extends AbstractUnaryTemporalExpressionWithR
 
     @Override
     public String render() {
+        if (getOperand() instanceof BinaryTemporalExpression || getOperand() instanceof TemporalJoinExpression)
+            return String.format("⊟ %s (%s)", getRange(), getOperand().render());
+
         return String.format("⊟ %s %s", getRange(), getOperand().render());
     }
 
