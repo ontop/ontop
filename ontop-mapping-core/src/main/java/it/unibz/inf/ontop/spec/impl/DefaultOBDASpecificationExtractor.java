@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.spec.impl;
 
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import it.unibz.inf.ontop.exception.OBDASpecificationException;
 import it.unibz.inf.ontop.mapping.extraction.PreProcessedMapping;
 import it.unibz.inf.ontop.model.DBMetadata;
@@ -15,11 +16,11 @@ import org.eclipse.rdf4j.model.Model;
 
 import javax.annotation.Nonnull;
 import java.io.File;
-import java.io.IOException;
 import java.io.Reader;
 import java.util.Optional;
 
 
+@Singleton
 public class DefaultOBDASpecificationExtractor implements OBDASpecificationExtractor {
 
     private final MappingExtractor mappingExtractor;

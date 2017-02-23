@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.spec.impl;
 
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import it.unibz.inf.ontop.exception.MappingException;
 import it.unibz.inf.ontop.exception.OntologyException;
 import it.unibz.inf.ontop.mapping.Mapping;
@@ -11,6 +12,7 @@ import it.unibz.inf.ontop.spec.OBDASpecification;
 
 import java.util.Optional;
 
+@Singleton
 public class DefaultMappingTransformer implements MappingTransformer {
 
     @Inject

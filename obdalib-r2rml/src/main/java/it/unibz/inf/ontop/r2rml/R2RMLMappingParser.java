@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.r2rml;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
+import it.unibz.inf.ontop.exception.MappingIOException;
 import it.unibz.inf.ontop.injection.MappingFactory;
 import it.unibz.inf.ontop.mapping.MappingMetadata;
 import org.eclipse.rdf4j.model.Model;
@@ -41,7 +42,7 @@ public class R2RMLMappingParser implements SQLMappingParser {
 
 
     @Override
-    public OBDAModel parse(File mappingFile) throws InvalidMappingException, IOException, DuplicateMappingException {
+    public OBDAModel parse(File mappingFile) throws InvalidMappingException, MappingIOException, DuplicateMappingException {
 
         try {
             R2RMLManager r2rmlManager = new R2RMLManager(mappingFile, nativeQLFactory);
@@ -53,14 +54,14 @@ public class R2RMLMappingParser implements SQLMappingParser {
     }
 
     @Override
-    public OBDAModel parse(Reader reader) throws InvalidMappingException, IOException, DuplicateMappingException {
+    public OBDAModel parse(Reader reader) throws InvalidMappingException, MappingIOException, DuplicateMappingException {
         // TODO: support this
         throw new UnsupportedOperationException("The R2RMLMappingParser does not support" +
                 "yet the Reader interface.");
     }
 
     @Override
-    public OBDAModel parse(Model mappingGraph) throws InvalidMappingException, IOException, DuplicateMappingException {
+    public OBDAModel parse(Model mappingGraph) throws InvalidMappingException, DuplicateMappingException {
         R2RMLManager r2rmlManager = new R2RMLManager(mappingGraph, nativeQLFactory);
         return parse(r2rmlManager);
     }

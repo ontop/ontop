@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.injection.impl;
 
 import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.exception.InvalidMappingException;
+import it.unibz.inf.ontop.exception.MappingIOException;
 import it.unibz.inf.ontop.exception.OBDASpecificationException;
 import it.unibz.inf.ontop.injection.InvalidOntopConfigurationException;
 import it.unibz.inf.ontop.injection.OntopMappingSQLAllConfiguration;
@@ -12,7 +13,6 @@ import org.eclipse.rdf4j.model.Model;
 
 import javax.annotation.Nonnull;
 import java.io.File;
-import java.io.IOException;
 import java.io.Reader;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -38,12 +38,12 @@ public class OntopMappingSQLAllConfigurationImpl extends OntopMappingSQLConfigur
     }
 
     @Override
-    public Optional<OBDASpecification> loadSpecification() throws IOException, OBDASpecificationException {
+    public Optional<OBDASpecification> loadSpecification() throws OBDASpecificationException {
         return loadSpecification(Optional::empty);
     }
 
     Optional<OBDASpecification> loadSpecification(OntologySupplier ontologySupplier)
-            throws IOException, OBDASpecificationException {
+            throws OBDASpecificationException {
 
         return loadSpecification(ontologySupplier,
                 () -> options.mappingFile,
@@ -52,12 +52,12 @@ public class OntopMappingSQLAllConfigurationImpl extends OntopMappingSQLConfigur
     }
 
     @Override
-    public Optional<OBDAModel> loadPPMapping() throws IOException, InvalidMappingException, DuplicateMappingException {
+    public Optional<OBDAModel> loadPPMapping() throws MappingIOException, InvalidMappingException, DuplicateMappingException {
         return loadPPMapping(Optional::empty);
     }
 
     Optional<OBDAModel> loadPPMapping(OntologySupplier ontologySupplier)
-            throws IOException, InvalidMappingException, DuplicateMappingException {
+            throws MappingIOException, InvalidMappingException, DuplicateMappingException {
         return loadPPMapping(ontologySupplier,
                 () -> options.mappingFile,
                 () -> options.mappingReader,

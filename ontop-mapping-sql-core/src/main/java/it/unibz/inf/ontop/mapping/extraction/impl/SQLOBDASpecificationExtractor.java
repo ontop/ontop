@@ -34,7 +34,7 @@ public class SQLOBDASpecificationExtractor implements OBDASpecificationExtractor
     @Override
     public OBDASpecification extract(@Nonnull File mappingFile, @Nonnull Optional<DBMetadata> dbMetadata,
                                      @Nonnull Optional<Ontology> ontology, ExecutorRegistry executorRegistry)
-            throws OBDASpecificationException, IOException {
+            throws OBDASpecificationException {
 
         OBDAModel ppMapping =  mappingParser.parse(mappingFile);
         return convertToDataSourceModel(ppMapping, dbMetadata, ontology, executorRegistry);
@@ -43,7 +43,7 @@ public class SQLOBDASpecificationExtractor implements OBDASpecificationExtractor
     @Override
     public OBDASpecification extract(@Nonnull Reader mappingReader, @Nonnull Optional<DBMetadata> dbMetadata,
                                      @Nonnull Optional<Ontology> ontology, ExecutorRegistry executorRegistry)
-            throws OBDASpecificationException, IOException {
+            throws OBDASpecificationException {
         OBDAModel ppModel =  mappingParser.parse(mappingReader);
         return convertToDataSourceModel(ppModel, dbMetadata, ontology, executorRegistry);
     }
@@ -51,7 +51,7 @@ public class SQLOBDASpecificationExtractor implements OBDASpecificationExtractor
     @Override
     public OBDASpecification extract(@Nonnull Model mappingGraph, @Nonnull Optional<DBMetadata> dbMetadata,
                                      @Nonnull Optional<Ontology> ontology, ExecutorRegistry executorRegistry)
-            throws OBDASpecificationException, IOException {
+            throws OBDASpecificationException {
         OBDAModel ppModel =  mappingParser.parse(mappingGraph);
         return convertToDataSourceModel(ppModel, dbMetadata, ontology, executorRegistry);
     }
@@ -59,7 +59,7 @@ public class SQLOBDASpecificationExtractor implements OBDASpecificationExtractor
     @Override
     public OBDASpecification extract(@Nonnull PreProcessedMapping ppMapping, @Nonnull Optional<DBMetadata> dbMetadata,
                                      @Nonnull Optional<Ontology> ontology, ExecutorRegistry executorRegistry)
-            throws OBDASpecificationException, IOException {
+            throws OBDASpecificationException {
         if (ppMapping instanceof OBDAModel) {
             return convertToDataSourceModel((OBDAModel) ppMapping, dbMetadata, ontology, executorRegistry);
         }

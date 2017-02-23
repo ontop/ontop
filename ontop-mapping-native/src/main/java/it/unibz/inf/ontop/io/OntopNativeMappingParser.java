@@ -95,30 +95,33 @@ public class OntopNativeMappingParser implements SQLMappingParser {
      *
      */
     @Override
-    public OBDAModel parse(File file) throws InvalidMappingException, IOException, DuplicateMappingException {
+    public OBDAModel parse(File file) throws InvalidMappingException, DuplicateMappingException, MappingIOException {
         checkFile(file);
-        Reader reader = new FileReader(file);
-        return load(reader, mappingFactory, nativeQLFactory, obdaFactory, file.getName());
+        try (Reader reader = new FileReader(file)) {
+            return load(reader, mappingFactory, nativeQLFactory, obdaFactory, file.getName());
+        } catch (IOException e) {
+            throw new MappingIOException(e);
+        }
     }
 
     @Override
-    public OBDAModel parse(Reader reader) throws InvalidMappingException, IOException, DuplicateMappingException {
+    public OBDAModel parse(Reader reader) throws InvalidMappingException, DuplicateMappingException, MappingIOException {
         return load(reader, mappingFactory, nativeQLFactory, obdaFactory, ".obda file");
     }
 
     @Override
-    public OBDAModel parse(Model mappingGraph) throws InvalidMappingException, IOException, DuplicateMappingException {
+    public OBDAModel parse(Model mappingGraph) throws InvalidMappingException, DuplicateMappingException {
         throw new IllegalArgumentException("The Ontop native mapping language has no RDF serialization. Passing a RDF graph" +
                 "to the OntopNativeMappingParser is thus invalid.");
     }
 
 
-    private static void checkFile(File file) throws IOException {
+    private static void checkFile(File file) throws MappingIOException {
         if (!file.exists()) {
-            throw new IOException("WARNING: Cannot locate OBDA file at: " + file.getPath());
+            throw new MappingIOException("WARNING: Cannot locate OBDA file at: " + file.getPath());
         }
         if (!file.canRead()) {
-            throw new IOException(String.format("Error while reading the file located at %s.\n" +
+            throw new MappingIOException(String.format("Error while reading the file located at %s.\n" +
                     "Make sure you have the read permission at the location specified.", file.getAbsolutePath()));
         }
     }
@@ -132,9 +135,7 @@ public class OntopNativeMappingParser implements SQLMappingParser {
 	private static OBDAModel load(Reader reader, MappingFactory mappingFactory,
                                   NativeQueryLanguageComponentFactory nativeQLFactory,
                                   OBDAFactoryWithException obdaFactory, String fileName)
-            throws IOException, InvalidMappingExceptionWithIndicator, DuplicateMappingException {
-
-        LineNumberReader lineNumberReader = new LineNumberReader(reader);
+            throws MappingIOException, InvalidMappingExceptionWithIndicator, DuplicateMappingException {
 
         final Map<String, String> prefixes = new HashMap<>();
         final List<OBDAMappingAxiom> mappings = new ArrayList<>();
@@ -144,51 +145,55 @@ public class OntopNativeMappingParser implements SQLMappingParser {
 		
 		String line;
 
-        while ((line = lineNumberReader.readLine()) != null) {
-        	try {
-	            if (isCommentLine(line) || line.isEmpty()) {
-	                continue; // skip comment lines and blank lines
-	            }
-	            if (line.contains(PREFIX_DECLARATION_TAG)) {
-	                prefixes.putAll(readPrefixDeclaration(lineNumberReader));
+        try (LineNumberReader lineNumberReader = new LineNumberReader(reader)) {
+
+            while ((line = lineNumberReader.readLine()) != null) {
+                try {
+                    if (isCommentLine(line) || line.isEmpty()) {
+                        continue; // skip comment lines and blank lines
+                    }
+                    if (line.contains(PREFIX_DECLARATION_TAG)) {
+                        prefixes.putAll(readPrefixDeclaration(lineNumberReader));
 
                     /*
                      * In case of late prefix declaration
                      */
-                    if (parsers != null) {
-                        parsers = createParsers(ImmutableMap.copyOf(prefixes));
-                    }
+                        if (parsers != null) {
+                            parsers = createParsers(ImmutableMap.copyOf(prefixes));
+                        }
 
-	            } else if (line.contains(CLASS_DECLARATION_TAG)) {
-	            	// deprecated tag
-	            	throw new UnsupportedTagException(CLASS_DECLARATION_TAG);
-	            } else if (line.contains(OBJECT_PROPERTY_DECLARATION_TAG)) {
-	            	// deprecated tag
-	            	throw new UnsupportedTagException(OBJECT_PROPERTY_DECLARATION_TAG);
-	            } else if (line.contains(DATA_PROPERTY_DECLARATION_TAG)) {
-	            	// deprecated tag
-	            	throw new UnsupportedTagException(DATA_PROPERTY_DECLARATION_TAG);
-	            } else if (line.contains(SOURCE_DECLARATION_TAG)) {
-	                // This exception wil be rethrown
-                    throw new RuntimeException("Source declaration is not supported anymore (since 3.0). " +
-                            "Please give this information with the Ontop configuration.");
-	            } else if (line.contains(MAPPING_DECLARATION_TAG)) {
-                    if (parsers == null) {
-                        parsers = createParsers(ImmutableMap.copyOf(prefixes));
+                    } else if (line.contains(CLASS_DECLARATION_TAG)) {
+                        // deprecated tag
+                        throw new UnsupportedTagException(CLASS_DECLARATION_TAG);
+                    } else if (line.contains(OBJECT_PROPERTY_DECLARATION_TAG)) {
+                        // deprecated tag
+                        throw new UnsupportedTagException(OBJECT_PROPERTY_DECLARATION_TAG);
+                    } else if (line.contains(DATA_PROPERTY_DECLARATION_TAG)) {
+                        // deprecated tag
+                        throw new UnsupportedTagException(DATA_PROPERTY_DECLARATION_TAG);
+                    } else if (line.contains(SOURCE_DECLARATION_TAG)) {
+                        // This exception wil be rethrown
+                        throw new RuntimeException("Source declaration is not supported anymore (since 3.0). " +
+                                "Please give this information with the Ontop configuration.");
+                    } else if (line.contains(MAPPING_DECLARATION_TAG)) {
+                        if (parsers == null) {
+                            parsers = createParsers(ImmutableMap.copyOf(prefixes));
+                        }
+                        mappings.addAll(readMappingDeclaration(lineNumberReader, parsers, invalidMappingIndicators,
+                                nativeQLFactory));
+                    } else {
+                        throw new IOException("Unknown syntax: " + line);
                     }
-	                mappings.addAll(readMappingDeclaration(lineNumberReader, parsers, invalidMappingIndicators,
-                            nativeQLFactory));
-	            } else {
-	                throw new IOException("Unknown syntax: " + line);
-	            }
-	       	} catch (Exception e) {
-	        	throw new IOException(String.format("ERROR reading %s at line: %s", fileName,
-                        lineNumberReader.getLineNumber()
-                        + " \nMESSAGE: " + e.getMessage()), e);
-	        }
+                } catch (Exception e) {
+                    throw new IOException(String.format("ERROR reading %s at line: %s", fileName,
+                            lineNumberReader.getLineNumber()
+                                    + " \nMESSAGE: " + e.getMessage()), e);
+                }
+            }
+        } catch (IOException e) {
+            throw new MappingIOException(e);
         }
-        reader.close();
-        
+
         // Throw some validation exceptions
         if (!invalidMappingIndicators.isEmpty()) {
             throw new InvalidMappingExceptionWithIndicator(invalidMappingIndicators);

@@ -3,13 +3,13 @@ package it.unibz.inf.ontop.r2rml;
 import eu.optique.api.mapping.TriplesMap;
 import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.exception.InvalidMappingException;
+import it.unibz.inf.ontop.exception.MappingIOException;
 import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
 import it.unibz.inf.ontop.injection.OntopMappingSQLAllConfiguration;
 import it.unibz.inf.ontop.model.OBDAModel;
 import org.junit.Test;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.Collection;
 import java.util.Properties;
 
@@ -19,7 +19,7 @@ import static junit.framework.TestCase.assertTrue;
 public class OBDAMappingTransformerDebugTest {
 
     @Test
-    public void testMultipleSubjectsInMappingTarget() throws IOException, InvalidMappingException, DuplicateMappingException {
+    public void testMultipleSubjectsInMappingTarget() throws MappingIOException, InvalidMappingException, DuplicateMappingException {
         File mapFile = new File("src/test/resources/obdaMappingTransformerTests/splitMappingAxiomBySubject.obda");
 
         OntopMappingSQLAllConfiguration config = OntopMappingSQLAllConfiguration.defaultBuilder()
@@ -40,7 +40,7 @@ public class OBDAMappingTransformerDebugTest {
     }
 
     @Test
-    public void testPredicateMapTranslation() throws IOException, InvalidMappingException, DuplicateMappingException {
+    public void testPredicateMapTranslation() throws MappingIOException, InvalidMappingException, DuplicateMappingException {
         File mapFile = new File("src/test/resources/obdaMappingTransformerTests/predicateMap.obda");
         OntopMappingSQLAllConfiguration config = OntopMappingSQLAllConfiguration.defaultBuilder()
                 .properties(generateProperties())

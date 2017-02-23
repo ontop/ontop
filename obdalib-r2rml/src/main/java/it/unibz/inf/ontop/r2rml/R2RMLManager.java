@@ -29,6 +29,7 @@ import eu.optique.api.mapping.Join;
 import eu.optique.api.mapping.PredicateObjectMap;
 import eu.optique.api.mapping.RefObjectMap;
 import eu.optique.api.mapping.TriplesMap;
+import it.unibz.inf.ontop.exception.MappingIOException;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.SQLMappingFactoryImpl;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
@@ -63,7 +64,8 @@ public class R2RMLManager {
 	 * Constructor to start parsing R2RML mappings from file.
 	 * @param file - the full path of the file
 	 */
-	public R2RMLManager(String file, NativeQueryLanguageComponentFactory nativeQLFactory) throws RDFParseException, IOException, RDFHandlerException {
+	public R2RMLManager(String file, NativeQueryLanguageComponentFactory nativeQLFactory)
+			throws RDFParseException, MappingIOException, RDFHandlerException {
 		this(new File(file), nativeQLFactory);
 	}
 	
@@ -71,9 +73,11 @@ public class R2RMLManager {
 	 * Constructor to start parsing R2RML mappings from file.
 	 * @param file - the File object
 	 */
-	public R2RMLManager(File file, NativeQueryLanguageComponentFactory nativeQLFactory) throws IOException, RDFParseException, RDFHandlerException {
+	public R2RMLManager(File file, NativeQueryLanguageComponentFactory nativeQLFactory)
+			throws MappingIOException, RDFParseException, RDFHandlerException {
 
-			myModel = new LinkedHashModel();			
+		try {
+			myModel = new LinkedHashModel();
 			RDFParser parser = Rio.createParser(RDFFormat.TURTLE);
 			InputStream in = new FileInputStream(file);
 			URL documentUrl = new URL("file://" + file);
@@ -83,6 +87,9 @@ public class R2RMLManager {
 			r2rmlParser = new R2RMLParser();
 
 			this.nativeQLFactory = nativeQLFactory;
+		} catch (IOException e) {
+			throw new MappingIOException(e);
+		}
 
 	}
 	

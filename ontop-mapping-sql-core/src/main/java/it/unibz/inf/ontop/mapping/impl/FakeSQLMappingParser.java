@@ -21,17 +21,17 @@ public class FakeSQLMappingParser implements SQLMappingParser {
     }
 
     @Override
-    public OBDAModel parse(File file) throws InvalidMappingException, IOException, DuplicateMappingException {
+    public OBDAModel parse(File file) throws InvalidMappingException, DuplicateMappingException {
         throw new UnsupportedOperationException("This mapping parser is fake and thus does not parse");
     }
 
     @Override
-    public OBDAModel parse(Reader reader) throws InvalidMappingException, IOException, DuplicateMappingException {
+    public OBDAModel parse(Reader reader) throws InvalidMappingException, DuplicateMappingException {
         throw new UnsupportedOperationException("This mapping parser is fake and thus does not parse");
     }
 
     @Override
-    public OBDAModel parse(Model mappingGraph) throws InvalidMappingException, IOException, DuplicateMappingException {
+    public OBDAModel parse(Model mappingGraph) throws InvalidMappingException, DuplicateMappingException {
         throw new UnsupportedOperationException("This mapping parser is fake and thus does not parse");
     }
 }
