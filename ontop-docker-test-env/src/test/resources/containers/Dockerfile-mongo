@@ -1,0 +1,10 @@
+FROM mongo:latest
+
+RUN mkdir -p /tmp/sql_scripts/
+
+COPY sql/mongo/*.sql /tmp/sql_scripts/
+COPY load-scripts-mongo.sh /data/db
+
+
+
+# docker run --name some-mongo -d mongo

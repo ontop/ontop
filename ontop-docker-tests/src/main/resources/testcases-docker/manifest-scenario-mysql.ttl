@@ -6,6 +6,10 @@
 <>  rdf:type mf:Manifest ;
     rdfs:label "Quest query evaluation scenario tests" ;
     mf:include (
-        <sparql/filter/regex/manifest-mysql.ttl>
+        #<sparql/filter/regex/manifest-mysql.ttl>
+        <virtual-mode/stockexchange/datatypes/manifest-mysql.ttl>
+        <virtual-mode/stockexchange/filters/manifest-mysql.ttl>
+        <virtual-mode/stockexchange/modifiers/manifest-mysql.ttl>
+        <virtual-mode/stockexchange/simplecq/manifest-mysql.ttl>
     ).
 

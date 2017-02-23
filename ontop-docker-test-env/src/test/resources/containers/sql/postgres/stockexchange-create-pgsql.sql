@@ -6,7 +6,7 @@
 -- Dumped by pg_dump version 9.3.1
 -- Started on 2017-01-20 11:38:09 CET
 
-DROP DATABASE stockexchange_new;
+DROP DATABASE IF EXISTS stockexchange_new;
 --
 -- TOC entry 1958 (class 1262 OID 1208187)
 -- Name: stockexchange_new; Type: DATABASE; Schema: -; Owner: -
@@ -16,13 +16,6 @@ CREATE DATABASE stockexchange_new WITH TEMPLATE = template0 ENCODING = 'UTF8' LC
 
 
 \connect stockexchange_new
-
---
--- TOC entry 6 (class 2615 OID 2200)
--- Name: public; Type: SCHEMA; Schema: -; Owner: -
---
-
-CREATE SCHEMA public;
 
 
 --

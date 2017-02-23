@@ -1,5 +1,6 @@
 
 FROM alexeiled/docker-oracle-xe-11g
+# FROM wnameless/oracle-xe-11g
 
 
 RUN mkdir -p /tmp/sql_scripts/
@@ -18,10 +19,6 @@ RUN sed -i -E "s/HOST = [^)]+/HOST = $HOSTNAME/g" /u01/app/oracle/product/11.2.0
 	service oracle-xe start; \
     bash load-scripts-oracle.sh \
     service oracle-xe stop; \
-
-
-
-
 
 
 # docker build -t ontop_oracle .
@@ -45,7 +42,7 @@ RUN sed -i -E "s/HOST = [^)]+/HOST = $HOSTNAME/g" /u01/app/oracle/product/11.2.0
 
 # password for SYS = oracle
 
-# Oracle applicaiton expresss
+# Oracle application expresss
 
 # url: http://localhost:49162/apex
 # workspace: INTERNAL

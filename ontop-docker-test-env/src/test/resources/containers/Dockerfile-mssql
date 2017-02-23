@@ -1,0 +1,11 @@
+
+FROM mssql-server-linux:latest
+
+RUN mkdir -p /tmp/sql_scripts/
+
+COPY sql/mssql/*.sql /tmp/sql_scripts/
+
+RUN TO DO
+
+
+#docker run -e 'ACCEPT_EULA=Y' -e 'SA_PASSWORD=yourStrong(!)Password' -p 1433:1433 -d microsoft/mssql-server-linux
