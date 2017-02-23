@@ -36,6 +36,6 @@ public class TemporalJoinExpressionImpl implements TemporalJoinExpression, NAryT
 
     @Override
     public String render() {
-        return operands.stream().map(TemporalExpression::render).collect(joining(","));
+        return operands.stream().map(TemporalExpression::render).collect(joining(", "));
     }
 }
