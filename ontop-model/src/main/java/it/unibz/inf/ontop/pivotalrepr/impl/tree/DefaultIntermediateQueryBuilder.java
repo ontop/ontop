@@ -5,6 +5,7 @@ import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.injection.OntopModelFactory;
 import it.unibz.inf.ontop.injection.OntopModelSettings;
+import it.unibz.inf.ontop.model.DBMetadata;
 import it.unibz.inf.ontop.model.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.pivotalrepr.*;
 import it.unibz.inf.ontop.pivotalrepr.BinaryOrderedOperatorNode.ArgumentPosition;
@@ -21,7 +22,7 @@ import java.util.Optional;
  */
 public class DefaultIntermediateQueryBuilder implements IntermediateQueryBuilder {
 
-    private final MetadataForQueryOptimization metadata;
+    private final DBMetadata dbMetadata;
     private final ExecutorRegistry executorRegistry;
     private final OntopModelFactory modelFactory;
     private final IntermediateQueryValidator validator;
@@ -31,12 +32,12 @@ public class DefaultIntermediateQueryBuilder implements IntermediateQueryBuilder
     private boolean canEdit;
 
     @AssistedInject
-    protected DefaultIntermediateQueryBuilder(@Assisted MetadataForQueryOptimization metadata,
+    protected DefaultIntermediateQueryBuilder(@Assisted DBMetadata dbMetadata,
                                             @Assisted ExecutorRegistry executorRegistry,
                                             OntopModelFactory modelFactory,
                                             IntermediateQueryValidator validator,
                                             OntopModelSettings settings) {
-        this.metadata = metadata;
+        this.dbMetadata = dbMetadata;
         this.executorRegistry = executorRegistry;
         this.modelFactory = modelFactory;
         this.validator = validator;
@@ -100,7 +101,7 @@ public class DefaultIntermediateQueryBuilder implements IntermediateQueryBuilder
     public IntermediateQuery build() throws IntermediateQueryBuilderException{
         checkInitialization();
 
-        IntermediateQuery query = buildQuery(metadata, projectionAtom, new DefaultQueryTreeComponent(tree));
+        IntermediateQuery query = buildQuery(dbMetadata, projectionAtom, new DefaultQueryTreeComponent(tree));
         canEdit = false;
         return query;
     }
@@ -108,7 +109,7 @@ public class DefaultIntermediateQueryBuilder implements IntermediateQueryBuilder
     /**
      * Can be overwritten to use another constructor
      */
-    protected IntermediateQuery buildQuery(MetadataForQueryOptimization metadata,
+    protected IntermediateQuery buildQuery(DBMetadata metadata,
                                            DistinctVariableOnlyDataAtom projectionAtom,
                                            QueryTreeComponent treeComponent) {
 

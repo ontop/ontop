@@ -63,7 +63,7 @@ public class DatalogProgram2QueryConverterImpl implements DatalogProgram2QueryCo
      *
      */
     @Override
-    public IntermediateQuery convertDatalogProgram(MetadataForQueryOptimization metadata,
+    public IntermediateQuery convertDatalogProgram(DBMetadata dbMetadata,
                                                    DatalogProgram queryProgram,
                                                    Collection<Predicate> tablePredicates,
                                                    ExecutorRegistry executorRegistry)
@@ -88,7 +88,7 @@ public class DatalogProgram2QueryConverterImpl implements DatalogProgram2QueryCo
         /**
          * TODO: explain
          */
-        IntermediateQuery intermediateQuery = convertDatalogDefinitions(metadata, rootPredicate, ruleIndex, tablePredicates,
+        IntermediateQuery intermediateQuery = convertDatalogDefinitions(dbMetadata, rootPredicate, ruleIndex, tablePredicates,
                 topQueryModifiers, executorRegistry).get();
 
         /**
@@ -96,7 +96,7 @@ public class DatalogProgram2QueryConverterImpl implements DatalogProgram2QueryCo
          */
         for (int i=1; i < topDownPredicates.size() ; i++) {
             Predicate datalogAtomPredicate  = topDownPredicates.get(i);
-            Optional<IntermediateQuery> optionalSubQuery = convertDatalogDefinitions(metadata, datalogAtomPredicate,
+            Optional<IntermediateQuery> optionalSubQuery = convertDatalogDefinitions(dbMetadata, datalogAtomPredicate,
                     ruleIndex, tablePredicates, NO_QUERY_MODIFIER, executorRegistry);
             if (optionalSubQuery.isPresent()) {
 
@@ -128,7 +128,7 @@ public class DatalogProgram2QueryConverterImpl implements DatalogProgram2QueryCo
      * TODO: explain and comment
      */
     @Override
-    public Optional<IntermediateQuery> convertDatalogDefinitions(MetadataForQueryOptimization metadata,
+    public Optional<IntermediateQuery> convertDatalogDefinitions(DBMetadata dbMetadata,
                                                                  Predicate datalogAtomPredicate,
                                                                  Multimap<Predicate, CQIE> datalogRuleIndex,
                                                                  Collection<Predicate> tablePredicates,
@@ -141,13 +141,13 @@ public class DatalogProgram2QueryConverterImpl implements DatalogProgram2QueryCo
                 return Optional.empty();
             case 1:
                 CQIE definition = atomDefinitions.iterator().next();
-                return Optional.of(convertDatalogRule(metadata, definition, tablePredicates, optionalModifiers,
+                return Optional.of(convertDatalogRule(dbMetadata, definition, tablePredicates, optionalModifiers,
                         modelFactory, executorRegistry));
             default:
                 List<IntermediateQuery> convertedDefinitions = new ArrayList<>();
                 for (CQIE datalogAtomDefinition : atomDefinitions) {
                     convertedDefinitions.add(
-                            convertDatalogRule(metadata, datalogAtomDefinition, tablePredicates,
+                            convertDatalogRule(dbMetadata, datalogAtomDefinition, tablePredicates,
                                     Optional.<ImmutableQueryModifiers>empty(), modelFactory, executorRegistry));
                 }
                 return IntermediateQueryUtils.mergeDefinitions(convertedDefinitions, optionalModifiers);

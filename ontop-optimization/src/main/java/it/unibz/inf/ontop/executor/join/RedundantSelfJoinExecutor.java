@@ -48,7 +48,7 @@ public class RedundantSelfJoinExecutor extends SelfJoinLikeExecutor implements I
 
             try {
                 Optional<ConcreteProposal> optionalConcreteProposal = propose(initialMap, priorityVariables,
-                        query.getMetadata().getUniqueConstraints());
+                        query.getDBMetadata().getUniqueConstraints());
 
                 if (!optionalConcreteProposal.isPresent()) {
                     break;

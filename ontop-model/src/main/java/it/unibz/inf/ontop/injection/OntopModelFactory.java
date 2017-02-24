@@ -1,7 +1,7 @@
 package it.unibz.inf.ontop.injection;
 
+import it.unibz.inf.ontop.model.DBMetadata;
 import it.unibz.inf.ontop.pivotalrepr.IntermediateQueryBuilder;
-import it.unibz.inf.ontop.pivotalrepr.MetadataForQueryOptimization;
 import it.unibz.inf.ontop.pivotalrepr.utils.ExecutorRegistry;
 
 /**
@@ -11,7 +11,6 @@ import it.unibz.inf.ontop.pivotalrepr.utils.ExecutorRegistry;
  */
 public interface OntopModelFactory {
 
-    IntermediateQueryBuilder create(MetadataForQueryOptimization metadata,
-                                    ExecutorRegistry executorRegistry);
+    IntermediateQueryBuilder create(DBMetadata metadata, ExecutorRegistry executorRegistry);
 
 }

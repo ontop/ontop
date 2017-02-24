@@ -99,7 +99,7 @@ public class DatalogRule2QueryConverter {
     /**
      * TODO: describe
      */
-    public static IntermediateQuery convertDatalogRule(MetadataForQueryOptimization metadata, CQIE datalogRule,
+    public static IntermediateQuery convertDatalogRule(DBMetadata dbMetadata, CQIE datalogRule,
                                                        Collection<Predicate> tablePredicates,
                                                        Optional<ImmutableQueryModifiers> optionalModifiers,
                                                        OntopModelFactory modelFactory,
@@ -115,21 +115,21 @@ public class DatalogRule2QueryConverter {
 
         List<Function> bodyAtoms = List.iterableList(datalogRule.getBody());
         if (bodyAtoms.isEmpty()) {
-            return createFact(metadata, rootNode, projectionAtom, executorRegistry, modelFactory);
+            return createFact(dbMetadata, rootNode, projectionAtom, executorRegistry, modelFactory);
         }
         else {
             AtomClassification atomClassification = new AtomClassification(bodyAtoms);
 
-            return createDefinition(metadata, rootNode, projectionAtom, tablePredicates,
+            return createDefinition(dbMetadata, rootNode, projectionAtom, tablePredicates,
                     atomClassification.dataAndCompositeAtoms, atomClassification.booleanAtoms,
                     atomClassification.optionalGroupAtom, modelFactory, executorRegistry);
         }
     }
 
-    private static IntermediateQuery createFact(MetadataForQueryOptimization metadata, ConstructionNode rootNode,
+    private static IntermediateQuery createFact(DBMetadata dbMetadata, ConstructionNode rootNode,
                                                 DistinctVariableOnlyDataAtom projectionAtom, ExecutorRegistry executorRegistry,
                                                 OntopModelFactory modelFactory) {
-        IntermediateQueryBuilder queryBuilder = modelFactory.create(metadata, executorRegistry);
+        IntermediateQueryBuilder queryBuilder = modelFactory.create(dbMetadata, executorRegistry);
         queryBuilder.init(projectionAtom, rootNode);
         return queryBuilder.build();
     }
@@ -138,7 +138,7 @@ public class DatalogRule2QueryConverter {
     /**
      * TODO: explain
      */
-    private static IntermediateQuery createDefinition(MetadataForQueryOptimization metadata, ConstructionNode rootNode,
+    private static IntermediateQuery createDefinition(DBMetadata dbMetadata, ConstructionNode rootNode,
                                                       DistinctVariableOnlyDataAtom projectionAtom,
                                                       Collection<Predicate> tablePredicates,
                                                       List<Function> dataAndCompositeAtoms,
@@ -152,7 +152,7 @@ public class DatalogRule2QueryConverter {
         Optional<JoinOrFilterNode> optionalFilterOrJoinNode = createFilterOrJoinNode(dataAndCompositeAtoms, booleanAtoms);
 
         // Non final
-        IntermediateQueryBuilder queryBuilder = modelFactory.create(metadata, executorRegistry);
+        IntermediateQueryBuilder queryBuilder = modelFactory.create(dbMetadata, executorRegistry);
 
         try {
             queryBuilder.init(projectionAtom, rootNode);

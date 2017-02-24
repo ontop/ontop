@@ -34,6 +34,7 @@ import com.google.common.collect.Sets;
 import com.google.common.io.Resources;
 import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.exception.InvalidMappingException;
+import it.unibz.inf.ontop.exception.MappingIOException;
 import it.unibz.inf.ontop.injection.OntopMappingSettings;
 import it.unibz.inf.ontop.injection.OntopSQLCoreSettings;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
@@ -299,7 +300,7 @@ public class RDB2RDFTest {
 	 * Bootstraps the mapping and returns a new configuration
 	 */
 	OntopSQLOWLAPIConfiguration bootstrapDMConfiguration()
-			throws SQLException, IOException, InvalidMappingException, OWLOntologyStorageException,
+			throws SQLException, MappingIOException, InvalidMappingException, OWLOntologyStorageException,
 			OWLOntologyCreationException, DuplicateMappingException {
 
 		OntopSQLOWLAPIConfiguration initialConfiguration = createInMemoryBuilder().build();

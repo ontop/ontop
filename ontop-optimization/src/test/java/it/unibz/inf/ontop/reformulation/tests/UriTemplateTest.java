@@ -46,23 +46,13 @@ public class UriTemplateTest {
 
     private final static AtomPredicate ANS1_PREDICATE_1 = new AtomPredicateImpl("ans1", 1);
 
-    private final MetadataForQueryOptimization metadata;
-
     public UriTemplateTest() {
-        metadata = initMetadata();
-    }
-
-    /**
-     * TODO: init the UriTemplateMatcher
-     */
-    private static MetadataForQueryOptimization initMetadata() {
-        return new EmptyMetadataForQueryOptimization();
     }
 
     @Ignore
     @Test
     public void testCompatibleUriTemplates1() throws EmptyQueryException {
-        IntermediateQueryBuilder initialQueryBuilder = createQueryBuilder(metadata);
+        IntermediateQueryBuilder initialQueryBuilder = createQueryBuilder(EMPTY_METADATA);
 
         DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_1, X);
         ConstructionNode rootNode = new ConstructionNodeImpl(projectionAtom.getVariables());

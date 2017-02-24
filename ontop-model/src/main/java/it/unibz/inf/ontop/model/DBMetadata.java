@@ -38,7 +38,7 @@ public interface DBMetadata extends Serializable {
      *
      *
      */
-    ImmutableMultimap<AtomPredicate,ImmutableList<Integer>> extractUniqueConstraints();
+    ImmutableMultimap<AtomPredicate,ImmutableList<Integer>> getUniqueConstraints();
 
     /**
      * generate CQIE rules from foreign key info of db metadata
@@ -73,6 +73,11 @@ public interface DBMetadata extends Serializable {
      * Retrieves the tables list form the metadata.
      */
     Collection<DatabaseRelationDefinition> getDatabaseRelations();
+
+    /**
+     * After calling this method, the DBMetadata cannot be modified
+     */
+    void freeze();
 
 
 }

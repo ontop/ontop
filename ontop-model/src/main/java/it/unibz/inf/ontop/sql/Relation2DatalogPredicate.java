@@ -2,25 +2,35 @@ package it.unibz.inf.ontop.sql;
 
 import java.util.List;
 
+import it.unibz.inf.ontop.model.AtomPredicate;
 import it.unibz.inf.ontop.model.Function;
 import it.unibz.inf.ontop.model.Predicate;
 import it.unibz.inf.ontop.model.Term;
+import it.unibz.inf.ontop.model.impl.AtomPredicateImpl;
 
 import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
 
 public class Relation2DatalogPredicate {
 
 	public static Predicate createPredicateFromRelation(RelationDefinition r) {
-		RelationID id = r.getID();
 		
+		Predicate pred = DATA_FACTORY.getPredicate(extractPredicateName(r), r.getAttributes().size());
+		return pred;
+	}
+
+	private static String extractPredicateName(RelationDefinition r) {
+		RelationID id = r.getID();
 		String name = id.getSchemaName();
 		if (name == null)
 			name =  id.getTableName();
 		else
 			name = name + "." + id.getTableName();
-		
-		Predicate pred = DATA_FACTORY.getPredicate(name, r.getAttributes().size());
-		return pred;
+		return name;
+	}
+
+	public static AtomPredicate createAtomPredicateFromRelation(RelationDefinition r) {
+		// TODO: use a factory
+		return new AtomPredicateImpl(extractPredicateName(r), r.getAttributes().size());
 	}
 	
 	public static Function getAtom(RelationDefinition r, List<Term> terms) {
@@ -50,5 +60,5 @@ public class Relation2DatalogPredicate {
 			return RelationID.createRelationIdFromDatabaseRecord(idfac,
 					s.substring(0, position), s.substring(position + 1, s.length()));
 		}
-	}	
+	}
 }

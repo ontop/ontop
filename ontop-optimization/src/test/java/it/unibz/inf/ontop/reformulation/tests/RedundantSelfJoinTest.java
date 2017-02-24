@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.reformulation.tests;
 
+import java.sql.Types;
 import java.util.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -13,7 +14,7 @@ import it.unibz.inf.ontop.pivotalrepr.equivalence.IQSyntacticEquivalenceChecker;
 import it.unibz.inf.ontop.pivotalrepr.impl.*;
 import it.unibz.inf.ontop.pivotalrepr.proposal.InvalidQueryOptimizationProposalException;
 import it.unibz.inf.ontop.pivotalrepr.proposal.NodeCentricOptimizationResults;
-import it.unibz.inf.ontop.sql.DBMetadataTestingTools;
+import it.unibz.inf.ontop.sql.*;
 import org.junit.Test;
 import it.unibz.inf.ontop.pivotalrepr.proposal.impl.InnerJoinOptimizationProposalImpl;
 import it.unibz.inf.ontop.model.*;
@@ -39,12 +40,12 @@ import static it.unibz.inf.ontop.OptimizationTestingTools.*;
  */
 public class RedundantSelfJoinTest {
 
-    private final static AtomPredicate TABLE1_PREDICATE = new AtomPredicateImpl("table1", 3);
-    private final static AtomPredicate TABLE2_PREDICATE = new AtomPredicateImpl("table2", 3);
-    private final static AtomPredicate TABLE3_PREDICATE = new AtomPredicateImpl("table3", 3);
-    private final static AtomPredicate TABLE4_PREDICATE = new AtomPredicateImpl("table4", 2);
-    private final static AtomPredicate TABLE5_PREDICATE = new AtomPredicateImpl("table5", 2);
-    private final static AtomPredicate TABLE6_PREDICATE = new AtomPredicateImpl("table6", 3);
+    private final static AtomPredicate TABLE1_PREDICATE;
+    private final static AtomPredicate TABLE2_PREDICATE;
+    private final static AtomPredicate TABLE3_PREDICATE;
+    private final static AtomPredicate TABLE4_PREDICATE;
+    private final static AtomPredicate TABLE5_PREDICATE;
+    private final static AtomPredicate TABLE6_PREDICATE;
     private final static AtomPredicate ANS1_PREDICATE = new AtomPredicateImpl("ans1", 3);
     private final static AtomPredicate ANS1_PREDICATE_1 = new AtomPredicateImpl("ans1", 1);
     private final static AtomPredicate ANS1_PREDICATE_2 = new AtomPredicateImpl("ans1", 2);
@@ -72,50 +73,79 @@ public class RedundantSelfJoinTest {
     private final static ImmutableExpression EXPRESSION1 = DATA_FACTORY.getImmutableExpression(
             ExpressionOperation.EQ, M, N);
 
-    private static final MetadataForQueryOptimization METADATA = initMetadata();
+    private static final DBMetadata METADATA;
 
     private static URITemplatePredicate URI_PREDICATE_ONE_VAR =  new URITemplatePredicateImpl(2);
     private static Constant URI_TEMPLATE_STR_1 =  DATA_FACTORY.getConstantLiteral("http://example.org/ds1/{}");
     private static Constant URI_TEMPLATE_STR_2 =  DATA_FACTORY.getConstantLiteral("http://example.org/ds2/{}");
 
-    private static MetadataForQueryOptimization initMetadata() {
-        ImmutableMultimap.Builder<AtomPredicate, ImmutableList<Integer>> uniqueKeyBuilder = ImmutableMultimap.builder();
+    static{
+        BasicDBMetadata dbMetadata = DBMetadataTestingTools.createDummyMetadata();
+        QuotedIDFactory idFactory = dbMetadata.getQuotedIDFactory();
 
         /**
          * Table 1: non-composite unique constraint and regular field
          */
-        uniqueKeyBuilder.put(TABLE1_PREDICATE, ImmutableList.of(1));
+        DatabaseRelationDefinition table1Def = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null,"table1"));
+        Attribute col1T1 = table1Def.addAttribute(idFactory.createAttributeID("col1"), Types.INTEGER, null, false);
+        table1Def.addAttribute(idFactory.createAttributeID("col2"), Types.INTEGER, null, false);
+        table1Def.addAttribute(idFactory.createAttributeID("col3"), Types.INTEGER, null, false);
+        table1Def.addUniqueConstraint(UniqueConstraint.primaryKeyOf(col1T1));
+        TABLE1_PREDICATE = Relation2DatalogPredicate.createAtomPredicateFromRelation(table1Def);
 
         /**
          * Table 2: non-composite unique constraint and regular field
          */
-        uniqueKeyBuilder.put(TABLE2_PREDICATE, ImmutableList.of(2));
+        DatabaseRelationDefinition table2Def = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null,"table2"));
+        table2Def.addAttribute(idFactory.createAttributeID("col1"), Types.INTEGER, null, false);
+        Attribute col2T2 = table2Def.addAttribute(idFactory.createAttributeID("col2"), Types.INTEGER, null, false);
+        table2Def.addAttribute(idFactory.createAttributeID("col3"), Types.INTEGER, null, false);
+        table2Def.addUniqueConstraint(UniqueConstraint.primaryKeyOf(col2T2));
+        TABLE2_PREDICATE = Relation2DatalogPredicate.createAtomPredicateFromRelation(table2Def);
 
         /**
          * Table 3: composite unique constraint over the first TWO columns
          */
-        uniqueKeyBuilder.put(TABLE3_PREDICATE, ImmutableList.of(1, 2));
+        DatabaseRelationDefinition table3Def = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null,"table3"));
+        Attribute col1T3 = table3Def.addAttribute(idFactory.createAttributeID("col1"), Types.INTEGER, null, false);
+        Attribute col2T3 = table3Def.addAttribute(idFactory.createAttributeID("col2"), Types.INTEGER, null, false);
+        table3Def.addAttribute(idFactory.createAttributeID("col3"), Types.INTEGER, null, false);
+        table3Def.addUniqueConstraint(UniqueConstraint.primaryKeyOf(col1T3, col2T3));
+        TABLE3_PREDICATE = Relation2DatalogPredicate.createAtomPredicateFromRelation(table3Def);
 
         /**
          * Table 4: unique constraint over the first column
          */
-        uniqueKeyBuilder.put(TABLE4_PREDICATE, ImmutableList.of(1));
+        DatabaseRelationDefinition table4Def = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null,"table4"));
+        Attribute col1T4 = table4Def.addAttribute(idFactory.createAttributeID("col1"), Types.INTEGER, null, false);
+        table4Def.addAttribute(idFactory.createAttributeID("col2"), Types.INTEGER, null, false);
+        table4Def.addUniqueConstraint(UniqueConstraint.primaryKeyOf(col1T4));
+        TABLE4_PREDICATE = Relation2DatalogPredicate.createAtomPredicateFromRelation(table4Def);
 
         /**
          * Table 5: unique constraint over the second column
          */
-        uniqueKeyBuilder.put(TABLE5_PREDICATE, ImmutableList.of(2));
+        DatabaseRelationDefinition table5Def = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null,"table5"));
+        table5Def.addAttribute(idFactory.createAttributeID("col1"), Types.INTEGER, null, false);
+        Attribute col2T5 = table5Def.addAttribute(idFactory.createAttributeID("col2"), Types.INTEGER, null, false);
+        table5Def.addUniqueConstraint(UniqueConstraint.primaryKeyOf(col2T5));
+        TABLE5_PREDICATE = Relation2DatalogPredicate.createAtomPredicateFromRelation(table5Def);
 
         /**
          * Table 6: two atomic unique constraints over the first and third columns
          */
-        uniqueKeyBuilder.put(TABLE6_PREDICATE, ImmutableList.of(1));
-        uniqueKeyBuilder.put(TABLE6_PREDICATE, ImmutableList.of(3));
+        DatabaseRelationDefinition table6Def = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null,"table1"));
+        Attribute col1T6 = table6Def.addAttribute(idFactory.createAttributeID("col1"), Types.INTEGER, null, false);
+        table6Def.addAttribute(idFactory.createAttributeID("col2"), Types.INTEGER, null, false);
+        Attribute col3T6 = table6Def.addAttribute(idFactory.createAttributeID("col3"), Types.INTEGER, null, false);
+        table6Def.addUniqueConstraint(UniqueConstraint.primaryKeyOf(col1T6));
+        table6Def.addUniqueConstraint(new UniqueConstraint.Builder(table6Def)
+                .add(col3T6)
+                .build("table6-uc3", false));
+        TABLE6_PREDICATE = Relation2DatalogPredicate.createAtomPredicateFromRelation(table6Def);
 
-
-        return new MetadataForQueryOptimizationImpl(
-                DBMetadataTestingTools.createDummyMetadata(),
-                uniqueKeyBuilder.build());
+        dbMetadata.freeze();
+        METADATA = dbMetadata;
     }
 
     @Test
@@ -1303,7 +1333,7 @@ public class RedundantSelfJoinTest {
     }
 
 
-    private static P2<IntermediateQueryBuilder, InnerJoinNode> initAns1(MetadataForQueryOptimization metadata)
+    private static P2<IntermediateQueryBuilder, InnerJoinNode> initAns1(DBMetadata metadata)
             throws IntermediateQueryBuilderException {
         IntermediateQueryBuilder queryBuilder = createQueryBuilder(metadata);
 

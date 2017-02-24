@@ -25,6 +25,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.exception.InvalidMappingException;
+import it.unibz.inf.ontop.exception.MappingIOException;
 import it.unibz.inf.ontop.injection.*;
 import it.unibz.inf.ontop.mapping.MappingMetadata;
 import it.unibz.inf.ontop.model.*;
@@ -38,10 +39,10 @@ import it.unibz.inf.ontop.sql.JDBCConnectionManager;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.*;
 
-import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.*;
+import java.util.stream.Stream;
 
 import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
 
@@ -88,7 +89,7 @@ public class DirectMappingEngine {
 	 *
 	 */
 	public static BootstrappingResults bootstrap(OntopSQLOWLAPIConfiguration configuration, String baseIRI)
-			throws IOException, InvalidMappingException, OWLOntologyCreationException, SQLException, OWLOntologyStorageException, DuplicateMappingException {
+			throws MappingIOException, InvalidMappingException, OWLOntologyCreationException, SQLException, OWLOntologyStorageException, DuplicateMappingException {
 		DirectMappingEngine engine = configuration.getInjector().getInstance(DirectMappingEngine.class);
 		return engine.bootstrapMappingAndOntology(baseIRI, configuration.loadPPMapping(),
 				configuration.loadInputOntology());
@@ -189,7 +190,7 @@ public class DirectMappingEngine {
 	 */
 	private OBDAModel extractMappings() throws DuplicateMappingException, SQLException {
 		it.unibz.inf.ontop.io.PrefixManager prefixManager = mappingFactory.create(ImmutableMap.of());
-		MappingMetadata mappingMetadata = mappingFactory.create(prefixManager);
+		MappingMetadata mappingMetadata = mappingFactory.create(prefixManager, UriTemplateMatcher.create(Stream.empty()));
 		OBDAModel emptyModel = obdaFactory.createOBDAModel(ImmutableList.of(), mappingMetadata);
 		return extractMappings(emptyModel);
 	}

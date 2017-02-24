@@ -12,8 +12,6 @@ import it.unibz.inf.ontop.mapping.Mapping;
 import it.unibz.inf.ontop.mapping.MappingMetadata;
 import it.unibz.inf.ontop.mapping.conversion.SQLPPMapping2OBDASpecificationConverter;
 import it.unibz.inf.ontop.mapping.datalog.Datalog2QueryMappingConverter;
-import it.unibz.inf.ontop.pivotalrepr.MetadataForQueryOptimization;
-import it.unibz.inf.ontop.pivotalrepr.impl.MetadataForQueryOptimizationImpl;
 import it.unibz.inf.ontop.pivotalrepr.utils.ExecutorRegistry;
 import it.unibz.inf.ontop.spec.OBDASpecification;
 import it.unibz.inf.ontop.model.*;
@@ -112,6 +110,7 @@ public class DefaultSQLPPMapping2OBDASpecificationConverter implements SQLPPMapp
 
         // NB: may also views in the DBMetadata (for non-understood SQL queries)
         ImmutableList<CQIE> initialMappingRules = convertMappingAxioms(dbMetadataAndAxioms.axioms, dbMetadata);
+        dbMetadata.freeze();
 
         /*
          * Transformations at the Datalog level
@@ -157,9 +156,7 @@ public class DefaultSQLPPMapping2OBDASpecificationConverter implements SQLPPMapp
 
         ImmutableList<CQIE> saturatedMappingRules = saturateMapping(mappingRulesWithFacts, tBox, dbMetadata);
 
-        MetadataForQueryOptimization metadataForQueryOptimization = new MetadataForQueryOptimizationImpl(dbMetadata);
-
-        Mapping saturatedMapping = mappingConverter.convertMappingRules(saturatedMappingRules, metadataForQueryOptimization,
+        Mapping saturatedMapping = mappingConverter.convertMappingRules(saturatedMappingRules, dbMetadata,
                 executorRegistry, mappingMetadata);
 
         return new OBDASpecificationImpl(saturatedMapping, dbMetadata, tBox, ontology.getVocabulary());

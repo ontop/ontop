@@ -54,7 +54,7 @@ public class RedundantSelfLeftJoinExecutor
             DataNode leftDataNode = (DataNode) leftChild;
             DataNode rightDataNode = (DataNode) rightChild;
 
-            if (isOptimizableSelfLeftJoin(leftDataNode, rightDataNode, query.getMetadata())) {
+            if (isOptimizableSelfLeftJoin(leftDataNode, rightDataNode, query.getDBMetadata())) {
                 return tryToOptimizeSelfJoin(leftDataNode, rightDataNode, query, treeComponent, leftJoinNode);
             }
         }
@@ -68,7 +68,7 @@ public class RedundantSelfLeftJoinExecutor
      * the left and the right predicates are the same, and
      * the join is over the keys
      */
-    private boolean isOptimizableSelfLeftJoin(DataNode leftDataNode, DataNode rightDataNode, MetadataForQueryOptimization metadata) {
+    private boolean isOptimizableSelfLeftJoin(DataNode leftDataNode, DataNode rightDataNode, DBMetadata metadata) {
         AtomPredicate leftPredicate = leftDataNode.getProjectionAtom().getPredicate();
         AtomPredicate rightPredicate = rightDataNode.getProjectionAtom().getPredicate();
 
@@ -189,7 +189,7 @@ public class RedundantSelfLeftJoinExecutor
 
         ImmutableMultimap<ImmutableList<VariableOrGroundTerm>, DataNode> groupingMap =
                 groupByPrimaryKeyArguments(leftDataNode, rightDataNode,
-                        query.getMetadata().getUniqueConstraints().get(leftDataNode.getProjectionAtom().getPredicate()));
+                        query.getDBMetadata().getUniqueConstraints().get(leftDataNode.getProjectionAtom().getPredicate()));
 
         ImmutableList<Variable> priorityVariables = prioritizeVariables(query, leftJoinNode);
 

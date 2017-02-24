@@ -55,7 +55,7 @@ public class ForeignKeyLeftJoinExecutor implements SimpleNodeCentricExecutor<Lef
                 DataNode leftDataNode = (DataNode) leftChild;
                 DataNode rightDataNode = (DataNode) rightChild;
 
-                boolean replaceLeftJoinByInnerJoin = propose(leftDataNode, rightDataNode, query.getMetadata());
+                boolean replaceLeftJoinByInnerJoin = propose(leftDataNode, rightDataNode, query.getDBMetadata());
                 if (replaceLeftJoinByInnerJoin) {
 
                     /**
@@ -76,8 +76,7 @@ public class ForeignKeyLeftJoinExecutor implements SimpleNodeCentricExecutor<Lef
      *
      *  Returns a proposal for optimization.
      */
-    private boolean propose(DataNode leftDataNode, DataNode rightDataNode,
-                            MetadataForQueryOptimization metadata) {
+    private boolean propose(DataNode leftDataNode, DataNode rightDataNode, DBMetadata dbMetadata) {
 
         AtomPredicate leftPredicate = leftDataNode.getProjectionAtom().getPredicate();
         AtomPredicate rightPredicate = rightDataNode.getProjectionAtom().getPredicate();
@@ -86,8 +85,8 @@ public class ForeignKeyLeftJoinExecutor implements SimpleNodeCentricExecutor<Lef
          * we check whether there are foreign key constraints
          */
 
-        DatabaseRelationDefinition leftPredicateDatabaseRelation = getDatabaseRelation(metadata.getDBMetadata(), leftPredicate);
-        DatabaseRelationDefinition rightPredicateDatabaseRelation = getDatabaseRelation(metadata.getDBMetadata(), rightPredicate);
+        DatabaseRelationDefinition leftPredicateDatabaseRelation = getDatabaseRelation(dbMetadata, leftPredicate);
+        DatabaseRelationDefinition rightPredicateDatabaseRelation = getDatabaseRelation(dbMetadata, rightPredicate);
 
 
         if(leftPredicateDatabaseRelation != null && rightPredicateDatabaseRelation != null) {

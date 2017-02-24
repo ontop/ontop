@@ -3,13 +3,10 @@ package it.unibz.inf.ontop.iq;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
-import com.google.inject.Injector;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.AtomPredicateImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionImpl;
-import it.unibz.inf.ontop.injection.OntopModelConfiguration;
 import it.unibz.inf.ontop.pivotalrepr.*;
 import it.unibz.inf.ontop.pivotalrepr.impl.*;
 import it.unibz.inf.ontop.pivotalrepr.validation.InvalidIntermediateQueryException;
@@ -23,7 +20,6 @@ import static it.unibz.inf.ontop.OntopModelTestingTools.*;
 
 public class IQValidationTest {
 
-    private final static AtomPredicate TABLE1_PREDICATE = new AtomPredicateImpl("table1", 3);
     private final static AtomPredicate TABLE2_PREDICATE = new AtomPredicateImpl("table1", 2);
     private final static AtomPredicate P3_PREDICATE = new AtomPredicateImpl("p1", 3);
     private final static AtomPredicate ANS1_VAR1_PREDICATE = new AtomPredicateImpl("ans1", 1);
@@ -37,25 +33,10 @@ public class IQValidationTest {
     private final static ImmutableExpression EXPRESSION = DATA_FACTORY.getImmutableExpression(
             ExpressionOperation.EQ, X, Y);
 
-    private final MetadataForQueryOptimization metadata;
-
-    private static final Injector INJECTOR = OntopModelConfiguration.defaultBuilder().build().getInjector();
+    private final DBMetadata metadata;
 
     public IQValidationTest() {
-        metadata = initMetadata();
-    }
-
-    private static MetadataForQueryOptimization initMetadata() {
-        ImmutableMultimap.Builder<AtomPredicate, ImmutableList<Integer>> uniqueKeyBuilder = ImmutableMultimap.builder();
-
-        /**
-         * Table 1: non-composite key and regular field
-         */
-        uniqueKeyBuilder.put(TABLE1_PREDICATE, ImmutableList.of(1));
-
-        return new MetadataForQueryOptimizationImpl(
-                DBMetadataTestingTools.createDummyMetadata(),
-                uniqueKeyBuilder.build());
+        metadata = DBMetadataTestingTools.createDummyMetadata();
     }
 
     @Test(expected = InvalidIntermediateQueryException.class)

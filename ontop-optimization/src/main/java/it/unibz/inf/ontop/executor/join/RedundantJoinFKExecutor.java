@@ -102,7 +102,7 @@ public class RedundantJoinFKExecutor implements InnerJoinExecutor {
     private ImmutableMultimap<DatabaseRelationDefinition, DataNode> extractDataNodeMap(IntermediateQuery query,
                                                                                        InnerJoinNode joinNode) {
 
-        DBMetadata dbMetadata = query.getMetadata().getDBMetadata();
+        DBMetadata dbMetadata = query.getDBMetadata();
 
         return query.getChildren(joinNode).stream()
                 .filter(c -> c instanceof DataNode)

@@ -80,7 +80,7 @@ public class MappingTest {
          */
         MappingMetadata mappingMetadata = MAPPING_FACTORY.create(MAPPING_FACTORY.create(ImmutableMap.of()),
                 UriTemplateMatcher.create(Stream.of()));
-        Mapping mapping = MAPPING_FACTORY.create(mappingMetadata, EMPTY_METADATA, mappingAssertions.stream());
+        Mapping mapping = MAPPING_FACTORY.create(mappingMetadata, mappingAssertions.stream());
 
         /**
          * Test whether two mapping assertions share a variable

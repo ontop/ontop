@@ -10,7 +10,6 @@ import it.unibz.inf.ontop.mapping.MappingMetadata;
 import it.unibz.inf.ontop.mapping.datalog.Datalog2QueryMappingConverter;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.pivotalrepr.IntermediateQuery;
-import it.unibz.inf.ontop.pivotalrepr.MetadataForQueryOptimization;
 import it.unibz.inf.ontop.pivotalrepr.datalog.DatalogProgram2QueryConverter;
 import it.unibz.inf.ontop.pivotalrepr.utils.ExecutorRegistry;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -37,7 +36,7 @@ public class Datalog2QueryMappingConverterImpl implements Datalog2QueryMappingCo
 
     @Override
     public Mapping convertMappingRules(ImmutableList<CQIE> mappingRules,
-                                       MetadataForQueryOptimization metadataForQueryOptimization,
+                                       DBMetadata dbMetadata,
                                        ExecutorRegistry executorRegistry, MappingMetadata mappingMetadata) {
 
         ImmutableMultimap<Predicate, CQIE> ruleIndex = mappingRules.stream()
@@ -53,12 +52,12 @@ public class Datalog2QueryMappingConverterImpl implements Datalog2QueryMappingCo
                 .collect(ImmutableCollectors.toSet());
 
         Stream<IntermediateQuery> mappingStream = ruleIndex.keySet().stream()
-                .map(predicate -> converter.convertDatalogDefinitions(metadataForQueryOptimization,
+                .map(predicate -> converter.convertDatalogDefinitions(dbMetadata,
                         predicate, ruleIndex, extensionalPredicates, Optional.empty(), executorRegistry))
                 .filter(Optional::isPresent)
                 .map(Optional::get);
 
-        return mappingFactory.create(mappingMetadata, metadataForQueryOptimization, mappingStream);
+        return mappingFactory.create(mappingMetadata, mappingStream);
 
     }
 
