@@ -62,7 +62,7 @@ public class SelectQueryAttributeExtractor {
 
             // COULD NOT PARSE - do a rough approximation
 
-            int start = "select".length();
+            int start = sql.toLowerCase().indexOf("select") + "select".length();
             // might be a good idea to surround FROM with whitespaces
             int end = sql.toLowerCase().indexOf("from");
             if (end == -1)
@@ -75,6 +75,7 @@ public class SelectQueryAttributeExtractor {
                 projection = projection.replaceAll("\\([^\\(]*\\)", "");
 
             for (String col : projection.split(",")) {
+                // TODO: AS should be treated as optional
                 String[] components = AS.split(col);
                 String columnName = components[components.length - 1].trim();
 

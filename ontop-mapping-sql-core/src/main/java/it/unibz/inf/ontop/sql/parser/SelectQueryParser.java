@@ -353,7 +353,7 @@ public class SelectQueryParser {
                     throw new InvalidSelectQueryRuntimeException("Complex expression in SELECT must have an alias", selectExpressionItem);
 
                 QuotedID name = idfac.createAttributeID(columnAlias.getName());
-                Variable var = DATA_FACTORY.getVariable(columnAlias.getName() + relationIndex);
+                Variable var = DATA_FACTORY.getVariable(name.getName() + relationIndex);
                 map = ImmutableMap.of(new QualifiedAttributeID(null, name), var);
 
                 Term term = new ExpressionParser(idfac, attributes).parseTerm(expr);
