@@ -13,6 +13,8 @@ import it.unibz.inf.ontop.pivotalrepr.impl.IntensionalDataNodeImpl;
 import it.unibz.inf.ontop.model.impl.AtomPredicateImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionImpl;
 import it.unibz.inf.ontop.pivotalrepr.impl.ExtensionalDataNodeImpl;
+import it.unibz.inf.ontop.pivotalrepr.mapping.TargetAtom;
+import it.unibz.inf.ontop.pivotalrepr.mapping.impl.TargetAtomImpl;
 
 import java.util.Collection;
 
@@ -41,7 +43,7 @@ public class DatalogConversionTools {
      *
      * TODO: deal with multiple occurences of the same variable in the head of the DatalogProgram
      */
-    public static P2<DistinctVariableOnlyDataAtom, ImmutableSubstitution<ImmutableTerm>> convertFromDatalogDataAtom(
+    public static TargetAtom convertFromDatalogDataAtom(
             Function datalogDataAtom)
             throws DatalogProgram2QueryConverterImpl.InvalidDatalogProgramException {
 
@@ -98,6 +100,6 @@ public class DatalogConversionTools {
         ImmutableSubstitution<ImmutableTerm> substitution = new ImmutableSubstitutionImpl<>(allBindingBuilder.build());
 
 
-        return P.p(dataAtom, substitution);
+        return new TargetAtomImpl(dataAtom, substitution);
     }
 }

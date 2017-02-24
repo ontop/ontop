@@ -44,6 +44,13 @@ public class MappingImpl implements Mapping {
                 ));
     }
 
+    @AssistedInject
+    private MappingImpl(@Assisted MappingMetadata metadata,
+                        @Assisted MetadataForQueryOptimization metadataForOptimization,
+                        @Assisted ImmutableMap<AtomPredicate, IntermediateQuery> mappingMap) {
+        this(metadata, metadataForOptimization, mappingMap.values().stream());
+    }
+
     @Override
     public MappingMetadata getMetadata() {
         return metadata;
@@ -59,7 +66,7 @@ public class MappingImpl implements Mapping {
         return definitions.keySet();
     }
 
-    private IntermediateQuery appendSuffixToVariableNames(IntermediateQuery query, int suffix) {
+    private static IntermediateQuery appendSuffixToVariableNames(IntermediateQuery query, int suffix) {
         Map<Variable, Variable> substitutionMap =
                 query.getKnownVariables().stream()
                         .collect(Collectors.toMap(v -> v, v -> DATA_FACTORY.getVariable(v.getName()+"m"+suffix)));

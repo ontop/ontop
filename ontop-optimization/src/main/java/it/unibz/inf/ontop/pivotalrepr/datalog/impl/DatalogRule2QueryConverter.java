@@ -13,6 +13,7 @@ import it.unibz.inf.ontop.pivotalrepr.impl.*;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.pivotalrepr.*;
 import it.unibz.inf.ontop.pivotalrepr.impl.ConstructionNodeImpl;
+import it.unibz.inf.ontop.pivotalrepr.mapping.TargetAtom;
 import it.unibz.inf.ontop.pivotalrepr.utils.ExecutorRegistry;
 
 import java.util.Collection;
@@ -105,12 +106,11 @@ public class DatalogRule2QueryConverter {
                                                        ExecutorRegistry executorRegistry)
             throws DatalogProgram2QueryConverterImpl.InvalidDatalogProgramException {
 
-        P2<DistinctVariableOnlyDataAtom, ImmutableSubstitution<ImmutableTerm>> decomposition =
-                DatalogConversionTools.convertFromDatalogDataAtom(datalogRule.getHead());
+        TargetAtom targetAtom = DatalogConversionTools.convertFromDatalogDataAtom(datalogRule.getHead());
 
-        DistinctVariableOnlyDataAtom projectionAtom = decomposition._1();
+        DistinctVariableOnlyDataAtom projectionAtom = targetAtom.getProjectionAtom();
 
-        ConstructionNode rootNode = new ConstructionNodeImpl(projectionAtom.getVariables(), decomposition._2(),
+        ConstructionNode rootNode = new ConstructionNodeImpl(projectionAtom.getVariables(), targetAtom.getSubstitution(),
                 optionalModifiers);
 
         List<Function> bodyAtoms = List.iterableList(datalogRule.getBody());
@@ -271,9 +271,9 @@ public class DatalogRule2QueryConverter {
                 /**
                  * Creates the node
                  */
-                P2<DistinctVariableOnlyDataAtom, ImmutableSubstitution<ImmutableTerm>> convertionResults = DatalogConversionTools.convertFromDatalogDataAtom(atom);
-                ImmutableSubstitution<ImmutableTerm> bindings = convertionResults._2();
-                DataAtom dataAtom = bindings.applyToDataAtom(convertionResults._1());
+                TargetAtom targetAtom = DatalogConversionTools.convertFromDatalogDataAtom(atom);
+                ImmutableSubstitution<ImmutableTerm> bindings = targetAtom.getSubstitution();
+                DataAtom dataAtom = bindings.applyToDataAtom(targetAtom.getProjectionAtom());
                 DataNode currentNode = DatalogConversionTools.createDataNode(dataAtom, tablePredicates);
                 queryBuilder.addChild(parentNode, currentNode, optionalPosition);
             }

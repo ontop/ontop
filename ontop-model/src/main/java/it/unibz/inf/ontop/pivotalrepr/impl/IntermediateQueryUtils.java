@@ -14,6 +14,7 @@ import it.unibz.inf.ontop.utils.FunctionalTools;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.AbstractMap;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -31,8 +32,8 @@ public class IntermediateQueryUtils {
     /**
      * TODO: describe
      */
-    public static Optional<IntermediateQuery> mergeDefinitions(List<IntermediateQuery> predicateDefinitions) {
-        return mergeDefinitions(predicateDefinitions, Optional.<ImmutableQueryModifiers>empty());
+    public static Optional<IntermediateQuery> mergeDefinitions(Collection<IntermediateQuery> predicateDefinitions) {
+        return mergeDefinitions(predicateDefinitions, Optional.empty());
     }
 
 
@@ -42,12 +43,12 @@ public class IntermediateQueryUtils {
      *
      * TODO: refactor it so that the definitive intermediate query is directly constructed.
      */
-    public static Optional<IntermediateQuery> mergeDefinitions(List<IntermediateQuery> predicateDefinitions,
+    public static Optional<IntermediateQuery> mergeDefinitions(Collection<IntermediateQuery> predicateDefinitions,
                                                                Optional<ImmutableQueryModifiers> optionalTopModifiers) {
         if (predicateDefinitions.isEmpty())
             return Optional.empty();
 
-        IntermediateQuery firstDefinition = predicateDefinitions.get(0);
+        IntermediateQuery firstDefinition = predicateDefinitions.iterator().next();
         if (predicateDefinitions.size() == 1) {
             return Optional.of(firstDefinition);
         }

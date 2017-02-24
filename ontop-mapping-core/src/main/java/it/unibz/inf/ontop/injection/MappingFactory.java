@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.injection;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableMultimap;
 import it.unibz.inf.ontop.mapping.Mapping;
 import it.unibz.inf.ontop.mapping.MappingMetadata;
 import it.unibz.inf.ontop.io.PrefixManager;
@@ -21,4 +22,7 @@ public interface MappingFactory {
 
     Mapping create(MappingMetadata metadata, MetadataForQueryOptimization metadataForOptimization,
                    Stream<IntermediateQuery> mappingStream);
+
+    Mapping create(MappingMetadata metadata, MetadataForQueryOptimization metadataForOptimization,
+                   ImmutableMap<AtomPredicate, IntermediateQuery> mappingMap);
 }
