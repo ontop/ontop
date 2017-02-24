@@ -16,8 +16,6 @@ public interface MetadataForQueryOptimization {
 
     ImmutableMultimap<AtomPredicate, ImmutableList<Integer>> getUniqueConstraints();
 
-    UriTemplateMatcher getUriTemplateMatcher();
-
     DBMetadata getDBMetadata();
     
 }

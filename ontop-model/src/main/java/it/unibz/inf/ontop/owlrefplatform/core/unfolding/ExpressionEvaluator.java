@@ -39,10 +39,7 @@ import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
 
 public class ExpressionEvaluator {
 
-	private final UriTemplateMatcher uriTemplateMatcher;
-
-	public ExpressionEvaluator(UriTemplateMatcher matcher) {
-		uriTemplateMatcher = matcher;
+	public ExpressionEvaluator() {
 	}
 
 	public static class Evaluation {
@@ -829,13 +826,13 @@ public class ExpressionEvaluator {
 			if (arityForFunction2 == 1) {
 				return evalUriFunctionsWithSingleTerm(uriFunction1, uriFunction2, isEqual);
 			} else if (arityForFunction2 > 1) {
-				Function newUriFunction1 = getUriFunctionWithParameters(uriFunction1);
-				return evalUriFunctionsWithMultipleTerms(newUriFunction1, uriFunction2, isEqual);
+				// Currently, we assume the arity should be the same (already decomposed URIs)
+				return DATA_FACTORY.getBooleanConstant(!isEqual);
 			}
 		} else if (arityForFunction1 > 1) {
 			if (arityForFunction2 == 1) {
-				Function newUriFunction2 = getUriFunctionWithParameters(uriFunction2);
-				return evalUriFunctionsWithMultipleTerms(newUriFunction2, uriFunction1, isEqual);
+				// Currently, we assume the arity should be the same (already decomposed URIs)
+				return DATA_FACTORY.getBooleanConstant(!isEqual);
 			} else if (arityForFunction2 > 1) {
 				return evalUriFunctionsWithMultipleTerms(uriFunction1, uriFunction2, isEqual);
 			}
@@ -913,12 +910,6 @@ public class ExpressionEvaluator {
 				return result;
 			}				
 		}
-	}
-
-
-	private Function getUriFunctionWithParameters(Function uriFunction) {
-		ValueConstant uriString = (ValueConstant) uriFunction.getTerm(0);
-		return uriTemplateMatcher.generateURIFunction(uriString.getValue());
 	}
 		
 	

@@ -115,8 +115,7 @@ public class RedundantSelfJoinTest {
 
         return new MetadataForQueryOptimizationImpl(
                 DBMetadataTestingTools.createDummyMetadata(),
-                uniqueKeyBuilder.build(),
-                new UriTemplateMatcher());
+                uniqueKeyBuilder.build());
     }
 
     @Test

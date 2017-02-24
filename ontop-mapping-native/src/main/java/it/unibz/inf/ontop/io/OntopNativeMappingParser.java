@@ -200,8 +200,17 @@ public class OntopNativeMappingParser implements SQLMappingParser {
         }
 
         PrefixManager prefixManager = mappingFactory.create(ImmutableMap.copyOf(prefixes));
-        MappingMetadata metadata = mappingFactory.create(prefixManager);
-        return obdaFactory.createOBDAModel(ImmutableList.copyOf(mappings), metadata);
+        ImmutableList<OBDAMappingAxiom> mappingAxioms = ImmutableList.copyOf(mappings);
+
+        UriTemplateMatcher uriTemplateMatcher = UriTemplateMatcher.create(
+                mappingAxioms.stream()
+                        .flatMap(ax -> ax.getTargetQuery().stream())
+                        .flatMap(atom -> atom.getTerms().stream())
+                        .filter(t -> t instanceof Function)
+                        .map(t -> (Function) t));
+
+        MappingMetadata metadata = mappingFactory.create(prefixManager, uriTemplateMatcher);
+        return obdaFactory.createOBDAModel(mappingAxioms, metadata);
 	}
     
     /*

@@ -98,9 +98,7 @@ public class RedundantJoinFKTest {
                 .add(table4Col3, pk3)
                 .build("fk2-1"));
 
-        return new MetadataForQueryOptimizationImpl(dbMetadata,
-                ImmutableMultimap.of(),
-                new UriTemplateMatcher());
+        return new MetadataForQueryOptimizationImpl(dbMetadata, ImmutableMultimap.of());
     }
 
 

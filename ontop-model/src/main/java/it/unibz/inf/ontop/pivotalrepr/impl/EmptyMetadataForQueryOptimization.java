@@ -19,11 +19,6 @@ public class EmptyMetadataForQueryOptimization implements MetadataForQueryOptimi
     }
 
     @Override
-    public UriTemplateMatcher getUriTemplateMatcher() {
-        return new UriTemplateMatcher();
-    }
-
-    @Override
     public DBMetadata getDBMetadata() {
         return DBMetadataTestingTools.createDummyMetadata();
     }

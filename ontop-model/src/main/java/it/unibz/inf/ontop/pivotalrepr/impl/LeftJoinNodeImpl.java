@@ -98,7 +98,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
          * and propagates the new substitution if the conditions still holds.
          *
          */
-        return computeAndEvaluateNewCondition(substitution, query, optionalNewEqualities)
+        return computeAndEvaluateNewCondition(substitution, optionalNewEqualities)
                 .map(ev -> applyEvaluation(query, ev, newSubstitution, Optional.of(leftVariables), Provenance.FROM_RIGHT))
                 .orElseGet(() -> new SubstitutionResultsImpl<>(this, newSubstitution));
     }
@@ -124,7 +124,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
          * and propagates the same substitution if the conditions still holds.
          *
          */
-        return computeAndEvaluateNewCondition(substitution, query, Optional.empty())
+        return computeAndEvaluateNewCondition(substitution, Optional.empty())
                 .map(ev -> applyEvaluation(query, ev, substitution, Optional.of(rightVariables), Provenance.FROM_LEFT))
                 .orElseGet(() -> new SubstitutionResultsImpl<>(this, substitution));
     }
@@ -135,7 +135,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
             ImmutableSubstitution<? extends ImmutableTerm> substitution, IntermediateQuery query) {
 
         return getOptionalFilterCondition()
-                .map(cond -> transformBooleanExpression(query, substitution, cond))
+                .map(cond -> transformBooleanExpression(substitution, cond))
                 .map(ev -> applyEvaluation(query, ev, substitution, Optional.empty(), Provenance.FROM_ABOVE))
                 .orElseGet(() -> new SubstitutionResultsImpl<>(
                         SubstitutionResults.LocalAction.NO_CHANGE,

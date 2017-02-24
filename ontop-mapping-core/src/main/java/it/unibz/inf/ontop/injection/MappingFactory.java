@@ -6,6 +6,7 @@ import it.unibz.inf.ontop.mapping.Mapping;
 import it.unibz.inf.ontop.mapping.MappingMetadata;
 import it.unibz.inf.ontop.io.PrefixManager;
 import it.unibz.inf.ontop.model.AtomPredicate;
+import it.unibz.inf.ontop.model.UriTemplateMatcher;
 import it.unibz.inf.ontop.pivotalrepr.IntermediateQuery;
 import it.unibz.inf.ontop.pivotalrepr.MetadataForQueryOptimization;
 
@@ -18,7 +19,7 @@ public interface MappingFactory {
 
     PrefixManager create(ImmutableMap<String, String> prefixToURIMap);
 
-    MappingMetadata create(PrefixManager prefixManager);
+    MappingMetadata create(PrefixManager prefixManager, UriTemplateMatcher templateMatcher);
 
     Mapping create(MappingMetadata metadata, MetadataForQueryOptimization metadataForOptimization,
                    Stream<IntermediateQuery> mappingStream);

@@ -56,8 +56,7 @@ public class IQSyntacticEquivalenceCheckerTest {
 
         return new MetadataForQueryOptimizationImpl(
                 DBMetadataTestingTools.createDummyMetadata(),
-                uniqueKeyBuilder.build(),
-                new UriTemplateMatcher());
+                uniqueKeyBuilder.build());
     }
 
     @Test

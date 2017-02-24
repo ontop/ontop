@@ -69,8 +69,7 @@ public class UnionLiftInternalTest {
 
     private static MetadataForQueryOptimization initMetadata() {
         ImmutableMultimap.Builder<AtomPredicate, ImmutableList<Integer>> uniqueKeyBuilder = ImmutableMultimap.builder();
-        return new MetadataForQueryOptimizationImpl(DBMetadataTestingTools.createDummyMetadata(),
-                uniqueKeyBuilder.build(), new UriTemplateMatcher());
+        return new MetadataForQueryOptimizationImpl(DBMetadataTestingTools.createDummyMetadata(), uniqueKeyBuilder.build());
     }
 
 

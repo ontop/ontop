@@ -41,8 +41,7 @@ public class JoinBooleanExpressionExecutor implements InnerJoinExecutor {
 
         Optional<ImmutableExpression> optionalAggregatedFilterCondition;
         try {
-            optionalAggregatedFilterCondition = extractFoldAndOptimizeBooleanExpressions(filterOrJoinNodes,
-                    query.getMetadata());
+            optionalAggregatedFilterCondition = extractFoldAndOptimizeBooleanExpressions(filterOrJoinNodes);
         }
         /**
          * The filter condition cannot be satisfied --> the join node and its sub-tree is thus removed from the tree.

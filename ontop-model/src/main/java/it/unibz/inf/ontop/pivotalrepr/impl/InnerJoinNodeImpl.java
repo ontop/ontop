@@ -74,7 +74,7 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
             return new SubstitutionResultsImpl<>(DECLARE_AS_EMPTY);
         }
 
-        return computeAndEvaluateNewCondition(substitution, query, Optional.empty())
+        return computeAndEvaluateNewCondition(substitution, Optional.empty())
                 .map(ev -> applyEvaluation(ev, substitution))
                 .orElseGet(() -> new SubstitutionResultsImpl<>(NO_CHANGE, Optional.of(substitution)));
     }
@@ -84,7 +84,7 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
             ImmutableSubstitution<? extends ImmutableTerm> substitution, IntermediateQuery query) {
 
         return getOptionalFilterCondition()
-                .map(cond -> transformBooleanExpression(query, substitution, cond))
+                .map(cond -> transformBooleanExpression(substitution, cond))
                 .map(ev -> applyEvaluation(ev, substitution))
                 .orElseGet(() -> new SubstitutionResultsImpl<>(NO_CHANGE, Optional.of(substitution)));
     }

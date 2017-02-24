@@ -6,6 +6,8 @@ import com.google.inject.Inject;
 import it.unibz.inf.ontop.exception.MappingIOException;
 import it.unibz.inf.ontop.injection.MappingFactory;
 import it.unibz.inf.ontop.mapping.MappingMetadata;
+import it.unibz.inf.ontop.model.Function;
+import it.unibz.inf.ontop.model.UriTemplateMatcher;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.rio.RDFHandlerException;
 import org.eclipse.rdf4j.rio.RDFParseException;
@@ -70,9 +72,16 @@ public class R2RMLMappingParser implements SQLMappingParser {
         //TODO: make the R2RMLManager simpler.
         ImmutableList<OBDAMappingAxiom> sourceMappings = manager.getMappings(manager.getModel());
 
+        UriTemplateMatcher uriTemplateMatcher = UriTemplateMatcher.create(
+                sourceMappings.stream()
+                        .flatMap(ax -> ax.getTargetQuery().stream())
+                        .flatMap(atom -> atom.getTerms().stream())
+                        .filter(t -> t instanceof Function)
+                        .map(t -> (Function) t));
+
         //TODO: try to extract prefixes from the R2RML mappings
         PrefixManager prefixManager = mappingFactory.create(ImmutableMap.of());
-        MappingMetadata mappingMetadata = mappingFactory.create(prefixManager);
+        MappingMetadata mappingMetadata = mappingFactory.create(prefixManager, uriTemplateMatcher);
 
         return obdaFactory.createOBDAModel(sourceMappings, mappingMetadata);
     }

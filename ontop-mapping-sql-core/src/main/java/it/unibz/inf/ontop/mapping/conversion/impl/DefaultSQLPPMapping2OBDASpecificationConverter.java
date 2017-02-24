@@ -152,12 +152,12 @@ public class DefaultSQLPPMapping2OBDASpecificationConverter implements SQLPPMapp
         // Adding data typing on the mapping axioms.
         ImmutableList<CQIE> fullyTypedRules = inferMissingDataTypesAndValidate(initialMappingRules, tBox, ontology, dbMetadata);
 
-        ImmutableList<CQIE> mappingRulesWithFacts = insertFacts(fullyTypedRules, ontology);
+        ImmutableList<CQIE> mappingRulesWithFacts = insertFacts(fullyTypedRules, ontology,
+                mappingMetadata.getUriTemplateMatcher());
 
         ImmutableList<CQIE> saturatedMappingRules = saturateMapping(mappingRulesWithFacts, tBox, dbMetadata);
 
-        MetadataForQueryOptimization metadataForQueryOptimization = new MetadataForQueryOptimizationImpl(dbMetadata,
-                UriTemplateMatcher.create(saturatedMappingRules));
+        MetadataForQueryOptimization metadataForQueryOptimization = new MetadataForQueryOptimizationImpl(dbMetadata);
 
         Mapping saturatedMapping = mappingConverter.convertMappingRules(saturatedMappingRules, metadataForQueryOptimization,
                 executorRegistry, mappingMetadata);
@@ -257,7 +257,8 @@ public class DefaultSQLPPMapping2OBDASpecificationConverter implements SQLPPMapp
         return unfoldingProgram;
     }
 
-    private ImmutableList<CQIE> insertFacts(ImmutableList<CQIE> mapping, Ontology ontology) {
+    private ImmutableList<CQIE> insertFacts(ImmutableList<CQIE> mapping, Ontology ontology,
+                                            UriTemplateMatcher uriTemplateMatcher) {
         // Adding ontology assertions (ABox) as rules (facts, head with no body).
         List<AnnotationAssertion> annotationAssertions;
         if (settings.isOntologyAnnotationQueryingEnabled()) {
@@ -269,7 +270,8 @@ public class DefaultSQLPPMapping2OBDASpecificationConverter implements SQLPPMapp
 
         // Adding ontology assertions (ABox) as rules (facts, head with no body).
         return addAssertionsAsFacts(mapping, ontology.getClassAssertions(),
-                ontology.getObjectPropertyAssertions(), ontology.getDataPropertyAssertions(), annotationAssertions);
+                ontology.getObjectPropertyAssertions(), ontology.getDataPropertyAssertions(), annotationAssertions,
+                uriTemplateMatcher);
 
     }
 
@@ -348,9 +350,8 @@ public class DefaultSQLPPMapping2OBDASpecificationConverter implements SQLPPMapp
      */
     private ImmutableList<CQIE> addAssertionsAsFacts(ImmutableList<CQIE> mapping, Iterable<ClassAssertion> cas,
                                                      Iterable<ObjectPropertyAssertion> pas,
-                                                     Iterable<DataPropertyAssertion> das, List<AnnotationAssertion> aas) {
-
-        UriTemplateMatcher uriTemplateMatcher = UriTemplateMatcher.create(mapping);
+                                                     Iterable<DataPropertyAssertion> das, List<AnnotationAssertion> aas,
+                                                     UriTemplateMatcher uriTemplateMatcher) {
 
         List<CQIE> mutableMapping = new ArrayList<>(mapping);
 

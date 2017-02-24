@@ -58,7 +58,7 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
     public SubstitutionResults<FilterNode> applyDescendingSubstitution(
             ImmutableSubstitution<? extends ImmutableTerm> substitution,
             IntermediateQuery query) {
-        Evaluation evaluation = transformBooleanExpression(query, substitution, getFilterCondition());
+        Evaluation evaluation = transformBooleanExpression(substitution, getFilterCondition());
 
         /**
          * The condition cannot be satisfied --> the sub-tree is empty.

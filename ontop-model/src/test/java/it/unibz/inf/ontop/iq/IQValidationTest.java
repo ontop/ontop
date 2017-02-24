@@ -55,8 +55,7 @@ public class IQValidationTest {
 
         return new MetadataForQueryOptimizationImpl(
                 DBMetadataTestingTools.createDummyMetadata(),
-                uniqueKeyBuilder.build(),
-                new UriTemplateMatcher());
+                uniqueKeyBuilder.build());
     }
 
     @Test(expected = InvalidIntermediateQueryException.class)

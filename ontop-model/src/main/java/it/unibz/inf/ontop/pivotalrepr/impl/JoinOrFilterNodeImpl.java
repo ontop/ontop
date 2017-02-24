@@ -44,13 +44,11 @@ public abstract class JoinOrFilterNodeImpl extends QueryNodeImpl implements Join
     }
 
     protected ExpressionEvaluator.Evaluation transformBooleanExpression(
-            IntermediateQuery query,
             ImmutableSubstitution<? extends ImmutableTerm> substitution,
             ImmutableExpression booleanExpression) {
 
         ImmutableExpression substitutedExpression = substitution.applyToBooleanExpression(booleanExpression);
 
-        return new ExpressionEvaluator(query.getMetadata().getUriTemplateMatcher()).evaluateExpression(
-                substitutedExpression);
+        return new ExpressionEvaluator().evaluateExpression(substitutedExpression);
     }
 }

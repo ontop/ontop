@@ -62,6 +62,7 @@ public class QuestQueryProcessor implements OntopQueryReformulator {
 	private final ImmutableSet<Predicate> dataPropertiesAndClassesMapped;
 	private final ImmutableSet<Predicate> objectPropertiesMapped;
 	private final OntopQueryAnsweringSettings settings;
+	private final UriTemplateMatcher uriTemplateMatcher;
 
 	@AssistedInject
 	private QuestQueryProcessor(@Assisted OBDASpecification obdaSpecification,
@@ -91,6 +92,7 @@ public class QuestQueryProcessor implements OntopQueryReformulator {
 		this.settings = settings;
 		this.executorRegistry = executorRegistry;
 		this.datalogConverter = datalogConverter;
+		this.uriTemplateMatcher = saturatedMapping.getMetadata().getUriTemplateMatcher();
 
 		if (settings.isSameAsInMappingsEnabled()) {
 			MappingSameAsPredicateExtractor msa = new MappingSameAsPredicateExtractor(saturatedMapping);
@@ -103,8 +105,7 @@ public class QuestQueryProcessor implements OntopQueryReformulator {
 	}
 	
 	private DatalogProgram translateAndPreProcess(InputQuery inputQuery) throws OntopUnsupportedInputQueryException {
-		InputQueryTranslator translator = new SparqlAlgebraToDatalogTranslator(
-				metadataForOptimization.getUriTemplateMatcher(), iriDictionary);
+		InputQueryTranslator translator = new SparqlAlgebraToDatalogTranslator(uriTemplateMatcher, iriDictionary);
 		InternalSparqlQuery translation = inputQuery.translate(translator);
 		return preProcess(translation);
 	}
@@ -156,8 +157,7 @@ public class QuestQueryProcessor implements OntopQueryReformulator {
 			return cachedQuery;
 
 		try {
-			InputQueryTranslator translator = new SparqlAlgebraToDatalogTranslator(
-					metadataForOptimization.getUriTemplateMatcher(), iriDictionary);
+			InputQueryTranslator translator = new SparqlAlgebraToDatalogTranslator(uriTemplateMatcher, iriDictionary);
 			InternalSparqlQuery translation = inputQuery.translate(translator);
 			DatalogProgram newprogram = preProcess(translation);
 

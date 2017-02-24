@@ -4,10 +4,7 @@ package it.unibz.inf.ontop.mapping;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import it.unibz.inf.ontop.model.AtomPredicate;
-import it.unibz.inf.ontop.model.DataAtom;
-import it.unibz.inf.ontop.model.DistinctVariableOnlyDataAtom;
-import it.unibz.inf.ontop.model.Variable;
+import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.AtomPredicateImpl;
 import it.unibz.inf.ontop.pivotalrepr.ConstructionNode;
 import it.unibz.inf.ontop.pivotalrepr.ExtensionalDataNode;
@@ -81,7 +78,8 @@ public class MappingTest {
         /**
          * Renaming
          */
-        MappingMetadata mappingMetadata = MAPPING_FACTORY.create(MAPPING_FACTORY.create(ImmutableMap.of()));
+        MappingMetadata mappingMetadata = MAPPING_FACTORY.create(MAPPING_FACTORY.create(ImmutableMap.of()),
+                UriTemplateMatcher.create(Stream.of()));
         Mapping mapping = MAPPING_FACTORY.create(mappingMetadata, EMPTY_METADATA, mappingAssertions.stream());
 
         /**

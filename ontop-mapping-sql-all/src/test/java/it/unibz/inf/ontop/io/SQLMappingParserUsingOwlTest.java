@@ -24,6 +24,7 @@ import java.io.File;
 import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -143,7 +144,8 @@ public class SQLMappingParserUsingOwlTest {
 
     private void saveRegularFile() throws Exception {
         OBDAModel model = modelFactory.createOBDAModel(ImmutableList.of(),
-                mappingFactory.create(mappingFactory.create(ImmutableMap.of())));
+                mappingFactory.create(mappingFactory.create(ImmutableMap.of()),
+                        UriTemplateMatcher.create(Stream.of())));
         OntopNativeMappingSerializer writer = new OntopNativeMappingSerializer(model);
         writer.save(new File("src/test/resources/it/unibz/inf/ontop/io/SchoolRegularFile.obda"));
     }

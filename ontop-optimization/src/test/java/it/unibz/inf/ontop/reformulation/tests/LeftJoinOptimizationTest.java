@@ -129,7 +129,7 @@ public class LeftJoinOptimizationTest {
         table2aDef.addForeignKeyConstraint(fkBuilder.build("composite-fk"));
 
 
-        return new MetadataForQueryOptimizationImpl(dbMetadata, uniqueKeyBuilder.build(), new UriTemplateMatcher());
+        return new MetadataForQueryOptimizationImpl(dbMetadata, uniqueKeyBuilder.build());
     }
 
     /**
