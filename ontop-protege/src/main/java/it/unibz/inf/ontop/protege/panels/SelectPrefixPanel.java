@@ -21,7 +21,6 @@ package it.unibz.inf.ontop.protege.panels;
  */
 
 import it.unibz.inf.ontop.io.PrefixManager;
-import it.unibz.inf.ontop.io.SimplePrefixManager;
 import it.unibz.inf.ontop.protege.utils.DialogUtils;
 
 import javax.swing.*;

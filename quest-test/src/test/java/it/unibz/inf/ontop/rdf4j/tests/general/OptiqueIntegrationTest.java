@@ -1,36 +1,15 @@
 package it.unibz.inf.ontop.rdf4j.tests.general;
 
-import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.inf.ontop.injection.QuestCoreSettings;
-
-import java.util.Properties;
-
 import org.junit.Test;
 
 
 public class OptiqueIntegrationTest extends AbstractVirtualSesameTest {
 	private static final String owlfile = "src/test/resources/example/npd-v2-ql_a.owl";
 	private static final String mappingfile = "src/test/resources/example/npd-v2-ql_a.ttl";
+	private static final String propertyfile = "src/test/resources/example/npd-v2-ql_a.properties";
 
 	public OptiqueIntegrationTest() {
-		super(owlfile, mappingfile, buildProperties());
-	}
-
-	private static Properties buildProperties() {
-		Properties p = new Properties();
-		p.setProperty(QuestCoreSettings.ABOX_MODE,
-				QuestConstants.VIRTUAL);
-		p.setProperty(QuestCoreSettings.REWRITE, "true");
-		p.setProperty(QuestCoreSettings.REFORMULATION_TECHNIQUE, QuestConstants.TW);
-		// set jdbc params in config
-		p.setProperty(QuestCoreSettings.DB_NAME, "npd");
-		p.setProperty(QuestCoreSettings.JDBC_URL,
-				"jdbc:mysql://10.7.20.39/npd?sessionVariables=sql_mode='ANSI'");
-		p.setProperty(QuestCoreSettings.DB_USER, "fish");
-		p.setProperty(QuestCoreSettings.DB_PASSWORD, "fish");
-		p.setProperty(QuestCoreSettings.JDBC_DRIVER, "com.mysql.jdbc.Driver");
-
-		return p;
+		super(owlfile, mappingfile, propertyfile);
 	}
 
 

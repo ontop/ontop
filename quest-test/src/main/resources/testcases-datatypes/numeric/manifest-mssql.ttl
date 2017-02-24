@@ -26,7 +26,8 @@
             [ qt:query <tinyint.rq> ] ;
     mf:result <tinyint.ttl> ;
     mf:knowledgebase <datatypes.owl> ;
-    mf:mappings <datatypes-mssql.obda> .
+    mf:mappings <datatypes-mssql.obda> ;
+	mf:parameters <datatypes-mssql.properties> .
     
 :smallint rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: SMALLINT" ;
@@ -36,7 +37,8 @@
             [ qt:query <smallint.rq> ] ;
     mf:result <smallint.ttl> ;
     mf:knowledgebase <datatypes.owl> ;
-    mf:mappings <datatypes-mssql.obda> .
+    mf:mappings <datatypes-mssql.obda> ;
+	mf:parameters <datatypes-mssql.properties> .
     
  :int rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: INT" ;
@@ -46,7 +48,8 @@
             [ qt:query <int.rq> ] ;
     mf:result <int.ttl> ;
     mf:knowledgebase <datatypes.owl> ;
-    mf:mappings <datatypes-mssql.obda> .
+    mf:mappings <datatypes-mssql.obda> ;
+	mf:parameters <datatypes-mssql.properties> .
     
  :bigint rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: BIGINT" ;
@@ -56,7 +59,8 @@
             [ qt:query <bigint.rq> ] ;
     mf:result <bigint.ttl> ;
     mf:knowledgebase <datatypes.owl> ;
-    mf:mappings <datatypes-mssql.obda> .
+    mf:mappings <datatypes-mssql.obda> ;
+	mf:parameters <datatypes-mssql.properties> .
  
  :decimal rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: DECIMAL" ;
@@ -66,7 +70,8 @@
             [ qt:query <decimal.rq> ] ;
     mf:result <decimal.ttl> ;
     mf:knowledgebase <datatypes.owl> ;
-    mf:mappings <datatypes-mssql.obda> .
+    mf:mappings <datatypes-mssql.obda> ;
+	mf:parameters <datatypes-mssql.properties> .
     
  :float rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: FLOAT" ;
@@ -76,7 +81,8 @@
             [ qt:query <float.rq> ] ;
     mf:result <float.ttl> ;
     mf:knowledgebase <datatypes.owl> ;
-    mf:mappings <datatypes-mssql.obda> .
+    mf:mappings <datatypes-mssql.obda> ;
+	mf:parameters <datatypes-mssql.properties> .
     
  :real rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: REAL" ;
@@ -86,4 +92,5 @@
             [ qt:query <real.rq> ] ;
     mf:result <real.ttl> ;
     mf:knowledgebase <datatypes.owl> ;
-    mf:mappings <datatypes-mssql.obda> .
+    mf:mappings <datatypes-mssql.obda> ;
+    mf:parameters <datatypes-mssql.properties> .

@@ -1,6 +1,6 @@
 package it.unibz.inf.ontop.pivotalrepr.proposal;
 
-import it.unibz.inf.ontop.exception.OntopLowLevelException;
+import it.unibz.inf.ontop.exception.OntopIllegalStateException;
 
 /**
  *
@@ -8,7 +8,7 @@ import it.unibz.inf.ontop.exception.OntopLowLevelException;
  *
  * Internal bug, should not be expected but fixed.
  */
-public class InvalidQueryOptimizationProposalException extends OntopLowLevelException {
+public class InvalidQueryOptimizationProposalException extends OntopIllegalStateException {
     public InvalidQueryOptimizationProposalException(String message) {
         super(message);
     }

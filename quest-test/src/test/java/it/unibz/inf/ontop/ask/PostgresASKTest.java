@@ -9,9 +9,11 @@ public class PostgresASKTest extends AbstractVirtualModeTest {
 	 "src/main/resources/testcases-scenarios/virtual-mode/stockexchange/simplecq/stockexchange.owl";
 	 static final String obdafile =
 	 "src/main/resources/testcases-scenarios/virtual-mode/stockexchange/simplecq/stockexchange-pgsql.obda";
+	static final String propertiesfile =
+			"src/main/resources/testcases-scenarios/virtual-mode/stockexchange/simplecq/stockexchange-pgsql.properties";
 
 	public PostgresASKTest() {
-		super(owlfile, obdafile);
+		super(owlfile, obdafile, propertiesfile);
 	}
 
 	public void testTrue() throws Exception {

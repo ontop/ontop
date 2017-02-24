@@ -20,7 +20,7 @@ package it.unibz.inf.ontop.obda;
  * #L%
  */
 
-import it.unibz.inf.ontop.injection.QuestConfiguration;
+import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import it.unibz.inf.ontop.utils.SQLScriptRunner;
@@ -47,7 +47,7 @@ import java.sql.Statement;
  */
 public class ReverseURITestH2 {
 
-	private static QuestOWLConnection conn;
+	private static OntopOWLConnection conn;
 
 	static Logger log = LoggerFactory.getLogger(ReverseURITestH2.class);
 
@@ -126,7 +126,7 @@ public class ReverseURITestH2 {
 
 		    // Creating a new instance of the reasoner
 	        QuestOWLFactory factory = new QuestOWLFactory();
-	        QuestConfiguration config = QuestConfiguration.defaultBuilder()
+	        OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
 					.nativeOntopMappingFile(obdafile)
 					.ontologyFile(owlfile)
 					.enableFullMetadataExtraction(false)
@@ -169,7 +169,7 @@ public class ReverseURITestH2 {
 	}
 
 	private void runTests(String query, int numberOfResults) throws Exception {
-		QuestOWLStatement st = conn.createStatement();
+		OntopOWLStatement st = conn.createStatement();
 		try {
 
 			QuestOWLResultSet rs = st.executeTuple(query);

@@ -1,8 +1,5 @@
 package it.unibz.inf.ontop.sql;
 
-import it.unibz.inf.ontop.model.OBDAException;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLResultSet;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLStatement;
 import it.unibz.inf.ontop.quest.AbstractVirtualModeTest;
 import org.semanticweb.owlapi.model.OWLException;
 
@@ -13,12 +10,13 @@ public class LeftJoinPullOutEqualityTest extends AbstractVirtualModeTest {
 
     static final String owlFileName = "resources/pullOutEq/pullOutEq.ttl";
     static final String obdaFileName = "resources/pullOutEq/pullOutEq.obda";
+    static final String propertyFileName = "resources/pullOutEq/pullOutEq.properties";
 
     public LeftJoinPullOutEqualityTest() {
-        super(owlFileName, obdaFileName);
+        super(owlFileName, obdaFileName, propertyFileName);
     }
 
-    public void testFlatLeftJoins() throws OBDAException, OWLException {
+    public void testFlatLeftJoins() throws  OWLException {
         countResults("PREFIX : <http://example.com/vocab#>" +
                 "PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>" +
                 "SELECT ?p ?firstName ?lastName " +
@@ -29,7 +27,7 @@ public class LeftJoinPullOutEqualityTest extends AbstractVirtualModeTest {
                 "}", 1);
     }
 
-    public void testNestedLeftJoins() throws OBDAException, OWLException {
+    public void testNestedLeftJoins() throws  OWLException {
         countResults("PREFIX : <http://example.com/vocab#>" +
                 "PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>" +
                 "SELECT ?p ?firstName ?lastName " +
@@ -41,7 +39,7 @@ public class LeftJoinPullOutEqualityTest extends AbstractVirtualModeTest {
                 "}", 1);
     }
 
-    public void testJoinAndFlatLeftJoins() throws OBDAException, OWLException {
+    public void testJoinAndFlatLeftJoins() throws  OWLException {
         countResults("PREFIX : <http://example.com/vocab#>" +
                 "PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>" +
                 "SELECT ?p ?firstName ?lastName " +
@@ -54,7 +52,7 @@ public class LeftJoinPullOutEqualityTest extends AbstractVirtualModeTest {
                 "}", 1);
     }
 
-    public void testBasic() throws OBDAException, OWLException {
+    public void testBasic() throws OWLException {
         countResults("PREFIX : <http://example.com/vocab#>" +
                 "PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>" +
                 "SELECT ?p " +

@@ -6,12 +6,6 @@ xsd:		http://www.w3.org/2001/XMLSchema#
 rdfs:		http://www.w3.org/2000/01/rdf-schema#
 quest:		http://obda.org/quest#
 
-[SourceDeclaration]
-sourceUri	BookPublication
-connectionUrl	jdbc:oracle:thin:@//10.7.20.91:1521/xe
-username	system
-password	obdaps83
-driverClass	oracle.jdbc.driver.OracleDriver
 
 [MappingDeclaration] @collection [[
 mappingId	RE-001

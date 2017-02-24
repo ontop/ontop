@@ -109,8 +109,7 @@ public class OntopModelSettingsImpl implements OntopModelSettings {
     /**
      * Returns the boolean value of the given key.
      */
-    @Override
-    public Optional<Boolean> getBoolean(String key) {
+    Optional<Boolean> getBoolean(String key) {
         Object value = get(key);
 
         if (value == null) {
@@ -128,26 +127,23 @@ public class OntopModelSettingsImpl implements OntopModelSettings {
         }
     }
 
-    @Override
-    public boolean getRequiredBoolean(String key) {
+    boolean getRequiredBoolean(String key) {
         return getBoolean(key)
-                .orElseThrow(() -> new IllegalStateException(key + " is required but missing " +
+                .orElseThrow(() -> new InvalidOntopConfigurationException(key + " is required but missing " +
                         "(must have a default value)"));
     }
 
     /**
      * Returns the integer value of the given key.
      */
-    @Override
-    public Optional<Integer> getInteger(String key) {
+    Optional<Integer> getInteger(String key) {
         String value = (String) get(key);
         return Optional.ofNullable(Integer.parseInt(value));
     }
 
-    @Override
-    public int getRequiredInteger(String key) {
+    int getRequiredInteger(String key) {
         return getInteger(key)
-                .orElseThrow(() -> new IllegalStateException(key + " is required but missing " +
+                .orElseThrow(() -> new InvalidOntopConfigurationException(key + " is required but missing " +
                         "(must have a default value)"));
     }
 
@@ -159,10 +155,9 @@ public class OntopModelSettingsImpl implements OntopModelSettings {
         return Optional.ofNullable((String) get(key));
     }
 
-    @Override
-    public String getRequiredProperty(String key) {
+    String getRequiredProperty(String key) {
         return getProperty(key)
-                .orElseThrow(() -> new IllegalStateException(key + " is required but missing " +
+                .orElseThrow(() -> new InvalidOntopConfigurationException(key + " is required but missing " +
                         "(must have a default value)"));
     }
 

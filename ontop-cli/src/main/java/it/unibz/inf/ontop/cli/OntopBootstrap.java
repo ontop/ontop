@@ -3,13 +3,10 @@ package it.unibz.inf.ontop.cli;
 import com.github.rvesse.airline.annotations.Command;
 import com.github.rvesse.airline.annotations.Option;
 import com.github.rvesse.airline.annotations.OptionType;
-import com.google.inject.Injector;
-import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
-import it.unibz.inf.ontop.injection.OBDACoreConfiguration;
-import it.unibz.inf.ontop.injection.OBDAFactoryWithException;
+import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.io.OntopNativeMappingSerializer;
-import it.unibz.inf.ontop.model.OBDAModel;
-import it.unibz.inf.ontop.owlapi.bootstrapping.DirectMappingBootstrapper;
+import it.unibz.inf.ontop.owlapi.directmapping.DirectMappingEngine;
+import it.unibz.inf.ontop.owlapi.directmapping.DirectMappingEngine.BootstrappingResults;
 import org.semanticweb.owlapi.io.FileDocumentTarget;
 import org.semanticweb.owlapi.model.OWLOntology;
 
@@ -33,22 +30,26 @@ public class OntopBootstrap extends OntopMappingOntologyRelatedCommand {
                 throw new IllegalArgumentException("Base IRI cannot contain the character '#'!");
             }
 
-            OBDACoreConfiguration defaultConfiguration = OBDACoreConfiguration.defaultBuilder()
-                    .build();
-            Injector injector = defaultConfiguration.getInjector();
-
             Objects.requireNonNull(owlFile, "ontology file must not be null");
+
+            OntopSQLOWLAPIConfiguration configuration = OntopSQLOWLAPIConfiguration.defaultBuilder()
+                    .jdbcUrl(jdbcURL)
+                    .jdbcUser(jdbcUserName)
+                    .jdbcPassword(jdbcPassword)
+                    .jdbcDriver(jdbcDriverClass)
+                    .ontologyFile(owlFile)
+                    .nativeOntopMappingFile(mappingFile)
+                    .build();
+
+            BootstrappingResults results = DirectMappingEngine.bootstrap(configuration, baseIRI);
+
             File ontologyFile = new File(owlFile);
             File obdaFile = new File(mappingFile);
-                    DirectMappingBootstrapper dm = new DirectMappingBootstrapper(
-                    baseIRI, jdbcURL, jdbcUserName, jdbcPassword, jdbcDriverClass,
-                            injector.getInstance(NativeQueryLanguageComponentFactory.class),
-                            injector.getInstance(OBDAFactoryWithException.class));
 
-                    OBDAModel model = dm.getModel();
-                    OWLOntology onto = dm.getOntology();
-            OntopNativeMappingSerializer writer = new OntopNativeMappingSerializer(model);
+            OntopNativeMappingSerializer writer = new OntopNativeMappingSerializer(results.getMapping());
             writer.save(obdaFile);
+
+            OWLOntology onto = results.getOntology();
             onto.getOWLOntologyManager().saveOntology(onto, new FileDocumentTarget(ontologyFile));
 
         } catch (Exception e) {

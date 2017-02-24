@@ -21,8 +21,6 @@ package it.unibz.inf.ontop.protege.core;
  */
 
 import it.unibz.inf.ontop.model.impl.OBDAModelImpl;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.inf.ontop.injection.QuestCoreSettings;
 import org.protege.editor.core.editorkit.EditorKit;
 import org.protege.editor.core.editorkit.plugin.EditorKitHook;
 import org.protege.editor.core.prefs.Preferences;
@@ -32,6 +30,9 @@ import org.protege.editor.owl.OWLEditorKit;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+
+import static it.unibz.inf.ontop.model.impl.DeprecatedConstants.ABOX_MODE;
+import static it.unibz.inf.ontop.model.impl.DeprecatedConstants.CLASSIC;
 
 /***
  * This class is responsible for initializing all base classes for the OBDA
@@ -123,7 +124,7 @@ public class OBDAEditorKitSynchronizerPlugin extends EditorKitHook {
 			String key = it.next();
 			String value = pref.getString(key, null);
 			if(value != null){			// here we ensure that if the abox mode is classic the the data location can only be in memory
-				if (key.equals(QuestCoreSettings.ABOX_MODE) && value.equals(QuestConstants.CLASSIC)) {
+				if (key.equals(ABOX_MODE) && value.equals(CLASSIC)) {
 //					refplatPref.put(ReformulationPlatformPreferences.DATA_LOCATION, QuestConstants.INMEMORY);
 					refplatPref.put(key, value);
 					isCalssic = true;

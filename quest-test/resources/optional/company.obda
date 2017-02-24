@@ -1,12 +1,6 @@
 [PrefixDeclaration]
 :		http://it.unibz.krdb/obda/test/company#
 
-[SourceDeclaration]
-sourceUri	optional
-connectionUrl	jdbc:h2:mem:questjunitdb
-username	fish
-password	fish
-driverClass	org.h2.Driver
 
 [MappingDeclaration] @collection [[
 mappingId	MAPPING-company

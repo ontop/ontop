@@ -1,8 +1,6 @@
 package it.unibz.inf.ontop.reformulation.tests;
 
-import it.unibz.inf.ontop.injection.QuestConfiguration;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.inf.ontop.injection.QuestCoreSettings;
+import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWL;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLFactory;
 import org.junit.Test;
@@ -30,17 +28,17 @@ public class TMappingUOBMShortTest {
 		execute(conn, "src/test/resources/tmapping-uobm/univ-bench-dl.sql");
 
 		Properties pref = new Properties();
-		//pref.put(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC_INDEX);
-		pref.put(QuestCoreSettings.ABOX_MODE, QuestConstants.VIRTUAL);
-		pref.put(QuestCoreSettings.REFORMULATION_TECHNIQUE, QuestConstants.TW);
-		pref.put(QuestCoreSettings.REWRITE, QuestConstants.TRUE);
-		pref.put(QuestCoreSettings.PRINT_KEYS, QuestConstants.TRUE);
+		//pref.put(QuestCoreSettings.PRINT_KEYS, QuestConstants.TRUE);
 
 		QuestOWLFactory factory = new QuestOWLFactory();
-        QuestConfiguration config = QuestConfiguration.defaultBuilder()
+        OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.nativeOntopMappingFile("src/test/resources/tmapping-uobm/univ-bench-dl.obda")
 				.ontologyFile("src/test/resources/tmapping-uobm/univ-bench-dl.owl")
 				.properties(pref)
+				.jdbcUrl(url)
+				.jdbcUser(username)
+				.jdbcPassword(password)
+				.enableExistentialReasoning(true)
 				.build();
         QuestOWL reasoner = factory.createReasoner(config);
 	}

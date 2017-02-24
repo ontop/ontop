@@ -20,5 +20,6 @@
             [ qt:query <boolean.rq> ] ;
     mf:result <boolean.ttl> ;
     mf:knowledgebase <datatypes.owl> ;
-    mf:mappings <datatypes-pgsql.obda> .
+    mf:mappings <datatypes-pgsql.obda> ;
+    mf:parameters <datatypes-pgsql.properties> .
   

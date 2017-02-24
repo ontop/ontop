@@ -15,12 +15,6 @@ book:isReading, person:owns
 book:author, book:title, person:name
 ]]
 
-[SourceDeclaration]
-sourceUri	simple-h2
-connectionUrl	jdbc:h2:tcp://localhost/test
-username	sa
-password	
-driverClass	org.h2.Driver
 
 [MappingDeclaration] @collection [[
 mappingId	Book

@@ -10,9 +10,11 @@ public class MsSQLASKTest extends AbstractVirtualModeTest {
 	 "src/main/resources/testcases-scenarios/virtual-mode/stockexchange/simplecq/stockexchange.owl";
 	 private static final String obdafile =
 	 "src/main/resources/testcases-scenarios/virtual-mode/stockexchange/simplecq/stockexchange-mssql.obda";
+	private static final String propertyfile =
+			"src/main/resources/testcases-scenarios/virtual-mode/stockexchange/simplecq/stockexchange-mssql.properties";
 
 	public MsSQLASKTest() {
-		super(owlfile, obdafile);
+		super(owlfile, obdafile, propertyfile);
 	}
 
 	//	@Test test fails since mssql does not have limit and offset

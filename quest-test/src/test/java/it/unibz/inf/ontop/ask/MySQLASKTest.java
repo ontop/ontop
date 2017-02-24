@@ -11,9 +11,11 @@ public class MySQLASKTest extends AbstractVirtualModeTest {
 	 "src/main/resources/testcases-scenarios/virtual-mode/stockexchange/simplecq/stockexchange.owl";
 	 static final String obdafile =
 	 "src/main/resources/testcases-scenarios/virtual-mode/stockexchange/simplecq/stockexchange-mysql.obda";
+	static final String propertyfile =
+			"src/main/resources/testcases-scenarios/virtual-mode/stockexchange/simplecq/stockexchange-mysql.properties";
 
 	public MySQLASKTest() {
-		super(owlfile, obdafile);
+		super(owlfile, obdafile, propertyfile);
 	}
 
 	public void testTrue() throws Exception {

@@ -1,12 +1,6 @@
 [PrefixDeclaration]
 :		http://www.semanticweb.org/mindaugas/ontologies/2013/9/untitled-ontology-58#
 
-[SourceDeclaration]
-sourceUri	person
-connectionUrl	jdbc:mysql://10.7.20.39/optional_test
-username	fish
-password	fish
-driverClass	com.mysql.jdbc.Driver
 
 [MappingDeclaration] @collection [[
 mappingId	MAPID-1006f0dbb06844d59f019373151efbb9

@@ -3,12 +3,6 @@
 a:		http://www.example.org/test/1#
 b:		http://www.example.org/test/2#
 
-[SourceDeclaration]
-sourceUri	person
-connectionUrl	jdbc:mysql://obdalin3.inf.unibz.it:3306/optional_test
-username	fish
-password	fish
-driverClass	com.mysql.jdbc.Driver
 
 [MappingDeclaration] @collection [[
 mappingId	MAPID-1

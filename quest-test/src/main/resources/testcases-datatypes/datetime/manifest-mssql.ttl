@@ -27,7 +27,8 @@
             [ qt:query <dateLiteral.rq> ] ;
     mf:result <noresult.ttl> ;
     mf:knowledgebase <datatypes.owl> ;
-    mf:mappings <datatypes-mssql.obda> .
+    mf:mappings <datatypes-mssql.obda> ;
+	mf:parameters <datatypes-mssql.properties> .
 
 :date rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: DATE" ;
@@ -37,7 +38,8 @@
             [ qt:query <date.rq> ] ;
     mf:result <date.ttl> ;
     mf:knowledgebase <datatypes.owl> ;
-    mf:mappings <datatypes-mssql.obda> .
+    mf:mappings <datatypes-mssql.obda> ;
+	mf:parameters <datatypes-mssql.properties> .
 
 :date-str rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: DATE - cast to xsd:string" ;
@@ -47,7 +49,8 @@
             [ qt:query <date-str.rq> ] ;
     mf:result <date-str.ttl> ;
     mf:knowledgebase <datatypes.owl> ;
-    mf:mappings <datatypes-mssql.obda> .
+    mf:mappings <datatypes-mssql.obda> ;
+	mf:parameters <datatypes-mssql.properties> .
 
 :date-bgp rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: DATE - using basic graph pattern" ;
@@ -57,7 +60,8 @@
             [ qt:query <date-bgp.rq> ] ;
     mf:result <date.ttl> ;
     mf:knowledgebase <datatypes.owl> ;
-    mf:mappings <datatypes-mssql.obda> .
+    mf:mappings <datatypes-mssql.obda> ;
+	mf:parameters <datatypes-mssql.properties> .
 
 
 ## >>> This test should fail!
@@ -70,7 +74,8 @@
             [ qt:query <timeLiteral.rq> ] ;
     mf:result <noresult.ttl> ;
     mf:knowledgebase <datatypes.owl> ;
-    mf:mappings <datatypes-mssql.obda> .
+    mf:mappings <datatypes-mssql.obda> ;
+	mf:parameters <datatypes-mssql.properties> .
 
 :time rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: TIME " ;
@@ -81,7 +86,8 @@
             [ qt:query <time.rq> ] ;
     mf:result <time.ttl> ;
     mf:knowledgebase <datatypes.owl> ;
-    mf:mappings <datatypes-mssql.obda> .
+    mf:mappings <datatypes-mssql.obda> ;
+	mf:parameters <datatypes-mssql.properties> .
 
 :time-str rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: TIME - cast to xsd:string" ;
@@ -91,7 +97,8 @@
             [ qt:query <time-str.rq> ] ;
     mf:result <time-str.ttl> ;
     mf:knowledgebase <datatypes.owl> ;
-    mf:mappings <datatypes-mssql.obda> .
+    mf:mappings <datatypes-mssql.obda> ;
+	mf:parameters <datatypes-mssql.properties> .
 
 :time-bgp rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: TIME - using basic graph pattern" ;
@@ -101,7 +108,8 @@
             [ qt:query <time-bgp.rq> ] ;
     mf:result <time.ttl> ;
     mf:knowledgebase <datatypes.owl> ;
-    mf:mappings <datatypes-mssql.obda> .
+    mf:mappings <datatypes-mssql.obda> ;
+	mf:parameters <datatypes-mssql.properties> .
     
 :datetime rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: DATETIME" ;
@@ -111,7 +119,8 @@
             [ qt:query <datetime.rq> ] ;
     mf:result <datetime.ttl> ;
     mf:knowledgebase <datatypes.owl> ;
-    mf:mappings <datatypes-mssql.obda> .
+    mf:mappings <datatypes-mssql.obda> ;
+	mf:parameters <datatypes-mssql.properties> .
 
 :datetime-str rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: DATETIME - cast to xsd:string" ;
@@ -121,7 +130,8 @@
             [ qt:query <datetime-str.rq> ] ;
     mf:result <datetime-str.ttl> ;
     mf:knowledgebase <datatypes.owl> ;
-    mf:mappings <datatypes-mssql.obda> .
+    mf:mappings <datatypes-mssql.obda> ;
+	mf:parameters <datatypes-mssql.properties> .
 
 :datetime2 rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: DATETIME2" ;
@@ -131,7 +141,8 @@
             [ qt:query <datetime2.rq> ] ;
     mf:result <datetime2.ttl> ;
     mf:knowledgebase <datatypes.owl> ;
-    mf:mappings <datatypes-mssql.obda> .
+    mf:mappings <datatypes-mssql.obda> ;
+	mf:parameters <datatypes-mssql.properties> .
 
 
 :datetime2-str rdf:type mf:DatatypeEvaluationTest ;
@@ -142,7 +153,8 @@
             [ qt:query <datetime-str2.rq> ] ;
     mf:result <datetime-str2.ttl> ;
     mf:knowledgebase <datatypes.owl> ;
-    mf:mappings <datatypes-mssql.obda> .
+    mf:mappings <datatypes-mssql.obda> ;
+	mf:parameters <datatypes-mssql.properties> .
 
 :timestamp_tz rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: TIMESTAMP WITH TIMEZONE" ;
@@ -152,6 +164,7 @@
             [ qt:query <datetimeoffset.rq> ] ;
     mf:result <datetimeoffset.ttl> ;
     mf:knowledgebase <datatypes.owl> ;
-    mf:mappings <datatypes-mssql.obda> .
+    mf:mappings <datatypes-mssql.obda> ;
+	mf:parameters <datatypes-mssql.properties> .
 
 

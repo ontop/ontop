@@ -20,40 +20,30 @@ package it.unibz.inf.ontop.owlrefplatform.owlapi;
  * #L%
  */
 
-import it.unibz.inf.ontop.model.OBDAException;
-import it.unibz.inf.ontop.owlrefplatform.core.IQuestConnection;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestStatement;
+import it.unibz.inf.ontop.answering.input.InputQueryFactory;
+import it.unibz.inf.ontop.answering.input.RDF4JInputQueryFactory;
+import it.unibz.inf.ontop.exception.OntopConnectionException;
+import it.unibz.inf.ontop.owlrefplatform.core.OntopConnection;
 import org.semanticweb.owlapi.model.OWLException;
 
-/***
- * Handler for a connection. Note that as with JDBC, executing queries in
- * parallels over a single connection is inefficient, since JDBC drivers will
- * serialize each query execution and you get a bottle neck (even if using
- * multiple {@link QuestOWLStatement}) . Having explicit QuestOWLConnections
- * allows to initialize a single QuestOWLReasoner and make multiple queries in
- * parallel with good performance (as with JDBC).
- * 
- * <p>
- * Besides parallel connections, at the moment, the class is not very useful,
- * it will be when transactions and updates are implemented. Or when we allow
- * the user to setup the kind of statement that he wants to use.
- * 
- * <p>
- * Internally, this class is mostly an OWLAPI specific wrapper for the API
- * agnostic {@link QuestStatement}.
- * 
- * @author Mariano Rodriguez Muro <mariano.muro@gmail.com>
- * 
- * @see QuestOWLStatement
- * @see QuestOWL
- * @see QuestStatement
- */
-public class QuestOWLConnection implements AutoCloseable {
 
-	private final IQuestConnection conn;
+public class QuestOWLConnection implements OntopOWLConnection {
 
-	public QuestOWLConnection(IQuestConnection conn) {
+	private final OntopConnection conn;
+	private final InputQueryFactory inputQueryFactory;
+
+	public QuestOWLConnection(OntopConnection conn, InputQueryFactory inputQueryFactory) {
 		this.conn = conn;
+		this.inputQueryFactory = inputQueryFactory;
+	}
+
+	@Override
+	public OntopOWLStatement createStatement() throws OWLException {
+		try {
+			return new QuestOWLStatement(conn.createStatement(), this, inputQueryFactory);
+		} catch (OntopConnectionException e) {
+			throw new OWLException(e);
+		}
 	}
 	
 	/***
@@ -61,83 +51,60 @@ public class QuestOWLConnection implements AutoCloseable {
 	 * 
 	 * @throws OWLException
 	 */
+	@Override
 	public void close() throws OWLException {
 		try {
 			conn.close();
-		} catch (OBDAException e) {
-			throw new OWLException(e); 
-		}
-
-	}
-
-	/**
-	 * For the virtual A-box mode.
-	 */
-	public QuestOWLStatement createStatement() throws OWLException {
-		try {
-			return new QuestOWLStatement(conn.createStatement(), this);
-		} catch (OBDAException e) {
+		} catch (OntopConnectionException e) {
 			throw new OWLException(e); 
 		}
 	}
 
-	/**
-	 * For the classic A-box mode
-     */
-	public SIQuestOWLStatement createSIStatement() throws OWLException {
-		try {
-			return new SIQuestOWLStatementImpl(conn.createSIStatement(), this);
-		} catch (OBDAException e) {
-			throw new OWLException(e);
-		}
-	}
-
-	public void commit() throws OWLException {
-		try {
-			conn.close();
-		} catch (OBDAException e) {
-			throw new OWLException(e); 
-		}
-	}
-
-	public void setAutoCommit(boolean autocommit) throws OWLException {
-		try {
-			conn.setAutoCommit(autocommit);
-		} catch (OBDAException e) {
-			throw new OWLException(e); 
-		}
-	}
-
-	public boolean getAutoCommit() throws OWLException {
-		try {
-			return conn.getAutoCommit();
-		} catch (OBDAException e) {
-			throw new OWLException(e);
-		}
-	}
-
+	@Override
 	public boolean isClosed() throws OWLException {
 		try {
 			return conn.isClosed();
-		} catch (OBDAException e) {
+		} catch (OntopConnectionException e) {
 			throw new OWLException(e);
 		}
 	}
 
-	public boolean isReadOnly() throws OWLException {
+	@Override
+	public void commit() throws OWLException {
 		try {
-			return conn.isReadOnly();
-		} catch (OBDAException e) {
+			conn.close();
+		} catch (OntopConnectionException e) {
 			throw new OWLException(e);
 		}
 	}
 
+	@Override
+	public void setAutoCommit(boolean autocommit) throws OWLException {
+		try {
+			conn.setAutoCommit(autocommit);
+		} catch (OntopConnectionException e) {
+			throw new OWLException(e);
+		}
+	}
+
+	@Override
+	public boolean getAutoCommit() throws OWLException {
+		try {
+			return conn.getAutoCommit();
+		} catch (OntopConnectionException e) {
+			throw new OWLException(e);
+		}
+	}
+
+
+	@Override
 	public void rollBack() throws OWLException {
 		try {
 			conn.rollBack();
-		} catch (OBDAException e) {
-			throw new OWLException(e); 
+		} catch (OntopConnectionException e) {
+			throw new OWLException(e);
 		}
 	}
+
 
 }

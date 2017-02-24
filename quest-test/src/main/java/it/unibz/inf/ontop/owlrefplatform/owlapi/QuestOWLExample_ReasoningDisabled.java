@@ -3,18 +3,16 @@ package it.unibz.inf.ontop.owlrefplatform.owlapi;
 
 import it.unibz.inf.ontop.exception.InvalidMappingException;
 import it.unibz.inf.ontop.exception.InvalidPredicateDeclarationException;
-import it.unibz.inf.ontop.injection.QuestConfiguration;
-import it.unibz.inf.ontop.model.OBDAException;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
+import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.core.SQLExecutableQuery;
-import it.unibz.inf.ontop.injection.QuestCoreSettings;
 import it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing.TMappingExclusionConfig;
-import org.semanticweb.owlapi.model.*;
+import org.semanticweb.owlapi.model.OWLException;
+import org.semanticweb.owlapi.model.OWLObject;
+import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Properties;
 
 
 public class QuestOWLExample_ReasoningDisabled {
@@ -29,14 +27,22 @@ public class QuestOWLExample_ReasoningDisabled {
 
     interface ParamConst{
         public static final String MYSQL_OBDA_FILE  = "src/main/resources/example/disableReasoning/mysql_obdalin3.obda";
+        public static final String MYSQL_PROPERTY_FILE  = "src/main/resources/example/disableReasoning/mysql_obdalin3.properties";
 
         public static final String POSTGRES_OBDA_FILE = "src/main/resources/example/disableReasoning/pgsql_obdalin3.obda";
+        public static final String POSTGRES_PROPERTY_FILE = "src/main/resources/example/disableReasoning/pgsql_obdalin3.properties";
 
         public static final String DB2_OBDA_FILE = "src/main/resources/example/disableReasoning/db2_obdalin3.obda";
+        public static final String DB2_PROPERTY_FILE = "src/main/resources/example/disableReasoning/db2_obdalin3.properties";
 
         public static final String MYSQL_SMALL_OBDA_FILE  = "src/main/resources/example/disableReasoning/mysql_vulcan.obda";
+        public static final String MYSQL_SMALL_PROPERTY_FILE  = "src/main/resources/example/disableReasoning/mysql_vulcan.properties";
+
         public static final String POSTGRES_SMALL_OBDA_FILE = "src/main/resources/example/disableReasoning/pgsql_obdalin3.obda";
+        public static final String POSTGRES_SMALL_PROPERTY_FILE = "src/main/resources/example/disableReasoning/pgsql_obdalin3.properties";
+
         //public static final String DB2_SMALL_OBDA_FILE = "src/main/resources/example/disableReasoning/ontowis-hierarchy-db2.obda";
+        //public static final String DB2_SMALL_PROPERTY_FILE = "src/main/resources/example/disableReasoning/ontowis-hierarchy-db2.properties";
 
 
         static final String[] tMappingConfFiles = {
@@ -54,6 +60,7 @@ public class QuestOWLExample_ReasoningDisabled {
     public static class Settings {
         static String obdaFile;
         static DbType dbType;
+        static String propertyFile;
         static String tMappingConfFile;
         public static String tableFileName;
     }
@@ -333,7 +340,7 @@ public class QuestOWLExample_ReasoningDisabled {
      * @param conn
      * @throws org.semanticweb.owlapi.model.OWLException
      */
-    private void closeEverything(QuestOWLConnection conn) throws OWLException {
+    private void closeEverything(OntopOWLConnection conn) throws OWLException {
 		/*
 		 * Close connection and resources
 		 */
@@ -345,21 +352,18 @@ public class QuestOWLExample_ReasoningDisabled {
     }
 
     /**
-     * @throws it.unibz.inf.ontop.model.OBDAException
      * @throws org.semanticweb.owlapi.model.OWLOntologyCreationException
      * @throws it.unibz.inf.ontop.exception.InvalidMappingException
      * @throws it.unibz.inf.ontop.exception.InvalidPredicateDeclarationException
      * @throws java.io.IOException
      * @throws OWLException
      */
-    private QuestOWLConnection createStuff() throws OBDAException, OWLOntologyCreationException, IOException, InvalidPredicateDeclarationException, InvalidMappingException {
+    private OntopOWLConnection createStuff() throws OWLOntologyCreationException, IOException, InvalidPredicateDeclarationException, InvalidMappingException {
 
 		/*
 		 * Prepare the configuration for the Quest instance. The example below shows the setup for
 		 * "Virtual ABox" mode
 		 */
-        Properties p = new Properties();
-        p.put(QuestCoreSettings.SQL_GENERATE_REPLACE, QuestConstants.FALSE);
 
 //		TEST preference.setCurrentValueOf(QuestPreferences.T_MAPPINGS, QuestConstants.FALSE); // Disable T_Mappings
 
@@ -367,17 +371,18 @@ public class QuestOWLExample_ReasoningDisabled {
 
 
         QuestOWLFactory factory = new QuestOWLFactory();
-        QuestConfiguration config = QuestConfiguration.defaultBuilder()
+        OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
                 .nativeOntopMappingFile(new File(Settings.obdaFile))
                 .ontologyFile(owlfile)
+                .propertyFile(Settings.propertyFile)
                 .tMappingExclusionConfig(tMapConfig)
-                .properties(p)
+                .enableIRISafeEncoding(false)
                 .build();
         this.reasoner = factory.createReasoner(config);
 		/*
 		 * Prepare the data connection for querying.
 		 */
-        QuestOWLConnection conn = reasoner.getConnection();
+        OntopOWLConnection conn = reasoner.getConnection();
 
         return conn;
     }
@@ -385,10 +390,11 @@ public class QuestOWLExample_ReasoningDisabled {
     private QuestOWL reasoner;
 
 
-    public QuestOWLExample_ReasoningDisabled(DbType dbType, String obdaFile, String tMappingsConfFile){
+    public QuestOWLExample_ReasoningDisabled(DbType dbType, String obdaFile, String tMappingsConfFile, String propertyFile){
         Settings.obdaFile = obdaFile;
         Settings.dbType = dbType;
         Settings.tMappingConfFile = tMappingsConfFile;
+        Settings.propertyFile = propertyFile;
     }
 
     /*
@@ -454,7 +460,7 @@ public class QuestOWLExample_ReasoningDisabled {
     }
 
     private List<Long> runQueries(//QuestOWLConnection conn,
-                                  List<String> queries) throws OWLException, InvalidPredicateDeclarationException, InvalidMappingException, OBDAException, IOException {
+                                  List<String> queries) throws OWLException, InvalidPredicateDeclarationException, InvalidMappingException, IOException {
 
         //int nWarmUps = Constants.NUM_WARM_UPS;
         //int nRuns = Constants.NUM_RUNS;
@@ -464,8 +470,8 @@ public class QuestOWLExample_ReasoningDisabled {
         for(String sparqlQuery:queries){
             //String sparqlQuery = queries[j];
 
-            QuestOWLConnection conn;
-            QuestOWLStatement st = null;
+            OntopOWLConnection conn;
+            OntopOWLStatement st = null;
             try {
 
                 // Warm ups
@@ -571,7 +577,7 @@ public class QuestOWLExample_ReasoningDisabled {
 
         try {
             QuestOWLExample_ReasoningDisabled example = new QuestOWLExample_ReasoningDisabled(
-                    Settings.dbType, Settings.obdaFile, Settings.tMappingConfFile);
+                    Settings.dbType, Settings.obdaFile, Settings.tMappingConfFile, Settings.propertyFile);
             example.runQuery();
         } catch (Exception e) {
             e.printStackTrace();
@@ -584,26 +590,31 @@ public class QuestOWLExample_ReasoningDisabled {
             case "--MYSQL-SMALL":{
                 Settings.obdaFile = ParamConst.MYSQL_SMALL_OBDA_FILE;
                 Settings.dbType = DbType.MYSQL;
+                Settings.propertyFile = ParamConst.MYSQL_SMALL_PROPERTY_FILE;
                 break;
             }
             case "--MYSQL":{
                 Settings.obdaFile = ParamConst.MYSQL_OBDA_FILE;
                 Settings.dbType = DbType.MYSQL;
+                Settings.propertyFile = ParamConst.MYSQL_PROPERTY_FILE;
                 break;
             }
             case "--POSTGRES-SMALL":{
                 Settings.obdaFile = ParamConst.POSTGRES_SMALL_OBDA_FILE;
                 Settings.dbType = DbType.SMALL_POSTGRES;
+                Settings.propertyFile = ParamConst.POSTGRES_SMALL_PROPERTY_FILE;
                 break;
             }
             case "--POSTGRES":{
                 Settings.obdaFile = ParamConst.POSTGRES_OBDA_FILE;
                 Settings.dbType = DbType.POSTGRES;
+                Settings.propertyFile = ParamConst.POSTGRES_PROPERTY_FILE;
                 break;
             }
             case "--DB2":{
                 Settings.obdaFile = ParamConst.DB2_OBDA_FILE;
                 Settings.dbType = DbType.DB2;
+                Settings.propertyFile = ParamConst.DB2_PROPERTY_FILE;
                 break;
             }
 

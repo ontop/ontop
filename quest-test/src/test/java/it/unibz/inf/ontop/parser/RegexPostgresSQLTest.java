@@ -31,9 +31,10 @@ public class RegexPostgresSQLTest extends AbstractVirtualModeTest {
 
 	static final String owlfile = "src/test/resources/regex/stockBolzanoAddress.owl";
 	static final String obdafile = "src/test/resources/regex/stockexchangeRegex.obda";
+	static final String propertiesfile = "src/test/resources/regex/stockexchangeRegex.properties";
 
 	public RegexPostgresSQLTest() {
-		super(owlfile, obdafile);
+		super(owlfile, obdafile,propertiesfile );
 	}
 
 	/**

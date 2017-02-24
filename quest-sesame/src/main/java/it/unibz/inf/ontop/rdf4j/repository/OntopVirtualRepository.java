@@ -20,175 +20,159 @@ package it.unibz.inf.ontop.rdf4j.repository;
  * #L%
  */
 
-import it.unibz.inf.ontop.injection.QuestConfiguration;
-import it.unibz.inf.ontop.model.OBDAException;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestDBConnection;
-import it.unibz.inf.ontop.owlrefplatform.questdb.QuestDBVirtualStore;
+import it.unibz.inf.ontop.answering.OntopQueryEngine;
+import it.unibz.inf.ontop.answering.input.RDF4JInputQueryFactory;
+import it.unibz.inf.ontop.injection.OntopEngineFactory;
+import it.unibz.inf.ontop.injection.OntopSystemConfiguration;
+import it.unibz.inf.ontop.owlrefplatform.core.OntopConnection;
 
+import it.unibz.inf.ontop.spec.OBDASpecification;
+import org.eclipse.rdf4j.model.ValueFactory;
+import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
+import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.eclipse.rdf4j.repository.RepositoryException;
-public class OntopVirtualRepository extends AbstractOntopRepository {
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-	private QuestDBVirtualStore virtualStore;
-	private QuestDBConnection questDBConn;
+import javax.annotation.Nullable;
+import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
 
-//	@Deprecated
-//	public OntopVirtualRepository(String name, String obdaFile, boolean existential, String rewriting)
-//			throws Exception {
-//		this(name, null, obdaFile, existential, rewriting);
-//	}
-//
-//	@Deprecated
-//	public OntopVirtualRepository(String name, String obdaFile, String configFileName) throws Exception {
-//		this(name, null, obdaFile, configFileName);
-//	}
-//
-//	@Deprecated
-//	public OntopVirtualRepository(String name, String tboxFile, String obdaFile, boolean existential, String rewriting)
-//			throws Exception {
-//		super();
-//		createRepo(name, getPreferencesFromSettings(existential, rewriting, tboxFile, obdaFile));
-//	}
-//
-//	@Deprecated
-//	public OntopVirtualRepository(String name, String tboxFile, String obdaFile, String configFileName) throws Exception {
-//		super();
-//		createRepo(name, getPreferencesFromFile(configFileName, tboxFile, obdaFile));
-//	}
-//
-//	@Deprecated
-//	public OntopVirtualRepository(String name, OWLOntology tbox, Model mappings, String configFileName) throws Exception {
-//		super();
-//		createRepo(name, getPreferencesFromFile(configFileName, tbox, mappings));
-//	}
-	
-	public OntopVirtualRepository(String name, QuestConfiguration configuration) throws Exception {
-		super();
-		this.virtualStore = new QuestDBVirtualStore(name, configuration);
+public class OntopVirtualRepository implements org.eclipse.rdf4j.repository.Repository, AutoCloseable {
+
+	private boolean initialized = false;
+	private static final Logger logger = LoggerFactory.getLogger(OntopVirtualRepository.class);
+	private Map<String, String> namespaces;
+
+	// Temporary (dropped after initialization)
+	@Nullable
+	private OntopSystemConfiguration configuration;
+	@Nullable
+	private OntopQueryEngine queryEngine;
+	private final RDF4JInputQueryFactory inputQueryFactory;
+
+	public OntopVirtualRepository(OntopSystemConfiguration configuration) {
+		this.namespaces = new HashMap<>();
+		this.configuration = configuration;
+		inputQueryFactory = configuration.getInjector().getInstance(RDF4JInputQueryFactory.class);
 	}
 
-//	/**
-//	 * Generate QuestPreferences from a config file
-//	 * @param configFileName - the path to the config file
-//	 * @return the read QuestPreferences object
-//	 * @throws FileNotFoundException
-//	 * @throws IOException
-//	 */
-//	private QuestPreferences getPreferencesFromFile(String configFileName) throws IOException {
-//		if (!configFileName.isEmpty()) {
-//			Properties p = new Properties();
-//			File configFile = new File(URI.create(configFileName));
-//			p.load(new FileInputStream(configFile));
-//			return new QuestPreferences(p);
-//		} else {
-//			return new QuestPreferences();
-//		}
-//	}
-//
-//	/**
-//	 * Generate a QuestPreferences object from some passed
-//	 * arguments as settings
-//	 * @param existential - boolean to turn existential reasoning on or off (default=false)
-//	 * @param rewriting - String to indicate rewriting technique to be used (default=TreeWitness)
-//	 * @return the QuestPreferences object
-//	 */
-//	private QuestPreferences getPreferencesFromSettings(boolean existential, String rewriting) {
-//		Properties p = new Properties();
-//		p.setProperty(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-//		if (existential)
-//			p.setProperty(QuestPreferences.REWRITE, "true");
-//		else
-//			p.setProperty(QuestPreferences.REWRITE, "false");
-//		if (rewriting.equals("TreeWitness"))
-//			p.setProperty(QuestPreferences.REFORMULATION_TECHNIQUE, QuestConstants.TW);
-//		else if (rewriting.equals("Default"))
-//			p.setProperty(QuestPreferences.REFORMULATION_TECHNIQUE, QuestConstants.UCQBASED);
-//		return new QuestPreferences(p);
-//	}
+	/**
+	 * Returns a new RepositoryConnection.
+	 *
+	 * (No repository connection sharing for the sake
+	 *  of thread-safeness)
+	 *
+	 */
+	public RepositoryConnection getConnection() throws RepositoryException {
+		try {
+			return new OntopRepositoryConnection(this, getOntopConnection(), inputQueryFactory);
+		} catch (Exception e) {
+			logger.error("Error creating repo connection: " + e.getMessage());
+			throw new RepositoryException(e);
+		}
+	}
+
 
 	/**
-	 * This method leads to the reasoner being initalized, which includes the call to {@code Quest.setupRepository}: connecting to the database,
-	 * analyzing mappings etc. This must be called before any queries are run, i.e. before {@code getQuestConnection}.
+	 * This method leads to the reasoner being initialized (connecting to the database,
+	 * analyzing mappings, etc.). This must be called before any queries are run, i.e. before {@code getConnection}.
 	 * 
 	 */
 	@Override
 	public void initialize() throws RepositoryException{
-		super.initialize();
+		initialized = true;
 		try {
-			this.virtualStore.initialize();
+			OBDASpecification obdaSpecification = configuration.loadProvidedSpecification();
+			OntopEngineFactory factory = configuration.getInjector().getInstance(OntopEngineFactory.class);
+
+			queryEngine = factory.create(obdaSpecification, configuration.getExecutorRegistry());
+			queryEngine.connect();
 		}
 		catch (Exception e){
 			throw new RepositoryException(e);
 		}
 	}
 	
-//	private void createRepo(String name, String tboxFile, QuestPreferences pref) throws Exception
-//	{
-//		if (mappingFile == null) {
-//			//if we have no mappings
-//			// (then user constraints are also no point)
-//			this.virtualStore = new QuestDBVirtualStore(name, pref);
-//
-//		} else {
-//			//generate obdaURI
-//			URI obdaURI;
-//			if (mappingFile.startsWith("file:"))
-//				obdaURI = URI.create(mappingFile);
-//			else
-//				 obdaURI = new File(mappingFile).toURI();
-//
-//			if (tboxFile == null) {
-//				//if we have no owl file
-//				this.virtualStore = new QuestDBVirtualStore(name, obdaURI, pref);
-//			} else {
-//				//if we have both owl and mappings file
-//				//generate tboxURI
-//				URI tboxURI;
-//				if (tboxFile.startsWith("file:"))
-//					 tboxURI = URI.create(tboxFile);
-//				else
-//					tboxURI = new File(tboxFile).toURI();
-//				this.virtualStore = new QuestDBVirtualStore(name, tboxURI,	obdaURI, pref);
-//			}
-//		}
-//	}
-	
 	/**
 	 * Returns a connection which can be used to run queries over the repository
-	 * Before this method can be used, {@link initialize()} must be called once.
+	 * Before this method can be used, initialize() must be called once.
 	 */
-	@Override
-	public QuestDBConnection getQuestConnection() throws OBDAException {
-		if(!super.initialized)
-			throw new Error("The OntopVirtualRepository must be initialized before getQuestConnection can be run. See https://github.com/ontop/ontop/wiki/API-change-in-OntopVirtualRepository-and-QuestDBVirtualStore");
+	private OntopConnection getOntopConnection() throws RepositoryException {
+		if(!initialized)
+			throw new RepositoryException("The OntopVirtualRepository must be initialized before getConnection can be run.");
+		try {
+			return queryEngine.getConnection();
+		} catch (Exception e) {
+			throw new RepositoryException(e);
+		}
 
-		questDBConn = this.virtualStore.getConnection();
-		return questDBConn;
 	}
 
 	@Override
 	public boolean isWritable() throws RepositoryException {
-		// Checks whether this repository is writable, i.e.
-		// if the data contained in this repository can be changed.
-		// The writability of the repository is determined by the writability
-		// of the Sail that this repository operates on.
 		return false;
 	}
-	
+
+	@Override
+	public boolean isInitialized() {
+		return initialized;
+	}
+
 	@Override
 	public void shutDown() throws RepositoryException {
-		super.shutDown();
+		initialized = false;
 		try {
-			questDBConn.close();
-			virtualStore.close();
-		} catch (OBDAException e) {
-			e.printStackTrace();
+			queryEngine.close();
+		} catch (Exception e) {
+			throw new RepositoryException(e);
 		}
 	}
 
-	public String getType() {
-		return QuestConstants.VIRTUAL;
+	@Override
+	public File getDataDir() {
+		throw new RepositoryException("Ontop does not have a data directory");
 	}
 
+	@Override
+	public ValueFactory getValueFactory() {
+		// Gets a ValueFactory for this Repository.
+		return SimpleValueFactory.getInstance();
+	}
 
+	@Override
+	public void setDataDir(File arg0) {
+		// Ignores it
+	}
+
+	@Override
+	public void close() throws RepositoryException {
+		this.shutDown();
+	}
+
+	void setNamespace(String key, String value)
+	{
+		namespaces.put(key, value);
+	}
+
+	String getNamespace(String key)
+	{
+		return namespaces.get(key);
+	}
+
+	Map<String, String> getNamespaces()
+	{
+		return namespaces;
+	}
+
+	void setNamespaces(Map<String, String> nsp)
+	{
+		this.namespaces = nsp;
+	}
+
+	void removeNamespace(String key)
+	{
+		namespaces.remove(key);
+	}
 }

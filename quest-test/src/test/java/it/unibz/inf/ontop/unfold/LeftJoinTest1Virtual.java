@@ -33,9 +33,10 @@ public class LeftJoinTest1Virtual extends AbstractVirtualModeTest {
 
 	private static final String owlfile = "src/test/resources/person.owl";
 	private static final String obdafile = "src/test/resources/person1.obda";
+	private static final String propertyfile = "src/test/resources/person1.properties";
 
     public LeftJoinTest1Virtual() {
-        super(owlfile, obdafile);
+        super(owlfile, obdafile, propertyfile);
     }
 
     @Test

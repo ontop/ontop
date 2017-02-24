@@ -1,6 +1,6 @@
 package it.unibz.inf.ontop.ask;
 
-import it.unibz.inf.ontop.injection.QuestConfiguration;
+import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import org.junit.After;
 import org.junit.Before;
@@ -24,7 +24,7 @@ public class H2ASKTest  {
 	 "src/main/resources/testcases-scenarios/virtual-mode/stockexchange/simplecq/stockexchange-h2.obda";
 
 	private QuestOWL reasoner;
-	private QuestOWLConnection conn;
+	private OntopOWLConnection conn;
 	Connection sqlConnection;
 
 	@Before
@@ -44,7 +44,7 @@ public class H2ASKTest  {
 
 		s.close();
 
-		QuestConfiguration config = QuestConfiguration.defaultBuilder()
+		OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.ontologyFile(owlFile)
 				.nativeOntopMappingFile(obdaFile)
 				.build();
@@ -97,7 +97,7 @@ public class H2ASKTest  {
 	}
 
 	private boolean runQueryAndReturnBooleanX(String query) throws Exception {
-		QuestOWLStatement st = conn.createStatement();
+		OntopOWLStatement st = conn.createStatement();
 		boolean retval;
 		try {
 			QuestOWLResultSet rs = st.executeTuple(query);

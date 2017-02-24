@@ -13,7 +13,12 @@
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>ontop-model</artifactId>
+            <artifactId>ontop-obda-core</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>ontop-optimization</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

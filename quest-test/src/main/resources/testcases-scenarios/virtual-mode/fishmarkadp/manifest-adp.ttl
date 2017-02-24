@@ -20,5 +20,7 @@
             [ qt:query <common-name.rq> ] ;
     mf:result <common-name.ttl> ;
     mf:knowledgebase <fishdelish.owl> ;
-    mf:mappings <fishdelish-adp.obda> .
+    mf:mappings <fishdelish-adp.obda> ;
+	mf:parameters <fishdelish-adp.properties> .
+
   

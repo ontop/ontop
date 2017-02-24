@@ -26,7 +26,8 @@
             [ qt:query <dateLiteral.rq> ] ;
     mf:result <noresult.ttl> ;
     mf:knowledgebase <datatypes.owl> ;
-    mf:mappings <datatypes-mysql.obda> .
+    mf:mappings <datatypes-mysql.obda> ;
+	mf:parameters <datatypes-mysql.properties> .
     
 :date rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: DATE" ;
@@ -37,7 +38,8 @@
             [ qt:query <date.rq> ] ;
     mf:result <date.ttl> ;
     mf:knowledgebase <datatypes.owl> ;
-    mf:mappings <datatypes-mysql.obda> .
+    mf:mappings <datatypes-mysql.obda> ;
+	mf:parameters <datatypes-mysql.properties> .
 
 :date-bgp rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: DATE - using basic graph pattern" ;
@@ -47,7 +49,8 @@
             [ qt:query <date-bgp.rq> ] ;
     mf:result <date.ttl> ;
     mf:knowledgebase <datatypes.owl> ;
-    mf:mappings <datatypes-mysql.obda> .
+    mf:mappings <datatypes-mysql.obda> ;
+	mf:parameters <datatypes-mysql.properties> .
 
 :date-str rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: DATE - cast to xsd:string" ;
@@ -57,7 +60,8 @@
             [ qt:query <date-str.rq> ] ;
     mf:result <date.ttl> ;
     mf:knowledgebase <datatypes.owl> ;
-    mf:mappings <datatypes-mysql.obda> .
+    mf:mappings <datatypes-mysql.obda> ;
+	mf:parameters <datatypes-mysql.properties> .
 
 ## >>> This test should fail!
 :timeLiteral rdf:type mf:DatatypeEvaluationTest ;
@@ -69,7 +73,8 @@
             [ qt:query <timeLiteral.rq> ] ;
     mf:result <noresult.ttl> ;
     mf:knowledgebase <datatypes.owl> ;
-    mf:mappings <datatypes-mysql.obda> .
+    mf:mappings <datatypes-mysql.obda> ;
+	mf:parameters <datatypes-mysql.properties> .
 
 :time rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: TIME" ;
@@ -80,7 +85,8 @@
             [ qt:query <time.rq> ] ;
     mf:result <time.ttl> ;
     mf:knowledgebase <datatypes.owl> ;
-    mf:mappings <datatypes-mysql.obda> .
+    mf:mappings <datatypes-mysql.obda> ;
+	mf:parameters <datatypes-mysql.properties> .
 
 :time-bgp rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: TIME - using basic graph pattern" ;
@@ -90,7 +96,8 @@
             [ qt:query <time-bgp.rq> ] ;
     mf:result <time.ttl> ;
     mf:knowledgebase <datatypes.owl> ;
-    mf:mappings <datatypes-mysql.obda> .
+    mf:mappings <datatypes-mysql.obda> ;
+	mf:parameters <datatypes-mysql.properties> .
 
 :time-str rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: TIME - cast to xsd:string" ;
@@ -100,7 +107,8 @@
             [ qt:query <time-str.rq> ] ;
     mf:result <time.ttl> ;
     mf:knowledgebase <datatypes.owl> ;
-    mf:mappings <datatypes-mysql.obda> .
+    mf:mappings <datatypes-mysql.obda> ;
+	mf:parameters <datatypes-mysql.properties> .
     
 :datetime rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: DATETIME" ;
@@ -110,7 +118,8 @@
             [ qt:query <datetime.rq> ] ;
     mf:result <datetime.ttl> ;
     mf:knowledgebase <datatypes.owl> ;
-    mf:mappings <datatypes-mysql.obda> .
+    mf:mappings <datatypes-mysql.obda> ;
+	mf:parameters <datatypes-mysql.properties> .
 
 :datetime-str rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: DATETIME - cast to xsd:string" ;
@@ -120,7 +129,8 @@
             [ qt:query <datetime-str.rq> ] ;
     mf:result <datetime.ttl> ;
     mf:knowledgebase <datatypes.owl> ;
-    mf:mappings <datatypes-mysql.obda> .
+    mf:mappings <datatypes-mysql.obda> ;
+	mf:parameters <datatypes-mysql.properties> .
     
 :timestamp rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: TIMESTAMP" ;
@@ -130,7 +140,8 @@
             [ qt:query <timestamp.rq> ] ;
     mf:result <timestamp.ttl> ;
     mf:knowledgebase <datatypes.owl> ;
-    mf:mappings <datatypes-mysql.obda> .
+    mf:mappings <datatypes-mysql.obda> ;
+	mf:parameters <datatypes-mysql.properties> .
  
 :timestamp-str rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: TIMESTAMP - cast to xsd:string" ;
@@ -140,7 +151,8 @@
             [ qt:query <timestamp-str.rq> ] ;
     mf:result <timestamp.ttl> ;
     mf:knowledgebase <datatypes.owl> ;
-    mf:mappings <datatypes-mysql.obda> .
+    mf:mappings <datatypes-mysql.obda> ;
+	mf:parameters <datatypes-mysql.properties> .
     
 ## >>> This test should fail!
 :yearLiteral rdf:type mf:DatatypeEvaluationTest ;
@@ -152,7 +164,8 @@
             [ qt:query <yearLiteral.rq> ] ;
     mf:result <noresult.ttl> ;
     mf:knowledgebase <datatypes.owl> ;
-    mf:mappings <datatypes-mysql.obda> .
+    mf:mappings <datatypes-mysql.obda> ;
+	mf:parameters <datatypes-mysql.properties> .
 
 
 :year rdf:type mf:DatatypeEvaluationTest ;
@@ -163,7 +176,8 @@
             [ qt:query <year.rq> ] ;
     mf:result <year.ttl> ;
     mf:knowledgebase <datatypes.owl> ;
-    mf:mappings <datatypes-mysql.obda> .
+    mf:mappings <datatypes-mysql.obda> ;
+	mf:parameters <datatypes-mysql.properties> .
 
 :year-bgp rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: YEAR - using basic graph pattern" ;
@@ -173,7 +187,8 @@
             [ qt:query <year-bgp.rq> ] ;
     mf:result <year.ttl> ;
     mf:knowledgebase <datatypes.owl> ;
-    mf:mappings <datatypes-mysql.obda> .
+    mf:mappings <datatypes-mysql.obda> ;
+	mf:parameters <datatypes-mysql.properties> .
 
 :year-str rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: YEAR - cast to xsd:string" ;
@@ -183,4 +198,5 @@
             [ qt:query <year-str.rq> ] ;
     mf:result <year.ttl> ;
     mf:knowledgebase <datatypes.owl> ;
-    mf:mappings <datatypes-mysql.obda> .
+    mf:mappings <datatypes-mysql.obda> ;
+	mf:parameters <datatypes-mysql.properties> .

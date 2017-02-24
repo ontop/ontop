@@ -30,9 +30,10 @@ public class RegexOracleSQLTest extends AbstractVirtualModeTest {
 
 	static final String owlfile = "src/test/resources/regex/stockBolzanoAddress.owl";
 	static final String obdafile = "src/test/resources/regex/stockexchangeRegexLike.obda";
+	static final String propertiesfile = "src/test/resources/regex/stockexchangeRegexLike.properties";
 
 	public RegexOracleSQLTest() {
-		super(owlfile, obdafile);
+		super(owlfile, obdafile, propertiesfile);
 	}
 
 	/**

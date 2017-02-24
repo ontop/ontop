@@ -21,8 +21,8 @@ package it.unibz.inf.ontop.obda;
  */
 
 
+import it.unibz.inf.ontop.owlrefplatform.owlapi.OntopOWLStatement;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLResultSet;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLStatement;
 import it.unibz.inf.ontop.quest.AbstractVirtualModeTest;
 import org.semanticweb.owlapi.model.OWLObject;
 
@@ -30,21 +30,22 @@ import org.semanticweb.owlapi.model.OWLObject;
  * Test
  * CONCAT with table.columnName and string values that need to be change to literal
  * use mysql.
- * Refer to {@link Mapping2DatalogConverter} {@link ProjectionVisitor}
+ *
  */
 
 public class ConferenceConcatMySQLTest extends AbstractVirtualModeTest {
 
     static final String owlFile = "src/test/resources/conference/ontology3.owl";
     static final String obdaFile = "src/test/resources/conference/secondmapping-test.obda";
+	static final String propertyFile = "src/test/resources/conference/secondmapping-test.properties";
 
 	public ConferenceConcatMySQLTest() {
-		super(owlFile, obdaFile);
+		super(owlFile, obdaFile, propertyFile);
 	}
 
 	private void runTests(String query1) throws Exception {
 
-		QuestOWLStatement st = conn.createStatement();
+		OntopOWLStatement st = conn.createStatement();
 
 
 		try {
@@ -63,7 +64,7 @@ public class ConferenceConcatMySQLTest extends AbstractVirtualModeTest {
 		}
 	}
 	
-	private void executeQueryAssertResults(String query, QuestOWLStatement st) throws Exception {
+	private void executeQueryAssertResults(String query, OntopOWLStatement st) throws Exception {
 		QuestOWLResultSet rs = st.executeTuple(query);
 
 		OWLObject answer, answer2;

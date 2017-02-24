@@ -5,12 +5,6 @@ quest:		http://obda.org/quest#
 rdf:		http://www.w3.org/1999/02/22-rdf-syntax-ns#
 rdfs:		http://www.w3.org/2000/01/rdf-schema#
 
-[SourceDeclaration]
-sourceUri	oreda
-connectionUrl	jdbc:sqlserver://10.7.20.91;databaseName=OREDA_OPTIQUE
-username	mssql
-password	obdaps83
-driverClass	com.microsoft.sqlserver.jdbc.SQLServerDriver
 
 [MappingDeclaration] @collection [[
 mappingId	mapping--1588052611

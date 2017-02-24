@@ -1,11 +1,10 @@
 package it.unibz.inf.ontop.reformulation.tests;
 
 
-import it.unibz.inf.ontop.injection.QuestConfiguration;
+import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.io.QueryIOManager;
-import it.unibz.inf.ontop.model.OBDAModel;
 
-import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
+import it.unibz.inf.ontop.owlrefplatform.core.ExecutableQuery;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import it.unibz.inf.ontop.querymanager.QueryController;
 import it.unibz.inf.ontop.querymanager.QueryControllerGroup;
@@ -14,11 +13,9 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.io.ToStringRenderer;
 import org.semanticweb.owlapi.model.OWLException;
 import org.semanticweb.owlapi.model.OWLObject;
-import org.semanticweb.owlapi.model.OWLOntology;
 
 import java.io.File;
 
@@ -39,22 +36,29 @@ public class CanonicalIRIUniversityTest {
     final String sparqlFile = "src/test/resources/canonicalIRI/university/univ-ontology.q";
 
     private QuestOWL reasoner;
-    private QuestOWLConnection conn;
+    private OntopOWLConnection conn;
     Connection sqlConnection;
+
+    private static final String JDBC_URL =  "jdbc:h2:mem:university";
+    private static final String JDBC_USER =  "sa";
+    private static final String JDBC_PASSWORD =  "";
 
 
     @Before
     public void setUp() throws Exception{
-        sqlConnection = DriverManager.getConnection("jdbc:h2:mem:university","sa", "");
+        sqlConnection = DriverManager.getConnection(JDBC_URL,JDBC_USER, JDBC_PASSWORD);
         java.sql.Statement s = sqlConnection.createStatement();
         String text = new Scanner( new File("src/test/resources/canonicalIRI/university/dataset_dump.sql") ).useDelimiter("\\A").next();
         s.execute(text);
         s.close();
 
-        QuestConfiguration config = QuestConfiguration.defaultBuilder()
+        OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
                 .ontologyFile(owlFile)
                 .nativeOntopMappingFile(obdaFile)
                 .enableExistentialReasoning(true)
+                .jdbcUrl(JDBC_URL)
+                .jdbcUser(JDBC_USER)
+                .jdbcPassword(JDBC_PASSWORD)
                 .build();
 
 		/*
@@ -96,7 +100,7 @@ public class CanonicalIRIUniversityTest {
 
 
         try (
-             QuestOWLStatement st = conn.createStatement();
+             OntopOWLStatement st = conn.createStatement();
         ) {
             QueryController qc = new QueryController();
             QueryIOManager qman = new QueryIOManager(qc);
@@ -106,7 +110,7 @@ public class CanonicalIRIUniversityTest {
                 for (QueryControllerQuery query : group.getQueries()) {
 
                     String sparqlQuery = query.getQuery();
-                    QuestOWLResultSet res = st.executeTuple(sparqlQuery);
+                    QuestOWLResultSet res = st.executeSelectQuery(sparqlQuery);
                     int columnSize = res.getColumnCount();
                     while (res.nextRow()) {
                         for (int idx = 1; idx <= columnSize; idx++) {
@@ -120,17 +124,17 @@ public class CanonicalIRIUniversityTest {
 			            * Print the query summary
 			         */
 
-                    String sqlQuery = st.getUnfolding(sparqlQuery);
+                    ExecutableQuery executableQuery = st.getExecutableQuery(sparqlQuery);
 
                     System.out.println();
-                    System.out.println("The input SPARQL query:");
+                    System.out.println("The input SELECT SPARQL query:");
                     System.out.println("=======================");
                     System.out.println(sparqlQuery);
                     System.out.println();
 
                     System.out.println("The output SQL query:");
                     System.out.println("=====================");
-                    System.out.println(sqlQuery);
+                    System.out.println(executableQuery);
 
 
                     res.close();
@@ -162,15 +166,15 @@ public class CanonicalIRIUniversityTest {
                 "  }\n" +
                 "}";
 
-        runQuery(query);
+        runSelectQuery(query);
 
     }
 
-    private void runQuery(String query) throws OWLException {
-        QuestOWLStatement st = conn.createStatement();
+    private void runSelectQuery(String query) throws OWLException {
+        OntopOWLStatement st = conn.createStatement();
         ArrayList<String> retVal = new ArrayList<>();
         try {
-            QuestOWLResultSet rs = st.executeTuple(query);
+            QuestOWLResultSet rs = st.executeSelectQuery(query);
             while(rs.nextRow()) {
                 for (String s : rs.getSignature()) {
                     OWLObject binding = rs.getOWLObject(s);
@@ -203,7 +207,7 @@ public class CanonicalIRIUniversityTest {
             "  ?teacher a :Teacher ; foaf:lastName ?lastName .\n" +
                     "}\n";
 
-        runQuery(query);
+        runSelectQuery(query);
 
     }
 
@@ -218,7 +222,7 @@ public class CanonicalIRIUniversityTest {
                         "   ?researcher a :Researcher .\n" +
                         "}";
 
-        runQuery(query);
+        runSelectQuery(query);
 
 
     }
@@ -234,7 +238,7 @@ public class CanonicalIRIUniversityTest {
                         "   ?x :isSupervisedBy [ a :Professor ] .\n" +
                         "}";
 
-        runQuery(query);
+        runSelectQuery(query);
 
 
     }

@@ -1,8 +1,7 @@
 package it.unibz.inf.ontop.quest;
 
-import it.unibz.inf.ontop.injection.QuestConfiguration;
+import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.io.QueryIOManager;
-import it.unibz.inf.ontop.model.OBDAException;
 import it.unibz.inf.ontop.owlrefplatform.core.SQLExecutableQuery;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import it.unibz.inf.ontop.querymanager.QueryController;
@@ -25,23 +24,26 @@ public abstract class AbstractVirtualModeTest extends TestCase {
     private final Logger log = LoggerFactory.getLogger(this.getClass());
     private final String owlFileName;
     private final String obdaFileName;
+    private final String propertyFileName;
 
     protected QuestOWL reasoner;
-    protected QuestOWLConnection conn;
+    protected OntopOWLConnection conn;
 
-    public AbstractVirtualModeTest(String owlfile, String obdafile) {
-        this.owlFileName = owlfile;
-        this.obdaFileName = obdafile;
+    public AbstractVirtualModeTest(String owlFile, String obdaFile, String propertyFile) {
+        this.owlFileName = owlFile;
+        this.obdaFileName = obdaFile;
+        this.propertyFileName = propertyFile;
     }
 
     @Override
     public void setUp() throws Exception {
         // Creating a new instance of the reasoner
         QuestOWLFactory factory = new QuestOWLFactory();
-        QuestConfiguration config = QuestConfiguration.defaultBuilder()
+        OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
                 .enableFullMetadataExtraction(false)
                 .ontologyFile(owlFileName)
                 .nativeOntopMappingFile(new File(obdaFileName))
+                .propertyFile(propertyFileName)
                 .build();
         reasoner = factory.createReasoner(config);
 
@@ -55,7 +57,7 @@ public abstract class AbstractVirtualModeTest extends TestCase {
     }
 
     protected String runQueryAndReturnStringOfIndividualX(String query) throws Exception {
-        QuestOWLStatement st = conn.createStatement();
+        OntopOWLStatement st = conn.createStatement();
         String retval;
         try {
             QuestOWLResultSet rs = st.executeTuple(query);
@@ -74,7 +76,7 @@ public abstract class AbstractVirtualModeTest extends TestCase {
     }
 
     protected String runQueryAndReturnStringOfLiteralX(String query) throws Exception {
-        QuestOWLStatement st = conn.createStatement();
+        OntopOWLStatement st = conn.createStatement();
         String retval;
         try {
             QuestOWLResultSet rs = st.executeTuple(query);
@@ -93,7 +95,7 @@ public abstract class AbstractVirtualModeTest extends TestCase {
     }
 
     protected boolean runQueryAndReturnBooleanX(String query) throws Exception {
-        QuestOWLStatement st = conn.createStatement();
+        OntopOWLStatement st = conn.createStatement();
         boolean retval;
         try {
             QuestOWLResultSet rs = st.executeTuple(query);
@@ -115,9 +117,9 @@ public abstract class AbstractVirtualModeTest extends TestCase {
         return retval;
     }
 
-    protected void countResults(String query, int expectedCount) throws OBDAException, OWLException {
+    protected void countResults(String query, int expectedCount) throws OWLException {
 
-        QuestOWLStatement st = conn.createStatement();
+        OntopOWLStatement st = conn.createStatement();
         QuestOWLResultSet results = st.executeTuple(query);
         int count = 0;
         while (results.nextRow()) {
@@ -127,7 +129,7 @@ public abstract class AbstractVirtualModeTest extends TestCase {
     }
 
     protected void checkReturnedUris(String query, List<String> expectedUris) throws Exception {
-        QuestOWLStatement st = conn.createStatement();
+        OntopOWLStatement st = conn.createStatement();
         int i = 0;
         List<String> returnedUris = new ArrayList<>();
         try {
@@ -151,7 +153,7 @@ public abstract class AbstractVirtualModeTest extends TestCase {
     }
 
     protected void checkThereIsAtLeastOneResult(String query) throws Exception {
-        QuestOWLStatement st = conn.createStatement();
+        OntopOWLStatement st = conn.createStatement();
         try {
             QuestOWLResultSet rs = st.executeTuple(query);
             assertTrue(rs.nextRow());
@@ -171,7 +173,7 @@ public abstract class AbstractVirtualModeTest extends TestCase {
     }
 
     protected boolean runASKTests(String query) throws Exception {
-        QuestOWLStatement st = conn.createStatement();
+        OntopOWLStatement st = conn.createStatement();
         boolean retval;
         try {
             QuestOWLResultSet rs = st.executeTuple(query);
@@ -195,7 +197,7 @@ public abstract class AbstractVirtualModeTest extends TestCase {
 
     protected void runQueries(String queryFileName) throws Exception {
 
-        QuestOWLStatement st = conn.createStatement();
+        OntopOWLStatement st = conn.createStatement();
 
         QueryController qc = new QueryController();
         QueryIOManager qman = new QueryIOManager(qc);
@@ -227,7 +229,7 @@ public abstract class AbstractVirtualModeTest extends TestCase {
     protected void runQuery(String query) throws Exception {
         long t1 = System.currentTimeMillis();
 
-        QuestOWLStatement st = conn.createStatement();
+        OntopOWLStatement st = conn.createStatement();
         QuestOWLResultSet rs = st.executeTuple(query);
 
         int columnSize = rs.getColumnCount();

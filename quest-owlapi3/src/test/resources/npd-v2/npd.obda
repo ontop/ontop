@@ -17,13 +17,6 @@ rdfs:	http://www.w3.org/2000/01/rdf-schema#
 xsd:	http://www.w3.org/2001/XMLSchema#
 owl:	http://www.w3.org/2002/07/owl#
 
-[SourceDeclaration]
-sourceUri	x
-connectionUrl	jdbc:h2:mem:npdv
-username	sa
-password	
-driverClass	org.h2.Driver
-
 [MappingDeclaration] @collection [[
 
 mappingId	Mapping:00001:Literal:wellbore_coordinates:wlbNsMin

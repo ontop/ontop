@@ -14,9 +14,10 @@ public class UnboundVariableIMDbTest extends AbstractVirtualModeTest {
 
 	static final String owlfile = "src/test/resources/ontologyIMDB.owl";
 	static final String obdafile = "src/test/resources/ontologyIMDBSimplify.obda";
+	static final String propertyfile = "src/test/resources/ontologyIMDBSimplify.properties";
 
 	public UnboundVariableIMDbTest() {
-		super(owlfile, obdafile);
+		super(owlfile, obdafile, propertyfile);
 	}
 
 

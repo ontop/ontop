@@ -1,8 +1,6 @@
 package it.unibz.inf.ontop.rdf4j.tests.general;
 
-import it.unibz.inf.ontop.injection.QuestConfiguration;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
-import it.unibz.inf.ontop.injection.QuestCoreSettings;
+import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWL;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLFactory;
 import org.junit.Before;
@@ -47,8 +45,6 @@ public class InconsistencyCheckingVirtualTest {
 	public void setUp() throws Exception {
 
 		p = new Properties();
-		// ???
-		p.setProperty(QuestCoreSettings.OBTAIN_FROM_ONTOLOGY, QuestConstants.TRUE);
 
 		manager = OWLManager.createOWLOntologyManager();
 		try {
@@ -63,14 +59,14 @@ public class InconsistencyCheckingVirtualTest {
 	public void testInitialConsistency() {
 		//initially the ontology is consistent
 		startReasoner();
-		assertTrue(reasoner.isQuestConsistent());
+		assertTrue(reasoner.isConsistent());
 	}
 	
 	private void startReasoner(){
 
         // Creating a new instance of the reasoner
         QuestOWLFactory factory = new QuestOWLFactory();
-        QuestConfiguration config = QuestConfiguration.defaultBuilder()
+        OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
                 .nativeOntopMappingFile(new File(obdafile))
 				.ontology(ontology)
 				.properties(p)
@@ -93,7 +89,7 @@ public class InconsistencyCheckingVirtualTest {
 		
 		startReasoner();
 		
-		boolean consistent = reasoner.isQuestConsistent();
+		boolean consistent = reasoner.isConsistent();
 		assertFalse(consistent);
 		
 		manager.removeAxiom(ontology, DisjointClasses(c1, c2));
@@ -110,7 +106,7 @@ public class InconsistencyCheckingVirtualTest {
 		
 		startReasoner();
 		
-		boolean consistent = reasoner.isQuestConsistent();
+		boolean consistent = reasoner.isConsistent();
 		assertFalse(consistent);
 
 		manager.removeAxiom(ontology,ObjectPropertyAssertion(r1, a, b)); //
@@ -128,7 +124,7 @@ public class InconsistencyCheckingVirtualTest {
 		
 		startReasoner();
 		
-		boolean consistent = reasoner.isQuestConsistent();
+		boolean consistent = reasoner.isConsistent();
 		assertFalse(consistent);
 		
 		manager.removeAxiom(ontology, DataPropertyAssertion(d1, a, Literal(21)));
@@ -147,7 +143,7 @@ public class InconsistencyCheckingVirtualTest {
 		
 		startReasoner();
 		
-		boolean consistent = reasoner.isQuestConsistent();
+		boolean consistent = reasoner.isConsistent();
 		assertFalse(consistent);
 
 		manager.removeAxiom(ontology,ObjectPropertyAssertion(r1, a, b)); //
@@ -165,7 +161,7 @@ public class InconsistencyCheckingVirtualTest {
 		
 		startReasoner();
 		
-		boolean consistent = reasoner.isQuestConsistent();
+		boolean consistent = reasoner.isConsistent();
 		assertFalse(consistent);
 		
 		manager.removeAxiom(ontology, DataPropertyAssertion(d1, a, Literal(18)));

@@ -1,9 +1,9 @@
 package it.unibz.inf.ontop.protege.gui.action;
 
-import it.unibz.inf.ontop.model.OBDAException;
+import it.unibz.inf.ontop.exception.OntopConnectionException;
+import it.unibz.inf.ontop.owlrefplatform.owlapi.OntopOWLConnection;
+import it.unibz.inf.ontop.owlrefplatform.owlapi.OntopOWLStatement;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWL;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLConnection;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLStatement;
 import it.unibz.inf.ontop.protege.utils.DialogUtils;
 import it.unibz.inf.ontop.protege.utils.OBDAProgressListener;
 import it.unibz.inf.ontop.protege.utils.OBDAProgressMonitor;
@@ -50,7 +50,7 @@ public abstract class OBDADataQueryAction<T> implements OBDAProgressListener {
 	private long time;
 
 	private boolean queryExecError = false;
-	private QuestOWLStatement statement = null;
+	private OntopOWLStatement statement = null;
 	private CountDownLatch latch = null;
 	private Thread thread = null;
 	private String queryString = null;
@@ -73,7 +73,7 @@ public abstract class OBDADataQueryAction<T> implements OBDAProgressListener {
 	/**
 	 *  This function must do the call to e.g. statement.query()
 	 */
-	public abstract T executeQuery(QuestOWLStatement st, String queryString) throws OWLException;
+	public abstract T executeQuery(OntopOWLStatement st, String queryString) throws OWLException;
 
 	/**
 	 * Must be implemented by the subclass for getting the current reasoner
@@ -173,10 +173,10 @@ public abstract class OBDADataQueryAction<T> implements OBDAProgressListener {
 	 */
 	private class Canceller extends Thread{
 		private CountDownLatch old_latch;
-		private QuestOWLConnection old_conn;
-		private QuestOWLStatement old_stmt;
+		private OntopOWLConnection old_conn;
+		private OntopOWLStatement old_stmt;
 
-		Canceller() throws OBDAException{
+		Canceller() throws OntopConnectionException {
 			super();
 			this.old_latch = latch;
 			this.old_stmt = statement;
@@ -204,7 +204,7 @@ public abstract class OBDADataQueryAction<T> implements OBDAProgressListener {
 		try {
 			Canceller canceller = new Canceller();
 			canceller.start();
-		} catch (OBDAException e) {
+		} catch (OntopConnectionException e) {
 			DialogUtils.showQuickErrorDialog(rootView, e, "Error creating new database connection.");
 		} finally {
 			this.actionStarted = false;

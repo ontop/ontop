@@ -20,7 +20,7 @@ package it.unibz.inf.ontop.obda;
  * #L%
  */
 
-import it.unibz.inf.ontop.injection.QuestConfiguration;
+import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWL;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLFactory;
 import org.junit.Test;
@@ -45,7 +45,7 @@ public class ConferenceMySQLTest {
 
         // Creating a new instance of the reasoner
         QuestOWLFactory factory = new QuestOWLFactory();
-        QuestConfiguration config = QuestConfiguration.defaultBuilder()
+        OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.ontologyFile(owlFile)
 				.nativeOntopMappingFile(new File(obdaFile))
 				.build();

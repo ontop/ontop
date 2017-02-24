@@ -31,9 +31,10 @@ public class PostgresIdentifierTest extends AbstractVirtualModeTest {
 
 	static final String owlfile = "resources/identifiers/identifiers.owl";
 	static final String obdafile = "resources/identifiers/identifiers-postgres.obda";
+	static final String propertiesfile = "resources/identifiers/identifiers-postgres.properties";
 
 	public PostgresIdentifierTest() {
-		super(owlfile, obdafile);
+		super(owlfile, obdafile, propertiesfile);
 	}
 
 	/**

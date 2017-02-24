@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.sql;
 
 import com.google.common.base.Joiner;
 import com.google.common.io.CharStreams;
-import it.unibz.inf.ontop.injection.QuestConfiguration;
+import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.core.SQLExecutableQuery;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import org.semanticweb.owlapi.model.OWLObject;
@@ -27,7 +27,7 @@ public class ADPOntopTest {
 		 * Create the instance of Quest OWL reasoner.
 		 */
         QuestOWLFactory factory = new QuestOWLFactory();
-        QuestConfiguration config = QuestConfiguration.defaultBuilder()
+        OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.nativeOntopMappingFile(new File(obdafile))
 				.ontologyFile(owlfile)
 				.build();
@@ -36,8 +36,8 @@ public class ADPOntopTest {
 		/*
 		 * Prepare the data connection for querying.
 		 */
-		QuestOWLConnection conn = reasoner.getConnection();
-		QuestOWLStatement st = conn.createStatement();
+		OntopOWLConnection conn = reasoner.getConnection();
+		OntopOWLStatement st = conn.createStatement();
 
 		String sparqlQuery = Joiner.on("\n").join(
 				CharStreams.readLines(new FileReader(queryfile))); 

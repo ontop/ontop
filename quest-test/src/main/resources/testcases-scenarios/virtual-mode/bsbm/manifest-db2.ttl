@@ -31,7 +31,9 @@
             [ qt:query <query-1.rq> ] ;
     mf:result <query-result-1.ttl> ;
     mf:knowledgebase <bsbm.owl> ;
-    mf:mappings <bsbm-db2.obda> .
+    mf:mappings <bsbm-db2.obda> ;
+	mf:parameters <bsbm-db2.properties> .
+
 
 :query-2 rdf:type mf:QueryEvaluationTest ;
     mf:name    "Q2: Retrieve basic information about a specific product for display purposes" ;
@@ -41,7 +43,9 @@
             [ qt:query <query-2.rq> ] ;
     mf:result <query-result-2.ttl> ;
     mf:knowledgebase <bsbm.owl> ;
-    mf:mappings <bsbm-db2.obda> .
+    mf:mappings <bsbm-db2.obda> ;
+	mf:parameters <bsbm-db2.properties> .
+
 
 :query-3 rdf:type mf:QueryEvaluationTest ;
     mf:name    "Q3: Find products having some specific features and not having one feature" ;
@@ -51,7 +55,9 @@
             [ qt:query <query-3.rq> ] ;
     mf:result <query-result-3.ttl> ;
     mf:knowledgebase <bsbm.owl> ;
-    mf:mappings <bsbm-db2.obda> .
+    mf:mappings <bsbm-db2.obda> ;
+	mf:parameters <bsbm-db2.properties> .
+
     
 :query-4 rdf:type mf:QueryEvaluationTest ;
     mf:name    "Q4: Find products matching two different sets of features" ;
@@ -61,7 +67,9 @@
             [ qt:query <query-4.rq> ] ;
     mf:result <query-result-4.ttl> ;
     mf:knowledgebase <bsbm.owl> ;
-    mf:mappings <bsbm-db2.obda> .
+    mf:mappings <bsbm-db2.obda> ;
+	mf:parameters <bsbm-db2.properties> .
+
  
 :query-5 rdf:type mf:QueryEvaluationTest ;
     mf:name    "Q5: Find products that are similar to a given product" ;
@@ -71,7 +79,9 @@
             [ qt:query <query-5.rq> ] ;
     mf:result <query-result-5.ttl> ;
     mf:knowledgebase <bsbm.owl> ;
-    mf:mappings <bsbm-db2.obda> .
+    mf:mappings <bsbm-db2.obda> ;
+	mf:parameters <bsbm-db2.properties> .
+
 
 :query-5b rdf:type mf:QueryEvaluationTest ;
     mf:name    "Q5B: Find products that are similar to a given product, with different FILTER settings" ;
@@ -81,7 +91,9 @@
             [ qt:query <query-5b.rq> ] ;
     mf:result <query-result-5b.ttl> ;
     mf:knowledgebase <bsbm.owl> ;
-    mf:mappings <bsbm-db2.obda> .
+    mf:mappings <bsbm-db2.obda> ;
+	mf:parameters <bsbm-db2.properties> .
+
   
 :query-6 rdf:type mf:QueryEvaluationTest ;
     mf:name    "Q6: Find products having a label that contains a specific string" ;
@@ -91,7 +103,9 @@
             [ qt:query <query-6.rq> ] ;
     mf:result <query-result-6.ttl> ;
     mf:knowledgebase <bsbm.owl> ;
-    mf:mappings <bsbm-db2.obda> .
+    mf:mappings <bsbm-db2.obda> ;
+	mf:parameters <bsbm-db2.properties> .
+
   
 :query-7 rdf:type mf:QueryEvaluationTest ;
     mf:name    "Q7: Retrieve in-depth information about a product including offers and reviews" ;
@@ -101,7 +115,9 @@
             [ qt:query <query-7.rq> ] ;
     mf:result <query-result-7.ttl> ;
     mf:knowledgebase <bsbm.owl> ;
-    mf:mappings <bsbm-db2.obda> .
+    mf:mappings <bsbm-db2.obda> ;
+	mf:parameters <bsbm-db2.properties> .
+
   
 :query-8 rdf:type mf:QueryEvaluationTest ;
     mf:name    "Q8: Give me recent English language reviews for a specific product" ;
@@ -111,7 +127,9 @@
             [ qt:query <query-8.rq> ] ;
     mf:result <query-result-8.ttl> ;
     mf:knowledgebase <bsbm.owl> ;
-    mf:mappings <bsbm-db2.obda> .
+    mf:mappings <bsbm-db2.obda> ;
+	mf:parameters <bsbm-db2.properties> .
+
     
 :query-9 rdf:type mf:QueryEvaluationTest ;
     mf:name    "Q9: Get information about a reviewer" ;
@@ -121,7 +139,9 @@
             [ qt:query <query-9.rq> ] ;
     mf:result <query-result-9.ttl> ;
     mf:knowledgebase <bsbm.owl> ;
-    mf:mappings <bsbm-db2.obda> .
+    mf:mappings <bsbm-db2.obda> ;
+	mf:parameters <bsbm-db2.properties> .
+
  
 :query-10 rdf:type mf:QueryEvaluationTest ;
     mf:name    "Q10: Get cheap offers which fulfill the consumer's delivery requirements" ;
@@ -131,7 +151,9 @@
             [ qt:query <query-10.rq> ] ;
     mf:result <query-result-10.ttl> ;
     mf:knowledgebase <bsbm.owl> ;
-    mf:mappings <bsbm-db2.obda> .
+    mf:mappings <bsbm-db2.obda> ;
+	mf:parameters <bsbm-db2.properties> .
+
  
 :query-11 rdf:type mf:QueryEvaluationTest ;
     mf:name    "Q11: Get all information about an offer" ;
@@ -141,7 +163,9 @@
             [ qt:query <query-11.rq> ] ;
     mf:result <query-result-11.ttl> ;
     mf:knowledgebase <bsbm.owl> ;
-    mf:mappings <bsbm-db2.obda> . 
+    mf:mappings <bsbm-db2.obda> ;
+	mf:parameters <bsbm-db2.properties> .
+ 
     
 :query-12 rdf:type mf:QueryEvaluationTest ;
     mf:name    "Q12: Export information about an offer into another schema" ;
@@ -151,4 +175,6 @@
             [ qt:query <query-12.rq> ] ;
     mf:result <query-result-12.ttl> ;
     mf:knowledgebase <bsbm.owl> ;
-    mf:mappings <bsbm-db2.obda> . 
+    mf:mappings <bsbm-db2.obda> ;
+	mf:parameters <bsbm-db2.properties> .
+ 

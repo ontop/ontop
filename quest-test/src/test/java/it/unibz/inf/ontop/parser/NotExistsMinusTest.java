@@ -70,7 +70,7 @@
 //
 //        // Loading the OBDA data
 //        factory = OBDADataFactoryImpl.getInstance();
-//        obdaModel = factory.getOBDAModel();
+//        obdaModel = factory.parse();
 //
 //        ModelIOManager ioManager = new ModelIOManager(obdaModel);
 //        ioManager.load(obdaFile);
@@ -98,7 +98,7 @@
 //    }
 //
 //    private void checkReturnedUris(String query, List<String> expectedUris) throws Exception {
-//        QuestOWLStatement st = conn.createStatement();
+//        OntopOWLStatement st = conn.createStatement();
 //        int i = 0;
 //        List<String> returnedUris = new ArrayList<>();
 //        try {

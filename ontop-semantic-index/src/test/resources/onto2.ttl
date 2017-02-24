@@ -1,0 +1,8 @@
+@prefix : <http://it.unibz.inf/obda/ontologies/test/translation/onto2.owl#> .
+:Lisa a :Person.
+:Alice  a :Person.
+:Bob  a :Person.
+:Bob  :age "5".
+:Alice  :age "14".
+
+

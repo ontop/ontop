@@ -1,12 +1,6 @@
 [PrefixDeclaration]
 :		http://www.owl-ontologies.com/Ontology1207768242.owl#
 
-[SourceDeclaration]
-sourceUri	MultiSchemaH2
-connectionUrl	jdbc:h2:mem:questrepository
-username	fish
-password	fish
-driverClass	org.h2.Driver
 
 [MappingDeclaration] @collection [[
 mappingId	Address

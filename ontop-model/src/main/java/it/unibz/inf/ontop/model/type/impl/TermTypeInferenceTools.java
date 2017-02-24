@@ -6,7 +6,7 @@ import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.Predicate.COL_TYPE;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
 import it.unibz.inf.ontop.model.TermType;
-import it.unibz.inf.ontop.model.type.TermTypeException;
+import it.unibz.inf.ontop.model.type.IncompatibleTermException;
 
 import java.util.Map;
 import java.util.Optional;
@@ -113,7 +113,7 @@ public class TermTypeInferenceTools {
     /**
      * TODO: simplify this method
      */
-    public static Optional<TermType> inferType(Term term) throws TermTypeException {
+    public static Optional<TermType> inferType(Term term) throws IncompatibleTermException {
         if(term instanceof Function){
             Function f = (Function)term;
             Predicate typePred = f.getFunctionSymbol();

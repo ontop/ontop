@@ -20,7 +20,7 @@ package it.unibz.inf.ontop.rdf4j.tests.general;
  * #L%
  */
 
-import it.unibz.inf.ontop.injection.QuestConfiguration;
+import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.rdf4j.repository.OntopVirtualRepository;
 import junit.framework.TestCase;
 import org.eclipse.rdf4j.model.Statement;
@@ -51,12 +51,12 @@ public class SesameVirtualTest extends TestCase {
 			
 			String owlfile = "src/test/resources/example/exampleBooks.owl";
 			String obdafile = "src/test/resources/example/exampleBooks.obda";
-			QuestConfiguration configuration = QuestConfiguration.defaultBuilder()
+			OntopSQLOWLAPIConfiguration configuration = OntopSQLOWLAPIConfiguration.defaultBuilder()
 					.ontologyFile(owlfile)
 					.nativeOntopMappingFile(obdafile)
 					.build();
 
-			repo = new OntopVirtualRepository("my_name", configuration);
+			repo = new OntopVirtualRepository(configuration);
 	
 			repo.initialize();
 			

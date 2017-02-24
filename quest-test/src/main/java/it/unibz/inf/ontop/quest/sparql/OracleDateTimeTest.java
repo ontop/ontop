@@ -24,10 +24,12 @@ package it.unibz.inf.ontop.quest.sparql;
  */
 
 
+import it.unibz.inf.ontop.owlrefplatform.owlapi.OntopOWLStatement;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLResultSet;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLStatement;
 import it.unibz.inf.ontop.quest.AbstractVirtualModeTest;
 import org.semanticweb.owlapi.model.OWLObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /***
@@ -38,13 +40,15 @@ public class OracleDateTimeTest extends AbstractVirtualModeTest {
 
 	static final String owlfile = "src/test/resources/dateTimeExampleBooks.owl";
 	static final String obdafile = "src/test/resources/dateTimeExampleBooks.obda";
+	static final String propertyfile = "src/test/resources/dateTimeExampleBooks.properties";
+	private final Logger log = LoggerFactory.getLogger(this.getClass());
 
 	public OracleDateTimeTest() {
-		super(owlfile, obdafile);
+		super(owlfile, obdafile, propertyfile);
 	}
 
 
-	private String runTest(QuestOWLStatement st, String query, boolean hasResult) throws Exception {
+	private String runTest(OntopOWLStatement st, String query, boolean hasResult) throws Exception {
 		String retval;
 		QuestOWLResultSet rs = st.executeTuple(query);
 		if(hasResult){
@@ -64,7 +68,7 @@ public class OracleDateTimeTest extends AbstractVirtualModeTest {
 	 * @throws Exception
 	 */
 	public void testSparql2OracleRegex() throws Exception {
-		QuestOWLStatement st = null;
+		OntopOWLStatement st = null;
 		try {
 			st = conn.createStatement();
 
@@ -72,7 +76,7 @@ public class OracleDateTimeTest extends AbstractVirtualModeTest {
 						" SELECT ?x ?y WHERE " +
 						"{?x :dateOfPublication ?y .}";
 				String date = runTest(st, query, true);
-				System.out.println(date);
+				log.debug(date);
 				
 				//assertEquals(countryName, "<http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country-Egypt>");
 			

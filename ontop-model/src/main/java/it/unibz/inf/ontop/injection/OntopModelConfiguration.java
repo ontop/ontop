@@ -24,14 +24,14 @@ public interface OntopModelConfiguration {
     /**
      * Default builder
      */
-    static Builder<Builder> defaultBuilder() {
+    static Builder defaultBuilder() {
         return new OntopModelConfigurationImpl.BuilderImpl<>();
     }
 
     /**
      * TODO: explain
      */
-    interface OntopModelBuilderFragment<B extends Builder> {
+    interface OntopModelBuilderFragment<B extends Builder<B>> {
 
         B properties(@Nonnull Properties properties);
         B propertyFile(String propertyFilePath);
@@ -45,7 +45,7 @@ public interface OntopModelConfiguration {
     /**
      * TODO: explain
      */
-    interface Builder<B extends Builder> extends OntopModelBuilderFragment<B> {
+    interface Builder<B extends Builder<B>> extends OntopModelBuilderFragment<B> {
 
         OntopModelConfiguration build();
     }

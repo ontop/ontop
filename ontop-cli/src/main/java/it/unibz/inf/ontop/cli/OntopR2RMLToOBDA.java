@@ -5,8 +5,8 @@ import com.github.rvesse.airline.annotations.Option;
 import com.github.rvesse.airline.annotations.OptionType;
 import com.github.rvesse.airline.annotations.restrictions.Required;
 import com.google.common.base.Strings;
-import it.unibz.inf.ontop.injection.OBDASettings;
-import it.unibz.inf.ontop.injection.QuestConfiguration;
+import it.unibz.inf.ontop.injection.OntopSQLCoreSettings;
+import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.io.OntopNativeMappingSerializer;
 import it.unibz.inf.ontop.model.OBDAModel;
 
@@ -36,18 +36,18 @@ public class OntopR2RMLToOBDA implements OntopCommand {
         File out = new File(outputMappingFile);
         try {
             Properties p = new Properties();
-            p.put(OBDASettings.DB_NAME, "h2");
-            p.put(OBDASettings.JDBC_URL, "jdbc:h2:tcp://localhost/DBName");
-            p.put(OBDASettings.DB_USER, "username");
-            p.put(OBDASettings.DB_PASSWORD, "password");
-            p.put(OBDASettings.JDBC_DRIVER, "com.mysql.jdbc.Driver");
+            p.put(OntopSQLCoreSettings.JDBC_NAME, "h2");
+            p.put(OntopSQLCoreSettings.JDBC_URL, "jdbc:h2:tcp://localhost/DBName");
+            p.put(OntopSQLCoreSettings.JDBC_USER, "username");
+            p.put(OntopSQLCoreSettings.JDBC_PASSWORD, "password");
+            p.put(OntopSQLCoreSettings.JDBC_DRIVER, "com.mysql.jdbc.Driver");
 
-            QuestConfiguration configuration = QuestConfiguration.defaultBuilder()
+            OntopSQLOWLAPIConfiguration configuration = OntopSQLOWLAPIConfiguration.defaultBuilder()
                     .r2rmlMappingFile(inputMappingFile)
                     .properties(p)
                     .build();
 
-            OBDAModel obdaModel = configuration.loadProvidedMapping();
+            OBDAModel obdaModel = configuration.loadProvidedPPMapping();
 
             OntopNativeMappingSerializer writer = new OntopNativeMappingSerializer(obdaModel);
             writer.save(out);

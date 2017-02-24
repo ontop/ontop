@@ -39,9 +39,10 @@ public class MultiSchemaTestDB2 extends AbstractVirtualModeTest {
 
 	static final String owlfile = "src/test/resources/multischemadb2.owl";
 	static final String obdafile = "src/test/resources/multischemadb2.obda";
+	static final String propertiesfile = "src/test/resources/multischemadb2.properties";
 
 	public MultiSchemaTestDB2() {
-		super(owlfile, obdafile);
+		super(owlfile, obdafile, propertiesfile);
 	}
 
 	/**

@@ -2,12 +2,6 @@
 :		http://ontop.inf.unibz.it/test/datatypes#
 xsd:	http://www.w3.org/2001/XMLSchema#
 
-[SourceDeclaration]
-sourceUri	OracleTypes
-connectionUrl	jdbc:oracle:thin:@//obdawin.unibz.it:1521/xe
-username	system
-password	obdaps83
-driverClass	oracle.jdbc.driver.OracleDriver
 
 [MappingDeclaration] @collection [[
 mappingId	Date-Time Types

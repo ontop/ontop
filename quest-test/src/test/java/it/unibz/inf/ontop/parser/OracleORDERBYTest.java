@@ -20,9 +20,8 @@ package it.unibz.inf.ontop.parser;
  * #L%
  */
 
-import it.unibz.inf.ontop.model.OBDAException;
 import it.unibz.inf.ontop.owlrefplatform.core.SQLExecutableQuery;
-import it.unibz.inf.ontop.owlrefplatform.owlapi.QuestOWLStatement;
+import it.unibz.inf.ontop.owlrefplatform.owlapi.OntopOWLStatement;
 import it.unibz.inf.ontop.quest.AbstractVirtualModeTest;
 import org.junit.Test;
 import org.semanticweb.owlapi.model.OWLException;
@@ -40,14 +39,15 @@ public class OracleORDERBYTest extends AbstractVirtualModeTest {
     private static final Logger log = LoggerFactory.getLogger(OracleORDERBYTest.class);
     static final String owlFile = "resources/orderby/orderBy.owl";
     static final String obdaFile = "resources/orderby/orderBy.obda";
+    static final String propertyFile = "resources/orderby/orderBy.properties";
 
     public OracleORDERBYTest() {
-        super(owlFile, obdaFile);
+        super(owlFile, obdaFile, propertyFile);
     }
 
-    private void runQueryAndCheckSQL(String query) throws OBDAException, OWLException{
+    private void runQueryAndCheckSQL(String query) throws OWLException{
 
-        QuestOWLStatement st = conn.createStatement();
+        OntopOWLStatement st = conn.createStatement();
         String sql = ((SQLExecutableQuery)st.getExecutableQuery(query)).getSQL();
         //boolean m = sql.matches("(?ms)(.*)ORDER BY country_name (.*)");
         boolean m = sql.matches("(?ms)(.*)ORDER BY (.*)");

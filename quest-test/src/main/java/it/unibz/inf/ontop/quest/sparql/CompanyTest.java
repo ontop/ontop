@@ -20,7 +20,7 @@ package it.unibz.inf.ontop.quest.sparql;
  * #L%
  */
 
-import it.unibz.inf.ontop.injection.QuestConfiguration;
+import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import org.junit.After;
 import org.junit.Before;
@@ -56,7 +56,7 @@ public class CompanyTest  {
 	private static final String obdaFile = "resources/optional/company.obda";
 
 	private QuestOWL reasoner;
-	private QuestOWLConnection conn;
+	private OntopOWLConnection conn;
 	Connection sqlConnection;
 
 //	public CompanyTest() {
@@ -72,7 +72,7 @@ public class CompanyTest  {
 		s.execute(text);
 		s.close();
 
-		QuestConfiguration config = QuestConfiguration.defaultBuilder()
+		OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.ontologyFile(owlFile)
 				.nativeOntopMappingFile(obdaFile)
 				.build();
@@ -119,7 +119,7 @@ public class CompanyTest  {
 
 	private void runTests() throws Exception {
 
-		QuestOWLStatement st = conn.createStatement();
+		OntopOWLStatement st = conn.createStatement();
 
 		
 		String queryEx =  "PREFIX : <http://it.unibz.krdb/obda/test/company#> SELECT * WHERE"

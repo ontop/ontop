@@ -9,12 +9,6 @@ rdfs:		http://www.w3.org/2000/01/rdf-schema#
 iso3166:		http://downlode.org/rdf/iso-3166/countries#
 bsbm-inst:	http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/instances/
 
-[SourceDeclaration]
-sourceUri	BSBM-Benchmark
-connectionUrl	jdbc:mysql://10.7.20.39/bsbm250k
-username	fish
-password	fish
-driverClass	com.mysql.jdbc.Driver
 
 [MappingDeclaration] @collection [[
 mappingId	Offer

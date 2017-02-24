@@ -22,7 +22,7 @@ package it.unibz.inf.ontop.protege.gui.action;
 
 import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
-import it.unibz.inf.ontop.injection.OBDACoreConfiguration;
+import it.unibz.inf.ontop.injection.OntopMappingSQLAllConfiguration;
 import it.unibz.inf.ontop.io.DataSource2PropertiesConvertor;
 import it.unibz.inf.ontop.model.OBDADataSource;
 import it.unibz.inf.ontop.model.OBDAMappingAxiom;
@@ -33,8 +33,8 @@ import it.unibz.inf.ontop.protege.core.OBDAModelWrapper;
 import org.protege.editor.core.Disposable;
 import org.protege.editor.core.ui.action.ProtegeAction;
 import org.protege.editor.owl.OWLEditorKit;
-import org.protege.editor.owl.model.OWLWorkspace;
 import org.protege.editor.owl.model.OWLModelManager;
+import org.protege.editor.owl.model.OWLWorkspace;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.slf4j.Logger;
@@ -103,7 +103,7 @@ public class R2RMLImportAction extends ProtegeAction {
 					 */
 					OBDADataSource dataSource = obdaModelController.getSources().get(0);
 
-					OBDACoreConfiguration configuration = OBDACoreConfiguration.defaultBuilder()
+					OntopMappingSQLAllConfiguration configuration = OntopMappingSQLAllConfiguration.defaultBuilder()
 							.properties(DataSource2PropertiesConvertor.convert(dataSource))
 							.r2rmlMappingFile(file)
 							.build();
@@ -111,12 +111,12 @@ public class R2RMLImportAction extends ProtegeAction {
 					URI sourceID = dataSource.getSourceID();
 
 					try {
-						OBDAModel parsedModel = configuration.loadProvidedMapping();
+						OBDAModel parsedModel = configuration.loadProvidedPPMapping();
 
 						/**
 						 * TODO: improve this inefficient method (batch processing, not one by one)
 						 */
-						for (OBDAMappingAxiom mapping : parsedModel.getMappings(sourceID)) {
+						for (OBDAMappingAxiom mapping : parsedModel.getMappings()) {
 							if (mapping.getTargetQuery().toString().contains("BNODE")) {
 								JOptionPane.showMessageDialog(workspace, "The mapping " + mapping.getId() + " contains BNode. -ontoPro- does not support it yet.");
 							} else {

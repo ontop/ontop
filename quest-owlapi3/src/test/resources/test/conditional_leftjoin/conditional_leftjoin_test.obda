@@ -7,12 +7,6 @@ xml:		http://www.w3.org/XML/1998/namespace
 quest:		http://obda.org/quest#
 rdfs:		http://www.w3.org/2000/01/rdf-schema#
 
-[SourceDeclaration]
-sourceUri	datasource1
-connectionUrl	jdbc:h2:mem:restaurant
-username	sa
-password	sa
-driverClass	org.h2.Driver
 
 [MappingDeclaration] @collection [[
 mappingId	MAPID-e601171745c0418c936b64d4abc06923

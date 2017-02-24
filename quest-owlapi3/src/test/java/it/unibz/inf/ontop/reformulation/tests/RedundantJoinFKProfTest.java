@@ -1,6 +1,8 @@
 package it.unibz.inf.ontop.reformulation.tests;
 
-import it.unibz.inf.ontop.injection.QuestConfiguration;
+import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
+import it.unibz.inf.ontop.owlrefplatform.core.ExecutableQuery;
+import it.unibz.inf.ontop.owlrefplatform.core.SQLExecutableQuery;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import org.junit.After;
 import org.junit.Before;
@@ -28,17 +30,18 @@ public class RedundantJoinFKProfTest {
     private static final String ODBA_FILE = "src/test/resources/test/redundant_join/redundant_join_fk_test.obda";
     private static final String NO_OPTIMIZATION_MSG = "The table professors should not be used";
 
+    private static final String URL = "jdbc:h2:mem:professor";
+    private static final String USER = "sa";
+    private static final String PASSWORD = "sa";
+
     private Connection conn;
+
 
 
     @Before
     public void setUp() throws Exception {
 
-        String url = "jdbc:h2:mem:professor";
-        String username = "sa";
-        String password = "sa";
-
-        conn = DriverManager.getConnection(url, username, password);
+        conn = DriverManager.getConnection(URL, USER, PASSWORD);
         Statement st = conn.createStatement();
 
         FileReader reader = new FileReader(CREATE_SCRIPT);
@@ -111,22 +114,28 @@ public class RedundantJoinFKProfTest {
     private String checkReturnedValuesAndReturnSql(String query, List<String> expectedValues) throws Exception {
 
         QuestOWLFactory factory = new QuestOWLFactory();
-        QuestConfiguration config = QuestConfiguration.defaultBuilder()
+        OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
                 .nativeOntopMappingFile(ODBA_FILE)
                 .ontologyFile(OWL_FILE)
+                .jdbcUrl(URL)
+                .jdbcUser(USER)
+                .jdbcPassword(PASSWORD)
                 .build();
         QuestOWL reasoner = factory.createReasoner(config);
 
         // Now we are ready for querying
-        QuestOWLConnection conn = reasoner.getConnection();
-        QuestOWLStatement st = conn.createStatement();
+        OntopOWLConnection conn = reasoner.getConnection();
+        OntopOWLStatement st = conn.createStatement();
         String sql;
 
         int i = 0;
         List<String> returnedValues = new ArrayList<>();
         try {
-            sql = st.getUnfolding(query);
-            QuestOWLResultSet rs = st.executeTuple(query);
+            ExecutableQuery executableQuery = st.getExecutableQuery(query);
+            if (! (executableQuery instanceof SQLExecutableQuery))
+                throw new IllegalStateException("A SQLExecutableQuery was expected");
+            sql = ((SQLExecutableQuery)executableQuery).getSQL();
+            QuestOWLResultSet rs = st.executeSelectQuery(query);
             while (rs.nextRow()) {
                 OWLObject ind1 = rs.getOWLObject("p");
                 // log.debug(ind1.toString());

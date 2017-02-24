@@ -41,6 +41,10 @@ public abstract class OntopAbstractModule extends AbstractModule {
         }
     }
 
+    public Class getImplementation(Class abstractInterface) throws UnknownClassException {
+        return getImplementation(abstractInterface.getCanonicalName());
+    }
+
     protected Module buildFactory(List<Class> types,  Class factoryInterface) {
         FactoryModuleBuilder builder = new FactoryModuleBuilder();
 

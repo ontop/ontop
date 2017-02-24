@@ -20,7 +20,7 @@ package it.unibz.inf.ontop.quest.sparql;
  * #L%
  */
 
-import it.unibz.inf.ontop.injection.QuestConfiguration;
+import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import junit.framework.TestCase;
 import org.junit.After;
@@ -52,7 +52,7 @@ public class RegexpTest extends TestCase {
 	// TODO We need to extend this test to import the contents of the mappings
 	// into OWL and repeat everything taking form OWL
 
-	private QuestOWLConnection conn;
+	private OntopOWLConnection conn;
 
 	Logger log = LoggerFactory.getLogger(this.getClass());
 	private OWLOntology ontology;
@@ -122,7 +122,7 @@ public class RegexpTest extends TestCase {
 
 		// Creating a new instance of the reasoner
 		QuestOWLFactory factory = new QuestOWLFactory();
-        QuestConfiguration config = QuestConfiguration.defaultBuilder()
+        OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.nativeOntopMappingFile(new File(obdafile))
 				.ontologyFile(owlfile)
 				.enableFullMetadataExtraction(false)
@@ -158,7 +158,7 @@ public class RegexpTest extends TestCase {
 	}
 	
 
-	private String runTest(QuestOWLStatement st, String query, boolean hasResult) throws Exception {
+	private String runTest(OntopOWLStatement st, String query, boolean hasResult) throws Exception {
 		String retval;
 		QuestOWLResultSet rs = st.executeTuple(query);
 		if(hasResult){
@@ -179,7 +179,7 @@ public class RegexpTest extends TestCase {
 	 */
 	@Test
 	public void testSparql2sqlRegex() throws Exception {
-		QuestOWLStatement st = null;
+		OntopOWLStatement st = null;
 		try {
 			st = conn.createStatement();
 

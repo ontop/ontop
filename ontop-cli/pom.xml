@@ -37,7 +37,16 @@
             <artifactId>ontop-quest-rdf4j</artifactId>
             <version>${project.version}</version>
         </dependency>
-
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>ontop-mapping-sql-all</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>ontop-system-sql-owlapi</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         <dependency>
             <groupId>com.github.rvesse</groupId>
             <artifactId>airline</artifactId>

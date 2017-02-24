@@ -20,7 +20,7 @@ package it.unibz.inf.ontop.obda;
  * #L%
  */
 
-import it.unibz.inf.ontop.injection.QuestConfiguration;
+import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import org.junit.Before;
 import org.junit.Test;
@@ -36,7 +36,7 @@ import static org.junit.Assert.assertTrue;
  */
 public class AdventureWorksDatetimeTest {
 
-	private QuestOWLConnection conn;
+	private OntopOWLConnection conn;
 
 	Logger log = LoggerFactory.getLogger(this.getClass());
 
@@ -48,7 +48,7 @@ public class AdventureWorksDatetimeTest {
 		// Creating a new instance of the reasoner
 		QuestOWLFactory factory = new QuestOWLFactory();
 
-		QuestConfiguration configuration = QuestConfiguration.defaultBuilder()
+		OntopSQLOWLAPIConfiguration configuration = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				//.enableEquivalenceOptimization(true)
 				.nativeOntopMappingFile(obdaFile)
 				.ontologyFile(owlFile)
@@ -66,7 +66,7 @@ public class AdventureWorksDatetimeTest {
 
 	
 	private String runTests(String query) throws Exception {
-		QuestOWLStatement st = conn.createStatement();
+		OntopOWLStatement st = conn.createStatement();
 		String retval="";
 		try {
 			QuestOWLResultSet rs = st.executeTuple(query);

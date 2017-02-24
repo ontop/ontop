@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.injection.impl;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -11,28 +12,51 @@ import it.unibz.inf.ontop.injection.OntopModelSettings;
 import it.unibz.inf.ontop.pivotalrepr.utils.ExecutorRegistry;
 import it.unibz.inf.ontop.pivotalrepr.utils.impl.StandardExecutorRegistry;
 import it.unibz.inf.ontop.pivotalrepr.proposal.QueryOptimizationProposal;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Optional;
-import java.util.Properties;
+import java.util.*;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class OntopModelConfigurationImpl implements OntopModelConfiguration {
 
     private final OntopModelConfigurationOptions options;
+    @Nullable
+    private final Supplier<Injector> injectorSupplier;
     private final OntopModelSettings settings;
+    @Nullable
     private ExecutorRegistry executorRegistry;
+    @Nullable
     private Injector injector;
 
-    protected OntopModelConfigurationImpl(OntopModelSettings settings, OntopModelConfigurationOptions options) {
+
+    protected OntopModelConfigurationImpl(@Nonnull OntopModelSettings settings, @Nonnull OntopModelConfigurationOptions options) {
         this.settings = settings;
         this.options = options;
+
+        // Will be built on-demand
+        this.executorRegistry = null;
+        this.injector = null;
+        this.injectorSupplier = null;
+    }
+
+    /**
+     * "Slave" configuration (in case of multiple inheritance)
+     *  --> uses the injector of another configuration
+     */
+    protected OntopModelConfigurationImpl(@Nonnull OntopModelSettings settings, @Nonnull OntopModelConfigurationOptions options,
+                                          @Nonnull Supplier<Injector> injectorSupplier) {
+        this.settings = settings;
+        this.options = options;
+        this.injectorSupplier = injectorSupplier;
 
         // Will be built on-demand
         this.executorRegistry = null;
@@ -50,14 +74,22 @@ public class OntopModelConfigurationImpl implements OntopModelConfiguration {
     @Override
     public final Injector getInjector() {
         if (injector == null) {
-            injector = Guice.createInjector(buildGuiceModules()
-                    .collect(Collectors.toMap(
-                            // Group modules per class
-                            Module::getClass,
-                            m -> m,
-                            // Two instances of the same class: takes the first one (both are expected to be equivalent)
-                            (m1, m2) -> m1
-                    )).values());
+            /*
+             * When the configuration is a "slave"
+             */
+            if (injectorSupplier != null) {
+                injector = injectorSupplier.get();
+            }
+            else {
+                Set<Class> moduleClasses = new HashSet();
+
+                // Only keeps the first instance of a module class
+                ImmutableList<Module> modules = buildGuiceModules()
+                        .filter(m -> moduleClasses.add(m.getClass()))
+                        .collect(ImmutableCollectors.toList());
+
+                injector = Guice.createInjector(modules);
+            }
         }
         return injector;
     }
@@ -101,7 +133,7 @@ public class OntopModelConfigurationImpl implements OntopModelConfiguration {
         }
     }
 
-    protected static class DefaultOntopModelBuilderFragment<B extends Builder> implements OntopModelBuilderFragment<B> {
+    protected static class DefaultOntopModelBuilderFragment<B extends Builder<B>> implements OntopModelBuilderFragment<B> {
 
         private final B builder;
         private Optional<Boolean> testMode = Optional.empty();
@@ -193,7 +225,7 @@ public class OntopModelConfigurationImpl implements OntopModelConfiguration {
      * Builder
      *
      */
-    public final static class BuilderImpl<B extends Builder> extends DefaultOntopModelBuilderFragment<B>
+    public final static class BuilderImpl<B extends Builder<B>> extends DefaultOntopModelBuilderFragment<B>
             implements Builder<B> {
 
         @Override

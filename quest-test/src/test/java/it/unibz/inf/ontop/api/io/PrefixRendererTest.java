@@ -20,7 +20,8 @@ package it.unibz.inf.ontop.api.io;
  * #L%
  */
 
-import it.unibz.inf.ontop.io.SimplePrefixManager;
+import com.google.common.collect.ImmutableMap;
+import it.unibz.inf.ontop.io.impl.SimplePrefixManager;
 import it.unibz.inf.ontop.model.CQIE;
 import it.unibz.inf.ontop.model.DatalogProgram;
 import it.unibz.inf.ontop.model.Function;
@@ -72,7 +73,7 @@ public class PrefixRendererTest extends TestCase {
 	 */
 	public void testNamespace1() {
 		prefixes.put(PrefixManager.DEFAULT_PREFIX, "http://obda.org/onto.owl#");
-        PrefixManager pm = new SimplePrefixManager(prefixes);
+        PrefixManager pm = new SimplePrefixManager(ImmutableMap.copyOf(prefixes));
 		String name = pm.getShortForm(query.getRules().get(0).getHead().getFunctionSymbol().toString(), true);
 		assertTrue(name, name.equals("http://obda.org/predicates#q"));
 
@@ -84,7 +85,7 @@ public class PrefixRendererTest extends TestCase {
 		assertTrue(name, name.equals("&:;person-individual"));
 
         prefixes.put(PrefixManager.DEFAULT_PREFIX, "http://obda.org/predicates#");
-        pm = new SimplePrefixManager(prefixes);
+        pm = new SimplePrefixManager(ImmutableMap.copyOf(prefixes));
 		name = pm.getShortForm(query.getRules().get(0).getHead().getFunctionSymbol().toString(), true);
 		assertTrue(name, name.equals("&:;q"));
 
@@ -103,7 +104,7 @@ public class PrefixRendererTest extends TestCase {
         prefixes.put(PrefixManager.DEFAULT_PREFIX, "http://obda.org/onto.owl#");
         prefixes.put("obdap:", "http://obda.org/predicates#");
 
-        PrefixManager pm = new SimplePrefixManager(prefixes);
+        PrefixManager pm = new SimplePrefixManager(ImmutableMap.copyOf(prefixes));
 		String name = pm.getShortForm(query.getRules().get(0).getHead().getFunctionSymbol().toString(), false);
 		assertTrue(name, name.equals("obdap:q"));
 
@@ -116,7 +117,7 @@ public class PrefixRendererTest extends TestCase {
 
         prefixes.put(PrefixManager.DEFAULT_PREFIX, "http://obda.org/predicates#");
         prefixes.put("onto:", "http://obda.org/onto.owl#");
-        pm = new SimplePrefixManager(prefixes);
+        pm = new SimplePrefixManager(ImmutableMap.copyOf(prefixes));
 		name = pm.getShortForm(query.getRules().get(0).getHead().getFunctionSymbol().toString(), false);
 		assertTrue(name, name.equals(":q"));
 

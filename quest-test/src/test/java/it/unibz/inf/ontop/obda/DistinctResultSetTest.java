@@ -1,9 +1,7 @@
 package it.unibz.inf.ontop.obda;
 
 
-import it.unibz.inf.ontop.injection.QuestConfiguration;
-import it.unibz.inf.ontop.injection.QuestCoreSettings;
-import it.unibz.inf.ontop.owlrefplatform.core.QuestConstants;
+import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.core.resultset.QuestDistinctTupleResultSet;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import it.unibz.inf.ontop.rdf4j.repository.OntopVirtualRepository;
@@ -20,7 +18,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.util.List;
-import java.util.Properties;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -37,25 +34,26 @@ public class DistinctResultSetTest { //
 
     final String owlFile = "src/test/resources/example/exampleBooks.owl";
     final String obdaFile = "src/test/resources/example/exampleBooks.obda";
+    final String propertyFile = "src/test/resources/example/exampleBooks.properties";
 
     @Before
     public void setUp() throws Exception {
 
 
     }
-    private int runTestsQuestOWL(Properties p, String query) throws Exception {
+    private int runTestsQuestOWL( String query) throws Exception {
 
         // Creating a new instance of the reasoner
         QuestOWLFactory factory = new QuestOWLFactory();
-        QuestConfiguration config = QuestConfiguration.defaultBuilder()
-                .properties(p)
+        OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
                 .nativeOntopMappingFile(obdaFile)
                 .ontologyFile(owlFile)
+                .propertyFile(propertyFile)
                 .build();
         QuestOWL reasoner = factory.createReasoner(config);
         // Now we are ready for querying
-        QuestOWLConnection conn = reasoner.getConnection();
-        QuestOWLStatement st = conn.createStatement();
+        OntopOWLConnection conn = reasoner.getConnection();
+        OntopOWLStatement st = conn.createStatement();
 
         int results = 0;
 
@@ -83,13 +81,13 @@ public class DistinctResultSetTest { //
         Repository repo = null;
         int count = 0;
         try {
-            QuestConfiguration configuration = QuestConfiguration.defaultBuilder()
+            OntopSQLOWLAPIConfiguration configuration = OntopSQLOWLAPIConfiguration.defaultBuilder()
                     .ontologyFile(owlFile)
                     .nativeOntopMappingFile(obdaFile)
                     .propertyFile(configFile)
                     .build();
 
-        repo = new OntopVirtualRepository("my_name", configuration);
+        repo = new OntopVirtualRepository(configuration);
 
         repo.initialize();
 
@@ -124,7 +122,7 @@ public class DistinctResultSetTest { //
 
         }
 
-    private int executeQueryAssertResults(String query, QuestOWLStatement st) throws Exception {
+    private int executeQueryAssertResults(String query, OntopOWLStatement st) throws Exception {
         QuestOWLResultSet rs = st.executeTuple(query);
         int count = 0;
         while (rs.nextRow()) {
@@ -145,12 +143,9 @@ public class DistinctResultSetTest { //
     @Test
     public void testDistinctQuestOWL() throws Exception {
 
-
-        Properties p = new Properties();
-        p.setProperty(QuestCoreSettings.DISTINCT_RESULTSET, QuestConstants.TRUE);
         String query = "PREFIX : <http://meraka/moss/exampleBooks.owl#>" +
                 " select distinct * {?x a :Author}";
-        int nResults = runTestsQuestOWL(p, query);
+        int nResults = runTestsQuestOWL(query);
         assertEquals(25, nResults);
     }
 

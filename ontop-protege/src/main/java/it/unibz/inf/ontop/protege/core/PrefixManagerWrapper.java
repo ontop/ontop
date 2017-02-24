@@ -21,12 +21,11 @@ package it.unibz.inf.ontop.protege.core;
  */
 
 import com.google.common.collect.ImmutableMap;
-import it.unibz.inf.ontop.io.AbstractPrefixManager;
+import it.unibz.inf.ontop.io.impl.AbstractPrefixManager;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 import org.semanticweb.owlapi.formats.PrefixDocumentFormat;
 

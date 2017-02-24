@@ -1,7 +1,7 @@
 package it.unibz.inf.ontop.reformulation.tests;
 
 import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.injection.QuestConfiguration;
+import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import org.junit.After;
 import org.junit.Before;
@@ -36,14 +36,14 @@ public class TypeInferenceTest {
     private static final String CREATE_DB_FILE = "src/test/resources/test/typeinference/types-create-db.sql";
     private static final String DROP_DB_FILE = "src/test/resources/test/typeinference/types-drop-db.sql";
 
+    private static final String URL = "jdbc:h2:mem:types";
+    private static final String USER = "sa";
+    private static final String PASSWORD = "";
+
     @Before
     public void setUp() throws Exception {
 
-        String url = "jdbc:h2:mem:types";
-        String username = "sa";
-        String password = "";
-
-        conn = DriverManager.getConnection(url, username, password);
+        conn = DriverManager.getConnection(URL, USER, PASSWORD);
 
 
         Statement st = conn.createStatement();
@@ -109,20 +109,23 @@ public class TypeInferenceTest {
     private void checkReturnedValues(String query, List<String> expectedValues) throws Exception {
 
         QuestOWLFactory factory = new QuestOWLFactory();
-        QuestConfiguration config = QuestConfiguration.defaultBuilder()
+        OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
                 .nativeOntopMappingFile(OBDA_FILE)
                 .ontologyFile(ONTOLOGY_FILE)
+                .jdbcUrl(URL)
+                .jdbcUser(USER)
+                .jdbcPassword(PASSWORD)
                 .build();
         QuestOWL reasoner = factory.createReasoner(config);
 
         // Now we are ready for querying
-        QuestOWLConnection conn = reasoner.getConnection();
-        QuestOWLStatement st = conn.createStatement();
+        OntopOWLConnection conn = reasoner.getConnection();
+        OntopOWLStatement st = conn.createStatement();
 
         int i = 0;
         List<String> returnedValues = new ArrayList<>();
         try {
-            QuestOWLResultSet rs = st.executeTuple(query);
+            QuestOWLResultSet rs = st.executeSelectQuery(query);
             while (rs.nextRow()) {
                 OWLObject ind1 = rs.getOWLObject("r");
                 log.debug(ind1.toString());

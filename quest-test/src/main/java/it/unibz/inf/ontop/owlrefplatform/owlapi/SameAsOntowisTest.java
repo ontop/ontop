@@ -2,8 +2,8 @@ package it.unibz.inf.ontop.owlrefplatform.owlapi;
 
 import it.unibz.inf.ontop.exception.InvalidMappingException;
 import it.unibz.inf.ontop.exception.InvalidPredicateDeclarationException;
-import it.unibz.inf.ontop.injection.QuestConfiguration;
-import it.unibz.inf.ontop.model.OBDAException;
+import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
+import it.unibz.inf.ontop.owlrefplatform.core.ExecutableQuery;
 import org.semanticweb.owlapi.model.*;
 
 
@@ -64,7 +64,7 @@ public class SameAsOntowisTest {
     public void runQuery() throws Exception {
 
         long t1 = System.currentTimeMillis();
-        QuestOWLConnection conn =  createStuff();
+        OntopOWLConnection conn =  createStuff();
         long t2 = System.currentTimeMillis();
 
         long time =  (t2-t1);
@@ -246,7 +246,7 @@ public class SameAsOntowisTest {
      * @param conn
      * @throws OWLException
      */
-    private void closeEverything(QuestOWLConnection conn) throws OWLException {
+    private void closeEverything(OntopOWLConnection conn) throws OWLException {
 		/*
 		 * Close connection and resources
 		 */
@@ -258,14 +258,13 @@ public class SameAsOntowisTest {
     }
 
     /**
-     * @throws OBDAException
      * @throws OWLOntologyCreationException
      * @throws InvalidMappingException
      * @throws InvalidPredicateDeclarationException
      * @throws IOException
      * @throws OWLException
      */
-    private QuestOWLConnection createStuff() throws OBDAException, OWLOntologyCreationException, IOException, InvalidPredicateDeclarationException, InvalidMappingException{
+    private OntopOWLConnection createStuff() throws OWLOntologyCreationException, IOException, InvalidPredicateDeclarationException, InvalidMappingException{
 
 		/*
 		 * Create the instance of Quest OWL reasoner.
@@ -274,7 +273,7 @@ public class SameAsOntowisTest {
 //        factory.setOBDAController(obdaModel);
 //        factory.setPreferenceHolder(preference);
 
-        QuestConfiguration config = QuestConfiguration.defaultBuilder()
+        OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
                 .ontologyFile(owlfile)
                 .nativeOntopMappingFile(obdaFile)
                 .sameAsMappings(true)
@@ -289,7 +288,7 @@ public class SameAsOntowisTest {
 		/*
 		 * Prepare the data connection for querying.
 		 */
-        QuestOWLConnection conn = reasoner.getConnection();
+        OntopOWLConnection conn = reasoner.getConnection();
 
         return conn;
 
@@ -298,7 +297,7 @@ public class SameAsOntowisTest {
 
 
 
-    private List<Long> runQueries(QuestOWLConnection conn, List<String> queries) throws OWLException {
+    private List<Long> runQueries(OntopOWLConnection conn, List<String> queries) throws OWLException {
 
         //int nWarmUps = Constants.NUM_WARM_UPS;
         //int nRuns = Constants.NUM_RUNS;
@@ -309,7 +308,7 @@ public class SameAsOntowisTest {
         int length = queries.size();
         while (j < length){
             String sparqlQuery = queries.get(j);
-            QuestOWLStatement st = conn.createStatement();
+            OntopOWLStatement st = conn.createStatement();
             try {
 
                 long time = 0;
@@ -339,8 +338,7 @@ public class SameAsOntowisTest {
 				/*
 				 * Print the query summary
 				 */
-                QuestOWLStatement qst = (QuestOWLStatement) st;
-                String sqlQuery = qst.getUnfolding(sparqlQuery);
+                ExecutableQuery executableQuery = st.getExecutableQuery(sparqlQuery);
 
                 System.out.println();
                 System.out.println("The input SPARQL query:");
@@ -350,7 +348,7 @@ public class SameAsOntowisTest {
 
                 System.out.println("The output SQL query:");
                 System.out.println("=====================");
-                System.out.println(sqlQuery);
+                System.out.println(executableQuery.toString());
 
                 System.out.println("Query Execution Time:");
                 System.out.println("=====================");

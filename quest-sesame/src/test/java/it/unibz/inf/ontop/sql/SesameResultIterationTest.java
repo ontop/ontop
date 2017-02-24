@@ -2,18 +2,16 @@ package it.unibz.inf.ontop.sql;
 
 import static org.junit.Assert.assertTrue;
 
-import it.unibz.inf.ontop.injection.OBDASettings;
-import it.unibz.inf.ontop.injection.QuestConfiguration;
+import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 
 import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.util.Properties;
 import java.util.Scanner;
 
-import it.unibz.inf.ontop.rdf4j.repository.OntopRepositoryConnection;
 import it.unibz.inf.ontop.rdf4j.repository.OntopVirtualRepository;
+import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -55,15 +53,17 @@ public class SesameResultIterationTest {
     static String uc_keyfile = "src/test/resources/userconstraints/keys.lst";
     static String uc_create = "src/test/resources/userconstraints/create.sql";
 
-    static String jdbcUrl = "jdbc:h2:mem:countries_iteration_test";
+    private static final String URL = "jdbc:h2:mem:countries_iteration_test";
+    private static final String USER = "sa";
+    private static final String PASSWORD = "";
 
     private Connection sqlConnection;
-    private OntopRepositoryConnection conn;
+    private RepositoryConnection conn;
 
 
     @Before
     public void init() throws Exception {
-        sqlConnection = DriverManager.getConnection(jdbcUrl, "sa", "");
+        sqlConnection = DriverManager.getConnection(URL, USER, PASSWORD);
         java.sql.Statement s = sqlConnection.createStatement();
 
         try {
@@ -82,20 +82,16 @@ public class SesameResultIterationTest {
 
         s.close();
 
-        Properties p = new Properties();
-        p.put(OBDASettings.DB_NAME, "countries_iteration_test");
-        p.put(OBDASettings.JDBC_URL, jdbcUrl);
-        p.put(OBDASettings.DB_USER, "sa");
-        p.put(OBDASettings.DB_PASSWORD, "");
-        p.put(OBDASettings.JDBC_DRIVER, "org.h2.Driver");
 
-        QuestConfiguration configuration = QuestConfiguration.defaultBuilder()
+        OntopSQLOWLAPIConfiguration configuration = OntopSQLOWLAPIConfiguration.defaultBuilder()
                 .ontologyFile(owlfile)
                 .r2rmlMappingFile(r2rmlfile)
-                .properties(p)
+                .jdbcUrl(URL)
+                .jdbcUser(USER)
+                .jdbcPassword(PASSWORD)
                 .build();
 
-        OntopVirtualRepository repo = new OntopVirtualRepository("", configuration);
+        OntopVirtualRepository repo = new OntopVirtualRepository(configuration);
         repo.initialize();
         /*
 		 * Prepare the data connection for querying.

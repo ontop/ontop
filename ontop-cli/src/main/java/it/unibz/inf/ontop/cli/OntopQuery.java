@@ -26,11 +26,7 @@ import com.github.rvesse.airline.annotations.Option;
 import com.github.rvesse.airline.annotations.OptionType;
 import com.github.rvesse.airline.annotations.help.BashCompletion;
 import com.github.rvesse.airline.help.cli.bash.CompletionBehaviour;
-import it.unibz.inf.ontop.exception.InvalidMappingException;
-import it.unibz.inf.ontop.exception.InvalidPredicateDeclarationException;
-import it.unibz.inf.ontop.injection.QuestConfiguration;
-import it.unibz.inf.ontop.io.InvalidDataSourceException;
-import it.unibz.inf.ontop.model.OBDAModel;
+import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.io.ToStringRenderer;
@@ -83,7 +79,7 @@ public class OntopQuery extends OntopReasoningCommandBase {
 
 
         QuestOWLFactory factory = new QuestOWLFactory();
-        QuestConfiguration.Builder configurationBuilder = QuestConfiguration.defaultBuilder()
+        OntopSQLOWLAPIConfiguration.Builder configurationBuilder = OntopSQLOWLAPIConfiguration.defaultBuilder()
                 .ontology(ontology)
                 .enableOntologyAnnotationQuerying(enableAnnotations);
 
@@ -96,8 +92,8 @@ public class OntopQuery extends OntopReasoningCommandBase {
         factory = new QuestOWLFactory();
 
         try (QuestOWL reasoner = factory.createReasoner(configurationBuilder.build());
-             QuestOWLConnection conn = reasoner.getConnection();
-             QuestOWLStatement st = conn.createStatement();
+             OntopOWLConnection conn = reasoner.getConnection();
+             OntopOWLStatement st = conn.createStatement();
         ) {
 
 			/*

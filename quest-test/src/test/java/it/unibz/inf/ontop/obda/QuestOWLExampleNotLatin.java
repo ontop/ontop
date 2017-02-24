@@ -20,7 +20,7 @@ package it.unibz.inf.ontop.obda;
  * #L%
  */
 
-import it.unibz.inf.ontop.injection.QuestConfiguration;
+import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.core.SQLExecutableQuery;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import org.junit.Test;
@@ -48,7 +48,7 @@ public class QuestOWLExampleNotLatin {
 		 * Create the instance of Quest OWL reasoner.
 		 */
         QuestOWLFactory factory = new QuestOWLFactory();
-        QuestConfiguration config = QuestConfiguration.defaultBuilder()
+        OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.nativeOntopMappingFile(obdafile)
 				.ontologyFile(owlfile)
 				.build();
@@ -57,8 +57,8 @@ public class QuestOWLExampleNotLatin {
 		/*
 		 * Prepare the data connection for querying.
 		 */
-		QuestOWLConnection conn = reasoner.getConnection();
-		QuestOWLStatement st = conn.createStatement();
+		OntopOWLConnection conn = reasoner.getConnection();
+		OntopOWLStatement st = conn.createStatement();
 
 		/*
 		 * Get the book information that is stored in the database
@@ -87,7 +87,7 @@ public class QuestOWLExampleNotLatin {
 			/*
 			 * Print the query summary
 			 */
-			QuestOWLStatement qst = st;
+			OntopOWLStatement qst = st;
 			String sqlQuery = ((SQLExecutableQuery)qst.getExecutableQuery(sparqlQuery)).getSQL();
 
 			System.out.println();

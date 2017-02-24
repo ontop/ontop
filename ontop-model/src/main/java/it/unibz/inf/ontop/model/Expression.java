@@ -1,7 +1,7 @@
 package it.unibz.inf.ontop.model;
 
 import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.model.type.TermTypeException;
+import it.unibz.inf.ontop.model.type.IncompatibleTermException;
 
 import java.util.Optional;
 
@@ -24,13 +24,13 @@ public interface Expression extends Function {
     /**
      * TODO: generalize
      */
-    default Optional<TermType> getOptionalTermType() throws TermTypeException {
+    default Optional<TermType> getOptionalTermType() throws IncompatibleTermException {
         try {
             OperationPredicate predicate = getFunctionSymbol();
             return predicate.getTermTypeInferenceRule().inferType(
                     getTerms(), predicate.getArgumentTypes());
-        } catch (TermTypeException e) {
-            throw new TermTypeException(this, e);
+        } catch (IncompatibleTermException e) {
+            throw new IncompatibleTermException(this, e);
         }
     }
 
@@ -39,8 +39,8 @@ public interface Expression extends Function {
             OperationPredicate predicate = getFunctionSymbol();
             return predicate.getTermTypeInferenceRule().inferTypeFromArgumentTypes(
                     actualArgumentTypes, predicate.getArgumentTypes());
-        } catch (TermTypeException e) {
-            throw new TermTypeException(this, e);
+        } catch (IncompatibleTermException e) {
+            throw new IncompatibleTermException(this, e);
         }
     }
 }

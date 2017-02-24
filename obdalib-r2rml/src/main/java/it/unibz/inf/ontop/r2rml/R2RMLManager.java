@@ -30,7 +30,7 @@ import eu.optique.api.mapping.PredicateObjectMap;
 import eu.optique.api.mapping.RefObjectMap;
 import eu.optique.api.mapping.TriplesMap;
 import it.unibz.inf.ontop.model.*;
-import it.unibz.inf.ontop.model.impl.MappingFactoryImpl;
+import it.unibz.inf.ontop.model.impl.SQLMappingFactoryImpl;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
 import it.unibz.inf.ontop.model.impl.TermUtils;
 import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
@@ -54,7 +54,7 @@ import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
 
 public class R2RMLManager {
 
-	private static final MappingFactory MAPPING_FACTORY = MappingFactoryImpl.getInstance();
+	private static final SQLMappingFactory MAPPING_FACTORY = SQLMappingFactoryImpl.getInstance();
 	private R2RMLParser r2rmlParser;
 	private Model myModel;
 	private final NativeQueryLanguageComponentFactory nativeQLFactory;

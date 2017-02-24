@@ -20,7 +20,7 @@ package it.unibz.inf.ontop.reformulation.tests;
  * #L%
  */
 
-import it.unibz.inf.ontop.injection.QuestConfiguration;
+import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.owlrefplatform.owlapi.*;
 import org.junit.After;
 import org.junit.Before;
@@ -28,6 +28,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.semanticweb.owlapi.model.OWLIndividual;
+import org.semanticweb.owlapi.reasoner.IllegalConfigurationException;
 import org.semanticweb.owlapi.reasoner.ReasonerInternalException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -63,6 +64,10 @@ public class MetaMappingVirtualABoxMissingColumnTest {
 	final String owlfile = "src/test/resources/test/metamapping.owl";
 	final String obdafile = "src/test/resources/test/metamapping_broken.obda";
 
+	String url = "jdbc:h2:mem:questjunitdb2_broken;DATABASE_TO_UPPER=FALSE";
+	String username = "sa";
+	String password = "";
+
 	@Before
     public void setUp() throws Exception {
 
@@ -72,9 +77,7 @@ public class MetaMappingVirtualABoxMissingColumnTest {
 		 */
 		// String driver = "org.h2.Driver";
 		// Roman: changed the database name to avoid conflict with other tests (in .obda as well)
-		String url = "jdbc:h2:mem:questjunitdb2_broken;DATABASE_TO_UPPER=FALSE";
-		String username = "sa";
-		String password = "";
+
 
 		conn = DriverManager.getConnection(url, username, password);
 		Statement st = conn.createStatement();
@@ -119,17 +122,20 @@ public class MetaMappingVirtualABoxMissingColumnTest {
 	private void runTests() throws Exception {
 
         QuestOWLFactory factory = new QuestOWLFactory();
-        QuestConfiguration config = QuestConfiguration.defaultBuilder()
+        OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.nativeOntopMappingFile(obdafile)
 				.ontologyFile(owlfile)
+				.jdbcUrl(url)
+				.jdbcUser(username)
+				.jdbcPassword(password)
 				.build();
        
 		String query1 = "PREFIX : <http://it.unibz.inf/obda/test/simple#> SELECT * WHERE { ?x a :A_1 }";
         try (QuestOWL reasoner = factory.createReasoner(config);
              // Now we are ready for querying
-             QuestOWLConnection conn = reasoner.getConnection();
-             QuestOWLStatement st = conn.createStatement();
-             QuestOWLResultSet rs1 = st.executeTuple(query1);
+             OntopOWLConnection conn = reasoner.getConnection();
+             OntopOWLStatement st = conn.createStatement();
+             QuestOWLResultSet rs1 = st.executeSelectQuery(query1);
         ) {
             assertTrue(rs1.nextRow());
 			OWLIndividual ind = rs1.getOWLIndividual("x");
@@ -149,7 +155,7 @@ public class MetaMappingVirtualABoxMissingColumnTest {
     @Test
 	public void testViEqSig() throws Exception {
 
-        expectedEx.expect(ReasonerInternalException.class);
+        expectedEx.expect(IllegalConfigurationException.class);
         expectedEx.expectMessage("The placeholder 'code1' in the target does not occur in the body of the mapping");
 
 		runTests();
