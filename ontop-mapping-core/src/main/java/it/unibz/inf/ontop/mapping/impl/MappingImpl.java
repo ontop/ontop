@@ -9,7 +9,6 @@ import it.unibz.inf.ontop.mapping.Mapping;
 import it.unibz.inf.ontop.mapping.MappingMetadata;
 import it.unibz.inf.ontop.model.AtomPredicate;
 import it.unibz.inf.ontop.model.Variable;
-import it.unibz.inf.ontop.model.impl.InjectiveVar2VarSubstitutionImpl;
 import it.unibz.inf.ontop.pivotalrepr.IntermediateQuery;
 import it.unibz.inf.ontop.pivotalrepr.impl.QueryRenamer;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -69,7 +68,7 @@ public class MappingImpl implements Mapping {
         Map<Variable, Variable> substitutionMap =
                 query.getKnownVariables().stream()
                         .collect(Collectors.toMap(v -> v, v -> DATA_FACTORY.getVariable(v.getName()+"m"+suffix)));
-        QueryRenamer queryRenamer = new QueryRenamer(iqFactory, new InjectiveVar2VarSubstitutionImpl(substitutionMap));
+        QueryRenamer queryRenamer = new QueryRenamer(iqFactory, DATA_FACTORY.getInjectiveVar2VarSubstitution(substitutionMap));
         return queryRenamer.transform(query);
     }
 }

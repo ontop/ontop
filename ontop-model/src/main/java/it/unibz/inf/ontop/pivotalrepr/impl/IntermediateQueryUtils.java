@@ -6,7 +6,6 @@ import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.InjectiveVar2VarSubstitution;
-import it.unibz.inf.ontop.model.impl.InjectiveVar2VarSubstitutionImpl;
 import it.unibz.inf.ontop.model.impl.NeutralSubstitution;
 import it.unibz.inf.ontop.pivotalrepr.*;
 import it.unibz.inf.ontop.utils.FunctionalTools;
@@ -15,6 +14,8 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import java.util.AbstractMap;
 import java.util.Collection;
 import java.util.Optional;
+
+import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
 
 /**
  * TODO: explain
@@ -123,7 +124,7 @@ public class IntermediateQueryUtils {
                     .filter(e -> !e.getKey().equals(e.getValue()))
                     .collect(ImmutableCollectors.toMap());
 
-            return Optional.of(new InjectiveVar2VarSubstitutionImpl(newMap));
+            return Optional.of(DATA_FACTORY.getInjectiveVar2VarSubstitution(newMap));
         }
     }
 
@@ -155,7 +156,7 @@ public class IntermediateQueryUtils {
                 .filter(pair -> ! pair.getKey().equals(pair.getValue()))
                 .collect(ImmutableCollectors.toMap());
 
-        return new InjectiveVar2VarSubstitutionImpl(newMap);
+        return DATA_FACTORY.getInjectiveVar2VarSubstitution(newMap);
     }
 
     /**

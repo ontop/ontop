@@ -12,15 +12,13 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import static it.unibz.inf.ontop.model.impl.ImmutableSubstitutionTools.isInjective;
-
 public class InjectiveVar2VarSubstitutionImpl extends Var2VarSubstitutionImpl implements InjectiveVar2VarSubstitution {
     private final boolean isEmpty;
 
     /**
      * Regular constructor
      */
-    public InjectiveVar2VarSubstitutionImpl(Map<Variable, Variable> substitutionMap) {
+    protected InjectiveVar2VarSubstitutionImpl(Map<Variable, Variable> substitutionMap) {
         super(substitutionMap);
         isEmpty = substitutionMap.isEmpty();
 

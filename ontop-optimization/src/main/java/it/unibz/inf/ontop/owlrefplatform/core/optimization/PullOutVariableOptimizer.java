@@ -7,7 +7,6 @@ import it.unibz.inf.ontop.model.DataAtom;
 import it.unibz.inf.ontop.model.Variable;
 import it.unibz.inf.ontop.model.VariableOrGroundTerm;
 import it.unibz.inf.ontop.model.InjectiveVar2VarSubstitution;
-import it.unibz.inf.ontop.model.impl.InjectiveVar2VarSubstitutionImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.optimization.QueryNodeNavigationTools.NextNodeAndQuery;
 import it.unibz.inf.ontop.pivotalrepr.*;
 import it.unibz.inf.ontop.pivotalrepr.proposal.NodeCentricOptimizationResults;
@@ -23,6 +22,7 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
+import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
 import static it.unibz.inf.ontop.owlrefplatform.core.optimization.QueryNodeNavigationTools.getDepthFirstNextNode;
 import static it.unibz.inf.ontop.owlrefplatform.core.optimization.QueryNodeNavigationTools.getNextNodeAndQuery;
 
@@ -156,7 +156,7 @@ public class PullOutVariableOptimizer implements IntermediateQueryOptimizer {
             else {
                 variablesFromOtherSubTrees.addAll(substitutionMap.keySet());
 
-                InjectiveVar2VarSubstitution renamingSubstitution = new InjectiveVar2VarSubstitutionImpl(substitutionMap);
+                InjectiveVar2VarSubstitution renamingSubstitution = DATA_FACTORY.getInjectiveVar2VarSubstitution(substitutionMap);
 
                 PullVariableOutOfSubTreeProposal<JoinLikeNode> proposal = new PullVariableOutOfSubTreeProposalImpl<>(
                         currentJoinLikeNode, renamingSubstitution, childNode);

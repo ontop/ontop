@@ -414,7 +414,7 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
     private static Var2VarSubstitution extractTauEq(Var2VarSubstitution tauR) {
         int domainVariableCount = tauR.getDomain().size();
         if (domainVariableCount <= 1) {
-            return new Var2VarSubstitutionImpl(ImmutableMap.of());
+            return DATA_FACTORY.getVar2VarSubstitution(ImmutableMap.of());
         }
 
         ImmutableMultimap<Variable, Variable> inverseMultimap = tauR.getImmutableMap().entrySet().stream()
@@ -437,7 +437,7 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
                 })
                 .collect(ImmutableCollectors.toMap());
 
-        return new Var2VarSubstitutionImpl(newMap);
+        return DATA_FACTORY.getVar2VarSubstitution(newMap);
     }
 
     private static ImmutableSubstitution<ImmutableTerm> extractEtaB(ImmutableSubstitution<ImmutableTerm> eta,

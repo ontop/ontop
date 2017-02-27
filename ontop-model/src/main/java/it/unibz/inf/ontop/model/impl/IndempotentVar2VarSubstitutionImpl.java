@@ -9,7 +9,7 @@ import java.util.Set;
 
 public class IndempotentVar2VarSubstitutionImpl extends Var2VarSubstitutionImpl implements IndempotentVar2VarSubstitution {
 
-    public IndempotentVar2VarSubstitutionImpl(Map<Variable, Variable> substitutionMap) {
+    protected IndempotentVar2VarSubstitutionImpl(Map<Variable, Variable> substitutionMap) {
         super(substitutionMap);
 
         if (!isIndempotent(substitutionMap)) {

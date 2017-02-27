@@ -24,6 +24,7 @@ package it.unibz.inf.ontop.model;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import com.google.common.collect.ImmutableList;
@@ -326,4 +327,7 @@ public interface OBDADataFactory extends Serializable {
 	<T extends ImmutableTerm> ImmutableSubstitution<T> getSubstitution(Variable k1, T v1, Variable k2, T v2,
 																	   Variable k3, T v3, Variable k4, T v4);
 	<T extends ImmutableTerm> ImmutableSubstitution<T> getSubstitution();
+
+	Var2VarSubstitution getVar2VarSubstitution(ImmutableMap<Variable, Variable> substitutionMap);
+	InjectiveVar2VarSubstitution getInjectiveVar2VarSubstitution(Map<Variable, Variable> substitutionMap);
 }

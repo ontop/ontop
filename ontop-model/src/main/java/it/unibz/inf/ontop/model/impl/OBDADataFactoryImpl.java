@@ -611,6 +611,16 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 		return new ImmutableSubstitutionImpl<>(ImmutableMap.of());
 	}
 
+	@Override
+	public Var2VarSubstitution getVar2VarSubstitution(ImmutableMap<Variable, Variable> substitutionMap) {
+		return new Var2VarSubstitutionImpl(substitutionMap);
+	}
+
+	@Override
+	public InjectiveVar2VarSubstitution getInjectiveVar2VarSubstitution(Map<Variable, Variable> substitutionMap) {
+		return new InjectiveVar2VarSubstitutionImpl(substitutionMap);
+	}
+
 	private LanguageTag getLanguageTag(String languageTagString) {
 		return new LanguageTagImpl(languageTagString);
 	}
