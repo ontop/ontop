@@ -5,7 +5,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.exception.OntopIllegalStateException;
-import it.unibz.inf.ontop.injection.OntopModelFactory;
+import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.pivotalrepr.*;
 import it.unibz.inf.ontop.pivotalrepr.datalog.DatalogProgram2QueryConverter;
@@ -29,10 +29,10 @@ import static it.unibz.inf.ontop.pivotalrepr.datalog.impl.DatalogRule2QueryConve
  */
 public class DatalogProgram2QueryConverterImpl implements DatalogProgram2QueryConverter {
 
-    private final OntopModelFactory modelFactory;
+    private final IntermediateQueryFactory modelFactory;
 
     @Inject
-    private DatalogProgram2QueryConverterImpl(OntopModelFactory modelFactory) {
+    private DatalogProgram2QueryConverterImpl(IntermediateQueryFactory modelFactory) {
         this.modelFactory = modelFactory;
     }
 

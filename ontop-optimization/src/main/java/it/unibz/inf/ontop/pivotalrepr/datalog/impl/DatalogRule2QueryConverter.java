@@ -4,7 +4,7 @@ import java.util.Optional;
 
 import fj.P2;
 import fj.data.List;
-import it.unibz.inf.ontop.injection.OntopModelFactory;
+import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.model.impl.DatalogTools;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.PullOutEqualityNormalizerImpl;
@@ -102,7 +102,7 @@ public class DatalogRule2QueryConverter {
     public static IntermediateQuery convertDatalogRule(DBMetadata dbMetadata, CQIE datalogRule,
                                                        Collection<Predicate> tablePredicates,
                                                        Optional<ImmutableQueryModifiers> optionalModifiers,
-                                                       OntopModelFactory modelFactory,
+                                                       IntermediateQueryFactory modelFactory,
                                                        ExecutorRegistry executorRegistry)
             throws DatalogProgram2QueryConverterImpl.InvalidDatalogProgramException {
 
@@ -128,8 +128,8 @@ public class DatalogRule2QueryConverter {
 
     private static IntermediateQuery createFact(DBMetadata dbMetadata, ConstructionNode rootNode,
                                                 DistinctVariableOnlyDataAtom projectionAtom, ExecutorRegistry executorRegistry,
-                                                OntopModelFactory modelFactory) {
-        IntermediateQueryBuilder queryBuilder = modelFactory.create(dbMetadata, executorRegistry);
+                                                IntermediateQueryFactory modelFactory) {
+        IntermediateQueryBuilder queryBuilder = modelFactory.createIQBuilder(dbMetadata, executorRegistry);
         queryBuilder.init(projectionAtom, rootNode);
         return queryBuilder.build();
     }
@@ -143,7 +143,7 @@ public class DatalogRule2QueryConverter {
                                                       Collection<Predicate> tablePredicates,
                                                       List<Function> dataAndCompositeAtoms,
                                                       List<Function> booleanAtoms, Optional<Function> optionalGroupAtom,
-                                                      OntopModelFactory modelFactory,
+                                                      IntermediateQueryFactory modelFactory,
                                                       ExecutorRegistry executorRegistry)
             throws DatalogProgram2QueryConverterImpl.InvalidDatalogProgramException {
         /**
@@ -152,7 +152,7 @@ public class DatalogRule2QueryConverter {
         Optional<JoinOrFilterNode> optionalFilterOrJoinNode = createFilterOrJoinNode(dataAndCompositeAtoms, booleanAtoms);
 
         // Non final
-        IntermediateQueryBuilder queryBuilder = modelFactory.create(dbMetadata, executorRegistry);
+        IntermediateQueryBuilder queryBuilder = modelFactory.createIQBuilder(dbMetadata, executorRegistry);
 
         try {
             queryBuilder.init(projectionAtom, rootNode);

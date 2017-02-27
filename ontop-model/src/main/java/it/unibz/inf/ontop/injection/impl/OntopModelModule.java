@@ -3,7 +3,7 @@ package it.unibz.inf.ontop.injection.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Module;
 import it.unibz.inf.ontop.injection.OntopModelConfiguration;
-import it.unibz.inf.ontop.injection.OntopModelFactory;
+import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.model.DatatypeFactory;
 import it.unibz.inf.ontop.model.OBDADataFactory;
 import it.unibz.inf.ontop.pivotalrepr.IntermediateQueryBuilder;
@@ -30,7 +30,7 @@ public class OntopModelModule extends OntopAbstractModule {
         Module modelFactoryModule = buildFactory(ImmutableList.<Class>of(
                 IntermediateQueryBuilder.class
                 ),
-                OntopModelFactory.class);
+                IntermediateQueryFactory.class);
         install(modelFactoryModule);
     }
 }

@@ -50,7 +50,7 @@ public class IQValidationTest {
 
         DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_VAR1_PREDICATE, A);
 
-        IntermediateQueryBuilder queryBuilder = MODEL_FACTORY.create(metadata, EXECUTOR_REGISTRY);
+        IntermediateQueryBuilder queryBuilder = MODEL_FACTORY.createIQBuilder(metadata, EXECUTOR_REGISTRY);
         queryBuilder.init(projectionAtom, constructionNode);
         queryBuilder.addChild(constructionNode, table1DataNode);
         queryBuilder.addChild(constructionNode, table2DataNode);
@@ -68,7 +68,7 @@ public class IQValidationTest {
                 DATA_FACTORY.getDistinctVariableOnlyDataAtom(
                         P3_PREDICATE, ImmutableList.of(A, B, C));
 
-        IntermediateQueryBuilder queryBuilder = MODEL_FACTORY.create(metadata, EXECUTOR_REGISTRY);
+        IntermediateQueryBuilder queryBuilder = MODEL_FACTORY.createIQBuilder(metadata, EXECUTOR_REGISTRY);
 
         ConstructionNode rootConstructionNode = new ConstructionNodeImpl(ROOT_CONSTRUCTION_NODE_ATOM.getVariables(),
                 new ImmutableSubstitutionImpl<>(ImmutableMap.of()), Optional.empty());
@@ -104,7 +104,7 @@ public class IQValidationTest {
                 DATA_FACTORY.getDistinctVariableOnlyDataAtom(
                         P3_PREDICATE, ImmutableList.of(A, B, C));
 
-        IntermediateQueryBuilder queryBuilder = MODEL_FACTORY.create(metadata, EXECUTOR_REGISTRY);
+        IntermediateQueryBuilder queryBuilder = MODEL_FACTORY.createIQBuilder(metadata, EXECUTOR_REGISTRY);
 
         ConstructionNode rootConstructionNode = new ConstructionNodeImpl(ROOT_CONSTRUCTION_NODE_ATOM.getVariables(),
                 new ImmutableSubstitutionImpl<>(ImmutableMap.of()), Optional.empty());
@@ -134,7 +134,7 @@ public class IQValidationTest {
 
     @Test(expected = InvalidIntermediateQueryException.class)
     public void testInnerJoinNodeChildren() {
-        IntermediateQueryBuilder queryBuilder = MODEL_FACTORY.create(metadata, EXECUTOR_REGISTRY);
+        IntermediateQueryBuilder queryBuilder = MODEL_FACTORY.createIQBuilder(metadata, EXECUTOR_REGISTRY);
         InnerJoinNode innerJoinNode = new InnerJoinNodeImpl(Optional.of(EXPRESSION));
         ConstructionNode constructionNode = new ConstructionNodeImpl(ImmutableSet.of(Z));
         DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_VAR1_PREDICATE, Z);
@@ -147,7 +147,7 @@ public class IQValidationTest {
 
     @Test(expected = InvalidIntermediateQueryException.class)
     public void testLeftJoinNodeChildren() {
-        IntermediateQueryBuilder queryBuilder = MODEL_FACTORY.create(metadata, EXECUTOR_REGISTRY);
+        IntermediateQueryBuilder queryBuilder = MODEL_FACTORY.createIQBuilder(metadata, EXECUTOR_REGISTRY);
         LeftJoinNode leftJoinNode = new LeftJoinNodeImpl(Optional.of(EXPRESSION));
         ConstructionNode constructionNode = new ConstructionNodeImpl(ImmutableSet.of(Z));
         DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_VAR1_PREDICATE, Z);
@@ -160,7 +160,7 @@ public class IQValidationTest {
 
     @Test(expected = InvalidIntermediateQueryException.class)
     public void testFilterNodeChild() {
-        IntermediateQueryBuilder queryBuilder = MODEL_FACTORY.create(metadata, EXECUTOR_REGISTRY);
+        IntermediateQueryBuilder queryBuilder = MODEL_FACTORY.createIQBuilder(metadata, EXECUTOR_REGISTRY);
         FilterNode filterNode = new FilterNodeImpl(EXPRESSION);
         ConstructionNode constructionNode = new ConstructionNodeImpl(ImmutableSet.of(Z));
         DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_VAR1_PREDICATE, Z);
@@ -175,7 +175,7 @@ public class IQValidationTest {
         AtomPredicate TABLE_2 = new AtomPredicateImpl("table2", 1);
         AtomPredicate TABLE_3 = new AtomPredicateImpl("table2", 1);
 
-        IntermediateQueryBuilder queryBuilder = MODEL_FACTORY.create(metadata, EXECUTOR_REGISTRY);
+        IntermediateQueryBuilder queryBuilder = MODEL_FACTORY.createIQBuilder(metadata, EXECUTOR_REGISTRY);
         InnerJoinNode innerJoinNode = new InnerJoinNodeImpl(Optional.of(EXPRESSION));
         ConstructionNode constructionNode = new ConstructionNodeImpl(ImmutableSet.of(A));
         DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_VAR1_PREDICATE, A);
@@ -197,7 +197,7 @@ public class IQValidationTest {
         AtomPredicate TABLE_2 = new AtomPredicateImpl("table2", 1);
         AtomPredicate TABLE_3 = new AtomPredicateImpl("table2", 1);
 
-        IntermediateQueryBuilder queryBuilder = MODEL_FACTORY.create(metadata, EXECUTOR_REGISTRY);
+        IntermediateQueryBuilder queryBuilder = MODEL_FACTORY.createIQBuilder(metadata, EXECUTOR_REGISTRY);
         InnerJoinNode innerJoinNode = new InnerJoinNodeImpl(Optional.of(EXPRESSION));
         ConstructionNode constructionNode = new ConstructionNodeImpl(ImmutableSet.of(A));
         DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_VAR1_PREDICATE, A);
@@ -225,7 +225,7 @@ public class IQValidationTest {
 
     @Test(expected = InvalidIntermediateQueryException.class)
     public void testEmptyNodeChildren() {
-        IntermediateQueryBuilder queryBuilder = MODEL_FACTORY.create(metadata, EXECUTOR_REGISTRY);
+        IntermediateQueryBuilder queryBuilder = MODEL_FACTORY.createIQBuilder(metadata, EXECUTOR_REGISTRY);
         EmptyNode emptyNode = new EmptyNodeImpl(ImmutableSet.of(Z));
         ConstructionNode constructionNode = new ConstructionNodeImpl(ImmutableSet.of(Z));
         DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_VAR1_PREDICATE, Z);

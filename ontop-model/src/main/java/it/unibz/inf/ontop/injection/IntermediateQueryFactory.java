@@ -9,8 +9,8 @@ import it.unibz.inf.ontop.pivotalrepr.utils.ExecutorRegistry;
  *
  * See https://github.com/google/guice/wiki/AssistedInject.
  */
-public interface OntopModelFactory {
+public interface IntermediateQueryFactory {
 
-    IntermediateQueryBuilder create(DBMetadata metadata, ExecutorRegistry executorRegistry);
+    IntermediateQueryBuilder createIQBuilder(DBMetadata metadata, ExecutorRegistry executorRegistry);
 
 }

@@ -3,7 +3,7 @@ package it.unibz.inf.ontop.pivotalrepr.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.executor.ProposalExecutor;
-import it.unibz.inf.ontop.injection.OntopModelFactory;
+import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.OntopModelSettings;
 import it.unibz.inf.ontop.model.DBMetadata;
 import it.unibz.inf.ontop.model.DistinctVariableOnlyDataAtom;
@@ -57,7 +57,7 @@ public class IntermediateQueryImpl implements IntermediateQuery {
 
     private final OntopModelSettings settings;
 
-    private final OntopModelFactory modelFactory;
+    private final IntermediateQueryFactory iqFactory;
 
 
     /**
@@ -66,14 +66,14 @@ public class IntermediateQueryImpl implements IntermediateQuery {
     public IntermediateQueryImpl(DBMetadata dbMetadata, DistinctVariableOnlyDataAtom projectionAtom,
                                  QueryTreeComponent treeComponent, ExecutorRegistry executorRegistry,
                                  IntermediateQueryValidator validator, OntopModelSettings settings,
-                                 OntopModelFactory modelFactory) {
+                                 IntermediateQueryFactory iqFactory) {
         this.dbMetadata = dbMetadata;
         this.projectionAtom = projectionAtom;
         this.treeComponent = treeComponent;
         this.executorRegistry = executorRegistry;
         this.validator = validator;
         this.settings = settings;
-        this.modelFactory = modelFactory;
+        this.iqFactory = iqFactory;
 
         if (settings.isTestModeEnabled())
             validate();
@@ -92,7 +92,7 @@ public class IntermediateQueryImpl implements IntermediateQuery {
     @Override
     public IntermediateQuery createSnapshot() {
         return new IntermediateQueryImpl(dbMetadata, projectionAtom, treeComponent.createSnapshot(),
-                executorRegistry, validator, settings, modelFactory);
+                executorRegistry, validator, settings, iqFactory);
     }
 
     @Override
@@ -121,7 +121,7 @@ public class IntermediateQueryImpl implements IntermediateQuery {
 
     @Override
     public IntermediateQueryBuilder newBuilder() {
-        return modelFactory.create(dbMetadata, executorRegistry);
+        return iqFactory.createIQBuilder(dbMetadata, executorRegistry);
     }
 
     @Override

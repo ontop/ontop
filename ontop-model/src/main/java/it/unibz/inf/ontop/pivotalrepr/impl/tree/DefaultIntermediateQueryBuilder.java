@@ -3,7 +3,7 @@ package it.unibz.inf.ontop.pivotalrepr.impl.tree;
 import com.google.common.collect.ImmutableList;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
-import it.unibz.inf.ontop.injection.OntopModelFactory;
+import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.OntopModelSettings;
 import it.unibz.inf.ontop.model.DBMetadata;
 import it.unibz.inf.ontop.model.DistinctVariableOnlyDataAtom;
@@ -24,7 +24,7 @@ public class DefaultIntermediateQueryBuilder implements IntermediateQueryBuilder
 
     private final DBMetadata dbMetadata;
     private final ExecutorRegistry executorRegistry;
-    private final OntopModelFactory modelFactory;
+    private final IntermediateQueryFactory modelFactory;
     private final IntermediateQueryValidator validator;
     private final OntopModelSettings settings;
     private DistinctVariableOnlyDataAtom projectionAtom;
@@ -34,7 +34,7 @@ public class DefaultIntermediateQueryBuilder implements IntermediateQueryBuilder
     @AssistedInject
     protected DefaultIntermediateQueryBuilder(@Assisted DBMetadata dbMetadata,
                                             @Assisted ExecutorRegistry executorRegistry,
-                                            OntopModelFactory modelFactory,
+                                            IntermediateQueryFactory modelFactory,
                                             IntermediateQueryValidator validator,
                                             OntopModelSettings settings) {
         this.dbMetadata = dbMetadata;
@@ -146,7 +146,7 @@ public class DefaultIntermediateQueryBuilder implements IntermediateQueryBuilder
         return executorRegistry;
     }
 
-    protected OntopModelFactory getModelFactory() {
+    protected IntermediateQueryFactory getModelFactory() {
         return modelFactory;
     }
 
