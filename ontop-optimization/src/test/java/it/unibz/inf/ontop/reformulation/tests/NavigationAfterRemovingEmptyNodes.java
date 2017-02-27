@@ -3,7 +3,6 @@ package it.unibz.inf.ontop.reformulation.tests;
 
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.*;
-import it.unibz.inf.ontop.model.impl.AtomPredicateImpl;
 import it.unibz.inf.ontop.model.impl.URITemplatePredicateImpl;
 import it.unibz.inf.ontop.pivotalrepr.*;
 import it.unibz.inf.ontop.pivotalrepr.impl.*;

@@ -1,7 +1,6 @@
 package it.unibz.inf.ontop.reformulation.tests;
 
 import it.unibz.inf.ontop.model.*;
-import it.unibz.inf.ontop.model.impl.AtomPredicateImpl;
 import it.unibz.inf.ontop.model.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.owlrefplatform.core.optimization.PushDownBooleanExpressionOptimizer;
 import it.unibz.inf.ontop.owlrefplatform.core.optimization.PushDownBooleanExpressionOptimizerImpl;

@@ -25,11 +25,9 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.model.*;
-import it.unibz.inf.ontop.model.impl.AtomPredicateImpl;
 import it.unibz.inf.ontop.model.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.model.impl.MutableQueryModifiersImpl;
 import it.unibz.inf.ontop.pivotalrepr.*;
-import it.unibz.inf.ontop.pivotalrepr.impl.ConstructionNodeImpl;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;

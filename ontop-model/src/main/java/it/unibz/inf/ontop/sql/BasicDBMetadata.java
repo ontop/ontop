@@ -5,7 +5,6 @@ import com.google.common.collect.ImmutableMultimap;
 import it.unibz.inf.ontop.model.AtomPredicate;
 import it.unibz.inf.ontop.model.DBMetadata;
 import it.unibz.inf.ontop.model.Predicate;
-import it.unibz.inf.ontop.model.impl.AtomPredicateImpl;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import javax.annotation.Nullable;

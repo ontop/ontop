@@ -8,7 +8,6 @@ import it.unibz.inf.ontop.pivotalrepr.BinaryOrderedOperatorNode.ArgumentPosition
 import it.unibz.inf.ontop.pivotalrepr.QueryNode;
 import it.unibz.inf.ontop.pivotalrepr.UnionNode;
 import it.unibz.inf.ontop.pivotalrepr.impl.QueryTreeComponent;
-import it.unibz.inf.ontop.pivotalrepr.impl.UnionNodeImpl;
 import it.unibz.inf.ontop.pivotalrepr.proposal.InvalidQueryOptimizationProposalException;
 import it.unibz.inf.ontop.pivotalrepr.proposal.NodeCentricOptimizationResults;
 import it.unibz.inf.ontop.pivotalrepr.proposal.UnionLiftProposal;

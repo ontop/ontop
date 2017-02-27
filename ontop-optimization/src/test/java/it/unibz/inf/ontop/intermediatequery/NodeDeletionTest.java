@@ -2,7 +2,6 @@ package it.unibz.inf.ontop.intermediatequery;
 
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.*;
-import it.unibz.inf.ontop.model.impl.AtomPredicateImpl;
 import org.junit.Test;
 import it.unibz.inf.ontop.owlrefplatform.core.optimization.BasicJoinOptimizer;
 import it.unibz.inf.ontop.pivotalrepr.EmptyQueryException;

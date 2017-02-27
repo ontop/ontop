@@ -6,7 +6,6 @@ import it.unibz.inf.ontop.executor.SimpleNodeCentricExecutor;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.pivotalrepr.*;
-import it.unibz.inf.ontop.pivotalrepr.impl.InnerJoinNodeImpl;
 import it.unibz.inf.ontop.pivotalrepr.impl.QueryTreeComponent;
 import it.unibz.inf.ontop.pivotalrepr.proposal.InvalidQueryOptimizationProposalException;
 import it.unibz.inf.ontop.pivotalrepr.proposal.LeftJoinOptimizationProposal;

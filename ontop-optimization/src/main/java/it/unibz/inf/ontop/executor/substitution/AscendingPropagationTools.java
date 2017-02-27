@@ -7,7 +7,6 @@ import it.unibz.inf.ontop.model.ImmutableSubstitution;
 import it.unibz.inf.ontop.model.ImmutableTerm;
 import it.unibz.inf.ontop.model.Variable;
 import it.unibz.inf.ontop.pivotalrepr.*;
-import it.unibz.inf.ontop.pivotalrepr.impl.EmptyNodeImpl;
 import it.unibz.inf.ontop.pivotalrepr.impl.QueryTreeComponent;
 import it.unibz.inf.ontop.pivotalrepr.proposal.NodeTracker;
 import it.unibz.inf.ontop.pivotalrepr.proposal.NodeTrackingResults;

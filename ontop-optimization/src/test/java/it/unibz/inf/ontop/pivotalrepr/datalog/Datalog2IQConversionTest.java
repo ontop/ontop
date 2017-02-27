@@ -2,9 +2,7 @@ package it.unibz.inf.ontop.pivotalrepr.datalog;
 
 
 import com.google.common.collect.ImmutableList;
-import fj.P2;
 import it.unibz.inf.ontop.model.*;
-import it.unibz.inf.ontop.model.impl.AtomPredicateImpl;
 import it.unibz.inf.ontop.pivotalrepr.datalog.impl.DatalogProgram2QueryConverterImpl;
 import it.unibz.inf.ontop.pivotalrepr.mapping.TargetAtom;
 import org.junit.Test;

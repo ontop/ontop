@@ -12,7 +12,6 @@ import it.unibz.inf.ontop.pivotalrepr.BinaryOrderedOperatorNode.ArgumentPosition
 import it.unibz.inf.ontop.pivotalrepr.impl.*;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.pivotalrepr.*;
-import it.unibz.inf.ontop.pivotalrepr.impl.ConstructionNodeImpl;
 import it.unibz.inf.ontop.pivotalrepr.mapping.TargetAtom;
 import it.unibz.inf.ontop.pivotalrepr.utils.ExecutorRegistry;
 

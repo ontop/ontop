@@ -6,7 +6,6 @@ import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.model.ImmutableExpression;
 import it.unibz.inf.ontop.model.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.pivotalrepr.*;
-import it.unibz.inf.ontop.pivotalrepr.impl.FilterNodeImpl;
 import it.unibz.inf.ontop.pivotalrepr.impl.IllegalTreeUpdateException;
 import it.unibz.inf.ontop.pivotalrepr.impl.QueryTreeComponent;
 import it.unibz.inf.ontop.pivotalrepr.proposal.InvalidQueryOptimizationProposalException;

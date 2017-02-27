@@ -10,7 +10,6 @@ import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
 import it.unibz.inf.ontop.model.impl.ImmutableUnificationTools;
-import it.unibz.inf.ontop.model.impl.Var2VarSubstitutionImpl;
 import it.unibz.inf.ontop.pivotalrepr.*;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.slf4j.Logger;

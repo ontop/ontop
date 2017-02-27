@@ -6,7 +6,6 @@ import it.unibz.inf.ontop.model.AtomPredicate;
 import it.unibz.inf.ontop.model.Function;
 import it.unibz.inf.ontop.model.Predicate;
 import it.unibz.inf.ontop.model.Term;
-import it.unibz.inf.ontop.model.impl.AtomPredicateImpl;
 
 import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
 
