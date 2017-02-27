@@ -10,8 +10,6 @@ import it.unibz.inf.ontop.pivotalrepr.ConstructionNode;
 import it.unibz.inf.ontop.pivotalrepr.ExtensionalDataNode;
 import it.unibz.inf.ontop.pivotalrepr.IntermediateQuery;
 import it.unibz.inf.ontop.pivotalrepr.IntermediateQueryBuilder;
-import it.unibz.inf.ontop.pivotalrepr.impl.ConstructionNodeImpl;
-import it.unibz.inf.ontop.pivotalrepr.impl.ExtensionalDataNodeImpl;
 import org.junit.Test;
 
 import java.util.ArrayList;

@@ -7,7 +7,6 @@ import it.unibz.inf.ontop.model.impl.URITemplatePredicateImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionImpl;
 import it.unibz.inf.ontop.pivotalrepr.*;
 import it.unibz.inf.ontop.pivotalrepr.equivalence.IQSyntacticEquivalenceChecker;
-import it.unibz.inf.ontop.pivotalrepr.impl.*;
 import it.unibz.inf.ontop.pivotalrepr.proposal.impl.InnerJoinOptimizationProposalImpl;
 import it.unibz.inf.ontop.sql.*;
 import org.junit.Test;

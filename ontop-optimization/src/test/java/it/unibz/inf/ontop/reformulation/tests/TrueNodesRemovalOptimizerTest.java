@@ -9,10 +9,7 @@ import it.unibz.inf.ontop.owlrefplatform.core.optimization.IntermediateQueryOpti
 import it.unibz.inf.ontop.owlrefplatform.core.optimization.TrueNodesRemovalOptimizer;
 import it.unibz.inf.ontop.pivotalrepr.*;
 import it.unibz.inf.ontop.pivotalrepr.equivalence.IQSyntacticEquivalenceChecker;
-import it.unibz.inf.ontop.pivotalrepr.impl.*;
 import org.junit.Test;
-
-import java.util.Optional;
 
 import static it.unibz.inf.ontop.model.ExpressionOperation.NEQ;
 import static it.unibz.inf.ontop.model.Predicate.COL_TYPE.INTEGER;

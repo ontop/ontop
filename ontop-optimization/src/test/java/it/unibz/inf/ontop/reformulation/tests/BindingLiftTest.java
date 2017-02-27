@@ -12,12 +12,9 @@ import it.unibz.inf.ontop.owlrefplatform.core.optimization.FixedPointBindingLift
 import it.unibz.inf.ontop.owlrefplatform.core.optimization.IntermediateQueryOptimizer;
 import it.unibz.inf.ontop.pivotalrepr.*;
 import it.unibz.inf.ontop.pivotalrepr.equivalence.IQSyntacticEquivalenceChecker;
-import it.unibz.inf.ontop.pivotalrepr.impl.*;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
-
-import java.util.Optional;
 
 import static it.unibz.inf.ontop.model.ExpressionOperation.EQ;
 import static it.unibz.inf.ontop.model.ExpressionOperation.SPARQL_DATATYPE;

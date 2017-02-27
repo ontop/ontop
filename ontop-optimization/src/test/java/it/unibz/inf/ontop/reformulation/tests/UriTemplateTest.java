@@ -9,7 +9,6 @@ import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitut
 import it.unibz.inf.ontop.owlrefplatform.core.optimization.BindingLiftOptimizer;
 import it.unibz.inf.ontop.owlrefplatform.core.optimization.FixedPointBindingLiftOptimizer;
 import it.unibz.inf.ontop.pivotalrepr.*;
-import it.unibz.inf.ontop.pivotalrepr.impl.*;
 import org.junit.Ignore;
 import org.junit.Test;
 

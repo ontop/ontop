@@ -2,16 +2,13 @@ package it.unibz.inf.ontop.reformulation.tests;
 
 import java.sql.Types;
 import java.util.Optional;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
 import fj.P;
 import fj.P2;
 import it.unibz.inf.ontop.model.impl.*;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionImpl;
 import it.unibz.inf.ontop.pivotalrepr.equivalence.IQSyntacticEquivalenceChecker;
-import it.unibz.inf.ontop.pivotalrepr.impl.*;
 import it.unibz.inf.ontop.pivotalrepr.proposal.InvalidQueryOptimizationProposalException;
 import it.unibz.inf.ontop.pivotalrepr.proposal.NodeCentricOptimizationResults;
 import it.unibz.inf.ontop.sql.*;

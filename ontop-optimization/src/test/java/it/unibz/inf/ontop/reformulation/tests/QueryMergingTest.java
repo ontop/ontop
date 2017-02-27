@@ -8,7 +8,6 @@ import it.unibz.inf.ontop.model.impl.AtomPredicateImpl;
 import it.unibz.inf.ontop.model.impl.URITemplatePredicateImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionImpl;
 import it.unibz.inf.ontop.pivotalrepr.*;
-import it.unibz.inf.ontop.pivotalrepr.impl.*;
 import it.unibz.inf.ontop.pivotalrepr.proposal.QueryMergingProposal;
 import it.unibz.inf.ontop.pivotalrepr.proposal.impl.QueryMergingProposalImpl;
 import org.junit.Test;

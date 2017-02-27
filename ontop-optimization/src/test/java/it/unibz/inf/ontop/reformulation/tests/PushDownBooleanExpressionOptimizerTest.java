@@ -7,7 +7,6 @@ import it.unibz.inf.ontop.owlrefplatform.core.optimization.PushDownBooleanExpres
 import it.unibz.inf.ontop.owlrefplatform.core.optimization.PushDownBooleanExpressionOptimizerImpl;
 import it.unibz.inf.ontop.pivotalrepr.*;
 import it.unibz.inf.ontop.pivotalrepr.equivalence.IQSyntacticEquivalenceChecker;
-import it.unibz.inf.ontop.pivotalrepr.impl.*;
 import org.junit.Test;
 
 import java.util.Optional;

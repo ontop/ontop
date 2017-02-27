@@ -6,10 +6,8 @@ import it.unibz.inf.ontop.model.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.owlrefplatform.core.optimization.PullOutVariableOptimizer;
 import it.unibz.inf.ontop.pivotalrepr.*;
 import it.unibz.inf.ontop.pivotalrepr.equivalence.IQSyntacticEquivalenceChecker;
-import it.unibz.inf.ontop.pivotalrepr.impl.*;
 import org.junit.Test;
 
-import java.util.Optional;
 
 import static it.unibz.inf.ontop.model.ExpressionOperation.EQ;
 import static junit.framework.TestCase.assertTrue;

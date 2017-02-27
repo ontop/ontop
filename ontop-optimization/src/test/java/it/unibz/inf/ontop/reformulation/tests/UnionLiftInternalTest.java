@@ -3,7 +3,6 @@ package it.unibz.inf.ontop.reformulation.tests;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.AtomPredicateImpl;
@@ -11,11 +10,9 @@ import it.unibz.inf.ontop.model.impl.URITemplatePredicateImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionImpl;
 import it.unibz.inf.ontop.pivotalrepr.*;
 import it.unibz.inf.ontop.pivotalrepr.equivalence.IQSyntacticEquivalenceChecker;
-import it.unibz.inf.ontop.pivotalrepr.impl.*;
 import it.unibz.inf.ontop.pivotalrepr.proposal.InvalidQueryOptimizationProposalException;
 import it.unibz.inf.ontop.pivotalrepr.proposal.NodeCentricOptimizationResults;
 import it.unibz.inf.ontop.pivotalrepr.proposal.impl.UnionLiftProposalImpl;
-import it.unibz.inf.ontop.sql.DBMetadataTestingTools;
 import org.junit.Test;
 
 import static it.unibz.inf.ontop.OptimizationTestingTools.*;
