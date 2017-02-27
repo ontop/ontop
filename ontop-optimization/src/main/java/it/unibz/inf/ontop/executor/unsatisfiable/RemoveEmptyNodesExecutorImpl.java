@@ -18,7 +18,7 @@ import it.unibz.inf.ontop.pivotalrepr.proposal.impl.NodeTrackingResultsImpl;
 import java.util.Optional;
 
 import static it.unibz.inf.ontop.executor.substitution.AscendingPropagationTools.propagateSubstitutionUp;
-import static it.unibz.inf.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionTools.computeNullSubstitution;
+import static it.unibz.inf.ontop.model.impl.ImmutableSubstitutionTools.computeNullSubstitution;
 
 /**
  * TODO: explain

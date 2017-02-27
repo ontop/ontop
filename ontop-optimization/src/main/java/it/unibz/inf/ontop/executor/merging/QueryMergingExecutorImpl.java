@@ -7,8 +7,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.model.*;
-import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionImpl;
-import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.InjectiveVar2VarSubstitution;
+import it.unibz.inf.ontop.model.InjectiveVar2VarSubstitution;
 import it.unibz.inf.ontop.pivotalrepr.*;
 import it.unibz.inf.ontop.pivotalrepr.impl.*;
 import it.unibz.inf.ontop.pivotalrepr.proposal.InvalidQueryOptimizationProposalException;
@@ -24,6 +23,7 @@ import java.util.LinkedList;
 import java.util.Optional;
 import java.util.Queue;
 
+import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
 import static it.unibz.inf.ontop.pivotalrepr.impl.IntermediateQueryUtils.generateNotConflictingRenaming;
 
 @Singleton
@@ -303,7 +303,7 @@ public class QueryMergingExecutorImpl implements QueryMergingExecutor {
                 (ImmutableList<VariableOrGroundTerm>) targetAtom.getArguments()).stream()
                 .collect(ImmutableCollectors.toMap());
 
-        return new ImmutableSubstitutionImpl<>(newMap);
+        return DATA_FACTORY.getSubstitution(newMap);
     }
 
     /**

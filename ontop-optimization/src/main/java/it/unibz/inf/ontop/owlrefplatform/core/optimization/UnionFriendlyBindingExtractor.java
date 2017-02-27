@@ -5,7 +5,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.*;
-import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionImpl;
 import it.unibz.inf.ontop.pivotalrepr.ConstructionNode;
 import it.unibz.inf.ontop.pivotalrepr.IntermediateQuery;
 import it.unibz.inf.ontop.pivotalrepr.QueryNode;
@@ -57,7 +56,7 @@ public class UnionFriendlyBindingExtractor implements BindingExtractor {
             @Override
             public Optional<ImmutableSubstitution<ImmutableTerm>> getOptionalSubstitution() {
                 return Optional.of(substitutionMap.getMergedBindings().collect(ImmutableCollectors.toMap())).filter(m -> !m.isEmpty())
-                        .map(ImmutableSubstitutionImpl::new);
+                        .map(DATA_FACTORY::getSubstitution);
             }
 
             @Override

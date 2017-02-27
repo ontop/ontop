@@ -2,12 +2,10 @@ package it.unibz.inf.ontop.reformulation.tests;
 
 import java.sql.Types;
 import java.util.Optional;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import fj.P;
 import fj.P2;
 import it.unibz.inf.ontop.model.impl.*;
-import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionImpl;
 import it.unibz.inf.ontop.pivotalrepr.equivalence.IQSyntacticEquivalenceChecker;
 import it.unibz.inf.ontop.pivotalrepr.proposal.InvalidQueryOptimizationProposalException;
 import it.unibz.inf.ontop.pivotalrepr.proposal.NodeCentricOptimizationResults;
@@ -655,7 +653,7 @@ public class RedundantSelfJoinTest {
 
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(METADATA);
         ConstructionNode newConstructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
-                new ImmutableSubstitutionImpl<>(ImmutableMap.of(O, TWO)), Optional.empty());
+                DATA_FACTORY.getSubstitution(O, TWO));
         expectedQueryBuilder.init(projectionAtom, newConstructionNode);
 
         ExtensionalDataNode dataNode3 =  IQ_FACTORY.createExtensionalDataNode(DATA_FACTORY.getDataAtom(TABLE6_PREDICATE, M, N, TWO));
@@ -693,7 +691,7 @@ public class RedundantSelfJoinTest {
 
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(METADATA);
         ConstructionNode newConstructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
-                new ImmutableSubstitutionImpl<>(ImmutableMap.of(M, TWO)), Optional.empty());
+                DATA_FACTORY.getSubstitution(M, TWO));
         expectedQueryBuilder.init(projectionAtom, newConstructionNode);
 
         ExtensionalDataNode expectedDataNode =  IQ_FACTORY.createExtensionalDataNode(DATA_FACTORY.getDataAtom(TABLE6_PREDICATE, TWO, N, O));
@@ -803,7 +801,7 @@ public class RedundantSelfJoinTest {
 
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(METADATA);
         ConstructionNode newRootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
-                new ImmutableSubstitutionImpl<>(ImmutableMap.of(N, NULL, O, NULL)), Optional.empty());
+                DATA_FACTORY.getSubstitution(N, NULL, O, NULL));
         expectedQueryBuilder.init(projectionAtom, newRootNode);
         expectedQueryBuilder.addChild(newRootNode, leftConstructionNode);
         expectedQueryBuilder.addChild(leftConstructionNode, dataNode1);
@@ -849,7 +847,7 @@ public class RedundantSelfJoinTest {
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(METADATA);
         DistinctVariableOnlyDataAtom projectionAtom1 = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE, M, N, O);
         ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode(projectionAtom1.getVariables(),
-                new ImmutableSubstitutionImpl<>(ImmutableMap.of(O, ONE)), Optional.empty());
+                DATA_FACTORY.getSubstitution(O, ONE));
         expectedQueryBuilder.init(projectionAtom1, constructionNode1);
 
         ExtensionalDataNode dataNode5 =  IQ_FACTORY.createExtensionalDataNode(DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, M, N, ONE));
@@ -1047,8 +1045,7 @@ public class RedundantSelfJoinTest {
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(METADATA);
         ConstructionNode newConstructionNode = IQ_FACTORY.createConstructionNode(
                 projectionAtom.getVariables(),
-                new ImmutableSubstitutionImpl<>(ImmutableMap.of(O, M)),
-                Optional.empty());
+                DATA_FACTORY.getSubstitution(O, M));
         expectedQueryBuilder.init(projectionAtom, newConstructionNode);
 
         LeftJoinNode newLJNode = IQ_FACTORY.createLeftJoinNode(DATA_FACTORY.getImmutableExpression(EQ, M, N));
@@ -1254,8 +1251,7 @@ public class RedundantSelfJoinTest {
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(METADATA);
         ConstructionNode newConstructionNode = IQ_FACTORY.createConstructionNode(
                 projectionAtom.getVariables(),
-                new ImmutableSubstitutionImpl<>(ImmutableMap.of(M, O)),
-                Optional.empty());
+                DATA_FACTORY.getSubstitution(M, O));
         expectedQueryBuilder.init(projectionAtom, newConstructionNode);
 
         LeftJoinNode newLJNode = IQ_FACTORY.createLeftJoinNode(DATA_FACTORY.getImmutableExpression(EQ, N, O));

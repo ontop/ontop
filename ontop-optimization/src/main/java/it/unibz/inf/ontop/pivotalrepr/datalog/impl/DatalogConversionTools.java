@@ -3,17 +3,9 @@ package it.unibz.inf.ontop.pivotalrepr.datalog.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import fj.P;
-import fj.P2;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.pivotalrepr.DataNode;
-import it.unibz.inf.ontop.pivotalrepr.datalog.impl.DatalogProgram2QueryConverterImpl;
-import it.unibz.inf.ontop.pivotalrepr.impl.IntensionalDataNodeImpl;
-
-import it.unibz.inf.ontop.model.impl.AtomPredicateImpl;
-import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionImpl;
-import it.unibz.inf.ontop.pivotalrepr.impl.ExtensionalDataNodeImpl;
 import it.unibz.inf.ontop.pivotalrepr.mapping.TargetAtom;
 import it.unibz.inf.ontop.pivotalrepr.mapping.impl.TargetAtomImpl;
 
@@ -99,7 +91,7 @@ public class DatalogConversionTools {
         }
 
         DistinctVariableOnlyDataAtom dataAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(atomPredicate, argListBuilder.build());
-        ImmutableSubstitution<ImmutableTerm> substitution = new ImmutableSubstitutionImpl<>(allBindingBuilder.build());
+        ImmutableSubstitution<ImmutableTerm> substitution = DATA_FACTORY.getSubstitution(allBindingBuilder.build());
 
 
         return new TargetAtomImpl(dataAtom, substitution);

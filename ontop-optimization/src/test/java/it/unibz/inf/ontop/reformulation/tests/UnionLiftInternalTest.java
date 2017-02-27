@@ -2,12 +2,9 @@ package it.unibz.inf.ontop.reformulation.tests;
 
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.*;
-import it.unibz.inf.ontop.model.impl.AtomPredicateImpl;
 import it.unibz.inf.ontop.model.impl.URITemplatePredicateImpl;
-import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionImpl;
 import it.unibz.inf.ontop.pivotalrepr.*;
 import it.unibz.inf.ontop.pivotalrepr.equivalence.IQSyntacticEquivalenceChecker;
 import it.unibz.inf.ontop.pivotalrepr.proposal.InvalidQueryOptimizationProposalException;
@@ -71,29 +68,27 @@ public class UnionLiftInternalTest {
         IntermediateQueryBuilder originalBuilder = createQueryBuilder(EMPTY_METADATA);
 
         ConstructionNode rootConstructionNode = IQ_FACTORY.createConstructionNode(ROOT_CONSTRUCTION_NODE_ATOM.getVariables(),
-                new ImmutableSubstitutionImpl<>(ImmutableMap.of()), Optional.empty());
+                DATA_FACTORY.getSubstitution());
 
         InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
         LeftJoinNode leftJoinNode = IQ_FACTORY.createLeftJoinNode();
 
         ConstructionNode table4Construction = IQ_FACTORY.createConstructionNode(TABLE4_ATOM.getVariables(),
-                new ImmutableSubstitutionImpl<>(ImmutableMap.of(Y, generateURI1(E), Z, generateURI1(F))),
-                Optional.empty());
+                DATA_FACTORY.getSubstitution(Y, generateURI1(E), Z, generateURI1(F)));
         ExtensionalDataNode table4DataNode = IQ_FACTORY.createExtensionalDataNode(DATA_FACTORY.getDataAtom(TABLE_4, E, F));
 
         UnionNode unionNode = IQ_FACTORY.createUnionNode(ImmutableSet.of(X));
 
         ConstructionNode table1Construction = IQ_FACTORY.createConstructionNode(TABLE1_ATOM.getVariables(),
-                new ImmutableSubstitutionImpl<>(ImmutableMap.of(X, generateURI1(A))), Optional.empty());
+                DATA_FACTORY.getSubstitution(X, generateURI1(A)));
         ExtensionalDataNode table1DataNode = IQ_FACTORY.createExtensionalDataNode(DATA_FACTORY.getDataAtom(TABLE_1, A));
 
         ConstructionNode table2Construction = IQ_FACTORY.createConstructionNode(TABLE2_ATOM.getVariables(),
-                new ImmutableSubstitutionImpl<>(ImmutableMap.of(X, generateURI1(B))), Optional.empty());
+                DATA_FACTORY.getSubstitution(X, generateURI1(B)));
         ExtensionalDataNode table2DataNode = IQ_FACTORY.createExtensionalDataNode(DATA_FACTORY.getDataAtom(TABLE_2, B));
 
         ConstructionNode table3Construction = IQ_FACTORY.createConstructionNode(TABLE3_ATOM.getVariables(),
-                new ImmutableSubstitutionImpl<>(ImmutableMap.of(X, generateURI1(C), Y, generateURI1(D))),
-                Optional.empty());
+                DATA_FACTORY.getSubstitution(X, generateURI1(C), Y, generateURI1(D)));
         ExtensionalDataNode table3DataNode = IQ_FACTORY.createExtensionalDataNode(DATA_FACTORY.getDataAtom(TABLE_3, C, D));
 
         originalBuilder.init(ROOT_CONSTRUCTION_NODE_ATOM, rootConstructionNode);
@@ -128,8 +123,7 @@ public class UnionLiftInternalTest {
         LeftJoinNode leftJoinNode2 = IQ_FACTORY.createLeftJoinNode();
 
         ConstructionNode table3ConstructionExpected = IQ_FACTORY.createConstructionNode(TABLE3_ATOM.getVariables(),
-                new ImmutableSubstitutionImpl<>(ImmutableMap.of(X, generateURI1(C), Y, generateURI1(D))),
-                Optional.empty());
+                DATA_FACTORY.getSubstitution(X, generateURI1(C), Y, generateURI1(D)));
         ExtensionalDataNode table3DataNodeExpected = IQ_FACTORY.createExtensionalDataNode(DATA_FACTORY.getDataAtom(TABLE_3, C, D));
 
         expectedBuilder.init(ROOT_CONSTRUCTION_NODE_ATOM, rootConstructionNode);
@@ -177,7 +171,7 @@ public class UnionLiftInternalTest {
         IntermediateQueryBuilder originalBuilder = createQueryBuilder(EMPTY_METADATA);
 
         ConstructionNode rootConstructionNode = IQ_FACTORY.createConstructionNode(ROOT_CONSTRUCTION_NODE_ATOM.getVariables(),
-                new ImmutableSubstitutionImpl<>(ImmutableMap.of()), Optional.empty());
+                DATA_FACTORY.getSubstitution(), Optional.empty());
 
         UnionNode unionNode1  = IQ_FACTORY.createUnionNode(ImmutableSet.of(A, B, C));
         InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
@@ -260,7 +254,7 @@ public class UnionLiftInternalTest {
         IntermediateQueryBuilder originalBuilder = createQueryBuilder(EMPTY_METADATA);
 
         ConstructionNode rootConstructionNode = IQ_FACTORY.createConstructionNode(ROOT_CONSTRUCTION_NODE_ATOM.getVariables(),
-                new ImmutableSubstitutionImpl<>(ImmutableMap.of()), Optional.empty());
+                DATA_FACTORY.getSubstitution());
 
         UnionNode unionNode1  = IQ_FACTORY.createUnionNode(ImmutableSet.of(A, B, C));
         InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
@@ -359,7 +353,7 @@ public class UnionLiftInternalTest {
         IntermediateQueryBuilder originalBuilder = createQueryBuilder(EMPTY_METADATA);
 
         ConstructionNode rootConstructionNode = IQ_FACTORY.createConstructionNode(ROOT_CONSTRUCTION_NODE_ATOM.getVariables(),
-                new ImmutableSubstitutionImpl<>(ImmutableMap.of()), Optional.empty());
+                DATA_FACTORY.getSubstitution());
 
         UnionNode unionNode1  = IQ_FACTORY.createUnionNode(ImmutableSet.of(A, B, C));
         InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
@@ -453,7 +447,7 @@ public class UnionLiftInternalTest {
         IntermediateQueryBuilder originalBuilder = createQueryBuilder(EMPTY_METADATA);
 
         ConstructionNode rootConstructionNode = IQ_FACTORY.createConstructionNode(ROOT_CONSTRUCTION_NODE_ATOM.getVariables(),
-                new ImmutableSubstitutionImpl<>(ImmutableMap.of()), Optional.empty());
+                DATA_FACTORY.getSubstitution());
 
         UnionNode unionNode1  = IQ_FACTORY.createUnionNode(ImmutableSet.of(A, B, C));
         InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
@@ -646,7 +640,7 @@ public class UnionLiftInternalTest {
         IntermediateQueryBuilder originalBuilder = createQueryBuilder(EMPTY_METADATA);
 
         ConstructionNode rootConstructionNode = IQ_FACTORY.createConstructionNode(ROOT_CONSTRUCTION_NODE_ATOM.getVariables(),
-                new ImmutableSubstitutionImpl<>(ImmutableMap.of()), Optional.empty());
+                DATA_FACTORY.getSubstitution());
 
         UnionNode unionNode1  = IQ_FACTORY.createUnionNode(ImmutableSet.of(A, B, C));
         InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
@@ -696,7 +690,7 @@ public class UnionLiftInternalTest {
         IntermediateQueryBuilder originalBuilder = createQueryBuilder(EMPTY_METADATA);
 
         ConstructionNode rootConstructionNode = IQ_FACTORY.createConstructionNode(ROOT_CONSTRUCTION_NODE_ATOM.getVariables(),
-                new ImmutableSubstitutionImpl<>(ImmutableMap.of()), Optional.empty());
+                DATA_FACTORY.getSubstitution());
 
         InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
         InnerJoinNode joinNode1 = IQ_FACTORY.createInnerJoinNode();
@@ -750,7 +744,7 @@ public class UnionLiftInternalTest {
         IntermediateQueryBuilder originalBuilder = createQueryBuilder(EMPTY_METADATA);
 
         ConstructionNode rootConstructionNode = IQ_FACTORY.createConstructionNode(ROOT_CONSTRUCTION_NODE_ATOM.getVariables(),
-                new ImmutableSubstitutionImpl<>(ImmutableMap.of()), Optional.empty());
+                DATA_FACTORY.getSubstitution());
 
         InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
         InnerJoinNode joinNode1 = IQ_FACTORY.createInnerJoinNode();
@@ -804,7 +798,7 @@ public class UnionLiftInternalTest {
         IntermediateQueryBuilder originalBuilder = createQueryBuilder(EMPTY_METADATA);
 
         ConstructionNode rootConstructionNode = IQ_FACTORY.createConstructionNode(ROOT_CONSTRUCTION_NODE_ATOM.getVariables(),
-                new ImmutableSubstitutionImpl<>(ImmutableMap.of()), Optional.empty());
+                DATA_FACTORY.getSubstitution());
 
         InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
         LeftJoinNode leftJoinNode = IQ_FACTORY.createLeftJoinNode();

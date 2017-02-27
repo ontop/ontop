@@ -1,18 +1,13 @@
 package it.unibz.inf.ontop.reformulation.tests;
 
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.*;
-import it.unibz.inf.ontop.model.impl.AtomPredicateImpl;
 import it.unibz.inf.ontop.model.impl.URITemplatePredicateImpl;
-import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.optimization.BindingLiftOptimizer;
 import it.unibz.inf.ontop.owlrefplatform.core.optimization.FixedPointBindingLiftOptimizer;
 import it.unibz.inf.ontop.pivotalrepr.*;
 import org.junit.Ignore;
 import org.junit.Test;
-
-import java.util.Optional;
 
 import static it.unibz.inf.ontop.OptimizationTestingTools.*;
 import static it.unibz.inf.ontop.model.ExpressionOperation.CONCAT;
@@ -64,24 +59,21 @@ public class UriTemplateTest {
         initialQueryBuilder.addChild(leftJoinNode, joinNode, LEFT);
 
         ConstructionNode leftConstructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X),
-                new ImmutableSubstitutionImpl<>(ImmutableMap.of(X, generateOneVarURITemplate(URI_TEMPLATE_STR_1, A))),
-                Optional.empty());
+                DATA_FACTORY.getSubstitution(X, generateOneVarURITemplate(URI_TEMPLATE_STR_1, A)));
         initialQueryBuilder.addChild(joinNode, leftConstructionNode);
 
         ExtensionalDataNode leftDataNode = IQ_FACTORY.createExtensionalDataNode(DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, A, B));
         initialQueryBuilder.addChild(leftConstructionNode, leftDataNode);
 
         ConstructionNode middleConstructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X),
-                new ImmutableSubstitutionImpl<>(ImmutableMap.of(X, generateOneVarURITemplate(URI_TEMPLATE_STR_3, C))),
-                Optional.empty());
+                DATA_FACTORY.getSubstitution(X, generateOneVarURITemplate(URI_TEMPLATE_STR_3, C)));
         initialQueryBuilder.addChild(joinNode, middleConstructionNode);
 
         ExtensionalDataNode middleDataNode = IQ_FACTORY.createExtensionalDataNode(DATA_FACTORY.getDataAtom(TABLE2_PREDICATE, C, D));
         initialQueryBuilder.addChild(middleConstructionNode, middleDataNode);
 
         ConstructionNode rightConstructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X),
-                new ImmutableSubstitutionImpl<>(ImmutableMap.of(X, generateOneVarURITemplate(URI_TEMPLATE_STR_2, E))),
-                Optional.empty());
+                DATA_FACTORY.getSubstitution(X, generateOneVarURITemplate(URI_TEMPLATE_STR_2, E)));
         initialQueryBuilder.addChild(leftJoinNode, rightConstructionNode, RIGHT);
 
         ExtensionalDataNode rightDataNode = IQ_FACTORY.createExtensionalDataNode(DATA_FACTORY.getDataAtom(TABLE3_PREDICATE, E));

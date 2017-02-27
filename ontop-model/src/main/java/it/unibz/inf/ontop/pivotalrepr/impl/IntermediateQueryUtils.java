@@ -3,20 +3,17 @@ package it.unibz.inf.ontop.pivotalrepr.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import com.google.inject.Injector;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.model.*;
-import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.InjectiveVar2VarSubstitution;
-import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.InjectiveVar2VarSubstitutionImpl;
-import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.NeutralSubstitution;
-import it.unibz.inf.ontop.pivotalrepr.impl.tree.DefaultIntermediateQueryBuilder;
+import it.unibz.inf.ontop.model.InjectiveVar2VarSubstitution;
+import it.unibz.inf.ontop.model.impl.InjectiveVar2VarSubstitutionImpl;
+import it.unibz.inf.ontop.model.impl.NeutralSubstitution;
 import it.unibz.inf.ontop.pivotalrepr.*;
 import it.unibz.inf.ontop.utils.FunctionalTools;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.AbstractMap;
 import java.util.Collection;
-import java.util.List;
 import java.util.Optional;
 
 /**

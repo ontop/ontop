@@ -2,18 +2,15 @@ package it.unibz.inf.ontop.reformulation.tests;
 
 import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.model.*;
-import it.unibz.inf.ontop.model.impl.AtomPredicateImpl;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
-import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionImpl;
+
 import it.unibz.inf.ontop.pivotalrepr.*;
 import it.unibz.inf.ontop.pivotalrepr.equivalence.IQSyntacticEquivalenceChecker;
-import it.unibz.inf.ontop.pivotalrepr.impl.*;
 import it.unibz.inf.ontop.pivotalrepr.proposal.impl.LeftJoinOptimizationProposalImpl;
 import it.unibz.inf.ontop.sql.*;
 import org.junit.Test;
 
 import java.sql.Types;
-import java.util.Optional;
 
 import static it.unibz.inf.ontop.pivotalrepr.BinaryOrderedOperatorNode.ArgumentPosition.LEFT;
 import static it.unibz.inf.ontop.pivotalrepr.BinaryOrderedOperatorNode.ArgumentPosition.RIGHT;
@@ -255,7 +252,7 @@ public class LeftJoinOptimizationTest {
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(DB_METADATA);
         ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode(
                 projectionAtom.getVariables(),
-                new ImmutableSubstitutionImpl<>(ImmutableMap.of(N, OBDAVocabulary.NULL)));
+                DATA_FACTORY.getSubstitution(N, OBDAVocabulary.NULL));
         expectedQueryBuilder.init(projectionAtom, constructionNode1);
 
         expectedQueryBuilder.addChild(constructionNode1, dataNode1);

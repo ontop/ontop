@@ -1,18 +1,16 @@
-package it.unibz.inf.ontop.owlrefplatform.core.basicoperations;
+package it.unibz.inf.ontop.model.impl;
 
 import java.util.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.model.*;
 
-import it.unibz.inf.ontop.model.impl.AtomPredicateImpl;
-import it.unibz.inf.ontop.model.impl.ImmutabilityTools;
+import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.UnifierUtilities;
 
 import java.util.*;
 
 import static it.unibz.inf.ontop.model.impl.ImmutabilityTools.convertToMutableFunction;
 import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
-import static it.unibz.inf.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionTools.convertSubstitution;
 
 /**
  * Tools for new-gen immutable unifying substitutions.
@@ -121,7 +119,7 @@ public class ImmutableUnificationTools {
         if (mutableSubstitution == null) {
             return Optional.empty();
         }
-        return Optional.of(convertSubstitution(mutableSubstitution));
+        return Optional.of(ImmutableSubstitutionTools.convertSubstitution(mutableSubstitution));
     }
 
     public static Optional<ImmutableSubstitution<VariableOrGroundTerm>> computeAtomMGU(DataAtom atom1, DataAtom atom2) {

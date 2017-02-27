@@ -4,16 +4,11 @@ package it.unibz.inf.ontop.iq;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.*;
-import it.unibz.inf.ontop.model.impl.AtomPredicateImpl;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
-import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionImpl;
 import it.unibz.inf.ontop.pivotalrepr.*;
 import it.unibz.inf.ontop.pivotalrepr.equivalence.IQSyntacticEquivalenceChecker;
-import it.unibz.inf.ontop.pivotalrepr.impl.*;
 import it.unibz.inf.ontop.sql.DBMetadataTestingTools;
 import org.junit.Test;
-
-import java.util.Optional;
 
 import static it.unibz.inf.ontop.OntopModelTestingTools.*;
 import static junit.framework.Assert.assertFalse;
@@ -501,7 +496,7 @@ public class IQSyntacticEquivalenceCheckerTest {
 
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(
                 ImmutableSet.of(X,Y),
-                new ImmutableSubstitutionImpl<>(ImmutableMap.of(Y, OBDAVocabulary.NULL)));
+                DATA_FACTORY.getSubstitution(ImmutableMap.of(Y, OBDAVocabulary.NULL)));
         DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS2_PREDICATE, X, Y);
         IntermediateQueryBuilder queryBuilder = IQ_FACTORY.createIQBuilder(dbMetadata, EXECUTOR_REGISTRY);
         queryBuilder.init(projectionAtom, constructionNode);
@@ -512,7 +507,7 @@ public class IQSyntacticEquivalenceCheckerTest {
 
         ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode(
                 ImmutableSet.of(X,Y),
-                new ImmutableSubstitutionImpl<>(ImmutableMap.of(Y, DATA_FACTORY.getConstantLiteral("John"))));
+                DATA_FACTORY.getSubstitution(Y, DATA_FACTORY.getConstantLiteral("John")));
         DistinctVariableOnlyDataAtom projectionAtom1 = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS2_PREDICATE, X, Y);
         IntermediateQueryBuilder queryBuilder1 = query.newBuilder();
         queryBuilder1.init(projectionAtom1, constructionNode1);

@@ -9,9 +9,8 @@ import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
-import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionImpl;
-import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.ImmutableUnificationTools;
-import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.Var2VarSubstitutionImpl;
+import it.unibz.inf.ontop.model.impl.ImmutableUnificationTools;
+import it.unibz.inf.ontop.model.impl.Var2VarSubstitutionImpl;
 import it.unibz.inf.ontop.pivotalrepr.*;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.slf4j.Logger;
@@ -73,7 +72,7 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
     @AssistedInject
     private ConstructionNodeImpl(@Assisted ImmutableSet<Variable> projectedVariables) {
         this.projectedVariables = projectedVariables;
-        this.substitution = new ImmutableSubstitutionImpl<>(ImmutableMap.<Variable, ImmutableTerm>of());
+        this.substitution = DATA_FACTORY.getSubstitution();
         this.optionalModifiers = Optional.empty();
     }
 
@@ -209,7 +208,7 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
                 .filter(e -> projectedVariables.contains(e.getKey()))
                 .forEach(newSubstitutionMapBuilder::put);
 
-        ImmutableSubstitutionImpl<ImmutableTerm> newSubstitution = new ImmutableSubstitutionImpl<>(
+        ImmutableSubstitution<ImmutableTerm> newSubstitution = DATA_FACTORY.getSubstitution(
                 newSubstitutionMapBuilder.build());
 
         ConstructionNode newConstructionNode = new ConstructionNodeImpl(projectedVariables,
@@ -406,7 +405,7 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
                 .map(e -> (Map.Entry<Variable, NonVariableTerm>) e)
                 .collect(ImmutableCollectors.toMap());
 
-        return new ImmutableSubstitutionImpl<>(newMap);
+        return DATA_FACTORY.getSubstitution(newMap);
     }
 
     /**
@@ -453,7 +452,7 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
                 .filter(e -> !tauCDomain.contains(e.getKey()))
                 .collect(ImmutableCollectors.toMap());
 
-        return new ImmutableSubstitutionImpl<>(newMap);
+        return DATA_FACTORY.getSubstitution(newMap);
     }
 
     private static ImmutableSubstitution<? extends ImmutableTerm> computeDelta(
@@ -474,7 +473,7 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
                 .distinct()
                 .collect(ImmutableCollectors.toMap());
 
-        return new ImmutableSubstitutionImpl<>(newMap);
+        return DATA_FACTORY.getSubstitution(newMap);
     }
 
     /**

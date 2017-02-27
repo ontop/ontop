@@ -6,7 +6,6 @@ import com.google.inject.Inject;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.model.ImmutableTerm;
 import it.unibz.inf.ontop.model.Variable;
-import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionImpl;
 import it.unibz.inf.ontop.pivotalrepr.*;
 import it.unibz.inf.ontop.pivotalrepr.impl.*;
 import it.unibz.inf.ontop.pivotalrepr.proposal.InvalidQueryOptimizationProposalException;
@@ -16,6 +15,8 @@ import it.unibz.inf.ontop.pivotalrepr.proposal.impl.NodeCentricOptimizationResul
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Optional;
+
+import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
 
 public class ProjectionShrinkingExecutorImpl implements ProjectionShrinkingExecutor {
 
@@ -45,7 +46,7 @@ public class ProjectionShrinkingExecutorImpl implements ProjectionShrinkingExecu
                                 filter(e -> retainedVariables.contains(e.getKey()))
                                 .collect(ImmutableCollectors.toMap());
                 ConstructionNode replacingNode = iqFactory.createConstructionNode(retainedVariables,
-                        new ImmutableSubstitutionImpl<>(shrinkedMap),
+                        DATA_FACTORY.getSubstitution(shrinkedMap),
                         ((ConstructionNode) focusNode).getOptionalModifiers());
                 treeComponent.replaceNode(focusNode, replacingNode);
                 return new NodeCentricOptimizationResultsImpl<>(query, replacingNode);

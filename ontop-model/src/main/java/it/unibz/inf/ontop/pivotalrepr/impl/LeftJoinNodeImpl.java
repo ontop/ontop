@@ -6,7 +6,6 @@ import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
-import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.unfolding.ExpressionEvaluator;
 import it.unibz.inf.ontop.pivotalrepr.*;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -96,7 +95,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
                 .filter(e -> !leftVariables.contains(e.getKey()))
                 .map(e -> (Map.Entry<Variable, ImmutableTerm>)e)
                 .collect(ImmutableCollectors.toMap());
-        ImmutableSubstitution<ImmutableTerm> newSubstitution = new ImmutableSubstitutionImpl<>(newSubstitutionMap);
+        ImmutableSubstitution<ImmutableTerm> newSubstitution = DATA_FACTORY.getSubstitution(newSubstitutionMap);
 
         /**
          * New equalities (which could not be propagated)
@@ -215,7 +214,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
         Stream<Map.Entry<Variable, ImmutableTerm>> alreadyExistingEntries = substitution.getImmutableMap().entrySet().stream()
                 .map(e -> (Map.Entry<Variable, ImmutableTerm>)e);
 
-        return new ImmutableSubstitutionImpl<>(
+        return DATA_FACTORY.getSubstitution(
                 Stream.concat(nullEntries, alreadyExistingEntries)
                         .collect(ImmutableCollectors.toMap()));
 
@@ -241,7 +240,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
                 .filter(e -> !newlyNullVariables.contains(e.getKey()))
                 .map(e -> (Map.Entry<Variable, ImmutableTerm>)e);
 
-        return new ImmutableSubstitutionImpl<>(
+        return DATA_FACTORY.getSubstitution(
                 Stream.concat(nullEntries, otherEntries)
                         .collect(ImmutableCollectors.toMap()));
     }

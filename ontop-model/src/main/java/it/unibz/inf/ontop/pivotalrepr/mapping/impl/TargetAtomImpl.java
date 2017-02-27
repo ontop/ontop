@@ -3,7 +3,7 @@ package it.unibz.inf.ontop.pivotalrepr.mapping.impl;
 import it.unibz.inf.ontop.model.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.ImmutableSubstitution;
 import it.unibz.inf.ontop.model.ImmutableTerm;
-import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.InjectiveVar2VarSubstitution;
+import it.unibz.inf.ontop.model.InjectiveVar2VarSubstitution;
 import it.unibz.inf.ontop.pivotalrepr.mapping.TargetAtom;
 
 public class TargetAtomImpl implements TargetAtom {

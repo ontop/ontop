@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.owlrefplatform.core.basicoperations;
+package it.unibz.inf.ontop.model.impl;
 
 import com.google.common.base.Joiner;
 

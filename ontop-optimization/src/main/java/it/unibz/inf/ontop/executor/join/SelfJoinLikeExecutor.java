@@ -1,14 +1,10 @@
 package it.unibz.inf.ontop.executor.join;
 
 import com.google.common.collect.*;
-import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.model.*;
-import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionImpl;
-import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.ImmutableUnificationTools;
+import it.unibz.inf.ontop.model.impl.ImmutableUnificationTools;
 import it.unibz.inf.ontop.pivotalrepr.*;
 import it.unibz.inf.ontop.pivotalrepr.BinaryOrderedOperatorNode.ArgumentPosition;
-import it.unibz.inf.ontop.pivotalrepr.impl.ExtensionalDataNodeImpl;
-import it.unibz.inf.ontop.pivotalrepr.impl.FilterNodeImpl;
 import it.unibz.inf.ontop.pivotalrepr.impl.QueryTreeComponent;
 import it.unibz.inf.ontop.pivotalrepr.proposal.NodeCentricOptimizationResults;
 import it.unibz.inf.ontop.pivotalrepr.proposal.SubstitutionPropagationProposal;
@@ -19,6 +15,7 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import java.util.*;
 import java.util.stream.Stream;
 
+import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
 import static it.unibz.inf.ontop.pivotalrepr.BinaryOrderedOperatorNode.ArgumentPosition.LEFT;
 
 public class SelfJoinLikeExecutor {
@@ -311,8 +308,7 @@ public class SelfJoinLikeExecutor {
     protected static ImmutableSubstitution<VariableOrGroundTerm> unifyRedundantNodes(
             Collection<DataNode> redundantNodes) throws AtomUnificationException {
         // Non-final
-        ImmutableSubstitution<VariableOrGroundTerm> accumulatedSubstitution = new ImmutableSubstitutionImpl<>(
-                ImmutableMap.<Variable, VariableOrGroundTerm>of());
+        ImmutableSubstitution<VariableOrGroundTerm> accumulatedSubstitution = DATA_FACTORY.getSubstitution();
 
         /**
          * Should normally not be called in this case.

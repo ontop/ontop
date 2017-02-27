@@ -1,17 +1,12 @@
 package it.unibz.inf.ontop.reformulation.tests;
 
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.*;
-import it.unibz.inf.ontop.model.impl.AtomPredicateImpl;
-import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.optimization.ProjectionShrinkingOptimizer;
 import it.unibz.inf.ontop.pivotalrepr.*;
 import it.unibz.inf.ontop.pivotalrepr.equivalence.IQSyntacticEquivalenceChecker;
 import it.unibz.inf.ontop.pivotalrepr.impl.*;
 import org.junit.Test;
-
-import java.util.Optional;
 
 import static it.unibz.inf.ontop.model.Predicate.COL_TYPE.INTEGER;
 import static junit.framework.TestCase.assertTrue;
@@ -308,7 +303,7 @@ public class ProjectionShrinkingOptimizerTest {
 
         ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode(projectionAtom1.getVariables());
         ConstructionNode constructionNode2 = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X,Y),
-                new ImmutableSubstitutionImpl<>(ImmutableMap.of(X,generateInt(A),Y,generateInt(B))));
+                DATA_FACTORY.getSubstitution(X,generateInt(A),Y,generateInt(B)));
         ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, A, B));
 
         queryBuilder1.init(projectionAtom1, constructionNode1);
@@ -327,7 +322,7 @@ public class ProjectionShrinkingOptimizerTest {
         IntermediateQueryBuilder queryBuilder2 = createQueryBuilder(EMPTY_METADATA);
 
         ConstructionNode constructionNode3 = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X),
-                new ImmutableSubstitutionImpl<>(ImmutableMap.of(X,generateInt(A))));
+                DATA_FACTORY.getSubstitution(X,generateInt(A)));
         queryBuilder2.init(projectionAtom1, constructionNode1);
         queryBuilder2.addChild(constructionNode1, constructionNode3);
         queryBuilder2.addChild(constructionNode3, dataNode1);
@@ -347,7 +342,7 @@ public class ProjectionShrinkingOptimizerTest {
         ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode(projectionAtom1.getVariables());
         InnerJoinNode innerJoinNode1 = IQ_FACTORY.createInnerJoinNode();
         ConstructionNode constructionNode2 = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X,Y),
-                new ImmutableSubstitutionImpl<>(ImmutableMap.of(X,generateInt(A),Y,generateInt(B))), Optional.empty());
+                DATA_FACTORY.getSubstitution(X,generateInt(A),Y,generateInt(B)));
         ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, Y, Z));
         ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, A, B));
 
@@ -382,7 +377,7 @@ public class ProjectionShrinkingOptimizerTest {
         ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode(projectionAtom1.getVariables());
         InnerJoinNode innerJoinNode1 = IQ_FACTORY.createInnerJoinNode();
         ConstructionNode constructionNode2 = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X,Y),
-                new ImmutableSubstitutionImpl<>(ImmutableMap.of(X,generateInt(A),Y,generateInt(B))), Optional.empty());
+                DATA_FACTORY.getSubstitution(X,generateInt(A),Y,generateInt(B)));
         ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, X, Z));
         ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, A, B));
 
@@ -404,7 +399,7 @@ public class ProjectionShrinkingOptimizerTest {
         IntermediateQueryBuilder queryBuilder2 = createQueryBuilder(EMPTY_METADATA);
 
         ConstructionNode constructionNode3 = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X),
-                new ImmutableSubstitutionImpl<>(ImmutableMap.of(X,generateInt(A))), Optional.empty());
+                DATA_FACTORY.getSubstitution(X,generateInt(A)));
 
 
         queryBuilder2.init(projectionAtom1, constructionNode1);

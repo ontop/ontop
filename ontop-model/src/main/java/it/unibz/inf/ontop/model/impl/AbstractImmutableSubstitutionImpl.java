@@ -1,10 +1,11 @@
-package it.unibz.inf.ontop.owlrefplatform.core.basicoperations;
+package it.unibz.inf.ontop.model.impl;
 
 import java.util.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.*;
+import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.LocallyImmutableSubstitutionImpl;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.*;

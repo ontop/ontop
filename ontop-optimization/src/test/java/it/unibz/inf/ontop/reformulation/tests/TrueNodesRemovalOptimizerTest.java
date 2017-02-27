@@ -1,10 +1,7 @@
 package it.unibz.inf.ontop.reformulation.tests;
 
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.*;
-import it.unibz.inf.ontop.model.impl.AtomPredicateImpl;
-import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.optimization.IntermediateQueryOptimizer;
 import it.unibz.inf.ontop.owlrefplatform.core.optimization.TrueNodesRemovalOptimizer;
 import it.unibz.inf.ontop.pivotalrepr.*;
@@ -15,7 +12,6 @@ import static it.unibz.inf.ontop.model.ExpressionOperation.NEQ;
 import static it.unibz.inf.ontop.model.Predicate.COL_TYPE.INTEGER;
 import static it.unibz.inf.ontop.pivotalrepr.BinaryOrderedOperatorNode.ArgumentPosition.LEFT;
 import static it.unibz.inf.ontop.pivotalrepr.BinaryOrderedOperatorNode.ArgumentPosition.RIGHT;
-import static java.util.Optional.empty;
 import static org.junit.Assert.assertTrue;
 
 import static it.unibz.inf.ontop.OptimizationTestingTools.*;
@@ -53,7 +49,7 @@ public class TrueNodesRemovalOptimizerTest {
         IntermediateQueryBuilder queryBuilder = createQueryBuilder(EMPTY_METADATA);
         DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_1_PREDICATE, X);
         ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
-                new ImmutableSubstitutionImpl<>(ImmutableMap.of(X, generateInt(A))), empty());
+                DATA_FACTORY.getSubstitution(X, generateInt(A)));
         queryBuilder.init(projectionAtom, rootNode);
 
         InnerJoinNode jn = IQ_FACTORY.createInnerJoinNode();
@@ -90,7 +86,7 @@ public class TrueNodesRemovalOptimizerTest {
         IntermediateQueryBuilder queryBuilder = createQueryBuilder(EMPTY_METADATA);
         DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_1_PREDICATE, X);
         ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
-                new ImmutableSubstitutionImpl<>(ImmutableMap.of(X, generateInt(A))), empty());
+                DATA_FACTORY.getSubstitution(X, generateInt(A)));
         queryBuilder.init(projectionAtom, rootNode);
 
         ImmutableExpression expression = DATA_FACTORY.getImmutableExpression(NEQ, A, B);
@@ -130,7 +126,7 @@ public class TrueNodesRemovalOptimizerTest {
         IntermediateQueryBuilder queryBuilder = createQueryBuilder(EMPTY_METADATA);
         DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_2_PREDICATE, X, Y);
         ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
-                new ImmutableSubstitutionImpl<>(ImmutableMap.of(X, generateInt(A), Y, generateInt(B))), empty());
+                DATA_FACTORY.getSubstitution(X, generateInt(A), Y, generateInt(B)));
         queryBuilder.init(projectionAtom, rootNode);
 
         InnerJoinNode jn = IQ_FACTORY.createInnerJoinNode();
@@ -168,7 +164,7 @@ public class TrueNodesRemovalOptimizerTest {
         IntermediateQueryBuilder queryBuilder = createQueryBuilder(EMPTY_METADATA);
         DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_1_PREDICATE, X);
         ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
-                new ImmutableSubstitutionImpl<>(ImmutableMap.of(X, generateInt(A))), empty());
+                DATA_FACTORY.getSubstitution(X, generateInt(A)));
         queryBuilder.init(projectionAtom, rootNode);
 
         LeftJoinNode ljn = IQ_FACTORY.createLeftJoinNode();
@@ -204,7 +200,7 @@ public class TrueNodesRemovalOptimizerTest {
         IntermediateQueryBuilder queryBuilder = createQueryBuilder(EMPTY_METADATA);
         DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_1_PREDICATE, X);
         ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
-                new ImmutableSubstitutionImpl<>(ImmutableMap.of(X, generateInt(A))), empty());
+                DATA_FACTORY.getSubstitution(X, generateInt(A)));
         queryBuilder.init(projectionAtom, rootNode);
 
         UnionNode un = IQ_FACTORY.createUnionNode(ImmutableSet.of());
@@ -245,7 +241,7 @@ public class TrueNodesRemovalOptimizerTest {
         IntermediateQueryBuilder queryBuilder = createQueryBuilder(EMPTY_METADATA);
         DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_1_PREDICATE, X);
         ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
-                new ImmutableSubstitutionImpl<>(ImmutableMap.of(X, generateInt(A))), empty());
+                DATA_FACTORY.getSubstitution(X, generateInt(A)));
         queryBuilder.init(projectionAtom, rootNode);
         InnerJoinNode jn = IQ_FACTORY.createInnerJoinNode();
         queryBuilder.addChild(rootNode, jn);
@@ -283,7 +279,7 @@ public class TrueNodesRemovalOptimizerTest {
         IntermediateQueryBuilder queryBuilder = createQueryBuilder(EMPTY_METADATA);
         DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_1_PREDICATE, X);
         ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
-                new ImmutableSubstitutionImpl<>(ImmutableMap.of(X, generateInt(A))), empty());
+                DATA_FACTORY.getSubstitution(X, generateInt(A)));
         queryBuilder.init(projectionAtom, rootNode);
 
         LeftJoinNode ljn = IQ_FACTORY.createLeftJoinNode();
@@ -320,7 +316,7 @@ public class TrueNodesRemovalOptimizerTest {
         IntermediateQueryBuilder queryBuilder = createQueryBuilder(EMPTY_METADATA);
         DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_1_PREDICATE, X);
         ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
-                new ImmutableSubstitutionImpl<>(ImmutableMap.of(X, generateInt(A))), empty());
+                DATA_FACTORY.getSubstitution(X, generateInt(A)));
         queryBuilder.init(projectionAtom, rootNode);
 
         UnionNode un = IQ_FACTORY.createUnionNode(ImmutableSet.of());
@@ -357,7 +353,7 @@ public class TrueNodesRemovalOptimizerTest {
         IntermediateQueryBuilder queryBuilder = createQueryBuilder(EMPTY_METADATA);
         DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_1_PREDICATE, X);
         ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
-                new ImmutableSubstitutionImpl<>(ImmutableMap.of(X, generateInt(A))), empty());
+                DATA_FACTORY.getSubstitution(X, generateInt(A)));
         queryBuilder.init(projectionAtom, rootNode);
 
         InnerJoinNode jn1 = IQ_FACTORY.createInnerJoinNode();
@@ -396,7 +392,7 @@ public class TrueNodesRemovalOptimizerTest {
         IntermediateQueryBuilder queryBuilder = createQueryBuilder(EMPTY_METADATA);
         DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_1_PREDICATE, X);
         ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
-                new ImmutableSubstitutionImpl<>(ImmutableMap.of(X, generateInt(A))), empty());
+                DATA_FACTORY.getSubstitution(X, generateInt(A)));
         queryBuilder.init(projectionAtom, rootNode);
 
         InnerJoinNode jn = IQ_FACTORY.createInnerJoinNode();
@@ -435,7 +431,7 @@ public class TrueNodesRemovalOptimizerTest {
         IntermediateQueryBuilder queryBuilder = createQueryBuilder(EMPTY_METADATA);
         DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_1_PREDICATE, X);
         ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
-                new ImmutableSubstitutionImpl<>(ImmutableMap.of(X, generateInt(A))), empty());
+                DATA_FACTORY.getSubstitution(X, generateInt(A)));
         queryBuilder.init(projectionAtom, rootNode);
 
         InnerJoinNode jn = IQ_FACTORY.createInnerJoinNode();

@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Optional;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.model.Predicate.COL_TYPE;
 
 public interface OBDADataFactory extends Serializable {
@@ -316,4 +317,13 @@ public interface OBDADataFactory extends Serializable {
 
 	AtomPredicate getAtomPredicate(String name, int arity);
 	AtomPredicate getAtomPredicate(Predicate datalogPredicate);
+
+	<T extends ImmutableTerm> ImmutableSubstitution<T> getSubstitution(ImmutableMap<Variable, T> newSubstitutionMap);
+	<T extends ImmutableTerm> ImmutableSubstitution<T> getSubstitution(Variable k1, T v1);
+	<T extends ImmutableTerm> ImmutableSubstitution<T> getSubstitution(Variable k1, T v1, Variable k2, T v2);
+	<T extends ImmutableTerm> ImmutableSubstitution<T> getSubstitution(Variable k1, T v1, Variable k2, T v2,
+																	   Variable k3, T v3);
+	<T extends ImmutableTerm> ImmutableSubstitution<T> getSubstitution(Variable k1, T v1, Variable k2, T v2,
+																	   Variable k3, T v3, Variable k4, T v4);
+	<T extends ImmutableTerm> ImmutableSubstitution<T> getSubstitution();
 }

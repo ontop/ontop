@@ -5,7 +5,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.model.*;
-import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionImpl;
 import it.unibz.inf.ontop.pivotalrepr.ConstructionNode;
 import it.unibz.inf.ontop.pivotalrepr.ImmutableQueryModifiers;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -13,7 +12,8 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import java.util.*;
 import java.util.stream.Stream;
 
-import static it.unibz.inf.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionTools.computeUnidirectionalSubstitution;
+import static it.unibz.inf.ontop.model.impl.ImmutableSubstitutionTools.computeUnidirectionalSubstitution;
+import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
 
 /**
  * TODO: explain
@@ -93,7 +93,7 @@ public class ConstructionNodeTools {
         ImmutableSubstitution<ImmutableTerm> newSubstitution = projectedVariables.containsAll(
                 childConstructionNode.getVariables())
                 ? composition
-                : new ImmutableSubstitutionImpl<>(
+                : DATA_FACTORY.getSubstitution(
                 composition.getImmutableMap().entrySet().stream()
                         .filter(e -> !projectedVariables.contains(e.getKey()))
                         .collect(ImmutableCollectors.toMap()));
@@ -136,7 +136,7 @@ public class ConstructionNodeTools {
                 .map(e -> (Map.Entry<Variable, ImmutableTerm>) e)
                 .collect(ImmutableCollectors.toMap());
 
-        return new ImmutableSubstitutionImpl<>(newSubstitutionMap);
+        return DATA_FACTORY.getSubstitution(newSubstitutionMap);
     }
 
 
@@ -181,7 +181,7 @@ public class ConstructionNodeTools {
             substitutionMapBuilder.put(variable, term);
         }
 
-        return iqFactory.createConstructionNode(projectedVariables, new ImmutableSubstitutionImpl<>(substitutionMapBuilder.build()),
+        return iqFactory.createConstructionNode(projectedVariables, DATA_FACTORY.getSubstitution(substitutionMapBuilder.build()),
                 formerConstructionNode.getOptionalModifiers());
 
     }
@@ -233,7 +233,7 @@ public class ConstructionNodeTools {
 
         mapBuilder.putAll(newBindings.getImmutableMap());
 
-        return new ImmutableSubstitutionImpl<>(mapBuilder.build());
+        return DATA_FACTORY.getSubstitution(mapBuilder.build());
 
     }
 
@@ -332,9 +332,9 @@ public class ConstructionNodeTools {
             }
         }
 
-        ImmutableSubstitution<VariableOrGroundTerm> substitutionToPropagate = new ImmutableSubstitutionImpl<>(
+        ImmutableSubstitution<VariableOrGroundTerm> substitutionToPropagate = DATA_FACTORY.getSubstitution(
                 ImmutableMap.copyOf(substitutionMapToPropagate));
-        ImmutableSubstitution<VariableOrGroundTerm> newBindings = new ImmutableSubstitutionImpl<>(newBindingsMapBuilder.build());
+        ImmutableSubstitution<VariableOrGroundTerm> newBindings = DATA_FACTORY.getSubstitution(newBindingsMapBuilder.build());
 
         return new NewSubstitutions(substitutionToPropagate, newBindings);
     }
@@ -409,7 +409,7 @@ public class ConstructionNodeTools {
                 mapBuilder.put(entry.getKey(), (VariableOrGroundTerm) rightTerm);
             }
         }
-        return new ImmutableSubstitutionImpl<>(mapBuilder.build());
+        return DATA_FACTORY.getSubstitution(mapBuilder.build());
     }
 
 }

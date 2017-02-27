@@ -9,7 +9,7 @@ import it.unibz.inf.ontop.mapping.Mapping;
 import it.unibz.inf.ontop.mapping.MappingMetadata;
 import it.unibz.inf.ontop.model.AtomPredicate;
 import it.unibz.inf.ontop.model.Variable;
-import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.InjectiveVar2VarSubstitutionImpl;
+import it.unibz.inf.ontop.model.impl.InjectiveVar2VarSubstitutionImpl;
 import it.unibz.inf.ontop.pivotalrepr.IntermediateQuery;
 import it.unibz.inf.ontop.pivotalrepr.impl.QueryRenamer;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
