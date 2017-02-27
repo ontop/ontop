@@ -21,10 +21,10 @@ import static junit.framework.TestCase.assertTrue;
 
 public class IQSyntacticEquivalenceCheckerTest {
 
-    private final static AtomPredicate TABLE2_PREDICATE = new AtomPredicateImpl("table1", 2);
-    private final static AtomPredicate TABLE3_PREDICATE = new AtomPredicateImpl("table1", 1);
-    private final static AtomPredicate ANS2_PREDICATE = new AtomPredicateImpl("ans2", 2);
-    private final static AtomPredicate ANS1_VAR1_PREDICATE = new AtomPredicateImpl("ans1", 1);
+    private final static AtomPredicate TABLE2_PREDICATE = DATA_FACTORY.getAtomPredicate("table1", 2);
+    private final static AtomPredicate TABLE3_PREDICATE = DATA_FACTORY.getAtomPredicate("table1", 1);
+    private final static AtomPredicate ANS2_PREDICATE = DATA_FACTORY.getAtomPredicate("ans2", 2);
+    private final static AtomPredicate ANS1_VAR1_PREDICATE = DATA_FACTORY.getAtomPredicate("ans1", 1);
     private final static Variable X = DATA_FACTORY.getVariable("x");
     private final static Variable Y = DATA_FACTORY.getVariable("y");
     private final static Variable Z = DATA_FACTORY.getVariable("z");

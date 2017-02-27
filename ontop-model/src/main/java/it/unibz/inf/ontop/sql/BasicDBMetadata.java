@@ -12,6 +12,8 @@ import javax.annotation.Nullable;
 import java.util.*;
 import java.util.stream.Stream;
 
+import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
+
 public class BasicDBMetadata extends AbstractDBMetadata implements DBMetadata {
 
     private final Map<RelationID, DatabaseRelationDefinition> tables;
@@ -199,7 +201,7 @@ public class BasicDBMetadata extends AbstractDBMetadata implements DBMetadata {
             return predicateCache.get(originalPredicate);
         }
         else {
-            AtomPredicate atomPredicate = new AtomPredicateImpl(originalPredicate);
+            AtomPredicate atomPredicate = DATA_FACTORY.getAtomPredicate(originalPredicate);
             // Cache it
             predicateCache.put(originalPredicate, atomPredicate);
             return atomPredicate;

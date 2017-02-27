@@ -569,6 +569,16 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 				: new TermTypeImpl(languageTagTerm);
 	}
 
+	@Override
+	public AtomPredicate getAtomPredicate(String name, int arity) {
+		return new AtomPredicateImpl(name, arity);
+	}
+
+	@Override
+	public AtomPredicate getAtomPredicate(Predicate datalogPredicate) {
+		return new AtomPredicateImpl(datalogPredicate);
+	}
+
 	private LanguageTag getLanguageTag(String languageTagString) {
 		return new LanguageTagImpl(languageTagString);
 	}

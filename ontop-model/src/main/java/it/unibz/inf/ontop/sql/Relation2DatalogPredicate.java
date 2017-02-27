@@ -29,8 +29,7 @@ public class Relation2DatalogPredicate {
 	}
 
 	public static AtomPredicate createAtomPredicateFromRelation(RelationDefinition r) {
-		// TODO: use a factory
-		return new AtomPredicateImpl(extractPredicateName(r), r.getAttributes().size());
+		return DATA_FACTORY.getAtomPredicate(extractPredicateName(r), r.getAttributes().size());
 	}
 	
 	public static Function getAtom(RelationDefinition r, List<Term> terms) {

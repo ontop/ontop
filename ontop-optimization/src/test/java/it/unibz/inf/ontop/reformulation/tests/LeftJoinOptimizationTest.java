@@ -32,9 +32,9 @@ public class LeftJoinOptimizationTest {
     private final static AtomPredicate TABLE2_PREDICATE;
     private final static AtomPredicate TABLE2a_PREDICATE;
     private final static AtomPredicate TABLE3_PREDICATE;
-    private final static AtomPredicate ANS1_ARITY_2_PREDICATE = new AtomPredicateImpl("ans1", 2);
-    private final static AtomPredicate ANS1_ARITY_3_PREDICATE = new AtomPredicateImpl("ans1", 3);
-    private final static AtomPredicate ANS1_ARITY_4_PREDICATE = new AtomPredicateImpl("ans1", 4);
+    private final static AtomPredicate ANS1_ARITY_2_PREDICATE = DATA_FACTORY.getAtomPredicate("ans1", 2);
+    private final static AtomPredicate ANS1_ARITY_3_PREDICATE = DATA_FACTORY.getAtomPredicate("ans1", 3);
+    private final static AtomPredicate ANS1_ARITY_4_PREDICATE = DATA_FACTORY.getAtomPredicate("ans1", 4);
     private final static Variable X = DATA_FACTORY.getVariable("X");
     private final static Variable Y = DATA_FACTORY.getVariable("Y");
     private final static Variable Z = DATA_FACTORY.getVariable("z");

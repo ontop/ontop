@@ -22,13 +22,13 @@ import static it.unibz.inf.ontop.OptimizationTestingTools.*;
 
 public class TrueNodesRemovalOptimizerTest {
 
-    private final AtomPredicate TABLE1_ARITY_1_PREDICATE = new AtomPredicateImpl("table1", 1);
-    private final AtomPredicate TABLE2_ARITY_1_PREDICATE = new AtomPredicateImpl("table2", 1);
-    private final AtomPredicate TABLE3_ARITY_2_PREDICATE = new AtomPredicateImpl("table3", 2);
+    private final AtomPredicate TABLE1_ARITY_1_PREDICATE = DATA_FACTORY.getAtomPredicate("table1", 1);
+    private final AtomPredicate TABLE2_ARITY_1_PREDICATE = DATA_FACTORY.getAtomPredicate("table2", 1);
+    private final AtomPredicate TABLE3_ARITY_2_PREDICATE = DATA_FACTORY.getAtomPredicate("table3", 2);
 
-    private final AtomPredicate ANS1_ARITY_0_PREDICATE = new AtomPredicateImpl("ans1", 0);
-    private final AtomPredicate ANS1_ARITY_1_PREDICATE = new AtomPredicateImpl("ans1", 1);
-    private final AtomPredicate ANS1_ARITY_2_PREDICATE = new AtomPredicateImpl("ans1", 2);
+    private final AtomPredicate ANS1_ARITY_0_PREDICATE = DATA_FACTORY.getAtomPredicate("ans1", 0);
+    private final AtomPredicate ANS1_ARITY_1_PREDICATE = DATA_FACTORY.getAtomPredicate("ans1", 1);
+    private final AtomPredicate ANS1_ARITY_2_PREDICATE = DATA_FACTORY.getAtomPredicate("ans1", 2);
 
     private final Variable A = DATA_FACTORY.getVariable("a");
     private final Variable B = DATA_FACTORY.getVariable("b");

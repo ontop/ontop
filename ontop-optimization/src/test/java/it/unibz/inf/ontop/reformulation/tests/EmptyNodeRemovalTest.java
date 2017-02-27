@@ -25,7 +25,7 @@ import static org.junit.Assert.assertTrue;
 
 public class EmptyNodeRemovalTest {
 
-    private static AtomPredicate ANS1_PREDICATE = new AtomPredicateImpl("ans1", 2);
+    private static AtomPredicate ANS1_PREDICATE = DATA_FACTORY.getAtomPredicate("ans1", 2);
     private static Variable X = DATA_FACTORY.getVariable("x");
     private static Variable Y = DATA_FACTORY.getVariable("y");
     private static Variable A = DATA_FACTORY.getVariable("a");
@@ -36,8 +36,8 @@ public class EmptyNodeRemovalTest {
             ANS1_PREDICATE, ImmutableList.of(X, Y));
     private static URITemplatePredicate URI_PREDICATE =  new URITemplatePredicateImpl(2);
     private static Constant URI_TEMPLATE_STR_1 =  DATA_FACTORY.getConstantLiteral("http://example.org/ds1/{}");
-    private static AtomPredicate TABLE_1 = new AtomPredicateImpl("table1", 2);
-    private static AtomPredicate TABLE_2 = new AtomPredicateImpl("table2", 1);
+    private static AtomPredicate TABLE_1 = DATA_FACTORY.getAtomPredicate("table1", 2);
+    private static AtomPredicate TABLE_2 = DATA_FACTORY.getAtomPredicate("table2", 1);
     private static ExtensionalDataNode DATA_NODE_1 = IQ_FACTORY.createExtensionalDataNode(DATA_FACTORY.getDataAtom(TABLE_1, A, B));
     private static ExtensionalDataNode DATA_NODE_2 = IQ_FACTORY.createExtensionalDataNode(DATA_FACTORY.getDataAtom(TABLE_2, A));
     private static final EmptyNode EMPTY_NODE_1 = IQ_FACTORY.createEmptyNode(ImmutableSet.of(A, C));

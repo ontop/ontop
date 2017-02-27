@@ -20,15 +20,15 @@ import static it.unibz.inf.ontop.OptimizationTestingTools.*;
 
 public class PushDownBooleanExpressionOptimizerTest {
 
-    private final static AtomPredicate TABLE1_PREDICATE = new AtomPredicateImpl("table1", 2);
-    private final static AtomPredicate TABLE2_PREDICATE = new AtomPredicateImpl("table2", 2);
-    private final static AtomPredicate TABLE3_PREDICATE = new AtomPredicateImpl("table3", 2);
-    private final static AtomPredicate TABLE4_PREDICATE = new AtomPredicateImpl("table2", 3);
-    private final static AtomPredicate TABLE5_PREDICATE = new AtomPredicateImpl("table3", 2);
-    private final static AtomPredicate ANS1_PREDICATE1 = new AtomPredicateImpl("ans1", 4);
-    private final static AtomPredicate ANS1_PREDICATE2 = new AtomPredicateImpl("ans1", 3);
-    private final static AtomPredicate ANS1_PREDICATE3 = new AtomPredicateImpl("ans1", 5);
-    private final static AtomPredicate ANS2_PREDICATE1 = new AtomPredicateImpl("ans2", 2);
+    private final static AtomPredicate TABLE1_PREDICATE = DATA_FACTORY.getAtomPredicate("table1", 2);
+    private final static AtomPredicate TABLE2_PREDICATE = DATA_FACTORY.getAtomPredicate("table2", 2);
+    private final static AtomPredicate TABLE3_PREDICATE = DATA_FACTORY.getAtomPredicate("table3", 2);
+    private final static AtomPredicate TABLE4_PREDICATE = DATA_FACTORY.getAtomPredicate("table2", 3);
+    private final static AtomPredicate TABLE5_PREDICATE = DATA_FACTORY.getAtomPredicate("table3", 2);
+    private final static AtomPredicate ANS1_PREDICATE1 = DATA_FACTORY.getAtomPredicate("ans1", 4);
+    private final static AtomPredicate ANS1_PREDICATE2 = DATA_FACTORY.getAtomPredicate("ans1", 3);
+    private final static AtomPredicate ANS1_PREDICATE3 = DATA_FACTORY.getAtomPredicate("ans1", 5);
+    private final static AtomPredicate ANS2_PREDICATE1 = DATA_FACTORY.getAtomPredicate("ans2", 2);
     private final static Variable X = DATA_FACTORY.getVariable("X");
     private final static Variable Y = DATA_FACTORY.getVariable("Y");
     private final static Variable Z = DATA_FACTORY.getVariable("Z");

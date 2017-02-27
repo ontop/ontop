@@ -5,7 +5,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.*;
-import it.unibz.inf.ontop.model.impl.AtomPredicateImpl;
 import it.unibz.inf.ontop.pivotalrepr.ConstructionNode;
 import it.unibz.inf.ontop.pivotalrepr.ExtensionalDataNode;
 import it.unibz.inf.ontop.pivotalrepr.IntermediateQuery;
@@ -24,10 +23,10 @@ import static org.junit.Assert.fail;
 
 public class MappingTest {
 
-    private static AtomPredicate P1_PREDICATE = new AtomPredicateImpl("p1", 2);
-    private static AtomPredicate P3_PREDICATE = new AtomPredicateImpl("p3", 1);
-    private static AtomPredicate P4_PREDICATE = new AtomPredicateImpl("p4", 1);
-    private static AtomPredicate P5_PREDICATE = new AtomPredicateImpl("p5", 1);
+    private static AtomPredicate P1_PREDICATE = DATA_FACTORY.getAtomPredicate("p1", 2);
+    private static AtomPredicate P3_PREDICATE = DATA_FACTORY.getAtomPredicate("p3", 1);
+    private static AtomPredicate P4_PREDICATE = DATA_FACTORY.getAtomPredicate("p4", 1);
+    private static AtomPredicate P5_PREDICATE = DATA_FACTORY.getAtomPredicate("p5", 1);
 
     private static Variable X = DATA_FACTORY.getVariable("x");
     private static Variable S = DATA_FACTORY.getVariable("s");

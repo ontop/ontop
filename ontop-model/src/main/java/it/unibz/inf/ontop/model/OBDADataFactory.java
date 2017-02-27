@@ -314,5 +314,6 @@ public interface OBDADataFactory extends Serializable {
 	TermType getTermType(String languageTagString);
 	TermType getTermType(Term languageTagTerm);
 
-
+	AtomPredicate getAtomPredicate(String name, int arity);
+	AtomPredicate getAtomPredicate(Predicate datalogPredicate);
 }

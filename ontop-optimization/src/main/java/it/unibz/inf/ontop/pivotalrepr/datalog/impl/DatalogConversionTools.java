@@ -52,7 +52,7 @@ public class DatalogConversionTools {
         Predicate datalogAtomPredicate = datalogDataAtom.getFunctionSymbol();
         AtomPredicate atomPredicate = (datalogAtomPredicate instanceof AtomPredicate)
                 ? (AtomPredicate) datalogAtomPredicate
-                : new AtomPredicateImpl(datalogAtomPredicate);
+                : DATA_FACTORY.getAtomPredicate(datalogAtomPredicate);
 
         ImmutableList.Builder<Variable> argListBuilder = ImmutableList.builder();
         ImmutableMap.Builder<Variable, ImmutableTerm> allBindingBuilder = ImmutableMap.builder();

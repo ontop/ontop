@@ -20,15 +20,15 @@ import static it.unibz.inf.ontop.OptimizationTestingTools.*;
 
 public class NavigationAfterRemovingEmptyNodes {
 
-    private static final AtomPredicate TABLE1_PREDICATE = new AtomPredicateImpl("table1", 2);
-    private static final AtomPredicate TABLE2_PREDICATE = new AtomPredicateImpl("table2", 2);
-    private static final AtomPredicate TABLE3_PREDICATE = new AtomPredicateImpl("table3", 2);
-    private static final AtomPredicate TABLE4_PREDICATE = new AtomPredicateImpl("table4", 2);
-    private static final AtomPredicate TABLE5_PREDICATE = new AtomPredicateImpl("table5", 2);
-    private static final AtomPredicate TABLE6_PREDICATE = new AtomPredicateImpl("table6", 2);
+    private static final AtomPredicate TABLE1_PREDICATE = DATA_FACTORY.getAtomPredicate("table1", 2);
+    private static final AtomPredicate TABLE2_PREDICATE = DATA_FACTORY.getAtomPredicate("table2", 2);
+    private static final AtomPredicate TABLE3_PREDICATE = DATA_FACTORY.getAtomPredicate("table3", 2);
+    private static final AtomPredicate TABLE4_PREDICATE = DATA_FACTORY.getAtomPredicate("table4", 2);
+    private static final AtomPredicate TABLE5_PREDICATE = DATA_FACTORY.getAtomPredicate("table5", 2);
+    private static final AtomPredicate TABLE6_PREDICATE = DATA_FACTORY.getAtomPredicate("table6", 2);
 
-    private static final AtomPredicate ANS1_ARITY_1_PREDICATE = new AtomPredicateImpl("ans1", 1);
-    private static final AtomPredicate ANS1_ARITY_2_PREDICATE = new AtomPredicateImpl("ans1", 2);
+    private static final AtomPredicate ANS1_ARITY_1_PREDICATE = DATA_FACTORY.getAtomPredicate("ans1", 1);
+    private static final AtomPredicate ANS1_ARITY_2_PREDICATE = DATA_FACTORY.getAtomPredicate("ans1", 2);
 
     private static final Variable X = DATA_FACTORY.getVariable("x");
     private static final Variable Y = DATA_FACTORY.getVariable("y");

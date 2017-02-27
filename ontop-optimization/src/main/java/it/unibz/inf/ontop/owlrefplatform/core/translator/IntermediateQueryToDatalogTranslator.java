@@ -290,7 +290,7 @@ public class IntermediateQueryToDatalogTranslator {
 			//DataAtom projectionAtom = generateProjectionAtom(ImmutableSet.of());
 			//heads.add(new RuleHead(new ImmutableSubstitutionImpl<>(ImmutableMap.of()), projectionAtom,Optional.empty()));
 			//return body;
-			body.add(DATA_FACTORY.getDistinctVariableOnlyDataAtom(new AtomPredicateImpl("dummy", 0), ImmutableList.of()));
+			body.add(DATA_FACTORY.getDistinctVariableOnlyDataAtom(DATA_FACTORY.getAtomPredicate("dummy", 0), ImmutableList.of()));
 			return body;
 
 		} else {
@@ -300,7 +300,7 @@ public class IntermediateQueryToDatalogTranslator {
 	}
 
 	private DistinctVariableOnlyDataAtom generateProjectionAtom(ImmutableSet<Variable> projectedVariables) {
-		AtomPredicate newPredicate = new AtomPredicateImpl("ansSQ" + ++subQueryCounter, projectedVariables.size());
+		AtomPredicate newPredicate = DATA_FACTORY.getAtomPredicate("ansSQ" + ++subQueryCounter, projectedVariables.size());
 		return DATA_FACTORY.getDistinctVariableOnlyDataAtom(newPredicate, ImmutableList.copyOf(projectedVariables));
 	}
 

@@ -26,13 +26,13 @@ public class UnionLiftInternalTest {
     private static Constant URI_TEMPLATE_STR_1 =  DATA_FACTORY.getConstantLiteral("http://example.org/ds1/{}");
     private static URITemplatePredicate URI_PREDICATE =  new URITemplatePredicateImpl(2);
 
-    private static AtomPredicate P1_PREDICATE = new AtomPredicateImpl("p1", 1);
-    private static AtomPredicate P2_PREDICATE = new AtomPredicateImpl("p1", 2);
-    private static AtomPredicate P3_PREDICATE = new AtomPredicateImpl("p1", 3);
-    private static AtomPredicate TABLE_1 = new AtomPredicateImpl("table1", 1);
-    private static AtomPredicate TABLE_2 = new AtomPredicateImpl("table2", 1);
-    private static AtomPredicate TABLE_3 = new AtomPredicateImpl("table3", 2);
-    private static AtomPredicate TABLE_4 = new AtomPredicateImpl("table4", 2);
+    private static AtomPredicate P1_PREDICATE = DATA_FACTORY.getAtomPredicate("p1", 1);
+    private static AtomPredicate P2_PREDICATE = DATA_FACTORY.getAtomPredicate("p1", 2);
+    private static AtomPredicate P3_PREDICATE = DATA_FACTORY.getAtomPredicate("p1", 3);
+    private static AtomPredicate TABLE_1 = DATA_FACTORY.getAtomPredicate("table1", 1);
+    private static AtomPredicate TABLE_2 = DATA_FACTORY.getAtomPredicate("table2", 1);
+    private static AtomPredicate TABLE_3 = DATA_FACTORY.getAtomPredicate("table3", 2);
+    private static AtomPredicate TABLE_4 = DATA_FACTORY.getAtomPredicate("table4", 2);
 
     private static Variable X = DATA_FACTORY.getVariable("x");
     private static Variable Y = DATA_FACTORY.getVariable("y");
@@ -164,11 +164,11 @@ public class UnionLiftInternalTest {
          * Original Query
          */
 
-        AtomPredicate TABLE_1 = new AtomPredicateImpl("table1", 2);
-        AtomPredicate TABLE_2 = new AtomPredicateImpl("table2", 2);
-        AtomPredicate TABLE_3 = new AtomPredicateImpl("table3", 2);
-        AtomPredicate TABLE_4 = new AtomPredicateImpl("table4", 2);
-        AtomPredicate TABLE_5 = new AtomPredicateImpl("table5", 3);
+        AtomPredicate TABLE_1 = DATA_FACTORY.getAtomPredicate("table1", 2);
+        AtomPredicate TABLE_2 = DATA_FACTORY.getAtomPredicate("table2", 2);
+        AtomPredicate TABLE_3 = DATA_FACTORY.getAtomPredicate("table3", 2);
+        AtomPredicate TABLE_4 = DATA_FACTORY.getAtomPredicate("table4", 2);
+        AtomPredicate TABLE_5 = DATA_FACTORY.getAtomPredicate("table5", 3);
 
         DistinctVariableOnlyDataAtom ROOT_CONSTRUCTION_NODE_ATOM =
                 DATA_FACTORY.getDistinctVariableOnlyDataAtom(
@@ -247,11 +247,11 @@ public class UnionLiftInternalTest {
          * Original Query
          */
 
-        AtomPredicate TABLE_1 = new AtomPredicateImpl("table1", 2);
-        AtomPredicate TABLE_2 = new AtomPredicateImpl("table2", 2);
-        AtomPredicate TABLE_3 = new AtomPredicateImpl("table3", 2);
-        AtomPredicate TABLE_4 = new AtomPredicateImpl("table4", 2);
-        AtomPredicate TABLE_5 = new AtomPredicateImpl("table5", 3);
+        AtomPredicate TABLE_1 = DATA_FACTORY.getAtomPredicate("table1", 2);
+        AtomPredicate TABLE_2 = DATA_FACTORY.getAtomPredicate("table2", 2);
+        AtomPredicate TABLE_3 = DATA_FACTORY.getAtomPredicate("table3", 2);
+        AtomPredicate TABLE_4 = DATA_FACTORY.getAtomPredicate("table4", 2);
+        AtomPredicate TABLE_5 = DATA_FACTORY.getAtomPredicate("table5", 3);
 
         DistinctVariableOnlyDataAtom ROOT_CONSTRUCTION_NODE_ATOM =
                 DATA_FACTORY.getDistinctVariableOnlyDataAtom(
@@ -346,11 +346,11 @@ public class UnionLiftInternalTest {
          * Original Query
          */
 
-        AtomPredicate TABLE_1 = new AtomPredicateImpl("table1", 2);
-        AtomPredicate TABLE_2 = new AtomPredicateImpl("table2", 2);
-        AtomPredicate TABLE_3 = new AtomPredicateImpl("table3", 2);
-        AtomPredicate TABLE_4 = new AtomPredicateImpl("table4", 2);
-        AtomPredicate TABLE_5 = new AtomPredicateImpl("table5", 3);
+        AtomPredicate TABLE_1 = DATA_FACTORY.getAtomPredicate("table1", 2);
+        AtomPredicate TABLE_2 = DATA_FACTORY.getAtomPredicate("table2", 2);
+        AtomPredicate TABLE_3 = DATA_FACTORY.getAtomPredicate("table3", 2);
+        AtomPredicate TABLE_4 = DATA_FACTORY.getAtomPredicate("table4", 2);
+        AtomPredicate TABLE_5 = DATA_FACTORY.getAtomPredicate("table5", 3);
 
         DistinctVariableOnlyDataAtom ROOT_CONSTRUCTION_NODE_ATOM =
                 DATA_FACTORY.getDistinctVariableOnlyDataAtom(
@@ -440,11 +440,11 @@ public class UnionLiftInternalTest {
          * Original Query
          */
 
-        AtomPredicate TABLE_1 = new AtomPredicateImpl("table1", 2);
-        AtomPredicate TABLE_2 = new AtomPredicateImpl("table2", 2);
-        AtomPredicate TABLE_3 = new AtomPredicateImpl("table3", 2);
-        AtomPredicate TABLE_4 = new AtomPredicateImpl("table4", 2);
-        AtomPredicate TABLE_5 = new AtomPredicateImpl("table5", 3);
+        AtomPredicate TABLE_1 = DATA_FACTORY.getAtomPredicate("table1", 2);
+        AtomPredicate TABLE_2 = DATA_FACTORY.getAtomPredicate("table2", 2);
+        AtomPredicate TABLE_3 = DATA_FACTORY.getAtomPredicate("table3", 2);
+        AtomPredicate TABLE_4 = DATA_FACTORY.getAtomPredicate("table4", 2);
+        AtomPredicate TABLE_5 = DATA_FACTORY.getAtomPredicate("table5", 3);
 
         DistinctVariableOnlyDataAtom ROOT_CONSTRUCTION_NODE_ATOM =
                 DATA_FACTORY.getDistinctVariableOnlyDataAtom(
@@ -633,11 +633,11 @@ public class UnionLiftInternalTest {
         /**
          * Original Query
          */
-        AtomPredicate TABLE_1 = new AtomPredicateImpl("table1", 2);
-        AtomPredicate TABLE_2 = new AtomPredicateImpl("table2", 2);
-        AtomPredicate TABLE_3 = new AtomPredicateImpl("table3", 2);
-        AtomPredicate TABLE_4 = new AtomPredicateImpl("table4", 2);
-        AtomPredicate TABLE_5 = new AtomPredicateImpl("table5", 3);
+        AtomPredicate TABLE_1 = DATA_FACTORY.getAtomPredicate("table1", 2);
+        AtomPredicate TABLE_2 = DATA_FACTORY.getAtomPredicate("table2", 2);
+        AtomPredicate TABLE_3 = DATA_FACTORY.getAtomPredicate("table3", 2);
+        AtomPredicate TABLE_4 = DATA_FACTORY.getAtomPredicate("table4", 2);
+        AtomPredicate TABLE_5 = DATA_FACTORY.getAtomPredicate("table5", 3);
 
         DistinctVariableOnlyDataAtom ROOT_CONSTRUCTION_NODE_ATOM =
                 DATA_FACTORY.getDistinctVariableOnlyDataAtom(
@@ -683,11 +683,11 @@ public class UnionLiftInternalTest {
         /**
          * Original Query
          */
-        AtomPredicate TABLE_1 = new AtomPredicateImpl("table1", 2);
-        AtomPredicate TABLE_2 = new AtomPredicateImpl("table2", 2);
-        AtomPredicate TABLE_3 = new AtomPredicateImpl("table3", 2);
-        AtomPredicate TABLE_4 = new AtomPredicateImpl("table4", 2);
-        AtomPredicate TABLE_5 = new AtomPredicateImpl("table5", 2);
+        AtomPredicate TABLE_1 = DATA_FACTORY.getAtomPredicate("table1", 2);
+        AtomPredicate TABLE_2 = DATA_FACTORY.getAtomPredicate("table2", 2);
+        AtomPredicate TABLE_3 = DATA_FACTORY.getAtomPredicate("table3", 2);
+        AtomPredicate TABLE_4 = DATA_FACTORY.getAtomPredicate("table4", 2);
+        AtomPredicate TABLE_5 = DATA_FACTORY.getAtomPredicate("table5", 2);
 
         DistinctVariableOnlyDataAtom ROOT_CONSTRUCTION_NODE_ATOM =
                 DATA_FACTORY.getDistinctVariableOnlyDataAtom(
@@ -737,11 +737,11 @@ public class UnionLiftInternalTest {
         /**
          * Original Query
          */
-        AtomPredicate TABLE_1 = new AtomPredicateImpl("table1", 2);
-        AtomPredicate TABLE_2 = new AtomPredicateImpl("table2", 2);
-        AtomPredicate TABLE_3 = new AtomPredicateImpl("table3", 2);
-        AtomPredicate TABLE_4 = new AtomPredicateImpl("table4", 2);
-        AtomPredicate TABLE_5 = new AtomPredicateImpl("table5", 2);
+        AtomPredicate TABLE_1 = DATA_FACTORY.getAtomPredicate("table1", 2);
+        AtomPredicate TABLE_2 = DATA_FACTORY.getAtomPredicate("table2", 2);
+        AtomPredicate TABLE_3 = DATA_FACTORY.getAtomPredicate("table3", 2);
+        AtomPredicate TABLE_4 = DATA_FACTORY.getAtomPredicate("table4", 2);
+        AtomPredicate TABLE_5 = DATA_FACTORY.getAtomPredicate("table5", 2);
 
         DistinctVariableOnlyDataAtom ROOT_CONSTRUCTION_NODE_ATOM =
                 DATA_FACTORY.getDistinctVariableOnlyDataAtom(
@@ -792,10 +792,10 @@ public class UnionLiftInternalTest {
         /**
          * Original Query
          */
-        AtomPredicate TABLE_1 = new AtomPredicateImpl("table1", 2);
-        AtomPredicate TABLE_2 = new AtomPredicateImpl("table2", 2);
-        AtomPredicate TABLE_4 = new AtomPredicateImpl("table4", 2);
-        AtomPredicate TABLE_5 = new AtomPredicateImpl("table5", 2);
+        AtomPredicate TABLE_1 = DATA_FACTORY.getAtomPredicate("table1", 2);
+        AtomPredicate TABLE_2 = DATA_FACTORY.getAtomPredicate("table2", 2);
+        AtomPredicate TABLE_4 = DATA_FACTORY.getAtomPredicate("table4", 2);
+        AtomPredicate TABLE_5 = DATA_FACTORY.getAtomPredicate("table5", 2);
 
         DistinctVariableOnlyDataAtom ROOT_CONSTRUCTION_NODE_ATOM =
                 DATA_FACTORY.getDistinctVariableOnlyDataAtom(

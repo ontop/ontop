@@ -29,9 +29,9 @@ public class UriTemplateTest {
     private static Constant URI_TEMPLATE_STR_2 =  DATA_FACTORY.getConstantLiteral(URI_TEMPLATE_STR_2_PREFIX.getValue() + "{}");
     private static Constant URI_TEMPLATE_STR_3 =  DATA_FACTORY.getConstantLiteral("{}");
 
-    private final static AtomPredicate TABLE1_PREDICATE = new AtomPredicateImpl("T1", 2);
-    private final static AtomPredicate TABLE2_PREDICATE = new AtomPredicateImpl("T2", 2);
-    private final static AtomPredicate TABLE3_PREDICATE = new AtomPredicateImpl("T3", 1);
+    private final static AtomPredicate TABLE1_PREDICATE = DATA_FACTORY.getAtomPredicate("T1", 2);
+    private final static AtomPredicate TABLE2_PREDICATE = DATA_FACTORY.getAtomPredicate("T2", 2);
+    private final static AtomPredicate TABLE3_PREDICATE = DATA_FACTORY.getAtomPredicate("T3", 1);
 
     private final static Variable X = DATA_FACTORY.getVariable("x");
     private final static Variable Y = DATA_FACTORY.getVariable("y");
@@ -43,7 +43,7 @@ public class UriTemplateTest {
     private final static Variable E = DATA_FACTORY.getVariable("e");
     private final static Variable F = DATA_FACTORY.getVariable("f");
 
-    private final static AtomPredicate ANS1_PREDICATE_1 = new AtomPredicateImpl("ans1", 1);
+    private final static AtomPredicate ANS1_PREDICATE_1 = DATA_FACTORY.getAtomPredicate("ans1", 1);
 
     public UriTemplateTest() {
     }

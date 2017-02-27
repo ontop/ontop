@@ -18,7 +18,7 @@ public class SubstitutionTest {
     private static final Variable Y = DATA_FACTORY.getVariable("y");
     private static final Variable Z = DATA_FACTORY.getVariable("z");
     private static final Constant ONE = DATA_FACTORY.getConstantLiteral("1", Predicate.COL_TYPE.INTEGER);
-    private static final Predicate F_ARITY_1 = new AtomPredicateImpl("f", 1);
+    private static final Predicate F_ARITY_1 = DATA_FACTORY.getAtomPredicate("f", 1);
 
     @Test
     public void testOrientate1() {

@@ -31,20 +31,20 @@ import static it.unibz.inf.ontop.OptimizationTestingTools.*;
 public class BindingLiftTest {
 
 
-    private final AtomPredicate TABLE1_PREDICATE = new AtomPredicateImpl("table1", 2);
-    private final AtomPredicate TABLE2_PREDICATE = new AtomPredicateImpl("table2", 2);
-    private final AtomPredicate TABLE3_PREDICATE = new AtomPredicateImpl("table3", 2);
-    private final AtomPredicate TABLE4_PREDICATE = new AtomPredicateImpl("table4", 2);
-    private final AtomPredicate TABLE5_PREDICATE = new AtomPredicateImpl("table5", 2);
-    private final AtomPredicate TABLE6_PREDICATE = new AtomPredicateImpl("table6", 2);
-    private final AtomPredicate TABLE7_ARITY_1_PREDICATE = new AtomPredicateImpl("table7", 1);
-    private final AtomPredicate TABLE8_ARITY_1_PREDICATE = new AtomPredicateImpl("table8", 1);
-    private final AtomPredicate TABLE9_ARITY_1_PREDICATE = new AtomPredicateImpl("table9", 1);
+    private final AtomPredicate TABLE1_PREDICATE = DATA_FACTORY.getAtomPredicate("table1", 2);
+    private final AtomPredicate TABLE2_PREDICATE = DATA_FACTORY.getAtomPredicate("table2", 2);
+    private final AtomPredicate TABLE3_PREDICATE = DATA_FACTORY.getAtomPredicate("table3", 2);
+    private final AtomPredicate TABLE4_PREDICATE = DATA_FACTORY.getAtomPredicate("table4", 2);
+    private final AtomPredicate TABLE5_PREDICATE = DATA_FACTORY.getAtomPredicate("table5", 2);
+    private final AtomPredicate TABLE6_PREDICATE = DATA_FACTORY.getAtomPredicate("table6", 2);
+    private final AtomPredicate TABLE7_ARITY_1_PREDICATE = DATA_FACTORY.getAtomPredicate("table7", 1);
+    private final AtomPredicate TABLE8_ARITY_1_PREDICATE = DATA_FACTORY.getAtomPredicate("table8", 1);
+    private final AtomPredicate TABLE9_ARITY_1_PREDICATE = DATA_FACTORY.getAtomPredicate("table9", 1);
 
 
-    private final AtomPredicate ANS1_ARITY_2_PREDICATE = new AtomPredicateImpl("ans1", 2);
-    private final AtomPredicate ANS1_ARITY_3_PREDICATE = new AtomPredicateImpl("ans1", 3);
-    private final AtomPredicate ANS1_ARITY_4_PREDICATE = new AtomPredicateImpl("ans1", 4);
+    private final AtomPredicate ANS1_ARITY_2_PREDICATE = DATA_FACTORY.getAtomPredicate("ans1", 2);
+    private final AtomPredicate ANS1_ARITY_3_PREDICATE = DATA_FACTORY.getAtomPredicate("ans1", 3);
+    private final AtomPredicate ANS1_ARITY_4_PREDICATE = DATA_FACTORY.getAtomPredicate("ans1", 4);
 
     private final Variable X = DATA_FACTORY.getVariable("x");
     private final Variable Y = DATA_FACTORY.getVariable("y");
@@ -1330,11 +1330,11 @@ public class BindingLiftTest {
          * Original Query
          */
 
-        AtomPredicate TABLE_1 = new AtomPredicateImpl("table1", 2);
-        AtomPredicate TABLE_2 = new AtomPredicateImpl("table2", 2);
-        AtomPredicate TABLE_3 = new AtomPredicateImpl("table3", 2);
-        AtomPredicate TABLE_4 = new AtomPredicateImpl("table4", 2);
-        AtomPredicate TABLE_5 = new AtomPredicateImpl("table5", 3);
+        AtomPredicate TABLE_1 = DATA_FACTORY.getAtomPredicate("table1", 2);
+        AtomPredicate TABLE_2 = DATA_FACTORY.getAtomPredicate("table2", 2);
+        AtomPredicate TABLE_3 = DATA_FACTORY.getAtomPredicate("table3", 2);
+        AtomPredicate TABLE_4 = DATA_FACTORY.getAtomPredicate("table4", 2);
+        AtomPredicate TABLE_5 = DATA_FACTORY.getAtomPredicate("table5", 3);
 
         DistinctVariableOnlyDataAtom ROOT_CONSTRUCTION_NODE_ATOM =
                 DATA_FACTORY.getDistinctVariableOnlyDataAtom(

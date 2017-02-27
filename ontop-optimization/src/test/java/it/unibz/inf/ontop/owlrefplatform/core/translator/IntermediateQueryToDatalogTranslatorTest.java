@@ -21,11 +21,11 @@ import static org.junit.Assert.assertTrue;
 public class IntermediateQueryToDatalogTranslatorTest {
 
     private static Variable X = DATA_FACTORY.getVariable("x");
-    private static AtomPredicate ANS1_IQ_PREDICATE = new AtomPredicateImpl("ans1", 1);
+    private static AtomPredicate ANS1_IQ_PREDICATE = DATA_FACTORY.getAtomPredicate("ans1", 1);
     private static DistinctVariableOnlyDataAtom ANS1_X_ATOM = DATA_FACTORY.getDistinctVariableOnlyDataAtom(
             ANS1_IQ_PREDICATE, ImmutableList.of(X));
-    private static AtomPredicate P1_IQ_PREDICATE = new AtomPredicateImpl("p1", 1);
-    private static AtomPredicate P2_IQ_PREDICATE = new AtomPredicateImpl("p2", 1);
+    private static AtomPredicate P1_IQ_PREDICATE = DATA_FACTORY.getAtomPredicate("p1", 1);
+    private static AtomPredicate P2_IQ_PREDICATE = DATA_FACTORY.getAtomPredicate("p2", 1);
     private static DistinctVariableOnlyDataAtom P1_X_ATOM = DATA_FACTORY.getDistinctVariableOnlyDataAtom(
             P1_IQ_PREDICATE, ImmutableList.of(X));
     private static DistinctVariableOnlyDataAtom P2_X_ATOM = DATA_FACTORY.getDistinctVariableOnlyDataAtom(

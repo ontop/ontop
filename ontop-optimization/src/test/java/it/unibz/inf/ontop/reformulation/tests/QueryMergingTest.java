@@ -22,15 +22,15 @@ import static it.unibz.inf.ontop.OptimizationTestingTools.*;
 
 public class QueryMergingTest {
 
-    private static AtomPredicate ANS0_PREDICATE = new AtomPredicateImpl("ans1", 0);
-    private static AtomPredicate ANS1_PREDICATE = new AtomPredicateImpl("ans1", 2);
-    private static AtomPredicate ANS2_PREDICATE = new AtomPredicateImpl("ans1", 1);
-    private static AtomPredicate ANS4_PREDICATE = new AtomPredicateImpl("ans1", 3);
-    private static AtomPredicate P1_PREDICATE = new AtomPredicateImpl("p1", 2);
-    private static AtomPredicate P2_PREDICATE = new AtomPredicateImpl("p2", 3);
-    private static AtomPredicate P3_PREDICATE = new AtomPredicateImpl("p3", 1);
-    private static AtomPredicate P4_PREDICATE = new AtomPredicateImpl("p4", 1);
-    private static AtomPredicate P5_PREDICATE = new AtomPredicateImpl("p5", 1);
+    private static AtomPredicate ANS0_PREDICATE = DATA_FACTORY.getAtomPredicate("ans1", 0);
+    private static AtomPredicate ANS1_PREDICATE = DATA_FACTORY.getAtomPredicate("ans1", 2);
+    private static AtomPredicate ANS2_PREDICATE = DATA_FACTORY.getAtomPredicate("ans1", 1);
+    private static AtomPredicate ANS4_PREDICATE = DATA_FACTORY.getAtomPredicate("ans1", 3);
+    private static AtomPredicate P1_PREDICATE = DATA_FACTORY.getAtomPredicate("p1", 2);
+    private static AtomPredicate P2_PREDICATE = DATA_FACTORY.getAtomPredicate("p2", 3);
+    private static AtomPredicate P3_PREDICATE = DATA_FACTORY.getAtomPredicate("p3", 1);
+    private static AtomPredicate P4_PREDICATE = DATA_FACTORY.getAtomPredicate("p4", 1);
+    private static AtomPredicate P5_PREDICATE = DATA_FACTORY.getAtomPredicate("p5", 1);
     private static Variable X = DATA_FACTORY.getVariable("x");
     private static Variable Y = DATA_FACTORY.getVariable("y");
     private static Variable Z = DATA_FACTORY.getVariable("z");
@@ -72,10 +72,10 @@ public class QueryMergingTest {
     private static GroundTerm INT_OF_ONE = (GroundTerm) DATA_FACTORY.getImmutableFunctionalTerm(XSD_INTEGER, ONE);
     private static GroundTerm INT_OF_TWO = (GroundTerm) DATA_FACTORY.getImmutableFunctionalTerm(XSD_INTEGER, TWO);
     private static ImmutableFunctionalTerm INT_OF_B = DATA_FACTORY.getImmutableFunctionalTerm(XSD_INTEGER, B);
-    private static AtomPredicate TABLE_1 = new AtomPredicateImpl("table1", 2);
-    private static AtomPredicate TABLE_2 = new AtomPredicateImpl("table2", 1);
-    private static AtomPredicate TABLE_3 = new AtomPredicateImpl("table3", 2);
-    private static AtomPredicate TABLE_4 = new AtomPredicateImpl("table4", 3);
+    private static AtomPredicate TABLE_1 = DATA_FACTORY.getAtomPredicate("table1", 2);
+    private static AtomPredicate TABLE_2 = DATA_FACTORY.getAtomPredicate("table2", 1);
+    private static AtomPredicate TABLE_3 = DATA_FACTORY.getAtomPredicate("table3", 2);
+    private static AtomPredicate TABLE_4 = DATA_FACTORY.getAtomPredicate("table4", 3);
     private static ExtensionalDataNode DATA_NODE_1 = IQ_FACTORY.createExtensionalDataNode(DATA_FACTORY.getDataAtom(TABLE_1, A, B));
     private static ExtensionalDataNode DATA_NODE_3 = IQ_FACTORY.createExtensionalDataNode(DATA_FACTORY.getDataAtom(TABLE_3, B, C));
     private static ExtensionalDataNode DATA_NODE_4 = IQ_FACTORY.createExtensionalDataNode(DATA_FACTORY.getDataAtom(TABLE_1, S, T));
@@ -453,7 +453,7 @@ public class QueryMergingTest {
          */
         DistinctVariableOnlyDataAtom p1Atom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(
                 P1_PREDICATE, ImmutableList.of(S, T));
-        AtomPredicate tableSubquery = new AtomPredicateImpl("table1", 2);
+        AtomPredicate tableSubquery = DATA_FACTORY.getAtomPredicate("table1", 2);
         ExtensionalDataNode dataNodeSubquery = IQ_FACTORY.createExtensionalDataNode(DATA_FACTORY.getDataAtom(tableSubquery, A, B));
         IntermediateQueryBuilder subQueryBuilder = createQueryBuilder(EMPTY_METADATA);
         ConstructionNode subQueryRoot = IQ_FACTORY.createConstructionNode(p1Atom.getVariables(),
@@ -508,7 +508,7 @@ public class QueryMergingTest {
          */
         DistinctVariableOnlyDataAtom p1Atom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(
                 P2_PREDICATE, ImmutableList.of(S, T, U));
-        AtomPredicate tableSubquery = new AtomPredicateImpl("table1", 3);
+        AtomPredicate tableSubquery = DATA_FACTORY.getAtomPredicate("table1", 3);
 
         IntermediateQueryBuilder subQueryBuilder = createQueryBuilder(EMPTY_METADATA);
         ConstructionNode subQueryRoot = IQ_FACTORY.createConstructionNode(p1Atom.getVariables(),
@@ -734,7 +734,7 @@ public class QueryMergingTest {
          */
         IntermediateQueryBuilder queryBuilder = createQueryBuilder(EMPTY_METADATA);
 
-        AtomPredicate emptyAns1 = new AtomPredicateImpl("ans1", 0);
+        AtomPredicate emptyAns1 = DATA_FACTORY.getAtomPredicate("ans1", 0);
         DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(
                 emptyAns1, ImmutableList.of());
 
@@ -793,7 +793,7 @@ public class QueryMergingTest {
          */
         DistinctVariableOnlyDataAtom p1Atom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(
                 P1_PREDICATE, ImmutableList.of(S, T));
-        AtomPredicate tableSubquery = new AtomPredicateImpl("table1", 2);
+        AtomPredicate tableSubquery = DATA_FACTORY.getAtomPredicate("table1", 2);
 
         ExtensionalDataNode dataNodeSubquery = IQ_FACTORY.createExtensionalDataNode(DATA_FACTORY.getDataAtom(tableSubquery, A, B));
         IntermediateQueryBuilder subQueryBuilder = createQueryBuilder(EMPTY_METADATA);
@@ -855,7 +855,7 @@ public class QueryMergingTest {
          */
         DistinctVariableOnlyDataAtom p1Atom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(
                 P1_PREDICATE, ImmutableList.of(S, T));
-        AtomPredicate tableSubquery = new AtomPredicateImpl("table1", 2);
+        AtomPredicate tableSubquery = DATA_FACTORY.getAtomPredicate("table1", 2);
         ExtensionalDataNode dataNodeSubquery = IQ_FACTORY.createExtensionalDataNode(DATA_FACTORY.getDataAtom(tableSubquery, B, C));
         IntermediateQueryBuilder subQueryBuilder = createQueryBuilder(EMPTY_METADATA);
         ConstructionNode subQueryRoot = IQ_FACTORY.createConstructionNode(p1Atom.getVariables(),
@@ -982,7 +982,7 @@ public class QueryMergingTest {
                         T, generateURI3(C, D)
                 )), Optional.empty());
         subQueryBuilder.addChild(subQueryRoot, constructionNode2);
-        AtomPredicate tableSubquery = new AtomPredicateImpl("table5", 4);
+        AtomPredicate tableSubquery = DATA_FACTORY.getAtomPredicate("table5", 4);
         ExtensionalDataNode dataNodeSubquery = IQ_FACTORY.createExtensionalDataNode(DATA_FACTORY.getDataAtom(tableSubquery, A, B, C, D));
         subQueryBuilder.addChild(constructionNode2, dataNodeSubquery);
 
@@ -1018,8 +1018,8 @@ public class QueryMergingTest {
         InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
         queryBuilder.addChild(rootNode, joinNode);
 
-        AtomPredicate firstNamePredicate = new AtomPredicateImpl("firstName", 2);
-        AtomPredicate lastNamePredicate = new AtomPredicateImpl("lastName", 2);
+        AtomPredicate firstNamePredicate = DATA_FACTORY.getAtomPredicate("firstName", 2);
+        AtomPredicate lastNamePredicate = DATA_FACTORY.getAtomPredicate("lastName", 2);
 
         IntensionalDataNode firstIntentional = IQ_FACTORY.createIntensionalDataNode(
                 DATA_FACTORY.getDataAtom(firstNamePredicate, X, Y));
