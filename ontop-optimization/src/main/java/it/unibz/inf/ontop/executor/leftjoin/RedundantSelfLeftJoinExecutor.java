@@ -1,12 +1,13 @@
 package it.unibz.inf.ontop.executor.leftjoin;
 
 import com.google.common.collect.*;
+import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.executor.SimpleNodeCentricExecutor;
 import it.unibz.inf.ontop.executor.join.SelfJoinLikeExecutor;
+import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.pivotalrepr.*;
-import it.unibz.inf.ontop.pivotalrepr.impl.EmptyNodeImpl;
 import it.unibz.inf.ontop.pivotalrepr.impl.QueryTreeComponent;
 import it.unibz.inf.ontop.pivotalrepr.proposal.*;
 import it.unibz.inf.ontop.pivotalrepr.proposal.impl.NodeCentricOptimizationResultsImpl;
@@ -33,8 +34,15 @@ public class RedundantSelfLeftJoinExecutor
         extends SelfJoinLikeExecutor
         implements SimpleNodeCentricExecutor<LeftJoinNode, LeftJoinOptimizationProposal> {
 
+    private final IntermediateQueryFactory iqFactory;
+
     enum Action {
         UNIFY, DO_NOTHING, DROP_RIGHT
+    }
+
+    @Inject
+    private RedundantSelfLeftJoinExecutor(IntermediateQueryFactory iqFactory) {
+        this.iqFactory = iqFactory;
     }
 
     @Override
@@ -216,7 +224,7 @@ public class RedundantSelfLeftJoinExecutor
      * even lead to the empty query.
      */
     private NodeCentricOptimizationResults<LeftJoinNode> tryToDropRight(LeftJoinNode leftJoinNode, DataNode rightDataNode, IntermediateQuery query, QueryTreeComponent treeComponent) throws EmptyQueryException {
-        EmptyNode emptyChild = new EmptyNodeImpl(query.getVariables(rightDataNode));
+        EmptyNode emptyChild = iqFactory.createEmptyNode(query.getVariables(rightDataNode));
         treeComponent.replaceSubTree(rightDataNode, emptyChild);
 
         RemoveEmptyNodeProposal emptyNodeProposal = new RemoveEmptyNodeProposalImpl(emptyChild, true);

@@ -120,7 +120,7 @@ public class LocalPropagationTools {
                 return new SubstitutionApplicationResults<>(query, replacingChild, newSubstitution, true, optionalTracker);
 
             case DECLARE_AS_TRUE:
-                TrueNode replacingNode = new TrueNodeImpl();
+                TrueNode replacingNode = query.getFactory().createTrueNode();
                 // The replaced node must already be a leaf,
                 // so we can perform a single node replacement
                 // (there is no need here to delete its subtree)
@@ -164,7 +164,7 @@ public class LocalPropagationTools {
                 .flatMap(v -> descendingSubstitution.apply(v).getVariableStream())
                 .collect(ImmutableCollectors.toSet());
 
-        return new EmptyNodeImpl(newProjectedVariables);
+        return query.getFactory().createEmptyNode(newProjectedVariables);
     }
 
 }

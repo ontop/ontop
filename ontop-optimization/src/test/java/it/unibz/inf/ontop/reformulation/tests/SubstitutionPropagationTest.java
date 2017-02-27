@@ -77,13 +77,13 @@ public class SubstitutionPropagationTest {
         IntermediateQueryBuilder initialQueryBuilder = createQueryBuilder(EMPTY_METADATA);
         DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE, X, Y);
 
-        ConstructionNode initialRootNode = new ConstructionNodeImpl(projectionAtom.getVariables());
+        ConstructionNode initialRootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
         initialQueryBuilder.init(projectionAtom, initialRootNode);
 
-        InnerJoinNode joinNode = new InnerJoinNodeImpl(Optional.empty());
+        InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
         initialQueryBuilder.addChild(initialRootNode, joinNode);
 
-        ConstructionNode leftConstructionNode = new ConstructionNodeImpl(ImmutableSet.of(X, Y),
+        ConstructionNode leftConstructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X, Y),
                 new ImmutableSubstitutionImpl<>(ImmutableMap.of(
                         X, generateURI1(A),
                         Y, generateURI1(B))),
@@ -92,7 +92,7 @@ public class SubstitutionPropagationTest {
         initialQueryBuilder.addChild(leftConstructionNode, DATA_NODE_1);
 
 
-        ConstructionNode rightConstructionNode = new ConstructionNodeImpl(ImmutableSet.of(X),
+        ConstructionNode rightConstructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X),
                 new ImmutableSubstitutionImpl<>(ImmutableMap.of(
                         X, generateURI1(C))),
                 Optional.empty());
@@ -131,13 +131,13 @@ public class SubstitutionPropagationTest {
         IntermediateQueryBuilder initialQueryBuilder = createQueryBuilder(EMPTY_METADATA);
         DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE, X, Y);
 
-        ConstructionNode initialRootNode = new ConstructionNodeImpl(projectionAtom.getVariables());
+        ConstructionNode initialRootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
         initialQueryBuilder.init(projectionAtom, initialRootNode);
 
-        InnerJoinNode joinNode = new InnerJoinNodeImpl(Optional.empty());
+        InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
         initialQueryBuilder.addChild(initialRootNode, joinNode);
 
-        ConstructionNode leftConstructionNode = new ConstructionNodeImpl(ImmutableSet.of(X, Y),
+        ConstructionNode leftConstructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X, Y),
                 new ImmutableSubstitutionImpl<>(ImmutableMap.of(
                         X, generateURI1(A),
                         Y, generateURI1(B))),
@@ -146,7 +146,7 @@ public class SubstitutionPropagationTest {
         initialQueryBuilder.addChild(leftConstructionNode, DATA_NODE_1);
 
 
-        ConstructionNode rightConstructionNode = new ConstructionNodeImpl(ImmutableSet.of(X),
+        ConstructionNode rightConstructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X),
                 new ImmutableSubstitutionImpl<>(ImmutableMap.of(
                         X, generateURI2(C, D))),
                 Optional.empty());
@@ -180,13 +180,13 @@ public class SubstitutionPropagationTest {
         IntermediateQueryBuilder initialQueryBuilder = createQueryBuilder(EMPTY_METADATA);
         DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE, X, Y);
 
-        ConstructionNode initialRootNode = new ConstructionNodeImpl(projectionAtom.getVariables());
+        ConstructionNode initialRootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
         initialQueryBuilder.init(projectionAtom, initialRootNode);
 
-        InnerJoinNode joinNode = new InnerJoinNodeImpl(Optional.empty());
+        InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
         initialQueryBuilder.addChild(initialRootNode, joinNode);
 
-        ConstructionNode leftConstructionNode = new ConstructionNodeImpl(ImmutableSet.of(X, Y),
+        ConstructionNode leftConstructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X, Y),
                 new ImmutableSubstitutionImpl<>(ImmutableMap.of(
                         X, generateURI1(A),
                         Y, generateURI1(B))),
@@ -195,7 +195,7 @@ public class SubstitutionPropagationTest {
         initialQueryBuilder.addChild(leftConstructionNode, DATA_NODE_1);
 
 
-        ConstructionNode rightConstructionNode = new ConstructionNodeImpl(ImmutableSet.of(X),
+        ConstructionNode rightConstructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X),
                 new ImmutableSubstitutionImpl<>(ImmutableMap.of(
                         X, generateURI2(C, D))),
                 Optional.empty());
@@ -222,13 +222,13 @@ public class SubstitutionPropagationTest {
         IntermediateQueryBuilder initialQueryBuilder = createQueryBuilder(EMPTY_METADATA);
         DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE, X, Y);
 
-        ConstructionNode initialRootNode = new ConstructionNodeImpl(projectionAtom.getVariables());
+        ConstructionNode initialRootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
         initialQueryBuilder.init(projectionAtom, initialRootNode);
 
-        InnerJoinNode joinNode = new InnerJoinNodeImpl(Optional.empty());
+        InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
         initialQueryBuilder.addChild(initialRootNode, joinNode);
 
-        ConstructionNode leftConstructionNode = new ConstructionNodeImpl(ImmutableSet.of(X, Y),
+        ConstructionNode leftConstructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X, Y),
                 new ImmutableSubstitutionImpl<>(ImmutableMap.of(
                         X, generateURI2(A, B),
                         Y, generateURI1(B))),
@@ -237,7 +237,7 @@ public class SubstitutionPropagationTest {
         initialQueryBuilder.addChild(leftConstructionNode, DATA_NODE_1);
 
 
-        ConstructionNode rightConstructionNode = new ConstructionNodeImpl(ImmutableSet.of(X),
+        ConstructionNode rightConstructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X),
                 new ImmutableSubstitutionImpl<>(ImmutableMap.of(
                         X, generateURI2(C, D))),
                 Optional.empty());
@@ -283,13 +283,13 @@ public class SubstitutionPropagationTest {
         IntermediateQueryBuilder initialQueryBuilder = createQueryBuilder(EMPTY_METADATA);
         DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE, X, Y);
 
-        ConstructionNode initialRootNode = new ConstructionNodeImpl(projectionAtom.getVariables());
+        ConstructionNode initialRootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
         initialQueryBuilder.init(projectionAtom, initialRootNode);
 
-        InnerJoinNode joinNode = new InnerJoinNodeImpl(Optional.empty());
+        InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
         initialQueryBuilder.addChild(initialRootNode, joinNode);
 
-        ConstructionNode leftConstructionNode = new ConstructionNodeImpl(ImmutableSet.of(X, Y),
+        ConstructionNode leftConstructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X, Y),
                 new ImmutableSubstitutionImpl<>(ImmutableMap.of(
                         X, generateURI1(A),
                         Y, generateURI1(B))),
@@ -298,13 +298,13 @@ public class SubstitutionPropagationTest {
         initialQueryBuilder.addChild(leftConstructionNode, DATA_NODE_1);
 
 
-        ConstructionNode rightConstructionNode = new ConstructionNodeImpl(ImmutableSet.of(X),
+        ConstructionNode rightConstructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X),
                 new ImmutableSubstitutionImpl<>(ImmutableMap.of(
                         X, generateURI1(C))),
                 Optional.empty());
         initialQueryBuilder.addChild(joinNode, rightConstructionNode);
 
-        UnionNode initialUnionNode = new UnionNodeImpl(ImmutableSet.of(C));
+        UnionNode initialUnionNode = IQ_FACTORY.createUnionNode(ImmutableSet.of(C));
         initialQueryBuilder.addChild(rightConstructionNode, initialUnionNode);
 
         initialQueryBuilder.addChild(initialUnionNode, DATA_NODE_3);
@@ -320,7 +320,7 @@ public class SubstitutionPropagationTest {
         expectedQueryBuilder.init(projectionAtom, newRootNode);
         expectedQueryBuilder.addChild(newRootNode, joinNode);
         expectedQueryBuilder.addChild(joinNode, DATA_NODE_1);
-        UnionNode newUnionNode = new UnionNodeImpl(ImmutableSet.of(A));
+        UnionNode newUnionNode = IQ_FACTORY.createUnionNode(ImmutableSet.of(A));
         expectedQueryBuilder.addChild(joinNode, newUnionNode);
         expectedQueryBuilder.addChild(newUnionNode, buildExtensionalDataNode(TABLE3_PREDICATE, A, D));
         expectedQueryBuilder.addChild(newUnionNode, buildExtensionalDataNode(TABLE2_PREDICATE, A, E));
@@ -346,13 +346,13 @@ public class SubstitutionPropagationTest {
         IntermediateQueryBuilder initialQueryBuilder = createQueryBuilder(EMPTY_METADATA);
         DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE, X, Y);
 
-        ConstructionNode initialRootNode = new ConstructionNodeImpl(projectionAtom.getVariables());
+        ConstructionNode initialRootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
         initialQueryBuilder.init(projectionAtom, initialRootNode);
 
-        InnerJoinNode joinNode = new InnerJoinNodeImpl(Optional.empty());
+        InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
         initialQueryBuilder.addChild(initialRootNode, joinNode);
 
-        ConstructionNode leftConstructionNode = new ConstructionNodeImpl(ImmutableSet.of(X, Y),
+        ConstructionNode leftConstructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X, Y),
                 new ImmutableSubstitutionImpl<>(ImmutableMap.of(
                         X, generateURI1(A),
                         Y, generateURI1(B))),
@@ -361,17 +361,17 @@ public class SubstitutionPropagationTest {
         initialQueryBuilder.addChild(leftConstructionNode, DATA_NODE_1);
 
 
-        UnionNode initialUnionNode = new UnionNodeImpl(ImmutableSet.of(X));
+        UnionNode initialUnionNode = IQ_FACTORY.createUnionNode(ImmutableSet.of(X));
         initialQueryBuilder.addChild(joinNode, initialUnionNode);
 
-        ConstructionNode constructionNode2 = new ConstructionNodeImpl(ImmutableSet.of(X),
+        ConstructionNode constructionNode2 = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X),
                 new ImmutableSubstitutionImpl<>(ImmutableMap.of(
                         X, generateURI1(C))),
                 Optional.empty());
         initialQueryBuilder.addChild(initialUnionNode, constructionNode2);
         initialQueryBuilder.addChild(constructionNode2, DATA_NODE_3);
 
-        ConstructionNode constructionNode3 = new ConstructionNodeImpl(ImmutableSet.of(X),
+        ConstructionNode constructionNode3 = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X),
                 new ImmutableSubstitutionImpl<>(ImmutableMap.of(
                         X, generateURI1(E))),
                 Optional.empty());
@@ -388,7 +388,7 @@ public class SubstitutionPropagationTest {
         expectedQueryBuilder.init(projectionAtom, newRootNode);
         expectedQueryBuilder.addChild(newRootNode, joinNode);
         expectedQueryBuilder.addChild(joinNode, DATA_NODE_1);
-        UnionNode newUnionNode = new UnionNodeImpl(ImmutableSet.of(A));
+        UnionNode newUnionNode = IQ_FACTORY.createUnionNode(ImmutableSet.of(A));
         expectedQueryBuilder.addChild(joinNode, newUnionNode);
         expectedQueryBuilder.addChild(newUnionNode, buildExtensionalDataNode(TABLE3_PREDICATE, A, D));
         expectedQueryBuilder.addChild(newUnionNode, buildExtensionalDataNode(TABLE2_PREDICATE, A, F));
@@ -413,13 +413,13 @@ public class SubstitutionPropagationTest {
         IntermediateQueryBuilder initialQueryBuilder = createQueryBuilder(EMPTY_METADATA);
         DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE, X, Y);
 
-        ConstructionNode initialRootNode = new ConstructionNodeImpl(projectionAtom.getVariables());
+        ConstructionNode initialRootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
         initialQueryBuilder.init(projectionAtom, initialRootNode);
 
-        InnerJoinNode joinNode = new InnerJoinNodeImpl(Optional.empty());
+        InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
         initialQueryBuilder.addChild(initialRootNode, joinNode);
 
-        ConstructionNode leftConstructionNode = new ConstructionNodeImpl(ImmutableSet.of(X, Y),
+        ConstructionNode leftConstructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X, Y),
                 new ImmutableSubstitutionImpl<>(ImmutableMap.of(
                         X, generateURI1(A),
                         Y, generateURI1(B))),
@@ -428,17 +428,17 @@ public class SubstitutionPropagationTest {
         initialQueryBuilder.addChild(leftConstructionNode, DATA_NODE_1);
 
 
-        InnerJoinNode joinNode2 = new InnerJoinNodeImpl(Optional.empty());
+        InnerJoinNode joinNode2 = IQ_FACTORY.createInnerJoinNode();
         initialQueryBuilder.addChild(joinNode, joinNode2);
 
-        ConstructionNode constructionNode2 = new ConstructionNodeImpl(ImmutableSet.of(X),
+        ConstructionNode constructionNode2 = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X),
                 new ImmutableSubstitutionImpl<>(ImmutableMap.of(
                         X, generateURI1(C))),
                 Optional.empty());
         initialQueryBuilder.addChild(joinNode2, constructionNode2);
         initialQueryBuilder.addChild(constructionNode2, DATA_NODE_3);
 
-        ConstructionNode constructionNode3 = new ConstructionNodeImpl(ImmutableSet.of(X),
+        ConstructionNode constructionNode3 = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X),
                 new ImmutableSubstitutionImpl<>(ImmutableMap.of(
                         X, generateURI2(E,F))),
                 Optional.empty());
@@ -462,13 +462,13 @@ public class SubstitutionPropagationTest {
         IntermediateQueryBuilder initialQueryBuilder = createQueryBuilder(EMPTY_METADATA);
         DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE, X, Y);
 
-        ConstructionNode initialRootNode = new ConstructionNodeImpl(projectionAtom.getVariables());
+        ConstructionNode initialRootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
         initialQueryBuilder.init(projectionAtom, initialRootNode);
 
-        InnerJoinNode joinNode = new InnerJoinNodeImpl(Optional.empty());
+        InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
         initialQueryBuilder.addChild(initialRootNode, joinNode);
 
-        ConstructionNode leftConstructionNode = new ConstructionNodeImpl(ImmutableSet.of(X, Y),
+        ConstructionNode leftConstructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X, Y),
                 new ImmutableSubstitutionImpl<>(ImmutableMap.of(
                         X, generateURI1(A),
                         Y, generateURI1(B))),
@@ -477,17 +477,17 @@ public class SubstitutionPropagationTest {
         initialQueryBuilder.addChild(leftConstructionNode, DATA_NODE_1);
 
 
-        UnionNode initialUnionNode = new UnionNodeImpl(ImmutableSet.of(X));
+        UnionNode initialUnionNode = IQ_FACTORY.createUnionNode(ImmutableSet.of(X));
         initialQueryBuilder.addChild(joinNode, initialUnionNode);
 
-        ConstructionNode constructionNode2 = new ConstructionNodeImpl(ImmutableSet.of(X),
+        ConstructionNode constructionNode2 = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X),
                 new ImmutableSubstitutionImpl<>(ImmutableMap.of(
                         X, generateURI1(C))),
                 Optional.empty());
         initialQueryBuilder.addChild(initialUnionNode, constructionNode2);
         initialQueryBuilder.addChild(constructionNode2, DATA_NODE_3);
 
-        ConstructionNode constructionNode3 = new ConstructionNodeImpl(ImmutableSet.of(X),
+        ConstructionNode constructionNode3 = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X),
                 new ImmutableSubstitutionImpl<>(ImmutableMap.of(
                         X, generateURI2(E,F))),
                 Optional.empty());
@@ -504,7 +504,7 @@ public class SubstitutionPropagationTest {
         expectedQueryBuilder.init(projectionAtom, newRootNode);
         expectedQueryBuilder.addChild(newRootNode, joinNode);
         expectedQueryBuilder.addChild(joinNode, DATA_NODE_1);
-        UnionNode newUnionNode = new UnionNodeImpl(ImmutableSet.of(A));
+        UnionNode newUnionNode = IQ_FACTORY.createUnionNode(ImmutableSet.of(A));
         expectedQueryBuilder.addChild(joinNode, buildExtensionalDataNode(TABLE3_PREDICATE, A, D));
         propagateAndCompare(initialQuery, expectedQueryBuilder.build(), propagationProposal);
     }
@@ -514,13 +514,13 @@ public class SubstitutionPropagationTest {
         IntermediateQueryBuilder initialQueryBuilder = createQueryBuilder(EMPTY_METADATA);
         DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE, X, Y);
 
-        ConstructionNode initialRootNode = new ConstructionNodeImpl(projectionAtom.getVariables());
+        ConstructionNode initialRootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
         initialQueryBuilder.init(projectionAtom, initialRootNode);
 
-        InnerJoinNode joinNode = new InnerJoinNodeImpl(Optional.empty());
+        InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
         initialQueryBuilder.addChild(initialRootNode, joinNode);
 
-        ConstructionNode leftConstructionNode = new ConstructionNodeImpl(ImmutableSet.of(X, Y),
+        ConstructionNode leftConstructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X, Y),
                 new ImmutableSubstitutionImpl<>(ImmutableMap.of(
                         X, generateURI2(A, B),
                         Y, generateURI1(B))),
@@ -529,13 +529,13 @@ public class SubstitutionPropagationTest {
         initialQueryBuilder.addChild(leftConstructionNode, DATA_NODE_1);
 
 
-        ConstructionNode rightConstructionNode = new ConstructionNodeImpl(ImmutableSet.of(X),
+        ConstructionNode rightConstructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X),
                 new ImmutableSubstitutionImpl<>(ImmutableMap.of(
                         X, generateURI2(C, D))),
                 Optional.empty());
         initialQueryBuilder.addChild(joinNode, rightConstructionNode);
 
-        UnionNode initialUnionNode = new UnionNodeImpl(ImmutableSet.of(C, D));
+        UnionNode initialUnionNode = IQ_FACTORY.createUnionNode(ImmutableSet.of(C, D));
         initialQueryBuilder.addChild(rightConstructionNode, initialUnionNode);
 
         initialQueryBuilder.addChild(initialUnionNode, DATA_NODE_3);
@@ -551,7 +551,7 @@ public class SubstitutionPropagationTest {
         expectedQueryBuilder.init(projectionAtom, newRootNode);
         expectedQueryBuilder.addChild(newRootNode, joinNode);
         expectedQueryBuilder.addChild(joinNode, DATA_NODE_1);
-        UnionNode newUnionNode = new UnionNodeImpl(ImmutableSet.of(A, B));
+        UnionNode newUnionNode = IQ_FACTORY.createUnionNode(ImmutableSet.of(A, B));
         expectedQueryBuilder.addChild(joinNode, newUnionNode);
         expectedQueryBuilder.addChild(newUnionNode, buildExtensionalDataNode(TABLE3_PREDICATE, A, B));
         expectedQueryBuilder.addChild(newUnionNode, buildExtensionalDataNode(TABLE2_PREDICATE, A, B));
@@ -577,26 +577,26 @@ public class SubstitutionPropagationTest {
         IntermediateQueryBuilder initialQueryBuilder = createQueryBuilder(EMPTY_METADATA);
         DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE, X, Y);
 
-        ConstructionNode initialRootNode = new ConstructionNodeImpl(projectionAtom.getVariables());
+        ConstructionNode initialRootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
         initialQueryBuilder.init(projectionAtom, initialRootNode);
 
-        InnerJoinNode joinNode = new InnerJoinNodeImpl(Optional.empty());
+        InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
         initialQueryBuilder.addChild(initialRootNode, joinNode);
 
-        ConstructionNode leftConstructionNode = new ConstructionNodeImpl(ImmutableSet.of(X),
+        ConstructionNode leftConstructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X),
                 new ImmutableSubstitutionImpl<>(ImmutableMap.of(
                         X, generateURI2(C, D))),
                 Optional.empty());
         initialQueryBuilder.addChild(joinNode, leftConstructionNode);
 
-        ConstructionNode rightConstructionNode = new ConstructionNodeImpl(ImmutableSet.of(X, Y),
+        ConstructionNode rightConstructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X, Y),
                 new ImmutableSubstitutionImpl<>(ImmutableMap.of(
                         X, generateURI2(A, B),
                         Y, generateURI1(B))),
                 Optional.empty());
 
 
-        UnionNode initialUnionNode = new UnionNodeImpl(ImmutableSet.of(C, D));
+        UnionNode initialUnionNode = IQ_FACTORY.createUnionNode(ImmutableSet.of(C, D));
         initialQueryBuilder.addChild(leftConstructionNode, initialUnionNode);
 
         initialQueryBuilder.addChild(joinNode, rightConstructionNode);
@@ -615,7 +615,7 @@ public class SubstitutionPropagationTest {
         expectedQueryBuilder.init(projectionAtom, newRootNode);
         expectedQueryBuilder.addChild(newRootNode, joinNode);
 
-        UnionNode newUnionNode = new UnionNodeImpl(ImmutableSet.of(A, B));
+        UnionNode newUnionNode = IQ_FACTORY.createUnionNode(ImmutableSet.of(A, B));
         expectedQueryBuilder.addChild(joinNode, newUnionNode);
         expectedQueryBuilder.addChild(joinNode, DATA_NODE_1);
         expectedQueryBuilder.addChild(newUnionNode, buildExtensionalDataNode(TABLE3_PREDICATE, A, B));
@@ -640,13 +640,13 @@ public class SubstitutionPropagationTest {
         IntermediateQueryBuilder initialQueryBuilder = createQueryBuilder(EMPTY_METADATA);
         DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE, X, Y);
 
-        ConstructionNode initialRootNode = new ConstructionNodeImpl(projectionAtom.getVariables());
+        ConstructionNode initialRootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
         initialQueryBuilder.init(projectionAtom, initialRootNode);
 
-        InnerJoinNode joinNode = new InnerJoinNodeImpl(Optional.empty());
+        InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
         initialQueryBuilder.addChild(initialRootNode, joinNode);
 
-        ConstructionNode leftConstructionNode = new ConstructionNodeImpl(ImmutableSet.of(X, Y),
+        ConstructionNode leftConstructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X, Y),
                 new ImmutableSubstitutionImpl<>(ImmutableMap.of(
                         X, generateURI2(A, B),
                         Y, generateURI1(B))),
@@ -655,17 +655,17 @@ public class SubstitutionPropagationTest {
         initialQueryBuilder.addChild(leftConstructionNode, DATA_NODE_1);
 
 
-        UnionNode initialUnionNode = new UnionNodeImpl(ImmutableSet.of(X));
+        UnionNode initialUnionNode = IQ_FACTORY.createUnionNode(ImmutableSet.of(X));
         initialQueryBuilder.addChild(joinNode, initialUnionNode);
 
-        ConstructionNode constructionNode2 = new ConstructionNodeImpl(ImmutableSet.of(X),
+        ConstructionNode constructionNode2 = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X),
                 new ImmutableSubstitutionImpl<>(ImmutableMap.of(
                         X, generateURI2(C, D))),
                 Optional.empty());
         initialQueryBuilder.addChild(initialUnionNode, constructionNode2);
         initialQueryBuilder.addChild(constructionNode2, DATA_NODE_3);
 
-        ConstructionNode constructionNode3 = new ConstructionNodeImpl(ImmutableSet.of(X),
+        ConstructionNode constructionNode3 = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X),
                 new ImmutableSubstitutionImpl<>(ImmutableMap.of(
                         X, generateURI2(E, F))),
                 Optional.empty());
@@ -682,7 +682,7 @@ public class SubstitutionPropagationTest {
         expectedQueryBuilder.init(projectionAtom, newRootNode);
         expectedQueryBuilder.addChild(newRootNode, joinNode);
         expectedQueryBuilder.addChild(joinNode, DATA_NODE_1);
-        UnionNode newUnionNode = new UnionNodeImpl(ImmutableSet.of(A, B));
+        UnionNode newUnionNode = IQ_FACTORY.createUnionNode(ImmutableSet.of(A, B));
         expectedQueryBuilder.addChild(joinNode, newUnionNode);
         expectedQueryBuilder.addChild(newUnionNode, buildExtensionalDataNode(TABLE3_PREDICATE, A, B));
         expectedQueryBuilder.addChild(newUnionNode, buildExtensionalDataNode(TABLE2_PREDICATE, A, B));
@@ -708,16 +708,16 @@ public class SubstitutionPropagationTest {
         IntermediateQueryBuilder initialQueryBuilder = createQueryBuilder(EMPTY_METADATA);
         DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE, X, Y);
 
-        ConstructionNode initialRootNode = new ConstructionNodeImpl(projectionAtom.getVariables());
+        ConstructionNode initialRootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
         initialQueryBuilder.init(projectionAtom, initialRootNode);
 
-        InnerJoinNode joinNode = new InnerJoinNodeImpl(Optional.empty());
+        InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
         initialQueryBuilder.addChild(initialRootNode, joinNode);
 
-        UnionNode initialUnionNode = new UnionNodeImpl(ImmutableSet.of(X));
+        UnionNode initialUnionNode = IQ_FACTORY.createUnionNode(ImmutableSet.of(X));
         initialQueryBuilder.addChild(joinNode, initialUnionNode);
 
-        ConstructionNode rightConstructionNode = new ConstructionNodeImpl(ImmutableSet.of(X, Y),
+        ConstructionNode rightConstructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X, Y),
                 new ImmutableSubstitutionImpl<>(ImmutableMap.of(
                         X, generateURI2(A, B),
                         Y, generateURI1(B))),
@@ -725,14 +725,14 @@ public class SubstitutionPropagationTest {
         initialQueryBuilder.addChild(joinNode, rightConstructionNode);
         initialQueryBuilder.addChild(rightConstructionNode, DATA_NODE_1);
 
-        ConstructionNode constructionNode2 = new ConstructionNodeImpl(ImmutableSet.of(X),
+        ConstructionNode constructionNode2 = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X),
                 new ImmutableSubstitutionImpl<>(ImmutableMap.of(
                         X, generateURI2(C, D))),
                 Optional.empty());
         initialQueryBuilder.addChild(initialUnionNode, constructionNode2);
         initialQueryBuilder.addChild(constructionNode2, DATA_NODE_3);
 
-        ConstructionNode constructionNode3 = new ConstructionNodeImpl(ImmutableSet.of(X),
+        ConstructionNode constructionNode3 = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X),
                 new ImmutableSubstitutionImpl<>(ImmutableMap.of(
                         X, generateURI2(E, F))),
                 Optional.empty());
@@ -748,7 +748,7 @@ public class SubstitutionPropagationTest {
         ConstructionNode newRootNode = rightConstructionNode;
         expectedQueryBuilder.init(projectionAtom, newRootNode);
         expectedQueryBuilder.addChild(newRootNode, joinNode);
-        UnionNode newUnionNode = new UnionNodeImpl(ImmutableSet.of(A, B));
+        UnionNode newUnionNode = IQ_FACTORY.createUnionNode(ImmutableSet.of(A, B));
         expectedQueryBuilder.addChild(joinNode, newUnionNode);
         expectedQueryBuilder.addChild(joinNode, DATA_NODE_1);
         expectedQueryBuilder.addChild(newUnionNode, buildExtensionalDataNode(TABLE3_PREDICATE, A, B));
@@ -774,13 +774,13 @@ public class SubstitutionPropagationTest {
         IntermediateQueryBuilder initialQueryBuilder = createQueryBuilder(EMPTY_METADATA);
         DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE, X, Y);
 
-        ConstructionNode initialRootNode = new ConstructionNodeImpl(projectionAtom.getVariables());
+        ConstructionNode initialRootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
         initialQueryBuilder.init(projectionAtom, initialRootNode);
 
-        LeftJoinNode leftJoin = new LeftJoinNodeImpl(Optional.empty());
+        LeftJoinNode leftJoin = IQ_FACTORY.createLeftJoinNode();
         initialQueryBuilder.addChild(initialRootNode, leftJoin);
 
-        ConstructionNode leftConstructionNode = new ConstructionNodeImpl(ImmutableSet.of(X, Y),
+        ConstructionNode leftConstructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X, Y),
                 new ImmutableSubstitutionImpl<>(ImmutableMap.of(
                         X, generateURI2(A, B),
                         Y, generateURI1(B))),
@@ -788,11 +788,11 @@ public class SubstitutionPropagationTest {
         initialQueryBuilder.addChild(leftJoin, leftConstructionNode, LEFT);
         initialQueryBuilder.addChild(leftConstructionNode, DATA_NODE_1);
 
-        FilterNode filterNode = new FilterNodeImpl(DATA_FACTORY.getImmutableExpression(ExpressionOperation.EQ,
+        FilterNode filterNode = IQ_FACTORY.createFilterNode(DATA_FACTORY.getImmutableExpression(ExpressionOperation.EQ,
                 X, generateURI1(DATA_FACTORY.getConstantLiteral("two"))));
         initialQueryBuilder.addChild(leftJoin, filterNode, RIGHT);
 
-        ConstructionNode rightConstructionNode = new ConstructionNodeImpl(ImmutableSet.of(X),
+        ConstructionNode rightConstructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X),
                 new ImmutableSubstitutionImpl<>(ImmutableMap.of(
                         X, generateURI2(C, D))),
                 Optional.empty());
@@ -830,19 +830,19 @@ public class SubstitutionPropagationTest {
         IntermediateQueryBuilder initialQueryBuilder = createQueryBuilder(EMPTY_METADATA);
         DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE, X, Y);
 
-        ConstructionNode initialRootNode = new ConstructionNodeImpl(projectionAtom.getVariables());
+        ConstructionNode initialRootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
         initialQueryBuilder.init(projectionAtom, initialRootNode);
 
-        LeftJoinNode leftJoinNode = new LeftJoinNodeImpl(Optional.empty());
+        LeftJoinNode leftJoinNode = IQ_FACTORY.createLeftJoinNode();
         initialQueryBuilder.addChild(initialRootNode, leftJoinNode);
 
-        ConstructionNode leftConstructionNode = new ConstructionNodeImpl(ImmutableSet.of(X),
+        ConstructionNode leftConstructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X),
                 new ImmutableSubstitutionImpl<>(ImmutableMap.of(X, generateURI1(A))),
                 Optional.empty());
         initialQueryBuilder.addChild(leftJoinNode, leftConstructionNode, LEFT);
         initialQueryBuilder.addChild(leftConstructionNode, DATA_NODE_1);
 
-        ConstructionNode rightConstructionNode = new ConstructionNodeImpl(ImmutableSet.of(X, Y),
+        ConstructionNode rightConstructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X, Y),
                 new ImmutableSubstitutionImpl<>(ImmutableMap.of(X, generateURI2(C, D),
                         Y, generateURI1(D))),
                 Optional.empty());
@@ -859,7 +859,7 @@ public class SubstitutionPropagationTest {
 
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(EMPTY_METADATA);
 
-        ConstructionNode expectedRootNode = new ConstructionNodeImpl(projectionAtom.getVariables(),
+        ConstructionNode expectedRootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
                 new ImmutableSubstitutionImpl<>(ImmutableMap.of(
                         X, generateURI1(A),
                         Y, OBDAVocabulary.NULL)), Optional.empty());
@@ -882,22 +882,22 @@ public class SubstitutionPropagationTest {
         IntermediateQueryBuilder initialQueryBuilder = createQueryBuilder(EMPTY_METADATA);
         DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE, X, Y);
 
-        ConstructionNode initialRootNode = new ConstructionNodeImpl(projectionAtom.getVariables());
+        ConstructionNode initialRootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
         initialQueryBuilder.init(projectionAtom, initialRootNode);
 
-        ConstructionNode uselessConstructionNode = new ConstructionNodeImpl(projectionAtom.getVariables());
+        ConstructionNode uselessConstructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
         initialQueryBuilder.addChild(initialRootNode, uselessConstructionNode);
 
-        UnionNode unionNode = new UnionNodeImpl(projectionAtom.getVariables());
+        UnionNode unionNode = IQ_FACTORY.createUnionNode(projectionAtom.getVariables());
         initialQueryBuilder.addChild(uselessConstructionNode, unionNode);
 
-        ConstructionNode leftConstructionNode = new ConstructionNodeImpl(projectionAtom.getVariables(),
+        ConstructionNode leftConstructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
                 new ImmutableSubstitutionImpl<>(ImmutableMap.of(X, generateURI1(A),
                         Y, generateURI1(B))), Optional.empty());
         initialQueryBuilder.addChild(unionNode, leftConstructionNode);
         initialQueryBuilder.addChild(leftConstructionNode, DATA_NODE_1);
 
-        ConstructionNode rightConstructionNode = new ConstructionNodeImpl(projectionAtom.getVariables(),
+        ConstructionNode rightConstructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
                 new ImmutableSubstitutionImpl<>(ImmutableMap.of(X, generateURI1(C),
                         Y, generateURI1(D))), Optional.empty());
         initialQueryBuilder.addChild(unionNode, rightConstructionNode);
@@ -911,7 +911,7 @@ public class SubstitutionPropagationTest {
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(EMPTY_METADATA);
 
         expectedQueryBuilder.init(projectionAtom, leftConstructionNode);
-        UnionNode newUnionNode = new UnionNodeImpl(ImmutableSet.of(A, B));
+        UnionNode newUnionNode = IQ_FACTORY.createUnionNode(ImmutableSet.of(A, B));
         expectedQueryBuilder.addChild(leftConstructionNode, newUnionNode);
         expectedQueryBuilder.addChild(newUnionNode, DATA_NODE_1);
         expectedQueryBuilder.addChild(newUnionNode, buildExtensionalDataNode(TABLE3_PREDICATE, A, B));
@@ -925,13 +925,13 @@ public class SubstitutionPropagationTest {
         IntermediateQueryBuilder initialQueryBuilder = createQueryBuilder(EMPTY_METADATA);
         DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE, X, Y);
 
-        ConstructionNode initialRootNode = new ConstructionNodeImpl(projectionAtom.getVariables());
+        ConstructionNode initialRootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
         initialQueryBuilder.init(projectionAtom, initialRootNode);
 
-        ConstructionNode uselessConstructionNode = new ConstructionNodeImpl(projectionAtom.getVariables());
+        ConstructionNode uselessConstructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
         initialQueryBuilder.addChild(initialRootNode, uselessConstructionNode);
 
-        ConstructionNode thirdConstructionNode = new ConstructionNodeImpl(projectionAtom.getVariables(),
+        ConstructionNode thirdConstructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
                 new ImmutableSubstitutionImpl<>(ImmutableMap.of(X, generateURI2(A,B),
                         Y, OBDAVocabulary.NULL)), Optional.empty());
         initialQueryBuilder.addChild(uselessConstructionNode, thirdConstructionNode);
@@ -957,13 +957,13 @@ public class SubstitutionPropagationTest {
         IntermediateQueryBuilder initialQueryBuilder = createQueryBuilder(EMPTY_METADATA);
         DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE, X, Y);
 
-        ConstructionNode initialRootNode = new ConstructionNodeImpl(projectionAtom.getVariables());
+        ConstructionNode initialRootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
         initialQueryBuilder.init(projectionAtom, initialRootNode);
 
-        InnerJoinNode joinNode = new InnerJoinNodeImpl(Optional.empty());
+        InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
         initialQueryBuilder.addChild(initialRootNode, joinNode);
 
-        ConstructionNode leftConstructionNode = new ConstructionNodeImpl(ImmutableSet.of(X, Y),
+        ConstructionNode leftConstructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X, Y),
                 new ImmutableSubstitutionImpl<>(ImmutableMap.of(
                         X, generateURI1(A),
                         Y, generateURI1(B))),
@@ -972,13 +972,13 @@ public class SubstitutionPropagationTest {
         initialQueryBuilder.addChild(leftConstructionNode, DATA_NODE_1);
 
 
-        ConstructionNode rightConstructionNode = new ConstructionNodeImpl(ImmutableSet.of(X),
+        ConstructionNode rightConstructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X),
                 new ImmutableSubstitutionImpl<>(ImmutableMap.of(
                         X, generateURI1(C))),
                 Optional.empty());
         initialQueryBuilder.addChild(joinNode, rightConstructionNode);
 
-        UnionNode initialUnionNode = new UnionNodeImpl(ImmutableSet.of(C));
+        UnionNode initialUnionNode = IQ_FACTORY.createUnionNode(ImmutableSet.of(C));
         initialQueryBuilder.addChild(rightConstructionNode, initialUnionNode);
 
         initialQueryBuilder.addChild(initialUnionNode, DATA_NODE_3);
@@ -990,19 +990,19 @@ public class SubstitutionPropagationTest {
                 new SubstitutionPropagationProposalImpl<>(rightConstructionNode, rightConstructionNode.getSubstitution());
 
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(EMPTY_METADATA);
-        ConstructionNode newRootNode = new ConstructionNodeImpl(ImmutableSet.of(X, Y),
+        ConstructionNode newRootNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X, Y),
                 new ImmutableSubstitutionImpl<>(ImmutableMap.of(
                         X, generateURI1(C))),
                 Optional.empty());
         expectedQueryBuilder.init(projectionAtom, newRootNode);
         expectedQueryBuilder.addChild(newRootNode, joinNode);
-        ConstructionNode constructNode = new ConstructionNodeImpl(ImmutableSet.of(C, Y),
+        ConstructionNode constructNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(C, Y),
                 new ImmutableSubstitutionImpl<>(ImmutableMap.of(
                         Y, generateURI1(B))),
                 Optional.empty());
         expectedQueryBuilder.addChild(joinNode, constructNode);
         expectedQueryBuilder.addChild(constructNode, buildExtensionalDataNode(TABLE1_PREDICATE, C, B));
-        UnionNode newUnionNode = new UnionNodeImpl(ImmutableSet.of(C));
+        UnionNode newUnionNode = IQ_FACTORY.createUnionNode(ImmutableSet.of(C));
         expectedQueryBuilder.addChild(joinNode, newUnionNode);
         expectedQueryBuilder.addChild(newUnionNode, buildExtensionalDataNode(TABLE3_PREDICATE, C, D));
         expectedQueryBuilder.addChild(newUnionNode, buildExtensionalDataNode(TABLE2_PREDICATE, C, E));
@@ -1054,7 +1054,7 @@ public class SubstitutionPropagationTest {
     }
     
     private static ExtensionalDataNode buildExtensionalDataNode(AtomPredicate predicate, VariableOrGroundTerm ... arguments) {
-        return new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(predicate, arguments));
+        return IQ_FACTORY.createExtensionalDataNode(DATA_FACTORY.getDataAtom(predicate, arguments));
     }
 
 }

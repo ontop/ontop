@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import fj.P;
 import fj.P2;
+import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.pivotalrepr.DataNode;
 import it.unibz.inf.ontop.pivotalrepr.datalog.impl.DatalogProgram2QueryConverterImpl;
@@ -28,13 +29,14 @@ public class DatalogConversionTools {
     /**
      * TODO: explain
      */
-    public static DataNode createDataNode(DataAtom dataAtom, Collection<Predicate> tablePredicates) {
+    public static DataNode createDataNode(IntermediateQueryFactory iqFactory, DataAtom dataAtom,
+                                          Collection<Predicate> tablePredicates) {
 
         if (tablePredicates.contains(dataAtom.getPredicate())) {
-            return new ExtensionalDataNodeImpl(dataAtom);
+            return iqFactory.createExtensionalDataNode(dataAtom);
         }
 
-        return new IntensionalDataNodeImpl(dataAtom);
+        return iqFactory.createIntensionalDataNode(dataAtom);
     }
 
 

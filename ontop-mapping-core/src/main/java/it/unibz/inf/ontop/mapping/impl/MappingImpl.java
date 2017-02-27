@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
+import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.mapping.Mapping;
 import it.unibz.inf.ontop.mapping.MappingMetadata;
 import it.unibz.inf.ontop.model.AtomPredicate;
@@ -29,11 +30,12 @@ public class MappingImpl implements Mapping {
 
     @AssistedInject
     private MappingImpl(@Assisted MappingMetadata metadata,
-                        @Assisted Stream<IntermediateQuery> queryStream) {
+                        @Assisted Stream<IntermediateQuery> queryStream,
+                        IntermediateQueryFactory iqFactory) {
         AtomicInteger i = new AtomicInteger(0);
         this.metadata = metadata;
         this.definitions = queryStream
-                .map(m -> appendSuffixToVariableNames(m, i.incrementAndGet()))
+                .map(m -> appendSuffixToVariableNames(iqFactory, m, i.incrementAndGet()))
                 .collect(ImmutableCollectors.toMap(
                         q -> q.getProjectionAtom().getPredicate(),
                         q -> q
@@ -42,8 +44,9 @@ public class MappingImpl implements Mapping {
 
     @AssistedInject
     private MappingImpl(@Assisted MappingMetadata metadata,
-                        @Assisted ImmutableMap<AtomPredicate, IntermediateQuery> mappingMap) {
-        this(metadata, mappingMap.values().stream());
+                        @Assisted ImmutableMap<AtomPredicate, IntermediateQuery> mappingMap,
+                        IntermediateQueryFactory iqFactory) {
+        this(metadata, mappingMap.values().stream(), iqFactory);
     }
 
     @Override
@@ -61,11 +64,12 @@ public class MappingImpl implements Mapping {
         return definitions.keySet();
     }
 
-    private static IntermediateQuery appendSuffixToVariableNames(IntermediateQuery query, int suffix) {
+    private static IntermediateQuery appendSuffixToVariableNames(IntermediateQueryFactory iqFactory,
+                                                                 IntermediateQuery query, int suffix) {
         Map<Variable, Variable> substitutionMap =
                 query.getKnownVariables().stream()
                         .collect(Collectors.toMap(v -> v, v -> DATA_FACTORY.getVariable(v.getName()+"m"+suffix)));
-        QueryRenamer queryRenamer = new QueryRenamer(new InjectiveVar2VarSubstitutionImpl(substitutionMap));
+        QueryRenamer queryRenamer = new QueryRenamer(iqFactory, new InjectiveVar2VarSubstitutionImpl(substitutionMap));
         return queryRenamer.transform(query);
     }
 }

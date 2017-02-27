@@ -1,7 +1,9 @@
 package it.unibz.inf.ontop.executor.leftjoin;
 
+import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.executor.SimpleNodeCentricExecutor;
+import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.pivotalrepr.*;
 import it.unibz.inf.ontop.pivotalrepr.impl.InnerJoinNodeImpl;
@@ -22,6 +24,13 @@ import static it.unibz.inf.ontop.pivotalrepr.BinaryOrderedOperatorNode.ArgumentP
  */
 @Singleton
 public class ForeignKeyLeftJoinExecutor implements SimpleNodeCentricExecutor<LeftJoinNode, LeftJoinOptimizationProposal> {
+
+    private final IntermediateQueryFactory iqFactory;
+
+    @Inject
+    private ForeignKeyLeftJoinExecutor(IntermediateQueryFactory iqFactory) {
+        this.iqFactory = iqFactory;
+    }
 
     /**
      * This method assumes that all redundant IS_NOT_NULL predicates
@@ -148,7 +157,7 @@ public class ForeignKeyLeftJoinExecutor implements SimpleNodeCentricExecutor<Lef
          * as we only replace left join by inner join if the filter condition
          * is not present.
          */
-        InnerJoinNode newTopNode = new InnerJoinNodeImpl(Optional.empty());
+        InnerJoinNode newTopNode = iqFactory.createInnerJoinNode();
         treeComponent.replaceNode(leftJoinNode, newTopNode);
 
         return new NodeCentricOptimizationResultsImpl<>(query, Optional.of(newTopNode));

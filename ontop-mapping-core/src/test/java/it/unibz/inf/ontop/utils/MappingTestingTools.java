@@ -14,7 +14,7 @@ import it.unibz.inf.ontop.sql.DBMetadataTestingTools;
 public class MappingTestingTools {
 
     private static final ExecutorRegistry EXECUTOR_REGISTRY;
-    private static final IntermediateQueryFactory MODEL_FACTORY;
+    public static final IntermediateQueryFactory IQ_FACTORY;
     public static final DBMetadata EMPTY_METADATA = DBMetadataTestingTools.createDummyMetadata();
 
     public static final OBDADataFactory DATA_FACTORY = OntopModelSingletons.DATA_FACTORY;
@@ -29,11 +29,11 @@ public class MappingTestingTools {
 
         Injector injector = defaultConfiguration.getInjector();
         EXECUTOR_REGISTRY = defaultConfiguration.getExecutorRegistry();
-        MODEL_FACTORY = injector.getInstance(IntermediateQueryFactory.class);
+        IQ_FACTORY = injector.getInstance(IntermediateQueryFactory.class);
         MAPPING_FACTORY = injector.getInstance(MappingFactory.class);
     }
 
     public static IntermediateQueryBuilder createQueryBuilder(DBMetadata dbMetadata) {
-        return MODEL_FACTORY.createIQBuilder(dbMetadata, EXECUTOR_REGISTRY);
+        return IQ_FACTORY.createIQBuilder(dbMetadata, EXECUTOR_REGISTRY);
     }
 }

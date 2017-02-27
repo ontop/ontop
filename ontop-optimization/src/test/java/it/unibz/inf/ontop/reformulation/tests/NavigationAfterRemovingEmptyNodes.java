@@ -14,8 +14,6 @@ import it.unibz.inf.ontop.pivotalrepr.proposal.impl.InnerJoinOptimizationProposa
 import it.unibz.inf.ontop.pivotalrepr.proposal.impl.RemoveEmptyNodeProposalImpl;
 import org.junit.Test;
 
-import java.util.Optional;
-
 import static junit.framework.Assert.assertTrue;
 import static junit.framework.TestCase.assertFalse;
 import static it.unibz.inf.ontop.OptimizationTestingTools.*;
@@ -68,20 +66,20 @@ public class NavigationAfterRemovingEmptyNodes {
         IntermediateQueryBuilder initialQueryBuilder = createQueryBuilder(EMPTY_METADATA);
         DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_1_PREDICATE, A);
 
-        ConstructionNode initialRootNode = new ConstructionNodeImpl(projectionAtom.getVariables());
+        ConstructionNode initialRootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
         initialQueryBuilder.init(projectionAtom, initialRootNode);
 
-        UnionNode unionNode = new UnionNodeImpl(projectionAtom.getVariables());
+        UnionNode unionNode = IQ_FACTORY.createUnionNode(projectionAtom.getVariables());
         initialQueryBuilder.addChild(initialRootNode, unionNode);
         initialQueryBuilder.addChild(unionNode, DATA_NODE_1);
 
-        InnerJoinNode joinNode = new InnerJoinNodeImpl(Optional.empty());
+        InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
         initialQueryBuilder.addChild(unionNode, joinNode);
 
-        FilterNode filterNode = new FilterNodeImpl(DATA_FACTORY.getImmutableExpression(ExpressionOperation.GT, A,
+        FilterNode filterNode = IQ_FACTORY.createFilterNode(DATA_FACTORY.getImmutableExpression(ExpressionOperation.GT, A,
                 DATA_FACTORY.getConstantLiteral("2")));
         initialQueryBuilder.addChild(joinNode, filterNode);
-        EmptyNode emptyNode = new EmptyNodeImpl(ImmutableSet.of(A));
+        EmptyNode emptyNode = IQ_FACTORY.createEmptyNode(ImmutableSet.of(A));
         initialQueryBuilder.addChild(filterNode, emptyNode);
         initialQueryBuilder.addChild(joinNode, buildExtensionalDataNode(TABLE2_PREDICATE, A, C));
 
@@ -108,16 +106,16 @@ public class NavigationAfterRemovingEmptyNodes {
         IntermediateQueryBuilder initialQueryBuilder = createQueryBuilder(EMPTY_METADATA);
         DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_1_PREDICATE, A);
 
-        ConstructionNode initialRootNode = new ConstructionNodeImpl(projectionAtom.getVariables());
+        ConstructionNode initialRootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
         initialQueryBuilder.init(projectionAtom, initialRootNode);
 
-        UnionNode unionNode = new UnionNodeImpl(projectionAtom.getVariables());
+        UnionNode unionNode = IQ_FACTORY.createUnionNode(projectionAtom.getVariables());
         initialQueryBuilder.addChild(initialRootNode, unionNode);
 
-        InnerJoinNode unsatisfiedJoinNode = new InnerJoinNodeImpl(Optional.of(DATA_FACTORY.getImmutableExpression(
+        InnerJoinNode unsatisfiedJoinNode = IQ_FACTORY.createInnerJoinNode(DATA_FACTORY.getImmutableExpression(
                 ExpressionOperation.EQ,
                 DATA_FACTORY.getConstantLiteral("2", Predicate.COL_TYPE.INTEGER),
-                DATA_FACTORY.getConstantLiteral("3", Predicate.COL_TYPE.INTEGER))));
+                DATA_FACTORY.getConstantLiteral("3", Predicate.COL_TYPE.INTEGER)));
         initialQueryBuilder.addChild(unionNode, unsatisfiedJoinNode);
         initialQueryBuilder.addChild(unsatisfiedJoinNode, DATA_NODE_1);
         initialQueryBuilder.addChild(unsatisfiedJoinNode, DATA_NODE_2);
@@ -147,7 +145,7 @@ public class NavigationAfterRemovingEmptyNodes {
     }
 
     private static ExtensionalDataNode buildExtensionalDataNode(AtomPredicate predicate, VariableOrGroundTerm ... arguments) {
-        return new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(predicate, arguments));
+        return IQ_FACTORY.createExtensionalDataNode(DATA_FACTORY.getDataAtom(predicate, arguments));
     }
 
 }

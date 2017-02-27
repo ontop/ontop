@@ -1,12 +1,13 @@
 package it.unibz.inf.ontop.executor.unsatisfiable;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.model.Constant;
 import it.unibz.inf.ontop.model.ImmutableSubstitution;
 import it.unibz.inf.ontop.model.Variable;
 import it.unibz.inf.ontop.pivotalrepr.*;
-import it.unibz.inf.ontop.pivotalrepr.impl.EmptyNodeImpl;
 import it.unibz.inf.ontop.pivotalrepr.impl.QueryTreeComponent;
 import it.unibz.inf.ontop.pivotalrepr.proposal.InvalidQueryOptimizationProposalException;
 import it.unibz.inf.ontop.pivotalrepr.proposal.NodeTracker;
@@ -24,6 +25,13 @@ import static it.unibz.inf.ontop.owlrefplatform.core.basicoperations.ImmutableSu
  */
 @Singleton
 public class RemoveEmptyNodesExecutorImpl implements RemoveEmptyNodesExecutor {
+
+    private final IntermediateQueryFactory iqFactory;
+
+    @Inject
+    private RemoveEmptyNodesExecutorImpl(IntermediateQueryFactory iqFactory) {
+        this.iqFactory = iqFactory;
+    }
 
     /**
      * TODO: explain
@@ -43,7 +51,7 @@ public class RemoveEmptyNodesExecutorImpl implements RemoveEmptyNodesExecutor {
      *
      * Recursive!
      */
-    private static NodeTrackingResults<EmptyNode> reactToEmptyChildNode(IntermediateQuery query, EmptyNode emptyNode,
+    private NodeTrackingResults<EmptyNode> reactToEmptyChildNode(IntermediateQuery query, EmptyNode emptyNode,
                                                                         QueryTreeComponent treeComponent,
                                                                         Optional<NodeTracker> optionalTracker)
             throws EmptyQueryException {
@@ -90,7 +98,7 @@ public class RemoveEmptyNodesExecutorImpl implements RemoveEmptyNodesExecutor {
 
             case DECLARE_AS_EMPTY:
                 optionalTracker.ifPresent(tr -> tr.recordUpcomingRemoval(query, originalParentNode));
-                EmptyNode newEmptyNode = new EmptyNodeImpl(transformationProposal.getNullVariables());
+                EmptyNode newEmptyNode = iqFactory.createEmptyNode(transformationProposal.getNullVariables());
                 treeComponent.replaceSubTree(originalParentNode, newEmptyNode);
 
                 /**

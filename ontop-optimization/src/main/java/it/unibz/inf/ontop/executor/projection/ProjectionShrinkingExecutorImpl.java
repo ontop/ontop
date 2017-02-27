@@ -2,6 +2,8 @@ package it.unibz.inf.ontop.executor.projection;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import com.google.inject.Inject;
+import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.model.ImmutableTerm;
 import it.unibz.inf.ontop.model.Variable;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionImpl;
@@ -17,12 +19,22 @@ import java.util.Optional;
 
 public class ProjectionShrinkingExecutorImpl implements ProjectionShrinkingExecutor {
 
+    private final IntermediateQueryFactory iqFactory;
+
+    @Inject
+    private ProjectionShrinkingExecutorImpl(IntermediateQueryFactory iqFactory) {
+        this.iqFactory = iqFactory;
+    }
+
     @Override
-    public NodeCentricOptimizationResults<ExplicitVariableProjectionNode> apply(ProjectionShrinkingProposal proposal, IntermediateQuery query, QueryTreeComponent treeComponent) throws InvalidQueryOptimizationProposalException, EmptyQueryException {
+    public NodeCentricOptimizationResults<ExplicitVariableProjectionNode> apply(ProjectionShrinkingProposal proposal,
+                                                                                IntermediateQuery query,
+                                                                                QueryTreeComponent treeComponent)
+            throws InvalidQueryOptimizationProposalException, EmptyQueryException {
         ExplicitVariableProjectionNode focusNode = proposal.getFocusNode();
         ImmutableSet<Variable> retainedVariables = proposal.getRetainedVariables();
         if (focusNode instanceof UnionNode) {
-            UnionNode replacingNode = new UnionNodeImpl(retainedVariables);
+            UnionNode replacingNode = iqFactory.createUnionNode(retainedVariables);
             treeComponent.replaceNode(focusNode, replacingNode);
             return new NodeCentricOptimizationResultsImpl<>(query, replacingNode);
         }
@@ -32,7 +44,8 @@ public class ProjectionShrinkingExecutorImpl implements ProjectionShrinkingExecu
                         ((ConstructionNode) focusNode).getSubstitution().getImmutableMap().entrySet().stream().
                                 filter(e -> retainedVariables.contains(e.getKey()))
                                 .collect(ImmutableCollectors.toMap());
-                ConstructionNode replacingNode = new ConstructionNodeImpl(retainedVariables, new ImmutableSubstitutionImpl<>(shrinkedMap),
+                ConstructionNode replacingNode = iqFactory.createConstructionNode(retainedVariables,
+                        new ImmutableSubstitutionImpl<>(shrinkedMap),
                         ((ConstructionNode) focusNode).getOptionalModifiers());
                 treeComponent.replaceNode(focusNode, replacingNode);
                 return new NodeCentricOptimizationResultsImpl<>(query, replacingNode);
@@ -41,7 +54,7 @@ public class ProjectionShrinkingExecutorImpl implements ProjectionShrinkingExecu
                 QueryNode replacingNode = treeComponent.removeOrReplaceNodeByUniqueChild(focusNode);
                 return new NodeCentricOptimizationResultsImpl<>(query, Optional.of(replacingNode));
             }
-            TrueNode replacingNode = new TrueNodeImpl();
+            TrueNode replacingNode = iqFactory.createTrueNode();
             treeComponent.replaceNode(focusNode, replacingNode);
             /**
              * This is a dirty trick (the TrueNode is considered as the child of the construction node)

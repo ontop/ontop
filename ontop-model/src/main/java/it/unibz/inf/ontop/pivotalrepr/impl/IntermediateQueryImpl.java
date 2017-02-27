@@ -317,6 +317,11 @@ public class IntermediateQueryImpl implements IntermediateQuery {
         return executorRegistry;
     }
 
+    @Override
+    public IntermediateQueryFactory getFactory() {
+        return iqFactory;
+    }
+
     private void validate() throws InvalidIntermediateQueryException {
         validator.validate(this);
     }

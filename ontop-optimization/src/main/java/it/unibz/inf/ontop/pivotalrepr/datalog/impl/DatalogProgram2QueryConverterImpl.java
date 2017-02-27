@@ -29,11 +29,11 @@ import static it.unibz.inf.ontop.pivotalrepr.datalog.impl.DatalogRule2QueryConve
  */
 public class DatalogProgram2QueryConverterImpl implements DatalogProgram2QueryConverter {
 
-    private final IntermediateQueryFactory modelFactory;
+    private final IntermediateQueryFactory iqFactory;
 
     @Inject
-    private DatalogProgram2QueryConverterImpl(IntermediateQueryFactory modelFactory) {
-        this.modelFactory = modelFactory;
+    private DatalogProgram2QueryConverterImpl(IntermediateQueryFactory iqFactory) {
+        this.iqFactory = iqFactory;
     }
 
 
@@ -142,15 +142,15 @@ public class DatalogProgram2QueryConverterImpl implements DatalogProgram2QueryCo
             case 1:
                 CQIE definition = atomDefinitions.iterator().next();
                 return Optional.of(convertDatalogRule(dbMetadata, definition, tablePredicates, optionalModifiers,
-                        modelFactory, executorRegistry));
+                        iqFactory, executorRegistry));
             default:
                 List<IntermediateQuery> convertedDefinitions = new ArrayList<>();
                 for (CQIE datalogAtomDefinition : atomDefinitions) {
                     convertedDefinitions.add(
                             convertDatalogRule(dbMetadata, datalogAtomDefinition, tablePredicates,
-                                    Optional.<ImmutableQueryModifiers>empty(), modelFactory, executorRegistry));
+                                    Optional.<ImmutableQueryModifiers>empty(), iqFactory, executorRegistry));
                 }
-                return IntermediateQueryUtils.mergeDefinitions(convertedDefinitions, optionalModifiers);
+                return IntermediateQueryUtils.mergeDefinitions(iqFactory, convertedDefinitions, optionalModifiers);
         }
     }
 

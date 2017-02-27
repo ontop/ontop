@@ -311,7 +311,7 @@ public class AscendingPropagationTools {
             Optional<NodeTracker> optionalAncestryTracker) throws EmptyQueryException {
 
         ImmutableSet<Variable> nullVariables = query.getVariables(currentAncestor);
-        EmptyNode replacingEmptyNode = new EmptyNodeImpl(nullVariables);
+        EmptyNode replacingEmptyNode = query.getFactory().createEmptyNode(nullVariables);
 
         treeComponent.replaceSubTree(currentAncestor, replacingEmptyNode);
 

@@ -66,9 +66,9 @@ public class MappingTest {
          */
         for (int i =0; i < projectionAtoms.length;  i++){
             IntermediateQueryBuilder mappingBuilder = createQueryBuilder(EMPTY_METADATA);
-            ConstructionNode mappingRootNode = new ConstructionNodeImpl(projectionAtoms[i].getVariables());
+            ConstructionNode mappingRootNode = IQ_FACTORY.createConstructionNode(projectionAtoms[i].getVariables());
             mappingBuilder.init(projectionAtoms[i], mappingRootNode);
-            ExtensionalDataNode extensionalDataNode = new ExtensionalDataNodeImpl(dataAtoms[i]);
+            ExtensionalDataNode extensionalDataNode = IQ_FACTORY.createExtensionalDataNode(dataAtoms[i]);
             mappingBuilder.addChild(mappingRootNode, extensionalDataNode);
             IntermediateQuery mappingAssertion = mappingBuilder.build();
             mappingAssertions.add(mappingAssertion);

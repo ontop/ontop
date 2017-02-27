@@ -1,6 +1,8 @@
 package it.unibz.inf.ontop.pivotalrepr.impl;
 
 
+import com.google.inject.assistedinject.Assisted;
+import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.model.ImmutableExpression;
 import it.unibz.inf.ontop.model.ImmutableSubstitution;
 import it.unibz.inf.ontop.model.ImmutableTerm;
@@ -13,7 +15,8 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
 
     private static final String FILTER_NODE_STR = "FILTER";
 
-    public FilterNodeImpl(ImmutableExpression filterCondition) {
+    @AssistedInject
+    private FilterNodeImpl(@Assisted ImmutableExpression filterCondition) {
         super(Optional.of(filterCondition));
     }
 

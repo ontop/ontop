@@ -102,7 +102,7 @@ public class DatalogRule2QueryConverter {
     public static IntermediateQuery convertDatalogRule(DBMetadata dbMetadata, CQIE datalogRule,
                                                        Collection<Predicate> tablePredicates,
                                                        Optional<ImmutableQueryModifiers> optionalModifiers,
-                                                       IntermediateQueryFactory modelFactory,
+                                                       IntermediateQueryFactory iqFactory,
                                                        ExecutorRegistry executorRegistry)
             throws DatalogProgram2QueryConverterImpl.InvalidDatalogProgramException {
 
@@ -110,19 +110,19 @@ public class DatalogRule2QueryConverter {
 
         DistinctVariableOnlyDataAtom projectionAtom = targetAtom.getProjectionAtom();
 
-        ConstructionNode rootNode = new ConstructionNodeImpl(projectionAtom.getVariables(), targetAtom.getSubstitution(),
-                optionalModifiers);
+        ConstructionNode rootNode = iqFactory.createConstructionNode(projectionAtom.getVariables(),
+                targetAtom.getSubstitution(), optionalModifiers);
 
         List<Function> bodyAtoms = List.iterableList(datalogRule.getBody());
         if (bodyAtoms.isEmpty()) {
-            return createFact(dbMetadata, rootNode, projectionAtom, executorRegistry, modelFactory);
+            return createFact(dbMetadata, rootNode, projectionAtom, executorRegistry, iqFactory);
         }
         else {
             AtomClassification atomClassification = new AtomClassification(bodyAtoms);
 
             return createDefinition(dbMetadata, rootNode, projectionAtom, tablePredicates,
                     atomClassification.dataAndCompositeAtoms, atomClassification.booleanAtoms,
-                    atomClassification.optionalGroupAtom, modelFactory, executorRegistry);
+                    atomClassification.optionalGroupAtom, iqFactory, executorRegistry);
         }
     }
 
@@ -143,16 +143,16 @@ public class DatalogRule2QueryConverter {
                                                       Collection<Predicate> tablePredicates,
                                                       List<Function> dataAndCompositeAtoms,
                                                       List<Function> booleanAtoms, Optional<Function> optionalGroupAtom,
-                                                      IntermediateQueryFactory modelFactory,
+                                                      IntermediateQueryFactory iqFactory,
                                                       ExecutorRegistry executorRegistry)
             throws DatalogProgram2QueryConverterImpl.InvalidDatalogProgramException {
         /**
          * TODO: explain
          */
-        Optional<JoinOrFilterNode> optionalFilterOrJoinNode = createFilterOrJoinNode(dataAndCompositeAtoms, booleanAtoms);
+        Optional<JoinOrFilterNode> optionalFilterOrJoinNode = createFilterOrJoinNode(iqFactory, dataAndCompositeAtoms, booleanAtoms);
 
         // Non final
-        IntermediateQueryBuilder queryBuilder = modelFactory.createIQBuilder(dbMetadata, executorRegistry);
+        IntermediateQueryBuilder queryBuilder = iqFactory.createIQBuilder(dbMetadata, executorRegistry);
 
         try {
             queryBuilder.init(projectionAtom, rootNode);
@@ -198,8 +198,9 @@ public class DatalogRule2QueryConverter {
     /**
      * TODO: explain
      */
-    private static Optional<JoinOrFilterNode> createFilterOrJoinNode(List<Function> dataAndCompositeAtoms,
-                                                              List<Function> booleanAtoms) {
+    private static Optional<JoinOrFilterNode> createFilterOrJoinNode(IntermediateQueryFactory iqFactory,
+                                                                     List<Function> dataAndCompositeAtoms,
+                                                                     List<Function> booleanAtoms) {
         Optional<ImmutableExpression> optionalFilter = createFilterExpression(booleanAtoms);
 
         int dataAndCompositeAtomCount = dataAndCompositeAtoms.length();
@@ -209,10 +210,10 @@ public class DatalogRule2QueryConverter {
          * Filter as a root node
          */
         if (optionalFilter.isPresent() && (dataAndCompositeAtomCount == 1)) {
-            optionalRootNode = Optional.of((JoinOrFilterNode) new FilterNodeImpl(optionalFilter.get()));
+            optionalRootNode = Optional.of((JoinOrFilterNode) iqFactory.createFilterNode(optionalFilter.get()));
         }
         else if (dataAndCompositeAtomCount > 1) {
-            optionalRootNode = Optional.of((JoinOrFilterNode) new InnerJoinNodeImpl(optionalFilter));
+            optionalRootNode = Optional.of((JoinOrFilterNode) iqFactory.createInnerJoinNode(optionalFilter));
         }
         /**
          * No need to create a special root node (will be the unique data atom)
@@ -274,7 +275,8 @@ public class DatalogRule2QueryConverter {
                 TargetAtom targetAtom = DatalogConversionTools.convertFromDatalogDataAtom(atom);
                 ImmutableSubstitution<ImmutableTerm> bindings = targetAtom.getSubstitution();
                 DataAtom dataAtom = bindings.applyToDataAtom(targetAtom.getProjectionAtom());
-                DataNode currentNode = DatalogConversionTools.createDataNode(dataAtom, tablePredicates);
+                DataNode currentNode = DatalogConversionTools.createDataNode(queryBuilder.getFactory(),
+                        dataAtom, tablePredicates);
                 queryBuilder.addChild(parentNode, currentNode, optionalPosition);
             }
             else {
@@ -304,7 +306,7 @@ public class DatalogRule2QueryConverter {
         Optional<ImmutableExpression> optionalFilterCondition = createFilterExpression(
                 rightSubAtomClassification.booleanAtoms);
 
-        LeftJoinNode ljNode = new LeftJoinNodeImpl(optionalFilterCondition);
+        LeftJoinNode ljNode = queryBuilder.getFactory().createLeftJoinNode(optionalFilterCondition);
         queryBuilder.addChild(parentNodeOfTheLJ, ljNode, optionalPosition);
 
         /**
@@ -346,7 +348,7 @@ public class DatalogRule2QueryConverter {
          */
         else if (classification.dataAndCompositeAtoms.length() == 1) {
             if (optionalFilterCondition.isPresent()) {
-                FilterNode filterNode = new FilterNodeImpl(optionalFilterCondition.get());
+                FilterNode filterNode = queryBuilder.getFactory().createFilterNode(optionalFilterCondition.get());
                 queryBuilder.addChild(parentNodeOfTheJoinNode, filterNode, optionalPosition);
 
                 return convertDataOrCompositeAtoms(classification.dataAndCompositeAtoms, queryBuilder, filterNode,
@@ -364,7 +366,7 @@ public class DatalogRule2QueryConverter {
          * Normal case
          */
         else {
-            InnerJoinNode joinNode = new InnerJoinNodeImpl(optionalFilterCondition);
+            InnerJoinNode joinNode = queryBuilder.getFactory().createInnerJoinNode(optionalFilterCondition);
             queryBuilder.addChild(parentNodeOfTheJoinNode, joinNode, optionalPosition);
 
             /**

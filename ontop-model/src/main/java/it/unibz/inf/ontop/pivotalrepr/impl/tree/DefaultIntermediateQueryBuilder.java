@@ -24,7 +24,7 @@ public class DefaultIntermediateQueryBuilder implements IntermediateQueryBuilder
 
     private final DBMetadata dbMetadata;
     private final ExecutorRegistry executorRegistry;
-    private final IntermediateQueryFactory modelFactory;
+    private final IntermediateQueryFactory iqFactory;
     private final IntermediateQueryValidator validator;
     private final OntopModelSettings settings;
     private DistinctVariableOnlyDataAtom projectionAtom;
@@ -34,12 +34,12 @@ public class DefaultIntermediateQueryBuilder implements IntermediateQueryBuilder
     @AssistedInject
     protected DefaultIntermediateQueryBuilder(@Assisted DBMetadata dbMetadata,
                                             @Assisted ExecutorRegistry executorRegistry,
-                                            IntermediateQueryFactory modelFactory,
+                                            IntermediateQueryFactory iqFactory,
                                             IntermediateQueryValidator validator,
                                             OntopModelSettings settings) {
         this.dbMetadata = dbMetadata;
         this.executorRegistry = executorRegistry;
-        this.modelFactory = modelFactory;
+        this.iqFactory = iqFactory;
         this.validator = validator;
         this.settings = settings;
         tree = null;
@@ -114,7 +114,7 @@ public class DefaultIntermediateQueryBuilder implements IntermediateQueryBuilder
                                            QueryTreeComponent treeComponent) {
 
         return new IntermediateQueryImpl(metadata, projectionAtom, treeComponent, executorRegistry, validator,
-                settings, modelFactory);
+                settings, iqFactory);
     }
 
     private void checkInitialization() throws IntermediateQueryBuilderException {
@@ -142,12 +142,13 @@ public class DefaultIntermediateQueryBuilder implements IntermediateQueryBuilder
         return tree.getChildren(node);
     }
 
-    protected ExecutorRegistry getExecutorRegistry() {
-        return executorRegistry;
+    @Override
+    public IntermediateQueryFactory getFactory() {
+        return iqFactory;
     }
 
-    protected IntermediateQueryFactory getModelFactory() {
-        return modelFactory;
+    protected ExecutorRegistry getExecutorRegistry() {
+        return executorRegistry;
     }
 
     protected IntermediateQueryValidator getValidator() {

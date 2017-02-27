@@ -3,10 +3,11 @@ package it.unibz.inf.ontop.executor.groundterm;
 import java.util.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMultimap;
+import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.model.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.pivotalrepr.impl.ExtensionalDataNodeImpl;
-import it.unibz.inf.ontop.pivotalrepr.impl.FilterNodeImpl;
 import it.unibz.inf.ontop.pivotalrepr.impl.IntensionalDataNodeImpl;
 import it.unibz.inf.ontop.pivotalrepr.impl.QueryTreeComponent;
 import it.unibz.inf.ontop.pivotalrepr.proposal.GroundTermRemovalFromDataNodeProposal;
@@ -49,6 +50,14 @@ public class GroundTermRemovalFromDataNodeExecutorImpl implements
         }
     }
 
+
+    private final IntermediateQueryFactory iqFactory;
+
+    @Inject
+    private GroundTermRemovalFromDataNodeExecutorImpl(IntermediateQueryFactory iqFactory) {
+        this.iqFactory = iqFactory;
+    }
+
     /**
      * TODO: explain
      */
@@ -89,7 +98,7 @@ public class GroundTermRemovalFromDataNodeExecutorImpl implements
              */
             else {
                 ImmutableExpression joiningCondition = convertIntoBooleanExpression(pairExtraction.pairs);
-                FilterNode newFilterNode = new FilterNodeImpl(joiningCondition);
+                FilterNode newFilterNode = iqFactory.createFilterNode(joiningCondition);
                 treeComponent.insertParent(pairExtraction.newDataNode, newFilterNode);
             }
         }
@@ -142,10 +151,10 @@ public class GroundTermRemovalFromDataNodeExecutorImpl implements
     protected DataNode generateDataNode(DataNode formerDataNode, ImmutableList<VariableOrGroundTerm> arguments) {
         DataAtom dataAtom = DATA_FACTORY.getDataAtom(formerDataNode.getProjectionAtom().getPredicate(), arguments);
         if (formerDataNode instanceof ExtensionalDataNode) {
-            return new ExtensionalDataNodeImpl(dataAtom);
+            return iqFactory.createExtensionalDataNode(dataAtom);
         }
         else if (formerDataNode instanceof IntensionalDataNode) {
-            return new IntensionalDataNodeImpl(dataAtom);
+            return iqFactory.createIntensionalDataNode(dataAtom);
         }
         else {
             throw new RuntimeException("Transformation of a data node of type "

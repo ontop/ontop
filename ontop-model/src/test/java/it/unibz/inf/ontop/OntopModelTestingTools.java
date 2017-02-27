@@ -12,7 +12,7 @@ import it.unibz.inf.ontop.pivotalrepr.utils.ExecutorRegistry;
  */
 public class OntopModelTestingTools {
 
-    public static final IntermediateQueryFactory MODEL_FACTORY;
+    public static final IntermediateQueryFactory IQ_FACTORY;
     public static final ExecutorRegistry EXECUTOR_REGISTRY;
     public static final OBDADataFactory DATA_FACTORY = OntopModelSingletons.DATA_FACTORY;
 
@@ -22,7 +22,7 @@ public class OntopModelTestingTools {
                 .build();
         Injector injector = defaultConfiguration.getInjector();
 
-        MODEL_FACTORY = injector.getInstance(IntermediateQueryFactory.class);
+        IQ_FACTORY = injector.getInstance(IntermediateQueryFactory.class);
 
         EXECUTOR_REGISTRY = defaultConfiguration.getExecutorRegistry();
     }

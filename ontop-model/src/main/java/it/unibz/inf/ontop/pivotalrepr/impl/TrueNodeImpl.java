@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.pivotalrepr.impl;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.model.ImmutableSubstitution;
 import it.unibz.inf.ontop.model.ImmutableTerm;
 import it.unibz.inf.ontop.model.Variable;
@@ -13,7 +14,8 @@ public class TrueNodeImpl implements TrueNode {
 
     private static final String PREFIX = "TRUE";
 
-    public TrueNodeImpl() {
+    @AssistedInject
+    private TrueNodeImpl() {
     }
 
     @Override

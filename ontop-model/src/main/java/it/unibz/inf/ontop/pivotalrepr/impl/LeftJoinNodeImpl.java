@@ -2,6 +2,8 @@ package it.unibz.inf.ontop.pivotalrepr.impl;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import com.google.inject.assistedinject.Assisted;
+import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionImpl;
@@ -34,8 +36,19 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
 
     private static final String LEFT_JOIN_NODE_STR = "LJ";
 
-    public LeftJoinNodeImpl(Optional<ImmutableExpression> optionalJoinCondition) {
+    @AssistedInject
+    private LeftJoinNodeImpl(@Assisted Optional<ImmutableExpression> optionalJoinCondition) {
         super(optionalJoinCondition);
+    }
+
+    @AssistedInject
+    private LeftJoinNodeImpl(@Assisted ImmutableExpression joiningCondition) {
+        super(Optional.of(joiningCondition));
+    }
+
+    @AssistedInject
+    private LeftJoinNodeImpl() {
+        super(Optional.empty());
     }
 
     @Override
@@ -290,7 +303,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
                 if (condition.isPresent()) {
                     return new NodeTransformationProposalImpl(
                             REPLACE_BY_NEW_NODE,
-                            new FilterNodeImpl(condition.get()),
+                            query.getFactory().createFilterNode(condition.get()),
                             ImmutableSet.of()
                     );
                 }

@@ -1,9 +1,11 @@
 package it.unibz.inf.ontop.executor.join;
 
 import com.google.common.collect.*;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.pivotalrepr.*;
-import it.unibz.inf.ontop.pivotalrepr.impl.EmptyNodeImpl;
 import it.unibz.inf.ontop.pivotalrepr.impl.QueryTreeComponent;
 import it.unibz.inf.ontop.pivotalrepr.proposal.*;
 import it.unibz.inf.ontop.pivotalrepr.proposal.impl.NodeCentricOptimizationResultsImpl;
@@ -19,12 +21,19 @@ import java.util.Optional;
  * Naturally assumes that the data atoms are leafs.
  *
  */
+@Singleton
 public class RedundantSelfJoinExecutor extends SelfJoinLikeExecutor implements InnerJoinExecutor {
 
     /**
      * Safety, to prevent infinite loops
      */
     private static final int MAX_ITERATIONS = 100;
+    private final IntermediateQueryFactory iqFactory;
+
+    @Inject
+    private RedundantSelfJoinExecutor(IntermediateQueryFactory iqFactory) {
+        this.iqFactory = iqFactory;
+    }
 
 
     @Override
@@ -186,7 +195,7 @@ public class RedundantSelfJoinExecutor extends SelfJoinLikeExecutor implements I
         /**
          * Replaces by an EmptyNode
          */
-        EmptyNode emptyNode = new EmptyNodeImpl(query.getVariables(topJoinNode));
+        EmptyNode emptyNode = iqFactory.createEmptyNode(query.getVariables(topJoinNode));
         treeComponent.replaceSubTree(topJoinNode, emptyNode);
 
         /**

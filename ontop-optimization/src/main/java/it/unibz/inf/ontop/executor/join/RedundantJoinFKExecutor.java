@@ -4,12 +4,13 @@ import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
+import com.google.inject.Inject;
+import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.model.AtomPredicate;
 import it.unibz.inf.ontop.model.DBMetadata;
 import it.unibz.inf.ontop.model.Variable;
 import it.unibz.inf.ontop.model.VariableOrGroundTerm;
 import it.unibz.inf.ontop.pivotalrepr.*;
-import it.unibz.inf.ontop.pivotalrepr.impl.FilterNodeImpl;
 import it.unibz.inf.ontop.pivotalrepr.impl.NaiveVariableOccurrenceAnalyzerImpl;
 import it.unibz.inf.ontop.pivotalrepr.impl.QueryTreeComponent;
 import it.unibz.inf.ontop.pivotalrepr.proposal.InnerJoinOptimizationProposal;
@@ -31,6 +32,13 @@ import java.util.stream.Stream;
  *
  */
 public class RedundantJoinFKExecutor implements InnerJoinExecutor {
+
+    private final IntermediateQueryFactory iqFactory;
+
+    @Inject
+    private RedundantJoinFKExecutor(IntermediateQueryFactory iqFactory) {
+        this.iqFactory = iqFactory;
+    }
 
     @Override
     public NodeCentricOptimizationResults<InnerJoinNode> apply(InnerJoinOptimizationProposal proposal,
@@ -79,7 +87,7 @@ public class RedundantJoinFKExecutor implements InnerJoinExecutor {
                 QueryNode replacingChild = query.getFirstChild(joinNode).get();
 
                 if (joinNode.getOptionalFilterCondition().isPresent()) {
-                    FilterNode newFilterNode = new FilterNodeImpl(joinNode.getOptionalFilterCondition().get());
+                    FilterNode newFilterNode = iqFactory.createFilterNode(joinNode.getOptionalFilterCondition().get());
                     treeComponent.replaceNode(joinNode, newFilterNode);
                     /**
                      * NB: the filter node is not declared as the replacing node but the child is.

@@ -55,37 +55,37 @@ public class UriTemplateTest {
         IntermediateQueryBuilder initialQueryBuilder = createQueryBuilder(EMPTY_METADATA);
 
         DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_1, X);
-        ConstructionNode rootNode = new ConstructionNodeImpl(projectionAtom.getVariables());
+        ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
         initialQueryBuilder.init(projectionAtom, rootNode);
 
-        LeftJoinNode leftJoinNode = new LeftJoinNodeImpl(Optional.empty());
+        LeftJoinNode leftJoinNode = IQ_FACTORY.createLeftJoinNode();
         initialQueryBuilder.addChild(rootNode, leftJoinNode);
 
-        InnerJoinNode joinNode = new InnerJoinNodeImpl(Optional.empty());
+        InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
         initialQueryBuilder.addChild(leftJoinNode, joinNode, LEFT);
 
-        ConstructionNode leftConstructionNode = new ConstructionNodeImpl(ImmutableSet.of(X),
+        ConstructionNode leftConstructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X),
                 new ImmutableSubstitutionImpl<>(ImmutableMap.of(X, generateOneVarURITemplate(URI_TEMPLATE_STR_1, A))),
                 Optional.empty());
         initialQueryBuilder.addChild(joinNode, leftConstructionNode);
 
-        ExtensionalDataNode leftDataNode = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, A, B));
+        ExtensionalDataNode leftDataNode = IQ_FACTORY.createExtensionalDataNode(DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, A, B));
         initialQueryBuilder.addChild(leftConstructionNode, leftDataNode);
 
-        ConstructionNode middleConstructionNode = new ConstructionNodeImpl(ImmutableSet.of(X),
+        ConstructionNode middleConstructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X),
                 new ImmutableSubstitutionImpl<>(ImmutableMap.of(X, generateOneVarURITemplate(URI_TEMPLATE_STR_3, C))),
                 Optional.empty());
         initialQueryBuilder.addChild(joinNode, middleConstructionNode);
 
-        ExtensionalDataNode middleDataNode = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE2_PREDICATE, C, D));
+        ExtensionalDataNode middleDataNode = IQ_FACTORY.createExtensionalDataNode(DATA_FACTORY.getDataAtom(TABLE2_PREDICATE, C, D));
         initialQueryBuilder.addChild(middleConstructionNode, middleDataNode);
 
-        ConstructionNode rightConstructionNode = new ConstructionNodeImpl(ImmutableSet.of(X),
+        ConstructionNode rightConstructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X),
                 new ImmutableSubstitutionImpl<>(ImmutableMap.of(X, generateOneVarURITemplate(URI_TEMPLATE_STR_2, E))),
                 Optional.empty());
         initialQueryBuilder.addChild(leftJoinNode, rightConstructionNode, RIGHT);
 
-        ExtensionalDataNode rightDataNode = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE3_PREDICATE, E));
+        ExtensionalDataNode rightDataNode = IQ_FACTORY.createExtensionalDataNode(DATA_FACTORY.getDataAtom(TABLE3_PREDICATE, E));
         initialQueryBuilder.addChild(rightConstructionNode, rightDataNode);
 
         IntermediateQuery initialQuery = initialQueryBuilder.build();
@@ -95,10 +95,10 @@ public class UriTemplateTest {
         IntermediateQueryBuilder expectedQueryBuilder = initialQuery.newBuilder();
         expectedQueryBuilder.init(projectionAtom, leftConstructionNode);
 
-        InnerJoinNode newJoinNode = new InnerJoinNodeImpl(Optional.of(
+        InnerJoinNode newJoinNode = IQ_FACTORY.createInnerJoinNode(
                 DATA_FACTORY.getImmutableExpression(EQ,
                         DATA_FACTORY.getImmutableExpression(CONCAT, URI_TEMPLATE_STR_1_PREFIX, A),
-                        C)));
+                        C));
 
         expectedQueryBuilder.addChild(leftConstructionNode, newJoinNode);
         expectedQueryBuilder.addChild(newJoinNode, leftDataNode);

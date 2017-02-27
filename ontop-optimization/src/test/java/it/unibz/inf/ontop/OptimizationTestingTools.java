@@ -14,7 +14,7 @@ import it.unibz.inf.ontop.sql.DBMetadataTestingTools;
 public class OptimizationTestingTools {
 
     private static final ExecutorRegistry EXECUTOR_REGISTRY;
-    private static final IntermediateQueryFactory IQ_FACTORY;
+    public static final IntermediateQueryFactory IQ_FACTORY;
     public static final DBMetadata EMPTY_METADATA = DBMetadataTestingTools.createDummyMetadata();
     public static final OBDADataFactory DATA_FACTORY = OntopModelSingletons.DATA_FACTORY;
 

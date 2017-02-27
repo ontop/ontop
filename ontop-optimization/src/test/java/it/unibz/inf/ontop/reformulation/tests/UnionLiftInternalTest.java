@@ -73,31 +73,31 @@ public class UnionLiftInternalTest {
          */
         IntermediateQueryBuilder originalBuilder = createQueryBuilder(EMPTY_METADATA);
 
-        ConstructionNode rootConstructionNode = new ConstructionNodeImpl(ROOT_CONSTRUCTION_NODE_ATOM.getVariables(),
+        ConstructionNode rootConstructionNode = IQ_FACTORY.createConstructionNode(ROOT_CONSTRUCTION_NODE_ATOM.getVariables(),
                 new ImmutableSubstitutionImpl<>(ImmutableMap.of()), Optional.empty());
 
-        InnerJoinNode joinNode = new InnerJoinNodeImpl(Optional.empty());
-        LeftJoinNode leftJoinNode = new LeftJoinNodeImpl(Optional.empty());
+        InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
+        LeftJoinNode leftJoinNode = IQ_FACTORY.createLeftJoinNode();
 
-        ConstructionNode table4Construction = new ConstructionNodeImpl(TABLE4_ATOM.getVariables(),
+        ConstructionNode table4Construction = IQ_FACTORY.createConstructionNode(TABLE4_ATOM.getVariables(),
                 new ImmutableSubstitutionImpl<>(ImmutableMap.of(Y, generateURI1(E), Z, generateURI1(F))),
                 Optional.empty());
-        ExtensionalDataNode table4DataNode = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE_4, E, F));
+        ExtensionalDataNode table4DataNode = IQ_FACTORY.createExtensionalDataNode(DATA_FACTORY.getDataAtom(TABLE_4, E, F));
 
-        UnionNode unionNode = new UnionNodeImpl(ImmutableSet.of(X));
+        UnionNode unionNode = IQ_FACTORY.createUnionNode(ImmutableSet.of(X));
 
-        ConstructionNode table1Construction = new ConstructionNodeImpl(TABLE1_ATOM.getVariables(),
+        ConstructionNode table1Construction = IQ_FACTORY.createConstructionNode(TABLE1_ATOM.getVariables(),
                 new ImmutableSubstitutionImpl<>(ImmutableMap.of(X, generateURI1(A))), Optional.empty());
-        ExtensionalDataNode table1DataNode = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE_1, A));
+        ExtensionalDataNode table1DataNode = IQ_FACTORY.createExtensionalDataNode(DATA_FACTORY.getDataAtom(TABLE_1, A));
 
-        ConstructionNode table2Construction = new ConstructionNodeImpl(TABLE2_ATOM.getVariables(),
+        ConstructionNode table2Construction = IQ_FACTORY.createConstructionNode(TABLE2_ATOM.getVariables(),
                 new ImmutableSubstitutionImpl<>(ImmutableMap.of(X, generateURI1(B))), Optional.empty());
-        ExtensionalDataNode table2DataNode = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE_2, B));
+        ExtensionalDataNode table2DataNode = IQ_FACTORY.createExtensionalDataNode(DATA_FACTORY.getDataAtom(TABLE_2, B));
 
-        ConstructionNode table3Construction = new ConstructionNodeImpl(TABLE3_ATOM.getVariables(),
+        ConstructionNode table3Construction = IQ_FACTORY.createConstructionNode(TABLE3_ATOM.getVariables(),
                 new ImmutableSubstitutionImpl<>(ImmutableMap.of(X, generateURI1(C), Y, generateURI1(D))),
                 Optional.empty());
-        ExtensionalDataNode table3DataNode = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE_3, C, D));
+        ExtensionalDataNode table3DataNode = IQ_FACTORY.createExtensionalDataNode(DATA_FACTORY.getDataAtom(TABLE_3, C, D));
 
         originalBuilder.init(ROOT_CONSTRUCTION_NODE_ATOM, rootConstructionNode);
         originalBuilder.addChild(rootConstructionNode, joinNode);
@@ -125,15 +125,15 @@ public class UnionLiftInternalTest {
          */
         IntermediateQueryBuilder expectedBuilder = createQueryBuilder(EMPTY_METADATA);
 
-        InnerJoinNode joinNodeExpected = new InnerJoinNodeImpl(Optional.empty());
-        UnionNode unionNodeExpected = new UnionNodeImpl(ImmutableSet.of(X, Y));
-        LeftJoinNode leftJoinNode1 = new LeftJoinNodeImpl(Optional.empty());
-        LeftJoinNode leftJoinNode2 = new LeftJoinNodeImpl(Optional.empty());
+        InnerJoinNode joinNodeExpected = IQ_FACTORY.createInnerJoinNode();
+        UnionNode unionNodeExpected = IQ_FACTORY.createUnionNode(ImmutableSet.of(X, Y));
+        LeftJoinNode leftJoinNode1 = IQ_FACTORY.createLeftJoinNode();
+        LeftJoinNode leftJoinNode2 = IQ_FACTORY.createLeftJoinNode();
 
-        ConstructionNode table3ConstructionExpected = new ConstructionNodeImpl(TABLE3_ATOM.getVariables(),
+        ConstructionNode table3ConstructionExpected = IQ_FACTORY.createConstructionNode(TABLE3_ATOM.getVariables(),
                 new ImmutableSubstitutionImpl<>(ImmutableMap.of(X, generateURI1(C), Y, generateURI1(D))),
                 Optional.empty());
-        ExtensionalDataNode table3DataNodeExpected = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE_3, C, D));
+        ExtensionalDataNode table3DataNodeExpected = IQ_FACTORY.createExtensionalDataNode(DATA_FACTORY.getDataAtom(TABLE_3, C, D));
 
         expectedBuilder.init(ROOT_CONSTRUCTION_NODE_ATOM, rootConstructionNode);
         expectedBuilder.addChild(rootConstructionNode, joinNodeExpected);
@@ -179,18 +179,18 @@ public class UnionLiftInternalTest {
 
         IntermediateQueryBuilder originalBuilder = createQueryBuilder(EMPTY_METADATA);
 
-        ConstructionNode rootConstructionNode = new ConstructionNodeImpl(ROOT_CONSTRUCTION_NODE_ATOM.getVariables(),
+        ConstructionNode rootConstructionNode = IQ_FACTORY.createConstructionNode(ROOT_CONSTRUCTION_NODE_ATOM.getVariables(),
                 new ImmutableSubstitutionImpl<>(ImmutableMap.of()), Optional.empty());
 
-        UnionNode unionNode1  = new UnionNodeImpl(ImmutableSet.of(A, B, C));
-        InnerJoinNode joinNode = new InnerJoinNodeImpl(Optional.empty());
-        UnionNode unionNode2 = new UnionNodeImpl(ImmutableSet.of(A, B));
+        UnionNode unionNode1  = IQ_FACTORY.createUnionNode(ImmutableSet.of(A, B, C));
+        InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
+        UnionNode unionNode2 = IQ_FACTORY.createUnionNode(ImmutableSet.of(A, B));
 
-        ExtensionalDataNode table1DataNode = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE_1, A, B));
-        ExtensionalDataNode table2DataNode = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE_2, A, B));
-        ExtensionalDataNode table3DataNode = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE_3, A, B));
-        ExtensionalDataNode table4DataNode = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE_4, A, C));
-        ExtensionalDataNode table5DataNode = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE_5, A, B, C));
+        ExtensionalDataNode table1DataNode = IQ_FACTORY.createExtensionalDataNode(DATA_FACTORY.getDataAtom(TABLE_1, A, B));
+        ExtensionalDataNode table2DataNode = IQ_FACTORY.createExtensionalDataNode(DATA_FACTORY.getDataAtom(TABLE_2, A, B));
+        ExtensionalDataNode table3DataNode = IQ_FACTORY.createExtensionalDataNode(DATA_FACTORY.getDataAtom(TABLE_3, A, B));
+        ExtensionalDataNode table4DataNode = IQ_FACTORY.createExtensionalDataNode(DATA_FACTORY.getDataAtom(TABLE_4, A, C));
+        ExtensionalDataNode table5DataNode = IQ_FACTORY.createExtensionalDataNode(DATA_FACTORY.getDataAtom(TABLE_5, A, B, C));
 
         originalBuilder.init(ROOT_CONSTRUCTION_NODE_ATOM, rootConstructionNode);
         originalBuilder.addChild(rootConstructionNode, unionNode1);
@@ -216,11 +216,11 @@ public class UnionLiftInternalTest {
          */
         IntermediateQueryBuilder expectedBuilder = createQueryBuilder(EMPTY_METADATA);
 
-        UnionNode unionNode3 = new UnionNodeImpl(ImmutableSet.of(A, B, C));
-        UnionNode unionNode4 = new UnionNodeImpl(ImmutableSet.of(A, B, C));
-        InnerJoinNode joinNode2 = new InnerJoinNodeImpl(Optional.empty());
-        InnerJoinNode joinNode3 = new InnerJoinNodeImpl(Optional.empty());
-        InnerJoinNode joinNode4 = new InnerJoinNodeImpl(Optional.empty());
+        UnionNode unionNode3 = IQ_FACTORY.createUnionNode(ImmutableSet.of(A, B, C));
+        UnionNode unionNode4 = IQ_FACTORY.createUnionNode(ImmutableSet.of(A, B, C));
+        InnerJoinNode joinNode2 = IQ_FACTORY.createInnerJoinNode();
+        InnerJoinNode joinNode3 = IQ_FACTORY.createInnerJoinNode();
+        InnerJoinNode joinNode4 = IQ_FACTORY.createInnerJoinNode();
 
         expectedBuilder.init(ROOT_CONSTRUCTION_NODE_ATOM, rootConstructionNode);
         expectedBuilder.addChild(rootConstructionNode, unionNode3);
@@ -262,19 +262,19 @@ public class UnionLiftInternalTest {
 
         IntermediateQueryBuilder originalBuilder = createQueryBuilder(EMPTY_METADATA);
 
-        ConstructionNode rootConstructionNode = new ConstructionNodeImpl(ROOT_CONSTRUCTION_NODE_ATOM.getVariables(),
+        ConstructionNode rootConstructionNode = IQ_FACTORY.createConstructionNode(ROOT_CONSTRUCTION_NODE_ATOM.getVariables(),
                 new ImmutableSubstitutionImpl<>(ImmutableMap.of()), Optional.empty());
 
-        UnionNode unionNode1  = new UnionNodeImpl(ImmutableSet.of(A, B, C));
-        InnerJoinNode joinNode = new InnerJoinNodeImpl(Optional.empty());
-        UnionNode unionNode21 = new UnionNodeImpl(ImmutableSet.of(A, B));
-        UnionNode unionNode22  = new UnionNodeImpl(ImmutableSet.of(A, C));
+        UnionNode unionNode1  = IQ_FACTORY.createUnionNode(ImmutableSet.of(A, B, C));
+        InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
+        UnionNode unionNode21 = IQ_FACTORY.createUnionNode(ImmutableSet.of(A, B));
+        UnionNode unionNode22  = IQ_FACTORY.createUnionNode(ImmutableSet.of(A, C));
 
-        ExtensionalDataNode table1DataNode = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE_1, A, B));
-        ExtensionalDataNode table2DataNode = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE_2, A, B));
-        ExtensionalDataNode table3DataNode = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE_3, A, B));
-        ExtensionalDataNode table4DataNode = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE_4, A, C));
-        ExtensionalDataNode table5DataNode = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE_5, A, B, C));
+        ExtensionalDataNode table1DataNode = IQ_FACTORY.createExtensionalDataNode(DATA_FACTORY.getDataAtom(TABLE_1, A, B));
+        ExtensionalDataNode table2DataNode = IQ_FACTORY.createExtensionalDataNode(DATA_FACTORY.getDataAtom(TABLE_2, A, B));
+        ExtensionalDataNode table3DataNode = IQ_FACTORY.createExtensionalDataNode(DATA_FACTORY.getDataAtom(TABLE_3, A, B));
+        ExtensionalDataNode table4DataNode = IQ_FACTORY.createExtensionalDataNode(DATA_FACTORY.getDataAtom(TABLE_4, A, C));
+        ExtensionalDataNode table5DataNode = IQ_FACTORY.createExtensionalDataNode(DATA_FACTORY.getDataAtom(TABLE_5, A, B, C));
 
         originalBuilder.init(ROOT_CONSTRUCTION_NODE_ATOM, rootConstructionNode);
         originalBuilder.addChild(rootConstructionNode, unionNode1);
@@ -303,14 +303,14 @@ public class UnionLiftInternalTest {
          */
         IntermediateQueryBuilder expectedBuilder = createQueryBuilder(EMPTY_METADATA);
 
-        UnionNode unionNode3 = new UnionNodeImpl(ImmutableSet.of(A, B, C));
-        UnionNode unionNode4 = new UnionNodeImpl(ImmutableSet.of(A, B, C));
-        InnerJoinNode joinNode2 = new InnerJoinNodeImpl(Optional.empty());
-        InnerJoinNode joinNode3 = new InnerJoinNodeImpl(Optional.empty());
-        InnerJoinNode joinNode4 = new InnerJoinNodeImpl(Optional.empty());
-        UnionNode unionNode5 = new UnionNodeImpl(ImmutableSet.of(A, C));
-        UnionNode unionNode6 = new UnionNodeImpl(ImmutableSet.of(A, C));
-        UnionNode unionNode7 = new UnionNodeImpl(ImmutableSet.of(A, C));
+        UnionNode unionNode3 = IQ_FACTORY.createUnionNode(ImmutableSet.of(A, B, C));
+        UnionNode unionNode4 = IQ_FACTORY.createUnionNode(ImmutableSet.of(A, B, C));
+        InnerJoinNode joinNode2 = IQ_FACTORY.createInnerJoinNode();
+        InnerJoinNode joinNode3 = IQ_FACTORY.createInnerJoinNode();
+        InnerJoinNode joinNode4 = IQ_FACTORY.createInnerJoinNode();
+        UnionNode unionNode5 = IQ_FACTORY.createUnionNode(ImmutableSet.of(A, C));
+        UnionNode unionNode6 = IQ_FACTORY.createUnionNode(ImmutableSet.of(A, C));
+        UnionNode unionNode7 = IQ_FACTORY.createUnionNode(ImmutableSet.of(A, C));
 
         expectedBuilder.init(ROOT_CONSTRUCTION_NODE_ATOM, rootConstructionNode);
         expectedBuilder.addChild(rootConstructionNode, unionNode3);
@@ -361,19 +361,19 @@ public class UnionLiftInternalTest {
 
         IntermediateQueryBuilder originalBuilder = createQueryBuilder(EMPTY_METADATA);
 
-        ConstructionNode rootConstructionNode = new ConstructionNodeImpl(ROOT_CONSTRUCTION_NODE_ATOM.getVariables(),
+        ConstructionNode rootConstructionNode = IQ_FACTORY.createConstructionNode(ROOT_CONSTRUCTION_NODE_ATOM.getVariables(),
                 new ImmutableSubstitutionImpl<>(ImmutableMap.of()), Optional.empty());
 
-        UnionNode unionNode1  = new UnionNodeImpl(ImmutableSet.of(A, B, C));
-        InnerJoinNode joinNode = new InnerJoinNodeImpl(Optional.empty());
-        UnionNode unionNode21 = new UnionNodeImpl(ImmutableSet.of(A, B));
-        UnionNode unionNode22  = new UnionNodeImpl(ImmutableSet.of(A, C));
+        UnionNode unionNode1  = IQ_FACTORY.createUnionNode(ImmutableSet.of(A, B, C));
+        InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
+        UnionNode unionNode21 = IQ_FACTORY.createUnionNode(ImmutableSet.of(A, B));
+        UnionNode unionNode22  = IQ_FACTORY.createUnionNode(ImmutableSet.of(A, C));
 
-        ExtensionalDataNode table1DataNode = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE_1, A, B));
-        ExtensionalDataNode table2DataNode = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE_2, A, B));
-        ExtensionalDataNode table3DataNode = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE_3, A, B));
-        ExtensionalDataNode table4DataNode = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE_4, A, C));
-        ExtensionalDataNode table5DataNode = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE_5, A, B, C));
+        ExtensionalDataNode table1DataNode = IQ_FACTORY.createExtensionalDataNode(DATA_FACTORY.getDataAtom(TABLE_1, A, B));
+        ExtensionalDataNode table2DataNode = IQ_FACTORY.createExtensionalDataNode(DATA_FACTORY.getDataAtom(TABLE_2, A, B));
+        ExtensionalDataNode table3DataNode = IQ_FACTORY.createExtensionalDataNode(DATA_FACTORY.getDataAtom(TABLE_3, A, B));
+        ExtensionalDataNode table4DataNode = IQ_FACTORY.createExtensionalDataNode(DATA_FACTORY.getDataAtom(TABLE_4, A, C));
+        ExtensionalDataNode table5DataNode = IQ_FACTORY.createExtensionalDataNode(DATA_FACTORY.getDataAtom(TABLE_5, A, B, C));
 
         originalBuilder.init(ROOT_CONSTRUCTION_NODE_ATOM, rootConstructionNode);
         originalBuilder.addChild(rootConstructionNode, unionNode1);
@@ -402,12 +402,12 @@ public class UnionLiftInternalTest {
          */
         IntermediateQueryBuilder expectedBuilder = createQueryBuilder(EMPTY_METADATA);
 
-        UnionNode unionNode3 = new UnionNodeImpl(ImmutableSet.of(A, B, C));
-        UnionNode unionNode4 = new UnionNodeImpl(ImmutableSet.of(A, B, C));
-        InnerJoinNode joinNode2 = new InnerJoinNodeImpl(Optional.empty());
-        InnerJoinNode joinNode3 = new InnerJoinNodeImpl(Optional.empty());
-        UnionNode unionNode5 = new UnionNodeImpl(ImmutableSet.of(A, B));
-        UnionNode unionNode6 = new UnionNodeImpl(ImmutableSet.of(A, B));
+        UnionNode unionNode3 = IQ_FACTORY.createUnionNode(ImmutableSet.of(A, B, C));
+        UnionNode unionNode4 = IQ_FACTORY.createUnionNode(ImmutableSet.of(A, B, C));
+        InnerJoinNode joinNode2 = IQ_FACTORY.createInnerJoinNode();
+        InnerJoinNode joinNode3 = IQ_FACTORY.createInnerJoinNode();
+        UnionNode unionNode5 = IQ_FACTORY.createUnionNode(ImmutableSet.of(A, B));
+        UnionNode unionNode6 = IQ_FACTORY.createUnionNode(ImmutableSet.of(A, B));
 
 
         expectedBuilder.init(ROOT_CONSTRUCTION_NODE_ATOM, rootConstructionNode);
@@ -455,20 +455,20 @@ public class UnionLiftInternalTest {
 
         IntermediateQueryBuilder originalBuilder = createQueryBuilder(EMPTY_METADATA);
 
-        ConstructionNode rootConstructionNode = new ConstructionNodeImpl(ROOT_CONSTRUCTION_NODE_ATOM.getVariables(),
+        ConstructionNode rootConstructionNode = IQ_FACTORY.createConstructionNode(ROOT_CONSTRUCTION_NODE_ATOM.getVariables(),
                 new ImmutableSubstitutionImpl<>(ImmutableMap.of()), Optional.empty());
 
-        UnionNode unionNode1  = new UnionNodeImpl(ImmutableSet.of(A, B, C));
-        InnerJoinNode joinNode = new InnerJoinNodeImpl(Optional.empty());
-        UnionNode unionNode21 = new UnionNodeImpl(ImmutableSet.of(A, B));
-        UnionNode unionNode22  = new UnionNodeImpl(ImmutableSet.of(A, C));
-        InnerJoinNode joinNode1 = new InnerJoinNodeImpl(Optional.empty());
+        UnionNode unionNode1  = IQ_FACTORY.createUnionNode(ImmutableSet.of(A, B, C));
+        InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
+        UnionNode unionNode21 = IQ_FACTORY.createUnionNode(ImmutableSet.of(A, B));
+        UnionNode unionNode22  = IQ_FACTORY.createUnionNode(ImmutableSet.of(A, C));
+        InnerJoinNode joinNode1 = IQ_FACTORY.createInnerJoinNode();
 
-        ExtensionalDataNode table1DataNode = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE_1, A, B));
-        ExtensionalDataNode table2DataNode = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE_2, A, B));
-        ExtensionalDataNode table3DataNode = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE_3, A, B));
-        ExtensionalDataNode table4DataNode = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE_4, A, C));
-        ExtensionalDataNode table5DataNode = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE_5, A, B, C));
+        ExtensionalDataNode table1DataNode = IQ_FACTORY.createExtensionalDataNode(DATA_FACTORY.getDataAtom(TABLE_1, A, B));
+        ExtensionalDataNode table2DataNode = IQ_FACTORY.createExtensionalDataNode(DATA_FACTORY.getDataAtom(TABLE_2, A, B));
+        ExtensionalDataNode table3DataNode = IQ_FACTORY.createExtensionalDataNode(DATA_FACTORY.getDataAtom(TABLE_3, A, B));
+        ExtensionalDataNode table4DataNode = IQ_FACTORY.createExtensionalDataNode(DATA_FACTORY.getDataAtom(TABLE_4, A, C));
+        ExtensionalDataNode table5DataNode = IQ_FACTORY.createExtensionalDataNode(DATA_FACTORY.getDataAtom(TABLE_5, A, B, C));
 
         originalBuilder.init(ROOT_CONSTRUCTION_NODE_ATOM, rootConstructionNode);
         originalBuilder.addChild(rootConstructionNode, unionNode1);
@@ -503,17 +503,17 @@ public class UnionLiftInternalTest {
          */
         IntermediateQueryBuilder expectedBuilder = createQueryBuilder(EMPTY_METADATA);
 
-        UnionNode unionNode3 = new UnionNodeImpl(ImmutableSet.of(A, B, C));
-        UnionNode unionNode4 = new UnionNodeImpl(ImmutableSet.of(A, B, C));
-        UnionNode unionNode5 = new UnionNodeImpl(ImmutableSet.of(A,C));
-        UnionNode unionNode6 = new UnionNodeImpl(ImmutableSet.of(A,C));
-        UnionNode unionNode7 = new UnionNodeImpl(ImmutableSet.of(A,C));
-        InnerJoinNode joinNode2 = new InnerJoinNodeImpl(Optional.empty());
-        InnerJoinNode joinNode3 = new InnerJoinNodeImpl(Optional.empty());
-        InnerJoinNode joinNode4 = new InnerJoinNodeImpl(Optional.empty());
-        InnerJoinNode joinNode5 = new InnerJoinNodeImpl(Optional.empty());
-        InnerJoinNode joinNode6 = new InnerJoinNodeImpl(Optional.empty());
-        InnerJoinNode joinNode7 = new InnerJoinNodeImpl(Optional.empty());
+        UnionNode unionNode3 = IQ_FACTORY.createUnionNode(ImmutableSet.of(A, B, C));
+        UnionNode unionNode4 = IQ_FACTORY.createUnionNode(ImmutableSet.of(A, B, C));
+        UnionNode unionNode5 = IQ_FACTORY.createUnionNode(ImmutableSet.of(A,C));
+        UnionNode unionNode6 = IQ_FACTORY.createUnionNode(ImmutableSet.of(A,C));
+        UnionNode unionNode7 = IQ_FACTORY.createUnionNode(ImmutableSet.of(A,C));
+        InnerJoinNode joinNode2 = IQ_FACTORY.createInnerJoinNode();
+        InnerJoinNode joinNode3 = IQ_FACTORY.createInnerJoinNode();
+        InnerJoinNode joinNode4 = IQ_FACTORY.createInnerJoinNode();
+        InnerJoinNode joinNode5 = IQ_FACTORY.createInnerJoinNode();
+        InnerJoinNode joinNode6 = IQ_FACTORY.createInnerJoinNode();
+        InnerJoinNode joinNode7 = IQ_FACTORY.createInnerJoinNode();
 
 
         expectedBuilder.init(ROOT_CONSTRUCTION_NODE_ATOM, rootConstructionNode);
@@ -567,19 +567,19 @@ public class UnionLiftInternalTest {
          */
         IntermediateQueryBuilder expectedBuilder2 = createQueryBuilder(EMPTY_METADATA);
 
-        UnionNode unionNode8 = new UnionNodeImpl(ImmutableSet.of(A, B, C));
-        UnionNode unionNode9 = new UnionNodeImpl(ImmutableSet.of(A, B, C));
-        UnionNode unionNode10 = new UnionNodeImpl(ImmutableSet.of(A, B, C));
-        UnionNode unionNode11 = new UnionNodeImpl(ImmutableSet.of(A,C));
-        UnionNode unionNode12 = new UnionNodeImpl(ImmutableSet.of(A,C));
-        InnerJoinNode joinNode8 = new InnerJoinNodeImpl(Optional.empty());
-        InnerJoinNode joinNode9 = new InnerJoinNodeImpl(Optional.empty());
-        InnerJoinNode joinNode10 = new InnerJoinNodeImpl(Optional.empty());
-        InnerJoinNode joinNode11 = new InnerJoinNodeImpl(Optional.empty());
-        InnerJoinNode joinNode12 = new InnerJoinNodeImpl(Optional.empty());
-        InnerJoinNode joinNode13 = new InnerJoinNodeImpl(Optional.empty());
-        InnerJoinNode joinNode14 = new InnerJoinNodeImpl(Optional.empty());
-        InnerJoinNode joinNode15 = new InnerJoinNodeImpl(Optional.empty());
+        UnionNode unionNode8 = IQ_FACTORY.createUnionNode(ImmutableSet.of(A, B, C));
+        UnionNode unionNode9 = IQ_FACTORY.createUnionNode(ImmutableSet.of(A, B, C));
+        UnionNode unionNode10 = IQ_FACTORY.createUnionNode(ImmutableSet.of(A, B, C));
+        UnionNode unionNode11 = IQ_FACTORY.createUnionNode(ImmutableSet.of(A,C));
+        UnionNode unionNode12 = IQ_FACTORY.createUnionNode(ImmutableSet.of(A,C));
+        InnerJoinNode joinNode8 = IQ_FACTORY.createInnerJoinNode();
+        InnerJoinNode joinNode9 = IQ_FACTORY.createInnerJoinNode();
+        InnerJoinNode joinNode10 = IQ_FACTORY.createInnerJoinNode();
+        InnerJoinNode joinNode11 = IQ_FACTORY.createInnerJoinNode();
+        InnerJoinNode joinNode12 = IQ_FACTORY.createInnerJoinNode();
+        InnerJoinNode joinNode13 = IQ_FACTORY.createInnerJoinNode();
+        InnerJoinNode joinNode14 = IQ_FACTORY.createInnerJoinNode();
+        InnerJoinNode joinNode15 = IQ_FACTORY.createInnerJoinNode();
 
 
         expectedBuilder2.init(ROOT_CONSTRUCTION_NODE_ATOM, rootConstructionNode);
@@ -648,18 +648,18 @@ public class UnionLiftInternalTest {
 
         IntermediateQueryBuilder originalBuilder = createQueryBuilder(EMPTY_METADATA);
 
-        ConstructionNode rootConstructionNode = new ConstructionNodeImpl(ROOT_CONSTRUCTION_NODE_ATOM.getVariables(),
+        ConstructionNode rootConstructionNode = IQ_FACTORY.createConstructionNode(ROOT_CONSTRUCTION_NODE_ATOM.getVariables(),
                 new ImmutableSubstitutionImpl<>(ImmutableMap.of()), Optional.empty());
 
-        UnionNode unionNode1  = new UnionNodeImpl(ImmutableSet.of(A, B, C));
-        InnerJoinNode joinNode = new InnerJoinNodeImpl(Optional.empty());
-        UnionNode unionNode2 = new UnionNodeImpl(ImmutableSet.of(A, B));
+        UnionNode unionNode1  = IQ_FACTORY.createUnionNode(ImmutableSet.of(A, B, C));
+        InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
+        UnionNode unionNode2 = IQ_FACTORY.createUnionNode(ImmutableSet.of(A, B));
 
-        ExtensionalDataNode table1DataNode = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE_1, A, B));
-        ExtensionalDataNode table2DataNode = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE_2, A, B));
-        ExtensionalDataNode table3DataNode = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE_3, A, B));
-        ExtensionalDataNode table4DataNode = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE_4, A, C));
-        ExtensionalDataNode table5DataNode = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE_5, A, B, C));
+        ExtensionalDataNode table1DataNode = IQ_FACTORY.createExtensionalDataNode(DATA_FACTORY.getDataAtom(TABLE_1, A, B));
+        ExtensionalDataNode table2DataNode = IQ_FACTORY.createExtensionalDataNode(DATA_FACTORY.getDataAtom(TABLE_2, A, B));
+        ExtensionalDataNode table3DataNode = IQ_FACTORY.createExtensionalDataNode(DATA_FACTORY.getDataAtom(TABLE_3, A, B));
+        ExtensionalDataNode table4DataNode = IQ_FACTORY.createExtensionalDataNode(DATA_FACTORY.getDataAtom(TABLE_4, A, C));
+        ExtensionalDataNode table5DataNode = IQ_FACTORY.createExtensionalDataNode(DATA_FACTORY.getDataAtom(TABLE_5, A, B, C));
 
         originalBuilder.init(ROOT_CONSTRUCTION_NODE_ATOM, rootConstructionNode);
         originalBuilder.addChild(rootConstructionNode, unionNode1);
@@ -698,19 +698,19 @@ public class UnionLiftInternalTest {
 
         IntermediateQueryBuilder originalBuilder = createQueryBuilder(EMPTY_METADATA);
 
-        ConstructionNode rootConstructionNode = new ConstructionNodeImpl(ROOT_CONSTRUCTION_NODE_ATOM.getVariables(),
+        ConstructionNode rootConstructionNode = IQ_FACTORY.createConstructionNode(ROOT_CONSTRUCTION_NODE_ATOM.getVariables(),
                 new ImmutableSubstitutionImpl<>(ImmutableMap.of()), Optional.empty());
 
-        InnerJoinNode joinNode = new InnerJoinNodeImpl(Optional.empty());
-        InnerJoinNode joinNode1 = new InnerJoinNodeImpl(Optional.empty());
-        LeftJoinNode leftJoinNode = new LeftJoinNodeImpl(Optional.empty());
-        UnionNode unionNode = new UnionNodeImpl(ImmutableSet.of(A, B));
+        InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
+        InnerJoinNode joinNode1 = IQ_FACTORY.createInnerJoinNode();
+        LeftJoinNode leftJoinNode = IQ_FACTORY.createLeftJoinNode();
+        UnionNode unionNode = IQ_FACTORY.createUnionNode(ImmutableSet.of(A, B));
 
-        ExtensionalDataNode table1DataNode = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE_1, A, B));
-        ExtensionalDataNode table2DataNode = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE_2, A, B));
-        ExtensionalDataNode table3DataNode = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE_3, A, E));
-        ExtensionalDataNode table4DataNode = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE_4, A, C));
-        ExtensionalDataNode table5DataNode = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE_5, A, E));
+        ExtensionalDataNode table1DataNode = IQ_FACTORY.createExtensionalDataNode(DATA_FACTORY.getDataAtom(TABLE_1, A, B));
+        ExtensionalDataNode table2DataNode = IQ_FACTORY.createExtensionalDataNode(DATA_FACTORY.getDataAtom(TABLE_2, A, B));
+        ExtensionalDataNode table3DataNode = IQ_FACTORY.createExtensionalDataNode(DATA_FACTORY.getDataAtom(TABLE_3, A, E));
+        ExtensionalDataNode table4DataNode = IQ_FACTORY.createExtensionalDataNode(DATA_FACTORY.getDataAtom(TABLE_4, A, C));
+        ExtensionalDataNode table5DataNode = IQ_FACTORY.createExtensionalDataNode(DATA_FACTORY.getDataAtom(TABLE_5, A, E));
 
         originalBuilder.init(ROOT_CONSTRUCTION_NODE_ATOM, rootConstructionNode);
         originalBuilder.addChild(rootConstructionNode, joinNode);
@@ -752,19 +752,19 @@ public class UnionLiftInternalTest {
 
         IntermediateQueryBuilder originalBuilder = createQueryBuilder(EMPTY_METADATA);
 
-        ConstructionNode rootConstructionNode = new ConstructionNodeImpl(ROOT_CONSTRUCTION_NODE_ATOM.getVariables(),
+        ConstructionNode rootConstructionNode = IQ_FACTORY.createConstructionNode(ROOT_CONSTRUCTION_NODE_ATOM.getVariables(),
                 new ImmutableSubstitutionImpl<>(ImmutableMap.of()), Optional.empty());
 
-        InnerJoinNode joinNode = new InnerJoinNodeImpl(Optional.empty());
-        InnerJoinNode joinNode1 = new InnerJoinNodeImpl(Optional.empty());
-        LeftJoinNode leftJoinNode = new LeftJoinNodeImpl(Optional.empty());
-        UnionNode unionNode = new UnionNodeImpl(ImmutableSet.of(A, B));
+        InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
+        InnerJoinNode joinNode1 = IQ_FACTORY.createInnerJoinNode();
+        LeftJoinNode leftJoinNode = IQ_FACTORY.createLeftJoinNode();
+        UnionNode unionNode = IQ_FACTORY.createUnionNode(ImmutableSet.of(A, B));
 
-        ExtensionalDataNode table1DataNode = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE_1, A, B));
-        ExtensionalDataNode table2DataNode = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE_2, A, B));
-        ExtensionalDataNode table3DataNode = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE_3, A, E));
-        ExtensionalDataNode table4DataNode = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE_4, A, C));
-        ExtensionalDataNode table5DataNode = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE_5, A, E));
+        ExtensionalDataNode table1DataNode = IQ_FACTORY.createExtensionalDataNode(DATA_FACTORY.getDataAtom(TABLE_1, A, B));
+        ExtensionalDataNode table2DataNode = IQ_FACTORY.createExtensionalDataNode(DATA_FACTORY.getDataAtom(TABLE_2, A, B));
+        ExtensionalDataNode table3DataNode = IQ_FACTORY.createExtensionalDataNode(DATA_FACTORY.getDataAtom(TABLE_3, A, E));
+        ExtensionalDataNode table4DataNode = IQ_FACTORY.createExtensionalDataNode(DATA_FACTORY.getDataAtom(TABLE_4, A, C));
+        ExtensionalDataNode table5DataNode = IQ_FACTORY.createExtensionalDataNode(DATA_FACTORY.getDataAtom(TABLE_5, A, E));
 
         originalBuilder.init(ROOT_CONSTRUCTION_NODE_ATOM, rootConstructionNode);
         originalBuilder.addChild(rootConstructionNode, joinNode);
@@ -806,17 +806,17 @@ public class UnionLiftInternalTest {
 
         IntermediateQueryBuilder originalBuilder = createQueryBuilder(EMPTY_METADATA);
 
-        ConstructionNode rootConstructionNode = new ConstructionNodeImpl(ROOT_CONSTRUCTION_NODE_ATOM.getVariables(),
+        ConstructionNode rootConstructionNode = IQ_FACTORY.createConstructionNode(ROOT_CONSTRUCTION_NODE_ATOM.getVariables(),
                 new ImmutableSubstitutionImpl<>(ImmutableMap.of()), Optional.empty());
 
-        InnerJoinNode joinNode = new InnerJoinNodeImpl(Optional.empty());
-        LeftJoinNode leftJoinNode = new LeftJoinNodeImpl(Optional.empty());
-        UnionNode unionNode = new UnionNodeImpl(ImmutableSet.of(A, B));
+        InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
+        LeftJoinNode leftJoinNode = IQ_FACTORY.createLeftJoinNode();
+        UnionNode unionNode = IQ_FACTORY.createUnionNode(ImmutableSet.of(A, B));
 
-        ExtensionalDataNode table1DataNode = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE_1, A, B));
-        ExtensionalDataNode table2DataNode = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE_2, A, B));
-        ExtensionalDataNode table4DataNode = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE_4, A, C));
-        ExtensionalDataNode table5DataNode = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE_5, A, E));
+        ExtensionalDataNode table1DataNode = IQ_FACTORY.createExtensionalDataNode(DATA_FACTORY.getDataAtom(TABLE_1, A, B));
+        ExtensionalDataNode table2DataNode = IQ_FACTORY.createExtensionalDataNode(DATA_FACTORY.getDataAtom(TABLE_2, A, B));
+        ExtensionalDataNode table4DataNode = IQ_FACTORY.createExtensionalDataNode(DATA_FACTORY.getDataAtom(TABLE_4, A, C));
+        ExtensionalDataNode table5DataNode = IQ_FACTORY.createExtensionalDataNode(DATA_FACTORY.getDataAtom(TABLE_5, A, E));
 
         originalBuilder.init(ROOT_CONSTRUCTION_NODE_ATOM, rootConstructionNode);
         originalBuilder.addChild(rootConstructionNode, joinNode);
@@ -840,11 +840,11 @@ public class UnionLiftInternalTest {
          */
         IntermediateQueryBuilder expectedBuilder = createQueryBuilder(EMPTY_METADATA);
 
-        UnionNode unionNode1 = new UnionNodeImpl(ImmutableSet.of(A, B, C, E));
-        InnerJoinNode joinNode1 = new InnerJoinNodeImpl(Optional.empty());
-        InnerJoinNode joinNode2 = new InnerJoinNodeImpl(Optional.empty());
-        LeftJoinNode leftJoinNode1 = new LeftJoinNodeImpl(Optional.empty());
-        LeftJoinNode leftJoinNode2 = new LeftJoinNodeImpl(Optional.empty());
+        UnionNode unionNode1 = IQ_FACTORY.createUnionNode(ImmutableSet.of(A, B, C, E));
+        InnerJoinNode joinNode1 = IQ_FACTORY.createInnerJoinNode();
+        InnerJoinNode joinNode2 = IQ_FACTORY.createInnerJoinNode();
+        LeftJoinNode leftJoinNode1 = IQ_FACTORY.createLeftJoinNode();
+        LeftJoinNode leftJoinNode2 = IQ_FACTORY.createLeftJoinNode();
 
         expectedBuilder.init(ROOT_CONSTRUCTION_NODE_ATOM, rootConstructionNode);
         expectedBuilder.addChild(rootConstructionNode, unionNode1);

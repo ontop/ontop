@@ -3,7 +3,9 @@ package it.unibz.inf.ontop.executor.merging;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.InjectiveVar2VarSubstitution;
@@ -101,7 +103,7 @@ public class QueryMergingExecutorImpl implements QueryMergingExecutor {
                                 results.getSubstitutionToPropagate());
 
                     case DECLARE_AS_TRUE:
-                        return new AnalysisResults(originalNode, new TrueNodeImpl(),
+                        return new AnalysisResults(originalNode, query.getFactory().createTrueNode(),
                                 Optional.empty());
                     /**
                      * Recursive
@@ -117,7 +119,8 @@ public class QueryMergingExecutorImpl implements QueryMergingExecutor {
                         throw new IllegalStateException("Construction node insertion not expected during query merging");
 
                     case DECLARE_AS_EMPTY:
-                        return analyze(query, new EmptyNodeImpl(query.getVariables(originalNode)), substitutionToApply);
+                        return analyze(query, query.getFactory().createEmptyNode(query.getVariables(originalNode)),
+                                substitutionToApply);
 
                     default:
                         throw new IllegalStateException("Unknown local action:" + results.getLocalAction());
@@ -148,6 +151,15 @@ public class QueryMergingExecutorImpl implements QueryMergingExecutor {
         public Optional<BinaryOrderedOperatorNode.ArgumentPosition> getOptionalPosition() {
             return optionalPosition;
         }
+    }
+
+
+
+    private final IntermediateQueryFactory iqFactory;
+
+    @Inject
+    private QueryMergingExecutorImpl(IntermediateQueryFactory iqFactory) {
+        this.iqFactory = iqFactory;
     }
 
 
@@ -183,7 +195,7 @@ public class QueryMergingExecutorImpl implements QueryMergingExecutor {
 
     private void removeUnsatisfiedNode(QueryTreeComponent treeComponent, IntensionalDataNode intensionalNode) {
 
-        EmptyNode emptyNode = new EmptyNodeImpl(intensionalNode.getVariables());
+        EmptyNode emptyNode = iqFactory.createEmptyNode(intensionalNode.getVariables());
         treeComponent.replaceSubTree(intensionalNode, emptyNode);
     }
 
@@ -191,7 +203,7 @@ public class QueryMergingExecutorImpl implements QueryMergingExecutor {
      * TODO: explain
      *
      */
-    protected static void mergeSubQuery(QueryTreeComponent treeComponent, IntermediateQuery subQuery,
+    protected void mergeSubQuery(QueryTreeComponent treeComponent, IntermediateQuery subQuery,
                                         IntensionalDataNode intensionalDataNode) {
         /**
          * Gets the parent of the intensional node and remove the latter
@@ -211,7 +223,7 @@ public class QueryMergingExecutorImpl implements QueryMergingExecutor {
         if(renamingSubstitution.isEmpty()){
             renamedSubQuery = subQuery;
         } else {
-            QueryTransformer queryRenamer = new QueryRenamer(renamingSubstitution);
+            QueryTransformer queryRenamer = new QueryRenamer(iqFactory, renamingSubstitution);
             renamedSubQuery = queryRenamer.transform(subQuery);
         }
 
@@ -267,12 +279,12 @@ public class QueryMergingExecutorImpl implements QueryMergingExecutor {
     }
 
 
-    private static HomogeneousQueryNodeTransformer createRenamer(InjectiveVar2VarSubstitution renamingSubstitution) {
+    private HomogeneousQueryNodeTransformer createRenamer(InjectiveVar2VarSubstitution renamingSubstitution) {
         if (renamingSubstitution.isEmpty()) {
             return new IdentityQueryNodeTransformer();
         }
         else {
-            return new QueryNodeRenamer(renamingSubstitution);
+            return new QueryNodeRenamer(iqFactory, renamingSubstitution);
         }
     }
 

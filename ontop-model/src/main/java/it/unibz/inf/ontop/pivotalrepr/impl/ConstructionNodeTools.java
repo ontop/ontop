@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.pivotalrepr.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionImpl;
 import it.unibz.inf.ontop.pivotalrepr.ConstructionNode;
@@ -82,7 +83,7 @@ public class ConstructionNodeTools {
     }
 
     public static ConstructionNode merge(ConstructionNode parentConstructionNode,
-                                         ConstructionNode childConstructionNode) {
+                                         ConstructionNode childConstructionNode, IntermediateQueryFactory iqFactory) {
 
         ImmutableSubstitution<ImmutableTerm> composition = childConstructionNode.getSubstitution().composeWith(
                 parentConstructionNode.getSubstitution());
@@ -108,7 +109,7 @@ public class ConstructionNodeTools {
                 .map(Optional::of)
                 .orElseGet(childConstructionNode::getOptionalModifiers);
 
-        return new ConstructionNodeImpl(projectedVariables, newSubstitution, optionalModifiers);
+        return iqFactory.createConstructionNode(projectedVariables, newSubstitution, optionalModifiers);
     }
 
     public static ImmutableSet<Variable> computeNewProjectedVariables(
@@ -142,7 +143,8 @@ public class ConstructionNodeTools {
     /**
      * TODO: explain
      */
-    public static ConstructionNode newNodeWithAdditionalBindings(ConstructionNode formerConstructionNode,
+    public static ConstructionNode newNodeWithAdditionalBindings(IntermediateQueryFactory iqFactory,
+                                                                 ConstructionNode formerConstructionNode,
                                                                  ImmutableSubstitution<ImmutableTerm> additionalBindingsSubstitution)
             throws InconsistentBindingException {
 
@@ -179,7 +181,7 @@ public class ConstructionNodeTools {
             substitutionMapBuilder.put(variable, term);
         }
 
-        return new ConstructionNodeImpl(projectedVariables, new ImmutableSubstitutionImpl<>(substitutionMapBuilder.build()),
+        return iqFactory.createConstructionNode(projectedVariables, new ImmutableSubstitutionImpl<>(substitutionMapBuilder.build()),
                 formerConstructionNode.getOptionalModifiers());
 
     }
@@ -190,7 +192,8 @@ public class ConstructionNodeTools {
      * TODO: refactor
      *
      */
-    public static BindingRemoval newNodeWithLessBindings(ConstructionNode formerConstructionNode,
+    public static BindingRemoval newNodeWithLessBindings(IntermediateQueryFactory iqFactory,
+                                                         ConstructionNode formerConstructionNode,
                                                          ImmutableSubstitution<ImmutableTerm> bindingsToRemove)
             throws InconsistentBindingException {
 
@@ -208,7 +211,7 @@ public class ConstructionNodeTools {
         Optional<ImmutableQueryModifiers> newOptionalModifiers = computeNewOptionalModifiers(formerConstructionNode.getOptionalModifiers(),
                 bindingsToRemove);
 
-        ConstructionNode newConstructionNode = new ConstructionNodeImpl(newVariablesToProject, newBindingSubstitution, newOptionalModifiers);
+        ConstructionNode newConstructionNode = iqFactory.createConstructionNode(newVariablesToProject, newBindingSubstitution, newOptionalModifiers);
 
         return new BindingRemoval(newConstructionNode, newSubstitutions.getOptionalSubstitutionToPropagate());
     }

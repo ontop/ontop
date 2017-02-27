@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.executor.join;
 
 import com.google.common.collect.*;
+import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.ImmutableUnificationTools;
@@ -299,7 +300,7 @@ public class SelfJoinLikeExecutor {
 
     private static DataNode createNewDataNode(DataNode previousDataNode, DataAtom newDataAtom) {
         if (previousDataNode instanceof ExtensionalDataNode) {
-            return new ExtensionalDataNodeImpl(newDataAtom);
+            return previousDataNode.newAtom(newDataAtom);
         }
         else {
             throw new IllegalArgumentException("Unexpected type of data node: " + previousDataNode);
@@ -454,7 +455,7 @@ public class SelfJoinLikeExecutor {
 
                 QueryNode newTopNode;
                 if (optionalFilter.isPresent()) {
-                    newTopNode = new FilterNodeImpl(optionalFilter.get());
+                    newTopNode = query.getFactory().createFilterNode(optionalFilter.get());
                     treeComponent.replaceNode(joinNode, newTopNode);
                 }
                 else {

@@ -5,6 +5,8 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
+import com.google.inject.assistedinject.Assisted;
+import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionImpl;
@@ -56,8 +58,10 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
 
     private static final String CONSTRUCTION_NODE_STR = "CONSTRUCT";
 
-    public ConstructionNodeImpl(ImmutableSet<Variable> projectedVariables, ImmutableSubstitution<ImmutableTerm> substitution,
-                                Optional<ImmutableQueryModifiers> optionalQueryModifiers) {
+    @AssistedInject
+    private ConstructionNodeImpl(@Assisted ImmutableSet<Variable> projectedVariables,
+                                @Assisted ImmutableSubstitution<ImmutableTerm> substitution,
+                                @Assisted Optional<ImmutableQueryModifiers> optionalQueryModifiers) {
         this.projectedVariables = projectedVariables;
         this.substitution = substitution;
         this.optionalModifiers = optionalQueryModifiers;
@@ -66,9 +70,18 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
     /**
      * Without modifiers nor substitution.
      */
-    public ConstructionNodeImpl(ImmutableSet<Variable> projectedVariables) {
+    @AssistedInject
+    private ConstructionNodeImpl(@Assisted ImmutableSet<Variable> projectedVariables) {
         this.projectedVariables = projectedVariables;
         this.substitution = new ImmutableSubstitutionImpl<>(ImmutableMap.<Variable, ImmutableTerm>of());
+        this.optionalModifiers = Optional.empty();
+    }
+
+    @AssistedInject
+    private ConstructionNodeImpl(@Assisted ImmutableSet<Variable> projectedVariables,
+                                 @Assisted ImmutableSubstitution<ImmutableTerm> substitution) {
+        this.projectedVariables = projectedVariables;
+        this.substitution = substitution;
         this.optionalModifiers = Optional.empty();
     }
 

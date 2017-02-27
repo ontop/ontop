@@ -1,6 +1,8 @@
 package it.unibz.inf.ontop.executor.expression;
 
 import com.google.common.collect.ImmutableList;
+import com.google.inject.Inject;
+import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.model.ImmutableExpression;
 import it.unibz.inf.ontop.model.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.pivotalrepr.*;
@@ -20,6 +22,13 @@ import java.util.Optional;
  * TODO: explain
  */
 public class PushDownExpressionExecutorImpl implements PushDownExpressionExecutor {
+
+    private final IntermediateQueryFactory iqFactory;
+
+    @Inject
+    private PushDownExpressionExecutorImpl(IntermediateQueryFactory iqFactory) {
+        this.iqFactory = iqFactory;
+    }
 
     /**
      * TODO: explain
@@ -52,7 +61,7 @@ public class PushDownExpressionExecutorImpl implements PushDownExpressionExecuto
                                              Collection<ImmutableExpression> additionalExpressions) {
         ImmutableExpression foldedExpression = ImmutabilityTools.foldBooleanExpressions(
                 ImmutableList.copyOf(additionalExpressions)).get();
-        FilterNode newFilterNode = new FilterNodeImpl(foldedExpression);
+        FilterNode newFilterNode = iqFactory.createFilterNode(foldedExpression);
 
         treeComponent.insertParent(targetNode, newFilterNode);
     }
@@ -91,7 +100,7 @@ public class PushDownExpressionExecutorImpl implements PushDownExpressionExecuto
         return optionalNewFocusNode;
     }
 
-    private static Optional<JoinOrFilterNode> generateNewJoinOrFilterNode(JoinOrFilterNode formerNode,
+    private Optional<JoinOrFilterNode> generateNewJoinOrFilterNode(JoinOrFilterNode formerNode,
                                                                           ImmutableList<ImmutableExpression> newExpressions) {
         Optional<ImmutableExpression> optionalExpression = ImmutabilityTools.foldBooleanExpressions(
                 newExpressions);
@@ -102,7 +111,7 @@ public class PushDownExpressionExecutorImpl implements PushDownExpressionExecuto
         }
         else if (formerNode instanceof FilterNode) {
             if (optionalExpression.isPresent()) {
-                return Optional.of((JoinOrFilterNode) new FilterNodeImpl(optionalExpression.get()));
+                return Optional.of(iqFactory.createFilterNode(optionalExpression.get()));
             }
             else {
                 return Optional.empty();

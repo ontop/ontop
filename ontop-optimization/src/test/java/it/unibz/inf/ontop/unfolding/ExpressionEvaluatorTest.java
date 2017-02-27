@@ -49,11 +49,11 @@ public class ExpressionEvaluatorTest {
     private URITemplatePredicate URI_PREDICATE2 =  new URITemplatePredicateImpl(3);
     private Constant URI_TEMPLATE_STR_1 =  DATA_FACTORY.getConstantLiteral("http://example.org/stock/{}");
 
-    private ExtensionalDataNode DATA_NODE_1 = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, A, B));
-    private ExtensionalDataNode DATA_NODE_2 = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE2_PREDICATE, C, D));
-    private ExtensionalDataNode EXPECTED_DATA_NODE_2 = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE2_PREDICATE, A, D));
-    private ExtensionalDataNode EXP_DATA_NODE_1 = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, C, B));
-    private ExtensionalDataNode EXP_DATA_NODE_2 = new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE2_PREDICATE, C, D));
+    private ExtensionalDataNode DATA_NODE_1 = IQ_FACTORY.createExtensionalDataNode(DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, A, B));
+    private ExtensionalDataNode DATA_NODE_2 = IQ_FACTORY.createExtensionalDataNode(DATA_FACTORY.getDataAtom(TABLE2_PREDICATE, C, D));
+    private ExtensionalDataNode EXPECTED_DATA_NODE_2 = IQ_FACTORY.createExtensionalDataNode(DATA_FACTORY.getDataAtom(TABLE2_PREDICATE, A, D));
+    private ExtensionalDataNode EXP_DATA_NODE_1 = IQ_FACTORY.createExtensionalDataNode(DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, C, B));
+    private ExtensionalDataNode EXP_DATA_NODE_2 = IQ_FACTORY.createExtensionalDataNode(DATA_FACTORY.getDataAtom(TABLE2_PREDICATE, C, D));
 
     private final ImmutableExpression EXPR_LANG = DATA_FACTORY.getImmutableExpression(
             ExpressionOperation.SPARQL_LANG, W );
@@ -79,27 +79,26 @@ public class ExpressionEvaluatorTest {
         //Construct unoptimized query
         IntermediateQueryBuilder queryBuilder = createQueryBuilder(EMPTY_METADATA);;
         DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_3_PREDICATE, X, Y, W);
-        ConstructionNode rootNode = new ConstructionNodeImpl(projectionAtom.getVariables());
+        ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
 
         queryBuilder.init(projectionAtom, rootNode);
 
         //construct innerjoin
-        InnerJoinNode joinNode = new InnerJoinNodeImpl(Optional.of(EXPR_LANGMATCHES));
+        InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode(EXPR_LANGMATCHES);
         queryBuilder.addChild(rootNode, joinNode);
 
         //construct left side join
-        ConstructionNode leftNode = new ConstructionNodeImpl(ImmutableSet.of(X,W),
+        ConstructionNode leftNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X,W),
                 new ImmutableSubstitutionImpl<>(ImmutableMap.of(X, generateURI1(A), W, generateLangString(B,B))), Optional.empty());
         queryBuilder.addChild(joinNode, leftNode);
 
         queryBuilder.addChild(leftNode, DATA_NODE_1);
 
         //construct right side join
-        ConstructionNode rightNode = new ConstructionNodeImpl(ImmutableSet.of(X,Y),
+        ConstructionNode rightNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X,Y),
                 new ImmutableSubstitutionImpl<>(ImmutableMap.of(
                         X, generateURI1(C),
-                        Y, generateInt(D))),
-                Optional.empty());
+                        Y, generateInt(D))));
 
         queryBuilder.addChild(joinNode, rightNode);
 
@@ -124,7 +123,7 @@ public class ExpressionEvaluatorTest {
 
 
         DistinctVariableOnlyDataAtom expectedProjectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_3_PREDICATE, X, Y, W);
-        ConstructionNode expectedRootNode = new ConstructionNodeImpl(expectedProjectionAtom.getVariables(),
+        ConstructionNode expectedRootNode = IQ_FACTORY.createConstructionNode(expectedProjectionAtom.getVariables(),
                 new ImmutableSubstitutionImpl<>(ImmutableMap.of( W, generateLangString(B, B), X, generateURI1(A), Y, generateInt(D))),
                 Optional.empty());
 
@@ -132,7 +131,7 @@ public class ExpressionEvaluatorTest {
 
         //construct expected innerjoin
 
-        InnerJoinNode expectedJoinNode = new InnerJoinNodeImpl(Optional.of(EXPR_EQ));
+        InnerJoinNode expectedJoinNode = IQ_FACTORY.createInnerJoinNode(EXPR_EQ);
         expectedQueryBuilder.addChild(expectedRootNode, expectedJoinNode);
 
         expectedQueryBuilder.addChild(expectedJoinNode, DATA_NODE_1);
@@ -153,15 +152,14 @@ public class ExpressionEvaluatorTest {
 
 
         DistinctVariableOnlyDataAtom expectedProjectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_3_PREDICATE, X, Y, W);
-        ConstructionNode expectedRootNode = new ConstructionNodeImpl(expectedProjectionAtom.getVariables(),
-                new ImmutableSubstitutionImpl<>(ImmutableMap.of(X, generateURI1(A), Y, generateInt(D), W, generateLangString(B, langValueConstant))),
-                Optional.empty());
+        ConstructionNode expectedRootNode = IQ_FACTORY.createConstructionNode(expectedProjectionAtom.getVariables(),
+                new ImmutableSubstitutionImpl<>(ImmutableMap.of(X, generateURI1(A), Y, generateInt(D), W, generateLangString(B, langValueConstant))));
 
         expectedQueryBuilder.init(expectedProjectionAtom, expectedRootNode);
 
         //construct expected innerjoin
 
-        InnerJoinNode expectedJoinNode = new InnerJoinNodeImpl(Optional.empty());
+        InnerJoinNode expectedJoinNode = IQ_FACTORY.createInnerJoinNode();
         expectedQueryBuilder.addChild(expectedRootNode, expectedJoinNode);
 
         expectedQueryBuilder.addChild(expectedJoinNode, DATA_NODE_1);
@@ -181,15 +179,14 @@ public class ExpressionEvaluatorTest {
 
 
         DistinctVariableOnlyDataAtom expectedProjectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_3_PREDICATE, X, Y, W);
-        ConstructionNode expectedRootNode = new ConstructionNodeImpl(expectedProjectionAtom.getVariables(),
-                new ImmutableSubstitutionImpl<>(ImmutableMap.of(X, generateURI1(C), Y, generateInt(D), W, generateLangString(B, langValueConstant))),
-                Optional.empty());
+        ConstructionNode expectedRootNode = IQ_FACTORY.createConstructionNode(expectedProjectionAtom.getVariables(),
+                new ImmutableSubstitutionImpl<>(ImmutableMap.of(X, generateURI1(C), Y, generateInt(D), W, generateLangString(B, langValueConstant))));
 
         expectedQueryBuilder.init(expectedProjectionAtom, expectedRootNode);
 
         //construct expected innerjoin
 
-        InnerJoinNode expectedJoinNode = new InnerJoinNodeImpl(Optional.empty());
+        InnerJoinNode expectedJoinNode = IQ_FACTORY.createInnerJoinNode();
         expectedQueryBuilder.addChild(expectedRootNode, expectedJoinNode);
 
         expectedQueryBuilder.addChild(expectedJoinNode, EXP_DATA_NODE_2);
@@ -212,23 +209,23 @@ public class ExpressionEvaluatorTest {
         //Construct unoptimized query
         IntermediateQueryBuilder queryBuilder = createQueryBuilder(EMPTY_METADATA);;
         DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_3_PREDICATE, X, Y,W);
-        ConstructionNode rootNode = new ConstructionNodeImpl(projectionAtom.getVariables());
+        ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
 
         queryBuilder.init(projectionAtom, rootNode);
 
         //construct innerjoin
-        InnerJoinNode joinNode = new InnerJoinNodeImpl(Optional.of(EXPR_LANGMATCHES));
+        InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode(EXPR_LANGMATCHES);
         queryBuilder.addChild(rootNode, joinNode);
 
         //construct left side join
-        ConstructionNode leftNode = new ConstructionNodeImpl(ImmutableSet.of(X,W),
+        ConstructionNode leftNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X,W),
                 new ImmutableSubstitutionImpl<>(ImmutableMap.of(X, generateURI1(A), W, generateLangString(B,langValueConstant))), Optional.empty());
         queryBuilder.addChild(joinNode, leftNode);
 
         queryBuilder.addChild(leftNode, DATA_NODE_1);
 
         //construct right side join
-        ConstructionNode rightNode = new ConstructionNodeImpl(ImmutableSet.of(X,Y),
+        ConstructionNode rightNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X,Y),
                 new ImmutableSubstitutionImpl<>(ImmutableMap.of(
                         X, generateURI1(C),
                         Y, generateInt(D))),
@@ -267,16 +264,16 @@ public class ExpressionEvaluatorTest {
         //Construct unoptimized query
         IntermediateQueryBuilder queryBuilder = createQueryBuilder(EMPTY_METADATA);;
         DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_3_PREDICATE, X, Y,W);
-        ConstructionNode rootNode = new ConstructionNodeImpl(projectionAtom.getVariables());
+        ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
 
         queryBuilder.init(projectionAtom, rootNode);
 
         //construct innerjoin
-        InnerJoinNode joinNode = new InnerJoinNodeImpl(Optional.of(EXPR_LANGMATCHES));
+        InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode(EXPR_LANGMATCHES);
         queryBuilder.addChild(rootNode, joinNode);
 
         //construct left side join
-        ConstructionNode leftNode = new ConstructionNodeImpl(ImmutableSet.of(X,Y),
+        ConstructionNode leftNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X,Y),
                 new ImmutableSubstitutionImpl<>(ImmutableMap.of(
                         X, generateURI1(C),
                         Y, generateInt(D))),
@@ -286,7 +283,7 @@ public class ExpressionEvaluatorTest {
         queryBuilder.addChild(leftNode, DATA_NODE_2);
 
         //construct right side join
-        ConstructionNode rightNode = new ConstructionNodeImpl(ImmutableSet.of(X,W),
+        ConstructionNode rightNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X,W),
                 new ImmutableSubstitutionImpl<>(ImmutableMap.of(X, generateURI1(A), W, generateLangString(B,langValueConstant))), Optional.empty());
 
 
@@ -319,13 +316,13 @@ public class ExpressionEvaluatorTest {
         IntermediateQueryBuilder queryBuilder = createQueryBuilder(EMPTY_METADATA);;
         DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom
                 (ANS1_ARITY_2_PREDICATE, X ,Y);
-        ConstructionNode rootNode = new ConstructionNodeImpl(projectionAtom.getVariables());
-        ConstructionNode constructionNode1 = new ConstructionNodeImpl(ImmutableSet.of(X),
+        ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
+        ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X),
                 new ImmutableSubstitutionImpl<>(ImmutableMap.of(X, generateURI2(A,B))), Optional.empty());
-        ConstructionNode constructionNode2 = new ConstructionNodeImpl(ImmutableSet.of(Y),
+        ConstructionNode constructionNode2 = IQ_FACTORY.createConstructionNode(ImmutableSet.of(Y),
                 new ImmutableSubstitutionImpl<>(ImmutableMap.of(Y, generateURI2(C,D))), Optional.empty());
 
-        InnerJoinNode joinNode1 = new InnerJoinNodeImpl(Optional.of(DATA_FACTORY.getImmutableExpression(NEQ, X, Y)));
+        InnerJoinNode joinNode1 = IQ_FACTORY.createInnerJoinNode(DATA_FACTORY.getImmutableExpression(NEQ, X, Y));
 
         queryBuilder.init(projectionAtom, rootNode);
         queryBuilder.addChild(rootNode, joinNode1);
@@ -346,7 +343,7 @@ public class ExpressionEvaluatorTest {
         //----------------------------------------------------------------------
         // Construct expected query
 
-        ConstructionNode expectedRootNode = new ConstructionNodeImpl(
+        ConstructionNode expectedRootNode = IQ_FACTORY.createConstructionNode(
                 ImmutableSet.of(X, Y),
                 new ImmutableSubstitutionImpl<>(
                         ImmutableMap.of(X, generateURI2(A,B), Y, generateURI2(C,D))),
@@ -356,8 +353,8 @@ public class ExpressionEvaluatorTest {
         ImmutableExpression subExpression1 = DATA_FACTORY.getImmutableExpression(NEQ, A, C);
         ImmutableExpression subExpression2 = DATA_FACTORY.getImmutableExpression(NEQ, B, D);
 
-        InnerJoinNode joinNode2 = new InnerJoinNodeImpl(Optional.of(
-                DATA_FACTORY.getImmutableExpression(OR, subExpression1, subExpression2)));
+        InnerJoinNode joinNode2 = IQ_FACTORY.createInnerJoinNode(
+                DATA_FACTORY.getImmutableExpression(OR, subExpression1, subExpression2));
 
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(EMPTY_METADATA);;
         expectedQueryBuilder.init(projectionAtom, expectedRootNode);

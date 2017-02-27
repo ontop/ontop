@@ -52,20 +52,18 @@ public class IntermediateQueryToDatalogTranslatorTest {
          */
         IntermediateQueryBuilder queryBuilder = createQueryBuilder(EMPTY_METADATA);
 
-        ConstructionNode rootNode = new ConstructionNodeImpl(ImmutableSet.of(X),
-                new ImmutableSubstitutionImpl<>(ImmutableMap.of()), Optional.empty());
+        ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X),
+                new ImmutableSubstitutionImpl<>(ImmutableMap.of()));
 
         queryBuilder.init(ANS1_X_ATOM, rootNode);
 
-        UnionNode unionNode = new UnionNodeImpl(ImmutableSet.of(X));
+        UnionNode unionNode = IQ_FACTORY.createUnionNode(ImmutableSet.of(X));
         queryBuilder.addChild(rootNode, unionNode);
 
-        ExtensionalDataNode extensionalDataNode1 = new ExtensionalDataNodeImpl(
-                P1_X_ATOM);
+        ExtensionalDataNode extensionalDataNode1 = IQ_FACTORY.createExtensionalDataNode(P1_X_ATOM);
         queryBuilder.addChild(unionNode, extensionalDataNode1);
 
-        ExtensionalDataNode extensionalDataNode2 = new ExtensionalDataNodeImpl(
-                P2_X_ATOM);
+        ExtensionalDataNode extensionalDataNode2 = IQ_FACTORY.createExtensionalDataNode(P2_X_ATOM);
         queryBuilder.addChild(unionNode, extensionalDataNode2);
 
 
