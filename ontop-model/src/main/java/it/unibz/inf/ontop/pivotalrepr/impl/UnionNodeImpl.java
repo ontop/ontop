@@ -3,6 +3,9 @@ package it.unibz.inf.ontop.pivotalrepr.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.google.inject.assistedinject.Assisted;
+import com.google.inject.assistedinject.AssistedInject;
+import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.model.ImmutableSubstitution;
 import it.unibz.inf.ontop.model.ImmutableTerm;
 import it.unibz.inf.ontop.model.Variable;
@@ -19,7 +22,8 @@ public class UnionNodeImpl extends QueryNodeImpl implements UnionNode {
     private static final String UNION_NODE_STR = "UNION";
     private final ImmutableSet<Variable> projectedVariables;
 
-    public UnionNodeImpl(ImmutableSet<Variable> projectedVariables) {
+    @AssistedInject
+    private UnionNodeImpl(@Assisted ImmutableSet<Variable> projectedVariables) {
         this.projectedVariables = projectedVariables;
     }
 
@@ -54,8 +58,8 @@ public class UnionNodeImpl extends QueryNodeImpl implements UnionNode {
          * Such a construction node will contain the substitution.
          */
         else {
-            ConstructionNode newParentOfChildNode = new ConstructionNodeImpl(projectedVariables,
-                    (ImmutableSubstitution<ImmutableTerm>) substitution, Optional.empty());
+            ConstructionNode newParentOfChildNode = query.getFactory().createConstructionNode(projectedVariables,
+                    (ImmutableSubstitution<ImmutableTerm>) substitution);
             return new SubstitutionResultsImpl<>(newParentOfChildNode, childNode);
         }
     }

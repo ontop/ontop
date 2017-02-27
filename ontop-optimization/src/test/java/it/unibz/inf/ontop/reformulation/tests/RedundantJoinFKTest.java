@@ -1,21 +1,14 @@
 package it.unibz.inf.ontop.reformulation.tests;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableMultimap;
 import it.unibz.inf.ontop.model.*;
-import it.unibz.inf.ontop.model.impl.AtomPredicateImpl;
 import it.unibz.inf.ontop.model.impl.URITemplatePredicateImpl;
-import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionImpl;
 import it.unibz.inf.ontop.pivotalrepr.*;
 import it.unibz.inf.ontop.pivotalrepr.equivalence.IQSyntacticEquivalenceChecker;
-import it.unibz.inf.ontop.pivotalrepr.impl.*;
 import it.unibz.inf.ontop.pivotalrepr.proposal.impl.InnerJoinOptimizationProposalImpl;
 import it.unibz.inf.ontop.sql.*;
 import org.junit.Test;
 
 import java.sql.Types;
-import java.util.Optional;
 
 import static it.unibz.inf.ontop.model.Predicate.COL_TYPE.INTEGER;
 import static junit.framework.TestCase.assertTrue;
@@ -27,11 +20,11 @@ import static it.unibz.inf.ontop.OptimizationTestingTools.*;
  */
 public class RedundantJoinFKTest {
 
-    private final static AtomPredicate TABLE1_PREDICATE = new AtomPredicateImpl("TABLE1", 2);
-    private final static AtomPredicate TABLE2_PREDICATE = new AtomPredicateImpl("TABLE2", 2);
-    private final static AtomPredicate TABLE3_PREDICATE = new AtomPredicateImpl("TABLE3", 3);
-    private final static AtomPredicate TABLE4_PREDICATE = new AtomPredicateImpl("TABLE4", 3);
-    private final static AtomPredicate ANS1_PREDICATE = new AtomPredicateImpl("ans1", 1);
+    private final static AtomPredicate TABLE1_PREDICATE;
+    private final static AtomPredicate TABLE2_PREDICATE;
+    private final static AtomPredicate TABLE3_PREDICATE;
+    private final static AtomPredicate TABLE4_PREDICATE;
+    private final static AtomPredicate ANS1_PREDICATE = DATA_FACTORY.getAtomPredicate("ans1", 1);
     private final static Variable X = DATA_FACTORY.getVariable("X");
     private final static Variable A = DATA_FACTORY.getVariable("A");
     private final static Variable B = DATA_FACTORY.getVariable("B");
@@ -46,49 +39,38 @@ public class RedundantJoinFKTest {
     private final static ImmutableExpression EXPRESSION = DATA_FACTORY.getImmutableExpression(
             ExpressionOperation.EQ, B, ONE);
 
-    private final MetadataForQueryOptimization metadata;
+    private static final DBMetadata DB_METADATA;
 
     private static URITemplatePredicate URI_PREDICATE_ONE_VAR =  new URITemplatePredicateImpl(2);
     private static Constant URI_TEMPLATE_STR_1 =  DATA_FACTORY.getConstantLiteral("http://example.org/ds1/{}");
     private static Constant URI_TEMPLATE_STR_2 =  DATA_FACTORY.getConstantLiteral("http://example.org/ds2/{}");
 
-    public RedundantJoinFKTest() {
-        metadata = initMetadata();
-    }
-
-    private static MetadataForQueryOptimization initMetadata() {
-
-        ImmutableMultimap.Builder<AtomPredicate, ImmutableList<Integer>> uniqueKeyBuilder = ImmutableMultimap.builder();
-
-        /**
-         * Table 1: non-composite unique constraint and regular field
-         */
-        uniqueKeyBuilder.put(TABLE1_PREDICATE, ImmutableList.of(1));
+    static {
 
         /**
          * build the FKs
          */
         BasicDBMetadata dbMetadata = DBMetadataTestingTools.createDummyMetadata();
         QuotedIDFactory idFactory = dbMetadata.getQuotedIDFactory();
-        DatabaseRelationDefinition table1Def = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null,
-                TABLE1_PREDICATE.getName()));
+
+        DatabaseRelationDefinition table1Def = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null, "TABLE1"));
         Attribute pk1 = table1Def.addAttribute(idFactory.createAttributeID("col1"), Types.INTEGER, null, false);
         table1Def.addAttribute(idFactory.createAttributeID("col2"), Types.INTEGER, null, false);
+        TABLE1_PREDICATE = Relation2DatalogPredicate.createAtomPredicateFromRelation(table1Def);
 
-        DatabaseRelationDefinition table2Def = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null,
-                TABLE2_PREDICATE.getName()));
+        DatabaseRelationDefinition table2Def = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null, "TABLE2"));
         table2Def.addAttribute(idFactory.createAttributeID("col1"), Types.INTEGER, null, false);
         Attribute table2Col2 = table2Def.addAttribute(idFactory.createAttributeID("col2"), Types.INTEGER, null, false);
         table2Def.addForeignKeyConstraint(ForeignKeyConstraint.of("fk2-1", table2Col2, pk1));
+        TABLE2_PREDICATE = Relation2DatalogPredicate.createAtomPredicateFromRelation(table2Def);
 
-        DatabaseRelationDefinition table3Def = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null,
-                TABLE3_PREDICATE.getName()));
+        DatabaseRelationDefinition table3Def = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null, "TABLE3"));
         Attribute pk2 = table3Def.addAttribute(idFactory.createAttributeID("col1"), Types.INTEGER, null, false);
         Attribute pk3 = table3Def.addAttribute(idFactory.createAttributeID("col2"), Types.INTEGER, null, false);
         table3Def.addAttribute(idFactory.createAttributeID("col3"), Types.INTEGER, null, false);
+        TABLE3_PREDICATE = Relation2DatalogPredicate.createAtomPredicateFromRelation(table3Def);
 
-        DatabaseRelationDefinition table4Def = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null,
-                TABLE4_PREDICATE.getName()));
+        DatabaseRelationDefinition table4Def = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null, "TABLE4"));
         table4Def.addAttribute(idFactory.createAttributeID("col1"), Types.INTEGER, null, false);
         Attribute table4Col2 = table4Def.addAttribute(idFactory.createAttributeID("col2"), Types.INTEGER, null, false);
         Attribute table4Col3 = table4Def.addAttribute(idFactory.createAttributeID("col3"), Types.INTEGER, null, false);
@@ -97,26 +79,27 @@ public class RedundantJoinFKTest {
                 .add(table4Col2, pk2)
                 .add(table4Col3, pk3)
                 .build("fk2-1"));
+        TABLE4_PREDICATE = Relation2DatalogPredicate.createAtomPredicateFromRelation(table4Def);
 
-        return new MetadataForQueryOptimizationImpl(dbMetadata,
-                ImmutableMultimap.of(),
-                new UriTemplateMatcher());
+        dbMetadata.freeze();
+
+        DB_METADATA = dbMetadata;
     }
 
 
     @Test
     public void testForeignKeyOptimization() throws EmptyQueryException {
 
-        IntermediateQueryBuilder queryBuilder = createQueryBuilder(metadata);
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder(DB_METADATA);
         DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE, A);
-        ConstructionNode constructionNode = new ConstructionNodeImpl(projectionAtom.getVariables(),
-                new ImmutableSubstitutionImpl<>(ImmutableMap.of(P1, generateURI1(A), C, generateURI1(D))), Optional.empty());
+        ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
+                DATA_FACTORY.getSubstitution(P1, generateURI1(A), C, generateURI1(D)));
         queryBuilder.init(projectionAtom, constructionNode);
 
-        InnerJoinNode joinNode = new InnerJoinNodeImpl(Optional.empty());
+        InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
         queryBuilder.addChild(constructionNode, joinNode);
-        ExtensionalDataNode dataNode1 =  new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, A, B));
-        ExtensionalDataNode dataNode2 =  new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE2_PREDICATE, D, A));
+        ExtensionalDataNode dataNode1 =  IQ_FACTORY.createExtensionalDataNode(DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, A, B));
+        ExtensionalDataNode dataNode2 =  IQ_FACTORY.createExtensionalDataNode(DATA_FACTORY.getDataAtom(TABLE2_PREDICATE, D, A));
 
         queryBuilder.addChild(joinNode, dataNode1);
         queryBuilder.addChild(joinNode, dataNode2);
@@ -128,10 +111,10 @@ public class RedundantJoinFKTest {
 
         System.out.println("\n After optimization: \n" +  query);
 
-        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(metadata);
+        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(DB_METADATA);
         DistinctVariableOnlyDataAtom projectionAtom1 = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE, A);
-        ConstructionNode constructionNode1 = new ConstructionNodeImpl(projectionAtom.getVariables(),
-                new ImmutableSubstitutionImpl<>(ImmutableMap.of(P1, generateURI1(A), C, generateURI1(D))), Optional.empty());
+        ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
+                DATA_FACTORY.getSubstitution(P1, generateURI1(A), C, generateURI1(D)));
         expectedQueryBuilder.init(projectionAtom1, constructionNode1);
         expectedQueryBuilder.addChild(constructionNode1, dataNode2);
 
@@ -146,19 +129,19 @@ public class RedundantJoinFKTest {
     @Test
     public void testForeignKeyNonOptimization() throws EmptyQueryException {
 
-        IntermediateQueryBuilder queryBuilder = createQueryBuilder(metadata);
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder(DB_METADATA);
         DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE, A);
-        ConstructionNode constructionNode = new ConstructionNodeImpl(projectionAtom.getVariables(),
-                new ImmutableSubstitutionImpl<>(ImmutableMap.of(
+        ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
+                DATA_FACTORY.getSubstitution(
                         P1, generateURI1(A),
                         C, generateURI1(D),
-                        X, generateURI1(B))), Optional.empty());
+                        X, generateURI1(B)));
         queryBuilder.init(projectionAtom, constructionNode);
 
-        InnerJoinNode joinNode = new InnerJoinNodeImpl(Optional.empty());
+        InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
         queryBuilder.addChild(constructionNode, joinNode);
-        ExtensionalDataNode dataNode1 =  new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, A, B));
-        ExtensionalDataNode dataNode2 =  new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE2_PREDICATE, D, A));
+        ExtensionalDataNode dataNode1 =  IQ_FACTORY.createExtensionalDataNode(DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, A, B));
+        ExtensionalDataNode dataNode2 =  IQ_FACTORY.createExtensionalDataNode(DATA_FACTORY.getDataAtom(TABLE2_PREDICATE, D, A));
 
         queryBuilder.addChild(joinNode, dataNode1);
         queryBuilder.addChild(joinNode, dataNode2);
@@ -180,17 +163,17 @@ public class RedundantJoinFKTest {
     @Test
     public void testForeignKeyNonOptimization1() throws EmptyQueryException {
 
-        IntermediateQueryBuilder queryBuilder = createQueryBuilder(metadata);
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder(DB_METADATA);
         DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE, A);
-        ConstructionNode constructionNode = new ConstructionNodeImpl(projectionAtom.getVariables(),
-                new ImmutableSubstitutionImpl<>(ImmutableMap.of(
-                        P1, generateURI1(A))), Optional.empty());
+        ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
+                DATA_FACTORY.getSubstitution(
+                        P1, generateURI1(A)));
         queryBuilder.init(projectionAtom, constructionNode);
 
-        InnerJoinNode joinNode = new InnerJoinNodeImpl(Optional.empty());
+        InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
         queryBuilder.addChild(constructionNode, joinNode);
-        ExtensionalDataNode dataNode1 =  new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, A, ONE));
-        ExtensionalDataNode dataNode2 =  new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE2_PREDICATE, B, A));
+        ExtensionalDataNode dataNode1 =  IQ_FACTORY.createExtensionalDataNode(DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, A, ONE));
+        ExtensionalDataNode dataNode2 =  IQ_FACTORY.createExtensionalDataNode(DATA_FACTORY.getDataAtom(TABLE2_PREDICATE, B, A));
 
         queryBuilder.addChild(joinNode, dataNode1);
         queryBuilder.addChild(joinNode, dataNode2);
@@ -211,21 +194,21 @@ public class RedundantJoinFKTest {
     @Test
     public void testForeignKeyNonOptimization2() throws EmptyQueryException {
 
-        IntermediateQueryBuilder queryBuilder = createQueryBuilder(metadata);
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder(DB_METADATA);
         DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE, A);
-        ConstructionNode constructionNode = new ConstructionNodeImpl(projectionAtom.getVariables(),
-                new ImmutableSubstitutionImpl<>(ImmutableMap.of(
+        ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
+                DATA_FACTORY.getSubstitution(
                         P1, generateURI1(A),
-                        C, generateURI1(D))), Optional.empty());
+                        C, generateURI1(D)));
         queryBuilder.init(projectionAtom, constructionNode);
 
-        FilterNode filterNode = new FilterNodeImpl(EXPRESSION);
+        FilterNode filterNode = IQ_FACTORY.createFilterNode(EXPRESSION);
         queryBuilder.addChild(constructionNode, filterNode);
-        InnerJoinNode joinNode = new InnerJoinNodeImpl(Optional.empty());
+        InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
         queryBuilder.addChild(filterNode, joinNode);
 
-        ExtensionalDataNode dataNode1 =  new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, A, B));
-        ExtensionalDataNode dataNode2 =  new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE2_PREDICATE, D, A));
+        ExtensionalDataNode dataNode1 =  IQ_FACTORY.createExtensionalDataNode(DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, A, B));
+        ExtensionalDataNode dataNode2 =  IQ_FACTORY.createExtensionalDataNode(DATA_FACTORY.getDataAtom(TABLE2_PREDICATE, D, A));
 
         queryBuilder.addChild(joinNode, dataNode1);
         queryBuilder.addChild(joinNode, dataNode2);
@@ -246,17 +229,17 @@ public class RedundantJoinFKTest {
     @Test
     public void testForeignKeyNonOptimization3() throws EmptyQueryException {
 
-        IntermediateQueryBuilder queryBuilder = createQueryBuilder(metadata);
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder(DB_METADATA);
         DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE, A);
-        ConstructionNode constructionNode = new ConstructionNodeImpl(projectionAtom.getVariables(),
-                new ImmutableSubstitutionImpl<>(ImmutableMap.of(
-                        P1, generateURI1(A))), Optional.empty());
+        ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
+                DATA_FACTORY.getSubstitution(
+                        P1, generateURI1(A)));
         queryBuilder.init(projectionAtom, constructionNode);
 
-        InnerJoinNode joinNode = new InnerJoinNodeImpl(Optional.empty());
+        InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
         queryBuilder.addChild(constructionNode, joinNode);
-        ExtensionalDataNode dataNode1 =  new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, A, A));
-        ExtensionalDataNode dataNode2 =  new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE2_PREDICATE, B, A));
+        ExtensionalDataNode dataNode1 =  IQ_FACTORY.createExtensionalDataNode(DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, A, A));
+        ExtensionalDataNode dataNode2 =  IQ_FACTORY.createExtensionalDataNode(DATA_FACTORY.getDataAtom(TABLE2_PREDICATE, B, A));
 
         queryBuilder.addChild(joinNode, dataNode1);
         queryBuilder.addChild(joinNode, dataNode2);
@@ -277,22 +260,22 @@ public class RedundantJoinFKTest {
     @Test
     public void testForeignKeyOptimization1() throws EmptyQueryException {
 
-        IntermediateQueryBuilder queryBuilder = createQueryBuilder(metadata);
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder(DB_METADATA);
         DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE, A);
-        ConstructionNode constructionNode = new ConstructionNodeImpl(projectionAtom.getVariables(),
-                new ImmutableSubstitutionImpl<>(ImmutableMap.of(P1, generateURI1(A), C, generateURI1(D))), Optional.empty());
+        ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
+                DATA_FACTORY.getSubstitution(P1, generateURI1(A), C, generateURI1(D)));
         queryBuilder.init(projectionAtom, constructionNode);
 
-        InnerJoinNode joinNode = new InnerJoinNodeImpl(Optional.empty());
+        InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
         queryBuilder.addChild(constructionNode, joinNode);
-        ExtensionalDataNode dataNode1_1 =  new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, A, A));
-        ExtensionalDataNode dataNode1_2 =  new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, A, B));
-        ExtensionalDataNode dataNode1_3 =  new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, C, E));
-        ExtensionalDataNode dataNode1_4 =  new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, A, F));
-        ExtensionalDataNode dataNode2_1 =  new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE2_PREDICATE, D, A));
-        ExtensionalDataNode dataNode2_2 =  new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE2_PREDICATE, B, A));
-        ExtensionalDataNode dataNode2_3 =  new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE2_PREDICATE, D, A));
-        ExtensionalDataNode dataNode2_4 =  new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE2_PREDICATE, D, C));
+        ExtensionalDataNode dataNode1_1 =  IQ_FACTORY.createExtensionalDataNode(DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, A, A));
+        ExtensionalDataNode dataNode1_2 =  IQ_FACTORY.createExtensionalDataNode(DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, A, B));
+        ExtensionalDataNode dataNode1_3 =  IQ_FACTORY.createExtensionalDataNode(DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, C, E));
+        ExtensionalDataNode dataNode1_4 =  IQ_FACTORY.createExtensionalDataNode(DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, A, F));
+        ExtensionalDataNode dataNode2_1 =  IQ_FACTORY.createExtensionalDataNode(DATA_FACTORY.getDataAtom(TABLE2_PREDICATE, D, A));
+        ExtensionalDataNode dataNode2_2 =  IQ_FACTORY.createExtensionalDataNode(DATA_FACTORY.getDataAtom(TABLE2_PREDICATE, B, A));
+        ExtensionalDataNode dataNode2_3 =  IQ_FACTORY.createExtensionalDataNode(DATA_FACTORY.getDataAtom(TABLE2_PREDICATE, D, A));
+        ExtensionalDataNode dataNode2_4 =  IQ_FACTORY.createExtensionalDataNode(DATA_FACTORY.getDataAtom(TABLE2_PREDICATE, D, C));
 
         queryBuilder.addChild(joinNode, dataNode1_1);
         queryBuilder.addChild(joinNode, dataNode1_2);
@@ -310,12 +293,12 @@ public class RedundantJoinFKTest {
 
         System.out.println("\n After optimization: \n" +  query);
 
-        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(metadata);
+        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(DB_METADATA);
         DistinctVariableOnlyDataAtom projectionAtom1 = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE, A);
-        ConstructionNode constructionNode1 = new ConstructionNodeImpl(projectionAtom.getVariables(),
-                new ImmutableSubstitutionImpl<>(ImmutableMap.of(P1, generateURI1(A), C, generateURI1(D))), Optional.empty());
+        ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
+                DATA_FACTORY.getSubstitution(P1, generateURI1(A), C, generateURI1(D)));
         expectedQueryBuilder.init(projectionAtom1, constructionNode1);
-        InnerJoinNode joinNode1 = new InnerJoinNodeImpl(Optional.empty());
+        InnerJoinNode joinNode1 = IQ_FACTORY.createInnerJoinNode();
         expectedQueryBuilder.addChild(constructionNode1, joinNode1);
         expectedQueryBuilder.addChild(joinNode1, dataNode1_1);
         expectedQueryBuilder.addChild(joinNode1, dataNode1_2);
@@ -334,16 +317,16 @@ public class RedundantJoinFKTest {
     @Test
     public void testForeignKeyOptimization2() throws EmptyQueryException {
 
-        IntermediateQueryBuilder queryBuilder = createQueryBuilder(metadata);
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder(DB_METADATA);
         DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE, A);
-        ConstructionNode constructionNode = new ConstructionNodeImpl(projectionAtom.getVariables(),
-                new ImmutableSubstitutionImpl<>(ImmutableMap.of(P1, generateURI1(A))), Optional.empty());
+        ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
+                DATA_FACTORY.getSubstitution(P1, generateURI1(A)));
         queryBuilder.init(projectionAtom, constructionNode);
 
-        InnerJoinNode joinNode = new InnerJoinNodeImpl(Optional.empty());
+        InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
         queryBuilder.addChild(constructionNode, joinNode);
-        ExtensionalDataNode dataNode1 =  new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE3_PREDICATE, A, B, C));
-        ExtensionalDataNode dataNode2 =  new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE4_PREDICATE, D, A, B));
+        ExtensionalDataNode dataNode1 =  IQ_FACTORY.createExtensionalDataNode(DATA_FACTORY.getDataAtom(TABLE3_PREDICATE, A, B, C));
+        ExtensionalDataNode dataNode2 =  IQ_FACTORY.createExtensionalDataNode(DATA_FACTORY.getDataAtom(TABLE4_PREDICATE, D, A, B));
 
         queryBuilder.addChild(joinNode, dataNode1);
         queryBuilder.addChild(joinNode, dataNode2);
@@ -355,10 +338,10 @@ public class RedundantJoinFKTest {
 
         System.out.println("\n After optimization: \n" +  query);
 
-        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(metadata);
+        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(DB_METADATA);
         DistinctVariableOnlyDataAtom projectionAtom1 = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE, A);
-        ConstructionNode constructionNode1 = new ConstructionNodeImpl(projectionAtom.getVariables(),
-                new ImmutableSubstitutionImpl<>(ImmutableMap.of(P1, generateURI1(A))), Optional.empty());
+        ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
+                DATA_FACTORY.getSubstitution(P1, generateURI1(A)));
         expectedQueryBuilder.init(projectionAtom1, constructionNode1);
         expectedQueryBuilder.addChild(constructionNode1, dataNode2);
 
@@ -372,17 +355,16 @@ public class RedundantJoinFKTest {
     @Test
     public void testForeignKeyNonOptimization4() throws EmptyQueryException {
 
-        IntermediateQueryBuilder queryBuilder = createQueryBuilder(metadata);
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder(DB_METADATA);
         DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE, A);
-        ConstructionNode constructionNode = new ConstructionNodeImpl(projectionAtom.getVariables(),
-                new ImmutableSubstitutionImpl<>(ImmutableMap.of(
-                        P1, generateURI1(A))), Optional.empty());
+        ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
+                DATA_FACTORY.getSubstitution(P1, generateURI1(A)));
         queryBuilder.init(projectionAtom, constructionNode);
 
-        InnerJoinNode joinNode = new InnerJoinNodeImpl(Optional.empty());
+        InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
         queryBuilder.addChild(constructionNode, joinNode);
-        ExtensionalDataNode dataNode1 =  new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE3_PREDICATE, A, B, C));
-        ExtensionalDataNode dataNode2 =  new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE4_PREDICATE, D, B, A));
+        ExtensionalDataNode dataNode1 =  IQ_FACTORY.createExtensionalDataNode(DATA_FACTORY.getDataAtom(TABLE3_PREDICATE, A, B, C));
+        ExtensionalDataNode dataNode2 =  IQ_FACTORY.createExtensionalDataNode(DATA_FACTORY.getDataAtom(TABLE4_PREDICATE, D, B, A));
 
         queryBuilder.addChild(joinNode, dataNode1);
         queryBuilder.addChild(joinNode, dataNode2);
@@ -403,17 +385,16 @@ public class RedundantJoinFKTest {
     @Test
     public void testForeignKeyNonOptimization5() throws EmptyQueryException {
 
-        IntermediateQueryBuilder queryBuilder = createQueryBuilder(metadata);
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder(DB_METADATA);
         DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE, A);
-        ConstructionNode constructionNode = new ConstructionNodeImpl(projectionAtom.getVariables(),
-                new ImmutableSubstitutionImpl<>(ImmutableMap.of(
-                        P1, generateURI1(A))), Optional.empty());
+        ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
+                DATA_FACTORY.getSubstitution(P1, generateURI1(A)));
         queryBuilder.init(projectionAtom, constructionNode);
 
-        InnerJoinNode joinNode = new InnerJoinNodeImpl(Optional.empty());
+        InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
         queryBuilder.addChild(constructionNode, joinNode);
-        ExtensionalDataNode dataNode1 =  new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE3_PREDICATE, A, A, C));
-        ExtensionalDataNode dataNode2 =  new ExtensionalDataNodeImpl(DATA_FACTORY.getDataAtom(TABLE4_PREDICATE, A, A, B));
+        ExtensionalDataNode dataNode1 =  IQ_FACTORY.createExtensionalDataNode(DATA_FACTORY.getDataAtom(TABLE3_PREDICATE, A, A, C));
+        ExtensionalDataNode dataNode2 =  IQ_FACTORY.createExtensionalDataNode(DATA_FACTORY.getDataAtom(TABLE4_PREDICATE, A, A, B));
 
         queryBuilder.addChild(joinNode, dataNode1);
         queryBuilder.addChild(joinNode, dataNode2);

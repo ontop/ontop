@@ -20,6 +20,7 @@ package it.unibz.inf.ontop.model.impl;
  * #L%
  */
 
+import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.Predicate.COL_TYPE;
 import it.unibz.inf.ontop.model.LanguageTag;
@@ -567,6 +568,57 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 		return languageTagTerm instanceof Constant
 				? getTermType(((Constant) languageTagTerm).getValue())
 				: new TermTypeImpl(languageTagTerm);
+	}
+
+	@Override
+	public AtomPredicate getAtomPredicate(String name, int arity) {
+		return new AtomPredicateImpl(name, arity);
+	}
+
+	@Override
+	public AtomPredicate getAtomPredicate(Predicate datalogPredicate) {
+		return new AtomPredicateImpl(datalogPredicate);
+	}
+
+	@Override
+	public <T extends ImmutableTerm> ImmutableSubstitution<T> getSubstitution(ImmutableMap<Variable, T> newSubstitutionMap) {
+		return new ImmutableSubstitutionImpl<>(newSubstitutionMap);
+	}
+
+	@Override
+	public <T extends ImmutableTerm> ImmutableSubstitution<T> getSubstitution(Variable k1, T v1) {
+		return getSubstitution(ImmutableMap.of(k1, v1));
+	}
+
+	@Override
+	public <T extends ImmutableTerm> ImmutableSubstitution<T> getSubstitution(Variable k1, T v1, Variable k2, T v2) {
+		return getSubstitution(ImmutableMap.of(k1, v1, k2, v2));
+	}
+
+	@Override
+	public <T extends ImmutableTerm> ImmutableSubstitution<T> getSubstitution(Variable k1, T v1, Variable k2, T v2, Variable k3, T v3) {
+		return getSubstitution(ImmutableMap.of(k1, v1, k2, v2, k3, v3));
+	}
+
+	@Override
+	public <T extends ImmutableTerm> ImmutableSubstitution<T> getSubstitution(Variable k1, T v1, Variable k2, T v2,
+																			  Variable k3, T v3, Variable k4, T v4) {
+		return getSubstitution(ImmutableMap.of(k1, v1, k2, v2, k3, v3, k4, v4));
+	}
+
+	@Override
+	public <T extends ImmutableTerm> ImmutableSubstitution<T> getSubstitution() {
+		return new ImmutableSubstitutionImpl<>(ImmutableMap.of());
+	}
+
+	@Override
+	public Var2VarSubstitution getVar2VarSubstitution(ImmutableMap<Variable, Variable> substitutionMap) {
+		return new Var2VarSubstitutionImpl(substitutionMap);
+	}
+
+	@Override
+	public InjectiveVar2VarSubstitution getInjectiveVar2VarSubstitution(Map<Variable, Variable> substitutionMap) {
+		return new InjectiveVar2VarSubstitutionImpl(substitutionMap);
 	}
 
 	private LanguageTag getLanguageTag(String languageTagString) {

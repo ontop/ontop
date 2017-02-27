@@ -9,7 +9,7 @@ import it.unibz.inf.ontop.injection.OBDAFactoryWithException;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.io.DataSource2PropertiesConvertor;
 import it.unibz.inf.ontop.io.PrefixManager;
-import it.unibz.inf.ontop.mapping.MappingParser;
+import it.unibz.inf.ontop.mapping.SQLMappingParser;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.ontology.OntologyFactory;
 import it.unibz.inf.ontop.ontology.OntologyVocabulary;
@@ -101,7 +101,7 @@ public class OBDAModelWrapper {
                 .properties(properties)
                 .nativeOntopMappingFile(mappingFile)
                 .build();
-        MappingParser mappingParser = configuration.getInjector().getInstance(MappingParser.class);
+        SQLMappingParser mappingParser = configuration.getInjector().getInstance(SQLMappingParser.class);
 
         OBDAModel newObdaModel = mappingParser.parse(mappingFile);
 

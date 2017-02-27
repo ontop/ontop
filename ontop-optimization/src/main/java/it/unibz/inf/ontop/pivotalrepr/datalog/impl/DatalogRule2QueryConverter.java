@@ -4,7 +4,7 @@ import java.util.Optional;
 
 import fj.P2;
 import fj.data.List;
-import it.unibz.inf.ontop.injection.OntopModelFactory;
+import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.model.impl.DatalogTools;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
 import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.PullOutEqualityNormalizerImpl;
@@ -12,7 +12,7 @@ import it.unibz.inf.ontop.pivotalrepr.BinaryOrderedOperatorNode.ArgumentPosition
 import it.unibz.inf.ontop.pivotalrepr.impl.*;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.pivotalrepr.*;
-import it.unibz.inf.ontop.pivotalrepr.impl.ConstructionNodeImpl;
+import it.unibz.inf.ontop.pivotalrepr.mapping.TargetAtom;
 import it.unibz.inf.ontop.pivotalrepr.utils.ExecutorRegistry;
 
 import java.util.Collection;
@@ -98,38 +98,37 @@ public class DatalogRule2QueryConverter {
     /**
      * TODO: describe
      */
-    public static IntermediateQuery convertDatalogRule(MetadataForQueryOptimization metadata, CQIE datalogRule,
+    public static IntermediateQuery convertDatalogRule(DBMetadata dbMetadata, CQIE datalogRule,
                                                        Collection<Predicate> tablePredicates,
                                                        Optional<ImmutableQueryModifiers> optionalModifiers,
-                                                       OntopModelFactory modelFactory,
+                                                       IntermediateQueryFactory iqFactory,
                                                        ExecutorRegistry executorRegistry)
             throws DatalogProgram2QueryConverterImpl.InvalidDatalogProgramException {
 
-        P2<DistinctVariableOnlyDataAtom, ImmutableSubstitution<ImmutableTerm>> decomposition =
-                DatalogConversionTools.convertFromDatalogDataAtom(datalogRule.getHead());
+        TargetAtom targetAtom = DatalogConversionTools.convertFromDatalogDataAtom(datalogRule.getHead());
 
-        DistinctVariableOnlyDataAtom projectionAtom = decomposition._1();
+        DistinctVariableOnlyDataAtom projectionAtom = targetAtom.getProjectionAtom();
 
-        ConstructionNode rootNode = new ConstructionNodeImpl(projectionAtom.getVariables(), decomposition._2(),
-                optionalModifiers);
+        ConstructionNode rootNode = iqFactory.createConstructionNode(projectionAtom.getVariables(),
+                targetAtom.getSubstitution(), optionalModifiers);
 
         List<Function> bodyAtoms = List.iterableList(datalogRule.getBody());
         if (bodyAtoms.isEmpty()) {
-            return createFact(metadata, rootNode, projectionAtom, executorRegistry, modelFactory);
+            return createFact(dbMetadata, rootNode, projectionAtom, executorRegistry, iqFactory);
         }
         else {
             AtomClassification atomClassification = new AtomClassification(bodyAtoms);
 
-            return createDefinition(metadata, rootNode, projectionAtom, tablePredicates,
+            return createDefinition(dbMetadata, rootNode, projectionAtom, tablePredicates,
                     atomClassification.dataAndCompositeAtoms, atomClassification.booleanAtoms,
-                    atomClassification.optionalGroupAtom, modelFactory, executorRegistry);
+                    atomClassification.optionalGroupAtom, iqFactory, executorRegistry);
         }
     }
 
-    private static IntermediateQuery createFact(MetadataForQueryOptimization metadata, ConstructionNode rootNode,
+    private static IntermediateQuery createFact(DBMetadata dbMetadata, ConstructionNode rootNode,
                                                 DistinctVariableOnlyDataAtom projectionAtom, ExecutorRegistry executorRegistry,
-                                                OntopModelFactory modelFactory) {
-        IntermediateQueryBuilder queryBuilder = modelFactory.create(metadata, executorRegistry);
+                                                IntermediateQueryFactory modelFactory) {
+        IntermediateQueryBuilder queryBuilder = modelFactory.createIQBuilder(dbMetadata, executorRegistry);
         queryBuilder.init(projectionAtom, rootNode);
         return queryBuilder.build();
     }
@@ -138,21 +137,21 @@ public class DatalogRule2QueryConverter {
     /**
      * TODO: explain
      */
-    private static IntermediateQuery createDefinition(MetadataForQueryOptimization metadata, ConstructionNode rootNode,
+    private static IntermediateQuery createDefinition(DBMetadata dbMetadata, ConstructionNode rootNode,
                                                       DistinctVariableOnlyDataAtom projectionAtom,
                                                       Collection<Predicate> tablePredicates,
                                                       List<Function> dataAndCompositeAtoms,
                                                       List<Function> booleanAtoms, Optional<Function> optionalGroupAtom,
-                                                      OntopModelFactory modelFactory,
+                                                      IntermediateQueryFactory iqFactory,
                                                       ExecutorRegistry executorRegistry)
             throws DatalogProgram2QueryConverterImpl.InvalidDatalogProgramException {
         /**
          * TODO: explain
          */
-        Optional<JoinOrFilterNode> optionalFilterOrJoinNode = createFilterOrJoinNode(dataAndCompositeAtoms, booleanAtoms);
+        Optional<JoinOrFilterNode> optionalFilterOrJoinNode = createFilterOrJoinNode(iqFactory, dataAndCompositeAtoms, booleanAtoms);
 
         // Non final
-        IntermediateQueryBuilder queryBuilder = modelFactory.create(metadata, executorRegistry);
+        IntermediateQueryBuilder queryBuilder = iqFactory.createIQBuilder(dbMetadata, executorRegistry);
 
         try {
             queryBuilder.init(projectionAtom, rootNode);
@@ -198,8 +197,9 @@ public class DatalogRule2QueryConverter {
     /**
      * TODO: explain
      */
-    private static Optional<JoinOrFilterNode> createFilterOrJoinNode(List<Function> dataAndCompositeAtoms,
-                                                              List<Function> booleanAtoms) {
+    private static Optional<JoinOrFilterNode> createFilterOrJoinNode(IntermediateQueryFactory iqFactory,
+                                                                     List<Function> dataAndCompositeAtoms,
+                                                                     List<Function> booleanAtoms) {
         Optional<ImmutableExpression> optionalFilter = createFilterExpression(booleanAtoms);
 
         int dataAndCompositeAtomCount = dataAndCompositeAtoms.length();
@@ -209,10 +209,10 @@ public class DatalogRule2QueryConverter {
          * Filter as a root node
          */
         if (optionalFilter.isPresent() && (dataAndCompositeAtomCount == 1)) {
-            optionalRootNode = Optional.of((JoinOrFilterNode) new FilterNodeImpl(optionalFilter.get()));
+            optionalRootNode = Optional.of((JoinOrFilterNode) iqFactory.createFilterNode(optionalFilter.get()));
         }
         else if (dataAndCompositeAtomCount > 1) {
-            optionalRootNode = Optional.of((JoinOrFilterNode) new InnerJoinNodeImpl(optionalFilter));
+            optionalRootNode = Optional.of((JoinOrFilterNode) iqFactory.createInnerJoinNode(optionalFilter));
         }
         /**
          * No need to create a special root node (will be the unique data atom)
@@ -271,10 +271,11 @@ public class DatalogRule2QueryConverter {
                 /**
                  * Creates the node
                  */
-                P2<DistinctVariableOnlyDataAtom, ImmutableSubstitution<ImmutableTerm>> convertionResults = DatalogConversionTools.convertFromDatalogDataAtom(atom);
-                ImmutableSubstitution<ImmutableTerm> bindings = convertionResults._2();
-                DataAtom dataAtom = bindings.applyToDataAtom(convertionResults._1());
-                DataNode currentNode = DatalogConversionTools.createDataNode(dataAtom, tablePredicates);
+                TargetAtom targetAtom = DatalogConversionTools.convertFromDatalogDataAtom(atom);
+                ImmutableSubstitution<ImmutableTerm> bindings = targetAtom.getSubstitution();
+                DataAtom dataAtom = bindings.applyToDataAtom(targetAtom.getProjectionAtom());
+                DataNode currentNode = DatalogConversionTools.createDataNode(queryBuilder.getFactory(),
+                        dataAtom, tablePredicates);
                 queryBuilder.addChild(parentNode, currentNode, optionalPosition);
             }
             else {
@@ -304,7 +305,7 @@ public class DatalogRule2QueryConverter {
         Optional<ImmutableExpression> optionalFilterCondition = createFilterExpression(
                 rightSubAtomClassification.booleanAtoms);
 
-        LeftJoinNode ljNode = new LeftJoinNodeImpl(optionalFilterCondition);
+        LeftJoinNode ljNode = queryBuilder.getFactory().createLeftJoinNode(optionalFilterCondition);
         queryBuilder.addChild(parentNodeOfTheLJ, ljNode, optionalPosition);
 
         /**
@@ -346,7 +347,7 @@ public class DatalogRule2QueryConverter {
          */
         else if (classification.dataAndCompositeAtoms.length() == 1) {
             if (optionalFilterCondition.isPresent()) {
-                FilterNode filterNode = new FilterNodeImpl(optionalFilterCondition.get());
+                FilterNode filterNode = queryBuilder.getFactory().createFilterNode(optionalFilterCondition.get());
                 queryBuilder.addChild(parentNodeOfTheJoinNode, filterNode, optionalPosition);
 
                 return convertDataOrCompositeAtoms(classification.dataAndCompositeAtoms, queryBuilder, filterNode,
@@ -364,7 +365,7 @@ public class DatalogRule2QueryConverter {
          * Normal case
          */
         else {
-            InnerJoinNode joinNode = new InnerJoinNodeImpl(optionalFilterCondition);
+            InnerJoinNode joinNode = queryBuilder.getFactory().createInnerJoinNode(optionalFilterCondition);
             queryBuilder.addChild(parentNodeOfTheJoinNode, joinNode, optionalPosition);
 
             /**

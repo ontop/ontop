@@ -3,10 +3,10 @@ package it.unibz.inf.ontop.injection.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Module;
 import it.unibz.inf.ontop.injection.OntopModelConfiguration;
-import it.unibz.inf.ontop.injection.OntopModelFactory;
+import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.model.DatatypeFactory;
 import it.unibz.inf.ontop.model.OBDADataFactory;
-import it.unibz.inf.ontop.pivotalrepr.IntermediateQueryBuilder;
+import it.unibz.inf.ontop.pivotalrepr.*;
 import it.unibz.inf.ontop.pivotalrepr.validation.IntermediateQueryValidator;
 
 import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.*;
@@ -27,10 +27,19 @@ public class OntopModelModule extends OntopAbstractModule {
 
         bindFromPreferences(IntermediateQueryValidator.class);
 
-        Module modelFactoryModule = buildFactory(ImmutableList.<Class>of(
-                IntermediateQueryBuilder.class
+        Module iqFactoryModule = buildFactory(ImmutableList.of(
+                IntermediateQueryBuilder.class,
+                ConstructionNode.class,
+                UnionNode.class,
+                InnerJoinNode.class,
+                LeftJoinNode.class,
+                FilterNode.class,
+                ExtensionalDataNode.class,
+                IntensionalDataNode.class,
+                EmptyNode.class,
+                TrueNode.class
                 ),
-                OntopModelFactory.class);
-        install(modelFactoryModule);
+                IntermediateQueryFactory.class);
+        install(iqFactoryModule);
     }
 }

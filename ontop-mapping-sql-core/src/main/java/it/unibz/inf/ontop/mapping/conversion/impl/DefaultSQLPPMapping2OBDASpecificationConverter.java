@@ -12,13 +12,10 @@ import it.unibz.inf.ontop.mapping.Mapping;
 import it.unibz.inf.ontop.mapping.MappingMetadata;
 import it.unibz.inf.ontop.mapping.conversion.SQLPPMapping2OBDASpecificationConverter;
 import it.unibz.inf.ontop.mapping.datalog.Datalog2QueryMappingConverter;
-import it.unibz.inf.ontop.pivotalrepr.MetadataForQueryOptimization;
-import it.unibz.inf.ontop.pivotalrepr.impl.MetadataForQueryOptimizationImpl;
 import it.unibz.inf.ontop.pivotalrepr.utils.ExecutorRegistry;
 import it.unibz.inf.ontop.spec.OBDASpecification;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
-import it.unibz.inf.ontop.model.impl.SQLMappingFactoryImpl;
 import it.unibz.inf.ontop.model.impl.TermUtils;
 import it.unibz.inf.ontop.exception.DBMetadataExtractionException;
 import it.unibz.inf.ontop.nativeql.RDBMetadataExtractor;
@@ -48,8 +45,6 @@ import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
 
 public class DefaultSQLPPMapping2OBDASpecificationConverter implements SQLPPMapping2OBDASpecificationConverter {
 
-
-    private static final SQLMappingFactory SQL_MAPPING_FACTORY = SQLMappingFactoryImpl.getInstance();
     private static final OntologyFactory ONTOLOGY_FACTORY = OntologyFactoryImpl.getInstance();
 
     private static class DBMetadataAndMappingAxioms {
@@ -115,6 +110,7 @@ public class DefaultSQLPPMapping2OBDASpecificationConverter implements SQLPPMapp
 
         // NB: may also views in the DBMetadata (for non-understood SQL queries)
         ImmutableList<CQIE> initialMappingRules = convertMappingAxioms(dbMetadataAndAxioms.axioms, dbMetadata);
+        dbMetadata.freeze();
 
         /*
          * Transformations at the Datalog level
@@ -155,14 +151,12 @@ public class DefaultSQLPPMapping2OBDASpecificationConverter implements SQLPPMapp
         // Adding data typing on the mapping axioms.
         ImmutableList<CQIE> fullyTypedRules = inferMissingDataTypesAndValidate(initialMappingRules, tBox, ontology, dbMetadata);
 
-        ImmutableList<CQIE> mappingRulesWithFacts = insertFacts(fullyTypedRules, ontology);
+        ImmutableList<CQIE> mappingRulesWithFacts = insertFacts(fullyTypedRules, ontology,
+                mappingMetadata.getUriTemplateMatcher());
 
         ImmutableList<CQIE> saturatedMappingRules = saturateMapping(mappingRulesWithFacts, tBox, dbMetadata);
 
-        MetadataForQueryOptimization metadataForQueryOptimization = new MetadataForQueryOptimizationImpl(dbMetadata,
-                UriTemplateMatcher.create(saturatedMappingRules));
-
-        Mapping saturatedMapping = mappingConverter.convertMappingRules(saturatedMappingRules, metadataForQueryOptimization,
+        Mapping saturatedMapping = mappingConverter.convertMappingRules(saturatedMappingRules, dbMetadata,
                 executorRegistry, mappingMetadata);
 
         return new OBDASpecificationImpl(saturatedMapping, dbMetadata, tBox, ontology.getVocabulary());
@@ -260,7 +254,8 @@ public class DefaultSQLPPMapping2OBDASpecificationConverter implements SQLPPMapp
         return unfoldingProgram;
     }
 
-    private ImmutableList<CQIE> insertFacts(ImmutableList<CQIE> mapping, Ontology ontology) {
+    private ImmutableList<CQIE> insertFacts(ImmutableList<CQIE> mapping, Ontology ontology,
+                                            UriTemplateMatcher uriTemplateMatcher) {
         // Adding ontology assertions (ABox) as rules (facts, head with no body).
         List<AnnotationAssertion> annotationAssertions;
         if (settings.isOntologyAnnotationQueryingEnabled()) {
@@ -272,7 +267,8 @@ public class DefaultSQLPPMapping2OBDASpecificationConverter implements SQLPPMapp
 
         // Adding ontology assertions (ABox) as rules (facts, head with no body).
         return addAssertionsAsFacts(mapping, ontology.getClassAssertions(),
-                ontology.getObjectPropertyAssertions(), ontology.getDataPropertyAssertions(), annotationAssertions);
+                ontology.getObjectPropertyAssertions(), ontology.getDataPropertyAssertions(), annotationAssertions,
+                uriTemplateMatcher);
 
     }
 
@@ -351,9 +347,8 @@ public class DefaultSQLPPMapping2OBDASpecificationConverter implements SQLPPMapp
      */
     private ImmutableList<CQIE> addAssertionsAsFacts(ImmutableList<CQIE> mapping, Iterable<ClassAssertion> cas,
                                                      Iterable<ObjectPropertyAssertion> pas,
-                                                     Iterable<DataPropertyAssertion> das, List<AnnotationAssertion> aas) {
-
-        UriTemplateMatcher uriTemplateMatcher = UriTemplateMatcher.create(mapping);
+                                                     Iterable<DataPropertyAssertion> das, List<AnnotationAssertion> aas,
+                                                     UriTemplateMatcher uriTemplateMatcher) {
 
         List<CQIE> mutableMapping = new ArrayList<>(mapping);
 
@@ -456,6 +451,8 @@ public class DefaultSQLPPMapping2OBDASpecificationConverter implements SQLPPMapp
      *  (e.g., owl:sameAs, obda:canonicalIRI)
      *
      * TODO: split these two different concerns
+     *
+     * --> Should be moved to the MappingExtraction part
      *
      */
     public ImmutableList<CQIE> inferMissingDataTypesAndValidate(ImmutableList<CQIE> unfoldingProgram, TBoxReasoner tBoxReasoner,

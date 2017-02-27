@@ -18,12 +18,6 @@ void:		http://rdfs.org/ns/void#
 diskos:		http://sws.ifi.uio.no/data/diskos/
 diskosv:		http://sws.ifi.uio.no/vocab/diskos#
 
-[SourceDeclaration]
-sourceUri	http://sws.ifi.uio.no/vocab/npd-v2
-connectionUrl	jdbc:mysql://10.7.20.39/npd
-username	fish
-password	fish
-driverClass	com.mysql.jdbc.Driver
 
 [MappingDeclaration] @collection [[
 

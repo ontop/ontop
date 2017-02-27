@@ -21,7 +21,7 @@ public abstract class JoinLikeNodeImpl extends JoinOrFilterNodeImpl implements J
      * TODO: explain
      */
     protected Optional<ExpressionEvaluator.Evaluation> computeAndEvaluateNewCondition(
-            ImmutableSubstitution<? extends ImmutableTerm> substitution, IntermediateQuery query,
+            ImmutableSubstitution<? extends ImmutableTerm> substitution,
             Optional<ImmutableExpression> optionalNewEqualities) {
 
         Optional<ImmutableExpression> updatedExistingCondition = getOptionalFilterCondition()
@@ -36,8 +36,7 @@ public abstract class JoinLikeNodeImpl extends JoinOrFilterNodeImpl implements J
                     .flatMap(e -> e.flattenAND().stream()));
 
         return newCondition
-                .map(cond -> new ExpressionEvaluator(query.getMetadata().getUriTemplateMatcher())
-                        .evaluateExpression(cond));
+                .map(cond -> new ExpressionEvaluator().evaluateExpression(cond));
     }
 
     protected static ImmutableSet<Variable> union(ImmutableSet<Variable> set1, ImmutableSet<Variable> set2) {

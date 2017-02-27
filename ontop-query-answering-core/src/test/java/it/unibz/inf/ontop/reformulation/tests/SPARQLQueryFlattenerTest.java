@@ -12,6 +12,7 @@ import org.eclipse.rdf4j.query.parser.QueryParser;
 import org.eclipse.rdf4j.query.parser.QueryParserUtil;
 
 import java.util.Optional;
+import java.util.stream.Stream;
 
 
 /**
@@ -34,7 +35,7 @@ public class SPARQLQueryFlattenerTest {
         ParsedQuery pq = parser.parseQuery(queryBind, null);
 
         SparqlAlgebraToDatalogTranslator translator = new SparqlAlgebraToDatalogTranslator(
-                new UriTemplateMatcher(), Optional.empty());
+                UriTemplateMatcher.create(Stream.of()), Optional.empty());
 
         InternalSparqlQuery program = translator.translate(pq);
         System.out.println(program);
@@ -57,7 +58,7 @@ public class SPARQLQueryFlattenerTest {
         ParsedQuery pq = parser.parseQuery(queryBind, null);
 
         SparqlAlgebraToDatalogTranslator translator = new SparqlAlgebraToDatalogTranslator(
-                new UriTemplateMatcher(), Optional.empty());
+                UriTemplateMatcher.create(Stream.of()), Optional.empty());
         InternalSparqlQuery program = translator.translate(pq);
         System.out.println(program);
     }
@@ -81,7 +82,7 @@ public class SPARQLQueryFlattenerTest {
         ParsedQuery pq = parser.parseQuery(query6, null);
 
         SparqlAlgebraToDatalogTranslator translator = new SparqlAlgebraToDatalogTranslator(
-                new UriTemplateMatcher(), Optional.empty());
+                UriTemplateMatcher.create(Stream.of()), Optional.empty());
         InternalSparqlQuery program = translator.translate(pq);
         System.out.println(program);
     }
@@ -100,7 +101,7 @@ public class SPARQLQueryFlattenerTest {
         ParsedQuery pq = parser.parseQuery(query6, null);
 
         SparqlAlgebraToDatalogTranslator translator = new SparqlAlgebraToDatalogTranslator(
-                new UriTemplateMatcher(), Optional.empty());
+                UriTemplateMatcher.create(Stream.of()), Optional.empty());
         InternalSparqlQuery program = translator.translate(pq);
         System.out.println(program);
     }

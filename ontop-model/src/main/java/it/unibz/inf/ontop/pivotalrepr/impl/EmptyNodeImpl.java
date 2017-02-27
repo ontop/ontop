@@ -1,6 +1,8 @@
 package it.unibz.inf.ontop.pivotalrepr.impl;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.inject.assistedinject.Assisted;
+import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.model.ImmutableSubstitution;
 import it.unibz.inf.ontop.model.ImmutableTerm;
 import it.unibz.inf.ontop.model.Variable;
@@ -14,7 +16,8 @@ public class EmptyNodeImpl extends QueryNodeImpl implements EmptyNode {
     private static final String PREFIX = "EMPTY ";
     private final ImmutableSet<Variable> projectedVariables;
 
-    public EmptyNodeImpl(ImmutableSet<Variable> projectedVariables) {
+    @AssistedInject
+    private EmptyNodeImpl(@Assisted ImmutableSet<Variable> projectedVariables) {
         this.projectedVariables = projectedVariables;
     }
 

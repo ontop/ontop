@@ -1,13 +1,17 @@
 package it.unibz.inf.ontop.si.impl;
 
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.injection.MappingFactory;
 import it.unibz.inf.ontop.injection.OntopMappingConfiguration;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.io.PrefixManager;
+import it.unibz.inf.ontop.model.Function;
+import it.unibz.inf.ontop.model.OBDAMappingAxiom;
 import it.unibz.inf.ontop.model.OBDAModel;
+import it.unibz.inf.ontop.model.UriTemplateMatcher;
 import it.unibz.inf.ontop.model.impl.OBDAModelImpl;
 import it.unibz.inf.ontop.ontology.ImmutableOntologyVocabulary;
 import it.unibz.inf.ontop.ontology.Ontology;
@@ -147,9 +151,18 @@ class SILoadingTools {
         MappingFactory mappingFactory = defaultConfiguration.getInjector().getInstance(MappingFactory.class);
         PrefixManager prefixManager = mappingFactory.create(ImmutableMap.of());
 
+        ImmutableList<OBDAMappingAxiom> mappingAxioms = dataRepository.getMappings();
+
+        UriTemplateMatcher uriTemplateMatcher = UriTemplateMatcher.create(
+                mappingAxioms.stream()
+                        .flatMap(ax -> ax.getTargetQuery().stream())
+                        .flatMap(atom -> atom.getTerms().stream())
+                        .filter(t -> t instanceof Function)
+                        .map(t -> (Function) t));
+
         try {
-            return new OBDAModelImpl(dataRepository.getMappings(),
-                    mappingFactory.create(prefixManager));
+            return new OBDAModelImpl(mappingAxioms,
+                    mappingFactory.create(prefixManager, uriTemplateMatcher));
 
         } catch (DuplicateMappingException e) {
             throw new IllegalStateException(e.getMessage());

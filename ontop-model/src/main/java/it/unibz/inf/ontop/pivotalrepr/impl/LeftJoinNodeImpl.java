@@ -2,9 +2,10 @@ package it.unibz.inf.ontop.pivotalrepr.impl;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import com.google.inject.assistedinject.Assisted;
+import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
-import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.unfolding.ExpressionEvaluator;
 import it.unibz.inf.ontop.pivotalrepr.*;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -34,8 +35,19 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
 
     private static final String LEFT_JOIN_NODE_STR = "LJ";
 
-    public LeftJoinNodeImpl(Optional<ImmutableExpression> optionalJoinCondition) {
+    @AssistedInject
+    private LeftJoinNodeImpl(@Assisted Optional<ImmutableExpression> optionalJoinCondition) {
         super(optionalJoinCondition);
+    }
+
+    @AssistedInject
+    private LeftJoinNodeImpl(@Assisted ImmutableExpression joiningCondition) {
+        super(Optional.of(joiningCondition));
+    }
+
+    @AssistedInject
+    private LeftJoinNodeImpl() {
+        super(Optional.empty());
     }
 
     @Override
@@ -83,7 +95,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
                 .filter(e -> !leftVariables.contains(e.getKey()))
                 .map(e -> (Map.Entry<Variable, ImmutableTerm>)e)
                 .collect(ImmutableCollectors.toMap());
-        ImmutableSubstitution<ImmutableTerm> newSubstitution = new ImmutableSubstitutionImpl<>(newSubstitutionMap);
+        ImmutableSubstitution<ImmutableTerm> newSubstitution = DATA_FACTORY.getSubstitution(newSubstitutionMap);
 
         /**
          * New equalities (which could not be propagated)
@@ -98,7 +110,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
          * and propagates the new substitution if the conditions still holds.
          *
          */
-        return computeAndEvaluateNewCondition(substitution, query, optionalNewEqualities)
+        return computeAndEvaluateNewCondition(substitution, optionalNewEqualities)
                 .map(ev -> applyEvaluation(query, ev, newSubstitution, Optional.of(leftVariables), Provenance.FROM_RIGHT))
                 .orElseGet(() -> new SubstitutionResultsImpl<>(this, newSubstitution));
     }
@@ -124,7 +136,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
          * and propagates the same substitution if the conditions still holds.
          *
          */
-        return computeAndEvaluateNewCondition(substitution, query, Optional.empty())
+        return computeAndEvaluateNewCondition(substitution, Optional.empty())
                 .map(ev -> applyEvaluation(query, ev, substitution, Optional.of(rightVariables), Provenance.FROM_LEFT))
                 .orElseGet(() -> new SubstitutionResultsImpl<>(this, substitution));
     }
@@ -135,7 +147,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
             ImmutableSubstitution<? extends ImmutableTerm> substitution, IntermediateQuery query) {
 
         return getOptionalFilterCondition()
-                .map(cond -> transformBooleanExpression(query, substitution, cond))
+                .map(cond -> transformBooleanExpression(substitution, cond))
                 .map(ev -> applyEvaluation(query, ev, substitution, Optional.empty(), Provenance.FROM_ABOVE))
                 .orElseGet(() -> new SubstitutionResultsImpl<>(
                         SubstitutionResults.LocalAction.NO_CHANGE,
@@ -202,7 +214,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
         Stream<Map.Entry<Variable, ImmutableTerm>> alreadyExistingEntries = substitution.getImmutableMap().entrySet().stream()
                 .map(e -> (Map.Entry<Variable, ImmutableTerm>)e);
 
-        return new ImmutableSubstitutionImpl<>(
+        return DATA_FACTORY.getSubstitution(
                 Stream.concat(nullEntries, alreadyExistingEntries)
                         .collect(ImmutableCollectors.toMap()));
 
@@ -228,7 +240,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
                 .filter(e -> !newlyNullVariables.contains(e.getKey()))
                 .map(e -> (Map.Entry<Variable, ImmutableTerm>)e);
 
-        return new ImmutableSubstitutionImpl<>(
+        return DATA_FACTORY.getSubstitution(
                 Stream.concat(nullEntries, otherEntries)
                         .collect(ImmutableCollectors.toMap()));
     }
@@ -290,7 +302,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
                 if (condition.isPresent()) {
                     return new NodeTransformationProposalImpl(
                             REPLACE_BY_NEW_NODE,
-                            new FilterNodeImpl(condition.get()),
+                            query.getFactory().createFilterNode(condition.get()),
                             ImmutableSet.of()
                     );
                 }

@@ -11,4 +11,8 @@ public class OBDASpecificationException extends Exception {
     protected OBDASpecificationException(String message) {
         super(message);
     }
+
+    protected OBDASpecificationException(Exception e) {
+        super(e);
+    }
 }

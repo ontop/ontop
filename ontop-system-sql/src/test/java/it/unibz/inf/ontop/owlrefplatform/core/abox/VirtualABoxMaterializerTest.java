@@ -169,8 +169,14 @@ public class VirtualABoxMaterializerTest {
 
 		OBDAMappingAxiom map1 = nativeQLFactory.create(MAPPING_FACTORY.getSQLQuery(sql), body);
 
+		UriTemplateMatcher uriTemplateMatcher = UriTemplateMatcher.create(
+				body.stream()
+						.flatMap(atom -> atom.getTerms().stream())
+						.filter(t -> t instanceof Function)
+						.map(t -> (Function) t));
+
 		PrefixManager prefixManager = mappingFactory.create(ImmutableMap.of());
-		MappingMetadata mappingMetadata = mappingFactory.create(prefixManager);
+		MappingMetadata mappingMetadata = mappingFactory.create(prefixManager, uriTemplateMatcher);
 		return obdaFactory.createOBDAModel(ImmutableList.of(map1), mappingMetadata);
 	}
 

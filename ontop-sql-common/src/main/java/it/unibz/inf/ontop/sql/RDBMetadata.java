@@ -56,6 +56,9 @@ public class RDBMetadata extends BasicDBMetadata {
 	 */
 	
 	public ParserViewDefinition createParserView(String sql) {
+		if (!isStillMutable()) {
+			throw new IllegalStateException("Too late! Parser views must be created before freezing the DBMetadata");
+		}
 		RelationID id = getQuotedIDFactory().createRelationID(null, String.format("view_%s", parserViewCounter++));
 		
 		ParserViewDefinition view = new ParserViewDefinition(id, sql);
@@ -64,6 +67,7 @@ public class RDBMetadata extends BasicDBMetadata {
 		return view;
 	}
 
+	@Deprecated
 	@Override
 	public RDBMetadata clone() {
 		return new RDBMetadata(getDriverName(), getDriverVersion(), getDbmsProductName(), getDbmsVersion(), getQuotedIDFactory(),

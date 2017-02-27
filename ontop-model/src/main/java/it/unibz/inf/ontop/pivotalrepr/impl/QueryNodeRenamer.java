@@ -2,10 +2,11 @@ package it.unibz.inf.ontop.pivotalrepr.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.pivotalrepr.*;
 
-import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.InjectiveVar2VarSubstitution;
+import it.unibz.inf.ontop.model.InjectiveVar2VarSubstitution;
 
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -17,50 +18,49 @@ import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
  */
 public class QueryNodeRenamer implements HomogeneousQueryNodeTransformer {
 
+    private final IntermediateQueryFactory iqFactory;
     private final InjectiveVar2VarSubstitution renamingSubstitution;
 
-    public QueryNodeRenamer(InjectiveVar2VarSubstitution renamingSubstitution) {
+    public QueryNodeRenamer(IntermediateQueryFactory iqFactory, InjectiveVar2VarSubstitution renamingSubstitution) {
+        this.iqFactory = iqFactory;
         this.renamingSubstitution = renamingSubstitution;
     }
 
     @Override
     public FilterNode transform(FilterNode filterNode) {
-        return new FilterNodeImpl(renameBooleanExpression(
-                filterNode.getOptionalFilterCondition().get()));
+        return iqFactory.createFilterNode(renameBooleanExpression(filterNode.getFilterCondition()));
     }
 
     @Override
     public ExtensionalDataNode transform(ExtensionalDataNode extensionalDataNode) {
-        return new ExtensionalDataNodeImpl(renameDataAtom(extensionalDataNode.getProjectionAtom()));
+        return iqFactory.createExtensionalDataNode(renameDataAtom(extensionalDataNode.getProjectionAtom()));
     }
 
     @Override
     public LeftJoinNode transform(LeftJoinNode leftJoinNode) {
-        return new LeftJoinNodeImpl(renameOptionalBooleanExpression(
+        return iqFactory.createLeftJoinNode(renameOptionalBooleanExpression(
                 leftJoinNode.getOptionalFilterCondition()));
     }
 
     @Override
     public UnionNode transform(UnionNode unionNode){
-        return new UnionNodeImpl(renameProjectedVars(
-                unionNode.getVariables()));
+        return iqFactory.createUnionNode(renameProjectedVars(unionNode.getVariables()));
 //        return unionNode.clone();
     }
 
     @Override
     public IntensionalDataNode transform(IntensionalDataNode intensionalDataNode) {
-        return new IntensionalDataNodeImpl(renameDataAtom(intensionalDataNode.getProjectionAtom()));
+        return iqFactory.createIntensionalDataNode(renameDataAtom(intensionalDataNode.getProjectionAtom()));
     }
 
     @Override
     public InnerJoinNode transform(InnerJoinNode innerJoinNode) {
-        return new InnerJoinNodeImpl(renameOptionalBooleanExpression(
-                innerJoinNode.getOptionalFilterCondition()));
+        return iqFactory.createInnerJoinNode(renameOptionalBooleanExpression(innerJoinNode.getOptionalFilterCondition()));
     }
 
     @Override
     public ConstructionNode transform(ConstructionNode constructionNode) {
-        return new ConstructionNodeImpl(renameProjectedVars(constructionNode.getVariables()),
+        return iqFactory.createConstructionNode(renameProjectedVars(constructionNode.getVariables()),
                 renameSubstitution(constructionNode.getSubstitution()),
                 renameOptionalModifiers(constructionNode.getOptionalModifiers())
                 );

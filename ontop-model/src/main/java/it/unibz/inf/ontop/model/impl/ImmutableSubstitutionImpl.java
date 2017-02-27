@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.owlrefplatform.core.basicoperations;
+package it.unibz.inf.ontop.model.impl;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableMap;
@@ -17,7 +17,7 @@ public class ImmutableSubstitutionImpl<T extends ImmutableTerm> extends Abstract
 
     private final ImmutableMap<Variable, T> map;
 
-    public ImmutableSubstitutionImpl(ImmutableMap<Variable, ? extends T> substitutionMap) {
+    protected ImmutableSubstitutionImpl(ImmutableMap<Variable, ? extends T> substitutionMap) {
         this.map = (ImmutableMap<Variable, T>) substitutionMap;
 
         if (substitutionMap.entrySet().stream()
@@ -26,7 +26,6 @@ public class ImmutableSubstitutionImpl<T extends ImmutableTerm> extends Abstract
             throw new IllegalArgumentException("Please do not insert entries like t/t in your substitution " +
                     "(for efficiency reasons)\n. Substitution: " + substitutionMap);
         }
-
     }
 
     @Override

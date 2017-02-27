@@ -1,7 +1,6 @@
 package it.unibz.inf.ontop.io;
 
-import java.io.IOException;
-
+import it.unibz.inf.ontop.exception.MappingIOException;
 import it.unibz.inf.ontop.injection.OntopMappingSQLAllConfiguration;
 
 import org.junit.Test;
@@ -15,7 +14,7 @@ public class SQLMappingParserTest {
         configuration.loadProvidedPPMapping();
 	}
 
-	@Test(expected = IOException.class)
+	@Test(expected = MappingIOException.class)
 	public void testEndCollectionSymbolRequirement() throws Exception {
         OntopMappingSQLAllConfiguration configuration = createConfiguration(
                 "src/test/resources/format/obda/missingCollectionEnding.obda");

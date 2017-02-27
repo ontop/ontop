@@ -25,10 +25,7 @@ import it.unibz.inf.ontop.model.Function;
 import it.unibz.inf.ontop.model.Substitution;
 import it.unibz.inf.ontop.model.Term;
 import it.unibz.inf.ontop.model.Variable;
-import it.unibz.inf.ontop.model.impl.BNodeConstantImpl;
-import it.unibz.inf.ontop.model.impl.FunctionalTermImpl;
-import it.unibz.inf.ontop.model.impl.URIConstantImpl;
-import it.unibz.inf.ontop.model.impl.ValueConstantImpl;
+import it.unibz.inf.ontop.model.impl.*;
 
 import java.util.*;
 

@@ -1,12 +1,13 @@
 package it.unibz.inf.ontop.executor.leftjoin;
 
 import com.google.common.collect.*;
+import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.executor.SimpleNodeCentricExecutor;
 import it.unibz.inf.ontop.executor.join.SelfJoinLikeExecutor;
+import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.pivotalrepr.*;
-import it.unibz.inf.ontop.pivotalrepr.impl.EmptyNodeImpl;
 import it.unibz.inf.ontop.pivotalrepr.impl.QueryTreeComponent;
 import it.unibz.inf.ontop.pivotalrepr.proposal.*;
 import it.unibz.inf.ontop.pivotalrepr.proposal.impl.NodeCentricOptimizationResultsImpl;
@@ -33,8 +34,15 @@ public class RedundantSelfLeftJoinExecutor
         extends SelfJoinLikeExecutor
         implements SimpleNodeCentricExecutor<LeftJoinNode, LeftJoinOptimizationProposal> {
 
+    private final IntermediateQueryFactory iqFactory;
+
     enum Action {
         UNIFY, DO_NOTHING, DROP_RIGHT
+    }
+
+    @Inject
+    private RedundantSelfLeftJoinExecutor(IntermediateQueryFactory iqFactory) {
+        this.iqFactory = iqFactory;
     }
 
     @Override
@@ -54,7 +62,7 @@ public class RedundantSelfLeftJoinExecutor
             DataNode leftDataNode = (DataNode) leftChild;
             DataNode rightDataNode = (DataNode) rightChild;
 
-            if (isOptimizableSelfLeftJoin(leftDataNode, rightDataNode, query.getMetadata())) {
+            if (isOptimizableSelfLeftJoin(leftDataNode, rightDataNode, query.getDBMetadata())) {
                 return tryToOptimizeSelfJoin(leftDataNode, rightDataNode, query, treeComponent, leftJoinNode);
             }
         }
@@ -68,7 +76,7 @@ public class RedundantSelfLeftJoinExecutor
      * the left and the right predicates are the same, and
      * the join is over the keys
      */
-    private boolean isOptimizableSelfLeftJoin(DataNode leftDataNode, DataNode rightDataNode, MetadataForQueryOptimization metadata) {
+    private boolean isOptimizableSelfLeftJoin(DataNode leftDataNode, DataNode rightDataNode, DBMetadata metadata) {
         AtomPredicate leftPredicate = leftDataNode.getProjectionAtom().getPredicate();
         AtomPredicate rightPredicate = rightDataNode.getProjectionAtom().getPredicate();
 
@@ -189,7 +197,7 @@ public class RedundantSelfLeftJoinExecutor
 
         ImmutableMultimap<ImmutableList<VariableOrGroundTerm>, DataNode> groupingMap =
                 groupByPrimaryKeyArguments(leftDataNode, rightDataNode,
-                        query.getMetadata().getUniqueConstraints().get(leftDataNode.getProjectionAtom().getPredicate()));
+                        query.getDBMetadata().getUniqueConstraints().get(leftDataNode.getProjectionAtom().getPredicate()));
 
         ImmutableList<Variable> priorityVariables = prioritizeVariables(query, leftJoinNode);
 
@@ -216,7 +224,7 @@ public class RedundantSelfLeftJoinExecutor
      * even lead to the empty query.
      */
     private NodeCentricOptimizationResults<LeftJoinNode> tryToDropRight(LeftJoinNode leftJoinNode, DataNode rightDataNode, IntermediateQuery query, QueryTreeComponent treeComponent) throws EmptyQueryException {
-        EmptyNode emptyChild = new EmptyNodeImpl(query.getVariables(rightDataNode));
+        EmptyNode emptyChild = iqFactory.createEmptyNode(query.getVariables(rightDataNode));
         treeComponent.replaceSubTree(rightDataNode, emptyChild);
 
         RemoveEmptyNodeProposal emptyNodeProposal = new RemoveEmptyNodeProposalImpl(emptyChild, true);

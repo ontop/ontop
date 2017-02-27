@@ -18,18 +18,18 @@ public interface OBDASpecificationExtractor {
 
     OBDASpecification extract(@Nonnull File mappingFile, @Nonnull Optional<DBMetadata> dbMetadata,
                               @Nonnull Optional<Ontology> ontology, ExecutorRegistry executorRegistry)
-            throws OBDASpecificationException, IOException;
+            throws OBDASpecificationException;
 
     OBDASpecification extract(@Nonnull Reader mappingReader, @Nonnull Optional<DBMetadata> dbMetadata,
                               @Nonnull Optional<Ontology> ontology, ExecutorRegistry executorRegistry)
-            throws OBDASpecificationException, IOException;
+            throws OBDASpecificationException;
 
     OBDASpecification extract(@Nonnull Model mappingGraph, @Nonnull Optional<DBMetadata> dbMetadata,
                               @Nonnull Optional<Ontology> ontology, ExecutorRegistry executorRegistry)
-            throws OBDASpecificationException, IOException;
+            throws OBDASpecificationException;
 
-    OBDASpecification extract(@Nonnull PreProcessedMapping mapping, @Nonnull Optional<DBMetadata> dbMetadata,
+    OBDASpecification extract(@Nonnull PreProcessedMapping ppMapping, @Nonnull Optional<DBMetadata> dbMetadata,
                               @Nonnull Optional<Ontology> ontology, ExecutorRegistry executorRegistry)
-            throws OBDASpecificationException, IOException;
+            throws OBDASpecificationException;
 
 }

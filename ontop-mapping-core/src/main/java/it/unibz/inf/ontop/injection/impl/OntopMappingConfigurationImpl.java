@@ -22,7 +22,6 @@ import org.eclipse.rdf4j.model.Model;
 
 import javax.annotation.Nonnull;
 import java.io.File;
-import java.io.IOException;
 import java.io.Reader;
 import java.util.Optional;
 import java.util.Properties;
@@ -85,7 +84,7 @@ public class OntopMappingConfigurationImpl extends OntopOBDAConfigurationImpl im
      * However, the expected usage is to use the other method loadSpecification(...).
      */
     @Override
-    public Optional<OBDASpecification> loadSpecification() throws IOException, OBDASpecificationException {
+    public Optional<OBDASpecification> loadSpecification() throws OBDASpecificationException {
         return loadSpecification(
                 Optional::empty,
                 Optional::empty,
@@ -100,7 +99,7 @@ public class OntopMappingConfigurationImpl extends OntopOBDAConfigurationImpl im
                                                   Supplier<Optional<File>> mappingFileSupplier,
                                                   Supplier<Optional<Reader>> mappingReaderSupplier,
                                                   Supplier<Optional<Model>> mappingGraphSupplier
-                                                  ) throws IOException, OBDASpecificationException {
+                                                  ) throws OBDASpecificationException {
         OBDASpecificationExtractor extractor = getInjector().getInstance(OBDASpecificationExtractor.class);
 
          Optional<Ontology> optionalOntology = ontologySupplier.get();

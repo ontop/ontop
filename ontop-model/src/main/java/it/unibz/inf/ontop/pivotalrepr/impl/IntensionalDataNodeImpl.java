@@ -1,5 +1,7 @@
 package it.unibz.inf.ontop.pivotalrepr.impl;
 
+import com.google.inject.assistedinject.Assisted;
+import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.model.DataAtom;
 import it.unibz.inf.ontop.model.ImmutableTerm;
 import it.unibz.inf.ontop.model.ImmutableSubstitution;
@@ -9,7 +11,8 @@ public class IntensionalDataNodeImpl extends DataNodeImpl implements Intensional
 
     private static final String INTENSIONAL_DATA_NODE_STR = "INTENSIONAL";
 
-    public IntensionalDataNodeImpl(DataAtom atom) {
+    @AssistedInject
+    private IntensionalDataNodeImpl(@Assisted DataAtom atom) {
         super(atom);
     }
 

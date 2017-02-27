@@ -1,8 +1,8 @@
-package it.unibz.inf.ontop.owlrefplatform.core.basicoperations;
+package it.unibz.inf.ontop.model.impl;
 
 
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
+import it.unibz.inf.ontop.model.InjectiveVar2VarSubstitution;
 import it.unibz.inf.ontop.model.Variable;
 import it.unibz.inf.ontop.model.ImmutableSubstitution;
 import it.unibz.inf.ontop.model.ImmutableTerm;
@@ -12,15 +12,13 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import static it.unibz.inf.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionTools.isInjective;
-
 public class InjectiveVar2VarSubstitutionImpl extends Var2VarSubstitutionImpl implements InjectiveVar2VarSubstitution {
     private final boolean isEmpty;
 
     /**
      * Regular constructor
      */
-    public InjectiveVar2VarSubstitutionImpl(Map<Variable, Variable> substitutionMap) {
+    protected InjectiveVar2VarSubstitutionImpl(Map<Variable, Variable> substitutionMap) {
         super(substitutionMap);
         isEmpty = substitutionMap.isEmpty();
 
