@@ -146,7 +146,7 @@
         <antlr.version>3.5.2</antlr.version>
         <airline.version>2.1.0</airline.version>
         <tomcat-jdbc.version>9.0.0.M1</tomcat-jdbc.version>
-        <r2rml-api.version>0.4.0</r2rml-api.version>
+        <r2rml-api.version>0.5.1-SNAPSHOT</r2rml-api.version>
         <jetty.version>9.4.0.v20161208</jetty.version>
     </properties>
 
@@ -563,13 +563,13 @@
 			<!-- Optique R2RML API -->
 			<dependency>
 				<groupId>eu.optique-project</groupId>
-				<artifactId>r2rml-api</artifactId>
+				<artifactId>r2rml-api-core</artifactId>
 				<version>${r2rml-api.version}</version>
 			</dependency>
 
 			<dependency>
 				<groupId>eu.optique-project</groupId>
-				<artifactId>r2rml-api-rdf4j-bridge</artifactId>
+				<artifactId>r2rml-api-rdf4j-binding</artifactId>
 				<version>${r2rml-api.version}</version>
 			</dependency>
 
