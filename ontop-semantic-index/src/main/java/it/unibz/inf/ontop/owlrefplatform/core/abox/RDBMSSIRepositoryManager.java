@@ -1129,7 +1129,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 	 */
 	public void insertMetadata(Connection conn) throws SQLException {
 
-		log.debug("Inserting semantic index metadata. This will allow the repository to reconstruct itself afterwards.");
+		log.debug("Inserting semantic index metadata.");
 
 		boolean commitval = conn.getAutoCommit();
 		conn.setAutoCommit(false);

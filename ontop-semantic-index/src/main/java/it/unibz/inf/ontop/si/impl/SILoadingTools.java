@@ -35,6 +35,7 @@ import java.sql.SQLException;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
+import java.util.UUID;
 
 class SILoadingTools {
 
@@ -170,6 +171,6 @@ class SILoadingTools {
     }
 
     private static String buildNewJdbcUrl() {
-        return "jdbc:h2:mem:questrepository:" + System.currentTimeMillis() + ";LOG=0;CACHE_SIZE=65536;LOCK_MODE=0;UNDO_LOG=0";
+        return "jdbc:h2:mem:questrepository:" + UUID.randomUUID() + ";LOG=0;CACHE_SIZE=65536;LOCK_MODE=0;UNDO_LOG=0";
     }
 }

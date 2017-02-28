@@ -149,6 +149,7 @@ public class GraphLoading {
         public void run()
         {
             try {
+                LOG.debug("Loading triples from the graph {}", graphIRI);
                 int count = dataRepository.insertData(localConnection, iterator, 5000, 500);
                 LOG.debug("Inserted {} triples from the graph {}", count, graphIRI);
             } catch (SQLException e) {
