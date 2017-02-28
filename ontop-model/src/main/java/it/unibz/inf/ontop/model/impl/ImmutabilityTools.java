@@ -164,16 +164,7 @@ public class ImmutabilityTools {
                 case 1:
                     return Optional.of(filteredConjuncts.iterator().next());
                 default:
-                    if (filteredConjuncts.stream().anyMatch(c -> !c.isGround())) {
-                        return Optional.of(new NonGroundExpressionImpl(AND, filteredConjuncts));
-                    }
-                    return Optional.of(
-                            new GroundExpressionImpl(
-                                    AND,
-                                    filteredConjuncts.stream()
-                                            .map(c -> (GroundTerm) c)
-                                            .collect(ImmutableCollectors.toList())
-                            ));
+                    return foldBooleanExpressions(filteredConjuncts);
             }
         }
         return filterMethod.test(expression) ?
