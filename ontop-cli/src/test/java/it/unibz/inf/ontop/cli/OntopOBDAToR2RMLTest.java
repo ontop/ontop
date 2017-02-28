@@ -37,7 +37,4 @@ public class OntopOBDAToR2RMLTest {
         };
         Ontop.main(argv);
     }
-
-
-
 }

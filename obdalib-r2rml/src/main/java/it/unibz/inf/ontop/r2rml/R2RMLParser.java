@@ -20,13 +20,6 @@ package it.unibz.inf.ontop.r2rml;
  * #L%
  */
 
-/**
- * @author timea bagosi
- * The R2RML parser class that breaks down the responsibility of parsing by case
- *
- * Low-level class that should not be confused with the R2RMLMappingParser.
- */
-
 import eu.optique.r2rml.api.binding.rdf4j.RDF4JR2RMLMappingManager;
 import eu.optique.r2rml.api.model.ObjectMap;
 import eu.optique.r2rml.api.model.PredicateMap;
