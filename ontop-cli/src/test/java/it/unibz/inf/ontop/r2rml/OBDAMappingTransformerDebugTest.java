@@ -29,7 +29,7 @@ public class OBDAMappingTransformerDebugTest {
 
         OBDAModel model = config.loadProvidedPPMapping();
 
-        R2RMLWriter writer = new R2RMLWriter(model, null, config.getInjector().getInstance(
+        OBDAModelToR2RMLConverter writer = new OBDAModelToR2RMLConverter(model, null, config.getInjector().getInstance(
                 NativeQueryLanguageComponentFactory.class));
 
         Collection<TriplesMap> tripleMaps = writer.getTripleMaps();
@@ -49,7 +49,7 @@ public class OBDAMappingTransformerDebugTest {
 
         OBDAModel model = config.loadProvidedPPMapping();
 
-        R2RMLWriter writer = new R2RMLWriter(model,null, config.getInjector().getInstance(
+        OBDAModelToR2RMLConverter writer = new OBDAModelToR2RMLConverter(model,null, config.getInjector().getInstance(
                 NativeQueryLanguageComponentFactory.class));
 
         assertTrue(writer.getTripleMaps().stream().findFirst()

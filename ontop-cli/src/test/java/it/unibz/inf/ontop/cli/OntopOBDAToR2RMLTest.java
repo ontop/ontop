@@ -14,7 +14,7 @@ public class OntopOBDAToR2RMLTest {
     public void testOntopOBDAToR2RML (){
         String[] argv = {"mapping", "to-r2rml",
                 "-i", "src/test/resources/books/exampleBooks.obda",
-                "-t", "src/test/resources/mapping-northwind.owl"
+                "-t", "src/test/resources/books/exampleBooks.owl"
         };
         Ontop.main(argv);
     }
@@ -30,20 +30,10 @@ public class OntopOBDAToR2RMLTest {
     }
 
     @Test
-    public void testOntopOBDAToR2RML3 (){
+    public void testOntopOBDAToR2RML_NoOntology (){
         String[] argv = {"mapping", "to-r2rml",
-                "-i", "src/test/resources/booktutorial.obda",
-                "-t", "src/test/resources/booktutorial.owl",
-                "-o", "src/test/resources/booktutorial.r2rml"
-        };
-        Ontop.main(argv);
-    }
-
-    @Test
-    public void testOntopOBDAToR2RML_NPD (){
-        String[] argv = {"mapping", "to-r2rml",
-                "-i", "src/test/resources/npd-v2-ql-mysql-ontop1.17.obda",
-                "-o", "src/test/resources/npd-v2-ql-mysql-ontop1.17.ttl",
+                "-i", "src/test/resources/books/exampleBooks.obda",
+                "-o", "src/test/resources/books/exampleBooks.r2rml"
         };
         Ontop.main(argv);
     }

@@ -54,21 +54,20 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 
-public class R2RMLWriter {
+public class OBDAModelToR2RMLConverter {
 
 	private List<OBDAMappingAxiom> mappings;
 	private PrefixManager prefixmng;
 	private OWLOntology ontology;
 	private final NativeQueryLanguageComponentFactory nativeQLFactory;
 
-    public R2RMLWriter(OBDAModel obdamodel, OWLOntology ontology, NativeQueryLanguageComponentFactory nativeQLFactory)
+    public OBDAModelToR2RMLConverter(OBDAModel obdamodel, OWLOntology ontology, NativeQueryLanguageComponentFactory nativeQLFactory)
 	{
 		this.mappings = obdamodel.getMappings();
 		this.prefixmng = obdamodel.getMetadata().getPrefixManager();
 		this.ontology = ontology;
 		this.nativeQLFactory = nativeQLFactory;
 	}
-
 
 	public Collection <TriplesMap> getTripleMaps() {
 		OBDAMappingTransformer transformer = new OBDAMappingTransformer();

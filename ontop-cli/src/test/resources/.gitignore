@@ -8,3 +8,6 @@ bootstrapped-univ-benchQL.obda
 bootstrapped-univ-benchQL.owl
 npd-v2-ql-mysql-ontop1.17.ttl
 /books/materializedBooks.ttl
+/books/exampleBooks.r2rml
+/books/converted-exampleBooks.obda
+/books/q1-answer.csv

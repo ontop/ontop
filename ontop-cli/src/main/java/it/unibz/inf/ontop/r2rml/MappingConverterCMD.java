@@ -86,7 +86,7 @@ class MappingConverterCMD {
 							.loadOntologyFromOntologyDocument((new File(owlfile)));
 				}
 
-				R2RMLWriter writer = new R2RMLWriter(model, ontology, configuration.getInjector().getInstance(
+				OBDAModelToR2RMLConverter writer = new OBDAModelToR2RMLConverter(model, ontology, configuration.getInjector().getInstance(
 						NativeQueryLanguageComponentFactory.class));
 				// writer.writePretty(out);
 				writer.write(out);
