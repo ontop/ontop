@@ -1,6 +1,6 @@
 #!/bin/bash
 #wait for the SQL Server to come up
-sleep 90s
+sleep 30s
 
 for f in /tmp/sql_scripts/*.sql;
 do

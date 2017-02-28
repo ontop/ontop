@@ -1,3 +1,4 @@
 build-*.sh
 Dockerfile-*
 remove-*.sh
+run-*.sh
