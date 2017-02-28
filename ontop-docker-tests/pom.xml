@@ -8,6 +8,9 @@
         <version>3.0.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
+    <properties>
+        <skipTests>true</skipTests>
+    </properties>
 
     <artifactId>ontop-docker-tests</artifactId>
     <name>ontop-docker-tests</name>
@@ -117,6 +120,47 @@
 
     </dependencies>
 
+    <repositories>
+        <!-- for 3rd party JDBC drivers -->
+        <repository>
+            <id>bolzano-nexus-public</id>
+            <url>http://obdavm.inf.unibz.it:8080/nexus/content/groups/public/</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+
+        <!-- for monetdb -->
+        <repository>
+            <id>clojars.org</id>
+            <url>http://clojars.org/repo</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+        </repository>
+    </repositories>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <skipTests>${skipTests}</skipTests>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-deploy-plugin</artifactId>
+                <configuration>
+                    <skip>${skipTests}</skip>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 
 
 </project>
