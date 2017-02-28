@@ -11,7 +11,6 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static it.unibz.inf.ontop.model.ExpressionOperation.AND;
@@ -142,16 +141,16 @@ public class ImmutabilityTools {
                 .collect(ImmutableCollectors.toList()));
     }
 
-    public static Optional<ImmutableExpression> retainVar2VarEqualityConjuncts(ImmutableExpression expression) {
+    public static ImmutableSet<ImmutableExpression> retainVar2VarEqualityConjuncts(ImmutableExpression expression) {
         return filterOuterMostConjuncts(e -> e.isVar2VarEquality(), expression);
     }
 
-    public static Optional<ImmutableExpression> discardVar2VarEqualityConjuncts(ImmutableExpression expression) {
+    public static ImmutableSet<ImmutableExpression> discardVar2VarEqualityConjuncts(ImmutableExpression expression) {
         return filterOuterMostConjuncts(e -> !(e.isVar2VarEquality()), expression);
     }
 
-    private static Optional<ImmutableExpression> filterOuterMostConjuncts(java.util.function.Predicate<ImmutableExpression> filterMethod,
-                                                                   ImmutableExpression expression) {
+    private static ImmutableSet<ImmutableExpression> filterOuterMostConjuncts(java.util.function.Predicate<ImmutableExpression> filterMethod,
+                                                                              ImmutableExpression expression) {
 
         ImmutableSet<ImmutableExpression> conjuncts = expression.flattenAND();
         if (conjuncts.size() > 1) {
@@ -160,15 +159,15 @@ public class ImmutabilityTools {
                     .collect(ImmutableCollectors.toList());
             switch (filteredConjuncts.size()) {
                 case 0:
-                    return Optional.empty();
+                    return ImmutableSet.of();
                 case 1:
-                    return Optional.of(filteredConjuncts.iterator().next());
+                    return ImmutableSet.of(filteredConjuncts.iterator().next());
                 default:
-                    return foldBooleanExpressions(filteredConjuncts);
+                    return ImmutableSet.copyOf(filteredConjuncts);
             }
         }
         return filterMethod.test(expression) ?
-                Optional.of(expression) :
-                Optional.empty();
+                ImmutableSet.of(expression) :
+                ImmutableSet.of();
     }
 }
