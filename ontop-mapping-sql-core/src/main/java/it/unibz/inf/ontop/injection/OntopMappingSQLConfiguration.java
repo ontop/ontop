@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.injection;
 
 import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.exception.InvalidMappingException;
+import it.unibz.inf.ontop.exception.MappingIOException;
 import it.unibz.inf.ontop.injection.impl.OntopMappingSQLConfigurationImpl;
 import it.unibz.inf.ontop.model.OBDAModel;
 
@@ -22,9 +23,9 @@ public interface OntopMappingSQLConfiguration extends OntopSQLCoreConfiguration,
         return new OntopMappingSQLConfigurationImpl.BuilderImpl<>();
     }
 
-    Optional<OBDAModel> loadPPMapping() throws IOException, InvalidMappingException, DuplicateMappingException;
+    Optional<OBDAModel> loadPPMapping() throws MappingIOException, InvalidMappingException, DuplicateMappingException;
 
-    default OBDAModel loadProvidedPPMapping() throws DuplicateMappingException, IOException, InvalidMappingException {
+    default OBDAModel loadProvidedPPMapping() throws DuplicateMappingException, MappingIOException, InvalidMappingException {
         return loadPPMapping()
                 .orElseThrow(() -> new IllegalStateException("No PreProcessedMapping could have been loaded. " +
                         "Do not call this method unless you are sure of the input provision."));

@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.ImmutableSubstitution;
 import it.unibz.inf.ontop.model.ImmutableTerm;
 import it.unibz.inf.ontop.model.Variable;
-import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionImpl;
 import it.unibz.inf.ontop.owlrefplatform.core.optimization.QueryNodeNavigationTools.NextNodeAndQuery;
 import it.unibz.inf.ontop.pivotalrepr.*;
 import it.unibz.inf.ontop.pivotalrepr.proposal.NodeCentricOptimizationResults;
@@ -18,6 +17,7 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
+import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
 import static it.unibz.inf.ontop.owlrefplatform.core.optimization.QueryNodeNavigationTools.getDepthFirstNextNode;
 import static it.unibz.inf.ontop.owlrefplatform.core.optimization.QueryNodeNavigationTools.getNextNodeAndQuery;
 import static it.unibz.inf.ontop.pivotalrepr.BinaryOrderedOperatorNode.ArgumentPosition.LEFT;
@@ -308,7 +308,7 @@ public class TopDownBindingLiftOptimizer implements BindingLiftOptimizer {
                 if(optionalSubstitution.isPresent()){
 
                 //extract variables present only in the right child
-                Optional<ImmutableSubstitutionImpl<ImmutableTerm>> substitutionRightMap =
+                Optional<ImmutableSubstitution<ImmutableTerm>> substitutionRightMap =
                         getRightChildSubstitutionMap(currentQuery, currentNode, rightChild, optionalSubstitution);
 
                 /**
@@ -345,7 +345,9 @@ public class TopDownBindingLiftOptimizer implements BindingLiftOptimizer {
      * and do not appear in the left child
      */
 
-    private Optional<ImmutableSubstitutionImpl<ImmutableTerm>> getRightChildSubstitutionMap(IntermediateQuery currentQuery, QueryNode currentNode, QueryNode rightChild, Optional<ImmutableSubstitution<ImmutableTerm>> optionalSubstitution) {
+    private Optional<ImmutableSubstitution<ImmutableTerm>> getRightChildSubstitutionMap(
+            IntermediateQuery currentQuery, QueryNode currentNode, QueryNode rightChild,
+            Optional<ImmutableSubstitution<ImmutableTerm>> optionalSubstitution) {
 
         Optional<QueryNode> optionalLeftChild;
         Set<Variable> onlyRightVariables = new HashSet<>();
@@ -367,7 +369,7 @@ public class TopDownBindingLiftOptimizer implements BindingLiftOptimizer {
                     .filter(binding -> onlyRightVariables.contains(binding.getKey()))
                     .collect(ImmutableCollectors.toMap()))
                 .filter(m -> !m.isEmpty())
-                .map(ImmutableSubstitutionImpl::new);
+                .map(DATA_FACTORY::getSubstitution);
     }
 
 }

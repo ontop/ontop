@@ -1,18 +1,13 @@
 package it.unibz.inf.ontop.owlrefplatform.core.translator;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.*;
-import it.unibz.inf.ontop.model.impl.AtomPredicateImpl;
-import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.ImmutableSubstitutionImpl;
 import it.unibz.inf.ontop.pivotalrepr.*;
-import it.unibz.inf.ontop.pivotalrepr.impl.*;
 import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import static it.unibz.inf.ontop.OptimizationTestingTools.*;
 import static org.junit.Assert.assertTrue;
@@ -21,11 +16,11 @@ import static org.junit.Assert.assertTrue;
 public class IntermediateQueryToDatalogTranslatorTest {
 
     private static Variable X = DATA_FACTORY.getVariable("x");
-    private static AtomPredicate ANS1_IQ_PREDICATE = new AtomPredicateImpl("ans1", 1);
+    private static AtomPredicate ANS1_IQ_PREDICATE = DATA_FACTORY.getAtomPredicate("ans1", 1);
     private static DistinctVariableOnlyDataAtom ANS1_X_ATOM = DATA_FACTORY.getDistinctVariableOnlyDataAtom(
             ANS1_IQ_PREDICATE, ImmutableList.of(X));
-    private static AtomPredicate P1_IQ_PREDICATE = new AtomPredicateImpl("p1", 1);
-    private static AtomPredicate P2_IQ_PREDICATE = new AtomPredicateImpl("p2", 1);
+    private static AtomPredicate P1_IQ_PREDICATE = DATA_FACTORY.getAtomPredicate("p1", 1);
+    private static AtomPredicate P2_IQ_PREDICATE = DATA_FACTORY.getAtomPredicate("p2", 1);
     private static DistinctVariableOnlyDataAtom P1_X_ATOM = DATA_FACTORY.getDistinctVariableOnlyDataAtom(
             P1_IQ_PREDICATE, ImmutableList.of(X));
     private static DistinctVariableOnlyDataAtom P2_X_ATOM = DATA_FACTORY.getDistinctVariableOnlyDataAtom(
@@ -52,20 +47,17 @@ public class IntermediateQueryToDatalogTranslatorTest {
          */
         IntermediateQueryBuilder queryBuilder = createQueryBuilder(EMPTY_METADATA);
 
-        ConstructionNode rootNode = new ConstructionNodeImpl(ImmutableSet.of(X),
-                new ImmutableSubstitutionImpl<>(ImmutableMap.of()), Optional.empty());
+        ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X));
 
         queryBuilder.init(ANS1_X_ATOM, rootNode);
 
-        UnionNode unionNode = new UnionNodeImpl(ImmutableSet.of(X));
+        UnionNode unionNode = IQ_FACTORY.createUnionNode(ImmutableSet.of(X));
         queryBuilder.addChild(rootNode, unionNode);
 
-        ExtensionalDataNode extensionalDataNode1 = new ExtensionalDataNodeImpl(
-                P1_X_ATOM);
+        ExtensionalDataNode extensionalDataNode1 = IQ_FACTORY.createExtensionalDataNode(P1_X_ATOM);
         queryBuilder.addChild(unionNode, extensionalDataNode1);
 
-        ExtensionalDataNode extensionalDataNode2 = new ExtensionalDataNodeImpl(
-                P2_X_ATOM);
+        ExtensionalDataNode extensionalDataNode2 = IQ_FACTORY.createExtensionalDataNode(P2_X_ATOM);
         queryBuilder.addChild(unionNode, extensionalDataNode2);
 
 

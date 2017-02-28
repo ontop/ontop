@@ -1,5 +1,7 @@
 package it.unibz.inf.ontop.pivotalrepr.impl;
 
+import com.google.inject.assistedinject.Assisted;
+import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.pivotalrepr.*;
 
@@ -12,7 +14,8 @@ public class ExtensionalDataNodeImpl extends DataNodeImpl implements Extensional
 
     private static final String EXTENSIONAL_NODE_STR = "EXTENSIONAL";
 
-    public ExtensionalDataNodeImpl(DataAtom atom) {
+    @AssistedInject
+    private ExtensionalDataNodeImpl(@Assisted DataAtom atom) {
         super(atom);
     }
 

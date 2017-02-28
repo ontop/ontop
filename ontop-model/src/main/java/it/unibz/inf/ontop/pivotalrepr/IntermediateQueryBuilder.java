@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.pivotalrepr;
 
 import java.util.Optional;
 import com.google.common.collect.ImmutableList;
+import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.model.DistinctVariableOnlyDataAtom;
 
 /**
@@ -38,4 +39,6 @@ public interface IntermediateQueryBuilder {
     ConstructionNode getRootConstructionNode() throws IntermediateQueryBuilderException;
 
     ImmutableList<QueryNode> getSubNodesOf(QueryNode node) throws IntermediateQueryBuilderException;
+
+    IntermediateQueryFactory getFactory();
 }

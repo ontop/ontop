@@ -5,13 +5,14 @@ import com.google.common.collect.ImmutableMap;
 import com.google.inject.Module;
 import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.exception.InvalidMappingException;
+import it.unibz.inf.ontop.exception.MappingIOException;
 import it.unibz.inf.ontop.exception.OBDASpecificationException;
 import it.unibz.inf.ontop.executor.ProposalExecutor;
 import it.unibz.inf.ontop.injection.InvalidOntopConfigurationException;
 import it.unibz.inf.ontop.injection.OntopMappingSQLConfiguration;
 import it.unibz.inf.ontop.injection.OntopMappingSQLSettings;
 import it.unibz.inf.ontop.injection.impl.OntopMappingConfigurationImpl.OntopMappingOptions;
-import it.unibz.inf.ontop.mapping.MappingParser;
+import it.unibz.inf.ontop.mapping.SQLMappingParser;
 import it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing.TMappingExclusionConfig;
 import it.unibz.inf.ontop.pivotalrepr.proposal.QueryOptimizationProposal;
 import it.unibz.inf.ontop.spec.OBDASpecification;
@@ -22,7 +23,6 @@ import org.eclipse.rdf4j.model.Model;
 
 import javax.annotation.Nonnull;
 import java.io.File;
-import java.io.IOException;
 import java.io.Reader;
 import java.util.Optional;
 import java.util.Properties;
@@ -81,7 +81,7 @@ public class OntopMappingSQLConfigurationImpl extends OntopSQLCoreConfigurationI
      * To be overloaded
      */
     @Override
-    public Optional<OBDASpecification> loadSpecification() throws IOException, OBDASpecificationException {
+    public Optional<OBDASpecification> loadSpecification() throws OBDASpecificationException {
         return loadSpecification(Optional::empty, Optional::empty, Optional::empty, Optional::empty);
     }
 
@@ -89,7 +89,7 @@ public class OntopMappingSQLConfigurationImpl extends OntopSQLCoreConfigurationI
                                                   Supplier<Optional<File>> mappingFileSupplier,
                                                   Supplier<Optional<Reader>> mappingReaderSupplier,
                                                   Supplier<Optional<Model>> mappingGraphSupplier)
-            throws IOException, OBDASpecificationException {
+            throws OBDASpecificationException {
         return mappingConfiguration.loadSpecification(
                 ontologySupplier,
                 () -> options.predefinedMappingModel.map(m -> (PreProcessedMapping) m),
@@ -101,7 +101,7 @@ public class OntopMappingSQLConfigurationImpl extends OntopSQLCoreConfigurationI
 
 
     @Override
-    public Optional<OBDAModel> loadPPMapping() throws IOException, InvalidMappingException, DuplicateMappingException {
+    public Optional<OBDAModel> loadPPMapping() throws MappingIOException, InvalidMappingException, DuplicateMappingException {
         return loadPPMapping(Optional::empty, Optional::empty, Optional::empty, Optional::empty);
     }
 
@@ -112,13 +112,13 @@ public class OntopMappingSQLConfigurationImpl extends OntopSQLCoreConfigurationI
                                       Supplier<Optional<File>> mappingFileSupplier,
                                       Supplier<Optional<Reader>> mappingReaderSupplier,
                                       Supplier<Optional<Model>> mappingGraphSupplier)
-            throws IOException, InvalidMappingException, DuplicateMappingException {
+            throws MappingIOException, InvalidMappingException, DuplicateMappingException {
 
         if (options.predefinedMappingModel.isPresent()) {
             return options.predefinedMappingModel;
         }
 
-        MappingParser parser = getInjector().getInstance(MappingParser.class);
+        SQLMappingParser parser = getInjector().getInstance(SQLMappingParser.class);
 
         Optional<File> optionalMappingFile = mappingFileSupplier.get();
         if (optionalMappingFile.isPresent()) {

@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.injection.impl;
 
 import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.exception.InvalidMappingException;
+import it.unibz.inf.ontop.exception.MappingIOException;
 import it.unibz.inf.ontop.exception.OBDASpecificationException;
 import it.unibz.inf.ontop.injection.InvalidOntopConfigurationException;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
@@ -34,12 +35,12 @@ public class OntopSQLOWLAPIConfigurationImpl extends OntopStandaloneSQLConfigura
     }
 
     @Override
-    public Optional<OBDASpecification> loadSpecification() throws IOException, OBDASpecificationException {
+    public Optional<OBDASpecification> loadSpecification() throws OBDASpecificationException {
         return loadSpecification(mappingOWLConfiguration::loadOntology);
     }
 
     @Override
-    public Optional<OBDAModel> loadPPMapping() throws IOException, InvalidMappingException, DuplicateMappingException {
+    public Optional<OBDAModel> loadPPMapping() throws MappingIOException, InvalidMappingException, DuplicateMappingException {
         return loadPPMapping(mappingOWLConfiguration::loadOntology);
     }
 

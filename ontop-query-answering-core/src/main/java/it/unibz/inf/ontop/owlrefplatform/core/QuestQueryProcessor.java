@@ -25,7 +25,6 @@ import it.unibz.inf.ontop.owlrefplatform.core.srcquerygeneration.NativeQueryGene
 import it.unibz.inf.ontop.owlrefplatform.core.translator.*;
 import it.unibz.inf.ontop.pivotalrepr.EmptyQueryException;
 import it.unibz.inf.ontop.pivotalrepr.IntermediateQuery;
-import it.unibz.inf.ontop.pivotalrepr.MetadataForQueryOptimization;
 import it.unibz.inf.ontop.pivotalrepr.datalog.DatalogProgram2QueryConverter;
 import it.unibz.inf.ontop.pivotalrepr.utils.ExecutorRegistry;
 import it.unibz.inf.ontop.renderer.DatalogProgramRenderer;
@@ -57,11 +56,12 @@ public class QuestQueryProcessor implements OntopQueryReformulator {
 	
 	private static final Logger log = LoggerFactory.getLogger(QuestQueryProcessor.class);
 	private final ExecutorRegistry executorRegistry;
-	private final MetadataForQueryOptimization metadataForOptimization;
 	private final DatalogProgram2QueryConverter datalogConverter;
 	private final ImmutableSet<Predicate> dataPropertiesAndClassesMapped;
 	private final ImmutableSet<Predicate> objectPropertiesMapped;
 	private final OntopQueryAnsweringSettings settings;
+	private final UriTemplateMatcher uriTemplateMatcher;
+	private final DBMetadata dbMetadata;
 
 	@AssistedInject
 	private QuestQueryProcessor(@Assisted OBDASpecification obdaSpecification,
@@ -81,16 +81,17 @@ public class QuestQueryProcessor implements OntopQueryReformulator {
 		Mapping saturatedMapping = obdaSpecification.getSaturatedMapping();
 
 		this.queryUnfolder = reformulationFactory.create(saturatedMapping);
-		this.metadataForOptimization = saturatedMapping.getMetadataForOptimization();
 
 		this.vocabularyValidator = new VocabularyValidator(obdaSpecification.getSaturatedTBox(),
 				obdaSpecification.getVocabulary());
 		this.iriDictionary = Optional.ofNullable(iriDictionary);
-		this.datasourceQueryGenerator = reformulationFactory.create(metadataForOptimization.getDBMetadata());
+		this.dbMetadata = obdaSpecification.getDBMetadata();
+		this.datasourceQueryGenerator = reformulationFactory.create(dbMetadata);
 		this.queryCache = queryCache;
 		this.settings = settings;
 		this.executorRegistry = executorRegistry;
 		this.datalogConverter = datalogConverter;
+		this.uriTemplateMatcher = saturatedMapping.getMetadata().getUriTemplateMatcher();
 
 		if (settings.isSameAsInMappingsEnabled()) {
 			MappingSameAsPredicateExtractor msa = new MappingSameAsPredicateExtractor(saturatedMapping);
@@ -103,8 +104,7 @@ public class QuestQueryProcessor implements OntopQueryReformulator {
 	}
 	
 	private DatalogProgram translateAndPreProcess(InputQuery inputQuery) throws OntopUnsupportedInputQueryException {
-		InputQueryTranslator translator = new SparqlAlgebraToDatalogTranslator(
-				metadataForOptimization.getUriTemplateMatcher(), iriDictionary);
+		InputQueryTranslator translator = new SparqlAlgebraToDatalogTranslator(uriTemplateMatcher, iriDictionary);
 		InternalSparqlQuery translation = inputQuery.translate(translator);
 		return preProcess(translation);
 	}
@@ -156,8 +156,7 @@ public class QuestQueryProcessor implements OntopQueryReformulator {
 			return cachedQuery;
 
 		try {
-			InputQueryTranslator translator = new SparqlAlgebraToDatalogTranslator(
-					metadataForOptimization.getUriTemplateMatcher(), iriDictionary);
+			InputQueryTranslator translator = new SparqlAlgebraToDatalogTranslator(uriTemplateMatcher, iriDictionary);
 			InternalSparqlQuery translation = inputQuery.translate(translator);
 			DatalogProgram newprogram = preProcess(translation);
 
@@ -183,7 +182,7 @@ public class QuestQueryProcessor implements OntopQueryReformulator {
 			DatalogProgram programAfterUnfolding;
 			try {
 				IntermediateQuery intermediateQuery = datalogConverter.convertDatalogProgram(
-						metadataForOptimization, programAfterRewriting, ImmutableList.of(), executorRegistry);
+						dbMetadata, programAfterRewriting, ImmutableList.of(), executorRegistry);
 
 				log.debug("Directly translated (SPARQL) intermediate query: \n" + intermediateQuery.toString());
 
@@ -278,6 +277,6 @@ public class QuestQueryProcessor implements OntopQueryReformulator {
 
 	@Override
 	public DBMetadata getDBMetadata() {
-		return metadataForOptimization.getDBMetadata();
+		return dbMetadata;
 	}
 }

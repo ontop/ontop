@@ -2,6 +2,8 @@ package it.unibz.inf.ontop.pivotalrepr.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.google.inject.assistedinject.Assisted;
+import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.model.ImmutableExpression;
 import it.unibz.inf.ontop.model.ImmutableSubstitution;
 import it.unibz.inf.ontop.model.ImmutableTerm;
@@ -22,8 +24,19 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
 
     private static final String JOIN_NODE_STR = "JOIN" ;
 
-    public InnerJoinNodeImpl(Optional<ImmutableExpression> optionalFilterCondition) {
+    @AssistedInject
+    protected InnerJoinNodeImpl(@Assisted Optional<ImmutableExpression> optionalFilterCondition) {
         super(optionalFilterCondition);
+    }
+
+    @AssistedInject
+    private InnerJoinNodeImpl(@Assisted ImmutableExpression joiningCondition) {
+        super(Optional.of(joiningCondition));
+    }
+
+    @AssistedInject
+    private InnerJoinNodeImpl() {
+        super(Optional.empty());
     }
 
     @Override
@@ -74,7 +87,7 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
             return new SubstitutionResultsImpl<>(DECLARE_AS_EMPTY);
         }
 
-        return computeAndEvaluateNewCondition(substitution, query, Optional.empty())
+        return computeAndEvaluateNewCondition(substitution, Optional.empty())
                 .map(ev -> applyEvaluation(ev, substitution))
                 .orElseGet(() -> new SubstitutionResultsImpl<>(NO_CHANGE, Optional.of(substitution)));
     }
@@ -84,7 +97,7 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
             ImmutableSubstitution<? extends ImmutableTerm> substitution, IntermediateQuery query) {
 
         return getOptionalFilterCondition()
-                .map(cond -> transformBooleanExpression(query, substitution, cond))
+                .map(cond -> transformBooleanExpression(substitution, cond))
                 .map(ev -> applyEvaluation(ev, substitution))
                 .orElseGet(() -> new SubstitutionResultsImpl<>(NO_CHANGE, Optional.of(substitution)));
     }
@@ -127,7 +140,7 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
                 if (condition.isPresent()) {
                     return new NodeTransformationProposalImpl(
                             REPLACE_BY_NEW_NODE,
-                            new FilterNodeImpl(condition.get()),
+                            query.getFactory().createFilterNode(condition.get()),
                             ImmutableSet.of()
                     );
                 }

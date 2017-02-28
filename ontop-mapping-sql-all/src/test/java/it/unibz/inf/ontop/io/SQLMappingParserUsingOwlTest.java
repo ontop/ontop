@@ -21,15 +21,16 @@ package it.unibz.inf.ontop.io;
  */
 
 import java.io.File;
-import java.io.IOException;
 import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Injector;
 
+import it.unibz.inf.ontop.exception.*;
 import it.unibz.inf.ontop.injection.MappingFactory;
 import it.unibz.inf.ontop.injection.OntopMappingSQLAllConfiguration;
 import it.unibz.inf.ontop.io.impl.SimplePrefixManager;
@@ -37,13 +38,9 @@ import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.impl.SQLMappingFactoryImpl;
 import org.junit.Before;
 import org.junit.Test;
-import it.unibz.inf.ontop.exception.DuplicateMappingException;
-import it.unibz.inf.ontop.exception.InvalidMappingException;
-import it.unibz.inf.ontop.exception.InvalidMappingExceptionWithIndicator;
-import it.unibz.inf.ontop.exception.InvalidPredicateDeclarationException;
 import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
 import it.unibz.inf.ontop.injection.OBDAFactoryWithException;
-import it.unibz.inf.ontop.mapping.MappingParser;
+import it.unibz.inf.ontop.mapping.SQLMappingParser;
 
 import it.unibz.inf.ontop.parser.TurtleOBDASyntaxParser;
 
@@ -55,7 +52,7 @@ public class SQLMappingParserUsingOwlTest {
     private final NativeQueryLanguageComponentFactory nativeQLFactory;
     private final OBDAFactoryWithException modelFactory;
     private final MappingFactory mappingFactory;
-    private final MappingParser mappingParser;
+    private final SQLMappingParser mappingParser;
 
     private TurtleOBDASyntaxParser parser;
 
@@ -88,7 +85,7 @@ public class SQLMappingParserUsingOwlTest {
         Injector injector = configuration.getInjector();
         mappingFactory = injector.getInstance(MappingFactory.class);
 
-        mappingParser = injector.getInstance(MappingParser.class);
+        mappingParser = injector.getInstance(SQLMappingParser.class);
         nativeQLFactory = injector.getInstance(NativeQueryLanguageComponentFactory.class);
         modelFactory = injector.getInstance(OBDAFactoryWithException.class);
     }
@@ -110,34 +107,34 @@ public class SQLMappingParserUsingOwlTest {
 
     @Test(expected=InvalidMappingExceptionWithIndicator.class)
     public void testLoadWithBlankMappingId()
-            throws DuplicateMappingException, InvalidMappingException, IOException, InvalidPredicateDeclarationException {
+            throws DuplicateMappingException, InvalidMappingException, MappingIOException, InvalidPredicateDeclarationException {
         loadObdaFile("src/test/resources/it/unibz/inf/ontop/io/SchoolBadFile5.obda");
     }
 
     @Test(expected=InvalidMappingExceptionWithIndicator.class)
-    public void testLoadWithBlankTargetQuery() throws DuplicateMappingException, InvalidMappingException, InvalidPredicateDeclarationException, IOException {
+    public void testLoadWithBlankTargetQuery() throws DuplicateMappingException, InvalidMappingException, InvalidPredicateDeclarationException, MappingIOException {
         loadObdaFile("src/test/resources/it/unibz/inf/ontop/io/SchoolBadFile6.obda");
     }
 
     @Test(expected=InvalidMappingExceptionWithIndicator.class)
-    public void testLoadWithBlankSourceQuery() throws DuplicateMappingException, InvalidMappingException, InvalidPredicateDeclarationException, IOException {
+    public void testLoadWithBlankSourceQuery() throws DuplicateMappingException, InvalidMappingException, InvalidPredicateDeclarationException, MappingIOException {
         loadObdaFile("src/test/resources/it/unibz/inf/ontop/io/SchoolBadFile7.obda");
     }
 
-    @Test(expected=IOException.class)
+    @Test(expected=MappingIOException.class)
     public void testLoadWithBadTargetQuery() throws DuplicateMappingException, InvalidMappingException,
-            InvalidPredicateDeclarationException, IOException {
+            InvalidPredicateDeclarationException, MappingIOException {
         loadObdaFile("src/test/resources/it/unibz/inf/ontop/io/SchoolBadFile8.obda");
     }
 
-    @Test(expected=IOException.class)
+    @Test(expected=MappingIOException.class)
     public void testLoadWithPredicateDeclarations() throws Exception {
         loadObdaFile("src/test/resources/it/unibz/inf/ontop/io/SchoolBadFile9.obda");
     }
 
     @Test(expected=InvalidMappingExceptionWithIndicator.class)
     public void testLoadWithAllMistakes() throws DuplicateMappingException, InvalidMappingException,
-            InvalidPredicateDeclarationException, IOException {
+            InvalidPredicateDeclarationException, MappingIOException {
             loadObdaFile("src/test/resources/it/unibz/inf/ontop/io/SchoolBadFile10.obda");
     }
     
@@ -147,7 +144,8 @@ public class SQLMappingParserUsingOwlTest {
 
     private void saveRegularFile() throws Exception {
         OBDAModel model = modelFactory.createOBDAModel(ImmutableList.of(),
-                mappingFactory.create(mappingFactory.create(ImmutableMap.of())));
+                mappingFactory.create(mappingFactory.create(ImmutableMap.of()),
+                        UriTemplateMatcher.create(Stream.of())));
         OntopNativeMappingSerializer writer = new OntopNativeMappingSerializer(model);
         writer.save(new File("src/test/resources/it/unibz/inf/ontop/io/SchoolRegularFile.obda"));
     }
@@ -172,7 +170,7 @@ public class SQLMappingParserUsingOwlTest {
         assertEquals(model.getMappings().size(), 2);
     }
 
-    private OBDAModel loadObdaFile(String fileLocation) throws IOException,
+    private OBDAModel loadObdaFile(String fileLocation) throws MappingIOException,
             InvalidPredicateDeclarationException, InvalidMappingException, DuplicateMappingException {
         // Load the OBDA model
         return mappingParser.parse(new File(fileLocation));

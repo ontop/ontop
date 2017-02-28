@@ -5,11 +5,13 @@ import com.google.common.collect.ImmutableMultimap;
 import it.unibz.inf.ontop.model.AtomPredicate;
 import it.unibz.inf.ontop.model.DBMetadata;
 import it.unibz.inf.ontop.model.Predicate;
-import it.unibz.inf.ontop.model.impl.AtomPredicateImpl;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
+import javax.annotation.Nullable;
 import java.util.*;
 import java.util.stream.Stream;
+
+import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
 
 public class BasicDBMetadata extends AbstractDBMetadata implements DBMetadata {
 
@@ -24,6 +26,9 @@ public class BasicDBMetadata extends AbstractDBMetadata implements DBMetadata {
     private final String databaseProductName;
     private final String databaseVersion;
     private final QuotedIDFactory idfac;
+    private boolean isStillMutable;
+    @Nullable
+    private ImmutableMultimap<AtomPredicate, ImmutableList<Integer>> uniqueConstraints;
 
     protected BasicDBMetadata(String driverName, String driverVersion, String databaseProductName, String databaseVersion, QuotedIDFactory idfac) {
         this(driverName, driverVersion, databaseProductName, databaseVersion, idfac, new HashMap<>(), new HashMap<>(),
@@ -41,6 +46,8 @@ public class BasicDBMetadata extends AbstractDBMetadata implements DBMetadata {
         this.tables = tables;
         this.relations = relations;
         this.listOfTables = listOfTables;
+        this.isStillMutable = true;
+        this.uniqueConstraints = null;
     }
 
     /**
@@ -54,6 +61,9 @@ public class BasicDBMetadata extends AbstractDBMetadata implements DBMetadata {
      */
 
     public DatabaseRelationDefinition createDatabaseRelation(RelationID id) {
+        if (!isStillMutable) {
+            throw new IllegalStateException("Too late, cannot create a DB relation");
+        }
         DatabaseRelationDefinition table = new DatabaseRelationDefinition(id);
         add(table, tables);
         add(table, relations);
@@ -69,6 +79,9 @@ public class BasicDBMetadata extends AbstractDBMetadata implements DBMetadata {
      *            {@link ParserViewDefinition} object.
      */
     protected <T extends RelationDefinition> void add(T td, Map<RelationID, T> schema) {
+        if (!isStillMutable) {
+            throw new IllegalStateException("Too late, cannot add a schema");
+        }
         schema.put(td.getID(), td);
         if (td.getID().hasSchema()) {
             RelationID noSchemaID = td.getID().getSchemalessID();
@@ -107,6 +120,11 @@ public class BasicDBMetadata extends AbstractDBMetadata implements DBMetadata {
     }
 
     @Override
+    public void freeze() {
+        isStillMutable = false;
+    }
+
+    @Override
     public String getDriverName() {
         return driverName;
     }
@@ -138,7 +156,19 @@ public class BasicDBMetadata extends AbstractDBMetadata implements DBMetadata {
     }
 
     @Override
-    public ImmutableMultimap<AtomPredicate, ImmutableList<Integer>> extractUniqueConstraints() {
+    public ImmutableMultimap<AtomPredicate, ImmutableList<Integer>> getUniqueConstraints() {
+        if (uniqueConstraints == null) {
+            ImmutableMultimap<AtomPredicate, ImmutableList<Integer>> constraints = extractUniqueConstraints();
+            if (!isStillMutable)
+                uniqueConstraints = constraints;
+            return constraints;
+        }
+        else
+            return uniqueConstraints;
+
+    }
+
+    private ImmutableMultimap<AtomPredicate, ImmutableList<Integer>> extractUniqueConstraints() {
         Map<Predicate, AtomPredicate> predicateCache = new HashMap<>();
 
         return getDatabaseRelations().stream()
@@ -170,7 +200,7 @@ public class BasicDBMetadata extends AbstractDBMetadata implements DBMetadata {
             return predicateCache.get(originalPredicate);
         }
         else {
-            AtomPredicate atomPredicate = new AtomPredicateImpl(originalPredicate);
+            AtomPredicate atomPredicate = DATA_FACTORY.getAtomPredicate(originalPredicate);
             // Cache it
             predicateCache.put(originalPredicate, atomPredicate);
             return atomPredicate;
@@ -207,9 +237,14 @@ public class BasicDBMetadata extends AbstractDBMetadata implements DBMetadata {
         return tables;
     }
 
+    @Deprecated
     @Override
     public BasicDBMetadata clone() {
         return new BasicDBMetadata(driverName, driverVersion, databaseProductName, databaseVersion, idfac,
                 new HashMap<>(tables), new HashMap<>(relations), new LinkedList<>(listOfTables));
+    }
+
+    protected boolean isStillMutable() {
+        return isStillMutable;
     }
 }

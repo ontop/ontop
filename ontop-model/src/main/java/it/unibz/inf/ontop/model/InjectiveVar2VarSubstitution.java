@@ -1,9 +1,4 @@
-package it.unibz.inf.ontop.owlrefplatform.core.basicoperations;
-
-import it.unibz.inf.ontop.model.ImmutableSubstitution;
-import it.unibz.inf.ontop.model.ImmutableTerm;
-import it.unibz.inf.ontop.model.Var2VarSubstitution;
-import it.unibz.inf.ontop.model.Variable;
+package it.unibz.inf.ontop.model;
 
 import java.util.Optional;
 import java.util.Set;

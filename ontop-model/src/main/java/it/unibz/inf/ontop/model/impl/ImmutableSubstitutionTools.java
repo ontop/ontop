@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.owlrefplatform.core.basicoperations;
+package it.unibz.inf.ontop.model.impl;
 
 import java.util.AbstractMap;
 import java.util.Optional;
@@ -8,8 +8,6 @@ import com.google.common.collect.ImmutableSet;
 import fj.P;
 import fj.P2;
 import it.unibz.inf.ontop.model.*;
-import it.unibz.inf.ontop.model.impl.ImmutabilityTools;
-import it.unibz.inf.ontop.model.impl.OBDAVocabulary;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Map;

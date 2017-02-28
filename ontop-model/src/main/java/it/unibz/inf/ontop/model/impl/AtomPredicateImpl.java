@@ -9,11 +9,11 @@ import it.unibz.inf.ontop.model.AtomPredicate;
  */
 public class AtomPredicateImpl extends PredicateImpl implements AtomPredicate {
 
-    public AtomPredicateImpl(String name, int arity) {
+    protected AtomPredicateImpl(String name, int arity) {
         super(name, arity, null);
     }
 
-    public AtomPredicateImpl(Predicate datalogPredicate) {
+    protected AtomPredicateImpl(Predicate datalogPredicate) {
         super(datalogPredicate.getName(), datalogPredicate.getArity(), null);
 
 //        if (!(datalogPredicate.isDataProperty()

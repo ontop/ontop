@@ -1,12 +1,13 @@
 package it.unibz.inf.ontop.executor.union;
 
+import com.google.inject.Inject;
+import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.pivotalrepr.IntermediateQuery;
 import it.unibz.inf.ontop.pivotalrepr.LeftJoinNode;
 import it.unibz.inf.ontop.pivotalrepr.BinaryOrderedOperatorNode.ArgumentPosition;
 import it.unibz.inf.ontop.pivotalrepr.QueryNode;
 import it.unibz.inf.ontop.pivotalrepr.UnionNode;
 import it.unibz.inf.ontop.pivotalrepr.impl.QueryTreeComponent;
-import it.unibz.inf.ontop.pivotalrepr.impl.UnionNodeImpl;
 import it.unibz.inf.ontop.pivotalrepr.proposal.InvalidQueryOptimizationProposalException;
 import it.unibz.inf.ontop.pivotalrepr.proposal.NodeCentricOptimizationResults;
 import it.unibz.inf.ontop.pivotalrepr.proposal.UnionLiftProposal;
@@ -20,6 +21,13 @@ import static it.unibz.inf.ontop.pivotalrepr.BinaryOrderedOperatorNode.ArgumentP
  * TODO: explain
  */
 public class UnionLiftExecutorImpl implements UnionLiftExecutor {
+
+    private final IntermediateQueryFactory iqFactory;
+
+    @Inject
+    private UnionLiftExecutorImpl(IntermediateQueryFactory iqFactory) {
+        this.iqFactory = iqFactory;
+    }
 
     @Override
     public NodeCentricOptimizationResults<UnionNode> apply(UnionLiftProposal proposal, IntermediateQuery query,
@@ -75,7 +83,7 @@ public class UnionLiftExecutorImpl implements UnionLiftExecutor {
         QueryNode targetNode = proposal.getTargetNode();
         UnionNode focusNode = proposal.getFocusNode();
 
-        UnionNode newTopUnionNode = new UnionNodeImpl(query.getVariables(targetNode));
+        UnionNode newTopUnionNode = iqFactory.createUnionNode(query.getVariables(targetNode));
 
         IntermediateQuery querySnapshot = query.createSnapshot();
 

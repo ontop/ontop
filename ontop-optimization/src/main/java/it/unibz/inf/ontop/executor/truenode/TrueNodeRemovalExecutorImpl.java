@@ -1,8 +1,9 @@
 package it.unibz.inf.ontop.executor.truenode;
 
+import com.google.inject.Inject;
+import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.pivotalrepr.*;
 import it.unibz.inf.ontop.pivotalrepr.impl.QueryTreeComponent;
-import it.unibz.inf.ontop.pivotalrepr.impl.TrueNodeImpl;
 import it.unibz.inf.ontop.pivotalrepr.proposal.InvalidQueryOptimizationProposalException;
 import it.unibz.inf.ontop.pivotalrepr.proposal.NodeCentricOptimizationResults;
 import it.unibz.inf.ontop.pivotalrepr.proposal.TrueNodeRemovalProposal;
@@ -11,6 +12,14 @@ import it.unibz.inf.ontop.pivotalrepr.proposal.impl.NodeCentricOptimizationResul
 import java.util.Optional;
 
 public class TrueNodeRemovalExecutorImpl implements TrueNodeRemovalExecutor {
+
+    private final IntermediateQueryFactory iqFactory;
+
+    @Inject
+    private TrueNodeRemovalExecutorImpl(IntermediateQueryFactory iqFactory) {
+        this.iqFactory = iqFactory;
+    }
+
     @Override
     public NodeCentricOptimizationResults<TrueNode> apply(TrueNodeRemovalProposal proposal, IntermediateQuery query, QueryTreeComponent treeComponent) throws InvalidQueryOptimizationProposalException, EmptyQueryException {
 
@@ -19,7 +28,7 @@ public class TrueNodeRemovalExecutorImpl implements TrueNodeRemovalExecutor {
         return reactToTrueChildNodeRemovalProposal(query, originalFocusNode, treeComponent);
     }
 
-    private static NodeCentricOptimizationResults reactToTrueChildNodeRemovalProposal(IntermediateQuery query, TrueNode trueNode, QueryTreeComponent treeComponent)
+    private NodeCentricOptimizationResults reactToTrueChildNodeRemovalProposal(IntermediateQuery query, TrueNode trueNode, QueryTreeComponent treeComponent)
             throws EmptyQueryException {
 
         QueryNode originalParentNode = query.getParent(trueNode).orElseThrow(EmptyQueryException::new);
@@ -37,7 +46,7 @@ public class TrueNodeRemovalExecutorImpl implements TrueNodeRemovalExecutor {
                 treeComponent.removeOrReplaceNodeByUniqueChild(originalParentNode);
                 return new NodeCentricOptimizationResultsImpl<>(query, transformationProposal.getOptionalNewNodeOrReplacingChild());
             case DECLARE_AS_TRUE:
-                TrueNode newTrueNode = new TrueNodeImpl();
+                TrueNode newTrueNode = iqFactory.createTrueNode();
                 treeComponent.replaceSubTree(originalParentNode, newTrueNode);
                 return new NodeCentricOptimizationResultsImpl<>(query, query.getNextSibling(newTrueNode), query.getParent(newTrueNode));
             case REPLACE_BY_NEW_NODE:

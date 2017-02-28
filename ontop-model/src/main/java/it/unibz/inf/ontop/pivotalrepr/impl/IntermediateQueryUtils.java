@@ -3,19 +3,19 @@ package it.unibz.inf.ontop.pivotalrepr.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import com.google.inject.Injector;
+import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.model.*;
-import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.InjectiveVar2VarSubstitution;
-import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.InjectiveVar2VarSubstitutionImpl;
-import it.unibz.inf.ontop.owlrefplatform.core.basicoperations.NeutralSubstitution;
-import it.unibz.inf.ontop.pivotalrepr.impl.tree.DefaultIntermediateQueryBuilder;
+import it.unibz.inf.ontop.model.InjectiveVar2VarSubstitution;
+import it.unibz.inf.ontop.model.impl.NeutralSubstitution;
 import it.unibz.inf.ontop.pivotalrepr.*;
 import it.unibz.inf.ontop.utils.FunctionalTools;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.AbstractMap;
-import java.util.List;
+import java.util.Collection;
 import java.util.Optional;
+
+import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
 
 /**
  * TODO: explain
@@ -31,8 +31,9 @@ public class IntermediateQueryUtils {
     /**
      * TODO: describe
      */
-    public static Optional<IntermediateQuery> mergeDefinitions(List<IntermediateQuery> predicateDefinitions) {
-        return mergeDefinitions(predicateDefinitions, Optional.<ImmutableQueryModifiers>empty());
+    public static Optional<IntermediateQuery> mergeDefinitions(IntermediateQueryFactory iqFactory,
+                                                               Collection<IntermediateQuery> predicateDefinitions) {
+        return mergeDefinitions(iqFactory, predicateDefinitions, Optional.empty());
     }
 
 
@@ -42,25 +43,26 @@ public class IntermediateQueryUtils {
      *
      * TODO: refactor it so that the definitive intermediate query is directly constructed.
      */
-    public static Optional<IntermediateQuery> mergeDefinitions(List<IntermediateQuery> predicateDefinitions,
+    public static Optional<IntermediateQuery> mergeDefinitions(IntermediateQueryFactory iqFactory,
+                                                               Collection<IntermediateQuery> predicateDefinitions,
                                                                Optional<ImmutableQueryModifiers> optionalTopModifiers) {
         if (predicateDefinitions.isEmpty())
             return Optional.empty();
 
-        IntermediateQuery firstDefinition = predicateDefinitions.get(0);
+        IntermediateQuery firstDefinition = predicateDefinitions.iterator().next();
         if (predicateDefinitions.size() == 1) {
             return Optional.of(firstDefinition);
         }
 
         DistinctVariableOnlyDataAtom projectionAtom = firstDefinition.getProjectionAtom();
 
-        ConstructionNode rootNode = new ConstructionNodeImpl(projectionAtom.getVariables(),
+        ConstructionNode rootNode = iqFactory.createConstructionNode(projectionAtom.getVariables(),
                 new NeutralSubstitution(), optionalTopModifiers);
 
         IntermediateQueryBuilder queryBuilder = firstDefinition.newBuilder();
         queryBuilder.init(projectionAtom, rootNode);
 
-        UnionNode unionNode = new UnionNodeImpl(projectionAtom.getVariables());
+        UnionNode unionNode = iqFactory.createUnionNode(projectionAtom.getVariables());
         queryBuilder.addChild(rootNode, unionNode);
 
         // First definition can be added safely
@@ -93,7 +95,7 @@ public class IntermediateQueryUtils {
                             headSubstitution.composeWithAndPreserveInjectivity(disjointVariableSetRenaming, freshVariables)
                             .orElseThrow(()-> new IllegalStateException("Bug: the renaming substitution is not injective"));
 
-                    appendDefinition(queryBuilder, unionNode, def, renamingSubstitution);
+                    appendDefinition(iqFactory, queryBuilder, unionNode, def, renamingSubstitution);
                 });
 
         return Optional.of(queryBuilder.build());
@@ -122,7 +124,7 @@ public class IntermediateQueryUtils {
                     .filter(e -> !e.getKey().equals(e.getValue()))
                     .collect(ImmutableCollectors.toMap());
 
-            return Optional.of(new InjectiveVar2VarSubstitutionImpl(newMap));
+            return Optional.of(DATA_FACTORY.getInjectiveVar2VarSubstitution(newMap));
         }
     }
 
@@ -154,15 +156,16 @@ public class IntermediateQueryUtils {
                 .filter(pair -> ! pair.getKey().equals(pair.getValue()))
                 .collect(ImmutableCollectors.toMap());
 
-        return new InjectiveVar2VarSubstitutionImpl(newMap);
+        return DATA_FACTORY.getInjectiveVar2VarSubstitution(newMap);
     }
 
     /**
      * Appends a definition under the union node after renaming it.
      */
-    private static void appendDefinition(IntermediateQueryBuilder queryBuilder, UnionNode unionNode,
+    private static void appendDefinition(IntermediateQueryFactory iqFactory,
+                                         IntermediateQueryBuilder queryBuilder, UnionNode unionNode,
                                          IntermediateQuery definition, InjectiveVar2VarSubstitution renamingSubstitution) {
-        QueryNodeRenamer nodeRenamer = new QueryNodeRenamer(renamingSubstitution);
+        QueryNodeRenamer nodeRenamer = new QueryNodeRenamer(iqFactory, renamingSubstitution);
         ImmutableList<QueryNode> originalNodesInTopDownOrder = definition.getNodesInTopDownOrder();
 
         /**

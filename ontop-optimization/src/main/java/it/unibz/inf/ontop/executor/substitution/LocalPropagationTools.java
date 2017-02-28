@@ -5,9 +5,7 @@ import it.unibz.inf.ontop.model.ImmutableSubstitution;
 import it.unibz.inf.ontop.model.ImmutableTerm;
 import it.unibz.inf.ontop.model.Variable;
 import it.unibz.inf.ontop.pivotalrepr.*;
-import it.unibz.inf.ontop.pivotalrepr.impl.EmptyNodeImpl;
 import it.unibz.inf.ontop.pivotalrepr.impl.QueryTreeComponent;
-import it.unibz.inf.ontop.pivotalrepr.impl.TrueNodeImpl;
 import it.unibz.inf.ontop.pivotalrepr.proposal.NodeTracker;
 import it.unibz.inf.ontop.pivotalrepr.proposal.NodeTrackingResults;
 import it.unibz.inf.ontop.pivotalrepr.proposal.RemoveEmptyNodeProposal;
@@ -120,7 +118,7 @@ public class LocalPropagationTools {
                 return new SubstitutionApplicationResults<>(query, replacingChild, newSubstitution, true, optionalTracker);
 
             case DECLARE_AS_TRUE:
-                TrueNode replacingNode = new TrueNodeImpl();
+                TrueNode replacingNode = query.getFactory().createTrueNode();
                 // The replaced node must already be a leaf,
                 // so we can perform a single node replacement
                 // (there is no need here to delete its subtree)
@@ -164,7 +162,7 @@ public class LocalPropagationTools {
                 .flatMap(v -> descendingSubstitution.apply(v).getVariableStream())
                 .collect(ImmutableCollectors.toSet());
 
-        return new EmptyNodeImpl(newProjectedVariables);
+        return query.getFactory().createEmptyNode(newProjectedVariables);
     }
 
 }

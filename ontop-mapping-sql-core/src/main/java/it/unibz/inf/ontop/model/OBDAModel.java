@@ -30,8 +30,6 @@ import it.unibz.inf.ontop.mapping.extraction.PreProcessedMapping;
  */
 public interface OBDAModel extends PreProcessedMapping {
 
-    MappingMetadata getMetadata();
-
     /**
      * Retrieves the mapping axiom given its id.
      */

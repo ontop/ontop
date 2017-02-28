@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.owlrefplatform.core.basicoperations;
+package it.unibz.inf.ontop.model.impl;
 
 import com.google.common.base.Joiner;
 
@@ -31,7 +31,7 @@ public class Var2VarSubstitutionImpl extends AbstractImmutableSubstitutionImpl<V
     /**
      * Regular constructor
      */
-    public Var2VarSubstitutionImpl(Map<Variable, Variable> substitutionMap) {
+    protected Var2VarSubstitutionImpl(Map<Variable, Variable> substitutionMap) {
         this.map = ImmutableMap.copyOf(substitutionMap);
     }
 

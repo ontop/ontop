@@ -20,10 +20,9 @@ package it.unibz.inf.ontop.reformulation.tests;
  * #L%
  */
 
-import java.io.IOException;
-
 import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.exception.InvalidMappingException;
+import it.unibz.inf.ontop.exception.MappingIOException;
 import it.unibz.inf.ontop.injection.OntopMappingSQLAllConfiguration;
 import it.unibz.inf.ontop.ontology.OntologyVocabulary;
 import it.unibz.inf.ontop.ontology.impl.OntologyFactoryImpl;
@@ -55,7 +54,7 @@ public class MetaMappingTargetQueryValidatorTest extends TestCase {
 	String username = "sa";
 	String password = "";
 
-	public void testValidate() throws IOException, InvalidMappingException, DuplicateMappingException {
+	public void testValidate() throws MappingIOException, InvalidMappingException, DuplicateMappingException {
 		OntopMappingSQLAllConfiguration configuration = OntopMappingSQLAllConfiguration.defaultBuilder()
 				.nativeOntopMappingFile(obdafile)
 				.jdbcUrl(url)
