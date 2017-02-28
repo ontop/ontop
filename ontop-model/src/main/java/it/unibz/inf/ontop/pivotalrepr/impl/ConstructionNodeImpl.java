@@ -27,6 +27,7 @@ import static it.unibz.inf.ontop.pivotalrepr.SubstitutionResults.LocalAction.DEC
 import static it.unibz.inf.ontop.pivotalrepr.impl.ConstructionNodeTools.computeNewProjectedVariables;
 import static it.unibz.inf.ontop.pivotalrepr.impl.ConstructionNodeTools.extractRelevantDescendingSubstitution;
 
+@SuppressWarnings({"OptionalUsedAsFieldOrParameterType", "BindingAnnotationWithoutInject"})
 public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionNode {
 
 
@@ -34,8 +35,8 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
      * TODO: find a better name
      */
     private static class NewSubstitutionPair {
-        public final ImmutableSubstitution<ImmutableTerm> bindings;
-        public final ImmutableSubstitution<? extends ImmutableTerm> propagatedSubstitution;
+        final ImmutableSubstitution<ImmutableTerm> bindings;
+        final ImmutableSubstitution<? extends ImmutableTerm> propagatedSubstitution;
 
         private NewSubstitutionPair(ImmutableSubstitution<ImmutableTerm> bindings,
                                     ImmutableSubstitution<? extends ImmutableTerm> propagatedSubstitution) {
@@ -48,6 +49,7 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
 
 
     private static Logger LOGGER = LoggerFactory.getLogger(ConstructionNodeImpl.class);
+    @SuppressWarnings("FieldCanBeLocal")
     private static int CONVERGENCE_BOUND = 5;
 
     private final Optional<ImmutableQueryModifiers> optionalModifiers;
@@ -117,7 +119,7 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
         ImmutableSet<Variable> variableDefinedByBindings = substitution.getDomain();
 
         Stream<Variable> variablesRequiredByBindings = substitution.getImmutableMap().values().stream()
-                .flatMap(t -> t.getVariableStream());
+                .flatMap(ImmutableTerm::getVariableStream);
 
         //return only the variables that are also used in the bindings for the child of the construction node
         return Stream.concat(projectedVariables.stream(), variablesRequiredByBindings)
@@ -398,6 +400,7 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
         return new NewSubstitutionPair(newTheta, delta);
     }
 
+    @SuppressWarnings("unchecked")
     private static ImmutableSubstitution<NonVariableTerm> extractTauO(ImmutableSubstitution<? extends ImmutableTerm> tau) {
         ImmutableMap<Variable, NonVariableTerm> newMap = tau.getImmutableMap().entrySet().stream()
                 .filter(e -> e.getValue() instanceof NonVariableTerm)
@@ -463,6 +466,7 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
         ImmutableSet<Map.Entry<Variable, Variable>> tauEqEntries = tauEq.getImmutableMap().entrySet();
         ImmutableSet<Variable> formerThetaDomain = formerTheta.getDomain();
 
+        @SuppressWarnings("SuspiciousMethodCalls")
         ImmutableMap<Variable, ImmutableTerm> newMap = Stream.concat(
                 eta.getImmutableMap().entrySet().stream(),
                 tauR.getImmutableMap().entrySet().stream())

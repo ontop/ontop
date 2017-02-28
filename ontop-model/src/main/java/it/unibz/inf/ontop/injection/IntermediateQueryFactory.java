@@ -12,6 +12,7 @@ import java.util.Optional;
  *
  * See https://github.com/google/guice/wiki/AssistedInject.
  */
+@SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 public interface IntermediateQueryFactory {
 
     IntermediateQueryBuilder createIQBuilder(DBMetadata metadata, ExecutorRegistry executorRegistry);
