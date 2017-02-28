@@ -119,6 +119,7 @@ public class OntopMaterialize extends OntopReasoningCommandBase {
             // Loads it only once
             OBDAModel obdaModel = configuration.loadProvidedPPMapping();
             OntopSQLOWLAPIConfiguration materializationConfig = createAndInitConfigurationBuilder()
+                    .propertyFile(propertiesFile)
                     // To avoid parsing it again and again
                     .obdaModel(obdaModel)
                     .build();
@@ -345,17 +346,16 @@ public class OntopMaterialize extends OntopReasoningCommandBase {
      * Mapping file + connection info
      */
     private Builder<? extends Builder> createAndInitConfigurationBuilder() {
-        Builder configBuilder = OntopSQLOWLAPIConfiguration.defaultBuilder()
-                .enableOntologyAnnotationQuerying(true)
-                .properties(createConnectionProperties());
 
-        if (isR2rmlFile(mappingFile)) {
-            configBuilder.r2rmlMappingFile(mappingFile);
-        }
-        else {
-            configBuilder.nativeOntopMappingFile(mappingFile);
-        }
+//        if (isR2rmlFile(mappingFile)) {
+//            configBuilder.r2rmlMappingFile(mappingFile);
+//        }
+//        else {
+//            configBuilder.nativeOntopMappingFile(mappingFile);
+//        }
 
-        return configBuilder;
+        return OntopSQLOWLAPIConfiguration.defaultBuilder()
+                .propertyFile(propertiesFile)
+                .enableOntologyAnnotationQuerying(true);
     }
 }

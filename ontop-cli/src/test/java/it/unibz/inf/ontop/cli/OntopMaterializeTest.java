@@ -10,7 +10,6 @@ public class OntopMaterializeTest {
         Ontop.main("help", "materialize");
     }
 
-
     @Ignore("too expensive")
     @Test
     public void testOntopMaterializeSeparateFiles (){

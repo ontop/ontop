@@ -11,6 +11,7 @@ import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.exception.InvalidMappingException;
+import it.unibz.inf.ontop.exception.MappingIOException;
 import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.model.OBDAModel;
@@ -31,18 +32,17 @@ public class OntopOBDAToR2RML implements OntopCommand {
             description = "Input mapping file in Ontop native format (.obda)")
     @Required
     @BashCompletion(behaviour = CompletionBehaviour.FILENAMES)
-
-    protected String inputMappingFile;
+    private String inputMappingFile;
 
     @Option(type = OptionType.COMMAND, name = {"-t", "--ontology"}, title = "ontology.owl",
             description = "OWL ontology file")
     @BashCompletion(behaviour = CompletionBehaviour.FILENAMES)
-    protected String owlFile;
+    private String owlFile;
 
     @Option(type = OptionType.COMMAND, name = {"-o", "--output"}, title = "mapping.ttl",
             description = "Output mapping file in R2RML format (.ttl)")
     @BashCompletion(behaviour = CompletionBehaviour.FILENAMES)
-    protected String outputMappingFile;
+    private String outputMappingFile;
 
     @Override
     public void run() {
@@ -72,7 +72,7 @@ public class OntopOBDAToR2RML implements OntopCommand {
          */
         try {
             model = config.loadProvidedPPMapping();
-        } catch (IOException | InvalidMappingException | DuplicateMappingException e) {
+        } catch ( InvalidMappingException | DuplicateMappingException | MappingIOException e) {
             e.printStackTrace();
             System.exit(1);
             return;
