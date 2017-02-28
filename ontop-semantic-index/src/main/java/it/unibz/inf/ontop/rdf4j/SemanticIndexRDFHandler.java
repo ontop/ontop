@@ -28,6 +28,7 @@ import it.unibz.inf.ontop.ontology.Assertion;
 import it.unibz.inf.ontop.ontology.AssertionFactory;
 import it.unibz.inf.ontop.ontology.InconsistentOntologyException;
 import it.unibz.inf.ontop.ontology.impl.AssertionFactoryImpl;
+import it.unibz.inf.ontop.owlrefplatform.core.abox.RDBMSSIRepositoryManager;
 import org.eclipse.rdf4j.model.BNode;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Literal;
@@ -37,89 +38,60 @@ import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.rio.RDFHandlerException;
 import org.eclipse.rdf4j.rio.helpers.AbstractRDFHandler;
 
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.NoSuchElementException;
+import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
 
 import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATATYPE_FACTORY;
 import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
 
-// TODO(xiao): find a proper name (the original name was SesameRDFIterator)
-public class RDF4JRDFIterator extends AbstractRDFHandler implements Iterator<Assertion> {
+public class SemanticIndexRDFHandler extends AbstractRDFHandler {
 
-	private final AssertionFactory ofac = AssertionFactoryImpl.getInstance();
+	private static final AssertionFactory ASSERTION_FACTORY = AssertionFactoryImpl.getInstance();
+	private final RDBMSSIRepositoryManager repositoryManager;
+	private final Connection connection;
 
-	private BlockingQueue<Statement> buffer;
-	private Iterator<Statement> iterator;
-	private int size = 50000;
-	
-	private boolean endRDF = false;
-	private boolean fromIterator = false;
+	private List<Statement> buffer;
+	private int MAX_BUFFER_SIZE = 5000;
+	private int count;
 
-	public RDF4JRDFIterator() {
-		buffer = new ArrayBlockingQueue<Statement>(size, true);
-	}
-
-	public RDF4JRDFIterator(Iterator<Statement> it) {
-		this.iterator = it;
-		this.fromIterator = true;
-	}
-
-	public void startRDF() throws RDFHandlerException {
-		endRDF = false;
+	public SemanticIndexRDFHandler(RDBMSSIRepositoryManager repositoryManager, Connection connection) {
+		this.repositoryManager = repositoryManager;
+		this.connection = connection;
+		this.buffer = new ArrayList<>(MAX_BUFFER_SIZE);
+		this.count = 0;
 	}
 
 	public void endRDF() throws RDFHandlerException {
-		endRDF = true;
+		try {
+			loadBuffer();
+		} catch (SQLException e) {
+			throw new RDFHandlerException(e);
+		}
 	}
 
 	@Override
 	public void handleStatement(Statement st) throws RDFHandlerException {
 		// Add statement to buffer
 		try {
-			buffer.put(st);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
+			buffer.add(st);
+			if (buffer.size() == MAX_BUFFER_SIZE) {
+				loadBuffer();
+			}
+		} catch (Exception e) {
+			throw new RDFHandlerException(e);
 		}
 	}
 
-	public boolean hasNext() {
-		if (fromIterator) {
-			return iterator.hasNext();
-		}
-		else {
-			Statement stmt = buffer.peek();
-			if (stmt == null) {
-				if (endRDF) {
-					return false;
-				} else {
-					return true;
-				}
-			}
-			return true;
-		}
-	}
-
-	public Assertion next() {
-		Statement stmt = null;
-		if (fromIterator) {
-			stmt = iterator.next();
-		} else {
-			try {
-				stmt = buffer.take();
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-		}
-		if (stmt == null) {
-			if (!hasNext()) {
-				throw new NoSuchElementException();
-			}
-		}
-		Assertion assertion = constructAssertion(stmt);
-		return assertion;
+	private void loadBuffer() throws SQLException {
+		Iterator<Assertion> assertionIterator = buffer.stream()
+				.map(SemanticIndexRDFHandler::constructAssertion)
+				.iterator();
+		count += repositoryManager.insertData(connection, assertionIterator, 5000, 500);
+		buffer.clear();
 	}
 
 	/***
@@ -129,7 +101,7 @@ public class RDF4JRDFIterator extends AbstractRDFHandler implements Iterator<Ass
 	 * predicate is not type and the object is URI or BNode. Its a data property
 	 * if the predicate is not rdf:type and the object is a Literal.
 	 */
-	private Assertion constructAssertion(Statement st) {
+	private static Assertion constructAssertion(Statement st) {
 		Resource currSubject = st.getSubject();
 		
 		ObjectConstant c = null;
@@ -150,13 +122,7 @@ public class RDF4JRDFIterator extends AbstractRDFHandler implements Iterator<Ass
 		} else {
 			String predStringValue = currPredicate.stringValue();
 			if (predStringValue.equals(OBDAVocabulary.RDF_TYPE)) {
-//				if (!(predStringValue.endsWith("/owl#Thing"))
-//						|| predStringValue.endsWith("/owl#Nothing")
-//						|| predStringValue.endsWith("/owl#Ontology")) {
 					currentPredicate = DATA_FACTORY.getClassPredicate(currObject.stringValue());
-//				} else {
-//					return null;
-//				}
 			} else {
 				currentPredicate = DATA_FACTORY.getObjectPropertyPredicate(currPredicate.stringValue());
 			}
@@ -166,16 +132,16 @@ public class RDF4JRDFIterator extends AbstractRDFHandler implements Iterator<Ass
 		Assertion assertion;
 		try {
 			if (currentPredicate.getArity() == 1) {
-				assertion = ofac.createClassAssertion(currentPredicate.getName(), c);
+				assertion = ASSERTION_FACTORY.createClassAssertion(currentPredicate.getName(), c);
 			} 
 			else if (currentPredicate.getArity() == 2) {
 				if (currObject instanceof IRI) {
 					ObjectConstant c2 = DATA_FACTORY.getConstantURI(currObject.stringValue());
-					assertion = ofac.createObjectPropertyAssertion(currentPredicate.getName(), c, c2);
+					assertion = ASSERTION_FACTORY.createObjectPropertyAssertion(currentPredicate.getName(), c, c2);
 				} 
 				else if (currObject instanceof BNode) {
 					ObjectConstant c2 = DATA_FACTORY.getConstantBNode(currObject.stringValue());
-					assertion = ofac.createObjectPropertyAssertion(currentPredicate.getName(), c, c2);
+					assertion = ASSERTION_FACTORY.createObjectPropertyAssertion(currentPredicate.getName(), c, c2);
 				} 
 				else if (currObject instanceof Literal) {
 					Literal l = (Literal) currObject;				
@@ -199,7 +165,7 @@ public class RDF4JRDFIterator extends AbstractRDFHandler implements Iterator<Ass
 					else {
 						c2 = DATA_FACTORY.getConstantLiteral(l.getLabel(), lang.get());
 					}
-					assertion = ofac.createDataPropertyAssertion(currentPredicate.getName(), c, c2);			
+					assertion = ASSERTION_FACTORY.createDataPropertyAssertion(currentPredicate.getName(), c, c2);
 				} 
 				else {
 					throw new RuntimeException("Unsupported object found in triple: " + st.toString() + " (Required URI, BNode or Literal)");
@@ -215,11 +181,7 @@ public class RDF4JRDFIterator extends AbstractRDFHandler implements Iterator<Ass
 		return assertion;
 	}
 
-
-	/**
-	 * Removes the entry at the beginning in the buffer.
-	 */
-	public void remove() {
-		buffer.poll();
+	public int getCount() {
+		return count;
 	}
 }
