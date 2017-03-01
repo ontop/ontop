@@ -29,7 +29,6 @@ import eu.optique.r2rml.api.model.PredicateMap;
 import eu.optique.r2rml.api.model.PredicateObjectMap;
 import eu.optique.r2rml.api.model.SubjectMap;
 import eu.optique.r2rml.api.model.Template;
-import eu.optique.r2rml.api.model.TermMap;
 import eu.optique.r2rml.api.model.TriplesMap;
 import it.unibz.inf.ontop.io.PrefixManager;
 import it.unibz.inf.ontop.model.*;
@@ -40,14 +39,12 @@ import it.unibz.inf.ontop.utils.IDGenerator;
 import it.unibz.inf.ontop.utils.URITemplates;
 
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
 import org.apache.commons.rdf.api.BlankNodeOrIRI;
 import org.apache.commons.rdf.api.IRI;
-import org.apache.commons.rdf.api.Triple;
 import org.apache.commons.rdf.rdf4j.RDF4J;
 //import org.eclipse.rdf4j.model.Resource;
 //import org.eclipse.rdf4j.model.Statement;
@@ -76,203 +73,23 @@ import static it.unibz.inf.ontop.model.impl.OntopModelSingletons.DATA_FACTORY;
  *
  */
 public class OBDAMappingTransformer {
-	
-	private ValueFactory vf;
-	private OWLOntology ontology;
+
+    private OWLOntology ontology;
 	private Set<OWLObjectProperty> objectProperties;
     private Set<OWLDataProperty> dataProperties;
 
 	private RDF4J rdf4j = new RDF4J();
+    private String baseIRIString;
 
-	public OBDAMappingTransformer() {
-		this.vf = SimpleValueFactory.getInstance();
-		
-	}
-//	public OBDAMappingTransformer(OWLOntology onto) {
-//		this.vf = new ValueFactoryImpl();
-//		//get the objectProperties in the ontology so that we can distinguish between object property and data property
-//		objectProperties = onto.getObjectPropertiesInSignature();
-//	}
-	/**
-	 * Get Sesame statements from OBDA mapping axiom
-	 */
-	public List<Triple> getTriples(OBDAMappingAxiom axiom, PrefixManager prefixmng) {
-		List<Triple> statements = new ArrayList<Triple>();
-		SQLQueryImpl squery = (SQLQueryImpl) axiom.getSourceQuery();
-		List<Function> tquery = axiom.getTargetQuery();
-		
-		String random_number = IDGenerator.getNextUniqueID("");
-		
-		//triplesMap node
-		String mapping_id = axiom.getId();
-		if (!mapping_id.startsWith("http://"))
-			mapping_id = "http://example.org/" + mapping_id;
-		BlankNodeOrIRI mainNode = rdf4j.createIRI(mapping_id);
-		statements.add(rdf4j.createTriple(mainNode, rdf4j.createIRI(OBDAVocabulary.RDF_TYPE), R2RMLVocabulary.TriplesMap));
-		
-		//creating logical table node
-		BlankNodeOrIRI logicalTableNode = rdf4j.createBlankNode("logicalTable"+ random_number);
-		
-		//process source query
-		String sqlquery = squery.getSQLQuery();
-		if (sqlquery.startsWith("SELECT * FROM") &&
-			 !sqlquery.contains("WHERE") && !sqlquery.contains(",")) {
-				//tableName -> need small parser
-				String tableName = sqlquery.substring(14);
-				tableName = trimApostrophes(tableName);
-				statements.add(rdf4j.createTriple(mainNode, R2RMLVocabulary.logicalTable, logicalTableNode));
-				
-				if(tableName.startsWith("\"") && tableName.endsWith("\"")){
-					tableName = tableName.substring(1, tableName.length() - 1);
-				}
-				
-				statements.add(rdf4j.createTriple(logicalTableNode, R2RMLVocabulary.tableName, rdf4j.createLiteral(tableName)));
-		} else {
-			//sqlquery -> general case
-			//creating triple main-node -- logical table
-			statements.add(rdf4j.createTriple(mainNode, R2RMLVocabulary.logicalTable, logicalTableNode));
-
-			//the node is a view
-			statements.add(rdf4j.createTriple(logicalTableNode, rdf4j.createIRI(OBDAVocabulary.RDF_TYPE),  R2RMLVocabulary.r2rmlView));
-
-			//this is the SQL in the logical table
-			statements.add(rdf4j.createTriple(logicalTableNode, R2RMLVocabulary.sqlQuery, rdf4j.createLiteral(sqlquery)));
-		}
-		
-		//get subject uri
-		BlankNodeOrIRI subjectNode =  rdf4j.createBlankNode("subjectMap" +random_number);
-		
-		//add subject Map to triples Map node
-		statements.add(rdf4j.createTriple(mainNode, R2RMLVocabulary.subjectMap, subjectNode));
-		statements.add(rdf4j.createTriple(subjectNode, rdf4j.createIRI(OBDAVocabulary.RDF_TYPE),   R2RMLVocabulary.termMap));
-
-		//Now we add the template!!
-		Function uriTemplate = (Function) tquery.get(0).getTerm(0); //URI("..{}..", , )
-		String subjectTemplate =  URITemplates.getUriTemplateString(uriTemplate, prefixmng);
-		
-		//add template subject
-		statements.add(rdf4j.createTriple(subjectNode, R2RMLVocabulary.template, rdf4j.createLiteral(subjectTemplate)));
-		
-		
-		
-		//process target query
-		for (Function func : tquery) {
-			random_number = IDGenerator.getNextUniqueID("");
-			Predicate pred = func.getFunctionSymbol();
-			
-
-			String predName = pred.getName();
-			IRI predUri = null;
-			String predURIString ="";
-			
-			if (pred.isTriplePredicate()) {
-				//triple
-				Function predf = (Function)func.getTerm(1);
-				if (predf.getFunctionSymbol() instanceof URITemplatePredicate) {
-					if (predf.getTerms().size() == 1) //fixed string
-					{
-                        pred = DATA_FACTORY.getPredicate(((ValueConstant)(predf.getTerm(0))).getValue(), 1);
-                        predUri = rdf4j.createIRI(pred.getName());
-					}
-				    else {
-						//custom predicate
-						predURIString = URITemplates.getUriTemplateString(predf, prefixmng);
-						predUri = rdf4j.createIRI(predURIString);
-					}
-				}
-				
-			} 
-			else {
-				predUri = rdf4j.createIRI(predName);
-			}
-			predURIString = predUri.getIRIString();
-			
-			org.semanticweb.owlapi.model.IRI propname = org.semanticweb.owlapi.model.IRI.create(predURIString);
-			OWLDataFactory factory =  OWLManager.getOWLDataFactory();
-			OWLObjectProperty prop = factory.getOWLObjectProperty(propname);
-		
-			if (  !predURIString.equals(OBDAVocabulary.RDF_TYPE) && pred.isClass() ){
-				// The term is actually a SubjectMap (class)
-			//	statements.add(rdf4j.createTriple(nod_subject, rdf4j.createIRI(OBDAVocabulary.RDF_TYPE),   R2RMLVocabulary.subjectMapClass));
-				
-				//add class declaration to subject Map node
-				statements.add(rdf4j.createTriple(subjectNode, R2RMLVocabulary.classUri, predUri));
-				
-			} else {
-				BlankNodeOrIRI predObjNode = rdf4j.createBlankNode("predicateObjectMap"+ random_number);
-				
-				//add predicateObjectMap to triples Map node
-				Triple triple_main_predicate = rdf4j.createTriple(mainNode, R2RMLVocabulary.predicateObjectMap, predObjNode);
-				statements.add(triple_main_predicate);
-				
-				if (!pred.isTriplePredicate()) {
-					//add predicate declaration to predObj node
-					Triple triple_predicateObject_predicate_uri = rdf4j.createTriple(predObjNode, R2RMLVocabulary.predicate, predUri);
-					statements.add(triple_predicateObject_predicate_uri);
-				}
-				else {
-					//add predicate template declaration
-					BlankNodeOrIRI predMapNode = rdf4j.createBlankNode("predicateMap"+ random_number);
-					Triple triple_predicateObject_predicate_map = rdf4j.createTriple(predObjNode, R2RMLVocabulary.predicateMap, predMapNode);
-					Triple triple_predicateTemplate = rdf4j.createTriple(predMapNode, R2RMLVocabulary.template, rdf4j.createLiteral(predURIString));
-					statements.add(triple_predicateObject_predicate_map);
-					statements.add(triple_predicateTemplate);
-					
-				}
-				
-				//add object declaration to predObj node
-				//term 0 is always the subject, we are interested in term 1
-				Term object = func.getTerm(1);
-				
-				
-				
-				BlankNodeOrIRI objNode = rdf4j.createBlankNode("objectMap"+random_number);
-				
-				Triple triple_prop_obj = rdf4j.createTriple(predObjNode, R2RMLVocabulary.objectMap, objNode);
-				statements.add(triple_prop_obj);
-
-				if (object instanceof Variable){
-					statements.add(rdf4j.createTriple(objNode, R2RMLVocabulary.column, rdf4j.createLiteral(((Variable) object).getName())));
-				} else if (object instanceof Function) {
-					//check if uritemplate
-					Predicate objectPred = ((Function) object).getFunctionSymbol();
-					if (objectPred instanceof URITemplatePredicate) {
-						String objectURI =  URITemplates.getUriTemplateString((Function)object, prefixmng);
-						//add template object
-						statements.add(rdf4j.createTriple(objNode, R2RMLVocabulary.template, rdf4j.createLiteral(objectURI)));
-					}
-					else if (objectPred instanceof DatatypePredicate) {
-						Term objectTerm = ((Function) object).getTerm(0);
-
-						if (objectTerm instanceof Variable) {
-							//Now we add the template!!
-							String objectTemplate =  "{"+ ((Variable) objectTerm).getName() +"}" ;
-							//add template subject
-							statements.add(rdf4j.createTriple(objNode, R2RMLVocabulary.template, rdf4j.createLiteral(objectTemplate)));
-						} else if (objectTerm instanceof Constant) {
-							statements.add(rdf4j.createTriple(objNode, R2RMLVocabulary.constant, rdf4j.createLiteral(((Constant) objectTerm).getValue())));
-						}
-					}
-				} else {
-					System.out.println("FOUND UNKNOWN: "+object.toString());
-				}
-			}
-			
-		}
-		
-		return statements;
-	}
-	
-	private String trimApostrophes(String input) {
-		input = input.trim();
-		while (input.startsWith("\""))
-			input = input.substring(1);
-		while (input.endsWith("\""))
-			input = input.substring(0, input.length()-1);
-		return input;
+    OBDAMappingTransformer() {
+        this("http://example.org/");
 	}
 
-	/**
+    OBDAMappingTransformer(String baseIRIString) {
+        this.baseIRIString = baseIRIString;
+    }
+
+    /**
 	 * Get R2RML TriplesMaps from OBDA mapping axiom
 	 */
 	public TriplesMap getTriplesMap(OBDAMappingAxiom axiom,
@@ -285,8 +102,11 @@ public class OBDAMappingTransformer {
 
 		//triplesMap node
 		String mapping_id = axiom.getId();
-		if (!mapping_id.startsWith("http://"))
-			mapping_id = "http://example.org/" + mapping_id;
+
+		// check if mapping id is an iri
+		if (!mapping_id.contains(":")) {
+            mapping_id = baseIRIString + mapping_id;
+        }
 		BlankNodeOrIRI mainNode = rdf4j.createIRI(mapping_id);
 
         R2RMLMappingManager mm = RDF4JR2RMLMappingManager.getInstance();
@@ -300,8 +120,8 @@ public class OBDAMappingTransformer {
 		String subjectTemplate =  URITemplates.getUriTemplateString(uriTemplate, prefixmng);		
 		Template templs = mfact.createTemplate(subjectTemplate);
 		SubjectMap sm = mfact.createSubjectMap(templs);
-		
-		TriplesMap tm = mfact.createTriplesMap(lt, sm, axiom.getId());
+
+		TriplesMap tm = mfact.createTriplesMap(lt, sm, mainNode);
 		
 		//process target query
 		for (Function func : tquery) {
@@ -445,9 +265,7 @@ public class OBDAMappingTransformer {
                                     }
 								}
 							}
-							
-	
-							
+
 						} else if (objectTerm instanceof Constant) {
 							//statements.add(rdf4j.createTriple(objNode, R2RMLVocabulary.constant, rdf4j.createLiteral(((Constant) objectTerm).getValue())));
 							//obm.setConstant(rdf4j.createLiteral(((Constant) objectTerm).getValue()).stringValue());

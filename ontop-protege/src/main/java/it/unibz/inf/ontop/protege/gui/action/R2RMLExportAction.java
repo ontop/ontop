@@ -96,7 +96,7 @@ public class R2RMLExportAction extends ProtegeAction {
 					OBDAModelToR2RMLConverter writer = new OBDAModelToR2RMLConverter(obdaModel.getCurrentImmutableOBDAModel(),
 							modelManager.getActiveOntology(),
 							nativeQLFactory);
-                writer.write(file);
+                    writer.write(file);
                     JOptionPane.showMessageDialog(workspace, "R2RML Export completed.");
                 }
             }

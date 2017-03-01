@@ -34,8 +34,6 @@ public class OntopBootstrap extends OntopMappingOntologyRelatedCommand {
 
             OntopSQLOWLAPIConfiguration configuration = OntopSQLOWLAPIConfiguration.defaultBuilder()
                     .propertyFile(propertiesFile)
-                    .ontologyFile(owlFile)
-                    .nativeOntopMappingFile(mappingFile)
                     .build();
 
             BootstrappingResults results = DirectMappingEngine.bootstrap(configuration, baseIRI);

@@ -24,7 +24,7 @@ public class OntopOBDAToR2RMLTest {
         String[] argv = {"mapping", "to-r2rml",
                 "-i", "src/test/resources/mapping-northwind.obda",
                 "-t", "src/test/resources/mapping-northwind.owl",
-                "-o", "src/test/resources/mapping-northwind.r2rml"
+                "-o", "src/test/resources/output/mapping-northwind.r2rml"
         };
         Ontop.main(argv);
     }
@@ -33,7 +33,7 @@ public class OntopOBDAToR2RMLTest {
     public void testOntopOBDAToR2RML_NoOntology (){
         String[] argv = {"mapping", "to-r2rml",
                 "-i", "src/test/resources/books/exampleBooks.obda",
-                "-o", "src/test/resources/books/exampleBooks.r2rml"
+                "-o", "src/test/resources/output/exampleBooks.r2rml"
         };
         Ontop.main(argv);
     }

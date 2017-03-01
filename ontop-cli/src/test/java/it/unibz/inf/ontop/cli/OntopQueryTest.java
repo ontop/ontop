@@ -1,32 +1,15 @@
 package it.unibz.inf.ontop.cli;
 
-import org.h2.tools.Server;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
+import org.junit.ClassRule;
 import org.junit.Ignore;
 import org.junit.Test;
-
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
+import org.junit.rules.ExternalResource;
 
 @Ignore
 public class OntopQueryTest {
 
-    // a random port to avoid conflicts
-    private static String H2_PORT = "19123";;
-
-    @BeforeClass
-    public static void setup() throws ClassNotFoundException, SQLException {
-        Server.createTcpServer("-tcpPort", H2_PORT, "-tcpAllowOthers").start();
-        Connection conn = DriverManager.getConnection("jdbc:h2:tcp://localhost:" + H2_PORT + "/./src/test/resources/h2/books", "sa", "test");
-        System.out.println("Connection Established: " + conn.getMetaData().getDatabaseProductName() + "/" + conn.getCatalog());
-    }
-
-    @AfterClass
-    public static void close() throws SQLException {
-        Server.shutdownTcpServer("tcp://localhost:" + H2_PORT, "", true, true);
-    }
+    @ClassRule
+    public static ExternalResource h2Connection = new H2ExternalResourceForBookExample();
 
     @Test
     public void testOntopQueryCMD (){
@@ -44,7 +27,7 @@ public class OntopQueryTest {
                 "-p", "src/test/resources/books/exampleBooks.properties",
                 "-t", "src/test/resources/books/exampleBooks.owl",
                 "-q", "src/test/resources/books/q1.rq",
-                "-o", "src/test/resources/books/q1-answer.csv"};
+                "-o", "src/test/resources/output/q1-answer.csv"};
         Ontop.main(argv);
     }
 

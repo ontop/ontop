@@ -17,7 +17,7 @@ public class OntopR2RMLPrettyfyTest {
     public void testOntopR2RMLToOBDA (){
         String[] argv = {"mapping", "pretty-r2rml",
                 "-i", "src/test/resources/ugly-mapping-northwind.ttl",
-                "-o", "src/test/resources/pretty-mapping-northwind.ttl"
+                "-o", "src/test/resources/output/pretty-mapping-northwind.ttl"
         };
         Ontop.main(argv);
     }
