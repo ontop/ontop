@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.cli;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 public class OntopOBDAToR2RMLTest {
@@ -10,6 +11,7 @@ public class OntopOBDAToR2RMLTest {
         Ontop.main(argv);
     }
 
+    @Ignore("avoids overwriting exampleBooks.ttl")
     @Test
     public void testOntopOBDAToR2RML (){
         String[] argv = {"mapping", "to-r2rml",
