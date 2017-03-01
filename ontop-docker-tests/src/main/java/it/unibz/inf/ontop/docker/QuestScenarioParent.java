@@ -20,8 +20,6 @@ package it.unibz.inf.ontop.docker;
  * #L%
  */
 
-import it.unibz.inf.ontop.quest.ResultSetInfo;
-import it.unibz.inf.ontop.quest.ResultSetInfoTupleUtil;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 import org.eclipse.rdf4j.common.io.IOUtil;

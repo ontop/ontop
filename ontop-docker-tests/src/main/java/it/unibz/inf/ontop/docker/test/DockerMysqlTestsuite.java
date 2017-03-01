@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.docker;
+package it.unibz.inf.ontop.docker.test;
 
 /*
  * #%L
@@ -21,6 +21,8 @@ package it.unibz.inf.ontop.docker;
  */
 
 
+import it.unibz.inf.ontop.docker.QuestVirtualScenarioParent;
+import it.unibz.inf.ontop.docker.ScenarioManifestTestUtils;
 import junit.framework.Test;
 
 public class DockerMysqlTestsuite extends QuestVirtualScenarioParent {

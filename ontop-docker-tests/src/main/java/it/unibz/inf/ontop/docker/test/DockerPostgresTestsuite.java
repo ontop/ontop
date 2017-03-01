@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.docker;
+package it.unibz.inf.ontop.docker.test;
 
 /*
  * #%L
@@ -20,11 +20,13 @@ package it.unibz.inf.ontop.docker;
  * #L%
  */
 
+import it.unibz.inf.ontop.docker.QuestVirtualScenarioParent;
+import it.unibz.inf.ontop.docker.ScenarioManifestTestUtils;
 import junit.framework.Test;
 
-public class DockerOracleTestsuite extends QuestVirtualScenarioParent {
+public class DockerPostgresTestsuite extends QuestVirtualScenarioParent {
 
-	public DockerOracleTestsuite(String testURI, String name, String queryFileURL, String resultFileURL, 
+	public DockerPostgresTestsuite(String testURI, String name, String queryFileURL, String resultFileURL, 
 			String owlFileURL, String obdaFileURL, String parameterFileURL) {
 		super(testURI, name, queryFileURL, resultFileURL, owlFileURL, obdaFileURL, parameterFileURL);
 	}
@@ -32,20 +34,20 @@ public class DockerOracleTestsuite extends QuestVirtualScenarioParent {
 	public static Test suite() throws Exception {
 		return ScenarioManifestTestUtils.suite(new Factory() {
 			@Override
-			public QuestVirtualScenarioParent createQuestScenarioTest(String testURI, String name, String queryFileURL, 
+			public QuestVirtualScenarioParent createQuestScenarioTest(String testURI, String name, String queryFileURL,
 					String resultFileURL, String owlFileURL, String obdaFileURL) {
-				return new DockerOracleTestsuite(testURI, name, queryFileURL, resultFileURL, owlFileURL, 
+				return new DockerPostgresTestsuite(testURI, name, queryFileURL, resultFileURL, owlFileURL, 
 						obdaFileURL, "");
 			}
 			@Override
-			public QuestVirtualScenarioParent createQuestScenarioTest(String testURI, String name, String queryFileURL, 
+			public QuestVirtualScenarioParent createQuestScenarioTest(String testURI, String name, String queryFileURL,
 					String resultFileURL, String owlFileURL, String obdaFileURL, String parameterFileURL) {
-				return new DockerOracleTestsuite(testURI, name, queryFileURL, resultFileURL, owlFileURL, 
+				return new DockerPostgresTestsuite(testURI, name, queryFileURL, resultFileURL, owlFileURL, 
 						obdaFileURL, parameterFileURL);
 			}
 			@Override
 			public String getMainManifestFile() {
-				return "/testcases-docker/manifest-scenario-oracle.ttl";
+				return "/testcases-docker/manifest-scenario-postgres.ttl";
 			}
 		});
 	}
